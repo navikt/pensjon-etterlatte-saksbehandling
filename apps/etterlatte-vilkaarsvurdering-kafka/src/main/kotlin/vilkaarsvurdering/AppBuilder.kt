@@ -4,6 +4,7 @@ import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
+import no.nav.etterlatte.vilkaarsvurdering.services.EtterlatteHttpClient
 import no.nav.etterlatte.vilkaarsvurdering.services.VilkaarsvurderingServiceImpl
 
 class AppBuilder(props: Miljoevariabler) {
@@ -17,6 +18,6 @@ class AppBuilder(props: Miljoevariabler) {
     private val vilkaarsvurderingUrl = requireNotNull(props["ETTERLATTE_VILKAARSVURDERING_URL"])
 
     fun lagVilkaarsvurderingKlient(): VilkaarsvurderingServiceImpl {
-        return VilkaarsvurderingServiceImpl(vilkaarsvurderingHttpKlient, vilkaarsvurderingUrl)
+        return VilkaarsvurderingServiceImpl(EtterlatteHttpClient(vilkaarsvurderingHttpKlient), vilkaarsvurderingUrl)
     }
 }

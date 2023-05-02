@@ -1,6 +1,5 @@
 package no.nav.etterlatte.vilkaarsvurdering.services
 
-import io.ktor.client.HttpClient
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.client.statement.HttpResponse
@@ -16,7 +15,7 @@ interface VilkaarsvurderingService {
     fun migrer(behandlingId: UUID): HttpResponse
 }
 
-class VilkaarsvurderingServiceImpl(private val vilkaarsvurderingKlient: HttpClient, private val url: String) :
+class VilkaarsvurderingServiceImpl(private val vilkaarsvurderingKlient: EtterlatteHttpClient, private val url: String) :
     VilkaarsvurderingService {
     override fun kopierForrigeVilkaarsvurdering(behandlingId: UUID, behandlingViOmregnerFra: UUID) =
         runBlocking {

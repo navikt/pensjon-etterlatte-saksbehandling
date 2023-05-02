@@ -1,13 +1,14 @@
 package no.nav.etterlatte
 
-import io.ktor.client.HttpClient
-import io.ktor.client.request.post
 import io.ktor.server.application.log
 import io.ktor.server.config.HoconApplicationConfig
 import io.ktor.server.testing.ApplicationTestBuilder
 import io.ktor.server.testing.testApplication
 import io.mockk.coEvery
+import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
+import io.mockk.runs
 import io.mockk.slot
 import io.mockk.spyk
 import no.nav.etterlatte.libs.database.DataSourceBuilder
@@ -17,8 +18,10 @@ import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.vilkaarsvurdering.Vilkaarsvurdering
 import no.nav.etterlatte.vilkaarsvurdering.VilkaarsvurderingService
 import no.nav.etterlatte.vilkaarsvurdering.klienter.BehandlingKlient
+import no.nav.etterlatte.vilkaarsvurdering.migrering.MigreringService
+import no.nav.etterlatte.vilkaarsvurdering.migrering.migrering
+import no.nav.etterlatte.vilkaarsvurdering.services.EtterlatteHttpClient
 import no.nav.etterlatte.vilkaarsvurdering.services.VilkaarsvurderingServiceImpl
-import no.nav.etterlatte.vilkaarsvurdering.vilkaarsvurdering
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
@@ -82,7 +85,7 @@ internal class VilkaarsvurderingAPITest {
             }
             val (sti, request) = kallKlient()
             klargjoerRute()
-            verifiserAtRutaMatcherDetKlientenKallerForPost(sti.toString(), request, token)
+            verifiserAtRutaMatcherDetKlientenKallerForPost(sti, request, token)
         }
     }
 
@@ -101,11 +104,15 @@ internal class VilkaarsvurderingAPITest {
         val behandlingKlient = mockk<BehandlingKlient>().also {
             coEvery { it.harTilgangTilBehandling(any(), any()) } returns true
         }
+        val migreringService = mockk<MigreringService>().also {
+            every { it.endreUtfallTilIkkeVurdertForAlleVilkaar(any()) } just runs
+        }
         application {
             restModule(this.log) {
-                vilkaarsvurdering(
-                    vilkaarsvurderingService,
-                    behandlingKlient
+                migrering(
+                    migreringService,
+                    behandlingKlient,
+                    vilkaarsvurderingService
                 )
             }
         }
@@ -113,9 +120,9 @@ internal class VilkaarsvurderingAPITest {
 
     private fun kallKlient(): Pair<String, Any> {
         val sti = slot<String>()
-        val httpClient = mockk<HttpClient>()
+        val httpClient = mockk<EtterlatteHttpClient>()
         val klient = spyk(VilkaarsvurderingServiceImpl(httpClient, ""))
-        coEvery { httpClient.post(capture(sti), {}) } returns mockk()
+        coEvery { httpClient.post(capture(sti)) } returns mockk()
         klient.migrer(UUID.randomUUID())
         return Pair(sti.captured, "{}")
     }

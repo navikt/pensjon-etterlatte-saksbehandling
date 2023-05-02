@@ -1,5 +1,6 @@
 package no.nav.etterlatte
 
+import io.ktor.client.HttpClient
 import io.ktor.server.application.log
 import io.ktor.server.config.HoconApplicationConfig
 import io.ktor.server.testing.ApplicationTestBuilder
@@ -8,12 +9,10 @@ import io.mockk.coEvery
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.spyk
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
 import no.nav.etterlatte.libs.ktor.restModule
-import no.nav.etterlatte.libs.vilkaarsvurdering.VurdertVilkaarsvurderingResultatDto
 import no.nav.etterlatte.vilkaarsvurdering.Vilkaarsvurdering
 import no.nav.etterlatte.vilkaarsvurdering.VilkaarsvurderingService
 import no.nav.etterlatte.vilkaarsvurdering.klienter.BehandlingKlient
@@ -82,7 +81,7 @@ internal class VilkaarsvurderingAPITest {
             }
             val (sti, request) = kallKlient()
             klargjoerRute()
-            verifiserAtRutaMatcherDetKlientenKallerForPost(sti, request, token)
+            verifiserAtRutaMatcherDetKlientenKallerForPost(sti.toString(), request, token)
         }
     }
 
@@ -111,12 +110,12 @@ internal class VilkaarsvurderingAPITest {
         }
     }
 
-    private fun kallKlient(): Pair<String, VurdertVilkaarsvurderingResultatDto> {
-        val sti = slot<String>()
-        val request = VurdertVilkaarsvurderingResultatDto(VilkaarsvurderingUtfall.OPPFYLT, "")
-        val klient = spyk(VilkaarsvurderingServiceImpl(mockk(), ""))
-        coEvery { klient.post(any(), capture(sti)) } returns mockk()
-        klient.oppdaterTotalVurdering(UUID.randomUUID(), request)
-        return Pair(sti.captured, request)
+    private fun kallKlient(): Pair<UUID, Any> {
+        val sti = slot<UUID>()
+        val httpClient = mockk<HttpClient>()
+        val klient = spyk(VilkaarsvurderingServiceImpl(httpClient, ""))
+        coEvery { klient.migrer(capture(sti)) } returns mockk()
+        klient.migrer(UUID.randomUUID())
+        return Pair(sti.captured, "{}")
     }
 }

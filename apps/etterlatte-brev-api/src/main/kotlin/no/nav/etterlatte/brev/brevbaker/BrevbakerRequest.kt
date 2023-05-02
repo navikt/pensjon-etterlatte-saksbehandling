@@ -7,14 +7,7 @@ data class BrevbakerRequest(
     val letterData: Any,
     val felles: Felles,
     val language: LanguageCode
-) {
-    constructor(brevInfo: BrevInfo, language: LanguageCode) : this(
-        kode = brevInfo.template,
-        letterData = brevInfo.letterData,
-        felles = brevInfo.felles,
-        language = language
-    )
-}
+)
 
 enum class LanguageCode {
     BOKMAL, NYNORSK, ENGLISH;
@@ -33,7 +26,7 @@ enum class LanguageCode {
     }
 }
 
-data class BrevInfo(val template: String, val letterData: Any, val felles: Felles)
+// data class BrevInfo(val template: String, val letterData: Any, val felles: Felles)
 
 data class Felles(
     val dokumentDato: LocalDate,

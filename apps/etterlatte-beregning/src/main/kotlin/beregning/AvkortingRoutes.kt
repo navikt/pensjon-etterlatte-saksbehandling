@@ -12,9 +12,12 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.beregning.klienter.BehandlingKlient
 import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.periode.Periode
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.withBehandlingId
 import no.nav.etterlatte.libs.ktor.bruker
+import no.nav.etterlatte.token.Bruker
 import java.time.YearMonth
 import java.util.*
 
@@ -37,7 +40,7 @@ fun Route.avkorting(avkortingService: AvkortingService, behandlingKlient: Behand
             withBehandlingId(behandlingKlient) {
                 logger.info("Lagre avkortinggrunnlag for behandlingId=$it")
                 val avkortingGrunnlag = call.receive<AvkortingGrunnlagDto>()
-                val avkorting = avkortingService.lagreAvkortingGrunnlag(it, bruker, avkortingGrunnlag.fromDto())
+                val avkorting = avkortingService.lagreAvkortingGrunnlag(it, bruker, avkortingGrunnlag.fromDto(bruker))
                 call.respond(avkorting.toDto())
             }
         }
@@ -70,10 +73,11 @@ fun AvkortingGrunnlag.toDto() = AvkortingGrunnlagDto(
     spesifikasjon = spesifikasjon
 )
 
-fun AvkortingGrunnlagDto.fromDto() = AvkortingGrunnlag(
+fun AvkortingGrunnlagDto.fromDto(bruker: Bruker) = AvkortingGrunnlag(
     periode = Periode(fom = fom, tom = null),
     aarsinntekt = aarsinntekt,
     gjeldendeAar = gjeldendeAar,
     spesifikasjon = spesifikasjon,
+    kilde = Grunnlagsopplysning.Saksbehandler(bruker.ident(), Tidspunkt.now()),
     beregnetAvkorting = emptyList()
 )

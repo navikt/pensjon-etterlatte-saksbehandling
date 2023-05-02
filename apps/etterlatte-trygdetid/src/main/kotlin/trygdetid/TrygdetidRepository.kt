@@ -156,7 +156,7 @@ class TrygdetidRepository(private val dataSource: DataSource) {
                         "bosted" to trygdetidGrunnlag.bosted,
                         "periodeFra" to trygdetidGrunnlag.periode.fra,
                         "periodeTil" to trygdetidGrunnlag.periode.til,
-                        "kilde" to trygdetidGrunnlag.kilde?.toJson(),
+                        "kilde" to trygdetidGrunnlag.kilde.toJson(),
                         "beregnetVerdi" to trygdetidGrunnlag.beregnetTrygdetid?.verdi.toString(),
                         "beregnetTidspunkt" to trygdetidGrunnlag.beregnetTrygdetid?.tidspunkt?.toTimestamp(),
                         "beregnetRegelresultat" to trygdetidGrunnlag.beregnetTrygdetid?.regelResultat?.toJson()

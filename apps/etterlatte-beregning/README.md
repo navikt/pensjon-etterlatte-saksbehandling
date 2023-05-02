@@ -20,7 +20,7 @@ beregninger tilknyttet en behandling.
 ```
 2. Sett følgende environment-variabler under oppstart av applikasjonen.
 ```
-DB_JDBC_URL=jdbc:postgresql://localhost:5433/beregning?user=FORNAVN.ETTERNAVN@nav.no;
+DB_JDBC_URL=jdbc:postgresql://localhost:5432/postgres;
 DB_PASSWORD=postgres;
 DB_USERNAME=postgres;
 ETTERLATTE_BEHANDLING_CLIENT_ID=59967ac8-009c-492e-a618-e5a0f6b3e4e4;
@@ -29,9 +29,9 @@ ETTERLATTE_GRUNNLAG_CLIENT_ID=ce96a301-13db-4409-b277-5b27f464d08b;
 ETTERLATTE_GRUNNLAG_URL=https://etterlatte-grunnlag.intern.dev.nav.no;
 ETTERLATTE_TRYGDETID_CLIENT_ID=8385435e-f3d7-45ec-be59-ebd1c71df735;
 ETTERLATTE_TRYGDETID_URL=https://etterlatte-trygdetid.intern.dev.nav.no;
-ETTERLATTE_VILKAARSVURDERING_CLIENT_ID=dev-gcp.etterlatte.etterlatte-vilkaarsvurdering
-ETTERLATTE_VILKAARSVURDERING_URL=http://etterlatte-vilkaarsvurdering
-HTTP_PORT=8080
+ETTERLATTE_VILKAARSVURDERING_CLIENT_ID=dev-gcp.etterlatte.etterlatte-vilkaarsvurdering;
+ETTERLATTE_VILKAARSVURDERING_URL=http://etterlatte-vilkaarsvurdering;
+HTTP_PORT=8080;
 ```
 Legg også til `.env.dev-gcp` som `Env-file` under `Run configurations` i Intellij.
 

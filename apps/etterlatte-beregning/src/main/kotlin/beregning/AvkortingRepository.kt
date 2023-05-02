@@ -1,5 +1,6 @@
 package no.nav.etterlatte.beregning
 
+import com.fasterxml.jackson.module.kotlin.readValue
 import kotliquery.Row
 import kotliquery.queryOf
 import kotliquery.sessionOf
@@ -60,9 +61,9 @@ class AvkortingRepository(private val dataSource: DataSource) {
                 queryOf(
                     statement = """
                         INSERT INTO avkortinggrunnlag(
-                        id, behandling_id, fom, tom, aarsinntekt, gjeldende_aar, spesifikasjon
+                        id, behandling_id, fom, tom, aarsinntekt, gjeldende_aar, spesifikasjon, kilde
                         ) VALUES (
-                        :id, :behandlingId, :fom, :tom, :aarsinntekt, :gjeldendeAar, :spesifikasjon
+                        :id, :behandlingId, :fom, :tom, :aarsinntekt, :gjeldendeAar, :spesifikasjon, :kilde
                         )
                     """.trimIndent(),
                     paramMap = mapOf(
@@ -72,7 +73,8 @@ class AvkortingRepository(private val dataSource: DataSource) {
                         "tom" to avkortingGrunnlag.periode.tom?.atDay(1),
                         "aarsinntekt" to avkortingGrunnlag.aarsinntekt,
                         "gjeldendeAar" to avkortingGrunnlag.gjeldendeAar,
-                        "spesifikasjon" to avkortingGrunnlag.spesifikasjon
+                        "spesifikasjon" to avkortingGrunnlag.spesifikasjon,
+                        "kilde" to avkortingGrunnlag.kilde.toJson()
                     )
                 ).let { tx.run(it.asUpdate) }
 
@@ -113,6 +115,7 @@ class AvkortingRepository(private val dataSource: DataSource) {
         aarsinntekt = int("aarsinntekt"),
         gjeldendeAar = int("gjeldende_aar"),
         spesifikasjon = string("spesifikasjon"),
+        kilde = string("kilde").let { objectMapper.readValue(it) },
         beregnetAvkorting = beregnetAvkorting
     )
 

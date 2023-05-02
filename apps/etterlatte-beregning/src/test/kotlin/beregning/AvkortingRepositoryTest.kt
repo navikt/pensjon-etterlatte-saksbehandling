@@ -4,6 +4,7 @@ import io.kotest.matchers.shouldBe
 import no.nav.etterlatte.beregning.AvkortingGrunnlag
 import no.nav.etterlatte.beregning.AvkortingRepository
 import no.nav.etterlatte.beregning.BeregnetAvkortingGrunnlag
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
@@ -16,7 +17,7 @@ import org.junit.jupiter.api.TestInstance
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
 import java.time.YearMonth
-import java.util.UUID
+import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class AvkortingRepositoryTest {
@@ -51,6 +52,7 @@ internal class AvkortingRepositoryTest {
             aarsinntekt = 500000,
             gjeldendeAar = 2023,
             spesifikasjon = "Grunnlag før endring",
+            kilde = Grunnlagsopplysning.Saksbehandler.create("Z123456"),
             beregnetAvkorting = listOf(
                 BeregnetAvkortingGrunnlag(
                     periode = Periode(fom = YearMonth.now(), tom = null),

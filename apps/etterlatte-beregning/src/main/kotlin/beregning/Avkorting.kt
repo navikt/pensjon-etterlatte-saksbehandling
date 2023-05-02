@@ -1,5 +1,6 @@
 package no.nav.etterlatte.beregning
 
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -17,6 +18,7 @@ data class AvkortingGrunnlag(
     val gjeldendeAar: Int,
     val spesifikasjon: String,
     val beregnetAvkorting: List<BeregnetAvkortingGrunnlag>
+    val kilde: Grunnlagsopplysning.Saksbehandler,
 )
 
 data class BeregnetAvkortingGrunnlag(

@@ -60,10 +60,11 @@ class GrunnlagsendringshendelseService(
         )
     }
 
-    private fun ikkeVurderteHendelser(minutterGamle: Long): List<Grunnlagsendringshendelse> =
+    private fun ikkeVurderteHendelser(minutterGamle: Long): List<Grunnlagsendringshendelse> = inTransaction {
         grunnlagsendringshendelseDao.hentIkkeVurderteGrunnlagsendringshendelserEldreEnn(
             minutter = minutterGamle
         )
+    }
 
     fun opprettDoedshendelse(doedshendelse: Doedshendelse): List<Grunnlagsendringshendelse> {
         return opprettHendelseAvTypeForPerson(doedshendelse.avdoedFnr, GrunnlagsendringsType.DOEDSFALL)

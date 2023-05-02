@@ -24,7 +24,7 @@ export const handlinger: Record<Handlinger, IPar> = {
 }
 
 export enum OppgaveTypeFilter {
-  VELG = 'VELG',
+  ALLE = 'ALLE',
   FØRSTEGANGSBEHANDLING = 'FØRSTEGANGSBEHANDLING',
   REVURDERING = 'REVURDERING',
   ENDRING_PAA_SAK = 'ENDRING_PAA_SAK',
@@ -32,7 +32,7 @@ export enum OppgaveTypeFilter {
 }
 
 export const oppgaveTypeFilter: Record<OppgaveTypeFilter, IPar> = {
-  VELG: { id: 'VELG', navn: 'Velg' },
+  ALLE: { id: 'ALLE', navn: 'Vis alle' },
   FØRSTEGANGSBEHANDLING: { id: 'FØRSTEGANGSBEHANDLING', navn: 'Førstegangsbehandling' },
   REVURDERING: { id: 'REVURDERING', navn: 'Revurdering' },
   MANUELT_OPPHOER: { id: 'MANUELT_OPPHOER', navn: 'Manuelt opphør' },
@@ -40,33 +40,33 @@ export const oppgaveTypeFilter: Record<OppgaveTypeFilter, IPar> = {
 }
 
 export enum SoeknadTypeFilter {
-  VELG = 'VELG',
+  ALLE = 'ALLE',
   BARNEPENSJON = 'BARNEPENSJON',
   OMSTILLINGSSTOENAD = 'OMSTILLINGSSTOENAD',
 }
 
 export const soeknadTypeFilter: Record<SoeknadTypeFilter, IPar> = {
-  VELG: { id: 'VELG', navn: 'Velg' },
+  ALLE: { id: 'ALLE', navn: 'Vis alle' },
   BARNEPENSJON: { id: 'BARNEPENSJON', navn: 'Barnepensjon' },
   OMSTILLINGSSTOENAD: { id: 'OMSTILLINGSSTOENAD', navn: 'Omstillingsstønad' },
 }
 
 export enum StatusFilter {
-  VELG = 'VELG',
+  ALLE = 'ALLE',
   NY = 'NY',
   TIL_ATTESTERING = 'TIL_ATTESTERING',
   RETURNERT = 'RETURNERT',
 }
 
 export const statusFilter: Record<StatusFilter, IPar> = {
-  VELG: { id: 'VELG', navn: 'Velg' },
+  ALLE: { id: 'ALLE', navn: 'Vis alle' },
   NY: { id: 'NY', navn: 'Ny' },
   TIL_ATTESTERING: { id: 'TIL_ATTESTERING', navn: 'Til attestering' },
   RETURNERT: { id: 'RETURNERT', navn: 'Returnert' },
 }
 
 export enum EnhetFilter {
-  VELG = 'VELG',
+  ALLE = 'ALLE',
   INGEN_ENHET = 'INGEN_ENHET',
   E0001 = 'E0001',
   E2103 = 'E2103',
@@ -78,7 +78,7 @@ export enum EnhetFilter {
 }
 
 export const enhetFilter: Record<EnhetFilter, IPar> = {
-  VELG: { id: 'VELG', navn: 'Velg' },
+  ALLE: { id: 'ALLE', navn: 'Vis alle' },
 
   INGEN_ENHET: { id: 'INGEN_ENHET', navn: 'Ingen' },
   E4815: { id: 'E4815', navn: '4815 - Ålesund' },
@@ -98,8 +98,4 @@ export interface FilterPar {
 export interface IPar {
   id: string
   navn: string
-}
-
-export interface INoekkelPar {
-  [key: string]: IPar
 }

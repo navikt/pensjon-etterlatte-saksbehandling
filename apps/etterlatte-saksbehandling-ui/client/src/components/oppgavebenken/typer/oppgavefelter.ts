@@ -95,7 +95,7 @@ export const initialOppgaveFelter = (): IOppgaveFelter => {
       label: 'Status',
       filter: {
         type: 'select',
-        selectedValue: StatusFilter.VELG,
+        selectedValue: StatusFilter.ALLE,
         nedtrekksliste: statusFilter,
       },
     },
@@ -104,7 +104,7 @@ export const initialOppgaveFelter = (): IOppgaveFelter => {
       label: 'Enhet',
       filter: {
         type: 'select',
-        selectedValue: EnhetFilter.VELG,
+        selectedValue: EnhetFilter.ALLE,
         nedtrekksliste: enhetFilter,
       },
     },

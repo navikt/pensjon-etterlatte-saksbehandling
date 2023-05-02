@@ -4,6 +4,7 @@ import com.zaxxer.hikari.HikariDataSource
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.jobs.LeaderElection
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -31,7 +32,7 @@ internal class GrunnlagsendringshendelseJobTest {
     fun `skal ikke utfoere jobb siden pod ikke er leader`() {
         every { leaderElection.isLeader() } returns false
 
-        grunnlagsendringshendelseJob.run()
+        runBlocking { grunnlagsendringshendelseJob.run() }
 
         coVerify(exactly = 0) { grunnlagsendringshendelseService.sjekkKlareGrunnlagsendringshendelser(any()) }
         assertFalse(leaderElection.isLeader())
@@ -41,7 +42,7 @@ internal class GrunnlagsendringshendelseJobTest {
     fun `skal ikke utfoere jobb siden pod er i shutdown`() {
         every { leaderElection.isLeader() } returns true
         closed.set(true) // simulerer shutdown
-        grunnlagsendringshendelseJob.run()
+        runBlocking { grunnlagsendringshendelseJob.run() }
 
         coVerify(exactly = 0) { grunnlagsendringshendelseService.sjekkKlareGrunnlagsendringshendelser(any()) }
     }
@@ -50,7 +51,7 @@ internal class GrunnlagsendringshendelseJobTest {
     fun `skal utfoere jobb siden pod er leader`() {
         every { leaderElection.isLeader() } returns true
 
-        grunnlagsendringshendelseJob.run()
+        runBlocking { grunnlagsendringshendelseJob.run() }
 
         coVerify(exactly = 1) { grunnlagsendringshendelseService.sjekkKlareGrunnlagsendringshendelser(any()) }
         assertTrue(leaderElection.isLeader())

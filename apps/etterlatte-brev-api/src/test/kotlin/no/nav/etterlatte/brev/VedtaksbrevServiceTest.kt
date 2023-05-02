@@ -22,6 +22,7 @@ import no.nav.etterlatte.brev.behandling.SakOgBehandlingService
 import no.nav.etterlatte.brev.behandling.Saksbehandler
 import no.nav.etterlatte.brev.behandling.Soeker
 import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
+import no.nav.etterlatte.brev.brevbaker.BrevbakerKlient
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.dokarkiv.DokarkivServiceImpl
 import no.nav.etterlatte.brev.journalpost.JournalpostResponse
@@ -56,12 +57,13 @@ internal class VedtaksbrevServiceTest {
 
     private val db = mockk<BrevRepository>(relaxed = true)
     private val pdfGenerator = mockk<PdfGeneratorKlient>()
+    private val brevbaker = mockk<BrevbakerKlient>()
     private val sakOgBehandlingService = mockk<SakOgBehandlingService>()
     private val adresseService = mockk<AdresseService>()
     private val dokarkivService = mockk<DokarkivServiceImpl>()
 
     private val vedtaksbrevService =
-        VedtaksbrevService(db, pdfGenerator, sakOgBehandlingService, adresseService, dokarkivService)
+        VedtaksbrevService(db, pdfGenerator, sakOgBehandlingService, adresseService, dokarkivService, brevbaker)
 
     @BeforeEach
     fun before() {
@@ -70,7 +72,7 @@ internal class VedtaksbrevServiceTest {
 
     @AfterEach
     fun after() {
-        confirmVerified(db, pdfGenerator, sakOgBehandlingService, adresseService, dokarkivService)
+        confirmVerified(db, pdfGenerator, sakOgBehandlingService, adresseService, dokarkivService, brevbaker)
     }
 
     @Nested

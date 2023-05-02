@@ -5,6 +5,7 @@ import {
   BarnSamsvar,
   DoedsdatoSamsvar,
   Grunnlagsendringshendelse,
+  InstitusjonsoppholdSamsvar,
   UtlandSamsvar,
   VergemaalEllerFremtidsfullmakt,
   VergemaalEllerFremtidsfullmaktForholdSamsvar,
@@ -177,19 +178,30 @@ const GrunnlagVergemaal = (props: { vergemaal: VergemaalEllerFremtidsfullmakt })
   const { navn, omfang, motpartsPersonident, omfangetErInnenPersonligOmraade } = vergeEllerFullmektig
   return (
     <>
-      <BodyShort>Embete: {embete ?? 'ikke angitt'}</BodyShort>
-      <BodyShort>Type: {type ?? 'ikke angitt'}</BodyShort>
+      <BodySmall>Embete: {embete ?? 'ikke angitt'}</BodySmall>
+      <BodySmall>Type: {type ?? 'ikke angitt'}</BodySmall>
 
-      <BodyShort>
+      <BodySmall>
         Omfang: {omfang ?? 'ikke angitt '}
         {omfangetErInnenPersonligOmraade ? 'Er innenfor personlig område' : 'Er ikke innenfor personlig område'}
-      </BodyShort>
-      <BodyShort>
+      </BodySmall>
+      <BodySmall>
         Verge: {navn ?? 'ikke angitt'} ({motpartsPersonident})
-      </BodyShort>
+      </BodySmall>
     </>
   )
 }
+
+const Institusjonsopphold = (props: { samsvar: InstitusjonsoppholdSamsvar }) => {
+  const { samsvar } = props
+  return (
+    <>
+      <BodySmall>Oppholdstype</BodySmall>
+      <BodySmall>{samsvar.oppholdstype}</BodySmall>
+    </>
+  )
+}
+
 const Vergemaal = (props: { samsvar: VergemaalEllerFremtidsfullmaktForholdSamsvar }) => {
   return (
     <GrunnlagSammenligningWrapper>
@@ -257,6 +269,13 @@ const HendelseBeskrivelse = (props: { hendelse: Grunnlagsendringshendelse }) => 
         <Header>
           <HendelseDetaljer hendelse={hendelse} />
           <Barn samsvar={hendelse.samsvarMellomKildeOgGrunnlag} />
+        </Header>
+      )
+    case 'INSTITUSJONSOPPHOLD':
+      return (
+        <Header>
+          <HendelseDetaljer hendelse={hendelse} />
+          <Institusjonsopphold samsvar={hendelse.samsvarMellomKildeOgGrunnlag} />
         </Header>
       )
     case 'VERGEMAAL_ELLER_FREMTIDSFULLMAKT':

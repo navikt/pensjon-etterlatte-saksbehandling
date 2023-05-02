@@ -8,6 +8,7 @@ export interface Grunnlagsopplysning<T, K> {
 export interface PersonMedNavn {
   fnr: string
   fornavn: string
+  mellomnavn?: string
   etternavn: string
 }
 

@@ -137,7 +137,8 @@ class RealGrunnlagService(
             PersonMedNavn(
                 fnr = fnr,
                 fornavn = navn.fornavn,
-                etternavn = navn.etternavn
+                etternavn = navn.etternavn,
+                mellomnavn = navn.mellomnavn
             )
         }.associateBy { it.fnr }
     }

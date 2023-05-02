@@ -129,7 +129,8 @@ private data class PersonerISakDto(
 data class PersonMedNavn(
     val fnr: Folkeregisteridentifikator,
     val fornavn: String,
-    val etternavn: String
+    val etternavn: String,
+    val mellomnavn: String?
 )
 
 fun PipelineContext<Unit, ApplicationCall>.navIdentFraToken() = call.principal<TokenValidationContextPrincipal>()

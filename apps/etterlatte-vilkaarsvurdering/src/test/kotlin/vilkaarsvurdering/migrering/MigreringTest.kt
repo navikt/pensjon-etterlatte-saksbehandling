@@ -29,11 +29,12 @@ import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
+import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import no.nav.etterlatte.vilkaarsvurdering.DelvilkaarRepository
-import no.nav.etterlatte.vilkaarsvurdering.Vilkaarsvurdering
 import no.nav.etterlatte.vilkaarsvurdering.VilkaarsvurderingRepository
 import no.nav.etterlatte.vilkaarsvurdering.VilkaarsvurderingService
 import no.nav.etterlatte.vilkaarsvurdering.klienter.BehandlingKlient
+import no.nav.etterlatte.vilkaarsvurdering.klienter.GrunnlagKlient
 import no.nav.etterlatte.vilkaarsvurdering.migrering.MigreringRepository
 import no.nav.etterlatte.vilkaarsvurdering.migrering.MigreringService
 import no.nav.etterlatte.vilkaarsvurdering.migrering.migrering
@@ -41,7 +42,6 @@ import no.nav.etterlatte.vilkaarsvurdering.vilkaarsvurdering
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
@@ -50,7 +50,6 @@ import org.junit.jupiter.api.TestInstance
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
 import testsupport.buildTestApplicationConfigurationForOauth
-import java.time.YearMonth
 import java.util.*
 import javax.sql.DataSource
 
@@ -95,20 +94,13 @@ class MigreringTest {
 
         val delvilkaarRepository = DelvilkaarRepository()
         vilkaarsvurderingRepository = VilkaarsvurderingRepository(ds, delvilkaarRepository)
-        vilkaarsvurderingRepository.opprettVilkaarsvurdering(
-            Vilkaarsvurdering(
-                behandlingId = behandlingId,
-                grunnlagVersjon = 1L,
-                virkningstidspunkt = YearMonth.now(),
-                vilkaar = vilkaar
-            )
-        )
 
+        val grunnlagKlient = mockk<GrunnlagKlient>()
         vilkaarsvurderingServiceImpl =
             VilkaarsvurderingService(
                 vilkaarsvurderingRepository,
                 behandlingKlient,
-                mockk()
+                grunnlagKlient
             )
 
         migreringService = MigreringService(
@@ -119,6 +111,7 @@ class MigreringTest {
         coEvery { behandlingKlient.kanSetteBehandlingStatusVilkaarsvurdert(any(), any()) } returns true
         coEvery { behandlingKlient.hentBehandling(behandlingId, any()) } returns detaljertBehandling()
         coEvery { behandlingKlient.settBehandlingStatusVilkaarsvurdert(behandlingId, any()) } returns true
+        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns GrunnlagTestData().hentOpplysningsgrunnlag()
     }
 
     private fun detaljertBehandling() = mockk<DetaljertBehandling>().apply {
@@ -177,7 +170,7 @@ class MigreringTest {
                 client.post("/api/vilkaarsvurdering/migrering/$behandlingId") {
                     header(HttpHeaders.Authorization, "Bearer $token")
                 }
-            Assertions.assertEquals(HttpStatusCode.Accepted, response.status)
+            assertEquals(HttpStatusCode.Accepted, response.status)
 
             client.get("/api/vilkaarsvurdering/$behandlingId") {
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
@@ -186,7 +179,7 @@ class MigreringTest {
                 .also { assertTrue(it.status.isSuccess()) }
                 .let { objectMapper.readValue(it.bodyAsText(), VilkaarsvurderingDto::class.java) }
                 .vilkaar
-                .also { assertEquals(it.size, 1) }
+                .also { assertEquals(it.size, 6) }
                 .map { it.hovedvilkaar }
                 .map { it.resultat }
                 .forEach { assertTrue(it == Utfall.IKKE_VURDERT) }

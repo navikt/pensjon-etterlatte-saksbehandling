@@ -58,13 +58,14 @@ class Server(private val context: ApplicationContext) {
     fun run() = with(context) {
         dataSource.migrate()
 
-        val grunnlagsendringshendelseJob = grunnlagsendringshendelseJob.schedule()
+        val grunnlagsendringshendelseJobSkedulert = grunnlagsendringshendelseJob.schedule()
         behandlingsHendelser.start()
         setReady().also { engine.start(true) }
 
         Runtime.getRuntime().addShutdownHook(
             Thread {
-                grunnlagsendringshendelseJob.cancel()
+                grunnlagsendringshendelseJob.setClosedTrue()
+                grunnlagsendringshendelseJobSkedulert.cancel()
                 behandlingsHendelser.hendelserKanal.close()
             }
         )

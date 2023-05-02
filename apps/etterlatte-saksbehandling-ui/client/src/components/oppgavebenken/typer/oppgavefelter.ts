@@ -77,7 +77,7 @@ export const initialOppgaveFelter = (): IOppgaveFelter => {
       label: 'Oppgavetype',
       filter: {
         type: 'select',
-        selectedValue: OppgaveTypeFilter.VELG,
+        selectedValue: OppgaveTypeFilter.ALLE,
         nedtrekksliste: oppgaveTypeFilter,
       },
     },
@@ -86,7 +86,7 @@ export const initialOppgaveFelter = (): IOppgaveFelter => {
       label: 'Ytelse',
       filter: {
         type: 'select',
-        selectedValue: SoeknadTypeFilter.VELG,
+        selectedValue: SoeknadTypeFilter.ALLE,
         nedtrekksliste: soeknadTypeFilter,
       },
     },

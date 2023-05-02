@@ -20,11 +20,11 @@ export const tagColors: Record<
   OppgaveTypeFilter | SoeknadTypeFilter | ISaksType | INasjonalitetsType | IBehandlingsType,
   Variants
 > = {
-  [OppgaveTypeFilter.VELG]: Variants.NEUTRAL,
+  [OppgaveTypeFilter.ALLE]: Variants.NEUTRAL,
   [OppgaveTypeFilter.FØRSTEGANGSBEHANDLING]: Variants.ALT3_FILLED,
   [OppgaveTypeFilter.REVURDERING]: Variants.ALT3_FILLED,
   [OppgaveTypeFilter.ENDRING_PAA_SAK]: Variants.ALT3_FILLED,
-  [SoeknadTypeFilter.VELG]: Variants.NEUTRAL,
+  [SoeknadTypeFilter.ALLE]: Variants.NEUTRAL,
   [SoeknadTypeFilter.BARNEPENSJON]: Variants.INFO,
   [SoeknadTypeFilter.OMSTILLINGSSTOENAD]: Variants.NEUTRAL,
   [IBehandlingsType.FØRSTEGANGSBEHANDLING]: Variants.ALT3_FILLED,

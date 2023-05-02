@@ -60,6 +60,14 @@ class GrunnlagsendringshendelseService(
         )
     }
 
+    fun lukkHendelseMedKommentar(hendelse: Grunnlagsendringshendelse) {
+        logger.info("Lukker hendelse med id $hendelse.id")
+
+        inTransaction {
+            grunnlagsendringshendelseDao.lukkGrunnlagsendringStatus(hendelse = hendelse)
+        }
+    }
+
     private fun ikkeVurderteHendelser(minutterGamle: Long): List<Grunnlagsendringshendelse> = inTransaction {
         grunnlagsendringshendelseDao.hentIkkeVurderteGrunnlagsendringshendelserEldreEnn(
             minutter = minutterGamle
@@ -187,7 +195,8 @@ class GrunnlagsendringshendelseService(
                                 opprettet = tidspunktForMottakAvHendelse,
                                 hendelseGjelderRolle = rolleOgSak.rolle,
                                 gjelderPerson = fnr,
-                                samsvarMellomKildeOgGrunnlag = samsvar
+                                samsvarMellomKildeOgGrunnlag = samsvar,
+                                aapen = true
                             )
                         )
                     }
@@ -226,7 +235,8 @@ class GrunnlagsendringshendelseService(
                                 type = grunnlagendringType,
                                 opprettet = tidspunktForMottakAvHendelse,
                                 hendelseGjelderRolle = rolleOgSak.rolle,
-                                gjelderPerson = fnr
+                                gjelderPerson = fnr,
+                                aapen = true
                             )
                         )
                     }
@@ -257,7 +267,8 @@ class GrunnlagsendringshendelseService(
                             type = grunnlagendringType,
                             opprettet = Tidspunkt.now().toLocalDatetimeUTC(),
                             hendelseGjelderRolle = Saksrolle.SOEKER,
-                            gjelderPerson = sakService.finnSak(sakId)?.ident!!
+                            gjelderPerson = sakService.finnSak(sakId)?.ident!!,
+                            aapen = true
                         )
                     )
 

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Saksliste } from './saksliste'
+import { Behandlingsliste } from './behandlingsliste'
 import styled from 'styled-components'
 import { Grunnlagsendringshendelse, GrunnlagsendringsListe, IBehandlingListe, IBehandlingsammendrag } from './typer'
 import { INasjonalitetsType } from '../behandling/fargetags/nasjonalitetsType'
@@ -145,10 +145,14 @@ export const Saksoversikt = ({ fnr }: { fnr: string | undefined }) => {
                     disabled={harAapenRevurdering}
                     grunnlag={personerISak}
                   />
-                  <div className="behandlinger">
-                    <h2>Behandlinger</h2>
-                    {behandlingliste !== undefined && <Saksliste behandlinger={behandlingliste} />}
-                  </div>
+                  {sakId !== undefined ? (
+                    <div className="behandlinger">
+                      <h2>Behandlinger</h2>
+                      {behandlingliste !== undefined && (
+                        <Behandlingsliste behandlinger={behandlingliste} sakId={sakId} />
+                      )}
+                    </div>
+                  ) : null}
                 </>
               ),
               right: grunnlagshendelser?.length ? (

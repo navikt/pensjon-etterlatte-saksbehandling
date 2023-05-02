@@ -1,4 +1,4 @@
-import { Alert, BodyShort, Button, Heading, Label } from '@navikt/ds-react'
+import { Alert, BodyShort, Button, Heading, Label, Loader, Modal, Textarea } from '@navikt/ds-react'
 import styled from 'styled-components'
 import {
   AnsvarligeForeldreSamsvar,
@@ -21,9 +21,12 @@ import {
   stoetterGjennyRevurderingAvHendelse,
 } from '~components/person/uhaandtereHendelser/utils'
 import { formaterKanskjeStringDatoMedFallback, formaterStringDato } from '~utils/formattering'
-import { isSuccess, Result } from '~shared/hooks/useApiCall'
-import React, { useContext, useMemo } from 'react'
+import { isFailure, isPending, isSuccess, Result, useApiCall } from '~shared/hooks/useApiCall'
+import React, { useContext, useMemo, useState } from 'react'
 import { PersonerISakResponse } from '~shared/api/grunnlag'
+import HistoriskeHendelser from '~components/person/uhaandtereHendelser/HistoriskeHendelser'
+import { lukkGrunnlagshendelse } from '~shared/api/behandling'
+import { ApiErrorAlert } from '~ErrorBoundary'
 
 type Props = {
   hendelser: Array<Grunnlagsendringshendelse>
@@ -43,22 +46,28 @@ const UhaandterteHendelser = (props: Props) => {
       return {}
     }
   }, [grunnlag])
-
+  const aapneHendelser = hendelser.filter((h) => h.aapen || true) //TODO: modify without OR
+  const lukkedeHendelser = hendelser.filter((h) => !h.aapen)
   return (
-    <div>
-      <FnrTilNavnMapContext.Provider value={navneMap}>
-        <StyledAlert>Ny hendelse som kan kreve revurdering. Vurder om det har konsekvens for ytelsen.</StyledAlert>
-        <Heading size="medium">Hendelser</Heading>
-        {hendelser.map((hendelse) => (
-          <UhaandtertHendelse
-            key={hendelse.id}
-            hendelse={hendelse}
-            disabled={disabled}
-            startRevurdering={startRevurdering}
-          />
-        ))}
-      </FnrTilNavnMapContext.Provider>
-    </div>
+    <>
+      <BorderWidth>
+        <HendelserBorder>
+          <FnrTilNavnMapContext.Provider value={navneMap}>
+            <StyledAlert>Ny hendelse som kan kreve revurdering. Vurder om det har konsekvens for ytelsen.</StyledAlert>
+            <Heading size="medium">Nye hendelser</Heading>
+            {aapneHendelser.map((hendelse) => (
+              <UhaandtertHendelse
+                key={hendelse.id}
+                hendelse={hendelse}
+                disabled={disabled}
+                startRevurdering={startRevurdering}
+              />
+            ))}
+          </FnrTilNavnMapContext.Provider>
+        </HendelserBorder>
+      </BorderWidth>
+      <HistoriskeHendelser hendelser={lukkedeHendelser} />
+    </>
   )
 }
 
@@ -70,7 +79,21 @@ const UhaandtertHendelse = (props: {
   const { hendelse, disabled, startRevurdering } = props
   const { type, opprettet } = hendelse
   const stoetterRevurdering = stoetterGjennyRevurderingAvHendelse(hendelse)
-
+  const [open, setOpen] = useState(false)
+  const [hendelsekommentar, oppdaterKommentar] = useState<string>('')
+  const [res, lukkGrunnlagshendelseFunc, resetApiCall] = useApiCall(lukkGrunnlagshendelse)
+  const lukkGrunnlagshendelseWrapper = () => {
+    lukkGrunnlagshendelseFunc(
+      { ...hendelse, kommentar: hendelsekommentar },
+      () => {
+        setOpen(false)
+        location.reload()
+      },
+      (err) => {
+        console.error(`Feil status: ${err.status} error: ${err.error}`)
+      }
+    )
+  }
   return (
     <Wrapper>
       <Label spacing>{grunnlagsendringsTittel[type]}</Label>
@@ -80,15 +103,54 @@ const UhaandtertHendelse = (props: {
           <BodySmall>{formaterStringDato(opprettet)}</BodySmall>
         </Header>
         <HendelseBeskrivelse hendelse={hendelse} />
-        {stoetterRevurdering ? (
-          <Button disabled={disabled} onClick={startRevurdering}>
-            Start revurdering
-          </Button>
-        ) : (
-          <Alert variant="warning" size="small" inline>
-            Gjenny støtter ikke revurdering
-          </Alert>
-        )}
+
+        <div>
+          {stoetterRevurdering ? (
+            <Button disabled={disabled} onClick={startRevurdering}>
+              Start revurdering
+            </Button>
+          ) : (
+            <Alert variant="info" inline>
+              Automatisk revurdering støttes ikke for denne hendelsen
+            </Alert>
+          )}
+          <MarginTop15>
+            <Button onClick={() => setOpen(true)}>Lukk hendelse</Button>
+            <Modal open={open} onClose={() => setOpen((x) => !x)} closeButton={false} aria-labelledby="modal-heading">
+              <Modal.Content>
+                <Heading spacing level="2" size="medium" id="modal-heading">
+                  Avslutt uten revurdering
+                </Heading>
+                <MaxWidth>
+                  I noen tilfeller krever ikke ny informasjon eller hendelser noen revurdering. Beskriv hvorfor en
+                  revurdering ikke er nødvendig.
+                </MaxWidth>
+                <Textarea
+                  label={'Begrunnelse'}
+                  value={hendelsekommentar}
+                  onChange={(e) => oppdaterKommentar(e.target.value)}
+                />
+                <MarginTop15>
+                  <MarginRight15>
+                    <Button onClick={() => lukkGrunnlagshendelseWrapper()}>Lagre</Button>
+                  </MarginRight15>
+                  <Button
+                    variant="secondary"
+                    onClick={() => {
+                      oppdaterKommentar('')
+                      setOpen(false)
+                      resetApiCall()
+                    }}
+                  >
+                    Avbryt
+                  </Button>
+                </MarginTop15>
+                {isPending(res) && <Loader />}
+                {isFailure(res) && <ApiErrorAlert>Vi kunne ikke lukke hendelsen</ApiErrorAlert>}
+              </Modal.Content>
+            </Modal>
+          </MarginTop15>
+        </div>
       </Content>
     </Wrapper>
   )
@@ -240,7 +302,7 @@ const HendelseDetaljer = (props: { hendelse: Grunnlagsendringshendelse }) => {
   )
 }
 
-const HendelseBeskrivelse = (props: { hendelse: Grunnlagsendringshendelse }) => {
+export const HendelseBeskrivelse = (props: { hendelse: Grunnlagsendringshendelse }) => {
   const { hendelse } = props
   switch (hendelse.samsvarMellomKildeOgGrunnlag.type) {
     case 'UTLAND':
@@ -295,6 +357,30 @@ const HendelseBeskrivelse = (props: { hendelse: Grunnlagsendringshendelse }) => 
   }
 }
 
+const HendelserBorder = styled.div`
+  outline: solid;
+  outline-offset: 25px;
+`
+
+const BorderWidth = styled.div`
+  margin-top: 55px;
+  margin-right: 10px;
+  margin-left: 2px;
+  max-width: 1000px;
+`
+
+const MarginTop15 = styled.div`
+  margin-top: 15px;
+`
+
+const MaxWidth = styled.p`
+  max-width: 500px;
+`
+
+const MarginRight15 = styled.span`
+  margin-right: 15px;
+`
+
 const DetaljerWrapper = styled.div`
   margin-bottom: 1rem;
 `
@@ -306,6 +392,7 @@ const GrunnlagSammenligningWrapper = styled.div`
 `
 
 const Wrapper = styled.div`
+  margin-top: 3rem;
   margin-bottom: 1rem;
   max-width: 50rem;
 `

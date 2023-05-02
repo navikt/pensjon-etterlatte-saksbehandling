@@ -130,11 +130,11 @@ export type SamsvarMellomKildeOgGrunnlag =
   | ReguleringSamsvar
   | InstitusjonsoppholdSamsvar
 
-export type GrunnlagsendringStatus = typeof GRUNNLAGSENDRING_STATUS[number]
+export type GrunnlagsendringStatus = (typeof GRUNNLAGSENDRING_STATUS)[number]
 
 const SAKSROLLER = ['SOEKER', 'INNSENDER', 'SOESKEN', 'AVDOED', 'GJENLEVENDE', 'UKJENT'] as const
 
-export type Saksrolle = typeof SAKSROLLER[number]
+export type Saksrolle = (typeof SAKSROLLER)[number]
 
 export interface GrunnlagsendringsListe {
   hendelser: Grunnlagsendringshendelse[]
@@ -150,6 +150,8 @@ export interface Grunnlagsendringshendelse {
   hendelseGjelderRolle: Saksrolle
   gjelderPerson: string
   samsvarMellomKildeOgGrunnlag: SamsvarMellomKildeOgGrunnlag
+  aapen: boolean
+  kommentar?: string
 }
 
 export interface VedtakSammendrag {

@@ -210,7 +210,8 @@ fun grunnlagsendringshendelseMedSamsvar(
     behandlingId = behandlingId,
     hendelseGjelderRolle = hendelseGjelderRolle,
     samsvarMellomKildeOgGrunnlag = samsvarMellomKildeOgGrunnlag,
-    gjelderPerson = fnr
+    gjelderPerson = fnr,
+    aapen = true
 )
 
 fun grunnlagsinformasjonDoedshendelse(

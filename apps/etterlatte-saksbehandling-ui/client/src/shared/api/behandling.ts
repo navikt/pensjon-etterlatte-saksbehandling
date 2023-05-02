@@ -6,6 +6,7 @@ import {
 } from '~shared/types/IDetaljertBehandling'
 import { apiClient, ApiResponse } from './apiClient'
 import { ManueltOpphoerDetaljer } from '~components/behandling/manueltopphoeroversikt/ManueltOpphoerOversikt'
+import { Grunnlagsendringshendelse } from '~components/person/typer'
 
 export const hentBehandlingerForPerson = async (fnr: string): Promise<ApiResponse<any>> => {
   return apiClient.post(`/personer/behandlinger`, { foedselsnummer: fnr })
@@ -13,6 +14,10 @@ export const hentBehandlingerForPerson = async (fnr: string): Promise<ApiRespons
 
 export const hentGrunnlagsendringshendelserForPerson = async (fnr: string): Promise<ApiResponse<any>> => {
   return apiClient.post(`/personer/grunnlagsendringshendelser`, { foedselsnummer: fnr })
+}
+
+export const lukkGrunnlagshendelse = async (hendelse: Grunnlagsendringshendelse): Promise<ApiResponse<any>> => {
+  return apiClient.post(`/personer/lukkgrunnlagsendringshendelse}`, { hendelse })
 }
 
 export const hentBehandling = async (id: string): Promise<ApiResponse<IDetaljertBehandling>> => {

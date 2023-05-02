@@ -14,7 +14,8 @@ data class Grunnlagsendringshendelse(
     val hendelseGjelderRolle: Saksrolle,
     val gjelderPerson: String,
     val samsvarMellomKildeOgGrunnlag: SamsvarMellomKildeOgGrunnlag? = null,
-    val beskrivelse: String? = null
+    val aapen: Boolean = true,
+    val kommentar: String? = null
 )
 
 enum class GrunnlagsendringsType {

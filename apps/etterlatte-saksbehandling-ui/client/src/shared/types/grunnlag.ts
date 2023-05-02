@@ -5,6 +5,13 @@ export interface Grunnlagsopplysning<T, K> {
   opplysning: T
 }
 
+export interface PersonMedNavn {
+  fnr: string
+  fornavn: string
+  mellomnavn?: string
+  etternavn: string
+}
+
 export interface Soeskenjusteringsgrunnlag {
   beregningsgrunnlag: SoeskenMedIBeregning[]
 }

@@ -93,8 +93,21 @@ export interface AnsvarligeForeldreSamsvar {
 export interface VergemaalEllerFremtidsfullmaktForholdSamsvar {
   type: 'VERGEMAAL_ELLER_FREMTIDSFULLMAKT'
   samsvar: boolean
-  fraPdl?: string[]
-  fraGrunnlag?: string[]
+  fraPdl?: VergemaalEllerFremtidsfullmakt[]
+  fraGrunnlag?: VergemaalEllerFremtidsfullmakt[]
+}
+
+export interface VergemaalEllerFremtidsfullmakt {
+  embete?: string
+  type?: string
+  vergeEllerFullmektig: VergeEllerFullmektig
+}
+
+export interface VergeEllerFullmektig {
+  motpartsPersonident?: string
+  navn?: string
+  omfang?: string
+  omfangetErInnenPersonligOmraade: boolean
 }
 
 export interface ReguleringSamsvar {
@@ -117,11 +130,11 @@ export type SamsvarMellomKildeOgGrunnlag =
   | ReguleringSamsvar
   | InstitusjonsoppholdSamsvar
 
-export type GrunnlagsendringStatus = (typeof GRUNNLAGSENDRING_STATUS)[number]
+export type GrunnlagsendringStatus = typeof GRUNNLAGSENDRING_STATUS[number]
 
 const SAKSROLLER = ['SOEKER', 'INNSENDER', 'SOESKEN', 'AVDOED', 'GJENLEVENDE', 'UKJENT'] as const
 
-export type Saksrolle = (typeof SAKSROLLER)[number]
+export type Saksrolle = typeof SAKSROLLER[number]
 
 export interface GrunnlagsendringsListe {
   hendelser: Grunnlagsendringshendelse[]

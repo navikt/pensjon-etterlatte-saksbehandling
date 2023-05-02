@@ -8,7 +8,7 @@ import {
   IKommerBarnetTilgode,
   Virkningstidspunkt,
 } from '~shared/types/IDetaljertBehandling'
-import { Soeskenjusteringsgrunnlag } from '~shared/types/Grunnlagsopplysning'
+import { Soeskenjusteringsgrunnlag } from '~shared/types/grunnlag'
 
 export const addBehandling = createAction<IDetaljertBehandling>('behandling/add')
 export const resetBehandling = createAction('behandling/reset')

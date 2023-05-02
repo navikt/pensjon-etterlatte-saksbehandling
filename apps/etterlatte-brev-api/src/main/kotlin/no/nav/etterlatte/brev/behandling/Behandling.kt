@@ -64,7 +64,7 @@ data class Beregningsperiode(
 data class Persongalleri(
     val innsender: Innsender,
     val soeker: Soeker,
-    val gjenlevende: Gjenlevende,
+    // TODO: Legge til gjenlevende, men det krever litt logikk siden gjenlevende er null på OMS (søker = gjenlevende)
     val avdoed: Avdoed
 )
 
@@ -72,15 +72,6 @@ fun Grunnlag.mapSoeker(): Soeker = with(this.soeker) {
     Soeker(
         navn = hentNavn()!!.verdi.fulltNavn(),
         fnr = hentFoedselsnummer()!!.verdi.value
-    )
-}
-
-fun Grunnlag.mapGjenlevende(): Gjenlevende = with(this.familie) {
-    val gjenlevende = hentGjenlevende()
-
-    Gjenlevende(
-        navn = gjenlevende.hentNavn()!!.verdi.fulltNavn(),
-        fnr = gjenlevende.hentFoedselsnummer()!!.verdi.value
     )
 }
 

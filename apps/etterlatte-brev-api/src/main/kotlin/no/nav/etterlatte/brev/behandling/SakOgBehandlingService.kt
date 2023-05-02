@@ -58,7 +58,6 @@ class SakOgBehandlingService(
             persongalleri = Persongalleri(
                 innsender = grunnlag.mapInnsender(),
                 soeker = grunnlag.mapSoeker(),
-                gjenlevende = grunnlag.mapGjenlevende(),
                 avdoed = grunnlag.mapAvdoed()
             ),
             vedtak = ForenkletVedtak(

@@ -16,7 +16,6 @@ import no.nav.etterlatte.brev.behandling.Avdoed
 import no.nav.etterlatte.brev.behandling.Behandling
 import no.nav.etterlatte.brev.behandling.Beregningsperiode
 import no.nav.etterlatte.brev.behandling.ForenkletVedtak
-import no.nav.etterlatte.brev.behandling.Gjenlevende
 import no.nav.etterlatte.brev.behandling.Innsender
 import no.nav.etterlatte.brev.behandling.Persongalleri
 import no.nav.etterlatte.brev.behandling.SakOgBehandlingService
@@ -337,7 +336,6 @@ internal class VedtaksbrevServiceTest {
         Persongalleri(
             Innsender("STOR SNERK", "11057523044"),
             Soeker("GRØNN KOPP", "12345"),
-            Gjenlevende("LUR VANNFLASKE", "443434"),
             Avdoed("DØD TESTPERSON", LocalDate.now().minusMonths(1))
         ),
         ForenkletVedtak(1, VedtakType.INNVILGELSE, Saksbehandler(ident, PORSGRUNN), Attestant(ident, PORSGRUNN)),

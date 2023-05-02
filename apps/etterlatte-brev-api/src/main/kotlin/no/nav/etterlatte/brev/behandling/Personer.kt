@@ -6,6 +6,4 @@ data class Innsender(val navn: String, val fnr: String)
 
 data class Soeker(val navn: String, val fnr: String)
 
-data class Gjenlevende(val navn: String, val fnr: String)
-
 data class Avdoed(val navn: String, val doedsdato: LocalDate)

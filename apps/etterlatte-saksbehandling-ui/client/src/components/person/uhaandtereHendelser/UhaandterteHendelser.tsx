@@ -285,7 +285,6 @@ const HendelseBeskrivelse = (props: { hendelse: Grunnlagsendringshendelse }) => 
           <Vergemaal samsvar={hendelse.samsvarMellomKildeOgGrunnlag} />
         </Header>
       )
-    case 'INSTITUSJONSOPPHOLD':
     case 'GRUNNBELOEP':
       return (
         <Header>

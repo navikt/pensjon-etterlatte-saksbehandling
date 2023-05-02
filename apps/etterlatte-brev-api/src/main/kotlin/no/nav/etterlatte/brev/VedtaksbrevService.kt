@@ -3,6 +3,12 @@ package no.nav.etterlatte.brev
 import no.nav.etterlatte.brev.adresse.AdresseService
 import no.nav.etterlatte.brev.behandling.Behandling
 import no.nav.etterlatte.brev.behandling.SakOgBehandlingService
+import no.nav.etterlatte.brev.brevbaker.BrevbakerKlient
+import no.nav.etterlatte.brev.brevbaker.BrevbakerRequest
+import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevDto
+import no.nav.etterlatte.brev.brevbaker.Felles
+import no.nav.etterlatte.brev.brevbaker.LanguageCode
+import no.nav.etterlatte.brev.brevbaker.SignerendeSaksbehandlere
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.dokarkiv.DokarkivServiceImpl
 import no.nav.etterlatte.brev.journalpost.JournalpostResponse
@@ -18,6 +24,7 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.rivers.VedtakTilJournalfoering
 import no.nav.etterlatte.token.Bruker
 import org.slf4j.LoggerFactory
+import java.time.LocalDate
 import java.util.*
 
 class VedtaksbrevService(
@@ -25,7 +32,8 @@ class VedtaksbrevService(
     private val pdfGenerator: PdfGeneratorKlient,
     private val sakOgBehandlingService: SakOgBehandlingService,
     private val adresseService: AdresseService,
-    private val dokarkivService: DokarkivServiceImpl
+    private val dokarkivService: DokarkivServiceImpl,
+    private val brevbaker: BrevbakerKlient
 ) {
     private val logger = LoggerFactory.getLogger(VedtaksbrevService::class.java)
 
@@ -129,6 +137,23 @@ class VedtaksbrevService(
 
         val brevRequest = BrevRequestMapper.fra(behandling, avsender, mottaker, attestant)
 
-        return pdfGenerator.genererPdf(brevRequest)
+        val brevbakerBrev = brevbaker.genererPdf(
+            BrevbakerRequest(
+                kode = "A_LETTER",
+                letterData = brevRequest,
+                felles = Felles(
+                    dokumentDato = LocalDate.now(),
+                    saksnummer = "1234",
+                    avsenderEnhet = null,
+                    mottaker = null,
+                    signerendeSaksbehandlere = SignerendeSaksbehandlere("Ole Olesen")
+                ),
+                language = LanguageCode.standardLanguage()
+            )
+        )
+
+        logger.info("Generert brev for vedtak (vedtakId=${behandling.vedtak.id}) med størrelse: ${brevbakerBrev.size}")
+
+        return brevbakerBrev
     }
 }

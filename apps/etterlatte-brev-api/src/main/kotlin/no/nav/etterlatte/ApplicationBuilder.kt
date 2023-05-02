@@ -18,6 +18,7 @@ import no.nav.etterlatte.brev.adresse.enhetsregister.BrregService
 import no.nav.etterlatte.brev.behandling.SakOgBehandlingService
 import no.nav.etterlatte.brev.behandlingklient.BehandlingKlient
 import no.nav.etterlatte.brev.beregning.BeregningKlient
+import no.nav.etterlatte.brev.brevbaker.BrevbakerKlient
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.distribusjon.DistribusjonKlient
 import no.nav.etterlatte.brev.distribusjon.DistribusjonServiceImpl
@@ -79,6 +80,12 @@ class ApplicationBuilder {
         )
     }
 
+    private val brevbaker =
+        BrevbakerKlient(
+            httpClient(scope = env.requireEnvValue("BREVBAKER_SCOPE")),
+            env.requireEnvValue("BREVBAKER_URL")
+        )
+
     private val pdfGenerator = PdfGeneratorKlient(httpClient(), env.requireEnvValue("ETTERLATTE_PDFGEN_URL"))
     private val brregService = BrregService(BrregKlient(httpClient(), env.requireEnvValue("BRREG_URL")))
     private val regoppslagKlient = RegoppslagKlient(proxyClient, env.requireEnvValue("ETTERLATTE_PROXY_URL"))
@@ -112,7 +119,8 @@ class ApplicationBuilder {
             pdfGenerator,
             sakOgBehandlingService,
             adresseService,
-            dokarkivService
+            dokarkivService,
+            brevbaker
         )
 
     private val journalpostService =

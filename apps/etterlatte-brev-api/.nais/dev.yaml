@@ -49,6 +49,10 @@ spec:
     max: 1
     min: 1
   env:
+    - name: BREVBAKER_URL
+      value: https://pensjon-brevbaker.intern.dev.nav.no
+    - name: BREVBAKER_SCOPE
+      value: api://dev-gcp.pensjonsbrev.pensjon-brevbaker/.default
     - name: BRREG_URL
       value: https://data.brreg.no
     - name: NORG2_URL

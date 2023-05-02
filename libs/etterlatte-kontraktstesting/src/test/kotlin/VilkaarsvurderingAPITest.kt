@@ -1,6 +1,7 @@
 package no.nav.etterlatte
 
 import io.ktor.client.HttpClient
+import io.ktor.client.request.post
 import io.ktor.server.application.log
 import io.ktor.server.config.HoconApplicationConfig
 import io.ktor.server.testing.ApplicationTestBuilder
@@ -110,11 +111,11 @@ internal class VilkaarsvurderingAPITest {
         }
     }
 
-    private fun kallKlient(): Pair<UUID, Any> {
-        val sti = slot<UUID>()
+    private fun kallKlient(): Pair<String, Any> {
+        val sti = slot<String>()
         val httpClient = mockk<HttpClient>()
         val klient = spyk(VilkaarsvurderingServiceImpl(httpClient, ""))
-        coEvery { klient.migrer(capture(sti)) } returns mockk()
+        coEvery { httpClient.post(capture(sti), {}) } returns mockk()
         klient.migrer(UUID.randomUUID())
         return Pair(sti.captured, "{}")
     }

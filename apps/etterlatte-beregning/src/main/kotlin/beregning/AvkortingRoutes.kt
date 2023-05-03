@@ -13,7 +13,6 @@ import io.ktor.server.routing.route
 import no.nav.etterlatte.beregning.klienter.BehandlingKlient
 import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.periode.Periode
-import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.withBehandlingId
 import no.nav.etterlatte.libs.ktor.bruker
 import java.time.YearMonth
@@ -47,8 +46,7 @@ fun Route.avkorting(avkortingService: AvkortingService, behandlingKlient: Behand
 
 data class AvkortingDto(
     val behandlingId: UUID,
-    val avkortingGrunnlag: List<AvkortingGrunnlagDto>,
-    val tidspunktForAvkorting: Tidspunkt
+    val avkortingGrunnlag: List<AvkortingGrunnlagDto>
 )
 
 data class AvkortingGrunnlagDto(
@@ -61,8 +59,7 @@ data class AvkortingGrunnlagDto(
 
 fun Avkorting.toDto() = AvkortingDto(
     behandlingId = behandlingId,
-    avkortingGrunnlag = avkortingGrunnlag.map { it.toDto() },
-    tidspunktForAvkorting = tidspunktForAvkorting
+    avkortingGrunnlag = avkortingGrunnlag.map { it.toDto() }
 )
 
 fun AvkortingGrunnlag.toDto() = AvkortingGrunnlagDto(

@@ -88,7 +88,7 @@ internal class VedtaksbrevRouteTest {
                 }
             }
 
-            val response = client.post("/api/brev/vedtak/$BEHANDLING_ID") {
+            val response = client.post("/api/brev/behandling/$BEHANDLING_ID/vedtak") {
                 header(HttpHeaders.Authorization, "Bearer $token")
                 contentType(ContentType.Application.Json)
                 setBody(OpprettVedtaksbrevRequest(sakId))
@@ -150,7 +150,7 @@ internal class VedtaksbrevRouteTest {
                 }
             }
 
-            val response = client.post("/api/brev/vedtak/${UUID.randomUUID()}")
+            val response = client.post("/api/brev/behandling/${UUID.randomUUID()}/vedtak")
 
             assertEquals(HttpStatusCode.Unauthorized, response.status)
         }

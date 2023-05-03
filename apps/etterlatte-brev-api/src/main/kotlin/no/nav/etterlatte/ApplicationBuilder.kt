@@ -109,7 +109,7 @@ class ApplicationBuilder {
         DistribusjonKlient(httpClient("DOKDIST_SCOPE", false), env.requireEnvValue("DOKDIST_URL"))
     private val distribusjonService = DistribusjonServiceImpl(distribusjonKlient, db)
 
-    private val brevService = BrevService(db, pdfGenerator, adresseService)
+    private val brevService = BrevService(db)
     private val vedtaksbrevService =
         VedtaksbrevService(
             db,
@@ -126,7 +126,7 @@ class ApplicationBuilder {
         RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(env))
             .withKtorModule {
                 restModule(sikkerLogg, routePrefix = "api", config = HoconApplicationConfig(config)) {
-                    brevRoute(brevService, brregService, behandlingKlient)
+                    brevRoute(brevService)
                     vedtaksbrevRoute(vedtaksbrevService, behandlingKlient)
                     dokumentRoute(journalpostService, behandlingKlient)
                 }

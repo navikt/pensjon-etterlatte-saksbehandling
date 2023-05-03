@@ -5,7 +5,6 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
 import no.nav.etterlatte.libs.common.periode.Periode
-import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import java.time.YearMonth
 import java.util.*
 import javax.sql.DataSource
@@ -25,8 +24,7 @@ class AvkortingRepository(private val dataSource: DataSource) {
                 Avkorting(
                     behandlingId = behandlingId,
                     avkortinggrunnlag,
-                    beregningEtterAvkorting = emptyList(),
-                    tidspunktForAvkorting = Tidspunkt.now() // TODO sette ved beregningEtterAvkorting
+                    beregningEtterAvkorting = emptyList()
                 )
             }
         }

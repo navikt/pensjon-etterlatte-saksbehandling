@@ -31,6 +31,8 @@ fun Route.migrering(
 
         post("/{$BEHANDLINGSID_CALL_PARAMETER}") {
             withBehandlingId(behandlingKlient) { behandlingId ->
+                logger.info("Oppretter vilkårsvurdering for migrering for $behandlingId")
+                vilkaarsvurderingService.opprettVilkaarsvurdering(behandlingId, bruker)
                 logger.info("Setter alle vilkår til ikke vurdert for behandling $behandlingId")
                 migreringService.endreUtfallTilIkkeVurdertForAlleVilkaar(behandlingId)
                 settVilkaarsvurderingaSomHelhetSomOppfylt(vilkaarsvurderingService, behandlingId)

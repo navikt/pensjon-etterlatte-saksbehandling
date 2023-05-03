@@ -5,12 +5,12 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakType
 
 object BrevRequestMapper {
     fun fra(
-        vedtakType: VedtakType,
         behandling: Behandling,
         avsender: Avsender,
         mottaker: Mottaker,
         attestant: Attestant?
-    ) = when (vedtakType) {
+    ) = when (val vedtakType = behandling.vedtak.type) {
+        // TODO: Skille på forskjellige typer søknad (OMS, BP)
         VedtakType.INNVILGELSE -> InnvilgetBrevRequest.fraVedtak(
             behandling,
             avsender,

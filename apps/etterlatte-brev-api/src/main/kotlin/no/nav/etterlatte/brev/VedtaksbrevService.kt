@@ -5,10 +5,8 @@ import no.nav.etterlatte.brev.behandling.Behandling
 import no.nav.etterlatte.brev.behandling.SakOgBehandlingService
 import no.nav.etterlatte.brev.brevbaker.BrevbakerKlient
 import no.nav.etterlatte.brev.brevbaker.BrevbakerRequest
-import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevDto
-import no.nav.etterlatte.brev.brevbaker.Felles
+import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode
 import no.nav.etterlatte.brev.brevbaker.LanguageCode
-import no.nav.etterlatte.brev.brevbaker.SignerendeSaksbehandlere
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.dokarkiv.DokarkivServiceImpl
 import no.nav.etterlatte.brev.journalpost.JournalpostResponse
@@ -19,17 +17,20 @@ import no.nav.etterlatte.brev.model.BrevRequestMapper
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.OpprettNyttBrev
 import no.nav.etterlatte.brev.model.Status
-import no.nav.etterlatte.brev.pdf.PdfGeneratorKlient
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.rivers.VedtakTilJournalfoering
 import no.nav.etterlatte.token.Bruker
+import no.nav.pensjon.brev.api.model.Felles
+import no.nav.pensjon.brev.api.model.Foedselsnummer
+import no.nav.pensjon.brev.api.model.NAVEnhet
+import no.nav.pensjon.brev.api.model.Telefonnummer
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.util.*
+import no.nav.pensjon.brev.api.model.Bruker as BrevBruker
 
 class VedtaksbrevService(
     private val db: BrevRepository,
-    private val pdfGenerator: PdfGeneratorKlient,
     private val sakOgBehandlingService: SakOgBehandlingService,
     private val adresseService: AdresseService,
     private val dokarkivService: DokarkivServiceImpl,
@@ -139,21 +140,30 @@ class VedtaksbrevService(
 
         val brevbakerBrev = brevbaker.genererPdf(
             BrevbakerRequest(
-                kode = "A_LETTER",
+                kode = EtterlatteBrevKode.A_LETTER,
                 letterData = brevRequest,
                 felles = Felles(
                     dokumentDato = LocalDate.now(),
                     saksnummer = "1234",
-                    avsenderEnhet = null,
-                    mottaker = null,
-                    signerendeSaksbehandlere = SignerendeSaksbehandlere("Ole Olesen")
+                    avsenderEnhet = NAVEnhet("", "", Telefonnummer("12345678")),
+                    bruker = BrevBruker(
+                        fornavn = "Test",
+                        mellomnavn = "bruker",
+                        etternavn = "Testerson",
+                        foedselsnummer = Foedselsnummer("01019878910"),
+                        foedselsdato = LocalDate.of(1998, 1, 1)
+                    ),
+                    signerendeSaksbehandlere = null,
+                    vergeNavn = null
                 ),
-                language = LanguageCode.standardLanguage()
+                language = LanguageCode.BOKMAL
             )
         )
 
-        logger.info("Generert brev for vedtak (vedtakId=${behandling.vedtak.id}) med størrelse: ${brevbakerBrev.size}")
+        val brev = Base64.getDecoder().decode(brevbakerBrev.base64pdf)
 
-        return brevbakerBrev
+        logger.info("Generert brev for vedtak (vedtakId=${behandling.vedtak.id}) med størrelse: ${brev.size}")
+
+        return brev
     }
 }

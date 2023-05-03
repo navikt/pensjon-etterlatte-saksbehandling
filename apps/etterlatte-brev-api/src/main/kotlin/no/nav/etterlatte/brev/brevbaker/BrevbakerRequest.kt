@@ -1,9 +1,9 @@
 package no.nav.etterlatte.brev.brevbaker
 
-import java.time.LocalDate
+import no.nav.pensjon.brev.api.model.Felles
 
 data class BrevbakerRequest(
-    val kode: String,
+    val kode: EtterlatteBrevKode,
     val letterData: Any,
     val felles: Felles,
     val language: LanguageCode
@@ -26,42 +26,4 @@ enum class LanguageCode {
     }
 }
 
-// data class BrevInfo(val template: String, val letterData: Any, val felles: Felles)
-
-data class Felles(
-    val dokumentDato: LocalDate,
-    val saksnummer: String,
-    val avsenderEnhet: NAVEnhet? = null,
-    val mottaker: Mottaker? = null,
-    val signerendeSaksbehandlere: SignerendeSaksbehandlere? = null
-)
-
-data class Mottaker(
-    val fornavn: String,
-    val mellomnavn: String? = null,
-    val etternavn: String,
-    val foedselsnummer: Foedselsnummer,
-    val adresse: Adresse?
-)
-
-data class Adresse(
-    val linje1: String,
-    val linje2: String,
-    val linje3: String? = null,
-    val linje4: String? = null,
-    val linje5: String? = null
-)
-
-data class SignerendeSaksbehandlere(val saksbehandler: String, val attesterendeSaksbehandler: String? = null)
-
-data class NAVEnhet(
-    val returAdresse: ReturAdresse,
-    val nettside: String,
-    val navn: String,
-    val telefonnummer: Telefonnummer
-)
-
-data class ReturAdresse(val adresseLinje1: String, val postNr: String, val postSted: String)
-
-data class Telefonnummer(val value: String)
-data class Foedselsnummer(val value: String)
+enum class EtterlatteBrevKode { A_LETTER }

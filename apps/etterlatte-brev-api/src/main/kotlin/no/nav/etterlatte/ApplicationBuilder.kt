@@ -116,7 +116,6 @@ class ApplicationBuilder {
     private val vedtaksbrevService =
         VedtaksbrevService(
             db,
-            pdfGenerator,
             sakOgBehandlingService,
             adresseService,
             dokarkivService,

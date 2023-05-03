@@ -72,6 +72,7 @@ spec:
       rules:
         - application: etterlatte-saksbehandling-ui
         - application: etterlatte-beregning
+        - application: etterlatte-trygdetid-kafka
     outbound:
       rules:
         - application: etterlatte-behandling

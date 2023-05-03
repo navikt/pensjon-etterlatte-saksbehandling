@@ -34,7 +34,7 @@ internal class Migrering(
                 val behandlingId = packet.behandlingId
                 logger.info("Mottatt vilkårs-migreringshendelse for $BEHANDLING_ID_KEY $behandlingId")
                 vilkaarsvurderingService.migrer(behandlingId)
-                packet.eventName = Migreringshendelser.BEREGN
+                packet.eventName = Migreringshendelser.TRYGDETID
                 context.publish(packet.toJson())
                 logger.info("Publiserte oppdatert migreringshendelse fra vilkårsvurdering for behandling $behandlingId")
             }

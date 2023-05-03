@@ -74,5 +74,6 @@ fun AvkortingGrunnlagDto.fromDto() = AvkortingGrunnlag(
     periode = Periode(fom = fom, tom = null),
     aarsinntekt = aarsinntekt,
     gjeldendeAar = gjeldendeAar,
-    spesifikasjon = spesifikasjon
+    spesifikasjon = spesifikasjon,
+    beregnetAvkorting = emptyList()
 )

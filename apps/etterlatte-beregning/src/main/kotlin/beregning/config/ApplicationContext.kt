@@ -8,6 +8,7 @@ import no.nav.etterlatte.beregning.BeregnBarnepensjonService
 import no.nav.etterlatte.beregning.BeregnOmstillingsstoenadService
 import no.nav.etterlatte.beregning.BeregningRepository
 import no.nav.etterlatte.beregning.BeregningService
+import no.nav.etterlatte.beregning.InntektAvkortingService
 import no.nav.etterlatte.beregning.klienter.BehandlingKlientImpl
 import no.nav.etterlatte.beregning.klienter.GrunnlagKlientImpl
 import no.nav.etterlatte.beregning.klienter.TrygdetidKlient
@@ -47,6 +48,7 @@ class ApplicationContext {
     )
     val avkortingService = AvkortingService(
         avkortingRepository = AvkortingRepository(dataSource),
-        behandlingKlient = behandlingKlient
+        behandlingKlient = behandlingKlient,
+        inntektAvkortingService = InntektAvkortingService
     )
 }

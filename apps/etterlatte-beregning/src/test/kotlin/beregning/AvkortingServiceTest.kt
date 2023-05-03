@@ -11,9 +11,11 @@ import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.beregning.AvkortingRepository
 import no.nav.etterlatte.beregning.AvkortingService
+import no.nav.etterlatte.beregning.InntektAvkortingService
 import no.nav.etterlatte.beregning.klienter.BehandlingKlient
 import no.nav.etterlatte.beregning.regler.avkorting
 import no.nav.etterlatte.beregning.regler.avkortinggrunnlag
+import no.nav.etterlatte.beregning.regler.beregnetAvkortingGrunnlag
 import no.nav.etterlatte.beregning.regler.bruker
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -25,7 +27,8 @@ internal class AvkortingServiceTest {
 
     private val repository: AvkortingRepository = mockk()
     private val behandlingKlient: BehandlingKlient = mockk()
-    private val service = AvkortingService(repository, behandlingKlient)
+    private val inntektAvkortingService: InntektAvkortingService = mockk()
+    private val service = AvkortingService(repository, behandlingKlient, inntektAvkortingService)
 
     @BeforeEach
     fun beforeEach() {
@@ -62,7 +65,13 @@ internal class AvkortingServiceTest {
         val behandlingId = UUID.randomUUID()
         val avkorting = avkorting()
         val avkortinggrunnlag = avkortinggrunnlag()
-        every { repository.lagreEllerOppdaterAvkortingGrunnlag(behandlingId, avkortinggrunnlag) } returns avkorting
+        val inntektsavkorting = listOf(beregnetAvkortingGrunnlag())
+        val grunnlagMedBeregnetAvkorting = avkortinggrunnlag.copy(beregnetAvkorting = inntektsavkorting)
+
+        every { inntektAvkortingService.beregnInntektsavkorting(avkortinggrunnlag) } returns inntektsavkorting
+        every {
+            repository.lagreEllerOppdaterAvkortingGrunnlag(behandlingId, grunnlagMedBeregnetAvkorting)
+        } returns avkorting
 
         val result = runBlocking {
             service.lagreAvkortingGrunnlag(behandlingId, bruker, avkortinggrunnlag)
@@ -71,7 +80,8 @@ internal class AvkortingServiceTest {
         result shouldBe avkorting
         coVerify(exactly = 1) {
             behandlingKlient.beregn(behandlingId, bruker, false)
-            repository.lagreEllerOppdaterAvkortingGrunnlag(behandlingId, avkortinggrunnlag)
+            inntektAvkortingService.beregnInntektsavkorting(avkortinggrunnlag)
+            repository.lagreEllerOppdaterAvkortingGrunnlag(behandlingId, grunnlagMedBeregnetAvkorting)
         }
     }
 

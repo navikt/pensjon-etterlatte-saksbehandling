@@ -3,6 +3,7 @@ package no.nav.etterlatte.trygdetid
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.regler.FaktumNode
+import no.nav.etterlatte.libs.regler.KonstantGrunnlag
 import no.nav.etterlatte.libs.regler.RegelPeriode
 import no.nav.etterlatte.libs.regler.RegelkjoeringResultat
 import no.nav.etterlatte.libs.regler.eksekver
@@ -28,7 +29,7 @@ object TrygdetidBeregningService {
             )
         )
 
-        val resultat = beregnAntallAarTrygdetid.eksekver(grunnlag, RegelPeriode(LocalDate.now()))
+        val resultat = beregnAntallAarTrygdetid.eksekver(KonstantGrunnlag(grunnlag), RegelPeriode(LocalDate.now()))
         return when (resultat) {
             is RegelkjoeringResultat.Suksess -> {
                 val periodisertResultat = resultat.periodiserteResultater.first().resultat
@@ -62,7 +63,7 @@ object TrygdetidBeregningService {
             )
         )
 
-        val resultat = beregnTrygdetidMellomToDatoer.eksekver(grunnlag, RegelPeriode(LocalDate.now()))
+        val resultat = beregnTrygdetidMellomToDatoer.eksekver(KonstantGrunnlag(grunnlag), RegelPeriode(LocalDate.now()))
         return when (resultat) {
             is RegelkjoeringResultat.Suksess -> {
                 val periodisertResultat = resultat.periodiserteResultater.first().resultat

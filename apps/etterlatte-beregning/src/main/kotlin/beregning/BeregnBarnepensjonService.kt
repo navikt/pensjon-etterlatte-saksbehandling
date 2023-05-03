@@ -23,6 +23,7 @@ import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.libs.regler.FaktumNode
+import no.nav.etterlatte.libs.regler.KonstantGrunnlag
 import no.nav.etterlatte.libs.regler.RegelPeriode
 import no.nav.etterlatte.libs.regler.RegelkjoeringResultat
 import no.nav.etterlatte.libs.regler.eksekver
@@ -75,7 +76,7 @@ class BeregnBarnepensjonService(
         virkningstidspunkt: YearMonth
     ): Beregning {
         val resultat = kroneavrundetBarnepensjonRegel.eksekver(
-            grunnlag = beregningsgrunnlag,
+            grunnlag = KonstantGrunnlag(beregningsgrunnlag),
             periode = RegelPeriode(virkningstidspunkt.atDay(1))
         )
 

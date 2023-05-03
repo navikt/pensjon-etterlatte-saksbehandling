@@ -55,7 +55,10 @@ internal class RegelkjoeringTest {
 
     @Test
     fun `Skal periodisere resultatet basert paa alle knekkpunkter i grafen`() {
-        when (val perioder = velgNyesteGyldigeRegel.eksekver(grunnlag, RegelPeriode(gjelderFra2021))) {
+        when (
+            val perioder =
+                velgNyesteGyldigeRegel.eksekver(KonstantGrunnlag(grunnlag), RegelPeriode(gjelderFra2021))
+        ) {
             is RegelkjoeringResultat.Suksess -> {
                 perioder.periodiserteResultater shouldHaveSize 3
                 perioder.periodiserteResultater.map { it.periode } shouldContainExactly setOf(
@@ -65,13 +68,17 @@ internal class RegelkjoeringTest {
                 )
                 perioder.reglerVersjon should containADigit()
             }
+
             is RegelkjoeringResultat.UgyldigPeriode -> throw Exception("Skal ikke ha ugyldige perioder")
         }
     }
 
     @Test
     fun `Skal returnere med ugyldige regler for perioden hvis man eksekverer en regel utenfor gyldig periode`() {
-        when (val resultat = velgNyesteGyldigeRegel.eksekver(grunnlag, RegelPeriode(gjelderFra1900))) {
+        when (
+            val resultat =
+                velgNyesteGyldigeRegel.eksekver(KonstantGrunnlag(grunnlag), RegelPeriode(gjelderFra1900))
+        ) {
             is RegelkjoeringResultat.Suksess -> throw Exception("Skal ha ugyldige perioder")
             is RegelkjoeringResultat.UgyldigPeriode -> {
                 resultat.ugyldigeReglerForPeriode shouldHaveSize 1

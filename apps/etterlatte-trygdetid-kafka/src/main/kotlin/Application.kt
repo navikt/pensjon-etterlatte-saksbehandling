@@ -1,4 +1,4 @@
-package no.nav.etterlatte.trygdetid.kafka
+package no.nav.etterlatte
 
 import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.helse.rapids_rivers.RapidApplication

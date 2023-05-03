@@ -24,14 +24,14 @@ val trygdetidRegel: Regel<OmstillingstoenadGrunnlag, Beregningstall> =
 val maksTrygdetid = definerKonstant<OmstillingstoenadGrunnlag, Beregningstall>(
     gjelderFra = OMS_GYLDIG_FROM_TEST,
     beskrivelse = "Full trygdetidsopptjening er 40 år",
-    regelReferanse = RegelReferanse("TODO"),
+    regelReferanse = RegelReferanse("OMS-BEREGNING-2024-MAKS-TRYGDETID"),
     verdi = Beregningstall(40)
 )
 
 val trygdetidsFaktor = RegelMeta(
     gjelderFra = OMS_GYLDIG_FROM_TEST,
     beskrivelse = "Finn trygdetidsfaktor",
-    regelReferanse = RegelReferanse(id = "TODO")
+    regelReferanse = RegelReferanse(id = "OMS-BEREGNING-2024-TRYGDETIDSFAKTOR")
 ) benytter maksTrygdetid og trygdetidRegel med { maksTrygdetid, trygdetid ->
     minOf(trygdetid, maksTrygdetid).divide(maksTrygdetid)
 }

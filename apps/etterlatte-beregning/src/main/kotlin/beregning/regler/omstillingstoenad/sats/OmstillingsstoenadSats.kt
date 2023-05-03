@@ -14,9 +14,13 @@ import no.nav.etterlatte.libs.regler.med
 import no.nav.etterlatte.libs.regler.og
 import no.nav.etterlatte.libs.regler.velgNyesteGyldige
 
-val historiskeGrunnbeloep = GrunnbeloepRepository.historiskeGrunnbeloep.map { grunnbeloep ->
+val grunnbeloep: Regel<OmstillingstoenadGrunnlag, Grunnbeloep> = RegelMeta(
+    gjelderFra = OMS_GYLDIG_FROM_TEST,
+    beskrivelse = "Finner grunnbeløp for periode i beregning",
+    regelReferanse = RegelReferanse(id = "REGEL-GRUNNBELOEP")
+) velgNyesteGyldige GrunnbeloepRepository.historiskeGrunnbeloep.map { grunnbeloep ->
     val grunnbeloepGyldigFra = grunnbeloep.dato.atDay(1)
-    definerKonstant<OmstillingstoenadGrunnlag, Grunnbeloep>(
+    definerKonstant(
         gjelderFra = grunnbeloepGyldigFra,
         beskrivelse = "Grunnbeløp gyldig fra $grunnbeloepGyldigFra",
         regelReferanse = RegelReferanse(id = "REGEL-GRUNNBELOEP"),
@@ -24,23 +28,17 @@ val historiskeGrunnbeloep = GrunnbeloepRepository.historiskeGrunnbeloep.map { gr
     )
 }
 
-val grunnbeloep: Regel<OmstillingstoenadGrunnlag, Grunnbeloep> = RegelMeta(
-    gjelderFra = OMS_GYLDIG_FROM_TEST,
-    beskrivelse = "Finner grunnbeløp",
-    regelReferanse = RegelReferanse(id = "REGEL-GRUNNBELOEP")
-) velgNyesteGyldige historiskeGrunnbeloep
-
 val faktorKonstant = definerKonstant<OmstillingstoenadGrunnlag, Beregningstall>(
     gjelderFra = OMS_GYLDIG_FROM_TEST,
     beskrivelse = "Faktor for omstillingsstønad",
-    regelReferanse = RegelReferanse(id = "TODO"),
+    regelReferanse = RegelReferanse(id = "OMS-BEREGNING-2024-FAKTOR"),
     verdi = Beregningstall(2.25)
 )
 
 val omstillingsstoenadSatsRegel = RegelMeta(
     gjelderFra = OMS_GYLDIG_FROM_TEST,
-    beskrivelse = "Beregn uavkortet omstillingsstønad",
-    regelReferanse = RegelReferanse(id = "TODO")
+    beskrivelse = "Beregn sats for omstillingsstønad",
+    regelReferanse = RegelReferanse(id = "OMS-BEREGNING-2024-SATS")
 ) benytter faktorKonstant og grunnbeloep med { faktor, grunnbeloep ->
     faktor
         .multiply(grunnbeloep.grunnbeloep)

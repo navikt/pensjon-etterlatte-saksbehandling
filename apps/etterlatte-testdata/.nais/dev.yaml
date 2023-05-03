@@ -44,8 +44,8 @@ spec:
     - name: DOLLY_CLIENT_ID
       value: dev-gcp.dolly.dolly-backend
     - name: DOLLY_RESOURCE_URL
-      value: https://dolly-backend.dev.intern.nav.no/api/v1
+      value: https://dolly-backend.intern.dev.nav.no/api/v1
   accessPolicy:
     outbound:
       external:
-        - host: dolly-backend.dev.intern.nav.no
+        - host: dolly-backend.intern.dev.nav.no

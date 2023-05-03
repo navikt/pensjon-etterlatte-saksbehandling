@@ -59,7 +59,7 @@ internal class FordelerRepositoryTest {
     @Test
     fun `For søknader som har en fordeling skal den returneres`() {
         assertNull(fordelerRepo.finnFordeling(3L))
-        val ulagretFordeling = FordeltTransient(3, "DOFFEN", emptyList())
+        val ulagretFordeling = FordeltTransient(3, "GJENNY", emptyList())
 
         fordelerRepo.lagreFordeling(ulagretFordeling)
 
@@ -83,13 +83,13 @@ internal class FordelerRepositoryTest {
 
     @Test
     fun `Skal kunne fine ut hvor mange om er fordelt til et system`() {
-        assertEquals(0, fordelerRepo.antallFordeltTil("DOFFEN"))
+        assertEquals(0, fordelerRepo.antallFordeltTil("GJENNY"))
 
-        fordelerRepo.lagreFordeling(FordeltTransient(2, "DOFFEN", emptyList()))
+        fordelerRepo.lagreFordeling(FordeltTransient(2, "GJENNY", emptyList()))
         fordelerRepo.lagreFordeling(FordeltTransient(4, "PESYS", emptyList()))
-        fordelerRepo.lagreFordeling(FordeltTransient(8, "DOFFEN", emptyList()))
+        fordelerRepo.lagreFordeling(FordeltTransient(8, "GJENNY", emptyList()))
 
-        assertEquals(2, fordelerRepo.antallFordeltTil("DOFFEN"))
+        assertEquals(2, fordelerRepo.antallFordeltTil("GJENNY"))
         assertEquals(1, fordelerRepo.antallFordeltTil("PESYS"))
     }
 }

@@ -18,7 +18,7 @@ import {
   grunnlagsendringsKilde,
   grunnlagsendringsTittel,
   rolletekst,
-  stoetterDoffenRevurderingAvHendelse,
+  stoetterGjennyRevurderingAvHendelse,
 } from '~components/person/uhaandtereHendelser/utils'
 import { formaterKanskjeStringDatoMedFallback, formaterStringDato } from '~utils/formattering'
 import { isSuccess, Result } from '~shared/hooks/useApiCall'
@@ -69,7 +69,7 @@ const UhaandtertHendelse = (props: {
 }) => {
   const { hendelse, disabled, startRevurdering } = props
   const { type, opprettet } = hendelse
-  const stoetterRevurdering = stoetterDoffenRevurderingAvHendelse(hendelse)
+  const stoetterRevurdering = stoetterGjennyRevurderingAvHendelse(hendelse)
 
   return (
     <Wrapper>
@@ -86,7 +86,7 @@ const UhaandtertHendelse = (props: {
           </Button>
         ) : (
           <Alert variant="warning" size="small" inline>
-            Doffen støtter ikke revurdering
+            Gjenny støtter ikke revurdering
           </Alert>
         )}
       </Content>

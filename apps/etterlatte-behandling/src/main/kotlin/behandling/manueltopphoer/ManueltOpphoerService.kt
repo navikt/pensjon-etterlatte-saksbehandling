@@ -97,7 +97,7 @@ class RealManueltOpphoerService(
                     opphoerAarsaker = opphoerRequest.opphoerAarsaker,
                     fritekstAarsak = opphoerRequest.fritekstAarsak,
                     virkningstidspunkt = virkningstidspunkt,
-                    kilde = Vedtaksloesning.DOFFEN
+                    kilde = Vedtaksloesning.GJENNY
                 )
 
                 is ManueltOpphoer -> {

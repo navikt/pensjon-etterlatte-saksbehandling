@@ -61,7 +61,7 @@ fun opprettBehandling(
     opphoerAarsaker: List<ManueltOpphoerAarsak>? = null,
     fritekstAarsak: String? = null,
     prosesstype: Prosesstype = Prosesstype.MANUELL,
-    kilde: Vedtaksloesning = Vedtaksloesning.DOFFEN
+    kilde: Vedtaksloesning = Vedtaksloesning.GJENNY
 ) = OpprettBehandling(
     type = type,
     sakId = sakId,
@@ -88,7 +88,7 @@ fun foerstegangsbehandling(
     gyldighetsproeving: GyldighetsResultat? = null,
     virkningstidspunkt: Virkningstidspunkt? = null,
     kommerBarnetTilgode: KommerBarnetTilgode? = null,
-    kilde: Vedtaksloesning = Vedtaksloesning.DOFFEN,
+    kilde: Vedtaksloesning = Vedtaksloesning.GJENNY,
     enhet: String? = null
 ) = Foerstegangsbehandling(
     id = id,
@@ -120,7 +120,7 @@ fun revurdering(
     kommerBarnetTilgode: KommerBarnetTilgode = kommerBarnetTilgode(),
     virkningstidspunkt: Virkningstidspunkt? = null,
     prosesstype: Prosesstype = Prosesstype.MANUELL,
-    kilde: Vedtaksloesning = Vedtaksloesning.DOFFEN,
+    kilde: Vedtaksloesning = Vedtaksloesning.GJENNY,
     enhet: String? = null
 ) = Revurdering.opprett(
     id = id,

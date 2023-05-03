@@ -90,7 +90,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
                 sakId = sak.id,
                 forrigeBehandling = behandling!!,
                 revurderingAarsak = RevurderingAarsak.REGULERING,
-                kilde = Vedtaksloesning.DOFFEN
+                kilde = Vedtaksloesning.GJENNY
             )
 
         inTransaction {
@@ -140,7 +140,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
                 sakId = sak.id,
                 forrigeBehandling = behandling!!,
                 revurderingAarsak = RevurderingAarsak.REGULERING,
-                kilde = Vedtaksloesning.DOFFEN
+                kilde = Vedtaksloesning.GJENNY
             )
         )
     }

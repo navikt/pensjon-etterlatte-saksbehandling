@@ -26,7 +26,7 @@ export const grunnlagsendringsBeskrivelse: Record<GrunnlagsendringsType, string>
 export const grunnlagsendringsKilde = (type: GrunnlagsendringsType): string => {
   switch (type) {
     case 'GRUNNBELOEP':
-      return 'Doffen'
+      return 'Gjenny'
     case 'INSTITUSJONSOPPHOLD':
       return 'Inst2'
     case 'DOEDSDATO':
@@ -38,7 +38,7 @@ export const grunnlagsendringsKilde = (type: GrunnlagsendringsType): string => {
   }
 }
 
-export const stoetterDoffenRevurderingAvHendelse = (hendelse: Grunnlagsendringshendelse) => {
+export const stoetterGjennyRevurderingAvHendelse = (hendelse: Grunnlagsendringshendelse) => {
   switch (hendelse.type) {
     case 'GRUNNBELOEP':
       return true

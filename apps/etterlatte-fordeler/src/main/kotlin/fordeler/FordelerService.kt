@@ -40,7 +40,7 @@ class FordelerService(
     private val skjermingKlient: SkjermingKlient,
     private val skalBrukeSkjermingsklient: Boolean,
     private val klokke: Clock = utcKlokke(),
-    private val maxFordelingTilDoffen: Long
+    private val maxFordelingTilGjenny: Long
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -53,7 +53,7 @@ class FordelerService(
         return try {
             fordelSoeknad(event).let {
                 when (it.fordeltTil) {
-                    Vedtaksloesning.DOFFEN -> GyldigForBehandling
+                    Vedtaksloesning.GJENNY -> GyldigForBehandling
                     Vedtaksloesning.PESYS -> IkkeGyldigForBehandling(it.kriterier)
                 }
             }
@@ -103,9 +103,9 @@ class FordelerService(
 
         fordelerKriterier.sjekkMotKriterier(barn, avdoed, gjenlevende, soeknad, barnetErSkjermet).let {
             if (it.kandidat &&
-                fordelerRepository.antallFordeltTil(Vedtaksloesning.DOFFEN.name) < maxFordelingTilDoffen
+                fordelerRepository.antallFordeltTil(Vedtaksloesning.GJENNY.name) < maxFordelingTilGjenny
             ) {
-                Fordeling(event.soeknadId, Vedtaksloesning.DOFFEN, emptyList())
+                Fordeling(event.soeknadId, Vedtaksloesning.GJENNY, emptyList())
             } else {
                 Fordeling(event.soeknadId, Vedtaksloesning.PESYS, it.forklaring)
             }

@@ -197,7 +197,7 @@ abstract class BehandlingIntegrationTest {
                 sak.id,
                 persongalleri(),
                 LocalDateTime.now().toString(),
-                Vedtaksloesning.DOFFEN
+                Vedtaksloesning.GJENNY
             )
 
         return Pair(sak, behandling)

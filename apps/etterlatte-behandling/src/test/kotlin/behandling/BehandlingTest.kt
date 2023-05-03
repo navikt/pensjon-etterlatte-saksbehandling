@@ -44,7 +44,7 @@ internal class BehandlingTest {
         virkningstidspunkt = null,
         soeknadMottattDato = Tidspunkt.now().toLocalDatetimeUTC(),
         gyldighetsproeving = null,
-        kilde = Vedtaksloesning.DOFFEN
+        kilde = Vedtaksloesning.GJENNY
     )
 
     private val saksbehandler = Grunnlagsopplysning.Saksbehandler.create("saksbehandler01")

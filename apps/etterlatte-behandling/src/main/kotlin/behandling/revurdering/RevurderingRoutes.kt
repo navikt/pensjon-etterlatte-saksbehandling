@@ -38,7 +38,7 @@ internal fun Route.revurderingRoutes(
                     sakId = forrigeIverksatteBehandling.sak.id,
                     forrigeBehandling = forrigeIverksatteBehandling,
                     revurderingAarsak = body.aarsak,
-                    kilde = Vedtaksloesning.DOFFEN
+                    kilde = Vedtaksloesning.GJENNY
                 )
 
                 when (revurdering) {

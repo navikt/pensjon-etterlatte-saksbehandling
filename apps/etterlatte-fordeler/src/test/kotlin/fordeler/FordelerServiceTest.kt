@@ -34,7 +34,7 @@ internal class FordelerServiceTest {
         FordelerKriterier(),
         pdlTjenesterKlient,
         fordelerRepo,
-        maxFordelingTilDoffen = Long.MAX_VALUE,
+        maxFordelingTilGjenny = Long.MAX_VALUE,
         skjermingKlient = skjermingKlient,
         skalBrukeSkjermingsklient = true,
         behandlingKlient = behandlingKlient
@@ -47,7 +47,7 @@ internal class FordelerServiceTest {
         val etterlattFnr = Folkeregisteridentifikator.of(FNR_3)
         every { fordelerRepo.finnFordeling(any()) } returns null
         every { fordelerRepo.lagreFordeling(any()) } returns Unit
-        every { fordelerRepo.antallFordeltTil("DOFFEN") } returns 0
+        every { fordelerRepo.antallFordeltTil("GJENNY") } returns 0
         coEvery { skjermingKlient.personErSkjermet(any()) } returns false
 
         coEvery { pdlTjenesterKlient.hentPerson(match { it.foedselsnummer == barnFnr }) } returns mockPerson(
@@ -147,7 +147,7 @@ internal class FordelerServiceTest {
         val etterlattFnr = Folkeregisteridentifikator.of(FNR_3)
         every { fordelerRepo.finnFordeling(any()) } returns null
         every { fordelerRepo.lagreFordeling(any()) } returns Unit
-        every { fordelerRepo.antallFordeltTil("DOFFEN") } returns 0
+        every { fordelerRepo.antallFordeltTil("GJENNY") } returns 0
         coEvery { skjermingKlient.personErSkjermet(any()) } returns true
 
         coEvery { pdlTjenesterKlient.hentPerson(match { it.foedselsnummer == barnFnr }) } returns mockPerson(
@@ -182,8 +182,8 @@ internal class FordelerServiceTest {
     }
 
     @Test
-    fun `Er gyldig for behandling om søknad tidligere er fordelt til Doffen`() {
-        every { fordelerRepo.finnFordeling(any()) } returns FordeltRecord(1, "DOFFEN", Tidspunkt.now())
+    fun `Er gyldig for behandling om søknad tidligere er fordelt til Gjenny`() {
+        every { fordelerRepo.finnFordeling(any()) } returns FordeltRecord(1, "GJENNY", Tidspunkt.now())
         every { fordelerRepo.finnKriterier(any()) } returns emptyList()
 
         val resultat = fordelerService.sjekkGyldighetForBehandling(fordelerEvent())
@@ -206,12 +206,12 @@ internal class FordelerServiceTest {
     }
 
     @Test
-    fun `Skal ikke fordele søknader til DOFFEN utover et maksimum antall`() {
+    fun `Skal ikke fordele søknader til GJENNY utover et maksimum antall`() {
         val fordelerService = FordelerService(
             FordelerKriterier(),
             pdlTjenesterKlient,
             fordelerRepo,
-            maxFordelingTilDoffen = 10,
+            maxFordelingTilGjenny = 10,
             skjermingKlient = skjermingKlient,
             skalBrukeSkjermingsklient = true,
             behandlingKlient = behandlingKlient
@@ -222,7 +222,7 @@ internal class FordelerServiceTest {
         val etterlattFnr = Folkeregisteridentifikator.of(FNR_3)
         every { fordelerRepo.finnFordeling(any()) } returns null
         every { fordelerRepo.lagreFordeling(any()) } returns Unit
-        every { fordelerRepo.antallFordeltTil("DOFFEN") } returns 10
+        every { fordelerRepo.antallFordeltTil("GJENNY") } returns 10
         coEvery { skjermingKlient.personErSkjermet(any()) } returns false
 
         coEvery { pdlTjenesterKlient.hentPerson(match { it.foedselsnummer == barnFnr }) } returns mockPerson(
@@ -259,7 +259,7 @@ internal class FordelerServiceTest {
             FordelerKriterier(),
             pdlTjenesterKlient,
             fordelerRepo,
-            maxFordelingTilDoffen = 10,
+            maxFordelingTilGjenny = 10,
             skjermingKlient = skjermingKlient,
             skalBrukeSkjermingsklient = true,
             behandlingKlient = behandlingKlient
@@ -304,7 +304,7 @@ internal class FordelerServiceTest {
             FordelerKriterier(),
             pdlTjenesterKlient,
             fordelerRepo,
-            maxFordelingTilDoffen = 10,
+            maxFordelingTilGjenny = 10,
             skjermingKlient = skjermingKlient,
             skalBrukeSkjermingsklient = true,
             behandlingKlient = behandlingKlient

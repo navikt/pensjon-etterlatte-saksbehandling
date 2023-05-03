@@ -26,7 +26,7 @@ fun main() {
                     it.asyncPing()
                 },
                 skalBrukeSkjermingsklient = ab.skalBrukeSkjermingsklient(),
-                maxFordelingTilDoffen = ab.longFeature("FEATURE_MAX_FORDELING_TIL_DOFFEN")
+                maxFordelingTilGjenny = ab.longFeature("FEATURE_MAX_FORDELING_TIL_GJENNY")
             )
         )
     }.start()

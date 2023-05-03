@@ -33,7 +33,7 @@ class KonstantGrunnlag<G>(private val konstantGrunnlag: G) : PeriodisertGrunnlag
 object Regelkjoering {
     private val reglerVersjon = Properties.reglerVersjon
 
-    fun <S, G> eksekver(
+    fun <G, S> eksekver(
         regel: Regel<G, S>,
         periodisertGrunnlag: PeriodisertGrunnlag<G>,
         periode: RegelPeriode

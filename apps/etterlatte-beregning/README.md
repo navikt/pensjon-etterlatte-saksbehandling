@@ -20,7 +20,7 @@ beregninger tilknyttet en behandling.
 ```
 2. Sett følgende environment-variabler under oppstart av applikasjonen.
 ```
-DB_JDBC_URL=jdbc:postgresql://localhost:5432/postgres;
+DB_JDBC_URL=jdbc:postgresql://localhost:5433/postgres;
 DB_PASSWORD=postgres;
 DB_USERNAME=postgres;
 ETTERLATTE_BEHANDLING_CLIENT_ID=59967ac8-009c-492e-a618-e5a0f6b3e4e4;

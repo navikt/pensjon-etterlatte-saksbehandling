@@ -38,6 +38,6 @@ services:
     container_name: beregning-postgres
     image: postgres
     ports:
-      - '5432:5432'
+      - '5433:5432'
     environment:
       - POSTGRES_HOST_AUTH_METHOD=trust

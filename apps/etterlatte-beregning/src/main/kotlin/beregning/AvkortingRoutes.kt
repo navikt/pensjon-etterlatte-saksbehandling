@@ -57,7 +57,13 @@ data class AvkortingGrunnlagDto(
     val tom: YearMonth?,
     val aarsinntekt: Int,
     val gjeldendeAar: Int,
-    val spesifikasjon: String
+    val spesifikasjon: String,
+    val kilde: AvkortingGrunnlagKildeDto?
+)
+
+data class AvkortingGrunnlagKildeDto(
+    val tidspunkt: String,
+    val ident: String
 )
 
 fun Avkorting.toDto() = AvkortingDto(
@@ -70,7 +76,8 @@ fun AvkortingGrunnlag.toDto() = AvkortingGrunnlagDto(
     tom = periode.tom,
     aarsinntekt = aarsinntekt,
     gjeldendeAar = gjeldendeAar,
-    spesifikasjon = spesifikasjon
+    spesifikasjon = spesifikasjon,
+    kilde = AvkortingGrunnlagKildeDto(kilde.tidspunkt.toString(), kilde.ident)
 )
 
 fun AvkortingGrunnlagDto.fromDto(bruker: Bruker) = AvkortingGrunnlag(

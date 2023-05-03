@@ -8,8 +8,9 @@ import { IAvkorting, IAvkortingGrunnlag } from '~shared/types/IAvkorting'
 import { isPending, useApiCall } from '~shared/hooks/useApiCall'
 import { lagreAvkortingGrunnlag } from '~shared/api/avkorting'
 import { useParams } from 'react-router-dom'
-import { formaterDatoTilYearMonth } from '~utils/formattering'
+import { formaterDatoTilYearMonth, formaterStringDato } from '~utils/formattering'
 import { HjemmelLenke } from '~components/behandling/felles/HjemmelLenke'
+import { Info } from '~components/behandling/soeknadsoversikt/Info'
 
 export const AvkortingInntekt = (props: {
   avkortingGrunnlag?: IAvkortingGrunnlag[]
@@ -115,6 +116,16 @@ export const AvkortingInntekt = (props: {
                 </KalenderIkon>
               </Datovelger>
             </DatoSection>
+            {inntektGrunnlag.kilde && (
+              <Kilde>
+                <Label>Kilde</Label>
+                <Info
+                  tekst={inntektGrunnlag.kilde.ident}
+                  label={''}
+                  undertekst={`saksbehandler: ${formaterStringDato(inntektGrunnlag.kilde.tidspunkt)}`}
+                />
+              </Kilde>
+            )}
           </FormWrapper>
           <FormWrapper>
             <Textarea
@@ -138,6 +149,12 @@ export const AvkortingInntekt = (props: {
     </div>
   )
 }
+
+const Kilde = styled.div`
+  width: 250px;
+  display: grid;
+  gap: 0.5em;
+`
 
 const InntektAvkortingForm = styled.form`
   display: flex;

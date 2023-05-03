@@ -14,6 +14,7 @@ import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.VergeMaalEllerFremtidsfullmakt
+import no.nav.etterlatte.libs.common.sak.BehandlingOgSak
 import no.nav.etterlatte.libs.common.sak.SakIDListe
 import no.nav.etterlatte.libs.common.sak.Saker
 import no.nav.etterlatte.rapidsandrivers.migrering.MigreringRequest
@@ -29,7 +30,7 @@ interface BehandlingService {
     fun hentAlleSaker(): Saker
     fun opprettOmregning(omregningshendelse: Omregningshendelse): OpprettOmregningResponse
     fun migrerAlleTempBehandlingerTilbakeTilVilkaarsvurdert(): SakIDListe
-    fun migrer(hendelse: MigreringRequest): UUID
+    fun migrer(hendelse: MigreringRequest): BehandlingOgSak
 }
 
 data class ReguleringFeiletHendelse(val sakId: Long)
@@ -109,7 +110,7 @@ class BehandlingServiceImpl(
         }
     }
 
-    override fun migrer(hendelse: MigreringRequest): UUID = runBlocking {
+    override fun migrer(hendelse: MigreringRequest): BehandlingOgSak = runBlocking {
         behandlingKlient.post("$url/migrering") {
             contentType(ContentType.Application.Json)
             setBody(hendelse)

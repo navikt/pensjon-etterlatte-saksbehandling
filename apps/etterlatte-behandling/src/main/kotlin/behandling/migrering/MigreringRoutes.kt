@@ -7,19 +7,19 @@ import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
-import no.nav.etterlatte.rapidsandrivers.migrering.MigreringRequest
+import no.nav.etterlatte.libs.common.sak.BehandlingOgSak
 
 fun Route.migreringRoutes(
     migreringService: MigreringService
 ) {
     route("/migrering") {
         post {
-            val request = call.receive<MigreringRequest>()
-            val behandling = migreringService.migrer(request)
-
-            when (behandling) {
+            when (val behandling = migreringService.migrer(call.receive())) {
                 null -> call.respond(HttpStatusCode.NotFound)
-                else -> call.respond(HttpStatusCode.Companion.Created, behandling.id)
+                else -> call.respond(
+                    HttpStatusCode.Companion.Created,
+                    BehandlingOgSak(behandling.id, behandling.sak.id)
+                )
             }
         }
     }

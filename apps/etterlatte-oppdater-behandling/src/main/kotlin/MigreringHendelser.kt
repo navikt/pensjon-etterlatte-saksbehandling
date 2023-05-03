@@ -40,8 +40,9 @@ internal class MigreringHendelser(rapidsConnection: RapidsConnection, private va
                 logger.info("Mottatt migreringshendelse")
 
                 val hendelse: MigreringRequest = objectMapper.treeToValue(packet[HENDELSE_DATA_KEY])
-                val behandlingId = behandlinger.migrer(hendelse)
-                packet.behandlingId = behandlingId
+                val behandlingOgSak = behandlinger.migrer(hendelse)
+                packet.behandlingId = behandlingOgSak.behandlingId
+                packet.sakId = behandlingOgSak.sakId
                 packet.eventName = VILKAARSVURDER
                 context.publish(packet.toJson())
                 logger.info("Publiserte oppdatert migreringshendelse")

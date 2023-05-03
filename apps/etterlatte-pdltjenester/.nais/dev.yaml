@@ -37,12 +37,12 @@ spec:
     - name: PDL_OUTBOUND_SCOPE
       value: api://dev-fss.pdl.pdl-api/.default
     - name: PPS_URL
-      value: https://pensjon-parallelle-sannheter.dev.intern.nav.no
+      value: https://pensjon-parallelle-sannheter.intern.dev.nav.no
   accessPolicy:
     outbound:
       external:
         - host: "pdl-api.dev-fss-pub.nais.io"
-        - host: "pensjon-parallelle-sannheter.dev.intern.nav.no"
+        - host: "pensjon-parallelle-sannheter.intern.dev.nav.no"
     inbound:
       rules:
         - application: etterlatte-fordeler

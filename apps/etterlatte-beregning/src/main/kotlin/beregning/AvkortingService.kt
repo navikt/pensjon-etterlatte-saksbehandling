@@ -7,7 +7,8 @@ import java.util.*
 
 class AvkortingService(
     private val avkortingRepository: AvkortingRepository,
-    private val behandlingKlient: BehandlingKlient
+    private val behandlingKlient: BehandlingKlient,
+    private val inntektAvkortingService: InntektAvkortingService
 ) {
     private val logger = LoggerFactory.getLogger(AvkortingService::class.java)
 
@@ -22,7 +23,13 @@ class AvkortingService(
         avkortingGrunnlag: AvkortingGrunnlag
     ): Avkorting = tilstandssjekk(behandlingId, bruker) {
         logger.info("Lagre grunnlag for avkorting for behandlingId=$behandlingId")
-        avkortingRepository.lagreEllerOppdaterAvkortingGrunnlag(behandlingId, avkortingGrunnlag)
+
+        val inntektavkorting = inntektAvkortingService.beregnInntektsavkorting(avkortingGrunnlag)
+
+        avkortingRepository.lagreEllerOppdaterAvkortingGrunnlag(
+            behandlingId,
+            avkortingGrunnlag.copy(beregnetAvkorting = inntektavkorting)
+        )
     }
 
     private suspend fun tilstandssjekk(behandlingId: UUID, bruker: Bruker, block: suspend () -> Avkorting): Avkorting {

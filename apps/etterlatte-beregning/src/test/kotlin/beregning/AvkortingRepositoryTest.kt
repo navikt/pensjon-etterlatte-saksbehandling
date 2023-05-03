@@ -3,7 +3,10 @@ package beregning
 import io.kotest.matchers.shouldBe
 import no.nav.etterlatte.beregning.AvkortingGrunnlag
 import no.nav.etterlatte.beregning.AvkortingRepository
+import no.nav.etterlatte.beregning.BeregnetAvkortingGrunnlag
 import no.nav.etterlatte.libs.common.periode.Periode
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.migrate
 import org.junit.jupiter.api.AfterAll
@@ -47,7 +50,15 @@ internal class AvkortingRepositoryTest {
             periode = Periode(fom = YearMonth.now(), tom = null),
             aarsinntekt = 500000,
             gjeldendeAar = 2023,
-            spesifikasjon = "Grunnlag før endring"
+            spesifikasjon = "Grunnlag før endring",
+            beregnetAvkorting = listOf(
+                BeregnetAvkortingGrunnlag(
+                    periode = Periode(fom = YearMonth.now(), tom = null),
+                    avkorting = 100,
+                    tidspunkt = Tidspunkt.now(),
+                    regelResultat = "".toJsonNode()
+                )
+            )
         )
         val endretAvkortningGrunnlag = avkortinggrunnlag.copy(spesifikasjon = "Endret grunnlag")
 

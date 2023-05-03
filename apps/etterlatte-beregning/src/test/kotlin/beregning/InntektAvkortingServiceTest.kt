@@ -37,9 +37,7 @@ class InntektAvkortingServiceTest {
 
     @Test
     fun `skal beregene avkorting for inntekt`() {
-        val avkortingGrunnlag = listOf(
-            avkortinggrunnlag(aarsinntekt = 500000)
-        )
+        val avkortingGrunnlag = avkortinggrunnlag(aarsinntekt = 500000)
 
         val beregnedeAvkortingGrunnlag = InntektAvkortingService.beregnInntektsavkorting(avkortingGrunnlag)
 

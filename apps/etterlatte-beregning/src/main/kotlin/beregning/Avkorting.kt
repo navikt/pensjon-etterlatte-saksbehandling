@@ -16,7 +16,7 @@ data class AvkortingGrunnlag(
     val aarsinntekt: Int,
     val gjeldendeAar: Int,
     val spesifikasjon: String,
-    val beregnetAvkorting: List<BeregnetAvkortingGrunnlag> = emptyList()
+    val beregnetAvkorting: List<BeregnetAvkortingGrunnlag>
 )
 
 data class BeregnetAvkortingGrunnlag(

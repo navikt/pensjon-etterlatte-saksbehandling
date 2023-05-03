@@ -32,6 +32,7 @@ import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.brev.pdf.PdfGeneratorKlient
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.rivers.VedtakTilJournalfoering
@@ -329,6 +330,7 @@ internal class VedtaksbrevServiceTest {
 
     private fun opprettBehandling() = Behandling(
         SAK_ID,
+        SakType.BARNEPENSJON,
         BEHANDLING_ID,
         Spraak.NB,
         Persongalleri(

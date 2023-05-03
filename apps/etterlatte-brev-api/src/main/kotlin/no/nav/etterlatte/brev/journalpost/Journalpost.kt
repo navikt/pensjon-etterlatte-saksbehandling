@@ -1,12 +1,5 @@
 package no.nav.etterlatte.brev.journalpost
 
-data class JournalpostInfo(
-    val tittel: String,
-    val avsenderMottaker: AvsenderMottaker,
-    val bruker: Bruker,
-    val journalfoerendeEnhet: String?
-)
-
 data class JournalpostRequest(
     val tittel: String,
     val journalpostType: JournalPostType,
@@ -46,7 +39,7 @@ data class Sak(
     val fagsaksystem: String? = "EY"
 )
 
-enum class Sakstype() {
+enum class Sakstype {
     FAGSAK,
     GENERELL_SAK
 }
@@ -82,7 +75,7 @@ enum class DokumentKategori(val type: String) {
     IB("IB")
 }
 
-enum class BrukerIdType() {
+enum class BrukerIdType {
     FNR,
     AKTOERID,
     ORGNR

@@ -1,4 +1,4 @@
-import { BodyLong } from '@navikt/ds-react'
+import { ErrorMessage } from '@navikt/ds-react'
 import styled from 'styled-components'
 import Spinner from '~shared/Spinner'
 
@@ -16,8 +16,8 @@ const Container = styled.div`
 `
 
 interface Props {
-  fileUrl?: string
-  error?: string
+  fileUrl: string | undefined
+  error?: string | undefined
   loading?: boolean
 }
 
@@ -25,15 +25,15 @@ export const PdfVisning = ({ fileUrl, error, loading }: Props) => {
   return (
     <Container>
       {error && (
-        <BodyLong>
+        <ErrorMessage>
           En feil har oppstått ved henting av PDF:
           <br />
           <code>{error}</code>
-        </BodyLong>
+        </ErrorMessage>
       )}
 
       {loading ? (
-        <Spinner visible={true} label={'Oppretter brev ...'} />
+        <Spinner visible={true} label={'Klargjør forhåndsvisning av PDF ...'} />
       ) : (
         fileUrl && <PdfViewer src={`${fileUrl}#toolbar=0`} />
       )}

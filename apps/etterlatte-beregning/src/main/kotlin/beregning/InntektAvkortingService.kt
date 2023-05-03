@@ -22,7 +22,7 @@ object InntektAvkortingService {
     fun beregnInntektsavkorting(avkortingGrunnlag: AvkortingGrunnlag): List<BeregnetAvkortingGrunnlag> {
         logger.info("Beregner inntektsavkorting")
         val grunnlag = InntektAvkortingGrunnlag(
-            inntekt = FaktumNode(verdi = avkortingGrunnlag.aarsinntekt, "TODO kilde", "Forventet årsinntekt")
+            inntekt = FaktumNode(verdi = avkortingGrunnlag.aarsinntekt, avkortingGrunnlag.kilde, "Forventet årsinntekt")
         )
         val resultat = inntektAvkorting.eksekver(grunnlag, RegelPeriode(avkortingGrunnlag.periode.fom.atDay(1)))
         return when (resultat) {

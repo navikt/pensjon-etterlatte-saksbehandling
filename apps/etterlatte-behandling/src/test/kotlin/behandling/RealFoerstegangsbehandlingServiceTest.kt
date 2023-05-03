@@ -127,7 +127,7 @@ internal class RealFoerstegangsbehandlingServiceTest {
                 "begrunnelse"
             ),
             kommerBarnetTilgode = null,
-            kilde = Vedtaksloesning.DOFFEN
+            kilde = Vedtaksloesning.GJENNY
         )
 
         assertEquals("Soeker", sut.hentFoerstegangsbehandling(id)!!.persongalleri.innsender)
@@ -170,7 +170,7 @@ internal class RealFoerstegangsbehandlingServiceTest {
                 "begrunnelse"
             ),
             kommerBarnetTilgode = null,
-            kilde = Vedtaksloesning.DOFFEN
+            kilde = Vedtaksloesning.GJENNY
         )
 
         val persongalleri = Persongalleri(
@@ -192,7 +192,7 @@ internal class RealFoerstegangsbehandlingServiceTest {
             1,
             persongalleri,
             datoNaa.toString(),
-            Vedtaksloesning.DOFFEN
+            Vedtaksloesning.GJENNY
         )!!
 
         assertEquals(opprettetBehandling, resultat)
@@ -231,7 +231,7 @@ internal class RealFoerstegangsbehandlingServiceTest {
             soeknadMottattDato = now,
             gyldighetsproeving = null,
             prosesstype = Prosesstype.MANUELL,
-            kilde = Vedtaksloesning.DOFFEN
+            kilde = Vedtaksloesning.GJENNY
         )
         every { behandlingDaoMock.hentBehandling(any()) } returns behandling
 
@@ -298,7 +298,7 @@ internal class RealFoerstegangsbehandlingServiceTest {
                 "begrunnelse"
             ),
             kommerBarnetTilgode = null,
-            kilde = Vedtaksloesning.DOFFEN
+            kilde = Vedtaksloesning.GJENNY
         )
 
         assertEquals("Soeker", sut.hentFoerstegangsbehandling(id)!!.persongalleri.innsender)
@@ -344,7 +344,7 @@ internal class RealFoerstegangsbehandlingServiceTest {
                 "begrunnelse"
             ),
             kommerBarnetTilgode = null,
-            kilde = Vedtaksloesning.DOFFEN
+            kilde = Vedtaksloesning.GJENNY
         )
 
         assertEquals("Soeker", sut.hentFoerstegangsbehandling(id)!!.persongalleri.innsender)
@@ -390,7 +390,7 @@ internal class RealFoerstegangsbehandlingServiceTest {
                 "begrunnelse"
             ),
             kommerBarnetTilgode = null,
-            kilde = Vedtaksloesning.DOFFEN
+            kilde = Vedtaksloesning.GJENNY
         )
 
         assertNull(sut.hentFoerstegangsbehandling(id))

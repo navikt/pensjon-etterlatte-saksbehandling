@@ -53,7 +53,7 @@ spec:
       value: https://skjermede-personer-pip.intern.dev.nav.no
     - name: AZURE_SCOPE_SKJERMEDE_PIP
       value: api://dev-gcp.nom.skjermede-personer-pip/.default
-    - name: FEATURE_MAX_FORDELING_TIL_DOFFEN
+    - name: FEATURE_MAX_FORDELING_TIL_GJENNY
       value: "-1"
     - name: SKAL_BRUKE_SKJERMING
       value: "true"

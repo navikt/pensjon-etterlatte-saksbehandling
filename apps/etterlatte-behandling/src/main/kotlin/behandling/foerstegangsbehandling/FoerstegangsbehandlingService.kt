@@ -106,7 +106,7 @@ class RealFoerstegangsbehandlingService(
                 status = BehandlingStatus.OPPRETTET,
                 soeknadMottattDato = LocalDateTime.parse(mottattDato),
                 persongalleri = persongalleri,
-                kilde = Vedtaksloesning.DOFFEN,
+                kilde = Vedtaksloesning.GJENNY,
                 merknad = opprettMerknad(sak, persongalleri)
             ).let { opprettBehandling ->
                 behandlingDao.opprettBehandling(opprettBehandling)

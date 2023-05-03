@@ -26,14 +26,14 @@ class OmregningService(
                 forrigeBehandling = forrigeBehandling,
                 fraDato = fraDato,
                 revurderingAarsak = RevurderingAarsak.REGULERING,
-                kilde = Vedtaksloesning.DOFFEN
+                kilde = Vedtaksloesning.GJENNY
             )
 
             Prosesstype.MANUELL -> revurderingService.opprettManuellRevurdering(
                 sakId = sakId,
                 forrigeBehandling = forrigeBehandling,
                 revurderingAarsak = RevurderingAarsak.REGULERING,
-                kilde = Vedtaksloesning.DOFFEN
+                kilde = Vedtaksloesning.GJENNY
             )
         }
 

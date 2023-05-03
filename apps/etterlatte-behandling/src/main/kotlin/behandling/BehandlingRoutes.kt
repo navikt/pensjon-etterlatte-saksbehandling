@@ -185,7 +185,7 @@ internal fun Route.behandlingRoutes(
                         behandlingsBehov.sak,
                         behandlingsBehov.persongalleri,
                         behandlingsBehov.mottattDato,
-                        Vedtaksloesning.DOFFEN
+                        Vedtaksloesning.GJENNY
                     )
                 ) {
                     null -> call.respond(HttpStatusCode.NotFound)

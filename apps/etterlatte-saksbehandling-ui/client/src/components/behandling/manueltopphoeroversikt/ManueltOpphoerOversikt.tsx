@@ -72,7 +72,7 @@ export const ManueltOpphoerOversikt = (props: { behandling: IBehandlingReducer }
             Manuelt opphør
           </Heading>
           <Infoboks>
-            Det har kommet inn nye endringer på saken som gjør at den ikke kan behandles i Doffen. Saken må opprettes
+            Det har kommet inn nye endringer på saken som gjør at den ikke kan behandles i Gjenny. Saken må opprettes
             manuelt i Pesys og deretter opphøres i nytt system. Se rutiner for å opprette sak i Pesys
           </Infoboks>
         </SectionSpacing>

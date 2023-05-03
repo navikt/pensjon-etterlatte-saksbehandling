@@ -57,7 +57,7 @@ spec:
       value: http://etterlatte-pdltjenester/person
     - name: PDL_AZURE_SCOPE
       value: api://prod-gcp.etterlatte.etterlatte-pdltjenester/.default
-    - name: FEATURE_MAX_FORDELING_TIL_DOFFEN
+    - name: FEATURE_MAX_FORDELING_TIL_GJENNY
       value: "26"
     - name: BEHANDLING_AZURE_SCOPE
       value: api://prod-gcp.etterlatte.etterlatte-behandling/.default

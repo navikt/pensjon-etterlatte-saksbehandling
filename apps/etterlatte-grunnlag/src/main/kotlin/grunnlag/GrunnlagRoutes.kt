@@ -99,7 +99,7 @@ fun Route.grunnlagRoute(grunnlagService: GrunnlagService, behandlingKlient: Beha
                 } else {
                     call.respond(
                         HttpStatusCode.NotFound,
-                        "Doffen har ingen navnedata på fødselsnummeret som ble etterspurt"
+                        "Gjenny har ingen navnedata på fødselsnummeret som ble etterspurt"
                     )
                 }
             }

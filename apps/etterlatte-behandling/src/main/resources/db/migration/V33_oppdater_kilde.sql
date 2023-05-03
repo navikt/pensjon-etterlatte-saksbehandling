@@ -1,0 +1,1 @@
+UPDATE behandling SET kilde = 'GJENNY' WHERE kilde = 'DOFFEN';

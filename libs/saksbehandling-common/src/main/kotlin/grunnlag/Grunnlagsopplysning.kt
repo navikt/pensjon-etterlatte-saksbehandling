@@ -44,7 +44,7 @@ open class Grunnlagsopplysning<T>(
             )
         }
 
-        val automatiskSaksbehandler = Saksbehandler.create(ident = "Doffen")
+        val automatiskSaksbehandler = Saksbehandler.create(ident = "Gjenny")
     }
 
     override fun toString(): String {

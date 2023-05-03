@@ -74,7 +74,7 @@ export const Search = () => {
           </span>
           <SearchResult>
             <BodyShort className="text">
-              {personStatus.error.statusCode === 404 ? 'Fant ingen data i Doffen' : 'En feil har skjedd'}
+              {personStatus.error.statusCode === 404 ? 'Fant ingen data i Gjenny' : 'En feil har skjedd'}
             </BodyShort>
           </SearchResult>
         </Dropdown>

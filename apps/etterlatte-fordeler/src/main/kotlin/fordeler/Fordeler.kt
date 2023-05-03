@@ -68,7 +68,7 @@ internal class Fordeler(
 
                 when (val resultat = fordelerService.sjekkGyldighetForBehandling(packet.toFordelerEvent())) {
                     FordelerResultat.GyldigForBehandling -> {
-                        logger.info("Soknad ${packet.soeknadId()} er gyldig for fordeling, henter sakId for Doffen")
+                        logger.info("Soknad ${packet.soeknadId()} er gyldig for fordeling, henter sakId for Gjenny")
                         try {
                             fordelerService.hentSakId(
                                 packet[SoeknadInnsendt.fnrSoekerKey].textValue(),

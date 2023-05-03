@@ -188,7 +188,7 @@ internal class OppgaveDaoTest {
             sakId = sak.id,
             status = BehandlingStatus.OPPRETTET,
             persongalleri = Persongalleri("soeker", "innsender", listOf("soesken"), listOf("avdoed")),
-            kilde = Vedtaksloesning.DOFFEN,
+            kilde = Vedtaksloesning.GJENNY,
             merknad = "1 søsken"
         )
 
@@ -220,7 +220,7 @@ internal class OppgaveDaoTest {
             opphoerAarsaker = listOf(),
             fritekstAarsak = null,
             prosesstype = prosesstype,
-            kilde = Vedtaksloesning.DOFFEN
+            kilde = Vedtaksloesning.GJENNY
         )
     }
 }

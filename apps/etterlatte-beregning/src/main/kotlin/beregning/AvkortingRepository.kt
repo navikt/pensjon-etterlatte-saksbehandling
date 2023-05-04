@@ -2,6 +2,7 @@ package no.nav.etterlatte.beregning
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import kotliquery.Row
+import kotliquery.TransactionalSession
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
@@ -18,26 +19,40 @@ class AvkortingRepository(private val dataSource: DataSource) {
 
     fun hentAvkorting(behandlingId: UUID): Avkorting? = using(sessionOf(dataSource)) { session ->
         session.transaction { tx ->
-            val beregnetAvkortingGrunnlag = queryOf(
-                "SELECT * FROM beregnet_avkortinggrunnlag WHERE behandling_id = ?",
-                behandlingId
-            ).let { query ->
-                tx.run(query.map { row -> row.toBeregnetAvkortinggrunnlag() }.asList)
-            }
-            queryOf(
-                "SELECT * FROM avkortinggrunnlag WHERE behandling_id = ?",
-                behandlingId
-            ).let { query ->
-                tx.run(query.map { row -> row.toAvkortinggrunnlag(beregnetAvkortingGrunnlag) }.asList).ifEmpty {
-                    null
-                }
-            }?.let { avkortinggrunnlag ->
+            hentAvkortingGrunnlag(tx, behandlingId)?.let { avkortingGrunnlag ->
+                val avkortetYtelse = hentAvkortetYtelse(tx, behandlingId)
                 Avkorting(
                     behandlingId = behandlingId,
-                    avkortinggrunnlag,
-                    avkortetYtelse = emptyList()
+                    avkortingGrunnlag = avkortingGrunnlag,
+                    avkortetYtelse = avkortetYtelse
                 )
             }
+        }
+    }
+
+    private fun hentAvkortingGrunnlag(tx: TransactionalSession, behandlingId: UUID): List<AvkortingGrunnlag>? {
+        val beregnetAvkortingGrunnlag = queryOf(
+            "SELECT * FROM beregnet_avkortinggrunnlag WHERE behandling_id = ?",
+            behandlingId
+        ).let { query ->
+            tx.run(query.map { row -> row.toBeregnetAvkortinggrunnlag() }.asList)
+        }
+        return queryOf(
+            "SELECT * FROM avkortinggrunnlag WHERE behandling_id = ?",
+            behandlingId
+        ).let { query ->
+            tx.run(query.map { row -> row.toAvkortinggrunnlag(beregnetAvkortingGrunnlag) }.asList).ifEmpty {
+                null
+            }
+        }
+    }
+
+    private fun hentAvkortetYtelse(tx: TransactionalSession, behandlingId: UUID): List<AvkortetYtelse> {
+        return queryOf(
+            "SELECT * FROM avkortet_ytelse WHERE behandling_id = ?",
+            behandlingId
+        ).let { query ->
+            tx.run(query.map { row -> row.toAvkortetYtelse() }.asList)
         }
     }
 
@@ -104,6 +119,41 @@ class AvkortingRepository(private val dataSource: DataSource) {
         return hentAvkortingUtenNullable(behandlingId)
     }
 
+    fun lagreEllerOppdaterAvkortetYtelse(behandlingId: UUID, avkortetYtelse: List<AvkortetYtelse>): Avkorting {
+        using(sessionOf(dataSource)) { session ->
+            session.transaction { tx ->
+                queryOf(
+                    "DELETE FROM avkortet_ytelse WHERE behandling_id = ?",
+                    behandlingId
+                ).let { query ->
+                    tx.run(query.asUpdate)
+                }
+
+                avkortetYtelse.forEach {
+                    queryOf(
+                        statement = """
+                        INSERT INTO avkortet_ytelse(
+                        id, behandling_id, fom, tom, ytelse_etter_avkorting, tidspunkt, regel_resultat 
+                        ) VALUES (
+                        :id, :behandlingId, :fom, :tom, :ytelseEtterAvkorting, :tidspunkt, :regel_resultat
+                        )
+                        """.trimIndent(),
+                        paramMap = mapOf(
+                            "id" to UUID.randomUUID(),
+                            "behandlingId" to behandlingId,
+                            "fom" to it.periode.fom.atDay(1),
+                            "tom" to it.periode.tom?.atDay(1),
+                            "ytelseEtterAvkorting" to it.ytelseEtterAvkorting,
+                            "tidspunkt" to it.tidspunkt.toTimestamp(),
+                            "regel_resultat" to it.regelResultat.toJson()
+                        )
+                    ).let { query -> tx.run(query.asUpdate) }
+                }
+            }
+        }
+        return hentAvkortingUtenNullable(behandlingId)
+    }
+
     private fun hentAvkortingUtenNullable(behandlingId: UUID): Avkorting =
         hentAvkorting(behandlingId) ?: throw Exception("Uthenting av avkorting for behandling $behandlingId feilet")
 
@@ -125,6 +175,16 @@ class AvkortingRepository(private val dataSource: DataSource) {
             tom = sqlDateOrNull("tom")?.let { YearMonth.from(it.toLocalDate()) }
         ),
         avkorting = int("avkorting"),
+        tidspunkt = sqlTimestamp("tidspunkt").toTidspunkt(),
+        regelResultat = objectMapper.readTree(string("regel_resultat"))
+    )
+
+    private fun Row.toAvkortetYtelse() = AvkortetYtelse(
+        periode = Periode(
+            fom = sqlDate("fom").let { YearMonth.from(it.toLocalDate()) },
+            tom = sqlDateOrNull("tom")?.let { YearMonth.from(it.toLocalDate()) }
+        ),
+        ytelseEtterAvkorting = int("ytelse_etter_avkorting"),
         tidspunkt = sqlTimestamp("tidspunkt").toTidspunkt(),
         regelResultat = objectMapper.readTree(string("regel_resultat"))
     )

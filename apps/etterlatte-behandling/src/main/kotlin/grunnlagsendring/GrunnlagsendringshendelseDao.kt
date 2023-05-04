@@ -28,8 +28,8 @@ class GrunnlagsendringshendelseDao(val connection: () -> Connection) {
             val stmt = prepareStatement(
                 """
                 INSERT INTO grunnlagsendringshendelse(id, sak_id, type, opprettet, status, hendelse_gjelder_rolle, 
-                    samsvar_mellom_pdl_og_grunnlag, gjelder_person, aapen)
-                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    samsvar_mellom_pdl_og_grunnlag, gjelder_person)
+                VALUES(?, ?, ?, ?, ?, ?, ?, ?)
                 """.trimIndent()
             )
             with(hendelse) {
@@ -41,7 +41,6 @@ class GrunnlagsendringshendelseDao(val connection: () -> Connection) {
                 stmt.setString(6, hendelseGjelderRolle.name)
                 stmt.setJsonb(7, samsvarMellomKildeOgGrunnlag)
                 stmt.setString(8, gjelderPerson)
-                stmt.setBoolean(9, aapen)
             }
             stmt.executeUpdate()
         }.let {
@@ -55,7 +54,7 @@ class GrunnlagsendringshendelseDao(val connection: () -> Connection) {
             val stmt = prepareStatement(
                 """
                     SELECT id, sak_id, type, opprettet, status, behandling_id, hendelse_gjelder_rolle, 
-                        samsvar_mellom_pdl_og_grunnlag, gjelder_person, kommentar, aapen
+                        samsvar_mellom_pdl_og_grunnlag, gjelder_person, kommentar
                     FROM grunnlagsendringshendelse
                     WHERE id = ?
                 """.trimIndent()
@@ -96,12 +95,13 @@ class GrunnlagsendringshendelseDao(val connection: () -> Connection) {
                 """
                    UPDATE grunnlagsendringshendelse
                    SET kommentar = ?,
-                   aapen = 'false'
+                   status = ?
                    WHERE id = ?
                 """.trimIndent()
             ).use {
                 it.setString(1, hendelse.kommentar)
-                it.setObject(2, hendelse.id)
+                it.setString(2, GrunnlagsendringStatus.VURDERT_SOM_IKKE_RELEVANT.toString())
+                it.setObject(3, hendelse.id)
                 it.executeUpdate()
             }
         }
@@ -133,7 +133,7 @@ class GrunnlagsendringshendelseDao(val connection: () -> Connection) {
             val stmt = prepareStatement(
                 """
                     SELECT id, sak_id, type, opprettet, status, behandling_id, hendelse_gjelder_rolle, 
-                        samsvar_mellom_pdl_og_grunnlag, gjelder_person, kommentar, aapen
+                        samsvar_mellom_pdl_og_grunnlag, gjelder_person, kommentar
                     FROM grunnlagsendringshendelse
                 """.trimIndent()
             )
@@ -148,7 +148,7 @@ class GrunnlagsendringshendelseDao(val connection: () -> Connection) {
             prepareStatement(
                 """
                    SELECT id, sak_id, type, opprettet, status, behandling_id, hendelse_gjelder_rolle, 
-                       samsvar_mellom_pdl_og_grunnlag, gjelder_person, kommentar, aapen
+                       samsvar_mellom_pdl_og_grunnlag, gjelder_person, kommentar
                    FROM grunnlagsendringshendelse
                    WHERE opprettet <= ?
                    AND status = ?
@@ -169,7 +169,7 @@ class GrunnlagsendringshendelseDao(val connection: () -> Connection) {
             prepareStatement(
                 """
                     SELECT id, sak_id, type, opprettet, status, behandling_id, hendelse_gjelder_rolle, 
-                        samsvar_mellom_pdl_og_grunnlag, gjelder_person, kommentar, aapen
+                        samsvar_mellom_pdl_og_grunnlag, gjelder_person, kommentar
                     FROM grunnlagsendringshendelse
                     WHERE sak_id = ?
                     AND status = ANY(?)
@@ -203,7 +203,6 @@ class GrunnlagsendringshendelseDao(val connection: () -> Connection) {
             samsvarMellomKildeOgGrunnlag = objectMapper.readValue(
                 getString("samsvar_mellom_pdl_og_grunnlag")
             ),
-            aapen = getBoolean("aapen"),
             kommentar = getString("kommentar")
         )
     }

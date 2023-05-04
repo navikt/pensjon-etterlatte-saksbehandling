@@ -195,8 +195,7 @@ class GrunnlagsendringshendelseService(
                                 opprettet = tidspunktForMottakAvHendelse,
                                 hendelseGjelderRolle = rolleOgSak.rolle,
                                 gjelderPerson = fnr,
-                                samsvarMellomKildeOgGrunnlag = samsvar,
-                                aapen = true
+                                samsvarMellomKildeOgGrunnlag = samsvar
                             )
                         )
                     }
@@ -235,8 +234,7 @@ class GrunnlagsendringshendelseService(
                                 type = grunnlagendringType,
                                 opprettet = tidspunktForMottakAvHendelse,
                                 hendelseGjelderRolle = rolleOgSak.rolle,
-                                gjelderPerson = fnr,
-                                aapen = true
+                                gjelderPerson = fnr
                             )
                         )
                     }
@@ -267,8 +265,7 @@ class GrunnlagsendringshendelseService(
                             type = grunnlagendringType,
                             opprettet = Tidspunkt.now().toLocalDatetimeUTC(),
                             hendelseGjelderRolle = Saksrolle.SOEKER,
-                            gjelderPerson = sakService.finnSak(sakId)?.ident!!,
-                            aapen = true
+                            gjelderPerson = sakService.finnSak(sakId)?.ident!!
                         )
                     )
 

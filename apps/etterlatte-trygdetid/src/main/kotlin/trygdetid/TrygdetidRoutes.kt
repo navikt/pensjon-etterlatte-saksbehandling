@@ -131,8 +131,8 @@ private fun TrygdetidGrunnlag.toDto(): TrygdetidGrunnlagDto {
             BeregnetTrygdetidGrunnlagDto(it.verdi.days, it.verdi.months, it.verdi.years)
         },
         kilde = TrygdetidGrunnlagKildeDto(
-            tidspunkt = kilde?.tidspunkt.toString(),
-            ident = kilde?.ident ?: throw Exception("Mangler gyldig kilde for trygdetidgrunnlag $id")
+            tidspunkt = kilde.tidspunkt.toString(),
+            ident = kilde.ident
         )
     )
 }

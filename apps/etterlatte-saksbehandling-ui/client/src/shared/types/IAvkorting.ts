@@ -10,4 +10,8 @@ export interface IAvkortingGrunnlag {
   aarsinntekt?: number
   gjeldendeAar?: number
   spesifikasjon?: string
+  kilde?: {
+    tidspunkt: ''
+    ident: ''
+  }
 }

@@ -1,0 +1,1 @@
+ALTER TABLE avkortinggrunnlag ADD COLUMN kilde TEXT;

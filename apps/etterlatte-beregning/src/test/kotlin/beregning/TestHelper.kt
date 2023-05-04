@@ -8,6 +8,7 @@ import no.nav.etterlatte.beregning.regler.avkorting.InntektAvkortingGrunnlag
 import no.nav.etterlatte.beregning.regler.barnepensjon.AvdoedForelder
 import no.nav.etterlatte.beregning.regler.barnepensjon.BarnepensjonGrunnlag
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -20,7 +21,7 @@ import no.nav.etterlatte.token.Saksbehandler
 import java.math.RoundingMode
 import java.time.LocalDate
 import java.time.YearMonth
-import java.util.UUID
+import java.util.*
 
 val REGEL_PERIODE = RegelPeriode(LocalDate.of(2023, 1, 1))
 
@@ -66,6 +67,7 @@ fun avkortinggrunnlag(
     aarsinntekt = aarsinntekt,
     gjeldendeAar = 2023,
     spesifikasjon = "Spesifikasjon",
+    kilde = Grunnlagsopplysning.Saksbehandler.create("Z123456"),
     beregnetAvkorting = beregnetAvkorting
 )
 

@@ -6,6 +6,7 @@ import {
   DoedsdatoSamsvar,
   Grunnlagsendringshendelse,
   InstitusjonsoppholdSamsvar,
+  STATUS_IRRELEVANT,
   UtlandSamsvar,
   VergemaalEllerFremtidsfullmakt,
   VergemaalEllerFremtidsfullmaktForholdSamsvar,
@@ -46,8 +47,10 @@ const UhaandterteHendelser = (props: Props) => {
       return {}
     }
   }, [grunnlag])
-  const aapneHendelser = hendelser.filter((h) => h.aapen)
-  const lukkedeHendelser = hendelser.filter((h) => !h.aapen)
+
+  const aapneHendelser = hendelser.filter((h) => h.status !== STATUS_IRRELEVANT)
+  const lukkedeHendelser = hendelser.filter((h) => h.status === STATUS_IRRELEVANT)
+
   return (
     <>
       <BorderWidth>

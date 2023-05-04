@@ -201,7 +201,9 @@ export const SaksoversiktWrapper = styled.div`
 
   h1 {
     margin-bottom: 1em;
-    text-transform: capitalize;
+    &::first-letter {
+      text-transform: capitalize;
+    }
   }
 
   .button {

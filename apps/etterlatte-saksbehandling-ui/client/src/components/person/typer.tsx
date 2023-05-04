@@ -43,13 +43,15 @@ export enum AarsaksTyper {
 
 export type GrunnlagsendringsType = SamsvarMellomKildeOgGrunnlag['type']
 
-const GRUNNLAGSENDRING_STATUS = [
+export const GRUNNLAGSENDRING_STATUS = [
   'VENTER_PAA_JOBB',
   'SJEKKET_AV_JOBB',
   'TATT_MED_I_BEHANDLING',
   'VURDERT_SOM_IKKE_RELEVANT',
   'FORKASTET',
 ] as const
+
+export const STATUS_IRRELEVANT: GrunnlagsendringStatus = 'VURDERT_SOM_IKKE_RELEVANT'
 
 interface Utland {
   utflyttingFraNorge?: {
@@ -150,7 +152,6 @@ export interface Grunnlagsendringshendelse {
   hendelseGjelderRolle: Saksrolle
   gjelderPerson: string
   samsvarMellomKildeOgGrunnlag: SamsvarMellomKildeOgGrunnlag
-  aapen: boolean
   kommentar?: string
 }
 

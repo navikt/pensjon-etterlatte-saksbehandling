@@ -53,7 +53,11 @@ const UhaandterteHendelser = (props: Props) => {
       <BorderWidth>
         <HendelserBorder>
           <FnrTilNavnMapContext.Provider value={navneMap}>
-            <StyledAlert>Ny hendelse som kan kreve revurdering. Vurder om det har konsekvens for ytelsen.</StyledAlert>
+            {aapneHendelser && aapneHendelser.length > 0 && (
+              <StyledAlert>
+                Ny hendelse som kan kreve revurdering. Vurder om det har konsekvens for ytelsen.
+              </StyledAlert>
+            )}
             <Heading size="medium">Nye hendelser</Heading>
             {aapneHendelser.map((hendelse) => (
               <UhaandtertHendelse

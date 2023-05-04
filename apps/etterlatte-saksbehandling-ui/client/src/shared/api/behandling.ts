@@ -17,7 +17,7 @@ export const hentGrunnlagsendringshendelserForPerson = async (fnr: string): Prom
 }
 
 export const lukkGrunnlagshendelse = async (hendelse: Grunnlagsendringshendelse): Promise<ApiResponse<any>> => {
-  return apiClient.post(`/personer/lukkgrunnlagsendringshendelse}`, { hendelse })
+  return apiClient.post(`/personer/lukkgrunnlagsendringshendelse`, { ...hendelse })
 }
 
 export const hentBehandling = async (id: string): Promise<ApiResponse<IDetaljertBehandling>> => {

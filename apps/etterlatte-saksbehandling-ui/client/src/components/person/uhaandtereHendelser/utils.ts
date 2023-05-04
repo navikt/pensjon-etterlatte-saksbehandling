@@ -52,20 +52,13 @@ export const stoettedeRevurderingerSomListe = (): Array<string> => {
 
 export const genererStoettedeRevurderinger = (): Record<string, string> => {
   return {
-    GRUNNBELOEP: requireEnvValue(import.meta.env.VITE_GRUNNBELOEP),
-    ANSVARLIGE_FORELDRE: requireEnvValue(import.meta.env.VITE_ANSVARLIGE_FORELDRE),
-    UTLAND: requireEnvValue(import.meta.env.VITE_ANSVARLIGE_FORELDRE),
-    BARN: requireEnvValue(import.meta.env.VITE_BARN),
-    DOEDSDATO: requireEnvValue(import.meta.env.VITE_DOEDSDATO),
-    VERGEMAAL_ELLER_FREMTIDSFULLMAKT: requireEnvValue(import.meta.env.VITE_VERGEMAAL_ELLER_FREMTIDSFULLMAKT),
+    GRUNNBELOEP: import.meta.env.VITE_GRUNNBELOEP || 'false',
+    ANSVARLIGE_FORELDRE: import.meta.env.VITE_ANSVARLIGE_FORELDRE || 'false',
+    UTLAND: import.meta.env.VITE_ANSVARLIGE_FORELDRE || 'false',
+    BARN: import.meta.env.VITE_BARN || 'false',
+    DOEDSDATO: import.meta.env.VITE_DOEDSDATO || 'false',
+    VERGEMAAL_ELLER_FREMTIDSFULLMAKT: import.meta.env.VITE_VERGEMAAL_ELLER_FREMTIDSFULLMAKT || 'false',
   }
-}
-
-function requireEnvValue(envValue: string): string {
-  if (envValue) {
-    return envValue
-  }
-  throw new Error(`Env is missing required key ${envValue}`)
 }
 
 export const rolletekst: Record<Grunnlagsendringshendelse['hendelseGjelderRolle'], string> = {

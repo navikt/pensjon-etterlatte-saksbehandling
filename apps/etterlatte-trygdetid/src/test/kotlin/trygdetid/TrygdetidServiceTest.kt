@@ -11,12 +11,14 @@ import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
+import kotliquery.TransactionalSession
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
 import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsdato
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import no.nav.etterlatte.trygdetid.BeregnetTrygdetid
+import no.nav.etterlatte.trygdetid.Trygdetid
 import no.nav.etterlatte.trygdetid.TrygdetidBeregningService
 import no.nav.etterlatte.trygdetid.TrygdetidGrunnlag
 import no.nav.etterlatte.trygdetid.TrygdetidOpplysningType
@@ -164,22 +166,27 @@ internal class TrygdetidServiceTest {
         val trygdetidGrunnlag = trygdetidGrunnlag()
         val trygdetidGrunnlagSlot = slot<TrygdetidGrunnlag>()
         val beregnetTrygdetidSlot = slot<BeregnetTrygdetid>()
+        val transactionLambda = slot<(TransactionalSession) -> Trygdetid>()
+        val tx: TransactionalSession = mockk()
 
         coEvery { behandlingKlient.settBehandlingStatusVilkaarsvurdert(any(), any()) } returns true
+
         every { repository.hentEnkeltTrygdetidGrunnlag(any()) } returns null
-        every { repository.opprettTrygdetidGrunnlag(any(), capture(trygdetidGrunnlagSlot)) } answers {
+        every { repository.opprettTrygdetidGrunnlag(any(), capture(trygdetidGrunnlagSlot), tx) } answers {
             trygdetid(
                 behandlingId = behandlingId,
                 trygdetidGrunnlag = listOf(trygdetidGrunnlagSlot.captured)
             )
         }
-        every { repository.oppdaterBeregnetTrygdetid(any(), capture(beregnetTrygdetidSlot)) } answers {
+        every { repository.oppdaterBeregnetTrygdetid(any(), capture(beregnetTrygdetidSlot), tx) } answers {
             trygdetid(
                 behandlingId = behandlingId,
                 trygdetidGrunnlag = listOf(trygdetidGrunnlagSlot.captured),
                 beregnetTrygdetid = beregnetTrygdetidSlot.captured
             )
         }
+
+        every { repository.transaction(capture(transactionLambda)) } answers { transactionLambda.captured.invoke(tx) }
 
         val trygdetid = runBlocking {
             service.lagreTrygdetidGrunnlag(
@@ -197,9 +204,10 @@ internal class TrygdetidServiceTest {
         coVerify(exactly = 1) {
             behandlingKlient.kanBeregnes(behandlingId, saksbehandler)
             repository.hentEnkeltTrygdetidGrunnlag(trygdetidGrunnlag.id)
-            repository.opprettTrygdetidGrunnlag(behandlingId, trygdetidGrunnlagSlot.captured)
-            repository.oppdaterBeregnetTrygdetid(behandlingId, beregnetTrygdetidSlot.captured)
+            repository.opprettTrygdetidGrunnlag(behandlingId, trygdetidGrunnlagSlot.captured, tx)
+            repository.oppdaterBeregnetTrygdetid(behandlingId, beregnetTrygdetidSlot.captured, tx)
             behandlingKlient.settBehandlingStatusVilkaarsvurdert(behandlingId, saksbehandler)
+            repository.transaction(any<(TransactionalSession) -> Trygdetid>())
         }
     }
 
@@ -210,22 +218,26 @@ internal class TrygdetidServiceTest {
         val endretTrygdetidGrunnlag = trygdetidGrunnlag.copy(bosted = "Polen")
         val trygdetidGrunnlagSlot = slot<TrygdetidGrunnlag>()
         val beregnetTrygdetidSlot = slot<BeregnetTrygdetid>()
+        val transactionLambda = slot<(TransactionalSession) -> Trygdetid>()
+        val tx: TransactionalSession = mockk()
 
         coEvery { behandlingKlient.settBehandlingStatusVilkaarsvurdert(any(), any()) } returns true
         every { repository.hentEnkeltTrygdetidGrunnlag(any()) } returns trygdetidGrunnlag
-        every { repository.oppdaterTrygdetidGrunnlag(any(), capture(trygdetidGrunnlagSlot)) } answers {
+        every { repository.oppdaterTrygdetidGrunnlag(any(), capture(trygdetidGrunnlagSlot), tx) } answers {
             trygdetid(
                 behandlingId = behandlingId,
                 trygdetidGrunnlag = listOf(trygdetidGrunnlagSlot.captured)
             )
         }
-        every { repository.oppdaterBeregnetTrygdetid(any(), capture(beregnetTrygdetidSlot)) } answers {
+        every { repository.oppdaterBeregnetTrygdetid(any(), capture(beregnetTrygdetidSlot), tx) } answers {
             trygdetid(
                 behandlingId = behandlingId,
                 trygdetidGrunnlag = listOf(trygdetidGrunnlagSlot.captured),
                 beregnetTrygdetid = beregnetTrygdetidSlot.captured
             )
         }
+
+        every { repository.transaction(capture(transactionLambda)) } answers { transactionLambda.captured.invoke(tx) }
 
         val trygdetid = runBlocking {
             service.lagreTrygdetidGrunnlag(
@@ -244,9 +256,10 @@ internal class TrygdetidServiceTest {
         coVerify(exactly = 1) {
             behandlingKlient.kanBeregnes(behandlingId, saksbehandler)
             repository.hentEnkeltTrygdetidGrunnlag(endretTrygdetidGrunnlag.id)
-            repository.oppdaterTrygdetidGrunnlag(behandlingId, trygdetidGrunnlagSlot.captured)
-            repository.oppdaterBeregnetTrygdetid(behandlingId, beregnetTrygdetidSlot.captured)
+            repository.oppdaterTrygdetidGrunnlag(behandlingId, trygdetidGrunnlagSlot.captured, tx)
+            repository.oppdaterBeregnetTrygdetid(behandlingId, beregnetTrygdetidSlot.captured, tx)
             behandlingKlient.settBehandlingStatusVilkaarsvurdert(behandlingId, saksbehandler)
+            repository.transaction(any<(TransactionalSession) -> Trygdetid>())
         }
     }
 

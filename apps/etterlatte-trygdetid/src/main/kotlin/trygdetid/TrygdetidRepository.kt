@@ -13,11 +13,17 @@ import no.nav.etterlatte.libs.common.tidspunkt.toTimestamp
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.database.tidspunkt
+import no.nav.etterlatte.libs.database.transaction
 import java.time.Period
 import java.util.*
 import javax.sql.DataSource
 
 class TrygdetidRepository(private val dataSource: DataSource) {
+
+    fun <T> transaction(block: (tx: TransactionalSession) -> T): T = dataSource.transaction(block)
+
+    private fun <T> retrieveTransaction(txIn: TransactionalSession?, block: (tx: TransactionalSession) -> T): T =
+        txIn?.let(block) ?: transaction { block(it) }
 
     fun hentTrygdetid(behandlingId: UUID): Trygdetid? =
         using(sessionOf(dataSource)) { session ->
@@ -99,13 +105,16 @@ class TrygdetidRepository(private val dataSource: DataSource) {
         ).let { query -> tx.update(query) }
     }
 
-    fun opprettTrygdetidGrunnlag(behandlingId: UUID, trygdetidGrunnlag: TrygdetidGrunnlag): Trygdetid =
-        using(sessionOf(dataSource)) { session ->
-            session.transaction { tx ->
-                val trygdetid = hentTrygdtidNotNull(behandlingId)
+    fun opprettTrygdetidGrunnlag(
+        behandlingId: UUID,
+        trygdetidGrunnlag: TrygdetidGrunnlag,
+        txIn: TransactionalSession? = null
+    ): Trygdetid =
+        retrieveTransaction(txIn) { tx ->
+            val trygdetid = hentTrygdtidNotNull(behandlingId)
 
-                queryOf(
-                    statement = """
+            queryOf(
+                statement = """
                         INSERT INTO trygdetid_grunnlag(
                             id, 
                             trygdetid_id, 
@@ -119,28 +128,30 @@ class TrygdetidRepository(private val dataSource: DataSource) {
                         ) 
                         VALUES(:id, :trygdetidId, :type, :bosted, :periodeFra, :periodeTil, :kilde, 
                             :beregnetVerdi, :beregnetTidspunkt, :beregnetRegelresultat)
-                    """.trimIndent(),
-                    paramMap = mapOf(
-                        "id" to trygdetidGrunnlag.id,
-                        "trygdetidId" to trygdetid.id,
-                        "type" to trygdetidGrunnlag.type.name,
-                        "bosted" to trygdetidGrunnlag.bosted,
-                        "periodeFra" to trygdetidGrunnlag.periode.fra,
-                        "periodeTil" to trygdetidGrunnlag.periode.til,
-                        "kilde" to trygdetidGrunnlag.kilde?.toJson(),
-                        "beregnetVerdi" to trygdetidGrunnlag.beregnetTrygdetid?.verdi.toString(),
-                        "beregnetTidspunkt" to trygdetidGrunnlag.beregnetTrygdetid?.tidspunkt?.toTimestamp(),
-                        "beregnetRegelresultat" to trygdetidGrunnlag.beregnetTrygdetid?.regelResultat?.toJson()
-                    )
-                ).let { query -> tx.update(query) }
-            }
+                """.trimIndent(),
+                paramMap = mapOf(
+                    "id" to trygdetidGrunnlag.id,
+                    "trygdetidId" to trygdetid.id,
+                    "type" to trygdetidGrunnlag.type.name,
+                    "bosted" to trygdetidGrunnlag.bosted,
+                    "periodeFra" to trygdetidGrunnlag.periode.fra,
+                    "periodeTil" to trygdetidGrunnlag.periode.til,
+                    "kilde" to trygdetidGrunnlag.kilde?.toJson(),
+                    "beregnetVerdi" to trygdetidGrunnlag.beregnetTrygdetid?.verdi.toString(),
+                    "beregnetTidspunkt" to trygdetidGrunnlag.beregnetTrygdetid?.tidspunkt?.toTimestamp(),
+                    "beregnetRegelresultat" to trygdetidGrunnlag.beregnetTrygdetid?.regelResultat?.toJson()
+                )
+            ).let { query -> tx.update(query) }
         }.let { hentTrygdtidNotNull(behandlingId) }
 
-    fun oppdaterTrygdetidGrunnlag(behandlingId: UUID, trygdetidGrunnlag: TrygdetidGrunnlag): Trygdetid =
-        using(sessionOf(dataSource)) { session ->
-            session.transaction { tx ->
-                queryOf(
-                    statement = """
+    fun oppdaterTrygdetidGrunnlag(
+        behandlingId: UUID,
+        trygdetidGrunnlag: TrygdetidGrunnlag,
+        txIn: TransactionalSession? = null
+    ): Trygdetid =
+        retrieveTransaction(txIn) { tx ->
+            queryOf(
+                statement = """
                         UPDATE trygdetid_grunnlag
                         SET bosted = :bosted,
                          periode_fra = :periodeFra,
@@ -150,40 +161,41 @@ class TrygdetidRepository(private val dataSource: DataSource) {
                          beregnet_tidspunkt = :beregnetTidspunkt, 
                          beregnet_regelresultat = :beregnetRegelresultat 
                         WHERE id = :trygdetidGrunnlagId
-                    """.trimIndent(),
-                    paramMap = mapOf(
-                        "trygdetidGrunnlagId" to trygdetidGrunnlag.id,
-                        "bosted" to trygdetidGrunnlag.bosted,
-                        "periodeFra" to trygdetidGrunnlag.periode.fra,
-                        "periodeTil" to trygdetidGrunnlag.periode.til,
-                        "kilde" to trygdetidGrunnlag.kilde.toJson(),
-                        "beregnetVerdi" to trygdetidGrunnlag.beregnetTrygdetid?.verdi.toString(),
-                        "beregnetTidspunkt" to trygdetidGrunnlag.beregnetTrygdetid?.tidspunkt?.toTimestamp(),
-                        "beregnetRegelresultat" to trygdetidGrunnlag.beregnetTrygdetid?.regelResultat?.toJson()
-                    )
-                ).let { query -> tx.update(query) }
-            }
+                """.trimIndent(),
+                paramMap = mapOf(
+                    "trygdetidGrunnlagId" to trygdetidGrunnlag.id,
+                    "bosted" to trygdetidGrunnlag.bosted,
+                    "periodeFra" to trygdetidGrunnlag.periode.fra,
+                    "periodeTil" to trygdetidGrunnlag.periode.til,
+                    "kilde" to trygdetidGrunnlag.kilde?.toJson(),
+                    "beregnetVerdi" to trygdetidGrunnlag.beregnetTrygdetid?.verdi.toString(),
+                    "beregnetTidspunkt" to trygdetidGrunnlag.beregnetTrygdetid?.tidspunkt?.toTimestamp(),
+                    "beregnetRegelresultat" to trygdetidGrunnlag.beregnetTrygdetid?.regelResultat?.toJson()
+                )
+            ).let { query -> tx.update(query) }
         }.let { hentTrygdtidNotNull(behandlingId) }
 
-    fun oppdaterBeregnetTrygdetid(behandlingId: UUID, beregnetTrygdetid: BeregnetTrygdetid): Trygdetid =
-        using(sessionOf(dataSource)) { session ->
-            session.transaction { tx ->
-                queryOf(
-                    statement = """
+    fun oppdaterBeregnetTrygdetid(
+        behandlingId: UUID,
+        beregnetTrygdetid: BeregnetTrygdetid,
+        txIn: TransactionalSession? = null
+    ): Trygdetid =
+        retrieveTransaction(txIn) { tx ->
+            queryOf(
+                statement = """
                         UPDATE trygdetid 
                         SET trygdetid_nasjonal = :trygdetidNasjonal, trygdetid_fremtidig = :trygdetidFremtidig, 
                             trygdetid_total = :trygdetidTotal, trygdetid_total_tidspunkt = :tidspunkt, 
                             trygdetid_total_regelresultat = :regelResultat
                         WHERE behandling_id = :behandlingId
-                    """.trimIndent(),
-                    paramMap = mapOf(
-                        "behandlingId" to behandlingId,
-                        "trygdetidTotal" to beregnetTrygdetid.verdi,
-                        "tidspunkt" to beregnetTrygdetid.tidspunkt.toTimestamp(),
-                        "regelResultat" to beregnetTrygdetid.regelResultat.toJson()
-                    )
-                ).let { query -> tx.update(query) }
-            }
+                """.trimIndent(),
+                paramMap = mapOf(
+                    "behandlingId" to behandlingId,
+                    "trygdetidTotal" to beregnetTrygdetid.verdi,
+                    "tidspunkt" to beregnetTrygdetid.tidspunkt.toTimestamp(),
+                    "regelResultat" to beregnetTrygdetid.regelResultat.toJson()
+                )
+            ).let { query -> tx.update(query) }
         }.let { hentTrygdtidNotNull(behandlingId) }
 
     private fun hentTrygdetidGrunnlag(trygdetidId: UUID): List<TrygdetidGrunnlag> =

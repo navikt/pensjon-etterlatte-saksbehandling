@@ -46,7 +46,7 @@ const UhaandterteHendelser = (props: Props) => {
       return {}
     }
   }, [grunnlag])
-  const aapneHendelser = hendelser.filter((h) => h.aapen || true) //TODO: modify without OR
+  const aapneHendelser = hendelser.filter((h) => h.aapen)
   const lukkedeHendelser = hendelser.filter((h) => !h.aapen)
   return (
     <>

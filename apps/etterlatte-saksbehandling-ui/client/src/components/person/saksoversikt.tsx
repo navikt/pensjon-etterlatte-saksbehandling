@@ -19,7 +19,7 @@ import {
 } from '~components/behandling/felles/utils'
 import OpprettRevurderingModal from '~components/person/OpprettRevurderingModal'
 import { IBehandlingsType } from '~shared/types/IDetaljertBehandling'
-import UhaandterteHendelser from '~components/person/uhaandtereHendelser/UhaandterteHendelser'
+import RelevanteHendelser from '~components/person/uhaandtereHendelser/RelevanteHendelser'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentPersonerISak } from '~shared/api/grunnlag'
 
@@ -39,8 +39,6 @@ export const Saksoversikt = ({ fnr }: { fnr: string | undefined }) => {
     void hentPersoner(sakId)
     return resetPersoner
   }, [sakId])
-
-  const erUhaandtert = (hendelse: Grunnlagsendringshendelse) => hendelse.status === 'SJEKKET_AV_JOBB'
 
   useEffect(() => {
     const getBehandlingsListeAsync = async (fnr: string) => {
@@ -106,7 +104,7 @@ export const Saksoversikt = ({ fnr }: { fnr: string | undefined }) => {
       .filter((behandling) => behandling.behandlingType === IBehandlingsType.REVURDERING)
       .filter((behandling) => !erFerdigBehandlet(behandling.status)).length > 0
 
-  const hendelser = (grunnlagshendelser ?? []).filter(erUhaandtert)
+  const hendelser = grunnlagshendelser ?? []
 
   return (
     <>
@@ -139,7 +137,7 @@ export const Saksoversikt = ({ fnr }: { fnr: string | undefined }) => {
                       />
                     </EkstraHandlinger>
                   ) : null}
-                  <UhaandterteHendelser
+                  <RelevanteHendelser
                     hendelser={hendelser}
                     startRevurdering={() => setVisOpprettRevurderingsmodal(true)}
                     disabled={harAapenRevurdering}

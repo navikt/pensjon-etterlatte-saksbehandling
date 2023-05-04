@@ -36,8 +36,9 @@ type Props = {
   grunnlag: Result<PersonerISakResponse>
 }
 
-const UhaandterteHendelser = (props: Props) => {
+const RelevanteHendelser = (props: Props) => {
   const { hendelser, disabled, startRevurdering, grunnlag } = props
+
   if (hendelser.length === 0) return null
 
   const navneMap = useMemo(() => {
@@ -421,4 +422,4 @@ const StyledAlert = styled(Alert).attrs({ variant: 'warning' })`
   margin: 1em 0;
 `
 
-export default UhaandterteHendelser
+export default RelevanteHendelser

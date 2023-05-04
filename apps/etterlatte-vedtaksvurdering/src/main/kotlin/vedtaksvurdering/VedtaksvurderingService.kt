@@ -149,7 +149,7 @@ class VedtaksvurderingService(
                 mapOf(
                     SKAL_SENDE_BREV to when (behandling.revurderingsaarsak) {
                         RevurderingAarsak.REGULERING -> false
-                        null -> true
+                        else -> true
                     }
                 )
             ),

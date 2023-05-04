@@ -60,6 +60,14 @@ class GrunnlagsendringshendelseService(
         )
     }
 
+    fun lukkHendelseMedKommentar(hendelse: Grunnlagsendringshendelse) {
+        logger.info("Lukker hendelse med id $hendelse.id")
+
+        inTransaction {
+            grunnlagsendringshendelseDao.lukkGrunnlagsendringStatus(hendelse = hendelse)
+        }
+    }
+
     private fun ikkeVurderteHendelser(minutterGamle: Long): List<Grunnlagsendringshendelse> = inTransaction {
         grunnlagsendringshendelseDao.hentIkkeVurderteGrunnlagsendringshendelserEldreEnn(
             minutter = minutterGamle

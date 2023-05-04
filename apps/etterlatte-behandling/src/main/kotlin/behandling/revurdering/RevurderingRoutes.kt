@@ -28,11 +28,14 @@ internal fun Route.revurderingRoutes(
             val body = try {
                 call.receive<OpprettRevurderingRequest>()
             } catch (e: Exception) {
-                logger.error("Feil skjedde under lesing av payloaden. Mangler gitt revurderingsårsak.")
-                call.respond(HttpStatusCode.BadRequest, "Støtter ikke denne revurderingstypen")
+                logger.error("Feil skjedde under lesing av payloaden.", e)
+                call.respond(HttpStatusCode.BadRequest, "Feil under deserialiseringen av objektet")
                 return@post
             }
-
+            if (!body.aarsak.kanBrukes) {
+                call.respond(HttpStatusCode.BadRequest, "Feil revurderingsårsak, foreløpig ikke støttet")
+                return@post
+            }
             generellBehandlingService.hentSisteIverksatte(sakId)?.let { forrigeIverksatteBehandling ->
                 val revurdering = revurderingService.opprettManuellRevurdering(
                     sakId = forrigeIverksatteBehandling.sak.id,

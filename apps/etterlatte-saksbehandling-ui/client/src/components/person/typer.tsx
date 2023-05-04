@@ -43,13 +43,15 @@ export enum AarsaksTyper {
 
 export type GrunnlagsendringsType = SamsvarMellomKildeOgGrunnlag['type']
 
-const GRUNNLAGSENDRING_STATUS = [
+export const GRUNNLAGSENDRING_STATUS = [
   'VENTER_PAA_JOBB',
   'SJEKKET_AV_JOBB',
   'TATT_MED_I_BEHANDLING',
   'VURDERT_SOM_IKKE_RELEVANT',
   'FORKASTET',
 ] as const
+
+export const STATUS_IRRELEVANT: GrunnlagsendringStatus = 'VURDERT_SOM_IKKE_RELEVANT'
 
 interface Utland {
   utflyttingFraNorge?: {
@@ -130,11 +132,11 @@ export type SamsvarMellomKildeOgGrunnlag =
   | ReguleringSamsvar
   | InstitusjonsoppholdSamsvar
 
-export type GrunnlagsendringStatus = typeof GRUNNLAGSENDRING_STATUS[number]
+export type GrunnlagsendringStatus = (typeof GRUNNLAGSENDRING_STATUS)[number]
 
 const SAKSROLLER = ['SOEKER', 'INNSENDER', 'SOESKEN', 'AVDOED', 'GJENLEVENDE', 'UKJENT'] as const
 
-export type Saksrolle = typeof SAKSROLLER[number]
+export type Saksrolle = (typeof SAKSROLLER)[number]
 
 export interface GrunnlagsendringsListe {
   hendelser: Grunnlagsendringshendelse[]
@@ -150,6 +152,7 @@ export interface Grunnlagsendringshendelse {
   hendelseGjelderRolle: Saksrolle
   gjelderPerson: string
   samsvarMellomKildeOgGrunnlag: SamsvarMellomKildeOgGrunnlag
+  kommentar?: string
 }
 
 export interface VedtakSammendrag {

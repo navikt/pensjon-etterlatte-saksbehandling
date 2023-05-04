@@ -2,6 +2,7 @@ package no.nav.etterlatte.sak
 
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
+import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
@@ -9,6 +10,7 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.behandling.BehandlingListe
 import no.nav.etterlatte.behandling.GenerellBehandlingService
+import no.nav.etterlatte.behandling.domain.Grunnlagsendringshendelse
 import no.nav.etterlatte.behandling.domain.toBehandlingSammendrag
 import no.nav.etterlatte.behandling.domain.toDetaljertBehandling
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringsListe
@@ -83,6 +85,12 @@ internal fun Route.sakRoutes(
                     }
                 )
             }
+        }
+
+        post("lukkgrunnlagsendringshendelse") {
+            val lukketHendelse = call.receive<Grunnlagsendringshendelse>()
+            grunnlagsendringshendelseService.lukkHendelseMedKommentar(hendelse = lukketHendelse)
+            call.respond(HttpStatusCode.OK)
         }
     }
 }

@@ -4,8 +4,9 @@ import { formaterBehandlingstype, formaterEnumTilLesbarString, formaterStringDat
 import { IBehandlingStatus, IBehandlingsType } from '~shared/types/IDetaljertBehandling'
 import { VilkaarsvurderingResultat } from '~shared/api/vilkaarsvurdering'
 import { erFerdigBehandlet } from '~components/behandling/felles/utils'
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { hentVedtakSammendrag } from '~shared/api/vedtak'
+import { OpprettNyBehandling } from '~components/person/OpprettNyBehandling'
 
 const colonner = ['Reg. dato', 'Type', 'Årsak', 'Status', 'Virkningstidspunkt', 'Vedtaksdato', 'Resultat', '']
 
@@ -46,9 +47,9 @@ const lenkeTilBehandling = (behandlingSammendrag: IBehandlingsammendrag): string
   }
 }
 
-export const Saksliste = ({ behandlinger }: { behandlinger: IBehandlingsammendrag[] }) => {
+export const Behandlingsliste = ({ behandlinger, sakId }: { behandlinger: IBehandlingsammendrag[]; sakId: number }) => {
   return (
-    <div>
+    <>
       <Table zebraStripes>
         <Table.Header>
           <Table.Row>
@@ -86,7 +87,8 @@ export const Saksliste = ({ behandlinger }: { behandlinger: IBehandlingsammendra
           ))}
         </Table.Body>
       </Table>
-    </div>
+      <OpprettNyBehandling sakId={sakId} />
+    </>
   )
 }
 

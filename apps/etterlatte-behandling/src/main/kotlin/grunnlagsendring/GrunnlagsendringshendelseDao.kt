@@ -54,26 +54,13 @@ class GrunnlagsendringshendelseDao(val connection: () -> Connection) {
             val stmt = prepareStatement(
                 """
                     SELECT id, sak_id, type, opprettet, status, behandling_id, hendelse_gjelder_rolle, 
-                        samsvar_mellom_pdl_og_grunnlag, gjelder_person 
+                        samsvar_mellom_pdl_og_grunnlag, gjelder_person, kommentar
                     FROM grunnlagsendringshendelse
                     WHERE id = ?
                 """.trimIndent()
             )
             stmt.setObject(1, id)
             return stmt.executeQuery().singleOrNull { asGrunnlagsendringshendelse() }
-        }
-    }
-
-    fun hentAlleGrunnlagsendringshendelser(): List<Grunnlagsendringshendelse> {
-        with(connection()) {
-            val stmt = prepareStatement(
-                """
-                    SELECT id, sak_id, type, opprettet, status, behandling_id, hendelse_gjelder_rolle, 
-                        samsvar_mellom_pdl_og_grunnlag, gjelder_person
-                    FROM grunnlagsendringshendelse
-                """.trimIndent()
-            )
-            return stmt.executeQuery().toList { asGrunnlagsendringshendelse() }
         }
     }
 
@@ -102,6 +89,24 @@ class GrunnlagsendringshendelseDao(val connection: () -> Connection) {
         }
     }
 
+    fun lukkGrunnlagsendringStatus(hendelse: Grunnlagsendringshendelse) {
+        with(connection()) {
+            prepareStatement(
+                """
+                   UPDATE grunnlagsendringshendelse
+                   SET kommentar = ?,
+                   status = ?
+                   WHERE id = ?
+                """.trimIndent()
+            ).use {
+                it.setString(1, hendelse.kommentar)
+                it.setString(2, GrunnlagsendringStatus.VURDERT_SOM_IKKE_RELEVANT.toString())
+                it.setObject(3, hendelse.id)
+                it.executeUpdate()
+            }
+        }
+    }
+
     fun settBehandlingIdForTattMedIBehandling(
         grlaghendelseId: UUID,
         behandlingId: UUID
@@ -123,6 +128,19 @@ class GrunnlagsendringshendelseDao(val connection: () -> Connection) {
         }
     }
 
+    fun hentAlleGrunnlagsendringshendelser(): List<Grunnlagsendringshendelse> {
+        with(connection()) {
+            val stmt = prepareStatement(
+                """
+                    SELECT id, sak_id, type, opprettet, status, behandling_id, hendelse_gjelder_rolle, 
+                        samsvar_mellom_pdl_og_grunnlag, gjelder_person, kommentar
+                    FROM grunnlagsendringshendelse
+                """.trimIndent()
+            )
+            return stmt.executeQuery().toList { asGrunnlagsendringshendelse() }
+        }
+    }
+
     fun hentIkkeVurderteGrunnlagsendringshendelserEldreEnn(
         minutter: Long
     ): List<Grunnlagsendringshendelse> {
@@ -130,7 +148,7 @@ class GrunnlagsendringshendelseDao(val connection: () -> Connection) {
             prepareStatement(
                 """
                    SELECT id, sak_id, type, opprettet, status, behandling_id, hendelse_gjelder_rolle, 
-                       samsvar_mellom_pdl_og_grunnlag, gjelder_person
+                       samsvar_mellom_pdl_og_grunnlag, gjelder_person, kommentar
                    FROM grunnlagsendringshendelse
                    WHERE opprettet <= ?
                    AND status = ?
@@ -151,7 +169,7 @@ class GrunnlagsendringshendelseDao(val connection: () -> Connection) {
             prepareStatement(
                 """
                     SELECT id, sak_id, type, opprettet, status, behandling_id, hendelse_gjelder_rolle, 
-                        samsvar_mellom_pdl_og_grunnlag, gjelder_person
+                        samsvar_mellom_pdl_og_grunnlag, gjelder_person, kommentar
                     FROM grunnlagsendringshendelse
                     WHERE sak_id = ?
                     AND status = ANY(?)
@@ -184,7 +202,8 @@ class GrunnlagsendringshendelseDao(val connection: () -> Connection) {
             gjelderPerson = getString("gjelder_person"),
             samsvarMellomKildeOgGrunnlag = objectMapper.readValue(
                 getString("samsvar_mellom_pdl_og_grunnlag")
-            )
+            ),
+            kommentar = getString("kommentar")
         )
     }
 }

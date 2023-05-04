@@ -28,7 +28,7 @@ internal fun Route.revurderingRoutes(
             val body = try {
                 call.receive<OpprettRevurderingRequest>()
             } catch (e: Exception) {
-                logger.error("Feil skjedde under lesing av payloaden. Mangler gitt revurderingsårsak. ${e.message}", e)
+                logger.error("Feil skjedde under lesing av payloaden.", e)
                 call.respond(HttpStatusCode.BadRequest, "Feil under deserialiseringen av objektet")
                 return@post
             }

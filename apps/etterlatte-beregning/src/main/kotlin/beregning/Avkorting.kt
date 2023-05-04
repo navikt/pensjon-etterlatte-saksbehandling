@@ -8,7 +8,7 @@ import java.util.*
 data class Avkorting(
     val behandlingId: UUID,
     val avkortingGrunnlag: List<AvkortingGrunnlag>,
-    val beregningEtterAvkorting: List<BeregningEtterAvkorting>
+    val avkortetYtelse: List<AvkortetYtelse>
 )
 
 data class AvkortingGrunnlag(
@@ -26,9 +26,9 @@ data class BeregnetAvkortingGrunnlag(
     val regelResultat: JsonNode
 )
 
-data class BeregningEtterAvkorting(
+data class AvkortetYtelse(
     val periode: Periode,
-    val bruttoYtelse: Int,
-    val avkorting: Int,
-    val ytelseEtterAvkorting: Int
+    val ytelseEtterAvkorting: Int,
+    val tidspunkt: Tidspunkt,
+    val regelResultat: JsonNode
 )

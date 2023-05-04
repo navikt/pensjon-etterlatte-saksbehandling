@@ -34,7 +34,7 @@ class AvkortingRepository(private val dataSource: DataSource) {
                 Avkorting(
                     behandlingId = behandlingId,
                     avkortinggrunnlag,
-                    beregningEtterAvkorting = emptyList()
+                    avkortetYtelse = emptyList()
                 )
             }
         }

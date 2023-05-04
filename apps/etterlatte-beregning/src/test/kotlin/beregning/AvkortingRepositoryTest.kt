@@ -1,10 +1,10 @@
 package beregning
 
 import io.kotest.matchers.shouldBe
-import no.nav.etterlatte.beregning.AvkortetYtelse
 import no.nav.etterlatte.beregning.AvkortingGrunnlag
 import no.nav.etterlatte.beregning.AvkortingRepository
 import no.nav.etterlatte.beregning.BeregnetAvkortingGrunnlag
+import no.nav.etterlatte.beregning.regler.avkortetYtelse
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -62,12 +62,6 @@ internal class AvkortingRepositoryTest {
                 )
             )
         )
-        val avkortetYtelse = AvkortetYtelse(
-            periode = Periode(fom = YearMonth.now(), tom = null),
-            ytelseEtterAvkorting = 100,
-            tidspunkt = Tidspunkt.now(),
-            regelResultat = "".toJsonNode()
-        )
     }
 
     @Test
@@ -86,6 +80,7 @@ internal class AvkortingRepositoryTest {
 
     @Test
     fun `Skal lagre eller oppdatere avkortet ytelse`() {
+        val avkortetYtelse = avkortetYtelse()
         val endretAvkortetYtelse = avkortetYtelse.copy(ytelseEtterAvkorting = 200)
 
         avkortingRepository.lagreEllerOppdaterAvkortingGrunnlag(behandlingId, avkortinggrunnlag)
@@ -98,8 +93,8 @@ internal class AvkortingRepositoryTest {
 
         with(avkortning) {
             this.behandlingId shouldBe behandlingId
-            avkortetYtelse.size shouldBe 1
-            avkortetYtelse[0] shouldBe endretAvkortetYtelse
+            this.avkortetYtelse.size shouldBe 1
+            this.avkortetYtelse[0] shouldBe endretAvkortetYtelse
         }
     }
 }

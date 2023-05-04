@@ -9,4 +9,4 @@ export const lagreAvkortingGrunnlag = async (args: {
   behandlingId: string
   avkortingGrunnlag: IAvkortingGrunnlag
 }): Promise<ApiResponse<IAvkorting>> =>
-  apiClient.post(`/beregning/avkorting/${args.behandlingId}/grunnlag`, { ...args.avkortingGrunnlag })
+  apiClient.post(`/beregning/avkorting/${args.behandlingId}`, { ...args.avkortingGrunnlag })

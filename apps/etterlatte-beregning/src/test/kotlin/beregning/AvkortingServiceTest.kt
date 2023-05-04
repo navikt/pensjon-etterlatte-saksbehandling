@@ -11,11 +11,15 @@ import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.beregning.AvkortingRepository
 import no.nav.etterlatte.beregning.AvkortingService
+import no.nav.etterlatte.beregning.BeregningRepository
 import no.nav.etterlatte.beregning.InntektAvkortingService
 import no.nav.etterlatte.beregning.klienter.BehandlingKlient
+import no.nav.etterlatte.beregning.regler.avkortetYtelse
 import no.nav.etterlatte.beregning.regler.avkorting
 import no.nav.etterlatte.beregning.regler.avkortinggrunnlag
 import no.nav.etterlatte.beregning.regler.beregnetAvkortingGrunnlag
+import no.nav.etterlatte.beregning.regler.beregning
+import no.nav.etterlatte.beregning.regler.beregningsperiode
 import no.nav.etterlatte.beregning.regler.bruker
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -25,10 +29,12 @@ import java.util.UUID
 
 internal class AvkortingServiceTest {
 
-    private val repository: AvkortingRepository = mockk()
     private val behandlingKlient: BehandlingKlient = mockk()
     private val inntektAvkortingService: InntektAvkortingService = mockk()
-    private val service = AvkortingService(repository, behandlingKlient, inntektAvkortingService)
+    private val avkortingRepository: AvkortingRepository = mockk()
+    private val beregningRepository: BeregningRepository = mockk()
+    private val service =
+        AvkortingService(behandlingKlient, inntektAvkortingService, avkortingRepository, beregningRepository)
 
     @BeforeEach
     fun beforeEach() {
@@ -45,43 +51,53 @@ internal class AvkortingServiceTest {
     fun `skal hente avkorting`() {
         val behandlingId = UUID.randomUUID()
         val avkorting = avkorting()
-        every { repository.hentAvkorting(behandlingId) } returns avkorting
+        every { avkortingRepository.hentAvkorting(behandlingId) } returns avkorting
 
         service.hentAvkorting(behandlingId) shouldBe avkorting
-        verify { repository.hentAvkorting(behandlingId) }
+        verify { avkortingRepository.hentAvkorting(behandlingId) }
     }
 
     @Test
     fun `skal returnere null hvis avkorting ikke finnes`() {
         val behandlingId = UUID.randomUUID()
-        every { repository.hentAvkorting(behandlingId) } returns null
+        every { avkortingRepository.hentAvkorting(behandlingId) } returns null
 
         service.hentAvkorting(behandlingId) shouldBe null
-        verify { repository.hentAvkorting(behandlingId) }
+        verify { avkortingRepository.hentAvkorting(behandlingId) }
     }
 
     @Test
-    fun `skal lagre eller oppdatere avkortinggrunnlag`() {
+    fun `skal kjoere regler for avkorting og lagre resultat`() {
         val behandlingId = UUID.randomUUID()
         val avkorting = avkorting()
         val avkortinggrunnlag = avkortinggrunnlag()
         val inntektsavkorting = listOf(beregnetAvkortingGrunnlag())
         val grunnlagMedBeregnetAvkorting = avkortinggrunnlag.copy(beregnetAvkorting = inntektsavkorting)
+        val beregninger = listOf(beregningsperiode())
+        val avkortetYtelse = listOf(avkortetYtelse())
 
         every { inntektAvkortingService.beregnInntektsavkorting(avkortinggrunnlag) } returns inntektsavkorting
         every {
-            repository.lagreEllerOppdaterAvkortingGrunnlag(behandlingId, grunnlagMedBeregnetAvkorting)
+            avkortingRepository.lagreEllerOppdaterAvkortingGrunnlag(behandlingId, grunnlagMedBeregnetAvkorting)
         } returns avkorting
+        every { beregningRepository.hent(behandlingId) } returns beregning(beregninger)
+        every {
+            inntektAvkortingService.beregnAvkortetYtelse(beregninger, avkorting.avkortingGrunnlag)
+        } returns avkortetYtelse
+        every { avkortingRepository.lagreEllerOppdaterAvkortetYtelse(behandlingId, avkortetYtelse) } returns avkorting
 
         val result = runBlocking {
-            service.lagreAvkortingGrunnlag(behandlingId, bruker, avkortinggrunnlag)
+            service.lagreAvkorting(behandlingId, bruker, avkortinggrunnlag)
         }
 
         result shouldBe avkorting
         coVerify(exactly = 1) {
             behandlingKlient.beregn(behandlingId, bruker, false)
             inntektAvkortingService.beregnInntektsavkorting(avkortinggrunnlag)
-            repository.lagreEllerOppdaterAvkortingGrunnlag(behandlingId, grunnlagMedBeregnetAvkorting)
+            avkortingRepository.lagreEllerOppdaterAvkortingGrunnlag(behandlingId, grunnlagMedBeregnetAvkorting)
+            beregningRepository.hent(behandlingId)
+            inntektAvkortingService.beregnAvkortetYtelse(beregninger, avkorting.avkortingGrunnlag)
+            avkortingRepository.lagreEllerOppdaterAvkortetYtelse(behandlingId, avkortetYtelse)
         }
     }
 
@@ -92,7 +108,7 @@ internal class AvkortingServiceTest {
 
         runBlocking {
             assertThrows<Exception> {
-                service.lagreAvkortingGrunnlag(behandlingId, bruker, avkortinggrunnlag())
+                service.lagreAvkorting(behandlingId, bruker, avkortinggrunnlag())
             }
         }
 

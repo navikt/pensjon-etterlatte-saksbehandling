@@ -6,9 +6,10 @@ import org.slf4j.LoggerFactory
 import java.util.*
 
 class AvkortingService(
-    private val avkortingRepository: AvkortingRepository,
     private val behandlingKlient: BehandlingKlient,
-    private val inntektAvkortingService: InntektAvkortingService
+    private val inntektAvkortingService: InntektAvkortingService,
+    private val avkortingRepository: AvkortingRepository,
+    private val beregningRepository: BeregningRepository
 ) {
     private val logger = LoggerFactory.getLogger(AvkortingService::class.java)
 
@@ -17,19 +18,28 @@ class AvkortingService(
         return avkortingRepository.hentAvkorting(behandlingId)
     }
 
-    suspend fun lagreAvkortingGrunnlag(
+    suspend fun lagreAvkorting(
         behandlingId: UUID,
         bruker: Bruker,
         avkortingGrunnlag: AvkortingGrunnlag
     ): Avkorting = tilstandssjekk(behandlingId, bruker) {
+        // TODO EY-2127 transaksjonshandtering
         logger.info("Lagre grunnlag for avkorting for behandlingId=$behandlingId")
 
         val inntektavkorting = inntektAvkortingService.beregnInntektsavkorting(avkortingGrunnlag)
-
-        avkortingRepository.lagreEllerOppdaterAvkortingGrunnlag(
+        val avkorting = avkortingRepository.lagreEllerOppdaterAvkortingGrunnlag(
             behandlingId,
             avkortingGrunnlag.copy(beregnetAvkorting = inntektavkorting)
         )
+
+        val beregning = beregningRepository.hent(behandlingId)
+            ?: throw Exception("Mangler beregning for behandlingId=$behandlingId")
+        val avkortetYtelse = inntektAvkortingService.beregnAvkortetYtelse(
+            beregning.beregningsperioder,
+            avkorting.avkortingGrunnlag
+        )
+
+        avkortingRepository.lagreEllerOppdaterAvkortetYtelse(behandlingId, avkortetYtelse)
     }
 
     private suspend fun tilstandssjekk(behandlingId: UUID, bruker: Bruker, block: suspend () -> Avkorting): Avkorting {

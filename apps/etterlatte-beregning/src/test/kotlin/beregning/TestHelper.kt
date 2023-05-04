@@ -3,13 +3,16 @@ package no.nav.etterlatte.beregning.regler
 import no.nav.etterlatte.beregning.Avkorting
 import no.nav.etterlatte.beregning.AvkortingGrunnlag
 import no.nav.etterlatte.beregning.BeregnetAvkortingGrunnlag
+import no.nav.etterlatte.beregning.regler.avkorting.AvkortetYtelseGrunnlag
 import no.nav.etterlatte.beregning.regler.avkorting.InntektAvkortingGrunnlag
 import no.nav.etterlatte.beregning.regler.barnepensjon.AvdoedForelder
 import no.nav.etterlatte.beregning.regler.barnepensjon.BarnepensjonGrunnlag
+import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
+import no.nav.etterlatte.libs.common.toObjectNode
 import no.nav.etterlatte.libs.regler.FaktumNode
 import no.nav.etterlatte.libs.regler.RegelPeriode
 import no.nav.etterlatte.libs.testdata.grunnlag.kilde
@@ -52,26 +55,53 @@ fun avkorting(
 ) = Avkorting(
     behandlingId = behandlingId,
     avkortingGrunnlag = emptyList(),
-    beregningEtterAvkorting = emptyList()
+    avkortetYtelse = emptyList()
 )
 
 fun avkortinggrunnlag(
-    aarsinntekt: Int = 100000
+    aarsinntekt: Int = 100000,
+    beregnetAvkorting: List<BeregnetAvkortingGrunnlag> = emptyList()
 ) = AvkortingGrunnlag(
     periode = Periode(fom = YearMonth.now(), tom = null),
     aarsinntekt = aarsinntekt,
     gjeldendeAar = 2023,
     spesifikasjon = "Spesifikasjon",
-    beregnetAvkorting = emptyList()
+    beregnetAvkorting = beregnetAvkorting
 )
 
 fun inntektAvkortingGrunnlag(inntekt: Int = 500000) = InntektAvkortingGrunnlag(
     inntekt = FaktumNode(verdi = inntekt, "", "")
 )
 
-fun beregnetAvkortingGrunnlag() = BeregnetAvkortingGrunnlag(
-    Periode(fom = YearMonth.now(), tom = null),
-    avkorting = 10000,
+fun beregnetAvkortingGrunnlag(
+    fom: YearMonth = YearMonth.now(),
+    tom: YearMonth? = null,
+    avkorting: Int = 10000
+) = BeregnetAvkortingGrunnlag(
+    Periode(fom = fom, tom = tom),
+    avkorting = avkorting,
     tidspunkt = Tidspunkt.now(),
     regelResultat = "".toJsonNode()
+)
+
+fun avkortetYtelseGrunnlag(bruttoYtelse: Int, avkorting: Int) = AvkortetYtelseGrunnlag(
+    fom = YearMonth.now(),
+    bruttoYtelse = FaktumNode(verdi = bruttoYtelse, "", ""),
+    avkorting = FaktumNode(verdi = avkorting, "", "")
+)
+
+fun beregningsperiode(
+    datoFOM: YearMonth = YearMonth.now(),
+    datoTOM: YearMonth? = null,
+    utbetaltBeloep: Int = 3000
+) = Beregningsperiode(
+    datoFOM = datoFOM,
+    datoTOM = datoTOM,
+    utbetaltBeloep = utbetaltBeloep,
+    soeskenFlokk = listOf(FNR_1),
+    grunnbelopMnd = 10_000,
+    grunnbelop = 100_000,
+    trygdetid = 40,
+    regelResultat = mapOf("regel" to "resultat").toObjectNode(),
+    regelVersjon = "1"
 )

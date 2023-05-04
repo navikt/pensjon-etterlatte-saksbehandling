@@ -1,0 +1,1 @@
+ALTER TABLE grunnlagsendringshendelse DROP COLUMN aapen;

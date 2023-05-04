@@ -1,5 +1,6 @@
 package no.nav.etterlatte.trygdetid
 
+import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning.RegelKilde
 import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
 import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsdato
@@ -59,21 +60,21 @@ class TrygdetidService(
         trygdetidGrunnlag: TrygdetidGrunnlag
     ): Trygdetid =
         tilstandssjekk(behandlingId, bruker) {
-            // TODO transaksjonshåndtering bør skje her i service
             val beregnetTrygdetidGrunnlag = beregnTrygdetidService.beregnTrygdetidGrunnlag(trygdetidGrunnlag)
             val trygdetidGrunnlagMedBeregning = trygdetidGrunnlag.copy(beregnetTrygdetid = beregnetTrygdetidGrunnlag)
             val eksisterendeTrygdetid = trygdetidRepository.hentEnkeltTrygdetidGrunnlag(trygdetidGrunnlag.id)
-            val trygdetid = if (eksisterendeTrygdetid != null) {
-                trygdetidRepository.oppdaterTrygdetidGrunnlag(behandlingId, trygdetidGrunnlagMedBeregning)
-            } else {
-                trygdetidRepository.opprettTrygdetidGrunnlag(behandlingId, trygdetidGrunnlagMedBeregning)
-            }
 
-            trygdetidRepository.oppdaterBeregnetTrygdetid(
-                behandlingId = behandlingId,
-                beregnetTrygdetid = beregnTrygdetidService.beregnTrygdetid(trygdetid.trygdetidGrunnlag)
-            ).also {
-                behandlingKlient.settBehandlingStatusVilkaarsvurdert(behandlingId, bruker)
+            trygdetidRepository.transaction { tx ->
+                val trygdetid = if (eksisterendeTrygdetid != null) {
+                    trygdetidRepository.oppdaterTrygdetidGrunnlag(behandlingId, trygdetidGrunnlagMedBeregning, tx)
+                } else {
+                    trygdetidRepository.opprettTrygdetidGrunnlag(behandlingId, trygdetidGrunnlagMedBeregning, tx)
+                }
+
+                val beregnetTrygdetid = beregnTrygdetidService.beregnTrygdetid(trygdetid.trygdetidGrunnlag)
+                trygdetidRepository.oppdaterBeregnetTrygdetid(behandlingId, beregnetTrygdetid, tx).also {
+                    runBlocking { behandlingKlient.settBehandlingStatusVilkaarsvurdert(behandlingId, bruker) }
+                }
             }
         }
 

@@ -108,7 +108,7 @@ internal class SakOgBehandlingServiceTest {
         }
 
         assertEquals(1, behandling.utbetalingsinfo?.antallBarn)
-        assertEquals(3063, behandling.utbetalingsinfo?.beloep?.value)
+        assertEquals(Kroner(3063), behandling.utbetalingsinfo?.beloep)
         assertEquals(YearMonth.now().atDay(1), behandling.utbetalingsinfo?.virkningsdato)
         assertEquals(false, behandling.utbetalingsinfo?.soeskenjustering)
         assertEquals(

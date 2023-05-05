@@ -2,6 +2,8 @@ package no.nav.etterlatte.beregning
 
 import beregning.regler.finnAnvendtGrunnbeloep
 import no.nav.etterlatte.beregning.grunnbeloep.GrunnbeloepRepository
+import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlag
+import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlagService
 import no.nav.etterlatte.beregning.klienter.GrunnlagKlient
 import no.nav.etterlatte.beregning.klienter.VilkaarsvurderingKlient
 import no.nav.etterlatte.beregning.regler.Beregningstall
@@ -16,9 +18,6 @@ import no.nav.etterlatte.libs.common.beregning.Beregningstype
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.Metadata
-import no.nav.etterlatte.libs.common.grunnlag.Opplysning
-import no.nav.etterlatte.libs.common.grunnlag.hentSoeskenjustering
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Beregningsgrunnlag
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
@@ -35,7 +34,8 @@ import java.util.*
 class BeregnBarnepensjonService(
     private val grunnlagKlient: GrunnlagKlient,
     private val vilkaarsvurderingKlient: VilkaarsvurderingKlient,
-    private val grunnbeloepRepository: GrunnbeloepRepository = GrunnbeloepRepository
+    private val grunnbeloepRepository: GrunnbeloepRepository = GrunnbeloepRepository,
+    private val beregningsGrunnlagService: BeregningsGrunnlagService
 ) {
     private val logger = LoggerFactory.getLogger(BeregnBarnepensjonService::class.java)
 
@@ -43,13 +43,17 @@ class BeregnBarnepensjonService(
         val grunnlag = grunnlagKlient.hentGrunnlag(behandling.sak, bruker)
         val behandlingType = behandling.behandlingType
         val virkningstidspunkt = requireNotNull(behandling.virkningstidspunkt?.dato)
-        val beregningsgrunnlag = opprettBeregningsgrunnlag(requireNotNull(grunnlag.sak.hentSoeskenjustering()))
+
+        val beregningsGrunnlag = requireNotNull(
+            beregningsGrunnlagService.hentBarnepensjonBeregningsGrunnlag(behandling.id)
+        )
+        val barnepensjonGrunnlag = opprettBeregningsgrunnlag(beregningsGrunnlag)
 
         logger.info("Beregner barnepensjon for behandlingId=${behandling.id} med behandlingType=$behandlingType")
 
         return when (behandlingType) {
             BehandlingType.FØRSTEGANGSBEHANDLING ->
-                beregnBarnepensjon(behandling.id, grunnlag, beregningsgrunnlag, virkningstidspunkt)
+                beregnBarnepensjon(behandling.id, grunnlag, barnepensjonGrunnlag, virkningstidspunkt)
 
             BehandlingType.REVURDERING -> {
                 val vilkaarsvurderingUtfall = vilkaarsvurderingKlient.hentVilkaarsvurdering(behandling.id, bruker)
@@ -58,7 +62,7 @@ class BeregnBarnepensjonService(
 
                 when (vilkaarsvurderingUtfall) {
                     VilkaarsvurderingUtfall.OPPFYLT ->
-                        beregnBarnepensjon(behandling.id, grunnlag, beregningsgrunnlag, virkningstidspunkt)
+                        beregnBarnepensjon(behandling.id, grunnlag, barnepensjonGrunnlag, virkningstidspunkt)
 
                     VilkaarsvurderingUtfall.IKKE_OPPFYLT -> opphoer(behandling.id, grunnlag, virkningstidspunkt)
                 }
@@ -156,11 +160,11 @@ class BeregnBarnepensjonService(
     )
 
     private fun opprettBeregningsgrunnlag(
-        soeskenJustering: Opplysning.Konstant<Beregningsgrunnlag>
+        beregningsGrunnlag: BeregningsGrunnlag
     ) = BarnepensjonGrunnlag(
         soeskenKull = FaktumNode(
-            verdi = soeskenJustering.verdi.beregningsgrunnlag.filter { it.skalBrukes }.map { it.foedselsnummer },
-            kilde = soeskenJustering.kilde,
+            verdi = beregningsGrunnlag.soeskenMedIBeregning.filter { it.skalBrukes }.map { it.foedselsnummer },
+            kilde = beregningsGrunnlag.kilde,
             beskrivelse = "Søsken i kullet"
         ),
         avdoedForelder = FaktumNode(

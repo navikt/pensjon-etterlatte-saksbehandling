@@ -10,6 +10,8 @@ import no.nav.etterlatte.beregning.BeregningRepository
 import no.nav.etterlatte.beregning.BeregningService
 import no.nav.etterlatte.beregning.InntektAvkortingService
 import no.nav.etterlatte.beregning.grunnlag.BarnepensjonBeregningsGrunnlagMigreringJobb
+import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlagRepository
+import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlagService
 import no.nav.etterlatte.beregning.klienter.BehandlingKlientImpl
 import no.nav.etterlatte.beregning.klienter.GrunnlagKlientImpl
 import no.nav.etterlatte.beregning.klienter.TrygdetidKlient
@@ -44,9 +46,16 @@ class ApplicationContext {
     val trygdetidKlient = TrygdetidKlient(config, httpClient())
     val behandlingKlient = BehandlingKlientImpl(config, httpClient())
 
+    private val beregningsGrunnlagRepository = BeregningsGrunnlagRepository(dataSource)
+    val beregningsGrunnlagService = BeregningsGrunnlagService(
+        beregningsGrunnlagRepository = beregningsGrunnlagRepository,
+        behandlingKlient = behandlingKlient
+    )
+
     val beregnBarnepensjonService = BeregnBarnepensjonService(
         vilkaarsvurderingKlient = vilkaarsvurderingKlient,
-        grunnlagKlient = grunnlagKlient
+        grunnlagKlient = grunnlagKlient,
+        beregningsGrunnlagService = beregningsGrunnlagService
     )
     val beregnOmstillingsstoenadService = BeregnOmstillingsstoenadService(
         vilkaarsvurderingKlient = vilkaarsvurderingKlient,

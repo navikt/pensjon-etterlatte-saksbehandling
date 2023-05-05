@@ -71,7 +71,7 @@ internal class TrygdetidRepositoryTest {
             Opplysningsgrunnlag.ny(TrygdetidOpplysningType.FYLT_16, regel, seksten),
             Opplysningsgrunnlag.ny(TrygdetidOpplysningType.FYLLER_66, regel, seksti)
         )
-        val trygdetid = repository.opprettTrygdetid(behandling, opplysninger)
+        val trygdetid = repository.transaction { tx -> repository.opprettTrygdetid(behandling, opplysninger, tx) }
 
         trygdetid shouldNotBe null
         trygdetid.behandlingId shouldBe behandlingId
@@ -106,7 +106,7 @@ internal class TrygdetidRepositoryTest {
             every { id } returns behandlingId
             every { sak } returns 123L
         }
-        repository.opprettTrygdetid(behandling, emptyList())
+        repository.transaction { tx -> repository.opprettTrygdetid(behandling, emptyList(), tx) }
 
         val trygdetid = repository.hentTrygdetid(behandlingId)
 
@@ -124,10 +124,11 @@ internal class TrygdetidRepositoryTest {
             every { id } returns behandlingId
             every { sak } returns 123L
         }
-        repository.opprettTrygdetid(behandling, emptyList())
 
-        val trygdetidMedTrygdetidGrunnlag =
-            repository.opprettTrygdetidGrunnlag(behandlingId, trygdetidGrunnlag)
+        val trygdetidMedTrygdetidGrunnlag = repository.transaction { tx ->
+            repository.opprettTrygdetid(behandling, emptyList(), tx)
+            repository.opprettTrygdetidGrunnlag(behandlingId, trygdetidGrunnlag, tx)
+        }
 
         trygdetidMedTrygdetidGrunnlag shouldNotBe null
         with(trygdetidMedTrygdetidGrunnlag.trygdetidGrunnlag.first()) {
@@ -143,13 +144,13 @@ internal class TrygdetidRepositoryTest {
             every { sak } returns 123L
         }
         val trygdetidGrunnlag = trygdetidGrunnlag(beregnetTrygdetidGrunnlag = beregnetTrygdetidGrunnlag())
-
-        repository.opprettTrygdetid(behandling, emptyList())
-        repository.opprettTrygdetidGrunnlag(behandlingId, trygdetidGrunnlag)
-
         val endretTrygdetidGrunnlag = trygdetidGrunnlag.copy(bosted = "Polen")
-        val trygdetidMedOppdatertGrunnlag =
-            repository.oppdaterTrygdetidGrunnlag(behandlingId, endretTrygdetidGrunnlag)
+
+        val trygdetidMedOppdatertGrunnlag = repository.transaction { tx ->
+            repository.opprettTrygdetid(behandling, emptyList(), tx)
+            repository.opprettTrygdetidGrunnlag(behandlingId, trygdetidGrunnlag, tx)
+            repository.oppdaterTrygdetidGrunnlag(behandlingId, endretTrygdetidGrunnlag, tx)
+        }
 
         trygdetidMedOppdatertGrunnlag shouldNotBe null
         with(trygdetidMedOppdatertGrunnlag.trygdetidGrunnlag.first()) {
@@ -167,10 +168,12 @@ internal class TrygdetidRepositoryTest {
             every { sak } returns 123L
         }
 
-        repository.opprettTrygdetid(behandling, emptyList())
-        repository.opprettTrygdetidGrunnlag(behandlingId, trygdetidGrunnlag)
+        val hentetTrygdetidGrunnlag = repository.transaction { tx ->
+            repository.opprettTrygdetid(behandling, emptyList(), tx)
+            repository.opprettTrygdetidGrunnlag(behandlingId, trygdetidGrunnlag, tx)
 
-        val hentetTrygdetidGrunnlag = repository.hentEnkeltTrygdetidGrunnlag(trygdetidGrunnlag.id)
+            repository.hentEnkeltTrygdetidGrunnlag(trygdetidGrunnlag.id, tx)
+        }
 
         hentetTrygdetidGrunnlag shouldNotBe null
     }
@@ -183,9 +186,12 @@ internal class TrygdetidRepositoryTest {
             every { id } returns behandlingId
             every { sak } returns 123L
         }
-        repository.opprettTrygdetid(behandling, emptyList())
 
-        val trygdetidMedBeregnetTrygdetid = repository.oppdaterBeregnetTrygdetid(behandlingId, beregnetTrygdetid)
+        val trygdetidMedBeregnetTrygdetid = repository.transaction { tx ->
+            repository.opprettTrygdetid(behandling, emptyList(), tx)
+
+            repository.oppdaterBeregnetTrygdetid(behandlingId, beregnetTrygdetid, tx)
+        }
 
         trygdetidMedBeregnetTrygdetid shouldNotBe null
         trygdetidMedBeregnetTrygdetid.beregnetTrygdetid shouldBe beregnetTrygdetid

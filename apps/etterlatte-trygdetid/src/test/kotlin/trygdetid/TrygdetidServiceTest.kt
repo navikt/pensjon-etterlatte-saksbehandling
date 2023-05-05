@@ -86,10 +86,14 @@ internal class TrygdetidServiceTest {
         val forventetFoedselsdato = grunnlag.hentAvdoed().hentFoedselsdato()!!.verdi
         val forventetDoedsdato = grunnlag.hentAvdoed().hentDoedsdato()!!.verdi
 
-        every { repository.hentTrygdetid(any()) } returns null
+        val transactionSlot = slot<(TransactionalSession) -> Trygdetid>()
+        val tx: TransactionalSession = mockk()
+
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
-        every { repository.opprettTrygdetid(any(), any()) } returns trygdetid(behandlingId)
+        every { repository.hentTrygdetid(any()) } returns null
+        every { repository.opprettTrygdetid(any(), any(), any()) } returns trygdetid(behandlingId)
+        every { repository.transaction(capture(transactionSlot)) } answers { transactionSlot.captured.invoke(tx) }
 
         runBlocking {
             service.opprettTrygdetid(behandlingId, saksbehandler)
@@ -124,8 +128,10 @@ internal class TrygdetidServiceTest {
                         opplysning shouldBe forventetDoedsdato!!.toJsonNode()
                         kilde shouldNotBe null
                     }
-                }
+                },
+                tx
             )
+            repository.transaction(any<(TransactionalSession) -> Trygdetid>())
         }
     }
 
@@ -166,7 +172,7 @@ internal class TrygdetidServiceTest {
         val trygdetidGrunnlag = trygdetidGrunnlag()
         val trygdetidGrunnlagSlot = slot<TrygdetidGrunnlag>()
         val beregnetTrygdetidSlot = slot<BeregnetTrygdetid>()
-        val transactionLambda = slot<(TransactionalSession) -> Trygdetid>()
+        val transactionSlot = slot<(TransactionalSession) -> Trygdetid>()
         val tx: TransactionalSession = mockk()
 
         coEvery { behandlingKlient.settBehandlingStatusVilkaarsvurdert(any(), any()) } returns true
@@ -186,7 +192,7 @@ internal class TrygdetidServiceTest {
             )
         }
 
-        every { repository.transaction(capture(transactionLambda)) } answers { transactionLambda.captured.invoke(tx) }
+        every { repository.transaction(capture(transactionSlot)) } answers { transactionSlot.captured.invoke(tx) }
 
         val trygdetid = runBlocking {
             service.lagreTrygdetidGrunnlag(
@@ -218,7 +224,7 @@ internal class TrygdetidServiceTest {
         val endretTrygdetidGrunnlag = trygdetidGrunnlag.copy(bosted = "Polen")
         val trygdetidGrunnlagSlot = slot<TrygdetidGrunnlag>()
         val beregnetTrygdetidSlot = slot<BeregnetTrygdetid>()
-        val transactionLambda = slot<(TransactionalSession) -> Trygdetid>()
+        val transactionSlot = slot<(TransactionalSession) -> Trygdetid>()
         val tx: TransactionalSession = mockk()
 
         coEvery { behandlingKlient.settBehandlingStatusVilkaarsvurdert(any(), any()) } returns true
@@ -237,7 +243,7 @@ internal class TrygdetidServiceTest {
             )
         }
 
-        every { repository.transaction(capture(transactionLambda)) } answers { transactionLambda.captured.invoke(tx) }
+        every { repository.transaction(capture(transactionSlot)) } answers { transactionSlot.captured.invoke(tx) }
 
         val trygdetid = runBlocking {
             service.lagreTrygdetidGrunnlag(

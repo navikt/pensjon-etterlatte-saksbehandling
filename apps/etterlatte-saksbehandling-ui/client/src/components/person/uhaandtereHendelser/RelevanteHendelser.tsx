@@ -23,10 +23,10 @@ import {
 } from '~components/person/uhaandtereHendelser/utils'
 import { formaterKanskjeStringDatoMedFallback, formaterStringDato } from '~utils/formattering'
 import { isFailure, isPending, isSuccess, Result, useApiCall } from '~shared/hooks/useApiCall'
-import React, { useContext, useEffect, useMemo, useState } from 'react'
+import React, { useContext, useMemo, useState } from 'react'
 import { PersonerISakResponse } from '~shared/api/grunnlag'
 import HistoriskeHendelser from '~components/person/uhaandtereHendelser/HistoriskeHendelser'
-import { hentStoettedeRevurderinger, lukkGrunnlagshendelse } from '~shared/api/behandling'
+import { lukkGrunnlagshendelse } from '~shared/api/behandling'
 import { ApiErrorAlert } from '~ErrorBoundary'
 
 type Props = {
@@ -34,27 +34,14 @@ type Props = {
   startRevurdering: () => void
   disabled: boolean
   grunnlag: Result<PersonerISakResponse>
+  revurderinger: Array<string>
 }
 
 const RelevanteHendelser = (props: Props) => {
-  const { hendelser, disabled, startRevurdering, grunnlag } = props
+  const { hendelser, disabled, startRevurdering, grunnlag, revurderinger } = props
 
   if (hendelser.length === 0) return null
-  const [hentStoettedeRevurderingerStatus, hentStoettedeRevurderingerFc] = useApiCall(hentStoettedeRevurderinger)
-  const [revurderinger, setStoettedeRevurderinger] = useState<Array<string> | undefined>(undefined)
-  useEffect(() => {
-    hentStoettedeRevurderingerFc(
-      {},
-      (ans) => setStoettedeRevurderinger(ans),
-      () => {}
-    )
-  }, [])
-  if (isPending(hentStoettedeRevurderingerStatus) || revurderinger == undefined) {
-    return null
-  }
-  if (isFailure(hentStoettedeRevurderingerStatus)) {
-    return <ApiErrorAlert>En feil skjedde under kallet for å hente støttede revurderinger</ApiErrorAlert>
-  }
+
   const navneMap = useMemo(() => {
     if (isSuccess(grunnlag)) {
       return grunnlag.data.personer

@@ -93,3 +93,7 @@ export const opprettRevurdering = async (args: {
     aarsak: args.aarsak,
   })
 }
+
+export const hentStoettedeRevurderinger = async (): Promise<ApiResponse<Array<string>>> => {
+  return apiClient.get(`/stoettederevurdering`)
+}

@@ -2,8 +2,6 @@
 .eslintcache
 *.iml
 **.env**
-!.env.development
-!.env.production
 
 .gradle/
 .idea/

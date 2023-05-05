@@ -19,14 +19,14 @@ import {
   grunnlagsendringsKilde,
   grunnlagsendringsTittel,
   rolletekst,
-  stoetterGjennyRevurderingAvHendelse,
+  stoetterRevurderingAvHendelse,
 } from '~components/person/uhaandtereHendelser/utils'
 import { formaterKanskjeStringDatoMedFallback, formaterStringDato } from '~utils/formattering'
 import { isFailure, isPending, isSuccess, Result, useApiCall } from '~shared/hooks/useApiCall'
-import React, { useContext, useMemo, useState } from 'react'
+import React, { useContext, useEffect, useMemo, useState } from 'react'
 import { PersonerISakResponse } from '~shared/api/grunnlag'
 import HistoriskeHendelser from '~components/person/uhaandtereHendelser/HistoriskeHendelser'
-import { lukkGrunnlagshendelse } from '~shared/api/behandling'
+import { hentStoettedeRevurderinger, lukkGrunnlagshendelse } from '~shared/api/behandling'
 import { ApiErrorAlert } from '~ErrorBoundary'
 
 type Props = {
@@ -40,7 +40,21 @@ const RelevanteHendelser = (props: Props) => {
   const { hendelser, disabled, startRevurdering, grunnlag } = props
 
   if (hendelser.length === 0) return null
-
+  const [hentStoettedeRevurderingerStatus, hentStoettedeRevurderingerFc] = useApiCall(hentStoettedeRevurderinger)
+  const [revurderinger, setStoettedeRevurderinger] = useState<Array<string> | undefined>(undefined)
+  useEffect(() => {
+    hentStoettedeRevurderingerFc(
+      {},
+      (ans) => setStoettedeRevurderinger(ans),
+      () => {}
+    )
+  }, [])
+  if (isPending(hentStoettedeRevurderingerStatus) || revurderinger == undefined) {
+    return null
+  }
+  if (isFailure(hentStoettedeRevurderingerStatus)) {
+    return <ApiErrorAlert>En feil skjedde under kallet for å hente støttede revurderinger</ApiErrorAlert>
+  }
   const navneMap = useMemo(() => {
     if (isSuccess(grunnlag)) {
       return grunnlag.data.personer
@@ -49,7 +63,7 @@ const RelevanteHendelser = (props: Props) => {
     }
   }, [grunnlag])
 
-  const aapneHendelser = hendelser.filter((h) => h.status !== STATUS_IRRELEVANT)
+  const relevanteHendelser = hendelser.filter((h) => h.status !== STATUS_IRRELEVANT)
   const lukkedeHendelser = hendelser.filter((h) => h.status === STATUS_IRRELEVANT)
 
   return (
@@ -57,15 +71,16 @@ const RelevanteHendelser = (props: Props) => {
       <BorderWidth>
         <HendelserBorder>
           <FnrTilNavnMapContext.Provider value={navneMap}>
-            {aapneHendelser && aapneHendelser.length > 0 && (
+            {relevanteHendelser && relevanteHendelser.length > 0 && (
               <StyledAlert>
                 Ny hendelse som kan kreve revurdering. Vurder om det har konsekvens for ytelsen.
               </StyledAlert>
             )}
             <Heading size="medium">Nye hendelser</Heading>
-            {aapneHendelser.map((hendelse) => (
+            {relevanteHendelser.map((hendelse) => (
               <UhaandtertHendelse
                 key={hendelse.id}
+                revurderinger={revurderinger}
                 hendelse={hendelse}
                 disabled={disabled}
                 startRevurdering={startRevurdering}
@@ -82,11 +97,12 @@ const RelevanteHendelser = (props: Props) => {
 const UhaandtertHendelse = (props: {
   hendelse: Grunnlagsendringshendelse
   disabled: boolean
+  revurderinger: Array<string>
   startRevurdering: () => void
 }) => {
-  const { hendelse, disabled, startRevurdering } = props
+  const { hendelse, disabled, startRevurdering, revurderinger } = props
   const { type, opprettet } = hendelse
-  const stoetterRevurdering = stoetterGjennyRevurderingAvHendelse(hendelse)
+  const stoetterRevurdering = stoetterRevurderingAvHendelse(hendelse, revurderinger)
   const [open, setOpen] = useState(false)
   const [hendelsekommentar, oppdaterKommentar] = useState<string>('')
   const [res, lukkGrunnlagshendelseFunc, resetApiCall] = useApiCall(lukkGrunnlagshendelse)

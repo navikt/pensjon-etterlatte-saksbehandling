@@ -49,9 +49,6 @@ export const Saksoversikt = ({ fnr }: { fnr: string | undefined }) => {
     )
   }, [])
 
-  if (isFailure(hentStoettedeRevurderingerStatus)) {
-    return <ApiErrorAlert>En feil skjedde under kallet for å hente støttede revurderinger</ApiErrorAlert>
-  }
   useEffect(() => {
     if (!sakId) return resetPersoner
     void hentPersoner(sakId)
@@ -155,6 +152,9 @@ export const Saksoversikt = ({ fnr }: { fnr: string | undefined }) => {
                       />
                     </EkstraHandlinger>
                   ) : null}
+                  {isFailure(hentStoettedeRevurderingerStatus) && (
+                    <ApiErrorAlert>En feil skjedde under kallet for å hente støttede revurderinger</ApiErrorAlert>
+                  )}
                   {revurderinger && (
                     <RelevanteHendelser
                       hendelser={hendelser}

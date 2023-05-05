@@ -13,14 +13,14 @@ import { NesteOgTilbake } from '../handlinger/NesteOgTilbake'
 import { useAppDispatch } from '~store/Store'
 import { opprettEllerEndreBeregning } from '~shared/api/beregning'
 import { isFailure, isPending, useApiCall } from '~shared/hooks/useApiCall'
-import { hentSoeskenjusteringsgrunnlag, lagreSoeskenMedIBeregning } from '~shared/api/grunnlag'
-import { SoeskenMedIBeregning } from '~shared/types/grunnlag'
+import { hentSoeskenjusteringsgrunnlag, lagreSoeskenMedIBeregning } from '~shared/api/beregning'
+import { SoeskenMedIBeregning } from '~shared/types/Beregning'
 import Spinner from '~shared/Spinner'
 import { IPdlPerson } from '~shared/types/Person'
 import {
   IBehandlingReducer,
   oppdaterBehandlingsstatus,
-  oppdaterSoeskenjusteringsgrunnlag,
+  oppdaterBeregingsGrunnlag,
   resetBeregning,
 } from '~store/reducers/BehandlingReducer'
 import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
@@ -36,7 +36,7 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
   const { behandling } = props
   const { next } = useBehandlingRoutes()
   const behandles = hentBehandlesFraStatus(behandling?.status)
-  const soeskenjustering = behandling.soeskenjusteringsgrunnlag?.beregningsgrunnlag
+  const soeskenjustering = behandling.beregningsGrunnlag?.soeskenMedIBeregning
   const [ikkeValgtOppdrasSammenPaaAlle, setIkkeValgtOppdrasSammenPaaAlleFeil] = useState(false)
   const dispatch = useAppDispatch()
   const [soeskenjusteringsgrunnlag, fetchSoeskenjusteringsgrunnlag] = useApiCall(hentSoeskenjusteringsgrunnlag)
@@ -52,11 +52,9 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
 
   useEffect(() => {
     if (!soeskenjusteringErDefinertIRedux) {
-      fetchSoeskenjusteringsgrunnlag(behandling.sak, (result) => {
-        reset({ soeskengrunnlag: result?.opplysning?.beregningsgrunnlag ?? [] })
-        dispatch(
-          oppdaterSoeskenjusteringsgrunnlag({ beregningsgrunnlag: result?.opplysning?.beregningsgrunnlag ?? [] })
-        )
+      fetchSoeskenjusteringsgrunnlag(behandling.id, (result) => {
+        reset({ soeskengrunnlag: result?.soeskenMedIBeregning ?? [] })
+        dispatch(oppdaterBeregingsGrunnlag({ soeskenMedIBeregning: result?.soeskenMedIBeregning ?? [] }))
       })
     }
   }, [])
@@ -75,8 +73,8 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
     postSoeskenMedIBeregning({ behandlingsId: behandling.id, soeskenMedIBeregning: soeskengrunnlag }, () =>
       postOpprettEllerEndreBeregning(behandling.id, () => {
         dispatch(
-          oppdaterSoeskenjusteringsgrunnlag({
-            beregningsgrunnlag: soeskengrunnlag,
+          oppdaterBeregingsGrunnlag({
+            soeskenMedIBeregning: soeskengrunnlag,
           })
         )
         dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.BEREGNET))

@@ -68,9 +68,18 @@ data class Foerstegangsbehandling(
         listOf(
             BehandlingStatus.VILKAARSVURDERT,
             BehandlingStatus.BEREGNET,
+            BehandlingStatus.AVKORTET,
             BehandlingStatus.RETURNERT
         )
     ) { endreTilStatus(BehandlingStatus.BEREGNET) }
+
+    override fun tilAvkortet(): Foerstegangsbehandling = hvisTilstandEr(
+        listOf(
+            BehandlingStatus.BEREGNET,
+            BehandlingStatus.AVKORTET,
+            BehandlingStatus.RETURNERT
+        )
+    ) { endreTilStatus(BehandlingStatus.AVKORTET) }
 
     override fun tilFattetVedtak(): Foerstegangsbehandling {
         if (!erFyltUt()) {

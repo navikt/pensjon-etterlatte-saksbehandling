@@ -45,6 +45,7 @@ export const hentBehandlesFraStatus = (status: IBehandlingStatus): boolean => {
     status === IBehandlingStatus.OPPRETTET ||
     status === IBehandlingStatus.VILKAARSVURDERT ||
     status === IBehandlingStatus.BEREGNET ||
+    status === IBehandlingStatus.AVKORTET ||
     status === IBehandlingStatus.RETURNERT
   )
 }

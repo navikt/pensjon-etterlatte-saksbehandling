@@ -13,7 +13,8 @@ enum class OppgaveStatus {
             return when (behandlingStatus) {
                 BehandlingStatus.OPPRETTET,
                 BehandlingStatus.VILKAARSVURDERT,
-                BehandlingStatus.BEREGNET -> NY
+                BehandlingStatus.BEREGNET,
+                BehandlingStatus.AVKORTET -> NY
 
                 BehandlingStatus.FATTET_VEDTAK -> TIL_ATTESTERING
                 BehandlingStatus.RETURNERT -> RETURNERT

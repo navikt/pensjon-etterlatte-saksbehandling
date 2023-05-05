@@ -65,6 +65,16 @@ data class ManueltOpphoer(
         endreTilStatus(BehandlingStatus.BEREGNET)
     }
 
+    override fun tilAvkortet(): ManueltOpphoer = hvisTilstandEr(
+        listOf(
+            BehandlingStatus.BEREGNET,
+            BehandlingStatus.AVKORTET,
+            BehandlingStatus.RETURNERT
+        )
+    ) {
+        endreTilStatus(BehandlingStatus.BEREGNET)
+    }
+
     override fun tilFattetVedtak(): ManueltOpphoer {
         if (!erFyltUt) {
             logger.info(("Behandling ($id) må være fylt ut for å settes til fattet vedtak"))

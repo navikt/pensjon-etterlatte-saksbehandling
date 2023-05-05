@@ -27,23 +27,25 @@ class AvkortingService(
         logger.info("Lagre grunnlag for avkorting for behandlingId=$behandlingId")
 
         val inntektavkorting = inntektAvkortingService.beregnInntektsavkorting(avkortingGrunnlag)
-        val avkorting = avkortingRepository.lagreEllerOppdaterAvkortingGrunnlag(
+        val avkortingMedGrunnlag = avkortingRepository.lagreEllerOppdaterAvkortingGrunnlag(
             behandlingId,
             avkortingGrunnlag.copy(beregnetAvkorting = inntektavkorting)
         )
 
         val beregning = beregningRepository.hent(behandlingId)
             ?: throw Exception("Mangler beregning for behandlingId=$behandlingId")
-        val avkortetYtelse = inntektAvkortingService.beregnAvkortetYtelse(
+        val beregnetAvkortetYtelse = inntektAvkortingService.beregnAvkortetYtelse(
             beregning.beregningsperioder,
-            avkorting.avkortingGrunnlag
+            avkortingMedGrunnlag.avkortingGrunnlag
         )
 
-        avkortingRepository.lagreEllerOppdaterAvkortetYtelse(behandlingId, avkortetYtelse)
+        val avkortetYtelse = avkortingRepository.lagreEllerOppdaterAvkortetYtelse(behandlingId, beregnetAvkortetYtelse)
+        behandlingKlient.avkort(behandlingId, bruker, true)
+        avkortetYtelse
     }
 
     private suspend fun tilstandssjekk(behandlingId: UUID, bruker: Bruker, block: suspend () -> Avkorting): Avkorting {
-        val kanAvkorte = behandlingKlient.beregn(behandlingId, bruker, commit = false)
+        val kanAvkorte = behandlingKlient.avkort(behandlingId, bruker, commit = false)
         return if (kanAvkorte) {
             block()
         } else {

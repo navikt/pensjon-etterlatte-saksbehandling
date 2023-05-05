@@ -76,6 +76,7 @@ internal class AvkortingServiceTest {
         val beregninger = listOf(beregningsperiode())
         val avkortetYtelse = listOf(avkortetYtelse())
 
+        coEvery { behandlingKlient.avkort(behandlingId, bruker, false) } returns true
         every { inntektAvkortingService.beregnInntektsavkorting(avkortinggrunnlag) } returns inntektsavkorting
         every {
             avkortingRepository.lagreEllerOppdaterAvkortingGrunnlag(behandlingId, grunnlagMedBeregnetAvkorting)
@@ -85,6 +86,7 @@ internal class AvkortingServiceTest {
             inntektAvkortingService.beregnAvkortetYtelse(beregninger, avkorting.avkortingGrunnlag)
         } returns avkortetYtelse
         every { avkortingRepository.lagreEllerOppdaterAvkortetYtelse(behandlingId, avkortetYtelse) } returns avkorting
+        coEvery { behandlingKlient.avkort(behandlingId, bruker, true) } returns true
 
         val result = runBlocking {
             service.lagreAvkorting(behandlingId, bruker, avkortinggrunnlag)
@@ -92,19 +94,20 @@ internal class AvkortingServiceTest {
 
         result shouldBe avkorting
         coVerify(exactly = 1) {
-            behandlingKlient.beregn(behandlingId, bruker, false)
+            behandlingKlient.avkort(behandlingId, bruker, false)
             inntektAvkortingService.beregnInntektsavkorting(avkortinggrunnlag)
             avkortingRepository.lagreEllerOppdaterAvkortingGrunnlag(behandlingId, grunnlagMedBeregnetAvkorting)
             beregningRepository.hent(behandlingId)
             inntektAvkortingService.beregnAvkortetYtelse(beregninger, avkorting.avkortingGrunnlag)
             avkortingRepository.lagreEllerOppdaterAvkortetYtelse(behandlingId, avkortetYtelse)
+            behandlingKlient.avkort(behandlingId, bruker, true)
         }
     }
 
     @Test
     fun `skal feile ved lagring av avkortinggrunnlag hvis behandling er i feil tilstand`() {
         val behandlingId = UUID.randomUUID()
-        coEvery { behandlingKlient.beregn(behandlingId, bruker, false) } returns false
+        coEvery { behandlingKlient.avkort(behandlingId, bruker, false) } returns false
 
         runBlocking {
             assertThrows<Exception> {
@@ -113,7 +116,7 @@ internal class AvkortingServiceTest {
         }
 
         coVerify {
-            behandlingKlient.beregn(behandlingId, bruker, false)
+            behandlingKlient.avkort(behandlingId, bruker, false)
         }
     }
 }

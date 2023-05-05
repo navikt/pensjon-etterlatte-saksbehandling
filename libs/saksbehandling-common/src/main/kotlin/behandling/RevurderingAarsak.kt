@@ -11,11 +11,15 @@ enum class RevurderingAarsak(val kanBrukesDev: Boolean, val kanBrukesProd: Boole
 
     fun kanBrukesIMiljo(): Boolean {
         val env = System.getenv()
-        val naisClusterName = env.get("NAIS_CLUSTER_NAME")!!
-        if (naisClusterName == GcpEnv.PROD.name) {
-            return this.kanBrukesProd
+        val naisClusterName = env.get("NAIS_CLUSTER_NAME")
+        if (naisClusterName == null) {
+            return true
+        } else {
+            if (naisClusterName == GcpEnv.PROD.name) {
+                return this.kanBrukesProd
+            }
+            return this.kanBrukesDev
         }
-        return this.kanBrukesDev
     }
 }
 

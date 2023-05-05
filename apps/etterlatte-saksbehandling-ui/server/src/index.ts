@@ -46,6 +46,7 @@ if (isDev) {
       '/api/oppgaver',
       '/api/personer',
       '/api/:sakid/revurdering',
+      '/api/stoettederevurderinger',
     ],
     tokenMiddleware(ApiConfig.behandling.scope),
     proxy(ApiConfig.behandling.url)

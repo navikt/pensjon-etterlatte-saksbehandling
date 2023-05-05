@@ -1,15 +1,14 @@
 import { Button, Heading, Modal, Select } from '@navikt/ds-react'
 import React, { useState } from 'react'
 import styled from 'styled-components'
-import { stoettedeRevurderingerSomListe } from '~components/person/uhaandtereHendelser/utils'
 import { isPending, useApiCall } from '~shared/hooks/useApiCall'
 import { opprettRevurdering as opprettRevurderingApi } from '~shared/api/behandling'
 
-export const OpprettNyBehandling = ({ sakId }: { sakId: number }) => {
+export const OpprettNyBehandling = ({ sakId, revurderinger }: { sakId: number; revurderinger: Array<string> }) => {
   const [error, setError] = useState<string | null>(null)
   const [open, setOpen] = useState(false)
   const [valgtRevurdering, setValgtRevurdering] = useState<string | undefined>()
-  const stoettedeRevurderinger = stoettedeRevurderingerSomListe()
+  const stoettedeRevurderinger = revurderinger
 
   const [opprettRevurderingStatus, opprettRevurdering, resetApiCall] = useApiCall(opprettRevurderingApi)
   const opprettBehandling = () => {

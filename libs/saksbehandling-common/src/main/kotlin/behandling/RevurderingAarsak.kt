@@ -1,11 +1,29 @@
 package no.nav.etterlatte.libs.common.behandling
 
-enum class RevurderingAarsak(val kanBrukes: Boolean) {
-    REGULERING(true),
-    GRUNNBELOEP(false),
-    ANSVARLIGE_FORELDRE(false),
-    UTLAND(false),
-    BARN(false),
-    DOEDSDATO(false),
-    VERGEMAAL_ELLER_FREMTIDSFULLMAKT(false)
+enum class RevurderingAarsak(val kanBrukesDev: Boolean, val kanBrukesProd: Boolean) {
+    REGULERING(true, true),
+    GRUNNBELOEP(false, false),
+    ANSVARLIGE_FORELDRE(false, false),
+    UTLAND(false, false),
+    BARN(false, false),
+    DOEDSDATO(false, false),
+    VERGEMAAL_ELLER_FREMTIDSFULLMAKT(false, false);
+
+    fun kanBrukesIMiljo(): Boolean {
+        val env = System.getenv()
+        val naisClusterName = env.get("NAIS_CLUSTER_NAME")
+        if (naisClusterName == null) {
+            return true
+        } else {
+            if (naisClusterName == GcpEnv.PROD.name) {
+                return this.kanBrukesProd
+            }
+            return this.kanBrukesDev
+        }
+    }
+}
+
+enum class GcpEnv(val env: String) {
+    PROD("prod-gcp"),
+    DEV("dev-gcp")
 }

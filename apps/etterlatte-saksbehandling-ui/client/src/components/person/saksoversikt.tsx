@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Behandlingsliste } from './behandlingsliste'
 import styled from 'styled-components'
 import { Grunnlagsendringshendelse, GrunnlagsendringsListe, IBehandlingListe, IBehandlingsammendrag } from './typer'
@@ -9,7 +9,11 @@ import { ToKolonner } from '../toKolonner/ToKolonner'
 import { Grunnlagshendelser } from './grunnlagshendelser/Grunnlagsendringshendelser'
 import { tagColors } from '~shared/Tags'
 import { formaterEnumTilLesbarString } from '~utils/formattering'
-import { hentBehandlingerForPerson, hentGrunnlagsendringshendelserForPerson } from '~shared/api/behandling'
+import {
+  hentBehandlingerForPerson,
+  hentGrunnlagsendringshendelserForPerson,
+  hentStoettedeRevurderinger,
+} from '~shared/api/behandling'
 import { Container } from '~shared/styled'
 import Spinner from '~shared/Spinner'
 import {
@@ -20,8 +24,9 @@ import {
 import OpprettRevurderingModal from '~components/person/OpprettRevurderingModal'
 import { IBehandlingsType } from '~shared/types/IDetaljertBehandling'
 import RelevanteHendelser from '~components/person/uhaandtereHendelser/RelevanteHendelser'
-import { useApiCall } from '~shared/hooks/useApiCall'
+import { isFailure, useApiCall } from '~shared/hooks/useApiCall'
 import { hentPersonerISak } from '~shared/api/grunnlag'
+import { ApiErrorAlert } from '~ErrorBoundary'
 
 export const Saksoversikt = ({ fnr }: { fnr: string | undefined }) => {
   const [behandlingliste, setBehandlingliste] = useState<IBehandlingsammendrag[]>([])
@@ -33,6 +38,16 @@ export const Saksoversikt = ({ fnr }: { fnr: string | undefined }) => {
   const [sakId, setSakId] = useState<number | undefined>()
   const [visOpprettRevurderingsmodal, setVisOpprettRevurderingsmodal] = useState<boolean>(false)
   const [personerISak, hentPersoner, resetPersoner] = useApiCall(hentPersonerISak)
+
+  const [hentStoettedeRevurderingerStatus, hentStoettedeRevurderingerFc] = useApiCall(hentStoettedeRevurderinger)
+  const [revurderinger, setStoettedeRevurderinger] = useState<Array<string> | undefined>(undefined)
+  useEffect(() => {
+    hentStoettedeRevurderingerFc(
+      {},
+      (ans) => setStoettedeRevurderinger(ans),
+      () => {}
+    )
+  }, [])
 
   useEffect(() => {
     if (!sakId) return resetPersoner
@@ -137,17 +152,23 @@ export const Saksoversikt = ({ fnr }: { fnr: string | undefined }) => {
                       />
                     </EkstraHandlinger>
                   ) : null}
-                  <RelevanteHendelser
-                    hendelser={hendelser}
-                    startRevurdering={() => setVisOpprettRevurderingsmodal(true)}
-                    disabled={harAapenRevurdering}
-                    grunnlag={personerISak}
-                  />
+                  {isFailure(hentStoettedeRevurderingerStatus) && (
+                    <ApiErrorAlert>En feil skjedde under kallet for å hente støttede revurderinger</ApiErrorAlert>
+                  )}
+                  {revurderinger && (
+                    <RelevanteHendelser
+                      hendelser={hendelser}
+                      revurderinger={revurderinger}
+                      startRevurdering={() => setVisOpprettRevurderingsmodal(true)}
+                      disabled={harAapenRevurdering}
+                      grunnlag={personerISak}
+                    />
+                  )}
                   {sakId !== undefined ? (
                     <div className="behandlinger">
                       <h2>Behandlinger</h2>
                       {behandlingliste !== undefined && (
-                        <Behandlingsliste behandlinger={behandlingliste} sakId={sakId} />
+                        <Behandlingsliste revurderinger={revurderinger} behandlinger={behandlingliste} sakId={sakId} />
                       )}
                     </div>
                   ) : null}

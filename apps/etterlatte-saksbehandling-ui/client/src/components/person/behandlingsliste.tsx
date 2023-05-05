@@ -47,7 +47,15 @@ const lenkeTilBehandling = (behandlingSammendrag: IBehandlingsammendrag): string
   }
 }
 
-export const Behandlingsliste = ({ behandlinger, sakId }: { behandlinger: IBehandlingsammendrag[]; sakId: number }) => {
+export const Behandlingsliste = ({
+  behandlinger,
+  sakId,
+  revurderinger,
+}: {
+  behandlinger: IBehandlingsammendrag[]
+  sakId: number
+  revurderinger: Array<string> | undefined
+}) => {
   return (
     <>
       <Table zebraStripes>
@@ -87,7 +95,7 @@ export const Behandlingsliste = ({ behandlinger, sakId }: { behandlinger: IBehan
           ))}
         </Table.Body>
       </Table>
-      <OpprettNyBehandling sakId={sakId} />
+      {revurderinger && <OpprettNyBehandling revurderinger={revurderinger} sakId={sakId} />}
     </>
   )
 }

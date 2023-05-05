@@ -7,6 +7,7 @@ import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.application
+import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.behandling.GenerellBehandlingService
@@ -32,7 +33,7 @@ internal fun Route.revurderingRoutes(
                 call.respond(HttpStatusCode.BadRequest, "Feil under deserialiseringen av objektet")
                 return@post
             }
-            if (!body.aarsak.kanBrukes) {
+            if (!body.aarsak.kanBrukesIMiljo()) {
                 call.respond(HttpStatusCode.BadRequest, "Feil revurderingsårsak, foreløpig ikke støttet")
                 return@post
             }
@@ -49,6 +50,15 @@ internal fun Route.revurderingRoutes(
                     else -> call.respond(revurdering.toDetaljertBehandling())
                 }
             } ?: call.respond(HttpStatusCode.BadRequest, "Kan ikke revurdere en sak uten iverksatt behandling")
+        }
+    }
+
+    route("/api/stoettederevurderinger") {
+        get {
+            val stoettedeRevurderinger = RevurderingAarsak.values()
+                .filter { it.kanBrukesIMiljo() }
+                .map { it.name }
+            call.respond(stoettedeRevurderinger)
         }
     }
 }

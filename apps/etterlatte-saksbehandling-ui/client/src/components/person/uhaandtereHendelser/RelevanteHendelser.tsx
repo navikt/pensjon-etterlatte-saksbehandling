@@ -19,7 +19,7 @@ import {
   grunnlagsendringsKilde,
   grunnlagsendringsTittel,
   rolletekst,
-  stoetterGjennyRevurderingAvHendelse,
+  stoetterRevurderingAvHendelse,
 } from '~components/person/uhaandtereHendelser/utils'
 import { formaterKanskjeStringDatoMedFallback, formaterStringDato } from '~utils/formattering'
 import { isFailure, isPending, isSuccess, Result, useApiCall } from '~shared/hooks/useApiCall'
@@ -34,10 +34,11 @@ type Props = {
   startRevurdering: () => void
   disabled: boolean
   grunnlag: Result<PersonerISakResponse>
+  revurderinger: Array<string>
 }
 
 const RelevanteHendelser = (props: Props) => {
-  const { hendelser, disabled, startRevurdering, grunnlag } = props
+  const { hendelser, disabled, startRevurdering, grunnlag, revurderinger } = props
 
   if (hendelser.length === 0) return null
 
@@ -49,7 +50,7 @@ const RelevanteHendelser = (props: Props) => {
     }
   }, [grunnlag])
 
-  const aapneHendelser = hendelser.filter((h) => h.status !== STATUS_IRRELEVANT)
+  const relevanteHendelser = hendelser.filter((h) => h.status !== STATUS_IRRELEVANT)
   const lukkedeHendelser = hendelser.filter((h) => h.status === STATUS_IRRELEVANT)
 
   return (
@@ -57,15 +58,16 @@ const RelevanteHendelser = (props: Props) => {
       <BorderWidth>
         <HendelserBorder>
           <FnrTilNavnMapContext.Provider value={navneMap}>
-            {aapneHendelser && aapneHendelser.length > 0 && (
+            {relevanteHendelser && relevanteHendelser.length > 0 && (
               <StyledAlert>
                 Ny hendelse som kan kreve revurdering. Vurder om det har konsekvens for ytelsen.
               </StyledAlert>
             )}
             <Heading size="medium">Nye hendelser</Heading>
-            {aapneHendelser.map((hendelse) => (
+            {relevanteHendelser.map((hendelse) => (
               <UhaandtertHendelse
                 key={hendelse.id}
+                revurderinger={revurderinger}
                 hendelse={hendelse}
                 disabled={disabled}
                 startRevurdering={startRevurdering}
@@ -82,11 +84,12 @@ const RelevanteHendelser = (props: Props) => {
 const UhaandtertHendelse = (props: {
   hendelse: Grunnlagsendringshendelse
   disabled: boolean
+  revurderinger: Array<string>
   startRevurdering: () => void
 }) => {
-  const { hendelse, disabled, startRevurdering } = props
+  const { hendelse, disabled, startRevurdering, revurderinger } = props
   const { type, opprettet } = hendelse
-  const stoetterRevurdering = stoetterGjennyRevurderingAvHendelse(hendelse)
+  const stoetterRevurdering = stoetterRevurderingAvHendelse(hendelse, revurderinger)
   const [open, setOpen] = useState(false)
   const [hendelsekommentar, oppdaterKommentar] = useState<string>('')
   const [res, lukkGrunnlagshendelseFunc, resetApiCall] = useApiCall(lukkGrunnlagshendelse)

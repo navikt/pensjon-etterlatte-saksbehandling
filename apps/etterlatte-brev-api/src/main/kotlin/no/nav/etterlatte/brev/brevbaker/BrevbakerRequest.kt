@@ -26,4 +26,4 @@ enum class LanguageCode {
     }
 }
 
-enum class EtterlatteBrevKode { A_LETTER }
+enum class EtterlatteBrevKode { A_LETTER, BARNEPENSJON_VEDTAK }

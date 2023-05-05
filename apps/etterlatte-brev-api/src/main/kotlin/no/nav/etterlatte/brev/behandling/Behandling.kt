@@ -13,8 +13,14 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Navn
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
+import no.nav.pensjon.brev.api.model.Foedselsnummer
+import no.nav.pensjon.brev.api.model.Kroner
 import java.time.LocalDate
 import java.util.*
+
+interface IntValue {
+    val value: Int
+}
 
 data class Behandling(
     val sakId: Long,
@@ -49,8 +55,8 @@ data class Saksbehandler(
 typealias Attestant = Saksbehandler
 
 data class Utbetalingsinfo(
-    val antallBarn: Int?,
-    val beloep: Int,
+    val antallBarn: Int,
+    val beloep: Kroner,
     val virkningsdato: LocalDate,
     val soeskenjustering: Boolean,
     val beregningsperioder: List<Beregningsperiode>
@@ -59,9 +65,9 @@ data class Utbetalingsinfo(
 data class Beregningsperiode(
     val datoFOM: LocalDate,
     val datoTOM: LocalDate?,
-    val grunnbeloep: Int,
+    val grunnbeloep: Kroner,
     val antallBarn: Int,
-    val utbetaltBeloep: Int,
+    val utbetaltBeloep: Kroner,
     val trygdetid: Int
 )
 
@@ -75,7 +81,7 @@ data class Persongalleri(
 fun Grunnlag.mapSoeker(): Soeker = with(this.soeker) {
     Soeker(
         navn = hentNavn()!!.verdi.fulltNavn(),
-        fnr = hentFoedselsnummer()!!.verdi.value
+        fnr = Foedselsnummer(hentFoedselsnummer()!!.verdi.value)
     )
 }
 
@@ -97,7 +103,7 @@ fun Grunnlag.mapInnsender(): Innsender = with(this.sak) {
 
     Innsender(
         navn = innsender.let { "${it.fornavn} ${it.etternavn}" },
-        fnr = innsender.foedselsnummer.value
+        fnr = Foedselsnummer(innsender.foedselsnummer.value)
     )
 }
 
@@ -111,7 +117,7 @@ fun Grunnlag.mapSpraak(): Spraak = with(this.sak) {
 
 fun List<Beregningsperiode>.hentUtbetaltBeloep(): Int {
     // TODO: Håndter grunnbeløpsendringer
-    return this.last().utbetaltBeloep
+    return this.last().utbetaltBeloep.value
 }
 
 private fun Navn.fulltNavn(): String = listOfNotNull(fornavn, mellomnavn, etternavn).joinToString(" ")

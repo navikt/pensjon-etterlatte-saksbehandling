@@ -23,7 +23,7 @@ import no.nav.etterlatte.token.Bruker
 import no.nav.pensjon.brev.api.model.Felles
 import no.nav.pensjon.brev.api.model.Foedselsnummer
 import no.nav.pensjon.brev.api.model.NAVEnhet
-import no.nav.pensjon.brev.api.model.Telefonnummer
+import no.nav.pensjon.brev.api.model.SignerendeSaksbehandlere
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.util.*
@@ -57,13 +57,13 @@ class VedtaksbrevService(
     ): Brev {
         val behandling = sakOgBehandlingService.hentBehandling(sakId, behandlingId, bruker)
 
-        val mottaker = adresseService.hentMottakerAdresse(behandling.persongalleri.innsender.fnr)
+        val mottaker = adresseService.hentMottakerAdresse(behandling.persongalleri.innsender.fnr.value)
 
         val vedtakType = behandling.vedtak.type
 
         val nyttBrev = OpprettNyttBrev(
             behandlingId = behandling.behandlingId,
-            soekerFnr = behandling.persongalleri.soeker.fnr,
+            soekerFnr = behandling.persongalleri.soeker.fnr.value,
             tittel = "Vedtak om ${vedtakType.name.lowercase()}",
             mottaker = mottaker,
             erVedtaksbrev = true
@@ -138,28 +138,34 @@ class VedtaksbrevService(
 
         val brevRequest = BrevRequestMapper.fra(behandling, avsender, mottaker, attestant)
 
-        val brevbakerBrev = brevbaker.genererPdf(
-            BrevbakerRequest(
-                kode = EtterlatteBrevKode.A_LETTER,
-                letterData = brevRequest,
-                felles = Felles(
-                    dokumentDato = LocalDate.now(),
-                    saksnummer = "1234",
-                    avsenderEnhet = NAVEnhet("", "", Telefonnummer("12345678")),
-                    bruker = BrevBruker(
-                        fornavn = "Test",
-                        mellomnavn = "bruker",
-                        etternavn = "Testerson",
-                        foedselsnummer = Foedselsnummer("01019878910"),
-                        foedselsdato = LocalDate.of(1998, 1, 1)
-                    ),
-                    signerendeSaksbehandlere = null,
-                    vergeNavn = null
+        val request = BrevbakerRequest(
+            kode = EtterlatteBrevKode.BARNEPENSJON_VEDTAK,
+            letterData = brevRequest,
+            felles = Felles(
+                dokumentDato = LocalDate.of(2020, 1, 1),
+                saksnummer = behandling.sakId.toString(),
+                avsenderEnhet = NAVEnhet(
+                    nettside = "nav.no",
+                    navn = avsender.kontor,
+                    telefonnummer = avsender.telefonnummer
                 ),
-                language = LanguageCode.BOKMAL
-            )
+                bruker = BrevBruker(
+                    fornavn = mottaker.navn,
+                    mellomnavn = "BREv brevesern bereres asdasdasd", // TODO: Fiks navn
+                    etternavn = "asdasdasdadasdasd",
+                    foedselsnummer = Foedselsnummer(mottaker.foedselsnummer!!.value),
+                    foedselsdato = LocalDate.of(1998, 1, 1)
+                ),
+                signerendeSaksbehandlere = SignerendeSaksbehandlere(
+                    saksbehandler = avsender.saksbehandler,
+                    attesterendeSaksbehandler = attestant?.navn ?: ""
+                ),
+                vergeNavn = null
+            ),
+            language = LanguageCode.BOKMAL
         )
 
+        val brevbakerBrev = brevbaker.genererPdf(request)
         val brev = Base64.getDecoder().decode(brevbakerBrev.base64pdf)
 
         logger.info("Generert brev for vedtak (vedtakId=${behandling.vedtak.id}) med størrelse: ${brev.size}")

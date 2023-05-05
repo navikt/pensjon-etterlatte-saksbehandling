@@ -1,5 +1,6 @@
 package no.nav.etterlatte.brev.model
 
+import no.nav.pensjon.brev.api.model.Telefonnummer
 import java.time.LocalDate
 
 abstract class BrevRequest {
@@ -41,7 +42,7 @@ data class Avsender(
     val kontor: String,
     val adresse: String,
     val postnummer: String,
-    val telefon: String,
+    val telefonnummer: Telefonnummer,
     val saksbehandler: String
 )
 

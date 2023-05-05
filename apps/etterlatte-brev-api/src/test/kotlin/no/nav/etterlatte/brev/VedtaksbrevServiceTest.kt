@@ -23,17 +23,19 @@ import no.nav.etterlatte.brev.behandling.Saksbehandler
 import no.nav.etterlatte.brev.behandling.Soeker
 import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
 import no.nav.etterlatte.brev.brevbaker.BrevbakerKlient
+import no.nav.etterlatte.brev.brevbaker.BrevbakerPdfResponse
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.dokarkiv.DokarkivServiceImpl
 import no.nav.etterlatte.brev.journalpost.JournalpostResponse
 import no.nav.etterlatte.brev.model.Adresse
+import no.nav.etterlatte.brev.model.Attestant
+import no.nav.etterlatte.brev.model.Avsender
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevInnhold
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.OpprettNyttBrev
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.Status
-import no.nav.etterlatte.brev.pdf.PdfGeneratorKlient
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.VedtakSak
@@ -41,6 +43,10 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.rivers.VedtakTilJournalfoering
 import no.nav.etterlatte.token.Bruker
+import no.nav.pensjon.brev.api.model.Foedselsnummer
+import no.nav.pensjon.brev.api.model.Kroner
+import no.nav.pensjon.brev.api.model.LetterMetadata
+import no.nav.pensjon.brev.api.model.Telefonnummer
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
@@ -56,14 +62,13 @@ import kotlin.random.Random
 internal class VedtaksbrevServiceTest {
 
     private val db = mockk<BrevRepository>(relaxed = true)
-    private val pdfGenerator = mockk<PdfGeneratorKlient>()
     private val brevbaker = mockk<BrevbakerKlient>()
     private val sakOgBehandlingService = mockk<SakOgBehandlingService>()
     private val adresseService = mockk<AdresseService>()
     private val dokarkivService = mockk<DokarkivServiceImpl>()
 
     private val vedtaksbrevService =
-        VedtaksbrevService(db, pdfGenerator, sakOgBehandlingService, adresseService, dokarkivService, brevbaker)
+        VedtaksbrevService(db, sakOgBehandlingService, adresseService, dokarkivService, brevbaker)
 
     @BeforeEach
     fun before() {
@@ -72,7 +77,7 @@ internal class VedtaksbrevServiceTest {
 
     @AfterEach
     fun after() {
-        confirmVerified(db, pdfGenerator, sakOgBehandlingService, adresseService, dokarkivService, brevbaker)
+        confirmVerified(db, sakOgBehandlingService, adresseService, dokarkivService, brevbaker)
     }
 
     @Nested
@@ -136,18 +141,18 @@ internal class VedtaksbrevServiceTest {
             coVerify {
                 db.hentBrevForBehandling(BEHANDLING_ID)
                 sakOgBehandlingService.hentBehandling(SAK_ID, BEHANDLING_ID, any())
-                adresseService.hentMottakerAdresse(behandling.persongalleri.innsender.fnr)
+                adresseService.hentMottakerAdresse(behandling.persongalleri.innsender.fnr.value)
             }
 
             verify {
                 db.opprettBrev(capture(brevSlot))
-                pdfGenerator wasNot Called
+                brevbaker wasNot Called
                 dokarkivService wasNot Called
             }
 
             val brev = brevSlot.captured
             brev.behandlingId shouldBe behandling.behandlingId
-            brev.soekerFnr shouldBe behandling.persongalleri.soeker.fnr
+            brev.soekerFnr shouldBe behandling.persongalleri.soeker.fnr.value
             brev.tittel shouldBe "Vedtak om ${behandling.vedtak.type.name.lowercase()}"
             brev.mottaker shouldBe mottaker
             brev.erVedtaksbrev shouldBe true
@@ -176,11 +181,11 @@ internal class VedtaksbrevServiceTest {
             coVerify {
                 db.hentBrevForBehandling(BEHANDLING_ID)
                 sakOgBehandlingService.hentBehandling(SAK_ID, BEHANDLING_ID, any())
-                adresseService.hentMottakerAdresse(behandling.persongalleri.innsender.fnr)
+                adresseService.hentMottakerAdresse(behandling.persongalleri.innsender.fnr.value)
             }
 
             verify {
-                pdfGenerator wasNot Called
+                brevbaker wasNot Called
                 dokarkivService wasNot Called
             }
         }
@@ -194,8 +199,8 @@ internal class VedtaksbrevServiceTest {
 
             every { db.hentBrevForBehandling(any()) } returns opprettBrev(Status.OPPRETTET)
             coEvery { sakOgBehandlingService.hentBehandling(any(), any(), any()) } returns behandling
-            coEvery { adresseService.hentAvsenderOgAttestant(any()) } returns Pair(mockk(), mockk())
-            coEvery { pdfGenerator.genererPdf(any()) } returns PDF_BYTES
+            coEvery { adresseService.hentAvsenderOgAttestant(any()) } returns opprettAvsenderOgAttestant()
+            coEvery { brevbaker.genererPdf(any()) } returns opprettBrevbakerResponse()
 
             runBlocking {
                 vedtaksbrevService.genererPdfInnhold(SAK_ID, BEHANDLING_ID, bruker = SAKSBEHANDLER)
@@ -208,7 +213,7 @@ internal class VedtaksbrevServiceTest {
             coVerify {
                 sakOgBehandlingService.hentBehandling(SAK_ID, BEHANDLING_ID, SAKSBEHANDLER)
                 adresseService.hentAvsenderOgAttestant(any())
-                pdfGenerator.genererPdf(any())
+                brevbaker.genererPdf(any())
             }
         }
 
@@ -218,8 +223,8 @@ internal class VedtaksbrevServiceTest {
 
             every { db.hentBrevForBehandling(any()) } returns opprettBrev(Status.OPPRETTET)
             coEvery { sakOgBehandlingService.hentBehandling(any(), any(), any()) } returns behandling
-            coEvery { adresseService.hentAvsenderOgAttestant(any()) } returns Pair(mockk(), mockk())
-            coEvery { pdfGenerator.genererPdf(any()) } returns PDF_BYTES
+            coEvery { adresseService.hentAvsenderOgAttestant(any()) } returns opprettAvsenderOgAttestant()
+            coEvery { brevbaker.genererPdf(any()) } returns opprettBrevbakerResponse()
 
             runBlocking {
                 vedtaksbrevService.genererPdfInnhold(SAK_ID, BEHANDLING_ID, bruker = ATTESTANT)
@@ -233,7 +238,7 @@ internal class VedtaksbrevServiceTest {
             coVerify {
                 sakOgBehandlingService.hentBehandling(SAK_ID, BEHANDLING_ID, ATTESTANT)
                 adresseService.hentAvsenderOgAttestant(any())
-                pdfGenerator.genererPdf(any())
+                brevbaker.genererPdf(any())
             }
         }
 
@@ -243,8 +248,8 @@ internal class VedtaksbrevServiceTest {
 
             every { db.hentBrevForBehandling(any()) } returns opprettBrev(Status.OPPRETTET)
             coEvery { sakOgBehandlingService.hentBehandling(any(), any(), any()) } returns behandling
-            coEvery { adresseService.hentAvsenderOgAttestant(any()) } returns Pair(mockk(), mockk())
-            coEvery { pdfGenerator.genererPdf(any()) } returns PDF_BYTES
+            coEvery { adresseService.hentAvsenderOgAttestant(any()) } returns opprettAvsenderOgAttestant()
+            coEvery { brevbaker.genererPdf(any()) } returns opprettBrevbakerResponse()
 
             runBlocking {
                 vedtaksbrevService.genererPdfInnhold(SAK_ID, BEHANDLING_ID, bruker = SAKSBEHANDLER)
@@ -257,7 +262,7 @@ internal class VedtaksbrevServiceTest {
             coVerify {
                 sakOgBehandlingService.hentBehandling(SAK_ID, BEHANDLING_ID, SAKSBEHANDLER)
                 adresseService.hentAvsenderOgAttestant(any())
-                pdfGenerator.genererPdf(any())
+                brevbaker.genererPdf(any())
             }
         }
 
@@ -285,7 +290,7 @@ internal class VedtaksbrevServiceTest {
             coVerify {
                 sakOgBehandlingService wasNot Called
                 adresseService wasNot Called
-                pdfGenerator wasNot Called
+                brevbaker wasNot Called
             }
         }
     }
@@ -314,7 +319,7 @@ internal class VedtaksbrevServiceTest {
             }
 
             verify {
-                listOf(pdfGenerator, sakOgBehandlingService, adresseService) wasNot Called
+                listOf(sakOgBehandlingService, adresseService) wasNot Called
             }
         }
 
@@ -336,7 +341,7 @@ internal class VedtaksbrevServiceTest {
             verify(exactly = 0) { db.settBrevFerdigstilt(any()) }
 
             verify {
-                listOf(pdfGenerator, sakOgBehandlingService, adresseService, dokarkivService)
+                listOf(sakOgBehandlingService, adresseService, dokarkivService)
                     .wasNot(Called)
             }
         }
@@ -365,8 +370,8 @@ internal class VedtaksbrevServiceTest {
         BEHANDLING_ID,
         Spraak.NB,
         Persongalleri(
-            Innsender("STOR SNERK", "11057523044"),
-            Soeker("GRØNN KOPP", "12345"),
+            Innsender("STOR SNERK", Foedselsnummer("11057523044")),
+            Soeker("GRØNN KOPP", Foedselsnummer("12345612345")),
             Avdoed("DØD TESTPERSON", LocalDate.now().minusMonths(1))
         ),
         ForenkletVedtak(
@@ -377,17 +382,26 @@ internal class VedtaksbrevServiceTest {
             attestant = null
         ),
         Utbetalingsinfo(
-            null,
-            3436,
+            1,
+            Kroner(3436),
             LocalDate.now(),
             false,
-            listOf(Beregningsperiode(LocalDate.now(), LocalDate.now().plusYears(4), 120000, 1, 5000, 40))
+            listOf(
+                Beregningsperiode(
+                    LocalDate.now(),
+                    LocalDate.now().plusYears(4),
+                    Kroner(120000),
+                    1,
+                    Kroner(5000),
+                    40
+                )
+            )
         )
     )
 
     private fun opprettMottaker() = Mottaker(
         "Stor Snerk",
-        foedselsnummer = STOR_SNERK,
+        foedselsnummer = Foedselsnummer(STOR_SNERK),
         orgnummer = null,
         adresse = Adresse(
             adresseType = "NORSKPOSTADRESSE",
@@ -399,10 +413,25 @@ internal class VedtaksbrevServiceTest {
         )
     )
 
+    private fun opprettBrevbakerResponse() = BrevbakerPdfResponse(
+        "",
+        LetterMetadata(
+            "Testtitle",
+            isSensitiv = false,
+            LetterMetadata.Distribusjonstype.VEDTAK,
+            LetterMetadata.Brevtype.VEDTAKSBREV
+        )
+    )
+
+    private fun opprettAvsenderOgAttestant() = Pair(
+        Avsender(kontor = "Nav Porsgrunn", "Etterstad 1", "0556", Telefonnummer("55553333"), "Sak Saksbehandler"),
+        Attestant("Per Attestant", PORSGRUNN)
+    )
+
     private companion object {
         private const val SAK_ID = 123L
         private val BEHANDLING_ID = UUID.randomUUID()
-        private val STOR_SNERK = Folkeregisteridentifikator.of("11057523044")
+        private val STOR_SNERK = Folkeregisteridentifikator.of("11057523044").value
         private const val PORSGRUNN = "0805"
         private val PDF_BYTES = "Hello world!".toByteArray()
         private val SAKSBEHANDLER = Bruker.of("token", "saksbehandler", null, null, null)

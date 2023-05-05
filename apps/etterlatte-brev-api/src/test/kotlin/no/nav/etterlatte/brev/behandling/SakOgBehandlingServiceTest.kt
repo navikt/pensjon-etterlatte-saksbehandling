@@ -32,6 +32,7 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import no.nav.etterlatte.token.Bruker
+import no.nav.pensjon.brev.api.model.Kroner
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -106,8 +107,8 @@ internal class SakOgBehandlingServiceTest {
             service.hentBehandling(SAK_ID, BEHANDLING_ID, BRUKER)
         }
 
-        assertEquals(null, behandling.utbetalingsinfo?.antallBarn)
-        assertEquals(3063, behandling.utbetalingsinfo?.beloep)
+        assertEquals(1, behandling.utbetalingsinfo?.antallBarn)
+        assertEquals(3063, behandling.utbetalingsinfo?.beloep?.value)
         assertEquals(YearMonth.now().atDay(1), behandling.utbetalingsinfo?.virkningsdato)
         assertEquals(false, behandling.utbetalingsinfo?.soeskenjustering)
         assertEquals(
@@ -214,6 +215,7 @@ internal class SakOgBehandlingServiceTest {
         private val BRUKER = Bruker.of("321", SAKSBEHANDLER_IDENT, null, null, null)
         private const val ATTESTANT_IDENT = "Z54321"
         private const val SAK_ID = 123L
-        private val BREV_BEREGNINGSPERIODE = BrevBeregningsperiode(YearMonth.now().atDay(1), null, 10000, 1, 3063, 10)
+        private val BREV_BEREGNINGSPERIODE =
+            BrevBeregningsperiode(YearMonth.now().atDay(1), null, Kroner(10000), 1, Kroner(3063), 10)
     }
 }

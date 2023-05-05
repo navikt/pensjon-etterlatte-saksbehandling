@@ -10,6 +10,7 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.token.Bruker
+import no.nav.pensjon.brev.api.model.Kroner
 import java.time.YearMonth
 import java.util.*
 
@@ -90,19 +91,19 @@ class SakOgBehandlingService(
             Beregningsperiode(
                 datoFOM = it.datoFOM.atDay(1),
                 datoTOM = it.datoTOM?.atEndOfMonth(),
-                grunnbeloep = it.grunnbelop,
+                grunnbeloep = Kroner(it.grunnbelop),
                 antallBarn = (it.soeskenFlokk?.size ?: 0) + 1, // Legger til 1 pga at beregning fjerner soeker
-                utbetaltBeloep = it.utbetaltBeloep,
+                utbetaltBeloep = Kroner(it.utbetaltBeloep),
                 trygdetid = it.trygdetid
             )
         }
 
         val soeskenjustering = beregning.beregningsperioder.any { !it.soeskenFlokk.isNullOrEmpty() }
-        val antallBarn = if (soeskenjustering) beregningsperioder.last().antallBarn else null
+        val antallBarn = if (soeskenjustering) beregningsperioder.last().antallBarn else 1
 
         return Utbetalingsinfo(
             antallBarn,
-            beregningsperioder.hentUtbetaltBeloep(),
+            Kroner(beregningsperioder.hentUtbetaltBeloep()),
             virkningstidspunkt.atDay(1),
             soeskenjustering,
             beregningsperioder

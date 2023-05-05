@@ -18,6 +18,7 @@ import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.migrate
+import no.nav.pensjon.brev.api.model.Foedselsnummer
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -203,6 +204,6 @@ internal class BrevRepositoryIntegrationTest {
 
     companion object {
         private val PDF_BYTES = "Hello world!".toByteArray()
-        private val STOR_SNERK = Folkeregisteridentifikator.of("11057523044")
+        private val STOR_SNERK = Foedselsnummer("11057523044")
     }
 }

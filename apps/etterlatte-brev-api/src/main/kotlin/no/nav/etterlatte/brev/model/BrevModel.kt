@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonValue
 import no.nav.etterlatte.brev.adresse.RegoppslagResponseDTO
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.pensjon.brev.api.model.Foedselsnummer
 import java.util.*
 
 typealias BrevID = Long
@@ -32,7 +33,7 @@ data class Adresse(
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class Mottaker(
     val navn: String,
-    val foedselsnummer: Folkeregisteridentifikator? = null,
+    val foedselsnummer: Foedselsnummer? = null,
     val orgnummer: String? = null,
     val adresse: Adresse
 ) {
@@ -45,7 +46,7 @@ data class Mottaker(
     companion object {
         fun fra(fnr: Folkeregisteridentifikator, regoppslag: RegoppslagResponseDTO) = Mottaker(
             navn = regoppslag.navn,
-            foedselsnummer = fnr,
+            foedselsnummer = Foedselsnummer(fnr.value),
             adresse = Adresse(
                 adresseType = regoppslag.adresse.type.name,
                 adresselinje1 = regoppslag.adresse.adresselinje1,

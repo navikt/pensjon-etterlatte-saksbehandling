@@ -154,7 +154,7 @@ class VedtaksbrevService(
                     mellomnavn = "BREv brevesern bereres asdasdasd", // TODO: Fiks navn
                     etternavn = "asdasdasdadasdasd",
                     foedselsnummer = Foedselsnummer(mottaker.foedselsnummer!!.value),
-                    foedselsdato = LocalDate.of(1998, 1, 1)
+                    foedselsdato = LocalDate.now() // Blir ikke brukt, men kan ikke være null
                 ),
                 signerendeSaksbehandlere = SignerendeSaksbehandlere(
                     saksbehandler = avsender.saksbehandler,

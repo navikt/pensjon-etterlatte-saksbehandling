@@ -53,7 +53,7 @@ internal fun Route.revurderingRoutes(
         }
     }
 
-    route("/api/stoettederevurdering") {
+    route("/api/stoettederevurderinger") {
         get {
             val stoettedeRevurderinger = RevurderingAarsak.values()
                 .filter { it.kanBrukesIMiljo() }

@@ -18,10 +18,6 @@ import no.nav.pensjon.brev.api.model.Kroner
 import java.time.LocalDate
 import java.util.*
 
-interface IntValue {
-    val value: Int
-}
-
 data class Behandling(
     val sakId: Long,
     val sakType: SakType,

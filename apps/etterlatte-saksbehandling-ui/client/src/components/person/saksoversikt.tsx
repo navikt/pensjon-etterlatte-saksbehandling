@@ -167,7 +167,7 @@ export const Saksoversikt = ({ fnr }: { fnr: string | undefined }) => {
                   {sakId !== undefined ? (
                     <div className="behandlinger">
                       <h2>Behandlinger</h2>
-                      {behandlingliste !== undefined && revurderinger && (
+                      {behandlingliste !== undefined && (
                         <Behandlingsliste revurderinger={revurderinger} behandlinger={behandlingliste} sakId={sakId} />
                       )}
                     </div>

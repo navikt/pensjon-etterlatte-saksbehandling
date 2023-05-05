@@ -54,7 +54,7 @@ export const Behandlingsliste = ({
 }: {
   behandlinger: IBehandlingsammendrag[]
   sakId: number
-  revurderinger: Array<string>
+  revurderinger: Array<string> | undefined
 }) => {
   return (
     <>
@@ -95,7 +95,7 @@ export const Behandlingsliste = ({
           ))}
         </Table.Body>
       </Table>
-      <OpprettNyBehandling revurderinger={revurderinger} sakId={sakId} />
+      {revurderinger && <OpprettNyBehandling revurderinger={revurderinger} sakId={sakId} />}
     </>
   )
 }

@@ -45,7 +45,9 @@ class TrygdetidService(
                     Opplysningsgrunnlag.ny(TrygdetidOpplysningType.DOEDSDATO, it?.kilde, it?.verdi)
                 }
             )
-            trygdetidRepository.opprettTrygdetid(behandling, opplysninger)
+            trygdetidRepository.transaction { tx ->
+                trygdetidRepository.opprettTrygdetid(behandling, opplysninger, tx)
+            }
         }
 
     private fun kildeFoedselsnummer(): RegelKilde = RegelKilde(

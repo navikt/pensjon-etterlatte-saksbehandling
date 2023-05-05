@@ -11,20 +11,16 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsnummer
 import no.nav.etterlatte.libs.common.grunnlag.hentNavn
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Beregningsgrunnlag
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Navn
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeskenMedIBeregning
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.toJson
-import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.sporingslogg.Decision
 import no.nav.etterlatte.libs.sporingslogg.HttpMethod
 import no.nav.etterlatte.libs.sporingslogg.Sporingslogg
 import no.nav.etterlatte.libs.sporingslogg.Sporingsrequest
-import no.nav.etterlatte.token.Bruker
 import org.slf4j.LoggerFactory
 import java.util.*
 
@@ -37,18 +33,13 @@ interface GrunnlagService {
         fnr: Folkeregisteridentifikator,
         nyeOpplysninger: List<Grunnlagsopplysning<JsonNode>>
     )
+
     fun hentOpplysningsgrunnlag(sak: Long): Grunnlag?
     fun hentOpplysningsgrunnlagMedVersjon(sak: Long, versjon: Long): Grunnlag?
     fun hentOpplysningsgrunnlag(
         sak: Long,
         persongalleri: Persongalleri
     ): Grunnlag // TODO ai: Kan fjernes når kafka flyten fjernes
-
-    suspend fun lagreSoeskenMedIBeregning(
-        behandlingId: UUID,
-        soeskenMedIBeregning: List<SoeskenMedIBeregning>,
-        bruker: Bruker
-    )
 
     fun hentSakerOgRoller(fnr: Folkeregisteridentifikator): PersonMedSakerOgRoller
     fun hentAlleSakerForFnr(fnr: Folkeregisteridentifikator): Set<Long>
@@ -96,25 +87,6 @@ class RealGrunnlagService(
             }
 
         return OpplysningsgrunnlagMapper(grunnlag, sak, personGalleri).hentGrunnlag()
-    }
-
-    override suspend fun lagreSoeskenMedIBeregning(
-        behandlingId: UUID,
-        soeskenMedIBeregning: List<SoeskenMedIBeregning>,
-        bruker: Bruker
-    ) {
-        val opplysning: List<Grunnlagsopplysning<JsonNode>> = listOf(
-            lagOpplysning(
-                opplysningsType = Opplysningstype.SOESKEN_I_BEREGNINGEN,
-                kilde = Grunnlagsopplysning.Saksbehandler.create(bruker.ident()),
-                opplysning = Beregningsgrunnlag(soeskenMedIBeregning).toJsonNode()
-            )
-        )
-
-        val behandling = behandlingKlient.hentBehandling(behandlingId, bruker)
-
-        val sakId = behandling.sak
-        lagreNyeSaksopplysninger(sakId, opplysning)
     }
 
     override fun hentSakerOgRoller(fnr: Folkeregisteridentifikator): PersonMedSakerOgRoller {

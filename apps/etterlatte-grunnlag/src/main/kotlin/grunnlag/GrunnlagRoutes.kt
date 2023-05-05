@@ -4,7 +4,6 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.call
 import io.ktor.server.auth.principal
-import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
@@ -12,15 +11,11 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import io.ktor.util.pipeline.PipelineContext
 import no.nav.etterlatte.klienter.BehandlingKlient
-import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeskenMedIBeregning
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
-import no.nav.etterlatte.libs.common.withBehandlingId
 import no.nav.etterlatte.libs.common.withFoedselsnummer
 import no.nav.etterlatte.libs.common.withSakId
-import no.nav.etterlatte.libs.ktor.bruker
 import no.nav.security.token.support.v2.TokenValidationContextPrincipal
 
 fun Route.grunnlagRoute(grunnlagService: GrunnlagService, behandlingKlient: BehandlingKlient) {
@@ -104,23 +99,8 @@ fun Route.grunnlagRoute(grunnlagService: GrunnlagService, behandlingKlient: Beha
                 }
             }
         }
-        post("/beregningsgrunnlag/{$BEHANDLINGSID_CALL_PARAMETER}") {
-            withBehandlingId(behandlingKlient) { behandlingId ->
-                val body = call.receive<SoeskenMedIBeregningDTO>()
-                grunnlagService.lagreSoeskenMedIBeregning(
-                    behandlingId,
-                    body.soeskenMedIBeregning,
-                    bruker
-                )
-                call.respond(HttpStatusCode.OK)
-            }
-        }
     }
 }
-
-private data class SoeskenMedIBeregningDTO(
-    val soeskenMedIBeregning: List<SoeskenMedIBeregning>
-)
 
 private data class PersonerISakDto(
     val personer: Map<Folkeregisteridentifikator, PersonMedNavn>

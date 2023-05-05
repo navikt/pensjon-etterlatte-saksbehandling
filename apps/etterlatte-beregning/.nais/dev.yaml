@@ -21,6 +21,7 @@ spec:
     path: /metrics
   secureLogs:
     enabled: true
+  leaderElection: true
   replicas:
     cpuThresholdPercentage: 90
     max: 2
@@ -49,6 +50,8 @@ spec:
           - name: max_connections
             value: "100"
   env:
+    - name: GRUNNLAG_AZURE_SCOPE
+      value: api://dev-gcp.etterlatte.etterlatte-grunnlag/.default
     - name: ETTERLATTE_VILKAARSVURDERING_CLIENT_ID
       value: dev-gcp.etterlatte.etterlatte-vilkaarsvurdering
     - name: ETTERLATTE_VILKAARSVURDERING_URL
@@ -72,6 +75,8 @@ spec:
         - application: etterlatte-vilkaarsvurdering
         - application: etterlatte-behandling
         - application: etterlatte-trygdetid
+      external:
+        - host: unleash.nais.io
     inbound:
       rules:
         - application: etterlatte-saksbehandling-ui

@@ -4,6 +4,7 @@ enum class BehandlingStatus {
     OPPRETTET,
     VILKAARSVURDERT,
     BEREGNET,
+    AVKORTET,
     FATTET_VEDTAK,
     ATTESTERT,
     RETURNERT,
@@ -21,6 +22,7 @@ enum class BehandlingStatus {
             OPPRETTET,
             VILKAARSVURDERT,
             BEREGNET,
+            AVKORTET,
             RETURNERT,
             FATTET_VEDTAK
         )

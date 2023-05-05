@@ -14,6 +14,7 @@ interface BehandlingStatusService {
     fun settOpprettet(behandlingId: UUID, dryRun: Boolean = true)
     fun settVilkaarsvurdert(behandlingId: UUID, dryRun: Boolean = true)
     fun settBeregnet(behandlingId: UUID, dryRun: Boolean = true)
+    fun settAvkortet(behandlingId: UUID, dryRun: Boolean = true)
     fun sjekkOmKanFatteVedtak(behandlingId: UUID)
     fun settFattetVedtak(behandlingId: UUID, vedtakHendelse: VedtakHendelse)
     fun sjekkOmKanAttestere(behandlingId: UUID)
@@ -50,6 +51,10 @@ class BehandlingStatusServiceImpl constructor(
 
     override fun settBeregnet(behandlingId: UUID, dryRun: Boolean) {
         hentBehandling(behandlingId).tilBeregnet().lagreEndring(dryRun)
+    }
+
+    override fun settAvkortet(behandlingId: UUID, dryRun: Boolean) {
+        hentBehandling(behandlingId).tilAvkortet().lagreEndring(dryRun)
     }
 
     override fun sjekkOmKanFatteVedtak(behandlingId: UUID) {

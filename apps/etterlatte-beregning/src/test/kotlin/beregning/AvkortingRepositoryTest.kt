@@ -4,6 +4,7 @@ import io.kotest.matchers.shouldBe
 import no.nav.etterlatte.beregning.AvkortingGrunnlag
 import no.nav.etterlatte.beregning.AvkortingRepository
 import no.nav.etterlatte.beregning.BeregnetAvkortingGrunnlag
+import no.nav.etterlatte.beregning.regler.avkortetYtelse
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -44,9 +45,8 @@ internal class AvkortingRepositoryTest {
         postgreSQLContainer.stop()
     }
 
-    @Test
-    fun `Skal lagre eller oppdatere avkortinggrunnlag`() {
-        val behandlingId = UUID.randomUUID()
+    companion object {
+        val behandlingId: UUID = UUID.randomUUID()
         val avkortinggrunnlag = AvkortingGrunnlag(
             periode = Periode(fom = YearMonth.now(), tom = null),
             aarsinntekt = 500000,
@@ -62,6 +62,10 @@ internal class AvkortingRepositoryTest {
                 )
             )
         )
+    }
+
+    @Test
+    fun `Skal lagre eller oppdatere avkortinggrunnlag`() {
         val endretAvkortningGrunnlag = avkortinggrunnlag.copy(spesifikasjon = "Endret grunnlag")
 
         avkortingRepository.lagreEllerOppdaterAvkortingGrunnlag(behandlingId, avkortinggrunnlag)
@@ -71,6 +75,26 @@ internal class AvkortingRepositoryTest {
             this.behandlingId shouldBe behandlingId
             avkortingGrunnlag.size shouldBe 1
             avkortingGrunnlag[0] shouldBe endretAvkortningGrunnlag
+        }
+    }
+
+    @Test
+    fun `Skal lagre eller oppdatere avkortet ytelse`() {
+        val avkortetYtelse = avkortetYtelse()
+        val endretAvkortetYtelse = avkortetYtelse.copy(ytelseEtterAvkorting = 200)
+
+        avkortingRepository.lagreEllerOppdaterAvkortingGrunnlag(behandlingId, avkortinggrunnlag)
+
+        avkortingRepository.lagreEllerOppdaterAvkortetYtelse(behandlingId, listOf(avkortetYtelse))
+        val avkortning = avkortingRepository.lagreEllerOppdaterAvkortetYtelse(
+            behandlingId,
+            listOf(endretAvkortetYtelse)
+        )
+
+        with(avkortning) {
+            this.behandlingId shouldBe behandlingId
+            this.avkortetYtelse.size shouldBe 1
+            this.avkortetYtelse[0] shouldBe endretAvkortetYtelse
         }
     }
 }

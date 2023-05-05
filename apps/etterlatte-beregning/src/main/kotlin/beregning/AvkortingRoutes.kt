@@ -22,10 +22,10 @@ import java.time.YearMonth
 import java.util.*
 
 fun Route.avkorting(avkortingService: AvkortingService, behandlingKlient: BehandlingKlient) {
-    route("/api/beregning/avkorting") {
+    route("/api/beregning/avkorting/{$BEHANDLINGSID_CALL_PARAMETER}") {
         val logger = application.log
 
-        get("/{$BEHANDLINGSID_CALL_PARAMETER}") {
+        get {
             withBehandlingId(behandlingKlient) {
                 logger.info("Henter avkorting med behandlingId=$it")
                 val avkorting = avkortingService.hentAvkorting(it)
@@ -36,11 +36,11 @@ fun Route.avkorting(avkortingService: AvkortingService, behandlingKlient: Behand
             }
         }
 
-        post("/{$BEHANDLINGSID_CALL_PARAMETER}/grunnlag") {
+        post {
             withBehandlingId(behandlingKlient) {
-                logger.info("Lagre avkortinggrunnlag for behandlingId=$it")
+                logger.info("Lagre avkorting for behandlingId=$it")
                 val avkortingGrunnlag = call.receive<AvkortingGrunnlagDto>()
-                val avkorting = avkortingService.lagreAvkortingGrunnlag(it, bruker, avkortingGrunnlag.fromDto(bruker))
+                val avkorting = avkortingService.lagreAvkorting(it, bruker, avkortingGrunnlag.fromDto(bruker))
                 call.respond(avkorting.toDto())
             }
         }

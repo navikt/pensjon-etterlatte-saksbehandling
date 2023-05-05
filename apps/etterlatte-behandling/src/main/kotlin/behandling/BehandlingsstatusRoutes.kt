@@ -52,6 +52,18 @@ internal fun Route.behandlingsstatusRoutes(
             }
         }
 
+        get("/avkort") {
+            haandterStatusEndring(call) {
+                behandlingsstatusService.settAvkortet(behandlingsId)
+            }
+        }
+
+        post("/avkort") {
+            haandterStatusEndring(call) {
+                behandlingsstatusService.settAvkortet(behandlingsId, false)
+            }
+        }
+
         get("/fatteVedtak") {
             haandterStatusEndring(call) {
                 behandlingsstatusService.sjekkOmKanFatteVedtak(behandlingsId)

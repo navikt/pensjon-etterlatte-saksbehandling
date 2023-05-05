@@ -1,14 +1,18 @@
 package no.nav.etterlatte.beregning.regler
 
+import no.nav.etterlatte.beregning.AvkortetYtelse
 import no.nav.etterlatte.beregning.Avkorting
 import no.nav.etterlatte.beregning.AvkortingGrunnlag
 import no.nav.etterlatte.beregning.BeregnetAvkortingGrunnlag
+import no.nav.etterlatte.beregning.Beregning
 import no.nav.etterlatte.beregning.regler.avkorting.AvkortetYtelseGrunnlag
 import no.nav.etterlatte.beregning.regler.avkorting.InntektAvkortingGrunnlag
 import no.nav.etterlatte.beregning.regler.barnepensjon.AvdoedForelder
 import no.nav.etterlatte.beregning.regler.barnepensjon.BarnepensjonGrunnlag
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
+import no.nav.etterlatte.libs.common.beregning.Beregningstype
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.grunnlag.Metadata
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -90,6 +94,24 @@ fun avkortetYtelseGrunnlag(bruttoYtelse: Int, avkorting: Int) = AvkortetYtelseGr
     fom = YearMonth.now(),
     bruttoYtelse = FaktumNode(verdi = bruttoYtelse, "", ""),
     avkorting = FaktumNode(verdi = avkorting, "", "")
+)
+
+fun avkortetYtelse() = AvkortetYtelse(
+    periode = Periode(fom = YearMonth.now(), tom = null),
+    ytelseEtterAvkorting = 100,
+    tidspunkt = Tidspunkt.now(),
+    regelResultat = "".toJsonNode()
+)
+
+fun beregning(
+    beregninger: List<Beregningsperiode> = listOf(beregningsperiode())
+) = Beregning(
+    beregningId = UUID.randomUUID(),
+    behandlingId = UUID.randomUUID(),
+    type = Beregningstype.OMS,
+    beregningsperioder = beregninger,
+    beregnetDato = Tidspunkt.now(),
+    grunnlagMetadata = Metadata(sakId = 123L, versjon = 1L)
 )
 
 fun beregningsperiode(

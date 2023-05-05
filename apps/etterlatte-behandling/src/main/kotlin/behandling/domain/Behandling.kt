@@ -5,6 +5,7 @@ import no.nav.etterlatte.behandling.OppgaveStatus
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus.ATTESTERT
+import no.nav.etterlatte.libs.common.behandling.BehandlingStatus.AVKORTET
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus.BEREGNET
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus.FATTET_VEDTAK
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus.OPPRETTET
@@ -90,6 +91,10 @@ sealed class Behandling {
 
     open fun tilBeregnet(): Behandling {
         throw BehandlingStoetterIkkeStatusEndringException(BEREGNET)
+    }
+
+    open fun tilAvkortet(): Behandling {
+        throw BehandlingStoetterIkkeStatusEndringException(AVKORTET)
     }
 
     open fun tilFattetVedtak(): Behandling {

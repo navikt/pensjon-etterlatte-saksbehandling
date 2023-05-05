@@ -32,7 +32,7 @@ internal fun Route.revurderingRoutes(
                 call.respond(HttpStatusCode.BadRequest, "Feil under deserialiseringen av objektet")
                 return@post
             }
-            if (!body.aarsak.kanBrukes) {
+            if (!body.aarsak.kanBrukesIMiljo()) {
                 call.respond(HttpStatusCode.BadRequest, "Feil revurderingsårsak, foreløpig ikke støttet")
                 return@post
             }

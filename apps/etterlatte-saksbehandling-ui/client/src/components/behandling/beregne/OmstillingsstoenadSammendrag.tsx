@@ -25,7 +25,7 @@ export const OmstillingsstoenadSammendrag = ({ beregning }: Props) => {
             <Table.HeaderCell>Ytelse</Table.HeaderCell>
             <Table.HeaderCell>Trygdetid</Table.HeaderCell>
             <Table.HeaderCell>Grunnbeløp</Table.HeaderCell>
-            <Table.HeaderCell>Månedelig utbetaling før skatt og avkorting</Table.HeaderCell>
+            <Table.HeaderCell>Bruttoytelse</Table.HeaderCell>
           </Table.Row>
         </Table.Header>
         <Table.Body>
@@ -56,6 +56,7 @@ export const TableWrapper = styled.div`
   display: flex;
   flex-wrap: wrap;
   max-width: 1000px;
+  margin-bottom: 5em;
   .table {
     max-width: 1000px;
 

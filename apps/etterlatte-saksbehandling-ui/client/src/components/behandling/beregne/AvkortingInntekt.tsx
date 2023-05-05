@@ -1,6 +1,5 @@
-import { BodyShort, Button, Label, Select, Textarea, TextField } from '@navikt/ds-react'
+import { BodyShort, Button, Heading, Label, ReadMore, Select, TextField } from '@navikt/ds-react'
 import styled from 'styled-components'
-import { FormKnapper, FormWrapper } from '~components/behandling/trygdetid/styled'
 import DatePicker from 'react-datepicker'
 import { Calender } from '@navikt/ds-icons'
 import React, { FormEvent, useRef, useState } from 'react'
@@ -41,7 +40,10 @@ export const AvkortingInntekt = (props: {
   }
 
   return (
-    <div>
+    <AvkortingInntektWrapper>
+      <Heading spacing size="small" level="2">
+        Inntektsavkorting
+      </Heading>
       <HjemmelLenke
         tittel={'Folketrygdloven § 17-9 (mangler lenke)'}
         lenke={'https://lovdata.no/lov/'} // TODO lenke finnes ikke enda
@@ -127,9 +129,12 @@ export const AvkortingInntekt = (props: {
               </Kilde>
             )}
           </FormWrapper>
-          <FormWrapper>
-            <Textarea
-              label={'Spesifikasjon av inntekt'}
+          <TextAreaWrapper>
+            <SpesifikasjonLabel>
+              <Label>Spesifikasjon av inntekt</Label>
+              <ReadMore header={'Hva regnes som inntekt?'}>Tekst som beskriver hva som er gyldig inntekt...</ReadMore>
+            </SpesifikasjonLabel>
+            <textarea
               value={inntektGrunnlag.spesifikasjon}
               onChange={(e) =>
                 setInntektGrunnlag({
@@ -138,7 +143,7 @@ export const AvkortingInntekt = (props: {
                 })
               }
             />
-          </FormWrapper>
+          </TextAreaWrapper>
           <FormKnapper>
             <Button size="small" loading={isPending(inntektGrunnlagStatus)} type="submit">
               Lagre
@@ -146,12 +151,17 @@ export const AvkortingInntekt = (props: {
           </FormKnapper>
         </Rows>
       </InntektAvkortingForm>
-    </div>
+    </AvkortingInntektWrapper>
   )
 }
 
+const AvkortingInntektWrapper = styled.div`
+  width: 50em;
+  margin-bottom: 3em;
+`
+
 const Kilde = styled.div`
-  width: 250px;
+  width: 2em;
   display: grid;
   gap: 0.5em;
 `
@@ -160,6 +170,19 @@ const InntektAvkortingForm = styled.form`
   display: flex;
   margin: 1em 0 1em 0;
 `
+
+const FormWrapper = styled.div`
+  display: flex;
+  gap: 1rem;
+  margin-top: 2em;
+`
+
+const FormKnapper = styled.div`
+  margin-top: 1rem;
+  margin-right: 1em;
+  gap: 1rem;
+`
+
 const Datovelger = styled.div`
   display: flex;
   align-items: flex-end;
@@ -174,6 +197,24 @@ const Datovelger = styled.div`
   }
 `
 
+const TextAreaWrapper = styled.div`
+  display: grid;
+  align-items: flex-end;
+  margin-top: 2.5em;
+
+  textArea {
+    margin-top: 1em;
+    border-width: 1px;
+    border-radius: 4px 4px 0 4px;
+    width: 46em;
+    height: 98px;
+    text-indent: 4px;
+    resize: none;
+  }
+`
+
+const SpesifikasjonLabel = styled.div``
+
 const KalenderIkon = styled.div`
   padding: 4px 10px;
   cursor: pointer;
@@ -187,6 +228,7 @@ const KalenderIkon = styled.div`
 const DatoSection = styled.section`
   display: grid;
   gap: 0.5em;
+  margin-left: 4.5em;
 `
 const Rows = styled.div`
   flex-direction: column;

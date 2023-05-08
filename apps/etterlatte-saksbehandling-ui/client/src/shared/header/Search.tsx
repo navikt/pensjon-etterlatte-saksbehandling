@@ -2,9 +2,10 @@ import styled from 'styled-components'
 import { BodyShort, Loader, Search as SearchField } from '@navikt/ds-react'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { getPerson, INVALID_FNR } from '../api/person'
 import { ErrorColored, InformationColored } from '@navikt/ds-icons'
 import { isFailure, isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
+import { getPerson } from '~shared/api/grunnlag'
+import { INVALID_FNR } from '~utils/fnr'
 
 export const Search = () => {
   const navigate = useNavigate()

@@ -1,17 +1,6 @@
 import { VilkaarsvurderingResultat } from '~shared/api/vilkaarsvurdering'
 import { IBehandlingStatus, IBehandlingsType, Virkningstidspunkt } from '~shared/types/IDetaljertBehandling'
 
-export interface Dokument {
-  dato: string
-  tittel: string
-  link: string
-  status: string
-}
-
-export interface Dokumenter {
-  brev: Dokument[]
-}
-
 export interface IPersonResult {
   fornavn: string
   mellomnavn?: string

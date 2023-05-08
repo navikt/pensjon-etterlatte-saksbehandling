@@ -2,14 +2,6 @@ import { Grunnlagsopplysning } from '~shared/types/grunnlag'
 import { IAdresse } from '~shared/types/IAdresse'
 import { KildePdl } from './kilde'
 
-export interface IPerson {
-  type: PersonType
-  fornavn: string
-  etternavn: string
-  foedselsnummer: string
-  foedselsdato: string
-}
-
 export interface IFamilieforhold {
   avdoede: Grunnlagsopplysning<IPdlPerson, KildePdl>
   gjenlevende: Grunnlagsopplysning<IPdlPerson, KildePdl>

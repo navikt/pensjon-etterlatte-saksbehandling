@@ -23,7 +23,7 @@ internal class BehandlingTest {
     fun `MapSoeker mapper til Soeker`() {
         val grunnlag = opprettGrunnlag()
 
-        Assertions.assertEquals(Soeker("Søker mellom Barn", Foedselsnummer("16021254243")), grunnlag.mapSoeker())
+        Assertions.assertEquals(Soeker("Søker", "mellom", "Barn", Foedselsnummer("16021254243")), grunnlag.mapSoeker())
     }
 
     @Test

@@ -76,7 +76,9 @@ data class Persongalleri(
 
 fun Grunnlag.mapSoeker(): Soeker = with(this.soeker) {
     Soeker(
-        navn = hentNavn()!!.verdi.fulltNavn(),
+        fornavn = hentNavn()!!.verdi.fornavn,
+        mellomnavn = hentNavn()!!.verdi.mellomnavn,
+        etternavn = hentNavn()!!.verdi.etternavn,
         fnr = Foedselsnummer(hentFoedselsnummer()!!.verdi.value)
     )
 }

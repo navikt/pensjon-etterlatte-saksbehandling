@@ -4,16 +4,14 @@ import no.nav.etterlatte.brev.behandling.Avdoed
 import no.nav.etterlatte.brev.behandling.Behandling
 import no.nav.etterlatte.brev.behandling.Soeker
 
-data class AvslagBrevRequest(
+data class AvslagBrevData(
     val saksnummer: String,
-    val barn: Soeker,
     val avdoed: Avdoed,
     val aktuelleParagrafer: List<String>,
-    override val spraak: Spraak,
     override val avsender: Avsender,
     override val mottaker: BrevMottaker,
     override val attestant: Attestant?
-) : BrevRequest() {
+) : BrevData() {
     override fun templateName(): String = "avslag"
 
     companion object {
@@ -22,13 +20,11 @@ data class AvslagBrevRequest(
             avsender: Avsender,
             mottaker: BrevMottaker,
             attestant: Attestant?
-        ): AvslagBrevRequest =
-            AvslagBrevRequest(
+        ): AvslagBrevData =
+            AvslagBrevData(
                 saksnummer = behandling.sakId.toString(),
-                barn = behandling.persongalleri.soeker,
                 avdoed = behandling.persongalleri.avdoed,
                 aktuelleParagrafer = emptyList(), // todo: Gå igjennom oppfylte vilkår?
-                spraak = behandling.spraak,
                 avsender = avsender,
                 mottaker = mottaker,
                 attestant = attestant

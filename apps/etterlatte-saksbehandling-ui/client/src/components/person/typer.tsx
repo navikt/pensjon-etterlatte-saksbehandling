@@ -14,6 +14,7 @@ export interface Dokumenter {
 
 export interface IPersonResult {
   fornavn: string
+  mellomnavn?: string
   etternavn: string
   foedselsnummer: string
 }

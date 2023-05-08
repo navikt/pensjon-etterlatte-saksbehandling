@@ -179,6 +179,7 @@ class RealGrunnlagService(
             NavnOpplysningDTO(
                 sakId = it.sakId,
                 fornavn = navn.fornavn,
+                mellomnavn = navn.mellomnavn,
                 etternavn = navn.etternavn,
                 foedselsnummer = fnr.value
             )
@@ -247,6 +248,7 @@ class RealGrunnlagService(
 data class NavnOpplysningDTO(
     val sakId: Long,
     val fornavn: String,
+    val mellomnavn: String?,
     val etternavn: String,
     val foedselsnummer: String
 )

@@ -76,8 +76,13 @@ export const formaterFoedselsnummerMedNavn = (
 ): string => {
   const person = fnrTilNavn[foedselsnummer]
   if (person) {
-    return `${person.fornavn} ${person.etternavn} (${foedselsnummer})`
+    return `${genererNavn(person)} (${foedselsnummer})`
   }
   return `${foedselsnummer}`
 }
+
+const genererNavn = (personInfo: PersonMedNavn) => {
+  return [personInfo.fornavn, personInfo.mellomnavn, personInfo.etternavn].join(' ')
+}
+
 export const FnrTilNavnMapContext = React.createContext<Record<string, PersonMedNavn>>({})

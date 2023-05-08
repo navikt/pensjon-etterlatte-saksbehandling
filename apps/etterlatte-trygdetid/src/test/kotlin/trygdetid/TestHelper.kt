@@ -6,6 +6,7 @@ import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.token.Saksbehandler
 import no.nav.etterlatte.trygdetid.BeregnetTrygdetid
 import no.nav.etterlatte.trygdetid.BeregnetTrygdetidGrunnlag
+import no.nav.etterlatte.trygdetid.Opplysningsgrunnlag
 import no.nav.etterlatte.trygdetid.Trygdetid
 import no.nav.etterlatte.trygdetid.TrygdetidGrunnlag
 import no.nav.etterlatte.trygdetid.TrygdetidPeriode
@@ -19,14 +20,17 @@ val saksbehandler = Saksbehandler("token", "ident", null)
 
 fun trygdetid(
     behandlingId: UUID = randomUUID(),
+    sakId: Long = 1,
     beregnetTrygdetid: BeregnetTrygdetid? = null,
-    trygdetidGrunnlag: List<TrygdetidGrunnlag> = emptyList()
+    trygdetidGrunnlag: List<TrygdetidGrunnlag> = emptyList(),
+    opplysninger: List<Opplysningsgrunnlag> = emptyList()
 ) = Trygdetid(
     id = randomUUID(),
+    sakId = sakId,
     behandlingId = behandlingId,
     trygdetidGrunnlag = trygdetidGrunnlag,
-    beregnetTrygdetid = beregnetTrygdetid,
-    opplysninger = emptyList()
+    opplysninger = opplysninger,
+    beregnetTrygdetid = beregnetTrygdetid
 )
 
 fun trygdetidGrunnlag(

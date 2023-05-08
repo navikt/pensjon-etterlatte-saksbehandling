@@ -7,14 +7,29 @@ import no.nav.etterlatte.libs.common.toJsonNode
 import java.time.LocalDate
 import java.time.Period
 import java.util.*
+import java.util.UUID.randomUUID
 
 data class Trygdetid(
-    val id: UUID,
+    val id: UUID = randomUUID(),
+    val sakId: Long,
     val behandlingId: UUID,
-    val trygdetidGrunnlag: List<TrygdetidGrunnlag>,
-    val beregnetTrygdetid: BeregnetTrygdetid?,
-    val opplysninger: List<Opplysningsgrunnlag>
-)
+    val trygdetidGrunnlag: List<TrygdetidGrunnlag> = emptyList(),
+    val opplysninger: List<Opplysningsgrunnlag> = emptyList(),
+    val beregnetTrygdetid: BeregnetTrygdetid? = null
+) {
+    fun leggTilEllerOppdaterTrygdetidGrunnlag(trygdetidGrunnlag: TrygdetidGrunnlag): Trygdetid {
+        return this.copy(
+            trygdetidGrunnlag = this.trygdetidGrunnlag.toMutableList().apply {
+                removeIf { it.id == trygdetidGrunnlag.id }
+                add(trygdetidGrunnlag)
+            }
+        )
+    }
+
+    fun oppdaterBeregnetTrygdetid(beregnetTrygdetid: BeregnetTrygdetid): Trygdetid {
+        return this.copy(beregnetTrygdetid = beregnetTrygdetid)
+    }
+}
 
 data class BeregnetTrygdetid(
     val verdi: Int,
@@ -23,7 +38,7 @@ data class BeregnetTrygdetid(
 )
 
 data class Opplysningsgrunnlag(
-    val id: UUID?,
+    val id: UUID,
     val type: TrygdetidOpplysningType,
     val opplysning: JsonNode,
     val kilde: Grunnlagsopplysning.Kilde
@@ -35,7 +50,7 @@ data class Opplysningsgrunnlag(
             verdi: LocalDate?
         ): Opplysningsgrunnlag =
             Opplysningsgrunnlag(
-                id = null,
+                id = randomUUID(),
                 type = type,
                 opplysning = verdi?.toJsonNode() ?: throw Exception("Mangler opplysning"),
                 kilde = kilde ?: throw Exception("Mangler kilde")
@@ -57,7 +72,11 @@ data class TrygdetidGrunnlag(
     val periode: TrygdetidPeriode,
     val kilde: Grunnlagsopplysning.Saksbehandler,
     val beregnetTrygdetid: BeregnetTrygdetidGrunnlag? = null
-)
+) {
+    fun oppdaterBeregnetTrygdetid(beregnetTrygdetid: BeregnetTrygdetidGrunnlag): TrygdetidGrunnlag {
+        return this.copy(beregnetTrygdetid = beregnetTrygdetid)
+    }
+}
 
 data class BeregnetTrygdetidGrunnlag(val verdi: Period, val tidspunkt: Tidspunkt, val regelResultat: JsonNode)
 

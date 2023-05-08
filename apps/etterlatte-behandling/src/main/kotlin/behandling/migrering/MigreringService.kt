@@ -32,7 +32,7 @@ class MigreringService(
             KommerBarnetTilgode(
                 JaNei.JA,
                 "Automatisk importert fra Pesys",
-                Grunnlagsopplysning.Saksbehandler.create(pesys)
+                Grunnlagsopplysning.Pesys.create()
             )
         )
         foerstegangsBehandlingService.lagreGyldighetsproeving(

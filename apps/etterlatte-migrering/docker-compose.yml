@@ -1,0 +1,10 @@
+version: "3"
+services:
+ postgres:
+    restart: always
+    container_name: migrering-postgres
+    image: postgres
+    ports:
+      - '5432:5432'
+    environment:
+      - POSTGRES_HOST_AUTH_METHOD=trust

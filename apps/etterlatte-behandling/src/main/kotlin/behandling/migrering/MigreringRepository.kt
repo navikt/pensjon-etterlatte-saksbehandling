@@ -1,7 +1,7 @@
 package no.nav.etterlatte.behandling.migrering
 
 import no.nav.etterlatte.libs.database.KotliqueryRepository
-import rapidsandrivers.migrering.PesysId
+import no.nav.etterlatte.rapidsandrivers.migrering.PesysId
 
 class MigreringRepository(private val kotliqueryRepository: KotliqueryRepository) {
     fun lagreKoplingTilPesyssaka(pesysSakId: PesysId, sakId: Long) = kotliqueryRepository.opprett(

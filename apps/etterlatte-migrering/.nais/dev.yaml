@@ -1,0 +1,38 @@
+apiVersion: "nais.io/v1alpha1"
+kind: "Application"
+metadata:
+  name: etterlatte-migrering
+  namespace: etterlatte
+  labels:
+    team: etterlatte
+spec:
+  image: {{image}}
+  port: 8080
+  ingresses:
+    - "https://etterlatte-migrering.dev.intern.nav.no"
+  liveness:
+    initialDelay: 5
+    path: /health/isalive
+  readiness:
+    initialDelay: 5
+    path: /health/isready
+  secureLogs:
+    enabled: true
+  prometheus:
+    enabled: true
+    path: /metrics
+  gcp:
+    sqlInstances:
+      - type: POSTGRES_14
+        name: etterlatte-migrering
+        databases:
+          - name: migrering
+            envVarPrefix: DB
+        flags:
+          - name: max_connections
+            value: "100"
+
+  replicas:
+    cpuThresholdPercentage: 90
+    max: 4
+    min: 2

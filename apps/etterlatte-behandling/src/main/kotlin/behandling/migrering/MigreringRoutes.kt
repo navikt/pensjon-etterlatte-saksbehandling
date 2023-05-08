@@ -7,7 +7,7 @@ import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
-import rapidsandrivers.migrering.MigreringRequest
+import no.nav.etterlatte.rapidsandrivers.migrering.MigreringRequest
 
 fun Route.migreringRoutes(
     migreringService: MigreringService

@@ -22,6 +22,7 @@ include(
     "apps:etterlatte-brev-api",
     "apps:etterlatte-tilbakekreving",
     "apps:etterlatte-hendelser-pdl",
+    "apps:etterlatte-migrering",
     "apps:etterlatte-statistikk",
     "apps:etterlatte-vilkaarsvurdering",
     "apps:etterlatte-vilkaarsvurdering-kafka",

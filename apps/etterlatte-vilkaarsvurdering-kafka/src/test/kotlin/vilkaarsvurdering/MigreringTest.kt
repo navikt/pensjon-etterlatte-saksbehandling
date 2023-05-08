@@ -3,6 +3,7 @@ package vilkaarsvurdering
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
+import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser
 import no.nav.etterlatte.vilkaarsvurdering.Migrering
 import no.nav.etterlatte.vilkaarsvurdering.services.VilkaarsvurderingService
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -10,7 +11,6 @@ import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import rapidsandrivers.BEHANDLING_ID_KEY
-import rapidsandrivers.migrering.Migreringshendelser
 import java.util.*
 
 internal class MigreringTest {

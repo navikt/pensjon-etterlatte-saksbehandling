@@ -28,52 +28,57 @@ export const OpprettNyBehandling = ({ sakId, revurderinger }: { sakId: number; r
   }
 
   return (
-    <MaxWidth>
-      <Button variant="secondary" onClick={() => setOpen(true)}>
-        Opprett ny behandling
-      </Button>
-      <Modal open={open} onClose={() => setOpen((x) => !x)} closeButton={false} aria-labelledby="modal-heading">
-        <Modal.Content>
-          <Heading spacing level="2" size="medium" id="modal-heading">
-            Opprett ny behandling
-          </Heading>
-          <Select
-            label="Årsak til revurdering"
-            value={valgtRevurdering}
-            onChange={(e) => setValgtRevurdering(e.target.value)}
-            error={error}
-          >
-            <option>Velg type</option>
-            {stoettedeRevurderinger.map((revurdering, i) => {
-              return (
-                <option key={`revurdering${i}`} value={revurdering}>
-                  {revurdering}
-                </option>
-              )
-            })}
-          </Select>
-          <MarginTop15>
-            <MarginRight15>
-              <Button loading={isPending(opprettRevurderingStatus)} onClick={opprettBehandling}>
-                Opprett
-              </Button>
-            </MarginRight15>
-            <Button
-              variant="secondary"
-              onClick={() => {
-                setOpen(false)
-                resetApiCall()
-              }}
+    <OpprettNyBehandlingWrapper>
+      <MaxWidth>
+        <Button variant="secondary" onClick={() => setOpen(true)}>
+          Opprett ny behandling
+        </Button>
+        <Modal open={open} onClose={() => setOpen((x) => !x)} closeButton={false} aria-labelledby="modal-heading">
+          <Modal.Content>
+            <Heading spacing level="2" size="medium" id="modal-heading">
+              Opprett ny behandling
+            </Heading>
+            <Select
+              label="Årsak til revurdering"
+              value={valgtRevurdering}
+              onChange={(e) => setValgtRevurdering(e.target.value)}
+              error={error}
             >
-              Avbryt
-            </Button>
-          </MarginTop15>
-        </Modal.Content>
-      </Modal>
-    </MaxWidth>
+              <option>Velg type</option>
+              {stoettedeRevurderinger.map((revurdering, i) => {
+                return (
+                  <option key={`revurdering${i}`} value={revurdering}>
+                    {revurdering}
+                  </option>
+                )
+              })}
+            </Select>
+            <MarginTop15>
+              <MarginRight15>
+                <Button loading={isPending(opprettRevurderingStatus)} onClick={opprettBehandling}>
+                  Opprett
+                </Button>
+              </MarginRight15>
+              <Button
+                variant="secondary"
+                onClick={() => {
+                  setOpen(false)
+                  resetApiCall()
+                }}
+              >
+                Avbryt
+              </Button>
+            </MarginTop15>
+          </Modal.Content>
+        </Modal>
+      </MaxWidth>
+    </OpprettNyBehandlingWrapper>
   )
 }
 
+const OpprettNyBehandlingWrapper = styled.div`
+  margin-top: 3rem;
+`
 const MarginTop15 = styled.div`
   margin-top: 15px;
 `

@@ -28,19 +28,28 @@ import { PersonerISakResponse } from '~shared/api/grunnlag'
 import HistoriskeHendelser from '~components/person/uhaandtereHendelser/HistoriskeHendelser'
 import { lukkGrunnlagshendelse } from '~shared/api/behandling'
 import { ApiErrorAlert } from '~ErrorBoundary'
+import { OpprettNyBehandling } from '~components/person/OpprettNyBehandling'
+import OpprettRevurderingModal from '~components/person/OpprettRevurderingModal'
 
 type Props = {
   hendelser: Array<Grunnlagsendringshendelse>
-  startRevurdering: () => void
   disabled: boolean
   grunnlag: Result<PersonerISakResponse>
   revurderinger: Array<string>
+  sakId: number
 }
 
 const RelevanteHendelser = (props: Props) => {
-  const { hendelser, disabled, startRevurdering, grunnlag, revurderinger } = props
+  const { hendelser, disabled, grunnlag, revurderinger, sakId } = props
 
   if (hendelser.length === 0) return null
+
+  const [visOpprettRevurderingsmodal, setVisOpprettRevurderingsmodal] = useState<boolean>(false)
+  const [valgtHendelse, setValgtHendelse] = useState<Grunnlagsendringshendelse | undefined>(undefined)
+  const startRevurdering = (hendelse: Grunnlagsendringshendelse) => {
+    setValgtHendelse(hendelse)
+    setVisOpprettRevurderingsmodal(true)
+  }
 
   const navneMap = useMemo(() => {
     if (isSuccess(grunnlag)) {
@@ -67,15 +76,25 @@ const RelevanteHendelser = (props: Props) => {
             {relevanteHendelser.map((hendelse) => (
               <UhaandtertHendelse
                 key={hendelse.id}
-                revurderinger={revurderinger}
                 hendelse={hendelse}
                 disabled={disabled}
                 startRevurdering={startRevurdering}
+                revurderinger={revurderinger}
               />
             ))}
           </FnrTilNavnMapContext.Provider>
         </HendelserBorder>
       </BorderWidth>
+      {valgtHendelse && (
+        <OpprettRevurderingModal
+          sakId={sakId}
+          valgtHendelse={valgtHendelse}
+          open={visOpprettRevurderingsmodal}
+          setOpen={setVisOpprettRevurderingsmodal}
+          revurderinger={revurderinger}
+        />
+      )}
+      <OpprettNyBehandling revurderinger={revurderinger} sakId={sakId} />
       <HistoriskeHendelser hendelser={lukkedeHendelser} />
     </>
   )
@@ -84,15 +103,16 @@ const RelevanteHendelser = (props: Props) => {
 const UhaandtertHendelse = (props: {
   hendelse: Grunnlagsendringshendelse
   disabled: boolean
+  startRevurdering: (hendelse: Grunnlagsendringshendelse) => void
   revurderinger: Array<string>
-  startRevurdering: () => void
 }) => {
   const { hendelse, disabled, startRevurdering, revurderinger } = props
   const { type, opprettet } = hendelse
-  const stoetterRevurdering = stoetterRevurderingAvHendelse(hendelse, revurderinger)
   const [open, setOpen] = useState(false)
   const [hendelsekommentar, oppdaterKommentar] = useState<string>('')
   const [res, lukkGrunnlagshendelseFunc, resetApiCall] = useApiCall(lukkGrunnlagshendelse)
+  const stoetterRevurdering = stoetterRevurderingAvHendelse(hendelse, revurderinger)
+
   const lukkGrunnlagshendelseWrapper = () => {
     lukkGrunnlagshendelseFunc(
       { ...hendelse, kommentar: hendelsekommentar },
@@ -117,7 +137,7 @@ const UhaandtertHendelse = (props: {
 
         <div>
           {stoetterRevurdering ? (
-            <Button disabled={disabled} onClick={startRevurdering}>
+            <Button disabled={disabled} onClick={() => startRevurdering(hendelse)}>
               Start revurdering
             </Button>
           ) : (

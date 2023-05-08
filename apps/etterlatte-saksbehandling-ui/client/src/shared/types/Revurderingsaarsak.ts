@@ -1,4 +1,4 @@
-export enum Revurderingsaarsak {
+export enum Revurderingsaarsak { //TODO: må være utfyllende
   SOESKENJUSTERING = 'SOESKENJUSTERING',
   REGULERING = 'REGULERING',
   DOEDSFALL = 'DOEDSFALL',

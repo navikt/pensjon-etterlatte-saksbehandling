@@ -6,7 +6,6 @@ import { VilkaarsvurderingResultat } from '~shared/api/vilkaarsvurdering'
 import { erFerdigBehandlet } from '~components/behandling/felles/utils'
 import React, { useEffect, useState } from 'react'
 import { hentVedtakSammendrag } from '~shared/api/vedtak'
-import { OpprettNyBehandling } from '~components/person/OpprettNyBehandling'
 
 const colonner = ['Reg. dato', 'Type', 'Årsak', 'Status', 'Virkningstidspunkt', 'Vedtaksdato', 'Resultat', '']
 
@@ -47,15 +46,7 @@ const lenkeTilBehandling = (behandlingSammendrag: IBehandlingsammendrag): string
   }
 }
 
-export const Behandlingsliste = ({
-  behandlinger,
-  sakId,
-  revurderinger,
-}: {
-  behandlinger: IBehandlingsammendrag[]
-  sakId: number
-  revurderinger: Array<string> | undefined
-}) => {
+export const Behandlingsliste = ({ behandlinger }: { behandlinger: IBehandlingsammendrag[] }) => {
   return (
     <>
       <Table zebraStripes>
@@ -95,7 +86,6 @@ export const Behandlingsliste = ({
           ))}
         </Table.Body>
       </Table>
-      {revurderinger && <OpprettNyBehandling revurderinger={revurderinger} sakId={sakId} />}
     </>
   )
 }

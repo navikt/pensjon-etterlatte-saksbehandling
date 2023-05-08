@@ -21,7 +21,6 @@ import {
   harIngenUavbrutteManuelleOpphoer,
   kunIverksatteBehandlinger,
 } from '~components/behandling/felles/utils'
-import OpprettRevurderingModal from '~components/person/OpprettRevurderingModal'
 import { IBehandlingsType } from '~shared/types/IDetaljertBehandling'
 import RelevanteHendelser from '~components/person/uhaandtereHendelser/RelevanteHendelser'
 import { isFailure, useApiCall } from '~shared/hooks/useApiCall'
@@ -36,7 +35,6 @@ export const Saksoversikt = ({ fnr }: { fnr: string | undefined }) => {
   const [behandlinglisteError, setBehandlinglisteError] = useState<IBehandlingsammendrag[]>()
   const [grunnlagshendelserError, setGrunnlagshendelserError] = useState<Grunnlagsendringshendelse[]>()
   const [sakId, setSakId] = useState<number | undefined>()
-  const [visOpprettRevurderingsmodal, setVisOpprettRevurderingsmodal] = useState<boolean>(false)
   const [personerISak, hentPersoner, resetPersoner] = useApiCall(hentPersonerISak)
 
   const [hentStoettedeRevurderingerStatus, hentStoettedeRevurderingerFc] = useApiCall(hentStoettedeRevurderinger)
@@ -145,33 +143,24 @@ export const Saksoversikt = ({ fnr }: { fnr: string | undefined }) => {
                       {kanOppretteManueltOpphoer && (
                         <ManueltOpphoerModal sakId={sakId} iverksatteBehandlinger={iverksatteBehandlinger} />
                       )}
-                      <OpprettRevurderingModal
-                        sakId={sakId}
-                        open={visOpprettRevurderingsmodal}
-                        setOpen={setVisOpprettRevurderingsmodal}
-                      />
                     </EkstraHandlinger>
                   ) : null}
                   {isFailure(hentStoettedeRevurderingerStatus) && (
                     <ApiErrorAlert>En feil skjedde under kallet for å hente støttede revurderinger</ApiErrorAlert>
                   )}
-                  {revurderinger && (
+                  {sakId !== undefined && revurderinger ? (
                     <RelevanteHendelser
                       hendelser={hendelser}
                       revurderinger={revurderinger}
-                      startRevurdering={() => setVisOpprettRevurderingsmodal(true)}
                       disabled={harAapenRevurdering}
                       grunnlag={personerISak}
+                      sakId={sakId}
                     />
-                  )}
-                  {sakId !== undefined ? (
-                    <div className="behandlinger">
-                      <h2>Behandlinger</h2>
-                      {behandlingliste !== undefined && (
-                        <Behandlingsliste revurderinger={revurderinger} behandlinger={behandlingliste} sakId={sakId} />
-                      )}
-                    </div>
                   ) : null}
+                  <div className="behandlinger">
+                    <h2>Behandlinger</h2>
+                    {behandlingliste !== undefined && <Behandlingsliste behandlinger={behandlingliste} />}
+                  </div>
                 </>
               ),
               right: grunnlagshendelser?.length ? (

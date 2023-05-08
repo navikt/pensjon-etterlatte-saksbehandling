@@ -3,14 +3,17 @@ import { useState } from 'react'
 import styled from 'styled-components'
 import { opprettRevurdering as opprettRevurderingApi } from '~shared/api/behandling'
 import { isPending, useApiCall } from '~shared/hooks/useApiCall'
-import { Revurderingsaarsak } from '~shared/types/Revurderingsaarsak'
+import { Grunnlagsendringshendelse } from '~components/person/typer'
 
 type Props = {
   open: boolean
   setOpen: (value: boolean) => void
   sakId: number
+  revurderinger: Array<string>
+  valgtHendelse: Grunnlagsendringshendelse
 }
 const OpprettRevurderingModal = (props: Props) => {
+  const { revurderinger } = props
   const [error, setError] = useState<string | null>(null)
   const [valgtAarsak, setValgtAarsak] = useState('')
   const [opprettRevurderingStatus, opprettRevurdering] = useApiCall(opprettRevurderingApi)
@@ -45,7 +48,7 @@ const OpprettRevurderingModal = (props: Props) => {
             <div>
               <Select label="Årsak" value={valgtAarsak} onChange={(e) => setValgtAarsak(e.target.value)} error={error}>
                 <option value={''}>Velg en årsak</option>
-                {Object.values(Revurderingsaarsak).map((aarsak) => (
+                {revurderinger.map((aarsak) => (
                   <option value={aarsak} key={aarsak}>
                     {aarsak}
                   </option>

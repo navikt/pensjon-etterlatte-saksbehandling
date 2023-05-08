@@ -2,7 +2,6 @@ import { useEffect } from 'react'
 import { Tab, TabList, TabPanel, Tabs } from 'react-tabs'
 import { useParams } from 'react-router-dom'
 import styled from 'styled-components'
-import { getPerson, INVALID_FNR } from '~shared/api/person'
 import { StatusBar, StatusBarTheme } from '~shared/statusbar/Statusbar'
 import { Container } from '~shared/styled'
 import { Dokumentoversikt } from './dokumentoversikt'
@@ -10,6 +9,8 @@ import { Saksoversikt } from './saksoversikt'
 import Spinner from '~shared/Spinner'
 import { isFailure, isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
 import { BodyShort, Label } from '@navikt/ds-react'
+import { getPerson } from '~shared/api/grunnlag'
+import { INVALID_FNR } from '~utils/fnr'
 
 export const Person = () => {
   const [personStatus, hentPerson] = useApiCall(getPerson)

@@ -5,15 +5,15 @@ import no.nav.etterlatte.beregning.regler.omstillingstoenad.OMS_GYLDIG_FROM_TEST
 import no.nav.etterlatte.libs.regler.FaktumNode
 import no.nav.etterlatte.libs.regler.Regel
 import no.nav.etterlatte.libs.regler.RegelMeta
+import no.nav.etterlatte.libs.regler.RegelPeriode
 import no.nav.etterlatte.libs.regler.RegelReferanse
 import no.nav.etterlatte.libs.regler.benytter
 import no.nav.etterlatte.libs.regler.finnFaktumIGrunnlag
 import no.nav.etterlatte.libs.regler.med
 import no.nav.etterlatte.libs.regler.og
-import java.time.YearMonth
 
 data class AvkortetYtelseGrunnlag(
-    val fom: YearMonth,
+    val periode: RegelPeriode,
     val bruttoYtelse: FaktumNode<Int>,
     val avkorting: FaktumNode<Int>
 )

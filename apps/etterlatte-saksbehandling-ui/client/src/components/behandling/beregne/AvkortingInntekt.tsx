@@ -1,4 +1,4 @@
-import { BodyShort, Button, Heading, Label, ReadMore, Select, TextField } from '@navikt/ds-react'
+import { BodyShort, Button, ErrorMessage, Heading, Label, ReadMore, Select, TextField } from '@navikt/ds-react'
 import styled from 'styled-components'
 import DatePicker from 'react-datepicker'
 import { Calender } from '@navikt/ds-icons'
@@ -20,6 +20,7 @@ export const AvkortingInntekt = (props: {
     props.avkortingGrunnlag ? props.avkortingGrunnlag[0] : {}
   )
   const [inntektGrunnlagStatus, requestLagreAvkortingGrunnlag] = useApiCall(lagreAvkortingGrunnlag)
+  const [errorTekst, setErrorTekst] = useState<string | null>(null)
 
   const fomPickerRef: any = useRef(null)
   const toggleDatepicker = (ref: any) => {
@@ -31,6 +32,12 @@ export const AvkortingInntekt = (props: {
 
   const onSubmit = (e: FormEvent) => {
     e.preventDefault()
+
+    setErrorTekst('')
+    if (inntektGrunnlag.aarsinntekt == null) return setErrorTekst('Årsinntekt må fylles ut')
+    if (inntektGrunnlag.gjeldendeAar === 0) return setErrorTekst('Gjeldende år må fylles ut')
+    if (inntektGrunnlag.fom == null) return setErrorTekst('Fra og med dato må fylles ut')
+
     if (!behandlingId) throw new Error('Mangler behandlingsid')
     requestLagreAvkortingGrunnlag({ behandlingId: behandlingId, avkortingGrunnlag: inntektGrunnlag }, (respons) => {
       const nyttAvkortingGrunnlag = respons.avkortingGrunnlag[0]
@@ -76,7 +83,7 @@ export const AvkortingInntekt = (props: {
               onChange={(e) =>
                 setInntektGrunnlag({
                   ...inntektGrunnlag,
-                  gjeldendeAar: Number(e.target.value),
+                  gjeldendeAar: e.target.value === 'Velg inntektsår' ? 0 : Number(e.target.value),
                 })
               }
               autoComplete="off"
@@ -102,7 +109,7 @@ export const AvkortingInntekt = (props: {
                   onChange={(date) =>
                     setInntektGrunnlag({
                       ...inntektGrunnlag,
-                      fom: date == null ? '' : formaterDatoTilYearMonth(date),
+                      fom: date == null ? undefined : formaterDatoTilYearMonth(date),
                     })
                   }
                 />
@@ -129,10 +136,17 @@ export const AvkortingInntekt = (props: {
               </Kilde>
             )}
           </FormWrapper>
+          {errorTekst == null ? null : <ErrorMessage>{errorTekst}</ErrorMessage>}
           <TextAreaWrapper>
             <SpesifikasjonLabel>
               <Label>Spesifikasjon av inntekt</Label>
-              <ReadMore header={'Hva regnes som inntekt?'}>Tekst som beskriver hva som er gyldig inntekt...</ReadMore>
+              <ReadMore header={'Hva regnes som inntekt?'}>
+                Med inntekt menes all arbeidsinntekt og ytelser som likestilles med arbeidsinntekt. Likestilt med
+                arbeidsinntekt er dagpenger etter kap 4, sykepenger etter kap 8, stønad ved barns og andre nærståendes
+                sykdom etter kap 9, arbeidsavklaringspenger etter kap 11, uføretrygd etter kap 12 der uføregraden er
+                under 100 prosent, svangerskapspenger og foreldrepenger etter kap 14 og pensjonsytelser etter AFP
+                tilskottloven kapitlene 2 og 3.
+              </ReadMore>
             </SpesifikasjonLabel>
             <textarea
               value={inntektGrunnlag.spesifikasjon}
@@ -175,6 +189,7 @@ const FormWrapper = styled.div`
   display: flex;
   gap: 1rem;
   margin-top: 2em;
+  margin-bottom: 2em;
 `
 
 const FormKnapper = styled.div`
@@ -200,7 +215,7 @@ const Datovelger = styled.div`
 const TextAreaWrapper = styled.div`
   display: grid;
   align-items: flex-end;
-  margin-top: 2.5em;
+  margin-top: 2em;
 
   textArea {
     margin-top: 1em;

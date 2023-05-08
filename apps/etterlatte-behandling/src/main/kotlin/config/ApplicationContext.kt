@@ -184,7 +184,8 @@ class ApplicationContext(
         sakService = sakService,
         foerstegangsBehandlingService = foerstegangsbehandlingService,
         behandlingsHendelser = behandlingsHendelser.hendelserKanal,
-        migreringRepository = MigreringRepository(KotliqueryRepository(dataSource))
+        migreringRepository = MigreringRepository(KotliqueryRepository(dataSource)),
+        generellBehandlingService = generellBehandlingService
     )
 
     // Job

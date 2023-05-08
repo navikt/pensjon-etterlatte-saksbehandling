@@ -13,7 +13,9 @@ import io.ktor.serialization.jackson.jackson
 import io.ktor.server.testing.testApplication
 import no.nav.etterlatte.BehandlingIntegrationTest
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
+import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
+import no.nav.etterlatte.libs.common.gyldigSoeknad.VurderingsResultat
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.module
 import org.junit.jupiter.api.AfterAll
@@ -25,6 +27,7 @@ import rapidsandrivers.migrering.Enhet
 import rapidsandrivers.migrering.MigreringRequest
 import rapidsandrivers.migrering.PesysId
 import java.time.LocalDateTime
+import java.time.YearMonth
 import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -54,7 +57,8 @@ class MigreringRoutesTest : BehandlingIntegrationTest() {
                 enhet = Enhet("4817"),
                 fnr = fnr,
                 mottattDato = LocalDateTime.now(),
-                persongalleri = Persongalleri(fnr.value, "innsender", emptyList(), emptyList(), emptyList())
+                persongalleri = Persongalleri(fnr.value, "innsender", emptyList(), emptyList(), emptyList()),
+                virkningstidspunkt = YearMonth.now()
             )
 
             val response: UUID = client.post("/migrering") {
@@ -65,13 +69,17 @@ class MigreringRoutesTest : BehandlingIntegrationTest() {
                 Assertions.assertEquals(HttpStatusCode.Created, status)
             }.body()
 
-            val sakId = client.get("/behandlinger/$response") {
+            val behandling = client.get("/behandlinger/$response") {
                 addAuthToken(tokenSaksbehandler)
             }.apply {
                 Assertions.assertEquals(HttpStatusCode.OK, status)
-            }.body<DetaljertBehandling>().sak
+            }.body<DetaljertBehandling>()
 
-            client.get("/saker/$sakId") {
+            Assertions.assertEquals(JaNei.JA, behandling.kommerBarnetTilgode!!.svar)
+            Assertions.assertNotNull(behandling.virkningstidspunkt)
+            Assertions.assertEquals(VurderingsResultat.OPPFYLT, behandling.gyldighetsproeving!!.resultat)
+
+            client.get("/saker/${behandling.sak}") {
                 addAuthToken(tokenSaksbehandler)
             }.apply {
                 Assertions.assertEquals(HttpStatusCode.OK, status)

@@ -16,7 +16,6 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.P
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.SOEKER_PDL_V1
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.SOEKER_SOEKNAD_V1
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.SOEKNAD_MOTTATT_DATO
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.SOESKEN_I_BEREGNINGEN
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeknadMottattDato
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.periode.Periode
@@ -40,7 +39,7 @@ import org.testcontainers.junit.jupiter.Container
 import java.time.LocalDate
 import java.time.Month
 import java.time.YearMonth
-import java.util.UUID
+import java.util.*
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -290,16 +289,12 @@ internal class GrunnlagDaoIntegrationTest {
             opplysningRepo.leggOpplysningTilGrunnlag(i.toLong(), lagGrunnlagsopplysning(SOEKER_SOEKNAD_V1, fnr = fnr))
             opplysningRepo.leggOpplysningTilGrunnlag(i.toLong(), lagGrunnlagsopplysning(AVDOED_PDL_V1, fnr = fnr))
             opplysningRepo.leggOpplysningTilGrunnlag(i.toLong(), lagGrunnlagsopplysning(PERSONGALLERI_V1, fnr = fnr))
-            opplysningRepo.leggOpplysningTilGrunnlag(
-                i.toLong(),
-                lagGrunnlagsopplysning(SOESKEN_I_BEREGNINGEN, fnr = fnr)
-            )
         }
 
         val result = opplysningRepo.finnAlleSakerForPerson(STOR_SNERK)
         assertEquals(3, result.size)
 
-        verify(exactly = 19) { opplysningRepo.leggOpplysningTilGrunnlag(any(), any(), any()) }
+        verify(exactly = 15) { opplysningRepo.leggOpplysningTilGrunnlag(any(), any(), any()) }
     }
 
     private companion object {

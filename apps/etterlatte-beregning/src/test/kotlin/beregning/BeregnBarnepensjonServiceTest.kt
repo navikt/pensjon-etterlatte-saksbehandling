@@ -6,6 +6,8 @@ import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlag
+import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlagService
 import no.nav.etterlatte.beregning.klienter.GrunnlagKlientImpl
 import no.nav.etterlatte.beregning.klienter.VilkaarsvurderingKlient
 import no.nav.etterlatte.beregning.regler.FNR_1
@@ -15,41 +17,46 @@ import no.nav.etterlatte.beregning.regler.bruker
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.beregning.Beregningstype
-import no.nav.etterlatte.libs.common.grunnlag.Opplysning
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Beregningsgrunnlag
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeskenMedIBeregning
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
-import no.nav.etterlatte.libs.common.toJsonNode
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
-import no.nav.etterlatte.libs.testdata.grunnlag.kilde
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.YearMonth
+import java.util.*
 import java.util.UUID.randomUUID
 
 internal class BeregnBarnepensjonServiceTest {
 
     private val vilkaarsvurderingKlient = mockk<VilkaarsvurderingKlient>()
     private val grunnlagKlient = mockk<GrunnlagKlientImpl>()
+    private val beregningsGrunnlagService = mockk<BeregningsGrunnlagService>()
     private lateinit var beregnBarnepensjonService: BeregnBarnepensjonService
 
     @BeforeEach
     fun setup() {
         beregnBarnepensjonService = BeregnBarnepensjonService(
             grunnlagKlient = grunnlagKlient,
-            vilkaarsvurderingKlient = vilkaarsvurderingKlient
+            vilkaarsvurderingKlient = vilkaarsvurderingKlient,
+            beregningsGrunnlagService = beregningsGrunnlagService
         )
     }
 
     @Test
     fun `skal beregne barnepensjon foerstegangsbehandling - ingen soesken`() {
         val behandling = mockBehandling(BehandlingType.FØRSTEGANGSBEHANDLING)
-        val grunnlag = grunnlag(soesken = emptyList())
+        val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
 
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
+        coEvery {
+            beregningsGrunnlagService.hentBarnepensjonBeregningsGrunnlag(
+                any()
+            )
+        } returns barnepensjonBeregningsGrunnlag(behandling.id, emptyList())
 
         runBlocking {
             val beregning = beregnBarnepensjonService.beregn(behandling, bruker)
@@ -78,9 +85,14 @@ internal class BeregnBarnepensjonServiceTest {
     @Test
     fun `skal beregne barnepensjon foerstegangsbehandling - ett soesken`() {
         val behandling = mockBehandling(BehandlingType.FØRSTEGANGSBEHANDLING)
-        val grunnlag = grunnlag(soesken = listOf(FNR_1))
+        val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
 
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
+        coEvery {
+            beregningsGrunnlagService.hentBarnepensjonBeregningsGrunnlag(
+                any()
+            )
+        } returns barnepensjonBeregningsGrunnlag(behandling.id, listOf(FNR_1))
 
         runBlocking {
             val beregning = beregnBarnepensjonService.beregn(behandling, bruker)
@@ -107,9 +119,14 @@ internal class BeregnBarnepensjonServiceTest {
     @Test
     fun `skal beregne barnepensjon foerstegangsbehandling - to soesken`() {
         val behandling = mockBehandling(BehandlingType.FØRSTEGANGSBEHANDLING)
-        val grunnlag = grunnlag(soesken = listOf(FNR_1, FNR_2))
+        val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
 
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
+        coEvery {
+            beregningsGrunnlagService.hentBarnepensjonBeregningsGrunnlag(
+                any()
+            )
+        } returns barnepensjonBeregningsGrunnlag(behandling.id, listOf(FNR_1, FNR_2))
 
         runBlocking {
             val beregning = beregnBarnepensjonService.beregn(behandling, bruker)
@@ -136,9 +153,14 @@ internal class BeregnBarnepensjonServiceTest {
     @Test
     fun `skal beregne barnepensjon revurdering - ingen soesken`() {
         val behandling = mockBehandling(BehandlingType.REVURDERING)
-        val grunnlag = grunnlag(soesken = emptyList())
+        val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
 
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
+        coEvery {
+            beregningsGrunnlagService.hentBarnepensjonBeregningsGrunnlag(
+                any()
+            )
+        } returns barnepensjonBeregningsGrunnlag(behandling.id, emptyList())
         coEvery { vilkaarsvurderingKlient.hentVilkaarsvurdering(any(), any()) } returns mockk {
             every { resultat?.utfall } returns VilkaarsvurderingUtfall.OPPFYLT
         }
@@ -168,9 +190,14 @@ internal class BeregnBarnepensjonServiceTest {
     @Test
     fun `skal opphoere ved revurdering og vilkaarsvurdering ikke oppfylt`() {
         val behandling = mockBehandling(BehandlingType.REVURDERING)
-        val grunnlag = grunnlag(soesken = emptyList())
+        val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
 
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
+        coEvery {
+            beregningsGrunnlagService.hentBarnepensjonBeregningsGrunnlag(
+                any()
+            )
+        } returns barnepensjonBeregningsGrunnlag(behandling.id, emptyList())
         coEvery { vilkaarsvurderingKlient.hentVilkaarsvurdering(any(), any()) } returns mockk {
             every { resultat?.utfall } returns VilkaarsvurderingUtfall.IKKE_OPPFYLT
         }
@@ -200,9 +227,14 @@ internal class BeregnBarnepensjonServiceTest {
     @Test
     fun `skal sette beloep til 0 ved manuelt opphoer`() {
         val behandling = mockBehandling(BehandlingType.MANUELT_OPPHOER)
-        val grunnlag = grunnlag(soesken = emptyList())
+        val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
 
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
+        coEvery {
+            beregningsGrunnlagService.hentBarnepensjonBeregningsGrunnlag(
+                any()
+            )
+        } returns barnepensjonBeregningsGrunnlag(behandling.id, emptyList())
 
         runBlocking {
             val beregning = beregnBarnepensjonService.beregn(behandling, bruker)
@@ -226,19 +258,21 @@ internal class BeregnBarnepensjonServiceTest {
         }
     }
 
-    private fun grunnlag(soesken: List<String>) = GrunnlagTestData(
-        opplysningsmapSakOverrides = mapOf(
-            Opplysningstype.SOESKEN_I_BEREGNINGEN to Opplysning.Konstant(
-                randomUUID(),
-                kilde,
-                Beregningsgrunnlag(
-                    soesken.map {
-                        SoeskenMedIBeregning(Folkeregisteridentifikator.of(it), true)
-                    }
-                ).toJsonNode()
-            )
+    private fun barnepensjonBeregningsGrunnlag(behandlingId: UUID, soesken: List<String>) =
+        BeregningsGrunnlag(
+            behandlingId,
+            mockk<Grunnlagsopplysning.Saksbehandler> {
+                every { ident } returns "Z123456"
+                every { tidspunkt } returns Tidspunkt.now()
+                every { type } returns ""
+            },
+            soeskenMedIBeregning = soesken.map {
+                SoeskenMedIBeregning(
+                    Folkeregisteridentifikator.of(it),
+                    skalBrukes = true
+                )
+            }
         )
-    ).hentOpplysningsgrunnlag()
 
     private fun mockBehandling(type: BehandlingType, virk: YearMonth = VIRKNINGSTIDSPUNKT_JAN_23): DetaljertBehandling =
         mockk<DetaljertBehandling>().apply {

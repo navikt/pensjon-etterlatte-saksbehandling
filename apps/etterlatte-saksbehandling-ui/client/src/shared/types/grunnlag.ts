@@ -11,12 +11,3 @@ export interface PersonMedNavn {
   mellomnavn?: string
   etternavn: string
 }
-
-export interface Soeskenjusteringsgrunnlag {
-  beregningsgrunnlag: SoeskenMedIBeregning[]
-}
-
-export interface SoeskenMedIBeregning {
-  foedselsnummer: string
-  skalBrukes: boolean
-}

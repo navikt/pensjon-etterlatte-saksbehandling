@@ -27,3 +27,18 @@ export interface Beregningsperiode {
   grunnbelop: number
   trygdetid: number
 }
+
+export interface BeregningsGrunnlag<K> {
+  behandlingId: string
+  kilde: K
+  soeskenMedIBeregning: SoeskenMedIBeregning[]
+}
+
+export interface SoeskenMedIBeregning {
+  foedselsnummer: string
+  skalBrukes: boolean
+}
+
+export interface BeregningsGrunnlagData {
+  soeskenMedIBeregning: SoeskenMedIBeregning[]
+}

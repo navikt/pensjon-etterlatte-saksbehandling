@@ -25,6 +25,7 @@ import org.junit.jupiter.api.TestInstance
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
 import java.time.LocalDateTime
+import java.time.YearMonth
 import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -59,7 +60,8 @@ class MigreringIntegrationTest {
                 Enhet("4808"),
                 Folkeregisteridentifikator.of(syntetiskFnr),
                 LocalDateTime.now(),
-                Persongalleri(syntetiskFnr, "innsender", emptyList(), emptyList(), emptyList())
+                Persongalleri(syntetiskFnr, "innsender", emptyList(), emptyList(), emptyList()),
+                YearMonth.now()
             )
             repository.lagrePesyssak(sakInn)
             val inspector = TestRapid()

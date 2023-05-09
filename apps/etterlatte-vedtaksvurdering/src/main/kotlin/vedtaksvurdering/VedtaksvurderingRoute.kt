@@ -45,7 +45,7 @@ fun Route.vedtaksvurderingRoute(service: VedtaksvurderingService, behandlingKlie
                 logger.info("Henter sammendrag av vedtak for behandling $behandlingId")
                 val vedtaksresultat = service.hentVedtak(behandlingId)?.toVedtakSammendragDto()
                 if (vedtaksresultat == null) {
-                    call.response.status(HttpStatusCode.NotFound)
+                    call.response.status(HttpStatusCode.NoContent)
                 } else {
                     call.respond(vedtaksresultat)
                 }

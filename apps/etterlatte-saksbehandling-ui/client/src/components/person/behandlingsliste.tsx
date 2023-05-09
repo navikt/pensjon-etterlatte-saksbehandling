@@ -5,7 +5,7 @@ import { IBehandlingStatus, IBehandlingsType } from '~shared/types/IDetaljertBeh
 import { VilkaarsvurderingResultat } from '~shared/api/vilkaarsvurdering'
 import { erFerdigBehandlet } from '~components/behandling/felles/utils'
 import React, { useEffect, useState } from 'react'
-import { hentVedtakSammendrag } from '~shared/api/vedtak'
+import { hentVedtakSammendrag } from '~shared/api/vedtaksvurdering'
 import { Revurderingsaarsak } from '~shared/types/Revurderingsaarsak'
 
 const colonner = ['Reg. dato', 'Type', 'Årsak', 'Status', 'Virkningstidspunkt', 'Vedtaksdato', 'Resultat', '']

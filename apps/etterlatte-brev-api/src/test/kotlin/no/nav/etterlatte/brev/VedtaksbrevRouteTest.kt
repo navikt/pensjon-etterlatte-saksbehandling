@@ -1,10 +1,11 @@
 package no.nav.etterlatte.brev
 
+import io.ktor.client.HttpClient
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.get
 import io.ktor.client.request.header
+import io.ktor.client.request.parameter
 import io.ktor.client.request.post
-import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
@@ -12,6 +13,7 @@ import io.ktor.http.contentType
 import io.ktor.serialization.jackson.jackson
 import io.ktor.server.application.log
 import io.ktor.server.config.HoconApplicationConfig
+import io.ktor.server.testing.ApplicationTestBuilder
 import io.ktor.server.testing.testApplication
 import io.mockk.Called
 import io.mockk.clearAllMocks
@@ -62,43 +64,96 @@ internal class VedtaksbrevRouteTest {
     }
 
     @Test
-    fun `Endepunkt for oppretting eller oppdatering av vedtaksbrev`() {
-        coEvery { vedtaksbrevService.oppdaterVedtaksbrev(any(), any(), any()) } returns opprettBrev()
+    fun `Endepunkt for henting av vedtaksbrev - brev finnes`() {
+        coEvery { vedtaksbrevService.hentVedtaksbrev(any()) } returns opprettBrev()
+        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any()) } returns true
+
+        testApplication {
+            val client = httpClient()
+
+            val response = client.get("/api/brev/behandling/$BEHANDLING_ID/vedtak") {
+                header(HttpHeaders.Authorization, "Bearer $accessToken")
+                contentType(ContentType.Application.Json)
+            }
+
+            assertEquals(HttpStatusCode.OK, response.status)
+        }
+
+        coVerify { vedtaksbrevService.hentVedtaksbrev(BEHANDLING_ID) }
+    }
+
+    @Test
+    fun `Endepunkt for henting av vedtaksbrev - brev finnes ikke`() {
+        coEvery { vedtaksbrevService.hentVedtaksbrev(any()) } returns null
+        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any()) } returns true
+
+        testApplication {
+            val client = httpClient()
+
+            val response = client.get("/api/brev/behandling/$BEHANDLING_ID/vedtak") {
+                header(HttpHeaders.Authorization, "Bearer $accessToken")
+                contentType(ContentType.Application.Json)
+            }
+
+            assertEquals(HttpStatusCode.NoContent, response.status)
+        }
+
+        coVerify {
+            vedtaksbrevService.hentVedtaksbrev(BEHANDLING_ID)
+            behandlingKlient.harTilgangTilBehandling(any(), any())
+        }
+    }
+
+    @Test
+    fun `Endepunkt for oppretting av vedtaksbrev`() {
+        coEvery { vedtaksbrevService.opprettVedtaksbrev(any(), any(), any()) } returns opprettBrev()
         coEvery { behandlingKlient.harTilgangTilBehandling(any(), any()) } returns true
 
         val sakId = 123456L
-        val token = accessToken
 
         testApplication {
-            environment {
-                config = hoconApplicationConfig
-            }
-            application {
-                restModule(this.log, routePrefix = "api") {
-                    vedtaksbrevRoute(
-                        vedtaksbrevService,
-                        behandlingKlient
-                    )
-                }
-            }
-
-            val client = createClient {
-                install(ContentNegotiation) {
-                    jackson()
-                }
-            }
+            val client = httpClient()
 
             val response = client.post("/api/brev/behandling/$BEHANDLING_ID/vedtak") {
-                header(HttpHeaders.Authorization, "Bearer $token")
+                parameter("sakId", sakId)
+                header(HttpHeaders.Authorization, "Bearer $accessToken")
                 contentType(ContentType.Application.Json)
-                setBody(OpprettVedtaksbrevRequest(sakId))
+            }
+
+            assertEquals(HttpStatusCode.Created, response.status)
+        }
+
+        coVerify(exactly = 1) {
+            vedtaksbrevService.opprettVedtaksbrev(
+                sakId,
+                BEHANDLING_ID,
+                any()
+            )
+            behandlingKlient.harTilgangTilBehandling(any(), any())
+        }
+    }
+
+    @Test
+    fun `Endepunkt for generering av brevinnhold`() {
+        coEvery { vedtaksbrevService.genererPdfInnhold(any(), any(), any()) } returns "pdf".toByteArray()
+        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any()) } returns true
+
+        val sakId = 123456L
+
+        testApplication {
+            val client = httpClient()
+
+            val response = client.get("/api/brev/behandling/$BEHANDLING_ID/vedtak/pdf") {
+                parameter("sakId", sakId)
+                header(HttpHeaders.Authorization, "Bearer $accessToken")
+                contentType(ContentType.Application.Json)
             }
 
             assertEquals(HttpStatusCode.OK, response.status)
         }
 
         coVerify(exactly = 1) {
-            vedtaksbrevService.oppdaterVedtaksbrev(
+            vedtaksbrevService.genererPdfInnhold(
                 sakId,
                 BEHANDLING_ID,
                 any()
@@ -112,17 +167,7 @@ internal class VedtaksbrevRouteTest {
         coEvery { behandlingKlient.harTilgangTilBehandling(any(), any()) } returns true
 
         testApplication {
-            environment {
-                config = hoconApplicationConfig
-            }
-            application {
-                restModule(this.log, routePrefix = "api") {
-                    vedtaksbrevRoute(
-                        vedtaksbrevService,
-                        behandlingKlient
-                    )
-                }
-            }
+            val client = httpClient()
 
             val response = client.get("/api/brev/finnesikke") {
                 header(HttpHeaders.Authorization, "Bearer $accessToken")
@@ -131,8 +176,10 @@ internal class VedtaksbrevRouteTest {
             assertEquals(HttpStatusCode.NotFound, response.status)
         }
 
-        verify { vedtaksbrevService wasNot Called }
-        verify { behandlingKlient wasNot Called }
+        verify {
+            vedtaksbrevService wasNot Called
+            behandlingKlient wasNot Called
+        }
     }
 
     @Test
@@ -155,8 +202,10 @@ internal class VedtaksbrevRouteTest {
             assertEquals(HttpStatusCode.Unauthorized, response.status)
         }
 
-        verify { vedtaksbrevService wasNot Called }
-        verify { behandlingKlient wasNot Called }
+        verify {
+            vedtaksbrevService wasNot Called
+            behandlingKlient wasNot Called
+        }
     }
 
     private val accessToken: String by lazy {
@@ -184,6 +233,26 @@ internal class VedtaksbrevRouteTest {
         ),
         true
     )
+
+    private fun ApplicationTestBuilder.httpClient(): HttpClient {
+        environment {
+            config = hoconApplicationConfig
+        }
+        application {
+            restModule(this.log, routePrefix = "api") {
+                vedtaksbrevRoute(
+                    vedtaksbrevService,
+                    behandlingKlient
+                )
+            }
+        }
+
+        return createClient {
+            install(ContentNegotiation) {
+                jackson()
+            }
+        }
+    }
 
     companion object {
         private const val CLIENT_ID = "mock-client-id"

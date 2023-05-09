@@ -62,6 +62,7 @@ class SakOgBehandlingService(
             ),
             vedtak = ForenkletVedtak(
                 vedtak.vedtakId,
+                vedtak.status,
                 vedtak.type,
                 Saksbehandler(
                     saksbehandlerIdent,

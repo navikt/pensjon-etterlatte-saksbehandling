@@ -10,6 +10,7 @@ import no.nav.etterlatte.libs.common.grunnlag.hentNavn
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.InnsenderSoeknad
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Navn
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
+import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import java.time.LocalDate
 import java.util.*
@@ -32,6 +33,7 @@ data class Behandling(
 
 data class ForenkletVedtak(
     val id: Long,
+    val status: VedtakStatus,
     val type: VedtakType,
     val saksbehandler: Saksbehandler,
     val attestant: Attestant?

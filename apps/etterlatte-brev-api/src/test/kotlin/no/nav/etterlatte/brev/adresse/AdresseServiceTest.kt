@@ -12,6 +12,7 @@ import no.nav.etterlatte.brev.behandling.ForenkletVedtak
 import no.nav.etterlatte.brev.behandling.Saksbehandler
 import no.nav.etterlatte.brev.navansatt.NavansattKlient
 import no.nav.etterlatte.brev.navansatt.SaksbehandlerInfo
+import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -44,7 +45,7 @@ internal class AdresseServiceTest {
         coEvery { navansattMock.hentSaksbehandlerInfo(attestant.ident) }
             .returns(opprettSaksbehandlerInfo(attestant.ident))
 
-        val vedtak = ForenkletVedtak(1, VedtakType.INNVILGELSE, saksbehandler, attestant)
+        val vedtak = ForenkletVedtak(1, VedtakStatus.FATTET_VEDTAK, VedtakType.INNVILGELSE, saksbehandler, attestant)
 
         val (faktiskAvsender, faktiskAttestant) = runBlocking {
             adresseService.hentAvsenderOgAttestant(vedtak)

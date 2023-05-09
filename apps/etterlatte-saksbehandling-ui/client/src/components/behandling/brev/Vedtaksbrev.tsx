@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react'
 import { ErrorMessage, Heading } from '@navikt/ds-react'
 import { HeadingWrapper } from '../soeknadsoversikt/styled'
 import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapper'
-import { opprettEllerOppdaterBrevForVedtak } from '~shared/api/brev'
+import { hentVedtaksbrev, opprettVedtaksbrev } from '~shared/api/brev'
 import { useParams } from 'react-router-dom'
 import { Soeknadsdato } from '../soeknadsoversikt/soeknadoversikt/Soeknadsdato'
 import styled from 'styled-components'
@@ -33,11 +33,19 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
         return
       }
 
-      const brevResponse = await opprettEllerOppdaterBrevForVedtak(sak, behandlingId!!)
-      if (brevResponse.status === 'ok') {
+      const brevResponse = await hentVedtaksbrev(behandlingId!!)
+      if (brevResponse.statusCode === 200) {
         setVedtaksbrev(brevResponse.data)
+      } else if (brevResponse.statusCode === 204) {
+        const brevOpprettetResponse = await opprettVedtaksbrev(sak, behandlingId!!)
+
+        if (brevOpprettetResponse.statusCode === 201) {
+          setVedtaksbrev(brevOpprettetResponse.data)
+        } else {
+          setError('Oppretting av vedtaksbrev feilet...')
+        }
       } else {
-        setError(brevResponse.error)
+        setError('Feil ved henting av brev...')
       }
       setLoading(false)
     }
@@ -67,7 +75,7 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
         ) : error ? (
           <ErrorMessage>{error}</ErrorMessage>
         ) : (
-          <ForhaandsvisningBrev brev={vedtaksbrev} />
+          <ForhaandsvisningBrev brev={vedtaksbrev} sakId={sak} />
         )}
       </BrevContent>
 

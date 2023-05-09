@@ -67,36 +67,36 @@ data class Brev(
     val tittel: String,
     val status: Status,
     val mottaker: Mottaker,
-    val erVedtaksbrev: Boolean
+    val erVedtaksbrev: Boolean,
 ) {
+
+    fun kanEndres() = status in listOf(Status.OPPRETTET, Status.OPPDATERT)
+
     companion object {
-        fun fraUlagretBrev(id: BrevID, ulagretBrev: UlagretBrev) =
+        fun fra(id: BrevID, opprettNyttBrev: OpprettNyttBrev) =
             Brev(
                 id = id,
-                behandlingId = ulagretBrev.behandlingId,
-                soekerFnr = ulagretBrev.soekerFnr,
-                tittel = ulagretBrev.tittel,
-                status = ulagretBrev.status,
-                mottaker = ulagretBrev.mottaker,
-                erVedtaksbrev = ulagretBrev.erVedtaksbrev
+                behandlingId = opprettNyttBrev.behandlingId,
+                soekerFnr = opprettNyttBrev.soekerFnr,
+                tittel = opprettNyttBrev.tittel,
+                status = opprettNyttBrev.status,
+                mottaker = opprettNyttBrev.mottaker,
+                erVedtaksbrev = opprettNyttBrev.erVedtaksbrev
             )
     }
 }
 
 class BrevInnhold(
-    val mal: String,
     val spraak: Spraak,
     val data: ByteArray
 )
 
-class UlagretBrev(
+data class OpprettNyttBrev(
     val behandlingId: UUID,
     val soekerFnr: String,
     val tittel: String,
-    val spraak: Spraak,
     val mottaker: Mottaker,
-    val erVedtaksbrev: Boolean,
-    val pdf: ByteArray
+    val erVedtaksbrev: Boolean
 ) {
     val status: Status = Status.OPPRETTET
 }

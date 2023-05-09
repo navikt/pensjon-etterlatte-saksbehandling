@@ -26,6 +26,7 @@ import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
+import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import no.nav.etterlatte.token.Bruker
@@ -157,6 +158,7 @@ internal class SakOgBehandlingServiceTest {
         every { behandling.id } returns BEHANDLING_ID
         every { vedtakId } returns 123L
         every { type } returns VedtakType.INNVILGELSE
+        every { status } returns VedtakStatus.OPPRETTET
         every { virkningstidspunkt } returns YearMonth.now()
         every { vedtakFattet } returns VedtakFattet(SAKSBEHANDLER_IDENT, "Ansvarlig enhet", Tidspunkt.now())
         every { attestasjon } returns Attestasjon(ATTESTANT_IDENT, "Attestant enhet", Tidspunkt.now())

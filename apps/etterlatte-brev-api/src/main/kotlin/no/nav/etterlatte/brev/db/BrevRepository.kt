@@ -7,9 +7,6 @@ import kotliquery.sessionOf
 import kotliquery.using
 import no.nav.etterlatte.brev.db.BrevRepository.Queries.HENT_BREV_FOR_BEHANDLING_QUERY
 import no.nav.etterlatte.brev.db.BrevRepository.Queries.HENT_BREV_QUERY
-import no.nav.etterlatte.brev.db.BrevRepository.Queries.OPPDATER_BREV_QUERY
-import no.nav.etterlatte.brev.db.BrevRepository.Queries.OPPDATER_INNHOLD_QUERY
-import no.nav.etterlatte.brev.db.BrevRepository.Queries.OPPDATER_MOTTAKER_QUERY
 import no.nav.etterlatte.brev.db.BrevRepository.Queries.OPPRETT_BREV_QUERY
 import no.nav.etterlatte.brev.db.BrevRepository.Queries.OPPRETT_HENDELSE_QUERY
 import no.nav.etterlatte.brev.db.BrevRepository.Queries.OPPRETT_INNHOLD_QUERY
@@ -21,9 +18,9 @@ import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.BrevInnhold
 import no.nav.etterlatte.brev.model.Mottaker
+import no.nav.etterlatte.brev.model.OpprettNyttBrev
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.Status
-import no.nav.etterlatte.brev.model.UlagretBrev
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.toJson
 import java.util.*
@@ -35,66 +32,35 @@ class BrevRepository(private val ds: DataSource) {
         it.run(queryOf(HENT_BREV_QUERY, id).map(tilBrev).asSingle)
     }!!
 
-    fun hentBrevInnhold(id: BrevID): BrevInnhold = using(sessionOf(ds)) {
+    fun hentBrevInnhold(id: BrevID): BrevInnhold? = using(sessionOf(ds)) {
         it.run(queryOf("SELECT * FROM innhold WHERE brev_id = ?", id).map(tilInnhold).asSingle)
-    }!!
-
-    fun hentBrevForBehandling(behandlingId: UUID): List<Brev> = using(sessionOf(ds)) {
-        it.run(queryOf(HENT_BREV_FOR_BEHANDLING_QUERY, behandlingId).map(tilBrev).asList)
     }
 
-    fun oppdaterBrev(brevId: Long, brev: UlagretBrev) {
+    fun hentBrevForBehandling(behandlingId: UUID): Brev? = using(sessionOf(ds)) {
+        it.run(queryOf(HENT_BREV_FOR_BEHANDLING_QUERY, behandlingId).map(tilBrev).asSingle)
+    }
+
+    fun opprettInnholdOgFerdigstill(id: BrevID, innhold: BrevInnhold) {
         using(sessionOf(ds)) { session ->
             session.transaction { tx ->
                 tx.run(
                     queryOf(
-                        OPPDATER_BREV_QUERY,
+                        OPPRETT_INNHOLD_QUERY,
                         mapOf(
-                            "id" to brevId,
-                            "tittel" to brev.tittel,
-                            "vedtaksbrev" to brev.erVedtaksbrev
-                        )
-                    ).asUpdate
-                ).also { oppdatert -> require(oppdatert == 1) }
-
-                tx.run(
-                    queryOf(
-                        OPPDATER_INNHOLD_QUERY,
-                        mapOf(
-                            "brev_id" to brevId,
+                            "brev_id" to id,
                             "mal" to "",
-                            "spraak" to brev.spraak.name,
-                            "bytes" to brev.pdf
+                            "spraak" to innhold.spraak.name,
+                            "bytes" to innhold.data
                         )
                     ).asUpdate
                 ).also { oppdatert -> require(oppdatert == 1) }
 
-                tx.run(
-                    queryOf(
-                        OPPDATER_MOTTAKER_QUERY,
-                        mapOf(
-                            "id" to brevId,
-                            "foedselsnummer" to brev.mottaker.foedselsnummer?.value,
-                            "orgnummer" to brev.mottaker.orgnummer,
-                            "navn" to brev.mottaker.navn,
-                            "adressetype" to brev.mottaker.adresse.adresseType,
-                            "adresselinje1" to brev.mottaker.adresse.adresselinje1,
-                            "adresselinje2" to brev.mottaker.adresse.adresselinje2,
-                            "adresselinje3" to brev.mottaker.adresse.adresselinje3,
-                            "postnummer" to brev.mottaker.adresse.postnummer,
-                            "poststed" to brev.mottaker.adresse.poststed,
-                            "landkode" to brev.mottaker.adresse.landkode,
-                            "land" to brev.mottaker.adresse.land
-                        )
-                    ).asUpdate
-                ).also { oppdatert -> require(oppdatert == 1) }
-
-                tx.lagreHendelse(brevId, Status.OPPDATERT)
+                tx.lagreHendelse(id, Status.FERDIGSTILT)
             }
         }
     }
 
-    fun opprettBrev(ulagretBrev: UlagretBrev): Brev = using(sessionOf(ds, returnGeneratedKey = true)) { session ->
+    fun opprettBrev(ulagretBrev: OpprettNyttBrev): Brev = using(sessionOf(ds, returnGeneratedKey = true)) { session ->
         session.transaction { tx ->
             val id = tx.run(
                 queryOf(
@@ -106,7 +72,9 @@ class BrevRepository(private val ds: DataSource) {
                         "vedtaksbrev" to ulagretBrev.erVedtaksbrev
                     )
                 ).asUpdateAndReturnGeneratedKey
-            )!!
+            )
+
+            requireNotNull(id) { "Brev ikke opprettet!" }
 
             tx.run(
                 queryOf(
@@ -128,22 +96,10 @@ class BrevRepository(private val ds: DataSource) {
                 ).asUpdate
             )
 
-            tx.run(
-                queryOf(
-                    OPPRETT_INNHOLD_QUERY,
-                    mapOf(
-                        "brev_id" to id,
-                        "mal" to "",
-                        "spraak" to ulagretBrev.spraak.name,
-                        "bytes" to ulagretBrev.pdf
-                    )
-                ).asUpdate
-            )
-
             tx.lagreHendelse(id, Status.OPPRETTET)
                 .also { oppdatert -> require(oppdatert == 1) }
 
-            Brev.fraUlagretBrev(id, ulagretBrev)
+            Brev.fra(id, ulagretBrev)
         }
     }
 
@@ -224,7 +180,6 @@ class BrevRepository(private val ds: DataSource) {
 
     private val tilInnhold: (Row) -> BrevInnhold = { row ->
         BrevInnhold(
-            row.string("mal"),
             row.string("spraak").let { Spraak.valueOf(it) },
             row.bytes("bytes")
         )
@@ -276,37 +231,6 @@ class BrevRepository(private val ds: DataSource) {
         const val OPPRETT_INNHOLD_QUERY = """
             INSERT INTO innhold (brev_id, mal, spraak, bytes) 
             VALUES (:brev_id, :mal, :spraak, :bytes)
-        """
-
-        const val OPPDATER_INNHOLD_QUERY = """
-            UPDATE innhold 
-            SET mal = :mal, 
-                spraak = :spraak, 
-                bytes = :bytes
-            WHERE brev_id = :brev_id
-        """
-
-        const val OPPDATER_MOTTAKER_QUERY = """
-            UPDATE mottaker 
-            SET foedselsnummer = :foedselsnummer, 
-                orgnummer = :orgnummer, 
-                navn = :navn, 
-                adressetype = :adressetype, 
-                adresselinje1 = :adresselinje1, 
-                adresselinje2 = :adresselinje2, 
-                adresselinje3 = :adresselinje3,
-                postnummer = :postnummer, 
-                poststed = :poststed, 
-                landkode = :landkode, 
-                land = :land
-            WHERE brev_id = :id
-        """
-
-        const val OPPDATER_BREV_QUERY = """
-            UPDATE brev 
-            SET tittel = :tittel, 
-                vedtaksbrev = :vedtaksbrev 
-            WHERE id = :id
         """
 
         const val OPPRETT_HENDELSE_QUERY = """

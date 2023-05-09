@@ -52,7 +52,7 @@ internal class DokarkivServiceTest {
 
     @Test
     fun `journalfoer brevet med barnet som mottaker`() {
-        every { mockDb.hentBrevInnhold(any()) } returns BrevInnhold("mal", Spraak.NB, "".toByteArray())
+        every { mockDb.hentBrevInnhold(any()) } returns BrevInnhold(Spraak.NB, data = "".toByteArray())
         coEvery { mockKlient.opprettJournalpost(any(), any()) } returns JournalpostResponse("id", "OK", "melding", true)
 
         val vedtaksbrev = opprettVedtaksbrev()

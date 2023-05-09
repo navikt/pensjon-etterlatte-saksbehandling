@@ -5,7 +5,7 @@ import io.mockk.confirmVerified
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.etterlatte.brev.BrevService
+import no.nav.etterlatte.brev.VedtaksbrevService
 import no.nav.etterlatte.brev.distribusjon.DistribusjonServiceImpl
 import no.nav.etterlatte.brev.distribusjon.DistribusjonsTidspunktType
 import no.nav.etterlatte.brev.distribusjon.DistribusjonsType
@@ -23,7 +23,7 @@ import org.junit.jupiter.api.Test
 import java.util.*
 
 internal class DistribuerBrevTest {
-    private val brevService = mockk<BrevService>()
+    private val brevService = mockk<VedtaksbrevService>()
     private val distribusjonService = mockk<DistribusjonServiceImpl>(relaxed = true)
 
     private val inspector = TestRapid().apply { DistribuerBrev(this, brevService, distribusjonService) }

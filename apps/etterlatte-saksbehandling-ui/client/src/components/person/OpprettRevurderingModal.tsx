@@ -4,6 +4,7 @@ import styled from 'styled-components'
 import { opprettRevurdering as opprettRevurderingApi } from '~shared/api/behandling'
 import { isPending, useApiCall } from '~shared/hooks/useApiCall'
 import { Grunnlagsendringshendelse } from '~components/person/typer'
+import { Revurderingsaarsak } from '~shared/types/Revurderingsaarsak'
 
 type Props = {
   open: boolean
@@ -15,11 +16,11 @@ type Props = {
 const OpprettRevurderingModal = (props: Props) => {
   const { revurderinger } = props
   const [error, setError] = useState<string | null>(null)
-  const [valgtAarsak, setValgtAarsak] = useState('')
+  const [valgtAarsak, setValgtAarsak] = useState<Revurderingsaarsak | undefined>(undefined)
   const [opprettRevurderingStatus, opprettRevurdering] = useApiCall(opprettRevurderingApi)
 
   const onSubmit = () => {
-    if (valgtAarsak === '') {
+    if (valgtAarsak === undefined) {
       return setError('Du må velge en årsak')
     }
 
@@ -46,7 +47,12 @@ const OpprettRevurderingModal = (props: Props) => {
               For å opprette en ny revurdering så må du først velge en årsak for revurderingen
             </BodyShort>
             <div>
-              <Select label="Årsak" value={valgtAarsak} onChange={(e) => setValgtAarsak(e.target.value)} error={error}>
+              <Select
+                label="Årsak"
+                value={valgtAarsak}
+                onChange={(e) => setValgtAarsak(e.target.value as Revurderingsaarsak)}
+                error={error}
+              >
                 <option value={''}>Velg en årsak</option>
                 {revurderinger.map((aarsak) => (
                   <option value={aarsak} key={aarsak}>

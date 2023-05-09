@@ -21,13 +21,18 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.confirmVerified
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
+import io.mockk.runs
 import io.mockk.verify
 import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.libs.common.FoedselsnummerDTO
 import no.nav.etterlatte.libs.common.behandling.PersonMedSakerOgRoller
+import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakOgRolle
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
+import no.nav.etterlatte.libs.common.grunnlag.PersongalleriRequest
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.serialize
 import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
 import no.nav.etterlatte.libs.ktor.restModule
@@ -42,7 +47,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import testsupport.buildTestApplicationConfigurationForOauth
-import java.util.UUID
+import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class GrunnlagRoutesKtTest {
@@ -239,5 +244,47 @@ internal class GrunnlagRoutesKtTest {
 
         verify(exactly = 1) { grunnlagService.hentAlleSakerForFnr(any()) }
         coVerify { behandlingKlient wasNot Called }
+    }
+
+    @Test
+    fun `lagrer persongrunnlag ved migrering`() {
+        every { grunnlagService.lagreNyePersonopplysninger(any(), any(), any()) } just runs
+
+        testApplication {
+            environment {
+                config = hoconApplicationConfig
+            }
+            application {
+                restModule(this.log, routePrefix = "api") { grunnlagRoute(grunnlagService, behandlingKlient) }
+            }
+            val httpClient = createClient {
+                install(ContentNegotiation) {
+                    jackson { registerModule(JavaTimeModule()) }
+                }
+            }
+            Assertions.assertEquals(
+                httpClient.post("api/grunnlag/person/persongalleri") {
+                    contentType(ContentType.Application.Json)
+                    setBody(
+                        PersongalleriRequest(
+                            sakId = 1,
+                            fnr = FoedselsnummerDTO(SOEKER_FOEDSELSNUMMER.value),
+                            persongalleri = Persongalleri(SOEKER_FOEDSELSNUMMER.value)
+                        )
+                    )
+                    headers {
+                        append(HttpHeaders.Authorization, "Bearer $systemBruker")
+                    }
+                }.status,
+                HttpStatusCode.Created
+            )
+            verify {
+                grunnlagService.lagreNyePersonopplysninger(
+                    1,
+                    Folkeregisteridentifikator.of(SOEKER_FOEDSELSNUMMER.value),
+                    any()
+                )
+            }
+        }
     }
 }

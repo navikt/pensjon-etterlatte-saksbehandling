@@ -1,9 +1,11 @@
 package no.nav.etterlatte.grunnlag
 
+import com.fasterxml.jackson.databind.JsonNode
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.call
 import io.ktor.server.auth.principal
+import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
@@ -12,11 +14,16 @@ import io.ktor.server.routing.route
 import io.ktor.util.pipeline.PipelineContext
 import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.grunnlag.PersongalleriRequest
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
+import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.common.withFoedselsnummer
 import no.nav.etterlatte.libs.common.withSakId
 import no.nav.security.token.support.v2.TokenValidationContextPrincipal
+import java.util.*
 
 fun Route.grunnlagRoute(grunnlagService: GrunnlagService, behandlingKlient: BehandlingKlient) {
     route("grunnlag") {
@@ -98,6 +105,21 @@ fun Route.grunnlagRoute(grunnlagService: GrunnlagService, behandlingKlient: Beha
                     )
                 }
             }
+        }
+        post("/person/persongalleri") {
+            val param = call.receive<PersongalleriRequest>()
+            val fnr = Folkeregisteridentifikator.of(param.fnr.foedselsnummer)
+
+            val node: Grunnlagsopplysning<JsonNode> = Grunnlagsopplysning(
+                id = UUID.randomUUID(),
+                kilde = Grunnlagsopplysning.Pesys.create(),
+                opplysningType = Opplysningstype.PERSONGALLERI_V1,
+                meta = objectMapper.createObjectNode(),
+                opplysning = param.toJsonNode(),
+                fnr = fnr
+            )
+            grunnlagService.lagreNyePersonopplysninger(param.sakId, fnr, listOf(node))
+            call.respond(HttpStatusCode.Created)
         }
     }
 }

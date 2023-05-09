@@ -1,21 +1,29 @@
 package vilkaarsvurdering.migrering
 
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.request.post
+import io.ktor.client.request.setBody
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.isSuccess
+import io.ktor.serialization.jackson.jackson
 import io.ktor.server.application.log
 import io.ktor.server.config.HoconApplicationConfig
 import io.ktor.server.testing.testApplication
 import io.mockk.coEvery
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
+import io.mockk.runs
+import no.nav.etterlatte.libs.common.FoedselsnummerDTO
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
+import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Delvilkaar
@@ -30,7 +38,9 @@ import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
+import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.etterlatte.vilkaarsvurdering.DelvilkaarRepository
+import no.nav.etterlatte.vilkaarsvurdering.VilkaarsvurderingMigreringRequest
 import no.nav.etterlatte.vilkaarsvurdering.VilkaarsvurderingRepository
 import no.nav.etterlatte.vilkaarsvurdering.VilkaarsvurderingService
 import no.nav.etterlatte.vilkaarsvurdering.klienter.BehandlingKlient
@@ -159,16 +169,34 @@ class MigreringTest {
             environment {
                 config = hoconApplicationConfig
             }
+            val grunnlagKlient = mockk<GrunnlagKlient>()
             application {
                 restModule(this.log) {
                     vilkaarsvurdering(vilkaarsvurderingServiceImpl, behandlingKlient)
-                    migrering(migreringService, behandlingKlient, vilkaarsvurderingServiceImpl)
+                    migrering(migreringService, behandlingKlient, vilkaarsvurderingServiceImpl, grunnlagKlient)
                 }
             }
+            val client = createClient {
+                install(ContentNegotiation) {
+                    jackson { registerModule(JavaTimeModule()) }
+                }
+            }
+            coEvery { grunnlagKlient.opprettPersongalleri(any(), any()) } just runs
 
             val response =
-                client.post("/api/vilkaarsvurdering/migrering/$behandlingId") {
+                client.post("/api/vilkaarsvurdering/migrering/") {
                     header(HttpHeaders.Authorization, "Bearer $token")
+                    header(HttpHeaders.ContentType, ContentType.Application.Json)
+                    setBody(
+                        VilkaarsvurderingMigreringRequest(
+                            1,
+                            behandlingId,
+                            FoedselsnummerDTO(SOEKER_FOEDSELSNUMMER.value),
+                            Persongalleri(
+                                SOEKER_FOEDSELSNUMMER.value
+                            )
+                        )
+                    )
                 }
             assertEquals(HttpStatusCode.Accepted, response.status)
 

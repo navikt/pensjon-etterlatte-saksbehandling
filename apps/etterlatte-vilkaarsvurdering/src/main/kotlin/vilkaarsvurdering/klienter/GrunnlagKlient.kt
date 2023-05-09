@@ -7,6 +7,7 @@ import io.ktor.client.HttpClient
 import no.nav.etterlatte.libs.common.RetryResult.Failure
 import no.nav.etterlatte.libs.common.RetryResult.Success
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
+import no.nav.etterlatte.libs.common.grunnlag.PersongalleriRequest
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.retry
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
@@ -17,6 +18,10 @@ import org.slf4j.LoggerFactory
 
 interface GrunnlagKlient {
     suspend fun hentGrunnlag(sakId: Long, bruker: Bruker): Grunnlag
+    suspend fun opprettPersongalleri(
+        request: PersongalleriRequest,
+        bruker: Bruker
+    )
 }
 
 class GrunnlagKlientException(override val message: String, override val cause: Throwable) : Exception(message, cause)
@@ -58,4 +63,17 @@ class GrunnlagKlientImpl(config: Config, httpClient: HttpClient) : GrunnlagKlien
             }
         }
     }
+
+    override suspend fun opprettPersongalleri(request: PersongalleriRequest, bruker: Bruker) =
+        downstreamResourceClient.post(
+            resource = Resource(
+                clientId = clientId,
+                url = "$resourceUrl/grunnlag/person/persongalleri"
+            ),
+            bruker = bruker,
+            postBody = request
+        ).mapBoth(
+            success = { },
+            failure = { throwableErrorMessage -> throw throwableErrorMessage }
+        )
 }

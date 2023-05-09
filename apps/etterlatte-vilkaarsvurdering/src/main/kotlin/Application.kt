@@ -33,7 +33,7 @@ class Server(private val context: ApplicationContext) {
                 module {
                     restModule(sikkerLogg) {
                         vilkaarsvurdering(vilkaarsvurderingService, behandlingKlient)
-                        migrering(migreringService, behandlingKlient, vilkaarsvurderingService)
+                        migrering(migreringService, behandlingKlient, vilkaarsvurderingService, grunnlagKlient)
                     }
                 }
                 connector { port = properties.httpPort }

@@ -8,12 +8,13 @@ import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.vilkaarsvurdering.OpprettVilkaarsvurderingFraBehandling
+import no.nav.etterlatte.vilkaarsvurdering.VilkaarsvurderingMigreringRequest
 import java.util.*
 
 interface VilkaarsvurderingService {
     fun kopierForrigeVilkaarsvurdering(behandlingId: UUID, behandlingViOmregnerFra: UUID): HttpResponse
     fun opprettVilkaarsvurdering(behandlingId: UUID): HttpResponse
-    fun migrer(behandlingId: UUID): HttpResponse
+    fun migrer(request: VilkaarsvurderingMigreringRequest): HttpResponse
 }
 
 class VilkaarsvurderingServiceImpl(private val vilkaarsvurderingKlient: HttpClient, private val url: String) :
@@ -32,9 +33,12 @@ class VilkaarsvurderingServiceImpl(private val vilkaarsvurderingKlient: HttpClie
         }
     }
 
-    override fun migrer(behandlingId: UUID) = runBlocking {
+    override fun migrer(request: VilkaarsvurderingMigreringRequest) = runBlocking {
         vilkaarsvurderingKlient.post(
-            "$url/api/vilkaarsvurdering/migrering/$behandlingId"
-        )
+            "$url/api/vilkaarsvurdering/migrering"
+        ) {
+            contentType(ContentType.Application.Json)
+            setBody(request)
+        }
     }
 }

@@ -15,7 +15,7 @@ import no.nav.etterlatte.libs.common.withBehandlingId
 import no.nav.etterlatte.libs.ktor.bruker
 import no.nav.etterlatte.token.SystemBruker
 import org.slf4j.LoggerFactory
-import java.util.*
+import java.util.UUID
 
 private val logger = LoggerFactory.getLogger("BeregningsGrunnlag Route")
 
@@ -31,37 +31,38 @@ fun Route.beregningsGrunnlag(beregningsGrunnlagService: BeregningsGrunnlagServic
 
                     call.respond(HttpStatusCode.NoContent)
                 }
+
                 else -> call.respond(HttpStatusCode.Forbidden)
             }
         }
-    }
 
-    post("/{$BEHANDLINGSID_CALL_PARAMETER}/barnepensjon") {
-        withBehandlingId(behandlingKlient) { behandlingId ->
-            val body = call.receive<BarnepensjonBeregningsGrunnlag>()
+        post("/{$BEHANDLINGSID_CALL_PARAMETER}/barnepensjon") {
+            withBehandlingId(behandlingKlient) { behandlingId ->
+                val body = call.receive<BarnepensjonBeregningsGrunnlag>()
 
-            when {
-                beregningsGrunnlagService.lagreBarnepensjonBeregningsGrunnlag(
-                    behandlingId,
-                    body,
-                    bruker
-                ) -> call.respond(HttpStatusCode.NoContent)
+                when {
+                    beregningsGrunnlagService.lagreBarnepensjonBeregningsGrunnlag(
+                        behandlingId,
+                        body,
+                        bruker
+                    ) -> call.respond(HttpStatusCode.NoContent)
 
-                else -> call.respond(HttpStatusCode.Conflict)
+                    else -> call.respond(HttpStatusCode.Conflict)
+                }
             }
         }
-    }
 
-    get("/{$BEHANDLINGSID_CALL_PARAMETER}/barnepensjon") {
-        withBehandlingId(behandlingKlient) { behandlingId ->
-            logger.info("Henter grunnlag for behandling $behandlingId")
-            val grunnlag = beregningsGrunnlagService.hentBarnepensjonBeregningsGrunnlag(
-                behandlingId
-            )
+        get("/{$BEHANDLINGSID_CALL_PARAMETER}/barnepensjon") {
+            withBehandlingId(behandlingKlient) { behandlingId ->
+                logger.info("Henter grunnlag for behandling $behandlingId")
+                val grunnlag = beregningsGrunnlagService.hentBarnepensjonBeregningsGrunnlag(
+                    behandlingId
+                )
 
-            when (grunnlag) {
-                null -> call.respond(HttpStatusCode.NoContent)
-                else -> call.respond(HttpStatusCode.OK, grunnlag)
+                when (grunnlag) {
+                    null -> call.respond(HttpStatusCode.NoContent)
+                    else -> call.respond(HttpStatusCode.OK, grunnlag)
+                }
             }
         }
     }

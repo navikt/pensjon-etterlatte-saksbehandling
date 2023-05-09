@@ -27,6 +27,7 @@ class BeregningsGrunnlagService(
                 )
             )
         }
+
         else -> false
     }
 
@@ -35,5 +36,18 @@ class BeregningsGrunnlagService(
     ): BeregningsGrunnlag? {
         logger.info("Henter grunnlag $behandlingId")
         return beregningsGrunnlagRepository.finnGrunnlagForBehandling(behandlingId)
+    }
+
+    fun dupliserBeregningsGrunnlag(behandlingId: UUID, forrigeBehandlingId: UUID) {
+        logger.info("Dupliser grunnlag for $behandlingId fra $forrigeBehandlingId")
+
+        val forrigeGrunnlag = beregningsGrunnlagRepository.finnGrunnlagForBehandling(forrigeBehandlingId)
+            ?: throw RuntimeException("Ingen grunnlag funnet for $forrigeBehandlingId")
+
+        if (beregningsGrunnlagRepository.finnGrunnlagForBehandling(behandlingId) != null) {
+            throw RuntimeException("Eksisterende grunnlag funnet for $behandlingId")
+        }
+
+        beregningsGrunnlagRepository.lagre(forrigeGrunnlag.copy(behandlingId = behandlingId))
     }
 }

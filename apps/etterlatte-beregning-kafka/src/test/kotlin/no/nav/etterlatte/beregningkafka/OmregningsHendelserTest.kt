@@ -2,6 +2,7 @@ package no.nav.etterlatte.beregningkafka
 
 import io.ktor.client.call.body
 import io.ktor.client.statement.HttpResponse
+import io.ktor.http.HttpStatusCode
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
@@ -16,7 +17,7 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import rapidsandrivers.BEREGNING_KEY
 import java.io.FileNotFoundException
-import java.util.*
+import java.util.UUID
 
 internal class OmregningsHendelserTest {
 
@@ -26,6 +27,8 @@ internal class OmregningsHendelserTest {
     @Test
     fun `skal opprette omregning`() {
         val omregningsid = slot<UUID>()
+        val behandlingsId = slot<UUID>()
+        val forrigeBehandlingId = slot<UUID>()
         val beregningDTO = BeregningDTO(
             beregningId = UUID.randomUUID(),
             behandlingId = UUID.randomUUID(),
@@ -40,13 +43,25 @@ internal class OmregningsHendelserTest {
                 runBlocking { it.body<BeregningDTO>() }
             } returns beregningDTO
         }
+
+        val noContentValue = mockk<HttpResponse>().also {
+            every {
+                runBlocking { it.status }
+            } returns HttpStatusCode.NoContent
+        }
+
         every { behandlingService.opprettOmregning(capture(omregningsid)) }.returns(returnValue)
+        every {
+            behandlingService.opprettBeregningsGrunnlag(capture(behandlingsId), capture(forrigeBehandlingId))
+        }.returns(noContentValue)
 
         val inspector = inspector.apply { sendTestMessage(fullMelding) }
 
         inspector.sendTestMessage(fullMelding)
 
         Assertions.assertEquals(UUID.fromString("11bf9683-4edb-403c-99da-b6ec6ff7fc31"), omregningsid.captured)
+        Assertions.assertEquals(UUID.fromString("11bf9683-4edb-403c-99da-b6ec6ff7fc31"), behandlingsId.captured)
+        Assertions.assertEquals(UUID.fromString("1be3d0dd-97be-4ccb-a71c-b3254ce7ae0a"), forrigeBehandlingId.captured)
         Assertions.assertEquals(2, inspector.inspektør.size)
         Assertions.assertEquals(
             beregningDTO.toJson(),

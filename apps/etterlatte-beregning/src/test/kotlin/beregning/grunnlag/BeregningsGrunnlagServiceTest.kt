@@ -6,16 +6,21 @@ import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.beregning.grunnlag.BarnepensjonBeregningsGrunnlag
+import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlag
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlagRepository
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlagService
 import no.nav.etterlatte.beregning.klienter.BehandlingKlientImpl
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeskenMedIBeregning
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
+import java.lang.RuntimeException
 import java.time.YearMonth
 import java.util.*
 import java.util.UUID.randomUUID
@@ -52,6 +57,73 @@ internal class BeregningsGrunnlagServiceTest {
             )
 
             verify(exactly = 1) { beregningsGrunnlagRepository.lagre(any()) }
+        }
+    }
+
+    @Test
+    fun `skal lage et kopi av grunnlaget`() {
+        val behandling = mockBehandling(SakType.BARNEPENSJON, randomUUID())
+
+        val omregningsId = randomUUID()
+        val behandlingsId = randomUUID()
+
+        coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
+        coEvery { behandlingKlient.beregn(any(), any(), any()) } returns true
+        every { beregningsGrunnlagRepository.finnGrunnlagForBehandling(omregningsId) } returns null
+        every { beregningsGrunnlagRepository.finnGrunnlagForBehandling(behandlingsId) } returns BeregningsGrunnlag(
+            behandlingsId,
+            Grunnlagsopplysning.Saksbehandler("Z123456", Tidspunkt.now()),
+            emptyList()
+        )
+        every { beregningsGrunnlagRepository.lagre(any()) } returns true
+
+        runBlocking {
+            beregningsGrunnlagService.dupliserBeregningsGrunnlag(omregningsId, behandlingsId)
+
+            verify(exactly = 1) { beregningsGrunnlagRepository.lagre(any()) }
+        }
+    }
+
+    @Test
+    fun `kan ikke lage et kopi av grunnlaget hvis forrige mangler`() {
+        val behandling = mockBehandling(SakType.BARNEPENSJON, randomUUID())
+
+        val behandlingsId = randomUUID()
+
+        coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
+        coEvery { behandlingKlient.beregn(any(), any(), any()) } returns true
+        every { beregningsGrunnlagRepository.finnGrunnlagForBehandling(behandlingsId) } returns null
+
+        runBlocking {
+            assertThrows<RuntimeException> {
+                beregningsGrunnlagService.dupliserBeregningsGrunnlag(randomUUID(), behandlingsId)
+
+                verify(exactly = 0) { beregningsGrunnlagRepository.lagre(any()) }
+            }
+        }
+    }
+
+    @Test
+    fun `kan ikke lage et kopi av grunnlaget hvis den allerede finnes`() {
+        val behandling = mockBehandling(SakType.BARNEPENSJON, randomUUID())
+
+        val behandlingsId = randomUUID()
+        val omregningsId = randomUUID()
+
+        coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
+        coEvery { behandlingKlient.beregn(any(), any(), any()) } returns true
+        every { beregningsGrunnlagRepository.finnGrunnlagForBehandling(any()) } returns BeregningsGrunnlag(
+            behandlingsId,
+            Grunnlagsopplysning.Saksbehandler("Z123456", Tidspunkt.now()),
+            emptyList()
+        )
+
+        runBlocking {
+            assertThrows<RuntimeException> {
+                beregningsGrunnlagService.dupliserBeregningsGrunnlag(omregningsId, behandlingsId)
+
+                verify(exactly = 0) { beregningsGrunnlagRepository.lagre(any()) }
+            }
         }
     }
 

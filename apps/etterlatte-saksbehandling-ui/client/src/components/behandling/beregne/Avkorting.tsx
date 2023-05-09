@@ -1,4 +1,3 @@
-import { Heading } from '@navikt/ds-react'
 import styled from 'styled-components'
 import { isFailure, useApiCall } from '~shared/hooks/useApiCall'
 import { hentAvkorting } from '~shared/api/avkorting'
@@ -9,6 +8,7 @@ import { isPending } from '@reduxjs/toolkit'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { useParams } from 'react-router-dom'
+import { YtelseEtterAvkorting } from '~components/behandling/beregne/YtelseEtterAvkorting'
 
 export const Avkorting = () => {
   const { behandlingId } = useParams()
@@ -24,17 +24,11 @@ export const Avkorting = () => {
 
   return (
     <AvkortingWrapper>
-      <Heading spacing size="small" level="2">
-        Inntektsavkorting
-      </Heading>
-
       {!['initial', 'pending'].includes(avkortingStatus.status) && (
         <AvkortingInntekt avkortingGrunnlag={avkorting?.avkortingGrunnlag} setAvkorting={setAvkorting} />
       )}
 
-      <Heading spacing size="small" level="2">
-        Omstillingsstønad etter avkorting
-      </Heading>
+      <YtelseEtterAvkorting ytelser={avkorting?.avkortetYtelse} />
 
       {isPending(avkortingStatus) && <Spinner visible={true} label={'Henter avkorting'} />}
       {isFailure(avkortingStatus) && avkortingStatus.error.statusCode !== 404 && (

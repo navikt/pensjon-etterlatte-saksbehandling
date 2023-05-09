@@ -91,7 +91,7 @@ fun beregnetAvkortingGrunnlag(
 )
 
 fun avkortetYtelseGrunnlag(bruttoYtelse: Int, avkorting: Int) = AvkortetYtelseGrunnlag(
-    fom = YearMonth.now(),
+    periode = RegelPeriode(fraDato = LocalDate.now()),
     bruttoYtelse = FaktumNode(verdi = bruttoYtelse, "", ""),
     avkorting = FaktumNode(verdi = avkorting, "", "")
 )

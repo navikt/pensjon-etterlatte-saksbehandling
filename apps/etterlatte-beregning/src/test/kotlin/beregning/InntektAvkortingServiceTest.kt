@@ -91,19 +91,26 @@ class InntektAvkortingServiceTest {
         val avkortetYtelse = InntektAvkortingService.beregnAvkortetYtelse(beregninger, avkortingGrunnlag)
 
         avkortetYtelse.size shouldBe 4
-        with(avkortetYtelse.find { it.periode.fom == YearMonth.of(2023, 1) }!!) {
+        with(avkortetYtelse[0]) {
             regelResultat shouldNotBe null
             tidspunkt shouldNotBe null
-            periode shouldNotBe null
+            periode.fom shouldBe YearMonth.of(2023, 1)
+            periode.tom shouldBe YearMonth.of(2023, 1)
             ytelseEtterAvkorting shouldBe 4000
         }
-        with(avkortetYtelse.find { it.periode.fom == YearMonth.of(2023, 2) }!!) {
+        with(avkortetYtelse[1]) {
+            periode.fom shouldBe YearMonth.of(2023, 2)
+            periode.tom shouldBe YearMonth.of(2023, 2)
             ytelseEtterAvkorting shouldBe 3000
         }
-        with(avkortetYtelse.find { it.periode.fom == YearMonth.of(2023, 3) }!!) {
+        with(avkortetYtelse[2]) {
+            periode.fom shouldBe YearMonth.of(2023, 3)
+            periode.tom shouldBe YearMonth.of(2023, 3)
             ytelseEtterAvkorting shouldBe 2000
         }
-        with(avkortetYtelse.find { it.periode.fom == YearMonth.of(2023, 4) }!!) {
+        with(avkortetYtelse[3]) {
+            periode.fom shouldBe YearMonth.of(2023, 4)
+            periode.tom shouldBe null
             ytelseEtterAvkorting shouldBe 7000
         }
     }

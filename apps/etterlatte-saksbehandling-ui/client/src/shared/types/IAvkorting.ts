@@ -1,7 +1,7 @@
 export interface IAvkorting {
   behandlingId: string
   avkortingGrunnlag: IAvkortingGrunnlag[]
-  tidspunktForAvkorting: string
+  avkortetYtelse: IAvkortetYtelse[]
 }
 
 export interface IAvkortingGrunnlag {
@@ -14,4 +14,10 @@ export interface IAvkortingGrunnlag {
     tidspunkt: ''
     ident: ''
   }
+}
+
+export interface IAvkortetYtelse {
+  fom: string
+  tom: string
+  ytelseEtterAvkorting: number
 }

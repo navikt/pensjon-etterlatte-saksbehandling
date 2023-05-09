@@ -18,6 +18,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.withBehandlingId
 import no.nav.etterlatte.libs.ktor.bruker
 import no.nav.etterlatte.token.Bruker
+import java.time.LocalDate
 import java.time.YearMonth
 import java.util.*
 
@@ -49,7 +50,8 @@ fun Route.avkorting(avkortingService: AvkortingService, behandlingKlient: Behand
 
 data class AvkortingDto(
     val behandlingId: UUID,
-    val avkortingGrunnlag: List<AvkortingGrunnlagDto>
+    val avkortingGrunnlag: List<AvkortingGrunnlagDto>,
+    val avkortetYtelse: List<AvkortetYtelseDto>
 )
 
 data class AvkortingGrunnlagDto(
@@ -66,9 +68,16 @@ data class AvkortingGrunnlagKildeDto(
     val ident: String
 )
 
+data class AvkortetYtelseDto(
+    val fom: LocalDate,
+    val tom: LocalDate?,
+    val ytelseEtterAvkorting: Int
+)
+
 fun Avkorting.toDto() = AvkortingDto(
     behandlingId = behandlingId,
-    avkortingGrunnlag = avkortingGrunnlag.map { it.toDto() }
+    avkortingGrunnlag = avkortingGrunnlag.map { it.toDto() },
+    avkortetYtelse = avkortetYtelse.map { it.toDto() }
 )
 
 fun AvkortingGrunnlag.toDto() = AvkortingGrunnlagDto(
@@ -78,6 +87,12 @@ fun AvkortingGrunnlag.toDto() = AvkortingGrunnlagDto(
     gjeldendeAar = gjeldendeAar,
     spesifikasjon = spesifikasjon,
     kilde = AvkortingGrunnlagKildeDto(kilde.tidspunkt.toString(), kilde.ident)
+)
+
+fun AvkortetYtelse.toDto() = AvkortetYtelseDto(
+    fom = periode.fom.atDay(1),
+    tom = periode.tom?.atEndOfMonth(),
+    ytelseEtterAvkorting = ytelseEtterAvkorting
 )
 
 fun AvkortingGrunnlagDto.fromDto(bruker: Bruker) = AvkortingGrunnlag(

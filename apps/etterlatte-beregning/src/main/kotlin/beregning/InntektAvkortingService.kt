@@ -49,9 +49,9 @@ object InntektAvkortingService {
         beregninger: List<Beregningsperiode>,
         avkortingGrunnlag: List<AvkortingGrunnlag>
     ): List<AvkortetYtelse> {
-        val avkortingsgrunnlag = periodisertBruttoYtelseOgAvkorting(beregninger, avkortingGrunnlag)
-        return avkortingsgrunnlag.map { grunnlag ->
-            val resultat = avkorteYtelse.eksekver(grunnlag, RegelPeriode(grunnlag.fom.atDay(1)))
+        val regelgrunnlag = periodisertBruttoYtelseOgAvkorting(beregninger, avkortingGrunnlag)
+        return regelgrunnlag.map { grunnlag ->
+            val resultat = avkorteYtelse.eksekver(grunnlag, grunnlag.periode)
             when (resultat) {
                 is RegelkjoeringResultat.Suksess -> {
                     resultat.periodiserteResultater.map { periodisertResultat ->
@@ -78,9 +78,11 @@ object InntektAvkortingService {
         avkortingGrunnlag: List<AvkortingGrunnlag>
     ): List<AvkortetYtelseGrunnlag> {
         val beregnedeAvkortinger = avkortingGrunnlag.flatMap { it.beregnetAvkorting }
-        val knekkpunkter = beregninger.map { it.datoFOM }.toMutableSet() + beregnedeAvkortinger.map { it.periode.fom }
+        val knekkpunkter = (beregninger.map { it.datoFOM }.toMutableSet() + beregnedeAvkortinger.map { it.periode.fom })
+            .toList().sorted()
 
-        return knekkpunkter.map { knekkpunkt ->
+        val avkortetYtelseGrunnlag = mutableListOf<AvkortetYtelseGrunnlag>()
+        knekkpunkter.forEachIndexed { indeks, knekkpunkt ->
             val beregning = beregninger.filter { it.datoFOM <= knekkpunkt }.maxByOrNull { it.datoFOM }
                 ?: throw Exception("Noe gikk galt ved uthenting av grunnlag for avkorting")
 
@@ -88,19 +90,25 @@ object InntektAvkortingService {
                 .maxByOrNull { it.periode.fom }
                 ?: throw Exception("Noe gikk galt ved uthenting av grunnlag for avkorting")
 
-            AvkortetYtelseGrunnlag(
-                fom = knekkpunkt,
-                bruttoYtelse = FaktumNode(
-                    verdi = beregning.utbetaltBeloep,
-                    kilde = "Regel", // TODO EY-2123
-                    beskrivelse = "Beregnet brutto ytelse for periode"
-                ),
-                avkorting = FaktumNode(
-                    verdi = beregnetAvkorting.avkorting,
-                    kilde = "Regel", // TODO EY-2123
-                    beskrivelse = "Beregnet avkorting for periode"
+            avkortetYtelseGrunnlag.add(
+                AvkortetYtelseGrunnlag(
+                    periode = RegelPeriode(
+                        fraDato = knekkpunkt.atDay(1),
+                        tilDato = knekkpunkter.getOrNull(indeks + 1)?.minusMonths(1)?.atEndOfMonth()
+                    ),
+                    bruttoYtelse = FaktumNode(
+                        verdi = beregning.utbetaltBeloep,
+                        kilde = "Regel", // TODO EY-2123
+                        beskrivelse = "Beregnet brutto ytelse for periode"
+                    ),
+                    avkorting = FaktumNode(
+                        verdi = beregnetAvkorting.avkorting,
+                        kilde = "Regel", // TODO EY-2123
+                        beskrivelse = "Beregnet avkorting for periode"
+                    )
                 )
             )
         }
+        return avkortetYtelseGrunnlag
     }
 }

@@ -61,7 +61,7 @@ const HistoriskeHendelser = (props: Props) => {
 }
 
 const HistoriskeHendelserWrapper = styled.div`
-  margin-top: 5rem;
+  margin-top: 3rem;
 `
 
 const MarginRightChevron = styled.span`

@@ -7,6 +7,7 @@ import {
 import { apiClient, ApiResponse } from './apiClient'
 import { ManueltOpphoerDetaljer } from '~components/behandling/manueltopphoeroversikt/ManueltOpphoerOversikt'
 import { Grunnlagsendringshendelse } from '~components/person/typer'
+import { Revurderingsaarsak } from '~shared/types/Revurderingsaarsak'
 
 export const hentBehandlingerForPerson = async (fnr: string): Promise<ApiResponse<any>> => {
   return apiClient.post(`/personer/behandlinger`, { foedselsnummer: fnr })
@@ -87,13 +88,13 @@ export const lagreBegrunnelseKommerBarnetTilgode = async (args: {
 
 export const opprettRevurdering = async (args: {
   sakId: number
-  aarsak: string
+  aarsak: Revurderingsaarsak
 }): Promise<ApiResponse<IDetaljertBehandling>> => {
   return apiClient.post(`/${args.sakId}/revurdering`, {
     aarsak: args.aarsak,
   })
 }
 
-export const hentStoettedeRevurderinger = async (): Promise<ApiResponse<Array<string>>> => {
+export const hentStoettedeRevurderinger = async (): Promise<ApiResponse<Array<Revurderingsaarsak>>> => {
   return apiClient.get(`/stoettederevurderinger`)
 }

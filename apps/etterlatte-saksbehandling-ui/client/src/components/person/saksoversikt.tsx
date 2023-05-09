@@ -6,7 +6,6 @@ import { INasjonalitetsType } from '../behandling/fargetags/nasjonalitetsType'
 import { Heading, Tag } from '@navikt/ds-react'
 import { ManueltOpphoerModal } from './ManueltOpphoerModal'
 import { ToKolonner } from '../toKolonner/ToKolonner'
-import { Grunnlagshendelser } from './grunnlagshendelser/Grunnlagsendringshendelser'
 import { tagColors } from '~shared/Tags'
 import { formaterEnumTilLesbarString } from '~utils/formattering'
 import {
@@ -21,12 +20,12 @@ import {
   harIngenUavbrutteManuelleOpphoer,
   kunIverksatteBehandlinger,
 } from '~components/behandling/felles/utils'
-import OpprettRevurderingModal from '~components/person/OpprettRevurderingModal'
 import { IBehandlingsType } from '~shared/types/IDetaljertBehandling'
 import RelevanteHendelser from '~components/person/uhaandtereHendelser/RelevanteHendelser'
 import { isFailure, useApiCall } from '~shared/hooks/useApiCall'
 import { hentPersonerISak } from '~shared/api/grunnlag'
 import { ApiErrorAlert } from '~ErrorBoundary'
+import { Revurderingsaarsak } from '~shared/types/Revurderingsaarsak'
 
 export const Saksoversikt = ({ fnr }: { fnr: string | undefined }) => {
   const [behandlingliste, setBehandlingliste] = useState<IBehandlingsammendrag[]>([])
@@ -36,11 +35,10 @@ export const Saksoversikt = ({ fnr }: { fnr: string | undefined }) => {
   const [behandlinglisteError, setBehandlinglisteError] = useState<IBehandlingsammendrag[]>()
   const [grunnlagshendelserError, setGrunnlagshendelserError] = useState<Grunnlagsendringshendelse[]>()
   const [sakId, setSakId] = useState<number | undefined>()
-  const [visOpprettRevurderingsmodal, setVisOpprettRevurderingsmodal] = useState<boolean>(false)
   const [personerISak, hentPersoner, resetPersoner] = useApiCall(hentPersonerISak)
 
   const [hentStoettedeRevurderingerStatus, hentStoettedeRevurderingerFc] = useApiCall(hentStoettedeRevurderinger)
-  const [revurderinger, setStoettedeRevurderinger] = useState<Array<string> | undefined>(undefined)
+  const [revurderinger, setStoettedeRevurderinger] = useState<Array<Revurderingsaarsak> | undefined>(undefined)
   useEffect(() => {
     hentStoettedeRevurderingerFc(
       {},
@@ -145,40 +143,27 @@ export const Saksoversikt = ({ fnr }: { fnr: string | undefined }) => {
                       {kanOppretteManueltOpphoer && (
                         <ManueltOpphoerModal sakId={sakId} iverksatteBehandlinger={iverksatteBehandlinger} />
                       )}
-                      <OpprettRevurderingModal
-                        sakId={sakId}
-                        open={visOpprettRevurderingsmodal}
-                        setOpen={setVisOpprettRevurderingsmodal}
-                      />
                     </EkstraHandlinger>
                   ) : null}
                   {isFailure(hentStoettedeRevurderingerStatus) && (
                     <ApiErrorAlert>En feil skjedde under kallet for å hente støttede revurderinger</ApiErrorAlert>
                   )}
-                  {revurderinger && (
+                  {sakId !== undefined && revurderinger ? (
                     <RelevanteHendelser
                       hendelser={hendelser}
                       revurderinger={revurderinger}
-                      startRevurdering={() => setVisOpprettRevurderingsmodal(true)}
                       disabled={harAapenRevurdering}
                       grunnlag={personerISak}
+                      sakId={sakId}
                     />
-                  )}
-                  {sakId !== undefined ? (
-                    <div className="behandlinger">
-                      <h2>Behandlinger</h2>
-                      {behandlingliste !== undefined && (
-                        <Behandlingsliste revurderinger={revurderinger} behandlinger={behandlingliste} sakId={sakId} />
-                      )}
-                    </div>
                   ) : null}
+                  <div className="behandlinger">
+                    <h2>Behandlinger</h2>
+                    {behandlingliste !== undefined && <Behandlingsliste behandlinger={behandlingliste} />}
+                  </div>
                 </>
               ),
-              right: grunnlagshendelser?.length ? (
-                <HendelseBorder>
-                  <Grunnlagshendelser hendelser={grunnlagshendelser} />
-                </HendelseBorder>
-              ) : null,
+              right: null,
             }}
           </ToKolonner>
         </SaksoversiktWrapper>
@@ -187,25 +172,10 @@ export const Saksoversikt = ({ fnr }: { fnr: string | undefined }) => {
   )
 }
 
-const HendelseBorder = styled.div`
-  height: 100%;
-  border-left: 2px solid lightgray;
-  padding-left: 2rem;
-`
-
 const EkstraHandlinger = styled.div`
   display: flex;
   flex-direction: row-reverse;
   gap: 0.5em;
-`
-
-export const IconButton = styled.div`
-  padding-top: 1em;
-  color: #000000;
-
-  :hover {
-    cursor: pointer;
-  }
 `
 
 export const SaksoversiktWrapper = styled.div`
@@ -239,26 +209,4 @@ export const HeadingWrapper = styled.div`
   .details {
     padding: 0.6em;
   }
-`
-
-export const InfoWrapper = styled.div`
-  border: 1px solid #000000;
-  border-radius: 4px;
-  display: flex;
-  justify-content: space-between;
-  padding: 3em;
-`
-
-export const Col = styled.div`
-  font-weight: 400;
-  font-size: 20px;
-  line-height: 28px;
-  margin-bottom: 10px;
-`
-
-export const Value = styled.div`
-  font-style: normal;
-  font-weight: 600;
-  font-size: 20px;
-  line-height: 28px;
 `

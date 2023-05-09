@@ -6,7 +6,6 @@ import { INasjonalitetsType } from '../behandling/fargetags/nasjonalitetsType'
 import { Heading, Tag } from '@navikt/ds-react'
 import { ManueltOpphoerModal } from './ManueltOpphoerModal'
 import { ToKolonner } from '../toKolonner/ToKolonner'
-import { Grunnlagshendelser } from './grunnlagshendelser/Grunnlagsendringshendelser'
 import { tagColors } from '~shared/Tags'
 import { formaterEnumTilLesbarString } from '~utils/formattering'
 import {
@@ -164,11 +163,7 @@ export const Saksoversikt = ({ fnr }: { fnr: string | undefined }) => {
                   </div>
                 </>
               ),
-              right: grunnlagshendelser?.length ? (
-                <HendelseBorder>
-                  <Grunnlagshendelser hendelser={grunnlagshendelser} />
-                </HendelseBorder>
-              ) : null,
+              right: null,
             }}
           </ToKolonner>
         </SaksoversiktWrapper>
@@ -176,12 +171,6 @@ export const Saksoversikt = ({ fnr }: { fnr: string | undefined }) => {
     </>
   )
 }
-
-const HendelseBorder = styled.div`
-  height: 100%;
-  border-left: 2px solid lightgray;
-  padding-left: 2rem;
-`
 
 const EkstraHandlinger = styled.div`
   display: flex;

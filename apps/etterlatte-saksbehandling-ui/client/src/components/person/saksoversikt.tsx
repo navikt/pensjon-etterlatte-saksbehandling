@@ -26,6 +26,7 @@ import RelevanteHendelser from '~components/person/uhaandtereHendelser/Relevante
 import { isFailure, useApiCall } from '~shared/hooks/useApiCall'
 import { hentPersonerISak } from '~shared/api/grunnlag'
 import { ApiErrorAlert } from '~ErrorBoundary'
+import { Revurderingsaarsak } from '~shared/types/Revurderingsaarsak'
 
 export const Saksoversikt = ({ fnr }: { fnr: string | undefined }) => {
   const [behandlingliste, setBehandlingliste] = useState<IBehandlingsammendrag[]>([])
@@ -38,7 +39,7 @@ export const Saksoversikt = ({ fnr }: { fnr: string | undefined }) => {
   const [personerISak, hentPersoner, resetPersoner] = useApiCall(hentPersonerISak)
 
   const [hentStoettedeRevurderingerStatus, hentStoettedeRevurderingerFc] = useApiCall(hentStoettedeRevurderinger)
-  const [revurderinger, setStoettedeRevurderinger] = useState<Array<string> | undefined>(undefined)
+  const [revurderinger, setStoettedeRevurderinger] = useState<Array<Revurderingsaarsak> | undefined>(undefined)
   useEffect(() => {
     hentStoettedeRevurderingerFc(
       {},
@@ -188,15 +189,6 @@ const EkstraHandlinger = styled.div`
   gap: 0.5em;
 `
 
-export const IconButton = styled.div`
-  padding-top: 1em;
-  color: #000000;
-
-  :hover {
-    cursor: pointer;
-  }
-`
-
 export const SaksoversiktWrapper = styled.div`
   min-width: 40em;
   max-width: 100%;
@@ -228,26 +220,4 @@ export const HeadingWrapper = styled.div`
   .details {
     padding: 0.6em;
   }
-`
-
-export const InfoWrapper = styled.div`
-  border: 1px solid #000000;
-  border-radius: 4px;
-  display: flex;
-  justify-content: space-between;
-  padding: 3em;
-`
-
-export const Col = styled.div`
-  font-weight: 400;
-  font-size: 20px;
-  line-height: 28px;
-  margin-bottom: 10px;
-`
-
-export const Value = styled.div`
-  font-style: normal;
-  font-weight: 600;
-  font-size: 20px;
-  line-height: 28px;
 `

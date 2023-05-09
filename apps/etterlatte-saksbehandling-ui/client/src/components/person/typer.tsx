@@ -1,5 +1,6 @@
 import { VilkaarsvurderingResultat } from '~shared/api/vilkaarsvurdering'
 import { IBehandlingStatus, IBehandlingsType, Virkningstidspunkt } from '~shared/types/IDetaljertBehandling'
+import { Revurderingsaarsak } from '~shared/types/Revurderingsaarsak'
 
 export interface IPersonResult {
   fornavn: string
@@ -19,17 +20,18 @@ export interface IBehandlingsammendrag {
   soeknadMottattDato: string
   behandlingOpprettet: string
   behandlingType: IBehandlingsType
-  aarsak: AarsaksTyper
+  aarsak: BehandlingOgRevurderingsAarsakerType
   virkningstidspunkt?: Virkningstidspunkt
   vilkaarsvurderingUtfall?: VilkaarsvurderingResultat
 }
 
 export enum AarsaksTyper {
-  SOEKER_DOD = 'SOEKER_DOD',
   MANUELT_OPPHOER = 'MANUELT_OPPHOER',
   SOEKNAD = 'SOEKNAD',
-  REGULERING = 'REGULERING',
+  REVURDERING = 'REVURDERING',
 }
+
+export type BehandlingOgRevurderingsAarsakerType = Revurderingsaarsak | AarsaksTyper
 
 export type GrunnlagsendringsType = SamsvarMellomKildeOgGrunnlag['type']
 

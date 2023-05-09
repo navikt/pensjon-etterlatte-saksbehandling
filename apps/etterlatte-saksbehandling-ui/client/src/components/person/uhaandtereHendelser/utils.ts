@@ -2,6 +2,7 @@ import { Grunnlagsendringshendelse, GrunnlagsendringsType } from '~components/pe
 import { formaterKanskjeStringDatoMedFallback } from '~utils/formattering'
 import React from 'react'
 import { PersonMedNavn } from '~shared/types/grunnlag'
+import { Revurderingsaarsak } from '~shared/types/Revurderingsaarsak'
 
 export const grunnlagsendringsTittel: Record<GrunnlagsendringsType, string> = {
   GRUNNBELOEP: 'Regulering feilet',
@@ -38,11 +39,23 @@ export const grunnlagsendringsKilde = (type: GrunnlagsendringsType): string => {
   }
 }
 
+const grunnlagsEndringstyperTilRevurderingsAarsaker: Record<GrunnlagsendringsType, Array<string>> = {
+  GRUNNBELOEP: [Revurderingsaarsak.REGULERING],
+  DOEDSDATO: [Revurderingsaarsak.DOEDSFALL, Revurderingsaarsak.SOESKENJUSTERING],
+  UTLAND: [Revurderingsaarsak.UTLAND],
+  BARN: [Revurderingsaarsak.BARN],
+  ANSVARLIGE_FORELDRE: [Revurderingsaarsak.ANSVARLIGE_FORELDRE],
+  VERGEMAAL_ELLER_FREMTIDSFULLMAKT: [Revurderingsaarsak.VERGEMAAL_ELLER_FREMTIDSFULLMAKT],
+  INSTITUSJONSOPPHOLD: [Revurderingsaarsak.SOESKENJUSTERING],
+}
+
 export const stoetterRevurderingAvHendelse = (
   hendelse: Grunnlagsendringshendelse,
-  revurderinger: Array<string>
+  revurderinger: Array<Revurderingsaarsak>
 ): boolean => {
-  return revurderinger.includes(hendelse.type)
+  return revurderinger.some((revurdering) =>
+    grunnlagsEndringstyperTilRevurderingsAarsaker[hendelse.type].includes(revurdering)
+  )
 }
 
 export const rolletekst: Record<Grunnlagsendringshendelse['hendelseGjelderRolle'], string> = {

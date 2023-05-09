@@ -3,11 +3,18 @@ import React, { useState } from 'react'
 import styled from 'styled-components'
 import { isPending, useApiCall } from '~shared/hooks/useApiCall'
 import { opprettRevurdering as opprettRevurderingApi } from '~shared/api/behandling'
+import { Revurderingsaarsak } from '~shared/types/Revurderingsaarsak'
 
-export const OpprettNyBehandling = ({ sakId, revurderinger }: { sakId: number; revurderinger: Array<string> }) => {
+export const OpprettNyBehandling = ({
+  sakId,
+  revurderinger,
+}: {
+  sakId: number
+  revurderinger: Array<Revurderingsaarsak>
+}) => {
   const [error, setError] = useState<string | null>(null)
   const [open, setOpen] = useState(false)
-  const [valgtRevurdering, setValgtRevurdering] = useState<string | undefined>()
+  const [valgtRevurdering, setValgtRevurdering] = useState<Revurderingsaarsak | undefined>()
   const stoettedeRevurderinger = revurderinger
 
   const [opprettRevurderingStatus, opprettRevurdering, resetApiCall] = useApiCall(opprettRevurderingApi)
@@ -41,7 +48,7 @@ export const OpprettNyBehandling = ({ sakId, revurderinger }: { sakId: number; r
             <Select
               label="Årsak til revurdering"
               value={valgtRevurdering}
-              onChange={(e) => setValgtRevurdering(e.target.value)}
+              onChange={(e) => setValgtRevurdering(e.target.value as Revurderingsaarsak)}
               error={error}
             >
               <option>Velg type</option>

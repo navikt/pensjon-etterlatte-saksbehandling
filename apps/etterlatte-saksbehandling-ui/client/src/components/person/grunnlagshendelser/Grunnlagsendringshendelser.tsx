@@ -152,6 +152,7 @@ const HendelseVisning = (props: { data?: SamsvarMellomKildeOgGrunnlag }) => {
   }
 }
 
+//TODO: Slett hele greia bare forvirriende
 const ListeAvHendelser = ({ hendelser }: { hendelser: Grunnlagsendringshendelse[] }) => (
   <div>
     {hendelser.map((hendelse) => (

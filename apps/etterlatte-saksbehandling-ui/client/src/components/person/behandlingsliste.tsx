@@ -1,11 +1,12 @@
 import { Link, Table } from '@navikt/ds-react'
-import { AarsaksTyper, IBehandlingsammendrag, VedtakSammendrag } from './typer'
+import { AarsaksTyper, BehandlingOgRevurderingsAarsakerType, IBehandlingsammendrag, VedtakSammendrag } from './typer'
 import { formaterBehandlingstype, formaterEnumTilLesbarString, formaterStringDato } from '~utils/formattering'
 import { IBehandlingStatus, IBehandlingsType } from '~shared/types/IDetaljertBehandling'
 import { VilkaarsvurderingResultat } from '~shared/api/vilkaarsvurdering'
 import { erFerdigBehandlet } from '~components/behandling/felles/utils'
 import React, { useEffect, useState } from 'react'
 import { hentVedtakSammendrag } from '~shared/api/vedtak'
+import { Revurderingsaarsak } from '~shared/types/Revurderingsaarsak'
 
 const colonner = ['Reg. dato', 'Type', 'Årsak', 'Status', 'Virkningstidspunkt', 'Vedtaksdato', 'Resultat', '']
 
@@ -90,16 +91,28 @@ export const Behandlingsliste = ({ behandlinger }: { behandlinger: IBehandlingsa
   )
 }
 
-function mapAarsak(aarsak: AarsaksTyper) {
+function mapAarsak(aarsak: BehandlingOgRevurderingsAarsakerType) {
   switch (aarsak) {
     case AarsaksTyper.MANUELT_OPPHOER:
       return 'Manuelt opphør'
-    case AarsaksTyper.SOEKER_DOD:
-      return 'Søker er død'
     case AarsaksTyper.SOEKNAD:
       return 'Søknad'
-    case AarsaksTyper.REGULERING:
+    case AarsaksTyper.REVURDERING:
+      return 'Revurdering'
+    case Revurderingsaarsak.REGULERING:
       return 'Regulering'
+    case Revurderingsaarsak.ANSVARLIGE_FORELDRE:
+      return 'Ansvarlige foreldre'
+    case Revurderingsaarsak.SOESKENJUSTERING:
+      return 'Søskenjustering'
+    case Revurderingsaarsak.UTLAND:
+      return 'Ut-/innflytting til Norge'
+    case Revurderingsaarsak.BARN:
+      return 'Barn'
+    case Revurderingsaarsak.DOEDSFALL:
+      return 'Dødsfall'
+    case Revurderingsaarsak.VERGEMAAL_ELLER_FREMTIDSFULLMAKT:
+      return 'Institusjonsopphold'
   }
 }
 

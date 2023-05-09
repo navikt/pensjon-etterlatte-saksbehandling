@@ -30,12 +30,13 @@ import { lukkGrunnlagshendelse } from '~shared/api/behandling'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { OpprettNyBehandling } from '~components/person/OpprettNyBehandling'
 import OpprettRevurderingModal from '~components/person/OpprettRevurderingModal'
+import { Revurderingsaarsak } from '~shared/types/Revurderingsaarsak'
 
 type Props = {
   hendelser: Array<Grunnlagsendringshendelse>
   disabled: boolean
   grunnlag: Result<PersonerISakResponse>
-  revurderinger: Array<string>
+  revurderinger: Array<Revurderingsaarsak>
   sakId: number
 }
 
@@ -104,7 +105,7 @@ const UhaandtertHendelse = (props: {
   hendelse: Grunnlagsendringshendelse
   disabled: boolean
   startRevurdering: (hendelse: Grunnlagsendringshendelse) => void
-  revurderinger: Array<string>
+  revurderinger: Array<Revurderingsaarsak>
 }) => {
   const { hendelse, disabled, startRevurdering, revurderinger } = props
   const { type, opprettet } = hendelse
@@ -136,14 +137,22 @@ const UhaandtertHendelse = (props: {
         <HendelseBeskrivelse hendelse={hendelse} />
 
         <div>
-          {stoetterRevurdering ? (
-            <Button disabled={disabled} onClick={() => startRevurdering(hendelse)}>
-              Start revurdering
-            </Button>
-          ) : (
+          {disabled ? (
             <Alert variant="info" inline>
-              Automatisk revurdering støttes ikke for denne hendelsen
+              Denne saken har en åpen revurdering, denne må behandles før en ny kan startes.
             </Alert>
+          ) : (
+            <>
+              {stoetterRevurdering ? (
+                <Button disabled={disabled} onClick={() => startRevurdering(hendelse)}>
+                  Start revurdering
+                </Button>
+              ) : (
+                <Alert variant="info" inline>
+                  Automatisk revurdering støttes ikke for denne hendelsen
+                </Alert>
+              )}
+            </>
           )}
           <MarginTop15>
             <Button onClick={() => setOpen(true)}>Lukk hendelse</Button>

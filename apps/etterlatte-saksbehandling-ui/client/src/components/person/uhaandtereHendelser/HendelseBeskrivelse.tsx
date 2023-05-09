@@ -156,7 +156,7 @@ const HendelseDetaljer = (props: { hendelse: Grunnlagsendringshendelse }) => {
         {`
         ${rolletekst[props.hendelse.hendelseGjelderRolle]}
         ${formaterFoedselsnummerMedNavn(navneMap, props.hendelse.gjelderPerson)} har
-        ${grunnlagsendringsBeskrivelse[props.hendelse.type]}
+        ${grunnlagsendringsBeskrivelse[props.hendelse.samsvarMellomKildeOgGrunnlag.type]}
           `}
       </BodySmall>
     </DetaljerWrapper>
@@ -211,8 +211,8 @@ export const HendelseBeskrivelse = (props: { hendelse: Grunnlagsendringshendelse
     case 'GRUNNBELOEP':
       return (
         <Header>
-          <BodySmall>Hendelse fra {grunnlagsendringsKilde(hendelse.type)}</BodySmall>
-          <BodySmall>{grunnlagsendringsBeskrivelse[hendelse.type]}</BodySmall>
+          <BodySmall>Hendelse fra {grunnlagsendringsKilde(hendelse.samsvarMellomKildeOgGrunnlag.type)}</BodySmall>
+          <BodySmall>{grunnlagsendringsBeskrivelse[hendelse.samsvarMellomKildeOgGrunnlag.type]}</BodySmall>
         </Header>
       )
   }

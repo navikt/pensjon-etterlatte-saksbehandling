@@ -37,7 +37,8 @@ internal class BesvarOpplysningsbehov(
             if (packet[BEHOV_NAME_KEY].asText() in listOf(
                     Opplysningstype.AVDOED_PDL_V1.name,
                     Opplysningstype.GJENLEVENDE_FORELDER_PDL_V1.name,
-                    Opplysningstype.SOEKER_PDL_V1.name
+                    Opplysningstype.SOEKER_PDL_V1.name,
+                    Opplysningstype.MIGRERING.name
                 )
             ) {
                 val fnr = packet["fnr"].textValue()

@@ -1,6 +1,8 @@
 package no.nav.etterlatte.vilkaarsvurdering
 
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.logging.withLogContext
+import no.nav.etterlatte.libs.common.rapidsandrivers.BEHOV_NAME_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser
@@ -11,6 +13,7 @@ import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import org.slf4j.LoggerFactory
 import rapidsandrivers.BEHANDLING_ID_KEY
+import rapidsandrivers.GRUNNLAG_OPPDATERT
 import rapidsandrivers.behandlingId
 import rapidsandrivers.withFeilhaandtering
 
@@ -22,7 +25,8 @@ internal class Migrering(
 
     init {
         River(rapidsConnection).apply {
-            eventName(Migreringshendelser.VILKAARSVURDER)
+            eventName(GRUNNLAG_OPPDATERT)
+            validate { it.demandValue(BEHOV_NAME_KEY, Opplysningstype.MIGRERING.name) }
             validate { it.requireKey(BEHANDLING_ID_KEY) }
             correlationId()
         }.register(this)

@@ -25,12 +25,14 @@ data class BeregnetAvkortingGrunnlag(
     val periode: Periode,
     val avkorting: Int,
     val tidspunkt: Tidspunkt,
-    val regelResultat: JsonNode
+    val regelResultat: JsonNode,
+    val kilde: Grunnlagsopplysning.RegelKilde
 )
 
 data class AvkortetYtelse(
     val periode: Periode,
     val ytelseEtterAvkorting: Int,
     val tidspunkt: Tidspunkt,
-    val regelResultat: JsonNode
+    val regelResultat: JsonNode,
+    val kilde: Grunnlagsopplysning.RegelKilde
 )

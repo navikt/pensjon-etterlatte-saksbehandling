@@ -8,6 +8,7 @@ import kotliquery.sessionOf
 import kotliquery.using
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
 import no.nav.etterlatte.libs.common.beregning.Beregningstype
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.Metadata
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -73,7 +74,8 @@ class BeregningRepository(private val dataSource: DataSource) {
             "grunnlagVersjon" to beregning.grunnlagMetadata.versjon,
             "trygdetid" to beregningsperiode.trygdetid,
             "regelResultat" to beregningsperiode.regelResultat?.toJson(),
-            "regelVersjon" to beregningsperiode.regelVersjon
+            "regelVersjon" to beregningsperiode.regelVersjon,
+            "kilde" to beregningsperiode.kilde?.toJson()
         )
     }
 }
@@ -100,7 +102,8 @@ private fun toBeregningsperiode(row: Row): BeregningsperiodeDAO = with(row) {
         regelResultat = stringOrNull(BeregningsperiodeDatabaseColumns.RegelResultat.navn)?.let {
             objectMapper.readTree(it)
         },
-        regelVersjon = stringOrNull(BeregningsperiodeDatabaseColumns.RegelVersjon.navn)
+        regelVersjon = stringOrNull(BeregningsperiodeDatabaseColumns.RegelVersjon.navn),
+        kilde = stringOrNull("kilde")?.let { objectMapper.readValue(it) }
     )
 }
 
@@ -139,7 +142,8 @@ private fun toBeregning(beregningsperioder: List<BeregningsperiodeDAO>): Beregni
                 grunnbelop = it.grunnbelop,
                 trygdetid = it.trygdetid,
                 regelResultat = it.regelResultat,
-                regelVersjon = it.regelVersjon
+                regelVersjon = it.regelVersjon,
+                kilde = it.kilde
             )
         }
 
@@ -162,7 +166,8 @@ private enum class BeregningsperiodeDatabaseColumns(val navn: String) {
     GrunnlagVersjon("grunnlagVersjon"),
     Trygdetid("trygdetid"),
     RegelResultat("regelResultat"),
-    RegelVersjon("regelVersjon")
+    RegelVersjon("regelVersjon"),
+    Kilde("kilde")
 }
 
 private object Queries {
@@ -189,11 +194,12 @@ private object Queries {
             ${BeregningsperiodeDatabaseColumns.GrunnlagVersjon.navn}, 
             ${BeregningsperiodeDatabaseColumns.Trygdetid.navn}, 
             ${BeregningsperiodeDatabaseColumns.RegelResultat.navn}, 
-            ${BeregningsperiodeDatabaseColumns.RegelVersjon.navn}) 
+            ${BeregningsperiodeDatabaseColumns.RegelVersjon.navn},
+            ${BeregningsperiodeDatabaseColumns.Kilde.navn}) 
         VALUES(:id::UUID, :beregningId::UUID, :behandlingId::UUID, :type::TEXT, :beregnetDato::TIMESTAMP, 
             :datoFOM::TEXT, :datoTOM::TEXT, :utbetaltBeloep::BIGINT, :soeskenFlokk::JSONB, :grunnbeloepMnd::BIGINT, 
             :grunnbeloep::BIGINT, :sakId::BIGINT, :grunnlagVersjon::BIGINT, :trygdetid::BIGINT, :regelResultat::JSONB, 
-            :regelVersjon::TEXT) 
+            :regelVersjon::TEXT, :kilde::TEXT) 
     """
 
     val slettBeregning = """
@@ -216,5 +222,6 @@ private data class BeregningsperiodeDAO(
     val grunnlagMetadata: Metadata,
     val trygdetid: Int,
     val regelResultat: JsonNode? = null,
-    val regelVersjon: String? = null
+    val regelVersjon: String? = null,
+    val kilde: Grunnlagsopplysning.RegelKilde? = null
 )

@@ -3,6 +3,7 @@ package no.nav.etterlatte.beregning
 import no.nav.etterlatte.beregning.regler.FNR_1
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
 import no.nav.etterlatte.libs.common.beregning.Beregningstype
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toObjectNode
 import no.nav.etterlatte.libs.database.DataSourceBuilder
@@ -98,7 +99,8 @@ internal class BeregningRepositoryTest {
                     grunnbelop = 100_000,
                     trygdetid = 40,
                     regelResultat = mapOf("regel" to "resultat").toObjectNode(),
-                    regelVersjon = "1"
+                    regelVersjon = "1",
+                    kilde = Grunnlagsopplysning.RegelKilde("regelid", Tidspunkt.now(), "1")
                 )
             )
         )

@@ -5,6 +5,7 @@ import no.nav.etterlatte.beregning.regler.avkorting.InntektAvkortingGrunnlag
 import no.nav.etterlatte.beregning.regler.avkorting.avkorteYtelse
 import no.nav.etterlatte.beregning.regler.avkorting.inntektAvkorting
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
@@ -27,6 +28,7 @@ object InntektAvkortingService {
         val resultat = inntektAvkorting.eksekver(grunnlag, RegelPeriode(avkortingGrunnlag.periode.fom.atDay(1)))
         return when (resultat) {
             is RegelkjoeringResultat.Suksess -> {
+                val tidspunkt = Tidspunkt.now()
                 resultat.periodiserteResultater.map { periodisertResultat ->
                     BeregnetAvkortingGrunnlag(
                         periode = Periode(
@@ -34,8 +36,13 @@ object InntektAvkortingService {
                             tom = periodisertResultat.periode.tilDato?.let { YearMonth.from(it) }
                         ),
                         avkorting = periodisertResultat.resultat.verdi,
-                        tidspunkt = Tidspunkt.now(),
-                        regelResultat = periodisertResultat.toJsonNode()
+                        tidspunkt = tidspunkt,
+                        regelResultat = periodisertResultat.toJsonNode(),
+                        kilde = Grunnlagsopplysning.RegelKilde(
+                            navn = inntektAvkorting.regelReferanse.id,
+                            ts = tidspunkt,
+                            versjon = periodisertResultat.reglerVersjon
+                        )
                     )
                 }
             }
@@ -54,6 +61,7 @@ object InntektAvkortingService {
             val resultat = avkorteYtelse.eksekver(grunnlag, grunnlag.periode)
             when (resultat) {
                 is RegelkjoeringResultat.Suksess -> {
+                    val tidspunkt = Tidspunkt.now()
                     resultat.periodiserteResultater.map { periodisertResultat ->
                         AvkortetYtelse(
                             periode = Periode(
@@ -61,8 +69,13 @@ object InntektAvkortingService {
                                 tom = periodisertResultat.periode.tilDato?.let { YearMonth.from(it) }
                             ),
                             ytelseEtterAvkorting = periodisertResultat.resultat.verdi,
-                            tidspunkt = Tidspunkt.now(),
-                            regelResultat = periodisertResultat.toJsonNode()
+                            tidspunkt = tidspunkt,
+                            regelResultat = periodisertResultat.toJsonNode(),
+                            kilde = Grunnlagsopplysning.RegelKilde(
+                                navn = inntektAvkorting.regelReferanse.id,
+                                ts = tidspunkt,
+                                versjon = periodisertResultat.reglerVersjon
+                            )
                         )
                     }
                 }
@@ -98,12 +111,12 @@ object InntektAvkortingService {
                     ),
                     bruttoYtelse = FaktumNode(
                         verdi = beregning.utbetaltBeloep,
-                        kilde = "Regel", // TODO EY-2123
+                        kilde = beregning.kilde ?: "",
                         beskrivelse = "Beregnet brutto ytelse for periode"
                     ),
                     avkorting = FaktumNode(
                         verdi = beregnetAvkorting.avkorting,
-                        kilde = "Regel", // TODO EY-2123
+                        kilde = beregnetAvkorting.kilde,
                         beskrivelse = "Beregnet avkorting for periode"
                     )
                 )

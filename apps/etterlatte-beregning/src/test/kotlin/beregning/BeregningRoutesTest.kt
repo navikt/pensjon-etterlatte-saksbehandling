@@ -24,6 +24,7 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.beregning.BeregningDTO
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
 import no.nav.etterlatte.libs.common.beregning.Beregningstype
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
@@ -178,7 +179,8 @@ internal class BeregningRoutesTest {
                     soeskenFlokk = listOf(FNR_1),
                     grunnbelopMnd = 10_000,
                     grunnbelop = 100_000,
-                    trygdetid = 40
+                    trygdetid = 40,
+                    kilde = Grunnlagsopplysning.RegelKilde("regelid", Tidspunkt.now(), "1")
                 )
             )
         )

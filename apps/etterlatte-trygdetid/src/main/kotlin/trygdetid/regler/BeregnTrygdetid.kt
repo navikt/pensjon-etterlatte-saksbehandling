@@ -83,7 +83,7 @@ val totalTrygdetidFraPerioder = RegelMeta(
 
 val totalTrygdetidAvrundet = RegelMeta(
     gjelderFra = TRYGDETID_DATO,
-    beskrivelse = "Avrunder trygdetid til nærmeste hele år",
+    beskrivelse = "Avrunder trygdetid til nærmeste hele år basert på måneder",
     regelReferanse = RegelReferanse(id = "REGEL-TOTAL-TRYGDETID-AVRUNDING")
 ) benytter totalTrygdetidFraPerioder med { totalTrygdetidFraPerioder ->
     if (totalTrygdetidFraPerioder.months >= 6) {

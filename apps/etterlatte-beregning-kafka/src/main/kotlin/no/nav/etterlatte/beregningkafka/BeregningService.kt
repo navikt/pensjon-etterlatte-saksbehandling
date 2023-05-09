@@ -16,6 +16,7 @@ class BeregningService(
 ) {
     fun opprettOmregning(omregningsId: UUID): HttpResponse = runBlocking {
         beregningApp.post("$url/api/beregning/$omregningsId") {}
+    }
 
     fun opprettBeregningsGrunnlag(omregningsId: UUID, forrigeBehandlingsId: UUID): HttpResponse = runBlocking {
         beregningApp.post("$url/api/beregning/beregningsgrunnlag/$omregningsId/fra/$forrigeBehandlingsId") {}

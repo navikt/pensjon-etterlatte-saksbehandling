@@ -29,8 +29,6 @@ const VedtaksDato = (props: { behandlingsId: string }) => {
     getVedtakSammendrag(props.behandlingsId)
   }, [])
 
-  // TODO - sjekk om det er attestert eller fattet dato
-
   const attestertDato = vedtak?.datoAttestert
 
   return <>{attestertDato ? formaterStringDato(attestertDato) : ''}</>

@@ -8,8 +8,8 @@ import no.nav.etterlatte.libs.regler.RegelkjoeringResultat
 import no.nav.etterlatte.libs.regler.eksekver
 import no.nav.etterlatte.trygdetid.regler.TotalTrygdetidGrunnlag
 import no.nav.etterlatte.trygdetid.regler.TrygdetidPeriodeGrunnlag
-import no.nav.etterlatte.trygdetid.regler.beregnAntallAarTrygdetid
-import no.nav.etterlatte.trygdetid.regler.beregnTrygdetidMellomToDatoer
+import no.nav.etterlatte.trygdetid.regler.beregnAntallAarTotalTrygdetid
+import no.nav.etterlatte.trygdetid.regler.beregnTrygdetidForPeriode
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 
@@ -28,7 +28,7 @@ object TrygdetidBeregningService {
             )
         )
 
-        val resultat = beregnAntallAarTrygdetid.eksekver(grunnlag, RegelPeriode(LocalDate.now()))
+        val resultat = beregnAntallAarTotalTrygdetid.eksekver(grunnlag, RegelPeriode(LocalDate.now()))
         return when (resultat) {
             is RegelkjoeringResultat.Suksess -> {
                 val periodisertResultat = resultat.periodiserteResultater.first().resultat
@@ -51,8 +51,7 @@ object TrygdetidBeregningService {
         val grunnlag = TrygdetidPeriodeGrunnlag(
             periodeFra = FaktumNode(
                 verdi = trygdetidGrunnlag.periode.fra,
-                kilde = trygdetidGrunnlag.kilde
-                    ?: throw Exception("Mangler kilde for trygdetidgrunnlag ${trygdetidGrunnlag.id}"),
+                kilde = trygdetidGrunnlag.kilde,
                 beskrivelse = "Startdato for trygdetidsperiode"
             ),
             periodeTil = FaktumNode(
@@ -62,7 +61,7 @@ object TrygdetidBeregningService {
             )
         )
 
-        val resultat = beregnTrygdetidMellomToDatoer.eksekver(grunnlag, RegelPeriode(LocalDate.now()))
+        val resultat = beregnTrygdetidForPeriode.eksekver(grunnlag, RegelPeriode(LocalDate.now()))
         return when (resultat) {
             is RegelkjoeringResultat.Suksess -> {
                 val periodisertResultat = resultat.periodiserteResultater.first().resultat

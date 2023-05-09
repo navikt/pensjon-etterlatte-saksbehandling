@@ -12,7 +12,8 @@ import no.nav.etterlatte.libs.regler.og
 import java.time.LocalDate
 import java.time.Period
 
-val TRYGDETID_OMS_DATO = LocalDate.of(1900, 1, 1)
+// TODO dato settes riktig senere
+val TRYGDETID_DATO = LocalDate.of(1900, 1, 1)
 
 data class TrygdetidPeriodeGrunnlag(
     val periodeFra: FaktumNode<LocalDate>,
@@ -24,63 +25,76 @@ data class TotalTrygdetidGrunnlag(
 )
 
 val periodeFra: Regel<TrygdetidPeriodeGrunnlag, LocalDate> = finnFaktumIGrunnlag(
-    gjelderFra = TRYGDETID_OMS_DATO,
+    gjelderFra = TRYGDETID_DATO,
     beskrivelse = "Periode fra",
     finnFaktum = TrygdetidPeriodeGrunnlag::periodeFra,
     finnFelt = { it }
 )
 
 val periodeTil: Regel<TrygdetidPeriodeGrunnlag, LocalDate> = finnFaktumIGrunnlag(
-    gjelderFra = TRYGDETID_OMS_DATO,
+    gjelderFra = TRYGDETID_DATO,
     beskrivelse = "Periode til",
     finnFaktum = TrygdetidPeriodeGrunnlag::periodeTil,
     finnFelt = { it }
 )
 
-val beregnTrygdetidMellomToDatoer = RegelMeta(
-    gjelderFra = TRYGDETID_OMS_DATO,
-    beskrivelse = "Beregner trygdetid mellom to datoer i år, måneder og dager",
+val beregnTrygdetidForPeriode = RegelMeta(
+    gjelderFra = TRYGDETID_DATO,
+    beskrivelse = "Beregner trygdetid fra og med periodeFra til og med periodeTil i år, måneder og dager",
     regelReferanse = RegelReferanse(id = "REGEL-TRYGDETID-BEREGNE-PERIODE")
 ) benytter periodeFra og periodeTil med { periodeFra, periodeTil ->
     Period.between(periodeFra, periodeTil.plusDays(1))
 }
 
 val beregnetTrygdetidPerioder: Regel<TotalTrygdetidGrunnlag, List<Period>> = finnFaktumIGrunnlag(
-    gjelderFra = TRYGDETID_OMS_DATO,
+    gjelderFra = TRYGDETID_DATO,
     beskrivelse = "Beregnet trygdetidsperioder",
     finnFaktum = TotalTrygdetidGrunnlag::beregnetTrygdetidPerioder,
     finnFelt = { it }
 )
 
 val maksTrygdetid = definerKonstant<TotalTrygdetidGrunnlag, Int>(
-    gjelderFra = TRYGDETID_OMS_DATO,
+    gjelderFra = TRYGDETID_DATO,
     beskrivelse = "Full trygdetidsopptjening er 40 år",
     regelReferanse = RegelReferanse("REGEL-TOTAL-TRYGDETID-MAKS-ANTALL-ÅR"),
     verdi = 40
 )
 
+val dagerPrMaanedTrygdetid = definerKonstant<TotalTrygdetidGrunnlag, Int>(
+    gjelderFra = TRYGDETID_DATO,
+    beskrivelse = "En måned trygdetid tilsvarer 30 dager",
+    regelReferanse = RegelReferanse("REGEL-TOTAL-TRYGDETID-DAGER-PR-MND-TRYGDETID"),
+    verdi = 30
+)
+
 val totalTrygdetidFraPerioder = RegelMeta(
-    gjelderFra = TRYGDETID_OMS_DATO,
+    gjelderFra = TRYGDETID_DATO,
     beskrivelse = "Beregner trygdetid fra perioder",
     regelReferanse = RegelReferanse(id = "REGEL-TOTAL-TRYGDETID-SLÅ-SAMMEN-PERIODER")
-) benytter beregnetTrygdetidPerioder med { beregnetTrygdetidPerioder ->
-    beregnetTrygdetidPerioder.reduce { acc, period -> acc.plus(period) }.normalized()
+) benytter beregnetTrygdetidPerioder og dagerPrMaanedTrygdetid med { trygdetidPerioder, antallDagerEnMaanedTrygdetid ->
+    trygdetidPerioder
+        .reduce { acc, period -> acc.plus(period) }
+        .let {
+            val dagerResterende = it.days.mod(antallDagerEnMaanedTrygdetid)
+            val maanederOppjustert = it.months + (it.days - dagerResterende).div(antallDagerEnMaanedTrygdetid)
+            Period.of(it.years, maanederOppjustert, dagerResterende).normalized()
+        }
 }
 
 val totalTrygdetidAvrundet = RegelMeta(
-    gjelderFra = TRYGDETID_OMS_DATO,
-    beskrivelse = "Runder av trygdetid opp til hele år",
+    gjelderFra = TRYGDETID_DATO,
+    beskrivelse = "Avrunder trygdetid til nærmeste hele år",
     regelReferanse = RegelReferanse(id = "REGEL-TOTAL-TRYGDETID-AVRUNDING")
 ) benytter totalTrygdetidFraPerioder med { totalTrygdetidFraPerioder ->
-    if (totalTrygdetidFraPerioder.months > 0 || totalTrygdetidFraPerioder.days > 0) {
+    if (totalTrygdetidFraPerioder.months >= 6) {
         totalTrygdetidFraPerioder.years + 1
     } else {
         totalTrygdetidFraPerioder.years
     }
 }
 
-val beregnAntallAarTrygdetid = RegelMeta(
-    gjelderFra = TRYGDETID_OMS_DATO,
+val beregnAntallAarTotalTrygdetid = RegelMeta(
+    gjelderFra = TRYGDETID_DATO,
     beskrivelse = "Beregner antall år trygdetid totalt",
     regelReferanse = RegelReferanse(id = "REGEL-TOTAL-TRYGDETID")
 ) benytter totalTrygdetidAvrundet og maksTrygdetid med { totalTrygdetidAvrundet, maksTrygdetid ->

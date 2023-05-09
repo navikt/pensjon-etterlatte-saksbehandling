@@ -39,14 +39,14 @@ class TrygdetidBeregningServiceTest {
     }
 
     @Test
-    fun `skal runde opp til naermeste aar med total trygdetid`() {
+    fun `skal avrunde til naermeste aar med total trygdetid`() {
         val trygdetidGrunnlag = listOf(
             trygdetidGrunnlag(beregnetTrygdetidGrunnlag = beregnetTrygdetidGrunnlag(Period.ofMonths(2)))
         )
 
         val beregnetTrygdetid = TrygdetidBeregningService.beregnTrygdetid(trygdetidGrunnlag)
 
-        beregnetTrygdetid.verdi shouldBe 1
+        beregnetTrygdetid.verdi shouldBe 0
     }
 
     @Test

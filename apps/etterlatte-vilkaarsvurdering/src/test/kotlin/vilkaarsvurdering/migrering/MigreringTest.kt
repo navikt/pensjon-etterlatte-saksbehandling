@@ -173,7 +173,7 @@ class MigreringTest {
             application {
                 restModule(this.log) {
                     vilkaarsvurdering(vilkaarsvurderingServiceImpl, behandlingKlient)
-                    migrering(migreringService, behandlingKlient, vilkaarsvurderingServiceImpl, grunnlagKlient)
+                    migrering(migreringService, vilkaarsvurderingServiceImpl, grunnlagKlient)
                 }
             }
             val client = createClient {

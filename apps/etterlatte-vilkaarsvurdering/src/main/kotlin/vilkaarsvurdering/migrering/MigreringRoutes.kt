@@ -19,13 +19,11 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.libs.ktor.bruker
 import no.nav.etterlatte.vilkaarsvurdering.VilkaarsvurderingMigreringRequest
 import no.nav.etterlatte.vilkaarsvurdering.VilkaarsvurderingService
-import no.nav.etterlatte.vilkaarsvurdering.klienter.BehandlingKlient
 import no.nav.etterlatte.vilkaarsvurdering.klienter.GrunnlagKlient
 import java.util.*
 
 fun Route.migrering(
     migreringService: MigreringService,
-    behandlingKlient: BehandlingKlient,
     vilkaarsvurderingService: VilkaarsvurderingService,
     grunnlagKlient: GrunnlagKlient
 ) {
@@ -35,7 +33,6 @@ fun Route.migrering(
         post("/") {
             val request = call.receive<VilkaarsvurderingMigreringRequest>()
             logger.info("Oppretter vilkårsvurdering for migrering for $request.behandlingId")
-            // http-kall mot grunnlag her for å legge inn persongalleri.
             grunnlagKlient.opprettPersongalleri(
                 PersongalleriRequest(
                     request.sakId,

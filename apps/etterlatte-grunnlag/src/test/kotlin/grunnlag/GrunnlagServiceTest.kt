@@ -37,7 +37,7 @@ import java.util.*
 internal class GrunnlagServiceTest {
     private val opplysningerMock = mockk<OpplysningDao>()
     private val behandlingKlient = mockk<BehandlingKlient>()
-    private val grunnlagService = RealGrunnlagService(opplysningerMock, behandlingKlient, mockk())
+    private val grunnlagService = RealGrunnlagService(opplysningerMock, mockk())
 
     private val testData = GrunnlagTestData()
 

@@ -50,7 +50,7 @@ internal class RapidTest {
         dataSource.migrate()
 
         opplysningRepo = OpplysningDao(dataSource)
-        grunnlagService = RealGrunnlagService(opplysningRepo, behandlingKlient, mockk())
+        grunnlagService = RealGrunnlagService(opplysningRepo, mockk())
         inspector = TestRapid().apply {
             GrunnlagHendelser(this, grunnlagService)
         }

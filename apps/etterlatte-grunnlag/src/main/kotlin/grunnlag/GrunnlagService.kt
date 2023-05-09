@@ -1,7 +1,6 @@
 package no.nav.etterlatte.grunnlag
 
 import com.fasterxml.jackson.databind.JsonNode
-import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.libs.common.behandling.PersonMedSakerOgRoller
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakOgRolle
@@ -48,7 +47,6 @@ interface GrunnlagService {
 
 class RealGrunnlagService(
     private val opplysningDao: OpplysningDao,
-    private val behandlingKlient: BehandlingKlient,
     private val sporingslogg: Sporingslogg
 ) : GrunnlagService {
 

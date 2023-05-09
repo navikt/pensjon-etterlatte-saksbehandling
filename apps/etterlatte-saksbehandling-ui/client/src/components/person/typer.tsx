@@ -33,7 +33,16 @@ export enum AarsaksTyper {
 
 export type BehandlingOgRevurderingsAarsakerType = Revurderingsaarsak | AarsaksTyper
 
-export type GrunnlagsendringsType = SamsvarMellomKildeOgGrunnlag['type']
+export type GrunnlagendringshendelseSamsvarType = SamsvarMellomKildeOgGrunnlag['type']
+
+export enum GrunnlagsendringsType {
+  DOEDSFALL = 'DOEDSFALL',
+  UTFLYTTING = 'UTFLYTTING',
+  FORELDER_BARN_RELASJON = 'FORELDER_BARN_RELASJON',
+  VERGEMAAL_ELLER_FREMTIDSFULLMAKT = 'VERGEMAAL_ELLER_FREMTIDSFULLMAKT',
+  GRUNNBELOEP = 'GRUNNBELOEP',
+  INSTITUSJONSOPPHOLD = 'INSTITUSJONSOPPHOLD',
+}
 
 export const GRUNNLAGSENDRING_STATUS = [
   'VENTER_PAA_JOBB',

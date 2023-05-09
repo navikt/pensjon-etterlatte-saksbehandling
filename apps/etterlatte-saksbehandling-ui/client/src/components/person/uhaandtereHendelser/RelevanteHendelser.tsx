@@ -94,12 +94,12 @@ const UhaandtertHendelse = (props: {
   revurderinger: Array<Revurderingsaarsak>
 }) => {
   const { hendelse, disabled, startRevurdering, revurderinger } = props
-  const { type, opprettet } = hendelse
+  const { samsvarMellomKildeOgGrunnlag, opprettet } = hendelse
   const [open, setOpen] = useState(false)
   const [hendelsekommentar, oppdaterKommentar] = useState<string>('')
   const [res, lukkGrunnlagshendelseFunc, resetApiCall] = useApiCall(lukkGrunnlagshendelse)
   const stoetterRevurdering = stoetterRevurderingAvHendelse(hendelse, revurderinger)
-
+  const { type: samsvarType } = samsvarMellomKildeOgGrunnlag
   const lukkGrunnlagshendelseWrapper = () => {
     lukkGrunnlagshendelseFunc(
       { ...hendelse, kommentar: hendelsekommentar },
@@ -114,7 +114,7 @@ const UhaandtertHendelse = (props: {
   }
   return (
     <Wrapper>
-      <Label spacing>{grunnlagsendringsTittel[type]}</Label>
+      <Label spacing>{grunnlagsendringsTittel[samsvarType]}</Label>
       <Content>
         <Header>
           <BodySmall>Dato</BodySmall>

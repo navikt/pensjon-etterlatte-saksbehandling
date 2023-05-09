@@ -1,10 +1,14 @@
-import { Grunnlagsendringshendelse, GrunnlagsendringsType } from '~components/person/typer'
+import {
+  Grunnlagsendringshendelse,
+  GrunnlagendringshendelseSamsvarType,
+  GrunnlagsendringsType,
+} from '~components/person/typer'
 import { formaterKanskjeStringDatoMedFallback } from '~utils/formattering'
 import React from 'react'
 import { PersonMedNavn } from '~shared/types/grunnlag'
 import { Revurderingsaarsak } from '~shared/types/Revurderingsaarsak'
 
-export const grunnlagsendringsTittel: Record<GrunnlagsendringsType, string> = {
+export const grunnlagsendringsTittel: Record<GrunnlagendringshendelseSamsvarType, string> = {
   GRUNNBELOEP: 'Regulering feilet',
   DOEDSDATO: 'Dødsdato',
   UTLAND: 'Ut-/innflytting til Norge',
@@ -14,7 +18,7 @@ export const grunnlagsendringsTittel: Record<GrunnlagsendringsType, string> = {
   INSTITUSJONSOPPHOLD: 'Institusjonsopphold',
 }
 
-export const grunnlagsendringsBeskrivelse: Record<GrunnlagsendringsType, string> = {
+export const grunnlagsendringsBeskrivelse: Record<GrunnlagendringshendelseSamsvarType, string> = {
   GRUNNBELOEP: 'Regulering av pensjonen kunne ikke behandles automatisk. Saken må derfor behandles manuelt',
   ANSVARLIGE_FORELDRE: 'andre ansvarlige foreldre i PDL',
   BARN: 'andre barn i PDL',
@@ -24,7 +28,7 @@ export const grunnlagsendringsBeskrivelse: Record<GrunnlagsendringsType, string>
   INSTITUSJONSOPPHOLD: 'INSTITUSJONSOPPHOLD',
 }
 
-export const grunnlagsendringsKilde = (type: GrunnlagsendringsType): string => {
+export const grunnlagsendringsKilde = (type: GrunnlagendringshendelseSamsvarType): string => {
   switch (type) {
     case 'GRUNNBELOEP':
       return 'Gjenny'
@@ -41,10 +45,9 @@ export const grunnlagsendringsKilde = (type: GrunnlagsendringsType): string => {
 
 const grunnlagsEndringstyperTilRevurderingsAarsaker: Record<GrunnlagsendringsType, Array<string>> = {
   GRUNNBELOEP: [Revurderingsaarsak.REGULERING],
-  DOEDSDATO: [Revurderingsaarsak.DOEDSFALL, Revurderingsaarsak.SOESKENJUSTERING],
-  UTLAND: [Revurderingsaarsak.UTLAND],
-  BARN: [Revurderingsaarsak.BARN],
-  ANSVARLIGE_FORELDRE: [Revurderingsaarsak.ANSVARLIGE_FORELDRE],
+  DOEDSFALL: [Revurderingsaarsak.DOEDSFALL, Revurderingsaarsak.SOESKENJUSTERING],
+  UTFLYTTING: [Revurderingsaarsak.UTLAND],
+  FORELDER_BARN_RELASJON: [Revurderingsaarsak.ANSVARLIGE_FORELDRE, Revurderingsaarsak.BARN],
   VERGEMAAL_ELLER_FREMTIDSFULLMAKT: [Revurderingsaarsak.VERGEMAAL_ELLER_FREMTIDSFULLMAKT],
   INSTITUSJONSOPPHOLD: [Revurderingsaarsak.SOESKENJUSTERING],
 }
@@ -53,8 +56,10 @@ export const stoetterRevurderingAvHendelse = (
   hendelse: Grunnlagsendringshendelse,
   revurderinger: Array<Revurderingsaarsak>
 ): boolean => {
-  return revurderinger.some((revurdering) =>
-    grunnlagsEndringstyperTilRevurderingsAarsaker[hendelse.type].includes(revurdering)
+  return revurderinger.some(
+    (revurdering) =>
+      grunnlagsEndringstyperTilRevurderingsAarsaker[hendelse.type] &&
+      grunnlagsEndringstyperTilRevurderingsAarsaker[hendelse.type].includes(revurdering)
   )
 }
 

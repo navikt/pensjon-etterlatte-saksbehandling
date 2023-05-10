@@ -118,6 +118,7 @@ spec:
         - host: dokdistfordeling-q1.dev-fss-pub.nais.io
         - host: data.brreg.no
         - host: navansatt.dev-fss-pub.nais.io
+        - host: pensjon-brevbaker.intern.dev.nav.no
 
     inbound:
       rules:

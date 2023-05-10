@@ -3,7 +3,6 @@ import { useState } from 'react'
 import { attesterVedtak } from '~shared/api/behandling'
 import { BeslutningWrapper, ButtonWrapper } from '../styled'
 import { GeneriskModal } from '~shared/modal/modal'
-import { attesterVedtaksbrev } from '~shared/api/brev'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { useNavigate } from 'react-router'
 import { behandlingSkalSendeBrev } from '~components/behandling/felles/utils'
@@ -13,27 +12,12 @@ export const AttesterVedtak = ({ behandling, kommentar }: { behandling: IDetalje
   const [modalisOpen, setModalisOpen] = useState(false)
   const skalSendeBrev = behandlingSkalSendeBrev(behandling)
 
-  const ferdigstillVedtaksbrev = async () => {
-    if (!skalSendeBrev) {
-      return true
-    }
-
-    return attesterVedtaksbrev(behandling.id).then((response) => {
-      if (response.status === 'ok') return true
-      else throw new Error(`Feil oppsto ved attestering av brev: \n${response.error}`)
-    })
-  }
-
   const attester = async () => {
-    const vedtaksbrevAttestertOK = await ferdigstillVedtaksbrev()
-
-    if (vedtaksbrevAttestertOK) {
-      attesterVedtak(behandling.id, kommentar).then((response) => {
-        if (response.status === 'ok') {
-          navigate(`/person/${behandling.søker?.foedselsnummer}`)
-        }
-      })
-    }
+    attesterVedtak(behandling.id, kommentar).then((response) => {
+      if (response.status === 'ok') {
+        navigate(`/person/${behandling.søker?.foedselsnummer}`)
+      }
+    })
   }
 
   return (

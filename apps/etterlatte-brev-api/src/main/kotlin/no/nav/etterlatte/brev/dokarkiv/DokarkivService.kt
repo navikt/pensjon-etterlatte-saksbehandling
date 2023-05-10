@@ -31,7 +31,7 @@ class DokarkivServiceImpl(
     override fun journalfoer(vedtaksbrev: Brev, vedtak: VedtakTilJournalfoering): JournalpostResponse = runBlocking {
         logger.info("Oppretter journalpost for brev med id=${vedtaksbrev.id}")
 
-        val innhold = db.hentBrevInnhold(vedtaksbrev.id)
+        val innhold = requireNotNull(db.hentBrevInnhold(vedtaksbrev.id))
         logger.info("Oppretter journalpost med brevinnhold", innhold)
 
         val request = mapTilJournalpostRequest(vedtaksbrev, vedtak, innhold.data)

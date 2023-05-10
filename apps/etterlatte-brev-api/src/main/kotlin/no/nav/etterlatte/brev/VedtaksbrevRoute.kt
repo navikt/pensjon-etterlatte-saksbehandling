@@ -2,9 +2,9 @@ package no.nav.etterlatte.brev
 
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
-import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
+import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.brev.behandlingklient.BehandlingKlient
@@ -12,35 +12,57 @@ import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.withBehandlingId
 import no.nav.etterlatte.libs.ktor.bruker
 import org.slf4j.LoggerFactory
+import kotlin.time.DurationUnit
+import kotlin.time.ExperimentalTime
+import kotlin.time.measureTimedValue
 
+@OptIn(ExperimentalTime::class)
 fun Route.vedtaksbrevRoute(service: VedtaksbrevService, behandlingKlient: BehandlingKlient) {
     val logger = LoggerFactory.getLogger("no.nav.etterlatte.brev.VedaksbrevRoute")
 
-    route("brev") {
-        post("behandling/{$BEHANDLINGSID_CALL_PARAMETER}/vedtak") {
+    route("brev/behandling/{$BEHANDLINGSID_CALL_PARAMETER}") {
+        get("vedtak") {
             withBehandlingId(behandlingKlient) { behandlingId ->
-                val (sakId) = call.receive<OpprettVedtaksbrevRequest>()
-                logger.info("Genererer vedtaksbrev for behandling (sakId=$sakId, behandlingId=$behandlingId)")
-                val brev = service.oppdaterVedtaksbrev(sakId, behandlingId, bruker)
+                logger.info("Henter vedtaksbrev for behandling (behandlingId=$behandlingId)")
 
-                call.respond(brev)
+                measureTimedValue {
+                    service.hentVedtaksbrev(behandlingId)
+                }.let { (brev, varighet) ->
+                    logger.info("Henting av brev tok ${varighet.toString(DurationUnit.SECONDS, 2)}")
+                    call.respond(brev ?: HttpStatusCode.NoContent)
+                }
+
             }
         }
 
-        post("behandling/{$BEHANDLINGSID_CALL_PARAMETER}/attestert") {
+        post("vedtak") {
             withBehandlingId(behandlingKlient) { behandlingId ->
-                val ferdigstiltOK = service.ferdigstillVedtaksbrev(behandlingId)
+                val sakId = requireNotNull(call.parameters["sakId"]).toLong()
 
-                if (ferdigstiltOK) {
-                    call.respond(HttpStatusCode.OK)
-                } else {
-                    call.respond(HttpStatusCode.InternalServerError)
+                logger.info("Oppretter vedtaksbrev for behandling (sakId=$sakId, behandlingId=$behandlingId)")
+
+                measureTimedValue {
+                    service.opprettVedtaksbrev(sakId, behandlingId, bruker)
+                }.let { (brev, varighet) ->
+                    logger.info("Oppretting av brev tok ${varighet.toString(DurationUnit.SECONDS, 2)}")
+                    call.respond(HttpStatusCode.Created, brev)
+                }
+            }
+        }
+
+        get("vedtak/pdf") {
+            withBehandlingId(behandlingKlient) { behandlingId ->
+                val sakId = requireNotNull(call.parameters["sakId"]).toLong()
+
+                logger.info("Genererer vedtaksbrev PDF (sakId=$sakId, behandlingId=$behandlingId)")
+
+                measureTimedValue {
+                    service.genererPdfInnhold(sakId,behandlingId,bruker)
+                }.let { (pdf, varighet) ->
+                    logger.info("Oppretting av innhold/pdf tok ${varighet.toString(DurationUnit.SECONDS, 2)}")
+                    call.respond(pdf)
                 }
             }
         }
     }
 }
-
-data class OpprettVedtaksbrevRequest(
-    val sakId: Long
-)

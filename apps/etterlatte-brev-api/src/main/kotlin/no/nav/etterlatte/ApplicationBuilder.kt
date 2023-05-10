@@ -9,7 +9,6 @@ import io.ktor.client.plugins.defaultRequest
 import io.ktor.client.request.header
 import io.ktor.serialization.jackson.jackson
 import io.ktor.server.config.HoconApplicationConfig
-import no.nav.etterlatte.brev.BrevService
 import no.nav.etterlatte.brev.VedtaksbrevService
 import no.nav.etterlatte.brev.adresse.AdresseService
 import no.nav.etterlatte.brev.adresse.Norg2Klient
@@ -19,7 +18,6 @@ import no.nav.etterlatte.brev.adresse.enhetsregister.BrregService
 import no.nav.etterlatte.brev.behandling.SakOgBehandlingService
 import no.nav.etterlatte.brev.behandlingklient.BehandlingKlient
 import no.nav.etterlatte.brev.beregning.BeregningKlient
-import no.nav.etterlatte.brev.brevRoute
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.distribusjon.DistribusjonKlient
 import no.nav.etterlatte.brev.distribusjon.DistribusjonServiceImpl
@@ -42,6 +40,7 @@ import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.libs.ktor.setReady
 import no.nav.etterlatte.rivers.DistribuerBrev
 import no.nav.etterlatte.rivers.JournalfoerVedtaksbrev
+import no.nav.etterlatte.rivers.VedtaksbrevUnderkjent
 import no.nav.etterlatte.security.ktor.clientCredential
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -107,7 +106,6 @@ class ApplicationBuilder {
         DistribusjonKlient(httpClient("DOKDIST_SCOPE", false), env.requireEnvValue("DOKDIST_URL"))
     private val distribusjonService = DistribusjonServiceImpl(distribusjonKlient, db)
 
-    private val brevService = BrevService(db)
     private val vedtaksbrevService =
         VedtaksbrevService(
             db,
@@ -124,7 +122,6 @@ class ApplicationBuilder {
         RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(env))
             .withKtorModule {
                 restModule(sikkerLogg, routePrefix = "api", config = HoconApplicationConfig(config)) {
-                    brevRoute(brevService)
                     vedtaksbrevRoute(vedtaksbrevService, behandlingKlient)
                     dokumentRoute(journalpostService, behandlingKlient)
                 }
@@ -137,7 +134,8 @@ class ApplicationBuilder {
                     }
                 })
                 JournalfoerVedtaksbrev(this, vedtaksbrevService)
-                DistribuerBrev(this, brevService, distribusjonService)
+                VedtaksbrevUnderkjent(this, vedtaksbrevService)
+                DistribuerBrev(this, vedtaksbrevService, distribusjonService)
             }
 
     fun start() = setReady().also { rapidsConnection.start() }

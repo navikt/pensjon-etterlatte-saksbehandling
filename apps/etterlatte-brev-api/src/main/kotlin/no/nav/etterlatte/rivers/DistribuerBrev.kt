@@ -1,6 +1,6 @@
 package no.nav.etterlatte.rivers
 
-import no.nav.etterlatte.brev.BrevService
+import no.nav.etterlatte.brev.VedtaksbrevService
 import no.nav.etterlatte.brev.distribusjon.BestillingsID
 import no.nav.etterlatte.brev.distribusjon.DistribusjonService
 import no.nav.etterlatte.brev.distribusjon.DistribusjonsTidspunktType
@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory
 
 internal class DistribuerBrev(
     private val rapidsConnection: RapidsConnection,
-    private val vedtaksbrevService: BrevService,
+    private val vedtaksbrevService: VedtaksbrevService,
     private val distribusjonService: DistribusjonService
 ) : River.PacketListener {
     private val logger = LoggerFactory.getLogger(DistribuerBrev::class.java)

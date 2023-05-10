@@ -23,12 +23,6 @@ class AdresseService(
         )
     }
 
-    suspend fun hentAvsenderEnhet(navEnhetNr: String, saksbehandlerNavn: String): Avsender {
-        val enhet = norg2Klient.hentEnhet(navEnhetNr)
-
-        return mapTilAvsender(enhet, saksbehandlerNavn)
-    }
-
     suspend fun hentEnhet(navEnhetNr: String): Norg2Enhet = norg2Klient.hentEnhet(navEnhetNr)
 
     suspend fun hentAvsenderOgAttestant(vedtak: ForenkletVedtak): Pair<Avsender, Attestant?> = coroutineScope {

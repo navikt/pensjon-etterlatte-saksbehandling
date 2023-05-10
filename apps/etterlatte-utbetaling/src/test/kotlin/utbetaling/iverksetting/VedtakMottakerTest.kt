@@ -19,6 +19,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.util.UUID
 
 internal class VedtakMottakerTest {
 
@@ -28,6 +29,18 @@ internal class VedtakMottakerTest {
             rapidsConnection = this,
             utbetalingService = utbetalingService
         )
+    }
+
+    @Test
+    fun `skal returnere GODKJENT når vedtak er OMS og vi returnerer mock data`(){
+        inspector.apply { sendTestMessage(ATTESTERT_VEDTAK_OMS) }
+        inspector.inspektør.message(0).run {
+            val event = objectMapper.readValue(this.toJson(), UtbetalingEventDto::class.java)
+            assertEquals(EVENT_NAME_OPPDATERT, event.event)
+            assertEquals(UtbetalingStatusDto.valueOf(UtbetalingStatus.GODKJENT.name), event.utbetalingResponse.status)
+            assertEquals(1, event.utbetalingResponse.vedtakId)
+            assertEquals(UUID.fromString("e89c6e25-4f22-48b3-b975-4c868d830913"), event.utbetalingResponse.behandlingId)
+        }
     }
 
     @Test
@@ -119,5 +132,6 @@ internal class VedtakMottakerTest {
 
     companion object {
         val ATTESTERT_VEDTAK = readFile("/vedtak.json")
+        val ATTESTERT_VEDTAK_OMS = readFile("/vedtakOms.json")
     }
 }

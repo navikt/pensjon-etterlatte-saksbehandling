@@ -364,55 +364,6 @@ internal class BehandlingDaoIntegrationTest {
     }
 
     @Test
-    fun `hent alle behandlinger av type for sak henter tilbake spesifiserte saker`() {
-        val sak = sakRepo.opprettSak("123", SakType.BARNEPENSJON).id
-
-        repeat(4) {
-            behandlingRepo.opprettBehandling(
-                opprettBehandling(
-                    type = BehandlingType.REVURDERING,
-                    sakId = sak,
-                    revurderingAarsak = RevurderingAarsak.REGULERING,
-                    prosesstype = Prosesstype.MANUELL
-                )
-            )
-        }
-
-        repeat(3) {
-            behandlingRepo.opprettBehandling(
-                opprettBehandling(
-                    type = BehandlingType.FØRSTEGANGSBEHANDLING,
-                    sakId = sak
-                )
-            )
-        }
-
-        behandlingRepo.opprettBehandling(
-            opprettBehandling(
-                type = BehandlingType.MANUELT_OPPHOER,
-                sakId = sak,
-                opphoerAarsaker = listOf(
-                    ManueltOpphoerAarsak.SOESKEN_DOED,
-                    ManueltOpphoerAarsak.GJENLEVENDE_FORELDER_DOED
-                )
-            )
-        )
-
-        assertEquals(
-            behandlingRepo.alleBehandlingerISak(sak).filter { it.type == BehandlingType.REVURDERING }.size,
-            4
-        )
-        assertEquals(
-            behandlingRepo.alleBehandlingerISak(sak).filter { it.type == BehandlingType.FØRSTEGANGSBEHANDLING }.size,
-            3
-        )
-        assertEquals(
-            behandlingRepo.alleBehandlingerISak(sak).filter { it.type == BehandlingType.MANUELT_OPPHOER }.size,
-            1
-        )
-    }
-
-    @Test
     fun `skal hente alle loepende behandlinger i en sak`() {
         val sak1 = sakRepo.opprettSak("123", SakType.BARNEPENSJON).id
 

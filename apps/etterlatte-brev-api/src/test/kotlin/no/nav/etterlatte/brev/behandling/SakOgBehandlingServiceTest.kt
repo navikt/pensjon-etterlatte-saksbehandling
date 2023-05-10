@@ -9,6 +9,7 @@ import io.mockk.confirmVerified
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.brev.behandlingklient.BehandlingKlient
 import no.nav.etterlatte.brev.beregning.BeregningKlient
 import no.nav.etterlatte.brev.grunnlag.GrunnlagKlient
 import no.nav.etterlatte.brev.model.Spraak
@@ -21,6 +22,7 @@ import no.nav.etterlatte.libs.common.grunnlag.Opplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.sak.VedtakSak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
@@ -43,12 +45,10 @@ internal class SakOgBehandlingServiceTest {
     private val vedtaksvurderingKlient = mockk<VedtaksvurderingKlient>()
     private val grunnlagKlient = mockk<GrunnlagKlient>()
     private val beregningKlient = mockk<BeregningKlient>()
-    private val saksbehandlere = mapOf(
-        SAKSBEHANDLER_IDENT to "0904"
-    )
+    private val behandlingKlient = mockk<BehandlingKlient>()
 
     private val service =
-        SakOgBehandlingService(vedtaksvurderingKlient, grunnlagKlient, beregningKlient, saksbehandlere)
+        SakOgBehandlingService(vedtaksvurderingKlient, grunnlagKlient, beregningKlient, behandlingKlient)
 
     @BeforeEach
     fun before() {
@@ -62,6 +62,9 @@ internal class SakOgBehandlingServiceTest {
 
     @Test
     fun `SakOgBehandling fungerer som forventet`() {
+        coEvery {
+            behandlingKlient.hentSak(any(), any())
+        } returns Sak("ident", SakType.BARNEPENSJON, SAK_ID, SAKSBEHANDLER_IDENT)
         coEvery { vedtaksvurderingKlient.hentVedtak(any(), any()) } returns opprettVedtak()
         coEvery { grunnlagKlient.hentGrunnlag(SAK_ID, BRUKER) } returns opprettGrunnlag()
         coEvery { beregningKlient.hentBeregning(any(), any()) } returns opprettBeregning()
@@ -91,6 +94,9 @@ internal class SakOgBehandlingServiceTest {
 
     @Test
     fun `FinnUtbetalingsinfo returnerer korrekt informasjon`() {
+        coEvery {
+            behandlingKlient.hentSak(any(), any())
+        } returns Sak("ident", SakType.BARNEPENSJON, SAK_ID, SAKSBEHANDLER_IDENT)
         coEvery { vedtaksvurderingKlient.hentVedtak(any(), any()) } returns opprettVedtak()
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns opprettGrunnlag()
         coEvery { beregningKlient.hentBeregning(any(), any()) } returns opprettBeregning()
@@ -117,6 +123,9 @@ internal class SakOgBehandlingServiceTest {
 
     @Test
     fun `FinnUtbetalingsinfo returnerer korrekt antall barn ved soeskenjustering`() {
+        coEvery {
+            behandlingKlient.hentSak(any(), any())
+        } returns Sak("ident", SakType.BARNEPENSJON, SAK_ID, SAKSBEHANDLER_IDENT)
         coEvery { vedtaksvurderingKlient.hentVedtak(any(), any()) } returns opprettVedtak()
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns opprettGrunnlag()
         coEvery { beregningKlient.hentBeregning(any(), any()) } returns opprettBeregningSoeskenjustering()
@@ -153,7 +162,7 @@ internal class SakOgBehandlingServiceTest {
     }
 
     private fun opprettVedtak() = mockk<VedtakDto> {
-        every { sak } returns Sak("ident", SakType.BARNEPENSJON, SAK_ID)
+        every { sak } returns VedtakSak("ident", SakType.BARNEPENSJON, SAK_ID)
         every { behandling.id } returns BEHANDLING_ID
         every { vedtakId } returns 123L
         every { type } returns VedtakType.INNVILGELSE

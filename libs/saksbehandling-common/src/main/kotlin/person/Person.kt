@@ -8,7 +8,6 @@ import no.nav.etterlatte.libs.common.innsendtsoeknad.OppholdUtlandType
 import no.nav.etterlatte.libs.common.innsendtsoeknad.common.JaNeiVetIkke
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.Period
 
 enum class PDLIdentGruppeTyper(val navn: String) {
     FOLKEREGISTERIDENT("FOLKEREGISTERIDENT"), // Kan være DNR og FNR
@@ -173,10 +172,6 @@ data class GeografiskTilknytning(
         land != null -> land
         else -> null
     }
-}
-
-fun Person.alder(): Int? {
-    return foedselsdato?.let { Period.between(foedselsdato, LocalDate.now()).years }
 }
 
 // TODO gir denne egentlig mening i nåværende form? Aktiv tar utgangspunkt i det vi får fra PPS, men det kan

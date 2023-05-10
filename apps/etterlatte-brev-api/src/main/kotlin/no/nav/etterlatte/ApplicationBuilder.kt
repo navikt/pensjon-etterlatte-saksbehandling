@@ -1,6 +1,5 @@
 package no.nav.etterlatte
 
-import com.fasterxml.jackson.core.type.TypeReference
 import com.typesafe.config.ConfigFactory
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
@@ -18,6 +17,7 @@ import no.nav.etterlatte.brev.adresse.RegoppslagKlient
 import no.nav.etterlatte.brev.adresse.enhetsregister.BrregKlient
 import no.nav.etterlatte.brev.adresse.enhetsregister.BrregService
 import no.nav.etterlatte.brev.behandling.SakOgBehandlingService
+import no.nav.etterlatte.brev.behandlingklient.BehandlingKlient
 import no.nav.etterlatte.brev.beregning.BeregningKlient
 import no.nav.etterlatte.brev.brevRoute
 import no.nav.etterlatte.brev.db.BrevRepository
@@ -30,12 +30,10 @@ import no.nav.etterlatte.brev.dokument.dokumentRoute
 import no.nav.etterlatte.brev.grunnlag.GrunnlagKlient
 import no.nav.etterlatte.brev.navansatt.NavansattKlient
 import no.nav.etterlatte.brev.pdf.PdfGeneratorKlient
-import no.nav.etterlatte.brev.tilgangssjekk.BehandlingKlient
 import no.nav.etterlatte.brev.vedtak.VedtaksvurderingKlient
 import no.nav.etterlatte.brev.vedtaksbrevRoute
 import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
-import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.requireEnvValue
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.migrate
@@ -94,7 +92,7 @@ class ApplicationBuilder {
         vedtakKlient,
         grunnlagKlient,
         beregningKlient,
-        saksbehandlere = getSaksbehandlere()
+        behandlingKlient
     )
     private val norg2Klient = Norg2Klient(env.requireEnvValue("NORG2_URL"), httpClient())
     private val datasource = DataSourceBuilder.createDataSource(env)
@@ -141,14 +139,6 @@ class ApplicationBuilder {
                 JournalfoerVedtaksbrev(this, vedtaksbrevService)
                 DistribuerBrev(this, brevService, distribusjonService)
             }
-
-    private fun getSaksbehandlere(): Map<String, String> {
-        val saksbehandlereSecret = env.requireEnvValue("saksbehandlere")
-        return objectMapper.readValue(
-            saksbehandlereSecret,
-            object : TypeReference<Map<String, String>>() {}
-        )
-    }
 
     fun start() = setReady().also { rapidsConnection.start() }
 

@@ -25,6 +25,7 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.SKAL_SENDE_BREV
+import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.vedtak.KafkaHendelseType
@@ -50,7 +51,6 @@ import vedtaksvurdering.ENHET_1
 import vedtaksvurdering.ENHET_2
 import vedtaksvurdering.FNR_1
 import vedtaksvurdering.SAKSBEHANDLER_1
-import vedtaksvurdering.SAKSBEHANDLER_2
 import vedtaksvurdering.attestant
 import vedtaksvurdering.opprettVedtak
 import vedtaksvurdering.saksbehandler
@@ -90,11 +90,7 @@ internal class VedtaksvurderingServiceTest {
             beregningKlient = beregningKlientMock,
             vilkaarsvurderingKlient = vilkaarsvurderingKlientMock,
             behandlingKlient = behandlingKlientMock,
-            sendToRapid = sendToRapidMock,
-            saksbehandlere = mapOf(
-                SAKSBEHANDLER_1 to ENHET_1,
-                SAKSBEHANDLER_2 to ENHET_2
-            )
+            sendToRapid = sendToRapidMock
         )
     }
 
@@ -117,6 +113,12 @@ internal class VedtaksvurderingServiceTest {
             virkningstidspunkt,
             behandlingId
         )
+        coEvery { behandlingKlientMock.hentSak(any(), any()) } returns Sak(
+            SAKSBEHANDLER_1,
+            SakType.BARNEPENSJON,
+            1L,
+            ENHET_1
+        )
         coEvery { vilkaarsvurderingKlientMock.hentVilkaarsvurdering(any(), any()) } returns mockVilkaarsvurdering()
         coEvery { beregningKlientMock.hentBeregning(any(), any()) } returns mockBeregning(
             virkningstidspunkt,
@@ -133,7 +135,12 @@ internal class VedtaksvurderingServiceTest {
     fun `skal opprette og hente nytt vedtak`() {
         val behandlingId = randomUUID()
         val virkningstidspunkt = VIRKNINGSTIDSPUNKT_JAN_2023
-
+        coEvery { behandlingKlientMock.hentSak(any(), any()) } returns Sak(
+            SAKSBEHANDLER_1,
+            SakType.BARNEPENSJON,
+            1L,
+            ENHET_1
+        )
         coEvery { behandlingKlientMock.hentBehandling(any(), any()) } returns mockBehandling(
             virkningstidspunkt,
             behandlingId
@@ -191,6 +198,12 @@ internal class VedtaksvurderingServiceTest {
             virkningstidspunkt2024,
             behandlingId
         )
+        coEvery { behandlingKlientMock.hentSak(any(), any()) } returns Sak(
+            SAKSBEHANDLER_1,
+            SakType.BARNEPENSJON,
+            1L,
+            ENHET_1
+        )
 
         val oppdatertVedtak = runBlocking {
             val nyttVedtak = repository.opprettVedtak(
@@ -212,7 +225,12 @@ internal class VedtaksvurderingServiceTest {
         val behandlingId = randomUUID()
         val virkningstidspunkt = VIRKNINGSTIDSPUNKT_JAN_2023
         val gjeldendeSaksbehandler = saksbehandler
-
+        coEvery { behandlingKlientMock.hentSak(any(), any()) } returns Sak(
+            SAKSBEHANDLER_1,
+            SakType.BARNEPENSJON,
+            1L,
+            ENHET_1
+        )
         coEvery { behandlingKlientMock.fattVedtak(any(), any(), any()) } returns true
         coEvery { behandlingKlientMock.hentBehandling(any(), any()) } returns mockBehandling(
             virkningstidspunkt,
@@ -285,7 +303,12 @@ internal class VedtaksvurderingServiceTest {
         val virkningstidspunkt = VIRKNINGSTIDSPUNKT_JAN_2023
         val gjeldendeSaksbehandler = saksbehandler
         val attestant = attestant
-
+        coEvery { behandlingKlientMock.hentSak(any(), any()) } returns Sak(
+            SAKSBEHANDLER_1,
+            SakType.BARNEPENSJON,
+            1L,
+            ENHET_2
+        )
         coEvery { behandlingKlientMock.fattVedtak(any(), any(), any()) } returns true
         coEvery { behandlingKlientMock.attester(any(), any(), any()) } returns true
         coEvery { behandlingKlientMock.hentBehandling(any(), any()) } returns mockBehandling(
@@ -347,7 +370,12 @@ internal class VedtaksvurderingServiceTest {
             kommerBarnetTilgode = null,
             prosesstype = Prosesstype.MANUELL
         )
-
+        coEvery { behandlingKlientMock.hentSak(any(), any()) } returns Sak(
+            SAKSBEHANDLER_1,
+            SakType.BARNEPENSJON,
+            1L,
+            ENHET_1
+        )
         coEvery { behandlingKlientMock.fattVedtak(any(), any(), any()) } returns true
         coEvery { behandlingKlientMock.attester(any(), any(), any()) } returns true
         coEvery { behandlingKlientMock.hentBehandling(any(), any()) } returns regulering
@@ -383,7 +411,12 @@ internal class VedtaksvurderingServiceTest {
 
         coEvery { behandlingKlientMock.fattVedtak(any(), any(), any()) } returns true
         coEvery { behandlingKlientMock.attester(any(), any(), any()) } returns false
-
+        coEvery { behandlingKlientMock.hentSak(any(), any()) } returns Sak(
+            SAKSBEHANDLER_1,
+            SakType.BARNEPENSJON,
+            1L,
+            ENHET_1
+        )
         runBlocking {
             repository.opprettVedtak(opprettVedtak(behandlingId = behandlingId))
             service.fattVedtak(behandlingId, saksbehandler)
@@ -412,7 +445,12 @@ internal class VedtaksvurderingServiceTest {
     @Test
     fun `skal ikke attestere vedtak naar vedtak allerede er attestert`() {
         val behandlingId = randomUUID()
-
+        coEvery { behandlingKlientMock.hentSak(any(), any()) } returns Sak(
+            SAKSBEHANDLER_1,
+            SakType.BARNEPENSJON,
+            1L,
+            ENHET_1
+        )
         coEvery { behandlingKlientMock.fattVedtak(any(), any(), any()) } returns true
         coEvery { behandlingKlientMock.attester(any(), any(), any()) } returns true
         coEvery {
@@ -444,7 +482,12 @@ internal class VedtaksvurderingServiceTest {
         val virkningstidspunkt = VIRKNINGSTIDSPUNKT_JAN_2023
         val gjeldendeSaksbehandler = saksbehandler
         val attestant = attestant
-
+        coEvery { behandlingKlientMock.hentSak(any(), any()) } returns Sak(
+            SAKSBEHANDLER_1,
+            SakType.BARNEPENSJON,
+            1L,
+            ENHET_1
+        )
         coEvery { behandlingKlientMock.fattVedtak(any(), any(), any()) } returns true
         coEvery { behandlingKlientMock.attester(any(), any(), any()) } returns true
         coEvery { behandlingKlientMock.hentBehandling(any(), any()) } returns mockBehandling(
@@ -490,7 +533,12 @@ internal class VedtaksvurderingServiceTest {
     @Test
     fun `skal ikke sette vedtak til iverksatt naar vedtak allerede er satt til iverksatt`() {
         val behandlingId = randomUUID()
-
+        coEvery { behandlingKlientMock.hentSak(any(), any()) } returns Sak(
+            SAKSBEHANDLER_1,
+            SakType.BARNEPENSJON,
+            1L,
+            ENHET_1
+        )
         coEvery { behandlingKlientMock.fattVedtak(any(), any(), any()) } returns true
         coEvery { behandlingKlientMock.attester(any(), any(), any()) } returns true
         coEvery {
@@ -522,7 +570,12 @@ internal class VedtaksvurderingServiceTest {
         val behandlingId = randomUUID()
         val virkningstidspunkt = VIRKNINGSTIDSPUNKT_JAN_2023
         val gjeldendeSaksbehandler = saksbehandler
-
+        coEvery { behandlingKlientMock.hentSak(any(), any()) } returns Sak(
+            SAKSBEHANDLER_1,
+            SakType.BARNEPENSJON,
+            1L,
+            ENHET_1
+        )
         coEvery { behandlingKlientMock.fattVedtak(any(), any(), any()) } returns true
         coEvery { behandlingKlientMock.underkjenn(any(), any(), any()) } returns true
         coEvery { behandlingKlientMock.hentBehandling(any(), any()) } returns mockBehandling(
@@ -552,7 +605,12 @@ internal class VedtaksvurderingServiceTest {
     @Test
     fun `skal ikke underkjenne vedtak naar behandling er i ugyldig tilstand`() {
         val behandlingId = randomUUID()
-
+        coEvery { behandlingKlientMock.hentSak(any(), any()) } returns Sak(
+            SAKSBEHANDLER_1,
+            SakType.BARNEPENSJON,
+            1L,
+            ENHET_1
+        )
         coEvery { behandlingKlientMock.fattVedtak(any(), any(), any()) } returns true
         coEvery { behandlingKlientMock.underkjenn(any(), any(), any()) } returns false
 
@@ -584,7 +642,12 @@ internal class VedtaksvurderingServiceTest {
     @Test
     fun `skal ikke underkjenne vedtak naar vedtak allerede er attestert`() {
         val behandlingId = randomUUID()
-
+        coEvery { behandlingKlientMock.hentSak(any(), any()) } returns Sak(
+            SAKSBEHANDLER_1,
+            SakType.BARNEPENSJON,
+            1L,
+            ENHET_1
+        )
         coEvery { behandlingKlientMock.fattVedtak(any(), any(), any()) } returns true
         coEvery { behandlingKlientMock.attester(any(), any(), any()) } returns true
         coEvery { behandlingKlientMock.underkjenn(any(), any(), any()) } returns true

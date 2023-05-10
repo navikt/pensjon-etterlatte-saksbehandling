@@ -17,6 +17,7 @@ import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.gyldigSoeknad.VurderingsResultat
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.sak.BehandlingOgSak
 import no.nav.etterlatte.module
 import no.nav.etterlatte.rapidsandrivers.migrering.Enhet
 import no.nav.etterlatte.rapidsandrivers.migrering.MigreringRequest
@@ -61,7 +62,7 @@ class MigreringRoutesTest : BehandlingIntegrationTest() {
                 virkningstidspunkt = YearMonth.now()
             )
 
-            val response: UUID = client.post("/migrering") {
+            val response: BehandlingOgSak = client.post("/migrering") {
                 addAuthToken(tokenSaksbehandler)
                 contentType(ContentType.Application.Json)
                 setBody(request)
@@ -69,7 +70,7 @@ class MigreringRoutesTest : BehandlingIntegrationTest() {
                 Assertions.assertEquals(HttpStatusCode.Created, status)
             }.body()
 
-            val behandling = client.get("/behandlinger/$response") {
+            val behandling = client.get("/behandlinger/${response.behandlingId}") {
                 addAuthToken(tokenSaksbehandler)
             }.apply {
                 Assertions.assertEquals(HttpStatusCode.OK, status)

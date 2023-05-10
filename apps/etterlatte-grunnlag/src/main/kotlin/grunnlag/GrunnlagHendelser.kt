@@ -10,6 +10,7 @@ import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.rapidsandrivers.BEHOV_NAME_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
+import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -17,6 +18,7 @@ import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import rapidsandrivers.GRUNNLAG_OPPDATERT
 
 class GrunnlagHendelser(
     rapidsConnection: RapidsConnection,
@@ -59,6 +61,7 @@ class GrunnlagHendelser(
                             opplysninger
                         )
                     }
+                    packet.eventName = GRUNNLAG_OPPDATERT
                 } catch (e: Exception) {
                     logger.error("Spiser en melding på grunn av feil", e)
                 }

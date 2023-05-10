@@ -93,7 +93,14 @@ class VedtaksvurderingService(
 
         val fattetVedtak = repository.fattVedtak(
             behandlingId,
-            VedtakFattet(bruker.ident(), sak.enhet!!, Tidspunkt.now(clock))
+            VedtakFattet(
+                bruker.ident(),
+                sak.enhet
+                    ?: throw SaksbehandlerManglerEnhetException(
+                        "Vedtak mangler ansvarlig enhet vedtakid: ${vedtak.id}"
+                    ),
+                Tidspunkt.now(clock)
+            )
         )
 
         behandlingKlient.fattVedtak(
@@ -128,7 +135,14 @@ class VedtaksvurderingService(
 
         val attestertVedtak = repository.attesterVedtak(
             behandlingId,
-            Attestasjon(bruker.ident(), sak.enhet!!, Tidspunkt.now(clock))
+            Attestasjon(
+                bruker.ident(),
+                sak.enhet
+                    ?: throw SaksbehandlerManglerEnhetException(
+                        "Vedtak mangler ansvarlig enhet vedtakid: ${vedtak.id}"
+                    ),
+                Tidspunkt.now(clock)
+            )
         )
 
         behandlingKlient.attester(
@@ -380,3 +394,5 @@ class VedtakTilstandException(gjeldendeStatus: VedtakStatus, forventetStatus: Li
 
 class BehandlingstilstandException(vedtak: Vedtak) :
     IllegalStateException("Statussjekk for behandling ${vedtak.behandlingId} feilet")
+
+class SaksbehandlerManglerEnhetException(message: String) : Exception(message)

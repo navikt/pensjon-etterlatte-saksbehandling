@@ -57,7 +57,7 @@ internal class SakOgBehandlingServiceTest {
 
     @AfterEach
     fun after() {
-        confirmVerified(vedtaksvurderingKlient, grunnlagKlient, beregningKlient, behandlingKlient)
+        confirmVerified(vedtaksvurderingKlient, grunnlagKlient, beregningKlient)
     }
 
     @Test

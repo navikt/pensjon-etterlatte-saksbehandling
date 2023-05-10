@@ -2,7 +2,7 @@ package no.nav.etterlatte.utbetaling
 
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.sak.VedtakSak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
@@ -42,7 +42,7 @@ fun vedtak(
     vedtakId = vedtakId,
     status = VedtakStatus.ATTESTERT,
     behandling = behandling,
-    sak = Sak(
+    sak = VedtakSak(
         id = sakId,
         ident = ident,
         sakType = saktype
@@ -73,7 +73,7 @@ fun ugyldigVedtakTilUtbetaling(
     vedtakId = vedtakId,
     status = VedtakStatus.ATTESTERT,
     behandling = behandling,
-    sak = Sak(
+    sak = VedtakSak(
         id = 1,
         ident = "12345678913",
         sakType = saktype

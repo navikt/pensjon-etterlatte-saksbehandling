@@ -2,10 +2,12 @@ package no.nav.etterlatte.brev.behandling
 
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
+import no.nav.etterlatte.brev.behandlingklient.BehandlingKlient
 import no.nav.etterlatte.brev.beregning.BeregningKlient
 import no.nav.etterlatte.brev.grunnlag.GrunnlagKlient
 import no.nav.etterlatte.brev.vedtak.VedtaksvurderingKlient
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
+import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.token.Bruker
 import java.time.YearMonth
@@ -14,7 +16,8 @@ import java.util.*
 class SakOgBehandlingService(
     private val vedtaksvurderingKlient: VedtaksvurderingKlient,
     private val grunnlagKlient: GrunnlagKlient,
-    private val beregningKlient: BeregningKlient
+    private val beregningKlient: BeregningKlient,
+    private val behandlingKlient: BehandlingKlient
 ) {
 
     suspend fun hentBehandling(
@@ -24,10 +27,11 @@ class SakOgBehandlingService(
     ): Behandling = coroutineScope {
         val vedtak = async { vedtaksvurderingKlient.hentVedtak(behandlingId, bruker) }
         val grunnlag = async { grunnlagKlient.hentGrunnlag(sakId, bruker) }
-
+        val sak = async { behandlingKlient.hentSak(sakId, bruker) }
         mapBehandling(
             vedtak.await(),
             grunnlag.await(),
+            sak.await(),
             bruker
         )
     }
@@ -35,6 +39,7 @@ class SakOgBehandlingService(
     private suspend fun mapBehandling(
         vedtak: VedtakDto,
         grunnlag: Grunnlag,
+        sak: Sak,
         bruker: Bruker
     ): Behandling {
         val innloggetSaksbehandlerIdent = bruker.ident()
@@ -46,7 +51,7 @@ class SakOgBehandlingService(
         val attestant = vedtak.vedtakFattet?.let {
             Attestant(
                 vedtak.attestasjon?.attestant ?: innloggetSaksbehandlerIdent,
-                vedtak.attestasjon?.attesterendeEnhet ?: vedtak.sak.enhet!!
+                vedtak.attestasjon?.attesterendeEnhet ?: sak.enhet!!
             )
         }
 

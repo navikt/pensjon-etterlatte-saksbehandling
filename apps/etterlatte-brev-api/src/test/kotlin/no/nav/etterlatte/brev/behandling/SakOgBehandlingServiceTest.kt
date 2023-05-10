@@ -20,7 +20,7 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.Opplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
-import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.sak.VedtakSak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
@@ -150,7 +150,7 @@ internal class SakOgBehandlingServiceTest {
     }
 
     private fun opprettVedtak() = mockk<VedtakDto> {
-        every { sak } returns Sak("ident", SakType.BARNEPENSJON, SAK_ID)
+        every { sak } returns VedtakSak("ident", SakType.BARNEPENSJON, SAK_ID)
         every { behandling.id } returns BEHANDLING_ID
         every { vedtakId } returns 123L
         every { type } returns VedtakType.INNVILGELSE

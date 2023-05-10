@@ -11,6 +11,7 @@ import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.sak.VedtakSak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
@@ -223,7 +224,7 @@ fun vedtak(
     vedtakId = vedtakId,
     status = VedtakStatus.ATTESTERT,
     virkningstidspunkt = virk,
-    sak = Sak(ident = ident, sakType = sakType, id = sakId),
+    sak = VedtakSak(ident = ident, sakType = sakType, id = sakId),
     behandling = Behandling(type = behandlingType, id = behandlingId),
     type = type,
     utbetalingsperioder = pensjonTilUtbetaling ?: emptyList(),

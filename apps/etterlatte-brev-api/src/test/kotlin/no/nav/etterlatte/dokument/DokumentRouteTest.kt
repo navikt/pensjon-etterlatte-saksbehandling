@@ -20,11 +20,11 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.etterlatte.brev.behandlingklient.BehandlingKlient
 import no.nav.etterlatte.brev.dokument.HentJournalposterResult
 import no.nav.etterlatte.brev.dokument.SafClient
 import no.nav.etterlatte.brev.dokument.dokumentRoute
 import no.nav.etterlatte.brev.journalpost.BrukerIdType
-import no.nav.etterlatte.brev.tilgangssjekk.BehandlingKlient
 import no.nav.etterlatte.libs.common.FoedselsnummerDTO
 import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
 import no.nav.etterlatte.libs.ktor.restModule

@@ -17,6 +17,7 @@ import no.nav.etterlatte.brev.adresse.RegoppslagKlient
 import no.nav.etterlatte.brev.adresse.enhetsregister.BrregKlient
 import no.nav.etterlatte.brev.adresse.enhetsregister.BrregService
 import no.nav.etterlatte.brev.behandling.SakOgBehandlingService
+import no.nav.etterlatte.brev.behandlingklient.BehandlingKlient
 import no.nav.etterlatte.brev.beregning.BeregningKlient
 import no.nav.etterlatte.brev.brevRoute
 import no.nav.etterlatte.brev.db.BrevRepository
@@ -29,7 +30,6 @@ import no.nav.etterlatte.brev.dokument.dokumentRoute
 import no.nav.etterlatte.brev.grunnlag.GrunnlagKlient
 import no.nav.etterlatte.brev.navansatt.NavansattKlient
 import no.nav.etterlatte.brev.pdf.PdfGeneratorKlient
-import no.nav.etterlatte.brev.tilgangssjekk.BehandlingKlient
 import no.nav.etterlatte.brev.vedtak.VedtaksvurderingKlient
 import no.nav.etterlatte.brev.vedtaksbrevRoute
 import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID

@@ -1,7 +1,7 @@
 package no.nav.etterlatte.libs.common.vedtak
 
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
-import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.sak.VedtakSak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import java.math.BigDecimal
 import java.time.YearMonth
@@ -12,7 +12,7 @@ data class VedtakDto(
     val vedtakId: Long,
     val status: VedtakStatus,
     val virkningstidspunkt: YearMonth,
-    val sak: Sak,
+    val sak: VedtakSak,
     val behandling: Behandling,
     val type: VedtakType,
     val vedtakFattet: VedtakFattet?,

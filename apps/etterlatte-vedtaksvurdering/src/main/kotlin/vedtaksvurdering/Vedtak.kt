@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
-import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.sak.VedtakSak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
 import no.nav.etterlatte.libs.common.vedtak.Behandling
@@ -51,7 +51,7 @@ data class Vedtak(
         vedtakId = id,
         status = status,
         virkningstidspunkt = virkningstidspunkt,
-        sak = Sak(soeker.value, sakType, sakId),
+        sak = VedtakSak(soeker.value, sakType, sakId),
         behandling = Behandling(behandlingType, behandlingId),
         type = type,
         utbetalingsperioder = utbetalingsperioder,

@@ -4,7 +4,6 @@ import no.nav.security.token.support.core.jwt.JwtTokenClaims
 
 sealed class Bruker {
     abstract fun ident(): String
-    abstract fun saksbehandlerEnhet(saksbehandlere: Map<String, String>): String // TODO: skal fjernes
 
     abstract fun accessToken(): String
 
@@ -33,16 +32,11 @@ sealed class Bruker {
 data class SystemBruker(val oid: String, val sub: String) : Bruker() {
     override fun ident() = Fagsaksystem.EY.navn
 
-    override fun saksbehandlerEnhet(saksbehandlere: Map<String, String>) = Fagsaksystem.EY.enhet
-
     override fun accessToken() = throw NotImplementedError("Kun relevant for saksbehandler")
 }
 
 data class Saksbehandler(val accessToken: String, val ident: String, val jwtTokenClaims: JwtTokenClaims?) : Bruker() {
     override fun ident() = ident
-
-    override fun saksbehandlerEnhet(saksbehandlere: Map<String, String>) = saksbehandlere[ident]
-        ?: throw SaksbehandlerManglerEnhetException("Saksbehandler $ident mangler enhet fra secret")
 
     override fun accessToken() = accessToken
 

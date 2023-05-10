@@ -41,7 +41,6 @@ class VedtaksvurderingService(
     private val vilkaarsvurderingKlient: VilkaarsvurderingKlient,
     private val behandlingKlient: BehandlingKlient,
     private val sendToRapid: (String, UUID) -> Unit,
-    private val saksbehandlere: Map<String, String>,
     private val clock: Clock = utcKlokke()
 ) {
     private val logger = LoggerFactory.getLogger(VedtaksvurderingService::class.java)
@@ -90,9 +89,11 @@ class VedtaksvurderingService(
         verifiserGyldigBehandlingStatus(behandlingKlient.fattVedtak(behandlingId, bruker), vedtak)
         verifiserGyldigVedtakStatus(vedtak.status, listOf(VedtakStatus.OPPRETTET, VedtakStatus.RETURNERT))
 
+        val sak = behandlingKlient.hentSak(vedtak.sakId, bruker)
+
         val fattetVedtak = repository.fattVedtak(
             behandlingId,
-            VedtakFattet(bruker.ident(), bruker.saksbehandlerEnhet(saksbehandlere), Tidspunkt.now(clock))
+            VedtakFattet(bruker.ident(), sak.enhet!!, Tidspunkt.now(clock))
         )
 
         behandlingKlient.fattVedtak(
@@ -123,11 +124,11 @@ class VedtaksvurderingService(
 
         verifiserGyldigBehandlingStatus(behandlingKlient.attester(behandlingId, bruker), vedtak)
         verifiserGyldigVedtakStatus(vedtak.status, listOf(VedtakStatus.FATTET_VEDTAK))
-        val (behandling, _, _) = hentDataForVedtak(behandlingId, bruker)
+        val (behandling, _, _, sak) = hentDataForVedtak(behandlingId, bruker)
 
         val attestertVedtak = repository.attesterVedtak(
             behandlingId,
-            Attestasjon(bruker.ident(), bruker.saksbehandlerEnhet(saksbehandlere), Tidspunkt.now(clock))
+            Attestasjon(bruker.ident(), sak.enhet!!, Tidspunkt.now(clock))
         )
 
         behandlingKlient.attester(
@@ -330,20 +331,20 @@ class VedtaksvurderingService(
     private suspend fun hentDataForVedtak(
         behandlingId: UUID,
         bruker: Bruker
-    ): Triple<DetaljertBehandling, VilkaarsvurderingDto?, BeregningDTO?> {
+    ): VedtakData {
         return coroutineScope {
             val behandling = behandlingKlient.hentBehandling(behandlingId, bruker)
-
+            val sak = behandlingKlient.hentSak(behandling.sak, bruker)
             when (behandling.behandlingType) {
-                BehandlingType.MANUELT_OPPHOER -> Triple(behandling, null, null)
+                BehandlingType.MANUELT_OPPHOER -> VedtakData(behandling, null, null, sak)
 
                 BehandlingType.FØRSTEGANGSBEHANDLING, BehandlingType.REVURDERING -> {
                     val vilkaarsvurdering = vilkaarsvurderingKlient.hentVilkaarsvurdering(behandlingId, bruker)
                     when (vilkaarsvurdering?.resultat?.utfall) {
-                        VilkaarsvurderingUtfall.IKKE_OPPFYLT -> Triple(behandling, vilkaarsvurdering, null)
+                        VilkaarsvurderingUtfall.IKKE_OPPFYLT -> VedtakData(behandling, vilkaarsvurdering, null, sak)
                         VilkaarsvurderingUtfall.OPPFYLT -> {
                             val beregning = beregningKlient.hentBeregning(behandlingId, bruker)
-                            Triple(behandling, vilkaarsvurdering, beregning)
+                            VedtakData(behandling, vilkaarsvurdering, beregning, sak)
                         }
 
                         null -> throw Exception("Mangler resultat av vilkårsvurdering for behandling $behandlingId")

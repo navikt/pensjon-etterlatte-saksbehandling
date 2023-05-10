@@ -205,23 +205,6 @@ internal class BehandlingDaoIntegrationTest {
     }
 
     @Test
-    fun `Sletting av alle behandlinger i en sak`() {
-        val sak1 = sakRepo.opprettSak("123", SakType.BARNEPENSJON).id
-        val sak2 = sakRepo.opprettSak("321", SakType.BARNEPENSJON).id
-
-        listOf(sak1, sak1, sak2).forEach { sak ->
-            behandlingRepo.opprettBehandling(
-                opprettBehandling(type = BehandlingType.FØRSTEGANGSBEHANDLING, sakId = sak)
-            )
-        }
-
-        assertEquals(2, behandlingRepo.alleBehandlingerISak(sak1).size)
-        behandlingRepo.slettBehandlingerISak(sak1)
-        assertEquals(0, behandlingRepo.alleBehandlingerISak(sak1).size)
-        assertEquals(1, behandlingRepo.alleBehandlingerISak(sak2).size)
-    }
-
-    @Test
     fun `avbryte sak`() {
         val sak1 = sakRepo.opprettSak("123", SakType.BARNEPENSJON).id
         listOf(
@@ -310,7 +293,7 @@ internal class BehandlingDaoIntegrationTest {
             )
         }
 
-        val behandlinger = behandlingRepo.alleBehandlinger()
+        val behandlinger = behandlingRepo.alleBehandlingerISak(sak1)
         assertAll(
             "Skal hente ut to foerstegangsbehandlinger og to revurderinger",
             { assertEquals(4, behandlinger.size) },
@@ -342,8 +325,10 @@ internal class BehandlingDaoIntegrationTest {
             )
         }
 
-        val foerstegangsbehandlinger = behandlingRepo.alleBehandlingerAvType(BehandlingType.FØRSTEGANGSBEHANDLING)
-        val revurderinger = behandlingRepo.alleBehandlingerAvType(BehandlingType.REVURDERING)
+        val foerstegangsbehandlinger = behandlingRepo.alleBehandlingerISak(sak1).filter {
+            it.type == BehandlingType.FØRSTEGANGSBEHANDLING
+        }
+        val revurderinger = behandlingRepo.alleBehandlingerISak(sak1).filter { it.type == BehandlingType.REVURDERING }
         assertAll(
             "Skal hente ut to foerstegangsbehandlinger og to revurderinger",
             { assertEquals(2, foerstegangsbehandlinger.size) },
@@ -379,122 +364,6 @@ internal class BehandlingDaoIntegrationTest {
     }
 
     @Test
-    fun `alleSakIderMedUavbruttBehandlingForSoekerMedFnr henter flere saker hvis bruker har flere`() {
-        val brukerFnr = "123"
-        val annenBrukerFnr = "456"
-        val sakBarnepensjon = sakRepo.opprettSak(brukerFnr, SakType.BARNEPENSJON)
-        val sakOmstillingstoenad = sakRepo.opprettSak(brukerFnr, SakType.OMSTILLINGSSTOENAD)
-
-        val sakBarnepensjonAnnenBruker = sakRepo.opprettSak(annenBrukerFnr, SakType.BARNEPENSJON)
-        behandlingRepo.opprettBehandling(
-            opprettBehandling(
-                type = BehandlingType.FØRSTEGANGSBEHANDLING,
-                sakId = sakBarnepensjonAnnenBruker.id,
-                persongalleri = persongalleri(soeker = annenBrukerFnr)
-            )
-        )
-
-        behandlingRepo.opprettBehandling(
-            opprettBehandling(
-                type = BehandlingType.FØRSTEGANGSBEHANDLING,
-                sakId = sakBarnepensjon.id,
-                persongalleri = persongalleri(soeker = brukerFnr)
-            )
-        )
-
-        behandlingRepo.opprettBehandling(
-            opprettBehandling(
-                type = BehandlingType.REVURDERING,
-                sakId = sakBarnepensjon.id,
-                persongalleri = persongalleri(soeker = brukerFnr),
-                revurderingAarsak = RevurderingAarsak.REGULERING
-            )
-        )
-
-        behandlingRepo.opprettBehandling(
-            opprettBehandling(
-                type = BehandlingType.FØRSTEGANGSBEHANDLING,
-                sakId = sakOmstillingstoenad.id,
-                persongalleri = persongalleri(soeker = brukerFnr)
-            )
-        )
-
-        assertEquals(
-            behandlingRepo.alleSakIderMedUavbruttBehandlingForSoekerMedFnr(brukerFnr).toSet(),
-            setOf(sakBarnepensjon.id, sakOmstillingstoenad.id)
-        )
-    }
-
-    @Test
-    fun `alleSakIderMedUavbruttBehandlingForSoekerMedFnr ignorerer saker med ingen uavbrutte behandlinger`() {
-        val brukerFnr = "123"
-        val sakBarnepensjon = sakRepo.opprettSak(brukerFnr, SakType.BARNEPENSJON)
-        sakRepo.opprettSak(brukerFnr, SakType.OMSTILLINGSSTOENAD)
-
-        behandlingRepo.opprettBehandling(
-            opprettBehandling(
-                BehandlingType.FØRSTEGANGSBEHANDLING,
-                sakId = sakBarnepensjon.id,
-                status = BehandlingStatus.AVBRUTT,
-                persongalleri = persongalleri(soeker = brukerFnr)
-            )
-        )
-        assertEquals(
-            behandlingRepo.alleSakIderMedUavbruttBehandlingForSoekerMedFnr(brukerFnr).toSet(),
-            emptySet<Long>()
-        )
-    }
-
-    @Test
-    fun `hent alle behandlinger av type for sak henter tilbake spesifiserte saker`() {
-        val sak = sakRepo.opprettSak("123", SakType.BARNEPENSJON).id
-
-        repeat(4) {
-            behandlingRepo.opprettBehandling(
-                opprettBehandling(
-                    type = BehandlingType.REVURDERING,
-                    sakId = sak,
-                    revurderingAarsak = RevurderingAarsak.REGULERING,
-                    prosesstype = Prosesstype.MANUELL
-                )
-            )
-        }
-
-        repeat(3) {
-            behandlingRepo.opprettBehandling(
-                opprettBehandling(
-                    type = BehandlingType.FØRSTEGANGSBEHANDLING,
-                    sakId = sak
-                )
-            )
-        }
-
-        behandlingRepo.opprettBehandling(
-            opprettBehandling(
-                type = BehandlingType.MANUELT_OPPHOER,
-                sakId = sak,
-                opphoerAarsaker = listOf(
-                    ManueltOpphoerAarsak.SOESKEN_DOED,
-                    ManueltOpphoerAarsak.GJENLEVENDE_FORELDER_DOED
-                )
-            )
-        )
-
-        assertEquals(
-            behandlingRepo.alleBehandlingerISakAvType(sak, BehandlingType.REVURDERING).size,
-            4
-        )
-        assertEquals(
-            behandlingRepo.alleBehandlingerISakAvType(sak, BehandlingType.FØRSTEGANGSBEHANDLING).size,
-            3
-        )
-        assertEquals(
-            behandlingRepo.alleBehandlingerISakAvType(sak, BehandlingType.MANUELT_OPPHOER).size,
-            1
-        )
-    }
-
-    @Test
     fun `skal hente alle loepende behandlinger i en sak`() {
         val sak1 = sakRepo.opprettSak("123", SakType.BARNEPENSJON).id
 
@@ -514,7 +383,8 @@ internal class BehandlingDaoIntegrationTest {
         }
 
         val lagredeBehandlinger = behandlingRepo.alleBehandlingerISak(sak1)
-        val alleLoependeBehandlinger = behandlingRepo.alleAktiveBehandlingerISak(sak1)
+        val alleLoependeBehandlinger =
+            behandlingRepo.alleBehandlingerISak(sak1).filter { it.status in BehandlingStatus.underBehandling() }
         assertEquals(4, lagredeBehandlinger.size)
         assertEquals(2, alleLoependeBehandlinger.size)
     }

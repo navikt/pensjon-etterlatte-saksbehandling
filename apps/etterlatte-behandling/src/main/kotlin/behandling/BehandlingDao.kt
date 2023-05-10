@@ -58,37 +58,6 @@ class BehandlingDao(private val connection: () -> Connection) {
         }
     }
 
-    fun alleBehandlingerAvType(type: BehandlingType): List<Behandling> {
-        val stmt =
-            connection().prepareStatement(
-                """
-                    $alleBehandlingerMedSak
-                    WHERE b.behandlingstype = ?
-                """.trimIndent()
-            )
-        stmt.setString(1, type.name)
-        return stmt.executeQuery().toList { tilBehandling(type.name)!! }
-    }
-
-    fun alleBehandlingerISakAvType(sakId: Long, type: BehandlingType): List<Behandling> {
-        return connection().prepareStatement(
-            """
-                $alleBehandlingerMedSak
-                WHERE b.sak_id = ? AND b.behandlingstype = ?
-            """.trimIndent()
-        ).let {
-            it.setLong(1, sakId)
-            it.setString(2, type.name)
-            it.executeQuery()
-        }.toList { tilBehandling(type.name)!! }
-    }
-
-    fun alleBehandlinger(): List<Behandling> {
-        val stmt =
-            connection().prepareStatement(alleBehandlingerMedSak)
-        return stmt.executeQuery().behandlingsListe()
-    }
-
     fun alleBehandlingerISak(sakid: Long): List<Behandling> {
         val stmt =
             connection().prepareStatement(
@@ -99,24 +68,6 @@ class BehandlingDao(private val connection: () -> Connection) {
             )
         stmt.setLong(1, sakid)
         return stmt.executeQuery().behandlingsListe()
-    }
-
-    fun alleAktiveBehandlingerISak(sakid: Long): List<Behandling> {
-        with(connection()) {
-            val stmt =
-                prepareStatement(
-                    """
-                        $alleBehandlingerMedSak
-                        WHERE b.sak_id = ? AND b.status = ANY(?)
-                    """.trimIndent()
-                )
-            stmt.setLong(1, sakid)
-            stmt.setArray(
-                2,
-                createArrayOf("text", BehandlingStatus.underBehandling().map { it.name }.toTypedArray())
-            )
-            return stmt.executeQuery().behandlingsListe()
-        }
     }
 
     fun migrerStatusPaaAlleBehandlingerSomTrengerNyBeregning(): SakIDListe {
@@ -192,20 +143,6 @@ class BehandlingDao(private val connection: () -> Connection) {
         enhet = rs.getString("enhet").takeUnless { rs.wasNull() }
     )
 
-    fun alleSakIderMedUavbruttBehandlingForSoekerMedFnr(fnr: String): List<Long> {
-        return connection().prepareStatement(
-            """
-                SELECT DISTINCT sak_id FROM behandling
-                WHERE soeker = ? AND  status != 'AVBRUTT'
-            """.trimIndent()
-        ).let {
-            it.setString(1, fnr)
-            it.executeQuery()
-        }.toList {
-            getLong(1)
-        }
-    }
-
     fun opprettBehandling(behandling: OpprettBehandling) {
         val stmt =
             connection().prepareStatement(
@@ -259,12 +196,6 @@ class BehandlingDao(private val connection: () -> Connection) {
         stmt.setTidspunkt(3, behandling.sistEndret.toTidspunkt())
         stmt.setObject(4, behandling.id)
         require(stmt.executeUpdate() == 1)
-    }
-
-    fun slettBehandlingerISak(id: Long) {
-        val statement = connection().prepareStatement("DELETE from behandling where sak_id = ?")
-        statement.setLong(1, id)
-        statement.executeUpdate()
     }
 
     fun lagreStatus(lagretBehandling: Behandling) {

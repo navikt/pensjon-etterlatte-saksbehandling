@@ -108,8 +108,6 @@ spec:
         - application: etterlatte-grunnlag
         - application: etterlatte-beregning
         - application: etterlatte-behandling
-        - application: pensjon-brevbaker
-          namespace: pensjonsbrev
       external:
         - host: etterlatte-proxy.dev-fss-pub.nais.io
         - host: norg2.dev-fss-pub.nais.io

@@ -45,7 +45,9 @@ class SakOgBehandlingService(
         val innloggetSaksbehandlerIdent = bruker.ident()
 
         val saksbehandlerEnhet = vedtak.vedtakFattet?.ansvarligEnhet
-            ?: throw SaksbehandlerManglerEnhetException("Vedtak mangler ansvarlig enhet vedtakid: ${vedtak.vedtakId}")
+            ?: sak.enhet ?: throw SaksbehandlerManglerEnhetException(
+            "Vedtak mangler ansvarlig enhet vedtakid: ${vedtak.vedtakId}"
+        )
         val saksbehandlerIdent = vedtak.vedtakFattet?.ansvarligSaksbehandler ?: innloggetSaksbehandlerIdent
 
         val attestant = vedtak.vedtakFattet?.let {

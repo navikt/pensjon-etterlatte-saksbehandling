@@ -110,3 +110,5 @@ class SakOgBehandlingService(
         )
     }
 }
+
+class SaksbehandlerManglerEnhetException(message: String) : Exception(message)

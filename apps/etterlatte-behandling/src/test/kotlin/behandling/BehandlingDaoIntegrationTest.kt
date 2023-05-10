@@ -519,7 +519,8 @@ internal class BehandlingDaoIntegrationTest {
         }
 
         val lagredeBehandlinger = behandlingRepo.alleBehandlingerISak(sak1)
-        val alleLoependeBehandlinger = behandlingRepo.alleAktiveBehandlingerISak(sak1)
+        val alleLoependeBehandlinger =
+            behandlingRepo.alleBehandlingerISak(sak1).filter { it.status in BehandlingStatus.underBehandling() }
         assertEquals(4, lagredeBehandlinger.size)
         assertEquals(2, alleLoependeBehandlinger.size)
     }

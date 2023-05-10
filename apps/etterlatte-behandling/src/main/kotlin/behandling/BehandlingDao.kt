@@ -76,25 +76,6 @@ class BehandlingDao(private val connection: () -> Connection) {
         stmt.setLong(1, sakid)
         return stmt.executeQuery().behandlingsListe()
     }
-    // TODO: slett, kun test
-
-    fun alleAktiveBehandlingerISak(sakid: Long): List<Behandling> {
-        with(connection()) {
-            val stmt =
-                prepareStatement(
-                    """
-                        $alleBehandlingerMedSak
-                        WHERE b.sak_id = ? AND b.status = ANY(?)
-                    """.trimIndent()
-                )
-            stmt.setLong(1, sakid)
-            stmt.setArray(
-                2,
-                createArrayOf("text", BehandlingStatus.underBehandling().map { it.name }.toTypedArray())
-            )
-            return stmt.executeQuery().behandlingsListe()
-        }
-    }
 
     fun migrerStatusPaaAlleBehandlingerSomTrengerNyBeregning(): SakIDListe {
         with(connection()) {

@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 import { Navigate, Route, Routes, useMatch } from 'react-router-dom'
 import { hentBehandling } from '~shared/api/behandling'
 import { GridContainer, MainContent } from '~shared/styled'
-import { addBehandling, resetBehandling } from '~store/reducers/BehandlingReducer'
+import { addBehandling, resetBehandling, updateVilkaarsvurdering } from '~store/reducers/BehandlingReducer'
 import Spinner from '~shared/Spinner'
 import { StatusBar, StatusBarTheme } from '~shared/statusbar/Statusbar'
 import { useBehandlingRoutes } from './BehandlingRoutes'
@@ -11,6 +11,7 @@ import { SideMeny } from './SideMeny/SideMeny'
 import { useAppDispatch, useAppSelector } from '~store/Store'
 import { isFailure, isPendingOrInitial, useApiCall } from '~shared/hooks/useApiCall'
 import { ApiErrorAlert } from '~ErrorBoundary'
+import { hentVilkaarsvurdering } from '~shared/api/vilkaarsvurdering'
 
 export const Behandling = () => {
   const behandling = useAppSelector((state) => state.behandlingReducer.behandling)
@@ -18,6 +19,7 @@ export const Behandling = () => {
   const match = useMatch('/behandling/:behandlingId/*')
   const { behandlingRoutes } = useBehandlingRoutes()
   const [fetchBehandlingStatus, fetchBehandling] = useApiCall(hentBehandling)
+  const [fetchVilkaarsvurderingStatus, fetchVilkaarsvurdering] = useApiCall(hentVilkaarsvurdering)
 
   const behandlingId = behandling?.id
 
@@ -28,7 +30,15 @@ export const Behandling = () => {
     if (behandlingIdFraURL !== behandlingId) {
       fetchBehandling(
         behandlingIdFraURL,
-        (res) => dispatch(addBehandling(res)),
+        (res) => {
+          dispatch(addBehandling(res))
+
+          fetchVilkaarsvurdering(behandlingIdFraURL, (vilkaarsvurdering) => {
+            if (vilkaarsvurdering !== null) {
+              dispatch(updateVilkaarsvurdering(vilkaarsvurdering))
+            }
+          })
+        },
         () => dispatch(resetBehandling())
       )
     }
@@ -51,7 +61,10 @@ export const Behandling = () => {
       )}
       {behandling && <StegMeny behandling={behandling} />}
 
-      <Spinner visible={isPendingOrInitial(fetchBehandlingStatus)} label="Laster" />
+      <Spinner
+        visible={isPendingOrInitial(fetchBehandlingStatus) || isPendingOrInitial(fetchVilkaarsvurderingStatus)}
+        label="Laster"
+      />
       {behandling && (
         <GridContainer>
           <MainContent>

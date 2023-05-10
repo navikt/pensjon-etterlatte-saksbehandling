@@ -205,23 +205,6 @@ internal class BehandlingDaoIntegrationTest {
     }
 
     @Test
-    fun `Sletting av alle behandlinger i en sak`() {
-        val sak1 = sakRepo.opprettSak("123", SakType.BARNEPENSJON).id
-        val sak2 = sakRepo.opprettSak("321", SakType.BARNEPENSJON).id
-
-        listOf(sak1, sak1, sak2).forEach { sak ->
-            behandlingRepo.opprettBehandling(
-                opprettBehandling(type = BehandlingType.FØRSTEGANGSBEHANDLING, sakId = sak)
-            )
-        }
-
-        assertEquals(2, behandlingRepo.alleBehandlingerISak(sak1).size)
-        behandlingRepo.slettBehandlingerISak(sak1)
-        assertEquals(0, behandlingRepo.alleBehandlingerISak(sak1).size)
-        assertEquals(1, behandlingRepo.alleBehandlingerISak(sak2).size)
-    }
-
-    @Test
     fun `avbryte sak`() {
         val sak1 = sakRepo.opprettSak("123", SakType.BARNEPENSJON).id
         listOf(

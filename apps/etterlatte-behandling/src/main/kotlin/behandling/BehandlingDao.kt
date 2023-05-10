@@ -220,13 +220,6 @@ class BehandlingDao(private val connection: () -> Connection) {
         require(stmt.executeUpdate() == 1)
     }
 
-    // TODO: slett, kun test
-    fun slettBehandlingerISak(id: Long) {
-        val statement = connection().prepareStatement("DELETE from behandling where sak_id = ?")
-        statement.setLong(1, id)
-        statement.executeUpdate()
-    }
-
     fun lagreStatus(lagretBehandling: Behandling) {
         lagreStatus(lagretBehandling.id, lagretBehandling.status, lagretBehandling.sistEndret)
     }

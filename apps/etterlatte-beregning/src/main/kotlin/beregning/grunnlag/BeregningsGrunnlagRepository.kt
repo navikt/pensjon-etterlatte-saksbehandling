@@ -35,6 +35,9 @@ class BeregningsGrunnlagRepository(private val dataSource: DataSource) {
                         "soesken_med_i_beregning" to objectMapper.writeValueAsString(
                             beregningsGrunnlag.soeskenMedIBeregning
                         ),
+                        "institusjonsopphold" to objectMapper.writeValueAsString(
+                            beregningsGrunnlag.institusjonsopphold
+                        ),
                         "kilde" to beregningsGrunnlag.kilde.toJson()
 
                     )
@@ -48,22 +51,23 @@ class BeregningsGrunnlagRepository(private val dataSource: DataSource) {
     companion object {
 
         val lagreGrunnlagQuery = """
-            INSERT INTO bp_beregningsgrunnlag(behandlings_id, soesken_med_i_beregning, kilde)
+            INSERT INTO bp_beregningsgrunnlag(behandlings_id, soesken_med_i_beregning, institusjonsopphold, kilde)
             VALUES(
                 :behandlings_id,
                 :soesken_med_i_beregning,
+                :institusjonsopphold,
                 :kilde
             )
         """.trimMargin()
 
         val oppdaterGrunnlagQuery = """
             UPDATE bp_beregningsgrunnlag
-            SET soesken_med_i_beregning = :soesken_med_i_beregning, kilde = :kilde
+            SET soesken_med_i_beregning = :soesken_med_i_beregning, institusjonsopphold = :institusjonsopphold, kilde = :kilde
             WHERE behandlings_id = :behandlings_id
         """.trimMargin()
 
         val finnGrunnlagForBehandling = """
-            SELECT behandlings_id, soesken_med_i_beregning, kilde
+            SELECT behandlings_id, soesken_med_i_beregning, institusjonsopphold, kilde
             FROM bp_beregningsgrunnlag
             WHERE behandlings_id = :behandlings_id
         """.trimIndent()
@@ -74,6 +78,7 @@ private fun Row.asBeregningsGrunnlag(): BeregningsGrunnlag {
     return BeregningsGrunnlag(
         behandlingId = this.uuid("behandlings_id"),
         soeskenMedIBeregning = objectMapper.readValue(this.string("soesken_med_i_beregning")),
+        institusjonsopphold = objectMapper.readValue(this.string("institusjonsopphold")),
         kilde = objectMapper.readValue(this.string("kilde"))
     )
 }

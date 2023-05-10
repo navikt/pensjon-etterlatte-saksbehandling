@@ -4,7 +4,7 @@ import styled from 'styled-components'
 import { Infoboks } from '~components/behandling/soeknadsoversikt/styled'
 import { BehandlingHandlingKnapper } from '~components/behandling/handlinger/BehandlingHandlingKnapper'
 import { useEffect, useState } from 'react'
-import { opprettEllerEndreBeregning, lagreSoeskenMedIBeregning } from '~shared/api/beregning'
+import { opprettEllerEndreBeregning, lagreBeregningsGrunnlag } from '~shared/api/beregning'
 import { useBehandlingRoutes } from '~components/behandling/BehandlingRoutes'
 import { Opphoersgrunn, OVERSETTELSER_OPPHOERSGRUNNER } from '~components/person/ManueltOpphoerModal'
 import { hentManueltOpphoerDetaljer } from '~shared/api/behandling'
@@ -17,6 +17,7 @@ import { Child } from '@navikt/ds-icons'
 import differenceInYears from 'date-fns/differenceInYears'
 import { IBehandlingsammendrag } from '~components/person/typer'
 import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
+import { Institusjonsopphold } from '~shared/types/Beregning'
 
 export interface ManueltOpphoerDetaljer {
   id: string
@@ -52,7 +53,13 @@ export const ManueltOpphoerOversikt = (props: { behandling: IBehandlingReducer }
     setLoadingBeregning(true)
     setFeilmelding('')
     try {
-      await lagreSoeskenMedIBeregning({ behandlingsId: behandling.id, soeskenMedIBeregning: [] })
+      // TODO EY-2170
+      const institusjonsopphold = { institusjonsopphold: false } as Institusjonsopphold
+      await lagreBeregningsGrunnlag({
+        behandlingsId: behandling.id,
+        soeskenMedIBeregning: [],
+        institusjonsopphold: institusjonsopphold,
+      })
       await opprettEllerEndreBeregning(behandling.id)
       behandlingRoutes.next()
     } catch (e) {

@@ -13,8 +13,8 @@ import { NesteOgTilbake } from '../handlinger/NesteOgTilbake'
 import { useAppDispatch } from '~store/Store'
 import { opprettEllerEndreBeregning } from '~shared/api/beregning'
 import { isFailure, isPending, useApiCall } from '~shared/hooks/useApiCall'
-import { hentSoeskenjusteringsgrunnlag, lagreSoeskenMedIBeregning } from '~shared/api/beregning'
-import { SoeskenMedIBeregning } from '~shared/types/Beregning'
+import { hentBeregningsGrunnlag, lagreBeregningsGrunnlag } from '~shared/api/beregning'
+import { Institusjonsopphold, SoeskenMedIBeregning } from '~shared/types/Beregning'
 import Spinner from '~shared/Spinner'
 import { IPdlPerson } from '~shared/types/Person'
 import {
@@ -39,8 +39,8 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
   const soeskenjustering = behandling.beregningsGrunnlag?.soeskenMedIBeregning
   const [ikkeValgtOppdrasSammenPaaAlle, setIkkeValgtOppdrasSammenPaaAlleFeil] = useState(false)
   const dispatch = useAppDispatch()
-  const [soeskenjusteringsgrunnlag, fetchSoeskenjusteringsgrunnlag] = useApiCall(hentSoeskenjusteringsgrunnlag)
-  const [lagreSoeskenMedIBeregningStatus, postSoeskenMedIBeregning] = useApiCall(lagreSoeskenMedIBeregning)
+  const [soeskenjusteringsgrunnlag, fetchSoeskenjusteringsgrunnlag] = useApiCall(hentBeregningsGrunnlag)
+  const [lagreSoeskenMedIBeregningStatus, postSoeskenMedIBeregning] = useApiCall(lagreBeregningsGrunnlag)
   const [endreBeregning, postOpprettEllerEndreBeregning] = useApiCall(opprettEllerEndreBeregning)
   const { control, handleSubmit, reset } = useForm<{ soeskengrunnlag: FormValues[] }>({
     defaultValues: {
@@ -54,7 +54,12 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
     if (!soeskenjusteringErDefinertIRedux) {
       fetchSoeskenjusteringsgrunnlag(behandling.id, (result) => {
         reset({ soeskengrunnlag: result?.soeskenMedIBeregning ?? [] })
-        dispatch(oppdaterBeregingsGrunnlag({ soeskenMedIBeregning: result?.soeskenMedIBeregning ?? [] }))
+        dispatch(
+          oppdaterBeregingsGrunnlag({
+            soeskenMedIBeregning: result?.soeskenMedIBeregning ?? [],
+            institusjonsopphold: result?.institusjonsopphold ?? { institusjonsopphold: false },
+          })
+        )
       })
     }
   }, [])
@@ -69,17 +74,26 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
     ) ?? []
 
   const onSubmit = (soeskengrunnlag: SoeskenMedIBeregning[]) => {
+    // TODO EY-2170
+    const institusjonsopphold = { institusjonsopphold: false } as Institusjonsopphold
     dispatch(resetBeregning())
-    postSoeskenMedIBeregning({ behandlingsId: behandling.id, soeskenMedIBeregning: soeskengrunnlag }, () =>
-      postOpprettEllerEndreBeregning(behandling.id, () => {
-        dispatch(
-          oppdaterBeregingsGrunnlag({
-            soeskenMedIBeregning: soeskengrunnlag,
-          })
-        )
-        dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.BEREGNET))
-        next()
-      })
+    postSoeskenMedIBeregning(
+      {
+        behandlingsId: behandling.id,
+        soeskenMedIBeregning: soeskengrunnlag,
+        institusjonsopphold: institusjonsopphold,
+      },
+      () =>
+        postOpprettEllerEndreBeregning(behandling.id, () => {
+          dispatch(
+            oppdaterBeregingsGrunnlag({
+              soeskenMedIBeregning: soeskengrunnlag,
+              institusjonsopphold: institusjonsopphold,
+            })
+          )
+          dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.BEREGNET))
+          next()
+        })
     )
   }
 

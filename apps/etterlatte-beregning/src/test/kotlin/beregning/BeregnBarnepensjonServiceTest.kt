@@ -8,6 +8,7 @@ import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlag
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlagService
+import no.nav.etterlatte.beregning.grunnlag.Institusjonsopphold
 import no.nav.etterlatte.beregning.klienter.GrunnlagKlientImpl
 import no.nav.etterlatte.beregning.klienter.VilkaarsvurderingKlient
 import no.nav.etterlatte.beregning.regler.FNR_1
@@ -271,7 +272,8 @@ internal class BeregnBarnepensjonServiceTest {
                     Folkeregisteridentifikator.of(it),
                     skalBrukes = true
                 )
-            }
+            },
+            Institusjonsopphold(false)
         )
 
     private fun mockBehandling(type: BehandlingType, virk: YearMonth = VIRKNINGSTIDSPUNKT_JAN_23): DetaljertBehandling =

@@ -23,7 +23,8 @@ class BeregningsGrunnlagService(
                 BeregningsGrunnlag(
                     behandlingId = behandlingId,
                     kilde = Grunnlagsopplysning.Saksbehandler.create(bruker.ident()),
-                    soeskenMedIBeregning = barnepensjonBeregningsGrunnlag.soeskenMedIBeregning
+                    soeskenMedIBeregning = barnepensjonBeregningsGrunnlag.soeskenMedIBeregning,
+                    institusjonsopphold = barnepensjonBeregningsGrunnlag.institusjonsopphold
                 )
             )
         }

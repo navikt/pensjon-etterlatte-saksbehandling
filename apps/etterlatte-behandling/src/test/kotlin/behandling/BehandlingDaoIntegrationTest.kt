@@ -293,7 +293,7 @@ internal class BehandlingDaoIntegrationTest {
             )
         }
 
-        val behandlinger = behandlingRepo.alleBehandlinger()
+        val behandlinger = behandlingRepo.alleBehandlingerISak(sak1)
         assertAll(
             "Skal hente ut to foerstegangsbehandlinger og to revurderinger",
             { assertEquals(4, behandlinger.size) },
@@ -325,10 +325,10 @@ internal class BehandlingDaoIntegrationTest {
             )
         }
 
-        val foerstegangsbehandlinger = behandlingRepo.alleBehandlinger().filter {
+        val foerstegangsbehandlinger = behandlingRepo.alleBehandlingerISak(sak1).filter {
             it.type == BehandlingType.FØRSTEGANGSBEHANDLING
         }
-        val revurderinger = behandlingRepo.alleBehandlinger().filter { it.type == BehandlingType.REVURDERING }
+        val revurderinger = behandlingRepo.alleBehandlingerISak(sak1).filter { it.type == BehandlingType.REVURDERING }
         assertAll(
             "Skal hente ut to foerstegangsbehandlinger og to revurderinger",
             { assertEquals(2, foerstegangsbehandlinger.size) },
@@ -466,18 +466,15 @@ internal class BehandlingDaoIntegrationTest {
         )
 
         assertEquals(
-            behandlingRepo.alleBehandlinger().filter { it.type == BehandlingType.REVURDERING }
-                .filter { it.sak.id == sak }.size,
+            behandlingRepo.alleBehandlingerISak(sak).filter { it.type == BehandlingType.REVURDERING }.size,
             4
         )
         assertEquals(
-            behandlingRepo.alleBehandlinger().filter { it.type == BehandlingType.FØRSTEGANGSBEHANDLING }
-                .filter { it.sak.id == sak }.size,
+            behandlingRepo.alleBehandlingerISak(sak).filter { it.type == BehandlingType.FØRSTEGANGSBEHANDLING }.size,
             3
         )
         assertEquals(
-            behandlingRepo.alleBehandlinger().filter { it.type == BehandlingType.MANUELT_OPPHOER }
-                .filter { it.sak.id == sak }.size,
+            behandlingRepo.alleBehandlingerISak(sak).filter { it.type == BehandlingType.MANUELT_OPPHOER }.size,
             1
         )
     }

@@ -58,13 +58,6 @@ class BehandlingDao(private val connection: () -> Connection) {
         }
     }
 
-    // TODO: slett, kun test
-    fun alleBehandlinger(): List<Behandling> {
-        val stmt =
-            connection().prepareStatement(alleBehandlingerMedSak)
-        return stmt.executeQuery().behandlingsListe()
-    }
-
     fun alleBehandlingerISak(sakid: Long): List<Behandling> {
         val stmt =
             connection().prepareStatement(

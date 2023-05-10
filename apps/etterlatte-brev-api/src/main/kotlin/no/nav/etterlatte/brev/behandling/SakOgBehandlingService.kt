@@ -14,8 +14,7 @@ import java.util.*
 class SakOgBehandlingService(
     private val vedtaksvurderingKlient: VedtaksvurderingKlient,
     private val grunnlagKlient: GrunnlagKlient,
-    private val beregningKlient: BeregningKlient,
-    private val saksbehandlere: Map<String, String>
+    private val beregningKlient: BeregningKlient
 ) {
 
     suspend fun hentBehandling(
@@ -39,14 +38,15 @@ class SakOgBehandlingService(
         bruker: Bruker
     ): Behandling {
         val innloggetSaksbehandlerIdent = bruker.ident()
-        val innloggetSaksbehandlerEnhet = bruker.saksbehandlerEnhet(saksbehandlere)
 
-        val saksbehandlerEnhet = vedtak.vedtakFattet?.ansvarligEnhet ?: innloggetSaksbehandlerEnhet
+        val saksbehandlerEnhet = vedtak.vedtakFattet?.ansvarligEnhet
+            ?: throw SaksbehandlerManglerEnhetException("Vedtak mangler ansvarlig enhet vedtakid: ${vedtak.vedtakId}")
         val saksbehandlerIdent = vedtak.vedtakFattet?.ansvarligSaksbehandler ?: innloggetSaksbehandlerIdent
+
         val attestant = vedtak.vedtakFattet?.let {
             Attestant(
                 vedtak.attestasjon?.attestant ?: innloggetSaksbehandlerIdent,
-                vedtak.attestasjon?.attesterendeEnhet ?: innloggetSaksbehandlerEnhet
+                vedtak.attestasjon?.attesterendeEnhet ?: vedtak.sak.enhet!!
             )
         }
 

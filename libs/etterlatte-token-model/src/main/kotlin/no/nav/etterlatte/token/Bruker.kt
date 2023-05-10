@@ -4,7 +4,7 @@ import no.nav.security.token.support.core.jwt.JwtTokenClaims
 
 sealed class Bruker {
     abstract fun ident(): String
-    abstract fun saksbehandlerEnhet(saksbehandlere: Map<String, String>): String
+    abstract fun saksbehandlerEnhet(saksbehandlere: Map<String, String>): String // TODO: skal fjernes
 
     abstract fun accessToken(): String
 

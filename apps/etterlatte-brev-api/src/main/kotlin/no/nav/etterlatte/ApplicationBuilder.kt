@@ -1,6 +1,5 @@
 package no.nav.etterlatte
 
-import com.fasterxml.jackson.core.type.TypeReference
 import com.typesafe.config.ConfigFactory
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
@@ -35,7 +34,6 @@ import no.nav.etterlatte.brev.vedtak.VedtaksvurderingKlient
 import no.nav.etterlatte.brev.vedtaksbrevRoute
 import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
-import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.requireEnvValue
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.migrate
@@ -93,8 +91,7 @@ class ApplicationBuilder {
     private val sakOgBehandlingService = SakOgBehandlingService(
         vedtakKlient,
         grunnlagKlient,
-        beregningKlient,
-        saksbehandlere = getSaksbehandlere()
+        beregningKlient
     )
     private val norg2Klient = Norg2Klient(env.requireEnvValue("NORG2_URL"), httpClient())
     private val datasource = DataSourceBuilder.createDataSource(env)
@@ -141,14 +138,6 @@ class ApplicationBuilder {
                 JournalfoerVedtaksbrev(this, vedtaksbrevService)
                 DistribuerBrev(this, brevService, distribusjonService)
             }
-
-    private fun getSaksbehandlere(): Map<String, String> {
-        val saksbehandlereSecret = env.requireEnvValue("saksbehandlere")
-        return objectMapper.readValue(
-            saksbehandlereSecret,
-            object : TypeReference<Map<String, String>>() {}
-        )
-    }
 
     fun start() = setReady().also { rapidsConnection.start() }
 

@@ -43,12 +43,9 @@ internal class SakOgBehandlingServiceTest {
     private val vedtaksvurderingKlient = mockk<VedtaksvurderingKlient>()
     private val grunnlagKlient = mockk<GrunnlagKlient>()
     private val beregningKlient = mockk<BeregningKlient>()
-    private val saksbehandlere = mapOf(
-        SAKSBEHANDLER_IDENT to "0904"
-    )
 
     private val service =
-        SakOgBehandlingService(vedtaksvurderingKlient, grunnlagKlient, beregningKlient, saksbehandlere)
+        SakOgBehandlingService(vedtaksvurderingKlient, grunnlagKlient, beregningKlient)
 
     @BeforeEach
     fun before() {

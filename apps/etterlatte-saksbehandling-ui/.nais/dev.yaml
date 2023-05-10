@@ -33,8 +33,6 @@ spec:
     sidecar:
       enabled: true
       autoLogin: true
-  envFrom:
-    - secret: saksbehandler-secret
   liveness:
     path: /health/isAlive
     initialDelay: 10

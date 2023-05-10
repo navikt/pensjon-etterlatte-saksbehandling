@@ -142,21 +142,6 @@ class BehandlingDao(private val connection: () -> Connection) {
         ident = rs.getString("fnr"),
         enhet = rs.getString("enhet").takeUnless { rs.wasNull() }
     )
-    // TODO: slett, kun test
-
-    fun alleSakIderMedUavbruttBehandlingForSoekerMedFnr(fnr: String): List<Long> {
-        return connection().prepareStatement(
-            """
-                SELECT DISTINCT sak_id FROM behandling
-                WHERE soeker = ? AND  status != 'AVBRUTT'
-            """.trimIndent()
-        ).let {
-            it.setString(1, fnr)
-            it.executeQuery()
-        }.toList {
-            getLong(1)
-        }
-    }
 
     fun opprettBehandling(behandling: OpprettBehandling) {
         val stmt =

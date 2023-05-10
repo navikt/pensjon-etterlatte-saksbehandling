@@ -34,6 +34,7 @@ class GrunnlagHendelser(
             validate { it.interestedIn("fnr") }
             validate { it.requireKey("opplysning") }
             validate { it.requireKey("sakId") }
+            validate { it.rejectValue(EVENT_NAME_KEY, GRUNNLAG_OPPDATERT) }
         }.register(this)
     }
 
@@ -62,6 +63,7 @@ class GrunnlagHendelser(
                         )
                     }
                     packet.eventName = GRUNNLAG_OPPDATERT
+                    context.publish(packet.toJson())
                 } catch (e: Exception) {
                     logger.error("Spiser en melding på grunn av feil", e)
                 }

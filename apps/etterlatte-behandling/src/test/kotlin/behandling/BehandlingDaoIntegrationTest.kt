@@ -483,15 +483,18 @@ internal class BehandlingDaoIntegrationTest {
         )
 
         assertEquals(
-            behandlingRepo.alleBehandlingerISakAvType(sak, BehandlingType.REVURDERING).size,
+            behandlingRepo.alleBehandlinger().filter { it.type == BehandlingType.REVURDERING }
+                .filter { it.sak.id == sak }.size,
             4
         )
         assertEquals(
-            behandlingRepo.alleBehandlingerISakAvType(sak, BehandlingType.FØRSTEGANGSBEHANDLING).size,
+            behandlingRepo.alleBehandlinger().filter { it.type == BehandlingType.FØRSTEGANGSBEHANDLING }
+                .filter { it.sak.id == sak }.size,
             3
         )
         assertEquals(
-            behandlingRepo.alleBehandlingerISakAvType(sak, BehandlingType.MANUELT_OPPHOER).size,
+            behandlingRepo.alleBehandlinger().filter { it.type == BehandlingType.MANUELT_OPPHOER }
+                .filter { it.sak.id == sak }.size,
             1
         )
     }

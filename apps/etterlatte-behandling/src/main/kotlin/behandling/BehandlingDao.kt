@@ -59,21 +59,6 @@ class BehandlingDao(private val connection: () -> Connection) {
     }
 
     // TODO: slett, kun test
-
-    fun alleBehandlingerISakAvType(sakId: Long, type: BehandlingType): List<Behandling> {
-        return connection().prepareStatement(
-            """
-                $alleBehandlingerMedSak
-                WHERE b.sak_id = ? AND b.behandlingstype = ?
-            """.trimIndent()
-        ).let {
-            it.setLong(1, sakId)
-            it.setString(2, type.name)
-            it.executeQuery()
-        }.toList { tilBehandling(type.name)!! }
-    }
-    // TODO: slett, kun test
-
     fun alleBehandlinger(): List<Behandling> {
         val stmt =
             connection().prepareStatement(alleBehandlingerMedSak)

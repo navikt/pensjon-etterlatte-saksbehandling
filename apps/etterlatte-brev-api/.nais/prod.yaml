@@ -126,6 +126,7 @@ spec:
         - host: dokdistfordeling.prod-fss-pub.nais.io
         - host: data.brreg.no
         - host: navansatt.prod-fss-pub.nais.io
+        - host: pensjon-brevbaker.intern.nav.no
     inbound:
       rules:
         - application: etterlatte-saksbehandling-ui-lokal

@@ -87,7 +87,9 @@ class VedtaksbrevService(
 
         if (behandling.vedtak.status == VedtakStatus.FATTET_VEDTAK) {
             logger.info("Behandling har fått status ${VedtakStatus.FATTET_VEDTAK} – låser brevets innhold")
-            db.opprettInnholdOgFerdigstill(brev.id, BrevInnhold(behandling.spraak, pdf))
+            if (behandling.vedtak.saksbehandler.ident != bruker.ident()) {
+                db.opprettInnholdOgFerdigstill(brev.id, BrevInnhold(behandling.spraak, pdf))
+            }
         }
 
         return pdf

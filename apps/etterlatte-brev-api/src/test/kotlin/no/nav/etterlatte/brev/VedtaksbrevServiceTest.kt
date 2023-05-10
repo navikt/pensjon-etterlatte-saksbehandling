@@ -12,7 +12,6 @@ import io.mockk.slot
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.brev.adresse.AdresseService
-import no.nav.etterlatte.brev.behandling.Attestant
 import no.nav.etterlatte.brev.behandling.Avdoed
 import no.nav.etterlatte.brev.behandling.Behandling
 import no.nav.etterlatte.brev.behandling.Beregningsperiode
@@ -125,7 +124,7 @@ internal class VedtaksbrevServiceTest {
                 vedtaksbrevService.opprettVedtaksbrev(
                     SAK_ID,
                     BEHANDLING_ID,
-                    Bruker.of("token", "saksbehandler", null, null, null)
+                    ATTESTANT
                 )
             }
 
@@ -220,12 +219,36 @@ internal class VedtaksbrevServiceTest {
             coEvery { pdfGenerator.genererPdf(any()) } returns PDF_BYTES
 
             runBlocking {
-                vedtaksbrevService.genererPdfInnhold(SAK_ID, BEHANDLING_ID, bruker = SAKSBEHANDLER)
+                vedtaksbrevService.genererPdfInnhold(SAK_ID, BEHANDLING_ID, bruker = ATTESTANT)
             }
 
             verify {
                 db.hentBrevForBehandling(BEHANDLING_ID)
                 db.opprettInnholdOgFerdigstill(any(), any())
+            }
+
+            coVerify {
+                sakOgBehandlingService.hentBehandling(SAK_ID, BEHANDLING_ID, ATTESTANT)
+                adresseService.hentAvsenderOgAttestant(any())
+                pdfGenerator.genererPdf(any())
+            }
+        }
+
+        @Test
+        fun `PDF genereres, men lagres ikke hvis saksbehanler sjekker sin egen sak med FATTET_VEDTAK`() {
+            val behandling = opprettBehandling(VedtakStatus.FATTET_VEDTAK)
+
+            every { db.hentBrevForBehandling(any()) } returns opprettBrev(Status.OPPRETTET)
+            coEvery { sakOgBehandlingService.hentBehandling(any(), any(), any()) } returns behandling
+            coEvery { adresseService.hentAvsenderOgAttestant(any()) } returns Pair(mockk(), mockk())
+            coEvery { pdfGenerator.genererPdf(any()) } returns PDF_BYTES
+
+            runBlocking {
+                vedtaksbrevService.genererPdfInnhold(SAK_ID, BEHANDLING_ID, bruker = SAKSBEHANDLER)
+            }
+
+            verify {
+                db.hentBrevForBehandling(BEHANDLING_ID)
             }
 
             coVerify {
@@ -348,8 +371,8 @@ internal class VedtaksbrevServiceTest {
             1,
             vedtakStatus,
             VedtakType.INNVILGELSE,
-            Saksbehandler("saksbehandler", PORSGRUNN),
-            Attestant("attestant", PORSGRUNN)
+            Saksbehandler(SAKSBEHANDLER.ident(), PORSGRUNN),
+            attestant = null
         ),
         Utbetalingsinfo(
             null,
@@ -381,5 +404,6 @@ internal class VedtaksbrevServiceTest {
         private const val PORSGRUNN = "0805"
         private val PDF_BYTES = "Hello world!".toByteArray()
         private val SAKSBEHANDLER = Bruker.of("token", "saksbehandler", null, null, null)
+        private val ATTESTANT = Bruker.of("token", "attestant", null, null, null)
     }
 }

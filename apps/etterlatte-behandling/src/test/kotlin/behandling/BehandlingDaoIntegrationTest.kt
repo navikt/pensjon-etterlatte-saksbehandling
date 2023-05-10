@@ -342,8 +342,10 @@ internal class BehandlingDaoIntegrationTest {
             )
         }
 
-        val foerstegangsbehandlinger = behandlingRepo.alleBehandlingerAvType(BehandlingType.FØRSTEGANGSBEHANDLING)
-        val revurderinger = behandlingRepo.alleBehandlingerAvType(BehandlingType.REVURDERING)
+        val foerstegangsbehandlinger = behandlingRepo.alleBehandlinger().filter {
+            it.type == BehandlingType.FØRSTEGANGSBEHANDLING
+        }
+        val revurderinger = behandlingRepo.alleBehandlinger().filter { it.type == BehandlingType.REVURDERING }
         assertAll(
             "Skal hente ut to foerstegangsbehandlinger og to revurderinger",
             { assertEquals(2, foerstegangsbehandlinger.size) },

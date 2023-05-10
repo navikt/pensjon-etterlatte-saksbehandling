@@ -58,17 +58,7 @@ class BehandlingDao(private val connection: () -> Connection) {
         }
     }
 
-    fun alleBehandlingerAvType(type: BehandlingType): List<Behandling> {
-        val stmt =
-            connection().prepareStatement(
-                """
-                    $alleBehandlingerMedSak
-                    WHERE b.behandlingstype = ?
-                """.trimIndent()
-            )
-        stmt.setString(1, type.name)
-        return stmt.executeQuery().toList { tilBehandling(type.name)!! }
-    }
+    // TODO: slett, kun test
 
     fun alleBehandlingerISakAvType(sakId: Long, type: BehandlingType): List<Behandling> {
         return connection().prepareStatement(
@@ -82,6 +72,7 @@ class BehandlingDao(private val connection: () -> Connection) {
             it.executeQuery()
         }.toList { tilBehandling(type.name)!! }
     }
+    // TODO: slett, kun test
 
     fun alleBehandlinger(): List<Behandling> {
         val stmt =
@@ -100,6 +91,7 @@ class BehandlingDao(private val connection: () -> Connection) {
         stmt.setLong(1, sakid)
         return stmt.executeQuery().behandlingsListe()
     }
+    // TODO: slett, kun test
 
     fun alleAktiveBehandlingerISak(sakid: Long): List<Behandling> {
         with(connection()) {
@@ -191,6 +183,7 @@ class BehandlingDao(private val connection: () -> Connection) {
         ident = rs.getString("fnr"),
         enhet = rs.getString("enhet").takeUnless { rs.wasNull() }
     )
+    // TODO: slett, kun test
 
     fun alleSakIderMedUavbruttBehandlingForSoekerMedFnr(fnr: String): List<Long> {
         return connection().prepareStatement(
@@ -261,6 +254,7 @@ class BehandlingDao(private val connection: () -> Connection) {
         require(stmt.executeUpdate() == 1)
     }
 
+    // TODO: slett, kun test
     fun slettBehandlingerISak(id: Long) {
         val statement = connection().prepareStatement("DELETE from behandling where sak_id = ?")
         statement.setLong(1, id)

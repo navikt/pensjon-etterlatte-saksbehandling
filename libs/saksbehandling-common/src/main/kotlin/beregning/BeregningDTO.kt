@@ -1,6 +1,7 @@
 package no.nav.etterlatte.libs.common.beregning
 
 import com.fasterxml.jackson.databind.JsonNode
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.Metadata
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import java.time.YearMonth
@@ -24,5 +25,6 @@ data class Beregningsperiode(
     val grunnbelop: Int,
     val trygdetid: Int,
     val regelResultat: JsonNode? = null,
-    val regelVersjon: String? = null
+    val regelVersjon: String? = null,
+    val kilde: Grunnlagsopplysning.RegelKilde? = null
 )

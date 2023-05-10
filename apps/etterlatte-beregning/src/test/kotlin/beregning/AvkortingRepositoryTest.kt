@@ -58,7 +58,8 @@ internal class AvkortingRepositoryTest {
                     periode = Periode(fom = YearMonth.now(), tom = null),
                     avkorting = 100,
                     tidspunkt = Tidspunkt.now(),
-                    regelResultat = "".toJsonNode()
+                    regelResultat = "".toJsonNode(),
+                    kilde = Grunnlagsopplysning.RegelKilde("regelid", Tidspunkt.now(), "1")
                 )
             )
         )

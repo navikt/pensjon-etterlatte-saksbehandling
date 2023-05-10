@@ -87,7 +87,8 @@ fun beregnetAvkortingGrunnlag(
     Periode(fom = fom, tom = tom),
     avkorting = avkorting,
     tidspunkt = Tidspunkt.now(),
-    regelResultat = "".toJsonNode()
+    regelResultat = "".toJsonNode(),
+    kilde = Grunnlagsopplysning.RegelKilde("regelid", Tidspunkt.now(), "1")
 )
 
 fun avkortetYtelseGrunnlag(bruttoYtelse: Int, avkorting: Int) = AvkortetYtelseGrunnlag(
@@ -100,7 +101,8 @@ fun avkortetYtelse() = AvkortetYtelse(
     periode = Periode(fom = YearMonth.now(), tom = null),
     ytelseEtterAvkorting = 100,
     tidspunkt = Tidspunkt.now(),
-    regelResultat = "".toJsonNode()
+    regelResultat = "".toJsonNode(),
+    kilde = Grunnlagsopplysning.RegelKilde("regelid", Tidspunkt.now(), "1")
 )
 
 fun beregning(

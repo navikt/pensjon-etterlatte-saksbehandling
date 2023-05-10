@@ -97,9 +97,10 @@ class AvkortingRepository(private val dataSource: DataSource) {
                     queryOf(
                         statement = """
                         INSERT INTO beregnet_avkortinggrunnlag(
-                        id, avkortinggrunnlag, behandling_id, fom, tom, avkorting, tidspunkt, regel_resultat 
+                        id, avkortinggrunnlag, behandling_id, fom, tom, avkorting, tidspunkt, regel_resultat, kilde
                         ) VALUES (
-                        :id, :avkortingGrunnlag, :behandlingId, :fom, :tom, :avkorting, :tidspunkt, :regel_resultat
+                        :id, :avkortingGrunnlag, :behandlingId, :fom, :tom, :avkorting,
+                        :tidspunkt, :regel_resultat, :kilde
                         )
                         """.trimIndent(),
                         paramMap = mapOf(
@@ -110,7 +111,8 @@ class AvkortingRepository(private val dataSource: DataSource) {
                             "tom" to beregnetAvkorting.periode.tom?.atDay(1),
                             "avkorting" to beregnetAvkorting.avkorting,
                             "tidspunkt" to beregnetAvkorting.tidspunkt.toTimestamp(),
-                            "regel_resultat" to beregnetAvkorting.regelResultat.toJson()
+                            "regel_resultat" to beregnetAvkorting.regelResultat.toJson(),
+                            "kilde" to beregnetAvkorting.kilde.toJson()
                         )
                     ).let { tx.run(it.asUpdate) }
                 }
@@ -133,9 +135,9 @@ class AvkortingRepository(private val dataSource: DataSource) {
                     queryOf(
                         statement = """
                         INSERT INTO avkortet_ytelse(
-                        id, behandling_id, fom, tom, ytelse_etter_avkorting, tidspunkt, regel_resultat 
+                        id, behandling_id, fom, tom, ytelse_etter_avkorting, tidspunkt, regel_resultat, kilde
                         ) VALUES (
-                        :id, :behandlingId, :fom, :tom, :ytelseEtterAvkorting, :tidspunkt, :regel_resultat
+                        :id, :behandlingId, :fom, :tom, :ytelseEtterAvkorting, :tidspunkt, :regel_resultat, :kilde
                         )
                         """.trimIndent(),
                         paramMap = mapOf(
@@ -145,7 +147,8 @@ class AvkortingRepository(private val dataSource: DataSource) {
                             "tom" to it.periode.tom?.atDay(1),
                             "ytelseEtterAvkorting" to it.ytelseEtterAvkorting,
                             "tidspunkt" to it.tidspunkt.toTimestamp(),
-                            "regel_resultat" to it.regelResultat.toJson()
+                            "regel_resultat" to it.regelResultat.toJson(),
+                            "kilde" to it.kilde.toJson()
                         )
                     ).let { query -> tx.run(query.asUpdate) }
                 }
@@ -176,7 +179,8 @@ class AvkortingRepository(private val dataSource: DataSource) {
         ),
         avkorting = int("avkorting"),
         tidspunkt = sqlTimestamp("tidspunkt").toTidspunkt(),
-        regelResultat = objectMapper.readTree(string("regel_resultat"))
+        regelResultat = objectMapper.readTree(string("regel_resultat")),
+        kilde = string("kilde").let { objectMapper.readValue(it) }
     )
 
     private fun Row.toAvkortetYtelse() = AvkortetYtelse(
@@ -186,6 +190,7 @@ class AvkortingRepository(private val dataSource: DataSource) {
         ),
         ytelseEtterAvkorting = int("ytelse_etter_avkorting"),
         tidspunkt = sqlTimestamp("tidspunkt").toTidspunkt(),
-        regelResultat = objectMapper.readTree(string("regel_resultat"))
+        regelResultat = objectMapper.readTree(string("regel_resultat")),
+        kilde = string("kilde").let { objectMapper.readValue(it) }
     )
 }

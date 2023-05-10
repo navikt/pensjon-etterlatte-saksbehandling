@@ -81,13 +81,14 @@ class BeregnOmstillingsstoenadService(
             periode = RegelPeriode(virkningstidspunkt.atDay(1))
         )
 
+        val beregnetDato = Tidspunkt.now()
         return when (resultat) {
             is RegelkjoeringResultat.Suksess ->
                 Beregning(
                     beregningId = randomUUID(),
                     behandlingId = behandlingId,
                     type = Beregningstype.OMS,
-                    beregnetDato = Tidspunkt.now(),
+                    beregnetDato = beregnetDato,
                     grunnlagMetadata = grunnlag.metadata,
                     beregningsperioder = resultat.periodiserteResultater.map { periodisertResultat ->
                         logger.info(
@@ -112,7 +113,12 @@ class BeregnOmstillingsstoenadService(
                             grunnbelop = grunnbeloep.grunnbeloep,
                             trygdetid = beregningsgrunnlag.avdoed.verdi.trygdetid.toInteger(),
                             regelResultat = objectMapper.valueToTree(periodisertResultat),
-                            regelVersjon = periodisertResultat.reglerVersjon
+                            regelVersjon = periodisertResultat.reglerVersjon,
+                            kilde = Grunnlagsopplysning.RegelKilde(
+                                navn = kroneavrundetOmstillingsstoenadRegel.regelReferanse.id,
+                                ts = beregnetDato,
+                                versjon = periodisertResultat.reglerVersjon
+                            )
                         )
                     }
                 )

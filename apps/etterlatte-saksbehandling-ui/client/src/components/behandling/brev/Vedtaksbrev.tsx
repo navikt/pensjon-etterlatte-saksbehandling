@@ -34,12 +34,12 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
       }
 
       const brevResponse = await hentVedtaksbrev(behandlingId!!)
-      if (brevResponse.statusCode === 200) {
+      if (brevResponse.status === 'ok' && brevResponse.statusCode === 200) {
         setVedtaksbrev(brevResponse.data)
       } else if (brevResponse.statusCode === 204) {
         const brevOpprettetResponse = await opprettVedtaksbrev(sak, behandlingId!!)
 
-        if (brevOpprettetResponse.statusCode === 201) {
+        if (brevOpprettetResponse.status === 'ok' && brevOpprettetResponse.statusCode === 201) {
           setVedtaksbrev(brevOpprettetResponse.data)
         } else {
           setError('Oppretting av vedtaksbrev feilet...')

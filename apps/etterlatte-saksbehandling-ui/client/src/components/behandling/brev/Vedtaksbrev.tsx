@@ -23,7 +23,7 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
   const [error, setError] = useState<string>()
 
   useEffect(() => {
-    if (!behandlingId) throw new Error('Mangler behandlingsid')
+    if (!behandlingId || !sak) return
 
     const fetchVedtaksbrev = async () => {
       const skalIkkeHenteVedtaksbrev =
@@ -50,7 +50,7 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
       setLoading(false)
     }
     fetchVedtaksbrev()
-  }, [behandlingId])
+  }, [behandlingId, sak])
 
   return (
     <Content>

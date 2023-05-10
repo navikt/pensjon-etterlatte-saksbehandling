@@ -19,8 +19,6 @@ spec:
         databases:
           - name: vedtaksvurdering
             envVarPrefix: DB
-  envFrom:
-    - secret: saksbehandler-secret
   liveness:
     initialDelay: 5
     path: /isalive

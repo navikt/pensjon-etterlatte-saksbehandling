@@ -91,7 +91,8 @@ class ApplicationBuilder {
     private val sakOgBehandlingService = SakOgBehandlingService(
         vedtakKlient,
         grunnlagKlient,
-        beregningKlient
+        beregningKlient,
+        behandlingKlient
     )
     private val norg2Klient = Norg2Klient(env.requireEnvValue("NORG2_URL"), httpClient())
     private val datasource = DataSourceBuilder.createDataSource(env)

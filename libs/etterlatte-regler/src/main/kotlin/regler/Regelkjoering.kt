@@ -64,7 +64,7 @@ object Regelkjoering {
     }
 
     private fun knekkpunktGyldigForPeriode(it: LocalDate, periode: RegelPeriode) =
-        it.isAfter(periode.fraDato) && it.isBefore(periode.tilDato ?: LocalDate.MAX)
+        it >= periode.fraDato && it <= (periode.tilDato ?: LocalDate.MAX)
 }
 
 fun <G, S> Regel<G, S>.eksekver(grunnlag: PeriodisertGrunnlag<G>, periode: RegelPeriode) = Regelkjoering.eksekver(

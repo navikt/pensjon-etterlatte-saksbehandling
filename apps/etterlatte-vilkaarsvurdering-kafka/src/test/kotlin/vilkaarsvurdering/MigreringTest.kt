@@ -32,7 +32,8 @@ internal class MigreringTest {
                 "@event_name" to GRUNNLAG_OPPDATERT,
                 BEHOV_NAME_KEY to Opplysningstype.MIGRERING.name,
                 "sakId" to 1,
-                BEHANDLING_ID_KEY to behandlingId
+                BEHANDLING_ID_KEY to behandlingId,
+                "fullstendig" to true
             )
         ).toJson()
         testRapid.sendTestMessage(melding)

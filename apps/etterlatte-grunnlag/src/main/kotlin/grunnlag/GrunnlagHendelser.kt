@@ -12,6 +12,7 @@ import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.etterlatte.libs.common.toJson
+import no.nav.etterlatte.rapidsandrivers.EventNames.FEILA
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -35,6 +36,7 @@ class GrunnlagHendelser(
             validate { it.requireKey("opplysning") }
             validate { it.requireKey("sakId") }
             validate { it.rejectValue(EVENT_NAME_KEY, GRUNNLAG_OPPDATERT) }
+            validate { it.rejectValue(EVENT_NAME_KEY, FEILA) }
         }.register(this)
     }
 

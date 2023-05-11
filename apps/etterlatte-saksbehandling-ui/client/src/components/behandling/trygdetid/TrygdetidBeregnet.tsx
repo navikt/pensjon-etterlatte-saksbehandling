@@ -2,7 +2,6 @@ import React from 'react'
 import { Heading } from '@navikt/ds-react'
 import { ITrygdetid } from '~shared/api/trygdetid'
 import styled from 'styled-components'
-import { ManglerRegelspesifikasjon } from '~components/behandling/felles/ManglerRegelspesifikasjon'
 
 type Props = {
   trygdetid: ITrygdetid
@@ -16,7 +15,7 @@ export const TrygdetidBeregnet: React.FC<Props> = ({ trygdetid }) => {
       <Heading spacing size="small" level="3">
         Sum faktisk og fremtidig trygdetid
       </Heading>
-      <ManglerRegelspesifikasjon>{beregnetTrygdetid}</ManglerRegelspesifikasjon>
+      {beregnetTrygdetid}
     </TrygdetidSum>
   )
 }

@@ -40,9 +40,9 @@ class VedtaksvurderingRepository(val datasource: DataSource) {
                     statement = """
                         INSERT INTO vedtak(
                             behandlingId, sakid, fnr, behandlingtype, saktype, vedtakstatus, type, datovirkfom, 
-                            beregningsresultat, vilkaarsresultat)
+                            beregningsresultat, avkorting, vilkaarsresultat)
                         VALUES (:behandlingId, :sakid, :fnr, :behandlingtype, :saktype, :vedtakstatus, :type, 
-                            :datovirkfom, :beregningsresultat, :vilkaarsresultat)
+                            :datovirkfom, :beregningsresultat, :avkorting, :vilkaarsresultat)
                         RETURNING id
                         """,
                     mapOf(
@@ -55,6 +55,7 @@ class VedtaksvurderingRepository(val datasource: DataSource) {
                         "type" to opprettVedtak.type.name,
                         "datovirkfom" to opprettVedtak.virkningstidspunkt.atDay(1),
                         "beregningsresultat" to opprettVedtak.beregning?.toJson(),
+                        "avkorting" to opprettVedtak.beregning?.toJson(),
                         "vilkaarsresultat" to opprettVedtak.vilkaarsvurdering?.toJson()
                     )
                 )
@@ -75,13 +76,15 @@ class VedtaksvurderingRepository(val datasource: DataSource) {
                     statement = """
                         UPDATE vedtak 
                         SET datovirkfom = :datovirkfom, type = :type, 
-                            beregningsresultat = :beregningsresultat, vilkaarsresultat = :vilkaarsresultat 
+                            beregningsresultat = :beregningsresultat, avkorting = :avkorting,
+                             vilkaarsresultat = :vilkaarsresultat 
                         WHERE behandlingId = :behandlingid
                         """,
                     mapOf(
                         "datovirkfom" to oppdatertVedtak.virkningstidspunkt.atDay(1),
                         "type" to oppdatertVedtak.type.name,
                         "beregningsresultat" to oppdatertVedtak.beregning?.toJson(),
+                        "avkorting" to oppdatertVedtak.beregning?.toJson(),
                         "vilkaarsresultat" to oppdatertVedtak.vilkaarsvurdering?.toJson(),
                         "behandlingid" to oppdatertVedtak.behandlingId
                     )
@@ -130,7 +133,7 @@ class VedtaksvurderingRepository(val datasource: DataSource) {
     fun hentVedtak(behandlingId: UUID): Vedtak? =
         repositoryWrapper.hentMedKotliquery(
             query = """
-            SELECT sakid, behandlingId, saksbehandlerId, beregningsresultat, vilkaarsresultat, id, fnr, 
+            SELECT sakid, behandlingId, saksbehandlerId, beregningsresultat, avkorting, vilkaarsresultat, id, fnr, 
                 datoFattet, datoattestert, attestant, datoVirkFom, vedtakstatus, saktype, behandlingtype, 
                 attestertVedtakEnhet, fattetVedtakEnhet, type  
             FROM vedtak 
@@ -147,7 +150,7 @@ class VedtaksvurderingRepository(val datasource: DataSource) {
 
     fun hentVedtakForSak(sakId: Long): List<Vedtak> {
         val hentVedtak = """
-            SELECT sakid, behandlingId, saksbehandlerId, beregningsresultat, vilkaarsresultat, id, fnr, 
+            SELECT sakid, behandlingId, saksbehandlerId, beregningsresultat, avkorting, vilkaarsresultat, id, fnr, 
                 datoFattet, datoattestert, attestant, datoVirkFom, vedtakstatus, saktype, behandlingtype, 
                 attestertVedtakEnhet, fattetVedtakEnhet, type  
             FROM vedtak  
@@ -240,6 +243,7 @@ class VedtaksvurderingRepository(val datasource: DataSource) {
         virkningstidspunkt = sqlDate("datovirkfom").toLocalDate().let { YearMonth.from(it) },
         vilkaarsvurdering = stringOrNull("vilkaarsresultat")?.let { objectMapper.readValue(it) },
         beregning = stringOrNull("beregningsresultat")?.let { objectMapper.readValue(it) },
+        avkorting = stringOrNull("avkorting")?.let { objectMapper.readValue(it) },
         vedtakFattet = stringOrNull("saksbehandlerid")?.let {
             VedtakFattet(
                 ansvarligSaksbehandler = string("saksbehandlerid"),

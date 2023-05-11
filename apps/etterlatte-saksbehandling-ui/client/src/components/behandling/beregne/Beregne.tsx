@@ -47,7 +47,9 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
 
   const opprettEllerOppdaterVedtak = () => {
     oppdaterVedtakRequest(behandling.id, () => {
-      dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.BEREGNET))
+      const nyStatus =
+        behandling.sakType === ISaksType.BARNEPENSJON ? IBehandlingStatus.BEREGNET : IBehandlingStatus.AVKORTET
+      dispatch(oppdaterBehandlingsstatus(nyStatus))
       if (behandlingSkalSendeBrev(behandling)) {
         next()
       } else {

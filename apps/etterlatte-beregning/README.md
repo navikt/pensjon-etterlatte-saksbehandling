@@ -31,7 +31,11 @@ ETTERLATTE_TRYGDETID_CLIENT_ID=8385435e-f3d7-45ec-be59-ebd1c71df735;
 ETTERLATTE_TRYGDETID_URL=https://etterlatte-trygdetid.intern.dev.nav.no;
 ETTERLATTE_VILKAARSVURDERING_CLIENT_ID=dev-gcp.etterlatte.etterlatte-vilkaarsvurdering;
 ETTERLATTE_VILKAARSVURDERING_URL=http://etterlatte-vilkaarsvurdering;
-HTTP_PORT=8080;
+GRUNNLAG_AZURE_SCOPE=api://dev-gcp.etterlatte.etterlatte-grunnlag/.default;
+NAIS_APP_NAME=etterlatte-beregning;
+NAIS_CLUSTER_NAME=dev-gcp;
+ELECTOR_PATH=localhost;
+HTTP_PORT=8089;
 ```
 Legg også til `.env.dev-gcp` som `Env-file` under `Run configurations` i Intellij.
 
@@ -43,7 +47,7 @@ Legg også til `.env.dev-gcp` som `Env-file` under `Run configurations` i Intell
    `./get-secret.sh apps/etterlatte-saksbehandling-ui`
    og legge til følgende linjer nederst i `.env.dev-gcp` fila til saksbehandling-ui.
 ```
-BEREGNING_API_URL=http://host.docker.internal:8088
+BEREGNING_API_URL=http://host.docker.internal:8089
 BEREGNING_API_SCOPE=api://<BEREGNING_CLIENT_ID>/.default // Se .env.dev-gcp fila du opprettet i steg 1.
 ```
 

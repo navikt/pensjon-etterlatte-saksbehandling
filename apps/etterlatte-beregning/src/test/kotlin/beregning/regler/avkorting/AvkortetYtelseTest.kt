@@ -16,4 +16,13 @@ class AvkortetYtelseTest {
         )
         avkortetYtelse.verdi shouldBe 50000
     }
+
+    @Test
+    fun `avkorteYtelse skal bli 0 dersom avkortingsbeloep er stoerre enn bruttoytelse `() {
+        val avkortetYtelse = avkorteYtelse.anvend(
+            avkortetYtelseGrunnlag(bruttoYtelse = 50000, avkorting = 100000),
+            RegelPeriode(LocalDate.of(2023, 1, 1))
+        )
+        avkortetYtelse.verdi shouldBe 0
+    }
 }

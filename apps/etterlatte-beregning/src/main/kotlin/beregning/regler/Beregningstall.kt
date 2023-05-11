@@ -87,6 +87,14 @@ class Beregningstall : Comparable<Beregningstall> {
         value.subtract(BigDecimal(subtrahend)).setScale(decimals, roundingMode)
     )
 
+    fun zeroIfNegative(): Beregningstall {
+        return if (this.value < BigDecimal.ZERO) {
+            Beregningstall(BigDecimal.ZERO)
+        } else {
+            this
+        }
+    }
+
     fun setScale(decimals: Int, roundingMode: RoundingMode = AVRUNDING_BEREGNING) =
         Beregningstall(value.setScale(decimals, roundingMode))
 

@@ -1,12 +1,15 @@
 package no.nav.etterlatte
 
 import com.fasterxml.jackson.module.kotlin.treeToValue
+import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.rapidsandrivers.BEHOV_NAME_KEY
+import no.nav.etterlatte.libs.common.rapidsandrivers.CORRELATION_ID_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.SAK_TYPE_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
@@ -26,6 +29,7 @@ import rapidsandrivers.HENDELSE_DATA_KEY
 import rapidsandrivers.behandlingId
 import rapidsandrivers.sakId
 import rapidsandrivers.withFeilhaandtering
+import java.util.*
 
 internal class MigreringHendelser(rapidsConnection: RapidsConnection, private val behandlinger: BehandlingService) :
     River.PacketListener {
@@ -52,17 +56,50 @@ internal class MigreringHendelser(rapidsConnection: RapidsConnection, private va
                 packet[BEHOV_NAME_KEY] = Opplysningstype.MIGRERING
 
                 val hendelse: MigreringRequest = objectMapper.treeToValue(packet[HENDELSE_DATA_KEY])
-                val behandlingOgSak = behandlinger.migrer(hendelse)
+                val (behandlingId, sakId) = behandlinger.migrer(hendelse)
 
-                packet.behandlingId = behandlingOgSak.behandlingId
-                packet.sakId = behandlingOgSak.sakId
+                packet.behandlingId = behandlingId
+                packet.sakId = sakId
                 packet[SAK_TYPE_KEY] = SakType.BARNEPENSJON
                 packet[ROLLE_KEY] = PersonRolle.AVDOED
                 packet.eventName = GRUNNLAG
+
+                opprettPersongalleriIGrunnlag(sakId, behandlingId, packet, hendelse, context)
 
                 context.publish(packet.toJson())
                 logger.info("Publiserte oppdatert migreringshendelse")
             }
         }
     }
+
+    private fun opprettPersongalleriIGrunnlag(
+        sakId: Long,
+        behandlingId: UUID,
+        packet: JsonMessage,
+        hendelse: MigreringRequest,
+        context: MessageContext
+    ) = JsonMessage.newMessage(
+        "OPPLYSNING:NY",
+        mapOf(
+            "sakId" to sakId,
+            "behandlingId" to behandlingId,
+            CORRELATION_ID_KEY to packet[CORRELATION_ID_KEY],
+            "opplysning" to tilOpplysning(hendelse.persongalleri)
+        )
+    ).apply {
+        try {
+            context.publish(behandlingId.toString(), toJson())
+        } catch (err: Exception) {
+            logger.error("Kunne ikke publisere persongalleri fra migrering", err)
+        }
+    }
+
+    private fun tilOpplysning(persongalleri: Persongalleri): Grunnlagsopplysning<out Persongalleri> =
+        Grunnlagsopplysning(
+            UUID.randomUUID(),
+            Grunnlagsopplysning.Pesys.create(),
+            Opplysningstype.PERSONGALLERI_V1,
+            objectMapper.createObjectNode(),
+            persongalleri
+        )
 }

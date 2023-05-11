@@ -114,6 +114,9 @@ class FordelerKriterier {
 
         Kriterie(FordelerKriterie.SOEKNAD_ER_IKKE_PAA_BOKMAAL) {
             it.spraak != Spraak.NB
+        },
+        Kriterie(FordelerKriterie.BARNET_ER_SKJERMET) {
+            barnetErSKjermet
         }
     )
 

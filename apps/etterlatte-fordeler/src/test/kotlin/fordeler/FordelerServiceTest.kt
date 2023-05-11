@@ -212,6 +212,47 @@ internal class FordelerServiceTest {
     }
 
     @Test
+    fun `Skal fordele sak til PESYS hvis barn er skjermet`() {
+        val barnFnr = Folkeregisteridentifikator.of(FNR_1)
+        val avdoedFnr = Folkeregisteridentifikator.of(FNR_2)
+        val etterlattFnr = Folkeregisteridentifikator.of(FNR_3)
+        every { fordelerRepo.finnFordeling(any()) } returns null
+        every { fordelerRepo.lagreFordeling(any()) } returns Unit
+        every { fordelerRepo.antallFordeltTil("GJENNY") } returns 0
+        coEvery { skjermingKlient.personErSkjermet(any()) } returns true
+
+        coEvery { pdlTjenesterKlient.hentPerson(match { it.foedselsnummer == barnFnr }) } returns mockPerson(
+            bostedsadresse = mockNorskAdresse(),
+            familieRelasjon = FamilieRelasjon(
+                ansvarligeForeldre = listOf(etterlattFnr, avdoedFnr),
+                foreldre = listOf(etterlattFnr, avdoedFnr),
+                barn = null
+            )
+        )
+
+        coEvery { pdlTjenesterKlient.hentPerson(match { it.foedselsnummer == avdoedFnr }) } returns mockPerson(
+            doedsdato = LocalDate.parse("2023-01-01"),
+            bostedsadresse = mockNorskAdresse()
+        )
+
+        coEvery { pdlTjenesterKlient.hentPerson(match { it.foedselsnummer == etterlattFnr }) } returns mockPerson(
+            bostedsadresse = mockNorskAdresse(),
+            familieRelasjon = FamilieRelasjon(
+                ansvarligeForeldre = listOf(etterlattFnr),
+                foreldre = null,
+                barn = listOf(barnFnr)
+            )
+        )
+
+        val resultat = fordelerService.sjekkGyldighetForBehandling(fordelerEvent())
+        assertTrue(
+            resultat is FordelerResultat.IkkeGyldigForBehandling && resultat.ikkeOppfylteKriterier.contains(
+                FordelerKriterie.BARNET_ER_SKJERMET
+            )
+        )
+    }
+
+    @Test
     fun `returnerer UgyldigHendelse hvis en av barn, avdød, gjenlevende ikke finnes i PDL`() {
         val fordelerService = FordelerService(
             FordelerKriterier(),

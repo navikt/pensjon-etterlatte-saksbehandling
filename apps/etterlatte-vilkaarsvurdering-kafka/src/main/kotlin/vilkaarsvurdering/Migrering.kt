@@ -29,6 +29,7 @@ internal class Migrering(
             validate { it.demandValue(BEHOV_NAME_KEY, Opplysningstype.MIGRERING.name) }
             validate { it.requireKey(BEHANDLING_ID_KEY) }
             validate { it.requireKey("fullstendig") }
+            validate { it.rejectKey("vilkaarsvurdert") }
             correlationId()
         }.register(this)
     }
@@ -39,6 +40,7 @@ internal class Migrering(
                 val behandlingId = packet.behandlingId
                 logger.info("Mottatt vilkårs-migreringshendelse for $BEHANDLING_ID_KEY $behandlingId")
                 vilkaarsvurderingService.migrer(behandlingId)
+                packet["vilkaarsvurdert"] = true
                 packet.eventName = Migreringshendelser.TRYGDETID
                 context.publish(packet.toJson())
                 logger.info("Publiserte oppdatert migreringshendelse fra vilkårsvurdering for behandling $behandlingId")

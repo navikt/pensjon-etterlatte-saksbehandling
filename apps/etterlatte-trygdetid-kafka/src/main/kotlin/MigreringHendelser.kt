@@ -26,6 +26,7 @@ internal class MigreringHendelser(rapidsConnection: RapidsConnection, private va
 
             correlationId()
             validate { it.requireKey(BEHANDLING_ID_KEY) }
+            validate { it.requireKey("vilkaarsvurdert") }
         }.register(this)
     }
 

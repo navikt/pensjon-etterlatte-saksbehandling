@@ -10,6 +10,7 @@ import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.etterlatte.rapidsandrivers.migrering.MigreringRequest
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser.MIGRER_SAK
+import no.nav.etterlatte.rapidsandrivers.migrering.REQUEST
 import no.nav.etterlatte.rapidsandrivers.migrering.request
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -34,6 +35,7 @@ internal class MigreringHendelser(rapidsConnection: RapidsConnection) :
             correlationId()
             validate { it.requireValue(BEHOV_NAME_KEY, Opplysningstype.MIGRERING.name) }
             validate { it.requireKey(BEHANDLING_ID_KEY) }
+            validate { it.requireKey(REQUEST) }
             validate { it.requireKey("opplysning") }
         }.register(this)
     }

@@ -19,24 +19,6 @@ sealed class RegelkjoeringResultat<S>(open val reglerVersjon: String) {
         RegelkjoeringResultat<S>(reglerVersjon)
 }
 
-interface PeriodisertGrunnlag<G> {
-    fun finnAlleKnekkpunkter(): Set<LocalDate>
-
-    fun finnKnekkpunkterInnenforPeriode(periode: RegelPeriode): Set<LocalDate> {
-        return finnAlleKnekkpunkter().filter { knekkpunkt ->
-            knekkpunkt >= periode.fraDato && (periode.tilDato?.let { it >= knekkpunkt } ?: true)
-        }.toSet()
-    }
-
-    fun finnGrunnlagForPeriode(datoIPeriode: LocalDate): G
-}
-
-class KonstantGrunnlag<G>(private val konstantGrunnlag: G) : PeriodisertGrunnlag<G> {
-
-    override fun finnAlleKnekkpunkter(): Set<LocalDate> = emptySet()
-    override fun finnGrunnlagForPeriode(datoIPeriode: LocalDate): G = konstantGrunnlag
-}
-
 object Regelkjoering {
     private val reglerVersjon = Properties.reglerVersjon
 
@@ -50,10 +32,10 @@ object Regelkjoering {
         return if (ugyldigePerioder.isEmpty()) {
             regel.finnAlleKnekkpunkter()
                 .asSequence()
+                .plus(grunnlag.finnKnekkpunkterInnenforPeriode(periode))
                 .filter { knekkpunktGyldigForPeriode(it, periode) }
                 .plus(periode.fraDato)
                 .plus(periode.tilDato?.plusDays(1) ?: LocalDate.MAX)
-                .plus(grunnlag.finnKnekkpunkterInnenforPeriode(periode))
                 .sorted()
                 .toSet()
                 .zipWithNext { periodeFra, nestePeriodeFra ->

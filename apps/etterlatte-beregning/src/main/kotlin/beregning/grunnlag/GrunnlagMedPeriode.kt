@@ -9,18 +9,21 @@ data class GrunnlagMedPeriode<T>(
     val tom: LocalDate? = null
 ) {
     init {
-        assert(tom == null || fom <= tom) {
-            "En periode kan ikke ha en til og med før fra og med!"
+        if (tom != null && fom > tom) {
+            throw UgyldigPeriodeForGrunnlag(fom, tom)
         }
     }
 }
+
+class UgyldigPeriodeForGrunnlag(fom: LocalDate, tom: LocalDate?) :
+    Exception("En periode kan ikke ha fra og med ($fom) etter til og med ($tom)!")
 
 fun <T, R> List<GrunnlagMedPeriode<T>>.mapVerdier(mapVerdi: (T) -> R): List<GrunnlagMedPeriode<R>> {
     return this.map { GrunnlagMedPeriode(data = mapVerdi(it.data), fom = it.fom, tom = it.tom) }
 }
 
 private val kastFeilUtenforPerioder =
-    { dato: LocalDate, _: LocalDate?, _: LocalDate? -> throw GrunnlagInneholderIkkePeriodeFeil(dato) }
+    { dato: LocalDate, _: LocalDate, _: LocalDate? -> throw PeriodiseringAvGrunnlagFeil.DatoUtenforPerioder(dato) }
 
 object PeriodisertBeregningGrunnlag {
 
@@ -28,17 +31,22 @@ object PeriodisertBeregningGrunnlag {
         opplysninger: List<GrunnlagMedPeriode<T>>,
         private val opplysningUtenforPeriode: (
             datoIPeriode: LocalDate,
-            tidligsteOpplysning: LocalDate?,
+            tidligsteOpplysning: LocalDate,
             senesteOpplysning: LocalDate?
         ) -> T = kastFeilUtenforPerioder
     ) : PeriodisertGrunnlag<T> {
         val sorterteOpplysninger = opplysninger.sortedBy { it.fom }
 
-        val tidligsteFom = sorterteOpplysninger.firstOrNull()?.fom
-        val senesteTom = sorterteOpplysninger.mapNotNull { it.tom }.maxOrNull()
+        val tidligsteFom = sorterteOpplysninger.first().fom
+        val senesteTom = sorterteOpplysninger.last().tom
 
         init {
-            assert(ingenPerioderOverlapper(opplysninger))
+            if (opplysninger.isEmpty()) {
+                throw PeriodiseringAvGrunnlagFeil.IngenPerioder()
+            }
+            if (perioderOverlapper(opplysninger)) {
+                throw PeriodiseringAvGrunnlagFeil.PerioderOverlapper()
+            }
         }
 
         override fun finnAlleKnekkpunkter(): Set<LocalDate> {
@@ -61,15 +69,15 @@ object PeriodisertBeregningGrunnlag {
         tom: LocalDate?
     ): PeriodisertGrunnlag<T> {
         val grunnlag = Grunnlag(opplysninger = perioder)
-        assert(harGrunnlagForHelePerioden(grunnlag.sorterteOpplysninger, fom, tom)) {
-            "Grunnlaget er ikke komplett for perioden [$fom, $tom]"
+        if (!harGrunnlagForHelePerioden(grunnlag.sorterteOpplysninger, fom, tom)) {
+            throw PeriodiseringAvGrunnlagFeil.PerioderErIkkeKomplett()
         }
         return grunnlag
     }
 
     fun <T> lagGrunnlagMedDefaultUtenforPerioder(
         perioder: List<GrunnlagMedPeriode<T>>,
-        defaultGrunnlag: (LocalDate, LocalDate?, LocalDate?) -> T
+        defaultGrunnlag: (datoIPeriode: LocalDate, foersteFom: LocalDate, senesteTom: LocalDate?) -> T
     ): PeriodisertGrunnlag<T> {
         return Grunnlag(
             opplysninger = perioder,
@@ -77,31 +85,41 @@ object PeriodisertBeregningGrunnlag {
         )
     }
 
-    private fun ingenPerioderOverlapper(sortertePerioder: List<GrunnlagMedPeriode<*>>): Boolean {
-        return sortertePerioder.zipWithNext().all { (first, second) ->
+    fun perioderOverlapper(sortertePerioder: List<GrunnlagMedPeriode<*>>): Boolean {
+        return !sortertePerioder.zipWithNext().all { (first, second) ->
             first.tom != null && first.tom < second.fom
         }
     }
 
-    private fun ingenHullInnadIPerioder(sortertePerioder: List<GrunnlagMedPeriode<*>>): Boolean {
+    fun ingenHullInnadIPerioder(sortertePerioder: List<GrunnlagMedPeriode<*>>): Boolean {
         return sortertePerioder.zipWithNext().all { (first, second) ->
             return first.tom != null && first.tom.plusDays(1) == second.fom
         }
     }
 
-    private fun harGrunnlagForHelePerioden(
+    fun harGrunnlagForHelePerioden(
         sortertePerioder: List<GrunnlagMedPeriode<*>>,
         fom: LocalDate,
         tom: LocalDate?
     ): Boolean {
-        val ingenHullInnad = ingenHullInnadIPerioder(sortertePerioder)
-        val hoeyesteTom = sortertePerioder.last().tom
-        val harGrunnlagIStarten = sortertePerioder.first().fom <= fom
+        val perioder =
+            listOf(sortertePerioder.takeWhile { it.fom <= fom }.last()) + sortertePerioder.dropWhile { it.fom <= fom }
+        val ingenHullInnad = ingenHullInnadIPerioder(perioder)
+        val hoeyesteTom = perioder.last().tom
+        val harGrunnlagIStarten = perioder.first().fom <= fom
         val varerUtPerioden = hoeyesteTom == null || (tom != null && tom <= hoeyesteTom)
 
         return ingenHullInnad && harGrunnlagIStarten && varerUtPerioden
     }
 }
 
-class GrunnlagInneholderIkkePeriodeFeil(datoIPeriode: LocalDate) :
-    Exception("Datoen $datoIPeriode er ikke innenfor grunnlaget")
+sealed class PeriodiseringAvGrunnlagFeil(message: String, cause: Throwable? = null) : Exception(message, cause) {
+
+    class DatoUtenforPerioder(datoIPeriode: LocalDate) :
+        PeriodiseringAvGrunnlagFeil("Datoen $datoIPeriode er ikke innenfor grunnlaget")
+
+    class IngenPerioder : PeriodiseringAvGrunnlagFeil("Ingen perioder for grunnlaget ble gitt for periodisering")
+    class PerioderOverlapper : PeriodiseringAvGrunnlagFeil("Periodene for periodisering overlapper")
+    class PerioderErIkkeKomplett :
+        PeriodiseringAvGrunnlagFeil("Periodene gitt er ikke komplette for den overordnede perioden")
+}

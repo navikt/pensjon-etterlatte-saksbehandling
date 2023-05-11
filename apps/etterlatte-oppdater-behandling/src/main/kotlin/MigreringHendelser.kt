@@ -45,7 +45,7 @@ internal class MigreringHendelser(rapidsConnection: RapidsConnection, private va
     override fun onPacket(packet: JsonMessage, context: MessageContext) {
         withLogContext(packet.correlationId) {
             withFeilhaandtering(packet, context, START_MIGRERING) {
-                logger.info("Mottatt migreringshendelse")
+                logger.info("Mottatt migreringshendelse, klar til å opprette persongalleri")
 
                 val hendelse: MigreringRequest = objectMapper.treeToValue(packet[HENDELSE_DATA_KEY])
                 val (behandlingId, sakId) = behandlinger.migrer(hendelse)
@@ -54,6 +54,8 @@ internal class MigreringHendelser(rapidsConnection: RapidsConnection, private va
                 packet.sakId = sakId
                 packet["opplysning"] = tilOpplysning(hendelse.persongalleri)
                 packet.eventName = "OPPLYSNING:NY"
+                context.publish(packet.toJson())
+                logger.info("Publiserte persongalleri")
             }
         }
     }

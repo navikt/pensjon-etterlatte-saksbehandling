@@ -1,5 +1,6 @@
 package no.nav.etterlatte.grunnlag
 
+import grunnlag.PersonMedNavn
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.call
@@ -104,13 +105,6 @@ fun Route.grunnlagRoute(grunnlagService: GrunnlagService, behandlingKlient: Beha
 
 private data class PersonerISakDto(
     val personer: Map<Folkeregisteridentifikator, PersonMedNavn>
-)
-
-data class PersonMedNavn(
-    val fnr: Folkeregisteridentifikator,
-    val fornavn: String,
-    val etternavn: String,
-    val mellomnavn: String?
 )
 
 fun PipelineContext<Unit, ApplicationCall>.navIdentFraToken() = call.principal<TokenValidationContextPrincipal>()

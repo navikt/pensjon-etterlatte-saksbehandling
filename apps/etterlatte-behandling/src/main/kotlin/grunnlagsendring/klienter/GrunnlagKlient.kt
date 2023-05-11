@@ -1,5 +1,6 @@
 package no.nav.etterlatte.grunnlagsendring.klienter
 
+import grunnlag.PersonMedNavn
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.accept
@@ -11,12 +12,14 @@ import io.ktor.http.contentType
 import no.nav.etterlatte.libs.common.FoedselsnummerDTO
 import no.nav.etterlatte.libs.common.behandling.PersonMedSakerOgRoller
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 
 interface GrunnlagKlient {
 
     suspend fun hentGrunnlag(sakId: Long): Grunnlag?
     suspend fun hentAlleSakIder(fnr: String): Set<Long>
     suspend fun hentPersonSakOgRolle(fnr: String): PersonMedSakerOgRoller
+    suspend fun hentAllePersonerISak(sakId: Long): Map<Folkeregisteridentifikator, PersonMedNavn>
 }
 
 class GrunnlagKlientImpl(
@@ -43,6 +46,12 @@ class GrunnlagKlientImpl(
             accept(ContentType.Application.Json)
             contentType(ContentType.Application.Json)
             setBody(FoedselsnummerDTO(fnr))
+        }.body()
+    }
+
+    override suspend fun hentAllePersonerISak(sakId: Long): Map<Folkeregisteridentifikator, PersonMedNavn> {
+        return grunnlagHttpClient.get("$url/api/grunnlag/$sakId/personer/alle") {
+            accept(ContentType.Application.Json)
         }.body()
     }
 }

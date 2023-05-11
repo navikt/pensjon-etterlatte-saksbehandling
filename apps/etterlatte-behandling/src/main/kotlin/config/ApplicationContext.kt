@@ -124,7 +124,7 @@ class ApplicationContext(
 
     // Service
     val oppgaveService = OppgaveServiceImpl(oppgaveDao, featureToggleService)
-    val sakService = RealSakService(sakDao, pdlKlient, norg2Klient, featureToggleService)
+
     val generellBehandlingService = RealGenerellBehandlingService(
         behandlingDao = behandlingDao,
         behandlingHendelser = behandlingsHendelser.hendelserKanal,
@@ -169,6 +169,8 @@ class ApplicationContext(
 
     val behandlingsStatusService = BehandlingStatusServiceImpl(behandlingDao, generellBehandlingService)
     val tilgangService = TilgangServiceImpl(SakTilgangDao(dataSource), saksbehandlerGroupIdsByKey)
+    val sakService =
+        RealSakService(sakDao, pdlKlient, norg2Klient, featureToggleService, tilgangService, grunnlagKlient)
     val enhetService = EnhetServiceImpl(navAnsattKlient)
     val grunnlagsendringshendelseService =
         GrunnlagsendringshendelseService(

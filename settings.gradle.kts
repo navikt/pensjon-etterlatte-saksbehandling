@@ -40,6 +40,7 @@ include(
     "libs:etterlatte-kafka",
     "libs:etterlatte-pdl-model",
     "libs:etterlatte-institusjonsopphold-model",
+    "libs:etterlatte-grunnlag-model",
     "libs:testdata",
     "libs:etterlatte-regler",
     "libs:etterlatte-sporingslogg",
@@ -47,3 +48,7 @@ include(
     "jobs:test-fordeler",
     "jobs:start-regulering"
 )
+include("libs:etterlatte-grunnlag-model")
+findProject(":libs:etterlatte-grunnlag-model")?.name = "etterlatte-grunnlag-model"
+include("libs:etterlatte-grunnlag-model")
+findProject(":libs:etterlatte-grunnlag-model")?.name = "etterlatte-grunnlag-model"

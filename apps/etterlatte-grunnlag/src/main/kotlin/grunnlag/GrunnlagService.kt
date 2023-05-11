@@ -1,6 +1,7 @@
 package no.nav.etterlatte.grunnlag
 
 import com.fasterxml.jackson.databind.JsonNode
+import grunnlag.PersonMedNavn
 import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.libs.common.behandling.PersonMedSakerOgRoller
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
@@ -11,6 +12,7 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsnummer
 import no.nav.etterlatte.libs.common.grunnlag.hentNavn
+import no.nav.etterlatte.libs.common.grunnlag.hentPersonrolle
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Navn
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.objectMapper
@@ -106,11 +108,13 @@ class RealGrunnlagService(
         return personer.mapNotNull {
             val navn = it.hentNavn()?.verdi ?: return@mapNotNull null
             val fnr = it.hentFoedselsnummer()?.verdi ?: return@mapNotNull null
+            val rolle = it.hentPersonrolle()?.verdi ?: return@mapNotNull null
             PersonMedNavn(
                 fnr = fnr,
                 fornavn = navn.fornavn,
                 etternavn = navn.etternavn,
-                mellomnavn = navn.mellomnavn
+                mellomnavn = navn.mellomnavn,
+                rolle = rolle
             )
         }.associateBy { it.fnr }
     }

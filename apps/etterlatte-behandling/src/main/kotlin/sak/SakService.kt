@@ -1,5 +1,6 @@
 package no.nav.etterlatte.sak
 
+import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.User
 import no.nav.etterlatte.behandling.domain.ArbeidsFordelingEnhet
@@ -12,9 +13,13 @@ import no.nav.etterlatte.filterForEnheter
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
+import no.nav.etterlatte.grunnlagsendring.klienter.GrunnlagKlient
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.person.HentPersonRequest
+import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.sak.Sak
 import org.slf4j.LoggerFactory
 
@@ -41,7 +46,9 @@ class RealSakService(
     private val dao: SakDao,
     private val pdlKlient: PdlKlient,
     private val norg2Klient: Norg2Klient,
-    private val featureToggleService: FeatureToggleService
+    private val featureToggleService: FeatureToggleService,
+    private val tilgangService: TilgangService,
+    private val grunnlagKlient: GrunnlagKlient
 ) : SakService {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -72,7 +79,11 @@ class RealSakService(
     }
 
     override fun finnEllerOpprettSak(fnr: String, type: SakType, enhet: String?): Sak {
-        return finnSakerForPersonOgType(fnr, type) ?: dao.opprettSak(
+        return finnSakerForPersonOgType(fnr, type) ?: opprettSak(fnr, type, enhet)
+    }
+
+    private fun opprettSak(fnr: String, type: SakType, enhet: String?): Sak {
+        val opprettSak = dao.opprettSak(
             fnr,
             type,
             if (featureToggleService.isEnabled(SakServiceFeatureToggle.OpprettMedEnhetId, false)) {
@@ -81,6 +92,26 @@ class RealSakService(
                 null
             }
         )
+        runBlocking {
+            val grunnlagAllePersoner = grunnlagKlient.hentAllePersonerISak(opprettSak.id)
+
+            val personerMedAdressebeskyttelse = grunnlagAllePersoner.map {
+                pdlKlient.hentPerson(HentPersonRequest(it.key, it.value.rolle, opprettSak.sakType))
+            }.filter {
+                harAdressebeskyttelse(it)
+            }
+            if (personerMedAdressebeskyttelse.isNotEmpty()) {
+                tilgangService.oppdaterAdressebeskyttelse(
+                    opprettSak.id,
+                    personerMedAdressebeskyttelse[0].adressebeskyttelse!!
+                )
+            }
+        }
+        return opprettSak
+    }
+
+    private fun harAdressebeskyttelse(person: Person): Boolean {
+        return person.adressebeskyttelse != AdressebeskyttelseGradering.UGRADERT
     }
 
     override fun oppdaterEnhetForSaker(saker: List<GrunnlagsendringshendelseService.SakMedEnhet>) {

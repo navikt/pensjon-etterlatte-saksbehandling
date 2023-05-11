@@ -11,6 +11,7 @@ import no.nav.etterlatte.behandling.domain.ArbeidsFordelingEnhet
 import no.nav.etterlatte.behandling.klienter.Norg2Klient
 import no.nav.etterlatte.common.klienter.PdlKlient
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
+import no.nav.etterlatte.grunnlagsendring.klienter.GrunnlagKlient
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.GeografiskTilknytning
@@ -21,6 +22,7 @@ import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.sak.RealSakService
 import no.nav.etterlatte.sak.SakDao
 import no.nav.etterlatte.sak.SakService
+import no.nav.etterlatte.sak.TilgangService
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
@@ -60,10 +62,14 @@ class EgenAnsattServiceTest {
         val pdlKlient = mockk<PdlKlient>()
         val norg2Klient = mockk<Norg2Klient>()
         val featureToggleService = mockk<FeatureToggleService>()
+        val tilgangService = mockk<TilgangService>()
+        val grunnlagKlient = mockk<GrunnlagKlient>()
 
         val connection = dataSource.connection
         sakRepo = SakDao { connection }
-        sakService = spyk(RealSakService(sakRepo, pdlKlient, norg2Klient, featureToggleService))
+        sakService = spyk(
+            RealSakService(sakRepo, pdlKlient, norg2Klient, featureToggleService, tilgangService, grunnlagKlient)
+        )
         egenAnsattService = EgenAnsattService(sakService, sikkerLogg)
 
         every { pdlKlient.hentGeografiskTilknytning(any(), any()) } returns GeografiskTilknytning(kommune = "0301")

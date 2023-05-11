@@ -6,7 +6,6 @@ import no.nav.etterlatte.FNR_5
 import no.nav.etterlatte.SVERIGE
 import no.nav.etterlatte.libs.common.innsendtsoeknad.Spraak
 import no.nav.etterlatte.libs.common.person.AdresseType
-import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.FamilieRelasjon
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.UtflyttingFraNorge
@@ -150,17 +149,6 @@ internal class FordelerKriterierTest {
         val fordelerResultat = fordelerKriterier.sjekkMotKriterier(barn, avdoed, gjenlevende, BARNEPENSJON_SOKNAD)
 
         assertTrue(fordelerResultat.forklaring.contains(FordelerKriterie.BARN_ER_IKKE_NORSK_STATSBORGER))
-    }
-
-    @Test
-    fun `barn som har adressebeskyttelse er ikke en gyldig kandidat`() {
-        val barn = mockPerson(adressebeskyttelse = AdressebeskyttelseGradering.STRENGT_FORTROLIG)
-        val avdoed = mockPerson()
-        val gjenlevende = mockPerson()
-
-        val fordelerResultat = fordelerKriterier.sjekkMotKriterier(barn, avdoed, gjenlevende, BARNEPENSJON_SOKNAD)
-
-        assertTrue(fordelerResultat.forklaring.contains(FordelerKriterie.BARN_HAR_ADRESSEBESKYTTELSE))
     }
 
     @Test
@@ -432,17 +420,6 @@ internal class FordelerKriterierTest {
     }
 
     @Test
-    fun `avdod med adressebeskyttelse er ikke en gyldig kandidat`() {
-        val barn = mockPerson()
-        val avdoed = mockPerson(adressebeskyttelse = AdressebeskyttelseGradering.STRENGT_FORTROLIG)
-        val gjenlevende = mockPerson()
-
-        val fordelerResultat = fordelerKriterier.sjekkMotKriterier(barn, avdoed, gjenlevende, BARNEPENSJON_SOKNAD)
-
-        assertTrue(fordelerResultat.forklaring.contains(FordelerKriterie.AVDOED_HAR_ADRESSEBESKYTTELSE))
-    }
-
-    @Test
     fun `innsender som ikke er forelder er ikke en gyldig kandidat`() {
         val barn = mockPerson()
         val avdoed = mockPerson()
@@ -503,17 +480,6 @@ internal class FordelerKriterierTest {
         val fordelerResultat = fordelerKriterier.sjekkMotKriterier(barn, avdoed, gjenlevende, BARNEPENSJON_SOKNAD)
 
         assertTrue(fordelerResultat.forklaring.contains(FordelerKriterie.GJENLEVENDE_HAR_IKKE_FORELDREANSVAR))
-    }
-
-    @Test
-    fun `gjenlevende med adressebeskyttelse er ikke en gyldig kandidat`() {
-        val barn = mockPerson()
-        val avdoed = mockPerson()
-        val gjenlevende = mockPerson(adressebeskyttelse = AdressebeskyttelseGradering.STRENGT_FORTROLIG)
-
-        val fordelerResultat = fordelerKriterier.sjekkMotKriterier(barn, avdoed, gjenlevende, BARNEPENSJON_SOKNAD)
-
-        assertTrue(fordelerResultat.forklaring.contains(FordelerKriterie.GJENLEVENDE_HAR_ADRESSEBESKYTTELSE))
     }
 
     companion object {

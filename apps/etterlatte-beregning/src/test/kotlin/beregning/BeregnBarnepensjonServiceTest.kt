@@ -8,6 +8,7 @@ import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlag
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlagService
+import no.nav.etterlatte.beregning.grunnlag.GrunnlagMedPeriode
 import no.nav.etterlatte.beregning.klienter.GrunnlagKlientImpl
 import no.nav.etterlatte.beregning.klienter.VilkaarsvurderingKlient
 import no.nav.etterlatte.beregning.regler.FNR_1
@@ -266,15 +267,25 @@ internal class BeregnBarnepensjonServiceTest {
                 every { tidspunkt } returns Tidspunkt.now()
                 every { type } returns ""
             },
-            soeskenMedIBeregning = soesken.map {
-                SoeskenMedIBeregning(
-                    Folkeregisteridentifikator.of(it),
-                    skalBrukes = true
+            soeskenMedIBeregning = listOf(
+                GrunnlagMedPeriode(
+                    fom = VIRKNINGSTIDSPUNKT_JAN_23.minusMonths(1).atDay(1),
+                    tom = null,
+                    data = soesken.map {
+                        SoeskenMedIBeregning(
+                            Folkeregisteridentifikator.of(it),
+                            skalBrukes = true
+                        )
+                    }
                 )
-            }
+            )
+
         )
 
-    private fun mockBehandling(type: BehandlingType, virk: YearMonth = VIRKNINGSTIDSPUNKT_JAN_23): DetaljertBehandling =
+    private fun mockBehandling(
+        type: BehandlingType,
+        virk: YearMonth = VIRKNINGSTIDSPUNKT_JAN_23
+    ): DetaljertBehandling =
         mockk<DetaljertBehandling>().apply {
             every { id } returns randomUUID()
             every { sak } returns 1

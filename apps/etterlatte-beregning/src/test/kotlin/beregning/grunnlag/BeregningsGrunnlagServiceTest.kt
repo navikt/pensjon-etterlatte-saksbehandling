@@ -9,6 +9,7 @@ import no.nav.etterlatte.beregning.grunnlag.BarnepensjonBeregningsGrunnlag
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlag
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlagRepository
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlagService
+import no.nav.etterlatte.beregning.grunnlag.GrunnlagMedPeriode
 import no.nav.etterlatte.beregning.klienter.BehandlingKlientImpl
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
@@ -21,6 +22,7 @@ import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.lang.RuntimeException
+import java.time.LocalDate
 import java.time.YearMonth
 import java.util.*
 import java.util.UUID.randomUUID
@@ -36,8 +38,14 @@ internal class BeregningsGrunnlagServiceTest {
 
     @Test
     fun `skal lagre soeksken med i beregning hvis ikke det finnes`() {
-        val soeskenMedIBeregning: List<SoeskenMedIBeregning> = listOf(
-            SoeskenMedIBeregning(STOR_SNERK, true)
+        val soeskenMedIBeregning: List<GrunnlagMedPeriode<List<SoeskenMedIBeregning>>> = listOf(
+            GrunnlagMedPeriode(
+                fom = LocalDate.of(2022, 8, 1),
+                tom = null,
+                data = listOf(
+                    SoeskenMedIBeregning(STOR_SNERK, true)
+                )
+            )
         )
 
         val behandling = mockBehandling(SakType.BARNEPENSJON, randomUUID())

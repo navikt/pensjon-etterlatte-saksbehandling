@@ -7,5 +7,5 @@ import java.util.UUID
 data class BeregningsGrunnlag(
     val behandlingId: UUID,
     val kilde: Grunnlagsopplysning.Saksbehandler,
-    val soeskenMedIBeregning: List<SoeskenMedIBeregning>
+    val soeskenMedIBeregning: List<GrunnlagMedPeriode<List<SoeskenMedIBeregning>>>
 )

@@ -36,6 +36,8 @@ internal class MigreringHendelser(rapidsConnection: RapidsConnection) :
             validate { it.requireKey(BEHANDLING_ID_KEY) }
             validate { it.requireKey(HENDELSE_DATA_KEY) }
             validate { it.requireKey("opplysning") }
+
+            validate { it.rejectKey("fullstendig") }
         }.register(this)
     }
 

@@ -28,6 +28,7 @@ internal class Migrering(
             eventName(GRUNNLAG_OPPDATERT)
             validate { it.demandValue(BEHOV_NAME_KEY, Opplysningstype.MIGRERING.name) }
             validate { it.requireKey(BEHANDLING_ID_KEY) }
+            validate { it.requireKey("fullstendig") }
             correlationId()
         }.register(this)
     }

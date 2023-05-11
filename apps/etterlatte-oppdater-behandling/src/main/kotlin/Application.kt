@@ -11,8 +11,8 @@ fun main() {
         PdlHendelser(rapidsConnection, behandlingservice)
         OmregningsHendelser(rapidsConnection, behandlingservice)
         Reguleringsforespoersel(rapidsConnection, behandlingservice)
-        MigreringHendelser(rapidsConnection, behandlingservice)
-        FortsettMigreringsflyten(rapidsConnection)
+        MigreringHendelser(rapidsConnection)
+        FortsettMigreringsflyten(rapidsConnection, behandlingservice)
         ReguleringFeilet(rapidsConnection, behandlingservice)
     }.start()
 }

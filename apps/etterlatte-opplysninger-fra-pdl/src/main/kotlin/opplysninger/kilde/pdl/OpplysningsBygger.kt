@@ -116,6 +116,6 @@ private fun behovNameTilPersonRolle(opplysningstype: Opplysningstype): PersonRol
     AVDOED_PDL_V1 -> PersonRolle.AVDOED
     GJENLEVENDE_FORELDER_PDL_V1 -> PersonRolle.GJENLEVENDE
     SOEKER_PDL_V1 -> PersonRolle.BARN
-    MIGRERING -> PersonRolle.BARN
+    MIGRERING -> PersonRolle.AVDOED
     else -> throw Exception("Ugyldig opplysningsbehov $opplysningstype")
 }

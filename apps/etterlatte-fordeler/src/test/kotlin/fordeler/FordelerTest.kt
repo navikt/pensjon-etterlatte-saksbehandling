@@ -134,8 +134,7 @@ internal class FordelerTest {
         )
 
         val kriterier = listOf(
-            FordelerKriterie.BARN_ER_IKKE_BOSATT_I_NORGE,
-            FordelerKriterie.AVDOED_HAR_ADRESSEBESKYTTELSE
+            FordelerKriterie.BARN_ER_IKKE_BOSATT_I_NORGE
         )
 
         val statistikkmeldingIkkeGyldig = fordeler.lagStatistikkMelding(
@@ -153,8 +152,7 @@ internal class FordelerTest {
                     "sak_type": "BARNEPENSJON",
                     "gyldig_for_behandling": false,
                     "feilende_kriterier": [
-                        "BARN_ER_IKKE_BOSATT_I_NORGE",
-                        "AVDOED_HAR_ADRESSEBESKYTTELSE"
+                        "BARN_ER_IKKE_BOSATT_I_NORGE"
                     ]
                 }
             """,

@@ -8,7 +8,6 @@ import no.nav.etterlatte.FNR_2
 import no.nav.etterlatte.FNR_3
 import no.nav.etterlatte.behandling.BehandlingKlient
 import no.nav.etterlatte.fordeler.FordelerKriterie.AVDOED_ER_IKKE_REGISTRERT_SOM_DOED
-import no.nav.etterlatte.fordeler.FordelerKriterie.BARNET_ER_SKJERMET
 import no.nav.etterlatte.libs.common.person.FamilieRelasjon
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -141,47 +140,6 @@ internal class FordelerServiceTest {
     }
 
     @Test
-    fun `Skal fordele sak til PESYS hvis barn er skjermet`() {
-        val barnFnr = Folkeregisteridentifikator.of(FNR_1)
-        val avdoedFnr = Folkeregisteridentifikator.of(FNR_2)
-        val etterlattFnr = Folkeregisteridentifikator.of(FNR_3)
-        every { fordelerRepo.finnFordeling(any()) } returns null
-        every { fordelerRepo.lagreFordeling(any()) } returns Unit
-        every { fordelerRepo.antallFordeltTil("GJENNY") } returns 0
-        coEvery { skjermingKlient.personErSkjermet(any()) } returns true
-
-        coEvery { pdlTjenesterKlient.hentPerson(match { it.foedselsnummer == barnFnr }) } returns mockPerson(
-            bostedsadresse = mockNorskAdresse(),
-            familieRelasjon = FamilieRelasjon(
-                ansvarligeForeldre = listOf(etterlattFnr, avdoedFnr),
-                foreldre = listOf(etterlattFnr, avdoedFnr),
-                barn = null
-            )
-        )
-
-        coEvery { pdlTjenesterKlient.hentPerson(match { it.foedselsnummer == avdoedFnr }) } returns mockPerson(
-            doedsdato = LocalDate.parse("2023-01-01"),
-            bostedsadresse = mockNorskAdresse()
-        )
-
-        coEvery { pdlTjenesterKlient.hentPerson(match { it.foedselsnummer == etterlattFnr }) } returns mockPerson(
-            bostedsadresse = mockNorskAdresse(),
-            familieRelasjon = FamilieRelasjon(
-                ansvarligeForeldre = listOf(etterlattFnr),
-                foreldre = null,
-                barn = listOf(barnFnr)
-            )
-        )
-
-        val resultat = fordelerService.sjekkGyldighetForBehandling(fordelerEvent())
-        assertTrue(
-            resultat is FordelerResultat.IkkeGyldigForBehandling && resultat.ikkeOppfylteKriterier.contains(
-                BARNET_ER_SKJERMET
-            )
-        )
-    }
-
-    @Test
     fun `Er gyldig for behandling om søknad tidligere er fordelt til Gjenny`() {
         every { fordelerRepo.finnFordeling(any()) } returns FordeltRecord(1, "GJENNY", Tidspunkt.now())
         every { fordelerRepo.finnKriterier(any()) } returns emptyList()
@@ -251,6 +209,47 @@ internal class FordelerServiceTest {
         val resultat = fordelerService.sjekkGyldighetForBehandling(fordelerEvent())
 
         assertTrue(resultat is FordelerResultat.IkkeGyldigForBehandling)
+    }
+
+    @Test
+    fun `Skal fordele sak til PESYS hvis barn er skjermet`() {
+        val barnFnr = Folkeregisteridentifikator.of(FNR_1)
+        val avdoedFnr = Folkeregisteridentifikator.of(FNR_2)
+        val etterlattFnr = Folkeregisteridentifikator.of(FNR_3)
+        every { fordelerRepo.finnFordeling(any()) } returns null
+        every { fordelerRepo.lagreFordeling(any()) } returns Unit
+        every { fordelerRepo.antallFordeltTil("GJENNY") } returns 0
+        coEvery { skjermingKlient.personErSkjermet(any()) } returns true
+
+        coEvery { pdlTjenesterKlient.hentPerson(match { it.foedselsnummer == barnFnr }) } returns mockPerson(
+            bostedsadresse = mockNorskAdresse(),
+            familieRelasjon = FamilieRelasjon(
+                ansvarligeForeldre = listOf(etterlattFnr, avdoedFnr),
+                foreldre = listOf(etterlattFnr, avdoedFnr),
+                barn = null
+            )
+        )
+
+        coEvery { pdlTjenesterKlient.hentPerson(match { it.foedselsnummer == avdoedFnr }) } returns mockPerson(
+            doedsdato = LocalDate.parse("2023-01-01"),
+            bostedsadresse = mockNorskAdresse()
+        )
+
+        coEvery { pdlTjenesterKlient.hentPerson(match { it.foedselsnummer == etterlattFnr }) } returns mockPerson(
+            bostedsadresse = mockNorskAdresse(),
+            familieRelasjon = FamilieRelasjon(
+                ansvarligeForeldre = listOf(etterlattFnr),
+                foreldre = null,
+                barn = listOf(barnFnr)
+            )
+        )
+
+        val resultat = fordelerService.sjekkGyldighetForBehandling(fordelerEvent())
+        assertTrue(
+            resultat is FordelerResultat.IkkeGyldigForBehandling && resultat.ikkeOppfylteKriterier.contains(
+                FordelerKriterie.BARNET_ER_SKJERMET
+            )
+        )
     }
 
     @Test

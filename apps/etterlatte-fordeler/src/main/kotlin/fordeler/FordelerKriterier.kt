@@ -7,7 +7,6 @@ import no.nav.etterlatte.libs.common.innsendtsoeknad.common.JaNeiVetIkke
 import no.nav.etterlatte.libs.common.innsendtsoeknad.common.PersonType
 import no.nav.etterlatte.libs.common.person.Adresse
 import no.nav.etterlatte.libs.common.person.AdresseType
-import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.aktiv
 import no.nav.etterlatte.libs.common.person.nyeste
@@ -25,7 +24,6 @@ data class FordelerKriterierResultat(
 enum class FordelerKriterie(val forklaring: String) {
     BARN_ER_IKKE_NORSK_STATSBORGER("Barn er ikke norsk statsborger"),
     BARN_ER_FOR_GAMMELT("Barn er for gammelt"),
-    BARN_HAR_ADRESSEBESKYTTELSE("Barn har adressebeskyttelse"),
     BARN_ER_IKKE_FOEDT_I_NORGE("Barn er ikke født i Norge"),
     BARN_HAR_UTVANDRING("Barn har utvandring"),
     BARN_HAR_HUKET_AV_UTLANDSADRESSE("Det er huket av for utenlandsopphold for avdøde i søknaden"),
@@ -41,13 +39,11 @@ enum class FordelerKriterie(val forklaring: String) {
     AVDOED_HAR_HATT_UTLANDSOPPHOLD("Det er huket av for utenlandsopphold for avdøde i søknaden"),
     AVDOED_VAR_IKKE_BOSATT_I_NORGE("Avdød var ikke bosatt i Norge"),
     AVDOED_ER_IKKE_FORELDER_TIL_BARN("Avdød er ikke forelder til barnet"),
-    AVDOED_HAR_ADRESSEBESKYTTELSE("Avdød har adressebeskyttelse"),
     AVDOED_HAR_DOEDSDATO_FOR_LANGT_TILBAKE_I_TID("Avdød har dødsdato for langt tilbake i tid"),
 
     GJENLEVENDE_ER_IKKE_BOSATT_I_NORGE("Gjenlevende er ikke bosatt i Norge"),
     GJENLEVENDE_OG_BARN_HAR_IKKE_SAMME_ADRESSE("Gjenlevende har ikke samme adresse som barnet"),
     GJENLEVENDE_HAR_IKKE_FORELDREANSVAR("Gjenlevende har ikke foreldreansvar for barnet"),
-    GJENLEVENDE_HAR_ADRESSEBESKYTTELSE("Gjenlevende har adressebeskyttelse"),
 
     INNSENDER_ER_IKKE_FORELDER("Innsender er ikke markert som forelder til barnet"),
 
@@ -89,7 +85,6 @@ class FordelerKriterier {
         Kriterie(FordelerKriterie.BARN_ER_IKKE_BOSATT_I_NORGE) { ikkeGyldigBostedsAdresseINorge(barn) },
         Kriterie(FordelerKriterie.BARN_HAR_HUKET_AV_UTLANDSADRESSE) { harHuketAvForUtenlandsadresse(it) },
         Kriterie(FordelerKriterie.BARN_HAR_UTVANDRING) { harUtvandring(barn) },
-        Kriterie(FordelerKriterie.BARN_HAR_ADRESSEBESKYTTELSE) { harAdressebeskyttelse(barn) },
         Kriterie(FordelerKriterie.BARN_HAR_VERGE) { harHuketAvForVerge(it) },
         Kriterie(FordelerKriterie.BARN_HAR_REGISTRERT_VERGE) { harVergemaalPDL(barn) },
         Kriterie(FordelerKriterie.BARN_HAR_FOR_GAMLE_SOESKEN) { barnHarForGamleSoesken(barn, avdoed) },
@@ -101,7 +96,6 @@ class FordelerKriterier {
         Kriterie(FordelerKriterie.AVDOED_HAR_UTVANDRING) { harUtvandring(avdoed) },
         Kriterie(FordelerKriterie.AVDOED_HAR_HATT_UTLANDSOPPHOLD) { harHuketAvForUtenlandsopphold(it) },
         Kriterie(FordelerKriterie.AVDOED_HAR_YRKESSKADE) { harHuketAvForYrkesskade(it) },
-        Kriterie(FordelerKriterie.AVDOED_HAR_ADRESSEBESKYTTELSE) { harAdressebeskyttelse(avdoed) },
         Kriterie(FordelerKriterie.AVDOED_HAR_DOEDSDATO_FOR_LANGT_TILBAKE_I_TID) {
             harDoedsdatoForLangtTilbakeITid(avdoed)
         },
@@ -114,7 +108,6 @@ class FordelerKriterier {
         Kriterie(FordelerKriterie.GJENLEVENDE_HAR_IKKE_FORELDREANSVAR) {
             gjenlevendeHarIkkeForeldreansvar(barn, gjenlevende)
         },
-        Kriterie(FordelerKriterie.GJENLEVENDE_HAR_ADRESSEBESKYTTELSE) { harAdressebeskyttelse(gjenlevende) },
 
         // Innsender
         Kriterie(FordelerKriterie.INNSENDER_ER_IKKE_FORELDER) { innsenderIkkeForelder(it) },
@@ -129,10 +122,6 @@ class FordelerKriterier {
 
     private fun ikkeForelderTilBarn(avdoed: Person, barn: Person): Boolean {
         return barn.familieRelasjon?.foreldre?.let { avdoed.foedselsnummer !in it } ?: true
-    }
-
-    private fun harAdressebeskyttelse(person: Person): Boolean {
-        return person.adressebeskyttelse != AdressebeskyttelseGradering.UGRADERT
     }
 
     private fun ikkeNorskStatsborger(person: Person): Boolean {

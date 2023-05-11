@@ -102,7 +102,7 @@ getLocalSecretName() {
 getRemoteSecretName() {
   info "Checking kubernetes for secret for $APP_NAME"
 
-  AZURE_SECRET_NAME=$(kubectl get secrets | grep "azure-$APP_NAME" | awk '{print $1}')
+  AZURE_SECRET_NAME=$(kubectl get secrets | grep "azure-$APP_NAME" -m1 | awk '{print $1}')
   if [ -z "$AZURE_SECRET_NAME" ]; then
     error "No azuread secret found for app name $APP_NAME"
   fi

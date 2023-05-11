@@ -15,8 +15,10 @@ import no.nav.etterlatte.utbetaling.common.UtbetalingEventDto
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.IverksettResultat.SendtTilOppdrag
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.IverksettResultat.UtbetalingForVedtakEksisterer
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.IverksettResultat.UtbetalingslinjerForVedtakEksisterer
+import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Saktype
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetaling
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingService
+import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingStatus
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetalingsvedtak
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -52,6 +54,12 @@ class VedtakMottaker(
             try {
                 val vedtak: Utbetalingsvedtak = lesVedtak(packet).also { vedtakId = it.vedtakId }
                 logger.info("Attestert vedtak med vedtakId=${vedtak.vedtakId} mottatt")
+
+                //TODO Mock for OMS
+                if(vedtak.sak.sakType == Saktype.OMSTILLINGSSTOENAD) {
+                    sendUtbetalingSendtEventForOMSMock(context, vedtak)
+                    return@withLogContext
+                }
 
                 when (val resultat = utbetalingService.iverksettUtbetaling(vedtak)) {
                     is SendtTilOppdrag -> {
@@ -100,6 +108,7 @@ class VedtakMottaker(
             }
         }
 
+
     private fun lesVedtak(packet: JsonMessage): Utbetalingsvedtak =
         try {
             val vedtak: VedtakDto = objectMapper.readValue(packet["vedtak"].toJson())
@@ -137,6 +146,19 @@ class VedtakMottaker(
                     status = UtbetalingStatusDto.valueOf(utbetaling.status().name),
                     vedtakId = utbetaling.vedtakId.value,
                     behandlingId = utbetaling.behandlingId.value
+                )
+            ).toJson()
+        )
+    }
+
+    //Mock for OMS
+    private fun sendUtbetalingSendtEventForOMSMock(context: MessageContext, utbetaling: Utbetalingsvedtak) {
+        context.publish(
+            UtbetalingEventDto(
+                utbetalingResponse = UtbetalingResponseDto(
+                    status = UtbetalingStatusDto.valueOf(UtbetalingStatus.GODKJENT.name),
+                    vedtakId = utbetaling.vedtakId,
+                    behandlingId = utbetaling.behandling.id
                 )
             ).toJson()
         )

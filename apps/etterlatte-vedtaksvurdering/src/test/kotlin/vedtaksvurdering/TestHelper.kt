@@ -32,7 +32,8 @@ fun opprettVedtak(
     sakId: Long = 1L,
     behandlingId: UUID = UUID.randomUUID(),
     vilkaarsvurdering: ObjectNode? = objectMapper.createObjectNode(),
-    beregning: ObjectNode? = objectMapper.createObjectNode()
+    beregning: ObjectNode? = objectMapper.createObjectNode(),
+    avkorting: ObjectNode? = objectMapper.createObjectNode()
 ) = OpprettVedtak(
     soeker = Folkeregisteridentifikator.of(FNR_1),
     sakId = sakId,
@@ -42,6 +43,7 @@ fun opprettVedtak(
     virkningstidspunkt = virkningstidspunkt,
     type = VedtakType.INNVILGELSE,
     beregning = beregning,
+    avkorting = avkorting,
     vilkaarsvurdering = vilkaarsvurdering,
     utbetalingsperioder = listOf(
         Utbetalingsperiode(
@@ -58,7 +60,8 @@ fun vedtak(
     sakId: Long = 1L,
     behandlingId: UUID = UUID.randomUUID(),
     vilkaarsvurdering: ObjectNode? = objectMapper.createObjectNode(),
-    beregning: ObjectNode? = objectMapper.createObjectNode()
+    beregning: ObjectNode? = objectMapper.createObjectNode(),
+    avkorting: ObjectNode? = objectMapper.createObjectNode()
 ) = Vedtak(
     id = 1L,
     status = VedtakStatus.OPPRETTET,
@@ -70,6 +73,7 @@ fun vedtak(
     virkningstidspunkt = virkningstidspunkt,
     type = VedtakType.INNVILGELSE,
     beregning = beregning,
+    avkorting = avkorting,
     vilkaarsvurdering = vilkaarsvurdering,
     utbetalingsperioder = listOf(
         Utbetalingsperiode(

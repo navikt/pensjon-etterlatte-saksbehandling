@@ -12,15 +12,16 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.beregning.klienter.BehandlingKlient
 import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
+import no.nav.etterlatte.libs.common.beregning.AvkortetYtelseDto
+import no.nav.etterlatte.libs.common.beregning.AvkortingDto
+import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagDto
+import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagKildeDto
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.withBehandlingId
 import no.nav.etterlatte.libs.ktor.bruker
 import no.nav.etterlatte.token.Bruker
-import java.time.LocalDate
-import java.time.YearMonth
-import java.util.*
 
 fun Route.avkorting(avkortingService: AvkortingService, behandlingKlient: BehandlingKlient) {
     route("/api/beregning/avkorting/{$BEHANDLINGSID_CALL_PARAMETER}") {
@@ -47,32 +48,6 @@ fun Route.avkorting(avkortingService: AvkortingService, behandlingKlient: Behand
         }
     }
 }
-
-data class AvkortingDto(
-    val behandlingId: UUID,
-    val avkortingGrunnlag: List<AvkortingGrunnlagDto>,
-    val avkortetYtelse: List<AvkortetYtelseDto>
-)
-
-data class AvkortingGrunnlagDto(
-    val fom: YearMonth,
-    val tom: YearMonth?,
-    val aarsinntekt: Int,
-    val gjeldendeAar: Int,
-    val spesifikasjon: String,
-    val kilde: AvkortingGrunnlagKildeDto?
-)
-
-data class AvkortingGrunnlagKildeDto(
-    val tidspunkt: String,
-    val ident: String
-)
-
-data class AvkortetYtelseDto(
-    val fom: LocalDate,
-    val tom: LocalDate?,
-    val ytelseEtterAvkorting: Int
-)
 
 fun Avkorting.toDto() = AvkortingDto(
     behandlingId = behandlingId,

@@ -264,6 +264,7 @@ private fun lagVedtak(
         sakType = SakType.BARNEPENSJON,
         behandlingId = UUID.randomUUID(),
         beregning = null,
+        avkorting = null,
         vilkaarsvurdering = null,
         soeker = Folkeregisteridentifikator.of(FNR_1),
         virkningstidspunkt = virkningsDato.let { YearMonth.from(it) },

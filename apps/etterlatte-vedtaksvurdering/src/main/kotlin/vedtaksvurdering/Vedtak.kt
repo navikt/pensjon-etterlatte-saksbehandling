@@ -27,6 +27,7 @@ data class OpprettVedtak(
     val status: VedtakStatus = VedtakStatus.OPPRETTET,
     val type: VedtakType,
     val beregning: ObjectNode?,
+    val avkorting: ObjectNode?,
     val vilkaarsvurdering: ObjectNode?,
     val utbetalingsperioder: List<Utbetalingsperiode>
 )
@@ -42,6 +43,7 @@ data class Vedtak(
     val status: VedtakStatus,
     val type: VedtakType,
     val beregning: ObjectNode?,
+    val avkorting: ObjectNode?,
     val vilkaarsvurdering: ObjectNode?,
     val utbetalingsperioder: List<Utbetalingsperiode>,
     val vedtakFattet: VedtakFattet? = null,

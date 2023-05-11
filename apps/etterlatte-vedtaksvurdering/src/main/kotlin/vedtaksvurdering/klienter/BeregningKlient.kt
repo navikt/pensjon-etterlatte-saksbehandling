@@ -4,17 +4,19 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.michaelbull.result.mapBoth
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
+import no.nav.etterlatte.libs.common.beregning.AvkortingDto
 import no.nav.etterlatte.libs.common.beregning.BeregningDTO
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktorobo.Resource
 import no.nav.etterlatte.token.Bruker
+import no.nav.etterlatte.vedtaksvurdering.BeregningOgAvkorting
 import org.slf4j.LoggerFactory
 import java.util.*
 
 interface BeregningKlient {
-    suspend fun hentBeregning(behandlingId: UUID, bruker: Bruker): BeregningDTO
+    suspend fun hentBeregningOgAvkorting(behandlingId: UUID, bruker: Bruker): BeregningOgAvkorting
 }
 
 class BeregningKlientException(override val message: String, override val cause: Throwable) :
@@ -29,7 +31,14 @@ class BeregningKlientImpl(config: Config, httpClient: HttpClient) : BeregningKli
     private val clientId = config.getString("beregning.client.id")
     private val resourceUrl = config.getString("beregning.resource.url")
 
-    override suspend fun hentBeregning(behandlingId: UUID, bruker: Bruker): BeregningDTO {
+    override suspend fun hentBeregningOgAvkorting(behandlingId: UUID, bruker: Bruker): BeregningOgAvkorting {
+        return BeregningOgAvkorting(
+            beregning = hentBeregning(behandlingId, bruker),
+            avkorting = hentAvkorting(behandlingId, bruker)
+        )
+    }
+
+    private suspend fun hentBeregning(behandlingId: UUID, bruker: Bruker): BeregningDTO {
         logger.info("Henter beregning for behandling med behandlingId=$behandlingId")
         try {
             return downstreamResourceClient
@@ -47,6 +56,29 @@ class BeregningKlientImpl(config: Config, httpClient: HttpClient) : BeregningKli
         } catch (e: Exception) {
             throw BeregningKlientException(
                 "Henting av beregning for behandling med behandlingId=$behandlingId feilet",
+                e
+            )
+        }
+    }
+
+    private suspend fun hentAvkorting(behandlingId: UUID, bruker: Bruker): AvkortingDto {
+        logger.info("Henter avkorting for behandling med behandlingId=$behandlingId")
+        try {
+            return downstreamResourceClient
+                .get(
+                    resource = Resource(
+                        clientId = clientId,
+                        url = "$resourceUrl/api/beregning/avkorting/$behandlingId"
+                    ),
+                    bruker = bruker
+                )
+                .mapBoth(
+                    success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
+                    failure = { throwableErrorMessage -> throw throwableErrorMessage }
+                )
+        } catch (e: Exception) {
+            throw BeregningKlientException(
+                "Henting av avkorting for behandling med behandlingId=$behandlingId feilet",
                 e
             )
         }

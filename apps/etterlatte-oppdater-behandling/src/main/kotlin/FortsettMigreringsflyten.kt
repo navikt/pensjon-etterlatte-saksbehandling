@@ -32,7 +32,7 @@ internal class FortsettMigreringsflyten(rapidsConnection: RapidsConnection) :
             correlationId()
             validate { it.rejectValue(BEHOV_NAME_KEY, Opplysningstype.MIGRERING.name) }
             validate { it.requireKey(BEHANDLING_ID_KEY) }
-            validate { it.rejectKey("opplysning") }
+            validate { it.requireKey("opplysning") }
         }.register(this)
     }
 

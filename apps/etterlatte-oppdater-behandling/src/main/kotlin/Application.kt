@@ -12,6 +12,7 @@ fun main() {
         OmregningsHendelser(rapidsConnection, behandlingservice)
         Reguleringsforespoersel(rapidsConnection, behandlingservice)
         MigreringHendelser(rapidsConnection, behandlingservice)
+        FortsettMigreringsflyten(rapidsConnection)
         ReguleringFeilet(rapidsConnection, behandlingservice)
     }.start()
 }

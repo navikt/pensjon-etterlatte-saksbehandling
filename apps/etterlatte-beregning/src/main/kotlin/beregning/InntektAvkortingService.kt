@@ -1,7 +1,10 @@
 package no.nav.etterlatte.beregning
 
-import no.nav.etterlatte.beregning.regler.avkorting.AvkortetYtelseGrunnlag
+import no.nav.etterlatte.beregning.grunnlag.GrunnlagMedPeriode
+import no.nav.etterlatte.beregning.grunnlag.PeriodisertBeregningGrunnlag
+import no.nav.etterlatte.beregning.grunnlag.mapVerdier
 import no.nav.etterlatte.beregning.regler.avkorting.InntektAvkortingGrunnlag
+import no.nav.etterlatte.beregning.regler.avkorting.PeriodisertAvkortetYtelseGrunnlag
 import no.nav.etterlatte.beregning.regler.avkorting.avkorteYtelse
 import no.nav.etterlatte.beregning.regler.avkorting.inntektAvkorting
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
@@ -15,6 +18,7 @@ import no.nav.etterlatte.libs.regler.RegelPeriode
 import no.nav.etterlatte.libs.regler.RegelkjoeringResultat
 import no.nav.etterlatte.libs.regler.eksekver
 import org.slf4j.LoggerFactory
+import java.lang.IllegalArgumentException
 import java.time.YearMonth
 
 object InntektAvkortingService {
@@ -58,74 +62,82 @@ object InntektAvkortingService {
 
     fun beregnAvkortetYtelse(
         beregninger: List<Beregningsperiode>,
-        avkortingGrunnlag: List<AvkortingGrunnlag>
+        avkortingGrunnlag: List<AvkortingGrunnlag>,
+        periode: RegelPeriode
     ): List<AvkortetYtelse> {
         val regelgrunnlag = periodisertBruttoYtelseOgAvkorting(beregninger, avkortingGrunnlag)
-        return regelgrunnlag.map { grunnlag ->
-            val resultat = avkorteYtelse.eksekver(KonstantGrunnlag(grunnlag), grunnlag.periode)
-            when (resultat) {
-                is RegelkjoeringResultat.Suksess -> {
-                    val tidspunkt = Tidspunkt.now()
-                    resultat.periodiserteResultater.map { periodisertResultat ->
-                        AvkortetYtelse(
-                            periode = Periode(
-                                fom = YearMonth.from(periodisertResultat.periode.fraDato),
-                                tom = periodisertResultat.periode.tilDato?.let { YearMonth.from(it) }
-                            ),
-                            ytelseEtterAvkorting = periodisertResultat.resultat.verdi,
-                            tidspunkt = tidspunkt,
-                            regelResultat = periodisertResultat.toJsonNode(),
-                            kilde = Grunnlagsopplysning.RegelKilde(
-                                navn = inntektAvkorting.regelReferanse.id,
-                                ts = tidspunkt,
-                                versjon = periodisertResultat.reglerVersjon
-                            )
+        val resultat = avkorteYtelse.eksekver(regelgrunnlag, periode)
+        when (resultat) {
+            is RegelkjoeringResultat.Suksess -> {
+                val tidspunkt = Tidspunkt.now()
+                return resultat.periodiserteResultater.map { periodisertResultat ->
+                    AvkortetYtelse(
+                        periode = Periode(
+                            fom = YearMonth.from(periodisertResultat.periode.fraDato),
+                            tom = periodisertResultat.periode.tilDato?.let { YearMonth.from(it) }
+                        ),
+                        ytelseEtterAvkorting = periodisertResultat.resultat.verdi,
+                        tidspunkt = tidspunkt,
+                        regelResultat = periodisertResultat.toJsonNode(),
+                        kilde = Grunnlagsopplysning.RegelKilde(
+                            navn = inntektAvkorting.regelReferanse.id,
+                            ts = tidspunkt,
+                            versjon = periodisertResultat.reglerVersjon
                         )
-                    }
+                    )
                 }
-
-                is RegelkjoeringResultat.UgyldigPeriode ->
-                    throw RuntimeException("Ugyldig regler for periode: ${resultat.ugyldigeReglerForPeriode}")
             }
-        }.flatten()
+
+            is RegelkjoeringResultat.UgyldigPeriode ->
+                throw RuntimeException("Ugyldig regler for periode: ${resultat.ugyldigeReglerForPeriode}")
+        }
     }
 
     private fun periodisertBruttoYtelseOgAvkorting(
         beregninger: List<Beregningsperiode>,
         avkortingGrunnlag: List<AvkortingGrunnlag>
-    ): List<AvkortetYtelseGrunnlag> {
-        val beregnedeAvkortinger = avkortingGrunnlag.flatMap { it.beregnetAvkorting }
-        val knekkpunkter = (beregninger.map { it.datoFOM }.toMutableSet() + beregnedeAvkortinger.map { it.periode.fom })
-            .toList().sorted()
-
-        val avkortetYtelseGrunnlag = mutableListOf<AvkortetYtelseGrunnlag>()
-        knekkpunkter.forEachIndexed { indeks, knekkpunkt ->
-            val beregning = beregninger.filter { it.datoFOM <= knekkpunkt }.maxByOrNull { it.datoFOM }
-                ?: throw Exception("Noe gikk galt ved uthenting av grunnlag for avkorting")
-
-            val beregnetAvkorting = beregnedeAvkortinger.filter { it.periode.fom <= knekkpunkt }
-                .maxByOrNull { it.periode.fom }
-                ?: throw Exception("Noe gikk galt ved uthenting av grunnlag for avkorting")
-
-            avkortetYtelseGrunnlag.add(
-                AvkortetYtelseGrunnlag(
-                    periode = RegelPeriode(
-                        fraDato = knekkpunkt.atDay(1),
-                        tilDato = knekkpunkter.getOrNull(indeks + 1)?.minusMonths(1)?.atEndOfMonth()
-                    ),
-                    bruttoYtelse = FaktumNode(
-                        verdi = beregning.utbetaltBeloep,
-                        kilde = beregning.kilde ?: "",
+    ): PeriodisertAvkortetYtelseGrunnlag {
+        return PeriodisertAvkortetYtelseGrunnlag(
+            bruttoYtelse = PeriodisertBeregningGrunnlag.lagGrunnlagMedDefaultUtenforPerioder(
+                beregninger.tilPeriodisertBeregning().mapVerdier {
+                    FaktumNode(
+                        verdi = it.utbetaltBeloep,
+                        kilde = it.kilde ?: "",
                         beskrivelse = "Beregnet brutto ytelse for periode"
-                    ),
-                    avkorting = FaktumNode(
-                        verdi = beregnetAvkorting.avkorting,
-                        kilde = beregnetAvkorting.kilde,
-                        beskrivelse = "Beregnet avkorting for periode"
                     )
-                )
+                }
+            ) { _, _, _ -> throw IllegalArgumentException() },
+            avkorting = PeriodisertBeregningGrunnlag.lagGrunnlagMedDefaultUtenforPerioder(
+                avkortingGrunnlag
+                    .flatMap { it.beregnetAvkorting }
+                    .tilPeriodisertGrunnlag().mapVerdier {
+                        FaktumNode(
+                            verdi = it.avkorting,
+                            kilde = it.kilde,
+                            beskrivelse = "Beregnet avkorting for periode"
+                        )
+                    }
+            ) { _, _, _ -> throw IllegalArgumentException() }
+        )
+    }
+
+    fun List<Beregningsperiode>.tilPeriodisertBeregning(): List<GrunnlagMedPeriode<Beregningsperiode>> {
+        return this.map {
+            GrunnlagMedPeriode(
+                data = it,
+                fom = it.datoFOM.atDay(1),
+                tom = it.datoTOM?.atEndOfMonth()
             )
         }
-        return avkortetYtelseGrunnlag
+    }
+
+    fun List<BeregnetAvkortingGrunnlag>.tilPeriodisertGrunnlag(): List<GrunnlagMedPeriode<BeregnetAvkortingGrunnlag>> {
+        return this.map {
+            GrunnlagMedPeriode(
+                data = it,
+                fom = it.periode.fom.atDay(1),
+                tom = it.periode.tom?.atEndOfMonth()
+            )
+        }
     }
 }

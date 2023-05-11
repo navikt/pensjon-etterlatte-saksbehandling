@@ -92,7 +92,7 @@ fun beregnetAvkortingGrunnlag(
 )
 
 fun avkortetYtelseGrunnlag(bruttoYtelse: Int, avkorting: Int) = AvkortetYtelseGrunnlag(
-    periode = RegelPeriode(fraDato = LocalDate.now()),
+//    periode = RegelPeriode(fraDato = LocalDate.now()),
     bruttoYtelse = FaktumNode(verdi = bruttoYtelse, "", ""),
     avkorting = FaktumNode(verdi = avkorting, "", "")
 )

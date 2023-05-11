@@ -11,10 +11,12 @@ import no.nav.etterlatte.beregning.grunnbeloep.GrunnbeloepRepository
 import no.nav.etterlatte.beregning.regler.avkortinggrunnlag
 import no.nav.etterlatte.beregning.regler.beregnetAvkortingGrunnlag
 import no.nav.etterlatte.beregning.regler.beregningsperiode
+import no.nav.etterlatte.libs.regler.RegelPeriode
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
+import java.time.LocalDate
 import java.time.YearMonth
 
 class InntektAvkortingServiceTest {
@@ -70,11 +72,12 @@ class InntektAvkortingServiceTest {
                     beregnetAvkortingGrunnlag(
                         avkorting = 1000,
                         fom = YearMonth.of(2023, 1),
-                        tom = YearMonth.of(2023, 2)
+                        tom = YearMonth.of(2023, 1)
                     ),
                     beregnetAvkortingGrunnlag(
                         avkorting = 2000,
-                        fom = YearMonth.of(2023, 2)
+                        fom = YearMonth.of(2023, 2),
+                        tom = YearMonth.of(2023, 2)
                     )
                 )
             ),
@@ -88,7 +91,13 @@ class InntektAvkortingServiceTest {
             )
         )
 
-        val avkortetYtelse = InntektAvkortingService.beregnAvkortetYtelse(beregninger, avkortingGrunnlag)
+        val avkortetYtelse = InntektAvkortingService.beregnAvkortetYtelse(
+            beregninger,
+            avkortingGrunnlag,
+            RegelPeriode(
+                LocalDate.of(2023, 1, 1)
+            )
+        )
 
         avkortetYtelse.size shouldBe 4
         with(avkortetYtelse[0]) {

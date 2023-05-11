@@ -1,6 +1,7 @@
 package no.nav.etterlatte.beregning
 
 import no.nav.etterlatte.beregning.klienter.BehandlingKlient
+import no.nav.etterlatte.libs.regler.RegelPeriode
 import no.nav.etterlatte.token.Bruker
 import org.slf4j.LoggerFactory
 import java.util.*
@@ -36,7 +37,8 @@ class AvkortingService(
             ?: throw Exception("Mangler beregning for behandlingId=$behandlingId")
         val beregnetAvkortetYtelse = inntektAvkortingService.beregnAvkortetYtelse(
             beregning.beregningsperioder,
-            avkortingMedGrunnlag.avkortingGrunnlag
+            avkortingMedGrunnlag.avkortingGrunnlag,
+            RegelPeriode(avkortingGrunnlag.periode.fom.atDay(1))
         )
 
         val avkortetYtelse = avkortingRepository.lagreEllerOppdaterAvkortetYtelse(behandlingId, beregnetAvkortetYtelse)

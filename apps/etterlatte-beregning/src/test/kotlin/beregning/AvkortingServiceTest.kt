@@ -83,7 +83,7 @@ internal class AvkortingServiceTest {
         } returns avkorting
         every { beregningRepository.hent(behandlingId) } returns beregning(beregninger)
         every {
-            inntektAvkortingService.beregnAvkortetYtelse(beregninger, avkorting.avkortingGrunnlag)
+            inntektAvkortingService.beregnAvkortetYtelse(beregninger, avkorting.avkortingGrunnlag, any())
         } returns avkortetYtelse
         every { avkortingRepository.lagreEllerOppdaterAvkortetYtelse(behandlingId, avkortetYtelse) } returns avkorting
         coEvery { behandlingKlient.avkort(behandlingId, bruker, true) } returns true
@@ -98,7 +98,7 @@ internal class AvkortingServiceTest {
             inntektAvkortingService.beregnInntektsavkorting(avkortinggrunnlag)
             avkortingRepository.lagreEllerOppdaterAvkortingGrunnlag(behandlingId, grunnlagMedBeregnetAvkorting)
             beregningRepository.hent(behandlingId)
-            inntektAvkortingService.beregnAvkortetYtelse(beregninger, avkorting.avkortingGrunnlag)
+            inntektAvkortingService.beregnAvkortetYtelse(beregninger, avkorting.avkortingGrunnlag, any())
             avkortingRepository.lagreEllerOppdaterAvkortetYtelse(behandlingId, avkortetYtelse)
             behandlingKlient.avkort(behandlingId, bruker, true)
         }

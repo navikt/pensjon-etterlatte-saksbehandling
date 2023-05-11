@@ -10,8 +10,6 @@ import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.etterlatte.rapidsandrivers.migrering.MigreringRequest
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser.MIGRER_SAK
-import no.nav.etterlatte.rapidsandrivers.migrering.REQUEST
-import no.nav.etterlatte.rapidsandrivers.migrering.request
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -19,6 +17,7 @@ import no.nav.helse.rapids_rivers.River
 import org.slf4j.LoggerFactory
 import rapidsandrivers.BEHANDLING_ID_KEY
 import rapidsandrivers.GRUNNLAG_OPPDATERT
+import rapidsandrivers.HENDELSE_DATA_KEY
 import rapidsandrivers.withFeilhaandtering
 import java.util.*
 
@@ -35,7 +34,7 @@ internal class MigreringHendelser(rapidsConnection: RapidsConnection) :
             correlationId()
             validate { it.requireValue(BEHOV_NAME_KEY, Opplysningstype.MIGRERING.name) }
             validate { it.requireKey(BEHANDLING_ID_KEY) }
-            validate { it.requireKey(REQUEST) }
+            validate { it.requireKey(HENDELSE_DATA_KEY) }
             validate { it.requireKey("opplysning") }
         }.register(this)
     }
@@ -44,7 +43,7 @@ internal class MigreringHendelser(rapidsConnection: RapidsConnection) :
         withLogContext(packet.correlationId) {
             withFeilhaandtering(packet, context, MIGRER_SAK) {
                 logger.info("Mottatt migreringshendelse, klar til å opprette persongalleri")
-                val request = objectMapper.readValue(packet.request, MigreringRequest::class.java)
+                val request = objectMapper.treeToValue(packet[HENDELSE_DATA_KEY], MigreringRequest::class.java)
                 packet["opplysning"] = tilOpplysning(request.persongalleri)
                 packet.eventName = "OPPLYSNING:NY"
                 packet["fullstendig"] = true

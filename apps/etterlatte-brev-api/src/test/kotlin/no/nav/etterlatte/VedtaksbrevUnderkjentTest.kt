@@ -12,7 +12,7 @@ import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
-import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.sak.VedtakSak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
 import no.nav.etterlatte.libs.common.vedtak.Behandling
@@ -101,7 +101,7 @@ internal class VedtaksbrevUnderkjentTest {
             vedtakId = 1L,
             status = VedtakStatus.RETURNERT,
             virkningstidspunkt = YearMonth.now(),
-            sak = Sak("Z123456", SakType.BARNEPENSJON, 2L),
+            sak = VedtakSak("Z123456", SakType.BARNEPENSJON, 2L),
             behandling = Behandling(behandlingType, UUID.randomUUID()),
             type = VedtakType.INNVILGELSE,
             utbetalingsperioder = emptyList(),

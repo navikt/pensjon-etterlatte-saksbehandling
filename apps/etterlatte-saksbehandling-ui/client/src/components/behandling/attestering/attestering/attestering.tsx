@@ -46,7 +46,6 @@ const TextWrapper = styled.div`
   font-size: 18px;
   font-weight: 600;
   margin: 1em;
-  color: #595959;
 `
 
 const Overskrift = styled.div`

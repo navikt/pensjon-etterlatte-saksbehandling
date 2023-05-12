@@ -4,21 +4,21 @@ import io.ktor.client.HttpClient
 import io.ktor.client.request.post
 import io.ktor.client.statement.HttpResponse
 import kotlinx.coroutines.runBlocking
-import java.util.UUID
+import java.util.*
 
 class BeregningService(
-    private val behandlingApp: HttpClient,
+    private val beregningApp: HttpClient,
     private val url: String
 ) {
-    fun opprettOmregning(omregningsId: UUID): HttpResponse = runBlocking {
-        behandlingApp.post("$url/api/beregning/$omregningsId") {}
+    fun beregn(behandlingId: UUID): HttpResponse = runBlocking {
+        beregningApp.post("$url/api/beregning/$behandlingId")
     }
 
     fun opprettBeregningsGrunnlag(omregningsId: UUID, forrigeBehandlingsId: UUID): HttpResponse = runBlocking {
-        behandlingApp.post("$url/api/beregning/beregningsgrunnlag/$omregningsId/fra/$forrigeBehandlingsId") {}
+        beregningApp.post("$url/api/beregning/beregningsgrunnlag/$omregningsId/fra/$forrigeBehandlingsId") {}
     }
 
     fun regulerAvkorting(behandlingId: UUID, forrigeBehandlingId: UUID): HttpResponse = runBlocking {
-        behandlingApp.post("$url/api/beregning/avkorting/$behandlingId/med/$forrigeBehandlingId") {}
+        beregningApp.post("$url/api/beregning/avkorting/$behandlingId/med/$forrigeBehandlingId") {}
     }
 }

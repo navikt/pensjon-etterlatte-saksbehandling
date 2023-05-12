@@ -61,11 +61,11 @@ internal class OmregningHendelser(
                 runBlocking {
                     if (sakType == SakType.BARNEPENSJON) {
                         beregningService.opprettBeregningsGrunnlag(behandlingId, behandlingViOmregnerFra)
-                        val beregning = beregningService.opprettOmregning(behandlingId).body<BeregningDTO>()
+                        val beregning = beregningService.beregn(behandlingId).body<BeregningDTO>()
                         packet[BEREGNING_KEY] = beregning
                     } else {
                         trygdetidService.kopierTrygdetidFraForrigeBehandling(behandlingId, behandlingViOmregnerFra)
-                        val beregning = beregningService.opprettOmregning(behandlingId).body<BeregningDTO>()
+                        val beregning = beregningService.beregn(behandlingId).body<BeregningDTO>()
                         packet[BEREGNING_KEY] = beregning
                         val avkorting = beregningService.regulerAvkorting(behandlingId, behandlingViOmregnerFra)
                             .body<AvkortingDto>()

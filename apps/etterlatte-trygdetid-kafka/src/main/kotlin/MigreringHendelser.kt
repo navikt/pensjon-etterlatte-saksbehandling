@@ -38,8 +38,7 @@ internal class MigreringHendelser(rapidsConnection: RapidsConnection, private va
             withFeilhaandtering(packet, context, Migreringshendelser.TRYGDETID) {
                 val behandlingId = packet.behandlingId
                 logger.info("Mottatt trygdetid-migreringshendelse for behandling $behandlingId")
-                trygdetidService.beregnTrygdetid(behandlingId).beregnetTrygdetid
-                    ?: throw IllegalStateException("Trygdetid er udefinert for behandling $behandlingId")
+                trygdetidService.beregnTrygdetid(behandlingId)
                 logger.info("Oppretta trygdetid for behandling $behandlingId")
             }.takeIf { it == Status.SUKSESS }
                 ?.let {

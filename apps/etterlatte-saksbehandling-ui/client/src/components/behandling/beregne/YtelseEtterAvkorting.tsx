@@ -1,5 +1,5 @@
 import { IAvkortetYtelse } from '~shared/types/IAvkorting'
-import { Table } from '@navikt/ds-react'
+import { Heading, Table } from '@navikt/ds-react'
 import React from 'react'
 import styled from 'styled-components'
 import { ManglerRegelspesifikasjon } from '~components/behandling/felles/ManglerRegelspesifikasjon'
@@ -12,12 +12,15 @@ export const YtelseEtterAvkorting = (props: { ytelser?: IAvkortetYtelse[] }) => 
     <>
       {ytelser && ytelser.length > 0 && (
         <TableWrapper>
+          <Heading spacing size="small" level="2">
+            Beregning etter avkorting
+          </Heading>
           <Table className="table" zebraStripes>
             <Table.Header>
               <Table.Row>
                 <Table.HeaderCell>Periode</Table.HeaderCell>
-                <Table.HeaderCell>Månedlig utbetaling</Table.HeaderCell>
-                <Table.HeaderCell>Utbetalingsdato</Table.HeaderCell>
+                <Table.HeaderCell>Avkorting</Table.HeaderCell>
+                <Table.HeaderCell>Månedlig ytelse etter avkorting</Table.HeaderCell>
               </Table.Row>
             </Table.Header>
             <Table.Body>
@@ -26,10 +29,10 @@ export const YtelseEtterAvkorting = (props: { ytelser?: IAvkortetYtelse[] }) => 
                   <Table.DataCell>
                     {formaterStringDato(ytelse.fom)} - {ytelse.tom ? formaterStringDato(ytelse.tom) : ''}
                   </Table.DataCell>
+                  <Table.DataCell>{ytelse.avkortingsbeloep}</Table.DataCell>
                   <Table.DataCell>
                     <ManglerRegelspesifikasjon>{ytelse.ytelseEtterAvkorting}</ManglerRegelspesifikasjon>
                   </Table.DataCell>
-                  <Table.DataCell>{ytelse.fom}</Table.DataCell>
                 </Table.Row>
               ))}
             </Table.Body>

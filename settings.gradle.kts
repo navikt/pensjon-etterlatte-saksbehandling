@@ -33,6 +33,7 @@ include(
     "libs:saksbehandling-common",
     "libs:ktor2client-onbehalfof",
     "libs:rapidsandrivers-extras",
+    "libs:etterlatte-beregning-model",
     "libs:etterlatte-database",
     "libs:etterlatte-funksjonsbrytere",
     "libs:etterlatte-ktor",

@@ -8,6 +8,7 @@ import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.rapidsandrivers.BEHOV_NAME_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
+import no.nav.etterlatte.rapidsandrivers.migrering.FULLSTENDIG_KEY
 import no.nav.etterlatte.rapidsandrivers.migrering.MigreringRequest
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -17,6 +18,7 @@ import org.slf4j.LoggerFactory
 import rapidsandrivers.BEHANDLING_ID_KEY
 import rapidsandrivers.GRUNNLAG_OPPDATERT
 import rapidsandrivers.HENDELSE_DATA_KEY
+import rapidsandrivers.OPPLYSNING_KEY
 import rapidsandrivers.withFeilhaandtering
 import java.util.*
 
@@ -34,9 +36,9 @@ internal class MigreringHendelser(rapidsConnection: RapidsConnection) :
             validate { it.requireValue(BEHOV_NAME_KEY, Opplysningstype.MIGRERING.name) }
             validate { it.requireKey(BEHANDLING_ID_KEY) }
             validate { it.requireKey(HENDELSE_DATA_KEY) }
-            validate { it.requireKey("opplysning") }
+            validate { it.requireKey(OPPLYSNING_KEY) }
 
-            validate { it.rejectKey("fullstendig") }
+            validate { it.rejectKey(FULLSTENDIG_KEY) }
         }.register(this)
     }
 
@@ -45,9 +47,9 @@ internal class MigreringHendelser(rapidsConnection: RapidsConnection) :
             withFeilhaandtering(packet, context, GRUNNLAG_OPPDATERT) {
                 logger.info("Mottatt migreringshendelse, klar til å opprette persongalleri")
                 val request = objectMapper.treeToValue(packet[HENDELSE_DATA_KEY], MigreringRequest::class.java)
-                packet["opplysning"] = tilOpplysning(request.persongalleri)
+                packet[OPPLYSNING_KEY] = tilOpplysning(request.persongalleri)
                 packet.eventName = "OPPLYSNING:NY"
-                packet["fullstendig"] = true
+                packet[FULLSTENDIG_KEY] = true
                 context.publish(packet.toJson())
                 logger.info("Publiserte persongalleri")
             }

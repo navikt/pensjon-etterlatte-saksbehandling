@@ -5,7 +5,9 @@ import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.rapidsandrivers.BEHOV_NAME_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
+import no.nav.etterlatte.rapidsandrivers.migrering.FULLSTENDIG_KEY
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser
+import no.nav.etterlatte.rapidsandrivers.migrering.VILKAARSVURDERT_KEY
 import no.nav.etterlatte.vilkaarsvurdering.services.VilkaarsvurderingService
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -28,8 +30,8 @@ internal class Migrering(
             eventName(GRUNNLAG_OPPDATERT)
             validate { it.demandValue(BEHOV_NAME_KEY, Opplysningstype.MIGRERING.name) }
             validate { it.requireKey(BEHANDLING_ID_KEY) }
-            validate { it.requireKey("fullstendig") }
-            validate { it.rejectKey("vilkaarsvurdert") }
+            validate { it.requireKey(FULLSTENDIG_KEY) }
+            validate { it.rejectKey(VILKAARSVURDERT_KEY) }
             correlationId()
         }.register(this)
     }
@@ -40,7 +42,7 @@ internal class Migrering(
                 val behandlingId = packet.behandlingId
                 logger.info("Mottatt vilkårs-migreringshendelse for $BEHANDLING_ID_KEY $behandlingId")
                 vilkaarsvurderingService.migrer(behandlingId)
-                packet["vilkaarsvurdert"] = true
+                packet[VILKAARSVURDERT_KEY] = true
                 packet.eventName = Migreringshendelser.TRYGDETID
                 context.publish(packet.toJson())
                 logger.info("Publiserte oppdatert migreringshendelse fra vilkårsvurdering for behandling $behandlingId")

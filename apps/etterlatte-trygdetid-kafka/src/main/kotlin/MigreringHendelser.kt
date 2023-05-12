@@ -5,6 +5,8 @@ import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser
+import no.nav.etterlatte.rapidsandrivers.migrering.TRYGDETID_KEY
+import no.nav.etterlatte.rapidsandrivers.migrering.VILKAARSVURDERT_KEY
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -26,7 +28,7 @@ internal class MigreringHendelser(rapidsConnection: RapidsConnection, private va
 
             correlationId()
             validate { it.requireKey(BEHANDLING_ID_KEY) }
-            validate { it.requireKey("vilkaarsvurdert") }
+            validate { it.requireKey(VILKAARSVURDERT_KEY) }
         }.register(this)
     }
 
@@ -40,7 +42,7 @@ internal class MigreringHendelser(rapidsConnection: RapidsConnection, private va
                     ?: throw IllegalStateException("Trygdetid er udefinert for behandling $behandlingId")
 
                 packet.eventName = Migreringshendelser.BEREGN
-                packet["trygdetid"] = trygdetid.toJson()
+                packet[TRYGDETID_KEY] = trygdetid.toJson()
                 context.publish(packet.toJson())
                 logger.info("Publiserte oppdatert migreringshendelse fra trygdetid for behandling $behandlingId")
             }

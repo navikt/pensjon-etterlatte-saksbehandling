@@ -21,6 +21,7 @@ import no.nav.helse.rapids_rivers.River
 import org.slf4j.LoggerFactory
 import rapidsandrivers.BEHANDLING_ID_KEY
 import rapidsandrivers.HENDELSE_DATA_KEY
+import rapidsandrivers.OPPLYSNING_KEY
 import rapidsandrivers.behandlingId
 import rapidsandrivers.sakId
 import rapidsandrivers.withFeilhaandtering
@@ -43,7 +44,7 @@ internal class FortsettMigreringsflyten(
             validate { it.rejectKey(BEHANDLING_ID_KEY) }
             validate { it.requireKey(HENDELSE_DATA_KEY) }
             validate { it.requireKey(FNR_KEY) }
-            validate { it.rejectKey("opplysning") }
+            validate { it.rejectKey(OPPLYSNING_KEY) }
         }.register(this)
     }
 

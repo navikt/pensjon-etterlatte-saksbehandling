@@ -1,6 +1,7 @@
 import { apiClient, ApiResponse } from '~shared/api/apiClient'
 import { Beregning, BeregningsGrunnlag, SoeskenMedIBeregning } from '~shared/types/Beregning'
 import { KildeSaksbehandler } from '~shared/types/kilde'
+import { PeriodisertBeregningsgrunnlag } from '~components/behandling/beregningsgrunnlag/Soeskenjustering'
 
 export const hentBeregning = async (behandlingId: string): Promise<ApiResponse<Beregning>> => {
   return apiClient.get(`/beregning/${behandlingId}`)
@@ -12,7 +13,7 @@ export const opprettEllerEndreBeregning = async (behandlingId: string): Promise<
 
 export const lagreSoeskenMedIBeregning = async (args: {
   behandlingsId: string
-  soeskenMedIBeregning: SoeskenMedIBeregning[]
+  soeskenMedIBeregning: PeriodisertBeregningsgrunnlag<SoeskenMedIBeregning[]>[]
 }): Promise<ApiResponse<void>> => {
   return apiClient.post(`/beregning/beregningsgrunnlag/${args.behandlingsId}/barnepensjon`, {
     soeskenMedIBeregning: args.soeskenMedIBeregning,

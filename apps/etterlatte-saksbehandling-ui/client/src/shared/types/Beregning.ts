@@ -1,3 +1,5 @@
+import { PeriodisertBeregningsgrunnlag } from '~components/behandling/beregningsgrunnlag/Soeskenjustering'
+
 export interface Beregning {
   beregningId: string
   behandlingId: string
@@ -31,7 +33,7 @@ export interface Beregningsperiode {
 export interface BeregningsGrunnlag<K> {
   behandlingId: string
   kilde: K
-  soeskenMedIBeregning: SoeskenMedIBeregning[]
+  soeskenMedIBeregning: PeriodisertBeregningsgrunnlag<SoeskenMedIBeregning[]>[]
 }
 
 export interface SoeskenMedIBeregning {
@@ -40,5 +42,5 @@ export interface SoeskenMedIBeregning {
 }
 
 export interface BeregningsGrunnlagData {
-  soeskenMedIBeregning: SoeskenMedIBeregning[]
+  soeskenMedIBeregning: PeriodisertBeregningsgrunnlag<SoeskenMedIBeregning[]>[]
 }

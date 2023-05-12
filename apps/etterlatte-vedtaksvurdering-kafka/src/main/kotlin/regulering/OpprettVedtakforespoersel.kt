@@ -14,7 +14,6 @@ import org.slf4j.LoggerFactory
 import rapidsandrivers.BEHANDLING_ID_KEY
 import rapidsandrivers.DATO_KEY
 import rapidsandrivers.SAK_ID_KEY
-import rapidsandrivers.Status
 import rapidsandrivers.behandlingId
 import rapidsandrivers.sakId
 import rapidsandrivers.withFeilhaandtering
@@ -46,10 +45,10 @@ internal class OpprettVedtakforespoersel(
                 val respons = vedtak.upsertVedtak(behandlingId)
                 logger.info("Opprettet vedtak ${respons.vedtakId} for sak: $sakId og behandling: $behandlingId")
             }
-                .takeIf { it == Status.SUKSESS }
+                .takeIf { it.isSuccess }
                 ?.let {
                     fattVedtak(packet, context, behandlingId, sakId)
-                        .takeIf { it == Status.SUKSESS }
+                        .takeIf { it.isSuccess }
                         ?.let { attester(packet, context, behandlingId, sakId) }
                 }
         }

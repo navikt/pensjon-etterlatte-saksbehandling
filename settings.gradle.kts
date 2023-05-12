@@ -41,6 +41,7 @@ include(
     "libs:etterlatte-pdl-model",
     "libs:etterlatte-institusjonsopphold-model",
     "libs:testdata",
+    "libs:etterlatte-trygdetid-model",
     "libs:etterlatte-regler",
     "libs:etterlatte-sporingslogg",
     "libs:etterlatte-vilkaarsvurdering-model",

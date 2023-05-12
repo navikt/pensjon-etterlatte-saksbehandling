@@ -13,6 +13,7 @@ import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.rapidsandrivers.EventNames.FEILA
+import no.nav.etterlatte.rapidsandrivers.migrering.FULLSTENDIG_KEY
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -40,6 +41,7 @@ class GrunnlagHendelser(
             validate { it.requireKey(SAK_ID_KEY) }
             validate { it.rejectValue(EVENT_NAME_KEY, GRUNNLAG_OPPDATERT) }
             validate { it.rejectValue(EVENT_NAME_KEY, FEILA) }
+            validate { it.rejectValue(FULLSTENDIG_KEY, true) }
         }.register(this)
     }
 

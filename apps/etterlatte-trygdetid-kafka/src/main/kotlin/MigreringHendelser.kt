@@ -50,6 +50,7 @@ internal class MigreringHendelser(rapidsConnection: RapidsConnection, private va
                 ?.let {
                     withFeilhaandtering(packet, context, Migreringshendelser.TRYGDETID_GRUNNLAG) {
                         val behandlingId = packet.behandlingId
+                        logger.info("Oppretter grunnlag for trygdetid for $behandlingId")
                         val beregnetTrygdetid =
                             trygdetidService.beregnTrygdetidGrunnlag(behandlingId, tilGrunnlag())
                         packet[TRYGDETID_KEY] = beregnetTrygdetid.toJson()

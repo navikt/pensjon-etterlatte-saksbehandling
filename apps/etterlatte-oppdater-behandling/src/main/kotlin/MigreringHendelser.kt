@@ -9,7 +9,6 @@ import no.nav.etterlatte.libs.common.rapidsandrivers.BEHOV_NAME_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.etterlatte.rapidsandrivers.migrering.MigreringRequest
-import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser.MIGRER_SAK
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -43,7 +42,7 @@ internal class MigreringHendelser(rapidsConnection: RapidsConnection) :
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) {
         withLogContext(packet.correlationId) {
-            withFeilhaandtering(packet, context, MIGRER_SAK) {
+            withFeilhaandtering(packet, context, GRUNNLAG_OPPDATERT) {
                 logger.info("Mottatt migreringshendelse, klar til å opprette persongalleri")
                 val request = objectMapper.treeToValue(packet[HENDELSE_DATA_KEY], MigreringRequest::class.java)
                 packet["opplysning"] = tilOpplysning(request.persongalleri)

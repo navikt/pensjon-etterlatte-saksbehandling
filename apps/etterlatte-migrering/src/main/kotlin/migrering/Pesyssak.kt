@@ -4,6 +4,7 @@ import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.rapidsandrivers.migrering.Enhet
 import no.nav.etterlatte.rapidsandrivers.migrering.PesysId
+import no.nav.etterlatte.rapidsandrivers.migrering.Trygdetidperioder
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.*
@@ -15,5 +16,6 @@ data class Pesyssak(
     val folkeregisteridentifikator: Folkeregisteridentifikator,
     val mottattdato: LocalDateTime,
     val persongalleri: Persongalleri,
-    val virkningstidspunkt: YearMonth
+    val virkningstidspunkt: YearMonth,
+    val trygdetidPerioder: Trygdetidperioder
 )

@@ -11,10 +11,12 @@ import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.migrering.Migrering
 import no.nav.etterlatte.migrering.PesysRepository
 import no.nav.etterlatte.migrering.Pesyssak
+import no.nav.etterlatte.rapidsandrivers.migrering.DatoPeriode
 import no.nav.etterlatte.rapidsandrivers.migrering.Enhet
 import no.nav.etterlatte.rapidsandrivers.migrering.MigreringRequest
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser
 import no.nav.etterlatte.rapidsandrivers.migrering.PesysId
+import no.nav.etterlatte.rapidsandrivers.migrering.Trygdetidperioder
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.AfterAll
@@ -24,6 +26,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.*
@@ -61,7 +64,15 @@ class MigreringIntegrationTest {
                 Folkeregisteridentifikator.of(syntetiskFnr),
                 LocalDateTime.now(),
                 Persongalleri(syntetiskFnr, "innsender", emptyList(), emptyList(), emptyList()),
-                YearMonth.now()
+                YearMonth.now(),
+                Trygdetidperioder(
+                    listOf(
+                        DatoPeriode(
+                            LocalDate.now().minusYears(40),
+                            LocalDate.now()
+                        )
+                    )
+                )
             )
             repository.lagrePesyssak(sakInn)
             val inspector = TestRapid()

@@ -67,12 +67,14 @@ internal class Fordeler(
                 logger.info("Sjekker om soknad (${packet.soeknadId()}) er gyldig for fordeling")
 
                 when (val resultat = fordelerService.sjekkGyldighetForBehandling(packet.toFordelerEvent())) {
-                    FordelerResultat.GyldigForBehandling -> {
+                    is FordelerResultat.GyldigForBehandling -> {
                         logger.info("Soknad ${packet.soeknadId()} er gyldig for fordeling, henter sakId for Gjenny")
                         try {
+                            // Denne har ansvaret for å sette gradering
                             fordelerService.hentSakId(
                                 packet[SoeknadInnsendt.fnrSoekerKey].textValue(),
-                                SakType.BARNEPENSJON
+                                SakType.BARNEPENSJON,
+                                resultat.gradering
                             )
                         } catch (e: ResponseException) {
                             logger.error("Avbrutt fordeling - kunne ikke hente sakId: ${e.message}")
@@ -123,7 +125,7 @@ internal class Fordeler(
 
     fun lagStatistikkMelding(packet: JsonMessage, fordelerResultat: FordelerResultat, sakType: SakType): String? {
         val (resultat, ikkeOppfylteKriterier) = when (fordelerResultat) {
-            FordelerResultat.GyldigForBehandling -> true to null
+            is FordelerResultat.GyldigForBehandling -> true to null
             is FordelerResultat.IkkeGyldigForBehandling ->
                 // Sjekker eksplisitt opp mot ikkeOppfylteKriterier for om det er gyldig for behandling,
                 // siden det er logikk for å begrense hvor mange saker vi tar inn i pilot

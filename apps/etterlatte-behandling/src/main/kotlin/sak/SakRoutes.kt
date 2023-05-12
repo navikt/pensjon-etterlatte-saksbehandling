@@ -22,6 +22,7 @@ import no.nav.etterlatte.libs.common.kunSystembruker
 import no.nav.etterlatte.libs.common.sak.Saker
 import no.nav.etterlatte.libs.common.sakId
 import no.nav.etterlatte.libs.common.withFoedselsnummer
+import no.nav.etterlatte.libs.common.withFoedselsnummerAndGradering
 
 internal fun Route.sakRoutes(
     tilgangService: TilgangService,
@@ -58,9 +59,17 @@ internal fun Route.sakRoutes(
     }
 
     post("personer/saker/{type}") {
+        withFoedselsnummerAndGradering(tilgangService) { fnr, gradering ->
+            val type: SakType = enumValueOf(requireNotNull(call.parameters["type"]))
+            call.respond(sakService.finnEllerOpprettSak(fnr = fnr.value, type, gradering = gradering))
+        }
+    }
+
+    post("personer/getsak/{type}") {
         withFoedselsnummer(tilgangService) { fnr ->
             val type: SakType = enumValueOf(requireNotNull(call.parameters["type"]))
-            call.respond(inTransaction { sakService.finnEllerOpprettSak(fnr.value, type) })
+            val sak = inTransaction { sakService.finnSak(fnr.value, type) }
+            call.respond(sak ?: HttpStatusCode.NotFound)
         }
     }
 

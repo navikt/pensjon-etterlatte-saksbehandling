@@ -6,6 +6,7 @@ import io.ktor.server.application.call
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.util.pipeline.PipelineContext
+import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.ktor.bruker
 import no.nav.etterlatte.token.Saksbehandler
@@ -79,6 +80,25 @@ suspend inline fun PipelineContext<*, ApplicationCall>.withFoedselsnummer(
     }
 }
 
+suspend inline fun PipelineContext<*, ApplicationCall>.withFoedselsnummerAndGradering(
+    personTilgangsSjekk: PersonTilgangsSjekk,
+    onSuccess: (fnr: Folkeregisteridentifikator, gradering: AdressebeskyttelseGradering?) -> Unit
+) {
+    val foedselsnummerDTOmedGradering = call.receive<FoedselsNummerMedGraderingDTO>()
+    val foedselsnummer = Folkeregisteridentifikator.of(foedselsnummerDTOmedGradering.foedselsnummer)
+    when (bruker) {
+        is Saksbehandler -> {
+            val harTilgangTilPerson = personTilgangsSjekk.harTilgangTilPerson(foedselsnummer, bruker as Saksbehandler)
+            if (harTilgangTilPerson) {
+                onSuccess(foedselsnummer, foedselsnummerDTOmedGradering.gradering)
+            } else {
+                call.respond(HttpStatusCode.NotFound)
+            }
+        }
+        else -> onSuccess(foedselsnummer, foedselsnummerDTOmedGradering.gradering)
+    }
+}
+
 suspend inline fun PipelineContext<*, ApplicationCall>.kunSystembruker(
     onSuccess: () -> Unit
 ) {
@@ -108,9 +128,17 @@ suspend inline fun PipelineContext<*, ApplicationCall>.withParam(
     }
 }
 
-data class FoedselsnummerDTO(
+interface IFoedselsnummerDTO {
     val foedselsnummer: String
-)
+}
+data class FoedselsnummerDTO(
+    override val foedselsnummer: String
+) : IFoedselsnummerDTO
+
+data class FoedselsNummerMedGraderingDTO(
+    override val foedselsnummer: String,
+    val gradering: AdressebeskyttelseGradering? = null
+) : IFoedselsnummerDTO
 
 interface BehandlingTilgangsSjekk {
     suspend fun harTilgangTilBehandling(behandlingId: UUID, bruker: Saksbehandler): Boolean

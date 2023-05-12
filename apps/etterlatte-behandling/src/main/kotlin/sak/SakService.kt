@@ -14,6 +14,7 @@ import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.Sak
 import org.slf4j.LoggerFactory
@@ -28,7 +29,12 @@ enum class SakServiceFeatureToggle(private val key: String) : FeatureToggle {
 interface SakService {
     fun hentSaker(): List<Sak>
     fun finnSaker(person: String): List<Sak>
-    fun finnEllerOpprettSak(fnr: String, type: SakType, enhet: String? = null): Sak
+    fun finnEllerOpprettSak(
+        fnr: String,
+        type: SakType,
+        enhet: String? = null,
+        gradering: AdressebeskyttelseGradering? = null
+    ): Sak
     fun finnSak(person: String, type: SakType): Sak?
     fun finnSak(id: Long): Sak?
     fun slettSak(id: Long)
@@ -41,7 +47,8 @@ class RealSakService(
     private val dao: SakDao,
     private val pdlKlient: PdlKlient,
     private val norg2Klient: Norg2Klient,
-    private val featureToggleService: FeatureToggleService
+    private val featureToggleService: FeatureToggleService,
+    private val tilgangService: TilgangService
 ) : SakService {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -71,16 +78,27 @@ class RealSakService(
         }
     }
 
-    override fun finnEllerOpprettSak(fnr: String, type: SakType, enhet: String?): Sak {
-        return finnSakerForPersonOgType(fnr, type) ?: dao.opprettSak(
-            fnr,
-            type,
-            if (featureToggleService.isEnabled(SakServiceFeatureToggle.OpprettMedEnhetId, false)) {
-                enhet ?: finnEnhetForPersonOgTema(fnr, type.tema, type).enhetNr
-            } else {
-                null
-            }
-        )
+    override fun finnEllerOpprettSak(
+        fnr: String,
+        type: SakType,
+        enhet: String?,
+        gradering: AdressebeskyttelseGradering?
+    ): Sak {
+        val sak = inTransaction {
+            finnSakerForPersonOgType(fnr, type) ?: dao.opprettSak(
+                fnr,
+                type,
+                if (featureToggleService.isEnabled(SakServiceFeatureToggle.OpprettMedEnhetId, false)) {
+                    enhet ?: finnEnhetForPersonOgTema(fnr, type.tema, type).enhetNr
+                } else {
+                    null
+                }
+            )
+        }
+        gradering?.let {
+            tilgangService.oppdaterAdressebeskyttelse(sak.id, it)
+        }
+        return sak
     }
 
     override fun oppdaterEnhetForSaker(saker: List<GrunnlagsendringshendelseService.SakMedEnhet>) {

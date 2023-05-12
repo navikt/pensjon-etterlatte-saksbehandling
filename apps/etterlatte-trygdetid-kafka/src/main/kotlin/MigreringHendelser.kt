@@ -13,7 +13,6 @@ import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import org.slf4j.LoggerFactory
 import rapidsandrivers.BEHANDLING_ID_KEY
-import rapidsandrivers.Status
 import rapidsandrivers.behandlingId
 import rapidsandrivers.withFeilhaandtering
 
@@ -40,7 +39,7 @@ internal class MigreringHendelser(rapidsConnection: RapidsConnection, private va
                 logger.info("Mottatt trygdetid-migreringshendelse for behandling $behandlingId")
                 trygdetidService.beregnTrygdetid(behandlingId)
                 logger.info("Oppretta trygdetid for behandling $behandlingId")
-            }.takeIf { it == Status.SUKSESS }
+            }.takeIf { it.isSuccess }
                 ?.let {
                     withFeilhaandtering(packet, context, Migreringshendelser.TRYGDETID_GRUNNLAG) {
                         val behandlingId = packet.behandlingId

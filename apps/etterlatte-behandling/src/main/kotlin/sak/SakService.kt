@@ -84,15 +84,17 @@ class RealSakService(
         enhet: String?,
         gradering: AdressebeskyttelseGradering?
     ): Sak {
-        val sak = finnSakerForPersonOgType(fnr, type) ?: dao.opprettSak(
-            fnr,
-            type,
-            if (featureToggleService.isEnabled(SakServiceFeatureToggle.OpprettMedEnhetId, false)) {
-                enhet ?: finnEnhetForPersonOgTema(fnr, type.tema, type).enhetNr
-            } else {
-                null
-            }
-        )
+        val sak = inTransaction {
+            finnSakerForPersonOgType(fnr, type) ?: dao.opprettSak(
+                fnr,
+                type,
+                if (featureToggleService.isEnabled(SakServiceFeatureToggle.OpprettMedEnhetId, false)) {
+                    enhet ?: finnEnhetForPersonOgTema(fnr, type.tema, type).enhetNr
+                } else {
+                    null
+                }
+            )
+        }
         gradering?.let {
             tilgangService.oppdaterAdressebeskyttelse(sak.id, it)
         }

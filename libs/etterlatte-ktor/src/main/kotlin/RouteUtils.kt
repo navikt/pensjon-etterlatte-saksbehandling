@@ -84,18 +84,18 @@ suspend inline fun PipelineContext<*, ApplicationCall>.withFoedselsnummerAndGrad
     personTilgangsSjekk: PersonTilgangsSjekk,
     onSuccess: (fnr: Folkeregisteridentifikator, gradering: AdressebeskyttelseGradering?) -> Unit
 ) {
-    val foedselsnummerDTO = call.receive<FoedselsNummerMedGradering>()
-    val foedselsnummer = Folkeregisteridentifikator.of(foedselsnummerDTO.foedselsnummer)
+    val foedselsnummerDTOmedGradering = call.receive<FoedselsNummerMedGraderingDTO>()
+    val foedselsnummer = Folkeregisteridentifikator.of(foedselsnummerDTOmedGradering.foedselsnummer)
     when (bruker) {
         is Saksbehandler -> {
             val harTilgangTilPerson = personTilgangsSjekk.harTilgangTilPerson(foedselsnummer, bruker as Saksbehandler)
             if (harTilgangTilPerson) {
-                onSuccess(foedselsnummer, foedselsnummerDTO.gradering)
+                onSuccess(foedselsnummer, foedselsnummerDTOmedGradering.gradering)
             } else {
                 call.respond(HttpStatusCode.NotFound)
             }
         }
-        else -> onSuccess(foedselsnummer, foedselsnummerDTO.gradering)
+        else -> onSuccess(foedselsnummer, foedselsnummerDTOmedGradering.gradering)
     }
 }
 
@@ -135,9 +135,9 @@ data class FoedselsnummerDTO(
     override val foedselsnummer: String
 ) : IFoedselsnummerDTO
 
-data class FoedselsNummerMedGradering(
+data class FoedselsNummerMedGraderingDTO(
     override val foedselsnummer: String,
-    val gradering: AdressebeskyttelseGradering?
+    val gradering: AdressebeskyttelseGradering? = null
 ) : IFoedselsnummerDTO
 
 interface BehandlingTilgangsSjekk {

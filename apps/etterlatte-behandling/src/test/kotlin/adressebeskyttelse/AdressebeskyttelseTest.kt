@@ -16,6 +16,7 @@ import io.ktor.server.testing.testApplication
 import no.nav.etterlatte.BehandlingIntegrationTest
 import no.nav.etterlatte.TILGANG_ROUTE_PATH
 import no.nav.etterlatte.behandling.BehandlingsBehov
+import no.nav.etterlatte.libs.common.FoedselsNummerMedGraderingDTO
 import no.nav.etterlatte.libs.common.FoedselsnummerDTO
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -338,6 +339,56 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
                 setBody(FoedselsnummerDTO(fnr))
             }.apply {
                 Assertions.assertEquals(HttpStatusCode.NotFound, status)
+            }
+        }
+    }
+
+    @Test
+    fun `Skal kunne sende med gradering ved opprettelse av sak`() {
+        val fnr = Folkeregisteridentifikator.of("08071272487").value
+        testApplication {
+            environment {
+                config = hoconApplicationConfig
+            }
+            val httpClient = createClient {
+                install(ContentNegotiation) {
+                    jackson { registerModule(JavaTimeModule()) }
+                }
+            }
+            application {
+                module(applicationContext)
+            }
+
+            val sak: Sak = httpClient.post("/personer/saker/${SakType.BARNEPENSJON}") {
+                addAuthToken(tokenSaksbehandler)
+                contentType(ContentType.Application.Json)
+                setBody(FoedselsNummerMedGraderingDTO(fnr, AdressebeskyttelseGradering.STRENGT_FORTROLIG))
+            }.apply {
+                Assertions.assertEquals(HttpStatusCode.OK, status)
+            }.body()
+
+            httpClient.post("/personer/saker/${SakType.BARNEPENSJON}") {
+                addAuthToken(tokenSaksbehandler)
+                contentType(ContentType.Application.Json)
+                setBody(FoedselsNummerMedGraderingDTO(fnr))
+            }.apply {
+                Assertions.assertEquals(HttpStatusCode.NotFound, status)
+            }
+
+            httpClient.post("/personer/saker/${SakType.BARNEPENSJON}") {
+                addAuthToken(tokenSaksbehandlerMedStrengtFortrolig)
+                contentType(ContentType.Application.Json)
+                setBody(FoedselsNummerMedGraderingDTO(fnr))
+            }.apply {
+                Assertions.assertEquals(HttpStatusCode.OK, status)
+            }
+
+            httpClient.post("/personer/saker/${SakType.BARNEPENSJON}") {
+                addAuthToken(systemBruker)
+                contentType(ContentType.Application.Json)
+                setBody(FoedselsNummerMedGraderingDTO(fnr))
+            }.apply {
+                Assertions.assertEquals(HttpStatusCode.OK, status)
             }
         }
     }

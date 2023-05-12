@@ -7,13 +7,12 @@ import no.nav.etterlatte.behandling.GenerellBehandlingService
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.foerstegangsbehandling.FoerstegangsbehandlingService
 import no.nav.etterlatte.behandling.migrering.MigreringRepository
-import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.rapidsandrivers.migrering.MigreringRequest
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.rapidsandrivers.migrering.MigreringRequest
 import no.nav.etterlatte.sak.SakService
 import java.time.format.DateTimeFormatter
 import java.util.*
@@ -61,7 +60,7 @@ class MigreringService(
         )
 
     private fun finnEllerOpprettSak(request: MigreringRequest) =
-        inTransaction { sakService.finnEllerOpprettSak(request.fnr.value, SakType.BARNEPENSJON, request.enhet.nr) }
+        sakService.finnEllerOpprettSak(request.fnr.value, SakType.BARNEPENSJON, request.enhet.nr)
 
     private suspend fun sendHendelse(behandlingId: UUID) =
         behandlingsHendelser.send(behandlingId to BehandlingHendelseType.OPPRETTET)

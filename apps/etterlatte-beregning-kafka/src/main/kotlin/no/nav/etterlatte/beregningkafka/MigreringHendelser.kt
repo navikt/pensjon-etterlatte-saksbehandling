@@ -17,6 +17,7 @@ import no.nav.helse.rapids_rivers.River
 import org.slf4j.LoggerFactory
 import rapidsandrivers.BEHANDLING_ID_KEY
 import rapidsandrivers.BEREGNING_KEY
+import rapidsandrivers.HENDELSE_DATA_KEY
 import rapidsandrivers.behandlingId
 import rapidsandrivers.withFeilhaandtering
 
@@ -29,6 +30,7 @@ internal class MigreringHendelser(rapidsConnection: RapidsConnection, private va
         River(rapidsConnection).apply {
             eventName(Migreringshendelser.BEREGN)
             validate { it.requireKey(BEHANDLING_ID_KEY) }
+            validate { it.requireKey(HENDELSE_DATA_KEY) }
             correlationId()
         }.register(this)
     }

@@ -3,10 +3,12 @@ package no.nav.etterlatte.beregningkafka
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.post
+import io.ktor.client.request.setBody
 import io.ktor.client.statement.HttpResponse
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.beregning.grunnlag.BarnepensjonBeregningsGrunnlag
 import no.nav.etterlatte.libs.common.beregning.BeregningDTO
 import java.util.*
 
@@ -23,5 +25,12 @@ class BeregningService(
         beregningApp.post("$url/api/beregning/$behandlingId") {
             contentType(ContentType.Application.Json)
         }.body()
+    }
+
+    fun opprettBeregningsgrunnlag(behandlingId: UUID, request: BarnepensjonBeregningsGrunnlag) = runBlocking {
+        beregningApp.post("$url/api/beregning/beregningsgrunnlag/$behandlingId/barnepensjon") {
+            contentType(ContentType.Application.Json)
+            setBody(request)
+        }
     }
 }

@@ -75,10 +75,10 @@ internal class BehandlingClientTest {
         val behandlingKlient = mockk<BehandlingClient>()
         val fnr = "123"
         every {
-            behandlingKlient.skaffSak(fnr, SakType.BARNEPENSJON.toString())
+            behandlingKlient.hentSak(fnr, SakType.BARNEPENSJON.toString())
         } returns Sak(fnr, SakType.BARNEPENSJON, 1L, null)
 
-        val sak = behandlingKlient.skaffSak(fnr, SakType.BARNEPENSJON.toString())
+        val sak = behandlingKlient.hentSak(fnr, SakType.BARNEPENSJON.toString())
 
         assertEquals(1L, sak.id)
     }

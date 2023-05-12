@@ -67,12 +67,13 @@ internal class Fordeler(
                 logger.info("Sjekker om soknad (${packet.soeknadId()}) er gyldig for fordeling")
 
                 when (val resultat = fordelerService.sjekkGyldighetForBehandling(packet.toFordelerEvent())) {
-                    FordelerResultat.GyldigForBehandling -> {
+                    is FordelerResultat.GyldigForBehandling -> {
                         logger.info("Soknad ${packet.soeknadId()} er gyldig for fordeling, henter sakId for Gjenny")
                         try {
                             fordelerService.hentSakId(
                                 packet[SoeknadInnsendt.fnrSoekerKey].textValue(),
-                                SakType.BARNEPENSJON
+                                SakType.BARNEPENSJON,
+                                resultat.gradering
                             )
                         } catch (e: ResponseException) {
                             logger.error("Avbrutt fordeling - kunne ikke hente sakId: ${e.message}")

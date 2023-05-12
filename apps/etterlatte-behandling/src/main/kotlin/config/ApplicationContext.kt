@@ -119,12 +119,11 @@ class ApplicationContext(
     val grunnlagKlient = GrunnlagKlientImpl(grunnlagHttpClient, "http://etterlatte-grunnlag")
     val leaderElectionKlient = LeaderElection(env.getValue("ELECTOR_PATH"), leaderElectionHttpClient)
 
-    val behandlingsHendelser = BehandlingsHendelser(rapid, behandlingDao, dataSource).apply {
-    }
+    val behandlingsHendelser = BehandlingsHendelser(rapid, behandlingDao, dataSource)
 
     // Service
     val oppgaveService = OppgaveServiceImpl(oppgaveDao, featureToggleService)
-    val sakService = RealSakService(sakDao, pdlKlient, norg2Klient, featureToggleService)
+
     val generellBehandlingService = RealGenerellBehandlingService(
         behandlingDao = behandlingDao,
         behandlingHendelser = behandlingsHendelser.hendelserKanal,
@@ -169,6 +168,7 @@ class ApplicationContext(
 
     val behandlingsStatusService = BehandlingStatusServiceImpl(behandlingDao, generellBehandlingService)
     val tilgangService = TilgangServiceImpl(SakTilgangDao(dataSource), saksbehandlerGroupIdsByKey)
+    val sakService = RealSakService(sakDao, pdlKlient, norg2Klient, featureToggleService, tilgangService)
     val enhetService = EnhetServiceImpl(navAnsattKlient)
     val grunnlagsendringshendelseService =
         GrunnlagsendringshendelseService(

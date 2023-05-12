@@ -61,7 +61,7 @@ internal fun Route.sakRoutes(
     post("personer/saker/{type}") {
         withFoedselsnummerAndGradering(tilgangService) { fnr, gradering ->
             val type: SakType = enumValueOf(requireNotNull(call.parameters["type"]))
-            call.respond(inTransaction { sakService.finnEllerOpprettSak(fnr.value, type, gradering) })
+            call.respond(inTransaction { sakService.finnEllerOpprettSak(fnr = fnr.value, type, gradering = gradering) })
         }
     }
 

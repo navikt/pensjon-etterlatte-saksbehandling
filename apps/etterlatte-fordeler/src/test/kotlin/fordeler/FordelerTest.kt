@@ -30,8 +30,8 @@ internal class FordelerTest {
 
     @Test
     fun `skal fordele gyldig soknad til behandling`() {
-        every { fordelerService.sjekkGyldighetForBehandling(any()) } returns FordelerResultat.GyldigForBehandling
-        every { fordelerService.hentSakId(any(), any()) } returns 1337L
+        every { fordelerService.sjekkGyldighetForBehandling(any()) } returns FordelerResultat.GyldigForBehandling()
+        every { fordelerService.hentSakId(any(), any(), null) } returns 1337L
         every { fordelerMetricLogger.logMetricFordelt() } just runs
         val inspector = inspector.apply { sendTestMessage(BARNEPENSJON_SOKNAD) }.inspektør
 
@@ -54,11 +54,11 @@ internal class FordelerTest {
 
     @Test
     fun `skal ikke fordele soknad uten sakId til behandling`() {
-        every { fordelerService.sjekkGyldighetForBehandling(any()) } returns FordelerResultat.GyldigForBehandling
+        every { fordelerService.sjekkGyldighetForBehandling(any()) } returns FordelerResultat.GyldigForBehandling()
 
         val responseException = mockk<ResponseException>()
         every { responseException.message } returns "Oops"
-        every { fordelerService.hentSakId(any(), any()) } throws responseException
+        every { fordelerService.hentSakId(any(), any(), null) } throws responseException
 
         val inspector = inspector.apply { sendTestMessage(BARNEPENSJON_SOKNAD) }.inspektør
 
@@ -117,7 +117,7 @@ internal class FordelerTest {
 
         val statistikkMeldingGyldig = fordeler.lagStatistikkMelding(
             packet,
-            FordelerResultat.GyldigForBehandling,
+            FordelerResultat.GyldigForBehandling(),
             SakType.BARNEPENSJON
         )
         assertJsonEquals(

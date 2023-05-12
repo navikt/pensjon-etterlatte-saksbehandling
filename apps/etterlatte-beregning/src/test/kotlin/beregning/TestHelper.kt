@@ -69,7 +69,6 @@ fun avkortinggrunnlag(
 ) = AvkortingGrunnlag(
     periode = Periode(fom = YearMonth.now(), tom = null),
     aarsinntekt = aarsinntekt,
-    gjeldendeAar = 2023,
     spesifikasjon = "Spesifikasjon",
     kilde = Grunnlagsopplysning.Saksbehandler.create("Z123456"),
     beregnetAvkorting = beregnetAvkorting

@@ -87,7 +87,6 @@ class AvkortingRepository(private val dataSource: DataSource) {
                         "fom" to avkortingGrunnlag.periode.fom.atDay(1),
                         "tom" to avkortingGrunnlag.periode.tom?.atDay(1),
                         "aarsinntekt" to avkortingGrunnlag.aarsinntekt,
-                        "gjeldendeAar" to avkortingGrunnlag.gjeldendeAar,
                         "spesifikasjon" to avkortingGrunnlag.spesifikasjon,
                         "kilde" to avkortingGrunnlag.kilde.toJson()
                     )
@@ -166,7 +165,6 @@ class AvkortingRepository(private val dataSource: DataSource) {
             tom = sqlDateOrNull("tom")?.let { YearMonth.from(it.toLocalDate()) }
         ),
         aarsinntekt = int("aarsinntekt"),
-        gjeldendeAar = int("gjeldende_aar"),
         spesifikasjon = string("spesifikasjon"),
         kilde = string("kilde").let { objectMapper.readValue(it) },
         beregnetAvkorting = beregnetAvkorting

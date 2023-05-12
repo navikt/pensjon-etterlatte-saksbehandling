@@ -1,4 +1,4 @@
-import { BodyShort, Button, ErrorMessage, Heading, Label, ReadMore, Select, TextField } from '@navikt/ds-react'
+import { BodyShort, Button, ErrorMessage, Heading, Label, ReadMore, TextField } from '@navikt/ds-react'
 import styled from 'styled-components'
 import DatePicker from 'react-datepicker'
 import { Calender } from '@navikt/ds-icons'
@@ -35,7 +35,6 @@ export const AvkortingInntekt = (props: {
 
     setErrorTekst('')
     if (inntektGrunnlag.aarsinntekt == null) return setErrorTekst('Årsinntekt må fylles ut')
-    if (inntektGrunnlag.gjeldendeAar === 0) return setErrorTekst('Gjeldende år må fylles ut')
     if (inntektGrunnlag.fom == null) return setErrorTekst('Fra og med dato må fylles ut')
 
     if (!behandlingId) throw new Error('Mangler behandlingsid')
@@ -76,25 +75,6 @@ export const AvkortingInntekt = (props: {
                 })
               }
             />
-            <Select
-              label="År"
-              value={inntektGrunnlag.gjeldendeAar}
-              key={`INNTEKT-${inntektGrunnlag.gjeldendeAar}`}
-              onChange={(e) =>
-                setInntektGrunnlag({
-                  ...inntektGrunnlag,
-                  gjeldendeAar: e.target.value === 'Velg inntektsår' ? 0 : Number(e.target.value),
-                })
-              }
-              autoComplete="off"
-            >
-              <option value="">Velg inntektsår</option>
-              {Array.from({ length: 10 }, (_, i) => new Date().getFullYear() - i).map((aar) => (
-                <option key={`INNTEKT-${aar}`} value={aar}>
-                  {aar}
-                </option>
-              ))}
-            </Select>
             <DatoSection>
               <Label>F.o.m dato (inntekt)</Label>
               <Datovelger>

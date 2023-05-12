@@ -84,21 +84,19 @@ class RealSakService(
         enhet: String?,
         gradering: AdressebeskyttelseGradering?
     ): Sak {
-        return finnSakerForPersonOgType(fnr, type) ?: run {
-            val opprettSak = dao.opprettSak(
-                fnr,
-                type,
-                if (featureToggleService.isEnabled(SakServiceFeatureToggle.OpprettMedEnhetId, false)) {
-                    enhet ?: finnEnhetForPersonOgTema(fnr, type.tema, type).enhetNr
-                } else {
-                    null
-                }
-            )
-            if (gradering != null) {
-                tilgangService.oppdaterAdressebeskyttelse(opprettSak.id, gradering)
+        val sak = finnSakerForPersonOgType(fnr, type) ?: dao.opprettSak(
+            fnr,
+            type,
+            if (featureToggleService.isEnabled(SakServiceFeatureToggle.OpprettMedEnhetId, false)) {
+                enhet ?: finnEnhetForPersonOgTema(fnr, type.tema, type).enhetNr
+            } else {
+                null
             }
-            opprettSak
+        )
+        gradering?.let {
+            tilgangService.oppdaterAdressebeskyttelse(sak.id, it)
         }
+        return sak
     }
 
     override fun oppdaterEnhetForSaker(saker: List<GrunnlagsendringshendelseService.SakMedEnhet>) {

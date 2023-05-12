@@ -70,6 +70,7 @@ internal class Fordeler(
                     is FordelerResultat.GyldigForBehandling -> {
                         logger.info("Soknad ${packet.soeknadId()} er gyldig for fordeling, henter sakId for Gjenny")
                         try {
+                            // Denne har ansvaret for å sette gradering
                             fordelerService.hentSakId(
                                 packet[SoeknadInnsendt.fnrSoekerKey].textValue(),
                                 SakType.BARNEPENSJON,

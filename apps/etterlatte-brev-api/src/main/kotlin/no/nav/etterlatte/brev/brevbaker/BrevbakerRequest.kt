@@ -45,7 +45,7 @@ data class BrevbakerRequest(
                     ),
                     signerendeSaksbehandlere = SignerendeSaksbehandlere(
                         saksbehandler = avsender.saksbehandler,
-                        attesterendeSaksbehandler = attestant?.navn ?: ""
+                        attesterendeSaksbehandler = attestant?.navn
                     ),
                     vergeNavn = null
                 ),

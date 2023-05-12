@@ -43,6 +43,7 @@ internal class SakServiceTest {
     private val norg2Klient = mockk<Norg2Klient>()
     private val featureToggleService = mockk<FeatureToggleService>()
     private val enhetService = mockk<EnhetService>()
+    private val tilgangService = mockk<TilgangService>()
 
     @BeforeEach
     fun before() {
@@ -142,7 +143,7 @@ internal class SakServiceTest {
 
         every { featureToggleService.isEnabled(SakServiceFeatureToggle.FiltrerMedEnhetId, false) } returns true
 
-        val service: SakService = RealSakService(sakDao, pdlKlient, norg2Klient, featureToggleService)
+        val service: SakService = RealSakService(sakDao, pdlKlient, norg2Klient, featureToggleService, tilgangService)
 
         val saker = service.finnSaker(TRIVIELL_MIDTPUNKT.value)
 
@@ -171,7 +172,7 @@ internal class SakServiceTest {
 
         every { featureToggleService.isEnabled(SakServiceFeatureToggle.FiltrerMedEnhetId, false) } returns true
 
-        val service: SakService = RealSakService(sakDao, pdlKlient, norg2Klient, featureToggleService)
+        val service: SakService = RealSakService(sakDao, pdlKlient, norg2Klient, featureToggleService, tilgangService)
 
         val saker = service.finnSaker(TRIVIELL_MIDTPUNKT.value)
 
@@ -200,7 +201,7 @@ internal class SakServiceTest {
 
         every { featureToggleService.isEnabled(SakServiceFeatureToggle.FiltrerMedEnhetId, false) } returns true
 
-        val service: SakService = RealSakService(sakDao, pdlKlient, norg2Klient, featureToggleService)
+        val service: SakService = RealSakService(sakDao, pdlKlient, norg2Klient, featureToggleService, tilgangService)
 
         val saker = service.finnSaker(TRIVIELL_MIDTPUNKT.value)
 
@@ -220,7 +221,7 @@ internal class SakServiceTest {
             pdlKlient.hentGeografiskTilknytning(TRIVIELL_MIDTPUNKT.value, SakType.BARNEPENSJON)
         } throws responseException
 
-        val service: SakService = RealSakService(sakDao, pdlKlient, norg2Klient, featureToggleService)
+        val service: SakService = RealSakService(sakDao, pdlKlient, norg2Klient, featureToggleService, tilgangService)
 
         val thrown = assertThrows<ResponseException> {
             service.finnEllerOpprettSak(
@@ -248,7 +249,7 @@ internal class SakServiceTest {
         } returns GeografiskTilknytning(kommune = "0301", ukjent = false)
         every { norg2Klient.hentEnheterForOmraade(SakType.BARNEPENSJON.tema, "0301") } returns emptyList()
 
-        val service: SakService = RealSakService(sakDao, pdlKlient, norg2Klient, featureToggleService)
+        val service: SakService = RealSakService(sakDao, pdlKlient, norg2Klient, featureToggleService, tilgangService)
 
         val thrown = assertThrows<IngenEnhetFunnetException> {
             service.finnEllerOpprettSak(TRIVIELL_MIDTPUNKT.value, SakType.BARNEPENSJON)
@@ -282,7 +283,7 @@ internal class SakServiceTest {
             ArbeidsFordelingEnhet(Enheter.PORSGRUNN.navn, Enheter.PORSGRUNN.enhetNr)
         )
 
-        val service: SakService = RealSakService(sakDao, pdlKlient, norg2Klient, featureToggleService)
+        val service: SakService = RealSakService(sakDao, pdlKlient, norg2Klient, featureToggleService, tilgangService)
 
         val sak = service.finnEllerOpprettSak(TRIVIELL_MIDTPUNKT.value, SakType.BARNEPENSJON)
 
@@ -315,7 +316,7 @@ internal class SakServiceTest {
         )
         every { featureToggleService.isEnabled(SakServiceFeatureToggle.OpprettMedEnhetId, false) } returns false
 
-        val service: SakService = RealSakService(sakDao, pdlKlient, norg2Klient, featureToggleService)
+        val service: SakService = RealSakService(sakDao, pdlKlient, norg2Klient, featureToggleService, tilgangService)
 
         val sak = service.finnEllerOpprettSak(TRIVIELL_MIDTPUNKT.value, SakType.BARNEPENSJON)
 
@@ -353,7 +354,7 @@ internal class SakServiceTest {
 
         every { featureToggleService.isEnabled(SakServiceFeatureToggle.FiltrerMedEnhetId, false) } returns true
 
-        val service: SakService = RealSakService(sakDao, pdlKlient, norg2Klient, featureToggleService)
+        val service: SakService = RealSakService(sakDao, pdlKlient, norg2Klient, featureToggleService, tilgangService)
 
         val saker = service.finnSaker(TRIVIELL_MIDTPUNKT.value)
 

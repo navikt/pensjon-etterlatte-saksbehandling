@@ -1,9 +1,13 @@
 package no.nav.etterlatte.trygdetid.kafka
 
+import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJson
+import no.nav.etterlatte.libs.common.trygdetid.TrygdetidGrunnlagDto
+import no.nav.etterlatte.libs.common.trygdetid.TrygdetidGrunnlagKildeDto
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser
 import no.nav.etterlatte.rapidsandrivers.migrering.TRYGDETID_KEY
 import no.nav.etterlatte.rapidsandrivers.migrering.VILKAARSVURDERT_KEY
@@ -15,6 +19,7 @@ import org.slf4j.LoggerFactory
 import rapidsandrivers.BEHANDLING_ID_KEY
 import rapidsandrivers.behandlingId
 import rapidsandrivers.withFeilhaandtering
+import java.time.LocalDate
 
 internal class MigreringHendelser(rapidsConnection: RapidsConnection, private val trygdetidService: TrygdetidService) :
     River.PacketListener {
@@ -37,13 +42,15 @@ internal class MigreringHendelser(rapidsConnection: RapidsConnection, private va
             withFeilhaandtering(packet, context, Migreringshendelser.TRYGDETID) {
                 val behandlingId = packet.behandlingId
                 logger.info("Mottatt trygdetid-migreringshendelse for behandling $behandlingId")
-                trygdetidService.beregnTrygdetid(behandlingId)
-                logger.info("Oppretta trygdetid for behandling $behandlingId")
+                trygdetidService.beregnTrygdetid(behandlingId).also {
+                    logger.info("Oppretta trygdetid for behandling $behandlingId")
+                }
             }.takeIf { it.isSuccess }
                 ?.let {
                     withFeilhaandtering(packet, context, Migreringshendelser.TRYGDETID_GRUNNLAG) {
                         val behandlingId = packet.behandlingId
-                        val beregnetTrygdetid = trygdetidService.beregnTrygdetidGrunnlag(behandlingId)
+                        val beregnetTrygdetid =
+                            trygdetidService.beregnTrygdetidGrunnlag(behandlingId, tilGrunnlag())
                         packet[TRYGDETID_KEY] = beregnetTrygdetid.toJson()
                         packet.eventName = Migreringshendelser.BEREGN
                         context.publish(packet.toJson())
@@ -54,4 +61,17 @@ internal class MigreringHendelser(rapidsConnection: RapidsConnection, private va
                 }
         }
     }
+
+    private fun tilGrunnlag() = TrygdetidGrunnlagDto(
+        id = null,
+        type = "Trygdetid",
+        bosted = "Pesys",
+        periodeFra = LocalDate.now().minusYears(40),
+        periodeTil = LocalDate.now(),
+        kilde = TrygdetidGrunnlagKildeDto(
+            tidspunkt = Tidspunkt.now().toString(),
+            ident = Vedtaksloesning.PESYS.name
+        ),
+        beregnet = null
+    )
 }

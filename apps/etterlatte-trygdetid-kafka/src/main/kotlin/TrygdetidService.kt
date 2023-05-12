@@ -3,10 +3,12 @@ package no.nav.etterlatte.trygdetid.kafka
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.post
+import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
+import no.nav.etterlatte.libs.common.trygdetid.TrygdetidGrunnlagDto
 import java.util.*
 
 class TrygdetidService(
@@ -20,9 +22,10 @@ class TrygdetidService(
         }.body()
     }
 
-    fun beregnTrygdetidGrunnlag(behandlingId: UUID): TrygdetidDto = runBlocking {
+    fun beregnTrygdetidGrunnlag(behandlingId: UUID, grunnlag: TrygdetidGrunnlagDto): TrygdetidDto = runBlocking {
         trygdetidApp.post("$url/api/trygdetid/$behandlingId/grunnlag") {
             contentType(ContentType.Application.Json)
+            setBody(grunnlag)
         }.body()
     }
 }

@@ -57,7 +57,7 @@ class OppgaveServiceImpl(private val oppgaveDao: OppgaveDao, private val feature
         this.filterOppgaverForEnheter(featureToggleService, bruker)
 }
 
-fun <T : Oppgave> List<T>.filterOppgaverForEnheter(
+fun List<Oppgave>.filterOppgaverForEnheter(
     featureToggleService: FeatureToggleService,
     user: User
 ) = this.filterForEnheter(
@@ -65,8 +65,5 @@ fun <T : Oppgave> List<T>.filterOppgaverForEnheter(
     OppgaveServiceFeatureToggle.EnhetFilterOppgaver,
     user
 ) { item, enheter ->
-    when (item) {
-        is Oppgave.BehandlingOppgave -> item.sak.enhet == null || enheter.contains(item.sak.enhet)
-        else -> true
-    }
+    item.sak.enhet == null || enheter.contains(item.sak.enhet)
 }

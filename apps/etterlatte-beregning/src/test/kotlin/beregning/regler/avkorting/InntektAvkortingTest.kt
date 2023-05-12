@@ -35,6 +35,15 @@ class InntektAvkortingTest {
     }
 
     @Test
+    fun `oversteget inntekt skal gi 0 naar inntekt er mindre en halvt grunnbeloep`() {
+        val overstegetInntekt = overstegetInntekt.anvend(
+            inntektAvkortingGrunnlag(inntekt = 25000),
+            RegelPeriode(LocalDate.of(2023, 1, 1))
+        )
+        overstegetInntekt.verdi.toInteger() shouldBe 0
+    }
+
+    @Test
     fun `avkortingsbeloep er oversteget inntekt ganget med avkortingsfaktor oppdelt i antall maaneder (12)`() {
         val avkortingsbeloep = inntektAvkorting.anvend(
             inntektAvkortingGrunnlag(inntekt = 500000),

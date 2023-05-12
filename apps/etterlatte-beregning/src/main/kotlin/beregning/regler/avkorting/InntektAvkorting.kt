@@ -56,7 +56,9 @@ val overstegetInntekt = RegelMeta(
     regelReferanse = RegelReferanse(id = "")
 ) benytter opprundetInntekt og grunnbeloep med { inntekt, grunnbeleop ->
     val halvtGrunnbeloep = Beregningstall(grunnbeleop.grunnbeloep).divide(2)
-    inntekt.minus(halvtGrunnbeloep)
+    inntekt
+        .minus(halvtGrunnbeloep)
+        .zeroIfNegative()
 }
 
 val avkortingFaktor = definerKonstant<InntektAvkortingGrunnlag, Beregningstall>(

@@ -11,6 +11,7 @@ import no.nav.etterlatte.libs.common.trygdetid.TrygdetidGrunnlagKildeDto
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser
 import no.nav.etterlatte.rapidsandrivers.migrering.TRYGDETID_KEY
 import no.nav.etterlatte.rapidsandrivers.migrering.VILKAARSVURDERT_KEY
+import no.nav.etterlatte.trygdetid.TrygdetidType
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -64,7 +65,7 @@ internal class MigreringHendelser(rapidsConnection: RapidsConnection, private va
 
     private fun tilGrunnlag() = TrygdetidGrunnlagDto(
         id = null,
-        type = "Trygdetid",
+        type = TrygdetidType.NASJONAL.name,
         bosted = "Pesys",
         periodeFra = LocalDate.now().minusYears(40),
         periodeTil = LocalDate.now(),

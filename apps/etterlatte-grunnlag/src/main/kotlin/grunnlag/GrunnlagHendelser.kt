@@ -12,13 +12,17 @@ import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.etterlatte.libs.common.toJson
+import no.nav.etterlatte.rapidsandrivers.EventNames.FEILA
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import rapidsandrivers.FNR_KEY
 import rapidsandrivers.GRUNNLAG_OPPDATERT
+import rapidsandrivers.OPPLYSNING_KEY
+import rapidsandrivers.SAK_ID_KEY
 
 class GrunnlagHendelser(
     rapidsConnection: RapidsConnection,
@@ -31,9 +35,11 @@ class GrunnlagHendelser(
             correlationId()
             validate { it.interestedIn(EVENT_NAME_KEY) }
             validate { it.interestedIn(BEHOV_NAME_KEY) }
-            validate { it.interestedIn("fnr") }
-            validate { it.requireKey("opplysning") }
-            validate { it.requireKey("sakId") }
+            validate { it.interestedIn(FNR_KEY) }
+            validate { it.requireKey(OPPLYSNING_KEY) }
+            validate { it.requireKey(SAK_ID_KEY) }
+            validate { it.rejectValue(EVENT_NAME_KEY, GRUNNLAG_OPPDATERT) }
+            validate { it.rejectValue(EVENT_NAME_KEY, FEILA) }
         }.register(this)
     }
 
@@ -44,11 +50,11 @@ class GrunnlagHendelser(
         if (eventName == "OPPLYSNING:NY" || opplysningType in OPPLYSNING_TYPER) {
             withLogContext(packet.correlationId) {
                 try {
-                    val sakId = packet["sakId"].asLong()
+                    val sakId = packet[SAK_ID_KEY].asLong()
                     val opplysninger: List<Grunnlagsopplysning<JsonNode>> =
-                        objectMapper.readValue(packet["opplysning"].toJson())!!
+                        objectMapper.readValue(packet[OPPLYSNING_KEY].toJson())!!
 
-                    val fnr = packet["fnr"].textValue()
+                    val fnr = packet[FNR_KEY].textValue()
                     if (fnr == null) {
                         grunnlagService.lagreNyeSaksopplysninger(
                             sakId,
@@ -62,6 +68,7 @@ class GrunnlagHendelser(
                         )
                     }
                     packet.eventName = GRUNNLAG_OPPDATERT
+                    context.publish(packet.toJson())
                 } catch (e: Exception) {
                     logger.error("Spiser en melding på grunn av feil", e)
                 }

@@ -83,7 +83,8 @@ internal class BeregningsGrunnlagRoutesTest {
         every { repository.finnGrunnlagForBehandling(any()) } returns BeregningsGrunnlag(
             id,
             Grunnlagsopplysning.Saksbehandler("Z123456", Tidspunkt.now()),
-            emptyList()
+            emptyList(),
+            Institusjonsopphold(false)
         )
 
         testApplication {
@@ -135,7 +136,12 @@ internal class BeregningsGrunnlagRoutesTest {
             client.post("/api/beregning/beregningsgrunnlag/${randomUUID()}/barnepensjon") {
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 header(HttpHeaders.Authorization, "Bearer $token")
-                setBody(BarnepensjonBeregningsGrunnlag(emptyList()))
+                setBody(
+                    BarnepensjonBeregningsGrunnlag(
+                        emptyList(),
+                        Institusjonsopphold(false)
+                    )
+                )
             }.let {
                 it.status shouldBe HttpStatusCode.NotFound
             }
@@ -162,7 +168,12 @@ internal class BeregningsGrunnlagRoutesTest {
             client.post("/api/beregning/beregningsgrunnlag/${randomUUID()}/barnepensjon") {
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 header(HttpHeaders.Authorization, "Bearer $token")
-                setBody(BarnepensjonBeregningsGrunnlag(emptyList()))
+                setBody(
+                    BarnepensjonBeregningsGrunnlag(
+                        emptyList(),
+                        Institusjonsopphold(false)
+                    )
+                )
             }.let {
                 it.status shouldBe HttpStatusCode.NoContent
             }
@@ -189,7 +200,12 @@ internal class BeregningsGrunnlagRoutesTest {
             client.post("/api/beregning/beregningsgrunnlag/${randomUUID()}/barnepensjon") {
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 header(HttpHeaders.Authorization, "Bearer $token")
-                setBody(BarnepensjonBeregningsGrunnlag(emptyList()))
+                setBody(
+                    BarnepensjonBeregningsGrunnlag(
+                        emptyList(),
+                        Institusjonsopphold(false)
+                    )
+                )
             }.let {
                 it.status shouldBe HttpStatusCode.Conflict
             }
@@ -223,7 +239,8 @@ internal class BeregningsGrunnlagRoutesTest {
         every { repository.finnGrunnlagForBehandling(forrige) } returns BeregningsGrunnlag(
             forrige,
             Grunnlagsopplysning.Saksbehandler("Z123456", Tidspunkt.now()),
-            emptyList()
+            emptyList(),
+            Institusjonsopphold(false)
         )
         every { repository.finnGrunnlagForBehandling(nye) } returns null
         every { repository.lagre(any()) } returns true
@@ -274,12 +291,14 @@ internal class BeregningsGrunnlagRoutesTest {
         every { repository.finnGrunnlagForBehandling(forrige) } returns BeregningsGrunnlag(
             forrige,
             Grunnlagsopplysning.Saksbehandler("Z123456", Tidspunkt.now()),
-            emptyList()
+            emptyList(),
+            Institusjonsopphold(false)
         )
         every { repository.finnGrunnlagForBehandling(nye) } returns BeregningsGrunnlag(
             nye,
             Grunnlagsopplysning.Saksbehandler("Z123456", Tidspunkt.now()),
-            emptyList()
+            emptyList(),
+            Institusjonsopphold(false)
         )
         every { repository.lagre(any()) } returns true
 

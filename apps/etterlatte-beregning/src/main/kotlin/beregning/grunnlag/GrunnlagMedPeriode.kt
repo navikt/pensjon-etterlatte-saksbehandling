@@ -37,8 +37,8 @@ object PeriodisertBeregningGrunnlag {
     ) : PeriodisertGrunnlag<T> {
         val sorterteOpplysninger = opplysninger.sortedBy { it.fom }
 
-        val tidligsteFom = sorterteOpplysninger.first().fom
-        val senesteTom = sorterteOpplysninger.last().tom
+        val tidligsteFom: LocalDate
+        val senesteTom: LocalDate?
 
         init {
             if (opplysninger.isEmpty()) {
@@ -47,6 +47,9 @@ object PeriodisertBeregningGrunnlag {
             if (perioderOverlapper(opplysninger)) {
                 throw PeriodiseringAvGrunnlagFeil.PerioderOverlapper()
             }
+
+            tidligsteFom = sorterteOpplysninger.first().fom
+            senesteTom = sorterteOpplysninger.last().tom
         }
 
         override fun finnAlleKnekkpunkter(): Set<LocalDate> {

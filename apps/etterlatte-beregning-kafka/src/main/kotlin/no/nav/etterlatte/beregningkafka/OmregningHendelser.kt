@@ -1,8 +1,6 @@
 package no.nav.etterlatte.beregningkafka
 
-import io.ktor.client.call.body
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.libs.common.beregning.BeregningDTO
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
@@ -51,7 +49,7 @@ internal class OmregningHendelser(
                 val behandlingViOmregnerFra = packet[BEHANDLING_VI_OMREGNER_FRA_KEY].asText().toUUID()
                 runBlocking {
                     beregningService.opprettBeregningsGrunnlag(behandlingId, behandlingViOmregnerFra)
-                    val beregning = beregningService.opprettOmregning(behandlingId).body<BeregningDTO>()
+                    val beregning = beregningService.beregn(behandlingId)
                     packet[BEREGNING_KEY] = beregning
                     packet[EVENT_NAME_KEY] = OPPRETT_VEDTAK
                     context.publish(packet.toJson())

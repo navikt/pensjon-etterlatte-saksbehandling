@@ -1,6 +1,5 @@
 package no.nav.etterlatte.beregningkafka
 
-import io.ktor.client.call.body
 import io.ktor.client.statement.HttpResponse
 import io.ktor.http.HttpStatusCode
 import io.mockk.every
@@ -17,7 +16,7 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import rapidsandrivers.BEREGNING_KEY
 import java.io.FileNotFoundException
-import java.util.UUID
+import java.util.*
 
 internal class OmregningsHendelserTest {
 
@@ -38,19 +37,13 @@ internal class OmregningsHendelserTest {
             grunnlagMetadata = Metadata(1234, 1)
         )
 
-        val returnValue = mockk<HttpResponse>().also {
-            every {
-                runBlocking { it.body<BeregningDTO>() }
-            } returns beregningDTO
-        }
-
         val noContentValue = mockk<HttpResponse>().also {
             every {
                 runBlocking { it.status }
             } returns HttpStatusCode.NoContent
         }
 
-        every { behandlingService.opprettOmregning(capture(omregningsid)) }.returns(returnValue)
+        every { behandlingService.beregn(capture(omregningsid)) }.returns(beregningDTO)
         every {
             behandlingService.opprettBeregningsGrunnlag(capture(behandlingsId), capture(forrigeBehandlingId))
         }.returns(noContentValue)

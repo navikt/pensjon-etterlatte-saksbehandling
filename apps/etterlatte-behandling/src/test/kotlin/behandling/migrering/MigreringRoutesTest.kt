@@ -19,11 +19,10 @@ import no.nav.etterlatte.libs.common.gyldigSoeknad.VurderingsResultat
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.BehandlingOgSak
 import no.nav.etterlatte.module
-import no.nav.etterlatte.rapidsandrivers.migrering.DatoPeriode
 import no.nav.etterlatte.rapidsandrivers.migrering.Enhet
 import no.nav.etterlatte.rapidsandrivers.migrering.MigreringRequest
 import no.nav.etterlatte.rapidsandrivers.migrering.PesysId
-import no.nav.etterlatte.rapidsandrivers.migrering.Trygdetidperioder
+import no.nav.etterlatte.rapidsandrivers.migrering.Trygdetidsgrunnlag
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
@@ -63,13 +62,10 @@ class MigreringRoutesTest : BehandlingIntegrationTest() {
                 mottattDato = LocalDateTime.now(),
                 persongalleri = Persongalleri(fnr.value, "innsender", emptyList(), emptyList(), emptyList()),
                 virkningstidspunkt = YearMonth.now(),
-                trygdetidperioder = Trygdetidperioder(
-                    listOf(
-                        DatoPeriode(
-                            LocalDate.now().minusYears(40),
-                            LocalDate.now()
-                        )
-                    )
+                trygdetidsgrunnlag = Trygdetidsgrunnlag(
+                    "Pesys",
+                    LocalDate.now().minusYears(40),
+                    LocalDate.now()
                 )
             )
 

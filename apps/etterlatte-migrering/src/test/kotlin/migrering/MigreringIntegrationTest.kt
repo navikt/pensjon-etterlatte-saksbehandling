@@ -11,12 +11,11 @@ import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.migrering.Migrering
 import no.nav.etterlatte.migrering.PesysRepository
 import no.nav.etterlatte.migrering.Pesyssak
-import no.nav.etterlatte.rapidsandrivers.migrering.DatoPeriode
 import no.nav.etterlatte.rapidsandrivers.migrering.Enhet
 import no.nav.etterlatte.rapidsandrivers.migrering.MigreringRequest
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser
 import no.nav.etterlatte.rapidsandrivers.migrering.PesysId
-import no.nav.etterlatte.rapidsandrivers.migrering.Trygdetidperioder
+import no.nav.etterlatte.rapidsandrivers.migrering.Trygdetidsgrunnlag
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.AfterAll
@@ -65,13 +64,10 @@ class MigreringIntegrationTest {
                 LocalDateTime.now(),
                 Persongalleri(syntetiskFnr, "innsender", emptyList(), emptyList(), emptyList()),
                 YearMonth.now(),
-                Trygdetidperioder(
-                    listOf(
-                        DatoPeriode(
-                            LocalDate.now().minusYears(40),
-                            LocalDate.now()
-                        )
-                    )
+                Trygdetidsgrunnlag(
+                    "Pesys",
+                    LocalDate.now().minusYears(40),
+                    LocalDate.now()
                 )
             )
             repository.lagrePesyssak(sakInn)

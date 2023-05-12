@@ -9,10 +9,10 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidGrunnlagDto
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidGrunnlagKildeDto
-import no.nav.etterlatte.rapidsandrivers.migrering.DatoPeriode
 import no.nav.etterlatte.rapidsandrivers.migrering.MigreringRequest
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser
 import no.nav.etterlatte.rapidsandrivers.migrering.TRYGDETID_KEY
+import no.nav.etterlatte.rapidsandrivers.migrering.Trygdetidsgrunnlag
 import no.nav.etterlatte.rapidsandrivers.migrering.VILKAARSVURDERT_KEY
 import no.nav.etterlatte.trygdetid.TrygdetidType
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -56,27 +56,28 @@ internal class MigreringHendelser(rapidsConnection: RapidsConnection, private va
                         val request = objectMapper.treeToValue(packet[HENDELSE_DATA_KEY], MigreringRequest::class.java)
                         logger.info("Oppretter grunnlag for trygdetid for $behandlingId")
 
-                        request.trygdetidperioder.perioder.forEach {
-                            val beregnetTrygdetid =
-                                trygdetidService.beregnTrygdetidGrunnlag(behandlingId, tilGrunnlag(it))
-                            packet[TRYGDETID_KEY] = beregnetTrygdetid.toJson()
-                            packet.eventName = Migreringshendelser.BEREGN
-                            context.publish(packet.toJson())
-                            logger.info(
-                                "Publiserte oppdatert migreringshendelse fra trygdetid for behandling $behandlingId"
+                        val beregnetTrygdetid =
+                            trygdetidService.beregnTrygdetidGrunnlag(
+                                behandlingId,
+                                tilGrunnlag(request.trygdetidsgrunnlag)
                             )
-                        }
+                        packet[TRYGDETID_KEY] = beregnetTrygdetid.toJson()
+                        packet.eventName = Migreringshendelser.BEREGN
+                        context.publish(packet.toJson())
+                        logger.info(
+                            "Publiserte oppdatert migreringshendelse fra trygdetid for behandling $behandlingId"
+                        )
                     }
                 }
         }
     }
 
-    private fun tilGrunnlag(periode: DatoPeriode) = TrygdetidGrunnlagDto(
+    private fun tilGrunnlag(trygdetidsgrunnlag: Trygdetidsgrunnlag) = TrygdetidGrunnlagDto(
         id = null,
         type = TrygdetidType.NASJONAL.name,
-        bosted = "Pesys",
-        periodeFra = periode.fom,
-        periodeTil = periode.tom,
+        bosted = trygdetidsgrunnlag.bosted,
+        periodeFra = trygdetidsgrunnlag.fom,
+        periodeTil = trygdetidsgrunnlag.tom,
         kilde = TrygdetidGrunnlagKildeDto(
             tidspunkt = Tidspunkt.now().toString(),
             ident = Vedtaksloesning.PESYS.name

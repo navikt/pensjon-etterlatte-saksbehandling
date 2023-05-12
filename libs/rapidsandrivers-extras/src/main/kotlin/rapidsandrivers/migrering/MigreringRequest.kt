@@ -13,12 +13,10 @@ data class MigreringRequest(
     val mottattDato: LocalDateTime,
     val persongalleri: Persongalleri,
     val virkningstidspunkt: YearMonth,
-    val trygdetidperioder: Trygdetidperioder
+    val trygdetidsgrunnlag: Trygdetidsgrunnlag
 )
 
 data class PesysId(val id: String)
 
 data class Enhet(val nr: String)
-data class Trygdetidperioder(val perioder: List<DatoPeriode>)
-
-data class DatoPeriode(val fom: LocalDate, val tom: LocalDate)
+data class Trygdetidsgrunnlag(val bosted: String, val fom: LocalDate, val tom: LocalDate)

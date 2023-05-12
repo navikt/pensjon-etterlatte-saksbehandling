@@ -13,6 +13,7 @@ import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import org.slf4j.LoggerFactory
 import rapidsandrivers.BEHANDLING_ID_KEY
+import rapidsandrivers.Status
 import rapidsandrivers.behandlingId
 import rapidsandrivers.withFeilhaandtering
 
@@ -37,15 +38,22 @@ internal class MigreringHendelser(rapidsConnection: RapidsConnection, private va
             withFeilhaandtering(packet, context, Migreringshendelser.TRYGDETID) {
                 val behandlingId = packet.behandlingId
                 logger.info("Mottatt trygdetid-migreringshendelse for behandling $behandlingId")
-
-                val trygdetid = trygdetidService.beregnTrygdetid(behandlingId).beregnetTrygdetid
+                trygdetidService.beregnTrygdetid(behandlingId).beregnetTrygdetid
                     ?: throw IllegalStateException("Trygdetid er udefinert for behandling $behandlingId")
-
-                packet.eventName = Migreringshendelser.BEREGN
-                packet[TRYGDETID_KEY] = trygdetid.toJson()
-                context.publish(packet.toJson())
-                logger.info("Publiserte oppdatert migreringshendelse fra trygdetid for behandling $behandlingId")
-            }
+                logger.info("Oppretta trygdetid for behandling $behandlingId")
+            }.takeIf { it == Status.SUKSESS }
+                ?.let {
+                    withFeilhaandtering(packet, context, Migreringshendelser.TRYGDETID_GRUNNLAG) {
+                        val behandlingId = packet.behandlingId
+                        val beregnetTrygdetid = trygdetidService.beregnTrygdetidGrunnlag(behandlingId)
+                        packet[TRYGDETID_KEY] = beregnetTrygdetid.toJson()
+                        packet.eventName = Migreringshendelser.BEREGN
+                        context.publish(packet.toJson())
+                        logger.info(
+                            "Publiserte oppdatert migreringshendelse fra trygdetid for behandling $behandlingId"
+                        )
+                    }
+                }
         }
     }
 }

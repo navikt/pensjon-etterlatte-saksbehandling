@@ -19,4 +19,10 @@ class TrygdetidService(
             contentType(ContentType.Application.Json)
         }.body()
     }
+
+    fun beregnTrygdetidGrunnlag(behandlingId: UUID): TrygdetidDto = runBlocking {
+        trygdetidApp.post("$url/api/trygdetid/$behandlingId/grunnlag") {
+            contentType(ContentType.Application.Json)
+        }.body()
+    }
 }

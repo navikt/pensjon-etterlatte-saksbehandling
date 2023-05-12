@@ -87,7 +87,13 @@ data class Foerstegangsbehandling(
             throw TilstandException.IkkeFyltUt
         }
 
-        return hvisTilstandEr(listOf(BehandlingStatus.BEREGNET, BehandlingStatus.RETURNERT)) {
+        return hvisTilstandEr(
+            listOf(
+                BehandlingStatus.BEREGNET,
+                BehandlingStatus.AVKORTET,
+                BehandlingStatus.RETURNERT
+            )
+        ) {
             endreTilStatus(BehandlingStatus.FATTET_VEDTAK)
         }
     }

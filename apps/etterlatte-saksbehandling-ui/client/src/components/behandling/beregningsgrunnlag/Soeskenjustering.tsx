@@ -42,16 +42,14 @@ type SoeskenjusteringProps = {
   onSubmit: (data: Soeskengrunnlag) => void
 }
 
-const nyttSoeskengrunnlagMedPerioderFraFamilieforhold = (soesken: IPdlPerson[], fom?: string) => [
-  {
-    fom: fom !== undefined ? new Date(fom) : new Date(),
-    harEnSlutt: false,
-    data: soesken.map((barn) => ({
-      foedselsnummer: barn.foedselsnummer,
-      skalBrukes: undefined,
-    })),
-  },
-]
+const nySoeskengrunnlagPeriode = (soesken: IPdlPerson[], fom?: string) => ({
+  fom: fom !== undefined ? new Date(fom) : new Date(),
+  harEnSlutt: false,
+  data: soesken.map((barn) => ({
+    foedselsnummer: barn.foedselsnummer,
+    skalBrukes: undefined,
+  })),
+})
 
 const Soeskenjustering = (props: SoeskenjusteringProps) => {
   const { behandling, onSubmit } = props
@@ -65,6 +63,7 @@ const Soeskenjustering = (props: SoeskenjusteringProps) => {
   const soeskenjusteringErDefinertIRedux = soeskenjustering !== undefined
 
   const sisteTom = watch(`soeskengrunnlag.${fields.length - 1}.tom`)
+  const sisteFom = watch(`soeskengrunnlag.${fields.length - 1}.fom`)
   if (!behandling || !behandling.familieforhold) {
     return null
   }
@@ -76,10 +75,11 @@ const Soeskenjustering = (props: SoeskenjusteringProps) => {
   useEffect(() => {
     if (!soeskenjusteringErDefinertIRedux) {
       fetchSoeskengjusteringGrunnlag(behandling.id, (result) => {
+        const nyttGrunnlag = result?.soeskenMedIBeregning ?? [
+          nySoeskengrunnlagPeriode(soesken, behandling.virkningstidspunkt?.dato),
+        ]
         reset({
-          soeskengrunnlag:
-            result?.soeskenMedIBeregning ??
-            nyttSoeskengrunnlagMedPerioderFraFamilieforhold(soesken, behandling.virkningstidspunkt?.dato),
+          soeskengrunnlag: nyttGrunnlag,
         })
       })
     }
@@ -116,7 +116,7 @@ const Soeskenjustering = (props: SoeskenjusteringProps) => {
         <Spinner visible={isPending(soeskenjusteringGrunnlag)} label={'Henter beregningsgrunnlag for søsken'} />
         {isFailure(soeskenjusteringGrunnlag) && <ApiErrorAlert>Søskenjustering kan ikke hentes</ApiErrorAlert>}
       </FamilieforholdWrapper>
-      <form name="form" onSubmit={handleSubmit(submitForm)}>
+      <form id="form" name="form" onSubmit={handleSubmit(submitForm)}>
         {isSuccess(soeskenjusteringGrunnlag) ? (
           <>
             <UstiletListe>
@@ -134,14 +134,7 @@ const Soeskenjustering = (props: SoeskenjusteringProps) => {
               ))}
             </UstiletListe>
             <NyPeriodeButton
-              onClick={() =>
-                append(
-                  nyttSoeskengrunnlagMedPerioderFraFamilieforhold(
-                    soesken,
-                    addMonths(sisteTom || new Date(), 1).toString()
-                  )[0]
-                )
-              }
+              onClick={() => append(nySoeskengrunnlagPeriode(soesken, addMonths(sisteTom || sisteFom, 1).toString()))}
             >
               Legg til periode
             </NyPeriodeButton>
@@ -223,7 +216,7 @@ const SoeskenjusteringPeriode = (props: SoeskenjusteringPeriodeProps) => {
             <Controller
               render={(field) =>
                 expanded ? (
-                  <div style={{ display: 'flex', justifyContent: 'flex-start', flexDirection: 'row', gap: '1em' }}>
+                  <MaanedvelgerMedUtnulling>
                     <MaanedVelger
                       onChange={(val) => field.field.onChange(val)}
                       label="Til og med"
@@ -232,16 +225,9 @@ const SoeskenjusteringPeriode = (props: SoeskenjusteringPeriodeProps) => {
                       value={field.field.value}
                     />
                     {field.field.value !== null && field.field.value !== undefined ? (
-                      <Button
-                        style={{ height: 'fit-content', width: 'fit-content', margin: 'auto 0' }}
-                        size="xsmall"
-                        onClick={() => field.field.onChange(null)}
-                        variant="secondary"
-                      >
-                        Fjern sluttdato
-                      </Button>
+                      <FjernKnapp onClick={() => field.field.onChange(null)}>Fjern sluttdato</FjernKnapp>
                     ) : null}
-                  </div>
+                  </MaanedvelgerMedUtnulling>
                 ) : (
                   <OppdrasSammenLes>
                     <Label>Til og med</Label>
@@ -253,20 +239,11 @@ const SoeskenjusteringPeriode = (props: SoeskenjusteringPeriodeProps) => {
               control={control}
             />
           </div>
-          <BodyShort style={{ margin: 'auto 0' }}>
+          <VertikalMidtstiltBodyShort>
             {antallSoeskenMed} i beregning, {antallSoeskenIkkeMed} ikke i beregning{' '}
             {antallSoeskenIkkeValgt ? <span>({antallSoeskenIkkeValgt} ikke valgt)</span> : null}
-          </BodyShort>
-          {canRemove ? (
-            <Button
-              style={{ height: 'fit-content', margin: 'auto 0' }}
-              size="xsmall"
-              variant="secondary"
-              onClick={remove}
-            >
-              Slett
-            </Button>
-          ) : null}
+          </VertikalMidtstiltBodyShort>
+          {canRemove ? <FjernKnapp onClick={remove}>Slett</FjernKnapp> : null}
         </PeriodeInfo>
       )}
     >
@@ -304,6 +281,16 @@ const SoeskenjusteringPeriode = (props: SoeskenjusteringPeriodeProps) => {
   )
 }
 
+const VertikalMidtstiltBodyShort = styled(BodyShort)`
+  margin: auto 0;
+`
+
+const FjernKnapp = styled(Button).attrs({ size: 'xsmall', variant: 'secondary' })`
+  height: fit-content;
+  width: fit-content;
+  margin: auto 0;
+`
+
 const UstiletListe = styled.ul`
   list-style-type: none;
 `
@@ -323,6 +310,13 @@ const OppdrasSammenLes = styled.div`
 const SoeskenContainer = styled.div`
   display: flex;
   align-items: center;
+`
+
+const MaanedvelgerMedUtnulling = styled.div`
+  display: flex;
+  justify-content: flex-start;
+  flex-direction: row;
+  gap: 1em;
 `
 
 const RadioGroupRow = styled(RadioGroup)`

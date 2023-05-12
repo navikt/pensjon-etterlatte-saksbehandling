@@ -22,12 +22,9 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
   const { behandling } = props
   const { next } = useBehandlingRoutes()
   const behandles = hentBehandlesFraStatus(behandling?.status)
-  const soeskenjustering = behandling.beregningsGrunnlag?.soeskenMedIBeregning
   const dispatch = useAppDispatch()
   const [lagreSoeskenMedIBeregningStatus, postSoeskenMedIBeregning] = useApiCall(lagreSoeskenMedIBeregning)
   const [endreBeregning, postOpprettEllerEndreBeregning] = useApiCall(opprettEllerEndreBeregning)
-
-  const soeskenjusteringErDefinertIRedux = soeskenjustering !== undefined
 
   if (behandling.kommerBarnetTilgode == null || behandling.familieforhold?.avdoede == null) {
     return <ApiErrorAlert>Familieforhold kan ikke hentes ut</ApiErrorAlert>
@@ -57,16 +54,14 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
 
       {behandles ? (
         <BehandlingHandlingKnapper>
-          {soeskenjusteringErDefinertIRedux && (
-            <Button
-              variant="primary"
-              size="medium"
-              form="form"
-              loading={isPending(lagreSoeskenMedIBeregningStatus) || isPending(endreBeregning)}
-            >
-              Beregne og fatte vedtak
-            </Button>
-          )}
+          <Button
+            variant="primary"
+            size="medium"
+            form="form"
+            loading={isPending(lagreSoeskenMedIBeregningStatus) || isPending(endreBeregning)}
+          >
+            Beregne og fatte vedtak
+          </Button>
         </BehandlingHandlingKnapper>
       ) : (
         <NesteOgTilbake />

@@ -13,7 +13,7 @@ import java.time.YearMonth
 
 class PeriodisertBeregningGrunnlagTest {
 
-    val perioderSomErKomplett = listOf<Pair<LocalDate, LocalDate?>>(
+    private val perioderSomErKomplett = listOf<Pair<LocalDate, LocalDate?>>(
         YearMonth.of(2022, Month.AUGUST).atDay(1) to YearMonth.of(
             2022,
             Month.DECEMBER
@@ -21,7 +21,7 @@ class PeriodisertBeregningGrunnlagTest {
         YearMonth.of(2023, Month.JANUARY).atDay(1) to null
     )
 
-    val perioderMedHull = listOf<Pair<LocalDate, LocalDate?>>(
+    private val perioderMedHull = listOf<Pair<LocalDate, LocalDate?>>(
         YearMonth.of(2022, Month.AUGUST).atDay(1) to YearMonth.of(
             2022,
             Month.AUGUST
@@ -29,7 +29,7 @@ class PeriodisertBeregningGrunnlagTest {
         YearMonth.of(2022, Month.DECEMBER).atDay(1) to YearMonth.of(2022, Month.DECEMBER).atEndOfMonth()
     )
 
-    val perioderMedOverlapp = listOf<Pair<LocalDate, LocalDate?>>(
+    private val perioderMedOverlapp = listOf<Pair<LocalDate, LocalDate?>>(
         YearMonth.of(2022, Month.AUGUST).atDay(1) to null,
         YearMonth.of(2023, Month.JANUARY).atDay(1) to null
     )

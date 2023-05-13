@@ -44,6 +44,9 @@ export const AttesterVedtak = ({ behandling, kommentar }: { behandling: IDetalje
       attesterVedtak(behandling.id, kommentar).then((response) => {
         if (response.status === 'ok') {
           navigate(`/person/${behandling.søker?.foedselsnummer}`)
+        } else {
+          setError(`Ukjent feil oppsto ved attestering av vedtaket... Prøv igjen.`)
+          setModalisOpen(false)
         }
       })
     }

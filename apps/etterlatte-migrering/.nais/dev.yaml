@@ -36,8 +36,8 @@ spec:
 
   replicas:
     cpuThresholdPercentage: 90
-    max: 4
-    min: 2
+    max: 1
+    min: 1
   env:
     - name: KAFKA_RAPID_TOPIC
       value: etterlatte.dodsmelding

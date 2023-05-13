@@ -1,7 +1,10 @@
-package no.nav.etterlatte.migrering
+package no.nav.etterlatte
 
 import no.nav.etterlatte.libs.database.KotliqueryRepository
 import no.nav.etterlatte.libs.database.migrate
+import no.nav.etterlatte.migrering.ApplicationContext
+import no.nav.etterlatte.migrering.Migrering
+import no.nav.etterlatte.migrering.PesysRepository
 import no.nav.helse.rapids_rivers.RapidApplication
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory

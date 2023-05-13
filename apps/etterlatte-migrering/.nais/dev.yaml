@@ -36,3 +36,9 @@ spec:
     cpuThresholdPercentage: 90
     max: 4
     min: 2
+  env:
+    - name: KAFKA_RAPID_TOPIC
+      value: etterlatte.dodsmelding
+    - name: KAFKA_RESET_POLICY
+      #sette tilbake til none senere
+      value: earliest

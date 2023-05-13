@@ -7,13 +7,12 @@ import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { useNavigate } from 'react-router'
 import { behandlingSkalSendeBrev } from '~components/behandling/felles/utils'
 import { hentVedtaksbrev } from '~shared/api/brev'
-import { isPending, useApiCall } from '~shared/hooks/useApiCall'
 
 export const AttesterVedtak = ({ behandling, kommentar }: { behandling: IDetaljertBehandling; kommentar: string }) => {
   const navigate = useNavigate()
   const [modalisOpen, setModalisOpen] = useState(false)
   const skalSendeBrev = behandlingSkalSendeBrev(behandling)
-  const [vedtaksbrevStatus, fetchVedtaksbrev] = useApiCall(hentVedtaksbrev)
+  const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string>()
 
   const vedtaksbrevErFerdigstilt = async () => {
@@ -21,20 +20,24 @@ export const AttesterVedtak = ({ behandling, kommentar }: { behandling: IDetalje
       return true
     }
 
-    return fetchVedtaksbrev(behandling.id, (vedtaksbrev) => {
-      if (vedtaksbrev.status === 'FERDIGSTILT') return true
-      else {
-        setError(`
-          Brev har feil status (${vedtaksbrev.status.toLowerCase()}).
-          Kan ikke attestere saken. Forsøk å laste siden på nytt.
-        `)
-        setModalisOpen(false)
-        return false
-      }
-    })
+    return hentVedtaksbrev(behandling.id)
+      .then((response) => {
+        if (response.status === 'ok') return response.data
+        else throw new Error('Ukjent feil oppsto ved verifisering av vedtaksbrev')
+      })
+      .then((vedtaksbrev) => {
+        if (vedtaksbrev.status === 'FERDIGSTILT') return true
+        else {
+          setError(`Brev har feil status (${vedtaksbrev.status.toLowerCase()}).
+                    Kan ikke attestere saken. Forsøk å laste siden på nytt.`)
+          setModalisOpen(false)
+          return false
+        }
+      })
   }
 
   const attester = async () => {
+    setLoading(true)
     const erVedtaksbrevFerdigstilt = await vedtaksbrevErFerdigstilt()
 
     if (erVedtaksbrevFerdigstilt) {
@@ -44,6 +47,7 @@ export const AttesterVedtak = ({ behandling, kommentar }: { behandling: IDetalje
         }
       })
     }
+    setLoading(false)
   }
 
   return (
@@ -66,7 +70,7 @@ export const AttesterVedtak = ({ behandling, kommentar }: { behandling: IDetalje
         onYesClick={attester}
         setModalisOpen={setModalisOpen}
         open={modalisOpen}
-        loading={isPending(vedtaksbrevStatus)}
+        loading={loading}
       />
     </BeslutningWrapper>
   )

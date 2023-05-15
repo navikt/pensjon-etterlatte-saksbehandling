@@ -40,7 +40,6 @@ data class AvkortingGrunnlagDto(
     val fom: YearMonth,
     val tom: YearMonth?,
     val aarsinntekt: Int,
-    val gjeldendeAar: Int,
     val spesifikasjon: String,
     val kilde: AvkortingGrunnlagKildeDto?
 )
@@ -53,5 +52,6 @@ data class AvkortingGrunnlagKildeDto(
 data class AvkortetYtelseDto(
     val fom: LocalDate,
     val tom: LocalDate?,
+    val avkortingsbeloep: Int,
     val ytelseEtterAvkorting: Int
 )

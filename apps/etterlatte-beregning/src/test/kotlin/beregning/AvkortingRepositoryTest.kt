@@ -50,7 +50,6 @@ internal class AvkortingRepositoryTest {
         val avkortinggrunnlag = AvkortingGrunnlag(
             periode = Periode(fom = YearMonth.now(), tom = null),
             aarsinntekt = 500000,
-            gjeldendeAar = 2023,
             spesifikasjon = "Grunnlag før endring",
             kilde = Grunnlagsopplysning.Saksbehandler.create("Z123456"),
             beregnetAvkorting = listOf(

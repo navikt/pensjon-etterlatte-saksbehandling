@@ -8,7 +8,6 @@ export interface IAvkortingGrunnlag {
   fom?: string
   tom?: string
   aarsinntekt?: number
-  gjeldendeAar?: number
   spesifikasjon?: string
   kilde?: {
     tidspunkt: ''
@@ -19,5 +18,6 @@ export interface IAvkortingGrunnlag {
 export interface IAvkortetYtelse {
   fom: string
   tom: string
+  avkortingsbeloep: number
   ytelseEtterAvkorting: number
 }

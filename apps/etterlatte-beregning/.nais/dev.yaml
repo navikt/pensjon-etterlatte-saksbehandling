@@ -21,7 +21,6 @@ spec:
     path: /metrics
   secureLogs:
     enabled: true
-  leaderElection: true
   replicas:
     cpuThresholdPercentage: 90
     max: 2
@@ -75,8 +74,6 @@ spec:
         - application: etterlatte-vilkaarsvurdering
         - application: etterlatte-behandling
         - application: etterlatte-trygdetid
-      external:
-        - host: unleash.nais.io
     inbound:
       rules:
         - application: etterlatte-saksbehandling-ui

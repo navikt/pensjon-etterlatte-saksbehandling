@@ -96,13 +96,14 @@ fun avkortetYtelseGrunnlag(bruttoYtelse: Int, avkorting: Int) = AvkortetYtelseGr
     avkorting = FaktumNode(verdi = avkorting, "", "")
 )
 
-fun avkortetYtelse() = AvkortetYtelse(
-    periode = Periode(fom = YearMonth.now(), tom = null),
-    ytelseEtterAvkorting = 100,
-    tidspunkt = Tidspunkt.now(),
-    regelResultat = "".toJsonNode(),
-    kilde = Grunnlagsopplysning.RegelKilde("regelid", Tidspunkt.now(), "1")
-)
+fun avkortetYtelse(ytelseEtterAvkorting: Int = 100, periode: Periode = Periode(fom = YearMonth.now(), tom = null)) =
+    AvkortetYtelse(
+        periode = periode,
+        ytelseEtterAvkorting = ytelseEtterAvkorting,
+        tidspunkt = Tidspunkt.now(),
+        regelResultat = "".toJsonNode(),
+        kilde = Grunnlagsopplysning.RegelKilde("regelid", Tidspunkt.now(), "1")
+    )
 
 fun beregning(
     beregninger: List<Beregningsperiode> = listOf(beregningsperiode())

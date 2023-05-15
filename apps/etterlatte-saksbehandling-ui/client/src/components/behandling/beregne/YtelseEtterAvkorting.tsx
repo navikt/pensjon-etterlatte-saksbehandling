@@ -20,7 +20,7 @@ export const YtelseEtterAvkorting = (props: { ytelser?: IAvkortetYtelse[] }) => 
               <Table.Row>
                 <Table.HeaderCell>Periode</Table.HeaderCell>
                 <Table.HeaderCell>Avkorting</Table.HeaderCell>
-                <Table.HeaderCell>Månedlig ytelse etter avkorting</Table.HeaderCell>
+                <Table.HeaderCell>Brutto stønad etter avkorting</Table.HeaderCell>
               </Table.Row>
             </Table.Header>
             <Table.Body>

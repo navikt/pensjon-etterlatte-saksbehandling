@@ -9,13 +9,14 @@ import { lagreAvkortingGrunnlag } from '~shared/api/avkorting'
 import { formaterDatoTilYearMonth, formaterStringDato } from '~utils/formattering'
 import { HjemmelLenke } from '~components/behandling/felles/HjemmelLenke'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
-import { useAppSelector } from '~store/Store'
+import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
 
 export const AvkortingInntekt = (props: {
+  behandling: IBehandlingReducer
   avkortingGrunnlag?: IAvkortingGrunnlag[]
   setAvkorting: (avkorting: IAvkorting) => void
 }) => {
-  const behandling = useAppSelector((state) => state.behandlingReducer.behandling)
+  const behandling = props.behandling
   const [inntektGrunnlag, setInntektGrunnlag] = useState<IAvkortingGrunnlag>(
     props.avkortingGrunnlag ? props.avkortingGrunnlag[0] : {}
   )

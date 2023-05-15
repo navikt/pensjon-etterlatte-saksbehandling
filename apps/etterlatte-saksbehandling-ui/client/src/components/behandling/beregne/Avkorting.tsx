@@ -7,25 +7,28 @@ import { AvkortingInntekt } from '~components/behandling/beregne/AvkortingInntek
 import { isPending } from '@reduxjs/toolkit'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
-import { useParams } from 'react-router-dom'
 import { YtelseEtterAvkorting } from '~components/behandling/beregne/YtelseEtterAvkorting'
+import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
 
-export const Avkorting = () => {
-  const { behandlingId } = useParams()
+export const Avkorting = (props: { behandling: IBehandlingReducer }) => {
+  const behandling = props.behandling
   const [avkortingStatus, hentAvkortingRequest] = useApiCall(hentAvkorting)
   const [avkorting, setAvkorting] = useState<IAvkorting>()
 
   useEffect(() => {
     if (!avkorting) {
-      if (!behandlingId) throw new Error('Mangler behandlingsid')
-      hentAvkortingRequest(behandlingId, (res) => setAvkorting(res))
+      hentAvkortingRequest(behandling.id, (res) => setAvkorting(res))
     }
   }, [])
 
   return (
     <AvkortingWrapper>
       {!['initial', 'pending'].includes(avkortingStatus.status) && (
-        <AvkortingInntekt avkortingGrunnlag={avkorting?.avkortingGrunnlag} setAvkorting={setAvkorting} />
+        <AvkortingInntekt
+          behandling={behandling}
+          avkortingGrunnlag={avkorting?.avkortingGrunnlag}
+          setAvkorting={setAvkorting}
+        />
       )}
 
       <YtelseEtterAvkorting ytelser={avkorting?.avkortetYtelse} />

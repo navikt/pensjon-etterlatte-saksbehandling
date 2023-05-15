@@ -1,4 +1,4 @@
-import { PeriodisertBeregningsgrunnlag } from '~components/behandling/beregningsgrunnlag/Soeskenjustering'
+import { PeriodisertBeregningsgrunnlag } from '~components/behandling/beregningsgrunnlag/PeriodisertBeregningsgrunnlag'
 
 export interface Beregning {
   beregningId: string

@@ -17,12 +17,10 @@ import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { ContentHeader } from '~shared/styled'
 import { FamilieforholdWrapper } from '~components/behandling/soeknadsoversikt/familieforhold/barnepensjon/FamilieforholdBarnepensjon'
-
-export interface PeriodisertBeregningsgrunnlag<G> {
-  fom: Date
-  tom?: Date
-  data: G
-}
+import {
+  FeilIPeriode,
+  PeriodisertBeregningsgrunnlag,
+} from '~components/behandling/beregningsgrunnlag/PeriodisertBeregningsgrunnlag'
 
 type SoeskenKanskjeMedIBeregning = {
   foedselsnummer: string
@@ -172,6 +170,22 @@ type SoeskenjusteringPeriodeProps = {
   watch: UseFormWatch<{ soeskengrunnlag: SoeskengrunnlagUtfylling }>
 }
 
+type FeilISoeskenPeriode = FeilIPeriode | 'IKKE_ALLE_VALGT'
+
+export function validerSoeskenjusteringsperiode(
+  grunnlag: PeriodisertBeregningsgrunnlag<SoeskenKanskjeMedIBeregning[]>
+): FeilISoeskenPeriode[] {
+  const feil: FeilISoeskenPeriode[] = []
+  const alleErValgt = grunnlag.data.every((person) => person.skalBrukes !== undefined && person.skalBrukes !== null)
+  if (!alleErValgt) {
+    feil.push('IKKE_ALLE_VALGT')
+  }
+  if (grunnlag.tom !== undefined && grunnlag.tom > grunnlag.fom) {
+    feil.push('TOM_FOER_FOM')
+  }
+  return feil
+}
+
 const SoeskenjusteringPeriode = (props: SoeskenjusteringPeriodeProps) => {
   const { control, index, remove, fnrTilSoesken, canRemove, behandling, watch } = props
   const { fields } = useFieldArray({
@@ -179,10 +193,11 @@ const SoeskenjusteringPeriode = (props: SoeskenjusteringPeriodeProps) => {
     control,
   })
 
-  const soeskenMedForPeriode = watch(`soeskengrunnlag.${index}.data`)
-  const antallSoeskenMed = soeskenMedForPeriode.filter((soesken) => soesken.skalBrukes === true).length
-  const antallSoeskenIkkeMed = soeskenMedForPeriode.filter((soesken) => soesken.skalBrukes === false).length
-  const antallSoeskenIkkeValgt = soeskenMedForPeriode.filter(
+  const grunnlag = watch(`soeskengrunnlag.${index}`)
+  const soeskenIPeriode = grunnlag.data
+  const antallSoeskenMed = soeskenIPeriode.filter((soesken) => soesken.skalBrukes === true).length
+  const antallSoeskenIkkeMed = soeskenIPeriode.filter((soesken) => soesken.skalBrukes === false).length
+  const antallSoeskenIkkeValgt = soeskenIPeriode.filter(
     (soesken) => soesken.skalBrukes === undefined || soesken.skalBrukes === null
   ).length
 

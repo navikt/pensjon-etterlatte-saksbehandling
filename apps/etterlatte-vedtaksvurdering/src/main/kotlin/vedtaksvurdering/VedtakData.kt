@@ -15,5 +15,5 @@ data class VedtakData(
 
 data class BeregningOgAvkorting(
     val beregning: BeregningDTO,
-    val avkorting: AvkortingDto
+    val avkorting: AvkortingDto? = null
 )

@@ -20,7 +20,6 @@ import no.nav.etterlatte.libs.common.sak.Sak
 import org.slf4j.LoggerFactory
 
 enum class SakServiceFeatureToggle(private val key: String) : FeatureToggle {
-    OpprettMedEnhetId("pensjon-etterlatte.opprett-sak-med-enhet-id"),
     FiltrerMedEnhetId("pensjon-etterlatte.filtrer-saker-med-enhet-id");
 
     override fun key() = key
@@ -88,11 +87,7 @@ class RealSakService(
             finnSakerForPersonOgType(fnr, type) ?: dao.opprettSak(
                 fnr,
                 type,
-                if (featureToggleService.isEnabled(SakServiceFeatureToggle.OpprettMedEnhetId, false)) {
-                    enhet ?: finnEnhetForPersonOgTema(fnr, type.tema, type).enhetNr
-                } else {
-                    null
-                }
+                enhet ?: finnEnhetForPersonOgTema(fnr, type.tema, type).enhetNr
             )
         }
         gradering?.let {

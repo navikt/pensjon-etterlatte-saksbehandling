@@ -12,10 +12,10 @@ spec:
     - "https://etterlatte-migrering.intern.dev.nav.no"
   liveness:
     initialDelay: 5
-    path: /health/isalive
+    path: /isalive
   readiness:
     initialDelay: 5
-    path: /health/isready
+    path: /isready
   kafka:
     pool: nav-dev
   prometheus:

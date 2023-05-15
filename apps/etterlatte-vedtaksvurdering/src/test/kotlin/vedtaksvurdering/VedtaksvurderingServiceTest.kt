@@ -18,6 +18,8 @@ import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
+import no.nav.etterlatte.libs.common.beregning.AvkortetYtelseDto
+import no.nav.etterlatte.libs.common.beregning.AvkortingDto
 import no.nav.etterlatte.libs.common.beregning.BeregningDTO
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
 import no.nav.etterlatte.libs.common.beregning.Beregningstype
@@ -54,6 +56,7 @@ import vedtaksvurdering.SAKSBEHANDLER_1
 import vedtaksvurdering.attestant
 import vedtaksvurdering.opprettVedtak
 import vedtaksvurdering.saksbehandler
+import java.math.BigDecimal
 import java.time.Month
 import java.time.YearMonth
 import java.util.*
@@ -120,9 +123,9 @@ internal class VedtaksvurderingServiceTest {
             ENHET_1
         )
         coEvery { vilkaarsvurderingKlientMock.hentVilkaarsvurdering(any(), any()) } returns mockVilkaarsvurdering()
-        coEvery { beregningKlientMock.hentBeregning(any(), any()) } returns mockBeregning(
-            virkningstidspunkt,
-            behandlingId
+        coEvery { beregningKlientMock.hentBeregningOgAvkorting(any(), any()) } returns BeregningOgAvkorting(
+            beregning = mockBeregning(virkningstidspunkt, behandlingId),
+            avkorting = mockAvkorting()
         )
 
         val vedtak = runBlocking { service.opprettEllerOppdaterVedtak(behandlingId, saksbehandler) }
@@ -146,9 +149,9 @@ internal class VedtaksvurderingServiceTest {
             behandlingId
         )
         coEvery { vilkaarsvurderingKlientMock.hentVilkaarsvurdering(any(), any()) } returns mockVilkaarsvurdering()
-        coEvery { beregningKlientMock.hentBeregning(any(), any()) } returns mockBeregning(
-            virkningstidspunkt,
-            behandlingId
+        coEvery { beregningKlientMock.hentBeregningOgAvkorting(any(), any()) } returns BeregningOgAvkorting(
+            beregning = mockBeregning(virkningstidspunkt, behandlingId),
+            avkorting = mockAvkorting()
         )
 
         val vedtak = runBlocking {
@@ -194,9 +197,9 @@ internal class VedtaksvurderingServiceTest {
             behandlingId
         )
         coEvery { vilkaarsvurderingKlientMock.hentVilkaarsvurdering(any(), any()) } returns mockVilkaarsvurdering()
-        coEvery { beregningKlientMock.hentBeregning(any(), any()) } returns mockBeregning(
-            virkningstidspunkt2024,
-            behandlingId
+        coEvery { beregningKlientMock.hentBeregningOgAvkorting(any(), any()) } returns BeregningOgAvkorting(
+            beregning = mockBeregning(virkningstidspunkt2024, behandlingId),
+            avkorting = mockAvkorting()
         )
         coEvery { behandlingKlientMock.hentSak(any(), any()) } returns Sak(
             SAKSBEHANDLER_1,
@@ -237,9 +240,9 @@ internal class VedtaksvurderingServiceTest {
             behandlingId
         )
         coEvery { vilkaarsvurderingKlientMock.hentVilkaarsvurdering(any(), any()) } returns mockVilkaarsvurdering()
-        coEvery { beregningKlientMock.hentBeregning(any(), any()) } returns mockBeregning(
-            virkningstidspunkt,
-            behandlingId
+        coEvery { beregningKlientMock.hentBeregningOgAvkorting(any(), any()) } returns BeregningOgAvkorting(
+            beregning = mockBeregning(virkningstidspunkt, behandlingId),
+            avkorting = mockAvkorting()
         )
 
         val fattetVedtak = runBlocking {
@@ -316,9 +319,9 @@ internal class VedtaksvurderingServiceTest {
             behandlingId
         )
         coEvery { vilkaarsvurderingKlientMock.hentVilkaarsvurdering(any(), any()) } returns mockVilkaarsvurdering()
-        coEvery { beregningKlientMock.hentBeregning(any(), any()) } returns mockBeregning(
-            virkningstidspunkt,
-            behandlingId
+        coEvery { beregningKlientMock.hentBeregningOgAvkorting(any(), any()) } returns BeregningOgAvkorting(
+            beregning = mockBeregning(virkningstidspunkt, behandlingId),
+            avkorting = mockAvkorting()
         )
 
         val attestertVedtak = runBlocking {
@@ -380,9 +383,9 @@ internal class VedtaksvurderingServiceTest {
         coEvery { behandlingKlientMock.attester(any(), any(), any()) } returns true
         coEvery { behandlingKlientMock.hentBehandling(any(), any()) } returns regulering
         coEvery { vilkaarsvurderingKlientMock.hentVilkaarsvurdering(any(), any()) } returns mockVilkaarsvurdering()
-        coEvery { beregningKlientMock.hentBeregning(any(), any()) } returns mockBeregning(
-            virkningstidspunkt,
-            behandlingId
+        coEvery { beregningKlientMock.hentBeregningOgAvkorting(any(), any()) } returns BeregningOgAvkorting(
+            beregning = mockBeregning(virkningstidspunkt, behandlingId),
+            avkorting = mockAvkorting()
         )
 
         runBlocking {
@@ -460,9 +463,9 @@ internal class VedtaksvurderingServiceTest {
             )
         } returns mockBehandling(VIRKNINGSTIDSPUNKT_JAN_2023, behandlingId)
         coEvery { vilkaarsvurderingKlientMock.hentVilkaarsvurdering(any(), any()) } returns mockVilkaarsvurdering()
-        coEvery { beregningKlientMock.hentBeregning(any(), any()) } returns mockBeregning(
-            VIRKNINGSTIDSPUNKT_JAN_2023,
-            behandlingId
+        coEvery { beregningKlientMock.hentBeregningOgAvkorting(any(), any()) } returns BeregningOgAvkorting(
+            beregning = mockBeregning(VIRKNINGSTIDSPUNKT_JAN_2023, behandlingId),
+            avkorting = mockAvkorting()
         )
 
         runBlocking {
@@ -495,9 +498,9 @@ internal class VedtaksvurderingServiceTest {
             behandlingId
         )
         coEvery { vilkaarsvurderingKlientMock.hentVilkaarsvurdering(any(), any()) } returns mockVilkaarsvurdering()
-        coEvery { beregningKlientMock.hentBeregning(any(), any()) } returns mockBeregning(
-            virkningstidspunkt,
-            behandlingId
+        coEvery { beregningKlientMock.hentBeregningOgAvkorting(any(), any()) } returns BeregningOgAvkorting(
+            beregning = mockBeregning(virkningstidspunkt, behandlingId),
+            avkorting = mockAvkorting()
         )
 
         val iverksattVedtak = runBlocking {
@@ -548,9 +551,9 @@ internal class VedtaksvurderingServiceTest {
             )
         } returns mockBehandling(VIRKNINGSTIDSPUNKT_JAN_2023, behandlingId)
         coEvery { vilkaarsvurderingKlientMock.hentVilkaarsvurdering(any(), any()) } returns mockVilkaarsvurdering()
-        coEvery { beregningKlientMock.hentBeregning(any(), any()) } returns mockBeregning(
-            VIRKNINGSTIDSPUNKT_JAN_2023,
-            behandlingId
+        coEvery { beregningKlientMock.hentBeregningOgAvkorting(any(), any()) } returns BeregningOgAvkorting(
+            beregning = mockBeregning(VIRKNINGSTIDSPUNKT_JAN_2023, behandlingId),
+            avkorting = mockAvkorting()
         )
 
         runBlocking {
@@ -583,9 +586,9 @@ internal class VedtaksvurderingServiceTest {
             behandlingId
         )
         coEvery { vilkaarsvurderingKlientMock.hentVilkaarsvurdering(any(), any()) } returns mockVilkaarsvurdering()
-        coEvery { beregningKlientMock.hentBeregning(any(), any()) } returns mockBeregning(
-            virkningstidspunkt,
-            behandlingId
+        coEvery { beregningKlientMock.hentBeregningOgAvkorting(any(), any()) } returns BeregningOgAvkorting(
+            beregning = mockBeregning(virkningstidspunkt, behandlingId),
+            avkorting = mockAvkorting()
         )
 
         val underkjentVedtak = runBlocking {
@@ -658,9 +661,9 @@ internal class VedtaksvurderingServiceTest {
             )
         } returns mockBehandling(VIRKNINGSTIDSPUNKT_JAN_2023, behandlingId)
         coEvery { vilkaarsvurderingKlientMock.hentVilkaarsvurdering(any(), any()) } returns mockVilkaarsvurdering()
-        coEvery { beregningKlientMock.hentBeregning(any(), any()) } returns mockBeregning(
-            VIRKNINGSTIDSPUNKT_JAN_2023,
-            behandlingId
+        coEvery { beregningKlientMock.hentBeregningOgAvkorting(any(), any()) } returns BeregningOgAvkorting(
+            beregning = mockBeregning(VIRKNINGSTIDSPUNKT_JAN_2023, behandlingId),
+            avkorting = mockAvkorting()
         )
 
         runBlocking {
@@ -686,6 +689,47 @@ internal class VedtaksvurderingServiceTest {
         }
     }
 
+    @Test
+    fun `skal sette utbetaling`() {
+        val behandlingId = randomUUID()
+        val virkningstidspunkt = YearMonth.now()
+
+        coEvery { behandlingKlientMock.hentBehandling(any(), any()) } returns mockBehandling(
+            virkningstidspunkt,
+            behandlingId,
+            SakType.BARNEPENSJON
+        )
+        coEvery { vilkaarsvurderingKlientMock.hentVilkaarsvurdering(any(), any()) } returns mockVilkaarsvurdering()
+        coEvery { beregningKlientMock.hentBeregningOgAvkorting(any(), any()) } returns BeregningOgAvkorting(
+            beregning = mockBeregning(virkningstidspunkt, behandlingId),
+            avkorting = mockAvkorting(virkningstidspunkt)
+        )
+        coEvery { behandlingKlientMock.hentSak(any(), any()) } returns Sak(
+            SAKSBEHANDLER_1,
+            SakType.BARNEPENSJON,
+            1L,
+            ENHET_1
+        )
+
+        with(runBlocking { service.opprettEllerOppdaterVedtak(behandlingId, saksbehandler) }) {
+            utbetalingsperioder.size shouldBe 1
+            utbetalingsperioder[0].beloep shouldBe BigDecimal(100)
+            utbetalingsperioder[0].periode.fom shouldBe virkningstidspunkt
+        }
+
+        coEvery { behandlingKlientMock.hentBehandling(any(), any()) } returns mockBehandling(
+            virkningstidspunkt,
+            behandlingId,
+            SakType.OMSTILLINGSSTOENAD
+        )
+
+        with(runBlocking { service.opprettEllerOppdaterVedtak(behandlingId, saksbehandler) }) {
+            utbetalingsperioder.size shouldBe 1
+            utbetalingsperioder[0].beloep shouldBe BigDecimal(50)
+            utbetalingsperioder[0].periode.fom shouldBe virkningstidspunkt
+        }
+    }
+
     private fun underkjennVedtakBegrunnelse() = UnderkjennVedtakDto("Vedtaket er ugyldig", "Annet")
 
     private fun mockBeregning(virkningstidspunkt: YearMonth, behandlingId_: UUID): BeregningDTO =
@@ -707,15 +751,31 @@ internal class VedtaksvurderingServiceTest {
             )
         }
 
+    private fun mockAvkorting(
+        virkningstidspunkt: YearMonth = YearMonth.now()
+    ): AvkortingDto = mockk(relaxed = true) {
+        every { avkortetYtelse } returns listOf(
+            AvkortetYtelseDto(
+                fom = virkningstidspunkt.atDay(1),
+                tom = null,
+                ytelseEtterAvkorting = 50
+            )
+        )
+    }
+
     private fun mockVilkaarsvurdering(): VilkaarsvurderingDto = mockk(relaxed = true) {
         every { resultat?.utfall } returns VilkaarsvurderingUtfall.OPPFYLT
     }
 
-    private fun mockBehandling(virk: YearMonth, behandlingId: UUID): DetaljertBehandling = mockk {
+    private fun mockBehandling(
+        virk: YearMonth,
+        behandlingId: UUID,
+        saktype: SakType = SakType.BARNEPENSJON
+    ): DetaljertBehandling = mockk {
         every { id } returns behandlingId
         every { soeker } returns FNR_1
         every { sak } returns 1L
-        every { sakType } returns SakType.BARNEPENSJON
+        every { sakType } returns saktype
         every { behandlingType } returns BehandlingType.FØRSTEGANGSBEHANDLING
         every { revurderingsaarsak } returns null
         every { virkningstidspunkt } returns Virkningstidspunkt(

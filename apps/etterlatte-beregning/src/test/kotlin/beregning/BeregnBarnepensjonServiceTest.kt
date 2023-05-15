@@ -9,6 +9,7 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlag
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlagService
 import no.nav.etterlatte.beregning.grunnlag.GrunnlagMedPeriode
+import no.nav.etterlatte.beregning.grunnlag.Institusjonsopphold
 import no.nav.etterlatte.beregning.klienter.GrunnlagKlientImpl
 import no.nav.etterlatte.beregning.klienter.VilkaarsvurderingKlient
 import no.nav.etterlatte.beregning.regler.FNR_1
@@ -278,7 +279,8 @@ internal class BeregnBarnepensjonServiceTest {
                         )
                     }
                 )
-            )
+            ),
+            institusjonsopphold = Institusjonsopphold(false)
 
         )
 

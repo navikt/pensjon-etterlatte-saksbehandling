@@ -25,7 +25,8 @@ class Grunnlag(
         familie.filter { it.hentPersonrolle()?.verdi == PersonRolle.BARN }
 
     private fun hentFamiliemedlem(personRolle: PersonRolle) =
-        familie.find { it.hentPersonrolle()?.verdi == personRolle }!!
+        familie.find { it.hentPersonrolle()?.verdi == personRolle }
+            ?: throw IllegalStateException("Fant ikke familiemedlem med rolle $personRolle")
 
     fun hentVersjon() = metadata.versjon
 }

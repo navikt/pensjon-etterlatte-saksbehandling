@@ -10,6 +10,7 @@ import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlag
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlagRepository
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlagService
 import no.nav.etterlatte.beregning.grunnlag.GrunnlagMedPeriode
+import no.nav.etterlatte.beregning.grunnlag.Institusjonsopphold
 import no.nav.etterlatte.beregning.klienter.BehandlingKlientImpl
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
@@ -47,6 +48,7 @@ internal class BeregningsGrunnlagServiceTest {
                 )
             )
         )
+        val institusjonsopphold = Institusjonsopphold(false)
 
         val behandling = mockBehandling(SakType.BARNEPENSJON, randomUUID())
 
@@ -58,7 +60,7 @@ internal class BeregningsGrunnlagServiceTest {
         runBlocking {
             beregningsGrunnlagService.lagreBarnepensjonBeregningsGrunnlag(
                 randomUUID(),
-                BarnepensjonBeregningsGrunnlag(soeskenMedIBeregning),
+                BarnepensjonBeregningsGrunnlag(soeskenMedIBeregning, institusjonsopphold),
                 mockk {
                     every { ident() } returns "Z123456"
                 }
@@ -81,7 +83,8 @@ internal class BeregningsGrunnlagServiceTest {
         every { beregningsGrunnlagRepository.finnGrunnlagForBehandling(behandlingsId) } returns BeregningsGrunnlag(
             behandlingsId,
             Grunnlagsopplysning.Saksbehandler("Z123456", Tidspunkt.now()),
-            emptyList()
+            emptyList(),
+            Institusjonsopphold(false)
         )
         every { beregningsGrunnlagRepository.lagre(any()) } returns true
 
@@ -123,7 +126,8 @@ internal class BeregningsGrunnlagServiceTest {
         every { beregningsGrunnlagRepository.finnGrunnlagForBehandling(any()) } returns BeregningsGrunnlag(
             behandlingsId,
             Grunnlagsopplysning.Saksbehandler("Z123456", Tidspunkt.now()),
-            emptyList()
+            emptyList(),
+            Institusjonsopphold(false)
         )
 
         runBlocking {

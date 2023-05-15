@@ -10,7 +10,7 @@ import { addMonths, format } from 'date-fns'
 import PeriodeAccordion from '~components/behandling/beregningsgrunnlag/PeriodeAccordion'
 import MaanedVelger from '~components/behandling/beregningsgrunnlag/MaanedVelger'
 import { SoeskenMedIBeregning } from '~shared/types/Beregning'
-import { hentSoeskenjusteringsgrunnlag } from '~shared/api/beregning'
+import { hentBeregningsGrunnlag } from '~shared/api/beregning'
 import { Barn } from '~components/behandling/soeknadsoversikt/familieforhold/personer/Barn'
 import { Border, HeadingWrapper } from '~components/behandling/soeknadsoversikt/styled'
 import Spinner from '~shared/Spinner'
@@ -57,7 +57,7 @@ const Soeskenjustering = (props: SoeskenjusteringProps) => {
     control,
   })
   const soeskenjustering = behandling.beregningsGrunnlag?.soeskenMedIBeregning
-  const [soeskenjusteringGrunnlag, fetchSoeskengjusteringGrunnlag] = useApiCall(hentSoeskenjusteringsgrunnlag)
+  const [soeskenjusteringGrunnlag, fetchSoeskengjusteringGrunnlag] = useApiCall(hentBeregningsGrunnlag)
   const soeskenjusteringErDefinertIRedux = soeskenjustering !== undefined
 
   const sisteTom = watch(`soeskengrunnlag.${fields.length - 1}.tom`)

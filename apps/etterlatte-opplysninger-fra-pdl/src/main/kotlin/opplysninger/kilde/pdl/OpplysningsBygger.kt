@@ -15,6 +15,7 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.F
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.FOEDSELSNUMMER
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.GJENLEVENDE_FORELDER_PDL_V1
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.KONTAKTADRESSE
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.MIGRERING
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.NAVN
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.OPPHOLDSADRESSE
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.PERSONROLLE
@@ -72,7 +73,7 @@ class Opplysningsbolk(private val fnr: Folkeregisteridentifikator, private val i
 fun lagEnkelopplysningerFraPDL(
     person: Person,
     personDTO: PersonDTO,
-    opplysningsbehov: Opplysningstype, // AVDOED_PDL_V1 || SOEKER_PDL_V1 || GJENLEVENDE_PDL_V1
+    opplysningsbehov: Opplysningstype, // AVDOED_PDL_V1 || SOEKER_PDL_V1 || GJENLEVENDE_PDL_V1 || MIGRERING
     fnr: Folkeregisteridentifikator
 ): List<Grunnlagsopplysning<*>> {
     val tidspunktForInnhenting = Tidspunkt.now()
@@ -115,5 +116,6 @@ private fun behovNameTilPersonRolle(opplysningstype: Opplysningstype): PersonRol
     AVDOED_PDL_V1 -> PersonRolle.AVDOED
     GJENLEVENDE_FORELDER_PDL_V1 -> PersonRolle.GJENLEVENDE
     SOEKER_PDL_V1 -> PersonRolle.BARN
-    else -> throw Exception("Ugyldig opplysningsbehov")
+    MIGRERING -> PersonRolle.AVDOED
+    else -> throw Exception("Ugyldig opplysningsbehov $opplysningstype")
 }

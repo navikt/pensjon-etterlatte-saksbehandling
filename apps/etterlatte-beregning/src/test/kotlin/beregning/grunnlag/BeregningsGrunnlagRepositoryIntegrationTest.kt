@@ -4,6 +4,7 @@ import io.mockk.clearAllMocks
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlag
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlagRepository
 import no.nav.etterlatte.beregning.grunnlag.GrunnlagMedPeriode
+import no.nav.etterlatte.beregning.grunnlag.Institusjonsopphold
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeskenMedIBeregning
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
@@ -67,6 +68,7 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest {
         val id = UUID.randomUUID()
 
         val soeskenMedIBeregning = listOf(SoeskenMedIBeregning(STOR_SNERK, true)).somPeriodisertGrunnlag()
+        val institusjonsopphold = Institusjonsopphold(false)
 
         repository.lagre(
             BeregningsGrunnlag(
@@ -75,7 +77,8 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest {
                     ident = "Z123456",
                     Tidspunkt.now()
                 ),
-                soeskenMedIBeregning
+                soeskenMedIBeregning,
+                institusjonsopphold
             )
         )
 
@@ -84,6 +87,7 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest {
         assertNotNull(result)
 
         assertEquals(soeskenMedIBeregning, result?.soeskenMedIBeregning)
+        assertEquals(institusjonsopphold, result?.institusjonsopphold)
     }
 
     @Test
@@ -96,6 +100,9 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest {
             SoeskenMedIBeregning(TRIVIELL_MIDTPUNKT, true)
         ).somPeriodisertGrunnlag()
 
+        val initialInstitusjonsopphold = Institusjonsopphold(false)
+        val oppdatertInstitusjonsopphold = Institusjonsopphold(true)
+
         repository.lagre(
             BeregningsGrunnlag(
                 id,
@@ -103,7 +110,8 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest {
                     ident = "Z123456",
                     Tidspunkt.now()
                 ),
-                initialSoeskenMedIBeregning
+                initialSoeskenMedIBeregning,
+                initialInstitusjonsopphold
             )
         )
 
@@ -114,7 +122,8 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest {
                     ident = "Z654321",
                     Tidspunkt.now()
                 ),
-                oppdatertSoeskenMedIBeregning
+                oppdatertSoeskenMedIBeregning,
+                oppdatertInstitusjonsopphold
             )
         )
 
@@ -123,6 +132,7 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest {
         assertNotNull(result)
 
         assertEquals(oppdatertSoeskenMedIBeregning, result?.soeskenMedIBeregning)
+        assertEquals(oppdatertInstitusjonsopphold, result?.institusjonsopphold)
         assertEquals("Z654321", result?.kilde?.ident)
     }
 

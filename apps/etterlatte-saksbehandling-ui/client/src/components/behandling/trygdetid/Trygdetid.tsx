@@ -13,8 +13,8 @@ import { Grunnlagopplysninger } from '~components/behandling/trygdetid/Grunnlago
 
 export const Trygdetid = () => {
   const { behandlingId } = useParams()
-  const [trygdetidStatus, fetchTrygdetid] = useApiCall(hentTrygdetid)
-  const [, requestOpprettTrygdetid] = useApiCall(opprettTrygdetid)
+  const [hentTrygdetidRequest, fetchTrygdetid] = useApiCall(hentTrygdetid)
+  const [opprettTrygdetidRequest, requestOpprettTrygdetid] = useApiCall(opprettTrygdetid)
   const [trygdetid, setTrygdetid] = useState<ITrygdetid>()
 
   useEffect(() => {
@@ -64,8 +64,9 @@ export const Trygdetid = () => {
           <TrygdetidBeregnet trygdetid={trygdetid} setTrygdetid={setTrygdetid} />
         </>
       )}
-      {isPending(trygdetidStatus) && <Spinner visible={true} label={'Henter trygdetid'} />}
-      {isFailure(trygdetidStatus) && <ApiErrorAlert>En feil har oppstått</ApiErrorAlert>}
+      {isPending(hentTrygdetidRequest) && <Spinner visible={true} label={'Henter trygdetid'} />}
+      {isPending(opprettTrygdetidRequest) && <Spinner visible={true} label={'Oppretter trygdetid'} />}
+      {isFailure(hentTrygdetidRequest) && <ApiErrorAlert>En feil har oppstått</ApiErrorAlert>}
     </TrygdetidWrapper>
   )
 }

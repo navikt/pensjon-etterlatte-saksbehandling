@@ -6,7 +6,7 @@ import { NesteOgTilbake } from '../handlinger/NesteOgTilbake'
 import { useAppDispatch } from '~store/Store'
 import { opprettEllerEndreBeregning } from '~shared/api/beregning'
 import { isFailure, isPending, useApiCall } from '~shared/hooks/useApiCall'
-import { lagreSoeskenMedIBeregning } from '~shared/api/beregning'
+import { lagreBeregningsGrunnlag } from '~shared/api/beregning'
 import {
   IBehandlingReducer,
   oppdaterBehandlingsstatus,
@@ -17,13 +17,14 @@ import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import Trygdetid from '~components/behandling/beregningsgrunnlag/Trygdetid'
 import Soeskenjustering, { Soeskengrunnlag } from '~components/behandling/beregningsgrunnlag/Soeskenjustering'
+import { Institusjonsopphold } from '~shared/types/Beregning'
 
 const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer }) => {
   const { behandling } = props
   const { next } = useBehandlingRoutes()
   const behandles = hentBehandlesFraStatus(behandling?.status)
   const dispatch = useAppDispatch()
-  const [lagreSoeskenMedIBeregningStatus, postSoeskenMedIBeregning] = useApiCall(lagreSoeskenMedIBeregning)
+  const [lagreSoeskenMedIBeregningStatus, postSoeskenMedIBeregning] = useApiCall(lagreBeregningsGrunnlag)
   const [endreBeregning, postOpprettEllerEndreBeregning] = useApiCall(opprettEllerEndreBeregning)
 
   if (behandling.kommerBarnetTilgode == null || behandling.familieforhold?.avdoede == null) {
@@ -31,17 +32,26 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
   }
 
   const onSubmit = (soeskengrunnlag: Soeskengrunnlag) => {
+    // TODO EY-2170
+    const institusjonsopphold = { institusjonsopphold: false } as Institusjonsopphold
     dispatch(resetBeregning())
-    postSoeskenMedIBeregning({ behandlingsId: behandling.id, soeskenMedIBeregning: soeskengrunnlag }, () =>
-      postOpprettEllerEndreBeregning(behandling.id, () => {
-        dispatch(
-          oppdaterBeregingsGrunnlag({
-            soeskenMedIBeregning: soeskengrunnlag,
-          })
-        )
-        dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.BEREGNET))
-        next()
-      })
+    postSoeskenMedIBeregning(
+      {
+        behandlingsId: behandling.id,
+        soeskenMedIBeregning: soeskengrunnlag,
+        institusjonsopphold: institusjonsopphold,
+      },
+      () =>
+        postOpprettEllerEndreBeregning(behandling.id, () => {
+          dispatch(
+            oppdaterBeregingsGrunnlag({
+              soeskenMedIBeregning: soeskengrunnlag,
+              institusjonsopphold: institusjonsopphold,
+            })
+          )
+          dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.BEREGNET))
+          next()
+        })
     )
   }
   return (

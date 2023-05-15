@@ -11,6 +11,7 @@ import no.nav.etterlatte.libs.regler.benytter
 import no.nav.etterlatte.libs.regler.finnFaktumIGrunnlag
 import no.nav.etterlatte.libs.regler.med
 import no.nav.etterlatte.libs.regler.og
+import kotlin.math.max
 
 data class AvkortetYtelseGrunnlag(
     val periode: RegelPeriode,
@@ -37,5 +38,8 @@ val avkorteYtelse = RegelMeta(
     beskrivelse = "Finner endelig ytelse ved å trekke avkortingsbeløp fra bruttoytelse",
     regelReferanse = RegelReferanse(id = "TODO")
 ) benytter bruttoYtelse og avkortingsbeloep med { bruttoYtelse, avkortingsbeloep ->
-    Beregningstall(bruttoYtelse).minus(Beregningstall(avkortingsbeloep)).toInteger()
+    Beregningstall(bruttoYtelse)
+        .minus(Beregningstall(avkortingsbeloep))
+        .toInteger()
+        .let { max(it, 0) }
 }

@@ -4,7 +4,7 @@ import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
-import no.nav.etterlatte.libs.common.beregning.BeregningDTO
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.SKAL_SENDE_BREV
@@ -67,7 +67,7 @@ class VedtaksvurderingService(
             verifiserGyldigVedtakStatus(vedtak.status, listOf(VedtakStatus.OPPRETTET, VedtakStatus.RETURNERT))
         }
 
-        val (behandling, vilkaarsvurdering, beregning) = hentDataForVedtak(behandlingId, bruker)
+        val (behandling, vilkaarsvurdering, beregningOgAvkorting) = hentDataForVedtak(behandlingId, bruker)
         val vedtakType = vedtakType(behandling.behandlingType, vilkaarsvurdering)
         val virkningstidspunkt = requireNotNull(behandling.virkningstidspunkt?.dato) {
             "Behandling med behandlingId=$behandlingId mangler virkningstidspunkt"
@@ -75,10 +75,10 @@ class VedtaksvurderingService(
 
         return if (vedtak != null) {
             logger.info("Oppdaterer vedtak for behandling med behandlingId=$behandlingId")
-            oppdaterVedtak(vedtak, vedtakType, virkningstidspunkt, beregning, vilkaarsvurdering)
+            oppdaterVedtak(behandling, vedtak, vedtakType, virkningstidspunkt, beregningOgAvkorting, vilkaarsvurdering)
         } else {
             logger.info("Oppretter vedtak for behandling med behandlingId=$behandlingId")
-            opprettVedtak(behandling, vedtakType, virkningstidspunkt, beregning, vilkaarsvurdering)
+            opprettVedtak(behandling, vedtakType, virkningstidspunkt, beregningOgAvkorting, vilkaarsvurdering)
         }
     }
 
@@ -245,7 +245,7 @@ class VedtaksvurderingService(
         behandling: DetaljertBehandling,
         vedtakType: VedtakType,
         virkningstidspunkt: YearMonth,
-        beregning: BeregningDTO?,
+        beregningOgAvkorting: BeregningOgAvkorting?,
         vilkaarsvurdering: VilkaarsvurderingDto?
     ): Vedtak {
         val opprettetVedtak = OpprettVedtak(
@@ -257,12 +257,14 @@ class VedtaksvurderingService(
             virkningstidspunkt = virkningstidspunkt,
             status = VedtakStatus.OPPRETTET,
             type = vedtakType,
-            beregning = beregning?.toObjectNode(),
+            beregning = beregningOgAvkorting?.beregning?.toObjectNode(),
+            avkorting = beregningOgAvkorting?.avkorting?.toObjectNode(),
             vilkaarsvurdering = vilkaarsvurdering?.toObjectNode(),
             utbetalingsperioder = opprettUtbetalingsperioder(
                 vedtakType = vedtakType,
                 virkningstidspunkt = virkningstidspunkt,
-                beregning = beregning
+                beregningOgAvkorting = beregningOgAvkorting,
+                behandling.sakType
             )
         )
 
@@ -270,20 +272,23 @@ class VedtaksvurderingService(
     }
 
     private fun oppdaterVedtak(
+        behandling: DetaljertBehandling,
         eksisterendeVedtak: Vedtak,
         vedtakType: VedtakType,
         virkningstidspunkt: YearMonth,
-        beregning: BeregningDTO?,
+        beregningOgAvkorting: BeregningOgAvkorting?,
         vilkaarsvurdering: VilkaarsvurderingDto?
     ): Vedtak {
         val oppdatertVedtak = eksisterendeVedtak.copy(
             virkningstidspunkt = virkningstidspunkt,
-            beregning = beregning?.toObjectNode(),
+            beregning = beregningOgAvkorting?.beregning?.toObjectNode(),
+            avkorting = beregningOgAvkorting?.avkorting?.toObjectNode(),
             vilkaarsvurdering = vilkaarsvurdering?.toObjectNode(),
             utbetalingsperioder = opprettUtbetalingsperioder(
                 vedtakType = vedtakType,
                 virkningstidspunkt = virkningstidspunkt,
-                beregning = beregning
+                beregningOgAvkorting = beregningOgAvkorting,
+                behandling.sakType
             )
         )
         return repository.oppdaterVedtak(oppdatertVedtak)
@@ -315,17 +320,34 @@ class VedtaksvurderingService(
     private fun opprettUtbetalingsperioder(
         vedtakType: VedtakType,
         virkningstidspunkt: YearMonth,
-        beregning: BeregningDTO?
+        beregningOgAvkorting: BeregningOgAvkorting?,
+        sakType: SakType
     ): List<Utbetalingsperiode> {
         return when (vedtakType) {
             VedtakType.INNVILGELSE, VedtakType.ENDRING -> {
-                val nonNullBeregning = requireNotNull(beregning) { "Mangler beregning" }
-                nonNullBeregning.beregningsperioder.map {
-                    Utbetalingsperiode(
-                        periode = Periode(it.datoFOM, it.datoTOM),
-                        beloep = it.utbetaltBeloep.toBigDecimal(),
-                        type = UtbetalingsperiodeType.UTBETALING
-                    )
+                // TODO Skal endres når barnepensjon tar i bruk avkorting
+                if (sakType == SakType.BARNEPENSJON) {
+                    val beregningsperioder = requireNotNull(beregningOgAvkorting?.beregning?.beregningsperioder) {
+                        "Mangler beregning"
+                    }
+                    beregningsperioder.map {
+                        Utbetalingsperiode(
+                            periode = Periode(it.datoFOM, it.datoTOM),
+                            beloep = it.utbetaltBeloep.toBigDecimal(),
+                            type = UtbetalingsperiodeType.UTBETALING
+                        )
+                    }
+                } else {
+                    val avkortetYtelse = requireNotNull(beregningOgAvkorting?.avkorting?.avkortetYtelse) {
+                        "Mangler avkortet ytelse"
+                    }
+                    avkortetYtelse.map {
+                        Utbetalingsperiode(
+                            periode = Periode(YearMonth.from(it.fom), YearMonth.from(it.fom)),
+                            beloep = it.ytelseEtterAvkorting.toBigDecimal(),
+                            type = UtbetalingsperiodeType.UTBETALING
+                        )
+                    }
                 }
             }
 
@@ -357,8 +379,8 @@ class VedtaksvurderingService(
                     when (vilkaarsvurdering?.resultat?.utfall) {
                         VilkaarsvurderingUtfall.IKKE_OPPFYLT -> VedtakData(behandling, vilkaarsvurdering, null, sak)
                         VilkaarsvurderingUtfall.OPPFYLT -> {
-                            val beregning = beregningKlient.hentBeregning(behandlingId, bruker)
-                            VedtakData(behandling, vilkaarsvurdering, beregning, sak)
+                            val beregningOgAvkorting = beregningKlient.hentBeregningOgAvkorting(behandlingId, bruker)
+                            VedtakData(behandling, vilkaarsvurdering, beregningOgAvkorting, sak)
                         }
 
                         null -> throw Exception("Mangler resultat av vilkårsvurdering for behandling $behandlingId")

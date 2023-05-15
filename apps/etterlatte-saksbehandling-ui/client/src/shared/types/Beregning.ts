@@ -33,6 +33,7 @@ export interface Beregningsperiode {
 export interface BeregningsGrunnlag<K> {
   behandlingId: string
   kilde: K
+  institusjonsopphold: Institusjonsopphold
   soeskenMedIBeregning: PeriodisertBeregningsgrunnlag<SoeskenMedIBeregning[]>[]
 }
 
@@ -43,4 +44,9 @@ export interface SoeskenMedIBeregning {
 
 export interface BeregningsGrunnlagData {
   soeskenMedIBeregning: PeriodisertBeregningsgrunnlag<SoeskenMedIBeregning[]>[]
+  institusjonsopphold: Institusjonsopphold
+}
+
+export interface Institusjonsopphold {
+  institusjonsopphold: boolean
 }

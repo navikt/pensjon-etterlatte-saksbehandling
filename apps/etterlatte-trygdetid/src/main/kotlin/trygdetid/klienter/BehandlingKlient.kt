@@ -7,6 +7,7 @@ import io.ktor.client.HttpClient
 import no.nav.etterlatte.libs.common.BehandlingTilgangsSjekk
 import no.nav.etterlatte.libs.common.RetryResult
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
+import no.nav.etterlatte.libs.common.logging.samleExceptions
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.retry
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
@@ -104,7 +105,7 @@ class BehandlingKlient(config: Config, httpClient: HttpClient) : BehandlingTilga
                 is RetryResult.Failure -> {
                     throw BehandlingKlientException(
                         "Klarte ikke hente behandling med behandlingId=$behandlingId",
-                        it.exceptions.last()
+                        samleExceptions(it.exceptions)
                     )
                 }
             }

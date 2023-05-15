@@ -10,6 +10,7 @@ import io.ktor.http.ContentType.Application.Json
 import io.ktor.http.contentType
 import no.nav.etterlatte.libs.common.RetryResult
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.logging.samleExceptions
 import no.nav.etterlatte.libs.common.person.Behandlingsnummer
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.HentGeografiskTilknytningRequest
@@ -41,7 +42,7 @@ class PdlKlient(private val httpClient: HttpClient, private val apiUrl: String) 
         }.let {
             when (it) {
                 is RetryResult.Success -> it.content
-                is RetryResult.Failure -> throw it.exceptions.last()
+                is RetryResult.Failure -> throw samleExceptions(it.exceptions)
             }
         }
     }
@@ -79,7 +80,7 @@ class PdlKlient(private val httpClient: HttpClient, private val apiUrl: String) 
         }.let {
             when (it) {
                 is RetryResult.Success -> it.content
-                is RetryResult.Failure -> throw it.exceptions.last()
+                is RetryResult.Failure -> throw samleExceptions(it.exceptions)
             }
         }
     }
@@ -103,7 +104,7 @@ class PdlKlient(private val httpClient: HttpClient, private val apiUrl: String) 
         }.let {
             when (it) {
                 is RetryResult.Success -> it.content
-                is RetryResult.Failure -> throw it.exceptions.last()
+                is RetryResult.Failure -> throw samleExceptions(it.exceptions)
             }
         }
     }
@@ -129,7 +130,7 @@ class PdlKlient(private val httpClient: HttpClient, private val apiUrl: String) 
         }.let {
             when (it) {
                 is RetryResult.Success -> it.content
-                is RetryResult.Failure -> throw it.exceptions.last()
+                is RetryResult.Failure -> throw samleExceptions(it.exceptions)
             }
         }
     }

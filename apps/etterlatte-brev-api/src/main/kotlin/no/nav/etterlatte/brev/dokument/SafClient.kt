@@ -20,6 +20,7 @@ import no.nav.etterlatte.brev.journalpost.BrukerIdType
 import no.nav.etterlatte.libs.common.RetryResult
 import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.getXCorrelationId
+import no.nav.etterlatte.libs.common.logging.samleExceptions
 import no.nav.etterlatte.libs.common.retry
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
@@ -101,7 +102,7 @@ class SafClient(
         }.let {
             when (it) {
                 is RetryResult.Success -> it.content
-                is RetryResult.Failure -> throw it.exceptions.last()
+                is RetryResult.Failure -> throw samleExceptions(it.exceptions)
             }
         }
     }

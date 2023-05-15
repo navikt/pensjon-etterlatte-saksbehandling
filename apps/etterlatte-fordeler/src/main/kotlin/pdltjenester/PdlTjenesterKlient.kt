@@ -10,6 +10,7 @@ import io.ktor.client.request.setBody
 import io.ktor.http.ContentType.Application.Json
 import io.ktor.http.contentType
 import no.nav.etterlatte.libs.common.RetryResult
+import no.nav.etterlatte.libs.common.logging.samleExceptions
 import no.nav.etterlatte.libs.common.pdl.PdlFeil
 import no.nav.etterlatte.libs.common.pdl.PdlFeilAarsak
 import no.nav.etterlatte.libs.common.person.FamilieRelasjonManglerIdent
@@ -35,16 +36,15 @@ class PdlTjenesterKlient(private val client: HttpClient, private val apiUrl: Str
             when (it) {
                 is RetryResult.Success -> it.content
                 is RetryResult.Failure -> {
-                    val exception = it.exceptions.last()
-                    val response = when (exception) {
+                    val response = when (val exception = it.exceptions.last()) {
                         is ClientRequestException -> exception.response
                         is ServerResponseException -> exception.response
-                        else -> throw exception
+                        else -> throw samleExceptions(it.exceptions)
                     }
                     val feilFraPdl = try {
                         response.body<PdlFeil>()
                     } catch (e: Exception) {
-                        throw exception
+                        throw samleExceptions(it.exceptions)
                     }
                     when (feilFraPdl.aarsak) {
                         PdlFeilAarsak.FANT_IKKE_PERSON ->

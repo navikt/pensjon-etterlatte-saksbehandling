@@ -7,6 +7,7 @@ import io.ktor.client.HttpClient
 import no.nav.etterlatte.libs.common.RetryResult.Failure
 import no.nav.etterlatte.libs.common.RetryResult.Success
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
+import no.nav.etterlatte.libs.common.logging.samleExceptions
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.retry
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
@@ -52,7 +53,7 @@ class GrunnlagKlientImpl(config: Config, httpClient: HttpClient) : GrunnlagKlien
                 is Failure -> {
                     throw GrunnlagKlientException(
                         "Klarte ikke hente grunnlag for sak med sakId=$sakId",
-                        it.exceptions.last()
+                        samleExceptions(it.exceptions)
                     )
                 }
             }

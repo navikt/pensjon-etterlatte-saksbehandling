@@ -18,8 +18,6 @@ spec:
     path: /health/isready
   kafka:
     pool: nav-dev
-  secureLogs:
-    enabled: true
   prometheus:
     enabled: true
     path: /metrics

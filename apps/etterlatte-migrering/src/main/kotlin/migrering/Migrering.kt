@@ -56,6 +56,7 @@ internal class Migrering(rapidsConnection: RapidsConnection, private val pesysRe
         fnr = sak.folkeregisteridentifikator,
         mottattDato = sak.mottattdato,
         persongalleri = sak.persongalleri,
-        virkningstidspunkt = sak.virkningstidspunkt
+        virkningstidspunkt = sak.virkningstidspunkt,
+        trygdetidsgrunnlag = sak.trygdetidPerioder
     )
 }

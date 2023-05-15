@@ -63,7 +63,7 @@ class MigreringRoutesTest : BehandlingIntegrationTest() {
                 persongalleri = Persongalleri(fnr.value, "innsender", emptyList(), emptyList(), emptyList()),
                 virkningstidspunkt = YearMonth.now(),
                 trygdetidsgrunnlag = Trygdetidsgrunnlag(
-                    "Pesys",
+                    "Norge",
                     LocalDate.now().minusYears(40),
                     LocalDate.now()
                 )

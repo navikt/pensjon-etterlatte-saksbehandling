@@ -47,7 +47,6 @@ import no.nav.etterlatte.oppgave.OppgaveServiceImpl
 import no.nav.etterlatte.sak.RealSakService
 import no.nav.etterlatte.sak.SakDao
 import no.nav.etterlatte.sak.SakTilgangDao
-import no.nav.etterlatte.sak.SettSakEnhetJobb
 import no.nav.etterlatte.sak.TilgangServiceImpl
 import java.time.Duration
 import java.time.temporal.ChronoUnit
@@ -198,14 +197,4 @@ class ApplicationContext(
         periode = Duration.of(env.getValue("HENDELSE_JOB_FREKVENS").toLong(), ChronoUnit.MINUTES),
         minutterGamleHendelser = env.getValue("HENDELSE_MINUTTER_GAMLE_HENDELSER").toLong()
     )
-
-    private val settSakEnhetJobb = SettSakEnhetJobb(
-        sakService,
-        dataSource,
-        leaderElectionKlient
-    )
-
-    init {
-        settSakEnhetJobb.schedule()
-    }
 }

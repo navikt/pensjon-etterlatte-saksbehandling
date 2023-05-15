@@ -32,7 +32,7 @@ internal class InnsendtSoeknadRiverTest {
 
         every {
             behandlingClientMock.hentSak(any(), any())
-        } returns Sak("21478247343", SakType.BARNEPENSJON, sakId, null)
+        } returns Sak("21478247343", SakType.BARNEPENSJON, sakId, "4808")
         every { behandlingClientMock.initierBehandling(any(), any(), any()) } returns id
         every { behandlingClientMock.lagreGyldighetsVurdering(any(), any()) } returns Unit
 

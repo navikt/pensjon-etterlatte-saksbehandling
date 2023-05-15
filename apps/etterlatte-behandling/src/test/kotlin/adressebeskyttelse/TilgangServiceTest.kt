@@ -3,6 +3,7 @@ package no.nav.etterlatte.adressebeskyttelse
 import com.nimbusds.jwt.JWTClaimsSet
 import no.nav.etterlatte.SaksbehandlerMedRoller
 import no.nav.etterlatte.behandling.BehandlingDao
+import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.config.AzureGroup
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
@@ -67,7 +68,7 @@ class TilgangServiceTest {
     @Test
     fun `Skal kunne sette adressebeskyttelse på sak`() {
         val fnr = Folkeregisteridentifikator.of("08071272487").value
-        val sakId = sakRepo.opprettSak(fnr, SakType.BARNEPENSJON).id
+        val sakId = sakRepo.opprettSak(fnr, SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr).id
         val saksbehandlerMedRoller = SaksbehandlerMedRoller(Saksbehandler("", "ident", null))
 
         tilgangService.oppdaterAdressebeskyttelse(sakId, AdressebeskyttelseGradering.STRENGT_FORTROLIG)
@@ -100,7 +101,7 @@ class TilgangServiceTest {
     @Test
     fun `Skal kunne sette strengt fortrolig på sak og se på den med riktig rolle men ikke fortrolig rolle`() {
         val fnr = Folkeregisteridentifikator.of("08071272487").value
-        val sakId = sakRepo.opprettSak(fnr, SakType.BARNEPENSJON).id
+        val sakId = sakRepo.opprettSak(fnr, SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr).id
         val jwtclaims = JWTClaimsSet.Builder().claim("groups", strengtfortroligDev).build()
         val saksbehandlerMedStrengtfortrolig = SaksbehandlerMedRoller(
             Saksbehandler("", "ident", JwtTokenClaims(jwtclaims))
@@ -143,7 +144,7 @@ class TilgangServiceTest {
     @Test
     fun `Skal kunne se på skjermet sak hvis riktig rolle`() {
         val fnr = Folkeregisteridentifikator.of("08071272487").value
-        val sakId = sakRepo.opprettSak(fnr, SakType.BARNEPENSJON).id
+        val sakId = sakRepo.opprettSak(fnr, SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr).id
         val jwtclaims = JWTClaimsSet.Builder().claim("groups", strengtfortroligDev).build()
         val saksbehandlerMedStrengtfortrolig = SaksbehandlerMedRoller(
             Saksbehandler("", "ident", JwtTokenClaims(jwtclaims))

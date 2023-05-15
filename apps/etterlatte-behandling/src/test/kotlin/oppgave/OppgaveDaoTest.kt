@@ -83,7 +83,7 @@ internal class OppgaveDaoTest {
     fun `uhaandterteGrunnlagsendringshendelser hentes som oppgaver hvis de har gyldig status`() {
         val fnr = "02458201458"
 
-        val sakid = sakDao.opprettSak(fnr, SakType.BARNEPENSJON).id
+        val sakid = sakDao.opprettSak(fnr, SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr).id
         val hendelse = Grunnlagsendringshendelse(
             id = UUID.randomUUID(),
             sakId = sakid,
@@ -117,7 +117,7 @@ internal class OppgaveDaoTest {
     @Test
     fun `manuelle reguleringer vises i oppgavelisten men ikke automatiske`() {
         val fnr = TRIVIELL_MIDTPUNKT.value
-        val sak = sakDao.opprettSak(fnr, SakType.BARNEPENSJON)
+        val sak = sakDao.opprettSak(fnr, SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr)
         val automatisk = lagRegulering(Prosesstype.AUTOMATISK, fnr, sak.id)
         val manuel = lagRegulering(Prosesstype.MANUELL, fnr, sak.id)
 
@@ -145,11 +145,11 @@ internal class OppgaveDaoTest {
     fun `skal ikke returnere strengt fortrolig oppgave for annen enn rolle som har strengt fortrolig`() {
         val fnr = STOR_SNERK.value
 
-        val sak = sakDao.opprettSak(fnr, SakType.BARNEPENSJON)
+        val sak = sakDao.opprettSak(fnr, SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr)
         behandlingDao.opprettBehandling(lagRegulering(Prosesstype.MANUELL, fnr, sak.id))
         sakTilgangDao.oppdaterAdresseBeskyttelse(sak.id, AdressebeskyttelseGradering.STRENGT_FORTROLIG)
 
-        val sakk = sakDao.opprettSak(TRIVIELL_MIDTPUNKT.value, SakType.BARNEPENSJON)
+        val sakk = sakDao.opprettSak(TRIVIELL_MIDTPUNKT.value, SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr)
         behandlingDao.opprettBehandling(lagRegulering(Prosesstype.MANUELL, TRIVIELL_MIDTPUNKT.value, sakk.id))
 
         val alleBehandlingsStatuser = BehandlingStatus.values().asList()
@@ -181,7 +181,7 @@ internal class OppgaveDaoTest {
 
     @Test
     fun `Behandling merknad er tilgjengelig i oppgave`() {
-        val sak = sakDao.opprettSak(SOEKER_FOEDSELSNUMMER.value, SakType.BARNEPENSJON)
+        val sak = sakDao.opprettSak(SOEKER_FOEDSELSNUMMER.value, SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr)
 
         val opprettBehandling = OpprettBehandling(
             type = BehandlingType.FØRSTEGANGSBEHANDLING,

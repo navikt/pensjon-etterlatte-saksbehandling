@@ -104,7 +104,7 @@ class OppgaveDao(private val connection: () -> Connection) {
         id = this.getLong("sak_id"),
         sakType = enumValueOf(this.getString("sakType")),
         ident = this.getString("fnr"),
-        enhet = this.getString("enhet").takeUnless { this.wasNull() }
+        enhet = this.getString("enhet")
     )
 
     private val tilOppgave: (ResultSet) -> Oppgave = { rs ->

@@ -242,7 +242,7 @@ fun behandling(
     soeker: String = "12312312312"
 ) = BehandlingIntern(
     id = id,
-    sak = Sak(soeker, SakType.BARNEPENSJON, sakId),
+    sak = Sak(soeker, SakType.BARNEPENSJON, sakId, "4808"),
     behandlingOpprettet = behandlingOpprettet,
     sistEndret = sistEndret,
     status = status,

@@ -313,13 +313,13 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
                 module(applicationContext)
             }
 
-            val sak: Sak = httpClient.post("/personer/saker/${SakType.BARNEPENSJON}") {
+            httpClient.post("/personer/saker/${SakType.BARNEPENSJON}") {
                 addAuthToken(tokenSaksbehandler)
                 contentType(ContentType.Application.Json)
                 setBody(FoedselsnummerDTO(fnr))
             }.apply {
                 Assertions.assertEquals(HttpStatusCode.OK, status)
-            }.body()
+            }.body<Sak>()
 
             httpClient.post("/grunnlagsendringshendelse/adressebeskyttelse") {
                 addAuthToken(systemBruker)
@@ -359,13 +359,13 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
                 module(applicationContext)
             }
 
-            val sak: Sak = httpClient.post("/personer/saker/${SakType.BARNEPENSJON}") {
+            httpClient.post("/personer/saker/${SakType.BARNEPENSJON}") {
                 addAuthToken(tokenSaksbehandler)
                 contentType(ContentType.Application.Json)
                 setBody(FoedselsNummerMedGraderingDTO(fnr, AdressebeskyttelseGradering.STRENGT_FORTROLIG))
             }.apply {
                 Assertions.assertEquals(HttpStatusCode.OK, status)
-            }.body()
+            }.body<Sak>()
 
             httpClient.post("/personer/saker/${SakType.BARNEPENSJON}") {
                 addAuthToken(tokenSaksbehandler)

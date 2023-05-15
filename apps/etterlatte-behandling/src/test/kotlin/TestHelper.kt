@@ -10,6 +10,7 @@ import no.nav.etterlatte.behandling.domain.OpprettBehandling
 import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.behandling.domain.SamsvarMellomKildeOgGrunnlag
 import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerAarsak
+import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.grunnlagsendring.samsvarDoedsdatoer
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
@@ -89,7 +90,7 @@ fun foerstegangsbehandling(
     virkningstidspunkt: Virkningstidspunkt? = null,
     kommerBarnetTilgode: KommerBarnetTilgode? = null,
     kilde: Vedtaksloesning = Vedtaksloesning.GJENNY,
-    enhet: String? = null
+    enhet: String = Enheter.defaultEnhet.enhetNr
 ) = Foerstegangsbehandling(
     id = id,
     sak = Sak(
@@ -121,7 +122,7 @@ fun revurdering(
     virkningstidspunkt: Virkningstidspunkt? = null,
     prosesstype: Prosesstype = Prosesstype.MANUELL,
     kilde: Vedtaksloesning = Vedtaksloesning.GJENNY,
-    enhet: String? = null
+    enhet: String = Enheter.defaultEnhet.enhetNr
 ) = Revurdering.opprett(
     id = id,
     sak = Sak(
@@ -151,7 +152,7 @@ fun manueltOpphoer(
     ),
     fritekstAarsak: String? = "Umulig å revurdere i nytt saksbehandlingssystem",
     virkningstidspunkt: Virkningstidspunkt? = null,
-    enhet: String? = null
+    enhet: String = Enheter.defaultEnhet.enhetNr
 ) = ManueltOpphoer(
     id = behandlingId,
     sak = Sak(

@@ -49,7 +49,6 @@ internal class MigreringHendelser(rapidsConnection: RapidsConnection) :
                 val request = objectMapper.treeToValue(packet[HENDELSE_DATA_KEY], MigreringRequest::class.java)
                 packet[OPPLYSNING_KEY] = tilOpplysning(request.persongalleri)
                 packet.eventName = "OPPLYSNING:NY"
-                packet[FULLSTENDIG_KEY] = true
                 context.publish(packet.toJson())
                 logger.info("Publiserte persongalleri")
             }

@@ -64,6 +64,18 @@ class PeriodisertBeregningGrunnlagTest {
     fun `lagKomplettPeriodisertGrunnlag kaster ikke feil hvis grunnlag har hull foer perioden`() {
         val fom = perioderSomErKomplett.minBy { it.first }.first
         val tom = null
+        val ekstraPeriodeFoerst =
+            YearMonth.from(fom).minusYears(1).atDay(1) to YearMonth.from(fom).minusYears(1).plusMonths(2).atEndOfMonth()
+        assertDoesNotThrow {
+            PeriodisertBeregningGrunnlag.lagKomplettPeriodisertGrunnlag(
+                perioderTilGrunnlagMedPerioder(
+                    listOf(ekstraPeriodeFoerst) + perioderSomErKomplett,
+                    null
+                ),
+                fom,
+                tom
+            )
+        }
     }
 
     @Test
@@ -141,6 +153,7 @@ class PeriodisertBeregningGrunnlagTest {
             setOf(LocalDate.of(2022, 8, 1), LocalDate.of(2023, 1, 1))
         )
     }
+
     private fun List<Pair<LocalDate, LocalDate?>>.somPeriodegrunnlag(): List<GrunnlagMedPeriode<String>> {
         return perioderTilGrunnlagMedPerioder(this, "hei")
     }

@@ -44,7 +44,6 @@ internal class Migrering(
                 vilkaarsvurderingService.migrer(behandlingId)
                 packet[VILKAARSVURDERT_KEY] = true
                 packet.eventName = Migreringshendelser.TRYGDETID
-                packet[FULLSTENDIG_KEY] = true
                 context.publish(packet.toJson())
                 logger.info("Publiserte oppdatert migreringshendelse fra vilkårsvurdering for behandling $behandlingId")
             }

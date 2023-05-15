@@ -236,7 +236,6 @@ const SoeskenjusteringPeriode = (props: SoeskenjusteringPeriodeProps) => {
                       onChange={(val) => field.field.onChange(val)}
                       label="Til og med"
                       placeholder="Ingen slutt"
-                      isNullable
                       value={field.field.value}
                     />
                     {field.field.value !== null && field.field.value !== undefined ? (

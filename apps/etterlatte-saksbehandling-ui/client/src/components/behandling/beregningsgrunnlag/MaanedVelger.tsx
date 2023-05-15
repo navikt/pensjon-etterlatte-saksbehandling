@@ -11,8 +11,6 @@ setDefaultOptions({ locale: nb })
 const maanedVelgerDefaultProps = {
   format: 'MMMM yyyy',
   placeholder: 'Velg måned og år',
-
-  isNullable: false,
 }
 
 type MaanedVelgerProps = {

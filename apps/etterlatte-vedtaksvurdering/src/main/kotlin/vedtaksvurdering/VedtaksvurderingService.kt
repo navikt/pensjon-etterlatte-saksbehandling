@@ -379,7 +379,11 @@ class VedtaksvurderingService(
                     when (vilkaarsvurdering?.resultat?.utfall) {
                         VilkaarsvurderingUtfall.IKKE_OPPFYLT -> VedtakData(behandling, vilkaarsvurdering, null, sak)
                         VilkaarsvurderingUtfall.OPPFYLT -> {
-                            val beregningOgAvkorting = beregningKlient.hentBeregningOgAvkorting(behandlingId, bruker)
+                            val beregningOgAvkorting = beregningKlient.hentBeregningOgAvkorting(
+                                behandlingId,
+                                bruker,
+                                sak.sakType
+                            )
                             VedtakData(behandling, vilkaarsvurdering, beregningOgAvkorting, sak)
                         }
 

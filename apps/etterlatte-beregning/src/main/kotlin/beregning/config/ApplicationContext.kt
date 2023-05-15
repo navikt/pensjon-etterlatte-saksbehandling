@@ -9,27 +9,14 @@ import no.nav.etterlatte.beregning.BeregnOmstillingsstoenadService
 import no.nav.etterlatte.beregning.BeregningRepository
 import no.nav.etterlatte.beregning.BeregningService
 import no.nav.etterlatte.beregning.InntektAvkortingService
-import no.nav.etterlatte.beregning.grunnlag.BarnepensjonBeregningsGrunnlagMigreringJobb
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlagRepository
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlagService
 import no.nav.etterlatte.beregning.klienter.BehandlingKlientImpl
 import no.nav.etterlatte.beregning.klienter.GrunnlagKlientImpl
 import no.nav.etterlatte.beregning.klienter.TrygdetidKlient
 import no.nav.etterlatte.beregning.klienter.VilkaarsvurderingKlientImpl
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggleServiceProperties
 import no.nav.etterlatte.libs.database.DataSourceBuilder
-import no.nav.etterlatte.libs.jobs.LeaderElection
 import no.nav.etterlatte.libs.ktor.httpClient
-
-private fun featureToggleProperties(config: Config) = mapOf(
-    FeatureToggleServiceProperties.ENABLED.navn to config.getString("funksjonsbrytere.enabled"),
-    FeatureToggleServiceProperties.APPLICATIONNAME.navn to config.getString(
-        "funksjonsbrytere.unleash.applicationName"
-    ),
-    FeatureToggleServiceProperties.URI.navn to config.getString("funksjonsbrytere.unleash.uri"),
-    FeatureToggleServiceProperties.CLUSTER.navn to config.getString("funksjonsbrytere.unleash.cluster")
-)
 
 class ApplicationContext {
     val config: Config = ConfigFactory.load()
@@ -74,20 +61,4 @@ class ApplicationContext {
         avkortingRepository = AvkortingRepository(dataSource),
         beregningRepository = BeregningRepository(dataSource)
     )
-
-    private val featureToggleService: FeatureToggleService = FeatureToggleService.initialiser(
-        featureToggleProperties(config)
-    )
-
-    private val leaderElectionKlient = LeaderElection(env.getValue("ELECTOR_PATH"), httpClient())
-
-    private val barnepensjonBeregningsGrunnlagMigreringJobb = BarnepensjonBeregningsGrunnlagMigreringJobb(
-        leaderElectionKlient,
-        dataSource,
-        featureToggleService
-    )
-
-    init {
-        barnepensjonBeregningsGrunnlagMigreringJobb.schedule()
-    }
 }

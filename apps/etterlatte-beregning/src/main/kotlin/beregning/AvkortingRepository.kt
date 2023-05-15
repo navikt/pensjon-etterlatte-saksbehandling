@@ -134,9 +134,13 @@ class AvkortingRepository(private val dataSource: DataSource) {
                     queryOf(
                         statement = """
                         INSERT INTO avkortet_ytelse(
-                        id, behandling_id, fom, tom, ytelse_etter_avkorting, tidspunkt, regel_resultat, kilde
+                        id, behandling_id, fom, tom,
+                         ytelse_etter_avkorting, avkortingsbeloep, ytelse_foer_avkorting,
+                         tidspunkt, regel_resultat, kilde
                         ) VALUES (
-                        :id, :behandlingId, :fom, :tom, :ytelseEtterAvkorting, :tidspunkt, :regel_resultat, :kilde
+                        :id, :behandlingId, :fom, :tom,
+                        :ytelseEtterAvkorting, :avkortingsbeloep, :ytelseFoerAvkorting,
+                        :tidspunkt, :regel_resultat, :kilde
                         )
                         """.trimIndent(),
                         paramMap = mapOf(
@@ -145,6 +149,8 @@ class AvkortingRepository(private val dataSource: DataSource) {
                             "fom" to it.periode.fom.atDay(1),
                             "tom" to it.periode.tom?.atDay(1),
                             "ytelseEtterAvkorting" to it.ytelseEtterAvkorting,
+                            "avkortingsbeloep" to it.avkortingsbeloep,
+                            "ytelseFoerAvkorting" to it.ytelseFoerAvkorting,
                             "tidspunkt" to it.tidspunkt.toTimestamp(),
                             "regel_resultat" to it.regelResultat.toJson(),
                             "kilde" to it.kilde.toJson()
@@ -187,6 +193,8 @@ class AvkortingRepository(private val dataSource: DataSource) {
             tom = sqlDateOrNull("tom")?.let { YearMonth.from(it.toLocalDate()) }
         ),
         ytelseEtterAvkorting = int("ytelse_etter_avkorting"),
+        avkortingsbeloep = int("avkortingsbeloep"),
+        ytelseFoerAvkorting = int("ytelse_foer_avkorting"),
         tidspunkt = sqlTimestamp("tidspunkt").toTidspunkt(),
         regelResultat = objectMapper.readTree(string("regel_resultat")),
         kilde = string("kilde").let { objectMapper.readValue(it) }

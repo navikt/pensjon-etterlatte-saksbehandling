@@ -90,7 +90,7 @@ export const AvkortingInntekt = (props: {
               }
             />
             <DatoSection>
-              <Label>F.o.m dato (inntekt)</Label>
+              <Label>F.o.m dato</Label>
               <Datovelger>
                 <DatePicker
                   ref={fomPickerRef}

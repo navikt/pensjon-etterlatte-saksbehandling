@@ -31,6 +31,8 @@ data class BeregnetAvkortingGrunnlag(
 data class AvkortetYtelse(
     val periode: Periode,
     val ytelseEtterAvkorting: Int,
+    val avkortingsbeloep: Int,
+    val ytelseFoerAvkorting: Int,
     val tidspunkt: Tidspunkt,
     val regelResultat: JsonNode,
     val kilde: Grunnlagsopplysning.RegelKilde

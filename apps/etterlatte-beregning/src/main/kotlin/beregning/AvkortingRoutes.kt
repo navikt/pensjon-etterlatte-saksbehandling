@@ -22,7 +22,6 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.withBehandlingId
 import no.nav.etterlatte.libs.ktor.bruker
 import no.nav.etterlatte.token.Bruker
-import java.time.YearMonth
 
 fun Route.avkorting(avkortingService: AvkortingService, behandlingKlient: BehandlingKlient) {
     route("/api/beregning/avkorting/{$BEHANDLINGSID_CALL_PARAMETER}") {
@@ -53,7 +52,7 @@ fun Route.avkorting(avkortingService: AvkortingService, behandlingKlient: Behand
 fun Avkorting.toDto() = AvkortingDto(
     behandlingId = behandlingId,
     avkortingGrunnlag = avkortingGrunnlag.map { it.toDto() },
-    avkortetYtelse = avkortetYtelse.map { it.toDto(avkortingGrunnlag) }
+    avkortetYtelse = avkortetYtelse.map { it.toDto() }
 )
 
 fun AvkortingGrunnlag.toDto() = AvkortingGrunnlagDto(
@@ -64,21 +63,12 @@ fun AvkortingGrunnlag.toDto() = AvkortingGrunnlagDto(
     kilde = AvkortingGrunnlagKildeDto(kilde.tidspunkt.toString(), kilde.ident)
 )
 
-fun AvkortetYtelse.toDto(avkortingsgrunnlag: List<AvkortingGrunnlag>) = AvkortetYtelseDto(
+fun AvkortetYtelse.toDto() = AvkortetYtelseDto(
     fom = periode.fom.atDay(1),
     tom = periode.tom?.atEndOfMonth(),
-    avkortingsbeloep = avkortingsgrunnlag.finnNaermesteBeregnetAvkorting(periode.fom),
+    avkortingsbeloep = avkortingsbeloep,
     ytelseEtterAvkorting = ytelseEtterAvkorting
 )
-
-fun List<AvkortingGrunnlag>.finnNaermesteBeregnetAvkorting(fom: YearMonth): Int =
-    flatMap { it.beregnetAvkorting }.reduce { acc, next ->
-        if (next.periode.fom <= fom && next.periode.fom > acc.periode.fom) {
-            next
-        } else {
-            acc
-        }
-    }.avkorting
 
 fun AvkortingGrunnlagDto.fromDto(bruker: Bruker) = AvkortingGrunnlag(
     periode = Periode(fom = fom, tom = null),

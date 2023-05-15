@@ -18,7 +18,6 @@ import no.nav.etterlatte.beregning.avkorting
 import no.nav.etterlatte.beregning.klienter.BehandlingKlient
 import no.nav.etterlatte.beregning.regler.avkortetYtelse
 import no.nav.etterlatte.beregning.regler.avkortinggrunnlag
-import no.nav.etterlatte.beregning.regler.beregnetAvkortingGrunnlag
 import no.nav.etterlatte.libs.common.beregning.AvkortingDto
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.periode.Periode
@@ -68,36 +67,17 @@ class AvkortingRoutesTest {
     @Test
     fun `skal returnere avkorting med avkortingsgrunnlag og beregnet avkorting over flere perioder`() {
         val avkortingGrunnlag = listOf(
-            avkortinggrunnlag(
-                beregnetAvkorting = listOf(
-                    beregnetAvkortingGrunnlag(
-                        avkorting = 1000,
-                        fom = YearMonth.of(2023, 1),
-                        tom = YearMonth.of(2023, 1)
-                    ),
-                    beregnetAvkortingGrunnlag(
-                        avkorting = 2000,
-                        fom = YearMonth.of(2023, 2)
-                    )
-                )
-            ),
-            avkortinggrunnlag(
-                beregnetAvkorting = listOf(
-                    beregnetAvkortingGrunnlag(
-                        avkorting = 5000,
-                        fom = YearMonth.of(2023, 5)
-                    )
-                )
-            )
+            avkortinggrunnlag(beregnetAvkorting = listOf()),
+            avkortinggrunnlag(beregnetAvkorting = listOf())
         )
         every { avkortingService.hentAvkorting(any()) } returns Avkorting(
             behandlingId = UUID.randomUUID(),
             avkortingGrunnlag = avkortingGrunnlag,
             avkortetYtelse = listOf(
-                avkortetYtelse(100, Periode(YearMonth.of(2023, 1), YearMonth.of(2023, 1))),
-                avkortetYtelse(200, Periode(YearMonth.of(2023, 2), YearMonth.of(2023, 2))),
-                avkortetYtelse(300, Periode(YearMonth.of(2023, 4), YearMonth.of(2023, 2))),
-                avkortetYtelse(400, Periode(YearMonth.of(2023, 5), null))
+                avkortetYtelse(100, 1000, periode = Periode(YearMonth.of(2023, 1), YearMonth.of(2023, 1))),
+                avkortetYtelse(200, 2000, periode = Periode(YearMonth.of(2023, 2), YearMonth.of(2023, 2))),
+                avkortetYtelse(300, 2000, periode = Periode(YearMonth.of(2023, 4), YearMonth.of(2023, 2))),
+                avkortetYtelse(400, 5000, periode = Periode(YearMonth.of(2023, 5), null))
             )
         )
         testApplication(server.config.httpServer.port()) {

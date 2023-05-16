@@ -10,7 +10,6 @@ import io.ktor.client.request.setBody
 import io.ktor.http.ContentType.Application.Json
 import io.ktor.http.content.TextContent
 import no.nav.etterlatte.libs.common.RetryResult
-import no.nav.etterlatte.libs.common.logging.samleExceptions
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.retry
 import no.nav.etterlatte.libs.common.toJson
@@ -70,7 +69,7 @@ class ParallelleSannheterKlient(val httpClient: HttpClient, val apiUrl: String) 
                 }.let {
                     when (it) {
                         is RetryResult.Success -> it.content
-                        is RetryResult.Failure -> throw samleExceptions(it.exceptions)
+                        is RetryResult.Failure -> throw it.samlaExceptions()
                     }
                 }
 

@@ -39,12 +39,12 @@ class PdlTjenesterKlient(private val client: HttpClient, private val apiUrl: Str
                     val response = when (val exception = it.exceptions.last()) {
                         is ClientRequestException -> exception.response
                         is ServerResponseException -> exception.response
-                        else -> throw samleExceptions(it.exceptions)
+                        else -> throw it.samlaExceptions()
                     }
                     val feilFraPdl = try {
                         response.body<PdlFeil>()
                     } catch (e: Exception) {
-                        throw samleExceptions(it.exceptions)
+                        throw samleExceptions(it.exceptions + e)
                     }
                     when (feilFraPdl.aarsak) {
                         PdlFeilAarsak.FANT_IKKE_PERSON ->

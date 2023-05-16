@@ -5,7 +5,6 @@ import com.github.michaelbull.result.mapBoth
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
 import no.nav.etterlatte.libs.common.RetryResult
-import no.nav.etterlatte.libs.common.logging.samleExceptions
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.retry
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
@@ -55,7 +54,7 @@ class VilkaarsvurderingKlientImpl(config: Config, httpClient: HttpClient) : Vilk
                 is RetryResult.Failure -> {
                     throw VilkaarsvurderingKlientException(
                         "Klarte ikke hente vilkåårsvurdering for behandling med behandlingId=$behandlingId",
-                        samleExceptions(it.exceptions)
+                        it.samlaExceptions()
                     )
                 }
             }

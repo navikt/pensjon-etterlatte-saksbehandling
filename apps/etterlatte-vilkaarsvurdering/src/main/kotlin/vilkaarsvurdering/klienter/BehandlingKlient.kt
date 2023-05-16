@@ -8,7 +8,6 @@ import no.nav.etterlatte.libs.common.BehandlingTilgangsSjekk
 import no.nav.etterlatte.libs.common.RetryResult
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus.OPPRETTET
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
-import no.nav.etterlatte.libs.common.logging.samleExceptions
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.retry
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
@@ -60,7 +59,7 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
                 is RetryResult.Failure -> {
                     throw BehandlingKlientException(
                         "Klarte ikke hente behandling med behandlingId=$behandlingId",
-                        samleExceptions(it.exceptions)
+                        it.samlaExceptions()
                     )
                 }
             }

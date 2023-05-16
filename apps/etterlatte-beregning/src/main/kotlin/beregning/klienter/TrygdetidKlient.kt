@@ -5,7 +5,6 @@ import com.github.michaelbull.result.mapBoth
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
 import no.nav.etterlatte.libs.common.RetryResult
-import no.nav.etterlatte.libs.common.logging.samleExceptions
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.retry
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
@@ -51,7 +50,7 @@ class TrygdetidKlient(config: Config, httpClient: HttpClient) {
                 is RetryResult.Failure -> {
                     throw TrygdetidKlientException(
                         "Klarte ikke hente trygdetid for behandling med behandlingId=$behandlingId",
-                        samleExceptions(it.exceptions)
+                        it.samlaExceptions()
                     )
                 }
             }

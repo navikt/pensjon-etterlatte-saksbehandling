@@ -1,6 +1,11 @@
 import { Link, Table } from '@navikt/ds-react'
 import { AarsaksTyper, BehandlingOgRevurderingsAarsakerType, IBehandlingsammendrag, VedtakSammendrag } from './typer'
-import { formaterBehandlingstype, formaterEnumTilLesbarString, formaterStringDato } from '~utils/formattering'
+import {
+  formaterBehandlingstype,
+  formaterEnumTilLesbarString,
+  formaterSakstype,
+  formaterStringDato,
+} from '~utils/formattering'
 import { IBehandlingStatus, IBehandlingsType } from '~shared/types/IDetaljertBehandling'
 import { VilkaarsvurderingResultat } from '~shared/api/vilkaarsvurdering'
 import { erFerdigBehandlet } from '~components/behandling/felles/utils'
@@ -8,7 +13,17 @@ import React, { useEffect, useState } from 'react'
 import { Revurderingsaarsak } from '~shared/types/Revurderingsaarsak'
 import { hentVedtakSammendrag } from '~shared/api/vedtaksvurdering'
 
-const colonner = ['Reg. dato', 'Type', 'Årsak', 'Status', 'Virkningstidspunkt', 'Vedtaksdato', 'Resultat', '']
+const kolonner = [
+  'Reg. dato',
+  'Sakstype',
+  'Behandlingstype',
+  'Årsak',
+  'Status',
+  'Virkningstidspunkt',
+  'Vedtaksdato',
+  'Resultat',
+  '',
+]
 
 const VedtaksDato = (props: { behandlingsId: string }) => {
   const [vedtak, setVedtak] = useState<VedtakSammendrag | undefined>(undefined)
@@ -51,7 +66,7 @@ export const Behandlingsliste = ({ behandlinger }: { behandlinger: IBehandlingsa
       <Table zebraStripes>
         <Table.Header>
           <Table.Row>
-            {colonner.map((col) => (
+            {kolonner.map((col) => (
               <Table.HeaderCell key={`header${col}`}>{col}</Table.HeaderCell>
             ))}
           </Table.Row>
@@ -62,6 +77,7 @@ export const Behandlingsliste = ({ behandlinger }: { behandlinger: IBehandlingsa
               <Table.DataCell key={`data${behandling.behandlingOpprettet}`}>
                 {formaterStringDato(behandling.behandlingOpprettet)}
               </Table.DataCell>
+              <Table.DataCell key={`data${behandling.sakType}`}>{formaterSakstype(behandling.sakType)}</Table.DataCell>
               <Table.DataCell key={`data${behandling.behandlingType}`}>
                 {formaterBehandlingstype(behandling.behandlingType)}
               </Table.DataCell>

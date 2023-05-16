@@ -3,14 +3,17 @@ package no.nav.etterlatte.grunnlag
 import MigreringGrunnlagRequest
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
+import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.rapidsandrivers.migrering.MIGRERING_GRUNNLAG_KEY
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser.PERSONGALLERI_GRUNNLAG
+import no.nav.etterlatte.rapidsandrivers.migrering.hendelseData
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -20,6 +23,7 @@ import org.slf4j.LoggerFactory
 import rapidsandrivers.SAK_ID_KEY
 import rapidsandrivers.sakId
 import rapidsandrivers.withFeilhaandtering
+import java.util.*
 
 class MigreringHendelser(
     rapidsConnection: RapidsConnection,
@@ -45,6 +49,19 @@ class MigreringHendelser(
                     objectMapper.treeToValue(packet[MIGRERING_GRUNNLAG_KEY], MigreringGrunnlagRequest::class.java)
 
                 lagreEnkeltgrunnlag(sakId, request.soeker.second, request.soeker.first)
+                lagreEnkeltgrunnlag(
+                    sakId,
+                    listOf(
+                        Grunnlagsopplysning(
+                            UUID.randomUUID(),
+                            Grunnlagsopplysning.Pesys.create(),
+                            Opplysningstype.PERSONGALLERI_V1,
+                            objectMapper.createObjectNode(),
+                            packet.hendelseData.persongalleri.toJsonNode()
+                        )
+                    ),
+                    request.soeker.first
+                )
                 request.gjenlevende.forEach { lagreEnkeltgrunnlag(sakId, it.second, it.first) }
                 request.avdoede.forEach { lagreEnkeltgrunnlag(sakId, it.second, it.first) }
 

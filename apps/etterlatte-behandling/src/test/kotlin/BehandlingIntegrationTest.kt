@@ -21,6 +21,7 @@ import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.behandling.klienter.NavAnsattKlient
 import no.nav.etterlatte.behandling.klienter.Norg2Klient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
+import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.config.ApplicationContext
 import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.kafka.TestProdusent
@@ -189,7 +190,7 @@ abstract class BehandlingIntegrationTest {
 
     fun opprettSakMedFoerstegangsbehandling(fnr: String): Pair<Sak, Foerstegangsbehandling?> {
         val sak = inTransaction {
-            applicationContext.sakDao.opprettSak(fnr, SakType.BARNEPENSJON)
+            applicationContext.sakDao.opprettSak(fnr, SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr)
         }
 
         val behandling = applicationContext.foerstegangsbehandlingService
@@ -307,7 +308,10 @@ class Norg2KlientTest : Norg2Klient {
 
 class NavAnsattKlientTest : NavAnsattKlient {
     override suspend fun hentSaksbehandlerEnhet(ident: String): List<SaksbehandlerEnhet> {
-        return listOf(SaksbehandlerEnhet("4817", "NAV Familie- og pensjonsytelser Steinkjer"))
+        return listOf(
+            SaksbehandlerEnhet(Enheter.defaultEnhet.enhetNr, Enheter.defaultEnhet.navn),
+            SaksbehandlerEnhet(Enheter.STEINKJER.enhetNr, Enheter.STEINKJER.navn)
+        )
     }
 
     override suspend fun hentSaksbehandlerTema(ident: String): List<SaksbehandlerTema> {

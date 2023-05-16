@@ -3,6 +3,7 @@ package no.nav.etterlatte.oppgave
 import io.kotest.matchers.shouldBe
 import no.nav.etterlatte.TRIVIELL_MIDTPUNKT
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringsType
+import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.sak.Sak
@@ -19,7 +20,7 @@ internal class OppgaveDTOTest {
                 id = 4,
                 sakType = SakType.BARNEPENSJON,
                 ident = TRIVIELL_MIDTPUNKT.value,
-                enhet = null
+                enhet = Enheter.defaultEnhet.enhetNr
             ),
             registrertDato = Tidspunkt.now(),
             grunnlagsendringsType = GrunnlagsendringsType.DOEDSFALL,
@@ -33,7 +34,7 @@ internal class OppgaveDTOTest {
                 id = 4,
                 sakType = SakType.BARNEPENSJON,
                 ident = TRIVIELL_MIDTPUNKT.value,
-                enhet = null
+                enhet = Enheter.defaultEnhet.enhetNr
             ),
             registrertDato = Tidspunkt.now(),
             grunnlagsendringsType = GrunnlagsendringsType.GRUNNBELOEP,

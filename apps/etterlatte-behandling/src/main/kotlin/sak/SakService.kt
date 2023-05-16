@@ -147,7 +147,5 @@ fun List<Sak>.filterSakerForEnheter(
     featureToggleService: FeatureToggleService,
     user: User
 ) = this.filterForEnheter(featureToggleService, SakServiceFeatureToggle.FiltrerMedEnhetId, user) { item, enheter ->
-    item.enhet?.let { enhet ->
-        enheter.contains(enhet)
-    } ?: true
+    enheter.contains(item.enhet)
 }

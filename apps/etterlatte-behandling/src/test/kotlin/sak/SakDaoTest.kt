@@ -43,14 +43,7 @@ class SakDaoTest {
     }
 
     @Test
-    fun `kan opprett sak uten enhet`() {
-        val opprettSak = sakRepo.opprettSak("fnr", SakType.BARNEPENSJON)
-
-        Assertions.assertNull(opprettSak.enhet)
-    }
-
-    @Test
-    fun `kan opprett sak med enhet`() {
+    fun `kan opprett sak`() {
         val opprettSak = sakRepo.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
 
         Assertions.assertEquals(Enheter.PORSGRUNN.enhetNr, opprettSak.enhet)

@@ -107,7 +107,8 @@ internal class RealFoerstegangsbehandlingServiceTest {
             sak = Sak(
                 ident = "Ola Olsen",
                 sakType = SakType.BARNEPENSJON,
-                id = 1
+                id = 1,
+                enhet = Enheter.defaultEnhet.enhetNr
             ),
             behandlingOpprettet = Tidspunkt.now().toLocalDatetimeUTC(),
             sistEndret = Tidspunkt.now().toLocalDatetimeUTC(),
@@ -150,7 +151,8 @@ internal class RealFoerstegangsbehandlingServiceTest {
             sak = Sak(
                 ident = "Soeker",
                 sakType = SakType.BARNEPENSJON,
-                id = 1
+                id = 1,
+                enhet = Enheter.defaultEnhet.enhetNr
             ),
             behandlingOpprettet = datoNaa,
             sistEndret = datoNaa,

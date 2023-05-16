@@ -44,16 +44,13 @@ class SakOgBehandlingService(
     ): Behandling {
         val innloggetSaksbehandlerIdent = bruker.ident()
 
-        val saksbehandlerEnhet = vedtak.vedtakFattet?.ansvarligEnhet
-            ?: sak.enhet ?: throw SaksbehandlerManglerEnhetException(
-            "Vedtak mangler ansvarlig enhet vedtakid: ${vedtak.vedtakId}"
-        )
+        val saksbehandlerEnhet = vedtak.vedtakFattet?.ansvarligEnhet ?: sak.enhet
         val saksbehandlerIdent = vedtak.vedtakFattet?.ansvarligSaksbehandler ?: innloggetSaksbehandlerIdent
 
         val attestant = vedtak.vedtakFattet?.let {
             Attestant(
                 vedtak.attestasjon?.attestant ?: innloggetSaksbehandlerIdent,
-                vedtak.attestasjon?.attesterendeEnhet ?: sak.enhet!!
+                vedtak.attestasjon?.attesterendeEnhet ?: sak.enhet
             )
         }
 

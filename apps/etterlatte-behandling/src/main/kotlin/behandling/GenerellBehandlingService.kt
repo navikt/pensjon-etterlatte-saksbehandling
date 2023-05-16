@@ -330,7 +330,5 @@ fun <T : Behandling> List<T>.filterBehandlingerForEnheter(
     BehandlingServiceFeatureToggle.FiltrerMedEnhetId,
     user
 ) { item, enheter ->
-    item.sak.enhet?.let { enhet ->
-        enheter.contains(enhet)
-    } ?: true
+    enheter.contains(item.sak.enhet)
 }

@@ -65,5 +65,5 @@ fun List<Oppgave>.filterOppgaverForEnheter(
     OppgaveServiceFeatureToggle.EnhetFilterOppgaver,
     user
 ) { item, enheter ->
-    item.sak.enhet == null || enheter.contains(item.sak.enhet)
+    enheter.contains(item.sak.enhet)
 }

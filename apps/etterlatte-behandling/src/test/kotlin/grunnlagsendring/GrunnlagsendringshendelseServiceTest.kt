@@ -438,7 +438,12 @@ internal class GrunnlagsendringshendelseServiceTest {
                 minutter
             )
         } returns grunnlagsendringshendelser
-        every { sakService.finnSak(any()) } returns Sak(avdoedFnr, SakType.BARNEPENSJON, sakId, null)
+        every { sakService.finnSak(any()) } returns Sak(
+            avdoedFnr,
+            SakType.BARNEPENSJON,
+            sakId,
+            enhet = Enheter.defaultEnhet.enhetNr
+        )
         every {
             grunnlagshendelsesDao.oppdaterGrunnlagsendringStatus(
                 capture(idArg),
@@ -556,7 +561,12 @@ internal class GrunnlagsendringshendelseServiceTest {
 
         val hendelseSomLagres = slot<Grunnlagsendringshendelse>()
 
-        every { sakService.finnSak(sakId) } returns Sak("test-fnr", SakType.BARNEPENSJON, sakId)
+        every { sakService.finnSak(sakId) } returns Sak(
+            "test-fnr",
+            SakType.BARNEPENSJON,
+            sakId,
+            Enheter.defaultEnhet.enhetNr
+        )
 
         every {
             grunnlagshendelsesDao.opprettGrunnlagsendringshendelse(capture(hendelseSomLagres))

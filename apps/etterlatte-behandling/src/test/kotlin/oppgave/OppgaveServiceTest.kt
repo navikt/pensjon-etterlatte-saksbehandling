@@ -25,7 +25,7 @@ internal class OppgaveServiceTest {
                 id = 1,
                 sakType = SakType.BARNEPENSJON,
                 ident = TRIVIELL_MIDTPUNKT.value,
-                enhet = null
+                enhet = Enheter.defaultEnhet.enhetNr
             ),
             registrertDato = Tidspunkt.now(),
             behandlingId = UUID.randomUUID(),
@@ -64,7 +64,7 @@ internal class OppgaveServiceTest {
                 id = 4,
                 sakType = SakType.BARNEPENSJON,
                 ident = TRIVIELL_MIDTPUNKT.value,
-                enhet = null
+                enhet = Enheter.defaultEnhet.enhetNr
             ),
             registrertDato = Tidspunkt.now(),
             grunnlagsendringsType = GrunnlagsendringsType.FORELDER_BARN_RELASJON,

@@ -140,7 +140,7 @@ class BehandlingDao(private val connection: () -> Connection) {
         id = rs.getLong("sak_id"),
         sakType = enumValueOf(rs.getString("saktype")),
         ident = rs.getString("fnr"),
-        enhet = rs.getString("enhet").takeUnless { rs.wasNull() }
+        enhet = rs.getString("enhet")
     )
 
     fun opprettBehandling(behandling: OpprettBehandling) {

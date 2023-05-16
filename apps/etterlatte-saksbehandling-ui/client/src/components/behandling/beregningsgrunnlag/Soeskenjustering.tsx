@@ -1,6 +1,6 @@
 import { isFailure, isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
 import React, { useEffect } from 'react'
-import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
+import { IBehandlingReducer, oppdaterBeregingsGrunnlag } from '~store/reducers/BehandlingReducer'
 import { Soesken } from '~components/behandling/soeknadsoversikt/familieforhold/personer/Soesken'
 import { Control, Controller, useFieldArray, useForm, UseFormWatch } from 'react-hook-form'
 import { BodyShort, Button, Heading, Label, Radio, RadioGroup } from '@navikt/ds-react'
@@ -19,16 +19,14 @@ import { ContentHeader } from '~shared/styled'
 import { FamilieforholdWrapper } from '~components/behandling/soeknadsoversikt/familieforhold/barnepensjon/FamilieforholdBarnepensjon'
 import {
   FeilIPeriode,
+  mapListeFraDto,
   PeriodisertBeregningsgrunnlag,
 } from '~components/behandling/beregningsgrunnlag/PeriodisertBeregningsgrunnlag'
+import { useAppDispatch } from '~store/Store'
 
 type SoeskenKanskjeMedIBeregning = {
   foedselsnummer: string
   skalBrukes?: boolean
-}
-
-const defaultValues: { soeskengrunnlag: SoeskengrunnlagUtfylling } = {
-  soeskengrunnlag: [],
 }
 
 export type Soeskengrunnlag = PeriodisertBeregningsgrunnlag<SoeskenMedIBeregning[]>[]
@@ -50,17 +48,21 @@ const nySoeskengrunnlagPeriode = (soesken: IPdlPerson[], fom?: string) => ({
 
 const Soeskenjustering = (props: SoeskenjusteringProps) => {
   const { behandling, onSubmit } = props
-  const { handleSubmit, reset, control, watch } = useForm({ defaultValues })
+  const { handleSubmit, reset, control, watch } = useForm<{
+    soeskenMedIBeregning: PeriodisertBeregningsgrunnlag<SoeskenKanskjeMedIBeregning[]>[]
+  }>({
+    defaultValues: { soeskenMedIBeregning: mapListeFraDto(behandling.beregningsGrunnlag?.soeskenMedIBeregning ?? []) },
+  })
   const { fields, append, remove } = useFieldArray({
-    name: 'soeskengrunnlag',
+    name: 'soeskenMedIBeregning',
     control,
   })
   const soeskenjustering = behandling.beregningsGrunnlag?.soeskenMedIBeregning
   const [soeskenjusteringGrunnlag, fetchSoeskengjusteringGrunnlag] = useApiCall(hentBeregningsGrunnlag)
   const soeskenjusteringErDefinertIRedux = soeskenjustering !== undefined
 
-  const sisteTom = watch(`soeskengrunnlag.${fields.length - 1}.tom`)
-  const sisteFom = watch(`soeskengrunnlag.${fields.length - 1}.fom`)
+  const sisteTom = watch(`soeskenMedIBeregning.${fields.length - 1}.tom`)
+  const sisteFom = watch(`soeskenMedIBeregning.${fields.length - 1}.fom`)
   if (!behandling || !behandling.familieforhold) {
     return null
   }
@@ -68,16 +70,17 @@ const Soeskenjustering = (props: SoeskenjusteringProps) => {
     behandling.familieforhold.avdoede.opplysning.avdoedesBarn?.filter(
       (barn) => barn.foedselsnummer !== behandling.søker?.foedselsnummer
     ) ?? []
+  const dispatch = useAppDispatch()
 
   useEffect(() => {
     if (!soeskenjusteringErDefinertIRedux) {
       fetchSoeskengjusteringGrunnlag(behandling.id, (result) => {
-        const nyttGrunnlag = result?.soeskenMedIBeregning ?? [
-          nySoeskengrunnlagPeriode(soesken, behandling.virkningstidspunkt?.dato),
-        ]
-        reset({
-          soeskengrunnlag: nyttGrunnlag,
-        })
+        if (result === null) {
+          reset({ soeskenMedIBeregning: [nySoeskengrunnlagPeriode(soesken, behandling.virkningstidspunkt?.dato)] })
+        } else {
+          reset({ soeskenMedIBeregning: mapListeFraDto(result.soeskenMedIBeregning) })
+          dispatch(oppdaterBeregingsGrunnlag(result))
+        }
       })
     }
   }, [])
@@ -90,9 +93,9 @@ const Soeskenjustering = (props: SoeskenjusteringProps) => {
     {} as Record<string, IPdlPerson>
   )
 
-  const submitForm = (data: { soeskengrunnlag: SoeskengrunnlagUtfylling }) => {
-    if (validerSoeskenjustering(data.soeskengrunnlag)) {
-      onSubmit(data.soeskengrunnlag)
+  const submitForm = (data: { soeskenMedIBeregning: SoeskengrunnlagUtfylling }) => {
+    if (validerSoeskenjustering(data.soeskenMedIBeregning)) {
+      onSubmit(data.soeskenMedIBeregning)
     }
   }
 
@@ -160,13 +163,13 @@ const formaterMaanedDato = (fallback: string, dato: Date | null | undefined) => 
 }
 
 type SoeskenjusteringPeriodeProps = {
-  control: Control<{ soeskengrunnlag: SoeskengrunnlagUtfylling }>
+  control: Control<{ soeskenMedIBeregning: SoeskengrunnlagUtfylling }>
   index: number
   remove: () => void
   canRemove: boolean
   behandling: IBehandlingReducer
   fnrTilSoesken: Record<string, IPdlPerson>
-  watch: UseFormWatch<{ soeskengrunnlag: SoeskengrunnlagUtfylling }>
+  watch: UseFormWatch<{ soeskenMedIBeregning: SoeskengrunnlagUtfylling }>
 }
 
 type FeilISoeskenPeriode = FeilIPeriode | 'IKKE_ALLE_VALGT'
@@ -188,11 +191,11 @@ export function validerSoeskenjusteringsperiode(
 const SoeskenjusteringPeriode = (props: SoeskenjusteringPeriodeProps) => {
   const { control, index, remove, fnrTilSoesken, canRemove, behandling, watch } = props
   const { fields } = useFieldArray({
-    name: `soeskengrunnlag.${index}.data`,
+    name: `soeskenMedIBeregning.${index}.data`,
     control,
   })
 
-  const grunnlag = watch(`soeskengrunnlag.${index}`)
+  const grunnlag = watch(`soeskenMedIBeregning.${index}`)
   const soeskenIPeriode = grunnlag.data
   const antallSoeskenMed = soeskenIPeriode.filter((soesken) => soesken.skalBrukes === true).length
   const antallSoeskenIkkeMed = soeskenIPeriode.filter((soesken) => soesken.skalBrukes === false).length
@@ -222,7 +225,7 @@ const SoeskenjusteringPeriode = (props: SoeskenjusteringPeriodeProps) => {
                   </OppdrasSammenLes>
                 )
               }
-              name={`soeskengrunnlag.${index}.fom`}
+              name={`soeskenMedIBeregning.${index}.fom`}
               control={control}
             />
           </div>
@@ -248,7 +251,7 @@ const SoeskenjusteringPeriode = (props: SoeskenjusteringPeriodeProps) => {
                   </OppdrasSammenLes>
                 )
               }
-              name={`soeskengrunnlag.${index}.tom`}
+              name={`soeskenMedIBeregning.${index}.tom`}
               control={control}
             />
           </div>
@@ -267,7 +270,7 @@ const SoeskenjusteringPeriode = (props: SoeskenjusteringPeriodeProps) => {
               <SoeskenContainer>
                 <Soesken person={fnrTilSoesken[item.foedselsnummer]} familieforhold={behandling.familieforhold!} />
                 <Controller
-                  name={`soeskengrunnlag.${index}.data.${k}`}
+                  name={`soeskenMedIBeregning.${index}.data.${k}`}
                   control={control}
                   render={(field) => (
                     <RadioGroupRow

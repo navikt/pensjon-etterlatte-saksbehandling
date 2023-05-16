@@ -1,9 +1,43 @@
-import { addDays, compareAsc, endOfMonth, isEqual, startOfMonth } from 'date-fns'
+import { addDays, compareAsc, endOfMonth, format, isEqual, parse, startOfMonth } from 'date-fns'
 
 export interface PeriodisertBeregningsgrunnlag<G> {
   fom: Date
   tom?: Date
   data: G
+}
+
+export interface PeriodisertBeregningsgrunnlagDto<G> {
+  fom: string
+  tom?: string
+  data: G
+}
+
+export function periodisertBeregningsgrunnlagFraDto<G>(
+  dto: PeriodisertBeregningsgrunnlagDto<G>
+): PeriodisertBeregningsgrunnlag<G> {
+  return {
+    data: dto.data,
+    fom: parse(dto.fom, 'yyyy-MM-dd', 0),
+    tom: !dto.tom ? undefined : parse(dto.tom, 'yyyy-MM-dd', 0),
+  }
+}
+
+export function periodisertBeregningsgrunnlagTilDto<G>(
+  grunnlag: PeriodisertBeregningsgrunnlag<G>
+): PeriodisertBeregningsgrunnlagDto<G> {
+  return {
+    data: grunnlag.data,
+    fom: format(startOfMonth(grunnlag.fom), 'yyyy-MM-dd'),
+    tom: !grunnlag.tom ? undefined : format(endOfMonth(grunnlag.tom), 'yyyy-MM-dd'),
+  }
+}
+
+export function mapListeFraDto<G>(dto: PeriodisertBeregningsgrunnlagDto<G>[]): PeriodisertBeregningsgrunnlag<G>[] {
+  return dto.map(periodisertBeregningsgrunnlagFraDto)
+}
+
+export function mapListeTilDto<G>(grunnlag: PeriodisertBeregningsgrunnlag<G>[]): PeriodisertBeregningsgrunnlagDto<G>[] {
+  return grunnlag.map(periodisertBeregningsgrunnlagTilDto)
 }
 
 const FEIL_I_PERIODE = [

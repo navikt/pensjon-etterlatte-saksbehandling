@@ -18,6 +18,7 @@ import { ApiErrorAlert } from '~ErrorBoundary'
 import Trygdetid from '~components/behandling/beregningsgrunnlag/Trygdetid'
 import Soeskenjustering, { Soeskengrunnlag } from '~components/behandling/beregningsgrunnlag/Soeskenjustering'
 import { Institusjonsopphold } from '~shared/types/Beregning'
+import { mapListeTilDto } from '~components/behandling/beregningsgrunnlag/PeriodisertBeregningsgrunnlag'
 
 const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer }) => {
   const { behandling } = props
@@ -35,20 +36,19 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
     // TODO EY-2170
     const institusjonsopphold = { institusjonsopphold: false } as Institusjonsopphold
     dispatch(resetBeregning())
+    const beregningsgrunnlag = {
+      soeskenMedIBeregning: mapListeTilDto(soeskengrunnlag),
+      institusjonsopphold: institusjonsopphold,
+    }
+
     postSoeskenMedIBeregning(
       {
         behandlingsId: behandling.id,
-        soeskenMedIBeregning: soeskengrunnlag,
-        institusjonsopphold: institusjonsopphold,
+        grunnlag: beregningsgrunnlag,
       },
       () =>
         postOpprettEllerEndreBeregning(behandling.id, () => {
-          dispatch(
-            oppdaterBeregingsGrunnlag({
-              soeskenMedIBeregning: soeskengrunnlag,
-              institusjonsopphold: institusjonsopphold,
-            })
-          )
+          dispatch(oppdaterBeregingsGrunnlag(beregningsgrunnlag))
           dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.BEREGNET))
           next()
         })

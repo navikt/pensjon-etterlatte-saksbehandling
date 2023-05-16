@@ -1,6 +1,6 @@
 package no.nav.etterlatte.grunnlagsendring
 
-import institusjonsopphold.KafkaOppholdHendelse
+import institusjonsopphold.InstitusjonsoppholdHendelseBeriket
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.GenerellBehandlingService
 import no.nav.etterlatte.behandling.domain.Behandling
@@ -100,7 +100,9 @@ class GrunnlagsendringshendelseService(
         )
     }
 
-    fun opprettInstitusjonsOppholdhendelse(oppholdsHendelse: KafkaOppholdHendelse): List<Grunnlagsendringshendelse> {
+    fun opprettInstitusjonsOppholdhendelse(
+        oppholdsHendelse: InstitusjonsoppholdHendelseBeriket
+    ): List<Grunnlagsendringshendelse> {
         return opprettHendelseAvTypeForPersonUtenSamsvarSjekketAvJobb(
             fnr = oppholdsHendelse.norskident,
             grunnlagendringType = GrunnlagsendringsType.INSTITUSJONSOPPHOLD,

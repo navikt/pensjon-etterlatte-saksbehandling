@@ -45,13 +45,23 @@ class Server {
 fun startInstitusjonsoppholdLytter(env: Map<String, String>, config: Config) {
     val logger = LoggerFactory.getLogger(Application::class.java)
 
+    val proxyHttpKlient = httpClientClientCredentials(
+        azureAppClientId = config.getString("azure.app.client.id"),
+        azureAppJwk = config.getString("azure.app.jwk"),
+        azureAppWellKnownUrl = config.getString("azure.app.well.known.url"),
+        azureAppScope = config.getString("etterlatte-proxy.azure.scope")
+    )
+
+    val institusjonsoppholdKlient = InstitusjonsoppholdKlient(proxyHttpKlient, config.getString("proxy.url"))
+
     val behandlingHttpClient = httpClientClientCredentials(
         azureAppClientId = config.getString("azure.app.client.id"),
         azureAppJwk = config.getString("azure.app.jwk"),
         azureAppWellKnownUrl = config.getString("azure.app.well.known.url"),
         azureAppScope = config.getString("behandling.azure.scope")
     )
-    val behandlingKlient = BehandlingKlient(behandlingHttpClient = behandlingHttpClient)
+
+    val behandlingKlient = BehandlingKlient(behandlingHttpClient = behandlingHttpClient, institusjonsoppholdKlient)
 
     val closed = AtomicBoolean()
     closed.set(false)

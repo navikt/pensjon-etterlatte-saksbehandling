@@ -2,7 +2,7 @@ package no.nav.etterlatte.kafka
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import institusjonsopphold.KafkaOppholdHendelse
+import institusjonsopphold.InstitusjonsoppholdHendelseBeriket
 import io.confluent.kafka.schemaregistry.client.SchemaRegistryClientConfig
 import io.confluent.kafka.serializers.AbstractKafkaSchemaSerDeConfig
 import org.apache.kafka.clients.CommonClientConfigs
@@ -59,10 +59,10 @@ class KafkaEnvironment : KafkaConsumerConfiguration {
         return properties
     }
 
-    class JsonDeserializer : org.apache.kafka.common.serialization.Deserializer<KafkaOppholdHendelse> {
+    class JsonDeserializer : org.apache.kafka.common.serialization.Deserializer<InstitusjonsoppholdHendelseBeriket> {
         private val mapper = jacksonObjectMapper()
 
-        override fun deserialize(topic: String?, data: ByteArray): KafkaOppholdHendelse {
+        override fun deserialize(topic: String?, data: ByteArray): InstitusjonsoppholdHendelseBeriket {
             return mapper.readValue(data)
         }
     }

@@ -1,6 +1,6 @@
 package no.nav.etterlatte.grunnlagsendring
 
-import institusjonsopphold.KafkaOppholdHendelse
+import institusjonsopphold.InstitusjonsoppholdHendelseBeriket
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
 import io.ktor.server.application.log
@@ -62,7 +62,7 @@ internal fun Route.grunnlagsendringshendelseRoute(
         }
 
         post("/institusjonsopphold") {
-            val oppholdsHendelse = call.receive<KafkaOppholdHendelse>()
+            val oppholdsHendelse = call.receive<InstitusjonsoppholdHendelseBeriket>()
             logger.info("Mottar en institusjons-hendelse fra inst2")
             grunnlagsendringshendelseService.opprettInstitusjonsOppholdhendelse(oppholdsHendelse)
             call.respond(HttpStatusCode.OK)

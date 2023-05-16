@@ -42,7 +42,7 @@ class MigreringHendelser(
                 logger.info("Mottok grunnlagshendelser for migrering")
                 val sakId = packet.sakId
                 val request =
-                    objectMapper.treeToValue(packet["migreringGrunnlagRequest"], MigreringGrunnlagRequest::class.java)
+                    objectMapper.treeToValue(packet[MIGRERING_GRUNNLAG_KEY], MigreringGrunnlagRequest::class.java)
 
                 lagreEnkeltgrunnlag(sakId, request.soeker.second, request.soeker.first)
                 request.gjenlevende.forEach { lagreEnkeltgrunnlag(sakId, it.second, it.first) }

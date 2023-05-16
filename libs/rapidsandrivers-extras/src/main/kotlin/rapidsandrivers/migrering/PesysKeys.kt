@@ -13,6 +13,7 @@ const val VILKAARSVURDERT_KEY = "vilkaarsvurdert"
 const val FULLSTENDIG_KEY = "fullstendig"
 const val TRYGDETID_KEY = "trygdetid"
 const val PERSONGALLERI_KEY = "persongalleri"
+const val MIGRERING_GRUNNLAG_KEY = "migrering_grunnlag"
 
 var JsonMessage.request: String
     get() = this[REQUEST].toJson()

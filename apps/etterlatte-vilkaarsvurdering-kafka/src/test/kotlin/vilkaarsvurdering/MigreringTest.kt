@@ -13,7 +13,6 @@ import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import rapidsandrivers.BEHANDLING_ID_KEY
-import rapidsandrivers.GRUNNLAG_OPPDATERT
 import java.util.*
 
 internal class MigreringTest {
@@ -29,7 +28,7 @@ internal class MigreringTest {
 
         val melding = JsonMessage.newMessage(
             mapOf(
-                "@event_name" to GRUNNLAG_OPPDATERT,
+                "@event_name" to Migreringshendelser.VILKAARSVURDER,
                 BEHOV_NAME_KEY to Opplysningstype.MIGRERING.name,
                 "sakId" to 1,
                 BEHANDLING_ID_KEY to behandlingId,

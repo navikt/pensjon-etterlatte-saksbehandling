@@ -1,17 +1,19 @@
 package no.nav.etterlatte.opplysninger.kilde.pdl
 
+import MigreringGrunnlagRequest
+import com.fasterxml.jackson.databind.JsonNode
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.PersonRolle
-import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
-import no.nav.etterlatte.rapidsandrivers.EventNames
+import no.nav.etterlatte.rapidsandrivers.migrering.MIGRERING_GRUNNLAG_KEY
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser.PERSONGALLERI
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser.PERSONGALLERI_GRUNNLAG
-import no.nav.etterlatte.rapidsandrivers.migrering.VILKAARSVURDERT_KEY
+import no.nav.etterlatte.rapidsandrivers.migrering.PERSONGALLERI_KEY
 import no.nav.etterlatte.rapidsandrivers.migrering.persongalleri
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -19,7 +21,6 @@ import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import rapidsandrivers.GRUNNLAG_OPPDATERT
 import rapidsandrivers.OPPLYSNING_KEY
 import rapidsandrivers.SAK_ID_KEY
 
@@ -35,9 +36,8 @@ class MigreringHendelser(
             eventName(PERSONGALLERI)
             validate { it.requireKey(OPPLYSNING_KEY) }
             validate { it.requireKey(SAK_ID_KEY) }
-            validate { it.rejectValue(EVENT_NAME_KEY, GRUNNLAG_OPPDATERT) }
-            validate { it.rejectValue(EVENT_NAME_KEY, EventNames.FEILA) }
-            validate { it.rejectValue(VILKAARSVURDERT_KEY, true) }
+            validate { it.requireKey(PERSONGALLERI_KEY) }
+            validate { it.requireKey("sakType") }
         }.register(this)
     }
 
@@ -51,29 +51,31 @@ class MigreringHendelser(
             personDTO = pdl.hentOpplysningsperson(persongalleri.soeker, PersonRolle.BARN, sakType),
             opplysningsbehov = Opplysningstype.SOEKER_PDL_V1,
             fnr = Folkeregisteridentifikator.of(persongalleri.soeker)
-        )
+        ) as List<Grunnlagsopplysning<JsonNode>>
 
         val gjenlevende = persongalleri.gjenlevende.map {
-            lagEnkelopplysningerFraPDL(
+            it to lagEnkelopplysningerFraPDL(
                 person = pdl.hentPerson(it, PersonRolle.GJENLEVENDE, sakType),
                 personDTO = pdl.hentOpplysningsperson(it, PersonRolle.GJENLEVENDE, sakType),
                 opplysningsbehov = Opplysningstype.GJENLEVENDE_FORELDER_PDL_V1,
                 fnr = Folkeregisteridentifikator.of(it)
-            )
+            ) as List<Grunnlagsopplysning<JsonNode>>
         }
 
         val avdoede = persongalleri.avdoed.map {
-            lagEnkelopplysningerFraPDL(
+            it to lagEnkelopplysningerFraPDL(
                 person = pdl.hentPerson(it, PersonRolle.AVDOED, sakType),
                 personDTO = pdl.hentOpplysningsperson(it, PersonRolle.AVDOED, sakType),
                 opplysningsbehov = Opplysningstype.AVDOED_PDL_V1,
                 fnr = Folkeregisteridentifikator.of(it)
-            )
+            ) as List<Grunnlagsopplysning<JsonNode>>
         }
 
-        packet["soeker"] = soeker
-        packet["gjenlevende"] = gjenlevende
-        packet["avdoede"] = avdoede
+        packet[MIGRERING_GRUNNLAG_KEY] = MigreringGrunnlagRequest(
+            soeker = Pair(persongalleri.soeker, soeker),
+            gjenlevende = gjenlevende,
+            avdoede = avdoede
+        )
         packet.eventName = PERSONGALLERI_GRUNNLAG
         context.publish(packet.toJson())
 

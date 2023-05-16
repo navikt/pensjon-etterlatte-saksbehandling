@@ -3,7 +3,7 @@ package beregning.regler.avkorting
 import io.kotest.matchers.shouldBe
 import no.nav.etterlatte.beregning.regler.Beregningstall
 import no.nav.etterlatte.beregning.regler.avkorting.avkortingFaktor
-import no.nav.etterlatte.beregning.regler.avkorting.inntektAvkorting
+import no.nav.etterlatte.beregning.regler.avkorting.kroneavrundetInntektAvkorting
 import no.nav.etterlatte.beregning.regler.avkorting.opprundetInntekt
 import no.nav.etterlatte.beregning.regler.avkorting.overstegetInntekt
 import no.nav.etterlatte.beregning.regler.inntektAvkortingGrunnlag
@@ -45,10 +45,10 @@ class InntektAvkortingTest {
 
     @Test
     fun `avkortingsbeloep er oversteget inntekt ganget med avkortingsfaktor oppdelt i antall maaneder (12)`() {
-        val avkortingsbeloep = inntektAvkorting.anvend(
+        val avkortingsbeloep = kroneavrundetInntektAvkorting.anvend(
             inntektAvkortingGrunnlag(inntekt = 500000),
             RegelPeriode(LocalDate.of(2023, 1, 1))
         )
-        avkortingsbeloep.verdi shouldBe 16659
+        avkortingsbeloep.verdi shouldBe 16660
     }
 }

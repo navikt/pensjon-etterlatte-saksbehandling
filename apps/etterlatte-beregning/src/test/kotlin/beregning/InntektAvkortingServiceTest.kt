@@ -38,8 +38,8 @@ class InntektAvkortingServiceTest {
     }
 
     @Test
-    fun `skal beregene avkorting for inntekt`() {
-        val avkortingGrunnlag = avkortinggrunnlag(aarsinntekt = 500000)
+    fun `skal beregene avkorting for inntekt til en foerstegangsbehandling`() {
+        val avkortingGrunnlag = avkortinggrunnlag(aarsinntekt = 300000)
 
         val beregnedeAvkortingGrunnlag = InntektAvkortingService.beregnInntektsavkorting(avkortingGrunnlag)
 
@@ -47,7 +47,7 @@ class InntektAvkortingServiceTest {
             regelResultat shouldNotBe null
             tidspunkt shouldNotBe null
             periode shouldNotBe null
-            avkorting shouldBe 16659
+            avkorting shouldBe 9160
         }
     }
 

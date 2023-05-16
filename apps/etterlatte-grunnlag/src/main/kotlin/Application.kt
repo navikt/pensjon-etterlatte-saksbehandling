@@ -4,6 +4,7 @@ import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 import io.ktor.server.config.HoconApplicationConfig
 import no.nav.etterlatte.grunnlag.GrunnlagHendelser
+import no.nav.etterlatte.grunnlag.MigreringHendelser
 import no.nav.etterlatte.grunnlag.OpplysningDao
 import no.nav.etterlatte.grunnlag.RealGrunnlagService
 import no.nav.etterlatte.grunnlag.grunnlagRoute
@@ -48,6 +49,7 @@ class ApplicationBuilder {
         }
         .build().apply {
             GrunnlagHendelser(this, grunnlagService)
+            MigreringHendelser(this, grunnlagService)
         }
 
     fun start() = setReady().also { rapidsConnection.start() }

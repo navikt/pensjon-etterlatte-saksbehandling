@@ -4,6 +4,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.michaelbull.result.mapBoth
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.beregning.AvkortingDto
 import no.nav.etterlatte.libs.common.beregning.BeregningDTO
 import no.nav.etterlatte.libs.common.objectMapper
@@ -16,7 +17,7 @@ import org.slf4j.LoggerFactory
 import java.util.*
 
 interface BeregningKlient {
-    suspend fun hentBeregningOgAvkorting(behandlingId: UUID, bruker: Bruker): BeregningOgAvkorting
+    suspend fun hentBeregningOgAvkorting(behandlingId: UUID, bruker: Bruker, saktype: SakType): BeregningOgAvkorting
 }
 
 class BeregningKlientException(override val message: String, override val cause: Throwable) :
@@ -31,10 +32,14 @@ class BeregningKlientImpl(config: Config, httpClient: HttpClient) : BeregningKli
     private val clientId = config.getString("beregning.client.id")
     private val resourceUrl = config.getString("beregning.resource.url")
 
-    override suspend fun hentBeregningOgAvkorting(behandlingId: UUID, bruker: Bruker): BeregningOgAvkorting {
+    override suspend fun hentBeregningOgAvkorting(
+        behandlingId: UUID,
+        bruker: Bruker,
+        saktype: SakType
+    ): BeregningOgAvkorting {
         return BeregningOgAvkorting(
             beregning = hentBeregning(behandlingId, bruker),
-            avkorting = hentAvkorting(behandlingId, bruker)
+            avkorting = if (saktype == SakType.OMSTILLINGSSTOENAD) hentAvkorting(behandlingId, bruker) else null
         )
     }
 

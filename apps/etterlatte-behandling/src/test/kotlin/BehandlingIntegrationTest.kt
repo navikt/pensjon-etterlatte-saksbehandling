@@ -77,7 +77,7 @@ abstract class BehandlingIntegrationTest {
                 put("DB_DATABASE", postgreSQLContainer.databaseName)
                 put("AZUREAD_ATTESTANT_GROUPID", azureAdAttestantClaim)
                 put("AZUREAD_SAKSBEHANDLER_GROUPID", azureAdSaksbehandlerClaim)
-                put("AZUREAD_STRENGT_FORTROLIG_GROUPID", "5ef775f2-61f8-4283-bf3d-8d03f428aa14")
+                put("AZUREAD_STRENGT_FORTROLIG_GROUPID", azureAdStrengtFortroligClaim)
                 put("AZUREAD_FORTROLIG_GROUPID", "ea930b6b-9397-44d9-b9e6-f4cf527a632a")
                 put("AZUREAD_NASJONAL_TILGANG_UTEN_LOGG_GROUPID", "753805ea-65a7-4855-bdc3-e6130348df9f")
                 put("AZUREAD_NASJONAL_TILGANG_MED_LOGG_GROUPID", "ea7411eb-8b48-41a0-bc56-7b521fbf0c25")
@@ -208,6 +208,10 @@ abstract class BehandlingIntegrationTest {
         postgreSQLContainer.stop()
     }
 
+    private val azureAdStrengtFortroligClaim: String by lazy {
+        "5ef775f2-61f8-4283-bf3d-8d03f428aa14"
+    }
+
     private val azureAdAttestantClaim: String by lazy {
         "0af3955f-df85-4eb0-b5b2-45bf2c8aeb9e"
     }
@@ -237,6 +241,20 @@ abstract class BehandlingIntegrationTest {
                 "groups" to listOf(
                     azureAdAttestantClaim,
                     azureAdSaksbehandlerClaim
+                )
+            )
+        )
+    }
+
+    protected val tokenSaksbehandlerMedStrengtFortrolig: String by lazy {
+        issueToken(
+            mapOf(
+                "navn" to "John Doe",
+                Claims.NAVident.toString() to "saksebehandlerstrengtfortrolig",
+                "groups" to listOf(
+                    azureAdAttestantClaim,
+                    azureAdSaksbehandlerClaim,
+                    azureAdStrengtFortroligClaim
                 )
             )
         )

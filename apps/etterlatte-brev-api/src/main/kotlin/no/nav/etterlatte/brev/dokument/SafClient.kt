@@ -25,7 +25,6 @@ import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
 import no.nav.etterlatte.token.Bruker
 import org.slf4j.LoggerFactory
-import java.util.*
 
 /*
 * SAF (Sak- og Arkiv Facade)
@@ -101,7 +100,7 @@ class SafClient(
         }.let {
             when (it) {
                 is RetryResult.Success -> it.content
-                is RetryResult.Failure -> throw it.exceptions.last()
+                is RetryResult.Failure -> throw it.samlaExceptions()
             }
         }
     }

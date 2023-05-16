@@ -80,12 +80,14 @@ fun Route.vilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService, 
                 } catch (e: BehandlingstilstandException) {
                     logger.error(
                         "Kunne ikke opprette vilkaarsvurdering for behandling $behandlingId. " +
-                            "Statussjekk for behandling feilet"
+                            "Statussjekk for behandling feilet",
+                        e
                     )
                     call.respond(HttpStatusCode.PreconditionFailed, "Statussjekk for behandling feilet")
                 } catch (e: NullPointerException) {
                     logger.error(
-                        "Kunne ikke kopiere vilkårsvurdering fra $forrigeBehandling. Fant ikke vilkårsvurdering"
+                        "Kunne ikke kopiere vilkårsvurdering fra $forrigeBehandling. Fant ikke vilkårsvurdering",
+                        e
                     )
                     call.respond(HttpStatusCode.NotFound, "Fant ikke vilkårsvurdering")
                 }

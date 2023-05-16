@@ -52,7 +52,7 @@ class GrunnlagKlientImpl(config: Config, httpClient: HttpClient) : GrunnlagKlien
                 is Failure -> {
                     throw GrunnlagKlientException(
                         "Klarte ikke hente grunnlag for sak med sakId=$sakId",
-                        it.exceptions.last()
+                        it.samlaExceptions()
                     )
                 }
             }

@@ -17,12 +17,9 @@ on:
     paths:
       - apps/etterlatte-migrering/**
       - libs/saksbehandling-common/**
-      - libs/testdata/**
-      - libs/etterlatte-helsesjekk/**
       - libs/etterlatte-ktor/**
       - libs/etterlatte-database/**
       - libs/ktor2client-onbehalfof/**
-      - libs/ktor2client-auth-clientcredentials/**
       - gradle/libs.versions.toml
   pull_request:
     branches:
@@ -30,12 +27,9 @@ on:
     paths:
       - apps/etterlatte-migrering/**
       - libs/saksbehandling-common/**
-      - libs/testdata/**
-      - libs/etterlatte-helsesjekk/**
       - libs/etterlatte-ktor/**
       - libs/etterlatte-database/**
       - libs/ktor2client-onbehalfof/**
-      - libs/ktor2client-auth-clientcredentials/**
       - gradle/libs.versions.toml
 
 jobs:

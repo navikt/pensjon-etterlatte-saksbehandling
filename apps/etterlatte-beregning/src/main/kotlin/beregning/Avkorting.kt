@@ -15,7 +15,6 @@ data class Avkorting(
 data class AvkortingGrunnlag(
     val periode: Periode,
     val aarsinntekt: Int,
-    val gjeldendeAar: Int,
     val spesifikasjon: String,
     val beregnetAvkorting: List<BeregnetAvkortingGrunnlag>,
     val kilde: Grunnlagsopplysning.Saksbehandler
@@ -32,6 +31,8 @@ data class BeregnetAvkortingGrunnlag(
 data class AvkortetYtelse(
     val periode: Periode,
     val ytelseEtterAvkorting: Int,
+    val avkortingsbeloep: Int,
+    val ytelseFoerAvkorting: Int,
     val tidspunkt: Tidspunkt,
     val regelResultat: JsonNode,
     val kilde: Grunnlagsopplysning.RegelKilde

@@ -59,7 +59,7 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
                 is RetryResult.Failure -> {
                     throw BehandlingKlientException(
                         "Klarte ikke hente behandling med behandlingId=$behandlingId",
-                        it.exceptions.last()
+                        it.samlaExceptions()
                     )
                 }
             }

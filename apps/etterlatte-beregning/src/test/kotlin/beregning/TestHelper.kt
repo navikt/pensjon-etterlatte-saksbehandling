@@ -69,7 +69,6 @@ fun avkortinggrunnlag(
 ) = AvkortingGrunnlag(
     periode = Periode(fom = YearMonth.now(), tom = null),
     aarsinntekt = aarsinntekt,
-    gjeldendeAar = 2023,
     spesifikasjon = "Spesifikasjon",
     kilde = Grunnlagsopplysning.Saksbehandler.create("Z123456"),
     beregnetAvkorting = beregnetAvkorting
@@ -97,9 +96,19 @@ fun avkortetYtelseGrunnlag(bruttoYtelse: Int, avkorting: Int) = AvkortetYtelseGr
     avkorting = FaktumNode(verdi = avkorting, "", "")
 )
 
-fun avkortetYtelse() = AvkortetYtelse(
-    periode = Periode(fom = YearMonth.now(), tom = null),
-    ytelseEtterAvkorting = 100,
+fun avkortetYtelse(
+    ytelseEtterAvkorting: Int = 100,
+    avkortingsbeloep: Int = 200,
+    ytelseFoerAvkorting: Int = 300,
+    periode: Periode = Periode(
+        fom = YearMonth.now(),
+        tom = null
+    )
+) = AvkortetYtelse(
+    periode = periode,
+    ytelseEtterAvkorting = ytelseEtterAvkorting,
+    avkortingsbeloep = avkortingsbeloep,
+    ytelseFoerAvkorting = ytelseFoerAvkorting,
     tidspunkt = Tidspunkt.now(),
     regelResultat = "".toJsonNode(),
     kilde = Grunnlagsopplysning.RegelKilde("regelid", Tidspunkt.now(), "1")

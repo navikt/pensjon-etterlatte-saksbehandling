@@ -73,6 +73,8 @@ object InntektAvkortingService {
                                 tom = periodisertResultat.periode.tilDato?.let { YearMonth.from(it) }
                             ),
                             ytelseEtterAvkorting = periodisertResultat.resultat.verdi,
+                            avkortingsbeloep = grunnlag.avkorting.verdi,
+                            ytelseFoerAvkorting = grunnlag.bruttoYtelse.verdi,
                             tidspunkt = tidspunkt,
                             regelResultat = periodisertResultat.toJsonNode(),
                             kilde = Grunnlagsopplysning.RegelKilde(

@@ -47,6 +47,7 @@ import no.nav.etterlatte.oppgave.OppgaveServiceImpl
 import no.nav.etterlatte.sak.RealSakService
 import no.nav.etterlatte.sak.SakDao
 import no.nav.etterlatte.sak.SakTilgangDao
+import no.nav.etterlatte.sak.SettSakEnhetJobb
 import no.nav.etterlatte.sak.TilgangServiceImpl
 import java.time.Duration
 import java.time.temporal.ChronoUnit
@@ -119,12 +120,11 @@ class ApplicationContext(
     val grunnlagKlient = GrunnlagKlientImpl(grunnlagHttpClient, "http://etterlatte-grunnlag")
     val leaderElectionKlient = LeaderElection(env.getValue("ELECTOR_PATH"), leaderElectionHttpClient)
 
-    val behandlingsHendelser = BehandlingsHendelser(rapid, behandlingDao, dataSource).apply {
-    }
+    val behandlingsHendelser = BehandlingsHendelser(rapid, behandlingDao, dataSource)
 
     // Service
     val oppgaveService = OppgaveServiceImpl(oppgaveDao, featureToggleService)
-    val sakService = RealSakService(sakDao, pdlKlient, norg2Klient, featureToggleService)
+
     val generellBehandlingService = RealGenerellBehandlingService(
         behandlingDao = behandlingDao,
         behandlingHendelser = behandlingsHendelser.hendelserKanal,
@@ -169,6 +169,7 @@ class ApplicationContext(
 
     val behandlingsStatusService = BehandlingStatusServiceImpl(behandlingDao, generellBehandlingService)
     val tilgangService = TilgangServiceImpl(SakTilgangDao(dataSource), saksbehandlerGroupIdsByKey)
+    val sakService = RealSakService(sakDao, pdlKlient, norg2Klient, featureToggleService, tilgangService)
     val enhetService = EnhetServiceImpl(navAnsattKlient)
     val grunnlagsendringshendelseService =
         GrunnlagsendringshendelseService(
@@ -197,4 +198,14 @@ class ApplicationContext(
         periode = Duration.of(env.getValue("HENDELSE_JOB_FREKVENS").toLong(), ChronoUnit.MINUTES),
         minutterGamleHendelser = env.getValue("HENDELSE_MINUTTER_GAMLE_HENDELSER").toLong()
     )
+
+    private val settSakEnhetJobb = SettSakEnhetJobb(
+        sakService,
+        dataSource,
+        leaderElectionKlient
+    )
+
+    init {
+        settSakEnhetJobb.schedule()
+    }
 }

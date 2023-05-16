@@ -78,7 +78,7 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
             [Beregningstype.BP]: <BarnepensjonSammendrag behandling={behandling} beregning={beregningFraState} />,
             [Beregningstype.OMS]: <OmstillingsstoenadSammendrag beregning={beregningFraState} />,
           }[beregningFraState.type]}
-        {behandling.sakType === ISaksType.OMSTILLINGSSTOENAD && <Avkorting />}
+        {behandling.sakType === ISaksType.OMSTILLINGSSTOENAD && <Avkorting behandling={behandling} />}
       </ContentHeader>
       {behandles ? (
         <BehandlingHandlingKnapper>

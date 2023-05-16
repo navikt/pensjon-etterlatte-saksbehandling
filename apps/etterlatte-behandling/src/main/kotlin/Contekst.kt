@@ -48,7 +48,6 @@ class Saksbehandler(
     private val logger = LoggerFactory.getLogger(Saksbehandler::class.java)
 
     init {
-        logger.info("""Groups: ${identifiedBy.getJwtToken(AZURE_ISSUER).jwtTokenClaims.getAsList("groups")}""")
     }
 
     override fun name(): String {

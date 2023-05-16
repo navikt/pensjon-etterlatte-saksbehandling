@@ -9,15 +9,15 @@ spec:
   image: {{image}}
   port: 8080
   ingresses:
-    - "https://etterlatte-migrering.dev.intern.nav.no"
+    - "https://etterlatte-migrering.intern.dev.nav.no"
   liveness:
     initialDelay: 5
-    path: /health/isalive
+    path: /isalive
   readiness:
     initialDelay: 5
-    path: /health/isready
-  secureLogs:
-    enabled: true
+    path: /isready
+  kafka:
+    pool: nav-dev
   prometheus:
     enabled: true
     path: /metrics
@@ -34,5 +34,11 @@ spec:
 
   replicas:
     cpuThresholdPercentage: 90
-    max: 4
-    min: 2
+    max: 1
+    min: 1
+  env:
+    - name: KAFKA_RAPID_TOPIC
+      value: etterlatte.dodsmelding
+    - name: KAFKA_RESET_POLICY
+      #sette tilbake til none senere
+      value: earliest

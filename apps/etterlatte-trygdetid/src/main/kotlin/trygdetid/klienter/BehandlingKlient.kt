@@ -104,7 +104,7 @@ class BehandlingKlient(config: Config, httpClient: HttpClient) : BehandlingTilga
                 is RetryResult.Failure -> {
                     throw BehandlingKlientException(
                         "Klarte ikke hente behandling med behandlingId=$behandlingId",
-                        it.exceptions.last()
+                        it.samlaExceptions()
                     )
                 }
             }

@@ -25,7 +25,7 @@ export const OmstillingsstoenadSammendrag = ({ beregning }: Props) => {
             <Table.HeaderCell>Ytelse</Table.HeaderCell>
             <Table.HeaderCell>Trygdetid</Table.HeaderCell>
             <Table.HeaderCell>Grunnbeløp</Table.HeaderCell>
-            <Table.HeaderCell>Bruttoytelse</Table.HeaderCell>
+            <Table.HeaderCell>Brutto stønad før avkorting</Table.HeaderCell>
           </Table.Row>
         </Table.Header>
         <Table.Body>

@@ -1,4 +1,4 @@
-import { BodyShort, Button, ErrorMessage, Heading, Label, ReadMore, Select, TextField } from '@navikt/ds-react'
+import { BodyShort, Button, ErrorMessage, Heading, Label, ReadMore, TextField } from '@navikt/ds-react'
 import styled from 'styled-components'
 import DatePicker from 'react-datepicker'
 import { Calender } from '@navikt/ds-icons'
@@ -6,16 +6,17 @@ import React, { FormEvent, useRef, useState } from 'react'
 import { IAvkorting, IAvkortingGrunnlag } from '~shared/types/IAvkorting'
 import { isPending, useApiCall } from '~shared/hooks/useApiCall'
 import { lagreAvkortingGrunnlag } from '~shared/api/avkorting'
-import { useParams } from 'react-router-dom'
 import { formaterDatoTilYearMonth, formaterStringDato } from '~utils/formattering'
 import { HjemmelLenke } from '~components/behandling/felles/HjemmelLenke'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
+import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
 
 export const AvkortingInntekt = (props: {
+  behandling: IBehandlingReducer
   avkortingGrunnlag?: IAvkortingGrunnlag[]
   setAvkorting: (avkorting: IAvkorting) => void
 }) => {
-  const { behandlingId } = useParams()
+  const behandling = props.behandling
   const [inntektGrunnlag, setInntektGrunnlag] = useState<IAvkortingGrunnlag>(
     props.avkortingGrunnlag ? props.avkortingGrunnlag[0] : {}
   )
@@ -30,20 +31,32 @@ export const AvkortingInntekt = (props: {
     }
   }
 
+  const virkningstidspunkt = () => {
+    if (!behandling) throw new Error('Mangler behandling')
+    if (!behandling.virkningstidspunkt) throw new Error('Mangler virkningstidspunkt')
+    return behandling.virkningstidspunkt.dato
+  }
+
   const onSubmit = (e: FormEvent) => {
     e.preventDefault()
 
     setErrorTekst('')
     if (inntektGrunnlag.aarsinntekt == null) return setErrorTekst('Årsinntekt må fylles ut')
-    if (inntektGrunnlag.gjeldendeAar === 0) return setErrorTekst('Gjeldende år må fylles ut')
-    if (inntektGrunnlag.fom == null) return setErrorTekst('Fra og med dato må fylles ut')
+    if (inntektGrunnlag.fom !== virkningstidspunkt())
+      return setErrorTekst('Fra og med for forventet årsinntekt må være fra virkningstidspunkt')
 
-    if (!behandlingId) throw new Error('Mangler behandlingsid')
-    requestLagreAvkortingGrunnlag({ behandlingId: behandlingId, avkortingGrunnlag: inntektGrunnlag }, (respons) => {
-      const nyttAvkortingGrunnlag = respons.avkortingGrunnlag[0]
-      nyttAvkortingGrunnlag && setInntektGrunnlag(nyttAvkortingGrunnlag)
-      props.setAvkorting(respons)
-    })
+    if (!behandling) throw new Error('Mangler behandling')
+    requestLagreAvkortingGrunnlag(
+      {
+        behandlingId: behandling.id,
+        avkortingGrunnlag: inntektGrunnlag,
+      },
+      (respons) => {
+        const nyttAvkortingGrunnlag = respons.avkortingGrunnlag[0]
+        nyttAvkortingGrunnlag && setInntektGrunnlag(nyttAvkortingGrunnlag)
+        props.setAvkorting(respons)
+      }
+    )
   }
 
   return (
@@ -72,37 +85,18 @@ export const AvkortingInntekt = (props: {
               onChange={(e) =>
                 setInntektGrunnlag({
                   ...inntektGrunnlag,
-                  aarsinntekt: Number(e.target.value),
+                  aarsinntekt: e.target.value === '' ? undefined : Number(e.target.value),
                 })
               }
             />
-            <Select
-              label="År"
-              value={inntektGrunnlag.gjeldendeAar}
-              key={`INNTEKT-${inntektGrunnlag.gjeldendeAar}`}
-              onChange={(e) =>
-                setInntektGrunnlag({
-                  ...inntektGrunnlag,
-                  gjeldendeAar: e.target.value === 'Velg inntektsår' ? 0 : Number(e.target.value),
-                })
-              }
-              autoComplete="off"
-            >
-              <option value="">Velg inntektsår</option>
-              {Array.from({ length: 10 }, (_, i) => new Date().getFullYear() - i).map((aar) => (
-                <option key={`INNTEKT-${aar}`} value={aar}>
-                  {aar}
-                </option>
-              ))}
-            </Select>
             <DatoSection>
-              <Label>F.o.m dato (inntekt)</Label>
+              <Label>F.o.m dato</Label>
               <Datovelger>
                 <DatePicker
                   ref={fomPickerRef}
                   dateFormat={'dd.MM.yyyy'}
                   placeholderText={'dd.mm.åååå'}
-                  selected={inntektGrunnlag.fom == null ? null : new Date(inntektGrunnlag.fom)}
+                  selected={new Date(inntektGrunnlag.fom == null ? virkningstidspunkt() : inntektGrunnlag.fom)}
                   locale="nb"
                   autoComplete="off"
                   showMonthYearPicker

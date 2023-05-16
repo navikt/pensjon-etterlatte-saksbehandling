@@ -31,7 +31,7 @@ internal class InnsendtSoeknadRiverTest {
         val id = UUID.randomUUID()
 
         every {
-            behandlingClientMock.skaffSak(any(), any())
+            behandlingClientMock.hentSak(any(), any())
         } returns Sak("21478247343", SakType.BARNEPENSJON, sakId, null)
         every { behandlingClientMock.initierBehandling(any(), any(), any()) } returns id
         every { behandlingClientMock.lagreGyldighetsVurdering(any(), any()) } returns Unit

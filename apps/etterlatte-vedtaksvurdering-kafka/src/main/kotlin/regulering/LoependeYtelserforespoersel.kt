@@ -51,7 +51,7 @@ internal class LoependeYtelserforespoersel(
                         vedtak.tilbakestillVedtak(it)
                         logger.info("Tilbakestilt vedtak for behandling $it")
                     } catch (e: Exception) {
-                        logger.error("Tilbakestilling av vedtak feilet for behandling $it")
+                        logger.error("Tilbakestilling av vedtak feilet for behandling $it", e)
                     }
                 }
 

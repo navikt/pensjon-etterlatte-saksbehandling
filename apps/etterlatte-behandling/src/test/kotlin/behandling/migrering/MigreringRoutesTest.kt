@@ -22,11 +22,13 @@ import no.nav.etterlatte.module
 import no.nav.etterlatte.rapidsandrivers.migrering.Enhet
 import no.nav.etterlatte.rapidsandrivers.migrering.MigreringRequest
 import no.nav.etterlatte.rapidsandrivers.migrering.PesysId
+import no.nav.etterlatte.rapidsandrivers.migrering.Trygdetidsgrunnlag
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.*
@@ -59,7 +61,12 @@ class MigreringRoutesTest : BehandlingIntegrationTest() {
                 fnr = fnr,
                 mottattDato = LocalDateTime.now(),
                 persongalleri = Persongalleri(fnr.value, "innsender", emptyList(), emptyList(), emptyList()),
-                virkningstidspunkt = YearMonth.now()
+                virkningstidspunkt = YearMonth.now(),
+                trygdetidsgrunnlag = Trygdetidsgrunnlag(
+                    "Norge",
+                    LocalDate.now().minusYears(40),
+                    LocalDate.now()
+                )
             )
 
             val response: BehandlingOgSak = client.post("/migrering") {

@@ -9,10 +9,12 @@ import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.innsendtsoeknad.barnepensjon.Barnepensjon
 import no.nav.etterlatte.libs.common.innsendtsoeknad.common.PersonType
+import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.FamilieRelasjonManglerIdent
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.HentPersonRequest
+import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.tidspunkt.utcKlokke
 import no.nav.etterlatte.pdltjenester.PdlTjenesterKlient
@@ -24,10 +26,15 @@ import java.time.Clock
 import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
 
-data class Fordeling(val soeknadId: Long, val fordeltTil: Vedtaksloesning, val kriterier: List<FordelerKriterie>)
+data class Fordeling(
+    val soeknadId: Long,
+    val fordeltTil: Vedtaksloesning,
+    val kriterier: List<FordelerKriterie>,
+    val gradering: AdressebeskyttelseGradering? = null
+)
 
 sealed class FordelerResultat {
-    object GyldigForBehandling : FordelerResultat()
+    class GyldigForBehandling(val gradering: AdressebeskyttelseGradering? = null) : FordelerResultat()
     class UgyldigHendelse(val message: String) : FordelerResultat()
     class IkkeGyldigForBehandling(val ikkeOppfylteKriterier: List<FordelerKriterie>) : FordelerResultat()
 }
@@ -53,7 +60,7 @@ class FordelerService(
         return try {
             fordelSoeknad(event).let {
                 when (it.fordeltTil) {
-                    Vedtaksloesning.GJENNY -> GyldigForBehandling
+                    Vedtaksloesning.GJENNY -> GyldigForBehandling(it.gradering)
                     Vedtaksloesning.PESYS -> IkkeGyldigForBehandling(it.kriterier)
                 }
             }
@@ -105,10 +112,24 @@ class FordelerService(
             if (it.kandidat &&
                 fordelerRepository.antallFordeltTil(Vedtaksloesning.GJENNY.name) < maxFordelingTilGjenny
             ) {
-                Fordeling(event.soeknadId, Vedtaksloesning.GJENNY, emptyList())
+                val adressebeskyttetPerson = finnAdressebeskyttetPerson(
+                    listOf(barn, avdoed, gjenlevende)
+                )
+                Fordeling(
+                    event.soeknadId,
+                    Vedtaksloesning.GJENNY,
+                    emptyList(),
+                    adressebeskyttetPerson?.adressebeskyttelse
+                )
             } else {
                 Fordeling(event.soeknadId, Vedtaksloesning.PESYS, it.forklaring)
             }
+        }
+    }
+
+    private fun finnAdressebeskyttetPerson(personer: List<Person>): Person? {
+        return personer.firstOrNull {
+            it.adressebeskyttelse != AdressebeskyttelseGradering.UGRADERT
         }
     }
 
@@ -143,9 +164,9 @@ class FordelerService(
             saktype = SakType.BARNEPENSJON
         )
 
-    fun hentSakId(fnr: String, barnepensjon: SakType): Long {
+    fun hentSakId(fnr: String, barnepensjon: SakType, gradering: AdressebeskyttelseGradering?): Long {
         return runBlocking {
-            behandlingKlient.hentSak(fnr, barnepensjon)
+            behandlingKlient.hentSak(fnr, barnepensjon, gradering)
         }
     }
 }

@@ -32,7 +32,7 @@ import testsupport.buildTestApplicationConfigurationForOauth
 import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-internal class SakRoutesKtTest {
+internal class SakRoutesTest {
 
     private val mockOAuth2Server = MockOAuth2Server()
     private lateinit var hoconApplicationConfig: HoconApplicationConfig

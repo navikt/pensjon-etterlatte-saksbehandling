@@ -50,7 +50,7 @@ class TrygdetidKlient(config: Config, httpClient: HttpClient) {
                 is RetryResult.Failure -> {
                     throw TrygdetidKlientException(
                         "Klarte ikke hente trygdetid for behandling med behandlingId=$behandlingId",
-                        it.exceptions.last()
+                        it.samlaExceptions()
                     )
                 }
             }

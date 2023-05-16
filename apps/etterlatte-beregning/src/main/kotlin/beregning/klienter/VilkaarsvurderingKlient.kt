@@ -54,7 +54,7 @@ class VilkaarsvurderingKlientImpl(config: Config, httpClient: HttpClient) : Vilk
                 is RetryResult.Failure -> {
                     throw VilkaarsvurderingKlientException(
                         "Klarte ikke hente vilkåårsvurdering for behandling med behandlingId=$behandlingId",
-                        it.exceptions.last()
+                        it.samlaExceptions()
                     )
                 }
             }

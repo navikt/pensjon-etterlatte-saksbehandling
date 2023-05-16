@@ -47,7 +47,7 @@ class GrunnlagKlient(config: Config, httpClient: HttpClient) {
                 is RetryResult.Failure -> {
                     throw GrunnlagKlientException(
                         "Klarte ikke hente grunnlag for sak med sakId=$sakId",
-                        it.exceptions.last()
+                        it.samlaExceptions()
                     )
                 }
             }

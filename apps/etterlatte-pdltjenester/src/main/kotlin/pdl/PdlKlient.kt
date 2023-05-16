@@ -41,7 +41,7 @@ class PdlKlient(private val httpClient: HttpClient, private val apiUrl: String) 
         }.let {
             when (it) {
                 is RetryResult.Success -> it.content
-                is RetryResult.Failure -> throw it.exceptions.last()
+                is RetryResult.Failure -> throw it.samlaExceptions()
             }
         }
     }
@@ -79,7 +79,7 @@ class PdlKlient(private val httpClient: HttpClient, private val apiUrl: String) 
         }.let {
             when (it) {
                 is RetryResult.Success -> it.content
-                is RetryResult.Failure -> throw it.exceptions.last()
+                is RetryResult.Failure -> throw it.samlaExceptions()
             }
         }
     }
@@ -103,7 +103,7 @@ class PdlKlient(private val httpClient: HttpClient, private val apiUrl: String) 
         }.let {
             when (it) {
                 is RetryResult.Success -> it.content
-                is RetryResult.Failure -> throw it.exceptions.last()
+                is RetryResult.Failure -> throw it.samlaExceptions()
             }
         }
     }
@@ -129,7 +129,7 @@ class PdlKlient(private val httpClient: HttpClient, private val apiUrl: String) 
         }.let {
             when (it) {
                 is RetryResult.Success -> it.content
-                is RetryResult.Failure -> throw it.exceptions.last()
+                is RetryResult.Failure -> throw it.samlaExceptions()
             }
         }
     }

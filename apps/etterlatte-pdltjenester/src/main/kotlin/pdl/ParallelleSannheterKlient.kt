@@ -69,7 +69,7 @@ class ParallelleSannheterKlient(val httpClient: HttpClient, val apiUrl: String) 
                 }.let {
                     when (it) {
                         is RetryResult.Success -> it.content
-                        is RetryResult.Failure -> throw it.exceptions.last()
+                        is RetryResult.Failure -> throw it.samlaExceptions()
                     }
                 }
 

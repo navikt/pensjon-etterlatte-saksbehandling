@@ -1,6 +1,5 @@
 package no.nav.etterlatte.rapidsandrivers.migrering
 
-import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -12,7 +11,6 @@ const val ROLLE_KEY = "rolle"
 const val VILKAARSVURDERT_KEY = "vilkaarsvurdert"
 const val FULLSTENDIG_KEY = "fullstendig"
 const val TRYGDETID_KEY = "trygdetid"
-const val PERSONGALLERI_KEY = "persongalleri"
 const val MIGRERING_GRUNNLAG_KEY = "migrering_grunnlag"
 
 var JsonMessage.request: String
@@ -21,8 +19,8 @@ var JsonMessage.request: String
         this[REQUEST] = name
     }
 
-var JsonMessage.persongalleri: Persongalleri
-    get() = objectMapper.treeToValue(this[PERSONGALLERI_KEY], Persongalleri::class.java)
+var JsonMessage.hendelseData: MigreringRequest
+    get() = objectMapper.treeToValue(this[HENDELSE_DATA_KEY], MigreringRequest::class.java)
     set(name) {
         this[HENDELSE_DATA_KEY] = name
     }

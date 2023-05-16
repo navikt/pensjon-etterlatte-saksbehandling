@@ -20,6 +20,7 @@ import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import rapidsandrivers.HENDELSE_DATA_KEY
 import rapidsandrivers.SAK_ID_KEY
 import rapidsandrivers.sakId
 import rapidsandrivers.withFeilhaandtering
@@ -37,6 +38,7 @@ class MigreringHendelser(
             eventName(PERSONGALLERI_GRUNNLAG)
             validate { it.requireKey(SAK_ID_KEY) }
             validate { it.requireKey(MIGRERING_GRUNNLAG_KEY) }
+            validate { it.requireKey(HENDELSE_DATA_KEY) }
         }.register(this)
     }
 

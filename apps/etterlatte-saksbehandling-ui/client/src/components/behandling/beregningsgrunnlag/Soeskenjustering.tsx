@@ -42,7 +42,6 @@ type SoeskenjusteringProps = {
 
 const nySoeskengrunnlagPeriode = (soesken: IPdlPerson[], fom?: string) => ({
   fom: fom !== undefined ? new Date(fom) : new Date(),
-  harEnSlutt: false,
   data: soesken.map((barn) => ({
     foedselsnummer: barn.foedselsnummer,
     skalBrukes: undefined,

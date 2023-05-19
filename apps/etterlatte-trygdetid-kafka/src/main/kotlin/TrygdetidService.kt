@@ -28,4 +28,10 @@ class TrygdetidService(
             setBody(grunnlag)
         }.body()
     }
+
+    fun regulerTrygdetid(behandlingId: UUID, forrigeBehandlingId: UUID) = runBlocking {
+        trygdetidApp.post("$url/api/trygdetid/$behandlingId/reguler/$forrigeBehandlingId") {
+            contentType(ContentType.Application.Json)
+        }
+    }
 }

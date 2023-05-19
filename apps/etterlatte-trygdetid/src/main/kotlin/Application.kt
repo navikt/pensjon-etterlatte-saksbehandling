@@ -9,6 +9,7 @@ import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.libs.ktor.setReady
 import no.nav.etterlatte.trygdetid.config.ApplicationContext
+import no.nav.etterlatte.trygdetid.regulering.regulerTrygdetid
 import no.nav.etterlatte.trygdetid.trygdetid
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -32,6 +33,7 @@ class Server(private val context: ApplicationContext) {
                 module {
                     restModule(sikkerLogg) {
                         trygdetid(trygdetidService, behandlingKlient)
+                        regulerTrygdetid(regulerTrygdetidService, behandlingKlient)
                     }
                 }
                 connector { port = properties.httpPort }

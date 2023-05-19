@@ -4,6 +4,7 @@ import com.fasterxml.jackson.module.kotlin.treeToValue
 import io.ktor.client.call.body
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.beregning.AvkortingDto
 import no.nav.etterlatte.libs.common.beregning.BeregningDTO
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
@@ -65,6 +66,7 @@ internal class OmregningHendelser(
                         val beregning = beregningService.opprettOmregning(behandlingId).body<BeregningDTO>()
                         packet[BEREGNING_KEY] = beregning
                         val avkorting = beregningService.regulerAvkorting(behandlingId, behandlingViOmregnerFra)
+                            .body<AvkortingDto>()
                         packet[AVKORTING_KEY] = avkorting
                     }
                     packet[EVENT_NAME_KEY] = OPPRETT_VEDTAK

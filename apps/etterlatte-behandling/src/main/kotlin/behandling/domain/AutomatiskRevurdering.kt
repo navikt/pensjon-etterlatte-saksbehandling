@@ -46,6 +46,8 @@ data class AutomatiskRevurdering(
 
     override fun tilBeregnet() = endreTilStatus(BehandlingStatus.BEREGNET)
 
+    override fun tilAvkortet() = endreTilStatus(BehandlingStatus.AVKORTET)
+
     override fun tilFattetVedtak() = endreTilStatus(BehandlingStatus.FATTET_VEDTAK)
 
     override fun tilAttestert() = endreTilStatus(BehandlingStatus.ATTESTERT)

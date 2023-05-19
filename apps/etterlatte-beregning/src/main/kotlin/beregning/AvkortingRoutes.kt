@@ -51,7 +51,7 @@ fun Route.avkorting(avkortingService: AvkortingService, behandlingKlient: Behand
 
         post("/med/{forrigeBehandlingId}") {
             withBehandlingId(behandlingKlient) {
-                logger.info("Lagre avkorting for behandlingId=$it")
+                logger.info("Regulere avkorting for behandlingId=$it")
                 val forrigeBehandlingId = call.uuid("forrigeBehandlingId")
                 val avkorting = avkortingService.regulerAvkorting(it, forrigeBehandlingId, bruker)
                 call.respond(avkorting.toDto())

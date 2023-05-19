@@ -1,7 +1,7 @@
 package no.nav.etterlatte.kafka
 
-import institusjonsopphold.Kilde
-import institusjonsopphold.Type
+import institusjonsopphold.InstitusjonsoppholdKilde
+import institusjonsopphold.InstitusjonsoppholdsType
 import no.nav.etterlatte.BehandlingKlient
 import no.nav.etterlatte.libs.common.requireEnvValue
 import org.apache.kafka.clients.consumer.ConsumerRecords
@@ -58,6 +58,6 @@ data class KafkaOppholdHendelse(
     val hendelseId: Long,
     var oppholdId: Long,
     var norskident: String,
-    var type: Type,
-    var kilde: Kilde
+    var institusjonsoppholdsType: InstitusjonsoppholdsType,
+    var institusjonsoppholdKilde: InstitusjonsoppholdKilde
 )

@@ -6,8 +6,8 @@ data class InstitusjonsoppholdHendelseBeriket(
     val hendelseId: Long,
     val oppholdId: Long,
     val norskident: String,
-    val type: Type,
-    val kilde: Kilde,
+    val institusjonsoppholdsType: InstitusjonsoppholdsType,
+    val institusjonsoppholdKilde: InstitusjonsoppholdKilde,
     val institusjonsType: String,
     val startdato: LocalDate? = null,
     val faktiskSluttdato: LocalDate? = null,
@@ -15,13 +15,13 @@ data class InstitusjonsoppholdHendelseBeriket(
     val institusjonsnavn: String? = null
 )
 
-enum class Type {
+enum class InstitusjonsoppholdsType {
     INNMELDING,
     OPPDATERING,
     UTMELDING,
     ANNULERING
 }
 
-enum class Kilde {
+enum class InstitusjonsoppholdKilde {
     APPBRK, KDI, IT, INST
 }

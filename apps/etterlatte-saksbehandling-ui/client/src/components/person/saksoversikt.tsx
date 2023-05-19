@@ -126,7 +126,7 @@ export const Saksoversikt = ({ fnr }: { fnr: string | undefined }) => {
         <SaksoversiktWrapper>
           <HeadingWrapper>
             <Heading spacing size="xlarge" level="1">
-              Ytelser
+              Saksoversikt
             </Heading>
             <div className="details">
               <Tag variant={tagColors[INasjonalitetsType.NASJONAL]}>

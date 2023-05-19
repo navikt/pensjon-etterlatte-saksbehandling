@@ -1,8 +1,8 @@
 package no.nav.etterlatte.kafka
 
-import institusjonsopphold.InstitusjonsoppholdKilde
-import institusjonsopphold.InstitusjonsoppholdsType
 import no.nav.etterlatte.BehandlingKlient
+import no.nav.etterlatte.institusjonsopphold.InstitusjonsoppholdKilde
+import no.nav.etterlatte.institusjonsopphold.InstitusjonsoppholdsType
 import no.nav.etterlatte.libs.common.requireEnvValue
 import org.apache.kafka.clients.consumer.ConsumerRecords
 import org.apache.kafka.clients.consumer.KafkaConsumer

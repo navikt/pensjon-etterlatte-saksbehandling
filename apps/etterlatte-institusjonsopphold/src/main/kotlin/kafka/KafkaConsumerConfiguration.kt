@@ -2,9 +2,9 @@ package no.nav.etterlatte.kafka
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import institusjonsopphold.InstitusjonsoppholdHendelseBeriket
 import io.confluent.kafka.schemaregistry.client.SchemaRegistryClientConfig
 import io.confluent.kafka.serializers.AbstractKafkaSchemaSerDeConfig
+import no.nav.etterlatte.institusjonsopphold.InstitusjonsoppholdHendelseBeriket
 import org.apache.kafka.clients.CommonClientConfigs
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.common.config.SslConfigs

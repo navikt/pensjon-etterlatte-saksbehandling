@@ -1,4 +1,4 @@
-package institusjonsopphold
+package no.nav.etterlatte.institusjonsopphold
 
 import java.time.LocalDate
 

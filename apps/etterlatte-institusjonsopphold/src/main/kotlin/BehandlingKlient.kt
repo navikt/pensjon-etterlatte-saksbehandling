@@ -1,12 +1,12 @@
 package no.nav.etterlatte
 
-import institusjonsopphold.InstitusjonsoppholdHendelseBeriket
 import io.ktor.client.HttpClient
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.institusjonsopphold.InstitusjonsoppholdHendelseBeriket
 import no.nav.etterlatte.kafka.KafkaOppholdHendelse
 import no.nav.etterlatte.libs.common.person.maskerFnr
 import org.apache.kafka.clients.consumer.ConsumerRecord

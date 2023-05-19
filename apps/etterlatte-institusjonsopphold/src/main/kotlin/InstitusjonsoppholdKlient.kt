@@ -26,23 +26,20 @@ class InstitusjonsoppholdKlient(val institusjonsoppholdHttpKlient: HttpClient, v
 }
 
 data class Institusjonsopphold(
-    val oppholdId: Long? = null,
-    val tssEksternId: String? = null,
-    val institusjonsnavn: String? = null,
-    val avdelingsnavn: String? = null,
-    val organisasjonsnummer: String? = null,
-    val institusjonstype: String? = null,
-    val varighet: String? = null,
-    val kategori: String? = null,
-    val tilleggsinformasjon: String? = null,
-    val startdato: LocalDate? = null,
-    val faktiskSluttdato: LocalDate? = null,
-    val forventetSluttdato: LocalDate? = null,
-    val kilde: String? = null,
+    val oppholdId: Long,
+    val tssEksternId: String,
+    val institusjonsnavn: String,
+    val avdelingsnavn: String,
+    val organisasjonsnummer: String,
+    val institusjonstype: String,
+    val varighet: String,
+    val kategori: String,
+    val startdato: LocalDate,
+    val faktiskSluttdato: LocalDate,
+    val forventetSluttdato: LocalDate,
+    val kilde: String,
     val overfoert: Boolean? = null,
-    val registreringstidspunkt: LocalDateTime? = null,
     val registrertAv: String? = null,
-    val endretAv: String? = null,
-    val endringstidspunkt: LocalDateTime? = null,
-    val kanEndresAvSaksbehandler: Boolean = false
+    val endretAv: String,
+    val endringstidspunkt: LocalDateTime? = null
 )

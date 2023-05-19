@@ -7,6 +7,7 @@ import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
+import no.nav.etterlatte.libs.common.behandling.Utenlandstilsnitt
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.sak.Sak
 import java.time.LocalDateTime
@@ -21,6 +22,7 @@ sealed class Revurdering(
     override val persongalleri: Persongalleri,
     override val kommerBarnetTilgode: KommerBarnetTilgode?,
     override val virkningstidspunkt: Virkningstidspunkt?,
+    override val utenlandstilsnitt: Utenlandstilsnitt?,
     open val revurderingsaarsak: RevurderingAarsak?,
     override val prosesstype: Prosesstype,
     override val kilde: Vedtaksloesning
@@ -39,6 +41,7 @@ sealed class Revurdering(
             persongalleri: Persongalleri,
             kommerBarnetTilgode: KommerBarnetTilgode?,
             virkningstidspunkt: Virkningstidspunkt?,
+            utenlandstilsnitt: Utenlandstilsnitt?,
             revurderingsaarsak: RevurderingAarsak,
             prosesstype: Prosesstype,
             kilde: Vedtaksloesning
@@ -52,6 +55,7 @@ sealed class Revurdering(
                 persongalleri,
                 kommerBarnetTilgode,
                 virkningstidspunkt,
+                utenlandstilsnitt,
                 revurderingsaarsak,
                 kilde
             )
@@ -65,6 +69,7 @@ sealed class Revurdering(
                 persongalleri,
                 kommerBarnetTilgode,
                 virkningstidspunkt,
+                utenlandstilsnitt,
                 revurderingsaarsak,
                 kilde
             )

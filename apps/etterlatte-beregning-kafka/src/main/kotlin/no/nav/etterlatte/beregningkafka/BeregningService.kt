@@ -17,4 +17,8 @@ class BeregningService(
     fun opprettBeregningsGrunnlag(omregningsId: UUID, forrigeBehandlingsId: UUID): HttpResponse = runBlocking {
         behandlingApp.post("$url/api/beregning/beregningsgrunnlag/$omregningsId/fra/$forrigeBehandlingsId") {}
     }
+
+    fun regulerAvkorting(behandlingId: UUID, forrigeBehandlingId: UUID): HttpResponse = runBlocking {
+        behandlingApp.post("$url/api/beregning/avkorting/$behandlingId/med/$forrigeBehandlingId") {}
+    }
 }

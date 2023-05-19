@@ -5,6 +5,7 @@ import no.nav.etterlatte.BehandlingServiceImpl
 import no.nav.etterlatte.OmregningsHendelser
 import no.nav.etterlatte.OpprettOmregningResponse
 import no.nav.etterlatte.libs.common.behandling.Omregningshendelse
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
@@ -24,7 +25,7 @@ internal class OmregningsHendelserTest {
         val behandlingId = UUID.randomUUID()
         val behandlingViOmregnerFra = UUID.randomUUID()
 
-        val returnValue = OpprettOmregningResponse(behandlingId, behandlingViOmregnerFra)
+        val returnValue = OpprettOmregningResponse(behandlingId, behandlingViOmregnerFra, SakType.BARNEPENSJON)
 
         every { behandlingService.opprettOmregning(capture(omregningshendelseSlot)) }.returns(returnValue)
 

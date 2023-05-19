@@ -7,8 +7,10 @@ import java.time.LocalDate
 import java.util.*
 
 const val SAK_ID_KEY = "sakId"
+const val SAK_TYPE = "sakType"
 const val BEHANDLING_ID_KEY = "behandlingId"
 const val BEREGNING_KEY = "beregning"
+const val AVKORTING_KEY = "avkorting"
 const val DATO_KEY = "dato"
 const val HENDELSE_DATA_KEY = "hendelse_data"
 const val BEHANDLING_VI_OMREGNER_FRA_KEY = "behandling_vi_omregner_fra"

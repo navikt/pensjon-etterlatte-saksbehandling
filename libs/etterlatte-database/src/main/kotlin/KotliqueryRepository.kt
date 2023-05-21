@@ -15,15 +15,13 @@ class KotliqueryRepository(private val datasource: DataSource) {
     private val logger = LoggerFactory.getLogger(KotliqueryRepository::class.java)
 
     fun opprett(query: String, params: Map<String, Any?>, loggtekst: String) =
-        using(sessionOf(datasource)) { session ->
-            session.transaction { tx ->
-                queryOf(
-                    statement = query,
-                    paramMap = params
-                )
-                    .also { logger.info(loggtekst) }
-                    .let { tx.run(it.asExecute) }
-            }
+        datasource.transaction { tx ->
+            queryOf(
+                statement = query,
+                paramMap = params
+            )
+                .also { logger.info(loggtekst) }
+                .let { tx.run(it.asExecute) }
         }
 
     fun oppdater(
@@ -32,24 +30,20 @@ class KotliqueryRepository(private val datasource: DataSource) {
         loggtekst: String,
         ekstra: ((tx: TransactionalSession) -> Unit)? = null
     ) =
-        using(sessionOf(datasource)) { session ->
-            session.transaction { tx ->
-                queryOf(
-                    statement = query,
-                    paramMap = params
-                )
-                    .also { logger.info(loggtekst) }
-                    .let { tx.run(it.asUpdate) }
-                    .also { ekstra?.invoke(tx) }
-            }
+        datasource.transaction { tx ->
+            queryOf(
+                statement = query,
+                paramMap = params
+            )
+                .also { logger.info(loggtekst) }
+                .let { tx.run(it.asUpdate) }
+                .also { ekstra?.invoke(tx) }
         }
 
     fun opprettFlere(query: String, params: List<Map<String, Serializable?>>, loggtekst: String) =
-        using(sessionOf(datasource)) { session ->
-            session.transaction { tx ->
-                logger.info(loggtekst)
-                tx.batchPreparedNamedStatement(query, params)
-            }
+        datasource.transaction { tx ->
+            logger.info(loggtekst)
+            tx.batchPreparedNamedStatement(query, params)
         }
 
     fun <T> hentMedKotliquery(query: String, params: Map<String, Any>, converter: (r: Row) -> T) =

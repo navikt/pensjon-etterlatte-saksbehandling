@@ -11,6 +11,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toTimestamp
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.database.tidspunkt
+import no.nav.etterlatte.libs.database.transaction
 import no.nav.etterlatte.tilbakekreving.kravgrunnlag.BehandlingId
 import no.nav.etterlatte.tilbakekreving.kravgrunnlag.Kravgrunnlag
 import no.nav.etterlatte.tilbakekreving.kravgrunnlag.KravgrunnlagId
@@ -25,26 +26,24 @@ class TilbakekrevingDao(
     fun lagreMottattKravgrunnlag(
         mottattKravgrunnlag: Tilbakekreving.MottattKravgrunnlag
     ): Tilbakekreving.MottattKravgrunnlag =
-        using(sessionOf(dataSource)) { session ->
-            session.transaction { tx ->
-                logger.info("Lagrer kravgrunnlag for vedtakId=${mottattKravgrunnlag.kravgrunnlag.vedtakId.value}")
+        dataSource.transaction { tx ->
+            logger.info("Lagrer kravgrunnlag for vedtakId=${mottattKravgrunnlag.kravgrunnlag.vedtakId.value}")
 
-                queryOf(
-                    statement = """
+            queryOf(
+                statement = """
                         INSERT INTO tilbakekreving(sak_id, behandling_id, kravgrunnlag_id, opprettet, kravgrunnlag)
                         VALUES(:sak_id, :behandling_id, :kravgrunnlag_id, :opprettet, to_json(:kravgrunnlag::json))
                         """,
-                    paramMap = with(mottattKravgrunnlag) {
-                        mapOf(
-                            "sak_id" to sakId.value.param<Long>(),
-                            "behandling_id" to behandlingId.value.param<UUID>(),
-                            "kravgrunnlag_id" to kravgrunnlagId.value.param<Long>(),
-                            "opprettet" to mottattKravgrunnlag.opprettet.toTimestamp().param(),
-                            "kravgrunnlag" to kravgrunnlag.toJson().param<String>()
-                        )
-                    }
-                ).let { tx.run(it.asUpdate) }
-            }
+                paramMap = with(mottattKravgrunnlag) {
+                    mapOf(
+                        "sak_id" to sakId.value.param<Long>(),
+                        "behandling_id" to behandlingId.value.param<UUID>(),
+                        "kravgrunnlag_id" to kravgrunnlagId.value.param<Long>(),
+                        "opprettet" to mottattKravgrunnlag.opprettet.toTimestamp().param(),
+                        "kravgrunnlag" to kravgrunnlag.toJson().param<String>()
+                    )
+                }
+            ).let { tx.run(it.asUpdate) }
         }
             .let { hentTilbakekreving(mottattKravgrunnlag.kravgrunnlagId.value) as Tilbakekreving.MottattKravgrunnlag }
 
@@ -52,22 +51,20 @@ class TilbakekrevingDao(
         fattetVedtak: Tilbakekreving.FattetVedtak,
         tidspunkt: Tidspunkt
     ): Tilbakekreving.FattetVedtak =
-        using(sessionOf(dataSource)) { session ->
-            session.transaction { tx ->
-                logger.info("Lagrer fattet vedtak for vedtakId=${fattetVedtak.kravgrunnlag.vedtakId.value}")
+        dataSource.transaction { tx ->
+            logger.info("Lagrer fattet vedtak for vedtakId=${fattetVedtak.kravgrunnlag.vedtakId.value}")
 
-                queryOf(
-                    statement = """
+            queryOf(
+                statement = """
                         UPDATE tilbakekreving
                         SET vedtak = to_json(:vedtak::json)
                         WHERE kravgrunnlag_id = :kravgrunnlag_id
                         """,
-                    paramMap =
-                    mapOf(
-                        "kravgrunnlag_id" to fattetVedtak.kravgrunnlagId.value
-                    )
-                ).let { tx.run(it.asUpdate) }
-            }
+                paramMap =
+                mapOf(
+                    "kravgrunnlag_id" to fattetVedtak.kravgrunnlagId.value
+                )
+            ).let { tx.run(it.asUpdate) }
         }
             .let { hentTilbakekreving(fattetVedtak.kravgrunnlagId.value) as Tilbakekreving.FattetVedtak }
 
@@ -109,6 +106,7 @@ class TilbakekrevingDao(
                         attestasjon = objectMapper.readValue(attestasjon)
                     )
                 }
+
                 vedtak != null -> {
                     Tilbakekreving.FattetVedtak(
                         sakId = SakId(row.long("sak_id")),
@@ -119,6 +117,7 @@ class TilbakekrevingDao(
                         vedtak = objectMapper.readValue(vedtak)
                     )
                 }
+
                 kravgrunnlag != null -> {
                     Tilbakekreving.MottattKravgrunnlag(
                         sakId = SakId(row.long("sak_id")),
@@ -128,6 +127,7 @@ class TilbakekrevingDao(
                         kravgrunnlag = objectMapper.readValue(kravgrunnlag)
                     )
                 }
+
                 else -> throw RuntimeException("Kunne ikke mappe tilbakekreving")
             }
         }

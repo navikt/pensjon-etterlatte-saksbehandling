@@ -21,6 +21,7 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.database.KotliqueryRepository
+import no.nav.etterlatte.libs.database.transaction
 import java.sql.Date
 import java.time.YearMonth
 import java.util.*
@@ -72,32 +73,30 @@ class VedtaksvurderingRepository(val datasource: DataSource) {
         }
 
     fun oppdaterVedtak(oppdatertVedtak: Vedtak): Vedtak =
-        using(sessionOf(datasource)) { session ->
-            session.transaction { tx ->
-                queryOf(
-                    statement = """
+        datasource.transaction { tx ->
+            queryOf(
+                statement = """
                         UPDATE vedtak 
                         SET datovirkfom = :datovirkfom, type = :type, 
                             beregningsresultat = :beregningsresultat, avkorting = :avkorting,
                              vilkaarsresultat = :vilkaarsresultat 
                         WHERE behandlingId = :behandlingid
                         """,
-                    mapOf(
-                        "datovirkfom" to oppdatertVedtak.virkningstidspunkt.atDay(1),
-                        "type" to oppdatertVedtak.type.name,
-                        "beregningsresultat" to oppdatertVedtak.beregning?.toJson(),
-                        "avkorting" to oppdatertVedtak.beregning?.toJson(),
-                        "vilkaarsresultat" to oppdatertVedtak.vilkaarsvurdering?.toJson(),
-                        "behandlingid" to oppdatertVedtak.behandlingId
-                    )
-                ).let { query -> tx.run(query.asUpdate) }
+                mapOf(
+                    "datovirkfom" to oppdatertVedtak.virkningstidspunkt.atDay(1),
+                    "type" to oppdatertVedtak.type.name,
+                    "beregningsresultat" to oppdatertVedtak.beregning?.toJson(),
+                    "avkorting" to oppdatertVedtak.beregning?.toJson(),
+                    "vilkaarsresultat" to oppdatertVedtak.vilkaarsvurdering?.toJson(),
+                    "behandlingid" to oppdatertVedtak.behandlingId
+                )
+            ).let { query -> tx.run(query.asUpdate) }
 
-                slettUtbetalingsperioder(oppdatertVedtak.id, tx)
-                opprettUtbetalingsperioder(oppdatertVedtak.id, oppdatertVedtak.utbetalingsperioder, tx)
-            }.let {
-                hentVedtak(oppdatertVedtak.behandlingId)
-                    ?: throw Exception("Kunne ikke oppdatere vedtak for behandling ${oppdatertVedtak.behandlingId}")
-            }
+            slettUtbetalingsperioder(oppdatertVedtak.id, tx)
+            opprettUtbetalingsperioder(oppdatertVedtak.id, oppdatertVedtak.utbetalingsperioder, tx)
+        }.let {
+            hentVedtak(oppdatertVedtak.behandlingId)
+                ?: throw Exception("Kunne ikke oppdatere vedtak for behandling ${oppdatertVedtak.behandlingId}")
         }
 
     private fun slettUtbetalingsperioder(vedtakId: Long, tx: TransactionalSession) =

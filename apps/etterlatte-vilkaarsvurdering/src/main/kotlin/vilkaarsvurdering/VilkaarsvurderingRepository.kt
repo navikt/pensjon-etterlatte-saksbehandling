@@ -22,6 +22,7 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.libs.database.KotliqueryRepository
 import no.nav.etterlatte.libs.database.tidspunkt
+import no.nav.etterlatte.libs.database.transaction
 import java.time.LocalDate
 import java.time.YearMonth
 import java.util.*
@@ -53,27 +54,23 @@ class VilkaarsvurderingRepository(private val ds: DataSource, private val delvil
     }
 
     fun opprettVilkaarsvurdering(vilkaarsvurdering: Vilkaarsvurdering): Vilkaarsvurdering {
-        using(sessionOf(ds)) { session ->
-            session.transaction { tx ->
-                opprettVilkaarsvurdering(vilkaarsvurdering, tx)
-            }
+        ds.transaction { tx ->
+            opprettVilkaarsvurdering(vilkaarsvurdering, tx)
         }
 
         return hentNonNull(vilkaarsvurdering.behandlingId)
     }
 
     fun kopierVilkaarsvurdering(nyVilkaarsvurdering: Vilkaarsvurdering, kopiertFraId: UUID): Vilkaarsvurdering {
-        using(sessionOf(ds)) { session ->
-            session.transaction { tx ->
-                opprettVilkaarsvurdering(nyVilkaarsvurdering, tx)
-                lagreVilkaarsvurderingResultat(
-                    nyVilkaarsvurdering.behandlingId,
-                    nyVilkaarsvurdering.virkningstidspunkt.atDay(1),
-                    nyVilkaarsvurdering.resultat ?: throw IllegalStateException("Fant ikke vilkårsvurderingsresultat"),
-                    tx
-                )
-                opprettVilkaarsvurderingKilde(nyVilkaarsvurdering.id, kopiertFraId, tx)
-            }
+        ds.transaction { tx ->
+            opprettVilkaarsvurdering(nyVilkaarsvurdering, tx)
+            lagreVilkaarsvurderingResultat(
+                nyVilkaarsvurdering.behandlingId,
+                nyVilkaarsvurdering.virkningstidspunkt.atDay(1),
+                nyVilkaarsvurdering.resultat ?: throw IllegalStateException("Fant ikke vilkårsvurderingsresultat"),
+                tx
+            )
+            opprettVilkaarsvurderingKilde(nyVilkaarsvurdering.id, kopiertFraId, tx)
         }
 
         return hentNonNull(nyVilkaarsvurdering.behandlingId)
@@ -181,13 +178,11 @@ class VilkaarsvurderingRepository(private val ds: DataSource, private val delvil
         behandlingId: UUID,
         vilkaarId: UUID
     ): Vilkaarsvurdering =
-        using(sessionOf(ds)) { session ->
-            session.transaction { tx ->
-                queryOf(Queries.slettVilkaarResultat, mapOf("id" to vilkaarId))
-                    .let { tx.run(it.asUpdate) }
+        ds.transaction { tx ->
+            queryOf(Queries.slettVilkaarResultat, mapOf("id" to vilkaarId))
+                .let { tx.run(it.asUpdate) }
 
-                delvilkaarRepository.slettDelvilkaarResultat(vilkaarId, tx)
-            }
+            delvilkaarRepository.slettDelvilkaarResultat(vilkaarId, tx)
         }.let { hentNonNull(behandlingId) }
 
     private fun hentNonNull(behandlingId: UUID): Vilkaarsvurdering =

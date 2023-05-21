@@ -22,6 +22,7 @@ import no.nav.etterlatte.brev.model.OpprettNyttBrev
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.libs.common.toJson
+import no.nav.etterlatte.libs.database.transaction
 import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
 import java.util.*
 import javax.sql.DataSource
@@ -41,22 +42,20 @@ class BrevRepository(private val ds: DataSource) {
     }
 
     fun opprettInnholdOgFerdigstill(id: BrevID, innhold: BrevInnhold) {
-        using(sessionOf(ds)) { session ->
-            session.transaction { tx ->
-                tx.run(
-                    queryOf(
-                        OPPRETT_INNHOLD_QUERY,
-                        mapOf(
-                            "brev_id" to id,
-                            "mal" to "",
-                            "spraak" to innhold.spraak.name,
-                            "bytes" to innhold.data
-                        )
-                    ).asUpdate
-                ).also { oppdatert -> require(oppdatert == 1) }
+        ds.transaction { tx ->
+            tx.run(
+                queryOf(
+                    OPPRETT_INNHOLD_QUERY,
+                    mapOf(
+                        "brev_id" to id,
+                        "mal" to "",
+                        "spraak" to innhold.spraak.name,
+                        "bytes" to innhold.data
+                    )
+                ).asUpdate
+            ).also { oppdatert -> require(oppdatert == 1) }
 
-                tx.lagreHendelse(id, Status.FERDIGSTILT)
-            }
+            tx.lagreHendelse(id, Status.FERDIGSTILT)
         }
     }
 
@@ -104,33 +103,29 @@ class BrevRepository(private val ds: DataSource) {
     }
 
     fun settBrevJournalfoert(brevId: BrevID, journalpostResponse: JournalpostResponse): Boolean =
-        using(sessionOf(ds)) { session ->
-            session.transaction { tx ->
-                tx.run(
-                    queryOf(
-                        "UPDATE brev SET journalpost_id = ? WHERE id = ?",
-                        journalpostResponse.journalpostId,
-                        brevId
-                    ).asUpdate
-                ).also { oppdatert -> require(oppdatert == 1) }
+        ds.transaction { tx ->
+            tx.run(
+                queryOf(
+                    "UPDATE brev SET journalpost_id = ? WHERE id = ?",
+                    journalpostResponse.journalpostId,
+                    brevId
+                ).asUpdate
+            ).also { oppdatert -> require(oppdatert == 1) }
 
-                tx.lagreHendelse(brevId, Status.JOURNALFOERT, journalpostResponse.toJson()) > 0
-            }
+            tx.lagreHendelse(brevId, Status.JOURNALFOERT, journalpostResponse.toJson()) > 0
         }
 
     fun settBrevDistribuert(brevId: Long, distResponse: DistribuerJournalpostResponse): Boolean =
-        using(sessionOf(ds)) { session ->
-            session.transaction { tx ->
-                tx.run(
-                    queryOf(
-                        "UPDATE brev SET bestilling_id = ? WHERE id = ?",
-                        distResponse.bestillingsId,
-                        brevId
-                    ).asUpdate
-                ).also { oppdatert -> require(oppdatert == 1) }
+        ds.transaction { tx ->
+            tx.run(
+                queryOf(
+                    "UPDATE brev SET bestilling_id = ? WHERE id = ?",
+                    distResponse.bestillingsId,
+                    brevId
+                ).asUpdate
+            ).also { oppdatert -> require(oppdatert == 1) }
 
-                tx.lagreHendelse(brevId, Status.DISTRIBUERT, distResponse.toJson()) > 0
-            }
+            tx.lagreHendelse(brevId, Status.DISTRIBUERT, distResponse.toJson()) > 0
         }
 
     fun settBrevFerdigstilt(id: BrevID): Boolean = using(sessionOf(ds)) {

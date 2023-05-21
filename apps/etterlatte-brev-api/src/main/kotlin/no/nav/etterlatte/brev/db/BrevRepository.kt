@@ -59,47 +59,45 @@ class BrevRepository(private val ds: DataSource) {
         }
     }
 
-    fun opprettBrev(ulagretBrev: OpprettNyttBrev): Brev = using(sessionOf(ds, returnGeneratedKey = true)) { session ->
-        session.transaction { tx ->
-            val id = tx.run(
-                queryOf(
-                    OPPRETT_BREV_QUERY,
-                    mapOf(
-                        "behandling_id" to ulagretBrev.behandlingId,
-                        "soeker_fnr" to ulagretBrev.soekerFnr,
-                        "tittel" to ulagretBrev.tittel,
-                        "vedtaksbrev" to ulagretBrev.erVedtaksbrev
-                    )
-                ).asUpdateAndReturnGeneratedKey
-            )
+    fun opprettBrev(ulagretBrev: OpprettNyttBrev): Brev = ds.transaction(true) { tx ->
+        val id = tx.run(
+            queryOf(
+                OPPRETT_BREV_QUERY,
+                mapOf(
+                    "behandling_id" to ulagretBrev.behandlingId,
+                    "soeker_fnr" to ulagretBrev.soekerFnr,
+                    "tittel" to ulagretBrev.tittel,
+                    "vedtaksbrev" to ulagretBrev.erVedtaksbrev
+                )
+            ).asUpdateAndReturnGeneratedKey
+        )
 
-            requireNotNull(id) { "Brev ikke opprettet!" }
+        requireNotNull(id) { "Brev ikke opprettet!" }
 
-            tx.run(
-                queryOf(
-                    OPPRETT_MOTTAKER_QUERY,
-                    mapOf(
-                        "brev_id" to id,
-                        "foedselsnummer" to ulagretBrev.mottaker.foedselsnummer?.value,
-                        "orgnummer" to ulagretBrev.mottaker.orgnummer,
-                        "navn" to ulagretBrev.mottaker.navn,
-                        "adressetype" to ulagretBrev.mottaker.adresse.adresseType,
-                        "adresselinje1" to ulagretBrev.mottaker.adresse.adresselinje1,
-                        "adresselinje2" to ulagretBrev.mottaker.adresse.adresselinje2,
-                        "adresselinje3" to ulagretBrev.mottaker.adresse.adresselinje3,
-                        "postnummer" to ulagretBrev.mottaker.adresse.postnummer,
-                        "poststed" to ulagretBrev.mottaker.adresse.poststed,
-                        "landkode" to ulagretBrev.mottaker.adresse.landkode,
-                        "land" to ulagretBrev.mottaker.adresse.land
-                    )
-                ).asUpdate
-            )
+        tx.run(
+            queryOf(
+                OPPRETT_MOTTAKER_QUERY,
+                mapOf(
+                    "brev_id" to id,
+                    "foedselsnummer" to ulagretBrev.mottaker.foedselsnummer?.value,
+                    "orgnummer" to ulagretBrev.mottaker.orgnummer,
+                    "navn" to ulagretBrev.mottaker.navn,
+                    "adressetype" to ulagretBrev.mottaker.adresse.adresseType,
+                    "adresselinje1" to ulagretBrev.mottaker.adresse.adresselinje1,
+                    "adresselinje2" to ulagretBrev.mottaker.adresse.adresselinje2,
+                    "adresselinje3" to ulagretBrev.mottaker.adresse.adresselinje3,
+                    "postnummer" to ulagretBrev.mottaker.adresse.postnummer,
+                    "poststed" to ulagretBrev.mottaker.adresse.poststed,
+                    "landkode" to ulagretBrev.mottaker.adresse.landkode,
+                    "land" to ulagretBrev.mottaker.adresse.land
+                )
+            ).asUpdate
+        )
 
-            tx.lagreHendelse(id, Status.OPPRETTET)
-                .also { oppdatert -> require(oppdatert == 1) }
+        tx.lagreHendelse(id, Status.OPPRETTET)
+            .also { oppdatert -> require(oppdatert == 1) }
 
-            Brev.fra(id, ulagretBrev)
-        }
+        Brev.fra(id, ulagretBrev)
     }
 
     fun settBrevJournalfoert(brevId: BrevID, journalpostResponse: JournalpostResponse): Boolean =

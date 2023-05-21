@@ -4,8 +4,6 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import kotliquery.Row
 import kotliquery.TransactionalSession
 import kotliquery.queryOf
-import kotliquery.sessionOf
-import kotliquery.using
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -36,10 +34,9 @@ class VedtaksvurderingRepository(val datasource: DataSource) {
     }
 
     fun opprettVedtak(opprettVedtak: OpprettVedtak): Vedtak =
-        using(sessionOf(datasource, returnGeneratedKey = true)) { session ->
-            session.transaction { tx ->
-                queryOf(
-                    statement = """
+        datasource.transaction(true) { tx ->
+            queryOf(
+                statement = """
                         INSERT INTO vedtak(
                             behandlingId, sakid, fnr, behandlingtype, saktype, vedtakstatus, type, datovirkfom, 
                             beregningsresultat, avkorting, vilkaarsresultat, revurderingsaarsak)
@@ -47,29 +44,28 @@ class VedtaksvurderingRepository(val datasource: DataSource) {
                             :datovirkfom, :beregningsresultat, :avkorting, :vilkaarsresultat, :revurderingsaarsak)
                         RETURNING id
                         """,
-                    mapOf(
-                        "behandlingId" to opprettVedtak.behandlingId,
-                        "behandlingtype" to opprettVedtak.behandlingType.name,
-                        "sakid" to opprettVedtak.sakId,
-                        "saktype" to opprettVedtak.sakType.name,
-                        "fnr" to opprettVedtak.soeker.value,
-                        "vedtakstatus" to opprettVedtak.status.name,
-                        "type" to opprettVedtak.type.name,
-                        "datovirkfom" to opprettVedtak.virkningstidspunkt.atDay(1),
-                        "beregningsresultat" to opprettVedtak.beregning?.toJson(),
-                        "avkorting" to opprettVedtak.beregning?.toJson(),
+                mapOf(
+                    "behandlingId" to opprettVedtak.behandlingId,
+                    "behandlingtype" to opprettVedtak.behandlingType.name,
+                    "sakid" to opprettVedtak.sakId,
+                    "saktype" to opprettVedtak.sakType.name,
+                    "fnr" to opprettVedtak.soeker.value,
+                    "vedtakstatus" to opprettVedtak.status.name,
+                    "type" to opprettVedtak.type.name,
+                    "datovirkfom" to opprettVedtak.virkningstidspunkt.atDay(1),
+                    "beregningsresultat" to opprettVedtak.beregning?.toJson(),
+                    "avkorting" to opprettVedtak.beregning?.toJson(),
                         "vilkaarsresultat" to opprettVedtak.vilkaarsvurdering?.toJson(),
                         "revurderingsaarsak" to opprettVedtak.revurderingsaarsak?.name
-                    )
                 )
-                    .let { query -> tx.run(query.asUpdateAndReturnGeneratedKey) }
-                    ?.let { vedtakId ->
-                        opprettUtbetalingsperioder(vedtakId, opprettVedtak.utbetalingsperioder, tx)
-                    } ?: throw Exception("Kunne ikke opprette vedtak for behandling ${opprettVedtak.behandlingId}")
-            }.let {
-                hentVedtak(opprettVedtak.behandlingId)
-                    ?: throw Exception("Kunne ikke opprette vedtak for behandling ${opprettVedtak.behandlingId}")
-            }
+            )
+                .let { query -> tx.run(query.asUpdateAndReturnGeneratedKey) }
+                ?.let { vedtakId ->
+                    opprettUtbetalingsperioder(vedtakId, opprettVedtak.utbetalingsperioder, tx)
+                } ?: throw Exception("Kunne ikke opprette vedtak for behandling ${opprettVedtak.behandlingId}")
+        }.let {
+            hentVedtak(opprettVedtak.behandlingId)
+                ?: throw Exception("Kunne ikke opprette vedtak for behandling ${opprettVedtak.behandlingId}")
         }
 
     fun oppdaterVedtak(oppdatertVedtak: Vedtak): Vedtak =

@@ -96,7 +96,7 @@ class TrygdetidRepository(private val dataSource: DataSource) {
                  VALUES(:id, :trygdetidId, :type, :opplysning::JSONB, :kilde::JSONB)
             """.trimIndent(),
             paramMap = mapOf(
-                "id" to opplysningsgrunnlag.id,
+                "id" to UUID.randomUUID(),
                 "trygdetidId" to trygdetidId,
                 "type" to opplysningsgrunnlag.type.name,
                 "opplysning" to opplysningsgrunnlag.opplysning.toJson(),

@@ -1,9 +1,6 @@
 package no.nav.etterlatte.vilkaarsvurdering
 
-import com.fasterxml.jackson.module.kotlin.treeToValue
-import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.logging.withLogContext
-import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.etterlatte.rapidsandrivers.EventNames
@@ -18,7 +15,6 @@ import org.slf4j.LoggerFactory
 import rapidsandrivers.BEHANDLING_ID_KEY
 import rapidsandrivers.BEHANDLING_VI_OMREGNER_FRA_KEY
 import rapidsandrivers.SAK_ID_KEY
-import rapidsandrivers.SAK_TYPE
 import rapidsandrivers.behandlingId
 import rapidsandrivers.withFeilhaandtering
 
@@ -33,7 +29,6 @@ internal class Vilkaarsvurder(
         River(rapidsConnection).apply {
             eventName(VILKAARSVURDER)
             validate { it.requireKey(SAK_ID_KEY) }
-            validate { it.requireKey(SAK_TYPE) }
             validate { it.requireKey(BEHANDLING_ID_KEY) }
             validate { it.requireKey(BEHANDLING_VI_OMREGNER_FRA_KEY) }
             correlationId()
@@ -45,14 +40,9 @@ internal class Vilkaarsvurder(
             withFeilhaandtering(packet, context, VILKAARSVURDER) {
                 val behandlingId = packet.behandlingId
                 val behandlingViOmregnerFra = packet[BEHANDLING_VI_OMREGNER_FRA_KEY].asText().toUUID()
-                val sakType = objectMapper.treeToValue<SakType>(packet[SAK_TYPE])
 
                 vilkaarsvurderingService.kopierForrigeVilkaarsvurdering(behandlingId, behandlingViOmregnerFra)
-                if (sakType == SakType.BARNEPENSJON) {
-                    packet.eventName = EventNames.BEREGN
-                } else {
-                    packet.eventName = EventNames.TRYGDETID
-                }
+                packet.eventName = EventNames.BEREGN
                 context.publish(packet.toJson())
                 logger.info(
                     "Vilkaarsvurdert ferdig for behandling $behandlingId og melding beregningsmelding ble sendt."

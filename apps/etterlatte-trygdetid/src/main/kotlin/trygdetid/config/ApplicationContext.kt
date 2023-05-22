@@ -9,7 +9,6 @@ import no.nav.etterlatte.trygdetid.TrygdetidRepository
 import no.nav.etterlatte.trygdetid.TrygdetidService
 import no.nav.etterlatte.trygdetid.klienter.BehandlingKlient
 import no.nav.etterlatte.trygdetid.klienter.GrunnlagKlient
-import no.nav.etterlatte.trygdetid.regulering.RegulerTrygdetidService
 
 class ApplicationContext {
     val config: Config = ConfigFactory.load()
@@ -28,9 +27,4 @@ class ApplicationContext {
             grunnlagKlient = grunnlagKlient,
             beregnTrygdetidService = TrygdetidBeregningService
         )
-    val regulerTrygdetidService = RegulerTrygdetidService(
-        TrygdetidRepository(dataSource),
-        behandlingKlient = behandlingKlient,
-        beregnTrygdetidService = TrygdetidBeregningService
-    )
 }

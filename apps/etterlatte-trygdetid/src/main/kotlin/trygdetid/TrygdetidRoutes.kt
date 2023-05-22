@@ -22,6 +22,7 @@ import no.nav.etterlatte.libs.common.trygdetid.OpplysningsgrunnlagDto
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidGrunnlagDto
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidGrunnlagKildeDto
+import no.nav.etterlatte.libs.common.uuid
 import no.nav.etterlatte.libs.common.withBehandlingId
 import no.nav.etterlatte.libs.ktor.bruker
 import no.nav.etterlatte.token.Bruker
@@ -63,6 +64,15 @@ fun Route.trygdetid(trygdetidService: TrygdetidService, behandlingKlient: Behand
                         trygdetidgrunnlagDto.toTrygdetidGrunnlag(bruker)
                     )
                 call.respond(trygdetid.toDto())
+            }
+        }
+
+        post("/kopier/{forrigeBehandlingId}") {
+            withBehandlingId(behandlingKlient) {
+                logger.info("Oppretter kopi av forrige trygdetid for behandling $behandlingsId")
+                val forrigeBehandlingId = call.uuid("forrigeBehandlingId")
+                trygdetidService.kopierSisteTrygdetidberegning(behandlingsId, forrigeBehandlingId, bruker)
+                call.respond(HttpStatusCode.OK)
             }
         }
     }

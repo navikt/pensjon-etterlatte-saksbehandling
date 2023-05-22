@@ -30,7 +30,8 @@ import rapidsandrivers.withFeilhaandtering
 
 internal class OmregningHendelser(
     rapidsConnection: RapidsConnection,
-    private val beregningService: BeregningService
+    private val beregningService: BeregningService,
+    private val trygdetidService: TrygdetidService
 ) :
     River.PacketListener {
 
@@ -63,6 +64,7 @@ internal class OmregningHendelser(
                         val beregning = beregningService.opprettOmregning(behandlingId).body<BeregningDTO>()
                         packet[BEREGNING_KEY] = beregning
                     } else {
+                        trygdetidService.kopierTrygdetidFraForrigeBehandling(behandlingId, behandlingViOmregnerFra)
                         val beregning = beregningService.opprettOmregning(behandlingId).body<BeregningDTO>()
                         packet[BEREGNING_KEY] = beregning
                         val avkorting = beregningService.regulerAvkorting(behandlingId, behandlingViOmregnerFra)

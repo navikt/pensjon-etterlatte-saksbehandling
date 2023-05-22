@@ -27,8 +27,7 @@ internal class VilkaarsvurderTest {
                 "@event_name" to "VILKAARSVURDER",
                 "sakId" to 1,
                 "behandlingId" to behandlingId,
-                "behandling_vi_omregner_fra" to behandlingViOmregnerFra,
-                "sakType" to "BARNEPENSJON"
+                "behandling_vi_omregner_fra" to behandlingViOmregnerFra
             )
         ).toJson()
         testRapid.sendTestMessage(melding)

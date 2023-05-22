@@ -34,7 +34,10 @@ spec:
       value: earliest
     - name: BEREGNING_AZURE_SCOPE
       value: api://dev-gcp.etterlatte.etterlatte-beregning/.default
+    - name: TRYGDETID_AZURE_SCOPE
+      value: api://dev-gcp.etterlatte.etterlatte-trygdetid/.default
   accessPolicy:
     outbound:
       rules:
         - application: etterlatte-beregning
+        - application: etterlatte-trygdetid

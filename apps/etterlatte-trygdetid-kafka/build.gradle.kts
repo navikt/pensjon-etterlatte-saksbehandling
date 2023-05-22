@@ -16,7 +16,6 @@ dependencies {
     implementation(libs.ktor2.clientcontentnegotiation)
     implementation(libs.ktor2.clientjackson)
 
-    testImplementation(libs.test.kotest.assertionscore)
     testImplementation(libs.ktor2.clientmock)
     testImplementation(libs.test.mockk)
     testImplementation(libs.kotlinx.coroutinescore)

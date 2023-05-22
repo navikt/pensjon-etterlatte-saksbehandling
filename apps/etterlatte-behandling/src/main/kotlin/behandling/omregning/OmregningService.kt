@@ -17,7 +17,7 @@ class OmregningService(
         sakId: Long,
         fraDato: LocalDate,
         prosessType: Prosesstype
-    ): Triple<UUID?, UUID, SakType?> {
+    ): Triple<UUID, UUID, SakType> {
         val forrigeBehandling = behandlingService.hentSisteIverksatte(sakId)
             ?: throw IllegalArgumentException("Fant ikke forrige behandling i sak $sakId")
 
@@ -36,8 +36,7 @@ class OmregningService(
                 revurderingAarsak = RevurderingAarsak.REGULERING,
                 kilde = Vedtaksloesning.GJENNY
             )
-        }
-
-        return Triple(behandling?.id, forrigeBehandling.id, behandling?.sak?.sakType)
+        } ?: throw Exception("Opprettelse av revurdering feilet for $sakId")
+        return Triple(behandling.id, forrigeBehandling.id, behandling.sak.sakType)
     }
 }

@@ -6,6 +6,7 @@ import styled from 'styled-components'
 
 const defaultAccordionProps = {
   defaultOpen: true,
+  feilBorder: false,
 }
 
 type PeriodeAccordionProps = {
@@ -13,14 +14,15 @@ type PeriodeAccordionProps = {
   title: string
   titleHeadingLevel: '1' | '2' | '3' | '4' | '5' | '6'
   topSummary: ReactNode | ((expanded: boolean) => ReactNode)
-} & typeof defaultAccordionProps
+} & typeof defaultAccordionProps &
+  React.HTMLAttributes<HTMLDivElement>
 
 const PeriodeAccordion = (props: PeriodeAccordionProps) => {
-  const { children, topSummary, title, titleHeadingLevel, defaultOpen } = props
+  const { children, topSummary, title, feilBorder, titleHeadingLevel, defaultOpen, ...rest } = props
   const [open, setOpen] = useState<boolean>(defaultOpen)
   const topContent = topSummary instanceof Function ? topSummary(open) : topSummary
   return (
-    <PeriodeAccordionWrapper>
+    <PeriodeAccordionWrapper {...rest} feilBorder={feilBorder}>
       <PeriodeAccordionHead>
         <ExpandButton onClick={() => setOpen((o) => !o)} aria-expanded={open}>
           {open ? <Collapse fontSize={20} aria-hidden /> : <Expand fontSize={20} aria-hidden />}
@@ -37,8 +39,8 @@ const PeriodeAccordion = (props: PeriodeAccordionProps) => {
   )
 }
 
-const PeriodeAccordionWrapper = styled.div`
-  border: 1px solid;
+const PeriodeAccordionWrapper = styled.div<{ feilBorder: boolean }>`
+  border: ${(props) => (props.feilBorder ? '2px solid var(--a-border-danger)' : '1px solid')};
   margin: 0 3em 2em 3em;
   padding: 1em 0;
 
@@ -59,7 +61,7 @@ const PeriodeAccordionContent = styled.div`
 
 PeriodeAccordion.defaultProps = defaultAccordionProps
 
-const ExpandButton = styled.button`
+const ExpandButton = styled.button.attrs({ type: 'button' })`
   display: flex;
   flex-direction: row;
   background: none;

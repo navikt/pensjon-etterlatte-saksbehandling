@@ -39,6 +39,7 @@ const MaanedVelger = (props: MaanedVelgerProps) => {
               positionFixed: true,
             }}
             dateFormat={format}
+            portalId="root-portal"
             placeholderText={placeholder}
             selected={value}
             locale="nb"

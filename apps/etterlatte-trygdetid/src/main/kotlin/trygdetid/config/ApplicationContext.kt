@@ -4,11 +4,13 @@ import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.ktor.httpClient
+import no.nav.etterlatte.trygdetid.KodeverkService
 import no.nav.etterlatte.trygdetid.TrygdetidBeregningService
 import no.nav.etterlatte.trygdetid.TrygdetidRepository
 import no.nav.etterlatte.trygdetid.TrygdetidService
 import no.nav.etterlatte.trygdetid.klienter.BehandlingKlient
 import no.nav.etterlatte.trygdetid.klienter.GrunnlagKlient
+import no.nav.etterlatte.trygdetid.klienter.KodeverkKlient
 
 class ApplicationContext {
     val config: Config = ConfigFactory.load()
@@ -18,8 +20,9 @@ class ApplicationContext {
         username = properties.dbUsername,
         password = properties.dbPassword
     )
+    private val grunnlagKlient = GrunnlagKlient(config, httpClient())
     val behandlingKlient = BehandlingKlient(config, httpClient())
-    val grunnlagKlient = GrunnlagKlient(config, httpClient())
+    val kodeverkService = KodeverkService(KodeverkKlient(config, httpClient()))
     val trygdetidService =
         TrygdetidService(
             TrygdetidRepository(dataSource),

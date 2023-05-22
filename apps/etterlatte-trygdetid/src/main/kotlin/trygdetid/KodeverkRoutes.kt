@@ -7,7 +7,7 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.route
 
 fun Route.kodeverk(kodeverkService: KodeverkService) {
-    route("api/trygdetid/kodeverk") {
+    route("api/trygdetid/kodeverk/land") {
         get {
             call.respond(kodeverkService.hentAlleLand())
         }

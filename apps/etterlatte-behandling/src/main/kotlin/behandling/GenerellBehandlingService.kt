@@ -239,6 +239,7 @@ class RealGenerellBehandlingService(
                 attestant = vedtak.await()?.attestasjon?.attestant,
                 soeknadMottattDato = detaljertBehandling.soeknadMottattDato,
                 virkningstidspunkt = detaljertBehandling.virkningstidspunkt,
+                utenlandstilsnitt = detaljertBehandling.utenlandstilsnitt,
                 status = detaljertBehandling.status,
                 hendelser = hendelserIBehandling,
                 familieforhold = Familieforhold(avdoed.await(), gjenlevende.await()),

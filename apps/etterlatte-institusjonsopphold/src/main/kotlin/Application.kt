@@ -49,7 +49,7 @@ fun startInstitusjonsoppholdLytter(env: Map<String, String>, config: Config) {
         azureAppClientId = config.getString("azure.app.client.id"),
         azureAppJwk = config.getString("azure.app.jwk"),
         azureAppWellKnownUrl = config.getString("azure.app.well.known.url"),
-        azureAppScope = config.getString("etterlatte-proxy.azure.scope")
+        azureAppScope = config.getString("azure.proxy.outbound.scope")
     )
 
     val institusjonsoppholdKlient = InstitusjonsoppholdKlient(proxyHttpKlient, config.getString("proxy.url"))

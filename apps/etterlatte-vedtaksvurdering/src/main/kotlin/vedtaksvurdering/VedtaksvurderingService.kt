@@ -95,10 +95,7 @@ class VedtaksvurderingService(
             behandlingId,
             VedtakFattet(
                 bruker.ident(),
-                sak.enhet
-                    ?: throw SaksbehandlerManglerEnhetException(
-                        "Vedtak mangler ansvarlig enhet vedtakid: ${vedtak.id}"
-                    ),
+                sak.enhet,
                 Tidspunkt.now(clock)
             )
         )
@@ -137,10 +134,7 @@ class VedtaksvurderingService(
             behandlingId,
             Attestasjon(
                 bruker.ident(),
-                sak.enhet
-                    ?: throw SaksbehandlerManglerEnhetException(
-                        "Vedtak mangler ansvarlig enhet vedtakid: ${vedtak.id}"
-                    ),
+                sak.enhet,
                 Tidspunkt.now(clock)
             )
         )

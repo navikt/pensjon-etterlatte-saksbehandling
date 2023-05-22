@@ -28,6 +28,8 @@ import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
+import no.nav.etterlatte.libs.common.behandling.Utenlandstilsnitt
+import no.nav.etterlatte.libs.common.behandling.UtenlandstilsnittType
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.behandlingsId
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
@@ -157,6 +159,34 @@ internal fun Route.behandlingRoutes(
                 call.respond(HttpStatusCode.BadRequest, "Kan ikke endre feltet")
             }
         }
+
+        post("/utenlandstilsnitt") {
+            logger.debug("Prøver å fastsette utenlandstilsnitt")
+            val navIdent = navIdentFraToken() ?: return@post call.respond(
+                HttpStatusCode.Unauthorized,
+                "Kunne ikke hente ut navident for fastsetting av utenlandstilsnitt"
+            )
+            val body = call.receive<UtenlandstilsnittRequest>()
+
+            try {
+                val utenlandstilsnitt = Utenlandstilsnitt(
+                    type = body.utenlandstilsnittType,
+                    kilde = Grunnlagsopplysning.Saksbehandler.create(navIdent),
+                    begrunnelse = body.begrunnelse
+                )
+
+                generellBehandlingService.oppdaterUtenlandstilsnitt(behandlingsId, utenlandstilsnitt)
+
+                call.respondText(
+                    contentType = ContentType.Application.Json,
+                    status = HttpStatusCode.OK,
+                    text = utenlandstilsnitt.toJson()
+
+                )
+            } catch (e: TilstandException.UgyldigTilstand) {
+                call.respond(HttpStatusCode.BadRequest, "Kan ikke endre feltet")
+            }
+        }
     }
 
     route("/behandlinger") {
@@ -219,6 +249,11 @@ internal fun Route.behandlingRoutes(
         }
     }
 }
+
+data class UtenlandstilsnittRequest(
+    val utenlandstilsnittType: UtenlandstilsnittType,
+    val begrunnelse: String
+)
 
 data class ManueltOpphoerOppsummeringDto(
     val id: UUID,

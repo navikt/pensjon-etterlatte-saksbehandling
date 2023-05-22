@@ -68,6 +68,7 @@ class StatistikkServiceTest {
             status = BehandlingStatus.FATTET_VEDTAK,
             behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
             virkningstidspunkt = null,
+            utenlandstilsnitt = null,
             kommerBarnetTilgode = null,
             revurderingsaarsak = null,
             prosesstype = Prosesstype.MANUELL
@@ -154,6 +155,7 @@ class StatistikkServiceTest {
             status = BehandlingStatus.OPPRETTET,
             behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
             virkningstidspunkt = null,
+            utenlandstilsnitt = null,
             kommerBarnetTilgode = null,
             revurderingsaarsak = null,
             prosesstype = Prosesstype.MANUELL

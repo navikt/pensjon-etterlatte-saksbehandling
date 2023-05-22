@@ -18,6 +18,7 @@ import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
+import no.nav.etterlatte.libs.common.behandling.Utenlandstilsnitt
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.sak.BehandlingOgSak
 import no.nav.etterlatte.libs.common.sak.Sak
@@ -95,6 +96,7 @@ class BehandlingDao(private val connection: () -> Connection) {
         gyldighetsproeving = rs.getString("gyldighetssproving")?.let { objectMapper.readValue(it) },
         status = rs.getString("status").let { BehandlingStatus.valueOf(it) },
         virkningstidspunkt = rs.getString("virkningstidspunkt")?.let { objectMapper.readValue(it) },
+        utenlandstilsnitt = rs.getString("utenlandstilsnitt")?.let { objectMapper.readValue(it) },
         kommerBarnetTilgode = rs.getString("kommer_barnet_tilgode")?.let { objectMapper.readValue(it) },
         prosesstype = rs.getString("prosesstype").let { Prosesstype.valueOf(it) },
         kilde = rs.getString("kilde").let { Vedtaksloesning.valueOf(it) }
@@ -119,6 +121,7 @@ class BehandlingDao(private val connection: () -> Connection) {
             revurderingsaarsak = rs.getString("revurdering_aarsak").let { RevurderingAarsak.valueOf(it) },
             kommerBarnetTilgode = rs.getString("kommer_barnet_tilgode")?.let { objectMapper.readValue(it) },
             virkningstidspunkt = rs.getString("virkningstidspunkt")?.let { objectMapper.readValue(it) },
+            utenlandstilsnitt = rs.getString("utenlandstilsnitt")?.let { objectMapper.readValue(it) },
             prosesstype = rs.getString("prosesstype").let { Prosesstype.valueOf(it) },
             kilde = rs.getString("kilde").let { Vedtaksloesning.valueOf(it) }
         )
@@ -131,6 +134,7 @@ class BehandlingDao(private val connection: () -> Connection) {
         persongalleri = hentPersongalleri(rs),
         status = rs.getString("status").let { BehandlingStatus.valueOf(it) },
         virkningstidspunkt = rs.getString("virkningstidspunkt")?.let { objectMapper.readValue(it) },
+        utenlandstilsnitt = rs.getString("utenlandstilsnitt")?.let { objectMapper.readValue(it) },
         opphoerAarsaker = rs.getString("opphoer_aarsaker").let { objectMapper.readValue(it) },
         fritekstAarsak = rs.getString("fritekst_aarsak"),
         prosesstype = rs.getString("prosesstype").let { Prosesstype.valueOf(it) }
@@ -208,6 +212,14 @@ class BehandlingDao(private val connection: () -> Connection) {
         stmt.setString(1, status.name)
         stmt.setTidspunkt(2, sistEndret.toTidspunkt())
         stmt.setObject(3, behandling)
+        require(stmt.executeUpdate() == 1)
+    }
+
+    fun lagreUtenlandstilsnitt(behandling: UUID, utenlandstilsnitt: Utenlandstilsnitt) {
+        val stmt =
+            connection().prepareStatement("UPDATE behandling SET utenlandstilsnitt = ? WHERE id = ?")
+        stmt.setString(1, objectMapper.writeValueAsString(utenlandstilsnitt))
+        stmt.setObject(2, behandling)
         require(stmt.executeUpdate() == 1)
     }
 

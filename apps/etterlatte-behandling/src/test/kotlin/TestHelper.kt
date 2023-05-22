@@ -22,6 +22,7 @@ import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
+import no.nav.etterlatte.libs.common.behandling.Utenlandstilsnitt
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
@@ -88,6 +89,7 @@ fun foerstegangsbehandling(
     persongalleri: Persongalleri = persongalleri(),
     gyldighetsproeving: GyldighetsResultat? = null,
     virkningstidspunkt: Virkningstidspunkt? = null,
+    utenlandstilsnitt: Utenlandstilsnitt? = null,
     kommerBarnetTilgode: KommerBarnetTilgode? = null,
     kilde: Vedtaksloesning = Vedtaksloesning.GJENNY,
     enhet: String = Enheter.defaultEnhet.enhetNr
@@ -106,6 +108,7 @@ fun foerstegangsbehandling(
     persongalleri = persongalleri,
     gyldighetsproeving = gyldighetsproeving,
     virkningstidspunkt = virkningstidspunkt,
+    utenlandstilsnitt = utenlandstilsnitt,
     kommerBarnetTilgode = kommerBarnetTilgode,
     kilde = kilde
 )
@@ -120,6 +123,7 @@ fun revurdering(
     revurderingAarsak: RevurderingAarsak,
     kommerBarnetTilgode: KommerBarnetTilgode = kommerBarnetTilgode(),
     virkningstidspunkt: Virkningstidspunkt? = null,
+    utenlandstilsnitt: Utenlandstilsnitt? = null,
     prosesstype: Prosesstype = Prosesstype.MANUELL,
     kilde: Vedtaksloesning = Vedtaksloesning.GJENNY,
     enhet: String = Enheter.defaultEnhet.enhetNr
@@ -138,6 +142,7 @@ fun revurdering(
     revurderingsaarsak = revurderingAarsak,
     kommerBarnetTilgode = kommerBarnetTilgode,
     virkningstidspunkt = virkningstidspunkt,
+    utenlandstilsnitt = utenlandstilsnitt,
     prosesstype = prosesstype,
     kilde = kilde
 )
@@ -152,6 +157,7 @@ fun manueltOpphoer(
     ),
     fritekstAarsak: String? = "Umulig å revurdere i nytt saksbehandlingssystem",
     virkningstidspunkt: Virkningstidspunkt? = null,
+    utenlandstilsnitt: Utenlandstilsnitt? = null,
     enhet: String = Enheter.defaultEnhet.enhetNr
 ) = ManueltOpphoer(
     id = behandlingId,
@@ -167,7 +173,8 @@ fun manueltOpphoer(
     persongalleri = persongalleri,
     opphoerAarsaker = opphoerAarsaker,
     fritekstAarsak = fritekstAarsak,
-    virkningstidspunkt = virkningstidspunkt
+    virkningstidspunkt = virkningstidspunkt,
+    utenlandstilsnitt = utenlandstilsnitt
 )
 
 fun persongalleri(

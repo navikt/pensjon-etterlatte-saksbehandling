@@ -40,6 +40,7 @@ internal class RevurderingTest {
             persongalleri = Persongalleri(""),
             kommerBarnetTilgode = kommerBarnetTilGodeVurdering(),
             virkningstidspunkt = virkningstidspunktVurdering(),
+            utenlandstilsnitt = null,
             revurderingsaarsak = RevurderingAarsak.REGULERING,
             prosesstype = Prosesstype.MANUELL,
             kilde = Vedtaksloesning.GJENNY
@@ -154,6 +155,7 @@ private fun opprettetRevurdering(prosesstype: Prosesstype) = Revurdering.opprett
     persongalleri = Persongalleri(""),
     kommerBarnetTilgode = kommerBarnetTilGodeVurdering(),
     virkningstidspunkt = virkningstidspunktVurdering(),
+    utenlandstilsnitt = null,
     revurderingsaarsak = RevurderingAarsak.REGULERING,
     prosesstype = prosesstype,
     kilde = Vedtaksloesning.GJENNY

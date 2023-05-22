@@ -127,6 +127,7 @@ internal class RealFoerstegangsbehandlingServiceTest {
                 Grunnlagsopplysning.Saksbehandler.create("ident"),
                 "begrunnelse"
             ),
+            utenlandstilsnitt = null,
             kommerBarnetTilgode = null,
             kilde = Vedtaksloesning.GJENNY
         )
@@ -171,6 +172,7 @@ internal class RealFoerstegangsbehandlingServiceTest {
                 Grunnlagsopplysning.Saksbehandler.create("ident"),
                 "begrunnelse"
             ),
+            utenlandstilsnitt = null,
             kommerBarnetTilgode = null,
             kilde = Vedtaksloesning.GJENNY
         )
@@ -230,6 +232,7 @@ internal class RealFoerstegangsbehandlingServiceTest {
             persongalleri = persongalleri(),
             kommerBarnetTilgode = null,
             virkningstidspunkt = null,
+            utenlandstilsnitt = null,
             soeknadMottattDato = now,
             gyldighetsproeving = null,
             prosesstype = Prosesstype.MANUELL,
@@ -299,6 +302,7 @@ internal class RealFoerstegangsbehandlingServiceTest {
                 Grunnlagsopplysning.Saksbehandler.create("ident"),
                 "begrunnelse"
             ),
+            utenlandstilsnitt = null,
             kommerBarnetTilgode = null,
             kilde = Vedtaksloesning.GJENNY
         )
@@ -345,6 +349,7 @@ internal class RealFoerstegangsbehandlingServiceTest {
                 Grunnlagsopplysning.Saksbehandler.create("ident"),
                 "begrunnelse"
             ),
+            utenlandstilsnitt = null,
             kommerBarnetTilgode = null,
             kilde = Vedtaksloesning.GJENNY
         )
@@ -391,6 +396,7 @@ internal class RealFoerstegangsbehandlingServiceTest {
                 Grunnlagsopplysning.Saksbehandler.create("ident"),
                 "begrunnelse"
             ),
+            utenlandstilsnitt = null,
             kommerBarnetTilgode = null,
             kilde = Vedtaksloesning.GJENNY
         )

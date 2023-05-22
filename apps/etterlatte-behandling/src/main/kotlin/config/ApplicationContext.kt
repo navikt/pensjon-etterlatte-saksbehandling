@@ -96,7 +96,9 @@ class ApplicationContext(
     val navAnsattKlient: NavAnsattKlient = NavAnsattKlientImpl(
         navAnsattHttpClient(config),
         env.getValue("NAVANSATT_URL")
-    ),
+    ).also {
+        it.asyncPing()
+    },
     val norg2Klient: Norg2Klient = Norg2KlientImpl(httpClient(), env.getValue("NORG2_URL")),
     val leaderElectionHttpClient: HttpClient = httpClient(),
     val vedtakKlientObo: VedtakKlient = VedtakKlientImpl(config, httpClient()),

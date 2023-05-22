@@ -12,18 +12,16 @@ import no.nav.helse.rapids_rivers.toUUID
 import org.slf4j.LoggerFactory
 import rapidsandrivers.BEHANDLING_ID_KEY
 import rapidsandrivers.BEHANDLING_VI_OMREGNER_FRA_KEY
-import rapidsandrivers.SAK_ID_KEY
 import rapidsandrivers.behandlingId
 import rapidsandrivers.withFeilhaandtering
 
-internal class BeregnTrygdetid(rapidsConnection: RapidsConnection, private val trygdetidService: TrygdetidService) :
+internal class RegulerTrygdetid(rapidsConnection: RapidsConnection, private val trygdetidService: TrygdetidService) :
     River.PacketListener {
-    private val logger = LoggerFactory.getLogger(BeregnTrygdetid::class.java)
+    private val logger = LoggerFactory.getLogger(RegulerTrygdetid::class.java)
 
     init {
         River(rapidsConnection).apply {
             eventName(TRYGDETID)
-            validate { it.requireKey(SAK_ID_KEY) }
             validate { it.requireKey(BEHANDLING_ID_KEY) }
             validate { it.requireKey(BEHANDLING_VI_OMREGNER_FRA_KEY) }
             correlationId()

@@ -128,6 +128,12 @@ suspend inline fun PipelineContext<*, ApplicationCall>.withParam(
     }
 }
 
+fun ApplicationCall.uuid(param: String) = this.parameters[param]?.let {
+    UUID.fromString(it)
+} ?: throw NullPointerException(
+    "$param er ikke i path params"
+)
+
 interface IFoedselsnummerDTO {
     val foedselsnummer: String
 }

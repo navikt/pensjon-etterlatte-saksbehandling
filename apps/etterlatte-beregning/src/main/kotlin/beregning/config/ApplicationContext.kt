@@ -2,6 +2,7 @@ package no.nav.etterlatte.beregning.config
 
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
+import no.nav.etterlatte.avkorting.regulering.RegulerAvkortingService
 import no.nav.etterlatte.beregning.AvkortingRepository
 import no.nav.etterlatte.beregning.AvkortingService
 import no.nav.etterlatte.beregning.BeregnBarnepensjonService
@@ -61,4 +62,5 @@ class ApplicationContext {
         avkortingRepository = AvkortingRepository(dataSource),
         beregningRepository = BeregningRepository(dataSource)
     )
+    val regulerAvkortingService = RegulerAvkortingService(avkortingService)
 }

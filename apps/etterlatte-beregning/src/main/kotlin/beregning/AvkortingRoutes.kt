@@ -1,7 +1,6 @@
 package no.nav.etterlatte.beregning
 
 import io.ktor.http.HttpStatusCode
-import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.call
 import io.ktor.server.application.log
 import io.ktor.server.request.receive
@@ -23,7 +22,6 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.withBehandlingId
 import no.nav.etterlatte.libs.ktor.bruker
 import no.nav.etterlatte.token.Bruker
-import java.util.*
 
 fun Route.avkorting(avkortingService: AvkortingService, behandlingKlient: BehandlingKlient) {
     route("/api/beregning/avkorting/{$BEHANDLINGSID_CALL_PARAMETER}") {
@@ -48,23 +46,8 @@ fun Route.avkorting(avkortingService: AvkortingService, behandlingKlient: Behand
                 call.respond(avkorting.toDto())
             }
         }
-
-        post("/med/{forrigeBehandlingId}") {
-            withBehandlingId(behandlingKlient) {
-                logger.info("Regulere avkorting for behandlingId=$it")
-                val forrigeBehandlingId = call.uuid("forrigeBehandlingId")
-                val avkorting = avkortingService.regulerAvkorting(it, forrigeBehandlingId, bruker)
-                call.respond(avkorting.toDto())
-            }
-        }
     }
 }
-
-private fun ApplicationCall.uuid(param: String) = this.parameters[param]?.let {
-    UUID.fromString(it)
-} ?: throw NullPointerException(
-    "$param er ikke i path params"
-)
 
 fun Avkorting.toDto() = AvkortingDto(
     behandlingId = behandlingId,

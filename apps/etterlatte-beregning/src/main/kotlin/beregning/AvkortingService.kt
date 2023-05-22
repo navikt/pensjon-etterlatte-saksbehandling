@@ -44,14 +44,6 @@ class AvkortingService(
         avkortetYtelse
     }
 
-    suspend fun regulerAvkorting(behandlignId: UUID, forrigeBehandlingId: UUID, bruker: Bruker): Avkorting {
-        val forrigeAvkorting = hentAvkorting(forrigeBehandlingId) ?: throw Exception(
-            "Fant ikke avkorting for $forrigeBehandlingId"
-        )
-        // TODO send liste med grunnlag
-        return lagreAvkorting(behandlignId, bruker, forrigeAvkorting.avkortingGrunnlag[0])
-    }
-
     private suspend fun tilstandssjekk(behandlingId: UUID, bruker: Bruker, block: suspend () -> Avkorting): Avkorting {
         val kanAvkorte = behandlingKlient.avkort(behandlingId, bruker, commit = false)
         return if (kanAvkorte) {

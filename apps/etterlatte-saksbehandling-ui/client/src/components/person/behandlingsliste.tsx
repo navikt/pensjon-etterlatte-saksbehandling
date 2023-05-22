@@ -1,4 +1,4 @@
-import { Link, Table } from '@navikt/ds-react'
+import { Link, Table, Tag } from '@navikt/ds-react'
 import { AarsaksTyper, BehandlingOgRevurderingsAarsakerType, IBehandlingsammendrag, VedtakSammendrag } from './typer'
 import {
   formaterBehandlingstype,
@@ -12,6 +12,9 @@ import { erFerdigBehandlet } from '~components/behandling/felles/utils'
 import React, { useEffect, useState } from 'react'
 import { Revurderingsaarsak } from '~shared/types/Revurderingsaarsak'
 import { hentVedtakSammendrag } from '~shared/api/vedtaksvurdering'
+import { tagColors } from '~shared/Tags'
+import { INasjonalitetsType } from '~components/behandling/fargetags/nasjonalitetsType'
+import styled from 'styled-components'
 
 const kolonner = [
   'Reg. dato',
@@ -79,7 +82,12 @@ export const Behandlingsliste = ({ behandlinger }: { behandlinger: IBehandlingsa
               </Table.DataCell>
               <Table.DataCell key={`data${behandling.sakType}`}>{formaterSakstype(behandling.sakType)}</Table.DataCell>
               <Table.DataCell key={`data${behandling.behandlingType}`}>
-                {formaterBehandlingstype(behandling.behandlingType)}
+                <BehandlingstypeWrapper>
+                  {formaterBehandlingstype(behandling.behandlingType)}
+                  <Tag variant={tagColors[INasjonalitetsType.NASJONAL]} size={'small'}>
+                    {formaterEnumTilLesbarString(INasjonalitetsType.NASJONAL)}
+                  </Tag>
+                </BehandlingstypeWrapper>
               </Table.DataCell>
               <Table.DataCell key={`data${behandling.aarsak}`}>{mapAarsak(behandling.aarsak)}</Table.DataCell>
               <Table.DataCell key={`data${behandling.status}`}>
@@ -167,3 +175,9 @@ function resultatTekstFoerstegangsbehandling(vilkaarsvurderingResultat?: Vilkaar
       return 'Avslått'
   }
 }
+
+const BehandlingstypeWrapper = styled.div`
+  display: flex;
+  flex-direction: row;
+  gap: 0.5em;
+`

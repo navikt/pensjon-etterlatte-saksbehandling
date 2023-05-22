@@ -2,12 +2,8 @@ import React, { useEffect, useState } from 'react'
 import { Behandlingsliste } from './behandlingsliste'
 import styled from 'styled-components'
 import { Grunnlagsendringshendelse, GrunnlagsendringsListe, IBehandlingListe, IBehandlingsammendrag } from './typer'
-import { INasjonalitetsType } from '../behandling/fargetags/nasjonalitetsType'
-import { Heading, Tag } from '@navikt/ds-react'
 import { ManueltOpphoerModal } from './ManueltOpphoerModal'
 import { ToKolonner } from '../toKolonner/ToKolonner'
-import { tagColors } from '~shared/Tags'
-import { formaterEnumTilLesbarString } from '~utils/formattering'
 import {
   hentBehandlingerForPerson,
   hentGrunnlagsendringshendelserForPerson,
@@ -124,16 +120,6 @@ export const Saksoversikt = ({ fnr }: { fnr: string | undefined }) => {
       <Spinner visible={!lastetBehandlingliste || !lastetGrunnlagshendelser} label={'Laster'} />
       {lastetBehandlingliste && lastetGrunnlagshendelser && (
         <SaksoversiktWrapper>
-          <HeadingWrapper>
-            <Heading spacing size="xlarge" level="1">
-              Saksoversikt
-            </Heading>
-            <div className="details">
-              <Tag variant={tagColors[INasjonalitetsType.NASJONAL]}>
-                {formaterEnumTilLesbarString(INasjonalitetsType.NASJONAL)}
-              </Tag>
-            </div>
-          </HeadingWrapper>
           <ToKolonner>
             {{
               left: (

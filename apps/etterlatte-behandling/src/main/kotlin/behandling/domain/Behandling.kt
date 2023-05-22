@@ -154,6 +154,7 @@ internal fun Behandling.toDetaljertBehandling(): DetaljertBehandling {
 fun Behandling.toBehandlingSammendrag() = BehandlingSammendrag(
     id = this.id,
     sak = this.sak.id,
+    sakType = this.sak.sakType,
     status = this.status,
     soeknadMottattDato = if (this is Foerstegangsbehandling) {
         this.soeknadMottattDato

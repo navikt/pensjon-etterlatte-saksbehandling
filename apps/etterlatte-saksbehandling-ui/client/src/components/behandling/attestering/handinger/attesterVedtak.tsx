@@ -7,50 +7,42 @@ import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { useNavigate } from 'react-router'
 import { behandlingSkalSendeBrev } from '~components/behandling/felles/utils'
 import { hentVedtaksbrev } from '~shared/api/brev'
+import { isPending, useApiCall } from '~shared/hooks/useApiCall'
+import { BrevStatus } from '~shared/types/Brev'
 
 export const AttesterVedtak = ({ behandling, kommentar }: { behandling: IDetaljertBehandling; kommentar: string }) => {
   const navigate = useNavigate()
   const [modalisOpen, setModalisOpen] = useState(false)
   const skalSendeBrev = behandlingSkalSendeBrev(behandling)
-  const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string>()
+  const [hentVedtaksbrevStatus, apiHentVedtaksbrev] = useApiCall(hentVedtaksbrev)
+  const [attesterVedtakStatus, apiAttesterVedtak] = useApiCall(attesterVedtak)
 
-  const vedtaksbrevErFerdigstilt = async () => {
+  const settVedtakTilAttestert = () => {
+    apiAttesterVedtak(
+      { behandlingId: behandling.id, kommentar },
+      () => navigate(`/person/${behandling.søker?.foedselsnummer}`),
+      () => {
+        setError(`Ukjent feil oppsto ved attestering av vedtaket... Prøv igjen.`)
+        setModalisOpen(false)
+      }
+    )
+  }
+
+  const attester = () => {
     if (!skalSendeBrev) {
-      return true
-    }
-
-    return hentVedtaksbrev(behandling.id)
-      .then((response) => {
-        if (response.status === 'ok') return response.data
-        else throw new Error('Ukjent feil oppsto ved verifisering av vedtaksbrev')
-      })
-      .then((vedtaksbrev) => {
-        if (vedtaksbrev.status === 'FERDIGSTILT') return true
-        else {
+      settVedtakTilAttestert()
+    } else {
+      apiHentVedtaksbrev(behandling.id, (vedtaksbrev) => {
+        if (vedtaksbrev.status === BrevStatus.FERDIGSTILT) {
+          settVedtakTilAttestert()
+        } else {
           setError(`Brev har feil status (${vedtaksbrev.status.toLowerCase()}).
                     Kan ikke attestere saken. Forsøk å laste siden på nytt.`)
           setModalisOpen(false)
-          return false
-        }
-      })
-  }
-
-  const attester = async () => {
-    setLoading(true)
-    const erVedtaksbrevFerdigstilt = await vedtaksbrevErFerdigstilt()
-
-    if (erVedtaksbrevFerdigstilt) {
-      attesterVedtak(behandling.id, kommentar).then((response) => {
-        if (response.status === 'ok') {
-          navigate(`/person/${behandling.søker?.foedselsnummer}`)
-        } else {
-          setError(`Ukjent feil oppsto ved attestering av vedtaket... Prøv igjen.`)
-          setModalisOpen(false)
         }
       })
     }
-    setLoading(false)
   }
 
   return (
@@ -73,7 +65,7 @@ export const AttesterVedtak = ({ behandling, kommentar }: { behandling: IDetalje
         onYesClick={attester}
         setModalisOpen={setModalisOpen}
         open={modalisOpen}
-        loading={loading}
+        loading={isPending(attesterVedtakStatus) || isPending(hentVedtaksbrevStatus)}
       />
     </BeslutningWrapper>
   )

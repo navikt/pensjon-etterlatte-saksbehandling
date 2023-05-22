@@ -1,7 +1,5 @@
 package no.nav.etterlatte.behandling.klienter
 
-import PingResult
-import Pingable
 import com.github.benmanes.caffeine.cache.Cache
 import com.github.benmanes.caffeine.cache.Caffeine
 import io.ktor.client.HttpClient
@@ -16,6 +14,8 @@ import no.nav.etterlatte.behandling.domain.SaksbehandlerEnhet
 import no.nav.etterlatte.behandling.domain.SaksbehandlerTema
 import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.getXCorrelationId
+import no.nav.etterlatte.libs.ktor.PingResult
+import no.nav.etterlatte.libs.ktor.Pingable
 import org.slf4j.LoggerFactory
 import java.time.Duration
 

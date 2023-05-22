@@ -1,3 +1,5 @@
+package no.nav.etterlatte.libs.ktor
+
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch

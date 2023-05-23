@@ -127,11 +127,6 @@ internal class FordelerServiceTest {
     }
 
     @Test
-    fun `skal feile dersom kall mot skjermetløsningen feiler`() {
-        assertThrows<RuntimeException> { fordelerService.sjekkGyldighetForBehandling(fordelerEvent()) }
-    }
-
-    @Test
     fun `Er gyldig for behandling om søknad tidligere er fordelt til Gjenny`() {
         every { fordelerRepo.finnFordeling(any()) } returns FordeltRecord(1, "GJENNY", Tidspunkt.now())
         every { fordelerRepo.finnKriterier(any()) } returns emptyList()

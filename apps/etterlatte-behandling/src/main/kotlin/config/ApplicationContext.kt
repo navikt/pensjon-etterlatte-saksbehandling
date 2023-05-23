@@ -39,6 +39,7 @@ import no.nav.etterlatte.libs.common.requireEnvValue
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.KotliqueryRepository
 import no.nav.etterlatte.libs.jobs.LeaderElection
+import no.nav.etterlatte.libs.ktor.asyncPing
 import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.libs.sporingslogg.Sporingslogg
@@ -97,7 +98,7 @@ class ApplicationContext(
         navAnsattHttpClient(config),
         env.getValue("NAVANSATT_URL")
     ).also {
-        it.asyncPing()
+        asyncPing { it.ping() }
     },
     val norg2Klient: Norg2Klient = Norg2KlientImpl(httpClient(), env.getValue("NORG2_URL")),
     val leaderElectionHttpClient: HttpClient = httpClient(),

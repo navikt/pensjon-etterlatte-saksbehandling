@@ -66,22 +66,6 @@ const Soeskenjustering = (props: SoeskenjusteringProps) => {
   const behandles = hentBehandlesFraStatus(behandling?.status)
   const sisteTom = watch(`soeskenMedIBeregning.${fields.length - 1}.tom`)
   const sisteFom = watch(`soeskenMedIBeregning.${fields.length - 1}.fom`)
-
-  if (!behandling || !behandling.familieforhold) {
-    return null
-  }
-  const allePerioder = watch('soeskenMedIBeregning')
-  const feil: [number, FeilISoeskenPeriode][] = [
-    ...feilIKomplettePerioderOverIntervall(allePerioder, new Date(behandling.virkningstidspunkt!.dato)),
-    ...allePerioder.flatMap((periode, indeks) =>
-      feilISoeskenjusteringsperiode(periode).map((feil) => [indeks, feil] as [number, FeilISoeskenPeriode])
-    ),
-  ]
-
-  const soesken: IPdlPerson[] =
-    behandling.familieforhold.avdoede.opplysning.avdoedesBarn?.filter(
-      (barn) => barn.foedselsnummer !== behandling.søker?.foedselsnummer
-    ) ?? []
   const dispatch = useAppDispatch()
 
   useEffect(() => {
@@ -97,6 +81,22 @@ const Soeskenjustering = (props: SoeskenjusteringProps) => {
     }
   }, [])
 
+  if (!behandling.familieforhold) {
+    return null
+  }
+
+  const allePerioder = watch('soeskenMedIBeregning')
+  const feil: [number, FeilISoeskenPeriode][] = [
+    ...feilIKomplettePerioderOverIntervall(allePerioder, new Date(behandling.virkningstidspunkt!.dato)),
+    ...allePerioder.flatMap((periode, indeks) =>
+      feilISoeskenjusteringsperiode(periode).map((feil) => [indeks, feil] as [number, FeilISoeskenPeriode])
+    ),
+  ]
+
+  const soesken: IPdlPerson[] =
+    behandling.familieforhold.avdoede.opplysning.avdoedesBarn?.filter(
+      (barn) => barn.foedselsnummer !== behandling.søker?.foedselsnummer
+    ) ?? []
   const fnrTilSoesken: Record<string, IPdlPerson> = soesken.reduce(
     (acc, next) => ({
       ...acc,

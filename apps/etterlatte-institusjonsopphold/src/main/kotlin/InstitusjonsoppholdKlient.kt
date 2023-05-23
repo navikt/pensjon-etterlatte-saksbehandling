@@ -28,7 +28,7 @@ class InstitusjonsoppholdKlient(val institusjonsoppholdHttpKlient: HttpClient, v
 data class Institusjonsopphold(
     val oppholdId: Long,
     val tssEksternId: String,
-    val institusjonsnavn: String,
+    val institusjonsnavn: String? = null,
     val avdelingsnavn: String,
     val organisasjonsnummer: String,
     val institusjonstype: String,

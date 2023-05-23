@@ -37,8 +37,8 @@ class BehandlingKlient(val behandlingHttpClient: HttpClient, val institusjonsopp
                 norskident = oppholdHendelse.norskident,
                 institusjonsoppholdsType = oppholdHendelse.type,
                 institusjonsoppholdKilde = oppholdHendelse.kilde,
-                institusjonsnavn = opphold.institusjonsnavn ?: "Uten navn",
-                institusjonsType = opphold.institusjonstype ?: "Ingen type oppgitt",
+                institusjonsnavn = opphold.institusjonsnavn,
+                institusjonsType = opphold.institusjonstype,
                 startdato = opphold.startdato,
                 faktiskSluttdato = opphold.faktiskSluttdato,
                 forventetSluttdato = opphold.forventetSluttdato

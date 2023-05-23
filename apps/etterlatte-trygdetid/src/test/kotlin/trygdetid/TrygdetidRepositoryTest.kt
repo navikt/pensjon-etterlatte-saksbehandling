@@ -1,5 +1,6 @@
 package no.nav.etterlatte.trygdetid
 
+import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.mockk.every
@@ -126,6 +127,28 @@ internal class TrygdetidRepositoryTest {
         with(trygdetidMedTrygdetidGrunnlag.trygdetidGrunnlag.first()) {
             this shouldBe trygdetidGrunnlag
         }
+    }
+
+    @Test
+    fun `skal slette et trygdetidsgrunnlag`() {
+        val behandling = behandlingMock()
+        val trygdetidGrunnlag = trygdetidGrunnlag(beregnetTrygdetidGrunnlag = beregnetTrygdetidGrunnlag())
+        val opprettetTrygdetid = trygdetid(behandling.id, behandling.sak)
+
+        val lagretTrygdetid = repository.opprettTrygdetid(opprettetTrygdetid)
+        val trygdetidMedTrygdetidGrunnlag =
+            repository.oppdaterTrygdetid(lagretTrygdetid.leggTilEllerOppdaterTrygdetidGrunnlag(trygdetidGrunnlag))
+
+        trygdetidMedTrygdetidGrunnlag shouldNotBe null
+        with(trygdetidMedTrygdetidGrunnlag.trygdetidGrunnlag.first()) {
+            this shouldBe trygdetidGrunnlag
+        }
+
+        val trygdetidUtenGrunnlag = trygdetidMedTrygdetidGrunnlag.copy(trygdetidGrunnlag = emptyList())
+        val lagretTrygdetidUtenGrunnlag = repository.oppdaterTrygdetid(trygdetidUtenGrunnlag)
+
+        lagretTrygdetidUtenGrunnlag shouldNotBe null
+        lagretTrygdetidUtenGrunnlag.trygdetidGrunnlag.shouldBeEmpty()
     }
 
     @Test

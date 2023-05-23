@@ -51,12 +51,22 @@ class TrygdetidRepository(private val dataSource: DataSource) {
         session.transaction { tx ->
             val gjeldendeTrygdetid = hentTrygdtidNotNull(oppdatertTrygdetid.behandlingId)
 
-            oppdatertTrygdetid.trygdetidGrunnlag.forEach { oppdatertGrunnlag ->
+            // opprett grunnlag
+            oppdatertTrygdetid.trygdetidGrunnlag
+                .filter { gjeldendeTrygdetid.trygdetidGrunnlag.find { tg -> tg.id == it.id } == null }
+                .forEach { opprettTrygdetidGrunnlag(oppdatertTrygdetid.id, it, tx) }
+
+            // oppdater grunnlag
+            oppdatertTrygdetid.trygdetidGrunnlag.forEach { trygdetidGrunnlag ->
                 gjeldendeTrygdetid.trygdetidGrunnlag
-                    .find { it.id == oppdatertGrunnlag.id && it != oppdatertGrunnlag }
-                    ?.apply { oppdaterTrygdetidGrunnlag(oppdatertGrunnlag, tx) }
-                    ?: opprettTrygdetidGrunnlag(oppdatertTrygdetid.id, oppdatertGrunnlag, tx)
+                    .find { it.id == trygdetidGrunnlag.id && it != trygdetidGrunnlag }
+                    ?.let { oppdaterTrygdetidGrunnlag(trygdetidGrunnlag, tx) }
             }
+
+            // slett grunnlag
+            gjeldendeTrygdetid.trygdetidGrunnlag
+                .filter { oppdatertTrygdetid.trygdetidGrunnlag.find { tg -> tg.id == it.id } == null }
+                .forEach { slettTrygdetidGrunnlag(it.id, tx) }
 
             if (oppdatertTrygdetid.beregnetTrygdetid != null) {
                 oppdaterBeregnetTrygdetid(oppdatertTrygdetid.behandlingId, oppdatertTrygdetid.beregnetTrygdetid, tx)
@@ -157,6 +167,18 @@ class TrygdetidRepository(private val dataSource: DataSource) {
                 "beregnetVerdi" to trygdetidGrunnlag.beregnetTrygdetid?.verdi.toString(),
                 "beregnetTidspunkt" to trygdetidGrunnlag.beregnetTrygdetid?.tidspunkt?.toTimestamp(),
                 "beregnetRegelresultat" to trygdetidGrunnlag.beregnetTrygdetid?.regelResultat?.toJson()
+            )
+        ).let { query -> tx.update(query) }
+    }
+
+    private fun slettTrygdetidGrunnlag(
+        trygdetidGrunnlagId: UUID,
+        tx: TransactionalSession
+    ) {
+        queryOf(
+            statement = "DELETE FROM trygdetid_grunnlag WHERE id = :id",
+            paramMap = mapOf(
+                "id" to trygdetidGrunnlagId
             )
         ).let { query -> tx.update(query) }
     }

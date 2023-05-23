@@ -168,12 +168,14 @@ class RealGrunnlagService(
         fnr: Folkeregisteridentifikator,
         nyeOpplysninger: List<Grunnlagsopplysning<JsonNode>>
     ) {
-        logger.info("Oppretter et grunnlag")
+        logger.info("Oppretter et grunnlag for personopplysninger")
         val gjeldendeGrunnlag = opplysningDao.finnHendelserIGrunnlag(sak).map { it.opplysning.id }
 
         for (opplysning in nyeOpplysninger) {
             if (opplysning.id in gjeldendeGrunnlag) {
-                logger.warn("Forsøker å lagre opplysning ${opplysning.id} i sak $sak men den er allerede gjeldende")
+                logger.warn(
+                    "Forsøker å lagre personopplysning ${opplysning.id} i sak $sak men den er allerede gjeldende"
+                )
             } else {
                 opplysningDao.leggOpplysningTilGrunnlag(sak, opplysning, fnr)
             }
@@ -184,12 +186,12 @@ class RealGrunnlagService(
         sak: Long,
         nyeOpplysninger: List<Grunnlagsopplysning<JsonNode>>
     ) {
-        logger.info("Oppretter et grunnlag")
+        logger.info("Oppretter et grunnlag for saksopplysninger")
         val gjeldendeGrunnlag = opplysningDao.finnHendelserIGrunnlag(sak).map { it.opplysning.id }
 
         for (opplysning in nyeOpplysninger) {
             if (opplysning.id in gjeldendeGrunnlag) {
-                logger.warn("Forsøker å lagre opplysning ${opplysning.id} i sak $sak men den er allerede gjeldende")
+                logger.warn("Forsøker å lagre sakopplysning ${opplysning.id} i sak $sak men den er allerede gjeldende")
             } else {
                 opplysningDao.leggOpplysningTilGrunnlag(sak, opplysning, null)
             }

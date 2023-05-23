@@ -59,7 +59,7 @@ internal class FordeltSoeknadRiverTest {
         every { gyldigSoeknadServiceMock.hentPersongalleriFraSoeknad(any()) } returns persongalleri
         every { gyldigSoeknadServiceMock.vurderGyldighet(persongalleri, any()) } returns gyldighetsResultat
         every {
-            behandlingClientMock.hentSak(any(), any())
+            behandlingClientMock.finnEllerOpprettSak(any(), any())
         } returns Sak(persongalleri.soeker, SakType.BARNEPENSJON, sakId, "4808")
         every { behandlingClientMock.initierBehandling(any(), any(), persongalleri) } returns id
         every { behandlingClientMock.lagreGyldighetsVurdering(any(), any()) } returns Unit

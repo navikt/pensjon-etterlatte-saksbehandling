@@ -49,21 +49,11 @@ spec:
       value: api://dev-gcp.etterlatte.etterlatte-behandling/.default
     - name: BEHANDLING_URL
       value: http://etterlatte-behandling
-    - name: SKJERMING_URL
-      value: https://skjermede-personer-pip.intern.dev.nav.no
-    - name: AZURE_SCOPE_SKJERMEDE_PIP
-      value: api://dev-gcp.nom.skjermede-personer-pip/.default
     - name: FEATURE_MAX_FORDELING_TIL_GJENNY
       value: "-1"
-    - name: SKAL_BRUKE_SKJERMING
-      value: "true"
   accessPolicy:
     outbound:
       rules:
         - application: etterlatte-pdltjenester
         - application: etterlatte-gyldig-soeknad
         - application: etterlatte-behandling
-        - application: skjermede-personer-pip
-          namespace: nom
-      external:
-        - host: skjermede-personer-pip.intern.dev.nav.no

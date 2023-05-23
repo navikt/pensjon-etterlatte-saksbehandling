@@ -49,9 +49,7 @@ enum class FordelerKriterie(val forklaring: String) {
 
     SOEKNAD_ER_IKKE_PAA_BOKMAAL("Søknaden er ikke sendt inn på bokmål"),
 
-    FAMILIERELASJON_MANGLER_IDENT("En person tilknyttet søknaden mangler en ident i PDL"),
-
-    BARNET_ER_SKJERMET("Barnet er skjermet")
+    FAMILIERELASJON_MANGLER_IDENT("En person tilknyttet søknaden mangler en ident i PDL")
 }
 
 class FordelerKriterier {
@@ -60,10 +58,9 @@ class FordelerKriterier {
         barn: Person,
         avdoed: Person,
         gjenlevende: Person,
-        soeknad: Barnepensjon,
-        barnetErSKjermet: Boolean = false
+        soeknad: Barnepensjon
     ): FordelerKriterierResultat {
-        return fordelerKriterier(barn, avdoed, gjenlevende, barnetErSKjermet)
+        return fordelerKriterier(barn, avdoed, gjenlevende)
             .filter { it.blirOppfyltAv(soeknad) }
             .map { it.fordelerKriterie }
             .let { FordelerKriterierResultat(it.isEmpty(), it) }
@@ -75,8 +72,7 @@ class FordelerKriterier {
     private fun fordelerKriterier(
         barn: Person,
         avdoed: Person,
-        gjenlevende: Person,
-        barnetErSKjermet: Boolean
+        gjenlevende: Person
     ) = listOf(
         // Barn (søker)
         Kriterie(FordelerKriterie.BARN_ER_FOR_GAMMELT) { forGammel(barn) },
@@ -114,9 +110,6 @@ class FordelerKriterier {
 
         Kriterie(FordelerKriterie.SOEKNAD_ER_IKKE_PAA_BOKMAAL) {
             it.spraak != Spraak.NB
-        },
-        Kriterie(FordelerKriterie.BARNET_ER_SKJERMET) {
-            barnetErSKjermet
         }
     )
 

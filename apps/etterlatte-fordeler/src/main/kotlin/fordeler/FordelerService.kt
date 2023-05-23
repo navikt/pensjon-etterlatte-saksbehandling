@@ -20,7 +20,6 @@ import no.nav.etterlatte.libs.common.tidspunkt.utcKlokke
 import no.nav.etterlatte.pdltjenester.PdlTjenesterKlient
 import no.nav.etterlatte.pdltjenester.PersonFinnesIkkeException
 import no.nav.etterlatte.sikkerLogg
-import no.nav.etterlatte.skjerming.SkjermingKlient
 import org.slf4j.LoggerFactory
 import java.time.Clock
 import java.time.OffsetDateTime
@@ -44,8 +43,6 @@ class FordelerService(
     private val pdlTjenesterKlient: PdlTjenesterKlient,
     private val fordelerRepository: FordelerRepository,
     private val behandlingKlient: BehandlingKlient,
-    private val skjermingKlient: SkjermingKlient,
-    private val skalBrukeSkjermingsklient: Boolean,
     private val klokke: Clock = utcKlokke(),
     private val maxFordelingTilGjenny: Long
 ) {
@@ -102,13 +99,7 @@ class FordelerService(
         val avdoed = pdlTjenesterKlient.hentPerson(hentAvdoedRequest(soeknad))
         val gjenlevende = pdlTjenesterKlient.hentPerson(hentGjenlevendeRequest(soeknad))
 
-        val barnetErSkjermet = if (skalBrukeSkjermingsklient) {
-            skjermingKlient.personErSkjermet(barn.foedselsnummer.value)
-        } else {
-            false
-        }
-
-        fordelerKriterier.sjekkMotKriterier(barn, avdoed, gjenlevende, soeknad, barnetErSkjermet).let {
+        fordelerKriterier.sjekkMotKriterier(barn, avdoed, gjenlevende, soeknad).let {
             if (it.kandidat &&
                 fordelerRepository.antallFordeltTil(Vedtaksloesning.GJENNY.name) < maxFordelingTilGjenny
             ) {

@@ -1,8 +1,8 @@
 package no.nav.etterlatte.beregning.grunnlag
 
-import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.beregning.klienter.BehandlingKlient
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
+import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.token.Bruker
 import org.slf4j.LoggerFactory
@@ -21,6 +21,13 @@ class BeregningsGrunnlagService(
         bruker: Bruker
     ): Boolean = when {
         behandlingKlient.beregn(behandlingId, bruker, false) -> {
+            val behandling = behandlingKlient.hentBehandling(behandlingId, bruker)
+            if (behandling.behandlingType == BehandlingType.REVURDERING) {
+                // Her vil vi sjekke opp om det vi lagrer ned ikke er modifisert før virk på revurderingen
+                val forrigeIverksatte = behandlingKlient.hentSisteIverksatteBehandling(behandling.sak, bruker)
+                sjekkAtGrunnlagIkkeErEndretFoerVirk(behandling, forrigeIverksatte, barnepensjonBeregningsGrunnlag)
+            }
+
             beregningsGrunnlagRepository.lagre(
                 BeregningsGrunnlag(
                     behandlingId = behandlingId,
@@ -30,10 +37,26 @@ class BeregningsGrunnlagService(
                 )
             )
         }
+
         else -> false
     }
 
-    fun hentBarnepensjonBeregningsGrunnlag(
+    private fun sjekkAtGrunnlagIkkeErEndretFoerVirk(
+        revurdering: DetaljertBehandling,
+        forrigeIverksatte: DetaljertBehandling,
+        barnepensjonBeregningsGrunnlag: BarnepensjonBeregningsGrunnlag
+    ): Boolean {
+        val forrigeGrunnlag = beregningsGrunnlagRepository.finnGrunnlagForBehandling(forrigeIverksatte.id)
+
+        // TODO: for periodisert institusjonsopphold må dette sjekkes her i tillegg til søskenjusteringen
+        return erGrunnlagLiktFoerEnDato(
+            barnepensjonBeregningsGrunnlag.soeskenMedIBeregning,
+            forrigeGrunnlag!!.soeskenMedIBeregning,
+            revurdering.virkningstidspunkt!!.dato.atDay(1)
+        )
+    }
+
+    suspend fun hentBarnepensjonBeregningsGrunnlag(
         behandlingId: UUID,
         bruker: Bruker
     ): BeregningsGrunnlag? {
@@ -44,14 +67,10 @@ class BeregningsGrunnlagService(
         }
 
         // Det kan hende behandlingen er en revurdering, og da må vi finne forrige grunnlag for saken
-        val behandling = runBlocking {
-            behandlingKlient.hentBehandling(behandlingId, bruker)
-        }
+        val behandling = behandlingKlient.hentBehandling(behandlingId, bruker)
         return if (behandling.behandlingType == BehandlingType.REVURDERING) {
-            runBlocking {
-                val forrigeIverksatteBehandling = behandlingKlient.hentSisteIverksatteBehandling(behandling.sak, bruker)
-                beregningsGrunnlagRepository.finnGrunnlagForBehandling(forrigeIverksatteBehandling.id)
-            }
+            val forrigeIverksatteBehandling = behandlingKlient.hentSisteIverksatteBehandling(behandling.sak, bruker)
+            beregningsGrunnlagRepository.finnGrunnlagForBehandling(forrigeIverksatteBehandling.id)
         } else {
             null
         }

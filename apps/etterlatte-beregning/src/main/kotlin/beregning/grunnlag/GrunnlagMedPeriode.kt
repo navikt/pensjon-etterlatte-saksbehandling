@@ -117,7 +117,6 @@ object PeriodisertBeregningGrunnlag {
 }
 
 sealed class PeriodiseringAvGrunnlagFeil(message: String, cause: Throwable? = null) : Exception(message, cause) {
-
     class DatoUtenforPerioder(datoIPeriode: LocalDate) :
         PeriodiseringAvGrunnlagFeil("Datoen $datoIPeriode er ikke innenfor grunnlaget")
 
@@ -125,4 +124,34 @@ sealed class PeriodiseringAvGrunnlagFeil(message: String, cause: Throwable? = nu
     class PerioderOverlapper : PeriodiseringAvGrunnlagFeil("Periodene for periodisering overlapper")
     class PerioderErIkkeKomplett :
         PeriodiseringAvGrunnlagFeil("Periodene gitt er ikke komplette for den overordnede perioden")
+}
+
+fun <T> erGrunnlagLiktFoerEnDato(
+    grunnlag1: List<GrunnlagMedPeriode<T>>,
+    grunnlag2: List<GrunnlagMedPeriode<T>>,
+    cutoff: LocalDate
+): Boolean {
+    // hjelpemetode som kutter av tom på dagen før cutoff hvis den går over
+    fun GrunnlagMedPeriode<T>.medNormalisertTom(): GrunnlagMedPeriode<T> {
+        if (tom == null || tom >= cutoff) {
+            return this.copy(tom = cutoff.minusDays(1))
+        }
+        return this.copy()
+    }
+
+    // ta kun med de periodene som er før cutoff
+    val relevantePerioder1 = grunnlag1.filter { it.fom < cutoff }.sortedBy { it.fom }
+    val relevantePerioder2 = grunnlag2.filter { it.fom < cutoff }.sortedBy { it.fom }
+
+    // Hvis en av grunnlagene er tomme må begge være tomme for at grunnlagene skal være like
+    if (relevantePerioder1.isEmpty() || relevantePerioder2.isEmpty()) {
+        return relevantePerioder1.isEmpty() && relevantePerioder2.isEmpty()
+    }
+
+    // Fiks siste tom for begge grunnlagene
+    val g1 = relevantePerioder1.dropLast(1) + relevantePerioder1.last().medNormalisertTom()
+    val g2 = relevantePerioder2.dropLast(1) + relevantePerioder2.last().medNormalisertTom()
+
+    // nå skal de være like
+    return g1 == g2
 }

@@ -4,7 +4,6 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.confluent.kafka.schemaregistry.client.SchemaRegistryClientConfig
 import io.confluent.kafka.serializers.AbstractKafkaSchemaSerDeConfig
-import no.nav.etterlatte.institusjonsopphold.InstitusjonsoppholdHendelseBeriket
 import org.apache.kafka.clients.CommonClientConfigs
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.common.config.SslConfigs
@@ -59,10 +58,10 @@ class KafkaEnvironment : KafkaConsumerConfiguration {
         return properties
     }
 
-    class JsonDeserializer : org.apache.kafka.common.serialization.Deserializer<InstitusjonsoppholdHendelseBeriket> {
+    class JsonDeserializer : org.apache.kafka.common.serialization.Deserializer<KafkaOppholdHendelse> {
         private val mapper = jacksonObjectMapper()
 
-        override fun deserialize(topic: String?, data: ByteArray): InstitusjonsoppholdHendelseBeriket {
+        override fun deserialize(topic: String?, data: ByteArray): KafkaOppholdHendelse {
             return mapper.readValue(data)
         }
     }

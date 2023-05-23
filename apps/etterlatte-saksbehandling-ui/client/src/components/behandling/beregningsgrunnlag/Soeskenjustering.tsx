@@ -218,7 +218,7 @@ const SoeskenjusteringPeriode = (props: SoeskenjusteringPeriodeProps) => {
     name: `soeskenMedIBeregning.${index}.data`,
     control,
   })
-  const behandles = hentBehandlesFraStatus(behandling?.status) || true
+  const behandles = hentBehandlesFraStatus(behandling?.status)
 
   const grunnlag = watch(`soeskenMedIBeregning.${index}`)
   const mineFeil = [...feil.filter(([feilIndex]) => feilIndex === index).flatMap((a) => a[1])]

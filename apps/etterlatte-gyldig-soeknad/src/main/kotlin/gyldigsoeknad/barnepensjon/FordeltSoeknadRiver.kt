@@ -48,7 +48,7 @@ internal class FordeltSoeknadRiver(
             try {
                 val soeknad = packet.soeknad()
                 val personGalleri = gyldigSoeknadService.hentPersongalleriFraSoeknad(soeknad)
-                val sak = behandlingClient.hentSak(personGalleri.soeker, SakType.BARNEPENSJON.toString())
+                val sak = behandlingClient.finnEllerOpprettSak(personGalleri.soeker, SakType.BARNEPENSJON.toString())
                 val gyldighetsVurdering = gyldigSoeknadService.vurderGyldighet(personGalleri, sak.sakType)
                 logger.info("Gyldighetsvurdering utført: {}", gyldighetsVurdering)
 

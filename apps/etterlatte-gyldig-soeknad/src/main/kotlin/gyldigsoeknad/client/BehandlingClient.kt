@@ -42,6 +42,15 @@ class BehandlingClient(
         }
     }
 
+    fun finnEllerOpprettSak(fnr: String, saktype: String): Sak {
+        return runBlocking {
+            sakOgBehandlingApp.post("$url/personer/saker/$saktype") {
+                contentType(ContentType.Application.Json)
+                setBody(FoedselsnummerDTO(fnr))
+            }.body()
+        }
+    }
+
     fun lagreGyldighetsVurdering(behandlingsId: UUID, gyldighet: GyldighetsResultat) {
         return runBlocking {
             sakOgBehandlingApp.post("$url/behandlinger/$behandlingsId/gyldigfremsatt") {

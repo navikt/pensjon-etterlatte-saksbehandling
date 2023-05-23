@@ -5,11 +5,29 @@ import no.nav.etterlatte.beregning.regler.barnepensjon.sats.barnepensjonSatsRege
 import no.nav.etterlatte.beregning.regler.barnepensjon.trygdetidsfaktor.trygdetidsFaktor
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.regler.FaktumNode
+import no.nav.etterlatte.libs.regler.PeriodisertGrunnlag
 import no.nav.etterlatte.libs.regler.RegelMeta
 import no.nav.etterlatte.libs.regler.RegelReferanse
 import no.nav.etterlatte.libs.regler.benytter
 import no.nav.etterlatte.libs.regler.med
 import no.nav.etterlatte.libs.regler.og
+import java.time.LocalDate
+
+data class PeriodisertBarnepensjonGrunnlag(
+    val soeskenKull: PeriodisertGrunnlag<FaktumNode<List<Folkeregisteridentifikator>>>,
+    val avdoedForelder: PeriodisertGrunnlag<FaktumNode<AvdoedForelder>>
+) : PeriodisertGrunnlag<BarnepensjonGrunnlag> {
+    override fun finnAlleKnekkpunkter(): Set<LocalDate> {
+        return soeskenKull.finnAlleKnekkpunkter() + avdoedForelder.finnAlleKnekkpunkter()
+    }
+
+    override fun finnGrunnlagForPeriode(datoIPeriode: LocalDate): BarnepensjonGrunnlag {
+        return BarnepensjonGrunnlag(
+            soeskenKull.finnGrunnlagForPeriode(datoIPeriode),
+            avdoedForelder.finnGrunnlagForPeriode(datoIPeriode)
+        )
+    }
+}
 
 data class AvdoedForelder(val trygdetid: Beregningstall)
 data class BarnepensjonGrunnlag(

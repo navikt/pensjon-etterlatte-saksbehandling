@@ -1,3 +1,9 @@
+import {
+  PeriodisertBeregningsgrunnlag,
+  PeriodisertBeregningsgrunnlagDto,
+} from '~components/behandling/beregningsgrunnlag/PeriodisertBeregningsgrunnlag'
+import { KildeSaksbehandler } from '~shared/types/kilde'
+
 export interface Beregning {
   beregningId: string
   behandlingId: string
@@ -31,8 +37,15 @@ export interface Beregningsperiode {
 export interface BeregningsGrunnlag<K> {
   behandlingId: string
   kilde: K
-  soeskenMedIBeregning: SoeskenMedIBeregning[]
   institusjonsopphold: Institusjonsopphold
+  soeskenMedIBeregning: PeriodisertBeregningsgrunnlag<SoeskenMedIBeregning[]>[]
+}
+
+export interface BeregningsGrunnlagDto {
+  behandlingId: string
+  kilde: KildeSaksbehandler
+  institusjonsopphold: Institusjonsopphold
+  soeskenMedIBeregning: PeriodisertBeregningsgrunnlagDto<SoeskenMedIBeregning[]>[]
 }
 
 export interface SoeskenMedIBeregning {
@@ -41,7 +54,7 @@ export interface SoeskenMedIBeregning {
 }
 
 export interface BeregningsGrunnlagData {
-  soeskenMedIBeregning: SoeskenMedIBeregning[]
+  soeskenMedIBeregning: PeriodisertBeregningsgrunnlagDto<SoeskenMedIBeregning[]>[]
   institusjonsopphold: Institusjonsopphold
 }
 

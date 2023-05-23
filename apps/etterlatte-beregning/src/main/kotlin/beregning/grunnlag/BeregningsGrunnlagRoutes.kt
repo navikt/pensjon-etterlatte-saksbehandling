@@ -56,7 +56,8 @@ fun Route.beregningsGrunnlag(beregningsGrunnlagService: BeregningsGrunnlagServic
             withBehandlingId(behandlingKlient) { behandlingId ->
                 logger.info("Henter grunnlag for behandling $behandlingId")
                 val grunnlag = beregningsGrunnlagService.hentBarnepensjonBeregningsGrunnlag(
-                    behandlingId
+                    behandlingId,
+                    bruker
                 )
 
                 when (grunnlag) {

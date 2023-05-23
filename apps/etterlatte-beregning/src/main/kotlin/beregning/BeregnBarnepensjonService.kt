@@ -4,11 +4,13 @@ import beregning.regler.finnAnvendtGrunnbeloep
 import no.nav.etterlatte.beregning.grunnbeloep.GrunnbeloepRepository
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlag
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlagService
+import no.nav.etterlatte.beregning.grunnlag.PeriodisertBeregningGrunnlag
+import no.nav.etterlatte.beregning.grunnlag.mapVerdier
 import no.nav.etterlatte.beregning.klienter.GrunnlagKlient
 import no.nav.etterlatte.beregning.klienter.VilkaarsvurderingKlient
 import no.nav.etterlatte.beregning.regler.Beregningstall
 import no.nav.etterlatte.beregning.regler.barnepensjon.AvdoedForelder
-import no.nav.etterlatte.beregning.regler.barnepensjon.BarnepensjonGrunnlag
+import no.nav.etterlatte.beregning.regler.barnepensjon.PeriodisertBarnepensjonGrunnlag
 import no.nav.etterlatte.beregning.regler.barnepensjon.kroneavrundetBarnepensjonRegel
 import no.nav.etterlatte.beregning.regler.barnepensjon.sats.grunnbeloep
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -22,12 +24,14 @@ import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.libs.regler.FaktumNode
+import no.nav.etterlatte.libs.regler.KonstantGrunnlag
 import no.nav.etterlatte.libs.regler.RegelPeriode
 import no.nav.etterlatte.libs.regler.RegelkjoeringResultat
 import no.nav.etterlatte.libs.regler.eksekver
 import no.nav.etterlatte.libs.regler.finnAnvendteRegler
 import no.nav.etterlatte.token.Bruker
 import org.slf4j.LoggerFactory
+import java.time.LocalDate
 import java.time.YearMonth
 import java.util.*
 
@@ -45,24 +49,32 @@ class BeregnBarnepensjonService(
         val virkningstidspunkt = requireNotNull(behandling.virkningstidspunkt?.dato)
 
         val beregningsGrunnlag = requireNotNull(
-            beregningsGrunnlagService.hentBarnepensjonBeregningsGrunnlag(behandling.id)
+            beregningsGrunnlagService.hentBarnepensjonBeregningsGrunnlag(behandling.id, bruker)
         )
-        val barnepensjonGrunnlag = opprettBeregningsgrunnlag(beregningsGrunnlag)
+        val barnepensjonGrunnlag = opprettBeregningsgrunnlag(beregningsGrunnlag, virkningstidspunkt.atDay(1), null)
 
         logger.info("Beregner barnepensjon for behandlingId=${behandling.id} med behandlingType=$behandlingType")
 
         return when (behandlingType) {
-            BehandlingType.FØRSTEGANGSBEHANDLING ->
-                beregnBarnepensjon(behandling.id, grunnlag, barnepensjonGrunnlag, virkningstidspunkt)
+            BehandlingType.FØRSTEGANGSBEHANDLING -> beregnBarnepensjon(
+                behandling.id,
+                grunnlag,
+                barnepensjonGrunnlag,
+                virkningstidspunkt
+            )
 
             BehandlingType.REVURDERING -> {
-                val vilkaarsvurderingUtfall = vilkaarsvurderingKlient.hentVilkaarsvurdering(behandling.id, bruker)
-                    .resultat?.utfall
-                    ?: throw RuntimeException("Forventa å ha resultat for behandling ${behandling.id}")
+                val vilkaarsvurderingUtfall =
+                    vilkaarsvurderingKlient.hentVilkaarsvurdering(behandling.id, bruker).resultat?.utfall
+                        ?: throw RuntimeException("Forventa å ha resultat for behandling ${behandling.id}")
 
                 when (vilkaarsvurderingUtfall) {
-                    VilkaarsvurderingUtfall.OPPFYLT ->
-                        beregnBarnepensjon(behandling.id, grunnlag, barnepensjonGrunnlag, virkningstidspunkt)
+                    VilkaarsvurderingUtfall.OPPFYLT -> beregnBarnepensjon(
+                        behandling.id,
+                        grunnlag,
+                        barnepensjonGrunnlag,
+                        virkningstidspunkt
+                    )
 
                     VilkaarsvurderingUtfall.IKKE_OPPFYLT -> opphoer(behandling.id, grunnlag, virkningstidspunkt)
                 }
@@ -75,7 +87,7 @@ class BeregnBarnepensjonService(
     private fun beregnBarnepensjon(
         behandlingId: UUID,
         grunnlag: Grunnlag,
-        beregningsgrunnlag: BarnepensjonGrunnlag,
+        beregningsgrunnlag: PeriodisertBarnepensjonGrunnlag,
         virkningstidspunkt: YearMonth
     ): Beregning {
         val resultat = kroneavrundetBarnepensjonRegel.eksekver(
@@ -84,41 +96,46 @@ class BeregnBarnepensjonService(
         )
 
         return when (resultat) {
-            is RegelkjoeringResultat.Suksess ->
-                beregning(
-                    behandlingId = behandlingId,
-                    grunnlagMetadata = grunnlag.metadata,
-                    beregningsperioder = resultat.periodiserteResultater.map { periodisertResultat ->
-                        logger.info(
-                            "Beregnet barnepensjon for periode fra={} til={} og beløp={} med regler={}",
-                            periodisertResultat.periode.fraDato,
-                            periodisertResultat.periode.tilDato,
-                            periodisertResultat.resultat.verdi,
-                            periodisertResultat.resultat.finnAnvendteRegler()
-                                .map { "${it.regelReferanse.id} (${it.beskrivelse})" }.toSet()
-                        )
+            is RegelkjoeringResultat.Suksess -> beregning(
+                behandlingId = behandlingId,
+                grunnlagMetadata = grunnlag.metadata,
+                beregningsperioder = resultat.periodiserteResultater.map { periodisertResultat ->
+                    logger.info(
+                        "Beregnet barnepensjon for periode fra={} til={} og beløp={} med regler={}",
+                        periodisertResultat.periode.fraDato,
+                        periodisertResultat.periode.tilDato,
+                        periodisertResultat.resultat.verdi,
+                        periodisertResultat.resultat.finnAnvendteRegler()
+                            .map { "${it.regelReferanse.id} (${it.beskrivelse})" }.toSet()
+                    )
 
-                        val grunnbeloep =
-                            requireNotNull(periodisertResultat.resultat.finnAnvendtGrunnbeloep(grunnbeloep)) {
-                                "Anvendt grunnbeløp ikke funnet for perioden"
-                            }
-
-                        Beregningsperiode(
-                            datoFOM = YearMonth.from(periodisertResultat.periode.fraDato),
-                            datoTOM = periodisertResultat.periode.tilDato?.let { YearMonth.from(it) },
-                            utbetaltBeloep = periodisertResultat.resultat.verdi,
-                            soeskenFlokk = beregningsgrunnlag.soeskenKull.verdi.map { it.value },
-                            grunnbelopMnd = grunnbeloep.grunnbeloepPerMaaned,
-                            grunnbelop = grunnbeloep.grunnbeloep,
-                            trygdetid = beregningsgrunnlag.avdoedForelder.verdi.trygdetid.toInteger(),
-                            regelResultat = objectMapper.valueToTree(periodisertResultat),
-                            regelVersjon = periodisertResultat.reglerVersjon
-                        )
+                    val grunnbeloep = requireNotNull(periodisertResultat.resultat.finnAnvendtGrunnbeloep(grunnbeloep)) {
+                        "Anvendt grunnbeløp ikke funnet for perioden"
                     }
-                )
 
-            is RegelkjoeringResultat.UgyldigPeriode ->
-                throw RuntimeException("Ugyldig regler for periode: ${resultat.ugyldigeReglerForPeriode}")
+                    Beregningsperiode(
+                        datoFOM = YearMonth.from(periodisertResultat.periode.fraDato),
+                        datoTOM = periodisertResultat.periode.tilDato?.let { YearMonth.from(it) },
+                        utbetaltBeloep = periodisertResultat.resultat.verdi,
+                        soeskenFlokk = beregningsgrunnlag.soeskenKull.finnGrunnlagForPeriode(
+                            periodisertResultat.periode.fraDato
+                        ).verdi.map {
+                            it.value
+                        },
+                        grunnbelopMnd = grunnbeloep.grunnbeloepPerMaaned,
+                        grunnbelop = grunnbeloep.grunnbeloep,
+                        trygdetid = beregningsgrunnlag.avdoedForelder.finnGrunnlagForPeriode(
+                            periodisertResultat.periode.fraDato
+                        ).verdi.trygdetid.toInteger(),
+                        regelResultat = objectMapper.valueToTree(periodisertResultat),
+                        regelVersjon = periodisertResultat.reglerVersjon
+                    )
+                }
+            )
+
+            is RegelkjoeringResultat.UgyldigPeriode -> throw RuntimeException(
+                "Ugyldig regler for periode: ${resultat.ugyldigeReglerForPeriode}"
+            )
         }
     }
 
@@ -160,17 +177,27 @@ class BeregnBarnepensjonService(
     )
 
     private fun opprettBeregningsgrunnlag(
-        beregningsGrunnlag: BeregningsGrunnlag
-    ) = BarnepensjonGrunnlag(
-        soeskenKull = FaktumNode(
-            verdi = beregningsGrunnlag.soeskenMedIBeregning.filter { it.skalBrukes }.map { it.foedselsnummer },
-            kilde = beregningsGrunnlag.kilde,
-            beskrivelse = "Søsken i kullet"
+        beregningsGrunnlag: BeregningsGrunnlag,
+        fom: LocalDate,
+        tom: LocalDate?
+    ) = PeriodisertBarnepensjonGrunnlag(
+        soeskenKull = PeriodisertBeregningGrunnlag.lagKomplettPeriodisertGrunnlag(
+            beregningsGrunnlag.soeskenMedIBeregning.mapVerdier { soeskenMedIBeregning ->
+                FaktumNode(
+                    verdi = soeskenMedIBeregning.filter { it.skalBrukes }.map { it.foedselsnummer },
+                    kilde = beregningsGrunnlag.kilde,
+                    beskrivelse = "Søsken i kullet"
+                )
+            },
+            fom,
+            tom
         ),
-        avdoedForelder = FaktumNode(
-            verdi = AvdoedForelder(Beregningstall(FASTSATT_TRYGDETID_I_PILOT)),
-            kilde = Grunnlagsopplysning.RegelKilde("MVP hardkodet trygdetid", Tidspunkt.now(), "1"),
-            beskrivelse = "Trygdetid avdød forelder"
+        avdoedForelder = KonstantGrunnlag(
+            FaktumNode(
+                verdi = AvdoedForelder(Beregningstall(FASTSATT_TRYGDETID_I_PILOT)),
+                kilde = Grunnlagsopplysning.RegelKilde("MVP hardkodet trygdetid", Tidspunkt.now(), "1"),
+                beskrivelse = "Trygdetid avdød forelder"
+            )
         )
     )
 

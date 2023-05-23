@@ -3,6 +3,7 @@ package beregning.grunnlag
 import io.mockk.clearAllMocks
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlag
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlagRepository
+import no.nav.etterlatte.beregning.grunnlag.GrunnlagMedPeriode
 import no.nav.etterlatte.beregning.grunnlag.Institusjonsopphold
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeskenMedIBeregning
@@ -19,6 +20,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
+import java.time.LocalDate
 import java.util.*
 import javax.sql.DataSource
 
@@ -29,6 +31,8 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest {
 
     private lateinit var repository: BeregningsGrunnlagRepository
     private lateinit var dataSource: DataSource
+
+    private val foerstePeriodeFra = LocalDate.of(2022, 8, 1)
 
     @BeforeAll
     fun beforeAll() {
@@ -63,7 +67,7 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest {
     fun `Opprettelse fungere`() {
         val id = UUID.randomUUID()
 
-        val soeskenMedIBeregning = listOf(SoeskenMedIBeregning(STOR_SNERK, true))
+        val soeskenMedIBeregning = listOf(SoeskenMedIBeregning(STOR_SNERK, true)).somPeriodisertGrunnlag()
         val institusjonsopphold = Institusjonsopphold(false)
 
         repository.lagre(
@@ -90,11 +94,11 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest {
     fun `Oppdatering fungere`() {
         val id = UUID.randomUUID()
 
-        val initialSoeskenMedIBeregning = listOf(SoeskenMedIBeregning(STOR_SNERK, true))
+        val initialSoeskenMedIBeregning = listOf(SoeskenMedIBeregning(STOR_SNERK, true)).somPeriodisertGrunnlag()
         val oppdatertSoeskenMedIBeregning = listOf(
             SoeskenMedIBeregning(STOR_SNERK, true),
             SoeskenMedIBeregning(TRIVIELL_MIDTPUNKT, true)
-        )
+        ).somPeriodisertGrunnlag()
 
         val initialInstitusjonsopphold = Institusjonsopphold(false)
         val oppdatertInstitusjonsopphold = Institusjonsopphold(true)
@@ -135,5 +139,18 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest {
     private companion object {
         val STOR_SNERK = Folkeregisteridentifikator.of("11057523044")
         val TRIVIELL_MIDTPUNKT = Folkeregisteridentifikator.of("19040550081")
+    }
+
+    private fun List<SoeskenMedIBeregning>.somPeriodisertGrunnlag(
+        periodeFra: LocalDate = foerstePeriodeFra,
+        periodeTil: LocalDate? = null
+    ): List<GrunnlagMedPeriode<List<SoeskenMedIBeregning>>> {
+        return listOf(
+            GrunnlagMedPeriode(
+                fom = periodeFra,
+                tom = periodeTil,
+                data = this
+            )
+        )
     }
 }

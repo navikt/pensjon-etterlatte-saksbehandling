@@ -10,6 +10,7 @@ import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.regler.FaktumNode
+import no.nav.etterlatte.libs.regler.KonstantGrunnlag
 import no.nav.etterlatte.libs.regler.RegelPeriode
 import no.nav.etterlatte.libs.regler.RegelkjoeringResultat
 import no.nav.etterlatte.libs.regler.eksekver
@@ -26,7 +27,7 @@ object InntektAvkortingService {
             inntekt = FaktumNode(verdi = avkortingGrunnlag.aarsinntekt, avkortingGrunnlag.kilde, "Forventet årsinntekt")
         )
         val resultat = kroneavrundetInntektAvkorting.eksekver(
-            grunnlag,
+            KonstantGrunnlag(grunnlag),
             RegelPeriode(avkortingGrunnlag.periode.fom.atDay(1))
         )
         return when (resultat) {
@@ -61,7 +62,7 @@ object InntektAvkortingService {
     ): List<AvkortetYtelse> {
         val regelgrunnlag = periodisertBruttoYtelseOgAvkorting(beregninger, avkortingGrunnlag)
         return regelgrunnlag.map { grunnlag ->
-            val resultat = avkorteYtelse.eksekver(grunnlag, grunnlag.periode)
+            val resultat = avkorteYtelse.eksekver(KonstantGrunnlag(grunnlag), grunnlag.periode)
             when (resultat) {
                 is RegelkjoeringResultat.Suksess -> {
                     val tidspunkt = Tidspunkt.now()

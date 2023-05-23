@@ -19,6 +19,8 @@ import java.util.*
 
 interface BehandlingKlient : BehandlingTilgangsSjekk {
     suspend fun hentBehandling(behandlingId: UUID, bruker: Bruker): DetaljertBehandling
+
+    suspend fun hentSisteIverksatteBehandling(sakId: Long, bruker: Bruker): DetaljertBehandling
     suspend fun beregn(behandlingId: UUID, bruker: Bruker, commit: Boolean): Boolean
     suspend fun avkort(behandlingId: UUID, bruker: Bruker, commit: Boolean): Boolean
 }
@@ -56,6 +58,33 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
                 is RetryResult.Failure -> {
                     throw BehandlingKlientException(
                         "Klarte ikke hente behandling med behandlingId=$behandlingId",
+                        it.samlaExceptions()
+                    )
+                }
+            }
+        }
+    }
+
+    override suspend fun hentSisteIverksatteBehandling(sakId: Long, bruker: Bruker): DetaljertBehandling {
+        return retry<DetaljertBehandling> {
+            downstreamResourceClient
+                .get(
+                    resource = Resource(
+                        clientId = clientId,
+                        url = "$resourceUrl/saker/$sakId/behandlinger/sisteIverksatte"
+                    ),
+                    bruker = bruker
+                )
+                .mapBoth(
+                    success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
+                    failure = { throwableErrorMessage -> throw throwableErrorMessage }
+                )
+        }.let {
+            when (it) {
+                is RetryResult.Success -> it.content
+                is RetryResult.Failure -> {
+                    throw BehandlingKlientException(
+                        "Klarte ikke hente siste iverksatte behandling på sak med id=$sakId",
                         it.samlaExceptions()
                     )
                 }

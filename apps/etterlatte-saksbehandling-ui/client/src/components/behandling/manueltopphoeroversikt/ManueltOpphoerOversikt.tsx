@@ -57,8 +57,10 @@ export const ManueltOpphoerOversikt = (props: { behandling: IBehandlingReducer }
       const institusjonsopphold = { institusjonsopphold: false } as Institusjonsopphold
       await lagreBeregningsGrunnlag({
         behandlingsId: behandling.id,
-        soeskenMedIBeregning: [],
-        institusjonsopphold: institusjonsopphold,
+        grunnlag: {
+          soeskenMedIBeregning: [],
+          institusjonsopphold: institusjonsopphold,
+        },
       })
       await opprettEllerEndreBeregning(behandling.id)
       behandlingRoutes.next()

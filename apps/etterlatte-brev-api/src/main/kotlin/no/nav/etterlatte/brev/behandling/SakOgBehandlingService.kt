@@ -10,7 +10,7 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.token.Bruker
-import no.nav.pensjon.brev.api.model.Kroner
+import no.nav.pensjon.brevbaker.api.model.Kroner
 import java.time.YearMonth
 import java.util.*
 

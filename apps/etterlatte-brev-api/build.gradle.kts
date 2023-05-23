@@ -9,7 +9,7 @@ dependencies {
     implementation(project(":libs:ktor2client-onbehalfof"))
     implementation(project(":libs:ktor2client-auth-clientcredentials"))
 
-    implementation("no.nav.pensjon.brev:pensjon-brevbaker-api-model:3.5.30")
+    implementation("no.nav.pensjon.brevbaker:brevbaker-api-model-common:1.0.2")
 
     implementation(libs.database.hikaricp)
     implementation(libs.database.flywaydb)

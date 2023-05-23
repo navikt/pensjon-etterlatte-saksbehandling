@@ -5,11 +5,12 @@ import no.nav.etterlatte.brev.model.Attestant
 import no.nav.etterlatte.brev.model.Avsender
 import no.nav.etterlatte.brev.model.BrevDataMapper
 import no.nav.etterlatte.brev.model.Mottaker
-import no.nav.pensjon.brev.api.model.Bruker
-import no.nav.pensjon.brev.api.model.Felles
-import no.nav.pensjon.brev.api.model.Foedselsnummer
-import no.nav.pensjon.brev.api.model.NAVEnhet
-import no.nav.pensjon.brev.api.model.SignerendeSaksbehandlere
+import no.nav.etterlatte.brev.model.Spraak
+import no.nav.pensjon.brevbaker.api.model.Bruker
+import no.nav.pensjon.brevbaker.api.model.Felles
+import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
+import no.nav.pensjon.brevbaker.api.model.NAVEnhet
+import no.nav.pensjon.brevbaker.api.model.SignerendeSaksbehandlere
 import java.time.LocalDate
 
 data class BrevbakerRequest(
@@ -40,8 +41,7 @@ data class BrevbakerRequest(
                         fornavn = behandling.persongalleri.soeker.fornavn,
                         mellomnavn = behandling.persongalleri.soeker.mellomnavn,
                         etternavn = behandling.persongalleri.soeker.etternavn,
-                        foedselsnummer = Foedselsnummer(mottaker.foedselsnummer!!.value),
-                        foedselsdato = LocalDate.now() // Blir ikke brukt, men kan ikke være null
+                        foedselsnummer = Foedselsnummer(mottaker.foedselsnummer!!.value)
                     ),
                     signerendeSaksbehandlere = SignerendeSaksbehandlere(
                         saksbehandler = avsender.saksbehandler,
@@ -49,7 +49,7 @@ data class BrevbakerRequest(
                     ),
                     vergeNavn = null
                 ),
-                language = LanguageCode.createLanguageCode(behandling.spraak.verdi)
+                language = LanguageCode.spraakToLanguageCode(behandling.spraak)
             )
         }
     }
@@ -59,16 +59,13 @@ enum class LanguageCode {
     BOKMAL, NYNORSK, ENGLISH;
 
     companion object {
-        fun createLanguageCode(spraak: String): LanguageCode {
-            return when (spraak.uppercase()) {
-                ("EN") -> ENGLISH
-                ("NB") -> BOKMAL
-                ("NN") -> NYNORSK
-                else -> standardLanguage()
+        fun spraakToLanguageCode(spraak: Spraak): LanguageCode {
+            return when (spraak) {
+                Spraak.EN -> ENGLISH
+                Spraak.NB -> BOKMAL
+                Spraak.NN -> NYNORSK
             }
         }
-
-        fun standardLanguage() = BOKMAL
     }
 }
 

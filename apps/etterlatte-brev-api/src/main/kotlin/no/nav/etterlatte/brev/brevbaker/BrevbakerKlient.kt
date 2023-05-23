@@ -11,7 +11,7 @@ import io.ktor.http.contentType
 import no.nav.etterlatte.libs.common.logging.getXCorrelationId
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
-import no.nav.pensjon.brev.api.model.LetterMetadata
+import no.nav.pensjon.brevbaker.api.model.LetterMetadata
 import org.slf4j.LoggerFactory
 import kotlin.time.DurationUnit
 import kotlin.time.ExperimentalTime

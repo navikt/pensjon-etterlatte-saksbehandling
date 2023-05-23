@@ -13,8 +13,8 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Navn
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
-import no.nav.pensjon.brev.api.model.Foedselsnummer
-import no.nav.pensjon.brev.api.model.Kroner
+import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
+import no.nav.pensjon.brevbaker.api.model.Kroner
 import java.time.LocalDate
 import java.util.*
 
@@ -75,10 +75,12 @@ data class Persongalleri(
 )
 
 fun Grunnlag.mapSoeker(): Soeker = with(this.soeker) {
+    val navn = hentNavn()!!.verdi
+
     Soeker(
-        fornavn = hentNavn()!!.verdi.fornavn,
-        mellomnavn = hentNavn()!!.verdi.mellomnavn,
-        etternavn = hentNavn()!!.verdi.etternavn,
+        fornavn = navn.fornavn,
+        mellomnavn = navn.mellomnavn,
+        etternavn = navn.etternavn,
         fnr = Foedselsnummer(hentFoedselsnummer()!!.verdi.value)
     )
 }

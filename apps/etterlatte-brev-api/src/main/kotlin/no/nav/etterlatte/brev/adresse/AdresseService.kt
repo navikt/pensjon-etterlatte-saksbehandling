@@ -8,7 +8,7 @@ import no.nav.etterlatte.brev.model.Avsender
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.navansatt.NavansattKlient
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
-import no.nav.pensjon.brev.api.model.Telefonnummer
+import no.nav.pensjon.brevbaker.api.model.Telefonnummer
 
 class AdresseService(
     private val norg2Klient: Norg2Klient,

@@ -1,6 +1,6 @@
 package no.nav.etterlatte.brev.model
 
-import no.nav.pensjon.brev.api.model.Telefonnummer
+import no.nav.pensjon.brevbaker.api.model.Telefonnummer
 
 abstract class BrevData {
     abstract val avsender: Avsender

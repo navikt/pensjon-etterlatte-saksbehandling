@@ -9,6 +9,7 @@ export type Props = {
   onYesClick: () => void
   setModalisOpen: React.Dispatch<React.SetStateAction<boolean>>
   open: boolean
+  loading?: boolean
 }
 
 export const GeneriskModal: React.FC<Props> = ({
@@ -19,6 +20,7 @@ export const GeneriskModal: React.FC<Props> = ({
   onYesClick,
   setModalisOpen,
   open,
+  loading,
 }) => {
   return (
     <Modal
@@ -35,7 +37,14 @@ export const GeneriskModal: React.FC<Props> = ({
         </Heading>
         {beskrivelse && <BodyShort spacing>{beskrivelse}</BodyShort>}
         <ButtonWrapper>
-          <Button variant="primary" size="medium" className="button" onClick={onYesClick}>
+          <Button
+            variant="primary"
+            size="medium"
+            className="button"
+            onClick={onYesClick}
+            disabled={!!loading}
+            loading={!!loading}
+          >
             {tekstKnappJa}
           </Button>
           <Button
@@ -45,6 +54,7 @@ export const GeneriskModal: React.FC<Props> = ({
             onClick={() => {
               setModalisOpen(false)
             }}
+            disabled={!!loading}
           >
             {tekstKnappNei}
           </Button>

@@ -58,6 +58,6 @@ data class KafkaOppholdHendelse(
     val hendelseId: Long,
     var oppholdId: Long,
     var norskident: String,
-    var institusjonsoppholdsType: InstitusjonsoppholdsType,
-    var institusjonsoppholdKilde: InstitusjonsoppholdKilde
+    var type: InstitusjonsoppholdsType,
+    var kilde: InstitusjonsoppholdKilde
 )

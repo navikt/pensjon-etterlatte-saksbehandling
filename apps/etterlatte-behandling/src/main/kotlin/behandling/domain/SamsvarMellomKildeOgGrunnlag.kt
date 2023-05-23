@@ -2,6 +2,7 @@ package no.nav.etterlatte.behandling.domain
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.fasterxml.jackson.annotation.JsonTypeName
+import no.nav.etterlatte.institusjonsopphold.InstitusjonsoppholdHendelseBeriket
 import no.nav.etterlatte.institusjonsopphold.InstitusjonsoppholdsType
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.Utland
@@ -55,6 +56,7 @@ sealed class SamsvarMellomKildeOgGrunnlag {
     @JsonTypeName("INSTITUSJONSOPPHOLD")
     data class INSTITUSJONSOPPHOLD(
         override val samsvar: Boolean,
-        val oppholdstype: InstitusjonsoppholdsType
+        val oppholdstype: InstitusjonsoppholdsType,
+        val oppholdBeriket: InstitusjonsoppholdHendelseBeriket
     ) : SamsvarMellomKildeOgGrunnlag()
 }

@@ -57,6 +57,6 @@ sealed class SamsvarMellomKildeOgGrunnlag {
     data class INSTITUSJONSOPPHOLD(
         override val samsvar: Boolean,
         val oppholdstype: InstitusjonsoppholdsType,
-        val oppholdBeriket: InstitusjonsoppholdHendelseBeriket
+        val oppholdBeriket: InstitusjonsoppholdHendelseBeriket?
     ) : SamsvarMellomKildeOgGrunnlag()
 }

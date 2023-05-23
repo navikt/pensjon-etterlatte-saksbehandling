@@ -16,8 +16,8 @@ import io.ktor.server.testing.testApplication
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.etterlatte.beregning.klienter.BehandlingKlient
 import no.nav.etterlatte.beregning.regler.FNR_1
+import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.SakType

@@ -11,7 +11,7 @@ import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlagRepository
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlagService
 import no.nav.etterlatte.beregning.grunnlag.GrunnlagMedPeriode
 import no.nav.etterlatte.beregning.grunnlag.Institusjonsopphold
-import no.nav.etterlatte.beregning.klienter.BehandlingKlientImpl
+import no.nav.etterlatte.klienter.BehandlingKlientImpl
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.SakType

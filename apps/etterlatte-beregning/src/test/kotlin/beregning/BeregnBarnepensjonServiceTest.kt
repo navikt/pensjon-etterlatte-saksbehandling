@@ -10,12 +10,12 @@ import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlag
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlagService
 import no.nav.etterlatte.beregning.grunnlag.GrunnlagMedPeriode
 import no.nav.etterlatte.beregning.grunnlag.Institusjonsopphold
-import no.nav.etterlatte.beregning.klienter.GrunnlagKlientImpl
-import no.nav.etterlatte.beregning.klienter.VilkaarsvurderingKlient
 import no.nav.etterlatte.beregning.regler.FNR_1
 import no.nav.etterlatte.beregning.regler.FNR_2
 import no.nav.etterlatte.beregning.regler.MAKS_TRYGDETID
 import no.nav.etterlatte.beregning.regler.bruker
+import no.nav.etterlatte.klienter.GrunnlagKlientImpl
+import no.nav.etterlatte.klienter.VilkaarsvurderingKlient
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.beregning.Beregningstype

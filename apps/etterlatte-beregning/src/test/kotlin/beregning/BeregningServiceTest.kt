@@ -6,8 +6,8 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.beregning.klienter.BehandlingKlientImpl
 import no.nav.etterlatte.beregning.regler.bruker
+import no.nav.etterlatte.klienter.BehandlingKlientImpl
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.SakType

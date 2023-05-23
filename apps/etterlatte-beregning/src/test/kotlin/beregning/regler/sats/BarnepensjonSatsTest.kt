@@ -3,8 +3,6 @@ package beregning.regler.sats
 import io.kotest.matchers.collections.shouldBeIn
 import io.kotest.matchers.ints.shouldBeExactly
 import io.kotest.matchers.shouldBe
-import no.nav.etterlatte.beregning.regler.Beregningstall
-import no.nav.etterlatte.beregning.regler.Beregningstall.Companion.DESIMALER_DELBEREGNING
 import no.nav.etterlatte.beregning.regler.FNR_1
 import no.nav.etterlatte.beregning.regler.FNR_2
 import no.nav.etterlatte.beregning.regler.FNR_3
@@ -21,6 +19,8 @@ import no.nav.etterlatte.beregning.regler.barnepensjon.sats.soeskenIKullet
 import no.nav.etterlatte.beregning.regler.barnepensjonGrunnlag
 import no.nav.etterlatte.beregning.regler.toBeregningstall
 import no.nav.etterlatte.libs.regler.RegelPeriode
+import no.nav.etterlatte.regler.Beregningstall
+import no.nav.etterlatte.regler.Beregningstall.Companion.DESIMALER_DELBEREGNING
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.YearMonth

@@ -1,6 +1,5 @@
 package no.nav.etterlatte.beregning.regler.barnepensjon
 
-import no.nav.etterlatte.beregning.regler.Beregningstall
 import no.nav.etterlatte.beregning.regler.barnepensjon.sats.barnepensjonSatsRegel
 import no.nav.etterlatte.beregning.regler.barnepensjon.trygdetidsfaktor.trygdetidsFaktor
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
@@ -11,6 +10,7 @@ import no.nav.etterlatte.libs.regler.RegelReferanse
 import no.nav.etterlatte.libs.regler.benytter
 import no.nav.etterlatte.libs.regler.med
 import no.nav.etterlatte.libs.regler.og
+import no.nav.etterlatte.regler.Beregningstall
 import java.time.LocalDate
 
 data class PeriodisertBarnepensjonGrunnlag(

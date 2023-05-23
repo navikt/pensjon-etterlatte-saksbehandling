@@ -1,6 +1,5 @@
 package no.nav.etterlatte.beregning.regler.omstillingstoenad
 
-import no.nav.etterlatte.beregning.regler.Beregningstall
 import no.nav.etterlatte.beregning.regler.omstillingstoenad.sats.omstillingsstoenadSatsRegel
 import no.nav.etterlatte.beregning.regler.omstillingstoenad.trygdetidsfaktor.trygdetidsFaktor
 import no.nav.etterlatte.libs.regler.FaktumNode
@@ -9,6 +8,7 @@ import no.nav.etterlatte.libs.regler.RegelReferanse
 import no.nav.etterlatte.libs.regler.benytter
 import no.nav.etterlatte.libs.regler.med
 import no.nav.etterlatte.libs.regler.og
+import no.nav.etterlatte.regler.Beregningstall
 
 data class Avdoed(val trygdetid: Beregningstall)
 data class OmstillingstoenadGrunnlag(

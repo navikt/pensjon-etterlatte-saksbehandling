@@ -1,7 +1,7 @@
 package no.nav.etterlatte.avkorting.regulering
 
-import no.nav.etterlatte.beregning.Avkorting
-import no.nav.etterlatte.beregning.AvkortingService
+import no.nav.etterlatte.avkorting.Avkorting
+import no.nav.etterlatte.avkorting.AvkortingService
 import no.nav.etterlatte.token.Bruker
 import java.util.*
 

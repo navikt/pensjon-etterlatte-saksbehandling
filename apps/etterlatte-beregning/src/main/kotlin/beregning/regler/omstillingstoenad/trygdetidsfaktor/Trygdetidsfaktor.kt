@@ -1,6 +1,5 @@
 package no.nav.etterlatte.beregning.regler.omstillingstoenad.trygdetidsfaktor
 
-import no.nav.etterlatte.beregning.regler.Beregningstall
 import no.nav.etterlatte.beregning.regler.omstillingstoenad.Avdoed
 import no.nav.etterlatte.beregning.regler.omstillingstoenad.OMS_GYLDIG_FROM_TEST
 import no.nav.etterlatte.beregning.regler.omstillingstoenad.OmstillingstoenadGrunnlag
@@ -12,6 +11,7 @@ import no.nav.etterlatte.libs.regler.definerKonstant
 import no.nav.etterlatte.libs.regler.finnFaktumIGrunnlag
 import no.nav.etterlatte.libs.regler.med
 import no.nav.etterlatte.libs.regler.og
+import no.nav.etterlatte.regler.Beregningstall
 
 val trygdetidRegel: Regel<OmstillingstoenadGrunnlag, Beregningstall> =
     finnFaktumIGrunnlag(

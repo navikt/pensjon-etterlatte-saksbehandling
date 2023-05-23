@@ -1,10 +1,9 @@
 package no.nav.etterlatte.beregning.regler.barnepensjon.sats
 
-import no.nav.etterlatte.beregning.grunnbeloep.Grunnbeloep
-import no.nav.etterlatte.beregning.grunnbeloep.GrunnbeloepRepository
-import no.nav.etterlatte.beregning.regler.Beregningstall
 import no.nav.etterlatte.beregning.regler.barnepensjon.BP_1967_DATO
 import no.nav.etterlatte.beregning.regler.barnepensjon.BarnepensjonGrunnlag
+import no.nav.etterlatte.grunnbeloep.Grunnbeloep
+import no.nav.etterlatte.grunnbeloep.GrunnbeloepRepository
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.regler.Regel
 import no.nav.etterlatte.libs.regler.RegelMeta
@@ -15,6 +14,7 @@ import no.nav.etterlatte.libs.regler.finnFaktumIGrunnlag
 import no.nav.etterlatte.libs.regler.med
 import no.nav.etterlatte.libs.regler.og
 import no.nav.etterlatte.libs.regler.velgNyesteGyldige
+import no.nav.etterlatte.regler.Beregningstall
 
 val historiskeGrunnbeloep = GrunnbeloepRepository.historiskeGrunnbeloep.map { grunnbeloep ->
     val grunnbeloepGyldigFra = grunnbeloep.dato.atDay(1)

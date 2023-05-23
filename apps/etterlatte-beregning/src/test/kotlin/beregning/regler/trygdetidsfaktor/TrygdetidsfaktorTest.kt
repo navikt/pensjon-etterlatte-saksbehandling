@@ -1,13 +1,13 @@
 package beregning.regler.trygdetidsfaktor
 
 import io.kotest.matchers.shouldBe
-import no.nav.etterlatte.beregning.regler.Beregningstall
 import no.nav.etterlatte.beregning.regler.REGEL_PERIODE
 import no.nav.etterlatte.beregning.regler.barnepensjon.trygdetidsfaktor.maksTrygdetid
 import no.nav.etterlatte.beregning.regler.barnepensjon.trygdetidsfaktor.trygdetidRegel
 import no.nav.etterlatte.beregning.regler.barnepensjon.trygdetidsfaktor.trygdetidsFaktor
 import no.nav.etterlatte.beregning.regler.barnepensjonGrunnlag
 import no.nav.etterlatte.beregning.regler.toBeregningstall
+import no.nav.etterlatte.regler.Beregningstall
 import org.junit.jupiter.api.Test
 
 internal class TrygdetidsfaktorTest {

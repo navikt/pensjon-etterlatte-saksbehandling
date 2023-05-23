@@ -12,6 +12,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.toTimestamp
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.database.tidspunkt
+import no.nav.etterlatte.libs.database.transaction
 import java.time.Period
 import java.util.*
 import javax.sql.DataSource
@@ -40,15 +41,14 @@ class TrygdetidRepository(private val dataSource: DataSource) {
             }
         }
 
-    fun opprettTrygdetid(trygdetid: Trygdetid): Trygdetid = using(sessionOf(dataSource)) { session ->
-        session.transaction { tx ->
+    fun opprettTrygdetid(trygdetid: Trygdetid): Trygdetid =
+        dataSource.transaction { tx ->
             opprettTrygdetid(trygdetid, tx)
             opprettOpplysningsgrunnlag(trygdetid.id, trygdetid.opplysninger, tx)
-        }
-    }.let { hentTrygdtidNotNull(trygdetid.behandlingId) }
+        }.let { hentTrygdtidNotNull(trygdetid.behandlingId) }
 
-    fun oppdaterTrygdetid(oppdatertTrygdetid: Trygdetid): Trygdetid = using(sessionOf(dataSource)) { session ->
-        session.transaction { tx ->
+    fun oppdaterTrygdetid(oppdatertTrygdetid: Trygdetid): Trygdetid =
+        dataSource.transaction { tx ->
             val gjeldendeTrygdetid = hentTrygdtidNotNull(oppdatertTrygdetid.behandlingId)
 
             // opprett grunnlag
@@ -71,8 +71,7 @@ class TrygdetidRepository(private val dataSource: DataSource) {
             if (oppdatertTrygdetid.beregnetTrygdetid != null) {
                 oppdaterBeregnetTrygdetid(oppdatertTrygdetid.behandlingId, oppdatertTrygdetid.beregnetTrygdetid, tx)
             }
-        }
-    }.let { hentTrygdtidNotNull(oppdatertTrygdetid.behandlingId) }
+        }.let { hentTrygdtidNotNull(oppdatertTrygdetid.behandlingId) }
 
     private fun opprettTrygdetid(trygdetid: Trygdetid, tx: TransactionalSession) =
         queryOf(

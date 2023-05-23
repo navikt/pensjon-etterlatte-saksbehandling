@@ -67,8 +67,6 @@ spec:
       value: https://skjermede-personer-pip.intern.nav.no
     - name: AZURE_SCOPE_SKJERMEDE_PIP
       value: api://prod-gcp.nom.skjermede-personer-pip/.default
-    - name: SKAL_BRUKE_SKJERMING
-      value: "true"
   accessPolicy:
     outbound:
       rules:

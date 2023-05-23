@@ -55,8 +55,6 @@ spec:
       value: api://dev-gcp.nom.skjermede-personer-pip/.default
     - name: FEATURE_MAX_FORDELING_TIL_GJENNY
       value: "-1"
-    - name: SKAL_BRUKE_SKJERMING
-      value: "true"
   accessPolicy:
     outbound:
       rules:

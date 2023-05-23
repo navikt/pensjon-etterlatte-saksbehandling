@@ -26,8 +26,6 @@ class AppBuilder(private val env: Miljoevariabler) {
         url = env.requireEnvValue("SKJERMING_URL")
     )
 
-    internal fun skalBrukeSkjermingsklient() = env.requireEnvValue("SKAL_BRUKE_SKJERMING").toBoolean()
-
     private val skjermingHttpKlient: HttpClient by lazy {
         httpClientClientCredentials(
             azureAppClientId = env.requireEnvValue("AZURE_APP_CLIENT_ID"),

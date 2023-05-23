@@ -25,7 +25,6 @@ fun main() {
                 skjermingKlient = ab.skjermingKlient().also {
                     it.asyncPing()
                 },
-                skalBrukeSkjermingsklient = ab.skalBrukeSkjermingsklient(),
                 maxFordelingTilGjenny = ab.longFeature("FEATURE_MAX_FORDELING_TIL_GJENNY")
             )
         )

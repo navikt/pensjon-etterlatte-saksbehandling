@@ -80,6 +80,27 @@ class TrygdetidService(
             }
         }
 
+    suspend fun kopierSisteTrygdetidberegning(
+        behandlingId: UUID,
+        forrigeBehandlingId: UUID,
+        bruker: Bruker
+    ): Trygdetid {
+        val forrigeTrygdetid = hentTrygdetid(forrigeBehandlingId)
+        val forrigeTrygdetidGrunnlag =
+            forrigeTrygdetid?.trygdetidGrunnlag ?: throw Exception("Mangler trygdetid for $forrigeBehandlingId")
+        val beregnetTrygdetid =
+            forrigeTrygdetid.beregnetTrygdetid ?: throw Exception("Mangler beregnet trygdetid for $forrigeBehandlingId")
+        val regulering = behandlingKlient.hentBehandling(behandlingId, bruker)
+
+        return trygdetidRepository.transaction { tx ->
+            trygdetidRepository.opprettTrygdetid(regulering, forrigeTrygdetid.opplysninger, tx)
+            forrigeTrygdetidGrunnlag.forEach { grunnlag ->
+                trygdetidRepository.opprettTrygdetidGrunnlag(behandlingId, grunnlag, tx)
+            }
+            trygdetidRepository.oppdaterBeregnetTrygdetid(behandlingId, beregnetTrygdetid, tx)
+        }
+    }
+
     private suspend fun tilstandssjekk(behandlingId: UUID, bruker: Bruker, block: suspend () -> Trygdetid): Trygdetid {
         val kanFastsetteTrygdetid = behandlingKlient.kanBeregnes(behandlingId, bruker)
         return if (kanFastsetteTrygdetid) {

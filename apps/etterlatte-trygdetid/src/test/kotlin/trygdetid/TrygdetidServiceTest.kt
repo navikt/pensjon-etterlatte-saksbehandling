@@ -18,6 +18,7 @@ import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsdato
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import no.nav.etterlatte.trygdetid.BeregnetTrygdetid
+import no.nav.etterlatte.trygdetid.Opplysningsgrunnlag
 import no.nav.etterlatte.trygdetid.Trygdetid
 import no.nav.etterlatte.trygdetid.TrygdetidBeregningService
 import no.nav.etterlatte.trygdetid.TrygdetidGrunnlag
@@ -286,5 +287,47 @@ internal class TrygdetidServiceTest {
         }
 
         coVerify { behandlingKlient.kanBeregnes(behandlingId, saksbehandler) }
+    }
+
+    @Test
+    fun `skal opprette ny trygdetid av kopi fra forrige behandling`() {
+        val behandlingId = randomUUID()
+        val forrigeBehandlingId = randomUUID()
+        val forrigeTrygdetidGrunnlag = listOf(mockk<TrygdetidGrunnlag>(), mockk())
+        val forrigeTrygdetidOpplysninger = mockk<List<Opplysningsgrunnlag>>()
+        val forrigeBeregnedeTrygdetid = mockk<BeregnetTrygdetid>()
+        val forrigeTrygdetid = mockk<Trygdetid>() {
+            every { trygdetidGrunnlag } returns forrigeTrygdetidGrunnlag
+            every { opplysninger } returns forrigeTrygdetidOpplysninger
+            every { beregnetTrygdetid } returns forrigeBeregnedeTrygdetid
+        }
+        val regulering = mockk<DetaljertBehandling>()
+
+        val transactionSlot = slot<(TransactionalSession) -> Trygdetid>()
+        val tx: TransactionalSession = mockk()
+        every { repository.transaction(capture(transactionSlot)) } answers { transactionSlot.captured.invoke(tx) }
+
+        every { repository.hentTrygdetid(forrigeBehandlingId) } returns forrigeTrygdetid
+        coEvery { behandlingKlient.hentBehandling(behandlingId, saksbehandler) } returns regulering
+        every { repository.opprettTrygdetid(regulering, forrigeTrygdetidOpplysninger, tx) } returns mockk()
+        every { repository.opprettTrygdetidGrunnlag(any(), any(), any()) } returns mockk()
+        every { repository.oppdaterBeregnetTrygdetid(behandlingId, forrigeBeregnedeTrygdetid, tx) } returns mockk()
+
+        runBlocking {
+            service.kopierSisteTrygdetidberegning(behandlingId, forrigeBehandlingId, saksbehandler)
+        }
+
+        coVerify(exactly = 1) {
+            repository.hentTrygdetid(forrigeBehandlingId)
+            forrigeTrygdetid.trygdetidGrunnlag
+            forrigeTrygdetid.opplysninger
+            forrigeTrygdetid.beregnetTrygdetid
+            behandlingKlient.hentBehandling(behandlingId, saksbehandler)
+            repository.opprettTrygdetid(regulering, forrigeTrygdetidOpplysninger, tx)
+            repository.opprettTrygdetidGrunnlag(behandlingId, forrigeTrygdetidGrunnlag[0], tx)
+            repository.opprettTrygdetidGrunnlag(behandlingId, forrigeTrygdetidGrunnlag[1], tx)
+            repository.oppdaterBeregnetTrygdetid(behandlingId, forrigeBeregnedeTrygdetid, tx)
+            repository.transaction(any<(TransactionalSession) -> Trygdetid>())
+        }
     }
 }

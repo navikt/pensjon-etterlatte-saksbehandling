@@ -23,7 +23,7 @@ data class BeregnetTrygdetid(
 )
 
 data class Opplysningsgrunnlag(
-    val id: UUID,
+    val id: UUID?,
     val type: TrygdetidOpplysningType,
     val opplysning: JsonNode,
     val kilde: Grunnlagsopplysning.Kilde
@@ -35,7 +35,7 @@ data class Opplysningsgrunnlag(
             verdi: LocalDate?
         ): Opplysningsgrunnlag =
             Opplysningsgrunnlag(
-                id = UUID.randomUUID(),
+                id = null,
                 type = type,
                 opplysning = verdi?.toJsonNode() ?: throw Exception("Mangler opplysning"),
                 kilde = kilde ?: throw Exception("Mangler kilde")

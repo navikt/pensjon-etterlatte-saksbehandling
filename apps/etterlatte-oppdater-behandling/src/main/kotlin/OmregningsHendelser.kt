@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory
 import rapidsandrivers.BEHANDLING_ID_KEY
 import rapidsandrivers.BEHANDLING_VI_OMREGNER_FRA_KEY
 import rapidsandrivers.HENDELSE_DATA_KEY
+import rapidsandrivers.SAK_TYPE
 import rapidsandrivers.behandlingId
 import rapidsandrivers.withFeilhaandtering
 
@@ -41,9 +42,10 @@ internal class OmregningsHendelser(rapidsConnection: RapidsConnection, private v
                 logger.info("Mottatt omregningshendelse")
 
                 val hendelse: Omregningshendelse = objectMapper.treeToValue(packet[HENDELSE_DATA_KEY])
-                val (behandlingId, behandlingViOmregnerFra) = behandlinger.opprettOmregning(hendelse)
+                val (behandlingId, behandlingViOmregnerFra, sakType) = behandlinger.opprettOmregning(hendelse)
                 packet.behandlingId = behandlingId
                 packet[BEHANDLING_VI_OMREGNER_FRA_KEY] = behandlingViOmregnerFra
+                packet[SAK_TYPE] = sakType
                 packet.eventName = VILKAARSVURDER
                 context.publish(packet.toJson())
                 logger.info("Publiserte oppdatert omregningshendelse")

@@ -22,7 +22,8 @@ import java.util.UUID
 internal class OmregningsHendelserTest {
 
     private val behandlingService = mockk<BeregningService>()
-    private val inspector = TestRapid().apply { OmregningHendelser(this, behandlingService) }
+    private val trygdetidService = mockk<TrygdetidService>()
+    private val inspector = TestRapid().apply { OmregningHendelser(this, behandlingService, trygdetidService) }
 
     @Test
     fun `skal opprette omregning`() {

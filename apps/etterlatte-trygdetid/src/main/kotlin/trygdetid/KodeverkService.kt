@@ -8,7 +8,7 @@ import java.util.concurrent.TimeUnit
 
 class KodeverkService(private val klient: KodeverkKlient) {
     private val cache = Caffeine.newBuilder()
-        .expireAfterWrite(1, TimeUnit.HOURS)
+        .expireAfterWrite(1, TimeUnit.DAYS)
         .build<CacheKey, KodeverkResponse>()
 
     suspend fun hentAlleLand(): List<Land> {

@@ -1,6 +1,8 @@
 package no.nav.etterlatte.beregning.grunnlag
 
+import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.beregning.klienter.BehandlingKlient
+import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.token.Bruker
 import org.slf4j.LoggerFactory
@@ -28,15 +30,31 @@ class BeregningsGrunnlagService(
                 )
             )
         }
-
         else -> false
     }
 
     fun hentBarnepensjonBeregningsGrunnlag(
-        behandlingId: UUID
+        behandlingId: UUID,
+        bruker: Bruker
     ): BeregningsGrunnlag? {
         logger.info("Henter grunnlag $behandlingId")
-        return beregningsGrunnlagRepository.finnGrunnlagForBehandling(behandlingId)
+        val grunnlag = beregningsGrunnlagRepository.finnGrunnlagForBehandling(behandlingId)
+        if (grunnlag != null) {
+            return grunnlag
+        }
+
+        // Det kan hende behandlingen er en revurdering, og da må vi finne forrige grunnlag for saken
+        val behandling = runBlocking {
+            behandlingKlient.hentBehandling(behandlingId, bruker)
+        }
+        return if (behandling.behandlingType == BehandlingType.REVURDERING) {
+            runBlocking {
+                val forrigeIverksatteBehandling = behandlingKlient.hentSisteIverksatteBehandling(behandling.sak, bruker)
+                beregningsGrunnlagRepository.finnGrunnlagForBehandling(forrigeIverksatteBehandling.id)
+            }
+        } else {
+            null
+        }
     }
 
     fun dupliserBeregningsGrunnlag(behandlingId: UUID, forrigeBehandlingId: UUID) {

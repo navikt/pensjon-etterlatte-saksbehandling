@@ -56,6 +56,7 @@ internal class BeregnBarnepensjonServiceTest {
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
         coEvery {
             beregningsGrunnlagService.hentBarnepensjonBeregningsGrunnlag(
+                any(),
                 any()
             )
         } returns barnepensjonBeregningsGrunnlag(behandling.id, emptyList())
@@ -92,6 +93,7 @@ internal class BeregnBarnepensjonServiceTest {
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
         coEvery {
             beregningsGrunnlagService.hentBarnepensjonBeregningsGrunnlag(
+                any(),
                 any()
             )
         } returns barnepensjonBeregningsGrunnlag(behandling.id, listOf(FNR_1))
@@ -126,6 +128,7 @@ internal class BeregnBarnepensjonServiceTest {
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
         coEvery {
             beregningsGrunnlagService.hentBarnepensjonBeregningsGrunnlag(
+                any(),
                 any()
             )
         } returns barnepensjonBeregningsGrunnlag(behandling.id, listOf(FNR_1, FNR_2))
@@ -160,6 +163,7 @@ internal class BeregnBarnepensjonServiceTest {
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
         coEvery {
             beregningsGrunnlagService.hentBarnepensjonBeregningsGrunnlag(
+                any(),
                 any()
             )
         } returns barnepensjonBeregningsGrunnlag(behandling.id, emptyList())
@@ -197,6 +201,7 @@ internal class BeregnBarnepensjonServiceTest {
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
         coEvery {
             beregningsGrunnlagService.hentBarnepensjonBeregningsGrunnlag(
+                any(),
                 any()
             )
         } returns barnepensjonBeregningsGrunnlag(behandling.id, emptyList())
@@ -234,6 +239,7 @@ internal class BeregnBarnepensjonServiceTest {
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
         coEvery {
             beregningsGrunnlagService.hentBarnepensjonBeregningsGrunnlag(
+                any(),
                 any()
             )
         } returns barnepensjonBeregningsGrunnlag(behandling.id, emptyList())

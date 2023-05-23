@@ -66,7 +66,7 @@ class BeregningsGrunnlagRepository(private val dataSource: DataSource) {
         """.trimMargin()
 
         val finnGrunnlagForBehandling = """
-            SELECT behandlings_id, soesken_med_i_beregning, institusjonsopphold, kilde
+            SELECT behandlings_id, soesken_med_i_beregning_perioder, institusjonsopphold, kilde
             FROM bp_beregningsgrunnlag
             WHERE behandlings_id = :behandlings_id
         """.trimIndent()

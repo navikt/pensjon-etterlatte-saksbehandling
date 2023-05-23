@@ -16,9 +16,16 @@ import io.ktor.server.application.log
 import io.ktor.server.config.HoconApplicationConfig
 import io.ktor.server.testing.testApplication
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.etterlatte.beregning.klienter.BehandlingKlient
+import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
+import no.nav.etterlatte.libs.common.behandling.BehandlingType
+import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
+import no.nav.etterlatte.libs.common.behandling.Prosesstype
+import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -30,6 +37,9 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import testsupport.buildTestApplicationConfigurationForOauth
+import java.time.LocalDateTime
+import java.time.Month
+import java.time.YearMonth
 import java.util.*
 import java.util.UUID.randomUUID
 
@@ -58,6 +68,27 @@ internal class BeregningsGrunnlagRoutesTest {
     @Test
     fun `skal returnere 204 naar beregnings ikke finnes`() {
         coEvery { behandlingKlient.harTilgangTilBehandling(any(), any()) } returns true
+        coEvery { behandlingKlient.hentBehandling(any(), any()) } returns DetaljertBehandling(
+            id = randomUUID(),
+            sak = 123,
+            sakType = SakType.BARNEPENSJON,
+            behandlingOpprettet = LocalDateTime.now(),
+            sistEndret = LocalDateTime.now(),
+            soeknadMottattDato = null,
+            innsender = null,
+            soeker = "diam",
+            gjenlevende = listOf(),
+            avdoed = listOf(),
+            soesken = listOf(),
+            gyldighetsproeving = null,
+            status = BehandlingStatus.VILKAARSVURDERT,
+            behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+            virkningstidspunkt = null,
+            kommerBarnetTilgode = null,
+            revurderingsaarsak = null,
+            prosesstype = Prosesstype.MANUELL
+
+        )
 
         every { repository.finnGrunnlagForBehandling(any()) } returns null
 
@@ -71,6 +102,100 @@ internal class BeregningsGrunnlagRoutesTest {
             }
 
             response.status shouldBe HttpStatusCode.NoContent
+        }
+    }
+
+    @Test
+    fun `skal hente beregningsgrunnlag for sist iverksatte hvis ikke noe finnes og det er revurdering`() {
+        val idRevurdering = randomUUID()
+        val idForrigeIverksatt = randomUUID()
+        val sakId = 123L
+        val virkOriginal = Virkningstidspunkt(
+            dato = YearMonth.of(2022, Month.AUGUST),
+            kilde = Grunnlagsopplysning.Saksbehandler(
+                ident = "",
+                tidspunkt = Tidspunkt.now()
+            ),
+            begrunnelse = ""
+        )
+        val virkRevurdering = Virkningstidspunkt(
+            dato = YearMonth.of(2023, Month.JANUARY),
+            kilde = Grunnlagsopplysning.Saksbehandler(
+                ident = "",
+                tidspunkt = Tidspunkt.now()
+            ),
+            begrunnelse = ""
+
+        )
+        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any()) } returns true
+        coEvery { behandlingKlient.hentBehandling(idRevurdering, any()) } returns DetaljertBehandling(
+            id = randomUUID(),
+            sak = sakId,
+            sakType = SakType.BARNEPENSJON,
+            behandlingOpprettet = LocalDateTime.now(),
+            sistEndret = LocalDateTime.now(),
+            soeknadMottattDato = null,
+            innsender = null,
+            soeker = "",
+            gjenlevende = listOf(),
+            avdoed = listOf(),
+            soesken = listOf(),
+            gyldighetsproeving = null,
+            status = BehandlingStatus.VILKAARSVURDERT,
+            behandlingType = BehandlingType.REVURDERING,
+            virkningstidspunkt = virkRevurdering,
+            kommerBarnetTilgode = null,
+            revurderingsaarsak = null,
+            prosesstype = Prosesstype.MANUELL
+        )
+        coEvery { behandlingKlient.hentSisteIverksatteBehandling(sakId, any()) } returns DetaljertBehandling(
+            id = idForrigeIverksatt,
+            sak = sakId,
+            sakType = SakType.BARNEPENSJON,
+            behandlingOpprettet = LocalDateTime.now().minusMonths(2),
+            sistEndret = LocalDateTime.now().minusMonths(1),
+            soeknadMottattDato = null,
+            innsender = null,
+            soeker = "",
+            gjenlevende = listOf(),
+            avdoed = listOf(),
+            soesken = listOf(),
+            gyldighetsproeving = null,
+            status = BehandlingStatus.IVERKSATT,
+            behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+            virkningstidspunkt = virkOriginal,
+            kommerBarnetTilgode = null,
+            revurderingsaarsak = null,
+            prosesstype = Prosesstype.MANUELL
+        )
+
+        every { repository.finnGrunnlagForBehandling(idRevurdering) } returns null
+        every { repository.finnGrunnlagForBehandling(idForrigeIverksatt) } returns BeregningsGrunnlag(
+            behandlingId = idForrigeIverksatt,
+            kilde = Grunnlagsopplysning.Saksbehandler(
+                ident = "",
+                tidspunkt = Tidspunkt.now()
+            ),
+            soeskenMedIBeregning = listOf(),
+            institusjonsopphold = Institusjonsopphold(institusjonsopphold = false)
+        )
+
+        testApplication {
+            environment { config = applicationConfig }
+            application { restModule(log) { beregningsGrunnlag(service, behandlingKlient) } }
+
+            val response = client.get("/api/beregning/beregningsgrunnlag/$idRevurdering/barnepensjon") {
+                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                header(HttpHeaders.Authorization, "Bearer $token")
+            }
+
+            response.status shouldBe HttpStatusCode.OK
+        }
+
+        coVerify(exactly = 1) {
+            repository.finnGrunnlagForBehandling(idRevurdering)
+            repository.finnGrunnlagForBehandling(idForrigeIverksatt)
+            behandlingKlient.hentSisteIverksatteBehandling(sakId, any())
         }
     }
 

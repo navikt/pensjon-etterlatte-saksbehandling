@@ -49,7 +49,7 @@ class BeregnBarnepensjonService(
         val virkningstidspunkt = requireNotNull(behandling.virkningstidspunkt?.dato)
 
         val beregningsGrunnlag = requireNotNull(
-            beregningsGrunnlagService.hentBarnepensjonBeregningsGrunnlag(behandling.id)
+            beregningsGrunnlagService.hentBarnepensjonBeregningsGrunnlag(behandling.id, bruker)
         )
         val barnepensjonGrunnlag = opprettBeregningsgrunnlag(beregningsGrunnlag, virkningstidspunkt.atDay(1), null)
 

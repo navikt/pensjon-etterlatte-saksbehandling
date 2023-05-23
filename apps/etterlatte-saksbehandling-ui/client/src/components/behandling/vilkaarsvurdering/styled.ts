@@ -28,8 +28,9 @@ export const VilkaarWrapper = styled.div`
 
 export const Title = styled.div`
   display: flex;
-  font-size: 1em;
+  font-size: 1.1em;
   font-weight: bold;
+  margin-bottom: 5px;
 `
 export const VilkaarBeskrivelse = styled.div`
   margin-top: 15px;

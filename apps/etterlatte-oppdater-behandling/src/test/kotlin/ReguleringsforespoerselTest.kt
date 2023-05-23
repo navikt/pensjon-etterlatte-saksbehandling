@@ -54,9 +54,9 @@ internal class ReguleringsforespoerselTest {
         val vedtakServiceMock = mockk<BehandlingService>(relaxed = true)
         every { vedtakServiceMock.hentAlleSaker() } returns Saker(
             listOf(
-                Sak("saksbehandler1", SakType.BARNEPENSJON, 1L),
-                Sak("saksbehandler2", SakType.BARNEPENSJON, 2L),
-                Sak("saksbehandler1", SakType.BARNEPENSJON, 3L)
+                Sak("saksbehandler1", SakType.BARNEPENSJON, 1L, "4808"),
+                Sak("saksbehandler2", SakType.BARNEPENSJON, 2L, "4808"),
+                Sak("saksbehandler1", SakType.BARNEPENSJON, 3L, "4808")
             )
         )
         val inspector = TestRapid().apply { Reguleringsforespoersel(this, vedtakServiceMock) }
@@ -77,9 +77,9 @@ internal class ReguleringsforespoerselTest {
         val behandlingServiceMock = mockk<BehandlingService>(relaxed = true)
         every { behandlingServiceMock.hentAlleSaker() } returns Saker(
             listOf(
-                Sak("saksbehandler1", SakType.BARNEPENSJON, 1000L),
-                Sak("saksbehandler2", SakType.BARNEPENSJON, 1002L),
-                Sak("saksbehandler1", SakType.BARNEPENSJON, 1003L)
+                Sak("saksbehandler1", SakType.BARNEPENSJON, 1000L, "4808"),
+                Sak("saksbehandler2", SakType.BARNEPENSJON, 1002L, "4808"),
+                Sak("saksbehandler1", SakType.BARNEPENSJON, 1003L, "4808")
             )
         )
         val inspector = TestRapid().apply { Reguleringsforespoersel(this, behandlingServiceMock) }
@@ -101,7 +101,7 @@ internal class ReguleringsforespoerselTest {
         val sakId = 1000L
         every { behandlingServiceMock.hentAlleSaker() } returns Saker(
             listOf(
-                Sak("saksbehandler1", SakType.BARNEPENSJON, sakId)
+                Sak("saksbehandler1", SakType.BARNEPENSJON, sakId, "4808")
             )
         )
         val behandlingId1 = UUID.randomUUID()

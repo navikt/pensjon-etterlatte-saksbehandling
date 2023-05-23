@@ -2,6 +2,7 @@ package no.nav.etterlatte.behandling
 
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.domain.TilstandException
+import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.JaNei
@@ -28,7 +29,8 @@ internal class BehandlingTest {
         sak = Sak(
             ident = "",
             sakType = SakType.BARNEPENSJON,
-            id = 1
+            id = 1,
+            enhet = Enheter.defaultEnhet.enhetNr
         ),
         behandlingOpprettet = Tidspunkt.now().toLocalDatetimeUTC(),
         sistEndret = Tidspunkt.now().toLocalDatetimeUTC(),
@@ -42,6 +44,7 @@ internal class BehandlingTest {
         ),
         kommerBarnetTilgode = null,
         virkningstidspunkt = null,
+        utenlandstilsnitt = null,
         soeknadMottattDato = Tidspunkt.now().toLocalDatetimeUTC(),
         gyldighetsproeving = null,
         kilde = Vedtaksloesning.GJENNY

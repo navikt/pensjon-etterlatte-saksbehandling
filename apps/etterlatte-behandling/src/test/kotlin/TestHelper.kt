@@ -10,6 +10,7 @@ import no.nav.etterlatte.behandling.domain.OpprettBehandling
 import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.behandling.domain.SamsvarMellomKildeOgGrunnlag
 import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerAarsak
+import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.grunnlagsendring.samsvarDoedsdatoer
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
@@ -21,6 +22,7 @@ import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
+import no.nav.etterlatte.libs.common.behandling.Utenlandstilsnitt
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
@@ -87,9 +89,10 @@ fun foerstegangsbehandling(
     persongalleri: Persongalleri = persongalleri(),
     gyldighetsproeving: GyldighetsResultat? = null,
     virkningstidspunkt: Virkningstidspunkt? = null,
+    utenlandstilsnitt: Utenlandstilsnitt? = null,
     kommerBarnetTilgode: KommerBarnetTilgode? = null,
     kilde: Vedtaksloesning = Vedtaksloesning.GJENNY,
-    enhet: String? = null
+    enhet: String = Enheter.defaultEnhet.enhetNr
 ) = Foerstegangsbehandling(
     id = id,
     sak = Sak(
@@ -105,6 +108,7 @@ fun foerstegangsbehandling(
     persongalleri = persongalleri,
     gyldighetsproeving = gyldighetsproeving,
     virkningstidspunkt = virkningstidspunkt,
+    utenlandstilsnitt = utenlandstilsnitt,
     kommerBarnetTilgode = kommerBarnetTilgode,
     kilde = kilde
 )
@@ -119,9 +123,10 @@ fun revurdering(
     revurderingAarsak: RevurderingAarsak,
     kommerBarnetTilgode: KommerBarnetTilgode = kommerBarnetTilgode(),
     virkningstidspunkt: Virkningstidspunkt? = null,
+    utenlandstilsnitt: Utenlandstilsnitt? = null,
     prosesstype: Prosesstype = Prosesstype.MANUELL,
     kilde: Vedtaksloesning = Vedtaksloesning.GJENNY,
-    enhet: String? = null
+    enhet: String = Enheter.defaultEnhet.enhetNr
 ) = Revurdering.opprett(
     id = id,
     sak = Sak(
@@ -137,6 +142,7 @@ fun revurdering(
     revurderingsaarsak = revurderingAarsak,
     kommerBarnetTilgode = kommerBarnetTilgode,
     virkningstidspunkt = virkningstidspunkt,
+    utenlandstilsnitt = utenlandstilsnitt,
     prosesstype = prosesstype,
     kilde = kilde
 )
@@ -151,7 +157,8 @@ fun manueltOpphoer(
     ),
     fritekstAarsak: String? = "Umulig å revurdere i nytt saksbehandlingssystem",
     virkningstidspunkt: Virkningstidspunkt? = null,
-    enhet: String? = null
+    utenlandstilsnitt: Utenlandstilsnitt? = null,
+    enhet: String = Enheter.defaultEnhet.enhetNr
 ) = ManueltOpphoer(
     id = behandlingId,
     sak = Sak(
@@ -166,7 +173,8 @@ fun manueltOpphoer(
     persongalleri = persongalleri,
     opphoerAarsaker = opphoerAarsaker,
     fritekstAarsak = fritekstAarsak,
-    virkningstidspunkt = virkningstidspunkt
+    virkningstidspunkt = virkningstidspunkt,
+    utenlandstilsnitt = utenlandstilsnitt
 )
 
 fun persongalleri(

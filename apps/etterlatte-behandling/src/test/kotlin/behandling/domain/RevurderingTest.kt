@@ -3,6 +3,7 @@ package behandling.domain
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.behandling.domain.TilstandException
+import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.kommerBarnetTilGodeVurdering
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
@@ -30,7 +31,8 @@ internal class RevurderingTest {
             sak = Sak(
                 ident = "",
                 sakType = SakType.BARNEPENSJON,
-                id = 1
+                id = 1,
+                enhet = Enheter.defaultEnhet.enhetNr
             ),
             behandlingOpprettet = Tidspunkt.now().toLocalDatetimeUTC(),
             sistEndret = Tidspunkt.now().toLocalDatetimeUTC(),
@@ -38,6 +40,7 @@ internal class RevurderingTest {
             persongalleri = Persongalleri(""),
             kommerBarnetTilgode = kommerBarnetTilGodeVurdering(),
             virkningstidspunkt = virkningstidspunktVurdering(),
+            utenlandstilsnitt = null,
             revurderingsaarsak = RevurderingAarsak.REGULERING,
             prosesstype = Prosesstype.MANUELL,
             kilde = Vedtaksloesning.GJENNY
@@ -140,13 +143,19 @@ internal class RevurderingTest {
 
 private fun opprettetRevurdering(prosesstype: Prosesstype) = Revurdering.opprett(
     id = UUID.randomUUID(),
-    sak = Sak(ident = "", sakType = SakType.BARNEPENSJON, id = 1),
+    sak = Sak(
+        ident = "",
+        sakType = SakType.BARNEPENSJON,
+        id = 1,
+        enhet = Enheter.defaultEnhet.enhetNr
+    ),
     behandlingOpprettet = Tidspunkt.now().toLocalDatetimeUTC(),
     sistEndret = Tidspunkt.now().toLocalDatetimeUTC(),
     status = BehandlingStatus.OPPRETTET,
     persongalleri = Persongalleri(""),
     kommerBarnetTilgode = kommerBarnetTilGodeVurdering(),
     virkningstidspunkt = virkningstidspunktVurdering(),
+    utenlandstilsnitt = null,
     revurderingsaarsak = RevurderingAarsak.REGULERING,
     prosesstype = prosesstype,
     kilde = Vedtaksloesning.GJENNY

@@ -21,6 +21,7 @@ import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.behandling.Utenlandstilsnitt
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
@@ -58,6 +59,11 @@ interface GenerellBehandlingService {
         ident: String,
         begrunnelse: String
     ): Virkningstidspunkt
+
+    fun oppdaterUtenlandstilsnitt(
+        behandlingId: UUID,
+        utenlandstilsnitt: Utenlandstilsnitt
+    ): Unit
 
     fun hentHendelserIBehandling(behandlingId: UUID): List<LagretHendelse>
     fun hentDetaljertBehandling(behandlingId: UUID): DetaljertBehandling?
@@ -233,6 +239,7 @@ class RealGenerellBehandlingService(
                 attestant = vedtak.await()?.attestasjon?.attestant,
                 soeknadMottattDato = detaljertBehandling.soeknadMottattDato,
                 virkningstidspunkt = detaljertBehandling.virkningstidspunkt,
+                utenlandstilsnitt = detaljertBehandling.utenlandstilsnitt,
                 status = detaljertBehandling.status,
                 hendelser = hendelserIBehandling,
                 familieforhold = Familieforhold(avdoed.await(), gjenlevende.await()),
@@ -309,6 +316,32 @@ class RealGenerellBehandlingService(
         return virkningstidspunkt
     }
 
+    override fun oppdaterUtenlandstilsnitt(
+        behandlingId: UUID,
+        utenlandstilsnitt: Utenlandstilsnitt
+    ) {
+        val behandling = hentBehandling(behandlingId) ?: run {
+            logger.error("Prøvde å oppdatere utenlandstilsnitt på en behandling som ikke eksisterer: $behandlingId")
+            throw RuntimeException("Fant ikke behandling")
+        }
+
+        try {
+            behandling.oppdaterUtenlandstilsnitt(utenlandstilsnitt)
+                .also {
+                    inTransaction {
+                        behandlingDao.lagreUtenlandstilsnitt(behandlingId, utenlandstilsnitt)
+                        behandlingDao.lagreStatus(it)
+                    }
+                }
+        } catch (e: NotImplementedError) {
+            logger.error(
+                "Kan ikke oppdatere utenlandstilsnitt for behandling: $behandlingId med typen ${behandling.type}",
+                e
+            )
+            throw e
+        }
+    }
+
     override fun hentHendelserIBehandling(behandlingId: UUID): List<LagretHendelse> {
         return inTransaction {
             hendelseDao.finnHendelserIBehandling(behandlingId)
@@ -330,7 +363,5 @@ fun <T : Behandling> List<T>.filterBehandlingerForEnheter(
     BehandlingServiceFeatureToggle.FiltrerMedEnhetId,
     user
 ) { item, enheter ->
-    item.sak.enhet?.let { enhet ->
-        enheter.contains(enhet)
-    } ?: true
+    enheter.contains(item.sak.enhet)
 }

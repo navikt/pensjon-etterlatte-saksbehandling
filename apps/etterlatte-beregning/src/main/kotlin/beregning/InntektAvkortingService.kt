@@ -3,7 +3,7 @@ package no.nav.etterlatte.beregning
 import no.nav.etterlatte.beregning.regler.avkorting.AvkortetYtelseGrunnlag
 import no.nav.etterlatte.beregning.regler.avkorting.InntektAvkortingGrunnlag
 import no.nav.etterlatte.beregning.regler.avkorting.avkorteYtelse
-import no.nav.etterlatte.beregning.regler.avkorting.inntektAvkorting
+import no.nav.etterlatte.beregning.regler.avkorting.kroneavrundetInntektAvkorting
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.periode.Periode
@@ -26,7 +26,7 @@ object InntektAvkortingService {
         val grunnlag = InntektAvkortingGrunnlag(
             inntekt = FaktumNode(verdi = avkortingGrunnlag.aarsinntekt, avkortingGrunnlag.kilde, "Forventet årsinntekt")
         )
-        val resultat = inntektAvkorting.eksekver(
+        val resultat = kroneavrundetInntektAvkorting.eksekver(
             KonstantGrunnlag(grunnlag),
             RegelPeriode(avkortingGrunnlag.periode.fom.atDay(1))
         )
@@ -43,7 +43,7 @@ object InntektAvkortingService {
                         tidspunkt = tidspunkt,
                         regelResultat = periodisertResultat.toJsonNode(),
                         kilde = Grunnlagsopplysning.RegelKilde(
-                            navn = inntektAvkorting.regelReferanse.id,
+                            navn = kroneavrundetInntektAvkorting.regelReferanse.id,
                             ts = tidspunkt,
                             versjon = periodisertResultat.reglerVersjon
                         )
@@ -78,7 +78,7 @@ object InntektAvkortingService {
                             tidspunkt = tidspunkt,
                             regelResultat = periodisertResultat.toJsonNode(),
                             kilde = Grunnlagsopplysning.RegelKilde(
-                                navn = inntektAvkorting.regelReferanse.id,
+                                navn = kroneavrundetInntektAvkorting.regelReferanse.id,
                                 ts = tidspunkt,
                                 versjon = periodisertResultat.reglerVersjon
                             )

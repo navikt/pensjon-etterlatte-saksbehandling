@@ -1,6 +1,7 @@
 import { VilkaarsvurderingResultat } from '~shared/api/vilkaarsvurdering'
 import { IBehandlingStatus, IBehandlingsType, Virkningstidspunkt } from '~shared/types/IDetaljertBehandling'
 import { Revurderingsaarsak } from '~shared/types/Revurderingsaarsak'
+import { ISaksType } from '~components/behandling/fargetags/saksType'
 
 export interface IPersonResult {
   fornavn: string
@@ -16,6 +17,7 @@ export interface IBehandlingListe {
 export interface IBehandlingsammendrag {
   id: string
   sak: number
+  sakType: ISaksType
   status: IBehandlingStatus
   soeknadMottattDato: string
   behandlingOpprettet: string

@@ -68,6 +68,7 @@ class StatistikkServiceTest {
             status = BehandlingStatus.FATTET_VEDTAK,
             behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
             virkningstidspunkt = null,
+            utenlandstilsnitt = null,
             kommerBarnetTilgode = null,
             revurderingsaarsak = null,
             prosesstype = Prosesstype.MANUELL
@@ -154,6 +155,7 @@ class StatistikkServiceTest {
             status = BehandlingStatus.OPPRETTET,
             behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
             virkningstidspunkt = null,
+            utenlandstilsnitt = null,
             kommerBarnetTilgode = null,
             revurderingsaarsak = null,
             prosesstype = Prosesstype.MANUELL
@@ -242,7 +244,7 @@ fun behandling(
     soeker: String = "12312312312"
 ) = BehandlingIntern(
     id = id,
-    sak = Sak(soeker, SakType.BARNEPENSJON, sakId),
+    sak = Sak(soeker, SakType.BARNEPENSJON, sakId, "4808"),
     behandlingOpprettet = behandlingOpprettet,
     sistEndret = sistEndret,
     status = status,

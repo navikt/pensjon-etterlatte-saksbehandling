@@ -76,7 +76,7 @@ internal class BehandlingClientTest {
         val fnr = "123"
         every {
             behandlingKlient.hentSak(fnr, SakType.BARNEPENSJON.toString())
-        } returns Sak(fnr, SakType.BARNEPENSJON, 1L, null)
+        } returns Sak(fnr, SakType.BARNEPENSJON, 1L, "4808")
 
         val sak = behandlingKlient.hentSak(fnr, SakType.BARNEPENSJON.toString())
 

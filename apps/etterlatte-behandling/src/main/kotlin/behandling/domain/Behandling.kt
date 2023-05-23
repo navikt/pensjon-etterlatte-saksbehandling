@@ -16,6 +16,7 @@ import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
+import no.nav.etterlatte.libs.common.behandling.Utenlandstilsnitt
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.sak.Sak
 import org.slf4j.Logger
@@ -38,6 +39,7 @@ sealed class Behandling {
     abstract val persongalleri: Persongalleri
     abstract val kommerBarnetTilgode: KommerBarnetTilgode?
     abstract val virkningstidspunkt: Virkningstidspunkt?
+    abstract val utenlandstilsnitt: Utenlandstilsnitt?
     abstract val kilde: Vedtaksloesning
     open val prosesstype: Prosesstype = Prosesstype.MANUELL
 
@@ -51,6 +53,13 @@ sealed class Behandling {
         throw NotImplementedError(
             "Kan ikke oppdatere virkningstidspunkt på behandling $id. " +
                 "Denne behandlingstypen støtter ikke oppdatering av virkningstidspunkt."
+        )
+    }
+
+    open fun oppdaterUtenlandstilsnitt(utenlandstilsnitt: Utenlandstilsnitt): Behandling {
+        throw NotImplementedError(
+            "Kan ikke oppdatere utenlandstilsnitt på behandling $id. " +
+                "Denne behandlingstypen støtter ikke oppdatering av utenlandstilsnitt."
         )
     }
 
@@ -142,6 +151,7 @@ internal fun Behandling.toDetaljertBehandling(): DetaljertBehandling {
         status = status,
         behandlingType = type,
         virkningstidspunkt = this.virkningstidspunkt,
+        utenlandstilsnitt = this.utenlandstilsnitt,
         kommerBarnetTilgode = kommerBarnetTilgode,
         revurderingsaarsak = when (this) {
             is Revurdering -> revurderingsaarsak
@@ -154,6 +164,7 @@ internal fun Behandling.toDetaljertBehandling(): DetaljertBehandling {
 fun Behandling.toBehandlingSammendrag() = BehandlingSammendrag(
     id = this.id,
     sak = this.sak.id,
+    sakType = this.sak.sakType,
     status = this.status,
     soeknadMottattDato = if (this is Foerstegangsbehandling) {
         this.soeknadMottattDato

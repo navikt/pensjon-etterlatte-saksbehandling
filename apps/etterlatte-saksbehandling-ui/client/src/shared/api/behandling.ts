@@ -54,8 +54,11 @@ export const upsertVedtak = async (behandlingsId: string): Promise<ApiResponse<u
   return apiClient.post(`/vedtak/${behandlingsId}/upsert`, {})
 }
 
-export const attesterVedtak = async (behandlingId: string, kommentar: string): Promise<ApiResponse<unknown>> => {
-  return apiClient.post(`/vedtak/${behandlingId}/attester`, { kommentar })
+export const attesterVedtak = async (args: {
+  behandlingId: string
+  kommentar: string
+}): Promise<ApiResponse<unknown>> => {
+  return apiClient.post(`/vedtak/${args.behandlingId}/attester`, { kommentar: args.kommentar })
 }
 
 export const underkjennVedtak = async (

@@ -7,6 +7,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
+import no.nav.etterlatte.libs.common.behandling.Utenlandstilsnitt
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -22,6 +23,7 @@ data class ManueltOpphoer(
     override val status: BehandlingStatus,
     override val persongalleri: Persongalleri,
     override val virkningstidspunkt: Virkningstidspunkt?,
+    override val utenlandstilsnitt: Utenlandstilsnitt?,
     val opphoerAarsaker: List<ManueltOpphoerAarsak>,
     val fritekstAarsak: String?,
     override val prosesstype: Prosesstype = Prosesstype.MANUELL
@@ -34,7 +36,8 @@ data class ManueltOpphoer(
         persongalleri: Persongalleri,
         opphoerAarsaker: List<ManueltOpphoerAarsak>,
         fritekstAarsak: String?,
-        virkningstidspunkt: Virkningstidspunkt?
+        virkningstidspunkt: Virkningstidspunkt?,
+        utenlandstilsnitt: Utenlandstilsnitt?
     ) : this(
         id = UUID.randomUUID(),
         sak = sak,
@@ -44,7 +47,8 @@ data class ManueltOpphoer(
         persongalleri = persongalleri,
         opphoerAarsaker = opphoerAarsaker,
         fritekstAarsak = fritekstAarsak,
-        virkningstidspunkt = virkningstidspunkt
+        virkningstidspunkt = virkningstidspunkt,
+        utenlandstilsnitt = utenlandstilsnitt
     )
 
     private val erFyltUt: Boolean

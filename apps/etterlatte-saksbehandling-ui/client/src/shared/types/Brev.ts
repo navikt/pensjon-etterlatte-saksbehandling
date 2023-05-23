@@ -2,7 +2,7 @@ export interface IBrev {
   id: number
   behandlingId: string
   tittel: string
-  status: string
+  status: BrevStatus
   mottaker: Mottaker
   erVedtaksbrev: boolean
 }
@@ -23,4 +23,13 @@ export interface Adresse {
   poststed?: string
   landkode?: string
   land?: string
+}
+
+export enum BrevStatus {
+  OPPRETTET = 'OPPRETTET',
+  OPPDATERT = 'OPPDATERT',
+  FERDIGSTILT = 'FERDIGSTILT',
+  JOURNALFOERT = 'JOURNALFOERT',
+  DISTRIBUERT = 'DISTRIBUERT',
+  SLETTET = 'SLETTET',
 }

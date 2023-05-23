@@ -6,6 +6,7 @@ import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
+import no.nav.etterlatte.libs.common.behandling.Utenlandstilsnitt
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -22,6 +23,7 @@ data class AutomatiskRevurdering(
     override val persongalleri: Persongalleri,
     override val kommerBarnetTilgode: KommerBarnetTilgode?,
     override val virkningstidspunkt: Virkningstidspunkt?,
+    override val utenlandstilsnitt: Utenlandstilsnitt?,
     override val revurderingsaarsak: RevurderingAarsak,
     override val kilde: Vedtaksloesning
 ) : Revurdering(
@@ -33,6 +35,7 @@ data class AutomatiskRevurdering(
     persongalleri,
     kommerBarnetTilgode,
     virkningstidspunkt,
+    utenlandstilsnitt,
     revurderingsaarsak,
     Prosesstype.AUTOMATISK,
     kilde = kilde

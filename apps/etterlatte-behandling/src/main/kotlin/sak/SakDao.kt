@@ -7,7 +7,6 @@ import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.database.toList
 import java.sql.Connection
 import java.sql.ResultSet
-import java.sql.Types
 
 class SakDao(private val connection: () -> Connection) {
     fun hentSaker(): List<Sak> {
@@ -21,14 +20,14 @@ class SakDao(private val connection: () -> Connection) {
         return statement.executeQuery().singleOrNull { this.toSak() }
     }
 
-    fun opprettSak(fnr: String, type: SakType, enhet: String? = null): Sak {
+    fun opprettSak(fnr: String, type: SakType, enhet: String): Sak {
         val statement =
             connection().prepareStatement(
                 "INSERT INTO sak(sakType, fnr, enhet) VALUES(?, ?, ?) RETURNING id, sakType, fnr, enhet"
             )
         statement.setString(1, type.name)
         statement.setString(2, fnr)
-        enhet?.let { statement.setString(3, it) } ?: statement.setNull(3, Types.VARCHAR)
+        statement.setString(3, enhet)
         return requireNotNull(
             statement.executeQuery().singleOrNull { this.toSak() }
         )
@@ -83,6 +82,6 @@ class SakDao(private val connection: () -> Connection) {
         sakType = enumValueOf(getString("sakType")),
         ident = getString("fnr"),
         id = getLong("id"),
-        enhet = getString("enhet").takeUnless { wasNull() }
+        enhet = getString("enhet")
     )
 }

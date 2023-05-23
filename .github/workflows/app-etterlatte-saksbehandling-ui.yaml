@@ -81,6 +81,7 @@ jobs:
           docker push ${{ env.branch-image }}:${{ env.GITHUB_REF_SLUG }}
 
   deploy-to-dev-gcp:
+    if: github.event_name != 'pull_request'
     name: Deploy to dev-gcp
     needs: build-and-publish
     runs-on: ubuntu-latest

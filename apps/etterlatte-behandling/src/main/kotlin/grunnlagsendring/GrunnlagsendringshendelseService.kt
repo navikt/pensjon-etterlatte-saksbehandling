@@ -108,7 +108,8 @@ class GrunnlagsendringshendelseService(
             grunnlagendringType = GrunnlagsendringsType.INSTITUSJONSOPPHOLD,
             samsvar = SamsvarMellomKildeOgGrunnlag.INSTITUSJONSOPPHOLD(
                 samsvar = false,
-                oppholdstype = oppholdsHendelse.institusjonsoppholdsType
+                oppholdstype = oppholdsHendelse.institusjonsoppholdsType,
+                oppholdBeriket = oppholdsHendelse
             )
         )
     }

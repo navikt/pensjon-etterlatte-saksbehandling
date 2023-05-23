@@ -9,7 +9,7 @@ data class InstitusjonsoppholdHendelseBeriket(
     val institusjonsoppholdsType: InstitusjonsoppholdsType,
     val institusjonsoppholdKilde: InstitusjonsoppholdKilde,
     val institusjonsType: String? = null,
-    val startdato: LocalDate? = null,
+    val startdato: LocalDate,
     val faktiskSluttdato: LocalDate? = null,
     val forventetSluttdato: LocalDate? = null,
     val institusjonsnavn: String? = null

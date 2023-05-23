@@ -16,7 +16,6 @@ import no.nav.etterlatte.mockPerson
 import no.nav.etterlatte.pdltjenester.PdlTjenesterKlient
 import no.nav.etterlatte.pdltjenester.PersonFinnesIkkeException
 import no.nav.etterlatte.readSoknad
-import no.nav.etterlatte.skjerming.SkjermingKlient
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -28,14 +27,11 @@ internal class FordelerServiceTest {
     private val pdlTjenesterKlient = mockk<PdlTjenesterKlient>()
     private val fordelerRepo = mockk<FordelerRepository>()
     private val behandlingKlient = mockk<BehandlingKlient>()
-    private val skjermingKlient = mockk<SkjermingKlient>()
     private val fordelerService = FordelerService(
         FordelerKriterier(),
         pdlTjenesterKlient,
         fordelerRepo,
         maxFordelingTilGjenny = Long.MAX_VALUE,
-        skjermingKlient = skjermingKlient,
-        skalBrukeSkjermingsklient = true,
         behandlingKlient = behandlingKlient
     )
 
@@ -47,7 +43,6 @@ internal class FordelerServiceTest {
         every { fordelerRepo.finnFordeling(any()) } returns null
         every { fordelerRepo.lagreFordeling(any()) } returns Unit
         every { fordelerRepo.antallFordeltTil("GJENNY") } returns 0
-        coEvery { skjermingKlient.personErSkjermet(any()) } returns false
 
         coEvery { pdlTjenesterKlient.hentPerson(match { it.foedselsnummer == barnFnr }) } returns mockPerson(
             bostedsadresse = mockNorskAdresse(),
@@ -92,7 +87,6 @@ internal class FordelerServiceTest {
 
         every { fordelerRepo.finnFordeling(any()) } returns null
         every { fordelerRepo.lagreFordeling(any()) } returns Unit
-        coEvery { skjermingKlient.personErSkjermet(any()) } returns false
 
         coEvery { pdlTjenesterKlient.hentPerson(match { it.foedselsnummer == barnFnr }) } returns mockPerson(
             bostedsadresse = mockNorskAdresse(),
@@ -134,8 +128,6 @@ internal class FordelerServiceTest {
 
     @Test
     fun `skal feile dersom kall mot skjermetløsningen feiler`() {
-        coEvery { skjermingKlient.personErSkjermet(any()) } throws RuntimeException("Noe feilet")
-
         assertThrows<RuntimeException> { fordelerService.sjekkGyldighetForBehandling(fordelerEvent()) }
     }
 
@@ -170,8 +162,6 @@ internal class FordelerServiceTest {
             pdlTjenesterKlient,
             fordelerRepo,
             maxFordelingTilGjenny = 10,
-            skjermingKlient = skjermingKlient,
-            skalBrukeSkjermingsklient = true,
             behandlingKlient = behandlingKlient
         )
 
@@ -181,7 +171,6 @@ internal class FordelerServiceTest {
         every { fordelerRepo.finnFordeling(any()) } returns null
         every { fordelerRepo.lagreFordeling(any()) } returns Unit
         every { fordelerRepo.antallFordeltTil("GJENNY") } returns 10
-        coEvery { skjermingKlient.personErSkjermet(any()) } returns false
 
         coEvery { pdlTjenesterKlient.hentPerson(match { it.foedselsnummer == barnFnr }) } returns mockPerson(
             bostedsadresse = mockNorskAdresse(),
@@ -218,8 +207,6 @@ internal class FordelerServiceTest {
             pdlTjenesterKlient,
             fordelerRepo,
             maxFordelingTilGjenny = 10,
-            skjermingKlient = skjermingKlient,
-            skalBrukeSkjermingsklient = true,
             behandlingKlient = behandlingKlient
         )
         every { fordelerRepo.finnFordeling(any()) } returns null
@@ -263,8 +250,6 @@ internal class FordelerServiceTest {
             pdlTjenesterKlient,
             fordelerRepo,
             maxFordelingTilGjenny = 10,
-            skjermingKlient = skjermingKlient,
-            skalBrukeSkjermingsklient = true,
             behandlingKlient = behandlingKlient
         )
         every { fordelerRepo.finnFordeling(any()) } returns null

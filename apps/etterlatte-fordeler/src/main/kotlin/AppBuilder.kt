@@ -7,7 +7,6 @@ import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.pdltjenester.PdlTjenesterKlient
-import no.nav.etterlatte.skjerming.SkjermingKlient
 
 class AppBuilder(private val env: Miljoevariabler) {
 
@@ -20,20 +19,6 @@ class AppBuilder(private val env: Miljoevariabler) {
         httpClient = behandlingHttpClient,
         url = env.requireEnvValue("BEHANDLING_URL")
     )
-
-    internal fun skjermingKlient() = SkjermingKlient(
-        httpClient = skjermingHttpKlient,
-        url = env.requireEnvValue("SKJERMING_URL")
-    )
-
-    private val skjermingHttpKlient: HttpClient by lazy {
-        httpClientClientCredentials(
-            azureAppClientId = env.requireEnvValue("AZURE_APP_CLIENT_ID"),
-            azureAppJwk = env.requireEnvValue("AZURE_APP_JWK"),
-            azureAppWellKnownUrl = env.requireEnvValue("AZURE_APP_WELL_KNOWN_URL"),
-            azureAppScope = env.requireEnvValue("AZURE_SCOPE_SKJERMEDE_PIP")
-        )
-    }
 
     private val behandlingHttpClient: HttpClient by lazy {
         httpClientClientCredentials(

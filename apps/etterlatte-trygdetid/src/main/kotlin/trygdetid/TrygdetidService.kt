@@ -1,6 +1,7 @@
 package no.nav.etterlatte.trygdetid
 
-import kotlinx.coroutines.runBlocking
+import com.fasterxml.jackson.databind.JsonNode
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsdata
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning.RegelKilde
 import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
 import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsdato
@@ -23,38 +24,17 @@ class TrygdetidService(
             trygdetidRepository.hentTrygdetid(behandlingId)?.let {
                 throw IllegalArgumentException("Trygdetid finnes allerede for behandling $behandlingId")
             }
+
             val behandling = behandlingKlient.hentBehandling(behandlingId, bruker)
             val avdoed = grunnlagKlient.hentGrunnlag(behandling.sak, bruker).hentAvdoed()
-
-            val foedselsdato = avdoed.hentFoedselsdato()
-            val opplysninger = listOf(
-                Opplysningsgrunnlag.ny(TrygdetidOpplysningType.FOEDSELSDATO, foedselsdato?.kilde, foedselsdato?.verdi),
-                Opplysningsgrunnlag.ny(
-                    TrygdetidOpplysningType.FYLT_16,
-                    kildeFoedselsnummer(),
-                    // Ifølge paragraf § 3-5 regnes trygdetid fra tidspunkt en person er fylt 16 år
-                    foedselsdato?.verdi?.plusYears(16)
-                ),
-                Opplysningsgrunnlag.ny(
-                    TrygdetidOpplysningType.FYLLER_66,
-                    kildeFoedselsnummer(),
-                    // Ifølge paragraf § 3-5 regnes trygdetid frem til tidspunkt en person er fyller 66 pår
-                    foedselsdato?.verdi?.plusYears(66)
-                ),
-                avdoed.hentDoedsdato().let {
-                    Opplysningsgrunnlag.ny(TrygdetidOpplysningType.DOEDSDATO, it?.kilde, it?.verdi)
-                }
+            val trygdetid = Trygdetid(
+                sakId = behandling.sak,
+                behandlingId = behandling.id,
+                opplysninger = hentOpplysninger(avdoed)
             )
-            trygdetidRepository.transaction { tx ->
-                trygdetidRepository.opprettTrygdetid(behandling, opplysninger, tx)
-            }
-        }
 
-    private fun kildeFoedselsnummer(): RegelKilde = RegelKilde(
-        "Beregnet basert på fødselsdato fra pdl",
-        Tidspunkt.now(),
-        "1"
-    )
+            trygdetidRepository.opprettTrygdetid(trygdetid)
+        }
 
     suspend fun lagreTrygdetidGrunnlag(
         behandlingId: UUID,
@@ -62,21 +42,25 @@ class TrygdetidService(
         trygdetidGrunnlag: TrygdetidGrunnlag
     ): Trygdetid =
         tilstandssjekk(behandlingId, bruker) {
-            val beregnetTrygdetidGrunnlag = beregnTrygdetidService.beregnTrygdetidGrunnlag(trygdetidGrunnlag)
-            val trygdetidGrunnlagMedBeregning = trygdetidGrunnlag.copy(beregnetTrygdetid = beregnetTrygdetidGrunnlag)
-            val eksisterendeTrygdetid = trygdetidRepository.hentEnkeltTrygdetidGrunnlag(trygdetidGrunnlag.id)
+            val trygdetidGrunnlagBeregnet = trygdetidGrunnlag.oppdaterBeregnetTrygdetid(
+                beregnTrygdetidService.beregnTrygdetidGrunnlag(trygdetidGrunnlag)
+            )
 
-            trygdetidRepository.transaction { tx ->
-                val trygdetid = if (eksisterendeTrygdetid != null) {
-                    trygdetidRepository.oppdaterTrygdetidGrunnlag(behandlingId, trygdetidGrunnlagMedBeregning, tx)
-                } else {
-                    trygdetidRepository.opprettTrygdetidGrunnlag(behandlingId, trygdetidGrunnlagMedBeregning, tx)
-                }
+            val gjeldendeTrygdetid = trygdetidRepository.hentTrygdetid(behandlingId)
+                ?: throw Exception("Fant ikke gjeldende trygdetid for behandlingId=$behandlingId")
 
-                val beregnetTrygdetid = beregnTrygdetidService.beregnTrygdetid(trygdetid.trygdetidGrunnlag)
-                trygdetidRepository.oppdaterBeregnetTrygdetid(behandlingId, beregnetTrygdetid, tx).also {
-                    runBlocking { behandlingKlient.settBehandlingStatusVilkaarsvurdert(behandlingId, bruker) }
-                }
+            val trygdetidMedOppdatertTrygdetidGrunnlag =
+                gjeldendeTrygdetid.leggTilEllerOppdaterTrygdetidGrunnlag(trygdetidGrunnlagBeregnet)
+
+            val trygdetidBeregnet =
+                trygdetidMedOppdatertTrygdetidGrunnlag.oppdaterBeregnetTrygdetid(
+                    beregnTrygdetidService.beregnTrygdetid(
+                        trygdetidMedOppdatertTrygdetidGrunnlag.trygdetidGrunnlag
+                    )
+                )
+
+            trygdetidRepository.oppdaterTrygdetid(trygdetidBeregnet).also {
+                behandlingKlient.settBehandlingStatusVilkaarsvurdert(behandlingId, bruker)
             }
         }
 
@@ -85,20 +69,49 @@ class TrygdetidService(
         forrigeBehandlingId: UUID,
         bruker: Bruker
     ): Trygdetid {
-        val forrigeTrygdetid = hentTrygdetid(forrigeBehandlingId)
-        val forrigeTrygdetidGrunnlag =
-            forrigeTrygdetid?.trygdetidGrunnlag ?: throw Exception("Mangler trygdetid for $forrigeBehandlingId")
-        val beregnetTrygdetid =
-            forrigeTrygdetid.beregnetTrygdetid ?: throw Exception("Mangler beregnet trygdetid for $forrigeBehandlingId")
+        val forrigeTrygdetid = requireNotNull(hentTrygdetid(forrigeBehandlingId)) {
+            "Fant ingen trygdetid for behandlingId=$forrigeBehandlingId"
+        }
         val regulering = behandlingKlient.hentBehandling(behandlingId, bruker)
 
-        return trygdetidRepository.transaction { tx ->
-            trygdetidRepository.opprettTrygdetid(regulering, forrigeTrygdetid.opplysninger, tx)
-            forrigeTrygdetidGrunnlag.forEach { grunnlag ->
-                trygdetidRepository.opprettTrygdetidGrunnlag(behandlingId, grunnlag, tx)
+        val kopiertTrygdetid = Trygdetid(
+            sakId = regulering.sak,
+            behandlingId = regulering.id,
+            opplysninger = forrigeTrygdetid.opplysninger,
+            trygdetidGrunnlag = forrigeTrygdetid.trygdetidGrunnlag,
+            beregnetTrygdetid = forrigeTrygdetid.beregnetTrygdetid
+        )
+
+        return trygdetidRepository.opprettTrygdetid(kopiertTrygdetid)
+    }
+
+    private fun kildeFoedselsnummer(): RegelKilde = RegelKilde(
+        "Beregnet basert på fødselsdato fra pdl",
+        Tidspunkt.now(),
+        "1"
+    )
+
+    private fun hentOpplysninger(avdoed: Grunnlagsdata<JsonNode>): List<Opplysningsgrunnlag> {
+        val foedselsdato = avdoed.hentFoedselsdato()
+        val opplysninger = listOf(
+            Opplysningsgrunnlag.ny(TrygdetidOpplysningType.FOEDSELSDATO, foedselsdato?.kilde, foedselsdato?.verdi),
+            Opplysningsgrunnlag.ny(
+                TrygdetidOpplysningType.FYLT_16,
+                kildeFoedselsnummer(),
+                // Ifølge paragraf § 3-5 regnes trygdetid fra tidspunkt en person er fylt 16 år
+                foedselsdato?.verdi?.plusYears(16)
+            ),
+            Opplysningsgrunnlag.ny(
+                TrygdetidOpplysningType.FYLLER_66,
+                kildeFoedselsnummer(),
+                // Ifølge paragraf § 3-5 regnes trygdetid frem til tidspunkt en person er fyller 66 pår
+                foedselsdato?.verdi?.plusYears(66)
+            ),
+            avdoed.hentDoedsdato().let {
+                Opplysningsgrunnlag.ny(TrygdetidOpplysningType.DOEDSDATO, it?.kilde, it?.verdi)
             }
-            trygdetidRepository.oppdaterBeregnetTrygdetid(behandlingId, beregnetTrygdetid, tx)
-        }
+        )
+        return opplysninger
     }
 
     private suspend fun tilstandssjekk(behandlingId: UUID, bruker: Bruker, block: suspend () -> Trygdetid): Trygdetid {

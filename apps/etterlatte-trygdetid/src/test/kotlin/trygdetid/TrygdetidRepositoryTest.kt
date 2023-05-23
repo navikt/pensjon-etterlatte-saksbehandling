@@ -1,5 +1,6 @@
 package no.nav.etterlatte.trygdetid
 
+import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.mockk.every
@@ -19,6 +20,7 @@ import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
 import trygdetid.beregnetTrygdetid
 import trygdetid.beregnetTrygdetidGrunnlag
+import trygdetid.trygdetid
 import trygdetid.trygdetidGrunnlag
 import java.time.LocalDate
 import java.util.*
@@ -52,11 +54,7 @@ internal class TrygdetidRepositoryTest {
 
     @Test
     fun `skal opprette trygdetid med opplysninger`() {
-        val behandlingId = randomUUID()
-        val behandling = mockk<DetaljertBehandling>().apply {
-            every { id } returns behandlingId
-            every { sak } returns 123L
-        }
+        val behandling = behandlingMock()
 
         val foedselsdato = LocalDate.of(2000, 1, 1)
         val doedsdato = LocalDate.of(2020, 1, 1)
@@ -71,10 +69,13 @@ internal class TrygdetidRepositoryTest {
             Opplysningsgrunnlag.ny(TrygdetidOpplysningType.FYLT_16, regel, seksten),
             Opplysningsgrunnlag.ny(TrygdetidOpplysningType.FYLLER_66, regel, seksti)
         )
-        val trygdetid = repository.transaction { tx -> repository.opprettTrygdetid(behandling, opplysninger, tx) }
+
+        val opprettetTrygdetid = trygdetid(behandling.id, behandling.sak, opplysninger = opplysninger)
+
+        val trygdetid = repository.opprettTrygdetid(opprettetTrygdetid)
 
         trygdetid shouldNotBe null
-        trygdetid.behandlingId shouldBe behandlingId
+        trygdetid.behandlingId shouldBe behandling.id
         trygdetid.opplysninger.size shouldBe 4
 
         with(trygdetid.opplysninger[0]) {
@@ -101,34 +102,26 @@ internal class TrygdetidRepositoryTest {
 
     @Test
     fun `skal opprette og hente trygdetid`() {
-        val behandlingId = randomUUID()
-        val behandling = mockk<DetaljertBehandling>().apply {
-            every { id } returns behandlingId
-            every { sak } returns 123L
-        }
-        repository.transaction { tx -> repository.opprettTrygdetid(behandling, emptyList(), tx) }
+        val behandling = behandlingMock()
+        val opprettetTrygdetid = trygdetid(behandling.id, behandling.sak)
 
-        val trygdetid = repository.hentTrygdetid(behandlingId)
+        repository.opprettTrygdetid(opprettetTrygdetid)
+        val trygdetid = repository.hentTrygdetid(behandling.id)
 
         trygdetid shouldNotBe null
         trygdetid?.id shouldNotBe null
-        trygdetid?.behandlingId shouldBe behandlingId
+        trygdetid?.behandlingId shouldBe behandling.id
     }
 
     @Test
     fun `skal opprette et trygdetidsgrunnlag`() {
-        val behandlingId = randomUUID()
+        val behandling = behandlingMock()
         val trygdetidGrunnlag = trygdetidGrunnlag(beregnetTrygdetidGrunnlag = beregnetTrygdetidGrunnlag())
+        val opprettetTrygdetid = trygdetid(behandling.id, behandling.sak)
 
-        val behandling = mockk<DetaljertBehandling>().apply {
-            every { id } returns behandlingId
-            every { sak } returns 123L
-        }
-
-        val trygdetidMedTrygdetidGrunnlag = repository.transaction { tx ->
-            repository.opprettTrygdetid(behandling, emptyList(), tx)
-            repository.opprettTrygdetidGrunnlag(behandlingId, trygdetidGrunnlag, tx)
-        }
+        val lagretTrygdetid = repository.opprettTrygdetid(opprettetTrygdetid)
+        val trygdetidMedTrygdetidGrunnlag =
+            repository.oppdaterTrygdetid(lagretTrygdetid.leggTilEllerOppdaterTrygdetidGrunnlag(trygdetidGrunnlag))
 
         trygdetidMedTrygdetidGrunnlag shouldNotBe null
         with(trygdetidMedTrygdetidGrunnlag.trygdetidGrunnlag.first()) {
@@ -137,20 +130,37 @@ internal class TrygdetidRepositoryTest {
     }
 
     @Test
-    fun `skal oppdatere et trygdetidsgrunnlag`() {
-        val behandlingId = randomUUID()
-        val behandling = mockk<DetaljertBehandling>().apply {
-            every { id } returns behandlingId
-            every { sak } returns 123L
-        }
+    fun `skal slette et trygdetidsgrunnlag`() {
+        val behandling = behandlingMock()
         val trygdetidGrunnlag = trygdetidGrunnlag(beregnetTrygdetidGrunnlag = beregnetTrygdetidGrunnlag())
-        val endretTrygdetidGrunnlag = trygdetidGrunnlag.copy(bosted = "Polen")
+        val opprettetTrygdetid = trygdetid(behandling.id, behandling.sak)
 
-        val trygdetidMedOppdatertGrunnlag = repository.transaction { tx ->
-            repository.opprettTrygdetid(behandling, emptyList(), tx)
-            repository.opprettTrygdetidGrunnlag(behandlingId, trygdetidGrunnlag, tx)
-            repository.oppdaterTrygdetidGrunnlag(behandlingId, endretTrygdetidGrunnlag, tx)
+        val lagretTrygdetid = repository.opprettTrygdetid(opprettetTrygdetid)
+        val trygdetidMedTrygdetidGrunnlag =
+            repository.oppdaterTrygdetid(lagretTrygdetid.leggTilEllerOppdaterTrygdetidGrunnlag(trygdetidGrunnlag))
+
+        trygdetidMedTrygdetidGrunnlag shouldNotBe null
+        with(trygdetidMedTrygdetidGrunnlag.trygdetidGrunnlag.first()) {
+            this shouldBe trygdetidGrunnlag
         }
+
+        val trygdetidUtenGrunnlag = trygdetidMedTrygdetidGrunnlag.copy(trygdetidGrunnlag = emptyList())
+        val lagretTrygdetidUtenGrunnlag = repository.oppdaterTrygdetid(trygdetidUtenGrunnlag)
+
+        lagretTrygdetidUtenGrunnlag shouldNotBe null
+        lagretTrygdetidUtenGrunnlag.trygdetidGrunnlag.shouldBeEmpty()
+    }
+
+    @Test
+    fun `skal oppdatere et trygdetidsgrunnlag`() {
+        val behandling = behandlingMock()
+        val trygdetidGrunnlag = trygdetidGrunnlag(beregnetTrygdetidGrunnlag = beregnetTrygdetidGrunnlag())
+        val opprettetTrygdetid = trygdetid(behandling.id, behandling.sak, trygdetidGrunnlag = listOf(trygdetidGrunnlag))
+
+        val trygdetid = repository.opprettTrygdetid(opprettetTrygdetid)
+        val endretTrygdetidGrunnlag = trygdetidGrunnlag.copy(bosted = "Polen")
+        val trygdetidMedOppdatertGrunnlag =
+            repository.oppdaterTrygdetid(trygdetid.leggTilEllerOppdaterTrygdetidGrunnlag(endretTrygdetidGrunnlag))
 
         trygdetidMedOppdatertGrunnlag shouldNotBe null
         with(trygdetidMedOppdatertGrunnlag.trygdetidGrunnlag.first()) {
@@ -159,43 +169,24 @@ internal class TrygdetidRepositoryTest {
     }
 
     @Test
-    fun `skal hente et trygdetidsgrunnlag`() {
-        val behandlingId = randomUUID()
-        val trygdetidGrunnlag = trygdetidGrunnlag(beregnetTrygdetidGrunnlag = beregnetTrygdetidGrunnlag())
-
-        val behandling = mockk<DetaljertBehandling>().apply {
-            every { id } returns behandlingId
-            every { sak } returns 123L
-        }
-
-        val hentetTrygdetidGrunnlag = repository.transaction { tx ->
-            repository.opprettTrygdetid(behandling, emptyList(), tx)
-            repository.opprettTrygdetidGrunnlag(behandlingId, trygdetidGrunnlag, tx)
-
-            repository.hentEnkeltTrygdetidGrunnlag(trygdetidGrunnlag.id, tx)
-        }
-
-        hentetTrygdetidGrunnlag shouldNotBe null
-    }
-
-    @Test
     fun `skal oppdatere beregnet trygdetid`() {
-        val behandlingId = randomUUID()
         val beregnetTrygdetid = beregnetTrygdetid(total = 12, tidspunkt = Tidspunkt.now())
-        val behandling = mockk<DetaljertBehandling>().apply {
-            every { id } returns behandlingId
-            every { sak } returns 123L
-        }
+        val behandling = behandlingMock()
+        val opprettetTrygdetid = trygdetid(behandling.id, behandling.sak)
 
-        val trygdetidMedBeregnetTrygdetid = repository.transaction { tx ->
-            repository.opprettTrygdetid(behandling, emptyList(), tx)
-
-            repository.oppdaterBeregnetTrygdetid(behandlingId, beregnetTrygdetid, tx)
-        }
+        val trygdetid = repository.opprettTrygdetid(opprettetTrygdetid)
+        val trygdetidMedBeregnetTrygdetid =
+            repository.oppdaterTrygdetid(trygdetid.oppdaterBeregnetTrygdetid(beregnetTrygdetid))
 
         trygdetidMedBeregnetTrygdetid shouldNotBe null
         trygdetidMedBeregnetTrygdetid.beregnetTrygdetid shouldBe beregnetTrygdetid
     }
+
+    private fun behandlingMock() =
+        mockk<DetaljertBehandling>().apply {
+            every { id } returns randomUUID()
+            every { sak } returns 123L
+        }
 
     private fun cleanDatabase() {
         dataSource.connection.use { it.prepareStatement("TRUNCATE trygdetid CASCADE").apply { execute() } }

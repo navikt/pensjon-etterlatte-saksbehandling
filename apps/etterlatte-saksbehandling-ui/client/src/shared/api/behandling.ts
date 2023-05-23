@@ -2,6 +2,7 @@ import {
   IDetaljertBehandling,
   IGyldighetResultat,
   IKommerBarnetTilgode,
+  IUtenlandstilsnitt,
   Virkningstidspunkt,
 } from '~shared/types/IDetaljertBehandling'
 import { apiClient, ApiResponse } from './apiClient'
@@ -100,4 +101,15 @@ export const opprettRevurdering = async (args: {
 
 export const hentStoettedeRevurderinger = async (): Promise<ApiResponse<Array<Revurderingsaarsak>>> => {
   return apiClient.get(`/stoettederevurderinger`)
+}
+
+export const lagreUtenlandstilsnitt = async (args: {
+  behandlingId: string
+  begrunnelse: string
+  svar: string
+}): Promise<ApiResponse<IUtenlandstilsnitt>> => {
+  return apiClient.post(`/behandling/${args.behandlingId}/utenlandstilsnitt`, {
+    utenlandstilsnittType: args.svar,
+    begrunnelse: args.begrunnelse,
+  })
 }

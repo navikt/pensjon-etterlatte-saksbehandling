@@ -18,6 +18,7 @@ export interface IDetaljertBehandling {
   attestant?: string
   soeknadMottattDato: string
   virkningstidspunkt: Virkningstidspunkt | null
+  utenlandstilsnitt: IUtenlandstilsnitt | undefined
   status: IBehandlingStatus
   hendelser: IHendelse[]
   familieforhold?: IFamilieforhold
@@ -43,6 +44,18 @@ export enum IBehandlingStatus {
   RETURNERT = 'RETURNERT',
   IVERKSATT = 'IVERKSATT',
   AVBRUTT = 'AVBRUTT',
+}
+
+export enum IUtenlandstilsnittType {
+  NASJONAL = 'NASJONAL',
+  UTLANDSTILSNITT = 'UTLANDSTILSNITT',
+  BOSATT_UTLAND = 'BOSATT_UTLAND',
+}
+
+export interface IUtenlandstilsnitt {
+  type: IUtenlandstilsnittType
+  kilde: KildeSaksbehandler
+  begrunnelse: string
 }
 
 export interface IGyldighetResultat {

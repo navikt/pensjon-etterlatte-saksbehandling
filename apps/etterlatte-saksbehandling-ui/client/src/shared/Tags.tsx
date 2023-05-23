@@ -1,5 +1,5 @@
 import { OppgaveTypeFilter, SoeknadTypeFilter } from '~components/oppgavebenken/typer/oppgavebenken'
-import { IBehandlingsType } from '~shared/types/IDetaljertBehandling'
+import { IBehandlingsType, IUtenlandstilsnittType } from '~shared/types/IDetaljertBehandling'
 import { ISaksType } from '~components/behandling/fargetags/saksType'
 import styled from 'styled-components'
 import { INasjonalitetsType } from '~components/behandling/fargetags/nasjonalitetsType'
@@ -17,7 +17,7 @@ enum Variants {
 }
 
 export const tagColors: Record<
-  OppgaveTypeFilter | SoeknadTypeFilter | ISaksType | INasjonalitetsType | IBehandlingsType,
+  OppgaveTypeFilter | SoeknadTypeFilter | ISaksType | INasjonalitetsType | IBehandlingsType | IUtenlandstilsnittType,
   Variants
 > = {
   [OppgaveTypeFilter.ALLE]: Variants.NEUTRAL,
@@ -34,6 +34,9 @@ export const tagColors: Record<
   [ISaksType.OMSTILLINGSSTOENAD]: Variants.NEUTRAL,
   [INasjonalitetsType.NASJONAL]: Variants.INFO_FILLED,
   [INasjonalitetsType.UTLAND]: Variants.ALT3,
+  [IUtenlandstilsnittType.NASJONAL]: Variants.INFO_FILLED,
+  [IUtenlandstilsnittType.UTLANDSTILSNITT]: Variants.ALT3,
+  [IUtenlandstilsnittType.BOSATT_UTLAND]: Variants.ALT2,
 }
 
 export const TagList = styled.ul`

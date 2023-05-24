@@ -7,7 +7,6 @@ import Beregningsgrunnlag from './beregningsgrunnlag/Beregningsgrunnlag'
 import { IBehandlingsType } from '~shared/types/IDetaljertBehandling'
 import { useAppSelector } from '~store/Store'
 import { Vedtaksbrev } from './brev/Vedtaksbrev'
-import { VilkaarsvurderingResultat } from '~shared/api/vilkaarsvurdering'
 import { ManueltOpphoerOversikt } from './manueltopphoeroversikt/ManueltOpphoerOversikt'
 import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
 import { Revurderingsoversikt } from '~components/behandling/revurderingsoversikt/Revurderingsoversikt'
@@ -78,12 +77,18 @@ export const useBehandlingRoutes = () => {
   return { next, back, lastPage, firstPage, behandlingRoutes: aktuelleRoutes, currentRoute, goto }
 }
 
+export const soeknadRoutes: Array<behandlingRouteTypes> = [
+  'soeknadsoversikt',
+  'vilkaarsvurdering',
+  'beregningsgrunnlag',
+  'beregne',
+  'brev',
+]
+export const manueltOpphoerRoutes: Array<behandlingRouteTypes> = ['opphoeroversikt', 'beregne']
+export const revurderingRoutes = (behandling: IBehandlingReducer) => hentRevurderingRoutes(behandling)
+
 const hentAktuelleRoutes = (behandling: IBehandlingReducer | null) => {
   if (!behandling) return []
-
-  const soeknadRoutes = finnRoutesFoerstegangbehandling(behandling)
-  const manueltOpphoerRoutes: Array<behandlingRouteTypes> = ['opphoeroversikt', 'beregne']
-  const revurderingRoutes = hentRevurderingRoutes(behandling)
 
   switch (behandling.behandlingType) {
     case IBehandlingsType.MANUELT_OPPHOER:
@@ -91,17 +96,8 @@ const hentAktuelleRoutes = (behandling: IBehandlingReducer | null) => {
     case IBehandlingsType.FØRSTEGANGSBEHANDLING:
       return behandlingRoutes(behandling).filter((route) => soeknadRoutes.includes(route.path))
     case IBehandlingsType.REVURDERING:
-      return behandlingRoutes(behandling).filter((route) => revurderingRoutes.includes(route.path))
+      return behandlingRoutes(behandling).filter((route) => revurderingRoutes(behandling).includes(route.path))
   }
-}
-
-function finnRoutesFoerstegangbehandling(behandling: IBehandlingReducer): Array<behandlingRouteTypes> {
-  const routes: Array<behandlingRouteTypes> = ['soeknadsoversikt', 'vilkaarsvurdering', 'brev']
-  if (behandling.vilkårsprøving?.resultat?.utfall === VilkaarsvurderingResultat.OPPFYLT) {
-    routes.push('beregningsgrunnlag')
-    routes.push('beregne')
-  }
-  return routes
 }
 
 function hentRevurderingRoutes(behandling: IBehandlingReducer): Array<behandlingRouteTypes> {

@@ -13,6 +13,7 @@ import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.SKAL_SENDE_BREV
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.etterlatte.libs.common.sak.VedtakSak
+import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vedtak.KafkaHendelseType
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -33,6 +34,7 @@ internal class JournalfoerVedtaksbrev(
             validate { it.requireKey("vedtak") }
             validate { it.requireKey("vedtak.vedtakId") }
             validate { it.requireKey("vedtak.behandling.id") }
+            validate { it.requireKey("vedtak.sak") }
             validate { it.requireKey("vedtak.sak.id") }
             validate { it.requireKey("vedtak.sak.ident") }
             validate { it.requireKey("vedtak.sak.sakType") }
@@ -49,7 +51,7 @@ internal class JournalfoerVedtaksbrev(
             withLogContext {
                 val vedtak = VedtakTilJournalfoering(
                     vedtakId = packet["vedtak.vedtakId"].asLong(),
-                    sak = deserialize(packet["vedtak.sak"].asText()),
+                    sak = deserialize(packet["vedtak.sak"].toJson()),
                     behandlingId = UUID.fromString(packet["vedtak.behandling.id"].asText()),
                     ansvarligEnhet = packet["vedtak.vedtakFattet.ansvarligEnhet"].asText()
                 )

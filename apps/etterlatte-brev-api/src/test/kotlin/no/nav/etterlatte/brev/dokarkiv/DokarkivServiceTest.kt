@@ -22,7 +22,9 @@ import no.nav.etterlatte.brev.model.BrevInnhold
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.Status
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.sak.VedtakSak
 import no.nav.etterlatte.rivers.VedtakTilJournalfoering
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -68,11 +70,11 @@ internal class DokarkivServiceTest {
         assertEquals(vedtaksbrev.tittel, actualRequest.tittel)
         assertEquals(JournalPostType.UTGAAENDE, actualRequest.journalpostType)
 
-        assertEquals(vedtak.soekerIdent, actualRequest.avsenderMottaker.id)
+        assertEquals(vedtak.sak.ident, actualRequest.avsenderMottaker.id)
 
-        assertEquals(Bruker(vedtak.soekerIdent), actualRequest.bruker)
+        assertEquals(Bruker(vedtak.sak.ident), actualRequest.bruker)
         assertEquals("${vedtaksbrev.behandlingId}.${vedtaksbrev.id}", actualRequest.eksternReferanseId)
-        assertEquals(JSak(Sakstype.FAGSAK, vedtak.sakId.toString()), actualRequest.sak)
+        assertEquals(JSak(Sakstype.FAGSAK, vedtak.sak.id.toString()), actualRequest.sak)
 
         val dokument = actualRequest.dokumenter.single()
         assertEquals(vedtaksbrev.tittel, dokument.tittel)
@@ -101,9 +103,8 @@ internal class DokarkivServiceTest {
 
     private fun opprettVedtak() = VedtakTilJournalfoering(
         vedtakId = 1,
-        sakId = 4,
+        sak = VedtakSak("ident", SakType.BARNEPENSJON, 4),
         behandlingId = UUID.randomUUID(),
-        soekerIdent = "ident",
         ansvarligEnhet = "4808"
     )
 

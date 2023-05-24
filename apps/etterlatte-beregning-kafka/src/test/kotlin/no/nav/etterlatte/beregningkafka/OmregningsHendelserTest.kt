@@ -51,7 +51,7 @@ internal class OmregningsHendelserTest {
             } returns HttpStatusCode.NoContent
         }
 
-        every { behandlingService.opprettOmregning(capture(omregningsid)) }.returns(returnValue)
+        every { behandlingService.beregn(capture(omregningsid)) }.returns(returnValue)
         every {
             behandlingService.opprettBeregningsGrunnlag(capture(behandlingsId), capture(forrigeBehandlingId))
         }.returns(noContentValue)

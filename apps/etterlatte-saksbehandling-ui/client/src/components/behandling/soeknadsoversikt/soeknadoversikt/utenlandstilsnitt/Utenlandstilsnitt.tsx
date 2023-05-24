@@ -19,7 +19,7 @@ export const Utenlandstilsnitt = ({
   behandling: IDetaljertBehandling
   redigerbar: boolean
 }) => {
-  const [vurder, setVurder] = useState(behandling.utenlandstilsnitt !== null)
+  const [vurdert, setVurdert] = useState(behandling.utenlandstilsnitt !== undefined)
 
   return (
     <Soeknadsvurdering tittel="Utlandstilknytning" hjemler={[]} status={statusIkon(behandling.utenlandstilsnitt)}>
@@ -30,15 +30,15 @@ export const Utenlandstilsnitt = ({
         utlandstilsnitt-sak. I andre tilfeller er det en nasjonal sak.
       </Beskrivelse>
       <VurderingsContainerWrapper>
-        {vurder ? (
+        {vurdert ? (
           <UtenlandstilsnittVurdering
             utenlandstilsnitt={behandling.utenlandstilsnitt}
             redigerbar={redigerbar}
-            setVurder={(visVurderingKnapp: boolean) => setVurder(visVurderingKnapp)}
+            setVurdert={(visVurderingKnapp: boolean) => setVurdert(visVurderingKnapp)}
             behandlingId={behandling.id}
           />
         ) : (
-          <LeggTilVurderingButton onClick={() => setVurder(true)}>Legg til vurdering</LeggTilVurderingButton>
+          <LeggTilVurderingButton onClick={() => setVurdert(true)}>Legg til vurdering</LeggTilVurderingButton>
         )}
       </VurderingsContainerWrapper>
     </Soeknadsvurdering>

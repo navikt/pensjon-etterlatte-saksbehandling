@@ -19,12 +19,12 @@ const UtenlandstilsnittTypeTittel: Record<IUtenlandstilsnittType, string> = {
 export const UtenlandstilsnittVurdering = ({
   utenlandstilsnitt,
   redigerbar,
-  setVurder,
+  setVurdert,
   behandlingId,
 }: {
   utenlandstilsnitt: IUtenlandstilsnitt | undefined
   redigerbar: boolean
-  setVurder: (visVurderingKnapp: boolean) => void
+  setVurdert: (visVurderingKnapp: boolean) => void
   behandlingId: string
 }) => {
   const dispatch = useAppDispatch()
@@ -50,7 +50,7 @@ export const UtenlandstilsnittVurdering = ({
     setSvar(utenlandstilsnitt?.type)
     setRadioError('')
     setBegrunnelse(utenlandstilsnitt?.begrunnelse || '')
-    setVurder(utenlandstilsnitt !== null)
+    setVurdert(utenlandstilsnitt !== null)
     onSuccess?.()
   }
 

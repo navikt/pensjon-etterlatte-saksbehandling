@@ -39,7 +39,7 @@ export interface Hjemmel {
 const Virkningstidspunkt = (props: Props) => {
   const dispatch = useAppDispatch()
 
-  const [vurder, setVurder] = useState(props.virkningstidspunkt !== null)
+  const [vurdert, setVurdert] = useState(props.virkningstidspunkt !== null)
   const [formData, setFormData] = useState<Date | null>(
     props.virkningstidspunkt ? new Date(props.virkningstidspunkt.dato) : null
   )
@@ -84,7 +84,7 @@ const Virkningstidspunkt = (props: Props) => {
     setFormData(props.virkningstidspunkt ? new Date(props.virkningstidspunkt.dato) : null)
     setBegrunnelse(props.virkningstidspunkt?.begrunnelse ?? '')
     setErrorTekst('')
-    setVurder(props.virkningstidspunkt !== null)
+    setVurdert(props.virkningstidspunkt !== null)
     onSuccess?.()
   }
 
@@ -109,8 +109,8 @@ const Virkningstidspunkt = (props: Props) => {
         </div>
 
         <VurderingsContainerWrapper>
-          {!vurder ? (
-            <LeggTilVurderingButton onClick={() => setVurder(true)}>Legg til vurdering</LeggTilVurderingButton>
+          {!vurdert ? (
+            <LeggTilVurderingButton onClick={() => setVurdert(true)}>Legg til vurdering</LeggTilVurderingButton>
           ) : (
             <VurderingsboksWrapper
               tittel={''}

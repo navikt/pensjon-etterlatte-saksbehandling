@@ -27,7 +27,7 @@ data class BrevbakerRequest(
             attestant: Attestant?
         ): BrevbakerRequest {
             return BrevbakerRequest(
-                kode = EtterlatteBrevKode.BARNEPENSJON_VEDTAK, // TODO: Sett opp støtte for OMS
+                kode = EtterlatteBrevKode.BARNEPENSJON_VEDTAK, // TODO: Sett opp støtte for OMS - EY-1774
                 letterData = BrevDataMapper.fra(behandling, avsender, mottaker, attestant),
                 felles = Felles(
                     dokumentDato = LocalDate.now(),

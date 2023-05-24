@@ -6,10 +6,10 @@ import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.beregning.klienter.GrunnlagKlientImpl
-import no.nav.etterlatte.beregning.klienter.TrygdetidKlient
-import no.nav.etterlatte.beregning.klienter.VilkaarsvurderingKlient
 import no.nav.etterlatte.beregning.regler.bruker
+import no.nav.etterlatte.klienter.GrunnlagKlientImpl
+import no.nav.etterlatte.klienter.TrygdetidKlient
+import no.nav.etterlatte.klienter.VilkaarsvurderingKlient
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.beregning.Beregningstype

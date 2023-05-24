@@ -5,11 +5,11 @@ import io.ktor.server.config.HoconApplicationConfig
 import io.ktor.server.engine.applicationEngineEnvironment
 import io.ktor.server.engine.connector
 import io.ktor.server.engine.embeddedServer
+import no.nav.etterlatte.avkorting.avkorting
 import no.nav.etterlatte.avkorting.regulering.regulerAvkorting
-import no.nav.etterlatte.beregning.avkorting
 import no.nav.etterlatte.beregning.beregning
-import no.nav.etterlatte.beregning.config.ApplicationContext
 import no.nav.etterlatte.beregning.grunnlag.beregningsGrunnlag
+import no.nav.etterlatte.config.ApplicationContext
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.libs.ktor.setReady

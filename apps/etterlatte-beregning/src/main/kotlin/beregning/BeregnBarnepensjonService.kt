@@ -1,18 +1,17 @@
 package no.nav.etterlatte.beregning
 
 import beregning.regler.finnAnvendtGrunnbeloep
-import no.nav.etterlatte.beregning.grunnbeloep.GrunnbeloepRepository
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlag
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlagService
 import no.nav.etterlatte.beregning.grunnlag.PeriodisertBeregningGrunnlag
 import no.nav.etterlatte.beregning.grunnlag.mapVerdier
-import no.nav.etterlatte.beregning.klienter.GrunnlagKlient
-import no.nav.etterlatte.beregning.klienter.VilkaarsvurderingKlient
-import no.nav.etterlatte.beregning.regler.Beregningstall
 import no.nav.etterlatte.beregning.regler.barnepensjon.AvdoedForelder
 import no.nav.etterlatte.beregning.regler.barnepensjon.PeriodisertBarnepensjonGrunnlag
 import no.nav.etterlatte.beregning.regler.barnepensjon.kroneavrundetBarnepensjonRegel
 import no.nav.etterlatte.beregning.regler.barnepensjon.sats.grunnbeloep
+import no.nav.etterlatte.grunnbeloep.GrunnbeloepRepository
+import no.nav.etterlatte.klienter.GrunnlagKlient
+import no.nav.etterlatte.klienter.VilkaarsvurderingKlient
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
@@ -29,6 +28,7 @@ import no.nav.etterlatte.libs.regler.RegelPeriode
 import no.nav.etterlatte.libs.regler.RegelkjoeringResultat
 import no.nav.etterlatte.libs.regler.eksekver
 import no.nav.etterlatte.libs.regler.finnAnvendteRegler
+import no.nav.etterlatte.regler.Beregningstall
 import no.nav.etterlatte.token.Bruker
 import org.slf4j.LoggerFactory
 import java.time.LocalDate

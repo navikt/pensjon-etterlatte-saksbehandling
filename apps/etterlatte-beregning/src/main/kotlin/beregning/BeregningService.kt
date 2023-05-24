@@ -1,6 +1,6 @@
 package no.nav.etterlatte.beregning
 
-import no.nav.etterlatte.beregning.klienter.BehandlingKlient
+import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.token.Bruker
 import org.slf4j.LoggerFactory

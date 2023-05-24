@@ -1,6 +1,5 @@
 package no.nav.etterlatte.beregning.regler.barnepensjon.trygdetidsfaktor
 
-import no.nav.etterlatte.beregning.regler.Beregningstall
 import no.nav.etterlatte.beregning.regler.barnepensjon.AvdoedForelder
 import no.nav.etterlatte.beregning.regler.barnepensjon.BP_1967_DATO
 import no.nav.etterlatte.beregning.regler.barnepensjon.BarnepensjonGrunnlag
@@ -12,6 +11,7 @@ import no.nav.etterlatte.libs.regler.definerKonstant
 import no.nav.etterlatte.libs.regler.finnFaktumIGrunnlag
 import no.nav.etterlatte.libs.regler.med
 import no.nav.etterlatte.libs.regler.og
+import no.nav.etterlatte.regler.Beregningstall
 
 val trygdetidRegel: Regel<BarnepensjonGrunnlag, Beregningstall> =
     finnFaktumIGrunnlag(

@@ -1,8 +1,8 @@
 package no.nav.etterlatte.beregning.grunnlag
 
-import no.nav.etterlatte.beregning.klienter.BehandlingKlient
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
+import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.token.Bruker
 import org.slf4j.LoggerFactory

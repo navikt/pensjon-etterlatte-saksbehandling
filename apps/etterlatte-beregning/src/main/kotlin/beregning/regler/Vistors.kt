@@ -1,6 +1,6 @@
 package beregning.regler
 
-import no.nav.etterlatte.beregning.grunnbeloep.Grunnbeloep
+import no.nav.etterlatte.grunnbeloep.Grunnbeloep
 import no.nav.etterlatte.libs.regler.Node
 import no.nav.etterlatte.libs.regler.Regel
 import no.nav.etterlatte.libs.regler.SubsumsjonsNode

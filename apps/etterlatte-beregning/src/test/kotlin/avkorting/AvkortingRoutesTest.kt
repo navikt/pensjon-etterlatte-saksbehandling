@@ -66,13 +66,10 @@ class AvkortingRoutesTest {
 
     @Test
     fun `skal returnere avkorting med avkortingsgrunnlag og beregnet avkorting over flere perioder`() {
-        val avkortingGrunnlag = listOf(
-            avkortinggrunnlag(beregnetAvkorting = listOf()),
-            avkortinggrunnlag(beregnetAvkorting = listOf())
-        )
         every { avkortingService.hentAvkorting(any()) } returns Avkorting(
             behandlingId = UUID.randomUUID(),
-            avkortingGrunnlag = avkortingGrunnlag,
+            avkortingGrunnlag = listOf(avkortinggrunnlag(), avkortinggrunnlag()),
+            avkortingsperioder = emptyList(),
             avkortetYtelse = listOf(
                 avkortetYtelse(100, 1000, periode = Periode(YearMonth.of(2023, 1), YearMonth.of(2023, 1))),
                 avkortetYtelse(200, 2000, periode = Periode(YearMonth.of(2023, 2), YearMonth.of(2023, 2))),

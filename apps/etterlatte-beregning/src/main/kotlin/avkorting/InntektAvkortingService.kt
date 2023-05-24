@@ -21,8 +21,7 @@ object InntektAvkortingService {
 
     private val logger = LoggerFactory.getLogger(InntektAvkortingService::class.java)
 
-    fun beregnInntektsavkorting(avkortingGrunnlag: AvkortingGrunnlag): List<BeregnetAvkortingGrunnlag> {
-        // liste / periodisert grunnlag
+    fun beregnInntektsavkorting(avkortingGrunnlag: AvkortingGrunnlag): List<Avkortingsperiode> {
         logger.info("Beregner inntektsavkorting")
         val grunnlag = InntektAvkortingGrunnlag(
             inntekt = FaktumNode(verdi = avkortingGrunnlag.aarsinntekt, avkortingGrunnlag.kilde, "Forventet årsinntekt")
@@ -35,7 +34,7 @@ object InntektAvkortingService {
             is RegelkjoeringResultat.Suksess -> {
                 val tidspunkt = Tidspunkt.now()
                 resultat.periodiserteResultater.map { periodisertResultat ->
-                    BeregnetAvkortingGrunnlag(
+                    Avkortingsperiode(
                         periode = Periode(
                             fom = YearMonth.from(periodisertResultat.periode.fraDato),
                             tom = periodisertResultat.periode.tilDato?.let { YearMonth.from(it) }
@@ -59,9 +58,9 @@ object InntektAvkortingService {
 
     fun beregnAvkortetYtelse(
         beregninger: List<Beregningsperiode>,
-        avkortingGrunnlag: List<AvkortingGrunnlag>
+        avkortingsperioder: List<Avkortingsperiode>
     ): List<AvkortetYtelse> {
-        val regelgrunnlag = periodisertBruttoYtelseOgAvkorting(beregninger, avkortingGrunnlag)
+        val regelgrunnlag = periodisertBruttoYtelseOgAvkorting(beregninger, avkortingsperioder)
         return regelgrunnlag.map { grunnlag ->
             val resultat = avkorteYtelse.eksekver(KonstantGrunnlag(grunnlag), grunnlag.periode)
             when (resultat) {
@@ -94,19 +93,19 @@ object InntektAvkortingService {
     }
 
     private fun periodisertBruttoYtelseOgAvkorting(
-        beregninger: List<Beregningsperiode>,
-        avkortingGrunnlag: List<AvkortingGrunnlag>
+        beregningsperioder: List<Beregningsperiode>,
+        avkortingsperioder: List<Avkortingsperiode>
     ): List<AvkortetYtelseGrunnlag> {
-        val beregnedeAvkortinger = avkortingGrunnlag.flatMap { it.beregnetAvkorting }
-        val knekkpunkter = (beregninger.map { it.datoFOM }.toMutableSet() + beregnedeAvkortinger.map { it.periode.fom })
-            .toList().sorted()
+        val knekkpunkter = beregningsperioder.map { it.datoFOM }.union(
+            avkortingsperioder.map { it.periode.fom }
+        ).sorted()
 
         val avkortetYtelseGrunnlag = mutableListOf<AvkortetYtelseGrunnlag>()
         knekkpunkter.forEachIndexed { indeks, knekkpunkt ->
-            val beregning = beregninger.filter { it.datoFOM <= knekkpunkt }.maxByOrNull { it.datoFOM }
+            val beregning = beregningsperioder.filter { it.datoFOM <= knekkpunkt }.maxByOrNull { it.datoFOM }
                 ?: throw Exception("Noe gikk galt ved uthenting av grunnlag for avkorting")
 
-            val beregnetAvkorting = beregnedeAvkortinger.filter { it.periode.fom <= knekkpunkt }
+            val beregnetAvkorting = avkortingsperioder.filter { it.periode.fom <= knekkpunkt }
                 .maxByOrNull { it.periode.fom }
                 ?: throw Exception("Noe gikk galt ved uthenting av grunnlag for avkorting")
 

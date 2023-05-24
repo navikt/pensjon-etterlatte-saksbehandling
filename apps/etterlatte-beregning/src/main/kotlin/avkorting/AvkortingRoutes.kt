@@ -74,6 +74,5 @@ fun AvkortingGrunnlagDto.fromDto(bruker: Bruker) = AvkortingGrunnlag(
     periode = Periode(fom = fom, tom = null),
     aarsinntekt = aarsinntekt,
     spesifikasjon = spesifikasjon,
-    kilde = Grunnlagsopplysning.Saksbehandler(bruker.ident(), Tidspunkt.now()),
-    beregnetAvkorting = emptyList()
+    kilde = Grunnlagsopplysning.Saksbehandler(bruker.ident(), Tidspunkt.now())
 )

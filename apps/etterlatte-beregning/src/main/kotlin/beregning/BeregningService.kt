@@ -19,6 +19,10 @@ class BeregningService(
         return beregningRepository.hent(behandlingId)
     }
 
+    fun hentBeregningNonnull(behandlingId: UUID): Beregning {
+        return hentBeregning(behandlingId) ?: throw Exception("Mangler beregning for behandlingId=$behandlingId")
+    }
+
     suspend fun opprettBeregning(behandlingId: UUID, bruker: Bruker): Beregning {
         logger.info("Oppretter beregning for behandlingId=$behandlingId")
         val kanBeregneYtelse = behandlingKlient.beregn(behandlingId, bruker, commit = false)

@@ -9,6 +9,7 @@ import java.util.*
 data class Avkorting(
     val behandlingId: UUID,
     val avkortingGrunnlag: List<AvkortingGrunnlag>,
+    val avkortingsperioder: List<Avkortingsperiode>,
     val avkortetYtelse: List<AvkortetYtelse>
 )
 
@@ -16,11 +17,10 @@ data class AvkortingGrunnlag(
     val periode: Periode,
     val aarsinntekt: Int,
     val spesifikasjon: String,
-    val beregnetAvkorting: List<BeregnetAvkortingGrunnlag>,
     val kilde: Grunnlagsopplysning.Saksbehandler
 )
 
-data class BeregnetAvkortingGrunnlag(
+data class Avkortingsperiode(
     val periode: Periode,
     val avkorting: Int,
     val tidspunkt: Tidspunkt,

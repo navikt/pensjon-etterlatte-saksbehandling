@@ -13,6 +13,7 @@ import no.nav.etterlatte.behandling.domain.SaksbehandlerTema
 import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.getXCorrelationId
 import no.nav.etterlatte.libs.ktor.PingResult
+import no.nav.etterlatte.libs.ktor.Pingable
 import no.nav.etterlatte.libs.ktor.ping
 import org.slf4j.LoggerFactory
 import java.time.Duration
@@ -31,7 +32,7 @@ interface NavAnsattKlient {
 class NavAnsattKlientImpl(
     private val client: HttpClient,
     private val url: String
-) : NavAnsattKlient {
+) : NavAnsattKlient, Pingable {
     private val logger = LoggerFactory.getLogger(NavAnsattKlientImpl::class.java)
     private val enhetCache = Caffeine.newBuilder()
         .expireAfterWrite(Duration.ofMinutes(15))
@@ -83,12 +84,19 @@ class NavAnsattKlientImpl(
             throw RuntimeException("Feil i kall mot navansatt med ident: $ident", exception)
         }
 
-    suspend fun ping(): PingResult {
+    override val serviceName: String
+        get() = "Navansatt"
+    override val beskrivelse: String
+        get() = "Henter enheter for saksbehandlerident"
+    override val endpoint: String
+        get() = this.url
+
+    override suspend fun ping(): PingResult {
         return client.ping(
             url = url.plus("/ping"),
             logger = logger,
-            serviceName = "Navansatt",
-            beskrivelse = "Henter enheter for saksbehandlerident",
+            serviceName = serviceName,
+            beskrivelse = beskrivelse,
             konsument = "etterlatte-behandling"
         )
     }

@@ -36,10 +36,17 @@ suspend fun HttpClient.ping(
     }
 }
 
-@OptIn(DelicateCoroutinesApi::class)
-fun asyncPing(pingFunc: suspend () -> PingResult) {
-    GlobalScope.launch(newSingleThreadContext("pingThread")) {
-        pingFunc()
+interface Pingable {
+    val serviceName: String
+    val beskrivelse: String
+    val endpoint: String
+    suspend fun ping(): PingResult
+
+    @OptIn(DelicateCoroutinesApi::class)
+    fun asyncPing() {
+        GlobalScope.launch(newSingleThreadContext("pingThread")) {
+            ping()
+        }
     }
 }
 

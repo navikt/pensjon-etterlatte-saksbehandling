@@ -26,14 +26,17 @@ export const NavLenke = (props: { path: string; behandling: IBehandlingReducer }
       </>
     )
   }
+  let routeIsDisabled = false
+  if (props.path === 'vilkaarsvurdering') {
+    routeIsDisabled = stegErDisabled(IBehandlingStatus.VILKAARSVURDERT)
+  } else if (props.path === 'beregne') {
+    routeIsDisabled = stegErDisabled(IBehandlingStatus.BEREGNET)
+  }
   return (
     <>
       <li
         className={classNames({
-          disabled:
-            props.path.toUpperCase() in IBehandlingStatus
-              ? stegErDisabled(props.path.toUpperCase() as IBehandlingStatus)
-              : false,
+          disabled: routeIsDisabled,
         })}
       >
         <NavLink to={props.path}>{makeFirstLetterCapitalized(props.path)}</NavLink>

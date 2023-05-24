@@ -3,20 +3,37 @@ import styled from 'styled-components'
 import { Next } from '@navikt/ds-icons'
 import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 import classNames from 'classnames'
-import { kanGaaTilStatus } from '~components/behandling/felles/utils'
+import { behandlingSkalSendeBrev, kanGaaTilStatus } from '~components/behandling/felles/utils'
+import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
 
-export const NavLenke = (props: { path: string; status: IBehandlingStatus }) => {
+export const NavLenke = (props: { path: string; behandling: IBehandlingReducer }) => {
+  const { status } = props.behandling
+  const stegErDisabled = (steg: IBehandlingStatus) => !kanGaaTilStatus(status).includes(steg)
   if (props.path == 'brev') {
-    return <></>
+    return (
+      <>
+        {behandlingSkalSendeBrev(props.behandling) && (
+          <>
+            <li
+              className={classNames({
+                disabled: stegErDisabled(IBehandlingStatus.FATTET_VEDTAK),
+              })}
+            >
+              <NavLink to="brev">Vedtaksbrev</NavLink>
+            </li>
+          </>
+        )}
+      </>
+    )
   }
-  const stegErDisabled = (steg: IBehandlingStatus) => !kanGaaTilStatus(props.status).includes(steg)
-
   return (
     <>
       <li
         className={classNames({
           disabled:
-            props.path.toUpperCase() in IBehandlingStatus ? stegErDisabled(IBehandlingStatus.VILKAARSVURDERT) : false,
+            props.path.toUpperCase() in IBehandlingStatus
+              ? stegErDisabled(props.path.toUpperCase() as IBehandlingStatus)
+              : false,
         })}
       >
         <NavLink to={props.path}>{makeFirstLetterCapitalized(props.path)}</NavLink>

@@ -1,39 +1,24 @@
 import styled from 'styled-components'
-import { NavLink } from 'react-router-dom'
-import classNames from 'classnames'
-import { IBehandlingStatus, IBehandlingsType } from '~shared/types/IDetaljertBehandling'
-import { behandlingSkalSendeBrev, kanGaaTilStatus } from '~components/behandling/felles/utils'
+import { IBehandlingsType } from '~shared/types/IDetaljertBehandling'
 import { NavLenke } from '~components/behandling/StegMeny/NavLenke'
 import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
 import { manueltOpphoerRoutes, revurderingRoutes, soeknadRoutes } from '~components/behandling/BehandlingRoutes'
 
 export const StegMeny = (props: { behandling: IBehandlingReducer }) => {
-  const { behandlingType, status } = props.behandling
-  const stegErDisabled = (steg: IBehandlingStatus) => !kanGaaTilStatus(status).includes(steg)
+  const { behandlingType } = props.behandling
   let links: JSX.Element[] = []
   if (behandlingType === IBehandlingsType.MANUELT_OPPHOER) {
-    links = manueltOpphoerRoutes.map((path) => <NavLenke key={path} path={path} status={status} />)
+    links = manueltOpphoerRoutes.map((path) => <NavLenke key={path} path={path} behandling={props.behandling} />)
   } else if (behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING) {
-    links = soeknadRoutes(props.behandling).map((path) => <NavLenke key={path} path={path} status={status} />)
+    links = soeknadRoutes(props.behandling).map((path) => (
+      <NavLenke key={path} path={path} behandling={props.behandling} />
+    ))
   } else if (behandlingType === IBehandlingsType.REVURDERING) {
-    links = revurderingRoutes(props.behandling).map((path) => <NavLenke key={path} path={path} status={status} />)
+    links = revurderingRoutes(props.behandling).map((path) => (
+      <NavLenke key={path} path={path} behandling={props.behandling} />
+    ))
   }
-  return (
-    <StegMenyWrapper role="navigation">
-      {links}
-      {behandlingSkalSendeBrev(props.behandling) && (
-        <>
-          <li
-            className={classNames({
-              disabled: stegErDisabled(IBehandlingStatus.FATTET_VEDTAK),
-            })}
-          >
-            <NavLink to="brev">Vedtaksbrev</NavLink>
-          </li>
-        </>
-      )}
-    </StegMenyWrapper>
-  )
+  return <StegMenyWrapper role="navigation">{links}</StegMenyWrapper>
 }
 
 const StegMenyWrapper = styled.ul`

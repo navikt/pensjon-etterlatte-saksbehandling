@@ -22,7 +22,7 @@ import no.nav.etterlatte.brev.model.OpprettNyttBrev
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.libs.common.toJson
-import no.nav.pensjon.brev.api.model.Foedselsnummer
+import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
 import java.util.*
 import javax.sql.DataSource
 

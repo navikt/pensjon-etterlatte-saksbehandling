@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonValue
 import no.nav.etterlatte.brev.adresse.RegoppslagResponseDTO
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
-import no.nav.pensjon.brev.api.model.Foedselsnummer
+import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
 import java.util.*
 
 typealias BrevID = Long

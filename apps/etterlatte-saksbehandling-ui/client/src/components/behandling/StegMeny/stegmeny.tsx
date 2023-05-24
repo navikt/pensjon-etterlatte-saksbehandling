@@ -6,18 +6,19 @@ import { manueltOpphoerRoutes, revurderingRoutes, soeknadRoutes } from '~compone
 
 export const StegMeny = (props: { behandling: IBehandlingReducer }) => {
   const { behandlingType } = props.behandling
-  let links: JSX.Element[] = []
-  console.log('type: ', behandlingType)
-  if (behandlingType === IBehandlingsType.MANUELT_OPPHOER) {
-    links = manueltOpphoerRoutes.map((path) => <NavLenke key={path} path={path} behandling={props.behandling} />)
-  } else if (behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING) {
-    links = soeknadRoutes.map((path) => <NavLenke key={path} path={path} behandling={props.behandling} />)
-  } else if (behandlingType === IBehandlingsType.REVURDERING) {
-    links = revurderingRoutes(props.behandling).map((path) => (
-      <NavLenke key={path} path={path} behandling={props.behandling} />
-    ))
-  }
-  return <StegMenyWrapper role="navigation">{links}</StegMenyWrapper>
+
+  return (
+    <StegMenyWrapper role="navigation">
+      {behandlingType === IBehandlingsType.MANUELT_OPPHOER &&
+        manueltOpphoerRoutes.map((path) => <NavLenke key={path} path={path} behandling={props.behandling} />)}
+      {behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING &&
+        soeknadRoutes.map((path) => <NavLenke key={path} path={path} behandling={props.behandling} />)}
+      {behandlingType === IBehandlingsType.REVURDERING &&
+        revurderingRoutes(props.behandling).map((path) => (
+          <NavLenke key={path} path={path} behandling={props.behandling} />
+        ))}
+    </StegMenyWrapper>
+  )
 }
 
 const StegMenyWrapper = styled.ul`

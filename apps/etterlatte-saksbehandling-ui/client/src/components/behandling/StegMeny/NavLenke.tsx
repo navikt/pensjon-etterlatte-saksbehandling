@@ -11,7 +11,7 @@ export const NavLenke = (props: { path: string; behandling: IBehandlingReducer }
   const { status } = props.behandling
   const stegErDisabled = (steg: IBehandlingStatus) => !kanGaaTilStatus(status).includes(steg)
   if (props.path == 'brev') {
-    let status = IBehandlingStatus.BEREGNET
+    let status = IBehandlingStatus.BEREGNET //BP krav for å gå til brev
     if (props.behandling.sakType === ISaksType.OMSTILLINGSSTOENAD) {
       status = IBehandlingStatus.AVKORTET
     }

@@ -7,6 +7,7 @@ import io.kotest.matchers.ints.shouldBeExactly
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.respond
+import io.ktor.client.engine.mock.respondError
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
@@ -69,12 +70,34 @@ internal class NavAnsattKlientTest {
                     }
                 }
             }
+            expectSuccess = true
         }
 
-        val navAnsattKlient: NavAnsattKlientImpl = NavAnsattKlientImpl(klient, "navansatt")
+        val navAnsattKlient = NavAnsattKlientImpl(klient, "navansatt")
         runBlocking {
             val ping = navAnsattKlient.ping()
             ping.status shouldBeEqualComparingTo ServiceStatus.UP
+        }
+    }
+
+    @Test
+    fun `ping it 404`() {
+        val klient = HttpClient(MockEngine) {
+            engine {
+                addHandler { request ->
+                    when (request.url.fullPath) {
+                        "/navansatt/ping" -> respondError(HttpStatusCode.NotFound)
+                        else -> error("Unhandled ${request.url.fullPath}")
+                    }
+                }
+            }
+            expectSuccess = true
+        }
+
+        val navAnsattKlient = NavAnsattKlientImpl(klient, "navansatt")
+        runBlocking {
+            val ping = navAnsattKlient.ping()
+            ping.status shouldBeEqualComparingTo ServiceStatus.DOWN
         }
     }
 

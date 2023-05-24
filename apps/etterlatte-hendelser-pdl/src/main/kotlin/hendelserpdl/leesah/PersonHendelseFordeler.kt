@@ -19,7 +19,7 @@ class PersonHendelseFordeler(
     private val logger: Logger = LoggerFactory.getLogger(PersonHendelseFordeler::class.java)
 
     suspend fun haandterHendelse(personhendelse: Personhendelse) {
-        if (personhendelse.personidenter.first() == null) {
+        if (personhendelse.personidenter.isNullOrEmpty()) {
             sikkerLogg.info("hendelse uten personident hendelseid: ${personhendelse.hendelseId}", personhendelse)
         } else {
             when (personhendelse.opplysningstype) {

@@ -86,9 +86,19 @@ class VedtaksbrevService(
         val pdf = genererPdf(behandling, brev.mottaker)
 
         if (behandling.vedtak.status == VedtakStatus.FATTET_VEDTAK) {
-            logger.info("Behandling har fått status ${VedtakStatus.FATTET_VEDTAK} – låser brevets innhold")
+            logger.info(
+                "Vedtak fattet på behandling (id=${behandling.behandlingId}). " +
+                    "Sjekker om brev (id=${brev.id}) kan ferdigstilles"
+            )
+
             if (behandling.vedtak.saksbehandler.ident != bruker.ident()) {
+                logger.info("Ferdigstiller brev med id=${brev.id}")
                 db.opprettInnholdOgFerdigstill(brev.id, BrevInnhold(behandling.spraak, pdf))
+            } else {
+                logger.warn(
+                    "Kan ikke ferdigstille/låse brev når saksbehandler (${behandling.vedtak.saksbehandler.ident})" +
+                        " og attestant (${bruker.ident()}) er samme person."
+                )
             }
         }
 

@@ -128,6 +128,8 @@ class VedtaksvurderingService(
 
         verifiserGyldigBehandlingStatus(behandlingKlient.attester(behandlingId, bruker), vedtak)
         verifiserGyldigVedtakStatus(vedtak.status, listOf(VedtakStatus.FATTET_VEDTAK))
+        verifiserGyldigAttestant(vedtak.vedtakFattet!!.ansvarligSaksbehandler, bruker)
+
         val (behandling, _, _, sak) = hentDataForVedtak(behandlingId, bruker)
 
         val attestertVedtak = repository.attesterVedtak(
@@ -233,6 +235,10 @@ class VedtaksvurderingService(
 
     private fun verifiserGyldigVedtakStatus(gjeldendeStatus: VedtakStatus, forventetStatus: List<VedtakStatus>) {
         if (gjeldendeStatus !in forventetStatus) throw VedtakTilstandException(gjeldendeStatus, forventetStatus)
+    }
+
+    private fun verifiserGyldigAttestant(ansvarligSaksbehandler: String, innloggetBruker: Bruker) {
+        if (ansvarligSaksbehandler == innloggetBruker.ident()) throw UgyldigAttestantException(innloggetBruker.ident())
     }
 
     private fun opprettVedtak(
@@ -414,5 +420,8 @@ class VedtakTilstandException(gjeldendeStatus: VedtakStatus, forventetStatus: Li
 
 class BehandlingstilstandException(vedtak: Vedtak) :
     IllegalStateException("Statussjekk for behandling ${vedtak.behandlingId} feilet")
+
+class UgyldigAttestantException(ident: String) :
+    IllegalArgumentException("Saksbehandler og attestant må være to forskjellige personer (ident=$ident)")
 
 class SaksbehandlerManglerEnhetException(message: String) : Exception(message)

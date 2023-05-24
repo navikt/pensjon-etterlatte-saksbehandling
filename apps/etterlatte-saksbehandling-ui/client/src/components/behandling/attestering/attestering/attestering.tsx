@@ -3,6 +3,8 @@ import { useBehandlingRoutes } from '~components/behandling/BehandlingRoutes'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { IBeslutning } from '../types'
 import { Beslutningsvalg } from './beslutningsvalg'
+import { useAppSelector } from '~store/Store'
+import { Alert } from '@navikt/ds-react'
 
 type Props = {
   setBeslutning: (value: IBeslutning) => void
@@ -10,8 +12,12 @@ type Props = {
   behandling: IDetaljertBehandling
 }
 
-export const Attestering: React.FC<Props> = ({ setBeslutning, beslutning, behandling }) => {
+export const Attestering = ({ setBeslutning, beslutning, behandling }: Props) => {
   const { lastPage } = useBehandlingRoutes()
+
+  const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.saksbehandler)
+
+  const attestantOgSaksbehanderErSammerPerson = behandling.saksbehandlerId === innloggetSaksbehandler.ident
 
   return (
     <AttesteringWrapper>
@@ -21,11 +27,17 @@ export const Attestering: React.FC<Props> = ({ setBeslutning, beslutning, behand
       <TextWrapper>
         Beslutning
         {lastPage ? (
-          <Beslutningsvalg beslutning={beslutning} setBeslutning={setBeslutning} behandling={behandling} />
+          <Beslutningsvalg
+            beslutning={beslutning}
+            setBeslutning={setBeslutning}
+            behandling={behandling}
+            disabled={attestantOgSaksbehanderErSammerPerson}
+          />
         ) : (
-          <>
-            <Tekst>Se gjennom alle steg før du tar en beslutning.</Tekst>
-          </>
+          <Tekst>Se gjennom alle steg før du tar en beslutning.</Tekst>
+        )}
+        {attestantOgSaksbehanderErSammerPerson && (
+          <Alert variant={'warning'}>Du kan ikke attestere en sak som du har saksbehandlet</Alert>
         )}
       </TextWrapper>
     </AttesteringWrapper>

@@ -8,4 +8,5 @@ repositories {
 
 dependencies {
     implementation(project(":libs:saksbehandling-common"))
+    implementation(project(":libs:etterlatte-regler"))
 }

@@ -461,13 +461,13 @@ class RealGenerellBehandlingServiceTest {
         sut.oppdaterUtenlandstilsnitt(
             uuid,
             Utenlandstilsnitt(
-                UtenlandstilsnittType.UTLAND_BOSATT_UTLAND,
+                UtenlandstilsnittType.BOSATT_UTLAND,
                 Grunnlagsopplysning.Saksbehandler.create("ident"),
                 "Test"
             )
         )
 
-        assertEquals(UtenlandstilsnittType.UTLAND_BOSATT_UTLAND, slot.captured.type)
+        assertEquals(UtenlandstilsnittType.BOSATT_UTLAND, slot.captured.type)
         assertEquals("Test", slot.captured.begrunnelse)
         assertEquals("ident", slot.captured.kilde.ident)
     }

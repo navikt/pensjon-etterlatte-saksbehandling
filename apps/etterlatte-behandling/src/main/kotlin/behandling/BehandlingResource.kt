@@ -3,6 +3,7 @@ package no.nav.etterlatte.behandling
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.behandling.Utenlandstilsnitt
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import java.time.LocalDateTime
 import java.util.*
@@ -18,5 +19,6 @@ data class BehandlingSammendrag(
     val behandlingOpprettet: LocalDateTime?,
     val behandlingType: BehandlingType,
     val aarsak: String?,
-    val virkningstidspunkt: Virkningstidspunkt?
+    val virkningstidspunkt: Virkningstidspunkt?,
+    val utenlandstilsnitt: Utenlandstilsnitt?
 )

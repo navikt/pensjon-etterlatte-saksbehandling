@@ -80,7 +80,7 @@ internal class BehandlingRoutesTest {
             val response = client.post("/api/behandling/$behandlingId/utenlandstilsnitt") {
                 header(HttpHeaders.Authorization, "Bearer $token")
                 contentType(ContentType.Application.Json)
-                setBody(UtenlandstilsnittRequest(UtenlandstilsnittType.UTLAND_BOSATT_UTLAND, "Test"))
+                setBody(UtenlandstilsnittRequest(UtenlandstilsnittType.BOSATT_UTLAND, "Test"))
             }
 
             assertEquals(200, response.status.value)

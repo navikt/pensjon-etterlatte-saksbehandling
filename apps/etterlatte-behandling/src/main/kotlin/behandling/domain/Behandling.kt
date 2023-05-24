@@ -178,5 +178,6 @@ fun Behandling.toBehandlingSammendrag() = BehandlingSammendrag(
         is Revurdering -> this.revurderingsaarsak?.name ?: "REVURDERING"
         is ManueltOpphoer -> "MANUELT_OPPHOER"
     },
-    virkningstidspunkt = this.virkningstidspunkt
+    virkningstidspunkt = this.virkningstidspunkt,
+    utenlandstilsnitt = this.utenlandstilsnitt
 )

@@ -224,7 +224,7 @@ internal class BehandlingDaoIntegrationTest {
         behandlingRepo.lagreUtenlandstilsnitt(
             opprettetBehandling.id,
             Utenlandstilsnitt(
-                UtenlandstilsnittType.UTLAND_BOSATT_UTLAND,
+                UtenlandstilsnittType.BOSATT_UTLAND,
                 Grunnlagsopplysning.Saksbehandler.create("navIdent"),
                 "Test"
             )
@@ -233,7 +233,7 @@ internal class BehandlingDaoIntegrationTest {
         val lagretBehandling =
             requireNotNull(behandlingRepo.hentBehandling(opprettBehandling.id)) as Foerstegangsbehandling
 
-        assertEquals(UtenlandstilsnittType.UTLAND_BOSATT_UTLAND, lagretBehandling.utenlandstilsnitt?.type)
+        assertEquals(UtenlandstilsnittType.BOSATT_UTLAND, lagretBehandling.utenlandstilsnitt?.type)
         assertEquals("Test", lagretBehandling.utenlandstilsnitt?.begrunnelse)
         assertEquals("navIdent", lagretBehandling.utenlandstilsnitt?.kilde?.ident)
     }

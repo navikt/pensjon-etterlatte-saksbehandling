@@ -17,7 +17,7 @@ export const Attestering = ({ setBeslutning, beslutning, behandling }: Props) =>
 
   const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.saksbehandler)
 
-  const attestantOgSaksbehanderErSammerPerson = behandling.saksbehandlerId === innloggetSaksbehandler.ident
+  const attestantOgSaksbehandlerErSammePerson = behandling.saksbehandlerId === innloggetSaksbehandler.ident
 
   return (
     <AttesteringWrapper>
@@ -31,12 +31,12 @@ export const Attestering = ({ setBeslutning, beslutning, behandling }: Props) =>
             beslutning={beslutning}
             setBeslutning={setBeslutning}
             behandling={behandling}
-            disabled={attestantOgSaksbehanderErSammerPerson}
+            disabled={attestantOgSaksbehandlerErSammePerson}
           />
         ) : (
           <Tekst>Se gjennom alle steg før du tar en beslutning.</Tekst>
         )}
-        {attestantOgSaksbehanderErSammerPerson && (
+        {attestantOgSaksbehandlerErSammePerson && (
           <Alert variant={'warning'}>Du kan ikke attestere en sak som du har saksbehandlet</Alert>
         )}
       </TextWrapper>

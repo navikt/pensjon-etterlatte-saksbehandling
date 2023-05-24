@@ -7,10 +7,12 @@ import no.nav.etterlatte.brev.model.BrevEventTypes
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
+import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.SKAL_SENDE_BREV
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
+import no.nav.etterlatte.libs.common.sak.VedtakSak
 import no.nav.etterlatte.libs.common.vedtak.KafkaHendelseType
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -33,6 +35,7 @@ internal class JournalfoerVedtaksbrev(
             validate { it.requireKey("vedtak.behandling.id") }
             validate { it.requireKey("vedtak.sak.id") }
             validate { it.requireKey("vedtak.sak.ident") }
+            validate { it.requireKey("vedtak.sak.sakType") }
             validate { it.requireKey("vedtak.vedtakFattet.ansvarligEnhet") }
             validate {
                 it.rejectValues("vedtak.behandling.type", listOf(BehandlingType.MANUELT_OPPHOER.name))
@@ -46,9 +49,8 @@ internal class JournalfoerVedtaksbrev(
             withLogContext {
                 val vedtak = VedtakTilJournalfoering(
                     vedtakId = packet["vedtak.vedtakId"].asLong(),
-                    sakId = packet["vedtak.sak.id"].asLong(),
+                    sak = deserialize(packet["vedtak.sak"].asText()),
                     behandlingId = UUID.fromString(packet["vedtak.behandling.id"].asText()),
-                    soekerIdent = packet["vedtak.sak.ident"].asText(),
                     ansvarligEnhet = packet["vedtak.vedtakFattet.ansvarligEnhet"].asText()
                 )
                 logger.info("Nytt vedtak med id ${vedtak.vedtakId} er attestert. Ferdigstiller vedtaksbrev.")
@@ -98,8 +100,7 @@ internal class JournalfoerVedtaksbrev(
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class VedtakTilJournalfoering(
     val vedtakId: Long,
-    val sakId: Long,
+    val sak: VedtakSak,
     val behandlingId: UUID,
-    val soekerIdent: String,
     val ansvarligEnhet: String
 )

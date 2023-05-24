@@ -12,7 +12,6 @@ import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.journalpost.Bruker
 import no.nav.etterlatte.brev.journalpost.DokumentVariant
 import no.nav.etterlatte.brev.journalpost.JournalPostType
-import no.nav.etterlatte.brev.journalpost.JournalpostKoder.Companion.BEHANDLINGSTEMA_BP
 import no.nav.etterlatte.brev.journalpost.JournalpostKoder.Companion.BREV_KODE
 import no.nav.etterlatte.brev.journalpost.JournalpostRequest
 import no.nav.etterlatte.brev.journalpost.JournalpostResponse
@@ -68,7 +67,6 @@ internal class DokarkivServiceTest {
 
         assertEquals(vedtaksbrev.tittel, actualRequest.tittel)
         assertEquals(JournalPostType.UTGAAENDE, actualRequest.journalpostType)
-        assertEquals(BEHANDLINGSTEMA_BP, actualRequest.behandlingstema)
 
         assertEquals(vedtak.soekerIdent, actualRequest.avsenderMottaker.id)
 

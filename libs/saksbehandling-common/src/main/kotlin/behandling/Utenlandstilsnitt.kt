@@ -10,6 +10,6 @@ data class Utenlandstilsnitt(
 
 enum class UtenlandstilsnittType {
     NASJONAL,
-    UTLAND_BOSATT_NORGE,
-    UTLAND_BOSATT_UTLAND
+    UTLANDSTILSNITT,
+    BOSATT_UTLAND
 }

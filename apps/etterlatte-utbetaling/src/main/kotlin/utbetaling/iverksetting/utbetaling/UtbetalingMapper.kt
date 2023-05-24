@@ -1,5 +1,6 @@
 package no.nav.etterlatte.utbetaling.iverksetting.utbetaling
 
+import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.utbetaling.common.forsteDagIMaaneden
 import no.nav.etterlatte.utbetaling.common.sisteDagIMaaneden
@@ -16,8 +17,7 @@ class UtbetalingMapper(
     private val utbetalingsperioder = vedtak.pensjonTilUtbetaling.sortedBy { it.periode.fom }
 
     fun opprettUtbetaling(): Utbetaling {
-        if (tidligereUtbetalinger.isEmpty() &&
-            utbetalingsperioder.size == 1 &&
+        if (tidligereUtbetalinger.isEmpty() && utbetalingsperioder.size == 1 &&
             utbetalingsperioder.first().type == UtbetalingsperiodeType.OPPHOER
         ) {
             throw IngenEksisterendeUtbetalingException()
@@ -72,6 +72,10 @@ class UtbetalingMapper(
             klassifikasjonskode = when (saktype) {
                 Saktype.BARNEPENSJON -> OppdragKlassifikasjonskode.BARNEPENSJON_OPTP
                 Saktype.OMSTILLINGSSTOENAD -> TODO("Kanskje det er samme som over men vi kræsjer dette i stedet")
+            },
+            brukKjoereplan = when (vedtak.behandling.revurderingsaarsak) {
+                RevurderingAarsak.REGULERING -> BrukKjoereplan.NESTE_PLANLAGTE_UTBETALING
+                else -> BrukKjoereplan.MED_EN_GANG
             }
         )
     }

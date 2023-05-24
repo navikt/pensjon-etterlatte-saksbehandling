@@ -33,12 +33,12 @@ class PersonHendelseFordeler(
             personhendelse.vergemaalEllerFremtidsfullmakt
         if (vergemaalEllerFremtidsfullmakt?.type in
             listOf(
-                    "ensligMindreaarigAsylsoeker",
-                    "ensligMindreaarigFlyktning",
-                    "mindreaarig",
-                    "midlertidigForMindreaarig",
-                    "forvaltningUtenforVergemaal"
-                )
+                "ensligMindreaarigAsylsoeker",
+                "ensligMindreaarigFlyktning",
+                "mindreaarig",
+                "midlertidigForMindreaarig",
+                "forvaltningUtenforVergemaal"
+            )
         ) {
             try {
                 when (val personnummer = pdlService.hentPdlIdentifikator(personhendelse.personidenter.first())) {

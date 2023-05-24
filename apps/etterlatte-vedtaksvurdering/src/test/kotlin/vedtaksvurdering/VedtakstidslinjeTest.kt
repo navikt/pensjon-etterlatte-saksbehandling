@@ -281,6 +281,7 @@ private fun lagVedtak(
             attesterendeEnhet = ENHET_2,
             tidspunkt = datoAttestert
         ),
-        utbetalingsperioder = emptyList()
+        utbetalingsperioder = emptyList(),
+        revurderingAarsak = null
     )
 }

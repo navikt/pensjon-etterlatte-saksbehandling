@@ -76,9 +76,9 @@ class UtbetalingDao(private val dataSource: DataSource) {
         queryOf(
             statement = """
                 INSERT INTO utbetalingslinje(id, type, utbetaling_id, erstatter_id, opprettet, periode_fra, periode_til, 
-                    beloep, sak_id, klassifikasjonskode)
+                    beloep, sak_id, klassifikasjonskode, bruk_kjoereplan)
                 VALUES(:id, :type, :utbetaling_id, :erstatter_id, :opprettet, :periode_fra, :periode_til,  
-                    :beloep, :sak_id, :klassifikasjonskode)
+                    :beloep, :sak_id, :klassifikasjonskode, :bruk_kjoereplan)
             """,
             paramMap = mapOf(
                 "id" to utbetalingslinje.id.value.param(),
@@ -90,7 +90,8 @@ class UtbetalingDao(private val dataSource: DataSource) {
                 "periode_fra" to utbetalingslinje.periode.fra.param(),
                 "periode_til" to utbetalingslinje.periode.til.param(),
                 "beloep" to utbetalingslinje.beloep.param(),
-                "klassifikasjonskode" to utbetalingslinje.klassifikasjonskode.toString().param()
+                "klassifikasjonskode" to utbetalingslinje.klassifikasjonskode.toString().param(),
+                "bruk_kjoereplan" to utbetalingslinje.brukKjoereplan.toString().param()
             )
         ).let { tx.run(it.asUpdate) }
     }
@@ -167,7 +168,7 @@ class UtbetalingDao(private val dataSource: DataSource) {
             queryOf(
                 statement = """
                     SELECT id, type, utbetaling_id, erstatter_id, opprettet, periode_fra, periode_til, beloep, sak_id,
-                        klassifikasjonskode
+                        klassifikasjonskode, bruk_kjoereplan
                     FROM utbetalingslinje 
                     WHERE utbetaling_id = :utbetalingId
                     """,
@@ -182,7 +183,7 @@ class UtbetalingDao(private val dataSource: DataSource) {
         queryOf(
             statement = """
                     SELECT ul.id, ul.type, ul.utbetaling_id, ul.erstatter_id, ul.opprettet, ul.periode_fra, ul.periode_til, ul.beloep, ul.sak_id,
-                        ul.klassifikasjonskode
+                        ul.klassifikasjonskode, ul.bruk_kjoereplan
                     FROM utbetalingslinje as ul 
                     INNER JOIN utbetaling as u
                         ON ul.utbetaling_id = u.id
@@ -377,7 +378,8 @@ class UtbetalingDao(private val dataSource: DataSource) {
                 til = localDateOrNull("periode_til")
             ),
             beloep = bigDecimalOrNull("beloep"),
-            klassifikasjonskode = OppdragKlassifikasjonskode.fraString(string("klassifikasjonskode"))
+            klassifikasjonskode = OppdragKlassifikasjonskode.fraString(string("klassifikasjonskode")),
+            brukKjoereplan = string("bruk_kjoereplan").let { BrukKjoereplan.fraKode(it) }
         )
     }
 

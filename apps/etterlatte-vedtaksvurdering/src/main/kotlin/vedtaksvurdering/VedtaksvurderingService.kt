@@ -7,6 +7,7 @@ import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
+import no.nav.etterlatte.libs.common.rapidsandrivers.REVURDERING_AARSAK
 import no.nav.etterlatte.libs.common.rapidsandrivers.SKAL_SENDE_BREV
 import no.nav.etterlatte.libs.common.rapidsandrivers.TEKNISK_TID_KEY
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -111,7 +112,7 @@ class VedtaksvurderingService(
         )
 
         sendToRapid(
-            lagStatistikkMelding(
+            lagRiverMelding(
                 vedtakhendelse = KafkaHendelseType.FATTET,
                 vedtak = fattetVedtak,
                 tekniskTid = fattetVedtak.vedtakFattet.tidspunkt.toLocalDatetimeUTC()
@@ -151,7 +152,7 @@ class VedtaksvurderingService(
         )
 
         sendToRapid(
-            lagStatistikkMelding(
+            lagRiverMelding(
                 vedtakhendelse = KafkaHendelseType.ATTESTERT,
                 vedtak = attestertVedtak,
                 tekniskTid = attestertVedtak.attestasjon.tidspunkt.toLocalDatetimeUTC(),
@@ -159,7 +160,8 @@ class VedtaksvurderingService(
                     SKAL_SENDE_BREV to when (behandling.revurderingsaarsak) {
                         RevurderingAarsak.REGULERING -> false
                         else -> true
-                    }
+                    },
+                    REVURDERING_AARSAK to behandling.revurderingsaarsak.toString()
                 )
             ),
             behandlingId
@@ -195,7 +197,7 @@ class VedtaksvurderingService(
         )
 
         sendToRapid(
-            lagStatistikkMelding(
+            lagRiverMelding(
                 KafkaHendelseType.UNDERKJENT,
                 underkjentVedtak,
                 underkjentTid.toLocalDatetimeUTC()
@@ -216,7 +218,7 @@ class VedtaksvurderingService(
         val iverksattVedtak = repository.iverksattVedtak(behandlingId)
 
         sendToRapid(
-            lagStatistikkMelding(
+            lagRiverMelding(
                 vedtakhendelse = KafkaHendelseType.IVERKSATT,
                 vedtak = iverksattVedtak,
                 tekniskTid = Tidspunkt.now(clock).toLocalDatetimeUTC()
@@ -259,7 +261,8 @@ class VedtaksvurderingService(
                 virkningstidspunkt = virkningstidspunkt,
                 beregningOgAvkorting = beregningOgAvkorting,
                 behandling.sakType
-            )
+            ),
+            revurderingsaarsak = behandling.revurderingsaarsak
         )
 
         return repository.opprettVedtak(opprettetVedtak)
@@ -391,7 +394,7 @@ class VedtaksvurderingService(
     private fun vilkaarsvurderingUtfallNonNull(vilkaarsvurderingUtfall: VilkaarsvurderingUtfall?) =
         requireNotNull(vilkaarsvurderingUtfall) { "Behandling mangler utfall på vilkårsvurdering" }
 
-    private fun lagStatistikkMelding(
+    private fun lagRiverMelding(
         vedtakhendelse: KafkaHendelseType,
         vedtak: Vedtak,
         tekniskTid: LocalDateTime,

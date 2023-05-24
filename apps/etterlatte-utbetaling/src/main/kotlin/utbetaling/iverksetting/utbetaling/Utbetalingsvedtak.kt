@@ -18,7 +18,11 @@ data class Utbetalingsvedtak(
             Utbetalingsvedtak(
                 vedtakId = vedtak.vedtakId,
                 sak = Sak(vedtak.sak.ident, vedtak.sak.id, Saktype.fraString(vedtak.sak.sakType.toString())),
-                behandling = Behandling(type = vedtak.behandling.type, id = vedtak.behandling.id),
+                behandling = Behandling(
+                    type = vedtak.behandling.type,
+                    id = vedtak.behandling.id,
+                    revurderingsaarsak = vedtak.behandling.revurderingsaarsak
+                ),
                 pensjonTilUtbetaling = vedtak.utbetalingsperioder.map {
                     Utbetalingsperiode(
                         id = it.id!!,

@@ -28,9 +28,9 @@ suspend fun HttpClient.ping(
             header("Nav-Consumer-Id", konsument)
         }
         logger.info("$serviceName svarer OK")
-        PingResult.up(serviceName, url, beskrivelse)
+        PingResultUp(serviceName, endpoint = url, beskrivelse = beskrivelse)
     } catch (e: Exception) {
-        PingResult.down(serviceName, url, e.message, beskrivelse).also {
+        PingResultDown(serviceName, endpoint = url, errorMessage = e.message, beskrivelse = beskrivelse).also {
             logger.warn("$serviceName svarer IKKE ok. ${it.toStringServiceDown()}")
         }
     }
@@ -50,29 +50,29 @@ interface Pingable {
     }
 }
 
-class PingResult private constructor(
-    private val serviceName: String,
-    private val status: ServiceStatus,
-    private val endpoint: String,
-    private val beskrivelse: String,
-    private val errorMessage: String?
-) {
-    fun getStatus(): ServiceStatus {
-        return status
-    }
+sealed class PingResult {
+    abstract val serviceName: String
+    abstract val status: ServiceStatus
+    abstract val endpoint: String
+    abstract val beskrivelse: String
+}
 
+class PingResultUp(
+    override val serviceName: String,
+    override val status: ServiceStatus = ServiceStatus.UP,
+    override val endpoint: String,
+    override val beskrivelse: String
+) : PingResult()
+
+class PingResultDown(
+    override val serviceName: String,
+    override val status: ServiceStatus = ServiceStatus.DOWN,
+    override val endpoint: String,
+    override val beskrivelse: String,
+    private val errorMessage: String?
+) : PingResult() {
     fun toStringServiceDown(): String {
         return "Servicename: $serviceName endpoint: $endpoint beskrivelse $beskrivelse errorMessage: $errorMessage "
-    }
-
-    companion object {
-        fun up(serviceName: String, endpoint: String, description: String): PingResult {
-            return PingResult(serviceName, ServiceStatus.UP, endpoint, description, null)
-        }
-
-        fun down(serviceName: String, endpoint: String, errorMessage: String?, description: String): PingResult {
-            return PingResult(serviceName, ServiceStatus.DOWN, endpoint, description, errorMessage)
-        }
     }
 }
 

@@ -20,14 +20,14 @@ class AvkortingRepository(private val dataSource: DataSource) {
     fun hentAvkorting(behandlingId: UUID): Avkorting? = using(sessionOf(dataSource)) { session ->
         session.transaction { tx ->
             val avkortingGrunnlag = queryOf(
-                "SELECT * FROM avkortinggrunnlag WHERE behandling_id = ?",
+                "SELECT * FROM avkortingsgrunnlag WHERE behandling_id = ?",
                 behandlingId
-            ).let { query -> tx.run(query.map { row -> row.toAvkortinggrunnlag() }.asList) }
+            ).let { query -> tx.run(query.map { row -> row.toAvkortingsgrunnlag() }.asList) }
 
             val avkortingsperioder = queryOf(
                 "SELECT * FROM avkortingsperioder WHERE behandling_id = ?",
                 behandlingId
-            ).let { query -> tx.run(query.map { row -> row.toBeregnetAvkortinggrunnlag() }.asList) }
+            ).let { query -> tx.run(query.map { row -> row.toAvkortingsperiode() }.asList) }
 
             val avkortetYtelse = queryOf(
                 "SELECT * FROM avkortet_ytelse WHERE behandling_id = ?",
@@ -72,7 +72,7 @@ class AvkortingRepository(private val dataSource: DataSource) {
             tx.run(query.asUpdate)
         }
         queryOf(
-            "DELETE FROM avkortinggrunnlag WHERE behandling_id = ?",
+            "DELETE FROM avkortingsgrunnlag WHERE behandling_id = ?",
             behandlingId
         ).let { query ->
             tx.run(query.asUpdate)
@@ -92,10 +92,10 @@ class AvkortingRepository(private val dataSource: DataSource) {
     ) = avkortingGrunnlag.forEach {
         queryOf(
             statement = """
-                INSERT INTO avkortinggrunnlag(
-                    id, behandling_id, fom, tom, aarsinntekt, gjeldende_aar, spesifikasjon, kilde
+                INSERT INTO avkortingsgrunnlag(
+                    id, behandling_id, fom, tom, aarsinntekt, spesifikasjon, kilde
                 ) VALUES (
-                    :id, :behandlingId, :fom, :tom, :aarsinntekt, :gjeldendeAar, :spesifikasjon, :kilde
+                    :id, :behandlingId, :fom, :tom, :aarsinntekt, :spesifikasjon, :kilde
                 )
             """.trimIndent(),
             paramMap = mapOf(
@@ -170,7 +170,7 @@ class AvkortingRepository(private val dataSource: DataSource) {
     private fun hentAvkortingUtenNullable(behandlingId: UUID): Avkorting =
         hentAvkorting(behandlingId) ?: throw Exception("Uthenting av avkorting for behandling $behandlingId feilet")
 
-    private fun Row.toAvkortinggrunnlag() = AvkortingGrunnlag(
+    private fun Row.toAvkortingsgrunnlag() = AvkortingGrunnlag(
         periode = Periode(
             fom = sqlDate("fom").let { YearMonth.from(it.toLocalDate()) },
             tom = sqlDateOrNull("tom")?.let { YearMonth.from(it.toLocalDate()) }
@@ -180,7 +180,7 @@ class AvkortingRepository(private val dataSource: DataSource) {
         kilde = string("kilde").let { objectMapper.readValue(it) }
     )
 
-    private fun Row.toBeregnetAvkortinggrunnlag() = Avkortingsperiode(
+    private fun Row.toAvkortingsperiode() = Avkortingsperiode(
         periode = Periode(
             fom = sqlDate("fom").let { YearMonth.from(it.toLocalDate()) },
             tom = sqlDateOrNull("tom")?.let { YearMonth.from(it.toLocalDate()) }

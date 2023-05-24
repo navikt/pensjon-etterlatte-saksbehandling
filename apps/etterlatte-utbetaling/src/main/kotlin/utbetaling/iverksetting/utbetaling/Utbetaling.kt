@@ -68,18 +68,18 @@ data class Utbetalingslinje(
     val periode: PeriodeForUtbetaling,
     val beloep: BigDecimal? = null,
     val klassifikasjonskode: OppdragKlassifikasjonskode,
-    val brukKjoereplan: BrukKjoereplan
+    val kjoereplan: Kjoereplan
 )
 
-enum class BrukKjoereplan(private val kode: String) {
+enum class Kjoereplan(private val oppdragVerdi: String) {
     NESTE_PLANLAGTE_UTBETALING("J"), MED_EN_GANG("N");
 
     override fun toString(): String {
-        return kode
+        return oppdragVerdi
     }
 
     companion object {
-        fun fraKode(kode: String): BrukKjoereplan = when (kode.trim()) {
+        fun fraKode(kode: String): Kjoereplan = when (kode.trim()) {
             "J", "j" -> NESTE_PLANLAGTE_UTBETALING
             "N", "n" -> MED_EN_GANG
             else -> throw IllegalArgumentException("kode $kode er ikke en gjenkjent verdi for bruk_kjoereplan")

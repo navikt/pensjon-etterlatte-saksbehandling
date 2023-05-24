@@ -73,9 +73,9 @@ class UtbetalingMapper(
                 Saktype.BARNEPENSJON -> OppdragKlassifikasjonskode.BARNEPENSJON_OPTP
                 Saktype.OMSTILLINGSSTOENAD -> TODO("Kanskje det er samme som over men vi kræsjer dette i stedet")
             },
-            brukKjoereplan = when (vedtak.behandling.revurderingsaarsak) {
-                RevurderingAarsak.REGULERING -> BrukKjoereplan.NESTE_PLANLAGTE_UTBETALING
-                else -> BrukKjoereplan.MED_EN_GANG
+            kjoereplan = when (vedtak.behandling.revurderingsaarsak) {
+                RevurderingAarsak.REGULERING -> Kjoereplan.NESTE_PLANLAGTE_UTBETALING
+                else -> Kjoereplan.MED_EN_GANG
             }
         )
     }

@@ -1,5 +1,5 @@
-alter table utbetalingslinje add column bruk_kjoereplan VARCHAR(20);
+alter table utbetalingslinje add column kjoereplan VARCHAR(20);
 
-update utbetalingslinje set bruk_kjoereplan = 'N';
+update utbetalingslinje set kjoereplan = 'N';
 
-alter table utbetalingslinje alter column bruk_kjoereplan SET NOT NULL;
+alter table utbetalingslinje alter column kjoereplan SET NOT NULL;

@@ -112,7 +112,7 @@ internal fun OppdragForKonsistensavstemming.toOppdragdata(): Oppdragsdata {
                     sats = it.beloep
                     satstypeKode = OppdragslinjeDefaults.UTBETALINGSFREKVENS
                     fradragTillegg = OppdragslinjeDefaults.FRADRAG_ELLER_TILLEGG.value()
-                    brukKjoreplan = it.brukKjoereplan.toString()
+                    brukKjoreplan = it.kjoereplan.toString()
                     utbetalesTilId = fnr.value
                     attestantListe.addAll(
                         it.attestanter.map {

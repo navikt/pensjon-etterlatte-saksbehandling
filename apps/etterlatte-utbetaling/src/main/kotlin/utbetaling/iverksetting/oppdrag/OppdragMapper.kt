@@ -70,7 +70,7 @@ object OppdragMapper {
                         sats = it.beloep
                         fradragTillegg = OppdragslinjeDefaults.FRADRAG_ELLER_TILLEGG
                         typeSats = OppdragslinjeDefaults.UTBETALINGSFREKVENS
-                        brukKjoreplan = it.brukKjoereplan.toString()
+                        brukKjoreplan = it.kjoereplan.toString()
                         saksbehId = utbetaling.saksbehandler.value
                         utbetalesTilId = utbetaling.stoenadsmottaker.value
                         henvisning = utbetaling.behandlingId.shortValue.value

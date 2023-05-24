@@ -7,12 +7,11 @@ import { manueltOpphoerRoutes, revurderingRoutes, soeknadRoutes } from '~compone
 export const StegMeny = (props: { behandling: IBehandlingReducer }) => {
   const { behandlingType } = props.behandling
   let links: JSX.Element[] = []
+  console.log('type: ', behandlingType)
   if (behandlingType === IBehandlingsType.MANUELT_OPPHOER) {
     links = manueltOpphoerRoutes.map((path) => <NavLenke key={path} path={path} behandling={props.behandling} />)
   } else if (behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING) {
-    links = soeknadRoutes(props.behandling).map((path) => (
-      <NavLenke key={path} path={path} behandling={props.behandling} />
-    ))
+    links = soeknadRoutes.map((path) => <NavLenke key={path} path={path} behandling={props.behandling} />)
   } else if (behandlingType === IBehandlingsType.REVURDERING) {
     links = revurderingRoutes(props.behandling).map((path) => (
       <NavLenke key={path} path={path} behandling={props.behandling} />

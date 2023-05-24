@@ -5,18 +5,23 @@ import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 import classNames from 'classnames'
 import { behandlingSkalSendeBrev, kanGaaTilStatus } from '~components/behandling/felles/utils'
 import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
+import { ISaksType } from '~components/behandling/fargetags/saksType'
 
 export const NavLenke = (props: { path: string; behandling: IBehandlingReducer }) => {
   const { status } = props.behandling
   const stegErDisabled = (steg: IBehandlingStatus) => !kanGaaTilStatus(status).includes(steg)
   if (props.path == 'brev') {
+    let status = IBehandlingStatus.BEREGNET
+    if (props.behandling.sakType === ISaksType.OMSTILLINGSSTOENAD) {
+      status = IBehandlingStatus.AVKORTET
+    }
     return (
       <>
         {behandlingSkalSendeBrev(props.behandling) && (
           <>
             <li
               className={classNames({
-                disabled: stegErDisabled(IBehandlingStatus.FATTET_VEDTAK),
+                disabled: stegErDisabled(status),
               })}
             >
               <NavLink to="brev">Vedtaksbrev</NavLink>
@@ -31,6 +36,8 @@ export const NavLenke = (props: { path: string; behandling: IBehandlingReducer }
     routeIsDisabled = stegErDisabled(IBehandlingStatus.VILKAARSVURDERT)
   } else if (props.path === 'beregne') {
     routeIsDisabled = stegErDisabled(IBehandlingStatus.BEREGNET)
+  } else if (props.path === 'beregningsgrunnlag') {
+    routeIsDisabled = stegErDisabled(IBehandlingStatus.VILKAARSVURDERT)
   }
   return (
     <>

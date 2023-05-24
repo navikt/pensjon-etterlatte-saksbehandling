@@ -3,7 +3,7 @@ package no.nav.etterlatte.libs.common.behandling
 enum class RevurderingAarsak(val kanBrukesDev: Boolean, val kanBrukesProd: Boolean) {
     REGULERING(true, true),
     ANSVARLIGE_FORELDRE(false, false),
-    SOESKENJUSTERING(false, false),
+    SOESKENJUSTERING(true, false),
     UTLAND(false, false),
     BARN(false, false),
     DOEDSFALL(false, false),

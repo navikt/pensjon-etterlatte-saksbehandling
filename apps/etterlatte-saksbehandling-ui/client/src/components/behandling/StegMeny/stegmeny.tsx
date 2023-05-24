@@ -1,54 +1,28 @@
 import styled from 'styled-components'
 import { NavLink } from 'react-router-dom'
 import classNames from 'classnames'
-import { Next } from '@navikt/ds-icons'
-import { IBehandlingStatus, IBehandlingsType, IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
+import { IBehandlingStatus, IBehandlingsType } from '~shared/types/IDetaljertBehandling'
 import { behandlingSkalSendeBrev, kanGaaTilStatus } from '~components/behandling/felles/utils'
+import { NavLenke } from '~components/behandling/StegMeny/NavLenke'
+import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
+import { manueltOpphoerRoutes, revurderingRoutes, soeknadRoutes } from '~components/behandling/BehandlingRoutes'
 
-export const StegMeny = (props: { behandling: IDetaljertBehandling }) => {
+export const StegMeny = (props: { behandling: IBehandlingReducer }) => {
   const { behandlingType, status } = props.behandling
   const stegErDisabled = (steg: IBehandlingStatus) => !kanGaaTilStatus(status).includes(steg)
-
+  let links: JSX.Element[] = []
+  if (behandlingType === IBehandlingsType.MANUELT_OPPHOER) {
+    links = manueltOpphoerRoutes.map((path) => <NavLenke key={path} path={path} status={status} />)
+  } else if (behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING) {
+    links = soeknadRoutes(props.behandling).map((path) => <NavLenke key={path} path={path} status={status} />)
+  } else if (behandlingType === IBehandlingsType.REVURDERING) {
+    links = revurderingRoutes(props.behandling).map((path) => <NavLenke key={path} path={path} status={status} />)
+  }
   return (
     <StegMenyWrapper role="navigation">
-      {behandlingType !== IBehandlingsType.MANUELT_OPPHOER && (
-        <>
-          <li>
-            <NavLink to="soeknadsoversikt">Søknadsoversikt</NavLink>
-          </li>
-          <Separator aria-hidden={'true'} />
-        </>
-      )}
-      {behandlingType === IBehandlingsType.MANUELT_OPPHOER && (
-        <>
-          <li>
-            <NavLink to="opphoeroversikt">Opphør</NavLink>
-          </li>
-          <Separator aria-hidden={'true'} />
-        </>
-      )}
-      {behandlingType !== IBehandlingsType.MANUELT_OPPHOER && (
-        <>
-          <li className={classNames({ disabled: stegErDisabled(IBehandlingStatus.VILKAARSVURDERT) })}>
-            <NavLink to="vilkaarsvurdering">Vilkårsvurdering</NavLink>
-          </li>
-          <Separator aria-hidden={'true'} />
-        </>
-      )}
-      {behandlingType !== IBehandlingsType.MANUELT_OPPHOER && (
-        <>
-          <li className={classNames({ disabled: stegErDisabled(IBehandlingStatus.BEREGNET) })}>
-            <NavLink to="beregningsgrunnlag">Beregningsgrunnlag</NavLink>
-          </li>
-          <Separator aria-hidden={'true'} />
-        </>
-      )}
-      <li className={classNames({ disabled: stegErDisabled(IBehandlingStatus.BEREGNET) })}>
-        <NavLink to="beregne">Beregning</NavLink>
-      </li>
+      {links}
       {behandlingSkalSendeBrev(props.behandling) && (
         <>
-          <Separator aria-hidden={'true'} />
           <li
             className={classNames({
               disabled: stegErDisabled(IBehandlingStatus.FATTET_VEDTAK),
@@ -104,8 +78,4 @@ const StegMenyWrapper = styled.ul`
       pointer-events: none;
     }
   }
-`
-
-const Separator = styled(Next)`
-  vertical-align: middle;
 `

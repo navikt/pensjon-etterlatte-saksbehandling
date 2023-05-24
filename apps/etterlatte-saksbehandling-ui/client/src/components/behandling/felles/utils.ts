@@ -5,6 +5,7 @@ import { IBehandlingsammendrag } from '~components/person/typer'
 import { ISaksType } from '~components/behandling/fargetags/saksType'
 import { JaNei } from '~shared/types/ISvar'
 import { Revurderingsaarsak } from '~shared/types/Revurderingsaarsak'
+import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
 
 export function behandlingErUtfylt(behandling: IDetaljertBehandling): boolean {
   const gyldigUtfylt = !!(behandling.gyldighetsprøving && behandling.virkningstidspunkt)
@@ -67,7 +68,7 @@ export const harIngenUavbrutteManuelleOpphoer = (behandlingliste: IBehandlingsam
 export const kunIverksatteBehandlinger = (behandlingliste: IBehandlingsammendrag[]): IBehandlingsammendrag[] =>
   behandlingliste.filter((behandling) => behandling.status === IBehandlingStatus.IVERKSATT)
 
-export const behandlingSkalSendeBrev = (behandling: IDetaljertBehandling): boolean => {
+export const behandlingSkalSendeBrev = (behandling: IBehandlingReducer): boolean => {
   switch (behandling.behandlingType) {
     case IBehandlingsType.FØRSTEGANGSBEHANDLING:
       return true

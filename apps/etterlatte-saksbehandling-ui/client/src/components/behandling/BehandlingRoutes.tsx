@@ -78,20 +78,20 @@ export const useBehandlingRoutes = () => {
   return { next, back, lastPage, firstPage, behandlingRoutes: aktuelleRoutes, currentRoute, goto }
 }
 
+export const soeknadRoutes = (behandling: IBehandlingReducer) => finnRoutesFoerstegangbehandling(behandling)
+export const manueltOpphoerRoutes: Array<behandlingRouteTypes> = ['opphoeroversikt', 'beregne']
+export const revurderingRoutes = (behandling: IBehandlingReducer) => hentRevurderingRoutes(behandling)
+
 const hentAktuelleRoutes = (behandling: IBehandlingReducer | null) => {
   if (!behandling) return []
-
-  const soeknadRoutes = finnRoutesFoerstegangbehandling(behandling)
-  const manueltOpphoerRoutes: Array<behandlingRouteTypes> = ['opphoeroversikt', 'beregne']
-  const revurderingRoutes = hentRevurderingRoutes(behandling)
 
   switch (behandling.behandlingType) {
     case IBehandlingsType.MANUELT_OPPHOER:
       return behandlingRoutes(behandling).filter((route) => manueltOpphoerRoutes.includes(route.path))
     case IBehandlingsType.FØRSTEGANGSBEHANDLING:
-      return behandlingRoutes(behandling).filter((route) => soeknadRoutes.includes(route.path))
+      return behandlingRoutes(behandling).filter((route) => soeknadRoutes(behandling).includes(route.path))
     case IBehandlingsType.REVURDERING:
-      return behandlingRoutes(behandling).filter((route) => revurderingRoutes.includes(route.path))
+      return behandlingRoutes(behandling).filter((route) => revurderingRoutes(behandling).includes(route.path))
   }
 }
 

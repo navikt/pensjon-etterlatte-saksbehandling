@@ -6,9 +6,10 @@ import { VurderingsTitle, Undertekst } from '../../styled'
 import { SoeknadsoversiktTextArea } from '../SoeknadsoversiktTextArea'
 import { useAppDispatch } from '~store/Store'
 import { useState } from 'react'
-import { useApiCall } from '~shared/hooks/useApiCall'
+import { useApiCall, isFailure } from '~shared/hooks/useApiCall'
 import { lagreUtenlandstilsnitt } from '~shared/api/behandling'
 import { oppdaterBehandlingsstatus, oppdaterUtenlandstilsnitt } from '~store/reducers/BehandlingReducer'
+import { ApiErrorAlert } from '~ErrorBoundary'
 
 const UtenlandstilsnittTypeTittel: Record<IUtenlandstilsnittType, string> = {
   [IUtenlandstilsnittType.NASJONAL]: 'Nasjonal',
@@ -32,7 +33,7 @@ export const UtenlandstilsnittVurdering = ({
   const [svar, setSvar] = useState<IUtenlandstilsnittType | undefined>(utenlandstilsnitt?.type)
   const [radioError, setRadioError] = useState<string>('')
   const [begrunnelse, setBegrunnelse] = useState<string>(utenlandstilsnitt?.begrunnelse || '')
-  const [, setUtenlandstilsnitt, resetToInitial] = useApiCall(lagreUtenlandstilsnitt)
+  const [setUtenlandstilsnittStatus, setUtenlandstilsnitt, resetToInitial] = useApiCall(lagreUtenlandstilsnitt)
 
   const lagre = (onSuccess?: () => void) => {
     !svar ? setRadioError('Du må velge et svar') : setRadioError('')
@@ -108,6 +109,7 @@ export const UtenlandstilsnittVurdering = ({
             setBegrunnelse(oppdatertBegrunnelse)
           }}
         />
+        {isFailure(setUtenlandstilsnittStatus) && <ApiErrorAlert>Kunne ikke lagre utlandstilknytning</ApiErrorAlert>}
       </>
     </VurderingsboksWrapper>
   )

@@ -9,13 +9,15 @@ type Props = {
   beslutning: IBeslutning | undefined
   setBeslutning: (value: IBeslutning) => void
   behandling: IDetaljertBehandling
+  disabled: boolean
 }
 
-export const Beslutningsvalg: React.FC<Props> = ({ beslutning, setBeslutning, behandling }) => {
+export const Beslutningsvalg: React.FC<Props> = ({ beslutning, setBeslutning, behandling, disabled }) => {
   return (
     <>
       <RadioGroupWrapper>
         <RadioGroup
+          disabled={disabled}
           legend=""
           size="small"
           className="radioGroup"

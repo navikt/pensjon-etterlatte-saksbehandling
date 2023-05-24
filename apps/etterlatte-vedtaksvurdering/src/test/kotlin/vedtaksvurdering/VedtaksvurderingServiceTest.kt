@@ -1,5 +1,6 @@
 package no.nav.etterlatte.vedtaksvurdering
 
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.mockk.clearAllMocks
@@ -344,6 +345,48 @@ internal class VedtaksvurderingServiceTest {
         coVerify(exactly = 1) { behandlingKlientMock.attester(any(), any(), capture(hendelse)) }
         hendelse.captured.kommentar shouldBe KOMMENTAR
         verify(exactly = 2) { sendToRapidMock.invoke(any(), any()) }
+    }
+
+    @Test
+    fun `attestering av egen sak kaster feil`() {
+        val behandlingId = randomUUID()
+        val virkningstidspunkt = VIRKNINGSTIDSPUNKT_JAN_2023
+        val gjeldendeSaksbehandler = saksbehandler
+        coEvery { behandlingKlientMock.hentSak(any(), any()) } returns Sak(
+            SAKSBEHANDLER_1,
+            SakType.BARNEPENSJON,
+            1L,
+            ENHET_2
+        )
+        coEvery { behandlingKlientMock.fattVedtak(any(), any(), any()) } returns true
+        coEvery { behandlingKlientMock.attester(any(), any(), any()) } returns true
+        coEvery { behandlingKlientMock.hentBehandling(any(), any()) } returns mockBehandling(
+            virkningstidspunkt,
+            behandlingId
+        )
+        coEvery { vilkaarsvurderingKlientMock.hentVilkaarsvurdering(any(), any()) } returns mockVilkaarsvurdering()
+        coEvery { beregningKlientMock.hentBeregningOgAvkorting(any(), any(), any()) } returns BeregningOgAvkorting(
+            beregning = mockBeregning(virkningstidspunkt, behandlingId),
+            avkorting = mockAvkorting()
+        )
+
+        runBlocking {
+            repository.opprettVedtak(
+                opprettVedtak(virkningstidspunkt = virkningstidspunkt, behandlingId = behandlingId)
+            )
+            service.fattVedtak(behandlingId, gjeldendeSaksbehandler)
+
+            shouldThrow<UgyldigAttestantException> {
+                service.attesterVedtak(behandlingId, KOMMENTAR, gjeldendeSaksbehandler)
+            }
+        }
+
+        coVerify {
+            behandlingKlientMock.fattVedtak(any(), any(), null) // sjekke status behandling
+            behandlingKlientMock.fattVedtak(any(), any(), any()) // commit ny status behandling
+            behandlingKlientMock.attester(any(), any(), null) // sjekke status behandling
+        }
+        verify(exactly = 1) { sendToRapidMock.invoke(any(), any()) }
     }
 
     @Test

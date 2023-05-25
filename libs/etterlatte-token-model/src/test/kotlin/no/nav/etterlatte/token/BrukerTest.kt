@@ -30,4 +30,19 @@ internal class BrukerTest {
     fun `er ikke maskin-til-maskin viss både oid og sub er null`() {
         assertFalse(Bruker.of("a", "b", null, null, null) is SystemBruker)
     }
+
+    @Test
+    fun `systembruker kan attestere for seg selv`() {
+        assertTrue(SystemBruker("a", "a").kanAttestereFor("a"))
+    }
+
+    @Test
+    fun `saksbehandler kan ikke attestere for seg selv`() {
+        assertFalse(Saksbehandler("token1", "a", null).kanAttestereFor("a"))
+    }
+
+    @Test
+    fun `saksbehandler kan attestere for andre`() {
+        assertTrue(Saksbehandler("token1", "a", null).kanAttestereFor("b"))
+    }
 }

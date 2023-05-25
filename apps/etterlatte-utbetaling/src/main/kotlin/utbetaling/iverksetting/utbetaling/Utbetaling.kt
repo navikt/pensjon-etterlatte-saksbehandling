@@ -67,8 +67,29 @@ data class Utbetalingslinje(
     val sakId: SakId,
     val periode: PeriodeForUtbetaling,
     val beloep: BigDecimal? = null,
-    val klassifikasjonskode: OppdragKlassifikasjonskode
+    val klassifikasjonskode: OppdragKlassifikasjonskode,
+    val kjoereplan: Kjoereplan
 )
+
+enum class Kjoereplan(private val oppdragVerdi: String) {
+    // ref. https://confluence.adeo.no/display/OKSY/Inputdata+fra+fagrutinen+til+Oppdragssystemet:
+    // "Bruk-kjoreplan gjør det mulig å velge om delytelsen skal beregnes/utbetales i henhold til kjøreplanen eller om
+    // dette skal skje idag. Verdien 'N' medfører at beregningen kjøres idag. Beregningen vil bare gjelde
+    // beregningsperioder som allerede er forfalt."
+    NESTE_PLANLAGTE_UTBETALING("J"), MED_EN_GANG("N");
+
+    override fun toString(): String {
+        return oppdragVerdi
+    }
+
+    companion object {
+        fun fraKode(kode: String): Kjoereplan = when (kode.trim()) {
+            "J", "j" -> NESTE_PLANLAGTE_UTBETALING
+            "N", "n" -> MED_EN_GANG
+            else -> throw IllegalArgumentException("kode $kode er ikke en gjenkjent verdi for bruk_kjoereplan")
+        }
+    }
+}
 
 enum class OppdragKlassifikasjonskode(private val oppdragVerdi: String) {
     BARNEPENSJON_OPTP("BARNEPENSJON-OPTP");

@@ -120,7 +120,8 @@ class KonsistensavstemmingService(
                                 beloep = it.beloep,
                                 attestanter = utbetalingslinjerPerSak
                                     .utbetalingslinjerTilAttestanter[it.id]
-                                    ?: emptyList()
+                                    ?: emptyList(),
+                                kjoereplan = it.kjoereplan
                             )
                         }
                     )

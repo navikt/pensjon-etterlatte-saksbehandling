@@ -1,6 +1,7 @@
 package no.nav.etterlatte.libs.common.vedtak
 
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
+import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.sak.VedtakSak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import java.math.BigDecimal
@@ -30,7 +31,8 @@ enum class VedtakStatus {
 
 data class Behandling(
     val type: BehandlingType,
-    val id: UUID
+    val id: UUID,
+    val revurderingsaarsak: RevurderingAarsak? = null
 )
 
 data class Periode(

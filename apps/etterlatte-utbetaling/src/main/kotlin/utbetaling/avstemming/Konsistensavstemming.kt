@@ -3,6 +3,7 @@ package no.nav.etterlatte.utbetaling.avstemming
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.utbetaling.grensesnittavstemming.UUIDBase64
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Foedselsnummer
+import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Kjoereplan
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.NavIdent
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.SakId
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Saktype
@@ -34,5 +35,6 @@ data class OppdragslinjeForKonsistensavstemming(
     val tilOgMed: LocalDate?,
     var forrigeUtbetalingslinjeId: UtbetalingslinjeId?,
     val beloep: BigDecimal?,
-    val attestanter: List<NavIdent>
+    val attestanter: List<NavIdent>,
+    val kjoereplan: Kjoereplan
 )

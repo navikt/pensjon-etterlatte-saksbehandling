@@ -1,6 +1,7 @@
 package no.nav.etterlatte
 
 import no.nav.etterlatte.libs.common.logging.withLogContext
+import no.nav.etterlatte.libs.common.rapidsandrivers.SKAL_SENDE_BREV
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.etterlatte.rapidsandrivers.EventNames
@@ -44,6 +45,7 @@ internal class MigreringHendelser(
             withFeilhaandtering(packet, context, OPPRETT_VEDTAK) {
                 val respons = vedtak.upsertVedtak(behandlingId)
                 logger.info("Opprettet vedtak ${respons.vedtakId} for migrert behandling: $behandlingId")
+                packet[SKAL_SENDE_BREV] = false
             }
                 .takeIf { it.isSuccess }
                 ?.let {

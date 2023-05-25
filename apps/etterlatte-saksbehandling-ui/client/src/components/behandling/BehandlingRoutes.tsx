@@ -80,23 +80,29 @@ export const useBehandlingRoutes = () => {
 export interface PathInfo {
   path: string
   description: string
-  disabledSteg?: IBehandlingStatus
+  kreverBehandlingsstatus?: IBehandlingStatus
 }
 
 export const soeknadRoutes: Array<PathInfo> = [
   { path: 'soeknadsoversikt', description: 'Søknadsoversikt' },
-  { path: 'vilkaarsvurdering', description: 'Vilkårsvurdering', disabledSteg: IBehandlingStatus.VILKAARSVURDERT },
-  { path: 'beregningsgrunnlag', description: 'Beregningsgrunnlag', disabledSteg: IBehandlingStatus.VILKAARSVURDERT },
-  { path: 'beregne', description: 'Beregning', disabledSteg: IBehandlingStatus.BEREGNET },
+  {
+    path: 'vilkaarsvurdering',
+    description: 'Vilkårsvurdering',
+    kreverBehandlingsstatus: IBehandlingStatus.VILKAARSVURDERT,
+  },
+  {
+    path: 'beregningsgrunnlag',
+    description: 'Beregningsgrunnlag',
+    kreverBehandlingsstatus: IBehandlingStatus.VILKAARSVURDERT,
+  },
+  { path: 'beregne', description: 'Beregning', kreverBehandlingsstatus: IBehandlingStatus.BEREGNET },
   { path: 'brev', description: 'Vedtaksbrev' },
 ]
 
 export const manueltOpphoerRoutes: Array<PathInfo> = [
   { path: 'opphoeroversikt', description: 'Opphøroversikt' },
-  { path: 'beregne', description: 'Beregning', disabledSteg: IBehandlingStatus.BEREGNET },
+  { path: 'beregne', description: 'Beregning', kreverBehandlingsstatus: IBehandlingStatus.BEREGNET },
 ]
-export const revurderingRoutes = (behandling: IBehandlingReducer) => hentRevurderingRoutes(behandling)
-
 const hentAktuelleRoutes = (behandling: IBehandlingReducer | null) => {
   if (!behandling) return []
 
@@ -118,12 +124,20 @@ const hentAktuelleRoutes = (behandling: IBehandlingReducer | null) => {
   }
 }
 
-function hentRevurderingRoutes(behandling: IBehandlingReducer): Array<PathInfo> {
+export function revurderingRoutes(behandling: IBehandlingReducer): Array<PathInfo> {
   const defaultRoutes: Array<PathInfo> = [
     { path: 'revurderingsoversikt', description: 'Revurderingsoversikt' },
-    { path: 'vilkaarsvurdering', description: 'Vilkårsvurdering', disabledSteg: IBehandlingStatus.VILKAARSVURDERT },
-    { path: 'beregningsgrunnlag', description: 'Beregningsgrunnlag', disabledSteg: IBehandlingStatus.VILKAARSVURDERT },
-    { path: 'beregne', description: 'Beregning', disabledSteg: IBehandlingStatus.BEREGNET },
+    {
+      path: 'vilkaarsvurdering',
+      description: 'Vilkårsvurdering',
+      kreverBehandlingsstatus: IBehandlingStatus.VILKAARSVURDERT,
+    },
+    {
+      path: 'beregningsgrunnlag',
+      description: 'Beregningsgrunnlag',
+      kreverBehandlingsstatus: IBehandlingStatus.VILKAARSVURDERT,
+    },
+    { path: 'beregne', description: 'Beregning', kreverBehandlingsstatus: IBehandlingStatus.BEREGNET },
   ]
 
   if (behandlingSkalSendeBrev(behandling)) {

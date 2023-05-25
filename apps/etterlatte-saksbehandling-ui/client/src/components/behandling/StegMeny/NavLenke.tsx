@@ -3,7 +3,7 @@ import styled from 'styled-components'
 import { Next } from '@navikt/ds-icons'
 import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 import classNames from 'classnames'
-import { behandlingSkalSendeBrev, kanGaaTilStatus } from '~components/behandling/felles/utils'
+import { behandlingSkalSendeBrev, hentGyldigeNavigeringsStatuser } from '~components/behandling/felles/utils'
 import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
 import { ISaksType } from '~components/behandling/fargetags/saksType'
 import { PathInfo } from '~components/behandling/BehandlingRoutes'
@@ -11,7 +11,7 @@ import { PathInfo } from '~components/behandling/BehandlingRoutes'
 export const NavLenke = (props: { pathInfo: PathInfo; behandling: IBehandlingReducer }) => {
   const { pathInfo } = props
   const { status } = props.behandling
-  const stegErDisabled = (steg: IBehandlingStatus) => !kanGaaTilStatus(status).includes(steg)
+  const routeErdisabled = (steg: IBehandlingStatus) => !hentGyldigeNavigeringsStatuser(status).includes(steg)
   if (pathInfo.path == 'brev') {
     let status = IBehandlingStatus.BEREGNET //BP krav for å gå til brev
     if (props.behandling.sakType === ISaksType.OMSTILLINGSSTOENAD) {
@@ -21,7 +21,7 @@ export const NavLenke = (props: { pathInfo: PathInfo; behandling: IBehandlingRed
       <>
         {behandlingSkalSendeBrev(props.behandling) && (
           <>
-            <li className={classNames({ disabled: stegErDisabled(status) })}>
+            <li className={classNames({ disabled: routeErdisabled(status) })}>
               <NavLink to="brev">Vedtaksbrev</NavLink>
             </li>
           </>
@@ -30,7 +30,7 @@ export const NavLenke = (props: { pathInfo: PathInfo; behandling: IBehandlingRed
     )
   }
 
-  const routeErDisabled = pathInfo.disabledSteg && stegErDisabled(pathInfo.disabledSteg)
+  const routeErDisabled = pathInfo.kreverBehandlingsstatus && routeErdisabled(pathInfo.kreverBehandlingsstatus)
   return (
     <>
       <li className={classNames({ disabled: routeErDisabled })}>

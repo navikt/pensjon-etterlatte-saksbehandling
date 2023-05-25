@@ -12,11 +12,11 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.avkorting.AvkortingRepository
 import no.nav.etterlatte.avkorting.AvkortingService
 import no.nav.etterlatte.avkorting.InntektAvkortingService
-import no.nav.etterlatte.beregning.BeregningRepository
+import no.nav.etterlatte.beregning.BeregningService
 import no.nav.etterlatte.beregning.regler.avkortetYtelse
 import no.nav.etterlatte.beregning.regler.avkorting
 import no.nav.etterlatte.beregning.regler.avkortinggrunnlag
-import no.nav.etterlatte.beregning.regler.beregnetAvkortingGrunnlag
+import no.nav.etterlatte.beregning.regler.avkortingsperiode
 import no.nav.etterlatte.beregning.regler.beregning
 import no.nav.etterlatte.beregning.regler.beregningsperiode
 import no.nav.etterlatte.beregning.regler.bruker
@@ -32,9 +32,9 @@ internal class AvkortingServiceTest {
     private val behandlingKlient: BehandlingKlient = mockk()
     private val inntektAvkortingService: InntektAvkortingService = mockk()
     private val avkortingRepository: AvkortingRepository = mockk()
-    private val beregningRepository: BeregningRepository = mockk()
+    private val beregningService: BeregningService = mockk()
     private val service =
-        AvkortingService(behandlingKlient, inntektAvkortingService, avkortingRepository, beregningRepository)
+        AvkortingService(behandlingKlient, inntektAvkortingService, avkortingRepository, beregningService)
 
     @BeforeEach
     fun beforeEach() {
@@ -71,21 +71,24 @@ internal class AvkortingServiceTest {
         val behandlingId = UUID.randomUUID()
         val avkorting = avkorting()
         val avkortinggrunnlag = avkortinggrunnlag()
-        val inntektsavkorting = listOf(beregnetAvkortingGrunnlag())
-        val grunnlagMedBeregnetAvkorting = avkortinggrunnlag.copy(beregnetAvkorting = inntektsavkorting)
+        val avkortingsperioder = listOf(avkortingsperiode())
         val beregninger = listOf(beregningsperiode())
         val avkortetYtelse = listOf(avkortetYtelse())
 
         coEvery { behandlingKlient.avkort(behandlingId, bruker, false) } returns true
-        every { inntektAvkortingService.beregnInntektsavkorting(avkortinggrunnlag) } returns inntektsavkorting
+        every { inntektAvkortingService.beregnInntektsavkorting(avkortinggrunnlag) } returns avkortingsperioder
+        every { beregningService.hentBeregningNonnull(behandlingId) } returns beregning(beregninger)
         every {
-            avkortingRepository.lagreEllerOppdaterAvkortingGrunnlag(behandlingId, grunnlagMedBeregnetAvkorting)
-        } returns avkorting
-        every { beregningRepository.hent(behandlingId) } returns beregning(beregninger)
-        every {
-            inntektAvkortingService.beregnAvkortetYtelse(beregninger, avkorting.avkortingGrunnlag)
+            inntektAvkortingService.beregnAvkortetYtelse(beregninger, avkortingsperioder)
         } returns avkortetYtelse
-        every { avkortingRepository.lagreEllerOppdaterAvkortetYtelse(behandlingId, avkortetYtelse) } returns avkorting
+        every {
+            avkortingRepository.lagreEllerOppdaterAvkorting(
+                behandlingId,
+                listOf(avkortinggrunnlag),
+                avkortingsperioder,
+                avkortetYtelse
+            )
+        } returns avkorting
         coEvery { behandlingKlient.avkort(behandlingId, bruker, true) } returns true
 
         val result = runBlocking {
@@ -96,10 +99,14 @@ internal class AvkortingServiceTest {
         coVerify(exactly = 1) {
             behandlingKlient.avkort(behandlingId, bruker, false)
             inntektAvkortingService.beregnInntektsavkorting(avkortinggrunnlag)
-            avkortingRepository.lagreEllerOppdaterAvkortingGrunnlag(behandlingId, grunnlagMedBeregnetAvkorting)
-            beregningRepository.hent(behandlingId)
-            inntektAvkortingService.beregnAvkortetYtelse(beregninger, avkorting.avkortingGrunnlag)
-            avkortingRepository.lagreEllerOppdaterAvkortetYtelse(behandlingId, avkortetYtelse)
+            beregningService.hentBeregningNonnull(behandlingId)
+            inntektAvkortingService.beregnAvkortetYtelse(beregninger, avkortingsperioder)
+            avkortingRepository.lagreEllerOppdaterAvkorting(
+                behandlingId,
+                listOf(avkortinggrunnlag),
+                avkortingsperioder,
+                avkortetYtelse
+            )
             behandlingKlient.avkort(behandlingId, bruker, true)
         }
     }

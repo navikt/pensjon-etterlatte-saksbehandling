@@ -60,7 +60,7 @@ class ApplicationContext {
         behandlingKlient = behandlingKlient,
         inntektAvkortingService = InntektAvkortingService,
         avkortingRepository = AvkortingRepository(dataSource),
-        beregningRepository = BeregningRepository(dataSource)
+        beregningService = beregningService
     )
     val regulerAvkortingService = RegulerAvkortingService(avkortingService)
 }

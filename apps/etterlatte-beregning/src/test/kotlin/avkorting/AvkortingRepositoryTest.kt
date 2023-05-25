@@ -1,14 +1,10 @@
 package avkorting
 
 import io.kotest.matchers.shouldBe
-import no.nav.etterlatte.avkorting.AvkortingGrunnlag
 import no.nav.etterlatte.avkorting.AvkortingRepository
-import no.nav.etterlatte.avkorting.BeregnetAvkortingGrunnlag
 import no.nav.etterlatte.beregning.regler.avkortetYtelse
-import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
-import no.nav.etterlatte.libs.common.periode.Periode
-import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.common.toJsonNode
+import no.nav.etterlatte.beregning.regler.avkortinggrunnlag
+import no.nav.etterlatte.beregning.regler.avkortingsperiode
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.migrate
 import org.junit.jupiter.api.AfterAll
@@ -17,7 +13,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
-import java.time.YearMonth
 import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -45,56 +40,39 @@ internal class AvkortingRepositoryTest {
         postgreSQLContainer.stop()
     }
 
-    companion object {
+    @Test
+    fun `skal returnere null hvis mangler avkorting`() {
+        avkortingRepository.hentAvkorting(UUID.randomUUID()) shouldBe null
+    }
+
+    @Test
+    fun `Skal lagre og oppdatere avkorting`() {
         val behandlingId: UUID = UUID.randomUUID()
-        val avkortinggrunnlag = AvkortingGrunnlag(
-            periode = Periode(fom = YearMonth.now(), tom = null),
-            aarsinntekt = 500000,
-            spesifikasjon = "Grunnlag før endring",
-            kilde = Grunnlagsopplysning.Saksbehandler.create("Z123456"),
-            beregnetAvkorting = listOf(
-                BeregnetAvkortingGrunnlag(
-                    periode = Periode(fom = YearMonth.now(), tom = null),
-                    avkorting = 100,
-                    tidspunkt = Tidspunkt.now(),
-                    regelResultat = "".toJsonNode(),
-                    kilde = Grunnlagsopplysning.RegelKilde("regelid", Tidspunkt.now(), "1")
-                )
-            )
-        )
-    }
+        val avkortinggrunnlag = listOf(avkortinggrunnlag())
+        val avkortingsperioder = listOf(avkortingsperiode())
+        val avkortetYtelse = listOf(avkortetYtelse())
 
-    @Test
-    fun `Skal lagre eller oppdatere avkortinggrunnlag`() {
-        val endretAvkortningGrunnlag = avkortinggrunnlag.copy(spesifikasjon = "Endret grunnlag")
-
-        avkortingRepository.lagreEllerOppdaterAvkortingGrunnlag(behandlingId, avkortinggrunnlag)
-        val avkortning = avkortingRepository.lagreEllerOppdaterAvkortingGrunnlag(behandlingId, endretAvkortningGrunnlag)
-
-        with(avkortning) {
-            this.behandlingId shouldBe behandlingId
-            avkortingGrunnlag.size shouldBe 1
-            avkortingGrunnlag[0] shouldBe endretAvkortningGrunnlag
-        }
-    }
-
-    @Test
-    fun `Skal lagre eller oppdatere avkortet ytelse`() {
-        val avkortetYtelse = avkortetYtelse()
-        val endretAvkortetYtelse = avkortetYtelse.copy(ytelseEtterAvkorting = 200)
-
-        avkortingRepository.lagreEllerOppdaterAvkortingGrunnlag(behandlingId, avkortinggrunnlag)
-
-        avkortingRepository.lagreEllerOppdaterAvkortetYtelse(behandlingId, listOf(avkortetYtelse))
-        val avkortning = avkortingRepository.lagreEllerOppdaterAvkortetYtelse(
+        avkortingRepository.lagreEllerOppdaterAvkorting(
             behandlingId,
-            listOf(endretAvkortetYtelse)
+            avkortinggrunnlag,
+            avkortingsperioder,
+            avkortetYtelse
         )
 
-        with(avkortning) {
-            this.behandlingId shouldBe behandlingId
-            this.avkortetYtelse.size shouldBe 1
-            this.avkortetYtelse[0] shouldBe endretAvkortetYtelse
-        }
+        val endretAvkortingGrunnlag = listOf(avkortinggrunnlag[0].copy(spesifikasjon = "Endret"))
+        val endretAvkortingsperiode = listOf(avkortingsperioder[0].copy(avkorting = 333))
+        val endretAvkortetYtelse = listOf(avkortetYtelse[0].copy(avkortingsbeloep = 444))
+
+        val avkorting = avkortingRepository.lagreEllerOppdaterAvkorting(
+            behandlingId,
+            endretAvkortingGrunnlag,
+            endretAvkortingsperiode,
+            endretAvkortetYtelse
+        )
+
+        avkorting.behandlingId shouldBe behandlingId
+        avkorting.avkortingGrunnlag shouldBe endretAvkortingGrunnlag
+        avkorting.avkortingsperioder shouldBe endretAvkortingsperiode
+        avkorting.avkortetYtelse shouldBe endretAvkortetYtelse
     }
 }

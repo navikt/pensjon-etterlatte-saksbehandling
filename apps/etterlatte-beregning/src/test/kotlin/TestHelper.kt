@@ -3,7 +3,7 @@ package no.nav.etterlatte.beregning.regler
 import no.nav.etterlatte.avkorting.AvkortetYtelse
 import no.nav.etterlatte.avkorting.Avkorting
 import no.nav.etterlatte.avkorting.AvkortingGrunnlag
-import no.nav.etterlatte.avkorting.BeregnetAvkortingGrunnlag
+import no.nav.etterlatte.avkorting.Avkortingsperiode
 import no.nav.etterlatte.avkorting.regler.AvkortetYtelseGrunnlag
 import no.nav.etterlatte.avkorting.regler.InntektAvkortingGrunnlag
 import no.nav.etterlatte.beregning.Beregning
@@ -61,29 +61,28 @@ fun avkorting(
 ) = Avkorting(
     behandlingId = behandlingId,
     avkortingGrunnlag = emptyList(),
+    avkortingsperioder = emptyList(),
     avkortetYtelse = emptyList()
 )
 
 fun avkortinggrunnlag(
-    aarsinntekt: Int = 100000,
-    beregnetAvkorting: List<BeregnetAvkortingGrunnlag> = emptyList()
+    aarsinntekt: Int = 100000
 ) = AvkortingGrunnlag(
     periode = Periode(fom = YearMonth.now(), tom = null),
     aarsinntekt = aarsinntekt,
     spesifikasjon = "Spesifikasjon",
-    kilde = Grunnlagsopplysning.Saksbehandler.create("Z123456"),
-    beregnetAvkorting = beregnetAvkorting
+    kilde = Grunnlagsopplysning.Saksbehandler.create("Z123456")
 )
 
 fun inntektAvkortingGrunnlag(inntekt: Int = 500000) = InntektAvkortingGrunnlag(
     inntekt = FaktumNode(verdi = inntekt, "", "")
 )
 
-fun beregnetAvkortingGrunnlag(
+fun avkortingsperiode(
     fom: YearMonth = YearMonth.now(),
     tom: YearMonth? = null,
     avkorting: Int = 10000
-) = BeregnetAvkortingGrunnlag(
+) = Avkortingsperiode(
     Periode(fom = fom, tom = tom),
     avkorting = avkorting,
     tidspunkt = Tidspunkt.now(),

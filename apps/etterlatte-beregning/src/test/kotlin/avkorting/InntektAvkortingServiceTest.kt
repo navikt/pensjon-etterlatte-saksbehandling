@@ -7,7 +7,7 @@ import io.mockk.mockkObject
 import io.mockk.unmockkObject
 import no.nav.etterlatte.avkorting.InntektAvkortingService
 import no.nav.etterlatte.beregning.regler.avkortinggrunnlag
-import no.nav.etterlatte.beregning.regler.beregnetAvkortingGrunnlag
+import no.nav.etterlatte.beregning.regler.avkortingsperiode
 import no.nav.etterlatte.beregning.regler.beregningsperiode
 import no.nav.etterlatte.grunnbeloep.Grunnbeloep
 import no.nav.etterlatte.grunnbeloep.GrunnbeloepRepository
@@ -64,31 +64,23 @@ class InntektAvkortingServiceTest {
                 datoFOM = YearMonth.of(2023, 4)
             )
         )
-        val avkortingGrunnlag = listOf(
-            avkortinggrunnlag(
-                beregnetAvkorting = listOf(
-                    beregnetAvkortingGrunnlag(
-                        avkorting = 1000,
-                        fom = YearMonth.of(2023, 1),
-                        tom = YearMonth.of(2023, 2)
-                    ),
-                    beregnetAvkortingGrunnlag(
-                        avkorting = 2000,
-                        fom = YearMonth.of(2023, 2)
-                    )
-                )
+        val avkortingsperioder = listOf(
+            avkortingsperiode(
+                avkorting = 1000,
+                fom = YearMonth.of(2023, 1),
+                tom = YearMonth.of(2023, 2)
             ),
-            avkortinggrunnlag(
-                beregnetAvkorting = listOf(
-                    beregnetAvkortingGrunnlag(
-                        avkorting = 3000,
-                        fom = YearMonth.of(2023, 3)
-                    )
-                )
+            avkortingsperiode(
+                avkorting = 2000,
+                fom = YearMonth.of(2023, 2)
+            ),
+            avkortingsperiode(
+                avkorting = 3000,
+                fom = YearMonth.of(2023, 3)
             )
         )
 
-        val avkortetYtelse = InntektAvkortingService.beregnAvkortetYtelse(beregninger, avkortingGrunnlag)
+        val avkortetYtelse = InntektAvkortingService.beregnAvkortetYtelse(beregninger, avkortingsperioder)
 
         avkortetYtelse.size shouldBe 4
         with(avkortetYtelse[0]) {

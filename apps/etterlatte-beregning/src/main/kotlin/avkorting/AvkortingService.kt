@@ -1,6 +1,6 @@
 package no.nav.etterlatte.avkorting
 
-import no.nav.etterlatte.beregning.BeregningRepository
+import no.nav.etterlatte.beregning.BeregningService
 import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.token.Bruker
 import org.slf4j.LoggerFactory
@@ -10,7 +10,7 @@ class AvkortingService(
     private val behandlingKlient: BehandlingKlient,
     private val inntektAvkortingService: InntektAvkortingService,
     private val avkortingRepository: AvkortingRepository,
-    private val beregningRepository: BeregningRepository
+    private val beregningService: BeregningService
 ) {
     private val logger = LoggerFactory.getLogger(AvkortingService::class.java)
 
@@ -22,27 +22,26 @@ class AvkortingService(
     suspend fun lagreAvkorting(
         behandlingId: UUID,
         bruker: Bruker,
-        avkortingGrunnlag: AvkortingGrunnlag
+        avkortingGrunnlag: AvkortingGrunnlag // TODO Endres til liste ved inntektsendring
     ): Avkorting = tilstandssjekk(behandlingId, bruker) {
-        // TODO EY-2127 transaksjonshandtering
-        logger.info("Lagre grunnlag for avkorting for behandlingId=$behandlingId")
+        logger.info("Beregne avkorting og avkortet ytelse for behandlingId=$behandlingId")
 
-        val inntektavkorting = inntektAvkortingService.beregnInntektsavkorting(avkortingGrunnlag)
-        val avkortingMedGrunnlag = avkortingRepository.lagreEllerOppdaterAvkortingGrunnlag(
-            behandlingId,
-            avkortingGrunnlag.copy(beregnetAvkorting = inntektavkorting)
-        )
+        val avkortingsperioder = inntektAvkortingService.beregnInntektsavkorting(avkortingGrunnlag)
 
-        val beregning = beregningRepository.hent(behandlingId)
-            ?: throw Exception("Mangler beregning for behandlingId=$behandlingId")
+        val beregning = beregningService.hentBeregningNonnull(behandlingId)
         val beregnetAvkortetYtelse = inntektAvkortingService.beregnAvkortetYtelse(
             beregning.beregningsperioder,
-            avkortingMedGrunnlag.avkortingGrunnlag
+            avkortingsperioder
         )
 
-        val avkortetYtelse = avkortingRepository.lagreEllerOppdaterAvkortetYtelse(behandlingId, beregnetAvkortetYtelse)
+        val avkorting = avkortingRepository.lagreEllerOppdaterAvkorting(
+            behandlingId,
+            listOf(avkortingGrunnlag),
+            avkortingsperioder,
+            beregnetAvkortetYtelse
+        )
         behandlingKlient.avkort(behandlingId, bruker, true)
-        avkortetYtelse
+        avkorting
     }
 
     private suspend fun tilstandssjekk(behandlingId: UUID, bruker: Bruker, block: suspend () -> Avkorting): Avkorting {

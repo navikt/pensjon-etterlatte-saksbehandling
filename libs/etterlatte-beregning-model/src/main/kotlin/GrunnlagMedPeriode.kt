@@ -72,8 +72,9 @@ object PeriodisertBeregningGrunnlag {
         tom: LocalDate?
     ): PeriodisertGrunnlag<T> {
         val grunnlag = Grunnlag(opplysninger = perioder)
-        if (!harGrunnlagForHelePerioden(grunnlag.sorterteOpplysninger, fom, tom)) {
-            throw PeriodiseringAvGrunnlagFeil.PerioderErIkkeKomplett()
+        val harGrunnlagForHelePerioden = harGrunnlagForHelePerioden(grunnlag.sorterteOpplysninger, fom, tom)
+        if (!harGrunnlagForHelePerioden.harGrunnlagForHelePerioden()) {
+            throw PeriodiseringAvGrunnlagFeil.PerioderErIkkeKomplett(harGrunnlagForHelePerioden)
         }
         return grunnlag
     }
@@ -100,11 +101,11 @@ object PeriodisertBeregningGrunnlag {
         }
     }
 
-    fun harGrunnlagForHelePerioden(
+    private fun harGrunnlagForHelePerioden(
         sortertePerioder: List<GrunnlagMedPeriode<*>>,
         fom: LocalDate,
         tom: LocalDate?
-    ): Boolean {
+    ): GrunnlagForHelePerioden {
         val perioder =
             listOf(sortertePerioder.takeWhile { it.fom <= fom }.last()) + sortertePerioder.dropWhile { it.fom <= fom }
         val ingenHullInnad = ingenHullInnadIPerioder(perioder)
@@ -112,8 +113,16 @@ object PeriodisertBeregningGrunnlag {
         val harGrunnlagIStarten = perioder.first().fom <= fom
         val varerUtPerioden = hoeyesteTom == null || (tom != null && tom <= hoeyesteTom)
 
-        return ingenHullInnad && harGrunnlagIStarten && varerUtPerioden
+        return GrunnlagForHelePerioden(ingenHullInnad, harGrunnlagIStarten, varerUtPerioden)
     }
+}
+
+data class GrunnlagForHelePerioden(
+    val ingenHullInnad: Boolean,
+    val harGrunnlagIStarten: Boolean,
+    val varerUtPerioden: Boolean
+) {
+    fun harGrunnlagForHelePerioden() = ingenHullInnad && harGrunnlagIStarten && varerUtPerioden
 }
 
 sealed class PeriodiseringAvGrunnlagFeil(message: String, cause: Throwable? = null) : Exception(message, cause) {
@@ -122,8 +131,10 @@ sealed class PeriodiseringAvGrunnlagFeil(message: String, cause: Throwable? = nu
 
     class IngenPerioder : PeriodiseringAvGrunnlagFeil("Ingen perioder for grunnlaget ble gitt for periodisering")
     class PerioderOverlapper : PeriodiseringAvGrunnlagFeil("Periodene for periodisering overlapper")
-    class PerioderErIkkeKomplett :
-        PeriodiseringAvGrunnlagFeil("Periodene gitt er ikke komplette for den overordnede perioden")
+    class PerioderErIkkeKomplett(grunnlagForHelePerioden: GrunnlagForHelePerioden) :
+        PeriodiseringAvGrunnlagFeil(
+            "Periodene gitt er ikke komplette for den overordnede perioden: $grunnlagForHelePerioden"
+        )
 }
 
 fun <T> erGrunnlagLiktFoerEnDato(

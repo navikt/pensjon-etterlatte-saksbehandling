@@ -103,7 +103,7 @@ class GrunnlagsendringshendelseService(
     fun opprettInstitusjonsOppholdhendelse(
         oppholdsHendelse: InstitusjonsoppholdHendelseBeriket
     ): List<Grunnlagsendringshendelse> {
-        return opprettHendelseAvTypeForPersonUtenSamsvarSjekketAvJobb(
+        return opprettHendelseInstitusjonsoppholdForPersonSjekketAvJobb(
             fnr = oppholdsHendelse.norskident,
             grunnlagendringType = GrunnlagsendringsType.INSTITUSJONSOPPHOLD,
             samsvar = SamsvarMellomKildeOgGrunnlag.INSTITUSJONSOPPHOLD(
@@ -164,7 +164,7 @@ class GrunnlagsendringshendelseService(
 
     data class SakMedEnhet(val id: Long, val enhet: String)
 
-    private fun opprettHendelseAvTypeForPersonUtenSamsvarSjekketAvJobb(
+    private fun opprettHendelseInstitusjonsoppholdForPersonSjekketAvJobb(
         fnr: String,
         grunnlagendringType: GrunnlagsendringsType,
         samsvar: SamsvarMellomKildeOgGrunnlag

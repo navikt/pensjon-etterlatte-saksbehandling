@@ -6,6 +6,7 @@ sealed class Bruker {
     abstract fun ident(): String
 
     abstract fun accessToken(): String
+    abstract fun kanAttestereFor(ansvarligSaksbehandler: String): Boolean
 
     companion object {
         private fun erSystembruker(oid: String?, sub: String?) = (oid == sub) && (oid != null)
@@ -33,12 +34,14 @@ data class SystemBruker(val oid: String, val sub: String) : Bruker() {
     override fun ident() = Fagsaksystem.EY.navn
 
     override fun accessToken() = throw NotImplementedError("Kun relevant for saksbehandler")
+    override fun kanAttestereFor(ansvarligSaksbehandler: String) = true
 }
 
 data class Saksbehandler(val accessToken: String, val ident: String, val jwtTokenClaims: JwtTokenClaims?) : Bruker() {
     override fun ident() = ident
 
     override fun accessToken() = accessToken
+    override fun kanAttestereFor(ansvarligSaksbehandler: String) = ansvarligSaksbehandler != this.ident()
 
     fun getClaims() = jwtTokenClaims
 }

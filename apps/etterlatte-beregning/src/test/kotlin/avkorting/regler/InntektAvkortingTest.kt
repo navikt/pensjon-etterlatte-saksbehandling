@@ -3,7 +3,7 @@ package no.nav.etterlatte.beregning.regler.avkorting.regler
 import io.kotest.matchers.shouldBe
 import no.nav.etterlatte.avkorting.regler.avkortingFaktor
 import no.nav.etterlatte.avkorting.regler.kroneavrundetInntektAvkorting
-import no.nav.etterlatte.avkorting.regler.opprundetInntekt
+import no.nav.etterlatte.avkorting.regler.nedrundetInntekt
 import no.nav.etterlatte.avkorting.regler.overstegetInntekt
 import no.nav.etterlatte.beregning.regler.inntektAvkortingGrunnlag
 import no.nav.etterlatte.libs.regler.RegelPeriode
@@ -21,7 +21,7 @@ class InntektAvkortingTest {
 
     @Test
     fun `inntekt hentes fra grunnlag og rundes opp til naermeste tusen`() {
-        val inntekt = opprundetInntekt.anvend(inntektAvkortingGrunnlag(inntekt = 499001), RegelPeriode(LocalDate.now()))
+        val inntekt = nedrundetInntekt.anvend(inntektAvkortingGrunnlag(inntekt = 500999), RegelPeriode(LocalDate.now()))
         inntekt.verdi.toInteger() shouldBe 500000
     }
 

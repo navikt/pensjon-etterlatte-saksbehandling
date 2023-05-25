@@ -95,7 +95,7 @@ object PeriodisertBeregningGrunnlag {
         }
     }
 
-    fun ingenHullInnadIPerioder(sortertePerioder: List<GrunnlagMedPeriode<*>>): Boolean {
+    private fun ingenHullInnadIPerioder(sortertePerioder: List<GrunnlagMedPeriode<*>>): Boolean {
         return sortertePerioder.zipWithNext().all { (first, second) ->
             return first.tom != null && first.tom.plusDays(1) == second.fom
         }
@@ -111,18 +111,21 @@ object PeriodisertBeregningGrunnlag {
         val ingenHullInnad = ingenHullInnadIPerioder(perioder)
         val hoeyesteTom = perioder.last().tom
         val harGrunnlagIStarten = perioder.first().fom <= fom
-        val varerUtPerioden = hoeyesteTom == null || (tom != null && tom <= hoeyesteTom)
 
-        return GrunnlagForHelePerioden(ingenHullInnad, harGrunnlagIStarten, varerUtPerioden)
+        return GrunnlagForHelePerioden(ingenHullInnad, harGrunnlagIStarten, VarerUtPerioden(tom, hoeyesteTom))
     }
 }
 
 data class GrunnlagForHelePerioden(
     val ingenHullInnad: Boolean,
     val harGrunnlagIStarten: Boolean,
-    val varerUtPerioden: Boolean
+    val varerUtPerioden: VarerUtPerioden
 ) {
-    fun harGrunnlagForHelePerioden() = ingenHullInnad && harGrunnlagIStarten && varerUtPerioden
+    fun harGrunnlagForHelePerioden() = ingenHullInnad && harGrunnlagIStarten && varerUtPerioden.varerUtPerioden()
+}
+
+data class VarerUtPerioden(val tom: LocalDate?, val hoeyesteTom: LocalDate?) {
+    fun varerUtPerioden() = hoeyesteTom == null || (tom != null && tom <= hoeyesteTom)
 }
 
 sealed class PeriodiseringAvGrunnlagFeil(message: String, cause: Throwable? = null) : Exception(message, cause) {

@@ -6,9 +6,9 @@ import classNames from 'classnames'
 import { behandlingSkalSendeBrev, hentGyldigeNavigeringsStatuser } from '~components/behandling/felles/utils'
 import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
 import { ISaksType } from '~components/behandling/fargetags/saksType'
-import { PathInfo } from '~components/behandling/BehandlingRoutes'
+import { BehandlingRouteTypes } from '~components/behandling/BehandlingRoutes'
 
-export const NavLenke = (props: { pathInfo: PathInfo; behandling: IBehandlingReducer }) => {
+export const NavLenke = (props: { pathInfo: BehandlingRouteTypes; behandling: IBehandlingReducer }) => {
   const { pathInfo } = props
   const { status } = props.behandling
   const routeErdisabled = (steg: IBehandlingStatus) => !hentGyldigeNavigeringsStatuser(status).includes(steg)

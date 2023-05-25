@@ -77,13 +77,13 @@ export const useBehandlingRoutes = () => {
   return { next, back, lastPage, firstPage, behandlingRoutes: aktuelleRoutes, currentRoute, goto }
 }
 
-export interface PathInfo {
+export interface BehandlingRouteTypes {
   path: string
   description: string
   kreverBehandlingsstatus?: IBehandlingStatus
 }
 
-export const soeknadRoutes: Array<PathInfo> = [
+export const soeknadRoutes: Array<BehandlingRouteTypes> = [
   { path: 'soeknadsoversikt', description: 'Søknadsoversikt' },
   {
     path: 'vilkaarsvurdering',
@@ -99,7 +99,7 @@ export const soeknadRoutes: Array<PathInfo> = [
   { path: 'brev', description: 'Vedtaksbrev' },
 ]
 
-export const manueltOpphoerRoutes: Array<PathInfo> = [
+export const manueltOpphoerRoutes: Array<BehandlingRouteTypes> = [
   { path: 'opphoeroversikt', description: 'Opphøroversikt' },
   { path: 'beregne', description: 'Beregning', kreverBehandlingsstatus: IBehandlingStatus.BEREGNET },
 ]
@@ -124,8 +124,8 @@ const hentAktuelleRoutes = (behandling: IBehandlingReducer | null) => {
   }
 }
 
-export function revurderingRoutes(behandling: IBehandlingReducer): Array<PathInfo> {
-  const defaultRoutes: Array<PathInfo> = [
+export function revurderingRoutes(behandling: IBehandlingReducer): Array<BehandlingRouteTypes> {
+  const defaultRoutes: Array<BehandlingRouteTypes> = [
     { path: 'revurderingsoversikt', description: 'Revurderingsoversikt' },
     {
       path: 'vilkaarsvurdering',

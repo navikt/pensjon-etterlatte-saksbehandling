@@ -71,7 +71,8 @@ data class Utbetalingslinje(
 )
 
 enum class OppdragKlassifikasjonskode(private val oppdragVerdi: String) {
-    BARNEPENSJON_OPTP("BARNEPENSJON-OPTP");
+    BARNEPENSJON_OPTP("BARNEPENSJON-OPTP"),
+    OMSTILLINGSTOENAD_OPTP("OMSTILLINGOR");
 
     override fun toString(): String {
         return oppdragVerdi
@@ -80,7 +81,7 @@ enum class OppdragKlassifikasjonskode(private val oppdragVerdi: String) {
     companion object {
         fun fraString(string: String): OppdragKlassifikasjonskode = when (string) {
             "BARNEPENSJON-OPTP" -> BARNEPENSJON_OPTP
-            "BARNEPENSJON_OPTP" -> BARNEPENSJON_OPTP
+            "OMSTILLINGOR" -> OMSTILLINGSTOENAD_OPTP
             else -> throw IllegalArgumentException("$string er ikke en OppgragKlassifikasjonskode!")
         }
     }

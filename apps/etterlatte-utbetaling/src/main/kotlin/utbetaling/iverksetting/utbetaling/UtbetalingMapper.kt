@@ -71,7 +71,7 @@ class UtbetalingMapper(
             erstatterId = finnErstatterId(utbetalingslinjeId = it.id),
             klassifikasjonskode = when (saktype) {
                 Saktype.BARNEPENSJON -> OppdragKlassifikasjonskode.BARNEPENSJON_OPTP
-                Saktype.OMSTILLINGSSTOENAD -> TODO("Kanskje det er samme som over men vi kræsjer dette i stedet")
+                Saktype.OMSTILLINGSSTOENAD -> OppdragKlassifikasjonskode.OMSTILLINGSTOENAD_OPTP
             }
         )
     }

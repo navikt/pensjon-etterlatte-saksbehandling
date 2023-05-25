@@ -72,6 +72,10 @@ data class Utbetalingslinje(
 )
 
 enum class Kjoereplan(private val oppdragVerdi: String) {
+    // ref. https://confluence.adeo.no/display/OKSY/Inputdata+fra+fagrutinen+til+Oppdragssystemet:
+    // "Bruk-kjoreplan gjør det mulig å velge om delytelsen skal beregnes/utbetales i henhold til kjøreplanen eller om
+    // dette skal skje idag. Verdien 'N' medfører at beregningen kjøres idag. Beregningen vil bare gjelde
+    // beregningsperioder som allerede er forfalt."
     NESTE_PLANLAGTE_UTBETALING("J"), MED_EN_GANG("N");
 
     override fun toString(): String {

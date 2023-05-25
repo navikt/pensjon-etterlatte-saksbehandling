@@ -63,7 +63,7 @@ internal class MigreringHendelser(rapidsConnection: RapidsConnection, private va
             soeskenMedIBeregning = listOf(
                 GrunnlagMedPeriode(
                     fom = request.trygdetidsgrunnlag.fom,
-                    tom = request.trygdetidsgrunnlag.tom,
+                    tom = null,
                     data = request.persongalleri.soesken.map {
                         SoeskenMedIBeregning(foedselsnummer = Folkeregisteridentifikator.of(it), skalBrukes = true)
                     }

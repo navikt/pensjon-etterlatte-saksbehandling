@@ -10,7 +10,7 @@ internal class GrunnbeloepRepositoryTest {
 
     @Test
     fun `skal hente alle historiske grunnbeloep`() {
-        GrunnbeloepRepository.historiskeGrunnbeloep shouldHaveSize 69
+        GrunnbeloepRepository.historiskeGrunnbeloep shouldHaveSize 70
     }
 
     @Test

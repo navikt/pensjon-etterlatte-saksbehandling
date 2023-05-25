@@ -4,7 +4,7 @@ import { Beregne } from './beregne/Beregne'
 import { Vilkaarsvurdering } from './vilkaarsvurdering/Vilkaarsvurdering'
 import { Soeknadsoversikt } from './soeknadsoversikt/Soeknadoversikt'
 import Beregningsgrunnlag from './beregningsgrunnlag/Beregningsgrunnlag'
-import { IBehandlingsType } from '~shared/types/IDetaljertBehandling'
+import { IBehandlingStatus, IBehandlingsType } from '~shared/types/IDetaljertBehandling'
 import { useAppSelector } from '~store/Store'
 import { Vedtaksbrev } from './brev/Vedtaksbrev'
 import { ManueltOpphoerOversikt } from './manueltopphoeroversikt/ManueltOpphoerOversikt'
@@ -77,39 +77,71 @@ export const useBehandlingRoutes = () => {
   return { next, back, lastPage, firstPage, behandlingRoutes: aktuelleRoutes, currentRoute, goto }
 }
 
-export const soeknadRoutes: Array<behandlingRouteTypes> = [
-  'soeknadsoversikt',
-  'vilkaarsvurdering',
-  'beregningsgrunnlag',
-  'beregne',
-  'brev',
-]
-export const manueltOpphoerRoutes: Array<behandlingRouteTypes> = ['opphoeroversikt', 'beregne']
-export const revurderingRoutes = (behandling: IBehandlingReducer) => hentRevurderingRoutes(behandling)
+export interface BehandlingRouteTypes {
+  path: string
+  description: string
+  kreverBehandlingsstatus?: IBehandlingStatus
+}
 
+export const soeknadRoutes: Array<BehandlingRouteTypes> = [
+  { path: 'soeknadsoversikt', description: 'Søknadsoversikt' },
+  {
+    path: 'vilkaarsvurdering',
+    description: 'Vilkårsvurdering',
+    kreverBehandlingsstatus: IBehandlingStatus.VILKAARSVURDERT,
+  },
+  {
+    path: 'beregningsgrunnlag',
+    description: 'Beregningsgrunnlag',
+    kreverBehandlingsstatus: IBehandlingStatus.VILKAARSVURDERT,
+  },
+  { path: 'beregne', description: 'Beregning', kreverBehandlingsstatus: IBehandlingStatus.BEREGNET },
+  { path: 'brev', description: 'Vedtaksbrev' },
+]
+
+export const manueltOpphoerRoutes: Array<BehandlingRouteTypes> = [
+  { path: 'opphoeroversikt', description: 'Opphøroversikt' },
+  { path: 'beregne', description: 'Beregning', kreverBehandlingsstatus: IBehandlingStatus.BEREGNET },
+]
 const hentAktuelleRoutes = (behandling: IBehandlingReducer | null) => {
   if (!behandling) return []
 
   switch (behandling.behandlingType) {
     case IBehandlingsType.MANUELT_OPPHOER:
-      return behandlingRoutes(behandling).filter((route) => manueltOpphoerRoutes.includes(route.path))
+      return behandlingRoutes(behandling).filter((route) =>
+        manueltOpphoerRoutes.map((pathinfo) => pathinfo.path).includes(route.path)
+      )
     case IBehandlingsType.FØRSTEGANGSBEHANDLING:
-      return behandlingRoutes(behandling).filter((route) => soeknadRoutes.includes(route.path))
+      return behandlingRoutes(behandling).filter((route) =>
+        soeknadRoutes.map((pathinfo) => pathinfo.path).includes(route.path)
+      )
     case IBehandlingsType.REVURDERING:
-      return behandlingRoutes(behandling).filter((route) => revurderingRoutes(behandling).includes(route.path))
+      return behandlingRoutes(behandling).filter((route) =>
+        revurderingRoutes(behandling)
+          .map((pathinfo) => pathinfo.path)
+          .includes(route.path)
+      )
   }
 }
 
-function hentRevurderingRoutes(behandling: IBehandlingReducer): Array<behandlingRouteTypes> {
-  const defaultRoutes: Array<behandlingRouteTypes> = [
-    'revurderingsoversikt',
-    'vilkaarsvurdering',
-    'beregningsgrunnlag',
-    'beregne',
+export function revurderingRoutes(behandling: IBehandlingReducer): Array<BehandlingRouteTypes> {
+  const defaultRoutes: Array<BehandlingRouteTypes> = [
+    { path: 'revurderingsoversikt', description: 'Revurderingsoversikt' },
+    {
+      path: 'vilkaarsvurdering',
+      description: 'Vilkårsvurdering',
+      kreverBehandlingsstatus: IBehandlingStatus.VILKAARSVURDERT,
+    },
+    {
+      path: 'beregningsgrunnlag',
+      description: 'Beregningsgrunnlag',
+      kreverBehandlingsstatus: IBehandlingStatus.VILKAARSVURDERT,
+    },
+    { path: 'beregne', description: 'Beregning', kreverBehandlingsstatus: IBehandlingStatus.BEREGNET },
   ]
 
   if (behandlingSkalSendeBrev(behandling)) {
-    return [...defaultRoutes, 'brev']
+    return [...defaultRoutes, { path: 'brev', description: 'Vedtaksbrev' }]
   }
 
   return defaultRoutes

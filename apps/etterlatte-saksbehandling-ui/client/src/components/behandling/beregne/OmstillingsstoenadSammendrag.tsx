@@ -4,7 +4,6 @@ import { lastDayOfMonth } from 'date-fns'
 import { formaterDato, formaterStringDato } from '~utils/formattering'
 import { Beregning } from '~shared/types/Beregning'
 import { OmstillingsstoenadToolTip } from '~components/behandling/beregne/OmstillingsstoenadToolTip'
-import { ManglerRegelspesifikasjon } from '~components/behandling/felles/ManglerRegelspesifikasjon'
 
 interface Props {
   beregning: Beregning
@@ -40,9 +39,7 @@ export const OmstillingsstoenadSammendrag = ({ beregning }: Props) => {
               <Table.DataCell>{beregningsperiode.trygdetid} år</Table.DataCell>
               <Table.DataCell>{beregningsperiode.grunnbelop} kr</Table.DataCell>
               <Table.DataCell>
-                <ManglerRegelspesifikasjon>
-                  {beregningsperiode.utbetaltBeloep} kr <OmstillingsstoenadToolTip />
-                </ManglerRegelspesifikasjon>
+                {beregningsperiode.utbetaltBeloep} kr <OmstillingsstoenadToolTip />
               </Table.DataCell>
             </Table.Row>
           ))}

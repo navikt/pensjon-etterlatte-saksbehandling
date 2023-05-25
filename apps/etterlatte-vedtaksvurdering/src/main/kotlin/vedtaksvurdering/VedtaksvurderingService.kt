@@ -238,7 +238,9 @@ class VedtaksvurderingService(
     }
 
     private fun verifiserGyldigAttestant(ansvarligSaksbehandler: String, innloggetBruker: Bruker) {
-        if (ansvarligSaksbehandler == innloggetBruker.ident()) throw UgyldigAttestantException(innloggetBruker.ident())
+        if (!innloggetBruker.kanAttestereFor(ansvarligSaksbehandler)) {
+            throw UgyldigAttestantException(innloggetBruker.ident())
+        }
     }
 
     private fun opprettVedtak(

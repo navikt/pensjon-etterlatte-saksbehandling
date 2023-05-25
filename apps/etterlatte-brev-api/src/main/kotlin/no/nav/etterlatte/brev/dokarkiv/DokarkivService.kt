@@ -7,7 +7,6 @@ import no.nav.etterlatte.brev.journalpost.Bruker
 import no.nav.etterlatte.brev.journalpost.DokumentVariant
 import no.nav.etterlatte.brev.journalpost.JournalPostType
 import no.nav.etterlatte.brev.journalpost.JournalpostDokument
-import no.nav.etterlatte.brev.journalpost.JournalpostKoder.Companion.BEHANDLINGSTEMA_BP
 import no.nav.etterlatte.brev.journalpost.JournalpostKoder.Companion.BREV_KODE
 import no.nav.etterlatte.brev.journalpost.JournalpostRequest
 import no.nav.etterlatte.brev.journalpost.JournalpostResponse
@@ -48,13 +47,12 @@ class DokarkivServiceImpl(
         return JournalpostRequest(
             tittel = vedtaksbrev.tittel,
             journalpostType = JournalPostType.UTGAAENDE,
-            behandlingstema = BEHANDLINGSTEMA_BP,
-            avsenderMottaker = AvsenderMottaker(vedtak.soekerIdent),
-            bruker = Bruker(vedtak.soekerIdent),
+            avsenderMottaker = AvsenderMottaker(vedtak.sak.ident),
+            bruker = Bruker(vedtak.sak.ident),
             eksternReferanseId = "${vedtaksbrev.behandlingId}.${vedtaksbrev.id}",
-            sak = Sak(Sakstype.FAGSAK, vedtak.sakId.toString()),
+            sak = Sak(Sakstype.FAGSAK, vedtak.sak.id.toString()),
             dokumenter = listOf(dokumentInnhold.tilJournalpostDokument(vedtaksbrev.tittel)),
-            tema = "EYB", // https://confluence.adeo.no/display/BOA/Tema
+            tema = vedtak.sak.sakType.tema, // https://confluence.adeo.no/display/BOA/Tema
             kanal = "S", // https://confluence.adeo.no/display/BOA/Utsendingskanal
             journalfoerendeEnhet = vedtak.ansvarligEnhet
         )

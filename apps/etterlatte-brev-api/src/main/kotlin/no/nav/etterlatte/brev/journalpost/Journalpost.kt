@@ -5,7 +5,6 @@ data class JournalpostRequest(
     val journalpostType: JournalPostType,
     val tema: String,
     val kanal: String?,
-    val behandlingstema: String,
     val journalfoerendeEnhet: String?,
     val avsenderMottaker: AvsenderMottaker,
     val bruker: Bruker,
@@ -83,7 +82,6 @@ enum class BrukerIdType {
 
 class JournalpostKoder {
     companion object {
-        const val BEHANDLINGSTEMA_BP = "ab0255"
         const val BREV_KODE = "XX.YY-ZZ"
     }
 }

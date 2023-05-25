@@ -35,6 +35,7 @@ import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.brev.pdf.PdfGeneratorKlient
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.sak.VedtakSak
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.rivers.VedtakTilJournalfoering
@@ -351,9 +352,8 @@ internal class VedtaksbrevServiceTest {
 
     private fun opprettVedtak() = VedtakTilJournalfoering(
         vedtakId = 1234,
-        sakId = 4,
+        sak = VedtakSak("ident", SakType.BARNEPENSJON, 4),
         behandlingId = BEHANDLING_ID,
-        soekerIdent = "ident",
         ansvarligEnhet = "ansvarlig enhet"
     )
 

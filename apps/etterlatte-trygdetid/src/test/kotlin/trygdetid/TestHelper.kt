@@ -34,7 +34,7 @@ fun trygdetid(
 )
 
 fun trygdetidGrunnlag(
-    beregnetTrygdetidGrunnlag: BeregnetTrygdetidGrunnlag? = null,
+    beregnetTrygdetidGrunnlag: BeregnetTrygdetidGrunnlag? = beregnetTrygdetidGrunnlag(),
     periode: TrygdetidPeriode = TrygdetidPeriode(
         fra = LocalDate.of(2023, 1, 1),
         til = LocalDate.of(2023, 2, 1)

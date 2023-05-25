@@ -114,6 +114,28 @@ internal class TrygdetidRepositoryTest {
     }
 
     @Test
+    fun `skal opprette og hente trygdetid med grunnlag og beregning`() {
+        val behandling = behandlingMock()
+        val beregnetTrygdetid = beregnetTrygdetid()
+        val trygdetidGrunnlag = trygdetidGrunnlag()
+        val opprettetTrygdetid = trygdetid(
+            behandling.id,
+            behandling.sak,
+            trygdetidGrunnlag = listOf(trygdetidGrunnlag),
+            beregnetTrygdetid = beregnetTrygdetid
+        )
+
+        repository.opprettTrygdetid(opprettetTrygdetid)
+        val trygdetid = repository.hentTrygdetid(behandling.id)
+
+        trygdetid shouldNotBe null
+        trygdetid?.id shouldNotBe null
+        trygdetid?.behandlingId shouldBe behandling.id
+        trygdetid?.trygdetidGrunnlag?.first() shouldBe trygdetidGrunnlag
+        trygdetid?.beregnetTrygdetid shouldBe beregnetTrygdetid
+    }
+
+    @Test
     fun `skal opprette et trygdetidsgrunnlag`() {
         val behandling = behandlingMock()
         val trygdetidGrunnlag = trygdetidGrunnlag(beregnetTrygdetidGrunnlag = beregnetTrygdetidGrunnlag())

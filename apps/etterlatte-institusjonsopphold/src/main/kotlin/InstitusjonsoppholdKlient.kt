@@ -16,7 +16,7 @@ class InstitusjonsoppholdKlient(val institusjonsoppholdHttpKlient: HttpClient, v
 
     fun hentDataForHendelse(oppholdId: Long) =
         runBlocking {
-            institusjonsoppholdHttpKlient.get(proxyUrl.plus("/inst2/$oppholdId")) {
+            institusjonsoppholdHttpKlient.get(proxyUrl.plus("/inst2/$oppholdId?Med-Institusjonsinformasjon=true")) {
                 contentType(ContentType.Application.Json)
                 header(X_CORRELATION_ID, getXCorrelationId())
                 header("Nav_Call_Id", getXCorrelationId())

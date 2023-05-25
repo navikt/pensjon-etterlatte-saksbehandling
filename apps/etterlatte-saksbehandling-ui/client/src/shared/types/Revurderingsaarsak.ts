@@ -9,5 +9,15 @@ export enum Revurderingsaarsak {
   VERGEMAAL_ELLER_FREMTIDSFULLMAKT = 'VERGEMAAL_ELLER_FREMTIDSFULLMAKT',
 }
 
+export const tekstRevurderingsaarsak: Record<Revurderingsaarsak, string> = {
+  REGULERING: 'Regulering',
+  ANSVARLIGE_FORELDRE: 'Ansvarlige foreldre',
+  SOESKENJUSTERING: 'Søskenjustering',
+  UTLAND: 'Utland',
+  BARN: 'Barn',
+  DOEDSFALL: 'Dødsfall',
+  VERGEMAAL_ELLER_FREMTIDSFULLMAKT: 'Verge / fullmakt',
+} as const
+
 export const erOpphoer = (revurderingsaarsak: Revurderingsaarsak) =>
   [Revurderingsaarsak.DOEDSFALL].includes(revurderingsaarsak)

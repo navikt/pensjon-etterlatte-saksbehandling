@@ -1,6 +1,7 @@
 package no.nav.etterlatte.utbetaling
 
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toNorskTidspunkt
 import no.nav.etterlatte.libs.common.vedtak.Behandling
@@ -117,7 +118,7 @@ fun oppdragMedFeiletKvittering(
 fun utbetaling(
     id: UUID = UUID.randomUUID(),
     sakId: SakId = SakId(1),
-    sakType: Saktype = Saktype.BARNEPENSJON,
+    sakType: Saktype? = Saktype.BARNEPENSJON,
     vedtakId: Long = 1,
     avstemmingsnoekkel: Tidspunkt = Tidspunkt.now(),
     opprettet: Tidspunkt = Tidspunkt.now(),
@@ -147,7 +148,7 @@ fun utbetaling(
         id = id,
         vedtakId = VedtakId(vedtakId),
         behandlingId = BehandlingId(behandlingId, behandlingId.toUUID30()),
-        sakType = sakType,
+        sakType = sakType?:Saktype.BARNEPENSJON,
         sakId = sakId,
         vedtak = utbetalingsvedtak(vedtakId),
         opprettet = opprettet,

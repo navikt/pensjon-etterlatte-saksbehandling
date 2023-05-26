@@ -17,6 +17,7 @@ import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sakId
+import java.util.UUID
 
 internal fun Route.revurderingRoutes(
     revurderingService: RevurderingService,
@@ -49,7 +50,8 @@ internal fun Route.revurderingRoutes(
                     sakId = forrigeIverksatteBehandling.sak.id,
                     forrigeBehandling = forrigeIverksatteBehandling,
                     revurderingAarsak = body.aarsak,
-                    kilde = Vedtaksloesning.GJENNY
+                    kilde = Vedtaksloesning.GJENNY,
+                    paaGrunnAvHendelse = body.paaGrunnAvHendelseId
                 )
 
                 when (revurdering) {
@@ -73,4 +75,4 @@ internal fun Route.revurderingRoutes(
     }
 }
 
-data class OpprettRevurderingRequest(val aarsak: RevurderingAarsak)
+data class OpprettRevurderingRequest(val aarsak: RevurderingAarsak, val paaGrunnAvHendelseId: UUID? = null)

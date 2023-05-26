@@ -13,10 +13,10 @@ type Props = {
   setOpen: (value: boolean) => void
   sakId: number
   revurderinger: Array<string>
-  valgtHendelse: Grunnlagsendringshendelse
+  valgtHendelse?: Grunnlagsendringshendelse
 }
 const OpprettRevurderingModal = (props: Props) => {
-  const { revurderinger } = props
+  const { revurderinger, valgtHendelse } = props
   const [error, setError] = useState<string | null>(null)
   const [valgtAarsak, setValgtAarsak] = useState<Revurderingsaarsak | undefined>(undefined)
   const [opprettRevurderingStatus, opprettRevurdering] = useApiCall(opprettRevurderingApi)
@@ -28,7 +28,7 @@ const OpprettRevurderingModal = (props: Props) => {
     }
 
     opprettRevurdering(
-      { sakId: props.sakId, aarsak: valgtAarsak },
+      { sakId: props.sakId, aarsak: valgtAarsak, paaGrunnAvHendelseId: valgtHendelse?.id },
       (revurdering: IDetaljertBehandling) => {
         navigate(`/behandling/${revurdering.id}/`)
       },

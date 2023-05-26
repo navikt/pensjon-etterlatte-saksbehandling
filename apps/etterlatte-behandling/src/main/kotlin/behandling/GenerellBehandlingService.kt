@@ -17,6 +17,7 @@ import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.filterForEnheter
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
+import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseDao
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
@@ -94,6 +95,7 @@ interface GenerellBehandlingService {
 class RealGenerellBehandlingService(
     private val behandlingDao: BehandlingDao,
     private val behandlingHendelser: BehandlingHendelserKanal,
+    private val grunnlagsendringshendelseDao: GrunnlagsendringshendelseDao,
     private val hendelseDao: HendelseDao,
     private val vedtakKlient: VedtakKlient,
     private val grunnlagKlient: GrunnlagKlient,
@@ -135,12 +137,15 @@ class RealGenerellBehandlingService(
             if (!behandling.status.kanAvbrytes()) {
                 throw IllegalStateException("Kan ikke avbryte en behandling med status ${behandling.status}")
             }
+
             behandlingDao.avbrytBehandling(behandlingId).also {
                 hendelseDao.behandlingAvbrutt(behandling, saksbehandler)
-                runBlocking {
-                    behandlingHendelser.send(behandlingId to BehandlingHendelseType.AVBRUTT)
-                }
+            }.also {
+                grunnlagsendringshendelseDao.aapneGrunnlagsendringshendelserForBehandlingId(behandlingId)
             }
+        }
+        runBlocking {
+            behandlingHendelser.send(behandlingId to BehandlingHendelseType.AVBRUTT)
         }
     }
 

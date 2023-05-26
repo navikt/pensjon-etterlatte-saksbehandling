@@ -21,6 +21,7 @@ import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.foerstegangsbehandling
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlagsOpplysningMedPersonopplysning
+import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseDao
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
@@ -82,13 +83,14 @@ class RealGenerellBehandlingServiceTest {
         every { featureToggleService.isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false) } returns false
 
         val sut = RealGenerellBehandlingService(
-            behandlingDaoMock,
-            hendleseskanal,
-            hendelserMock,
-            mockk(),
-            mockk(),
-            mockk(),
-            featureToggleService
+            behandlingDao = behandlingDaoMock,
+            behandlingHendelser = hendleseskanal,
+            grunnlagsendringshendelseDao = mockk(),
+            hendelseDao = hendelserMock,
+            vedtakKlient = mockk(),
+            grunnlagKlient = mockk(),
+            sporingslogg = mockk(),
+            featureToggleService = featureToggleService
         )
 
         val behandlinger = sut.hentBehandlingerISak(1)
@@ -367,13 +369,14 @@ class RealGenerellBehandlingServiceTest {
         every { featureToggleService.isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false) } returns true
 
         val sut = RealGenerellBehandlingService(
-            behandlingDaoMock,
-            hendleseskanal,
-            hendelserMock,
-            mockk(),
-            mockk(),
-            mockk(),
-            featureToggleService
+            behandlingDao = behandlingDaoMock,
+            behandlingHendelser = hendleseskanal,
+            grunnlagsendringshendelseDao = mockk(),
+            hendelseDao = hendelserMock,
+            vedtakKlient = mockk(),
+            grunnlagKlient = mockk(),
+            sporingslogg = mockk(),
+            featureToggleService = featureToggleService
         )
 
         val behandlinger = sut.hentBehandlingerISak(1)
@@ -409,13 +412,14 @@ class RealGenerellBehandlingServiceTest {
         every { featureToggleService.isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false) } returns true
 
         val sut = RealGenerellBehandlingService(
-            behandlingDaoMock,
-            hendleseskanal,
-            hendelserMock,
-            mockk(),
-            mockk(),
-            mockk(),
-            featureToggleService
+            behandlingDao = behandlingDaoMock,
+            behandlingHendelser = hendleseskanal,
+            grunnlagsendringshendelseDao = mockk(),
+            hendelseDao = hendelserMock,
+            vedtakKlient = mockk(),
+            grunnlagKlient = mockk(),
+            sporingslogg = mockk(),
+            featureToggleService = featureToggleService
         )
 
         val behandlinger = sut.hentBehandlingerISak(1)
@@ -450,13 +454,14 @@ class RealGenerellBehandlingServiceTest {
         every { featureToggleService.isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false) } returns true
 
         val sut = RealGenerellBehandlingService(
-            behandlingDaoMock,
-            mockk(),
-            mockk(),
-            mockk(),
-            mockk(),
-            mockk(),
-            featureToggleService
+            behandlingDao = behandlingDaoMock,
+            behandlingHendelser = mockk(),
+            grunnlagsendringshendelseDao = mockk(),
+            hendelseDao = mockk(),
+            vedtakKlient = mockk(),
+            grunnlagKlient = mockk(),
+            sporingslogg = mockk(),
+            featureToggleService = featureToggleService
         )
 
         sut.oppdaterUtenlandstilsnitt(
@@ -556,16 +561,18 @@ class RealGenerellBehandlingServiceTest {
         behandlingDao: BehandlingDao? = null,
         hendelseKanal: BehandlingHendelserKanal? = null,
         hendelseDao: HendelseDao? = null,
+        grunnlagsendringshendelseDao: GrunnlagsendringshendelseDao = mockk(relaxed = true),
         grunnlagKlient: GrunnlagKlient? = null,
         featureToggleService: FeatureToggleService
     ): RealGenerellBehandlingService = RealGenerellBehandlingService(
         behandlingDao = behandlingDao ?: mockk(),
         behandlingHendelser = hendelseKanal ?: mockk(),
+        grunnlagsendringshendelseDao = grunnlagsendringshendelseDao,
         hendelseDao = hendelseDao ?: mockk(),
-        mockk(),
-        grunnlagKlient ?: mockk(),
-        mockk(),
-        featureToggleService
+        vedtakKlient = mockk(),
+        grunnlagKlient = grunnlagKlient ?: mockk(),
+        sporingslogg = mockk(),
+        featureToggleService = featureToggleService
     )
 
     companion object {

@@ -140,6 +140,7 @@ class ApplicationContext(
         behandlingDao = behandlingDao,
         behandlingHendelser = behandlingsHendelser.hendelserKanal,
         hendelseDao = hendelseDao,
+        grunnlagsendringshendelseDao = grunnlagsendringshendelseDao,
         vedtakKlient = vedtakKlientObo,
         grunnlagKlient = grunnlagKlientObo,
         sporingslogg = sporingslogg,

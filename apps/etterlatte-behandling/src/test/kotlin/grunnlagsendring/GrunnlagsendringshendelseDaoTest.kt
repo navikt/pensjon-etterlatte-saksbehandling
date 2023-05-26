@@ -326,7 +326,7 @@ internal class GrunnlagsendringshendelseDaoTest {
                 sakId = sak1,
                 fnr = grunnlagsinformasjonDoedshendelse().avdoedFnr,
                 type = grunnlagsendringstype,
-                status = GrunnlagsendringStatus.TATT_MED_I_BEHANDLING,
+                status = GrunnlagsendringStatus.SJEKKET_AV_JOBB,
                 samsvarMellomKildeOgGrunnlag = null
             )
         ).forEach {

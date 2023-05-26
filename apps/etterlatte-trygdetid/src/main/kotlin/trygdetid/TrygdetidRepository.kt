@@ -18,13 +18,8 @@ import javax.sql.DataSource
 
 class TrygdetidRepository(private val dataSource: DataSource) {
 
-    fun <T> transaction(block: (tx: TransactionalSession) -> T): T = dataSource.transaction(false, block)
-
-    private fun <T> retrieveTransaction(txIn: TransactionalSession?, block: (tx: TransactionalSession) -> T): T =
-        txIn?.let(block) ?: transaction { block(it) }
-
-    fun hentTrygdetid(behandlingId: UUID, txIn: TransactionalSession? = null): Trygdetid? =
-        retrieveTransaction(txIn) { tx ->
+    fun hentTrygdetid(behandlingId: UUID): Trygdetid? =
+        using(sessionOf(dataSource)) { session ->
             queryOf(
                 statement = """
                     SELECT id, sak_id, behandling_id, trygdetid_nasjonal, trygdetid_fremtidig, tidspunkt, 

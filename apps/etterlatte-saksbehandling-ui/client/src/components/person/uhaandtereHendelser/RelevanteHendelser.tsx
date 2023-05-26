@@ -29,7 +29,9 @@ type Props = {
 const RelevanteHendelser = (props: Props) => {
   const { hendelser, disabled, grunnlag, revurderinger, sakId } = props
 
-  if (hendelser.length === 0) return null
+  if (hendelser.length === 0) {
+    return revurderinger.length > 0 ? <OpprettNyBehandling revurderinger={revurderinger} sakId={sakId} /> : null
+  }
 
   const [visOpprettRevurderingsmodal, setVisOpprettRevurderingsmodal] = useState<boolean>(false)
   const [valgtHendelse, setValgtHendelse] = useState<Grunnlagsendringshendelse | undefined>(undefined)

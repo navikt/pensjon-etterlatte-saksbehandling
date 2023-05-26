@@ -45,7 +45,10 @@ class VedtakServiceImpl(private val vedtakKlient: HttpClient, private val url: S
             vedtakKlient.post("$url/api/vedtak/$behandlingId/attester") {
                 contentType(ContentType.Application.Json)
                 setBody(
-                    AttesterVedtakDto("Automatisk attestert av ${Fagsaksystem.EY.systemnavn}")
+                    AttesterVedtakDto(
+                        kommentar = "Automatisk attestert av ${Fagsaksystem.EY.systemnavn}",
+                        skalSendeBrev = false
+                    )
                 )
             }
                 .body()

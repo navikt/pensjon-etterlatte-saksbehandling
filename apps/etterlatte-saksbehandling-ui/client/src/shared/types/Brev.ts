@@ -1,6 +1,7 @@
 export interface IBrev {
   id: number
   behandlingId: string
+  prosessType: BrevProsessType
   tittel: string
   status: BrevStatus
   mottaker: Mottaker
@@ -32,4 +33,9 @@ export enum BrevStatus {
   JOURNALFOERT = 'JOURNALFOERT',
   DISTRIBUERT = 'DISTRIBUERT',
   SLETTET = 'SLETTET',
+}
+
+export enum BrevProsessType {
+  AUTOMATISK = 'AUTOMATISK',
+  MANUELL = 'MANUELL',
 }

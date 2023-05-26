@@ -19,6 +19,7 @@ import no.nav.etterlatte.brev.journalpost.Sakstype
 import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevInnhold
+import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.Status
@@ -89,6 +90,7 @@ internal class DokarkivServiceTest {
     private fun opprettVedtaksbrev() = Brev(
         id = 1,
         behandlingId = UUID.randomUUID(),
+        prosessType = BrevProsessType.AUTOMATISK,
         soekerFnr = "soeker fnr",
         tittel = "vedtak om innvilgelse",
         status = Status.FERDIGSTILT,
@@ -97,8 +99,7 @@ internal class DokarkivServiceTest {
             STOR_SNERK,
             null,
             Adresse(adresseType = "NORSKPOSTADRESSE", "Testgaten 13", "1234", "OSLO", land = "Norge", landkode = "NOR")
-        ),
-        erVedtaksbrev = true
+        )
     )
 
     private fun opprettVedtak() = VedtakTilJournalfoering(

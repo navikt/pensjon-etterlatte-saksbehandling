@@ -17,10 +17,13 @@ import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.BrevInnhold
+import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.OpprettNyttBrev
+import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.Status
+import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.database.transaction
 import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
@@ -37,6 +40,10 @@ class BrevRepository(private val ds: DataSource) {
         it.run(queryOf("SELECT * FROM innhold WHERE brev_id = ?", id).map(tilInnhold).asSingle)
     }
 
+    fun hentBrevPayload(id: BrevID): Slate? = using(sessionOf(ds)) {
+        it.run(queryOf("SELECT payload FROM innhold WHERE brev_id = ?", id).map(tilPayload).asSingle)
+    }
+
     fun hentBrevForBehandling(behandlingId: UUID): Brev? = using(sessionOf(ds)) {
         it.run(queryOf(HENT_BREV_FOR_BEHANDLING_QUERY, behandlingId).map(tilBrev).asSingle)
     }
@@ -49,8 +56,40 @@ class BrevRepository(private val ds: DataSource) {
                     mapOf(
                         "brev_id" to id,
                         "mal" to "",
-                        "spraak" to innhold.spraak.name,
+                        "spraak" to innhold.spraak?.name,
                         "bytes" to innhold.data
+                    )
+                ).asUpdate
+            ).also { oppdatert -> require(oppdatert == 1) }
+
+            tx.lagreHendelse(id, Status.FERDIGSTILT)
+        }
+    }
+
+    fun opprettEllerOppdaterPayload(id: BrevID, payload: Slate) = ds.transaction { tx ->
+        tx.run(
+            queryOf(
+                Queries.OPPRETT_ELLER_OPPDATER_INNHOLD_PAYLOAD,
+                mapOf(
+                    "brev_id" to id,
+                    "spraak" to Spraak.NB.name,
+                    "payload" to payload.toJson()
+                )
+            ).asUpdate
+        ).also { require(it == 1) }
+
+        tx.lagreHendelse(id, Status.OPPDATERT, payload.toJson())
+            .also { require(it == 1) }
+    }
+
+    fun ferdigstillManueltBrevInnhold(id: BrevID, pdfBytes: ByteArray) {
+        ds.transaction { tx ->
+            tx.run(
+                queryOf(
+                    Queries.LAGRE_PDF_INNHOLD_QUERY,
+                    mapOf(
+                        "brev_id" to id,
+                        "bytes" to pdfBytes
                     )
                 ).asUpdate
             ).also { oppdatert -> require(oppdatert == 1) }
@@ -65,9 +104,9 @@ class BrevRepository(private val ds: DataSource) {
                 OPPRETT_BREV_QUERY,
                 mapOf(
                     "behandling_id" to ulagretBrev.behandlingId,
+                    "prosess_type" to ulagretBrev.prosessType.name,
                     "soeker_fnr" to ulagretBrev.soekerFnr,
-                    "tittel" to ulagretBrev.tittel,
-                    "vedtaksbrev" to ulagretBrev.erVedtaksbrev
+                    "tittel" to ulagretBrev.tittel
                 )
             ).asUpdateAndReturnGeneratedKey
         )
@@ -150,6 +189,7 @@ class BrevRepository(private val ds: DataSource) {
             id = row.long("id"),
             behandlingId = row.uuid("behandling_id"),
             soekerFnr = row.string("soeker_fnr"),
+            prosessType = BrevProsessType.valueOf(row.string("prosess_type")),
             tittel = row.string("tittel"),
             status = row.string("status_id").let { Status.valueOf(it) },
             mottaker = Mottaker(
@@ -166,21 +206,27 @@ class BrevRepository(private val ds: DataSource) {
                     landkode = row.string("landkode"),
                     land = row.string("land")
                 )
-            ),
-            erVedtaksbrev = row.boolean("vedtaksbrev")
+            )
         )
     }
 
     private val tilInnhold: (Row) -> BrevInnhold = { row ->
         BrevInnhold(
-            row.string("spraak").let { Spraak.valueOf(it) },
-            row.bytes("bytes")
+            row.stringOrNull("spraak")?.let { Spraak.valueOf(it) },
+            row.stringOrNull("payload")?.let { deserialize<Slate>(it) },
+            row.bytesOrNull("bytes")
         )
     }
 
+    private val tilPayload: (Row) -> Slate? = { row ->
+        row.stringOrNull("payload")?.let { deserialize<Slate>(it) }
+    }
+
+    // Spesifisere SQL som språk for å sikre formatering/styling i IntelliJ
+    // language=SQL
     private object Queries {
         const val HENT_BREV_QUERY = """
-            SELECT b.id, b.behandling_id, b.soeker_fnr, b.tittel, b.vedtaksbrev, h.status_id, m.*
+            SELECT b.id, b.behandling_id, b.prosess_type, b.soeker_fnr, b.tittel, h.status_id, m.*
             FROM brev b
             INNER JOIN mottaker m on b.id = m.brev_id
             INNER JOIN hendelse h on b.id = h.brev_id
@@ -193,7 +239,7 @@ class BrevRepository(private val ds: DataSource) {
         """
 
         const val HENT_BREV_FOR_BEHANDLING_QUERY = """
-            SELECT b.id, b.behandling_id, b.soeker_fnr, b.tittel, b.vedtaksbrev, h.status_id, m.*
+            SELECT b.id, b.behandling_id, b.prosess_type, b.soeker_fnr, b.tittel, h.status_id, m.*
             FROM brev b
             INNER JOIN mottaker m on b.id = m.brev_id
             INNER JOIN hendelse h on b.id = h.brev_id
@@ -206,8 +252,9 @@ class BrevRepository(private val ds: DataSource) {
         """
 
         const val OPPRETT_BREV_QUERY = """
-            INSERT INTO brev (behandling_id, soeker_fnr, tittel, vedtaksbrev) 
-            VALUES (:behandling_id, :soeker_fnr, :tittel, :vedtaksbrev) 
+            INSERT INTO brev (behandling_id, prosess_type, soeker_fnr, tittel) 
+            VALUES (:behandling_id, :prosess_type, :soeker_fnr, :tittel) 
+            ON CONFLICT DO NOTHING;
         """
 
         const val OPPRETT_MOTTAKER_QUERY = """
@@ -222,8 +269,21 @@ class BrevRepository(private val ds: DataSource) {
         """
 
         const val OPPRETT_INNHOLD_QUERY = """
-            INSERT INTO innhold (brev_id, mal, spraak, bytes) 
-            VALUES (:brev_id, :mal, :spraak, :bytes)
+            INSERT INTO innhold (brev_id, mal, spraak, payload, bytes) 
+            VALUES (:brev_id, :mal, :spraak, :payload, :bytes)
+        """
+
+        const val LAGRE_PDF_INNHOLD_QUERY = """
+            UPDATE innhold 
+            SET bytes = :bytes
+            WHERE brev_id = :brev_id
+        """
+
+        const val OPPRETT_ELLER_OPPDATER_INNHOLD_PAYLOAD = """
+            INSERT INTO innhold (brev_id, payload) 
+            VALUES (:brev_id, :payload)
+            ON CONFLICT (brev_id) DO UPDATE  
+            SET payload = :payload
         """
 
         const val OPPRETT_HENDELSE_QUERY = """

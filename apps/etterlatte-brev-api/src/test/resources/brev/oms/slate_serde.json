@@ -1,0 +1,50 @@
+[
+  {
+    "type" : "heading-one",
+    "children" : [
+      {
+        "text" : "Tittel 1"
+      }
+    ]
+  },
+  {
+    "type" : "heading-two",
+    "children" : [
+      {
+        "text" : "Tittel 2"
+      }
+    ]
+  },
+  {
+    "type" : "paragraph",
+    "children" : [
+      {
+        "text" : "Her er det en "
+      },
+      {
+        "text" : "<PLACEHOLDER_FOR_NOE_LURT>",
+        "placeholder" : true
+      },
+      {
+        "text" : ", og stønaden utbetales bla bla bla...osv. "
+      }
+    ]
+  },
+  {
+    "type" : "paragraph",
+    "children" : [
+      {
+        "text" : "> IF noe er sant, må saksbehandler ta stilling",
+        "placeholder": true
+      }
+    ]
+  },
+  {
+    "type" : "paragraph",
+    "children" : [
+      {
+        "text" : "Mer tekst"
+      }
+    ]
+  }
+]

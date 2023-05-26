@@ -3,6 +3,7 @@ package no.nav.etterlatte.db
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.ints.shouldBeExactly
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
@@ -11,8 +12,10 @@ import no.nav.etterlatte.brev.distribusjon.DistribuerJournalpostResponse
 import no.nav.etterlatte.brev.journalpost.JournalpostResponse
 import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.BrevInnhold
+import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.OpprettNyttBrev
+import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.libs.database.DataSourceBuilder
@@ -24,6 +27,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.postgresql.util.PSQLException
@@ -110,11 +114,11 @@ internal class BrevRepositoryIntegrationTest {
 
         db.hentBrevInnhold(brev.id) shouldBe null
 
-        db.opprettInnholdOgFerdigstill(brev.id, BrevInnhold(Spraak.NB, PDF_BYTES))
+        db.opprettInnholdOgFerdigstill(brev.id, BrevInnhold(Spraak.NB, data = PDF_BYTES))
 
         val innhold = db.hentBrevInnhold(brev.id)!!
         innhold.spraak shouldBe Spraak.NB
-        String(innhold.data) shouldBe String(PDF_BYTES)
+        String(innhold.data!!) shouldBe String(PDF_BYTES)
 
         val hentetBrev = db.hentBrev(brev.id)
 
@@ -122,7 +126,7 @@ internal class BrevRepositoryIntegrationTest {
 
         shouldThrow<PSQLException> {
             // Skal kun være mulig å lagre ETT innhold pr brev
-            db.opprettInnholdOgFerdigstill(brev.id, BrevInnhold(Spraak.NB, PDF_BYTES))
+            db.opprettInnholdOgFerdigstill(brev.id, BrevInnhold(Spraak.NB, data = PDF_BYTES))
         }
     }
 
@@ -130,8 +134,6 @@ internal class BrevRepositoryIntegrationTest {
     fun `Slett brev`() {
         val behandlingId = UUID.randomUUID()
 
-        db.opprettBrev(ulagretBrev(behandlingId))
-        db.opprettBrev(ulagretBrev(behandlingId))
         db.opprettBrev(ulagretBrev(behandlingId))
 
         val brev = db.hentBrevForBehandling(behandlingId)!!
@@ -161,7 +163,7 @@ internal class BrevRepositoryIntegrationTest {
     fun `Oppdater status`() {
         val opprettetBrev = db.opprettBrev(ulagretBrev(UUID.randomUUID()))
 
-        db.opprettInnholdOgFerdigstill(opprettetBrev.id, BrevInnhold(Spraak.NB, "".toByteArray()))
+        db.opprettInnholdOgFerdigstill(opprettetBrev.id, BrevInnhold(Spraak.NB, data = "".toByteArray()))
         db.settBrevFerdigstilt(opprettetBrev.id)
         db.settBrevJournalfoert(opprettetBrev.id, JournalpostResponse("id", journalpostferdigstilt = true))
         db.settBrevDistribuert(opprettetBrev.id, DistribuerJournalpostResponse("id"))
@@ -180,12 +182,48 @@ internal class BrevRepositoryIntegrationTest {
         assertEquals(5, count)
     }
 
+    @Nested
+    inner class TestInnholdPayload {
+        @Test
+        fun `Opprett og hent brev payload`() {
+            val opprettetBrev = db.opprettBrev(ulagretBrev(UUID.randomUUID()))
+
+            opprettetBrev.status shouldBe Status.OPPRETTET
+
+            db.hentBrevPayload(opprettetBrev.id) shouldBe null
+
+            db.opprettEllerOppdaterPayload(opprettetBrev.id, Slate(emptyList()))
+
+            val initialPayload = db.hentBrevPayload(opprettetBrev.id)
+
+            initialPayload shouldNotBe null
+
+            db.hentBrev(opprettetBrev.id).status shouldBe Status.OPPDATERT
+
+            db.opprettEllerOppdaterPayload(
+                opprettetBrev.id,
+                Slate(
+                    listOf(
+                        Slate.Element(
+                            Slate.ElementType.HEADING_ONE,
+                            listOf(Slate.Text("Hello world!"))
+                        )
+                    )
+                )
+            )
+
+            val payload = db.hentBrevPayload(opprettetBrev.id)!!
+            payload.value.size shouldBeExactly 1
+            payload.value[0].type shouldBe Slate.ElementType.HEADING_ONE
+        }
+    }
+
     private fun ulagretBrev(behandlingId: UUID) = OpprettNyttBrev(
         behandlingId = behandlingId,
+        prosessType = BrevProsessType.AUTOMATISK,
         soekerFnr = "00000012345",
         tittel = UUID.randomUUID().toString(),
-        mottaker = opprettMottaker(),
-        erVedtaksbrev = false
+        mottaker = opprettMottaker()
     )
 
     private fun opprettMottaker() = Mottaker(

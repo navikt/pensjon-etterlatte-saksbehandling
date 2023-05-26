@@ -1,0 +1,311 @@
+[
+  {
+    "type": "heading-two",
+    "children": [
+      {
+        "text": "Vedtak",
+        "placeholder": null
+      }
+    ]
+  },
+  {
+    "type": "paragraph",
+    "children": [
+      {
+        "text": "Du er innvilget omstillingsstønad fra ",
+        "placeholder": null
+      },
+      {
+        "text": "<VIRKNINGSDATO>",
+        "placeholder": true
+      },
+      {
+        "text": " fordi ",
+        "placeholder": null
+      },
+      {
+        "text": "<NAVN AVDØD>",
+        "placeholder": true
+      },
+      {
+        "text": " er registrert død ",
+        "placeholder": null
+      },
+      {
+        "text": "<DØDSDATO>",
+        "placeholder": true
+      },
+      {
+        "text": ". Du vil ikke få utbetalt omstillingsstønad fordi inntekten din er høyere enn grensen for å få utbetalt stønaden.",
+        "placeholder": null
+      }
+    ]
+  },
+  {
+    "type": "paragraph",
+    "children": [
+      {
+        "text": "Omstillingsstønad innvilges vanligvis for inntil tre år. ",
+        "placeholder": null
+      }
+    ]
+  },
+  {
+    "type": "heading-two",
+    "children": [
+      {
+        "text": "Beregning og utbetaling",
+        "placeholder": null
+      }
+    ]
+  },
+  {
+    "type": "heading-three",
+    "children": [
+      {
+        "placeholder": null,
+        "text": "Slik har vi beregnet omstillingsstønaden din "
+      }
+    ]
+  },
+  {
+    "type": "paragraph",
+    "children": [
+      {
+        "text": "Omstillingsstønad beregnes utfra 2,25 ganger folketrygdens grunnbeløp (G). Dagens verdi av grunnbeløpet er ",
+        "placeholder": null
+      },
+      {
+        "text": "<KRONEBELØP>",
+        "placeholder": true
+      },
+      {
+        "text": " kroner. Stønaden reduseres etter inntekten din og avdødes trygdetid.",
+        "placeholder": null
+      }
+    ]
+  },
+  {
+    "type": "paragraph",
+    "children": [
+      {
+        "text": "<TABELL>",
+        "placeholder": true
+      }
+    ]
+  },
+  {
+    "type": "paragraph",
+    "children": [
+      {
+        "text": "Tabellen viser at du ikke får utbetalt omstillingsstønad fordi inntekten din er høyere enn grensen for å få utbetalt stønaden.",
+        "placeholder": null
+      }
+    ]
+  },
+  {
+    "type": "heading-three",
+    "children": [
+      {
+        "text": "Beregningsgrunnlag",
+        "placeholder": null
+      }
+    ]
+  },
+  {
+    "type": "paragraph",
+    "children": [
+      {
+        "text": "Du har opplyst i søknaden at du har en arbeidsinntekt på <avrundet beløp> i inneværende kalenderår. Dette beløpet er høyere enn grensen for å få utbetalt omstillingsstønad. Du kan lese mer om beløpsgrense og hvordan vi beregner inntekt på nav.no/omstillingsstønad#hvor-mye.",
+        "placeholder": null
+      }
+    ]
+  },
+  {
+    "type": "heading-three",
+    "children": [
+      {
+        "text": "Utbetaling ",
+        "placeholder": null
+      }
+    ]
+  },
+  {
+    "type": "paragraph",
+    "children": [
+      {
+        "text": "Pensjonen blir utbetalt innen den 20. i hver måned. Du finner utbetalingsdatoer på nav.no/utbetalinger. ",
+        "placeholder": null
+      }
+    ]
+  },
+  {
+    "type": "paragraph",
+    "children": [
+      {
+        "text": "Etterbetaling og skatt ",
+        "placeholder": null
+      }
+    ]
+  },
+  {
+    "type": "paragraph",
+    "children": [
+      {
+        "text": "Du får etterbetalt pensjon fra ",
+        "placeholder": null
+      },
+      {
+        "text": "<VIRK FRA DATO>",
+        "placeholder": true
+      },
+      {
+        "text": ". Det trekkes vanligvis skatt av etterbetaling.",
+        "placeholder": null
+      }
+    ]
+  },
+  {
+    "type": "paragraph",
+    "children": [
+      {
+        "text": "Har du mottatt andre ytelser fra NAV eller andre, som for eksempel tjenestepensjonsordninger, kan det bli beregnet fradrag i etterbetalingen. Hvis Skatteetaten eller andre ordninger har krav i etterbetalingen kan utbetalingen bli forsinket. Hvis du får fradrag i etterbetalingen, vil det gå frem av utbetalingsmeldingen din.",
+        "placeholder": null
+      }
+    ]
+  },
+  {
+    "type": "paragraph",
+    "children": [
+      {
+        "text": "Gjelder etterbetalingen tidligere år trekker NAV skatt etter Skatteetatens standardsatser. Du kan lese mer om satsene på nav.no/skattetrekk#etterbetaling.",
+        "placeholder": null
+      }
+    ]
+  },
+  {
+    "type": "heading-three",
+    "children": [
+      {
+        "text": "Regulering",
+        "placeholder": null
+      }
+    ]
+  },
+  {
+    "type": "paragraph",
+    "children": [
+      {
+        "text": "Grunnbeløpet blir regulert 1. mai hvert år.  Økningen i stønaden din blir vanligvis etterbetalt i juni. Du kan lese mer om regulering på nav.no/omstillingsstønad#regulering.",
+        "placeholder": null
+      }
+    ]
+  },
+  {
+    "type": "heading-three",
+    "children": [
+      {
+        "text": "Du må være i aktivitet et halvt år etter dødsfallet/ Aktivitetsplikt",
+        "placeholder": null
+      }
+    ]
+  },
+  {
+    "type": "paragraph",
+    "children": [
+      {
+        "text": "<INFO OM AKTIVITETSPLIKT>",
+        "placeholder": true
+      }
+    ]
+  },
+  {
+    "type": "heading-three",
+    "children": [
+      {
+        "text": "Inntektsendring",
+        "placeholder": null
+      }
+    ]
+  },
+  {
+    "type": "paragraph",
+    "children": [
+      {
+        "text": "Du må si ifra til oss hvis årsinntekten din endrer seg og blir lavere enn ",
+        "placeholder": null
+      },
+      {
+        "text": "<MAKSBELØP>",
+        "placeholder": true
+      },
+      {
+        "text": ". Da må vi vurdere om du kan ha rett til utbetaling av omstillingsstønad.",
+        "placeholder": null
+      }
+    ]
+  },
+  {
+    "type": "paragraph",
+    "children": [
+      {
+        "text": "Du sier ifra om endringer i inntekt ved å skrive en beskjed til oss på nav.no/skriv-til-oss eller sende informasjon til NAV Familie- og pensjonsytelser, Postboks 6600, 0607 OSLO.",
+        "placeholder": null
+      }
+    ]
+  },
+  {
+    "type": "heading-three",
+    "children": [
+      {
+        "text": "Etteroppgjør",
+        "placeholder": null
+      }
+    ]
+  },
+  {
+    "type": "paragraph",
+    "children": [
+      {
+        "text": "Selv om du ikke har utbetalt omstillingsstønad vil vi hver høst sjekke inntektsopplysningene i skatteoppgjøret ditt for å se om du har fått utbetalt riktig beløp i stønad året før.",
+        "placeholder": null
+      }
+    ]
+  },
+  {
+    "type": "paragraph",
+    "children": [
+      {
+        "text": "Dersom du ikke har hatt utbetalt omstillingsstønad i kalenderåret vi sjekker vil du ikke motta brev om etteroppgjør fra oss. Viser skatteoppgjøret at du har hatt en annen inntekt enn den inntekten vi brukte da vi beregnet omstillingstønaden din, vil vi gjøre en ny beregning. Dette kalles etteroppgjør.",
+        "placeholder": null
+      }
+    ]
+  },
+  {
+    "type": "paragraph",
+    "children": [
+      {
+        "text": "Hvis du har fått for lite utbetalt, får du en etterbetaling. Har du fått for mye utbetalt, må du betale tilbake.",
+        "placeholder": null
+      }
+    ]
+  },
+  {
+    "type": "heading-four",
+    "children": [
+      {
+        "text": "Mer informasjon om hvordan vi har behandlet vedtaket",
+        "placeholder": null
+      }
+    ]
+  },
+  {
+    "type": "paragraph",
+    "children": [
+      {
+        "text": "Vedtaket er gjort etter folketrygdloven §§ 17-2 til 17-9 og 22-12/22-13.",
+        "placeholder": null
+      }
+    ]
+  }
+]

@@ -12,6 +12,7 @@ import no.nav.etterlatte.brev.distribusjon.DistribusjonsType
 import no.nav.etterlatte.brev.journalpost.JournalpostResponse
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevEventTypes
+import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -53,11 +54,11 @@ internal class JournalfoerVedtaksbrevTest {
         val brev = Brev(
             1,
             BEHANDLING_ID,
+            BrevProsessType.AUTOMATISK,
             "fnr",
             "tittel",
             Status.FERDIGSTILT,
-            mottaker = mockk(),
-            true
+            mottaker = mockk()
         )
         val response = JournalpostResponse("1234", null, null, true, emptyList())
 
@@ -91,11 +92,11 @@ internal class JournalfoerVedtaksbrevTest {
         val brev = Brev(
             1,
             BEHANDLING_ID,
+            BrevProsessType.AUTOMATISK,
             "fnr",
             "tittel",
             Status.JOURNALFOERT,
-            mottaker = mockk(),
-            true
+            mottaker = mockk()
         )
 
         every { vedtaksbrevService.hentVedtaksbrev(any()) } returns brev

@@ -6,6 +6,7 @@ import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.request.parameter
 import io.ktor.client.request.post
+import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
@@ -24,7 +25,9 @@ import io.mockk.verify
 import no.nav.etterlatte.brev.behandlingklient.BehandlingKlient
 import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Brev
+import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.Mottaker
+import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
 import no.nav.etterlatte.libs.ktor.restModule
@@ -38,6 +41,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import testsupport.buildTestApplicationConfigurationForOauth
 import java.util.*
+import kotlin.random.Random
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class VedtaksbrevRouteTest {
@@ -109,13 +113,11 @@ internal class VedtaksbrevRouteTest {
         coEvery { vedtaksbrevService.opprettVedtaksbrev(any(), any(), any()) } returns opprettBrev()
         coEvery { behandlingKlient.harTilgangTilBehandling(any(), any()) } returns true
 
-        val sakId = 123456L
-
         testApplication {
             val client = httpClient()
 
             val response = client.post("/api/brev/behandling/$BEHANDLING_ID/vedtak") {
-                parameter("sakId", sakId)
+                parameter("sakId", SAK_ID)
                 header(HttpHeaders.Authorization, "Bearer $accessToken")
                 contentType(ContentType.Application.Json)
             }
@@ -124,27 +126,21 @@ internal class VedtaksbrevRouteTest {
         }
 
         coVerify(exactly = 1) {
-            vedtaksbrevService.opprettVedtaksbrev(
-                sakId,
-                BEHANDLING_ID,
-                any()
-            )
+            vedtaksbrevService.opprettVedtaksbrev(SAK_ID, BEHANDLING_ID, any())
             behandlingKlient.harTilgangTilBehandling(any(), any())
         }
     }
 
     @Test
     fun `Endepunkt for generering av brevinnhold`() {
-        coEvery { vedtaksbrevService.genererPdfInnhold(any(), any(), any()) } returns "pdf".toByteArray()
+        coEvery { vedtaksbrevService.genererPdf(any(), any(), any()) } returns "pdf".toByteArray()
         coEvery { behandlingKlient.harTilgangTilBehandling(any(), any()) } returns true
-
-        val sakId = 123456L
 
         testApplication {
             val client = httpClient()
 
             val response = client.get("/api/brev/behandling/$BEHANDLING_ID/vedtak/pdf") {
-                parameter("sakId", sakId)
+                parameter("sakId", SAK_ID)
                 header(HttpHeaders.Authorization, "Bearer $accessToken")
                 contentType(ContentType.Application.Json)
             }
@@ -153,11 +149,53 @@ internal class VedtaksbrevRouteTest {
         }
 
         coVerify(exactly = 1) {
-            vedtaksbrevService.genererPdfInnhold(
-                sakId,
-                BEHANDLING_ID,
-                any()
-            )
+            vedtaksbrevService.genererPdf(SAK_ID, BEHANDLING_ID, any())
+            behandlingKlient.harTilgangTilBehandling(any(), any())
+        }
+    }
+
+    @Test
+    fun `Endepunkt for henting av manuelt brev`() {
+        coEvery { vedtaksbrevService.hentManueltBrevPayload(any(), any(), any()) } returns Slate()
+        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any()) } returns true
+
+        testApplication {
+            val client = httpClient()
+
+            val response = client.get("/api/brev/behandling/$BEHANDLING_ID/vedtak/manuell") {
+                parameter("sakId", SAK_ID)
+                header(HttpHeaders.Authorization, "Bearer $accessToken")
+                contentType(ContentType.Application.Json)
+            }
+
+            assertEquals(HttpStatusCode.OK, response.status)
+        }
+
+        coVerify(exactly = 1) {
+            vedtaksbrevService.hentManueltBrevPayload(BEHANDLING_ID, SAK_ID, any())
+            behandlingKlient.harTilgangTilBehandling(any(), any())
+        }
+    }
+
+    @Test
+    fun `Endepunkt for lagring av manuelt brev`() {
+        coEvery { vedtaksbrevService.lagreManueltBrevPayload(any(), any()) } returns Unit
+        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any()) } returns true
+
+        testApplication {
+            val client = httpClient()
+
+            val response = client.post("/api/brev/behandling/$BEHANDLING_ID/vedtak/manuell") {
+                header(HttpHeaders.Authorization, "Bearer $accessToken")
+                contentType(ContentType.Application.Json)
+                setBody(OppdaterPayloadRequest(Random.nextLong(), Slate()))
+            }
+
+            assertEquals(HttpStatusCode.OK, response.status)
+        }
+
+        coVerify(exactly = 1) {
+            vedtaksbrevService.lagreManueltBrevPayload(any(), any())
             behandlingKlient.harTilgangTilBehandling(any(), any())
         }
     }
@@ -222,6 +260,7 @@ internal class VedtaksbrevRouteTest {
     private fun opprettBrev() = Brev(
         1,
         BEHANDLING_ID,
+        BrevProsessType.AUTOMATISK,
         "soeker_fnr",
         "tittel",
         Status.OPPRETTET,
@@ -230,8 +269,7 @@ internal class VedtaksbrevRouteTest {
             STOR_SNERK,
             null,
             Adresse(adresseType = "NORSKPOSTADRESSE", "Testgaten 13", "1234", "OSLO", land = "Norge", landkode = "NOR")
-        ),
-        true
+        )
     )
 
     private fun ApplicationTestBuilder.httpClient(): HttpClient {
@@ -258,5 +296,6 @@ internal class VedtaksbrevRouteTest {
         private const val CLIENT_ID = "mock-client-id"
         private val STOR_SNERK = Foedselsnummer("11057523044")
         private val BEHANDLING_ID = UUID.randomUUID()
+        private val SAK_ID = Random.nextLong(1000)
     }
 }

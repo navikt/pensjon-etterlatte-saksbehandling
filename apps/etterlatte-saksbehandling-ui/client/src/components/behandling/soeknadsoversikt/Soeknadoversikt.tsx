@@ -8,6 +8,7 @@ import { NesteOgTilbake } from '../handlinger/NesteOgTilbake'
 import { behandlingErUtfylt, hentBehandlesFraStatus } from '../felles/utils'
 import { VurderingsResultat } from '~shared/types/VurderingsResultat'
 import { OversiktGyldigFramsatt } from '~components/behandling/soeknadsoversikt/soeknadoversikt/gyldigFramsattSoeknad/OversiktGyldigFramsatt'
+import { Utenlandstilsnitt } from '~components/behandling/soeknadsoversikt/soeknadoversikt/utenlandstilsnitt/Utenlandstilsnitt'
 import Virkningstidspunkt from '~components/behandling/soeknadsoversikt/soeknadoversikt/virkningstidspunkt/Virkningstidspunkt'
 import { ISaksType } from '~components/behandling/fargetags/saksType'
 import { OversiktKommerBarnetTilgode } from '~components/behandling/soeknadsoversikt/soeknadoversikt/kommerBarnetTilgode/OversiktKommerBarnetTilgode'
@@ -82,6 +83,7 @@ export const Soeknadsoversikt = (props: { behandling: IDetaljertBehandling }) =>
                 ),
               }}
             </Virkningstidspunkt>
+            <Utenlandstilsnitt behandling={behandling} redigerbar={behandles} />
           </>
         )}
       </Innhold>

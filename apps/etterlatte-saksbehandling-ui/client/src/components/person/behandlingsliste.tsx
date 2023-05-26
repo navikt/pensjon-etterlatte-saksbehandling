@@ -6,14 +6,13 @@ import {
   formaterSakstype,
   formaterStringDato,
 } from '~utils/formattering'
-import { IBehandlingStatus, IBehandlingsType } from '~shared/types/IDetaljertBehandling'
+import { IBehandlingStatus, IBehandlingsType, IUtenlandstilsnittType } from '~shared/types/IDetaljertBehandling'
 import { VilkaarsvurderingResultat } from '~shared/api/vilkaarsvurdering'
 import { erFerdigBehandlet } from '~components/behandling/felles/utils'
 import React, { useEffect, useState } from 'react'
 import { Revurderingsaarsak } from '~shared/types/Revurderingsaarsak'
 import { hentVedtakSammendrag } from '~shared/api/vedtaksvurdering'
 import { tagColors } from '~shared/Tags'
-import { INasjonalitetsType } from '~components/behandling/fargetags/nasjonalitetsType'
 import styled from 'styled-components'
 
 const kolonner = [
@@ -84,8 +83,11 @@ export const Behandlingsliste = ({ behandlinger }: { behandlinger: IBehandlingsa
               <Table.DataCell key={`data${behandling.behandlingType}`}>
                 <BehandlingstypeWrapper>
                   {formaterBehandlingstype(behandling.behandlingType)}
-                  <Tag variant={tagColors[INasjonalitetsType.NASJONAL]} size={'small'}>
-                    {formaterEnumTilLesbarString(INasjonalitetsType.NASJONAL)}
+                  <Tag
+                    variant={tagColors[behandling.utenlandstilsnitt?.type || IUtenlandstilsnittType.NASJONAL]}
+                    size={'small'}
+                  >
+                    {formaterEnumTilLesbarString(behandling.utenlandstilsnitt?.type || IUtenlandstilsnittType.NASJONAL)}
                   </Tag>
                 </BehandlingstypeWrapper>
               </Table.DataCell>

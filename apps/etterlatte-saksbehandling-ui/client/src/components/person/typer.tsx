@@ -1,5 +1,10 @@
 import { VilkaarsvurderingResultat } from '~shared/api/vilkaarsvurdering'
-import { IBehandlingStatus, IBehandlingsType, Virkningstidspunkt } from '~shared/types/IDetaljertBehandling'
+import {
+  IBehandlingStatus,
+  IBehandlingsType,
+  IUtenlandstilsnitt,
+  Virkningstidspunkt,
+} from '~shared/types/IDetaljertBehandling'
 import { Revurderingsaarsak } from '~shared/types/Revurderingsaarsak'
 import { ISaksType } from '~components/behandling/fargetags/saksType'
 
@@ -25,6 +30,7 @@ export interface IBehandlingsammendrag {
   aarsak: BehandlingOgRevurderingsAarsakerType
   virkningstidspunkt?: Virkningstidspunkt
   vilkaarsvurderingUtfall?: VilkaarsvurderingResultat
+  utenlandstilsnitt?: IUtenlandstilsnitt
 }
 
 export enum AarsaksTyper {

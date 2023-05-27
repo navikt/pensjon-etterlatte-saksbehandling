@@ -350,7 +350,7 @@ internal class VedtaksvurderingRouteTest {
             vedtakFattet = VedtakFattet(SAKSBEHANDLER_1, ENHET_1, Tidspunkt.now()),
             attestasjon = Attestasjon(SAKSBEHANDLER_2, ENHET_2, Tidspunkt.now())
         )
-        coEvery { vedtaksvurderingService.attesterVedtak(any(), any(), any(), any()) } returns attestertVedtak
+        coEvery { vedtaksvurderingService.attesterVedtak(any(), any(), any()) } returns attestertVedtak
 
         testApplication {
             environment { config = applicationConfig }
@@ -390,7 +390,6 @@ internal class VedtaksvurderingRouteTest {
                 vedtaksvurderingService.attesterVedtak(
                     any(),
                     match { it == attestertVedtakKommentar.kommentar },
-                    any(),
                     match { it.ident() == SAKSBEHANDLER_1 }
                 )
             }

@@ -56,7 +56,7 @@ data class Attestasjon(
     val tidspunkt: Tidspunkt
 )
 
-data class AttesterVedtakDto(val kommentar: String, val skalSendeBrev: Boolean = true)
+data class AttesterVedtakDto(val kommentar: String)
 
 data class Utbetalingsperiode(
     val id: Long? = null,

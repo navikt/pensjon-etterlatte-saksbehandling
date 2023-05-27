@@ -330,7 +330,7 @@ internal class VedtaksvurderingServiceTest {
                 opprettVedtak(virkningstidspunkt = virkningstidspunkt, behandlingId = behandlingId)
             )
             service.fattVedtak(behandlingId, gjeldendeSaksbehandler)
-            service.attesterVedtak(behandlingId, KOMMENTAR, true, attestant)
+            service.attesterVedtak(behandlingId, KOMMENTAR, attestant)
         }
 
         attestertVedtak shouldNotBe null
@@ -377,7 +377,7 @@ internal class VedtaksvurderingServiceTest {
             service.fattVedtak(behandlingId, gjeldendeSaksbehandler)
 
             shouldThrow<UgyldigAttestantException> {
-                service.attesterVedtak(behandlingId, KOMMENTAR, true, gjeldendeSaksbehandler)
+                service.attesterVedtak(behandlingId, KOMMENTAR, gjeldendeSaksbehandler)
             }
         }
 
@@ -440,7 +440,7 @@ internal class VedtaksvurderingServiceTest {
                 )
             )
             service.fattVedtak(behandlingId, gjeldendeSaksbehandler)
-            service.attesterVedtak(behandlingId, KOMMENTAR, true, attestant)
+            service.attesterVedtak(behandlingId, KOMMENTAR, attestant)
         }
 
         val hendelse = mutableListOf<String>()
@@ -469,7 +469,7 @@ internal class VedtaksvurderingServiceTest {
             service.fattVedtak(behandlingId, saksbehandler)
 
             assertThrows<BehandlingstilstandException> {
-                service.attesterVedtak(behandlingId, KOMMENTAR, true, attestant)
+                service.attesterVedtak(behandlingId, KOMMENTAR, attestant)
             }
         }
     }
@@ -484,7 +484,7 @@ internal class VedtaksvurderingServiceTest {
             repository.opprettVedtak(opprettVedtak(behandlingId = behandlingId))
 
             assertThrows<VedtakTilstandException> {
-                service.attesterVedtak(behandlingId, KOMMENTAR, true, saksbehandler)
+                service.attesterVedtak(behandlingId, KOMMENTAR, saksbehandler)
             }
         }
     }
@@ -515,10 +515,10 @@ internal class VedtaksvurderingServiceTest {
         runBlocking {
             repository.opprettVedtak(opprettVedtak(behandlingId = behandlingId))
             service.fattVedtak(behandlingId, saksbehandler)
-            service.attesterVedtak(behandlingId, KOMMENTAR, true, attestant)
+            service.attesterVedtak(behandlingId, KOMMENTAR, attestant)
 
             assertThrows<VedtakTilstandException> {
-                service.attesterVedtak(behandlingId, KOMMENTAR, true, attestant)
+                service.attesterVedtak(behandlingId, KOMMENTAR, attestant)
             }
         }
     }
@@ -552,7 +552,7 @@ internal class VedtaksvurderingServiceTest {
                 opprettVedtak(virkningstidspunkt = virkningstidspunkt, behandlingId = behandlingId)
             )
             service.fattVedtak(behandlingId, gjeldendeSaksbehandler)
-            service.attesterVedtak(behandlingId, KOMMENTAR, true, attestant)
+            service.attesterVedtak(behandlingId, KOMMENTAR, attestant)
             service.iverksattVedtak(behandlingId)
         }
 
@@ -603,7 +603,7 @@ internal class VedtaksvurderingServiceTest {
         runBlocking {
             repository.opprettVedtak(opprettVedtak(behandlingId = behandlingId))
             service.fattVedtak(behandlingId, saksbehandler)
-            service.attesterVedtak(behandlingId, KOMMENTAR, true, attestant)
+            service.attesterVedtak(behandlingId, KOMMENTAR, attestant)
             service.iverksattVedtak(behandlingId)
 
             assertThrows<VedtakTilstandException> {
@@ -713,7 +713,7 @@ internal class VedtaksvurderingServiceTest {
         runBlocking {
             repository.opprettVedtak(opprettVedtak(behandlingId = behandlingId))
             service.fattVedtak(behandlingId, saksbehandler)
-            service.attesterVedtak(behandlingId, KOMMENTAR, true, attestant)
+            service.attesterVedtak(behandlingId, KOMMENTAR, attestant)
 
             assertThrows<VedtakTilstandException> {
                 service.underkjennVedtak(behandlingId, attestant, underkjennVedtakBegrunnelse())

@@ -123,7 +123,7 @@ class VedtaksvurderingService(
         return fattetVedtak
     }
 
-    suspend fun attesterVedtak(behandlingId: UUID, kommentar: String, skalSendeBrev: Boolean, bruker: Bruker): Vedtak {
+    suspend fun attesterVedtak(behandlingId: UUID, kommentar: String, bruker: Bruker): Vedtak {
         logger.info("Attesterer vedtak for behandling med behandlingId=$behandlingId")
         val vedtak = hentVedtakNonNull(behandlingId)
 
@@ -161,7 +161,7 @@ class VedtaksvurderingService(
                 mapOf(
                     SKAL_SENDE_BREV to when (behandling.revurderingsaarsak) {
                         RevurderingAarsak.REGULERING -> false
-                        else -> skalSendeBrev
+                        else -> true
                     },
                     REVURDERING_AARSAK to behandling.revurderingsaarsak.toString()
                 )
@@ -428,3 +428,5 @@ class BehandlingstilstandException(vedtak: Vedtak) :
 
 class UgyldigAttestantException(ident: String) :
     IllegalArgumentException("Saksbehandler og attestant må være to forskjellige personer (ident=$ident)")
+
+class SaksbehandlerManglerEnhetException(message: String) : Exception(message)

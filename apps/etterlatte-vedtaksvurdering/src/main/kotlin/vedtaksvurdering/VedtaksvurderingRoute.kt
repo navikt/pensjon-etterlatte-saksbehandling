@@ -19,7 +19,6 @@ import no.nav.etterlatte.libs.common.vedtak.LoependeYtelseDTO
 import no.nav.etterlatte.libs.common.withBehandlingId
 import no.nav.etterlatte.libs.common.withSakId
 import no.nav.etterlatte.libs.ktor.bruker
-import no.nav.etterlatte.token.Saksbehandler
 import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlient
 import java.time.LocalDate
 import java.time.ZonedDateTime
@@ -73,14 +72,8 @@ fun Route.vedtaksvurderingRoute(service: VedtaksvurderingService, behandlingKlie
         post("/{$BEHANDLINGSID_CALL_PARAMETER}/attester") {
             withBehandlingId(behandlingKlient) { behandlingId ->
                 logger.info("Attesterer vedtak for behandling $behandlingId")
-                val (kommentar, skalSendeBrev) = call.receive<AttesterVedtakDto>()
-                if (!skalSendeBrev && bruker is Saksbehandler) {
-                    return@withBehandlingId call.respond(
-                        HttpStatusCode.BadRequest,
-                        "Saksbehandler kan ikke overstyre om brev skal sendes"
-                    )
-                }
-                val attestert = service.attesterVedtak(behandlingId, kommentar, skalSendeBrev, bruker)
+                val (kommentar) = call.receive<AttesterVedtakDto>()
+                val attestert = service.attesterVedtak(behandlingId, kommentar, bruker)
 
                 call.respond(attestert.toDto())
             }

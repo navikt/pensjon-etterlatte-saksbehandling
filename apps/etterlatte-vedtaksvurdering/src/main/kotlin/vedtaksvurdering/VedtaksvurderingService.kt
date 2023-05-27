@@ -25,6 +25,7 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.token.Bruker
+import no.nav.etterlatte.token.SystemBruker
 import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlient
 import no.nav.etterlatte.vedtaksvurdering.klienter.BeregningKlient
 import no.nav.etterlatte.vedtaksvurdering.klienter.VilkaarsvurderingKlient
@@ -159,8 +160,9 @@ class VedtaksvurderingService(
                 vedtak = attestertVedtak,
                 tekniskTid = attestertVedtak.attestasjon.tidspunkt.toLocalDatetimeUTC(),
                 mapOf(
-                    SKAL_SENDE_BREV to when (behandling.revurderingsaarsak) {
-                        RevurderingAarsak.REGULERING -> false
+                    SKAL_SENDE_BREV to when {
+                        behandling.revurderingsaarsak == RevurderingAarsak.REGULERING -> false
+                        bruker is SystemBruker -> false
                         else -> true
                     },
                     REVURDERING_AARSAK to behandling.revurderingsaarsak.toString()

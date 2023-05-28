@@ -14,7 +14,7 @@ val sikkerLogg: Logger = LoggerFactory.getLogger("sikkerLogg")
 
 fun main() = ApplicationContext().let { Server(it).run() }
 
-// Test2
+// Test3
 
 class Server(private val context: ApplicationContext) {
     init {

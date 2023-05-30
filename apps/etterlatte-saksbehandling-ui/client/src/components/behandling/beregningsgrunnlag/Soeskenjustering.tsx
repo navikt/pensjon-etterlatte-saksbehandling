@@ -60,9 +60,11 @@ const Soeskenjustering = (props: SoeskenjusteringProps) => {
     name: 'soeskenMedIBeregning',
     control,
   })
+  console.log('soeskenMedIBeregning: ', behandling.beregningsGrunnlag?.soeskenMedIBeregning)
   const soeskenjustering = behandling.beregningsGrunnlag?.soeskenMedIBeregning
   const [soeskenjusteringGrunnlag, fetchSoeskengjusteringGrunnlag] = useApiCall(hentBeregningsGrunnlag)
   const soeskenjusteringErDefinertIRedux = soeskenjustering !== undefined
+  console.log('soeskenjusteringErDefinertIRedux: ', soeskenjusteringErDefinertIRedux)
   const behandles = hentBehandlesFraStatus(behandling?.status)
   const sisteTom = watch(`soeskenMedIBeregning.${fields.length - 1}.tom`)
   const sisteFom = watch(`soeskenMedIBeregning.${fields.length - 1}.fom`)
@@ -97,6 +99,7 @@ const Soeskenjustering = (props: SoeskenjusteringProps) => {
     behandling.familieforhold.avdoede.opplysning.avdoedesBarn?.filter(
       (barn) => barn.foedselsnummer !== behandling.søker?.foedselsnummer
     ) ?? []
+
   const fnrTilSoesken: Record<string, IPdlPerson> = soesken.reduce(
     (acc, next) => ({
       ...acc,
@@ -104,6 +107,7 @@ const Soeskenjustering = (props: SoeskenjusteringProps) => {
     }),
     {} as Record<string, IPdlPerson>
   )
+  console.log('fnrTilSoesken: ', fnrTilSoesken)
 
   const submitForm = (data: { soeskenMedIBeregning: SoeskengrunnlagUtfylling }) => {
     if (validerSoeskenjustering(data.soeskenMedIBeregning) && feil.length === 0) {

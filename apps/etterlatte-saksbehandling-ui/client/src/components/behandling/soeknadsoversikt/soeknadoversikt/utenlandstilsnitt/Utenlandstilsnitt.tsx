@@ -1,5 +1,5 @@
 import { IDetaljertBehandling, IUtenlandstilsnitt } from '~shared/types/IDetaljertBehandling'
-import { Soeknadsvurdering } from '../SoeknadsVurdering'
+import { LovtekstMedLenke } from '../LovtekstMedLenke'
 import { Beskrivelse, VurderingsContainerWrapper } from '../../styled'
 import { useState } from 'react'
 import { LeggTilVurderingButton } from '../LeggTilVurderingButton'
@@ -22,7 +22,7 @@ export const Utenlandstilsnitt = ({
   const [vurdert, setVurdert] = useState(behandling.utenlandstilsnitt !== undefined)
 
   return (
-    <Soeknadsvurdering tittel="Utlandstilknytning" hjemler={[]} status={statusIkon(behandling.utenlandstilsnitt)}>
+    <LovtekstMedLenke tittel="Utlandstilknytning" hjemler={[]} status={statusIkon(behandling.utenlandstilsnitt)}>
       <Beskrivelse>
         Svar for om saken skal behandles som følge av utlandstilknytning basert på om avdøde har bodd/arbeidet i
         EØS/avtale-land eller ikke, og om gjenlevende bor i Norge eller utlandet. Om søker bor i utlandet er det en
@@ -41,6 +41,6 @@ export const Utenlandstilsnitt = ({
           <LeggTilVurderingButton onClick={() => setVurdert(true)}>Legg til vurdering</LeggTilVurderingButton>
         )}
       </VurderingsContainerWrapper>
-    </Soeknadsvurdering>
+    </LovtekstMedLenke>
   )
 }

@@ -22,6 +22,7 @@ import { Institusjonsopphold } from '~shared/types/Beregning'
 import { mapListeTilDto } from '~components/behandling/beregningsgrunnlag/PeriodisertBeregningsgrunnlag'
 import { hentFunksjonsbrytere } from '~shared/api/feature'
 import { useEffect, useState } from 'react'
+import Institusjonsopphold from '~components/behandling/beregningsgrunnlag/Institusjonsopphold'
 
 const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer }) => {
   const { behandling } = props
@@ -75,7 +76,7 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
     <>
       {!isPending(funksjonsbrytere) && (beregnTrygdetid ? <BeregnetTrygdetid /> : <FastTrygdetid />)}
       <Soeskenjustering behandling={behandling} onSubmit={onSubmit} />
-
+      <Institusjonsopphold behandling={behandling} onSubmit={onSubmit} />
       {isFailure(endreBeregning) && <ApiErrorAlert>Kunne ikke opprette ny beregning</ApiErrorAlert>}
       {isFailure(lagreSoeskenMedIBeregningStatus) && <ApiErrorAlert>Kunne ikke lagre beregningsgrunnlag</ApiErrorAlert>}
 

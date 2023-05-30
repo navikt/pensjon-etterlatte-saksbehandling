@@ -1,17 +1,5 @@
 plugins {
-    id("etterlatte.common")
-    id("etterlatte.kafka")
-}
-
-repositories {
-    maven {
-        url = uri("https://maven.pkg.github.com/navikt/pensjon-etterlatte-libs")
-        credentials {
-            username = "token"
-            password = System.getenv("GITHUB_TOKEN")
-        }
-    }
-    mavenCentral()
+    id("etterlatte.rapids-and-rivers-ktor2")
 }
 
 dependencies {
@@ -19,6 +7,7 @@ dependencies {
 
     implementation(libs.logging.logbackclassic)
     implementation(libs.etterlatte.common)
+    implementation(project(":libs:etterlatte-kafka"))
     implementation(libs.logging.logstashlogbackencoder) {
         exclude("com.fasterxml.jackson.core")
         exclude("com.fasterxml.jackson.dataformat")

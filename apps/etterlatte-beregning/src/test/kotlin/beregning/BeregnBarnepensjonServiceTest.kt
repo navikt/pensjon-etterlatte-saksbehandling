@@ -19,7 +19,6 @@ import no.nav.etterlatte.klienter.VilkaarsvurderingKlient
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.beregning.Beregningstype
-import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeskenMedIBeregning
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -28,6 +27,7 @@ import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.time.Month
 import java.time.YearMonth
 import java.util.*
 import java.util.UUID.randomUUID
@@ -269,7 +269,7 @@ internal class BeregnBarnepensjonServiceTest {
     private fun barnepensjonBeregningsGrunnlag(behandlingId: UUID, soesken: List<String>) =
         BeregningsGrunnlag(
             behandlingId,
-            mockk<Grunnlagsopplysning.Saksbehandler> {
+            mockk {
                 every { ident } returns "Z123456"
                 every { tidspunkt } returns Tidspunkt.now()
                 every { type } returns ""
@@ -302,7 +302,7 @@ internal class BeregnBarnepensjonServiceTest {
         }
 
     companion object {
-        val VIRKNINGSTIDSPUNKT_JAN_23: YearMonth = YearMonth.of(2023, 1)
+        val VIRKNINGSTIDSPUNKT_JAN_23: YearMonth = YearMonth.of(2023, Month.JANUARY)
         const val GRUNNBELOEP_JAN_23: Int = 9290
         const val BP_BELOEP_INGEN_SOESKEN_JAN_23: Int = 3716
         const val BP_BELOEP_ETT_SOESKEN_JAN_23: Int = 3019

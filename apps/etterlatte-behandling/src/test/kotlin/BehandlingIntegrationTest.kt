@@ -4,6 +4,7 @@ import com.typesafe.config.ConfigFactory
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.respond
+import io.ktor.client.engine.mock.respondOk
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.header
@@ -93,6 +94,7 @@ abstract class BehandlingIntegrationTest {
             rapid = TestProdusent(),
             featureToggleService = DummyFeatureToggleService(),
             pdlHttpClient = pdlHttpClient(),
+            skjermingHttpKlient = skjermingHttpClient(),
             grunnlagHttpClient = grunnlagHttpClient(),
             leaderElectionHttpClient = leaderElection(),
             navAnsattKlient = NavAnsattKlientTest(),
@@ -102,6 +104,20 @@ abstract class BehandlingIntegrationTest {
         ).also {
             it.dataSource.migrate()
             it.behandlingsHendelser.start()
+        }
+    }
+
+    fun skjermingHttpClient(): HttpClient = HttpClient(MockEngine) {
+        engine {
+            addHandler { request ->
+                respondOk()
+            }
+        }
+        install(ContentNegotiation) {
+            register(
+                ContentType.Application.Json,
+                JacksonConverter(objectMapper)
+            )
         }
     }
 

@@ -102,6 +102,10 @@ spec:
       value: https://navansatt.prod-fss-pub.nais.io
     - name: ETTERLATTE_NAVANSATT_OUTBOUND_SCOPE
       value: api://prod-fss.pensjondeployer.navansatt/.default
+    - name: SKJERMING_URL
+      value: https://skjermede-personer-pip.intern.nav.no
+    - name: AZURE_SCOPE_SKJERMEDE_PIP
+      value: api://prod-gcp.nom.skjermede-personer-pip/.default
   accessPolicy:
     outbound:
       rules:

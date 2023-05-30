@@ -5,7 +5,6 @@ import io.mockk.mockk
 import no.nav.etterlatte.grunnlag.GrunnlagHendelser
 import no.nav.etterlatte.grunnlag.OpplysningDao
 import no.nav.etterlatte.grunnlag.RealGrunnlagService
-import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.objectMapper
@@ -34,7 +33,6 @@ internal class RapidTest {
     private lateinit var opplysningRepo: OpplysningDao
     private lateinit var grunnlagService: RealGrunnlagService
     private lateinit var inspector: TestRapid
-    private val behandlingKlient = mockk<BehandlingKlient>()
 
     @BeforeAll
     fun beforeAll() {
@@ -50,7 +48,7 @@ internal class RapidTest {
         dataSource.migrate()
 
         opplysningRepo = OpplysningDao(dataSource)
-        grunnlagService = RealGrunnlagService(opplysningRepo, behandlingKlient, mockk())
+        grunnlagService = RealGrunnlagService(opplysningRepo, mockk())
         inspector = TestRapid().apply {
             GrunnlagHendelser(this, grunnlagService)
         }

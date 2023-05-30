@@ -1,5 +1,6 @@
 package no.nav.etterlatte.sak
 
+import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.User
 import no.nav.etterlatte.behandling.domain.ArbeidsFordelingEnhet
@@ -8,6 +9,7 @@ import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.common.IngenEnhetFunnetException
 import no.nav.etterlatte.common.IngenGeografiskOmraadeFunnetForEnhet
 import no.nav.etterlatte.common.klienter.PdlKlient
+import no.nav.etterlatte.common.klienter.SkjermingKlient
 import no.nav.etterlatte.filterForEnheter
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
@@ -47,7 +49,8 @@ class RealSakService(
     private val pdlKlient: PdlKlient,
     private val norg2Klient: Norg2Klient,
     private val featureToggleService: FeatureToggleService,
-    private val tilgangService: TilgangService
+    private val tilgangService: TilgangService,
+    private val skjermingKlient: SkjermingKlient
 ) : SakService {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -90,10 +93,27 @@ class RealSakService(
                 enhet ?: finnEnhetForPersonOgTema(fnr, type.tema, type).enhetNr
             )
         }
+        this.sjekkSkjerming(fnr = fnr, sakId = sak.id)
         gradering?.let {
             tilgangService.oppdaterAdressebeskyttelse(sak.id, it)
         }
         return sak
+    }
+
+    private fun sjekkSkjerming(fnr: String, sakId: Long) {
+        val erSkjermet = runBlocking {
+            skjermingKlient.personErSkjermet(fnr)
+        }
+        if (erSkjermet) {
+            inTransaction {
+                dao.oppdaterEnheterPaaSaker(
+                    listOf(GrunnlagsendringshendelseService.SakMedEnhet(sakId, Enheter.AALESUND.enhetNr))
+                )
+            }
+        }
+        inTransaction {
+            dao.markerSakerMedSkjerming(sakIder = listOf(sakId), skjermet = erSkjermet)
+        }
     }
 
     override fun oppdaterEnhetForSaker(saker: List<GrunnlagsendringshendelseService.SakMedEnhet>) {

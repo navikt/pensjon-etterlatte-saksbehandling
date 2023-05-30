@@ -10,6 +10,7 @@ import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.domain.ArbeidsFordelingEnhet
 import no.nav.etterlatte.behandling.klienter.Norg2Klient
 import no.nav.etterlatte.common.klienter.PdlKlient
+import no.nav.etterlatte.common.klienter.SkjermingKlient
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
@@ -62,9 +63,12 @@ class EgenAnsattServiceTest {
         val norg2Klient = mockk<Norg2Klient>()
         val featureToggleService = mockk<FeatureToggleService>()
         val tilgangService = mockk<TilgangService>()
+        val skjermingKlient = mockk<SkjermingKlient>()
         val connection = dataSource.connection
         sakRepo = SakDao { connection }
-        sakService = spyk(RealSakService(sakRepo, pdlKlient, norg2Klient, featureToggleService, tilgangService))
+        sakService = spyk(
+            RealSakService(sakRepo, pdlKlient, norg2Klient, featureToggleService, tilgangService, skjermingKlient)
+        )
         egenAnsattService = EgenAnsattService(sakService, sikkerLogg)
 
         every { pdlKlient.hentGeografiskTilknytning(any(), any()) } returns GeografiskTilknytning(kommune = "0301")

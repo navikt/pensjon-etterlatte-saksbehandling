@@ -9,7 +9,24 @@ jobs:
     strategy:
       matrix:
         applikasjon:
-          - migrering
+          - behandling
+          - beregning
+          - brev-api
+          - fordeler
+          - grunnlag
+          - gyldig-soeknad
+          - hendelser-pdl
+          - oppdater-behandling
+          - opplysninger-fra-pdl
+          - opplysninger-fra-soeknad
+          - pdltjenester
+          - saksbehandling-ui
+          - statistikk
+          - testdata
+          - tilbakekreving
+          - utbetaling
+          - vedtaksvurdering
+          - vilkaarsvurdering
     uses: ./.github/workflows/.deploy-main.yaml
     with:
       applikasjon: ${{ matrix.applikasjon }}

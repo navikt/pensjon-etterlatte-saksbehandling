@@ -14,8 +14,6 @@ val sikkerLogg: Logger = LoggerFactory.getLogger("sikkerLogg")
 
 fun main() = ApplicationContext().let { Server(it).run() }
 
-// Test3
-
 class Server(private val context: ApplicationContext) {
     init {
         sikkerLogg.info("SikkerLogg: etterlatte-migrering oppstart")

@@ -9,7 +9,7 @@ on:
         type: string
 
 env:
-  image: europe-north1-docker.pkg.dev/nais-management-233d/etterlatte/pensjon-etterlatte-saksbehandling-etterlatte-${{ inputs.applikasjon }}:2023.05.30-10.47-05d0869
+  image: europe-north1-docker.pkg.dev/nais-management-233d/etterlatte/pensjon-etterlatte-saksbehandling-etterlatte-${{ inputs.applikasjon }}:main
 
 jobs:
   deploy-main:

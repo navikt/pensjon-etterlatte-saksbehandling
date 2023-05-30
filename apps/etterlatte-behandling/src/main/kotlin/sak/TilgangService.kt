@@ -19,6 +19,11 @@ data class SakMedGraderingOgSkjermet(
     val erSkjermet: Boolean?
 )
 
+data class SakMedGradering(
+    val id: Long,
+    val adressebeskyttelseGradering: AdressebeskyttelseGradering?
+)
+
 class TilgangServiceImpl(
     private val dao: SakTilgangDao,
     private val saksbehandlereGroupIdsByKey: Map<AzureGroup, String>

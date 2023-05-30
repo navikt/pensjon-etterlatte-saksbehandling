@@ -1,8 +1,8 @@
 package no.nav.etterlatte.beregning.grunnlag
 
+import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
-import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.token.Bruker
 import org.slf4j.LoggerFactory
@@ -22,13 +22,15 @@ class BeregningsGrunnlagService(
     ): Boolean = when {
         behandlingKlient.beregn(behandlingId, bruker, false) -> {
             val behandling = behandlingKlient.hentBehandling(behandlingId, bruker)
-            if (behandling.behandlingType == BehandlingType.REVURDERING) {
+            val kanLagreDetteGrunnlaget = if (behandling.behandlingType == BehandlingType.REVURDERING) {
                 // Her vil vi sjekke opp om det vi lagrer ned ikke er modifisert før virk på revurderingen
                 val forrigeIverksatte = behandlingKlient.hentSisteIverksatteBehandling(behandling.sak, bruker)
-                sjekkAtGrunnlagIkkeErEndretFoerVirk(behandling, forrigeIverksatte, barnepensjonBeregningsGrunnlag)
+                grunnlagErIkkeEndretFoerVirk(behandling, forrigeIverksatte, barnepensjonBeregningsGrunnlag)
+            } else {
+                true
             }
 
-            beregningsGrunnlagRepository.lagre(
+            kanLagreDetteGrunnlaget && beregningsGrunnlagRepository.lagre(
                 BeregningsGrunnlag(
                     behandlingId = behandlingId,
                     kilde = Grunnlagsopplysning.Saksbehandler.create(bruker.ident()),
@@ -41,7 +43,7 @@ class BeregningsGrunnlagService(
         else -> false
     }
 
-    private fun sjekkAtGrunnlagIkkeErEndretFoerVirk(
+    private fun grunnlagErIkkeEndretFoerVirk(
         revurdering: DetaljertBehandling,
         forrigeIverksatte: DetaljertBehandling,
         barnepensjonBeregningsGrunnlag: BarnepensjonBeregningsGrunnlag

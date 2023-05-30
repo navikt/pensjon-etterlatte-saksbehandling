@@ -41,6 +41,8 @@ jobs:
         run: |
           chmod +x ./gradlew
           ./gradlew :jobs:${JOB_NAME}:test :jobs:${JOB_NAME}:build
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Build and publish docker image
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

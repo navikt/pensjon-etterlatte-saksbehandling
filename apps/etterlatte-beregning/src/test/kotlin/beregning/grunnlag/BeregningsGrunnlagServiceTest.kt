@@ -1,6 +1,7 @@
 package beregning.grunnlag
 
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -15,15 +16,19 @@ import no.nav.etterlatte.klienter.BehandlingKlientImpl
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeskenMedIBeregning
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.lang.RuntimeException
 import java.time.LocalDate
+import java.time.Month
 import java.time.YearMonth
 import java.util.*
 import java.util.UUID.randomUUID
@@ -35,6 +40,11 @@ internal class BeregningsGrunnlagServiceTest {
     private val beregningsGrunnlagService: BeregningsGrunnlagService = BeregningsGrunnlagService(
         beregningsGrunnlagRepository,
         behandlingKlient
+    )
+
+    private val personidenter = listOf(
+        "05108208963",
+        "18061264406"
     )
 
     @Test
@@ -68,6 +78,141 @@ internal class BeregningsGrunnlagServiceTest {
 
             verify(exactly = 1) { beregningsGrunnlagRepository.lagre(any()) }
         }
+    }
+
+    @Test
+    fun `skal ikke tillate endringer i beregningsgrunnlaget før virk på revurdering`() {
+        val sakId = 1337L
+        val foerstegangsbehandling = mockBehandling(type = SakType.BARNEPENSJON, uuid = randomUUID(), sakId = sakId)
+
+        val virk = YearMonth.of(2023, Month.JANUARY)
+        val virkMock = mockk<Virkningstidspunkt>()
+        every { virkMock.dato } returns virk
+        val revurdering = mockBehandling(
+            type = SakType.BARNEPENSJON,
+            uuid = randomUUID(),
+            behandlingstype = BehandlingType.REVURDERING,
+            sakId = sakId
+        )
+        every { revurdering.virkningstidspunkt } returns virkMock
+
+        val soesken = personidenter.map { Folkeregisteridentifikator.of(it) }
+
+        val periode1 = GrunnlagMedPeriode(
+            data = soesken.map { SoeskenMedIBeregning(it, true) },
+            fom = LocalDate.of(2022, 8, 1),
+            tom = null
+        )
+        val periode2 = GrunnlagMedPeriode(
+            data = soesken.map { SoeskenMedIBeregning(it, false) },
+            fom = virk.atDay(1).minusMonths(1)
+        )
+
+        val grunnlagIverksatt = beregningsgrunnlag(
+            behandlingId = foerstegangsbehandling.id,
+            soeskenMedIBeregning = listOf(periode1)
+        )
+        val grunnlagEndring = beregningsgrunnlag(
+            behandlingId = revurdering.id,
+            soeskenMedIBeregning = listOf(periode1.copy(tom = periode2.fom.minusDays(1)), periode2)
+        )
+
+        coEvery { behandlingKlient.hentBehandling(foerstegangsbehandling.id, any()) } returns foerstegangsbehandling
+        coEvery { behandlingKlient.beregn(revurdering.id, any(), any()) } returns true
+        coEvery {
+            behandlingKlient.hentSisteIverksatteBehandling(
+                sakId,
+                any()
+            )
+        } returns foerstegangsbehandling
+        coEvery { behandlingKlient.hentBehandling(revurdering.id, any()) } returns revurdering
+
+        every {
+            beregningsGrunnlagRepository.finnGrunnlagForBehandling(foerstegangsbehandling.id)
+        } returns grunnlagIverksatt
+        every { beregningsGrunnlagRepository.finnGrunnlagForBehandling(revurdering.id) } returns grunnlagEndring
+
+        runBlocking {
+            val lagret = beregningsGrunnlagService.lagreBarnepensjonBeregningsGrunnlag(
+                behandlingId = revurdering.id,
+                barnepensjonBeregningsGrunnlag = BarnepensjonBeregningsGrunnlag(
+                    soeskenMedIBeregning = grunnlagEndring.soeskenMedIBeregning,
+                    institusjonsopphold = grunnlagEndring.institusjonsopphold
+                ),
+                bruker = mockk(relaxed = true)
+            )
+            assertFalse(lagret)
+        }
+
+        coVerify(exactly = 0) { beregningsGrunnlagRepository.lagre(any()) }
+    }
+
+    @Test
+    fun `skal tillate endringer i beregningsgrunnlaget etter virk på revurdering`() {
+        val sakId = 1337L
+        val foerstegangsbehandling = mockBehandling(type = SakType.BARNEPENSJON, uuid = randomUUID(), sakId = sakId)
+
+        val virk = YearMonth.of(2023, Month.JANUARY)
+        val virkMock = mockk<Virkningstidspunkt>()
+        every { virkMock.dato } returns virk
+        val revurdering = mockBehandling(
+            type = SakType.BARNEPENSJON,
+            uuid = randomUUID(),
+            behandlingstype = BehandlingType.REVURDERING,
+            sakId = sakId
+        )
+        every { revurdering.virkningstidspunkt } returns virkMock
+
+        val soesken = personidenter.map { Folkeregisteridentifikator.of(it) }
+
+        val periode1 = GrunnlagMedPeriode(
+            data = soesken.map { SoeskenMedIBeregning(it, true) },
+            fom = LocalDate.of(2022, 8, 1),
+            tom = null
+        )
+        val periode2 = GrunnlagMedPeriode(
+            data = soesken.map { SoeskenMedIBeregning(it, false) },
+            fom = virk.atDay(1)
+        )
+
+        val grunnlagIverksatt = beregningsgrunnlag(
+            behandlingId = foerstegangsbehandling.id,
+            soeskenMedIBeregning = listOf(periode1)
+        )
+        val grunnlagEndring = beregningsgrunnlag(
+            behandlingId = revurdering.id,
+            soeskenMedIBeregning = listOf(periode1.copy(tom = periode2.fom.minusDays(1)), periode2)
+        )
+
+        coEvery { behandlingKlient.hentBehandling(foerstegangsbehandling.id, any()) } returns foerstegangsbehandling
+        coEvery { behandlingKlient.beregn(revurdering.id, any(), any()) } returns true
+        coEvery {
+            behandlingKlient.hentSisteIverksatteBehandling(
+                sakId,
+                any()
+            )
+        } returns foerstegangsbehandling
+        coEvery { behandlingKlient.hentBehandling(revurdering.id, any()) } returns revurdering
+
+        every {
+            beregningsGrunnlagRepository.finnGrunnlagForBehandling(foerstegangsbehandling.id)
+        } returns grunnlagIverksatt
+        every { beregningsGrunnlagRepository.finnGrunnlagForBehandling(revurdering.id) } returns grunnlagEndring
+        every { beregningsGrunnlagRepository.lagre(any()) } returns true
+
+        runBlocking {
+            val lagret = beregningsGrunnlagService.lagreBarnepensjonBeregningsGrunnlag(
+                behandlingId = revurdering.id,
+                barnepensjonBeregningsGrunnlag = BarnepensjonBeregningsGrunnlag(
+                    soeskenMedIBeregning = grunnlagEndring.soeskenMedIBeregning,
+                    institusjonsopphold = grunnlagEndring.institusjonsopphold
+                ),
+                bruker = mockk(relaxed = true)
+            )
+            assertTrue(lagret)
+        }
+
+        coVerify(exactly = 1) { beregningsGrunnlagRepository.lagre(any()) }
     }
 
     @Test
@@ -139,16 +284,35 @@ internal class BeregningsGrunnlagServiceTest {
         }
     }
 
-    private fun mockBehandling(type: SakType, uuid: UUID): DetaljertBehandling =
+    private fun mockBehandling(
+        type: SakType,
+        uuid: UUID,
+        behandlingstype: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+        sakId: Long = 1L
+    ): DetaljertBehandling =
         mockk<DetaljertBehandling>().apply {
             every { id } returns uuid
-            every { sak } returns 1
+            every { sak } returns sakId
             every { sakType } returns type
-            every { behandlingType } returns BehandlingType.FØRSTEGANGSBEHANDLING
+            every { behandlingType } returns behandlingstype
             every { virkningstidspunkt } returns VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2023, 1))
         }
 
     private companion object {
         val STOR_SNERK = Folkeregisteridentifikator.of("11057523044")
+    }
+
+    private fun beregningsgrunnlag(
+        behandlingId: UUID = randomUUID(),
+        soeskenMedIBeregning: List<GrunnlagMedPeriode<List<SoeskenMedIBeregning>>> = emptyList(),
+        institusjonsopphold: Institusjonsopphold = Institusjonsopphold(false),
+        kilde: Grunnlagsopplysning.Saksbehandler = Grunnlagsopplysning.Saksbehandler("test", Tidspunkt.now())
+    ): BeregningsGrunnlag {
+        return BeregningsGrunnlag(
+            behandlingId = behandlingId,
+            kilde = kilde,
+            soeskenMedIBeregning = soeskenMedIBeregning,
+            institusjonsopphold = institusjonsopphold
+        )
     }
 }

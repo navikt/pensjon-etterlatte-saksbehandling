@@ -11,7 +11,6 @@ repositories {
             password = System.getenv("GITHUB_TOKEN")
         }
     }
-    mavenCentral()
 }
 
 dependencies {

@@ -56,3 +56,8 @@ Testene fungerer med Colima som alternativ til docker desktop på mac, men vi ha
 kommando oppretter ny symlink til colima sin docker.sock.
 
     sudo ln -s /Users/$(whoami)/.colima/docker.sock /var/run/docker.sock
+
+### Integrasjonstester, MQ og M1
+Fram til bugen i https://stackoverflow.com/questions/71096568/ibm-mq-for-apple-silicon er fiksa, vil IBM MQ feile ved køyring på Apple M1-arkitekturen. 
+Derfor har vi ein mekanisme (annotasjon) som gjer at desse testane vil bli hoppa over for M1-chipsets. 
+Ved bygging på GitHub Actions brukar dei ein annan arkitektur, så der vil uansett desse testane køyre (kan jo sjølvsagt endre seg, men verkar lite plausibelt).

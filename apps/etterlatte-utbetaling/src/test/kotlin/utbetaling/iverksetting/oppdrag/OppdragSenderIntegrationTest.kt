@@ -1,5 +1,6 @@
 package no.nav.etterlatte.utbetaling.iverksetting.oppdrag
 
+import no.nav.etterlatte.utbetaling.ChipsetCheck
 import no.nav.etterlatte.utbetaling.TestContainers
 import no.nav.etterlatte.utbetaling.config.JmsConnectionFactory
 import no.nav.etterlatte.utbetaling.oppdrag
@@ -9,9 +10,11 @@ import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.condition.DisabledIf
 import org.testcontainers.junit.jupiter.Container
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@DisabledIf(value = ChipsetCheck.erM1)
 internal class OppdragSenderIntegrationTest {
 
     @Container

@@ -127,7 +127,7 @@ class ApplicationContext(
 
     // Klient
     val pdlKlient = PdlKlientImpl(pdlHttpClient, "http://etterlatte-pdltjenester")
-    val skjermingKlient = SkjermingKlient(skjermingHttpKlient, config.getString("skjerming.url"))
+    val skjermingKlient = SkjermingKlient(skjermingHttpKlient, env.getValue("SKJERMING_URL"))
     val grunnlagKlient = GrunnlagKlientImpl(grunnlagHttpClient, "http://etterlatte-grunnlag")
     val leaderElectionKlient = LeaderElection(env.getValue("ELECTOR_PATH"), leaderElectionHttpClient)
 

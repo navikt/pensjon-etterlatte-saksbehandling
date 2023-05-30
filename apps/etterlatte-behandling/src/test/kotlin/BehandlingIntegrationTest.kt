@@ -4,7 +4,6 @@ import com.typesafe.config.ConfigFactory
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.respond
-import io.ktor.client.engine.mock.respondOk
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.header
@@ -111,7 +110,12 @@ abstract class BehandlingIntegrationTest {
     fun skjermingHttpClient(): HttpClient = HttpClient(MockEngine) {
         engine {
             addHandler { request ->
-                respondOk()
+                if (request.url.fullPath.contains("skjermet")) {
+                    val headers = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
+                    respond(false.toJson(), headers = headers)
+                } else {
+                    error(request.url.fullPath)
+                }
             }
         }
         install(ContentNegotiation) {

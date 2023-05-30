@@ -1,5 +1,6 @@
 package no.nav.etterlatte.egenansatt
 
+import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.spyk
@@ -71,6 +72,7 @@ class EgenAnsattServiceTest {
         )
         egenAnsattService = EgenAnsattService(sakService, sikkerLogg)
 
+        coEvery { skjermingKlient.personErSkjermet(any()) } returns false
         every { pdlKlient.hentGeografiskTilknytning(any(), any()) } returns GeografiskTilknytning(kommune = "0301")
         every {
             norg2Klient.hentEnheterForOmraade("EYB", "0301")
@@ -98,7 +100,7 @@ class EgenAnsattServiceTest {
     }
 
     @Test
-    fun test() {
+    fun sjekkAtSettingAvSkjermingFungererEtterOpprettelseAvSak() {
         val fnr = Folkeregisteridentifikator.of("08071272487").value
         sakService.finnEllerOpprettSak(fnr, SakType.BARNEPENSJON)
         val fnr2 = Folkeregisteridentifikator.of("19078504903").value

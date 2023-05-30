@@ -211,7 +211,7 @@ class UtbetalingDao(private val dataSource: DataSource) {
                 SELECT DISTINCT (u.id), vedtak_id, behandling_id, behandling_id_til_oppdrag, u.sak_id, vedtak, u.opprettet,
                        avstemmingsnoekkel, endret, stoenadsmottaker, oppdrag, kvittering, kvittering_beskrivelse,
                        kvittering_alvorlighetsgrad, kvittering_kode, saksbehandler, saksbehandler_enhet, attestant, 
-                       attestant_enhet, u.saktype
+                       attestant_enhet, u.saktype 
                 FROM utbetaling u
                          INNER JOIN utbetalingslinje ul on u.id = ul.utbetaling_id
                 WHERE u.id in (SELECT utbetaling_id FROM utbetalingshendelse where status = 'GODKJENT')

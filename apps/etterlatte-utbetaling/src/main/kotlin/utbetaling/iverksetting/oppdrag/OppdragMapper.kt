@@ -4,6 +4,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.toNorskTid
 import no.nav.etterlatte.utbetaling.common.OppdragDefaults
 import no.nav.etterlatte.utbetaling.common.OppdragslinjeDefaults
 import no.nav.etterlatte.utbetaling.common.toXMLDate
+import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Saktype
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetaling
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetalingslinjetype
 import no.trygdeetaten.skjema.oppdrag.Attestant180
@@ -23,7 +24,7 @@ object OppdragMapper {
         val oppdrag110 = Oppdrag110().apply {
             kodeAksjon = OppdragDefaults.AKSJONSKODE_OPPDATER
             kodeEndring = if (erFoersteUtbetalingPaaSak) "NY" else "ENDR"
-            kodeFagomraade = "BARNEPE"
+            kodeFagomraade = if(utbetaling.sakType == Saktype.BARNEPENSJON) "BARNEPE" else "OMSTILL"
             fagsystemId = utbetaling.sakId.value.toString()
             utbetFrekvens = OppdragDefaults.UTBETALINGSFREKVENS
             oppdragGjelderId = utbetaling.stoenadsmottaker.value

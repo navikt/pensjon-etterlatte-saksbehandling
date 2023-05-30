@@ -55,12 +55,6 @@ class VedtakMottaker(
                 val vedtak: Utbetalingsvedtak = lesVedtak(packet).also { vedtakId = it.vedtakId }
                 logger.info("Attestert vedtak med vedtakId=${vedtak.vedtakId} mottatt")
 
-                //TODO Mock for OMS
-                if(vedtak.sak.sakType == Saktype.OMSTILLINGSSTOENAD) {
-                    sendUtbetalingSendtEventForOMSMock(context, vedtak)
-                    return@withLogContext
-                }
-
                 when (val resultat = utbetalingService.iverksettUtbetaling(vedtak)) {
                     is SendtTilOppdrag -> {
                         logger.info("Vedtak med vedtakId=${vedtak.vedtakId} sendt til oppdrag - avventer kvittering")

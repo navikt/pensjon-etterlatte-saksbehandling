@@ -14,4 +14,10 @@ internal class OppdragMapperTest {
 
         assertNotNull(oppdrag)
     }
+    @Test
+    fun oppdragFraVedtakOMS() {
+        val oppdrag = OppdragMapper.oppdragFraUtbetaling(utbetaling(sakType = Saktype.OMSTILLINGSSTOENAD), true)
+
+        assertNotNull(oppdrag)
+    }
 }

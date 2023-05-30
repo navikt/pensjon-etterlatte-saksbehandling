@@ -9,7 +9,7 @@ on:
         type: string
 
 env:
-  image: europe-north1-docker.pkg.dev/nais-management-233d/etterlatte/${{ github.repository }}-etterlatte-${{ inputs.applikasjon }}:main
+  image: europe-north1-docker.pkg.dev/nais-management-233d/etterlatte/${{ github.repository }}-etterlatte-${{ inputs.applikasjon }}:2023.05.28-14.16-cd56ef7
 
 jobs:
   deploy-main:

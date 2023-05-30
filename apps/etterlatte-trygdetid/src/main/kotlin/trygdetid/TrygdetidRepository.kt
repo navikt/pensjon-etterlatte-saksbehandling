@@ -45,6 +45,11 @@ class TrygdetidRepository(private val dataSource: DataSource) {
         dataSource.transaction { tx ->
             opprettTrygdetid(trygdetid, tx)
             opprettOpplysningsgrunnlag(trygdetid.id, trygdetid.opplysninger, tx)
+            trygdetid.trygdetidGrunnlag.forEach { opprettTrygdetidGrunnlag(trygdetid.id, it, tx) }
+
+            if (trygdetid.beregnetTrygdetid != null) {
+                oppdaterBeregnetTrygdetid(trygdetid.behandlingId, trygdetid.beregnetTrygdetid, tx)
+            }
         }.let { hentTrygdtidNotNull(trygdetid.behandlingId) }
 
     fun oppdaterTrygdetid(oppdatertTrygdetid: Trygdetid): Trygdetid =

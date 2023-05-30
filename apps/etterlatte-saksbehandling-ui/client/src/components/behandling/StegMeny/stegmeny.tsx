@@ -10,12 +10,16 @@ export const StegMeny = (props: { behandling: IBehandlingReducer }) => {
   return (
     <StegMenyWrapper role="navigation">
       {behandlingType === IBehandlingsType.MANUELT_OPPHOER &&
-        manueltOpphoerRoutes.map((path) => <NavLenke key={path} path={path} behandling={props.behandling} />)}
+        manueltOpphoerRoutes.map((pathInfo) => (
+          <NavLenke key={pathInfo.path} pathInfo={pathInfo} behandling={props.behandling} />
+        ))}
       {behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING &&
-        soeknadRoutes.map((path) => <NavLenke key={path} path={path} behandling={props.behandling} />)}
+        soeknadRoutes.map((pathInfo) => (
+          <NavLenke key={pathInfo.path} pathInfo={pathInfo} behandling={props.behandling} />
+        ))}
       {behandlingType === IBehandlingsType.REVURDERING &&
-        revurderingRoutes(props.behandling).map((path) => (
-          <NavLenke key={path} path={path} behandling={props.behandling} />
+        revurderingRoutes(props.behandling).map((pathInfo) => (
+          <NavLenke key={pathInfo.path} pathInfo={pathInfo} behandling={props.behandling} />
         ))}
     </StegMenyWrapper>
   )

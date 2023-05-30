@@ -10,8 +10,9 @@ import rapidsandrivers.getRapidEnv
 fun main() {
     val rapidEnv = getRapidEnv()
     RapidApplication.create(rapidEnv).also { rapidsConnection ->
-        val ab = AppBuilder(Miljoevariabler(rapidEnv))
-        LoependeYtelserforespoersel(rapidsConnection, ab.lagVedtakKlient())
-        OpprettVedtakforespoersel(rapidsConnection, ab.lagVedtakKlient())
+        val vedtakKlient = AppBuilder(Miljoevariabler(rapidEnv)).lagVedtakKlient()
+        LoependeYtelserforespoersel(rapidsConnection, vedtakKlient)
+        OpprettVedtakforespoersel(rapidsConnection, vedtakKlient)
+        MigreringHendelser(rapidsConnection, vedtakKlient)
     }.start()
 }

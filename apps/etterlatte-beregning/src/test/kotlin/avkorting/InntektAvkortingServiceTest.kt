@@ -68,11 +68,12 @@ class InntektAvkortingServiceTest {
             avkortingsperiode(
                 avkorting = 1000,
                 fom = YearMonth.of(2023, 1),
-                tom = YearMonth.of(2023, 2)
+                tom = YearMonth.of(2023, 1)
             ),
             avkortingsperiode(
                 avkorting = 2000,
-                fom = YearMonth.of(2023, 2)
+                fom = YearMonth.of(2023, 2),
+                tom = YearMonth.of(2023, 2)
             ),
             avkortingsperiode(
                 avkorting = 3000,
@@ -89,21 +90,29 @@ class InntektAvkortingServiceTest {
             periode.fom shouldBe YearMonth.of(2023, 1)
             periode.tom shouldBe YearMonth.of(2023, 1)
             ytelseEtterAvkorting shouldBe 4000
+            avkortingsbeloep shouldBe 1000
+            ytelseFoerAvkorting shouldBe 5000
         }
         with(avkortetYtelse[1]) {
             periode.fom shouldBe YearMonth.of(2023, 2)
             periode.tom shouldBe YearMonth.of(2023, 2)
             ytelseEtterAvkorting shouldBe 3000
+            avkortingsbeloep shouldBe 2000
+            ytelseFoerAvkorting shouldBe 5000
         }
         with(avkortetYtelse[2]) {
             periode.fom shouldBe YearMonth.of(2023, 3)
             periode.tom shouldBe YearMonth.of(2023, 3)
             ytelseEtterAvkorting shouldBe 2000
+            avkortingsbeloep shouldBe 3000
+            ytelseFoerAvkorting shouldBe 5000
         }
         with(avkortetYtelse[3]) {
             periode.fom shouldBe YearMonth.of(2023, 4)
             periode.tom shouldBe null
             ytelseEtterAvkorting shouldBe 7000
+            avkortingsbeloep shouldBe 3000
+            ytelseFoerAvkorting shouldBe 10000
         }
     }
 }

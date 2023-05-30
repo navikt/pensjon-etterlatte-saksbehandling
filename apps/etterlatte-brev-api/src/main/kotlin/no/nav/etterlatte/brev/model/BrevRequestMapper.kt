@@ -23,7 +23,12 @@ object BrevRequestMapper {
             BrevMottaker.fra(mottaker),
             attestant
         )
-        VedtakType.ENDRING -> TODO("Vedtakstype er ikke støttet: $vedtakType")
+        VedtakType.ENDRING -> EndringBrevRequest.fraVedtak(
+            behandling,
+            avsender,
+            BrevMottaker.fra(mottaker),
+            attestant
+        )
         VedtakType.OPPHOER -> TODO("Vedtakstype er ikke støttet: $vedtakType")
     }
 }

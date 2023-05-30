@@ -74,7 +74,8 @@ class SakOgBehandlingService(
                 ),
                 attestant
             ),
-            utbetalingsinfo = finnUtbetalingsinfo(vedtak.behandling.id, vedtak.virkningstidspunkt, bruker)
+            utbetalingsinfo = finnUtbetalingsinfo(vedtak.behandling.id, vedtak.virkningstidspunkt, bruker),
+            revurderingsaarsak = vedtak.behandling.revurderingsaarsak
         )
     }
 
@@ -108,5 +109,3 @@ class SakOgBehandlingService(
         )
     }
 }
-
-class SaksbehandlerManglerEnhetException(message: String) : Exception(message)

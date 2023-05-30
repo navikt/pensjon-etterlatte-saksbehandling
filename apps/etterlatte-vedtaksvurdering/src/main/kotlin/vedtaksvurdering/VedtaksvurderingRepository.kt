@@ -7,6 +7,7 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
+import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
@@ -40,9 +41,9 @@ class VedtaksvurderingRepository(val datasource: DataSource) {
                     statement = """
                         INSERT INTO vedtak(
                             behandlingId, sakid, fnr, behandlingtype, saktype, vedtakstatus, type, datovirkfom, 
-                            beregningsresultat, avkorting, vilkaarsresultat)
+                            beregningsresultat, avkorting, vilkaarsresultat, revurderingsaarsak)
                         VALUES (:behandlingId, :sakid, :fnr, :behandlingtype, :saktype, :vedtakstatus, :type, 
-                            :datovirkfom, :beregningsresultat, :avkorting, :vilkaarsresultat)
+                            :datovirkfom, :beregningsresultat, :avkorting, :vilkaarsresultat, :revurderingsaarsak)
                         RETURNING id
                         """,
                     mapOf(
@@ -56,7 +57,8 @@ class VedtaksvurderingRepository(val datasource: DataSource) {
                         "datovirkfom" to opprettVedtak.virkningstidspunkt.atDay(1),
                         "beregningsresultat" to opprettVedtak.beregning?.toJson(),
                         "avkorting" to opprettVedtak.beregning?.toJson(),
-                        "vilkaarsresultat" to opprettVedtak.vilkaarsvurdering?.toJson()
+                        "vilkaarsresultat" to opprettVedtak.vilkaarsvurdering?.toJson(),
+                        "revurderingsaarsak" to opprettVedtak.revurderingsaarsak?.name
                     )
                 )
                     .let { query -> tx.run(query.asUpdateAndReturnGeneratedKey) }
@@ -135,7 +137,7 @@ class VedtaksvurderingRepository(val datasource: DataSource) {
             query = """
             SELECT sakid, behandlingId, saksbehandlerId, beregningsresultat, avkorting, vilkaarsresultat, id, fnr, 
                 datoFattet, datoattestert, attestant, datoVirkFom, vedtakstatus, saktype, behandlingtype, 
-                attestertVedtakEnhet, fattetVedtakEnhet, type  
+                attestertVedtakEnhet, fattetVedtakEnhet, type, revurderingsaarsak
             FROM vedtak 
             WHERE behandlingId = :behandlingId
             """,
@@ -152,7 +154,7 @@ class VedtaksvurderingRepository(val datasource: DataSource) {
         val hentVedtak = """
             SELECT sakid, behandlingId, saksbehandlerId, beregningsresultat, avkorting, vilkaarsresultat, id, fnr, 
                 datoFattet, datoattestert, attestant, datoVirkFom, vedtakstatus, saktype, behandlingtype, 
-                attestertVedtakEnhet, fattetVedtakEnhet, type  
+                attestertVedtakEnhet, fattetVedtakEnhet, type, revurderingsaarsak 
             FROM vedtak  
             WHERE sakId = :sakId
             """
@@ -258,7 +260,8 @@ class VedtaksvurderingRepository(val datasource: DataSource) {
                 tidspunkt = sqlTimestamp("datoattestert").toTidspunkt()
             )
         },
-        utbetalingsperioder = utbetalingsperioder
+        utbetalingsperioder = utbetalingsperioder,
+        revurderingAarsak = stringOrNull("revurderingsaarsak")?.let { RevurderingAarsak.valueOf(it) }
     )
 
     private fun Row.toUtbetalingsperiode() =

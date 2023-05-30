@@ -5,6 +5,16 @@ env:
   JOB_NAME: ${{ github.workflow }}
 
 on:
+  workflow_dispatch: # Allow manually triggered workflow run
+    inputs:
+      deploy-prod:
+        description: 'Deploy til produksjon'
+        required: false
+        default: 'false'
+        type: choice
+        options:
+          - true
+          - false
   push:
     branches:
       - main
@@ -31,6 +41,8 @@ jobs:
         run: |
           chmod +x ./gradlew
           ./gradlew :jobs:${JOB_NAME}:test :jobs:${JOB_NAME}:build
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Build and publish docker image
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

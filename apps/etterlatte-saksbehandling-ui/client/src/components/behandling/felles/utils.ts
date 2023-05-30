@@ -28,7 +28,7 @@ export function hentAdresserEtterDoedsdato(adresser: IAdresse[], doedsdato: stri
   return adresser?.filter((adresse) => adresse.aktiv || isAfter(new Date(adresse.gyldigTilOgMed!), new Date(doedsdato)))
 }
 
-export const kanGaaTilStatus = (status: IBehandlingStatus) => {
+export const hentGyldigeNavigeringsStatuser = (status: IBehandlingStatus) => {
   const rekkefoelge = [
     IBehandlingStatus.OPPRETTET,
     IBehandlingStatus.VILKAARSVURDERT,

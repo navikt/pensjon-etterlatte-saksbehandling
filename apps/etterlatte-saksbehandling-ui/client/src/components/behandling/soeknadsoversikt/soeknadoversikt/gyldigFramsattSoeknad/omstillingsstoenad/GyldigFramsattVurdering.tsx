@@ -33,7 +33,7 @@ export const GyldigFramsattVurdering = ({
   const manuellVurdering: IManuellVurdering = innsenderErGjenlevende?.basertPaaOpplysninger
 
   const dispatch = useAppDispatch()
-  const [vurder, setVurder] = useState(manuellVurdering != null)
+  const [vurdert, setVurdert] = useState(manuellVurdering != null)
   const [svar, setSvar] = useState<JaNei | undefined>(finnSvar(gyldigFramsatt))
   const [radioError, setRadioError] = useState<string>('')
   const [begrunnelse, setBegrunnelse] = useState<string>(manuellVurdering?.begrunnelse || '')
@@ -67,12 +67,12 @@ export const GyldigFramsattVurdering = ({
     setRadioError('')
     setBegrunnelseError('')
     setBegrunnelse(manuellVurdering?.begrunnelse || '')
-    setVurder(manuellVurdering != null)
+    setVurdert(manuellVurdering != null)
     onSuccess?.()
   }
 
-  return !vurder ? (
-    <LeggTilVurderingButton onClick={() => setVurder(true)}>Legg til vurdering</LeggTilVurderingButton>
+  return !vurdert ? (
+    <LeggTilVurderingButton onClick={() => setVurdert(true)}>Legg til vurdering</LeggTilVurderingButton>
   ) : (
     <VurderingsboksWrapper
       tittel={tittel}

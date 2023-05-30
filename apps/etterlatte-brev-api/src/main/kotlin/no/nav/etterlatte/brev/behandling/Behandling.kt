@@ -1,6 +1,7 @@
 package no.nav.etterlatte.brev.behandling
 
 import no.nav.etterlatte.brev.model.Spraak
+import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
@@ -22,7 +23,8 @@ data class Behandling(
     val spraak: Spraak,
     val persongalleri: Persongalleri,
     val vedtak: ForenkletVedtak,
-    val utbetalingsinfo: Utbetalingsinfo? = null
+    val utbetalingsinfo: Utbetalingsinfo? = null,
+    val revurderingsaarsak: RevurderingAarsak? = null
 ) {
     init {
         if (vedtak.type == VedtakType.INNVILGELSE) {

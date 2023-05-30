@@ -14,6 +14,7 @@ import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.OppdragMapper
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Attestasjon
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.BehandlingId
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Foedselsnummer
+import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Kjoereplan
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Kvittering
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.NavIdent
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.OppdragKlassifikasjonskode
@@ -61,7 +62,8 @@ fun utbetalingsvedtak(
     vedtakId = vedtakId,
     behandling = Behandling(
         id = UUID.randomUUID(),
-        type = BehandlingType.FØRSTEGANGSBEHANDLING
+        type = BehandlingType.FØRSTEGANGSBEHANDLING,
+        revurderingsaarsak = null
     ),
     sak = Sak(
         id = 1,
@@ -174,7 +176,8 @@ fun utbetalingslinje(
     periodeFra: LocalDate = LocalDate.parse("2022-01-01"),
     periodeTil: LocalDate? = null,
     opprettet: Tidspunkt = Tidspunkt.now(),
-    klassifikasjonskode: OppdragKlassifikasjonskode = OppdragKlassifikasjonskode.BARNEPENSJON_OPTP
+    klassifikasjonskode: OppdragKlassifikasjonskode = OppdragKlassifikasjonskode.BARNEPENSJON_OPTP,
+    kjoereplan: Kjoereplan = Kjoereplan.MED_EN_GANG
 ): Utbetalingslinje =
     Utbetalingslinje(
         id = UtbetalingslinjeId(utbetalingslinjeId),
@@ -188,7 +191,8 @@ fun utbetalingslinje(
             til = periodeTil
         ),
         beloep = beloep,
-        klassifikasjonskode = klassifikasjonskode
+        klassifikasjonskode = klassifikasjonskode,
+        kjoereplan = kjoereplan
     )
 
 fun utbetalingMedOpphoer() = utbetaling(
@@ -244,8 +248,8 @@ fun oppdragslinjeForKonsistensavstemming(
     tilOgMed: LocalDate? = null,
     forrigeUtbetalingslinjeId: Long? = null,
     beloep: BigDecimal = BigDecimal(10000),
-    attestanter: List<NavIdent> = listOf(NavIdent("attestant"))
-
+    attestanter: List<NavIdent> = listOf(NavIdent("attestant")),
+    kjoereplan: Kjoereplan = Kjoereplan.MED_EN_GANG
 ) = OppdragslinjeForKonsistensavstemming(
     id = UtbetalingslinjeId(id),
     opprettet = opprettet,
@@ -253,5 +257,6 @@ fun oppdragslinjeForKonsistensavstemming(
     tilOgMed = tilOgMed,
     forrigeUtbetalingslinjeId = forrigeUtbetalingslinjeId?.let { UtbetalingslinjeId(it) },
     beloep = beloep,
-    attestanter = attestanter
+    attestanter = attestanter,
+    kjoereplan = kjoereplan
 )

@@ -90,9 +90,8 @@ fun avkortingsperiode(
     kilde = Grunnlagsopplysning.RegelKilde("regelid", Tidspunkt.now(), "1")
 )
 
-fun avkortetYtelseGrunnlag(bruttoYtelse: Int, avkorting: Int) = AvkortetYtelseGrunnlag(
-    periode = RegelPeriode(fraDato = LocalDate.now()),
-    bruttoYtelse = FaktumNode(verdi = bruttoYtelse, "", ""),
+fun avkortetYtelseGrunnlag(beregning: Int, avkorting: Int) = AvkortetYtelseGrunnlag(
+    beregning = FaktumNode(verdi = beregning, "", ""),
     avkorting = FaktumNode(verdi = avkorting, "", "")
 )
 
@@ -138,5 +137,6 @@ fun beregningsperiode(
     grunnbelop = 100_000,
     trygdetid = 40,
     regelResultat = mapOf("regel" to "resultat").toObjectNode(),
-    regelVersjon = "1"
+    regelVersjon = "1",
+    kilde = Grunnlagsopplysning.RegelKilde("regelid", Tidspunkt.now(), "1")
 )

@@ -41,7 +41,7 @@ export const OversiktKommerBarnetTilgode = ({
   gjenlevendeForelder,
   behandlingId,
 }: Props) => {
-  const [vurder, setVurder] = useState(kommerBarnetTilgode !== null)
+  const [vurdert, setVurdert] = useState(kommerBarnetTilgode !== null)
   const bostedsadresse = soeker?.bostedsadresse?.find((adresse) => adresse.aktiv)
   const foreldersadresse = gjenlevendeForelder?.opplysning?.bostedsadresse?.find((adresse) => adresse.aktiv)
 
@@ -76,15 +76,15 @@ export const OversiktKommerBarnetTilgode = ({
       </div>
 
       <VurderingsContainerWrapper>
-        {vurder ? (
+        {vurdert ? (
           <KommerBarnetTilGodeVurdering
             kommerBarnetTilgode={kommerBarnetTilgode}
             redigerbar={redigerbar}
-            setVurder={(visVurderingKnapp: boolean) => setVurder(visVurderingKnapp)}
+            setVurdert={(visVurderingKnapp: boolean) => setVurdert(visVurderingKnapp)}
             behandlingId={behandlingId}
           />
         ) : (
-          <LeggTilVurderingButton onClick={() => setVurder(true)}>Legg til vurdering</LeggTilVurderingButton>
+          <LeggTilVurderingButton onClick={() => setVurdert(true)}>Legg til vurdering</LeggTilVurderingButton>
         )}
       </VurderingsContainerWrapper>
     </Soeknadsvurdering>

@@ -41,7 +41,8 @@ class BehandlingKlient(val behandlingHttpClient: HttpClient, val institusjonsopp
                 institusjonsType = opphold.institusjonstype,
                 startdato = opphold.startdato,
                 faktiskSluttdato = opphold.faktiskSluttdato,
-                forventetSluttdato = opphold.forventetSluttdato
+                forventetSluttdato = opphold.forventetSluttdato,
+                organisasjonsnummer = opphold.organisasjonsnummer
             )
         )
     }

@@ -3,7 +3,7 @@ import React, { useState } from 'react'
 import styled from 'styled-components'
 import { isPending, useApiCall } from '~shared/hooks/useApiCall'
 import { opprettRevurdering as opprettRevurderingApi } from '~shared/api/behandling'
-import { Revurderingsaarsak } from '~shared/types/Revurderingsaarsak'
+import { Revurderingsaarsak, tekstRevurderingsaarsak } from '~shared/types/Revurderingsaarsak'
 
 export const OpprettNyBehandling = ({
   sakId,
@@ -55,7 +55,7 @@ export const OpprettNyBehandling = ({
               {stoettedeRevurderinger.map((revurdering, i) => {
                 return (
                   <option key={`revurdering${i}`} value={revurdering}>
-                    {revurdering}
+                    {tekstRevurderingsaarsak[revurdering]}
                   </option>
                 )
               })}

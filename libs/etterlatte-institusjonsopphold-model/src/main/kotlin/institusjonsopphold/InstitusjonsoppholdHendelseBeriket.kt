@@ -12,7 +12,8 @@ data class InstitusjonsoppholdHendelseBeriket(
     val startdato: LocalDate,
     val faktiskSluttdato: LocalDate? = null,
     val forventetSluttdato: LocalDate? = null,
-    val institusjonsnavn: String? = null
+    val institusjonsnavn: String? = null,
+    val organisasjonsnummer: String? = null
 )
 
 enum class InstitusjonsoppholdsType {

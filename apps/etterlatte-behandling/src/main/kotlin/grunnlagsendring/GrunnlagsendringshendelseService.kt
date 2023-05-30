@@ -103,7 +103,7 @@ class GrunnlagsendringshendelseService(
     fun opprettInstitusjonsOppholdhendelse(
         oppholdsHendelse: InstitusjonsoppholdHendelseBeriket
     ): List<Grunnlagsendringshendelse> {
-        return opprettHendelseAvTypeForPersonUtenSamsvarSjekketAvJobb(
+        return opprettHendelseInstitusjonsoppholdForPersonSjekketAvJobb(
             fnr = oppholdsHendelse.norskident,
             grunnlagendringType = GrunnlagsendringsType.INSTITUSJONSOPPHOLD,
             samsvar = SamsvarMellomKildeOgGrunnlag.INSTITUSJONSOPPHOLD(
@@ -164,7 +164,7 @@ class GrunnlagsendringshendelseService(
 
     data class SakMedEnhet(val id: Long, val enhet: String)
 
-    private fun opprettHendelseAvTypeForPersonUtenSamsvarSjekketAvJobb(
+    private fun opprettHendelseInstitusjonsoppholdForPersonSjekketAvJobb(
         fnr: String,
         grunnlagendringType: GrunnlagsendringsType,
         samsvar: SamsvarMellomKildeOgGrunnlag
@@ -176,32 +176,25 @@ class GrunnlagsendringshendelseService(
 
         return sakerForSoeker.let {
             inTransaction {
-                it.filter { rolleOgSak ->
-                    !hendelseEksistererFraFoer(
-                        rolleOgSak.sakId,
-                        fnr,
-                        grunnlagendringType
+                it.map { rolleOgSak ->
+                    val hendelseId = UUID.randomUUID()
+                    logger.info(
+                        "Oppretter grunnlagsendringshendelse med id=$hendelseId for hendelse av " +
+                            "type $grunnlagendringType på sak med id=${rolleOgSak.sakId}"
+                    )
+                    grunnlagsendringshendelseDao.opprettGrunnlagsendringshendelse(
+                        Grunnlagsendringshendelse(
+                            id = hendelseId,
+                            sakId = rolleOgSak.sakId,
+                            status = GrunnlagsendringStatus.SJEKKET_AV_JOBB,
+                            type = grunnlagendringType,
+                            opprettet = tidspunktForMottakAvHendelse,
+                            hendelseGjelderRolle = rolleOgSak.rolle,
+                            gjelderPerson = fnr,
+                            samsvarMellomKildeOgGrunnlag = samsvar
+                        )
                     )
                 }
-                    .map { rolleOgSak ->
-                        val hendelseId = UUID.randomUUID()
-                        logger.info(
-                            "Oppretter grunnlagsendringshendelse med id=$hendelseId for hendelse av " +
-                                "type $grunnlagendringType på sak med id=${rolleOgSak.sakId}"
-                        )
-                        grunnlagsendringshendelseDao.opprettGrunnlagsendringshendelse(
-                            Grunnlagsendringshendelse(
-                                id = hendelseId,
-                                sakId = rolleOgSak.sakId,
-                                status = GrunnlagsendringStatus.SJEKKET_AV_JOBB,
-                                type = grunnlagendringType,
-                                opprettet = tidspunktForMottakAvHendelse,
-                                hendelseGjelderRolle = rolleOgSak.rolle,
-                                gjelderPerson = fnr,
-                                samsvarMellomKildeOgGrunnlag = samsvar
-                            )
-                        )
-                    }
             }
         }
     }

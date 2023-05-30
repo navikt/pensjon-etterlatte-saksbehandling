@@ -19,10 +19,10 @@ object OppdragMapper {
 
     private val tidspunktFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd-HH.mm.ss.SSSSSS")
 
-    fun oppdragFraUtbetaling(utbetaling: Utbetaling, foerstegangsbehandling: Boolean): Oppdrag {
+    fun oppdragFraUtbetaling(utbetaling: Utbetaling, erFoersteUtbetalingPaaSak: Boolean): Oppdrag {
         val oppdrag110 = Oppdrag110().apply {
             kodeAksjon = OppdragDefaults.AKSJONSKODE_OPPDATER
-            kodeEndring = if (foerstegangsbehandling) "NY" else "ENDR"
+            kodeEndring = if (erFoersteUtbetalingPaaSak) "NY" else "ENDR"
             kodeFagomraade = "BARNEPE"
             fagsystemId = utbetaling.sakId.value.toString()
             utbetFrekvens = OppdragDefaults.UTBETALINGSFREKVENS

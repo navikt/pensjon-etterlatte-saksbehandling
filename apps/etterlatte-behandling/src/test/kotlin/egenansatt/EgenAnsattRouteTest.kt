@@ -74,8 +74,6 @@ class EgenAnsattRouteTest : BehandlingIntegrationTest() {
             Assertions.assertNotNull(sak.id)
             Assertions.assertEquals(Enheter.PORSGRUNN.enhetNr, sak.enhet)
 
-            val virtuellEnhet = ArbeidsFordelingEnhet("virtuellenhet", "2222")
-            coEvery { norg2Klient.hentEnheterForOmraade(any(), any()) } returns listOf(virtuellEnhet)
             client.post("egenansatt") {
                 addAuthToken(systemBruker)
                 contentType(ContentType.Application.Json)
@@ -101,7 +99,8 @@ class EgenAnsattRouteTest : BehandlingIntegrationTest() {
             }
 
             Assertions.assertEquals(sak.id, saketterSkjerming.id)
-            Assertions.assertEquals(virtuellEnhet.enhetNr, saketterSkjerming.enhet)
+            // Denne skal alltid settes hvis noen blir skjermet
+            Assertions.assertEquals(Enheter.AALESUND.enhetNr, saketterSkjerming.enhet)
 
             val steinkjer = ArbeidsFordelingEnhet("NAV Familie- og pensjonsytelser Steinkjer", "4817")
             coEvery { norg2Klient.hentEnheterForOmraade(any(), any()) } returns listOf(steinkjer)

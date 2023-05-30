@@ -1,5 +1,6 @@
 package no.nav.etterlatte.egenansatt
 
+import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.libs.common.person.maskerFnr
 import no.nav.etterlatte.libs.common.skjermet.EgenAnsattSkjermet
@@ -22,11 +23,15 @@ class EgenAnsattService(private val sakService: SakService, val sikkerLogg: Logg
         val sakerMedNyEnhet = saker.map {
             GrunnlagsendringshendelseService.SakMedEnhet(
                 it.id,
-                sakService.finnEnhetForPersonOgTema(
-                    skjermetHendelse.fnr,
-                    it.sakType.tema,
-                    it.sakType
-                ).enhetNr
+                if (skjermetHendelse.skjermet) {
+                    Enheter.AALESUND.enhetNr
+                } else {
+                    sakService.finnEnhetForPersonOgTema(
+                        skjermetHendelse.fnr,
+                        it.sakType.tema,
+                        it.sakType
+                    ).enhetNr
+                }
             )
         }
         sakService.oppdaterEnhetForSaker(sakerMedNyEnhet)

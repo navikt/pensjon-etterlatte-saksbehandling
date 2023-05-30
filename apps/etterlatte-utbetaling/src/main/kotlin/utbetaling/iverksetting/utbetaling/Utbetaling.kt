@@ -1,6 +1,5 @@
 package no.nav.etterlatte.utbetaling.iverksetting.utbetaling
 
-import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.utbetaling.common.UUID30
 import no.trygdeetaten.skjema.oppdrag.Oppdrag
@@ -93,8 +92,7 @@ enum class Kjoereplan(private val oppdragVerdi: String) {
 }
 
 enum class OppdragKlassifikasjonskode(private val oppdragVerdi: String) {
-    BARNEPENSJON_OPTP("BARNEPENSJON-OPTP"),
-    OMSTILLINGSTOENAD_OPTP("OMSTILLINGOR");
+    BARNEPENSJON_OPTP("BARNEPENSJON-OPTP");
 
     override fun toString(): String {
         return oppdragVerdi
@@ -103,7 +101,7 @@ enum class OppdragKlassifikasjonskode(private val oppdragVerdi: String) {
     companion object {
         fun fraString(string: String): OppdragKlassifikasjonskode = when (string) {
             "BARNEPENSJON-OPTP" -> BARNEPENSJON_OPTP
-            "OMSTILLINGOR" -> OMSTILLINGSTOENAD_OPTP
+            "BARNEPENSJON_OPTP" -> BARNEPENSJON_OPTP
             else -> throw IllegalArgumentException("$string er ikke en OppgragKlassifikasjonskode!")
         }
     }

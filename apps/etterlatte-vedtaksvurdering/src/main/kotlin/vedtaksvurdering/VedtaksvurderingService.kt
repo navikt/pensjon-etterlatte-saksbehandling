@@ -25,6 +25,7 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.token.Bruker
+import no.nav.etterlatte.token.SystemBruker
 import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlient
 import no.nav.etterlatte.vedtaksvurdering.klienter.BeregningKlient
 import no.nav.etterlatte.vedtaksvurdering.klienter.VilkaarsvurderingKlient
@@ -123,7 +124,7 @@ class VedtaksvurderingService(
         return fattetVedtak
     }
 
-    suspend fun attesterVedtak(behandlingId: UUID, kommentar: String, skalSendeBrev: Boolean, bruker: Bruker): Vedtak {
+    suspend fun attesterVedtak(behandlingId: UUID, kommentar: String, bruker: Bruker): Vedtak {
         logger.info("Attesterer vedtak for behandling med behandlingId=$behandlingId")
         val vedtak = hentVedtakNonNull(behandlingId)
 
@@ -159,9 +160,10 @@ class VedtaksvurderingService(
                 vedtak = attestertVedtak,
                 tekniskTid = attestertVedtak.attestasjon.tidspunkt.toLocalDatetimeUTC(),
                 mapOf(
-                    SKAL_SENDE_BREV to when (behandling.revurderingsaarsak) {
-                        RevurderingAarsak.REGULERING -> false
-                        else -> skalSendeBrev
+                    SKAL_SENDE_BREV to when {
+                        behandling.revurderingsaarsak == RevurderingAarsak.REGULERING -> false
+                        bruker is SystemBruker -> false
+                        else -> true
                     },
                     REVURDERING_AARSAK to behandling.revurderingsaarsak.toString()
                 )
@@ -428,3 +430,5 @@ class BehandlingstilstandException(vedtak: Vedtak) :
 
 class UgyldigAttestantException(ident: String) :
     IllegalArgumentException("Saksbehandler og attestant må være to forskjellige personer (ident=$ident)")
+
+class SaksbehandlerManglerEnhetException(message: String) : Exception(message)

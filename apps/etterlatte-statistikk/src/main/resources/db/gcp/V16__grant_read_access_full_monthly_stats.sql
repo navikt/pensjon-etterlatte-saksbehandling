@@ -1,0 +1,1 @@
+GRANT SELECT ON maaned_stoenad TO bigquery_import;

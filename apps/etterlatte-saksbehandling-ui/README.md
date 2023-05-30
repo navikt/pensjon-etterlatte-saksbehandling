@@ -7,6 +7,8 @@ for testing.
 
 ---
 
+test
+
 ## Kjøring lokalt
 
 Avhengigheter må installeres for at prosjektet skal kjøre. Dette kan du gjøre ved å kjøre kommandoen `yarn` i enten 

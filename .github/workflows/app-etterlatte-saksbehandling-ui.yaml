@@ -48,7 +48,7 @@ jobs:
         run: CI=true yarn test
 
   build-and-publish:
-    if: github.event_name != 'pull_request'
+    if: github.event_name == 'pull_request'
     name: Build, test and publish
     runs-on: ubuntu-latest
     permissions:
@@ -87,7 +87,7 @@ jobs:
           tag: ${{ env.GITHUB_REF_SLUG }}
 
   deploy-to-dev-gcp:
-    if: github.event_name != 'pull_request'
+    if: github.event_name == 'pull_request'
     name: Deploy to dev-gcp
     needs: build-and-publish
     runs-on: ubuntu-latest

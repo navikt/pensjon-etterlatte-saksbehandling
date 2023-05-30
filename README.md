@@ -30,6 +30,11 @@ kubectl apply -f apps/etterlatte-saksbehandling-ui/.nais/azuread-etterlatte-saks
 [EnvFile](https://plugins.jetbrains.com/plugin/7861-envfile) i IntelliJ. Uten denne må du manuelt kopiere
 fra .env-filen til appen sine miljøvariabler.
 
+## Maven
+Vi bruker personal access token til autentisering for å hente intern pakker til prosjektet.
+Du må derfor sette `export GITHUB_TOKEN='DITT_TOKEN'` som miljøvariabel.
+Dette tokenet må autoriseres mot navikt.
+
 ## Apper
 
 [etterlatte-behandling](apps/etterlatte-behandling) \

@@ -63,8 +63,8 @@ class SakDao(private val connection: () -> Connection) {
         statement.executeUpdate()
     }
 
-    fun markerSakerMedSkjerming(sakIder: List<Long>, skjermet: Boolean) {
-        with(connection()) {
+    fun markerSakerMedSkjerming(sakIder: List<Long>, skjermet: Boolean): Int {
+        return with(connection()) {
             val statement = prepareStatement(
                 """
                 UPDATE sak 

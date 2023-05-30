@@ -1,7 +1,6 @@
 package no.nav.etterlatte.grunnlag
 
 import com.fasterxml.jackson.databind.JsonNode
-import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.libs.common.behandling.PersonMedSakerOgRoller
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakOgRolle
@@ -14,7 +13,6 @@ import no.nav.etterlatte.libs.common.grunnlag.hentNavn
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Navn
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.sporingslogg.Decision
@@ -22,7 +20,6 @@ import no.nav.etterlatte.libs.sporingslogg.HttpMethod
 import no.nav.etterlatte.libs.sporingslogg.Sporingslogg
 import no.nav.etterlatte.libs.sporingslogg.Sporingsrequest
 import org.slf4j.LoggerFactory
-import java.util.*
 
 interface GrunnlagService {
     fun hentGrunnlagAvType(sak: Long, opplysningstype: Opplysningstype): Grunnlagsopplysning<JsonNode>?
@@ -48,7 +45,6 @@ interface GrunnlagService {
 
 class RealGrunnlagService(
     private val opplysningDao: OpplysningDao,
-    private val behandlingKlient: BehandlingKlient,
     private val sporingslogg: Sporingslogg
 ) : GrunnlagService {
 
@@ -121,24 +117,6 @@ class RealGrunnlagService(
         in persongalleri.avdoed -> Saksrolle.AVDOED
         in persongalleri.gjenlevende -> Saksrolle.GJENLEVENDE
         else -> Saksrolle.UKJENT
-    }
-
-    private fun <T> lagOpplysning(
-        opplysningsType: Opplysningstype,
-        kilde: Grunnlagsopplysning.Kilde,
-        opplysning: T,
-        fnr: Folkeregisteridentifikator? = null,
-        periode: Periode? = null
-    ): Grunnlagsopplysning<T> {
-        return Grunnlagsopplysning(
-            id = UUID.randomUUID(),
-            kilde = kilde,
-            opplysningType = opplysningsType,
-            meta = objectMapper.createObjectNode(),
-            opplysning = opplysning,
-            fnr = fnr,
-            periode = periode
-        )
     }
 
     override fun hentGrunnlagAvType(sak: Long, opplysningstype: Opplysningstype): Grunnlagsopplysning<JsonNode>? {

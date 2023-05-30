@@ -39,7 +39,7 @@ class ApplicationBuilder {
     private val config: Config = ConfigFactory.load()
     private val opplysningDao = OpplysningDao(ds)
     private val behandlingKlient = BehandlingKlientImpl(config, httpClient())
-    private val grunnlagService = RealGrunnlagService(opplysningDao, behandlingKlient, Sporingslogg())
+    private val grunnlagService = RealGrunnlagService(opplysningDao, Sporingslogg())
 
     private val rapidsConnection = RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(env))
         .withKtorModule {

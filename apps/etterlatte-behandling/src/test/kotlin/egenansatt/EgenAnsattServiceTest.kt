@@ -1,5 +1,6 @@
 package no.nav.etterlatte.egenansatt
 
+import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.spyk
@@ -10,6 +11,7 @@ import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.domain.ArbeidsFordelingEnhet
 import no.nav.etterlatte.behandling.klienter.Norg2Klient
 import no.nav.etterlatte.common.klienter.PdlKlient
+import no.nav.etterlatte.common.klienter.SkjermingKlient
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
@@ -62,11 +64,15 @@ class EgenAnsattServiceTest {
         val norg2Klient = mockk<Norg2Klient>()
         val featureToggleService = mockk<FeatureToggleService>()
         val tilgangService = mockk<TilgangService>()
+        val skjermingKlient = mockk<SkjermingKlient>()
         val connection = dataSource.connection
         sakRepo = SakDao { connection }
-        sakService = spyk(RealSakService(sakRepo, pdlKlient, norg2Klient, featureToggleService, tilgangService))
+        sakService = spyk(
+            RealSakService(sakRepo, pdlKlient, norg2Klient, featureToggleService, tilgangService, skjermingKlient)
+        )
         egenAnsattService = EgenAnsattService(sakService, sikkerLogg)
 
+        coEvery { skjermingKlient.personErSkjermet(any()) } returns false
         every { pdlKlient.hentGeografiskTilknytning(any(), any()) } returns GeografiskTilknytning(kommune = "0301")
         every {
             norg2Klient.hentEnheterForOmraade("EYB", "0301")
@@ -94,7 +100,7 @@ class EgenAnsattServiceTest {
     }
 
     @Test
-    fun test() {
+    fun sjekkAtSettingAvSkjermingFungererEtterOpprettelseAvSak() {
         val fnr = Folkeregisteridentifikator.of("08071272487").value
         sakService.finnEllerOpprettSak(fnr, SakType.BARNEPENSJON)
         val fnr2 = Folkeregisteridentifikator.of("19078504903").value

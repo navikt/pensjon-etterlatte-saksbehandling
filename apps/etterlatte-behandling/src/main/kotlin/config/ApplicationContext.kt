@@ -24,6 +24,7 @@ import no.nav.etterlatte.behandling.omregning.MigreringService
 import no.nav.etterlatte.behandling.omregning.OmregningService
 import no.nav.etterlatte.behandling.revurdering.RealRevurderingService
 import no.nav.etterlatte.common.klienter.PdlKlientImpl
+import no.nav.etterlatte.common.klienter.SkjermingKlient
 import no.nav.etterlatte.databaseContext
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleServiceProperties
@@ -56,6 +57,13 @@ private fun pdlHttpClient(config: Config) = httpClientClientCredentials(
     azureAppJwk = config.getString("azure.app.jwk"),
     azureAppWellKnownUrl = config.getString("azure.app.well.known.url"),
     azureAppScope = config.getString("pdl.azure.scope")
+)
+
+private fun skjermingHttpClient(config: Config) = httpClientClientCredentials(
+    azureAppClientId = config.getString("azure.app.client.id"),
+    azureAppJwk = config.getString("azure.app.jwk"),
+    azureAppWellKnownUrl = config.getString("azure.app.well.known.url"),
+    azureAppScope = config.getString("skjerming.azure.scope")
 )
 
 private fun grunnlagHttpClient(config: Config) = httpClientClientCredentials(
@@ -92,6 +100,7 @@ class ApplicationContext(
         },
     val featureToggleService: FeatureToggleService = FeatureToggleService.initialiser(featureToggleProperties(config)),
     val pdlHttpClient: HttpClient = pdlHttpClient(config),
+    val skjermingHttpKlient: HttpClient = skjermingHttpClient(config),
     val grunnlagHttpClient: HttpClient = grunnlagHttpClient(config),
     val navAnsattKlient: NavAnsattKlient = NavAnsattKlientImpl(
         navAnsattHttpClient(config),
@@ -118,6 +127,7 @@ class ApplicationContext(
 
     // Klient
     val pdlKlient = PdlKlientImpl(pdlHttpClient, "http://etterlatte-pdltjenester")
+    val skjermingKlient = SkjermingKlient(skjermingHttpKlient, env.getValue("SKJERMING_URL"))
     val grunnlagKlient = GrunnlagKlientImpl(grunnlagHttpClient, "http://etterlatte-grunnlag")
     val leaderElectionKlient = LeaderElection(env.getValue("ELECTOR_PATH"), leaderElectionHttpClient)
 
@@ -170,7 +180,14 @@ class ApplicationContext(
 
     val behandlingsStatusService = BehandlingStatusServiceImpl(behandlingDao, generellBehandlingService)
     val tilgangService = TilgangServiceImpl(SakTilgangDao(dataSource), saksbehandlerGroupIdsByKey)
-    val sakService = RealSakService(sakDao, pdlKlient, norg2Klient, featureToggleService, tilgangService)
+    val sakService = RealSakService(
+        sakDao,
+        pdlKlient,
+        norg2Klient,
+        featureToggleService,
+        tilgangService,
+        skjermingKlient
+    )
     val enhetService = EnhetServiceImpl(navAnsattKlient)
     val grunnlagsendringshendelseService =
         GrunnlagsendringshendelseService(

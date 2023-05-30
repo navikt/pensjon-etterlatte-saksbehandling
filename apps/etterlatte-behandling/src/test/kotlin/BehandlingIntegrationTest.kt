@@ -88,11 +88,13 @@ abstract class BehandlingIntegrationTest {
                 put("NORG2_URL", "http://localhost")
                 put("ELECTOR_PATH", "http://localhost")
                 put("NAVANSATT_URL", "http://localhost")
+                put("SKJERMING_URL", "http://localhost")
             },
             config = ConfigFactory.parseMap(hoconApplicationConfig.toMap()),
             rapid = TestProdusent(),
             featureToggleService = DummyFeatureToggleService(),
             pdlHttpClient = pdlHttpClient(),
+            skjermingHttpKlient = skjermingHttpClient(),
             grunnlagHttpClient = grunnlagHttpClient(),
             leaderElectionHttpClient = leaderElection(),
             navAnsattKlient = NavAnsattKlientTest(),
@@ -102,6 +104,25 @@ abstract class BehandlingIntegrationTest {
         ).also {
             it.dataSource.migrate()
             it.behandlingsHendelser.start()
+        }
+    }
+
+    fun skjermingHttpClient(): HttpClient = HttpClient(MockEngine) {
+        engine {
+            addHandler { request ->
+                if (request.url.fullPath.contains("skjermet")) {
+                    val headers = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
+                    respond(false.toJson(), headers = headers)
+                } else {
+                    error(request.url.fullPath)
+                }
+            }
+        }
+        install(ContentNegotiation) {
+            register(
+                ContentType.Application.Json,
+                JacksonConverter(objectMapper)
+            )
         }
     }
 

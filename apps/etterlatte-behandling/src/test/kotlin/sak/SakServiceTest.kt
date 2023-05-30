@@ -8,7 +8,9 @@ import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.confirmVerified
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
+import io.mockk.runs
 import io.mockk.verify
 import no.nav.etterlatte.Context
 import no.nav.etterlatte.DatabaseKontekst
@@ -390,5 +392,48 @@ internal class SakServiceTest {
 
         verify(exactly = 1) { sakDao.finnSaker(TRIVIELL_MIDTPUNKT.value) }
         verify(exactly = 1) { featureToggleService.isEnabled(SakServiceFeatureToggle.FiltrerMedEnhetId, false) }
+    }
+
+    @Test
+    fun `skal sette skjerming hvis skjermingstjenesten sier at person er skjermet`() {
+        saksbehandlerKontekst()
+        every { sakDao.finnSaker(TRIVIELL_MIDTPUNKT.value) } returns emptyList()
+        every {
+            sakDao.opprettSak(TRIVIELL_MIDTPUNKT.value, SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
+        } returns Sak(
+            id = 1,
+            ident = TRIVIELL_MIDTPUNKT.value,
+            sakType = SakType.BARNEPENSJON,
+            enhet = Enheter.PORSGRUNN.enhetNr
+        )
+        coEvery { skjermingKlient.personErSkjermet(TRIVIELL_MIDTPUNKT.value) } returns true
+        every { sakDao.oppdaterEnheterPaaSaker(any()) } just runs
+        every { sakDao.markerSakerMedSkjerming(any(), any()) } returns 1
+        every {
+            pdlKlient.hentGeografiskTilknytning(TRIVIELL_MIDTPUNKT.value, SakType.BARNEPENSJON)
+        } returns GeografiskTilknytning(kommune = "0301", ukjent = false)
+        every { norg2Klient.hentEnheterForOmraade(SakType.BARNEPENSJON.tema, "0301") } returns listOf(
+            ArbeidsFordelingEnhet(Enheter.PORSGRUNN.navn, Enheter.PORSGRUNN.enhetNr)
+        )
+
+        val service: SakService =
+            RealSakService(sakDao, pdlKlient, norg2Klient, featureToggleService, tilgangService, skjermingKlient)
+        val sak = service.finnEllerOpprettSak(TRIVIELL_MIDTPUNKT.value, SakType.BARNEPENSJON)
+
+        sak shouldBe Sak(
+            ident = TRIVIELL_MIDTPUNKT.value,
+            sakType = SakType.BARNEPENSJON,
+            id = 1,
+            enhet = Enheter.PORSGRUNN.enhetNr
+        )
+
+        verify(exactly = 1) { sakDao.markerSakerMedSkjerming(any(), any()) }
+        verify(exactly = 1) { sakDao.finnSaker(TRIVIELL_MIDTPUNKT.value) }
+        verify(exactly = 1) { pdlKlient.hentGeografiskTilknytning(TRIVIELL_MIDTPUNKT.value, SakType.BARNEPENSJON) }
+        verify(exactly = 1) { norg2Klient.hentEnheterForOmraade(SakType.BARNEPENSJON.tema, "0301") }
+        verify(exactly = 1) {
+            sakDao.opprettSak(TRIVIELL_MIDTPUNKT.value, SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
+        }
+        verify(exactly = 1) { sakDao.oppdaterEnheterPaaSaker(any()) }
     }
 }

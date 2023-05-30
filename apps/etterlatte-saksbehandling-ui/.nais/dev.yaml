@@ -87,6 +87,7 @@ spec:
         - host: navikt.github.io
         - host: https://login.microsoftonline.com
         - host: graph.microsoft.com
+        - host: unleash.nais.io
       rules:
         - application: etterlatte-brev-api
         - application: etterlatte-vilkaarsvurdering

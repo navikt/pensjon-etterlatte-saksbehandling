@@ -23,6 +23,12 @@ function hentApiConfigFraEnv() {
   }
 }
 
+export const FeatureToggleConfig = {
+  uri: process.env.UNLEASH_URL || 'https://unleash.nais.io/api/',
+  cluster: process.env.NAIS_CLUSTER_NAME || 'dev-gcp',
+  applicationName: process.env.NAIS_APP_NAME || 'etterlatte-saksbehandling-ui',
+}
+
 const LOKAL_API_CONFIG = () => {
   return {
     vilkaarsvurdering: {

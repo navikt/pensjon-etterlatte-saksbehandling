@@ -5,6 +5,16 @@ env:
   JOB_NAME: ${{ github.workflow }}
 
 on:
+  workflow_dispatch: # Allow manually triggered workflow run
+    inputs:
+      deploy-prod:
+        description: 'Deploy til produksjon'
+        required: false
+        default: 'false'
+        type: choice
+        options:
+          - true
+          - false
   push:
     branches:
       - main

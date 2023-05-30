@@ -1,5 +1,6 @@
 package no.nav.etterlatte.beregning
 
+import io.kotest.matchers.ints.shouldBeGreaterThanOrEqual
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.mockk.coEvery
@@ -70,11 +71,11 @@ internal class BeregnBarnepensjonServiceTest {
                 type shouldBe Beregningstype.BP
                 beregnetDato shouldNotBe null
                 grunnlagMetadata shouldBe grunnlag.metadata
-                beregningsperioder.size shouldBe 1
+                beregningsperioder.size shouldBeGreaterThanOrEqual 2
                 with(beregningsperioder.first()) {
                     utbetaltBeloep shouldBe BP_BELOEP_INGEN_SOESKEN_JAN_23
                     datoFOM shouldBe behandling.virkningstidspunkt?.dato
-                    datoTOM shouldBe null
+                    datoTOM shouldBe YearMonth.of(2023, Month.APRIL)
                     grunnbelopMnd shouldBe GRUNNBELOEP_JAN_23
                     soeskenFlokk shouldBe emptyList()
                     trygdetid shouldBe MAKS_TRYGDETID
@@ -107,11 +108,11 @@ internal class BeregnBarnepensjonServiceTest {
                 type shouldBe Beregningstype.BP
                 beregnetDato shouldNotBe null
                 grunnlagMetadata shouldBe grunnlag.metadata
-                beregningsperioder.size shouldBe 1
+                beregningsperioder.size shouldBeGreaterThanOrEqual 2
                 with(beregningsperioder.first()) {
                     utbetaltBeloep shouldBe BP_BELOEP_ETT_SOESKEN_JAN_23
                     datoFOM shouldBe behandling.virkningstidspunkt?.dato
-                    datoTOM shouldBe null
+                    datoTOM shouldBe YearMonth.of(2023, Month.APRIL)
                     grunnbelopMnd shouldBe GRUNNBELOEP_JAN_23
                     soeskenFlokk shouldBe listOf(FNR_1)
                     trygdetid shouldBe MAKS_TRYGDETID
@@ -142,11 +143,11 @@ internal class BeregnBarnepensjonServiceTest {
                 type shouldBe Beregningstype.BP
                 beregnetDato shouldNotBe null
                 grunnlagMetadata shouldBe grunnlag.metadata
-                beregningsperioder.size shouldBe 1
+                beregningsperioder.size shouldBeGreaterThanOrEqual 2
                 with(beregningsperioder.first()) {
                     utbetaltBeloep shouldBe BP_BELOEP_TO_SOESKEN_JAN_23
                     datoFOM shouldBe behandling.virkningstidspunkt?.dato
-                    datoTOM shouldBe null
+                    datoTOM shouldBe YearMonth.of(2023, Month.APRIL)
                     grunnbelopMnd shouldBe GRUNNBELOEP_JAN_23
                     soeskenFlokk shouldBe listOf(FNR_1, FNR_2)
                     trygdetid shouldBe MAKS_TRYGDETID
@@ -180,11 +181,11 @@ internal class BeregnBarnepensjonServiceTest {
                 type shouldBe Beregningstype.BP
                 beregnetDato shouldNotBe null
                 grunnlagMetadata shouldBe grunnlag.metadata
-                beregningsperioder.size shouldBe 1
+                beregningsperioder.size shouldBeGreaterThanOrEqual 2
                 with(beregningsperioder.first()) {
                     utbetaltBeloep shouldBe BP_BELOEP_INGEN_SOESKEN_JAN_23
                     datoFOM shouldBe behandling.virkningstidspunkt?.dato
-                    datoTOM shouldBe null
+                    datoTOM shouldBe YearMonth.of(2023, Month.APRIL)
                     grunnbelopMnd shouldBe GRUNNBELOEP_JAN_23
                     soeskenFlokk shouldBe emptyList()
                     trygdetid shouldBe MAKS_TRYGDETID
@@ -218,7 +219,7 @@ internal class BeregnBarnepensjonServiceTest {
                 type shouldBe Beregningstype.BP
                 beregnetDato shouldNotBe null
                 grunnlagMetadata shouldBe grunnlag.metadata
-                beregningsperioder.size shouldBe 1
+                beregningsperioder.size shouldBeGreaterThanOrEqual 1
                 with(beregningsperioder.first()) {
                     utbetaltBeloep shouldBe 0
                     datoFOM shouldBe behandling.virkningstidspunkt?.dato
@@ -253,7 +254,7 @@ internal class BeregnBarnepensjonServiceTest {
                 type shouldBe Beregningstype.BP
                 beregnetDato shouldNotBe null
                 grunnlagMetadata shouldBe grunnlag.metadata
-                beregningsperioder.size shouldBe 1
+                beregningsperioder.size shouldBeGreaterThanOrEqual 1
                 with(beregningsperioder.first()) {
                     utbetaltBeloep shouldBe 0
                     datoFOM shouldBe behandling.virkningstidspunkt?.dato

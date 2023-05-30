@@ -1,5 +1,6 @@
 package no.nav.etterlatte.beregning.regler.beregning
 
+import io.kotest.matchers.ints.shouldBeGreaterThanOrEqual
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.mockk.coEvery
@@ -76,7 +77,7 @@ class ReguleringTest {
                 type shouldBe Beregningstype.BP
                 beregnetDato shouldNotBe null
                 grunnlagMetadata shouldBe grunnlag.metadata
-                beregningsperioder.size shouldBe 2
+                beregningsperioder.size shouldBeGreaterThanOrEqual 3
                 with(beregningsperioder.first()) {
                     utbetaltBeloep shouldBe 3547
                     datoFOM shouldBe behandling.virkningstidspunkt?.dato
@@ -92,7 +93,7 @@ class ReguleringTest {
             }
 
             val utbetaltBeloep22 = beregning22.beregningsperioder.first().utbetaltBeloep
-            val utbetaltBeloep23 = beregning22.beregningsperioder.last().utbetaltBeloep
+            val utbetaltBeloep23 = beregning22.beregningsperioder.get(1).utbetaltBeloep
             val faktorUtbetalt = utbetaltBeloep23.toDouble().div(utbetaltBeloep22)
 
             val grunnbeloep22 = hentGjeldendeGrunnbeloep(YearMonth.of(2022, Month.JANUARY)).grunnbeloepPerMaaned

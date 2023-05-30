@@ -29,7 +29,7 @@ internal class BarnepensjonSatsTest {
 
     @Test
     fun `historiskeGrunnbeloep skal hente alle historiske grunnbeloep`() {
-        historiskeGrunnbeloep.size shouldBeExactly 69
+        historiskeGrunnbeloep.size shouldBeExactly 70
     }
 
     @Test

@@ -89,6 +89,7 @@ abstract class BehandlingIntegrationTest {
                 put("NORG2_URL", "http://localhost")
                 put("ELECTOR_PATH", "http://localhost")
                 put("NAVANSATT_URL", "http://localhost")
+                put("SKJERMING_URL", "http://localhost")
             },
             config = ConfigFactory.parseMap(hoconApplicationConfig.toMap()),
             rapid = TestProdusent(),

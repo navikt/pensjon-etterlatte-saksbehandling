@@ -279,6 +279,8 @@ internal class SakServiceTest {
             sakType = SakType.BARNEPENSJON,
             enhet = Enheter.PORSGRUNN.enhetNr
         )
+        coEvery { skjermingKlient.personErSkjermet(TRIVIELL_MIDTPUNKT.value) } returns false
+        every { sakDao.markerSakerMedSkjerming(any(), any()) } returns 0
         every {
             pdlKlient.hentGeografiskTilknytning(TRIVIELL_MIDTPUNKT.value, SakType.BARNEPENSJON)
         } returns GeografiskTilknytning(kommune = "0301", ukjent = false)
@@ -298,6 +300,7 @@ internal class SakServiceTest {
             enhet = Enheter.PORSGRUNN.enhetNr
         )
 
+        verify(exactly = 1) { sakDao.markerSakerMedSkjerming(any(), any()) }
         verify(exactly = 1) { sakDao.finnSaker(TRIVIELL_MIDTPUNKT.value) }
         verify(exactly = 1) { pdlKlient.hentGeografiskTilknytning(TRIVIELL_MIDTPUNKT.value, SakType.BARNEPENSJON) }
         verify(exactly = 1) { norg2Klient.hentEnheterForOmraade(SakType.BARNEPENSJON.tema, "0301") }
@@ -310,6 +313,8 @@ internal class SakServiceTest {
     fun `finnEllerOpprettSak lagre enhet og setter gradering`() {
         systemBrukerKontekst()
         every { sakDao.finnSaker(TRIVIELL_MIDTPUNKT.value) } returns emptyList()
+        coEvery { skjermingKlient.personErSkjermet(TRIVIELL_MIDTPUNKT.value) } returns false
+        every { sakDao.markerSakerMedSkjerming(any(), any()) } returns 0
         every {
             sakDao.opprettSak(TRIVIELL_MIDTPUNKT.value, SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
         } returns Sak(
@@ -348,6 +353,7 @@ internal class SakServiceTest {
                 AdressebeskyttelseGradering.STRENGT_FORTROLIG
             )
         }
+        verify(exactly = 1) { sakDao.markerSakerMedSkjerming(any(), any()) }
         verify(exactly = 1) { sakDao.finnSaker(TRIVIELL_MIDTPUNKT.value) }
         verify(exactly = 1) { pdlKlient.hentGeografiskTilknytning(TRIVIELL_MIDTPUNKT.value, SakType.BARNEPENSJON) }
         verify(exactly = 1) { norg2Klient.hentEnheterForOmraade(SakType.BARNEPENSJON.tema, "0301") }

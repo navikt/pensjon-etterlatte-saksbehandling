@@ -81,8 +81,8 @@ jobs:
           team: etterlatte
           identity_provider: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}
           project_id: ${{ vars.NAIS_MANAGEMENT_PROJECT_ID }}
-          dockerfile: docker/Dockerfile
-          docker_context: apps/${{ github.workflow }}/
+          dockerfile: apps/${{ env.APP_NAME }}/Dockerfile
+          docker_context: apps/${{ env.APP_NAME }}/
           image_suffix: ${{ github.workflow }}
           tag: ${{ env.GITHUB_REF_SLUG }}
 
@@ -98,12 +98,13 @@ jobs:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: dev-gcp
           RESOURCE: apps/${{ env.APP_NAME }}/.nais/dev.yaml
+          VAR: image=${{ needs.build-and-publish.outputs.image }}
 
 
   deploy-to-prod-gcp:
     name: Deploy to prod-gcp
     if: ${{ github.ref == 'refs/heads/main' || github.event.inputs.deploy-prod == 'true' }}
-    needs: deploy-to-dev-gcp
+    needs: [build-and-publish,deploy-to-dev-gcp]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -112,3 +113,4 @@ jobs:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: prod-gcp
           RESOURCE: apps/${{ env.APP_NAME }}/.nais/prod.yaml
+          VAR: image=${{ needs.build-and-publish.outputs.image }}

@@ -4,6 +4,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.toNorskTid
 import no.nav.etterlatte.utbetaling.common.OppdragDefaults
 import no.nav.etterlatte.utbetaling.common.OppdragslinjeDefaults
 import no.nav.etterlatte.utbetaling.common.toXMLDate
+import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.OppdragKlassifikasjonskode
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Saktype
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetaling
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetalingslinjetype
@@ -63,9 +64,7 @@ object OppdragMapper {
 
                         vedtakId = utbetaling.vedtakId.value.toString()
                         delytelseId = it.id.value.toString()
-                        // TODO: dobbeltsjekk dennne også med omstillingsstønad når vi
-                        //  går igjennom kodeFagomraade "BARNEPE"
-                        kodeKlassifik = OppdragDefaults.KODEKOMPONENT.toString()
+                        kodeKlassifik = if(utbetaling.sakType == Saktype.BARNEPENSJON) OppdragKlassifikasjonskode.BARNEPENSJON_OPTP.toString() else OppdragKlassifikasjonskode.OMSTILLINGSTOENAD_OPTP.toString()
                         datoVedtakFom = it.periode.fra.toXMLDate()
                         datoVedtakTom = it.periode.til?.toXMLDate()
                         sats = it.beloep

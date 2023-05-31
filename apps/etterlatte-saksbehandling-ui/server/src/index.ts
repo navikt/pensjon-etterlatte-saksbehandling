@@ -20,7 +20,6 @@ const app = express()
 app.set('trust proxy', 1)
 app.use('/', express.static(clientPath))
 app.use(requestLogger(isDev))
-app.use(express.json())
 
 app.use(['/health/isAlive', '/health/isReady'], (req: Request, res: Response) => {
   res.send('OK')
@@ -32,7 +31,7 @@ if (isDev) {
 } else {
   app.use('/api/logg', loggerRouter)
 
-  app.post('/api/feature', (req: Request, res: Response) => {
+  app.post('/api/feature', express.json(), (req: Request, res: Response) => {
     const toggles: string[] = req.body.features
 
     res.json(

@@ -3,7 +3,6 @@ import { Behandlingsliste } from './behandlingsliste'
 import styled from 'styled-components'
 import { Grunnlagsendringshendelse, GrunnlagsendringsListe, IBehandlingListe, IBehandlingsammendrag } from './typer'
 import { ManueltOpphoerModal } from './ManueltOpphoerModal'
-import { ToKolonner } from '../toKolonner/ToKolonner'
 import {
   hentBehandlingerForPerson,
   hentGrunnlagsendringshendelserForPerson,
@@ -120,38 +119,29 @@ export const Saksoversikt = ({ fnr }: { fnr: string | undefined }) => {
       <Spinner visible={!lastetBehandlingliste || !lastetGrunnlagshendelser} label={'Laster'} />
       {lastetBehandlingliste && lastetGrunnlagshendelser && (
         <SaksoversiktWrapper>
-          <ToKolonner>
-            {{
-              left: (
-                <>
-                  {sakId !== undefined ? (
-                    <EkstraHandlinger>
-                      {kanOppretteManueltOpphoer && (
-                        <ManueltOpphoerModal sakId={sakId} iverksatteBehandlinger={iverksatteBehandlinger} />
-                      )}
-                    </EkstraHandlinger>
-                  ) : null}
-                  {isFailure(hentStoettedeRevurderingerStatus) && (
-                    <ApiErrorAlert>En feil skjedde under kallet for å hente støttede revurderinger</ApiErrorAlert>
-                  )}
-                  {sakId !== undefined && revurderinger ? (
-                    <RelevanteHendelser
-                      hendelser={hendelser}
-                      revurderinger={revurderinger}
-                      disabled={harAapenRevurdering}
-                      grunnlag={personerISak}
-                      sakId={sakId}
-                    />
-                  ) : null}
-                  <div className="behandlinger">
-                    <h2>Behandlinger</h2>
-                    {behandlingliste !== undefined && <Behandlingsliste behandlinger={behandlingliste} />}
-                  </div>
-                </>
-              ),
-              right: null,
-            }}
-          </ToKolonner>
+          {sakId !== undefined ? (
+            <EkstraHandlinger>
+              {kanOppretteManueltOpphoer && (
+                <ManueltOpphoerModal sakId={sakId} iverksatteBehandlinger={iverksatteBehandlinger} />
+              )}
+            </EkstraHandlinger>
+          ) : null}
+          {isFailure(hentStoettedeRevurderingerStatus) && (
+            <ApiErrorAlert>En feil skjedde under kallet for å hente støttede revurderinger</ApiErrorAlert>
+          )}
+          {sakId !== undefined && revurderinger ? (
+            <RelevanteHendelser
+              hendelser={hendelser}
+              revurderinger={revurderinger}
+              disabled={harAapenRevurdering}
+              grunnlag={personerISak}
+              sakId={sakId}
+            />
+          ) : null}
+          <div className="behandlinger">
+            <h2>Behandlinger</h2>
+            {behandlingliste !== undefined && <Behandlingsliste behandlinger={behandlingliste} />}
+          </div>
         </SaksoversiktWrapper>
       )}
     </>

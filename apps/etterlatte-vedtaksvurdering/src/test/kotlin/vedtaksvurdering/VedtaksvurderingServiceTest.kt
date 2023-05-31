@@ -34,6 +34,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.vedtak.KafkaHendelseType
 import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
+import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.libs.database.DataSourceBuilder
@@ -47,6 +48,7 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
@@ -183,6 +185,84 @@ internal class VedtaksvurderingServiceTest {
 
             assertThrows<VedtakTilstandException> {
                 service.opprettEllerOppdaterVedtak(behandlingId, saksbehandler)
+            }
+        }
+    }
+
+    @Test
+    fun `kan ikke attestere et vedtak om revurdering dødsfall som ikke er opphørsvedtak`() {
+        val behandlingId = randomUUID()
+        val virkningstidspunkt = YearMonth.of(2022, 8)
+        coEvery { behandlingKlientMock.hentSak(any(), any()) } returns Sak(
+            SAKSBEHANDLER_1,
+            SakType.BARNEPENSJON,
+            1L,
+            ENHET_2
+        )
+        coEvery { behandlingKlientMock.fattVedtak(any(), any(), any()) } returns true
+        coEvery { behandlingKlientMock.attester(any(), any(), any()) } returns true
+        coEvery { behandlingKlientMock.hentBehandling(any(), any()) } returns mockBehandling(
+            virkningstidspunkt,
+            behandlingId,
+            revurderingAarsak = RevurderingAarsak.DOEDSFALL
+        )
+        coEvery { vilkaarsvurderingKlientMock.hentVilkaarsvurdering(any(), any()) } returns mockVilkaarsvurdering()
+        coEvery { beregningKlientMock.hentBeregningOgAvkorting(any(), any(), any()) } returns BeregningOgAvkorting(
+            beregning = mockBeregning(virkningstidspunkt, behandlingId),
+            avkorting = mockAvkorting()
+        )
+        runBlocking {
+            repository.opprettVedtak(opprettVedtak(behandlingId = behandlingId, type = VedtakType.INNVILGELSE))
+            repository.fattVedtak(
+                behandlingId = behandlingId,
+                vedtakFattet = VedtakFattet(
+                    ansvarligSaksbehandler = saksbehandler.ident,
+                    ansvarligEnhet = "",
+                    tidspunkt = Tidspunkt.now()
+                )
+            )
+
+            assertThrows<OpphoersrevurderingErIkkeOpphoersvedtakException> {
+                service.attesterVedtak(behandlingId, "", attestant)
+            }
+        }
+    }
+
+    @Test
+    fun `kan attestere opphørsvedtak på revurderinger av dødsfall`() {
+        val behandlingId = randomUUID()
+        val virkningstidspunkt = YearMonth.of(2022, 8)
+        coEvery { behandlingKlientMock.hentSak(any(), any()) } returns Sak(
+            SAKSBEHANDLER_1,
+            SakType.BARNEPENSJON,
+            1L,
+            ENHET_2
+        )
+        coEvery { behandlingKlientMock.fattVedtak(any(), any(), any()) } returns true
+        coEvery { behandlingKlientMock.attester(any(), any(), any()) } returns true
+        coEvery { behandlingKlientMock.hentBehandling(any(), any()) } returns mockBehandling(
+            virkningstidspunkt,
+            behandlingId,
+            revurderingAarsak = RevurderingAarsak.DOEDSFALL
+        )
+        coEvery { vilkaarsvurderingKlientMock.hentVilkaarsvurdering(any(), any()) } returns mockVilkaarsvurdering()
+        coEvery { beregningKlientMock.hentBeregningOgAvkorting(any(), any(), any()) } returns BeregningOgAvkorting(
+            beregning = mockBeregning(virkningstidspunkt, behandlingId),
+            avkorting = mockAvkorting()
+        )
+        runBlocking {
+            repository.opprettVedtak(opprettVedtak(behandlingId = behandlingId, type = VedtakType.OPPHOER))
+            repository.fattVedtak(
+                behandlingId = behandlingId,
+                vedtakFattet = VedtakFattet(
+                    ansvarligSaksbehandler = saksbehandler.ident,
+                    ansvarligEnhet = "",
+                    tidspunkt = Tidspunkt.now()
+                )
+            )
+
+            assertDoesNotThrow {
+                service.attesterVedtak(behandlingId, "", attestant)
             }
         }
     }
@@ -815,14 +895,19 @@ internal class VedtaksvurderingServiceTest {
     private fun mockBehandling(
         virk: YearMonth,
         behandlingId: UUID,
-        saktype: SakType = SakType.BARNEPENSJON
+        saktype: SakType = SakType.BARNEPENSJON,
+        revurderingAarsak: RevurderingAarsak? = null
     ): DetaljertBehandling = mockk {
         every { id } returns behandlingId
         every { soeker } returns FNR_1
         every { sak } returns 1L
         every { sakType } returns saktype
-        every { behandlingType } returns BehandlingType.FØRSTEGANGSBEHANDLING
-        every { revurderingsaarsak } returns null
+        every { behandlingType } returns if (revurderingAarsak == null) {
+            BehandlingType.FØRSTEGANGSBEHANDLING
+        } else {
+            BehandlingType.REVURDERING
+        }
+        every { revurderingsaarsak } returns revurderingAarsak
         every { virkningstidspunkt } returns Virkningstidspunkt(
             virk,
             Grunnlagsopplysning.Saksbehandler(SAKSBEHANDLER_1, Tidspunkt.now()),

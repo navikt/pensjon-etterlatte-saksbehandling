@@ -15,7 +15,7 @@ export const tekstRevurderingsaarsak: Record<Revurderingsaarsak, string> = {
   SOESKENJUSTERING: 'Søskenjustering',
   UTLAND: 'Utland',
   BARN: 'Barn',
-  DOEDSFALL: 'Dødsfall',
+  DOEDSFALL: 'Dødsfall søker',
   VERGEMAAL_ELLER_FREMTIDSFULLMAKT: 'Verge / fullmakt',
 } as const
 

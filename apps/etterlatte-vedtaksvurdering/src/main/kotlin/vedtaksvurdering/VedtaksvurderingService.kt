@@ -133,6 +133,7 @@ class VedtaksvurderingService(
         verifiserGyldigAttestant(vedtak.vedtakFattet!!.ansvarligSaksbehandler, bruker)
 
         val (behandling, _, _, sak) = hentDataForVedtak(behandlingId, bruker)
+        verifiserGyldigVedtakForRevurdering(behandling, vedtak)
 
         val attestertVedtak = repository.attesterVedtak(
             behandlingId,
@@ -162,6 +163,7 @@ class VedtaksvurderingService(
                 mapOf(
                     SKAL_SENDE_BREV to when {
                         behandling.revurderingsaarsak == RevurderingAarsak.REGULERING -> false
+                        behandling.revurderingsaarsak == RevurderingAarsak.DOEDSFALL -> false
                         bruker is SystemBruker -> false
                         else -> true
                     },
@@ -244,6 +246,12 @@ class VedtaksvurderingService(
     private fun verifiserGyldigAttestant(ansvarligSaksbehandler: String, innloggetBruker: Bruker) {
         if (!innloggetBruker.kanAttestereFor(ansvarligSaksbehandler)) {
             throw UgyldigAttestantException(innloggetBruker.ident())
+        }
+    }
+
+    private fun verifiserGyldigVedtakForRevurdering(behandling: DetaljertBehandling, vedtak: Vedtak) {
+        if (behandling.revurderingsaarsak == RevurderingAarsak.DOEDSFALL && vedtak.type != VedtakType.OPPHOER) {
+            throw OpphoersrevurderingErIkkeOpphoersvedtakException(vedtak, behandling.revurderingsaarsak!!)
         }
     }
 
@@ -428,7 +436,11 @@ class VedtakTilstandException(gjeldendeStatus: VedtakStatus, forventetStatus: Li
 class BehandlingstilstandException(vedtak: Vedtak) :
     IllegalStateException("Statussjekk for behandling ${vedtak.behandlingId} feilet")
 
+class OpphoersrevurderingErIkkeOpphoersvedtakException(vedtak: Vedtak, revurderingAarsak: RevurderingAarsak) :
+    IllegalStateException(
+        "Vedtaket er av type ${vedtak.type}, men dette er " +
+            "ikke gyldig for revurderingen med årsak $revurderingAarsak"
+    )
+
 class UgyldigAttestantException(ident: String) :
     IllegalArgumentException("Saksbehandler og attestant må være to forskjellige personer (ident=$ident)")
-
-class SaksbehandlerManglerEnhetException(message: String) : Exception(message)

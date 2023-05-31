@@ -75,10 +75,9 @@ export const behandlingSkalSendeBrev = (behandling: IBehandlingReducer): boolean
     case IBehandlingsType.MANUELT_OPPHOER:
       return false
     case IBehandlingsType.REVURDERING:
-      if (behandling.revurderingsaarsak === Revurderingsaarsak.REGULERING) {
-        return false
-      }
-
-      return true
+      return !(
+        behandling.revurderingsaarsak === Revurderingsaarsak.REGULERING ||
+        behandling.revurderingsaarsak === Revurderingsaarsak.DOEDSFALL
+      )
   }
 }

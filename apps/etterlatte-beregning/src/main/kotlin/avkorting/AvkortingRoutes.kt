@@ -19,6 +19,7 @@ import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagKildeDto
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.uuid
 import no.nav.etterlatte.libs.common.withBehandlingId
 import no.nav.etterlatte.libs.ktor.bruker
 import no.nav.etterlatte.token.Bruker
@@ -30,7 +31,7 @@ fun Route.avkorting(avkortingService: AvkortingService, behandlingKlient: Behand
         get {
             withBehandlingId(behandlingKlient) {
                 logger.info("Henter avkorting med behandlingId=$it")
-                val avkorting = avkortingService.hentAvkorting(it)
+                val avkorting = avkortingService.hentAvkorting(it, bruker)
                 when (avkorting) {
                     null -> call.response.status(HttpStatusCode.NotFound)
                     else -> call.respond(avkorting.toDto())
@@ -43,6 +44,15 @@ fun Route.avkorting(avkortingService: AvkortingService, behandlingKlient: Behand
                 logger.info("Lagre avkorting for behandlingId=$it")
                 val avkortingGrunnlag = call.receive<AvkortingGrunnlagDto>()
                 val avkorting = avkortingService.lagreAvkorting(it, bruker, avkortingGrunnlag.fromDto(bruker))
+                call.respond(avkorting.toDto())
+            }
+        }
+
+        post("/med/{forrigeBehandlingId}") {
+            withBehandlingId(behandlingKlient) {
+                logger.info("Regulere avkorting for behandlingId=$it")
+                val forrigeBehandlingId = call.uuid("forrigeBehandlingId")
+                val avkorting = avkortingService.kopierAvkorting(it, forrigeBehandlingId, bruker)
                 call.respond(avkorting.toDto())
             }
         }

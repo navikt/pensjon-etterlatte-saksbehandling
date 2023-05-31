@@ -10,7 +10,6 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.log
 import io.ktor.server.testing.ApplicationTestBuilder
 import io.mockk.coEvery
-import io.mockk.every
 import io.mockk.mockk
 import no.nav.etterlatte.avkorting.Avkorting
 import no.nav.etterlatte.avkorting.AvkortingService
@@ -52,7 +51,7 @@ class AvkortingRoutesTest {
 
     @Test
     fun `skal returnere 404 naar avkorting ikke finnes`() {
-        every { avkortingService.hentAvkorting(any()) } returns null
+        coEvery { avkortingService.hentAvkorting(any(), any()) } returns null
 
         testApplication(server.config.httpServer.port()) {
             val response = client.get("/api/beregning/avkorting/${UUID.randomUUID()}") {
@@ -66,7 +65,7 @@ class AvkortingRoutesTest {
 
     @Test
     fun `skal returnere avkorting med avkortingsgrunnlag og beregnet avkorting over flere perioder`() {
-        every { avkortingService.hentAvkorting(any()) } returns Avkorting(
+        coEvery { avkortingService.hentAvkorting(any(), any()) } returns Avkorting(
             behandlingId = UUID.randomUUID(),
             avkortingGrunnlag = listOf(avkortinggrunnlag(), avkortinggrunnlag()),
             avkortingsperioder = emptyList(),

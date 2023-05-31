@@ -31,6 +31,7 @@ class KodeverkService(private val klient: KodeverkKlient) {
             .mapNotNull { betydningMedIsoKode ->
                 betydningMedIsoKode.beskrivelser["nb"]?.let { beskrivelse ->
                     Land(
+                        isoLandkode = betydningMedIsoKode.isolandkode,
                         betydningMedIsoKode.gyldigFra,
                         betydningMedIsoKode.gyldigTil,
                         LandNormalisert.hentBeskrivelse(betydningMedIsoKode.isolandkode)
@@ -46,6 +47,7 @@ private enum class CacheKey {
 }
 
 data class Land(
+    val isoLandkode: String,
     val gyldigFra: String,
     val gyldigTil: String,
     val beskrivelse: Beskrivelse

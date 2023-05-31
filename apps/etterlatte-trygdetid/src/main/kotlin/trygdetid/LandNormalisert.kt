@@ -273,15 +273,13 @@ enum class LandNormalisert(val isoCode: String, val beskrivelse: String) {
     KOSOVO("XXK", "Kosovo"),
     STATSLOS("XXX", "Statløs");
 
-    init {
-        LandNormalisert.values().forEach {
-            mapAvLandkodeOgBeskrivelse[it.isoCode] = it.beskrivelse
-        }
-    }
-
     companion object {
         private val mapAvLandkodeOgBeskrivelse = HashMap<String, String>()
-
+        init {
+            LandNormalisert.values().forEach {
+                mapAvLandkodeOgBeskrivelse[it.isoCode] = it.beskrivelse
+            }
+        }
         fun hentBeskrivelse(isoCode: String): String? {
             return mapAvLandkodeOgBeskrivelse[isoCode]
         }

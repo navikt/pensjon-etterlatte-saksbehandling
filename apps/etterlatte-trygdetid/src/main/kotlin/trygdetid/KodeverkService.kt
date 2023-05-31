@@ -1,6 +1,7 @@
 package no.nav.etterlatte.trygdetid
 
 import com.github.benmanes.caffeine.cache.Caffeine
+import no.nav.etterlatte.trygdetid.klienter.Beskrivelse
 import no.nav.etterlatte.trygdetid.klienter.BetydningMedIsoKode
 import no.nav.etterlatte.trygdetid.klienter.KodeverkKlient
 import no.nav.etterlatte.trygdetid.klienter.KodeverkResponse
@@ -27,20 +28,17 @@ class KodeverkService(private val klient: KodeverkKlient) {
                     )
                 }
             }
-            .mapNotNull {
-                it.beskrivelser["nb"]?.let { beskrivelse ->
+            .mapNotNull { betydningMedIsoKode ->
+                betydningMedIsoKode.beskrivelser["nb"]?.let { beskrivelse ->
                     Land(
-                        it.gyldigFra,
-                        it.gyldigTil,
-                        LandNormalisert.hentBeskrivelse(it.isolandkode) ?: beskrivelse
+                        betydningMedIsoKode.gyldigFra,
+                        betydningMedIsoKode.gyldigTil,
+                        LandNormalisert.hentBeskrivelse(betydningMedIsoKode.isolandkode)
+                            ?.let { Beskrivelse(term = beskrivelse.term, tekst = it) } ?: beskrivelse
                     )
                 }
             }
     }
-}
-
-fun test() {
-    val s = LandNormalisert.hentBeskrivelse("it.isolandkode") ?: "beskrivelse"
 }
 
 private enum class CacheKey {
@@ -50,5 +48,5 @@ private enum class CacheKey {
 data class Land(
     val gyldigFra: String,
     val gyldigTil: String,
-    val beskrivelse: String
+    val beskrivelse: Beskrivelse
 )

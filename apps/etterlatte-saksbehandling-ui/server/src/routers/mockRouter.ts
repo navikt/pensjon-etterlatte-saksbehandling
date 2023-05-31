@@ -127,16 +127,3 @@ mockRouter.get(`/trygdetid`, (req: Request, res: Response) => {
     res.json(trygdetid)
   }, 1000)
 })
-
-mockRouter.post('/feaeture', (req: Request, res: Response) => {
-  const toggles: string[] = req.body.features
-
-  res.json(
-    toggles.map((toggle) => {
-      return {
-        toggle: toggle,
-        enabled: false,
-      }
-    })
-  )
-})

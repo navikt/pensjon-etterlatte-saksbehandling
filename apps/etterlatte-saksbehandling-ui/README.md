@@ -17,7 +17,7 @@ Prosjektet bruker [Vite](https://vitejs.dev/).
 
 Det finnes to måter å kjøre opp frontend:
 
-### Alternativ 1: Ren mock _uten_ auth og docker
+### Alternativ 1: Med lokal mock
 
 Med ren mock vil frontend bruke lokale mockfiler for å simulere backend APIer. 
 
@@ -26,7 +26,9 @@ Kjøres opp med:
 2. Frontend er nå tilgjengelig på [localhost:5173](http://localhost:5173)
 
 
-### Alternativ 2: _Med_ auth og docker
+### Alternativ 2: Med APIer i dev-gcp
+
+#### Docker host
 
 For å kjøre mot backend lokalt med docker må det være mulig å nå `host.docker.internal`, så pass på at du legger til 
 dette i `/etc/hosts`:
@@ -34,7 +36,7 @@ dette i `/etc/hosts`:
 `127.0.0.1 host.docker.internal`
 
 
-#### Variant A: Med gyldig token mot dev-gcp
+#### Uthenting av secrets
 
 For å kjøre mot dev-gcp må du først kjøre `get-secret.sh` ([../../get-secret.sh](../../get-secret.sh)). \
 Felles bruksanvisning til scriptet finner du på [prosjektets rot](../..). 
@@ -48,30 +50,31 @@ du skal benytte deg av lokalt. Resten vil automatisk gå mot dev.
 
 Når `.env.dev-gcp` er opprettet kan du kjøre opp docker (dev-gcp varianten):
 
-1. Kjør `docker-compose -f ./docker-compose.dev-gcp.yml up -d` \
+1. Kjør `docker-compose up -d` \
    Dette starter wonderwall og frackend i docker, _med_ gyldig AzureAD config.
 2. Start frontend (client):
    `yarn dev`
 3. Du når frontend *via* wonderwall på [localhost:3000](http://localhost:3000) \
    Frontend kjører nå mot autentisert frackend og har gyldig Authorization i header.
 
-**NB:** Hvis du gjør endringer i frackend kan det hende du må bygge den på nytt. Kan gjøres ved å legge til
+**OBS:** Hvis du gjør endringer i frackend kan det hende du må bygge den på nytt. Kan gjøres ved å legge til
 `--build --force-recreate` i kommandoen over.
 
 
-#### Variant B: Med mock-oauth2 mot lokal backend
+### Azuread lokal
 
-For å kjøre frackend med mock-oauth2 må du lage en fil som heter `.env`. I den filen kan du legge til lenke til 
-backend API som skal testes. Nøkler/endepunkter som ikke er spesifisert vil returnere mockdata.\
-Gyldige nøkler ser du i `config.ts`
+For å få tilgang til dev-gcp lokalt bruker vi egne secrets for frontend. Filen sikrer at det gis tilgang til appene 
+frontend kobler seg mot i dev-gcp. Filen finner du under `.nais/`
 
-1. Kjør `docker-compose up -d` \
-   Dette starter wonderwall, mock-oauth2-server, og frackend i docker.
-2. Start frontend (client):
-   `yarn dev`
-3. Du når frontend *via* wonderwall på [localhost:3000](http://localhost:3000) \
-   Frontend kjører nå mot autentisert frackend og har gyldig Authorization i header.
+Dersom filen endres kan denne kommandoen kjøres (OBS: Dette medfører at alle må hente secrets på nytt). 
 
+```
+kubectl apply -f .nais/azuread-etterlatte-saksbehandling-ui-lokal.yaml
+```
+
+Det er kun frontend som trenger denne filen. Ved kjøring av backend-apper er det bedre å kjøre frontend mot lokal
+backend og kjøre opp den lokale backenden med secrets fra dev-gcp. Bare kjør `get-secret.sh` for ønsket backend-app,
+så vil det genereres secrets for den appen.
 
 ---
 

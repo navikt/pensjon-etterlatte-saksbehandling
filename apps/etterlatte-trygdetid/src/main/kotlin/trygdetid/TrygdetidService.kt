@@ -52,14 +52,14 @@ class TrygdetidService(
             val trygdetidMedOppdatertTrygdetidGrunnlag =
                 gjeldendeTrygdetid.leggTilEllerOppdaterTrygdetidGrunnlag(trygdetidGrunnlagBeregnet)
 
-            val trygdetidBeregnet =
-                trygdetidMedOppdatertTrygdetidGrunnlag.oppdaterBeregnetTrygdetid(
-                    beregnTrygdetidService.beregnTrygdetid(
-                        trygdetidMedOppdatertTrygdetidGrunnlag.trygdetidGrunnlag
-                    )
-                )
+            val beregnetTrygdetid = beregnTrygdetidService.beregnTrygdetid(
+                trygdetidMedOppdatertTrygdetidGrunnlag.trygdetidGrunnlag
+            )
 
-            trygdetidRepository.oppdaterTrygdetid(trygdetidBeregnet).also {
+            val oppdatertTrygdetid =
+                trygdetidMedOppdatertTrygdetidGrunnlag.oppdaterBeregnetTrygdetid(beregnetTrygdetid)
+
+            trygdetidRepository.oppdaterTrygdetid(oppdatertTrygdetid).also {
                 behandlingKlient.settBehandlingStatusVilkaarsvurdert(behandlingId, bruker)
             }
         }

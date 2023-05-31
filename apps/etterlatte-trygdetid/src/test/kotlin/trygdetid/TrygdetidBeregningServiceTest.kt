@@ -20,10 +20,12 @@ class TrygdetidBeregningServiceTest {
         )
 
         val beregnetTrygdetid = TrygdetidBeregningService.beregnTrygdetid(trygdetidGrunnlag)
-
-        beregnetTrygdetid.regelResultat shouldNotBe null
-        beregnetTrygdetid.tidspunkt shouldNotBe null
-        beregnetTrygdetid.verdi shouldBe 22
+        beregnetTrygdetid shouldNotBe null
+        with(beregnetTrygdetid!!) {
+            regelResultat shouldNotBe null
+            tidspunkt shouldNotBe null
+            verdi shouldBe 22
+        }
     }
 
     @Test
@@ -35,7 +37,7 @@ class TrygdetidBeregningServiceTest {
 
         val beregnetTrygdetid = TrygdetidBeregningService.beregnTrygdetid(trygdetidGrunnlag)
 
-        beregnetTrygdetid.verdi shouldBe 40
+        beregnetTrygdetid!!.verdi shouldBe 40
     }
 
     @Test
@@ -46,7 +48,7 @@ class TrygdetidBeregningServiceTest {
 
         val beregnetTrygdetid = TrygdetidBeregningService.beregnTrygdetid(trygdetidGrunnlag)
 
-        beregnetTrygdetid.verdi shouldBe 0
+        beregnetTrygdetid!!.verdi shouldBe 0
     }
 
     @Test
@@ -57,9 +59,12 @@ class TrygdetidBeregningServiceTest {
 
         val beregnetTrygdetid = TrygdetidBeregningService.beregnTrygdetidGrunnlag(trygdetidGrunnlag)
 
-        beregnetTrygdetid.regelResultat shouldNotBe null
-        beregnetTrygdetid.tidspunkt shouldNotBe null
-        beregnetTrygdetid.verdi shouldBe Period.of(3, 1, 3)
+        beregnetTrygdetid shouldNotBe null
+        with(beregnetTrygdetid!!) {
+            regelResultat shouldNotBe null
+            tidspunkt shouldNotBe null
+            verdi shouldBe Period.of(3, 1, 3)
+        }
     }
 
     @Test
@@ -70,9 +75,12 @@ class TrygdetidBeregningServiceTest {
 
         val beregnetTrygdetid = TrygdetidBeregningService.beregnTrygdetidGrunnlag(trygdetidGrunnlag)
 
-        beregnetTrygdetid.regelResultat shouldNotBe null
-        beregnetTrygdetid.tidspunkt shouldNotBe null
-        beregnetTrygdetid.verdi shouldBe Period.ofDays(1)
+        beregnetTrygdetid shouldNotBe null
+        with(beregnetTrygdetid!!) {
+            regelResultat shouldNotBe null
+            tidspunkt shouldNotBe null
+            verdi shouldBe Period.ofDays(1)
+        }
     }
 
     @Test

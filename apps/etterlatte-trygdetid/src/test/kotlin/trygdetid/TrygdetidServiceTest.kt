@@ -203,11 +203,48 @@ internal class TrygdetidServiceTest {
     }
 
     @Test
+    fun `Perioder utenfor Norge skal ikke gi trygdetid`() {
+        val behandlingId = randomUUID()
+        val trygdetidGrunnlag = trygdetidGrunnlag()
+        val eksisterendeTrygdetid = trygdetid(behandlingId)
+
+        coEvery { behandlingKlient.settBehandlingStatusVilkaarsvurdert(any(), any()) } returns true
+        every { repository.hentTrygdetid(behandlingId) } returns eksisterendeTrygdetid
+        every { repository.oppdaterTrygdetid(any()) } answers { firstArg() }
+
+        val trygdetid = runBlocking {
+            service.lagreTrygdetidGrunnlag(
+                behandlingId,
+                saksbehandler,
+                trygdetidGrunnlag.copy(bosted = "Polen")
+            )
+        }
+
+        with(trygdetid.trygdetidGrunnlag.first()) {
+            bosted shouldBe "Polen"
+            beregnetTrygdetid shouldBe null
+        }
+
+        coVerify(exactly = 1) {
+            behandlingKlient.kanBeregnes(behandlingId, saksbehandler)
+            repository.hentTrygdetid(behandlingId)
+            repository.oppdaterTrygdetid(
+                withArg {
+                    it.trygdetidGrunnlag.first().let { tg -> tg.id shouldBe trygdetidGrunnlag.id }
+                }
+            )
+            behandlingKlient.settBehandlingStatusVilkaarsvurdert(behandlingId, saksbehandler)
+            beregningService.beregnTrygdetidGrunnlag(any())
+            beregningService.beregnTrygdetid(any())
+        }
+    }
+
+    @Test
     fun `skal oppdatere trygdetidsgrunnlag`() {
         val behandlingId = randomUUID()
         val trygdetidGrunnlag = trygdetidGrunnlag()
         val eksisterendeTrygdetid = trygdetid(behandlingId, trygdetidGrunnlag = listOf(trygdetidGrunnlag))
-        val endretTrygdetidGrunnlag = trygdetidGrunnlag.copy(bosted = "Polen")
+        val endretTrygdetidGrunnlag = trygdetidGrunnlag.copy(bosted = bostedNorge)
 
         coEvery { behandlingKlient.settBehandlingStatusVilkaarsvurdert(any(), any()) } returns true
         every { repository.hentTrygdetid(behandlingId) } returns eksisterendeTrygdetid
@@ -234,7 +271,7 @@ internal class TrygdetidServiceTest {
                 withArg {
                     it.trygdetidGrunnlag.first().let { tg ->
                         tg.id shouldBe trygdetidGrunnlag.id
-                        tg.bosted shouldBe "Polen"
+                        tg.bosted shouldBe bostedNorge
                     }
                 }
             )

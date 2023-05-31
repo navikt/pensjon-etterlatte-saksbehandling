@@ -18,12 +18,19 @@ object TrygdetidBeregningService {
 
     private val logger = LoggerFactory.getLogger(TrygdetidBeregningService::class.java)
 
-    fun beregnTrygdetid(trygdetidGrunnlag: List<TrygdetidGrunnlag>): BeregnetTrygdetid {
+    fun beregnTrygdetid(trygdetidGrunnlag: List<TrygdetidGrunnlag>): BeregnetTrygdetid? {
         logger.info("Beregner antall år trygdetid")
+
+        val beregnetTrygdetidListe = trygdetidGrunnlag.mapNotNull { it.beregnetTrygdetid }
+
+        if (beregnetTrygdetidListe.isEmpty()) {
+            logger.info("Har ingen perioder med beregnet trygdetidsgrunnlag.")
+            return null
+        }
 
         val grunnlag = TotalTrygdetidGrunnlag(
             FaktumNode(
-                verdi = trygdetidGrunnlag.mapNotNull { it.beregnetTrygdetid?.verdi },
+                verdi = beregnetTrygdetidListe.map { it.verdi },
                 kilde = "System",
                 beskrivelse = "Beregninger alle trygdetidgrunnlag"
             )
@@ -46,8 +53,15 @@ object TrygdetidBeregningService {
         }
     }
 
-    fun beregnTrygdetidGrunnlag(trygdetidGrunnlag: TrygdetidGrunnlag): BeregnetTrygdetidGrunnlag {
+    fun beregnTrygdetidGrunnlag(trygdetidGrunnlag: TrygdetidGrunnlag): BeregnetTrygdetidGrunnlag? {
         logger.info("Beregner trygdetid for trygdetidsgrunnlag ${trygdetidGrunnlag.id}")
+
+        if (!trygdetidGrunnlag.erNasjonal()) {
+            logger.info(
+                "Kan ikke beregne trygdetidsgrunnlag for perioder utenfor Norge. Lagt inn ${trygdetidGrunnlag.bosted}"
+            )
+            return null
+        }
 
         val grunnlag = TrygdetidPeriodeGrunnlag(
             periodeFra = FaktumNode(

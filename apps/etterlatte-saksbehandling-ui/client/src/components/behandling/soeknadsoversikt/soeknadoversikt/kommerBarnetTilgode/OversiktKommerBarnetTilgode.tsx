@@ -49,8 +49,8 @@ export const OversiktKommerBarnetTilgode = ({
     <Soeknadsvurdering
       tittel="Kommer pensjonen barnet tilgode?"
       hjemler={[
-        { lenke: 'https://lovdata.no/lov/1997-02-28-19/§18-1', tittel: 'Folketrygdeloven § 18-1' },
-        { lenke: 'https://lovdata.no/lov/1997-02-28-19/§22-1', tittel: 'Folketrygdeloven § 22-1' },
+        { lenke: 'https://lovdata.no/lov/1997-02-28-19/§18-1', tittel: 'Folketrygdloven § 18-1' },
+        { lenke: 'https://lovdata.no/lov/1997-02-28-19/§22-1', tittel: 'Folketrygdloven § 22-1' },
         { lenke: 'https://lovdata.no/lov/2010-03-26-9/§9', tittel: 'Vergemålsloven § 9, § 16 og § 19' },
         { lenke: 'https://lovdata.no/lov/1981-04-08-7/§30', tittel: 'Barneloven § 30 og § 38' },
       ]}

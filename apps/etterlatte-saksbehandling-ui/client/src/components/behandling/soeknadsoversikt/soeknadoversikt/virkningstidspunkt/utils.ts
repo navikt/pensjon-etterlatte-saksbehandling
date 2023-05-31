@@ -11,7 +11,7 @@ export function hentMinimumsVirkningstidspunkt(avdoedDoedsdato: string | undefin
 }
 
 export const BP_FOERSTEGANGSBEHANDLING_HJEMLER: Array<Hjemmel> = [
-  { lenke: 'https://lovdata.no/lov/1997-02-28-19/§22-12', tittel: 'Folketrygdeloven § 22-12 første ledd' },
+  { lenke: 'https://lovdata.no/lov/1997-02-28-19/§22-12', tittel: 'Folketrygdloven § 22-12 første ledd' },
   { lenke: 'https://lovdata.no/lov/1997-02-28-19/§22-13', tittel: '§ 22-13 fjerde ledd' },
 ]
 

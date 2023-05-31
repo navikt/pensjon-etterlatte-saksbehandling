@@ -11,7 +11,7 @@ Monorepo for ny saksbehandlingsløsning for ytelser til etterlatte
 Tokens/secrets som gjør det mulig å gå mot dev-gcp fra lokal maskin.\
 Kan hentes ved å kjøre følgende kommando:
 ```
-./get-secret.sh apps/<app_du_vil_lage_secrets_for>
+./get-secret.sh <APP_NAME>
 ```
 
 Hvis du får feilmelding `Not logged in or lacking rights. Ensure you're connected to naisdevice and gcp.`
@@ -21,10 +21,6 @@ og du er sikker på du er koblet både naisdevice og gcp så kan det være at du
 kubectl config set-context --current --namespace=etterlatte
 ```
 
-Ved endring i filen kan denne kommandoen kjøres (OBS: dette innebærer at alle må hente tokens på nytt). Eksempel for etterlatte-saksbehandling-ui:
-```
-kubectl apply -f apps/etterlatte-saksbehandling-ui/.nais/azuread-etterlatte-saksbehandling-ui-lokal.yaml
-```
 
 **NB:** Ved kjøring av en eller flere backend(s) lokalt kan det være lurt å installere
 [EnvFile](https://plugins.jetbrains.com/plugin/7861-envfile) i IntelliJ. Uten denne må du manuelt kopiere

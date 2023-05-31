@@ -9,8 +9,11 @@ import no.nav.etterlatte.beregning.regler.barnepensjon.AvdoedForelder
 import no.nav.etterlatte.beregning.regler.barnepensjon.PeriodisertBarnepensjonGrunnlag
 import no.nav.etterlatte.beregning.regler.barnepensjon.kroneavrundetBarnepensjonRegel
 import no.nav.etterlatte.beregning.regler.barnepensjon.sats.grunnbeloep
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnbeloep.GrunnbeloepRepository
 import no.nav.etterlatte.klienter.GrunnlagKlient
+import no.nav.etterlatte.klienter.TrygdetidKlient
 import no.nav.etterlatte.klienter.VilkaarsvurderingKlient
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
@@ -21,6 +24,7 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.Metadata
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.libs.regler.FaktumNode
 import no.nav.etterlatte.libs.regler.KonstantGrunnlag
@@ -35,11 +39,19 @@ import java.time.LocalDate
 import java.time.YearMonth
 import java.util.*
 
+enum class BeregnBarnepensjonServiceFeatureToggle(private val key: String) : FeatureToggle {
+    BrukFaktiskTrygdetid("pensjon-etterlatte.bp-bruk-faktisk-trygdetid");
+
+    override fun key() = key
+}
+
 class BeregnBarnepensjonService(
     private val grunnlagKlient: GrunnlagKlient,
     private val vilkaarsvurderingKlient: VilkaarsvurderingKlient,
     private val grunnbeloepRepository: GrunnbeloepRepository = GrunnbeloepRepository,
-    private val beregningsGrunnlagService: BeregningsGrunnlagService
+    private val beregningsGrunnlagService: BeregningsGrunnlagService,
+    private val trygdetidKlient: TrygdetidKlient,
+    private val featureToggleService: FeatureToggleService
 ) {
     private val logger = LoggerFactory.getLogger(BeregnBarnepensjonService::class.java)
 
@@ -51,7 +63,15 @@ class BeregnBarnepensjonService(
         val beregningsGrunnlag = requireNotNull(
             beregningsGrunnlagService.hentBarnepensjonBeregningsGrunnlag(behandling.id, bruker)
         )
-        val barnepensjonGrunnlag = opprettBeregningsgrunnlag(beregningsGrunnlag, virkningstidspunkt.atDay(1), null)
+
+        val trygdetid = trygdetidKlient.hentTrygdetid(behandling.id, bruker)
+
+        val barnepensjonGrunnlag = opprettBeregningsgrunnlag(
+            beregningsGrunnlag,
+            trygdetid.hvisKanBrukes(),
+            virkningstidspunkt.atDay(1),
+            null
+        )
 
         logger.info("Beregner barnepensjon for behandlingId=${behandling.id} med behandlingType=$behandlingType")
 
@@ -178,6 +198,7 @@ class BeregnBarnepensjonService(
 
     private fun opprettBeregningsgrunnlag(
         beregningsGrunnlag: BeregningsGrunnlag,
+        trygdetid: TrygdetidDto?,
         fom: LocalDate,
         tom: LocalDate?
     ) = PeriodisertBarnepensjonGrunnlag(
@@ -192,14 +213,36 @@ class BeregnBarnepensjonService(
             fom,
             tom
         ),
-        avdoedForelder = KonstantGrunnlag(
-            FaktumNode(
-                verdi = AvdoedForelder(Beregningstall(FASTSATT_TRYGDETID_I_PILOT)),
-                kilde = Grunnlagsopplysning.RegelKilde("MVP hardkodet trygdetid", Tidspunkt.now(), "1"),
-                beskrivelse = "Trygdetid avdød forelder"
-            )
-        )
+        avdoedForelder = trygdetid?.beregnetTrygdetid?.total.let { trygdetidTotal ->
+            if (trygdetidTotal != null) {
+                KonstantGrunnlag(
+                    FaktumNode(
+                        verdi = AvdoedForelder(Beregningstall(trygdetidTotal)),
+                        kilde = Grunnlagsopplysning.RegelKilde(
+                            "Trygdetid fastsatt av saksbehandler",
+                            trygdetid?.beregnetTrygdetid?.tidspunkt
+                                ?: throw Exception("Trygdetid mangler tidspunkt på beregnet trygdetid"),
+                            "1"
+                        ),
+                        beskrivelse = "Trygdetid avdød forelder"
+                    )
+                )
+            } else {
+                KonstantGrunnlag(
+                    FaktumNode(
+                        verdi = AvdoedForelder(Beregningstall(FASTSATT_TRYGDETID_I_PILOT)),
+                        kilde = Grunnlagsopplysning.RegelKilde("MVP hardkodet trygdetid", Tidspunkt.now(), "1"),
+                        beskrivelse = "Trygdetid avdød forelder"
+                    )
+                )
+            }
+        }
     )
+
+    private fun TrygdetidDto?.hvisKanBrukes() = this.takeIf {
+        featureToggleService.isEnabled(BeregnBarnepensjonServiceFeatureToggle.BrukFaktiskTrygdetid, false) ||
+            it?.beregnetTrygdetid?.total == FASTSATT_TRYGDETID_I_PILOT
+    }
 
     companion object {
         private const val FASTSATT_TRYGDETID_I_PILOT = 40

@@ -8,6 +8,7 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.beregning.BeregnBarnepensjonService
+import no.nav.etterlatte.beregning.BeregnBarnepensjonServiceFeatureToggle
 import no.nav.etterlatte.beregning.BeregnBarnepensjonServiceTest
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlag
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlagService
@@ -15,8 +16,10 @@ import no.nav.etterlatte.beregning.grunnlag.GrunnlagMedPeriode
 import no.nav.etterlatte.beregning.grunnlag.Institusjonsopphold
 import no.nav.etterlatte.beregning.regler.MAKS_TRYGDETID
 import no.nav.etterlatte.beregning.regler.bruker
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnbeloep.GrunnbeloepRepository.hentGjeldendeGrunnbeloep
 import no.nav.etterlatte.klienter.GrunnlagKlientImpl
+import no.nav.etterlatte.klienter.TrygdetidKlient
 import no.nav.etterlatte.klienter.VilkaarsvurderingKlient
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
@@ -31,13 +34,15 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.Month
 import java.time.YearMonth
-import java.util.*
+import java.util.UUID
 import kotlin.math.abs
 
 class ReguleringTest {
     private val vilkaarsvurderingKlient = mockk<VilkaarsvurderingKlient>()
     private val grunnlagKlient = mockk<GrunnlagKlientImpl>()
     private val beregningsGrunnlagService = mockk<BeregningsGrunnlagService>()
+    private val trygdetidKlient = mockk<TrygdetidKlient>()
+    private val featureToggleService = mockk<FeatureToggleService>()
     private lateinit var beregnBarnepensjonService: BeregnBarnepensjonService
 
     @BeforeEach
@@ -45,7 +50,9 @@ class ReguleringTest {
         beregnBarnepensjonService = BeregnBarnepensjonService(
             grunnlagKlient = grunnlagKlient,
             vilkaarsvurderingKlient = vilkaarsvurderingKlient,
-            beregningsGrunnlagService = beregningsGrunnlagService
+            beregningsGrunnlagService = beregningsGrunnlagService,
+            trygdetidKlient = trygdetidKlient,
+            featureToggleService = featureToggleService
         )
     }
 
@@ -67,6 +74,11 @@ class ReguleringTest {
             emptyList(),
             BeregnBarnepensjonServiceTest.VIRKNINGSTIDSPUNKT_JAN_23.minusYears(1)
         )
+
+        coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns null
+        every {
+            featureToggleService.isEnabled(BeregnBarnepensjonServiceFeatureToggle.BrukFaktiskTrygdetid, false)
+        } returns false
 
         runBlocking {
             val beregning22 = beregnBarnepensjonService.beregn(behandling, bruker)

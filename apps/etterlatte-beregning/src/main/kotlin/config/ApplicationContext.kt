@@ -12,12 +12,23 @@ import no.nav.etterlatte.beregning.BeregningRepository
 import no.nav.etterlatte.beregning.BeregningService
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlagRepository
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlagService
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleServiceProperties
 import no.nav.etterlatte.klienter.BehandlingKlientImpl
 import no.nav.etterlatte.klienter.GrunnlagKlientImpl
 import no.nav.etterlatte.klienter.TrygdetidKlient
 import no.nav.etterlatte.klienter.VilkaarsvurderingKlientImpl
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.ktor.httpClient
+
+private fun featureToggleProperties(config: Config) = mapOf(
+    FeatureToggleServiceProperties.ENABLED.navn to config.getString("funksjonsbrytere.enabled"),
+    FeatureToggleServiceProperties.APPLICATIONNAME.navn to config.getString(
+        "funksjonsbrytere.unleash.applicationName"
+    ),
+    FeatureToggleServiceProperties.URI.navn to config.getString("funksjonsbrytere.unleash.uri"),
+    FeatureToggleServiceProperties.CLUSTER.navn to config.getString("funksjonsbrytere.unleash.cluster")
+)
 
 class ApplicationContext {
     val config: Config = ConfigFactory.load()
@@ -28,6 +39,8 @@ class ApplicationContext {
         username = properties.dbUsername,
         password = properties.dbPassword
     )
+
+    val featureToggleService: FeatureToggleService = FeatureToggleService.initialiser(featureToggleProperties(config))
 
     val vilkaarsvurderingKlient = VilkaarsvurderingKlientImpl(config, httpClient())
     val grunnlagKlient = GrunnlagKlientImpl(config, httpClient())
@@ -41,9 +54,11 @@ class ApplicationContext {
     )
 
     val beregnBarnepensjonService = BeregnBarnepensjonService(
-        vilkaarsvurderingKlient = vilkaarsvurderingKlient,
         grunnlagKlient = grunnlagKlient,
-        beregningsGrunnlagService = beregningsGrunnlagService
+        vilkaarsvurderingKlient = vilkaarsvurderingKlient,
+        beregningsGrunnlagService = beregningsGrunnlagService,
+        trygdetidKlient = trygdetidKlient,
+        featureToggleService = featureToggleService
     )
     val beregnOmstillingsstoenadService = BeregnOmstillingsstoenadService(
         vilkaarsvurderingKlient = vilkaarsvurderingKlient,

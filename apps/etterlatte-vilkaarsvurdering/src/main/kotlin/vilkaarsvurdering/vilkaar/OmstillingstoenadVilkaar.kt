@@ -8,11 +8,26 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
 object OmstillingstoenadVilkaar {
 
     fun inngangsvilkaar() = listOf(
+        etterlatteLever(),
         doedsfall(),
         yrkesskade(),
         avdoedesMedlemskap(),
         gjenlevendesMedlemskap(),
         oevrigeVilkaar()
+    )
+
+    private fun etterlatteLever() = Vilkaar(
+        hovedvilkaar = Delvilkaar(
+            type = VilkaarType.OMS_ETTERLATTE_LEVER,
+            tittel = " Lever den etterlatte?",
+            beskrivelse = """
+                Formålet med omstillingsstønad er blant annet å sikre inntekt til ektefelle/partner/samboer/tidligere familiepleier. Dette betyr at den etterlatte må være i live for å ha rett til stønaden.
+            """.trimIndent(),
+            spoersmaal = "Lever den etterlatte på virkningstidspunktet?",
+            lovreferanse = Lovreferanse(
+                paragraf = "§ 17-1"
+            )
+        )
     )
 
     private fun doedsfall() = Vilkaar(

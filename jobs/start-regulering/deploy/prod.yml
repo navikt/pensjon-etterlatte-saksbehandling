@@ -8,7 +8,9 @@ metadata:
 spec:
   image: ghcr.io/navikt/pensjon-etterlatte-saksbehandling/start-regulering:c77487de9f104f55c81f3dc44c01f94ecc173597
   kafka:
-    pool: nav-dev
+    pool: nav-prod
   env:
     - name: KAFKA_TARGET_TOPIC
-      value: etterlatte.dodsmelding
+      value: etterlatte.etterlatteytelser
+    - name: KAFKA_RAPID_TOPIC
+      value: etterlatte.etterlatteytelser

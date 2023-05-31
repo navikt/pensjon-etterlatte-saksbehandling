@@ -1,6 +1,12 @@
 {
   "grunnbeløp": [
     {
+      "dato": "2023-05",
+      "grunnbeløp": 118620,
+      "grunnbeløpPerMåned": 9885,
+      "omregningsfaktor": 1.064076
+    },
+    {
       "dato": "2022-05",
       "grunnbeløp": 111477,
       "grunnbeløpPerMåned": 9290,

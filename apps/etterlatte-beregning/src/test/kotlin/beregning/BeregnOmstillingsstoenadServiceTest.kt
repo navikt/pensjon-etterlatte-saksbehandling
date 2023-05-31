@@ -1,5 +1,6 @@
 package no.nav.etterlatte.beregning
 
+import io.kotest.matchers.ints.shouldBeGreaterThanOrEqual
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.mockk.coEvery
@@ -20,6 +21,7 @@ import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.time.Month
 import java.time.YearMonth
 import java.util.*
 import java.util.UUID.randomUUID
@@ -53,11 +55,11 @@ internal class BeregnOmstillingsstoenadServiceTest {
                 type shouldBe Beregningstype.OMS
                 beregnetDato shouldNotBe null
                 grunnlagMetadata shouldBe grunnlag.metadata
-                beregningsperioder.size shouldBe 1
+                beregningsperioder.size shouldBeGreaterThanOrEqual 2
                 with(beregningsperioder.first()) {
                     utbetaltBeloep shouldBe OMS_BELOEP_JAN_23
                     datoFOM shouldBe behandling.virkningstidspunkt?.dato
-                    datoTOM shouldBe null
+                    datoTOM shouldBe YearMonth.of(2023, Month.APRIL)
                     grunnbelopMnd shouldBe GRUNNBELOEP_JAN_23
                     soeskenFlokk shouldBe null
                     this.trygdetid shouldBe TRYGDETID_40_AAR
@@ -89,11 +91,11 @@ internal class BeregnOmstillingsstoenadServiceTest {
                 type shouldBe Beregningstype.OMS
                 beregnetDato shouldNotBe null
                 grunnlagMetadata shouldBe grunnlag.metadata
-                beregningsperioder.size shouldBe 1
+                beregningsperioder.size shouldBeGreaterThanOrEqual 2
                 with(beregningsperioder.first()) {
                     utbetaltBeloep shouldBe OMS_BELOEP_JAN_23
                     datoFOM shouldBe behandling.virkningstidspunkt?.dato
-                    datoTOM shouldBe null
+                    datoTOM shouldBe YearMonth.of(2023, Month.APRIL)
                     grunnbelopMnd shouldBe GRUNNBELOEP_JAN_23
                     this.trygdetid shouldBe TRYGDETID_40_AAR
                 }

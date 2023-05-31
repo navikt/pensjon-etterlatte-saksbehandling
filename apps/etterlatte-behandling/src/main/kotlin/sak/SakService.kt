@@ -42,6 +42,7 @@ interface SakService {
     fun markerSakerMedSkjerming(sakIder: List<Long>, skjermet: Boolean)
     fun finnEnhetForPersonOgTema(fnr: String, tema: String, saktype: SakType): ArbeidsFordelingEnhet
     fun oppdaterEnhetForSaker(saker: List<GrunnlagsendringshendelseService.SakMedEnhet>)
+    fun sjekkOmSakerErGradert(sakIder: List<Long>): List<SakMedGradering>
 }
 
 class RealSakService(
@@ -119,6 +120,12 @@ class RealSakService(
     override fun oppdaterEnhetForSaker(saker: List<GrunnlagsendringshendelseService.SakMedEnhet>) {
         inTransaction {
             dao.oppdaterEnheterPaaSaker(saker)
+        }
+    }
+
+    override fun sjekkOmSakerErGradert(sakIder: List<Long>): List<SakMedGradering> {
+        return inTransaction {
+            dao.finnSakerMedGraderingOgSkjerming(sakIder)
         }
     }
 

@@ -2,6 +2,7 @@ package no.nav.etterlatte.sak
 
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.database.toList
@@ -9,6 +10,21 @@ import java.sql.Connection
 import java.sql.ResultSet
 
 class SakDao(private val connection: () -> Connection) {
+
+    fun finnSakerMedGraderingOgSkjerming(sakIder: List<Long>): List<SakMedGradering> {
+        with(connection()) {
+            val statement = prepareStatement(
+                "SELECT id, adressebeskyttelse from sak where id = any(?)"
+            )
+            statement.setArray(1, createArrayOf("bigint", sakIder.toTypedArray()))
+            return statement.executeQuery().toList {
+                SakMedGradering(
+                    id = getLong(1),
+                    adressebeskyttelseGradering = getString(2)?.let { AdressebeskyttelseGradering.valueOf(it) }
+                )
+            }
+        }
+    }
     fun hentSaker(): List<Sak> {
         val statement = connection().prepareStatement("SELECT id, sakType, fnr, enhet from sak")
         return statement.executeQuery().toList { this.toSak() }

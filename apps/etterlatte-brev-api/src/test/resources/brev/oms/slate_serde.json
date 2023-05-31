@@ -1,17 +1,17 @@
 [
   {
-    "type" : "heading-one",
-    "children" : [
-      {
-        "text" : "Tittel 1"
-      }
-    ]
-  },
-  {
     "type" : "heading-two",
     "children" : [
       {
         "text" : "Tittel 2"
+      }
+    ]
+  },
+  {
+    "type" : "heading-three",
+    "children" : [
+      {
+        "text" : "Tittel 3"
       }
     ]
   },
@@ -44,6 +44,35 @@
     "children" : [
       {
         "text" : "Mer tekst"
+      }
+    ]
+  },
+  {
+    "type": "bulleted-list",
+    "children": [
+      {
+        "type": "list-item",
+        "children": [
+          {
+            "text": "1"
+          }
+        ]
+      },
+      {
+        "type": "list-item",
+        "children": [
+          {
+            "text": "2"
+          }
+        ]
+      },
+      {
+        "type": "list-item",
+        "children": [
+          {
+            "text": "3"
+          }
+        ]
       }
     ]
   }

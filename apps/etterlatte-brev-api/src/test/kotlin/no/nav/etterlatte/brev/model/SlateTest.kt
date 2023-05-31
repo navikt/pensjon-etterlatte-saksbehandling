@@ -14,10 +14,13 @@ internal class SlateTest {
 
         // Bare noen stikkprøver
         with(deserialized) {
-            value.size shouldBe 5
-            value[0].type shouldBe Slate.ElementType.HEADING_ONE
-            value[0].children.size shouldBe 1
-            value[2].children.size shouldBe 3
+            elements.size shouldBe 6
+            elements[0].type shouldBe Slate.ElementType.HEADING_TWO
+            elements[0].children.size shouldBe 1
+            elements[2].children.size shouldBe 3
+
+            elements.last().type shouldBe Slate.ElementType.BULLETED_LIST
+            elements.last().children.count { it.type == Slate.ElementType.LIST_ITEM } shouldBe 3
         }
     }
 }

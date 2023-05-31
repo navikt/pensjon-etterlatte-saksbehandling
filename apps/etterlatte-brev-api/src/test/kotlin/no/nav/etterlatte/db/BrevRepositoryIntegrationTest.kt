@@ -205,16 +205,16 @@ internal class BrevRepositoryIntegrationTest {
                 Slate(
                     listOf(
                         Slate.Element(
-                            Slate.ElementType.HEADING_ONE,
-                            listOf(Slate.Text("Hello world!"))
+                            Slate.ElementType.HEADING_TWO,
+                            listOf(Slate.InnerElement(text = "Hello world!"))
                         )
                     )
                 )
             )
 
             val payload = db.hentBrevPayload(opprettetBrev.id)!!
-            payload.value.size shouldBeExactly 1
-            payload.value[0].type shouldBe Slate.ElementType.HEADING_ONE
+            payload.elements.size shouldBeExactly 1
+            payload.elements[0].type shouldBe Slate.ElementType.HEADING_TWO
         }
     }
 

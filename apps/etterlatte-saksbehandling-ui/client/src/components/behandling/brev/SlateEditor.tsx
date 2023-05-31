@@ -22,12 +22,11 @@ export default function SlateEditor({ value, onChange, readonly }: EditorProps) 
 
   return (
     <BrevEditor>
-      <Slate editor={editor} value={value} onChange={onChange} className={'fuk-yu-tu'}>
+      <Slate editor={editor} value={value} onChange={onChange}>
         {!readonly && (
           <Toolbar>
             <BlockButton format="heading-two" icon="H2" />
             <BlockButton format="heading-three" icon="H3" />
-            <BlockButton format="heading-four" icon="H4" />
             <BlockButton format="bulleted-list" icon={<ListIcon title="a11y-title" fontSize="1.5rem" />} />
 
             <MarkButton format="placeholder" icon="<P/>" />
@@ -69,13 +68,6 @@ const Element = ({ attributes, children, element }) => {
       // noinspection TypeScriptValidateTypes
       return (
         <Heading level="3" size="medium" spacing style={style} {...attributes}>
-          {children}
-        </Heading>
-      )
-    case 'heading-four':
-      // noinspection TypeScriptValidateTypes
-      return (
-        <Heading level="4" size="small" spacing style={style} {...attributes}>
           {children}
         </Heading>
       )
@@ -173,4 +165,11 @@ const SlateEditable = styled(Editable)`
 const BrevEditor = styled.div`
   border: 1px solid #eee;
   background-color: #f7f7f7;
+
+  ul {
+    list-style: disc !important;
+    padding-left: 1.5rem;
+    margin-block-start: 1rem;
+    margin-block-end: 1rem;
+  }
 `

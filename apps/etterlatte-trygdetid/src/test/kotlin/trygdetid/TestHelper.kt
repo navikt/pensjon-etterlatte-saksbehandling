@@ -17,6 +17,7 @@ import java.util.*
 import java.util.UUID.randomUUID
 
 val saksbehandler = Saksbehandler("token", "ident", null)
+val bostedNorge = "NORGE"
 
 fun trygdetid(
     behandlingId: UUID = randomUUID(),
@@ -41,8 +42,8 @@ fun trygdetidGrunnlag(
     )
 ) = TrygdetidGrunnlag(
     id = randomUUID(),
-    type = TrygdetidType.NASJONAL,
-    bosted = "Norge",
+    type = TrygdetidType.FAKTISK,
+    bosted = bostedNorge,
     periode = periode,
     beregnetTrygdetid = beregnetTrygdetidGrunnlag,
     kilde = Grunnlagsopplysning.Saksbehandler(ident = "Z123", tidspunkt = Tidspunkt.now())

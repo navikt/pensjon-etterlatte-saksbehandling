@@ -12,6 +12,9 @@ export const lagreTrygdetidgrunnlag = async (args: {
 }): Promise<ApiResponse<ITrygdetid>> =>
   apiClient.post(`/trygdetid/${args.behandlingsId}/grunnlag`, { ...args.trygdetidgrunnlag })
 
+export const hentAlleLand = async (): Promise<ApiResponse<ILand[]>> =>
+  apiClient.get<ILand[]>('/trygdetid/kodeverk/land')
+
 export interface ITrygdetid {
   id: string
   behandlingId: string
@@ -59,6 +62,15 @@ export interface IBeregnetTrygdetidGrunnlag {
 }
 
 export enum ITrygdetidGrunnlagType {
-  NASJONAL = 'NASJONAL',
+  FAKTISK = 'FAKTISK',
   FREMTIDIG = 'FREMTIDIG',
+}
+
+export interface ILand {
+  gyldigFra: string
+  gyldigTil: string
+  beskrivelse: {
+    term: string
+    tekst: string
+  }
 }

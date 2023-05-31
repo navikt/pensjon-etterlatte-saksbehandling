@@ -1,7 +1,14 @@
 import React, { useEffect, useState } from 'react'
 import { TrygdetidGrunnlag } from '~components/behandling/trygdetid/TrygdetidGrunnlag'
 import { isFailure, isPending, useApiCall } from '~shared/hooks/useApiCall'
-import { hentTrygdetid, ITrygdetid, ITrygdetidGrunnlagType, opprettTrygdetid } from '~shared/api/trygdetid'
+import {
+  hentAlleLand,
+  hentTrygdetid,
+  ILand,
+  ITrygdetid,
+  ITrygdetidGrunnlagType,
+  opprettTrygdetid,
+} from '~shared/api/trygdetid'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { TrygdetidBeregnet } from '~components/behandling/trygdetid/TrygdetidBeregnet'
@@ -15,7 +22,9 @@ export const Trygdetid = () => {
   const { behandlingId } = useParams()
   const [hentTrygdetidRequest, fetchTrygdetid] = useApiCall(hentTrygdetid)
   const [opprettTrygdetidRequest, requestOpprettTrygdetid] = useApiCall(opprettTrygdetid)
+  const [hentAlleLandRequest, fetchAlleLand] = useApiCall(hentAlleLand)
   const [trygdetid, setTrygdetid] = useState<ITrygdetid>()
+  const [landListe, setLandListe] = useState<ILand[]>()
 
   useEffect(() => {
     if (!behandlingId) throw new Error('Mangler behandlingsid')
@@ -27,6 +36,19 @@ export const Trygdetid = () => {
       } else {
         setTrygdetid(trygdetid)
       }
+    })
+  }, [])
+
+  useEffect(() => {
+    fetchAlleLand(null, (landListe: ILand[]) => {
+      setLandListe(
+        landListe.sort((a: ILand, b: ILand) => {
+          if (a.beskrivelse.tekst > b.beskrivelse.tekst) {
+            return 1
+          }
+          return -1
+        })
+      )
     })
   }, [])
 
@@ -48,18 +70,20 @@ export const Trygdetid = () => {
         </BodyShort>
       </Soeknadsvurdering>
 
-      {trygdetid && (
+      {trygdetid && landListe && (
         <>
           <Grunnlagopplysninger opplysninger={trygdetid.opplysninger} />
           <TrygdetidGrunnlag
             trygdetid={trygdetid}
             setTrygdetid={setTrygdetid}
-            trygdetidGrunnlagType={ITrygdetidGrunnlagType.NASJONAL}
+            trygdetidGrunnlagType={ITrygdetidGrunnlagType.FAKTISK}
+            landListe={landListe}
           />
           <TrygdetidGrunnlag
             trygdetid={trygdetid}
             setTrygdetid={setTrygdetid}
             trygdetidGrunnlagType={ITrygdetidGrunnlagType.FREMTIDIG}
+            landListe={landListe}
           />
           <TrygdetidBeregnet trygdetid={trygdetid} setTrygdetid={setTrygdetid} />
         </>
@@ -67,6 +91,7 @@ export const Trygdetid = () => {
       {isPending(hentTrygdetidRequest) && <Spinner visible={true} label={'Henter trygdetid'} />}
       {isPending(opprettTrygdetidRequest) && <Spinner visible={true} label={'Oppretter trygdetid'} />}
       {isFailure(hentTrygdetidRequest) && <ApiErrorAlert>En feil har oppstått</ApiErrorAlert>}
+      {isFailure(hentAlleLandRequest) && <ApiErrorAlert>Klarer ikke hente inn land fra felles kodeverk</ApiErrorAlert>}
     </TrygdetidWrapper>
   )
 }

@@ -42,7 +42,9 @@ class BeregnOmstillingsstoenadService(
 
     suspend fun beregn(behandling: DetaljertBehandling, bruker: Bruker): Beregning {
         val grunnlag = grunnlagKlient.hentGrunnlag(behandling.sak, bruker)
-        val trygdetid = trygdetidKlient.hentTrygdetid(behandling.id, bruker)
+        val trygdetid = trygdetidKlient.hentTrygdetid(behandling.id, bruker) ?: throw Exception(
+            "Forventa å ha trygdetid for behandlingId=${behandling.id}"
+        )
         val behandlingType = behandling.behandlingType
         val virkningstidspunkt = requireNotNull(behandling.virkningstidspunkt?.dato)
         val beregningsgrunnlag = opprettBeregningsgrunnlagOmstillingsstoenad(trygdetid)

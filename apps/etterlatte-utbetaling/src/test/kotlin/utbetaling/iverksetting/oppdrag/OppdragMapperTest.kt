@@ -12,10 +12,13 @@ internal class OppdragMapperTest {
     fun oppdragFraVedtak() {
         val oppdrag = OppdragMapper.oppdragFraUtbetaling(utbetaling(sakType = Saktype.BARNEPENSJON), true)
         assertEquals(oppdrag.oppdrag110.kodeFagomraade, "BARNEPE")
+        assertEquals(oppdrag.oppdrag110.oppdragsLinje150.first().kodeKlassifik, "BARNEPENSJON-OPTP")
     }
+
     @Test
     fun oppdragFraVedtakOMS() {
         val oppdrag = OppdragMapper.oppdragFraUtbetaling(utbetaling(sakType = Saktype.OMSTILLINGSSTOENAD), true)
         assertEquals(oppdrag.oppdrag110.kodeFagomraade, "OMSTILL")
+        assertEquals(oppdrag.oppdrag110.oppdragsLinje150.first().kodeKlassifik, "OMSTILLINGOR")
     }
 }

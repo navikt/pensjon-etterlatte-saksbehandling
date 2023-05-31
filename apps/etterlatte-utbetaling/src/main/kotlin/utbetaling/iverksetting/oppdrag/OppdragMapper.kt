@@ -25,7 +25,10 @@ object OppdragMapper {
         val oppdrag110 = Oppdrag110().apply {
             kodeAksjon = OppdragDefaults.AKSJONSKODE_OPPDATER
             kodeEndring = if (erFoersteUtbetalingPaaSak) "NY" else "ENDR"
-            kodeFagomraade = if(utbetaling.sakType == Saktype.BARNEPENSJON) "BARNEPE" else "OMSTILL"
+            kodeFagomraade = when (utbetaling.sakType) {
+                Saktype.BARNEPENSJON -> "BARNEPE"
+                Saktype.OMSTILLINGSSTOENAD -> "OMSTILL"
+            }
             fagsystemId = utbetaling.sakId.value.toString()
             utbetFrekvens = OppdragDefaults.UTBETALINGSFREKVENS
             oppdragGjelderId = utbetaling.stoenadsmottaker.value
@@ -64,7 +67,11 @@ object OppdragMapper {
 
                         vedtakId = utbetaling.vedtakId.value.toString()
                         delytelseId = it.id.value.toString()
-                        kodeKlassifik = if(utbetaling.sakType == Saktype.BARNEPENSJON) OppdragKlassifikasjonskode.BARNEPENSJON_OPTP.toString() else OppdragKlassifikasjonskode.OMSTILLINGSTOENAD_OPTP.toString()
+                        kodeKlassifik = when (utbetaling.sakType) {
+                            Saktype.BARNEPENSJON -> OppdragKlassifikasjonskode.BARNEPENSJON_OPTP.toString()
+                            Saktype.OMSTILLINGSSTOENAD -> OppdragKlassifikasjonskode.OMSTILLINGSTOENAD_OPTP.toString()
+
+                        }
                         datoVedtakFom = it.periode.fra.toXMLDate()
                         datoVedtakTom = it.periode.til?.toXMLDate()
                         sats = it.beloep

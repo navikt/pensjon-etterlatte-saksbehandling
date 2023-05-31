@@ -15,10 +15,13 @@ import {
 } from '~store/reducers/BehandlingReducer'
 import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 import { ApiErrorAlert } from '~ErrorBoundary'
-import Trygdetid from '~components/behandling/beregningsgrunnlag/Trygdetid'
+import FastTrygdetid from '~components/behandling/beregningsgrunnlag/Trygdetid'
+import { Trygdetid as BeregnetTrygdetid } from '~components/behandling/trygdetid/Trygdetid'
 import Soeskenjustering, { Soeskengrunnlag } from '~components/behandling/beregningsgrunnlag/Soeskenjustering'
 import { Institusjonsopphold } from '~shared/types/Beregning'
 import { mapListeTilDto } from '~components/behandling/beregningsgrunnlag/PeriodisertBeregningsgrunnlag'
+import { hentFunksjonsbrytere } from '~shared/api/feature'
+import { useEffect, useState } from 'react'
 
 const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer }) => {
   const { behandling } = props
@@ -27,6 +30,20 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
   const dispatch = useAppDispatch()
   const [lagreSoeskenMedIBeregningStatus, postSoeskenMedIBeregning] = useApiCall(lagreBeregningsGrunnlag)
   const [endreBeregning, postOpprettEllerEndreBeregning] = useApiCall(opprettEllerEndreBeregning)
+  const [funksjonsbrytere, postHentFunksjonsbrytere] = useApiCall(hentFunksjonsbrytere)
+  const [beregnTrygdetid, setBeregnTrygdetid] = useState<boolean>(false)
+
+  const featureToggleName = 'pensjon-etterlatte.bp-bruk-faktisk-trygdetid'
+
+  useEffect(() => {
+    postHentFunksjonsbrytere([featureToggleName], (brytere) => {
+      const bryter = brytere.find((bryter) => bryter.toggle === featureToggleName)
+
+      if (bryter) {
+        setBeregnTrygdetid(bryter.enabled)
+      }
+    })
+  }, [])
 
   if (behandling.kommerBarnetTilgode == null || behandling.familieforhold?.avdoede == null) {
     return <ApiErrorAlert>Familieforhold kan ikke hentes ut</ApiErrorAlert>
@@ -56,7 +73,7 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
   }
   return (
     <>
-      <Trygdetid />
+      {!isPending(funksjonsbrytere) && (beregnTrygdetid ? <BeregnetTrygdetid /> : <FastTrygdetid />)}
       <Soeskenjustering behandling={behandling} onSubmit={onSubmit} />
 
       {isFailure(endreBeregning) && <ApiErrorAlert>Kunne ikke opprette ny beregning</ApiErrorAlert>}

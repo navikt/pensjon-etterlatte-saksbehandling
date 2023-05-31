@@ -9,6 +9,7 @@ import { requestLogger } from './middleware/logging'
 import { tokenMiddleware } from './middleware/getOboToken'
 import { proxy } from './middleware/proxy'
 import { loggerRouter } from './routers/loggerRouter'
+import { unleashContext, unleash } from './utils/unleash'
 
 logger.info(`environment: ${process.env.NODE_ENV}`)
 
@@ -29,6 +30,23 @@ if (isDev) {
   app.use('/api', mockRouter)
 } else {
   app.use('/api/logg', loggerRouter)
+
+  app.post('/api/feature', express.json(), (req: Request, res: Response) => {
+    const toggles: string[] = req.body.features
+
+    res.json(
+      toggles.map((toggle) => {
+        const enabled = unleash.isEnabled(toggle, unleashContext, false)
+
+        logger.info(`${toggle} enabled: ${enabled}`)
+
+        return {
+          toggle: toggle,
+          enabled: enabled,
+        }
+      })
+    )
+  })
 
   app.use(authenticateUser) // Alle ruter etter denne er authenticated
   app.use('/api/modiacontextholder/', modiaRouter) // bytte ut med etterlatte-innlogget?

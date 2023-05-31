@@ -183,6 +183,21 @@ internal class BeregnOmstillingsstoenadServiceTest {
         }
     }
 
+    @Test
+    fun `skal feile hvis trygdetid ikke finnes`() {
+        val behandling = mockBehandling(BehandlingType.FØRSTEGANGSBEHANDLING)
+        val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
+
+        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
+        coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns null
+
+        runBlocking {
+            assertThrows<Exception> {
+                beregnOmstillingsstoenadService.beregn(behandling, bruker)
+            }
+        }
+    }
+
     private fun mockBehandling(type: BehandlingType, virk: YearMonth = VIRKNINGSTIDSPUNKT_JAN_23): DetaljertBehandling =
         mockk<DetaljertBehandling>().apply {
             every { id } returns randomUUID()

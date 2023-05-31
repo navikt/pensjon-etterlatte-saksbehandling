@@ -29,9 +29,9 @@ class TrygdetidKlient(config: Config, httpClient: HttpClient) {
     suspend fun hentTrygdetid(
         behandlingId: UUID,
         bruker: Bruker
-    ): TrygdetidDto {
+    ): TrygdetidDto? {
         logger.info("Henter trygdetid med behandlingid $behandlingId")
-        return retry<TrygdetidDto> {
+        return retry<TrygdetidDto?> {
             downstreamResourceClient
                 .get(
                     resource = Resource(
@@ -41,7 +41,7 @@ class TrygdetidKlient(config: Config, httpClient: HttpClient) {
                     bruker = bruker
                 )
                 .mapBoth(
-                    success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
+                    success = { resource -> resource.response?.let { objectMapper.readValue(it.toString()) } },
                     failure = { throwableErrorMessage -> throw throwableErrorMessage }
                 )
         }.let {

@@ -10,7 +10,6 @@ import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toTimestamp
 import no.nav.etterlatte.libs.common.toJson
-import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.database.tidspunkt
 import no.nav.etterlatte.libs.database.transaction
 import java.time.Period
@@ -307,7 +306,7 @@ class TrygdetidRepository(private val dataSource: DataSource) {
         return Opplysningsgrunnlag(
             id = uuid("id"),
             type = string("type").let { TrygdetidOpplysningType.valueOf(it) },
-            opplysning = string("opplysning").toJsonNode(),
+            opplysning = string("opplysning").let { objectMapper.readValue(it) },
             kilde = string("kilde").let { objectMapper.readValue(it) }
         )
     }

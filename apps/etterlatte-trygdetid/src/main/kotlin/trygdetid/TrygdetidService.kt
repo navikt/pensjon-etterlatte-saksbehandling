@@ -1,6 +1,8 @@
 package no.nav.etterlatte.trygdetid
 
 import com.fasterxml.jackson.databind.JsonNode
+import no.nav.etterlatte.libs.common.behandling.BehandlingType
+import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsdata
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning.RegelKilde
 import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
@@ -9,6 +11,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.token.Bruker
 import no.nav.etterlatte.trygdetid.klienter.BehandlingKlient
 import no.nav.etterlatte.trygdetid.klienter.GrunnlagKlient
+import org.slf4j.LoggerFactory
 import java.util.*
 
 class TrygdetidService(
@@ -17,6 +20,9 @@ class TrygdetidService(
     private val grunnlagKlient: GrunnlagKlient,
     private val beregnTrygdetidService: TrygdetidBeregningService
 ) {
+
+    private val logger = LoggerFactory.getLogger(TrygdetidService::class.java)
+
     fun hentTrygdetid(behandlingsId: UUID): Trygdetid? = trygdetidRepository.hentTrygdetid(behandlingsId)
 
     suspend fun opprettTrygdetid(behandlingId: UUID, bruker: Bruker): Trygdetid =
@@ -24,16 +30,27 @@ class TrygdetidService(
             trygdetidRepository.hentTrygdetid(behandlingId)?.let {
                 throw IllegalArgumentException("Trygdetid finnes allerede for behandling $behandlingId")
             }
-
             val behandling = behandlingKlient.hentBehandling(behandlingId, bruker)
-            val avdoed = grunnlagKlient.hentGrunnlag(behandling.sak, bruker).hentAvdoed()
-            val trygdetid = Trygdetid(
-                sakId = behandling.sak,
-                behandlingId = behandling.id,
-                opplysninger = hentOpplysninger(avdoed)
-            )
-
-            trygdetidRepository.opprettTrygdetid(trygdetid)
+            when (behandling.behandlingType) {
+                BehandlingType.FØRSTEGANGSBEHANDLING -> {
+                    logger.info("Oppretter trygdetid for behandling $behandlingId")
+                    val avdoed = grunnlagKlient.hentGrunnlag(behandling.sak, bruker).hentAvdoed()
+                    val trygdetid = Trygdetid(
+                        sakId = behandling.sak,
+                        behandlingId = behandling.id,
+                        opplysninger = hentOpplysninger(avdoed)
+                    )
+                    trygdetidRepository.opprettTrygdetid(trygdetid)
+                }
+                BehandlingType.REVURDERING -> {
+                    logger.info("Kopierer trygdetid for behandling $behandlingId fra forrige behandling")
+                    val forrigeBehandling = behandlingKlient.hentSisteIverksatteBehandling(behandling.sak, bruker)
+                    kopierSisteTrygdetidberegning(behandling, forrigeBehandling.id)
+                }
+                else -> throw RuntimeException(
+                    "Støtter ikke trygdetid for behandlingType=${behandling.behandlingType}"
+                )
+            }
         }
 
     suspend fun lagreTrygdetidGrunnlag(
@@ -73,16 +90,24 @@ class TrygdetidService(
         forrigeBehandlingId: UUID,
         bruker: Bruker
     ): Trygdetid {
+        val behandling = behandlingKlient.hentBehandling(behandlingId, bruker)
+        return kopierSisteTrygdetidberegning(behandling, forrigeBehandlingId)
+    }
+
+    private fun kopierSisteTrygdetidberegning(
+        behandling: DetaljertBehandling,
+        forrigeBehandlingId: UUID
+    ): Trygdetid {
+        logger.info("Kopierer trygdetid for behandling ${behandling.id} fra behandling $forrigeBehandlingId")
         val forrigeTrygdetid = requireNotNull(hentTrygdetid(forrigeBehandlingId)) {
             "Fant ingen trygdetid for behandlingId=$forrigeBehandlingId"
         }
-        val regulering = behandlingKlient.hentBehandling(behandlingId, bruker)
 
         val kopiertTrygdetid = Trygdetid(
-            sakId = regulering.sak,
-            behandlingId = regulering.id,
-            opplysninger = forrigeTrygdetid.opplysninger,
-            trygdetidGrunnlag = forrigeTrygdetid.trygdetidGrunnlag,
+            sakId = behandling.sak,
+            behandlingId = behandling.id,
+            opplysninger = forrigeTrygdetid.opplysninger.map { it.copy(id = UUID.randomUUID()) },
+            trygdetidGrunnlag = forrigeTrygdetid.trygdetidGrunnlag.map { it.copy(id = UUID.randomUUID()) },
             beregnetTrygdetid = forrigeTrygdetid.beregnetTrygdetid
         )
 

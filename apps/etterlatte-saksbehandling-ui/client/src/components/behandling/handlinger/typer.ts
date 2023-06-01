@@ -11,7 +11,7 @@ export const handlinger = {
     OPPHOER: { id: 'opphoer', navn: 'Gå til beregning' },
   },
   ATTESTERING: { id: 'beregne', navn: 'Send til attestering' },
-  AVBRYT: { id: 'avbryt', navn: 'Avbryt behandling' },
+  AVBRYT: { id: 'avbryt', navn: 'Avbryt behandling og annuller saken' },
 
   AVBRYT_MODAL: {
     JA: { id: 'ja', navn: 'Ja, avbryt behandling' },

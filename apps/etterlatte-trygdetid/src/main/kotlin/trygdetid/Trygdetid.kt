@@ -26,6 +26,10 @@ data class Trygdetid(
         )
     }
 
+    fun slettTrygdetidGrunnlag(trygdetidGrunnlagId: UUID): Trygdetid = this.copy(
+        trygdetidGrunnlag = this.trygdetidGrunnlag.filter { it.id != trygdetidGrunnlagId }
+    )
+
     fun oppdaterBeregnetTrygdetid(beregnetTrygdetid: BeregnetTrygdetid): Trygdetid {
         return this.copy(beregnetTrygdetid = beregnetTrygdetid)
     }

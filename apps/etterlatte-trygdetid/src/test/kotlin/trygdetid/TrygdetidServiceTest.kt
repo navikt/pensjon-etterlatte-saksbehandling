@@ -1,5 +1,6 @@
 package trygdetid
 
+import io.kotest.matchers.collections.shouldNotContain
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.mockk.clearAllMocks
@@ -278,6 +279,36 @@ internal class TrygdetidServiceTest {
                 }
             )
             beregningService.beregnTrygdetidGrunnlag(any())
+            beregningService.beregnTrygdetid(any())
+            behandlingKlient.settBehandlingStatusVilkaarsvurdert(behandlingId, saksbehandler)
+        }
+    }
+
+    @Test
+    fun `skal slette trygdetidsgrunnlag`() {
+        val behandlingId = randomUUID()
+        val trygdetidGrunnlag = trygdetidGrunnlag()
+        val eksisterendeTrygdetid = trygdetid(behandlingId, trygdetidGrunnlag = listOf(trygdetidGrunnlag))
+
+        coEvery { behandlingKlient.settBehandlingStatusVilkaarsvurdert(any(), any()) } returns true
+        every { repository.hentTrygdetid(behandlingId) } returns eksisterendeTrygdetid
+        every { repository.oppdaterTrygdetid(any()) } answers { firstArg() }
+
+        val trygdetid = runBlocking {
+            service.slettTrygdetidGrunnlag(behandlingId, trygdetidGrunnlag.id, saksbehandler)
+        }
+
+        trygdetid.trygdetidGrunnlag shouldNotContain trygdetidGrunnlag
+        trygdetid.beregnetTrygdetid shouldBe null
+
+        coVerify(exactly = 1) {
+            behandlingKlient.kanBeregnes(behandlingId, saksbehandler)
+            repository.hentTrygdetid(behandlingId)
+            repository.oppdaterTrygdetid(
+                withArg {
+                    it.trygdetidGrunnlag shouldBe emptyList()
+                }
+            )
             beregningService.beregnTrygdetid(any())
             behandlingKlient.settBehandlingStatusVilkaarsvurdert(behandlingId, saksbehandler)
         }

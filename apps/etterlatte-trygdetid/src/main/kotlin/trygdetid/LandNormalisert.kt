@@ -33,7 +33,7 @@ enum class LandNormalisert(val isoCode: String, val beskrivelse: String) {
     BAHAMAS("BHS", "Bahamas"),
     BOSNIA_HERCEGOVINA("BIH", "Bosnia-Hercegovina"),
     SAINT_BARTHELEMY("BLM", "Saint Barthelemy"),
-    HVITERUSSLAND("BLR", "Hviterussland"),
+    BELARUS("BLR", "Belarus"),
     BELIZE("BLZ", "Belize"),
     BERMUDA("BMU", "Bermuda"),
     BOLIVIA("BOL", "Bolivia"),

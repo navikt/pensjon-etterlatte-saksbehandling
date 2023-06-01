@@ -7,6 +7,9 @@ import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.trygdetid.KodeverkService
+import no.nav.etterlatte.trygdetid.LandNormalisert
+import no.nav.etterlatte.trygdetid.klienter.Beskrivelse
+import no.nav.etterlatte.trygdetid.klienter.Betydning
 import no.nav.etterlatte.trygdetid.klienter.KodeverkKlient
 import no.nav.etterlatte.trygdetid.klienter.KodeverkResponse
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -38,6 +41,30 @@ internal class KodeverkServiceTest {
         }
 
         coVerify(exactly = 1) { mockKlient.hentLandkoder() }
+    }
+
+    @Test
+    fun `Sjekk at mapping blir riktig`() {
+        val betydning = Betydning(
+            gyldigTil = "1900-01-01",
+            gyldigFra = "9999-12-31",
+            beskrivelser = mapOf<String, Beskrivelse>(Pair("nb", Beskrivelse("term", "tekst")))
+        )
+        val testdatasandwich = mapOf<String, List<Betydning>>(
+            Pair(
+                LandNormalisert.SOR_GEORGIA_OG_SOR_SANDWICHOYENE.isoCode,
+                listOf<Betydning>(betydning)
+            )
+        )
+
+        coEvery { mockKlient.hentLandkoder() } returns KodeverkResponse(testdatasandwich)
+
+        runBlocking {
+            val alleLand = service.hentAlleLand()
+            assertEquals(1, alleLand.size)
+            val land = alleLand[0]
+            assertEquals(LandNormalisert.SOR_GEORGIA_OG_SOR_SANDWICHOYENE.beskrivelse, land.beskrivelse.tekst)
+        }
     }
 
     private fun opprettLandkoderResponse(): KodeverkResponse =

@@ -129,8 +129,8 @@ class VedtaksbrevService(
 
         val brevRequest = BrevbakerRequest.fra(behandling, avsender, mottaker, attestant)
 
-        val brevbakerBrev = brevbaker.genererPdf(brevRequest)
-        val brev = Base64.getDecoder().decode(brevbakerBrev.base64pdf)
+        val brevbakerResponse = brevbaker.genererPdf(brevRequest)
+        val brev = Base64.getDecoder().decode(brevbakerResponse.base64pdf)
 
         logger.info("Generert brev for vedtak (vedtakId=${behandling.vedtak.id}) med størrelse: ${brev.size}")
 

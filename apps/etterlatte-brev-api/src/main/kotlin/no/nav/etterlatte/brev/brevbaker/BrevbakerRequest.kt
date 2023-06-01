@@ -49,7 +49,7 @@ data class BrevbakerRequest(
                     ),
                     vergeNavn = null
                 ),
-                language = LanguageCode.BOKMAL
+                language = LanguageCode.createLanguageCode(behandling.spraak.verdi)
             )
         }
     }

@@ -32,9 +32,9 @@ class KodeverkService(private val klient: KodeverkKlient) {
                 betydningMedIsoKode.beskrivelser["nb"]?.let { beskrivelse ->
                     Land(
                         isoLandkode = betydningMedIsoKode.isolandkode,
-                        betydningMedIsoKode.gyldigFra,
-                        betydningMedIsoKode.gyldigTil,
-                        LandNormalisert.hentBeskrivelse(betydningMedIsoKode.isolandkode)
+                        gyldigFra = betydningMedIsoKode.gyldigFra,
+                        gyldigTil = betydningMedIsoKode.gyldigTil,
+                        beskrivelse = LandNormalisert.hentBeskrivelse(betydningMedIsoKode.isolandkode)
                             ?.let { Beskrivelse(term = beskrivelse.term, tekst = it) } ?: beskrivelse
                     )
                 }

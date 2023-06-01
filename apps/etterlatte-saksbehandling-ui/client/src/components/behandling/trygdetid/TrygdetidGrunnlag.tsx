@@ -1,7 +1,13 @@
 import { Button, Heading, Label, Select } from '@navikt/ds-react'
 import { FormKnapper, FormWrapper, Innhold } from '~components/behandling/trygdetid/styled'
 import { isFailure, isPending, useApiCall } from '~shared/hooks/useApiCall'
-import { ITrygdetid, ITrygdetidGrunnlag, ITrygdetidGrunnlagType, lagreTrygdetidgrunnlag } from '~shared/api/trygdetid'
+import {
+  ILand,
+  ITrygdetid,
+  ITrygdetidGrunnlag,
+  ITrygdetidGrunnlagType,
+  lagreTrygdetidgrunnlag,
+} from '~shared/api/trygdetid'
 import React, { FormEvent, useRef, useState } from 'react'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import styled from 'styled-components'
@@ -15,6 +21,7 @@ type Props = {
   trygdetid: ITrygdetid
   setTrygdetid: (trygdetid: ITrygdetid) => void
   trygdetidGrunnlagType: ITrygdetidGrunnlagType
+  landListe: ILand[]
 }
 
 const initialState = (type: ITrygdetidGrunnlagType) => {
@@ -28,7 +35,7 @@ const initialState = (type: ITrygdetidGrunnlagType) => {
   }
 }
 
-export const TrygdetidGrunnlag: React.FC<Props> = ({ trygdetid, setTrygdetid, trygdetidGrunnlagType }) => {
+export const TrygdetidGrunnlag: React.FC<Props> = ({ trygdetid, setTrygdetid, trygdetidGrunnlagType, landListe }) => {
   const { behandlingId } = useParams()
   const eksisterendeGrunnlag = trygdetid.trygdetidGrunnlag.find((grunnlag) => grunnlag.type === trygdetidGrunnlagType)
   const [trygdetidgrunnlag, setTrygdetidgrunnlag] = useState<ITrygdetidGrunnlag>(
@@ -70,7 +77,7 @@ export const TrygdetidGrunnlag: React.FC<Props> = ({ trygdetid, setTrygdetid, tr
     <TrygdetidGrunnlagWrapper>
       {
         {
-          [ITrygdetidGrunnlagType.NASJONAL]: (
+          [ITrygdetidGrunnlagType.FAKTISK]: (
             <>
               <Heading spacing size="small" level="3">
                 Faktisk trygdetid
@@ -106,9 +113,11 @@ export const TrygdetidGrunnlag: React.FC<Props> = ({ trygdetid, setTrygdetid, tr
                   autoComplete="off"
                 >
                   <option value="">Velg land</option>
-                  <option key={`NORGE-${trygdetidGrunnlagType}`} value="NORGE">
-                    Norge
-                  </option>
+                  {landListe.map((land) => (
+                    <option key={`${land.isoLandkode}-${trygdetidGrunnlagType}`} value={land.isoLandkode}>
+                      {land.beskrivelse.tekst}
+                    </option>
+                  ))}
                 </Select>
               </Land>
 

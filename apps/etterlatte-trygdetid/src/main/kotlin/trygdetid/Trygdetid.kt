@@ -29,6 +29,10 @@ data class Trygdetid(
     fun oppdaterBeregnetTrygdetid(beregnetTrygdetid: BeregnetTrygdetid): Trygdetid {
         return this.copy(beregnetTrygdetid = beregnetTrygdetid)
     }
+
+    fun nullstillBeregnetTrygdetid(): Trygdetid {
+        return this.copy(beregnetTrygdetid = null)
+    }
 }
 
 data class BeregnetTrygdetid(
@@ -73,9 +77,11 @@ data class TrygdetidGrunnlag(
     val kilde: Grunnlagsopplysning.Saksbehandler,
     val beregnetTrygdetid: BeregnetTrygdetidGrunnlag? = null
 ) {
-    fun oppdaterBeregnetTrygdetid(beregnetTrygdetid: BeregnetTrygdetidGrunnlag): TrygdetidGrunnlag {
+    fun oppdaterBeregnetTrygdetid(beregnetTrygdetid: BeregnetTrygdetidGrunnlag?): TrygdetidGrunnlag {
         return this.copy(beregnetTrygdetid = beregnetTrygdetid)
     }
+
+    fun erNasjonal() = this.bosted == LandNormalisert.NORGE.isoCode
 }
 
 data class BeregnetTrygdetidGrunnlag(val verdi: Period, val tidspunkt: Tidspunkt, val regelResultat: JsonNode)

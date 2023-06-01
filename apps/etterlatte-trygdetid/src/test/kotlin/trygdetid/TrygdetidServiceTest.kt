@@ -16,6 +16,7 @@ import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
 import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsdato
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
+import no.nav.etterlatte.trygdetid.LandNormalisert
 import no.nav.etterlatte.trygdetid.Opplysningsgrunnlag
 import no.nav.etterlatte.trygdetid.TrygdetidBeregningService
 import no.nav.etterlatte.trygdetid.TrygdetidOpplysningType
@@ -203,11 +204,49 @@ internal class TrygdetidServiceTest {
     }
 
     @Test
+    fun `Perioder utenfor Norge skal ikke gi trygdetid`() {
+        val behandlingId = randomUUID()
+        val trygdetidGrunnlag = trygdetidGrunnlag()
+        val eksisterendeTrygdetid = trygdetid(behandlingId)
+
+        coEvery { behandlingKlient.settBehandlingStatusVilkaarsvurdert(any(), any()) } returns true
+        every { repository.hentTrygdetid(behandlingId) } returns eksisterendeTrygdetid
+        every { repository.oppdaterTrygdetid(any()) } answers { firstArg() }
+
+        val trygdetid = runBlocking {
+            service.lagreTrygdetidGrunnlag(
+                behandlingId,
+                saksbehandler,
+                trygdetidGrunnlag.copy(bosted = LandNormalisert.POLEN.isoCode)
+            )
+        }
+
+        with(trygdetid.trygdetidGrunnlag.first()) {
+            bosted shouldBe LandNormalisert.POLEN.isoCode
+            beregnetTrygdetid shouldBe null
+        }
+        trygdetid.beregnetTrygdetid shouldBe null
+
+        coVerify(exactly = 1) {
+            behandlingKlient.kanBeregnes(behandlingId, saksbehandler)
+            repository.hentTrygdetid(behandlingId)
+            repository.oppdaterTrygdetid(
+                withArg {
+                    it.trygdetidGrunnlag.first().let { tg -> tg.id shouldBe trygdetidGrunnlag.id }
+                }
+            )
+            behandlingKlient.settBehandlingStatusVilkaarsvurdert(behandlingId, saksbehandler)
+            beregningService.beregnTrygdetidGrunnlag(any())
+            beregningService.beregnTrygdetid(any())
+        }
+    }
+
+    @Test
     fun `skal oppdatere trygdetidsgrunnlag`() {
         val behandlingId = randomUUID()
         val trygdetidGrunnlag = trygdetidGrunnlag()
         val eksisterendeTrygdetid = trygdetid(behandlingId, trygdetidGrunnlag = listOf(trygdetidGrunnlag))
-        val endretTrygdetidGrunnlag = trygdetidGrunnlag.copy(bosted = "Polen")
+        val endretTrygdetidGrunnlag = trygdetidGrunnlag.copy(bosted = LandNormalisert.NORGE.isoCode)
 
         coEvery { behandlingKlient.settBehandlingStatusVilkaarsvurdert(any(), any()) } returns true
         every { repository.hentTrygdetid(behandlingId) } returns eksisterendeTrygdetid
@@ -234,7 +273,7 @@ internal class TrygdetidServiceTest {
                 withArg {
                     it.trygdetidGrunnlag.first().let { tg ->
                         tg.id shouldBe trygdetidGrunnlag.id
-                        tg.bosted shouldBe "Polen"
+                        tg.bosted shouldBe LandNormalisert.NORGE.isoCode
                     }
                 }
             )

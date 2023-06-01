@@ -75,7 +75,7 @@ internal class MigreringHendelser(rapidsConnection: RapidsConnection, private va
 
     private fun tilGrunnlag(trygdetidsgrunnlag: Trygdetidsgrunnlag) = TrygdetidGrunnlagDto(
         id = null,
-        type = TrygdetidType.NASJONAL.name,
+        type = TrygdetidType.FAKTISK.name,
         bosted = trygdetidsgrunnlag.bosted,
         periodeFra = trygdetidsgrunnlag.fom,
         periodeTil = trygdetidsgrunnlag.tom,

@@ -13,7 +13,7 @@ import java.time.LocalDate
 import java.time.Period
 
 // TODO dato settes riktig senere
-val TRYGDETID_DATO = LocalDate.of(1900, 1, 1)
+val TRYGDETID_DATO: LocalDate = LocalDate.of(1900, 1, 1)
 
 data class TrygdetidPeriodeGrunnlag(
     val periodeFra: FaktumNode<LocalDate>,

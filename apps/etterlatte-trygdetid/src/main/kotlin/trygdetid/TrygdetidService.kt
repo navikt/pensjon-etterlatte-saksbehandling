@@ -42,24 +42,28 @@ class TrygdetidService(
         trygdetidGrunnlag: TrygdetidGrunnlag
     ): Trygdetid =
         tilstandssjekk(behandlingId, bruker) {
-            val trygdetidGrunnlagBeregnet = trygdetidGrunnlag.oppdaterBeregnetTrygdetid(
-                beregnTrygdetidService.beregnTrygdetidGrunnlag(trygdetidGrunnlag)
+            val trygdetidGrunnlagBeregnet: TrygdetidGrunnlag = trygdetidGrunnlag.oppdaterBeregnetTrygdetid(
+                beregnetTrygdetid = beregnTrygdetidService.beregnTrygdetidGrunnlag(trygdetidGrunnlag)
             )
 
-            val gjeldendeTrygdetid = trygdetidRepository.hentTrygdetid(behandlingId)
+            val gjeldendeTrygdetid: Trygdetid = trygdetidRepository.hentTrygdetid(behandlingId)
                 ?: throw Exception("Fant ikke gjeldende trygdetid for behandlingId=$behandlingId")
 
-            val trygdetidMedOppdatertTrygdetidGrunnlag =
+            val trygdetidMedOppdatertTrygdetidGrunnlag: Trygdetid =
                 gjeldendeTrygdetid.leggTilEllerOppdaterTrygdetidGrunnlag(trygdetidGrunnlagBeregnet)
 
-            val trygdetidBeregnet =
-                trygdetidMedOppdatertTrygdetidGrunnlag.oppdaterBeregnetTrygdetid(
-                    beregnTrygdetidService.beregnTrygdetid(
-                        trygdetidMedOppdatertTrygdetidGrunnlag.trygdetidGrunnlag
-                    )
-                )
+            val nyBeregnetTrygdetid: BeregnetTrygdetid? = beregnTrygdetidService.beregnTrygdetid(
+                trygdetidGrunnlag = trygdetidMedOppdatertTrygdetidGrunnlag.trygdetidGrunnlag
+            )
 
-            trygdetidRepository.oppdaterTrygdetid(trygdetidBeregnet).also {
+            val oppdatertTrygdetid: Trygdetid =
+                if (nyBeregnetTrygdetid != null) {
+                    trygdetidMedOppdatertTrygdetidGrunnlag.oppdaterBeregnetTrygdetid(nyBeregnetTrygdetid)
+                } else {
+                    trygdetidMedOppdatertTrygdetidGrunnlag.nullstillBeregnetTrygdetid()
+                }
+
+            trygdetidRepository.oppdaterTrygdetid(oppdatertTrygdetid).also {
                 behandlingKlient.settBehandlingStatusVilkaarsvurdert(behandlingId, bruker)
             }
         }

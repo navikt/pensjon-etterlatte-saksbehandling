@@ -75,6 +75,8 @@ class TrygdetidRepository(private val dataSource: DataSource) {
 
             if (oppdatertTrygdetid.beregnetTrygdetid != null) {
                 oppdaterBeregnetTrygdetid(oppdatertTrygdetid.behandlingId, oppdatertTrygdetid.beregnetTrygdetid, tx)
+            } else {
+                nullstillBeregnetTrygdetid(oppdatertTrygdetid.behandlingId, tx)
             }
         }.let { hentTrygdtidNotNull(oppdatertTrygdetid.behandlingId) }
 
@@ -210,6 +212,17 @@ class TrygdetidRepository(private val dataSource: DataSource) {
             tx.update(query)
         }
     }
+
+    private fun nullstillBeregnetTrygdetid(behandlingId: UUID, tx: TransactionalSession) = queryOf(
+        statement = """
+                UPDATE trygdetid 
+                SET trygdetid_total = null, 
+                    trygdetid_total_regelresultat = null,
+                    trygdetid_total_tidspunkt = null
+                WHERE behandling_id = :behandlingId
+        """.trimIndent(),
+        paramMap = mapOf("behandlingId" to behandlingId)
+    ).let { query -> tx.update(query) }
 
     private fun hentTrygdetidGrunnlag(trygdetidId: UUID): List<TrygdetidGrunnlag> =
         using(sessionOf(dataSource)) { session ->

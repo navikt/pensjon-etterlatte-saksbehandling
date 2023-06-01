@@ -1,31 +1,27 @@
 import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
-import { PeriodisertBeregningsgrunnlag } from '~components/behandling/beregningsgrunnlag/PeriodisertBeregningsgrunnlag'
 import React from 'react'
 import { LovtekstMedLenke } from '~components/behandling/soeknadsoversikt/soeknadoversikt/LovtekstMedLenke'
 import styled from 'styled-components'
-import { Heading } from '@navikt/ds-react'
-
-enum Reduksjon {
-  JA_VANLIG = 'Ja, etter vanlig sats(10% av G)',
-  NEI_KORT_OPPHOLD = 'Nei, kort opphold',
-  JA_EGEN_PROSENT_AV_G = 'Ja, utgifter til bolig(egen % av G)',
-  NEI_HOEYE_UTGIFTER_BOLIG = 'Nei, har høye utgifter til bolig',
-}
-
-export interface InstitusjonsoppholdIBeregning {
-  reduksjon: Reduksjon
-  egenReduksjon?: number
-  begrunnelse: string
-}
-
-export type InstitusjonsoppholdGrunnlag = PeriodisertBeregningsgrunnlag<InstitusjonsoppholdIBeregning[]>[]
+import { Heading, TextField } from '@navikt/ds-react'
+import { InstitusjonsoppholdGrunnlag } from '~shared/types/Beregning'
+import { Controller, useFieldArray, useForm } from 'react-hook-form'
+import MaanedVelger from '~components/behandling/beregningsgrunnlag/MaanedVelger'
 
 type InstitusjonsoppholdProps = {
   behandling: IBehandlingReducer
-  onSubmit: (data: InstitusjonsoppholdGrunnlag) => void
+  onSubmit: (data: InstitusjonsoppholdGrunnlag) => void //TODO: muyst be changed
 }
+
 const Institusjonsopphold = (props: InstitusjonsoppholdProps) => {
   const { behandling } = props
+  const { control } = useForm<{ institusjonsOppholdForm: InstitusjonsoppholdGrunnlag }>({
+    defaultValues: { institusjonsOppholdForm: behandling.beregningsGrunnlag?.institusjonsopphold },
+  })
+  const { fields } = useFieldArray({
+    name: 'institusjonsOppholdForm',
+    control,
+  })
+
   console.log(behandling.sakType)
   //TODO: hent hendelser på behandling som er av type instittusjonsopphold
   return (
@@ -53,6 +49,37 @@ const Institusjonsopphold = (props: InstitusjonsoppholdProps) => {
           Beregningsperiode institusjonsopphold
         </Heading>
       </InstitusjonsoppholdsWrapper>
+      <form>
+        <>
+          {fields.map((item, index) => (
+            <div key={item.id}>
+              <Controller
+                name={`institusjonsOppholdForm.${index}.fom`}
+                control={control}
+                render={(fom) => (
+                  <MaanedVelger
+                    label="Fra og med"
+                    value={fom.field.value}
+                    onChange={(date: Date | null) => fom.field.onChange(date)}
+                  />
+                )}
+              />
+              <Controller
+                name={`institusjonsOppholdForm.${index}.tom`}
+                control={control}
+                render={(tom) => (
+                  <MaanedVelger
+                    label="Til og med"
+                    value={tom.field.value}
+                    onChange={(date: Date | null) => tom.field.onChange(date)}
+                  />
+                )}
+              />
+              <TextField label="Reduksjon" />
+            </div>
+          ))}
+        </>
+      </form>
     </>
   )
 }

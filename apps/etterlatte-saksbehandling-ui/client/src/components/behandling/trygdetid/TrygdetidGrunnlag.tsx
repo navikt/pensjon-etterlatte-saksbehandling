@@ -114,8 +114,8 @@ export const TrygdetidGrunnlag: React.FC<Props> = ({ trygdetid, setTrygdetid, tr
                 >
                   <option value="">Velg land</option>
                   {landListe.map((land) => (
-                    <option key={`${land.beskrivelse.term}-${trygdetidGrunnlagType}`} value={land.beskrivelse.term}>
-                      {`${land.beskrivelse.tekst.charAt(0)}${land.beskrivelse.tekst.slice(1).toLowerCase()}`}
+                    <option key={`${land.isolandkode}-${trygdetidGrunnlagType}`} value={land.isolandkode}>
+                      {land.beskrivelse.tekst}
                     </option>
                   ))}
                 </Select>

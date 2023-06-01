@@ -131,6 +131,7 @@ spec:
         - application: etterlatte-statistikk
         - application: etterlatte-vilkaarsvurdering
         - application: etterlatte-vedtaksvurdering
+        - application: etterlatte-vedtaksvurdering-kafka
         - application: etterlatte-opplysninger-fra-soeknad
         - application: etterlatte-brev-api
           permissions:

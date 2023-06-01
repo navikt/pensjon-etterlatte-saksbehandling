@@ -62,6 +62,23 @@ class BehandlingKlient(config: Config, httpClient: HttpClient) : BehandlingTilga
             )
     }
 
+    suspend fun hentSisteIverksatteBehandling(sakId: Long, bruker: Bruker): DetaljertBehandling {
+        logger.info("Henter seneste iverksatte behandling for sak med id $sakId")
+
+        val response = downstreamResourceClient.get(
+            resource = Resource(clientId = clientId, url = "$resourceUrl/saker/$sakId/behandlinger/sisteIverksatte"),
+            bruker = bruker
+        )
+
+        return response.mapBoth(
+            success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
+            failure = {
+                logger.error("Kunne ikke hente seneste iverksatte behandling for sak med id $sakId")
+                throw it.throwable
+            }
+        )
+    }
+
     suspend fun settBehandlingStatusVilkaarsvurdert(
         behandlingId: UUID,
         bruker: Bruker

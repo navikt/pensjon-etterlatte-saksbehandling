@@ -11,6 +11,7 @@ import io.mockk.mockk
 import io.mockk.spyk
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
 import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsdato
@@ -81,6 +82,7 @@ internal class TrygdetidServiceTest {
         val behandling = mockk<DetaljertBehandling>().apply {
             every { id } returns behandlingId
             every { sak } returns sakId
+            every { behandlingType } returns BehandlingType.FØRSTEGANGSBEHANDLING
         }
         val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
         val forventetFoedselsdato = grunnlag.hentAvdoed().hentFoedselsdato()!!.verdi
@@ -131,6 +133,53 @@ internal class TrygdetidServiceTest {
         verify {
             behandling.id
             behandling.sak
+            behandling.behandlingType
+        }
+    }
+
+    @Test
+    fun `skal kopiere trygdetid hvis revurdering`() {
+        val behandlingId = randomUUID()
+        val sakId = 123L
+        val behandling = mockk<DetaljertBehandling>().apply {
+            every { id } returns behandlingId
+            every { sak } returns sakId
+            every { behandlingType } returns BehandlingType.REVURDERING
+        }
+        val forrigebehandlingId = randomUUID()
+        val forrigeBehandling = mockk<DetaljertBehandling>().apply {
+            every { id } returns forrigebehandlingId
+        }
+        val trygdetid = trygdetid(behandlingId, sakId)
+
+        every { repository.hentTrygdetid(behandlingId) } returns null
+        coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
+        coEvery { behandlingKlient.hentSisteIverksatteBehandling(any(), any()) } returns forrigeBehandling
+        every { repository.hentTrygdetid(forrigebehandlingId) } returns trygdetid
+        every { repository.opprettTrygdetid(any()) } returns trygdetid
+
+        runBlocking {
+            service.opprettTrygdetid(behandlingId, saksbehandler)
+        }
+
+        coVerify(exactly = 1) {
+            behandlingKlient.kanBeregnes(behandlingId, saksbehandler)
+            repository.hentTrygdetid(behandlingId)
+            behandlingKlient.hentBehandling(behandlingId, saksbehandler)
+            behandlingKlient.hentSisteIverksatteBehandling(sakId, saksbehandler)
+            repository.hentTrygdetid(forrigebehandlingId)
+
+            repository.opprettTrygdetid(
+                withArg {
+                    it.opplysninger shouldBe trygdetid.opplysninger
+                }
+            )
+        }
+        verify {
+            behandling.id
+            behandling.sak
+            behandling.behandlingType
+            forrigeBehandling.id
         }
     }
 
@@ -308,7 +357,7 @@ internal class TrygdetidServiceTest {
         val behandlingId = randomUUID()
         val forrigeBehandlingId = randomUUID()
         val forrigeTrygdetidGrunnlag = trygdetidGrunnlag()
-        val forrigeTrygdetidOpplysninger = mockk<List<Opplysningsgrunnlag>>()
+        val forrigeTrygdetidOpplysninger = listOf<Opplysningsgrunnlag>()
         val forrigeTrygdetid = trygdetid(
             behandlingId,
             trygdetidGrunnlag = listOf(forrigeTrygdetidGrunnlag),

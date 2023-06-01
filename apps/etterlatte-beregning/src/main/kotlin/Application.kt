@@ -6,7 +6,6 @@ import io.ktor.server.engine.applicationEngineEnvironment
 import io.ktor.server.engine.connector
 import io.ktor.server.engine.embeddedServer
 import no.nav.etterlatte.avkorting.avkorting
-import no.nav.etterlatte.avkorting.regulering.regulerAvkorting
 import no.nav.etterlatte.beregning.beregning
 import no.nav.etterlatte.beregning.grunnlag.beregningsGrunnlag
 import no.nav.etterlatte.config.ApplicationContext
@@ -37,7 +36,6 @@ class Server(private val context: ApplicationContext) {
                         beregning(beregningService, behandlingKlient)
                         beregningsGrunnlag(beregningsGrunnlagService, behandlingKlient)
                         avkorting(avkortingService, behandlingKlient)
-                        regulerAvkorting(regulerAvkortingService, behandlingKlient)
                     }
                 }
                 connector { port = properties.httpPort }

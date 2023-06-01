@@ -5,7 +5,6 @@ import com.typesafe.config.ConfigFactory
 import no.nav.etterlatte.avkorting.AvkortingRepository
 import no.nav.etterlatte.avkorting.AvkortingService
 import no.nav.etterlatte.avkorting.InntektAvkortingService
-import no.nav.etterlatte.avkorting.regulering.RegulerAvkortingService
 import no.nav.etterlatte.beregning.BeregnBarnepensjonService
 import no.nav.etterlatte.beregning.BeregnOmstillingsstoenadService
 import no.nav.etterlatte.beregning.BeregningRepository
@@ -77,5 +76,4 @@ class ApplicationContext {
         avkortingRepository = AvkortingRepository(dataSource),
         beregningService = beregningService
     )
-    val regulerAvkortingService = RegulerAvkortingService(avkortingService)
 }

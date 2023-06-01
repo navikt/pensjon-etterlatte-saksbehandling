@@ -9,6 +9,8 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
+import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
+import no.nav.pensjon.brevbaker.api.model.Kroner
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -21,7 +23,7 @@ internal class BehandlingTest {
     fun `MapSoeker mapper til Soeker`() {
         val grunnlag = opprettGrunnlag()
 
-        Assertions.assertEquals(Soeker("Søker mellom Barn", "16021254243"), grunnlag.mapSoeker())
+        Assertions.assertEquals(Soeker("Søker", "mellom", "Barn", Foedselsnummer("16021254243")), grunnlag.mapSoeker())
     }
 
     @Test
@@ -35,7 +37,7 @@ internal class BehandlingTest {
     fun `MapInnsender mapper til Innsender`() {
         val grunnlag = opprettGrunnlag()
 
-        Assertions.assertEquals(Innsender("Innsend Innsender", "11057523044"), grunnlag.mapInnsender())
+        Assertions.assertEquals(Innsender("Innsend Innsender", Foedselsnummer("11057523044")), grunnlag.mapInnsender())
     }
 
     @Test
@@ -81,9 +83,9 @@ internal class BehandlingTest {
     private fun opprettBeregningsperiode(fom: LocalDate, tom: LocalDate? = null, beloep: Int) = Beregningsperiode(
         fom,
         tom,
-        101011,
+        Kroner(101011),
         0,
-        beloep,
+        Kroner(beloep),
         10000
     )
 

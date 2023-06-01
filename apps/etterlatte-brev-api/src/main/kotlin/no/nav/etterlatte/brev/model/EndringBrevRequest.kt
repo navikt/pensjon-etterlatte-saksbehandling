@@ -12,11 +12,10 @@ class EndringBrevRequest(
     val barn: Soeker,
     val revurderingsaarsak: RevurderingAarsak,
     val avdoed: Avdoed,
-    override val spraak: Spraak,
     override val avsender: Avsender,
     override val mottaker: BrevMottaker,
     override val attestant: Attestant?
-) : BrevRequest() {
+) : BrevData() {
 
     override fun templateName(): String = "endring"
 
@@ -27,7 +26,6 @@ class EndringBrevRequest(
             mottaker: BrevMottaker,
             attestant: Attestant?
         ): EndringBrevRequest = EndringBrevRequest(
-            spraak = behandling.spraak,
             avsender = avsender,
             mottaker = mottaker,
             attestant = attestant,

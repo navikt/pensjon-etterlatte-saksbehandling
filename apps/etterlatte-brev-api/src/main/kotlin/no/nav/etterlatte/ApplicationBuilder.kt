@@ -18,6 +18,7 @@ import no.nav.etterlatte.brev.adresse.enhetsregister.BrregService
 import no.nav.etterlatte.brev.behandling.SakOgBehandlingService
 import no.nav.etterlatte.brev.behandlingklient.BehandlingKlient
 import no.nav.etterlatte.brev.beregning.BeregningKlient
+import no.nav.etterlatte.brev.brevbaker.BrevbakerKlient
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.distribusjon.DistribusjonKlient
 import no.nav.etterlatte.brev.distribusjon.DistribusjonServiceImpl
@@ -27,7 +28,6 @@ import no.nav.etterlatte.brev.dokument.SafClient
 import no.nav.etterlatte.brev.dokument.dokumentRoute
 import no.nav.etterlatte.brev.grunnlag.GrunnlagKlient
 import no.nav.etterlatte.brev.navansatt.NavansattKlient
-import no.nav.etterlatte.brev.pdf.PdfGeneratorKlient
 import no.nav.etterlatte.brev.vedtak.VedtaksvurderingKlient
 import no.nav.etterlatte.brev.vedtaksbrevRoute
 import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
@@ -79,7 +79,12 @@ class ApplicationBuilder {
         )
     }
 
-    private val pdfGenerator = PdfGeneratorKlient(httpClient(), env.requireEnvValue("ETTERLATTE_PDFGEN_URL"))
+    private val brevbaker =
+        BrevbakerKlient(
+            httpClient("BREVBAKER_SCOPE"),
+            env.requireEnvValue("BREVBAKER_URL")
+        )
+
     private val brregService = BrregService(BrregKlient(httpClient(), env.requireEnvValue("BRREG_URL")))
     private val regoppslagKlient = RegoppslagKlient(proxyClient, env.requireEnvValue("ETTERLATTE_PROXY_URL"))
     private val navansattKlient = NavansattKlient(navansattHttpKlient, env.requireEnvValue("NAVANSATT_URL"))
@@ -109,10 +114,10 @@ class ApplicationBuilder {
     private val vedtaksbrevService =
         VedtaksbrevService(
             db,
-            pdfGenerator,
             sakOgBehandlingService,
             adresseService,
-            dokarkivService
+            dokarkivService,
+            brevbaker
         )
 
     private val journalpostService =

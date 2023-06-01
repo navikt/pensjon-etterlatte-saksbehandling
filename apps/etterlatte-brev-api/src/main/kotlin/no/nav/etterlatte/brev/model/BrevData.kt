@@ -1,13 +1,11 @@
 package no.nav.etterlatte.brev.model
 
-import java.time.LocalDate
+import no.nav.pensjon.brevbaker.api.model.Telefonnummer
 
-abstract class BrevRequest {
-    abstract val spraak: Spraak
+abstract class BrevData {
     abstract val avsender: Avsender
     abstract val mottaker: BrevMottaker
     abstract val attestant: Attestant?
-    val utsendingsDato = LocalDate.now()
     abstract fun templateName(): String
 }
 
@@ -41,7 +39,7 @@ data class Avsender(
     val kontor: String,
     val adresse: String,
     val postnummer: String,
-    val telefon: String,
+    val telefonnummer: Telefonnummer,
     val saksbehandler: String
 )
 

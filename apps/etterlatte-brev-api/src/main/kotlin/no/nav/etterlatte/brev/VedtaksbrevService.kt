@@ -3,17 +3,17 @@ package no.nav.etterlatte.brev
 import no.nav.etterlatte.brev.adresse.AdresseService
 import no.nav.etterlatte.brev.behandling.Behandling
 import no.nav.etterlatte.brev.behandling.SakOgBehandlingService
+import no.nav.etterlatte.brev.brevbaker.BrevbakerKlient
+import no.nav.etterlatte.brev.brevbaker.BrevbakerRequest
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.dokarkiv.DokarkivServiceImpl
 import no.nav.etterlatte.brev.journalpost.JournalpostResponse
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.BrevInnhold
-import no.nav.etterlatte.brev.model.BrevRequestMapper
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.OpprettNyttBrev
 import no.nav.etterlatte.brev.model.Status
-import no.nav.etterlatte.brev.pdf.PdfGeneratorKlient
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.rivers.VedtakTilJournalfoering
 import no.nav.etterlatte.token.Bruker
@@ -22,10 +22,10 @@ import java.util.*
 
 class VedtaksbrevService(
     private val db: BrevRepository,
-    private val pdfGenerator: PdfGeneratorKlient,
     private val sakOgBehandlingService: SakOgBehandlingService,
     private val adresseService: AdresseService,
-    private val dokarkivService: DokarkivServiceImpl
+    private val dokarkivService: DokarkivServiceImpl,
+    private val brevbaker: BrevbakerKlient
 ) {
     private val logger = LoggerFactory.getLogger(VedtaksbrevService::class.java)
 
@@ -48,13 +48,13 @@ class VedtaksbrevService(
     ): Brev {
         val behandling = sakOgBehandlingService.hentBehandling(sakId, behandlingId, bruker)
 
-        val mottaker = adresseService.hentMottakerAdresse(behandling.persongalleri.innsender.fnr)
+        val mottaker = adresseService.hentMottakerAdresse(behandling.persongalleri.innsender.fnr.value)
 
         val vedtakType = behandling.vedtak.type
 
         val nyttBrev = OpprettNyttBrev(
             behandlingId = behandling.behandlingId,
-            soekerFnr = behandling.persongalleri.soeker.fnr,
+            soekerFnr = behandling.persongalleri.soeker.fnr.value,
             tittel = "Vedtak om ${vedtakType.name.lowercase()}",
             mottaker = mottaker,
             erVedtaksbrev = true
@@ -127,8 +127,13 @@ class VedtaksbrevService(
     private suspend fun genererPdf(behandling: Behandling, mottaker: Mottaker): ByteArray {
         val (avsender, attestant) = adresseService.hentAvsenderOgAttestant(behandling.vedtak)
 
-        val brevRequest = BrevRequestMapper.fra(behandling, avsender, mottaker, attestant)
+        val brevRequest = BrevbakerRequest.fra(behandling, avsender, mottaker, attestant)
 
-        return pdfGenerator.genererPdf(brevRequest)
+        val brevbakerResponse = brevbaker.genererPdf(brevRequest)
+        val brev = Base64.getDecoder().decode(brevbakerResponse.base64pdf)
+
+        logger.info("Generert brev for vedtak (vedtakId=${behandling.vedtak.id}) med størrelse: ${brev.size}")
+
+        return brev
     }
 }

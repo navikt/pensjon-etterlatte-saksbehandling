@@ -21,8 +21,8 @@ import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.OpprettNyttBrev
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.Status
-import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.toJson
+import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
 import java.util.*
 import javax.sql.DataSource
 
@@ -161,7 +161,7 @@ class BrevRepository(private val ds: DataSource) {
             status = row.string("status_id").let { Status.valueOf(it) },
             mottaker = Mottaker(
                 navn = row.string("navn"),
-                foedselsnummer = row.stringOrNull("foedselsnummer")?.let { Folkeregisteridentifikator.of(it) },
+                foedselsnummer = row.stringOrNull("foedselsnummer")?.let { Foedselsnummer(it) },
                 orgnummer = row.stringOrNull("orgnummer"),
                 adresse = Adresse(
                     adresseType = row.string("adressetype"),

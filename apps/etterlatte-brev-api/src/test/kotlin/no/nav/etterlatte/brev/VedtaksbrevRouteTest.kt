@@ -26,9 +26,9 @@ import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.Status
-import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
 import no.nav.etterlatte.libs.ktor.restModule
+import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
@@ -256,7 +256,7 @@ internal class VedtaksbrevRouteTest {
 
     companion object {
         private const val CLIENT_ID = "mock-client-id"
-        private val STOR_SNERK = Folkeregisteridentifikator.of("11057523044")
+        private val STOR_SNERK = Foedselsnummer("11057523044")
         private val BEHANDLING_ID = UUID.randomUUID()
     }
 }

@@ -23,9 +23,9 @@ import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.VedtakSak
 import no.nav.etterlatte.rivers.VedtakTilJournalfoering
+import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -109,6 +109,6 @@ internal class DokarkivServiceTest {
     )
 
     companion object {
-        private val STOR_SNERK = Folkeregisteridentifikator.of("11057523044")
+        private val STOR_SNERK = Foedselsnummer("11057523044")
     }
 }

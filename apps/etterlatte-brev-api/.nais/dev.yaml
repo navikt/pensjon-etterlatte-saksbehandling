@@ -49,6 +49,10 @@ spec:
     max: 1
     min: 1
   env:
+    - name: BREVBAKER_URL
+      value: https://pensjon-brevbaker.intern.dev.nav.no
+    - name: BREVBAKER_SCOPE
+      value: api://dev-gcp.pensjonsbrev.pensjon-brevbaker/.default
     - name: BRREG_URL
       value: https://data.brreg.no
     - name: NORG2_URL
@@ -112,6 +116,7 @@ spec:
         - host: dokdistfordeling-q1.dev-fss-pub.nais.io
         - host: data.brreg.no
         - host: navansatt.dev-fss-pub.nais.io
+        - host: pensjon-brevbaker.intern.dev.nav.no
 
     inbound:
       rules:

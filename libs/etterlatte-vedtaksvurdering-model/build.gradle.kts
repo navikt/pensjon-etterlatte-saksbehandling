@@ -5,3 +5,7 @@ plugins {
 repositories {
     mavenCentral()
 }
+
+dependencies {
+    implementation(project(":libs:saksbehandling-common"))
+}

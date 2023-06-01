@@ -6,7 +6,6 @@ import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.VedtakSak
-import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
 import no.nav.etterlatte.libs.common.vedtak.Behandling
 import no.nav.etterlatte.libs.common.vedtak.Utbetalingsperiode
@@ -64,13 +63,5 @@ data class Vedtak(
         attestasjon = attestasjon
     )
 }
-
-data class VedtakHendelse(
-    val vedtakId: Long,
-    val inntruffet: Tidspunkt,
-    val saksbehandler: String? = null,
-    val kommentar: String? = null,
-    val valgtBegrunnelse: String? = null
-)
 
 data class LoependeYtelse(val erLoepende: Boolean, val dato: LocalDate)

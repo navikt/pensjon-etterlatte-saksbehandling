@@ -6,7 +6,7 @@ enum class RevurderingAarsak(val kanBrukesDev: Boolean, val kanBrukesProd: Boole
     SOESKENJUSTERING(true, false),
     UTLAND(false, false),
     BARN(false, false),
-    DOEDSFALL(false, false),
+    DOEDSFALL(true, false),
     VERGEMAAL_ELLER_FREMTIDSFULLMAKT(false, false);
 
     fun kanBrukesIMiljo(): Boolean {

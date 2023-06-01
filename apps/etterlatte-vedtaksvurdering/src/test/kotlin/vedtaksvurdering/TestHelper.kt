@@ -31,6 +31,7 @@ val attestant = Saksbehandler("token", SAKSBEHANDLER_2, null)
 fun opprettVedtak(
     virkningstidspunkt: YearMonth = YearMonth.of(2023, Month.JANUARY),
     sakId: Long = 1L,
+    type: VedtakType = VedtakType.INNVILGELSE,
     behandlingId: UUID = UUID.randomUUID(),
     vilkaarsvurdering: ObjectNode? = objectMapper.createObjectNode(),
     beregning: ObjectNode? = objectMapper.createObjectNode(),
@@ -43,7 +44,7 @@ fun opprettVedtak(
     behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
     revurderingsaarsak = null,
     virkningstidspunkt = virkningstidspunkt,
-    type = VedtakType.INNVILGELSE,
+    type = type,
     beregning = beregning,
     avkorting = avkorting,
     vilkaarsvurdering = vilkaarsvurdering,

@@ -8,6 +8,7 @@ import no.nav.etterlatte.libs.common.utbetaling.UtbetalingStatusDto
 import no.nav.etterlatte.utbetaling.common.EVENT_NAME_OPPDATERT
 import no.nav.etterlatte.utbetaling.common.UtbetalingEventDto
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.IverksettResultat
+import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Saktype
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingService
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingStatus
 import no.nav.etterlatte.utbetaling.readFile
@@ -32,14 +33,21 @@ internal class VedtakMottakerTest {
     }
 
     @Test
-    fun `skal returnere GODKJENT når vedtak er OMS og vi returnerer mock data`(){
+    fun `skal returnere GODKJENT når vedtak er OMS`(){
+        val utbetaling = utbetaling(
+            utbetalingshendelser = listOf(utbetalingshendelse(status = UtbetalingStatus.GODKJENT)),
+            vedtakId = 1,
+            sakType = Saktype.OMSTILLINGSSTOENAD
+        )
+        every { utbetalingService.iverksettUtbetaling(any()) } returns
+                IverksettResultat.SendtTilOppdrag(utbetaling)
+
         inspector.apply { sendTestMessage(ATTESTERT_VEDTAK_OMS) }
         inspector.inspektør.message(0).run {
             val event = objectMapper.readValue(this.toJson(), UtbetalingEventDto::class.java)
             assertEquals(EVENT_NAME_OPPDATERT, event.event)
             assertEquals(UtbetalingStatusDto.valueOf(UtbetalingStatus.GODKJENT.name), event.utbetalingResponse.status)
             assertEquals(1, event.utbetalingResponse.vedtakId)
-            assertEquals(UUID.fromString("e89c6e25-4f22-48b3-b975-4c868d830913"), event.utbetalingResponse.behandlingId)
         }
     }
 

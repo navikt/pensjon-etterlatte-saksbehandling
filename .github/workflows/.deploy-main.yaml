@@ -9,7 +9,7 @@ on:
         type: string
 
 env:
-  image: ghcr.io/${{ github.repository }}/etterlatte-${{ inputs.applikasjon }}:main
+  image: europe-north1-docker.pkg.dev/nais-management-233d/etterlatte/pensjon-etterlatte-saksbehandling-etterlatte-${{ inputs.applikasjon }}:main
 
 jobs:
   deploy-main:

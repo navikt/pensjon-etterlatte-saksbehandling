@@ -3,7 +3,6 @@ import {
   PeriodisertBeregningsgrunnlagDto,
 } from '~components/behandling/beregningsgrunnlag/PeriodisertBeregningsgrunnlag'
 import { KildeSaksbehandler } from '~shared/types/kilde'
-import { InstitusjonsoppholdGrunnlag } from '~components/behandling/beregningsgrunnlag/Institusjonsopphold'
 
 export interface Beregning {
   beregningId: string
@@ -49,18 +48,19 @@ export interface SoeskenMedIBeregning {
 
 export interface BeregningsGrunnlagData {
   soeskenMedIBeregning: PeriodisertBeregningsgrunnlagDto<SoeskenMedIBeregning[]>[]
-  institusjonsopphold: InstitusjonsoppholdGrunnlag
+  institusjonsopphold: InstitusjonsoppholdGrunnlag | undefined
 }
 
-export type InstitusjonsoppholdGrunnlag = PeriodisertBeregningsgrunnlag<InstitusjonsoppholdIBeregning[]>[]
+export type InstitusjonsoppholdGrunnlag = PeriodisertBeregningsgrunnlag<InstitusjonsoppholdIBeregning>[]
 
 export interface InstitusjonsoppholdIBeregning {
   reduksjon: Reduksjon
   egenReduksjon?: number
-  begrunnelse: string
+  begrunnelse?: string | undefined
 }
 
-enum Reduksjon {
+export enum Reduksjon {
+  VELG_REDUKSJON = 'Velg reduksjon',
   JA_VANLIG = 'Ja, etter vanlig sats(10% av G)',
   NEI_KORT_OPPHOLD = 'Nei, kort opphold',
   JA_EGEN_PROSENT_AV_G = 'Ja, utgifter til bolig(egen % av G)',

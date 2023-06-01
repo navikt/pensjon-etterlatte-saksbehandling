@@ -8,5 +8,5 @@ data class BeregningsGrunnlag(
     val behandlingId: UUID,
     val kilde: Grunnlagsopplysning.Saksbehandler,
     val soeskenMedIBeregning: List<GrunnlagMedPeriode<List<SoeskenMedIBeregning>>>,
-    val institusjonsopphold: Institusjonsopphold
+    val institusjonsoppholdBeregnignsGrunnlag: List<GrunnlagMedPeriode<InstitusjonsoppholdBeregnignsGrunnlag>>
 )

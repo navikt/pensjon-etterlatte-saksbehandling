@@ -10,7 +10,7 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlag
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlagService
 import no.nav.etterlatte.beregning.grunnlag.GrunnlagMedPeriode
-import no.nav.etterlatte.beregning.grunnlag.Institusjonsopphold
+import no.nav.etterlatte.beregning.grunnlag.InstitusjonsoppholdBeregnignsGrunnlag
 import no.nav.etterlatte.beregning.regler.FNR_1
 import no.nav.etterlatte.beregning.regler.FNR_2
 import no.nav.etterlatte.beregning.regler.MAKS_TRYGDETID
@@ -560,7 +560,7 @@ internal class BeregnBarnepensjonServiceTest {
                     }
                 )
             ),
-            institusjonsopphold = Institusjonsopphold(false)
+            institusjonsoppholdBeregnignsGrunnlag = InstitusjonsoppholdBeregnignsGrunnlag(false)
 
         )
 

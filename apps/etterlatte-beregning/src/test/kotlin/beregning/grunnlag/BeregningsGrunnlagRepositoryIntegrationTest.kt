@@ -4,7 +4,8 @@ import io.mockk.clearAllMocks
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlag
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlagRepository
 import no.nav.etterlatte.beregning.grunnlag.GrunnlagMedPeriode
-import no.nav.etterlatte.beregning.grunnlag.Institusjonsopphold
+import no.nav.etterlatte.beregning.grunnlag.InstitusjonsoppholdBeregnignsGrunnlag
+import no.nav.etterlatte.beregning.grunnlag.Reduksjon
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeskenMedIBeregning
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
@@ -64,11 +65,12 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest {
     }
 
     @Test
-    fun `Opprettelse fungere`() {
+    fun `Opprettelse fungerer`() {
         val id = UUID.randomUUID()
 
         val soeskenMedIBeregning = listOf(SoeskenMedIBeregning(STOR_SNERK, true)).somPeriodisertGrunnlag()
-        val institusjonsopphold = Institusjonsopphold(false)
+        val institusjonsoppholdBeregnignsGrunnlag =
+            InstitusjonsoppholdBeregnignsGrunnlag(reduksjon = Reduksjon.JA_VANLIG)
 
         repository.lagre(
             BeregningsGrunnlag(
@@ -78,7 +80,7 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest {
                     Tidspunkt.now()
                 ),
                 soeskenMedIBeregning,
-                institusjonsopphold
+                institusjonsoppholdBeregnignsGrunnlag
             )
         )
 
@@ -87,11 +89,11 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest {
         assertNotNull(result)
 
         assertEquals(soeskenMedIBeregning, result?.soeskenMedIBeregning)
-        assertEquals(institusjonsopphold, result?.institusjonsopphold)
+        assertEquals(institusjonsoppholdBeregnignsGrunnlag, result?.institusjonsoppholdBeregnignsGrunnlag)
     }
 
     @Test
-    fun `Oppdatering fungere`() {
+    fun `Oppdatering fungerer`() {
         val id = UUID.randomUUID()
 
         val initialSoeskenMedIBeregning = listOf(SoeskenMedIBeregning(STOR_SNERK, true)).somPeriodisertGrunnlag()
@@ -100,8 +102,10 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest {
             SoeskenMedIBeregning(TRIVIELL_MIDTPUNKT, true)
         ).somPeriodisertGrunnlag()
 
-        val initialInstitusjonsopphold = Institusjonsopphold(false)
-        val oppdatertInstitusjonsopphold = Institusjonsopphold(true)
+        val initialInstitusjonsoppholdBeregnignsGrunnlag =
+            InstitusjonsoppholdBeregnignsGrunnlag(reduksjon = Reduksjon.NEI_KORT_OPPHOLD)
+        val oppdatertInstitusjonsoppholdBeregnignsGrunnlag =
+            InstitusjonsoppholdBeregnignsGrunnlag(reduksjon = Reduksjon.JA_VANLIG)
 
         repository.lagre(
             BeregningsGrunnlag(
@@ -111,7 +115,7 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest {
                     Tidspunkt.now()
                 ),
                 initialSoeskenMedIBeregning,
-                initialInstitusjonsopphold
+                initialInstitusjonsoppholdBeregnignsGrunnlag
             )
         )
 
@@ -123,7 +127,7 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest {
                     Tidspunkt.now()
                 ),
                 oppdatertSoeskenMedIBeregning,
-                oppdatertInstitusjonsopphold
+                oppdatertInstitusjonsoppholdBeregnignsGrunnlag
             )
         )
 
@@ -132,7 +136,7 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest {
         assertNotNull(result)
 
         assertEquals(oppdatertSoeskenMedIBeregning, result?.soeskenMedIBeregning)
-        assertEquals(oppdatertInstitusjonsopphold, result?.institusjonsopphold)
+        assertEquals(oppdatertInstitusjonsoppholdBeregnignsGrunnlag, result?.institusjonsoppholdBeregnignsGrunnlag)
         assertEquals("Z654321", result?.kilde?.ident)
     }
 

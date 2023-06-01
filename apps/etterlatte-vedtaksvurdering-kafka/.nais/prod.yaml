@@ -35,14 +35,7 @@ spec:
       value: api://prod-gcp.etterlatte.etterlatte-vedtaksvurdering/.default
     - name: ETTERLATTE_VEDTAK_URL
       value: http://etterlatte-vedtaksvurdering
-    - name: ETTERLATTE_BEHANDLING_URL
-      value: http://etterlatte-behandling
-    - name: ETTERLATTE_BEHANDLING_CLIENT_ID
-      value: prod-gcp.etterlatte.etterlatte-behandling
-    - name: BEHANDLING_AZURE_SCOPE
-      value: api://prod-gcp.etterlatte.etterlatte-behandling/.default
   accessPolicy:
     outbound:
       rules:
         - application: etterlatte-vedtaksvurdering
-        - application: etterlatte-behandling

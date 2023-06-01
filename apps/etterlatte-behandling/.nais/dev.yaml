@@ -124,7 +124,6 @@ spec:
         - application: etterlatte-vilkaarsvurdering
         - application: etterlatte-vilkaarsvurdering-lokal
         - application: etterlatte-vedtaksvurdering
-        - application: etterlatte-vedtaksvurdering-kafka
         - application: etterlatte-opplysninger-fra-soeknad
         - application: etterlatte-brev-api
           permissions:

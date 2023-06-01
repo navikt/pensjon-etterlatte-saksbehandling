@@ -7,6 +7,7 @@ import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.VedtakService
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
@@ -15,7 +16,6 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.utbetaling.UtbetalingResponseDto
 import no.nav.etterlatte.libs.common.utbetaling.UtbetalingStatusDto
 import no.nav.etterlatte.vedtaksvurdering.VedtakHendelse
-import no.nav.etterlatte.vedtaksvurdering.VedtaksvurderingService
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -25,7 +25,7 @@ import java.util.*
 
 internal class LagreIverksattVedtak(
     rapidsConnection: RapidsConnection,
-    private val vedtaksvurderingService: VedtaksvurderingService,
+    private val vedtaksvurderingService: VedtakService,
     private val behandlingHttpClient: HttpClient
 ) : River.PacketListener {
     init {
@@ -60,9 +60,8 @@ internal class LagreIverksattVedtak(
                 when (respons.status) {
                     UtbetalingStatusDto.GODKJENT, UtbetalingStatusDto.GODKJENT_MED_FEIL -> {
                         respons.behandlingId?.also { behandlingId ->
-                            vedtaksvurderingService.iverksattVedtak(behandlingId)
-                            requireNotNull(vedtaksvurderingService.hentVedtak(behandlingId)).also { vedtak ->
-                                postTilBehandling(behandlingId, vedtak.id)
+                            requireNotNull(vedtaksvurderingService.iverksattVedtak(behandlingId)).also { vedtak ->
+                                postTilBehandling(behandlingId, vedtak.vedtakId)
                             }
                         }
                             ?: logger.error(

@@ -22,6 +22,7 @@ interface VedtakService {
     fun fattVedtak(behandlingId: UUID): VedtakDto
     fun attesterVedtak(behandlingId: UUID): VedtakDto
     fun tilbakestillVedtak(behandlingId: UUID)
+    fun iverksattVedtak(behandlingId: UUID): VedtakDto
 }
 
 class VedtakServiceImpl(private val vedtakKlient: HttpClient, private val url: String) : VedtakService {
@@ -55,5 +56,11 @@ class VedtakServiceImpl(private val vedtakKlient: HttpClient, private val url: S
         runBlocking {
             vedtakKlient.patch("$url/api/vedtak/$behandlingId/tilbakestill")
         }
+    }
+
+    override fun iverksattVedtak(behandlingId: UUID): VedtakDto = runBlocking {
+        vedtakKlient.post("$url/api/vedtak/$behandlingId/iverksett") {
+            contentType(ContentType.Application.Json)
+        }.body()
     }
 }

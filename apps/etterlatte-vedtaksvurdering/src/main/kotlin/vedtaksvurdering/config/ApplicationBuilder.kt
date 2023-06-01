@@ -6,7 +6,6 @@ import io.ktor.server.config.HoconApplicationConfig
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.ktor.httpClient
-import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.libs.ktor.setReady
 import no.nav.etterlatte.vedtaksvurdering.VedtaksvurderingRepository
@@ -14,7 +13,6 @@ import no.nav.etterlatte.vedtaksvurdering.VedtaksvurderingService
 import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlientImpl
 import no.nav.etterlatte.vedtaksvurdering.klienter.BeregningKlientImpl
 import no.nav.etterlatte.vedtaksvurdering.klienter.VilkaarsvurderingKlientImpl
-import no.nav.etterlatte.vedtaksvurdering.rivers.LagreIverksattVedtak
 import no.nav.etterlatte.vedtaksvurdering.vedtaksvurderingRoute
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -62,16 +60,6 @@ class ApplicationBuilder {
                         dataSource.migrate()
                     }
                 })
-                LagreIverksattVedtak(
-                    rapidsConnection = this,
-                    vedtaksvurderingService = vedtaksvurderingService,
-                    behandlingHttpClient = httpClientClientCredentials(
-                        azureAppClientId = config.getString("azure.app.client.id"),
-                        azureAppJwk = config.getString("azure.app.jwk"),
-                        azureAppWellKnownUrl = config.getString("azure.app.well.known.url"),
-                        azureAppScope = config.getString("behandling.azure.scope")
-                    )
-                )
             }
 
     fun start() = setReady().also { rapidsConnection.start() }

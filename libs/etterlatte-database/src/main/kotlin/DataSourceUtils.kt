@@ -5,7 +5,7 @@ import kotliquery.sessionOf
 import kotliquery.using
 import javax.sql.DataSource
 
-fun <A> DataSource.transaction(operation: (TransactionalSession) -> A): A =
-    using(sessionOf(this)) { session ->
+fun <A> DataSource.transaction(returnGeneratedKey: Boolean = false, operation: (TransactionalSession) -> A): A =
+    using(sessionOf(this, returnGeneratedKey)) { session ->
         session.transaction { operation(it) }
     }

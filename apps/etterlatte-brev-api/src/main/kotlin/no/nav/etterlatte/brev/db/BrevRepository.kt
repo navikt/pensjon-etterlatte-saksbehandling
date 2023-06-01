@@ -22,6 +22,7 @@ import no.nav.etterlatte.brev.model.OpprettNyttBrev
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.libs.common.toJson
+import no.nav.etterlatte.libs.database.transaction
 import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
 import java.util.*
 import javax.sql.DataSource
@@ -41,96 +42,88 @@ class BrevRepository(private val ds: DataSource) {
     }
 
     fun opprettInnholdOgFerdigstill(id: BrevID, innhold: BrevInnhold) {
-        using(sessionOf(ds)) { session ->
-            session.transaction { tx ->
-                tx.run(
-                    queryOf(
-                        OPPRETT_INNHOLD_QUERY,
-                        mapOf(
-                            "brev_id" to id,
-                            "mal" to "",
-                            "spraak" to innhold.spraak.name,
-                            "bytes" to innhold.data
-                        )
-                    ).asUpdate
-                ).also { oppdatert -> require(oppdatert == 1) }
+        ds.transaction { tx ->
+            tx.run(
+                queryOf(
+                    OPPRETT_INNHOLD_QUERY,
+                    mapOf(
+                        "brev_id" to id,
+                        "mal" to "",
+                        "spraak" to innhold.spraak.name,
+                        "bytes" to innhold.data
+                    )
+                ).asUpdate
+            ).also { oppdatert -> require(oppdatert == 1) }
 
-                tx.lagreHendelse(id, Status.FERDIGSTILT)
-            }
+            tx.lagreHendelse(id, Status.FERDIGSTILT)
         }
     }
 
-    fun opprettBrev(ulagretBrev: OpprettNyttBrev): Brev = using(sessionOf(ds, returnGeneratedKey = true)) { session ->
-        session.transaction { tx ->
-            val id = tx.run(
-                queryOf(
-                    OPPRETT_BREV_QUERY,
-                    mapOf(
-                        "behandling_id" to ulagretBrev.behandlingId,
-                        "soeker_fnr" to ulagretBrev.soekerFnr,
-                        "tittel" to ulagretBrev.tittel,
-                        "vedtaksbrev" to ulagretBrev.erVedtaksbrev
-                    )
-                ).asUpdateAndReturnGeneratedKey
-            )
+    fun opprettBrev(ulagretBrev: OpprettNyttBrev): Brev = ds.transaction(true) { tx ->
+        val id = tx.run(
+            queryOf(
+                OPPRETT_BREV_QUERY,
+                mapOf(
+                    "behandling_id" to ulagretBrev.behandlingId,
+                    "soeker_fnr" to ulagretBrev.soekerFnr,
+                    "tittel" to ulagretBrev.tittel,
+                    "vedtaksbrev" to ulagretBrev.erVedtaksbrev
+                )
+            ).asUpdateAndReturnGeneratedKey
+        )
 
-            requireNotNull(id) { "Brev ikke opprettet!" }
+        requireNotNull(id) { "Brev ikke opprettet!" }
 
-            tx.run(
-                queryOf(
-                    OPPRETT_MOTTAKER_QUERY,
-                    mapOf(
-                        "brev_id" to id,
-                        "foedselsnummer" to ulagretBrev.mottaker.foedselsnummer?.value,
-                        "orgnummer" to ulagretBrev.mottaker.orgnummer,
-                        "navn" to ulagretBrev.mottaker.navn,
-                        "adressetype" to ulagretBrev.mottaker.adresse.adresseType,
-                        "adresselinje1" to ulagretBrev.mottaker.adresse.adresselinje1,
-                        "adresselinje2" to ulagretBrev.mottaker.adresse.adresselinje2,
-                        "adresselinje3" to ulagretBrev.mottaker.adresse.adresselinje3,
-                        "postnummer" to ulagretBrev.mottaker.adresse.postnummer,
-                        "poststed" to ulagretBrev.mottaker.adresse.poststed,
-                        "landkode" to ulagretBrev.mottaker.adresse.landkode,
-                        "land" to ulagretBrev.mottaker.adresse.land
-                    )
-                ).asUpdate
-            )
+        tx.run(
+            queryOf(
+                OPPRETT_MOTTAKER_QUERY,
+                mapOf(
+                    "brev_id" to id,
+                    "foedselsnummer" to ulagretBrev.mottaker.foedselsnummer?.value,
+                    "orgnummer" to ulagretBrev.mottaker.orgnummer,
+                    "navn" to ulagretBrev.mottaker.navn,
+                    "adressetype" to ulagretBrev.mottaker.adresse.adresseType,
+                    "adresselinje1" to ulagretBrev.mottaker.adresse.adresselinje1,
+                    "adresselinje2" to ulagretBrev.mottaker.adresse.adresselinje2,
+                    "adresselinje3" to ulagretBrev.mottaker.adresse.adresselinje3,
+                    "postnummer" to ulagretBrev.mottaker.adresse.postnummer,
+                    "poststed" to ulagretBrev.mottaker.adresse.poststed,
+                    "landkode" to ulagretBrev.mottaker.adresse.landkode,
+                    "land" to ulagretBrev.mottaker.adresse.land
+                )
+            ).asUpdate
+        )
 
-            tx.lagreHendelse(id, Status.OPPRETTET)
-                .also { oppdatert -> require(oppdatert == 1) }
+        tx.lagreHendelse(id, Status.OPPRETTET)
+            .also { oppdatert -> require(oppdatert == 1) }
 
-            Brev.fra(id, ulagretBrev)
-        }
+        Brev.fra(id, ulagretBrev)
     }
 
     fun settBrevJournalfoert(brevId: BrevID, journalpostResponse: JournalpostResponse): Boolean =
-        using(sessionOf(ds)) { session ->
-            session.transaction { tx ->
-                tx.run(
-                    queryOf(
-                        "UPDATE brev SET journalpost_id = ? WHERE id = ?",
-                        journalpostResponse.journalpostId,
-                        brevId
-                    ).asUpdate
-                ).also { oppdatert -> require(oppdatert == 1) }
+        ds.transaction { tx ->
+            tx.run(
+                queryOf(
+                    "UPDATE brev SET journalpost_id = ? WHERE id = ?",
+                    journalpostResponse.journalpostId,
+                    brevId
+                ).asUpdate
+            ).also { oppdatert -> require(oppdatert == 1) }
 
-                tx.lagreHendelse(brevId, Status.JOURNALFOERT, journalpostResponse.toJson()) > 0
-            }
+            tx.lagreHendelse(brevId, Status.JOURNALFOERT, journalpostResponse.toJson()) > 0
         }
 
     fun settBrevDistribuert(brevId: Long, distResponse: DistribuerJournalpostResponse): Boolean =
-        using(sessionOf(ds)) { session ->
-            session.transaction { tx ->
-                tx.run(
-                    queryOf(
-                        "UPDATE brev SET bestilling_id = ? WHERE id = ?",
-                        distResponse.bestillingsId,
-                        brevId
-                    ).asUpdate
-                ).also { oppdatert -> require(oppdatert == 1) }
+        ds.transaction { tx ->
+            tx.run(
+                queryOf(
+                    "UPDATE brev SET bestilling_id = ? WHERE id = ?",
+                    distResponse.bestillingsId,
+                    brevId
+                ).asUpdate
+            ).also { oppdatert -> require(oppdatert == 1) }
 
-                tx.lagreHendelse(brevId, Status.DISTRIBUERT, distResponse.toJson()) > 0
-            }
+            tx.lagreHendelse(brevId, Status.DISTRIBUERT, distResponse.toJson()) > 0
         }
 
     fun settBrevFerdigstilt(id: BrevID): Boolean = using(sessionOf(ds)) {

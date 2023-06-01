@@ -4,8 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.readValue
 import kotliquery.Row
 import kotliquery.queryOf
-import kotliquery.sessionOf
-import kotliquery.using
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
 import no.nav.etterlatte.libs.common.beregning.Beregningstype
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
@@ -15,6 +13,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toTimestamp
 import no.nav.etterlatte.libs.common.toJson
+import no.nav.etterlatte.libs.database.transaction
 import java.io.Serializable
 import java.time.YearMonth
 import java.util.*
@@ -22,34 +21,30 @@ import javax.sql.DataSource
 
 class BeregningRepository(private val dataSource: DataSource) {
 
-    fun hent(behandlingId: UUID): Beregning? = using(sessionOf(dataSource)) { session ->
-        session.transaction { tx ->
-            val beregningsperioder = queryOf(
-                statement = Queries.hentBeregning,
-                paramMap = mapOf("behandlingId" to behandlingId)
-            ).let { query ->
-                tx.run(query.map { toBeregningsperiode(it) }.asList).ifEmpty {
-                    null
-                }
+    fun hent(behandlingId: UUID): Beregning? = dataSource.transaction { tx ->
+        val beregningsperioder = queryOf(
+            statement = Queries.hentBeregning,
+            paramMap = mapOf("behandlingId" to behandlingId)
+        ).let { query ->
+            tx.run(query.map { toBeregningsperiode(it) }.asList).ifEmpty {
+                null
             }
-            beregningsperioder?.let { toBeregning(beregningsperioder) }
         }
+        beregningsperioder?.let { toBeregning(beregningsperioder) }
     }
 
     fun lagreEllerOppdaterBeregning(beregning: Beregning): Beregning {
-        using(sessionOf(dataSource)) { session ->
-            session.transaction { tx ->
-                queryOf(
-                    statement = Queries.slettBeregning,
-                    paramMap = mapOf("behandlingId" to beregning.behandlingId)
-                ).let { query ->
-                    tx.run(query.asUpdate)
-                }
-                val queries = beregning.beregningsperioder.map {
-                    createMapFromBeregningsperiode(it, beregning)
-                }
-                tx.batchPreparedNamedStatement(Queries.lagreBeregningsperioder, queries)
+        dataSource.transaction { tx ->
+            queryOf(
+                statement = Queries.slettBeregning,
+                paramMap = mapOf("behandlingId" to beregning.behandlingId)
+            ).let { query ->
+                tx.run(query.asUpdate)
             }
+            val queries = beregning.beregningsperioder.map {
+                createMapFromBeregningsperiode(it, beregning)
+            }
+            tx.batchPreparedNamedStatement(Queries.lagreBeregningsperioder, queries)
         }
         return hent(beregning.behandlingId)!!
     }

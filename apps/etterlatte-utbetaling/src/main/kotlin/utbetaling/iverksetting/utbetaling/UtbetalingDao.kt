@@ -12,6 +12,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toTimestamp
 import no.nav.etterlatte.libs.common.toJson
+import no.nav.etterlatte.libs.database.transaction
 import no.nav.etterlatte.utbetaling.common.UUID30
 import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.OppdragJaxb
 import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.vedtakId
@@ -24,12 +25,11 @@ data class UtbetalingNotFoundException(override val message: String) : RuntimeEx
 
 class UtbetalingDao(private val dataSource: DataSource) {
 
-    fun opprettUtbetaling(utbetaling: Utbetaling) = using(sessionOf(dataSource)) { session ->
-        session.transaction { tx ->
-            logger.info("Oppretter utbetaling for vedtakId=${utbetaling.vedtakId.value}")
+    fun opprettUtbetaling(utbetaling: Utbetaling) = dataSource.transaction { tx ->
+        logger.info("Oppretter utbetaling for vedtakId=${utbetaling.vedtakId.value}")
 
-            queryOf(
-                statement = """
+        queryOf(
+            statement = """
                         INSERT INTO utbetaling(id, vedtak_id, behandling_id, behandling_id_til_oppdrag, sak_id, oppdrag, 
                             vedtak, opprettet, avstemmingsnoekkel, endret, stoenadsmottaker, saksbehandler, 
                             saksbehandler_enhet, attestant, attestant_enhet, saktype)
@@ -37,35 +37,34 @@ class UtbetalingDao(private val dataSource: DataSource) {
                             :vedtak, :opprettet, :avstemmingsnoekkel, :endret, :stoenadsmottaker, :saksbehandler, 
                             :saksbehandlerEnhet, :attestant, :attestantEnhet, :saktype)
                         """,
-                paramMap = mapOf(
-                    "id" to utbetaling.id.param(),
-                    "vedtakId" to utbetaling.vedtakId.value.param(),
-                    "behandlingId" to utbetaling.behandlingId.value.param(),
-                    "behandlingIdTilOppdrag" to utbetaling.behandlingId.shortValue.value.param(),
-                    "sakId" to utbetaling.sakId.value.param(),
-                    "vedtak" to utbetaling.vedtak.toJson().param(),
-                    "opprettet" to utbetaling.opprettet.toTimestamp().param(),
-                    "avstemmingsnoekkel" to utbetaling.avstemmingsnoekkel.toTimestamp().param(),
-                    "endret" to utbetaling.endret.toTimestamp().param(),
-                    "stoenadsmottaker" to utbetaling.stoenadsmottaker.value.param(),
-                    "saksbehandler" to utbetaling.saksbehandler.value.param(),
-                    "saksbehandlerEnhet" to utbetaling.saksbehandlerEnhet.param(),
-                    "attestant" to utbetaling.attestant.value.param(),
-                    "attestantEnhet" to utbetaling.attestantEnhet.param(),
-                    "oppdrag" to utbetaling.oppdrag?.let { o -> OppdragJaxb.toXml(o) }.param(),
-                    "saktype" to utbetaling.sakType.name.param()
-                )
-            ).let { tx.run(it.asUpdate) }
+            paramMap = mapOf(
+                "id" to utbetaling.id.param(),
+                "vedtakId" to utbetaling.vedtakId.value.param(),
+                "behandlingId" to utbetaling.behandlingId.value.param(),
+                "behandlingIdTilOppdrag" to utbetaling.behandlingId.shortValue.value.param(),
+                "sakId" to utbetaling.sakId.value.param(),
+                "vedtak" to utbetaling.vedtak.toJson().param(),
+                "opprettet" to utbetaling.opprettet.toTimestamp().param(),
+                "avstemmingsnoekkel" to utbetaling.avstemmingsnoekkel.toTimestamp().param(),
+                "endret" to utbetaling.endret.toTimestamp().param(),
+                "stoenadsmottaker" to utbetaling.stoenadsmottaker.value.param(),
+                "saksbehandler" to utbetaling.saksbehandler.value.param(),
+                "saksbehandlerEnhet" to utbetaling.saksbehandlerEnhet.param(),
+                "attestant" to utbetaling.attestant.value.param(),
+                "attestantEnhet" to utbetaling.attestantEnhet.param(),
+                "oppdrag" to utbetaling.oppdrag?.let { o -> OppdragJaxb.toXml(o) }.param(),
+                "saktype" to utbetaling.sakType.name.param()
+            )
+        ).let { tx.run(it.asUpdate) }
 
-            utbetaling.utbetalingslinjer.forEach { utbetalingslinje ->
-                opprettUtbetalingslinje(utbetalingslinje, tx)
-            }
-            utbetaling.utbetalingshendelser.forEach { utbetalingshendelse ->
-                opprettUtbetalingshendelse(
-                    utbetalingshendelse,
-                    tx
-                )
-            }
+        utbetaling.utbetalingslinjer.forEach { utbetalingslinje ->
+            opprettUtbetalingslinje(utbetalingslinje, tx)
+        }
+        utbetaling.utbetalingshendelser.forEach { utbetalingshendelse ->
+            opprettUtbetalingshendelse(
+                utbetalingshendelse,
+                tx
+            )
         }
     }.let { hentUtbetalingNonNull(utbetaling.vedtakId.value) }
 
@@ -99,10 +98,8 @@ class UtbetalingDao(private val dataSource: DataSource) {
     fun nyUtbetalingshendelse(
         vedtakId: Long,
         utbetalingshendelse: Utbetalingshendelse
-    ): Utbetaling = using(sessionOf(dataSource)) { session ->
-        session.transaction { tx ->
-            opprettUtbetalingshendelse(utbetalingshendelse, tx)
-        }
+    ): Utbetaling = dataSource.transaction { tx ->
+        opprettUtbetalingshendelse(utbetalingshendelse, tx)
     }.let {
         hentUtbetalingNonNull(vedtakId = vedtakId)
     }
@@ -290,40 +287,38 @@ class UtbetalingDao(private val dataSource: DataSource) {
     }
 
     fun oppdaterKvittering(oppdragMedKvittering: Oppdrag, endret: Tidspunkt, utbetalingId: UUID) =
-        using(sessionOf(dataSource)) { session ->
-            session.transaction { tx ->
-                logger.info("Oppdaterer kvittering i utbetaling for vedtakId=${oppdragMedKvittering.vedtakId()}")
+        dataSource.transaction { tx ->
+            logger.info("Oppdaterer kvittering i utbetaling for vedtakId=${oppdragMedKvittering.vedtakId()}")
 
-                queryOf(
-                    statement = """
+            queryOf(
+                statement = """
                     UPDATE utbetaling 
                     SET kvittering = :kvittering, kvittering_beskrivelse = :beskrivelse, 
                         kvittering_alvorlighetsgrad = :alvorlighetsgrad, kvittering_kode = :kode, 
                         endret = :endret 
                     WHERE vedtak_id = :vedtakId
                     """,
-                    paramMap = mapOf(
-                        "kvittering" to OppdragJaxb.toXml(oppdragMedKvittering).param(),
-                        "beskrivelse" to oppdragMedKvittering.mmel.beskrMelding.param(),
-                        "alvorlighetsgrad" to oppdragMedKvittering.mmel.alvorlighetsgrad.param(),
-                        "kode" to oppdragMedKvittering.mmel.kodeMelding.param(),
-                        "endret" to endret.toTimestamp().param(),
-                        "vedtakId" to oppdragMedKvittering.vedtakId().param()
-                    )
-                ).let { tx.run(it.asUpdate) }
-                    .also { require(it == 1) { "Kunne ikke oppdatere kvittering i utbetaling" } }
-
-                opprettUtbetalingshendelse(
-                    Utbetalingshendelse(
-                        UUID.randomUUID(),
-                        utbetalingId,
-                        endret,
-                        statusFraKvittering(oppdragMedKvittering.mmel.alvorlighetsgrad)
-                    ),
-                    tx
+                paramMap = mapOf(
+                    "kvittering" to OppdragJaxb.toXml(oppdragMedKvittering).param(),
+                    "beskrivelse" to oppdragMedKvittering.mmel.beskrMelding.param(),
+                    "alvorlighetsgrad" to oppdragMedKvittering.mmel.alvorlighetsgrad.param(),
+                    "kode" to oppdragMedKvittering.mmel.kodeMelding.param(),
+                    "endret" to endret.toTimestamp().param(),
+                    "vedtakId" to oppdragMedKvittering.vedtakId().param()
                 )
-            }.let { hentUtbetalingNonNull(oppdragMedKvittering.vedtakId()) }
-        }
+            ).let { tx.run(it.asUpdate) }
+                .also { require(it == 1) { "Kunne ikke oppdatere kvittering i utbetaling" } }
+
+            opprettUtbetalingshendelse(
+                Utbetalingshendelse(
+                    UUID.randomUUID(),
+                    utbetalingId,
+                    endret,
+                    statusFraKvittering(oppdragMedKvittering.mmel.alvorlighetsgrad)
+                ),
+                tx
+            )
+        }.let { hentUtbetalingNonNull(oppdragMedKvittering.vedtakId()) }
 
     private fun hentUtbetalingNonNull(vedtakId: Long): Utbetaling = hentUtbetaling(vedtakId)
         ?: throw UtbetalingNotFoundException("Utbetaling for vedtak med vedtakId=$vedtakId finnes ikke")

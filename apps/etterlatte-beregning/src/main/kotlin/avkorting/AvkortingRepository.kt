@@ -4,46 +4,43 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import kotliquery.Row
 import kotliquery.TransactionalSession
 import kotliquery.queryOf
-import kotliquery.sessionOf
-import kotliquery.using
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toTimestamp
 import no.nav.etterlatte.libs.common.toJson
+import no.nav.etterlatte.libs.database.transaction
 import java.time.YearMonth
-import java.util.*
+import java.util.UUID
 import javax.sql.DataSource
 
 class AvkortingRepository(private val dataSource: DataSource) {
 
-    fun hentAvkorting(behandlingId: UUID): Avkorting? = using(sessionOf(dataSource)) { session ->
-        session.transaction { tx ->
-            val avkortingGrunnlag = queryOf(
-                "SELECT * FROM avkortingsgrunnlag WHERE behandling_id = ?",
-                behandlingId
-            ).let { query -> tx.run(query.map { row -> row.toAvkortingsgrunnlag() }.asList) }
+    fun hentAvkorting(behandlingId: UUID): Avkorting? = dataSource.transaction { tx ->
+        val avkortingGrunnlag = queryOf(
+            "SELECT * FROM avkortingsgrunnlag WHERE behandling_id = ?",
+            behandlingId
+        ).let { query -> tx.run(query.map { row -> row.toAvkortingsgrunnlag() }.asList) }
 
-            val avkortingsperioder = queryOf(
-                "SELECT * FROM avkortingsperioder WHERE behandling_id = ?",
-                behandlingId
-            ).let { query -> tx.run(query.map { row -> row.toAvkortingsperiode() }.asList) }
+        val avkortingsperioder = queryOf(
+            "SELECT * FROM avkortingsperioder WHERE behandling_id = ?",
+            behandlingId
+        ).let { query -> tx.run(query.map { row -> row.toAvkortingsperiode() }.asList) }
 
-            val avkortetYtelse = queryOf(
-                "SELECT * FROM avkortet_ytelse WHERE behandling_id = ?",
-                behandlingId
-            ).let { query -> tx.run(query.map { row -> row.toAvkortetYtelse() }.asList) }
+        val avkortetYtelse = queryOf(
+            "SELECT * FROM avkortet_ytelse WHERE behandling_id = ?",
+            behandlingId
+        ).let { query -> tx.run(query.map { row -> row.toAvkortetYtelse() }.asList) }
 
-            if (avkortingGrunnlag.isEmpty()) {
-                null
-            } else {
-                Avkorting(
-                    behandlingId = behandlingId,
-                    avkortingGrunnlag = avkortingGrunnlag,
-                    avkortingsperioder = avkortingsperioder,
-                    avkortetYtelse = avkortetYtelse
-                )
-            }
+        if (avkortingGrunnlag.isEmpty()) {
+            null
+        } else {
+            Avkorting(
+                behandlingId = behandlingId,
+                avkortingGrunnlag = avkortingGrunnlag,
+                avkortingsperioder = avkortingsperioder,
+                avkortetYtelse = avkortetYtelse
+            )
         }
     }
 
@@ -53,13 +50,11 @@ class AvkortingRepository(private val dataSource: DataSource) {
         avkortingsperioder: List<Avkortingsperiode>,
         avkortetYtelse: List<AvkortetYtelse>
     ): Avkorting {
-        using(sessionOf(dataSource)) { session ->
-            session.transaction { tx ->
-                slettAvkorting(behandlingId, tx)
-                lagreAvkortingGrunnlag(behandlingId, avkortingGrunnlag, tx)
-                lagreAvkortingsperioder(behandlingId, avkortingsperioder, tx)
-                lagreAvkortetYtelse(behandlingId, avkortetYtelse, tx)
-            }
+        dataSource.transaction { tx ->
+            slettAvkorting(behandlingId, tx)
+            lagreAvkortingGrunnlag(behandlingId, avkortingGrunnlag, tx)
+            lagreAvkortingsperioder(behandlingId, avkortingsperioder, tx)
+            lagreAvkortetYtelse(behandlingId, avkortetYtelse, tx)
         }
         return hentAvkortingUtenNullable(behandlingId)
     }

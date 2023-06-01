@@ -76,13 +76,27 @@ data class ManuellRevurdering(
         )
     ) { endreTilStatus(BehandlingStatus.BEREGNET) }
 
+    override fun tilAvkortet() = hvisTilstandEr(
+        listOf(
+            BehandlingStatus.BEREGNET,
+            BehandlingStatus.AVKORTET,
+            BehandlingStatus.RETURNERT
+        )
+    ) { endreTilStatus(BehandlingStatus.AVKORTET) }
+
     override fun tilFattetVedtak(): Revurdering {
         if (!erFyltUt()) {
             logger.info(("Behandling ($id) må være fylt ut for å settes til fattet vedtak"))
             throw TilstandException.IkkeFyltUt
         }
 
-        return hvisTilstandEr(listOf(BehandlingStatus.BEREGNET, BehandlingStatus.RETURNERT)) {
+        return hvisTilstandEr(
+            listOf(
+                BehandlingStatus.BEREGNET,
+                BehandlingStatus.AVKORTET,
+                BehandlingStatus.RETURNERT
+            )
+        ) {
             endreTilStatus(BehandlingStatus.FATTET_VEDTAK)
         }
     }

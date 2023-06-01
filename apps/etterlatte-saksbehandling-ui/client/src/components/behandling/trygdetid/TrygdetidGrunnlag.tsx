@@ -52,8 +52,8 @@ export const TrygdetidGrunnlag: React.FC<Props> = ({ trygdetid, setTrygdetid, tr
     }
   }
 
-  const beregnetTrygdetid = eksisterendeGrunnlag
-    ? `${eksisterendeGrunnlag.beregnet?.aar} år ${eksisterendeGrunnlag.beregnet?.maaneder} måneder ${eksisterendeGrunnlag.beregnet?.dager} dager`
+  const beregnetTrygdetid = eksisterendeGrunnlag?.beregnet
+    ? `${eksisterendeGrunnlag.beregnet.aar} år ${eksisterendeGrunnlag.beregnet.maaneder} måneder ${eksisterendeGrunnlag.beregnet.dager} dager`
     : '-'
   const onSubmit = (e: FormEvent) => {
     e.preventDefault()

@@ -1,5 +1,6 @@
 package no.nav.etterlatte.regulering
 
+import no.nav.etterlatte.VedtakService
 import no.nav.etterlatte.libs.common.behandling.Omregningshendelse
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.logging.withLogContext

@@ -1,4 +1,4 @@
-package no.nav.etterlatte.regulering
+package no.nav.etterlatte
 
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body

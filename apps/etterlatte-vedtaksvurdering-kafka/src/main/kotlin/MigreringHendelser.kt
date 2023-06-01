@@ -8,7 +8,6 @@ import no.nav.etterlatte.rapidsandrivers.EventNames
 import no.nav.etterlatte.rapidsandrivers.EventNames.FATT_VEDTAK
 import no.nav.etterlatte.rapidsandrivers.EventNames.OPPRETT_VEDTAK
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser.VEDTAK
-import no.nav.etterlatte.regulering.VedtakService
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection

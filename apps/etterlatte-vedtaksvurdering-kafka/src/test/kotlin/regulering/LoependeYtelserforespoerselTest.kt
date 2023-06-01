@@ -5,6 +5,7 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
 import io.mockk.verify
+import no.nav.etterlatte.VedtakService
 import no.nav.etterlatte.libs.common.behandling.Omregningshendelse
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.objectMapper
@@ -13,7 +14,6 @@ import no.nav.etterlatte.libs.common.vedtak.LoependeYtelseDTO
 import no.nav.etterlatte.rapidsandrivers.EventNames.FINN_LOEPENDE_YTELSER
 import no.nav.etterlatte.rapidsandrivers.EventNames.OMREGNINGSHENDELSE
 import no.nav.etterlatte.regulering.LoependeYtelserforespoersel
-import no.nav.etterlatte.regulering.VedtakService
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions

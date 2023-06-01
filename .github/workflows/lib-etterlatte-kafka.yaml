@@ -1,6 +1,7 @@
 name: etterlatte-kafka
 
 on:
+  workflow_dispatch: # Allow manually triggered workflow run
   push:
     branches:
       - main

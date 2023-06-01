@@ -28,7 +28,7 @@ export const AvbrytBehandling = () => {
 
   return (
     <>
-      <Button variant={"tertiary"} className="textButton" onClick={() => setIsOpen(true)}>
+      <Button variant={'tertiary'} className="textButton" onClick={() => setIsOpen(true)}>
         {handlinger.AVBRYT.navn}
       </Button>
 
@@ -39,11 +39,11 @@ export const AvbrytBehandling = () => {
           setError(false)
         }}
         aria-labelledby="modal-heading"
-        className={"padding-modal"}
+        className={'padding-modal'}
       >
         <Modal.Content>
           <Heading level={'1'} spacing size={'medium'} id="modal-heading">
-            Er du sikker på at du vil avbryte behandlingen?
+            Er du sikker på at du vil avbryte behandlingen? Saken blir annullert og kan ikke behandles videre i Gjenny.
           </Heading>
           <ButtonWrapper>
             <Button

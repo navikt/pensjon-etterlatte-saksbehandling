@@ -15,7 +15,7 @@
     "@navikt/ds-react": "^2.9.8",
     "@navikt/ds-react-internal": "^2.9.8",
     "@navikt/navspa": "^6.0.1",
-    "@reduxjs/toolkit": "^1.9.3",
+    "@reduxjs/toolkit": "^1.9.5",
     "bowser": "^2.11.0",
     "date-fns": "^2.29.3",
     "error-stack-parser": "^2.1.4",

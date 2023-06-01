@@ -64,7 +64,15 @@ class BeregnBarnepensjonService(
             beregningsGrunnlagService.hentBarnepensjonBeregningsGrunnlag(behandling.id, bruker)
         )
 
-        val trygdetid = trygdetidKlient.hentTrygdetid(behandling.id, bruker)
+        val trygdetid = try {
+            trygdetidKlient.hentTrygdetid(behandling.id, bruker)
+        } catch (e: Exception) {
+            logger.warn(
+                "Kunne ikke hente ut trygdetid for behandlingen med id=${behandling.id}. " +
+                    "Dette er ikke kritisk siden vi ikke har krav om trygdetid enda."
+            )
+            null
+        }
 
         val barnepensjonGrunnlag = opprettBeregningsgrunnlag(
             beregningsGrunnlag,

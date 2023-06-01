@@ -250,8 +250,9 @@ class VedtaksvurderingService(
     }
 
     private fun verifiserGyldigVedtakForRevurdering(behandling: DetaljertBehandling, vedtak: Vedtak) {
-        if (behandling.revurderingsaarsak == RevurderingAarsak.DOEDSFALL && vedtak.type != VedtakType.OPPHOER) {
-            throw OpphoersrevurderingErIkkeOpphoersvedtakException(vedtak, behandling.revurderingsaarsak!!)
+        val revurderingsaarsak = behandling.revurderingsaarsak
+        if (revurderingsaarsak == RevurderingAarsak.DOEDSFALL && vedtak.type != VedtakType.OPPHOER) {
+            throw OpphoersrevurderingErIkkeOpphoersvedtakException(vedtak, revurderingsaarsak)
         }
     }
 

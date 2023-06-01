@@ -141,7 +141,7 @@ class TrygdetidRepository(private val dataSource: DataSource) {
                 "periodeFra" to trygdetidGrunnlag.periode.fra,
                 "periodeTil" to trygdetidGrunnlag.periode.til,
                 "kilde" to trygdetidGrunnlag.kilde.toJson(),
-                "beregnetVerdi" to trygdetidGrunnlag.beregnetTrygdetid?.verdi.toString(),
+                "beregnetVerdi" to trygdetidGrunnlag.beregnetTrygdetid?.verdi?.toString(),
                 "beregnetTidspunkt" to trygdetidGrunnlag.beregnetTrygdetid?.tidspunkt?.toTimestamp(),
                 "beregnetRegelresultat" to trygdetidGrunnlag.beregnetTrygdetid?.regelResultat?.toJson()
             )
@@ -170,7 +170,7 @@ class TrygdetidRepository(private val dataSource: DataSource) {
                 "periodeFra" to trygdetidGrunnlag.periode.fra,
                 "periodeTil" to trygdetidGrunnlag.periode.til,
                 "kilde" to trygdetidGrunnlag.kilde.toJson(),
-                "beregnetVerdi" to trygdetidGrunnlag.beregnetTrygdetid?.verdi.toString(),
+                "beregnetVerdi" to trygdetidGrunnlag.beregnetTrygdetid?.verdi?.toString(),
                 "beregnetTidspunkt" to trygdetidGrunnlag.beregnetTrygdetid?.tidspunkt?.toTimestamp(),
                 "beregnetRegelresultat" to trygdetidGrunnlag.beregnetTrygdetid?.regelResultat?.toJson()
             )
@@ -292,13 +292,15 @@ class TrygdetidRepository(private val dataSource: DataSource) {
                 til = localDate("periode_til")
             ),
             kilde = string("kilde").let { objectMapper.readValue(it) },
-            beregnetTrygdetid = BeregnetTrygdetidGrunnlag(
-                verdi = string("beregnet_verdi").let { Period.parse(it) },
-                tidspunkt = sqlTimestamp("beregnet_tidspunkt").toTidspunkt(),
-                regelResultat = string("beregnet_regelresultat").let {
-                    objectMapper.readTree(it)
-                }
-            )
+            beregnetTrygdetid = stringOrNull("beregnet_verdi")?.let { verdi ->
+                BeregnetTrygdetidGrunnlag(
+                    verdi = Period.parse(verdi),
+                    tidspunkt = sqlTimestamp("beregnet_tidspunkt").toTidspunkt(),
+                    regelResultat = string("beregnet_regelresultat").let {
+                        objectMapper.readTree(it)
+                    }
+                )
+            }
         )
 
     private fun Row.toOpplysningsgrunnlag(): Opplysningsgrunnlag {

@@ -4,7 +4,7 @@ analyze = { id = "com.faire.gradle.analyze", version = "1.0.9" }
 cutterslade-analyze = { id = "ca.cutterslade.analyze", version = "1.9.1" }
 
 [versions]
-jackson-version = "2.15.0"
+jackson-version = "2.15.2"
 jupiter-version = "5.9.3"
 kotlinx-version = "1.6.4"
 ktor2-version = "2.3.0"

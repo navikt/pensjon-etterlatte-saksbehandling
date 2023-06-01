@@ -88,10 +88,15 @@ export const Trygdetid = () => {
           <TrygdetidBeregnet trygdetid={trygdetid} setTrygdetid={setTrygdetid} />
         </>
       )}
-      {isPending(hentTrygdetidRequest) && <Spinner visible={true} label={'Henter trygdetid'} />}
+      {(isPending(hentTrygdetidRequest) || isPending(hentAlleLandRequest)) && (
+        <Spinner visible={true} label={'Henter trygdetid'} />
+      )}
       {isPending(opprettTrygdetidRequest) && <Spinner visible={true} label={'Oppretter trygdetid'} />}
-      {isFailure(hentTrygdetidRequest) && <ApiErrorAlert>En feil har oppstått</ApiErrorAlert>}
-      {isFailure(hentAlleLandRequest) && <ApiErrorAlert>Klarer ikke hente inn land fra felles kodeverk</ApiErrorAlert>}
+      {isFailure(hentTrygdetidRequest) && <ApiErrorAlert>En feil har oppstått ved henting av trygdetid</ApiErrorAlert>}
+      {isFailure(opprettTrygdetidRequest) && (
+        <ApiErrorAlert>En feil har oppstått ved opprettelse av trygdetid</ApiErrorAlert>
+      )}
+      {isFailure(hentAlleLandRequest) && <ApiErrorAlert>Hent feil har oppstått ved henting av landliste</ApiErrorAlert>}
     </TrygdetidWrapper>
   )
 }

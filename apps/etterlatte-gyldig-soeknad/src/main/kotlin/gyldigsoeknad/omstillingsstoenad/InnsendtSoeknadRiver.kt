@@ -70,7 +70,7 @@ internal class InnsendtSoeknadRiver(
                     Tidspunkt.now().toLocalDatetimeUTC()
                 )
 
-                val sak = behandlingClient.hentSak(personGalleri.soeker, SakType.OMSTILLINGSSTOENAD.name)
+                val sak = behandlingClient.finnEllerOpprettSak(personGalleri.soeker, SakType.OMSTILLINGSSTOENAD.name)
                 val behandlingId = behandlingClient.initierBehandling(sak.id, soeknad.mottattDato, personGalleri)
                 behandlingClient.lagreGyldighetsVurdering(behandlingId, gyldighetsVurdering)
                 logger.info("Behandling {} startet på sak {}", behandlingId, sak.id)

@@ -15,7 +15,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import java.io.FileNotFoundException
-import java.util.UUID
+import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class InnsendtSoeknadRiverTest {
@@ -31,8 +31,8 @@ internal class InnsendtSoeknadRiverTest {
         val id = UUID.randomUUID()
 
         every {
-            behandlingClientMock.hentSak(any(), any())
-        } returns Sak("21478247343", SakType.BARNEPENSJON, sakId, "4808")
+            behandlingClientMock.finnEllerOpprettSak(any(), any())
+        } returns Sak("21478247343", SakType.OMSTILLINGSSTOENAD, sakId, "4808")
         every { behandlingClientMock.initierBehandling(any(), any(), any()) } returns id
         every { behandlingClientMock.lagreGyldighetsVurdering(any(), any()) } returns Unit
 

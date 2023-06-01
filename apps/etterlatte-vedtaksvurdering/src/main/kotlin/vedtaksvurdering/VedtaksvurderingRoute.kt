@@ -98,11 +98,10 @@ fun Route.vedtaksvurderingRoute(service: VedtaksvurderingService, behandlingKlie
                 logger.info("Iverksetter vedtak for behandling $behandlingId")
                 service.iverksattVedtak(behandlingId)
                 val vedtak = service.hentVedtak(behandlingId)
-                if (vedtak != null) {
-                    call.respond(HttpStatusCode.OK, vedtak.toDto())
-                } else {
-                    call.respond(HttpStatusCode.NoContent)
+                requireNotNull(vedtak).also { v ->
+                    service.postTilBehandling(behandlingId, bruker, v.id)
                 }
+                call.respond(HttpStatusCode.OK, vedtak.toDto())
             }
         }
 

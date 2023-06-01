@@ -10,6 +10,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktorobo.Resource
@@ -39,6 +40,8 @@ interface BehandlingKlient : BehandlingTilgangsSjekk, SakTilgangsSjekk {
         bruker: Bruker,
         vedtakHendelse: VedtakHendelse? = null
     ): Boolean
+
+    suspend fun iverksett(behandlingId: UUID, bruker: Bruker, vedtakId: Long): Boolean
 }
 
 class BehandlingKlientException(override val message: String, override val cause: Throwable? = null) :
@@ -128,6 +131,16 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
             commitStatussjekkForBehandling(behandlingId, bruker, BehandlingStatus.RETURNERT, vedtakHendelse)
         }
     }
+
+    override suspend fun iverksett(behandlingId: UUID, bruker: Bruker, vedtakId: Long) =
+        downstreamResourceClient.post(
+            Resource(clientId = clientId, url = "$resourceUrl/behandlinger/$behandlingId/iverksett"),
+            bruker,
+            VedtakHendelse(
+                vedtakId = vedtakId,
+                inntruffet = Tidspunkt.now()
+            )
+        ).mapBoth({ true }, { false })
 
     override suspend fun harTilgangTilBehandling(behandlingId: UUID, bruker: Saksbehandler): Boolean {
         try {

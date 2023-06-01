@@ -22,7 +22,7 @@ internal class LagreIverksattVedtakTest {
     }
 
     private val vedtaksvurderingServiceMock = mockk<VedtakService>()
-    private val inspector = spyk(TestRapid().apply { LagreIverksattVedtak(this, vedtaksvurderingServiceMock, mockk()) })
+    private val inspector = spyk(TestRapid().apply { LagreIverksattVedtak(this, vedtaksvurderingServiceMock) })
 
     @Test
     fun `skal lese utbetalingsmelding`() {

@@ -10,7 +10,7 @@ kotlinx-version = "1.6.4"
 ktor2-version = "2.3.0"
 navfelles-token-version = "3.0.11"
 prometheus-version = "0.16.0"
-testcontainer-version = "1.17.6"
+testcontainer-version = "1.18.3"
 
 [libraries]
 cache-caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version = "3.1.5" }

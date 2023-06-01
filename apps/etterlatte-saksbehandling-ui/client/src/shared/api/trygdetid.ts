@@ -69,7 +69,7 @@ export enum ITrygdetidGrunnlagType {
 export interface ILand {
   gyldigFra: string
   gyldigTil: string
-  isolandkode: string
+  isoLandkode: string
   beskrivelse: {
     term: string
     tekst: string

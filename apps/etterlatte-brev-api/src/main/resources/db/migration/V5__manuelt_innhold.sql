@@ -18,6 +18,6 @@ alter table brev
 alter table brev
     drop column vedtaksbrev;
 
--- Oppdatering av statuser (fjerne rang + ny status)
+-- Fjerne rang fra status siden det ikke brukes
 alter table status
     drop column rang;

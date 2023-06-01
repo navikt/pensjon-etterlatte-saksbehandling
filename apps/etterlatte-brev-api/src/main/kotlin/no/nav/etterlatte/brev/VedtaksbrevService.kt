@@ -3,12 +3,23 @@ package no.nav.etterlatte.brev
 import no.nav.etterlatte.brev.adresse.AdresseService
 import no.nav.etterlatte.brev.behandling.Behandling
 import no.nav.etterlatte.brev.behandling.SakOgBehandlingService
+import no.nav.etterlatte.brev.brevbaker.BrevbakerHelpers
 import no.nav.etterlatte.brev.brevbaker.BrevbakerKlient
 import no.nav.etterlatte.brev.brevbaker.BrevbakerRequest
+import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode
+import no.nav.etterlatte.brev.brevbaker.LanguageCode
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.dokarkiv.DokarkivServiceImpl
 import no.nav.etterlatte.brev.journalpost.JournalpostResponse
-import no.nav.etterlatte.brev.model.*
+import no.nav.etterlatte.brev.model.Brev
+import no.nav.etterlatte.brev.model.BrevID
+import no.nav.etterlatte.brev.model.BrevInnhold
+import no.nav.etterlatte.brev.model.BrevProsessType
+import no.nav.etterlatte.brev.model.ManueltBrevData
+import no.nav.etterlatte.brev.model.OpprettNyttBrev
+import no.nav.etterlatte.brev.model.Slate
+import no.nav.etterlatte.brev.model.Spraak
+import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
@@ -90,9 +101,9 @@ class VedtaksbrevService(
         behandling: Behandling,
         bruker: Bruker
     ): ByteArray {
-        val (avsender, attestant) = adresseService.hentAvsenderOgAttestant(behandling.vedtak)
+        val avsender = adresseService.hentAvsender(behandling.vedtak)
 
-        val brevRequest = BrevbakerRequest.fra(behandling, avsender, brev.mottaker, attestant)
+        val brevRequest = BrevbakerRequest.fra(behandling, avsender, brev.mottaker)
         val pdf = genererPdf(brev.id, brevRequest)
 
         hvisInnholdKanFerdigstilles(brev.id, behandling, bruker) {
@@ -107,15 +118,16 @@ class VedtaksbrevService(
         behandling: Behandling,
         bruker: Bruker
     ): ByteArray {
-        val (avsender, attestant) = adresseService.hentAvsenderOgAttestant(behandling.vedtak)
+        val avsender = adresseService.hentAvsender(behandling.vedtak)
 
-        TODO()
         val innhold = requireNotNull(db.hentBrevInnhold(brev.id))
 
-//        val brevRequest =
-//            ManueltBrevRequest.fraVedtak(innhold.payload!!, behandling, avsender, brev.mottaker, attestant)
-//        val pdf = pdfGenerator.genererPdf(brevRequest)
-        val brevRequest = BrevbakerRequest.fra(behandling, avsender, brev.mottaker, attestant)
+        val brevRequest = BrevbakerRequest(
+            kode = EtterlatteBrevKode.OMS_INNVILGELSE_MANUELL,
+            letterData = ManueltBrevData(innhold.payload?.elements ?: emptyList()),
+            felles = BrevbakerHelpers.mapFelles(behandling, avsender, brev.mottaker),
+            LanguageCode.spraakToLanguageCode(Spraak.NB)
+        )
         val pdf = genererPdf(brev.id, brevRequest)
 
         hvisInnholdKanFerdigstilles(brev.id, behandling, bruker) {
@@ -136,12 +148,12 @@ class VedtaksbrevService(
                 "Sjekker om brev (id=$brevID) kan ferdigstilles"
         )
 
-        if (behandling.vedtak.saksbehandler.ident != bruker.ident()) {
+        if (behandling.vedtak.saksbehandlerIdent != bruker.ident()) {
             logger.info("Ferdigstiller brev med id=$brevID")
             block()
         } else {
             logger.warn(
-                "Kan ikke ferdigstille/låse brev når saksbehandler (${behandling.vedtak.saksbehandler.ident})" +
+                "Kan ikke ferdigstille/låse brev når saksbehandler (${behandling.vedtak.saksbehandlerIdent})" +
                     " og attestant (${bruker.ident()}) er samme person."
             )
         }
@@ -156,11 +168,9 @@ class VedtaksbrevService(
 
     private suspend fun initBrevPayload(id: BrevID, behandlingId: UUID, sakId: Long, bruker: Bruker): Slate {
         val behandling = sakOgBehandlingService.hentBehandling(sakId, behandlingId, bruker)
-        val slate = hentInitiellPayload(behandling.sakType, behandling.vedtak.type)
 
-        lagreManueltBrevPayload(id, slate)
-
-        return slate
+        return hentInitiellPayload(behandling.sakType, behandling.vedtak.type)
+            .also { slate -> lagreManueltBrevPayload(id, slate) }
     }
 
     fun lagreManueltBrevPayload(id: BrevID, payload: Slate) {
@@ -205,7 +215,7 @@ class VedtaksbrevService(
                     VedtakType.INNVILGELSE -> getJsonFile("/maler/oms-nasjonal-innvilget.json")
                     VedtakType.OPPHOER,
                     VedtakType.AVSLAG,
-                    VedtakType.ENDRING -> TODO("Sakype $sakType med vedtaktype $vedtakType ikke støttet")
+                    VedtakType.ENDRING -> getJsonFile("/maler/tom-brevmal.json")
                 }
             }
 
@@ -214,7 +224,7 @@ class VedtaksbrevService(
                     VedtakType.INNVILGELSE,
                     VedtakType.OPPHOER,
                     VedtakType.AVSLAG,
-                    VedtakType.ENDRING -> TODO("Sakype $sakType med vedtaktype $vedtakType ikke støttet")
+                    VedtakType.ENDRING -> getJsonFile("/maler/tom-brevmal.json")
                 }
             }
         }.let { deserialize(it) }

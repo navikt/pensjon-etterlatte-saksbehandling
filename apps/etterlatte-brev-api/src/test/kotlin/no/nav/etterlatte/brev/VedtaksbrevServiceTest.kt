@@ -1,42 +1,16 @@
 package no.nav.etterlatte.brev
 
 import io.kotest.matchers.shouldBe
-import io.mockk.Called
-import io.mockk.clearAllMocks
-import io.mockk.coEvery
-import io.mockk.coVerify
-import io.mockk.confirmVerified
-import io.mockk.every
-import io.mockk.mockk
-import io.mockk.slot
-import io.mockk.verify
+import io.mockk.*
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.brev.adresse.AdresseService
-import no.nav.etterlatte.brev.behandling.Avdoed
-import no.nav.etterlatte.brev.behandling.Behandling
-import no.nav.etterlatte.brev.behandling.Beregningsperiode
-import no.nav.etterlatte.brev.behandling.ForenkletVedtak
-import no.nav.etterlatte.brev.behandling.Innsender
-import no.nav.etterlatte.brev.behandling.Persongalleri
-import no.nav.etterlatte.brev.behandling.SakOgBehandlingService
-import no.nav.etterlatte.brev.behandling.Saksbehandler
-import no.nav.etterlatte.brev.behandling.Soeker
-import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
+import no.nav.etterlatte.brev.behandling.*
 import no.nav.etterlatte.brev.brevbaker.BrevbakerKlient
 import no.nav.etterlatte.brev.brevbaker.BrevbakerPdfResponse
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.dokarkiv.DokarkivServiceImpl
 import no.nav.etterlatte.brev.journalpost.JournalpostResponse
-import no.nav.etterlatte.brev.model.Adresse
-import no.nav.etterlatte.brev.model.Attestant
-import no.nav.etterlatte.brev.model.Avsender
-import no.nav.etterlatte.brev.model.Brev
-import no.nav.etterlatte.brev.model.BrevInnhold
-import no.nav.etterlatte.brev.model.BrevProsessType
-import no.nav.etterlatte.brev.model.Mottaker
-import no.nav.etterlatte.brev.model.OpprettNyttBrev
-import no.nav.etterlatte.brev.model.Spraak
-import no.nav.etterlatte.brev.model.Status
+import no.nav.etterlatte.brev.model.*
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.VedtakSak
@@ -48,12 +22,8 @@ import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
 import no.nav.pensjon.brevbaker.api.model.Kroner
 import no.nav.pensjon.brevbaker.api.model.LetterMetadata
 import no.nav.pensjon.brevbaker.api.model.Telefonnummer
-import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
 import org.junit.jupiter.params.provider.EnumSource
@@ -217,7 +187,7 @@ internal class VedtaksbrevServiceTest {
 
             every { db.hentBrevForBehandling(any()) } returns opprettBrev(Status.OPPRETTET, BrevProsessType.AUTOMATISK)
             coEvery { sakOgBehandlingService.hentBehandling(any(), any(), any()) } returns behandling
-            coEvery { adresseService.hentAvsenderOgAttestant(any()) } returns opprettAvsenderOgAttestant()
+            coEvery { adresseService.hentAvsender(any()) } returns opprettAvsender()
             coEvery { brevbaker.genererPdf(any()) } returns opprettBrevbakerResponse()
 
             runBlocking {
@@ -230,7 +200,7 @@ internal class VedtaksbrevServiceTest {
 
             coVerify {
                 sakOgBehandlingService.hentBehandling(SAK_ID, BEHANDLING_ID, SAKSBEHANDLER)
-                adresseService.hentAvsenderOgAttestant(any())
+                adresseService.hentAvsender(any())
                 brevbaker.genererPdf(any())
             }
         }
@@ -241,7 +211,7 @@ internal class VedtaksbrevServiceTest {
 
             every { db.hentBrevForBehandling(any()) } returns opprettBrev(Status.OPPRETTET, BrevProsessType.AUTOMATISK)
             coEvery { sakOgBehandlingService.hentBehandling(any(), any(), any()) } returns behandling
-            coEvery { adresseService.hentAvsenderOgAttestant(any()) } returns opprettAvsenderOgAttestant()
+            coEvery { adresseService.hentAvsender(any()) } returns opprettAvsender()
             coEvery { brevbaker.genererPdf(any()) } returns opprettBrevbakerResponse()
 
             runBlocking {
@@ -255,7 +225,7 @@ internal class VedtaksbrevServiceTest {
 
             coVerify {
                 sakOgBehandlingService.hentBehandling(SAK_ID, BEHANDLING_ID, ATTESTANT)
-                adresseService.hentAvsenderOgAttestant(any())
+                adresseService.hentAvsender(any())
                 brevbaker.genererPdf(any())
             }
         }
@@ -266,7 +236,7 @@ internal class VedtaksbrevServiceTest {
 
             every { db.hentBrevForBehandling(any()) } returns opprettBrev(Status.OPPRETTET, BrevProsessType.AUTOMATISK)
             coEvery { sakOgBehandlingService.hentBehandling(any(), any(), any()) } returns behandling
-            coEvery { adresseService.hentAvsenderOgAttestant(any()) } returns opprettAvsenderOgAttestant()
+            coEvery { adresseService.hentAvsender(any()) } returns opprettAvsender()
             coEvery { brevbaker.genererPdf(any()) } returns opprettBrevbakerResponse()
 
             runBlocking {
@@ -279,7 +249,7 @@ internal class VedtaksbrevServiceTest {
 
             coVerify {
                 sakOgBehandlingService.hentBehandling(SAK_ID, BEHANDLING_ID, SAKSBEHANDLER)
-                adresseService.hentAvsenderOgAttestant(any())
+                adresseService.hentAvsender(any())
                 brevbaker.genererPdf(any())
             }
         }
@@ -292,7 +262,7 @@ internal class VedtaksbrevServiceTest {
             val brev = opprettBrev(Status.OPPRETTET, BrevProsessType.MANUELL)
             every { db.hentBrevForBehandling(any()) } returns brev
             coEvery { sakOgBehandlingService.hentBehandling(any(), any(), any()) } returns behandling
-            coEvery { adresseService.hentAvsenderOgAttestant(any()) } returns Pair(mockk(), mockk())
+            coEvery { adresseService.hentAvsender(any()) } returns opprettAvsender()
             coEvery { brevbaker.genererPdf(any()) } returns opprettBrevbakerResponse()
 
             runBlocking {
@@ -306,7 +276,7 @@ internal class VedtaksbrevServiceTest {
 
             coVerify {
                 sakOgBehandlingService.hentBehandling(SAK_ID, BEHANDLING_ID, SAKSBEHANDLER)
-                adresseService.hentAvsenderOgAttestant(any())
+                adresseService.hentAvsender(any())
                 brevbaker.genererPdf(any())
             }
         }
@@ -319,7 +289,7 @@ internal class VedtaksbrevServiceTest {
             val brev = opprettBrev(Status.OPPRETTET, BrevProsessType.MANUELL)
             every { db.hentBrevForBehandling(any()) } returns brev
             coEvery { sakOgBehandlingService.hentBehandling(any(), any(), any()) } returns behandling
-            coEvery { adresseService.hentAvsenderOgAttestant(any()) } returns Pair(mockk(), mockk())
+            coEvery { adresseService.hentAvsender(any()) } returns opprettAvsender()
             coEvery { brevbaker.genererPdf(any()) } returns opprettBrevbakerResponse()
 
             runBlocking {
@@ -334,7 +304,7 @@ internal class VedtaksbrevServiceTest {
 
             coVerify {
                 sakOgBehandlingService.hentBehandling(SAK_ID, BEHANDLING_ID, ATTESTANT)
-                adresseService.hentAvsenderOgAttestant(any())
+                adresseService.hentAvsender(any())
                 brevbaker.genererPdf(any())
             }
         }
@@ -347,7 +317,7 @@ internal class VedtaksbrevServiceTest {
             val brev = opprettBrev(Status.OPPRETTET, BrevProsessType.MANUELL)
             every { db.hentBrevForBehandling(any()) } returns brev
             coEvery { sakOgBehandlingService.hentBehandling(any(), any(), any()) } returns behandling
-            coEvery { adresseService.hentAvsenderOgAttestant(any()) } returns Pair(mockk(), mockk())
+            coEvery { adresseService.hentAvsender(any()) } returns opprettAvsender()
             coEvery { brevbaker.genererPdf(any()) } returns opprettBrevbakerResponse()
 
             runBlocking {
@@ -361,7 +331,7 @@ internal class VedtaksbrevServiceTest {
 
             coVerify {
                 sakOgBehandlingService.hentBehandling(SAK_ID, BEHANDLING_ID, SAKSBEHANDLER)
-                adresseService.hentAvsenderOgAttestant(any())
+                adresseService.hentAvsender(any())
                 brevbaker.genererPdf(any())
             }
         }
@@ -528,16 +498,17 @@ internal class VedtaksbrevServiceTest {
         BEHANDLING_ID,
         Spraak.NB,
         Persongalleri(
-            Innsender("STOR SNERK", Folkeregisteridentifikator.of("11057523044")),
-            Soeker("GRØNN", "MELLOMNAVN", "KOPP", Folkeregisteridentifikator.of("12345612345")),
+            Innsender("STOR SNERK", Foedselsnummer("11057523044")),
+            Soeker("GRØNN", "MELLOMNAVN", "KOPP", Foedselsnummer("12345612345")),
             Avdoed("DØD TESTPERSON", LocalDate.now().minusMonths(1))
         ),
         ForenkletVedtak(
             1,
             vedtakStatus,
             vedtakType,
-            Saksbehandler(SAKSBEHANDLER.ident(), PORSGRUNN),
-            attestant = null
+            PORSGRUNN,
+            SAKSBEHANDLER.ident(),
+            attestantIdent = null
         ),
         Utbetalingsinfo(
             1,
@@ -581,9 +552,13 @@ internal class VedtaksbrevServiceTest {
         )
     )
 
-    private fun opprettAvsenderOgAttestant() = Pair(
-        Avsender(kontor = "Nav Porsgrunn", "Etterstad 1", "0556", Telefonnummer("55553333"), "Sak Saksbehandler"),
-        Attestant("Per Attestant", PORSGRUNN)
+    private fun opprettAvsender() = Avsender(
+        kontor = "Nav Porsgrunn",
+        "Etterstad 1",
+        "0556",
+        Telefonnummer("55553333"),
+        "Sak Saksbehandler",
+        "Per Attestant"
     )
 
     private companion object {

@@ -66,7 +66,7 @@ internal class SakOgBehandlingServiceTest {
     fun `SakOgBehandling fungerer som forventet`() {
         coEvery {
             behandlingKlient.hentSak(any(), any())
-        } returns Sak("ident", SakType.BARNEPENSJON, SAK_ID, SAKSBEHANDLER_IDENT)
+        } returns Sak("ident", SakType.BARNEPENSJON, SAK_ID, ENHET)
         coEvery { vedtaksvurderingKlient.hentVedtak(any(), any()) } returns opprettVedtak()
         coEvery { grunnlagKlient.hentGrunnlag(SAK_ID, BRUKER) } returns opprettGrunnlag()
         coEvery { beregningKlient.hentBeregning(any(), any()) } returns opprettBeregning()
@@ -85,8 +85,9 @@ internal class SakOgBehandlingServiceTest {
         assertEquals("Død mellom Far", behandling.persongalleri.avdoed.navn)
         assertEquals(VedtakType.INNVILGELSE, behandling.vedtak.type)
         assertEquals(123L, behandling.vedtak.id)
-        assertEquals(SAKSBEHANDLER_IDENT, behandling.vedtak.saksbehandler.ident)
-        assertEquals(ATTESTANT_IDENT, behandling.vedtak.attestant?.ident)
+        assertEquals(ENHET, behandling.vedtak.ansvarligEnhet)
+        assertEquals(SAKSBEHANDLER_IDENT, behandling.vedtak.saksbehandlerIdent)
+        assertEquals(ATTESTANT_IDENT, behandling.vedtak.attestantIdent)
         assertEquals(YearMonth.now().atDay(1), behandling.utbetalingsinfo?.virkningsdato)
 
         coVerify(exactly = 1) {
@@ -100,7 +101,7 @@ internal class SakOgBehandlingServiceTest {
     fun `FinnUtbetalingsinfo returnerer korrekt informasjon`() {
         coEvery {
             behandlingKlient.hentSak(any(), any())
-        } returns Sak("ident", SakType.BARNEPENSJON, SAK_ID, SAKSBEHANDLER_IDENT)
+        } returns Sak("ident", SakType.BARNEPENSJON, SAK_ID, ENHET)
         coEvery { vedtaksvurderingKlient.hentVedtak(any(), any()) } returns opprettVedtak()
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns opprettGrunnlag()
         coEvery { beregningKlient.hentBeregning(any(), any()) } returns opprettBeregning()
@@ -129,7 +130,7 @@ internal class SakOgBehandlingServiceTest {
     fun `FinnUtbetalingsinfo returnerer korrekt antall barn ved soeskenjustering`() {
         coEvery {
             behandlingKlient.hentSak(any(), any())
-        } returns Sak("ident", SakType.BARNEPENSJON, SAK_ID, SAKSBEHANDLER_IDENT)
+        } returns Sak("ident", SakType.BARNEPENSJON, SAK_ID, ENHET)
         coEvery { vedtaksvurderingKlient.hentVedtak(any(), any()) } returns opprettVedtak()
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns opprettGrunnlag()
         coEvery { beregningKlient.hentBeregning(any(), any()) } returns opprettBeregningSoeskenjustering()
@@ -173,8 +174,8 @@ internal class SakOgBehandlingServiceTest {
         every { type } returns VedtakType.INNVILGELSE
         every { status } returns VedtakStatus.OPPRETTET
         every { virkningstidspunkt } returns YearMonth.now()
-        every { vedtakFattet } returns VedtakFattet(SAKSBEHANDLER_IDENT, "Ansvarlig enhet", Tidspunkt.now())
-        every { attestasjon } returns Attestasjon(ATTESTANT_IDENT, "Attestant enhet", Tidspunkt.now())
+        every { vedtakFattet } returns VedtakFattet(SAKSBEHANDLER_IDENT, ENHET, Tidspunkt.now())
+        every { attestasjon } returns Attestasjon(ATTESTANT_IDENT, ENHET, Tidspunkt.now())
     }
 
     private fun opprettGrunnlag() = GrunnlagTestData(
@@ -213,6 +214,7 @@ internal class SakOgBehandlingServiceTest {
         private val GRUNNLAGSOPPLYSNING_PDL = Grunnlagsopplysning.Pdl("pdl", Tidspunkt.now(), null, null)
         private val STATISK_UUID = UUID.randomUUID()
         private val BEHANDLING_ID = UUID.randomUUID()
+        private const val ENHET = "0000"
         private const val SAKSBEHANDLER_IDENT = "Z1235"
         private val BRUKER = Bruker.of("321", SAKSBEHANDLER_IDENT, null, null, null)
         private const val ATTESTANT_IDENT = "Z54321"

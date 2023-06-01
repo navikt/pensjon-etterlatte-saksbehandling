@@ -5,7 +5,6 @@ import no.nav.pensjon.brevbaker.api.model.Telefonnummer
 abstract class BrevData {
     abstract val avsender: Avsender
     abstract val mottaker: BrevMottaker
-    abstract val attestant: Attestant?
     abstract fun templateName(): String
 }
 
@@ -40,10 +39,6 @@ data class Avsender(
     val adresse: String,
     val postnummer: String,
     val telefonnummer: Telefonnummer,
-    val saksbehandler: String
-)
-
-data class Attestant(
-    val navn: String,
-    val kontor: String
+    val saksbehandler: String,
+    val attestant: String?
 )

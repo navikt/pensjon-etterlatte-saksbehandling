@@ -3,7 +3,6 @@ package no.nav.etterlatte.brev.adresse
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.brev.behandling.ForenkletVedtak
-import no.nav.etterlatte.brev.model.Attestant
 import no.nav.etterlatte.brev.model.Avsender
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.navansatt.NavansattKlient
@@ -24,30 +23,29 @@ class AdresseService(
         )
     }
 
-    suspend fun hentEnhet(navEnhetNr: String): Norg2Enhet = norg2Klient.hentEnhet(navEnhetNr)
-
-    suspend fun hentAvsenderOgAttestant(vedtak: ForenkletVedtak): Pair<Avsender, Attestant?> = coroutineScope {
-        val avsender = vedtak.saksbehandler.let {
-            val saksbehandlerNavn = async { navansattKlient.hentSaksbehandlerInfo(it.ident).fornavnEtternavn }
-            val saksbehandlerEnhet = async { hentEnhet(it.enhet) }
-
-            mapTilAvsender(saksbehandlerEnhet.await(), saksbehandlerNavn.await())
+    suspend fun hentAvsender(vedtak: ForenkletVedtak): Avsender = coroutineScope {
+        val saksbehandlerNavn = async {
+            navansattKlient.hentSaksbehandlerInfo(vedtak.saksbehandlerIdent).fornavnEtternavn
         }
 
-        val attestant = vedtak.attestant?.let {
-            val attestantNavn = async { navansattKlient.hentSaksbehandlerInfo(it.ident).fornavnEtternavn }
-            val attestantEnhet = async { hentEnhet(it.enhet).navn ?: "NAV" }
-
-            Attestant(attestantNavn.await(), attestantEnhet.await())
+        val saksbehandlerEnhet = async {
+            hentEnhet(vedtak.ansvarligEnhet)
         }
 
-        Pair(
-            avsender,
-            attestant
-        )
+        val attestantNavn = async {
+            vedtak.attestantIdent?.let { navansattKlient.hentSaksbehandlerInfo(it).fornavnEtternavn }
+        }
+
+        mapTilAvsender(saksbehandlerEnhet.await(), saksbehandlerNavn.await(), attestantNavn.await())
     }
 
-    private fun mapTilAvsender(enhet: Norg2Enhet, saksbehandlerNavn: String): Avsender {
+    private suspend fun hentEnhet(navEnhetNr: String): Norg2Enhet = norg2Klient.hentEnhet(navEnhetNr)
+
+    private fun mapTilAvsender(
+        enhet: Norg2Enhet,
+        saksbehandlerNavn: String,
+        attestantNavn: String?,
+    ): Avsender {
         val postadresse = enhet.kontaktinfo?.postadresse
 
         val kontor = enhet.navn ?: "NAV"
@@ -64,7 +62,8 @@ class AdresseService(
             adresse = adresse,
             postnummer = postnr,
             telefonnummer = Telefonnummer(telefon),
-            saksbehandler = saksbehandlerNavn
+            saksbehandler = saksbehandlerNavn,
+            attestant = attestantNavn
         )
     }
 }

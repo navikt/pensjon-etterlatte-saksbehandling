@@ -3,11 +3,7 @@ package no.nav.etterlatte.brev.behandling
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
-import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
-import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsnummer
-import no.nav.etterlatte.libs.common.grunnlag.hentKonstantOpplysning
-import no.nav.etterlatte.libs.common.grunnlag.hentNavn
+import no.nav.etterlatte.libs.common.grunnlag.*
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.InnsenderSoeknad
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Navn
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
@@ -39,16 +35,10 @@ data class ForenkletVedtak(
     val id: Long,
     val status: VedtakStatus,
     val type: VedtakType,
-    val saksbehandler: Saksbehandler,
-    val attestant: Attestant?
+    val ansvarligEnhet: String,
+    val saksbehandlerIdent: String,
+    val attestantIdent: String?
 )
-
-data class Saksbehandler(
-    val ident: String,
-    val enhet: String
-)
-
-typealias Attestant = Saksbehandler
 
 data class Utbetalingsinfo(
     val antallBarn: Int,

@@ -180,7 +180,7 @@ internal class TrygdetidRepositoryTest {
         val opprettetTrygdetid = trygdetid(behandling.id, behandling.sak, trygdetidGrunnlag = listOf(trygdetidGrunnlag))
 
         val trygdetid = repository.opprettTrygdetid(opprettetTrygdetid)
-        val endretTrygdetidGrunnlag = trygdetidGrunnlag.copy(bosted = "Polen")
+        val endretTrygdetidGrunnlag = trygdetidGrunnlag.copy(bosted = LandNormalisert.POLEN.isoCode)
         val trygdetidMedOppdatertGrunnlag =
             repository.oppdaterTrygdetid(trygdetid.leggTilEllerOppdaterTrygdetidGrunnlag(endretTrygdetidGrunnlag))
 

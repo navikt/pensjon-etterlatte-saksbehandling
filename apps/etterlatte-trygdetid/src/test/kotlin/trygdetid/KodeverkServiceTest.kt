@@ -48,9 +48,9 @@ internal class KodeverkServiceTest {
         val betydning = Betydning(
             gyldigTil = "1900-01-01",
             gyldigFra = "9999-12-31",
-            beskrivelser = mapOf<String, Beskrivelse>(Pair("nb", Beskrivelse("term", "tekst")))
+            beskrivelser = mapOf(Pair("nb", Beskrivelse("term", "tekst")))
         )
-        val testdatasandwich = mapOf<String, List<Betydning>>(
+        val testdatasandwich = mapOf(
             Pair(
                 LandNormalisert.SOR_GEORGIA_OG_SOR_SANDWICHOYENE.isoCode,
                 listOf<Betydning>(betydning)

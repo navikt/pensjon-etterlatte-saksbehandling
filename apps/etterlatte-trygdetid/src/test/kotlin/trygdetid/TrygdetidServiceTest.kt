@@ -16,6 +16,7 @@ import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
 import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsdato
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
+import no.nav.etterlatte.trygdetid.LandNormalisert
 import no.nav.etterlatte.trygdetid.Opplysningsgrunnlag
 import no.nav.etterlatte.trygdetid.TrygdetidBeregningService
 import no.nav.etterlatte.trygdetid.TrygdetidOpplysningType
@@ -216,12 +217,12 @@ internal class TrygdetidServiceTest {
             service.lagreTrygdetidGrunnlag(
                 behandlingId,
                 saksbehandler,
-                trygdetidGrunnlag.copy(bosted = "Polen")
+                trygdetidGrunnlag.copy(bosted = LandNormalisert.POLEN.isoCode)
             )
         }
 
         with(trygdetid.trygdetidGrunnlag.first()) {
-            bosted shouldBe "Polen"
+            bosted shouldBe LandNormalisert.POLEN.isoCode
             beregnetTrygdetid shouldBe null
         }
         trygdetid.beregnetTrygdetid shouldBe null
@@ -245,7 +246,7 @@ internal class TrygdetidServiceTest {
         val behandlingId = randomUUID()
         val trygdetidGrunnlag = trygdetidGrunnlag()
         val eksisterendeTrygdetid = trygdetid(behandlingId, trygdetidGrunnlag = listOf(trygdetidGrunnlag))
-        val endretTrygdetidGrunnlag = trygdetidGrunnlag.copy(bosted = bostedNorge)
+        val endretTrygdetidGrunnlag = trygdetidGrunnlag.copy(bosted = LandNormalisert.NORGE.isoCode)
 
         coEvery { behandlingKlient.settBehandlingStatusVilkaarsvurdert(any(), any()) } returns true
         every { repository.hentTrygdetid(behandlingId) } returns eksisterendeTrygdetid
@@ -272,7 +273,7 @@ internal class TrygdetidServiceTest {
                 withArg {
                     it.trygdetidGrunnlag.first().let { tg ->
                         tg.id shouldBe trygdetidGrunnlag.id
-                        tg.bosted shouldBe bostedNorge
+                        tg.bosted shouldBe LandNormalisert.NORGE.isoCode
                     }
                 }
             )

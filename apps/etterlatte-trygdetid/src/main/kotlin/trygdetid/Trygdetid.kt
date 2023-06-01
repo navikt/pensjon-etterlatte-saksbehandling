@@ -81,7 +81,7 @@ data class TrygdetidGrunnlag(
         return this.copy(beregnetTrygdetid = beregnetTrygdetid)
     }
 
-    fun erNasjonal() = this.bosted == "NORGE"
+    fun erNasjonal() = this.bosted == LandNormalisert.NORGE.isoCode
 }
 
 data class BeregnetTrygdetidGrunnlag(val verdi: Period, val tidspunkt: Tidspunkt, val regelResultat: JsonNode)

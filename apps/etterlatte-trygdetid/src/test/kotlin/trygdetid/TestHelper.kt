@@ -6,6 +6,7 @@ import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.token.Saksbehandler
 import no.nav.etterlatte.trygdetid.BeregnetTrygdetid
 import no.nav.etterlatte.trygdetid.BeregnetTrygdetidGrunnlag
+import no.nav.etterlatte.trygdetid.LandNormalisert
 import no.nav.etterlatte.trygdetid.Opplysningsgrunnlag
 import no.nav.etterlatte.trygdetid.Trygdetid
 import no.nav.etterlatte.trygdetid.TrygdetidGrunnlag
@@ -17,7 +18,6 @@ import java.util.*
 import java.util.UUID.randomUUID
 
 val saksbehandler = Saksbehandler("token", "ident", null)
-val bostedNorge = "NORGE"
 
 fun trygdetid(
     behandlingId: UUID = randomUUID(),
@@ -43,7 +43,7 @@ fun trygdetidGrunnlag(
 ) = TrygdetidGrunnlag(
     id = randomUUID(),
     type = TrygdetidType.FAKTISK,
-    bosted = bostedNorge,
+    bosted = LandNormalisert.NORGE.isoCode,
     periode = periode,
     beregnetTrygdetid = beregnetTrygdetidGrunnlag,
     kilde = Grunnlagsopplysning.Saksbehandler(ident = "Z123", tidspunkt = Tidspunkt.now())

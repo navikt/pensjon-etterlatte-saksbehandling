@@ -5,6 +5,6 @@ services:
     container_name: vilkaarsvurdering-postgres
     image: postgres
     ports:
-      - '5435:5432'
+      - '5436:5432'
     environment:
       - POSTGRES_HOST_AUTH_METHOD=trust

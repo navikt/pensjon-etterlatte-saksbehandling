@@ -224,6 +224,7 @@ internal class TrygdetidServiceTest {
             bosted shouldBe "Polen"
             beregnetTrygdetid shouldBe null
         }
+        trygdetid.beregnetTrygdetid shouldBe null
 
         coVerify(exactly = 1) {
             behandlingKlient.kanBeregnes(behandlingId, saksbehandler)

@@ -26,8 +26,12 @@ data class Trygdetid(
         )
     }
 
-    fun oppdaterBeregnetTrygdetid(beregnetTrygdetid: BeregnetTrygdetid?): Trygdetid {
+    fun oppdaterBeregnetTrygdetid(beregnetTrygdetid: BeregnetTrygdetid): Trygdetid {
         return this.copy(beregnetTrygdetid = beregnetTrygdetid)
+    }
+
+    fun nullstillBeregnetTrygdetid(): Trygdetid {
+        return this.copy(beregnetTrygdetid = null)
     }
 }
 

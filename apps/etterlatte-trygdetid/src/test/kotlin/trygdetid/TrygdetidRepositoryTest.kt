@@ -204,6 +204,24 @@ internal class TrygdetidRepositoryTest {
         trygdetidMedBeregnetTrygdetid.beregnetTrygdetid shouldBe beregnetTrygdetid
     }
 
+    @Test
+    fun `skal nullstille beregnet trygdetid`() {
+        val beregnetTrygdetid = beregnetTrygdetid(total = 12, tidspunkt = Tidspunkt.now())
+        val behandling = behandlingMock()
+        val opprettetTrygdetid = trygdetid(behandling.id, behandling.sak)
+
+        val trygdetid = repository.opprettTrygdetid(opprettetTrygdetid)
+        val trygdetidMedBeregnetTrygdetid =
+            repository.oppdaterTrygdetid(trygdetid.oppdaterBeregnetTrygdetid(beregnetTrygdetid))
+
+        trygdetidMedBeregnetTrygdetid.beregnetTrygdetid shouldBe beregnetTrygdetid
+
+        val trygdetidUtenBeregning = repository.oppdaterTrygdetid(
+            trygdetidMedBeregnetTrygdetid.nullstillBeregnetTrygdetid()
+        )
+        trygdetidUtenBeregning.beregnetTrygdetid shouldBe null
+    }
+
     private fun behandlingMock() =
         mockk<DetaljertBehandling>().apply {
             every { id } returns randomUUID()

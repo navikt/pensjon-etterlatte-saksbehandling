@@ -42,22 +42,26 @@ class TrygdetidService(
         trygdetidGrunnlag: TrygdetidGrunnlag
     ): Trygdetid =
         tilstandssjekk(behandlingId, bruker) {
-            val trygdetidGrunnlagBeregnet = trygdetidGrunnlag.oppdaterBeregnetTrygdetid(
-                beregnTrygdetidService.beregnTrygdetidGrunnlag(trygdetidGrunnlag)
+            val trygdetidGrunnlagBeregnet: TrygdetidGrunnlag = trygdetidGrunnlag.oppdaterBeregnetTrygdetid(
+                beregnetTrygdetid = beregnTrygdetidService.beregnTrygdetidGrunnlag(trygdetidGrunnlag)
             )
 
-            val gjeldendeTrygdetid = trygdetidRepository.hentTrygdetid(behandlingId)
+            val gjeldendeTrygdetid: Trygdetid = trygdetidRepository.hentTrygdetid(behandlingId)
                 ?: throw Exception("Fant ikke gjeldende trygdetid for behandlingId=$behandlingId")
 
-            val trygdetidMedOppdatertTrygdetidGrunnlag =
+            val trygdetidMedOppdatertTrygdetidGrunnlag: Trygdetid =
                 gjeldendeTrygdetid.leggTilEllerOppdaterTrygdetidGrunnlag(trygdetidGrunnlagBeregnet)
 
-            val beregnetTrygdetid = beregnTrygdetidService.beregnTrygdetid(
-                trygdetidMedOppdatertTrygdetidGrunnlag.trygdetidGrunnlag
+            val nyBeregnetTrygdetid: BeregnetTrygdetid? = beregnTrygdetidService.beregnTrygdetid(
+                trygdetidGrunnlag = trygdetidMedOppdatertTrygdetidGrunnlag.trygdetidGrunnlag
             )
 
-            val oppdatertTrygdetid =
-                trygdetidMedOppdatertTrygdetidGrunnlag.oppdaterBeregnetTrygdetid(beregnetTrygdetid)
+            val oppdatertTrygdetid: Trygdetid =
+                if (nyBeregnetTrygdetid != null) {
+                    trygdetidMedOppdatertTrygdetidGrunnlag.oppdaterBeregnetTrygdetid(nyBeregnetTrygdetid)
+                } else {
+                    trygdetidMedOppdatertTrygdetidGrunnlag.nullstillBeregnetTrygdetid()
+                }
 
             trygdetidRepository.oppdaterTrygdetid(oppdatertTrygdetid).also {
                 behandlingKlient.settBehandlingStatusVilkaarsvurdert(behandlingId, bruker)

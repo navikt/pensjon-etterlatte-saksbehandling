@@ -292,13 +292,15 @@ class TrygdetidRepository(private val dataSource: DataSource) {
                 til = localDate("periode_til")
             ),
             kilde = string("kilde").let { objectMapper.readValue(it) },
-            beregnetTrygdetid = BeregnetTrygdetidGrunnlag(
-                verdi = string("beregnet_verdi").let { Period.parse(it) },
-                tidspunkt = sqlTimestamp("beregnet_tidspunkt").toTidspunkt(),
-                regelResultat = string("beregnet_regelresultat").let {
-                    objectMapper.readTree(it)
-                }
-            )
+            beregnetTrygdetid = stringOrNull("beregnet_verdi")?.let { verdi ->
+                BeregnetTrygdetidGrunnlag(
+                    verdi = Period.parse(verdi),
+                    tidspunkt = sqlTimestamp("beregnet_tidspunkt").toTidspunkt(),
+                    regelResultat = string("beregnet_regelresultat").let {
+                        objectMapper.readTree(it)
+                    }
+                )
+            }
         )
 
     private fun Row.toOpplysningsgrunnlag(): Opplysningsgrunnlag {

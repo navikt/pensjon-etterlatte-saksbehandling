@@ -93,6 +93,19 @@ fun Route.vedtaksvurderingRoute(service: VedtaksvurderingService, behandlingKlie
             }
         }
 
+        post("/{$BEHANDLINGSID_CALL_PARAMETER}/iverksett") {
+            withBehandlingId(behandlingKlient) { behandlingId ->
+                logger.info("Iverksetter vedtak for behandling $behandlingId")
+                service.iverksattVedtak(behandlingId)
+                val vedtak = service.hentVedtak(behandlingId)
+                if (vedtak != null) {
+                    call.respond(HttpStatusCode.OK, vedtak.toDto())
+                } else {
+                    call.respond(HttpStatusCode.NoContent)
+                }
+            }
+        }
+
         get("/loepende/{$SAKID_CALL_PARAMETER}") {
             withSakId(behandlingKlient) { sakId ->
                 val dato = call.request.queryParameters["dato"]?.let { LocalDate.parse(it) }

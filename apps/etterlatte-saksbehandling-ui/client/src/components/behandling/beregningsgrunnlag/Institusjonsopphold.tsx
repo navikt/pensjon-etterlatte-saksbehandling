@@ -28,6 +28,10 @@ const Institusjonsopphold = (props: InstitusjonsoppholdProps) => {
 
   console.log(behandling.sakType)
   //TODO: hent hendelser på behandling som er av type instittusjonsopphold
+
+  /*
+    Mangler validering
+     */
   return (
     <InstitusjonsoppholdsWrapper>
       <>

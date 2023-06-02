@@ -16,6 +16,7 @@ spec:
     cpuThresholdPercentage: 90
   ingresses:
     - https://etterlatte-saksbehandling.intern.dev.nav.no
+    - https://gjenny.intern.dev.nav.no
   azure:
     application:
       enabled: true

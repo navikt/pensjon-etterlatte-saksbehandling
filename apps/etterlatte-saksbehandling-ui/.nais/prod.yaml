@@ -17,6 +17,7 @@ spec:
   ingresses:
     - https://etterlatte-saksbehandling.intern.nav.no
     - https://gjenny.intern.nav.no
+    - https://j9.intern.nav.no
   azure:
     application:
       enabled: true

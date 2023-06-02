@@ -1,6 +1,6 @@
 import { Content, ContentHeader } from '~shared/styled'
 import { useEffect, useState } from 'react'
-import { ErrorMessage, Heading } from '@navikt/ds-react'
+import { Alert, ErrorMessage, Heading } from '@navikt/ds-react'
 import { HeadingWrapper } from '../soeknadsoversikt/styled'
 import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapper'
 import { hentVedtaksbrev, opprettVedtaksbrev } from '~shared/api/brev'
@@ -13,6 +13,8 @@ import { IBehandlingsType, IDetaljertBehandling, IProsesstype } from '~shared/ty
 import MottakerPanel from '~components/behandling/brev/detaljer/MottakerPanel'
 import ForhaandsvisningBrev from '~components/behandling/brev/ForhaandsvisningBrev'
 import Spinner from '~shared/Spinner'
+import { BrevProsessType } from '~shared/types/Brev'
+import RedigerbartBrev from '~components/behandling/brev/RedigerbartBrev'
 
 export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
   const { behandlingId } = useParams()
@@ -64,6 +66,11 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
             </HeadingWrapper>
             <Soeknadsdato mottattDato={soeknadMottattDato} />
 
+            <br />
+            {vedtaksbrev?.prosessType === BrevProsessType.MANUELL && (
+              <Alert variant={'warning'}>Kan ikke generere brev automatisk. Du må selv redigere innholdet.</Alert>
+            )}
+            <br />
             {vedtaksbrev && <MottakerPanel vedtaksbrev={vedtaksbrev} />}
           </ContentHeader>
         </Sidebar>
@@ -74,8 +81,10 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
           </SpinnerContainer>
         ) : error ? (
           <ErrorMessage>{error}</ErrorMessage>
-        ) : (
+        ) : vedtaksbrev.prosessType === BrevProsessType.AUTOMATISK ? (
           <ForhaandsvisningBrev brev={vedtaksbrev} sakId={sak} />
+        ) : (
+          <RedigerbartBrev brev={vedtaksbrev} behandling={props.behandling} />
         )}
       </BrevContent>
 

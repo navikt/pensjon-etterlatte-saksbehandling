@@ -9,7 +9,6 @@ data class InnvilgetBrevData(
     val avdoed: Avdoed,
     override val avsender: Avsender,
     override val mottaker: BrevMottaker,
-    override val attestant: Attestant?
 ) : BrevData() {
     override fun templateName(): String = "innvilget"
 
@@ -18,14 +17,12 @@ data class InnvilgetBrevData(
             behandling: Behandling,
             avsender: Avsender,
             mottaker: BrevMottaker,
-            attestant: Attestant?
         ): InnvilgetBrevData =
             InnvilgetBrevData(
                 utbetalingsinfo = behandling.utbetalingsinfo!!,
                 avdoed = behandling.persongalleri.avdoed,
                 mottaker = mottaker,
                 avsender = avsender,
-                attestant = attestant
             )
     }
 }

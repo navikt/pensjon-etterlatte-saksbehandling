@@ -13,8 +13,7 @@ class EndringBrevRequest(
     val revurderingsaarsak: RevurderingAarsak,
     val avdoed: Avdoed,
     override val avsender: Avsender,
-    override val mottaker: BrevMottaker,
-    override val attestant: Attestant?
+    override val mottaker: BrevMottaker
 ) : BrevData() {
 
     override fun templateName(): String = "endring"
@@ -23,12 +22,10 @@ class EndringBrevRequest(
         fun fraVedtak(
             behandling: Behandling,
             avsender: Avsender,
-            mottaker: BrevMottaker,
-            attestant: Attestant?
+            mottaker: BrevMottaker
         ): EndringBrevRequest = EndringBrevRequest(
             avsender = avsender,
             mottaker = mottaker,
-            attestant = attestant,
             saksnummer = behandling.sakId.toString(),
             utbetalingsinfo = behandling.utbetalingsinfo!!,
             barn = behandling.persongalleri.soeker,

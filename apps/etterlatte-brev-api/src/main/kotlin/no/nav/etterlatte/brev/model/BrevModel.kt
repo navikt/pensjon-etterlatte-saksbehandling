@@ -64,11 +64,11 @@ data class Mottaker(
 data class Brev(
     val id: BrevID,
     val behandlingId: UUID,
+    val prosessType: BrevProsessType,
     val soekerFnr: String,
     val tittel: String,
     val status: Status,
-    val mottaker: Mottaker,
-    val erVedtaksbrev: Boolean,
+    val mottaker: Mottaker
 ) {
 
     fun kanEndres() = status in listOf(Status.OPPRETTET, Status.OPPDATERT)
@@ -78,28 +78,34 @@ data class Brev(
             Brev(
                 id = id,
                 behandlingId = opprettNyttBrev.behandlingId,
+                prosessType = opprettNyttBrev.prosessType,
                 soekerFnr = opprettNyttBrev.soekerFnr,
                 tittel = opprettNyttBrev.tittel,
                 status = opprettNyttBrev.status,
-                mottaker = opprettNyttBrev.mottaker,
-                erVedtaksbrev = opprettNyttBrev.erVedtaksbrev
+                mottaker = opprettNyttBrev.mottaker
             )
     }
 }
 
 class BrevInnhold(
-    val spraak: Spraak,
-    val data: ByteArray
+    val spraak: Spraak? = null,
+    val payload: Slate? = null,
+    val data: ByteArray? = null
 )
 
 data class OpprettNyttBrev(
     val behandlingId: UUID,
     val soekerFnr: String,
+    val prosessType: BrevProsessType,
     val tittel: String,
-    val mottaker: Mottaker,
-    val erVedtaksbrev: Boolean
+    val mottaker: Mottaker
 ) {
     val status: Status = Status.OPPRETTET
+}
+
+enum class BrevProsessType {
+    MANUELL,
+    AUTOMATISK
 }
 
 enum class Spraak(@get:JsonValue val verdi: String) { NB("nb"), NN("nn"), EN("en") }

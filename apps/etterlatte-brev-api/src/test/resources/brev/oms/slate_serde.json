@@ -1,0 +1,79 @@
+[
+  {
+    "type" : "heading-two",
+    "children" : [
+      {
+        "text" : "Tittel 2"
+      }
+    ]
+  },
+  {
+    "type" : "heading-three",
+    "children" : [
+      {
+        "text" : "Tittel 3"
+      }
+    ]
+  },
+  {
+    "type" : "paragraph",
+    "children" : [
+      {
+        "text" : "Her er det en "
+      },
+      {
+        "text" : "<PLACEHOLDER_FOR_NOE_LURT>",
+        "placeholder" : true
+      },
+      {
+        "text" : ", og stønaden utbetales bla bla bla...osv. "
+      }
+    ]
+  },
+  {
+    "type" : "paragraph",
+    "children" : [
+      {
+        "text" : "> IF noe er sant, må saksbehandler ta stilling",
+        "placeholder": true
+      }
+    ]
+  },
+  {
+    "type" : "paragraph",
+    "children" : [
+      {
+        "text" : "Mer tekst"
+      }
+    ]
+  },
+  {
+    "type": "bulleted-list",
+    "children": [
+      {
+        "type": "list-item",
+        "children": [
+          {
+            "text": "1"
+          }
+        ]
+      },
+      {
+        "type": "list-item",
+        "children": [
+          {
+            "text": "2"
+          }
+        ]
+      },
+      {
+        "type": "list-item",
+        "children": [
+          {
+            "text": "3"
+          }
+        ]
+      }
+    ]
+  }
+]

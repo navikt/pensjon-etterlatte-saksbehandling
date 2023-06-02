@@ -1,15 +1,9 @@
 package no.nav.etterlatte.brev.adresse
 
 import io.kotest.matchers.shouldBe
-import io.mockk.clearAllMocks
-import io.mockk.coEvery
-import io.mockk.coVerify
-import io.mockk.confirmVerified
-import io.mockk.mockk
+import io.mockk.*
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.brev.behandling.Attestant
 import no.nav.etterlatte.brev.behandling.ForenkletVedtak
-import no.nav.etterlatte.brev.behandling.Saksbehandler
 import no.nav.etterlatte.brev.navansatt.NavansattKlient
 import no.nav.etterlatte.brev.navansatt.SaksbehandlerInfo
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
@@ -38,33 +32,38 @@ internal class AdresseServiceTest {
 
     @Test
     fun `Hent avsender og attestant fungerer`() {
-        coEvery { norg2Mock.hentEnhet(saksbehandler.enhet) } returns opprettEnhet(saksbehandler.enhet)
-        coEvery { norg2Mock.hentEnhet(attestant.enhet) } returns opprettEnhet(attestant.enhet)
-        coEvery { navansattMock.hentSaksbehandlerInfo(saksbehandler.ident) }
-            .returns(opprettSaksbehandlerInfo(saksbehandler.ident))
-        coEvery { navansattMock.hentSaksbehandlerInfo(attestant.ident) }
-            .returns(opprettSaksbehandlerInfo(attestant.ident))
+        coEvery { norg2Mock.hentEnhet(any()) } returns opprettEnhet()
+        coEvery { navansattMock.hentSaksbehandlerInfo(SAKSBEHANDLER) }
+            .returns(opprettSaksbehandlerInfo(SAKSBEHANDLER, "saks", "behandler"))
+        coEvery { navansattMock.hentSaksbehandlerInfo(ATTESTANT) }
+            .returns(opprettSaksbehandlerInfo(ATTESTANT, "att", "estant"))
 
-        val vedtak = ForenkletVedtak(1, VedtakStatus.FATTET_VEDTAK, VedtakType.INNVILGELSE, saksbehandler, attestant)
+        val vedtak = ForenkletVedtak(
+            1,
+            VedtakStatus.FATTET_VEDTAK,
+            VedtakType.INNVILGELSE,
+            ANSVARLIG_ENHET,
+            SAKSBEHANDLER,
+            ATTESTANT
+        )
 
-        val (faktiskAvsender, faktiskAttestant) = runBlocking {
-            adresseService.hentAvsenderOgAttestant(vedtak)
+        val faktiskAvsender = runBlocking {
+            adresseService.hentAvsender(vedtak)
         }
 
-        faktiskAvsender.saksbehandler shouldBe "fornavn etternavn"
-        faktiskAttestant?.navn shouldBe "fornavn etternavn"
+        faktiskAvsender.saksbehandler shouldBe "saks behandler"
+        faktiskAvsender.attestant shouldBe "att estant"
 
         coVerify(exactly = 1) {
-            norg2Mock.hentEnhet(saksbehandler.enhet)
-            norg2Mock.hentEnhet(attestant.enhet)
-            navansattMock.hentSaksbehandlerInfo(saksbehandler.ident)
-            navansattMock.hentSaksbehandlerInfo(attestant.ident)
+            norg2Mock.hentEnhet(vedtak.ansvarligEnhet)
+            navansattMock.hentSaksbehandlerInfo(vedtak.saksbehandlerIdent)
+            navansattMock.hentSaksbehandlerInfo(vedtak.attestantIdent!!)
         }
     }
 
-    private fun opprettEnhet(enhetNr: String) = Norg2Enhet(
+    private fun opprettEnhet() = Norg2Enhet(
         navn = "NAV Porsgrunn",
-        enhetNr = enhetNr,
+        enhetNr = ANSVARLIG_ENHET,
         kontaktinfo = Norg2Kontaktinfo(
             telefonnummer = "00 11 22 33",
             epost = "test@nav.no",
@@ -76,11 +75,12 @@ internal class AdresseServiceTest {
         )
     )
 
-    private fun opprettSaksbehandlerInfo(ident: String) =
-        SaksbehandlerInfo(ident, "navn", "fornavn", "etternavn", "epost@nav.no")
+    private fun opprettSaksbehandlerInfo(ident: String, fornavn: String, etternavn: String) =
+        SaksbehandlerInfo(ident, "navn", fornavn, etternavn, "epost@nav.no")
 
     companion object {
-        private val saksbehandler = Saksbehandler("Z123456", "1000")
-        private val attestant = Attestant("Z00002", "3000")
+        private const val ANSVARLIG_ENHET = "1234"
+        private const val SAKSBEHANDLER = "Z123456"
+        private const val ATTESTANT = "Z00002"
     }
 }

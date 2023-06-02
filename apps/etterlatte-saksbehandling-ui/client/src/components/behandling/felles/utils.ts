@@ -81,3 +81,16 @@ export const behandlingSkalSendeBrev = (behandling: IBehandlingReducer): boolean
       )
   }
 }
+
+export const manueltBrevKanRedigeres = (status: IBehandlingStatus): boolean => {
+  switch (status) {
+    case IBehandlingStatus.OPPRETTET:
+    case IBehandlingStatus.VILKAARSVURDERT:
+    case IBehandlingStatus.BEREGNET:
+    case IBehandlingStatus.AVKORTET:
+    case IBehandlingStatus.RETURNERT:
+      return true
+    default:
+      return false
+  }
+}

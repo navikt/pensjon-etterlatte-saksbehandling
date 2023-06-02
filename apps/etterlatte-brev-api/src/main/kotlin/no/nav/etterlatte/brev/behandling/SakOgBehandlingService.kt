@@ -29,6 +29,7 @@ class SakOgBehandlingService(
         val vedtak = async { vedtaksvurderingKlient.hentVedtak(behandlingId, bruker) }
         val grunnlag = async { grunnlagKlient.hentGrunnlag(sakId, bruker) }
         val sak = async { behandlingKlient.hentSak(sakId, bruker) }
+
         mapBehandling(
             vedtak.await(),
             grunnlag.await(),
@@ -45,15 +46,9 @@ class SakOgBehandlingService(
     ): Behandling {
         val innloggetSaksbehandlerIdent = bruker.ident()
 
-        val saksbehandlerEnhet = vedtak.vedtakFattet?.ansvarligEnhet ?: sak.enhet
+        val ansvarligEnhet = vedtak.vedtakFattet?.ansvarligEnhet ?: sak.enhet
         val saksbehandlerIdent = vedtak.vedtakFattet?.ansvarligSaksbehandler ?: innloggetSaksbehandlerIdent
-
-        val attestant = vedtak.vedtakFattet?.let {
-            Attestant(
-                vedtak.attestasjon?.attestant ?: innloggetSaksbehandlerIdent,
-                vedtak.attestasjon?.attesterendeEnhet ?: sak.enhet
-            )
-        }
+        val attestantIdent = vedtak.vedtakFattet?.let { vedtak.attestasjon?.attestant ?: innloggetSaksbehandlerIdent }
 
         return Behandling(
             sakId = vedtak.sak.id,
@@ -69,11 +64,9 @@ class SakOgBehandlingService(
                 vedtak.vedtakId,
                 vedtak.status,
                 vedtak.type,
-                Saksbehandler(
-                    saksbehandlerIdent,
-                    saksbehandlerEnhet
-                ),
-                attestant
+                ansvarligEnhet,
+                saksbehandlerIdent,
+                attestantIdent
             ),
             utbetalingsinfo = finnUtbetalingsinfo(vedtak.behandling.id, vedtak.virkningstidspunkt, bruker),
             revurderingsaarsak = vedtak.behandling.revurderingsaarsak

@@ -10,6 +10,8 @@ spec:
   port: 8080
   ingresses:
     - "https://etterlatte-migrering.intern.dev.nav.no"
+  startup:
+    failureThreshold: 5
   liveness:
     initialDelay: 5
     path: /isalive

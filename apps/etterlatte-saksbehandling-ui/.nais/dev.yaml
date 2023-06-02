@@ -35,6 +35,8 @@ spec:
     sidecar:
       enabled: true
       autoLogin: true
+  startup:
+    failureThreshold: 5
   liveness:
     path: /health/isAlive
     initialDelay: 10

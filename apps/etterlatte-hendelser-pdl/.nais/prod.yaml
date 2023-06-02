@@ -8,6 +8,8 @@ metadata:
 spec:
   image: {{image}}
   port: 8080
+  startup:
+    failureThreshold: 5
   liveness:
     initialDelay: 5
     path: /health/isalive

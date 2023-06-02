@@ -1,6 +1,6 @@
 package no.nav.etterlatte.beregning.grunnlag
 
-data class InstitusjonsoppholdBeregnignsGrunnlag(
+data class InstitusjonsoppholdBeregningsgrunnlag(
     val reduksjon: Reduksjon,
     val egenReduksjon: String? = null,
     val begrunnelse: String? = null

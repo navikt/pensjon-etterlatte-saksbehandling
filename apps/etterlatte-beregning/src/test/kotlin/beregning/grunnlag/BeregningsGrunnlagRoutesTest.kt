@@ -179,7 +179,7 @@ internal class BeregningsGrunnlagRoutesTest {
                 tidspunkt = Tidspunkt.now()
             ),
             soeskenMedIBeregning = listOf(),
-            institusjonsoppholdBeregnignsGrunnlag = InstitusjonsoppholdBeregnignsGrunnlag(institusjonsopphold = false)
+            institusjonsoppholdBeregnignsGrunnlag = emptyList()
         )
 
         testApplication {
@@ -211,7 +211,7 @@ internal class BeregningsGrunnlagRoutesTest {
             id,
             Grunnlagsopplysning.Saksbehandler("Z123456", Tidspunkt.now()),
             emptyList(),
-            InstitusjonsoppholdBeregnignsGrunnlag(false)
+            emptyList()
         )
 
         testApplication {
@@ -266,7 +266,7 @@ internal class BeregningsGrunnlagRoutesTest {
                 setBody(
                     BarnepensjonBeregningsGrunnlag(
                         emptyList(),
-                        InstitusjonsoppholdBeregnignsGrunnlag(false)
+                        emptyList()
                     )
                 )
             }.let {
@@ -298,7 +298,7 @@ internal class BeregningsGrunnlagRoutesTest {
                 setBody(
                     BarnepensjonBeregningsGrunnlag(
                         emptyList(),
-                        InstitusjonsoppholdBeregnignsGrunnlag(false)
+                        emptyList()
                     )
                 )
             }.let {
@@ -330,7 +330,7 @@ internal class BeregningsGrunnlagRoutesTest {
                 setBody(
                     BarnepensjonBeregningsGrunnlag(
                         emptyList(),
-                        InstitusjonsoppholdBeregnignsGrunnlag(false)
+                        emptyList()
                     )
                 )
             }.let {
@@ -367,7 +367,7 @@ internal class BeregningsGrunnlagRoutesTest {
             forrige,
             Grunnlagsopplysning.Saksbehandler("Z123456", Tidspunkt.now()),
             emptyList(),
-            InstitusjonsoppholdBeregnignsGrunnlag(false)
+            emptyList()
         )
         every { repository.finnGrunnlagForBehandling(nye) } returns null
         every { repository.lagre(any()) } returns true
@@ -419,13 +419,13 @@ internal class BeregningsGrunnlagRoutesTest {
             forrige,
             Grunnlagsopplysning.Saksbehandler("Z123456", Tidspunkt.now()),
             emptyList(),
-            InstitusjonsoppholdBeregnignsGrunnlag(false)
+            emptyList()
         )
         every { repository.finnGrunnlagForBehandling(nye) } returns BeregningsGrunnlag(
             nye,
             Grunnlagsopplysning.Saksbehandler("Z123456", Tidspunkt.now()),
             emptyList(),
-            InstitusjonsoppholdBeregnignsGrunnlag(false)
+            emptyList()
         )
         every { repository.lagre(any()) } returns true
 

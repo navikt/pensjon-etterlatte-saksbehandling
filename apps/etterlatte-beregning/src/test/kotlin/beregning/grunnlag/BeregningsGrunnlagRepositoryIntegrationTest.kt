@@ -4,7 +4,7 @@ import io.mockk.clearAllMocks
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlag
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlagRepository
 import no.nav.etterlatte.beregning.grunnlag.GrunnlagMedPeriode
-import no.nav.etterlatte.beregning.grunnlag.InstitusjonsoppholdBeregnignsGrunnlag
+import no.nav.etterlatte.beregning.grunnlag.InstitusjonsoppholdBeregningsgrunnlag
 import no.nav.etterlatte.beregning.grunnlag.Reduksjon
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeskenMedIBeregning
@@ -70,7 +70,13 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest {
 
         val soeskenMedIBeregning = listOf(SoeskenMedIBeregning(STOR_SNERK, true)).somPeriodisertGrunnlag()
         val institusjonsoppholdBeregnignsGrunnlag =
-            InstitusjonsoppholdBeregnignsGrunnlag(reduksjon = Reduksjon.JA_VANLIG)
+            listOf(
+                GrunnlagMedPeriode(
+                    fom = LocalDate.of(2022, 8, 1),
+                    tom = null,
+                    data = InstitusjonsoppholdBeregningsgrunnlag(Reduksjon.NEI_KORT_OPPHOLD)
+                )
+            )
 
         repository.lagre(
             BeregningsGrunnlag(
@@ -103,9 +109,21 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest {
         ).somPeriodisertGrunnlag()
 
         val initialInstitusjonsoppholdBeregnignsGrunnlag =
-            InstitusjonsoppholdBeregnignsGrunnlag(reduksjon = Reduksjon.NEI_KORT_OPPHOLD)
+            listOf(
+                GrunnlagMedPeriode(
+                    fom = LocalDate.of(2022, 8, 1),
+                    tom = null,
+                    data = InstitusjonsoppholdBeregningsgrunnlag(Reduksjon.NEI_KORT_OPPHOLD)
+                )
+            )
         val oppdatertInstitusjonsoppholdBeregnignsGrunnlag =
-            InstitusjonsoppholdBeregnignsGrunnlag(reduksjon = Reduksjon.JA_VANLIG)
+            listOf(
+                GrunnlagMedPeriode(
+                    fom = LocalDate.of(2022, 8, 1),
+                    tom = null,
+                    data = InstitusjonsoppholdBeregningsgrunnlag(Reduksjon.JA_VANLIG)
+                )
+            )
 
         repository.lagre(
             BeregningsGrunnlag(

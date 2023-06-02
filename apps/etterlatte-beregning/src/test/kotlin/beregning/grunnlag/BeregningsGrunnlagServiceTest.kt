@@ -11,7 +11,7 @@ import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlag
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlagRepository
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlagService
 import no.nav.etterlatte.beregning.grunnlag.GrunnlagMedPeriode
-import no.nav.etterlatte.beregning.grunnlag.InstitusjonsoppholdBeregnignsGrunnlag
+import no.nav.etterlatte.beregning.grunnlag.InstitusjonsoppholdBeregningsgrunnlag
 import no.nav.etterlatte.beregning.grunnlag.Reduksjon
 import no.nav.etterlatte.klienter.BehandlingKlientImpl
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -63,7 +63,7 @@ internal class BeregningsGrunnlagServiceTest {
             GrunnlagMedPeriode(
                 fom = LocalDate.of(2022, 8, 1),
                 tom = null,
-                data = InstitusjonsoppholdBeregnignsGrunnlag(Reduksjon.NEI_KORT_OPPHOLD)
+                data = InstitusjonsoppholdBeregningsgrunnlag(Reduksjon.NEI_KORT_OPPHOLD)
             )
         )
 
@@ -313,7 +313,7 @@ internal class BeregningsGrunnlagServiceTest {
     private fun beregningsgrunnlag(
         behandlingId: UUID = randomUUID(),
         soeskenMedIBeregning: List<GrunnlagMedPeriode<List<SoeskenMedIBeregning>>> = emptyList(),
-        institusjonsoppholdBeregnignsGrunnlag: List<GrunnlagMedPeriode<InstitusjonsoppholdBeregnignsGrunnlag>> =
+        institusjonsoppholdBeregnignsGrunnlag: List<GrunnlagMedPeriode<InstitusjonsoppholdBeregningsgrunnlag>> =
             emptyList(),
         kilde: Grunnlagsopplysning.Saksbehandler = Grunnlagsopplysning.Saksbehandler("test", Tidspunkt.now())
     ): BeregningsGrunnlag {

@@ -15,6 +15,7 @@ import no.nav.etterlatte.behandling.domain.toDetaljertBehandling
 import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sakId
 
 internal fun Route.revurderingRoutes(
@@ -53,10 +54,13 @@ internal fun Route.revurderingRoutes(
         }
     }
 
-    route("/api/stoettederevurderinger") {
+    route("/api/stoettederevurderinger/{saktype}") {
         get {
+            val sakType = call.parameters["saktype"]?.let { runCatching { SakType.valueOf(it) }.getOrNull() }
+                ?: return@get call.respond(HttpStatusCode.BadRequest, "Ugyldig saktype")
+
             val stoettedeRevurderinger = RevurderingAarsak.values()
-                .filter { it.kanBrukesIMiljo() }
+                .filter { it.kanBrukesIMiljo() && it.gyldigForSakType(sakType) }
                 .map { it.name }
             call.respond(stoettedeRevurderinger)
         }

@@ -9,6 +9,7 @@ import { apiClient, ApiResponse } from './apiClient'
 import { ManueltOpphoerDetaljer } from '~components/behandling/manueltopphoeroversikt/ManueltOpphoerOversikt'
 import { Grunnlagsendringshendelse } from '~components/person/typer'
 import { Revurderingsaarsak } from '~shared/types/Revurderingsaarsak'
+import { ISaksType } from '~components/behandling/fargetags/saksType'
 
 export const hentBehandlingerForPerson = async (fnr: string): Promise<ApiResponse<any>> => {
   return apiClient.post(`/personer/behandlinger`, { foedselsnummer: fnr })
@@ -99,8 +100,10 @@ export const opprettRevurdering = async (args: {
   })
 }
 
-export const hentStoettedeRevurderinger = async (): Promise<ApiResponse<Array<Revurderingsaarsak>>> => {
-  return apiClient.get(`/stoettederevurderinger`)
+export const hentStoettedeRevurderinger = async (args: {
+  sakType: ISaksType
+}): Promise<ApiResponse<Array<Revurderingsaarsak>>> => {
+  return apiClient.get(`/stoettederevurderinger/${args.sakType}`)
 }
 
 export const lagreUtenlandstilsnitt = async (args: {

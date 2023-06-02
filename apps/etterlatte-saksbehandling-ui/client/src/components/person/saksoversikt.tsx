@@ -35,12 +35,15 @@ export const Saksoversikt = ({ fnr }: { fnr: string | undefined }) => {
   const [hentStoettedeRevurderingerStatus, hentStoettedeRevurderingerFc] = useApiCall(hentStoettedeRevurderinger)
   const [revurderinger, setStoettedeRevurderinger] = useState<Array<Revurderingsaarsak> | undefined>(undefined)
   useEffect(() => {
-    hentStoettedeRevurderingerFc(
-      {},
-      (ans) => setStoettedeRevurderinger(ans),
-      () => {}
-    )
-  }, [])
+    if (behandlingliste.length > 0) {
+      hentStoettedeRevurderingerFc(
+        // TODO saksoversikt burde ha et forhold til saktype uten å måtte se på behandlinger
+        { sakType: behandlingliste[0].sakType },
+        (ans) => setStoettedeRevurderinger(ans),
+        () => {}
+      )
+    }
+  }, [behandlingliste])
 
   useEffect(() => {
     if (!sakId) return resetPersoner

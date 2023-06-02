@@ -1,6 +1,8 @@
 package behandling.revurdering
 
+import io.ktor.client.call.body
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
@@ -15,11 +17,13 @@ import io.mockk.mockk
 import no.nav.etterlatte.behandling.revurdering.OpprettRevurderingRequest
 import no.nav.etterlatte.config.ApplicationContext
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
 import no.nav.etterlatte.module
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
-import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -69,7 +73,7 @@ internal class RevurderingRoutesKtTest {
                 setBody(OpprettRevurderingRequest(RevurderingAarsak.REGULERING))
             }
 
-            Assertions.assertEquals(HttpStatusCode.OK, response.status)
+            assertEquals(HttpStatusCode.OK, response.status)
         }
     }
 
@@ -91,7 +95,7 @@ internal class RevurderingRoutesKtTest {
                 setBody(OpprettRevurderingRequest(RevurderingAarsak.REGULERING))
             }
 
-            Assertions.assertEquals(HttpStatusCode.BadRequest, response.status)
+            assertEquals(HttpStatusCode.BadRequest, response.status)
         }
     }
 
@@ -112,7 +116,83 @@ internal class RevurderingRoutesKtTest {
                 setBody("""{ "aarsak": "foo" }""")
             }
 
-            Assertions.assertEquals(HttpStatusCode.BadRequest, response.status)
+            assertEquals(HttpStatusCode.BadRequest, response.status)
+        }
+    }
+
+    @Test
+    fun `returnerer gyldig revurderingstyper for barnepensjon`() {
+        testApplication {
+            environment { config = hoconApplicationConfig }
+            application { module(applicationContext) }
+            val client = createClient {
+                install(ContentNegotiation) {
+                    register(ContentType.Application.Json, JacksonConverter(no.nav.etterlatte.libs.common.objectMapper))
+                }
+            }
+
+            val response = client.get("api/stoettederevurderinger/${SakType.BARNEPENSJON.name}") {
+                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                header(HttpHeaders.Authorization, "Bearer $token")
+            }
+
+            val revurderingAarsak: List<String> = response.body()
+            assertEquals(HttpStatusCode.OK, response.status)
+            assertTrue(
+                revurderingAarsak.containsAll(
+                    RevurderingAarsak.values()
+                        .filter { it.gyldigForSakType(SakType.BARNEPENSJON) }
+                        .map { it.name }
+                )
+            )
+        }
+    }
+
+    @Test
+    fun `returnerer gyldig revurderingstyper for omstillingsstoenad`() {
+        testApplication {
+            environment { config = hoconApplicationConfig }
+            application { module(applicationContext) }
+            val client = createClient {
+                install(ContentNegotiation) {
+                    register(ContentType.Application.Json, JacksonConverter(no.nav.etterlatte.libs.common.objectMapper))
+                }
+            }
+
+            val response = client.get("api/stoettederevurderinger/${SakType.OMSTILLINGSSTOENAD.name}") {
+                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                header(HttpHeaders.Authorization, "Bearer $token")
+            }
+
+            val revurderingAarsak: List<String> = response.body()
+            assertEquals(HttpStatusCode.OK, response.status)
+            assertTrue(
+                revurderingAarsak.containsAll(
+                    RevurderingAarsak.values()
+                        .filter { it.gyldigForSakType(SakType.OMSTILLINGSSTOENAD) }
+                        .map { it.name }
+                )
+            )
+        }
+    }
+
+    @Test
+    fun `returnerer bad request hvis saktype ikke er angitt ved uthenting av gyldig revurderingstyper`() {
+        testApplication {
+            environment { config = hoconApplicationConfig }
+            application { module(applicationContext) }
+            val client = createClient {
+                install(ContentNegotiation) {
+                    register(ContentType.Application.Json, JacksonConverter(no.nav.etterlatte.libs.common.objectMapper))
+                }
+            }
+
+            val response = client.get("api/stoettederevurderinger/ugyldigtype") {
+                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                header(HttpHeaders.Authorization, "Bearer $token")
+            }
+
+            assertEquals(HttpStatusCode.BadRequest, response.status)
         }
     }
 

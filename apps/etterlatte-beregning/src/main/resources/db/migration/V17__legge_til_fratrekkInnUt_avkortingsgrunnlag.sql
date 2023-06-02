@@ -1,0 +1,1 @@
+ALTER TABLE avkortingsgrunnlag ADD COLUMN fratrekk_inn_ut TEXT;

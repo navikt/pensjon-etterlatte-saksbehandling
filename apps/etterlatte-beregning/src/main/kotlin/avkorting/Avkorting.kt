@@ -16,6 +16,7 @@ data class Avkorting(
 data class AvkortingGrunnlag(
     val periode: Periode,
     val aarsinntekt: Int,
+    val fratrekkInnUt: Int,
     val spesifikasjon: String,
     val kilde: Grunnlagsopplysning.Saksbehandler
 )

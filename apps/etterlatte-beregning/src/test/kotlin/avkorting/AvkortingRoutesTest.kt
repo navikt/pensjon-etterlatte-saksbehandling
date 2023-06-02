@@ -3,6 +3,8 @@ package avkorting
 import io.kotest.matchers.shouldBe
 import io.ktor.client.request.get
 import io.ktor.client.request.header
+import io.ktor.client.request.post
+import io.ktor.client.request.setBody
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
@@ -11,15 +13,24 @@ import io.ktor.server.application.log
 import io.ktor.server.testing.ApplicationTestBuilder
 import io.mockk.coEvery
 import io.mockk.mockk
+import io.mockk.slot
 import no.nav.etterlatte.avkorting.Avkorting
+import no.nav.etterlatte.avkorting.AvkortingGrunnlag
 import no.nav.etterlatte.avkorting.AvkortingService
 import no.nav.etterlatte.avkorting.avkorting
 import no.nav.etterlatte.beregning.regler.avkortetYtelse
 import no.nav.etterlatte.beregning.regler.avkortinggrunnlag
+import no.nav.etterlatte.beregning.regler.avkortingsperiode
 import no.nav.etterlatte.klienter.BehandlingKlient
+import no.nav.etterlatte.libs.common.beregning.AvkortetYtelseDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingDto
+import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagDto
+import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagKildeDto
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.periode.Periode
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.security.mock.oauth2.MockOAuth2Server
@@ -64,42 +75,63 @@ class AvkortingRoutesTest {
     }
 
     @Test
-    fun `skal returnere avkorting med avkortingsgrunnlag og beregnet avkorting over flere perioder`() {
-        coEvery { avkortingService.hentAvkorting(any(), any()) } returns Avkorting(
-            behandlingId = UUID.randomUUID(),
-            avkortingGrunnlag = listOf(avkortinggrunnlag(), avkortinggrunnlag()),
-            avkortingsperioder = emptyList(),
+    fun `skal motta og returnere avkorting`() {
+        val behandlingsId = UUID.randomUUID()
+        val dato = YearMonth.now()
+        val tidspunkt = Tidspunkt.now()
+        val avkortingsgrunnlag = avkortinggrunnlag(
+            periode = Periode(fom = dato, tom = dato),
+            kilde = Grunnlagsopplysning.Saksbehandler("Saksbehandler01", tidspunkt)
+        )
+        val avkorting = Avkorting(
+            behandlingId = behandlingsId,
+            avkortingGrunnlag = listOf(avkortingsgrunnlag),
+            avkortingsperioder = listOf(avkortingsperiode()),
+            avkortetYtelse = listOf(avkortetYtelse(periode = Periode(fom = dato, tom = dato)))
+        )
+        val dto = AvkortingDto(
+            behandlingId = behandlingsId,
+            avkortingGrunnlag = listOf(
+                AvkortingGrunnlagDto(
+                    fom = dato,
+                    tom = dato,
+                    aarsinntekt = 100000,
+                    fratrekkInnUt = 10000,
+                    spesifikasjon = "Spesifikasjon",
+                    kilde = AvkortingGrunnlagKildeDto(
+                        tidspunkt = tidspunkt.toString(),
+                        ident = "Saksbehandler01"
+                    )
+                )
+            ),
             avkortetYtelse = listOf(
-                avkortetYtelse(100, 1000, periode = Periode(YearMonth.of(2023, 1), YearMonth.of(2023, 1))),
-                avkortetYtelse(200, 2000, periode = Periode(YearMonth.of(2023, 2), YearMonth.of(2023, 2))),
-                avkortetYtelse(300, 2000, periode = Periode(YearMonth.of(2023, 4), YearMonth.of(2023, 2))),
-                avkortetYtelse(400, 5000, periode = Periode(YearMonth.of(2023, 5), null))
+                AvkortetYtelseDto(
+                    fom = dato.atDay(1),
+                    tom = dato.atEndOfMonth(),
+                    avkortingsbeloep = 200,
+                    ytelseEtterAvkorting = 100
+                )
             )
         )
+        val avkortingsgrunnlagSlot = slot<AvkortingGrunnlag>()
+        coEvery { avkortingService.lagreAvkorting(any(), any(), capture(avkortingsgrunnlagSlot)) } returns avkorting
+
         testApplication(server.config.httpServer.port()) {
-            val response = client.get("/api/beregning/avkorting/${UUID.randomUUID()}") {
+            val response = client.post("/api/beregning/avkorting/$behandlingsId") {
+                setBody(dto.avkortingGrunnlag[0].toJson())
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 header(HttpHeaders.Authorization, "Bearer $token")
             }
 
             response.status shouldBe HttpStatusCode.OK
-
-            val avkorting = objectMapper.readValue(response.bodyAsText(), AvkortingDto::class.java)
-            with(avkorting.avkortetYtelse[0]) {
-                avkortingsbeloep shouldBe 1000
-                ytelseEtterAvkorting shouldBe 100
-            }
-            with(avkorting.avkortetYtelse[1]) {
-                avkortingsbeloep shouldBe 2000
-                ytelseEtterAvkorting shouldBe 200
-            }
-            with(avkorting.avkortetYtelse[2]) {
-                avkortingsbeloep shouldBe 2000
-                ytelseEtterAvkorting shouldBe 300
-            }
-            with(avkorting.avkortetYtelse[3]) {
-                avkortingsbeloep shouldBe 5000
-                ytelseEtterAvkorting shouldBe 400
+            val result = objectMapper.readValue(response.bodyAsText(), AvkortingDto::class.java)
+            result shouldBe dto
+            with(avkortingsgrunnlagSlot.captured) {
+                periode shouldBe avkortingsgrunnlag.periode
+                aarsinntekt shouldBe avkortingsgrunnlag.aarsinntekt
+                fratrekkInnUt shouldBe avkortingsgrunnlag.fratrekkInnUt
+                spesifikasjon shouldBe avkortingsgrunnlag.spesifikasjon
+                kilde.ident shouldBe avkortingsgrunnlag.kilde.ident
             }
         }
     }

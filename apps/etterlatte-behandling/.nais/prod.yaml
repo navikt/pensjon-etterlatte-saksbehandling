@@ -113,7 +113,10 @@ spec:
         - application: etterlatte-pdltjenester
         - application: etterlatte-grunnlag
         - application: etterlatte-vedtaksvurdering
+        - application: skjermede-personer-pip
+          namespace: nom
       external:
+        - host: skjermede-personer-pip.intern.nav.no
         - host: unleash.nais.io
         - host: norg2.prod-fss-pub.nais.io
         - host: navansatt.prod-fss-pub.nais.io

@@ -57,21 +57,27 @@ fun Int.toBeregningstall(
 val bruker = Saksbehandler("token", "ident", null)
 
 fun avkorting(
-    behandlingId: UUID = UUID.randomUUID()
+    behandlingId: UUID = UUID.randomUUID(),
+    avkortingGrunnlag: List<AvkortingGrunnlag> = emptyList(),
+    avkortingsperioder: List<Avkortingsperiode> = emptyList(),
+    avkortetYtelse: List<AvkortetYtelse> = emptyList()
 ) = Avkorting(
     behandlingId = behandlingId,
-    avkortingGrunnlag = emptyList(),
-    avkortingsperioder = emptyList(),
-    avkortetYtelse = emptyList()
+    avkortingGrunnlag = avkortingGrunnlag,
+    avkortingsperioder = avkortingsperioder,
+    avkortetYtelse = avkortetYtelse
 )
 
 fun avkortinggrunnlag(
-    aarsinntekt: Int = 100000
+    aarsinntekt: Int = 100000,
+    periode: Periode = Periode(fom = YearMonth.now(), tom = null),
+    kilde: Grunnlagsopplysning.Saksbehandler = Grunnlagsopplysning.Saksbehandler.create("Z123456")
 ) = AvkortingGrunnlag(
-    periode = Periode(fom = YearMonth.now(), tom = null),
+    periode = periode,
     aarsinntekt = aarsinntekt,
+    fratrekkInnUt = 10000,
     spesifikasjon = "Spesifikasjon",
-    kilde = Grunnlagsopplysning.Saksbehandler.create("Z123456")
+    kilde = kilde
 )
 
 fun inntektAvkortingGrunnlag(inntekt: Int = 500000) = InntektAvkortingGrunnlag(

@@ -89,6 +89,20 @@ export const AvkortingInntekt = (props: {
                 })
               }
             />
+            <TextField
+              label={'Fratrekk inn/ut'}
+              size="medium"
+              type="text"
+              inputMode="numeric"
+              pattern="[0-9]*"
+              value={inntektGrunnlag.fratrekkInnUt == null ? '0' : inntektGrunnlag.fratrekkInnUt}
+              onChange={(e) =>
+                setInntektGrunnlag({
+                  ...inntektGrunnlag,
+                  fratrekkInnUt: e.target.value === '' ? undefined : Number(e.target.value),
+                })
+              }
+            />
             <DatoSection>
               <Label>F.o.m dato</Label>
               <Datovelger>
@@ -237,7 +251,6 @@ const KalenderIkon = styled.div`
 const DatoSection = styled.section`
   display: grid;
   gap: 0.5em;
-  margin-left: 4.5em;
 `
 const Rows = styled.div`
   flex-direction: column;

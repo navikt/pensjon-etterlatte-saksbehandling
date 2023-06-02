@@ -93,7 +93,7 @@ class PdlKlient(private val httpClient: HttpClient, private val apiUrl: String) 
                 historikk = true
             )
         )
-        logger.info("Henter PdlIdentifikator for ident = ${request.ident.value} fra PDL")
+        logger.info("Henter PdlIdentifikator for ident = ${request.ident} fra PDL")
         return retry<PdlIdentResponse> {
             httpClient.post(apiUrl) {
                 accept(Json)
@@ -116,7 +116,7 @@ class PdlKlient(private val httpClient: HttpClient, private val apiUrl: String) 
             )
         )
 
-        logger.info("Henter geografisk tilknytning for fnr = ${request.foedselsnummer.value} fra PDL")
+        logger.info("Henter geografisk tilknytning for fnr = ${request.foedselsnummer} fra PDL")
         val behandlingsnummer = findBehandlingsnummerFromSaktype(request.saktype)
         return retry<PdlGeografiskTilknytningResponse> {
             httpClient.post(apiUrl) {

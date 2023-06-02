@@ -40,12 +40,12 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
   >(undefined)
 
   const [manglerSoeskenJustering, setSoeskenJusteringMangler] = useState<boolean>(false)
-  const featureToggleName = 'pensjon-etterlatte.bp-bruk-faktisk-trygdetid'
+  const featureToggleNameTrygdetid = 'pensjon-etterlatte.bp-bruk-faktisk-trygdetid'
   const featureToggleNameInstitusjonsopphold = 'pensjon-etterlatte.bp-bruk-institusjonsopphold'
 
   useEffect(() => {
-    postHentFunksjonsbrytere([featureToggleName, featureToggleNameInstitusjonsopphold], (brytere) => {
-      const trygdetidBryter = brytere.find((bryter) => bryter.toggle === featureToggleName)
+    postHentFunksjonsbrytere([featureToggleNameTrygdetid, featureToggleNameInstitusjonsopphold], (brytere) => {
+      const trygdetidBryter = brytere.find((bryter) => bryter.toggle === featureToggleNameTrygdetid)
 
       if (trygdetidBryter) {
         setBeregnTrygdetid(trygdetidBryter.enabled)

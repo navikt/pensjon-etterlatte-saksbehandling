@@ -63,7 +63,7 @@ fun Application.restModule(
     install(StatusPages) {
         exception<Throwable> { call, cause ->
             if (cause.erDeserialiseringsException()) {
-                call.application.log.error("En feil har oppstått ved deserialisering", cause)
+                sikkerLogg.error("En feil har oppstått ved deserialisering", cause)
                 call.application.log.error("En feil har oppstått ved deserialisering. Se sikkerlogg for mer detaljer.")
             } else {
                 call.application.log.error("En feil oppstod: ${cause.message}", cause)

@@ -33,6 +33,7 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
   const [endreBeregning, postOpprettEllerEndreBeregning] = useApiCall(opprettEllerEndreBeregning)
   const [funksjonsbrytere, postHentFunksjonsbrytere] = useApiCall(hentFunksjonsbrytere)
   const [beregnTrygdetid, setBeregnTrygdetid] = useState<boolean>(false)
+  const [visInstitusjonsopphold, setVisInstitusjonsopphold] = useState<boolean>(false)
   const [soeskenGrunnlagsData, setSoeskenGrunnlagsData] = useState<Soeskengrunnlag | undefined>(undefined)
   const [institusjonsoppholdsGrunnlagData, setInstitusjonsoppholdsGrunnlagData] = useState<
     InstitusjonsoppholdGrunnlag | undefined
@@ -40,13 +41,18 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
 
   const [manglerSoeskenJustering, setSoeskenJusteringMangler] = useState<boolean>(false)
   const featureToggleName = 'pensjon-etterlatte.bp-bruk-faktisk-trygdetid'
+  const featureToggleNameInstitusjonsopphold = 'pensjon-etterlatte.bp-bruk-institusjonsopphold'
 
   useEffect(() => {
-    postHentFunksjonsbrytere([featureToggleName], (brytere) => {
-      const bryter = brytere.find((bryter) => bryter.toggle === featureToggleName)
+    postHentFunksjonsbrytere([featureToggleName, featureToggleNameInstitusjonsopphold], (brytere) => {
+      const trygdetidBryter = brytere.find((bryter) => bryter.toggle === featureToggleName)
 
-      if (bryter) {
-        setBeregnTrygdetid(bryter.enabled)
+      if (trygdetidBryter) {
+        setBeregnTrygdetid(trygdetidBryter.enabled)
+      }
+      const institusjonsoppholdBryter = brytere.find((bryter) => bryter.toggle === featureToggleNameInstitusjonsopphold)
+      if (institusjonsoppholdBryter) {
+        setVisInstitusjonsopphold(institusjonsoppholdBryter.enabled)
       }
     })
   }, [])
@@ -87,10 +93,12 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
         behandling={behandling}
         onSubmit={(soeskenGrunnlag) => setSoeskenGrunnlagsData(soeskenGrunnlag)}
       />
-      <Institusjonsopphold
-        behandling={behandling}
-        onSubmit={(institusjonsoppholdGrunnlag) => setInstitusjonsoppholdsGrunnlagData(institusjonsoppholdGrunnlag)}
-      />
+      {!isPending(funksjonsbrytere) && !isFailure(funksjonsbrytere) && visInstitusjonsopphold && (
+        <Institusjonsopphold
+          behandling={behandling}
+          onSubmit={(institusjonsoppholdGrunnlag) => setInstitusjonsoppholdsGrunnlagData(institusjonsoppholdGrunnlag)}
+        />
+      )}
       {manglerSoeskenJustering && <ApiErrorAlert>Søskenjustering er ikke fylt ut </ApiErrorAlert>}
       {isFailure(endreBeregning) && <ApiErrorAlert>Kunne ikke opprette ny beregning</ApiErrorAlert>}
       {isFailure(lagreSoeskenMedIBeregningStatus) && <ApiErrorAlert>Kunne ikke lagre beregningsgrunnlag</ApiErrorAlert>}

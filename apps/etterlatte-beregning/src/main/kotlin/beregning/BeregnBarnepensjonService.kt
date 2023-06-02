@@ -40,8 +40,8 @@ import java.time.YearMonth
 import java.util.*
 
 enum class BeregnBarnepensjonServiceFeatureToggle(private val key: String) : FeatureToggle {
-    BrukFaktiskTrygdetid("pensjon-etterlatte.bp-bruk-faktisk-trygdetid");
-
+    BrukFaktiskTrygdetid("pensjon-etterlatte.bp-bruk-faktisk-trygdetid"),
+    BrukInstitusjonsopphold("pensjon-etterlatte.bp-bruk-institusjonsopphold");
     override fun key() = key
 }
 

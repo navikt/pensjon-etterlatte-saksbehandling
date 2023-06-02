@@ -42,7 +42,8 @@ data class TrygdetidGrunnlagDto(
     val periodeFra: LocalDate,
     val periodeTil: LocalDate,
     val kilde: TrygdetidGrunnlagKildeDto?,
-    val beregnet: BeregnetTrygdetidGrunnlagDto?
+    val beregnet: BeregnetTrygdetidGrunnlagDto?,
+    val begrunnelse: String?
 )
 
 data class TrygdetidGrunnlagKildeDto(

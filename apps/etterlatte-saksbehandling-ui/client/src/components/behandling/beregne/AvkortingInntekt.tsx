@@ -1,15 +1,14 @@
-import { BodyShort, Button, ErrorMessage, Heading, Label, ReadMore, TextField } from '@navikt/ds-react'
+import { BodyShort, Button, ErrorMessage, Heading, Label, ReadMore, Table, TextField } from '@navikt/ds-react'
 import styled from 'styled-components'
-import DatePicker from 'react-datepicker'
-import { Calender } from '@navikt/ds-icons'
-import React, { FormEvent, useRef, useState } from 'react'
+import React, { FormEvent, useState } from 'react'
 import { IAvkorting, IAvkortingGrunnlag } from '~shared/types/IAvkorting'
 import { isPending, useApiCall } from '~shared/hooks/useApiCall'
 import { lagreAvkortingGrunnlag } from '~shared/api/avkorting'
-import { formaterDatoTilYearMonth, formaterStringDato } from '~utils/formattering'
+import { formaterStringDato } from '~utils/formattering'
 import { HjemmelLenke } from '~components/behandling/felles/HjemmelLenke'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
+import { PencilIcon } from '@navikt/aksel-icons'
 
 export const AvkortingInntekt = (props: {
   behandling: IBehandlingReducer
@@ -17,44 +16,42 @@ export const AvkortingInntekt = (props: {
   setAvkorting: (avkorting: IAvkorting) => void
 }) => {
   const behandling = props.behandling
-  const [inntektGrunnlag, setInntektGrunnlag] = useState<IAvkortingGrunnlag>(
-    props.avkortingGrunnlag ? props.avkortingGrunnlag[0] : {}
+  if (!behandling) throw new Error('Mangler behandling')
+
+  const virkningstidspunkt = () => {
+    if (!behandling.virkningstidspunkt) throw new Error('Mangler virkningstidspunkt')
+    return behandling.virkningstidspunkt.dato
+  }
+  const [inntektGrunnlagForm, setInntektGrunnlagForm] = useState<IAvkortingGrunnlag>(
+    props.avkortingGrunnlag
+      ? props.avkortingGrunnlag[props.avkortingGrunnlag.length - 1]
+      : {
+          fom: virkningstidspunkt(),
+        }
   )
   const [inntektGrunnlagStatus, requestLagreAvkortingGrunnlag] = useApiCall(lagreAvkortingGrunnlag)
   const [errorTekst, setErrorTekst] = useState<string | null>(null)
 
-  const fomPickerRef: any = useRef(null)
-  const toggleDatepicker = (ref: any) => {
-    return () => {
-      ref.current.setOpen(true)
-      ref.current.setFocus()
-    }
-  }
-
-  const virkningstidspunkt = () => {
-    if (!behandling) throw new Error('Mangler behandling')
-    if (!behandling.virkningstidspunkt) throw new Error('Mangler virkningstidspunkt')
-    return behandling.virkningstidspunkt.dato
-  }
+  const [formToggle, setFormToggle] = useState(false)
 
   const onSubmit = (e: FormEvent) => {
     e.preventDefault()
 
     setErrorTekst('')
-    if (inntektGrunnlag.aarsinntekt == null) return setErrorTekst('Årsinntekt må fylles ut')
-    if (inntektGrunnlag.fom !== virkningstidspunkt())
+    if (inntektGrunnlagForm.aarsinntekt == null) return setErrorTekst('Årsinntekt må fylles ut')
+    if (inntektGrunnlagForm.fom !== virkningstidspunkt())
       return setErrorTekst('Fra og med for forventet årsinntekt må være fra virkningstidspunkt')
 
-    if (!behandling) throw new Error('Mangler behandling')
     requestLagreAvkortingGrunnlag(
       {
         behandlingId: behandling.id,
-        avkortingGrunnlag: inntektGrunnlag,
+        avkortingGrunnlag: inntektGrunnlagForm,
       },
       (respons) => {
         const nyttAvkortingGrunnlag = respons.avkortingGrunnlag[0]
-        nyttAvkortingGrunnlag && setInntektGrunnlag(nyttAvkortingGrunnlag)
+        nyttAvkortingGrunnlag && setInntektGrunnlagForm(nyttAvkortingGrunnlag)
         props.setAvkorting(respons)
+        setFormToggle(false)
       }
     )
   }
@@ -72,104 +69,133 @@ export const AvkortingInntekt = (props: {
         Omstillingsstønaden reduseres med 45 prosent av den gjenlevende sin inntekt som på årsbasis overstiger et halvt
         grunnbeløp. Inntekt avrundes til nærmeste tusen.
       </BodyShort>
+
+      {props.avkortingGrunnlag && props.avkortingGrunnlag.length > 0 && (
+        <InntektAvkortingTabell>
+          <Table className="table" zebraStripes>
+            <Table.Header>
+              <Table.HeaderCell>Forventet inntekt</Table.HeaderCell>
+              <Table.HeaderCell>Fratrekk ut/inn</Table.HeaderCell>
+              <Table.HeaderCell>F.o.m dato</Table.HeaderCell>
+              <Table.HeaderCell>T.o.m dato</Table.HeaderCell>
+              <Table.HeaderCell>Spesifikasjon av inntekt</Table.HeaderCell>
+              <Table.HeaderCell>Kilde</Table.HeaderCell>
+            </Table.Header>
+            <Table.Body>
+              {(props.avkortingGrunnlag ? props.avkortingGrunnlag : []).map((inntektsgrunnlag, index) => (
+                <Table.Row key={index}>
+                  <Table.DataCell key="Inntekt">{inntektsgrunnlag.aarsinntekt}</Table.DataCell>
+                  <Table.DataCell key="FratrekkInnUt">{inntektsgrunnlag.fratrekkInnUt}</Table.DataCell>
+                  <Table.DataCell key="InntektFom">{inntektsgrunnlag.fom}</Table.DataCell>
+                  <Table.DataCell key="InntektTom">{inntektsgrunnlag.tom}</Table.DataCell>
+                  <Table.DataCell key="InntektSpesifikasjon">{inntektsgrunnlag.spesifikasjon}</Table.DataCell>
+                  <Table.DataCell key="InntektKilde">
+                    {inntektsgrunnlag.kilde && (
+                      <Info
+                        tekst={inntektsgrunnlag.kilde.ident}
+                        label={''}
+                        undertekst={`saksbehandler: ${formaterStringDato(inntektsgrunnlag.kilde.tidspunkt)}`}
+                      />
+                    )}
+                  </Table.DataCell>
+                </Table.Row>
+              ))}
+            </Table.Body>
+          </Table>
+        </InntektAvkortingTabell>
+      )}
       <InntektAvkortingForm onSubmit={onSubmit}>
         <Rows>
-          <FormWrapper>
-            <TextField
-              label={'Forventet årsinnekt'}
-              size="medium"
-              type="text"
-              inputMode="numeric"
-              pattern="[0-9]*"
-              value={inntektGrunnlag.aarsinntekt}
-              onChange={(e) =>
-                setInntektGrunnlag({
-                  ...inntektGrunnlag,
-                  aarsinntekt: e.target.value === '' ? undefined : Number(e.target.value),
-                })
-              }
-            />
-            <TextField
-              label={'Fratrekk inn/ut'}
-              size="medium"
-              type="text"
-              inputMode="numeric"
-              pattern="[0-9]*"
-              value={inntektGrunnlag.fratrekkInnUt == null ? '0' : inntektGrunnlag.fratrekkInnUt}
-              onChange={(e) =>
-                setInntektGrunnlag({
-                  ...inntektGrunnlag,
-                  fratrekkInnUt: e.target.value === '' ? undefined : Number(e.target.value),
-                })
-              }
-            />
-            <DatoSection>
-              <Label>F.o.m dato</Label>
-              <Datovelger>
-                <DatePicker
-                  ref={fomPickerRef}
-                  dateFormat={'dd.MM.yyyy'}
-                  placeholderText={'dd.mm.åååå'}
-                  selected={new Date(inntektGrunnlag.fom == null ? virkningstidspunkt() : inntektGrunnlag.fom)}
-                  locale="nb"
-                  autoComplete="off"
-                  showMonthYearPicker
-                  onChange={(date) =>
-                    setInntektGrunnlag({
-                      ...inntektGrunnlag,
-                      fom: date == null ? undefined : formaterDatoTilYearMonth(date),
+          {formToggle && (
+            <>
+              <FormWrapper>
+                <TextField
+                  label={'Forventet årsinnekt'}
+                  size="medium"
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  value={inntektGrunnlagForm.aarsinntekt}
+                  onChange={(e) =>
+                    setInntektGrunnlagForm({
+                      ...inntektGrunnlagForm,
+                      aarsinntekt: e.target.value === '' ? undefined : Number(e.target.value),
                     })
                   }
                 />
-                <KalenderIkon
-                  tabIndex={0}
-                  onKeyPress={toggleDatepicker(fomPickerRef)}
-                  onClick={toggleDatepicker(fomPickerRef)}
-                  role="button"
-                  title="Åpne datovelger"
-                  aria-label="Åpne datovelger"
-                >
-                  <Calender color="white" />
-                </KalenderIkon>
-              </Datovelger>
-            </DatoSection>
-            {inntektGrunnlag.kilde && (
-              <Kilde>
-                <Label>Kilde</Label>
-                <Info
-                  tekst={inntektGrunnlag.kilde.ident}
-                  label={''}
-                  undertekst={`saksbehandler: ${formaterStringDato(inntektGrunnlag.kilde.tidspunkt)}`}
+                <TextField
+                  label={'Fratrekk inn/ut'}
+                  size="medium"
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  value={inntektGrunnlagForm.fratrekkInnUt == null ? '0' : inntektGrunnlagForm.fratrekkInnUt}
+                  onChange={(e) =>
+                    setInntektGrunnlagForm({
+                      ...inntektGrunnlagForm,
+                      fratrekkInnUt: e.target.value === '' ? undefined : Number(e.target.value),
+                    })
+                  }
                 />
-              </Kilde>
-            )}
-          </FormWrapper>
-          {errorTekst == null ? null : <ErrorMessage>{errorTekst}</ErrorMessage>}
-          <TextAreaWrapper>
-            <SpesifikasjonLabel>
-              <Label>Spesifikasjon av inntekt</Label>
-              <ReadMore header={'Hva regnes som inntekt?'}>
-                Med inntekt menes all arbeidsinntekt og ytelser som likestilles med arbeidsinntekt. Likestilt med
-                arbeidsinntekt er dagpenger etter kap 4, sykepenger etter kap 8, stønad ved barns og andre nærståendes
-                sykdom etter kap 9, arbeidsavklaringspenger etter kap 11, uføretrygd etter kap 12 der uføregraden er
-                under 100 prosent, svangerskapspenger og foreldrepenger etter kap 14 og pensjonsytelser etter AFP
-                tilskottloven kapitlene 2 og 3.
-              </ReadMore>
-            </SpesifikasjonLabel>
-            <textarea
-              value={inntektGrunnlag.spesifikasjon}
-              onChange={(e) =>
-                setInntektGrunnlag({
-                  ...inntektGrunnlag,
-                  spesifikasjon: e.target.value,
-                })
-              }
-            />
-          </TextAreaWrapper>
+                <DatoSection>
+                  <Label>F.o.m dato</Label>
+                  <Info label={''} tekst={formaterStringDato(inntektGrunnlagForm.fom!)} />
+                </DatoSection>
+              </FormWrapper>
+              <TextAreaWrapper>
+                <SpesifikasjonLabel>
+                  <Label>Spesifikasjon av inntekt</Label>
+                  <ReadMore header={'Hva regnes som inntekt?'}>
+                    Med inntekt menes all arbeidsinntekt og ytelser som likestilles med arbeidsinntekt. Likestilt med
+                    arbeidsinntekt er dagpenger etter kap 4, sykepenger etter kap 8, stønad ved barns og andre
+                    nærståendes sykdom etter kap 9, arbeidsavklaringspenger etter kap 11, uføretrygd etter kap 12 der
+                    uføregraden er under 100 prosent, svangerskapspenger og foreldrepenger etter kap 14 og
+                    pensjonsytelser etter AFP tilskottloven kapitlene 2 og 3.
+                  </ReadMore>
+                </SpesifikasjonLabel>
+                <textarea
+                  value={inntektGrunnlagForm.spesifikasjon}
+                  onChange={(e) =>
+                    setInntektGrunnlagForm({
+                      ...inntektGrunnlagForm,
+                      spesifikasjon: e.target.value,
+                    })
+                  }
+                />
+              </TextAreaWrapper>
+              {errorTekst == null ? null : <ErrorMessage>{errorTekst}</ErrorMessage>}
+            </>
+          )}
           <FormKnapper>
-            <Button size="small" loading={isPending(inntektGrunnlagStatus)} type="submit">
-              Lagre
-            </Button>
+            {formToggle ? (
+              <>
+                <Button size="small" loading={isPending(inntektGrunnlagStatus)} type="submit">
+                  Lagre
+                </Button>
+                <Button
+                  size="small"
+                  variant="tertiary"
+                  onClick={(e) => {
+                    e.preventDefault()
+                    setFormToggle(false)
+                  }}
+                >
+                  Avbryt
+                </Button>
+              </>
+            ) : (
+              <Button
+                size="small"
+                variant="secondary"
+                icon={<PencilIcon title="a11y-title" fontSize="1.5rem" />}
+                onClick={(e) => {
+                  e.preventDefault()
+                  setFormToggle(true)
+                }}
+              >
+                Legg til / rediger
+              </Button>
+            )}
           </FormKnapper>
         </Rows>
       </InntektAvkortingForm>
@@ -178,14 +204,12 @@ export const AvkortingInntekt = (props: {
 }
 
 const AvkortingInntektWrapper = styled.div`
-  width: 50em;
+  width: 57em;
   margin-bottom: 3em;
 `
 
-const Kilde = styled.div`
-  width: 2em;
-  display: grid;
-  gap: 0.5em;
+const InntektAvkortingTabell = styled.div`
+  margin: 1em 0 1em 0;
 `
 
 const InntektAvkortingForm = styled.form`
@@ -206,24 +230,11 @@ const FormKnapper = styled.div`
   gap: 1rem;
 `
 
-const Datovelger = styled.div`
-  display: flex;
-  align-items: flex-end;
-
-  input {
-    border-right: none;
-    border-width: 1px;
-    border-radius: 4px 0 0 4px;
-    width: 160px;
-    height: 48px;
-    text-indent: 4px;
-  }
-`
-
 const TextAreaWrapper = styled.div`
   display: grid;
   align-items: flex-end;
-  margin-top: 2em;
+  margin-top: 1em;
+  margin-bottom: 1em;
 
   textArea {
     margin-top: 1em;
@@ -237,16 +248,6 @@ const TextAreaWrapper = styled.div`
 `
 
 const SpesifikasjonLabel = styled.div``
-
-const KalenderIkon = styled.div`
-  padding: 4px 10px;
-  cursor: pointer;
-  background-color: #0167c5;
-  border: 1px solid #000;
-  border-radius: 0 4px 4px 0;
-  height: 48px;
-  line-height: 42px;
-`
 
 const DatoSection = styled.section`
   display: grid;

@@ -22,6 +22,8 @@ spec:
         flags:
           - name: max_connections
             value: "100"
+  startup:
+    failureThreshold: 5
   liveness:
     initialDelay: 5
     path: /health/isalive

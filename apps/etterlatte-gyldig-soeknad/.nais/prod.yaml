@@ -12,6 +12,8 @@ spec:
     application:
       enabled: true
       tenant: nav.no
+  startup:
+    failureThreshold: 5
   liveness:
     initialDelay: 5
     path: /isalive

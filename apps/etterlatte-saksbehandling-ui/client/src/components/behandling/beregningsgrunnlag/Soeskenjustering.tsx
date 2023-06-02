@@ -25,6 +25,7 @@ import {
 } from '~components/behandling/beregningsgrunnlag/PeriodisertBeregningsgrunnlag'
 import { useAppDispatch } from '~store/Store'
 import { hentBehandlesFraStatus } from '~components/behandling/felles/utils'
+import { SuccessColored } from '@navikt/ds-icons'
 
 type SoeskenKanskjeMedIBeregning = {
   foedselsnummer: string
@@ -68,6 +69,7 @@ const Soeskenjustering = (props: SoeskenjusteringProps) => {
   const sisteTom = watch(`soeskenMedIBeregning.${fields.length - 1}.tom`)
   const sisteFom = watch(`soeskenMedIBeregning.${fields.length - 1}.fom`)
   const dispatch = useAppDispatch()
+  const [visOkLagret, setVisOkLagret] = useState(false)
 
   useEffect(() => {
     if (!soeskenjusteringErDefinertIRedux) {
@@ -107,12 +109,17 @@ const Soeskenjustering = (props: SoeskenjusteringProps) => {
     {} as Record<string, IPdlPerson>
   )
 
-  const ferdigstilleForm = (data: { soeskenMedIBeregning: SoeskengrunnlagUtfylling }) => {
+  const ferdigstillForm = (data: { soeskenMedIBeregning: SoeskengrunnlagUtfylling }) => {
     if (validerSoeskenjustering(data.soeskenMedIBeregning) && feil.length === 0) {
       setVisFeil(false)
       onSubmit(data.soeskenMedIBeregning)
+      setVisOkLagret(true)
+      setTimeout(() => {
+        setVisOkLagret(false)
+      }, 1000)
     } else {
       setVisFeil(true)
+      setVisOkLagret(false)
     }
   }
 
@@ -160,7 +167,8 @@ const Soeskenjustering = (props: SoeskenjusteringProps) => {
                 Legg til periode
               </NyPeriodeButton>
             ) : null}
-            <Button onClick={handleSubmit(ferdigstilleForm)}>Lagre søskenjustering</Button>
+            <Button onClick={handleSubmit(ferdigstillForm)}>Lagre søskenjustering</Button>
+            {visOkLagret && <SuccessColored fontSize={20} />}
           </>
         ) : null}
       </form>

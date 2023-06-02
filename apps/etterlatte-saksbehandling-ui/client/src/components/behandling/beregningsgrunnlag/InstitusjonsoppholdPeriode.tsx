@@ -12,10 +12,11 @@ type InstitusjonsoppholdPerioder = {
   register: UseFormRegister<{ institusjonsOppholdForm: InstitusjonsoppholdGrunnlag }>
   remove: (index: number) => void
   watch: UseFormWatch<{ institusjonsOppholdForm: InstitusjonsoppholdGrunnlag }>
+  setVisFeil: (truefalse: boolean) => void
 }
 
 const InstitusjonsoppholdPeriode = (props: InstitusjonsoppholdPerioder) => {
-  const { item, index, control, register, remove, watch } = props
+  const { item, index, control, register, remove, watch, setVisFeil } = props
   watch(`institusjonsOppholdForm.${index}.data.reduksjon`)
   return (
     <>
@@ -71,7 +72,14 @@ const InstitusjonsoppholdPeriode = (props: InstitusjonsoppholdPerioder) => {
           label="Begrunnelse for periode(hvis aktuelt)"
           {...register(`institusjonsOppholdForm.${index}.data.begrunnelse`)}
         />
-        <Button onClick={() => remove(index)}>Fjern opphold</Button>
+        <Button
+          onClick={() => {
+            setVisFeil(false)
+            remove(index)
+          }}
+        >
+          Fjern opphold
+        </Button>
       </div>
     </>
   )

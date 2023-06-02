@@ -9,6 +9,7 @@ import { useFieldArray, useForm } from 'react-hook-form'
 import InstitusjonsoppholdPeriode from '~components/behandling/beregningsgrunnlag/InstitusjonsoppholdPeriode'
 import Insthendelser from '~components/behandling/beregningsgrunnlag/Insthendelser'
 import { ApiErrorAlert } from '~ErrorBoundary'
+import { SuccessColored } from '@navikt/ds-icons'
 
 type InstitusjonsoppholdProps = {
   behandling: IBehandlingReducer
@@ -18,7 +19,7 @@ type InstitusjonsoppholdProps = {
 const Institusjonsopphold = (props: InstitusjonsoppholdProps) => {
   const { behandling, onSubmit } = props
   const [feil, setVisFeil] = useState(false)
-
+  const [visOkLagret, setVisOkLagret] = useState(false)
   const { control, register, watch, handleSubmit, formState } = useForm<{
     institusjonsOppholdForm: InstitusjonsoppholdGrunnlag
   }>({
@@ -37,8 +38,13 @@ const Institusjonsopphold = (props: InstitusjonsoppholdProps) => {
     if (validerInstitusjonsopphold(data.institusjonsOppholdForm) && isValid) {
       onSubmit(data.institusjonsOppholdForm)
       setVisFeil(false)
+      setVisOkLagret(true)
+      setTimeout(() => {
+        setVisOkLagret(false)
+      }, 1000)
     } else {
       setVisFeil(true)
+      setVisOkLagret(false)
     }
   }
 
@@ -79,6 +85,7 @@ const Institusjonsopphold = (props: InstitusjonsoppholdProps) => {
               register={register}
               remove={remove}
               watch={watch}
+              setVisFeil={setVisFeil}
             />
           ))}
         </>
@@ -87,7 +94,8 @@ const Institusjonsopphold = (props: InstitusjonsoppholdProps) => {
         icon={<PlusCircleIcon title="a11y-title" />}
         iconPosition="left"
         variant="tertiary"
-        onClick={() =>
+        onClick={() => {
+          setVisFeil(false)
           append([
             {
               fom: new Date(Date.now()),
@@ -95,13 +103,14 @@ const Institusjonsopphold = (props: InstitusjonsoppholdProps) => {
               data: { reduksjon: 'VELG_REDUKSJON', egenReduksjon: undefined, begrunnelse: '' },
             },
           ])
-        }
+        }}
       >
         Legg til beregningsperiode
       </Button>
       {fields.length > 0 && (
         <Button onClick={handleSubmit(ferdigstilleForm, () => {})}>Lagre institusjonsopphold</Button>
       )}
+      {visOkLagret && <SuccessColored fontSize={20} />}
       {feil && <ApiErrorAlert>Det er feil i skjemaet</ApiErrorAlert>}
     </InstitusjonsoppholdsWrapper>
   )

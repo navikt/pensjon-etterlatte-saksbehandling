@@ -27,8 +27,6 @@ spec:
         databases:
           - name: sakogbehandlinger
             envVarPrefix: DB
-  startup:
-    failureThreshold: 5
   liveness:
     initialDelay: 5
     path: /health/isalive

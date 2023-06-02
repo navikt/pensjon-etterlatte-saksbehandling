@@ -25,8 +25,6 @@ spec:
   #  failureThreshold: 10
   #  periodSeconds: 5
   #  path: /started
-  startup:
-    failureThreshold: 5
   liveness:
     initialDelay: 7
     failureThreshold: 10

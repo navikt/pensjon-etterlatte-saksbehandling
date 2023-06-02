@@ -73,15 +73,28 @@ class TrygdetidService(
                 trygdetidGrunnlag = trygdetidMedOppdatertTrygdetidGrunnlag.trygdetidGrunnlag
             )
 
-            val oppdatertTrygdetid: Trygdetid =
-                if (nyBeregnetTrygdetid != null) {
-                    trygdetidMedOppdatertTrygdetidGrunnlag.oppdaterBeregnetTrygdetid(nyBeregnetTrygdetid)
-                } else {
-                    trygdetidMedOppdatertTrygdetidGrunnlag.nullstillBeregnetTrygdetid()
+            when (nyBeregnetTrygdetid) {
+                null -> trygdetidMedOppdatertTrygdetidGrunnlag.nullstillBeregnetTrygdetid()
+                else -> trygdetidMedOppdatertTrygdetidGrunnlag.oppdaterBeregnetTrygdetid(nyBeregnetTrygdetid)
+            }.also { nyTrygdetid ->
+                trygdetidRepository.oppdaterTrygdetid(nyTrygdetid).also {
+                    behandlingKlient.settBehandlingStatusVilkaarsvurdert(behandlingId, bruker)
                 }
+            }
+        }
 
-            trygdetidRepository.oppdaterTrygdetid(oppdatertTrygdetid).also {
-                behandlingKlient.settBehandlingStatusVilkaarsvurdert(behandlingId, bruker)
+    suspend fun slettTrygdetidGrunnlag(behandlingId: UUID, trygdetidGrunnlagId: UUID, bruker: Bruker): Trygdetid =
+        tilstandssjekk(behandlingId, bruker) {
+            val trygdetid = trygdetidRepository.hentTrygdetid(behandlingId)?.slettTrygdetidGrunnlag(trygdetidGrunnlagId)
+                ?: throw Exception("Fant ikke gjeldende trygdetid for behandlingId=$behandlingId")
+
+            when (val nyBeregnetTrygdetid = beregnTrygdetidService.beregnTrygdetid(trygdetid.trygdetidGrunnlag)) {
+                null -> trygdetid.nullstillBeregnetTrygdetid()
+                else -> trygdetid.oppdaterBeregnetTrygdetid(nyBeregnetTrygdetid)
+            }.also { nyTrygdetid ->
+                trygdetidRepository.oppdaterTrygdetid(nyTrygdetid).also {
+                    behandlingKlient.settBehandlingStatusVilkaarsvurdert(behandlingId, bruker)
+                }
             }
         }
 
@@ -123,7 +136,11 @@ class TrygdetidService(
     private fun hentOpplysninger(avdoed: Grunnlagsdata<JsonNode>): List<Opplysningsgrunnlag> {
         val foedselsdato = avdoed.hentFoedselsdato()
         val opplysninger = listOf(
-            Opplysningsgrunnlag.ny(TrygdetidOpplysningType.FOEDSELSDATO, foedselsdato?.kilde, foedselsdato?.verdi),
+            Opplysningsgrunnlag.ny(
+                TrygdetidOpplysningType.FOEDSELSDATO,
+                foedselsdato?.kilde,
+                foedselsdato?.verdi
+            ),
             Opplysningsgrunnlag.ny(
                 TrygdetidOpplysningType.FYLT_16,
                 kildeFoedselsnummer(),
@@ -143,7 +160,11 @@ class TrygdetidService(
         return opplysninger
     }
 
-    private suspend fun tilstandssjekk(behandlingId: UUID, bruker: Bruker, block: suspend () -> Trygdetid): Trygdetid {
+    private suspend fun tilstandssjekk(
+        behandlingId: UUID,
+        bruker: Bruker,
+        block: suspend () -> Trygdetid
+    ): Trygdetid {
         val kanFastsetteTrygdetid = behandlingKlient.kanBeregnes(behandlingId, bruker)
         return if (kanFastsetteTrygdetid) {
             block()

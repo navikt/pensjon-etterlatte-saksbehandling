@@ -7,6 +7,7 @@ import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.application
+import io.ktor.server.routing.delete
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
@@ -24,6 +25,7 @@ import no.nav.etterlatte.libs.common.trygdetid.TrygdetidGrunnlagDto
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidGrunnlagKildeDto
 import no.nav.etterlatte.libs.common.uuid
 import no.nav.etterlatte.libs.common.withBehandlingId
+import no.nav.etterlatte.libs.common.withParam
 import no.nav.etterlatte.libs.ktor.bruker
 import no.nav.etterlatte.token.Bruker
 import no.nav.etterlatte.trygdetid.klienter.BehandlingKlient
@@ -64,6 +66,16 @@ fun Route.trygdetid(trygdetidService: TrygdetidService, behandlingKlient: Behand
                         trygdetidgrunnlagDto.toTrygdetidGrunnlag(bruker)
                     )
                 call.respond(trygdetid.toDto())
+            }
+        }
+
+        delete("/grunnlag/{trygdetidGrunnlagId}") {
+            withBehandlingId(behandlingKlient) {
+                withParam("trygdetidGrunnlagId") { trygdetidGrunnlagId ->
+                    logger.info("Sletter trygdetidsgrunnlag for behandling $behandlingsId")
+                    val trygdetid = trygdetidService.slettTrygdetidGrunnlag(behandlingsId, trygdetidGrunnlagId, bruker)
+                    call.respond(trygdetid.toDto())
+                }
             }
         }
 

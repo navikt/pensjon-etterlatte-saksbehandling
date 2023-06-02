@@ -2,10 +2,10 @@ package no.nav.etterlatte.libs.common.behandling
 
 private val SAKTYPE_OMS = listOf(SakType.OMSTILLINGSSTOENAD)
 private val SAKTYPE_BP = listOf(SakType.BARNEPENSJON)
-private val SAKTYPE_BEGGE = SAKTYPE_BP + SAKTYPE_OMS
+private val SAKTYPE_BP_OMS = SAKTYPE_BP + SAKTYPE_OMS
 
 enum class RevurderingAarsak(
-    val gyldigForSakTyper: List<SakType>,
+    val gyldigFor: List<SakType>,
     val kanBrukesDev: Boolean,
     val kanBrukesProd: Boolean
 ) {
@@ -14,8 +14,8 @@ enum class RevurderingAarsak(
     UTLAND(SAKTYPE_BP, false, false),
     BARN(SAKTYPE_BP, false, false),
     VERGEMAAL_ELLER_FREMTIDSFULLMAKT(SAKTYPE_BP, false, false),
-    REGULERING(SAKTYPE_BEGGE, true, true),
-    DOEDSFALL(SAKTYPE_BEGGE, true, false);
+    REGULERING(SAKTYPE_BP_OMS, true, true),
+    DOEDSFALL(SAKTYPE_BP_OMS, true, false);
 
     fun kanBrukesIMiljo(): Boolean {
         val env = System.getenv()
@@ -30,7 +30,7 @@ enum class RevurderingAarsak(
         }
     }
 
-    fun gyldigForSakType(sakType: SakType): Boolean = gyldigForSakTyper.any { it == sakType }
+    fun gyldigForSakType(sakType: SakType): Boolean = gyldigFor.any { it == sakType }
 }
 
 enum class GcpEnv(val env: String) {

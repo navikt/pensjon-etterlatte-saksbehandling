@@ -39,6 +39,12 @@ internal fun Route.revurderingRoutes(
                 return@post
             }
             generellBehandlingService.hentSisteIverksatte(sakId)?.let { forrigeIverksatteBehandling ->
+                val sakType = forrigeIverksatteBehandling.sak.sakType
+                if (!body.aarsak.gyldigForSakType(sakType)) {
+                    call.respond(HttpStatusCode.BadRequest, "${body.aarsak} er ikke støttet for $sakType")
+                    return@post
+                }
+
                 val revurdering = revurderingService.opprettManuellRevurdering(
                     sakId = forrigeIverksatteBehandling.sak.id,
                     forrigeBehandling = forrigeIverksatteBehandling,

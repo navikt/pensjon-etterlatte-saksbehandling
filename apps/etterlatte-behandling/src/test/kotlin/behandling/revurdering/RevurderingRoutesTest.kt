@@ -31,7 +31,7 @@ import testsupport.buildTestApplicationConfigurationForOauth
 import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-internal class RevurderingRoutesKtTest {
+internal class RevurderingRoutesTest {
     private val applicationContext: ApplicationContext = mockk(relaxed = true)
     private val server: MockOAuth2Server = MockOAuth2Server()
     private lateinit var hoconApplicationConfig: HoconApplicationConfig
@@ -114,6 +114,37 @@ internal class RevurderingRoutesKtTest {
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 header(HttpHeaders.Authorization, "Bearer $token")
                 setBody("""{ "aarsak": "foo" }""")
+            }
+
+            assertEquals(HttpStatusCode.BadRequest, response.status)
+        }
+    }
+
+    @Test
+    fun `returnerer bad request hvis revurderingaarsak ikke er stoettet for sak`() {
+        every { applicationContext.generellBehandlingService } returns mockk {
+            every { hentSisteIverksatte(any()) } returns mockk(relaxed = true) {
+                every { sak.sakType } returns SakType.OMSTILLINGSSTOENAD
+            }
+        }
+
+        testApplication {
+            environment {
+                config = hoconApplicationConfig
+            }
+            application {
+                module(applicationContext)
+            }
+            val client = createClient {
+                install(ContentNegotiation) {
+                    register(ContentType.Application.Json, JacksonConverter(no.nav.etterlatte.libs.common.objectMapper))
+                }
+            }
+
+            val response = client.post("api/1/revurdering") {
+                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                header(HttpHeaders.Authorization, "Bearer $token")
+                setBody(OpprettRevurderingRequest(RevurderingAarsak.BARN))
             }
 
             assertEquals(HttpStatusCode.BadRequest, response.status)

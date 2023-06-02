@@ -84,6 +84,11 @@ internal fun Route.grunnlagsendringshendelseRoute(
                 call.respond(grunnlagsendringshendelseService.hentGyldigeHendelserForSak(sakId))
             }
         }
+        route("/{$SAKID_CALL_PARAMETER}/institusjonshendelser") {
+            get {
+                call.respond(GrunnlagsendringsListe(grunnlagsendringshendelseService.hentAlleHendelserForSak(sakId)))
+            }
+        }
     }
 }
 

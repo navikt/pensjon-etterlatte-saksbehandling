@@ -33,12 +33,12 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
   const [endreBeregning, postOpprettEllerEndreBeregning] = useApiCall(opprettEllerEndreBeregning)
   const [funksjonsbrytere, postHentFunksjonsbrytere] = useApiCall(hentFunksjonsbrytere)
   const [beregnTrygdetid, setBeregnTrygdetid] = useState<boolean>(false)
-
   const [soeskenGrunnlagsData, setSoeskenGrunnlagsData] = useState<Soeskengrunnlag | undefined>(undefined)
   const [institusjonsoppholdsGrunnlagData, setInstitusjonsoppholdsGrunnlagData] = useState<
     InstitusjonsoppholdGrunnlag | undefined
   >(undefined)
 
+  const [manglerSoeskenJustering, setSoeskenJusteringMangler] = useState<boolean>(false)
   const featureToggleName = 'pensjon-etterlatte.bp-bruk-faktisk-trygdetid'
 
   useEffect(() => {
@@ -57,6 +57,7 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
 
   const onSubmit = () => {
     if (soeskenGrunnlagsData) {
+      setSoeskenJusteringMangler(false)
       dispatch(resetBeregning())
       const beregningsgrunnlag = {
         soeskenMedIBeregning: mapListeTilDto(soeskenGrunnlagsData),
@@ -76,7 +77,7 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
           })
       )
     } else {
-      //TODO: vise en feil?
+      setSoeskenJusteringMangler(true)
     }
   }
   return (
@@ -90,6 +91,7 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
         behandling={behandling}
         onSubmit={(institusjonsoppholdGrunnlag) => setInstitusjonsoppholdsGrunnlagData(institusjonsoppholdGrunnlag)}
       />
+      {manglerSoeskenJustering && <ApiErrorAlert>Søskenjustering er ikke fylt ut </ApiErrorAlert>}
       {isFailure(endreBeregning) && <ApiErrorAlert>Kunne ikke opprette ny beregning</ApiErrorAlert>}
       {isFailure(lagreSoeskenMedIBeregningStatus) && <ApiErrorAlert>Kunne ikke lagre beregningsgrunnlag</ApiErrorAlert>}
 

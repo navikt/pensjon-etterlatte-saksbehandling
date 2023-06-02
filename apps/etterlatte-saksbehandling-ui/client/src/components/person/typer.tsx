@@ -130,6 +130,15 @@ export interface InstitusjonsoppholdSamsvar {
   type: 'INSTITUSJONSOPPHOLD'
   samsvar: boolean
   oppholdstype: string
+  oppholdBeriket: InstitusjonsoppholdHendelseBeriket
+}
+
+interface InstitusjonsoppholdHendelseBeriket {
+  startdato: Date
+  faktiskSluttdato: Date
+  forventetSluttdato?: Date
+  institusjonsType?: string
+  institusjonsnavn?: string
 }
 
 export type SamsvarMellomKildeOgGrunnlag =

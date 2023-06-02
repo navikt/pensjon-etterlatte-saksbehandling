@@ -107,7 +107,7 @@ const Soeskenjustering = (props: SoeskenjusteringProps) => {
     {} as Record<string, IPdlPerson>
   )
 
-  const submitForm = (data: { soeskenMedIBeregning: SoeskengrunnlagUtfylling }) => {
+  const ferdigstilleForm = (data: { soeskenMedIBeregning: SoeskengrunnlagUtfylling }) => {
     if (validerSoeskenjustering(data.soeskenMedIBeregning) && feil.length === 0) {
       setVisFeil(false)
       onSubmit(data.soeskenMedIBeregning)
@@ -134,7 +134,7 @@ const Soeskenjustering = (props: SoeskenjusteringProps) => {
         {isFailure(soeskenjusteringGrunnlag) && <ApiErrorAlert>Søskenjustering kan ikke hentes</ApiErrorAlert>}
       </FamilieforholdWrapper>
       {visFeil && feil.length > 0 && behandles ? <FeilIPerioder feil={feil} /> : null}
-      <form id="form" name="form" onSubmit={handleSubmit(submitForm)}>
+      <form id="formsoeskenjustering" name="formsoeskenjustering">
         {isSuccess(soeskenjusteringGrunnlag) || soeskenjusteringErDefinertIRedux ? (
           <>
             <UstiletListe>
@@ -160,6 +160,7 @@ const Soeskenjustering = (props: SoeskenjusteringProps) => {
                 Legg til periode
               </NyPeriodeButton>
             ) : null}
+            <Button onClick={handleSubmit(ferdigstilleForm)}>Lagre søskenjustering</Button>
           </>
         ) : null}
       </form>

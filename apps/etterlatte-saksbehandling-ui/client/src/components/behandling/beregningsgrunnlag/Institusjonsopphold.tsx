@@ -1,12 +1,14 @@
 import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
-import React from 'react'
+import React, { useState } from 'react'
 import { LovtekstMedLenke } from '~components/behandling/soeknadsoversikt/soeknadoversikt/LovtekstMedLenke'
 import styled from 'styled-components'
-import { Button, Heading, Select, TextField } from '@navikt/ds-react'
+import { Button, Heading } from '@navikt/ds-react'
 import { PlusCircleIcon } from '@navikt/aksel-icons'
-import { InstitusjonsoppholdGrunnlag, Reduksjon } from '~shared/types/Beregning'
-import { Controller, useFieldArray, useForm } from 'react-hook-form'
-import MaanedVelger from '~components/behandling/beregningsgrunnlag/MaanedVelger'
+import { InstitusjonsoppholdGrunnlag } from '~shared/types/Beregning'
+import { useFieldArray, useForm } from 'react-hook-form'
+import InstitusjonsoppholdPeriode from '~components/behandling/beregningsgrunnlag/InstitusjonsoppholdPeriode'
+import Insthendelser from '~components/behandling/beregningsgrunnlag/Insthendelser'
+import { ApiErrorAlert } from '~ErrorBoundary'
 
 type InstitusjonsoppholdProps = {
   behandling: IBehandlingReducer
@@ -14,24 +16,32 @@ type InstitusjonsoppholdProps = {
 }
 
 const Institusjonsopphold = (props: InstitusjonsoppholdProps) => {
-  const { behandling } = props
-  const { control, register } = useForm<{ institusjonsOppholdForm: InstitusjonsoppholdGrunnlag }>({
+  const { behandling, onSubmit } = props
+  const [feil, setVisFeil] = useState(false)
+
+  const { control, register, watch, handleSubmit, formState } = useForm<{
+    institusjonsOppholdForm: InstitusjonsoppholdGrunnlag
+  }>({
     defaultValues: {
       institusjonsOppholdForm: behandling.beregningsGrunnlag?.institusjonsopphold,
     },
   })
+  const { isValid } = formState //har også alle errors per felt
 
   const { fields, append, remove } = useFieldArray({
     name: 'institusjonsOppholdForm',
     control,
   })
 
-  console.log(behandling.sakType)
-  //TODO: hent hendelser på behandling som er av type instittusjonsopphold
+  const ferdigstilleForm = (data: { institusjonsOppholdForm: InstitusjonsoppholdGrunnlag }) => {
+    if (validerInstitusjonsopphold(data.institusjonsOppholdForm) && isValid) {
+      onSubmit(data.institusjonsOppholdForm)
+      setVisFeil(false)
+    } else {
+      setVisFeil(true)
+    }
+  }
 
-  /*
-    Mangler validering
-     */
   return (
     <InstitusjonsoppholdsWrapper>
       <>
@@ -53,64 +63,26 @@ const Institusjonsopphold = (props: InstitusjonsoppholdProps) => {
             barnepensjonen ikke skal reduseres eller reduseres mindre enn hovedregelen sier.
           </p>
         </LovtekstMedLenke>
+        <Insthendelser sakid={behandling.sak} />
         <Heading level="3" size="small">
           Beregningsperiode institusjonsopphold
         </Heading>
       </>
-      <form>
+      <form id="forminstitusjonsopphold">
         <>
           {fields.map((item, index) => (
-            <div key={item.id}>
-              <InstitusjonsperioderWrapper>
-                <Controller
-                  name={`institusjonsOppholdForm.${index}.fom`}
-                  control={control}
-                  rules={{ required: true }}
-                  render={(fom) => (
-                    <MaanedVelger
-                      label="Fra og med"
-                      value={fom.field.value}
-                      onChange={(date: Date | null) => fom.field.onChange(date)}
-                    />
-                  )}
-                />
-                <Controller
-                  name={`institusjonsOppholdForm.${index}.tom`}
-                  control={control}
-                  render={(tom) => (
-                    <MaanedVelger
-                      label="Til og med"
-                      value={tom.field.value}
-                      onChange={(date: Date | null) => tom.field.onChange(date)}
-                    />
-                  )}
-                />
-                <Select
-                  label="Reduksjon"
-                  {...register(`institusjonsOppholdForm.${index}.data.reduksjon`, {
-                    required: true,
-                    validate: { notDefault: (v) => v !== Reduksjon.VELG_REDUKSJON },
-                  })}
-                >
-                  {Object.entries(Reduksjon).map(([reduksjonsKey, reduksjontekst]) => (
-                    <option key={reduksjonsKey} value={reduksjonsKey}>
-                      {reduksjontekst}
-                    </option>
-                  ))}
-                </Select>
-              </InstitusjonsperioderWrapper>
-              <TextField
-                label="Begrunnelse for periode(hvis aktuelt)"
-                {...register(`institusjonsOppholdForm.${index}.data.begrunnelse`)}
-              />
-              <Button onClick={() => remove(index)}>Fjern opphold</Button>
-            </div>
+            <InstitusjonsoppholdPeriode
+              key={item.id}
+              item={item}
+              index={index}
+              control={control}
+              register={register}
+              remove={remove}
+              watch={watch}
+            />
           ))}
         </>
       </form>
-      <div>
-        <LagreButtonWrapper>Lagre</LagreButtonWrapper>
-      </div>
       <Button
         icon={<PlusCircleIcon title="a11y-title" />}
         iconPosition="left"
@@ -120,13 +92,17 @@ const Institusjonsopphold = (props: InstitusjonsoppholdProps) => {
             {
               fom: new Date(Date.now()),
               tom: undefined,
-              data: { reduksjon: Reduksjon.VELG_REDUKSJON, egenReduksjon: undefined, begrunnelse: '' },
+              data: { reduksjon: 'VELG_REDUKSJON', egenReduksjon: undefined, begrunnelse: '' },
             },
           ])
         }
       >
         Legg til beregningsperiode
       </Button>
+      {fields.length > 0 && (
+        <Button onClick={handleSubmit(ferdigstilleForm, () => {})}>Lagre institusjonsopphold</Button>
+      )}
+      {feil && <ApiErrorAlert>Det er feil i skjemaet</ApiErrorAlert>}
     </InstitusjonsoppholdsWrapper>
   )
 }
@@ -134,19 +110,10 @@ const Institusjonsopphold = (props: InstitusjonsoppholdProps) => {
 export default Institusjonsopphold
 
 const InstitusjonsoppholdsWrapper = styled.div`
-  padding: 0em 4em;
-  max-width: 56em;
+  padding: 0em 2em;
+  max-width: 60em;
 `
 
-const InstitusjonsperioderWrapper = styled.div`
-  width: 100%;
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-`
-
-const LagreButtonWrapper = styled(Button)`
-  margin-top: 15px;
-  margin-bottom: 15px;
-  width: 150px;
-`
+const validerInstitusjonsopphold = (institusjonsopphold: InstitusjonsoppholdGrunnlag): boolean => {
+  return !institusjonsopphold.some((e) => e.tom === undefined)
+}

@@ -54,13 +54,12 @@ export interface BeregningsGrunnlagData {
 export type InstitusjonsoppholdGrunnlag = PeriodisertBeregningsgrunnlag<InstitusjonsoppholdIBeregning>[]
 
 export interface InstitusjonsoppholdIBeregning {
-  reduksjon: Reduksjon
-  egenReduksjon?: number
+  reduksjon: string
+  egenReduksjon?: number | undefined
   begrunnelse?: string | undefined
 }
 
 export enum Reduksjon {
-  VELG_REDUKSJON = 'Velg reduksjon',
   JA_VANLIG = 'Ja, etter vanlig sats(10% av G)',
   NEI_KORT_OPPHOLD = 'Nei, kort opphold',
   JA_EGEN_PROSENT_AV_G = 'Ja, utgifter til bolig(egen % av G)',

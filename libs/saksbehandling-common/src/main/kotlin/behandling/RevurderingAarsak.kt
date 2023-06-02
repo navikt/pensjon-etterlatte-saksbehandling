@@ -1,13 +1,21 @@
 package no.nav.etterlatte.libs.common.behandling
 
-enum class RevurderingAarsak(val kanBrukesDev: Boolean, val kanBrukesProd: Boolean) {
-    REGULERING(true, true),
-    ANSVARLIGE_FORELDRE(false, false),
-    SOESKENJUSTERING(true, false),
-    UTLAND(false, false),
-    BARN(false, false),
-    DOEDSFALL(true, false),
-    VERGEMAAL_ELLER_FREMTIDSFULLMAKT(false, false);
+private val SAKTYPE_OMS = listOf(SakType.OMSTILLINGSSTOENAD)
+private val SAKTYPE_BP = listOf(SakType.BARNEPENSJON)
+private val SAKTYPE_BP_OMS = SAKTYPE_BP + SAKTYPE_OMS
+
+enum class RevurderingAarsak(
+    val gyldigFor: List<SakType>,
+    val kanBrukesDev: Boolean,
+    val kanBrukesProd: Boolean
+) {
+    ANSVARLIGE_FORELDRE(SAKTYPE_BP, false, false),
+    SOESKENJUSTERING(SAKTYPE_BP, true, false),
+    UTLAND(SAKTYPE_BP, false, false),
+    BARN(SAKTYPE_BP, false, false),
+    VERGEMAAL_ELLER_FREMTIDSFULLMAKT(SAKTYPE_BP, false, false),
+    REGULERING(SAKTYPE_BP_OMS, true, true),
+    DOEDSFALL(SAKTYPE_BP_OMS, true, false);
 
     fun kanBrukesIMiljo(): Boolean {
         val env = System.getenv()
@@ -21,6 +29,8 @@ enum class RevurderingAarsak(val kanBrukesDev: Boolean, val kanBrukesProd: Boole
             return this.kanBrukesDev
         }
     }
+
+    fun gyldigForSakType(sakType: SakType): Boolean = gyldigFor.any { it == sakType }
 }
 
 enum class GcpEnv(val env: String) {

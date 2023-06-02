@@ -1,0 +1,43 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="etterlatte-utbetaling.dev-gcp" type="JetRunConfigurationType">
+    <envs>
+      <env name="LOGBACK_APPENDER" value="STDOUT" />
+      <env name="NAIS_APP_NAME" value="etterlatte-utbetaling" />
+      <env name="KAFKA_RAPID_TOPIC" value="etterlatte" />
+      <env name="KAFKA_BOOTSTRAP_SERVERS" value="0.0.0.0:9092" />
+      <env name="DB_DATABASE" value="postgres" />
+      <env name="DB_HOST" value="localhost" />
+      <env name="DB_PORT" value="5438" />
+      <env name="DB_USERNAME" value="postgres" />
+      <env name="DB_PASSWORD" value="postgres" />
+      <env name="OPPDRAG_MQ_HOSTNAME" value="localhost" />
+      <env name="OPPDRAG_MQ_PORT" value="1414" />
+      <env name="OPPDRAG_MQ_MANAGER" value="QM1" />
+      <env name="OPPDRAG_MQ_CHANNEL" value="DEV.ADMIN.SVRCONN" />
+      <env name="OPPDRAG_SEND_MQ_NAME" value="DEV.QUEUE.1" />
+      <env name="OPPDRAG_KVITTERING_MQ_NAME" value="DEV.QUEUE.2" />
+      <env name="OPPDRAG_AVSTEMMING_MQ_NAME" value="DEV.QUEUE.1" />
+      <env name="srvuser" value="admin" />
+      <env name="srvpwd" value="passw0rd" />
+      <env name="ELECTOR_PATH" value="localhost:1080" />
+      <env name="GRENSESNITTAVSTEMMING_ENABLED" value="true" />
+      <env name="KONSISTENSAVSTEMMING_ENABLED" value="true" />
+    </envs>
+    <option name="MAIN_CLASS_NAME" value="no.nav.etterlatte.ApplicationKt" />
+    <module name="pensjon-etterlatte-saksbehandling.apps.etterlatte-utbetaling.main" />
+    <shortenClasspath name="NONE" />
+    <extension name="net.ashald.envfile">
+      <option name="IS_ENABLED" value="false" />
+      <option name="IS_SUBST" value="false" />
+      <option name="IS_PATH_MACRO_SUPPORTED" value="false" />
+      <option name="IS_IGNORE_MISSING_FILES" value="false" />
+      <option name="IS_ENABLE_EXPERIMENTAL_INTEGRATIONS" value="false" />
+      <ENTRIES>
+        <ENTRY IS_ENABLED="true" PARSER="runconfig" IS_EXECUTABLE="false" />
+      </ENTRIES>
+    </extension>
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

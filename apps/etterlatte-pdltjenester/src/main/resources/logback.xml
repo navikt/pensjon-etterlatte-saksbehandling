@@ -10,7 +10,7 @@
     </appender>
 
     <root level="INFO">
-        <appender-ref ref="STDOUT_JSON"/>
+        <appender-ref ref="${LOGBACK_APPENDER:-STDOUT_JSON}"/>
     </root>
 
     <include resource="logback-secure.xml"/>

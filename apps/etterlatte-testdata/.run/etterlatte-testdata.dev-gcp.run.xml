@@ -1,0 +1,29 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="etterlatte-testdata.dev-gcp" type="JetRunConfigurationType">
+    <envs>
+      <env name="DEV" value="true" />
+      <env name="LOGBACK_APPENDER" value="STDOUT" />
+      <env name="KAFKA_BROKERS" value="0.0.0.0:9092" />
+      <env name="KAFKA_TARGET_TOPIC" value="etterlatte" />
+      <env name="DOLLY_CLIENT_ID" value="1" />
+      <env name="DOLLY_RESOURCE_URL" value="http://localhost" />
+    </envs>
+    <option name="MAIN_CLASS_NAME" value="no.nav.etterlatte.ApplicationKt" />
+    <module name="pensjon-etterlatte-saksbehandling.apps.etterlatte-testdata.main" />
+    <shortenClasspath name="NONE" />
+    <extension name="net.ashald.envfile">
+      <option name="IS_ENABLED" value="true" />
+      <option name="IS_SUBST" value="false" />
+      <option name="IS_PATH_MACRO_SUPPORTED" value="false" />
+      <option name="IS_IGNORE_MISSING_FILES" value="false" />
+      <option name="IS_ENABLE_EXPERIMENTAL_INTEGRATIONS" value="false" />
+      <ENTRIES>
+        <ENTRY IS_ENABLED="true" PARSER="runconfig" IS_EXECUTABLE="false" />
+        <ENTRY IS_ENABLED="true" PARSER="env" IS_EXECUTABLE="false" PATH="apps/etterlatte-testdata/.env.dev-gcp" />
+      </ENTRIES>
+    </extension>
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

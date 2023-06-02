@@ -8,8 +8,9 @@ import no.nav.etterlatte.pdl.ParallelleSannheterKlient
 import no.nav.etterlatte.pdl.PdlKlient
 import no.nav.etterlatte.person.PersonService
 
-class ApplicationContext {
+class ApplicationContext(env: Map<String, String>) {
     val config: Config = ConfigFactory.load()
+    val httpPort = env.getOrDefault("HTTP_PORT", "8080").toInt()
 
     val pdlKlient = PdlKlient(
         httpClient = httpClientClientCredentials(

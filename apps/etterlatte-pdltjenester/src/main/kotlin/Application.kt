@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory
 val sikkerLogg: Logger = LoggerFactory.getLogger("sikkerLogg")
 
 fun main() {
-    Server(ApplicationContext()).run()
+    Server(ApplicationContext(System.getenv())).run()
 }
 
 class Server(applicationContext: ApplicationContext) {
@@ -32,7 +32,7 @@ class Server(applicationContext: ApplicationContext) {
                     personRoute(applicationContext.personService)
                 }
             }
-            connector { port = 8080 }
+            connector { port = applicationContext.httpPort }
         }
     )
 

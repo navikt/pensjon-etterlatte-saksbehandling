@@ -86,7 +86,11 @@ private fun Row.asBeregningsGrunnlag(): BeregningsGrunnlag {
     return BeregningsGrunnlag(
         behandlingId = this.uuid("behandlings_id"),
         soeskenMedIBeregning = objectMapper.readValue(this.string("soesken_med_i_beregning_perioder")),
-        institusjonsoppholdBeregnignsGrunnlag = objectMapper.readValue(this.string("institusjonsopphold")),
+        institusjonsoppholdBeregnignsGrunnlag = this.stringOrNull("institusjonsopphold")?.let {
+            objectMapper.readValue(
+                it
+            )
+        },
         kilde = objectMapper.readValue(this.string("kilde"))
     )
 }

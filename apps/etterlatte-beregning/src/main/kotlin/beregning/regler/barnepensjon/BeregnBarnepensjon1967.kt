@@ -48,7 +48,7 @@ val beregnBarnepensjon1967Regel = RegelMeta(
 ) benytter barnepensjonSatsRegel og trygdetidsFaktor og institusjonsoppholdRegel med { sats,
         trygdetidsfaktor,
         institusjonsopphold ->
-    sats.multiply(trygdetidsfaktor).multiply(Beregningstall(institusjonsopphold.verdi).divide(100))
+    sats.multiply(trygdetidsfaktor).multiply(Beregningstall.somBroek(institusjonsopphold))
 }
 
 val kroneavrundetBarnepensjonRegel = RegelMeta(

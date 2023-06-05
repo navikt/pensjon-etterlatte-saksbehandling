@@ -82,7 +82,7 @@ fun AvkortetYtelse.toDto() = AvkortetYtelseDto(
 )
 
 fun AvkortingGrunnlagDto.fromDto(bruker: Bruker) = AvkortingGrunnlag(
-    periode = Periode(fom = fom, tom = fom),
+    periode = Periode(fom = fom, tom = tom),
     aarsinntekt = aarsinntekt,
     fratrekkInnUt = fratrekkInnUt,
     spesifikasjon = spesifikasjon,

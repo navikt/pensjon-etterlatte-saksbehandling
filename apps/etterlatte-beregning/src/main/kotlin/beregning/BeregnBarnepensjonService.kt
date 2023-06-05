@@ -244,7 +244,18 @@ class BeregnBarnepensjonService(
                     )
                 )
             }
-        }
+        },
+        institusjonsopphold = PeriodisertBeregningGrunnlag.lagKomplettPeriodisertGrunnlag(
+            beregningsGrunnlag.institusjonsoppholdBeregnignsGrunnlag?.mapVerdier { institusjonsopphold ->
+                FaktumNode(
+                    verdi = institusjonsopphold,
+                    kilde = beregningsGrunnlag.kilde,
+                    beskrivelse = "Institusjonsopphold"
+                )
+            } ?: listOf(),
+            fom,
+            tom
+        )
     )
 
     private fun TrygdetidDto?.hvisKanBrukes() = this.takeIf {

@@ -183,6 +183,31 @@ class GrunnlagsendringshendelseDao(val connection: () -> Connection) {
         }
     }
 
+    fun hentGrunnlagsendringshendelserMedStatuserISakAvType(
+        sakId: Long,
+        statuser: List<GrunnlagsendringStatus>,
+        type: GrunnlagsendringsType
+    ): List<Grunnlagsendringshendelse> {
+        with(connection()) {
+            prepareStatement(
+                """
+                    SELECT id, sak_id, type, opprettet, status, behandling_id, hendelse_gjelder_rolle, 
+                        samsvar_mellom_pdl_og_grunnlag, gjelder_person, kommentar
+                    FROM grunnlagsendringshendelse
+                    WHERE sak_id = ?
+                    AND type = ?
+                    AND status = ANY(?)
+                """.trimIndent()
+            ).use {
+                it.setLong(1, sakId)
+                it.setString(2, type.toString())
+                val statusArray = this.createArrayOf("text", statuser.toTypedArray())
+                it.setArray(3, statusArray)
+                return it.executeQuery().toList { asGrunnlagsendringshendelse() }
+            }
+        }
+    }
+
     fun hentGrunnlagsendringshendelserSomErSjekketAvJobb(
         sakId: Long
     ): List<Grunnlagsendringshendelse> = hentGrunnlagsendringshendelserMedStatuserISak(

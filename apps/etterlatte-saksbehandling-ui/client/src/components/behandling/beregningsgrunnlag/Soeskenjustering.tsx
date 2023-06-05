@@ -141,7 +141,14 @@ const Soeskenjustering = (props: SoeskenjusteringProps) => {
         {isFailure(soeskenjusteringGrunnlag) && <ApiErrorAlert>Søskenjustering kan ikke hentes</ApiErrorAlert>}
       </FamilieforholdWrapper>
       {visFeil && feil.length > 0 && behandles ? <FeilIPerioder feil={feil} /> : null}
-      <form id="formsoeskenjustering" name="formsoeskenjustering">
+      <form
+        id="formsoeskenjustering"
+        name="formsoeskenjustering"
+        onSubmit={(e) => {
+          e.preventDefault()
+          e.stopPropagation()
+        }}
+      >
         {isSuccess(soeskenjusteringGrunnlag) || soeskenjusteringErDefinertIRedux ? (
           <>
             <UstiletListe>

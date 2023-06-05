@@ -74,7 +74,13 @@ const Institusjonsopphold = (props: InstitusjonsoppholdProps) => {
           Beregningsperiode institusjonsopphold
         </Heading>
       </>
-      <form id="forminstitusjonsopphold">
+      <form
+        id="forminstitusjonsopphold"
+        onSubmit={(e) => {
+          e.preventDefault()
+          e.stopPropagation()
+        }}
+      >
         <>
           {fields.map((item, index) => (
             <InstitusjonsoppholdPeriode

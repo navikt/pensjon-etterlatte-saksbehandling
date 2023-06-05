@@ -246,7 +246,7 @@ class BeregnBarnepensjonService(
             }
         },
         institusjonsopphold = PeriodisertBeregningGrunnlag.lagKomplettPeriodisertGrunnlag(
-            beregningsGrunnlag.institusjonsoppholdBeregnignsGrunnlag?.mapVerdier { institusjonsopphold ->
+            beregningsGrunnlag.institusjonsoppholdBeregningsgrunnlag?.mapVerdier { institusjonsopphold ->
                 FaktumNode(
                     verdi = institusjonsopphold,
                     kilde = beregningsGrunnlag.kilde,

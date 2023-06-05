@@ -59,7 +59,7 @@ internal class BeregningsGrunnlagServiceTest {
                 )
             )
         )
-        val institusjonsoppholdBeregnignsGrunnlag = listOf(
+        val institusjonsoppholdBeregningsgrunnlag = listOf(
             GrunnlagMedPeriode(
                 fom = LocalDate.of(2022, 8, 1),
                 tom = null,
@@ -77,7 +77,7 @@ internal class BeregningsGrunnlagServiceTest {
         runBlocking {
             beregningsGrunnlagService.lagreBarnepensjonBeregningsGrunnlag(
                 randomUUID(),
-                BarnepensjonBeregningsGrunnlag(soeskenMedIBeregning, institusjonsoppholdBeregnignsGrunnlag),
+                BarnepensjonBeregningsGrunnlag(soeskenMedIBeregning, institusjonsoppholdBeregningsgrunnlag),
                 mockk {
                     every { ident() } returns "Z123456"
                 }
@@ -144,7 +144,7 @@ internal class BeregningsGrunnlagServiceTest {
                 behandlingId = revurdering.id,
                 barnepensjonBeregningsGrunnlag = BarnepensjonBeregningsGrunnlag(
                     soeskenMedIBeregning = grunnlagEndring.soeskenMedIBeregning,
-                    institusjonsoppholdBeregnignsGrunnlag = grunnlagEndring.institusjonsoppholdBeregnignsGrunnlag
+                    institusjonsoppholdBeregningsgrunnlag = grunnlagEndring.institusjonsoppholdBeregningsgrunnlag
                 ),
                 bruker = mockk(relaxed = true)
             )
@@ -212,7 +212,7 @@ internal class BeregningsGrunnlagServiceTest {
                 behandlingId = revurdering.id,
                 barnepensjonBeregningsGrunnlag = BarnepensjonBeregningsGrunnlag(
                     soeskenMedIBeregning = grunnlagEndring.soeskenMedIBeregning,
-                    institusjonsoppholdBeregnignsGrunnlag = grunnlagEndring.institusjonsoppholdBeregnignsGrunnlag
+                    institusjonsoppholdBeregningsgrunnlag = grunnlagEndring.institusjonsoppholdBeregningsgrunnlag
                 ),
                 bruker = mockk(relaxed = true)
             )
@@ -313,7 +313,7 @@ internal class BeregningsGrunnlagServiceTest {
     private fun beregningsgrunnlag(
         behandlingId: UUID = randomUUID(),
         soeskenMedIBeregning: List<GrunnlagMedPeriode<List<SoeskenMedIBeregning>>> = emptyList(),
-        institusjonsoppholdBeregnignsGrunnlag: List<GrunnlagMedPeriode<InstitusjonsoppholdBeregningsgrunnlag>> =
+        institusjonsoppholdBeregningsgrunnlag: List<GrunnlagMedPeriode<InstitusjonsoppholdBeregningsgrunnlag>> =
             emptyList(),
         kilde: Grunnlagsopplysning.Saksbehandler = Grunnlagsopplysning.Saksbehandler("test", Tidspunkt.now())
     ): BeregningsGrunnlag {
@@ -321,7 +321,7 @@ internal class BeregningsGrunnlagServiceTest {
             behandlingId = behandlingId,
             kilde = kilde,
             soeskenMedIBeregning = soeskenMedIBeregning,
-            institusjonsoppholdBeregnignsGrunnlag = institusjonsoppholdBeregnignsGrunnlag
+            institusjonsoppholdBeregningsgrunnlag = institusjonsoppholdBeregningsgrunnlag
         )
     }
 }

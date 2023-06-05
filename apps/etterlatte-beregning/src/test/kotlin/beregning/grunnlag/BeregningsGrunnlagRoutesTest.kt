@@ -179,7 +179,7 @@ internal class BeregningsGrunnlagRoutesTest {
                 tidspunkt = Tidspunkt.now()
             ),
             soeskenMedIBeregning = listOf(),
-            institusjonsoppholdBeregnignsGrunnlag = emptyList()
+            institusjonsoppholdBeregningsgrunnlag = emptyList()
         )
 
         testApplication {

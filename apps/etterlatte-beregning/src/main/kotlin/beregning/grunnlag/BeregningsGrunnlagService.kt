@@ -35,8 +35,8 @@ class BeregningsGrunnlagService(
                     behandlingId = behandlingId,
                     kilde = Grunnlagsopplysning.Saksbehandler.create(bruker.ident()),
                     soeskenMedIBeregning = barnepensjonBeregningsGrunnlag.soeskenMedIBeregning,
-                    institusjonsoppholdBeregnignsGrunnlag =
-                    barnepensjonBeregningsGrunnlag.institusjonsoppholdBeregnignsGrunnlag
+                    institusjonsoppholdBeregningsgrunnlag =
+                    barnepensjonBeregningsGrunnlag.institusjonsoppholdBeregningsgrunnlag
                 )
             )
         }

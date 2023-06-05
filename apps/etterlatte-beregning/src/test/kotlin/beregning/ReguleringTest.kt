@@ -148,7 +148,7 @@ class ReguleringTest {
                 }
             )
         ),
-        institusjonsoppholdBeregnignsGrunnlag = listOf(
+        institusjonsoppholdBeregningsgrunnlag = listOf(
             GrunnlagMedPeriode(
                 fom = LocalDate.of(2022, 8, 1),
                 tom = null,

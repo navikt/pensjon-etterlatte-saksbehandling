@@ -69,7 +69,7 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest {
         val id = UUID.randomUUID()
 
         val soeskenMedIBeregning = listOf(SoeskenMedIBeregning(STOR_SNERK, true)).somPeriodisertGrunnlag()
-        val institusjonsoppholdBeregnignsGrunnlag =
+        val institusjonsoppholdBeregningsgrunnlag =
             listOf(
                 GrunnlagMedPeriode(
                     fom = LocalDate.of(2022, 8, 1),
@@ -86,7 +86,7 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest {
                     Tidspunkt.now()
                 ),
                 soeskenMedIBeregning,
-                institusjonsoppholdBeregnignsGrunnlag
+                institusjonsoppholdBeregningsgrunnlag
             )
         )
 
@@ -95,7 +95,7 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest {
         assertNotNull(result)
 
         assertEquals(soeskenMedIBeregning, result?.soeskenMedIBeregning)
-        assertEquals(institusjonsoppholdBeregnignsGrunnlag, result?.institusjonsoppholdBeregnignsGrunnlag)
+        assertEquals(institusjonsoppholdBeregningsgrunnlag, result?.institusjonsoppholdBeregningsgrunnlag)
     }
 
     @Test
@@ -108,7 +108,7 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest {
             SoeskenMedIBeregning(TRIVIELL_MIDTPUNKT, true)
         ).somPeriodisertGrunnlag()
 
-        val initialInstitusjonsoppholdBeregnignsGrunnlag =
+        val initialInstitusjonsoppholdBeregningsgrunnlag =
             listOf(
                 GrunnlagMedPeriode(
                     fom = LocalDate.of(2022, 8, 1),
@@ -116,7 +116,7 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest {
                     data = InstitusjonsoppholdBeregningsgrunnlag(Reduksjon.NEI_KORT_OPPHOLD)
                 )
             )
-        val oppdatertInstitusjonsoppholdBeregnignsGrunnlag =
+        val oppdatertInstitusjonsoppholdBeregningsgrunnlag =
             listOf(
                 GrunnlagMedPeriode(
                     fom = LocalDate.of(2022, 8, 1),
@@ -133,7 +133,7 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest {
                     Tidspunkt.now()
                 ),
                 initialSoeskenMedIBeregning,
-                initialInstitusjonsoppholdBeregnignsGrunnlag
+                initialInstitusjonsoppholdBeregningsgrunnlag
             )
         )
 
@@ -145,7 +145,7 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest {
                     Tidspunkt.now()
                 ),
                 oppdatertSoeskenMedIBeregning,
-                oppdatertInstitusjonsoppholdBeregnignsGrunnlag
+                oppdatertInstitusjonsoppholdBeregningsgrunnlag
             )
         )
 
@@ -154,7 +154,7 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest {
         assertNotNull(result)
 
         assertEquals(oppdatertSoeskenMedIBeregning, result?.soeskenMedIBeregning)
-        assertEquals(oppdatertInstitusjonsoppholdBeregnignsGrunnlag, result?.institusjonsoppholdBeregnignsGrunnlag)
+        assertEquals(oppdatertInstitusjonsoppholdBeregningsgrunnlag, result?.institusjonsoppholdBeregningsgrunnlag)
         assertEquals("Z654321", result?.kilde?.ident)
     }
 

@@ -4,12 +4,17 @@ import { LovtekstMedLenke } from '~components/behandling/soeknadsoversikt/soekna
 import styled from 'styled-components'
 import { Button, Heading } from '@navikt/ds-react'
 import { PlusCircleIcon } from '@navikt/aksel-icons'
-import { InstitusjonsoppholdGrunnlag } from '~shared/types/Beregning'
+import { InstitusjonsoppholdGrunnlag, InstitusjonsoppholdIBeregning } from '~shared/types/Beregning'
 import { useFieldArray, useForm } from 'react-hook-form'
 import InstitusjonsoppholdPeriode from '~components/behandling/beregningsgrunnlag/InstitusjonsoppholdPeriode'
 import Insthendelser from '~components/behandling/beregningsgrunnlag/Insthendelser'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { SuccessColored } from '@navikt/ds-icons'
+import {
+  feilIKomplettePerioderOverIntervall,
+  PeriodisertBeregningsgrunnlag,
+} from '~components/behandling/beregningsgrunnlag/PeriodisertBeregningsgrunnlag'
+import { FeilIPeriodeGrunnlagAlle, FeilIPerioder } from '~components/behandling/beregningsgrunnlag/PerioderFelles'
 
 type InstitusjonsoppholdProps = {
   behandling: IBehandlingReducer
@@ -18,7 +23,7 @@ type InstitusjonsoppholdProps = {
 
 const Institusjonsopphold = (props: InstitusjonsoppholdProps) => {
   const { behandling, onSubmit } = props
-  const [feil, setVisFeil] = useState(false)
+  const [visFeil, setVisFeil] = useState(false)
   const [visOkLagret, setVisOkLagret] = useState(false)
   const { control, register, watch, handleSubmit, formState } = useForm<{
     institusjonsOppholdForm: InstitusjonsoppholdGrunnlag
@@ -32,9 +37,14 @@ const Institusjonsopphold = (props: InstitusjonsoppholdProps) => {
     name: 'institusjonsOppholdForm',
     control,
   })
+  const heleSkjemaet = watch('institusjonsOppholdForm')
 
+  const feilOverlappendePerioder = [
+    ...feilIKomplettePerioderOverIntervall(heleSkjemaet, new Date(behandling.virkningstidspunkt!.dato)),
+    ...heleSkjemaet.map((e) => feilIinstitusjonsoppholdsPeriode(e)),
+  ]
   const ferdigstilleForm = (data: { institusjonsOppholdForm: InstitusjonsoppholdGrunnlag }) => {
-    if (validerInstitusjonsopphold(data.institusjonsOppholdForm) && isValid) {
+    if (validerInstitusjonsopphold(data.institusjonsOppholdForm) && isValid && feilOverlappendePerioder.length === 0) {
       onSubmit(data.institusjonsOppholdForm)
       setVisFeil(false)
       setVisOkLagret(true)
@@ -108,17 +118,15 @@ const Institusjonsopphold = (props: InstitusjonsoppholdProps) => {
         Legg til beregningsperiode
       </Button>
       {fields.length > 0 && (
-        <Button
-          type="submit"
-          onClick={(e) => {
-            handleSubmit(ferdigstilleForm)(e)
-          }}
-        >
+        <Button type="submit" onClick={handleSubmit(ferdigstilleForm)}>
           Lagre institusjonsopphold
         </Button>
       )}
+      {visFeil && feilOverlappendePerioder.length > 0 && (
+        <FeilIPerioder feil={feilOverlappendePerioder} tekster={teksterFeilIPeriode} hreftag="institusjonsopphold" />
+      )}
+      {visFeil && <ApiErrorAlert>Det er feil i skjemaet</ApiErrorAlert>}
       {visOkLagret && <SuccessColored fontSize={20} />}
-      {feil && <ApiErrorAlert>Det er feil i skjemaet</ApiErrorAlert>}
     </InstitusjonsoppholdsWrapper>
   )
 }
@@ -133,3 +141,23 @@ const InstitusjonsoppholdsWrapper = styled.div`
 const validerInstitusjonsopphold = (institusjonsopphold: InstitusjonsoppholdGrunnlag): boolean => {
   return !institusjonsopphold.some((e) => e.fom === undefined)
 }
+
+export function feilIinstitusjonsoppholdsPeriode(
+  grunnlag: PeriodisertBeregningsgrunnlag<InstitusjonsoppholdIBeregning>
+): FeilIPeriodeGrunnlagAlle[] {
+  const feil: FeilIPeriodeGrunnlagAlle[] = []
+  if (grunnlag.tom !== undefined && grunnlag.tom < grunnlag.fom) {
+    feil.push('TOM_FOER_FOM')
+  }
+  return feil
+}
+
+const teksterFeilIPeriode: Record<FeilIPeriodeGrunnlagAlle, string> = {
+  INGEN_PERIODER: 'Minst et institusjonsopphold må finnes',
+  DEKKER_IKKE_SLUTT_AV_INTERVALL: 'Periodene må være komplette tilbake til virk',
+  DEKKER_IKKE_START_AV_INTERVALL: 'Periodene må vare ut ytelsen',
+  HULL_ETTER_PERIODE: 'Det er et hull i periodene etter denne perioden',
+  PERIODE_OVERLAPPER_MED_NESTE: 'Perioden overlapper med neste periode',
+  TOM_FOER_FOM: 'Til og med kan ikke være før fra og med',
+  IKKE_ALLE_VALGT: 'Skal ikke skje',
+} as const

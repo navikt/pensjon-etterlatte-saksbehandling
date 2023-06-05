@@ -1,4 +1,5 @@
 import { compareAsc, differenceInDays, endOfMonth, format, parse, startOfMonth } from 'date-fns'
+import { FeilIPeriode } from '~components/behandling/beregningsgrunnlag/PerioderFelles'
 
 export interface PeriodisertBeregningsgrunnlag<G> {
   fom: Date
@@ -39,16 +40,6 @@ export function mapListeFraDto<G>(dto: PeriodisertBeregningsgrunnlagDto<G>[]): P
 export function mapListeTilDto<G>(grunnlag: PeriodisertBeregningsgrunnlag<G>[]): PeriodisertBeregningsgrunnlagDto<G>[] {
   return grunnlag.map(periodisertBeregningsgrunnlagTilDto)
 }
-
-const FEIL_I_PERIODE = [
-  'TOM_FOER_FOM',
-  'PERIODE_OVERLAPPER_MED_NESTE',
-  'HULL_ETTER_PERIODE',
-  'INGEN_PERIODER',
-  'DEKKER_IKKE_START_AV_INTERVALL',
-  'DEKKER_IKKE_SLUTT_AV_INTERVALL',
-] as const
-export type FeilIPeriode = (typeof FEIL_I_PERIODE)[number]
 
 export function feilIKomplettePerioderOverIntervall(
   grunnlag: PeriodisertBeregningsgrunnlag<unknown>[],

@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react'
 import { IBehandlingReducer, oppdaterBeregingsGrunnlag } from '~store/reducers/BehandlingReducer'
 import { Soesken } from '~components/behandling/soeknadsoversikt/familieforhold/personer/Soesken'
 import { Control, Controller, useFieldArray, useForm, UseFormWatch } from 'react-hook-form'
-import { BodyShort, Button, ErrorSummary, Heading, Label, Radio, RadioGroup } from '@navikt/ds-react'
+import { BodyShort, Button, Heading, Label, Radio, RadioGroup } from '@navikt/ds-react'
 import styled from 'styled-components'
 import { IPdlPerson } from '~shared/types/Person'
 import { addMonths, format } from 'date-fns'
@@ -18,7 +18,6 @@ import { ApiErrorAlert } from '~ErrorBoundary'
 import { ContentHeader } from '~shared/styled'
 import { FamilieforholdWrapper } from '~components/behandling/soeknadsoversikt/familieforhold/barnepensjon/FamilieforholdBarnepensjon'
 import {
-  FeilIPeriode,
   mapListeFraDto,
   PeriodisertBeregningsgrunnlag,
   feilIKomplettePerioderOverIntervall,
@@ -26,6 +25,7 @@ import {
 import { useAppDispatch } from '~store/Store'
 import { hentBehandlesFraStatus } from '~components/behandling/felles/utils'
 import { SuccessColored } from '@navikt/ds-icons'
+import { FeilIPeriodeGrunnlagAlle, FeilIPerioder } from '~components/behandling/beregningsgrunnlag/PerioderFelles'
 
 type SoeskenKanskjeMedIBeregning = {
   foedselsnummer: string
@@ -89,10 +89,10 @@ const Soeskenjustering = (props: SoeskenjusteringProps) => {
   }
 
   const allePerioder = watch('soeskenMedIBeregning')
-  const feil: [number, FeilISoeskenPeriode][] = [
+  const feil: [number, FeilIPeriodeGrunnlagAlle][] = [
     ...feilIKomplettePerioderOverIntervall(allePerioder, new Date(behandling.virkningstidspunkt!.dato)),
     ...allePerioder.flatMap((periode, indeks) =>
-      feilISoeskenjusteringsperiode(periode).map((feil) => [indeks, feil] as [number, FeilISoeskenPeriode])
+      feilISoeskenjusteringsperiode(periode).map((feil) => [indeks, feil] as [number, FeilIPeriodeGrunnlagAlle])
     ),
   ]
 
@@ -140,7 +140,9 @@ const Soeskenjustering = (props: SoeskenjusteringProps) => {
         <Spinner visible={isPending(soeskenjusteringGrunnlag)} label={'Henter beregningsgrunnlag for søsken'} />
         {isFailure(soeskenjusteringGrunnlag) && <ApiErrorAlert>Søskenjustering kan ikke hentes</ApiErrorAlert>}
       </FamilieforholdWrapper>
-      {visFeil && feil.length > 0 && behandles ? <FeilIPerioder feil={feil} /> : null}
+      {visFeil && feil.length > 0 && behandles ? (
+        <FeilIPerioder feil={feil} tekster={teksterFeilIPeriode} hreftag="soeskenjustering" />
+      ) : null}
       <form
         id="formsoeskenjustering"
         onSubmit={(e) => {
@@ -172,12 +174,7 @@ const Soeskenjustering = (props: SoeskenjusteringProps) => {
                 Legg til periode
               </NyPeriodeButton>
             ) : null}
-            <Button
-              type="submit"
-              onClick={(e) => {
-                handleSubmit(ferdigstillForm)(e)
-              }}
-            >
+            <Button type="submit" onClick={handleSubmit(ferdigstillForm)}>
               Lagre søskenjustering
             </Button>
             {visOkLagret && <SuccessColored fontSize={20} />}
@@ -207,12 +204,10 @@ const formaterMaanedDato = (fallback: string, dato: Date | null | undefined) => 
   return fallback
 }
 
-type FeilISoeskenPeriode = FeilIPeriode | 'IKKE_ALLE_VALGT'
-
 export function feilISoeskenjusteringsperiode(
   grunnlag: PeriodisertBeregningsgrunnlag<SoeskenKanskjeMedIBeregning[]>
-): FeilISoeskenPeriode[] {
-  const feil: FeilISoeskenPeriode[] = []
+): FeilIPeriodeGrunnlagAlle[] {
+  const feil: FeilIPeriodeGrunnlagAlle[] = []
   const alleErValgt = grunnlag.data.every((person) => person.skalBrukes !== undefined && person.skalBrukes !== null)
   if (!alleErValgt) {
     feil.push('IKKE_ALLE_VALGT')
@@ -230,7 +225,7 @@ type SoeskenjusteringPeriodeProps = {
   canRemove: boolean
   behandling: IBehandlingReducer
   fnrTilSoesken: Record<string, IPdlPerson>
-  feil: [number, FeilISoeskenPeriode][]
+  feil: [number, FeilIPeriodeGrunnlagAlle][]
   watch: UseFormWatch<{ soeskenMedIBeregning: SoeskengrunnlagUtfylling }>
   visFeil: boolean
 }
@@ -357,7 +352,7 @@ const SoeskenjusteringPeriode = (props: SoeskenjusteringPeriodeProps) => {
   )
 }
 
-const FeilForPeriode = (props: { feil: FeilISoeskenPeriode[] }) => {
+const FeilForPeriode = (props: { feil: FeilIPeriodeGrunnlagAlle[] }) => {
   return (
     <>
       {props.feil.map((feil) => (
@@ -373,19 +368,7 @@ const FeilContainer = styled.span`
   display: block;
 `
 
-const FeilIPerioder = (props: { feil: [number, FeilISoeskenPeriode][] }) => {
-  return (
-    <FeilIPerioderOppsummering heading="Du må fikse feil i periodiseringen før du kan beregne">
-      {props.feil.map(([index, feil]) => (
-        <ErrorSummary.Item key={`${index}${feil}`} href={`#soeskenjustering.${index}`}>
-          {teksterFeilIPeriode[feil]}
-        </ErrorSummary.Item>
-      ))}
-    </FeilIPerioderOppsummering>
-  )
-}
-
-const teksterFeilIPeriode: Record<FeilISoeskenPeriode, string> = {
+const teksterFeilIPeriode: Record<FeilIPeriodeGrunnlagAlle, string> = {
   INGEN_PERIODER: 'Minst en søskenjusteringsperiode må finnes',
   DEKKER_IKKE_SLUTT_AV_INTERVALL: 'Periodene må være komplette tilbake til virk',
   DEKKER_IKKE_START_AV_INTERVALL: 'Periodene må vare ut ytelsen',
@@ -394,11 +377,6 @@ const teksterFeilIPeriode: Record<FeilISoeskenPeriode, string> = {
   TOM_FOER_FOM: 'Til og med kan ikke være før fra og med',
   IKKE_ALLE_VALGT: 'Alle søsken må fylles ut',
 } as const
-
-const FeilIPerioderOppsummering = styled(ErrorSummary)`
-  margin: 2em auto;
-  width: 30em;
-`
 
 const VertikalMidtstiltBodyShort = styled(BodyShort)`
   margin: auto 0;

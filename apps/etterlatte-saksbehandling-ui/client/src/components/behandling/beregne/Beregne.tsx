@@ -22,6 +22,7 @@ import { BarnepensjonSammendrag } from '~components/behandling/beregne/Barnepens
 import { OmstillingsstoenadSammendrag } from '~components/behandling/beregne/OmstillingsstoenadSammendrag'
 import { Avkorting } from '~components/behandling/avkorting/Avkorting'
 import { ISaksType } from '~components/behandling/fargetags/saksType'
+import { erOpphoer } from '~shared/types/Revurderingsaarsak'
 
 export const Beregne = (props: { behandling: IBehandlingReducer }) => {
   const { behandling } = props
@@ -41,7 +42,8 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
   const virkningstidspunkt = behandling.virkningstidspunkt?.dato
     ? formaterStringDato(behandling.virkningstidspunkt.dato)
     : undefined
-  const behandles = hentBehandlesFraStatus(behandling?.status)
+  const behandles = hentBehandlesFraStatus(behandling.status)
+  const opphoer = behandling?.revurderingsaarsak && erOpphoer(behandling.revurderingsaarsak)
   const vedtaksresultat =
     behandling.behandlingType !== IBehandlingsType.MANUELT_OPPHOER ? useVedtaksResultat() : 'opphoer'
 
@@ -76,9 +78,13 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
         {beregningFraState &&
           {
             [Beregningstype.BP]: <BarnepensjonSammendrag behandling={behandling} beregning={beregningFraState} />,
-            [Beregningstype.OMS]: <OmstillingsstoenadSammendrag beregning={beregningFraState} />,
+            [Beregningstype.OMS]: (
+              <>
+                <OmstillingsstoenadSammendrag beregning={beregningFraState} />
+                {!opphoer && <Avkorting behandling={behandling} />}
+              </>
+            ),
           }[beregningFraState.type]}
-        {behandling.sakType === ISaksType.OMSTILLINGSSTOENAD && <Avkorting behandling={behandling} />}
       </ContentHeader>
       {behandles ? (
         <BehandlingHandlingKnapper>

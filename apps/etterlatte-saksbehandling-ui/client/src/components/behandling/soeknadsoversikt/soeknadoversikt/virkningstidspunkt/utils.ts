@@ -36,5 +36,23 @@ export const BP_REVURDERING_BESKRIVELSE =
 export const BP_OPPHOER_BESKRIVELSE =
   'Barnepensjonen stanses ved utgangen av den måneden retten til ytelsen faller bort.'
 
+export const OMS_REVURDERING_HJEMLER: Array<Hjemmel> = [
+  {
+    lenke: 'https://lovdata.no/lov/1997-02-28-19/§22-12',
+    tittel: 'Folketrygdloven § 22-12 fjerde, femte og sjette ledd',
+  },
+]
+
+export const OMS_OPPHOER_HJEMLER: Array<Hjemmel> = [
+  {
+    lenke: 'https://lovdata.no/lov/1997-02-28-19/§22-12',
+    tittel: 'Folketrygdloven § 22-12 sjette ledd',
+  },
+]
+
 export const OMS_FOERSTEGANGSBEHANDLING_BESKRIVELSE =
   'Omstillingsstønad kan innvilges fra og med den første i måneden etter dødsfallet, men kan som hovedregel ikke gis for mer enn tre måneder før søknaden er mottatt hos NAV.'
+export const OMS_REVURDERING_BESKRIVELSE =
+  'Omstillingsstønad blir satt opp fra og med den måneden vilkårene for dette er oppfylt, og satt ned fra og med måneden etter den måneden vilkårene for dette er oppfylt. Omstillingsstønad stanses ved utgangen av den måneden retten til ytelsen faller bort.'
+export const OMS_OPPHOER_BESKRIVELSE =
+  'Omstillingsstønaden stanses ved utgangen av den måneden retten til ytelsen faller bort.'

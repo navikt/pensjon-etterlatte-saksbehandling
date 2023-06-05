@@ -158,6 +158,32 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest {
         assertEquals("Z654321", result?.kilde?.ident)
     }
 
+    @Test
+    fun `skal håndtere at institusjonsopphold er null`() {
+        val id = UUID.randomUUID()
+
+        val oppdatertSoeskenMedIBeregning = listOf(
+            SoeskenMedIBeregning(STOR_SNERK, true),
+            SoeskenMedIBeregning(TRIVIELL_MIDTPUNKT, true)
+        ).somPeriodisertGrunnlag()
+
+        repository.lagre(
+            BeregningsGrunnlag(
+                id,
+                Grunnlagsopplysning.Saksbehandler(
+                    ident = "Z654321",
+                    Tidspunkt.now()
+                ),
+                oppdatertSoeskenMedIBeregning,
+                null
+            )
+        )
+
+        val result = repository.finnGrunnlagForBehandling(id)
+
+        assertNotNull(result)
+    }
+
     private companion object {
         val STOR_SNERK = Folkeregisteridentifikator.of("11057523044")
         val TRIVIELL_MIDTPUNKT = Folkeregisteridentifikator.of("19040550081")

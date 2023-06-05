@@ -35,7 +35,7 @@ class BeregningsGrunnlagRepository(private val dataSource: DataSource) {
                         "behandlings_id" to beregningsGrunnlag.behandlingId,
                         "soesken_med_i_beregning" to beregningsGrunnlag.soeskenMedIBeregning.somJsonb(),
                         "institusjonsopphold" to objectMapper.writeValueAsString(
-                            beregningsGrunnlag.institusjonsopphold
+                            beregningsGrunnlag.institusjonsoppholdBeregningsgrunnlag
                         ),
                         "kilde" to beregningsGrunnlag.kilde.toJson()
 
@@ -86,7 +86,11 @@ private fun Row.asBeregningsGrunnlag(): BeregningsGrunnlag {
     return BeregningsGrunnlag(
         behandlingId = this.uuid("behandlings_id"),
         soeskenMedIBeregning = objectMapper.readValue(this.string("soesken_med_i_beregning_perioder")),
-        institusjonsopphold = objectMapper.readValue(this.string("institusjonsopphold")),
+        institusjonsoppholdBeregningsgrunnlag = this.stringOrNull("institusjonsopphold")?.let {
+            objectMapper.readValue(
+                it
+            )
+        },
         kilde = objectMapper.readValue(this.string("kilde"))
     )
 }

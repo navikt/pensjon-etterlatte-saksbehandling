@@ -10,6 +10,7 @@ import io.ktor.server.routing.application
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
+import no.nav.etterlatte.behandling.domain.GrunnlagsendringsType
 import no.nav.etterlatte.behandling.domain.Grunnlagsendringshendelse
 import no.nav.etterlatte.institusjonsopphold.InstitusjonsoppholdHendelseBeriket
 import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
@@ -83,6 +84,16 @@ internal fun Route.grunnlagsendringshendelseRoute(
             get("/gyldigehendelser") {
                 call.respond(grunnlagsendringshendelseService.hentGyldigeHendelserForSak(sakId))
             }
+        }
+    }
+    route("api/grunnlagsendringshendelse/{$SAKID_CALL_PARAMETER}/institusjon") {
+        get {
+            call.respond(
+                GrunnlagsendringsListe(
+                    grunnlagsendringshendelseService
+                        .hentAlleHendelserForSakAvType(sakId, GrunnlagsendringsType.INSTITUSJONSOPPHOLD)
+                )
+            )
         }
     }
 }

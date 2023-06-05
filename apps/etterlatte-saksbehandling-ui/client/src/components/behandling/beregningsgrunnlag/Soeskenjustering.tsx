@@ -25,6 +25,7 @@ import {
 } from '~components/behandling/beregningsgrunnlag/PeriodisertBeregningsgrunnlag'
 import { useAppDispatch } from '~store/Store'
 import { hentBehandlesFraStatus } from '~components/behandling/felles/utils'
+import { SuccessColored } from '@navikt/ds-icons'
 
 type SoeskenKanskjeMedIBeregning = {
   foedselsnummer: string
@@ -60,6 +61,7 @@ const Soeskenjustering = (props: SoeskenjusteringProps) => {
     name: 'soeskenMedIBeregning',
     control,
   })
+
   const soeskenjustering = behandling.beregningsGrunnlag?.soeskenMedIBeregning
   const [soeskenjusteringGrunnlag, fetchSoeskengjusteringGrunnlag] = useApiCall(hentBeregningsGrunnlag)
   const soeskenjusteringErDefinertIRedux = soeskenjustering !== undefined
@@ -67,6 +69,7 @@ const Soeskenjustering = (props: SoeskenjusteringProps) => {
   const sisteTom = watch(`soeskenMedIBeregning.${fields.length - 1}.tom`)
   const sisteFom = watch(`soeskenMedIBeregning.${fields.length - 1}.fom`)
   const dispatch = useAppDispatch()
+  const [visOkLagret, setVisOkLagret] = useState(false)
 
   useEffect(() => {
     if (!soeskenjusteringErDefinertIRedux) {
@@ -97,6 +100,7 @@ const Soeskenjustering = (props: SoeskenjusteringProps) => {
     behandling.familieforhold.avdoede.opplysning.avdoedesBarn?.filter(
       (barn) => barn.foedselsnummer !== behandling.søker?.foedselsnummer
     ) ?? []
+
   const fnrTilSoesken: Record<string, IPdlPerson> = soesken.reduce(
     (acc, next) => ({
       ...acc,
@@ -105,12 +109,17 @@ const Soeskenjustering = (props: SoeskenjusteringProps) => {
     {} as Record<string, IPdlPerson>
   )
 
-  const submitForm = (data: { soeskenMedIBeregning: SoeskengrunnlagUtfylling }) => {
+  const ferdigstillForm = (data: { soeskenMedIBeregning: SoeskengrunnlagUtfylling }) => {
     if (validerSoeskenjustering(data.soeskenMedIBeregning) && feil.length === 0) {
       setVisFeil(false)
       onSubmit(data.soeskenMedIBeregning)
+      setVisOkLagret(true)
+      setTimeout(() => {
+        setVisOkLagret(false)
+      }, 1000)
     } else {
       setVisFeil(true)
+      setVisOkLagret(false)
     }
   }
 
@@ -132,7 +141,14 @@ const Soeskenjustering = (props: SoeskenjusteringProps) => {
         {isFailure(soeskenjusteringGrunnlag) && <ApiErrorAlert>Søskenjustering kan ikke hentes</ApiErrorAlert>}
       </FamilieforholdWrapper>
       {visFeil && feil.length > 0 && behandles ? <FeilIPerioder feil={feil} /> : null}
-      <form id="form" name="form" onSubmit={handleSubmit(submitForm)}>
+      <form
+        id="formsoeskenjustering"
+        name="formsoeskenjustering"
+        onSubmit={(e) => {
+          e.preventDefault()
+          e.stopPropagation()
+        }}
+      >
         {isSuccess(soeskenjusteringGrunnlag) || soeskenjusteringErDefinertIRedux ? (
           <>
             <UstiletListe>
@@ -158,6 +174,8 @@ const Soeskenjustering = (props: SoeskenjusteringProps) => {
                 Legg til periode
               </NyPeriodeButton>
             ) : null}
+            <Button onClick={handleSubmit(ferdigstillForm)}>Lagre søskenjustering</Button>
+            {visOkLagret && <SuccessColored fontSize={20} />}
           </>
         ) : null}
       </form>

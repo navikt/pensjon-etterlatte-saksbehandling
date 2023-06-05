@@ -1,5 +1,5 @@
 import { GyldigFramsattType, IGyldighetproving, IGyldighetResultat } from '~shared/types/IDetaljertBehandling'
-import { Soeknadsvurdering } from '~components/behandling/soeknadsoversikt/soeknadoversikt/SoeknadsVurdering'
+import { LovtekstMedLenke } from '~components/behandling/soeknadsoversikt/soeknadoversikt/LovtekstMedLenke'
 import {
   Beskrivelse,
   InfobokserWrapper,
@@ -34,7 +34,7 @@ export const GyldigFramsattBarnepensjon = ({
   )
 
   return (
-    <Soeknadsvurdering
+    <LovtekstMedLenke
       tittel="Gyldig fremsatt"
       hjemler={[
         {
@@ -61,6 +61,6 @@ export const GyldigFramsattBarnepensjon = ({
           ingenAnnenVergeEnnForelder={ingenAnnenVergeEnnForelder}
         />
       </VurderingsContainerWrapper>
-    </Soeknadsvurdering>
+    </LovtekstMedLenke>
   )
 }

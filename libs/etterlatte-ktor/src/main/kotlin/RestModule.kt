@@ -23,6 +23,7 @@ import io.ktor.server.routing.IgnoreTrailingSlash
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
+import isProd
 import no.nav.etterlatte.libs.common.logging.CORRELATION_ID
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.security.token.support.v2.tokenValidationSupport
@@ -62,7 +63,7 @@ fun Application.restModule(
 
     install(StatusPages) {
         exception<Throwable> { call, cause ->
-            if (cause.erDeserialiseringsException()) {
+            if (cause.erDeserialiseringsException() && isProd()) {
                 sikkerLogg.error("En feil har oppstått ved deserialisering", cause)
                 call.application.log.error("En feil har oppstått ved deserialisering. Se sikkerlogg for mer detaljer.")
             } else {

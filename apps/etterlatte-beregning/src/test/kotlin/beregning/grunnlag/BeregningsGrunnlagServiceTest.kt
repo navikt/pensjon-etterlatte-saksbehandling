@@ -11,7 +11,8 @@ import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlag
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlagRepository
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlagService
 import no.nav.etterlatte.beregning.grunnlag.GrunnlagMedPeriode
-import no.nav.etterlatte.beregning.grunnlag.Institusjonsopphold
+import no.nav.etterlatte.beregning.grunnlag.InstitusjonsoppholdBeregningsgrunnlag
+import no.nav.etterlatte.beregning.grunnlag.Reduksjon
 import no.nav.etterlatte.klienter.BehandlingKlientImpl
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
@@ -58,7 +59,13 @@ internal class BeregningsGrunnlagServiceTest {
                 )
             )
         )
-        val institusjonsopphold = Institusjonsopphold(false)
+        val institusjonsoppholdBeregningsgrunnlag = listOf(
+            GrunnlagMedPeriode(
+                fom = LocalDate.of(2022, 8, 1),
+                tom = null,
+                data = InstitusjonsoppholdBeregningsgrunnlag(Reduksjon.NEI_KORT_OPPHOLD)
+            )
+        )
 
         val behandling = mockBehandling(SakType.BARNEPENSJON, randomUUID())
 
@@ -70,7 +77,7 @@ internal class BeregningsGrunnlagServiceTest {
         runBlocking {
             beregningsGrunnlagService.lagreBarnepensjonBeregningsGrunnlag(
                 randomUUID(),
-                BarnepensjonBeregningsGrunnlag(soeskenMedIBeregning, institusjonsopphold),
+                BarnepensjonBeregningsGrunnlag(soeskenMedIBeregning, institusjonsoppholdBeregningsgrunnlag),
                 mockk {
                     every { ident() } returns "Z123456"
                 }
@@ -137,7 +144,7 @@ internal class BeregningsGrunnlagServiceTest {
                 behandlingId = revurdering.id,
                 barnepensjonBeregningsGrunnlag = BarnepensjonBeregningsGrunnlag(
                     soeskenMedIBeregning = grunnlagEndring.soeskenMedIBeregning,
-                    institusjonsopphold = grunnlagEndring.institusjonsopphold
+                    institusjonsoppholdBeregningsgrunnlag = grunnlagEndring.institusjonsoppholdBeregningsgrunnlag
                 ),
                 bruker = mockk(relaxed = true)
             )
@@ -205,7 +212,7 @@ internal class BeregningsGrunnlagServiceTest {
                 behandlingId = revurdering.id,
                 barnepensjonBeregningsGrunnlag = BarnepensjonBeregningsGrunnlag(
                     soeskenMedIBeregning = grunnlagEndring.soeskenMedIBeregning,
-                    institusjonsopphold = grunnlagEndring.institusjonsopphold
+                    institusjonsoppholdBeregningsgrunnlag = grunnlagEndring.institusjonsoppholdBeregningsgrunnlag
                 ),
                 bruker = mockk(relaxed = true)
             )
@@ -229,8 +236,9 @@ internal class BeregningsGrunnlagServiceTest {
             behandlingsId,
             Grunnlagsopplysning.Saksbehandler("Z123456", Tidspunkt.now()),
             emptyList(),
-            Institusjonsopphold(false)
+            emptyList()
         )
+
         every { beregningsGrunnlagRepository.lagre(any()) } returns true
 
         runBlocking {
@@ -272,7 +280,7 @@ internal class BeregningsGrunnlagServiceTest {
             behandlingsId,
             Grunnlagsopplysning.Saksbehandler("Z123456", Tidspunkt.now()),
             emptyList(),
-            Institusjonsopphold(false)
+            emptyList()
         )
 
         runBlocking {
@@ -305,14 +313,15 @@ internal class BeregningsGrunnlagServiceTest {
     private fun beregningsgrunnlag(
         behandlingId: UUID = randomUUID(),
         soeskenMedIBeregning: List<GrunnlagMedPeriode<List<SoeskenMedIBeregning>>> = emptyList(),
-        institusjonsopphold: Institusjonsopphold = Institusjonsopphold(false),
+        institusjonsoppholdBeregningsgrunnlag: List<GrunnlagMedPeriode<InstitusjonsoppholdBeregningsgrunnlag>> =
+            emptyList(),
         kilde: Grunnlagsopplysning.Saksbehandler = Grunnlagsopplysning.Saksbehandler("test", Tidspunkt.now())
     ): BeregningsGrunnlag {
         return BeregningsGrunnlag(
             behandlingId = behandlingId,
             kilde = kilde,
             soeskenMedIBeregning = soeskenMedIBeregning,
-            institusjonsopphold = institusjonsopphold
+            institusjonsoppholdBeregningsgrunnlag = institusjonsoppholdBeregningsgrunnlag
         )
     }
 }

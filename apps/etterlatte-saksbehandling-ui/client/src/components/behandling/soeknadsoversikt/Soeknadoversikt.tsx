@@ -9,7 +9,6 @@ import { behandlingErUtfylt, hentBehandlesFraStatus } from '../felles/utils'
 import { VurderingsResultat } from '~shared/types/VurderingsResultat'
 import { OversiktGyldigFramsatt } from '~components/behandling/soeknadsoversikt/soeknadoversikt/gyldigFramsattSoeknad/OversiktGyldigFramsatt'
 import { Utenlandstilsnitt } from '~components/behandling/soeknadsoversikt/soeknadoversikt/utenlandstilsnitt/Utenlandstilsnitt'
-import Virkningstidspunkt from '~components/behandling/soeknadsoversikt/soeknadoversikt/virkningstidspunkt/Virkningstidspunkt'
 import { ISaksType } from '~components/behandling/fargetags/saksType'
 import { OversiktKommerBarnetTilgode } from '~components/behandling/soeknadsoversikt/soeknadoversikt/kommerBarnetTilgode/OversiktKommerBarnetTilgode'
 import { Start } from '~components/behandling/handlinger/start'
@@ -22,6 +21,7 @@ import {
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import { formaterKildePdl } from '~components/behandling/soeknadsoversikt/utils'
 import { formaterStringDato } from '~utils/formattering'
+import Virkningstidspunkt from '~components/behandling/soeknadsoversikt/soeknadoversikt/virkningstidspunkt/Virkningstidspunkt'
 
 export const Soeknadsoversikt = (props: { behandling: IDetaljertBehandling }) => {
   const { behandling } = props

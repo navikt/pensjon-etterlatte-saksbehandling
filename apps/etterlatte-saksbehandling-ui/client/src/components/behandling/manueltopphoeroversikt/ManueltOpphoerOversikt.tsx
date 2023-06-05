@@ -17,7 +17,6 @@ import { Child } from '@navikt/ds-icons'
 import differenceInYears from 'date-fns/differenceInYears'
 import { IBehandlingsammendrag } from '~components/person/typer'
 import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
-import { Institusjonsopphold } from '~shared/types/Beregning'
 
 export interface ManueltOpphoerDetaljer {
   id: string
@@ -53,13 +52,11 @@ export const ManueltOpphoerOversikt = (props: { behandling: IBehandlingReducer }
     setLoadingBeregning(true)
     setFeilmelding('')
     try {
-      // TODO EY-2170
-      const institusjonsopphold = { institusjonsopphold: false } as Institusjonsopphold
       await lagreBeregningsGrunnlag({
         behandlingsId: behandling.id,
         grunnlag: {
           soeskenMedIBeregning: [],
-          institusjonsopphold: institusjonsopphold,
+          institusjonsopphold: [],
         },
       })
       await opprettEllerEndreBeregning(behandling.id)

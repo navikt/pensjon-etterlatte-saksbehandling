@@ -34,17 +34,10 @@ export interface Beregningsperiode {
   trygdetid: number
 }
 
-export interface BeregningsGrunnlag<K> {
-  behandlingId: string
-  kilde: K
-  institusjonsopphold: Institusjonsopphold
-  soeskenMedIBeregning: PeriodisertBeregningsgrunnlag<SoeskenMedIBeregning[]>[]
-}
-
 export interface BeregningsGrunnlagDto {
   behandlingId: string
   kilde: KildeSaksbehandler
-  institusjonsopphold: Institusjonsopphold
+  institusjonsopphold: InstitusjonsoppholdGrunnlag
   soeskenMedIBeregning: PeriodisertBeregningsgrunnlagDto<SoeskenMedIBeregning[]>[]
 }
 
@@ -55,9 +48,20 @@ export interface SoeskenMedIBeregning {
 
 export interface BeregningsGrunnlagData {
   soeskenMedIBeregning: PeriodisertBeregningsgrunnlagDto<SoeskenMedIBeregning[]>[]
-  institusjonsopphold: Institusjonsopphold
+  institusjonsopphold: InstitusjonsoppholdGrunnlag | undefined
 }
 
-export interface Institusjonsopphold {
-  institusjonsopphold: boolean
+export type InstitusjonsoppholdGrunnlag = PeriodisertBeregningsgrunnlag<InstitusjonsoppholdIBeregning>[]
+
+export interface InstitusjonsoppholdIBeregning {
+  reduksjon: string
+  egenReduksjon?: number | undefined
+  begrunnelse?: string | undefined
+}
+
+export enum Reduksjon {
+  JA_VANLIG = 'Ja, etter vanlig sats(10% av G)',
+  NEI_KORT_OPPHOLD = 'Nei, kort opphold',
+  JA_EGEN_PROSENT_AV_G = 'Ja, utgifter til bolig(egen % av G)',
+  NEI_HOEYE_UTGIFTER_BOLIG = 'Nei, har høye utgifter til bolig',
 }

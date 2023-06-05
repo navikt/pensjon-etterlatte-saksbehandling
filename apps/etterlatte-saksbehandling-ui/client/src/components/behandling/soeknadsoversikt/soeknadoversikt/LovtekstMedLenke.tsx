@@ -5,14 +5,14 @@ import { SoeknadOversiktWrapper } from '../styled'
 import { StatusIconProps, StatusIcon } from '~shared/icons/statusIcon'
 import { HjemmelLenke, HjemmelLenkeProps } from '~components/behandling/felles/HjemmelLenke'
 
-interface SoeknadsVurderingProps {
+interface LovtekstMedLenkeProps {
   tittel: string
   hjemler: HjemmelLenkeProps[]
   children: ReactNode
   status: StatusIconProps | null
 }
 
-export const Soeknadsvurdering = (props: SoeknadsVurderingProps) => {
+export const LovtekstMedLenke = (props: LovtekstMedLenkeProps) => {
   return (
     <VurderingWrapper>
       <HeadingMedIkon>

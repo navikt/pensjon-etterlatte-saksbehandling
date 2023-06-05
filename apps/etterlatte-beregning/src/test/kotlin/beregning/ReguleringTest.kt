@@ -13,7 +13,8 @@ import no.nav.etterlatte.beregning.BeregnBarnepensjonServiceTest
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlag
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlagService
 import no.nav.etterlatte.beregning.grunnlag.GrunnlagMedPeriode
-import no.nav.etterlatte.beregning.grunnlag.Institusjonsopphold
+import no.nav.etterlatte.beregning.grunnlag.InstitusjonsoppholdBeregningsgrunnlag
+import no.nav.etterlatte.beregning.grunnlag.Reduksjon
 import no.nav.etterlatte.beregning.regler.MAKS_TRYGDETID
 import no.nav.etterlatte.beregning.regler.bruker
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
@@ -32,6 +33,7 @@ import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 import java.time.Month
 import java.time.YearMonth
 import java.util.UUID
@@ -146,7 +148,13 @@ class ReguleringTest {
                 }
             )
         ),
-        institusjonsopphold = Institusjonsopphold(false)
+        institusjonsoppholdBeregningsgrunnlag = listOf(
+            GrunnlagMedPeriode(
+                fom = LocalDate.of(2022, 8, 1),
+                tom = null,
+                data = InstitusjonsoppholdBeregningsgrunnlag(Reduksjon.NEI_KORT_OPPHOLD)
+            )
+        )
 
     )
 

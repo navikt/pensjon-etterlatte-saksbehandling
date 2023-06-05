@@ -4,7 +4,8 @@ import io.mockk.clearAllMocks
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlag
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlagRepository
 import no.nav.etterlatte.beregning.grunnlag.GrunnlagMedPeriode
-import no.nav.etterlatte.beregning.grunnlag.Institusjonsopphold
+import no.nav.etterlatte.beregning.grunnlag.InstitusjonsoppholdBeregningsgrunnlag
+import no.nav.etterlatte.beregning.grunnlag.Reduksjon
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeskenMedIBeregning
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
@@ -64,11 +65,18 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest {
     }
 
     @Test
-    fun `Opprettelse fungere`() {
+    fun `Opprettelse fungerer`() {
         val id = UUID.randomUUID()
 
         val soeskenMedIBeregning = listOf(SoeskenMedIBeregning(STOR_SNERK, true)).somPeriodisertGrunnlag()
-        val institusjonsopphold = Institusjonsopphold(false)
+        val institusjonsoppholdBeregningsgrunnlag =
+            listOf(
+                GrunnlagMedPeriode(
+                    fom = LocalDate.of(2022, 8, 1),
+                    tom = null,
+                    data = InstitusjonsoppholdBeregningsgrunnlag(Reduksjon.NEI_KORT_OPPHOLD)
+                )
+            )
 
         repository.lagre(
             BeregningsGrunnlag(
@@ -78,7 +86,7 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest {
                     Tidspunkt.now()
                 ),
                 soeskenMedIBeregning,
-                institusjonsopphold
+                institusjonsoppholdBeregningsgrunnlag
             )
         )
 
@@ -87,11 +95,11 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest {
         assertNotNull(result)
 
         assertEquals(soeskenMedIBeregning, result?.soeskenMedIBeregning)
-        assertEquals(institusjonsopphold, result?.institusjonsopphold)
+        assertEquals(institusjonsoppholdBeregningsgrunnlag, result?.institusjonsoppholdBeregningsgrunnlag)
     }
 
     @Test
-    fun `Oppdatering fungere`() {
+    fun `Oppdatering fungerer`() {
         val id = UUID.randomUUID()
 
         val initialSoeskenMedIBeregning = listOf(SoeskenMedIBeregning(STOR_SNERK, true)).somPeriodisertGrunnlag()
@@ -100,8 +108,22 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest {
             SoeskenMedIBeregning(TRIVIELL_MIDTPUNKT, true)
         ).somPeriodisertGrunnlag()
 
-        val initialInstitusjonsopphold = Institusjonsopphold(false)
-        val oppdatertInstitusjonsopphold = Institusjonsopphold(true)
+        val initialInstitusjonsoppholdBeregningsgrunnlag =
+            listOf(
+                GrunnlagMedPeriode(
+                    fom = LocalDate.of(2022, 8, 1),
+                    tom = null,
+                    data = InstitusjonsoppholdBeregningsgrunnlag(Reduksjon.NEI_KORT_OPPHOLD)
+                )
+            )
+        val oppdatertInstitusjonsoppholdBeregningsgrunnlag =
+            listOf(
+                GrunnlagMedPeriode(
+                    fom = LocalDate.of(2022, 8, 1),
+                    tom = null,
+                    data = InstitusjonsoppholdBeregningsgrunnlag(Reduksjon.JA_VANLIG)
+                )
+            )
 
         repository.lagre(
             BeregningsGrunnlag(
@@ -111,7 +133,7 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest {
                     Tidspunkt.now()
                 ),
                 initialSoeskenMedIBeregning,
-                initialInstitusjonsopphold
+                initialInstitusjonsoppholdBeregningsgrunnlag
             )
         )
 
@@ -123,7 +145,7 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest {
                     Tidspunkt.now()
                 ),
                 oppdatertSoeskenMedIBeregning,
-                oppdatertInstitusjonsopphold
+                oppdatertInstitusjonsoppholdBeregningsgrunnlag
             )
         )
 
@@ -132,8 +154,34 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest {
         assertNotNull(result)
 
         assertEquals(oppdatertSoeskenMedIBeregning, result?.soeskenMedIBeregning)
-        assertEquals(oppdatertInstitusjonsopphold, result?.institusjonsopphold)
+        assertEquals(oppdatertInstitusjonsoppholdBeregningsgrunnlag, result?.institusjonsoppholdBeregningsgrunnlag)
         assertEquals("Z654321", result?.kilde?.ident)
+    }
+
+    @Test
+    fun `skal håndtere at institusjonsopphold er null`() {
+        val id = UUID.randomUUID()
+
+        val oppdatertSoeskenMedIBeregning = listOf(
+            SoeskenMedIBeregning(STOR_SNERK, true),
+            SoeskenMedIBeregning(TRIVIELL_MIDTPUNKT, true)
+        ).somPeriodisertGrunnlag()
+
+        repository.lagre(
+            BeregningsGrunnlag(
+                id,
+                Grunnlagsopplysning.Saksbehandler(
+                    ident = "Z654321",
+                    Tidspunkt.now()
+                ),
+                oppdatertSoeskenMedIBeregning,
+                null
+            )
+        )
+
+        val result = repository.finnGrunnlagForBehandling(id)
+
+        assertNotNull(result)
     }
 
     private companion object {

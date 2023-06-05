@@ -60,6 +60,15 @@ class GrunnlagsendringshendelseService(
         )
     }
 
+    fun hentAlleHendelserForSakAvType(sakId: Long, type: GrunnlagsendringsType) = inTransaction {
+        logger.info("Henter alle relevante hendelser for sak $sakId")
+        grunnlagsendringshendelseDao.hentGrunnlagsendringshendelserMedStatuserISakAvType(
+            sakId,
+            GrunnlagsendringStatus.relevantForSaksbehandler().toList(),
+            type
+        )
+    }
+
     fun lukkHendelseMedKommentar(hendelse: Grunnlagsendringshendelse) {
         logger.info("Lukker hendelse med id $hendelse.id")
 

@@ -3,7 +3,7 @@ import { Beskrivelse, InfobokserWrapper, InfoWrapper, VurderingsContainerWrapper
 import { IKommerBarnetTilgode } from '~shared/types/IDetaljertBehandling'
 import { IPdlPerson } from '~shared/types/Person'
 import { formaterKildePdl, svarTilStatusIcon } from '../../utils'
-import { Soeknadsvurdering } from '../SoeknadsVurdering'
+import { LovtekstMedLenke } from '../LovtekstMedLenke'
 import { Info } from '../../Info'
 import { LeggTilVurderingButton } from '~components/behandling/soeknadsoversikt/soeknadoversikt/LeggTilVurderingButton'
 import { useState } from 'react'
@@ -46,7 +46,7 @@ export const OversiktKommerBarnetTilgode = ({
   const foreldersadresse = gjenlevendeForelder?.opplysning?.bostedsadresse?.find((adresse) => adresse.aktiv)
 
   return (
-    <Soeknadsvurdering
+    <LovtekstMedLenke
       tittel="Kommer pensjonen barnet tilgode?"
       hjemler={[
         { lenke: 'https://lovdata.no/lov/1997-02-28-19/§18-1', tittel: 'Folketrygdloven § 18-1' },
@@ -87,6 +87,6 @@ export const OversiktKommerBarnetTilgode = ({
           <LeggTilVurderingButton onClick={() => setVurdert(true)}>Legg til vurdering</LeggTilVurderingButton>
         )}
       </VurderingsContainerWrapper>
-    </Soeknadsvurdering>
+    </LovtekstMedLenke>
   )
 }

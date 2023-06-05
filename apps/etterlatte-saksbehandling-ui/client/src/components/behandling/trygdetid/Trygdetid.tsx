@@ -12,7 +12,7 @@ import {
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { TrygdetidBeregnet } from '~components/behandling/trygdetid/TrygdetidBeregnet'
-import { Soeknadsvurdering } from '~components/behandling/soeknadsoversikt/soeknadoversikt/SoeknadsVurdering'
+import { LovtekstMedLenke } from '~components/behandling/soeknadsoversikt/soeknadoversikt/LovtekstMedLenke'
 import styled from 'styled-components'
 import { BodyShort } from '@navikt/ds-react'
 import { useParams } from 'react-router-dom'
@@ -54,7 +54,7 @@ export const Trygdetid = () => {
 
   return (
     <TrygdetidWrapper>
-      <Soeknadsvurdering
+      <LovtekstMedLenke
         tittel={'Avdødes trygdetid'}
         hjemler={[
           {
@@ -68,7 +68,7 @@ export const Trygdetid = () => {
           Faktisk trygdetid er den tiden fra avdøde fylte 16 år til personen døde. fremtidig trygdetid er tiden fra
           dødsfallet til og med kalenderåret avdøde hadde blitt 66 år. Tilsammen kan man ha maks 40 år med trygdetid.
         </BodyShort>
-      </Soeknadsvurdering>
+      </LovtekstMedLenke>
 
       {trygdetid && landListe && (
         <>

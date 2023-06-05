@@ -1,10 +1,10 @@
 import styled from 'styled-components'
-import { Soeknadsvurdering } from '~components/behandling/soeknadsoversikt/soeknadoversikt/SoeknadsVurdering'
+import { LovtekstMedLenke } from '~components/behandling/soeknadsoversikt/soeknadoversikt/LovtekstMedLenke'
 
 const Trygdetid = () => {
   return (
     <TrygdetidWrapper>
-      <Soeknadsvurdering
+      <LovtekstMedLenke
         tittel={'Trygdetid'}
         hjemler={[
           {
@@ -25,7 +25,7 @@ const Trygdetid = () => {
             Trygdetid: <strong>40 år</strong>
           </p>
         </TrygdetidInfo>
-      </Soeknadsvurdering>
+      </LovtekstMedLenke>
     </TrygdetidWrapper>
   )
 }

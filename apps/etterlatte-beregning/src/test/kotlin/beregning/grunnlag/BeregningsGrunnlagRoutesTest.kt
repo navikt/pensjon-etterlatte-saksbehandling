@@ -19,13 +19,13 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
-import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -179,7 +179,7 @@ internal class BeregningsGrunnlagRoutesTest {
                 tidspunkt = Tidspunkt.now()
             ),
             soeskenMedIBeregning = listOf(),
-            institusjonsopphold = Institusjonsopphold(institusjonsopphold = false)
+            institusjonsoppholdBeregningsgrunnlag = emptyList()
         )
 
         testApplication {
@@ -211,7 +211,7 @@ internal class BeregningsGrunnlagRoutesTest {
             id,
             Grunnlagsopplysning.Saksbehandler("Z123456", Tidspunkt.now()),
             emptyList(),
-            Institusjonsopphold(false)
+            emptyList()
         )
 
         testApplication {
@@ -266,7 +266,7 @@ internal class BeregningsGrunnlagRoutesTest {
                 setBody(
                     BarnepensjonBeregningsGrunnlag(
                         emptyList(),
-                        Institusjonsopphold(false)
+                        emptyList()
                     )
                 )
             }.let {
@@ -298,7 +298,7 @@ internal class BeregningsGrunnlagRoutesTest {
                 setBody(
                     BarnepensjonBeregningsGrunnlag(
                         emptyList(),
-                        Institusjonsopphold(false)
+                        emptyList()
                     )
                 )
             }.let {
@@ -330,7 +330,7 @@ internal class BeregningsGrunnlagRoutesTest {
                 setBody(
                     BarnepensjonBeregningsGrunnlag(
                         emptyList(),
-                        Institusjonsopphold(false)
+                        emptyList()
                     )
                 )
             }.let {
@@ -367,7 +367,7 @@ internal class BeregningsGrunnlagRoutesTest {
             forrige,
             Grunnlagsopplysning.Saksbehandler("Z123456", Tidspunkt.now()),
             emptyList(),
-            Institusjonsopphold(false)
+            emptyList()
         )
         every { repository.finnGrunnlagForBehandling(nye) } returns null
         every { repository.lagre(any()) } returns true
@@ -419,13 +419,13 @@ internal class BeregningsGrunnlagRoutesTest {
             forrige,
             Grunnlagsopplysning.Saksbehandler("Z123456", Tidspunkt.now()),
             emptyList(),
-            Institusjonsopphold(false)
+            emptyList()
         )
         every { repository.finnGrunnlagForBehandling(nye) } returns BeregningsGrunnlag(
             nye,
             Grunnlagsopplysning.Saksbehandler("Z123456", Tidspunkt.now()),
             emptyList(),
-            Institusjonsopphold(false)
+            emptyList()
         )
         every { repository.lagre(any()) } returns true
 

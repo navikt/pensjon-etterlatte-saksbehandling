@@ -4,7 +4,6 @@ import io.ktor.client.call.body
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.beregning.grunnlag.BarnepensjonBeregningsGrunnlag
 import no.nav.etterlatte.beregning.grunnlag.GrunnlagMedPeriode
-import no.nav.etterlatte.beregning.grunnlag.Institusjonsopphold
 import no.nav.etterlatte.libs.common.beregning.BeregningDTO
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeskenMedIBeregning
 import no.nav.etterlatte.libs.common.logging.withLogContext
@@ -69,6 +68,6 @@ internal class MigreringHendelser(rapidsConnection: RapidsConnection, private va
                     }
                 )
             ),
-            institusjonsopphold = Institusjonsopphold(false)
+            institusjonsoppholdBeregningsgrunnlag = emptyList()
         )
 }

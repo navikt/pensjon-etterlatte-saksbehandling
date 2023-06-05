@@ -11,7 +11,7 @@ import { Beskrivelse, InfoWrapper, InfobokserWrapper, VurderingsContainerWrapper
 import { useAppDispatch } from '~store/Store'
 import { IBehandlingStatus, Virkningstidspunkt } from '~shared/types/IDetaljertBehandling'
 import { addMonths } from 'date-fns'
-import { Soeknadsvurdering } from '../SoeknadsVurdering'
+import { LovtekstMedLenke } from '../LovtekstMedLenke'
 import { Info } from '../../Info'
 import { LeggTilVurderingButton } from '~components/behandling/soeknadsoversikt/soeknadoversikt/LeggTilVurderingButton'
 import { VurderingsboksWrapper } from '~components/vurderingsboks/VurderingsboksWrapper'
@@ -90,7 +90,7 @@ const Virkningstidspunkt = (props: Props) => {
 
   return (
     <>
-      <Soeknadsvurdering
+      <LovtekstMedLenke
         tittel="Virkningstidspunkt"
         hjemler={props.hjemmler}
         status={Boolean(props.virkningstidspunkt) ? 'success' : 'warning'}
@@ -164,7 +164,7 @@ const Virkningstidspunkt = (props: Props) => {
             </VurderingsboksWrapper>
           )}
         </VurderingsContainerWrapper>
-      </Soeknadsvurdering>
+      </LovtekstMedLenke>
     </>
   )
 }

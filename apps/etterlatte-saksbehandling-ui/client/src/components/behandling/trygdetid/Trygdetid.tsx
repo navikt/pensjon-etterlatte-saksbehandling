@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react'
-import { TrygdetidGrunnlag } from '~components/behandling/trygdetid/TrygdetidGrunnlag'
 import { isFailure, isPending, useApiCall } from '~shared/hooks/useApiCall'
 import {
   hentAlleLand,
@@ -75,33 +74,17 @@ export const Trygdetid = () => {
         <>
           <Grunnlagopplysninger opplysninger={trygdetid.opplysninger} />
 
-          <br />
           <TrygdetidGrunnlagListe
             trygdetid={trygdetid}
             setTrygdetid={setTrygdetid}
             landListe={landListe}
             trygdetidGrunnlagType={ITrygdetidGrunnlagType.FAKTISK}
           />
-          <br />
           <TrygdetidGrunnlagListe
             trygdetid={trygdetid}
             setTrygdetid={setTrygdetid}
             landListe={landListe}
             trygdetidGrunnlagType={ITrygdetidGrunnlagType.FREMTIDIG}
-          />
-          <br />
-          <br />
-          <TrygdetidGrunnlag
-            trygdetid={trygdetid}
-            setTrygdetid={setTrygdetid}
-            trygdetidGrunnlagType={ITrygdetidGrunnlagType.FAKTISK}
-            landListe={landListe}
-          />
-          <TrygdetidGrunnlag
-            trygdetid={trygdetid}
-            setTrygdetid={setTrygdetid}
-            trygdetidGrunnlagType={ITrygdetidGrunnlagType.FREMTIDIG}
-            landListe={landListe}
           />
           <TrygdetidBeregnet trygdetid={trygdetid} setTrygdetid={setTrygdetid} />
         </>

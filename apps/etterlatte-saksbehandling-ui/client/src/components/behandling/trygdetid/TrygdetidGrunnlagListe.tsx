@@ -11,9 +11,12 @@ import { Button, Heading, Table } from '@navikt/ds-react'
 import { CalendarIcon } from '@navikt/aksel-icons'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import { formaterStringDato } from '~utils/formattering'
-import React from 'react'
+import React, { useState } from 'react'
 import styled from 'styled-components'
-import { useApiCall } from '~shared/hooks/useApiCall'
+import { isFailure, isPending, useApiCall } from '~shared/hooks/useApiCall'
+import { TrygdetidGrunnlag } from '~components/behandling/trygdetid/TrygdetidGrunnlag'
+import { ApiErrorAlert } from '~ErrorBoundary'
+import Spinner from '~shared/Spinner'
 
 type Props = {
   trygdetid: ITrygdetid
@@ -22,30 +25,28 @@ type Props = {
   landListe: ILand[]
 }
 
+const initialEndreModusState = {
+  status: false,
+  trygdetidGrunnlagId: '',
+}
+
 export const TrygdetidGrunnlagListe: React.FC<Props> = ({
   trygdetid,
   setTrygdetid,
   trygdetidGrunnlagType,
   landListe,
 }) => {
-  const [nyTrygdetid, slettTrygdetidsgrunnlagRequest] = useApiCall(slettTrygdetidsgrunnlag)
+  const [endreModus, setEndreModus] = useState(initialEndreModusState)
   const trygdetidGrunnlagListe = trygdetid.trygdetidGrunnlag.filter((tg) => tg.type == trygdetidGrunnlagType)
   const grunnlagTypeTekst = trygdetidGrunnlagType == ITrygdetidGrunnlagType.FAKTISK ? 'Faktisk' : 'Fremtidig'
 
-  const slettTrygdetid = (grunnlagId: string) => {
-    slettTrygdetidsgrunnlagRequest(
-      {
-        behandlingsId: trygdetid.behandlingId,
-        trygdetidGrunnlagId: grunnlagId,
-      },
-      (oppdatertTrygdetid) => {
-        setTrygdetid(oppdatertTrygdetid)
-      }
-    )
+  const oppdaterStateOgSettTrygdetid = (trygdetid: ITrygdetid) => {
+    setEndreModus(initialEndreModusState)
+    setTrygdetid(trygdetid)
   }
 
   return (
-    <div>
+    <GrunnlagListe>
       <FlexHeader>
         <IconWrapper>
           <CalendarIcon fontSize={IconSize.DEFAULT} />
@@ -54,6 +55,11 @@ export const TrygdetidGrunnlagListe: React.FC<Props> = ({
           {grunnlagTypeTekst} trygdetid
         </Heading>
       </FlexHeader>
+      {trygdetidGrunnlagType == ITrygdetidGrunnlagType.FAKTISK ? (
+        <p>Legg til trygdetid fra avdøde var 16 år frem til hen døde.</p>
+      ) : (
+        <p>Legg til trygdetid fra dødsdato til og med kalenderåret avdøde hadde blitt 66 år.</p>
+      )}
       {trygdetidGrunnlagListe.length ? (
         <TableWrapper>
           <Table size={'medium'}>
@@ -71,7 +77,18 @@ export const TrygdetidGrunnlagListe: React.FC<Props> = ({
             </Table.Header>
             <Table.Body>
               {trygdetidGrunnlagListe.map((periode) => {
-                return <PeriodeRow trygdetidGrunnlag={periode} slettGrunnlag={slettTrygdetid} landListe={landListe} />
+                return (
+                  <PeriodeRow
+                    trygdetidGrunnlag={periode}
+                    behandlingId={trygdetid.behandlingId}
+                    setTrygdetid={setTrygdetid}
+                    endrePeriode={(trygdetidGrunnlagId) => {
+                      console.log('Endrer periode: ' + trygdetidGrunnlagId)
+                      setEndreModus({ status: true, trygdetidGrunnlagId: trygdetidGrunnlagId })
+                    }}
+                    landListe={landListe}
+                  />
+                )
               })}
             </Table.Body>
           </Table>
@@ -80,22 +97,52 @@ export const TrygdetidGrunnlagListe: React.FC<Props> = ({
         <p>Ingen perioder registert</p>
       )}
 
-      <NyPeriode>
-        <Button size="small">Legg til ny periode</Button>
-      </NyPeriode>
-    </div>
+      <NyEllerOppdatertPeriode>
+        {endreModus.status ? (
+          <TrygdetidGrunnlag
+            setTrygdetid={oppdaterStateOgSettTrygdetid}
+            avbryt={() => setEndreModus({ status: false, trygdetidGrunnlagId: '' })}
+            eksisterendeGrunnlag={trygdetidGrunnlagListe.find((tg) => tg.id == endreModus.trygdetidGrunnlagId)}
+            trygdetidGrunnlagType={trygdetidGrunnlagType}
+            landListe={landListe}
+          />
+        ) : (
+          <Button size="small" onClick={() => setEndreModus({ status: true, trygdetidGrunnlagId: '' })}>
+            Legg til ny periode
+          </Button>
+        )}
+      </NyEllerOppdatertPeriode>
+    </GrunnlagListe>
   )
 }
 
 const PeriodeRow = ({
   trygdetidGrunnlag,
-  slettGrunnlag,
+  behandlingId,
+  setTrygdetid,
+  endrePeriode,
   landListe,
 }: {
   trygdetidGrunnlag: ITrygdetidGrunnlag
-  slettGrunnlag: (grunnlagId: string) => void
+  behandlingId: string
+  setTrygdetid: (trygdetid: ITrygdetid) => void
+  endrePeriode: (trygdetidGrunnlagId: string) => void
   landListe: ILand[]
 }) => {
+  const [slettTrygdetidStatus, slettTrygdetidsgrunnlagRequest] = useApiCall(slettTrygdetidsgrunnlag)
+
+  const slettGrunnlag = (grunnlagId: string) => {
+    slettTrygdetidsgrunnlagRequest(
+      {
+        behandlingsId: behandlingId,
+        trygdetidGrunnlagId: grunnlagId,
+      },
+      (oppdatertTrygdetid) => {
+        setTrygdetid(oppdatertTrygdetid)
+      }
+    )
+  }
+
   const beregnetTrygdetid = trygdetidGrunnlag?.beregnet
     ? `${trygdetidGrunnlag.beregnet.aar} år ${trygdetidGrunnlag.beregnet.maaneder} måneder ${trygdetidGrunnlag.beregnet.dager} dager`
     : '-'
@@ -120,14 +167,23 @@ const PeriodeRow = ({
         />
       </Table.DataCell>
       <Table.DataCell>
-        <RedigerWrapper>Rediger</RedigerWrapper>
+        <RedigerWrapper onClick={() => endrePeriode(trygdetidGrunnlag.id!!)}>Rediger</RedigerWrapper>
       </Table.DataCell>
       <Table.DataCell>
-        <RedigerWrapper onClick={() => slettGrunnlag(trygdetidGrunnlag.id!!)}>Slett</RedigerWrapper>
+        {isPending(slettTrygdetidStatus) ? (
+          <Spinner visible="true" variant={'neutral'} label="Sletter" margin={'1em'} />
+        ) : (
+          <RedigerWrapper onClick={() => slettGrunnlag(trygdetidGrunnlag.id!!)}>Slett</RedigerWrapper>
+        )}
+        {isFailure(slettTrygdetidStatus) && <ApiErrorAlert>En feil har oppstått</ApiErrorAlert>}
       </Table.DataCell>
     </Table.ExpandableRow>
   )
 }
+
+const GrunnlagListe = styled.div`
+  margin-top: 2em;
+`
 
 const Datofelt = styled.div`
   width: 5em;
@@ -144,6 +200,6 @@ const RedigerWrapper = styled.div`
   }
 `
 
-const NyPeriode = styled.div`
+const NyEllerOppdatertPeriode = styled.div`
   margin-top: 1em;
 `

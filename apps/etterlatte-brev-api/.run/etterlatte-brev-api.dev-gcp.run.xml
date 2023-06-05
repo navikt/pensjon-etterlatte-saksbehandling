@@ -14,7 +14,6 @@
       <env name="ETTERLATTE_BEREGNING_URL" value="http://etterlatte-beregning.intern.dev.nav.no" />
       <env name="ETTERLATTE_GRUNNLAG_CLIENT_ID" value="ce96a301-13db-4409-b277-5b27f464d08b" />
       <env name="ETTERLATTE_GRUNNLAG_URL" value="https://etterlatte-grunnlag.intern.dev.nav.no" />
-      <env name="ETTERLATTE_PDFGEN_URL" value="http://host.docker.internal:8081/api/v1/genpdf/brev" />
       <env name="ETTERLATTE_PROXY_OUTBOUND_SCOPE" value="&quot;&quot;" />
       <env name="ETTERLATTE_PROXY_URL" value="http://host.docker.internal:9091" />
       <env name="ETTERLATTE_VEDTAK_CLIENT_ID" value="069b1b2c-0a06-4cc9-8418-f100b8ff71be" />

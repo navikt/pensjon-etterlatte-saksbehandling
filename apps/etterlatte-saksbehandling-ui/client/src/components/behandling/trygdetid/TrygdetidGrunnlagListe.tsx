@@ -39,7 +39,7 @@ export const TrygdetidGrunnlagListe: React.FC<Props> = ({
   const [endreModus, setEndreModus] = useState(initialEndreModusState)
   const trygdetidGrunnlagListe = trygdetid.trygdetidGrunnlag
     .filter((tg) => tg.type == trygdetidGrunnlagType)
-    .sort((a, b) => (a.periodeFra > b.periodeFra ? 1 : -1))
+    .sort((a, b) => (a.periodeFra!! > b.periodeFra!! ? 1 : -1))
   const grunnlagTypeTekst = trygdetidGrunnlagType == ITrygdetidGrunnlagType.FAKTISK ? 'Faktisk' : 'Fremtidig'
 
   const oppdaterStateOgSettTrygdetid = (trygdetid: ITrygdetid) => {
@@ -88,6 +88,7 @@ export const TrygdetidGrunnlagListe: React.FC<Props> = ({
                       setEndreModus({ status: true, trygdetidGrunnlagId: trygdetidGrunnlagId })
                     }}
                     landListe={landListe}
+                    key={periode.id}
                   />
                 )
               })}
@@ -151,7 +152,6 @@ const PeriodeRow = ({
   return (
     <Table.ExpandableRow
       expansionDisabled={!trygdetidGrunnlag.begrunnelse}
-      key={trygdetidGrunnlag.id}
       content={
         <div>
           <Heading size={'small'}>Begrunnelse</Heading>
@@ -160,7 +160,7 @@ const PeriodeRow = ({
       }
     >
       <Table.DataCell>
-        {landListe.find((land) => land.isoLandkode == trygdetidGrunnlag.bosted).beskrivelse.tekst}
+        {landListe.find((land) => land.isoLandkode == trygdetidGrunnlag.bosted)?.beskrivelse?.tekst}
       </Table.DataCell>
       <Table.DataCell>
         <Datofelt>{formaterStringDato(trygdetidGrunnlag.periodeFra!!)}</Datofelt>
@@ -181,7 +181,7 @@ const PeriodeRow = ({
       </Table.DataCell>
       <Table.DataCell>
         {isPending(slettTrygdetidStatus) ? (
-          <Spinner visible="true" variant={'neutral'} label="Sletter" margin={'1em'} />
+          <Spinner visible={true} variant={'neutral'} label="Sletter" margin={'1em'} />
         ) : (
           <RedigerWrapper onClick={() => slettGrunnlag(trygdetidGrunnlag.id!!)}>Slett</RedigerWrapper>
         )}

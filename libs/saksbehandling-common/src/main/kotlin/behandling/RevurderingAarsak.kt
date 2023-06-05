@@ -19,7 +19,7 @@ enum class RevurderingAarsak(
 
     fun kanBrukesIMiljo(): Boolean {
         val env = System.getenv()
-        val naisClusterName = env.get("NAIS_CLUSTER_NAME")
+        val naisClusterName = env["NAIS_CLUSTER_NAME"]
         if (naisClusterName == null) {
             return true
         } else {

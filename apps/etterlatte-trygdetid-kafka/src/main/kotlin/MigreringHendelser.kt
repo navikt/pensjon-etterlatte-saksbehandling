@@ -83,6 +83,7 @@ internal class MigreringHendelser(rapidsConnection: RapidsConnection, private va
             tidspunkt = Tidspunkt.now().toString(),
             ident = Vedtaksloesning.PESYS.name
         ),
-        beregnet = null
+        beregnet = null,
+        begrunnelse = trygdetidsgrunnlag.begrunnelse
     )
 }

@@ -62,7 +62,8 @@ internal class MigreringHendelserTest {
             trygdetidsgrunnlag = Trygdetidsgrunnlag(
                 "Norge",
                 LocalDate.now().minusYears(40),
-                LocalDate.now()
+                LocalDate.now(),
+                "derfor"
             )
         )
         every { behandlingService.opprettBeregningsgrunnlag(any(), any()) } returns mockk()

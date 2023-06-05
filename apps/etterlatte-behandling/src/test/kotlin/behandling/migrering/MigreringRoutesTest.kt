@@ -65,7 +65,8 @@ class MigreringRoutesTest : BehandlingIntegrationTest() {
                 trygdetidsgrunnlag = Trygdetidsgrunnlag(
                     "Norge",
                     LocalDate.now().minusYears(40),
-                    LocalDate.now()
+                    LocalDate.now(),
+                    "derfor"
                 )
             )
 

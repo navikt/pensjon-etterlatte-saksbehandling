@@ -67,7 +67,8 @@ class MigreringIntegrationTest {
                 Trygdetidsgrunnlag(
                     "Pesys",
                     LocalDate.now().minusYears(40),
-                    LocalDate.now()
+                    LocalDate.now(),
+                    "fordi"
                 )
             )
             repository.lagrePesyssak(sakInn)

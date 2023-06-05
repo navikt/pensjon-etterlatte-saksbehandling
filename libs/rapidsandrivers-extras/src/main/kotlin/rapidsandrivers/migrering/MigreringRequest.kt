@@ -19,4 +19,4 @@ data class MigreringRequest(
 data class PesysId(val id: String)
 
 data class Enhet(val nr: String)
-data class Trygdetidsgrunnlag(val bosted: String, val fom: LocalDate, val tom: LocalDate)
+data class Trygdetidsgrunnlag(val bosted: String, val fom: LocalDate, val tom: LocalDate, val begrunnelse: String?)

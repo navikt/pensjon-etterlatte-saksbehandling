@@ -12,6 +12,12 @@ export const lagreTrygdetidgrunnlag = async (args: {
 }): Promise<ApiResponse<ITrygdetid>> =>
   apiClient.post(`/trygdetid/${args.behandlingsId}/grunnlag`, { ...args.trygdetidgrunnlag })
 
+export const slettTrygdetidsgrunnlag = async (args: {
+  behandlingsId: string
+  trygdetidGrunnlagId: string
+}): Promise<ApiResponse<ITrygdetid>> =>
+  apiClient.delete<ITrygdetid>(`/trygdetid/${args.behandlingsId}/grunnlag/${args.trygdetidGrunnlagId}`)
+
 export const hentAlleLand = async (): Promise<ApiResponse<ILand[]>> =>
   apiClient.get<ILand[]>('/trygdetid/kodeverk/land')
 

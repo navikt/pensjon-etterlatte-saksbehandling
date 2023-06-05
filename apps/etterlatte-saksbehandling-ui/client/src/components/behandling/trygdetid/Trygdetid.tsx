@@ -17,6 +17,7 @@ import styled from 'styled-components'
 import { BodyShort } from '@navikt/ds-react'
 import { useParams } from 'react-router-dom'
 import { Grunnlagopplysninger } from '~components/behandling/trygdetid/Grunnlagopplysninger'
+import { TrygdetidGrunnlagListe } from '~components/behandling/trygdetid/TrygdetidGrunnlagListe'
 
 export const Trygdetid = () => {
   const { behandlingId } = useParams()
@@ -73,6 +74,23 @@ export const Trygdetid = () => {
       {trygdetid && landListe && (
         <>
           <Grunnlagopplysninger opplysninger={trygdetid.opplysninger} />
+
+          <br />
+          <TrygdetidGrunnlagListe
+            trygdetid={trygdetid}
+            setTrygdetid={setTrygdetid}
+            landListe={landListe}
+            trygdetidGrunnlagType={ITrygdetidGrunnlagType.FAKTISK}
+          />
+          <br />
+          <TrygdetidGrunnlagListe
+            trygdetid={trygdetid}
+            setTrygdetid={setTrygdetid}
+            landListe={landListe}
+            trygdetidGrunnlagType={ITrygdetidGrunnlagType.FREMTIDIG}
+          />
+          <br />
+          <br />
           <TrygdetidGrunnlag
             trygdetid={trygdetid}
             setTrygdetid={setTrygdetid}
@@ -102,5 +120,5 @@ export const Trygdetid = () => {
 }
 const TrygdetidWrapper = styled.div`
   padding: 0 4em;
-  max-width: 52em;
+  max-width: 69em;
 `

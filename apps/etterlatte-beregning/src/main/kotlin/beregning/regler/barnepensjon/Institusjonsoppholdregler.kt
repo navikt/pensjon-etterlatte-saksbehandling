@@ -22,5 +22,5 @@ val institusjonsoppholdRegel: Regel<BarnepensjonGrunnlag, Prosent> =
         gjelderFra = BP_1967_DATO,
         beskrivelse = "Finner søkers institusjonsopphold",
         finnFaktum = BarnepensjonGrunnlag::institusjonsopphold,
-        finnFelt = InstitusjonsoppholdBeregningsgrunnlag::redusertProsent
+        finnFelt = InstitusjonsoppholdBeregningsgrunnlag::prosentEtterReduksjon
     )

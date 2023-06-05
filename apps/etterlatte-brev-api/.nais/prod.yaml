@@ -67,8 +67,6 @@ spec:
       value: https://data.brreg.no
     - name: NORG2_URL
       value: https://norg2.prod-fss-pub.nais.io/norg2/api/v1
-    - name: ETTERLATTE_PDFGEN_URL
-      value: http://ey-pdfgen/api/v1/genpdf/brev
     - name: SAF_BASE_URL
       value: https://saf.prod-fss-pub.nais.io
     - name: SAF_SCOPE
@@ -112,7 +110,6 @@ spec:
   accessPolicy:
     outbound:
       rules:
-        - application: ey-pdfgen
         - application: etterlatte-pdl-proxy
         - application: etterlatte-vedtaksvurdering
         - application: etterlatte-grunnlag

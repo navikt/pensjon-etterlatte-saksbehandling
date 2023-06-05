@@ -8,19 +8,6 @@ services:
     environment:
       - POSTGRES_HOST_AUTH_METHOD=trust
 
-  pdfgen:
-    container_name: ey-pdfgen
-    image: 'ghcr.io/navikt/pdfgen:1.5.0'
-    ports:
-      - '8081:8080'
-    environment:
-      - DISABLE_PDF_GET=false
-    volumes:
-      - '${PDFGEN_HOME:?PDFGEN_HOME is not set!}/templates:/app/templates'
-      - '${PDFGEN_HOME:?PDFGEN_HOME is not set!}/fonts:/app/fonts'
-      - '${PDFGEN_HOME:?PDFGEN_HOME is not set!}/data:/app/data'
-      - '${PDFGEN_HOME:?PDFGEN_HOME is not set!}/resources:/app/resources'
-
   kafka:
     image: 'bitnami/kafka:latest'
     restart: on-failure

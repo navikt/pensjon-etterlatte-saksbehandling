@@ -8,21 +8,10 @@ Ktor og Rapid app for å håndtere generering av brev, brevmaler og sende videre
 ### Krav for å kjøre lokalt
 - **Kafka** må kjøres lokalt. Docker er anbefalt.
 - **Postgres**: Kjør f. eks opp PostgreSQL med Docker eller bruk [Postgres.app](https://postgresapp.com/)
-- **ey-pdfgen**: Repo [pensjon-etterlatte-felles](https://github.com/navikt/pensjon-etterlatte-felles) må klones. Deretter kan pdfgen kjøres via Docker.  
 
 ### Hvordan kjøre brev-api
 
 Det enkleste er å kjøre opp frontend og docker compose som starter alt man trenger for at APIet skal fungere.  
-
-Kommandoen under må kjøres _før_ docker compose og trenger kun kjøres én gang.
-
-OBS: Hvis du bruker bash i stedet for zsh må du bytte ut `~/.zshrc` med `~/.bashrc`  
-
-```shell
-echo "export PDFGEN_HOME=$(find ~/ -type d -name ey-pdfgen -print -quit 2>/dev/null)" >> ~/.zshrc \
-  && source ~/.zshrc
-```
-
 
 1. Kjør docker compose
     ```shell

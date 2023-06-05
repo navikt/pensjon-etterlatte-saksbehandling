@@ -55,7 +55,7 @@ export type InstitusjonsoppholdGrunnlag = PeriodisertBeregningsgrunnlag<Institus
 
 export interface InstitusjonsoppholdIBeregning {
   reduksjon: string
-  egenReduksjon?: number | undefined
+  egenReduksjon?: string | undefined
   begrunnelse?: string | undefined
 }
 

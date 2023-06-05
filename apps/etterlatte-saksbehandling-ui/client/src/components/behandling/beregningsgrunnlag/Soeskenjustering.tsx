@@ -143,10 +143,8 @@ const Soeskenjustering = (props: SoeskenjusteringProps) => {
       {visFeil && feil.length > 0 && behandles ? <FeilIPerioder feil={feil} /> : null}
       <form
         id="formsoeskenjustering"
-        name="formsoeskenjustering"
         onSubmit={(e) => {
           e.preventDefault()
-          e.stopPropagation()
         }}
       >
         {isSuccess(soeskenjusteringGrunnlag) || soeskenjusteringErDefinertIRedux ? (
@@ -174,7 +172,14 @@ const Soeskenjustering = (props: SoeskenjusteringProps) => {
                 Legg til periode
               </NyPeriodeButton>
             ) : null}
-            <Button onClick={handleSubmit(ferdigstillForm)}>Lagre søskenjustering</Button>
+            <Button
+              type="submit"
+              onClick={(e) => {
+                handleSubmit(ferdigstillForm)(e)
+              }}
+            >
+              Lagre søskenjustering
+            </Button>
             {visOkLagret && <SuccessColored fontSize={20} />}
           </>
         ) : null}

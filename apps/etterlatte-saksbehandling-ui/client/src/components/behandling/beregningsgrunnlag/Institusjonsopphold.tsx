@@ -27,8 +27,7 @@ const Institusjonsopphold = (props: InstitusjonsoppholdProps) => {
       institusjonsOppholdForm: behandling.beregningsGrunnlag?.institusjonsopphold,
     },
   })
-  const { isValid } = formState //har også alle errors per felt
-
+  const { isValid, errors } = formState
   const { fields, append, remove } = useFieldArray({
     name: 'institusjonsOppholdForm',
     control,
@@ -74,15 +73,9 @@ const Institusjonsopphold = (props: InstitusjonsoppholdProps) => {
           Beregningsperiode institusjonsopphold
         </Heading>
       </>
-      <form
-        id="forminstitusjonsopphold"
-        onSubmit={(e) => {
-          e.preventDefault()
-          e.stopPropagation()
-        }}
-      >
-        <>
-          {fields.map((item, index) => (
+      <form id="forminstitusjonsopphold">
+        {fields.map((item, index) => {
+          return (
             <InstitusjonsoppholdPeriode
               key={item.id}
               item={item}
@@ -92,12 +85,13 @@ const Institusjonsopphold = (props: InstitusjonsoppholdProps) => {
               remove={remove}
               watch={watch}
               setVisFeil={setVisFeil}
+              errors={errors.institusjonsOppholdForm?.[index]}
             />
-          ))}
-        </>
+          )
+        })}
       </form>
       <Button
-        icon={<PlusCircleIcon title="a11y-title" />}
+        icon={<PlusCircleIcon title="legg til" />}
         iconPosition="left"
         variant="tertiary"
         onClick={() => {
@@ -114,7 +108,14 @@ const Institusjonsopphold = (props: InstitusjonsoppholdProps) => {
         Legg til beregningsperiode
       </Button>
       {fields.length > 0 && (
-        <Button onClick={handleSubmit(ferdigstilleForm, () => {})}>Lagre institusjonsopphold</Button>
+        <Button
+          type="submit"
+          onClick={(e) => {
+            handleSubmit(ferdigstilleForm)(e)
+          }}
+        >
+          Lagre institusjonsopphold
+        </Button>
       )}
       {visOkLagret && <SuccessColored fontSize={20} />}
       {feil && <ApiErrorAlert>Det er feil i skjemaet</ApiErrorAlert>}
@@ -130,5 +131,5 @@ const InstitusjonsoppholdsWrapper = styled.div`
 `
 
 const validerInstitusjonsopphold = (institusjonsopphold: InstitusjonsoppholdGrunnlag): boolean => {
-  return !institusjonsopphold.some((e) => e.tom === undefined)
+  return !institusjonsopphold.some((e) => e.fom === undefined)
 }

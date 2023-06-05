@@ -21,8 +21,8 @@ import Soeskenjustering, { Soeskengrunnlag } from '~components/behandling/beregn
 import { mapListeTilDto } from '~components/behandling/beregningsgrunnlag/PeriodisertBeregningsgrunnlag'
 import { hentFunksjonsbrytere } from '~shared/api/feature'
 import { useEffect, useState } from 'react'
-import Institusjonsopphold from '~components/behandling/beregningsgrunnlag/Institusjonsopphold'
 import { InstitusjonsoppholdGrunnlag } from '~shared/types/Beregning'
+import Institusjonsopphold from '~components/behandling/beregningsgrunnlag/Institusjonsopphold'
 
 const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer }) => {
   const { behandling } = props

@@ -39,7 +39,7 @@ const InstitusjonsoppholdPeriode = (props: InstitusjonsoppholdPerioder) => {
   watch(`institusjonsOppholdForm.${index}.data.reduksjon`)
   return (
     <>
-      <div key={item.id}>
+      <div key={item.id} id={`institusjonsopphold.${index}`}>
         <InstitusjonsperioderWrapper>
           <Controller
             name={`institusjonsOppholdForm.${index}.fom`}

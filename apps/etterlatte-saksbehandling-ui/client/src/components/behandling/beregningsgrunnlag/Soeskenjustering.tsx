@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react'
 import { IBehandlingReducer, oppdaterBeregingsGrunnlag } from '~store/reducers/BehandlingReducer'
 import { Soesken } from '~components/behandling/soeknadsoversikt/familieforhold/personer/Soesken'
 import { Control, Controller, useFieldArray, useForm, UseFormWatch } from 'react-hook-form'
-import { BodyShort, Button, Heading, Label, Radio, RadioGroup } from '@navikt/ds-react'
+import { BodyShort, Button, ErrorSummary, Heading, Label, Radio, RadioGroup } from '@navikt/ds-react'
 import styled from 'styled-components'
 import { IPdlPerson } from '~shared/types/Person'
 import { addMonths, format } from 'date-fns'
@@ -25,7 +25,6 @@ import {
 import { useAppDispatch } from '~store/Store'
 import { hentBehandlesFraStatus } from '~components/behandling/felles/utils'
 import { SuccessColored } from '@navikt/ds-icons'
-import { FeilIPeriodeGrunnlagAlle, FeilIPerioder } from '~components/behandling/beregningsgrunnlag/PerioderFelles'
 
 type SoeskenKanskjeMedIBeregning = {
   foedselsnummer: string
@@ -140,9 +139,7 @@ const Soeskenjustering = (props: SoeskenjusteringProps) => {
         <Spinner visible={isPending(soeskenjusteringGrunnlag)} label={'Henter beregningsgrunnlag for søsken'} />
         {isFailure(soeskenjusteringGrunnlag) && <ApiErrorAlert>Søskenjustering kan ikke hentes</ApiErrorAlert>}
       </FamilieforholdWrapper>
-      {visFeil && feil.length > 0 && behandles ? (
-        <FeilIPerioder feil={feil} tekster={teksterFeilIPeriode} hreftag="soeskenjustering" />
-      ) : null}
+      {visFeil && feil.length > 0 && behandles ? <FeilIPerioder feil={feil} /> : null}
       <form
         id="formsoeskenjustering"
         onSubmit={(e) => {
@@ -362,11 +359,39 @@ const FeilForPeriode = (props: { feil: FeilIPeriodeGrunnlagAlle[] }) => {
   )
 }
 
+const FeilIPerioder = (props: { feil: [number, FeilIPeriodeGrunnlagAlle][] }) => {
+  return (
+    <FeilIPerioderOppsummering heading="Du må fikse feil i periodiseringen før du kan beregne">
+      {props.feil.map(([index, feil]) => (
+        <ErrorSummary.Item key={`${index}${feil}`} href={`#soeskenjustering̋.${index}`}>
+          {teksterFeilIPeriode[feil]}
+        </ErrorSummary.Item>
+      ))}
+    </FeilIPerioderOppsummering>
+  )
+}
+
+const FeilIPerioderOppsummering = styled(ErrorSummary)`
+  margin: 2em auto;
+  width: 30em;
+`
+
 const FeilContainer = styled.span`
   margin-top: 0.5em;
   word-wrap: break-word;
   display: block;
 `
+
+export const FEIL_I_PERIODE = [
+  'TOM_FOER_FOM',
+  'PERIODE_OVERLAPPER_MED_NESTE',
+  'HULL_ETTER_PERIODE',
+  'INGEN_PERIODER',
+  'DEKKER_IKKE_START_AV_INTERVALL',
+  'DEKKER_IKKE_SLUTT_AV_INTERVALL',
+] as const
+export type FeilIPeriode = (typeof FEIL_I_PERIODE)[number]
+export type FeilIPeriodeGrunnlagAlle = FeilIPeriode | 'IKKE_ALLE_VALGT'
 
 const teksterFeilIPeriode: Record<FeilIPeriodeGrunnlagAlle, string> = {
   INGEN_PERIODER: 'Minst en søskenjusteringsperiode må finnes',

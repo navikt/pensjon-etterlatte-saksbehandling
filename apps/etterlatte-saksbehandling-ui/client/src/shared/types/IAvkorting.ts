@@ -5,6 +5,7 @@ export interface IAvkorting {
 }
 
 export interface IAvkortingGrunnlag {
+  id?: string
   fom?: string
   tom?: string
   aarsinntekt?: number

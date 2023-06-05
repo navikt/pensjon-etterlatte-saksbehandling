@@ -66,6 +66,7 @@ fun Avkorting.toDto() = AvkortingDto(
 )
 
 fun AvkortingGrunnlag.toDto() = AvkortingGrunnlagDto(
+    id = id,
     fom = periode.fom,
     tom = periode.tom,
     aarsinntekt = aarsinntekt,
@@ -82,6 +83,7 @@ fun AvkortetYtelse.toDto() = AvkortetYtelseDto(
 )
 
 fun AvkortingGrunnlagDto.fromDto(bruker: Bruker) = AvkortingGrunnlag(
+    id = id,
     periode = Periode(fom = fom, tom = tom),
     aarsinntekt = aarsinntekt,
     fratrekkInnUt = fratrekkInnUt,

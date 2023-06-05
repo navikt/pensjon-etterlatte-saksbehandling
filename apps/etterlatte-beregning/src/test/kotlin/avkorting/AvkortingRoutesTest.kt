@@ -77,22 +77,25 @@ class AvkortingRoutesTest {
     @Test
     fun `skal motta og returnere avkorting`() {
         val behandlingsId = UUID.randomUUID()
+        val avkortingsgrunnlagId = UUID.randomUUID()
         val dato = YearMonth.now()
         val tidspunkt = Tidspunkt.now()
         val avkortingsgrunnlag = avkortinggrunnlag(
+            id = avkortingsgrunnlagId,
             periode = Periode(fom = dato, tom = dato),
             kilde = Grunnlagsopplysning.Saksbehandler("Saksbehandler01", tidspunkt)
         )
         val avkorting = Avkorting(
             behandlingId = behandlingsId,
-            avkortingGrunnlag = listOf(avkortingsgrunnlag),
-            avkortingsperioder = listOf(avkortingsperiode()),
-            avkortetYtelse = listOf(avkortetYtelse(periode = Periode(fom = dato, tom = dato)))
+            avkortingGrunnlag = mutableListOf(avkortingsgrunnlag),
+            avkortingsperioder = mutableListOf(avkortingsperiode()),
+            avkortetYtelse = mutableListOf(avkortetYtelse(periode = Periode(fom = dato, tom = dato)))
         )
         val dto = AvkortingDto(
             behandlingId = behandlingsId,
             avkortingGrunnlag = listOf(
                 AvkortingGrunnlagDto(
+                    id = avkortingsgrunnlagId,
                     fom = dato,
                     tom = dato,
                     aarsinntekt = 100000,

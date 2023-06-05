@@ -35,38 +35,44 @@ class AvkortingService(
         bruker: Bruker,
         avkortingGrunnlag: AvkortingGrunnlag
     ): Avkorting = tilstandssjekk(behandlingId, bruker) {
-        logger.info("Beregne avkorting og avkortet ytelse for behandlingId=$behandlingId")
+        logger.info("Lagre og beregne avkorting og avkortet ytelse for behandlingId=$behandlingId")
+        val virkningstidspunkt = behandlingKlient.hentBehandling(behandlingId, bruker).virkningstidspunkt?.dato
+            ?: throw Exception("Mangler virkningstidspunkt for behandling $behandlingId")
 
-        val avkortingsperioder = inntektAvkortingService.beregnInntektsavkorting(avkortingGrunnlag)
+        val avkorting = avkortingRepository.hentAvkorting(behandlingId) ?: Avkorting.nyAvkorting(behandlingId)
+        val avkortingMedNyttGrunnlag = avkorting.leggTilEllerOppdaterGrunnlag(avkortingGrunnlag)
 
+        val avkortingsperioder = inntektAvkortingService.beregnInntektsavkorting(
+            virkningstidspunkt,
+            avkortingMedNyttGrunnlag.avkortingGrunnlag
+        )
         val beregning = beregningService.hentBeregningNonnull(behandlingId)
         val beregnetAvkortetYtelse = inntektAvkortingService.beregnAvkortetYtelse(
+            virkningstidspunkt,
             beregning.beregningsperioder,
             avkortingsperioder
         )
 
-        val avkorting = avkortingRepository.lagreEllerOppdaterAvkorting(
-            behandlingId,
-            // TODO EY-2256 ikke sende listof her men endre repo til å appende istedenfor å slette/lagre
-            listOf(avkortingGrunnlag),
-            avkortingsperioder,
-            beregnetAvkortetYtelse
-        )
+        val oppdatertAvkorting =
+            avkortingMedNyttGrunnlag.oppdaterAvkortingMedNyeBeregninger(avkortingsperioder, beregnetAvkortetYtelse)
+
+        val lagretAvkorting = avkortingRepository.lagreAvkorting(oppdatertAvkorting)
         behandlingKlient.avkort(behandlingId, bruker, true)
-        avkorting
+        lagretAvkorting
     }
 
     /*
     * Kopierer avkortingsgrunnlag men beregner avkorting på nytt
     */
     suspend fun kopierAvkorting(behandlingId: UUID, forrigeBehandlingId: UUID, bruker: Bruker): Avkorting {
-        logger.info("Kopierer trygdetid fra forrige behandling med behandlingId=$forrigeBehandlingId")
+        logger.info("Kopierer avkorting fra forrige behandling med behandlingId=$forrigeBehandlingId")
         val forrigeAvkorting = avkortingRepository.hentAvkorting(forrigeBehandlingId) ?: throw Exception(
             "Fant ikke avkorting for $forrigeBehandlingId"
         )
-        // TODO Antar her at det bare finnes et grunnlag tidligere enn så lenge da vi kun har
-        //  førstegangsbehandling frem til EY-2256
-        return lagreAvkorting(behandlingId, bruker, forrigeAvkorting.avkortingGrunnlag[0])
+        forrigeAvkorting.avkortingGrunnlag.forEach {
+            lagreAvkorting(behandlingId, bruker, it.copy(id = UUID.randomUUID()))
+        }
+        return avkortingRepository.hentAvkortingUtenNullable(behandlingId)
     }
 
     private suspend fun tilstandssjekk(behandlingId: UUID, bruker: Bruker, block: suspend () -> Avkorting): Avkorting {

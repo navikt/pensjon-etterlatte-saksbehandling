@@ -1,7 +1,7 @@
 package no.nav.etterlatte.avkorting
 
-import no.nav.etterlatte.avkorting.regler.InntektAvkortingGrunnlag
 import no.nav.etterlatte.avkorting.regler.PeriodisertAvkortetYtelseGrunnlag
+import no.nav.etterlatte.avkorting.regler.PeriodisertInntektAvkortingGrunnlag
 import no.nav.etterlatte.avkorting.regler.avkorteYtelse
 import no.nav.etterlatte.avkorting.regler.kroneavrundetInntektAvkorting
 import no.nav.etterlatte.beregning.grunnlag.GrunnlagMedPeriode
@@ -13,7 +13,6 @@ import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.regler.FaktumNode
-import no.nav.etterlatte.libs.regler.KonstantGrunnlag
 import no.nav.etterlatte.libs.regler.PeriodisertGrunnlag
 import no.nav.etterlatte.libs.regler.RegelPeriode
 import no.nav.etterlatte.libs.regler.RegelkjoeringResultat
@@ -26,15 +25,32 @@ object InntektAvkortingService {
 
     private val logger = LoggerFactory.getLogger(InntektAvkortingService::class.java)
 
-    fun beregnInntektsavkorting(avkortingGrunnlag: AvkortingGrunnlag): List<Avkortingsperiode> {
+    fun beregnInntektsavkorting(
+        virkningstidspunkt: YearMonth,
+        avkortingGrunnlag: List<AvkortingGrunnlag>
+    ): List<Avkortingsperiode> {
         logger.info("Beregner inntektsavkorting")
-        val grunnlag = InntektAvkortingGrunnlag(
-            inntekt = FaktumNode(verdi = avkortingGrunnlag.aarsinntekt, avkortingGrunnlag.kilde, "Forventet årsinntekt")
+
+        val grunnlag = PeriodisertInntektAvkortingGrunnlag(
+            inntektsperioder = PeriodisertBeregningGrunnlag.lagGrunnlagMedDefaultUtenforPerioder(
+                avkortingGrunnlag.map {
+                    GrunnlagMedPeriode(
+                        data = it,
+                        fom = it.periode.fom.atDay(1),
+                        tom = it.periode.tom?.atEndOfMonth()
+                    )
+                }.mapVerdier {
+                    FaktumNode(
+                        verdi = it.aarsinntekt,
+                        kilde = it.kilde,
+                        beskrivelse = "Forventet årsinntekt"
+                    )
+                }
+            ) { _, _, _ -> throw IllegalArgumentException("Noe gikk galt ved uthenting av periodiserte beregninger") }
         )
-        val resultat = kroneavrundetInntektAvkorting.eksekver(
-            KonstantGrunnlag(grunnlag),
-            RegelPeriode(avkortingGrunnlag.periode.fom.atDay(1))
-        )
+
+        val resultat =
+            kroneavrundetInntektAvkorting.eksekver(grunnlag, RegelPeriode(virkningstidspunkt.atDay(1)))
         return when (resultat) {
             is RegelkjoeringResultat.Suksess -> {
                 val tidspunkt = Tidspunkt.now()
@@ -62,6 +78,7 @@ object InntektAvkortingService {
     }
 
     fun beregnAvkortetYtelse(
+        virkningstidspunkt: YearMonth,
         beregningsperioder: List<Beregningsperiode>,
         avkortingsperioder: List<Avkortingsperiode>
     ): List<AvkortetYtelse> {
@@ -69,7 +86,7 @@ object InntektAvkortingService {
             beregningsperioder = periodiserteBeregninger(beregningsperioder),
             avkortingsperioder = periodiserteAvkortinger(avkortingsperioder)
         )
-        val resultat = avkorteYtelse.eksekver(regelgrunnlag, RegelPeriode(beregningsperioder[0].datoFOM.atDay(1)))
+        val resultat = avkorteYtelse.eksekver(regelgrunnlag, RegelPeriode(virkningstidspunkt.atDay(1)))
         when (resultat) {
             is RegelkjoeringResultat.Suksess -> {
                 val tidspunkt = Tidspunkt.now()

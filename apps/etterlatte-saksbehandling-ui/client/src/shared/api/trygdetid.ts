@@ -53,6 +53,7 @@ export interface ITrygdetidGrunnlag {
     tidspunkt: string
     ident: string
   }
+  begrunnelse?: string
 }
 
 export interface IBeregnetTrygdetidGrunnlag {

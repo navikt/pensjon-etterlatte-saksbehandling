@@ -37,7 +37,9 @@ export const TrygdetidGrunnlagListe: React.FC<Props> = ({
   landListe,
 }) => {
   const [endreModus, setEndreModus] = useState(initialEndreModusState)
-  const trygdetidGrunnlagListe = trygdetid.trygdetidGrunnlag.filter((tg) => tg.type == trygdetidGrunnlagType)
+  const trygdetidGrunnlagListe = trygdetid.trygdetidGrunnlag
+    .filter((tg) => tg.type == trygdetidGrunnlagType)
+    .sort((a, b) => (a.periodeFra > b.periodeFra ? 1 : -1))
   const grunnlagTypeTekst = trygdetidGrunnlagType == ITrygdetidGrunnlagType.FAKTISK ? 'Faktisk' : 'Fremtidig'
 
   const oppdaterStateOgSettTrygdetid = (trygdetid: ITrygdetid) => {
@@ -83,7 +85,6 @@ export const TrygdetidGrunnlagListe: React.FC<Props> = ({
                     behandlingId={trygdetid.behandlingId}
                     setTrygdetid={setTrygdetid}
                     endrePeriode={(trygdetidGrunnlagId) => {
-                      console.log('Endrer periode: ' + trygdetidGrunnlagId)
                       setEndreModus({ status: true, trygdetidGrunnlagId: trygdetidGrunnlagId })
                     }}
                     landListe={landListe}
@@ -148,7 +149,16 @@ const PeriodeRow = ({
     : '-'
 
   return (
-    <Table.ExpandableRow key={trygdetidGrunnlag.id} content="Her kommer beskrivelse.">
+    <Table.ExpandableRow
+      expansionDisabled={!trygdetidGrunnlag.begrunnelse}
+      key={trygdetidGrunnlag.id}
+      content={
+        <div>
+          <Heading size={'small'}>Begrunnelse</Heading>
+          {trygdetidGrunnlag.begrunnelse}
+        </div>
+      }
+    >
       <Table.DataCell>
         {landListe.find((land) => land.isoLandkode == trygdetidGrunnlag.bosted).beskrivelse.tekst}
       </Table.DataCell>

@@ -36,10 +36,7 @@ const Institusjonsopphold = (props: InstitusjonsoppholdProps) => {
   const feilOverlappendePerioder: [number, FeilIPeriode][] = [
     ...feilIKomplettePerioderOverIntervallInstitusjonsopphold(heleSkjemaet),
   ]
-  console.log('feilOverlappendePerioder: ', feilOverlappendePerioder)
-  console.log('visfeil: ', visFeil)
   const ferdigstilleForm = (data: { institusjonsOppholdForm: InstitusjonsoppholdGrunnlag }) => {
-    console.log('ferdigstilleForm')
     if (validerInstitusjonsopphold(data.institusjonsOppholdForm) && isValid && feilOverlappendePerioder?.length === 0) {
       onSubmit(data.institusjonsOppholdForm)
       setVisFeil(false)
@@ -48,7 +45,6 @@ const Institusjonsopphold = (props: InstitusjonsoppholdProps) => {
         setVisOkLagret(false)
       }, 1000)
     } else {
-      console.log('skal sette visfeil')
       setVisFeil(true)
       setVisOkLagret(false)
     }
@@ -136,7 +132,6 @@ const InstitusjonsoppholdsWrapper = styled.div`
   max-width: 60em;
 `
 const FeilIPerioder = (props: { feil: [number, FeilIPeriode][] }) => {
-  console.log('feiliperioder')
   return (
     <FeilIPerioderOppsummering heading="Du må fikse feil i periodiseringen før du kan beregne">
       {props.feil.map(([index, feil]) => (

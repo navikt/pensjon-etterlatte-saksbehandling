@@ -1,4 +1,4 @@
-import { Button, Heading, Label, Select } from '@navikt/ds-react'
+import { Button, Heading, Label, Select, Textarea } from '@navikt/ds-react'
 import { FormKnapper, FormWrapper, Innhold } from '~components/behandling/trygdetid/styled'
 import { isFailure, isPending, useApiCall } from '~shared/hooks/useApiCall'
 import {
@@ -44,6 +44,8 @@ export const TrygdetidGrunnlag: React.FC<Props> = ({ trygdetid, setTrygdetid, tr
   const [trygdetidgrunnlagStatus, requestLagreTrygdetidgrunnlag] = useApiCall(lagreTrygdetidgrunnlag)
   const fraDatoPickerRef: any = useRef(null)
   const tilDatoPickerRef: any = useRef(null)
+
+  const kanBegrunnes = trygdetidGrunnlagType === 'FAKTISK'
 
   const toggleDatepicker = (ref: any) => {
     return () => {
@@ -200,6 +202,21 @@ export const TrygdetidGrunnlag: React.FC<Props> = ({ trygdetid, setTrygdetid, tr
               )}
             </FormWrapper>
 
+            <FormWrapper>
+              {kanBegrunnes && (
+                <Begrunnelse
+                  value={trygdetidgrunnlag.begrunnelse}
+                  key={`begrunnelse-${trygdetidGrunnlagType}`}
+                  onChange={(e) =>
+                    setTrygdetidgrunnlag({
+                      ...trygdetidgrunnlag,
+                      begrunnelse: e.target.value,
+                    })
+                  }
+                />
+              )}
+            </FormWrapper>
+
             <FormKnapper>
               <Button size="small" loading={isPending(trygdetidgrunnlagStatus)} type="submit">
                 Lagre
@@ -244,7 +261,7 @@ const TrygdetidBeregnet = styled.div`
 
 const Datovelger = styled.div`
   display: flex;
-  align-items: flex-end;
+  align-items: flex-start;
 
   input {
     border-right: none;
@@ -269,4 +286,15 @@ const KalenderIkon = styled.div`
 const DatoSection = styled.section`
   display: grid;
   gap: 0.5em;
+`
+export const Begrunnelse = styled(Textarea).attrs({
+  label: 'Begrunnelse',
+  hideLabel: false,
+  placeholder: 'Valgfritt',
+  minRows: 3,
+  autoComplete: 'off',
+})`
+  margin-bottom: 10px;
+  margin-top: 10px;
+  width: 250px;
 `

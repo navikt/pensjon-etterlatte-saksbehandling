@@ -1,7 +1,7 @@
 package beregning.regler.barnepensjon
 
 import no.nav.etterlatte.beregning.grunnlag.InstitusjonsoppholdBeregningsgrunnlag
-import no.nav.etterlatte.beregning.grunnlag.Reduksjon
+import no.nav.etterlatte.beregning.grunnlag.Prosent
 import no.nav.etterlatte.beregning.regler.barnepensjon.BP_1967_DATO
 import no.nav.etterlatte.beregning.regler.barnepensjon.BarnepensjonGrunnlag
 import no.nav.etterlatte.libs.regler.Regel
@@ -17,10 +17,10 @@ val institusjonsoppholdFaktor = definerKonstant<BarnepensjonGrunnlag, Beregnings
     verdi = Beregningstall(0.1)
 )
 
-val institusjonsoppholdRegel: Regel<BarnepensjonGrunnlag, Reduksjon> =
+val institusjonsoppholdRegel: Regel<BarnepensjonGrunnlag, Prosent> =
     finnFaktumIGrunnlag(
         gjelderFra = BP_1967_DATO,
         beskrivelse = "Finner søkers institusjonsopphold",
         finnFaktum = BarnepensjonGrunnlag::institusjonsopphold,
-        finnFelt = InstitusjonsoppholdBeregningsgrunnlag::reduksjon
+        finnFelt = InstitusjonsoppholdBeregningsgrunnlag::redusertProsent
     )

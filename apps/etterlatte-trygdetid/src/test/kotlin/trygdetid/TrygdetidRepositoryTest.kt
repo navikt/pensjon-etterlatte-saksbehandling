@@ -191,6 +191,36 @@ internal class TrygdetidRepositoryTest {
     }
 
     @Test
+    fun `skal oppdatere et trygdetidsgrunnlag med begrunnelse`() {
+        val behandling = behandlingMock()
+        val trygdetidGrunnlag = trygdetidGrunnlag(
+            beregnetTrygdetidGrunnlag = beregnetTrygdetidGrunnlag(),
+            begrunnelse = "Test"
+        )
+        val opprettetTrygdetid = trygdetid(behandling.id, behandling.sak, trygdetidGrunnlag = listOf(trygdetidGrunnlag))
+
+        val trygdetid = repository.opprettTrygdetid(opprettetTrygdetid)
+
+        val lagretTrygdetid = repository.hentTrygdetid(behandling.id)
+
+        lagretTrygdetid shouldNotBe null
+        lagretTrygdetid?.trygdetidGrunnlag?.firstOrNull()?.begrunnelse shouldBe "Test"
+
+        val endretTrygdetidGrunnlag = trygdetidGrunnlag.copy(
+            bosted = LandNormalisert.POLEN.isoCode,
+            begrunnelse = "Test2"
+        )
+
+        val trygdetidMedOppdatertGrunnlag =
+            repository.oppdaterTrygdetid(trygdetid.leggTilEllerOppdaterTrygdetidGrunnlag(endretTrygdetidGrunnlag))
+
+        trygdetidMedOppdatertGrunnlag shouldNotBe null
+        with(trygdetidMedOppdatertGrunnlag.trygdetidGrunnlag.first()) {
+            this shouldBe endretTrygdetidGrunnlag
+        }
+    }
+
+    @Test
     fun `skal oppdatere beregnet trygdetid`() {
         val beregnetTrygdetid = beregnetTrygdetid(total = 12, tidspunkt = Tidspunkt.now())
         val behandling = behandlingMock()

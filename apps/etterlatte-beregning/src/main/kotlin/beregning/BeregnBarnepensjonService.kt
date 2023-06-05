@@ -245,17 +245,15 @@ class BeregnBarnepensjonService(
                 )
             }
         },
-        institusjonsopphold = PeriodisertBeregningGrunnlag.lagKomplettPeriodisertGrunnlag(
+        institusjonsopphold = PeriodisertBeregningGrunnlag.lagGrunnlagMedDefaultUtenforPerioder(
             beregningsGrunnlag.institusjonsoppholdBeregningsgrunnlag?.mapVerdier { institusjonsopphold ->
                 FaktumNode(
                     verdi = institusjonsopphold,
                     kilde = beregningsGrunnlag.kilde,
                     beskrivelse = "Institusjonsopphold"
                 )
-            } ?: listOf(),
-            fom,
-            tom
-        )
+            } ?: listOf()
+        ) { _, _, _ -> FaktumNode(null, beregningsGrunnlag.kilde, "Institusjonsopphold") }
     )
 
     private fun TrygdetidDto?.hvisKanBrukes() = this.takeIf {

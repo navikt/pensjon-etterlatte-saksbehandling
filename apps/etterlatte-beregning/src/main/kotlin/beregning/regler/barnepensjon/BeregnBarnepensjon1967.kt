@@ -19,7 +19,7 @@ data class PeriodisertBarnepensjonGrunnlag(
     val soeskenKull: PeriodisertGrunnlag<FaktumNode<List<Folkeregisteridentifikator>>>,
     val avdoedForelder: PeriodisertGrunnlag<FaktumNode<AvdoedForelder>>,
     val institusjonsopphold:
-    PeriodisertGrunnlag<FaktumNode<InstitusjonsoppholdBeregningsgrunnlag>>
+    PeriodisertGrunnlag<FaktumNode<InstitusjonsoppholdBeregningsgrunnlag?>>
 ) : PeriodisertGrunnlag<BarnepensjonGrunnlag> {
     override fun finnAlleKnekkpunkter(): Set<LocalDate> {
         return soeskenKull.finnAlleKnekkpunkter() + avdoedForelder.finnAlleKnekkpunkter()
@@ -38,7 +38,7 @@ data class AvdoedForelder(val trygdetid: Beregningstall)
 data class BarnepensjonGrunnlag(
     val soeskenKull: FaktumNode<List<Folkeregisteridentifikator>>,
     val avdoedForelder: FaktumNode<AvdoedForelder>,
-    val institusjonsopphold: FaktumNode<InstitusjonsoppholdBeregningsgrunnlag>
+    val institusjonsopphold: FaktumNode<InstitusjonsoppholdBeregningsgrunnlag?>
 )
 
 val beregnBarnepensjon1967Regel = RegelMeta(
@@ -48,7 +48,7 @@ val beregnBarnepensjon1967Regel = RegelMeta(
 ) benytter barnepensjonSatsRegel og trygdetidsFaktor og institusjonsoppholdRegel med { sats,
         trygdetidsfaktor,
         institusjonsopphold ->
-    sats.multiply(trygdetidsfaktor).multiply(institusjonsopphold.verdi)
+    sats.multiply(trygdetidsfaktor).multiply(Beregningstall(institusjonsopphold.verdi).divide(100))
 }
 
 val kroneavrundetBarnepensjonRegel = RegelMeta(

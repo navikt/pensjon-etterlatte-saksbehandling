@@ -79,6 +79,9 @@ object PeriodisertBeregningGrunnlag {
         return grunnlag
     }
 
+    fun <T> lagGrunnlagMedMuligeHullMellomPerioder(perioder: List<GrunnlagMedPeriode<T>>): PeriodisertGrunnlag<T> =
+        Grunnlag(opplysninger = perioder)
+
     fun <T> lagGrunnlagMedDefaultUtenforPerioder(
         perioder: List<GrunnlagMedPeriode<T>>,
         defaultGrunnlag: (datoIPeriode: LocalDate, foersteFom: LocalDate, senesteTom: LocalDate?) -> T

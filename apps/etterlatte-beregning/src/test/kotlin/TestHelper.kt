@@ -41,7 +41,8 @@ fun barnepensjonGrunnlag(
     trygdeTid: Beregningstall = Beregningstall(MAKS_TRYGDETID)
 ) = BarnepensjonGrunnlag(
     soeskenKull = FaktumNode(soeskenKull.map { Folkeregisteridentifikator.of(it) }, kilde, "søskenkull"),
-    avdoedForelder = FaktumNode(AvdoedForelder(trygdetid = trygdeTid), kilde, "trygdetid")
+    avdoedForelder = FaktumNode(AvdoedForelder(trygdetid = trygdeTid), kilde, "trygdetid"),
+    institusjonsopphold = FaktumNode(null, kilde, "institusjonsopphold")
 )
 
 fun Double.toBeregningstall(

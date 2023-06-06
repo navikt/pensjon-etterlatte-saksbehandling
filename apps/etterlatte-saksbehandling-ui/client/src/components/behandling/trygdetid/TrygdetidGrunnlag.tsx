@@ -45,8 +45,6 @@ export const TrygdetidGrunnlag: React.FC<Props> = ({ trygdetid, setTrygdetid, tr
   const fraDatoPickerRef: any = useRef(null)
   const tilDatoPickerRef: any = useRef(null)
 
-  const kanBegrunnes = trygdetidGrunnlagType === 'FAKTISK'
-
   const toggleDatepicker = (ref: any) => {
     return () => {
       ref.current.setOpen(true)
@@ -203,18 +201,16 @@ export const TrygdetidGrunnlag: React.FC<Props> = ({ trygdetid, setTrygdetid, tr
             </FormWrapper>
 
             <FormWrapper>
-              {kanBegrunnes && (
-                <Begrunnelse
-                  value={trygdetidgrunnlag.begrunnelse}
-                  key={`begrunnelse-${trygdetidGrunnlagType}`}
-                  onChange={(e) =>
-                    setTrygdetidgrunnlag({
-                      ...trygdetidgrunnlag,
-                      begrunnelse: e.target.value,
-                    })
-                  }
-                />
-              )}
+              <Begrunnelse
+                value={trygdetidgrunnlag.begrunnelse}
+                key={`begrunnelse-${trygdetidGrunnlagType}`}
+                onChange={(e) =>
+                  setTrygdetidgrunnlag({
+                    ...trygdetidgrunnlag,
+                    begrunnelse: e.target.value,
+                  })
+                }
+              />
             </FormWrapper>
 
             <FormKnapper>

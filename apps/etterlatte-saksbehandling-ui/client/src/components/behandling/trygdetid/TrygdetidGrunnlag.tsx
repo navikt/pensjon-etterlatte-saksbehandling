@@ -1,4 +1,4 @@
-import { Button, Heading, Label, Select, Textarea } from '@navikt/ds-react'
+import { Button, Label, Select, Textarea } from '@navikt/ds-react'
 import { FormKnapper, FormWrapper, Innhold } from '~components/behandling/trygdetid/styled'
 import { isFailure, isPending, useApiCall } from '~shared/hooks/useApiCall'
 import {
@@ -7,6 +7,7 @@ import {
   ITrygdetidGrunnlag,
   ITrygdetidGrunnlagType,
   lagreTrygdetidgrunnlag,
+  OppdaterTrygdetidGrunnlag,
 } from '~shared/api/trygdetid'
 import React, { FormEvent, useRef, useState } from 'react'
 import { ApiErrorAlert } from '~ErrorBoundary'
@@ -14,31 +15,28 @@ import styled from 'styled-components'
 import DatePicker from 'react-datepicker'
 import { Calender } from '@navikt/ds-icons'
 import { useParams } from 'react-router-dom'
-import { Info } from '~components/behandling/soeknadsoversikt/Info'
-import { formaterStringDato } from '~utils/formattering'
 
 type Props = {
-  trygdetid: ITrygdetid
+  eksisterendeGrunnlag: ITrygdetidGrunnlag | undefined
   setTrygdetid: (trygdetid: ITrygdetid) => void
+  avbryt: () => void
   trygdetidGrunnlagType: ITrygdetidGrunnlagType
   landListe: ILand[]
 }
 
 const initialState = (type: ITrygdetidGrunnlagType) => {
-  return {
-    type: type,
-    bosted: '',
-    kilde: {
-      tidspunkt: '',
-      ident: '',
-    },
-  }
+  return { type: type, bosted: '' }
 }
 
-export const TrygdetidGrunnlag: React.FC<Props> = ({ trygdetid, setTrygdetid, trygdetidGrunnlagType, landListe }) => {
+export const TrygdetidGrunnlag: React.FC<Props> = ({
+  eksisterendeGrunnlag,
+  setTrygdetid,
+  avbryt,
+  trygdetidGrunnlagType,
+  landListe,
+}) => {
   const { behandlingId } = useParams()
-  const eksisterendeGrunnlag = trygdetid.trygdetidGrunnlag.find((grunnlag) => grunnlag.type === trygdetidGrunnlagType)
-  const [trygdetidgrunnlag, setTrygdetidgrunnlag] = useState<ITrygdetidGrunnlag>(
+  const [trygdetidgrunnlag, setTrygdetidgrunnlag] = useState<OppdaterTrygdetidGrunnlag>(
     eksisterendeGrunnlag ? eksisterendeGrunnlag : initialState(trygdetidGrunnlagType)
   )
   const [trygdetidgrunnlagStatus, requestLagreTrygdetidgrunnlag] = useApiCall(lagreTrygdetidgrunnlag)
@@ -54,9 +52,6 @@ export const TrygdetidGrunnlag: React.FC<Props> = ({ trygdetid, setTrygdetid, tr
     }
   }
 
-  const beregnetTrygdetid = eksisterendeGrunnlag?.beregnet
-    ? `${eksisterendeGrunnlag.beregnet.aar} år ${eksisterendeGrunnlag.beregnet.maaneder} måneder ${eksisterendeGrunnlag.beregnet.dager} dager`
-    : '-'
   const onSubmit = (e: FormEvent) => {
     e.preventDefault()
     if (!behandlingId) throw new Error('Mangler behandlingsid')
@@ -77,26 +72,6 @@ export const TrygdetidGrunnlag: React.FC<Props> = ({ trygdetid, setTrygdetid, tr
 
   return (
     <TrygdetidGrunnlagWrapper>
-      {
-        {
-          [ITrygdetidGrunnlagType.FAKTISK]: (
-            <>
-              <Heading spacing size="small" level="3">
-                Faktisk trygdetid
-              </Heading>
-              <p>Legg til trygdetid fra avdøde var 16 år frem til hen døde.</p>
-            </>
-          ),
-          [ITrygdetidGrunnlagType.FREMTIDIG]: (
-            <>
-              <Heading spacing size="small" level="3">
-                Fremtidig trygdetid
-              </Heading>
-              <p>Legg til trygdetid fra dødsdato til og med kalenderåret avdøde hadde blitt 66 år.</p>
-            </>
-          ),
-        }[trygdetidGrunnlagType]
-      }
       <Innhold>
         <TrygdetidForm onSubmit={onSubmit}>
           <Rows>
@@ -181,25 +156,6 @@ export const TrygdetidGrunnlag: React.FC<Props> = ({ trygdetid, setTrygdetid, tr
                   </KalenderIkon>
                 </Datovelger>
               </DatoSection>
-              <TrygdetidBeregnet>
-                <Label>
-                  {trygdetidGrunnlagType === ITrygdetidGrunnlagType.FREMTIDIG
-                    ? 'Fremtidig trygdetid'
-                    : 'Faktisk trygdetid'}
-                </Label>
-                <div>{beregnetTrygdetid}</div>
-              </TrygdetidBeregnet>
-              {eksisterendeGrunnlag && (
-                <Kilde>
-                  <Label>Kilde</Label>
-
-                  <Info
-                    tekst={eksisterendeGrunnlag.kilde.ident}
-                    label={''}
-                    undertekst={`saksbehandler: ${formaterStringDato(eksisterendeGrunnlag.kilde.tidspunkt)}`}
-                  />
-                </Kilde>
-              )}
             </FormWrapper>
 
             <FormWrapper>
@@ -220,6 +176,15 @@ export const TrygdetidGrunnlag: React.FC<Props> = ({ trygdetid, setTrygdetid, tr
             <FormKnapper>
               <Button size="small" loading={isPending(trygdetidgrunnlagStatus)} type="submit">
                 Lagre
+              </Button>
+              <Button
+                size="small"
+                onClick={(event) => {
+                  event.preventDefault()
+                  avbryt()
+                }}
+              >
+                Avbryt
               </Button>
             </FormKnapper>
           </Rows>
@@ -245,18 +210,6 @@ const Rows = styled.div`
 
 const Land = styled.div`
   width: 250px;
-`
-
-const Kilde = styled.div`
-  width: 250px;
-  display: grid;
-  gap: 0.5em;
-`
-
-const TrygdetidBeregnet = styled.div`
-  width: 220px;
-  display: grid;
-  gap: 0.5em;
 `
 
 const Datovelger = styled.div`

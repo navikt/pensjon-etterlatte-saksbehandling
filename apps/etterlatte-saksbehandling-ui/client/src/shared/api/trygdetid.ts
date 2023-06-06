@@ -8,9 +8,15 @@ export const opprettTrygdetid = async (behandlingsId: string): Promise<ApiRespon
 
 export const lagreTrygdetidgrunnlag = async (args: {
   behandlingsId: string
-  trygdetidgrunnlag: ITrygdetidGrunnlag
+  trygdetidgrunnlag: OppdaterTrygdetidGrunnlag
 }): Promise<ApiResponse<ITrygdetid>> =>
   apiClient.post(`/trygdetid/${args.behandlingsId}/grunnlag`, { ...args.trygdetidgrunnlag })
+
+export const slettTrygdetidsgrunnlag = async (args: {
+  behandlingsId: string
+  trygdetidGrunnlagId: string
+}): Promise<ApiResponse<ITrygdetid>> =>
+  apiClient.delete<ITrygdetid>(`/trygdetid/${args.behandlingsId}/grunnlag/${args.trygdetidGrunnlagId}`)
 
 export const hentAlleLand = async (): Promise<ApiResponse<ILand[]>> =>
   apiClient.get<ILand[]>('/trygdetid/kodeverk/land')
@@ -43,16 +49,25 @@ export interface IBeregnetTrygdetid {
 }
 
 export interface ITrygdetidGrunnlag {
-  id?: string
+  id: string
   type: ITrygdetidGrunnlagType
   bosted: string
-  periodeFra?: string
-  periodeTil?: string
+  periodeFra: string
+  periodeTil: string
   beregnet?: IBeregnetTrygdetidGrunnlag
   kilde: {
     tidspunkt: string
     ident: string
   }
+  begrunnelse?: string
+}
+
+export interface OppdaterTrygdetidGrunnlag {
+  id?: string
+  type: ITrygdetidGrunnlagType
+  bosted: string
+  periodeFra?: string
+  periodeTil?: string
   begrunnelse?: string
 }
 

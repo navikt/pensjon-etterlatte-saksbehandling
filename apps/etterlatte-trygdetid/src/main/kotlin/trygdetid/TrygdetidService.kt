@@ -3,6 +3,8 @@ package no.nav.etterlatte.trygdetid
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
+import no.nav.etterlatte.libs.common.behandling.Prosesstype
+import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsdata
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning.RegelKilde
 import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
@@ -25,63 +27,87 @@ class TrygdetidService(
 
     fun hentTrygdetid(behandlingsId: UUID): Trygdetid? = trygdetidRepository.hentTrygdetid(behandlingsId)
 
-    suspend fun opprettTrygdetid(behandlingId: UUID, bruker: Bruker): Trygdetid =
-        tilstandssjekk(behandlingId, bruker) {
-            trygdetidRepository.hentTrygdetid(behandlingId)?.let {
-                throw IllegalArgumentException("Trygdetid finnes allerede for behandling $behandlingId")
-            }
-            val behandling = behandlingKlient.hentBehandling(behandlingId, bruker)
-            when (behandling.behandlingType) {
-                BehandlingType.FØRSTEGANGSBEHANDLING -> {
-                    logger.info("Oppretter trygdetid for behandling $behandlingId")
-                    val avdoed = grunnlagKlient.hentGrunnlag(behandling.sak, bruker).hentAvdoed()
-                    val trygdetid = Trygdetid(
-                        sakId = behandling.sak,
-                        behandlingId = behandling.id,
-                        opplysninger = hentOpplysninger(avdoed)
-                    )
-                    trygdetidRepository.opprettTrygdetid(trygdetid)
-                }
-                BehandlingType.REVURDERING -> {
-                    logger.info("Kopierer trygdetid for behandling $behandlingId fra forrige behandling")
-                    val forrigeBehandling = behandlingKlient.hentSisteIverksatteBehandling(behandling.sak, bruker)
-                    kopierSisteTrygdetidberegning(behandling, forrigeBehandling.id)
-                }
-                else -> throw RuntimeException(
-                    "Støtter ikke trygdetid for behandlingType=${behandling.behandlingType}"
-                )
-            }
+    suspend fun opprettTrygdetid(behandlingId: UUID, bruker: Bruker): Trygdetid = tilstandssjekk(behandlingId, bruker) {
+        trygdetidRepository.hentTrygdetid(behandlingId)?.let {
+            throw IllegalArgumentException("Trygdetid finnes allerede for behandling $behandlingId")
         }
+        val behandling = behandlingKlient.hentBehandling(behandlingId, bruker)
+        when (behandling.behandlingType) {
+            BehandlingType.FØRSTEGANGSBEHANDLING -> {
+                logger.info("Oppretter trygdetid for behandling $behandlingId")
+                opprettTrygdetid(behandling, bruker)
+            }
+
+            BehandlingType.REVURDERING -> {
+                logger.info("Oppretter trygdetid for behandling $behandlingId for revurdering")
+                val forrigeBehandling = behandlingKlient.hentSisteIverksatteBehandling(behandling.sak, bruker)
+
+                when (val forrigeTrygdetid = hentTrygdetid(forrigeBehandling.id)) {
+                    null -> opprettTrygdetidForRevurdering(behandling, bruker)
+                    else -> kopierSisteTrygdetidberegning(behandling, forrigeTrygdetid)
+                }
+            }
+
+            else -> throw RuntimeException(
+                "Støtter ikke trygdetid for behandlingType=${behandling.behandlingType}"
+            )
+        }
+    }
+
+    private suspend fun opprettTrygdetidForRevurdering(behandling: DetaljertBehandling, bruker: Bruker) =
+        if (behandling.revurderingsaarsak == RevurderingAarsak.REGULERING &&
+            behandling.prosesstype == Prosesstype.AUTOMATISK
+        ) {
+            logger.info("Forrige trygdetid for ${behandling.id} finnes ikke - må reguleres manuelt")
+            throw RuntimeException(
+                "Forrige trygdetid for ${behandling.id} finnes ikke - må reguleres manuelt"
+            )
+        } else {
+            logger.info("Oppretter trygdetid for behandling ${behandling.id} revurdering")
+            opprettTrygdetid(behandling, bruker)
+        }
+
+    private suspend fun opprettTrygdetid(
+        behandling: DetaljertBehandling,
+        bruker: Bruker
+    ): Trygdetid {
+        val avdoed = grunnlagKlient.hentGrunnlag(behandling.sak, bruker).hentAvdoed()
+        val trygdetid = Trygdetid(
+            sakId = behandling.sak,
+            behandlingId = behandling.id,
+            opplysninger = hentOpplysninger(avdoed)
+        )
+        return trygdetidRepository.opprettTrygdetid(trygdetid)
+    }
 
     suspend fun lagreTrygdetidGrunnlag(
         behandlingId: UUID,
         bruker: Bruker,
         trygdetidGrunnlag: TrygdetidGrunnlag
-    ): Trygdetid =
-        tilstandssjekk(behandlingId, bruker) {
-            val trygdetidGrunnlagBeregnet: TrygdetidGrunnlag = trygdetidGrunnlag.oppdaterBeregnetTrygdetid(
-                beregnetTrygdetid = beregnTrygdetidService.beregnTrygdetidGrunnlag(trygdetidGrunnlag)
-            )
+    ): Trygdetid = tilstandssjekk(behandlingId, bruker) {
+        val trygdetidGrunnlagBeregnet: TrygdetidGrunnlag = trygdetidGrunnlag.oppdaterBeregnetTrygdetid(
+            beregnetTrygdetid = beregnTrygdetidService.beregnTrygdetidGrunnlag(trygdetidGrunnlag)
+        )
 
-            val gjeldendeTrygdetid: Trygdetid = trygdetidRepository.hentTrygdetid(behandlingId)
-                ?: throw Exception("Fant ikke gjeldende trygdetid for behandlingId=$behandlingId")
+        val gjeldendeTrygdetid: Trygdetid = trygdetidRepository.hentTrygdetid(behandlingId)
+            ?: throw Exception("Fant ikke gjeldende trygdetid for behandlingId=$behandlingId")
 
-            val trygdetidMedOppdatertTrygdetidGrunnlag: Trygdetid =
-                gjeldendeTrygdetid.leggTilEllerOppdaterTrygdetidGrunnlag(trygdetidGrunnlagBeregnet)
+        val trygdetidMedOppdatertTrygdetidGrunnlag: Trygdetid =
+            gjeldendeTrygdetid.leggTilEllerOppdaterTrygdetidGrunnlag(trygdetidGrunnlagBeregnet)
 
-            val nyBeregnetTrygdetid: BeregnetTrygdetid? = beregnTrygdetidService.beregnTrygdetid(
-                trygdetidGrunnlag = trygdetidMedOppdatertTrygdetidGrunnlag.trygdetidGrunnlag
-            )
+        val nyBeregnetTrygdetid: BeregnetTrygdetid? = beregnTrygdetidService.beregnTrygdetid(
+            trygdetidGrunnlag = trygdetidMedOppdatertTrygdetidGrunnlag.trygdetidGrunnlag
+        )
 
-            when (nyBeregnetTrygdetid) {
-                null -> trygdetidMedOppdatertTrygdetidGrunnlag.nullstillBeregnetTrygdetid()
-                else -> trygdetidMedOppdatertTrygdetidGrunnlag.oppdaterBeregnetTrygdetid(nyBeregnetTrygdetid)
-            }.also { nyTrygdetid ->
-                trygdetidRepository.oppdaterTrygdetid(nyTrygdetid).also {
-                    behandlingKlient.settBehandlingStatusVilkaarsvurdert(behandlingId, bruker)
-                }
+        when (nyBeregnetTrygdetid) {
+            null -> trygdetidMedOppdatertTrygdetidGrunnlag.nullstillBeregnetTrygdetid()
+            else -> trygdetidMedOppdatertTrygdetidGrunnlag.oppdaterBeregnetTrygdetid(nyBeregnetTrygdetid)
+        }.also { nyTrygdetid ->
+            trygdetidRepository.oppdaterTrygdetid(nyTrygdetid).also {
+                behandlingKlient.settBehandlingStatusVilkaarsvurdert(behandlingId, bruker)
             }
         }
+    }
 
     suspend fun slettTrygdetidGrunnlag(behandlingId: UUID, trygdetidGrunnlagId: UUID, bruker: Bruker): Trygdetid =
         tilstandssjekk(behandlingId, bruker) {
@@ -112,9 +138,19 @@ class TrygdetidService(
         forrigeBehandlingId: UUID
     ): Trygdetid {
         logger.info("Kopierer trygdetid for behandling ${behandling.id} fra behandling $forrigeBehandlingId")
+
         val forrigeTrygdetid = requireNotNull(hentTrygdetid(forrigeBehandlingId)) {
             "Fant ingen trygdetid for behandlingId=$forrigeBehandlingId"
         }
+
+        return kopierSisteTrygdetidberegning(behandling, forrigeTrygdetid)
+    }
+
+    private fun kopierSisteTrygdetidberegning(
+        behandling: DetaljertBehandling,
+        forrigeTrygdetid: Trygdetid
+    ): Trygdetid {
+        logger.info("Kopierer trygdetid for behandling ${behandling.id} fra trygdetid ${forrigeTrygdetid.id}")
 
         val kopiertTrygdetid = Trygdetid(
             sakId = behandling.sak,

@@ -86,7 +86,7 @@ internal fun Route.grunnlagsendringshendelseRoute(
             }
         }
     }
-    route("api/grunnlagsendringshendelse/{$SAKID_CALL_PARAMETER}/institusjon") {
+    route("/api/grunnlagsendringshendelse/{$SAKID_CALL_PARAMETER}/institusjon") {
         get {
             call.respond(
                 GrunnlagsendringsListe(

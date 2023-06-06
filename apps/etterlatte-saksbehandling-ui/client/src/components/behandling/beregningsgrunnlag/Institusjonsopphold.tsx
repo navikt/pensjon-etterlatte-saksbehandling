@@ -2,14 +2,14 @@ import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
 import React, { useState } from 'react'
 import { LovtekstMedLenke } from '~components/behandling/soeknadsoversikt/soeknadoversikt/LovtekstMedLenke'
 import styled from 'styled-components'
-import { Button, Heading } from '@navikt/ds-react'
+import { Button, ErrorSummary, Heading } from '@navikt/ds-react'
 import { PlusCircleIcon } from '@navikt/aksel-icons'
 import { InstitusjonsoppholdGrunnlag } from '~shared/types/Beregning'
 import { useFieldArray, useForm } from 'react-hook-form'
 import InstitusjonsoppholdPeriode from '~components/behandling/beregningsgrunnlag/InstitusjonsoppholdPeriode'
 import Insthendelser from '~components/behandling/beregningsgrunnlag/Insthendelser'
-import { ApiErrorAlert } from '~ErrorBoundary'
 import { SuccessColored } from '@navikt/ds-icons'
+import { feilIKomplettePerioderOverIntervallInstitusjonsopphold } from '~components/behandling/beregningsgrunnlag/PeriodisertBeregningsgrunnlag'
 
 type InstitusjonsoppholdProps = {
   behandling: IBehandlingReducer
@@ -18,7 +18,7 @@ type InstitusjonsoppholdProps = {
 
 const Institusjonsopphold = (props: InstitusjonsoppholdProps) => {
   const { behandling, onSubmit } = props
-  const [feil, setVisFeil] = useState(false)
+  const [visFeil, setVisFeil] = useState(false)
   const [visOkLagret, setVisOkLagret] = useState(false)
   const { control, register, watch, handleSubmit, formState } = useForm<{
     institusjonsOppholdForm: InstitusjonsoppholdGrunnlag
@@ -27,15 +27,17 @@ const Institusjonsopphold = (props: InstitusjonsoppholdProps) => {
       institusjonsOppholdForm: behandling.beregningsGrunnlag?.institusjonsopphold,
     },
   })
-  const { isValid } = formState //har også alle errors per felt
-
+  const { isValid, errors } = formState
   const { fields, append, remove } = useFieldArray({
     name: 'institusjonsOppholdForm',
     control,
   })
-
+  const heleSkjemaet = watch('institusjonsOppholdForm')
+  const feilOverlappendePerioder: [number, FeilIPeriode][] = [
+    ...feilIKomplettePerioderOverIntervallInstitusjonsopphold(heleSkjemaet),
+  ]
   const ferdigstilleForm = (data: { institusjonsOppholdForm: InstitusjonsoppholdGrunnlag }) => {
-    if (validerInstitusjonsopphold(data.institusjonsOppholdForm) && isValid) {
+    if (validerInstitusjonsopphold(data.institusjonsOppholdForm) && isValid && feilOverlappendePerioder?.length === 0) {
       onSubmit(data.institusjonsOppholdForm)
       setVisFeil(false)
       setVisOkLagret(true)
@@ -74,15 +76,9 @@ const Institusjonsopphold = (props: InstitusjonsoppholdProps) => {
           Beregningsperiode institusjonsopphold
         </Heading>
       </>
-      <form
-        id="forminstitusjonsopphold"
-        onSubmit={(e) => {
-          e.preventDefault()
-          e.stopPropagation()
-        }}
-      >
-        <>
-          {fields.map((item, index) => (
+      <form id="forminstitusjonsopphold">
+        {fields.map((item, index) => {
+          return (
             <InstitusjonsoppholdPeriode
               key={item.id}
               item={item}
@@ -92,12 +88,14 @@ const Institusjonsopphold = (props: InstitusjonsoppholdProps) => {
               remove={remove}
               watch={watch}
               setVisFeil={setVisFeil}
+              errors={errors.institusjonsOppholdForm?.[index]}
             />
-          ))}
-        </>
+          )
+        })}
       </form>
       <Button
-        icon={<PlusCircleIcon title="a11y-title" />}
+        type="button"
+        icon={<PlusCircleIcon title="legg til" />}
         iconPosition="left"
         variant="tertiary"
         onClick={() => {
@@ -114,10 +112,16 @@ const Institusjonsopphold = (props: InstitusjonsoppholdProps) => {
         Legg til beregningsperiode
       </Button>
       {fields.length > 0 && (
-        <Button onClick={handleSubmit(ferdigstilleForm, () => {})}>Lagre institusjonsopphold</Button>
+        <Button type="submit" onClick={handleSubmit(ferdigstilleForm)}>
+          Lagre institusjonsopphold
+        </Button>
+      )}
+      {visFeil && feilOverlappendePerioder?.length > 0 && (
+        <>
+          <FeilIPerioder feil={feilOverlappendePerioder} />
+        </>
       )}
       {visOkLagret && <SuccessColored fontSize={20} />}
-      {feil && <ApiErrorAlert>Det er feil i skjemaet</ApiErrorAlert>}
     </InstitusjonsoppholdsWrapper>
   )
 }
@@ -128,7 +132,29 @@ const InstitusjonsoppholdsWrapper = styled.div`
   padding: 0em 2em;
   max-width: 60em;
 `
+const FeilIPerioder = (props: { feil: [number, FeilIPeriode][] }) => {
+  return (
+    <FeilIPerioderOppsummering heading="Du må fikse feil i periodiseringen før du kan beregne">
+      {props.feil.map(([index, feil]) => (
+        <ErrorSummary.Item key={`${index}${feil}`} href={`#institusjonsopphold.${index}`}>
+          {`${teksterFeilIPeriode[feil]}, opphold nummer ${index}`}
+        </ErrorSummary.Item>
+      ))}
+    </FeilIPerioderOppsummering>
+  )
+}
+
+const FeilIPerioderOppsummering = styled(ErrorSummary)`
+  margin: 2em auto;
+  width: 30em;
+`
 
 const validerInstitusjonsopphold = (institusjonsopphold: InstitusjonsoppholdGrunnlag): boolean => {
-  return !institusjonsopphold.some((e) => e.tom === undefined)
+  return !institusjonsopphold.some((e) => e.fom === undefined)
 }
+
+export type FeilIPeriode = 'PERIODE_OVERLAPPER_MED_NESTE'[number]
+
+const teksterFeilIPeriode: Record<FeilIPeriode, string> = {
+  PERIODE_OVERLAPPER_MED_NESTE: 'Perioden overlapper med neste periode',
+} as const

@@ -1,4 +1,13 @@
-import { Control, Controller, FieldArrayWithId, UseFormRegister, UseFormWatch } from 'react-hook-form'
+import {
+  Control,
+  Controller,
+  FieldArrayWithId,
+  FieldError,
+  FieldErrorsImpl,
+  Merge,
+  UseFormRegister,
+  UseFormWatch,
+} from 'react-hook-form'
 import MaanedVelger from '~components/behandling/beregningsgrunnlag/MaanedVelger'
 import { Button, Select, TextField } from '@navikt/ds-react'
 import { InstitusjonsoppholdGrunnlag, Reduksjon } from '~shared/types/Beregning'
@@ -13,14 +22,24 @@ type InstitusjonsoppholdPerioder = {
   remove: (index: number) => void
   watch: UseFormWatch<{ institusjonsOppholdForm: InstitusjonsoppholdGrunnlag }>
   setVisFeil: (truefalse: boolean) => void
+  errors:
+    | Merge<
+        FieldError,
+        FieldErrorsImpl<{
+          fom: Date
+          tom: Date
+          data: { reduksjon: string; egenReduksjon: number; begrunnelse: string }
+        }>
+      >
+    | undefined
 }
 
 const InstitusjonsoppholdPeriode = (props: InstitusjonsoppholdPerioder) => {
-  const { item, index, control, register, remove, watch, setVisFeil } = props
+  const { item, index, control, register, remove, watch, setVisFeil, errors } = props
   watch(`institusjonsOppholdForm.${index}.data.reduksjon`)
   return (
     <>
-      <div key={item.id}>
+      <div key={item.id} id={`institusjonsopphold.${index}`}>
         <InstitusjonsperioderWrapper>
           <Controller
             name={`institusjonsOppholdForm.${index}.fom`}
@@ -46,9 +65,10 @@ const InstitusjonsoppholdPeriode = (props: InstitusjonsoppholdPerioder) => {
             )}
           />
           <Select
+            error={errors?.data?.reduksjon?.message}
             label="Reduksjon"
             {...register(`institusjonsOppholdForm.${index}.data.reduksjon`, {
-              required: true,
+              required: { value: true, message: 'Feltet er påkrevd' },
               validate: { notDefault: (v) => v !== 'VELG_REDUKSJON' },
             })}
           >
@@ -61,10 +81,16 @@ const InstitusjonsoppholdPeriode = (props: InstitusjonsoppholdPerioder) => {
           </Select>
           {item.data.reduksjon === 'JA_EGEN_PROSENT_AV_G' && (
             <TextField
+              error={errors?.data?.egenReduksjon?.message}
               label="Reduksjonsbeløp"
-              inputMode="numeric"
-              pattern="[0-9]*"
-              {...register(`institusjonsOppholdForm.${index}.data.egenReduksjon`)}
+              type="text"
+              {...register(`institusjonsOppholdForm.${index}.data.egenReduksjon`, {
+                validate: (beloep) => {
+                  if (!beloep?.match(/[0-9]*/)?.[0]) {
+                    return 'Beløp kan kun være heltall'
+                  }
+                },
+              })}
             />
           )}
         </InstitusjonsperioderWrapper>

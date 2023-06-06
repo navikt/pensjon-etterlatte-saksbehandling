@@ -17,12 +17,14 @@ import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import FastTrygdetid from '~components/behandling/beregningsgrunnlag/Trygdetid'
 import { Trygdetid as BeregnetTrygdetid } from '~components/behandling/trygdetid/Trygdetid'
-import Soeskenjustering, { Soeskengrunnlag } from '~components/behandling/beregningsgrunnlag/Soeskenjustering'
 import { mapListeTilDto } from '~components/behandling/beregningsgrunnlag/PeriodisertBeregningsgrunnlag'
 import { hentFunksjonsbrytere } from '~shared/api/feature'
 import { useEffect, useState } from 'react'
-import Institusjonsopphold from '~components/behandling/beregningsgrunnlag/Institusjonsopphold'
 import { InstitusjonsoppholdGrunnlag } from '~shared/types/Beregning'
+import Institusjonsopphold from '~components/behandling/beregningsgrunnlag/Institusjonsopphold'
+import Soeskenjustering, {
+  Soeskengrunnlag,
+} from '~components/behandling/beregningsgrunnlag/soeskenjustering/Soeskenjustering'
 
 const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer }) => {
   const { behandling } = props

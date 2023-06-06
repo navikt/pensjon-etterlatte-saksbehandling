@@ -23,7 +23,6 @@ import no.nav.etterlatte.libs.common.sak.Saker
 import no.nav.etterlatte.libs.common.sakId
 import no.nav.etterlatte.libs.common.withFoedselsnummer
 import no.nav.etterlatte.libs.common.withFoedselsnummerAndGradering
-import no.nav.etterlatte.libs.common.withSakId
 
 internal fun Route.sakRoutes(
     tilgangService: TilgangService,
@@ -106,7 +105,7 @@ internal fun Route.sakRoutes(
 
     route("/api/finnSak/{$SAKID_CALL_PARAMETER}") {
         get {
-            withSakId(tilgangService) { sakId ->
+            withSakIdInternal(tilgangService) { sakId ->
                 val sak = inTransaction {
                     sakService.finnSak(sakId)
                 }

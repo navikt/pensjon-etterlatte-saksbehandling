@@ -3,12 +3,11 @@ package no.nav.etterlatte.sak
 import no.nav.etterlatte.SaksbehandlerMedRoller
 import no.nav.etterlatte.config.AzureGroup
 import no.nav.etterlatte.libs.common.PersonTilgangsSjekk
-import no.nav.etterlatte.libs.common.SakTilgangsSjekk
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.token.Saksbehandler
 
-interface TilgangService : PersonTilgangsSjekk, SakTilgangsSjekk {
+interface TilgangService : PersonTilgangsSjekk {
     fun harTilgangTilBehandling(behandlingId: String, saksbehandlerMedRoller: SaksbehandlerMedRoller): Boolean
     fun oppdaterAdressebeskyttelse(id: Long, adressebeskyttelseGradering: AdressebeskyttelseGradering): Int
     fun harTilgangTilSak(sakId: Long, saksbehandlerMedRoller: SaksbehandlerMedRoller): Boolean
@@ -51,10 +50,6 @@ class TilgangServiceImpl(
     override fun harTilgangTilSak(sakId: Long, saksbehandlerMedRoller: SaksbehandlerMedRoller): Boolean {
         val sak = dao.hentSakMedGraderingOgSkjerming(sakId) ?: return true
         return harTilgangSjekker(sak, saksbehandlerMedRoller)
-    }
-
-    override suspend fun harTilgangTilSak(sakId: Long, bruker: Saksbehandler): Boolean {
-        return this.harTilgangTilSak(sakId, SaksbehandlerMedRoller(bruker))
     }
 
     override fun harTilgangTilBehandling(

@@ -14,6 +14,8 @@ import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
+import no.nav.etterlatte.libs.common.behandling.Prosesstype
+import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
 import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsdato
 import no.nav.etterlatte.libs.common.toJsonNode
@@ -177,6 +179,155 @@ internal class TrygdetidServiceTest {
             )
         }
         verify {
+            behandling.id
+            behandling.sak
+            behandling.behandlingType
+            forrigeBehandling.id
+        }
+    }
+
+    @Test
+    fun `skal opprette trygdetid hvis revurdering og forrige trygdetid mangler og det ikke er regulering`() {
+        val behandlingId = randomUUID()
+        val sakId = 123L
+        val behandling = mockk<DetaljertBehandling>().apply {
+            every { id } returns behandlingId
+            every { sak } returns sakId
+            every { behandlingType } returns BehandlingType.REVURDERING
+            every { revurderingsaarsak } returns RevurderingAarsak.SOESKENJUSTERING
+        }
+        val forrigeBehandlingId = randomUUID()
+        val forrigeBehandling = mockk<DetaljertBehandling>().apply {
+            every { id } returns forrigeBehandlingId
+        }
+        val trygdetid = trygdetid(behandlingId, sakId)
+        val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
+
+        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
+        every { repository.hentTrygdetid(behandlingId) } returns null
+        coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
+        coEvery { behandlingKlient.hentSisteIverksatteBehandling(any(), any()) } returns forrigeBehandling
+        every { repository.hentTrygdetid(forrigeBehandlingId) } returns null
+        every { repository.opprettTrygdetid(any()) } returns trygdetid
+
+        runBlocking {
+            service.opprettTrygdetid(behandlingId, saksbehandler)
+        }
+
+        coVerify(exactly = 1) {
+            behandlingKlient.kanBeregnes(behandlingId, saksbehandler)
+            repository.hentTrygdetid(behandlingId)
+            behandlingKlient.hentBehandling(behandlingId, saksbehandler)
+            behandlingKlient.hentSisteIverksatteBehandling(sakId, saksbehandler)
+            repository.hentTrygdetid(forrigeBehandlingId)
+            grunnlagKlient.hentGrunnlag(any(), any())
+
+            repository.opprettTrygdetid(
+                withArg {
+                    it.trygdetidGrunnlag shouldBe emptyList()
+                }
+            )
+        }
+        verify {
+            behandling.revurderingsaarsak
+            behandling.id
+            behandling.sak
+            behandling.behandlingType
+            forrigeBehandling.id
+        }
+    }
+
+    @Test
+    fun `skal ikke opprette trygdetid hvis revurdering og forrige trygdetid mangler og det er automatisk regulering`() {
+        val behandlingId = randomUUID()
+        val sakId = 123L
+        val behandling = mockk<DetaljertBehandling>().apply {
+            every { id } returns behandlingId
+            every { sak } returns sakId
+            every { behandlingType } returns BehandlingType.REVURDERING
+            every { revurderingsaarsak } returns RevurderingAarsak.REGULERING
+            every { prosesstype } returns Prosesstype.AUTOMATISK
+        }
+        val forrigeBehandlingId = randomUUID()
+        val forrigeBehandling = mockk<DetaljertBehandling>().apply {
+            every { id } returns forrigeBehandlingId
+        }
+        every { repository.hentTrygdetid(behandlingId) } returns null
+        coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
+        coEvery { behandlingKlient.hentSisteIverksatteBehandling(any(), any()) } returns forrigeBehandling
+        every { repository.hentTrygdetid(forrigeBehandlingId) } returns null
+
+        runBlocking {
+            val err = assertThrows<RuntimeException> {
+                service.opprettTrygdetid(behandlingId, saksbehandler)
+            }
+
+            err.message shouldBe "Forrige trygdetid for ${behandling.id} finnes ikke - må reguleres manuelt"
+        }
+
+        coVerify(exactly = 1) {
+            behandlingKlient.kanBeregnes(behandlingId, saksbehandler)
+            repository.hentTrygdetid(behandlingId)
+            behandlingKlient.hentBehandling(behandlingId, saksbehandler)
+            behandlingKlient.hentSisteIverksatteBehandling(sakId, saksbehandler)
+            repository.hentTrygdetid(forrigeBehandlingId)
+        }
+        verify {
+            behandling.revurderingsaarsak
+            behandling.prosesstype
+            behandling.id
+            behandling.sak
+            behandling.behandlingType
+            forrigeBehandling.id
+        }
+    }
+
+    @Test
+    fun `skal opprette trygdetid hvis revurdering og forrige trygdetid mangler og det er manuell regulering`() {
+        val behandlingId = randomUUID()
+        val sakId = 123L
+        val behandling = mockk<DetaljertBehandling>().apply {
+            every { id } returns behandlingId
+            every { sak } returns sakId
+            every { behandlingType } returns BehandlingType.REVURDERING
+            every { revurderingsaarsak } returns RevurderingAarsak.REGULERING
+            every { prosesstype } returns Prosesstype.MANUELL
+        }
+        val forrigeBehandlingId = randomUUID()
+        val forrigeBehandling = mockk<DetaljertBehandling>().apply {
+            every { id } returns forrigeBehandlingId
+        }
+        val trygdetid = trygdetid(behandlingId, sakId)
+        val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
+
+        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
+        every { repository.hentTrygdetid(behandlingId) } returns null
+        coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
+        coEvery { behandlingKlient.hentSisteIverksatteBehandling(any(), any()) } returns forrigeBehandling
+        every { repository.hentTrygdetid(forrigeBehandlingId) } returns null
+        every { repository.opprettTrygdetid(any()) } returns trygdetid
+
+        runBlocking {
+            service.opprettTrygdetid(behandlingId, saksbehandler)
+        }
+
+        coVerify(exactly = 1) {
+            behandlingKlient.kanBeregnes(behandlingId, saksbehandler)
+            repository.hentTrygdetid(behandlingId)
+            behandlingKlient.hentBehandling(behandlingId, saksbehandler)
+            behandlingKlient.hentSisteIverksatteBehandling(sakId, saksbehandler)
+            repository.hentTrygdetid(forrigeBehandlingId)
+            grunnlagKlient.hentGrunnlag(any(), any())
+
+            repository.opprettTrygdetid(
+                withArg {
+                    it.trygdetidGrunnlag shouldBe emptyList()
+                }
+            )
+        }
+        verify {
+            behandling.revurderingsaarsak
+            behandling.prosesstype
             behandling.id
             behandling.sak
             behandling.behandlingType

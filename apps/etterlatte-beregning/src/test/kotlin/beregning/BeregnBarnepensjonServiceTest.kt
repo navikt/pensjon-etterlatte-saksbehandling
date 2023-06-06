@@ -75,7 +75,10 @@ internal class BeregnBarnepensjonServiceTest {
             featureToggleService.isEnabled(BeregnBarnepensjonServiceFeatureToggle.BrukFaktiskTrygdetid, false)
         } returns false
         every {
-            featureToggleService.isEnabled(BeregnBarnepensjonServiceFeatureToggle.BrukInstitusjonsopphold, false)
+            featureToggleService.isEnabled(
+                BeregnBarnepensjonServiceFeatureToggle.BrukInstitusjonsoppholdIBeregning,
+                false
+            )
         } returns false
 
         runBlocking {
@@ -119,7 +122,10 @@ internal class BeregnBarnepensjonServiceTest {
             featureToggleService.isEnabled(BeregnBarnepensjonServiceFeatureToggle.BrukFaktiskTrygdetid, false)
         } returns true
         every {
-            featureToggleService.isEnabled(BeregnBarnepensjonServiceFeatureToggle.BrukInstitusjonsopphold, false)
+            featureToggleService.isEnabled(
+                BeregnBarnepensjonServiceFeatureToggle.BrukInstitusjonsoppholdIBeregning,
+                false
+            )
         } returns false
 
         runBlocking {
@@ -163,7 +169,10 @@ internal class BeregnBarnepensjonServiceTest {
             featureToggleService.isEnabled(BeregnBarnepensjonServiceFeatureToggle.BrukFaktiskTrygdetid, false)
         } returns false
         every {
-            featureToggleService.isEnabled(BeregnBarnepensjonServiceFeatureToggle.BrukInstitusjonsopphold, false)
+            featureToggleService.isEnabled(
+                BeregnBarnepensjonServiceFeatureToggle.BrukInstitusjonsoppholdIBeregning,
+                false
+            )
         } returns false
 
         runBlocking {
@@ -205,7 +214,10 @@ internal class BeregnBarnepensjonServiceTest {
             featureToggleService.isEnabled(BeregnBarnepensjonServiceFeatureToggle.BrukFaktiskTrygdetid, false)
         } returns true
         every {
-            featureToggleService.isEnabled(BeregnBarnepensjonServiceFeatureToggle.BrukInstitusjonsopphold, false)
+            featureToggleService.isEnabled(
+                BeregnBarnepensjonServiceFeatureToggle.BrukInstitusjonsoppholdIBeregning,
+                false
+            )
         } returns false
 
         runBlocking {
@@ -247,7 +259,10 @@ internal class BeregnBarnepensjonServiceTest {
             featureToggleService.isEnabled(BeregnBarnepensjonServiceFeatureToggle.BrukFaktiskTrygdetid, false)
         } returns false
         every {
-            featureToggleService.isEnabled(BeregnBarnepensjonServiceFeatureToggle.BrukInstitusjonsopphold, false)
+            featureToggleService.isEnabled(
+                BeregnBarnepensjonServiceFeatureToggle.BrukInstitusjonsoppholdIBeregning,
+                false
+            )
         } returns false
 
         runBlocking {
@@ -289,7 +304,10 @@ internal class BeregnBarnepensjonServiceTest {
             featureToggleService.isEnabled(BeregnBarnepensjonServiceFeatureToggle.BrukFaktiskTrygdetid, false)
         } returns true
         every {
-            featureToggleService.isEnabled(BeregnBarnepensjonServiceFeatureToggle.BrukInstitusjonsopphold, false)
+            featureToggleService.isEnabled(
+                BeregnBarnepensjonServiceFeatureToggle.BrukInstitusjonsoppholdIBeregning,
+                false
+            )
         } returns false
 
         runBlocking {
@@ -334,7 +352,10 @@ internal class BeregnBarnepensjonServiceTest {
             featureToggleService.isEnabled(BeregnBarnepensjonServiceFeatureToggle.BrukFaktiskTrygdetid, false)
         } returns false
         every {
-            featureToggleService.isEnabled(BeregnBarnepensjonServiceFeatureToggle.BrukInstitusjonsopphold, false)
+            featureToggleService.isEnabled(
+                BeregnBarnepensjonServiceFeatureToggle.BrukInstitusjonsoppholdIBeregning,
+                false
+            )
         } returns false
 
         runBlocking {
@@ -379,7 +400,10 @@ internal class BeregnBarnepensjonServiceTest {
             featureToggleService.isEnabled(BeregnBarnepensjonServiceFeatureToggle.BrukFaktiskTrygdetid, false)
         } returns true
         every {
-            featureToggleService.isEnabled(BeregnBarnepensjonServiceFeatureToggle.BrukInstitusjonsopphold, false)
+            featureToggleService.isEnabled(
+                BeregnBarnepensjonServiceFeatureToggle.BrukInstitusjonsoppholdIBeregning,
+                false
+            )
         } returns false
 
         runBlocking {

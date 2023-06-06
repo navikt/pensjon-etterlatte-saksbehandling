@@ -1,7 +1,7 @@
 package no.nav.etterlatte.beregning
 
 import beregning.regler.finnAnvendtGrunnbeloep
-import no.nav.etterlatte.beregning.BeregnBarnepensjonServiceFeatureToggle.BrukInstitusjonsopphold
+import no.nav.etterlatte.beregning.BeregnBarnepensjonServiceFeatureToggle.BrukInstitusjonsoppholdIBeregning
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlag
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlagService
 import no.nav.etterlatte.beregning.grunnlag.PeriodisertBeregningGrunnlag
@@ -43,7 +43,7 @@ import java.util.*
 
 enum class BeregnBarnepensjonServiceFeatureToggle(private val key: String) : FeatureToggle {
     BrukFaktiskTrygdetid("pensjon-etterlatte.bp-bruk-faktisk-trygdetid"),
-    BrukInstitusjonsopphold("pensjon-etterlatte.bp-bruk-institusjonsopphold");
+    BrukInstitusjonsoppholdIBeregning("pensjon-etterlatte.bp-bruk-institusjonsopphold-i-beregning");
     override fun key() = key
 }
 
@@ -120,7 +120,7 @@ class BeregnBarnepensjonService(
         beregningsgrunnlag: PeriodisertBarnepensjonGrunnlag,
         virkningstidspunkt: YearMonth
     ): Beregning {
-        val resultat = if (featureToggleService.isEnabled(BrukInstitusjonsopphold, false)) {
+        val resultat = if (featureToggleService.isEnabled(BrukInstitusjonsoppholdIBeregning, false)) {
             kroneavrundetBarnepensjonRegelMedInstitusjon.eksekver(
                 grunnlag = beregningsgrunnlag,
                 periode = RegelPeriode(virkningstidspunkt.atDay(1))

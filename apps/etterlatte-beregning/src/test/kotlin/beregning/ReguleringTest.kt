@@ -82,7 +82,10 @@ class ReguleringTest {
             featureToggleService.isEnabled(BeregnBarnepensjonServiceFeatureToggle.BrukFaktiskTrygdetid, false)
         } returns false
         every {
-            featureToggleService.isEnabled(BeregnBarnepensjonServiceFeatureToggle.BrukInstitusjonsopphold, false)
+            featureToggleService.isEnabled(
+                BeregnBarnepensjonServiceFeatureToggle.BrukInstitusjonsoppholdIBeregning,
+                false
+            )
         } returns false
 
         runBlocking {

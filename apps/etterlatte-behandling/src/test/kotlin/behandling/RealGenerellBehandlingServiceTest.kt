@@ -22,6 +22,7 @@ import no.nav.etterlatte.foerstegangsbehandling
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlagsOpplysningMedPersonopplysning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
+import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.behandling.Utenlandstilsnitt
@@ -468,6 +469,56 @@ class RealGenerellBehandlingServiceTest {
         )
 
         assertEquals(UtenlandstilsnittType.BOSATT_UTLAND, slot.captured.type)
+        assertEquals("Test", slot.captured.begrunnelse)
+        assertEquals("ident", slot.captured.kilde.ident)
+    }
+
+    @Test
+    fun `kan oppdatere bodd eller arbeidet i utlandet`() {
+        every {
+            user.enheter()
+        } returns listOf(Enheter.PORSGRUNN.enhetNr)
+
+        val uuid = UUID.randomUUID()
+
+        val slot = slot<BoddEllerArbeidetUtlandet>()
+
+        val behandlingDaoMock = mockk<BehandlingDao> {
+            every { hentBehandling(any()) } returns
+                foerstegangsbehandling(
+                    id = uuid,
+                    sakId = 1,
+                    enhet = Enheter.PORSGRUNN.enhetNr
+                )
+
+            every { lagreBoddEllerArbeidetUtlandet(any(), capture(slot)) } just runs
+
+            every { lagreStatus(any()) } just runs
+        }
+
+        val featureToggleService = mockk<FeatureToggleService>()
+        every { featureToggleService.isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false) } returns true
+
+        val sut = RealGenerellBehandlingService(
+            behandlingDaoMock,
+            mockk(),
+            mockk(),
+            mockk(),
+            mockk(),
+            mockk(),
+            featureToggleService
+        )
+
+        sut.oppdaterBoddEllerArbeidetUtlandet(
+            uuid,
+            BoddEllerArbeidetUtlandet(
+                true,
+                Grunnlagsopplysning.Saksbehandler.create("ident"),
+                "Test"
+            )
+        )
+
+        assertEquals(true, slot.captured.boddEllerArbeidetUtlandet)
         assertEquals("Test", slot.captured.begrunnelse)
         assertEquals("ident", slot.captured.kilde.ident)
     }

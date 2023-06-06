@@ -41,6 +41,7 @@ internal class RevurderingTest {
             kommerBarnetTilgode = kommerBarnetTilGodeVurdering(),
             virkningstidspunkt = virkningstidspunktVurdering(),
             utenlandstilsnitt = null,
+            boddEllerArbeidetUtlandet = null,
             revurderingsaarsak = RevurderingAarsak.REGULERING,
             prosesstype = Prosesstype.MANUELL,
             kilde = Vedtaksloesning.GJENNY
@@ -156,6 +157,7 @@ private fun opprettetRevurdering(prosesstype: Prosesstype) = Revurdering.opprett
     kommerBarnetTilgode = kommerBarnetTilGodeVurdering(),
     virkningstidspunkt = virkningstidspunktVurdering(),
     utenlandstilsnitt = null,
+    boddEllerArbeidetUtlandet = null,
     revurderingsaarsak = RevurderingAarsak.REGULERING,
     prosesstype = prosesstype,
     kilde = Vedtaksloesning.GJENNY

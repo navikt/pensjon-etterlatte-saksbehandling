@@ -20,6 +20,7 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
 import io.mockk.verify
+import no.nav.etterlatte.behandling.BoddEllerArbeidetUtlandetRequest
 import no.nav.etterlatte.behandling.GenerellBehandlingService
 import no.nav.etterlatte.behandling.UtenlandstilsnittRequest
 import no.nav.etterlatte.behandling.behandlingRoutes
@@ -71,7 +72,7 @@ internal class BehandlingRoutesTest {
     }
 
     @Test
-    fun `kan lagre virkningstidspunkt hvis det er gyldig`() {
+    fun `kan oppdater utenlandstilsnitt`() {
         coEvery {
             generellBehandlingService.oppdaterUtenlandstilsnitt(any(), any())
         } just runs
@@ -88,7 +89,24 @@ internal class BehandlingRoutesTest {
     }
 
     @Test
-    fun `kan oppdater utenlandstilsnitt`() {
+    fun `kan oppdater bodd eller arbeidet i utlandet`() {
+        coEvery {
+            generellBehandlingService.oppdaterBoddEllerArbeidetUtlandet(any(), any())
+        } just runs
+
+        withTestApplication { client ->
+            val response = client.post("/api/behandling/$behandlingId/boddellerarbeidetutlandet") {
+                header(HttpHeaders.Authorization, "Bearer $token")
+                contentType(ContentType.Application.Json)
+                setBody(BoddEllerArbeidetUtlandetRequest(true, "Test"))
+            }
+
+            assertEquals(200, response.status.value)
+        }
+    }
+
+    @Test
+    fun `kan lagre virkningstidspunkt hvis det er gyldig`() {
         val bodyVirkningstidspunkt = Tidspunkt.parse("2017-02-01T00:00:00Z")
         val bodyBegrunnelse = "begrunnelse"
 

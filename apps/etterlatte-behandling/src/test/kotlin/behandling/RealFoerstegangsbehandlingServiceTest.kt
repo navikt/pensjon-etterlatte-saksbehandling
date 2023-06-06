@@ -128,6 +128,7 @@ internal class RealFoerstegangsbehandlingServiceTest {
                 "begrunnelse"
             ),
             utenlandstilsnitt = null,
+            boddEllerArbeidetUtlandet = null,
             kommerBarnetTilgode = null,
             kilde = Vedtaksloesning.GJENNY
         )
@@ -173,6 +174,7 @@ internal class RealFoerstegangsbehandlingServiceTest {
                 "begrunnelse"
             ),
             utenlandstilsnitt = null,
+            boddEllerArbeidetUtlandet = null,
             kommerBarnetTilgode = null,
             kilde = Vedtaksloesning.GJENNY
         )
@@ -232,6 +234,7 @@ internal class RealFoerstegangsbehandlingServiceTest {
             persongalleri = persongalleri(),
             kommerBarnetTilgode = null,
             virkningstidspunkt = null,
+            boddEllerArbeidetUtlandet = null,
             utenlandstilsnitt = null,
             soeknadMottattDato = now,
             gyldighetsproeving = null,
@@ -303,6 +306,7 @@ internal class RealFoerstegangsbehandlingServiceTest {
                 "begrunnelse"
             ),
             utenlandstilsnitt = null,
+            boddEllerArbeidetUtlandet = null,
             kommerBarnetTilgode = null,
             kilde = Vedtaksloesning.GJENNY
         )
@@ -350,6 +354,7 @@ internal class RealFoerstegangsbehandlingServiceTest {
                 "begrunnelse"
             ),
             utenlandstilsnitt = null,
+            boddEllerArbeidetUtlandet = null,
             kommerBarnetTilgode = null,
             kilde = Vedtaksloesning.GJENNY
         )
@@ -397,6 +402,7 @@ internal class RealFoerstegangsbehandlingServiceTest {
                 "begrunnelse"
             ),
             utenlandstilsnitt = null,
+            boddEllerArbeidetUtlandet = null,
             kommerBarnetTilgode = null,
             kilde = Vedtaksloesning.GJENNY
         )

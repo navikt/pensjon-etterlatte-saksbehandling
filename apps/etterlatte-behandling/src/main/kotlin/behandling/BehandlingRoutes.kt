@@ -25,6 +25,7 @@ import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerRequest
 import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerService
 import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.Vedtaksloesning
+import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
@@ -187,6 +188,34 @@ internal fun Route.behandlingRoutes(
                 call.respond(HttpStatusCode.BadRequest, "Kan ikke endre feltet")
             }
         }
+
+        post("/boddellerarbeidetutlandet") {
+            logger.debug("Prøver å fastsette boddEllerArbeidetUtlandet")
+            val navIdent = navIdentFraToken() ?: return@post call.respond(
+                HttpStatusCode.Unauthorized,
+                "Kunne ikke hente ut navident for fastsetting av boddEllerArbeidetUtlandet"
+            )
+            val body = call.receive<BoddEllerArbeidetUtlandetRequest>()
+
+            try {
+                val boddEllerArbeidetUtlandet = BoddEllerArbeidetUtlandet(
+                    boddEllerArbeidetUtlandet = body.boddEllerArbeidetUtlandet,
+                    kilde = Grunnlagsopplysning.Saksbehandler.create(navIdent),
+                    begrunnelse = body.begrunnelse
+                )
+
+                generellBehandlingService.oppdaterBoddEllerArbeidetUtlandet(behandlingsId, boddEllerArbeidetUtlandet)
+
+                call.respondText(
+                    contentType = ContentType.Application.Json,
+                    status = HttpStatusCode.OK,
+                    text = boddEllerArbeidetUtlandet.toJson()
+
+                )
+            } catch (e: TilstandException.UgyldigTilstand) {
+                call.respond(HttpStatusCode.BadRequest, "Kan ikke endre feltet")
+            }
+        }
     }
 
     route("/behandlinger") {
@@ -252,6 +281,11 @@ internal fun Route.behandlingRoutes(
 
 data class UtenlandstilsnittRequest(
     val utenlandstilsnittType: UtenlandstilsnittType,
+    val begrunnelse: String
+)
+
+data class BoddEllerArbeidetUtlandetRequest(
+    val boddEllerArbeidetUtlandet: Boolean,
     val begrunnelse: String
 )
 

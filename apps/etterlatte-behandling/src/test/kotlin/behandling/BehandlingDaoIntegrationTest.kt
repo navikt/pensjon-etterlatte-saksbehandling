@@ -7,6 +7,7 @@ import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerAarsak
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
+import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
 import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
@@ -236,6 +237,37 @@ internal class BehandlingDaoIntegrationTest {
         assertEquals(UtenlandstilsnittType.BOSATT_UTLAND, lagretBehandling.utenlandstilsnitt?.type)
         assertEquals("Test", lagretBehandling.utenlandstilsnitt?.begrunnelse)
         assertEquals("navIdent", lagretBehandling.utenlandstilsnitt?.kilde?.ident)
+    }
+
+    @Test
+    fun `Skal legge til bodd eller arbeidet utlandet til en opprettet behandling`() {
+        val sak1 = sakRepo.opprettSak("123", SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr).id
+
+        val opprettBehandling = opprettBehandling(
+            type = BehandlingType.FØRSTEGANGSBEHANDLING,
+            sakId = sak1
+        )
+
+        behandlingRepo.opprettBehandling(opprettBehandling)
+
+        val opprettetBehandling =
+            requireNotNull(behandlingRepo.hentBehandling(opprettBehandling.id)) as Foerstegangsbehandling
+
+        behandlingRepo.lagreBoddEllerArbeidetUtlandet(
+            opprettetBehandling.id,
+            BoddEllerArbeidetUtlandet(
+                true,
+                Grunnlagsopplysning.Saksbehandler.create("navIdent"),
+                "Test"
+            )
+        )
+
+        val lagretBehandling =
+            requireNotNull(behandlingRepo.hentBehandling(opprettBehandling.id)) as Foerstegangsbehandling
+
+        assertEquals(true, lagretBehandling.boddEllerArbeidetUtlandet?.boddEllerArbeidetUtlandet)
+        assertEquals("Test", lagretBehandling.boddEllerArbeidetUtlandet?.begrunnelse)
+        assertEquals("navIdent", lagretBehandling.boddEllerArbeidetUtlandet?.kilde?.ident)
     }
 
     @Test

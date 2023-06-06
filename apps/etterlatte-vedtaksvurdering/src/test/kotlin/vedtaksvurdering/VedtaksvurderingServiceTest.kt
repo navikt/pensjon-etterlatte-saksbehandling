@@ -494,6 +494,7 @@ internal class VedtaksvurderingServiceTest {
             status = BehandlingStatus.VILKAARSVURDERT,
             virkningstidspunkt = null,
             utenlandstilsnitt = null,
+            boddEllerArbeidetUtlandet = null,
             kommerBarnetTilgode = null,
             prosesstype = Prosesstype.MANUELL
         )

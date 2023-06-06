@@ -87,7 +87,7 @@ spec:
     outbound:
       external:
         - host: navikt.github.io
-        - host: https://login.microsoftonline.com
+        - host: login.microsoftonline.com
         - host: graph.microsoft.com
         - host: unleash.nais.io
       rules:

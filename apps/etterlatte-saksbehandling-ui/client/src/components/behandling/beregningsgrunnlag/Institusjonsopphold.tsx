@@ -94,6 +94,7 @@ const Institusjonsopphold = (props: InstitusjonsoppholdProps) => {
         })}
       </form>
       <Button
+        type="button"
         icon={<PlusCircleIcon title="legg til" />}
         iconPosition="left"
         variant="tertiary"

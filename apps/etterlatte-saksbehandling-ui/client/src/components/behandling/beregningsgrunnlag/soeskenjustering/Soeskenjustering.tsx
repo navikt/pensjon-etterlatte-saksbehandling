@@ -138,12 +138,7 @@ const Soeskenjustering = (props: SoeskenjusteringProps) => {
         {isFailure(soeskenjusteringGrunnlag) && <ApiErrorAlert>Søskenjustering kan ikke hentes</ApiErrorAlert>}
       </FamilieforholdWrapper>
       {visFeil && feil.length > 0 && behandles ? <FeilIPerioder feil={feil} /> : null}
-      <form
-        id="formsoeskenjustering"
-        onSubmit={(e) => {
-          e.preventDefault()
-        }}
-      >
+      <form id="formsoeskenjustering">
         {isSuccess(soeskenjusteringGrunnlag) || soeskenjusteringErDefinertIRedux ? (
           <>
             <UstiletListe>
@@ -164,6 +159,7 @@ const Soeskenjustering = (props: SoeskenjusteringProps) => {
             </UstiletListe>
             {behandles ? (
               <NyPeriodeButton
+                type="button"
                 onClick={() => append(nySoeskengrunnlagPeriode(soesken, addMonths(sisteTom || sisteFom, 1).toString()))}
               >
                 Legg til periode

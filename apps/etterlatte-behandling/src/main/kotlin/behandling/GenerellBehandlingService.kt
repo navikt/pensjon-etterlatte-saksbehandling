@@ -141,7 +141,7 @@ class RealGenerellBehandlingService(
             behandlingDao.avbrytBehandling(behandlingId).also {
                 hendelseDao.behandlingAvbrutt(behandling, saksbehandler)
             }.also {
-                grunnlagsendringshendelseDao.aapneGrunnlagsendringshendelserForBehandlingId(behandlingId)
+                grunnlagsendringshendelseDao.kobleGrunnlagsendringshendelserFraBehandlingId(behandlingId)
             }
         }
         runBlocking {

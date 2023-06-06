@@ -124,6 +124,9 @@ class RealGenerellBehandlingServiceTest {
         val hendelseskanalMock = mockk<BehandlingHendelserKanal> {
             coEvery { send(any()) } returns Unit
         }
+        val grunnlagsendringshendelseDaoMock = mockk<GrunnlagsendringshendelseDao> {
+            every { kobleGrunnlagsendringshendelserFraBehandlingId(any()) } just runs
+        }
 
         val featureToggleService = mockk<FeatureToggleService>()
         every { featureToggleService.isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false) } returns false
@@ -133,6 +136,7 @@ class RealGenerellBehandlingServiceTest {
                 behandlingDao = behandlingDaoMock,
                 hendelseKanal = hendelseskanalMock,
                 hendelseDao = hendelserMock,
+                grunnlagsendringshendelseDao = grunnlagsendringshendelseDaoMock,
                 featureToggleService = featureToggleService
             )
 
@@ -167,6 +171,9 @@ class RealGenerellBehandlingServiceTest {
         val hendelseskanalMock = mockk<BehandlingHendelserKanal> {
             coEvery { send(any()) } returns Unit
         }
+        val grunnlagsendringshendelseDaoMock = mockk<GrunnlagsendringshendelseDao> {
+            every { kobleGrunnlagsendringshendelserFraBehandlingId(any()) } just runs
+        }
 
         val featureToggleService = mockk<FeatureToggleService>()
         every { featureToggleService.isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false) } returns false
@@ -175,6 +182,7 @@ class RealGenerellBehandlingServiceTest {
             lagRealGenerellBehandlingService(
                 behandlingDao = behandlingDaoMock,
                 hendelseKanal = hendelseskanalMock,
+                grunnlagsendringshendelseDao = grunnlagsendringshendelseDaoMock,
                 hendelseDao = hendelserMock,
                 featureToggleService = featureToggleService
             )
@@ -200,6 +208,9 @@ class RealGenerellBehandlingServiceTest {
         val hendelseskanalMock = mockk<BehandlingHendelserKanal> {
             coEvery { send(Pair(nyFoerstegangsbehandling.id, BehandlingHendelseType.AVBRUTT)) } returns Unit
         }
+        val grunnlagsendringshendelseDaoMock = mockk<GrunnlagsendringshendelseDao> {
+            every { kobleGrunnlagsendringshendelserFraBehandlingId(any()) } just runs
+        }
 
         val featureToggleService = mockk<FeatureToggleService>()
         every { featureToggleService.isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false) } returns false
@@ -208,6 +219,7 @@ class RealGenerellBehandlingServiceTest {
             lagRealGenerellBehandlingService(
                 behandlingDao = behandlingDaoMock,
                 hendelseKanal = hendelseskanalMock,
+                grunnlagsendringshendelseDao = grunnlagsendringshendelseDaoMock,
                 hendelseDao = hendelserMock,
                 featureToggleService = featureToggleService
             )
@@ -215,6 +227,43 @@ class RealGenerellBehandlingServiceTest {
         behandlingService.avbrytBehandling(nyFoerstegangsbehandling.id, "")
         coVerify {
             hendelseskanalMock.send(Pair(nyFoerstegangsbehandling.id, BehandlingHendelseType.AVBRUTT))
+        }
+    }
+
+    @Test
+    fun `avbryt behandling setter koblede grunnlagsendringshendelser tilbake til ingen kobling`() {
+        val sakId = 1L
+        val nyFoerstegangsbehandling = foerstegangsbehandling(sakId = sakId)
+
+        val behandlingDaoMock = mockk<BehandlingDao> {
+            every { hentBehandling(nyFoerstegangsbehandling.id) } returns nyFoerstegangsbehandling
+            every { avbrytBehandling(nyFoerstegangsbehandling.id) } just runs
+        }
+        val hendelserMock = mockk<HendelseDao> {
+            every { behandlingAvbrutt(any(), any()) } returns Unit
+        }
+        val hendelseskanalMock = mockk<BehandlingHendelserKanal> {
+            coEvery { send(Pair(nyFoerstegangsbehandling.id, BehandlingHendelseType.AVBRUTT)) } returns Unit
+        }
+        val grunnlagsendringshendelseDaoMock = mockk<GrunnlagsendringshendelseDao> {
+            every { kobleGrunnlagsendringshendelserFraBehandlingId(any()) } just runs
+        }
+
+        val featureToggleService = mockk<FeatureToggleService>()
+        every { featureToggleService.isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false) } returns false
+
+        val behandlingService =
+            lagRealGenerellBehandlingService(
+                behandlingDao = behandlingDaoMock,
+                hendelseKanal = hendelseskanalMock,
+                grunnlagsendringshendelseDao = grunnlagsendringshendelseDaoMock,
+                hendelseDao = hendelserMock,
+                featureToggleService = featureToggleService
+            )
+
+        behandlingService.avbrytBehandling(nyFoerstegangsbehandling.id, "")
+        verify(exactly = 1) {
+            grunnlagsendringshendelseDaoMock.kobleGrunnlagsendringshendelserFraBehandlingId(nyFoerstegangsbehandling.id)
         }
     }
 
@@ -561,7 +610,7 @@ class RealGenerellBehandlingServiceTest {
         behandlingDao: BehandlingDao? = null,
         hendelseKanal: BehandlingHendelserKanal? = null,
         hendelseDao: HendelseDao? = null,
-        grunnlagsendringshendelseDao: GrunnlagsendringshendelseDao = mockk(relaxed = true),
+        grunnlagsendringshendelseDao: GrunnlagsendringshendelseDao = mockk(),
         grunnlagKlient: GrunnlagKlient? = null,
         featureToggleService: FeatureToggleService
     ): RealGenerellBehandlingService = RealGenerellBehandlingService(

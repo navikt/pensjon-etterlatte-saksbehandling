@@ -3,7 +3,11 @@ package no.nav.etterlatte.brev.brevbaker
 import no.nav.etterlatte.brev.behandling.Behandling
 import no.nav.etterlatte.brev.model.Avsender
 import no.nav.etterlatte.brev.model.Mottaker
-import no.nav.pensjon.brevbaker.api.model.*
+import no.nav.pensjon.brevbaker.api.model.Bruker
+import no.nav.pensjon.brevbaker.api.model.Felles
+import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
+import no.nav.pensjon.brevbaker.api.model.NAVEnhet
+import no.nav.pensjon.brevbaker.api.model.SignerendeSaksbehandlere
 import java.time.LocalDate
 
 object BrevbakerHelpers {
@@ -23,7 +27,7 @@ object BrevbakerHelpers {
             fornavn = behandling.persongalleri.soeker.fornavn,
             mellomnavn = behandling.persongalleri.soeker.mellomnavn,
             etternavn = behandling.persongalleri.soeker.etternavn,
-            foedselsnummer = Foedselsnummer(mottaker.foedselsnummer!!.value)
+            foedselsnummer = Foedselsnummer(behandling.persongalleri.soeker.fnr.value)
         ),
         signerendeSaksbehandlere = SignerendeSaksbehandlere(
             saksbehandler = avsender.saksbehandler,

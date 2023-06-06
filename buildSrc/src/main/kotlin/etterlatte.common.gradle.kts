@@ -1,3 +1,7 @@
+import gradle.kotlin.dsl.accessors._a7ea0f62ad9d6a9eb732bb7f38634da0.implementation
+import gradle.kotlin.dsl.accessors._a7ea0f62ad9d6a9eb732bb7f38634da0.runtimeClasspath
+import gradle.kotlin.dsl.accessors._a7ea0f62ad9d6a9eb732bb7f38634da0.testImplementation
+import gradle.kotlin.dsl.accessors._a7ea0f62ad9d6a9eb732bb7f38634da0.testRuntimeOnly
 import org.gradle.accessors.dm.LibrariesForLibs
 import org.gradle.api.tasks.testing.logging.TestLogEvent
 
@@ -5,19 +9,12 @@ val libs = the<LibrariesForLibs>()
 
 plugins {
     kotlin("jvm")
+    id("etterlatte.libs")
     application
 }
 
 repositories {
-    mavenCentral()
     maven("https://packages.confluent.io/maven/")
-    maven {
-        url = uri("https://maven.pkg.github.com/navikt/pensjon-etterlatte-libs")
-        credentials {
-            username = "token"
-            password = System.getenv("GITHUB_TOKEN")
-        }
-    }
 }
 
 dependencies {

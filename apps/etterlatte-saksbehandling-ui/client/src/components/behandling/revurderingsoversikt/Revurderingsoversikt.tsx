@@ -1,5 +1,5 @@
 import { Content, ContentHeader } from '~shared/styled'
-import { Heading } from '@navikt/ds-react'
+import { BodyShort, Heading } from '@navikt/ds-react'
 import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapper'
 import { NesteOgTilbake } from '../handlinger/NesteOgTilbake'
 import { hentBehandlesFraStatus } from '../felles/utils'
@@ -14,7 +14,11 @@ import {
   BP_REVURDERING_BESKRIVELSE,
   BP_REVURDERING_HJEMLER,
 } from '~components/behandling/soeknadsoversikt/soeknadoversikt/virkningstidspunkt/utils'
-import { erOpphoer } from '~shared/types/Revurderingsaarsak'
+import { erOpphoer, Revurderingsaarsak, tekstRevurderingsaarsak } from '~shared/types/Revurderingsaarsak'
+import styled from 'styled-components'
+
+const revurderingsaarsakTilTekst = (revurderingsaarsak: Revurderingsaarsak | null | undefined): string =>
+  !revurderingsaarsak ? 'ukjent årsak' : tekstRevurderingsaarsak[revurderingsaarsak]
 
 export const Revurderingsoversikt = (props: { behandling: IDetaljertBehandling }) => {
   const { behandling } = props
@@ -29,6 +33,9 @@ export const Revurderingsoversikt = (props: { behandling: IDetaljertBehandling }
             Revurdering
           </Heading>
         </HeadingWrapper>
+        <BodyShort>
+          Revurdering på grunn av <Lowercase>{revurderingsaarsakTilTekst(behandling.revurderingsaarsak)}</Lowercase>.
+        </BodyShort>
       </ContentHeader>
       <Innhold>
         <Virkningstidspunkt
@@ -53,3 +60,7 @@ export const Revurderingsoversikt = (props: { behandling: IDetaljertBehandling }
     </Content>
   )
 }
+
+const Lowercase = styled.span`
+  text-transform: lowercase;
+`

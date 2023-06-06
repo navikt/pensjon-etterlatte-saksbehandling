@@ -18,9 +18,10 @@ on:
       - apps/etterlatte-behandling/**
       - libs/saksbehandling-common/**
       - libs/etterlatte-jobs/**
-      - libs/etterlatte-helsesjekk/**
+      - libs/etterlatte-institusjonsopphold-model/**
       - libs/etterlatte-ktor/**
       - libs/etterlatte-database/**
+      - libs/etterlatte-pdl-model/**
       - libs/etterlatte-sporingslogg/**
       - libs/etterlatte-funksjonsbrytere/**
       - libs/ktor2client-onbehalfof/**
@@ -34,8 +35,9 @@ on:
       - apps/etterlatte-behandling/**
       - libs/saksbehandling-common/**
       - libs/etterlatte-jobs/**
-      - libs/etterlatte-helsesjekk/**
+      - libs/etterlatte-institusjonsopphold-model/**
       - libs/etterlatte-ktor/**
+      - libs/etterlatte-pdl-model/**
       - libs/etterlatte-database/**
       - libs/etterlatte-sporingslogg/**
       - libs/etterlatte-funksjonsbrytere/**

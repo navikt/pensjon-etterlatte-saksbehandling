@@ -17,7 +17,6 @@ on:
     paths:
       - apps/etterlatte-brev-api/**
       - libs/saksbehandling-common/**
-      - libs/etterlatte-helsesjekk/**
       - libs/etterlatte-ktor/**
       - libs/etterlatte-database/**
       - libs/ktor2client-onbehalfof/**
@@ -29,7 +28,6 @@ on:
     paths:
       - apps/etterlatte-brev-api/**
       - libs/saksbehandling-common/**
-      - libs/etterlatte-helsesjekk/**
       - libs/etterlatte-ktor/**
       - libs/etterlatte-database/**
       - libs/ktor2client-onbehalfof/**

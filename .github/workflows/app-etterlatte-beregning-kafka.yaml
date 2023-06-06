@@ -17,6 +17,7 @@ on:
     paths:
       - apps/etterlatte-beregning-kafka/**
       - libs/saksbehandling-common/**
+      - apps/etterlatte-beregning-model/**
       - libs/ktor2client-auth-clientcredentials/**
       - libs/rapidsandrivers-extras/**
       - gradle/libs.versions.toml
@@ -26,6 +27,7 @@ on:
     paths:
       - apps/etterlatte-beregning-kafka/**
       - libs/saksbehandling-common/**
+      - apps/etterlatte-beregning-model/**
       - libs/ktor2client-auth-clientcredentials/**
       - libs/rapidsandrivers-extras/**
       - gradle/libs.versions.toml

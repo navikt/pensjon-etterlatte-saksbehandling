@@ -17,6 +17,7 @@ on:
     paths:
       - apps/etterlatte-vilkaarsvurdering-kafka/**
       - libs/saksbehandling-common/**
+      - libs/etterlatte-vilkaarsvurdering-model/**
       - libs/ktor2client-auth-clientcredentials/**
       - libs/testdata/**
       - gradle/libs.versions.toml
@@ -26,6 +27,7 @@ on:
     paths:
       - apps/etterlatte-vilkaarsvurdering-kafka/**
       - libs/saksbehandling-common/**
+      - libs/etterlatte-vilkaarsvurdering-model/**
       - libs/ktor2client-auth-clientcredentials/**
       - libs/testdata/**
       - gradle/libs.versions.toml

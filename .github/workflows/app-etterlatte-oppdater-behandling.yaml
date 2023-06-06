@@ -17,6 +17,8 @@ on:
     paths:
       - apps/etterlatte-oppdater-behandling/**
       - libs/saksbehandling-common/**
+      - libs/etterlatte-ktor/**
+      - libs/etterlatte-pdl-model/**
       - libs/ktor2client-auth-clientcredentials/**
       - gradle/libs.versions.toml
   pull_request:
@@ -25,6 +27,8 @@ on:
     paths:
       - apps/etterlatte-oppdater-behandling/**
       - libs/saksbehandling-common/**
+      - libs/etterlatte-ktor/**
+      - libs/etterlatte-pdl-model/**
       - libs/ktor2client-auth-clientcredentials/**
       - gradle/libs.versions.toml
 

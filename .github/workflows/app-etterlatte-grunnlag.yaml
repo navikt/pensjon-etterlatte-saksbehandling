@@ -18,10 +18,10 @@ on:
       - apps/etterlatte-grunnlag/**
       - libs/saksbehandling-common/**
       - libs/testdata/**
-      - libs/etterlatte-helsesjekk/**
       - libs/etterlatte-ktor/**
       - libs/etterlatte-sporingslogg/**
       - libs/etterlatte-database/**
+      - libs/etterlatte-pdl-model/**
       - gradle/libs.versions.toml
   pull_request:
     branches:
@@ -30,10 +30,10 @@ on:
       - apps/etterlatte-grunnlag/**
       - libs/saksbehandling-common/**
       - libs/testdata/**
-      - libs/etterlatte-helsesjekk/**
       - libs/etterlatte-ktor/**
       - libs/etterlatte-sporingslogg/**
       - libs/etterlatte-database/**
+      - libs/etterlatte-pdl-model/**
       - gradle/libs.versions.toml
 
 jobs:

@@ -7,9 +7,8 @@ import {
 } from '~shared/api/trygdetid'
 import { FlexHeader, IconWrapper, TableWrapper } from '~components/behandling/soeknadsoversikt/familieforhold/styled'
 import { IconSize } from '~shared/types/Icon'
-import { Button, Heading, Table } from '@navikt/ds-react'
+import { BodyShort, Button, Detail, Heading, Table } from '@navikt/ds-react'
 import { CalendarIcon } from '@navikt/aksel-icons'
-import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import { formaterStringDato } from '~utils/formattering'
 import React, { useState } from 'react'
 import styled from 'styled-components'
@@ -170,11 +169,8 @@ const PeriodeRow = ({
       </Table.DataCell>
       <Table.DataCell>{beregnetTrygdetid}</Table.DataCell>
       <Table.DataCell>
-        <Info
-          tekst={trygdetidGrunnlag.kilde.ident}
-          label={''}
-          undertekst={`saksbehandler: ${formaterStringDato(trygdetidGrunnlag.kilde.tidspunkt)}`}
-        />
+        <BodyShort>{trygdetidGrunnlag.kilde.ident}</BodyShort>
+        <Detail>{`saksbehandler: ${formaterStringDato(trygdetidGrunnlag.kilde.tidspunkt)}`}</Detail>
       </Table.DataCell>
       <Table.DataCell>
         <RedigerWrapper onClick={() => endrePeriode(trygdetidGrunnlag.id!!)}>Rediger</RedigerWrapper>

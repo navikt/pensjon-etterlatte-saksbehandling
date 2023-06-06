@@ -133,7 +133,8 @@ const Dropdown = styled.div<{ error?: boolean; info?: boolean }>`
 
 const SearchWrapper = styled.span`
   max-width: 100%;
-  padding: 0.3em;
+  min-width: 350px;
+  padding: 0.5em;
 `
 
 const SearchResult = styled.div<{ link?: boolean }>`

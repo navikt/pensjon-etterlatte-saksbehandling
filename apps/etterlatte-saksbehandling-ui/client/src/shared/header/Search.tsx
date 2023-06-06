@@ -6,6 +6,7 @@ import { ErrorColored, InformationColored } from '@navikt/ds-icons'
 import { isFailure, isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
 import { getPerson } from '~shared/api/grunnlag'
 import { INVALID_FNR } from '~utils/fnr'
+import { ApiError } from '~shared/api/apiClient'
 
 export const Search = () => {
   const navigate = useNavigate()
@@ -38,7 +39,7 @@ export const Search = () => {
   return (
     <SearchWrapper>
       <SearchField
-        placeholder="Fødselsnummer"
+        placeholder="Fødselsnummer "
         label="Tast inn fødselsnummer"
         hideLabel
         onChange={setSearchInput}
@@ -74,14 +75,20 @@ export const Search = () => {
             <ErrorColored />
           </span>
           <SearchResult>
-            <BodyShort className="text">
-              {personStatus.error.statusCode === 404 ? 'Fant ingen data i Gjenny' : 'En feil har skjedd'}
-            </BodyShort>
+            <BodyShort className="text">{feilmelding(personStatus.error)}</BodyShort>
           </SearchResult>
         </Dropdown>
       )}
     </SearchWrapper>
   )
+}
+
+const feilmelding = (error: ApiError) => {
+  if (error.statusCode === 404) {
+    return 'Fant ingen data i Gjenny'
+  } else {
+    return 'En feil har skjedd'
+  }
 }
 
 const Dropdown = styled.div<{ error?: boolean; info?: boolean }>`

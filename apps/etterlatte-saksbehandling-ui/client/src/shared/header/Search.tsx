@@ -7,20 +7,34 @@ import { isFailure, isPending, isSuccess, useApiCall } from '~shared/hooks/useAp
 import { getPerson } from '~shared/api/grunnlag'
 import { INVALID_FNR } from '~utils/fnr'
 import { ApiError } from '~shared/api/apiClient'
+import { finnSakForSoek } from '~shared/api/behandling'
 
 export const Search = () => {
   const navigate = useNavigate()
   const [searchInput, setSearchInput] = useState('')
   const [feilInput, setFeilInput] = useState(false)
   const [personStatus, hentPerson, reset] = useApiCall(getPerson)
+  const [funnetFnrForSak, finnSak, resetSakSoek] = useApiCall(finnSakForSoek)
 
   const ugyldigInput = INVALID_FNR(searchInput)
 
   const soekEtterPerson = () => (ugyldigInput ? setFeilInput(true) : hentPerson(searchInput))
-  const onEnter = (e: any) => e.key === 'Enter' && soekEtterPerson()
+
+  const soekEtterSak = () => {
+    if (searchInput && /^\d+$/.test(searchInput ?? '')) {
+      finnSak(searchInput)
+    }
+  }
+  const onEnter = (e: any) => {
+    if (e.key === 'Enter') {
+      soekEtterPerson()
+      soekEtterSak()
+    }
+  }
 
   useEffect(() => {
     reset()
+    resetSakSoek()
     if (searchInput.length === 0) {
       setFeilInput(false)
     } else if (feilInput && ugyldigInput) {
@@ -33,8 +47,12 @@ export const Search = () => {
   useEffect(() => {
     if (isSuccess(personStatus)) {
       navigate(`/person/${searchInput}`)
+      return
     }
-  }, [personStatus])
+    if (isSuccess(funnetFnrForSak)) {
+      navigate(`/person/${funnetFnrForSak.data}`)
+    }
+  }, [personStatus, funnetFnrForSak])
 
   return (
     <SearchWrapper>
@@ -46,7 +64,12 @@ export const Search = () => {
         onKeyUp={onEnter}
         autoComplete="off"
       >
-        <SearchField.Button onClick={soekEtterPerson} />
+        <SearchField.Button
+          onClick={() => {
+            soekEtterPerson()
+            soekEtterSak()
+          }}
+        />
       </SearchField>
 
       {isPending(personStatus) && (

@@ -122,3 +122,7 @@ export const hentGrunnlagsendringshendelserInstitusjonsoppholdforSak = async (
 ): Promise<ApiResponse<Array<Grunnlagsendringshendelse>>> => {
   return apiClient.get(`/grunnlagsendringshendelse/${sakid}/institusjon`)
 }
+
+export const finnSakForSoek = async (maybeSakdId: string): Promise<ApiResponse<String>> => {
+  return apiClient.get(`/finnSak/${maybeSakdId}`)
+}

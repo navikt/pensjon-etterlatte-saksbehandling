@@ -23,6 +23,7 @@ import no.nav.etterlatte.libs.common.sak.Saker
 import no.nav.etterlatte.libs.common.sakId
 import no.nav.etterlatte.libs.common.withFoedselsnummer
 import no.nav.etterlatte.libs.common.withFoedselsnummerAndGradering
+import no.nav.etterlatte.libs.common.withSakId
 
 internal fun Route.sakRoutes(
     tilgangService: TilgangService,
@@ -100,6 +101,17 @@ internal fun Route.sakRoutes(
             val lukketHendelse = call.receive<Grunnlagsendringshendelse>()
             grunnlagsendringshendelseService.lukkHendelseMedKommentar(hendelse = lukketHendelse)
             call.respond(HttpStatusCode.OK)
+        }
+    }
+
+    route("/api/finnSak/{$SAKID_CALL_PARAMETER}") {
+        get {
+            withSakId(tilgangService) { sakId ->
+                val sak = inTransaction {
+                    sakService.finnSak(sakId)
+                }
+                call.respond(sak?.ident ?: HttpStatusCode.NotFound)
+            }
         }
     }
 }

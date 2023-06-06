@@ -66,6 +66,7 @@ if (isDev) {
       '/api/:sakid/revurdering',
       '/api/stoettederevurderinger',
       '/api/grunnlagsendringshendelse/:sakid/institusjon',
+      '/api/finnSak/:sakid',
     ],
     tokenMiddleware(ApiConfig.behandling.scope),
     proxy(ApiConfig.behandling.url)

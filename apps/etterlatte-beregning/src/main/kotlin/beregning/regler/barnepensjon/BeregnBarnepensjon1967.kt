@@ -45,10 +45,9 @@ val beregnBarnepensjon1967Regel = RegelMeta(
     gjelderFra = BP_1967_DATO,
     beskrivelse = "Reduserer ytelsen mot opptjening i folketrygden",
     regelReferanse = RegelReferanse(id = "BP-BEREGNING-1967-REDUSERMOTTRYGDETID")
-) benytter barnepensjonSatsRegel og trygdetidsFaktor og institusjonsoppholdRegel med { sats,
-        trygdetidsfaktor,
-        institusjonsopphold ->
-    sats.multiply(trygdetidsfaktor).multiply(Beregningstall.somBroek(institusjonsopphold))
+) benytter barnepensjonSatsRegel og trygdetidsFaktor med { sats,
+        trygdetidsfaktor ->
+    sats.multiply(trygdetidsfaktor)
 }
 
 val kroneavrundetBarnepensjonRegel = RegelMeta(
@@ -56,5 +55,23 @@ val kroneavrundetBarnepensjonRegel = RegelMeta(
     beskrivelse = "Gjør en kroneavrunding av barnepensjonen",
     regelReferanse = RegelReferanse(id = "REGEL-KRONEAVRUNDING")
 ) benytter beregnBarnepensjon1967Regel med { beregnetBarnepensjon ->
+    beregnetBarnepensjon.round(decimals = 0).toInteger()
+}
+
+val beregnBarnepensjon1967RegelMedInstitusjon = RegelMeta(
+    gjelderFra = BP_1967_DATO,
+    beskrivelse = "Reduserer ytelsen mot opptjening i folketrygden inkludert institusjonsopphold",
+    regelReferanse = RegelReferanse(id = "BP-BEREGNING-1967-REDUSERMOTTRYGDETID-INSTITUSJON")
+) benytter barnepensjonSatsRegel og trygdetidsFaktor og institusjonsoppholdRegel med { sats,
+        trygdetidsfaktor,
+        institusjonsopphold ->
+    sats.multiply(trygdetidsfaktor).multiply(Beregningstall.somBroek(institusjonsopphold))
+}
+
+val kroneavrundetBarnepensjonRegelMedInstitusjon = RegelMeta(
+    gjelderFra = BP_1967_DATO,
+    beskrivelse = "Gjør en kroneavrunding av barnepensjonen inkludert institusjonsopphold",
+    regelReferanse = RegelReferanse(id = "REGEL-KRONEAVRUNDING-INSTITUSJON")
+) benytter beregnBarnepensjon1967RegelMedInstitusjon med { beregnetBarnepensjon ->
     beregnetBarnepensjon.round(decimals = 0).toInteger()
 }

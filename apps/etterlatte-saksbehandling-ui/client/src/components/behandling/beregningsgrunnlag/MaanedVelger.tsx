@@ -27,7 +27,7 @@ const MaanedVelger = (props: MaanedVelgerProps) => {
   }, [datePicker])
 
   return (
-    <div>
+    <>
       <DatePickerLabel onClick={openDatePicker}>{label}</DatePickerLabel>
       <Datovelger>
         <div style={{ textTransform: 'capitalize' }}>
@@ -59,7 +59,7 @@ const MaanedVelger = (props: MaanedVelgerProps) => {
           <Calender color="white" />
         </KalenderIkon>
       </Datovelger>
-    </div>
+    </>
   )
 }
 

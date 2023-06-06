@@ -46,22 +46,26 @@ const InstitusjonsoppholdPeriode = (props: InstitusjonsoppholdPerioder) => {
             control={control}
             rules={{ required: true }}
             render={(fom) => (
-              <MaanedVelger
-                label="Fra og med"
-                value={fom.field.value}
-                onChange={(date: Date | null) => fom.field.onChange(date)}
-              />
+              <DatoSection>
+                <MaanedVelger
+                  label="Fra og med"
+                  value={fom.field.value}
+                  onChange={(date: Date | null) => fom.field.onChange(date)}
+                />
+              </DatoSection>
             )}
           />
           <Controller
             name={`institusjonsOppholdForm.${index}.tom`}
             control={control}
             render={(tom) => (
-              <MaanedVelger
-                label="Til og med"
-                value={tom.field.value}
-                onChange={(date: Date | null) => tom.field.onChange(date)}
-              />
+              <DatoSection>
+                <MaanedVelger
+                  label="Til og med"
+                  value={tom.field.value}
+                  onChange={(date: Date | null) => tom.field.onChange(date)}
+                />
+              </DatoSection>
             )}
           />
           <Select
@@ -110,6 +114,11 @@ const InstitusjonsoppholdPeriode = (props: InstitusjonsoppholdPerioder) => {
     </>
   )
 }
+
+const DatoSection = styled.section`
+  display: grid;
+  gap: 0.5em;
+`
 
 const InstitusjonsperioderWrapper = styled.div`
   width: 100%;

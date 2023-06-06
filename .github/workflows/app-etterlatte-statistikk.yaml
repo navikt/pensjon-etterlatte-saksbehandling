@@ -19,6 +19,7 @@ on:
       - libs/saksbehandling-common/**
       - libs/ktor2client-auth-clientcredentials/**
       - libs/etterlatte-database/**
+      - libs/etterlatte-ktor/**
       - gradle/libs.versions.toml
   pull_request:
     branches:
@@ -28,6 +29,7 @@ on:
       - libs/saksbehandling-common/**
       - libs/ktor2client-auth-clientcredentials/**
       - libs/etterlatte-database/**
+      - libs/etterlatte-ktor/**
       - gradle/libs.versions.toml
 
 jobs:

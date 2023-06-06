@@ -17,7 +17,7 @@ on:
     paths:
       - apps/etterlatte-vilkaarsvurdering/**
       - libs/saksbehandling-common/**
-      - libs/etterlatte-helsesjekk/**
+      - libs/etterlatte-vilkaarsvurdering-model/**
       - libs/etterlatte-ktor/**
       - libs/etterlatte-database/**
       - libs/ktor2client-onbehalfof/**
@@ -29,7 +29,7 @@ on:
     paths:
       - apps/etterlatte-vilkaarsvurdering/**
       - libs/saksbehandling-common/**
-      - libs/etterlatte-helsesjekk/**
+      - libs/etterlatte-vilkaarsvurdering-model/**
       - libs/etterlatte-ktor/**
       - libs/etterlatte-database/**
       - libs/ktor2client-onbehalfof/**

@@ -17,6 +17,7 @@ on:
     paths:
       - apps/etterlatte-trygdetid-kafka/**
       - libs/saksbehandling-common/**
+      - libs/etterlatte-trygdetid-model/**
       - libs/ktor2client-auth-clientcredentials/**
       - libs/rapidsandrivers-extras/**
       - gradle/libs.versions.toml
@@ -26,6 +27,7 @@ on:
     paths:
       - apps/etterlatte-trygdetid-kafka/**
       - libs/saksbehandling-common/**
+      - libs/etterlatte-trygdetid-model/**
       - libs/ktor2client-auth-clientcredentials/**
       - libs/rapidsandrivers-extras/**
       - gradle/libs.versions.toml

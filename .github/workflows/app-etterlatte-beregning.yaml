@@ -17,10 +17,11 @@ on:
     paths:
       - apps/etterlatte-beregning/**
       - libs/saksbehandling-common/**
-      - libs/etterlatte-helsesjekk/**
+      - libs/etterlatte-funksjonsbrytere/**
       - libs/etterlatte-ktor/**
       - libs/etterlatte-database/**
       - libs/etterlatte-regler/**
+      - libs/etterlatte-trygdetid-model/**
       - libs/ktor2client-onbehalfof/**
       - libs/testdata/**
       - gradle/libs.versions.toml
@@ -30,10 +31,11 @@ on:
     paths:
       - apps/etterlatte-beregning/**
       - libs/saksbehandling-common/**
-      - libs/etterlatte-helsesjekk/**
+      - libs/etterlatte-funksjonsbrytere/**
       - libs/etterlatte-ktor/**
       - libs/etterlatte-database/**
       - libs/etterlatte-regler/**
+      - libs/etterlatte-trygdetid-model/**
       - libs/ktor2client-onbehalfof/**
       - libs/testdata/**
       - gradle/libs.versions.toml

@@ -18,8 +18,8 @@ on:
       - apps/etterlatte-pdltjenester/**
       - libs/etterlatte-sporingslogg/**
       - libs/saksbehandling-common/**
-      - libs/etterlatte-helsesjekk/**
       - libs/etterlatte-ktor/**
+      - libs/etterlatte-pdl-model/**
       - libs/ktor2client-auth-clientcredentials/**
       - libs/testdata/**
       - gradle/libs.versions.toml
@@ -30,8 +30,8 @@ on:
       - apps/etterlatte-pdltjenester/**
       - libs/etterlatte-sporingslogg/**
       - libs/saksbehandling-common/**
-      - libs/etterlatte-helsesjekk/**
       - libs/etterlatte-ktor/**
+      - libs/etterlatte-pdl-model/**
       - libs/ktor2client-auth-clientcredentials/**
       - libs/testdata/**
       - gradle/libs.versions.toml

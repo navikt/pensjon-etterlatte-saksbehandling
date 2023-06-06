@@ -17,6 +17,7 @@ on:
     paths:
       - apps/etterlatte-egne-ansatte-lytter/**
       - libs/saksbehandling-common/**
+      - libs/etterlatte-ktor/**
       - gradle/libs.versions.toml
   pull_request:
     branches:
@@ -24,6 +25,7 @@ on:
     paths:
       - apps/etterlatte-egne-ansatte-lytter/**
       - libs/saksbehandling-common/**
+      - libs/etterlatte-ktor/**
       - gradle/libs.versions.toml
 
 jobs:

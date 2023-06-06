@@ -57,8 +57,8 @@ export const Search = () => {
   return (
     <SearchWrapper>
       <SearchField
-        placeholder="Fødselsnummer "
-        label="Tast inn fødselsnummer"
+        placeholder="Fødselsnummer eller sakid "
+        label="Tast inn fødselsnummer eller sakid"
         hideLabel
         onChange={setSearchInput}
         onKeyUp={onEnter}

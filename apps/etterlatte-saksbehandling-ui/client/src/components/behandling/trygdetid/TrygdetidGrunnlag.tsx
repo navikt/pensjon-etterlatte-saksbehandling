@@ -7,6 +7,7 @@ import {
   ITrygdetidGrunnlag,
   ITrygdetidGrunnlagType,
   lagreTrygdetidgrunnlag,
+  OppdaterTrygdetidGrunnlag,
 } from '~shared/api/trygdetid'
 import React, { FormEvent, useRef, useState } from 'react'
 import { ApiErrorAlert } from '~ErrorBoundary'
@@ -24,14 +25,7 @@ type Props = {
 }
 
 const initialState = (type: ITrygdetidGrunnlagType) => {
-  return {
-    type: type,
-    bosted: '',
-    kilde: {
-      tidspunkt: '',
-      ident: '',
-    },
-  }
+  return { type: type, bosted: '' }
 }
 
 export const TrygdetidGrunnlag: React.FC<Props> = ({
@@ -42,7 +36,7 @@ export const TrygdetidGrunnlag: React.FC<Props> = ({
   landListe,
 }) => {
   const { behandlingId } = useParams()
-  const [trygdetidgrunnlag, setTrygdetidgrunnlag] = useState<ITrygdetidGrunnlag>(
+  const [trygdetidgrunnlag, setTrygdetidgrunnlag] = useState<OppdaterTrygdetidGrunnlag>(
     eksisterendeGrunnlag ? eksisterendeGrunnlag : initialState(trygdetidGrunnlagType)
   )
   const [trygdetidgrunnlagStatus, requestLagreTrygdetidgrunnlag] = useApiCall(lagreTrygdetidgrunnlag)

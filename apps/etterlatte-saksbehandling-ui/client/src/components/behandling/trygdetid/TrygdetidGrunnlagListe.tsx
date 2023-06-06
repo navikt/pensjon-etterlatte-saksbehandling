@@ -38,7 +38,7 @@ export const TrygdetidGrunnlagListe: React.FC<Props> = ({
   const [endreModus, setEndreModus] = useState(initialEndreModusState)
   const trygdetidGrunnlagListe = trygdetid.trygdetidGrunnlag
     .filter((tg) => tg.type == trygdetidGrunnlagType)
-    .sort((a, b) => (a.periodeFra!! > b.periodeFra!! ? 1 : -1))
+    .sort((a, b) => (a.periodeFra > b.periodeFra ? 1 : -1))
   const grunnlagTypeTekst = trygdetidGrunnlagType == ITrygdetidGrunnlagType.FAKTISK ? 'Faktisk' : 'Fremtidig'
 
   const oppdaterStateOgSettTrygdetid = (trygdetid: ITrygdetid) => {
@@ -162,10 +162,10 @@ const PeriodeRow = ({
         {landListe.find((land) => land.isoLandkode == trygdetidGrunnlag.bosted)?.beskrivelse?.tekst}
       </Table.DataCell>
       <Table.DataCell>
-        <Datofelt>{formaterStringDato(trygdetidGrunnlag.periodeFra!!)}</Datofelt>
+        <Datofelt>{formaterStringDato(trygdetidGrunnlag.periodeFra)}</Datofelt>
       </Table.DataCell>
       <Table.DataCell>
-        <Datofelt>{formaterStringDato(trygdetidGrunnlag.periodeTil!!)}</Datofelt>
+        <Datofelt>{formaterStringDato(trygdetidGrunnlag.periodeTil)}</Datofelt>
       </Table.DataCell>
       <Table.DataCell>{beregnetTrygdetid}</Table.DataCell>
       <Table.DataCell>
@@ -173,13 +173,13 @@ const PeriodeRow = ({
         <Detail>{`saksbehandler: ${formaterStringDato(trygdetidGrunnlag.kilde.tidspunkt)}`}</Detail>
       </Table.DataCell>
       <Table.DataCell>
-        <RedigerWrapper onClick={() => endrePeriode(trygdetidGrunnlag.id!!)}>Rediger</RedigerWrapper>
+        <RedigerWrapper onClick={() => endrePeriode(trygdetidGrunnlag.id)}>Rediger</RedigerWrapper>
       </Table.DataCell>
       <Table.DataCell>
         {isPending(slettTrygdetidStatus) ? (
           <Spinner visible={true} variant={'neutral'} label="Sletter" margin={'1em'} />
         ) : (
-          <RedigerWrapper onClick={() => slettGrunnlag(trygdetidGrunnlag.id!!)}>Slett</RedigerWrapper>
+          <RedigerWrapper onClick={() => slettGrunnlag(trygdetidGrunnlag.id)}>Slett</RedigerWrapper>
         )}
         {isFailure(slettTrygdetidStatus) && <ApiErrorAlert>En feil har oppstått</ApiErrorAlert>}
       </Table.DataCell>

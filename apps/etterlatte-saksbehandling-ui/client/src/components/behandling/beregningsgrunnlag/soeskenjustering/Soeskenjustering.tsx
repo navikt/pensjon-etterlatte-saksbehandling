@@ -1,14 +1,11 @@
 import { isFailure, isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
 import React, { useEffect, useState } from 'react'
 import { IBehandlingReducer, oppdaterBeregingsGrunnlag } from '~store/reducers/BehandlingReducer'
-import { Soesken } from '~components/behandling/soeknadsoversikt/familieforhold/personer/Soesken'
-import { Control, Controller, useFieldArray, useForm, UseFormWatch } from 'react-hook-form'
-import { BodyShort, Button, ErrorSummary, Heading, Label, Radio, RadioGroup } from '@navikt/ds-react'
+import { useFieldArray, useForm } from 'react-hook-form'
+import { Button, ErrorSummary, Heading } from '@navikt/ds-react'
 import styled from 'styled-components'
 import { IPdlPerson } from '~shared/types/Person'
-import { addMonths, format } from 'date-fns'
-import PeriodeAccordion from '~components/behandling/beregningsgrunnlag/PeriodeAccordion'
-import MaanedVelger from '~components/behandling/beregningsgrunnlag/MaanedVelger'
+import { addMonths } from 'date-fns'
 import { SoeskenMedIBeregning } from '~shared/types/Beregning'
 import { hentBeregningsGrunnlag } from '~shared/api/beregning'
 import { Barn } from '~components/behandling/soeknadsoversikt/familieforhold/personer/Barn'
@@ -25,6 +22,7 @@ import {
 import { useAppDispatch } from '~store/Store'
 import { hentBehandlesFraStatus } from '~components/behandling/felles/utils'
 import { SuccessColored } from '@navikt/ds-icons'
+import SoeskenjusteringPeriode from '~components/behandling/beregningsgrunnlag/soeskenjustering/SoeskenjusteringPeriode'
 
 type SoeskenKanskjeMedIBeregning = {
   foedselsnummer: string
@@ -194,13 +192,6 @@ const validerSoeskenjustering = (grunnlag: SoeskengrunnlagUtfylling): grunnlag i
   )
 }
 
-const formaterMaanedDato = (fallback: string, dato: Date | null | undefined) => {
-  if (dato) {
-    return format(dato, 'MMMM yyyy')
-  }
-  return fallback
-}
-
 export function feilISoeskenjusteringsperiode(
   grunnlag: PeriodisertBeregningsgrunnlag<SoeskenKanskjeMedIBeregning[]>
 ): FeilIPeriodeGrunnlagAlle[] {
@@ -213,150 +204,6 @@ export function feilISoeskenjusteringsperiode(
     feil.push('TOM_FOER_FOM')
   }
   return feil
-}
-
-type SoeskenjusteringPeriodeProps = {
-  control: Control<{ soeskenMedIBeregning: SoeskengrunnlagUtfylling }>
-  index: number
-  remove: () => void
-  canRemove: boolean
-  behandling: IBehandlingReducer
-  fnrTilSoesken: Record<string, IPdlPerson>
-  feil: [number, FeilIPeriodeGrunnlagAlle][]
-  watch: UseFormWatch<{ soeskenMedIBeregning: SoeskengrunnlagUtfylling }>
-  visFeil: boolean
-}
-
-const SoeskenjusteringPeriode = (props: SoeskenjusteringPeriodeProps) => {
-  const { control, index, remove, fnrTilSoesken, canRemove, behandling, watch, visFeil, feil } = props
-  const { fields } = useFieldArray({
-    name: `soeskenMedIBeregning.${index}.data`,
-    control,
-  })
-  const behandles = hentBehandlesFraStatus(behandling?.status)
-
-  const grunnlag = watch(`soeskenMedIBeregning.${index}`)
-  const mineFeil = [...feil.filter(([feilIndex]) => feilIndex === index).flatMap((a) => a[1])]
-
-  const soeskenIPeriode = grunnlag.data
-  const antallSoeskenMed = soeskenIPeriode.filter((soesken) => soesken.skalBrukes === true).length
-  const antallSoeskenIkkeMed = soeskenIPeriode.filter((soesken) => soesken.skalBrukes === false).length
-  const antallSoeskenIkkeValgt = soeskenIPeriode.filter(
-    (soesken) => soesken.skalBrukes === undefined || soesken.skalBrukes === null
-  ).length
-
-  return (
-    <PeriodeAccordion
-      id={`soeskenjustering.${index}`}
-      title={`Periode ${index + 1}`}
-      titleHeadingLevel="3"
-      feilBorder={visFeil && mineFeil.length > 0}
-      topSummary={(expanded) => (
-        <PeriodeInfo>
-          <div>
-            <Controller
-              render={(fom) =>
-                expanded && behandles ? (
-                  <MaanedVelger
-                    label="Fra og med"
-                    value={fom.field.value}
-                    onChange={(date: Date | null) => fom.field.onChange(date)}
-                  />
-                ) : (
-                  <OppdrasSammenLes>
-                    <Label>Fra og med</Label>
-                    <BodyShort>{format(fom.field.value, 'MMMM yyyy')}</BodyShort>
-                  </OppdrasSammenLes>
-                )
-              }
-              name={`soeskenMedIBeregning.${index}.fom`}
-              control={control}
-            />
-          </div>
-          <div>
-            <Controller
-              render={(tom) =>
-                expanded && behandles ? (
-                  <MaanedvelgerMedUtnulling>
-                    <MaanedVelger
-                      onChange={(val) => tom.field.onChange(val)}
-                      label="Til og med"
-                      placeholder="Ingen slutt"
-                      value={tom.field.value}
-                    />
-                    {tom.field.value !== null && tom.field.value !== undefined ? (
-                      <FjernKnapp onClick={() => tom.field.onChange(undefined)}>Fjern sluttdato</FjernKnapp>
-                    ) : null}
-                  </MaanedvelgerMedUtnulling>
-                ) : (
-                  <OppdrasSammenLes>
-                    <Label>Til og med</Label>
-                    <BodyShort>{formaterMaanedDato('Ingen slutt', tom.field.value)}</BodyShort>
-                  </OppdrasSammenLes>
-                )
-              }
-              name={`soeskenMedIBeregning.${index}.tom`}
-              control={control}
-            />
-          </div>
-          <VertikalMidtstiltBodyShort>
-            {antallSoeskenMed} i beregning, {antallSoeskenIkkeMed} ikke i beregning{' '}
-            {antallSoeskenIkkeValgt ? <span>({antallSoeskenIkkeValgt} ikke valgt)</span> : null}
-            {mineFeil.length > 0 && visFeil ? <FeilForPeriode feil={mineFeil} /> : null}
-          </VertikalMidtstiltBodyShort>
-          {canRemove && behandles ? <FjernKnapp onClick={remove}>Slett</FjernKnapp> : null}
-        </PeriodeInfo>
-      )}
-    >
-      <UstiletListe>
-        {fields.map((item, k) => {
-          return (
-            <li key={item.id}>
-              <SoeskenContainer>
-                <Soesken person={fnrTilSoesken[item.foedselsnummer]} familieforhold={behandling.familieforhold!} />
-                <Controller
-                  name={`soeskenMedIBeregning.${index}.data.${k}`}
-                  control={control}
-                  render={(soesken) =>
-                    behandles ? (
-                      <RadioGroupRow
-                        legend="Oppdras sammen"
-                        value={soesken.field.value?.skalBrukes ?? null}
-                        onChange={(value) => {
-                          soesken.field.onChange({
-                            foedselsnummer: item.foedselsnummer,
-                            skalBrukes: value,
-                          })
-                        }}
-                      >
-                        <Radio value={true}>Ja</Radio>
-                        <Radio value={false}>Nei</Radio>
-                      </RadioGroupRow>
-                    ) : (
-                      <OppdrasSammenLes>
-                        <strong>Oppdras sammen</strong>
-                        <label>{soesken.field.value?.skalBrukes ? 'Ja' : 'Nei'}</label>
-                      </OppdrasSammenLes>
-                    )
-                  }
-                />
-              </SoeskenContainer>
-            </li>
-          )
-        })}
-      </UstiletListe>
-    </PeriodeAccordion>
-  )
-}
-
-const FeilForPeriode = (props: { feil: FeilIPeriodeGrunnlagAlle[] }) => {
-  return (
-    <>
-      {props.feil.map((feil) => (
-        <FeilContainer key={feil}>{teksterFeilIPeriode[feil]}</FeilContainer>
-      ))}
-    </>
-  )
 }
 
 const FeilIPerioder = (props: { feil: [number, FeilIPeriodeGrunnlagAlle][] }) => {
@@ -376,12 +223,6 @@ const FeilIPerioderOppsummering = styled(ErrorSummary)`
   width: 30em;
 `
 
-const FeilContainer = styled.span`
-  margin-top: 0.5em;
-  word-wrap: break-word;
-  display: block;
-`
-
 export const FEIL_I_PERIODE = [
   'TOM_FOER_FOM',
   'PERIODE_OVERLAPPER_MED_NESTE',
@@ -390,10 +231,10 @@ export const FEIL_I_PERIODE = [
   'DEKKER_IKKE_START_AV_INTERVALL',
   'DEKKER_IKKE_SLUTT_AV_INTERVALL',
 ] as const
-export type FeilIPeriode = (typeof FEIL_I_PERIODE)[number]
-export type FeilIPeriodeGrunnlagAlle = FeilIPeriode | 'IKKE_ALLE_VALGT'
+export type FeilIPeriodeSoeskenjustering = (typeof FEIL_I_PERIODE)[number]
+export type FeilIPeriodeGrunnlagAlle = FeilIPeriodeSoeskenjustering | 'IKKE_ALLE_VALGT'
 
-const teksterFeilIPeriode: Record<FeilIPeriodeGrunnlagAlle, string> = {
+export const teksterFeilIPeriode: Record<FeilIPeriodeGrunnlagAlle, string> = {
   INGEN_PERIODER: 'Minst en søskenjusteringsperiode må finnes',
   DEKKER_IKKE_SLUTT_AV_INTERVALL: 'Periodene må være komplette tilbake til virk',
   DEKKER_IKKE_START_AV_INTERVALL: 'Periodene må vare ut ytelsen',
@@ -403,56 +244,8 @@ const teksterFeilIPeriode: Record<FeilIPeriodeGrunnlagAlle, string> = {
   IKKE_ALLE_VALGT: 'Alle søsken må fylles ut',
 } as const
 
-const VertikalMidtstiltBodyShort = styled(BodyShort)`
-  margin: auto 0;
-`
-
-const FjernKnapp = styled(Button).attrs({ size: 'xsmall', variant: 'secondary' })`
-  height: fit-content;
-  width: fit-content;
-  margin: auto 0;
-`
-
-const UstiletListe = styled.ul`
+export const UstiletListe = styled.ul`
   list-style-type: none;
-`
-
-const PeriodeInfo = styled.div`
-  max-width: 80em;
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr 5em;
-  grid-gap: 1em;
-`
-
-const OppdrasSammenLes = styled.div`
-  display: flex;
-  flex-direction: column;
-`
-
-const SoeskenContainer = styled.div`
-  display: flex;
-  align-items: center;
-`
-
-const MaanedvelgerMedUtnulling = styled.div`
-  display: flex;
-  justify-content: flex-start;
-  flex-direction: row;
-  gap: 1em;
-`
-
-const RadioGroupRow = styled(RadioGroup)`
-  margin-top: 1.2em;
-
-  .navds-radio-buttons {
-    display: flex;
-    flex-direction: row;
-    gap: 12px;
-  }
-
-  legend {
-    padding-top: 9px;
-  }
 `
 
 export default Soeskenjustering

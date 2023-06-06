@@ -1,6 +1,6 @@
 import { compareAsc, differenceInDays, endOfMonth, format, parse, startOfMonth } from 'date-fns'
 import { InstitusjonsoppholdGrunnlag } from '~shared/types/Beregning'
-import { FeilIPeriode } from '~components/behandling/beregningsgrunnlag/Soeskenjustering'
+import { FeilIPeriodeSoeskenjustering } from '~components/behandling/beregningsgrunnlag/soeskenjustering/Soeskenjustering'
 
 export interface PeriodisertBeregningsgrunnlag<G> {
   fom: Date
@@ -46,12 +46,12 @@ export function feilIKomplettePerioderOverIntervall(
   grunnlag: PeriodisertBeregningsgrunnlag<unknown>[],
   fom: Date,
   tom?: Date
-): [number, FeilIPeriode][] {
+): [number, FeilIPeriodeSoeskenjustering][] {
   if (grunnlag.length === 0) {
     return [[0, 'INGEN_PERIODER']]
   }
 
-  const feil = new Set<[number, FeilIPeriode]>()
+  const feil = new Set<[number, FeilIPeriodeSoeskenjustering]>()
   const sortertMedNormaliserteDatoer = grunnlag
     .map((g, index) => ({
       ...g,
@@ -88,8 +88,8 @@ export function feilIKomplettePerioderOverIntervall(
 
 export function feilIKomplettePerioderOverIntervallInstitusjonsopphold(
   grunnlag: InstitusjonsoppholdGrunnlag
-): [number, FeilIPeriode][] {
-  const feil = new Set<[number, FeilIPeriode]>()
+): [number, FeilIPeriodeSoeskenjustering][] {
+  const feil = new Set<[number, FeilIPeriodeSoeskenjustering]>()
   if (!grunnlag || grunnlag?.length === 0) {
     return []
   }

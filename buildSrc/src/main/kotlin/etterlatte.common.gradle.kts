@@ -1,7 +1,3 @@
-import gradle.kotlin.dsl.accessors._a7ea0f62ad9d6a9eb732bb7f38634da0.implementation
-import gradle.kotlin.dsl.accessors._a7ea0f62ad9d6a9eb732bb7f38634da0.runtimeClasspath
-import gradle.kotlin.dsl.accessors._a7ea0f62ad9d6a9eb732bb7f38634da0.testImplementation
-import gradle.kotlin.dsl.accessors._a7ea0f62ad9d6a9eb732bb7f38634da0.testRuntimeOnly
 import org.gradle.accessors.dm.LibrariesForLibs
 import org.gradle.api.tasks.testing.logging.TestLogEvent
 

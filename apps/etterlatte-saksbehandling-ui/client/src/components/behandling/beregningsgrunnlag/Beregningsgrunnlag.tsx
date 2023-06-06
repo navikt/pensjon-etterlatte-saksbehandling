@@ -5,10 +5,16 @@ import { HeadingWrapper } from '~components/behandling/soeknadsoversikt/styled'
 import { BodyShort, Heading } from '@navikt/ds-react'
 import { formaterStringDato } from '~utils/formattering'
 import { Content, ContentHeader } from '~shared/styled'
-import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
+import { IBehandlingsType, IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
+import { formaterVedtaksResultat, useVedtaksResultat } from '~components/behandling/useVedtaksResultat'
 
 const Beregningsgrunnlag = (props: { behandling: IDetaljertBehandling }) => {
   const { behandling } = props
+  const vedtaksresultat =
+    behandling.behandlingType !== IBehandlingsType.MANUELT_OPPHOER ? useVedtaksResultat() : 'opphoer'
+  const virkningstidspunkt = behandling.virkningstidspunkt?.dato
+    ? formaterStringDato(behandling.virkningstidspunkt.dato)
+    : undefined
 
   return (
     <Content>
@@ -18,11 +24,7 @@ const Beregningsgrunnlag = (props: { behandling: IDetaljertBehandling }) => {
             Beregningsgrunnlag
           </Heading>
           <BodyShort spacing>
-            Vilkårsresultat:{' '}
-            <strong>
-              Innvilget fra{' '}
-              {behandling.virkningstidspunkt ? formaterStringDato(behandling.virkningstidspunkt.dato) : 'ukjent dato'}
-            </strong>
+            Vilkårsresultat: <strong>{formaterVedtaksResultat(vedtaksresultat, virkningstidspunkt)}</strong>
           </BodyShort>
         </HeadingWrapper>
       </ContentHeader>

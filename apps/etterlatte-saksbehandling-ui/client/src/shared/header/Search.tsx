@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom'
 import { ErrorColored, InformationColored } from '@navikt/ds-icons'
 import { isFailure, isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
 import { getPerson } from '~shared/api/grunnlag'
-import { INVALID_FNR } from '~utils/fnr'
+import { GYLDIG_FNR } from '~utils/fnr'
 import { ApiError } from '~shared/api/apiClient'
 import { finnSakForSoek } from '~shared/api/behandling'
 
@@ -16,17 +16,16 @@ export const Search = () => {
   const [personStatus, hentPerson, reset] = useApiCall(getPerson)
   const [funnetFnrForSak, finnSak, resetSakSoek] = useApiCall(finnSakForSoek)
 
-  const ugyldigInput = INVALID_FNR(searchInput)
-
+  const gyldigInputFnr = GYLDIG_FNR(searchInput)
+  const gyldigInputSakId = /^\d{1,10}$/.test(searchInput ?? '')
   const avgjoerSoek = () => {
-    if (ugyldigInput) {
-      if (searchInput && /^\d+$/.test(searchInput ?? '')) {
-        finnSak(searchInput)
-      } else {
-        setFeilInput(true)
-      }
-    } else {
+    if (gyldigInputFnr) {
       hentPerson(searchInput)
+      return
+    }
+    if (gyldigInputSakId) {
+      finnSak(searchInput)
+      return
     }
   }
 
@@ -41,7 +40,7 @@ export const Search = () => {
     resetSakSoek()
     if (searchInput.length === 0) {
       setFeilInput(false)
-    } else if (feilInput && ugyldigInput) {
+    } else if (feilInput && (!gyldigInputFnr || !gyldigInputSakId)) {
       setFeilInput(true)
     } else {
       setFeilInput(false)

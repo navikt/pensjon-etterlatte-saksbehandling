@@ -10,7 +10,7 @@ import Spinner from '~shared/Spinner'
 import { isFailure, isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
 import { BodyShort, Label } from '@navikt/ds-react'
 import { getPerson } from '~shared/api/grunnlag'
-import { INVALID_FNR } from '~utils/fnr'
+import { GYLDIG_FNR } from '~utils/fnr'
 
 export const Person = () => {
   const [personStatus, hentPerson] = useApiCall(getPerson)
@@ -36,7 +36,7 @@ export const Person = () => {
     return (
       <Container>
         <BodyShort>
-          {INVALID_FNR(match.fnr) ? 'Fødselsnummeret i URLen er ugyldig' : JSON.stringify(personStatus)}
+          {!GYLDIG_FNR(match.fnr) ? 'Fødselsnummeret i URLen er ugyldig' : JSON.stringify(personStatus)}
         </BodyShort>
       </Container>
     )

@@ -103,7 +103,7 @@ internal fun Route.sakRoutes(
         }
     }
 
-    route("/api/finnsak/{$SAKID_CALL_PARAMETER}") {
+    route("/api/sak/{$SAKID_CALL_PARAMETER}") {
         get {
             withSakIdInternal(tilgangService) { sakId ->
                 val sak = inTransaction {

@@ -124,5 +124,5 @@ export const hentGrunnlagsendringshendelserInstitusjonsoppholdforSak = async (
 }
 
 export const finnSakForSoek = async (maybeSakdId: string): Promise<ApiResponse<String>> => {
-  return apiClient.get(`/finnsak/${maybeSakdId}`)
+  return apiClient.get(`/sak/${maybeSakdId}`)
 }

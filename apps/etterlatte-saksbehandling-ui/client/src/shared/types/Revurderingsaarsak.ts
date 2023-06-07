@@ -7,6 +7,7 @@ export enum Revurderingsaarsak {
   BARN = 'BARN',
   DOEDSFALL = 'DOEDSFALL',
   VERGEMAAL_ELLER_FREMTIDSFULLMAKT = 'VERGEMAAL_ELLER_FREMTIDSFULLMAKT',
+  INNTEKTSENDRING = 'INNTEKTSENDRING',
 }
 
 export const tekstRevurderingsaarsak: Record<Revurderingsaarsak, string> = {
@@ -17,6 +18,7 @@ export const tekstRevurderingsaarsak: Record<Revurderingsaarsak, string> = {
   BARN: 'Barn',
   DOEDSFALL: 'Dødsfall mottaker',
   VERGEMAAL_ELLER_FREMTIDSFULLMAKT: 'Verge / fullmakt',
+  INNTEKTSENDRING: 'Endring av inntekt',
 } as const
 
 export const erOpphoer = (revurderingsaarsak: Revurderingsaarsak) =>

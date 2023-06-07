@@ -4,6 +4,7 @@ import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.regulering.AppBuilder
 import no.nav.etterlatte.regulering.LoependeYtelserforespoersel
 import no.nav.etterlatte.regulering.OpprettVedtakforespoersel
+import no.nav.etterlatte.vedtaksvurdering.rivers.LagreIverksattVedtak
 import no.nav.helse.rapids_rivers.RapidApplication
 import rapidsandrivers.getRapidEnv
 
@@ -14,5 +15,6 @@ fun main() {
         LoependeYtelserforespoersel(rapidsConnection, vedtakKlient)
         OpprettVedtakforespoersel(rapidsConnection, vedtakKlient)
         MigreringHendelser(rapidsConnection, vedtakKlient)
+        LagreIverksattVedtak(rapidsConnection, vedtakKlient)
     }.start()
 }

@@ -1,10 +1,8 @@
-package vedtaksvurdering.rivers
-
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.spyk
-import no.nav.etterlatte.vedtaksvurdering.VedtaksvurderingService
+import no.nav.etterlatte.VedtakService
 import no.nav.etterlatte.vedtaksvurdering.rivers.LagreIverksattVedtak
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions
@@ -23,8 +21,8 @@ internal class LagreIverksattVedtakTest {
             Companion::class.java.getResource(file)?.readText() ?: throw FileNotFoundException("Fant ikke filen $file")
     }
 
-    private val vedtaksvurderingServiceMock = mockk<VedtaksvurderingService>()
-    private val inspector = spyk(TestRapid().apply { LagreIverksattVedtak(this, vedtaksvurderingServiceMock, mockk()) })
+    private val vedtaksvurderingServiceMock = mockk<VedtakService>()
+    private val inspector = spyk(TestRapid().apply { LagreIverksattVedtak(this, vedtaksvurderingServiceMock) })
 
     @Test
     fun `skal lese utbetalingsmelding`() {
@@ -32,11 +30,10 @@ internal class LagreIverksattVedtakTest {
         val sakIdVal = 1234L
         val vedtakIdVal = 1L
         val behandlingIdSlot = slot<UUID>()
-        every { vedtaksvurderingServiceMock.iverksattVedtak(capture(behandlingIdSlot)) } returns mockk()
-        every { vedtaksvurderingServiceMock.hentVedtak(behandlingIdVal) } returns mockk {
-            every { sakId } returns sakIdVal
-            every { behandlingId } returns behandlingIdVal
-            every { id } returns vedtakIdVal
+        every { vedtaksvurderingServiceMock.iverksattVedtak(capture(behandlingIdSlot)) } returns mockk {
+            every { sak } returns mockk { every { id } returns sakIdVal }
+            every { behandling } returns mockk { every { id } returns behandlingIdVal }
+            every { vedtakId } returns vedtakIdVal
         }
 
         inspector.apply { sendTestMessage(melding) }.inspektør

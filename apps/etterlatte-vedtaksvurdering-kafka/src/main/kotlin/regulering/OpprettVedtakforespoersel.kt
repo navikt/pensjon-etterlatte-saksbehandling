@@ -1,5 +1,6 @@
 package no.nav.etterlatte.regulering
 
+import no.nav.etterlatte.VedtakService
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName

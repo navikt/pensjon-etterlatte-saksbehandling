@@ -2,6 +2,7 @@ package no.nav.etterlatte.regulering
 
 import com.fasterxml.jackson.databind.SerializationFeature
 import io.ktor.client.HttpClient
+import no.nav.etterlatte.VedtakServiceImpl
 import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.common.requireEnvValue
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials

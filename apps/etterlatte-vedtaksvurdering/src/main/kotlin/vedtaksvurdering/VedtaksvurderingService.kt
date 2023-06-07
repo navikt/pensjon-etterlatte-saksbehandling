@@ -429,6 +429,9 @@ class VedtaksvurderingService(
 
     fun tilbakestillIkkeIverksatteVedtak(behandlingId: UUID): Vedtak? =
         repository.tilbakestillIkkeIverksatteVedtak(behandlingId)
+
+    suspend fun postTilBehandling(behandlingId: UUID, bruker: Bruker, vedtakId: Long) =
+        behandlingKlient.iverksett(behandlingId, bruker, vedtakId)
 }
 
 class VedtakTilstandException(gjeldendeStatus: VedtakStatus, forventetStatus: List<VedtakStatus>) :

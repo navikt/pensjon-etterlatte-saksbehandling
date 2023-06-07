@@ -20,6 +20,7 @@ on:
       - libs/testdata/**
       - libs/etterlatte-ktor/**
       - libs/etterlatte-database/**
+      - libs/etterlatte-vedtaksvurdering-model/**
       - libs/ktor2client-onbehalfof/**
       - libs/ktor2client-auth-clientcredentials/**
       - gradle/libs.versions.toml
@@ -32,6 +33,7 @@ on:
       - libs/testdata/**
       - libs/etterlatte-ktor/**
       - libs/etterlatte-database/**
+      - libs/etterlatte-vedtaksvurdering-model/**
       - libs/ktor2client-onbehalfof/**
       - libs/ktor2client-auth-clientcredentials/**
       - gradle/libs.versions.toml

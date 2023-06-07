@@ -61,7 +61,7 @@ export const TrygdetidGrunnlagListe: React.FC<Props> = ({
       ) : (
         <p>Legg til trygdetid fra dødsdato til og med kalenderåret avdøde hadde blitt 66 år.</p>
       )}
-      {trygdetidGrunnlagListe.length ? (
+      {trygdetidGrunnlagListe.length > 0 && (
         <TableWrapper>
           <Table size={'medium'}>
             <Table.Header>
@@ -94,12 +94,10 @@ export const TrygdetidGrunnlagListe: React.FC<Props> = ({
             </Table.Body>
           </Table>
         </TableWrapper>
-      ) : (
-        <p>Ingen perioder registert</p>
       )}
 
       <NyEllerOppdatertPeriode>
-        {endreModus.status ? (
+        {endreModus.status && (
           <TrygdetidGrunnlag
             setTrygdetid={oppdaterStateOgSettTrygdetid}
             avbryt={() => setEndreModus({ status: false, trygdetidGrunnlagId: '' })}
@@ -107,11 +105,13 @@ export const TrygdetidGrunnlagListe: React.FC<Props> = ({
             trygdetidGrunnlagType={trygdetidGrunnlagType}
             landListe={landListe}
           />
-        ) : (
-          <Button size="small" onClick={() => setEndreModus({ status: true, trygdetidGrunnlagId: '' })}>
-            Legg til ny periode
-          </Button>
         )}
+        {!endreModus.status &&
+          !(trygdetidGrunnlagType === ITrygdetidGrunnlagType.FREMTIDIG && trygdetidGrunnlagListe.length > 0) && (
+            <Button size="small" onClick={() => setEndreModus({ status: true, trygdetidGrunnlagId: '' })}>
+              Legg til ny periode
+            </Button>
+          )}
       </NyEllerOppdatertPeriode>
     </GrunnlagListe>
   )

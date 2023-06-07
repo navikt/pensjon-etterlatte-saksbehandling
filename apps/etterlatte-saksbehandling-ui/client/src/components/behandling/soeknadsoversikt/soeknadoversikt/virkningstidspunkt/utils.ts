@@ -50,9 +50,18 @@ export const OMS_OPPHOER_HJEMLER: Array<Hjemmel> = [
   },
 ]
 
+export const OMS_INNTEKTSENDRING_HJEMLER: Array<Hjemmel> = [
+  {
+    lenke: 'https://lovdata.no/lov/(finnes ikke)',
+    tittel: 'Folketrygdloven § 17-9, jf. utkast til forskrift § 10 (er ikke vedtatt enda)',
+  },
+]
+
 export const OMS_FOERSTEGANGSBEHANDLING_BESKRIVELSE =
   'Omstillingsstønad kan innvilges fra og med den første i måneden etter dødsfallet, men kan som hovedregel ikke gis for mer enn tre måneder før søknaden er mottatt hos NAV.'
 export const OMS_REVURDERING_BESKRIVELSE =
   'Omstillingsstønad blir satt opp fra og med den måneden vilkårene for dette er oppfylt, og satt ned fra og med måneden etter den måneden vilkårene for dette er oppfylt. Omstillingsstønad stanses ved utgangen av den måneden retten til ytelsen faller bort.'
 export const OMS_OPPHOER_BESKRIVELSE =
   'Omstillingsstønaden stanses ved utgangen av den måneden retten til ytelsen faller bort.'
+export const OMS_INNTEKTSENDRING_BESKRIVELSE =
+  'Alle inntektsendringer utenom etteroppgjør skal gjøres fra måneden etter bruker har meldt fra om endringen.'

@@ -2,21 +2,24 @@ import { useState } from 'react'
 import { Button, Heading, Modal } from '@navikt/ds-react'
 import { WarningText } from '~shared/styled'
 import { avbrytBehandling } from '~shared/api/behandling'
-import { useMatch, useNavigate } from 'react-router'
+import { useNavigate } from 'react-router'
 import { handlinger } from './typer'
 import { ApiResponse } from '~shared/api/apiClient'
 import { ButtonWrapper } from '~shared/modal/modal'
+import { useAppSelector } from '~store/Store'
+import { IBehandlingsType } from '~shared/types/IDetaljertBehandling'
 
 export const AvbrytBehandling = () => {
   const navigate = useNavigate()
-  const match = useMatch('/behandling/:behandlingId/*')
   const [isOpen, setIsOpen] = useState(false)
   const [error, setError] = useState(false)
 
+  const behandling = useAppSelector((state) => state.behandlingReducer.behandling)
+  const erFoerstegangsbehandling = behandling?.behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING
+
   const avbryt = () => {
-    //TODO!
-    if (match?.params.behandlingId) {
-      avbrytBehandling(match.params.behandlingId).then((response: ApiResponse<any>) => {
+    if (behandling?.id) {
+      avbrytBehandling(behandling.id).then((response: ApiResponse<any>) => {
         if (response.status === 'ok') {
           navigate('/')
         } else {
@@ -29,7 +32,7 @@ export const AvbrytBehandling = () => {
   return (
     <>
       <Button variant={'tertiary'} className="textButton" onClick={() => setIsOpen(true)}>
-        {handlinger.AVBRYT.navn}
+        {erFoerstegangsbehandling ? handlinger.AVBRYT.navn : handlinger.AVBRYT_REVURDERING.navn}
       </Button>
 
       <Modal
@@ -43,7 +46,8 @@ export const AvbrytBehandling = () => {
       >
         <Modal.Content>
           <Heading level={'1'} spacing size={'medium'} id="modal-heading">
-            Er du sikker på at du vil avbryte behandlingen? Saken blir annullert og kan ikke behandles videre i Gjenny.
+            Er du sikker på at du vil avbryte behandlingen?
+            {erFoerstegangsbehandling ? 'Saken blir annullert og kan ikke behandles videre i Gjenny.' : null}
           </Heading>
           <ButtonWrapper>
             <Button
@@ -61,7 +65,7 @@ export const AvbrytBehandling = () => {
               {handlinger.AVBRYT_MODAL.JA.navn}
             </Button>
           </ButtonWrapper>
-          {error && <WarningText>Det oppsto enn feil ved avbryting av behandlingen.</WarningText>}
+          {error && <WarningText>Det oppsto en feil ved avbryting av behandlingen.</WarningText>}
         </Modal.Content>
       </Modal>
     </>

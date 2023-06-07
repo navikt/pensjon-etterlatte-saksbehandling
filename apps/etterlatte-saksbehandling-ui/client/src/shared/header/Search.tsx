@@ -23,6 +23,7 @@ export const Search = () => {
       if (searchInput && /^\d+$/.test(searchInput ?? '')) {
         finnSak(searchInput)
       } else {
+        setFeilInput(true)
       }
     } else {
       hentPerson(searchInput)
@@ -85,7 +86,7 @@ export const Search = () => {
             <InformationColored />
           </span>
           <SearchResult>
-            <BodyShort className="text">Tast inn gyldig fødselsnummer</BodyShort>
+            <BodyShort className="text">Tast inn gyldig fødselsnummer eller saksid</BodyShort>
           </SearchResult>
         </Dropdown>
       )}

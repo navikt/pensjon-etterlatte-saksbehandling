@@ -70,7 +70,7 @@ export const Search = () => {
         <SearchField.Button onClick={avgjoerSoek} />
       </SearchField>
 
-      {isPending(personStatus) && (
+      {(isPending(personStatus) || isPending(funnetFnrForSak)) && (
         <Dropdown>
           <SpinnerContent>
             <Loader />
@@ -90,6 +90,16 @@ export const Search = () => {
         </Dropdown>
       )}
 
+      {isFailure(funnetFnrForSak) && (
+        <Dropdown error={true}>
+          <span className="icon">
+            <ErrorColored />
+          </span>
+          <SearchResult>
+            <BodyShort className="text">{feilmelding(funnetFnrForSak.error)}</BodyShort>
+          </SearchResult>
+        </Dropdown>
+      )}
       {isFailure(personStatus) && (
         <Dropdown error={true}>
           <span className="icon">

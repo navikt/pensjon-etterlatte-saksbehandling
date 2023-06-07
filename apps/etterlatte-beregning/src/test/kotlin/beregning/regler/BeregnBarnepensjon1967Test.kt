@@ -73,7 +73,7 @@ internal class BeregnBarnepensjon1967Test {
     }
 
     @Test
-    fun `beregnBarnepensjon1967RegelMedInstitusjon gir 267,01875 ved inst-opphold, 40 aars trygdetid og 3 soesken`() {
+    fun `kan beregne med institusjonsopphold, 40 aars trygdetid og 3 soesken`() {
         val resultat = beregnBarnepensjon1967RegelMedInstitusjon.anvend(
             grunnlag = barnepensjonGrunnlag(
                 soeskenKull = listOf(FNR_1, FNR_2, FNR_3),
@@ -86,7 +86,7 @@ internal class BeregnBarnepensjon1967Test {
     }
 
     @Test
-    fun `beregnBarnepensjon1967RegelMedInstitusjon gi 1335,875 ved 20 aars trygdetid og tre soesken`() {
+    fun `kan beregne med institusjonsopphold, 20 aars trygdetid og 3 soesken`() {
         val resultat = beregnBarnepensjon1967RegelMedInstitusjon.anvend(
             grunnlag = barnepensjonGrunnlag(
                 soeskenKull = listOf(FNR_1, FNR_2, FNR_3),

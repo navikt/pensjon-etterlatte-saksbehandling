@@ -2,7 +2,7 @@ import { Content, ContentHeader } from '~shared/styled'
 import { BodyShort, Heading } from '@navikt/ds-react'
 import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapper'
 import { NesteOgTilbake } from '../handlinger/NesteOgTilbake'
-import { hentBehandlesFraStatus } from '../felles/utils'
+import { hentBehandlesFraStatus, requireNotNull } from '../felles/utils'
 import Virkningstidspunkt, {
   Hjemmel,
 } from '~components/behandling/soeknadsoversikt/soeknadoversikt/virkningstidspunkt/Virkningstidspunkt'
@@ -26,8 +26,8 @@ import { ISaksType } from '~components/behandling/fargetags/saksType'
 import { Revurderingsaarsak, tekstRevurderingsaarsak } from '~shared/types/Revurderingsaarsak'
 import styled from 'styled-components'
 
-const revurderingsaarsakTilTekst = (revurderingsaarsak: Revurderingsaarsak | null | undefined): string =>
-  !revurderingsaarsak ? 'ukjent årsak' : tekstRevurderingsaarsak[revurderingsaarsak]
+const revurderingsaarsakTilTekst = (revurderingsaarsak: Revurderingsaarsak): string =>
+  tekstRevurderingsaarsak[revurderingsaarsak]
 
 const hjemlerOgBeskrivelse = (sakType: ISaksType, revurderingsaarsak: Revurderingsaarsak): [Array<Hjemmel>, string] => {
   switch (sakType) {
@@ -61,7 +61,11 @@ const hjemlerOgBeskrivelseBarnepensjon = (revurderingsaarsak: Revurderingsaarsak
 export const Revurderingsoversikt = (props: { behandling: IDetaljertBehandling }) => {
   const { behandling } = props
   const behandles = hentBehandlesFraStatus(behandling.status)
-  const [hjemler, beskrivelse] = hjemlerOgBeskrivelse(behandling.sakType, behandling.revurderingsaarsak!!)
+  const revurderingsaarsak = requireNotNull(
+    behandling.revurderingsaarsak,
+    'Kan ikke starte en revurdering uten en revurderingsårsak'
+  )
+  const [hjemler, beskrivelse] = hjemlerOgBeskrivelse(behandling.sakType, revurderingsaarsak)
 
   return (
     <Content>
@@ -72,7 +76,7 @@ export const Revurderingsoversikt = (props: { behandling: IDetaljertBehandling }
           </Heading>
         </HeadingWrapper>
         <BodyShort>
-          Revurdering på grunn av <Lowercase>{revurderingsaarsakTilTekst(behandling.revurderingsaarsak)}</Lowercase>.
+          Revurdering på grunn av <Lowercase>{revurderingsaarsakTilTekst(revurderingsaarsak)}</Lowercase>.
         </BodyShort>
       </ContentHeader>
       <Innhold>

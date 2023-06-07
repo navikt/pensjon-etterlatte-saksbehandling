@@ -1,0 +1,28 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="etterlatte-pdltjenester.dev-gcp" type="JetRunConfigurationType">
+    <envs>
+      <env name="HTTP_PORT" value="8091" />
+      <env name="LOGBACK_APPENDER" value="STDOUT" />
+      <env name="PDL_URL" value="https://pdl-api.dev-fss-pub.nais.io/graphql" />
+      <env name="PDL_OUTBOUND_SCOPE" value="api://dev-fss.pdl.pdl-api/.default" />
+      <env name="PPS_URL" value="https://pensjon-parallelle-sannheter.intern.dev.nav.no" />
+    </envs>
+    <option name="MAIN_CLASS_NAME" value="no.nav.etterlatte.ApplicationKt" />
+    <module name="pensjon-etterlatte-saksbehandling.apps.etterlatte-pdltjenester.main" />
+    <shortenClasspath name="NONE" />
+    <extension name="net.ashald.envfile">
+      <option name="IS_ENABLED" value="true" />
+      <option name="IS_SUBST" value="false" />
+      <option name="IS_PATH_MACRO_SUPPORTED" value="false" />
+      <option name="IS_IGNORE_MISSING_FILES" value="false" />
+      <option name="IS_ENABLE_EXPERIMENTAL_INTEGRATIONS" value="false" />
+      <ENTRIES>
+        <ENTRY IS_ENABLED="true" PARSER="runconfig" IS_EXECUTABLE="false" />
+        <ENTRY IS_ENABLED="true" PARSER="env" IS_EXECUTABLE="false" PATH="apps/etterlatte-pdltjenester/.env.dev-gcp" />
+      </ENTRIES>
+    </extension>
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

@@ -1,19 +1,15 @@
 version: "3"
 services:
   postgres:
+    restart: always
+    container_name: etterlatte-grunnlag
     image: postgres
     ports:
-      - '5438:5432'
+      - '5440:5432'
     environment:
       - POSTGRES_HOST_AUTH_METHOD=trust
-  mq:
-    image: 'icr.io/ibm-messaging/mq'
-    ports:
-      - '1414:1414'
-    environment:
-      - LICENSE=accept
-      - MQ_QMGR_NAME=QM1
   kafka:
+    container_name: etterlatte-rapid
     image: 'bitnami/kafka:latest'
     ports:
       - '9092:9092'
@@ -27,14 +23,3 @@ services:
       - KAFKA_BROKER_ID=1
       - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=1@127.0.0.1:9093
       - ALLOW_PLAINTEXT_LISTENER=yes
-  api-mock:
-    image: 'mockserver/mockserver'
-    ports:
-      - "1080:1080"
-    environment:
-      - MOCKSERVER_INITIALIZATION_JSON_PATH=/api-mock/elector-response.json
-      - MOCKSERVER_WATCH_INITIALIZATION_JSON='true'
-    volumes:
-      - ./api-mock/:/api-mock
-
-

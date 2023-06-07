@@ -1,0 +1,39 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="etterlatte-fordeler.dev-gcp" type="JetRunConfigurationType">
+    <envs>
+      <env name="HTTP_PORT" value="8093" />
+      <env name="LOGBACK_APPENDER" value="STDOUT" />
+      <env name="NAIS_APP_NAME" value="etterlatte-fordeler" />
+      <env name="KAFKA_RAPID_TOPIC" value="etterlatte" />
+      <env name="KAFKA_RESET_POLICY" value="earliest" />
+      <env name="KAFKA_BOOTSTRAP_SERVERS" value="0.0.0.0:9092" />
+      <env name="DB_HOST" value="localhost" />
+      <env name="DB_PORT" value="5441" />
+      <env name="DB_DATABASE" value="postgres" />
+      <env name="DB_USERNAME" value="postgres" />
+      <env name="DB_PASSWORD" value="postgres" />
+      <env name="BEHANDLING_AZURE_SCOPE" value="59967ac8-009c-492e-a618-e5a0f6b3e4e4" />
+      <env name="BEHANDLING_URL" value="https://etterlatte-behandling.intern.dev.nav.no" />
+      <env name="PDL_URL" value="https://etterlatte-pdltjenester.intern.dev.nav.no/person" />
+      <env name="PDL_AZURE_SCOPE" value="api://dev-gcp.etterlatte.etterlatte-pdltjenester/.default" />
+      <env name="FEATURE_MAX_FORDELING_TIL_GJENNY" value="-1" />
+    </envs>
+    <option name="MAIN_CLASS_NAME" value="no.nav.etterlatte.ApplicationKt" />
+    <module name="pensjon-etterlatte-saksbehandling.apps.etterlatte-fordeler.main" />
+    <shortenClasspath name="NONE" />
+    <extension name="net.ashald.envfile">
+      <option name="IS_ENABLED" value="true" />
+      <option name="IS_SUBST" value="false" />
+      <option name="IS_PATH_MACRO_SUPPORTED" value="false" />
+      <option name="IS_IGNORE_MISSING_FILES" value="false" />
+      <option name="IS_ENABLE_EXPERIMENTAL_INTEGRATIONS" value="false" />
+      <ENTRIES>
+          <ENTRY IS_ENABLED="true" PARSER="runconfig" IS_EXECUTABLE="false" />
+          <ENTRY IS_ENABLED="true" PARSER="env" IS_EXECUTABLE="false" PATH="apps/etterlatte-fordeler/.env.dev-gcp" />
+      </ENTRIES>
+    </extension>
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

@@ -1,0 +1,54 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="etterlatte-behandling.dev-gcp" type="JetRunConfigurationType">
+    <envs>
+      <env name="HTTP_PORT" value="8090" />
+      <env name="DEV" value="true" />
+      <env name="LOGBACK_APPENDER" value="STDOUT" />
+      <env name="NAIS_APP_NAME" value="etterlatte-behandling" />
+      <env name="NAIS_CLUSTER_NAME" value="dev-gcp" />
+      <env name="DB_HOST" value="localhost" />
+      <env name="DB_PORT" value="5439" />
+      <env name="DB_DATABASE" value="postgres" />
+      <env name="DB_USERNAME" value="postgres" />
+      <env name="DB_PASSWORD" value="postgres" />
+      <env name="NAVANSATT_URL" value="https://navansatt.dev-fss-pub.nais.io" />
+      <env name="NORG2_URL" value="https://norg2.dev-fss-pub.nais.io/norg2/api/v1" />
+      <env name="ELECTOR_PATH" value="localhost:9091" />
+      <env name="ETTERLATTE_NAVANSATT_OUTBOUND_SCOPE" value="api://dev-fss.teampensjon.navansatt/.default" />
+      <env name="GRUNNLAG_AZURE_SCOPE" value="api://dev-gcp.etterlatte.etterlatte-grunnlag/.default" />
+      <env name="PDL_AZURE_SCOPE" value="api://dev-gcp.etterlatte.etterlatte-pdltjenester/.default" />
+      <env name="ETTERLATTE_VEDTAK_CLIENT_ID" value="069b1b2c-0a06-4cc9-8418-f100b8ff71be" />
+      <env name="ETTERLATTE_VEDTAK_URL" value="https://etterlatte-vedtak.intern.dev.nav.no" />
+      <env name="ETTERLATTE_GRUNNLAG_CLIENT_ID" value="ce96a301-13db-4409-b277-5b27f464d08b" />
+      <env name="ETTERLATTE_GRUNNLAG_URL" value="https://etterlatte-grunnlag.intern.dev.nav.no/api" />
+      <env name="AZUREAD_ATTESTANT_GROUPID" value="63f46f74-84a8-4d1c-87a8-78532ab3ae60" />
+      <env name="AZUREAD_SAKSBEHANDLER_GROUPID" value="8bb9b8d1-f46a-4ade-8ee8-5895eccdf8cf" />
+      <env name="AZUREAD_STRENGT_FORTROLIG_GROUPID" value="5ef775f2-61f8-4283-bf3d-8d03f428aa14" />
+      <env name="AZUREAD_FORTROLIG_GROUPID" value="ea930b6b-9397-44d9-b9e6-f4cf527a632a" />
+      <env name="AZUREAD_EGEN_ANSATT_GROUPID" value="dbe4ad45-320b-4e9a-aaa1-73cca4ee124d" />
+      <env name="AZUREAD_NASJONAL_TILGANG_UTEN_LOGG_GROUPID" value="753805ea-65a7-4855-bdc3-e6130348df9f" />
+      <env name="AZUREAD_NASJONAL_TILGANG_MED_LOGG_GROUPID" value="ea7411eb-8b48-41a0-bc56-7b521fbf0c25" />
+      <env name="HENDELSE_JOB_FREKVENS" value="1" />
+      <env name="HENDELSE_MINUTTER_GAMLE_HENDELSER" value="1" />
+      <env name="AZURE_SCOPE_SKJERMEDE_PIP" value="api://dev-gcp.nom.skjermede-personer-pip/.default" />
+      <env name="SKJERMING_URL" value="https://skjermede-personer-pip.intern.dev.nav.no" />
+    </envs>
+    <option name="MAIN_CLASS_NAME" value="no.nav.etterlatte.ApplicationKt" />
+    <module name="pensjon-etterlatte-saksbehandling.apps.etterlatte-behandling.main" />
+    <shortenClasspath name="NONE" />
+    <extension name="net.ashald.envfile">
+      <option name="IS_ENABLED" value="true" />
+      <option name="IS_SUBST" value="false" />
+      <option name="IS_PATH_MACRO_SUPPORTED" value="false" />
+      <option name="IS_IGNORE_MISSING_FILES" value="false" />
+      <option name="IS_ENABLE_EXPERIMENTAL_INTEGRATIONS" value="false" />
+      <ENTRIES>
+        <ENTRY IS_ENABLED="true" PARSER="runconfig" IS_EXECUTABLE="false" />
+        <ENTRY IS_ENABLED="true" PARSER="env" IS_EXECUTABLE="false" PATH="apps/etterlatte-behandling/.env.dev-gcp" />
+      </ENTRIES>
+    </extension>
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

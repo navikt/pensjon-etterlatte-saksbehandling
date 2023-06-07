@@ -3,27 +3,24 @@ package no.nav.etterlatte.brev
 import no.nav.etterlatte.brev.adresse.AdresseService
 import no.nav.etterlatte.brev.behandling.Behandling
 import no.nav.etterlatte.brev.behandling.SakOgBehandlingService
-import no.nav.etterlatte.brev.brevbaker.BrevbakerHelpers
 import no.nav.etterlatte.brev.brevbaker.BrevbakerKlient
 import no.nav.etterlatte.brev.brevbaker.BrevbakerRequest
-import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode
-import no.nav.etterlatte.brev.brevbaker.LanguageCode
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.dokarkiv.DokarkivServiceImpl
 import no.nav.etterlatte.brev.journalpost.JournalpostResponse
 import no.nav.etterlatte.brev.model.Brev
+import no.nav.etterlatte.brev.model.BrevData
+import no.nav.etterlatte.brev.model.BrevDataMapper
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.BrevInnhold
 import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.ManueltBrevData
 import no.nav.etterlatte.brev.model.OpprettNyttBrev
+import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.Slate
-import no.nav.etterlatte.brev.model.Spraak
+import no.nav.etterlatte.brev.model.SlateHelper.hentInitiellPayload
 import no.nav.etterlatte.brev.model.Status
-import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
-import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.rivers.VedtakTilJournalfoering
 import no.nav.etterlatte.token.Bruker
 import org.slf4j.LoggerFactory
@@ -65,12 +62,16 @@ class VedtaksbrevService(
 
         val vedtakType = behandling.vedtak.type
 
+        val tittel = "Vedtak om ${vedtakType.name.lowercase()}"
+        val innhold = BrevInnhold(tittel, behandling.spraak)
+
         val nyttBrev = OpprettNyttBrev(
+            sakId = sakId,
             behandlingId = behandling.behandlingId,
-            prosessType = hentProsessType(behandling.sakType, vedtakType),
+            prosessType = BrevProsessType.fra(behandling.sakType, vedtakType),
             soekerFnr = behandling.persongalleri.soeker.fnr.value,
-            tittel = "Vedtak om ${vedtakType.name.lowercase()}",
-            mottaker = mottaker
+            mottaker = mottaker,
+            innhold = innhold
         )
 
         return db.opprettBrev(nyttBrev)
@@ -80,77 +81,44 @@ class VedtaksbrevService(
         sakId: Long,
         behandlingId: UUID,
         bruker: Bruker
-    ): ByteArray {
+    ): Pdf {
         val brev = requireNotNull(hentVedtaksbrev(behandlingId))
 
         if (!brev.kanEndres()) {
             logger.info("Brev har status ${brev.status} - returnerer lagret innhold")
-            return requireNotNull(db.hentBrevInnhold(brev.id)?.data)
+            return requireNotNull(db.hentPdf(brev.id))
         }
 
         val behandling = sakOgBehandlingService.hentBehandling(sakId, behandlingId, bruker)
-
-        return when (brev.prosessType) {
-            BrevProsessType.AUTOMATISK -> genererPdfForAutomatiskBrev(brev, behandling, bruker)
-            BrevProsessType.MANUELL -> genererPdfForManueltBrev(brev, behandling, bruker)
-        }
-    }
-
-    private suspend fun genererPdfForAutomatiskBrev(
-        brev: Brev,
-        behandling: Behandling,
-        bruker: Bruker
-    ): ByteArray {
         val avsender = adresseService.hentAvsender(behandling.vedtak)
 
-        val brevRequest = BrevbakerRequest.fra(behandling, avsender, brev.mottaker)
-        val pdf = genererPdf(brev.id, brevRequest)
+        val brevData = opprettBrevData(brev, behandling)
+        val brevRequest = BrevbakerRequest.fra(brevData, behandling, avsender)
 
-        hvisInnholdKanFerdigstilles(brev.id, behandling, bruker) {
-            db.opprettInnholdOgFerdigstill(brev.id, BrevInnhold(behandling.spraak, data = pdf))
-        }
-
-        return pdf
+        return genererPdf(brev.id, brevRequest)
+            .also { pdf -> ferdigstillHvisVedtakFattet(brev, behandling, pdf, bruker) }
     }
 
-    private suspend fun genererPdfForManueltBrev(
-        brev: Brev,
-        behandling: Behandling,
-        bruker: Bruker
-    ): ByteArray {
-        val avsender = adresseService.hentAvsender(behandling.vedtak)
+    private fun opprettBrevData(brev: Brev, behandling: Behandling): BrevData =
+        when (brev.prosessType) {
+            BrevProsessType.AUTOMATISK -> BrevDataMapper.fra(behandling)
+            BrevProsessType.MANUELL -> {
+                val payload = requireNotNull(db.hentBrevPayload(brev.id))
 
-        val innhold = requireNotNull(db.hentBrevInnhold(brev.id))
-
-        val brevRequest = BrevbakerRequest(
-            kode = EtterlatteBrevKode.OMS_INNVILGELSE_MANUELL,
-            letterData = ManueltBrevData(innhold.payload?.elements ?: emptyList()),
-            felles = BrevbakerHelpers.mapFelles(behandling, avsender, brev.mottaker),
-            LanguageCode.spraakToLanguageCode(Spraak.NB)
-        )
-        val pdf = genererPdf(brev.id, brevRequest)
-
-        hvisInnholdKanFerdigstilles(brev.id, behandling, bruker) {
-            db.ferdigstillManueltBrevInnhold(brev.id, pdf)
+                ManueltBrevData(payload.elements)
+            }
         }
 
-        return pdf
-    }
-
-    private fun hvisInnholdKanFerdigstilles(brevID: BrevID, behandling: Behandling, bruker: Bruker, block: () -> Unit) {
+    private fun ferdigstillHvisVedtakFattet(brev: Brev, behandling: Behandling, pdf: Pdf, bruker: Bruker) {
         if (behandling.vedtak.status != VedtakStatus.FATTET_VEDTAK) {
-            logger.info("Vedtak status er ${behandling.vedtak.status}. Avventer ferdigstilling av brev (id=$brevID)")
+            logger.info("Vedtak status er ${behandling.vedtak.status}. Avventer ferdigstilling av brev (id=${brev.id})")
             return
         }
 
-        logger.info(
-            "Vedtak fattet på behandling (id=${behandling.behandlingId}). " +
-                "Sjekker om brev (id=$brevID) kan ferdigstilles"
-        )
-
         if (behandling.vedtak.saksbehandlerIdent != bruker.ident()) {
-            logger.info("Ferdigstiller brev med id=$brevID")
-            block()
+            logger.info("Ferdigstiller brev med id=${brev.id}")
+
+            db.lagrePdfOgFerdigstillBrev(brev.id, pdf)
         } else {
             logger.warn(
                 "Kan ikke ferdigstille/låse brev når saksbehandler (${behandling.vedtak.saksbehandlerIdent})" +
@@ -197,50 +165,11 @@ class VedtaksbrevService(
         return db.slett(id)
     }
 
-    private suspend fun genererPdf(brevID: BrevID, brevRequest: BrevbakerRequest): ByteArray {
+    private suspend fun genererPdf(brevID: BrevID, brevRequest: BrevbakerRequest): Pdf {
         val brevbakerResponse = brevbaker.genererPdf(brevRequest)
-        val brev = Base64.getDecoder().decode(brevbakerResponse.base64pdf)
 
-        logger.info("Generert brev (id=$brevID) med størrelse: ${brev.size}")
-
-        return brev
-    }
-
-    private fun getJsonFile(url: String) = javaClass.getResource(url)!!.readText()
-
-    private fun hentInitiellPayload(sakType: SakType, vedtakType: VedtakType): Slate {
-        return when (sakType) {
-            SakType.OMSTILLINGSSTOENAD -> {
-                when (vedtakType) {
-                    VedtakType.INNVILGELSE -> getJsonFile("/maler/oms-nasjonal-innvilget.json")
-                    VedtakType.OPPHOER,
-                    VedtakType.AVSLAG,
-                    VedtakType.ENDRING -> getJsonFile("/maler/tom-brevmal.json")
-                }
-            }
-
-            SakType.BARNEPENSJON -> {
-                when (vedtakType) {
-                    VedtakType.INNVILGELSE,
-                    VedtakType.OPPHOER,
-                    VedtakType.AVSLAG,
-                    VedtakType.ENDRING -> getJsonFile("/maler/tom-brevmal.json")
-                }
-            }
-        }.let { deserialize(it) }
-    }
-
-    private fun hentProsessType(sakType: SakType, vedtakType: VedtakType): BrevProsessType {
-        return when (sakType) {
-            SakType.OMSTILLINGSSTOENAD -> BrevProsessType.MANUELL
-            SakType.BARNEPENSJON -> {
-                when (vedtakType) {
-                    VedtakType.INNVILGELSE -> BrevProsessType.AUTOMATISK
-                    VedtakType.OPPHOER,
-                    VedtakType.AVSLAG,
-                    VedtakType.ENDRING -> BrevProsessType.MANUELL
-                }
-            }
-        }
+        return Base64.getDecoder().decode(brevbakerResponse.base64pdf)
+            .let { Pdf(it) }
+            .also { logger.info("Generert brev (id=$brevID) med størrelse: ${it.bytes.size}") }
     }
 }

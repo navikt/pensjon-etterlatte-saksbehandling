@@ -1,8 +1,9 @@
 package no.nav.etterlatte.brev.brevbaker
 
-import no.nav.etterlatte.brev.behandling.Behandling
+import no.nav.etterlatte.brev.behandling.Soeker
 import no.nav.etterlatte.brev.model.Avsender
-import no.nav.etterlatte.brev.model.Mottaker
+import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.pensjon.brevbaker.api.model.Bruker
 import no.nav.pensjon.brevbaker.api.model.Felles
 import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
@@ -11,23 +12,42 @@ import no.nav.pensjon.brevbaker.api.model.SignerendeSaksbehandlere
 import java.time.LocalDate
 
 object BrevbakerHelpers {
+
+    fun hentBrevkode(sakType: SakType, vedtakType: VedtakType): EtterlatteBrevKode {
+        return when (sakType) {
+            SakType.OMSTILLINGSSTOENAD -> {
+                when (vedtakType) {
+                    VedtakType.INNVILGELSE -> EtterlatteBrevKode.OMS_INNVILGELSE_MANUELL
+                    else -> TODO("Finnes ingen brevkode for saktype=$sakType og vedtakType=$vedtakType")
+                }
+            }
+
+            SakType.BARNEPENSJON -> {
+                when (vedtakType) {
+                    VedtakType.INNVILGELSE -> EtterlatteBrevKode.BARNEPENSJON_INNVILGELSE
+                    else -> TODO("Finnes ingen brevkode for saktype=$sakType og vedtakType=$vedtakType")
+                }
+            }
+        }
+    }
+
     fun mapFelles(
-        behandling: Behandling,
-        avsender: Avsender,
-        mottaker: Mottaker
+        sakId: Long,
+        soeker: Soeker,
+        avsender: Avsender
     ) = Felles(
         dokumentDato = LocalDate.now(),
-        saksnummer = behandling.sakId.toString(),
+        saksnummer = sakId.toString(),
         avsenderEnhet = NAVEnhet(
             nettside = "nav.no",
             navn = avsender.kontor,
             telefonnummer = avsender.telefonnummer
         ),
         bruker = Bruker(
-            fornavn = behandling.persongalleri.soeker.fornavn,
-            mellomnavn = behandling.persongalleri.soeker.mellomnavn,
-            etternavn = behandling.persongalleri.soeker.etternavn,
-            foedselsnummer = Foedselsnummer(behandling.persongalleri.soeker.fnr.value)
+            fornavn = soeker.fornavn,
+            mellomnavn = soeker.mellomnavn,
+            etternavn = soeker.etternavn,
+            foedselsnummer = Foedselsnummer(soeker.fnr.value)
         ),
         signerendeSaksbehandlere = SignerendeSaksbehandlere(
             saksbehandler = avsender.saksbehandler,

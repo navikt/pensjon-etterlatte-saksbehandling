@@ -21,6 +21,7 @@ import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevInnhold
 import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.Mottaker
+import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -54,7 +55,9 @@ internal class DokarkivServiceTest {
 
     @Test
     fun `journalfoer brevet med barnet som mottaker`() {
-        every { mockDb.hentBrevInnhold(any()) } returns BrevInnhold(Spraak.NB, data = "".toByteArray())
+        val innhold = BrevInnhold("tittel", Spraak.NB)
+        every { mockDb.hentBrevInnhold(any()) } returns innhold
+        every { mockDb.hentPdf(any()) } returns Pdf("Hello world".toByteArray())
         coEvery { mockKlient.opprettJournalpost(any(), any()) } returns JournalpostResponse("id", "OK", "melding", true)
 
         val vedtaksbrev = opprettVedtaksbrev()
@@ -64,11 +67,14 @@ internal class DokarkivServiceTest {
 
         val requestSlot = slot<JournalpostRequest>()
         coVerify(exactly = 1) { mockKlient.opprettJournalpost(capture(requestSlot), true) }
-        verify(exactly = 1) { mockDb.hentBrevInnhold(vedtaksbrev.id) }
+        verify(exactly = 1) {
+            mockDb.hentBrevInnhold(vedtaksbrev.id)
+            mockDb.hentPdf(vedtaksbrev.id)
+        }
 
         val actualRequest = requestSlot.captured
 
-        assertEquals(vedtaksbrev.tittel, actualRequest.tittel)
+        assertEquals(innhold.tittel, actualRequest.tittel)
         assertEquals(JournalPostType.UTGAAENDE, actualRequest.journalpostType)
 
         assertEquals(vedtak.sak.ident, actualRequest.avsenderMottaker.id)
@@ -78,7 +84,7 @@ internal class DokarkivServiceTest {
         assertEquals(JSak(Sakstype.FAGSAK, vedtak.sak.id.toString()), actualRequest.sak)
 
         val dokument = actualRequest.dokumenter.single()
-        assertEquals(vedtaksbrev.tittel, dokument.tittel)
+        assertEquals(innhold.tittel, dokument.tittel)
         assertEquals(BREV_KODE, dokument.brevkode)
         assertTrue(dokument.dokumentvarianter.single() is DokumentVariant.ArkivPDF)
 
@@ -89,10 +95,10 @@ internal class DokarkivServiceTest {
 
     private fun opprettVedtaksbrev() = Brev(
         id = 1,
+        sakId = 41,
         behandlingId = UUID.randomUUID(),
         prosessType = BrevProsessType.AUTOMATISK,
         soekerFnr = "soeker fnr",
-        tittel = "vedtak om innvilgelse",
         status = Status.FERDIGSTILT,
         mottaker = Mottaker(
             "Stor Snerk",

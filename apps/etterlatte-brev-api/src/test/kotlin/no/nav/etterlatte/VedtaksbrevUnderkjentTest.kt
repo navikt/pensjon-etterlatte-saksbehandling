@@ -113,10 +113,10 @@ internal class VedtaksbrevUnderkjentTest {
 
     private fun opprettBrev() = Brev(
         1,
+        41,
         UUID.randomUUID(),
         BrevProsessType.AUTOMATISK,
         "fnr",
-        "tittel",
         Status.JOURNALFOERT,
         mottaker = mockk()
     )

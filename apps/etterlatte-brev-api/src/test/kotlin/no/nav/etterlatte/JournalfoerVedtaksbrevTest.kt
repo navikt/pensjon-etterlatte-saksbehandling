@@ -53,10 +53,10 @@ internal class JournalfoerVedtaksbrevTest {
     fun `Gyldig melding skal sende journalpost til distribusjon`() {
         val brev = Brev(
             1,
+            41,
             BEHANDLING_ID,
             BrevProsessType.AUTOMATISK,
             "fnr",
-            "tittel",
             Status.FERDIGSTILT,
             mottaker = mockk()
         )
@@ -91,10 +91,10 @@ internal class JournalfoerVedtaksbrevTest {
     fun `Brev er allerede journalfoert`() {
         val brev = Brev(
             1,
+            41,
             BEHANDLING_ID,
             BrevProsessType.AUTOMATISK,
             "fnr",
-            "tittel",
             Status.JOURNALFOERT,
             mottaker = mockk()
         )

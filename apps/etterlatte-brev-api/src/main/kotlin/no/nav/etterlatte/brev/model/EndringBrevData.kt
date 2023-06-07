@@ -6,27 +6,14 @@ import no.nav.etterlatte.brev.behandling.Soeker
 import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 
-class EndringBrevRequest(
-    val saksnummer: String,
+class EndringBrevData(
     val utbetalingsinfo: Utbetalingsinfo,
     val barn: Soeker,
     val revurderingsaarsak: RevurderingAarsak,
-    val avdoed: Avdoed,
-    override val avsender: Avsender,
-    override val mottaker: BrevMottaker
+    val avdoed: Avdoed
 ) : BrevData() {
-
-    override fun templateName(): String = "endring"
-
     companion object {
-        fun fraVedtak(
-            behandling: Behandling,
-            avsender: Avsender,
-            mottaker: BrevMottaker
-        ): EndringBrevRequest = EndringBrevRequest(
-            avsender = avsender,
-            mottaker = mottaker,
-            saksnummer = behandling.sakId.toString(),
+        fun fra(behandling: Behandling): EndringBrevData = EndringBrevData(
             utbetalingsinfo = behandling.utbetalingsinfo!!,
             barn = behandling.persongalleri.soeker,
             avdoed = behandling.persongalleri.avdoed,

@@ -8,7 +8,7 @@ import { useParams } from 'react-router-dom'
 import { Soeknadsdato } from '../soeknadsoversikt/soeknadoversikt/Soeknadsdato'
 import styled from 'styled-components'
 import { SendTilAttesteringModal } from '../handlinger/sendTilAttesteringModal'
-import { hentBehandlesFraStatus } from '~components/behandling/felles/utils'
+import { hentBehandlesFraStatus, manueltBrevKanRedigeres } from '~components/behandling/felles/utils'
 import { IBehandlingsType, IDetaljertBehandling, IProsesstype } from '~shared/types/IDetaljertBehandling'
 import MottakerPanel from '~components/behandling/brev/detaljer/MottakerPanel'
 import ForhaandsvisningBrev from '~components/behandling/brev/ForhaandsvisningBrev'
@@ -68,7 +68,11 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
 
             <br />
             {vedtaksbrev?.prosessType === BrevProsessType.MANUELL && (
-              <Alert variant={'warning'}>Kan ikke generere brev automatisk. Du må selv redigere innholdet.</Alert>
+              <Alert variant={'warning'}>
+                {manueltBrevKanRedigeres(status)
+                  ? 'Kan ikke generere brev automatisk. Du må selv redigere innholdet.'
+                  : 'Dette er et manuelt opprettet brev. Kontroller innholdet nøye før attestering.'}
+              </Alert>
             )}
             <br />
             {vedtaksbrev && <MottakerPanel vedtaksbrev={vedtaksbrev} />}

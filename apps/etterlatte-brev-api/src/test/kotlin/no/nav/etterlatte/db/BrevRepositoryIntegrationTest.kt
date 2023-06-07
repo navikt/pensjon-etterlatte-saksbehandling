@@ -15,6 +15,7 @@ import no.nav.etterlatte.brev.model.BrevInnhold
 import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.OpprettNyttBrev
+import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.Status
@@ -35,6 +36,7 @@ import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
 import java.util.*
 import javax.sql.DataSource
+import kotlin.random.Random
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class BrevRepositoryIntegrationTest {
@@ -107,26 +109,25 @@ internal class BrevRepositoryIntegrationTest {
     }
 
     @Test
-    fun `Opprett innhold ferdigstiller brev`() {
-        val brev = db.opprettBrev(ulagretBrev(UUID.randomUUID()))
+    fun `Lagring av pdf skal ferdigstille brev`() {
+        val ulagretBrev = ulagretBrev(UUID.randomUUID())
+        val brev = db.opprettBrev(ulagretBrev)
 
         brev.status shouldBe Status.OPPRETTET
 
-        db.hentBrevInnhold(brev.id) shouldBe null
+        db.hentBrevInnhold(brev.id) shouldBe ulagretBrev.innhold
+        db.lagrePdfOgFerdigstillBrev(brev.id, Pdf(PDF_BYTES))
 
-        db.opprettInnholdOgFerdigstill(brev.id, BrevInnhold(Spraak.NB, data = PDF_BYTES))
-
-        val innhold = db.hentBrevInnhold(brev.id)!!
-        innhold.spraak shouldBe Spraak.NB
-        String(innhold.data!!) shouldBe String(PDF_BYTES)
+        val pdf = db.hentPdf(brev.id)!!
+        pdf.bytes.contentEquals(PDF_BYTES) shouldBe true
 
         val hentetBrev = db.hentBrev(brev.id)
 
         hentetBrev.status shouldBe Status.FERDIGSTILT
 
         shouldThrow<PSQLException> {
-            // Skal kun være mulig å lagre ETT innhold pr brev
-            db.opprettInnholdOgFerdigstill(brev.id, BrevInnhold(Spraak.NB, data = PDF_BYTES))
+            // Skal kun være mulig å lagre ETT pdf-dokument pr brev
+            db.lagrePdfOgFerdigstillBrev(brev.id, Pdf(PDF_BYTES))
         }
     }
 
@@ -163,13 +164,12 @@ internal class BrevRepositoryIntegrationTest {
     fun `Oppdater status`() {
         val opprettetBrev = db.opprettBrev(ulagretBrev(UUID.randomUUID()))
 
-        db.opprettInnholdOgFerdigstill(opprettetBrev.id, BrevInnhold(Spraak.NB, data = "".toByteArray()))
         db.settBrevFerdigstilt(opprettetBrev.id)
         db.settBrevJournalfoert(opprettetBrev.id, JournalpostResponse("id", journalpostferdigstilt = true))
         db.settBrevDistribuert(opprettetBrev.id, DistribuerJournalpostResponse("id"))
 
         val count =
-            sessionOf(dataSource).use {
+            using(sessionOf(dataSource)) {
                 it.run(
                     queryOf(
                         "SELECT COUNT(*) FROM hendelse WHERE brev_id = ?",
@@ -179,17 +179,19 @@ internal class BrevRepositoryIntegrationTest {
             }
 
         // Skal være 5 hendelser. 1 for opprettet, og 4 for resten som ble kjørt manuelt
-        assertEquals(5, count)
+        assertEquals(4, count)
     }
 
     @Nested
     inner class TestInnholdPayload {
         @Test
         fun `Opprett og hent brev payload`() {
-            val opprettetBrev = db.opprettBrev(ulagretBrev(UUID.randomUUID()))
+            val ulagretBrev = ulagretBrev(UUID.randomUUID())
+            val opprettetBrev = db.opprettBrev(ulagretBrev)
 
             opprettetBrev.status shouldBe Status.OPPRETTET
 
+            db.hentBrevInnhold(opprettetBrev.id) shouldBe ulagretBrev.innhold
             db.hentBrevPayload(opprettetBrev.id) shouldBe null
 
             db.opprettEllerOppdaterPayload(opprettetBrev.id, Slate(emptyList()))
@@ -219,11 +221,12 @@ internal class BrevRepositoryIntegrationTest {
     }
 
     private fun ulagretBrev(behandlingId: UUID) = OpprettNyttBrev(
+        sakId = Random.nextLong(),
         behandlingId = behandlingId,
         prosessType = BrevProsessType.AUTOMATISK,
         soekerFnr = "00000012345",
-        tittel = UUID.randomUUID().toString(),
-        mottaker = opprettMottaker()
+        mottaker = opprettMottaker(),
+        innhold = BrevInnhold("tittel", Spraak.NB)
     )
 
     private fun opprettMottaker() = Mottaker(

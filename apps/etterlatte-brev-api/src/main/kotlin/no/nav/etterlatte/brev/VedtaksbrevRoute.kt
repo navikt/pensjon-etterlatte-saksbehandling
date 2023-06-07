@@ -59,7 +59,7 @@ fun Route.vedtaksbrevRoute(service: VedtaksbrevService, behandlingKlient: Behand
                 logger.info("Genererer vedtaksbrev PDF (sakId=$sakId, behandlingId=$behandlingId)")
 
                 measureTimedValue {
-                    service.genererPdf(sakId, behandlingId, bruker)
+                    service.genererPdf(sakId, behandlingId, bruker).bytes
                 }.let { (pdf, varighet) ->
                     logger.info("Oppretting av innhold/pdf tok ${varighet.toString(DurationUnit.SECONDS, 2)}")
                     call.respond(pdf)

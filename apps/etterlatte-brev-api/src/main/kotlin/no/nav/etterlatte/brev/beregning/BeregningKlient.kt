@@ -3,6 +3,7 @@ package no.nav.etterlatte.brev.beregning
 import com.github.michaelbull.result.mapBoth
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
+import no.nav.etterlatte.libs.common.beregning.AvkortingDto
 import no.nav.etterlatte.libs.common.beregning.BeregningDTO
 import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
@@ -37,6 +38,25 @@ class BeregningKlient(config: Config, httpClient: HttpClient) {
         } catch (e: Exception) {
             throw BeregningKlientException(
                 "Henting av beregning for behandling med behandlingId=$behandlingId feilet",
+                e
+            )
+        }
+    }
+
+    suspend fun hentAvkorting(behandlingId: UUID, bruker: Bruker): AvkortingDto {
+        try {
+            logger.info("Henter avkorting (behandlingId: $behandlingId)")
+
+            return downstreamResourceClient.get(
+                Resource(clientId, "$resourceUrl/api/beregning/avkorting/$behandlingId"),
+                bruker
+            ).mapBoth(
+                success = { resource -> deserialize(resource.response.toString()) },
+                failure = { errorResponse -> throw errorResponse }
+            )
+        } catch (e: Exception) {
+            throw BeregningKlientException(
+                "Henting av avkorting for behandling med behandlingId=$behandlingId feilet",
                 e
             )
         }

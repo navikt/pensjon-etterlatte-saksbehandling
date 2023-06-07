@@ -5,6 +5,7 @@ import no.nav.etterlatte.brev.behandling.Behandling
 import no.nav.etterlatte.brev.behandling.SakOgBehandlingService
 import no.nav.etterlatte.brev.brevbaker.BrevbakerKlient
 import no.nav.etterlatte.brev.brevbaker.BrevbakerRequest
+import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.dokarkiv.DokarkivServiceImpl
 import no.nav.etterlatte.brev.journalpost.JournalpostResponse
@@ -92,20 +93,20 @@ class VedtaksbrevService(
         val behandling = sakOgBehandlingService.hentBehandling(sakId, behandlingId, bruker)
         val avsender = adresseService.hentAvsender(behandling.vedtak)
 
-        val brevData = opprettBrevData(brev, behandling)
-        val brevRequest = BrevbakerRequest.fra(brevData, behandling, avsender)
+        val (brevKode, brevData) = opprettBrevData(brev, behandling)
+        val brevRequest = BrevbakerRequest.fra(brevKode, brevData, behandling, avsender)
 
         return genererPdf(brev.id, brevRequest)
             .also { pdf -> ferdigstillHvisVedtakFattet(brev, behandling, pdf, bruker) }
     }
 
-    private fun opprettBrevData(brev: Brev, behandling: Behandling): BrevData =
+    private fun opprettBrevData(brev: Brev, behandling: Behandling): Pair<EtterlatteBrevKode, BrevData> =
         when (brev.prosessType) {
             BrevProsessType.AUTOMATISK -> BrevDataMapper.fra(behandling)
             BrevProsessType.MANUELL -> {
                 val payload = requireNotNull(db.hentBrevPayload(brev.id))
 
-                ManueltBrevData(payload.elements)
+                Pair(EtterlatteBrevKode.OMS_INNVILGELSE_MANUELL, ManueltBrevData(payload.elements))
             }
         }
 

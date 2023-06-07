@@ -6,6 +6,7 @@ import no.nav.etterlatte.brev.behandlingklient.BehandlingKlient
 import no.nav.etterlatte.brev.beregning.BeregningKlient
 import no.nav.etterlatte.brev.grunnlag.GrunnlagKlient
 import no.nav.etterlatte.brev.vedtak.VedtaksvurderingKlient
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
@@ -69,6 +70,12 @@ class SakOgBehandlingService(
                 attestantIdent
             ),
             utbetalingsinfo = finnUtbetalingsinfo(vedtak.behandling.id, vedtak.virkningstidspunkt, bruker),
+            avkortingsinfo = finnAvkortingsinfo(
+                vedtak.behandling.id,
+                vedtak.sak.sakType,
+                vedtak.virkningstidspunkt,
+                bruker
+            ),
             revurderingsaarsak = vedtak.behandling.revurderingsaarsak
         )
     }
@@ -93,12 +100,41 @@ class SakOgBehandlingService(
 
         val soeskenjustering = beregning.beregningsperioder.any { !it.soeskenFlokk.isNullOrEmpty() }
         val antallBarn = if (soeskenjustering) beregningsperioder.last().antallBarn else 1
+        val grunnbeloep = beregningsperioder.first().grunnbeloep
 
         return Utbetalingsinfo(
             antallBarn,
             Kroner(beregningsperioder.hentUtbetaltBeloep()),
+            grunnbeloep,
             virkningstidspunkt.atDay(1),
             soeskenjustering,
+            beregningsperioder
+        )
+    }
+
+    private suspend fun finnAvkortingsinfo(
+        behandlingId: UUID,
+        sakType: SakType,
+        virkningstidspunkt: YearMonth,
+        bruker: Bruker
+    ): Avkortingsinfo? {
+        if (sakType == SakType.BARNEPENSJON) return null // TODO: Fjern når avkorting støttes for barnepensjon
+        val avkorting = beregningKlient.hentAvkorting(behandlingId, bruker)
+
+        val beregningsperioder = avkorting.avkortetYtelse.map {
+            AvkortetBeregningsperiode(
+                datoFOM = it.fom,
+                datoTOM = it.tom,
+                inntekt = Kroner(55000), // TODO: Finn denne fra aarsinntekt - fratrekkInnut
+                utbetaltBeloep = Kroner(it.ytelseEtterAvkorting)
+            )
+        }
+
+        val aarsInntekt = avkorting.avkortingGrunnlag.first().aarsinntekt
+
+        return Avkortingsinfo(
+            inntekt = Kroner(aarsInntekt),
+            virkningsdato = virkningstidspunkt.atDay(1),
             beregningsperioder
         )
     }

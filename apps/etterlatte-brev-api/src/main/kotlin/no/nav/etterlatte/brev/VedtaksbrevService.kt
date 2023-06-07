@@ -142,7 +142,7 @@ class VedtaksbrevService(
     }
 
     fun lagreManueltBrevPayload(id: BrevID, payload: Slate) {
-        db.opprettEllerOppdaterPayload(id, payload)
+        db.oppdaterPayload(id, payload)
             .let { logger.info("Payload for brev (id=$id) oppdatert") }
     }
 

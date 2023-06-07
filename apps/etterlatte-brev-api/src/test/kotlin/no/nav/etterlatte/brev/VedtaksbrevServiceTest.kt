@@ -428,7 +428,7 @@ internal class VedtaksbrevServiceTest {
             verify {
                 db.hentBrevForBehandling(BEHANDLING_ID)
                 db.hentBrevPayload(brev.id)
-                db.opprettEllerOppdaterPayload(brev.id, any())
+                db.oppdaterPayload(brev.id, any())
             }
 
             coVerify {
@@ -487,8 +487,6 @@ internal class VedtaksbrevServiceTest {
                     vedtaksbrevService.journalfoerVedtaksbrev(brev, opprettVedtak())
                 }
             }
-
-            verify(exactly = 0) { db.settBrevFerdigstilt(any()) }
 
             verify {
                 listOf(sakOgBehandlingService, adresseService, dokarkivService)

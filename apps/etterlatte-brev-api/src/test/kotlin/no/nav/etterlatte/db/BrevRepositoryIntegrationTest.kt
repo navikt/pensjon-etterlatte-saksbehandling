@@ -164,7 +164,8 @@ internal class BrevRepositoryIntegrationTest {
     fun `Oppdater status`() {
         val opprettetBrev = db.opprettBrev(ulagretBrev(UUID.randomUUID()))
 
-        db.settBrevFerdigstilt(opprettetBrev.id)
+        db.oppdaterPayload(opprettetBrev.id, Slate())
+        db.lagrePdfOgFerdigstillBrev(opprettetBrev.id, Pdf(PDF_BYTES))
         db.settBrevJournalfoert(opprettetBrev.id, JournalpostResponse("id", journalpostferdigstilt = true))
         db.settBrevDistribuert(opprettetBrev.id, DistribuerJournalpostResponse("id"))
 
@@ -178,8 +179,7 @@ internal class BrevRepositoryIntegrationTest {
                 )
             }
 
-        // Skal være 5 hendelser. 1 for opprettet, og 4 for resten som ble kjørt manuelt
-        assertEquals(4, count)
+        assertEquals(5, count)
     }
 
     @Nested
@@ -194,7 +194,7 @@ internal class BrevRepositoryIntegrationTest {
             db.hentBrevInnhold(opprettetBrev.id) shouldBe ulagretBrev.innhold
             db.hentBrevPayload(opprettetBrev.id) shouldBe null
 
-            db.opprettEllerOppdaterPayload(opprettetBrev.id, Slate(emptyList()))
+            db.oppdaterPayload(opprettetBrev.id, Slate(emptyList()))
 
             val initialPayload = db.hentBrevPayload(opprettetBrev.id)
 
@@ -202,7 +202,7 @@ internal class BrevRepositoryIntegrationTest {
 
             db.hentBrev(opprettetBrev.id).status shouldBe Status.OPPDATERT
 
-            db.opprettEllerOppdaterPayload(
+            db.oppdaterPayload(
                 opprettetBrev.id,
                 Slate(
                     listOf(

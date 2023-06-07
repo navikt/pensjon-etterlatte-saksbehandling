@@ -55,7 +55,7 @@ class BrevRepository(private val ds: DataSource) {
         it.run(queryOf(HENT_BREV_FOR_BEHANDLING_QUERY, behandlingId).map(tilBrev).asSingle)
     }
 
-    fun opprettEllerOppdaterPayload(id: BrevID, payload: Slate) = ds.transaction { tx ->
+    fun oppdaterPayload(id: BrevID, payload: Slate) = ds.transaction { tx ->
         tx.run(
             queryOf(
                 OPPDATER_INNHOLD_PAYLOAD,
@@ -164,10 +164,6 @@ class BrevRepository(private val ds: DataSource) {
 
             tx.lagreHendelse(brevId, Status.DISTRIBUERT, distResponse.toJson()) > 0
         }
-
-    fun settBrevFerdigstilt(id: BrevID): Boolean = using(sessionOf(ds)) {
-        it.lagreHendelse(id, Status.FERDIGSTILT) > 0
-    }
 
     fun slett(id: BrevID): Boolean = using(sessionOf(ds)) {
         it.run(queryOf("DELETE FROM brev WHERE id = ?", id).asUpdate) > 0

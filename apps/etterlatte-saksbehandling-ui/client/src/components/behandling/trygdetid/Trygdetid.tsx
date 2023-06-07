@@ -83,7 +83,7 @@ export const Trygdetid = () => {
           <TrygdetidGrunnlagListe
             trygdetid={trygdetid}
             setTrygdetid={setTrygdetid}
-            landListe={landListe}
+            landListe={landListe.filter((land) => land.isoLandkode == 'NOR')}
             trygdetidGrunnlagType={ITrygdetidGrunnlagType.FREMTIDIG}
           />
           <TrygdetidBeregnet trygdetid={trygdetid} setTrygdetid={setTrygdetid} />

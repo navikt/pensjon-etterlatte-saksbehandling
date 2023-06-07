@@ -17,6 +17,7 @@ on:
     paths:
       - apps/etterlatte-vedtaksvurdering-kafka/**
       - libs/saksbehandling-common/**
+      - libs/etterlatte-behandling-model/**
       - libs/etterlatte-ktor/**
       - libs/etterlatte-vedtaksvurdering-model/**
       - libs/ktor2client-auth-clientcredentials/**
@@ -28,6 +29,7 @@ on:
     paths:
       - apps/etterlatte-vedtaksvurdering-kafka/**
       - libs/saksbehandling-common/**
+      - libs/etterlatte-behandling-model/**
       - libs/etterlatte-ktor/**
       - libs/etterlatte-vedtaksvurdering-model/**
       - libs/ktor2client-auth-clientcredentials/**

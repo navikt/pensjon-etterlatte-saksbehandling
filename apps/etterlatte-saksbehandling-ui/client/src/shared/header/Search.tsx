@@ -18,17 +18,20 @@ export const Search = () => {
 
   const ugyldigInput = INVALID_FNR(searchInput)
 
-  const soekEtterPerson = () => (ugyldigInput ? setFeilInput(true) : hentPerson(searchInput))
-
-  const soekEtterSak = () => {
-    if (searchInput && /^\d+$/.test(searchInput ?? '')) {
-      finnSak(searchInput)
+  const avgjoerSoek = () => {
+    if (ugyldigInput) {
+      if (searchInput && /^\d+$/.test(searchInput ?? '')) {
+        finnSak(searchInput)
+      } else {
+      }
+    } else {
+      hentPerson(searchInput)
     }
   }
+
   const onEnter = (e: any) => {
     if (e.key === 'Enter') {
-      soekEtterPerson()
-      soekEtterSak()
+      avgjoerSoek()
     }
   }
 
@@ -64,12 +67,7 @@ export const Search = () => {
         onKeyUp={onEnter}
         autoComplete="off"
       >
-        <SearchField.Button
-          onClick={() => {
-            soekEtterPerson()
-            soekEtterSak()
-          }}
-        />
+        <SearchField.Button onClick={avgjoerSoek} />
       </SearchField>
 
       {isPending(personStatus) && (

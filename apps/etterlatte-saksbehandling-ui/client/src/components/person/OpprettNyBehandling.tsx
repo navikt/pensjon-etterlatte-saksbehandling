@@ -4,6 +4,8 @@ import styled from 'styled-components'
 import { isPending, useApiCall } from '~shared/hooks/useApiCall'
 import { opprettRevurdering as opprettRevurderingApi } from '~shared/api/behandling'
 import { Revurderingsaarsak, tekstRevurderingsaarsak } from '~shared/types/Revurderingsaarsak'
+import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
+import { useNavigate } from 'react-router-dom'
 
 export const OpprettNyBehandling = ({
   sakId,
@@ -18,14 +20,15 @@ export const OpprettNyBehandling = ({
   const stoettedeRevurderinger = revurderinger
 
   const [opprettRevurderingStatus, opprettRevurdering, resetApiCall] = useApiCall(opprettRevurderingApi)
+  const navigate = useNavigate()
   const opprettBehandling = () => {
     if (valgtRevurdering === undefined) {
       return setError('Du må velge en revurdering')
     }
     opprettRevurdering(
       { sakId: sakId, aarsak: valgtRevurdering },
-      () => {
-        location.reload()
+      (behandling: IDetaljertBehandling) => {
+        navigate(`/behandling/${behandling.id}/`)
       },
       (err) => {
         setError('En feil skjedde ved opprettelse av revurderingen. Prøv igjen senere.')

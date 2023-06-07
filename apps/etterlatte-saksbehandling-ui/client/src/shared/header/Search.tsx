@@ -5,24 +5,42 @@ import { useNavigate } from 'react-router-dom'
 import { ErrorColored, InformationColored } from '@navikt/ds-icons'
 import { isFailure, isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
 import { getPerson } from '~shared/api/grunnlag'
-import { INVALID_FNR } from '~utils/fnr'
+import { GYLDIG_FNR } from '~utils/fnr'
+import { ApiError } from '~shared/api/apiClient'
+import { finnSakForSoek } from '~shared/api/behandling'
 
 export const Search = () => {
   const navigate = useNavigate()
   const [searchInput, setSearchInput] = useState('')
   const [feilInput, setFeilInput] = useState(false)
   const [personStatus, hentPerson, reset] = useApiCall(getPerson)
+  const [funnetFnrForSak, finnSak, resetSakSoek] = useApiCall(finnSakForSoek)
 
-  const ugyldigInput = INVALID_FNR(searchInput)
+  const gyldigInputFnr = GYLDIG_FNR(searchInput)
+  const gyldigInputSakId = /^\d{1,10}$/.test(searchInput ?? '')
+  const avgjoerSoek = () => {
+    if (gyldigInputFnr) {
+      hentPerson(searchInput)
+      return
+    }
+    if (gyldigInputSakId) {
+      finnSak(searchInput)
+      return
+    }
+  }
 
-  const soekEtterPerson = () => (ugyldigInput ? setFeilInput(true) : hentPerson(searchInput))
-  const onEnter = (e: any) => e.key === 'Enter' && soekEtterPerson()
+  const onEnter = (e: any) => {
+    if (e.key === 'Enter') {
+      avgjoerSoek()
+    }
+  }
 
   useEffect(() => {
     reset()
+    resetSakSoek()
     if (searchInput.length === 0) {
       setFeilInput(false)
-    } else if (feilInput && ugyldigInput) {
+    } else if (feilInput && (!gyldigInputFnr || !gyldigInputSakId)) {
       setFeilInput(true)
     } else {
       setFeilInput(false)
@@ -32,23 +50,27 @@ export const Search = () => {
   useEffect(() => {
     if (isSuccess(personStatus)) {
       navigate(`/person/${searchInput}`)
+      return
     }
-  }, [personStatus])
+    if (isSuccess(funnetFnrForSak)) {
+      navigate(`/person/${funnetFnrForSak.data}`)
+    }
+  }, [personStatus, funnetFnrForSak])
 
   return (
     <SearchWrapper>
       <SearchField
-        placeholder="Fødselsnummer"
-        label="Tast inn fødselsnummer"
+        placeholder="Fødselsnummer eller sakid "
+        label="Tast inn fødselsnummer eller sakid"
         hideLabel
         onChange={setSearchInput}
         onKeyUp={onEnter}
         autoComplete="off"
       >
-        <SearchField.Button onClick={soekEtterPerson} />
+        <SearchField.Button onClick={avgjoerSoek} />
       </SearchField>
 
-      {isPending(personStatus) && (
+      {(isPending(personStatus) || isPending(funnetFnrForSak)) && (
         <Dropdown>
           <SpinnerContent>
             <Loader />
@@ -63,25 +85,41 @@ export const Search = () => {
             <InformationColored />
           </span>
           <SearchResult>
-            <BodyShort className="text">Tast inn gyldig fødselsnummer</BodyShort>
+            <BodyShort className="text">Tast inn gyldig fødselsnummer eller saksid</BodyShort>
           </SearchResult>
         </Dropdown>
       )}
 
+      {isFailure(funnetFnrForSak) && (
+        <Dropdown error={true}>
+          <span className="icon">
+            <ErrorColored />
+          </span>
+          <SearchResult>
+            <BodyShort className="text">{feilmelding(funnetFnrForSak.error)}</BodyShort>
+          </SearchResult>
+        </Dropdown>
+      )}
       {isFailure(personStatus) && (
         <Dropdown error={true}>
           <span className="icon">
             <ErrorColored />
           </span>
           <SearchResult>
-            <BodyShort className="text">
-              {personStatus.error.statusCode === 404 ? 'Fant ingen data i Gjenny' : 'En feil har skjedd'}
-            </BodyShort>
+            <BodyShort className="text">{feilmelding(personStatus.error)}</BodyShort>
           </SearchResult>
         </Dropdown>
       )}
     </SearchWrapper>
   )
+}
+
+const feilmelding = (error: ApiError) => {
+  if (error.statusCode === 404) {
+    return 'Fant ingen data i Gjenny'
+  } else {
+    return 'En feil har skjedd'
+  }
 }
 
 const Dropdown = styled.div<{ error?: boolean; info?: boolean }>`
@@ -103,7 +141,8 @@ const Dropdown = styled.div<{ error?: boolean; info?: boolean }>`
 
 const SearchWrapper = styled.span`
   max-width: 100%;
-  padding: 0.3em;
+  min-width: 350px;
+  padding: 0.5em;
 `
 
 const SearchResult = styled.div<{ link?: boolean }>`

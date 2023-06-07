@@ -14,6 +14,7 @@ import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.person.InvalidFoedselsnummerException
 import no.nav.etterlatte.libs.common.withFoedselsnummer
 import no.nav.etterlatte.libs.common.withSakId
 import no.nav.security.token.support.v2.TokenValidationContextPrincipal
@@ -82,21 +83,32 @@ fun Route.grunnlagRoute(grunnlagService: GrunnlagService, behandlingKlient: Beha
                 HttpStatusCode.Unauthorized,
                 "Kunne ikke hente ut navident for vurdering av ytelsen kommer barnet tilgode"
             )
-
-            withFoedselsnummer(behandlingKlient) { foedselsnummer ->
-                val opplysning = grunnlagService.hentOpplysningstypeNavnFraFnr(
-                    foedselsnummer,
-                    navIdent
-                )
-
-                if (opplysning != null) {
-                    call.respond(opplysning)
-                } else {
-                    call.respond(
-                        HttpStatusCode.NotFound,
-                        "Gjenny har ingen navnedata på fødselsnummeret som ble etterspurt"
+            try {
+                withFoedselsnummer(behandlingKlient) { foedselsnummer ->
+                    val opplysning = grunnlagService.hentOpplysningstypeNavnFraFnr(
+                        foedselsnummer,
+                        navIdent
                     )
+
+                    if (opplysning != null) {
+                        call.respond(opplysning)
+                    } else {
+                        call.respond(
+                            HttpStatusCode.NotFound,
+                            "Gjenny har ingen navnedata på fødselsnummeret som ble etterspurt"
+                        )
+                    }
                 }
+            } catch (ex: InvalidFoedselsnummerException) {
+                call.respond(
+                    HttpStatusCode.BadRequest,
+                    "Gjenny har ingen navnedata på fødselsnummeret som ble etterspurt"
+                )
+            } catch (ex: Exception) {
+                call.respond(
+                    HttpStatusCode.NotFound,
+                    "Gjenny har ingen navnedata på fødselsnummeret som ble etterspurt"
+                )
             }
         }
     }

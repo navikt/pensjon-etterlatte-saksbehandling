@@ -1,1 +1,1 @@
-export const INVALID_FNR = (input: string | undefined) => !/^\d{11}$/.test(input ?? '')
+export const GYLDIG_FNR = (input: string | undefined) => /^\d{11}$/.test(input ?? '')

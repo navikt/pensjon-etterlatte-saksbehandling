@@ -102,4 +102,15 @@ internal fun Route.sakRoutes(
             call.respond(HttpStatusCode.OK)
         }
     }
+
+    route("/api/sak/{$SAKID_CALL_PARAMETER}") {
+        get {
+            withSakIdInternal(tilgangService) { sakId ->
+                val sak = inTransaction {
+                    sakService.finnSak(sakId)
+                }
+                call.respond(sak?.ident ?: HttpStatusCode.NotFound)
+            }
+        }
+    }
 }

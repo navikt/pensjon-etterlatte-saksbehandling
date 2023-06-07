@@ -67,7 +67,7 @@ internal class RevurderingRoutesTest {
                 }
             }
 
-            val response = client.post("api/1/revurdering") {
+            val response = client.post("api/revurdering/1") {
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 header(HttpHeaders.Authorization, "Bearer $token")
                 setBody(OpprettRevurderingRequest(RevurderingAarsak.REGULERING))
@@ -89,7 +89,7 @@ internal class RevurderingRoutesTest {
                 }
             }
 
-            val response = client.post("api/1/revurdering") {
+            val response = client.post("api/revurdering/1") {
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 header(HttpHeaders.Authorization, "Bearer $token")
                 setBody(OpprettRevurderingRequest(RevurderingAarsak.REGULERING))
@@ -110,7 +110,7 @@ internal class RevurderingRoutesTest {
                 }
             }
 
-            val response = client.post("api/1/revurdering") {
+            val response = client.post("api/revurdering/1") {
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 header(HttpHeaders.Authorization, "Bearer $token")
                 setBody("""{ "aarsak": "foo" }""")
@@ -141,7 +141,7 @@ internal class RevurderingRoutesTest {
                 }
             }
 
-            val response = client.post("api/1/revurdering") {
+            val response = client.post("api/revurdering/1") {
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 header(HttpHeaders.Authorization, "Bearer $token")
                 setBody(OpprettRevurderingRequest(RevurderingAarsak.BARN))

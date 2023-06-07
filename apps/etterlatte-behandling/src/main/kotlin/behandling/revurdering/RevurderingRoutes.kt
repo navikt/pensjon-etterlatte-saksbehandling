@@ -24,7 +24,7 @@ internal fun Route.revurderingRoutes(
 ) {
     val logger = application.log
 
-    route("/api/{$SAKID_CALL_PARAMETER}/revurdering") {
+    route("/api/revurdering/{$SAKID_CALL_PARAMETER}") {
         post {
             logger.info("Oppretter ny revurdering på sak $sakId")
             val body = try {

@@ -95,7 +95,7 @@ export const opprettRevurdering = async (args: {
   sakId: number
   aarsak: Revurderingsaarsak
 }): Promise<ApiResponse<IDetaljertBehandling>> => {
-  return apiClient.post(`/${args.sakId}/revurdering`, {
+  return apiClient.post(`/revurdering/${args.sakId}`, {
     aarsak: args.aarsak,
   })
 }
@@ -121,4 +121,8 @@ export const hentGrunnlagsendringshendelserInstitusjonsoppholdforSak = async (
   sakid: number
 ): Promise<ApiResponse<Array<Grunnlagsendringshendelse>>> => {
   return apiClient.get(`/grunnlagsendringshendelse/${sakid}/institusjon`)
+}
+
+export const finnSakForSoek = async (maybeSakdId: string): Promise<ApiResponse<String>> => {
+  return apiClient.get(`/sak/${maybeSakdId}`)
 }

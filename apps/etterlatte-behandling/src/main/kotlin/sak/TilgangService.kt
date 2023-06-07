@@ -5,6 +5,7 @@ import no.nav.etterlatte.config.AzureGroup
 import no.nav.etterlatte.libs.common.PersonTilgangsSjekk
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.token.Saksbehandler
 
 interface TilgangService : PersonTilgangsSjekk {
     fun harTilgangTilBehandling(behandlingId: String, saksbehandlerMedRoller: SaksbehandlerMedRoller): Boolean
@@ -31,7 +32,7 @@ class TilgangServiceImpl(
 
     override suspend fun harTilgangTilPerson(
         foedselsnummer: Folkeregisteridentifikator,
-        bruker: no.nav.etterlatte.token.Saksbehandler
+        bruker: Saksbehandler
     ): Boolean {
         return this.harTilgangTilPerson(foedselsnummer.value, SaksbehandlerMedRoller(bruker))
     }

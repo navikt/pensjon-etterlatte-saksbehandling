@@ -2,6 +2,7 @@ package no.nav.etterlatte.behandling
 
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
+import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Utenlandstilsnitt
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
@@ -20,5 +21,6 @@ data class BehandlingSammendrag(
     val behandlingType: BehandlingType,
     val aarsak: String?,
     val virkningstidspunkt: Virkningstidspunkt?,
-    val utenlandstilsnitt: Utenlandstilsnitt?
+    val utenlandstilsnitt: Utenlandstilsnitt?,
+    val boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet?
 )

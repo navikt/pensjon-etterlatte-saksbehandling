@@ -2,6 +2,7 @@ package no.nav.etterlatte.behandling.domain
 
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
+import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
@@ -24,6 +25,7 @@ data class AutomatiskRevurdering(
     override val kommerBarnetTilgode: KommerBarnetTilgode?,
     override val virkningstidspunkt: Virkningstidspunkt?,
     override val utenlandstilsnitt: Utenlandstilsnitt?,
+    override val boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet?,
     override val revurderingsaarsak: RevurderingAarsak,
     override val kilde: Vedtaksloesning
 ) : Revurdering(
@@ -36,6 +38,7 @@ data class AutomatiskRevurdering(
     kommerBarnetTilgode,
     virkningstidspunkt,
     utenlandstilsnitt,
+    boddEllerArbeidetUtlandet,
     revurderingsaarsak,
     Prosesstype.AUTOMATISK,
     kilde = kilde

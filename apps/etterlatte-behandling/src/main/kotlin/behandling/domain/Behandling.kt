@@ -12,6 +12,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingStatus.OPPRETTET
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus.RETURNERT
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus.VILKAARSVURDERT
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
+import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
@@ -40,6 +41,7 @@ sealed class Behandling {
     abstract val kommerBarnetTilgode: KommerBarnetTilgode?
     abstract val virkningstidspunkt: Virkningstidspunkt?
     abstract val utenlandstilsnitt: Utenlandstilsnitt?
+    abstract val boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet?
     abstract val kilde: Vedtaksloesning
     open val prosesstype: Prosesstype = Prosesstype.MANUELL
 
@@ -60,6 +62,13 @@ sealed class Behandling {
         throw NotImplementedError(
             "Kan ikke oppdatere utenlandstilsnitt på behandling $id. " +
                 "Denne behandlingstypen støtter ikke oppdatering av utenlandstilsnitt."
+        )
+    }
+
+    open fun oppdaterBoddEllerArbeidetUtlandnet(boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet): Behandling {
+        throw NotImplementedError(
+            "Kan ikke oppdatere bodd eller arbeidet utlandet på behandling $id. " +
+                "Denne behandlingstypen støtter ikke oppdatering av bodd eller arbeidet utlandet."
         )
     }
 
@@ -152,6 +161,7 @@ internal fun Behandling.toDetaljertBehandling(): DetaljertBehandling {
         behandlingType = type,
         virkningstidspunkt = this.virkningstidspunkt,
         utenlandstilsnitt = this.utenlandstilsnitt,
+        boddEllerArbeidetUtlandet = this.boddEllerArbeidetUtlandet,
         kommerBarnetTilgode = kommerBarnetTilgode,
         revurderingsaarsak = when (this) {
             is Revurdering -> revurderingsaarsak
@@ -179,5 +189,6 @@ fun Behandling.toBehandlingSammendrag() = BehandlingSammendrag(
         is ManueltOpphoer -> "MANUELT_OPPHOER"
     },
     virkningstidspunkt = this.virkningstidspunkt,
-    utenlandstilsnitt = this.utenlandstilsnitt
+    utenlandstilsnitt = this.utenlandstilsnitt,
+    boddEllerArbeidetUtlandet = this.boddEllerArbeidetUtlandet
 )

@@ -3,6 +3,7 @@ package no.nav.etterlatte.behandling.domain
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
+import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
@@ -23,6 +24,7 @@ sealed class Revurdering(
     override val kommerBarnetTilgode: KommerBarnetTilgode?,
     override val virkningstidspunkt: Virkningstidspunkt?,
     override val utenlandstilsnitt: Utenlandstilsnitt?,
+    override val boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet?,
     open val revurderingsaarsak: RevurderingAarsak?,
     override val prosesstype: Prosesstype,
     override val kilde: Vedtaksloesning
@@ -42,36 +44,39 @@ sealed class Revurdering(
             kommerBarnetTilgode: KommerBarnetTilgode?,
             virkningstidspunkt: Virkningstidspunkt?,
             utenlandstilsnitt: Utenlandstilsnitt?,
+            boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet?,
             revurderingsaarsak: RevurderingAarsak,
             prosesstype: Prosesstype,
             kilde: Vedtaksloesning
         ) = when (prosesstype) {
             Prosesstype.MANUELL -> ManuellRevurdering(
-                id,
-                sak,
-                behandlingOpprettet,
-                sistEndret,
-                status,
-                persongalleri,
-                kommerBarnetTilgode,
-                virkningstidspunkt,
-                utenlandstilsnitt,
-                revurderingsaarsak,
-                kilde
+                id = id,
+                sak = sak,
+                behandlingOpprettet = behandlingOpprettet,
+                sistEndret = sistEndret,
+                status = status,
+                persongalleri = persongalleri,
+                kommerBarnetTilgode = kommerBarnetTilgode,
+                virkningstidspunkt = virkningstidspunkt,
+                utenlandstilsnitt = utenlandstilsnitt,
+                boddEllerArbeidetUtlandet = boddEllerArbeidetUtlandet,
+                revurderingsaarsak = revurderingsaarsak,
+                kilde = kilde
             )
 
             Prosesstype.AUTOMATISK -> AutomatiskRevurdering(
-                id,
-                sak,
-                behandlingOpprettet,
-                sistEndret,
-                status,
-                persongalleri,
-                kommerBarnetTilgode,
-                virkningstidspunkt,
-                utenlandstilsnitt,
-                revurderingsaarsak,
-                kilde
+                id = id,
+                sak = sak,
+                behandlingOpprettet = behandlingOpprettet,
+                sistEndret = sistEndret,
+                status = status,
+                persongalleri = persongalleri,
+                kommerBarnetTilgode = kommerBarnetTilgode,
+                virkningstidspunkt = virkningstidspunkt,
+                utenlandstilsnitt = utenlandstilsnitt,
+                boddEllerArbeidetUtlandet = boddEllerArbeidetUtlandet,
+                revurderingsaarsak = revurderingsaarsak,
+                kilde = kilde
             )
         }
     }

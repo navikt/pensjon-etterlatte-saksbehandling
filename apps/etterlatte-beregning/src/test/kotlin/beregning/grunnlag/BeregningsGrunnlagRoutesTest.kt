@@ -87,7 +87,8 @@ internal class BeregningsGrunnlagRoutesTest {
             kommerBarnetTilgode = null,
             revurderingsaarsak = null,
             prosesstype = Prosesstype.MANUELL,
-            utenlandstilsnitt = null
+            utenlandstilsnitt = null,
+            boddEllerArbeidetUtlandet = null
         )
 
         every { repository.finnGrunnlagForBehandling(any()) } returns null
@@ -147,7 +148,8 @@ internal class BeregningsGrunnlagRoutesTest {
             kommerBarnetTilgode = null,
             revurderingsaarsak = null,
             prosesstype = Prosesstype.MANUELL,
-            utenlandstilsnitt = null
+            utenlandstilsnitt = null,
+            boddEllerArbeidetUtlandet = null
         )
         coEvery { behandlingKlient.hentSisteIverksatteBehandling(sakId, any()) } returns DetaljertBehandling(
             id = idForrigeIverksatt,
@@ -168,7 +170,8 @@ internal class BeregningsGrunnlagRoutesTest {
             kommerBarnetTilgode = null,
             revurderingsaarsak = null,
             prosesstype = Prosesstype.MANUELL,
-            utenlandstilsnitt = null
+            utenlandstilsnitt = null,
+            boddEllerArbeidetUtlandet = null
         )
 
         every { repository.finnGrunnlagForBehandling(idRevurdering) } returns null

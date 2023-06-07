@@ -19,6 +19,7 @@ import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
+import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Utenlandstilsnitt
@@ -63,6 +64,11 @@ interface GenerellBehandlingService {
     fun oppdaterUtenlandstilsnitt(
         behandlingId: UUID,
         utenlandstilsnitt: Utenlandstilsnitt
+    ): Unit
+
+    fun oppdaterBoddEllerArbeidetUtlandet(
+        behandlingId: UUID,
+        boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet
     ): Unit
 
     fun hentHendelserIBehandling(behandlingId: UUID): List<LagretHendelse>
@@ -240,6 +246,7 @@ class RealGenerellBehandlingService(
                 soeknadMottattDato = detaljertBehandling.soeknadMottattDato,
                 virkningstidspunkt = detaljertBehandling.virkningstidspunkt,
                 utenlandstilsnitt = detaljertBehandling.utenlandstilsnitt,
+                boddEllerArbeidetUtlandet = detaljertBehandling.boddEllerArbeidetUtlandet,
                 status = detaljertBehandling.status,
                 hendelser = hendelserIBehandling,
                 familieforhold = Familieforhold(avdoed.await(), gjenlevende.await()),
@@ -336,6 +343,34 @@ class RealGenerellBehandlingService(
         } catch (e: NotImplementedError) {
             logger.error(
                 "Kan ikke oppdatere utenlandstilsnitt for behandling: $behandlingId med typen ${behandling.type}",
+                e
+            )
+            throw e
+        }
+    }
+
+    override fun oppdaterBoddEllerArbeidetUtlandet(
+        behandlingId: UUID,
+        boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet
+    ) {
+        val behandling = hentBehandling(behandlingId) ?: run {
+            logger.error(
+                "Prøvde å oppdatere bodd/arbeidet utlandet på en behandling som ikke eksisterer: $behandlingId"
+            )
+            throw RuntimeException("Fant ikke behandling")
+        }
+
+        try {
+            behandling.oppdaterBoddEllerArbeidetUtlandnet(boddEllerArbeidetUtlandet)
+                .also {
+                    inTransaction {
+                        behandlingDao.lagreBoddEllerArbeidetUtlandet(behandlingId, boddEllerArbeidetUtlandet)
+                        behandlingDao.lagreStatus(it)
+                    }
+                }
+        } catch (e: NotImplementedError) {
+            logger.error(
+                "Kan ikke oppdatere bodd/arbeidet utlandet for behandling: $behandlingId med typen ${behandling.type}",
                 e
             )
             throw e

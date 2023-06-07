@@ -69,6 +69,7 @@ class StatistikkServiceTest {
             behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
             virkningstidspunkt = null,
             utenlandstilsnitt = null,
+            boddEllerArbeidetUtlandet = null,
             kommerBarnetTilgode = null,
             revurderingsaarsak = null,
             prosesstype = Prosesstype.MANUELL
@@ -156,6 +157,7 @@ class StatistikkServiceTest {
             behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
             virkningstidspunkt = null,
             utenlandstilsnitt = null,
+            boddEllerArbeidetUtlandet = null,
             kommerBarnetTilgode = null,
             revurderingsaarsak = null,
             prosesstype = Prosesstype.MANUELL

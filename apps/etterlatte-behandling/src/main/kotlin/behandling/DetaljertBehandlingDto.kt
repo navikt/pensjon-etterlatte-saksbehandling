@@ -3,6 +3,7 @@ package no.nav.etterlatte.behandling
 import no.nav.etterlatte.behandling.hendelse.LagretHendelse
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
+import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -27,6 +28,7 @@ data class DetaljertBehandlingDto(
     val soeknadMottattDato: LocalDateTime?,
     val virkningstidspunkt: Virkningstidspunkt?,
     val utenlandstilsnitt: Utenlandstilsnitt?,
+    val boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet?,
     val status: BehandlingStatus,
     val hendelser: List<LagretHendelse>?,
     val familieforhold: Familieforhold?,

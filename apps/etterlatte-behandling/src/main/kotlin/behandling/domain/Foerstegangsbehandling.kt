@@ -3,6 +3,7 @@ package no.nav.etterlatte.behandling.domain
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
+import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
@@ -26,6 +27,7 @@ data class Foerstegangsbehandling(
     override val kommerBarnetTilgode: KommerBarnetTilgode?,
     override val virkningstidspunkt: Virkningstidspunkt?,
     override val utenlandstilsnitt: Utenlandstilsnitt?,
+    override val boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet?,
     val soeknadMottattDato: LocalDateTime,
     val gyldighetsproeving: GyldighetsResultat?,
     override val prosesstype: Prosesstype = Prosesstype.MANUELL,
@@ -51,6 +53,11 @@ data class Foerstegangsbehandling(
 
     override fun oppdaterUtenlandstilsnitt(utenlandstilsnitt: Utenlandstilsnitt) =
         hvisRedigerbar { endreTilStatus(BehandlingStatus.OPPRETTET).copy(utenlandstilsnitt = utenlandstilsnitt) }
+
+    override fun oppdaterBoddEllerArbeidetUtlandnet(boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet) =
+        hvisRedigerbar {
+            endreTilStatus(BehandlingStatus.OPPRETTET).copy(boddEllerArbeidetUtlandet = boddEllerArbeidetUtlandet)
+        }
 
     fun oppdaterKommerBarnetTilgode(kommerBarnetTilgode: KommerBarnetTilgode): Foerstegangsbehandling = hvisRedigerbar {
         endreTilStatus(BehandlingStatus.OPPRETTET).copy(kommerBarnetTilgode = kommerBarnetTilgode)

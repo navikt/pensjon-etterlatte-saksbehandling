@@ -2,6 +2,7 @@ package no.nav.etterlatte.behandling.domain
 
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
+import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
@@ -25,6 +26,7 @@ data class ManuellRevurdering(
     override val kommerBarnetTilgode: KommerBarnetTilgode?,
     override val virkningstidspunkt: Virkningstidspunkt?,
     override val utenlandstilsnitt: Utenlandstilsnitt?,
+    override val boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet?,
     override val revurderingsaarsak: RevurderingAarsak,
     override val kilde: Vedtaksloesning
 ) : Revurdering(
@@ -37,6 +39,7 @@ data class ManuellRevurdering(
     kommerBarnetTilgode,
     virkningstidspunkt,
     utenlandstilsnitt,
+    boddEllerArbeidetUtlandet,
     revurderingsaarsak,
     Prosesstype.MANUELL,
     kilde
@@ -55,6 +58,11 @@ data class ManuellRevurdering(
 
     override fun oppdaterUtenlandstilsnitt(utenlandstilsnitt: Utenlandstilsnitt) =
         hvisRedigerbar { endreTilStatus(BehandlingStatus.OPPRETTET).copy(utenlandstilsnitt = utenlandstilsnitt) }
+
+    override fun oppdaterBoddEllerArbeidetUtlandnet(boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet) =
+        hvisRedigerbar {
+            endreTilStatus(BehandlingStatus.OPPRETTET).copy(boddEllerArbeidetUtlandet = boddEllerArbeidetUtlandet)
+        }
 
     override fun tilOpprettet() =
         hvisRedigerbar { endreTilStatus(BehandlingStatus.OPPRETTET) }

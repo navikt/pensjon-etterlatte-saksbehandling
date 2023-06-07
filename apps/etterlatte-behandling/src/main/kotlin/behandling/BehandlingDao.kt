@@ -14,6 +14,7 @@ import no.nav.etterlatte.behandling.hendelse.getUUID
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
+import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
@@ -97,6 +98,7 @@ class BehandlingDao(private val connection: () -> Connection) {
         status = rs.getString("status").let { BehandlingStatus.valueOf(it) },
         virkningstidspunkt = rs.getString("virkningstidspunkt")?.let { objectMapper.readValue(it) },
         utenlandstilsnitt = rs.getString("utenlandstilsnitt")?.let { objectMapper.readValue(it) },
+        boddEllerArbeidetUtlandet = rs.getString("bodd_eller_arbeidet_utlandet")?.let { objectMapper.readValue(it) },
         kommerBarnetTilgode = rs.getString("kommer_barnet_tilgode")?.let { objectMapper.readValue(it) },
         prosesstype = rs.getString("prosesstype").let { Prosesstype.valueOf(it) },
         kilde = rs.getString("kilde").let { Vedtaksloesning.valueOf(it) }
@@ -122,6 +124,9 @@ class BehandlingDao(private val connection: () -> Connection) {
             kommerBarnetTilgode = rs.getString("kommer_barnet_tilgode")?.let { objectMapper.readValue(it) },
             virkningstidspunkt = rs.getString("virkningstidspunkt")?.let { objectMapper.readValue(it) },
             utenlandstilsnitt = rs.getString("utenlandstilsnitt")?.let { objectMapper.readValue(it) },
+            boddEllerArbeidetUtlandet = rs.getString("bodd_eller_arbeidet_utlandet")?.let {
+                objectMapper.readValue(it)
+            },
             prosesstype = rs.getString("prosesstype").let { Prosesstype.valueOf(it) },
             kilde = rs.getString("kilde").let { Vedtaksloesning.valueOf(it) }
         )
@@ -135,6 +140,7 @@ class BehandlingDao(private val connection: () -> Connection) {
         status = rs.getString("status").let { BehandlingStatus.valueOf(it) },
         virkningstidspunkt = rs.getString("virkningstidspunkt")?.let { objectMapper.readValue(it) },
         utenlandstilsnitt = rs.getString("utenlandstilsnitt")?.let { objectMapper.readValue(it) },
+        boddEllerArbeidetUtlandet = rs.getString("bodd_eller_arbeidet_utlandet")?.let { objectMapper.readValue(it) },
         opphoerAarsaker = rs.getString("opphoer_aarsaker").let { objectMapper.readValue(it) },
         fritekstAarsak = rs.getString("fritekst_aarsak"),
         prosesstype = rs.getString("prosesstype").let { Prosesstype.valueOf(it) }
@@ -206,20 +212,28 @@ class BehandlingDao(private val connection: () -> Connection) {
         lagreStatus(lagretBehandling.id, lagretBehandling.status, lagretBehandling.sistEndret)
     }
 
-    fun lagreStatus(behandling: UUID, status: BehandlingStatus, sistEndret: LocalDateTime) {
+    fun lagreStatus(behandlingId: UUID, status: BehandlingStatus, sistEndret: LocalDateTime) {
         val stmt =
             connection().prepareStatement("UPDATE behandling SET status = ?, sist_endret = ? WHERE id = ?")
         stmt.setString(1, status.name)
         stmt.setTidspunkt(2, sistEndret.toTidspunkt())
-        stmt.setObject(3, behandling)
+        stmt.setObject(3, behandlingId)
         require(stmt.executeUpdate() == 1)
     }
 
-    fun lagreUtenlandstilsnitt(behandling: UUID, utenlandstilsnitt: Utenlandstilsnitt) {
+    fun lagreUtenlandstilsnitt(behandlingId: UUID, utenlandstilsnitt: Utenlandstilsnitt) {
         val stmt =
             connection().prepareStatement("UPDATE behandling SET utenlandstilsnitt = ? WHERE id = ?")
         stmt.setString(1, objectMapper.writeValueAsString(utenlandstilsnitt))
-        stmt.setObject(2, behandling)
+        stmt.setObject(2, behandlingId)
+        require(stmt.executeUpdate() == 1)
+    }
+
+    fun lagreBoddEllerArbeidetUtlandet(behandlingId: UUID, boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet) {
+        val stmt =
+            connection().prepareStatement("UPDATE behandling SET bodd_eller_arbeidet_utlandet = ? WHERE id = ?")
+        stmt.setString(1, objectMapper.writeValueAsString(boddEllerArbeidetUtlandet))
+        stmt.setObject(2, behandlingId)
         require(stmt.executeUpdate() == 1)
     }
 
@@ -236,7 +250,7 @@ class BehandlingDao(private val connection: () -> Connection) {
     private fun ResultSet.behandlingAvRettType() = tilBehandling(getString("behandlingstype"))
 
     fun avbrytBehandling(behandlingId: UUID) = this.lagreStatus(
-        behandling = behandlingId,
+        behandlingId = behandlingId,
         status = BehandlingStatus.AVBRUTT,
         sistEndret = Tidspunkt.now().toLocalDatetimeUTC()
     )

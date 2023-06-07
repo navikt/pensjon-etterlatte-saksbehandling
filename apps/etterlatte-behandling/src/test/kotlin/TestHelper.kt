@@ -15,6 +15,7 @@ import no.nav.etterlatte.grunnlagsendring.samsvarDoedsdatoer
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
+import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
 import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
@@ -90,6 +91,7 @@ fun foerstegangsbehandling(
     gyldighetsproeving: GyldighetsResultat? = null,
     virkningstidspunkt: Virkningstidspunkt? = null,
     utenlandstilsnitt: Utenlandstilsnitt? = null,
+    boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet? = null,
     kommerBarnetTilgode: KommerBarnetTilgode? = null,
     kilde: Vedtaksloesning = Vedtaksloesning.GJENNY,
     enhet: String = Enheter.defaultEnhet.enhetNr
@@ -109,6 +111,7 @@ fun foerstegangsbehandling(
     gyldighetsproeving = gyldighetsproeving,
     virkningstidspunkt = virkningstidspunkt,
     utenlandstilsnitt = utenlandstilsnitt,
+    boddEllerArbeidetUtlandet = boddEllerArbeidetUtlandet,
     kommerBarnetTilgode = kommerBarnetTilgode,
     kilde = kilde
 )
@@ -124,6 +127,7 @@ fun revurdering(
     kommerBarnetTilgode: KommerBarnetTilgode = kommerBarnetTilgode(),
     virkningstidspunkt: Virkningstidspunkt? = null,
     utenlandstilsnitt: Utenlandstilsnitt? = null,
+    boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet? = null,
     prosesstype: Prosesstype = Prosesstype.MANUELL,
     kilde: Vedtaksloesning = Vedtaksloesning.GJENNY,
     enhet: String = Enheter.defaultEnhet.enhetNr
@@ -143,6 +147,7 @@ fun revurdering(
     kommerBarnetTilgode = kommerBarnetTilgode,
     virkningstidspunkt = virkningstidspunkt,
     utenlandstilsnitt = utenlandstilsnitt,
+    boddEllerArbeidetUtlandet = boddEllerArbeidetUtlandet,
     prosesstype = prosesstype,
     kilde = kilde
 )
@@ -158,6 +163,7 @@ fun manueltOpphoer(
     fritekstAarsak: String? = "Umulig å revurdere i nytt saksbehandlingssystem",
     virkningstidspunkt: Virkningstidspunkt? = null,
     utenlandstilsnitt: Utenlandstilsnitt? = null,
+    boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet? = null,
     enhet: String = Enheter.defaultEnhet.enhetNr
 ) = ManueltOpphoer(
     id = behandlingId,
@@ -174,7 +180,8 @@ fun manueltOpphoer(
     opphoerAarsaker = opphoerAarsaker,
     fritekstAarsak = fritekstAarsak,
     virkningstidspunkt = virkningstidspunkt,
-    utenlandstilsnitt = utenlandstilsnitt
+    utenlandstilsnitt = utenlandstilsnitt,
+    boddEllerArbeidetUtlandet = boddEllerArbeidetUtlandet
 )
 
 fun persongalleri(

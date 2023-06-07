@@ -21,6 +21,7 @@ data class DetaljertBehandling(
     val behandlingType: BehandlingType,
     val virkningstidspunkt: Virkningstidspunkt?,
     val utenlandstilsnitt: Utenlandstilsnitt?,
+    val boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet?,
     val kommerBarnetTilgode: KommerBarnetTilgode?,
     val revurderingsaarsak: RevurderingAarsak? = null,
     val prosesstype: Prosesstype

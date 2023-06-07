@@ -45,6 +45,7 @@ internal class BehandlingTest {
         kommerBarnetTilgode = null,
         virkningstidspunkt = null,
         utenlandstilsnitt = null,
+        boddEllerArbeidetUtlandet = null,
         soeknadMottattDato = Tidspunkt.now().toLocalDatetimeUTC(),
         gyldighetsproeving = null,
         kilde = Vedtaksloesning.GJENNY

@@ -7,6 +7,7 @@ import no.nav.etterlatte.avkorting.Avkortingsperiode
 import no.nav.etterlatte.avkorting.regler.AvkortetYtelseGrunnlag
 import no.nav.etterlatte.avkorting.regler.InntektAvkortingGrunnlag
 import no.nav.etterlatte.beregning.Beregning
+import no.nav.etterlatte.beregning.grunnlag.InstitusjonsoppholdBeregningsgrunnlag
 import no.nav.etterlatte.beregning.regler.barnepensjon.AvdoedForelder
 import no.nav.etterlatte.beregning.regler.barnepensjon.BarnepensjonGrunnlag
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
@@ -38,11 +39,12 @@ const val MAKS_TRYGDETID: Int = 40
 
 fun barnepensjonGrunnlag(
     soeskenKull: List<String> = emptyList(),
-    trygdeTid: Beregningstall = Beregningstall(MAKS_TRYGDETID)
+    trygdeTid: Beregningstall = Beregningstall(MAKS_TRYGDETID),
+    institusjonsopphold: InstitusjonsoppholdBeregningsgrunnlag? = null
 ) = BarnepensjonGrunnlag(
     soeskenKull = FaktumNode(soeskenKull.map { Folkeregisteridentifikator.of(it) }, kilde, "søskenkull"),
     avdoedForelder = FaktumNode(AvdoedForelder(trygdetid = trygdeTid), kilde, "trygdetid"),
-    institusjonsopphold = FaktumNode(null, kilde, "institusjonsopphold")
+    institusjonsopphold = FaktumNode(institusjonsopphold, kilde, "institusjonsopphold")
 )
 
 fun Double.toBeregningstall(

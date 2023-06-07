@@ -20,6 +20,7 @@ on:
       - libs/testdata/**
       - libs/etterlatte-ktor/**
       - libs/etterlatte-sporingslogg/**
+      - libs/etterlatte-behandling-model/**
       - libs/etterlatte-database/**
       - libs/etterlatte-pdl-model/**
       - gradle/libs.versions.toml
@@ -32,6 +33,7 @@ on:
       - libs/testdata/**
       - libs/etterlatte-ktor/**
       - libs/etterlatte-sporingslogg/**
+      - libs/etterlatte-behandling-model/**
       - libs/etterlatte-database/**
       - libs/etterlatte-pdl-model/**
       - gradle/libs.versions.toml

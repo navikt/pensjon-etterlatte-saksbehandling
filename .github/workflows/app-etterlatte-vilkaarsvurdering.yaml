@@ -19,6 +19,7 @@ on:
       - libs/saksbehandling-common/**
       - libs/etterlatte-vilkaarsvurdering-model/**
       - libs/etterlatte-ktor/**
+      - libs/etterlatte-behandling-model/**
       - libs/etterlatte-database/**
       - libs/ktor2client-onbehalfof/**
       - libs/testdata/**
@@ -31,6 +32,7 @@ on:
       - libs/saksbehandling-common/**
       - libs/etterlatte-vilkaarsvurdering-model/**
       - libs/etterlatte-ktor/**
+      - libs/etterlatte-behandling-model/**
       - libs/etterlatte-database/**
       - libs/ktor2client-onbehalfof/**
       - libs/testdata/**

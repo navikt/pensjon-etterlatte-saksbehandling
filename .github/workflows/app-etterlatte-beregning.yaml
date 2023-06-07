@@ -19,6 +19,7 @@ on:
       - libs/saksbehandling-common/**
       - libs/etterlatte-funksjonsbrytere/**
       - libs/etterlatte-ktor/**
+      - libs/etterlatte-behandling-model/**
       - libs/etterlatte-database/**
       - libs/etterlatte-regler/**
       - libs/etterlatte-trygdetid-model/**
@@ -33,6 +34,7 @@ on:
       - libs/saksbehandling-common/**
       - libs/etterlatte-funksjonsbrytere/**
       - libs/etterlatte-ktor/**
+      - libs/etterlatte-behandling-model/**
       - libs/etterlatte-database/**
       - libs/etterlatte-regler/**
       - libs/etterlatte-trygdetid-model/**

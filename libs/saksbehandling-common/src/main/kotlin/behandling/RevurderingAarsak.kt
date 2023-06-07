@@ -15,7 +15,8 @@ enum class RevurderingAarsak(
     BARN(SAKTYPE_BP, false, false),
     VERGEMAAL_ELLER_FREMTIDSFULLMAKT(SAKTYPE_BP, false, false),
     REGULERING(SAKTYPE_BP_OMS, true, true),
-    DOEDSFALL(SAKTYPE_BP_OMS, true, false);
+    DOEDSFALL(SAKTYPE_BP_OMS, true, false),
+    INNTEKTSENDRING(SAKTYPE_OMS, true, false);
 
     fun kanBrukesIMiljo(): Boolean {
         val env = System.getenv()

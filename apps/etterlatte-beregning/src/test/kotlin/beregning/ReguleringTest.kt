@@ -36,7 +36,7 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.Month
 import java.time.YearMonth
-import java.util.UUID
+import java.util.*
 import kotlin.math.abs
 
 class ReguleringTest {
@@ -80,6 +80,12 @@ class ReguleringTest {
         coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns null
         every {
             featureToggleService.isEnabled(BeregnBarnepensjonServiceFeatureToggle.BrukFaktiskTrygdetid, false)
+        } returns false
+        every {
+            featureToggleService.isEnabled(
+                BeregnBarnepensjonServiceFeatureToggle.BrukInstitusjonsoppholdIBeregning,
+                false
+            )
         } returns false
 
         runBlocking {

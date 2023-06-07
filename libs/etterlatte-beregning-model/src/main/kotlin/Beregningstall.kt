@@ -1,6 +1,7 @@
 package no.nav.etterlatte.regler
 
 import com.fasterxml.jackson.annotation.JsonProperty
+import no.nav.etterlatte.beregning.grunnlag.Prosent
 import java.math.BigDecimal
 import java.math.RoundingMode
 
@@ -123,6 +124,8 @@ class Beregningstall : Comparable<Beregningstall> {
     }
 
     companion object {
+        fun somBroek(verdi: Prosent) = Beregningstall(verdi.verdi).divide(100)
+
         const val DESIMALER_DELBEREGNING = 16
         val AVRUNDING_DELBEREGNING = RoundingMode.FLOOR
         val AVRUNDING_BEREGNING = RoundingMode.HALF_UP

@@ -1,6 +1,7 @@
 package no.nav.etterlatte.beregning
 
 import beregning.regler.finnAnvendtGrunnbeloep
+import no.nav.etterlatte.beregning.BeregnBarnepensjonServiceFeatureToggle.BrukInstitusjonsoppholdIBeregning
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlag
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlagService
 import no.nav.etterlatte.beregning.grunnlag.PeriodisertBeregningGrunnlag
@@ -8,6 +9,7 @@ import no.nav.etterlatte.beregning.grunnlag.mapVerdier
 import no.nav.etterlatte.beregning.regler.barnepensjon.AvdoedForelder
 import no.nav.etterlatte.beregning.regler.barnepensjon.PeriodisertBarnepensjonGrunnlag
 import no.nav.etterlatte.beregning.regler.barnepensjon.kroneavrundetBarnepensjonRegel
+import no.nav.etterlatte.beregning.regler.barnepensjon.kroneavrundetBarnepensjonRegelMedInstitusjon
 import no.nav.etterlatte.beregning.regler.barnepensjon.sats.grunnbeloep
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
@@ -41,7 +43,7 @@ import java.util.*
 
 enum class BeregnBarnepensjonServiceFeatureToggle(private val key: String) : FeatureToggle {
     BrukFaktiskTrygdetid("pensjon-etterlatte.bp-bruk-faktisk-trygdetid"),
-    BrukInstitusjonsopphold("pensjon-etterlatte.bp-bruk-institusjonsopphold");
+    BrukInstitusjonsoppholdIBeregning("pensjon-etterlatte.bp-bruk-institusjonsopphold-i-beregning");
     override fun key() = key
 }
 
@@ -118,10 +120,17 @@ class BeregnBarnepensjonService(
         beregningsgrunnlag: PeriodisertBarnepensjonGrunnlag,
         virkningstidspunkt: YearMonth
     ): Beregning {
-        val resultat = kroneavrundetBarnepensjonRegel.eksekver(
-            grunnlag = beregningsgrunnlag,
-            periode = RegelPeriode(virkningstidspunkt.atDay(1))
-        )
+        val resultat = if (featureToggleService.isEnabled(BrukInstitusjonsoppholdIBeregning, false)) {
+            kroneavrundetBarnepensjonRegelMedInstitusjon.eksekver(
+                grunnlag = beregningsgrunnlag,
+                periode = RegelPeriode(virkningstidspunkt.atDay(1))
+            )
+        } else {
+            kroneavrundetBarnepensjonRegel.eksekver(
+                grunnlag = beregningsgrunnlag,
+                periode = RegelPeriode(virkningstidspunkt.atDay(1))
+            )
+        }
 
         return when (resultat) {
             is RegelkjoeringResultat.Suksess -> beregning(
@@ -244,7 +253,16 @@ class BeregnBarnepensjonService(
                     )
                 )
             }
-        }
+        },
+        institusjonsopphold = PeriodisertBeregningGrunnlag.lagGrunnlagMedDefaultUtenforPerioder(
+            beregningsGrunnlag.institusjonsoppholdBeregningsgrunnlag?.mapVerdier { institusjonsopphold ->
+                FaktumNode(
+                    verdi = institusjonsopphold,
+                    kilde = beregningsGrunnlag.kilde,
+                    beskrivelse = "Institusjonsopphold"
+                )
+            } ?: listOf()
+        ) { _, _, _ -> FaktumNode(null, beregningsGrunnlag.kilde, "Institusjonsopphold") }
     )
 
     private fun TrygdetidDto?.hvisKanBrukes() = this.takeIf {

@@ -165,9 +165,11 @@ const Soeskenjustering = (props: SoeskenjusteringProps) => {
                 Legg til periode
               </NyPeriodeButton>
             ) : null}
-            <Button type="submit" onClick={handleSubmit(ferdigstillForm)}>
-              Lagre søskenjustering
-            </Button>
+            {behandles && (
+              <Button type="submit" onClick={handleSubmit(ferdigstillForm)}>
+                Lagre søskenjustering
+              </Button>
+            )}
             {visOkLagret && <SuccessColored fontSize={20} />}
           </>
         ) : null}

@@ -10,6 +10,7 @@ import InstitusjonsoppholdPeriode from '~components/behandling/beregningsgrunnla
 import Insthendelser from '~components/behandling/beregningsgrunnlag/Insthendelser'
 import { SuccessColored } from '@navikt/ds-icons'
 import { feilIKomplettePerioderOverIntervallInstitusjonsopphold } from '~components/behandling/beregningsgrunnlag/PeriodisertBeregningsgrunnlag'
+import { hentBehandlesFraStatus } from '~components/behandling/felles/utils'
 
 type InstitusjonsoppholdProps = {
   behandling: IBehandlingReducer
@@ -18,6 +19,7 @@ type InstitusjonsoppholdProps = {
 
 const Institusjonsopphold = (props: InstitusjonsoppholdProps) => {
   const { behandling, onSubmit } = props
+  const behandles = hentBehandlesFraStatus(behandling?.status)
   const [visFeil, setVisFeil] = useState(false)
   const [visOkLagret, setVisOkLagret] = useState(false)
   const { control, register, watch, handleSubmit, formState } = useForm<{
@@ -93,25 +95,27 @@ const Institusjonsopphold = (props: InstitusjonsoppholdProps) => {
           )
         })}
       </form>
-      <Button
-        type="button"
-        icon={<PlusCircleIcon title="legg til" />}
-        iconPosition="left"
-        variant="tertiary"
-        onClick={() => {
-          setVisFeil(false)
-          append([
-            {
-              fom: new Date(Date.now()),
-              tom: undefined,
-              data: { reduksjon: 'VELG_REDUKSJON', egenReduksjon: undefined, begrunnelse: '' },
-            },
-          ])
-        }}
-      >
-        Legg til beregningsperiode
-      </Button>
-      {fields.length > 0 && (
+      {behandles && (
+        <Button
+          type="button"
+          icon={<PlusCircleIcon title="legg til" />}
+          iconPosition="left"
+          variant="tertiary"
+          onClick={() => {
+            setVisFeil(false)
+            append([
+              {
+                fom: new Date(Date.now()),
+                tom: undefined,
+                data: { reduksjon: 'VELG_REDUKSJON', egenReduksjon: undefined, begrunnelse: '' },
+              },
+            ])
+          }}
+        >
+          Legg til beregningsperiode
+        </Button>
+      )}
+      {behandles && fields.length > 0 && (
         <Button type="submit" onClick={handleSubmit(ferdigstilleForm)}>
           Lagre institusjonsopphold
         </Button>

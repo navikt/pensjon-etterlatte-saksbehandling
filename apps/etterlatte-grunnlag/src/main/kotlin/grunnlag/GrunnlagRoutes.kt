@@ -101,6 +101,11 @@ fun Route.grunnlagRoute(grunnlagService: GrunnlagService, behandlingKlient: Beha
                 }
             } catch (ex: InvalidFoedselsnummerException) {
                 call.respond(
+                    HttpStatusCode.BadRequest,
+                    "Gjenny har ingen navnedata på fødselsnummeret som ble etterspurt"
+                )
+            } catch (ex: Exception) {
+                call.respond(
                     HttpStatusCode.NotFound,
                     "Gjenny har ingen navnedata på fødselsnummeret som ble etterspurt"
                 )

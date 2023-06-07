@@ -1,16 +1,9 @@
 plugins {
     kotlin("jvm")
+    id("etterlatte.libs")
 }
 
 repositories {
-    maven {
-        url = uri("https://maven.pkg.github.com/navikt/pensjon-etterlatte-libs")
-        credentials {
-            username = "token"
-            password = System.getenv("GITHUB_TOKEN")
-        }
-    }
-    mavenCentral()
     maven("https://packages.confluent.io/maven/")
 }
 

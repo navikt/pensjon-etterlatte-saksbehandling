@@ -19,6 +19,7 @@ export interface IDetaljertBehandling {
   soeknadMottattDato: string
   virkningstidspunkt: Virkningstidspunkt | null
   utenlandstilsnitt: IUtenlandstilsnitt | undefined
+  boddEllerArbeidetUtlandet: IBoddEllerArbeidetUtlandet | undefined
   status: IBehandlingStatus
   hendelser: IHendelse[]
   familieforhold?: IFamilieforhold
@@ -54,6 +55,12 @@ export enum IUtenlandstilsnittType {
 
 export interface IUtenlandstilsnitt {
   type: IUtenlandstilsnittType
+  kilde: KildeSaksbehandler
+  begrunnelse: string
+}
+
+export interface IBoddEllerArbeidetUtlandet {
+  boddEllerArbeidetUtlandet: boolean
   kilde: KildeSaksbehandler
   begrunnelse: string
 }

@@ -2,6 +2,7 @@ import { VilkaarsvurderingResultat } from '~shared/api/vilkaarsvurdering'
 import {
   IBehandlingStatus,
   IBehandlingsType,
+  IBoddEllerArbeidetUtlandet,
   IUtenlandstilsnitt,
   Virkningstidspunkt,
 } from '~shared/types/IDetaljertBehandling'
@@ -31,6 +32,7 @@ export interface IBehandlingsammendrag {
   virkningstidspunkt?: Virkningstidspunkt
   vilkaarsvurderingUtfall?: VilkaarsvurderingResultat
   utenlandstilsnitt?: IUtenlandstilsnitt
+  boddEllerArbeidetUtlandet?: IBoddEllerArbeidetUtlandet
 }
 
 export enum AarsaksTyper {

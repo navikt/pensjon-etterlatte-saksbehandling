@@ -1,4 +1,5 @@
 import {
+  IBoddEllerArbeidetUtlandet,
   IDetaljertBehandling,
   IGyldighetResultat,
   IKommerBarnetTilgode,
@@ -113,6 +114,17 @@ export const lagreUtenlandstilsnitt = async (args: {
 }): Promise<ApiResponse<IUtenlandstilsnitt>> => {
   return apiClient.post(`/behandling/${args.behandlingId}/utenlandstilsnitt`, {
     utenlandstilsnittType: args.svar,
+    begrunnelse: args.begrunnelse,
+  })
+}
+
+export const lagreBoddEllerArbeidetUtlandet = async (args: {
+  behandlingId: string
+  begrunnelse: string
+  svar: boolean
+}): Promise<ApiResponse<IBoddEllerArbeidetUtlandet>> => {
+  return apiClient.post(`/behandling/${args.behandlingId}/boddellerarbeidetutlandet`, {
+    boddEllerArbeidetUtlandet: args.svar,
     begrunnelse: args.begrunnelse,
   })
 }

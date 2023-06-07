@@ -3,6 +3,7 @@ import { IVilkaarsvurdering } from '~shared/api/vilkaarsvurdering'
 import { Beregning, BeregningsGrunnlagData } from '~shared/types/Beregning'
 import {
   IBehandlingStatus,
+  IBoddEllerArbeidetUtlandet,
   IDetaljertBehandling,
   IGyldighetResultat,
   IKommerBarnetTilgode,
@@ -17,6 +18,9 @@ export const oppdaterVirkningstidspunkt = createAction<Virkningstidspunkt>('beha
 export const updateVilkaarsvurdering = createAction<IVilkaarsvurdering>('behandling/update_vilkaarsvurdering')
 export const oppdaterKommerBarnetTilgode = createAction<IKommerBarnetTilgode>('behandling/kommerBarnetTilgode')
 export const oppdaterUtenlandstilsnitt = createAction<IUtenlandstilsnitt>('behandling/utenlandstilsnitt')
+export const oppdaterBoddEllerArbeidetUtlandet = createAction<IBoddEllerArbeidetUtlandet>(
+  'behandling/boddellerarbeidetutlandet'
+)
 export const oppdaterBeregning = createAction<Beregning>('behandling/beregning')
 export const oppdaterBehandlingsstatus = createAction<IBehandlingStatus>('behandling/status')
 export const oppdaterBeregingsGrunnlag = createAction<BeregningsGrunnlagData>('behandling/beregningsgrunnlag')
@@ -52,6 +56,9 @@ export const behandlingReducer = createReducer(initialState, (builder) => {
   })
   builder.addCase(oppdaterUtenlandstilsnitt, (state, action) => {
     state.behandling!!.utenlandstilsnitt = action.payload
+  })
+  builder.addCase(oppdaterBoddEllerArbeidetUtlandet, (state, action) => {
+    state.behandling!!.boddEllerArbeidetUtlandet = action.payload
   })
   builder.addCase(oppdaterBeregning, (state, action) => {
     state.behandling!!.beregning = action.payload

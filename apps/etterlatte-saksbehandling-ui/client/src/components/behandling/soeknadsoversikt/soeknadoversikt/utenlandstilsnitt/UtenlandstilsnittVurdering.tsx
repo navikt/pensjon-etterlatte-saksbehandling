@@ -108,6 +108,7 @@ export const UtenlandstilsnittVurdering = ({
             const oppdatertBegrunnelse = e.target.value
             setBegrunnelse(oppdatertBegrunnelse)
           }}
+          placeholder="Valgfritt"
         />
         {isFailure(setUtenlandstilsnittStatus) && <ApiErrorAlert>Kunne ikke lagre utlandstilknytning</ApiErrorAlert>}
       </>

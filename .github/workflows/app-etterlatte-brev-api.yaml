@@ -18,6 +18,7 @@ on:
       - apps/etterlatte-brev-api/**
       - libs/saksbehandling-common/**
       - libs/etterlatte-ktor/**
+      - libs/etterlatte-behandling-model/**
       - libs/etterlatte-database/**
       - libs/ktor2client-onbehalfof/**
       - libs/ktor2client-auth-clientcredentials/**
@@ -29,6 +30,7 @@ on:
       - apps/etterlatte-brev-api/**
       - libs/saksbehandling-common/**
       - libs/etterlatte-ktor/**
+      - libs/etterlatte-behandling-model/**
       - libs/etterlatte-database/**
       - libs/ktor2client-onbehalfof/**
       - libs/ktor2client-auth-clientcredentials/**

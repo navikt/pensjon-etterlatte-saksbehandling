@@ -32,7 +32,6 @@ import no.nav.etterlatte.libs.regler.FaktumNode
 import no.nav.etterlatte.libs.regler.KonstantGrunnlag
 import no.nav.etterlatte.libs.regler.RegelPeriode
 import no.nav.etterlatte.libs.regler.RegelkjoeringResultat
-import no.nav.etterlatte.libs.regler.TomtGrunnlag
 import no.nav.etterlatte.libs.regler.eksekver
 import no.nav.etterlatte.libs.regler.finnAnvendteRegler
 import no.nav.etterlatte.regler.Beregningstall
@@ -267,7 +266,7 @@ class BeregnBarnepensjonService(
                 } ?: listOf()
             ) { _, _, _ -> FaktumNode(null, beregningsGrunnlag.kilde, "Institusjonsopphold") }
         } else {
-            TomtGrunnlag(FaktumNode(null, beregningsGrunnlag.kilde, "Institusjonsopphold"))
+            KonstantGrunnlag(FaktumNode(null, beregningsGrunnlag.kilde, "Institusjonsopphold"))
         }
     )
 

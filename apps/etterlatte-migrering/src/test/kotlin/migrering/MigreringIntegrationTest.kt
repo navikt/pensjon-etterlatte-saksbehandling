@@ -26,7 +26,6 @@ import org.junit.jupiter.api.TestInstance
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.*
 
@@ -61,7 +60,6 @@ class MigreringIntegrationTest {
                 PesysId("4"),
                 Enhet("4808"),
                 Folkeregisteridentifikator.of(syntetiskFnr),
-                LocalDateTime.now(),
                 Persongalleri(syntetiskFnr, "innsender", emptyList(), emptyList(), emptyList()),
                 YearMonth.now(),
                 Trygdetidsgrunnlag(

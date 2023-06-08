@@ -43,7 +43,7 @@ interface FoerstegangsbehandlingService {
     fun startFoerstegangsbehandling(
         sakId: Long,
         persongalleri: Persongalleri,
-        mottattDato: String,
+        mottattDato: String?,
         kilde: Vedtaksloesning
     ): Foerstegangsbehandling?
 
@@ -87,7 +87,7 @@ class RealFoerstegangsbehandlingService(
     override fun startFoerstegangsbehandling(
         sakId: Long,
         persongalleri: Persongalleri,
-        mottattDato: String,
+        mottattDato: String?,
         kilde: Vedtaksloesning
     ): Foerstegangsbehandling? {
         logger.info("Starter behandling i sak $sakId")
@@ -104,7 +104,7 @@ class RealFoerstegangsbehandlingService(
                 type = BehandlingType.FØRSTEGANGSBEHANDLING,
                 sakId = sakId,
                 status = BehandlingStatus.OPPRETTET,
-                soeknadMottattDato = LocalDateTime.parse(mottattDato),
+                soeknadMottattDato = mottattDato?.let { LocalDateTime.parse(it) },
                 persongalleri = persongalleri,
                 kilde = Vedtaksloesning.GJENNY,
                 merknad = opprettMerknad(sak, persongalleri)

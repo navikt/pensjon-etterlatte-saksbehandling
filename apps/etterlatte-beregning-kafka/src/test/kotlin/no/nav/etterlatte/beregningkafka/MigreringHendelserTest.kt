@@ -26,7 +26,6 @@ import rapidsandrivers.BEHANDLING_ID_KEY
 import rapidsandrivers.BEREGNING_KEY
 import rapidsandrivers.HENDELSE_DATA_KEY
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.*
 
@@ -56,7 +55,6 @@ internal class MigreringHendelserTest {
             pesysId = PesysId("1"),
             enhet = Enhet("4817"),
             fnr = Folkeregisteridentifikator.of("12101376212"),
-            mottattDato = LocalDateTime.now(),
             persongalleri = Persongalleri("12101376212", "innsender", emptyList(), emptyList(), emptyList()),
             virkningstidspunkt = YearMonth.now(),
             trygdetidsgrunnlag = Trygdetidsgrunnlag(

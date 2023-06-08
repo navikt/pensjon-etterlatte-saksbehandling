@@ -1,16 +1,40 @@
 package no.nav.etterlatte.brev
 
 import io.kotest.matchers.shouldBe
-import io.mockk.*
+import io.mockk.Called
+import io.mockk.clearAllMocks
+import io.mockk.coEvery
+import io.mockk.coVerify
+import io.mockk.confirmVerified
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.slot
+import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.brev.adresse.AdresseService
-import no.nav.etterlatte.brev.behandling.*
+import no.nav.etterlatte.brev.behandling.Avdoed
+import no.nav.etterlatte.brev.behandling.Behandling
+import no.nav.etterlatte.brev.behandling.Beregningsperiode
+import no.nav.etterlatte.brev.behandling.ForenkletVedtak
+import no.nav.etterlatte.brev.behandling.Innsender
+import no.nav.etterlatte.brev.behandling.Persongalleri
+import no.nav.etterlatte.brev.behandling.SakOgBehandlingService
+import no.nav.etterlatte.brev.behandling.Soeker
+import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
 import no.nav.etterlatte.brev.brevbaker.BrevbakerKlient
 import no.nav.etterlatte.brev.brevbaker.BrevbakerPdfResponse
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.dokarkiv.DokarkivServiceImpl
 import no.nav.etterlatte.brev.journalpost.JournalpostResponse
-import no.nav.etterlatte.brev.model.*
+import no.nav.etterlatte.brev.model.Adresse
+import no.nav.etterlatte.brev.model.Avsender
+import no.nav.etterlatte.brev.model.Brev
+import no.nav.etterlatte.brev.model.BrevProsessType
+import no.nav.etterlatte.brev.model.Mottaker
+import no.nav.etterlatte.brev.model.OpprettNyttBrev
+import no.nav.etterlatte.brev.model.Pdf
+import no.nav.etterlatte.brev.model.Spraak
+import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.VedtakSak
@@ -22,8 +46,12 @@ import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
 import no.nav.pensjon.brevbaker.api.model.Kroner
 import no.nav.pensjon.brevbaker.api.model.LetterMetadata
 import no.nav.pensjon.brevbaker.api.model.Telefonnummer
-import org.junit.jupiter.api.*
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
 import org.junit.jupiter.params.provider.EnumSource
@@ -111,6 +139,7 @@ internal class VedtaksbrevServiceTest {
             vedtakType: VedtakType,
             forventetProsessType: BrevProsessType
         ) {
+            val sakId = Random.nextLong()
             val behandling = opprettBehandling(sakType, vedtakType)
             val mottaker = opprettMottaker()
 
@@ -120,7 +149,7 @@ internal class VedtaksbrevServiceTest {
 
             runBlocking {
                 vedtaksbrevService.opprettVedtaksbrev(
-                    SAK_ID,
+                    sakId,
                     BEHANDLING_ID,
                     ATTESTANT
                 )
@@ -130,7 +159,7 @@ internal class VedtaksbrevServiceTest {
 
             coVerify {
                 db.hentBrevForBehandling(BEHANDLING_ID)
-                sakOgBehandlingService.hentBehandling(SAK_ID, BEHANDLING_ID, any())
+                sakOgBehandlingService.hentBehandling(sakId, BEHANDLING_ID, any())
                 adresseService.hentMottakerAdresse(behandling.persongalleri.innsender.fnr.value)
             }
 
@@ -141,9 +170,9 @@ internal class VedtaksbrevServiceTest {
             }
 
             val brev = brevSlot.captured
+            brev.sakId shouldBe sakId
             brev.behandlingId shouldBe behandling.behandlingId
             brev.soekerFnr shouldBe behandling.persongalleri.soeker.fnr.value
-            brev.tittel shouldBe "Vedtak om ${behandling.vedtak.type.name.lowercase()}"
             brev.mottaker shouldBe mottaker
             brev.prosessType shouldBe forventetProsessType
         }
@@ -220,7 +249,7 @@ internal class VedtaksbrevServiceTest {
 
             verify {
                 db.hentBrevForBehandling(BEHANDLING_ID)
-                db.opprettInnholdOgFerdigstill(any(), any())
+                db.lagrePdfOgFerdigstillBrev(any(), any())
             }
 
             coVerify {
@@ -271,7 +300,7 @@ internal class VedtaksbrevServiceTest {
 
             verify {
                 db.hentBrevForBehandling(BEHANDLING_ID)
-                db.hentBrevInnhold(brev.id) // Henter Slate payload fra db
+                db.hentBrevPayload(brev.id) // Henter Slate payload fra db
             }
 
             coVerify {
@@ -298,8 +327,8 @@ internal class VedtaksbrevServiceTest {
 
             verify {
                 db.hentBrevForBehandling(BEHANDLING_ID)
-                db.hentBrevInnhold(brev.id)
-                db.ferdigstillManueltBrevInnhold(brev.id, any())
+                db.hentBrevPayload(brev.id)
+                db.lagrePdfOgFerdigstillBrev(brev.id, any())
             }
 
             coVerify {
@@ -325,8 +354,8 @@ internal class VedtaksbrevServiceTest {
             }
 
             verify {
-                db.hentBrevInnhold(brev.id)
                 db.hentBrevForBehandling(BEHANDLING_ID)
+                db.hentBrevPayload(brev.id)
             }
 
             coVerify {
@@ -346,7 +375,7 @@ internal class VedtaksbrevServiceTest {
             val brev = opprettBrev(status, mockk())
 
             every { db.hentBrevForBehandling(any()) } returns brev
-            every { db.hentBrevInnhold(any()) } returns BrevInnhold(Spraak.NB, data = PDF_BYTES)
+            every { db.hentPdf(any()) } returns Pdf(PDF_BYTES)
 
             runBlocking {
                 vedtaksbrevService.genererPdf(SAK_ID, BEHANDLING_ID, bruker = SAKSBEHANDLER)
@@ -354,7 +383,7 @@ internal class VedtaksbrevServiceTest {
 
             verify {
                 db.hentBrevForBehandling(BEHANDLING_ID)
-                db.hentBrevInnhold(brev.id)
+                db.hentPdf(brev.id)
             }
 
             coVerify {
@@ -399,7 +428,7 @@ internal class VedtaksbrevServiceTest {
             verify {
                 db.hentBrevForBehandling(BEHANDLING_ID)
                 db.hentBrevPayload(brev.id)
-                db.opprettEllerOppdaterPayload(brev.id, any())
+                db.oppdaterPayload(brev.id, any())
             }
 
             coVerify {
@@ -445,10 +474,10 @@ internal class VedtaksbrevServiceTest {
         fun `Journalfoering av brev med ugyldig status`(status: Status) {
             val brev = Brev(
                 Random.nextLong(),
+                Random.nextLong(),
                 BEHANDLING_ID,
                 BrevProsessType.AUTOMATISK,
                 "fnr",
-                "tittel",
                 status,
                 opprettMottaker()
             )
@@ -458,8 +487,6 @@ internal class VedtaksbrevServiceTest {
                     vedtaksbrevService.journalfoerVedtaksbrev(brev, opprettVedtak())
                 }
             }
-
-            verify(exactly = 0) { db.settBrevFerdigstilt(any()) }
 
             verify {
                 listOf(sakOgBehandlingService, adresseService, dokarkivService)
@@ -473,10 +500,10 @@ internal class VedtaksbrevServiceTest {
         prosessType: BrevProsessType
     ) = Brev(
         id = Random.nextLong(10000),
+        sakId = Random.nextLong(10000),
         behandlingId = BEHANDLING_ID,
         prosessType = prosessType,
         soekerFnr = "fnr",
-        tittel = "tittel",
         status = status,
         mottaker = opprettMottaker()
     )

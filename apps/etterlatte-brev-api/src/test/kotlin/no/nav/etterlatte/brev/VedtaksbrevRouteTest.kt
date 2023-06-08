@@ -1,6 +1,7 @@
 package no.nav.etterlatte.brev
 
 import io.ktor.client.HttpClient
+import io.ktor.client.call.body
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.get
 import io.ktor.client.request.header
@@ -27,6 +28,7 @@ import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.Mottaker
+import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
@@ -35,6 +37,7 @@ import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.Assertions.assertArrayEquals
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
@@ -132,8 +135,9 @@ internal class VedtaksbrevRouteTest {
     }
 
     @Test
-    fun `Endepunkt for generering av brevinnhold`() {
-        coEvery { vedtaksbrevService.genererPdf(any(), any(), any()) } returns "pdf".toByteArray()
+    fun `Endepunkt for generering av pdf`() {
+        val pdf = Pdf("Hello world".toByteArray())
+        coEvery { vedtaksbrevService.genererPdf(any(), any(), any()) } returns pdf
         coEvery { behandlingKlient.harTilgangTilBehandling(any(), any()) } returns true
 
         testApplication {
@@ -146,6 +150,7 @@ internal class VedtaksbrevRouteTest {
             }
 
             assertEquals(HttpStatusCode.OK, response.status)
+            assertArrayEquals(pdf.bytes, response.body())
         }
 
         coVerify(exactly = 1) {
@@ -259,10 +264,10 @@ internal class VedtaksbrevRouteTest {
 
     private fun opprettBrev() = Brev(
         1,
+        41,
         BEHANDLING_ID,
         BrevProsessType.AUTOMATISK,
         "soeker_fnr",
-        "tittel",
         Status.OPPRETTET,
         Mottaker(
             "Stor Snerk",

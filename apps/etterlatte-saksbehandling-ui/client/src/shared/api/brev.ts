@@ -10,6 +10,9 @@ export const opprettVedtaksbrev = async (sakId: number, behandlingId: string): P
 export const genererPdf = async (sakId: number, behandlingId: string): Promise<ApiResponse<ArrayBuffer>> =>
   apiClient.get(`/brev/behandling/${behandlingId}/vedtak/pdf?sakId=${sakId}`)
 
+export const genererHtml = async (sakId: number, behandlingId: string): Promise<ApiResponse<ArrayBuffer>> =>
+  apiClient.get(`/brev/behandling/${behandlingId}/vedtak/html?sakId=${sakId}`)
+
 export const hentManuellPayload = async (props: { sakId: number; behandlingId: string }): Promise<ApiResponse<any>> =>
   apiClient.get(`/brev/behandling/${props.behandlingId}/vedtak/manuell?sakId=${props.sakId}`)
 

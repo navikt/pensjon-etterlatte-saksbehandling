@@ -3,7 +3,9 @@ package no.nav.etterlatte.brev.model
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonValue
 import no.nav.etterlatte.brev.adresse.RegoppslagResponseDTO
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
 import java.util.*
 
@@ -63,10 +65,10 @@ data class Mottaker(
 
 data class Brev(
     val id: BrevID,
+    val sakId: Long,
     val behandlingId: UUID,
     val prosessType: BrevProsessType,
     val soekerFnr: String,
-    val tittel: String,
     val status: Status,
     val mottaker: Mottaker
 ) {
@@ -77,35 +79,62 @@ data class Brev(
         fun fra(id: BrevID, opprettNyttBrev: OpprettNyttBrev) =
             Brev(
                 id = id,
+                sakId = opprettNyttBrev.sakId,
                 behandlingId = opprettNyttBrev.behandlingId,
                 prosessType = opprettNyttBrev.prosessType,
                 soekerFnr = opprettNyttBrev.soekerFnr,
-                tittel = opprettNyttBrev.tittel,
                 status = opprettNyttBrev.status,
                 mottaker = opprettNyttBrev.mottaker
             )
     }
 }
 
-class BrevInnhold(
-    val spraak: Spraak? = null,
-    val payload: Slate? = null,
-    val data: ByteArray? = null
+class Pdf(val bytes: ByteArray)
+
+data class BrevInnhold(
+    val tittel: String,
+    val spraak: Spraak,
+    val payload: Slate? = null
 )
 
 data class OpprettNyttBrev(
+    val sakId: Long,
     val behandlingId: UUID,
     val soekerFnr: String,
     val prosessType: BrevProsessType,
-    val tittel: String,
-    val mottaker: Mottaker
+    val mottaker: Mottaker,
+    val innhold: BrevInnhold
 ) {
     val status: Status = Status.OPPRETTET
 }
 
 enum class BrevProsessType {
     MANUELL,
-    AUTOMATISK
+    AUTOMATISK;
+
+    companion object {
+        fun fra(sakType: SakType, vedtakType: VedtakType): BrevProsessType {
+            return when (sakType) {
+                SakType.OMSTILLINGSSTOENAD -> {
+                    when (vedtakType) {
+                        VedtakType.INNVILGELSE,
+                        VedtakType.OPPHOER,
+                        VedtakType.AVSLAG,
+                        VedtakType.ENDRING -> MANUELL
+                    }
+                }
+
+                SakType.BARNEPENSJON -> {
+                    when (vedtakType) {
+                        VedtakType.INNVILGELSE -> AUTOMATISK
+                        VedtakType.OPPHOER,
+                        VedtakType.AVSLAG,
+                        VedtakType.ENDRING -> MANUELL
+                    }
+                }
+            }
+        }
+    }
 }
 
 enum class Spraak(@get:JsonValue val verdi: String) { NB("nb"), NN("nn"), EN("en") }

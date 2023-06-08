@@ -4,26 +4,14 @@ import no.nav.etterlatte.brev.behandling.Avdoed
 import no.nav.etterlatte.brev.behandling.Behandling
 
 data class AvslagBrevData(
-    val saksnummer: String,
     val avdoed: Avdoed,
-    val aktuelleParagrafer: List<String>,
-    override val avsender: Avsender,
-    override val mottaker: BrevMottaker,
+    val aktuelleParagrafer: List<String>
 ) : BrevData() {
-    override fun templateName(): String = "avslag"
-
     companion object {
-        fun fraVedtak(
-            behandling: Behandling,
-            avsender: Avsender,
-            mottaker: BrevMottaker,
-        ): AvslagBrevData =
+        fun fra(behandling: Behandling): AvslagBrevData =
             AvslagBrevData(
-                saksnummer = behandling.sakId.toString(),
                 avdoed = behandling.persongalleri.avdoed,
-                aktuelleParagrafer = emptyList(), // todo: Gå igjennom oppfylte vilkår?
-                avsender = avsender,
-                mottaker = mottaker,
+                aktuelleParagrafer = emptyList() // todo: Gå igjennom oppfylte vilkår?
             )
     }
 }

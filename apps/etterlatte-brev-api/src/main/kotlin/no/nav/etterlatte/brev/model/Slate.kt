@@ -2,6 +2,9 @@ package no.nav.etterlatte.brev.model
 
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonValue
+import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.deserialize
+import no.nav.etterlatte.libs.common.vedtak.VedtakType
 
 class Slate(
     @JsonValue val elements: List<Element> = emptyList()
@@ -28,4 +31,21 @@ class Slate(
         BULLETED_LIST("bulleted-list"),
         LIST_ITEM("list-item")
     }
+}
+
+object SlateHelper {
+    fun hentInitiellPayload(sakType: SakType, vedtakType: VedtakType): Slate {
+        return when (sakType) {
+            SakType.OMSTILLINGSSTOENAD -> {
+                when (vedtakType) {
+                    VedtakType.INNVILGELSE -> getJsonFile("/maler/oms-nasjonal-innvilget.json")
+                    else -> getJsonFile("/maler/tom-brevmal.json")
+                }
+            }
+
+            else -> getJsonFile("/maler/tom-brevmal.json")
+        }.let { deserialize(it) }
+    }
+
+    private fun getJsonFile(url: String) = javaClass.getResource(url)!!.readText()
 }

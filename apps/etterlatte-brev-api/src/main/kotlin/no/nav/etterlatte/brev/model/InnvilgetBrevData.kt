@@ -6,23 +6,14 @@ import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
 
 data class InnvilgetBrevData(
     val utbetalingsinfo: Utbetalingsinfo,
-    val avdoed: Avdoed,
-    override val avsender: Avsender,
-    override val mottaker: BrevMottaker,
+    val avdoed: Avdoed
 ) : BrevData() {
-    override fun templateName(): String = "innvilget"
 
     companion object {
-        fun fraVedtak(
-            behandling: Behandling,
-            avsender: Avsender,
-            mottaker: BrevMottaker,
-        ): InnvilgetBrevData =
+        fun fra(behandling: Behandling): InnvilgetBrevData =
             InnvilgetBrevData(
                 utbetalingsinfo = behandling.utbetalingsinfo!!,
-                avdoed = behandling.persongalleri.avdoed,
-                mottaker = mottaker,
-                avsender = avsender,
+                avdoed = behandling.persongalleri.avdoed
             )
     }
 }

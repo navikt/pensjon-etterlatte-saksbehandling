@@ -1,10 +1,9 @@
 package no.nav.etterlatte.brev.brevbaker
 
 import no.nav.etterlatte.brev.behandling.Behandling
+import no.nav.etterlatte.brev.brevbaker.BrevbakerHelpers.hentBrevkode
 import no.nav.etterlatte.brev.brevbaker.BrevbakerHelpers.mapFelles
 import no.nav.etterlatte.brev.model.Avsender
-import no.nav.etterlatte.brev.model.BrevDataMapper
-import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.pensjon.brevbaker.api.model.Felles
 
@@ -16,14 +15,21 @@ data class BrevbakerRequest(
 ) {
     companion object {
         fun fra(
+            letterData: Any,
             behandling: Behandling,
-            avsender: Avsender,
-            mottaker: Mottaker
+            avsender: Avsender
         ): BrevbakerRequest {
             return BrevbakerRequest(
-                kode = EtterlatteBrevKode.BARNEPENSJON_INNVILGELSE, // TODO: Sett opp støtte for OMS - EY-1774
-                letterData = BrevDataMapper.fra(behandling, avsender, mottaker),
-                felles = mapFelles(behandling, avsender, mottaker),
+                kode = hentBrevkode(
+                    behandling.sakType,
+                    behandling.vedtak.type
+                ),
+                letterData = letterData,
+                felles = mapFelles(
+                    sakId = behandling.sakId,
+                    soeker = behandling.persongalleri.soeker,
+                    avsender = avsender
+                ),
                 language = LanguageCode.spraakToLanguageCode(behandling.spraak)
             )
         }
@@ -45,7 +51,6 @@ enum class LanguageCode {
 }
 
 enum class EtterlatteBrevKode {
-    A_LETTER,
     BARNEPENSJON_INNVILGELSE,
     OMS_INNVILGELSE_MANUELL
 }

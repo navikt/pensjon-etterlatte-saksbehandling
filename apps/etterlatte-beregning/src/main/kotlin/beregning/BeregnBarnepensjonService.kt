@@ -44,6 +44,7 @@ import java.util.*
 enum class BeregnBarnepensjonServiceFeatureToggle(private val key: String) : FeatureToggle {
     BrukFaktiskTrygdetid("pensjon-etterlatte.bp-bruk-faktisk-trygdetid"),
     BrukInstitusjonsoppholdIBeregning("pensjon-etterlatte.bp-bruk-institusjonsopphold-i-beregning");
+
     override fun key() = key
 }
 
@@ -254,15 +255,19 @@ class BeregnBarnepensjonService(
                 )
             }
         },
-        institusjonsopphold = PeriodisertBeregningGrunnlag.lagGrunnlagMedDefaultUtenforPerioder(
-            beregningsGrunnlag.institusjonsoppholdBeregningsgrunnlag?.mapVerdier { institusjonsopphold ->
-                FaktumNode(
-                    verdi = institusjonsopphold,
-                    kilde = beregningsGrunnlag.kilde,
-                    beskrivelse = "Institusjonsopphold"
-                )
-            } ?: listOf()
-        ) { _, _, _ -> FaktumNode(null, beregningsGrunnlag.kilde, "Institusjonsopphold") }
+        institusjonsopphold = if (featureToggleService.isEnabled(BrukInstitusjonsoppholdIBeregning, false)) {
+            PeriodisertBeregningGrunnlag.lagGrunnlagMedDefaultUtenforPerioder(
+                beregningsGrunnlag.institusjonsoppholdBeregningsgrunnlag?.mapVerdier { institusjonsopphold ->
+                    FaktumNode(
+                        verdi = institusjonsopphold,
+                        kilde = beregningsGrunnlag.kilde,
+                        beskrivelse = "Institusjonsopphold"
+                    )
+                } ?: listOf()
+            ) { _, _, _ -> FaktumNode(null, beregningsGrunnlag.kilde, "Institusjonsopphold") }
+        } else {
+            KonstantGrunnlag(FaktumNode(null, beregningsGrunnlag.kilde, "Institusjonsopphold"))
+        }
     )
 
     private fun TrygdetidDto?.hvisKanBrukes() = this.takeIf {

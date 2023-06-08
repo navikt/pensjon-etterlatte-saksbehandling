@@ -447,6 +447,12 @@ internal class BeregnBarnepensjonServiceTest {
         every {
             featureToggleService.isEnabled(BeregnBarnepensjonServiceFeatureToggle.BrukFaktiskTrygdetid, false)
         } returns false
+        every {
+            featureToggleService.isEnabled(
+                BeregnBarnepensjonServiceFeatureToggle.BrukInstitusjonsoppholdIBeregning,
+                false
+            )
+        } returns false
 
         runBlocking {
             val beregning = beregnBarnepensjonService.beregn(behandling, bruker)
@@ -489,6 +495,12 @@ internal class BeregnBarnepensjonServiceTest {
         every {
             featureToggleService.isEnabled(BeregnBarnepensjonServiceFeatureToggle.BrukFaktiskTrygdetid, false)
         } returns true
+        every {
+            featureToggleService.isEnabled(
+                BeregnBarnepensjonServiceFeatureToggle.BrukInstitusjonsoppholdIBeregning,
+                false
+            )
+        } returns false
 
         runBlocking {
             val beregning = beregnBarnepensjonService.beregn(behandling, bruker)
@@ -527,6 +539,12 @@ internal class BeregnBarnepensjonServiceTest {
         coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns null
         every {
             featureToggleService.isEnabled(BeregnBarnepensjonServiceFeatureToggle.BrukFaktiskTrygdetid, false)
+        } returns false
+        every {
+            featureToggleService.isEnabled(
+                BeregnBarnepensjonServiceFeatureToggle.BrukInstitusjonsoppholdIBeregning,
+                false
+            )
         } returns false
 
         runBlocking {
@@ -567,6 +585,12 @@ internal class BeregnBarnepensjonServiceTest {
         every {
             featureToggleService.isEnabled(BeregnBarnepensjonServiceFeatureToggle.BrukFaktiskTrygdetid, false)
         } returns true
+        every {
+            featureToggleService.isEnabled(
+                BeregnBarnepensjonServiceFeatureToggle.BrukInstitusjonsoppholdIBeregning,
+                false
+            )
+        } returns false
 
         runBlocking {
             val beregning = beregnBarnepensjonService.beregn(behandling, bruker)

@@ -144,7 +144,7 @@ internal class BeregningsGrunnlagServiceTest {
                 behandlingId = revurdering.id,
                 barnepensjonBeregningsGrunnlag = BarnepensjonBeregningsGrunnlag(
                     soeskenMedIBeregning = grunnlagEndring.soeskenMedIBeregning,
-                    institusjonsoppholdBeregningsgrunnlag = grunnlagEndring.institusjonsoppholdBeregningsgrunnlag
+                    institusjonsopphold = grunnlagEndring.institusjonsoppholdBeregningsgrunnlag
                 ),
                 bruker = mockk(relaxed = true)
             )
@@ -212,7 +212,7 @@ internal class BeregningsGrunnlagServiceTest {
                 behandlingId = revurdering.id,
                 barnepensjonBeregningsGrunnlag = BarnepensjonBeregningsGrunnlag(
                     soeskenMedIBeregning = grunnlagEndring.soeskenMedIBeregning,
-                    institusjonsoppholdBeregningsgrunnlag = grunnlagEndring.institusjonsoppholdBeregningsgrunnlag
+                    institusjonsopphold = grunnlagEndring.institusjonsoppholdBeregningsgrunnlag
                 ),
                 bruker = mockk(relaxed = true)
             )

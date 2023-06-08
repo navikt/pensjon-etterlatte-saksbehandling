@@ -11,11 +11,11 @@ import no.nav.etterlatte.libs.common.utbetaling.UtbetalingStatusDto
 import no.nav.etterlatte.libs.common.vedtak.KafkaHendelseType
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
+import no.nav.etterlatte.sikkerLogg
 import no.nav.etterlatte.utbetaling.common.UtbetalingEventDto
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.IverksettResultat.SendtTilOppdrag
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.IverksettResultat.UtbetalingForVedtakEksisterer
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.IverksettResultat.UtbetalingslinjerForVedtakEksisterer
-import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Saktype
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetaling
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingService
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingStatus
@@ -95,13 +95,13 @@ class VedtakMottaker(
                 }
             } catch (e: Exception) {
                 val feilmelding = "En feil oppstod under prosessering av vedtak med vedtakId=$vedtakId"
-                logger.error(feilmelding, e)
+                logger.error(feilmelding)
+                sikkerLogg.error(feilmelding, e)
                 sendUtbetalingFeiletEvent(context, vedtakId, null, feilmelding)
 
                 if (feilSkalKastesVidere(e)) throw e
             }
         }
-
 
     private fun lesVedtak(packet: JsonMessage): Utbetalingsvedtak =
         try {
@@ -145,7 +145,7 @@ class VedtakMottaker(
         )
     }
 
-    //Mock for OMS
+    // Mock for OMS
     private fun sendUtbetalingSendtEventForOMSMock(context: MessageContext, utbetaling: Utbetalingsvedtak) {
         context.publish(
             UtbetalingEventDto(

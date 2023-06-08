@@ -3,6 +3,7 @@ package no.nav.etterlatte.libs.common
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.call
+import io.ktor.server.auth.principal
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.util.pipeline.PipelineContext
@@ -11,6 +12,7 @@ import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.ktor.bruker
 import no.nav.etterlatte.token.Saksbehandler
 import no.nav.etterlatte.token.SystemBruker
+import no.nav.security.token.support.v2.TokenValidationContextPrincipal
 import java.util.*
 
 const val BEHANDLINGSID_CALL_PARAMETER = "behandlingsid"
@@ -125,6 +127,21 @@ suspend inline fun PipelineContext<*, ApplicationCall>.withParam(
         onSuccess(uuidParam)
     } else {
         call.respond(HttpStatusCode.BadRequest, "$param var null, forventet en UUID")
+    }
+}
+
+suspend inline fun PipelineContext<*, ApplicationCall>.hentNavidentFraToken(
+    onSuccess: (navident: String) -> Unit
+) {
+    val navident = call.principal<TokenValidationContextPrincipal>()
+        ?.context?.firstValidToken?.get()?.jwtTokenClaims?.get("NAVident")?.toString()
+    if (navident.isNullOrEmpty()) {
+        call.respond(
+            HttpStatusCode.Unauthorized,
+            "Kunne ikke hente ut navident "
+        )
+    } else {
+        onSuccess(navident)
     }
 }
 

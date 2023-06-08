@@ -1,23 +1,20 @@
 package no.nav.etterlatte.grunnlag
 
 import io.ktor.http.HttpStatusCode
-import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.call
-import io.ktor.server.auth.principal
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
-import io.ktor.util.pipeline.PipelineContext
 import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
+import no.nav.etterlatte.libs.common.hentNavidentFraToken
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.InvalidFoedselsnummerException
 import no.nav.etterlatte.libs.common.withFoedselsnummer
 import no.nav.etterlatte.libs.common.withSakId
-import no.nav.security.token.support.v2.TokenValidationContextPrincipal
 
 fun Route.grunnlagRoute(grunnlagService: GrunnlagService, behandlingKlient: BehandlingKlient) {
     route("grunnlag") {
@@ -79,36 +76,34 @@ fun Route.grunnlagRoute(grunnlagService: GrunnlagService, behandlingKlient: Beha
         }
 
         post("/person") {
-            val navIdent = navIdentFraToken() ?: return@post call.respond(
-                HttpStatusCode.Unauthorized,
-                "Kunne ikke hente ut navident for vurdering av ytelsen kommer barnet tilgode"
-            )
-            try {
-                withFoedselsnummer(behandlingKlient) { foedselsnummer ->
-                    val opplysning = grunnlagService.hentOpplysningstypeNavnFraFnr(
-                        foedselsnummer,
-                        navIdent
-                    )
-
-                    if (opplysning != null) {
-                        call.respond(opplysning)
-                    } else {
-                        call.respond(
-                            HttpStatusCode.NotFound,
-                            "Gjenny har ingen navnedata på fødselsnummeret som ble etterspurt"
+            hentNavidentFraToken { navIdent ->
+                try {
+                    withFoedselsnummer(behandlingKlient) { foedselsnummer ->
+                        val opplysning = grunnlagService.hentOpplysningstypeNavnFraFnr(
+                            foedselsnummer,
+                            navIdent
                         )
+
+                        if (opplysning != null) {
+                            call.respond(opplysning)
+                        } else {
+                            call.respond(
+                                HttpStatusCode.NotFound,
+                                "Gjenny har ingen navnedata på fødselsnummeret som ble etterspurt"
+                            )
+                        }
                     }
+                } catch (ex: InvalidFoedselsnummerException) {
+                    call.respond(
+                        HttpStatusCode.BadRequest,
+                        "Gjenny har ingen navnedata på fødselsnummeret som ble etterspurt"
+                    )
+                } catch (ex: Exception) {
+                    call.respond(
+                        HttpStatusCode.NotFound,
+                        "Gjenny har ingen navnedata på fødselsnummeret som ble etterspurt"
+                    )
                 }
-            } catch (ex: InvalidFoedselsnummerException) {
-                call.respond(
-                    HttpStatusCode.BadRequest,
-                    "Gjenny har ingen navnedata på fødselsnummeret som ble etterspurt"
-                )
-            } catch (ex: Exception) {
-                call.respond(
-                    HttpStatusCode.NotFound,
-                    "Gjenny har ingen navnedata på fødselsnummeret som ble etterspurt"
-                )
             }
         }
     }
@@ -124,6 +119,3 @@ data class PersonMedNavn(
     val etternavn: String,
     val mellomnavn: String?
 )
-
-fun PipelineContext<Unit, ApplicationCall>.navIdentFraToken() = call.principal<TokenValidationContextPrincipal>()
-    ?.context?.firstValidToken?.get()?.jwtTokenClaims?.get("NAVident")?.toString()

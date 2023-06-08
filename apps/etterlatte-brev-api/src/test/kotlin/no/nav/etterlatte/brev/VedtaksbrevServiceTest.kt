@@ -33,6 +33,7 @@ import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.OpprettNyttBrev
 import no.nav.etterlatte.brev.model.Pdf
+import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -48,6 +49,7 @@ import no.nav.pensjon.brevbaker.api.model.LetterMetadata
 import no.nav.pensjon.brevbaker.api.model.Telefonnummer
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -193,8 +195,6 @@ internal class VedtaksbrevServiceTest {
 
             coVerify {
                 db.hentBrevForBehandling(BEHANDLING_ID)
-//                sakOgBehandlingService.hentBehandling(SAK_ID, BEHANDLING_ID, any())
-//                adresseService.hentMottakerAdresse(behandling.persongalleri.innsender.fnr.value)
             }
 
             verify {
@@ -212,23 +212,24 @@ internal class VedtaksbrevServiceTest {
     inner class BrevInnholdTest {
         @Test
         fun `AUTOMATISK - PDF genereres uten lagring`() {
+            val brev = opprettBrev(Status.OPPRETTET, BrevProsessType.AUTOMATISK)
             val behandling = opprettBehandling(SakType.BARNEPENSJON, VedtakType.INNVILGELSE)
 
-            every { db.hentBrevForBehandling(any()) } returns opprettBrev(Status.OPPRETTET, BrevProsessType.AUTOMATISK)
+            every { db.hentBrev(any()) } returns brev
             coEvery { sakOgBehandlingService.hentBehandling(any(), any(), any()) } returns behandling
             coEvery { adresseService.hentAvsender(any()) } returns opprettAvsender()
             coEvery { brevbaker.genererPdf(any()) } returns opprettBrevbakerResponse()
 
             runBlocking {
-                vedtaksbrevService.genererPdf(SAK_ID, BEHANDLING_ID, bruker = SAKSBEHANDLER)
+                vedtaksbrevService.genererPdf(brev.id, bruker = SAKSBEHANDLER)
             }
 
             verify {
-                db.hentBrevForBehandling(BEHANDLING_ID)
+                db.hentBrev(brev.id)
             }
 
             coVerify {
-                sakOgBehandlingService.hentBehandling(SAK_ID, BEHANDLING_ID, SAKSBEHANDLER)
+                sakOgBehandlingService.hentBehandling(brev.sakId, brev.behandlingId, SAKSBEHANDLER)
                 adresseService.hentAvsender(any())
                 brevbaker.genererPdf(any())
             }
@@ -236,24 +237,25 @@ internal class VedtaksbrevServiceTest {
 
         @Test
         fun `PDF genereres, lagres, og ferdigstilles hvis vedtak er fattet`() {
+            val brev = opprettBrev(Status.OPPRETTET, BrevProsessType.AUTOMATISK)
             val behandling = opprettBehandling(SakType.BARNEPENSJON, VedtakType.INNVILGELSE, VedtakStatus.FATTET_VEDTAK)
 
-            every { db.hentBrevForBehandling(any()) } returns opprettBrev(Status.OPPRETTET, BrevProsessType.AUTOMATISK)
+            every { db.hentBrev(any()) } returns brev
             coEvery { sakOgBehandlingService.hentBehandling(any(), any(), any()) } returns behandling
             coEvery { adresseService.hentAvsender(any()) } returns opprettAvsender()
             coEvery { brevbaker.genererPdf(any()) } returns opprettBrevbakerResponse()
 
             runBlocking {
-                vedtaksbrevService.genererPdf(SAK_ID, BEHANDLING_ID, bruker = ATTESTANT)
+                vedtaksbrevService.genererPdf(brev.id, bruker = ATTESTANT)
             }
 
             verify {
-                db.hentBrevForBehandling(BEHANDLING_ID)
-                db.lagrePdfOgFerdigstillBrev(any(), any())
+                db.hentBrev(brev.id)
+                db.lagrePdfOgFerdigstillBrev(brev.id, any())
             }
 
             coVerify {
-                sakOgBehandlingService.hentBehandling(SAK_ID, BEHANDLING_ID, ATTESTANT)
+                sakOgBehandlingService.hentBehandling(brev.sakId, brev.behandlingId, ATTESTANT)
                 adresseService.hentAvsender(any())
                 brevbaker.genererPdf(any())
             }
@@ -261,23 +263,24 @@ internal class VedtaksbrevServiceTest {
 
         @Test
         fun `AUTOMATISK - PDF genereres, men lagres ikke hvis saksbehandler sjekker sin egen sak med FATTET_VEDTAK`() {
+            val brev = opprettBrev(Status.OPPRETTET, BrevProsessType.AUTOMATISK)
             val behandling = opprettBehandling(SakType.BARNEPENSJON, VedtakType.INNVILGELSE, VedtakStatus.FATTET_VEDTAK)
 
-            every { db.hentBrevForBehandling(any()) } returns opprettBrev(Status.OPPRETTET, BrevProsessType.AUTOMATISK)
+            every { db.hentBrev(any()) } returns brev
             coEvery { sakOgBehandlingService.hentBehandling(any(), any(), any()) } returns behandling
             coEvery { adresseService.hentAvsender(any()) } returns opprettAvsender()
             coEvery { brevbaker.genererPdf(any()) } returns opprettBrevbakerResponse()
 
             runBlocking {
-                vedtaksbrevService.genererPdf(SAK_ID, BEHANDLING_ID, bruker = SAKSBEHANDLER)
+                vedtaksbrevService.genererPdf(brev.id, bruker = SAKSBEHANDLER)
             }
 
             verify {
-                db.hentBrevForBehandling(BEHANDLING_ID)
+                db.hentBrev(brev.id)
             }
 
             coVerify {
-                sakOgBehandlingService.hentBehandling(SAK_ID, BEHANDLING_ID, SAKSBEHANDLER)
+                sakOgBehandlingService.hentBehandling(brev.sakId, brev.behandlingId, SAKSBEHANDLER)
                 adresseService.hentAvsender(any())
                 brevbaker.genererPdf(any())
             }
@@ -289,22 +292,22 @@ internal class VedtaksbrevServiceTest {
                 opprettBehandling(SakType.OMSTILLINGSSTOENAD, VedtakType.INNVILGELSE, VedtakStatus.OPPRETTET)
 
             val brev = opprettBrev(Status.OPPRETTET, BrevProsessType.MANUELL)
-            every { db.hentBrevForBehandling(any()) } returns brev
+            every { db.hentBrev(any()) } returns brev
             coEvery { sakOgBehandlingService.hentBehandling(any(), any(), any()) } returns behandling
             coEvery { adresseService.hentAvsender(any()) } returns opprettAvsender()
             coEvery { brevbaker.genererPdf(any()) } returns opprettBrevbakerResponse()
 
             runBlocking {
-                vedtaksbrevService.genererPdf(SAK_ID, BEHANDLING_ID, bruker = SAKSBEHANDLER)
+                vedtaksbrevService.genererPdf(brev.id, bruker = SAKSBEHANDLER)
             }
 
             verify {
-                db.hentBrevForBehandling(BEHANDLING_ID)
+                db.hentBrev(brev.id)
                 db.hentBrevPayload(brev.id) // Henter Slate payload fra db
             }
 
             coVerify {
-                sakOgBehandlingService.hentBehandling(SAK_ID, BEHANDLING_ID, SAKSBEHANDLER)
+                sakOgBehandlingService.hentBehandling(brev.sakId, brev.behandlingId, SAKSBEHANDLER)
                 adresseService.hentAvsender(any())
                 brevbaker.genererPdf(any())
             }
@@ -316,23 +319,23 @@ internal class VedtaksbrevServiceTest {
                 opprettBehandling(SakType.OMSTILLINGSSTOENAD, VedtakType.INNVILGELSE, VedtakStatus.FATTET_VEDTAK)
 
             val brev = opprettBrev(Status.OPPRETTET, BrevProsessType.MANUELL)
-            every { db.hentBrevForBehandling(any()) } returns brev
+            every { db.hentBrev(any()) } returns brev
             coEvery { sakOgBehandlingService.hentBehandling(any(), any(), any()) } returns behandling
             coEvery { adresseService.hentAvsender(any()) } returns opprettAvsender()
             coEvery { brevbaker.genererPdf(any()) } returns opprettBrevbakerResponse()
 
             runBlocking {
-                vedtaksbrevService.genererPdf(SAK_ID, BEHANDLING_ID, bruker = ATTESTANT)
+                vedtaksbrevService.genererPdf(brev.id, bruker = ATTESTANT)
             }
 
             verify {
-                db.hentBrevForBehandling(BEHANDLING_ID)
+                db.hentBrev(brev.id)
                 db.hentBrevPayload(brev.id)
                 db.lagrePdfOgFerdigstillBrev(brev.id, any())
             }
 
             coVerify {
-                sakOgBehandlingService.hentBehandling(SAK_ID, BEHANDLING_ID, ATTESTANT)
+                sakOgBehandlingService.hentBehandling(brev.sakId, brev.behandlingId, ATTESTANT)
                 adresseService.hentAvsender(any())
                 brevbaker.genererPdf(any())
             }
@@ -344,22 +347,22 @@ internal class VedtaksbrevServiceTest {
                 opprettBehandling(SakType.OMSTILLINGSSTOENAD, VedtakType.INNVILGELSE, VedtakStatus.FATTET_VEDTAK)
 
             val brev = opprettBrev(Status.OPPRETTET, BrevProsessType.MANUELL)
-            every { db.hentBrevForBehandling(any()) } returns brev
+            every { db.hentBrev(any()) } returns brev
             coEvery { sakOgBehandlingService.hentBehandling(any(), any(), any()) } returns behandling
             coEvery { adresseService.hentAvsender(any()) } returns opprettAvsender()
             coEvery { brevbaker.genererPdf(any()) } returns opprettBrevbakerResponse()
 
             runBlocking {
-                vedtaksbrevService.genererPdf(SAK_ID, BEHANDLING_ID, bruker = SAKSBEHANDLER)
+                vedtaksbrevService.genererPdf(brev.id, bruker = SAKSBEHANDLER)
             }
 
             verify {
-                db.hentBrevForBehandling(BEHANDLING_ID)
+                db.hentBrev(brev.id)
                 db.hentBrevPayload(brev.id)
             }
 
             coVerify {
-                sakOgBehandlingService.hentBehandling(SAK_ID, BEHANDLING_ID, SAKSBEHANDLER)
+                sakOgBehandlingService.hentBehandling(brev.sakId, brev.behandlingId, SAKSBEHANDLER)
                 adresseService.hentAvsender(any())
                 brevbaker.genererPdf(any())
             }
@@ -374,15 +377,15 @@ internal class VedtaksbrevServiceTest {
         fun `Brev innhold kan ikke endres`(status: Status) {
             val brev = opprettBrev(status, mockk())
 
-            every { db.hentBrevForBehandling(any()) } returns brev
+            every { db.hentBrev(any()) } returns brev
             every { db.hentPdf(any()) } returns Pdf(PDF_BYTES)
 
             runBlocking {
-                vedtaksbrevService.genererPdf(SAK_ID, BEHANDLING_ID, bruker = SAKSBEHANDLER)
+                vedtaksbrevService.genererPdf(brev.id, bruker = SAKSBEHANDLER)
             }
 
             verify {
-                db.hentBrevForBehandling(BEHANDLING_ID)
+                db.hentBrev(brev.id)
                 db.hentPdf(brev.id)
             }
 
@@ -399,40 +402,33 @@ internal class VedtaksbrevServiceTest {
         @Test
         fun `Hent payload`() {
             val brev = opprettBrev(Status.OPPRETTET, mockk())
-            every { db.hentBrevForBehandling(any()) } returns brev
-            every { db.hentBrevPayload(any()) } returns mockk()
+            every { db.hentBrev(any()) } returns brev
 
-            runBlocking {
-                vedtaksbrevService.hentManueltBrevPayload(BEHANDLING_ID, SAK_ID, SAKSBEHANDLER)
+            val payload = Slate(listOf(Slate.Element(Slate.ElementType.PARAGRAPH)))
+            every { db.hentBrevPayload(any()) } returns payload
+
+            val faktiskPayload = runBlocking {
+                vedtaksbrevService.hentManueltBrevPayload(brev.id)
             }
 
+            faktiskPayload shouldBe payload
+
             verify {
-                db.hentBrevForBehandling(BEHANDLING_ID)
                 db.hentBrevPayload(brev.id)
             }
         }
 
         @Test
-        fun `Hent payload - hvis ikke finnes, opprett ny`() {
+        fun `Hent payload - finnes ikke`() {
             val brev = opprettBrev(Status.OPPRETTET, mockk())
-            every { db.hentBrevForBehandling(any()) } returns brev
             every { db.hentBrevPayload(any()) } returns null
 
-            val behandling = opprettBehandling(SakType.OMSTILLINGSSTOENAD, VedtakType.INNVILGELSE)
-            coEvery { sakOgBehandlingService.hentBehandling(any(), any(), any()) } returns behandling
-
             runBlocking {
-                vedtaksbrevService.hentManueltBrevPayload(BEHANDLING_ID, SAK_ID, SAKSBEHANDLER)
+                assertNull(vedtaksbrevService.hentManueltBrevPayload(brev.id))
             }
 
             verify {
-                db.hentBrevForBehandling(BEHANDLING_ID)
                 db.hentBrevPayload(brev.id)
-                db.oppdaterPayload(brev.id, any())
-            }
-
-            coVerify {
-                sakOgBehandlingService.hentBehandling(SAK_ID, BEHANDLING_ID, SAKSBEHANDLER)
             }
         }
     }
@@ -448,15 +444,14 @@ internal class VedtaksbrevServiceTest {
 
             val vedtak = opprettVedtak()
 
-            val (brev, response) = runBlocking {
+            val response = runBlocking {
                 vedtaksbrevService.journalfoerVedtaksbrev(forventetBrev, vedtak)
             }
 
-            assertEquals(forventetBrev, brev)
             assertEquals(forventetResponse, response)
 
             verify(exactly = 1) {
-                dokarkivService.journalfoer(forventetBrev, vedtak)
+                dokarkivService.journalfoer(forventetBrev.id, vedtak)
                 db.settBrevJournalfoert(forventetBrev.id, response)
             }
 

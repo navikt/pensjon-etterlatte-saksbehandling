@@ -6,7 +6,7 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 
-class Slate(
+data class Slate(
     @JsonValue val elements: List<Element> = emptyList()
 ) {
 

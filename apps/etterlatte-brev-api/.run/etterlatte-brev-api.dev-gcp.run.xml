@@ -19,6 +19,7 @@
       <env name="ETTERLATTE_VEDTAK_CLIENT_ID" value="069b1b2c-0a06-4cc9-8418-f100b8ff71be" />
       <env name="ETTERLATTE_VEDTAK_URL" value="https://etterlatte-vedtaksvurdering.intern.dev.nav.no" />
       <env name="HTTP_PORT" value="8084" />
+      <env name="LOGBACK_APPENDER" value="STDOUT" />
       <env name="KAFKA_BOOTSTRAP_SERVERS" value="host.docker.internal:9092" />
       <env name="KAFKA_CONSUMER_GROUP_ID" value="0" />
       <env name="KAFKA_RAPID_TOPIC" value="brev" />
@@ -37,8 +38,8 @@
       <env name="DB_PASSWORD" value="postgres" />
       <env name="DB_PORT" value="5435" />
     </envs>
-    <option name="MAIN_CLASS_NAME" value="no.nav.etterlatte.ApplicationLocalhostKt" />
-    <module name="pensjon-etterlatte-saksbehandling.apps.etterlatte-brev-api.test" />
+    <option name="MAIN_CLASS_NAME" value="no.nav.etterlatte.ApplicationKt" />
+    <module name="pensjon-etterlatte-saksbehandling.apps.etterlatte-brev-api.main" />
     <shortenClasspath name="NONE" />
     <extension name="net.ashald.envfile">
       <option name="IS_ENABLED" value="true" />

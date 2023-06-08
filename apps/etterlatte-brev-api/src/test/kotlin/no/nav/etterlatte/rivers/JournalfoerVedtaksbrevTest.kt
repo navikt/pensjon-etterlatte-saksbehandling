@@ -1,4 +1,4 @@
-package no.nav.etterlatte
+package no.nav.etterlatte.rivers
 
 import io.mockk.Called
 import io.mockk.clearMocks
@@ -27,14 +27,13 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
-import no.nav.etterlatte.rivers.JournalfoerVedtaksbrev
-import no.nav.etterlatte.rivers.VedtakTilJournalfoering
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import java.time.YearMonth
 import java.util.*
 
@@ -63,7 +62,7 @@ internal class JournalfoerVedtaksbrevTest {
         val response = JournalpostResponse("1234", null, null, true, emptyList())
 
         every { vedtaksbrevService.hentVedtaksbrev(any()) } returns brev
-        every { vedtaksbrevService.journalfoerVedtaksbrev(any(), any()) } returns Pair(brev, response)
+        every { vedtaksbrevService.journalfoerVedtaksbrev(any(), any()) } returns response
 
         val vedtak = opprettVedtak()
         val melding = opprettMelding(vedtak)
@@ -71,8 +70,10 @@ internal class JournalfoerVedtaksbrevTest {
         val inspektoer = testRapid.apply { sendTestMessage(melding.toJson()) }.inspektør
 
         val vedtakCapture = slot<VedtakTilJournalfoering>()
-        verify(exactly = 1) { vedtaksbrevService.hentVedtaksbrev(vedtak.behandling.id) }
-        verify(exactly = 1) { vedtaksbrevService.journalfoerVedtaksbrev(any(), capture(vedtakCapture)) }
+        verify(exactly = 1) {
+            vedtaksbrevService.hentVedtaksbrev(vedtak.behandling.id)
+            vedtaksbrevService.journalfoerVedtaksbrev(any(), capture(vedtakCapture))
+        }
 
         val vedtakActual = vedtakCapture.captured
 
@@ -143,6 +144,20 @@ internal class JournalfoerVedtaksbrevTest {
         testRapid.apply { sendTestMessage(melding.toJson()) }.inspektør
 
         verify { vedtaksbrevService wasNot Called }
+    }
+
+    @Test
+    fun `Brev finnes ikke for behandling`() {
+        every { vedtaksbrevService.hentVedtaksbrev(any()) } returns null
+
+        val vedtak = opprettVedtak()
+        val melding = opprettMelding(vedtak)
+
+        assertThrows<NoSuchElementException> {
+            testRapid.apply { sendTestMessage(melding.toJson()) }
+        }
+
+        verify { vedtaksbrevService.hentVedtaksbrev(vedtak.behandling.id) }
     }
 
     private fun opprettMelding(vedtak: VedtakDto): JsonMessage {

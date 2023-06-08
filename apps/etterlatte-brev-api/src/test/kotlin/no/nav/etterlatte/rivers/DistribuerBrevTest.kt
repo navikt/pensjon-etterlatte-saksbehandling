@@ -1,6 +1,6 @@
-package no.nav.etterlatte
+package no.nav.etterlatte.rivers
 
-import io.mockk.clearMocks
+import io.mockk.clearAllMocks
 import io.mockk.confirmVerified
 import io.mockk.every
 import io.mockk.mockk
@@ -14,7 +14,6 @@ import no.nav.etterlatte.brev.model.BrevEventTypes
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.libs.common.rapidsandrivers.CORRELATION_ID_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
-import no.nav.etterlatte.rivers.DistribuerBrev
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.AfterEach
@@ -40,10 +39,10 @@ internal class DistribuerBrevTest {
     )
 
     @BeforeEach
-    fun before() = clearMocks(distribusjonService)
+    fun before() = clearAllMocks()
 
     @AfterEach
-    fun after() = confirmVerified(distribusjonService)
+    fun after() = confirmVerified(distribusjonService, brevService)
 
     @Test
     fun `Gyldig melding skal sende journalpost til distribusjon`() {
@@ -66,6 +65,8 @@ internal class DistribuerBrevTest {
         inspector.apply { sendTestMessage(melding.toJson()) }.inspektør
 
         verify(exactly = 1) {
+            brevService.hentBrev(brevId)
+
             distribusjonService.distribuerJournalpost(
                 brevId,
                 journalpostId,

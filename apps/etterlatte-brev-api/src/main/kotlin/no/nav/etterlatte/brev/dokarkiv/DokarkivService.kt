@@ -12,15 +12,14 @@ import no.nav.etterlatte.brev.journalpost.JournalpostRequest
 import no.nav.etterlatte.brev.journalpost.JournalpostResponse
 import no.nav.etterlatte.brev.journalpost.Sak
 import no.nav.etterlatte.brev.journalpost.Sakstype
-import no.nav.etterlatte.brev.model.Brev
-import no.nav.etterlatte.brev.model.BrevInnhold
+import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.rivers.VedtakTilJournalfoering
 import org.slf4j.LoggerFactory
 import java.util.*
 
 interface DokarkivService {
-    fun journalfoer(vedtaksbrev: Brev, vedtak: VedtakTilJournalfoering): JournalpostResponse
+    fun journalfoer(brevId: BrevID, vedtak: VedtakTilJournalfoering): JournalpostResponse
 }
 
 class DokarkivServiceImpl(
@@ -29,12 +28,10 @@ class DokarkivServiceImpl(
 ) : DokarkivService {
     private val logger = LoggerFactory.getLogger(DokarkivService::class.java)
 
-    override fun journalfoer(vedtaksbrev: Brev, vedtak: VedtakTilJournalfoering): JournalpostResponse = runBlocking {
-        logger.info("Oppretter journalpost for brev med id=${vedtaksbrev.id}")
+    override fun journalfoer(brevId: BrevID, vedtak: VedtakTilJournalfoering): JournalpostResponse = runBlocking {
+        logger.info("Oppretter journalpost for brev med id=$brevId")
 
-        val innhold = requireNotNull(db.hentBrevInnhold(vedtaksbrev.id))
-
-        val request = mapTilJournalpostRequest(vedtaksbrev, vedtak, innhold)
+        val request = mapTilJournalpostRequest(brevId, vedtak)
 
         client.opprettJournalpost(request, true).also {
             logger.info("Journalpost opprettet (journalpostId=${it.journalpostId}, status=${it.journalpoststatus})")
@@ -42,18 +39,18 @@ class DokarkivServiceImpl(
     }
 
     private fun mapTilJournalpostRequest(
-        vedtaksbrev: Brev,
-        vedtak: VedtakTilJournalfoering,
-        innhold: BrevInnhold
+        brevId: BrevID,
+        vedtak: VedtakTilJournalfoering
     ): JournalpostRequest {
-        val pdf = requireNotNull(db.hentPdf(vedtaksbrev.id))
+        val innhold = requireNotNull(db.hentBrevInnhold(brevId))
+        val pdf = requireNotNull(db.hentPdf(brevId))
 
         return JournalpostRequest(
             tittel = innhold.tittel,
             journalpostType = JournalPostType.UTGAAENDE,
             avsenderMottaker = AvsenderMottaker(vedtak.sak.ident),
             bruker = Bruker(vedtak.sak.ident),
-            eksternReferanseId = "${vedtaksbrev.behandlingId}.${vedtaksbrev.id}",
+            eksternReferanseId = "${vedtak.behandlingId}.$brevId",
             sak = Sak(Sakstype.FAGSAK, vedtak.sak.id.toString()),
             dokumenter = listOf(pdf.tilJournalpostDokument(innhold.tittel)),
             tema = vedtak.sak.sakType.tema, // https://confluence.adeo.no/display/BOA/Tema

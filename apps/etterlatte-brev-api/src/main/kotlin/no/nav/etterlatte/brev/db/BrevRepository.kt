@@ -128,7 +128,8 @@ class BrevRepository(private val ds: DataSource) {
                 mapOf(
                     "brev_id" to id,
                     "tittel" to ulagretBrev.innhold.tittel,
-                    "spraak" to ulagretBrev.innhold.spraak.name
+                    "spraak" to ulagretBrev.innhold.spraak.name,
+                    "payload" to ulagretBrev.innhold.payload?.toJson()
                 )
             ).asUpdate
         ).also { opprettet -> require(opprettet == 1) }
@@ -267,8 +268,8 @@ class BrevRepository(private val ds: DataSource) {
         """
 
         const val OPPRETT_INNHOLD_QUERY = """
-            INSERT INTO innhold (brev_id, tittel, spraak) 
-            VALUES (:brev_id, :tittel, :spraak)
+            INSERT INTO innhold (brev_id, tittel, spraak, payload) 
+            VALUES (:brev_id, :tittel, :spraak, :payload)
         """
 
         const val OPPRETT_PDF_QUERY = """

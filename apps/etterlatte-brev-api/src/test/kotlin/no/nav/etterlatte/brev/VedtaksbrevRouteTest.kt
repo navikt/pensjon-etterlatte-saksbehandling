@@ -136,15 +136,16 @@ internal class VedtaksbrevRouteTest {
 
     @Test
     fun `Endepunkt for generering av pdf`() {
+        val brevId = Random.nextLong()
         val pdf = Pdf("Hello world".toByteArray())
-        coEvery { vedtaksbrevService.genererPdf(any(), any(), any()) } returns pdf
+        coEvery { vedtaksbrevService.genererPdf(any(), any()) } returns pdf
         coEvery { behandlingKlient.harTilgangTilBehandling(any(), any()) } returns true
 
         testApplication {
             val client = httpClient()
 
             val response = client.get("/api/brev/behandling/$BEHANDLING_ID/vedtak/pdf") {
-                parameter("sakId", SAK_ID)
+                parameter("brevId", brevId)
                 header(HttpHeaders.Authorization, "Bearer $accessToken")
                 contentType(ContentType.Application.Json)
             }
@@ -154,21 +155,22 @@ internal class VedtaksbrevRouteTest {
         }
 
         coVerify(exactly = 1) {
-            vedtaksbrevService.genererPdf(SAK_ID, BEHANDLING_ID, any())
+            vedtaksbrevService.genererPdf(brevId, any())
             behandlingKlient.harTilgangTilBehandling(any(), any())
         }
     }
 
     @Test
     fun `Endepunkt for henting av manuelt brev`() {
-        coEvery { vedtaksbrevService.hentManueltBrevPayload(any(), any(), any()) } returns Slate()
+        val brevId = Random.nextLong()
+        coEvery { vedtaksbrevService.hentManueltBrevPayload(any()) } returns Slate()
         coEvery { behandlingKlient.harTilgangTilBehandling(any(), any()) } returns true
 
         testApplication {
             val client = httpClient()
 
             val response = client.get("/api/brev/behandling/$BEHANDLING_ID/vedtak/manuell") {
-                parameter("sakId", SAK_ID)
+                parameter("brevId", brevId)
                 header(HttpHeaders.Authorization, "Bearer $accessToken")
                 contentType(ContentType.Application.Json)
             }
@@ -177,13 +179,14 @@ internal class VedtaksbrevRouteTest {
         }
 
         coVerify(exactly = 1) {
-            vedtaksbrevService.hentManueltBrevPayload(BEHANDLING_ID, SAK_ID, any())
+            vedtaksbrevService.hentManueltBrevPayload(brevId)
             behandlingKlient.harTilgangTilBehandling(any(), any())
         }
     }
 
     @Test
     fun `Endepunkt for lagring av manuelt brev`() {
+        val brevId = Random.nextLong()
         coEvery { vedtaksbrevService.lagreManueltBrevPayload(any(), any()) } returns Unit
         coEvery { behandlingKlient.harTilgangTilBehandling(any(), any()) } returns true
 
@@ -193,14 +196,14 @@ internal class VedtaksbrevRouteTest {
             val response = client.post("/api/brev/behandling/$BEHANDLING_ID/vedtak/manuell") {
                 header(HttpHeaders.Authorization, "Bearer $accessToken")
                 contentType(ContentType.Application.Json)
-                setBody(OppdaterPayloadRequest(Random.nextLong(), Slate()))
+                setBody(OppdaterPayloadRequest(brevId, Slate()))
             }
 
             assertEquals(HttpStatusCode.OK, response.status)
         }
 
         coVerify(exactly = 1) {
-            vedtaksbrevService.lagreManueltBrevPayload(any(), any())
+            vedtaksbrevService.lagreManueltBrevPayload(brevId, any())
             behandlingKlient.harTilgangTilBehandling(any(), any())
         }
     }

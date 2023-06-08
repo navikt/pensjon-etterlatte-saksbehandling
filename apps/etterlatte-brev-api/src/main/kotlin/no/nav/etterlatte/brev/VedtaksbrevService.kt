@@ -14,11 +14,13 @@ import no.nav.etterlatte.brev.model.BrevDataMapper
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.BrevInnhold
 import no.nav.etterlatte.brev.model.BrevProsessType
+import no.nav.etterlatte.brev.model.BrevProsessType.AUTOMATISK
+import no.nav.etterlatte.brev.model.BrevProsessType.MANUELL
 import no.nav.etterlatte.brev.model.ManueltBrevData
 import no.nav.etterlatte.brev.model.OpprettNyttBrev
 import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.Slate
-import no.nav.etterlatte.brev.model.SlateHelper.hentInitiellPayload
+import no.nav.etterlatte.brev.model.SlateHelper
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.rivers.VedtakTilJournalfoering
@@ -60,36 +62,32 @@ class VedtaksbrevService(
 
         val mottaker = adresseService.hentMottakerAdresse(behandling.persongalleri.innsender.fnr.value)
 
-        val vedtakType = behandling.vedtak.type
-
-        val tittel = "Vedtak om ${vedtakType.name.lowercase()}"
-        val innhold = BrevInnhold(tittel, behandling.spraak)
+        val prosessType = BrevProsessType.fra(behandling.sakType, behandling.vedtak.type)
 
         val nyttBrev = OpprettNyttBrev(
             sakId = sakId,
             behandlingId = behandling.behandlingId,
-            prosessType = BrevProsessType.fra(behandling.sakType, vedtakType),
+            prosessType = prosessType,
             soekerFnr = behandling.persongalleri.soeker.fnr.value,
             mottaker = mottaker,
-            innhold = innhold
+            innhold = opprettInnhold(behandling, prosessType)
         )
 
         return db.opprettBrev(nyttBrev)
     }
 
     suspend fun genererPdf(
-        sakId: Long,
-        behandlingId: UUID,
+        id: BrevID,
         bruker: Bruker
     ): Pdf {
-        val brev = requireNotNull(hentVedtaksbrev(behandlingId))
+        val brev = hentBrev(id)
 
         if (!brev.kanEndres()) {
             logger.info("Brev har status ${brev.status} - returnerer lagret innhold")
             return requireNotNull(db.hentPdf(brev.id))
         }
 
-        val behandling = sakOgBehandlingService.hentBehandling(sakId, behandlingId, bruker)
+        val behandling = sakOgBehandlingService.hentBehandling(brev.sakId, brev.behandlingId, bruker)
         val avsender = adresseService.hentAvsender(behandling.vedtak)
 
         val brevData = opprettBrevData(brev, behandling)
@@ -101,13 +99,24 @@ class VedtaksbrevService(
 
     private fun opprettBrevData(brev: Brev, behandling: Behandling): BrevData =
         when (brev.prosessType) {
-            BrevProsessType.AUTOMATISK -> BrevDataMapper.fra(behandling)
-            BrevProsessType.MANUELL -> {
+            AUTOMATISK -> BrevDataMapper.fra(behandling)
+            MANUELL -> {
                 val payload = requireNotNull(db.hentBrevPayload(brev.id))
 
                 ManueltBrevData(payload.elements)
             }
         }
+
+    private fun opprettInnhold(behandling: Behandling, prosessType: BrevProsessType): BrevInnhold {
+        val tittel = "Vedtak om ${behandling.vedtak.type.name.lowercase()}"
+
+        val payload = when (prosessType) {
+            AUTOMATISK -> null
+            MANUELL -> SlateHelper.hentInitiellPayload(behandling.sakType, behandling.vedtak.type)
+        }
+
+        return BrevInnhold(tittel, behandling.spraak, payload)
+    }
 
     private fun ferdigstillHvisVedtakFattet(brev: Brev, behandling: Behandling, pdf: Pdf, bruker: Bruker) {
         if (behandling.vedtak.status != VedtakStatus.FATTET_VEDTAK) {
@@ -127,36 +136,23 @@ class VedtaksbrevService(
         }
     }
 
-    suspend fun hentManueltBrevPayload(behandlingId: UUID, sakId: Long, bruker: Bruker): Slate {
-        val brev = requireNotNull(hentVedtaksbrev(behandlingId))
-
-        return db.hentBrevPayload(brev.id)
-            ?: initBrevPayload(brev.id, behandlingId, sakId, bruker)
-    }
-
-    private suspend fun initBrevPayload(id: BrevID, behandlingId: UUID, sakId: Long, bruker: Bruker): Slate {
-        val behandling = sakOgBehandlingService.hentBehandling(sakId, behandlingId, bruker)
-
-        return hentInitiellPayload(behandling.sakType, behandling.vedtak.type)
-            .also { slate -> lagreManueltBrevPayload(id, slate) }
-    }
+    fun hentManueltBrevPayload(id: BrevID): Slate? = db.hentBrevPayload(id)
 
     fun lagreManueltBrevPayload(id: BrevID, payload: Slate) {
         db.oppdaterPayload(id, payload)
-            .let { logger.info("Payload for brev (id=$id) oppdatert") }
+            .also { logger.info("Payload for brev (id=$id) oppdatert") }
     }
 
-    fun journalfoerVedtaksbrev(vedtaksbrev: Brev, vedtak: VedtakTilJournalfoering): Pair<Brev, JournalpostResponse> {
+    fun journalfoerVedtaksbrev(vedtaksbrev: Brev, vedtak: VedtakTilJournalfoering): JournalpostResponse {
         if (vedtaksbrev.status != Status.FERDIGSTILT) {
             throw IllegalArgumentException("Ugyldig status ${vedtaksbrev.status} på vedtaksbrev (id=${vedtaksbrev.id})")
         }
 
-        val response = dokarkivService.journalfoer(vedtaksbrev, vedtak)
-
-        db.settBrevJournalfoert(vedtaksbrev.id, response)
-            .also { logger.info("Brev med id=${vedtaksbrev.id} markert som journalført") }
-
-        return vedtaksbrev to response
+        return dokarkivService.journalfoer(vedtaksbrev.id, vedtak)
+            .also { journalfoeringResponse ->
+                db.settBrevJournalfoert(vedtaksbrev.id, journalfoeringResponse)
+                logger.info("Brev med id=${vedtaksbrev.id} markert som journalført")
+            }
     }
 
     fun slettVedtaksbrev(id: BrevID): Boolean {

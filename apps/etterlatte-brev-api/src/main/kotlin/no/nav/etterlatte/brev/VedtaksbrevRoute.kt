@@ -53,13 +53,13 @@ fun Route.vedtaksbrevRoute(service: VedtaksbrevService, behandlingKlient: Behand
         }
 
         get("vedtak/pdf") {
-            withBehandlingId(behandlingKlient) { behandlingId ->
-                val sakId = requireNotNull(call.parameters["sakId"]).toLong()
+            withBehandlingId(behandlingKlient) {
+                val brevId = requireNotNull(call.parameters["brevId"]).toLong()
 
-                logger.info("Genererer vedtaksbrev PDF (sakId=$sakId, behandlingId=$behandlingId)")
+                logger.info("Genererer PDF for vedtaksbrev (id=$brevId)")
 
                 measureTimedValue {
-                    service.genererPdf(sakId, behandlingId, bruker).bytes
+                    service.genererPdf(brevId, bruker).bytes
                 }.let { (pdf, varighet) ->
                     logger.info("Oppretting av innhold/pdf tok ${varighet.toString(DurationUnit.SECONDS, 2)}")
                     call.respond(pdf)
@@ -68,10 +68,10 @@ fun Route.vedtaksbrevRoute(service: VedtaksbrevService, behandlingKlient: Behand
         }
 
         get("vedtak/manuell") {
-            withBehandlingId(behandlingKlient) { behandlingId ->
-                val sakId = requireNotNull(call.parameters["sakId"]).toLong()
+            withBehandlingId(behandlingKlient) {
+                val brevId = requireNotNull(call.parameters["brevId"]).toLong()
 
-                call.respond(service.hentManueltBrevPayload(behandlingId, sakId, bruker))
+                call.respond(service.hentManueltBrevPayload(brevId) ?: HttpStatusCode.NoContent)
             }
         }
 

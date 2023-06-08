@@ -1,0 +1,44 @@
+# This is a Gradle generated file for dependency locking.
+# Manual edits can break the build and are not advised.
+# This file is expected to be part of source control.
+ca.cutterslade.analyze:ca.cutterslade.analyze.gradle.plugin:1.9.1=classpath
+ca.cutterslade.gradle:gradle-dependency-analyze:1.9.1=classpath
+javax.inject:javax.inject:1=classpath
+net.java.dev.jna:jna:5.6.0=classpath
+org.apache.maven.shared:maven-dependency-analyzer:1.13.0=classpath
+org.codehaus.plexus:plexus-utils:3.4.2=classpath
+org.gradle.kotlin.kotlin-dsl:org.gradle.kotlin.kotlin-dsl.gradle.plugin:4.0.7=classpath
+org.gradle.kotlin:gradle-kotlin-dsl-plugins:4.0.7=classpath
+org.jetbrains.intellij.deps:trove4j:1.0.20200330=classpath
+org.jetbrains.kotlin:kotlin-android-extensions:1.8.10=classpath
+org.jetbrains.kotlin:kotlin-annotation-processing-gradle:1.8.10=classpath
+org.jetbrains.kotlin:kotlin-assignment:1.8.10=classpath
+org.jetbrains.kotlin:kotlin-build-common:1.8.10=classpath
+org.jetbrains.kotlin:kotlin-compiler-embeddable:1.8.10=classpath
+org.jetbrains.kotlin:kotlin-compiler-runner:1.8.10=classpath
+org.jetbrains.kotlin:kotlin-daemon-client:1.8.10=classpath
+org.jetbrains.kotlin:kotlin-daemon-embeddable:1.8.10=classpath
+org.jetbrains.kotlin:kotlin-gradle-plugin-api:1.8.10=classpath
+org.jetbrains.kotlin:kotlin-gradle-plugin-idea-proto:1.8.10=classpath
+org.jetbrains.kotlin:kotlin-gradle-plugin-idea:1.8.10=classpath
+org.jetbrains.kotlin:kotlin-gradle-plugin-model:1.8.10=classpath
+org.jetbrains.kotlin:kotlin-gradle-plugin:1.8.10=classpath
+org.jetbrains.kotlin:kotlin-klib-commonizer-api:1.8.10=classpath
+org.jetbrains.kotlin:kotlin-native-utils:1.8.10=classpath
+org.jetbrains.kotlin:kotlin-project-model:1.8.10=classpath
+org.jetbrains.kotlin:kotlin-sam-with-receiver:1.8.10=classpath
+org.jetbrains.kotlin:kotlin-scripting-common:1.8.10=classpath
+org.jetbrains.kotlin:kotlin-scripting-compiler-embeddable:1.8.10=classpath
+org.jetbrains.kotlin:kotlin-scripting-compiler-impl-embeddable:1.8.10=classpath
+org.jetbrains.kotlin:kotlin-scripting-jvm:1.8.10=classpath
+org.jetbrains.kotlin:kotlin-stdlib-common:1.8.10=classpath
+org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.10=classpath
+org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.10=classpath
+org.jetbrains.kotlin:kotlin-stdlib:1.8.10=classpath
+org.jetbrains.kotlin:kotlin-tooling-core:1.8.10=classpath
+org.jetbrains.kotlin:kotlin-util-io:1.8.10=classpath
+org.jetbrains.kotlin:kotlin-util-klib:1.8.10=classpath
+org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:1.5.0=classpath
+org.jetbrains:annotations:13.0=classpath
+org.ow2.asm:asm:9.3=classpath
+empty=

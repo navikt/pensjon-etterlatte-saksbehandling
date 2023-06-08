@@ -125,12 +125,12 @@ class SakOgBehandlingService(
             AvkortetBeregningsperiode(
                 datoFOM = it.fom,
                 datoTOM = it.tom,
-                inntekt = Kroner(55000), // TODO: Finn denne fra aarsinntekt - fratrekkInnut
+                inntekt = Kroner(123456), // TODO: Finn denne fra aarsinntekt - fratrekkInnut
                 utbetaltBeloep = Kroner(it.ytelseEtterAvkorting)
             )
         }
 
-        val aarsInntekt = avkorting.avkortingGrunnlag.first().aarsinntekt
+        val aarsInntekt = avkorting.avkortingGrunnlag.last().aarsinntekt
 
         return Avkortingsinfo(
             inntekt = Kroner(aarsInntekt),

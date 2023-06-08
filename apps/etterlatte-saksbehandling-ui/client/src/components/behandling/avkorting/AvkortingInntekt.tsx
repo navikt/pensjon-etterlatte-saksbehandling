@@ -22,13 +22,21 @@ export const AvkortingInntekt = (props: {
     if (!behandling.virkningstidspunkt) throw new Error('Mangler virkningstidspunkt')
     return behandling.virkningstidspunkt.dato
   }
-  const [inntektGrunnlagForm, setInntektGrunnlagForm] = useState<IAvkortingGrunnlag>(
-    props.avkortingGrunnlag
-      ? props.avkortingGrunnlag[props.avkortingGrunnlag.length - 1]
-      : {
-          fom: virkningstidspunkt(),
-        }
-  )
+  const finnesRedigerbartGrunnlag = () => {
+    if (props.avkortingGrunnlag) {
+      const siste = props.avkortingGrunnlag[props.avkortingGrunnlag.length - 1]
+      return siste.fom === behandling.virkningstidspunkt?.dato
+    }
+  }
+  const finnRedigerbartGrunnlag = () => {
+    if (finnesRedigerbartGrunnlag()) {
+      return props.avkortingGrunnlag![props.avkortingGrunnlag!.length - 1]
+    }
+    return {
+      fom: virkningstidspunkt(),
+    }
+  }
+  const [inntektGrunnlagForm, setInntektGrunnlagForm] = useState<IAvkortingGrunnlag>(finnRedigerbartGrunnlag())
   const [inntektGrunnlagStatus, requestLagreAvkortingGrunnlag] = useApiCall(lagreAvkortingGrunnlag)
   const [errorTekst, setErrorTekst] = useState<string | null>(null)
 
@@ -48,7 +56,7 @@ export const AvkortingInntekt = (props: {
         avkortingGrunnlag: inntektGrunnlagForm,
       },
       (respons) => {
-        const nyttAvkortingGrunnlag = respons.avkortingGrunnlag[0]
+        const nyttAvkortingGrunnlag = respons.avkortingGrunnlag[respons.avkortingGrunnlag.length - 1]
         nyttAvkortingGrunnlag && setInntektGrunnlagForm(nyttAvkortingGrunnlag)
         props.setAvkorting(respons)
         setFormToggle(false)
@@ -133,7 +141,7 @@ export const AvkortingInntekt = (props: {
                   onChange={(e) =>
                     setInntektGrunnlagForm({
                       ...inntektGrunnlagForm,
-                      fratrekkInnUt: e.target.value === '' ? undefined : Number(e.target.value),
+                      fratrekkInnUt: e.target.value === '' ? 0 : Number(e.target.value),
                     })
                   }
                 />
@@ -193,7 +201,7 @@ export const AvkortingInntekt = (props: {
                   setFormToggle(true)
                 }}
               >
-                Legg til / rediger
+                {finnesRedigerbartGrunnlag() ? 'Rediger' : 'Legg til'}
               </Button>
             )}
           </FormKnapper>

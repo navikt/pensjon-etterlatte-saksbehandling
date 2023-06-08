@@ -37,6 +37,7 @@ data class AvkortingDto(
 )
 
 data class AvkortingGrunnlagDto(
+    val id: UUID = UUID.randomUUID(),
     val fom: YearMonth,
     val tom: YearMonth?,
     val aarsinntekt: Int,

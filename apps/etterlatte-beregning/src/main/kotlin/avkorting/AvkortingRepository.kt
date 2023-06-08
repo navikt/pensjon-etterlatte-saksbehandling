@@ -44,24 +44,27 @@ class AvkortingRepository(private val dataSource: DataSource) {
         }
     }
 
-    fun lagreEllerOppdaterAvkorting(
-        behandlingId: UUID,
-        avkortingGrunnlag: List<AvkortingGrunnlag>,
-        avkortingsperioder: List<Avkortingsperiode>,
-        avkortetYtelse: List<AvkortetYtelse>
-    ): Avkorting {
-        dataSource.transaction { tx ->
-            slettAvkorting(behandlingId, tx)
-            lagreAvkortingGrunnlag(behandlingId, avkortingGrunnlag, tx)
-            lagreAvkortingsperioder(behandlingId, avkortingsperioder, tx)
-            lagreAvkortetYtelse(behandlingId, avkortetYtelse, tx)
-        }
-        return hentAvkortingUtenNullable(behandlingId)
-    }
+    fun hentAvkortingUtenNullable(behandlingId: UUID): Avkorting =
+        hentAvkorting(behandlingId) ?: throw Exception("Uthenting av avkorting for behandling $behandlingId feilet")
 
+    fun lagreAvkorting(avkorting: Avkorting): Avkorting {
+        dataSource.transaction { tx ->
+            slettAvkorting(avkorting.behandlingId, tx)
+            lagreAvkortingGrunnlag(avkorting.behandlingId, avkorting.avkortingGrunnlag, tx)
+            lagreAvkortingsperioder(avkorting.behandlingId, avkorting.avkortingsperioder, tx)
+            lagreAvkortetYtelse(avkorting.behandlingId, avkorting.avkortetYtelse, tx)
+        }
+        return hentAvkortingUtenNullable(avkorting.behandlingId)
+    }
     private fun slettAvkorting(behandlingId: UUID, tx: TransactionalSession) {
         queryOf(
             "DELETE FROM avkortingsperioder WHERE behandling_id = ?",
+            behandlingId
+        ).let { query ->
+            tx.run(query.asUpdate)
+        }
+        queryOf(
+            "DELETE FROM avkortet_ytelse WHERE behandling_id  = ?",
             behandlingId
         ).let { query ->
             tx.run(query.asUpdate)
@@ -72,19 +75,13 @@ class AvkortingRepository(private val dataSource: DataSource) {
         ).let { query ->
             tx.run(query.asUpdate)
         }
-        queryOf(
-            "DELETE FROM avkortet_ytelse WHERE behandling_id = ?",
-            behandlingId
-        ).let { query ->
-            tx.run(query.asUpdate)
-        }
     }
 
     private fun lagreAvkortingGrunnlag(
         behandlingId: UUID,
-        avkortingGrunnlag: List<AvkortingGrunnlag>,
+        avkortingsgrunnlag: List<AvkortingGrunnlag>,
         tx: TransactionalSession
-    ) = avkortingGrunnlag.forEach {
+    ) = avkortingsgrunnlag.forEach {
         queryOf(
             statement = """
                 INSERT INTO avkortingsgrunnlag(
@@ -94,7 +91,7 @@ class AvkortingRepository(private val dataSource: DataSource) {
                 )
             """.trimIndent(),
             paramMap = mapOf(
-                "id" to UUID.randomUUID(),
+                "id" to it.id,
                 "behandlingId" to behandlingId,
                 "fom" to it.periode.fom.atDay(1),
                 "tom" to it.periode.tom?.atDay(1),
@@ -163,10 +160,8 @@ class AvkortingRepository(private val dataSource: DataSource) {
             ).let { query -> tx.run(query.asUpdate) }
         }
 
-    private fun hentAvkortingUtenNullable(behandlingId: UUID): Avkorting =
-        hentAvkorting(behandlingId) ?: throw Exception("Uthenting av avkorting for behandling $behandlingId feilet")
-
     private fun Row.toAvkortingsgrunnlag() = AvkortingGrunnlag(
+        id = uuid("id"),
         periode = Periode(
             fom = sqlDate("fom").let { YearMonth.from(it.toLocalDate()) },
             tom = sqlDateOrNull("tom")?.let { YearMonth.from(it.toLocalDate()) }

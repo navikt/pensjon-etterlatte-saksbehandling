@@ -4,6 +4,7 @@ import no.nav.etterlatte.beregning.regler.omstillingstoenad.OMS_GYLDIG_FROM_TEST
 import no.nav.etterlatte.grunnbeloep.Grunnbeloep
 import no.nav.etterlatte.grunnbeloep.GrunnbeloepRepository
 import no.nav.etterlatte.libs.regler.FaktumNode
+import no.nav.etterlatte.libs.regler.PeriodisertGrunnlag
 import no.nav.etterlatte.libs.regler.Regel
 import no.nav.etterlatte.libs.regler.RegelMeta
 import no.nav.etterlatte.libs.regler.RegelReferanse
@@ -15,10 +16,25 @@ import no.nav.etterlatte.libs.regler.og
 import no.nav.etterlatte.libs.regler.velgNyesteGyldige
 import no.nav.etterlatte.regler.Beregningstall
 import java.math.RoundingMode
+import java.time.LocalDate
 
 data class InntektAvkortingGrunnlag(
     val inntekt: FaktumNode<Int>
 )
+
+data class PeriodisertInntektAvkortingGrunnlag(
+    val inntektsperioder: PeriodisertGrunnlag<FaktumNode<Int>>
+) : PeriodisertGrunnlag<InntektAvkortingGrunnlag> {
+    override fun finnAlleKnekkpunkter(): Set<LocalDate> {
+        return inntektsperioder.finnAlleKnekkpunkter()
+    }
+
+    override fun finnGrunnlagForPeriode(datoIPeriode: LocalDate): InntektAvkortingGrunnlag {
+        return InntektAvkortingGrunnlag(
+            inntektsperioder.finnGrunnlagForPeriode(datoIPeriode)
+        )
+    }
+}
 
 val historiskeGrunnbeloep = GrunnbeloepRepository.historiskeGrunnbeloep.map { grunnbeloep ->
     val grunnbeloepGyldigFra = grunnbeloep.dato.atDay(1)

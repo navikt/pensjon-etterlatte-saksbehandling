@@ -11,9 +11,42 @@ data class Avkorting(
     val avkortingGrunnlag: List<AvkortingGrunnlag>,
     val avkortingsperioder: List<Avkortingsperiode>,
     val avkortetYtelse: List<AvkortetYtelse>
-)
+) {
+    fun leggTilEllerOppdaterGrunnlag(nyttGrunnlag: AvkortingGrunnlag): Avkorting {
+        val oppdaterteGrunnlag = avkortingGrunnlag
+            .filter { it.id != nyttGrunnlag.id }
+            .map {
+                when (it.periode.tom) {
+                    null -> it.copy(
+                        periode = Periode(fom = it.periode.fom, tom = nyttGrunnlag.periode.fom.minusMonths(1))
+                    )
+
+                    else -> it
+                }
+            } + listOf(nyttGrunnlag)
+        return this.copy(avkortingGrunnlag = oppdaterteGrunnlag)
+    }
+
+    fun oppdaterAvkortingMedNyeBeregninger(
+        nyeAvkortingsperioder: List<Avkortingsperiode>,
+        nyAvkortetYtelse: List<AvkortetYtelse>
+    ): Avkorting = this.copy(
+        avkortingsperioder = nyeAvkortingsperioder,
+        avkortetYtelse = nyAvkortetYtelse
+    )
+
+    companion object {
+        fun nyAvkorting(behandlingId: UUID) = Avkorting(
+            behandlingId,
+            emptyList(),
+            emptyList(),
+            emptyList()
+        )
+    }
+}
 
 data class AvkortingGrunnlag(
+    val id: UUID,
     val periode: Periode,
     val aarsinntekt: Int,
     val fratrekkInnUt: Int,

@@ -8,6 +8,7 @@ dependencies {
     implementation(project(":libs:saksbehandling-common"))
     implementation(project(":libs:etterlatte-jobs"))
     implementation(project(":libs:ktor2client-auth-clientcredentials"))
+    implementation(project(":libs:etterlatte-behandling-model"))
     implementation(project(":libs:etterlatte-database"))
     implementation(project(":libs:etterlatte-ktor"))
 

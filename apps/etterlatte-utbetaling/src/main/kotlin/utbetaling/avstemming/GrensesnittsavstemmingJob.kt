@@ -2,6 +2,7 @@ package no.nav.etterlatte.utbetaling.grensesnittavstemming
 
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.jobs.LeaderElection
+import no.nav.etterlatte.sikkerLogg
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Saktype
 import org.slf4j.LoggerFactory
 import java.time.Duration
@@ -33,7 +34,8 @@ class GrensesnittsavstemmingJob(
                     jobbNavn = jobbNavn!!
                 ).run()
             } catch (throwable: Throwable) {
-                logger.error("Grensesnittavstemming feilet", throwable)
+                log.error("Grensesnittavstemming feilet, se sikker logg for stacktrace")
+                sikkerLogg.error("Grensesnittavstemming feilet", throwable)
             }
         }
     }
@@ -62,9 +64,5 @@ class GrensesnittsavstemmingJob(
                 }
             }
         }
-    }
-
-    companion object {
-        private val logger = LoggerFactory.getLogger(GrensesnittsavstemmingJob::class.java)
     }
 }

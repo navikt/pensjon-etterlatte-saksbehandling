@@ -3,6 +3,7 @@ package no.nav.etterlatte.utbetaling.avstemming
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.tidspunkt.norskKlokke
 import no.nav.etterlatte.libs.jobs.LeaderElection
+import no.nav.etterlatte.sikkerLogg
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Saktype
 import org.slf4j.LoggerFactory
 import java.time.Clock
@@ -40,7 +41,8 @@ class KonsistensavstemmingJob(
                     clock = clock
                 ).run()
             } catch (throwable: Throwable) {
-                logger.error("Konsistensavstemming feilet", throwable)
+                logger.error("Konsistensavstemming feilet, se sikker logg for stacktrace")
+                sikkerLogg.error("Konsistensavstemming feilet", throwable)
             }
         }
     }

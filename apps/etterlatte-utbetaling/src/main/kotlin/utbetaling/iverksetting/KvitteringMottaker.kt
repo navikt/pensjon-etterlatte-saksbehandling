@@ -56,7 +56,10 @@ class KvitteringMottaker(
                     oppdragXml = message.getBody(String::class.java)
                     val oppdrag = OppdragJaxb.toOppdrag(oppdragXml)
 
-                    logger.info("Kvittering mottatt fra Oppdrag", kv("oppdragXml", oppdragXml))
+                    sikkerLogg.info(
+                        "Kvittering på utbetaling fra Oppdrag mottatt med id=${message.jmsMessageID}",
+                        kv("oppdragXml", oppdragXml)
+                    )
 
                     when (val resultat = utbetalingService.oppdaterKvittering(oppdrag)) {
                         is KvitteringOppdatert -> {
@@ -82,7 +85,8 @@ class KvitteringMottaker(
                     logger.info("Melding med id=${message.jmsMessageID} er lest og behandlet")
                 } catch (e: Exception) {
                     "En feil oppstod under prosessering av kvittering fra Oppdrag".also {
-                        logger.error(it, kv("oppdragXml", oppdragXml), e)
+                        logger.error(it + ", se detaljer i sikker logg")
+                        sikkerLogg.error(it, kv("oppdragXml", oppdragXml), e)
                         sendUtbetalingFeiletEvent(it)
                     }
                 }

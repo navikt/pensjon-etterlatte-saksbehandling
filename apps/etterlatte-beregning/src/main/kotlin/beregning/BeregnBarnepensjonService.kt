@@ -255,19 +255,15 @@ class BeregnBarnepensjonService(
                 )
             }
         },
-        institusjonsopphold = if (featureToggleService.isEnabled(BrukInstitusjonsoppholdIBeregning, false)) {
-            PeriodisertBeregningGrunnlag.lagGrunnlagMedDefaultUtenforPerioder(
-                beregningsGrunnlag.institusjonsoppholdBeregningsgrunnlag?.mapVerdier { institusjonsopphold ->
-                    FaktumNode(
-                        verdi = institusjonsopphold,
-                        kilde = beregningsGrunnlag.kilde,
-                        beskrivelse = "Institusjonsopphold"
-                    )
-                } ?: listOf()
-            ) { _, _, _ -> FaktumNode(null, beregningsGrunnlag.kilde, "Institusjonsopphold") }
-        } else {
-            KonstantGrunnlag(FaktumNode(null, beregningsGrunnlag.kilde, "Institusjonsopphold"))
-        }
+        institusjonsopphold = PeriodisertBeregningGrunnlag.lagPotensieltTomtGrunnlagMedDefaultUtenforPerioder(
+            beregningsGrunnlag.institusjonsoppholdBeregningsgrunnlag?.mapVerdier { institusjonsopphold ->
+                FaktumNode(
+                    verdi = institusjonsopphold,
+                    kilde = beregningsGrunnlag.kilde,
+                    beskrivelse = "Institusjonsopphold"
+                )
+            } ?: listOf()
+        ) { _, _, _ -> FaktumNode(null, beregningsGrunnlag.kilde, "Institusjonsopphold") }
     )
 
     private fun TrygdetidDto?.hvisKanBrukes() = this.takeIf {

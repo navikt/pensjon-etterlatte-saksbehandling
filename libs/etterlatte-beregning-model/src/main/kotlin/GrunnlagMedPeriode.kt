@@ -1,5 +1,6 @@
 package no.nav.etterlatte.beregning.grunnlag
 
+import no.nav.etterlatte.libs.regler.KonstantGrunnlag
 import no.nav.etterlatte.libs.regler.PeriodisertGrunnlag
 import java.time.LocalDate
 
@@ -78,6 +79,16 @@ object PeriodisertBeregningGrunnlag {
         }
         return grunnlag
     }
+
+    fun <T> lagPotensieltTomtGrunnlagMedDefaultUtenforPerioder(
+        perioder: List<GrunnlagMedPeriode<T>>,
+        defaultGrunnlag: (datoIPeriode: LocalDate, foersteFom: LocalDate, senesteTom: LocalDate?) -> T
+    ): PeriodisertGrunnlag<T> =
+        if (perioder.isEmpty()) {
+            KonstantGrunnlag(defaultGrunnlag.invoke(LocalDate.now(), LocalDate.now(), null))
+        } else {
+            lagGrunnlagMedDefaultUtenforPerioder(perioder, defaultGrunnlag)
+        }
 
     fun <T> lagGrunnlagMedDefaultUtenforPerioder(
         perioder: List<GrunnlagMedPeriode<T>>,

@@ -108,6 +108,28 @@ class PeriodisertBeregningGrunnlagTest {
     }
 
     @Test
+    fun `lagPotensieltTomtGrunnlagMedDefaultUtenforPerioder returnerer standardverdi hvis ingen perioder er gitt`() {
+        val default = "konstant"
+        Assertions.assertEquals(
+            default,
+            PeriodisertBeregningGrunnlag.lagPotensieltTomtGrunnlagMedDefaultUtenforPerioder(
+                emptyList()
+            ) { _, _, _ -> default }
+                .finnGrunnlagForPeriode(perioderMedOverlapp.minBy { it.first }.first)
+        )
+    }
+
+    @Test
+    fun `lagPotensieltTomtGrunnlagMedDefaultUtenforPerioder returnerer  hvis ingen perioder er gitt`() {
+        assertDoesNotThrow {
+            PeriodisertBeregningGrunnlag.lagPotensieltTomtGrunnlagMedDefaultUtenforPerioder(
+                perioderTilGrunnlagMedPerioder(perioderSomErKomplett, null)
+            ) { _, _, _ -> "konstant" }
+                .finnGrunnlagForPeriode(perioderSomErKomplett.minBy { it.first }.first)
+        }
+    }
+
+    @Test
     fun `lagKomplettPeriodisertGrunnlag kaster feil hvis perioder har overlapp`() {
         val fom = perioderMedOverlapp.minBy { it.first }.first
         val tom = null

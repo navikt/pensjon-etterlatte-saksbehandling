@@ -4,6 +4,6 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeskenMedIBeregn
 
 data class BarnepensjonBeregningsGrunnlag(
     val soeskenMedIBeregning: List<GrunnlagMedPeriode<List<SoeskenMedIBeregning>>>,
-    val institusjonsoppholdBeregningsgrunnlag: List<GrunnlagMedPeriode<InstitusjonsoppholdBeregningsgrunnlag>>? =
+    val institusjonsopphold: List<GrunnlagMedPeriode<InstitusjonsoppholdBeregningsgrunnlag>>? =
         emptyList()
 )

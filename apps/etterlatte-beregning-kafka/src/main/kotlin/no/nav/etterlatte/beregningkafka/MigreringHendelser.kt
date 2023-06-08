@@ -68,6 +68,6 @@ internal class MigreringHendelser(rapidsConnection: RapidsConnection, private va
                     }
                 )
             ),
-            institusjonsoppholdBeregningsgrunnlag = emptyList()
+            institusjonsopphold = emptyList()
         )
 }

@@ -94,3 +94,8 @@ export const manueltBrevKanRedigeres = (status: IBehandlingStatus): boolean => {
       return false
   }
 }
+
+export function requireNotNull<T>(value: T | null, message: string): T {
+  if (!!value) return value
+  else throw Error(message)
+}

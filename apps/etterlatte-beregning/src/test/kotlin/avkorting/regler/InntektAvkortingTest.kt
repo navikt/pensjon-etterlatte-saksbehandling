@@ -3,8 +3,8 @@ package no.nav.etterlatte.beregning.regler.avkorting.regler
 import io.kotest.matchers.shouldBe
 import no.nav.etterlatte.avkorting.regler.avkortingFaktor
 import no.nav.etterlatte.avkorting.regler.kroneavrundetInntektAvkorting
-import no.nav.etterlatte.avkorting.regler.nedrundetInntekt
-import no.nav.etterlatte.avkorting.regler.overstegetInntekt
+import no.nav.etterlatte.avkorting.regler.maanedsinntekt
+import no.nav.etterlatte.avkorting.regler.overstegetInntektPerMaaned
 import no.nav.etterlatte.beregning.regler.inntektAvkortingGrunnlag
 import no.nav.etterlatte.libs.regler.RegelPeriode
 import no.nav.etterlatte.regler.Beregningstall
@@ -20,23 +20,26 @@ class InntektAvkortingTest {
     }
 
     @Test
-    fun `inntekt hentes fra grunnlag og rundes opp til naermeste tusen`() {
-        val inntekt = nedrundetInntekt.anvend(inntektAvkortingGrunnlag(inntekt = 500999), RegelPeriode(LocalDate.now()))
-        inntekt.verdi.toInteger() shouldBe 500000
+    fun `inntekt rundes opp til naermeste tusen, fratrekkes opptjent utenfor periode og justeres til maanedsinntekt`() {
+        val inntekt = maanedsinntekt.anvend(
+            inntektAvkortingGrunnlag(inntekt = 500999, fratrekkInnUt = 50000, relevanteMaaneder = 10),
+            RegelPeriode(LocalDate.now())
+        )
+        inntekt.verdi.toInteger() shouldBe 45000
     }
 
     @Test
-    fun `oversteget inntekt er alt over et halvt grunnbeloep`() {
-        val overstegetInntekt = overstegetInntekt.anvend(
-            inntektAvkortingGrunnlag(inntekt = 100000),
+    fun `oversteget inntekt er alt over et halvt maanedlig grunnbeloep`() {
+        val overstegetInntekt = overstegetInntektPerMaaned.anvend(
+            inntektAvkortingGrunnlag(inntekt = 120000),
             RegelPeriode(LocalDate.of(2023, 1, 1))
         )
-        overstegetInntekt.verdi.toInteger() shouldBe 44261
+        overstegetInntekt.verdi.toInteger() shouldBe 5355
     }
 
     @Test
     fun `oversteget inntekt skal gi 0 naar inntekt er mindre en halvt grunnbeloep`() {
-        val overstegetInntekt = overstegetInntekt.anvend(
+        val overstegetInntekt = overstegetInntektPerMaaned.anvend(
             inntektAvkortingGrunnlag(inntekt = 25000),
             RegelPeriode(LocalDate.of(2023, 1, 1))
         )
@@ -44,9 +47,9 @@ class InntektAvkortingTest {
     }
 
     @Test
-    fun `avkortingsbeloep er oversteget inntekt ganget med avkortingsfaktor oppdelt i antall maaneder (12)`() {
+    fun `avkortingsbeloep er oversteget inntekt ganget med avkortingsfaktor`() {
         val avkortingsbeloep = kroneavrundetInntektAvkorting.anvend(
-            inntektAvkortingGrunnlag(inntekt = 500000),
+            inntektAvkortingGrunnlag(inntekt = 500000, fratrekkInnUt = 0, relevanteMaaneder = 12),
             RegelPeriode(LocalDate.of(2023, 1, 1))
         )
         avkortingsbeloep.verdi shouldBe 16660

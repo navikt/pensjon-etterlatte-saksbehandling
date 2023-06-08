@@ -1,5 +1,6 @@
 package no.nav.etterlatte.avkorting
 
+import no.nav.etterlatte.avkorting.regler.InntektAvkortingGrunnlag
 import no.nav.etterlatte.avkorting.regler.PeriodisertAvkortetYtelseGrunnlag
 import no.nav.etterlatte.avkorting.regler.PeriodisertInntektAvkortingGrunnlag
 import no.nav.etterlatte.avkorting.regler.avkorteYtelse
@@ -17,6 +18,7 @@ import no.nav.etterlatte.libs.regler.PeriodisertGrunnlag
 import no.nav.etterlatte.libs.regler.RegelPeriode
 import no.nav.etterlatte.libs.regler.RegelkjoeringResultat
 import no.nav.etterlatte.libs.regler.eksekver
+import no.nav.etterlatte.regler.Beregningstall
 import org.slf4j.LoggerFactory
 import java.lang.IllegalArgumentException
 import java.time.YearMonth
@@ -32,7 +34,7 @@ object InntektAvkortingService {
         logger.info("Beregner inntektsavkorting")
 
         val grunnlag = PeriodisertInntektAvkortingGrunnlag(
-            inntektsperioder = PeriodisertBeregningGrunnlag.lagGrunnlagMedDefaultUtenforPerioder(
+            periodisertInntektAvkortingGrunnlag = PeriodisertBeregningGrunnlag.lagGrunnlagMedDefaultUtenforPerioder(
                 avkortingGrunnlag.map {
                     GrunnlagMedPeriode(
                         data = it,
@@ -41,7 +43,11 @@ object InntektAvkortingService {
                     )
                 }.mapVerdier {
                     FaktumNode(
-                        verdi = it.aarsinntekt,
+                        verdi = InntektAvkortingGrunnlag(
+                            inntekt = Beregningstall(it.aarsinntekt),
+                            fratrekkInnUt = Beregningstall(it.fratrekkInnUt),
+                            relevanteMaaneder = Beregningstall(it.relevanteMaaneder)
+                        ),
                         kilde = it.kilde,
                         beskrivelse = "Forventet årsinntekt"
                     )

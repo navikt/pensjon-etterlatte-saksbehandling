@@ -71,6 +71,7 @@ fun AvkortingGrunnlag.toDto() = AvkortingGrunnlagDto(
     tom = periode.tom,
     aarsinntekt = aarsinntekt,
     fratrekkInnUt = fratrekkInnUt,
+    relevanteMaaneder = relevanteMaaneder,
     spesifikasjon = spesifikasjon,
     kilde = AvkortingGrunnlagKildeDto(kilde.tidspunkt.toString(), kilde.ident)
 )
@@ -87,6 +88,7 @@ fun AvkortingGrunnlagDto.fromDto(bruker: Bruker) = AvkortingGrunnlag(
     periode = Periode(fom = fom, tom = tom),
     aarsinntekt = aarsinntekt,
     fratrekkInnUt = fratrekkInnUt,
+    relevanteMaaneder = relevanteMaaneder ?: (12 - fom.monthValue + 1),
     spesifikasjon = spesifikasjon,
     kilde = Grunnlagsopplysning.Saksbehandler(bruker.ident(), Tidspunkt.now())
 )

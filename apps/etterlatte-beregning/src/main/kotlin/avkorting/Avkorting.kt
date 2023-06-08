@@ -50,6 +50,7 @@ data class AvkortingGrunnlag(
     val periode: Periode,
     val aarsinntekt: Int,
     val fratrekkInnUt: Int,
+    val relevanteMaaneder: Int,
     val spesifikasjon: String,
     val kilde: Grunnlagsopplysning.Saksbehandler
 )

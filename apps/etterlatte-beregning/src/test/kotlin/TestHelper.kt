@@ -6,6 +6,7 @@ import no.nav.etterlatte.avkorting.AvkortingGrunnlag
 import no.nav.etterlatte.avkorting.Avkortingsperiode
 import no.nav.etterlatte.avkorting.regler.AvkortetYtelseGrunnlag
 import no.nav.etterlatte.avkorting.regler.InntektAvkortingGrunnlag
+import no.nav.etterlatte.avkorting.regler.InntektAvkortingGrunnlagWrapper
 import no.nav.etterlatte.beregning.Beregning
 import no.nav.etterlatte.beregning.grunnlag.InstitusjonsoppholdBeregningsgrunnlag
 import no.nav.etterlatte.beregning.regler.barnepensjon.AvdoedForelder
@@ -81,19 +82,34 @@ fun avkorting(
 fun avkortinggrunnlag(
     id: UUID = UUID.randomUUID(),
     aarsinntekt: Int = 100000,
+    fratrekkInnUt: Int = 10000,
+    relevanteMaaneder: Int = 12,
     periode: Periode = Periode(fom = YearMonth.now(), tom = null),
     kilde: Grunnlagsopplysning.Saksbehandler = Grunnlagsopplysning.Saksbehandler.create("Z123456")
 ) = AvkortingGrunnlag(
     id = id,
     periode = periode,
     aarsinntekt = aarsinntekt,
-    fratrekkInnUt = 10000,
+    fratrekkInnUt = fratrekkInnUt,
+    relevanteMaaneder = relevanteMaaneder,
     spesifikasjon = "Spesifikasjon",
     kilde = kilde
 )
 
-fun inntektAvkortingGrunnlag(inntekt: Int = 500000) = InntektAvkortingGrunnlag(
-    inntekt = FaktumNode(verdi = inntekt, "", "")
+fun inntektAvkortingGrunnlag(
+    inntekt: Int = 500000,
+    fratrekkInnUt: Int = 0,
+    relevanteMaaneder: Int = 12
+) = InntektAvkortingGrunnlagWrapper(
+    inntektAvkortingGrunnlag = FaktumNode(
+        verdi = InntektAvkortingGrunnlag(
+            inntekt = Beregningstall(inntekt),
+            fratrekkInnUt = Beregningstall(fratrekkInnUt),
+            relevanteMaaneder = Beregningstall(relevanteMaaneder)
+        ),
+        kilde = "",
+        beskrivelse = ""
+    )
 )
 
 fun avkortingsperiode(

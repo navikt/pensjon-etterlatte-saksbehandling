@@ -85,9 +85,9 @@ class AvkortingRepository(private val dataSource: DataSource) {
         queryOf(
             statement = """
                 INSERT INTO avkortingsgrunnlag(
-                    id, behandling_id, fom, tom, aarsinntekt, fratrekk_inn_ut, spesifikasjon, kilde
+                    id, behandling_id, fom, tom, aarsinntekt, fratrekk_inn_ut, relevante_maaneder, spesifikasjon, kilde
                 ) VALUES (
-                    :id, :behandlingId, :fom, :tom, :aarsinntekt, :fratrekkInnUt, :spesifikasjon, :kilde
+                    :id, :behandlingId, :fom, :tom, :aarsinntekt, :fratrekkInnUt, :relevanteMaaneder, :spesifikasjon, :kilde
                 )
             """.trimIndent(),
             paramMap = mapOf(
@@ -97,6 +97,7 @@ class AvkortingRepository(private val dataSource: DataSource) {
                 "tom" to it.periode.tom?.atDay(1),
                 "aarsinntekt" to it.aarsinntekt,
                 "fratrekkInnUt" to it.fratrekkInnUt,
+                "relevanteMaaneder" to it.relevanteMaaneder,
                 "spesifikasjon" to it.spesifikasjon,
                 "kilde" to it.kilde.toJson()
             )
@@ -168,6 +169,7 @@ class AvkortingRepository(private val dataSource: DataSource) {
         ),
         aarsinntekt = int("aarsinntekt"),
         fratrekkInnUt = int("fratrekk_inn_ut"),
+        relevanteMaaneder = int("relevante_maaneder"),
         spesifikasjon = string("spesifikasjon"),
         kilde = string("kilde").let { objectMapper.readValue(it) }
     )

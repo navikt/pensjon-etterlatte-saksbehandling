@@ -49,9 +49,9 @@ internal class AvkortingRepositoryTest {
     @Test
     fun `Skal lagre og oppdatere avkorting`() {
         val behandlingId: UUID = UUID.randomUUID()
-        val avkortinggrunnlag = mutableListOf(avkortinggrunnlag())
-        val avkortingsperioder = mutableListOf(avkortingsperiode())
-        val avkortetYtelse = mutableListOf(avkortetYtelse())
+        val avkortinggrunnlag = listOf(avkortinggrunnlag())
+        val avkortingsperioder = listOf(avkortingsperiode())
+        val avkortetYtelse = listOf(avkortetYtelse())
 
         avkortingRepository.lagreAvkorting(
             Avkorting(
@@ -62,9 +62,9 @@ internal class AvkortingRepositoryTest {
             )
         )
 
-        val endretAvkortingGrunnlag = mutableListOf(avkortinggrunnlag[0].copy(spesifikasjon = "Endret"))
-        val endretAvkortingsperiode = mutableListOf(avkortingsperioder[0].copy(avkorting = 333))
-        val endretAvkortetYtelse = mutableListOf(avkortetYtelse[0].copy(avkortingsbeloep = 444))
+        val endretAvkortingGrunnlag = listOf(avkortinggrunnlag[0].copy(spesifikasjon = "Endret"))
+        val endretAvkortingsperiode = listOf(avkortingsperioder[0].copy(avkorting = 333))
+        val endretAvkortetYtelse = listOf(avkortetYtelse[0].copy(avkortingsbeloep = 444))
 
         val avkorting = avkortingRepository.lagreAvkorting(
             Avkorting(

@@ -37,9 +37,9 @@ class AvkortingRepository(private val dataSource: DataSource) {
         } else {
             Avkorting(
                 behandlingId = behandlingId,
-                avkortingGrunnlag = avkortingGrunnlag.toMutableList(),
-                avkortingsperioder = avkortingsperioder.toMutableList(),
-                avkortetYtelse = avkortetYtelse.toMutableList()
+                avkortingGrunnlag = avkortingGrunnlag,
+                avkortingsperioder = avkortingsperioder,
+                avkortetYtelse = avkortetYtelse
             )
         }
     }

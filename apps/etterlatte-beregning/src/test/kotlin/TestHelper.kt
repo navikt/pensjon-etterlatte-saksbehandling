@@ -10,6 +10,11 @@ import no.nav.etterlatte.beregning.Beregning
 import no.nav.etterlatte.beregning.grunnlag.InstitusjonsoppholdBeregningsgrunnlag
 import no.nav.etterlatte.beregning.regler.barnepensjon.AvdoedForelder
 import no.nav.etterlatte.beregning.regler.barnepensjon.BarnepensjonGrunnlag
+import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
+import no.nav.etterlatte.libs.common.behandling.BehandlingType
+import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
+import no.nav.etterlatte.libs.common.behandling.Prosesstype
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
 import no.nav.etterlatte.libs.common.beregning.Beregningstype
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
@@ -21,11 +26,13 @@ import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.common.toObjectNode
 import no.nav.etterlatte.libs.regler.FaktumNode
 import no.nav.etterlatte.libs.regler.RegelPeriode
+import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
 import no.nav.etterlatte.libs.testdata.grunnlag.kilde
 import no.nav.etterlatte.regler.Beregningstall
 import no.nav.etterlatte.token.Saksbehandler
 import java.math.RoundingMode
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.*
 
@@ -150,4 +157,33 @@ fun beregningsperiode(
     regelResultat = mapOf("regel" to "resultat").toObjectNode(),
     regelVersjon = "1",
     kilde = Grunnlagsopplysning.RegelKilde("regelid", Tidspunkt.now(), "1")
+)
+
+fun behandling(
+    id: UUID = UUID.randomUUID(),
+    sak: Long = 123,
+    sakType: SakType = SakType.OMSTILLINGSSTOENAD,
+    behandlingType: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+    virkningstidspunkt: YearMonth = YearMonth.of(2023, 1)
+) = DetaljertBehandling(
+    id = id,
+    sak = sak,
+    sakType = sakType,
+    behandlingOpprettet = LocalDateTime.now(),
+    sistEndret = LocalDateTime.now(),
+    soeknadMottattDato = null,
+    innsender = null,
+    soeker = "diam",
+    gjenlevende = listOf(),
+    avdoed = listOf(),
+    soesken = listOf(),
+    gyldighetsproeving = null,
+    status = BehandlingStatus.VILKAARSVURDERT,
+    behandlingType = behandlingType,
+    virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(virkningstidspunkt),
+    kommerBarnetTilgode = null,
+    revurderingsaarsak = null,
+    prosesstype = Prosesstype.MANUELL,
+    utenlandstilsnitt = null,
+    boddEllerArbeidetUtlandet = null
 )

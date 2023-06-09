@@ -25,7 +25,13 @@ function Resultat({ vedtaksresultat }: { vedtaksresultat: VedtakResultat }) {
   return <UnderOverskrift innvilget={erInnvilget}>{tekst}</UnderOverskrift>
 }
 
-export const Innvilget = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo }) => {
+export const Innvilget = ({
+  behandlingsInfo,
+  children,
+}: {
+  behandlingsInfo: IBehandlingInfo
+  children: JSX.Element
+}) => {
   const innloggetId = useAppSelector((state) => state.saksbehandlerReducer.saksbehandler?.ident)
   const virkningsdato = behandlingsInfo.virkningsdato ? formaterStringDato(behandlingsInfo.virkningsdato) : '-'
   const vedtaksResultat = useVedtaksResultat()
@@ -34,31 +40,30 @@ export const Innvilget = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInf
     : formaterDato(new Date())
 
   return (
-    <>
-      <Wrapper innvilget={true}>
-        <Overskrift>{formaterBehandlingstype(behandlingsInfo.type)}</Overskrift>
-        <Resultat vedtaksresultat={vedtaksResultat} />
-        <div className="flex">
-          <div>
-            <Info>Attestant</Info>
-            <Tekst>{innloggetId}</Tekst>
-          </div>
-          <div>
-            <Info>Saksbehandler</Info>
-            <Tekst>{behandlingsInfo.saksbehandler}</Tekst>
-          </div>
+    <Wrapper innvilget={true}>
+      <Overskrift>{formaterBehandlingstype(behandlingsInfo.type)}</Overskrift>
+      <Resultat vedtaksresultat={vedtaksResultat} />
+      <div className="flex">
+        <div>
+          <Info>Attestant</Info>
+          <Tekst>{innloggetId}</Tekst>
         </div>
-        <div className="flex">
-          <div>
-            <Info>Virkningsdato</Info>
-            <Tekst>{virkningsdato}</Tekst>
-          </div>
-          <div>
-            <Info>Vedtaksdato</Info>
-            <Tekst>{attestertDato}</Tekst>
-          </div>
+        <div>
+          <Info>Saksbehandler</Info>
+          <Tekst>{behandlingsInfo.saksbehandler}</Tekst>
         </div>
-      </Wrapper>
-    </>
+      </div>
+      <div className="flex">
+        <div>
+          <Info>Virkningsdato</Info>
+          <Tekst>{virkningsdato}</Tekst>
+        </div>
+        <div>
+          <Info>Vedtaksdato</Info>
+          <Tekst>{attestertDato}</Tekst>
+        </div>
+      </div>
+      {children}
+    </Wrapper>
   )
 }

@@ -17,6 +17,7 @@ import styled from 'styled-components'
 
 const kolonner = [
   'Reg. dato',
+  'Sakid',
   'Sakstype',
   'Behandlingstype',
   'Årsak',
@@ -79,6 +80,7 @@ export const Behandlingsliste = ({ behandlinger }: { behandlinger: IBehandlingsa
               <Table.DataCell key={`data${behandling.behandlingOpprettet}`}>
                 {formaterStringDato(behandling.behandlingOpprettet)}
               </Table.DataCell>
+              <Table.DataCell key={`data${behandling.sak}`}>{behandling.sak}</Table.DataCell>
               <Table.DataCell key={`data${behandling.sakType}`}>{formaterSakstype(behandling.sakType)}</Table.DataCell>
               <Table.DataCell key={`data${behandling.behandlingType}`}>
                 <BehandlingstypeWrapper>

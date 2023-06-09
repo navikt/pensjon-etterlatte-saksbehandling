@@ -56,7 +56,6 @@ export const Behandling = () => {
             fornavn: soekerInfo.fornavn,
             mellomnavn: soekerInfo.mellomnavn,
             etternavn: soekerInfo.etternavn,
-            sakId: behandling?.sak,
           }}
         />
       )}

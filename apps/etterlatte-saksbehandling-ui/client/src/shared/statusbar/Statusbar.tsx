@@ -29,9 +29,7 @@ export const StatusBar = ({ theme, personInfo }: { theme: StatusBarTheme; person
             <Link href={`/person/${personInfo.foedselsnummer}`}>{navn}</Link>{' '}
           </Name>
           <Skilletegn>|</Skilletegn>
-          <KopierbarVerdi copy value={personInfo.foedselsnummer} />
-          <Skilletegn>| Sakid </Skilletegn>
-          <KopierbarVerdi copy value={personInfo.sakId.toString()} />
+          <KopierbarVerdi value={personInfo.foedselsnummer} />
         </UserInfo>
       )}
     </StatusBarWrapper>

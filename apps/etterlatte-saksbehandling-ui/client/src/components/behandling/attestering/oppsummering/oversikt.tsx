@@ -13,7 +13,13 @@ import { Tag } from '@navikt/ds-react'
 import { tagColors, TagList } from '~shared/Tags'
 import { INasjonalitetsType } from '~components/behandling/fargetags/nasjonalitetsType'
 
-export const Oversikt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo }) => {
+export const Oversikt = ({
+  behandlingsInfo,
+  children,
+}: {
+  behandlingsInfo: IBehandlingInfo
+  children: JSX.Element
+}) => {
   const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.saksbehandler.ident)
   const kommentarFraAttestant = behandlingsInfo.attestertLogg?.slice(-1)[0]?.kommentar
 
@@ -79,6 +85,7 @@ export const Oversikt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo
           <Tekst>{kommentarFraAttestant}</Tekst>
         </div>
       )}
+      {children}
     </BehandlingsinfoContainer>
   )
 }

@@ -26,7 +26,7 @@ interface Props {
 }
 
 export const VurderingsboksWrapper = (props: Props) => {
-  const [rediger, setRediger] = useState<boolean>(props.defaultRediger ?? false)
+  const [rediger, setRediger] = useState<boolean>((props.defaultRediger && props.redigerbar) ?? false)
   const [lagrer, setLagrer] = useState(false)
 
   return (

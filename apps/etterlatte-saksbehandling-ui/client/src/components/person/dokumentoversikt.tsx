@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { hentDokumenter } from '~shared/api/dokument'
 import { Journalpost } from '../behandling/types'
 import { DokumentlisteLiten } from '~components/person/dokumentlisteLiten'
+import { SidebarPanel } from '~components/behandling/SideMeny/SideMeny'
 
 export const Dokumentoversikt = (props: { fnr: string; liten?: boolean }) => {
   const [dokumenter, setDokumenter] = useState<Journalpost[]>([])
@@ -29,10 +30,10 @@ export const Dokumentoversikt = (props: { fnr: string; liten?: boolean }) => {
 
   return (
     (props.liten && (
-      <OversiktWrapperLiten>
+      <SidebarPanel>
         <Overskrift>Dokumenter</Overskrift>
         <DokumentlisteLiten dokumenter={dokumenter} dokumenterHentet={dokumenterHentet} error={error} />
-      </OversiktWrapperLiten>
+      </SidebarPanel>
     )) || (
       <OversiktWrapper>
         <h1>Dokumenter</h1>
@@ -51,12 +52,6 @@ export const OversiktWrapper = styled.div`
   .behandlinger {
     margin-top: 5em;
   }
-`
-
-export const OversiktWrapperLiten = styled.div`
-  border: 1px solid #c7c0c0;
-  margin: 30px 8px 0 8px;
-  padding: 1em;
 `
 
 export const Overskrift = styled.div`

@@ -1,6 +1,6 @@
 import { Button } from '@navikt/ds-react'
 import { useBehandlingRoutes } from '../BehandlingRoutes'
-import { AvbrytBehandling } from './avbryt'
+import AvbrytBehandling from './AvbrytBehandling'
 import { KnapperWrapper } from './BehandlingHandlingKnapper'
 import { handlinger } from './typer'
 

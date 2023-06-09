@@ -28,7 +28,7 @@ export const hentBehandling = async (id: string): Promise<ApiResponse<IDetaljert
   return apiClient.get(`/behandling/${id}`)
 }
 
-export const avbrytBehandling = async (id: string): Promise<ApiResponse<unknown>> => {
+export const annullerBehandling = async (id: string): Promise<ApiResponse<unknown>> => {
   return apiClient.post(`/behandling/${id}/avbryt`, {})
 }
 

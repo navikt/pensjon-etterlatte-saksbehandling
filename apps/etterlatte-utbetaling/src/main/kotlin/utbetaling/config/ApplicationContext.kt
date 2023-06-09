@@ -102,7 +102,8 @@ class ApplicationContext(
             grensesnittsavstemmingService = grensesnittsavstemmingService,
             leaderElection = leaderElection,
             starttidspunkt = Tidspunkt.now(norskKlokke()).next(LocalTime.of(3, 0, 0)),
-            periode = Duration.of(1, ChronoUnit.DAYS)
+            periode = Duration.of(1, ChronoUnit.DAYS),
+            omstillingstonadEnabled = properties.omstillingstonadEnabled
         )
 
     val konsistensavstemmingService by lazy {
@@ -119,7 +120,8 @@ class ApplicationContext(
         leaderElection,
         initialDelay = Duration.of(2, ChronoUnit.MINUTES).toMillis(),
         periode = Duration.of(4, ChronoUnit.HOURS),
-        clock = clock
+        clock = clock,
+        omstillingstonadEnabled = properties.omstillingstonadEnabled
     )
 
     val oppgavetrigger by lazy {

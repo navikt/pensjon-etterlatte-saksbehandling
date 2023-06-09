@@ -6,6 +6,7 @@ import no.nav.etterlatte.utbetaling.TestContainers
 import no.nav.etterlatte.utbetaling.avstemming.avstemmingsdata.KonsistensavstemmingDataMapper
 import no.nav.etterlatte.utbetaling.config.JmsConnectionFactory
 import no.nav.etterlatte.utbetaling.grensesnittavstemming.UUIDBase64
+import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Saktype
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingStatus
 import no.nav.etterlatte.utbetaling.mockKonsistensavstemming
 import no.nav.etterlatte.utbetaling.oppdragForKonsistensavstemming
@@ -57,7 +58,7 @@ internal class AvstemmingsdataSenderIntegrationTest {
         val konsistensavstemming = mockKonsistensavstemming(
             loependeUtbetalinger = listOf(oppdrag)
         )
-        val avstemmingsdata = KonsistensavstemmingDataMapper(konsistensavstemming).opprettAvstemmingsmelding()
+        val avstemmingsdata = KonsistensavstemmingDataMapper(konsistensavstemming).opprettAvstemmingsmelding(Saktype.BARNEPENSJON)
         avstemmingsdata.forEach {
             val xml = avstemmingsdataSender.sendKonsistensavstemming(it)
             assertNotNull(xml)
@@ -76,7 +77,7 @@ internal class AvstemmingsdataSenderIntegrationTest {
         )
         val grensesnittavstemmingDataMapper =
             GrensesnittavstemmingDataMapper(utbetalinger, fraOgMed, til, UUIDBase64(), 2)
-        val avstemmingsdata = grensesnittavstemmingDataMapper.opprettAvstemmingsmelding()
+        val avstemmingsdata = grensesnittavstemmingDataMapper.opprettAvstemmingsmelding(Saktype.BARNEPENSJON)
 
         avstemmingsdata.forEach {
             val xml = avstemmingsdataSender.sendGrensesnittavstemming(it)

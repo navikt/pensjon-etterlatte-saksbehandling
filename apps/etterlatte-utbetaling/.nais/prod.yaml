@@ -72,6 +72,8 @@ spec:
       value: "true"
     - name: KONSISTENSAVSTEMMING_ENABLED
       value: "true"
+    - name: OMS_ENABLED
+      value: "false"
   accessPolicy:
     outbound:
       external:

@@ -18,7 +18,8 @@ class KonsistensavstemmingJob(
     private val leaderElection: LeaderElection,
     private val initialDelay: Long,
     private val periode: Duration,
-    private val clock: Clock
+    private val clock: Clock,
+    private val omstillingstonadEnabled: Boolean
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
     private val jobbNavn = this::class.simpleName
@@ -38,7 +39,8 @@ class KonsistensavstemmingJob(
                     kjoereplan = kjoereplan,
                     leaderElection = leaderElection,
                     jobbNavn = jobbNavn!!,
-                    clock = clock
+                    clock = clock,
+                    omstillingstonadEnabled = omstillingstonadEnabled
                 ).run()
             } catch (throwable: Throwable) {
                 logger.error("Konsistensavstemming feilet, se sikker logg for stacktrace")
@@ -52,7 +54,8 @@ class KonsistensavstemmingJob(
         val kjoereplan: Set<LocalDate>,
         val leaderElection: LeaderElection,
         val jobbNavn: String,
-        val clock: Clock
+        val clock: Clock,
+        private val omstillingstonadEnabled: Boolean
     ) {
         private val log = LoggerFactory.getLogger(this::class.java)
 
@@ -76,9 +79,19 @@ class KonsistensavstemmingJob(
                                         log.info("Konsistensavstemming er allerede kjoert i dag ($idag)")
                                     }
                                 }
-                                Saktype.OMSTILLINGSSTOENAD -> {
-                                    log.info("Konsistensavstemming for omstillingsstoenad ennaa ikke implementert")
-                                    /* TODO: Blir haandtert i EY-1274 */
+                                Saktype.OMSTILLINGSSTOENAD  -> {
+                                    if(!omstillingstonadEnabled){
+                                        log.info("Konsistensavstemming for OMS er ikke aktivert. Hopper over")
+                                    }
+                                    else if (!konsistensavstemmingService.konsistensavstemmingErKjoertIDag(
+                                            saktype = it,
+                                            idag = idag
+                                        )
+                                    ) {
+                                        konsistensavstemmingService.startKonsistensavstemming(dag = idag, saktype = it)
+                                    } else {
+                                        log.info("Konsistensavstemming er allerede kjoert i dag ($idag)")
+                                    }
                                 }
                             }
                         }

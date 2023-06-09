@@ -17,7 +17,8 @@ data class ApplicationProperties(
     val serviceUserPassword: String,
     val leaderElectorPath: String,
     val grensesnittavstemmingEnabled: Boolean,
-    val konsistensavstemmingEnabled: Boolean
+    val konsistensavstemmingEnabled: Boolean,
+    val omstillingstonadEnabled: Boolean
 ) {
     companion object {
         fun fromEnv(env: Map<String, String>) = env.run {
@@ -38,7 +39,9 @@ data class ApplicationProperties(
                 serviceUserPassword = value("srvpwd"),
                 leaderElectorPath = value("ELECTOR_PATH"),
                 grensesnittavstemmingEnabled = value("GRENSESNITTAVSTEMMING_ENABLED").toBoolean(),
-                konsistensavstemmingEnabled = value("KONSISTENSAVSTEMMING_ENABLED").toBoolean()
+                konsistensavstemmingEnabled = value("KONSISTENSAVSTEMMING_ENABLED").toBoolean(),
+                omstillingstonadEnabled = value("OMS_ENABLED").toBoolean()
+
             )
         }
 

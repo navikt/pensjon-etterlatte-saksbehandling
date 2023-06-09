@@ -7,6 +7,7 @@ import no.nav.etterlatte.utbetaling.common.OppdragDefaults
 import no.nav.etterlatte.utbetaling.common.tidsstempelMikroOppdrag
 import no.nav.etterlatte.utbetaling.common.tidsstempelTimeOppdrag
 import no.nav.etterlatte.utbetaling.grensesnittavstemming.UUIDBase64
+import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Saktype
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetaling
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingStatus
 import no.nav.virksomhet.tjenester.avstemming.meldinger.v1.AksjonType
@@ -31,13 +32,13 @@ class GrensesnittavstemmingDataMapper(
 ) {
     private val avstemmingsperiode = periode(utbetalinger)
 
-    fun opprettAvstemmingsmelding(): List<Avstemmingsdata> =
-        startmelding() + datameldinger() + sluttmelding()
+    fun opprettAvstemmingsmelding(saktype: Saktype): List<Avstemmingsdata> =
+        startmelding(saktype) + datameldinger(saktype) + sluttmelding(saktype)
 
-    private fun startmelding() = listOf(avstemmingsdata(AksjonType.START))
+    private fun startmelding(saktype: Saktype) = listOf(avstemmingsdata(AksjonType.START, saktype))
 
-    private fun datameldinger(): List<Avstemmingsdata> =
-        avstemmingsdataLister().ifEmpty { listOf(avstemmingsdata(AksjonType.DATA)) }.let {
+    private fun datameldinger(saktype: Saktype): List<Avstemmingsdata> =
+        avstemmingsdataLister(saktype).ifEmpty { listOf(avstemmingsdata(AksjonType.DATA, saktype)) }.let {
             it.first().apply {
                 total = totaldata()
                 periode = periodedata()
@@ -46,13 +47,15 @@ class GrensesnittavstemmingDataMapper(
             it
         }
 
-    private fun sluttmelding() = listOf(avstemmingsdata(AksjonType.AVSL))
+    private fun sluttmelding(saktype: Saktype) = listOf(avstemmingsdata(AksjonType.AVSL, saktype))
 
-    private fun avstemmingsdata(aksjonstype: AksjonType) =
+    private fun avstemmingsdata(aksjonstype: AksjonType, saktype: Saktype) =
         Avstemmingsdata().apply {
             aksjon = Aksjonsdata().apply {
-                val fagomraade = "BARNEPE"
-
+                val fagomraade = when (saktype) {
+                    Saktype.BARNEPENSJON -> "BARNEPE"
+                    Saktype.OMSTILLINGSSTOENAD -> "OMSTILL"
+                }
                 aksjonType = aksjonstype
                 kildeType = KildeType.AVLEV
                 avstemmingType = AvstemmingType.GRSN
@@ -68,9 +71,9 @@ class GrensesnittavstemmingDataMapper(
             }
         }
 
-    private fun avstemmingsdataLister(): List<Avstemmingsdata> {
+    private fun avstemmingsdataLister(saktype: Saktype): List<Avstemmingsdata> {
         return detaljdata(utbetalinger).chunked(detaljerPrMelding).map {
-            avstemmingsdata(AksjonType.DATA).apply {
+            avstemmingsdata(AksjonType.DATA, saktype).apply {
                 this.detalj.addAll(it)
             }
         }

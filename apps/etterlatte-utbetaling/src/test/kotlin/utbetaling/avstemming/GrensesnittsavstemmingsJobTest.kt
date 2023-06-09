@@ -18,12 +18,17 @@ internal class GrensesnittsavstemmingsJobTest {
             Tidspunkt.now().minus(1, ChronoUnit.DAYS),
             Tidspunkt.now()
         )
+        every { hentNestePeriode(saktype = Saktype.OMSTILLINGSSTOENAD) } returns Avstemmingsperiode(
+            Tidspunkt.now().minus(1, ChronoUnit.DAYS),
+            Tidspunkt.now()
+        )
     }
     private val leaderElection: LeaderElection = mockk()
     private val grensesnittavstemming = GrensesnittsavstemmingJob.Grensesnittsavstemming(
         grensesnittsavstemmingService = grensesnittavstemmingService,
         leaderElection = leaderElection,
-        jobbNavn = "jobb"
+        jobbNavn = "jobb",
+        omstillingstonadEnabled = true
     )
 
     @Test
@@ -40,11 +45,15 @@ internal class GrensesnittsavstemmingsJobTest {
     fun `skal grensesnittsavstemme siden pod er leader`() {
         every { leaderElection.isLeader() } returns true
         every { grensesnittavstemmingService.startGrensesnittsavstemming(saktype = Saktype.BARNEPENSJON) } returns Unit
+        every { grensesnittavstemmingService.startGrensesnittsavstemming(saktype = Saktype.OMSTILLINGSSTOENAD) } returns Unit
 
         grensesnittavstemming.run()
 
         verify(exactly = 1) {
             grensesnittavstemmingService.startGrensesnittsavstemming(saktype = Saktype.BARNEPENSJON)
+        }
+        verify(exactly = 1) {
+            grensesnittavstemmingService.startGrensesnittsavstemming(saktype = Saktype.OMSTILLINGSSTOENAD)
         }
         assertTrue(leaderElection.isLeader())
     }

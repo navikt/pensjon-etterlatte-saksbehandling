@@ -25,7 +25,8 @@ internal class KonsistensavstemmingJobTest {
         kjoereplan = setOf(datoEksekvering),
         leaderElection = leaderElection,
         jobbNavn = "jobb",
-        clock = Tidspunkt.ofNorskTidssone(datoEksekvering, LocalTime.MIDNIGHT).fixedNorskTid()
+        clock = Tidspunkt.ofNorskTidssone(datoEksekvering, LocalTime.MIDNIGHT).fixedNorskTid(),
+        omstillingstonadEnabled = true
     )
 
     @Test
@@ -47,6 +48,12 @@ internal class KonsistensavstemmingJobTest {
                 datoEksekvering
             )
         } returns false
+        every {
+            konsistensavstemmingService.konsistensavstemmingErKjoertIDag(
+                Saktype.OMSTILLINGSSTOENAD,
+                datoEksekvering
+            )
+        } returns false
         every { konsistensavstemmingService.startKonsistensavstemming(any(), any()) } returns emptyList()
 
         konsistensavstemming.run()
@@ -56,7 +63,7 @@ internal class KonsistensavstemmingJobTest {
     }
 
     @Test
-    fun `skal ikke konsistensavstemme for barnepensjon naar datoen ikke er en del av kjoereplan`() {
+    fun `skal ikke konsistensavstemme naar datoen ikke er en del av kjoereplan`() {
         every { leaderElection.isLeader() } returns true
 
         val dagForTestMinusFemDager =
@@ -67,7 +74,8 @@ internal class KonsistensavstemmingJobTest {
             kjoereplan = setOf(datoEksekvering),
             leaderElection = leaderElection,
             jobbNavn = "jobb",
-            clock = dagForTestMinusFemDager.fixedNorskTid()
+            clock = dagForTestMinusFemDager.fixedNorskTid(),
+            omstillingstonadEnabled = true
         )
 
         konsistensavstemming.run()
@@ -79,16 +87,28 @@ internal class KonsistensavstemmingJobTest {
             )
         }
         verify(exactly = 0) {
+            konsistensavstemmingService.konsistensavstemmingErKjoertIDag(
+                Saktype.OMSTILLINGSSTOENAD,
+                datoEksekvering
+            )
+        }
+        verify(exactly = 0) {
             konsistensavstemmingService.startKonsistensavstemming(
                 datoEksekvering,
                 Saktype.BARNEPENSJON
+            )
+        }
+        verify(exactly = 0) {
+            konsistensavstemmingService.startKonsistensavstemming(
+                datoEksekvering,
+                Saktype.OMSTILLINGSSTOENAD
             )
         }
         confirmVerified(konsistensavstemmingService)
     }
 
     @Test
-    fun `skal konsistensavstemme for barnepensjon naar datoen er en del av kjoereplan`() {
+    fun `skal konsistensavstemme naar datoen er en del av kjoereplan`() {
         every { leaderElection.isLeader() } returns true
         every {
             konsistensavstemmingService.konsistensavstemmingErKjoertIDag(
@@ -96,8 +116,14 @@ internal class KonsistensavstemmingJobTest {
                 datoEksekvering
             )
         } returns false
-        every { konsistensavstemmingService.startKonsistensavstemming(any(), any()) } returns emptyList()
-
+        every {
+            konsistensavstemmingService.konsistensavstemmingErKjoertIDag(
+                Saktype.OMSTILLINGSSTOENAD,
+                datoEksekvering
+            )
+        } returns false
+        every { konsistensavstemmingService.startKonsistensavstemming(any(), Saktype.BARNEPENSJON) } returns emptyList()
+        every { konsistensavstemmingService.startKonsistensavstemming(any(), Saktype.OMSTILLINGSSTOENAD) } returns emptyList()
         konsistensavstemming.run()
 
         verify(exactly = 1) {
@@ -106,12 +132,19 @@ internal class KonsistensavstemmingJobTest {
                 any()
             )
         }
+        verify(exactly = 1) {
+            konsistensavstemmingService.konsistensavstemmingErKjoertIDag(
+                Saktype.OMSTILLINGSSTOENAD,
+                any()
+            )
+        }
         verify(exactly = 1) { konsistensavstemmingService.startKonsistensavstemming(any(), Saktype.BARNEPENSJON) }
+        verify(exactly = 1) { konsistensavstemmingService.startKonsistensavstemming(any(), Saktype.OMSTILLINGSSTOENAD) }
         confirmVerified(konsistensavstemmingService)
     }
 
     @Test
-    fun `skal konsistensavstemme for barnepensjon naar jobb ikke er kjoert samme dag`() {
+    fun `skal konsistensavstemme naar jobb ikke er kjoert samme dag`() {
         every { leaderElection.isLeader() } returns true
         every {
             konsistensavstemmingService.konsistensavstemmingErKjoertIDag(
@@ -120,9 +153,21 @@ internal class KonsistensavstemmingJobTest {
             )
         } returns false
         every {
+            konsistensavstemmingService.konsistensavstemmingErKjoertIDag(
+                Saktype.OMSTILLINGSSTOENAD,
+                datoEksekvering
+            )
+        } returns false
+        every {
             konsistensavstemmingService.startKonsistensavstemming(
                 datoEksekvering,
                 Saktype.BARNEPENSJON
+            )
+        } returns emptyList()
+        every {
+            konsistensavstemmingService.startKonsistensavstemming(
+                datoEksekvering,
+                Saktype.OMSTILLINGSSTOENAD
             )
         } returns emptyList()
 
@@ -134,6 +179,12 @@ internal class KonsistensavstemmingJobTest {
                 Saktype.BARNEPENSJON
             )
         }
+        verify(exactly = 1) {
+            konsistensavstemmingService.startKonsistensavstemming(
+                datoEksekvering,
+                Saktype.OMSTILLINGSSTOENAD
+            )
+        }
     }
 
     @Test
@@ -141,14 +192,14 @@ internal class KonsistensavstemmingJobTest {
         every { leaderElection.isLeader() } returns true
         every {
             konsistensavstemmingService.konsistensavstemmingErKjoertIDag(
-                Saktype.BARNEPENSJON,
+                any(),
                 datoEksekvering
             )
         } returns true
         every {
             konsistensavstemmingService.startKonsistensavstemming(
                 datoEksekvering,
-                Saktype.BARNEPENSJON
+                any()
             )
         } returns emptyList()
 

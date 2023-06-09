@@ -13,7 +13,8 @@ class GrensesnittsavstemmingJob(
     private val grensesnittsavstemmingService: GrensesnittsavstemmingService,
     private val leaderElection: LeaderElection,
     private val starttidspunkt: Date,
-    private val periode: Duration
+    private val periode: Duration,
+    private val omstillingstonadEnabled: Boolean
 ) {
     private val log = LoggerFactory.getLogger(this::class.java)
     private val jobbNavn = this::class.simpleName
@@ -31,7 +32,8 @@ class GrensesnittsavstemmingJob(
                 Grensesnittsavstemming(
                     grensesnittsavstemmingService = grensesnittsavstemmingService,
                     leaderElection = leaderElection,
-                    jobbNavn = jobbNavn!!
+                    jobbNavn = jobbNavn!!,
+                    omstillingstonadEnabled = omstillingstonadEnabled
                 ).run()
             } catch (throwable: Throwable) {
                 log.error("Grensesnittavstemming feilet, se sikker logg for stacktrace")
@@ -43,7 +45,8 @@ class GrensesnittsavstemmingJob(
     class Grensesnittsavstemming(
         val grensesnittsavstemmingService: GrensesnittsavstemmingService,
         val leaderElection: LeaderElection,
-        val jobbNavn: String
+        val jobbNavn: String,
+        private val omstillingstonadEnabled: Boolean
     ) {
         private val log = LoggerFactory.getLogger(this::class.java)
 
@@ -52,12 +55,13 @@ class GrensesnittsavstemmingJob(
             withLogContext {
                 if (leaderElection.isLeader()) {
                     Saktype.values().forEach {
+                        //Dette kan nok forenkles
                         when (it) {
                             Saktype.BARNEPENSJON -> {
                                 grensesnittsavstemmingService.startGrensesnittsavstemming(it)
                             }
                             Saktype.OMSTILLINGSSTOENAD -> {
-                                log.info("Grensesnittavstemming for omstillingsoeknad er ennaa ikke implementert")
+                                if(omstillingstonadEnabled) grensesnittsavstemmingService.startGrensesnittsavstemming(it)
                             }
                         }
                     }

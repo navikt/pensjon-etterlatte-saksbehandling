@@ -25,6 +25,7 @@ import {
 import { ISaksType } from '~components/behandling/fargetags/saksType'
 import { Revurderingsaarsak, tekstRevurderingsaarsak } from '~shared/types/Revurderingsaarsak'
 import styled from 'styled-components'
+import InstitusjonsoppholdForside from '~components/behandling/revurderingsoversikt/InstitusjonsoppholdForside'
 
 const revurderingsaarsakTilTekst = (revurderingsaarsak: Revurderingsaarsak): string =>
   tekstRevurderingsaarsak[revurderingsaarsak]
@@ -66,7 +67,7 @@ export const Revurderingsoversikt = (props: { behandling: IDetaljertBehandling }
     'Kan ikke starte en revurdering uten en revurderingsårsak'
   )
   const [hjemler, beskrivelse] = hjemlerOgBeskrivelse(behandling.sakType, revurderingsaarsak)
-
+  const institusjonsopphold = undefined //TODO: hvor skal det hentes fra
   return (
     <Content>
       <ContentHeader>
@@ -80,6 +81,12 @@ export const Revurderingsoversikt = (props: { behandling: IDetaljertBehandling }
         </BodyShort>
       </ContentHeader>
       <Innhold>
+        <InstitusjonsoppholdForside
+          behandles={behandles}
+          sakId={behandling.sak}
+          behandlingId={behandling.id}
+          institusjonsopphold={institusjonsopphold}
+        />
         <Virkningstidspunkt
           redigerbar={behandles}
           virkningstidspunkt={behandling.virkningstidspunkt}

@@ -9,9 +9,10 @@ import {
   formaterStringTidspunkt,
 } from '~utils/formattering'
 import { IBehandlingInfo } from '~components/behandling/SideMeny/types'
-import { Tag } from '@navikt/ds-react'
+import { Heading, Tag } from '@navikt/ds-react'
 import { tagColors, TagList } from '~shared/Tags'
 import { INasjonalitetsType } from '~components/behandling/fargetags/nasjonalitetsType'
+import { SidebarPanel } from '~components/behandling/SideMeny/SideMeny'
 
 export const Oversikt = ({
   behandlingsInfo,
@@ -45,9 +46,11 @@ export const Oversikt = ({
     : null
 
   return (
-    <BehandlingsinfoContainer>
-      <Overskrift>{formaterBehandlingstype(behandlingsInfo.type)}</Overskrift>
-      <UnderOverskrift>{hentStatus()}</UnderOverskrift>
+    <SidebarPanel>
+      <Heading size={'small'}>{formaterBehandlingstype(behandlingsInfo.type)}</Heading>
+      <Heading size={'xsmall'} spacing>
+        {hentStatus()}
+      </Heading>
       {fattetDato && <Tekst>{fattetDato}</Tekst>}
       <TagList>
         <li>
@@ -86,38 +89,9 @@ export const Oversikt = ({
         </div>
       )}
       {children}
-    </BehandlingsinfoContainer>
+    </SidebarPanel>
   )
 }
-
-const BehandlingsinfoContainer = styled.div`
-  margin: 20px 8px 0px 8px;
-  padding: 1em;
-  border: 1px solid #c7c0c0;
-  border-radius: 3px;
-
-  .flex {
-    display: flex;
-    justify-content: space-between;
-  }
-
-  .info {
-    margin-top: 1em;
-    margin-bottom: 1em;
-  }
-`
-
-const UnderOverskrift = styled.div`
-  font-size: 16px;
-  font-weight: 600;
-  color: #005b82;
-`
-
-const Overskrift = styled.div`
-  font-size: 20px;
-  font-weight: 600;
-  color: #3e3832;
-`
 
 const Info = styled.div`
   font-size: 14px;

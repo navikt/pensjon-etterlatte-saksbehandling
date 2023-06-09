@@ -10,6 +10,9 @@ import { Attestering } from '~components/behandling/attestering/attestering/atte
 import { IBeslutning } from '~components/behandling/attestering/types'
 import { IBehandlingInfo } from '~components/behandling/SideMeny/types'
 import { Dokumentoversikt } from '~components/person/dokumentoversikt'
+import styled from 'styled-components'
+import AnnullerBehandling from '~components/behandling/handlinger/AnnullerBehanding'
+import { ISaksType } from '~components/behandling/fargetags/saksType'
 
 export const SideMeny = (props: { behandling: IDetaljertBehandling }) => {
   const { behandling } = props
@@ -55,13 +58,30 @@ export const SideMeny = (props: { behandling: IDetaljertBehandling }) => {
             )}
           </>
         )}
-      </SidebarContent>
 
-      <SidebarContent collapsed={collapsed}>
         {behandlingsinfo && behandling.søker?.foedselsnummer && (
           <Dokumentoversikt fnr={behandling.søker.foedselsnummer} liten />
         )}
+
+        {behandling.sakType == ISaksType.BARNEPENSJON && <AnnullerBehandling />}
       </SidebarContent>
     </CollapsibleSidebar>
   )
 }
+
+export const SidebarPanel = styled.div`
+  margin: 20px 8px 0 8px;
+  padding: 1em;
+  border: 1px solid #c7c0c0;
+  border-radius: 3px;
+
+  .flex {
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .info {
+    margin-top: 1em;
+    margin-bottom: 1em;
+  }
+`

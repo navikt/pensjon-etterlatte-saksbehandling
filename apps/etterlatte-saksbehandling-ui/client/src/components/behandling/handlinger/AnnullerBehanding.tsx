@@ -1,15 +1,15 @@
 import { useState } from 'react'
-import { Button, Heading, Modal } from '@navikt/ds-react'
+import { BodyLong, Button, Heading, Modal } from '@navikt/ds-react'
 import { WarningText } from '~shared/styled'
-import { avbrytBehandling } from '~shared/api/behandling'
+import { annullerBehandling } from '~shared/api/behandling'
 import { useNavigate } from 'react-router'
-import { handlinger } from './typer'
 import { ApiResponse } from '~shared/api/apiClient'
 import { ButtonWrapper } from '~shared/modal/modal'
 import { useAppSelector } from '~store/Store'
 import { IBehandlingsType } from '~shared/types/IDetaljertBehandling'
+import { SidebarPanel } from '~components/behandling/SideMeny/SideMeny'
 
-export const AvbrytBehandling = () => {
+export default function AnnullerBehandling() {
   const navigate = useNavigate()
   const [isOpen, setIsOpen] = useState(false)
   const [error, setError] = useState(false)
@@ -17,9 +17,9 @@ export const AvbrytBehandling = () => {
   const behandling = useAppSelector((state) => state.behandlingReducer.behandling)
   const erFoerstegangsbehandling = behandling?.behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING
 
-  const avbryt = () => {
+  const annuller = () => {
     if (behandling?.id) {
-      avbrytBehandling(behandling.id).then((response: ApiResponse<any>) => {
+      annullerBehandling(behandling.id).then((response: ApiResponse<any>) => {
         if (response.status === 'ok') {
           navigate('/')
         } else {
@@ -31,9 +31,22 @@ export const AvbrytBehandling = () => {
 
   return (
     <>
-      <Button variant={'tertiary'} className="textButton" onClick={() => setIsOpen(true)}>
-        {erFoerstegangsbehandling ? handlinger.AVBRYT.navn : handlinger.AVBRYT_REVURDERING.navn}
-      </Button>
+      <SidebarPanel>
+        <Heading size={'small'} spacing>
+          {erFoerstegangsbehandling ? 'Annullering av saken' : 'Avbryte behandling'}.
+        </Heading>
+
+        <BodyLong spacing size={'small'}>
+          Dersom behandlingen ikke kan behandles i Gjenny må
+          {erFoerstegangsbehandling ? ' saken annulleres' : ' den avbrytes'}.
+        </BodyLong>
+
+        <div className="flex">
+          <Button variant={'danger'} size={'xsmall'} className="textButton" onClick={() => setIsOpen(true)}>
+            {erFoerstegangsbehandling ? 'Avbryt behandling og annuller saken' : 'Avbryt behandling'}
+          </Button>
+        </div>
+      </SidebarPanel>
 
       <Modal
         open={isOpen}
@@ -44,11 +57,16 @@ export const AvbrytBehandling = () => {
         aria-labelledby="modal-heading"
         className={'padding-modal'}
       >
-        <Modal.Content>
+        <Modal.Content style={{ textAlign: 'center' }}>
           <Heading level={'1'} spacing size={'medium'} id="modal-heading">
             Er du sikker på at du vil avbryte behandlingen?
-            {erFoerstegangsbehandling ? 'Saken blir annullert og kan ikke behandles videre i Gjenny.' : null}
           </Heading>
+          <BodyLong spacing>
+            {erFoerstegangsbehandling
+              ? 'Saken blir annullert og kan ikke behandles videre i Gjenny. Saken må manuelt opprettes på nytt i Pesys.'
+              : 'Behandlingen blir avsluttet og kan opprettes på nytt.'}
+          </BodyLong>
+
           <ButtonWrapper>
             <Button
               variant="secondary"
@@ -59,10 +77,10 @@ export const AvbrytBehandling = () => {
                 setError(false)
               }}
             >
-              {handlinger.AVBRYT_MODAL.NEI.navn}
+              Nei, fortsett behandling
             </Button>
-            <Button variant="primary" size="medium" className="button" onClick={avbryt}>
-              {handlinger.AVBRYT_MODAL.JA.navn}
+            <Button variant="danger" size="medium" className="button" onClick={annuller}>
+              {erFoerstegangsbehandling ? 'Ja, avbryt behandling og annuller saken' : 'Ja, avbryt behandling'}
             </Button>
           </ButtonWrapper>
           {error && <WarningText>Det oppsto en feil ved avbryting av behandlingen.</WarningText>}

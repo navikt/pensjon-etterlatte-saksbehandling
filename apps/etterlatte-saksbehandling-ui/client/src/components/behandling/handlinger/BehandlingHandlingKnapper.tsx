@@ -1,4 +1,4 @@
-import { AvbrytBehandling } from './avbryt'
+import AvbrytBehandling from './AvbrytBehandling'
 import styled from 'styled-components'
 import { Tilbake } from './tilbake'
 import { ReactNode } from 'react'

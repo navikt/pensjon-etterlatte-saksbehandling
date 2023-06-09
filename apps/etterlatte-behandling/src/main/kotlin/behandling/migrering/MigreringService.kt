@@ -14,7 +14,6 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.rapidsandrivers.migrering.MigreringRequest
 import no.nav.etterlatte.sak.SakService
-import java.time.format.DateTimeFormatter
 import java.util.*
 
 class MigreringService(
@@ -55,7 +54,7 @@ class MigreringService(
         foerstegangsBehandlingService.startFoerstegangsbehandling(
             finnEllerOpprettSak(request).id,
             request.persongalleri,
-            request.mottattDato.format(DateTimeFormatter.ISO_DATE_TIME),
+            null,
             Vedtaksloesning.PESYS
         )
 

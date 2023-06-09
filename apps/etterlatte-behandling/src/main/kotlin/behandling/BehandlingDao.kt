@@ -26,6 +26,7 @@ import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakIDListe
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.getTidspunktOrNull
 import no.nav.etterlatte.libs.common.tidspunkt.setTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
@@ -92,7 +93,7 @@ class BehandlingDao(private val connection: () -> Connection) {
         sak = mapSak(rs),
         behandlingOpprettet = rs.somLocalDateTimeUTC("behandling_opprettet"),
         sistEndret = rs.somLocalDateTimeUTC("sist_endret"),
-        soeknadMottattDato = rs.somLocalDateTimeUTC("soeknad_mottatt_dato"),
+        soeknadMottattDato = rs.getTidspunktOrNull("soeknad_mottatt_dato")?.toLocalDatetimeUTC(),
         persongalleri = hentPersongalleri(rs),
         gyldighetsproeving = rs.getString("gyldighetssproving")?.let { objectMapper.readValue(it) },
         status = rs.getString("status").let { BehandlingStatus.valueOf(it) },

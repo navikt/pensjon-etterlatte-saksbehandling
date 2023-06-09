@@ -29,7 +29,6 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.*
 
@@ -59,7 +58,6 @@ class MigreringRoutesTest : BehandlingIntegrationTest() {
                 pesysId = PesysId("1"),
                 enhet = Enhet("4817"),
                 fnr = fnr,
-                mottattDato = LocalDateTime.now(),
                 persongalleri = Persongalleri(fnr.value, "innsender", emptyList(), emptyList(), emptyList()),
                 virkningstidspunkt = YearMonth.now(),
                 trygdetidsgrunnlag = Trygdetidsgrunnlag(

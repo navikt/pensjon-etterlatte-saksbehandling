@@ -22,6 +22,7 @@ data class Behandling(
     val persongalleri: Persongalleri,
     val vedtak: ForenkletVedtak,
     val utbetalingsinfo: Utbetalingsinfo? = null,
+    val avkortingsinfo: Avkortingsinfo? = null,
     val revurderingsaarsak: RevurderingAarsak? = null
 ) {
     init {
@@ -43,9 +44,23 @@ data class ForenkletVedtak(
 data class Utbetalingsinfo(
     val antallBarn: Int,
     val beloep: Kroner,
+    val grunnbeloep: Kroner,
     val virkningsdato: LocalDate,
     val soeskenjustering: Boolean,
     val beregningsperioder: List<Beregningsperiode>
+)
+
+data class Avkortingsinfo(
+    val inntekt: Kroner,
+    val virkningsdato: LocalDate,
+    val beregningsperioder: List<AvkortetBeregningsperiode>
+)
+
+data class AvkortetBeregningsperiode(
+    val datoFOM: LocalDate,
+    val datoTOM: LocalDate?,
+    val inntekt: Kroner,
+    val utbetaltBeloep: Kroner
 )
 
 data class Beregningsperiode(

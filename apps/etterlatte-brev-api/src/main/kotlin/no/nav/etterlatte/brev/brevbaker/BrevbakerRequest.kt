@@ -1,7 +1,6 @@
 package no.nav.etterlatte.brev.brevbaker
 
 import no.nav.etterlatte.brev.behandling.Behandling
-import no.nav.etterlatte.brev.brevbaker.BrevbakerHelpers.hentBrevkode
 import no.nav.etterlatte.brev.brevbaker.BrevbakerHelpers.mapFelles
 import no.nav.etterlatte.brev.model.Avsender
 import no.nav.etterlatte.brev.model.Spraak
@@ -15,15 +14,13 @@ data class BrevbakerRequest(
 ) {
     companion object {
         fun fra(
+            brevKode: EtterlatteBrevKode,
             letterData: Any,
             behandling: Behandling,
             avsender: Avsender
         ): BrevbakerRequest {
             return BrevbakerRequest(
-                kode = hentBrevkode(
-                    behandling.sakType,
-                    behandling.vedtak.type
-                ),
+                kode = brevKode,
                 letterData = letterData,
                 felles = mapFelles(
                     sakId = behandling.sakId,
@@ -52,5 +49,6 @@ enum class LanguageCode {
 
 enum class EtterlatteBrevKode {
     BARNEPENSJON_INNVILGELSE,
+    OMS_INNVILGELSE_AUTO,
     OMS_INNVILGELSE_MANUELL
 }

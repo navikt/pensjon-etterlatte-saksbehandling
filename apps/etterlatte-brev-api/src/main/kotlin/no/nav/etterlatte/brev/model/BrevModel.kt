@@ -117,7 +117,7 @@ enum class BrevProsessType {
             return when (sakType) {
                 SakType.OMSTILLINGSSTOENAD -> {
                     when (vedtakType) {
-                        VedtakType.INNVILGELSE,
+                        VedtakType.INNVILGELSE -> AUTOMATISK
                         VedtakType.OPPHOER,
                         VedtakType.AVSLAG,
                         VedtakType.ENDRING -> MANUELL

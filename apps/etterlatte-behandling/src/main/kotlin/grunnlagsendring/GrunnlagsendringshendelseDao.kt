@@ -107,6 +107,24 @@ class GrunnlagsendringshendelseDao(val connection: () -> Connection) {
         }
     }
 
+    fun kobleGrunnlagsendringshendelserFraBehandlingId(behandlingId: UUID) {
+        with(connection()) {
+            prepareStatement(
+                """
+                    UPDATE grunnlagsendringshendelse
+                    SET kommentar = null,
+                        status = ?,
+                        behandling_id = null 
+                    WHERE behandling_id = ?
+                """.trimIndent()
+            ).use {
+                it.setString(1, GrunnlagsendringStatus.SJEKKET_AV_JOBB.toString())
+                it.setObject(2, behandlingId)
+                it.executeUpdate()
+            }
+        }
+    }
+
     fun settBehandlingIdForTattMedIBehandling(
         grlaghendelseId: UUID,
         behandlingId: UUID
@@ -115,14 +133,16 @@ class GrunnlagsendringshendelseDao(val connection: () -> Connection) {
             prepareStatement(
                 """
                    UPDATE grunnlagsendringshendelse
-                   SET behandling_id = ?
+                   SET behandling_id = ?,
+                   status = ?
                    WHERE id = ?
                    AND status = ?
                 """.trimIndent()
             ).use {
                 it.setObject(1, behandlingId)
-                it.setObject(2, grlaghendelseId)
-                it.setString(3, GrunnlagsendringStatus.TATT_MED_I_BEHANDLING.name)
+                it.setString(2, GrunnlagsendringStatus.TATT_MED_I_BEHANDLING.name)
+                it.setObject(3, grlaghendelseId)
+                it.setString(4, GrunnlagsendringStatus.SJEKKET_AV_JOBB.name)
                 it.executeUpdate()
             }
         }

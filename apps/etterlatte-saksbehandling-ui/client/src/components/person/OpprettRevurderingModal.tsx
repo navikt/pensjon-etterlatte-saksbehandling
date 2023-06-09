@@ -4,7 +4,7 @@ import styled from 'styled-components'
 import { opprettRevurdering as opprettRevurderingApi } from '~shared/api/behandling'
 import { isPending, useApiCall } from '~shared/hooks/useApiCall'
 import { Grunnlagsendringshendelse } from '~components/person/typer'
-import { Revurderingsaarsak } from '~shared/types/Revurderingsaarsak'
+import { Revurderingsaarsak, tekstRevurderingsaarsak } from '~shared/types/Revurderingsaarsak'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { useNavigate } from 'react-router-dom'
 
@@ -12,11 +12,11 @@ type Props = {
   open: boolean
   setOpen: (value: boolean) => void
   sakId: number
-  revurderinger: Array<string>
-  valgtHendelse: Grunnlagsendringshendelse
+  revurderinger: Array<Revurderingsaarsak>
+  valgtHendelse?: Grunnlagsendringshendelse
 }
 const OpprettRevurderingModal = (props: Props) => {
-  const { revurderinger } = props
+  const { revurderinger, valgtHendelse } = props
   const [error, setError] = useState<string | null>(null)
   const [valgtAarsak, setValgtAarsak] = useState<Revurderingsaarsak | undefined>(undefined)
   const [opprettRevurderingStatus, opprettRevurdering] = useApiCall(opprettRevurderingApi)
@@ -28,7 +28,7 @@ const OpprettRevurderingModal = (props: Props) => {
     }
 
     opprettRevurdering(
-      { sakId: props.sakId, aarsak: valgtAarsak },
+      { sakId: props.sakId, aarsak: valgtAarsak, paaGrunnAvHendelseId: valgtHendelse?.id },
       (revurdering: IDetaljertBehandling) => {
         navigate(`/behandling/${revurdering.id}/`)
       },
@@ -59,7 +59,7 @@ const OpprettRevurderingModal = (props: Props) => {
                 <option value={''}>Velg en årsak</option>
                 {revurderinger.map((aarsak) => (
                   <option value={aarsak} key={aarsak}>
-                    {aarsak}
+                    {tekstRevurderingsaarsak[aarsak]}
                   </option>
                 ))}
               </Select>

@@ -3,13 +3,18 @@ package no.nav.etterlatte.grunnlagsendring
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringStatus
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringsType
+import no.nav.etterlatte.behandling.domain.OpprettBehandling
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.grunnlagsendringshendelseMedSamsvar
 import no.nav.etterlatte.grunnlagsinformasjonDoedshendelse
 import no.nav.etterlatte.grunnlagsinformasjonForelderBarnRelasjonHendelse
 import no.nav.etterlatte.grunnlagsinformasjonUtflyttingshendelse
 import no.nav.etterlatte.ikkeSamsvarMellomPdlOgGrunnlagDoed
+import no.nav.etterlatte.libs.common.Vedtaksloesning
+import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
+import no.nav.etterlatte.libs.common.behandling.Persongalleri
+import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -22,6 +27,9 @@ import no.nav.etterlatte.samsvarMellomPdlOgGrunnlagDoed
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
@@ -326,7 +334,7 @@ internal class GrunnlagsendringshendelseDaoTest {
                 sakId = sak1,
                 fnr = grunnlagsinformasjonDoedshendelse().avdoedFnr,
                 type = grunnlagsendringstype,
-                status = GrunnlagsendringStatus.TATT_MED_I_BEHANDLING,
+                status = GrunnlagsendringStatus.SJEKKET_AV_JOBB,
                 samsvarMellomKildeOgGrunnlag = null
             )
         ).forEach {
@@ -335,6 +343,89 @@ internal class GrunnlagsendringshendelseDaoTest {
         grunnlagsendringshendelsesRepo.settBehandlingIdForTattMedIBehandling(hendelseId, opprettBehandling.id)
         val lagretHendelse = grunnlagsendringshendelsesRepo.hentGrunnlagsendringshendelse(hendelseId)
         assertEquals(opprettBehandling.id, lagretHendelse?.behandlingId)
+    }
+
+    @Test
+    fun `kobleGrunnlagsendringshendelserFraBehandlingId skal oppdatere riktige grunnlagsendringshendelser`() {
+        val sak1 = sakRepo.opprettSak("1", SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr).id
+        val sak2 = sakRepo.opprettSak("2", SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr).id
+
+        val behandling1 = OpprettBehandling(
+            type = BehandlingType.REVURDERING,
+            sakId = sak1,
+            status = BehandlingStatus.OPPRETTET,
+            persongalleri = Persongalleri(
+                soeker = "12312312312",
+                innsender = null,
+                soesken = listOf(),
+                avdoed = listOf(),
+                gjenlevende = listOf()
+            ),
+            soeknadMottattDato = null,
+            kommerBarnetTilgode = null,
+            virkningstidspunkt = null,
+            revurderingsAarsak = RevurderingAarsak.SOESKENJUSTERING,
+            opphoerAarsaker = listOf(),
+            fritekstAarsak = null,
+            prosesstype = Prosesstype.MANUELL,
+            kilde = Vedtaksloesning.GJENNY,
+            merknad = null
+        )
+        val behandling2 = behandling1.copy(sakId = sak2)
+        assertNotEquals(behandling1.id, behandling2.id)
+
+        behandlingRepo.opprettBehandling(
+            behandling = behandling1
+        )
+        behandlingRepo.opprettBehandling(behandling = behandling2)
+
+        val id1 = UUID.randomUUID()
+        val id2 = UUID.randomUUID()
+        val id3 = UUID.randomUUID()
+        val doedsdato = LocalDate.of(2022, 7, 21)
+        val samsvarMellomPdlOgGrunnlag = ikkeSamsvarMellomPdlOgGrunnlagDoed(doedsdato)
+        val fnrDoedshendelse = grunnlagsinformasjonDoedshendelse().avdoedFnr
+
+        listOf(
+            grunnlagsendringshendelseMedSamsvar(
+                id = id1,
+                sakId = sak1,
+                fnr = fnrDoedshendelse,
+                samsvarMellomKildeOgGrunnlag = samsvarMellomPdlOgGrunnlag,
+                status = GrunnlagsendringStatus.SJEKKET_AV_JOBB
+            ),
+            grunnlagsendringshendelseMedSamsvar(
+                id = id2,
+                sakId = sak1,
+                fnr = fnrDoedshendelse,
+                samsvarMellomKildeOgGrunnlag = samsvarMellomPdlOgGrunnlag,
+                status = GrunnlagsendringStatus.SJEKKET_AV_JOBB
+            ),
+            grunnlagsendringshendelseMedSamsvar(
+                id = id3,
+                sakId = sak2,
+                fnr = fnrDoedshendelse,
+                samsvarMellomKildeOgGrunnlag = samsvarMellomPdlOgGrunnlag,
+                status = GrunnlagsendringStatus.SJEKKET_AV_JOBB
+            )
+        ).forEach {
+            grunnlagsendringshendelsesRepo.opprettGrunnlagsendringshendelse(it)
+        }
+
+        grunnlagsendringshendelsesRepo.settBehandlingIdForTattMedIBehandling(id1, behandling1.id)
+        grunnlagsendringshendelsesRepo.settBehandlingIdForTattMedIBehandling(id3, behandling2.id)
+
+        grunnlagsendringshendelsesRepo.kobleGrunnlagsendringshendelserFraBehandlingId(behandling1.id)
+
+        val hendelse1 = grunnlagsendringshendelsesRepo.hentGrunnlagsendringshendelse(id1)
+        val hendelse2 = grunnlagsendringshendelsesRepo.hentGrunnlagsendringshendelse(id2)
+        val hendelse3 = grunnlagsendringshendelsesRepo.hentGrunnlagsendringshendelse(id3)
+
+        assertEquals(GrunnlagsendringStatus.SJEKKET_AV_JOBB, hendelse1?.status)
+        assertNull(hendelse1?.behandlingId)
+        assertEquals(GrunnlagsendringStatus.SJEKKET_AV_JOBB, hendelse2?.status)
+        assertEquals(GrunnlagsendringStatus.TATT_MED_I_BEHANDLING, hendelse3?.status)
+        assertNotNull(hendelse3?.behandlingId)
     }
 
     @Test

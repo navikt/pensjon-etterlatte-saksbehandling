@@ -6,8 +6,6 @@ import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.BehandlingHendelseType
 import no.nav.etterlatte.behandling.BehandlingHendelserKanal
 import no.nav.etterlatte.behandling.domain.Behandling
-import no.nav.etterlatte.behandling.domain.GrunnlagsendringStatus
-import no.nav.etterlatte.behandling.domain.GrunnlagsendringsType
 import no.nav.etterlatte.behandling.domain.OpprettBehandling
 import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.behandling.domain.toBehandlingOpprettet
@@ -33,7 +31,8 @@ interface RevurderingService {
         sakId: Long,
         forrigeBehandling: Behandling,
         revurderingAarsak: RevurderingAarsak,
-        kilde: Vedtaksloesning
+        kilde: Vedtaksloesning,
+        paaGrunnAvHendelse: UUID?
     ): Revurdering?
 
     fun opprettAutomatiskRevurdering(
@@ -67,7 +66,8 @@ class RealRevurderingService(
         sakId: Long,
         forrigeBehandling: Behandling,
         revurderingAarsak: RevurderingAarsak,
-        kilde: Vedtaksloesning
+        kilde: Vedtaksloesning,
+        paaGrunnAvHendelse: UUID?
     ): Revurdering? = forrigeBehandling.sjekkEnhet()?.let {
         return if (featureToggleService.isEnabled(RevurderingServiceFeatureToggle.OpprettManuellRevurdering, false)) {
             inTransaction {
@@ -79,24 +79,11 @@ class RealRevurderingService(
                     Prosesstype.MANUELL,
                     kilde
                 )?.also { revurdering ->
-                    if (revurderingAarsak == RevurderingAarsak.REGULERING) {
-                        grunnlagsendringshendelseDao.hentGrunnlagsendringshendelserMedStatuserISak(
-                            revurdering.sak.id,
-                            listOf(GrunnlagsendringStatus.SJEKKET_AV_JOBB)
+                    if (paaGrunnAvHendelse != null) {
+                        grunnlagsendringshendelseDao.settBehandlingIdForTattMedIBehandling(
+                            paaGrunnAvHendelse,
+                            revurdering.id
                         )
-                            .filter { it.type == GrunnlagsendringsType.GRUNNBELOEP }
-                            .forEach {
-                                grunnlagsendringshendelseDao.oppdaterGrunnlagsendringStatus(
-                                    it.id,
-                                    GrunnlagsendringStatus.SJEKKET_AV_JOBB,
-                                    GrunnlagsendringStatus.TATT_MED_I_BEHANDLING,
-                                    it.samsvarMellomKildeOgGrunnlag!!
-                                )
-                                grunnlagsendringshendelseDao.settBehandlingIdForTattMedIBehandling(
-                                    it.id,
-                                    revurdering.id
-                                )
-                            }
                     }
                 }
             }

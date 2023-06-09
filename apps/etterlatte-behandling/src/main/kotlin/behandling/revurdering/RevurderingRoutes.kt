@@ -46,12 +46,21 @@ internal fun Route.revurderingRoutes(
                     return@post
                 }
 
+                val paaGrunnAvHendelseId = try {
+                    body.paaGrunnAvHendelseId?.let { UUID.fromString(it) }
+                } catch (e: Exception) {
+                    return@post call.respond(
+                        HttpStatusCode.BadRequest,
+                        "${body.paaGrunnAvHendelseId} er ikke en gyldig UUID"
+                    )
+                }
+
                 val revurdering = revurderingService.opprettManuellRevurdering(
                     sakId = forrigeIverksatteBehandling.sak.id,
                     forrigeBehandling = forrigeIverksatteBehandling,
                     revurderingAarsak = body.aarsak,
                     kilde = Vedtaksloesning.GJENNY,
-                    paaGrunnAvHendelse = body.paaGrunnAvHendelseId
+                    paaGrunnAvHendelse = paaGrunnAvHendelseId
                 )
 
                 when (revurdering) {
@@ -75,4 +84,4 @@ internal fun Route.revurderingRoutes(
     }
 }
 
-data class OpprettRevurderingRequest(val aarsak: RevurderingAarsak, val paaGrunnAvHendelseId: UUID? = null)
+data class OpprettRevurderingRequest(val aarsak: RevurderingAarsak, val paaGrunnAvHendelseId: String? = null)

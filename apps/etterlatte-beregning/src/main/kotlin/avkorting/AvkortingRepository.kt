@@ -36,7 +36,6 @@ class AvkortingRepository(private val dataSource: DataSource) {
             null
         } else {
             Avkorting(
-                behandlingId = behandlingId,
                 avkortingGrunnlag = avkortingGrunnlag,
                 avkortingsperioder = avkortingsperioder,
                 avkortetYtelse = avkortetYtelse
@@ -47,14 +46,14 @@ class AvkortingRepository(private val dataSource: DataSource) {
     fun hentAvkortingUtenNullable(behandlingId: UUID): Avkorting =
         hentAvkorting(behandlingId) ?: throw Exception("Uthenting av avkorting for behandling $behandlingId feilet")
 
-    fun lagreAvkorting(avkorting: Avkorting): Avkorting {
+    fun lagreAvkorting(behandlingId: UUID, avkorting: Avkorting): Avkorting {
         dataSource.transaction { tx ->
-            slettAvkorting(avkorting.behandlingId, tx)
-            lagreAvkortingGrunnlag(avkorting.behandlingId, avkorting.avkortingGrunnlag, tx)
-            lagreAvkortingsperioder(avkorting.behandlingId, avkorting.avkortingsperioder, tx)
-            lagreAvkortetYtelse(avkorting.behandlingId, avkorting.avkortetYtelse, tx)
+            slettAvkorting(behandlingId, tx)
+            lagreAvkortingGrunnlag(behandlingId, avkorting.avkortingGrunnlag, tx)
+            lagreAvkortingsperioder(behandlingId, avkorting.avkortingsperioder, tx)
+            lagreAvkortetYtelse(behandlingId, avkorting.avkortetYtelse, tx)
         }
-        return hentAvkortingUtenNullable(avkorting.behandlingId)
+        return hentAvkortingUtenNullable(behandlingId)
     }
     private fun slettAvkorting(behandlingId: UUID, tx: TransactionalSession) {
         queryOf(

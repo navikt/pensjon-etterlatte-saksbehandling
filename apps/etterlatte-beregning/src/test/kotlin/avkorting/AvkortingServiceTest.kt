@@ -114,7 +114,7 @@ internal class AvkortingServiceTest {
         every { inntektAvkortingService.beregnInntektsavkorting(any(), any()) } returns listOf(nyAvkortingsperiode)
         every { beregningService.hentBeregningNonnull(any()) } returns beregning
         every { inntektAvkortingService.beregnAvkortetYtelse(any(), any(), any()) } returns listOf(nyAvkortetYtelse)
-        every { avkortingRepository.lagreAvkorting(any()) } returns lagretAvkorting
+        every { avkortingRepository.lagreAvkorting(any(), any()) } returns lagretAvkorting
         coEvery { behandlingKlient.avkort(any(), any(), any()) } returns true
 
         runBlocking {
@@ -142,6 +142,7 @@ internal class AvkortingServiceTest {
                 listOf(nyAvkortingsperiode)
             )
             avkortingRepository.lagreAvkorting(
+                behandlingId,
                 withArg {
                     with(it.avkortingGrunnlag[0]) {
                         id shouldNotBe avkortinggrunnlag.id
@@ -165,7 +166,6 @@ internal class AvkortingServiceTest {
         val nyAvkortetYtelse = mockk<AvkortetYtelse>()
         val beregning = mockk<Beregningsperiode>()
         val nyAvkorting = Avkorting(
-            behandlingId = behandlingId,
             avkortingGrunnlag = listOf(nyttGrunnlag),
             avkortingsperioder = listOf(nyAvkortingsperiode),
             avkortetYtelse = listOf(nyAvkortetYtelse)
@@ -177,7 +177,7 @@ internal class AvkortingServiceTest {
         every { inntektAvkortingService.beregnInntektsavkorting(any(), any()) } returns listOf(nyAvkortingsperiode)
         every { beregningService.hentBeregningNonnull(any()) } returns beregning(listOf(beregning))
         every { inntektAvkortingService.beregnAvkortetYtelse(any(), any(), any()) } returns listOf(nyAvkortetYtelse)
-        every { avkortingRepository.lagreAvkorting(any()) } returns nyAvkorting
+        every { avkortingRepository.lagreAvkorting(any(), any()) } returns nyAvkorting
         coEvery { behandlingKlient.avkort(any(), any(), any()) } returns true
 
         val result = runBlocking {
@@ -196,7 +196,7 @@ internal class AvkortingServiceTest {
                 listOf(beregning),
                 listOf(nyAvkortingsperiode)
             )
-            avkortingRepository.lagreAvkorting(nyAvkorting)
+            avkortingRepository.lagreAvkorting(behandlingId, nyAvkorting)
             behandlingKlient.avkort(behandlingId, bruker, true)
         }
     }
@@ -212,7 +212,6 @@ internal class AvkortingServiceTest {
         val eksisterendeAvkortetYtelse = mockk<AvkortetYtelse>()
 
         val avkorting = Avkorting(
-            behandlingId = behandlingId,
             avkortingGrunnlag = listOf(eksisterendeGrunnlag),
             avkortingsperioder = listOf(eksisterendeAvkortingsperiode),
             avkortetYtelse = listOf(eksisterendeAvkortetYtelse)
@@ -228,7 +227,7 @@ internal class AvkortingServiceTest {
         every { inntektAvkortingService.beregnInntektsavkorting(any(), any()) } returns listOf(nyAvkortingsperiode)
         every { beregningService.hentBeregningNonnull(any()) } returns beregning(listOf(beregning))
         every { inntektAvkortingService.beregnAvkortetYtelse(any(), any(), any()) } returns listOf(nyAvkortetYtelse)
-        every { avkortingRepository.lagreAvkorting(any()) } returns avkorting
+        every { avkortingRepository.lagreAvkorting(any(), any()) } returns avkorting
         coEvery { behandlingKlient.avkort(any(), any(), any()) } returns true
 
         val result = runBlocking {
@@ -248,6 +247,7 @@ internal class AvkortingServiceTest {
                 listOf(nyAvkortingsperiode)
             )
             avkortingRepository.lagreAvkorting(
+                behandlingId,
                 withArg {
                     it.avkortingGrunnlag shouldBe listOf(endretGrunnlag)
                     it.avkortingsperioder shouldBe listOf(nyAvkortingsperiode)
@@ -269,7 +269,6 @@ internal class AvkortingServiceTest {
         val eksisterendeAvkortingsperiode = mockk<Avkortingsperiode>()
         val eksisterendeAvkortetYtelse = mockk<AvkortetYtelse>()
         val avkorting = Avkorting(
-            behandlingId = behandlingId,
             avkortingGrunnlag = listOf(eksisterendeGrunnlag),
             avkortingsperioder = listOf(eksisterendeAvkortingsperiode),
             avkortetYtelse = listOf(eksisterendeAvkortetYtelse)
@@ -287,7 +286,7 @@ internal class AvkortingServiceTest {
         every { inntektAvkortingService.beregnInntektsavkorting(any(), any()) } returns listOf(nyeAvkortingsperioder)
         every { beregningService.hentBeregningNonnull(any()) } returns beregning(listOf(beregninger))
         every { inntektAvkortingService.beregnAvkortetYtelse(any(), any(), any()) } returns listOf(nyeAvkortetYtelser)
-        every { avkortingRepository.lagreAvkorting(any()) } returns avkorting
+        every { avkortingRepository.lagreAvkorting(any(), any()) } returns avkorting
         coEvery { behandlingKlient.avkort(any(), any(), any()) } returns true
 
         val result = runBlocking {
@@ -314,6 +313,7 @@ internal class AvkortingServiceTest {
                 listOf(nyeAvkortingsperioder)
             )
             avkortingRepository.lagreAvkorting(
+                behandlingId,
                 withArg {
                     it.avkortingGrunnlag[0].periode.tom shouldBe YearMonth.of(2023, 3)
                     it.avkortingGrunnlag[1].periode.tom shouldBe null

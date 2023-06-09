@@ -68,12 +68,10 @@ fun Int.toBeregningstall(
 val bruker = Saksbehandler("token", "ident", null)
 
 fun avkorting(
-    behandlingId: UUID = UUID.randomUUID(),
     avkortingGrunnlag: List<AvkortingGrunnlag> = emptyList(),
     avkortingsperioder: List<Avkortingsperiode> = emptyList(),
     avkortetYtelse: List<AvkortetYtelse> = emptyList()
 ) = Avkorting(
-    behandlingId = behandlingId,
     avkortingGrunnlag = avkortingGrunnlag,
     avkortingsperioder = avkortingsperioder,
     avkortetYtelse = avkortetYtelse

@@ -87,13 +87,11 @@ class AvkortingRoutesTest {
             kilde = Grunnlagsopplysning.Saksbehandler("Saksbehandler01", tidspunkt)
         )
         val avkorting = Avkorting(
-            behandlingId = behandlingsId,
             avkortingGrunnlag = mutableListOf(avkortingsgrunnlag),
             avkortingsperioder = mutableListOf(avkortingsperiode()),
             avkortetYtelse = mutableListOf(avkortetYtelse(periode = Periode(fom = dato, tom = dato)))
         )
         val dto = AvkortingDto(
-            behandlingId = behandlingsId,
             avkortingGrunnlag = listOf(
                 AvkortingGrunnlagDto(
                     id = avkortingsgrunnlagId,

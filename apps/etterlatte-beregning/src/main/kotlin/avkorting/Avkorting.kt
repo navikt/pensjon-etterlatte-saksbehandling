@@ -7,7 +7,6 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import java.util.*
 
 data class Avkorting(
-    val behandlingId: UUID,
     val avkortingGrunnlag: List<AvkortingGrunnlag>,
     val avkortingsperioder: List<Avkortingsperiode>,
     val avkortetYtelse: List<AvkortetYtelse>
@@ -36,8 +35,7 @@ data class Avkorting(
     )
 
     companion object {
-        fun nyAvkorting(behandlingId: UUID) = Avkorting(
-            behandlingId,
+        fun nyAvkorting() = Avkorting(
             emptyList(),
             emptyList(),
             emptyList()

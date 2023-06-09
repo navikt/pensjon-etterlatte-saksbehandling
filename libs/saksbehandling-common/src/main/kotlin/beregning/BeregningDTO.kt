@@ -31,7 +31,6 @@ data class Beregningsperiode(
 )
 
 data class AvkortingDto(
-    val behandlingId: UUID,
     val avkortingGrunnlag: List<AvkortingGrunnlagDto>,
     val avkortetYtelse: List<AvkortetYtelseDto>
 )

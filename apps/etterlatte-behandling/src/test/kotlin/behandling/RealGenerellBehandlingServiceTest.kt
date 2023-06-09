@@ -560,6 +560,7 @@ class RealGenerellBehandlingServiceTest {
             mockk(),
             mockk(),
             mockk(),
+            mockk(),
             featureToggleService
         )
 

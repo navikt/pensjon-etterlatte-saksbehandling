@@ -29,13 +29,24 @@ export const AvkortingInntekt = (props: {
     }
   }
   const finnRedigerbartGrunnlag = () => {
-    if (finnesRedigerbartGrunnlag()) {
-      return props.avkortingGrunnlag![props.avkortingGrunnlag!.length - 1]
+    if (props.avkortingGrunnlag) {
+      if (finnesRedigerbartGrunnlag()) {
+        return props.avkortingGrunnlag[props.avkortingGrunnlag.length - 1]
+      }
+      if (props.avkortingGrunnlag.length > 0) {
+        const siste = props.avkortingGrunnlag[props.avkortingGrunnlag.length - 1]
+        return {
+          fom: virkningstidspunkt(),
+          fratrekkInnUt: siste.fratrekkInnUt,
+          relevanteMaaneder: siste.relevanteMaaneder,
+        }
+      }
     }
     return {
       fom: virkningstidspunkt(),
     }
   }
+
   const [inntektGrunnlagForm, setInntektGrunnlagForm] = useState<IAvkortingGrunnlag>(finnRedigerbartGrunnlag())
   const [inntektGrunnlagStatus, requestLagreAvkortingGrunnlag] = useApiCall(lagreAvkortingGrunnlag)
   const [errorTekst, setErrorTekst] = useState<string | null>(null)
@@ -83,7 +94,7 @@ export const AvkortingInntekt = (props: {
           <Table className="table" zebraStripes>
             <Table.Header>
               <Table.HeaderCell>Forventet inntekt</Table.HeaderCell>
-              <Table.HeaderCell>Fratrekk ut/inn</Table.HeaderCell>
+              <Table.HeaderCell>Fratrekk inn/ut</Table.HeaderCell>
               <Table.HeaderCell>F.o.m dato</Table.HeaderCell>
               <Table.HeaderCell>T.o.m dato</Table.HeaderCell>
               <Table.HeaderCell>Spesifikasjon av inntekt</Table.HeaderCell>

@@ -10,6 +10,7 @@ export interface IAvkortingGrunnlag {
   tom?: string
   aarsinntekt?: number
   fratrekkInnUt?: number
+  relevanteMaaneder?: number
   spesifikasjon?: string
   kilde?: {
     tidspunkt: ''

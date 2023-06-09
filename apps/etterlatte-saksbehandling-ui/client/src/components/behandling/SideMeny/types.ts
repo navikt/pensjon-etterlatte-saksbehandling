@@ -4,6 +4,7 @@ import { ISaksType } from '~components/behandling/fargetags/saksType'
 
 export interface IBehandlingInfo {
   type: IBehandlingsType
+  sakId: number
   sakType: ISaksType
   status: IBehandlingStatus
   saksbehandler?: string

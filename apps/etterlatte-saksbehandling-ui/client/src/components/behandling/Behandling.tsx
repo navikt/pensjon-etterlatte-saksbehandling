@@ -52,7 +52,7 @@ export const Behandling = () => {
         <StatusBar
           theme={StatusBarTheme.gray}
           personInfo={{
-            fnr: soekerInfo.foedselsnummer,
+            foedselsnummer: soekerInfo.foedselsnummer,
             fornavn: soekerInfo.fornavn,
             mellomnavn: soekerInfo.mellomnavn,
             etternavn: soekerInfo.etternavn,

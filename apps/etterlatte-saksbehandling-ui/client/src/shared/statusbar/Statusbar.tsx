@@ -1,22 +1,17 @@
 import styled from 'styled-components'
 import { GenderIcon, GenderList } from '../icons/genderIcon'
-import { Fnr } from './fnr'
+import { KopierbarVerdi } from './kopierbarVerdi'
 import { Link } from '@navikt/ds-react'
+import { IPersonResult } from '~components/person/typer'
 
 export enum StatusBarTheme {
   gray = 'gray',
   white = 'white',
 }
 
-export interface IPersonInfo {
-  fornavn: string
-  mellomnavn?: string
-  etternavn: string
-  fnr: string
-}
-export const StatusBar = ({ theme, personInfo }: { theme: StatusBarTheme; personInfo: IPersonInfo }) => {
+export const StatusBar = ({ theme, personInfo }: { theme: StatusBarTheme; personInfo: IPersonResult }) => {
   const gender = (): GenderList => {
-    const genderNum = Number(personInfo.fnr[8])
+    const genderNum = Number(personInfo.foedselsnummer[8])
     if (genderNum % 2 === 0) {
       return GenderList.female
     }
@@ -27,21 +22,21 @@ export const StatusBar = ({ theme, personInfo }: { theme: StatusBarTheme; person
 
   return (
     <StatusBarWrapper theme={theme}>
-      {personInfo.fnr && (
+      {personInfo.foedselsnummer && (
         <UserInfo>
           <GenderIcon gender={gender()} />
           <Name>
-            <Link href={`/person/${personInfo.fnr}`}>{navn}</Link>{' '}
+            <Link href={`/person/${personInfo.foedselsnummer}`}>{navn}</Link>{' '}
           </Name>
           <Skilletegn>|</Skilletegn>
-          <Fnr copy value={personInfo.fnr} />
+          <KopierbarVerdi value={personInfo.foedselsnummer} />
         </UserInfo>
       )}
     </StatusBarWrapper>
   )
 }
 
-const genererNavn = (personInfo: IPersonInfo) => {
+const genererNavn = (personInfo: IPersonResult) => {
   return [personInfo.fornavn, personInfo.mellomnavn, personInfo.etternavn].join(' ')
 }
 

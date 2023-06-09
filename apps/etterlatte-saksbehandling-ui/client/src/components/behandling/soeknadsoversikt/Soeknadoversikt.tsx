@@ -22,6 +22,7 @@ import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import { formaterKildePdl } from '~components/behandling/soeknadsoversikt/utils'
 import { formaterStringDato } from '~utils/formattering'
 import Virkningstidspunkt from '~components/behandling/soeknadsoversikt/soeknadoversikt/virkningstidspunkt/Virkningstidspunkt'
+import { BoddEllerArbeidetUtlandet } from './soeknadoversikt/boddEllerArbeidetUtlandet/BoddEllerArbeidetUtlandet'
 
 export const Soeknadsoversikt = (props: { behandling: IDetaljertBehandling }) => {
   const { behandling } = props
@@ -84,6 +85,7 @@ export const Soeknadsoversikt = (props: { behandling: IDetaljertBehandling }) =>
               }}
             </Virkningstidspunkt>
             <Utenlandstilsnitt behandling={behandling} redigerbar={behandles} />
+            <BoddEllerArbeidetUtlandet behandling={behandling} redigerbar={behandles} />
           </>
         )}
       </Innhold>

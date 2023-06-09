@@ -23,15 +23,6 @@ export const Person = () => {
     }
   }, [match.fnr])
 
-  const personInfo = isSuccess(personStatus)
-    ? {
-        fornavn: personStatus.data.fornavn,
-        mellomnavn: personStatus.data.mellomnavn,
-        etternavn: personStatus.data.etternavn,
-        fnr: personStatus.data.foedselsnummer,
-      }
-    : null
-
   if (isFailure(personStatus)) {
     return (
       <Container>
@@ -45,7 +36,7 @@ export const Person = () => {
   return (
     <>
       {match.fnr === null && <Label>Kan ikke hente fødselsnummer fra URL</Label>}
-      {personInfo && <StatusBar theme={StatusBarTheme.gray} personInfo={personInfo} />}
+      {isSuccess(personStatus) && <StatusBar theme={StatusBarTheme.gray} personInfo={personStatus.data} />}
       {isPending(personStatus) && <Spinner visible={true} label={'Laster'} />}
       {isSuccess(personStatus) && (
         <Container>

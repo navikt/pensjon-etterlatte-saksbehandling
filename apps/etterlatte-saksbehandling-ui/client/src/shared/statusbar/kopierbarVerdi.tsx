@@ -1,6 +1,6 @@
 import { CopyToClipboard } from '@navikt/ds-react-internal'
 
-export const Fnr = (props: { value: string; copy?: boolean }) => {
+export const KopierbarVerdi = (props: { value: string; copy?: boolean }) => {
   return (
     <CopyToClipboard
       copyText={props.value}

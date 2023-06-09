@@ -14,6 +14,7 @@ export interface IPersonResult {
   mellomnavn?: string
   etternavn: string
   foedselsnummer: string
+  sakId: number
 }
 
 export interface IBehandlingListe {

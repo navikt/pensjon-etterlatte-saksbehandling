@@ -4,7 +4,7 @@ import styled from 'styled-components'
 import { opprettRevurdering as opprettRevurderingApi } from '~shared/api/behandling'
 import { isPending, useApiCall } from '~shared/hooks/useApiCall'
 import { Grunnlagsendringshendelse } from '~components/person/typer'
-import { Revurderingsaarsak } from '~shared/types/Revurderingsaarsak'
+import { Revurderingsaarsak, tekstRevurderingsaarsak } from '~shared/types/Revurderingsaarsak'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { useNavigate } from 'react-router-dom'
 
@@ -12,7 +12,7 @@ type Props = {
   open: boolean
   setOpen: (value: boolean) => void
   sakId: number
-  revurderinger: Array<string>
+  revurderinger: Array<Revurderingsaarsak>
   valgtHendelse?: Grunnlagsendringshendelse
 }
 const OpprettRevurderingModal = (props: Props) => {
@@ -59,7 +59,7 @@ const OpprettRevurderingModal = (props: Props) => {
                 <option value={''}>Velg en årsak</option>
                 {revurderinger.map((aarsak) => (
                   <option value={aarsak} key={aarsak}>
-                    {aarsak}
+                    {tekstRevurderingsaarsak[aarsak]}
                   </option>
                 ))}
               </Select>

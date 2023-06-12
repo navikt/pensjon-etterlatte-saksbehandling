@@ -47,8 +47,8 @@ data class AvkortingGrunnlag(
     val id: UUID,
     val periode: Periode,
     val aarsinntekt: Int,
-    val fratrekkInnUt: Int,
-    val relevanteMaaneder: Int,
+    val fratrekkInnAar: Int,
+    val relevanteMaanederInnAar: Int,
     val spesifikasjon: String,
     val kilde: Grunnlagsopplysning.Saksbehandler
 )

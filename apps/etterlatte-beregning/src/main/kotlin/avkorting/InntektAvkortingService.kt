@@ -45,8 +45,8 @@ object InntektAvkortingService {
                     FaktumNode(
                         verdi = InntektAvkortingGrunnlag(
                             inntekt = Beregningstall(it.aarsinntekt),
-                            fratrekkInnUt = Beregningstall(it.fratrekkInnUt),
-                            relevanteMaaneder = Beregningstall(it.relevanteMaaneder)
+                            fratrekkInnUt = Beregningstall(it.fratrekkInnAar),
+                            relevanteMaaneder = Beregningstall(it.relevanteMaanederInnAar)
                         ),
                         kilde = it.kilde,
                         beskrivelse = "Forventet årsinntekt"

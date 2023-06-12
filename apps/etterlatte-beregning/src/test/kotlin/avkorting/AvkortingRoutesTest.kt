@@ -98,8 +98,8 @@ class AvkortingRoutesTest {
                     fom = dato,
                     tom = dato,
                     aarsinntekt = 100000,
-                    fratrekkInnUt = 10000,
-                    relevanteMaaneder = 12,
+                    fratrekkInnAar = 10000,
+                    relevanteMaanederInnAar = 12,
                     spesifikasjon = "Spesifikasjon",
                     kilde = AvkortingGrunnlagKildeDto(
                         tidspunkt = tidspunkt.toString(),
@@ -135,8 +135,8 @@ class AvkortingRoutesTest {
                     withArg {
                         it.periode shouldBe avkortingsgrunnlag.periode
                         it.aarsinntekt shouldBe avkortingsgrunnlag.aarsinntekt
-                        it.fratrekkInnUt shouldBe avkortingsgrunnlag.fratrekkInnUt
-                        it.relevanteMaaneder shouldBe 12
+                        it.fratrekkInnAar shouldBe avkortingsgrunnlag.fratrekkInnAar
+                        it.relevanteMaanederInnAar shouldBe 12
                         it.spesifikasjon shouldBe avkortingsgrunnlag.spesifikasjon
                         it.kilde.ident shouldBe avkortingsgrunnlag.kilde.ident
                     }
@@ -148,12 +148,12 @@ class AvkortingRoutesTest {
     @Test
     fun `skal regne ut relevant antall maaneder inkludert innevaerende hvis det ikke finnes fra foer`() {
         val startenAvAaret = AvkortingGrunnlagDto(
-            relevanteMaaneder = null,
+            relevanteMaanederInnAar = null,
             id = UUID.randomUUID(),
             fom = YearMonth.of(2023, 1),
             tom = null,
             aarsinntekt = 100000,
-            fratrekkInnUt = 10000,
+            fratrekkInnAar = 10000,
             spesifikasjon = "Spesifikasjon",
             kilde = AvkortingGrunnlagKildeDto(
                 tidspunkt = Tidspunkt.now().toString(),
@@ -162,8 +162,8 @@ class AvkortingRoutesTest {
         )
         val sluttenavAaret = startenAvAaret.copy(fom = YearMonth.of(2023, 12))
 
-        startenAvAaret.fromDto(bruker).relevanteMaaneder shouldBe 12
-        sluttenavAaret.fromDto(bruker).relevanteMaaneder shouldBe 1
+        startenAvAaret.fromDto(bruker).relevanteMaanederInnAar shouldBe 12
+        sluttenavAaret.fromDto(bruker).relevanteMaanederInnAar shouldBe 1
     }
 
     private fun testApplication(port: Int, block: suspend ApplicationTestBuilder.() -> Unit) {

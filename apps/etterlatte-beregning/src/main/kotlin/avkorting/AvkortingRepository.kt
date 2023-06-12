@@ -86,7 +86,8 @@ class AvkortingRepository(private val dataSource: DataSource) {
                 INSERT INTO avkortingsgrunnlag(
                     id, behandling_id, fom, tom, aarsinntekt, fratrekk_inn_ut, relevante_maaneder, spesifikasjon, kilde
                 ) VALUES (
-                    :id, :behandlingId, :fom, :tom, :aarsinntekt, :fratrekkInnUt, :relevanteMaaneder, :spesifikasjon, :kilde
+                    :id, :behandlingId, :fom, :tom, :aarsinntekt, :fratrekkInnAar, :relevanteMaanederInnAar,
+                     :spesifikasjon, :kilde
                 )
             """.trimIndent(),
             paramMap = mapOf(
@@ -95,8 +96,8 @@ class AvkortingRepository(private val dataSource: DataSource) {
                 "fom" to it.periode.fom.atDay(1),
                 "tom" to it.periode.tom?.atDay(1),
                 "aarsinntekt" to it.aarsinntekt,
-                "fratrekkInnUt" to it.fratrekkInnUt,
-                "relevanteMaaneder" to it.relevanteMaaneder,
+                "fratrekkInnAar" to it.fratrekkInnAar,
+                "relevanteMaanederInnAar" to it.relevanteMaanederInnAar,
                 "spesifikasjon" to it.spesifikasjon,
                 "kilde" to it.kilde.toJson()
             )
@@ -167,8 +168,8 @@ class AvkortingRepository(private val dataSource: DataSource) {
             tom = sqlDateOrNull("tom")?.let { YearMonth.from(it.toLocalDate()) }
         ),
         aarsinntekt = int("aarsinntekt"),
-        fratrekkInnUt = int("fratrekk_inn_ut"),
-        relevanteMaaneder = int("relevante_maaneder"),
+        fratrekkInnAar = int("fratrekk_inn_ut"),
+        relevanteMaanederInnAar = int("relevante_maaneder"),
         spesifikasjon = string("spesifikasjon"),
         kilde = string("kilde").let { objectMapper.readValue(it) }
     )

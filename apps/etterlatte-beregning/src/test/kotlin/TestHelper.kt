@@ -88,8 +88,8 @@ fun avkortinggrunnlag(
     id = id,
     periode = periode,
     aarsinntekt = aarsinntekt,
-    fratrekkInnUt = fratrekkInnUt,
-    relevanteMaaneder = relevanteMaaneder,
+    fratrekkInnAar = fratrekkInnUt,
+    relevanteMaanederInnAar = relevanteMaaneder,
     spesifikasjon = "Spesifikasjon",
     kilde = kilde
 )

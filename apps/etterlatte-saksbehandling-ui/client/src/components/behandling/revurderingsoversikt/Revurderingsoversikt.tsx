@@ -26,6 +26,9 @@ import { ISaksType } from '~components/behandling/fargetags/saksType'
 import { Revurderingsaarsak, tekstRevurderingsaarsak } from '~shared/types/Revurderingsaarsak'
 import styled from 'styled-components'
 import InstitusjonsoppholdForside from '~components/behandling/revurderingsoversikt/InstitusjonsoppholdForside'
+import { isFailure, isPending, useApiCall } from '~shared/hooks/useApiCall'
+import { hentFunksjonsbrytere } from '~shared/api/feature'
+import { useEffect, useState } from 'react'
 
 const revurderingsaarsakTilTekst = (revurderingsaarsak: Revurderingsaarsak): string =>
   tekstRevurderingsaarsak[revurderingsaarsak]
@@ -66,6 +69,19 @@ export const Revurderingsoversikt = (props: { behandling: IDetaljertBehandling }
     behandling.revurderingsaarsak,
     'Kan ikke starte en revurdering uten en revurderingsårsak'
   )
+  const [funksjonsbrytere, postHentFunksjonsbrytere] = useApiCall(hentFunksjonsbrytere)
+  const [visInstitusjonsopphold, setVisInstitusjonsopphold] = useState<boolean>(false)
+  useEffect(() => {
+    const featureToggleNameInstitusjonsopphold = 'pensjon-etterlatte.bp-bruk-institusjonsopphold'
+
+    postHentFunksjonsbrytere([featureToggleNameInstitusjonsopphold], (brytere) => {
+      const institusjonsoppholdBryter = brytere.find((bryter) => bryter.toggle === featureToggleNameInstitusjonsopphold)
+      if (institusjonsoppholdBryter) {
+        setVisInstitusjonsopphold(institusjonsoppholdBryter.enabled)
+      }
+    })
+  }, [])
+
   const [hjemler, beskrivelse] = hjemlerOgBeskrivelse(behandling.sakType, revurderingsaarsak)
   const institusjonsopphold = undefined //TODO: hvor skal det hentes fra
   return (
@@ -81,12 +97,14 @@ export const Revurderingsoversikt = (props: { behandling: IDetaljertBehandling }
         </BodyShort>
       </ContentHeader>
       <Innhold>
-        <InstitusjonsoppholdForside
-          behandles={behandles}
-          sakId={behandling.sak}
-          behandlingId={behandling.id}
-          institusjonsopphold={institusjonsopphold}
-        />
+        {!isPending(funksjonsbrytere) && !isFailure(funksjonsbrytere) && visInstitusjonsopphold && (
+          <InstitusjonsoppholdForside
+            behandles={behandles}
+            sakId={behandling.sak}
+            behandlingId={behandling.id}
+            institusjonsopphold={institusjonsopphold}
+          />
+        )}
         <Virkningstidspunkt
           redigerbar={behandles}
           virkningstidspunkt={behandling.virkningstidspunkt}

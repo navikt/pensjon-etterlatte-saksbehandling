@@ -11,6 +11,7 @@ import { ManueltOpphoerDetaljer } from '~components/behandling/manueltopphoerove
 import { Grunnlagsendringshendelse } from '~components/person/typer'
 import { Revurderingsaarsak } from '~shared/types/Revurderingsaarsak'
 import { ISaksType } from '~components/behandling/fargetags/saksType'
+import { Institusjonsopphold } from '~components/behandling/revurderingsoversikt/InstitusjonsoppholdForside'
 
 export const hentBehandlingerForPerson = async (fnr: string): Promise<ApiResponse<any>> => {
   return apiClient.post(`/personer/behandlinger`, { foedselsnummer: fnr })
@@ -41,6 +42,15 @@ export const fastsettVirkningstidspunkt = async (args: {
     dato: args.dato,
     begrunnelse: args.begrunnelse,
   })
+}
+
+export const lagreInstitusjonsoppholdData = async (args: {
+  behandlingId: string
+  institusjonsopphold: Institusjonsopphold
+}): Promise<ApiResponse<Institusjonsopphold>> => {
+  return apiClient.post(`behandling/${args.behandlingId}/institusjonsopphold`, {
+    institusjonsopphold: args.institusjonsopphold,
+  }) //TODO: hvor skal den lagres?
 }
 
 export const hentManueltOpphoerDetaljer = async (

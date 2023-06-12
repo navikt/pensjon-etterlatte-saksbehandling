@@ -12,6 +12,7 @@ import no.nav.etterlatte.config.ApplicationContext
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.libs.ktor.setReady
+import no.nav.etterlatte.ytelseMedGrunnlag.ytelseMedGrunnlag
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -36,6 +37,7 @@ class Server(private val context: ApplicationContext) {
                         beregning(beregningService, behandlingKlient)
                         beregningsGrunnlag(beregningsGrunnlagService, behandlingKlient)
                         avkorting(avkortingService, behandlingKlient)
+                        ytelseMedGrunnlag(ytelseMedGrunnlagService, behandlingKlient)
                     }
                 }
                 connector { port = properties.httpPort }

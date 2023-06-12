@@ -140,7 +140,9 @@ private fun TrygdetidGrunnlagDto.toTrygdetidGrunnlag(bruker: Bruker): TrygdetidG
         bosted = bosted,
         periode = TrygdetidPeriode(periodeFra, periodeTil),
         kilde = Grunnlagsopplysning.Saksbehandler(bruker.ident(), Tidspunkt.now()),
-        begrunnelse = begrunnelse
+        begrunnelse = begrunnelse,
+        poengInnAar = poengInnAar,
+        poengUtAar = poengUtAar
     )
 
 private fun TrygdetidGrunnlag.toDto(): TrygdetidGrunnlagDto {
@@ -157,6 +159,8 @@ private fun TrygdetidGrunnlag.toDto(): TrygdetidGrunnlagDto {
             tidspunkt = kilde.tidspunkt.toString(),
             ident = kilde.ident
         ),
-        begrunnelse = begrunnelse
+        begrunnelse = begrunnelse,
+        poengInnAar = poengInnAar,
+        poengUtAar = poengUtAar
     )
 }

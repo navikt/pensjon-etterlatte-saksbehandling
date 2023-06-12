@@ -128,10 +128,12 @@ class TrygdetidRepository(private val dataSource: DataSource) {
                     beregnet_verdi, 
                     beregnet_tidspunkt, 
                     beregnet_regelresultat,
-                    begrunnelse
+                    begrunnelse,
+                    poeng_inn_aar,
+                    poeng_ut_aar
                 ) 
                 VALUES(:id, :trygdetidId, :type, :bosted, :periodeFra, :periodeTil, :kilde, 
-                    :beregnetVerdi, :beregnetTidspunkt, :beregnetRegelresultat, :begrunnelse)
+                    :beregnetVerdi, :beregnetTidspunkt, :beregnetRegelresultat, :begrunnelse, :poengInnAar, :poengUtAar)
             """.trimIndent(),
             paramMap = mapOf(
                 "id" to trygdetidGrunnlag.id,
@@ -144,7 +146,9 @@ class TrygdetidRepository(private val dataSource: DataSource) {
                 "beregnetVerdi" to trygdetidGrunnlag.beregnetTrygdetid?.verdi?.toString(),
                 "beregnetTidspunkt" to trygdetidGrunnlag.beregnetTrygdetid?.tidspunkt?.toTimestamp(),
                 "beregnetRegelresultat" to trygdetidGrunnlag.beregnetTrygdetid?.regelResultat?.toJson(),
-                "begrunnelse" to trygdetidGrunnlag.begrunnelse
+                "begrunnelse" to trygdetidGrunnlag.begrunnelse,
+                "poengInnAar" to trygdetidGrunnlag.poengInnAar,
+                "poengUtAar" to trygdetidGrunnlag.poengUtAar
             )
         ).let { query -> tx.update(query) }
     }
@@ -163,7 +167,9 @@ class TrygdetidRepository(private val dataSource: DataSource) {
                  beregnet_verdi = :beregnetVerdi, 
                  beregnet_tidspunkt = :beregnetTidspunkt, 
                  beregnet_regelresultat = :beregnetRegelresultat,
-                 begrunnelse = :begrunnelse
+                 begrunnelse = :begrunnelse,
+                 poeng_inn_aar = :poengInnAar,
+                 poeng_ut_aar = :poengUtAar
                 WHERE id = :trygdetidGrunnlagId
             """.trimIndent(),
             paramMap = mapOf(
@@ -175,7 +181,9 @@ class TrygdetidRepository(private val dataSource: DataSource) {
                 "beregnetVerdi" to trygdetidGrunnlag.beregnetTrygdetid?.verdi?.toString(),
                 "beregnetTidspunkt" to trygdetidGrunnlag.beregnetTrygdetid?.tidspunkt?.toTimestamp(),
                 "beregnetRegelresultat" to trygdetidGrunnlag.beregnetTrygdetid?.regelResultat?.toJson(),
-                "begrunnelse" to trygdetidGrunnlag.begrunnelse
+                "begrunnelse" to trygdetidGrunnlag.begrunnelse,
+                "poengInnAar" to trygdetidGrunnlag.poengInnAar,
+                "poengUtAar" to trygdetidGrunnlag.poengUtAar
             )
         ).let { query -> tx.update(query) }
     }
@@ -231,8 +239,8 @@ class TrygdetidRepository(private val dataSource: DataSource) {
         using(sessionOf(dataSource)) { session ->
             queryOf(
                 statement = """
-                    SELECT id, trygdetid_id, type, bosted, periode_fra, periode_til, kilde, 
-                        beregnet_verdi, beregnet_tidspunkt, beregnet_regelresultat , begrunnelse
+                    SELECT id, trygdetid_id, type, bosted, periode_fra, periode_til, kilde, beregnet_verdi,
+                    beregnet_tidspunkt, beregnet_regelresultat , begrunnelse, poeng_inn_aar, poeng_ut_aar
                     FROM trygdetid_grunnlag
                     WHERE trygdetid_id = :trygdetidId
                 """.trimIndent(),
@@ -304,7 +312,9 @@ class TrygdetidRepository(private val dataSource: DataSource) {
                     }
                 )
             },
-            begrunnelse = stringOrNull("begrunnelse")
+            begrunnelse = stringOrNull("begrunnelse"),
+            poengInnAar = boolean("poeng_inn_aar"),
+            poengUtAar = boolean("poeng_ut_aar")
         )
 
     private fun Row.toOpplysningsgrunnlag(): Opplysningsgrunnlag {

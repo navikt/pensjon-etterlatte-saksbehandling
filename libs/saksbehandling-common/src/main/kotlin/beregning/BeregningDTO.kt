@@ -3,6 +3,7 @@ package no.nav.etterlatte.libs.common.beregning
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.Metadata
+import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import java.time.LocalDate
 import java.time.YearMonth
@@ -56,4 +57,19 @@ data class AvkortetYtelseDto(
     val tom: LocalDate?,
     val avkortingsbeloep: Int,
     val ytelseEtterAvkorting: Int
+)
+
+data class YtelseMedGrunnlagDto(
+    val perioder: List<YtelseMedGrunnlagPeriodisertDto>
+)
+
+data class YtelseMedGrunnlagPeriodisertDto(
+    val periode: Periode,
+    val ytelseEtterAvkorting: Int,
+    val avkortingsbeloep: Int,
+    val ytelseFoerAvkorting: Int,
+    val aarsinntekt: Int,
+    val fratrekkInnAar: Int,
+    val grunnbelop: Int,
+    val grunnbelopMnd: Int
 )

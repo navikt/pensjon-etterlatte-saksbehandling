@@ -46,14 +46,14 @@ class InntektAvkortingServiceTest {
         val avkortingGrunnlag = listOf(
             avkortinggrunnlag(
                 aarsinntekt = 300000,
-                fratrekkInnUt = 50000,
-                relevanteMaaneder = 10,
+                fratrekkInnAar = 50000,
+                relevanteMaanederInnAar = 10,
                 periode = Periode(fom = YearMonth.of(2023, 1), tom = YearMonth.of(2023, 3))
             ),
             avkortinggrunnlag(
                 aarsinntekt = 600000,
-                fratrekkInnUt = 100000,
-                relevanteMaaneder = 10,
+                fratrekkInnAar = 100000,
+                relevanteMaanederInnAar = 10,
                 periode = Periode(fom = YearMonth.of(2023, 4), tom = null)
             )
         )

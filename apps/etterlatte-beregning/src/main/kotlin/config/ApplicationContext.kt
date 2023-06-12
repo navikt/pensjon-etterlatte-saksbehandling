@@ -19,6 +19,7 @@ import no.nav.etterlatte.klienter.TrygdetidKlient
 import no.nav.etterlatte.klienter.VilkaarsvurderingKlientImpl
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.ktor.httpClient
+import no.nav.etterlatte.ytelseMedGrunnlag.YtelseMedGrunnlagService
 
 private fun featureToggleProperties(config: Config) = mapOf(
     FeatureToggleServiceProperties.ENABLED.navn to config.getString("funksjonsbrytere.enabled"),
@@ -75,5 +76,8 @@ class ApplicationContext {
         inntektAvkortingService = InntektAvkortingService,
         avkortingRepository = AvkortingRepository(dataSource),
         beregningService = beregningService
+    )
+    val ytelseMedGrunnlagService = YtelseMedGrunnlagService(
+        avkortingRepository = AvkortingRepository(dataSource)
     )
 }

@@ -80,16 +80,16 @@ fun avkorting(
 fun avkortinggrunnlag(
     id: UUID = UUID.randomUUID(),
     aarsinntekt: Int = 100000,
-    fratrekkInnUt: Int = 10000,
-    relevanteMaaneder: Int = 12,
+    fratrekkInnAar: Int = 10000,
+    relevanteMaanederInnAar: Int = 12,
     periode: Periode = Periode(fom = YearMonth.now(), tom = null),
     kilde: Grunnlagsopplysning.Saksbehandler = Grunnlagsopplysning.Saksbehandler.create("Z123456")
 ) = AvkortingGrunnlag(
     id = id,
     periode = periode,
     aarsinntekt = aarsinntekt,
-    fratrekkInnAar = fratrekkInnUt,
-    relevanteMaanederInnAar = relevanteMaaneder,
+    fratrekkInnAar = fratrekkInnAar,
+    relevanteMaanederInnAar = relevanteMaanederInnAar,
     spesifikasjon = "Spesifikasjon",
     kilde = kilde
 )

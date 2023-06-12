@@ -61,9 +61,13 @@ export const UtenlandstilsnittVurdering = ({
       subtittelKomponent={
         <>
           <BodyShort spacing>Hvilken type sak er dette?</BodyShort>
-          {utenlandstilsnitt?.type && (
+          {utenlandstilsnitt?.type ? (
             <Label as={'p'} size="small" style={{ marginBottom: '32px' }}>
               {UtenlandstilsnittTypeTittel[utenlandstilsnitt.type]}
+            </Label>
+          ) : (
+            <Label as={'p'} size="small" style={{ marginBottom: '32px' }}>
+              {'Ikke vurdert'}
             </Label>
           )}
         </>

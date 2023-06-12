@@ -6,7 +6,9 @@ import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
+import no.nav.etterlatte.libs.common.vedtak.Attestasjon
 import no.nav.etterlatte.libs.common.vedtak.UtbetalingsperiodeType
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
@@ -108,20 +110,6 @@ class StatistikkService(
             null
         }
 
-        val behandlingMetode = when (detaljertBehandling.prosesstype) {
-            Prosesstype.AUTOMATISK -> if (detaljertBehandling.revurderingsaarsak == RevurderingAarsak.REGULERING) {
-                BehandlingMetode.AUTOMATISK_REGULERING
-            } else {
-                BehandlingMetode.AUTOMATISK
-            }
-
-            Prosesstype.MANUELL -> if (vedtak.attestasjon != null) {
-                BehandlingMetode.TOTRINN
-            } else {
-                BehandlingMetode.MANUELL
-            }
-        }
-
         return SakRad(
             id = -1,
             behandlingId = vedtak.behandling.id,
@@ -134,7 +122,7 @@ class StatistikkService(
             behandlingStatus = hendelse.name,
             behandlingResultat = behandlingResultatFraVedtak(vedtak, hendelse, detaljertBehandling),
             resultatBegrunnelse = null,
-            behandlingMetode = behandlingMetode,
+            behandlingMetode = detaljertBehandling.behandlingMetode(vedtak.attestasjon),
             soeknadFormat = SoeknadFormat.DIGITAL,
             opprettetAv = null,
             ansvarligBeslutter = vedtak.attestasjon?.attestant,
@@ -148,11 +136,7 @@ class StatistikkService(
             ansvarligEnhet = vedtak.attestasjon?.attesterendeEnhet,
             sakUtland = SakUtland.NASJONAL,
             beregning = beregning,
-            sakYtelsesgruppe = when (detaljertBehandling.avdoed?.size) {
-                1 -> SakYtelsesgruppe.EN_AVDOED_FORELDER
-                2 -> SakYtelsesgruppe.FORELDRELOES
-                else -> null
-            },
+            sakYtelsesgruppe = detaljertBehandling.sakYtelsesgruppe(),
             avdoedeForeldre = detaljertBehandling.avdoed,
             revurderingAarsak = detaljertBehandling.revurderingsaarsak?.name
         )
@@ -229,17 +213,7 @@ class StatistikkService(
             behandlingStatus = behandlingHendelse.name,
             behandlingResultat = null,
             resultatBegrunnelse = null,
-            behandlingMetode = detaljertBehandling.prosesstype.let {
-                when (it) {
-                    Prosesstype.MANUELL -> BehandlingMetode.MANUELL
-                    Prosesstype.AUTOMATISK ->
-                        if (detaljertBehandling.revurderingsaarsak == RevurderingAarsak.REGULERING) {
-                            BehandlingMetode.AUTOMATISK_REGULERING
-                        } else {
-                            BehandlingMetode.AUTOMATISK
-                        }
-                }
-            },
+            behandlingMetode = detaljertBehandling.behandlingMetode(null),
             opprettetAv = null,
             ansvarligBeslutter = null,
             aktorId = behandlingIntern.sak.ident,
@@ -253,12 +227,12 @@ class StatistikkService(
             soeknadFormat = SoeknadFormat.DIGITAL,
             sakUtland = SakUtland.NASJONAL,
             beregning = null,
-            sakYtelsesgruppe = when (detaljertBehandling.avdoed?.size) {
-                1 -> SakYtelsesgruppe.EN_AVDOED_FORELDER
-                2 -> SakYtelsesgruppe.FORELDRELOES
-                else -> null
+            sakYtelsesgruppe = detaljertBehandling.sakYtelsesgruppe(),
+            avdoedeForeldre = if (detaljertBehandling.sakType == SakType.BARNEPENSJON) {
+                detaljertBehandling.avdoed
+            } else {
+                null
             },
-            avdoedeForeldre = detaljertBehandling.avdoed ?: emptyList(),
             revurderingAarsak = detaljertBehandling.revurderingsaarsak?.name
         )
         if (behandlingHendelse == BehandlingHendelse.AVBRUTT) {
@@ -305,3 +279,24 @@ class StatistikkService(
 enum class VedtakHendelse {
     FATTET, ATTESTERT, UNDERKJENT, IVERKSATT
 }
+
+internal fun DetaljertBehandling.sakYtelsesgruppe(): SakYtelsesgruppe? = when (this.sakType to this.avdoed?.size) {
+    SakType.BARNEPENSJON to 1 -> SakYtelsesgruppe.EN_AVDOED_FORELDER
+    SakType.BARNEPENSJON to 2 -> SakYtelsesgruppe.FORELDRELOES
+    else -> null
+}
+
+internal fun DetaljertBehandling.behandlingMetode(attestasjon: Attestasjon?): BehandlingMetode =
+    when (this.prosesstype) {
+        Prosesstype.MANUELL -> if (attestasjon != null) {
+            BehandlingMetode.TOTRINN
+        } else {
+            BehandlingMetode.MANUELL
+        }
+
+        Prosesstype.AUTOMATISK -> if (this.revurderingsaarsak == RevurderingAarsak.REGULERING) {
+            BehandlingMetode.AUTOMATISK_REGULERING
+        } else {
+            BehandlingMetode.AUTOMATISK
+        }
+    }

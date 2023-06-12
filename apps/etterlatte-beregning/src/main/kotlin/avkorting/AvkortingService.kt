@@ -37,11 +37,11 @@ class AvkortingService(
     ): Avkorting = tilstandssjekk(behandlingId, bruker) {
         logger.info("Lagre og beregne avkorting og avkortet ytelse for behandlingId=$behandlingId")
 
-        val avkorting = avkortingRepository.hentAvkorting(behandlingId) ?: Avkorting.nyAvkorting(behandlingId)
+        val avkorting = avkortingRepository.hentAvkorting(behandlingId) ?: Avkorting.nyAvkorting()
         val avkortingMedNyttGrunnlag = avkorting.leggTilEllerOppdaterGrunnlag(avkortingGrunnlag)
         val beregnetAvkorting = beregnAvkorting(avkortingMedNyttGrunnlag, behandlingId, bruker)
 
-        val lagretAvkorting = avkortingRepository.lagreAvkorting(beregnetAvkorting)
+        val lagretAvkorting = avkortingRepository.lagreAvkorting(behandlingId, beregnetAvkorting)
         behandlingKlient.avkort(behandlingId, bruker, true)
         lagretAvkorting
     }
@@ -56,7 +56,7 @@ class AvkortingService(
         )
         val beregnetAvkorting = beregnAvkorting(nyAvkorting, behandlingId, bruker)
 
-        val lagretAvkorting = avkortingRepository.lagreAvkorting(beregnetAvkorting)
+        val lagretAvkorting = avkortingRepository.lagreAvkorting(behandlingId, beregnetAvkorting)
         behandlingKlient.avkort(behandlingId, bruker, true)
         return lagretAvkorting
     }

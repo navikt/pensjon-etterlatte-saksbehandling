@@ -41,15 +41,19 @@ class InntektAvkortingServiceTest {
     }
 
     @Test
-    fun `skal beregene avkorting for inntekt til en foerstegangsbehandling`() {
+    fun `skal beregne avkorting for inntekt til en foerstegangsbehandling`() {
         val virkningstidspunkt = YearMonth.of(2023, 1)
         val avkortingGrunnlag = listOf(
             avkortinggrunnlag(
                 aarsinntekt = 300000,
+                fratrekkInnUt = 50000,
+                relevanteMaaneder = 10,
                 periode = Periode(fom = YearMonth.of(2023, 1), tom = YearMonth.of(2023, 3))
             ),
             avkortinggrunnlag(
-                aarsinntekt = 500000,
+                aarsinntekt = 600000,
+                fratrekkInnUt = 100000,
+                relevanteMaaneder = 10,
                 periode = Periode(fom = YearMonth.of(2023, 4), tom = null)
             )
         )
@@ -68,12 +72,12 @@ class InntektAvkortingServiceTest {
             tidspunkt shouldNotBe null
             periode.fom shouldBe YearMonth.of(2023, 4)
             periode.tom shouldBe null
-            avkorting shouldBe 16660
+            avkorting shouldBe 20410
         }
     }
 
     @Test
-    fun `skal ikke tillate aa beregene avkorting for inntekt med feil perioder`() {
+    fun `skal ikke tillate aa beregne avkorting for inntekt med feil perioder`() {
         val virkningstidspunkt = YearMonth.of(2023, 1)
         val avkortingGrunnlag = listOf(
             avkortinggrunnlag(

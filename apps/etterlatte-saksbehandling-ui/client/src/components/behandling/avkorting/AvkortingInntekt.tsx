@@ -29,13 +29,24 @@ export const AvkortingInntekt = (props: {
     }
   }
   const finnRedigerbartGrunnlag = () => {
-    if (finnesRedigerbartGrunnlag()) {
-      return props.avkortingGrunnlag![props.avkortingGrunnlag!.length - 1]
+    if (props.avkortingGrunnlag) {
+      if (finnesRedigerbartGrunnlag()) {
+        return props.avkortingGrunnlag[props.avkortingGrunnlag.length - 1]
+      }
+      if (props.avkortingGrunnlag.length > 0) {
+        const siste = props.avkortingGrunnlag[props.avkortingGrunnlag.length - 1]
+        return {
+          fom: virkningstidspunkt(),
+          fratrekkInnUt: siste.fratrekkInnAar,
+          relevanteMaaneder: siste.relevanteMaanederInnAar,
+        }
+      }
     }
     return {
       fom: virkningstidspunkt(),
     }
   }
+
   const [inntektGrunnlagForm, setInntektGrunnlagForm] = useState<IAvkortingGrunnlag>(finnRedigerbartGrunnlag())
   const [inntektGrunnlagStatus, requestLagreAvkortingGrunnlag] = useApiCall(lagreAvkortingGrunnlag)
   const [errorTekst, setErrorTekst] = useState<string | null>(null)
@@ -83,7 +94,7 @@ export const AvkortingInntekt = (props: {
           <Table className="table" zebraStripes>
             <Table.Header>
               <Table.HeaderCell>Forventet inntekt</Table.HeaderCell>
-              <Table.HeaderCell>Fratrekk ut/inn</Table.HeaderCell>
+              <Table.HeaderCell>Fratrekk inn/ut</Table.HeaderCell>
               <Table.HeaderCell>F.o.m dato</Table.HeaderCell>
               <Table.HeaderCell>T.o.m dato</Table.HeaderCell>
               <Table.HeaderCell>Spesifikasjon av inntekt</Table.HeaderCell>
@@ -93,7 +104,7 @@ export const AvkortingInntekt = (props: {
               {(props.avkortingGrunnlag ? props.avkortingGrunnlag : []).map((inntektsgrunnlag, index) => (
                 <Table.Row key={index}>
                   <Table.DataCell key="Inntekt">{inntektsgrunnlag.aarsinntekt}</Table.DataCell>
-                  <Table.DataCell key="FratrekkInnUt">{inntektsgrunnlag.fratrekkInnUt}</Table.DataCell>
+                  <Table.DataCell key="FratrekkInnUt">{inntektsgrunnlag.fratrekkInnAar}</Table.DataCell>
                   <Table.DataCell key="InntektFom">{inntektsgrunnlag.fom}</Table.DataCell>
                   <Table.DataCell key="InntektTom">{inntektsgrunnlag.tom}</Table.DataCell>
                   <Table.DataCell key="InntektSpesifikasjon">{inntektsgrunnlag.spesifikasjon}</Table.DataCell>
@@ -137,11 +148,11 @@ export const AvkortingInntekt = (props: {
                   type="text"
                   inputMode="numeric"
                   pattern="[0-9]*"
-                  value={inntektGrunnlagForm.fratrekkInnUt == null ? '0' : inntektGrunnlagForm.fratrekkInnUt}
+                  value={inntektGrunnlagForm.fratrekkInnAar == null ? '0' : inntektGrunnlagForm.fratrekkInnAar}
                   onChange={(e) =>
                     setInntektGrunnlagForm({
                       ...inntektGrunnlagForm,
-                      fratrekkInnUt: e.target.value === '' ? 0 : Number(e.target.value),
+                      fratrekkInnAar: e.target.value === '' ? 0 : Number(e.target.value),
                     })
                   }
                 />

@@ -1,0 +1,1 @@
+ALTER TABLE avkortingsgrunnlag ADD COLUMN relevante_maaneder TEXT;

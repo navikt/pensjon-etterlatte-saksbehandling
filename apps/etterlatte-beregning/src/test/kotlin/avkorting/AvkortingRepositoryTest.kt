@@ -54,8 +54,8 @@ internal class AvkortingRepositoryTest {
         val avkortetYtelse = listOf(avkortetYtelse())
 
         avkortingRepository.lagreAvkorting(
+            behandlingId,
             Avkorting(
-                behandlingId,
                 avkortinggrunnlag,
                 avkortingsperioder,
                 avkortetYtelse
@@ -67,15 +67,14 @@ internal class AvkortingRepositoryTest {
         val endretAvkortetYtelse = listOf(avkortetYtelse[0].copy(avkortingsbeloep = 444))
 
         val avkorting = avkortingRepository.lagreAvkorting(
+            behandlingId,
             Avkorting(
-                behandlingId,
                 endretAvkortingGrunnlag,
                 endretAvkortingsperiode,
                 endretAvkortetYtelse
             )
         )
 
-        avkorting.behandlingId shouldBe behandlingId
         avkorting.avkortingGrunnlag.size shouldBe 1
         avkorting.avkortingGrunnlag shouldBe endretAvkortingGrunnlag
         avkorting.avkortingsperioder shouldBe endretAvkortingsperiode

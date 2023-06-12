@@ -19,26 +19,32 @@ import java.math.RoundingMode
 import java.time.LocalDate
 
 data class InntektAvkortingGrunnlag(
-    val inntekt: FaktumNode<Int>
+    val inntekt: Beregningstall,
+    val fratrekkInnUt: Beregningstall,
+    val relevanteMaaneder: Beregningstall
+)
+
+data class InntektAvkortingGrunnlagWrapper(
+    val inntektAvkortingGrunnlag: FaktumNode<InntektAvkortingGrunnlag>
 )
 
 data class PeriodisertInntektAvkortingGrunnlag(
-    val inntektsperioder: PeriodisertGrunnlag<FaktumNode<Int>>
-) : PeriodisertGrunnlag<InntektAvkortingGrunnlag> {
+    val periodisertInntektAvkortingGrunnlag: PeriodisertGrunnlag<FaktumNode<InntektAvkortingGrunnlag>>
+) : PeriodisertGrunnlag<InntektAvkortingGrunnlagWrapper> {
     override fun finnAlleKnekkpunkter(): Set<LocalDate> {
-        return inntektsperioder.finnAlleKnekkpunkter()
+        return periodisertInntektAvkortingGrunnlag.finnAlleKnekkpunkter()
     }
 
-    override fun finnGrunnlagForPeriode(datoIPeriode: LocalDate): InntektAvkortingGrunnlag {
-        return InntektAvkortingGrunnlag(
-            inntektsperioder.finnGrunnlagForPeriode(datoIPeriode)
+    override fun finnGrunnlagForPeriode(datoIPeriode: LocalDate): InntektAvkortingGrunnlagWrapper {
+        return InntektAvkortingGrunnlagWrapper(
+            periodisertInntektAvkortingGrunnlag.finnGrunnlagForPeriode(datoIPeriode)
         )
     }
 }
 
 val historiskeGrunnbeloep = GrunnbeloepRepository.historiskeGrunnbeloep.map { grunnbeloep ->
     val grunnbeloepGyldigFra = grunnbeloep.dato.atDay(1)
-    definerKonstant<InntektAvkortingGrunnlag, Grunnbeloep>(
+    definerKonstant<InntektAvkortingGrunnlagWrapper, Grunnbeloep>(
         gjelderFra = grunnbeloepGyldigFra,
         beskrivelse = "Grunnbeløp gyldig fra $grunnbeloepGyldigFra",
         regelReferanse = RegelReferanse(id = "REGEL-GRUNNBELOEP"),
@@ -46,39 +52,40 @@ val historiskeGrunnbeloep = GrunnbeloepRepository.historiskeGrunnbeloep.map { gr
     )
 }
 
-val grunnbeloep: Regel<InntektAvkortingGrunnlag, Grunnbeloep> = RegelMeta(
+val grunnbeloep: Regel<InntektAvkortingGrunnlagWrapper, Grunnbeloep> = RegelMeta(
     gjelderFra = OMS_GYLDIG_FROM_TEST,
     beskrivelse = "Finner grunnbeløp",
     regelReferanse = RegelReferanse(id = "REGEL-GRUNNBELOEP")
 ) velgNyesteGyldige historiskeGrunnbeloep
 
-val inntekt: Regel<InntektAvkortingGrunnlag, Int> = finnFaktumIGrunnlag(
+val inntektavkortingsgrunnlag: Regel<InntektAvkortingGrunnlagWrapper, InntektAvkortingGrunnlag> = finnFaktumIGrunnlag(
     gjelderFra = OMS_GYLDIG_FROM_TEST,
-    beskrivelse = "Finner inntekt",
-    finnFaktum = InntektAvkortingGrunnlag::inntekt,
+    beskrivelse = "Finner inntektsavkortingsgrunnlag",
+    finnFaktum = InntektAvkortingGrunnlagWrapper::inntektAvkortingGrunnlag,
     finnFelt = { it }
 )
 
-val nedrundetInntekt = RegelMeta(
+val maanedsinntekt = RegelMeta(
     gjelderFra = OMS_GYLDIG_FROM_TEST,
-    beskrivelse = "Inntekt nedrundet til nærmeste tusen",
-    regelReferanse = RegelReferanse(id = "REGEL-NEDRUNDET-INNTEKT")
-) benytter inntekt med { inntekt ->
-    Beregningstall(inntekt).round(-3, RoundingMode.FLOOR)
+    beskrivelse = "Inntekt for relevant periode nedrundet til nærmeste tusen oppdelt i relevante måneder",
+    regelReferanse = RegelReferanse(id = "REGEL-NEDRUNDET-MÅNEDSINNTEKT")
+) benytter inntektavkortingsgrunnlag med { inntektavkortingsgrunnlag ->
+    val (inntekt, fratrekkInnUt, relevanteMaaneder) = inntektavkortingsgrunnlag
+    inntekt.round(-3, RoundingMode.FLOOR).minus(fratrekkInnUt).divide(relevanteMaaneder)
 }
 
-val overstegetInntekt = RegelMeta(
+val overstegetInntektPerMaaned = RegelMeta(
     gjelderFra = OMS_GYLDIG_FROM_TEST,
-    beskrivelse = "Finner oversteget inntekt",
-    regelReferanse = RegelReferanse(id = "REGEL-INNTEKT-OVERSTEGET-HALV-G")
-) benytter nedrundetInntekt og grunnbeloep med { inntekt, grunnbeleop ->
-    val halvtGrunnbeloep = Beregningstall(grunnbeleop.grunnbeloep).divide(2)
+    beskrivelse = "Finner månedlig oversteget inntekt",
+    regelReferanse = RegelReferanse(id = "REGEL-MÅNEDSINNTEKT-OVERSTEGET-HALV-G")
+) benytter maanedsinntekt og grunnbeloep med { inntekt, grunnbeleop ->
+    val halvtMaanedligGrunnbeloep = Beregningstall(grunnbeleop.grunnbeloep).divide(12).divide(2)
     inntekt
-        .minus(halvtGrunnbeloep)
+        .minus(halvtMaanedligGrunnbeloep)
         .zeroIfNegative()
 }
 
-val avkortingFaktor = definerKonstant<InntektAvkortingGrunnlag, Beregningstall>(
+val avkortingFaktor = definerKonstant<InntektAvkortingGrunnlagWrapper, Beregningstall>(
     gjelderFra = OMS_GYLDIG_FROM_TEST,
     beskrivelse = "Faktor for inntektsavkorting",
     regelReferanse = RegelReferanse("REGEL-FAKTOR-FOR-AVKORTING"),
@@ -89,8 +96,8 @@ val inntektAvkorting = RegelMeta(
     gjelderFra = OMS_GYLDIG_FROM_TEST,
     beskrivelse = "Avkorter inntekt som har oversteget et halvt grunnbeløp med avkortingsfaktor",
     regelReferanse = RegelReferanse(id = "REGEL-INNTEKT-AVKORTING")
-) benytter overstegetInntekt og avkortingFaktor med { overstegetInntekt, avkortingFaktor ->
-    avkortingFaktor.multiply(overstegetInntekt).divide(12)
+) benytter overstegetInntektPerMaaned og avkortingFaktor med { overstegetInntekt, avkortingFaktor ->
+    avkortingFaktor.multiply(overstegetInntekt)
 }
 
 val kroneavrundetInntektAvkorting = RegelMeta(

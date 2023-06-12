@@ -12,15 +12,16 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.log
 import io.ktor.server.testing.ApplicationTestBuilder
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.mockk
-import io.mockk.slot
 import no.nav.etterlatte.avkorting.Avkorting
-import no.nav.etterlatte.avkorting.AvkortingGrunnlag
 import no.nav.etterlatte.avkorting.AvkortingService
 import no.nav.etterlatte.avkorting.avkorting
+import no.nav.etterlatte.avkorting.fromDto
 import no.nav.etterlatte.beregning.regler.avkortetYtelse
 import no.nav.etterlatte.beregning.regler.avkortinggrunnlag
 import no.nav.etterlatte.beregning.regler.avkortingsperiode
+import no.nav.etterlatte.beregning.regler.bruker
 import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.libs.common.beregning.AvkortetYtelseDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingDto
@@ -78,7 +79,7 @@ class AvkortingRoutesTest {
     fun `skal motta og returnere avkorting`() {
         val behandlingsId = UUID.randomUUID()
         val avkortingsgrunnlagId = UUID.randomUUID()
-        val dato = YearMonth.now()
+        val dato = YearMonth.of(2023, 1)
         val tidspunkt = Tidspunkt.now()
         val avkortingsgrunnlag = avkortinggrunnlag(
             id = avkortingsgrunnlagId,
@@ -86,20 +87,19 @@ class AvkortingRoutesTest {
             kilde = Grunnlagsopplysning.Saksbehandler("Saksbehandler01", tidspunkt)
         )
         val avkorting = Avkorting(
-            behandlingId = behandlingsId,
             avkortingGrunnlag = mutableListOf(avkortingsgrunnlag),
             avkortingsperioder = mutableListOf(avkortingsperiode()),
             avkortetYtelse = mutableListOf(avkortetYtelse(periode = Periode(fom = dato, tom = dato)))
         )
         val dto = AvkortingDto(
-            behandlingId = behandlingsId,
             avkortingGrunnlag = listOf(
                 AvkortingGrunnlagDto(
                     id = avkortingsgrunnlagId,
                     fom = dato,
                     tom = dato,
                     aarsinntekt = 100000,
-                    fratrekkInnUt = 10000,
+                    fratrekkInnAar = 10000,
+                    relevanteMaanederInnAar = 12,
                     spesifikasjon = "Spesifikasjon",
                     kilde = AvkortingGrunnlagKildeDto(
                         tidspunkt = tidspunkt.toString(),
@@ -116,8 +116,7 @@ class AvkortingRoutesTest {
                 )
             )
         )
-        val avkortingsgrunnlagSlot = slot<AvkortingGrunnlag>()
-        coEvery { avkortingService.lagreAvkorting(any(), any(), capture(avkortingsgrunnlagSlot)) } returns avkorting
+        coEvery { avkortingService.lagreAvkorting(any(), any(), any()) } returns avkorting
 
         testApplication(server.config.httpServer.port()) {
             val response = client.post("/api/beregning/avkorting/$behandlingsId") {
@@ -129,14 +128,42 @@ class AvkortingRoutesTest {
             response.status shouldBe HttpStatusCode.OK
             val result = objectMapper.readValue(response.bodyAsText(), AvkortingDto::class.java)
             result shouldBe dto
-            with(avkortingsgrunnlagSlot.captured) {
-                periode shouldBe avkortingsgrunnlag.periode
-                aarsinntekt shouldBe avkortingsgrunnlag.aarsinntekt
-                fratrekkInnUt shouldBe avkortingsgrunnlag.fratrekkInnUt
-                spesifikasjon shouldBe avkortingsgrunnlag.spesifikasjon
-                kilde.ident shouldBe avkortingsgrunnlag.kilde.ident
+            coVerify {
+                avkortingService.lagreAvkorting(
+                    behandlingsId,
+                    any(),
+                    withArg {
+                        it.periode shouldBe avkortingsgrunnlag.periode
+                        it.aarsinntekt shouldBe avkortingsgrunnlag.aarsinntekt
+                        it.fratrekkInnAar shouldBe avkortingsgrunnlag.fratrekkInnAar
+                        it.relevanteMaanederInnAar shouldBe 12
+                        it.spesifikasjon shouldBe avkortingsgrunnlag.spesifikasjon
+                        it.kilde.ident shouldBe avkortingsgrunnlag.kilde.ident
+                    }
+                )
             }
         }
+    }
+
+    @Test
+    fun `skal regne ut relevant antall maaneder inkludert innevaerende hvis det ikke finnes fra foer`() {
+        val startenAvAaret = AvkortingGrunnlagDto(
+            relevanteMaanederInnAar = null,
+            id = UUID.randomUUID(),
+            fom = YearMonth.of(2023, 1),
+            tom = null,
+            aarsinntekt = 100000,
+            fratrekkInnAar = 10000,
+            spesifikasjon = "Spesifikasjon",
+            kilde = AvkortingGrunnlagKildeDto(
+                tidspunkt = Tidspunkt.now().toString(),
+                ident = "Saksbehandler01"
+            )
+        )
+        val sluttenavAaret = startenAvAaret.copy(fom = YearMonth.of(2023, 12))
+
+        startenAvAaret.fromDto(bruker).relevanteMaanederInnAar shouldBe 12
+        sluttenavAaret.fromDto(bruker).relevanteMaanederInnAar shouldBe 1
     }
 
     private fun testApplication(port: Int, block: suspend ApplicationTestBuilder.() -> Unit) {

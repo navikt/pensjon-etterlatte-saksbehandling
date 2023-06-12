@@ -9,6 +9,7 @@ import no.nav.etterlatte.statistikk.domain.Beregning
 import no.nav.etterlatte.statistikk.domain.Beregningstype
 import no.nav.etterlatte.statistikk.domain.SakRad
 import no.nav.etterlatte.statistikk.domain.SakUtland
+import no.nav.etterlatte.statistikk.domain.SakYtelsesgruppe
 import no.nav.etterlatte.statistikk.service.VedtakHendelse
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
@@ -95,7 +96,10 @@ class SakRepositoryTest {
                 ansvarligEnhet = "en enhet",
                 soeknadFormat = null,
                 sakUtland = SakUtland.NASJONAL,
-                beregning = mockBeregning
+                beregning = mockBeregning,
+                sakYtelsesgruppe = SakYtelsesgruppe.EN_AVDOED_FORELDER,
+                avdoedeForeldre = emptyList(),
+                revurderingAarsak = "MIGRERING"
             )
         )
 
@@ -132,7 +136,10 @@ class SakRepositoryTest {
                 ansvarligEnhet = "en enhet",
                 soeknadFormat = null,
                 sakUtland = SakUtland.NASJONAL,
-                beregning = null
+                beregning = null,
+                sakYtelsesgruppe = SakYtelsesgruppe.EN_AVDOED_FORELDER,
+                avdoedeForeldre = emptyList(),
+                revurderingAarsak = "MIGRERING"
             )
         )
         Assertions.assertNotNull(lagretRad)

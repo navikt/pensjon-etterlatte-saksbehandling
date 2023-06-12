@@ -9,6 +9,7 @@ import no.nav.etterlatte.statistikk.domain.BehandlingMetode
 import no.nav.etterlatte.statistikk.domain.BehandlingResultat
 import no.nav.etterlatte.statistikk.domain.SakRad
 import no.nav.etterlatte.statistikk.domain.SakUtland
+import no.nav.etterlatte.statistikk.domain.SakYtelsesgruppe
 import no.nav.etterlatte.statistikk.domain.SoeknadFormat
 import java.sql.Date
 import java.sql.PreparedStatement
@@ -36,8 +37,8 @@ class SakRepository(private val datasource: DataSource) {
                     behandling_type, behandling_status, behandling_resultat, resultat_begrunnelse, behandling_metode, 
                     opprettet_av, ansvarlig_beslutter, aktor_id, dato_foerste_utbetaling, teknisk_tid, sak_ytelse, 
                     vedtak_loepende_fom, vedtak_loepende_tom, saksbehandler, ansvarlig_enhet, soeknad_format, 
-                    sak_utland, beregning
-                ) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    sak_utland, beregning, sak_ytelsesgruppe, avdoede_foreldre, revurdering_aarsak
+                ) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """.trimIndent(),
                 Statement.RETURN_GENERATED_KEYS
             ).apply {
@@ -82,7 +83,10 @@ class SakRepository(private val datasource: DataSource) {
         ansvarligEnhet = getString("ansvarlig_enhet"),
         soeknadFormat = getString("soeknad_format")?.let { enumValueOf<SoeknadFormat>(it) },
         sakUtland = getString("sak_utland")?.let { enumValueOf<SakUtland>(it) },
-        beregning = getString("beregning")?.let { objectMapper.readValue(it) }
+        beregning = getString("beregning")?.let { objectMapper.readValue(it) },
+        sakYtelsesgruppe = getString("sak_ytelsesgruppe")?.let { enumValueOf<SakYtelsesgruppe>(it) },
+        avdoedeForeldre = getString("avdoede_foreldre")?.let { objectMapper.readValue(it) },
+        revurderingAarsak = getString("revurdering_aarsak")
     )
 
     fun hentRader(): List<SakRad> {
@@ -92,7 +96,7 @@ class SakRepository(private val datasource: DataSource) {
                 behandling_type, behandling_status, behandling_resultat, resultat_begrunnelse, behandling_metode,
                 opprettet_av, ansvarlig_beslutter, aktor_id, dato_foerste_utbetaling, teknisk_tid, sak_ytelse,
                 vedtak_loepende_fom, vedtak_loepende_tom, saksbehandler, ansvarlig_enhet, soeknad_format, sak_utland,
-                beregning
+                beregning, sak_ytelsesgruppe, avdoede_foreldre, revurdering_aarsak
             FROM sak
             """.trimIndent()
         )
@@ -125,4 +129,7 @@ private fun PreparedStatement.setSakRad(sakRad: SakRad): PreparedStatement = thi
     setString(22, sakRad.soeknadFormat?.name)
     setString(23, sakRad.sakUtland?.name)
     setJsonb(24, sakRad.beregning)
+    setString(25, sakRad.sakYtelsesgruppe?.name)
+    setJsonb(26, sakRad.avdoedeForeldre)
+    setString(27, sakRad.revurderingAarsak)
 }

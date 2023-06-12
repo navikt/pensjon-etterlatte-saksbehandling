@@ -6,7 +6,7 @@ import java.time.LocalDate
 import java.util.*
 
 enum class BehandlingMetode {
-    MANUELL, AUTOMATISK
+    MANUELL, TOTRINN, AUTOMATISK, AUTOMATISK_REGULERING
 }
 
 enum class SakUtland {
@@ -18,7 +18,11 @@ enum class SoeknadFormat {
 }
 
 enum class BehandlingResultat {
-    VEDTAK, AVBRUTT, OPPHOER
+    INNVILGELSE, AVBRUTT, OPPHOER
+}
+
+enum class SakYtelsesgruppe {
+    EN_AVDOED_FORELDER, FORELDRELOES
 }
 
 data class SakRad(
@@ -44,6 +48,9 @@ data class SakRad(
     val datoFoersteUtbetaling: LocalDate?,
     val tekniskTid: Tidspunkt,
     val sakYtelse: String,
+    val sakYtelsesgruppe: SakYtelsesgruppe?,
+    val avdoedeForeldre: List<String>?,
+    val revurderingAarsak: String?,
     val vedtakLoependeFom: LocalDate?,
     val vedtakLoependeTom: LocalDate?,
     val beregning: Beregning?

@@ -29,7 +29,7 @@ internal fun Route.tilgangRoutes(tilgangService: TilgangService) {
                 harTilgang = {
                     tilgangService.harTilgangTilPerson(
                         fnr,
-                        SaksbehandlerMedRoller(bruker as Saksbehandler)
+                        SaksbehandlerMedRoller(bruker)
                     )
                 }
             )
@@ -42,7 +42,7 @@ internal fun Route.tilgangRoutes(tilgangService: TilgangService) {
                 harTilgang = {
                     tilgangService.harTilgangTilBehandling(
                         behandlingsId.toString(),
-                        SaksbehandlerMedRoller(bruker as Saksbehandler)
+                        SaksbehandlerMedRoller(bruker)
                     )
                 }
             )
@@ -56,7 +56,7 @@ internal fun Route.tilgangRoutes(tilgangService: TilgangService) {
                 harTilgang = {
                     tilgangService.harTilgangTilSak(
                         sakId,
-                        SaksbehandlerMedRoller(bruker as Saksbehandler)
+                        SaksbehandlerMedRoller(bruker)
                     )
                 }
             )

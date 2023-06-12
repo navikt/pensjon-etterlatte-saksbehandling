@@ -2,6 +2,7 @@
 avro = { id = "com.github.davidmc24.gradle.plugin.avro", version = "1.7.0" }
 analyze = { id = "com.faire.gradle.analyze", version = "1.0.9" }
 cutterslade-analyze = { id = "ca.cutterslade.analyze", version = "1.9.1" }
+cyclonedx = { id = "org.cyclonedx.bom", version = "1.7.4" }
 
 [versions]
 jackson-version = "2.15.2"

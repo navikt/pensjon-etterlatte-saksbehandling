@@ -50,15 +50,8 @@ data class Saksbehandler(val accessToken: String, val ident: String, val jwtToke
 
     override fun accessToken() = accessToken
     override fun kanAttestereFor(ansvarligSaksbehandler: String) = ansvarligSaksbehandler != this.ident()
-    override fun harRolle(saksbehandlerGroupIdsByKey: Map<AzureGroup, String>, rolle: AzureGroup): Boolean {
-        if (jwtTokenClaims == null) {
-            return false
-        }
-        return jwtTokenClaims.containsClaim(
-            "groups",
-            saksbehandlerGroupIdsByKey[rolle]
-        )
-    }
+    override fun harRolle(saksbehandlerGroupIdsByKey: Map<AzureGroup, String>, rolle: AzureGroup) =
+        jwtTokenClaims?.containsClaim("groups", saksbehandlerGroupIdsByKey[rolle]) ?: false
 }
 
 enum class Claims {

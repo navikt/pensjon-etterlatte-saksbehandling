@@ -4,6 +4,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
     `kotlin-dsl`
     alias(libs.plugins.cutterslade.analyze) apply true
+    alias(libs.plugins.cyclonedx)
 }
 
 group = "no.nav.etterlatte"

@@ -3,10 +3,12 @@ package no.nav.etterlatte.behandling
 import io.ktor.server.plugins.NotFoundException
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.hendelse.HendelseType
+import no.nav.etterlatte.config.AzureGroup
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.sak.SakIDListe
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
+import no.nav.etterlatte.token.Bruker
 import java.time.LocalDateTime
 import java.util.*
 
@@ -17,7 +19,7 @@ interface BehandlingStatusService {
     fun settAvkortet(behandlingId: UUID, dryRun: Boolean = true)
     fun sjekkOmKanFatteVedtak(behandlingId: UUID)
     fun settFattetVedtak(behandlingId: UUID, vedtakHendelse: VedtakHendelse)
-    fun sjekkOmKanAttestere(behandlingId: UUID)
+    fun sjekkOmKanAttestere(behandlingId: UUID, bruker: Bruker, saksbehandlerGroupIdsByKey: Map<AzureGroup, String>)
     fun settAttestertVedtak(behandlingId: UUID, vedtakHendelse: VedtakHendelse)
     fun sjekkOmKanReturnereVedtak(behandlingId: UUID)
     fun settReturnertVedtak(behandlingId: UUID, vedtakHendelse: VedtakHendelse)
@@ -69,8 +71,16 @@ class BehandlingStatusServiceImpl constructor(
         }
     }
 
-    override fun sjekkOmKanAttestere(behandlingId: UUID) {
-        hentBehandling(behandlingId).tilAttestert()
+    override fun sjekkOmKanAttestere(
+        behandlingId: UUID,
+        bruker: Bruker,
+        saksbehandlerGroupIdsByKey: Map<AzureGroup, String>
+    ) {
+        if (bruker.harRolle(saksbehandlerGroupIdsByKey, AzureGroup.ATTESTANT)) {
+            hentBehandling(behandlingId).tilAttestert()
+        } else {
+            throw IllegalStateException("Brukeren har ikke tilgang til behandling $behandlingId")
+        }
     }
 
     override fun settAttestertVedtak(behandlingId: UUID, vedtakHendelse: VedtakHendelse) {

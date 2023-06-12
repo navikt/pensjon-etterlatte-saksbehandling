@@ -95,7 +95,7 @@ fun Application.module(context: ApplicationContext) {
             )
             omregningRoutes(omregningService = omregningService)
             migreringRoutes(migreringService = migreringService)
-            behandlingsstatusRoutes(behandlingsstatusService = behandlingsStatusService)
+            behandlingsstatusRoutes(behandlingsstatusService = behandlingsStatusService, saksbehandlerGroupIdsByKey)
             oppgaveRoutes(service = oppgaveService)
             grunnlagsendringshendelseRoute(grunnlagsendringshendelseService = grunnlagsendringshendelseService)
             egenAnsattRoute(egenAnsattService = EgenAnsattService(sakService, sikkerLogg))

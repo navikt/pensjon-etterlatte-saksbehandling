@@ -51,7 +51,7 @@ data class Saksbehandler(val accessToken: String, val ident: String, val jwtToke
     override fun accessToken() = accessToken
     override fun kanAttestereFor(ansvarligSaksbehandler: String) = ansvarligSaksbehandler != this.ident()
     override fun harRolle(saksbehandlerGroupIdsByKey: Map<AzureGroup, String>, rolle: AzureGroup) =
-        jwtTokenClaims?.containsClaim("groups", saksbehandlerGroupIdsByKey[rolle]) ?: false
+        jwtTokenClaims?.harRolle(saksbehandlerGroupIdsByKey[rolle]) ?: false
 }
 
 enum class Claims {
@@ -59,3 +59,5 @@ enum class Claims {
     oid, // ktlint-disable enum-entry-name-case
     sub // ktlint-disable enum-entry-name-case
 }
+
+fun JwtTokenClaims.harRolle(rolle: String?) = containsClaim("groups", rolle)

@@ -43,12 +43,12 @@ class PersonHendelseFordeler(
             personhendelse.vergemaalEllerFremtidsfullmakt
         if (vergemaalEllerFremtidsfullmakt?.type in
             listOf(
-                "ensligMindreaarigAsylsoeker",
-                "ensligMindreaarigFlyktning",
-                "mindreaarig",
-                "midlertidigForMindreaarig",
-                "forvaltningUtenforVergemaal"
-            )
+                    "ensligMindreaarigAsylsoeker",
+                    "ensligMindreaarigFlyktning",
+                    "mindreaarig",
+                    "midlertidigForMindreaarig",
+                    "forvaltningUtenforVergemaal"
+                )
         ) {
             try {
                 when (val personnummer = pdlService.hentPdlIdentifikator(personhendelse.personidenter.first())) {
@@ -152,6 +152,7 @@ class PersonHendelseFordeler(
     private suspend fun haandterDoedsendelse(personhendelse: Personhendelse) {
         val hendelseType = "Doedshendelse"
         try {
+            logger.info("Identer" + personhendelse.personidenter.toString())
             when (val personnummer = pdlService.hentPdlIdentifikator(personhendelse.personidenter.first())) {
                 is PdlIdentifikator.Npid -> {
                     logger.info(

@@ -5,11 +5,12 @@ import io.confluent.kafka.serializers.KafkaAvroDeserializer
 import io.confluent.kafka.serializers.KafkaAvroDeserializerConfig
 import org.apache.kafka.clients.CommonClientConfigs
 import org.apache.kafka.clients.consumer.ConsumerConfig
+import org.apache.kafka.common.IsolationLevel
 import org.apache.kafka.common.config.SslConfigs
 import org.apache.kafka.common.security.auth.SecurityProtocol
 import org.apache.kafka.common.serialization.StringDeserializer
 import java.time.Duration
-import java.util.Properties
+import java.util.*
 
 interface KafkaConsumerConfiguration {
     fun generateKafkaConsumerProperties(env: Map<String, String>): Properties
@@ -54,6 +55,10 @@ class KafkaEnvironment : KafkaConsumerConfiguration {
             put(
                 "schema.registry.basic.auth.user.info",
                 "${env["KAFKA_SCHEMA_REGISTRY_USER"]}:${env["KAFKA_SCHEMA_REGISTRY_PASSWORD"]}"
+            )
+            put(
+                ConsumerConfig.ISOLATION_LEVEL_CONFIG,
+                IsolationLevel.READ_COMMITTED.toString().lowercase(Locale.getDefault())
             )
         }
         return properties

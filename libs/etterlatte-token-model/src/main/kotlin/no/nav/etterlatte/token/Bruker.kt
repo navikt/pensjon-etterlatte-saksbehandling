@@ -1,5 +1,6 @@
 package no.nav.etterlatte.token
 
+import no.nav.etterlatte.config.AzureGroup
 import no.nav.security.token.support.core.jwt.JwtTokenClaims
 
 sealed class Bruker {
@@ -7,6 +8,7 @@ sealed class Bruker {
 
     abstract fun accessToken(): String
     abstract fun kanAttestereFor(ansvarligSaksbehandler: String): Boolean
+    abstract fun harRolle(saksbehandlerGroupIdsByKey: Map<AzureGroup, String>, rolle: AzureGroup): Boolean
 
     companion object {
         private fun erSystembruker(oid: String?, sub: String?) = (oid == sub) && (oid != null)
@@ -35,6 +37,12 @@ data class SystemBruker(val oid: String, val sub: String) : Bruker() {
 
     override fun accessToken() = throw NotImplementedError("Kun relevant for saksbehandler")
     override fun kanAttestereFor(ansvarligSaksbehandler: String) = true
+    override fun harRolle(saksbehandlerGroupIdsByKey: Map<AzureGroup, String>, rolle: AzureGroup) = when (rolle) {
+        AzureGroup.STRENGT_FORTROLIG -> false
+        AzureGroup.FORTROLIG -> false
+        AzureGroup.EGEN_ANSATT -> false
+        else -> true
+    }
 }
 
 data class Saksbehandler(val accessToken: String, val ident: String, val jwtTokenClaims: JwtTokenClaims?) : Bruker() {
@@ -42,8 +50,15 @@ data class Saksbehandler(val accessToken: String, val ident: String, val jwtToke
 
     override fun accessToken() = accessToken
     override fun kanAttestereFor(ansvarligSaksbehandler: String) = ansvarligSaksbehandler != this.ident()
-
-    fun getClaims() = jwtTokenClaims
+    override fun harRolle(saksbehandlerGroupIdsByKey: Map<AzureGroup, String>, rolle: AzureGroup): Boolean {
+        if (jwtTokenClaims == null) {
+            return false
+        }
+        return jwtTokenClaims.containsClaim(
+            "groups",
+            saksbehandlerGroupIdsByKey[rolle]
+        )
+    }
 }
 
 enum class Claims {

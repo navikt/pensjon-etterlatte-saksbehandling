@@ -80,41 +80,14 @@ val adressebeskyttelsePlugin: RouteScopedPlugin<PluginConfiguration> = createRou
 }
 
 data class SaksbehandlerMedRoller(val saksbehandler: Saksbehandler) {
-    fun harRolleStrengtFortrolig(saksbehandlerGroupIdsByKey: Map<AzureGroup, String>): Boolean {
-        val claims = saksbehandler.getClaims()
+    fun harRolleStrengtFortrolig(saksbehandlerGroupIdsByKey: Map<AzureGroup, String>) =
+        saksbehandler.harRolle(saksbehandlerGroupIdsByKey, AzureGroup.STRENGT_FORTROLIG)
 
-        if (claims != null) {
-            return claims.containsClaim(
-                "groups",
-                saksbehandlerGroupIdsByKey[AzureGroup.STRENGT_FORTROLIG]
-            )
-        }
-        return false
-    }
+    fun harRolleFortrolig(saksbehandlerGroupIdsByKey: Map<AzureGroup, String>) =
+        saksbehandler.harRolle(saksbehandlerGroupIdsByKey, AzureGroup.FORTROLIG)
 
-    fun harRolleFortrolig(saksbehandlerGroupIdsByKey: Map<AzureGroup, String>): Boolean {
-        val claims = saksbehandler.getClaims()
-
-        if (claims != null) {
-            return claims.containsClaim(
-                "groups",
-                saksbehandlerGroupIdsByKey[AzureGroup.FORTROLIG]
-            )
-        }
-        return false
-    }
-
-    fun harRolleEgenAnsatt(saksbehandlerGroupIdsByKey: Map<AzureGroup, String>): Boolean {
-        val claims = saksbehandler.getClaims()
-
-        if (claims != null) {
-            return claims.containsClaim(
-                "groups",
-                saksbehandlerGroupIdsByKey[AzureGroup.EGEN_ANSATT]
-            )
-        }
-        return false
-    }
+    fun harRolleEgenAnsatt(saksbehandlerGroupIdsByKey: Map<AzureGroup, String>) =
+        saksbehandler.harRolle(saksbehandlerGroupIdsByKey, AzureGroup.EGEN_ANSATT)
 }
 
 fun <T> List<T>.filterForEnheter(

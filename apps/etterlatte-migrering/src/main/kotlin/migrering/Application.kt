@@ -18,6 +18,7 @@ class Server(private val context: ApplicationContext) {
     init {
         sikkerLogg.info("SikkerLogg: etterlatte-migrering oppstart")
     }
+    // test
 
     fun run() = with(context) {
         dataSource.migrate()

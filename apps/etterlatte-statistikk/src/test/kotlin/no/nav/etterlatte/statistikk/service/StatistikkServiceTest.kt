@@ -26,10 +26,12 @@ import no.nav.etterlatte.statistikk.clients.BehandlingKlient
 import no.nav.etterlatte.statistikk.clients.BeregningKlient
 import no.nav.etterlatte.statistikk.database.SakRepository
 import no.nav.etterlatte.statistikk.database.StoenadRepository
+import no.nav.etterlatte.statistikk.domain.BehandlingMetode
 import no.nav.etterlatte.statistikk.domain.Beregning
 import no.nav.etterlatte.statistikk.domain.Beregningstype
 import no.nav.etterlatte.statistikk.domain.MaanedStatistikk
 import no.nav.etterlatte.statistikk.domain.SakUtland
+import no.nav.etterlatte.statistikk.domain.SakYtelsesgruppe
 import no.nav.etterlatte.statistikk.river.BehandlingHendelse
 import no.nav.etterlatte.statistikk.river.BehandlingIntern
 import org.junit.jupiter.api.Assertions
@@ -150,7 +152,7 @@ class StatistikkServiceTest {
             innsender = null,
             soeker = "12312312312",
             gjenlevende = listOf(),
-            avdoed = listOf(),
+            avdoed = listOf("32132132132"),
             soesken = listOf(),
             gyldighetsproeving = null,
             status = BehandlingStatus.OPPRETTET,
@@ -183,8 +185,9 @@ class StatistikkServiceTest {
         Assertions.assertEquals(registrertStatistikk.sakYtelse, "BARNEPENSJON")
         Assertions.assertEquals(registrertStatistikk.sakUtland, SakUtland.NASJONAL)
         Assertions.assertEquals(registrertStatistikk.behandlingId, behandlingId)
+        Assertions.assertEquals(registrertStatistikk.sakYtelsesgruppe, SakYtelsesgruppe.EN_AVDOED_FORELDER)
         Assertions.assertEquals(registrertStatistikk.tekniskTid, tekniskTidForHendelse.toTidspunkt())
-        Assertions.assertNull(registrertStatistikk.behandlingMetode)
+        Assertions.assertEquals(registrertStatistikk.behandlingMetode, BehandlingMetode.MANUELL)
         Assertions.assertNull(registrertStatistikk.ansvarligBeslutter)
         Assertions.assertNull(registrertStatistikk.ansvarligEnhet)
         Assertions.assertNull(registrertStatistikk.saksbehandler)

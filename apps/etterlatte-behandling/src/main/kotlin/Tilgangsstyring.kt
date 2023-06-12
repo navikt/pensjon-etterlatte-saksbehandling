@@ -10,7 +10,6 @@ import io.ktor.server.application.createRouteScopedPlugin
 import io.ktor.server.request.uri
 import io.ktor.server.response.respond
 import io.ktor.util.pipeline.PipelinePhase
-import no.nav.etterlatte.config.AzureGroup
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
@@ -77,17 +76,6 @@ val adressebeskyttelsePlugin: RouteScopedPlugin<PluginConfiguration> = createRou
 
         return@on
     }
-}
-
-data class SaksbehandlerMedRoller(val saksbehandler: Saksbehandler) {
-    fun harRolleStrengtFortrolig(saksbehandlerGroupIdsByKey: Map<AzureGroup, String>) =
-        saksbehandler.harRolle(saksbehandlerGroupIdsByKey, AzureGroup.STRENGT_FORTROLIG)
-
-    fun harRolleFortrolig(saksbehandlerGroupIdsByKey: Map<AzureGroup, String>) =
-        saksbehandler.harRolle(saksbehandlerGroupIdsByKey, AzureGroup.FORTROLIG)
-
-    fun harRolleEgenAnsatt(saksbehandlerGroupIdsByKey: Map<AzureGroup, String>) =
-        saksbehandler.harRolle(saksbehandlerGroupIdsByKey, AzureGroup.EGEN_ANSATT)
 }
 
 fun <T> List<T>.filterForEnheter(

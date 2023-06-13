@@ -59,13 +59,17 @@ fun Route.trygdetid(trygdetidService: TrygdetidService, behandlingKlient: Behand
             withBehandlingId(behandlingKlient) {
                 logger.info("Legger til trygdetidsgrunnlag for behandling $behandlingsId")
                 val trygdetidgrunnlagDto = call.receive<TrygdetidGrunnlagDto>()
-                val trygdetid =
+
+                try {
                     trygdetidService.lagreTrygdetidGrunnlag(
                         behandlingsId,
                         bruker,
                         trygdetidgrunnlagDto.toTrygdetidGrunnlag(bruker)
-                    )
-                call.respond(trygdetid.toDto())
+                    ).let { trygdetid -> call.respond(trygdetid.toDto()) }
+                } catch (overlappendePeriodeException: OverlappendePeriodeException) {
+                    logger.info("Klarte ikke legge til ny trygdetidsperiode for $behandlingsId pga overlapp.")
+                    call.respond(HttpStatusCode.Conflict)
+                }
             }
         }
 

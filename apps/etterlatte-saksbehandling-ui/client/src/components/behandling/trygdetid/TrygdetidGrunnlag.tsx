@@ -1,6 +1,6 @@
 import { Button, Label, Select, Textarea } from '@navikt/ds-react'
 import { FormKnapper, FormWrapper, Innhold } from '~components/behandling/trygdetid/styled'
-import { isFailure, isPending, useApiCall } from '~shared/hooks/useApiCall'
+import { isConflict, isFailure, isPending, useApiCall } from '~shared/hooks/useApiCall'
 import {
   ILand,
   ITrygdetid,
@@ -187,7 +187,13 @@ export const TrygdetidGrunnlag: React.FC<Props> = ({
         </TrygdetidForm>
       </Innhold>
 
-      {isFailure(trygdetidgrunnlagStatus) && <ApiErrorAlert>En feil har oppstått</ApiErrorAlert>}
+      {isFailure(trygdetidgrunnlagStatus) && (
+        <ApiErrorAlert>
+          {isConflict(trygdetidgrunnlagStatus)
+            ? 'Trygdetidsperioder kan ikke være overlappende'
+            : 'En feil har oppstått'}
+        </ApiErrorAlert>
+      )}
     </TrygdetidGrunnlagWrapper>
   )
 }

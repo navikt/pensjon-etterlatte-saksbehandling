@@ -17,13 +17,18 @@ data class Trygdetid(
     val opplysninger: List<Opplysningsgrunnlag> = emptyList(),
     val beregnetTrygdetid: BeregnetTrygdetid? = null
 ) {
-    fun leggTilEllerOppdaterTrygdetidGrunnlag(trygdetidGrunnlag: TrygdetidGrunnlag): Trygdetid {
-        return this.copy(
-            trygdetidGrunnlag = this.trygdetidGrunnlag.toMutableList().apply {
-                removeIf { it.id == trygdetidGrunnlag.id }
-                add(trygdetidGrunnlag)
+    fun leggTilEllerOppdaterTrygdetidGrunnlag(nyttTrygdetidGrunnlag: TrygdetidGrunnlag): Trygdetid {
+        val oppdatertGrunnlagListe = trygdetidGrunnlag.toMutableList().apply {
+            removeAll { it.id == nyttTrygdetidGrunnlag.id }
+
+            find { it.periode.overlapperMed(nyttTrygdetidGrunnlag.periode) }?.let {
+                throw OverlappendePeriodeException("Trygdetidsperioder kan ikke være overlappende")
             }
-        )
+
+            add(nyttTrygdetidGrunnlag)
+        }
+
+        return this.copy(trygdetidGrunnlag = oppdatertGrunnlagListe)
     }
 
     fun slettTrygdetidGrunnlag(trygdetidGrunnlagId: UUID): Trygdetid = this.copy(
@@ -98,4 +103,10 @@ data class TrygdetidPeriode(
     init {
         require(fra.isBefore(til) || fra.isEqual(til)) { "Ugyldig periode, fra må være før eller lik til" }
     }
+
+    fun overlapperMed(other: TrygdetidPeriode): Boolean {
+        return this.fra.isBefore(other.til) && other.fra.isBefore(this.til)
+    }
 }
+
+class OverlappendePeriodeException(override val message: String) : RuntimeException(message)

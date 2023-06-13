@@ -168,37 +168,58 @@ export const TrygdetidGrunnlag: React.FC<Props> = ({
                 }
               />
               {trygdetidGrunnlagType === ITrygdetidGrunnlagType.FAKTISK && (
-                <PoengAar
-                  legend="Poeng i inn/ut år"
-                  value={[trygdetidgrunnlag.poengInnAar ? 'PIA' : '', trygdetidgrunnlag.poengUtAar ? 'PUA' : ''].filter(
-                    (val) => val !== ''
-                  )}
-                >
-                  <Checkbox
-                    value="PIA"
-                    key={`poeng-inn-aar-${trygdetidGrunnlagType}`}
-                    onChange={() => {
-                      setTrygdetidgrunnlag({
-                        ...trygdetidgrunnlag,
-                        poengInnAar: !trygdetidgrunnlag.poengInnAar!!,
-                      })
-                    }}
+                <>
+                  <PoengAar
+                    legend="Poeng i inn/ut år"
+                    value={[
+                      trygdetidgrunnlag.poengInnAar ? 'PIA' : '',
+                      trygdetidgrunnlag.poengUtAar ? 'PUA' : '',
+                    ].filter((val) => val !== '')}
                   >
-                    Poeng i inn år
-                  </Checkbox>
-                  <Checkbox
-                    value="PUA"
-                    key={`poeng-ut-aar-${trygdetidGrunnlagType}`}
-                    onChange={() =>
-                      setTrygdetidgrunnlag({
-                        ...trygdetidgrunnlag,
-                        poengUtAar: !trygdetidgrunnlag.poengUtAar!!,
-                      })
-                    }
+                    <Checkbox
+                      value="PIA"
+                      key={`poeng-inn-aar-${trygdetidGrunnlagType}`}
+                      onChange={() => {
+                        setTrygdetidgrunnlag({
+                          ...trygdetidgrunnlag,
+                          poengInnAar: !trygdetidgrunnlag.poengInnAar!!,
+                        })
+                      }}
+                    >
+                      Poeng i inn år
+                    </Checkbox>
+                    <Checkbox
+                      value="PUA"
+                      key={`poeng-ut-aar-${trygdetidGrunnlagType}`}
+                      onChange={() =>
+                        setTrygdetidgrunnlag({
+                          ...trygdetidgrunnlag,
+                          poengUtAar: !trygdetidgrunnlag.poengUtAar!!,
+                        })
+                      }
+                    >
+                      Poeng i ut år
+                    </Checkbox>
+                  </PoengAar>
+
+                  <Prorata
+                    legend="Prorata"
+                    value={[trygdetidgrunnlag.prorata ? 'PRORATA' : ''].filter((val) => val !== '')}
                   >
-                    Poeng i ut år
-                  </Checkbox>
-                </PoengAar>
+                    <Checkbox
+                      value="PRORATA"
+                      key={`prorata-${trygdetidGrunnlagType}`}
+                      onChange={() => {
+                        setTrygdetidgrunnlag({
+                          ...trygdetidgrunnlag,
+                          prorata: !trygdetidgrunnlag.prorata!!,
+                        })
+                      }}
+                    >
+                      Med i prorata
+                    </Checkbox>
+                  </Prorata>
+                </>
               )}
             </FormWrapper>
 
@@ -288,6 +309,12 @@ export const Begrunnelse = styled(Textarea).attrs({
 `
 
 export const PoengAar = styled(CheckboxGroup)`
+  margin-bottom: 10px;
+  margin-top: 10px;
+  width: 200px;
+`
+
+export const Prorata = styled(CheckboxGroup)`
   margin-bottom: 10px;
   margin-top: 10px;
   width: 200px;

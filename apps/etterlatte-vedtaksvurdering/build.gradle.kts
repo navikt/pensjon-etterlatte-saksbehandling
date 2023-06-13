@@ -11,6 +11,7 @@ dependencies {
     implementation(project(":libs:etterlatte-database"))
     implementation(project(":libs:etterlatte-ktor"))
     implementation(project(":libs:etterlatte-vedtaksvurdering-model"))
+    implementation(project(":libs:etterlatte-vilkaarsvurdering-model"))
     implementation(project(":libs:ktor2client-onbehalfof"))
     implementation(project(":libs:ktor2client-auth-clientcredentials"))
 

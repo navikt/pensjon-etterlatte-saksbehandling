@@ -23,6 +23,7 @@ on:
       - libs/etterlatte-database/**
       - libs/etterlatte-regler/**
       - libs/etterlatte-trygdetid-model/**
+      - libs/etterlatte-vilkaarsvurdering-model/**
       - libs/ktor2client-onbehalfof/**
       - libs/testdata/**
       - gradle/libs.versions.toml
@@ -38,6 +39,7 @@ on:
       - libs/etterlatte-database/**
       - libs/etterlatte-regler/**
       - libs/etterlatte-trygdetid-model/**
+      - libs/etterlatte-vilkaarsvurdering-model/**
       - libs/ktor2client-onbehalfof/**
       - libs/testdata/**
       - gradle/libs.versions.toml

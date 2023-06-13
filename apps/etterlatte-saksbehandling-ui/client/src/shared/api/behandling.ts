@@ -10,8 +10,8 @@ import { apiClient, ApiResponse } from './apiClient'
 import { ManueltOpphoerDetaljer } from '~components/behandling/manueltopphoeroversikt/ManueltOpphoerOversikt'
 import { Grunnlagsendringshendelse } from '~components/person/typer'
 import { Revurderingsaarsak } from '~shared/types/Revurderingsaarsak'
-import { ISaksType } from '~components/behandling/fargetags/saksType'
 import { Institusjonsopphold } from '~components/behandling/revurderingsoversikt/InstitusjonsoppholdForside'
+import { ISak, SakType } from '~shared/types/sak'
 
 export const hentBehandlingerForPerson = async (fnr: string): Promise<ApiResponse<any>> => {
   return apiClient.post(`/personer/behandlinger`, { foedselsnummer: fnr })
@@ -114,7 +114,7 @@ export const opprettRevurdering = async (args: {
 }
 
 export const hentStoettedeRevurderinger = async (args: {
-  sakType: ISaksType
+  sakType: SakType
 }): Promise<ApiResponse<Array<Revurderingsaarsak>>> => {
   return apiClient.get(`/stoettederevurderinger/${args.sakType}`)
 }
@@ -147,6 +147,6 @@ export const hentGrunnlagsendringshendelserInstitusjonsoppholdforSak = async (
   return apiClient.get(`/grunnlagsendringshendelse/${sakid}/institusjon`)
 }
 
-export const finnSakForSoek = async (maybeSakdId: string): Promise<ApiResponse<String>> => {
-  return apiClient.get(`/sak/${maybeSakdId}`)
+export const hentSak = async (sakId: string): Promise<ApiResponse<ISak>> => {
+  return apiClient.get(`/sak/${sakId}`)
 }

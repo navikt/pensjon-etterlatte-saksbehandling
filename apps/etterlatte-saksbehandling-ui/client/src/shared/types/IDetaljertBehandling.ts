@@ -3,13 +3,13 @@ import { JaNei } from '~shared/types/ISvar'
 import { KildeSaksbehandler } from '~shared/types/kilde'
 import { IFamilieforhold, IPdlPerson } from '~shared/types/Person'
 import { VurderingsResultat } from '~shared/types/VurderingsResultat'
-import { ISaksType } from '~components/behandling/fargetags/saksType'
 import { Revurderingsaarsak } from '~shared/types/Revurderingsaarsak'
+import { SakType } from '~shared/types/sak'
 
 export interface IDetaljertBehandling {
   id: string
   sak: number
-  sakType: ISaksType
+  sakType: SakType
   gyldighetsprøving?: IGyldighetResultat
   kommerBarnetTilgode: IKommerBarnetTilgode | null
   saksbehandlerId?: string

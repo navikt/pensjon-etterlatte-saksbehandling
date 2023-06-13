@@ -2,7 +2,7 @@ import { isAfter } from 'date-fns'
 import { IAdresse } from '~shared/types/IAdresse'
 import { IBehandlingStatus, IBehandlingsType, IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { IBehandlingsammendrag } from '~components/person/typer'
-import { ISaksType } from '~components/behandling/fargetags/saksType'
+import { SakType } from '~shared/types/sak'
 import { JaNei } from '~shared/types/ISvar'
 import { Revurderingsaarsak } from '~shared/types/Revurderingsaarsak'
 import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
@@ -10,11 +10,11 @@ import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
 export function behandlingErUtfylt(behandling: IDetaljertBehandling): boolean {
   const gyldigUtfylt = !!(behandling.gyldighetsprøving && behandling.virkningstidspunkt)
 
-  if (behandling.sakType == ISaksType.BARNEPENSJON) {
+  if (behandling.sakType == SakType.BARNEPENSJON) {
     const kommerBarnetTilgode = !!behandling.kommerBarnetTilgode && behandling.kommerBarnetTilgode?.svar === JaNei.JA
 
     return gyldigUtfylt && kommerBarnetTilgode
-  } else if (behandling.sakType == ISaksType.OMSTILLINGSSTOENAD) {
+  } else if (behandling.sakType == SakType.OMSTILLINGSSTOENAD) {
     return gyldigUtfylt
   } else {
     return false

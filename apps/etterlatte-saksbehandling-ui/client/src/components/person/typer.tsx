@@ -7,7 +7,7 @@ import {
   Virkningstidspunkt,
 } from '~shared/types/IDetaljertBehandling'
 import { Revurderingsaarsak } from '~shared/types/Revurderingsaarsak'
-import { ISaksType } from '~components/behandling/fargetags/saksType'
+import { SakType } from '~shared/types/sak'
 
 export interface IPersonResult {
   fornavn: string
@@ -23,7 +23,7 @@ export interface IBehandlingListe {
 export interface IBehandlingsammendrag {
   id: string
   sak: number
-  sakType: ISaksType
+  sakType: SakType
   status: IBehandlingStatus
   soeknadMottattDato: string
   behandlingOpprettet: string

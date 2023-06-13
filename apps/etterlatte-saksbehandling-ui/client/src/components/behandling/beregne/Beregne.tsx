@@ -21,7 +21,7 @@ import { Beregningstype } from '~shared/types/Beregning'
 import { BarnepensjonSammendrag } from '~components/behandling/beregne/BarnepensjonSammendrag'
 import { OmstillingsstoenadSammendrag } from '~components/behandling/beregne/OmstillingsstoenadSammendrag'
 import { Avkorting } from '~components/behandling/avkorting/Avkorting'
-import { ISaksType } from '~components/behandling/fargetags/saksType'
+import { SakType } from '~shared/types/sak'
 import { erOpphoer } from '~shared/types/Revurderingsaarsak'
 
 export const Beregne = (props: { behandling: IBehandlingReducer }) => {
@@ -50,7 +50,7 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
   const opprettEllerOppdaterVedtak = () => {
     oppdaterVedtakRequest(behandling.id, () => {
       const nyStatus =
-        behandling.sakType === ISaksType.BARNEPENSJON ? IBehandlingStatus.BEREGNET : IBehandlingStatus.AVKORTET
+        behandling.sakType === SakType.BARNEPENSJON ? IBehandlingStatus.BEREGNET : IBehandlingStatus.AVKORTET
       dispatch(oppdaterBehandlingsstatus(nyStatus))
       if (behandlingSkalSendeBrev(behandling)) {
         next()

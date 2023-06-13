@@ -22,7 +22,7 @@ import {
   OMS_REVURDERING_BESKRIVELSE,
   OMS_REVURDERING_HJEMLER,
 } from '~components/behandling/soeknadsoversikt/soeknadoversikt/virkningstidspunkt/utils'
-import { ISaksType } from '~components/behandling/fargetags/saksType'
+import { SakType } from '~shared/types/sak'
 import { Revurderingsaarsak, tekstRevurderingsaarsak } from '~shared/types/Revurderingsaarsak'
 import styled from 'styled-components'
 import InstitusjonsoppholdForside from '~components/behandling/revurderingsoversikt/InstitusjonsoppholdForside'
@@ -33,11 +33,11 @@ import { useEffect, useState } from 'react'
 const revurderingsaarsakTilTekst = (revurderingsaarsak: Revurderingsaarsak): string =>
   tekstRevurderingsaarsak[revurderingsaarsak]
 
-const hjemlerOgBeskrivelse = (sakType: ISaksType, revurderingsaarsak: Revurderingsaarsak): [Array<Hjemmel>, string] => {
+const hjemlerOgBeskrivelse = (sakType: SakType, revurderingsaarsak: Revurderingsaarsak): [Array<Hjemmel>, string] => {
   switch (sakType) {
-    case ISaksType.OMSTILLINGSSTOENAD:
+    case SakType.OMSTILLINGSSTOENAD:
       return hjemlerOgBeskrivelseOmstillingsstoenad(revurderingsaarsak)
-    case ISaksType.BARNEPENSJON:
+    case SakType.BARNEPENSJON:
       return hjemlerOgBeskrivelseBarnepensjon(revurderingsaarsak)
   }
 }

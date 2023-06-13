@@ -1,5 +1,5 @@
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
-import { ISaksType } from '~components/behandling/fargetags/saksType'
+import { SakType } from '~shared/types/sak'
 import { FamilieforholdBarnepensjon } from '~components/behandling/soeknadsoversikt/familieforhold/barnepensjon/FamilieforholdBarnepensjon'
 import { FamilieforholdOmstillingsstoenad } from '~components/behandling/soeknadsoversikt/familieforhold/omstillingsstoenad/FamilieforholdOmstillingsstoenad'
 import { Heading } from '@navikt/ds-react'
@@ -17,7 +17,7 @@ export const Familieforhold: React.FC<PropsFamilieforhold> = ({ behandling }) =>
           Familieforhold
         </Heading>
       </ContentHeader>
-      {behandling.sakType === ISaksType.BARNEPENSJON ? (
+      {behandling.sakType === SakType.BARNEPENSJON ? (
         <FamilieforholdBarnepensjon behandling={behandling} />
       ) : (
         <FamilieforholdOmstillingsstoenad behandling={behandling} />

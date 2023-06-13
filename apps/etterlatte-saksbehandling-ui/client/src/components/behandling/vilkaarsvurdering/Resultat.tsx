@@ -19,11 +19,11 @@ import { isPending, useApiCall } from '~shared/hooks/useApiCall'
 import { useAppDispatch } from '~store/Store'
 import { oppdaterBehandlingsstatus } from '~store/reducers/BehandlingReducer'
 import { IBehandlingStatus, IBehandlingsType } from '~shared/types/IDetaljertBehandling'
-import { ISaksType } from '~components/behandling/fargetags/saksType'
+import { SakType } from '~shared/types/sak'
 
 type Props = {
   virkningstidspunktDato: string | undefined
-  sakstype: ISaksType
+  sakstype: SakType
   vilkaarsvurdering: IVilkaarsvurdering
   oppdaterVilkaar: (vilkaarsvurdering: IVilkaarsvurdering) => void
   behandlingId: string

@@ -2,7 +2,7 @@ import { IDetaljertBehandling, IGyldighetResultat } from '~shared/types/IDetalje
 import { VurderingsResultat } from '~shared/types/VurderingsResultat'
 import { GyldigFramsattBarnepensjon } from '~components/behandling/soeknadsoversikt/soeknadoversikt/gyldigFramsattSoeknad/barnepensjon/GyldigFramsattBarnepensjon'
 import { GyldigFramsattOmstillingsstoenad } from '~components/behandling/soeknadsoversikt/soeknadoversikt/gyldigFramsattSoeknad/omstillingsstoenad/GyldigFramsattOmstillingsstoenad'
-import { ISaksType } from '~components/behandling/fargetags/saksType'
+import { SakType } from '~shared/types/sak'
 
 const gyldigFremsattTilStatusIcon = (gyldigFramsatt: IGyldighetResultat | undefined) => {
   if (gyldigFramsatt == undefined || gyldigFramsatt.resultat == undefined) {
@@ -19,7 +19,7 @@ const gyldigFremsattTilStatusIcon = (gyldigFramsatt: IGyldighetResultat | undefi
 }
 
 export const OversiktGyldigFramsatt = ({ behandling }: { behandling: IDetaljertBehandling }) => {
-  return behandling.sakType === ISaksType.BARNEPENSJON ? (
+  return behandling.sakType === SakType.BARNEPENSJON ? (
     <GyldigFramsattBarnepensjon
       gyldigFramsatt={behandling.gyldighetsprøving}
       gyldigFremsattTilStatusIcon={gyldigFremsattTilStatusIcon(behandling.gyldighetsprøving)}

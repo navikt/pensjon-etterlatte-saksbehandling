@@ -9,7 +9,7 @@ import {
   IProsesstype,
   Virkningstidspunkt,
 } from '~shared/types/IDetaljertBehandling'
-import { ISaksType } from '~components/behandling/fargetags/saksType'
+import { SakType } from '~shared/types/sak'
 import { VurderingsResultat } from '~shared/types/VurderingsResultat'
 import { JaNei } from '~shared/types/ISvar'
 import { KildeType } from '~shared/types/kilde'
@@ -18,7 +18,7 @@ import { Revurderingsaarsak } from '~shared/types/Revurderingsaarsak'
 describe('BARNEPENSJON: utfylt søknad er gyldig', () => {
   it('barnepensjon gyldig utfylt', () => {
     const behandling = opprettBehandling(
-      ISaksType.BARNEPENSJON,
+      SakType.BARNEPENSJON,
       mockKommerBarnetTilgode(JaNei.JA),
       mockVirkningstidspunkt(),
       mockGyldighetsprøving()
@@ -31,7 +31,7 @@ describe('BARNEPENSJON: utfylt søknad er gyldig', () => {
 
   it('barnepensjon hvor kommerbarnettilgode=nei er ikke gyldig utfylt', () => {
     const behandling = opprettBehandling(
-      ISaksType.BARNEPENSJON,
+      SakType.BARNEPENSJON,
       mockKommerBarnetTilgode(JaNei.NEI),
       mockVirkningstidspunkt(),
       mockGyldighetsprøving()
@@ -43,12 +43,7 @@ describe('BARNEPENSJON: utfylt søknad er gyldig', () => {
   })
 
   it('barnepensjon uten kommerbarnettilgode er ikke gyldig utfylt', () => {
-    const behandling = opprettBehandling(
-      ISaksType.BARNEPENSJON,
-      null,
-      mockVirkningstidspunkt(),
-      mockGyldighetsprøving()
-    )
+    const behandling = opprettBehandling(SakType.BARNEPENSJON, null, mockVirkningstidspunkt(), mockGyldighetsprøving())
 
     const utfylt = behandlingErUtfylt(behandling)
 
@@ -57,7 +52,7 @@ describe('BARNEPENSJON: utfylt søknad er gyldig', () => {
 
   it('barnepensjon uten virkningstidspunkt er ikke gyldig utfylt', () => {
     const behandling = opprettBehandling(
-      ISaksType.BARNEPENSJON,
+      SakType.BARNEPENSJON,
       mockKommerBarnetTilgode(JaNei.JA),
       null,
       mockGyldighetsprøving()
@@ -70,7 +65,7 @@ describe('BARNEPENSJON: utfylt søknad er gyldig', () => {
 
   it('barnepensjon uten gyldighetsprøving er ikke gyldig utfylt', () => {
     const behandling = opprettBehandling(
-      ISaksType.BARNEPENSJON,
+      SakType.BARNEPENSJON,
       mockKommerBarnetTilgode(JaNei.JA),
       mockVirkningstidspunkt(),
       undefined
@@ -85,7 +80,7 @@ describe('BARNEPENSJON: utfylt søknad er gyldig', () => {
 describe('OMSTILLINGSSTOENAD: utfylt søknad er gyldig', () => {
   it('omstillingsstoenad gyldig utfylt', () => {
     const behandling = opprettBehandling(
-      ISaksType.OMSTILLINGSSTOENAD,
+      SakType.OMSTILLINGSSTOENAD,
       null,
       mockVirkningstidspunkt(),
       mockGyldighetsprøving()
@@ -97,7 +92,7 @@ describe('OMSTILLINGSSTOENAD: utfylt søknad er gyldig', () => {
   })
 
   it('omstillingsstoenad uten virkningstidspunkt er ikke gyldig utfylt', () => {
-    const behandling = opprettBehandling(ISaksType.OMSTILLINGSSTOENAD, null, null, mockGyldighetsprøving())
+    const behandling = opprettBehandling(SakType.OMSTILLINGSSTOENAD, null, null, mockGyldighetsprøving())
 
     const utfylt = behandlingErUtfylt(behandling)
 
@@ -105,7 +100,7 @@ describe('OMSTILLINGSSTOENAD: utfylt søknad er gyldig', () => {
   })
 
   it('omstillingsstoenad uten gyldighetsprøving er ikke gyldig utfylt', () => {
-    const behandling = opprettBehandling(ISaksType.OMSTILLINGSSTOENAD, null, mockVirkningstidspunkt(), undefined)
+    const behandling = opprettBehandling(SakType.OMSTILLINGSSTOENAD, null, mockVirkningstidspunkt(), undefined)
 
     const utfylt = behandlingErUtfylt(behandling)
 
@@ -114,7 +109,7 @@ describe('OMSTILLINGSSTOENAD: utfylt søknad er gyldig', () => {
 })
 
 describe('behandlingSkalSendeBrev', () => {
-  const behandling = opprettBehandling(ISaksType.BARNEPENSJON, null, null, undefined)
+  const behandling = opprettBehandling(SakType.BARNEPENSJON, null, null, undefined)
   const revurdering = {
     ...behandling,
     behandlingType: IBehandlingsType.REVURDERING,
@@ -138,7 +133,7 @@ describe('behandlingSkalSendeBrev', () => {
 })
 
 const opprettBehandling = (
-  sakType: ISaksType,
+  sakType: SakType,
   kommerBarnetTilgode: IKommerBarnetTilgode | null,
   virkningstidspunkt: Virkningstidspunkt | null,
   gyldighetsprøving?: IGyldighetResultat

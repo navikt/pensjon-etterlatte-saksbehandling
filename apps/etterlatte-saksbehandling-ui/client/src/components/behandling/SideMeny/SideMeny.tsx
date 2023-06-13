@@ -12,7 +12,7 @@ import { IBehandlingInfo } from '~components/behandling/SideMeny/types'
 import { Dokumentoversikt } from '~components/person/dokumentoversikt'
 import styled from 'styled-components'
 import AnnullerBehandling from '~components/behandling/handlinger/AnnullerBehanding'
-import { ISaksType } from '~components/behandling/fargetags/saksType'
+import { SakType } from '~shared/types/sak'
 
 export const SideMeny = (props: { behandling: IDetaljertBehandling }) => {
   const { behandling } = props
@@ -63,7 +63,7 @@ export const SideMeny = (props: { behandling: IDetaljertBehandling }) => {
           <Dokumentoversikt fnr={behandling.søker.foedselsnummer} liten />
         )}
 
-        {behandling.sakType == ISaksType.BARNEPENSJON && <AnnullerBehandling />}
+        {behandling.sakType == SakType.BARNEPENSJON && <AnnullerBehandling />}
       </SidebarContent>
     </CollapsibleSidebar>
   )

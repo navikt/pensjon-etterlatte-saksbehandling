@@ -5,7 +5,7 @@ import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 import classNames from 'classnames'
 import { behandlingSkalSendeBrev, hentGyldigeNavigeringsStatuser } from '~components/behandling/felles/utils'
 import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
-import { ISaksType } from '~components/behandling/fargetags/saksType'
+import { SakType } from '~shared/types/sak'
 import { BehandlingRouteTypes } from '~components/behandling/BehandlingRoutes'
 
 export const NavLenke = (props: { pathInfo: BehandlingRouteTypes; behandling: IBehandlingReducer }) => {
@@ -14,7 +14,7 @@ export const NavLenke = (props: { pathInfo: BehandlingRouteTypes; behandling: IB
   const routeErdisabled = (steg: IBehandlingStatus) => !hentGyldigeNavigeringsStatuser(status).includes(steg)
   if (pathInfo.path == 'brev') {
     let status = IBehandlingStatus.BEREGNET //BP krav for å gå til brev
-    if (props.behandling.sakType === ISaksType.OMSTILLINGSSTOENAD) {
+    if (props.behandling.sakType === SakType.OMSTILLINGSSTOENAD) {
       status = IBehandlingStatus.AVKORTET
     }
     return (

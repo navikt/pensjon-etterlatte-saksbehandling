@@ -109,7 +109,7 @@ internal fun Route.sakRoutes(
                 val sak = inTransaction {
                     sakService.finnSak(sakId)
                 }
-                call.respond(sak?.ident ?: HttpStatusCode.NotFound)
+                call.respond(sak ?: HttpStatusCode.NotFound)
             }
         }
     }

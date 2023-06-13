@@ -7,14 +7,14 @@ import { isFailure, isPending, isSuccess, useApiCall } from '~shared/hooks/useAp
 import { getPerson } from '~shared/api/grunnlag'
 import { GYLDIG_FNR } from '~utils/fnr'
 import { ApiError } from '~shared/api/apiClient'
-import { finnSakForSoek } from '~shared/api/behandling'
+import { hentSak } from '~shared/api/behandling'
 
 export const Search = () => {
   const navigate = useNavigate()
   const [searchInput, setSearchInput] = useState('')
   const [feilInput, setFeilInput] = useState(false)
   const [personStatus, hentPerson, reset] = useApiCall(getPerson)
-  const [funnetFnrForSak, finnSak, resetSakSoek] = useApiCall(finnSakForSoek)
+  const [funnetSak, finnSak, resetSakSoek] = useApiCall(hentSak)
 
   const gyldigInputFnr = GYLDIG_FNR(searchInput)
   const gyldigInputSakId = /^\d{1,10}$/.test(searchInput ?? '')
@@ -52,10 +52,10 @@ export const Search = () => {
       navigate(`/person/${searchInput}`)
       return
     }
-    if (isSuccess(funnetFnrForSak)) {
-      navigate(`/person/${funnetFnrForSak.data}`)
+    if (isSuccess(funnetSak)) {
+      navigate(`/person/${funnetSak.data.ident}`)
     }
-  }, [personStatus, funnetFnrForSak])
+  }, [personStatus, funnetSak])
 
   return (
     <SearchWrapper>
@@ -70,7 +70,7 @@ export const Search = () => {
         <SearchField.Button onClick={avgjoerSoek} />
       </SearchField>
 
-      {(isPending(personStatus) || isPending(funnetFnrForSak)) && (
+      {(isPending(personStatus) || isPending(funnetSak)) && (
         <Dropdown>
           <SpinnerContent>
             <Loader />
@@ -90,13 +90,13 @@ export const Search = () => {
         </Dropdown>
       )}
 
-      {isFailure(funnetFnrForSak) && (
+      {isFailure(funnetSak) && (
         <Dropdown error={true}>
           <span className="icon">
             <ErrorColored />
           </span>
           <SearchResult>
-            <BodyShort className="text">{feilmelding(funnetFnrForSak.error)}</BodyShort>
+            <BodyShort className="text">{feilmelding(funnetSak.error)}</BodyShort>
           </SearchResult>
         </Dropdown>
       )}

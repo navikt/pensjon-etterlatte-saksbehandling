@@ -1,4 +1,4 @@
-import { ISaksType } from '~components/behandling/fargetags/saksType'
+import { SakType } from '~shared/types/sak'
 import BeregningsgrunnlagBarnepensjon from '~components/behandling/beregningsgrunnlag/BeregningsgrunnlagBarnepensjon'
 import BeregningsgrunnlagOmstillingsstoenad from '~components/behandling/beregningsgrunnlag/BeregningsgrunnlagOmstillingsstoenad'
 import { HeadingWrapper } from '~components/behandling/soeknadsoversikt/styled'
@@ -30,8 +30,8 @@ const Beregningsgrunnlag = (props: { behandling: IDetaljertBehandling }) => {
       </ContentHeader>
       {
         {
-          [ISaksType.BARNEPENSJON]: <BeregningsgrunnlagBarnepensjon behandling={behandling} />,
-          [ISaksType.OMSTILLINGSSTOENAD]: <BeregningsgrunnlagOmstillingsstoenad behandling={behandling} />,
+          [SakType.BARNEPENSJON]: <BeregningsgrunnlagBarnepensjon behandling={behandling} />,
+          [SakType.OMSTILLINGSSTOENAD]: <BeregningsgrunnlagOmstillingsstoenad behandling={behandling} />,
         }[behandling.sakType]
       }
     </Content>

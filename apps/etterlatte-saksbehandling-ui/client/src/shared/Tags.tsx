@@ -1,6 +1,6 @@
 import { OppgaveTypeFilter, SoeknadTypeFilter } from '~components/oppgavebenken/typer/oppgavebenken'
 import { IBehandlingsType, IUtenlandstilsnittType } from '~shared/types/IDetaljertBehandling'
-import { ISaksType } from '~components/behandling/fargetags/saksType'
+import { SakType } from '~shared/types/sak'
 import styled from 'styled-components'
 import { INasjonalitetsType } from '~components/behandling/fargetags/nasjonalitetsType'
 
@@ -17,7 +17,7 @@ enum Variants {
 }
 
 export const tagColors: Record<
-  OppgaveTypeFilter | SoeknadTypeFilter | ISaksType | INasjonalitetsType | IBehandlingsType | IUtenlandstilsnittType,
+  OppgaveTypeFilter | SoeknadTypeFilter | SakType | INasjonalitetsType | IBehandlingsType | IUtenlandstilsnittType,
   Variants
 > = {
   [OppgaveTypeFilter.ALLE]: Variants.NEUTRAL,
@@ -30,8 +30,8 @@ export const tagColors: Record<
   [IBehandlingsType.FØRSTEGANGSBEHANDLING]: Variants.ALT3_FILLED,
   [IBehandlingsType.REVURDERING]: Variants.ALT3_FILLED,
   [IBehandlingsType.MANUELT_OPPHOER]: Variants.ALT3_FILLED,
-  [ISaksType.BARNEPENSJON]: Variants.INFO,
-  [ISaksType.OMSTILLINGSSTOENAD]: Variants.NEUTRAL,
+  [SakType.BARNEPENSJON]: Variants.INFO,
+  [SakType.OMSTILLINGSSTOENAD]: Variants.NEUTRAL,
   [INasjonalitetsType.NASJONAL]: Variants.INFO_FILLED,
   [INasjonalitetsType.UTLAND]: Variants.ALT3,
   [IUtenlandstilsnittType.NASJONAL]: Variants.INFO_FILLED,

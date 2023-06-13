@@ -1,11 +1,11 @@
 import { IBehandlingsType, IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 import { IHendelse } from '~shared/types/IHendelse'
-import { ISaksType } from '~components/behandling/fargetags/saksType'
+import { SakType } from '~shared/types/sak'
 
 export interface IBehandlingInfo {
   type: IBehandlingsType
   sakId: number
-  sakType: ISaksType
+  sakType: SakType
   status: IBehandlingStatus
   saksbehandler?: string
   attestant?: string

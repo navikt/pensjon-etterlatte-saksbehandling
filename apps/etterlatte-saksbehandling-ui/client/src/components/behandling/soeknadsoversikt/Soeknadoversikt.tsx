@@ -9,7 +9,7 @@ import { behandlingErUtfylt, hentBehandlesFraStatus } from '../felles/utils'
 import { VurderingsResultat } from '~shared/types/VurderingsResultat'
 import { OversiktGyldigFramsatt } from '~components/behandling/soeknadsoversikt/soeknadoversikt/gyldigFramsattSoeknad/OversiktGyldigFramsatt'
 import { Utenlandstilsnitt } from '~components/behandling/soeknadsoversikt/soeknadoversikt/utenlandstilsnitt/Utenlandstilsnitt'
-import { ISaksType } from '~components/behandling/fargetags/saksType'
+import { SakType } from '~shared/types/sak'
 import { OversiktKommerBarnetTilgode } from '~components/behandling/soeknadsoversikt/soeknadoversikt/kommerBarnetTilgode/OversiktKommerBarnetTilgode'
 import { Start } from '~components/behandling/handlinger/start'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
@@ -48,7 +48,7 @@ export const Soeknadsoversikt = (props: { behandling: IDetaljertBehandling }) =>
         <OversiktGyldigFramsatt behandling={behandling} />
         {behandling.gyldighetsprøving?.resultat === VurderingsResultat.OPPFYLT && (
           <>
-            {behandling.sakType == ISaksType.BARNEPENSJON && (
+            {behandling.sakType == SakType.BARNEPENSJON && (
               <OversiktKommerBarnetTilgode
                 kommerBarnetTilgode={behandling.kommerBarnetTilgode}
                 redigerbar={behandles}

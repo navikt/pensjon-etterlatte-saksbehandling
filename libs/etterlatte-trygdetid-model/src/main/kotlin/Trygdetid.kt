@@ -43,7 +43,9 @@ data class TrygdetidGrunnlagDto(
     val periodeTil: LocalDate,
     val kilde: TrygdetidGrunnlagKildeDto?,
     val beregnet: BeregnetTrygdetidGrunnlagDto?,
-    val begrunnelse: String?
+    val begrunnelse: String?,
+    val poengInnAar: Boolean,
+    val poengUtAar: Boolean
 )
 
 data class TrygdetidGrunnlagKildeDto(

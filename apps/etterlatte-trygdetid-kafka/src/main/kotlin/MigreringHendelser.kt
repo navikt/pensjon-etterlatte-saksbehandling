@@ -84,6 +84,8 @@ internal class MigreringHendelser(rapidsConnection: RapidsConnection, private va
             ident = Vedtaksloesning.PESYS.name
         ),
         beregnet = null,
-        begrunnelse = trygdetidsgrunnlag.begrunnelse
+        begrunnelse = trygdetidsgrunnlag.begrunnelse,
+        poengInnAar = false,
+        poengUtAar = false
     )
 }

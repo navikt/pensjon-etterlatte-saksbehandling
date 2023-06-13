@@ -80,7 +80,9 @@ data class TrygdetidGrunnlag(
     val periode: TrygdetidPeriode,
     val kilde: Grunnlagsopplysning.Saksbehandler,
     val beregnetTrygdetid: BeregnetTrygdetidGrunnlag? = null,
-    val begrunnelse: String?
+    val begrunnelse: String?,
+    val poengInnAar: Boolean,
+    val poengUtAar: Boolean
 ) {
     fun oppdaterBeregnetTrygdetid(beregnetTrygdetid: BeregnetTrygdetidGrunnlag?): TrygdetidGrunnlag {
         return this.copy(beregnetTrygdetid = beregnetTrygdetid)

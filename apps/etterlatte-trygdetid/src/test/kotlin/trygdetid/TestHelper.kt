@@ -40,7 +40,9 @@ fun trygdetidGrunnlag(
         fra = LocalDate.of(2023, 1, 1),
         til = LocalDate.of(2023, 2, 1)
     ),
-    begrunnelse: String? = null
+    begrunnelse: String? = null,
+    poengInnAar: Boolean = false,
+    poengUtAar: Boolean = false
 ) = TrygdetidGrunnlag(
     id = randomUUID(),
     type = TrygdetidType.FAKTISK,
@@ -48,7 +50,9 @@ fun trygdetidGrunnlag(
     periode = periode,
     beregnetTrygdetid = beregnetTrygdetidGrunnlag,
     kilde = Grunnlagsopplysning.Saksbehandler(ident = "Z123", tidspunkt = Tidspunkt.now()),
-    begrunnelse = begrunnelse
+    begrunnelse = begrunnelse,
+    poengUtAar = poengUtAar,
+    poengInnAar = poengInnAar
 )
 
 fun beregnetTrygdetid(total: Int = 0, tidspunkt: Tidspunkt = Tidspunkt.now()) =

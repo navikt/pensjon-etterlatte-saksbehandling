@@ -1,4 +1,4 @@
-import { Button, Label, Select, Textarea } from '@navikt/ds-react'
+import { Button, Label, Select, Textarea, Checkbox, CheckboxGroup } from '@navikt/ds-react'
 import { FormKnapper, FormWrapper, Innhold } from '~components/behandling/trygdetid/styled'
 import { isFailure, isPending, useApiCall } from '~shared/hooks/useApiCall'
 import {
@@ -167,6 +167,39 @@ export const TrygdetidGrunnlag: React.FC<Props> = ({
                   })
                 }
               />
+              {trygdetidGrunnlagType === ITrygdetidGrunnlagType.FAKTISK && (
+                <PoengAar
+                  legend="Poeng i inn/ut år"
+                  value={[trygdetidgrunnlag.poengInnAar ? 'PIA' : '', trygdetidgrunnlag.poengUtAar ? 'PUA' : ''].filter(
+                    (val) => val !== ''
+                  )}
+                >
+                  <Checkbox
+                    value="PIA"
+                    key={`poeng-inn-aar-${trygdetidGrunnlagType}`}
+                    onChange={() => {
+                      setTrygdetidgrunnlag({
+                        ...trygdetidgrunnlag,
+                        poengInnAar: !trygdetidgrunnlag.poengInnAar!!,
+                      })
+                    }}
+                  >
+                    Poeng i inn år
+                  </Checkbox>
+                  <Checkbox
+                    value="PUA"
+                    key={`poeng-ut-aar-${trygdetidGrunnlagType}`}
+                    onChange={() =>
+                      setTrygdetidgrunnlag({
+                        ...trygdetidgrunnlag,
+                        poengUtAar: !trygdetidgrunnlag.poengUtAar!!,
+                      })
+                    }
+                  >
+                    Poeng i ut år
+                  </Checkbox>
+                </PoengAar>
+              )}
             </FormWrapper>
 
             <FormKnapper>
@@ -246,4 +279,10 @@ export const Begrunnelse = styled(Textarea).attrs({
   margin-bottom: 10px;
   margin-top: 10px;
   width: 250px;
+`
+
+export const PoengAar = styled(CheckboxGroup)`
+  margin-bottom: 10px;
+  margin-top: 10px;
+  width: 200px;
 `

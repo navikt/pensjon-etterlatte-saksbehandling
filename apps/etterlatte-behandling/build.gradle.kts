@@ -15,6 +15,7 @@ dependencies {
     implementation(project(":libs:etterlatte-behandling-model"))
     implementation(project(":libs:etterlatte-funksjonsbrytere"))
     implementation(project(":libs:etterlatte-pdl-model"))
+    implementation(project(":libs:etterlatte-vedtaksvurdering-model"))
     implementation(project(":libs:etterlatte-institusjonsopphold-model"))
 
     implementation(libs.ktor2.okhttp)

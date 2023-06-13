@@ -24,16 +24,12 @@ import no.nav.etterlatte.libs.database.hent
 import no.nav.etterlatte.libs.database.oppdater
 import no.nav.etterlatte.libs.database.tidspunkt
 import no.nav.etterlatte.libs.database.transaction
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.YearMonth
 import java.util.*
 import javax.sql.DataSource
 
 class VilkaarsvurderingRepository(private val ds: DataSource, private val delvilkaarRepository: DelvilkaarRepository) {
-
-    private val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
     fun hent(behandlingId: UUID): Vilkaarsvurdering? =
         using(sessionOf(ds)) { session ->
@@ -172,7 +168,6 @@ class VilkaarsvurderingRepository(private val ds: DataSource, private val delvil
                 "resultat_saksbehandler" to vurdertVilkaar.vurdering.saksbehandler
             ),
             loggtekst = "Lagrer vilkårresultat",
-            logger = logger,
             ekstra = { delvilkaarRepository.oppdaterDelvilkaar(vurdertVilkaar, it) }
         )
         return hentNonNull(behandlingId)

@@ -6,15 +6,17 @@ import kotliquery.TransactionalSession
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
-import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import javax.sql.DataSource
+
+private val logger = LoggerFactory.getLogger(DataSource::class.java)
 
 fun <A> DataSource.transaction(returnGeneratedKey: Boolean = false, operation: (TransactionalSession) -> A): A =
     using(sessionOf(this, returnGeneratedKey)) { session ->
         session.transaction { operation(it) }
     }
 
-fun DataSource.opprett(query: String, params: Map<String, Any?>, loggtekst: String, logger: Logger) =
+fun DataSource.opprett(query: String, params: Map<String, Any?>, loggtekst: String) =
     this.transaction { tx ->
         queryOf(
             statement = query,
@@ -28,7 +30,6 @@ fun DataSource.oppdater(
     query: String,
     params: Map<String, Any?>,
     loggtekst: String,
-    logger: Logger,
     ekstra: ((tx: TransactionalSession) -> Unit)? = null
 ) =
     this.transaction { tx ->

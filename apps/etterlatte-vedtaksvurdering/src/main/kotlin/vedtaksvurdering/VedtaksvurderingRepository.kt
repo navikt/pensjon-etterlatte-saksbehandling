@@ -22,16 +22,12 @@ import no.nav.etterlatte.libs.database.hent
 import no.nav.etterlatte.libs.database.hentListe
 import no.nav.etterlatte.libs.database.oppdater
 import no.nav.etterlatte.libs.database.transaction
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import java.sql.Date
 import java.time.YearMonth
 import java.util.*
 import javax.sql.DataSource
 
-class VedtaksvurderingRepository(val datasource: DataSource) {
-
-    private val logger: Logger = LoggerFactory.getLogger(this::class.java)
+class VedtaksvurderingRepository(private val datasource: DataSource) {
 
     companion object {
         fun using(datasource: DataSource): VedtaksvurderingRepository = VedtaksvurderingRepository(datasource)
@@ -186,8 +182,7 @@ class VedtaksvurderingRepository(val datasource: DataSource) {
                 "vedtakstatus" to VedtakStatus.FATTET_VEDTAK.name,
                 "behandlingId" to behandlingId
             ),
-            loggtekst = "Fatter vedtok for behandling $behandlingId",
-            logger = logger
+            loggtekst = "Fatter vedtok for behandling $behandlingId"
         )
             .also { require(it == 1) }
             .let { hentVedtakNonNull(behandlingId) }
@@ -206,8 +201,7 @@ class VedtaksvurderingRepository(val datasource: DataSource) {
                 "vedtakstatus" to VedtakStatus.ATTESTERT.name,
                 "behandlingId" to behandlingId
             ),
-            loggtekst = "Attesterer vedtak $behandlingId",
-            logger = logger
+            loggtekst = "Attesterer vedtak $behandlingId"
         )
             .also { require(it == 1) }
             .let { hentVedtakNonNull(behandlingId) }
@@ -221,8 +215,7 @@ class VedtaksvurderingRepository(val datasource: DataSource) {
             WHERE behandlingId = :behandlingId
             """,
             params = mapOf("vedtakstatus" to VedtakStatus.RETURNERT.name, "behandlingId" to behandlingId),
-            loggtekst = "Underkjenner vedtak for behandling $behandlingId",
-            logger = logger
+            loggtekst = "Underkjenner vedtak for behandling $behandlingId"
         )
             .also { require(it == 1) }
             .let { hentVedtakNonNull(behandlingId) }
@@ -230,8 +223,7 @@ class VedtaksvurderingRepository(val datasource: DataSource) {
     fun iverksattVedtak(behandlingId: UUID): Vedtak = datasource.oppdater(
         query = "UPDATE vedtak SET vedtakstatus = :vedtakstatus WHERE behandlingId = :behandlingId",
         params = mapOf("vedtakstatus" to VedtakStatus.IVERKSATT.name, "behandlingId" to behandlingId),
-        loggtekst = "Lagrer iverksatt vedtak",
-        logger = logger
+        loggtekst = "Lagrer iverksatt vedtak"
     )
         .also { require(it == 1) }
         .let { hentVedtakNonNull(behandlingId) }
@@ -293,8 +285,7 @@ class VedtaksvurderingRepository(val datasource: DataSource) {
                 "vedtakstatus" to VedtakStatus.RETURNERT.name,
                 "behandlingId" to behandlingId
             ),
-            loggtekst = "Returnerer vedtak $behandlingId",
-            logger
+            loggtekst = "Returnerer vedtak $behandlingId"
         )
             .also { require(it == 1) }
             .let { hentVedtakNonNull(behandlingId) }

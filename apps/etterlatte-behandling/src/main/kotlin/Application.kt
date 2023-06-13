@@ -25,6 +25,8 @@ import no.nav.etterlatte.config.ApplicationContext
 import no.nav.etterlatte.egenansatt.EgenAnsattService
 import no.nav.etterlatte.egenansatt.egenAnsattRoute
 import no.nav.etterlatte.grunnlagsendring.grunnlagsendringshendelseRoute
+import no.nav.etterlatte.institusjonsopphold.InstitusjonsoppholdService
+import no.nav.etterlatte.institusjonsopphold.institusjonsoppholdRoute
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.libs.ktor.setReady
@@ -99,6 +101,7 @@ fun Application.module(context: ApplicationContext) {
             oppgaveRoutes(service = oppgaveService)
             grunnlagsendringshendelseRoute(grunnlagsendringshendelseService = grunnlagsendringshendelseService)
             egenAnsattRoute(egenAnsattService = EgenAnsattService(sakService, sikkerLogg))
+            institusjonsoppholdRoute(institusjonsoppholdService = InstitusjonsoppholdService(institusjonsoppholdDao))
             tilgangRoutes(tilgangService)
 
             install(adressebeskyttelsePlugin) {

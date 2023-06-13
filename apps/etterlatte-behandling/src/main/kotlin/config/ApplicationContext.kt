@@ -32,6 +32,7 @@ import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseDao
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseJob
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.grunnlagsendring.klienter.GrunnlagKlientImpl
+import no.nav.etterlatte.institusjonsopphold.InstitusjonsoppholdDao
 import no.nav.etterlatte.kafka.GcpKafkaConfig
 import no.nav.etterlatte.kafka.KafkaProdusent
 import no.nav.etterlatte.kafka.TestProdusent
@@ -124,6 +125,7 @@ class ApplicationContext(
     val behandlingDao = BehandlingDao { databaseContext().activeTx() }
     val sakDao = SakDao { databaseContext().activeTx() }
     val grunnlagsendringshendelseDao = GrunnlagsendringshendelseDao { databaseContext().activeTx() }
+    val institusjonsoppholdDao = InstitusjonsoppholdDao { databaseContext().activeTx() }
 
     // Klient
     val pdlKlient = PdlKlientImpl(pdlHttpClient, "http://etterlatte-pdltjenester")

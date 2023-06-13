@@ -175,7 +175,7 @@ const PeriodeRow = ({
           {trygdetidGrunnlagType === ITrygdetidGrunnlagType.FAKTISK && (
             <>
               <ExpandableInfo>
-                <Heading size={'small'}>Poeng i inn/ut år</Heading>
+                <Heading size={'small'}>Poeng i inn år</Heading>
                 {trygdetidGrunnlag.poengInnAar ? 'Ja' : 'Nei'}
               </ExpandableInfo>
               <ExpandableInfo>

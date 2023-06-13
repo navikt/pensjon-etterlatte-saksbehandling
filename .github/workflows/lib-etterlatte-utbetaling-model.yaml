@@ -1,0 +1,22 @@
+name: etterlatte-utbetaling-model
+
+on:
+  workflow_dispatch: # Allow manually triggered workflow run
+  push:
+    branches:
+      - main
+    paths:
+      - libs/etterlatte-utbetaling-model/**
+      - gradle/libs.versions.toml
+  pull_request:
+    branches:
+      - main
+    paths:
+      - libs/etterlatte-utbetaling-model/**
+      - gradle/libs.versions.toml
+
+jobs:
+  test:
+    if: github.event_name == 'pull_request'
+    uses: ./.github/workflows/.lib-test.yaml
+    secrets: inherit

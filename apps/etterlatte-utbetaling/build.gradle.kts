@@ -9,6 +9,7 @@ dependencies {
     implementation(project(":libs:saksbehandling-common"))
     implementation(project(":libs:etterlatte-jobs"))
     implementation(project(":libs:etterlatte-database"))
+    implementation(project(":libs:etterlatte-utbetaling-model"))
     implementation(project(":libs:etterlatte-vedtaksvurdering-model"))
 
     implementation(libs.ktor2.okhttp)

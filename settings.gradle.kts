@@ -46,6 +46,7 @@ include(
     "libs:etterlatte-trygdetid-model",
     "libs:etterlatte-regler",
     "libs:etterlatte-sporingslogg",
+    "libs:etterlatte-utbetaling-model",
     "libs:etterlatte-vedtaksvurdering-model",
     "libs:etterlatte-vilkaarsvurdering-model",
     "jobs:test-fordeler",

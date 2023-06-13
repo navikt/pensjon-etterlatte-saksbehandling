@@ -106,7 +106,7 @@ class ApplicationContext(
             periode = Duration.of(1, ChronoUnit.DAYS),
             saktype = Saktype.BARNEPENSJON
         )
-    val OmsGrensesnittavstemmingJob =
+    val grensesnittavstemmingJobOMS =
         GrensesnittsavstemmingJob(
             grensesnittsavstemmingService = grensesnittsavstemmingService,
             leaderElection = leaderElection,
@@ -133,7 +133,7 @@ class ApplicationContext(
         saktype = Saktype.BARNEPENSJON
     )
 
-    val OMSkonsistensavstemmingJob = KonsistensavstemmingJob(
+    val konsistensavstemmingJobOMS = KonsistensavstemmingJob(
         konsistensavstemmingService,
         kjoereplanKonsistensavstemming(),
         leaderElection,

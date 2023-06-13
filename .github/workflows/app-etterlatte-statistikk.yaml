@@ -19,6 +19,7 @@ on:
       - libs/saksbehandling-common/**
       - libs/ktor2client-auth-clientcredentials/**
       - libs/etterlatte-behandling-model/**
+      - libs/etterlatte-beregning-model/**
       - libs/etterlatte-database/**
       - libs/etterlatte-ktor/**
       - gradle/libs.versions.toml
@@ -30,6 +31,7 @@ on:
       - libs/saksbehandling-common/**
       - libs/ktor2client-auth-clientcredentials/**
       - libs/etterlatte-behandling-model/**
+      - libs/etterlatte-beregning-model/**
       - libs/etterlatte-database/**
       - libs/etterlatte-ktor/**
       - gradle/libs.versions.toml

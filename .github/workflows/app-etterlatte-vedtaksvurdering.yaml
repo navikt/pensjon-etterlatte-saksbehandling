@@ -20,6 +20,7 @@ on:
       - libs/testdata/**
       - libs/etterlatte-ktor/**
       - libs/etterlatte-behandling-model/**
+      - libs/etterlatte-beregning-model/**
       - libs/etterlatte-database/**
       - libs/etterlatte-vedtaksvurdering-model/**
       - libs/ktor2client-onbehalfof/**
@@ -34,6 +35,7 @@ on:
       - libs/testdata/**
       - libs/etterlatte-ktor/**
       - libs/etterlatte-behandling-model/**
+      - libs/etterlatte-beregning-model/**
       - libs/etterlatte-database/**
       - libs/etterlatte-vedtaksvurdering-model/**
       - libs/ktor2client-onbehalfof/**

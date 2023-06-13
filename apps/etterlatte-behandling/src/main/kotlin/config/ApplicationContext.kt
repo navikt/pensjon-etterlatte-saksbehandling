@@ -36,7 +36,7 @@ import no.nav.etterlatte.kafka.GcpKafkaConfig
 import no.nav.etterlatte.kafka.KafkaProdusent
 import no.nav.etterlatte.kafka.TestProdusent
 import no.nav.etterlatte.kafka.standardProducer
-import no.nav.etterlatte.libs.common.requireEnvValue
+import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.KotliqueryRepository
 import no.nav.etterlatte.libs.jobs.LeaderElection
@@ -90,13 +90,13 @@ private fun featureToggleProperties(config: Config) = mapOf(
 )
 
 class ApplicationContext(
-    val env: Map<String, String> = System.getenv(),
+    val env: Miljoevariabler = Miljoevariabler(System.getenv()),
     val config: Config = ConfigFactory.load(),
     val rapid: KafkaProdusent<String, String> =
         if (env["DEV"] == "true") {
             TestProdusent()
         } else {
-            GcpKafkaConfig.fromEnv(env).standardProducer(env.getValue("KAFKA_RAPID_TOPIC"))
+            GcpKafkaConfig.fromEnv(env.props).standardProducer(env.getValue("KAFKA_RAPID_TOPIC"))
         },
     val featureToggleService: FeatureToggleService = FeatureToggleService.initialiser(featureToggleProperties(config)),
     val pdlHttpClient: HttpClient = pdlHttpClient(config),
@@ -116,7 +116,7 @@ class ApplicationContext(
     val httpPort = env.getOrDefault("HTTP_PORT", "8080").toInt()
     val saksbehandlerGroupIdsByKey = AzureGroup.values().associateWith { env.requireEnvValue(it.envKey) }
     val sporingslogg = Sporingslogg()
-    val dataSource = DataSourceBuilder.createDataSource(env)
+    val dataSource = DataSourceBuilder.createDataSource(env.props)
 
     // Dao
     val hendelseDao = HendelseDao { databaseContext().activeTx() }

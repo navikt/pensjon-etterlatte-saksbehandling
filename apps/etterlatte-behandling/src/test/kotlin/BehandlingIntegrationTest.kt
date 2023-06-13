@@ -25,6 +25,7 @@ import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.config.ApplicationContext
 import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.kafka.TestProdusent
+import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.PersonMedSakerOgRoller
 import no.nav.etterlatte.libs.common.behandling.SakOgRolle
@@ -89,7 +90,7 @@ abstract class BehandlingIntegrationTest {
                 put("ELECTOR_PATH", "http://localhost")
                 put("NAVANSATT_URL", "http://localhost")
                 put("SKJERMING_URL", "http://localhost")
-            },
+            }.let { Miljoevariabler(it) },
             config = ConfigFactory.parseMap(hoconApplicationConfig.toMap()),
             rapid = TestProdusent(),
             featureToggleService = DummyFeatureToggleService(),

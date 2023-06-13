@@ -10,7 +10,6 @@ import io.ktor.server.application.createRouteScopedPlugin
 import io.ktor.server.request.uri
 import io.ktor.server.response.respond
 import io.ktor.util.pipeline.PipelinePhase
-import no.nav.etterlatte.config.AzureGroup
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
@@ -76,44 +75,6 @@ val adressebeskyttelsePlugin: RouteScopedPlugin<PluginConfiguration> = createRou
         }
 
         return@on
-    }
-}
-
-data class SaksbehandlerMedRoller(val saksbehandler: Saksbehandler) {
-    fun harRolleStrengtFortrolig(saksbehandlerGroupIdsByKey: Map<AzureGroup, String>): Boolean {
-        val claims = saksbehandler.getClaims()
-
-        if (claims != null) {
-            return claims.containsClaim(
-                "groups",
-                saksbehandlerGroupIdsByKey[AzureGroup.STRENGT_FORTROLIG]
-            )
-        }
-        return false
-    }
-
-    fun harRolleFortrolig(saksbehandlerGroupIdsByKey: Map<AzureGroup, String>): Boolean {
-        val claims = saksbehandler.getClaims()
-
-        if (claims != null) {
-            return claims.containsClaim(
-                "groups",
-                saksbehandlerGroupIdsByKey[AzureGroup.FORTROLIG]
-            )
-        }
-        return false
-    }
-
-    fun harRolleEgenAnsatt(saksbehandlerGroupIdsByKey: Map<AzureGroup, String>): Boolean {
-        val claims = saksbehandler.getClaims()
-
-        if (claims != null) {
-            return claims.containsClaim(
-                "groups",
-                saksbehandlerGroupIdsByKey[AzureGroup.EGEN_ANSATT]
-            )
-        }
-        return false
     }
 }
 

@@ -18,7 +18,7 @@ suspend inline fun PipelineContext<*, ApplicationCall>.withSakIdInternal(
         is Saksbehandler -> {
             val harTilgangTilSak = tilgangService.harTilgangTilSak(
                 sakId,
-                SaksbehandlerMedRoller(bruker as Saksbehandler)
+                SaksbehandlerMedRoller(bruker)
             )
             if (harTilgangTilSak) {
                 onSuccess(sakId)

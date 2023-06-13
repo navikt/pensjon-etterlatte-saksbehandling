@@ -10,7 +10,7 @@ import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.bruker
 import no.nav.etterlatte.token.Saksbehandler
 
-suspend inline fun PipelineContext<*, ApplicationCall>.withSakIdInternal(
+suspend inline fun PipelineContext<*, ApplicationCall>.withSakIdInternal( // TODO: kan slettes, sjekkes i hook
     tilgangService: TilgangService,
     onSuccess: (id: Long) -> Unit
 ) = call.parameters[SAKID_CALL_PARAMETER]!!.toLong().let { sakId ->

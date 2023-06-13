@@ -17,7 +17,7 @@ const BeregningsgrunnlagOmstillingsstoenad = (props: { behandling: IDetaljertBeh
   const [beregning, setOpprettEllerEndreBeregning] = useApiCall(opprettEllerEndreBeregning)
   const { next } = useBehandlingRoutes()
   const dispatch = useAppDispatch()
-  const behandles = hentBehandlesFraStatus(behandling?.status)
+  const behandles = hentBehandlesFraStatus(behandling.status)
 
   const oppdaterBeregning = () => {
     dispatch(resetBeregning())
@@ -31,7 +31,7 @@ const BeregningsgrunnlagOmstillingsstoenad = (props: { behandling: IDetaljertBeh
     <>
       {isFailure(beregning) && <ApiErrorAlert>Kunne ikke opprette ny beregning</ApiErrorAlert>}
 
-      <Trygdetid />
+      <Trygdetid redigerbar={behandles} />
       <Border />
 
       {behandles ? (

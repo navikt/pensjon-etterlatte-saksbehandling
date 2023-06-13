@@ -47,7 +47,7 @@ const defaultErrorStatus = {
   varighetBegrunnelse: false,
 }
 const InstitusjonsoppholdForside = (props: InstitusjonsoppholdProps) => {
-  const { sakId, behandles, behandlingId, institusjonsopphold } = props
+  const { sakId, behandles, institusjonsopphold } = props
   const [vurdert, setVurdert] = useState(institusjonsopphold !== undefined)
   const [svarReduksjon, setSvarReduksjon] = useState<JaNei | undefined>(undefined)
   const [begrunnelseReduksjon, setBegrunnelseReduksjon] = useState<string>('')
@@ -75,7 +75,7 @@ const InstitusjonsoppholdForside = (props: InstitusjonsoppholdProps) => {
     }
     if (Object.values(tmpErrors).every((e) => !e)) {
       lagreInstitusjonsopphold({
-        behandlingId: behandlingId,
+        sakId: sakId,
         institusjonsopphold: {
           kanGiReduksjonAvYtelse: svarReduksjon as JaNei,
           kanGiReduksjonAvYtelseBegrunnelse: begrunnelseReduksjon,

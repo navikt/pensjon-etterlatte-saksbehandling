@@ -45,12 +45,12 @@ export const fastsettVirkningstidspunkt = async (args: {
 }
 
 export const lagreInstitusjonsoppholdData = async (args: {
-  behandlingId: string
+  sakId: number
   institusjonsopphold: Institusjonsopphold
 }): Promise<ApiResponse<Institusjonsopphold>> => {
-  return apiClient.post(`behandling/${args.behandlingId}/institusjonsopphold`, {
+  return apiClient.post(`/institusjonsopphold/${args.sakId}`, {
     institusjonsopphold: args.institusjonsopphold,
-  }) //TODO: hvor skal den lagres?
+  })
 }
 
 export const hentManueltOpphoerDetaljer = async (

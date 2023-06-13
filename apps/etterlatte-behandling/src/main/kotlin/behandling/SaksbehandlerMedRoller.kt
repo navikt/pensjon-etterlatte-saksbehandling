@@ -6,7 +6,7 @@ import no.nav.etterlatte.token.Bruker
 data class SaksbehandlerMedRoller(val saksbehandler: Bruker) {
 
     fun harRolle(saksbehandlerGroupIdsByKey: Map<AzureGroup, String>, rolle: AzureGroup) =
-        saksbehandler.harRolle(saksbehandlerGroupIdsByKey, rolle)
+        saksbehandler.harRolle(saksbehandlerGroupIdsByKey[rolle])
 
     fun harRolleStrengtFortrolig(saksbehandlerGroupIdsByKey: Map<AzureGroup, String>) =
         harRolle(saksbehandlerGroupIdsByKey, AzureGroup.STRENGT_FORTROLIG)

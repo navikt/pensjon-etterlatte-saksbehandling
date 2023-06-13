@@ -9,6 +9,7 @@ import { HjemmelLenke } from '~components/behandling/felles/HjemmelLenke'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
 import { PencilIcon } from '@navikt/aksel-icons'
+import { hentBehandlesFraStatus } from '~components/behandling/felles/utils'
 
 export const AvkortingInntekt = (props: {
   behandling: IBehandlingReducer
@@ -16,6 +17,7 @@ export const AvkortingInntekt = (props: {
   setAvkorting: (avkorting: IAvkorting) => void
 }) => {
   const behandling = props.behandling
+  const redigerbar = hentBehandlesFraStatus(behandling.status)
   if (!behandling) throw new Error('Mangler behandling')
 
   const virkningstidspunkt = () => {
@@ -123,101 +125,103 @@ export const AvkortingInntekt = (props: {
           </Table>
         </InntektAvkortingTabell>
       )}
-      <InntektAvkortingForm onSubmit={onSubmit}>
-        <Rows>
-          {formToggle && (
-            <>
-              <FormWrapper>
-                <TextField
-                  label={'Forventet årsinnekt'}
-                  size="medium"
-                  type="text"
-                  inputMode="numeric"
-                  pattern="[0-9]*"
-                  value={inntektGrunnlagForm.aarsinntekt}
-                  onChange={(e) =>
-                    setInntektGrunnlagForm({
-                      ...inntektGrunnlagForm,
-                      aarsinntekt: e.target.value === '' ? undefined : Number(e.target.value),
-                    })
-                  }
-                />
-                <TextField
-                  label={'Fratrekk inn/ut'}
-                  size="medium"
-                  type="text"
-                  inputMode="numeric"
-                  pattern="[0-9]*"
-                  value={inntektGrunnlagForm.fratrekkInnAar == null ? '0' : inntektGrunnlagForm.fratrekkInnAar}
-                  onChange={(e) =>
-                    setInntektGrunnlagForm({
-                      ...inntektGrunnlagForm,
-                      fratrekkInnAar: e.target.value === '' ? 0 : Number(e.target.value),
-                    })
-                  }
-                />
-                <DatoSection>
-                  <Label>F.o.m dato</Label>
-                  <Info label={''} tekst={formaterStringDato(inntektGrunnlagForm.fom!)} />
-                </DatoSection>
-              </FormWrapper>
-              <TextAreaWrapper>
-                <SpesifikasjonLabel>
-                  <Label>Spesifikasjon av inntekt</Label>
-                  <ReadMore header={'Hva regnes som inntekt?'}>
-                    Med inntekt menes all arbeidsinntekt og ytelser som likestilles med arbeidsinntekt. Likestilt med
-                    arbeidsinntekt er dagpenger etter kap 4, sykepenger etter kap 8, stønad ved barns og andre
-                    nærståendes sykdom etter kap 9, arbeidsavklaringspenger etter kap 11, uføretrygd etter kap 12 der
-                    uføregraden er under 100 prosent, svangerskapspenger og foreldrepenger etter kap 14 og
-                    pensjonsytelser etter AFP tilskottloven kapitlene 2 og 3.
-                  </ReadMore>
-                </SpesifikasjonLabel>
-                <textarea
-                  value={inntektGrunnlagForm.spesifikasjon}
-                  onChange={(e) =>
-                    setInntektGrunnlagForm({
-                      ...inntektGrunnlagForm,
-                      spesifikasjon: e.target.value,
-                    })
-                  }
-                />
-              </TextAreaWrapper>
-              {errorTekst == null ? null : <ErrorMessage>{errorTekst}</ErrorMessage>}
-            </>
-          )}
-          <FormKnapper>
-            {formToggle ? (
+      {redigerbar && (
+        <InntektAvkortingForm onSubmit={onSubmit}>
+          <Rows>
+            {formToggle && (
               <>
-                <Button size="small" loading={isPending(inntektGrunnlagStatus)} type="submit">
-                  Lagre
-                </Button>
+                <FormWrapper>
+                  <TextField
+                    label={'Forventet årsinnekt'}
+                    size="medium"
+                    type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    value={inntektGrunnlagForm.aarsinntekt}
+                    onChange={(e) =>
+                      setInntektGrunnlagForm({
+                        ...inntektGrunnlagForm,
+                        aarsinntekt: e.target.value === '' ? undefined : Number(e.target.value),
+                      })
+                    }
+                  />
+                  <TextField
+                    label={'Fratrekk inn/ut'}
+                    size="medium"
+                    type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    value={inntektGrunnlagForm.fratrekkInnAar == null ? '0' : inntektGrunnlagForm.fratrekkInnAar}
+                    onChange={(e) =>
+                      setInntektGrunnlagForm({
+                        ...inntektGrunnlagForm,
+                        fratrekkInnAar: e.target.value === '' ? 0 : Number(e.target.value),
+                      })
+                    }
+                  />
+                  <DatoSection>
+                    <Label>F.o.m dato</Label>
+                    <Info label={''} tekst={formaterStringDato(inntektGrunnlagForm.fom!)} />
+                  </DatoSection>
+                </FormWrapper>
+                <TextAreaWrapper>
+                  <SpesifikasjonLabel>
+                    <Label>Spesifikasjon av inntekt</Label>
+                    <ReadMore header={'Hva regnes som inntekt?'}>
+                      Med inntekt menes all arbeidsinntekt og ytelser som likestilles med arbeidsinntekt. Likestilt med
+                      arbeidsinntekt er dagpenger etter kap 4, sykepenger etter kap 8, stønad ved barns og andre
+                      nærståendes sykdom etter kap 9, arbeidsavklaringspenger etter kap 11, uføretrygd etter kap 12 der
+                      uføregraden er under 100 prosent, svangerskapspenger og foreldrepenger etter kap 14 og
+                      pensjonsytelser etter AFP tilskottloven kapitlene 2 og 3.
+                    </ReadMore>
+                  </SpesifikasjonLabel>
+                  <textarea
+                    value={inntektGrunnlagForm.spesifikasjon}
+                    onChange={(e) =>
+                      setInntektGrunnlagForm({
+                        ...inntektGrunnlagForm,
+                        spesifikasjon: e.target.value,
+                      })
+                    }
+                  />
+                </TextAreaWrapper>
+                {errorTekst == null ? null : <ErrorMessage>{errorTekst}</ErrorMessage>}
+              </>
+            )}
+            <FormKnapper>
+              {formToggle ? (
+                <>
+                  <Button size="small" loading={isPending(inntektGrunnlagStatus)} type="submit">
+                    Lagre
+                  </Button>
+                  <Button
+                    size="small"
+                    variant="tertiary"
+                    onClick={(e) => {
+                      e.preventDefault()
+                      setFormToggle(false)
+                    }}
+                  >
+                    Avbryt
+                  </Button>
+                </>
+              ) : (
                 <Button
                   size="small"
-                  variant="tertiary"
+                  variant="secondary"
+                  icon={<PencilIcon title="a11y-title" fontSize="1.5rem" />}
                   onClick={(e) => {
                     e.preventDefault()
-                    setFormToggle(false)
+                    setFormToggle(true)
                   }}
                 >
-                  Avbryt
+                  {finnesRedigerbartGrunnlag() ? 'Rediger' : 'Legg til'}
                 </Button>
-              </>
-            ) : (
-              <Button
-                size="small"
-                variant="secondary"
-                icon={<PencilIcon title="a11y-title" fontSize="1.5rem" />}
-                onClick={(e) => {
-                  e.preventDefault()
-                  setFormToggle(true)
-                }}
-              >
-                {finnesRedigerbartGrunnlag() ? 'Rediger' : 'Legg til'}
-              </Button>
-            )}
-          </FormKnapper>
-        </Rows>
-      </InntektAvkortingForm>
+              )}
+            </FormKnapper>
+          </Rows>
+        </InntektAvkortingForm>
+      )}
     </AvkortingInntektWrapper>
   )
 }

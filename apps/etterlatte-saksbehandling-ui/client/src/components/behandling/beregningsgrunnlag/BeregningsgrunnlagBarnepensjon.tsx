@@ -29,7 +29,7 @@ import Soeskenjustering, {
 const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer }) => {
   const { behandling } = props
   const { next } = useBehandlingRoutes()
-  const behandles = hentBehandlesFraStatus(behandling?.status)
+  const behandles = hentBehandlesFraStatus(behandling.status)
   const dispatch = useAppDispatch()
   const [lagreSoeskenMedIBeregningStatus, postSoeskenMedIBeregning] = useApiCall(lagreBeregningsGrunnlag)
   const [endreBeregning, postOpprettEllerEndreBeregning] = useApiCall(opprettEllerEndreBeregning)
@@ -90,7 +90,8 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
   }
   return (
     <>
-      {!isPending(funksjonsbrytere) && (beregnTrygdetid ? <BeregnetTrygdetid /> : <FastTrygdetid />)}
+      {!isPending(funksjonsbrytere) &&
+        (beregnTrygdetid ? <BeregnetTrygdetid redigerbar={behandles} /> : <FastTrygdetid />)}
       <Soeskenjustering
         behandling={behandling}
         onSubmit={(soeskenGrunnlag) => setSoeskenGrunnlagsData(soeskenGrunnlag)}

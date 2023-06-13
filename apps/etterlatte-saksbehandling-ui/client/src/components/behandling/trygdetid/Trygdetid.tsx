@@ -18,7 +18,11 @@ import { useParams } from 'react-router-dom'
 import { Grunnlagopplysninger } from '~components/behandling/trygdetid/Grunnlagopplysninger'
 import { TrygdetidGrunnlagListe } from '~components/behandling/trygdetid/TrygdetidGrunnlagListe'
 
-export const Trygdetid = () => {
+interface Props {
+  redigerbar: boolean
+}
+
+export const Trygdetid: React.FC<Props> = ({ redigerbar }) => {
   const { behandlingId } = useParams()
   const [hentTrygdetidRequest, fetchTrygdetid] = useApiCall(hentTrygdetid)
   const [opprettTrygdetidRequest, requestOpprettTrygdetid] = useApiCall(opprettTrygdetid)
@@ -79,12 +83,14 @@ export const Trygdetid = () => {
             setTrygdetid={setTrygdetid}
             landListe={landListe}
             trygdetidGrunnlagType={ITrygdetidGrunnlagType.FAKTISK}
+            redigerbar={redigerbar}
           />
           <TrygdetidGrunnlagListe
             trygdetid={trygdetid}
             setTrygdetid={setTrygdetid}
             landListe={landListe.filter((land) => land.isoLandkode == 'NOR')}
             trygdetidGrunnlagType={ITrygdetidGrunnlagType.FREMTIDIG}
+            redigerbar={redigerbar}
           />
           <TrygdetidBeregnet trygdetid={trygdetid} setTrygdetid={setTrygdetid} />
         </>

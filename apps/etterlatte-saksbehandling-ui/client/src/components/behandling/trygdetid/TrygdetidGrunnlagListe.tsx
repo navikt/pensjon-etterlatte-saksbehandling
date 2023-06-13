@@ -22,6 +22,7 @@ type Props = {
   setTrygdetid: (trygdetid: ITrygdetid) => void
   trygdetidGrunnlagType: ITrygdetidGrunnlagType
   landListe: ILand[]
+  redigerbar: boolean
 }
 
 const initialEndreModusState = {
@@ -34,6 +35,7 @@ export const TrygdetidGrunnlagListe: React.FC<Props> = ({
   setTrygdetid,
   trygdetidGrunnlagType,
   landListe,
+  redigerbar,
 }) => {
   const [endreModus, setEndreModus] = useState(initialEndreModusState)
   const trygdetidGrunnlagListe = trygdetid.trygdetidGrunnlag
@@ -45,6 +47,11 @@ export const TrygdetidGrunnlagListe: React.FC<Props> = ({
     setEndreModus(initialEndreModusState)
     setTrygdetid(trygdetid)
   }
+
+  const leggTilNyPeriodeTilgjengelig =
+    redigerbar &&
+    !endreModus.status &&
+    !(trygdetidGrunnlagType === ITrygdetidGrunnlagType.FREMTIDIG && trygdetidGrunnlagListe.length > 0)
 
   return (
     <GrunnlagListe>
@@ -72,8 +79,12 @@ export const TrygdetidGrunnlagListe: React.FC<Props> = ({
                 <Table.HeaderCell scope={'col'}>Til dato</Table.HeaderCell>
                 <Table.HeaderCell scope={'col'}>{grunnlagTypeTekst} trygdetid</Table.HeaderCell>
                 <Table.HeaderCell scope={'col'}>Kilde</Table.HeaderCell>
-                <Table.HeaderCell scope={'col'}> </Table.HeaderCell>
-                <Table.HeaderCell scope={'col'}> </Table.HeaderCell>
+                {redigerbar && (
+                  <>
+                    <Table.HeaderCell scope={'col'}> </Table.HeaderCell>
+                    <Table.HeaderCell scope={'col'}> </Table.HeaderCell>
+                  </>
+                )}
               </Table.Row>
             </Table.Header>
             <Table.Body>
@@ -88,6 +99,7 @@ export const TrygdetidGrunnlagListe: React.FC<Props> = ({
                     }}
                     landListe={landListe}
                     key={periode.id}
+                    redigerbar={redigerbar}
                   />
                 )
               })}
@@ -106,12 +118,11 @@ export const TrygdetidGrunnlagListe: React.FC<Props> = ({
             landListe={landListe}
           />
         )}
-        {!endreModus.status &&
-          !(trygdetidGrunnlagType === ITrygdetidGrunnlagType.FREMTIDIG && trygdetidGrunnlagListe.length > 0) && (
-            <Button size="small" onClick={() => setEndreModus({ status: true, trygdetidGrunnlagId: '' })}>
-              Legg til ny periode
-            </Button>
-          )}
+        {leggTilNyPeriodeTilgjengelig && (
+          <Button size="small" onClick={() => setEndreModus({ status: true, trygdetidGrunnlagId: '' })}>
+            Legg til ny periode
+          </Button>
+        )}
       </NyEllerOppdatertPeriode>
     </GrunnlagListe>
   )
@@ -123,12 +134,14 @@ const PeriodeRow = ({
   setTrygdetid,
   endrePeriode,
   landListe,
+  redigerbar,
 }: {
   trygdetidGrunnlag: ITrygdetidGrunnlag
   behandlingId: string
   setTrygdetid: (trygdetid: ITrygdetid) => void
   endrePeriode: (trygdetidGrunnlagId: string) => void
   landListe: ILand[]
+  redigerbar: boolean
 }) => {
   const [slettTrygdetidStatus, slettTrygdetidsgrunnlagRequest] = useApiCall(slettTrygdetidsgrunnlag)
 
@@ -172,17 +185,21 @@ const PeriodeRow = ({
         <BodyShort>{trygdetidGrunnlag.kilde.ident}</BodyShort>
         <Detail>{`saksbehandler: ${formaterStringDato(trygdetidGrunnlag.kilde.tidspunkt)}`}</Detail>
       </Table.DataCell>
-      <Table.DataCell>
-        <RedigerWrapper onClick={() => endrePeriode(trygdetidGrunnlag.id)}>Rediger</RedigerWrapper>
-      </Table.DataCell>
-      <Table.DataCell>
-        {isPending(slettTrygdetidStatus) ? (
-          <Spinner visible={true} variant={'neutral'} label="Sletter" margin={'1em'} />
-        ) : (
-          <RedigerWrapper onClick={() => slettGrunnlag(trygdetidGrunnlag.id)}>Slett</RedigerWrapper>
-        )}
-        {isFailure(slettTrygdetidStatus) && <ApiErrorAlert>En feil har oppstått</ApiErrorAlert>}
-      </Table.DataCell>
+      {redigerbar && (
+        <>
+          <Table.DataCell>
+            <RedigerWrapper onClick={() => endrePeriode(trygdetidGrunnlag.id)}>Rediger</RedigerWrapper>
+          </Table.DataCell>
+          <Table.DataCell>
+            {isPending(slettTrygdetidStatus) ? (
+              <Spinner visible={true} variant={'neutral'} label="Sletter" margin={'1em'} />
+            ) : (
+              <RedigerWrapper onClick={() => slettGrunnlag(trygdetidGrunnlag.id)}>Slett</RedigerWrapper>
+            )}
+            {isFailure(slettTrygdetidStatus) && <ApiErrorAlert>En feil har oppstått</ApiErrorAlert>}
+          </Table.DataCell>
+        </>
+      )}
     </Table.ExpandableRow>
   )
 }

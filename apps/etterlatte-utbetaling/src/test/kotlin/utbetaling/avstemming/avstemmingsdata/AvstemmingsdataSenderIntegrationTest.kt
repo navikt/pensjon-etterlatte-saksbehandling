@@ -56,7 +56,8 @@ internal class AvstemmingsdataSenderIntegrationTest {
         val oppdragslinjer = listOf(oppdragslinjeForKonsistensavstemming(fraOgMed = LocalDate.of(2022, 10, 7)))
         val oppdrag = oppdragForKonsistensavstemming(oppdragslinjeForKonsistensavstemming = oppdragslinjer)
         val konsistensavstemming = mockKonsistensavstemming(
-            loependeUtbetalinger = listOf(oppdrag)
+            loependeUtbetalinger = listOf(oppdrag),
+            sakType = Saktype.BARNEPENSJON
         )
         val avstemmingsdata = KonsistensavstemmingDataMapper(konsistensavstemming).opprettAvstemmingsmelding(Saktype.BARNEPENSJON)
         avstemmingsdata.forEach {

@@ -26,7 +26,15 @@ internal class KonsistensavstemmingJobTest {
         leaderElection = leaderElection,
         jobbNavn = "jobb",
         clock = Tidspunkt.ofNorskTidssone(datoEksekvering, LocalTime.MIDNIGHT).fixedNorskTid(),
-        omstillingstonadEnabled = true
+        saktype = Saktype.BARNEPENSJON
+    )
+    private val OMSkonsistensavstemming = KonsistensavstemmingJob.Konsistensavstemming(
+        konsistensavstemmingService = konsistensavstemmingService,
+        kjoereplan = setOf(datoEksekvering),
+        leaderElection = leaderElection,
+        jobbNavn = "jobb",
+        clock = Tidspunkt.ofNorskTidssone(datoEksekvering, LocalTime.MIDNIGHT).fixedNorskTid(),
+        saktype = Saktype.OMSTILLINGSSTOENAD
     )
 
     @Test
@@ -75,10 +83,20 @@ internal class KonsistensavstemmingJobTest {
             leaderElection = leaderElection,
             jobbNavn = "jobb",
             clock = dagForTestMinusFemDager.fixedNorskTid(),
-            omstillingstonadEnabled = true
+            saktype = Saktype.BARNEPENSJON
+        )
+
+        val OMSkonsistensavstemming = KonsistensavstemmingJob.Konsistensavstemming(
+            konsistensavstemmingService = konsistensavstemmingService,
+            kjoereplan = setOf(datoEksekvering),
+            leaderElection = leaderElection,
+            jobbNavn = "jobb",
+            clock = dagForTestMinusFemDager.fixedNorskTid(),
+            saktype = Saktype.OMSTILLINGSSTOENAD
         )
 
         konsistensavstemming.run()
+        OMSkonsistensavstemming.run()
 
         verify(exactly = 0) {
             konsistensavstemmingService.konsistensavstemmingErKjoertIDag(
@@ -125,6 +143,7 @@ internal class KonsistensavstemmingJobTest {
         every { konsistensavstemmingService.startKonsistensavstemming(any(), Saktype.BARNEPENSJON) } returns emptyList()
         every { konsistensavstemmingService.startKonsistensavstemming(any(), Saktype.OMSTILLINGSSTOENAD) } returns emptyList()
         konsistensavstemming.run()
+        OMSkonsistensavstemming.run()
 
         verify(exactly = 1) {
             konsistensavstemmingService.konsistensavstemmingErKjoertIDag(
@@ -172,6 +191,7 @@ internal class KonsistensavstemmingJobTest {
         } returns emptyList()
 
         konsistensavstemming.run()
+        OMSkonsistensavstemming.run()
 
         verify(exactly = 1) {
             konsistensavstemmingService.startKonsistensavstemming(

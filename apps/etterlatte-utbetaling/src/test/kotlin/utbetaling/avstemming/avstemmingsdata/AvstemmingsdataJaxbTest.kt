@@ -37,7 +37,7 @@ internal class AvstemmingsdataJaxbTest {
             loependeUtbetalinger = listOf(oppdrag),
             dag = idag,
             id = konsistensavstemmingId,
-            opprettTilOgMed = tidspunktAvstemmingTom
+            opprettTilOgMed = tidspunktAvstemmingTom,
         )
         val konsistensavstemmingDataMapper = KonsistensavstemmingDataMapper(konsistensavstemming)
         val (startMelding, dataMelding, sluttMelding) = konsistensavstemmingDataMapper.opprettAvstemmingsmelding(Saktype.BARNEPENSJON)
@@ -77,12 +77,13 @@ internal class AvstemmingsdataJaxbTest {
         val konsistensavstemmingId = UUIDBase64()
         val tidspunktAvstemmingTom = idag.minusDays(1).atTime(LocalTime.MAX).toNorskTidspunkt()
         val oppdragslinjer = listOf(oppdragslinjeForKonsistensavstemming(fraOgMed = LocalDate.of(2022, 10, 7)))
-        val oppdrag = oppdragForKonsistensavstemming(oppdragslinjeForKonsistensavstemming = oppdragslinjer)
+        val oppdrag = oppdragForKonsistensavstemming(oppdragslinjeForKonsistensavstemming = oppdragslinjer, sakType = Saktype.OMSTILLINGSSTOENAD)
         val konsistensavstemming = mockKonsistensavstemming(
             loependeUtbetalinger = listOf(oppdrag),
             dag = idag,
             id = konsistensavstemmingId,
-            opprettTilOgMed = tidspunktAvstemmingTom
+            opprettTilOgMed = tidspunktAvstemmingTom,
+            sakType = Saktype.OMSTILLINGSSTOENAD
         )
         val konsistensavstemmingDataMapper = KonsistensavstemmingDataMapper(konsistensavstemming)
         val (startMelding, dataMelding, sluttMelding) = konsistensavstemmingDataMapper.opprettAvstemmingsmelding(Saktype.OMSTILLINGSSTOENAD)

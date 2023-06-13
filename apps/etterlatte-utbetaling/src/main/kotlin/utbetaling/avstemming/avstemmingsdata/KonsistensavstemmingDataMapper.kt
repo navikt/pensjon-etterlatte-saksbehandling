@@ -42,7 +42,7 @@ internal class KonsistensavstemmingDataMapper(
             .map {
                 Konsistensavstemmingsdata().apply {
                     this.aksjonsdata = avstemmingsdata(KodeAksjon.DATA, saktype)
-                    this.oppdragsdataListe.addAll(it.map { it.toOppdragdata(saktype) })
+                    this.oppdragsdataListe.addAll(it.map { it.toOppdragdata() })
                 }
             }.ifEmpty {
                 listOf(
@@ -87,9 +87,9 @@ internal class KonsistensavstemmingDataMapper(
         }
 }
 
-internal fun OppdragForKonsistensavstemming.toOppdragdata(saktype: Saktype): Oppdragsdata {
+internal fun OppdragForKonsistensavstemming.toOppdragdata(): Oppdragsdata {
     return Oppdragsdata().apply {
-        fagomradeKode = when (saktype) {
+        fagomradeKode = when (sakType) {
             Saktype.BARNEPENSJON -> "BARNEPE"
             Saktype.OMSTILLINGSSTOENAD -> "OMSTILL"
         }

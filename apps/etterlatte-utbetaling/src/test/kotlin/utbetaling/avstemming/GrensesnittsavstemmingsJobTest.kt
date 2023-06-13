@@ -28,7 +28,13 @@ internal class GrensesnittsavstemmingsJobTest {
         grensesnittsavstemmingService = grensesnittavstemmingService,
         leaderElection = leaderElection,
         jobbNavn = "jobb",
-        omstillingstonadEnabled = true
+        saktype = Saktype.BARNEPENSJON
+    )
+    private val OMSgrensesnittavstemming = GrensesnittsavstemmingJob.Grensesnittsavstemming(
+        grensesnittsavstemmingService = grensesnittavstemmingService,
+        leaderElection = leaderElection,
+        jobbNavn = "jobb",
+        saktype = Saktype.OMSTILLINGSSTOENAD
     )
 
     @Test
@@ -48,6 +54,7 @@ internal class GrensesnittsavstemmingsJobTest {
         every { grensesnittavstemmingService.startGrensesnittsavstemming(saktype = Saktype.OMSTILLINGSSTOENAD) } returns Unit
 
         grensesnittavstemming.run()
+        OMSgrensesnittavstemming.run()
 
         verify(exactly = 1) {
             grensesnittavstemmingService.startGrensesnittsavstemming(saktype = Saktype.BARNEPENSJON)

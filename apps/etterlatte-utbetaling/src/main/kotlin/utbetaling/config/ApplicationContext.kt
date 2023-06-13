@@ -29,6 +29,7 @@ import no.nav.etterlatte.utbetaling.iverksetting.KvitteringMottaker
 import no.nav.etterlatte.utbetaling.iverksetting.VedtakMottaker
 import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.OppdragMapper
 import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.OppdragSender
+import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Saktype
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingDao
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingService
 import no.nav.helse.rapids_rivers.RapidApplication
@@ -103,7 +104,15 @@ class ApplicationContext(
             leaderElection = leaderElection,
             starttidspunkt = Tidspunkt.now(norskKlokke()).next(LocalTime.of(3, 0, 0)),
             periode = Duration.of(1, ChronoUnit.DAYS),
-            omstillingstonadEnabled = properties.omstillingstonadEnabled
+            saktype = Saktype.BARNEPENSJON
+        )
+    val OmsGrensesnittavstemmingJob =
+        GrensesnittsavstemmingJob(
+            grensesnittsavstemmingService = grensesnittsavstemmingService,
+            leaderElection = leaderElection,
+            starttidspunkt = Tidspunkt.now(norskKlokke()).next(LocalTime.of(3, 0, 0)),
+            periode = Duration.of(1, ChronoUnit.DAYS),
+            saktype = Saktype.OMSTILLINGSSTOENAD
         )
 
     val konsistensavstemmingService by lazy {
@@ -121,7 +130,17 @@ class ApplicationContext(
         initialDelay = Duration.of(2, ChronoUnit.MINUTES).toMillis(),
         periode = Duration.of(4, ChronoUnit.HOURS),
         clock = clock,
-        omstillingstonadEnabled = properties.omstillingstonadEnabled
+        saktype = Saktype.BARNEPENSJON
+    )
+
+    val OMSkonsistensavstemmingJob = KonsistensavstemmingJob(
+        konsistensavstemmingService,
+        kjoereplanKonsistensavstemming(),
+        leaderElection,
+        initialDelay = Duration.of(2, ChronoUnit.MINUTES).toMillis(),
+        periode = Duration.of(4, ChronoUnit.HOURS),
+        clock = clock,
+        saktype = Saktype.OMSTILLINGSSTOENAD
     )
 
     val oppgavetrigger by lazy {

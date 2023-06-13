@@ -14,7 +14,7 @@ class GrensesnittsavstemmingJob(
     private val leaderElection: LeaderElection,
     private val starttidspunkt: Date,
     private val periode: Duration,
-    private val omstillingstonadEnabled: Boolean
+    private val saktype: Saktype
 ) {
     private val log = LoggerFactory.getLogger(this::class.java)
     private val jobbNavn = this::class.simpleName
@@ -33,7 +33,7 @@ class GrensesnittsavstemmingJob(
                     grensesnittsavstemmingService = grensesnittsavstemmingService,
                     leaderElection = leaderElection,
                     jobbNavn = jobbNavn!!,
-                    omstillingstonadEnabled = omstillingstonadEnabled
+                    saktype = saktype
                 ).run()
             } catch (throwable: Throwable) {
                 log.error("Grensesnittavstemming feilet, se sikker logg for stacktrace")
@@ -46,7 +46,7 @@ class GrensesnittsavstemmingJob(
         val grensesnittsavstemmingService: GrensesnittsavstemmingService,
         val leaderElection: LeaderElection,
         val jobbNavn: String,
-        private val omstillingstonadEnabled: Boolean
+        val saktype: Saktype
     ) {
         private val log = LoggerFactory.getLogger(this::class.java)
 
@@ -54,17 +54,7 @@ class GrensesnittsavstemmingJob(
             log.info("Starter $jobbNavn")
             withLogContext {
                 if (leaderElection.isLeader()) {
-                    Saktype.values().forEach {
-                        //Dette kan nok forenkles
-                        when (it) {
-                            Saktype.BARNEPENSJON -> {
-                                grensesnittsavstemmingService.startGrensesnittsavstemming(it)
-                            }
-                            Saktype.OMSTILLINGSSTOENAD -> {
-                                if(omstillingstonadEnabled) grensesnittsavstemmingService.startGrensesnittsavstemming(it)
-                            }
-                        }
-                    }
+                    grensesnittsavstemmingService.startGrensesnittsavstemming(saktype)
                 }
             }
         }

@@ -136,10 +136,10 @@ internal class TrygdetidRepositoryTest {
     }
 
     @Test
-    fun `skal opprette og hente trygdetid med grunnlag og poeng inn og ut aar`() {
+    fun `skal opprette og hente trygdetid med grunnlag og poeng inn og ut aar og prorata`() {
         val behandling = behandlingMock()
         val beregnetTrygdetid = beregnetTrygdetid()
-        val trygdetidGrunnlag = trygdetidGrunnlag(poengInnAar = true, poengUtAar = true)
+        val trygdetidGrunnlag = trygdetidGrunnlag(poengInnAar = true, poengUtAar = true, prorata = true)
         val opprettetTrygdetid = trygdetid(
             behandling.id,
             behandling.sak,
@@ -243,7 +243,7 @@ internal class TrygdetidRepositoryTest {
     }
 
     @Test
-    fun `skal oppdatere et trygdetidsgrunnlag med poeng inn og ut aar`() {
+    fun `skal oppdatere et trygdetidsgrunnlag med poeng inn og ut aar og prorata`() {
         val behandling = behandlingMock()
         val trygdetidGrunnlag = trygdetidGrunnlag(
             beregnetTrygdetidGrunnlag = beregnetTrygdetidGrunnlag(),
@@ -262,7 +262,8 @@ internal class TrygdetidRepositoryTest {
             bosted = LandNormalisert.POLEN.isoCode,
             begrunnelse = "Test2",
             poengUtAar = true,
-            poengInnAar = true
+            poengInnAar = true,
+            prorata = true
         )
 
         val trygdetidMedOppdatertGrunnlag =

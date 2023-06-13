@@ -82,7 +82,8 @@ data class TrygdetidGrunnlag(
     val beregnetTrygdetid: BeregnetTrygdetidGrunnlag? = null,
     val begrunnelse: String?,
     val poengInnAar: Boolean,
-    val poengUtAar: Boolean
+    val poengUtAar: Boolean,
+    val prorata: Boolean
 ) {
     fun oppdaterBeregnetTrygdetid(beregnetTrygdetid: BeregnetTrygdetidGrunnlag?): TrygdetidGrunnlag {
         return this.copy(beregnetTrygdetid = beregnetTrygdetid)

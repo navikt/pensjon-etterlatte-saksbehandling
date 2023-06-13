@@ -1,6 +1,5 @@
 package no.nav.etterlatte
 
-import no.nav.etterlatte.libs.database.KotliqueryRepository
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.migrering.ApplicationContext
 import no.nav.etterlatte.migrering.Migrering
@@ -23,7 +22,7 @@ class Server(private val context: ApplicationContext) {
         dataSource.migrate()
         val rapidEnv = getRapidEnv()
         RapidApplication.create(rapidEnv).also { rapidsConnection ->
-            Migrering(rapidsConnection, PesysRepository(KotliqueryRepository(dataSource)))
+            Migrering(rapidsConnection, PesysRepository(dataSource))
         }.start()
     }
 }

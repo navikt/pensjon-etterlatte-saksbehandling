@@ -7,7 +7,7 @@ class InstitusjonsoppholdDao(private val connection: () -> Connection) {
     fun lagreInstitusjonsopphold(sakId: Long, institusjonoppholdBegrunnelse: InstitusjonsoppholdBegrunnelse) {
         with(connection()) {
             val statement = prepareStatement(
-                "INSERT INTO institusjonsoppholdhendelse(id, sak_id, kanGiReduksjon, kanGiReduksjonTekst" +
+                "INSERT INTO institusjonsoppholdhendelse(id, sak_id, kanGiReduksjon, kanGiReduksjonTekst," +
                     "merEnnTreMaaneder, merEnnTreMaanederTekst) " +
                     "VALUES(?, ?, ?, ?, ?, ?)"
             )

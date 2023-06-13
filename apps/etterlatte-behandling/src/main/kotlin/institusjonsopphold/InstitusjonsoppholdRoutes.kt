@@ -13,9 +13,14 @@ import no.nav.etterlatte.libs.common.sakId
 internal fun Route.institusjonsoppholdRoute(institusjonsoppholdService: InstitusjonsoppholdService) {
     route("/api/institusjonsoppholdbegrunnelse/{$SAKID_CALL_PARAMETER}") {
         post {
-            val institusjonsoppholdBegrunnelse = call.receive<InstitusjonsoppholdBegrunnelse>()
-            institusjonsoppholdService.leggInnInstitusjonsoppholdBegrunnelse(sakId, institusjonsoppholdBegrunnelse)
+            val institusjonsoppholdBegrunnelse = call.receive<InstitusjonsoppholdBegrunnelseWrapper>()
+            institusjonsoppholdService.leggInnInstitusjonsoppholdBegrunnelse(
+                sakId,
+                institusjonsoppholdBegrunnelse.institusjonsopphold
+            )
             call.respond(HttpStatusCode.OK)
         }
     }
 }
+
+data class InstitusjonsoppholdBegrunnelseWrapper(val institusjonsopphold: InstitusjonsoppholdBegrunnelse)

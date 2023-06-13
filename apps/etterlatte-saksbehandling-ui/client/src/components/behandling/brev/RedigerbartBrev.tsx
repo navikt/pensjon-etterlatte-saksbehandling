@@ -25,7 +25,7 @@ interface LagretStatus {
 const formaterTidspunkt = (dato: Date) => format(new Date(dato), 'HH:mm:ss').toString()
 
 export default function RedigerbartBrev({ brev, behandling }: { brev: IBrev; behandling: IDetaljertBehandling }) {
-  const { sak, status } = behandling
+  const { status } = behandling
 
   const brevKanRedigeres = manueltBrevKanRedigeres(status)
 
@@ -39,7 +39,7 @@ export default function RedigerbartBrev({ brev, behandling }: { brev: IBrev; beh
   useEffect(() => {
     if (!brev.id) return
 
-    apiHentManuellPayload({ sakId: sak, behandlingId: brev.behandlingId }, (payload: any) => {
+    apiHentManuellPayload({ brevId: brev.id, behandlingId: brev.behandlingId }, (payload: any) => {
       setContent(payload)
     })
   }, [brev.id])
@@ -103,7 +103,7 @@ export default function RedigerbartBrev({ brev, behandling }: { brev: IBrev; beh
 
         <Tabs.Panel value={ManueltBrevFane.FORHAANDSVIS}>
           <PanelWrapper>
-            <ForhaandsvisningBrev brev={brev} sakId={sak} />
+            <ForhaandsvisningBrev brev={brev} />
           </PanelWrapper>
         </Tabs.Panel>
       </Tabs>

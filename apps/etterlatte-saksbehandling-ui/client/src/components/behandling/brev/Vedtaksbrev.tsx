@@ -86,7 +86,7 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
         ) : error ? (
           <ErrorMessage>{error}</ErrorMessage>
         ) : vedtaksbrev.prosessType === BrevProsessType.AUTOMATISK ? (
-          <ForhaandsvisningBrev brev={vedtaksbrev} sakId={sak} />
+          <ForhaandsvisningBrev brev={vedtaksbrev} />
         ) : (
           <RedigerbartBrev brev={vedtaksbrev} behandling={props.behandling} />
         )}

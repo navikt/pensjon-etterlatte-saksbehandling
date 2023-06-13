@@ -1,4 +1,4 @@
-package no.nav.etterlatte.dokument
+package no.nav.etterlatte.brev.dokument
 
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
@@ -21,9 +21,6 @@ import io.mockk.coVerify
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.etterlatte.brev.behandlingklient.BehandlingKlient
-import no.nav.etterlatte.brev.dokument.HentJournalposterResult
-import no.nav.etterlatte.brev.dokument.SafClient
-import no.nav.etterlatte.brev.dokument.dokumentRoute
 import no.nav.etterlatte.brev.journalpost.BrukerIdType
 import no.nav.etterlatte.libs.common.FoedselsnummerDTO
 import no.nav.etterlatte.libs.ktor.AZURE_ISSUER

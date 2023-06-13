@@ -1,5 +1,6 @@
 package no.nav.etterlatte.brev.dokarkiv
 
+import io.kotest.matchers.shouldBe
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -9,32 +10,26 @@ import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
 import no.nav.etterlatte.brev.db.BrevRepository
+import no.nav.etterlatte.brev.journalpost.AvsenderMottaker
 import no.nav.etterlatte.brev.journalpost.Bruker
-import no.nav.etterlatte.brev.journalpost.DokumentVariant
 import no.nav.etterlatte.brev.journalpost.JournalPostType
 import no.nav.etterlatte.brev.journalpost.JournalpostKoder.Companion.BREV_KODE
 import no.nav.etterlatte.brev.journalpost.JournalpostRequest
 import no.nav.etterlatte.brev.journalpost.JournalpostResponse
+import no.nav.etterlatte.brev.journalpost.Sak
 import no.nav.etterlatte.brev.journalpost.Sakstype
-import no.nav.etterlatte.brev.model.Adresse
-import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevInnhold
-import no.nav.etterlatte.brev.model.BrevProsessType
-import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.Spraak
-import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.VedtakSak
 import no.nav.etterlatte.rivers.VedtakTilJournalfoering
-import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
 import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.EnumSource
 import java.util.*
-import no.nav.etterlatte.brev.journalpost.Sak as JSak
+import kotlin.random.Random
 
 internal class DokarkivServiceTest {
 
@@ -50,72 +45,57 @@ internal class DokarkivServiceTest {
 
     @AfterEach
     fun after() {
-        confirmVerified(mockKlient, mockDb)
+        confirmVerified()
     }
 
-    @Test
-    fun `journalfoer brevet med barnet som mottaker`() {
-        val innhold = BrevInnhold("tittel", Spraak.NB)
-        every { mockDb.hentBrevInnhold(any()) } returns innhold
-        every { mockDb.hentPdf(any()) } returns Pdf("Hello world".toByteArray())
-        coEvery { mockKlient.opprettJournalpost(any(), any()) } returns JournalpostResponse("id", "OK", "melding", true)
+    @ParameterizedTest
+    @EnumSource(SakType::class)
+    fun `Journalfoeringsrequest mappes korrekt`(type: SakType) {
+        val forventetInnhold = BrevInnhold("tittel", Spraak.NB, mockk())
+        val forventetPdf = Pdf("Hello world!".toByteArray())
+        val forventetResponse = JournalpostResponse("12345", journalpostferdigstilt = true)
 
-        val vedtaksbrev = opprettVedtaksbrev()
-        val vedtak = opprettVedtak()
+        coEvery { mockKlient.opprettJournalpost(any(), any()) } returns forventetResponse
+        every { mockDb.hentBrevInnhold(any()) } returns forventetInnhold
+        every { mockDb.hentPdf(any()) } returns forventetPdf
 
-        service.journalfoer(vedtaksbrev, vedtak)
+        val brevId = Random.nextLong()
+
+        val vedtak = VedtakTilJournalfoering(
+            1,
+            VedtakSak("ident", type, Random.nextLong()),
+            UUID.randomUUID(),
+            "ansvarligEnhet"
+        )
+
+        val response = service.journalfoer(brevId, vedtak)
+        response shouldBe forventetResponse
 
         val requestSlot = slot<JournalpostRequest>()
-        coVerify(exactly = 1) { mockKlient.opprettJournalpost(capture(requestSlot), true) }
-        verify(exactly = 1) {
-            mockDb.hentBrevInnhold(vedtaksbrev.id)
-            mockDb.hentPdf(vedtaksbrev.id)
+        coVerify { mockKlient.opprettJournalpost(capture(requestSlot), true) }
+        verify {
+            mockDb.hentBrevInnhold(brevId)
+            mockDb.hentPdf(brevId)
         }
 
-        val actualRequest = requestSlot.captured
+        with(requestSlot.captured) {
+            tittel shouldBe forventetInnhold.tittel
+            journalpostType shouldBe JournalPostType.UTGAAENDE
+            tema shouldBe vedtak.sak.sakType.tema
+            kanal shouldBe "S"
+            journalfoerendeEnhet shouldBe vedtak.ansvarligEnhet
+            avsenderMottaker shouldBe AvsenderMottaker(vedtak.sak.ident)
+            bruker shouldBe Bruker(vedtak.sak.ident)
+            sak shouldBe Sak(Sakstype.FAGSAK, vedtak.sak.id.toString())
+            eksternReferanseId shouldBe "${vedtak.behandlingId}.$brevId"
 
-        assertEquals(innhold.tittel, actualRequest.tittel)
-        assertEquals(JournalPostType.UTGAAENDE, actualRequest.journalpostType)
+            with(dokumenter.single()) {
+                tittel shouldBe forventetInnhold.tittel
+                brevkode shouldBe BREV_KODE
 
-        assertEquals(vedtak.sak.ident, actualRequest.avsenderMottaker.id)
-
-        assertEquals(Bruker(vedtak.sak.ident), actualRequest.bruker)
-        assertEquals("${vedtaksbrev.behandlingId}.${vedtaksbrev.id}", actualRequest.eksternReferanseId)
-        assertEquals(JSak(Sakstype.FAGSAK, vedtak.sak.id.toString()), actualRequest.sak)
-
-        val dokument = actualRequest.dokumenter.single()
-        assertEquals(innhold.tittel, dokument.tittel)
-        assertEquals(BREV_KODE, dokument.brevkode)
-        assertTrue(dokument.dokumentvarianter.single() is DokumentVariant.ArkivPDF)
-
-        assertEquals("EYB", actualRequest.tema)
-        assertEquals("S", actualRequest.kanal)
-        assertEquals(vedtak.ansvarligEnhet, actualRequest.journalfoerendeEnhet)
-    }
-
-    private fun opprettVedtaksbrev() = Brev(
-        id = 1,
-        sakId = 41,
-        behandlingId = UUID.randomUUID(),
-        prosessType = BrevProsessType.AUTOMATISK,
-        soekerFnr = "soeker fnr",
-        status = Status.FERDIGSTILT,
-        mottaker = Mottaker(
-            "Stor Snerk",
-            STOR_SNERK,
-            null,
-            Adresse(adresseType = "NORSKPOSTADRESSE", "Testgaten 13", "1234", "OSLO", land = "Norge", landkode = "NOR")
-        )
-    )
-
-    private fun opprettVedtak() = VedtakTilJournalfoering(
-        vedtakId = 1,
-        sak = VedtakSak("ident", SakType.BARNEPENSJON, 4),
-        behandlingId = UUID.randomUUID(),
-        ansvarligEnhet = "4808"
-    )
-
-    companion object {
-        private val STOR_SNERK = Foedselsnummer("11057523044")
+                val dokument = dokumentvarianter.single()
+                dokument.fysiskDokument shouldBe Base64.getEncoder().encodeToString(forventetPdf.bytes)
+            }
+        }
     }
 }

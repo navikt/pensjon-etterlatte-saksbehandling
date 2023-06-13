@@ -1,4 +1,4 @@
-package no.nav.etterlatte.norg2
+package no.nav.etterlatte.brev.norg2
 
 import io.kotest.matchers.string.shouldContain
 import io.ktor.client.HttpClient

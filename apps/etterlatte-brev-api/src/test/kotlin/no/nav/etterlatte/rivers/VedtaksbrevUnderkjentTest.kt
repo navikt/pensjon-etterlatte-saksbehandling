@@ -1,4 +1,4 @@
-package no.nav.etterlatte
+package no.nav.etterlatte.rivers
 
 import io.kotest.assertions.throwables.shouldThrow
 import io.mockk.clearMocks
@@ -22,7 +22,6 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
-import no.nav.etterlatte.rivers.VedtaksbrevUnderkjent
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.AfterEach

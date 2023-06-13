@@ -67,13 +67,13 @@ internal class JournalfoerVedtaksbrev(
                     return@withLogContext
                 }
 
-                val (brev, response) = service.journalfoerVedtaksbrev(vedtaksbrev, vedtak)
+                val response = service.journalfoerVedtaksbrev(vedtaksbrev, vedtak)
 
                 logger.info("Vedtaksbrev for vedtak med id ${vedtak.vedtakId} er journalfoert OK")
 
                 rapidsConnection.svarSuksess(
                     packet,
-                    brev.id,
+                    vedtaksbrev.id,
                     response.journalpostId
                 )
             }

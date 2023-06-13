@@ -1,4 +1,4 @@
-package no.nav.etterlatte.db
+package no.nav.etterlatte.brev.db
 
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.ints.shouldBeExactly
@@ -7,7 +7,6 @@ import io.kotest.matchers.shouldNotBe
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
-import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.distribusjon.DistribuerJournalpostResponse
 import no.nav.etterlatte.brev.journalpost.JournalpostResponse
 import no.nav.etterlatte.brev.model.Adresse
@@ -186,13 +185,35 @@ internal class BrevRepositoryIntegrationTest {
     inner class TestInnholdPayload {
         @Test
         fun `Opprett og hent brev payload`() {
+            val ulagretBrevUtenPayload =
+                ulagretBrev(UUID.randomUUID(), BrevInnhold("tittel", Spraak.NB, payload = null))
+            val brevUtenPayload = db.opprettBrev(ulagretBrevUtenPayload)
+
+            brevUtenPayload.status shouldBe Status.OPPRETTET
+
+            db.hentBrevInnhold(brevUtenPayload.id) shouldBe ulagretBrevUtenPayload.innhold
+            db.hentBrevPayload(brevUtenPayload.id) shouldBe null // Automatisk brev skal IKKE ha payload
+
+            val ulagretBrevMedPayload = ulagretBrev(
+                behandlingId = UUID.randomUUID(),
+                innhold = BrevInnhold(
+                    "tittel",
+                    Spraak.NB,
+                    payload = Slate(listOf(Slate.Element(Slate.ElementType.PARAGRAPH)))
+                )
+            )
+            val brevMedPayload = db.opprettBrev(ulagretBrevMedPayload)
+
+            brevMedPayload.status shouldBe Status.OPPRETTET
+
+            db.hentBrevInnhold(brevMedPayload.id) shouldBe ulagretBrevMedPayload.innhold
+            db.hentBrevPayload(brevMedPayload.id) shouldBe ulagretBrevMedPayload.innhold.payload
+        }
+
+        @Test
+        fun `Oppdatering av payload`() {
             val ulagretBrev = ulagretBrev(UUID.randomUUID())
             val opprettetBrev = db.opprettBrev(ulagretBrev)
-
-            opprettetBrev.status shouldBe Status.OPPRETTET
-
-            db.hentBrevInnhold(opprettetBrev.id) shouldBe ulagretBrev.innhold
-            db.hentBrevPayload(opprettetBrev.id) shouldBe null
 
             db.oppdaterPayload(opprettetBrev.id, Slate(emptyList()))
 
@@ -220,13 +241,13 @@ internal class BrevRepositoryIntegrationTest {
         }
     }
 
-    private fun ulagretBrev(behandlingId: UUID) = OpprettNyttBrev(
+    private fun ulagretBrev(behandlingId: UUID, innhold: BrevInnhold? = null) = OpprettNyttBrev(
         sakId = Random.nextLong(),
         behandlingId = behandlingId,
         prosessType = BrevProsessType.AUTOMATISK,
         soekerFnr = "00000012345",
         mottaker = opprettMottaker(),
-        innhold = BrevInnhold("tittel", Spraak.NB)
+        innhold = innhold ?: BrevInnhold("tittel", Spraak.NB)
     )
 
     private fun opprettMottaker() = Mottaker(

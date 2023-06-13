@@ -7,14 +7,11 @@ export const hentVedtaksbrev = async (behandlingId: string): Promise<ApiResponse
 export const opprettVedtaksbrev = async (sakId: number, behandlingId: string): Promise<ApiResponse<IBrev>> =>
   apiClient.post(`/brev/behandling/${behandlingId}/vedtak?sakId=${sakId}`, {})
 
-export const genererPdf = async (sakId: number, behandlingId: string): Promise<ApiResponse<ArrayBuffer>> =>
-  apiClient.get(`/brev/behandling/${behandlingId}/vedtak/pdf?sakId=${sakId}`)
+export const genererPdf = async (brevId: number, behandlingId: string): Promise<ApiResponse<ArrayBuffer>> =>
+  apiClient.get(`/brev/behandling/${behandlingId}/vedtak/pdf?brevId=${brevId}`)
 
-export const genererHtml = async (sakId: number, behandlingId: string): Promise<ApiResponse<ArrayBuffer>> =>
-  apiClient.get(`/brev/behandling/${behandlingId}/vedtak/html?sakId=${sakId}`)
-
-export const hentManuellPayload = async (props: { sakId: number; behandlingId: string }): Promise<ApiResponse<any>> =>
-  apiClient.get(`/brev/behandling/${props.behandlingId}/vedtak/manuell?sakId=${props.sakId}`)
+export const hentManuellPayload = async (props: { brevId: number; behandlingId: string }): Promise<ApiResponse<any>> =>
+  apiClient.get(`/brev/behandling/${props.behandlingId}/vedtak/manuell?brevId=${props.brevId}`)
 
 export const lagreManuellPayload = async (props: {
   brevId: number

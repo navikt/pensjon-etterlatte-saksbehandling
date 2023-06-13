@@ -48,7 +48,7 @@ export const lagreInstitusjonsoppholdData = async (args: {
   sakId: number
   institusjonsopphold: Institusjonsopphold
 }): Promise<ApiResponse<Institusjonsopphold>> => {
-  return apiClient.post(`/institusjonsopphold/${args.sakId}`, {
+  return apiClient.post(`/institusjonsoppholdbegrunnelse/${args.sakId}`, {
     institusjonsopphold: args.institusjonsopphold,
   })
 }

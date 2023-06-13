@@ -11,7 +11,7 @@ import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.sakId
 
 internal fun Route.institusjonsoppholdRoute(institusjonsoppholdService: InstitusjonsoppholdService) {
-    route("/api/institusjonsopphold/$SAKID_CALL_PARAMETER") {
+    route("/api/institusjonsoppholdbegrunnelse/{$SAKID_CALL_PARAMETER}") {
         post {
             val institusjonsoppholdBegrunnelse = call.receive<InstitusjonsoppholdBegrunnelse>()
             institusjonsoppholdService.leggInnInstitusjonsoppholdBegrunnelse(sakId, institusjonsoppholdBegrunnelse)

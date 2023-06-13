@@ -100,6 +100,7 @@ export const TrygdetidGrunnlagListe: React.FC<Props> = ({
                     landListe={landListe}
                     key={periode.id}
                     redigerbar={redigerbar}
+                    trygdetidGrunnlagType={trygdetidGrunnlagType}
                   />
                 )
               })}
@@ -135,6 +136,7 @@ const PeriodeRow = ({
   endrePeriode,
   landListe,
   redigerbar,
+  trygdetidGrunnlagType,
 }: {
   trygdetidGrunnlag: ITrygdetidGrunnlag
   behandlingId: string
@@ -142,6 +144,7 @@ const PeriodeRow = ({
   endrePeriode: (trygdetidGrunnlagId: string) => void
   landListe: ILand[]
   redigerbar: boolean
+  trygdetidGrunnlagType: ITrygdetidGrunnlagType
 }) => {
   const [slettTrygdetidStatus, slettTrygdetidsgrunnlagRequest] = useApiCall(slettTrygdetidsgrunnlag)
 
@@ -163,12 +166,25 @@ const PeriodeRow = ({
 
   return (
     <Table.ExpandableRow
-      expansionDisabled={!trygdetidGrunnlag.begrunnelse}
       content={
-        <div>
-          <Heading size={'small'}>Begrunnelse</Heading>
-          {trygdetidGrunnlag.begrunnelse}
-        </div>
+        <>
+          <ExpandableInfo>
+            <Heading size={'small'}>Begrunnelse</Heading>
+            {trygdetidGrunnlag.begrunnelse}
+          </ExpandableInfo>
+          {trygdetidGrunnlagType === ITrygdetidGrunnlagType.FAKTISK && (
+            <>
+              <ExpandableInfo>
+                <Heading size={'small'}>Poeng i inn/ut år</Heading>
+                {trygdetidGrunnlag.poengInnAar ? 'Ja' : 'Nei'}
+              </ExpandableInfo>
+              <ExpandableInfo>
+                <Heading size={'small'}>Poeng i ut år</Heading>
+                {trygdetidGrunnlag.poengUtAar ? 'Ja' : 'Nei'}
+              </ExpandableInfo>
+            </>
+          )}
+        </>
       }
     >
       <Table.DataCell>
@@ -203,6 +219,11 @@ const PeriodeRow = ({
     </Table.ExpandableRow>
   )
 }
+
+const ExpandableInfo = styled.div`
+  display: inline-block;
+  margin-right: 50px;
+`
 
 const GrunnlagListe = styled.div`
   margin-top: 2em;

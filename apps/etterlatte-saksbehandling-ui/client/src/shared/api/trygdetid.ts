@@ -60,6 +60,8 @@ export interface ITrygdetidGrunnlag {
     ident: string
   }
   begrunnelse?: string
+  poengInnAar?: boolean
+  poengUtAar?: boolean
 }
 
 export interface OppdaterTrygdetidGrunnlag {
@@ -69,6 +71,8 @@ export interface OppdaterTrygdetidGrunnlag {
   periodeFra?: string
   periodeTil?: string
   begrunnelse?: string
+  poengInnAar?: boolean
+  poengUtAar?: boolean
 }
 
 export interface IBeregnetTrygdetidGrunnlag {

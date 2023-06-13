@@ -70,7 +70,8 @@ class ApplicationIntegrationTest {
             leaderElectorPath = "",
             grensesnittavstemmingEnabled = false,
             konsistensavstemmingEnabled = false,
-            omstillingstonadEnabled = false
+            grensesnittavstemmingOMSEnabled = false,
+            konsistensavstemmingOMSEnabled = false
         )
 
         ApplicationContext(applicationProperties, rapidsConnection).also {

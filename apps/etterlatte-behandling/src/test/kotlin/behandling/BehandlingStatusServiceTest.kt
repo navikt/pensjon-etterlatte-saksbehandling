@@ -3,6 +3,7 @@ package behandling
 import com.nimbusds.jwt.JWTClaimsSet
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.etterlatte.SaksbehandlerMedRoller
 import no.nav.etterlatte.behandling.BehandlingStatusServiceImpl
 import no.nav.etterlatte.behandling.GenerellBehandlingService
 import no.nav.etterlatte.config.AzureGroup
@@ -24,7 +25,11 @@ internal class BehandlingStatusServiceTest {
         val jwtclaims = JWTClaimsSet.Builder().claim("groups", "123").build()
         val bruker = Saksbehandler("", "ident", JwtTokenClaims(jwtclaims))
         assertThrows<IllegalStateException> {
-            service.sjekkOmKanAttestere(UUID.randomUUID(), bruker, mapOf(AzureGroup.ATTESTANT to "789"))
+            service.sjekkOmKanAttestere(
+                UUID.randomUUID(),
+                SaksbehandlerMedRoller(bruker),
+                mapOf(AzureGroup.ATTESTANT to "789")
+            )
         }
     }
 
@@ -43,7 +48,11 @@ internal class BehandlingStatusServiceTest {
         val jwtclaims = JWTClaimsSet.Builder().claim("groups", "123").build()
         val bruker = Saksbehandler("", "ident", JwtTokenClaims(jwtclaims))
         assertDoesNotThrow {
-            service.sjekkOmKanAttestere(UUID.randomUUID(), bruker, mapOf(AzureGroup.ATTESTANT to "123"))
+            service.sjekkOmKanAttestere(
+                UUID.randomUUID(),
+                SaksbehandlerMedRoller(bruker),
+                mapOf(AzureGroup.ATTESTANT to "123")
+            )
         }
     }
 }

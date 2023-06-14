@@ -77,7 +77,7 @@ class SakOgBehandlingService(
                 attestantIdent
             ),
             utbetalingsinfo = finnUtbetalingsinfo(vedtak.behandling.id, vedtak.virkningstidspunkt, brukerTokenInfo),
-            avkortingsinfo = finnAvkortingsinfo(
+            avkortingsinfo = finnYtelseMedGrunnlag(
                 vedtak.behandling.id,
                 vedtak.sak.sakType,
                 vedtak.virkningstidspunkt,
@@ -108,39 +108,40 @@ class SakOgBehandlingService(
 
         val soeskenjustering = beregning.beregningsperioder.any { !it.soeskenFlokk.isNullOrEmpty() }
         val antallBarn = if (soeskenjustering) beregningsperioder.last().antallBarn else 1
-        val grunnbeloep = beregningsperioder.first().grunnbeloep
 
         return Utbetalingsinfo(
             antallBarn,
             Kroner(beregningsperioder.hentUtbetaltBeloep()),
-            grunnbeloep,
             virkningstidspunkt.atDay(1),
             soeskenjustering,
             beregningsperioder
         )
     }
 
-    private suspend fun finnAvkortingsinfo(
+    private suspend fun finnYtelseMedGrunnlag(
         behandlingId: UUID,
         sakType: SakType,
         virkningstidspunkt: YearMonth,
         brukerTokenInfo: BrukerTokenInfo
     ): Avkortingsinfo? {
         if (sakType == SakType.BARNEPENSJON) return null // TODO: Fjern når avkorting støttes for barnepensjon
-        val avkorting = beregningKlient.hentAvkorting(behandlingId, brukerTokenInfo)
 
-        val beregningsperioder = avkorting.avkortetYtelse.map {
+        val ytelseMedGrunnlag = beregningKlient.hentYtelseMedGrunnlag(behandlingId, brukerTokenInfo)
+
+        val beregningsperioder = ytelseMedGrunnlag.perioder.map {
             AvkortetBeregningsperiode(
-                datoFOM = it.fom,
-                datoTOM = it.tom,
-                inntekt = Kroner(123456), // TODO: Finn denne fra aarsinntekt - fratrekkInnut
+                datoFOM = it.periode.fom.atDay(1),
+                datoTOM = it.periode.tom?.atEndOfMonth(),
+                inntekt = Kroner(it.aarsinntekt - it.fratrekkInnAar),
                 utbetaltBeloep = Kroner(it.ytelseEtterAvkorting)
             )
         }
 
-        val aarsInntekt = avkorting.avkortingGrunnlag.last().aarsinntekt
+        val aarsInntekt = ytelseMedGrunnlag.perioder.first().aarsinntekt
+        val grunnbeloep = ytelseMedGrunnlag.perioder.first().grunnbelop
 
         return Avkortingsinfo(
+            grunnbeloep = Kroner(grunnbeloep),
             inntekt = Kroner(aarsInntekt),
             virkningsdato = virkningstidspunkt.atDay(1),
             beregningsperioder

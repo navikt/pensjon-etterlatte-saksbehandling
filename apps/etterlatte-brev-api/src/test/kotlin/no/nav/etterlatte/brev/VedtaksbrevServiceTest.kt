@@ -498,7 +498,6 @@ internal class VedtaksbrevServiceTest {
         Utbetalingsinfo(
             1,
             Kroner(3436),
-            Kroner(118000),
             LocalDate.now(),
             false,
             listOf(

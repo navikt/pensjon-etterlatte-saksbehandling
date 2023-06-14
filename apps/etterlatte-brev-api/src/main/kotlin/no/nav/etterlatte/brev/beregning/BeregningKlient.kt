@@ -68,7 +68,7 @@ class BeregningKlient(config: Config, httpClient: HttpClient) {
             logger.info("Henter utregnet ytelse med grunnlag for behandlingId=$behandlingId")
 
             return downstreamResourceClient.get(
-                Resource(clientId, "$resourceUrl/api/ytelse-med-grunnlag/$behandlingId"),
+                Resource(clientId, "$resourceUrl/api/beregning/ytelse-med-grunnlag/$behandlingId"),
                 brukerTokenInfo
             ).mapBoth(
                 success = { resource -> deserialize(resource.response.toString()) },

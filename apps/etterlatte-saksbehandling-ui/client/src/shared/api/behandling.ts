@@ -10,8 +10,9 @@ import { apiClient, ApiResponse } from './apiClient'
 import { ManueltOpphoerDetaljer } from '~components/behandling/manueltopphoeroversikt/ManueltOpphoerOversikt'
 import { Grunnlagsendringshendelse } from '~components/person/typer'
 import { Revurderingsaarsak } from '~shared/types/Revurderingsaarsak'
-import { Institusjonsopphold } from '~components/behandling/revurderingsoversikt/InstitusjonsoppholdForside'
+import { InstitusjonsoppholdBegrunnelse } from '~components/person/uhaandtereHendelser/InstitusjonsoppholdVurderingBegrunnelse'
 import { ISak, SakType } from '~shared/types/sak'
+import { InstitusjonsoppholdMedKilde } from '~components/person/uhaandtereHendelser/HistoriskeHendelser'
 
 export const hentBehandlingerForPerson = async (fnr: string): Promise<ApiResponse<any>> => {
   return apiClient.post(`/personer/behandlinger`, { foedselsnummer: fnr })
@@ -46,11 +47,17 @@ export const fastsettVirkningstidspunkt = async (args: {
 
 export const lagreInstitusjonsoppholdData = async (args: {
   sakId: number
-  institusjonsopphold: Institusjonsopphold
-}): Promise<ApiResponse<Institusjonsopphold>> => {
+  institusjonsopphold: InstitusjonsoppholdBegrunnelse
+}): Promise<ApiResponse<InstitusjonsoppholdBegrunnelse>> => {
   return apiClient.post(`/institusjonsoppholdbegrunnelse/${args.sakId}`, {
     institusjonsopphold: args.institusjonsopphold,
   })
+}
+
+export const hentInstitusjonsoppholdData = async (
+  grunnlagsendringshendelseid: string
+): Promise<ApiResponse<InstitusjonsoppholdMedKilde>> => {
+  return apiClient.get(`/institusjonsoppholdbegrunnelse/${grunnlagsendringshendelseid}`)
 }
 
 export const hentManueltOpphoerDetaljer = async (

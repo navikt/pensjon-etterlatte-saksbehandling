@@ -8,17 +8,22 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.hentNavidentFraToken
 import no.nav.etterlatte.libs.common.sakId
 
 internal fun Route.institusjonsoppholdRoute(institusjonsoppholdService: InstitusjonsoppholdService) {
     route("/api/institusjonsoppholdbegrunnelse/{$SAKID_CALL_PARAMETER}") {
         post {
-            val institusjonsoppholdBegrunnelse = call.receive<InstitusjonsoppholdBegrunnelseWrapper>()
-            institusjonsoppholdService.leggInnInstitusjonsoppholdBegrunnelse(
-                sakId,
-                institusjonsoppholdBegrunnelse.institusjonsopphold
-            )
-            call.respond(HttpStatusCode.OK)
+            hentNavidentFraToken { navIdent ->
+                val institusjonsoppholdBegrunnelse = call.receive<InstitusjonsoppholdBegrunnelseWrapper>()
+                institusjonsoppholdService.leggInnInstitusjonsoppholdBegrunnelse(
+                    sakId,
+                    Grunnlagsopplysning.Saksbehandler.create(navIdent),
+                    institusjonsoppholdBegrunnelse.institusjonsopphold
+                )
+                call.respond(HttpStatusCode.OK)
+            }
         }
     }
 }

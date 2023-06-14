@@ -1,36 +1,20 @@
 import { LovtekstMedLenke } from '~components/behandling/soeknadsoversikt/soeknadoversikt/LovtekstMedLenke'
 import React, { useState } from 'react'
-import Insthendelser from '~components/behandling/beregningsgrunnlag/Insthendelser'
 import { Radio, RadioGroup, Textarea } from '@navikt/ds-react'
 import { JaNei } from '~shared/types/ISvar'
 import { RadioGroupWrapper } from '~components/behandling/vilkaarsvurdering/Vurdering'
 import styled from 'styled-components'
 import { LeggTilVurderingButton } from '~components/behandling/soeknadsoversikt/soeknadoversikt/LeggTilVurderingButton'
 import { VurderingsboksWrapper } from '~components/vurderingsboks/VurderingsboksWrapper'
-import { KildeSaksbehandler } from '~shared/types/kilde'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { lagreInstitusjonsoppholdData } from '~shared/api/behandling'
 
-interface InstitusjonsoppholdMedKilde {
+export interface InstitusjonsoppholdBegrunnelse {
   kanGiReduksjonAvYtelse: JaNei
   kanGiReduksjonAvYtelseBegrunnelse: string
   forventetVarighetMerEnn3Maaneder: JaNei
   forventetVarighetMerEnn3MaanederBegrunnelse: string
-  kilde: KildeSaksbehandler
-}
-
-export interface Institusjonsopphold {
-  kanGiReduksjonAvYtelse: JaNei
-  kanGiReduksjonAvYtelseBegrunnelse: string
-  forventetVarighetMerEnn3Maaneder: JaNei
-  forventetVarighetMerEnn3MaanederBegrunnelse: string
-}
-
-type InstitusjonsoppholdProps = {
-  behandlingId: string
-  sakId: number
-  behandles: boolean
-  institusjonsopphold: InstitusjonsoppholdMedKilde | undefined
+  grunnlagsEndringshendelseId: string
 }
 
 type StateError = {
@@ -46,9 +30,16 @@ const defaultErrorStatus = {
   varighet: false,
   varighetBegrunnelse: false,
 }
-const InstitusjonsoppholdForside = (props: InstitusjonsoppholdProps) => {
-  const { sakId, behandles, institusjonsopphold } = props
-  const [vurdert, setVurdert] = useState(institusjonsopphold !== undefined)
+
+type InstitusjonsoppholdProps = {
+  sakId: number
+  grunnlagsEndringshendelseId: string
+  lukkGrunnlagshendelseWrapper: () => void
+}
+
+const InstitusjonsoppholdVurderingBegrunnelse = (props: InstitusjonsoppholdProps) => {
+  const { sakId, grunnlagsEndringshendelseId, lukkGrunnlagshendelseWrapper } = props
+  const [vurdert, setVurdert] = useState(false)
   const [svarReduksjon, setSvarReduksjon] = useState<JaNei | undefined>(undefined)
   const [begrunnelseReduksjon, setBegrunnelseReduksjon] = useState<string>('')
   const [svarForventetLengerEnnTreMaaneder, setSvarForventetLengerEnnTreMaaneder] = useState<JaNei | undefined>(
@@ -74,15 +65,21 @@ const InstitusjonsoppholdForside = (props: InstitusjonsoppholdProps) => {
       tmpErrors = { ...tmpErrors, varighetBegrunnelse: true }
     }
     if (Object.values(tmpErrors).every((e) => !e)) {
-      lagreInstitusjonsopphold({
-        sakId: sakId,
-        institusjonsopphold: {
-          kanGiReduksjonAvYtelse: svarReduksjon as JaNei,
-          kanGiReduksjonAvYtelseBegrunnelse: begrunnelseReduksjon,
-          forventetVarighetMerEnn3Maaneder: svarForventetLengerEnnTreMaaneder as JaNei,
-          forventetVarighetMerEnn3MaanederBegrunnelse: begrunnelseForventetLengerEnnTreMaaender,
+      lagreInstitusjonsopphold(
+        {
+          sakId: sakId,
+          institusjonsopphold: {
+            kanGiReduksjonAvYtelse: svarReduksjon as JaNei,
+            kanGiReduksjonAvYtelseBegrunnelse: begrunnelseReduksjon,
+            forventetVarighetMerEnn3Maaneder: svarForventetLengerEnnTreMaaneder as JaNei,
+            forventetVarighetMerEnn3MaanederBegrunnelse: begrunnelseForventetLengerEnnTreMaaender,
+            grunnlagsEndringshendelseId: grunnlagsEndringshendelseId,
+          },
         },
-      })
+        () => {
+          lukkGrunnlagshendelseWrapper()
+        }
+      )
     } else {
       setErrors(tmpErrors)
     }
@@ -97,7 +94,7 @@ const InstitusjonsoppholdForside = (props: InstitusjonsoppholdProps) => {
             lenke: 'https://lovdata.no/dokument/NL/lov/1997-02-28-19/KAPITTEL_6-6#%C2%A718-8',
           },
         ]}
-        status={institusjonsopphold ? 'success' : 'warning'}
+        status={null}
       >
         <>
           <MarginInnhold>
@@ -114,15 +111,8 @@ const InstitusjonsoppholdForside = (props: InstitusjonsoppholdProps) => {
           ) : (
             <VurderingsboksWrapper
               tittel={''}
-              vurdering={
-                institusjonsopphold
-                  ? {
-                      saksbehandler: institusjonsopphold.kilde.ident,
-                      tidspunkt: new Date(institusjonsopphold.kilde.tidspunkt),
-                    }
-                  : undefined
-              }
-              redigerbar={behandles}
+              vurdering={undefined}
+              redigerbar={true}
               lagreklikk={lagreSvarInstitusjonsopphold}
               avbrytklikk={() => {
                 setVurdert(false)
@@ -194,12 +184,11 @@ const InstitusjonsoppholdForside = (props: InstitusjonsoppholdProps) => {
           )}
         </VurderingsContainerWrapper>
       </LovtekstMedLenke>
-      <Insthendelser sakid={sakId} />
     </>
   )
 }
 
-export default InstitusjonsoppholdForside
+export default InstitusjonsoppholdVurderingBegrunnelse
 
 const MarginInnhold = styled('p')({
   marginRight: '2em',

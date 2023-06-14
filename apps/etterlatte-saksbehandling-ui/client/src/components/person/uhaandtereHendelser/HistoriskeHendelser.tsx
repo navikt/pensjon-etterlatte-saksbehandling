@@ -1,10 +1,14 @@
-import { Button, Heading } from '@navikt/ds-react'
+import { Button, Detail, Heading, Table } from '@navikt/ds-react'
 import styled from 'styled-components'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { ChevronDownIcon, ChevronUpIcon } from '@navikt/aksel-icons'
-import { Grunnlagsendringshendelse } from '~components/person/typer'
-import { Table } from '@navikt/ds-react'
-import { formaterStringDato } from '~utils/formattering'
+import { Grunnlagsendringshendelse, GrunnlagsendringsType } from '~components/person/typer'
+import { formaterDatoMedTidspunkt, formaterStringDato } from '~utils/formattering'
+import { JaNei } from '~shared/types/ISvar'
+import { KildeSaksbehandler } from '~shared/types/kilde'
+import { isSuccess, useApiCall } from '~shared/hooks/useApiCall'
+import { hentInstitusjonsoppholdData } from '~shared/api/behandling'
+import { VilkaarVurdertInformasjon } from '~components/behandling/vilkaarsvurdering/Vurdering'
 
 type Props = {
   hendelser: Array<Grunnlagsendringshendelse>
@@ -48,7 +52,10 @@ const HistoriskeHendelser = (props: Props) => {
                     <Table.DataCell>{type}</Table.DataCell>
                     <Table.DataCell>{gjelderPerson}</Table.DataCell>
                     <Table.DataCell>{formaterStringDato(opprettet)}</Table.DataCell>
-                    <Table.DataCell>{kommentar ? <p>{kommentar}</p> : <p>Ingen kommentar</p>}</Table.DataCell>
+                    <Table.DataCell>
+                      {kommentar ? <p>{kommentar}</p> : <p>Ingen kommentar</p>}
+                      {type === GrunnlagsendringsType.INSTITUSJONSOPPHOLD && <InstitusjonsoppholdBegrunnelse id={id} />}
+                    </Table.DataCell>
                   </Table.Row>
                 )
               })}
@@ -58,6 +65,47 @@ const HistoriskeHendelser = (props: Props) => {
       </div>
     </HistoriskeHendelserWrapper>
   )
+}
+
+const InstitusjonsoppholdBegrunnelse = ({ id }: { id: string }) => {
+  const [begrunnelse, hentInstbegrunnelseData] = useApiCall(hentInstitusjonsoppholdData)
+
+  useEffect(() => {
+    hentInstbegrunnelseData(id)
+  }, [])
+
+  return (
+    <>
+      {isSuccess(begrunnelse) && (
+        <div>
+          <p>Er dette en institusjon som kan gi reduksjon av ytelsen? - {begrunnelse.data.kanGiReduksjonAvYtelse}</p>
+          <p>{begrunnelse.data.kanGiReduksjonAvYtelseBegrunnelse}</p>
+          <p>
+            Er oppholdet forventet å vare lenger enn innleggelsesmåned + tre måneder? -{' '}
+            {begrunnelse.data.forventetVarighetMerEnn3Maaneder}
+          </p>
+          <p>{begrunnelse.data.forventetVarighetMerEnn3MaanederBegrunnelse}</p>
+          <VilkaarVurdertInformasjon>
+            <Detail>Manuelt av {begrunnelse.data.kilde.ident}</Detail>
+            <Detail>
+              Dato{' '}
+              {begrunnelse.data.kilde.tidspunkt
+                ? formaterDatoMedTidspunkt(new Date(begrunnelse.data.kilde.tidspunkt))
+                : '-'}
+            </Detail>
+          </VilkaarVurdertInformasjon>
+        </div>
+      )}
+    </>
+  )
+}
+
+export interface InstitusjonsoppholdMedKilde {
+  kanGiReduksjonAvYtelse: JaNei
+  kanGiReduksjonAvYtelseBegrunnelse: string
+  forventetVarighetMerEnn3Maaneder: JaNei
+  forventetVarighetMerEnn3MaanederBegrunnelse: string
+  kilde: KildeSaksbehandler
 }
 
 const HistoriskeHendelserWrapper = styled.div`

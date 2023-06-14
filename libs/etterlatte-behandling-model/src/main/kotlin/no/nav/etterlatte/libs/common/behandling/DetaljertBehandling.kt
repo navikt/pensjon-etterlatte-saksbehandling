@@ -35,4 +35,4 @@ data class DetaljertBehandling(
     }
 }
 
-fun RevurderingAarsak?.girOpphoer() = this != null && girOpphoer
+fun RevurderingAarsak?.girOpphoer() = this != null && utfall.girOpphoer

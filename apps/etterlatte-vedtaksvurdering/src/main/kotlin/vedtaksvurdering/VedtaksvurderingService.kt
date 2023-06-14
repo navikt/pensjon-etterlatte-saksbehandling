@@ -175,7 +175,7 @@ class VedtaksvurderingService(
         return attestertVedtak
     }
 
-    private fun RevurderingAarsak?.skalIkkeSendeBrev() = this != null && !this.skalSendeBrev
+    private fun RevurderingAarsak?.skalIkkeSendeBrev() = this != null && !utfall.skalSendeBrev
 
     suspend fun underkjennVedtak(
         behandlingId: UUID,

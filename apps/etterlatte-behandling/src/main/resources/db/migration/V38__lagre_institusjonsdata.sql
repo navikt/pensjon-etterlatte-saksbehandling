@@ -5,6 +5,5 @@ CREATE TABLE institusjonsoppholdhendelse
     kanGiReduksjon          TEXT,
     kanGiReduksjonTekst     TEXT,
     merEnnTreMaaneder          TEXT,
-    merEnnTreMaanederTekst     TEXT,
-    saksbehandler               TEXT
+    merEnnTreMaanederTekst     TEXT
 )

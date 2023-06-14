@@ -15,11 +15,29 @@ data class InstitusjonsoppholdService(private val institusjonsoppholdDao: Instit
             institusjonsoppholdDao.lagreInstitusjonsopphold(sakId, saksbehandler, institusjonoppholdBegrunnelse)
         }
     }
+
+    fun hentInstitusjonsoppholdBegrunnelse(
+        grunnlagsEndringshendelseId: String
+    ) {
+        inTransaction {
+            institusjonsoppholdDao.hentBegrunnelse(grunnlagsEndringshendelseId)
+        }
+    }
 }
 
 data class InstitusjonsoppholdBegrunnelse(
     val kanGiReduksjonAvYtelse: JaNei,
     val kanGiReduksjonAvYtelseBegrunnelse: String,
     val forventetVarighetMerEnn3Maaneder: JaNei,
-    val forventetVarighetMerEnn3MaanederBegrunnelse: String
+    val forventetVarighetMerEnn3MaanederBegrunnelse: String,
+    val grunnlagsEndringshendelseId: String
+)
+
+data class InstitusjonsoppholdBegrunnelseMedSaksbehandler(
+    val kanGiReduksjonAvYtelse: JaNei,
+    val kanGiReduksjonAvYtelseBegrunnelse: String,
+    val forventetVarighetMerEnn3Maaneder: JaNei,
+    val forventetVarighetMerEnn3MaanederBegrunnelse: String,
+    val grunnlagsEndringshendelseId: String,
+    val saksbehandler: Grunnlagsopplysning.Saksbehandler
 )

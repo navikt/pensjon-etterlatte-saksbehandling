@@ -13,6 +13,7 @@ dependencies {
     implementation(project(":libs:ktor2client-onbehalfof"))
     implementation(project(":libs:etterlatte-trygdetid-model"))
     implementation(project(":libs:etterlatte-funksjonsbrytere"))
+    implementation(project(":libs:etterlatte-vilkaarsvurdering-model"))
 
     implementation(libs.database.flywaydb)
     implementation(libs.database.kotliquery)

@@ -24,6 +24,7 @@ on:
       - libs/etterlatte-database/**
       - libs/etterlatte-pdl-model/**
       - libs/etterlatte-sporingslogg/**
+      - libs/etterlatte-vedtaksvurdering-model/**
       - libs/etterlatte-funksjonsbrytere/**
       - libs/ktor2client-onbehalfof/**
       - libs/ktor2client-auth-clientcredentials/**
@@ -42,6 +43,7 @@ on:
       - libs/etterlatte-pdl-model/**
       - libs/etterlatte-database/**
       - libs/etterlatte-sporingslogg/**
+      - libs/etterlatte-vedtaksvurdering-model/**
       - libs/etterlatte-funksjonsbrytere/**
       - libs/ktor2client-onbehalfof/**
       - libs/ktor2client-auth-clientcredentials/**

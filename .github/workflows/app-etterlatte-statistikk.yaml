@@ -19,8 +19,10 @@ on:
       - libs/saksbehandling-common/**
       - libs/ktor2client-auth-clientcredentials/**
       - libs/etterlatte-behandling-model/**
+      - libs/etterlatte-beregning-model/**
       - libs/etterlatte-database/**
       - libs/etterlatte-ktor/**
+      - libs/etterlatte-vedtaksvurdering-model/**
       - gradle/libs.versions.toml
   pull_request:
     branches:
@@ -30,8 +32,10 @@ on:
       - libs/saksbehandling-common/**
       - libs/ktor2client-auth-clientcredentials/**
       - libs/etterlatte-behandling-model/**
+      - libs/etterlatte-beregning-model/**
       - libs/etterlatte-database/**
       - libs/etterlatte-ktor/**
+      - libs/etterlatte-vedtaksvurdering-model/**
       - gradle/libs.versions.toml
 
 jobs:

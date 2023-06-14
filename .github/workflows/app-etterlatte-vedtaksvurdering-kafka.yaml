@@ -19,6 +19,7 @@ on:
       - libs/saksbehandling-common/**
       - libs/etterlatte-behandling-model/**
       - libs/etterlatte-ktor/**
+      - libs/etterlatte-utbetaling-model/**
       - libs/etterlatte-vedtaksvurdering-model/**
       - libs/ktor2client-auth-clientcredentials/**
       - libs/testdata/**
@@ -31,6 +32,7 @@ on:
       - libs/saksbehandling-common/**
       - libs/etterlatte-behandling-model/**
       - libs/etterlatte-ktor/**
+      - libs/etterlatte-utbetaling-model/**
       - libs/etterlatte-vedtaksvurdering-model/**
       - libs/ktor2client-auth-clientcredentials/**
       - libs/testdata/**

@@ -10,17 +10,18 @@ enum class RevurderingAarsak(
     private val gyldigFor: List<SakType>,
     private val kanBrukesDev: Boolean,
     private val kanBrukesProd: Boolean,
-    val girOpphoer: Boolean
+    val girOpphoer: Boolean,
+    val skalSendeBrev: Boolean
 ) {
-    ANSVARLIGE_FORELDRE(SAKTYPE_BP, false, false, false),
-    SOESKENJUSTERING(SAKTYPE_BP, true, false, false),
-    UTLAND(SAKTYPE_BP, false, false, false),
-    BARN(SAKTYPE_BP, false, false, false),
-    VERGEMAAL_ELLER_FREMTIDSFULLMAKT(SAKTYPE_BP, false, false, false),
-    REGULERING(SAKTYPE_BP_OMS, true, true, false),
-    DOEDSFALL(SAKTYPE_BP_OMS, true, false, true),
-    INNTEKTSENDRING(SAKTYPE_OMS, true, false, false),
-    OMGJOERING_AV_FARSKAP(SAKTYPE_BP, true, false, true);
+    ANSVARLIGE_FORELDRE(SAKTYPE_BP, false, false, false, true),
+    SOESKENJUSTERING(SAKTYPE_BP, true, false, false, true),
+    UTLAND(SAKTYPE_BP, false, false, false, true),
+    BARN(SAKTYPE_BP, false, false, false, true),
+    VERGEMAAL_ELLER_FREMTIDSFULLMAKT(SAKTYPE_BP, false, false, false, true),
+    REGULERING(SAKTYPE_BP_OMS, true, true, false, false),
+    DOEDSFALL(SAKTYPE_BP_OMS, true, false, true, false),
+    INNTEKTSENDRING(SAKTYPE_OMS, true, false, false, true),
+    OMGJOERING_AV_FARSKAP(SAKTYPE_BP, true, false, true, true);
 
     fun kanBrukesIMiljo(): Boolean = when (clusternavn()) {
         null -> true

@@ -162,8 +162,7 @@ class VedtaksvurderingService(
                 tekniskTid = attestertVedtak.attestasjon.tidspunkt.toLocalDatetimeUTC(),
                 mapOf(
                     SKAL_SENDE_BREV to when {
-                        behandling.revurderingsaarsak == RevurderingAarsak.REGULERING -> false
-                        behandling.revurderingsaarsak == RevurderingAarsak.DOEDSFALL -> false
+                        behandling.revurderingsaarsak.skalIkkeSendeBrev() -> false
                         bruker is SystemBruker -> false
                         else -> true
                     },
@@ -175,6 +174,8 @@ class VedtaksvurderingService(
 
         return attestertVedtak
     }
+
+    private fun RevurderingAarsak?.skalIkkeSendeBrev() = this != null && !this.skalSendeBrev
 
     suspend fun underkjennVedtak(
         behandlingId: UUID,

@@ -18,7 +18,8 @@ enum class RevurderingAarsak(
     VERGEMAAL_ELLER_FREMTIDSFULLMAKT(SAKTYPE_BP, false, false),
     REGULERING(SAKTYPE_BP_OMS, true, true),
     DOEDSFALL(SAKTYPE_BP_OMS, true, false),
-    INNTEKTSENDRING(SAKTYPE_OMS, true, false);
+    INNTEKTSENDRING(SAKTYPE_OMS, true, false),
+    OMGJOERING_AV_FARSKAP(SAKTYPE_BP, true, false);
 
     fun kanBrukesIMiljo(): Boolean = when (clusternavn()) {
         null -> true

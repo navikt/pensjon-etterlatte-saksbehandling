@@ -41,6 +41,8 @@ type Success<T> = { status: 'success'; data: T }
 export const isPending = (result: Result<unknown>): result is Pending => result.status === 'pending'
 export const isSuccess = <T>(result: Result<T>): result is Success<T> => result.status === 'success'
 export const isFailure = (result: Result<unknown>): result is Error<ApiError> => result.status === 'error'
+export const isConflict = (result: Result<unknown>): result is Error<ApiError> =>
+  result.status === 'error' && result.error.statusCode == 409
 export const isInitial = (result: Result<unknown>): result is Initial => result.status === 'initial'
 export const isPendingOrInitial = (result: Result<unknown>): result is Initial | Pending =>
   isPending(result) || isInitial(result)

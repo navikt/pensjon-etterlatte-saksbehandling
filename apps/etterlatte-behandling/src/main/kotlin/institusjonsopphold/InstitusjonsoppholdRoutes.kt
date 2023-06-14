@@ -30,11 +30,10 @@ internal fun Route.institusjonsoppholdRoute(institusjonsoppholdService: Institus
 
     route("/api/institusjonsoppholdbegrunnelse/{grunnlagsendringsid}") {
         get {
-            call.respond(
-                institusjonsoppholdService.hentInstitusjonsoppholdBegrunnelse(
-                    call.parameters["grunnlagsendringsid"]!!
-                )
+            val tmp = institusjonsoppholdService.hentInstitusjonsoppholdBegrunnelse(
+                call.parameters["grunnlagsendringsid"]!!
             )
+            call.respond(tmp ?: HttpStatusCode.NotFound)
         }
     }
 }

@@ -78,19 +78,19 @@ const InstitusjonsoppholdBegrunnelse = ({ id }: { id: string }) => {
     <>
       {isSuccess(begrunnelse) && (
         <div>
-          <p>Er dette en institusjon som kan gi reduksjon av ytelsen? - {begrunnelse.data.kanGiReduksjonAvYtelse}</p>
-          <p>{begrunnelse.data.kanGiReduksjonAvYtelseBegrunnelse}</p>
           <p>
+            Er dette en institusjon som kan gi reduksjon av ytelsen? - {begrunnelse.data.kanGiReduksjonAvYtelse}
+            {begrunnelse.data.kanGiReduksjonAvYtelseBegrunnelse}
             Er oppholdet forventet å vare lenger enn innleggelsesmåned + tre måneder? -{' '}
             {begrunnelse.data.forventetVarighetMerEnn3Maaneder}
+            {begrunnelse.data.forventetVarighetMerEnn3MaanederBegrunnelse}
           </p>
-          <p>{begrunnelse.data.forventetVarighetMerEnn3MaanederBegrunnelse}</p>
           <VilkaarVurdertInformasjon>
-            <Detail>Manuelt av {begrunnelse.data.kilde.ident}</Detail>
+            <Detail>Manuelt av {begrunnelse.data.saksbehandler.ident}</Detail>
             <Detail>
               Dato{' '}
-              {begrunnelse.data.kilde.tidspunkt
-                ? formaterDatoMedTidspunkt(new Date(begrunnelse.data.kilde.tidspunkt))
+              {begrunnelse.data.saksbehandler.tidspunkt
+                ? formaterDatoMedTidspunkt(new Date(begrunnelse.data.saksbehandler.tidspunkt))
                 : '-'}
             </Detail>
           </VilkaarVurdertInformasjon>
@@ -105,7 +105,7 @@ export interface InstitusjonsoppholdMedKilde {
   kanGiReduksjonAvYtelseBegrunnelse: string
   forventetVarighetMerEnn3Maaneder: JaNei
   forventetVarighetMerEnn3MaanederBegrunnelse: string
-  kilde: KildeSaksbehandler
+  saksbehandler: KildeSaksbehandler
 }
 
 const HistoriskeHendelserWrapper = styled.div`

@@ -32,8 +32,8 @@ class InstitusjonsoppholdDao(private val connection: () -> Connection) {
         }
     }
 
-    fun hentBegrunnelse(grunnlagsEndringshendelseId: String) {
-        with(connection()) {
+    fun hentBegrunnelse(grunnlagsEndringshendelseId: String): InstitusjonsoppholdBegrunnelseMedSaksbehandler? {
+        return with(connection()) {
             val statement = prepareStatement(
                 "SELECT * from institusjonsoppholdhendelse" +
                     " WHERE grunnlagsendringshendelse_id = ?::UUID"

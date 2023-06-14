@@ -18,8 +18,8 @@ data class InstitusjonsoppholdService(private val institusjonsoppholdDao: Instit
 
     fun hentInstitusjonsoppholdBegrunnelse(
         grunnlagsEndringshendelseId: String
-    ) {
-        inTransaction {
+    ): InstitusjonsoppholdBegrunnelseMedSaksbehandler? {
+        return inTransaction {
             institusjonsoppholdDao.hentBegrunnelse(grunnlagsEndringshendelseId)
         }
     }

@@ -18,17 +18,11 @@ enum class RevurderingAarsak(
     DOEDSFALL(SAKTYPE_BP_OMS, true, false),
     INNTEKTSENDRING(SAKTYPE_OMS, true, false);
 
-    fun kanBrukesIMiljo(): Boolean {
-        val env = System.getenv()
-        val naisClusterName = env["NAIS_CLUSTER_NAME"]
-        if (naisClusterName == null) {
-            return true
-        } else {
-            if (naisClusterName == GcpEnv.PROD.name) {
-                return this.kanBrukesProd
-            }
-            return this.kanBrukesDev
-        }
+    fun kanBrukesIMiljo(): Boolean = when (System.getenv()["NAIS_CLUSTER_NAME"]) {
+        null -> true
+        GcpEnv.PROD.name -> this.kanBrukesProd
+        GcpEnv.DEV.name -> this.kanBrukesDev
+        else -> this.kanBrukesDev
     }
 
     fun gyldigForSakType(sakType: SakType): Boolean = gyldigFor.any { it == sakType }

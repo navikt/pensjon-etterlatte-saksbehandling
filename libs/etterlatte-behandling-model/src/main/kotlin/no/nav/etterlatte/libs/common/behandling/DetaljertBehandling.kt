@@ -28,6 +28,11 @@ data class DetaljertBehandling(
     val prosesstype: Prosesstype
 ) {
     fun kanVedta(type: VedtakType): Boolean {
-        return !(revurderingsaarsak == RevurderingAarsak.DOEDSFALL && type != VedtakType.OPPHOER)
+        if (revurderingsaarsak.girOpphoer() && type != VedtakType.OPPHOER) {
+            return false
+        }
+        return true
     }
 }
+
+fun RevurderingAarsak?.girOpphoer() = this != null && girOpphoer

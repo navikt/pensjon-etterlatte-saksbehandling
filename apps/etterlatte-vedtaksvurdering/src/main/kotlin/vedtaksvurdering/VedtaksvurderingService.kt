@@ -162,8 +162,7 @@ class VedtaksvurderingService(
                 tekniskTid = attestertVedtak.attestasjon.tidspunkt.toLocalDatetimeUTC(),
                 mapOf(
                     SKAL_SENDE_BREV to when {
-                        behandling.revurderingsaarsak == RevurderingAarsak.REGULERING -> false
-                        behandling.revurderingsaarsak == RevurderingAarsak.DOEDSFALL -> false
+                        behandling.revurderingsaarsak.skalIkkeSendeBrev() -> false
                         bruker is SystemBruker -> false
                         else -> true
                     },
@@ -175,6 +174,8 @@ class VedtaksvurderingService(
 
         return attestertVedtak
     }
+
+    private fun RevurderingAarsak?.skalIkkeSendeBrev() = this != null && !this.skalSendeBrev
 
     suspend fun underkjennVedtak(
         behandlingId: UUID,
@@ -250,9 +251,8 @@ class VedtaksvurderingService(
     }
 
     private fun verifiserGyldigVedtakForRevurdering(behandling: DetaljertBehandling, vedtak: Vedtak) {
-        val revurderingsaarsak = behandling.revurderingsaarsak
-        if (revurderingsaarsak == RevurderingAarsak.DOEDSFALL && vedtak.type != VedtakType.OPPHOER) {
-            throw OpphoersrevurderingErIkkeOpphoersvedtakException(vedtak, revurderingsaarsak)
+        if (!behandling.kanVedta(vedtak.type)) {
+            throw OpphoersrevurderingErIkkeOpphoersvedtakException(behandling.revurderingsaarsak, vedtak.type)
         }
     }
 
@@ -440,9 +440,9 @@ class VedtakTilstandException(gjeldendeStatus: VedtakStatus, forventetStatus: Li
 class BehandlingstilstandException(vedtak: Vedtak) :
     IllegalStateException("Statussjekk for behandling ${vedtak.behandlingId} feilet")
 
-class OpphoersrevurderingErIkkeOpphoersvedtakException(vedtak: Vedtak, revurderingAarsak: RevurderingAarsak) :
+class OpphoersrevurderingErIkkeOpphoersvedtakException(revurderingAarsak: RevurderingAarsak?, vedtakType: VedtakType) :
     IllegalStateException(
-        "Vedtaket er av type ${vedtak.type}, men dette er " +
+        "Vedtaket er av type $vedtakType, men dette er " +
             "ikke gyldig for revurderingen med årsak $revurderingAarsak"
     )
 

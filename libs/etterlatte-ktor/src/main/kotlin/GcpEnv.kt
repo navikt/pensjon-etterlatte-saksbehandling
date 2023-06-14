@@ -1,27 +1,8 @@
+import no.nav.etterlatte.libs.common.clusternavn
 
+fun isProd(): Boolean = clusternavn() == GcpEnv.PROD.name
 
-fun isProd(): Boolean {
-    val currentEnv = getNaisclustername()
-    return if (currentEnv == null) {
-        false
-    } else {
-        currentEnv == GcpEnv.PROD.name
-    }
-}
-
-fun isDev(): Boolean {
-    val currentEnv = getNaisclustername()
-    return if (currentEnv == null) {
-        false
-    } else {
-        currentEnv == GcpEnv.DEV.name
-    }
-}
-
-fun getNaisclustername(): String? {
-    val env = System.getenv()
-    return env["NAIS_CLUSTER_NAME"]
-}
+fun isDev(): Boolean = clusternavn() == GcpEnv.DEV.name
 
 enum class GcpEnv(val env: String) {
     PROD("prod-gcp"),

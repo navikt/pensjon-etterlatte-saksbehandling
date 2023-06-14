@@ -1,6 +1,7 @@
 package no.nav.etterlatte.libs.common.behandling
 
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
+import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import java.time.LocalDateTime
 import java.util.*
 
@@ -25,4 +26,13 @@ data class DetaljertBehandling(
     val kommerBarnetTilgode: KommerBarnetTilgode?,
     val revurderingsaarsak: RevurderingAarsak? = null,
     val prosesstype: Prosesstype
-)
+) {
+    fun kanVedta(type: VedtakType): Boolean {
+        if (revurderingsaarsak.girOpphoer() && type != VedtakType.OPPHOER) {
+            return false
+        }
+        return true
+    }
+}
+
+fun RevurderingAarsak?.girOpphoer() = this != null && girOpphoer

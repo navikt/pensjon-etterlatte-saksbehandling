@@ -68,7 +68,3 @@ data class Utbetalingsperiode(
 enum class UtbetalingsperiodeType {
     OPPHOER, UTBETALING
 }
-
-enum class VedtakType {
-    INNVILGELSE, OPPHOER, AVSLAG, ENDRING
-}

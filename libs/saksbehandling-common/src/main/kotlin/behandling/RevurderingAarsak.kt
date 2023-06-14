@@ -7,9 +7,9 @@ private val SAKTYPE_BP = listOf(SakType.BARNEPENSJON)
 private val SAKTYPE_BP_OMS = SAKTYPE_BP + SAKTYPE_OMS
 
 enum class RevurderingAarsak(
-    val gyldigFor: List<SakType>,
-    val kanBrukesDev: Boolean,
-    val kanBrukesProd: Boolean
+    private val gyldigFor: List<SakType>,
+    private val kanBrukesDev: Boolean,
+    private val kanBrukesProd: Boolean
 ) {
     ANSVARLIGE_FORELDRE(SAKTYPE_BP, false, false),
     SOESKENJUSTERING(SAKTYPE_BP, true, false),

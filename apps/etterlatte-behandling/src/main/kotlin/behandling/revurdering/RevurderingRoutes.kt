@@ -78,7 +78,6 @@ internal fun Route.revurderingRoutes(
 
             val stoettedeRevurderinger = RevurderingAarsak.values()
                 .filter { it.kanBrukesIMiljo() && it.gyldigForSakType(sakType) }
-                .map { it.name }
             call.respond(stoettedeRevurderinger)
         }
     }

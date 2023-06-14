@@ -12,8 +12,6 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.behandling.GenerellBehandlingService
 import no.nav.etterlatte.behandling.domain.toDetaljertBehandling
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
@@ -23,8 +21,7 @@ import java.util.*
 
 internal fun Route.revurderingRoutes(
     revurderingService: RevurderingService,
-    generellBehandlingService: GenerellBehandlingService,
-    featureToggleService: FeatureToggleService
+    generellBehandlingService: GenerellBehandlingService
 ) {
     val logger = application.log
 
@@ -81,12 +78,6 @@ internal fun Route.revurderingRoutes(
 
             val stoettedeRevurderinger = RevurderingAarsak.values()
                 .filter { it.kanBrukesIMiljo() && it.gyldigForSakType(sakType) }
-                .filter {
-                    it != RevurderingAarsak.OMGJOERING_AV_FARSKAP || featureToggleService.isEnabled(
-                        RevurderingFeatureToggles.OpphoerOmgjoerelseAvFarskap,
-                        false
-                    )
-                }
                 .map { it.name }
             call.respond(stoettedeRevurderinger)
         }
@@ -94,9 +85,3 @@ internal fun Route.revurderingRoutes(
 }
 
 data class OpprettRevurderingRequest(val aarsak: RevurderingAarsak, val paaGrunnAvHendelseId: String? = null)
-
-enum class RevurderingFeatureToggles(private val key: String) : FeatureToggle {
-    OpphoerOmgjoerelseAvFarskap("pensjon-etterlatte.opphoer-omgjoerelse-av-farskap");
-
-    override fun key() = key
-}

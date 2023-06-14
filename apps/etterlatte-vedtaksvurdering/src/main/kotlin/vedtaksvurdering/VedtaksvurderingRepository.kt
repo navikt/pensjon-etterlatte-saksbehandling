@@ -18,16 +18,16 @@ import no.nav.etterlatte.libs.common.vedtak.UtbetalingsperiodeType
 import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
-import no.nav.etterlatte.libs.database.KotliqueryRepository
+import no.nav.etterlatte.libs.database.hent
+import no.nav.etterlatte.libs.database.hentListe
+import no.nav.etterlatte.libs.database.oppdater
 import no.nav.etterlatte.libs.database.transaction
 import java.sql.Date
 import java.time.YearMonth
 import java.util.*
 import javax.sql.DataSource
 
-class VedtaksvurderingRepository(val datasource: DataSource) {
-
-    private val repositoryWrapper: KotliqueryRepository = KotliqueryRepository(datasource)
+class VedtaksvurderingRepository(private val datasource: DataSource) {
 
     companion object {
         fun using(datasource: DataSource): VedtaksvurderingRepository = VedtaksvurderingRepository(datasource)
@@ -55,8 +55,8 @@ class VedtaksvurderingRepository(val datasource: DataSource) {
                     "datovirkfom" to opprettVedtak.virkningstidspunkt.atDay(1),
                     "beregningsresultat" to opprettVedtak.beregning?.toJson(),
                     "avkorting" to opprettVedtak.beregning?.toJson(),
-                        "vilkaarsresultat" to opprettVedtak.vilkaarsvurdering?.toJson(),
-                        "revurderingsaarsak" to opprettVedtak.revurderingsaarsak?.name
+                    "vilkaarsresultat" to opprettVedtak.vilkaarsvurdering?.toJson(),
+                    "revurderingsaarsak" to opprettVedtak.revurderingsaarsak?.name
                 )
             )
                 .let { query -> tx.run(query.asUpdateAndReturnGeneratedKey) }
@@ -128,7 +128,7 @@ class VedtaksvurderingRepository(val datasource: DataSource) {
         }
 
     fun hentVedtak(behandlingId: UUID): Vedtak? =
-        repositoryWrapper.hentMedKotliquery(
+        datasource.hent(
             query = """
             SELECT sakid, behandlingId, saksbehandlerId, beregningsresultat, avkorting, vilkaarsresultat, id, fnr, 
                 datoFattet, datoattestert, attestant, datoVirkFom, vedtakstatus, saktype, behandlingtype, 
@@ -153,7 +153,7 @@ class VedtaksvurderingRepository(val datasource: DataSource) {
             FROM vedtak  
             WHERE sakId = :sakId
             """
-        return repositoryWrapper.hentListeMedKotliquery(
+        return datasource.hentListe(
             query = hentVedtak,
             params = { mapOf("sakId" to sakId) }
         ) {
@@ -163,13 +163,13 @@ class VedtaksvurderingRepository(val datasource: DataSource) {
     }
 
     private fun hentUtbetalingsPerioder(vedtakId: Long): List<Utbetalingsperiode> =
-        repositoryWrapper.hentListeMedKotliquery(
+        datasource.hentListe(
             query = "SELECT * FROM utbetalingsperiode WHERE vedtakid = :vedtakid",
             params = { mapOf("vedtakid" to vedtakId) }
         ) { it.toUtbetalingsperiode() }
 
     fun fattVedtak(behandlingId: UUID, vedtakFattet: VedtakFattet): Vedtak =
-        repositoryWrapper.oppdater(
+        datasource.oppdater(
             query = """
                 UPDATE vedtak 
                 SET saksbehandlerId = :saksbehandlerId, fattetVedtakEnhet = :saksbehandlerEnhet, datoFattet = now(), 
@@ -188,7 +188,7 @@ class VedtaksvurderingRepository(val datasource: DataSource) {
             .let { hentVedtakNonNull(behandlingId) }
 
     fun attesterVedtak(behandlingId: UUID, attestasjon: Attestasjon): Vedtak =
-        repositoryWrapper.oppdater(
+        datasource.oppdater(
             query = """
                 UPDATE vedtak 
                 SET attestant = :attestant, attestertVedtakEnhet = :attestertVedtakEnhet, datoAttestert = now(), 
@@ -207,7 +207,7 @@ class VedtaksvurderingRepository(val datasource: DataSource) {
             .let { hentVedtakNonNull(behandlingId) }
 
     fun underkjennVedtak(behandlingId: UUID): Vedtak =
-        repositoryWrapper.oppdater(
+        datasource.oppdater(
             """
             UPDATE vedtak 
             SET attestant = null, datoAttestert = null, attestertVedtakEnhet = null, saksbehandlerId = null, 
@@ -220,7 +220,7 @@ class VedtaksvurderingRepository(val datasource: DataSource) {
             .also { require(it == 1) }
             .let { hentVedtakNonNull(behandlingId) }
 
-    fun iverksattVedtak(behandlingId: UUID): Vedtak = repositoryWrapper.oppdater(
+    fun iverksattVedtak(behandlingId: UUID): Vedtak = datasource.oppdater(
         query = "UPDATE vedtak SET vedtakstatus = :vedtakstatus WHERE behandlingId = :behandlingId",
         params = mapOf("vedtakstatus" to VedtakStatus.IVERKSATT.name, "behandlingId" to behandlingId),
         loggtekst = "Lagrer iverksatt vedtak"
@@ -275,7 +275,7 @@ class VedtaksvurderingRepository(val datasource: DataSource) {
         if (hentVedtak?.status != VedtakStatus.FATTET_VEDTAK) {
             return null
         }
-        return repositoryWrapper.oppdater(
+        return datasource.oppdater(
             query = """
                 UPDATE vedtak 
                 SET vedtakstatus = :vedtakstatus 

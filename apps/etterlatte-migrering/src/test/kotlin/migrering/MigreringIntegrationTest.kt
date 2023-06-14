@@ -6,7 +6,6 @@ import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.database.DataSourceBuilder
-import no.nav.etterlatte.libs.database.KotliqueryRepository
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.migrering.Migrering
 import no.nav.etterlatte.migrering.PesysRepository
@@ -53,7 +52,7 @@ class MigreringIntegrationTest {
             postgreSQLContainer.password
         ).also { it.migrate() }
         testApplication {
-            val repository = PesysRepository(KotliqueryRepository(datasource))
+            val repository = PesysRepository(datasource)
             val syntetiskFnr = "19078504903"
             val sakInn = Pesyssak(
                 UUID.randomUUID(),

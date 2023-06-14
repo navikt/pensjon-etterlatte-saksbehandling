@@ -20,7 +20,8 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarVurderingData
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaarsgrunnlag
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
-import no.nav.etterlatte.libs.database.KotliqueryRepository
+import no.nav.etterlatte.libs.database.hent
+import no.nav.etterlatte.libs.database.oppdater
 import no.nav.etterlatte.libs.database.tidspunkt
 import no.nav.etterlatte.libs.database.transaction
 import java.time.LocalDate
@@ -29,8 +30,6 @@ import java.util.*
 import javax.sql.DataSource
 
 class VilkaarsvurderingRepository(private val ds: DataSource, private val delvilkaarRepository: DelvilkaarRepository) {
-
-    private val repositoryWrapper: KotliqueryRepository = KotliqueryRepository(ds)
 
     fun hent(behandlingId: UUID): Vilkaarsvurdering? =
         using(sessionOf(ds)) { session ->
@@ -47,7 +46,7 @@ class VilkaarsvurderingRepository(private val ds: DataSource, private val delvil
 
     private fun hentNonNull(behandlingId: UUID, tx: TransactionalSession): Vilkaarsvurdering {
         val params = mapOf("behandling_id" to behandlingId)
-        return repositoryWrapper.hentMedKotliquery(Queries.hentVilkaarsvurdering, params, tx) { row ->
+        return tx.hent(Queries.hentVilkaarsvurdering, params) { row ->
             val vilkaarsvurderingId = row.uuid("id")
             row.toVilkaarsvurdering(hentVilkaar(vilkaarsvurderingId, tx))
         } ?: throw NullPointerException("Forventet å hente en vilkaarsvurdering men var null.")
@@ -160,7 +159,7 @@ class VilkaarsvurderingRepository(private val ds: DataSource, private val delvil
         behandlingId: UUID,
         vurdertVilkaar: VurdertVilkaar
     ): Vilkaarsvurdering {
-        repositoryWrapper.oppdater(
+        ds.oppdater(
             query = Queries.lagreVilkaarResultat,
             params = mapOf(
                 "id" to vurdertVilkaar.vilkaarId,

@@ -10,6 +10,7 @@ import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toTimestamp
 import no.nav.etterlatte.libs.common.toJson
+import no.nav.etterlatte.libs.database.hentListe
 import no.nav.etterlatte.libs.database.tidspunkt
 import no.nav.etterlatte.libs.database.transaction
 import java.time.Period
@@ -258,20 +259,15 @@ class TrygdetidRepository(private val dataSource: DataSource) {
         }
 
     private fun hentGrunnlagOpplysninger(trygdetidId: UUID): List<Opplysningsgrunnlag> =
-        using(sessionOf(dataSource)) { session ->
-            queryOf(
-                statement = """
+        dataSource.hentListe(
+            query = """
                 SELECT id, trygdetid_id, type, opplysning, kilde
                 FROM opplysningsgrunnlag
                 WHERE trygdetid_id = :trygdetidId
-                """.trimIndent(),
-                paramMap = mapOf("trygdetidId" to trygdetidId)
-            ).let { query ->
-                session.run(
-                    query.map { row -> row.toOpplysningsgrunnlag() }.asList
-                )
-            }
-        }
+            """.trimIndent(),
+            params = { mapOf("trygdetidId" to trygdetidId) },
+            converter = { it.toOpplysningsgrunnlag() }
+        )
 
     private fun hentTrygdtidNotNull(behandlingsId: UUID) =
         hentTrygdetid(behandlingsId)

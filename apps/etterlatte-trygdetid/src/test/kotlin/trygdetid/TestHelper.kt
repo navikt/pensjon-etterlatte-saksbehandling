@@ -42,7 +42,8 @@ fun trygdetidGrunnlag(
     ),
     begrunnelse: String? = null,
     poengInnAar: Boolean = false,
-    poengUtAar: Boolean = false
+    poengUtAar: Boolean = false,
+    prorata: Boolean = false
 ) = TrygdetidGrunnlag(
     id = randomUUID(),
     type = TrygdetidType.FAKTISK,
@@ -52,7 +53,8 @@ fun trygdetidGrunnlag(
     kilde = Grunnlagsopplysning.Saksbehandler(ident = "Z123", tidspunkt = Tidspunkt.now()),
     begrunnelse = begrunnelse,
     poengUtAar = poengUtAar,
-    poengInnAar = poengInnAar
+    poengInnAar = poengInnAar,
+    prorata = prorata
 )
 
 fun beregnetTrygdetid(total: Int = 0, tidspunkt: Tidspunkt = Tidspunkt.now()) =

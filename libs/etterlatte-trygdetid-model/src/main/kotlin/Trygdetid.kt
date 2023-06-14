@@ -45,7 +45,8 @@ data class TrygdetidGrunnlagDto(
     val beregnet: BeregnetTrygdetidGrunnlagDto?,
     val begrunnelse: String?,
     val poengInnAar: Boolean,
-    val poengUtAar: Boolean
+    val poengUtAar: Boolean,
+    val prorata: Boolean
 )
 
 data class TrygdetidGrunnlagKildeDto(

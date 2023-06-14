@@ -86,6 +86,7 @@ internal class MigreringHendelser(rapidsConnection: RapidsConnection, private va
         beregnet = null,
         begrunnelse = trygdetidsgrunnlag.begrunnelse,
         poengInnAar = false,
-        poengUtAar = false
+        poengUtAar = false,
+        prorata = false
     )
 }

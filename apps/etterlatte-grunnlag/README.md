@@ -5,6 +5,18 @@ Grunnlag er både en kafka-app og en REST-app.
 Tjenesten har ansvar for henting og lagring av opplysninger, og sammenstillning av opplysningene til ett "grunnlag" for videre bruk.
 REST-api'et tilbyr tjenester for å hente ut enkeltopplysninger fra et grunnlag i en sak.
 
+## Kom i gang
+
+### Hvordan kjøre lokalt mot dev-gcp
+
+Les [README](../../README.md) på rot i prosjektet.
+
+...og legg til følgende linje nederst i `.env.dev-gcp` fila til saksbehandling-ui.
+
+```
+GRUNNLAG_API_URL=http://host.docker.internal:8092
+```
+
 ## Konsepter
 
 ### Opplysning

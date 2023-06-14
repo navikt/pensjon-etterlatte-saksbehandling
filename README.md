@@ -1,131 +1,65 @@
 # pensjon-etterlatte-saksbehandling
 
+### Ny saksbehandlingsløsning for ytelser til etterlatte
+
 Monorepoet bruker `husky` for pre-commit-hooks. Denne kjører `Prettier` for frontend og `ktlint` for backend.
-Før man starter å kode er det derfor viktig å kjøre `bash get-started.sh` fra Root. Da vil alle de tre overnevnte bli 
+Før man starter å kode er det derfor viktig å kjøre `bash get-started.sh` fra Root. Da vil alle de tre overnevnte bli
 installert.
 
-Monorepo for ny saksbehandlingsløsning for ytelser til etterlatte
+# Lokal utvikling
 
-### AzureAD secrets på lokal maskin
+## Hvordan kjøre en eller flere apper
 
-Tokens/secrets som gjør det mulig å gå mot dev-gcp fra lokal maskin.\
-Kan hentes ved å kjøre følgende kommando:
-```
-./get-secret.sh <APP_NAME>
-```
+Det enkleste er å kjøre opp frontend og valgfri backend med docker compose som starter alt man trenger for at APIet skal
+fungere.
 
-Hvis du får feilmelding `Not logged in or lacking rights. Ensure you're connected to naisdevice and gcp.`
-og du er sikker på du er koblet både naisdevice og gcp så kan det være at du må sette default namespace på context:
+1. **Hent secrets**
 
-```
-kubectl config set-context --current --namespace=etterlatte
-```
+   Kjør scriptet `get-secret.sh` med appnavn.
+    ```shell
+    ./get-secret.sh <app_name>
+    ```
 
+   Eksempel for henting av secrets til frontend:
+    ```shell
+    ./get-secret.sh etterlatte-saksbehandling-ui
+    ```
 
-**NB:** Ved kjøring av en eller flere backend(s) lokalt kan det være lurt å installere
-[EnvFile](https://plugins.jetbrains.com/plugin/7861-envfile) i IntelliJ. Uten denne må du manuelt kopiere
-fra .env-filen til appen sine miljøvariabler.
+2. **Kjør docker compose**
+    ```shell
+    docker compose up -d
+    ```
+   NB: Hvis du vil kjøre frontend mot lokal backend må du overskrive variabel for `_API`-url (se oversikt i `config.ts`)
 
-## Maven
-Vi bruker personal access token til autentisering for å hente intern pakker til prosjektet.
-Du må derfor sette `export GITHUB_TOKEN='DITT_TOKEN'` som miljøvariabel.
-Dette tokenet må autoriseres mot navikt.
+3. **Kjør run config** \
+   Config for å kjøre appen (i IntelliJ) ligger i `.run`. Denne skal dukke opp automatisk under `Run configurations` i
+   IntelliJ.
 
-## Apper
+### Feilsøking
 
-[etterlatte-behandling](apps/etterlatte-behandling) \
-Tjeneste som holder styr på behandlinger.
+- Hvis du får feilmelding `Not logged in or lacking rights. Ensure you're connected to naisdevice and gcp.`
+  og du er sikker på du er koblet både naisdevice og gcp, kan det være at du må sette default namespace på context:\
+  `kubectl config set-context --current --namespace=etterlatte`
+- Run config for backend bruker [EnvFile](https://plugins.jetbrains.com/plugin/7861-envfile) i IntelliJ, så pass på at
+  denne pluginen er installert før kjøring.
 
-[etterlatte-beregning](apps/etterlatte-beregning) \
-// TODO
+### Frontend mot lokal backend
 
-[etterlatte-brev-api](apps/etterlatte-brev-api) \
-Ktor og Rapid app for å håndtere generering av brev, brevmaler og sende videre til distribusjon.
+Om du skal kjøre med frontend og wonderwall mot lokal backend må du overskrive backend-appen sin 
+`*_API_URL` i `./apps/etterlatte-saksbehandling-ui/.env.dev-gcp`. 
 
-[etterlatte-fordeler](apps/etterlatte-fordeler) \
-Fordeler aktuelle saker inn til behandling i ny applikasjon.
+Se i filen `config.ts` for å se hvilke `_API_URL` verdier som kan overskrives. 
 
-[etterlatte-grunnlag](apps/etterlatte-grunnlag) \
-Tjeneste som holder styr på behandlinger.
+Eksempel på overskrevet verdi: \
+`BEHANDLING_API_URL=http://host.docker.internal:8090`
 
-[etterlatte-gyldig-soeknad](apps/etterlatte-gyldig-soeknad) \
-// TODO
+### Postgres (DB)
 
-[etterlatte-hendelser-pdl](apps/etterlatte-hendelser-pdl) \
-Lytter på hendelser fra Livet er en strøm av hendelser
+Apper som har en database vil få dette opprettet ved å kjøre `docker-compose up -d`. Alternativt er det mulig å
+kjøre en proxy mot gcp-dev ved å kjøre `nais postgres proxy <appnavn>`. Merk at for at dette skal fungere
+kan det ikke sendes passord ved opprettelse av database-kobling.
 
-[etterlatte-oppdater-behandling](apps/etterlatte-oppdater-behandling) \
-Oppdater behandling er en Rapid-app, som brukes til å lese meldinger relevant for behandlings-appen og sende HTTP-kall til behandlingsappen for å gjøre forskjellige handlinger.
-
-[etterlatte-opplysninger-fra-pdl](apps/etterlatte-opplysninger-fra-pdl) \
-// TODO
-
-[etterlatte-opplysninger-fra-soeknad](apps/etterlatte-opplysninger-fra-soeknad) \
-// TODO
-
-[etterlatte-pdltjenester](apps/etterlatte-pdltjenester) \
-// TODO
-
-[etterlatte-saksbehandling-ui](apps/etterlatte-saksbehandling-ui) \
-Appen består av en statisk frontend og en backend-for-frontends i NodeJS.
-
-[etterlatte-testdata](apps/etterlatte-testdata) \
-App for forenkling av manuell testing.
-
-[etterlatte-tilbakekreving](apps/etterlatte-tilbakekreving) \
-Mottar tilbakekrevingsvedtak fra Tilbakekrevingskomponenten til Oppdrag
-
-[etterlatte-utbetaling](apps/etterlatte-utbetaling) \
-Oversetter vedtak til et format som kan oversendes til oppdrag.
-
-[etterlatte-vedtaksvurdering](apps/etterlatte-vedtaksvurdering) \
-Tjeneste som tilbyr forslag til vedtak som kan fattes og attesteres
-
-# Flytdiagram
-
-### Hvordan appene samarbeider
-
-```mermaid
-flowchart TD
-
-classDef front fill:#BA99D2FF,color:#000,stroke:#C488F0FF
-classDef app fill:#88AACC,color:#000,stroke:#335577
-classDef db fill:#D7AE69FF,color:#000,stroke:#F39D0CFF
-classDef kafka fill:#79ab6d,color:#000,stroke:#39ba15
-classDef msg fill:#555,color:#ddd,stroke:none
-
-fordeler:::kafka -.-> gyldig-soeknad
-
-gyldig-soeknad:::kafka -.- t1[/"S&oslash;knad med\n behandlingsId og saksId"/]:::msg -.-> opplysninger-fra-soeknad
-gyldig-soeknad -.-> behandling:::app
-gyldig-soeknad --> pdl
-
-behandling -.- t2[/"Behandling opprettet\n inkludert persongalleri\n fra s&oslash;knad"/]:::msg -.-> grunnlag
-behandling -.- t3[/"Behandling uten grunnlag"/]:::msg -.-> grunnlag
-
-subgraph registere["Registere"]
-    pdl["PDL-tjenester"]
-    inntektskomponenten
-end
-
-opplysninger-fra-soeknad:::kafka -.- t5[/"Ny opplysning"/]:::msg -.-> grunnlag:::app
-opplysninger-fra-pdl:::kafka --> pdl
-opplysninger-fra-pdl -- "(kommer)" --> inntektskomponenten
-opplysninger-fra-pdl -.->  t5 -.-> grunnlag
-
-oppdater-behandling -.-> behandling
-
-grunnlag -.- t6[/"Opplysningsbehov"/]:::msg -.-> opplysninger-fra-pdl
-grunnlag -.- t7[/"Grunnlagsendring p&aring; sak"/]:::msg -.-> oppdater-behandling:::kafka
-grunnlag -.- t8[/"Behandling med grunnlag"/]:::msg -.-> vilkaar:::kafka
-grunnlag --> database[(Database)]:::db
-
-vilkaar -.- t9[/"Vilkaarsvurdert behandling"/]:::msg -.-> vedtaksvurdering:::kafka
-t9 -.-> beregning:::kafka
-beregning -.- t11[/"Beregnet behandling"/]:::msg -.-> vedtaksvurdering
-
-vedtaksvurdering <--> db2[(Database)]:::db
-```
+**OBS:** Ved bruk av proxy til lokal kjøring må du passe på å ikke endre på Flyway-scripts i prosjektet.
 
 # Bygg og deploy
 
@@ -133,10 +67,16 @@ En app bygges og deployes automatisk når en endring legges til i `main`.
 
 For å trigge **manuell deploy** kan du gå til `Actions -> (velg workflow) -> Run workflow from <branch>`
 
+## Maven
+
+Vi bruker personal access token til autentisering for å hente intern pakker til prosjektet.
+Du må derfor sette `export GITHUB_TOKEN='DITT_TOKEN'` som miljøvariabel.
+Dette tokenet må autoriseres mot navikt.
+
 ## Lokal bygg/test - docker
 
-Docker må være installert og kjørende for at lokal bygg/test skal fungere. Hvis man bruker docker desktop så klarer testene
-å finne docker socket automatisk. Hvis man har colima kjørende så må man sette opp noen miljøvariabler.
+Docker må være installert og kjørende for at lokal bygg/test skal fungere. Hvis man bruker docker desktop så klarer
+testene å finne docker socket automatisk. Hvis man har colima kjørende så må man sette opp noen miljøvariabler.
 
 ```
 DOCKER_HOST=unix://${HOME}/.colima/default/docker.sock

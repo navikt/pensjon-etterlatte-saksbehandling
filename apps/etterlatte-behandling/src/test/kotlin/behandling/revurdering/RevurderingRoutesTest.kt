@@ -169,7 +169,7 @@ internal class RevurderingRoutesTest {
 
             val revurderingAarsak: List<String> = response.body()
             assertEquals(HttpStatusCode.OK, response.status)
-            assertEquals(7, revurderingAarsak.size)
+            assertEquals(9, revurderingAarsak.size)
             assertTrue(
                 revurderingAarsak.containsAll<Any>(
                     setOf(
@@ -179,7 +179,9 @@ internal class RevurderingRoutesTest {
                         RevurderingAarsak.BARN.name,
                         RevurderingAarsak.VERGEMAAL_ELLER_FREMTIDSFULLMAKT.name,
                         RevurderingAarsak.REGULERING.name,
-                        RevurderingAarsak.DOEDSFALL.name
+                        RevurderingAarsak.DOEDSFALL.name,
+                        RevurderingAarsak.OMGJOERING_AV_FARSKAP.name,
+                        RevurderingAarsak.ADOPSJON.name
                     )
                 )
             )

@@ -60,6 +60,7 @@ import vedtaksvurdering.attestant
 import vedtaksvurdering.opprettVedtak
 import vedtaksvurdering.saksbehandler
 import java.math.BigDecimal
+import java.time.LocalDateTime
 import java.time.Month
 import java.time.YearMonth
 import java.util.*
@@ -898,23 +899,37 @@ internal class VedtaksvurderingServiceTest {
         behandlingId: UUID,
         saktype: SakType = SakType.BARNEPENSJON,
         revurderingAarsak: RevurderingAarsak? = null
-    ): DetaljertBehandling = mockk {
-        every { id } returns behandlingId
-        every { soeker } returns FNR_1
-        every { sak } returns 1L
-        every { sakType } returns saktype
-        every { behandlingType } returns if (revurderingAarsak == null) {
-            BehandlingType.FØRSTEGANGSBEHANDLING
-        } else {
-            BehandlingType.REVURDERING
-        }
-        every { revurderingsaarsak } returns revurderingAarsak
-        every { virkningstidspunkt } returns Virkningstidspunkt(
-            virk,
-            Grunnlagsopplysning.Saksbehandler(SAKSBEHANDLER_1, Tidspunkt.now()),
-            "enBegrunnelse"
+    ): DetaljertBehandling =
+        DetaljertBehandling(
+            id = behandlingId,
+            sak = 1L,
+            sakType = saktype,
+            behandlingOpprettet = LocalDateTime.now(),
+            sistEndret = LocalDateTime.now(),
+            soeknadMottattDato = LocalDateTime.now(),
+            innsender = null,
+            soeker = FNR_1,
+            gjenlevende = listOf(),
+            avdoed = listOf(),
+            soesken = listOf(),
+            gyldighetsproeving = null,
+            status = BehandlingStatus.OPPRETTET,
+            behandlingType = if (revurderingAarsak == null) {
+                BehandlingType.FØRSTEGANGSBEHANDLING
+            } else {
+                BehandlingType.REVURDERING
+            },
+            virkningstidspunkt = Virkningstidspunkt(
+                virk,
+                Grunnlagsopplysning.Saksbehandler(SAKSBEHANDLER_1, Tidspunkt.now()),
+                "enBegrunnelse"
+            ),
+            utenlandstilsnitt = null,
+            boddEllerArbeidetUtlandet = null,
+            kommerBarnetTilgode = null,
+            revurderingsaarsak = revurderingAarsak,
+            prosesstype = Prosesstype.MANUELL
         )
-    }
 
     private companion object {
         val VIRKNINGSTIDSPUNKT_JAN_2023: YearMonth = YearMonth.of(2023, Month.JANUARY)

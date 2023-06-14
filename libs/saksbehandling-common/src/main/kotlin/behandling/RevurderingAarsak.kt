@@ -1,5 +1,7 @@
 package no.nav.etterlatte.libs.common.behandling
 
+import no.nav.etterlatte.libs.common.clusternavn
+
 private val SAKTYPE_OMS = listOf(SakType.OMSTILLINGSSTOENAD)
 private val SAKTYPE_BP = listOf(SakType.BARNEPENSJON)
 private val SAKTYPE_BP_OMS = SAKTYPE_BP + SAKTYPE_OMS
@@ -18,7 +20,7 @@ enum class RevurderingAarsak(
     DOEDSFALL(SAKTYPE_BP_OMS, true, false),
     INNTEKTSENDRING(SAKTYPE_OMS, true, false);
 
-    fun kanBrukesIMiljo(): Boolean = when (System.getenv()["NAIS_CLUSTER_NAME"]) {
+    fun kanBrukesIMiljo(): Boolean = when (clusternavn()) {
         null -> true
         GcpEnv.PROD.name -> this.kanBrukesProd
         GcpEnv.DEV.name -> this.kanBrukesDev

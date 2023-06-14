@@ -69,7 +69,9 @@ class ApplicationIntegrationTest {
             serviceUserPassword = "passw0rd",
             leaderElectorPath = "",
             grensesnittavstemmingEnabled = false,
-            konsistensavstemmingEnabled = false
+            konsistensavstemmingEnabled = false,
+            grensesnittavstemmingOMSEnabled = false,
+            konsistensavstemmingOMSEnabled = false
         )
 
         ApplicationContext(applicationProperties, rapidsConnection).also {

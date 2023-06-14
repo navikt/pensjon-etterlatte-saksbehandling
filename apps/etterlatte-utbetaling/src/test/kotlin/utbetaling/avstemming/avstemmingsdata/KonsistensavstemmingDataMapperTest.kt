@@ -1,5 +1,6 @@
 package no.nav.etterlatte.utbetaling.avstemming.avstemmingsdata
 
+import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Saktype
 import no.nav.etterlatte.utbetaling.mockKonsistensavstemming
 import no.nav.etterlatte.utbetaling.oppdragForKonsistensavstemming
 import no.nav.etterlatte.utbetaling.oppdragslinjeForKonsistensavstemming
@@ -19,7 +20,7 @@ internal class KonsistensavstemmingDataMapperTest {
         val konsistensavstemming = mockKonsistensavstemming(loependeUtbetalinger = emptyList())
 
         val dataMapper = KonsistensavstemmingDataMapper(konsistensavstemming)
-        val opprettetAvstemmingsmelding = dataMapper.opprettAvstemmingsmelding()
+        val opprettetAvstemmingsmelding = dataMapper.opprettAvstemmingsmelding(Saktype.BARNEPENSJON)
 
         assertDoesNotThrow { `liste av konsistensavstemmingsdata har rett struktur`(opprettetAvstemmingsmelding) }
         assertEquals(emptyList<Oppdragsdata>(), opprettetAvstemmingsmelding[1].oppdragsdataListe)
@@ -35,7 +36,7 @@ internal class KonsistensavstemmingDataMapperTest {
         val konsistensavstemming = mockKonsistensavstemming(loependeUtbetalinger = listOf(oppdrag))
 
         val dataMapper = KonsistensavstemmingDataMapper(konsistensavstemming)
-        val opprettetAvstemmingsmelding = dataMapper.opprettAvstemmingsmelding()
+        val opprettetAvstemmingsmelding = dataMapper.opprettAvstemmingsmelding(Saktype.BARNEPENSJON)
         assertDoesNotThrow { `liste av konsistensavstemmingsdata har rett struktur`(opprettetAvstemmingsmelding) }
         assertEquals(1, opprettetAvstemmingsmelding[1].oppdragsdataListe.size)
         assertEquals(oppdrag.fnr.value, opprettetAvstemmingsmelding[1].oppdragsdataListe.first().oppdragGjelderId)
@@ -76,7 +77,7 @@ internal class KonsistensavstemmingDataMapperTest {
 
         val konsistensavstemming = mockKonsistensavstemming(loependeUtbetalinger = listOf(oppdrag1, oppdrag2))
         val dataMapper = KonsistensavstemmingDataMapper(konsistensavstemming)
-        val opprettetAvstemmingsmelding = dataMapper.opprettAvstemmingsmelding()
+        val opprettetAvstemmingsmelding = dataMapper.opprettAvstemmingsmelding(Saktype.BARNEPENSJON)
 
         assertDoesNotThrow { `liste av konsistensavstemmingsdata har rett struktur`(opprettetAvstemmingsmelding) }
 

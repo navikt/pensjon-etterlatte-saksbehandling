@@ -29,6 +29,7 @@ import no.nav.etterlatte.utbetaling.iverksetting.KvitteringMottaker
 import no.nav.etterlatte.utbetaling.iverksetting.VedtakMottaker
 import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.OppdragMapper
 import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.OppdragSender
+import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Saktype
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingDao
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingService
 import no.nav.helse.rapids_rivers.RapidApplication
@@ -102,7 +103,16 @@ class ApplicationContext(
             grensesnittsavstemmingService = grensesnittsavstemmingService,
             leaderElection = leaderElection,
             starttidspunkt = Tidspunkt.now(norskKlokke()).next(LocalTime.of(3, 0, 0)),
-            periode = Duration.of(1, ChronoUnit.DAYS)
+            periode = Duration.of(1, ChronoUnit.DAYS),
+            saktype = Saktype.BARNEPENSJON
+        )
+    val grensesnittavstemmingJobOMS =
+        GrensesnittsavstemmingJob(
+            grensesnittsavstemmingService = grensesnittsavstemmingService,
+            leaderElection = leaderElection,
+            starttidspunkt = Tidspunkt.now(norskKlokke()).next(LocalTime.of(3, 0, 0)),
+            periode = Duration.of(1, ChronoUnit.DAYS),
+            saktype = Saktype.OMSTILLINGSSTOENAD
         )
 
     val konsistensavstemmingService by lazy {
@@ -119,7 +129,18 @@ class ApplicationContext(
         leaderElection,
         initialDelay = Duration.of(2, ChronoUnit.MINUTES).toMillis(),
         periode = Duration.of(4, ChronoUnit.HOURS),
-        clock = clock
+        clock = clock,
+        saktype = Saktype.BARNEPENSJON
+    )
+
+    val konsistensavstemmingJobOMS = KonsistensavstemmingJob(
+        konsistensavstemmingService,
+        kjoereplanKonsistensavstemming(),
+        leaderElection,
+        initialDelay = Duration.of(2, ChronoUnit.MINUTES).toMillis(),
+        periode = Duration.of(4, ChronoUnit.HOURS),
+        clock = clock,
+        saktype = Saktype.OMSTILLINGSSTOENAD
     )
 
     val oppgavetrigger by lazy {

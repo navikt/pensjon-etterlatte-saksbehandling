@@ -8,6 +8,7 @@ import no.nav.etterlatte.utbetaling.common.OppdragDefaults
 import no.nav.etterlatte.utbetaling.common.OppdragslinjeDefaults
 import no.nav.etterlatte.utbetaling.common.tidsstempelDatoOppdrag
 import no.nav.etterlatte.utbetaling.common.tidsstempelMikroOppdrag
+import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Saktype
 import no.nav.virksomhet.tjenester.avstemming.informasjon.konsistensavstemmingsdata.v1.Aksjonsdata
 import no.nav.virksomhet.tjenester.avstemming.informasjon.konsistensavstemmingsdata.v1.Attestant
 import no.nav.virksomhet.tjenester.avstemming.informasjon.konsistensavstemmingsdata.v1.Enhet
@@ -24,29 +25,29 @@ internal class KonsistensavstemmingDataMapper(
     private val detaljerPrMelding: Int = ANTALL_DETALJER_PER_AVSTEMMINGMELDING_OPPDRAG
 ) {
 
-    fun opprettAvstemmingsmelding(): List<Konsistensavstemmingsdata> =
-        listOf(startmelding()) + datameldinger() + listOf(sluttmelding())
+    fun opprettAvstemmingsmelding(saktype: Saktype): List<Konsistensavstemmingsdata> =
+        listOf(startmelding(saktype)) + datameldinger(saktype) + listOf(sluttmelding(saktype))
 
-    private fun startmelding() = Konsistensavstemmingsdata().apply {
-        aksjonsdata = avstemmingsdata(KodeAksjon.START)
+    private fun startmelding(saktype: Saktype) = Konsistensavstemmingsdata().apply {
+        aksjonsdata = avstemmingsdata(KodeAksjon.START, saktype)
     }
 
-    private fun sluttmelding() = Konsistensavstemmingsdata().apply {
-        aksjonsdata = avstemmingsdata(KodeAksjon.AVSL)
+    private fun sluttmelding(saktype: Saktype) = Konsistensavstemmingsdata().apply {
+        aksjonsdata = avstemmingsdata(KodeAksjon.AVSL, saktype)
     }
 
-    private fun datameldinger(): List<Konsistensavstemmingsdata> {
+    private fun datameldinger(saktype: Saktype): List<Konsistensavstemmingsdata> {
         return avstemming.loependeUtbetalinger
             .chunked(detaljerPrMelding)
             .map {
                 Konsistensavstemmingsdata().apply {
-                    this.aksjonsdata = avstemmingsdata(KodeAksjon.DATA)
+                    this.aksjonsdata = avstemmingsdata(KodeAksjon.DATA, saktype)
                     this.oppdragsdataListe.addAll(it.map { it.toOppdragdata() })
                 }
             }.ifEmpty {
                 listOf(
                     Konsistensavstemmingsdata().apply {
-                        aksjonsdata = avstemmingsdata(KodeAksjon.DATA)
+                        aksjonsdata = avstemmingsdata(KodeAksjon.DATA, saktype)
                     }
                 )
             }.leggPaaTotaldata()
@@ -68,9 +69,12 @@ internal class KonsistensavstemmingDataMapper(
             fortegn = OppdragDefaults.TILLEGG.value()
         }
 
-    private fun avstemmingsdata(kodeAksjon: KodeAksjon): Aksjonsdata =
+    private fun avstemmingsdata(kodeAksjon: KodeAksjon, saktype: Saktype): Aksjonsdata =
         Aksjonsdata().apply {
-            val fagomraade = "BARNEPE"
+            val fagomraade = when (saktype) {
+                Saktype.BARNEPENSJON -> "BARNEPE"
+                Saktype.OMSTILLINGSSTOENAD -> "OMSTILL"
+            }
             aksjonsType = kodeAksjon.name
             kildeType = KildeType.AVLEV.name
             avstemmingType = KONSAVSTEMMING
@@ -85,7 +89,10 @@ internal class KonsistensavstemmingDataMapper(
 
 internal fun OppdragForKonsistensavstemming.toOppdragdata(): Oppdragsdata {
     return Oppdragsdata().apply {
-        fagomradeKode = "BARNEPE"
+        fagomradeKode = when (sakType) {
+            Saktype.BARNEPENSJON -> "BARNEPE"
+            Saktype.OMSTILLINGSSTOENAD -> "OMSTILL"
+        }
         fagsystemId = sakId.value.toString()
         utbetalingsfrekvens = OppdragDefaults.UTBETALINGSFREKVENS
         oppdragGjelderId = fnr.value

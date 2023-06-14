@@ -20,8 +20,14 @@ fun jobs(applicationContext: ApplicationContext) {
     with(applicationContext.grensesnittavstemmingJob) {
         if (applicationContext.properties.grensesnittavstemmingEnabled) schedule()
     }
+    with(applicationContext.grensesnittavstemmingJobOMS) {
+        if (applicationContext.properties.grensesnittavstemmingOMSEnabled) schedule()
+    }
     with(applicationContext.konsistensavstemmingJob) {
         if (applicationContext.properties.konsistensavstemmingEnabled) schedule()
+    }
+    with(applicationContext.konsistensavstemmingJobOMS) {
+        if (applicationContext.properties.konsistensavstemmingOMSEnabled) schedule()
     }
 }
 

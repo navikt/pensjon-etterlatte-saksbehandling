@@ -3,6 +3,7 @@ package no.nav.etterlatte.utbetaling.grensesnittavstemming.avstemmingsdata
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toNorskTidspunkt
 import no.nav.etterlatte.utbetaling.grensesnittavstemming.UUIDBase64
+import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Saktype
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetaling
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingStatus
 import no.nav.etterlatte.utbetaling.utbetaling
@@ -31,7 +32,25 @@ internal class GrensesnittavstemmingDataMapperTest {
             listOf(utbetaling(utbetalingshendelser = listOf(utbetalingshendelse(status = UtbetalingStatus.FEILET))))
 
         val grensesnittavstemmingDataMapper = GrensesnittavstemmingDataMapper(utbetalinger, fraOgMed, til, UUIDBase64())
-        val avstemmingsmelding = grensesnittavstemmingDataMapper.opprettAvstemmingsmelding()
+        val avstemmingsmelding = grensesnittavstemmingDataMapper.opprettAvstemmingsmelding(Saktype.BARNEPENSJON)
+
+        val (startMelding, dataMelding, sluttMelding) = avstemmingsmelding
+
+        assertEquals(AksjonType.START, startMelding.aksjon.aksjonType)
+        assertEquals(AksjonType.DATA, dataMelding.aksjon.aksjonType)
+        assertEquals(AksjonType.AVSL, sluttMelding.aksjon.aksjonType)
+    }
+
+    @Test
+    fun `skal opprette avstemming fra utbetaling med startmelding, datamelding og sluttmelding for OMS`() {
+        val fraOgMed = Tidspunkt.now().minus(1, ChronoUnit.DAYS)
+        val til = Tidspunkt.now()
+
+        val utbetalinger =
+            listOf(utbetaling(utbetalingshendelser = listOf(utbetalingshendelse(status = UtbetalingStatus.FEILET))))
+
+        val grensesnittavstemmingDataMapper = GrensesnittavstemmingDataMapper(utbetalinger, fraOgMed, til, UUIDBase64())
+        val avstemmingsmelding = grensesnittavstemmingDataMapper.opprettAvstemmingsmelding(Saktype.OMSTILLINGSSTOENAD)
 
         val (startMelding, dataMelding, sluttMelding) = avstemmingsmelding
 
@@ -53,7 +72,7 @@ internal class GrensesnittavstemmingDataMapperTest {
 
         val grensesnittavstemmingDataMapper =
             GrensesnittavstemmingDataMapper(utbetalinger, fraOgMed, til, UUIDBase64(), 2)
-        val avstemmingsmelding = grensesnittavstemmingDataMapper.opprettAvstemmingsmelding()
+        val avstemmingsmelding = grensesnittavstemmingDataMapper.opprettAvstemmingsmelding(Saktype.BARNEPENSJON)
 
         val (_, dataMelding1, dataMelding2, _) = avstemmingsmelding
 
@@ -77,7 +96,7 @@ internal class GrensesnittavstemmingDataMapperTest {
 
         val grensesnittavstemmingDataMapper =
             GrensesnittavstemmingDataMapper(utbetalinger, fraOgMed, til, UUIDBase64(), 2)
-        val avstemmingsmelding = grensesnittavstemmingDataMapper.opprettAvstemmingsmelding()
+        val avstemmingsmelding = grensesnittavstemmingDataMapper.opprettAvstemmingsmelding(Saktype.BARNEPENSJON)
 
         val (_, dataMelding1, dataMelding2, _) = avstemmingsmelding
 
@@ -106,7 +125,7 @@ internal class GrensesnittavstemmingDataMapperTest {
         )
 
         val grensesnittavstemmingDataMapper = GrensesnittavstemmingDataMapper(utbetalinger, fraOgMed, til, UUIDBase64())
-        val avstemmingsmelding = grensesnittavstemmingDataMapper.opprettAvstemmingsmelding()
+        val avstemmingsmelding = grensesnittavstemmingDataMapper.opprettAvstemmingsmelding(Saktype.BARNEPENSJON)
 
         val (_, dataMelding, _) = avstemmingsmelding
 
@@ -123,7 +142,7 @@ internal class GrensesnittavstemmingDataMapperTest {
         val utbetalinger = listOf(utbetalingMedOpphoer())
 
         val grensesnittavstemmingDataMapper = GrensesnittavstemmingDataMapper(utbetalinger, fraOgMed, til, UUIDBase64())
-        val avstemmingsmelding = grensesnittavstemmingDataMapper.opprettAvstemmingsmelding()
+        val avstemmingsmelding = grensesnittavstemmingDataMapper.opprettAvstemmingsmelding(Saktype.BARNEPENSJON)
 
         val (_, dataMelding, _) = avstemmingsmelding
 
@@ -153,7 +172,7 @@ internal class GrensesnittavstemmingDataMapperTest {
             periodeTil = til,
             avstemmingId = UUIDBase64()
         )
-        val avstemmingsmelding = grensesnittavstemmingDataMapper.opprettAvstemmingsmelding()
+        val avstemmingsmelding = grensesnittavstemmingDataMapper.opprettAvstemmingsmelding(Saktype.BARNEPENSJON)
         val (_, dataMelding, _) = avstemmingsmelding
 
         assertAll(
@@ -189,7 +208,7 @@ internal class GrensesnittavstemmingDataMapperTest {
             periodeTil = til,
             avstemmingId = UUIDBase64()
         )
-        val avstemmingsmelding = grensesnittavstemmingDataMapper.opprettAvstemmingsmelding()
+        val avstemmingsmelding = grensesnittavstemmingDataMapper.opprettAvstemmingsmelding(Saktype.BARNEPENSJON)
         val (_, dataMelding, _) = avstemmingsmelding
 
         assertAll(
@@ -214,7 +233,7 @@ internal class GrensesnittavstemmingDataMapperTest {
             periodeTil = til,
             avstemmingId = UUIDBase64("1")
         )
-        val avstemmingsmelding = grensesnittavstemmingDataMapper.opprettAvstemmingsmelding()
+        val avstemmingsmelding = grensesnittavstemmingDataMapper.opprettAvstemmingsmelding(Saktype.BARNEPENSJON)
         val (_, dataMelding, _) = avstemmingsmelding
 
         assertEquals(0, dataMelding.total.totalAntall)
@@ -233,7 +252,7 @@ internal class GrensesnittavstemmingDataMapperTest {
             periodeTil = til,
             avstemmingId = UUIDBase64()
         )
-        val avstemmingsmelding = grensesnittavstemmingDataMapper.opprettAvstemmingsmelding()
+        val avstemmingsmelding = grensesnittavstemmingDataMapper.opprettAvstemmingsmelding(Saktype.BARNEPENSJON)
         val (startmelding, dataMelding, sluttmelding) = avstemmingsmelding
 
         assertAll(
@@ -327,7 +346,7 @@ internal class GrensesnittavstemmingDataMapperTest {
             periodeTil = til,
             avstemmingId = UUIDBase64()
         )
-        val avstemmingsmelding = grensesnittavstemmingDataMapper.opprettAvstemmingsmelding()
+        val avstemmingsmelding = grensesnittavstemmingDataMapper.opprettAvstemmingsmelding(Saktype.BARNEPENSJON)
         val (_, dataMelding, _) = avstemmingsmelding
         assertAll(
             "skal finne forste og siste avstemmingsnoekkel i liste",

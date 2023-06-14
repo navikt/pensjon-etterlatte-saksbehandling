@@ -33,7 +33,7 @@ class KonsistensavstemmingService(
         logger.info("Starter konsistensavstemming for ${saktype.name} paa dato $dag")
         val konsistensavstemming = lagKonsistensavstemming(dag, saktype)
         val mappetKonsistensavstemming =
-            KonsistensavstemmingDataMapper(konsistensavstemming).opprettAvstemmingsmelding()
+            KonsistensavstemmingDataMapper(konsistensavstemming).opprettAvstemmingsmelding(saktype)
         val sendtAvstemmingsdata = mappetKonsistensavstemming.mapIndexed { meldingNr, melding ->
             val xmlMelding = avstemmingsdataSender.sendKonsistensavstemming(melding)
             logger.info(

@@ -26,14 +26,14 @@ class GrensesnittsavstemmingService(
         saktype: Saktype,
         periode: Avstemmingsperiode = hentNestePeriode(saktype)
     ) {
-        logger.info("Grensesnittavstemmer fra ${periode.fraOgMed} til ${periode.til}")
+        logger.info("Grensesnittavstemmer fra ${periode.fraOgMed} til ${periode.til} for ${saktype.name} ")
         val utbetalinger =
             utbetalingDao.hentUtbetalingerForGrensesnittavstemming(periode.fraOgMed, periode.til, saktype)
         val avstemmingId = UUIDBase64()
 
         val grensesnittavstemmingDataMapper =
             GrensesnittavstemmingDataMapper(utbetalinger, periode.fraOgMed, periode.til, avstemmingId)
-        val avstemmingsdataListe = grensesnittavstemmingDataMapper.opprettAvstemmingsmelding()
+        val avstemmingsdataListe = grensesnittavstemmingDataMapper.opprettAvstemmingsmelding(saktype)
 
         val sendtAvstemmingsdata = avstemmingsdataListe.mapIndexed { index, avstemmingsdata ->
             val sendtAvstemmingsdata = avstemmingsdataSender.sendGrensesnittavstemming(avstemmingsdata)
@@ -55,7 +55,7 @@ class GrensesnittsavstemmingService(
         )
 
         logger.info(
-            "Grensesnittsvstemming fra ${periode.fraOgMed} til ${periode.til} fullført" +
+            "Grensesnittsvstemming fra ${periode.fraOgMed} til ${periode.til} for ${saktype.name} fullført" +
                 " - ${utbetalinger.size} oppdrag ble avstemt"
         )
     }

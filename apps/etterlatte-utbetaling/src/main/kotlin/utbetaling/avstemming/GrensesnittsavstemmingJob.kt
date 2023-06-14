@@ -13,7 +13,8 @@ class GrensesnittsavstemmingJob(
     private val grensesnittsavstemmingService: GrensesnittsavstemmingService,
     private val leaderElection: LeaderElection,
     private val starttidspunkt: Date,
-    private val periode: Duration
+    private val periode: Duration,
+    private val saktype: Saktype
 ) {
     private val log = LoggerFactory.getLogger(this::class.java)
     private val jobbNavn = this::class.simpleName
@@ -31,7 +32,8 @@ class GrensesnittsavstemmingJob(
                 Grensesnittsavstemming(
                     grensesnittsavstemmingService = grensesnittsavstemmingService,
                     leaderElection = leaderElection,
-                    jobbNavn = jobbNavn!!
+                    jobbNavn = jobbNavn!!,
+                    saktype = saktype
                 ).run()
             } catch (throwable: Throwable) {
                 log.error("Grensesnittavstemming feilet, se sikker logg for stacktrace")
@@ -43,7 +45,8 @@ class GrensesnittsavstemmingJob(
     class Grensesnittsavstemming(
         val grensesnittsavstemmingService: GrensesnittsavstemmingService,
         val leaderElection: LeaderElection,
-        val jobbNavn: String
+        val jobbNavn: String,
+        val saktype: Saktype
     ) {
         private val log = LoggerFactory.getLogger(this::class.java)
 
@@ -51,16 +54,7 @@ class GrensesnittsavstemmingJob(
             log.info("Starter $jobbNavn")
             withLogContext {
                 if (leaderElection.isLeader()) {
-                    Saktype.values().forEach {
-                        when (it) {
-                            Saktype.BARNEPENSJON -> {
-                                grensesnittsavstemmingService.startGrensesnittsavstemming(it)
-                            }
-                            Saktype.OMSTILLINGSSTOENAD -> {
-                                log.info("Grensesnittavstemming for omstillingsoeknad er ennaa ikke implementert")
-                            }
-                        }
-                    }
+                    grensesnittsavstemmingService.startGrensesnittsavstemming(saktype)
                 }
             }
         }

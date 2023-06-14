@@ -212,30 +212,33 @@ class IntegrationTest {
         verify(exactly = 3) { rapidsKafkaProducer.publiser(any(), any()) }
         verify {
             livsHendelserTilRapid.personErDod(
+                "1",
+                no.nav.etterlatte.libs.common.pdlhendelse.Endringstype.OPPRETTET,
                 PDLfnr,
-                doedsfall.doedsdato.toString(),
-                no.nav.etterlatte.libs.common.pdlhendelse.Endringstype.OPPRETTET
+                doedsfall.doedsdato.toString()
             )
         }
 
         verify {
             livsHendelserTilRapid.personUtflyttingFraNorge(
+                "1",
+                no.nav.etterlatte.libs.common.pdlhendelse.Endringstype.OPPRETTET,
                 PDLfnr,
                 utflyttingFraNorge.tilflyttingsland,
                 utflyttingFraNorge.tilflyttingsstedIUtlandet,
-                utflyttingFraNorge.utflyttingsdato.toString(),
-                no.nav.etterlatte.libs.common.pdlhendelse.Endringstype.OPPRETTET
+                utflyttingFraNorge.utflyttingsdato.toString()
             )
         }
 
         verify {
             livsHendelserTilRapid.forelderBarnRelasjon(
+                "1",
+                no.nav.etterlatte.libs.common.pdlhendelse.Endringstype.OPPRETTET,
                 PDLfnr,
                 forelderBarnRelasjon.relatertPersonsIdent,
                 forelderBarnRelasjon.relatertPersonsRolle,
                 forelderBarnRelasjon.minRolleForPerson,
-                forelderBarnRelasjon.relatertPersonUtenFolkeregisteridentifikator?.toString(),
-                no.nav.etterlatte.libs.common.pdlhendelse.Endringstype.OPPRETTET
+                forelderBarnRelasjon.relatertPersonUtenFolkeregisteridentifikator?.toString()
             )
         }
     }

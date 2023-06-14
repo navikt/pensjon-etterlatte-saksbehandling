@@ -50,9 +50,9 @@ internal class KafkaConsumerHendelserPdlTest {
             )
         }
         val iLivsHendelserRapid = mockk<ILivsHendelserRapid>() {
-            every { personErDod(any(), any(), any()) } just runs
-            every { forelderBarnRelasjon(any(), any(), any(), any(), any(), any()) } just runs
-            every { personUtflyttingFraNorge(any(), any(), any(), any(), any()) } just runs
+            every { personErDod(any(), any(), any(), any()) } just runs
+            every { forelderBarnRelasjon(any(), any(), any(), any(), any(), any(), any()) } just runs
+            every { personUtflyttingFraNorge(any(), any(), any(), any(), any(), any()) } just runs
         }
 
         val gyldigeHendelser = listOf(
@@ -88,12 +88,13 @@ internal class KafkaConsumerHendelserPdlTest {
             }
         }
 
-        verify(exactly = 1) { iLivsHendelserRapid.personErDod(any(), any(), any()) }
+        verify(exactly = 1) { iLivsHendelserRapid.personErDod(any(), any(), any(), any()) }
         verify(exactly = 1) {
-            iLivsHendelserRapid.forelderBarnRelasjon(any(), any(), any(), any(), any(), any())
+            iLivsHendelserRapid.forelderBarnRelasjon(any(), any(), any(), any(), any(), any(), any())
         }
         verify(exactly = 1) {
             iLivsHendelserRapid.personUtflyttingFraNorge(
+                any(),
                 any(),
                 any(),
                 any(),

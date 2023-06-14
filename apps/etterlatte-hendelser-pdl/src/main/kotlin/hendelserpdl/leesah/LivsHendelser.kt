@@ -17,49 +17,71 @@ import java.util.*
 
 interface ILivsHendelserRapid {
     fun personErDod(
+        hendelseId: String,
+        endringstype: Endringstype,
         fnr: String,
-        doedsdato: String?,
-        endringstype: Endringstype
+        doedsdato: String?
     )
 
     fun personUtflyttingFraNorge(
+        hendelseId: String,
+        endringstype: Endringstype,
         fnr: String,
         tilflyttingsLand: String?,
         tilflyttingsstedIUtlandet: String?,
-        utflyttingsdato: String?,
-        endringstype: Endringstype
+        utflyttingsdato: String?
     )
 
     fun forelderBarnRelasjon(
+        hendelseId: String,
+        endringstype: Endringstype,
         fnr: String,
         relatertPersonsIdent: String?,
         relatertPersonsRolle: String?,
         minRolleForPerson: String?,
-        relatertPersonUtenFolkeregisteridentifikator: String?,
-        endringstype: Endringstype
+        relatertPersonUtenFolkeregisteridentifikator: String?
     )
 
     fun haandterAdressebeskyttelse(
+        hendelseId: String,
+        endringstype: Endringstype,
         fnr: String,
-        adressebeskyttelseGradering: AdressebeskyttelseGradering,
-        endringstype: Endringstype
+        adressebeskyttelseGradering: AdressebeskyttelseGradering
     )
+
     fun haandterVergeoppnevnelse(
+        hendelseId: String,
+        endringstype: Endringstype,
         fnr: String,
-        vergeIdent: String,
-        endringstype: Endringstype
+        vergeIdent: String
+    )
+
+    fun endringSivilstand(
+        hendelseId: String,
+        endringstype: Endringstype,
+        fnr: String,
+        type: String,
+        relatertVedSivilstand: String?,
+        gyldigFraOgMed: String?,
+        bekreftelsesdato: String?
     )
 }
 
 class LivsHendelserTilRapid(private val kafkaProduser: KafkaProdusent<String, JsonMessage>) : ILivsHendelserRapid {
     val logger = LoggerFactory.getLogger(this.javaClass)
 
-    override fun haandterVergeoppnevnelse(fnr: String, vergeIdent: String, endringstype: Endringstype) {
+    override fun haandterVergeoppnevnelse(
+        hendelseId: String,
+        endringstype: Endringstype,
+        fnr: String,
+        vergeIdent: String
+    ) {
         logger.info("Poster at en person med fnr=${fnr.maskerFnr()} har fått verge")
         val vergeMaalEllerFremtidsfullmakt = VergeMaalEllerFremtidsfullmakt(
+            hendelseId = hendelseId,
+            endringstype = endringstype,
             fnr = fnr,
-            vergeIdent = vergeIdent,
-            endringstype = endringstype
+            vergeIdent = vergeIdent
         )
         kafkaProduser.publiser(
             UUID.randomUUID().toString(),
@@ -73,10 +95,27 @@ class LivsHendelserTilRapid(private val kafkaProduser: KafkaProdusent<String, Js
         )
     }
 
-    override fun personErDod(fnr: String, doedsdato: String?, endringstype: Endringstype) {
+    override fun endringSivilstand(
+        hendelseId: String,
+        endringstype: Endringstype,
+        fnr: String,
+        type: String,
+        relatertVedSivilstand: String?,
+        gyldigFraOgMed: String?,
+        bekreftelsesdato: String?
+    ) {
+        TODO("Not yet implemented")
+    }
+
+    override fun personErDod(hendelseId: String, endringstype: Endringstype, fnr: String, doedsdato: String?) {
         logger.info("Poster at en person med fnr=${fnr.maskerFnr()} er doed")
         val avdoedDoedsdato = doedsdato.parseDato(fnr, logger)
-        val doedshendelse = Doedshendelse(avdoedFnr = fnr, doedsdato = avdoedDoedsdato, endringstype = endringstype)
+        val doedshendelse = Doedshendelse(
+            hendelseId = hendelseId,
+            endringstype = endringstype,
+            avdoedFnr = fnr,
+            doedsdato = avdoedDoedsdato
+        )
         kafkaProduser.publiser(
             UUID.randomUUID().toString(),
             JsonMessage.newMessage(
@@ -90,21 +129,22 @@ class LivsHendelserTilRapid(private val kafkaProduser: KafkaProdusent<String, Js
     }
 
     override fun personUtflyttingFraNorge(
+        hendelseId: String,
+        endringstype: Endringstype,
         fnr: String,
         tilflyttingsLand: String?,
         tilflyttingsstedIUtlandet: String?,
-        utflyttingsdato: String?,
-        endringstype: Endringstype
+        utflyttingsdato: String?
     ) {
         logger.info("Poster at en person med fnr=${fnr.maskerFnr()} har flyttet til utlandet")
         val utflyttingsdatoParsed = utflyttingsdato.parseDato(fnr, logger)
         val utflyttingsHendelse = UtflyttingsHendelse(
+            hendelseId = hendelseId,
+            endringstype = endringstype,
             fnr = fnr,
             tilflyttingsLand = tilflyttingsLand,
             tilflyttingsstedIUtlandet = tilflyttingsstedIUtlandet,
-            utflyttingsdato = utflyttingsdatoParsed,
-            endringstype = endringstype
-
+            utflyttingsdato = utflyttingsdatoParsed
         )
         kafkaProduser.publiser(
             UUID.randomUUID().toString(),
@@ -119,21 +159,23 @@ class LivsHendelserTilRapid(private val kafkaProduser: KafkaProdusent<String, Js
     }
 
     override fun forelderBarnRelasjon(
+        hendelseId: String,
+        endringstype: Endringstype,
         fnr: String,
         relatertPersonsIdent: String?,
         relatertPersonsRolle: String?,
         minRolleForPerson: String?,
-        relatertPersonUtenFolkeregisteridentifikator: String?,
-        endringstype: Endringstype
+        relatertPersonUtenFolkeregisteridentifikator: String?
     ) {
         logger.info("Poster at en person med fnr=${fnr.maskerFnr()} har endret forelder-barn-relasjon")
         val forelderBarnRelasjonHendelse = ForelderBarnRelasjonHendelse(
+            hendelseId = hendelseId,
+            endringstype = endringstype,
             fnr = fnr,
             relatertPersonsIdent = relatertPersonsIdent,
             relatertPersonsRolle = relatertPersonsRolle,
             minRolleForPerson = minRolleForPerson,
-            relatertPersonUtenFolkeregisteridentifikator = relatertPersonUtenFolkeregisteridentifikator,
-            endringstype = endringstype
+            relatertPersonUtenFolkeregisteridentifikator = relatertPersonUtenFolkeregisteridentifikator
         )
         kafkaProduser.publiser(
             UUID.randomUUID().toString(),
@@ -148,15 +190,17 @@ class LivsHendelserTilRapid(private val kafkaProduser: KafkaProdusent<String, Js
     }
 
     override fun haandterAdressebeskyttelse(
+        hendelseId: String,
+        endringstype: Endringstype,
         fnr: String,
-        adressebeskyttelseGradering: AdressebeskyttelseGradering,
-        endringstype: Endringstype
+        adressebeskyttelseGradering: AdressebeskyttelseGradering
     ) {
         logger.info("Poster at en person med fnr=${fnr.maskerFnr()} har adressebeskyttelse")
         val adressebeskyttelse = Adressebeskyttelse(
+            hendelseId = hendelseId,
+            endringstype = endringstype,
             fnr = fnr,
-            adressebeskyttelseGradering = adressebeskyttelseGradering,
-            endringstype = endringstype
+            adressebeskyttelseGradering = adressebeskyttelseGradering
         )
         kafkaProduser.publiser(
             UUID.randomUUID().toString(),

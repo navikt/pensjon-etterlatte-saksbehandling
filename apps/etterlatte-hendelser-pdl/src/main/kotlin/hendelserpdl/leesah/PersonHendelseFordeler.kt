@@ -1,13 +1,20 @@
 package no.nav.etterlatte.hendelserpdl.leesah
 
+import no.nav.etterlatte.hendelserpdl.leesah.LeesahOpplysningstyper.ADRESSEBESKYTTELSE_V1
+import no.nav.etterlatte.hendelserpdl.leesah.LeesahOpplysningstyper.DOEDSFALL_V1
+import no.nav.etterlatte.hendelserpdl.leesah.LeesahOpplysningstyper.FORELDERBARNRELASJON_V1
+import no.nav.etterlatte.hendelserpdl.leesah.LeesahOpplysningstyper.SIVILSTAND_V1
+import no.nav.etterlatte.hendelserpdl.leesah.LeesahOpplysningstyper.UTFLYTTING_FRA_NORGE
+import no.nav.etterlatte.hendelserpdl.leesah.LeesahOpplysningstyper.VERGEMAAL_ELLER_FREMTIDSFULLMAKT_V1
 import no.nav.etterlatte.hendelserpdl.pdl.Pdl
 import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.PdlIdentifikator
 import no.nav.person.pdl.leesah.Personhendelse
-import no.nav.person.pdl.leesah.verge.VergemaalEllerFremtidsfullmakt
+import no.nav.person.pdl.leesah.adressebeskyttelse.Gradering
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 val sikkerLogg: Logger = LoggerFactory.getLogger("sikkerLogg")
@@ -18,208 +25,158 @@ class PersonHendelseFordeler(
 ) {
     private val logger: Logger = LoggerFactory.getLogger(PersonHendelseFordeler::class.java)
 
-    suspend fun haandterHendelse(personhendelse: Personhendelse) {
-        if (personhendelse.personidenter.isNullOrEmpty()) {
-            sikkerLogg.info("hendelse uten personident hendelseid: ${personhendelse.hendelseId}", personhendelse)
-        } else {
-            when (personhendelse.opplysningstype) {
-                LeesahOpplysningstyper.DOEDSFALL_V1.toString() -> haandterDoedsendelse(personhendelse)
-                LeesahOpplysningstyper.UTFLYTTING_FRA_NORGE.toString() -> haandterUtflyttingFraNorge(personhendelse)
-                LeesahOpplysningstyper.FORELDERBARNRELASJON_V1.toString() -> haandterForelderBarnRelasjon(
-                    personhendelse
-                )
-                LeesahOpplysningstyper.ADRESSEBESKYTTELSE_V1.toString() -> haandterAdressebeskyttelse(personhendelse)
-                LeesahOpplysningstyper.VERGEMAAL_ELLER_FREMTIDSFULLMAKT_V1.toString() -> haandterVergemaal(
-                    personhendelse
-                )
-                else -> logger.info("Så en hendelse av type ${personhendelse.opplysningstype} som vi ikke håndterer")
-            }
-        }
-    }
-
-    private suspend fun haandterVergemaal(personhendelse: Personhendelse) {
-        val hendelseType = "Vergemål"
-        val vergemaalEllerFremtidsfullmakt: VergemaalEllerFremtidsfullmakt? =
-            personhendelse.vergemaalEllerFremtidsfullmakt
-        if (vergemaalEllerFremtidsfullmakt?.type in
-            listOf(
-                "ensligMindreaarigAsylsoeker",
-                "ensligMindreaarigFlyktning",
-                "mindreaarig",
-                "midlertidigForMindreaarig",
-                "forvaltningUtenforVergemaal"
-            )
-        ) {
-            try {
-                when (val personnummer = pdlService.hentPdlIdentifikator(personhendelse.personidenter.first())) {
-                    is PdlIdentifikator.Npid -> {
-                        logger.info(
-                            "Ignorerer en hendelse med id=${personhendelse.hendelseId} om en person som kun har NPID " +
-                                "som identifikator"
-                        )
-                        return
-                    }
-
-                    is PdlIdentifikator.FolkeregisterIdent -> {
-                        val endringstype = Endringstype.valueOf(personhendelse.endringstype.name)
-                        personhendelse.vergemaalEllerFremtidsfullmakt.vergeEllerFullmektig.let {
-                            postHendelser.haandterVergeoppnevnelse(
-                                fnr = personnummer.folkeregisterident.value,
-                                vergeIdent = personhendelse.vergemaalEllerFremtidsfullmakt
-                                    .vergeEllerFullmektig.motpartsPersonident,
-                                endringstype = endringstype
-                            )
-                        }
+    suspend fun haandterHendelse(hendelse: Personhendelse) =
+        try {
+            when (val personnummer = hentPersonnummer(hendelse)) {
+                null -> "Mottok en hendelse uten personident (hendelseId=${hendelse.hendelseId})".let {
+                    sikkerLogg.info(it, hendelse)
+                    logger.info(it)
+                }
+                is PdlIdentifikator.Npid -> loggIgnorererNpid(hendelse.hendelseId)
+                is PdlIdentifikator.FolkeregisterIdent -> {
+                    when (hendelse.opplysningstype) {
+                        VERGEMAAL_ELLER_FREMTIDSFULLMAKT_V1.toString() -> haandterVergemaal(hendelse, personnummer)
+                        ADRESSEBESKYTTELSE_V1.toString() -> haandterAdressebeskyttelse(hendelse, personnummer)
+                        FORELDERBARNRELASJON_V1.toString() -> haandterForelderBarnRelasjon(hendelse, personnummer)
+                        DOEDSFALL_V1.toString() -> haandterDoedsHendelse(hendelse, personnummer)
+                        UTFLYTTING_FRA_NORGE.toString() -> haandterUtflyttingFraNorge(hendelse, personnummer)
+                        SIVILSTAND_V1.toString() -> haandterSivilstand(hendelse, personnummer)
+                        else -> logger.info("Så en hendelse av type ${hendelse.opplysningstype} som vi ikke håndterer")
                     }
                 }
-            } catch (e: Exception) {
-                loggFeilVedHaandtering(personhendelse.hendelseId, hendelseType, e)
             }
-        } else {
-            logger.info("Ignorerer vergemaalEllerFremtidsfullmakt av typen ${vergemaalEllerFremtidsfullmakt?.type}")
+        } catch (e: Exception) {
+            loggFeilVedHaandteringAvHendelse(hendelse.hendelseId, hendelse.opplysningstype, e)
+            throw e
+        }
+
+    private fun haandterVergemaal(hendelse: Personhendelse, personnummer: PdlIdentifikator.FolkeregisterIdent) {
+        with(hendelse.vergemaalEllerFremtidsfullmakt) {
+            if (type !in listOf(
+                    "ensligMindreaarigAsylsoeker",
+                    "ensligMindreaarigFlyktning",
+                    "mindreaarig",
+                    "midlertidigForMindreaarig",
+                    "forvaltningUtenforVergemaal"
+                )
+            ) {
+                logger.info("Ignorerer vergemaalEllerFremtidsfullmakt med type=$type")
+                return
+            }
+
+            postHendelser.haandterVergeoppnevnelse(
+                hendelseId = hendelse.hendelseId,
+                endringstype = hendelse.endringstype(),
+                fnr = personnummer.folkeregisterident.value,
+                vergeIdent = vergeEllerFullmektig.motpartsPersonident
+            )
         }
     }
 
-    private suspend fun haandterAdressebeskyttelse(personhendelse: Personhendelse) {
-        val hendelseType = "Adressebeskyttelse"
-        val gradering = personhendelse.adressebeskyttelse?.gradering
-        if (gradering == null || gradering == no.nav.person.pdl.leesah.adressebeskyttelse.Gradering.UGRADERT) {
+    private fun haandterAdressebeskyttelse(
+        hendelse: Personhendelse,
+        personnummer: PdlIdentifikator.FolkeregisterIdent
+    ) {
+        val gradering = hendelse.adressebeskyttelse?.gradering
+        if (gradering == null || gradering == Gradering.UGRADERT) {
             logger.info("Ignorerer person med tom eller ugradert gradering, krever ingen tiltak.")
             return
         }
-        try {
-            when (val personnummer = pdlService.hentPdlIdentifikator(personhendelse.personidenter.first())) {
-                is PdlIdentifikator.Npid -> {
-                    logger.info(
-                        "Ignorerer en hendelse med id=${personhendelse.hendelseId} om en person som kun har NPID " +
-                            "som identifikator"
-                    )
-                    return
-                }
 
-                is PdlIdentifikator.FolkeregisterIdent -> {
-                    val endringstype = Endringstype.valueOf(personhendelse.endringstype.name)
-                    personhendelse.adressebeskyttelse.let {
-                        postHendelser.haandterAdressebeskyttelse(
-                            fnr = personnummer.folkeregisterident.value,
-                            adressebeskyttelseGradering = gradering.let {
-                                AdressebeskyttelseGradering.valueOf(gradering.toString())
-                            },
-                            endringstype = endringstype
-                        )
-                    }
+        hendelse.adressebeskyttelse.let {
+            postHendelser.haandterAdressebeskyttelse(
+                hendelseId = hendelse.hendelseId,
+                endringstype = hendelse.endringstype(),
+                fnr = personnummer.folkeregisterident.value,
+                adressebeskyttelseGradering = gradering.let {
+                    AdressebeskyttelseGradering.valueOf(gradering.toString())
                 }
-            }
-        } catch (e: Exception) {
-            loggFeilVedHaandtering(personhendelse.hendelseId, hendelseType, e)
-            throw e
+            )
         }
     }
 
-    private suspend fun haandterForelderBarnRelasjon(personhendelse: Personhendelse) {
-        val hendelseType = "Forelder-barn-relasjon-hendelse"
-        try {
-            when (val personnummer = pdlService.hentPdlIdentifikator(personhendelse.personidenter.first())) {
-                is PdlIdentifikator.Npid -> {
-                    logger.info(
-                        "Ignorerer en hendelse med id=${personhendelse.hendelseId} om en person som kun har NPID " +
-                            "som identifikator"
-                    )
-                    return
-                }
-
-                is PdlIdentifikator.FolkeregisterIdent -> {
-                    val endringstype = Endringstype.valueOf(personhendelse.endringstype.name)
-                    personhendelse.forelderBarnRelasjon.let {
-                        postHendelser.forelderBarnRelasjon(
-                            fnr = personnummer.folkeregisterident.value,
-                            relatertPersonsIdent = it?.relatertPersonsIdent,
-                            relatertPersonsRolle = it?.relatertPersonsRolle,
-                            minRolleForPerson = it?.minRolleForPerson,
-                            relatertPersonUtenFolkeregisteridentifikator =
-                            it?.relatertPersonUtenFolkeregisteridentifikator?.toString(),
-                            endringstype = endringstype
-                        )
-                    }
-                }
-            }
-        } catch (e: Exception) {
-            loggFeilVedHaandtering(personhendelse.hendelseId, hendelseType, e)
-            throw e
+    private fun haandterForelderBarnRelasjon(
+        hendelse: Personhendelse,
+        personnummer: PdlIdentifikator.FolkeregisterIdent
+    ) {
+        with(hendelse.forelderBarnRelasjon) {
+            postHendelser.forelderBarnRelasjon(
+                hendelseId = hendelse.hendelseId,
+                endringstype = hendelse.endringstype(),
+                fnr = personnummer.folkeregisterident.value,
+                relatertPersonsIdent = relatertPersonsIdent,
+                relatertPersonsRolle = relatertPersonsRolle,
+                minRolleForPerson = minRolleForPerson,
+                relatertPersonUtenFolkeregisteridentifikator = relatertPersonUtenFolkeregisteridentifikator?.toString()
+            )
         }
     }
 
-    private suspend fun haandterDoedsendelse(personhendelse: Personhendelse) {
-        val hendelseType = "Doedshendelse"
-        try {
-            when (val personnummer = pdlService.hentPdlIdentifikator(personhendelse.personidenter.first())) {
-                is PdlIdentifikator.Npid -> {
-                    logger.info(
-                        "Ignorerer en hendelse med id=${personhendelse.hendelseId} om en person som kun har NPID " +
-                            "som identifikator"
-                    )
-                    return
-                }
+    private fun haandterDoedsHendelse(
+        hendelse: Personhendelse,
+        personnummer: PdlIdentifikator.FolkeregisterIdent
+    ) {
+        postHendelser.personErDod(
+            hendelseId = hendelse.hendelseId,
+            endringstype = hendelse.endringstype(),
+            fnr = personnummer.folkeregisterident.value,
+            doedsdato = hendelse.doedsfall?.doedsdato?.asStringOrNull()
+        )
+    }
 
-                is PdlIdentifikator.FolkeregisterIdent -> {
-                    val endringstype = Endringstype.valueOf(personhendelse.endringstype.name)
-                    postHendelser.personErDod(
-                        fnr = personnummer.folkeregisterident.value,
-                        doedsdato = try {
-                            personhendelse.doedsfall?.doedsdato?.format(DateTimeFormatter.ISO_DATE)
-                        } catch (e: Exception) {
-                            logger.warn("Kunne ikke String-formatere dato i en dødshendelse")
-                            null
-                        },
-                        endringstype = endringstype
-                    )
-                }
-            }
-        } catch (e: Exception) {
-            loggFeilVedHaandtering(personhendelse.hendelseId, hendelseType, e)
-            throw e
+    private fun haandterUtflyttingFraNorge(
+        hendelse: Personhendelse,
+        personnummer: PdlIdentifikator.FolkeregisterIdent
+    ) {
+        postHendelser.personUtflyttingFraNorge(
+            hendelseId = hendelse.hendelseId,
+            endringstype = hendelse.endringstype(),
+            fnr = personnummer.folkeregisterident.value,
+            tilflyttingsLand = hendelse.utflyttingFraNorge?.tilflyttingsland,
+            tilflyttingsstedIUtlandet = hendelse.utflyttingFraNorge?.tilflyttingsstedIUtlandet,
+            utflyttingsdato = hendelse.utflyttingFraNorge?.utflyttingsdato?.asStringOrNull()
+        )
+    }
+
+    private fun haandterSivilstand(
+        hendelse: Personhendelse,
+        personnummer: PdlIdentifikator.FolkeregisterIdent
+    ) {
+        with(hendelse.sivilstand) {
+            postHendelser.endringSivilstand(
+                hendelseId = hendelse.hendelseId,
+                endringstype = hendelse.endringstype(),
+                fnr = personnummer.folkeregisterident.value,
+                type = type,
+                relatertVedSivilstand = relatertVedSivilstand,
+                gyldigFraOgMed = gyldigFraOgMed?.asStringOrNull(),
+                bekreftelsesdato = bekreftelsesdato?.asStringOrNull()
+            )
         }
     }
 
-    private suspend fun haandterUtflyttingFraNorge(personhendelse: Personhendelse) {
-        val hendelseType = "Utflytting fra Norge-hendelse"
-        try {
-            when (val personnummer = pdlService.hentPdlIdentifikator(personhendelse.personidenter.first())) {
-                is PdlIdentifikator.Npid -> {
-                    logger.info(
-                        "Ignorerer en hendelse med id=${personhendelse.hendelseId} om en person som kun har NPID " +
-                            "som identifikator"
-                    )
-                    return
-                }
+    private suspend fun hentPersonnummer(hendelse: Personhendelse) =
+        hendelse.personidenter.firstOrNull()?.let { pdlService.hentPdlIdentifikator(it) }
 
-                is PdlIdentifikator.FolkeregisterIdent -> {
-                    val endringstype = Endringstype.valueOf(personhendelse.endringstype.name)
-                    postHendelser.personUtflyttingFraNorge(
-                        fnr = personnummer.folkeregisterident.value,
-                        tilflyttingsLand = personhendelse.utflyttingFraNorge?.tilflyttingsland,
-                        tilflyttingsstedIUtlandet = personhendelse.utflyttingFraNorge?.tilflyttingsstedIUtlandet,
-                        utflyttingsdato = try {
-                            personhendelse.utflyttingFraNorge?.utflyttingsdato?.format(DateTimeFormatter.ISO_DATE)
-                        } catch (e: Exception) {
-                            logger.warn("Kunne ikke String-formatere dato i en utflyttingshendelse")
-                            null
-                        },
-                        endringstype = endringstype
-                    )
-                }
-            }
-        } catch (e: Exception) {
-            loggFeilVedHaandtering(personhendelse.hendelseId, hendelseType, e)
-            throw e
-        }
+    private fun LocalDate?.asStringOrNull() = try {
+        this?.format(DateTimeFormatter.ISO_DATE)
+    } catch (e: Exception) {
+        logger.warn("Kunne ikke String-formatere dato")
+        null
     }
 
-    private fun loggFeilVedHaandtering(hendelsesid: String, hendelseType: String, e: Exception) {
+    private fun Personhendelse.endringstype() = Endringstype.valueOf(this.endringstype.name)
+
+    private fun loggIgnorererNpid(hendelseId: String) =
+        logger.info("Ignorerer en hendelse med id=$hendelseId om en person som kun har NPID som identifikator")
+
+    private fun loggFeilVedHaandteringAvHendelse(hendelseId: String, opplysningstype: String, e: Exception) {
         logger.error(
-            "kunne ikke haandtere $hendelseType for hendelsen med id=$hendelsesid. Dette skyldes sannsynligvis" +
-                "at personhendelsen ser annerledes ut enn forventet, eller at det var problem med henting av " +
-                "personidentifikatoren fra PDL",
+            """
+            Kunne ikke haandtere $opplysningstype med id=$hendelseId. Dette skyldes sannsynligvis at 
+            personhendelsen ser annerledes ut enn forventet, eller at det var problem med henting av 
+            personidentifikatoren fra PDL
+            """.trimIndent(),
             e
         )
     }

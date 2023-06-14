@@ -3,42 +3,59 @@ package no.nav.etterlatte.libs.common.pdlhendelse
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import java.time.LocalDate
 
-sealed interface PdlHendelse
+sealed interface PdlHendelse {
+    val hendelseId: String
+    val endringstype: Endringstype
+}
 
 data class VergeMaalEllerFremtidsfullmakt(
+    override val hendelseId: String,
+    override val endringstype: Endringstype,
     val fnr: String,
-    val vergeIdent: String,
-    val endringstype: Endringstype
+    val vergeIdent: String
 ) : PdlHendelse
 
 data class Doedshendelse(
+    override val hendelseId: String,
+    override val endringstype: Endringstype,
     val avdoedFnr: String,
-    val doedsdato: LocalDate?,
-    val endringstype: Endringstype
+    val doedsdato: LocalDate?
 ) : PdlHendelse
 
 data class UtflyttingsHendelse(
+    override val hendelseId: String,
+    override val endringstype: Endringstype,
     val fnr: String,
     val tilflyttingsLand: String?,
     val tilflyttingsstedIUtlandet: String?,
-    val utflyttingsdato: LocalDate?,
-    val endringstype: Endringstype
+    val utflyttingsdato: LocalDate?
 ) : PdlHendelse
 
 data class ForelderBarnRelasjonHendelse(
+    override val hendelseId: String,
+    override val endringstype: Endringstype,
     val fnr: String,
     val relatertPersonsIdent: String?,
     val relatertPersonsRolle: String?,
     val minRolleForPerson: String?,
-    val relatertPersonUtenFolkeregisteridentifikator: String?,
-    val endringstype: Endringstype
+    val relatertPersonUtenFolkeregisteridentifikator: String?
 ) : PdlHendelse
 
 data class Adressebeskyttelse(
+    override val hendelseId: String,
+    override val endringstype: Endringstype,
     val fnr: String,
-    val adressebeskyttelseGradering: AdressebeskyttelseGradering,
-    val endringstype: Endringstype
-)
+    val adressebeskyttelseGradering: AdressebeskyttelseGradering
+) : PdlHendelse
+
+data class SivilstandHendelse(
+    override val hendelseId: String,
+    override val endringstype: Endringstype,
+    val type: String,
+    val relatertVedSivilstand: String,
+    val gyldigFraOgMed: LocalDate?,
+    val bekreftelsesdato: LocalDate?
+) : PdlHendelse
 
 enum class Endringstype {
     OPPRETTET, KORRIGERT, ANNULLERT, OPPHOERT

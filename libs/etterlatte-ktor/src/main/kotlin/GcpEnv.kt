@@ -1,27 +1,8 @@
+fun isProd(): Boolean = getNaisclustername() == GcpEnv.PROD.name
 
+fun isDev(): Boolean = getNaisclustername() == GcpEnv.DEV.name
 
-fun isProd(): Boolean {
-    val currentEnv = getNaisclustername()
-    return if (currentEnv == null) {
-        false
-    } else {
-        currentEnv == GcpEnv.PROD.name
-    }
-}
-
-fun isDev(): Boolean {
-    val currentEnv = getNaisclustername()
-    return if (currentEnv == null) {
-        false
-    } else {
-        currentEnv == GcpEnv.DEV.name
-    }
-}
-
-fun getNaisclustername(): String? {
-    val env = System.getenv()
-    return env["NAIS_CLUSTER_NAME"]
-}
+fun getNaisclustername(): String? = System.getenv()["NAIS_CLUSTER_NAME"]
 
 enum class GcpEnv(val env: String) {
     PROD("prod-gcp"),

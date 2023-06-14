@@ -93,7 +93,8 @@ fun Application.module(context: ApplicationContext) {
             )
             revurderingRoutes(
                 revurderingService = revurderingService,
-                generellBehandlingService = generellBehandlingService
+                generellBehandlingService = generellBehandlingService,
+                featureToggleService = featureToggleService
             )
             omregningRoutes(omregningService = omregningService)
             migreringRoutes(migreringService = migreringService)

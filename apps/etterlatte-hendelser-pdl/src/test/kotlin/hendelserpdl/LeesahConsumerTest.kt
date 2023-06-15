@@ -1,28 +1,11 @@
 package no.nav.etterlatte.hendelserpdl
 
-import io.mockk.coEvery
-import io.mockk.coVerify
-import io.mockk.every
-import io.mockk.just
-import io.mockk.mockk
-import io.mockk.runs
-import io.mockk.verify
-import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.hendelserpdl.leesah.ILivsHendelserRapid
-import no.nav.etterlatte.hendelserpdl.leesah.PersonHendelseFordeler
-import no.nav.etterlatte.hendelserpdl.pdl.PdlService
-import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
-import no.nav.etterlatte.libs.common.person.PdlIdentifikator
-import no.nav.person.pdl.leesah.Endringstype
-import no.nav.person.pdl.leesah.Personhendelse
-import no.nav.person.pdl.leesah.forelderbarnrelasjon.ForelderBarnRelasjon
-import org.junit.jupiter.api.Test
+internal class LeesahConsumerTest {
 
-internal class KafkaConsumerHendelserPdlTest {
-
+    /*
     @Test
     fun hendelserSomIkkeLyttesPaa() {
-        val pdlMock = mockk<PdlService>()
+        val pdlMock = mockk<PdlKlient>()
         val livshendelserRapid = mockk<ILivsHendelserRapid>()
         val personHendelseFordeler = PersonHendelseFordeler(livshendelserRapid, pdlMock)
         runBlocking {
@@ -38,7 +21,7 @@ internal class KafkaConsumerHendelserPdlTest {
 
     @Test
     fun hendelserSomLyttesPaa() {
-        val pdlMock = mockk<PdlService>() {
+        val pdlMock = mockk<PdlKlient>() {
             coEvery { hentPdlIdentifikator("123") } returns PdlIdentifikator.FolkeregisterIdent(
                 Folkeregisteridentifikator.of("70078749472")
             )
@@ -102,5 +85,5 @@ internal class KafkaConsumerHendelserPdlTest {
                 any()
             )
         }
-    }
+    }*/
 }

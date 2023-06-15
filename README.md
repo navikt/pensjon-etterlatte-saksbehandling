@@ -29,6 +29,8 @@ fungere.
     ```shell
     docker compose up -d
     ```
+   Legg til `--build` hvis du trenger å bygge imaget på nytt. Mer info
+   her: [docker compose up](https://docs.docker.com/engine/reference/commandline/compose_up/) \
    NB: Hvis du vil kjøre frontend mot lokal backend må du overskrive variabel for `_API`-url (se oversikt i `config.ts`)
 
 3. **Kjør run config** \

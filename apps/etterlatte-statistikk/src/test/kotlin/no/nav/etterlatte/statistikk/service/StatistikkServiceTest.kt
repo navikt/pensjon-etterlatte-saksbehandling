@@ -74,6 +74,7 @@ class StatistikkServiceTest {
             boddEllerArbeidetUtlandet = null,
             kommerBarnetTilgode = null,
             revurderingsaarsak = null,
+            revurderingInfo = null,
             prosesstype = Prosesstype.MANUELL
         )
         coEvery { behandlingKlient.hentPersongalleri(behandlingId) } returns Persongalleri(
@@ -162,7 +163,8 @@ class StatistikkServiceTest {
             boddEllerArbeidetUtlandet = null,
             kommerBarnetTilgode = null,
             revurderingsaarsak = null,
-            prosesstype = Prosesstype.MANUELL
+            prosesstype = Prosesstype.MANUELL,
+            revurderingInfo = null
         )
 
         val beregningKlient = mockk<BeregningKlient>()

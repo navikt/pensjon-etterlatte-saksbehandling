@@ -11,6 +11,7 @@ import no.nav.etterlatte.behandling.domain.ManueltOpphoer
 import no.nav.etterlatte.behandling.domain.OpprettBehandling
 import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.behandling.hendelse.getUUID
+import no.nav.etterlatte.grunnlagsendring.setJsonb
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -19,6 +20,7 @@ import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
+import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
 import no.nav.etterlatte.libs.common.behandling.Utenlandstilsnitt
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.sak.BehandlingOgSak
@@ -113,9 +115,12 @@ class BehandlingDao(private val connection: () -> Connection) {
         soesken = rs.getString("soesken").let { objectMapper.readValue(it) }
     )
 
-    private fun asRevurdering(rs: ResultSet): Revurdering =
-        Revurdering.opprett(
-            id = rs.getObject("id") as UUID,
+    private fun asRevurdering(rs: ResultSet): Revurdering {
+        val id = rs.getObject("id") as UUID
+        val revurderingInfo = hentRevurderingInfoForBehandling(id)
+
+        return Revurdering.opprett(
+            id = id,
             sak = mapSak(rs),
             behandlingOpprettet = rs.somLocalDateTimeUTC("behandling_opprettet"),
             sistEndret = rs.somLocalDateTimeUTC("sist_endret"),
@@ -129,8 +134,37 @@ class BehandlingDao(private val connection: () -> Connection) {
                 objectMapper.readValue(it)
             },
             prosesstype = rs.getString("prosesstype").let { Prosesstype.valueOf(it) },
-            kilde = rs.getString("kilde").let { Vedtaksloesning.valueOf(it) }
+            kilde = rs.getString("kilde").let { Vedtaksloesning.valueOf(it) },
+            revurderingInfo = revurderingInfo
         )
+    }
+
+    fun lagreRevurderingInfo(id: UUID, revurderingInfo: RevurderingInfo) {
+        connection().prepareStatement(
+            """
+                UPDATE revurdering_info
+                SET info = ?
+                WHERE behandling_id = ?
+            """.trimIndent()
+        ).let { statement ->
+            statement.setJsonb(1, revurderingInfo)
+            statement.setObject(2, id)
+            statement.executeUpdate()
+        }
+    }
+
+    private fun hentRevurderingInfoForBehandling(id: UUID): RevurderingInfo? {
+        return connection().prepareStatement(
+            """
+                SELECT info FROM revurdering_info 
+                WHERE behandling_id = ?
+            """.trimIndent()
+        ).let { statement ->
+            statement.setObject(1, id)
+            statement.executeQuery()
+                .singleOrNull { getString("revurdering_info")?.let { objectMapper.readValue(it) } }
+        }
+    }
 
     private fun asManueltOpphoer(rs: ResultSet) = ManueltOpphoer(
         id = rs.getObject("id") as UUID,

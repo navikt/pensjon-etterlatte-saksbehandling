@@ -2,6 +2,7 @@ package no.nav.etterlatte.brev.model
 
 import no.nav.etterlatte.brev.behandling.Behandling
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode
+import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 
@@ -23,12 +24,13 @@ object BrevDataMapper {
                         behandling
                     )
                 )
-                VedtakType.ENDRING -> Pair(
-                    EtterlatteBrevKode.BARNEPENSJON_INNVILGELSE, // TODO: Legg til brevkode for endring
-                    EndringBrevData.fra(
-                        behandling
+                VedtakType.ENDRING -> when (behandling.revurderingsaarsak) {
+                    RevurderingAarsak.SOESKENJUSTERING -> Pair(
+                        EtterlatteBrevKode.BARNEPENSJON_REVURDERING_SOESKENJUSTERING,
+                        SoeskenjusteringRevurderingBrevdata.fra(behandling)
                     )
-                )
+                    else -> TODO("Revurderingsbrev for ${behandling.revurderingsaarsak} er ikke støttet")
+                }
                 VedtakType.OPPHOER -> TODO("Vedtakstype er ikke støttet: $vedtakType")
             }
         }

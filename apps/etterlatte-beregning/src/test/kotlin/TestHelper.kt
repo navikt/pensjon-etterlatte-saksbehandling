@@ -187,7 +187,7 @@ fun behandling(
     sistEndret = LocalDateTime.now(),
     soeknadMottattDato = null,
     innsender = null,
-    soeker = "diam",
+    soeker = "12312312321",
     gjenlevende = listOf(),
     avdoed = listOf(),
     soesken = listOf(),
@@ -199,5 +199,6 @@ fun behandling(
     revurderingsaarsak = null,
     prosesstype = Prosesstype.MANUELL,
     utenlandstilsnitt = null,
-    boddEllerArbeidetUtlandet = null
+    boddEllerArbeidetUtlandet = null,
+    revurderingInfo = null
 )

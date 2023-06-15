@@ -48,6 +48,7 @@ fun opprettVedtak(
     beregning = beregning,
     avkorting = avkorting,
     vilkaarsvurdering = vilkaarsvurdering,
+    revurderingInfo = null,
     utbetalingsperioder = listOf(
         Utbetalingsperiode(
             id = 0,

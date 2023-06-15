@@ -12,10 +12,13 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.behandling.GenerellBehandlingService
 import no.nav.etterlatte.behandling.domain.toDetaljertBehandling
+import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
+import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.behandlingsId
 import no.nav.etterlatte.libs.common.sakId
 import java.util.*
 
@@ -25,49 +28,70 @@ internal fun Route.revurderingRoutes(
 ) {
     val logger = application.log
 
-    route("/api/revurdering/{$SAKID_CALL_PARAMETER}") {
-        post {
-            logger.info("Oppretter ny revurdering på sak $sakId")
-            val body = try {
-                call.receive<OpprettRevurderingRequest>()
-            } catch (e: Exception) {
-                logger.error("Feil skjedde under lesing av payloaden.", e)
-                call.respond(HttpStatusCode.BadRequest, "Feil under deserialiseringen av objektet")
-                return@post
+    route("/api/revurdering") {
+        route("{$BEHANDLINGSID_CALL_PARAMETER}") {
+            route("revurderinginfo") {
+                post {
+                    logger.info("Lagrer revurderinginfo på behandling $behandlingsId")
+                    val info = try {
+                        call.receive<RevurderingInfo>()
+                    } catch (e: Exception) {
+                        return@post call.respond(HttpStatusCode.BadRequest)
+                    }
+                    val fikkLagret = revurderingService.lagreRevurderingInfo(behandlingsId, info)
+                    if (fikkLagret) {
+                        call.respond(HttpStatusCode.NoContent)
+                    } else {
+                        call.respond(HttpStatusCode.InternalServerError)
+                    }
+                }
             }
-            if (!body.aarsak.kanBrukesIMiljo()) {
-                call.respond(HttpStatusCode.BadRequest, "Feil revurderingsårsak, foreløpig ikke støttet")
-                return@post
-            }
-            generellBehandlingService.hentSisteIverksatte(sakId)?.let { forrigeIverksatteBehandling ->
-                val sakType = forrigeIverksatteBehandling.sak.sakType
-                if (!body.aarsak.gyldigForSakType(sakType)) {
-                    call.respond(HttpStatusCode.BadRequest, "${body.aarsak} er ikke støttet for $sakType")
+        }
+
+        route("{$SAKID_CALL_PARAMETER}") {
+            post {
+                logger.info("Oppretter ny revurdering på sak $sakId")
+                val body = try {
+                    call.receive<OpprettRevurderingRequest>()
+                } catch (e: Exception) {
+                    logger.error("Feil skjedde under lesing av payloaden.", e)
+                    call.respond(HttpStatusCode.BadRequest, "Feil under deserialiseringen av objektet")
                     return@post
                 }
+                if (!body.aarsak.kanBrukesIMiljo()) {
+                    call.respond(HttpStatusCode.BadRequest, "Feil revurderingsårsak, foreløpig ikke støttet")
+                    return@post
+                }
+                generellBehandlingService.hentSisteIverksatte(sakId)?.let { forrigeIverksatteBehandling ->
+                    val sakType = forrigeIverksatteBehandling.sak.sakType
+                    if (!body.aarsak.gyldigForSakType(sakType)) {
+                        call.respond(HttpStatusCode.BadRequest, "${body.aarsak} er ikke støttet for $sakType")
+                        return@post
+                    }
 
-                val paaGrunnAvHendelseId = try {
-                    body.paaGrunnAvHendelseId?.let { UUID.fromString(it) }
-                } catch (e: Exception) {
-                    return@post call.respond(
-                        HttpStatusCode.BadRequest,
-                        "${body.paaGrunnAvHendelseId} er ikke en gyldig UUID"
+                    val paaGrunnAvHendelseId = try {
+                        body.paaGrunnAvHendelseId?.let { UUID.fromString(it) }
+                    } catch (e: Exception) {
+                        return@post call.respond(
+                            HttpStatusCode.BadRequest,
+                            "${body.paaGrunnAvHendelseId} er ikke en gyldig UUID"
+                        )
+                    }
+
+                    val revurdering = revurderingService.opprettManuellRevurdering(
+                        sakId = forrigeIverksatteBehandling.sak.id,
+                        forrigeBehandling = forrigeIverksatteBehandling,
+                        revurderingAarsak = body.aarsak,
+                        kilde = Vedtaksloesning.GJENNY,
+                        paaGrunnAvHendelse = paaGrunnAvHendelseId
                     )
-                }
 
-                val revurdering = revurderingService.opprettManuellRevurdering(
-                    sakId = forrigeIverksatteBehandling.sak.id,
-                    forrigeBehandling = forrigeIverksatteBehandling,
-                    revurderingAarsak = body.aarsak,
-                    kilde = Vedtaksloesning.GJENNY,
-                    paaGrunnAvHendelse = paaGrunnAvHendelseId
-                )
-
-                when (revurdering) {
-                    null -> call.respond(HttpStatusCode.NotFound)
-                    else -> call.respond(revurdering.toDetaljertBehandling())
-                }
-            } ?: call.respond(HttpStatusCode.BadRequest, "Kan ikke revurdere en sak uten iverksatt behandling")
+                    when (revurdering) {
+                        null -> call.respond(HttpStatusCode.NotFound)
+                        else -> call.respond(revurdering.toDetaljertBehandling())
+                    }
+                } ?: call.respond(HttpStatusCode.BadRequest, "Kan ikke revurdere en sak uten iverksatt behandling")
+            }
         }
     }
 

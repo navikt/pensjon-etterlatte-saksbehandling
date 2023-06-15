@@ -170,6 +170,7 @@ internal class SakOgBehandlingServiceTest {
         every { sak } returns VedtakSak("ident", SakType.BARNEPENSJON, SAK_ID)
         every { behandling.id } returns BEHANDLING_ID
         every { behandling.revurderingsaarsak } returns null
+        every { behandling.revurderingInfo } returns null
         every { vedtakId } returns 123L
         every { type } returns VedtakType.INNVILGELSE
         every { status } returns VedtakStatus.OPPRETTET

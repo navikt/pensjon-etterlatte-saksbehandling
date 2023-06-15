@@ -39,9 +39,10 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
                 statement = """
                         INSERT INTO vedtak(
                             behandlingId, sakid, fnr, behandlingtype, saktype, vedtakstatus, type, datovirkfom, 
-                            beregningsresultat, avkorting, vilkaarsresultat, revurderingsaarsak)
+                            beregningsresultat, avkorting, vilkaarsresultat, revurderingsaarsak, revurderinginfo)
                         VALUES (:behandlingId, :sakid, :fnr, :behandlingtype, :saktype, :vedtakstatus, :type, 
-                            :datovirkfom, :beregningsresultat, :avkorting, :vilkaarsresultat, :revurderingsaarsak)
+                            :datovirkfom, :beregningsresultat, :avkorting, :vilkaarsresultat, :revurderingsaarsak,
+                            :revurderinginfo)
                         RETURNING id
                         """,
                 mapOf(
@@ -56,7 +57,8 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
                     "beregningsresultat" to opprettVedtak.beregning?.toJson(),
                     "avkorting" to opprettVedtak.beregning?.toJson(),
                     "vilkaarsresultat" to opprettVedtak.vilkaarsvurdering?.toJson(),
-                    "revurderingsaarsak" to opprettVedtak.revurderingsaarsak?.name
+                    "revurderingsaarsak" to opprettVedtak.revurderingsaarsak?.name,
+                    "revurderinginfo" to opprettVedtak.revurderingInfo?.toJson()
                 )
             )
                 .let { query -> tx.run(query.asUpdateAndReturnGeneratedKey) }
@@ -75,7 +77,7 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
                         UPDATE vedtak 
                         SET datovirkfom = :datovirkfom, type = :type, 
                             beregningsresultat = :beregningsresultat, avkorting = :avkorting,
-                             vilkaarsresultat = :vilkaarsresultat 
+                             vilkaarsresultat = :vilkaarsresultat, revurderinginfo = :revurderinginfo
                         WHERE behandlingId = :behandlingid
                         """,
                 mapOf(
@@ -84,7 +86,8 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
                     "beregningsresultat" to oppdatertVedtak.beregning?.toJson(),
                     "avkorting" to oppdatertVedtak.beregning?.toJson(),
                     "vilkaarsresultat" to oppdatertVedtak.vilkaarsvurdering?.toJson(),
-                    "behandlingid" to oppdatertVedtak.behandlingId
+                    "behandlingid" to oppdatertVedtak.behandlingId,
+                    "revurderinginfo" to oppdatertVedtak.revurderingInfo
                 )
             ).let { query -> tx.run(query.asUpdate) }
 
@@ -132,7 +135,7 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
             query = """
             SELECT sakid, behandlingId, saksbehandlerId, beregningsresultat, avkorting, vilkaarsresultat, id, fnr, 
                 datoFattet, datoattestert, attestant, datoVirkFom, vedtakstatus, saktype, behandlingtype, 
-                attestertVedtakEnhet, fattetVedtakEnhet, type, revurderingsaarsak
+                attestertVedtakEnhet, fattetVedtakEnhet, type, revurderingsaarsak, revurderinginfo
             FROM vedtak 
             WHERE behandlingId = :behandlingId
             """,
@@ -149,7 +152,7 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
         val hentVedtak = """
             SELECT sakid, behandlingId, saksbehandlerId, beregningsresultat, avkorting, vilkaarsresultat, id, fnr, 
                 datoFattet, datoattestert, attestant, datoVirkFom, vedtakstatus, saktype, behandlingtype, 
-                attestertVedtakEnhet, fattetVedtakEnhet, type, revurderingsaarsak 
+                attestertVedtakEnhet, fattetVedtakEnhet, type, revurderingsaarsak, revurderinginfo
             FROM vedtak  
             WHERE sakId = :sakId
             """
@@ -256,7 +259,8 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
             )
         },
         utbetalingsperioder = utbetalingsperioder,
-        revurderingAarsak = stringOrNull("revurderingsaarsak")?.let { RevurderingAarsak.valueOf(it) }
+        revurderingAarsak = stringOrNull("revurderingsaarsak")?.let { RevurderingAarsak.valueOf(it) },
+        revurderingInfo = stringOrNull("revurderinginfo")?.let { objectMapper.readValue(it) }
     )
 
     private fun Row.toUtbetalingsperiode() =

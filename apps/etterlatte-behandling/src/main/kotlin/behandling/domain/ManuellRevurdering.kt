@@ -7,6 +7,7 @@ import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
+import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Utenlandstilsnitt
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
@@ -28,21 +29,23 @@ data class ManuellRevurdering(
     override val utenlandstilsnitt: Utenlandstilsnitt?,
     override val boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet?,
     override val revurderingsaarsak: RevurderingAarsak,
+    override val revurderingInfo: RevurderingInfo?,
     override val kilde: Vedtaksloesning
 ) : Revurdering(
-    id,
-    sak,
-    behandlingOpprettet,
-    sistEndret,
-    status,
-    persongalleri,
-    kommerBarnetTilgode,
-    virkningstidspunkt,
-    utenlandstilsnitt,
-    boddEllerArbeidetUtlandet,
-    revurderingsaarsak,
-    Prosesstype.MANUELL,
-    kilde
+    id = id,
+    sak = sak,
+    behandlingOpprettet = behandlingOpprettet,
+    sistEndret = sistEndret,
+    status = status,
+    persongalleri = persongalleri,
+    kommerBarnetTilgode = kommerBarnetTilgode,
+    virkningstidspunkt = virkningstidspunkt,
+    utenlandstilsnitt = utenlandstilsnitt,
+    boddEllerArbeidetUtlandet = boddEllerArbeidetUtlandet,
+    revurderingsaarsak = revurderingsaarsak,
+    revurderingInfo = revurderingInfo,
+    prosesstype = Prosesstype.MANUELL,
+    kilde = kilde
 ) {
 
     private fun erFyltUt(): Boolean =

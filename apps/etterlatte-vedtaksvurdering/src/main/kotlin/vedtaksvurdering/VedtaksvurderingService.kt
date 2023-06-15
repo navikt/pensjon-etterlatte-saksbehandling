@@ -281,7 +281,8 @@ class VedtaksvurderingService(
                 beregningOgAvkorting = beregningOgAvkorting,
                 behandling.sakType
             ),
-            revurderingsaarsak = behandling.revurderingsaarsak
+            revurderingsaarsak = behandling.revurderingsaarsak,
+            revurderingInfo = behandling.revurderingInfo
         )
 
         return repository.opprettVedtak(opprettetVedtak)
@@ -305,7 +306,8 @@ class VedtaksvurderingService(
                 virkningstidspunkt = virkningstidspunkt,
                 beregningOgAvkorting = beregningOgAvkorting,
                 behandling.sakType
-            )
+            ),
+            revurderingInfo = behandling.revurderingInfo
         )
         return repository.oppdaterVedtak(oppdatertVedtak)
     }

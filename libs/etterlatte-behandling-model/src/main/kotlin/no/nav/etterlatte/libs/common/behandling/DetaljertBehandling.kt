@@ -25,6 +25,7 @@ data class DetaljertBehandling(
     val boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet?,
     val kommerBarnetTilgode: KommerBarnetTilgode?,
     val revurderingsaarsak: RevurderingAarsak? = null,
+    val revurderingInfo: RevurderingInfo?,
     val prosesstype: Prosesstype
 ) {
     fun kanVedta(type: VedtakType): Boolean {

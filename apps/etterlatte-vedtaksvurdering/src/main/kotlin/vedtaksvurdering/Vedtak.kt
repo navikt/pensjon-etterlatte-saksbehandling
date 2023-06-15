@@ -3,6 +3,7 @@ package no.nav.etterlatte.vedtaksvurdering
 import com.fasterxml.jackson.databind.node.ObjectNode
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
+import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.VedtakSak
@@ -30,7 +31,8 @@ data class OpprettVedtak(
     val avkorting: ObjectNode?,
     val vilkaarsvurdering: ObjectNode?,
     val utbetalingsperioder: List<Utbetalingsperiode>,
-    val revurderingsaarsak: RevurderingAarsak?
+    val revurderingsaarsak: RevurderingAarsak?,
+    val revurderingInfo: RevurderingInfo?
 )
 
 data class Vedtak(
@@ -49,14 +51,15 @@ data class Vedtak(
     val vilkaarsvurdering: ObjectNode?,
     val utbetalingsperioder: List<Utbetalingsperiode>,
     val vedtakFattet: VedtakFattet? = null,
-    val attestasjon: Attestasjon? = null
+    val attestasjon: Attestasjon? = null,
+    val revurderingInfo: RevurderingInfo? = null
 ) {
     fun toDto() = VedtakDto(
         vedtakId = id,
         status = status,
         virkningstidspunkt = virkningstidspunkt,
         sak = VedtakSak(soeker.value, sakType, sakId),
-        behandling = Behandling(behandlingType, behandlingId, revurderingAarsak),
+        behandling = Behandling(behandlingType, behandlingId, revurderingAarsak, revurderingInfo),
         type = type,
         utbetalingsperioder = utbetalingsperioder,
         vedtakFattet = vedtakFattet,

@@ -17,7 +17,6 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
 import no.nav.etterlatte.libs.common.behandling.JaNei
-import no.nav.etterlatte.libs.common.behandling.JaNeiMedBegrunnelse
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
@@ -302,7 +301,7 @@ fun kommerBarnetTilgode(
     svar: JaNei = JaNei.JA,
     begrunnelse: String = "En begrunnelse",
     kilde: Grunnlagsopplysning.Saksbehandler = Grunnlagsopplysning.Saksbehandler.create("S01")
-) = KommerBarnetTilgode(JaNeiMedBegrunnelse(svar, begrunnelse), kilde)
+) = KommerBarnetTilgode(svar, begrunnelse, kilde)
 
 val TRIVIELL_MIDTPUNKT = Folkeregisteridentifikator.of("19040550081")
 val STOR_SNERK = Folkeregisteridentifikator.of("11057523044")
@@ -352,7 +351,8 @@ fun mockPerson(
 )
 
 fun kommerBarnetTilGodeVurdering() = KommerBarnetTilgode(
-    svar = JaNeiMedBegrunnelse(JaNei.JA, "begrunnelse"),
+    svar = JaNei.JA,
+    begrunnelse = "begrunnelse",
     kilde = Grunnlagsopplysning.Saksbehandler(ident = "ident", tidspunkt = Tidspunkt(instant = Instant.now()))
 )
 

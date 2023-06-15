@@ -15,7 +15,7 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.rapidsandrivers.migrering.MigreringRequest
 import no.nav.etterlatte.sak.SakService
-import java.util.*
+import java.util.UUID
 
 class MigreringService(
     private val sakService: SakService,
@@ -29,7 +29,8 @@ class MigreringService(
         foerstegangsBehandlingService.lagreKommerBarnetTilgode(
             it.id,
             KommerBarnetTilgode(
-                JaNeiMedBegrunnelse(JaNei.JA, "Automatisk importert fra Pesys"),
+                JaNei.JA,
+                "Automatisk importert fra Pesys",
                 Grunnlagsopplysning.Pesys.create()
             )
         )

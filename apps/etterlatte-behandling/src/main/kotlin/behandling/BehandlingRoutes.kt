@@ -73,7 +73,8 @@ internal fun Route.behandlingRoutes(
             hentNavidentFraToken { navIdent ->
                 val body = call.receive<JaNeiMedBegrunnelse>()
                 val kommerBarnetTilgode = KommerBarnetTilgode(
-                    body,
+                    body.svar,
+                    body.begrunnelse,
                     Grunnlagsopplysning.Saksbehandler.create(navIdent)
                 )
 

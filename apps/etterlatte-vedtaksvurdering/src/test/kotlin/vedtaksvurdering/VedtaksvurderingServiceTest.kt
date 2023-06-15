@@ -887,7 +887,8 @@ internal class VedtaksvurderingServiceTest {
                 fom = virkningstidspunkt.atDay(1),
                 tom = null,
                 ytelseEtterAvkorting = 50,
-                avkortingsbeloep = 50
+                avkortingsbeloep = 50,
+                restanse = 0
             )
         )
     }

@@ -27,6 +27,11 @@ class AvkortingRepository(private val dataSource: DataSource) {
             behandlingId
         ).let { query -> tx.run(query.map { row -> row.toAvkortingsperiode() }.asList) }
 
+        val aarsoppgjoer = queryOf(
+            "SELECT * FROM avkorting_aarsoppgjoer WHERE behandling_id = ?",
+            behandlingId
+        ).let { query -> tx.run(query.map { row -> row.toAarsoppgjoer() }.asList) }
+
         val avkortetYtelse = queryOf(
             "SELECT * FROM avkortet_ytelse WHERE behandling_id = ?",
             behandlingId
@@ -38,7 +43,8 @@ class AvkortingRepository(private val dataSource: DataSource) {
             Avkorting(
                 avkortingGrunnlag = avkortingGrunnlag,
                 avkortingsperioder = avkortingsperioder,
-                avkortetYtelse = avkortetYtelse
+                avkortetYtelse = avkortetYtelse,
+                aarsoppgjoer = aarsoppgjoer
             )
         }
     }
@@ -51,10 +57,12 @@ class AvkortingRepository(private val dataSource: DataSource) {
             slettAvkorting(behandlingId, tx)
             lagreAvkortingGrunnlag(behandlingId, avkorting.avkortingGrunnlag, tx)
             lagreAvkortingsperioder(behandlingId, avkorting.avkortingsperioder, tx)
+            lagreAarsoppgjoer(behandlingId, avkorting.aarsoppgjoer, tx)
             lagreAvkortetYtelse(behandlingId, avkorting.avkortetYtelse, tx)
         }
         return hentAvkortingUtenNullable(behandlingId)
     }
+
     private fun slettAvkorting(behandlingId: UUID, tx: TransactionalSession) {
         queryOf(
             "DELETE FROM avkortingsperioder WHERE behandling_id = ?",
@@ -64,6 +72,12 @@ class AvkortingRepository(private val dataSource: DataSource) {
         }
         queryOf(
             "DELETE FROM avkortet_ytelse WHERE behandling_id  = ?",
+            behandlingId
+        ).let { query ->
+            tx.run(query.asUpdate)
+        }
+        queryOf(
+            "DELETE FROM avkorting_aarsoppgjoer WHERE behandling_id = ?",
             behandlingId
         ).let { query ->
             tx.run(query.asUpdate)
@@ -130,6 +144,36 @@ class AvkortingRepository(private val dataSource: DataSource) {
         ).let { query -> tx.run(query.asUpdate) }
     }
 
+    private fun lagreAarsoppgjoer(
+        behandlingId: UUID,
+        aarsoppgjoer: List<Aarsoppgjoer>,
+        tx: TransactionalSession
+    ) =
+        aarsoppgjoer.forEach {
+            queryOf(
+                statement = """
+                    INSERT INTO avkorting_aarsoppgjoer(
+                        id, behandling_id, maaned, avkorting_forventet_inntekt, tidligere_avkorting,
+                         ny_avkorting, restanse
+                    ) VALUES (
+                        :id, :behandlingId, :maaned, :avkortingForventetInntekt, :tidligereAvkorting,
+                         :nyAvkorting, :restanse 
+                    )
+                """.trimIndent(),
+                paramMap = mapOf(
+                    "id" to UUID.randomUUID(),
+                    "behandlingId" to behandlingId,
+                    "maaned" to it.maaned.atDay(1),
+                    "avkortingForventetInntekt" to it.avkortingForventetInntekt,
+                    "tidligereAvkorting" to it.tidligereAvkorting,
+                    "nyAvkorting" to it.nyAvkorting,
+                    "restanse" to it.restanse
+                    // "regel_resultat" to it.regelResultat.toJson(), TODO EY-2368
+                    // "kilde" to it.kilde.toJson()
+                )
+            ).let { query -> tx.run(query.asUpdate) }
+        }
+
     private fun lagreAvkortetYtelse(
         behandlingId: UUID,
         avkortetYtelse: List<AvkortetYtelse>,
@@ -139,11 +183,11 @@ class AvkortingRepository(private val dataSource: DataSource) {
             queryOf(
                 statement = """
                     INSERT INTO avkortet_ytelse(
-                        id, behandling_id, fom, tom, ytelse_etter_avkorting, avkortingsbeloep,
+                        id, behandling_id, fom, tom, ytelse_etter_avkorting, avkortingsbeloep, restanse, 
                         ytelse_foer_avkorting, tidspunkt, regel_resultat, kilde
                     ) VALUES (
-                        :id, :behandlingId, :fom, :tom,:ytelseEtterAvkorting, :avkortingsbeloep, :ytelseFoerAvkorting,
-                        :tidspunkt, :regel_resultat, :kilde
+                        :id, :behandlingId, :fom, :tom,:ytelseEtterAvkorting, :avkortingsbeloep, :restanse,
+                        :ytelseFoerAvkorting, :tidspunkt, :regel_resultat, :kilde
                     )
                 """.trimIndent(),
                 paramMap = mapOf(
@@ -153,6 +197,7 @@ class AvkortingRepository(private val dataSource: DataSource) {
                     "tom" to it.periode.tom?.atDay(1),
                     "ytelseEtterAvkorting" to it.ytelseEtterAvkorting,
                     "avkortingsbeloep" to it.avkortingsbeloep,
+                    "restanse" to it.restanse,
                     "ytelseFoerAvkorting" to it.ytelseFoerAvkorting,
                     "tidspunkt" to it.tidspunkt.toTimestamp(),
                     "regel_resultat" to it.regelResultat.toJson(),
@@ -192,9 +237,19 @@ class AvkortingRepository(private val dataSource: DataSource) {
         ),
         ytelseEtterAvkorting = int("ytelse_etter_avkorting"),
         avkortingsbeloep = int("avkortingsbeloep"),
+        restanse = int("restanse"),
         ytelseFoerAvkorting = int("ytelse_foer_avkorting"),
         tidspunkt = sqlTimestamp("tidspunkt").toTidspunkt(),
         regelResultat = objectMapper.readTree(string("regel_resultat")),
         kilde = string("kilde").let { objectMapper.readValue(it) }
+    )
+
+    private fun Row.toAarsoppgjoer() = Aarsoppgjoer(
+        maaned = sqlDate("maaned").let { YearMonth.from(it.toLocalDate()) },
+        avkortingForventetInntekt = int("avkorting_forventet_inntekt"),
+        tidligereAvkorting = int("tidligere_avkorting"),
+        nyAvkorting = int("ny_avkorting"),
+        restanse = int("restanse")
+        // TODO EY-2368 - regel og kilde
     )
 }

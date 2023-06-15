@@ -87,9 +87,10 @@ class AvkortingRoutesTest {
             kilde = Grunnlagsopplysning.Saksbehandler("Saksbehandler01", tidspunkt)
         )
         val avkorting = Avkorting(
-            avkortingGrunnlag = mutableListOf(avkortingsgrunnlag),
-            avkortingsperioder = mutableListOf(avkortingsperiode()),
-            avkortetYtelse = mutableListOf(avkortetYtelse(periode = Periode(fom = dato, tom = dato)))
+            avkortingGrunnlag = listOf(avkortingsgrunnlag),
+            avkortingsperioder = listOf(avkortingsperiode()),
+            avkortetYtelse = listOf(avkortetYtelse(periode = Periode(fom = dato, tom = dato))),
+            aarsoppgjoer = emptyList()
         )
         val dto = AvkortingDto(
             avkortingGrunnlag = listOf(
@@ -112,7 +113,8 @@ class AvkortingRoutesTest {
                     fom = dato.atDay(1),
                     tom = dato.atEndOfMonth(),
                     avkortingsbeloep = 200,
-                    ytelseEtterAvkorting = 100
+                    ytelseEtterAvkorting = 100,
+                    restanse = 0
                 )
             )
         )

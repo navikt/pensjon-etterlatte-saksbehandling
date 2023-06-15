@@ -5,7 +5,7 @@ import io.kotest.matchers.shouldNotBe
 import io.mockk.every
 import io.mockk.mockkObject
 import io.mockk.unmockkObject
-import no.nav.etterlatte.avkorting.InntektAvkortingService
+import no.nav.etterlatte.avkorting.AvkortingRegelkjoring
 import no.nav.etterlatte.beregning.grunnlag.PeriodiseringAvGrunnlagFeil
 import no.nav.etterlatte.beregning.regler.avkortinggrunnlag
 import no.nav.etterlatte.beregning.regler.avkortingsperiode
@@ -20,7 +20,7 @@ import org.junit.jupiter.api.assertThrows
 import java.math.BigDecimal
 import java.time.YearMonth
 
-class InntektAvkortingServiceTest {
+class AvkortingRegelkjoringTest {
 
     @BeforeEach
     fun before() {
@@ -58,7 +58,10 @@ class InntektAvkortingServiceTest {
             )
         )
 
-        val avkortingsperioder = InntektAvkortingService.beregnInntektsavkorting(virkningstidspunkt, avkortingGrunnlag)
+        val avkortingsperioder = AvkortingRegelkjoring.beregnInntektsavkorting(
+            Periode(fom = virkningstidspunkt, tom = null),
+            avkortingGrunnlag
+        )
 
         with(avkortingsperioder[0]) {
             regelResultat shouldNotBe null
@@ -91,7 +94,10 @@ class InntektAvkortingServiceTest {
         )
 
         assertThrows<PeriodiseringAvGrunnlagFeil> {
-            InntektAvkortingService.beregnInntektsavkorting(virkningstidspunkt, avkortingGrunnlag)
+            AvkortingRegelkjoring.beregnInntektsavkorting(
+                Periode(fom = virkningstidspunkt, tom = null),
+                avkortingGrunnlag
+            )
         }
     }
 
@@ -126,10 +132,11 @@ class InntektAvkortingServiceTest {
             )
         )
 
-        val avkortetYtelse = InntektAvkortingService.beregnAvkortetYtelse(
-            virkningstidspunkt,
+        val avkortetYtelse = AvkortingRegelkjoring.beregnAvkortetYtelse(
+            Periode(fom = virkningstidspunkt, tom = null),
             beregninger,
-            avkortingsperioder
+            avkortingsperioder,
+            maanedligRestanse = 0
         )
 
         avkortetYtelse.size shouldBe 4

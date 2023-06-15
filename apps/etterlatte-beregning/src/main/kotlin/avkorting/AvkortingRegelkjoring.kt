@@ -19,16 +19,17 @@ import no.nav.etterlatte.libs.regler.RegelPeriode
 import no.nav.etterlatte.libs.regler.RegelkjoeringResultat
 import no.nav.etterlatte.libs.regler.eksekver
 import no.nav.etterlatte.regler.Beregningstall
+import okhttp3.internal.toImmutableList
 import org.slf4j.LoggerFactory
 import java.lang.IllegalArgumentException
 import java.time.YearMonth
 
-object InntektAvkortingService {
+object AvkortingRegelkjoring {
 
-    private val logger = LoggerFactory.getLogger(InntektAvkortingService::class.java)
+    private val logger = LoggerFactory.getLogger(AvkortingRegelkjoring::class.java)
 
     fun beregnInntektsavkorting(
-        virkningstidspunkt: YearMonth,
+        periode: Periode,
         avkortingGrunnlag: List<AvkortingGrunnlag>
     ): List<Avkortingsperiode> {
         logger.info("Beregner inntektsavkorting")
@@ -55,8 +56,7 @@ object InntektAvkortingService {
             ) { _, _, _ -> throw IllegalArgumentException("Noe gikk galt ved uthenting av periodiserte beregninger") }
         )
 
-        val resultat =
-            kroneavrundetInntektAvkorting.eksekver(grunnlag, RegelPeriode(virkningstidspunkt.atDay(1)))
+        val resultat = kroneavrundetInntektAvkorting.eksekver(grunnlag, periode.tilRegelPeriode())
         return when (resultat) {
             is RegelkjoeringResultat.Suksess -> {
                 val tidspunkt = Tidspunkt.now()
@@ -83,16 +83,68 @@ object InntektAvkortingService {
         }
     }
 
-    fun beregnAvkortetYtelse(
+    fun beregnAarsoppgjoer(
+        avkorting: Avkorting,
         virkningstidspunkt: YearMonth,
+        forrigeAvkorting: Avkorting? = null
+    ): List<Aarsoppgjoer> {
+        // TODO EY-2368 - Lag regler og grunnlag
+
+        val nyttAvkortingsgrunnlag = avkorting.hentAktiveInntektsgrunnlag()
+        val fraForsteVirkEllerStartenAvAr = Periode(
+            fom = YearMonth.of(virkningstidspunkt.year, 12 - nyttAvkortingsgrunnlag.relevanteMaanederInnAar + 1),
+            tom = null
+        )
+        val avkortingNyInntekt = beregnInntektsavkorting(
+            periode = fraForsteVirkEllerStartenAvAr,
+            listOf(nyttAvkortingsgrunnlag.copy(periode = fraForsteVirkEllerStartenAvAr))
+        )
+
+        val forrigeAvkortingsmaaneder =
+            forrigeAvkorting?.aarsoppgjoer?.associate { it.maaned to it.nyAvkorting }
+                ?: avkorting.aarsoppgjoer.associate { it.maaned to it.tidligereAvkorting }
+
+        val gjenvaerendeMaaneder = (12 - virkningstidspunkt.monthValue + 1)
+        val maanedligRestanse = forrigeAvkortingsmaaneder.filterKeys { it < virkningstidspunkt }
+            .map { (maaned, forrigeAvkorting) ->
+                avkortingNyInntekt.avkortingIPeriode(maaned) - forrigeAvkorting
+            }.sum() / gjenvaerendeMaaneder
+
+        val nyttOppgjoer = mutableListOf<Aarsoppgjoer>()
+        for (i in 1..12) {
+            val maaned = YearMonth.of(virkningstidspunkt.year, i)
+            if (maaned < fraForsteVirkEllerStartenAvAr.fom) continue
+
+            val avkortingForventetInntekt = avkortingNyInntekt.avkortingIPeriode(maaned)
+            val tidligereAvkorting = forrigeAvkortingsmaaneder[maaned] ?: 0
+            val restanse = if (maaned < virkningstidspunkt) 0 else maanedligRestanse
+            val nyAvkorting =
+                if (maaned < virkningstidspunkt) tidligereAvkorting else avkortingForventetInntekt + maanedligRestanse
+
+            nyttOppgjoer.add(
+                Aarsoppgjoer(
+                    maaned = maaned,
+                    avkortingForventetInntekt = avkortingForventetInntekt,
+                    tidligereAvkorting = tidligereAvkorting,
+                    restanse = restanse,
+                    nyAvkorting = nyAvkorting
+                )
+            )
+        }
+        return nyttOppgjoer.toImmutableList()
+    }
+
+    fun beregnAvkortetYtelse(
+        periode: Periode,
         beregningsperioder: List<Beregningsperiode>,
-        avkortingsperioder: List<Avkortingsperiode>
+        avkortingsperioder: List<Avkortingsperiode>,
+        maanedligRestanse: Int // TODO EY-2368 - må gjøres om til grunnlag
     ): List<AvkortetYtelse> {
         val regelgrunnlag = PeriodisertAvkortetYtelseGrunnlag(
             beregningsperioder = periodiserteBeregninger(beregningsperioder),
             avkortingsperioder = periodiserteAvkortinger(avkortingsperioder)
         )
-        val resultat = avkorteYtelse.eksekver(regelgrunnlag, RegelPeriode(virkningstidspunkt.atDay(1)))
+        val resultat = avkorteYtelse.eksekver(regelgrunnlag, periode.tilRegelPeriode())
         when (resultat) {
             is RegelkjoeringResultat.Suksess -> {
                 val tidspunkt = Tidspunkt.now()
@@ -103,7 +155,8 @@ object InntektAvkortingService {
                             fom = YearMonth.from(periodisertResultat.periode.fraDato),
                             tom = periodisertResultat.periode.tilDato?.let { YearMonth.from(it) }
                         ),
-                        ytelseEtterAvkorting = periodisertResultat.resultat.verdi,
+                        ytelseEtterAvkorting = periodisertResultat.resultat.verdi + maanedligRestanse,
+                        restanse = maanedligRestanse,
                         avkortingsbeloep = regelgrunnlag.finnGrunnlagForPeriode(resultatFom).avkorting.verdi,
                         ytelseFoerAvkorting = regelgrunnlag.finnGrunnlagForPeriode(resultatFom).beregning.verdi,
                         tidspunkt = tidspunkt,
@@ -158,3 +211,8 @@ object InntektAvkortingService {
             }
         ) { _, _, _ -> throw IllegalArgumentException("Noe gikk galt ved uthenting av periodiserte avkortinger") }
 }
+
+fun Periode.tilRegelPeriode(): RegelPeriode = RegelPeriode(
+    fom.atDay(1),
+    tom?.atEndOfMonth()
+)

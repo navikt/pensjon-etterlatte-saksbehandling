@@ -1,5 +1,6 @@
 package no.nav.etterlatte.beregning.regler
 
+import no.nav.etterlatte.avkorting.Aarsoppgjoer
 import no.nav.etterlatte.avkorting.AvkortetYtelse
 import no.nav.etterlatte.avkorting.Avkorting
 import no.nav.etterlatte.avkorting.AvkortingGrunnlag
@@ -70,11 +71,13 @@ val bruker = Saksbehandler("token", "ident", null)
 fun avkorting(
     avkortingGrunnlag: List<AvkortingGrunnlag> = emptyList(),
     avkortingsperioder: List<Avkortingsperiode> = emptyList(),
-    avkortetYtelse: List<AvkortetYtelse> = emptyList()
+    avkortetYtelse: List<AvkortetYtelse> = emptyList(),
+    aarsoppgjoer: List<Aarsoppgjoer> = emptyList()
 ) = Avkorting(
     avkortingGrunnlag = avkortingGrunnlag,
     avkortingsperioder = avkortingsperioder,
-    avkortetYtelse = avkortetYtelse
+    avkortetYtelse = avkortetYtelse,
+    aarsoppgjoer = aarsoppgjoer
 )
 
 fun avkortinggrunnlag(
@@ -143,6 +146,20 @@ fun avkortetYtelse(
     tidspunkt = Tidspunkt.now(),
     regelResultat = "".toJsonNode(),
     kilde = Grunnlagsopplysning.RegelKilde("regelid", Tidspunkt.now(), "1")
+)
+
+fun aarsoppgjoer(
+    maaned: YearMonth = YearMonth.of(2023, 1),
+    avkortingForventetInntekt: Int = 10000,
+    tidligereAvkorting: Int = 5000,
+    nyAvkorting: Int = 15000,
+    restanse: Int = 5000
+) = Aarsoppgjoer(
+    maaned = maaned,
+    avkortingForventetInntekt = avkortingForventetInntekt,
+    tidligereAvkorting = tidligereAvkorting,
+    nyAvkorting = nyAvkorting,
+    restanse = restanse
 )
 
 fun beregning(

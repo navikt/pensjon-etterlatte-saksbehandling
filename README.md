@@ -31,7 +31,7 @@ fungere.
     ```
    Legg til `--build` hvis du trenger å bygge imaget på nytt. Mer info
    her: [docker compose up](https://docs.docker.com/engine/reference/commandline/compose_up/) \
-   NB: Hvis du vil kjøre frontend mot lokal backend må du overskrive variabel for `_API`-url (se oversikt i `config.ts`)
+   NB: Hvis du vil kjøre frontend mot lokal backend kan du lese mer her: [#frontend-mot-lokal-backend](#frontend-mot-lokal-backend)
 
 3. **Kjør run config** \
    Config for å kjøre appen (i IntelliJ) ligger i `.run`. Denne skal dukke opp automatisk under `Run configurations` i

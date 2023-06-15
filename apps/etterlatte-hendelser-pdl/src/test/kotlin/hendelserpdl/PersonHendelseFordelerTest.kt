@@ -47,7 +47,7 @@ internal class PersonHendelseFordelerTest {
 
         runBlocking { personHendelseFordeler.haandterHendelse(personHendelse) }
 
-        coVerify { pdlKlient.hentPdlIdentifikator(STOR_SNERK.value) }
+        coVerify(exactly = 0) { pdlKlient.hentPdlIdentifikator(STOR_SNERK.value) }
         coVerify(exactly = 0) { kafkaProduser.publiser(any(), any()) }
 
         confirmVerified(pdlKlient, kafkaProduser)

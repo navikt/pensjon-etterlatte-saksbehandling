@@ -44,23 +44,26 @@ class PersonHendelseFordeler(
 
     suspend fun haandterHendelse(hendelse: Personhendelse) =
         try {
-            when (val personnummer = hentPersonnummer(hendelse)) {
-                null -> "Mottok en hendelse uten personident (hendelseId=${hendelse.hendelseId})".let {
-                    sikkerLogg.info(it, hendelse)
-                    logger.info(it)
-                }
-                is PdlIdentifikator.Npid -> loggIgnorererNpid(hendelse.hendelseId)
-                is PdlIdentifikator.FolkeregisterIdent -> {
-                    when (hendelse.opplysningstype) {
-                        VERGEMAAL_ELLER_FREMTIDSFULLMAKT_V1.toString() -> haandterVergemaal(hendelse, personnummer)
-                        ADRESSEBESKYTTELSE_V1.toString() -> haandterAdressebeskyttelse(hendelse, personnummer)
-                        FORELDERBARNRELASJON_V1.toString() -> haandterForelderBarnRelasjon(hendelse, personnummer)
-                        DOEDSFALL_V1.toString() -> haandterDoedsHendelse(hendelse, personnummer)
-                        UTFLYTTING_FRA_NORGE.toString() -> haandterUtflyttingFraNorge(hendelse, personnummer)
-                        SIVILSTAND_V1.toString() -> haandterSivilstand(hendelse, personnummer)
-                        else -> logger.info("Så en hendelse av type ${hendelse.opplysningstype} som vi ikke håndterer")
+            if (hendelse.opplysningstype in opplysningstyperSomHaandteres()) {
+                when (val personnummer = hentPersonnummer(hendelse)) {
+                    null -> "Mottok en hendelse uten personident (hendelseId=${hendelse.hendelseId})".let {
+                        sikkerLogg.info(it, hendelse)
+                        logger.info(it)
+                    }
+                    is PdlIdentifikator.Npid -> loggIgnorererNpid(hendelse.hendelseId)
+                    is PdlIdentifikator.FolkeregisterIdent -> {
+                        when (LeesahOpplysningstype.valueOf(hendelse.opplysningstype)) {
+                            VERGEMAAL_ELLER_FREMTIDSFULLMAKT_V1 -> haandterVergemaal(hendelse, personnummer)
+                            ADRESSEBESKYTTELSE_V1 -> haandterAdressebeskyttelse(hendelse, personnummer)
+                            FORELDERBARNRELASJON_V1 -> haandterForelderBarnRelasjon(hendelse, personnummer)
+                            DOEDSFALL_V1 -> haandterDoedsHendelse(hendelse, personnummer)
+                            UTFLYTTING_FRA_NORGE -> haandterUtflyttingFraNorge(hendelse, personnummer)
+                            SIVILSTAND_V1 -> haandterSivilstand(hendelse, personnummer)
+                        }
                     }
                 }
+            } else {
+                logger.info("Så en hendelse av type ${hendelse.opplysningstype} som vi ikke håndterer")
             }
         } catch (e: Exception) {
             loggFeilVedHaandteringAvHendelse(hendelse.hendelseId, hendelse.opplysningstype, e)
@@ -188,6 +191,8 @@ class PersonHendelseFordeler(
             )
         }
     }
+
+    private fun opplysningstyperSomHaandteres() = LeesahOpplysningstype.values().map { it.toString() }
 
     private fun publiserPaaRapid(opplysningstype: LeesahOpplysningstype, hendelse: PdlHendelse) {
         logger.info("Publiserer at en person med fnr=${hendelse.fnr.maskerFnr()} har mottatt hendelse $opplysningstype")

@@ -54,7 +54,7 @@ data class SivilstandHendelse(
     override val endringstype: Endringstype,
     override val fnr: String,
     val type: String,
-    val relatertVedSivilstand: String,
+    val relatertVedSivilstand: String?,
     val gyldigFraOgMed: LocalDate?,
     val bekreftelsesdato: LocalDate?
 ) : PdlHendelse

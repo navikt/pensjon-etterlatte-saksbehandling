@@ -1,5 +1,7 @@
 package no.nav.etterlatte.hendelserpdl
 
+import com.fasterxml.jackson.annotation.JsonProperty
+import com.fasterxml.jackson.module.kotlin.readValue
 import io.confluent.kafka.serializers.KafkaAvroDeserializer
 import io.confluent.kafka.serializers.KafkaAvroDeserializerConfig
 import io.confluent.kafka.serializers.KafkaAvroSerializer
@@ -88,8 +90,22 @@ class IntegrationTest {
 
         lesHendelserFraLeesah(leesahConsumer, personHendelseFordeler)
 
-        verify(exactly = 1, timeout = 5000) { rapidsKafkaProducer.publiser(any(), any()) }
+        verify(exactly = 1, timeout = 5000) {
+            rapidsKafkaProducer.publiser(
+                any(),
+                match {
+                    it.let {
+                        val hendelse: HendelseForVerifikasjon = objectMapper.readValue(it.toJson())
+                        hendelse.eventName == "PDL:PERSONHENDELSE"
+                    }
+                }
+            )
+        }
     }
+
+    data class HendelseForVerifikasjon(
+        @JsonProperty("@event_name") val eventName: String
+    )
 
     class KafkaConsumerEnvironmentTest : KafkaConsumerConfiguration {
         override fun generateKafkaConsumerProperties(env: Map<String, String>): Properties {

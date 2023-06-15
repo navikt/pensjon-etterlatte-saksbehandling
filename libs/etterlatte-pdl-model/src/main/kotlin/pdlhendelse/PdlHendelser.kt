@@ -13,7 +13,7 @@ data class VergeMaalEllerFremtidsfullmakt(
     override val hendelseId: String,
     override val endringstype: Endringstype,
     override val fnr: String,
-    val vergeIdent: String
+    val vergeIdent: String?
 ) : PdlHendelse
 
 data class Doedshendelse(
@@ -53,7 +53,7 @@ data class SivilstandHendelse(
     override val hendelseId: String,
     override val endringstype: Endringstype,
     override val fnr: String,
-    val type: String,
+    val type: String?,
     val relatertVedSivilstand: String?,
     val gyldigFraOgMed: LocalDate?,
     val bekreftelsesdato: LocalDate?

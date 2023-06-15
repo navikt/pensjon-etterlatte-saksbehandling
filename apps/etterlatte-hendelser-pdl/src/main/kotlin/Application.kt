@@ -16,6 +16,7 @@ import no.nav.etterlatte.libs.ktor.healthApi
 import no.nav.etterlatte.libs.ktor.setReady
 import org.slf4j.LoggerFactory
 import java.util.concurrent.atomic.AtomicBoolean
+import kotlin.concurrent.thread
 import kotlin.system.exitProcess
 
 fun main() {
@@ -47,23 +48,25 @@ class Server(val context: ApplicationContext) {
 fun lesHendelserFraLeesah(leesahConsumer: LeesahConsumer, personHendelseFordeler: PersonHendelseFordeler) {
     val logger = LoggerFactory.getLogger(Application::class.java)
 
-    withLogContext {
-        try {
-            val readyToConsume = AtomicBoolean(true)
+    thread(start = true) {
+        withLogContext {
+            try {
+                val readyToConsume = AtomicBoolean(true)
 
-            Runtime.getRuntime().addShutdownHook(
-                Thread {
-                    readyToConsume.set(false)
-                    leesahConsumer.consumer.wakeup(); // trådsikker, aborter konsumer fra polling
+                Runtime.getRuntime().addShutdownHook(
+                    Thread {
+                        readyToConsume.set(false)
+                        leesahConsumer.consumer.wakeup(); // trådsikker, aborter konsumer fra polling
+                    }
+                )
+
+                leesahConsumer.lesHendelserFraLeesah(readyToConsume) {
+                    personHendelseFordeler.haandterHendelse(it)
                 }
-            )
-
-            leesahConsumer.lesHendelserFraLeesah(readyToConsume) {
-                personHendelseFordeler.haandterHendelse(it)
+            } catch (e: Exception) {
+                logger.error("etterlatte-hendelser-pdl avsluttet med en feil", e)
+                exitProcess(1)
             }
-        } catch (e: Exception) {
-            logger.error("etterlatte-hendelser-pdl avsluttet med en feil", e)
-            exitProcess(1)
         }
     }
 }

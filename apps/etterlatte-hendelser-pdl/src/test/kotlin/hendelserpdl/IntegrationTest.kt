@@ -39,7 +39,6 @@ import org.junit.jupiter.api.TestInstance
 import java.time.Instant
 import java.time.LocalDate
 import java.util.*
-import kotlin.concurrent.thread
 
 @TestInstance(TestInstance.Lifecycle.PER_METHOD)
 class IntegrationTest {
@@ -87,9 +86,7 @@ class IntegrationTest {
             )
         )
 
-        thread(start = true) {
-            lesHendelserFraLeesah(leesahConsumer, personHendelseFordeler)
-        }
+        lesHendelserFraLeesah(leesahConsumer, personHendelseFordeler)
 
         verify(exactly = 1, timeout = 5000) { rapidsKafkaProducer.publiser(any(), any()) }
     }

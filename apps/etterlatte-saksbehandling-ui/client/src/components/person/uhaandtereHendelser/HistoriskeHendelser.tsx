@@ -6,9 +6,11 @@ import { Grunnlagsendringshendelse, GrunnlagsendringsType } from '~components/pe
 import { formaterDatoMedTidspunkt, formaterStringDato } from '~utils/formattering'
 import { JaNei } from '~shared/types/ISvar'
 import { KildeSaksbehandler } from '~shared/types/kilde'
-import { isSuccess, useApiCall } from '~shared/hooks/useApiCall'
+import { isFailure, isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
 import { hentInstitusjonsoppholdData } from '~shared/api/behandling'
 import { VilkaarVurdertInformasjon } from '~components/behandling/vilkaarsvurdering/Vurdering'
+import Spinner from '~shared/Spinner'
+import { SuccessColored } from '@navikt/ds-icons'
 
 type Props = {
   hendelser: Array<Grunnlagsendringshendelse>
@@ -53,7 +55,8 @@ const HistoriskeHendelser = (props: Props) => {
                     <Table.DataCell>{gjelderPerson}</Table.DataCell>
                     <Table.DataCell>{formaterStringDato(opprettet)}</Table.DataCell>
                     <Table.DataCell>
-                      {kommentar ? <p>{kommentar}</p> : <p>Ingen kommentar</p>}
+                      {type !== GrunnlagsendringsType.INSTITUSJONSOPPHOLD &&
+                        (kommentar ? <p>{kommentar}</p> : <p>Ingen kommentar</p>)}
                       {type === GrunnlagsendringsType.INSTITUSJONSOPPHOLD && <InstitusjonsoppholdBegrunnelse id={id} />}
                     </Table.DataCell>
                   </Table.Row>
@@ -76,15 +79,23 @@ const InstitusjonsoppholdBegrunnelse = ({ id }: { id: string }) => {
 
   return (
     <>
+      {isPending(begrunnelse) && <Spinner visible={true} label="Henter vurdering" />}
+      {isFailure(begrunnelse) && <p>Fant ingen begrunnelse for hendelsen</p>}
       {isSuccess(begrunnelse) && (
         <div>
+          <Heading spacing size="small" level="3">
+            Institusjonsoppholdshendelsen er vurdert
+            <SuccessColored aria-hidden={'true'} />
+          </Heading>
           <p>
-            Er dette en institusjon som kan gi reduksjon av ytelsen? - {begrunnelse.data.kanGiReduksjonAvYtelse}
-            {begrunnelse.data.kanGiReduksjonAvYtelseBegrunnelse}
-            Er oppholdet forventet å vare lenger enn innleggelsesmåned + tre måneder? -{' '}
-            {begrunnelse.data.forventetVarighetMerEnn3Maaneder}
-            {begrunnelse.data.forventetVarighetMerEnn3MaanederBegrunnelse}
+            Er dette en institusjon som kan gi reduksjon av ytelsen? - <b>{begrunnelse.data.kanGiReduksjonAvYtelse}</b>
           </p>
+          <p>Kommentar - {begrunnelse.data.kanGiReduksjonAvYtelseBegrunnelse}</p>
+          <p>
+            Er oppholdet forventet å vare lenger enn innleggelsesmåned + tre måneder? -
+            <b>{begrunnelse.data.forventetVarighetMerEnn3Maaneder}</b>
+          </p>
+          <p>Kommentar - {begrunnelse.data.forventetVarighetMerEnn3MaanederBegrunnelse}</p>
           <VilkaarVurdertInformasjon>
             <Detail>Manuelt av {begrunnelse.data.saksbehandler.ident}</Detail>
             <Detail>

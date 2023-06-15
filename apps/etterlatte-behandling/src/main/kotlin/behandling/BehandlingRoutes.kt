@@ -24,7 +24,7 @@ import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
-import no.nav.etterlatte.libs.common.behandling.JaNei
+import no.nav.etterlatte.libs.common.behandling.JaNeiMedBegrunnelse
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.Utenlandstilsnitt
 import no.nav.etterlatte.libs.common.behandling.UtenlandstilsnittType
@@ -55,13 +55,12 @@ internal fun Route.behandlingRoutes(
 
         post("/gyldigfremsatt") {
             hentNavidentFraToken { navIdent ->
-                val body = call.receive<VurderingMedBegrunnelseJson>()
+                val body = call.receive<JaNeiMedBegrunnelse>()
                 when (
                     val lagretGyldighetsResultat = foerstegangsbehandlingService.lagreGyldighetsproeving(
                         behandlingsId,
                         navIdent,
-                        body.svar,
-                        body.begrunnelse
+                        body
                     )
                 ) {
                     null -> call.respond(HttpStatusCode.NotFound)
@@ -72,10 +71,9 @@ internal fun Route.behandlingRoutes(
 
         post("/kommerbarnettilgode") {
             hentNavidentFraToken { navIdent ->
-                val body = call.receive<VurderingMedBegrunnelseJson>()
+                val body = call.receive<JaNeiMedBegrunnelse>()
                 val kommerBarnetTilgode = KommerBarnetTilgode(
-                    body.svar,
-                    body.begrunnelse,
+                    body,
                     Grunnlagsopplysning.Saksbehandler.create(navIdent)
                 )
 
@@ -329,5 +327,3 @@ internal data class FastsettVirkningstidspunktResponse(
         )
     }
 }
-
-internal data class VurderingMedBegrunnelseJson(val svar: JaNei, val begrunnelse: String)

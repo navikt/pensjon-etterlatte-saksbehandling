@@ -15,7 +15,7 @@ import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
-import no.nav.etterlatte.libs.common.behandling.JaNei
+import no.nav.etterlatte.libs.common.behandling.JaNeiMedBegrunnelse
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -50,8 +50,7 @@ interface FoerstegangsbehandlingService {
     fun lagreGyldighetsproeving(
         behandlingId: UUID,
         navIdent: String,
-        svar: JaNei,
-        begrunnelse: String
+        svar: JaNeiMedBegrunnelse
     ): GyldighetsResultat?
 
     fun lagreGyldighetsproeving(behandlingId: UUID, gyldighetsproeving: GyldighetsResultat)
@@ -128,13 +127,12 @@ class RealFoerstegangsbehandlingService(
     override fun lagreGyldighetsproeving(
         behandlingId: UUID,
         navIdent: String,
-        svar: JaNei,
-        begrunnelse: String
+        svar: JaNeiMedBegrunnelse
     ): GyldighetsResultat? {
         return inTransaction {
             hentBehandling(behandlingId)?.let { behandling ->
                 val resultat =
-                    if (svar == JaNei.JA) VurderingsResultat.OPPFYLT else VurderingsResultat.IKKE_OPPFYLT
+                    if (svar.erJa()) VurderingsResultat.OPPFYLT else VurderingsResultat.IKKE_OPPFYLT
                 val gyldighetsResultat = GyldighetsResultat(
                     resultat = resultat,
                     vurderinger = listOf(
@@ -142,7 +140,7 @@ class RealFoerstegangsbehandlingService(
                             navn = GyldighetsTyper.INNSENDER_ER_GJENLEVENDE,
                             resultat = resultat,
                             basertPaaOpplysninger = ManuellVurdering(
-                                begrunnelse = begrunnelse,
+                                begrunnelse = svar.begrunnelse,
                                 kilde = Grunnlagsopplysning.Saksbehandler(
                                     navIdent,
                                     Tidspunkt.from(klokke.norskKlokke())

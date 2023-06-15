@@ -9,6 +9,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
 import no.nav.etterlatte.libs.common.behandling.JaNei
+import no.nav.etterlatte.libs.common.behandling.JaNeiMedBegrunnelse
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
@@ -495,8 +496,7 @@ internal class BehandlingDaoIntegrationTest {
         behandlingRepo.opprettBehandling(opprettBehandling)
 
         val kommerBarnetTilgode = KommerBarnetTilgode(
-            JaNei.JA,
-            "begrunnelse",
+            JaNeiMedBegrunnelse(JaNei.JA, "begrunnelse"),
             Grunnlagsopplysning.Saksbehandler.create("navIdent")
         )
         behandlingRepo.lagreKommerBarnetTilgode(opprettBehandling.id, kommerBarnetTilgode)
@@ -531,7 +531,7 @@ internal class BehandlingDaoIntegrationTest {
 
         val saksbehandler = Grunnlagsopplysning.Saksbehandler.create("saksbehandler01")
 
-        val kommerBarnetTilgode = KommerBarnetTilgode(JaNei.JA, "", saksbehandler)
+        val kommerBarnetTilgode = KommerBarnetTilgode(JaNeiMedBegrunnelse(JaNei.JA, ""), saksbehandler)
         val virkningstidspunkt = Virkningstidspunkt(YearMonth.of(2021, 1), saksbehandler, "")
         val gyldighetsResultat = GyldighetsResultat(
             VurderingsResultat.OPPFYLT,

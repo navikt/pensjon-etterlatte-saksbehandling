@@ -6,6 +6,7 @@ import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.JaNei
+import no.nav.etterlatte.libs.common.behandling.JaNeiMedBegrunnelse
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -53,7 +54,7 @@ internal class BehandlingTest {
 
     private val saksbehandler = Grunnlagsopplysning.Saksbehandler.create("saksbehandler01")
 
-    private val kommerBarnetTilgode = KommerBarnetTilgode(JaNei.JA, "", saksbehandler)
+    private val kommerBarnetTilgode = KommerBarnetTilgode(JaNeiMedBegrunnelse(JaNei.JA, ""), saksbehandler)
     private val virkningstidspunkt = Virkningstidspunkt(YearMonth.of(2021, 1), saksbehandler, "begrunnelse")
     private val gyldighetsResultat = GyldighetsResultat(
         VurderingsResultat.OPPFYLT,

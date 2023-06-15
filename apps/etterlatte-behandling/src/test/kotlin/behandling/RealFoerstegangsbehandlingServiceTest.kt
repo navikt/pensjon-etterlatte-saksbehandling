@@ -23,6 +23,7 @@ import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.JaNei
+import no.nav.etterlatte.libs.common.behandling.JaNeiMedBegrunnelse
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -262,7 +263,7 @@ internal class RealFoerstegangsbehandlingServiceTest {
             vurdertDato = naaTid.toLocalDatetimeNorskTid()
         )
 
-        val resultat = sut.lagreGyldighetsproeving(id, "saksbehandler", JaNei.JA, "begrunnelse")
+        val resultat = sut.lagreGyldighetsproeving(id, "saksbehandler", JaNeiMedBegrunnelse(JaNei.JA, "begrunnelse"))
 
         assertEquals(forventetResultat, resultat)
 

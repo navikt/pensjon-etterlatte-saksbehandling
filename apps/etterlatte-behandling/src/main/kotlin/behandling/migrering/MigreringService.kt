@@ -9,6 +9,7 @@ import no.nav.etterlatte.behandling.foerstegangsbehandling.Foerstegangsbehandlin
 import no.nav.etterlatte.behandling.migrering.MigreringRepository
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.JaNei
+import no.nav.etterlatte.libs.common.behandling.JaNeiMedBegrunnelse
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
@@ -28,16 +29,14 @@ class MigreringService(
         foerstegangsBehandlingService.lagreKommerBarnetTilgode(
             it.id,
             KommerBarnetTilgode(
-                JaNei.JA,
-                "Automatisk importert fra Pesys",
+                JaNeiMedBegrunnelse(JaNei.JA, "Automatisk importert fra Pesys"),
                 Grunnlagsopplysning.Pesys.create()
             )
         )
         foerstegangsBehandlingService.lagreGyldighetsproeving(
             it.id,
             pesys,
-            JaNei.JA,
-            "Automatisk importert fra Pesys"
+            JaNeiMedBegrunnelse(JaNei.JA, "Automatisk importert fra Pesys")
         )
         generellBehandlingService.oppdaterVirkningstidspunkt(
             it.id,

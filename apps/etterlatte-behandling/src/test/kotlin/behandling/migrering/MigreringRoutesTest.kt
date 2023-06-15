@@ -82,7 +82,7 @@ class MigreringRoutesTest : BehandlingIntegrationTest() {
                 Assertions.assertEquals(HttpStatusCode.OK, status)
             }.body<DetaljertBehandling>()
 
-            Assertions.assertEquals(JaNei.JA, behandling.kommerBarnetTilgode!!.svar)
+            Assertions.assertEquals(JaNei.JA, behandling.kommerBarnetTilgode!!.svar.svar)
             Assertions.assertNotNull(behandling.virkningstidspunkt)
             Assertions.assertEquals(VurderingsResultat.OPPFYLT, behandling.gyldighetsproeving!!.resultat)
 

@@ -30,10 +30,13 @@ internal fun Route.institusjonsoppholdRoute(institusjonsoppholdService: Institus
 
     route("/api/institusjonsoppholdbegrunnelse/{grunnlagsendringsid}") {
         get {
-            val tmp = institusjonsoppholdService.hentInstitusjonsoppholdBegrunnelse(
-                call.parameters["grunnlagsendringsid"]!!
+            val grunnlagsendringsId = call.parameters["grunnlagsendringsid"] ?: return@get call.respond(
+                HttpStatusCode.BadRequest,
+                "Mangler grunnlagsendringsid"
             )
-            call.respond(tmp ?: HttpStatusCode.NotFound)
+            val institusjonsoppholdBegrunnelseMedSaksbehandler =
+                institusjonsoppholdService.hentInstitusjonsoppholdBegrunnelse(grunnlagsendringsId)
+            call.respond(institusjonsoppholdBegrunnelseMedSaksbehandler ?: HttpStatusCode.NotFound)
         }
     }
 }

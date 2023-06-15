@@ -139,6 +139,8 @@ function mapAarsak(aarsak: BehandlingOgRevurderingsAarsakerType) {
       return 'Dødsfall'
     case Revurderingsaarsak.OMGJOERING_AV_FARSKAP:
       return 'Omgjøring av farskap'
+    case Revurderingsaarsak.ADOPSJON:
+      return 'Adopsjon'
     case Revurderingsaarsak.VERGEMAAL_ELLER_FREMTIDSFULLMAKT:
       return 'Institusjonsopphold'
   }

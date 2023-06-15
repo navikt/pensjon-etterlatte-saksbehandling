@@ -167,19 +167,21 @@ internal class RevurderingRoutesTest {
                 header(HttpHeaders.Authorization, "Bearer $token")
             }
 
-            val revurderingAarsak: List<String> = response.body()
+            val revurderingAarsak: List<RevurderingAarsak> = response.body()
             assertEquals(HttpStatusCode.OK, response.status)
-            assertEquals(7, revurderingAarsak.size)
+            assertEquals(9, revurderingAarsak.size)
             assertTrue(
                 revurderingAarsak.containsAll<Any>(
                     setOf(
-                        RevurderingAarsak.ANSVARLIGE_FORELDRE.name,
-                        RevurderingAarsak.SOESKENJUSTERING.name,
-                        RevurderingAarsak.UTLAND.name,
-                        RevurderingAarsak.BARN.name,
-                        RevurderingAarsak.VERGEMAAL_ELLER_FREMTIDSFULLMAKT.name,
-                        RevurderingAarsak.REGULERING.name,
-                        RevurderingAarsak.DOEDSFALL.name
+                        RevurderingAarsak.ANSVARLIGE_FORELDRE,
+                        RevurderingAarsak.SOESKENJUSTERING,
+                        RevurderingAarsak.UTLAND,
+                        RevurderingAarsak.BARN,
+                        RevurderingAarsak.VERGEMAAL_ELLER_FREMTIDSFULLMAKT,
+                        RevurderingAarsak.REGULERING,
+                        RevurderingAarsak.DOEDSFALL,
+                        RevurderingAarsak.OMGJOERING_AV_FARSKAP,
+                        RevurderingAarsak.ADOPSJON
                     )
                 )
             )
@@ -202,13 +204,12 @@ internal class RevurderingRoutesTest {
                 header(HttpHeaders.Authorization, "Bearer $token")
             }
 
-            val revurderingAarsak: List<String> = response.body()
+            val revurderingAarsak: List<RevurderingAarsak> = response.body()
             assertEquals(HttpStatusCode.OK, response.status)
             assertTrue(
                 revurderingAarsak.containsAll(
                     RevurderingAarsak.values()
                         .filter { it.gyldigForSakType(SakType.OMSTILLINGSSTOENAD) }
-                        .map { it.name }
                 )
             )
         }

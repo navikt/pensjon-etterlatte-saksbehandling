@@ -9,6 +9,7 @@ export enum Revurderingsaarsak {
   VERGEMAAL_ELLER_FREMTIDSFULLMAKT = 'VERGEMAAL_ELLER_FREMTIDSFULLMAKT',
   INNTEKTSENDRING = 'INNTEKTSENDRING',
   OMGJOERING_AV_FARSKAP = 'OMGJOERING_AV_FARSKAP',
+  ADOPSJON = 'ADOPSJON',
 }
 
 export const tekstRevurderingsaarsak: Record<Revurderingsaarsak, string> = {
@@ -21,6 +22,7 @@ export const tekstRevurderingsaarsak: Record<Revurderingsaarsak, string> = {
   VERGEMAAL_ELLER_FREMTIDSFULLMAKT: 'Verge / fullmakt',
   INNTEKTSENDRING: 'Endring av inntekt',
   OMGJOERING_AV_FARSKAP: 'Omgjøring av farskap',
+  ADOPSJON: 'Adopsjon',
 } as const
 
 export const erOpphoer = (revurderingsaarsak: Revurderingsaarsak) =>

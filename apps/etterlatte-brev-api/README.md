@@ -2,35 +2,22 @@
 
 Ktor og Rapid app for å håndtere generering av brev, brevmaler og sende videre til distribusjon.
 
+Brev genereres ved hjelp av [Pensjonbrev (Brevbakeren)](https://github.com/navikt/pensjonsbrev).
 
-## Lokal utvikling
+## Kom i gang
 
-### Krav for å kjøre lokalt
-- **Kafka** må kjøres lokalt. Docker er anbefalt.
-- **Postgres**: Kjør f. eks opp PostgreSQL med Docker eller bruk [Postgres.app](https://postgresapp.com/)
+### Hvordan kjøre lokalt
 
-### Hvordan kjøre brev-api
+Les [README](../../README.md) på rot i prosjektet.
 
-Det enkleste er å kjøre opp frontend og docker compose som starter alt man trenger for at APIet skal fungere.  
+...og legg til følgende linje nederst i `.env.dev-gcp` fila til saksbehandling-ui.
 
-1. Kjør docker compose
-    ```shell
-    docker compose up -d
-    ```
+```
+BREV_API_URL=http://host.docker.internal:8084
+```
 
-2. Opprett/oppdater app config i IntelliJ
-   
-    Kjør scriptet `get-secret.sh` fra prosjektets [rotmappe](../..).
-    ```shell
-    ../../get-secret.sh etterlatte-brev-api
-    ```
+## Bygg og deploy
 
-    Om du skal kjøre med frontend og wonderwall må du også kjøre:
-    ```shell
-    ../../get-secret.sh etterlatte-saksbehandling-ui
-    ```
-    **OBS:** Siden vi går mot Norg2 APIet i dev (fra lokal maskin) må du koble til Naisdevice.
+Appen bygges og deployes automatisk ved commits til `apps/etterlatte-brev-api/**`.
 
-3. Kjør lagret run config \
-    Config for å kjøre appen (i IntelliJ) ligger i `.run`. Denne skal dukke opp automatisk under IntelliJ sin liste
-    over `Run configurations` med navnet `etterlatte-brev-api.dev-gcp`
+For å trigge **manuell deploy** kan du gå til `Actions -> (velg workflow) -> Run workflow from <branch>`

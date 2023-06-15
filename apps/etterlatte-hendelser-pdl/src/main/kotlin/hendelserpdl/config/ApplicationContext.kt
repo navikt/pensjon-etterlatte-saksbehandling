@@ -1,8 +1,8 @@
 package no.nav.etterlatte.hendelserpdl.config
 
 import com.fasterxml.jackson.databind.SerializationFeature
+import no.nav.etterlatte.hendelserpdl.PersonHendelseFordeler
 import no.nav.etterlatte.hendelserpdl.leesah.LeesahConsumer
-import no.nav.etterlatte.hendelserpdl.leesah.PersonHendelseFordeler
 import no.nav.etterlatte.hendelserpdl.pdl.PdlKlient
 import no.nav.etterlatte.kafka.GcpKafkaConfig
 import no.nav.etterlatte.kafka.rapidsAndRiversProducer

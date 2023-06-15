@@ -1,11 +1,9 @@
-package no.nav.etterlatte.hendelserpdl.leesah
+package no.nav.etterlatte.hendelserpdl
 
-import no.nav.etterlatte.hendelserpdl.leesah.LeesahOpplysningstype.ADRESSEBESKYTTELSE_V1
-import no.nav.etterlatte.hendelserpdl.leesah.LeesahOpplysningstype.DOEDSFALL_V1
-import no.nav.etterlatte.hendelserpdl.leesah.LeesahOpplysningstype.FORELDERBARNRELASJON_V1
-import no.nav.etterlatte.hendelserpdl.leesah.LeesahOpplysningstype.SIVILSTAND_V1
-import no.nav.etterlatte.hendelserpdl.leesah.LeesahOpplysningstype.UTFLYTTING_FRA_NORGE
-import no.nav.etterlatte.hendelserpdl.leesah.LeesahOpplysningstype.VERGEMAAL_ELLER_FREMTIDSFULLMAKT_V1
+import no.nav.etterlatte.hendelserpdl.LeesahOpplysningstype.DOEDSFALL_V1
+import no.nav.etterlatte.hendelserpdl.LeesahOpplysningstype.FORELDERBARNRELASJON_V1
+import no.nav.etterlatte.hendelserpdl.LeesahOpplysningstype.SIVILSTAND_V1
+import no.nav.etterlatte.hendelserpdl.LeesahOpplysningstype.UTFLYTTING_FRA_NORGE
 import no.nav.etterlatte.hendelserpdl.pdl.PdlKlient
 import no.nav.etterlatte.kafka.JsonMessage
 import no.nav.etterlatte.kafka.KafkaProdusent
@@ -26,7 +24,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.util.*
 
-internal enum class LeesahOpplysningstype {
+enum class LeesahOpplysningstype {
     ADRESSEBESKYTTELSE_V1,
     FORELDERBARNRELASJON_V1,
     UTFLYTTING_FRA_NORGE,
@@ -53,8 +51,14 @@ class PersonHendelseFordeler(
                     is PdlIdentifikator.Npid -> loggIgnorererNpid(hendelse.hendelseId)
                     is PdlIdentifikator.FolkeregisterIdent -> {
                         when (LeesahOpplysningstype.valueOf(hendelse.opplysningstype)) {
-                            VERGEMAAL_ELLER_FREMTIDSFULLMAKT_V1 -> haandterVergemaal(hendelse, personnummer)
-                            ADRESSEBESKYTTELSE_V1 -> haandterAdressebeskyttelse(hendelse, personnummer)
+                            LeesahOpplysningstype.VERGEMAAL_ELLER_FREMTIDSFULLMAKT_V1 -> haandterVergemaal(
+                                hendelse,
+                                personnummer
+                            )
+                            LeesahOpplysningstype.ADRESSEBESKYTTELSE_V1 -> haandterAdressebeskyttelse(
+                                hendelse,
+                                personnummer
+                            )
                             FORELDERBARNRELASJON_V1 -> haandterForelderBarnRelasjon(hendelse, personnummer)
                             DOEDSFALL_V1 -> haandterDoedsHendelse(hendelse, personnummer)
                             UTFLYTTING_FRA_NORGE -> haandterUtflyttingFraNorge(hendelse, personnummer)
@@ -63,7 +67,9 @@ class PersonHendelseFordeler(
                     }
                 }
             } else {
-                logger.info("Så en hendelse av type ${hendelse.opplysningstype} som vi ikke håndterer")
+                logger.info(
+                    "Hendelse ${hendelse.opplysningstype} med hendelseId=${hendelse.hendelseId} håndteres ikke"
+                )
             }
         } catch (e: Exception) {
             loggFeilVedHaandteringAvHendelse(hendelse.hendelseId, hendelse.opplysningstype, e)
@@ -85,7 +91,7 @@ class PersonHendelseFordeler(
         }
 
         publiserPaaRapid(
-            opplysningstype = VERGEMAAL_ELLER_FREMTIDSFULLMAKT_V1,
+            opplysningstype = LeesahOpplysningstype.VERGEMAAL_ELLER_FREMTIDSFULLMAKT_V1,
             hendelse = VergeMaalEllerFremtidsfullmakt(
                 hendelseId = hendelse.hendelseId,
                 endringstype = hendelse.endringstype(),
@@ -106,7 +112,7 @@ class PersonHendelseFordeler(
         }
 
         publiserPaaRapid(
-            opplysningstype = ADRESSEBESKYTTELSE_V1,
+            opplysningstype = LeesahOpplysningstype.ADRESSEBESKYTTELSE_V1,
             hendelse = Adressebeskyttelse(
                 hendelseId = hendelse.hendelseId,
                 endringstype = hendelse.endringstype(),

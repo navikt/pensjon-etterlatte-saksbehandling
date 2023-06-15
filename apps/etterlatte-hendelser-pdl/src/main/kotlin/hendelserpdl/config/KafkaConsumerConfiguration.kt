@@ -1,4 +1,4 @@
-package no.nav.etterlatte.hendelserpdl.leesah
+package no.nav.etterlatte.hendelserpdl.config
 
 import io.confluent.kafka.serializers.AbstractKafkaSchemaSerDeConfig
 import io.confluent.kafka.serializers.KafkaAvroDeserializer

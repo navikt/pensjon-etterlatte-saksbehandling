@@ -1,6 +1,5 @@
 package no.nav.etterlatte.hendelserpdl
 
-import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.confluent.kafka.serializers.KafkaAvroDeserializer
 import io.confluent.kafka.serializers.KafkaAvroDeserializerConfig
@@ -16,15 +15,15 @@ import io.ktor.serialization.jackson.JacksonConverter
 import io.mockk.spyk
 import io.mockk.verify
 import no.nav.common.KafkaEnvironment
-import no.nav.etterlatte.hendelserpdl.leesah.KafkaConsumerConfiguration
+import no.nav.etterlatte.hendelserpdl.config.KafkaConsumerConfiguration
 import no.nav.etterlatte.hendelserpdl.leesah.LeesahConsumer
-import no.nav.etterlatte.hendelserpdl.leesah.LeesahOpplysningstype
-import no.nav.etterlatte.hendelserpdl.leesah.PersonHendelseFordeler
 import no.nav.etterlatte.hendelserpdl.pdl.PdlKlient
 import no.nav.etterlatte.kafka.LocalKafkaConfig
 import no.nav.etterlatte.kafka.rapidsAndRiversProducer
 import no.nav.etterlatte.lesHendelserFraLeesah
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
+import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype.OPPRETTET
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.person.pdl.leesah.Endringstype
 import no.nav.person.pdl.leesah.Personhendelse
@@ -43,7 +42,7 @@ import java.time.LocalDate
 import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_METHOD)
-class IntegrationTest {
+class LeesahConsumerIntegrationTest {
 
     private lateinit var pdlKlient: PdlKlient
 
@@ -69,24 +68,30 @@ class IntegrationTest {
         val leesahConsumer = LeesahConsumer(env, PDL_PERSON_TOPIC, KafkaConsumerEnvironmentTest())
         val personHendelseFordeler = PersonHendelseFordeler(rapidsKafkaProducer, pdlKlient)
 
-        leesahKafkaProducer.send(
-            ProducerRecord(
-                PDL_PERSON_TOPIC,
-                1,
-                "key",
-                Personhendelse().apply {
-                    hendelseId = "1"
-                    endringstype = Endringstype.OPPRETTET
-                    master = ""
-                    opprettet = Instant.now()
-                    personidenter = listOf(IDENT)
-                    opplysningstype = LeesahOpplysningstype.DOEDSFALL_V1.toString()
-                    doedsfall = Doedsfall().apply {
-                        doedsdato = LocalDate.of(2022, 1, 1)
-                    }
-                }
+        val personHendelse = Personhendelse().apply {
+            hendelseId = "1"
+            endringstype = Endringstype.OPPRETTET
+            master = ""
+            opprettet = Instant.now()
+            personidenter = listOf(FNR.value)
+            opplysningstype = LeesahOpplysningstype.DOEDSFALL_V1.toString()
+            doedsfall = Doedsfall().apply {
+                doedsdato = LocalDate.of(2022, 1, 1)
+            }
+        }
+
+        val forventetMeldingPaaRapid = MeldingSendtPaaRapid(
+            eventName = "PDL:PERSONHENDELSE",
+            hendelse = LeesahOpplysningstype.DOEDSFALL_V1,
+            hendelse_data = Doedshendelse(
+                hendelseId = personHendelse.hendelseId,
+                endringstype = OPPRETTET,
+                fnr = personHendelse.personidenter.first(),
+                doedsdato = personHendelse.doedsfall?.doedsdato
             )
         )
+
+        leesahKafkaProducer.send(ProducerRecord(PDL_PERSON_TOPIC, 1, "key", personHendelse))
 
         lesHendelserFraLeesah(leesahConsumer, personHendelseFordeler)
 
@@ -94,18 +99,12 @@ class IntegrationTest {
             rapidsKafkaProducer.publiser(
                 any(),
                 match {
-                    it.let {
-                        val hendelse: HendelseForVerifikasjon = objectMapper.readValue(it.toJson())
-                        hendelse.eventName == "PDL:PERSONHENDELSE"
-                    }
+                    val hendelse: MeldingSendtPaaRapid<Doedshendelse> = objectMapper.readValue(it.toJson())
+                    hendelse == forventetMeldingPaaRapid
                 }
             )
         }
     }
-
-    data class HendelseForVerifikasjon(
-        @JsonProperty("@event_name") val eventName: String
-    )
 
     class KafkaConsumerEnvironmentTest : KafkaConsumerConfiguration {
         override fun generateKafkaConsumerProperties(env: Map<String, String>): Properties {
@@ -145,7 +144,7 @@ class IntegrationTest {
                     if (request.url.fullPath.startsWith("/")) {
                         val headers = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
                         val json = mapOf(
-                            "folkeregisterident" to IDENT,
+                            "folkeregisterident" to FNR.value,
                             "type" to "FOLKEREGISTERIDENT"
                         ).toJson()
                         respond(json, headers = headers)
@@ -162,7 +161,6 @@ class IntegrationTest {
 
     companion object {
         const val PDL_PERSON_TOPIC = "pdl.leesah-v1"
-        const val IDENT = "70078749472"
 
         val kafkaEnv = KafkaEnvironment(
             noOfBrokers = 1,

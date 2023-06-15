@@ -8,9 +8,9 @@ import io.ktor.server.engine.applicationEngineEnvironment
 import io.ktor.server.engine.connector
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.routing.routing
+import no.nav.etterlatte.hendelserpdl.PersonHendelseFordeler
 import no.nav.etterlatte.hendelserpdl.config.ApplicationContext
 import no.nav.etterlatte.hendelserpdl.leesah.LeesahConsumer
-import no.nav.etterlatte.hendelserpdl.leesah.PersonHendelseFordeler
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.ktor.healthApi
 import no.nav.etterlatte.libs.ktor.setReady

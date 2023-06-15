@@ -3,6 +3,8 @@ package no.nav.etterlatte.hendelserpdl.leesah
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.hendelserpdl.config.KafkaConsumerConfiguration
+import no.nav.etterlatte.hendelserpdl.config.KafkaEnvironment
 import no.nav.person.pdl.leesah.Personhendelse
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.apache.kafka.common.errors.WakeupException

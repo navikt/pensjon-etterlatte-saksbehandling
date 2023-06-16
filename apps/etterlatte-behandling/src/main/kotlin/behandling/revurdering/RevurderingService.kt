@@ -2,7 +2,6 @@ package no.nav.etterlatte.behandling.revurdering
 
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.Kontekst
-import no.nav.etterlatte.Saksbehandler
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.BehandlingHendelseType
 import no.nav.etterlatte.behandling.BehandlingHendelserKanal
@@ -46,7 +45,7 @@ interface RevurderingService {
         kilde: Vedtaksloesning
     ): Revurdering?
 
-    fun lagreRevurderingInfo(behandlingsId: UUID, info: RevurderingInfo, saksbehandlerIdent: String): Boolean
+    fun lagreRevurderingInfo(behandlingsId: UUID, info: RevurderingInfo, navIdent: String): Boolean
 }
 
 enum class RevurderingServiceFeatureToggle(private val key: String) : FeatureToggle {
@@ -116,13 +115,13 @@ class RealRevurderingService(
         }
     }
 
-    override fun lagreRevurderingInfo(behandlingsId: UUID, info: RevurderingInfo, saksbehandler: String): Boolean {
+    override fun lagreRevurderingInfo(behandlingsId: UUID, info: RevurderingInfo, navIdent: String): Boolean {
         return inTransaction {
             val behandling = hentBehandling(behandlingsId)
             if (behandling?.type != BehandlingType.REVURDERING || !behandling.status.kanEndres()) {
                 return@inTransaction false
             }
-            val kilde = Grunnlagsopplysning.Saksbehandler.create(saksbehandler)
+            val kilde = Grunnlagsopplysning.Saksbehandler.create(navIdent)
             behandlingDao.lagreRevurderingInfo(behandlingsId, info, kilde)
             return@inTransaction true
         }

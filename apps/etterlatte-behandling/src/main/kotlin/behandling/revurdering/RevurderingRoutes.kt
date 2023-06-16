@@ -33,18 +33,18 @@ internal fun Route.revurderingRoutes(
         route("{$BEHANDLINGSID_CALL_PARAMETER}") {
             route("revurderinginfo") {
                 post {
-                    hentNavidentFraToken { navident ->
+                    hentNavidentFraToken { navIdent ->
                         logger.info("Lagrer revurderinginfo på behandling $behandlingsId")
                         val info = try {
                             call.receive<RevurderingInfo>()
                         } catch (e: Exception) {
                             return@post call.respond(HttpStatusCode.BadRequest)
                         }
-                        val fikkLagret = revurderingService.lagreRevurderingInfo(behandlingsId, info, navident)
+                        val fikkLagret = revurderingService.lagreRevurderingInfo(behandlingsId, info, navIdent)
                         if (fikkLagret) {
                             call.respond(HttpStatusCode.NoContent)
                         } else {
-                            call.respond(HttpStatusCode.InternalServerError)
+                            call.respond(HttpStatusCode.Forbidden)
                         }
                     }
                 }

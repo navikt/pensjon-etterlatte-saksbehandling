@@ -115,10 +115,17 @@ class RealRevurderingService(
         }
     }
 
+    private fun kanLagreRevurderingInfo(behandlingsId: UUID): Boolean {
+        val behandling = hentBehandling(behandlingsId)
+        if (behandling?.type != BehandlingType.REVURDERING) {
+            return false
+        }
+        return behandling.status.kanEndres()
+    }
+
     override fun lagreRevurderingInfo(behandlingsId: UUID, info: RevurderingInfo, navIdent: String): Boolean {
         return inTransaction {
-            val behandling = hentBehandling(behandlingsId)
-            if (behandling?.type != BehandlingType.REVURDERING || !behandling.status.kanEndres()) {
+            if (!kanLagreRevurderingInfo(behandlingsId)) {
                 return@inTransaction false
             }
             val kilde = Grunnlagsopplysning.Saksbehandler.create(navIdent)

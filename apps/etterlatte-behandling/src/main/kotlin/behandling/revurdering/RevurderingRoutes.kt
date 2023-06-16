@@ -35,12 +35,12 @@ internal fun Route.revurderingRoutes(
                 post {
                     hentNavidentFraToken { navIdent ->
                         logger.info("Lagrer revurderinginfo på behandling $behandlingsId")
-                        val info = try {
-                            call.receive<RevurderingInfo>()
+                        val dto = try {
+                            call.receive<RevurderingInfoDto>()
                         } catch (e: Exception) {
                             return@post call.respond(HttpStatusCode.BadRequest)
                         }
-                        val fikkLagret = revurderingService.lagreRevurderingInfo(behandlingsId, info, navIdent)
+                        val fikkLagret = revurderingService.lagreRevurderingInfo(behandlingsId, dto.info, navIdent)
                         if (fikkLagret) {
                             call.respond(HttpStatusCode.NoContent)
                         } else {
@@ -111,3 +111,5 @@ internal fun Route.revurderingRoutes(
 }
 
 data class OpprettRevurderingRequest(val aarsak: RevurderingAarsak, val paaGrunnAvHendelseId: String? = null)
+
+data class RevurderingInfoDto(val info: RevurderingInfo)

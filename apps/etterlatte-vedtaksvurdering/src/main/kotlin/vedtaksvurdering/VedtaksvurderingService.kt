@@ -130,7 +130,7 @@ class VedtaksvurderingService(
 
         verifiserGyldigBehandlingStatus(behandlingKlient.attester(behandlingId, bruker), vedtak)
         verifiserGyldigVedtakStatus(vedtak.status, listOf(VedtakStatus.FATTET_VEDTAK))
-        verifiserGyldigAttestant(vedtak.vedtakFattet!!.ansvarligSaksbehandler, bruker)
+        attestantHarAnnenIdentEnnSaksbehandler(vedtak.vedtakFattet!!.ansvarligSaksbehandler, bruker)
 
         val (behandling, _, _, sak) = hentDataForVedtak(behandlingId, bruker)
         verifiserGyldigVedtakForRevurdering(behandling, vedtak)
@@ -244,8 +244,8 @@ class VedtaksvurderingService(
         if (gjeldendeStatus !in forventetStatus) throw VedtakTilstandException(gjeldendeStatus, forventetStatus)
     }
 
-    private fun verifiserGyldigAttestant(ansvarligSaksbehandler: String, innloggetBruker: Bruker) {
-        if (!innloggetBruker.kanAttestereFor(ansvarligSaksbehandler)) {
+    private fun attestantHarAnnenIdentEnnSaksbehandler(ansvarligSaksbehandler: String, innloggetBruker: Bruker) {
+        if (ansvarligSaksbehandler == innloggetBruker.ident()) {
             throw UgyldigAttestantException(innloggetBruker.ident())
         }
     }

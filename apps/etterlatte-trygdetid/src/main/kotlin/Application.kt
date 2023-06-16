@@ -8,6 +8,7 @@ import io.ktor.server.engine.embeddedServer
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.libs.ktor.setReady
+import no.nav.etterlatte.trygdetid.avtale.avtale
 import no.nav.etterlatte.trygdetid.config.ApplicationContext
 import no.nav.etterlatte.trygdetid.kodeverk
 import no.nav.etterlatte.trygdetid.trygdetid
@@ -33,6 +34,7 @@ class Server(private val context: ApplicationContext) {
                 module {
                     restModule(sikkerLogg) {
                         trygdetid(trygdetidService, behandlingKlient)
+                        avtale(avtaleService)
                         kodeverk(kodeverkService)
                     }
                 }

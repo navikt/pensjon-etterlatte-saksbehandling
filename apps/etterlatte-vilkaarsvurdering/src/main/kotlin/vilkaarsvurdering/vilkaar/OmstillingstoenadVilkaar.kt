@@ -10,6 +10,7 @@ object OmstillingstoenadVilkaar {
     fun inngangsvilkaar() = listOf(
         etterlatteLever(),
         doedsfall(),
+        etterlatteSivilstand(),
         yrkesskade(),
         avdoedesMedlemskap(),
         gjenlevendesMedlemskap(),
@@ -19,7 +20,7 @@ object OmstillingstoenadVilkaar {
     private fun etterlatteLever() = Vilkaar(
         hovedvilkaar = Delvilkaar(
             type = VilkaarType.OMS_ETTERLATTE_LEVER,
-            tittel = " Lever den etterlatte?",
+            tittel = "Lever den etterlatte?",
             beskrivelse = """
                 Formålet med omstillingsstønad er blant annet å sikre inntekt til ektefelle/partner/samboer/tidligere familiepleier. Dette betyr at den etterlatte må være i live for å ha rett til stønaden.
             """.trimIndent(),
@@ -40,6 +41,22 @@ object OmstillingstoenadVilkaar {
             spoersmaal = "Er ektefelle/partner/samboer registrert død?",
             lovreferanse = Lovreferanse(
                 paragraf = "§ 17-1"
+            )
+        )
+    )
+
+    private fun etterlatteSivilstand() = Vilkaar(
+        hovedvilkaar = Delvilkaar(
+            type = VilkaarType.OMS_SIVILSTAND,
+            tittel = "Har etterlatte rett til omstillingsstønad etter § 17-11? ",
+            beskrivelse = """
+                Retten til omstillingsstønad faller bort når etterlatte fyller 67 år eller tar ut alderspensjon, får rett til 100 % uføretrygd, mottar AFP fra en offentlig pensjonsordning eller gifter seg igjen, gjelder også samboere etter § 1-5.
+                
+                Hvis en etterlatt som er innvilget omstillingsstønad etter § 17-5 tredje ledd inngår skilsmisse innen to år, får vedkommende rett til omstillingsstønad igjen.
+            """.trimIndent(),
+            spoersmaal = "Er vilkår oppfylt?",
+            lovreferanse = Lovreferanse(
+                paragraf = "§ 17-11"
             )
         )
     )

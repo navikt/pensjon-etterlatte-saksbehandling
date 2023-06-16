@@ -22,6 +22,7 @@ enum class VilkaarType(val rekkefoelge: Int) {
     // Omstillingsstønad
     OMS_ETTERLATTE_LEVER(90),
     OMS_DOEDSFALL(100),
+    OMS_SIVILSTAND(110),
     OMS_YRKESSKADE(200),
     OMS_AVDOEDES_MEDLEMSKAP(300),
     OMS_AVDOEDES_MEDLEMSKAP_UNNTAK_UNDER_26(301),

@@ -85,6 +85,11 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
               </>
             ),
           }[beregningFraState.type]}
+        {behandlingSkalSendeBrev(behandling) ? null : (
+          <InfoAlert variant="info" inline>
+            Det sendes ikke brev for denne behandlingen.
+          </InfoAlert>
+        )}
       </ContentHeader>
       {behandles ? (
         <BehandlingHandlingKnapper>
@@ -115,4 +120,8 @@ const InfoWrapper = styled.div`
 
 const ApiErrorAlert = styled(Alert).attrs({ variant: 'error' })`
   margin-top: 8px;
+`
+
+const InfoAlert = styled(Alert).attrs({ variant: 'info' })`
+  margin-top: 2rem;
 `

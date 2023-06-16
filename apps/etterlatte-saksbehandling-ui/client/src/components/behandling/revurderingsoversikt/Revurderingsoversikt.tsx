@@ -23,7 +23,7 @@ import {
   OMS_REVURDERING_HJEMLER,
 } from '~components/behandling/soeknadsoversikt/soeknadoversikt/virkningstidspunkt/utils'
 import { SakType } from '~shared/types/sak'
-import { Revurderingsaarsak, tekstRevurderingsaarsak } from '~shared/types/Revurderingsaarsak'
+import { erOpphoer, Revurderingsaarsak, tekstRevurderingsaarsak } from '~shared/types/Revurderingsaarsak'
 import styled from 'styled-components'
 
 const revurderingsaarsakTilTekst = (revurderingsaarsak: Revurderingsaarsak): string =>
@@ -76,7 +76,8 @@ export const Revurderingsoversikt = (props: { behandling: IDetaljertBehandling }
           </Heading>
         </HeadingWrapper>
         <BodyShort>
-          Revurdering på grunn av <Lowercase>{revurderingsaarsakTilTekst(revurderingsaarsak)}</Lowercase>.
+          {erOpphoer(revurderingsaarsak) ? 'Opphør' : 'Revurdering'} på grunn av{' '}
+          <Lowercase>{revurderingsaarsakTilTekst(revurderingsaarsak)}</Lowercase>.
         </BodyShort>
       </ContentHeader>
       <Innhold>

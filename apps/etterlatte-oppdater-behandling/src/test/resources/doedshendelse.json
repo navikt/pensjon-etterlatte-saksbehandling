@@ -3,8 +3,9 @@
   "@event_name": "PDL:PERSONHENDELSE",
   "hendelse": "DOEDSFALL_V1",
   "hendelse_data": {
-    "avdoedFnr": "70078749472",
-    "doedsdato": "2022-01-01",
-    "endringstype": "OPPRETTET"
+    "hendelseId": "1",
+    "endringstype": "OPPRETTET",
+    "fnr": "70078749472",
+    "doedsdato": "2022-01-01"
   }
 }

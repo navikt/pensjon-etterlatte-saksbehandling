@@ -3,10 +3,11 @@
   "@event_name": "PDL:PERSONHENDELSE",
   "hendelse": "UTFLYTTING_FRA_NORGE",
   "hendelse_data": {
+    "hendelseId": "1",
+    "endringstype": "OPPRETTET",
     "fnr": "70078749472",
     "tilflyttingsLand": "Sverige",
     "tilflyttingsstedIUtlandet": null,
-    "utflyttingsdato": "2022-08-08",
-    "endringstype": "OPPRETTET"
+    "utflyttingsdato": "2022-08-08"
   }
 }

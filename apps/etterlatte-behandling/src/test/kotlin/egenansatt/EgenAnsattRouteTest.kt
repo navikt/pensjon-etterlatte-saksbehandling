@@ -193,6 +193,7 @@ class EgenAnsattRouteTest : BehandlingIntegrationTest() {
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(
                     Adressebeskyttelse(
+                        hendelseId = "1",
                         fnr = fnr,
                         adressebeskyttelseGradering = AdressebeskyttelseGradering.STRENGT_FORTROLIG,
                         endringstype = Endringstype.OPPRETTET

@@ -289,7 +289,7 @@ class IntegrationTest : BehandlingIntegrationTest() {
             client.post("/grunnlagsendringshendelse/doedshendelse") {
                 addAuthToken(systemBruker)
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                setBody(Doedshendelse("søker", LocalDate.now(), Endringstype.OPPRETTET))
+                setBody(Doedshendelse("1", Endringstype.OPPRETTET, fnr, LocalDate.now()))
             }.also {
                 assertEquals(HttpStatusCode.OK, it.status)
             }
@@ -297,7 +297,7 @@ class IntegrationTest : BehandlingIntegrationTest() {
             client.post("/grunnlagsendringshendelse/doedshendelse") {
                 addAuthToken(systemBruker)
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                setBody(Doedshendelse("søker", LocalDate.now(), Endringstype.OPPRETTET))
+                setBody(Doedshendelse("1", Endringstype.OPPRETTET, fnr, LocalDate.now()))
             }.also {
                 assertEquals(HttpStatusCode.OK, it.status)
             }
@@ -307,11 +307,12 @@ class IntegrationTest : BehandlingIntegrationTest() {
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(
                     UtflyttingsHendelse(
+                        hendelseId = "1",
+                        endringstype = Endringstype.OPPRETTET,
                         fnr = fnr,
                         tilflyttingsLand = null,
                         tilflyttingsstedIUtlandet = null,
-                        utflyttingsdato = null,
-                        endringstype = Endringstype.OPPRETTET
+                        utflyttingsdato = null
                     )
                 )
             }.also {
@@ -323,12 +324,13 @@ class IntegrationTest : BehandlingIntegrationTest() {
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(
                     ForelderBarnRelasjonHendelse(
+                        hendelseId = "1",
+                        endringstype = Endringstype.OPPRETTET,
                         fnr = fnr,
                         relatertPersonsIdent = null,
                         relatertPersonsRolle = "",
                         minRolleForPerson = "",
-                        relatertPersonUtenFolkeregisteridentifikator = null,
-                        endringstype = Endringstype.OPPRETTET
+                        relatertPersonUtenFolkeregisteridentifikator = null
                     )
                 )
             }.also {
@@ -380,9 +382,10 @@ class IntegrationTest : BehandlingIntegrationTest() {
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(
                     Adressebeskyttelse(
+                        hendelseId = "1",
+                        endringstype = Endringstype.OPPRETTET,
                         fnr = fnr,
-                        adressebeskyttelseGradering = AdressebeskyttelseGradering.STRENGT_FORTROLIG,
-                        endringstype = Endringstype.OPPRETTET
+                        adressebeskyttelseGradering = AdressebeskyttelseGradering.STRENGT_FORTROLIG
                     )
                 )
             }.also {

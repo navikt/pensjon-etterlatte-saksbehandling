@@ -232,18 +232,19 @@ fun grunnlagsinformasjonDoedshendelse(
     avdoedFnr: String = "12345678911",
     doedsdato: LocalDate = LocalDate.of(2022, 1, 1),
     endringstype: Endringstype = Endringstype.OPPRETTET
-) = Doedshendelse(avdoedFnr = avdoedFnr, doedsdato = doedsdato, endringstype = endringstype)
+) = Doedshendelse(hendelseId = "1", fnr = avdoedFnr, doedsdato = doedsdato, endringstype = endringstype)
 
 fun grunnlagsinformasjonUtflyttingshendelse(
     fnr: String = "12345678911",
     tilflyttingsLand: String = "Sverige",
     utflyttingsdato: LocalDate = LocalDate.of(2022, 8, 8)
 ) = UtflyttingsHendelse(
+    hendelseId = "1",
+    endringstype = Endringstype.OPPRETTET,
     fnr = fnr,
     tilflyttingsLand = tilflyttingsLand,
     tilflyttingsstedIUtlandet = null,
-    utflyttingsdato = utflyttingsdato,
-    endringstype = Endringstype.OPPRETTET
+    utflyttingsdato = utflyttingsdato
 )
 
 fun grunnlagsinformasjonForelderBarnRelasjonHendelse(
@@ -252,12 +253,13 @@ fun grunnlagsinformasjonForelderBarnRelasjonHendelse(
     relatertPersonsRolle: String = "MOR",
     minRolleForPerson: String = "BARN"
 ) = ForelderBarnRelasjonHendelse(
+    hendelseId = "1",
+    endringstype = Endringstype.OPPRETTET,
     fnr = fnr,
     relatertPersonsIdent = relatertPersonsIdent,
     relatertPersonsRolle = relatertPersonsRolle,
     minRolleForPerson = minRolleForPerson,
-    relatertPersonUtenFolkeregisteridentifikator = null,
-    endringstype = Endringstype.OPPRETTET
+    relatertPersonUtenFolkeregisteridentifikator = null
 )
 
 fun grunnlagsOpplysningMedPersonopplysning(

@@ -23,7 +23,7 @@ class PdlHendelserTest {
         every { behandlingService.sendDoedshendelse(capture(doedshendelse)) } returns Unit
         inspector.apply { sendTestMessage(readFile("/doedshendelse.json")) }
 
-        assertEquals("70078749472", doedshendelse.captured.avdoedFnr)
+        assertEquals("70078749472", doedshendelse.captured.fnr)
         assertEquals(LocalDate.of(2022, 1, 1), doedshendelse.captured.doedsdato)
         assertEquals(Endringstype.OPPRETTET, doedshendelse.captured.endringstype)
     }

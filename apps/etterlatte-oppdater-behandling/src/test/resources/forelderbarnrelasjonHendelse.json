@@ -3,11 +3,12 @@
   "@event_name": "PDL:PERSONHENDELSE",
   "hendelse": "FORELDERBARNRELASJON_V1",
   "hendelse_data": {
+    "hendelseId": "1",
     "fnr": "22028605009",
+    "endringstype": "OPPRETTET",
     "relatertPersonsIdent": "24091258702",
     "relatertPersonsRolle": "BARN",
     "minRolleForPerson": "MOR",
-    "relatertPersonUtenFolkeregisteridentifikator": null,
-    "endringstype": "OPPRETTET"
+    "relatertPersonUtenFolkeregisteridentifikator": null
   }
 }

@@ -29,7 +29,8 @@ class MigreringService(
             KommerBarnetTilgode(
                 JaNei.JA,
                 "Automatisk importert fra Pesys",
-                Grunnlagsopplysning.Pesys.create()
+                Grunnlagsopplysning.Pesys.create(),
+                behandlingId = it.id
             )
         )
         foerstegangsBehandlingService.lagreGyldighetsproeving(

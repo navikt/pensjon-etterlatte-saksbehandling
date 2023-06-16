@@ -26,8 +26,9 @@ internal class RevurderingTest {
 
     @Test
     fun `regulering kan endre tilstander`() {
+        val id = UUID.randomUUID()
         Revurdering.opprett(
-            id = UUID.randomUUID(),
+            id = id,
             sak = Sak(
                 ident = "",
                 sakType = SakType.BARNEPENSJON,
@@ -38,7 +39,7 @@ internal class RevurderingTest {
             sistEndret = Tidspunkt.now().toLocalDatetimeUTC(),
             status = BehandlingStatus.OPPRETTET,
             persongalleri = Persongalleri(""),
-            kommerBarnetTilgode = kommerBarnetTilGodeVurdering(),
+            kommerBarnetTilgode = kommerBarnetTilGodeVurdering(id),
             virkningstidspunkt = virkningstidspunktVurdering(),
             utenlandstilsnitt = null,
             boddEllerArbeidetUtlandet = null,
@@ -143,24 +144,27 @@ internal class RevurderingTest {
     }
 }
 
-private fun opprettetRevurdering(prosesstype: Prosesstype) = Revurdering.opprett(
-    id = UUID.randomUUID(),
-    sak = Sak(
-        ident = "",
-        sakType = SakType.BARNEPENSJON,
-        id = 1,
-        enhet = Enheter.defaultEnhet.enhetNr
-    ),
-    behandlingOpprettet = Tidspunkt.now().toLocalDatetimeUTC(),
-    sistEndret = Tidspunkt.now().toLocalDatetimeUTC(),
-    status = BehandlingStatus.OPPRETTET,
-    persongalleri = Persongalleri(""),
-    kommerBarnetTilgode = kommerBarnetTilGodeVurdering(),
-    virkningstidspunkt = virkningstidspunktVurdering(),
-    utenlandstilsnitt = null,
-    boddEllerArbeidetUtlandet = null,
-    revurderingsaarsak = RevurderingAarsak.REGULERING,
-    prosesstype = prosesstype,
+private fun opprettetRevurdering(prosesstype: Prosesstype): Revurdering {
+    val id = UUID.randomUUID()
+    return Revurdering.opprett(
+        id = id,
+        sak = Sak(
+            ident = "",
+            sakType = SakType.BARNEPENSJON,
+            id = 1,
+            enhet = Enheter.defaultEnhet.enhetNr
+        ),
+        behandlingOpprettet = Tidspunkt.now().toLocalDatetimeUTC(),
+        sistEndret = Tidspunkt.now().toLocalDatetimeUTC(),
+        status = BehandlingStatus.OPPRETTET,
+        persongalleri = Persongalleri(""),
+        kommerBarnetTilgode = kommerBarnetTilGodeVurdering(id),
+        virkningstidspunkt = virkningstidspunktVurdering(),
+        utenlandstilsnitt = null,
+        boddEllerArbeidetUtlandet = null,
+        revurderingsaarsak = RevurderingAarsak.REGULERING,
+        prosesstype = prosesstype,
     kilde = Vedtaksloesning.GJENNY,
     revurderingInfo = null
-)
+    )
+}

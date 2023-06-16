@@ -85,7 +85,7 @@ class OmregningIntegrationTest : BehandlingIntegrationTest() {
             val virkningstidspunkt = virkningstidspunktVurdering()
 
             val iverksattBehandling = behandling!!
-                .oppdaterKommerBarnetTilgode(kommerBarnetTilGodeVurdering())
+                .oppdaterKommerBarnetTilgode(kommerBarnetTilGodeVurdering(behandling.id))
                 .oppdaterGyldighetsproeving(gyldighetsresultatVurdering())
                 .oppdaterVirkningstidspunkt(virkningstidspunkt)
                 .tilVilkaarsvurdert()

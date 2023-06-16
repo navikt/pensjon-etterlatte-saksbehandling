@@ -75,7 +75,8 @@ internal fun Route.behandlingRoutes(
                 val kommerBarnetTilgode = KommerBarnetTilgode(
                     body.svar,
                     body.begrunnelse,
-                    Grunnlagsopplysning.Saksbehandler.create(navIdent)
+                    Grunnlagsopplysning.Saksbehandler.create(navIdent),
+                    behandlingsId
                 )
 
                 try {

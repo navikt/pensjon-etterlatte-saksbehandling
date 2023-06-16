@@ -53,7 +53,7 @@ internal class BehandlingTest {
 
     private val saksbehandler = Grunnlagsopplysning.Saksbehandler.create("saksbehandler01")
 
-    private val kommerBarnetTilgode = KommerBarnetTilgode(JaNei.JA, "", saksbehandler)
+    private val kommerBarnetTilgode = KommerBarnetTilgode(JaNei.JA, "", saksbehandler, behandling.id)
     private val virkningstidspunkt = Virkningstidspunkt(YearMonth.of(2021, 1), saksbehandler, "begrunnelse")
     private val gyldighetsResultat = GyldighetsResultat(
         VurderingsResultat.OPPFYLT,

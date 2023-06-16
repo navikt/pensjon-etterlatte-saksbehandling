@@ -25,6 +25,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -104,7 +105,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
     }
 
     @Test
-    fun `kan lagre revurderinginfo på en revurdering`() {
+    fun `kan lagre og oppdatere revurderinginfo på en revurdering`() {
         val hendelser = applicationContext.behandlingsHendelser.hendelserKanal
         val featureToggleService = mockk<FeatureToggleService>()
 
@@ -157,6 +158,42 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
         inTransaction {
             val lagretRevurdering = applicationContext.behandlingDao.hentBehandling(revurdering.id) as Revurdering
             Assertions.assertEquals(revurderingInfo, lagretRevurdering.revurderingInfo)
+        }
+
+        // kan oppdatere
+        val nyRevurderingInfo =
+            RevurderingInfo.Soeskenjustering(BarnepensjonSoeskenjusteringGrunn.FORPLEID_ETTER_BARNEVERNSLOVEN)
+        assertTrue(
+            revurderingService.lagreRevurderingInfo(
+                revurdering.id,
+                nyRevurderingInfo,
+                "saksbehandler"
+            )
+        )
+        inTransaction {
+            val oppdatert = applicationContext.behandlingDao.hentBehandling(revurdering.id) as Revurdering
+            Assertions.assertEquals(nyRevurderingInfo, oppdatert.revurderingInfo)
+        }
+
+        inTransaction {
+            applicationContext.behandlingDao.lagreStatus(
+                revurdering.id,
+                BehandlingStatus.IVERKSATT,
+                LocalDateTime.now()
+            )
+        }
+
+        // kan ikke oppdatere en ferdig revurdering
+        assertFalse(
+            revurderingService.lagreRevurderingInfo(
+                revurdering.id,
+                revurderingInfo,
+                "saksbehandler"
+            )
+        )
+        inTransaction {
+            val ferdigRevurdering = applicationContext.behandlingDao.hentBehandling(revurdering.id) as Revurdering
+            Assertions.assertEquals(nyRevurderingInfo, ferdigRevurdering.revurderingInfo)
         }
     }
 

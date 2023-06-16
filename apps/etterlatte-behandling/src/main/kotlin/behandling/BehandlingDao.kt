@@ -143,14 +143,13 @@ class BehandlingDao(private val connection: () -> Connection) {
     fun lagreRevurderingInfo(id: UUID, revurderingInfo: RevurderingInfo, kilde: Grunnlagsopplysning.Kilde) {
         connection().prepareStatement(
             """
-                UPDATE revurdering_info
-                SET info = ?, kilde = ?
-                WHERE behandling_id = ?
+                INSERT INTO revurdering_info(behandling_id, info, kilde)
+                VALUES(?, ?, ?) ON CONFLICT(behandling_id) DO UPDATE SET info = excluded.info, kilde = excluded.kilde
             """.trimIndent()
         ).let { statement ->
-            statement.setJsonb(1, revurderingInfo)
-            statement.setJsonb(2, kilde)
-            statement.setObject(3, id)
+            statement.setObject(1, id)
+            statement.setJsonb(2, revurderingInfo)
+            statement.setJsonb(3, kilde)
             statement.executeUpdate()
         }
     }
@@ -164,7 +163,7 @@ class BehandlingDao(private val connection: () -> Connection) {
         ).let { statement ->
             statement.setObject(1, id)
             statement.executeQuery()
-                .singleOrNull { getString("revurdering_info")?.let { objectMapper.readValue(it) } }
+                .singleOrNull { getString("info")?.let { objectMapper.readValue(it) } }
         }
     }
 

@@ -119,7 +119,7 @@ class RealRevurderingService(
     override fun lagreRevurderingInfo(behandlingsId: UUID, info: RevurderingInfo, saksbehandler: String): Boolean {
         return inTransaction {
             val behandling = hentBehandling(behandlingsId)
-            if (behandling?.type != BehandlingType.REVURDERING) {
+            if (behandling?.type != BehandlingType.REVURDERING || !behandling.status.kanEndres()) {
                 return@inTransaction false
             }
             val kilde = Grunnlagsopplysning.Saksbehandler.create(saksbehandler)

@@ -9,13 +9,16 @@ import no.nav.etterlatte.behandling.BehandlingServiceFeatureToggle
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringStatus
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringsType
 import no.nav.etterlatte.behandling.domain.Grunnlagsendringshendelse
+import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.behandling.domain.SamsvarMellomKildeOgGrunnlag
 import no.nav.etterlatte.common.DatabaseContext
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.Vedtaksloesning
+import no.nav.etterlatte.libs.common.behandling.BarnepensjonSoeskenjusteringGrunn
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
+import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
@@ -24,6 +27,7 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -96,6 +100,63 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
 
         inTransaction {
             Assertions.assertEquals(revurdering, applicationContext.behandlingDao.hentBehandling(revurdering!!.id))
+        }
+    }
+
+    @Test
+    fun `kan lagre revurderinginfo på en revurdering`() {
+        val hendelser = applicationContext.behandlingsHendelser.hendelserKanal
+        val featureToggleService = mockk<FeatureToggleService>()
+
+        every {
+            featureToggleService.isEnabled(
+                RevurderingServiceFeatureToggle.OpprettManuellRevurdering,
+                any()
+            )
+        } returns true
+
+        every {
+            featureToggleService.isEnabled(
+                BehandlingServiceFeatureToggle.FiltrerMedEnhetId,
+                false
+            )
+        } returns false
+
+        val (sak, behandling) = opprettSakMedFoerstegangsbehandling(fnr)
+
+        assertNotNull(behandling)
+
+        inTransaction {
+            applicationContext.behandlingDao.lagreStatus(
+                behandling!!.id,
+                BehandlingStatus.IVERKSATT,
+                Tidspunkt.now().toLocalDatetimeUTC()
+            )
+        }
+        val revurderingService = RealRevurderingService(
+            hendelser,
+            featureToggleService,
+            applicationContext.behandlingDao,
+            applicationContext.hendelseDao,
+            applicationContext.grunnlagsendringshendelseDao
+        )
+        val revurdering = revurderingService.opprettManuellRevurdering(
+            sakId = sak.id,
+            forrigeBehandling = behandling!!,
+            revurderingAarsak = RevurderingAarsak.SOESKENJUSTERING,
+            kilde = Vedtaksloesning.GJENNY,
+            paaGrunnAvHendelse = null
+        )
+        val revurderingInfo = RevurderingInfo.Soeskenjustering(BarnepensjonSoeskenjusteringGrunn.SOESKEN_DOER)
+        val fikkLagret = revurderingService.lagreRevurderingInfo(
+            revurdering!!.id,
+            revurderingInfo,
+            "saksbehandler"
+        )
+        assertTrue(fikkLagret)
+        inTransaction {
+            val lagretRevurdering = applicationContext.behandlingDao.hentBehandling(revurdering.id) as Revurdering
+            Assertions.assertEquals(revurderingInfo, lagretRevurdering.revurderingInfo)
         }
     }
 

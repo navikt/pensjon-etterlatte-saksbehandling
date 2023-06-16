@@ -57,7 +57,7 @@ class IntegrationTest {
             "KAFKA_BROKERS" to kafkaEnv.brokersURL,
             "LEESAH_KAFKA_GROUP_ID" to "etterlatte-v1",
             "KAFKA_SCHEMA_REGISTRY" to kafkaEnv.schemaRegistry?.url!!,
-            "LEESAH_TOPIC_PERSON" to PDL_PERSON_TOPIC
+            "LEESAH_TOPIC_PERSON" to LEESAH_TOPIC_PERSON
         )
 
         val leesahKafkaProducer = producerForLeesah()
@@ -65,7 +65,10 @@ class IntegrationTest {
             LocalKafkaConfig(kafkaEnv.brokersURL).rapidsAndRiversProducer("etterlatte.dodsmelding")
         )
 
-        val kafkaKonsument = KafkaKonsument<Personhendelse>(PDL_PERSON_TOPIC, env, KafkaConsumerEnvironmentTest())
+        val kafkaKonsument = KafkaKonsument<Personhendelse>(
+            LEESAH_TOPIC_PERSON,
+            KafkaConsumerEnvironmentTest().generateKafkaConsumerProperties(env)
+        )
         val personHendelseFordeler = PersonHendelseFordeler(rapidsKafkaProducer, pdlKlient)
 
         val personHendelse = Personhendelse().apply {
@@ -91,7 +94,7 @@ class IntegrationTest {
             )
         )
 
-        leesahKafkaProducer.send(ProducerRecord(PDL_PERSON_TOPIC, 1, "key", personHendelse))
+        leesahKafkaProducer.send(ProducerRecord(LEESAH_TOPIC_PERSON, 1, "key", personHendelse))
 
         lesHendelserFraLeesah(kafkaKonsument, personHendelseFordeler)
 
@@ -160,11 +163,11 @@ class IntegrationTest {
     }
 
     companion object {
-        const val PDL_PERSON_TOPIC = "pdl.leesah-v1"
+        const val LEESAH_TOPIC_PERSON = "pdl.leesah-v1"
 
         val kafkaEnv = KafkaEnvironment(
             noOfBrokers = 1,
-            topicNames = listOf(PDL_PERSON_TOPIC),
+            topicNames = listOf(LEESAH_TOPIC_PERSON),
             withSecurity = false,
             autoStart = true,
             withSchemaRegistry = true

@@ -3,26 +3,22 @@ package no.nav.etterlatte.hendelserpdl.common
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.hendelserpdl.config.KafkaConsumerConfiguration
-import no.nav.etterlatte.hendelserpdl.config.KafkaEnvironment
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.apache.kafka.common.errors.WakeupException
 import org.slf4j.LoggerFactory
 import java.time.Duration
+import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
 
 class KafkaKonsument<T>(
     private val topic: String,
-    env: Map<String, String>,
-    kafkaEnvironment: KafkaConsumerConfiguration = KafkaEnvironment()
+    kafkaProperties: Properties
 ) {
-    private val consumer: KafkaConsumer<String, T>
+    private val consumer: KafkaConsumer<String, T> = KafkaConsumer<String, T>(kafkaProperties)
     private val ready = AtomicBoolean(true)
     private val logger = LoggerFactory.getLogger(KafkaConsumer::class.java)
 
     init {
-        consumer = KafkaConsumer<String, T>(kafkaEnvironment.generateKafkaConsumerProperties(env))
-
         Runtime.getRuntime().addShutdownHook(
             Thread {
                 ready.set(false)

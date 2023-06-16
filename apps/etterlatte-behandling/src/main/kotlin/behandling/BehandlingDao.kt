@@ -23,6 +23,7 @@ import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
 import no.nav.etterlatte.libs.common.behandling.Utenlandstilsnitt
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.sak.BehandlingOgSak
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakIDListe
@@ -139,16 +140,17 @@ class BehandlingDao(private val connection: () -> Connection) {
         )
     }
 
-    fun lagreRevurderingInfo(id: UUID, revurderingInfo: RevurderingInfo) {
+    fun lagreRevurderingInfo(id: UUID, revurderingInfo: RevurderingInfo, kilde: Grunnlagsopplysning.Kilde) {
         connection().prepareStatement(
             """
                 UPDATE revurdering_info
-                SET info = ?
+                SET info = ?, kilde = ?
                 WHERE behandling_id = ?
             """.trimIndent()
         ).let { statement ->
             statement.setJsonb(1, revurderingInfo)
-            statement.setObject(2, id)
+            statement.setJsonb(2, kilde)
+            statement.setObject(3, id)
             statement.executeUpdate()
         }
     }

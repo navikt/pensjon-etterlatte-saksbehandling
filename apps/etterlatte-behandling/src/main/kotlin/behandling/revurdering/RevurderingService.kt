@@ -2,6 +2,7 @@ package no.nav.etterlatte.behandling.revurdering
 
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.Kontekst
+import no.nav.etterlatte.Saksbehandler
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.BehandlingHendelseType
 import no.nav.etterlatte.behandling.BehandlingHendelserKanal
@@ -23,6 +24,7 @@ import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.behandling.tilVirkningstidspunkt
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.util.*
@@ -44,7 +46,7 @@ interface RevurderingService {
         kilde: Vedtaksloesning
     ): Revurdering?
 
-    fun lagreRevurderingInfo(behandlingsId: UUID, info: RevurderingInfo): Boolean
+    fun lagreRevurderingInfo(behandlingsId: UUID, info: RevurderingInfo, saksbehandlerIdent: String): Boolean
 }
 
 enum class RevurderingServiceFeatureToggle(private val key: String) : FeatureToggle {
@@ -114,13 +116,14 @@ class RealRevurderingService(
         }
     }
 
-    override fun lagreRevurderingInfo(behandlingsId: UUID, info: RevurderingInfo): Boolean {
+    override fun lagreRevurderingInfo(behandlingsId: UUID, info: RevurderingInfo, saksbehandler: String): Boolean {
         return inTransaction {
             val behandling = hentBehandling(behandlingsId)
             if (behandling?.type != BehandlingType.REVURDERING) {
                 return@inTransaction false
             }
-            behandlingDao.lagreRevurderingInfo(behandlingsId, info)
+            val kilde = Grunnlagsopplysning.Saksbehandler.create(saksbehandler)
+            behandlingDao.lagreRevurderingInfo(behandlingsId, info, kilde)
             return@inTransaction true
         }
     }

@@ -19,6 +19,7 @@ import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandlingsId
+import no.nav.etterlatte.libs.common.hentNavidentFraToken
 import no.nav.etterlatte.libs.common.sakId
 import java.util.*
 
@@ -32,17 +33,19 @@ internal fun Route.revurderingRoutes(
         route("{$BEHANDLINGSID_CALL_PARAMETER}") {
             route("revurderinginfo") {
                 post {
-                    logger.info("Lagrer revurderinginfo på behandling $behandlingsId")
-                    val info = try {
-                        call.receive<RevurderingInfo>()
-                    } catch (e: Exception) {
-                        return@post call.respond(HttpStatusCode.BadRequest)
-                    }
-                    val fikkLagret = revurderingService.lagreRevurderingInfo(behandlingsId, info)
-                    if (fikkLagret) {
-                        call.respond(HttpStatusCode.NoContent)
-                    } else {
-                        call.respond(HttpStatusCode.InternalServerError)
+                    hentNavidentFraToken { navident ->
+                        logger.info("Lagrer revurderinginfo på behandling $behandlingsId")
+                        val info = try {
+                            call.receive<RevurderingInfo>()
+                        } catch (e: Exception) {
+                            return@post call.respond(HttpStatusCode.BadRequest)
+                        }
+                        val fikkLagret = revurderingService.lagreRevurderingInfo(behandlingsId, info, navident)
+                        if (fikkLagret) {
+                            call.respond(HttpStatusCode.NoContent)
+                        } else {
+                            call.respond(HttpStatusCode.InternalServerError)
+                        }
                     }
                 }
             }

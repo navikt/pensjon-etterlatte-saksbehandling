@@ -36,6 +36,7 @@ export type SoeskengrunnlagUtfylling = PeriodisertBeregningsgrunnlag<SoeskenKans
 type SoeskenjusteringProps = {
   behandling: IBehandlingReducer
   onSubmit: (data: Soeskengrunnlag) => void
+  setSoeskenJusteringManglerIkke: () => void
 }
 
 const nySoeskengrunnlagPeriode = (soesken: IPdlPerson[], fom?: string) => ({
@@ -47,7 +48,7 @@ const nySoeskengrunnlagPeriode = (soesken: IPdlPerson[], fom?: string) => ({
 })
 
 const Soeskenjustering = (props: SoeskenjusteringProps) => {
-  const { behandling, onSubmit } = props
+  const { behandling, onSubmit, setSoeskenJusteringManglerIkke } = props
   const [visFeil, setVisFeil] = useState(false)
   const { handleSubmit, reset, control, watch } = useForm<{
     soeskenMedIBeregning: PeriodisertBeregningsgrunnlag<SoeskenKanskjeMedIBeregning[]>[]
@@ -107,6 +108,7 @@ const Soeskenjustering = (props: SoeskenjusteringProps) => {
   )
 
   const ferdigstillForm = (data: { soeskenMedIBeregning: SoeskengrunnlagUtfylling }) => {
+    setSoeskenJusteringManglerIkke()
     if (validerSoeskenjustering(data.soeskenMedIBeregning) && feil.length === 0) {
       setVisFeil(false)
       onSubmit(data.soeskenMedIBeregning)

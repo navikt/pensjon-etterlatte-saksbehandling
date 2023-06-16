@@ -65,7 +65,6 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
 
   const onSubmit = () => {
     if (soeskenGrunnlagsData) {
-      setSoeskenJusteringMangler(false)
       dispatch(resetBeregning())
       const beregningsgrunnlag = {
         soeskenMedIBeregning: mapListeTilDto(soeskenGrunnlagsData),
@@ -95,6 +94,7 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
       <Soeskenjustering
         behandling={behandling}
         onSubmit={(soeskenGrunnlag) => setSoeskenGrunnlagsData(soeskenGrunnlag)}
+        setSoeskenJusteringManglerIkke={() => setSoeskenJusteringMangler(false)}
       />
       {!isPending(funksjonsbrytere) && !isFailure(funksjonsbrytere) && visInstitusjonsopphold && (
         <Institusjonsopphold

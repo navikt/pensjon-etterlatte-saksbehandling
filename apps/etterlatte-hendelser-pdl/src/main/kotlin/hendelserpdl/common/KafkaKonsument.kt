@@ -1,41 +1,47 @@
-package no.nav.etterlatte.hendelserpdl.leesah
+package no.nav.etterlatte.hendelserpdl.common
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.hendelserpdl.config.KafkaConsumerConfiguration
 import no.nav.etterlatte.hendelserpdl.config.KafkaEnvironment
-import no.nav.person.pdl.leesah.Personhendelse
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.apache.kafka.common.errors.WakeupException
 import org.slf4j.LoggerFactory
 import java.time.Duration
 import java.util.concurrent.atomic.AtomicBoolean
 
-class LeesahConsumer(
-    env: Map<String, String>,
+class KafkaKonsument<T>(
     private val topic: String,
+    env: Map<String, String>,
     kafkaEnvironment: KafkaConsumerConfiguration = KafkaEnvironment()
 ) {
-    val consumer: KafkaConsumer<String, Personhendelse>
-
-    private val logger = LoggerFactory.getLogger(LeesahConsumer::class.java)
+    private val consumer: KafkaConsumer<String, T>
+    private val ready = AtomicBoolean(true)
+    private val logger = LoggerFactory.getLogger(KafkaConsumer::class.java)
 
     init {
-        consumer = KafkaConsumer<String, Personhendelse>(kafkaEnvironment.generateKafkaConsumerProperties(env))
+        consumer = KafkaConsumer<String, T>(kafkaEnvironment.generateKafkaConsumerProperties(env))
+
+        Runtime.getRuntime().addShutdownHook(
+            Thread {
+                ready.set(false)
+                consumer.wakeup(); // trådsikker, aborter konsumer fra polling
+            }
+        )
     }
 
-    fun lesHendelserFraLeesah(readyToConsume: AtomicBoolean, haandterHendelse: suspend (Personhendelse) -> Unit) {
+    fun konsumer(haandter: suspend (T) -> Unit) {
         try {
-            logger.info("Starter å lese hendelser fra Leesah")
+            logger.info("Starter å lese hendelser fra $topic")
             consumer.subscribe(listOf(topic))
 
-            while (readyToConsume.get()) {
+            while (ready.get()) {
                 val hendelser = consumer.poll(Duration.ofSeconds(10L))
                 runBlocking {
                     val ventbareHendelser = hendelser.map {
                         async(context = Dispatchers.Default) {
-                            haandterHendelse(it.value())
+                            haandter(it.value())
                         }
                     }
                     ventbareHendelser.forEach { it.await() }
@@ -46,9 +52,9 @@ class LeesahConsumer(
             }
         } catch (e: WakeupException) {
             // Ignorerer exception hvis vi stenger ned
-            if (readyToConsume.get()) throw e
+            if (ready.get()) throw e
         } finally {
-            logger.info("Ferdig med å lese hendelser fra Leesah - lukker consumer")
+            logger.info("Ferdig med å lese hendelser fra $topic - lukker consumer")
             consumer.close()
         }
     }

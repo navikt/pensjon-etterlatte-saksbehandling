@@ -15,8 +15,8 @@ import io.ktor.serialization.jackson.JacksonConverter
 import io.mockk.spyk
 import io.mockk.verify
 import no.nav.common.KafkaEnvironment
+import no.nav.etterlatte.hendelserpdl.common.KafkaKonsument
 import no.nav.etterlatte.hendelserpdl.config.KafkaConsumerConfiguration
-import no.nav.etterlatte.hendelserpdl.leesah.LeesahConsumer
 import no.nav.etterlatte.hendelserpdl.pdl.PdlKlient
 import no.nav.etterlatte.kafka.LocalKafkaConfig
 import no.nav.etterlatte.kafka.rapidsAndRiversProducer
@@ -42,7 +42,7 @@ import java.time.LocalDate
 import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_METHOD)
-class LeesahConsumerIntegrationTest {
+class IntegrationTest {
 
     private lateinit var pdlKlient: PdlKlient
 
@@ -65,7 +65,7 @@ class LeesahConsumerIntegrationTest {
             LocalKafkaConfig(kafkaEnv.brokersURL).rapidsAndRiversProducer("etterlatte.dodsmelding")
         )
 
-        val leesahConsumer = LeesahConsumer(env, PDL_PERSON_TOPIC, KafkaConsumerEnvironmentTest())
+        val kafkaKonsument = KafkaKonsument<Personhendelse>(PDL_PERSON_TOPIC, env, KafkaConsumerEnvironmentTest())
         val personHendelseFordeler = PersonHendelseFordeler(rapidsKafkaProducer, pdlKlient)
 
         val personHendelse = Personhendelse().apply {
@@ -93,7 +93,7 @@ class LeesahConsumerIntegrationTest {
 
         leesahKafkaProducer.send(ProducerRecord(PDL_PERSON_TOPIC, 1, "key", personHendelse))
 
-        lesHendelserFraLeesah(leesahConsumer, personHendelseFordeler)
+        lesHendelserFraLeesah(kafkaKonsument, personHendelseFordeler)
 
         verify(exactly = 1, timeout = 5000) {
             rapidsKafkaProducer.publiser(

@@ -1,5 +1,7 @@
 package no.nav.etterlatte.behandling.omregning
 
+import behandling.kommerbarnettilgode.KommerBarnetTilGodeService
+import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingHendelseType
 import no.nav.etterlatte.behandling.BehandlingHendelserKafkaProducer
 import no.nav.etterlatte.behandling.BehandlingService
@@ -18,13 +20,14 @@ import no.nav.etterlatte.sak.SakService
 class MigreringService(
     private val sakService: SakService,
     private val foerstegangsBehandlingService: FoerstegangsbehandlingService,
+    private val kommerBarnetTilGodeService: KommerBarnetTilGodeService,
     private val behandlingsHendelser: BehandlingHendelserKafkaProducer,
     private val migreringRepository: MigreringRepository,
     private val behandlingService: BehandlingService
 ) {
     fun migrer(request: MigreringRequest) = opprettSakOgBehandling(request)?.let {
         val pesys = Vedtaksloesning.PESYS.name
-        foerstegangsBehandlingService.lagreKommerBarnetTilgode(
+        kommerBarnetTilGodeService.lagreKommerBarnetTilgode(
             KommerBarnetTilgode(
                 JaNei.JA,
                 "Automatisk importert fra Pesys",

@@ -11,7 +11,6 @@ import no.nav.etterlatte.behandling.domain.OpprettBehandling
 import no.nav.etterlatte.behandling.domain.toBehandlingOpprettet
 import no.nav.etterlatte.behandling.filterBehandlingerForEnheter
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
-import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
 import no.nav.etterlatte.behandling.revurdering.RevurderingService
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.inTransaction
@@ -19,7 +18,6 @@ import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.JaNeiMedBegrunnelse
-import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
@@ -61,7 +59,6 @@ interface FoerstegangsbehandlingService {
     ): GyldighetsResultat?
 
     fun lagreGyldighetsproeving(behandlingId: UUID, gyldighetsproeving: GyldighetsResultat)
-    fun lagreKommerBarnetTilgode(kommerBarnetTilgode: KommerBarnetTilgode)
     fun settOpprettet(behandlingId: UUID, dryRun: Boolean = true)
     fun settVilkaarsvurdert(behandlingId: UUID, dryRun: Boolean = true)
     fun settBeregnet(behandlingId: UUID, dryRun: Boolean = true)
@@ -77,7 +74,6 @@ class FoerstegangsbehandlingServiceImpl(
     private val revurderingService: RevurderingService,
     private val sakDao: SakDao,
     private val behandlingDao: BehandlingDao,
-    private val kommerBarnetTilGodeDao: KommerBarnetTilGodeDao,
     private val hendelseDao: HendelseDao,
     private val behandlingHendelser: BehandlingHendelserKafkaProducer,
     private val featureToggleService: FeatureToggleService,
@@ -221,17 +217,6 @@ class FoerstegangsbehandlingServiceImpl(
                 behandlingDao.lagreGyldighetsproving(it)
                 logger.info("behandling ${it.id} i sak: ${it.sak.id} er gyldighetsprøvd. Saktype: ${it.sak.sakType}")
             }
-    }
-
-    override fun lagreKommerBarnetTilgode(kommerBarnetTilgode: KommerBarnetTilgode) {
-        return inTransaction {
-            kommerBarnetTilgode.behandlingId?.let {
-                hentBehandling(it)
-                    ?.tilOpprettet()
-                    ?.also { kommerBarnetTilGodeDao.lagreKommerBarnetTilGode(kommerBarnetTilgode) }
-                    ?.also { behandling -> behandlingDao.lagreStatus(behandling) }
-            }
-        }
     }
 
     override fun settOpprettet(behandlingId: UUID, dryRun: Boolean) {

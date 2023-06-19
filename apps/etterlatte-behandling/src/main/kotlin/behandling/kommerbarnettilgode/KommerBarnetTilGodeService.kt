@@ -1,0 +1,25 @@
+package behandling.kommerbarnettilgode
+
+import no.nav.etterlatte.behandling.BehandlingDao
+import no.nav.etterlatte.behandling.GenerellBehandlingService
+import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
+import no.nav.etterlatte.inTransaction
+import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
+
+class KommerBarnetTilGodeService(
+    private val behandlingService: GenerellBehandlingService,
+    private val kommerBarnetTilGodeDao: KommerBarnetTilGodeDao,
+    private val behandlingDao: BehandlingDao
+) {
+
+    fun lagreKommerBarnetTilgode(kommerBarnetTilgode: KommerBarnetTilgode) {
+        return inTransaction {
+            kommerBarnetTilgode.behandlingId?.let {
+                behandlingService.hentBehandling(it)
+                    ?.tilOpprettet()
+                    ?.also { kommerBarnetTilGodeDao.lagreKommerBarnetTilGode(kommerBarnetTilgode) }
+                    ?.also { behandling -> behandlingDao.lagreStatus(behandling) }
+            }
+        }
+    }
+}

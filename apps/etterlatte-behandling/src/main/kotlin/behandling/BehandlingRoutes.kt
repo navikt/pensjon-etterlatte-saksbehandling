@@ -1,5 +1,6 @@
 package no.nav.etterlatte.behandling
 
+import behandling.kommerbarnettilgode.KommerBarnetTilGodeService
 import com.fasterxml.jackson.annotation.JsonProperty
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
@@ -43,6 +44,7 @@ import java.util.*
 internal fun Route.behandlingRoutes(
     behandlingService: BehandlingService,
     foerstegangsbehandlingService: FoerstegangsbehandlingService,
+    kommerBarnetTilGodeService: KommerBarnetTilGodeService,
     manueltOpphoerService: ManueltOpphoerService
 ) {
     val logger = application.log
@@ -80,7 +82,7 @@ internal fun Route.behandlingRoutes(
                 )
 
                 try {
-                    foerstegangsbehandlingService.lagreKommerBarnetTilgode(kommerBarnetTilgode)
+                    kommerBarnetTilGodeService.lagreKommerBarnetTilgode(kommerBarnetTilgode)
                     call.respond(HttpStatusCode.OK, kommerBarnetTilgode)
                 } catch (e: TilstandException.UgyldigTilstand) {
                     call.respond(HttpStatusCode.BadRequest, "Kunne ikke endre på feltet")

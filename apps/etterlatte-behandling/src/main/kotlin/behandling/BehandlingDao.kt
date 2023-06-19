@@ -42,8 +42,8 @@ import java.time.LocalDateTime
 import java.util.*
 
 class BehandlingDao(
-    private val connection: () -> Connection,
-    private val kommerBarnetTilGodeDao: KommerBarnetTilGodeDao
+    private val kommerBarnetTilGodeDao: KommerBarnetTilGodeDao,
+    private val connection: () -> Connection
 ) {
 
     private val alleBehandlingerMedSak = """

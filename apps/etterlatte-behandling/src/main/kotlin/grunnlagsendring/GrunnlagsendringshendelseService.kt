@@ -12,6 +12,7 @@ import no.nav.etterlatte.common.klienter.PdlKlient
 import no.nav.etterlatte.common.klienter.hentAnsvarligeForeldre
 import no.nav.etterlatte.common.klienter.hentBarn
 import no.nav.etterlatte.common.klienter.hentDoedsdato
+import no.nav.etterlatte.common.klienter.hentSivilstand
 import no.nav.etterlatte.common.klienter.hentUtland
 import no.nav.etterlatte.common.klienter.hentVergemaal
 import no.nav.etterlatte.grunnlagsendring.klienter.GrunnlagKlient
@@ -26,6 +27,7 @@ import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.pdlhendelse.Adressebeskyttelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
+import no.nav.etterlatte.libs.common.pdlhendelse.SivilstandHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.VergeMaalEllerFremtidsfullmakt
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
@@ -106,6 +108,15 @@ class GrunnlagsendringshendelseService(
         return opprettHendelseAvTypeForPerson(
             vergeMaalEllerFremtidsfullmakt.fnr,
             GrunnlagsendringsType.VERGEMAAL_ELLER_FREMTIDSFULLMAKT
+        )
+    }
+
+    fun opprettSivilstandHendelse(
+        sivilstandHendelse: SivilstandHendelse
+    ): List<Grunnlagsendringshendelse> {
+        return opprettHendelseAvTypeForPerson(
+            sivilstandHendelse.fnr,
+            GrunnlagsendringsType.SIVILSTAND
         )
     }
 
@@ -380,6 +391,13 @@ class GrunnlagsendringshendelseService(
                     samsvar = pdlVergemaal erLikRekkefoelgeIgnorert grunnlagVergemaal
                 )
             }
+
+            GrunnlagsendringsType.SIVILSTAND -> {
+                val pdlSivilstand = pdlData.hentSivilstand()
+                val grunnlagSivilstand = grunnlag?.sivilstand(rolle)
+                samsvarSivilstand(pdlSivilstand, grunnlagSivilstand)
+            }
+
             GrunnlagsendringsType.GRUNNBELOEP -> SamsvarMellomKildeOgGrunnlag.Grunnbeloep(samsvar = false)
             GrunnlagsendringsType.INSTITUSJONSOPPHOLD ->
                 throw IllegalStateException("Denne hendelsen skal gå rett til oppgavelisten og aldri komme hit")

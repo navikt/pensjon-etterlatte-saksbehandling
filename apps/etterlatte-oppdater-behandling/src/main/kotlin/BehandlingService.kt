@@ -13,6 +13,7 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.pdlhendelse.Adressebeskyttelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
+import no.nav.etterlatte.libs.common.pdlhendelse.SivilstandHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.VergeMaalEllerFremtidsfullmakt
 import no.nav.etterlatte.libs.common.sak.BehandlingOgSak
@@ -27,6 +28,7 @@ interface BehandlingService {
     fun sendForelderBarnRelasjonHendelse(forelderBarnRelasjon: ForelderBarnRelasjonHendelse)
     fun sendAdressebeskyttelseHendelse(adressebeskyttelse: Adressebeskyttelse)
     fun sendVergeMaalEllerFremtidsfullmakt(vergeMaalEllerFremtidsfullmakt: VergeMaalEllerFremtidsfullmakt)
+    fun sendSivilstandHendelse(sivilstandHendelse: SivilstandHendelse)
     fun sendReguleringFeiletHendelse(reguleringFeilethendelse: ReguleringFeiletHendelse)
     fun hentAlleSaker(): Saker
     fun opprettOmregning(omregningshendelse: Omregningshendelse): OpprettOmregningResponse
@@ -81,6 +83,15 @@ class BehandlingServiceImpl(
             behandlingKlient.post("$url/grunnlagsendringshendelse/vergemaalellerfremtidsfullmakt") {
                 contentType(ContentType.Application.Json)
                 setBody(vergeMaalEllerFremtidsfullmakt)
+            }
+        }
+    }
+
+    override fun sendSivilstandHendelse(sivilstandHendelse: SivilstandHendelse) {
+        runBlocking {
+            behandlingKlient.post("$url/grunnlagsendringshendelse/sivilstandhendelse") {
+                contentType(ContentType.Application.Json)
+                setBody(sivilstandHendelse)
             }
         }
     }

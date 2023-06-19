@@ -36,6 +36,7 @@ import no.nav.etterlatte.libs.common.pdlhendelse.Adressebeskyttelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
 import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
+import no.nav.etterlatte.libs.common.pdlhendelse.SivilstandHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.sak.Sak
@@ -416,6 +417,76 @@ internal class GrunnlagsendringshendelseServiceTest {
                 relatertPersonsRolle = null,
                 minRolleForPerson = null,
                 relatertPersonUtenFolkeregisteridentifikator = null,
+                endringstype = Endringstype.OPPRETTET
+            )
+        )
+
+        assertEquals(listOf(grunnlagsendringshendelse1), lagredeGrunnlagsendringshendelser1)
+        assertEquals(emptyList<Grunnlagsendringshendelse>(), lagredeGrunnlagsendringshendelser3)
+    }
+
+    @Test
+    fun `skal ikke opprette ny sivilstand-hendelse dersom en lignende allerede eksisterer`() {
+        val sakId = 1L
+        val grunnlagsendringshendelse1 = grunnlagsendringshendelseMedSamsvar(
+            type = GrunnlagsendringsType.SIVILSTAND,
+            id = UUID.randomUUID(),
+            sakId = sakId,
+            fnr = "Soeker",
+            samsvarMellomKildeOgGrunnlag = null
+        )
+        val grunnlagsendringshendelse2 = grunnlagsendringshendelseMedSamsvar(
+            type = GrunnlagsendringsType.SIVILSTAND,
+            id = UUID.randomUUID(),
+            sakId = sakId,
+            fnr = "Soeker",
+            samsvarMellomKildeOgGrunnlag = null
+        )
+
+        every {
+            grunnlagshendelsesDao.opprettGrunnlagsendringshendelse(any())
+        } returns grunnlagsendringshendelse1
+        every {
+            grunnlagshendelsesDao.hentGrunnlagsendringshendelserMedStatuserISak(any(), any())
+        } returns emptyList() andThen listOf(
+            grunnlagsendringshendelse1,
+            grunnlagsendringshendelse2
+        )
+        coEvery {
+            grunnlagClient.hentPersonSakOgRolle(any())
+        } returns PersonMedSakerOgRoller("Soeker", listOf(SakOgRolle(sakId, Saksrolle.SOEKER)))
+
+        val lagredeGrunnlagsendringshendelser1 = grunnlagsendringshendelseService.opprettSivilstandHendelse(
+            SivilstandHendelse(
+                hendelseId = "1",
+                fnr = "Soeker",
+                type = "GIFT",
+                relatertVedSivilstand = "Ny partner",
+                gyldigFraOgMed = LocalDate.now(),
+                bekreftelsesdato = LocalDate.now(),
+                endringstype = Endringstype.OPPRETTET
+            )
+        )
+
+        // siden dette er en hendelse av en annen type skal det ikke påvirke filtreringen
+        grunnlagsendringshendelseService.opprettDoedshendelse(
+            Doedshendelse(
+                hendelseId = "1",
+                fnr = "Soeker",
+                doedsdato = LocalDate.of(2022, 1, 1),
+                endringstype = Endringstype.OPPRETTET
+            )
+        )
+
+        // denne skal ikke opprette en sivilstandhendelse, siden den allerede eksisterer
+        val lagredeGrunnlagsendringshendelser3 = grunnlagsendringshendelseService.opprettSivilstandHendelse(
+            SivilstandHendelse(
+                hendelseId = "1",
+                fnr = "Soeker",
+                type = "GIFT",
+                relatertVedSivilstand = "Ny partner",
+                gyldigFraOgMed = LocalDate.now(),
+                bekreftelsesdato = LocalDate.now(),
                 endringstype = Endringstype.OPPRETTET
             )
         )

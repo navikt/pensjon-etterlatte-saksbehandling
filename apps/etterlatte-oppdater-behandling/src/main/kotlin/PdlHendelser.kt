@@ -6,6 +6,7 @@ import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.pdlhendelse.Adressebeskyttelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
+import no.nav.etterlatte.libs.common.pdlhendelse.SivilstandHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.VergeMaalEllerFremtidsfullmakt
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
@@ -67,6 +68,12 @@ internal class PdlHendelser(
                         val vergeMaalEllerFremtidsfullmakt: VergeMaalEllerFremtidsfullmakt =
                             objectMapper.treeToValue(packet["hendelse_data"])
                         behandlinger.sendVergeMaalEllerFremtidsfullmakt(vergeMaalEllerFremtidsfullmakt)
+                    }
+                    "SIVILSTAND_V1" -> {
+                        logger.info("Sivilstand mottatt")
+                        val sivilstandHendelse: SivilstandHendelse =
+                            objectMapper.treeToValue(packet["hendelse_data"])
+                        behandlinger.sendSivilstandHendelse(sivilstandHendelse)
                     }
                     else -> {
                         logger.info("Pdl-hendelsestypen mottatt håndteres ikke av applikasjonen")

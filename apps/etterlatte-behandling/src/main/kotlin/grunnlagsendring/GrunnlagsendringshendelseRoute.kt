@@ -17,6 +17,7 @@ import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.pdlhendelse.Adressebeskyttelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
+import no.nav.etterlatte.libs.common.pdlhendelse.SivilstandHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.VergeMaalEllerFremtidsfullmakt
 import no.nav.etterlatte.libs.common.sakId
@@ -59,6 +60,13 @@ internal fun Route.grunnlagsendringshendelseRoute(
             val vergeMaalEllerFremtidsfullmakt = call.receive<VergeMaalEllerFremtidsfullmakt>()
             logger.info("Mottar en vergeMaalEllerFremtidsfullmakt-hendelse fra PDL")
             grunnlagsendringshendelseService.opprettVergemaalEllerFremtidsfullmakt(vergeMaalEllerFremtidsfullmakt)
+            call.respond(HttpStatusCode.OK)
+        }
+
+        post("/sivilstandhendelse") {
+            val sivilstandHendelse = call.receive<SivilstandHendelse>()
+            logger.info("Mottar en sivilstand-hendelse fra PDL")
+            grunnlagsendringshendelseService.opprettSivilstandHendelse(sivilstandHendelse)
             call.respond(HttpStatusCode.OK)
         }
 

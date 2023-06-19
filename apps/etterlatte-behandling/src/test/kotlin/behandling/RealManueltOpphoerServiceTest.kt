@@ -10,7 +10,7 @@ import io.mockk.verify
 import no.nav.etterlatte.Context
 import no.nav.etterlatte.DatabaseKontekst
 import no.nav.etterlatte.Kontekst
-import no.nav.etterlatte.Saksbehandler
+import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.behandling.domain.OpprettBehandling
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerAarsak
@@ -40,7 +40,7 @@ import java.util.*
 
 internal class RealManueltOpphoerServiceTest {
 
-    private val user = mockk<Saksbehandler>()
+    private val user = mockk<SaksbehandlerMedEnheterOgRoller>()
 
     @BeforeEach
     fun before() {

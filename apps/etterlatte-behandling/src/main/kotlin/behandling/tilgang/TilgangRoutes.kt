@@ -7,6 +7,7 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
+import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.behandlingsId
@@ -16,7 +17,6 @@ import no.nav.etterlatte.sak.TilgangService
 import no.nav.etterlatte.token.Bruker
 import no.nav.etterlatte.token.Saksbehandler
 import no.nav.etterlatte.token.SystemBruker
-import tilgangsstyring.SaksbehandlerMedRoller
 import tilgangsstyring.TILGANG_ROUTE_PATH
 
 internal fun Route.tilgangRoutes(tilgangService: TilgangService) {
@@ -27,7 +27,7 @@ internal fun Route.tilgangRoutes(tilgangService: TilgangService) {
             val harTilgang = harTilgangBrukertypeSjekk(bruker) { saksbehandler ->
                 tilgangService.harTilgangTilPerson(
                     fnr,
-                    SaksbehandlerMedRoller(saksbehandler)
+                    Kontekst.get().appUserAsSaksbehandler().saksbehandlerMedRoller
                 )
             }
             call.respond(harTilgang)
@@ -37,7 +37,7 @@ internal fun Route.tilgangRoutes(tilgangService: TilgangService) {
             val harTilgang = harTilgangBrukertypeSjekk(bruker) { saksbehandler ->
                 tilgangService.harTilgangTilBehandling(
                     behandlingsId.toString(),
-                    SaksbehandlerMedRoller(saksbehandler)
+                    Kontekst.get().appUserAsSaksbehandler().saksbehandlerMedRoller
                 )
             }
             call.respond(harTilgang)
@@ -47,7 +47,7 @@ internal fun Route.tilgangRoutes(tilgangService: TilgangService) {
             val harTilgang = harTilgangBrukertypeSjekk(bruker) { saksbehandler ->
                 tilgangService.harTilgangTilSak(
                     sakId,
-                    SaksbehandlerMedRoller(saksbehandler)
+                    Kontekst.get().appUserAsSaksbehandler().saksbehandlerMedRoller
                 )
             }
             call.respond(harTilgang)

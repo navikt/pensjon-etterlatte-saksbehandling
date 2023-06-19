@@ -12,13 +12,13 @@ import io.ktor.server.request.uri
 import io.ktor.server.response.respond
 import io.ktor.util.pipeline.PipelineContext
 import io.ktor.util.pipeline.PipelinePhase
+import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.User
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.FoedselsNummerMedGraderingDTO
 import no.nav.etterlatte.libs.common.FoedselsnummerDTO
-import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
@@ -32,6 +32,7 @@ class PluginConfiguration {
     -> Boolean = { _, _ -> false }
     var harTilgangTilSak: (sakId: Long, saksbehandlerMedRoller: SaksbehandlerMedRoller)
     -> Boolean = { _, _ -> false }
+    var saksbehandlerGroupIdsByKey: Map<AzureGroup, String> = emptyMap()
 }
 
 private object AdressebeskyttelseHook : Hook<suspend (ApplicationCall) -> Unit> {
@@ -66,9 +67,14 @@ val adressebeskyttelsePlugin: RouteScopedPlugin<PluginConfiguration> = createRou
         }
 
         if (bruker is Saksbehandler) {
+            val saksbehandlerGroupIdsByKey = pluginConfig.saksbehandlerGroupIdsByKey
             val behandlingId = call.parameters[BEHANDLINGSID_CALL_PARAMETER]
             if (!behandlingId.isNullOrEmpty()) {
-                if (!pluginConfig.harTilgangBehandling(behandlingId, SaksbehandlerMedRoller(bruker))) {
+                if (!pluginConfig.harTilgangBehandling(
+                        behandlingId,
+                        SaksbehandlerMedRoller(bruker, saksbehandlerGroupIdsByKey)
+                    )
+                ) {
                     call.respond(HttpStatusCode.NotFound)
                 }
                 return@on
@@ -76,7 +82,11 @@ val adressebeskyttelsePlugin: RouteScopedPlugin<PluginConfiguration> = createRou
 
             val sakId = call.parameters[SAKID_CALL_PARAMETER]
             if (!sakId.isNullOrEmpty()) {
-                if (!pluginConfig.harTilgangTilSak(sakId.toLong(), SaksbehandlerMedRoller(bruker))) {
+                if (!pluginConfig.harTilgangTilSak(
+                        sakId.toLong(),
+                        SaksbehandlerMedRoller(bruker, saksbehandlerGroupIdsByKey)
+                    )
+                ) {
                     call.respond(HttpStatusCode.NotFound)
                 }
                 return@on
@@ -98,7 +108,7 @@ suspend inline fun PipelineContext<*, ApplicationCall>.withFoedselsnummerInterna
         is Saksbehandler -> {
             val harTilgang = tilgangService.harTilgangTilPerson(
                 foedselsnummer.value,
-                SaksbehandlerMedRoller(bruker as Saksbehandler)
+                Kontekst.get().appUserAsSaksbehandler().saksbehandlerMedRoller
             )
             if (harTilgang) {
                 onSuccess(foedselsnummer)
@@ -120,7 +130,7 @@ suspend inline fun PipelineContext<*, ApplicationCall>.withFoedselsnummerAndGrad
         is Saksbehandler -> {
             val harTilgangTilPerson = tilgangService.harTilgangTilPerson(
                 foedselsnummer.value,
-                SaksbehandlerMedRoller(bruker as Saksbehandler)
+                Kontekst.get().appUserAsSaksbehandler().saksbehandlerMedRoller
             )
             if (harTilgangTilPerson) {
                 onSuccess(foedselsnummer, foedselsnummerDTOmedGradering.gradering)
@@ -137,8 +147,8 @@ suspend inline fun PipelineContext<*, ApplicationCall>.kunAttestant(
 ) {
     when (bruker) {
         is Saksbehandler -> {
-            val saksbehandlerMedRoller = SaksbehandlerMedRoller(bruker as Saksbehandler)
-            val erAttestant = saksbehandlerMedRoller.harRolle(AzureGroup.ATTESTANT)
+            val saksbehandlerMedRoller = Kontekst.get().appUserAsSaksbehandler().saksbehandlerMedRoller
+            val erAttestant = saksbehandlerMedRoller.harRolleAttestant()
             if (erAttestant) {
                 onSuccess()
             } else {
@@ -149,17 +159,21 @@ suspend inline fun PipelineContext<*, ApplicationCall>.kunAttestant(
     }
 }
 
-data class SaksbehandlerMedRoller(val saksbehandler: Saksbehandler) {
-
-    companion object {
-        val env: Miljoevariabler = Miljoevariabler(System.getenv())
-        val saksbehandlerGroupIdsByKey = AzureGroup.values().associateWith { env.requireEnvValue(it.envKey) }
-    }
+data class SaksbehandlerMedRoller(
+    val saksbehandler: Saksbehandler,
+    val saksbehandlerGroupIdsByKey: Map<AzureGroup, String>
+) {
 
     fun harRolle(rolle: AzureGroup): Boolean {
         val claims = saksbehandler.getClaims()
-        return claims?.containsClaim("groups", saksbehandlerGroupIdsByKey[rolle]) ?: false
+        if (saksbehandlerGroupIdsByKey[rolle] !== null) {
+            return claims?.containsClaim("groups", saksbehandlerGroupIdsByKey[rolle]) ?: false
+        }
+        return false
     }
+
+    fun harRolleSaksbehandler() = harRolle(AzureGroup.SAKSBEHANDLER)
+    fun harRolleAttestant() = harRolle(AzureGroup.ATTESTANT)
 
     fun harRolleStrengtFortrolig() =
         harRolle(AzureGroup.STRENGT_FORTROLIG)
@@ -169,6 +183,8 @@ data class SaksbehandlerMedRoller(val saksbehandler: Saksbehandler) {
 
     fun harRolleEgenAnsatt() =
         harRolle(AzureGroup.EGEN_ANSATT)
+
+    fun harRolleNasjonalTilgang() = harRolle(AzureGroup.NASJONAL_MED_LOGG) || harRolle(AzureGroup.NASJONAL_UTEN_LOGG)
 }
 
 fun <T> List<T>.filterForEnheter(
@@ -179,7 +195,7 @@ fun <T> List<T>.filterForEnheter(
 ) =
     if (featureToggleService.isEnabled(toggle, false)) {
         when (user) {
-            is no.nav.etterlatte.Saksbehandler -> {
+            is no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller -> {
                 val enheter = user.enheter()
 
                 this.filter { filter(it, enheter) }

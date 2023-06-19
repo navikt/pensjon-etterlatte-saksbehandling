@@ -12,7 +12,7 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.Context
 import no.nav.etterlatte.DatabaseKontekst
 import no.nav.etterlatte.Kontekst
-import no.nav.etterlatte.Saksbehandler
+import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
@@ -48,7 +48,7 @@ import java.time.LocalDateTime
 import java.util.*
 
 class RealGenerellBehandlingServiceTest {
-    private val user = mockk<Saksbehandler>()
+    private val user = mockk<SaksbehandlerMedEnheterOgRoller>()
 
     @BeforeEach
     fun before() {

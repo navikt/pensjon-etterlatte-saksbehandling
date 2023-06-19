@@ -3,7 +3,7 @@ package no.nav.etterlatte.oppgave
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.etterlatte.Saksbehandler
+import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.TRIVIELL_MIDTPUNKT
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringsType
 import no.nav.etterlatte.common.Enheter
@@ -77,7 +77,7 @@ internal class OppgaveServiceTest {
         val featureToggleService = mockk<FeatureToggleService>()
         every { featureToggleService.isEnabled(any(), false) } returns true
 
-        val user = mockk<Saksbehandler>()
+        val user = mockk<SaksbehandlerMedEnheterOgRoller>()
 
         every { user.enheter() } returns listOf(
             Enheter.PORSGRUNN.enhetNr,

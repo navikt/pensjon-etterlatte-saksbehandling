@@ -28,6 +28,7 @@ import no.nav.etterlatte.grunnlagsendring.grunnlagsendringshendelseRoute
 import no.nav.etterlatte.institusjonsopphold.InstitusjonsoppholdService
 import no.nav.etterlatte.institusjonsopphold.institusjonsoppholdRoute
 import no.nav.etterlatte.libs.database.migrate
+import no.nav.etterlatte.libs.ktor.bruker
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.libs.ktor.setReady
 import no.nav.etterlatte.oppgave.oppgaveRoutes
@@ -106,6 +107,7 @@ fun Application.module(context: ApplicationContext) {
             tilgangRoutes(tilgangService)
 
             install(adressebeskyttelsePlugin) {
+                saksbehandlerGroupIdsByKey = context.saksbehandlerGroupIdsByKey
                 harTilgangBehandling = { behandlingId, saksbehandlerMedRoller ->
                     tilgangService.harTilgangTilBehandling(behandlingId, saksbehandlerMedRoller)
                 }
@@ -127,7 +129,8 @@ private fun Route.attachContekst(
                 AppUser = decideUser(
                     call.principal() ?: throw Exception("Ingen bruker funnet i jwt token"),
                     context.saksbehandlerGroupIdsByKey,
-                    context.enhetService
+                    context.enhetService,
+                    bruker
                 ),
                 databasecontxt = DatabaseContext(ds)
             )

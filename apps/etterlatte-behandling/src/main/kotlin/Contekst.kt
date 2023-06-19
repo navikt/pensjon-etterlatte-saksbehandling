@@ -4,9 +4,13 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.EnhetService
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
+import no.nav.etterlatte.token.Bruker
+import no.nav.etterlatte.token.Saksbehandler
+import no.nav.etterlatte.token.SystemBruker
 import no.nav.security.token.support.core.context.TokenValidationContext
 import no.nav.security.token.support.v2.TokenValidationContextPrincipal
 import tilgangsstyring.AzureGroup
+import tilgangsstyring.SaksbehandlerMedRoller
 import java.sql.Connection
 
 object Kontekst : ThreadLocal<Context>()
@@ -14,7 +18,11 @@ object Kontekst : ThreadLocal<Context>()
 class Context(
     val AppUser: User,
     val databasecontxt: DatabaseKontekst
-)
+) {
+    fun appUserAsSaksbehandler(): SaksbehandlerMedEnheterOgRoller {
+        return this.AppUser as SaksbehandlerMedEnheterOgRoller
+    }
+}
 
 interface User {
     fun name(): String
@@ -38,57 +46,17 @@ class SystemUser(identifiedBy: TokenValidationContext) : ExternalUser(identified
     }
 }
 
-class Saksbehandler(
+class SaksbehandlerMedEnheterOgRoller(
     identifiedBy: TokenValidationContext,
-    private val saksbehandlerGroupIdsByKey: Map<AzureGroup, String>,
-    private val enhetService: EnhetService
-) :
-    ExternalUser(identifiedBy) {
+    private val enhetService: EnhetService,
+    val saksbehandlerMedRoller: SaksbehandlerMedRoller
+) : ExternalUser(identifiedBy) {
 
     override fun name(): String {
         return identifiedBy.getJwtToken(AZURE_ISSUER).jwtTokenClaims.getStringClaim("NAVident")
     }
 
-    fun harRolleSaksbehandler(): Boolean {
-        return identifiedBy.getJwtToken(AZURE_ISSUER).jwtTokenClaims.containsClaim(
-            "groups",
-            saksbehandlerGroupIdsByKey[AzureGroup.SAKSBEHANDLER]
-        )
-    }
-
-    fun harRolleAttestant(): Boolean {
-        return identifiedBy.getJwtToken(AZURE_ISSUER).jwtTokenClaims.containsClaim(
-            "groups",
-            saksbehandlerGroupIdsByKey[AzureGroup.ATTESTANT]
-        )
-    }
-
-    fun harRolleStrengtFortrolig(): Boolean {
-        return identifiedBy.getJwtToken(AZURE_ISSUER).jwtTokenClaims.containsClaim(
-            "groups",
-            saksbehandlerGroupIdsByKey[AzureGroup.STRENGT_FORTROLIG]
-        )
-    }
-
-    fun harRolleFortrolig(): Boolean {
-        return identifiedBy.getJwtToken(AZURE_ISSUER).jwtTokenClaims.containsClaim(
-            "groups",
-            saksbehandlerGroupIdsByKey[AzureGroup.FORTROLIG]
-        )
-    }
-
-    private fun harRolleNasjonalTilgang(): Boolean {
-        val jwtTokenClaims = identifiedBy.getJwtToken(AZURE_ISSUER).jwtTokenClaims
-        return jwtTokenClaims.containsClaim(
-            "groups",
-            saksbehandlerGroupIdsByKey[AzureGroup.NASJONAL_MED_LOGG]
-        ) || jwtTokenClaims.containsClaim(
-            "groups",
-            saksbehandlerGroupIdsByKey[AzureGroup.NASJONAL_UTEN_LOGG]
-        )
-    }
-
-    fun enheter() = if (harRolleNasjonalTilgang()) {
+    fun enheter() = if (saksbehandlerMedRoller.harRolleNasjonalTilgang()) {
         Enheter.nasjonalTilgangEnheter()
     } else {
         runBlocking {
@@ -97,24 +65,21 @@ class Saksbehandler(
     }
 }
 
-class Kunde(identifiedBy: TokenValidationContext) : ExternalUser(identifiedBy) {
-    override fun name(): String {
-        return identifiedBy.getJwtToken("tokenx").jwtTokenClaims.getStringClaim("pid")
-    }
-}
-
 fun decideUser(
     principal: TokenValidationContextPrincipal,
     saksbehandlerGroupIdsByKey: Map<AzureGroup, String>,
-    enhetService: EnhetService
+    enhetService: EnhetService,
+    bruker: Bruker
 ): ExternalUser {
-    return if (principal.context.issuers.contains("tokenx")) {
-        Kunde(principal.context)
-    } else if (principal.context.issuers.contains(AZURE_ISSUER)) {
-        if (principal.context.getJwtToken(AZURE_ISSUER).jwtTokenClaims.let { it.getStringClaim("oid") == it.subject }) {
+    return if (principal.context.issuers.contains(AZURE_ISSUER)) {
+        if (bruker is SystemBruker) {
             SystemUser(principal.context)
         } else {
-            Saksbehandler(principal.context, saksbehandlerGroupIdsByKey, enhetService)
+            SaksbehandlerMedEnheterOgRoller(
+                principal.context,
+                enhetService,
+                SaksbehandlerMedRoller(bruker as Saksbehandler, saksbehandlerGroupIdsByKey)
+            )
         }
     } else {
         throw IllegalStateException("no token from preapproved issuers")

@@ -6,7 +6,7 @@ import { formaterVedtaksResultat, useVedtaksResultat } from '../useVedtaksResult
 import { useAppDispatch } from '~store/Store'
 import { useBehandlingRoutes } from '../BehandlingRoutes'
 import { useEffect, useState } from 'react'
-import { hentBeregning } from '~shared/api/beregning'
+import { hentBeregning, kopierBeregningsGrunnlag } from '~shared/api/beregning'
 import { IBehandlingReducer, oppdaterBehandlingsstatus, oppdaterBeregning } from '~store/reducers/BehandlingReducer'
 import Spinner from '~shared/Spinner'
 import { BehandlingHandlingKnapper } from '~components/behandling/handlinger/BehandlingHandlingKnapper'
@@ -23,6 +23,7 @@ import { OmstillingsstoenadSammendrag } from '~components/behandling/beregne/Oms
 import { Avkorting } from '~components/behandling/avkorting/Avkorting'
 import { SakType } from '~shared/types/sak'
 import { erOpphoer } from '~shared/types/Revurderingsaarsak'
+import { hentSisteIverksatteBehandling } from '~shared/api/sak'
 
 export const Beregne = (props: { behandling: IBehandlingReducer }) => {
   const { behandling } = props
@@ -34,7 +35,21 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
   const [visAttesteringsmodal, setVisAttesteringsmodal] = useState(false)
 
   useEffect(() => {
+    const kopierBeregningsgrunnlag = () => {
+      const [, hentSisteIverksatte] = useApiCall(hentSisteIverksatteBehandling)
+      hentSisteIverksatte(behandling.sak, (res) => {
+        const [, kall] = useApiCall(kopierBeregningsGrunnlag)
+        kall({
+          behandlingsId: behandling.id,
+          forrigeBehandlingsId: res.id,
+        })
+      })
+    }
+
     if (!beregningFraState) {
+      if (behandling.revurderingsaarsak && erOpphoer(behandling.revurderingsaarsak)) {
+        kopierBeregningsgrunnlag()
+      }
       hentBeregningRequest(behandling.id, (res) => dispatch(oppdaterBeregning(res)))
     }
   }, [])

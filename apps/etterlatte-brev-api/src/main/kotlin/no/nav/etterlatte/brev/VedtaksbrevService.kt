@@ -25,7 +25,7 @@ import no.nav.etterlatte.brev.model.SlateHelper
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.rivers.VedtakTilJournalfoering
-import no.nav.etterlatte.token.Bruker
+import no.nav.etterlatte.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
 import java.util.*
 
@@ -53,13 +53,13 @@ class VedtaksbrevService(
     suspend fun opprettVedtaksbrev(
         sakId: Long,
         behandlingId: UUID,
-        bruker: Bruker
+        brukerTokenInfo: BrukerTokenInfo
     ): Brev {
         require(hentVedtaksbrev(behandlingId) == null) {
             "Vedtaksbrev finnes allerede på behandling (id=$behandlingId) og kan ikke opprettes på nytt"
         }
 
-        val behandling = sakOgBehandlingService.hentBehandling(sakId, behandlingId, bruker)
+        val behandling = sakOgBehandlingService.hentBehandling(sakId, behandlingId, brukerTokenInfo)
 
         val mottaker = adresseService.hentMottakerAdresse(behandling.persongalleri.innsender.fnr.value)
 
@@ -79,7 +79,7 @@ class VedtaksbrevService(
 
     suspend fun genererPdf(
         id: BrevID,
-        bruker: Bruker
+        brukerTokenInfo: BrukerTokenInfo
     ): Pdf {
         val brev = hentBrev(id)
 
@@ -88,14 +88,14 @@ class VedtaksbrevService(
             return requireNotNull(db.hentPdf(brev.id))
         }
 
-        val behandling = sakOgBehandlingService.hentBehandling(brev.sakId, brev.behandlingId, bruker)
+        val behandling = sakOgBehandlingService.hentBehandling(brev.sakId, brev.behandlingId, brukerTokenInfo)
         val avsender = adresseService.hentAvsender(behandling.vedtak)
 
         val (brevKode, brevData) = opprettBrevData(brev, behandling)
         val brevRequest = BrevbakerRequest.fra(brevKode, brevData, behandling, avsender)
 
         return genererPdf(brev.id, brevRequest)
-            .also { pdf -> ferdigstillHvisVedtakFattet(brev, behandling, pdf, bruker) }
+            .also { pdf -> ferdigstillHvisVedtakFattet(brev, behandling, pdf, brukerTokenInfo) }
     }
 
     private fun opprettBrevData(brev: Brev, behandling: Behandling): Pair<EtterlatteBrevKode, BrevData> =
@@ -119,20 +119,25 @@ class VedtaksbrevService(
         return BrevInnhold(tittel, behandling.spraak, payload)
     }
 
-    private fun ferdigstillHvisVedtakFattet(brev: Brev, behandling: Behandling, pdf: Pdf, bruker: Bruker) {
+    private fun ferdigstillHvisVedtakFattet(
+        brev: Brev,
+        behandling: Behandling,
+        pdf: Pdf,
+        brukerTokenInfo: BrukerTokenInfo
+    ) {
         if (behandling.vedtak.status != VedtakStatus.FATTET_VEDTAK) {
             logger.info("Vedtak status er ${behandling.vedtak.status}. Avventer ferdigstilling av brev (id=${brev.id})")
             return
         }
 
-        if (behandling.vedtak.saksbehandlerIdent != bruker.ident()) {
+        if (behandling.vedtak.saksbehandlerIdent != brukerTokenInfo.ident()) {
             logger.info("Ferdigstiller brev med id=${brev.id}")
 
             db.lagrePdfOgFerdigstillBrev(brev.id, pdf)
         } else {
             logger.warn(
                 "Kan ikke ferdigstille/låse brev når saksbehandler (${behandling.vedtak.saksbehandlerIdent})" +
-                    " og attestant (${bruker.ident()}) er samme person."
+                    " og attestant (${brukerTokenInfo.ident()}) er samme person."
             )
         }
     }

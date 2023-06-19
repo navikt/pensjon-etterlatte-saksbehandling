@@ -36,7 +36,7 @@ import no.nav.etterlatte.libs.common.hentNavidentFraToken
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toNorskTid
 import no.nav.etterlatte.libs.common.toJson
-import no.nav.etterlatte.libs.ktor.bruker
+import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import java.time.YearMonth
 import java.util.*
 
@@ -49,7 +49,7 @@ internal fun Route.behandlingRoutes(
     route("/api/behandling/{$BEHANDLINGSID_CALL_PARAMETER}/") {
         get {
             val detaljertBehandlingDTO =
-                generellBehandlingService.hentDetaljertBehandlingMedTilbehoer(behandlingsId, bruker)
+                generellBehandlingService.hentDetaljertBehandlingMedTilbehoer(behandlingsId, brukerTokenInfo)
             call.respond(detaljertBehandlingDTO)
         }
 
@@ -123,7 +123,7 @@ internal fun Route.behandlingRoutes(
 
                 val erGyldigVirkningstidspunkt = generellBehandlingService.erGyldigVirkningstidspunkt(
                     behandlingsId,
-                    bruker,
+                    brukerTokenInfo,
                     body
                 )
                 if (!erGyldigVirkningstidspunkt) {

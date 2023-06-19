@@ -2,7 +2,7 @@ package no.nav.etterlatte.beregning
 
 import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.token.Bruker
+import no.nav.etterlatte.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
 import java.util.*
 
@@ -23,19 +23,19 @@ class BeregningService(
         return hentBeregning(behandlingId) ?: throw Exception("Mangler beregning for behandlingId=$behandlingId")
     }
 
-    suspend fun opprettBeregning(behandlingId: UUID, bruker: Bruker): Beregning {
+    suspend fun opprettBeregning(behandlingId: UUID, brukerTokenInfo: BrukerTokenInfo): Beregning {
         logger.info("Oppretter beregning for behandlingId=$behandlingId")
-        val kanBeregneYtelse = behandlingKlient.beregn(behandlingId, bruker, commit = false)
+        val kanBeregneYtelse = behandlingKlient.beregn(behandlingId, brukerTokenInfo, commit = false)
         if (kanBeregneYtelse) {
-            val behandling = behandlingKlient.hentBehandling(behandlingId, bruker)
+            val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
 
             val beregning = when (behandling.sakType) {
-                SakType.BARNEPENSJON -> beregnBarnepensjonService.beregn(behandling, bruker)
-                SakType.OMSTILLINGSSTOENAD -> beregnOmstillingsstoenadService.beregn(behandling, bruker)
+                SakType.BARNEPENSJON -> beregnBarnepensjonService.beregn(behandling, brukerTokenInfo)
+                SakType.OMSTILLINGSSTOENAD -> beregnOmstillingsstoenadService.beregn(behandling, brukerTokenInfo)
             }
 
             val lagretBeregning = beregningRepository.lagreEllerOppdaterBeregning(beregning)
-            behandlingKlient.beregn(behandlingId, bruker, commit = true)
+            behandlingKlient.beregn(behandlingId, brukerTokenInfo, commit = true)
             return lagretBeregning
         } else {
             throw IllegalStateException("Kan ikke beregne behandlingId=$behandlingId, behandling er i feil tilstand")

@@ -12,11 +12,11 @@ import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.behandlingsId
 import no.nav.etterlatte.libs.common.sakId
-import no.nav.etterlatte.libs.ktor.bruker
+import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.sak.TilgangService
-import no.nav.etterlatte.token.Bruker
+import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.etterlatte.token.Saksbehandler
-import no.nav.etterlatte.token.SystemBruker
+import no.nav.etterlatte.token.Systembruker
 import tilgangsstyring.TILGANG_ROUTE_PATH
 
 internal fun Route.tilgangRoutes(tilgangService: TilgangService) {
@@ -24,7 +24,7 @@ internal fun Route.tilgangRoutes(tilgangService: TilgangService) {
         post("/person") {
             val fnr = call.receive<String>()
 
-            val harTilgang = harTilgangBrukertypeSjekk(bruker) { saksbehandler ->
+            val harTilgang = harTilgangBrukertypeSjekk(brukerTokenInfo) { saksbehandler ->
                 tilgangService.harTilgangTilPerson(
                     fnr,
                     Kontekst.get().appUserAsSaksbehandler().saksbehandlerMedRoller
@@ -34,7 +34,7 @@ internal fun Route.tilgangRoutes(tilgangService: TilgangService) {
         }
 
         get("/behandling/{$BEHANDLINGSID_CALL_PARAMETER}") {
-            val harTilgang = harTilgangBrukertypeSjekk(bruker) { saksbehandler ->
+            val harTilgang = harTilgangBrukertypeSjekk(brukerTokenInfo) { saksbehandler ->
                 tilgangService.harTilgangTilBehandling(
                     behandlingsId.toString(),
                     Kontekst.get().appUserAsSaksbehandler().saksbehandlerMedRoller
@@ -44,7 +44,7 @@ internal fun Route.tilgangRoutes(tilgangService: TilgangService) {
         }
 
         get("/sak/{$SAKID_CALL_PARAMETER}") {
-            val harTilgang = harTilgangBrukertypeSjekk(bruker) { saksbehandler ->
+            val harTilgang = harTilgangBrukertypeSjekk(brukerTokenInfo) { saksbehandler ->
                 tilgangService.harTilgangTilSak(
                     sakId,
                     Kontekst.get().appUserAsSaksbehandler().saksbehandlerMedRoller
@@ -55,11 +55,14 @@ internal fun Route.tilgangRoutes(tilgangService: TilgangService) {
     }
 }
 
-fun harTilgangBrukertypeSjekk(bruker: Bruker, harTilgang: (saksbehandler: Saksbehandler) -> Boolean): Boolean {
-    return when (bruker) {
+fun harTilgangBrukertypeSjekk(
+    brukerTokenInfo: BrukerTokenInfo,
+    harTilgang: (saksbehandler: Saksbehandler) -> Boolean
+): Boolean {
+    return when (brukerTokenInfo) {
         is Saksbehandler -> {
-            harTilgang(bruker)
+            harTilgang(brukerTokenInfo)
         }
-        is SystemBruker -> true
+        is Systembruker -> true
     }
 }

@@ -11,14 +11,14 @@ import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktorobo.Resource
-import no.nav.etterlatte.token.Bruker
+import no.nav.etterlatte.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
 
 interface GrunnlagKlient {
     suspend fun finnPersonOpplysning(
         sakId: Long,
         opplysningsType: Opplysningstype,
-        bruker: Bruker
+        brukerTokenInfo: BrukerTokenInfo
     ): Grunnlagsopplysning<Person>?
 }
 
@@ -36,7 +36,7 @@ class GrunnlagKlientObo(config: Config, httpClient: HttpClient) : GrunnlagKlient
     override suspend fun finnPersonOpplysning(
         sakId: Long,
         opplysningsType: Opplysningstype,
-        bruker: Bruker
+        brukerTokenInfo: BrukerTokenInfo
     ): Grunnlagsopplysning<Person>? {
         try {
             logger.info("Henter opplysning ($opplysningsType) fra grunnlag for sak med sakId=$sakId")
@@ -47,7 +47,7 @@ class GrunnlagKlientObo(config: Config, httpClient: HttpClient) : GrunnlagKlient
                         clientId = clientId,
                         url = "$resourceUrl/grunnlag/$sakId/$opplysningsType"
                     ),
-                    bruker = bruker
+                    brukerTokenInfo = brukerTokenInfo
                 )
                 .mapBoth(
                     success = { resource -> resource.response?.let { objectMapper.readValue(it.toString()) } },

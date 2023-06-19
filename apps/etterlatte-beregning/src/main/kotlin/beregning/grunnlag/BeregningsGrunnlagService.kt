@@ -4,7 +4,7 @@ import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
-import no.nav.etterlatte.token.Bruker
+import no.nav.etterlatte.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
 import java.util.*
 
@@ -18,13 +18,13 @@ class BeregningsGrunnlagService(
     suspend fun lagreBarnepensjonBeregningsGrunnlag(
         behandlingId: UUID,
         barnepensjonBeregningsGrunnlag: BarnepensjonBeregningsGrunnlag,
-        bruker: Bruker
+        brukerTokenInfo: BrukerTokenInfo
     ): Boolean = when {
-        behandlingKlient.beregn(behandlingId, bruker, false) -> {
-            val behandling = behandlingKlient.hentBehandling(behandlingId, bruker)
+        behandlingKlient.beregn(behandlingId, brukerTokenInfo, false) -> {
+            val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
             val kanLagreDetteGrunnlaget = if (behandling.behandlingType == BehandlingType.REVURDERING) {
                 // Her vil vi sjekke opp om det vi lagrer ned ikke er modifisert før virk på revurderingen
-                val forrigeIverksatte = behandlingKlient.hentSisteIverksatteBehandling(behandling.sak, bruker)
+                val forrigeIverksatte = behandlingKlient.hentSisteIverksatteBehandling(behandling.sak, brukerTokenInfo)
                 grunnlagErIkkeEndretFoerVirk(behandling, forrigeIverksatte, barnepensjonBeregningsGrunnlag)
             } else {
                 true
@@ -33,7 +33,7 @@ class BeregningsGrunnlagService(
             kanLagreDetteGrunnlaget && beregningsGrunnlagRepository.lagre(
                 BeregningsGrunnlag(
                     behandlingId = behandlingId,
-                    kilde = Grunnlagsopplysning.Saksbehandler.create(bruker.ident()),
+                    kilde = Grunnlagsopplysning.Saksbehandler.create(brukerTokenInfo.ident()),
                     soeskenMedIBeregning = barnepensjonBeregningsGrunnlag.soeskenMedIBeregning,
                     institusjonsoppholdBeregningsgrunnlag =
                     barnepensjonBeregningsGrunnlag.institusjonsopphold
@@ -61,7 +61,7 @@ class BeregningsGrunnlagService(
 
     suspend fun hentBarnepensjonBeregningsGrunnlag(
         behandlingId: UUID,
-        bruker: Bruker
+        brukerTokenInfo: BrukerTokenInfo
     ): BeregningsGrunnlag? {
         logger.info("Henter grunnlag $behandlingId")
         val grunnlag = beregningsGrunnlagRepository.finnGrunnlagForBehandling(behandlingId)
@@ -70,9 +70,12 @@ class BeregningsGrunnlagService(
         }
 
         // Det kan hende behandlingen er en revurdering, og da må vi finne forrige grunnlag for saken
-        val behandling = behandlingKlient.hentBehandling(behandlingId, bruker)
+        val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
         return if (behandling.behandlingType == BehandlingType.REVURDERING) {
-            val forrigeIverksatteBehandling = behandlingKlient.hentSisteIverksatteBehandling(behandling.sak, bruker)
+            val forrigeIverksatteBehandling = behandlingKlient.hentSisteIverksatteBehandling(
+                behandling.sak,
+                brukerTokenInfo
+            )
             beregningsGrunnlagRepository.finnGrunnlagForBehandling(forrigeIverksatteBehandling.id)
         } else {
             null

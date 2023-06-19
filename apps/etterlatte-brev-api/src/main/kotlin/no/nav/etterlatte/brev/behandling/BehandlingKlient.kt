@@ -12,7 +12,7 @@ import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktorobo.Resource
-import no.nav.etterlatte.token.Bruker
+import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.etterlatte.token.Saksbehandler
 import java.util.*
 
@@ -24,7 +24,7 @@ class BehandlingKlient(config: Config, httpClient: HttpClient) : BehandlingTilga
     private val clientId = config.getString("behandling.client.id")
     private val resourceUrl = config.getString("behandling.resource.url")
 
-    suspend fun hentSak(sakId: Long, bruker: Bruker): Sak {
+    suspend fun hentSak(sakId: Long, brukerTokenInfo: BrukerTokenInfo): Sak {
         try {
             return downstreamResourceClient
                 .get(
@@ -32,7 +32,7 @@ class BehandlingKlient(config: Config, httpClient: HttpClient) : BehandlingTilga
                         clientId = clientId,
                         url = "$resourceUrl/saker/$sakId"
                     ),
-                    bruker = bruker
+                    brukerTokenInfo = brukerTokenInfo
                 )
                 .mapBoth(
                     success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
@@ -51,7 +51,7 @@ class BehandlingKlient(config: Config, httpClient: HttpClient) : BehandlingTilga
                         clientId = clientId,
                         url = "$resourceUrl/tilgang/behandling/$behandlingId"
                     ),
-                    bruker = bruker
+                    brukerTokenInfo = bruker
                 )
                 .mapBoth(
                     success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
@@ -73,7 +73,7 @@ class BehandlingKlient(config: Config, httpClient: HttpClient) : BehandlingTilga
                         clientId = clientId,
                         url = "$resourceUrl/tilgang/person"
                     ),
-                    bruker = bruker,
+                    brukerTokenInfo = bruker,
                     postBody = foedselsnummer.value
                 )
                 .mapBoth(

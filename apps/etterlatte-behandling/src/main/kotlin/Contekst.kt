@@ -5,9 +5,9 @@ import no.nav.etterlatte.behandling.EnhetService
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
 import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
-import no.nav.etterlatte.token.Bruker
+import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.etterlatte.token.Saksbehandler
-import no.nav.etterlatte.token.SystemBruker
+import no.nav.etterlatte.token.Systembruker
 import no.nav.security.token.support.core.context.TokenValidationContext
 import no.nav.security.token.support.v2.TokenValidationContextPrincipal
 import tilgangsstyring.AzureGroup
@@ -69,16 +69,16 @@ fun decideUser(
     principal: TokenValidationContextPrincipal,
     saksbehandlerGroupIdsByKey: Map<AzureGroup, String>,
     enhetService: EnhetService,
-    bruker: Bruker
+    brukerTokenInfo: BrukerTokenInfo
 ): ExternalUser {
     return if (principal.context.issuers.contains(AZURE_ISSUER)) {
-        if (bruker is SystemBruker) {
+        if (brukerTokenInfo is Systembruker) {
             SystemUser(principal.context)
         } else {
             SaksbehandlerMedEnheterOgRoller(
                 principal.context,
                 enhetService,
-                SaksbehandlerMedRoller(bruker as Saksbehandler, saksbehandlerGroupIdsByKey)
+                SaksbehandlerMedRoller(brukerTokenInfo as Saksbehandler, saksbehandlerGroupIdsByKey)
             )
         }
     } else {

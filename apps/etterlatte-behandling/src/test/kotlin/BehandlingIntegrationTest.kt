@@ -42,7 +42,7 @@ import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
-import no.nav.etterlatte.token.Bruker
+import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.etterlatte.token.Claims
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.testcontainers.containers.PostgreSQLContainer
@@ -306,7 +306,7 @@ abstract class BehandlingIntegrationTest {
 }
 
 class VedtakKlientTest : VedtakKlient {
-    override suspend fun hentVedtak(behandlingId: String, bruker: Bruker): VedtakDto? {
+    override suspend fun hentVedtak(behandlingId: String, brukerTokenInfo: BrukerTokenInfo): VedtakDto? {
         TODO("Not yet implemented")
     }
 }
@@ -315,7 +315,7 @@ class GrunnlagKlientTest : GrunnlagKlient {
     override suspend fun finnPersonOpplysning(
         sakId: Long,
         opplysningsType: Opplysningstype,
-        bruker: Bruker
+        brukerTokenInfo: BrukerTokenInfo
     ): Grunnlagsopplysning<Person>? {
         val personopplysning = personOpplysning(doedsdato = LocalDate.parse("2022-01-01"))
         return grunnlagsOpplysningMedPersonopplysning(personopplysning)

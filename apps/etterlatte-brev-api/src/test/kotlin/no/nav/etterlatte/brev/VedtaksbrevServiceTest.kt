@@ -42,7 +42,7 @@ import no.nav.etterlatte.libs.common.sak.VedtakSak
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.rivers.VedtakTilJournalfoering
-import no.nav.etterlatte.token.Bruker
+import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
 import no.nav.pensjon.brevbaker.api.model.Kroner
 import no.nav.pensjon.brevbaker.api.model.LetterMetadata
@@ -221,7 +221,7 @@ internal class VedtaksbrevServiceTest {
             coEvery { brevbaker.genererPdf(any()) } returns opprettBrevbakerResponse()
 
             runBlocking {
-                vedtaksbrevService.genererPdf(brev.id, bruker = SAKSBEHANDLER)
+                vedtaksbrevService.genererPdf(brev.id, brukerTokenInfo = SAKSBEHANDLER)
             }
 
             verify {
@@ -246,7 +246,7 @@ internal class VedtaksbrevServiceTest {
             coEvery { brevbaker.genererPdf(any()) } returns opprettBrevbakerResponse()
 
             runBlocking {
-                vedtaksbrevService.genererPdf(brev.id, bruker = ATTESTANT)
+                vedtaksbrevService.genererPdf(brev.id, brukerTokenInfo = ATTESTANT)
             }
 
             verify {
@@ -272,7 +272,7 @@ internal class VedtaksbrevServiceTest {
             coEvery { brevbaker.genererPdf(any()) } returns opprettBrevbakerResponse()
 
             runBlocking {
-                vedtaksbrevService.genererPdf(brev.id, bruker = SAKSBEHANDLER)
+                vedtaksbrevService.genererPdf(brev.id, brukerTokenInfo = SAKSBEHANDLER)
             }
 
             verify {
@@ -298,7 +298,7 @@ internal class VedtaksbrevServiceTest {
             coEvery { brevbaker.genererPdf(any()) } returns opprettBrevbakerResponse()
 
             runBlocking {
-                vedtaksbrevService.genererPdf(brev.id, bruker = SAKSBEHANDLER)
+                vedtaksbrevService.genererPdf(brev.id, brukerTokenInfo = SAKSBEHANDLER)
             }
 
             verify {
@@ -325,7 +325,7 @@ internal class VedtaksbrevServiceTest {
             coEvery { brevbaker.genererPdf(any()) } returns opprettBrevbakerResponse()
 
             runBlocking {
-                vedtaksbrevService.genererPdf(brev.id, bruker = ATTESTANT)
+                vedtaksbrevService.genererPdf(brev.id, brukerTokenInfo = ATTESTANT)
             }
 
             verify {
@@ -353,7 +353,7 @@ internal class VedtaksbrevServiceTest {
             coEvery { brevbaker.genererPdf(any()) } returns opprettBrevbakerResponse()
 
             runBlocking {
-                vedtaksbrevService.genererPdf(brev.id, bruker = SAKSBEHANDLER)
+                vedtaksbrevService.genererPdf(brev.id, brukerTokenInfo = SAKSBEHANDLER)
             }
 
             verify {
@@ -381,7 +381,7 @@ internal class VedtaksbrevServiceTest {
             every { db.hentPdf(any()) } returns Pdf(PDF_BYTES)
 
             runBlocking {
-                vedtaksbrevService.genererPdf(brev.id, bruker = SAKSBEHANDLER)
+                vedtaksbrevService.genererPdf(brev.id, brukerTokenInfo = SAKSBEHANDLER)
             }
 
             verify {
@@ -590,7 +590,7 @@ internal class VedtaksbrevServiceTest {
         private val STOR_SNERK = Folkeregisteridentifikator.of("11057523044").value
         private const val PORSGRUNN = "0805"
         private val PDF_BYTES = "Hello world!".toByteArray()
-        private val SAKSBEHANDLER = Bruker.of("token", "saksbehandler", null, null, null)
-        private val ATTESTANT = Bruker.of("token", "attestant", null, null, null)
+        private val SAKSBEHANDLER = BrukerTokenInfo.of("token", "saksbehandler", null, null, null)
+        private val ATTESTANT = BrukerTokenInfo.of("token", "attestant", null, null, null)
     }
 }

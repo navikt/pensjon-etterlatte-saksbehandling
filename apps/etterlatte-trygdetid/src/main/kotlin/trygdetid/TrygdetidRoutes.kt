@@ -26,8 +26,8 @@ import no.nav.etterlatte.libs.common.trygdetid.TrygdetidGrunnlagKildeDto
 import no.nav.etterlatte.libs.common.uuid
 import no.nav.etterlatte.libs.common.withBehandlingId
 import no.nav.etterlatte.libs.common.withParam
-import no.nav.etterlatte.libs.ktor.bruker
-import no.nav.etterlatte.token.Bruker
+import no.nav.etterlatte.libs.ktor.brukerTokenInfo
+import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.etterlatte.trygdetid.klienter.BehandlingKlient
 import java.util.*
 
@@ -50,7 +50,7 @@ fun Route.trygdetid(trygdetidService: TrygdetidService, behandlingKlient: Behand
         post {
             withBehandlingId(behandlingKlient) {
                 logger.info("Oppretter trygdetid for behandling $behandlingsId")
-                val trygdetid = trygdetidService.opprettTrygdetid(behandlingsId, bruker)
+                val trygdetid = trygdetidService.opprettTrygdetid(behandlingsId, brukerTokenInfo)
                 call.respond(trygdetid.toDto())
             }
         }
@@ -63,8 +63,8 @@ fun Route.trygdetid(trygdetidService: TrygdetidService, behandlingKlient: Behand
                 try {
                     trygdetidService.lagreTrygdetidGrunnlag(
                         behandlingsId,
-                        bruker,
-                        trygdetidgrunnlagDto.toTrygdetidGrunnlag(bruker)
+                        brukerTokenInfo,
+                        trygdetidgrunnlagDto.toTrygdetidGrunnlag(brukerTokenInfo)
                     ).let { trygdetid -> call.respond(trygdetid.toDto()) }
                 } catch (overlappendePeriodeException: OverlappendePeriodeException) {
                     logger.info("Klarte ikke legge til ny trygdetidsperiode for $behandlingsId pga overlapp.")
@@ -77,7 +77,11 @@ fun Route.trygdetid(trygdetidService: TrygdetidService, behandlingKlient: Behand
             withBehandlingId(behandlingKlient) {
                 withParam("trygdetidGrunnlagId") { trygdetidGrunnlagId ->
                     logger.info("Sletter trygdetidsgrunnlag for behandling $behandlingsId")
-                    val trygdetid = trygdetidService.slettTrygdetidGrunnlag(behandlingsId, trygdetidGrunnlagId, bruker)
+                    val trygdetid = trygdetidService.slettTrygdetidGrunnlag(
+                        behandlingsId,
+                        trygdetidGrunnlagId,
+                        brukerTokenInfo
+                    )
                     call.respond(trygdetid.toDto())
                 }
             }
@@ -87,7 +91,7 @@ fun Route.trygdetid(trygdetidService: TrygdetidService, behandlingKlient: Behand
             withBehandlingId(behandlingKlient) {
                 logger.info("Oppretter kopi av forrige trygdetid for behandling $behandlingsId")
                 val forrigeBehandlingId = call.uuid("forrigeBehandlingId")
-                trygdetidService.kopierSisteTrygdetidberegning(behandlingsId, forrigeBehandlingId, bruker)
+                trygdetidService.kopierSisteTrygdetidberegning(behandlingsId, forrigeBehandlingId, brukerTokenInfo)
                 call.respond(HttpStatusCode.OK)
             }
         }
@@ -137,13 +141,13 @@ private fun Opplysningsgrunnlag.toDto(): OpplysningsgrunnlagDto = Opplysningsgru
     }
 )
 
-private fun TrygdetidGrunnlagDto.toTrygdetidGrunnlag(bruker: Bruker): TrygdetidGrunnlag =
+private fun TrygdetidGrunnlagDto.toTrygdetidGrunnlag(brukerTokenInfo: BrukerTokenInfo): TrygdetidGrunnlag =
     TrygdetidGrunnlag(
         id = id ?: UUID.randomUUID(),
         type = TrygdetidType.valueOf(type),
         bosted = bosted,
         periode = TrygdetidPeriode(periodeFra, periodeTil),
-        kilde = Grunnlagsopplysning.Saksbehandler(bruker.ident(), Tidspunkt.now()),
+        kilde = Grunnlagsopplysning.Saksbehandler(brukerTokenInfo.ident(), Tidspunkt.now()),
         begrunnelse = begrunnelse,
         poengInnAar = poengInnAar,
         poengUtAar = poengUtAar,

@@ -18,7 +18,7 @@ import no.nav.etterlatte.libs.common.vedtak.AttesterVedtakDto
 import no.nav.etterlatte.libs.common.vedtak.LoependeYtelseDTO
 import no.nav.etterlatte.libs.common.withBehandlingId
 import no.nav.etterlatte.libs.common.withSakId
-import no.nav.etterlatte.libs.ktor.bruker
+import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlient
 import java.time.LocalDate
 import java.time.ZonedDateTime
@@ -55,7 +55,7 @@ fun Route.vedtaksvurderingRoute(service: VedtaksvurderingService, behandlingKlie
         post("/{$BEHANDLINGSID_CALL_PARAMETER}/upsert") {
             withBehandlingId(behandlingKlient) { behandlingId ->
                 logger.info("Oppretter eller oppdaterer vedtak for behandling $behandlingId")
-                val nyttVedtak = service.opprettEllerOppdaterVedtak(behandlingId, bruker)
+                val nyttVedtak = service.opprettEllerOppdaterVedtak(behandlingId, brukerTokenInfo)
                 call.respond(nyttVedtak.toDto())
             }
         }
@@ -63,7 +63,7 @@ fun Route.vedtaksvurderingRoute(service: VedtaksvurderingService, behandlingKlie
         post("/{$BEHANDLINGSID_CALL_PARAMETER}/fattvedtak") {
             withBehandlingId(behandlingKlient) { behandlingId ->
                 logger.info("Fatter vedtak for behandling $behandlingId")
-                val fattetVedtak = service.fattVedtak(behandlingId, bruker)
+                val fattetVedtak = service.fattVedtak(behandlingId, brukerTokenInfo)
 
                 call.respond(fattetVedtak.toDto())
             }
@@ -73,7 +73,7 @@ fun Route.vedtaksvurderingRoute(service: VedtaksvurderingService, behandlingKlie
             withBehandlingId(behandlingKlient) { behandlingId ->
                 logger.info("Attesterer vedtak for behandling $behandlingId")
                 val (kommentar) = call.receive<AttesterVedtakDto>()
-                val attestert = service.attesterVedtak(behandlingId, kommentar, bruker)
+                val attestert = service.attesterVedtak(behandlingId, kommentar, brukerTokenInfo)
 
                 call.respond(attestert.toDto())
             }
@@ -85,7 +85,7 @@ fun Route.vedtaksvurderingRoute(service: VedtaksvurderingService, behandlingKlie
                 val begrunnelse = call.receive<UnderkjennVedtakDto>()
                 val underkjentVedtak = service.underkjennVedtak(
                     behandlingId,
-                    bruker,
+                    brukerTokenInfo,
                     begrunnelse
                 )
 
@@ -99,7 +99,7 @@ fun Route.vedtaksvurderingRoute(service: VedtaksvurderingService, behandlingKlie
                 service.iverksattVedtak(behandlingId)
                 val vedtak = service.hentVedtak(behandlingId)
                 requireNotNull(vedtak).also { v ->
-                    service.postTilBehandling(behandlingId, bruker, v.id)
+                    service.postTilBehandling(behandlingId, brukerTokenInfo, v.id)
                 }
                 call.respond(HttpStatusCode.OK, vedtak.toDto())
             }

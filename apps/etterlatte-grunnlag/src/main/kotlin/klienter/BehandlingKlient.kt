@@ -13,13 +13,13 @@ import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktorobo.Resource
-import no.nav.etterlatte.token.Bruker
+import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.etterlatte.token.Saksbehandler
 import org.slf4j.LoggerFactory
 import java.util.*
 
 interface BehandlingKlient : BehandlingTilgangsSjekk, SakTilgangsSjekk, PersonTilgangsSjekk {
-    suspend fun hentBehandling(behandlingId: UUID, bruker: Bruker): DetaljertBehandling
+    suspend fun hentBehandling(behandlingId: UUID, brukerTokenInfo: BrukerTokenInfo): DetaljertBehandling
 }
 
 class BehandlingKlientException(override val message: String, override val cause: Throwable) : Exception(message, cause)
@@ -33,7 +33,7 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
     private val clientId = config.getString("behandling.client.id")
     private val resourceUrl = config.getString("behandling.resource.url")
 
-    override suspend fun hentBehandling(behandlingId: UUID, bruker: Bruker): DetaljertBehandling {
+    override suspend fun hentBehandling(behandlingId: UUID, brukerTokenInfo: BrukerTokenInfo): DetaljertBehandling {
         logger.info("Henter behandling med behandlingId=$behandlingId")
         try {
             return downstreamResourceClient
@@ -42,7 +42,7 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
                         clientId = clientId,
                         url = "$resourceUrl/behandlinger/$behandlingId"
                     ),
-                    bruker = bruker
+                    brukerTokenInfo = brukerTokenInfo
                 )
                 .mapBoth(
                     success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
@@ -64,7 +64,7 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
                         clientId = clientId,
                         url = "$resourceUrl/tilgang/behandling/$behandlingId"
                     ),
-                    bruker = bruker
+                    brukerTokenInfo = bruker
                 )
                 .mapBoth(
                     success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
@@ -83,7 +83,7 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
                         clientId = clientId,
                         url = "$resourceUrl/tilgang/sak/$sakId"
                     ),
-                    bruker = bruker
+                    brukerTokenInfo = bruker
                 )
                 .mapBoth(
                     success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
@@ -105,7 +105,7 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
                         clientId = clientId,
                         url = "$resourceUrl/tilgang/person"
                     ),
-                    bruker = bruker,
+                    brukerTokenInfo = bruker,
                     postBody = foedselsnummer.value
                 )
                 .mapBoth(

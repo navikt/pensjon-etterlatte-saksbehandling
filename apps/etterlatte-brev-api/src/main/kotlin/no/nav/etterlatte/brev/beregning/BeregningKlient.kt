@@ -10,7 +10,7 @@ import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktorobo.Resource
-import no.nav.etterlatte.token.Bruker
+import no.nav.etterlatte.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
 import java.util.*
 
@@ -25,13 +25,13 @@ class BeregningKlient(config: Config, httpClient: HttpClient) {
     private val clientId = config.getString("beregning.client.id")
     private val resourceUrl = config.getString("beregning.resource.url")
 
-    suspend fun hentBeregning(behandlingId: UUID, bruker: Bruker): BeregningDTO {
+    suspend fun hentBeregning(behandlingId: UUID, brukerTokenInfo: BrukerTokenInfo): BeregningDTO {
         try {
             logger.info("Henter beregning (behandlingId: $behandlingId)")
 
             return downstreamResourceClient.get(
                 Resource(clientId, "$resourceUrl/api/beregning/$behandlingId"),
-                bruker
+                brukerTokenInfo
             ).mapBoth(
                 success = { resource -> deserialize(resource.response.toString()) },
                 failure = { errorResponse -> throw errorResponse }
@@ -44,13 +44,13 @@ class BeregningKlient(config: Config, httpClient: HttpClient) {
         }
     }
 
-    suspend fun hentAvkorting(behandlingId: UUID, bruker: Bruker): AvkortingDto {
+    suspend fun hentAvkorting(behandlingId: UUID, brukerTokenInfo: BrukerTokenInfo): AvkortingDto {
         try {
             logger.info("Henter avkorting (behandlingId: $behandlingId)")
 
             return downstreamResourceClient.get(
                 Resource(clientId, "$resourceUrl/api/beregning/avkorting/$behandlingId"),
-                bruker
+                brukerTokenInfo
             ).mapBoth(
                 success = { resource -> deserialize(resource.response.toString()) },
                 failure = { errorResponse -> throw errorResponse }
@@ -63,13 +63,13 @@ class BeregningKlient(config: Config, httpClient: HttpClient) {
         }
     }
 
-    suspend fun hentYtelseMedGrunnlag(behandlingId: UUID, bruker: Bruker): YtelseMedGrunnlagDto {
+    suspend fun hentYtelseMedGrunnlag(behandlingId: UUID, brukerTokenInfo: BrukerTokenInfo): YtelseMedGrunnlagDto {
         try {
             logger.info("Henter utregnet ytelse med grunnlag for behandlingId=$behandlingId")
 
             return downstreamResourceClient.get(
                 Resource(clientId, "$resourceUrl/api/ytelse-med-grunnlag/$behandlingId"),
-                bruker
+                brukerTokenInfo
             ).mapBoth(
                 success = { resource -> deserialize(resource.response.toString()) },
                 failure = { errorResponse -> throw errorResponse }

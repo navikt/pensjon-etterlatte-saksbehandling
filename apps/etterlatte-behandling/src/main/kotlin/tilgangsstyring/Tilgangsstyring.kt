@@ -22,11 +22,11 @@ import no.nav.etterlatte.libs.common.FoedselsnummerDTO
 import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
-import no.nav.etterlatte.libs.ktor.bruker
+import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.sak.TilgangService
 import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
 import no.nav.etterlatte.token.Saksbehandler
-import no.nav.etterlatte.token.SystemBruker
+import no.nav.etterlatte.token.Systembruker
 
 class PluginConfiguration {
     var harTilgangBehandling: (behandlingId: String, saksbehandlerMedRoller: SaksbehandlerMedRoller)
@@ -58,9 +58,9 @@ val adressebeskyttelsePlugin: RouteScopedPlugin<PluginConfiguration> = createRou
     createConfiguration = ::PluginConfiguration
 ) {
     on(AdressebeskyttelseHook) { call ->
-        val bruker = call.bruker
+        val bruker = call.brukerTokenInfo
 
-        if (bruker is SystemBruker) {
+        if (bruker is Systembruker) {
             return@on
         }
         if (call.request.uri.contains(TILGANG_ROUTE_PATH)) {
@@ -105,7 +105,7 @@ suspend inline fun PipelineContext<*, ApplicationCall>.withFoedselsnummerInterna
 ) {
     val foedselsnummerDTO = call.receive<FoedselsnummerDTO>()
     val foedselsnummer = Folkeregisteridentifikator.of(foedselsnummerDTO.foedselsnummer)
-    when (bruker) {
+    when (brukerTokenInfo) {
         is Saksbehandler -> {
             val harTilgang = tilgangService.harTilgangTilPerson(
                 foedselsnummer.value,
@@ -127,7 +127,7 @@ suspend inline fun PipelineContext<*, ApplicationCall>.withFoedselsnummerAndGrad
 ) {
     val foedselsnummerDTOmedGradering = call.receive<FoedselsNummerMedGraderingDTO>()
     val foedselsnummer = Folkeregisteridentifikator.of(foedselsnummerDTOmedGradering.foedselsnummer)
-    when (bruker) {
+    when (brukerTokenInfo) {
         is Saksbehandler -> {
             val harTilgangTilPerson = tilgangService.harTilgangTilPerson(
                 foedselsnummer.value,
@@ -146,7 +146,7 @@ suspend inline fun PipelineContext<*, ApplicationCall>.withFoedselsnummerAndGrad
 suspend inline fun PipelineContext<*, ApplicationCall>.kunAttestant(
     onSuccess: () -> Unit
 ) {
-    when (bruker) {
+    when (brukerTokenInfo) {
         is Saksbehandler -> {
             val saksbehandlerMedRoller = Kontekst.get().appUserAsSaksbehandler().saksbehandlerMedRoller
             val erAttestant = saksbehandlerMedRoller.harRolleAttestant()

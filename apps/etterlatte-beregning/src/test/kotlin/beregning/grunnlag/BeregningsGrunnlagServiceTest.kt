@@ -146,7 +146,7 @@ internal class BeregningsGrunnlagServiceTest {
                     soeskenMedIBeregning = grunnlagEndring.soeskenMedIBeregning,
                     institusjonsopphold = grunnlagEndring.institusjonsoppholdBeregningsgrunnlag
                 ),
-                bruker = mockk(relaxed = true)
+                brukerTokenInfo = mockk(relaxed = true)
             )
             assertFalse(lagret)
         }
@@ -214,7 +214,7 @@ internal class BeregningsGrunnlagServiceTest {
                     soeskenMedIBeregning = grunnlagEndring.soeskenMedIBeregning,
                     institusjonsopphold = grunnlagEndring.institusjonsoppholdBeregningsgrunnlag
                 ),
-                bruker = mockk(relaxed = true)
+                brukerTokenInfo = mockk(relaxed = true)
             )
             assertTrue(lagret)
         }

@@ -28,7 +28,7 @@ import no.nav.etterlatte.grunnlagsendring.grunnlagsendringshendelseRoute
 import no.nav.etterlatte.institusjonsopphold.InstitusjonsoppholdService
 import no.nav.etterlatte.institusjonsopphold.institusjonsoppholdRoute
 import no.nav.etterlatte.libs.database.migrate
-import no.nav.etterlatte.libs.ktor.bruker
+import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.libs.ktor.setReady
 import no.nav.etterlatte.oppgave.oppgaveRoutes
@@ -130,7 +130,7 @@ private fun Route.attachContekst(
                     call.principal() ?: throw Exception("Ingen bruker funnet i jwt token"),
                     context.saksbehandlerGroupIdsByKey,
                     context.enhetService,
-                    bruker
+                    brukerTokenInfo
                 ),
                 databasecontxt = DatabaseContext(ds)
             )

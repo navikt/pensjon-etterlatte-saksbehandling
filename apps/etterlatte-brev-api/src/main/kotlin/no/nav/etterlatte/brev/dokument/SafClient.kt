@@ -23,7 +23,7 @@ import no.nav.etterlatte.libs.common.logging.getXCorrelationId
 import no.nav.etterlatte.libs.common.retry
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
-import no.nav.etterlatte.token.Bruker
+import no.nav.etterlatte.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
 
 /*
@@ -57,7 +57,7 @@ class SafClient(
     override suspend fun hentDokumenter(
         fnr: String,
         idType: BrukerIdType,
-        bruker: Bruker
+        brukerTokenInfo: BrukerTokenInfo
     ): HentJournalposterResult {
         val request = GraphqlRequest(
             query = getQuery("/graphql/journalpost.graphql"),
@@ -72,7 +72,7 @@ class SafClient(
 
         return retry {
             val res = httpClient.post("$baseUrl/graphql") {
-                header("Authorization", "Bearer ${getToken(bruker.accessToken())}")
+                header("Authorization", "Bearer ${getToken(brukerTokenInfo.accessToken())}")
                 accept(ContentType.Application.Json)
                 setBody(TextContent(request.toJson(), ContentType.Application.Json))
             }
@@ -85,7 +85,8 @@ class SafClient(
             } else if (res.status == HttpStatusCode.Forbidden) {
                 val error = res.bodyAsText()
                 logger.warn(
-                    "Saksbehandler ${bruker.ident()} har ikke tilgang til å hente journalposter for bruker: $error"
+                    "Saksbehandler ${brukerTokenInfo.ident()} " +
+                        "har ikke tilgang til å hente journalposter for bruker: $error"
                 )
 
                 HentJournalposterResult(

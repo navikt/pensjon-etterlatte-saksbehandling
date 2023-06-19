@@ -11,7 +11,7 @@ import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktorobo.Resource
-import no.nav.etterlatte.token.Bruker
+import no.nav.etterlatte.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
 import java.util.*
 
@@ -28,7 +28,7 @@ class TrygdetidKlient(config: Config, httpClient: HttpClient) {
 
     suspend fun hentTrygdetid(
         behandlingId: UUID,
-        bruker: Bruker
+        brukerTokenInfo: BrukerTokenInfo
     ): TrygdetidDto? {
         logger.info("Henter trygdetid med behandlingid $behandlingId")
         return retry<TrygdetidDto?> {
@@ -38,7 +38,7 @@ class TrygdetidKlient(config: Config, httpClient: HttpClient) {
                         clientId = clientId,
                         url = "$resourceUrl/api/trygdetid/$behandlingId"
                     ),
-                    bruker = bruker
+                    brukerTokenInfo = brukerTokenInfo
                 )
                 .mapBoth(
                     success = { resource -> resource.response?.let { objectMapper.readValue(it.toString()) } },

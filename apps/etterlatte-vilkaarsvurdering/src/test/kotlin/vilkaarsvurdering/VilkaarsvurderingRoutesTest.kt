@@ -33,7 +33,7 @@ import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import no.nav.etterlatte.libs.vilkaarsvurdering.VurdertVilkaarsvurderingResultatDto
-import no.nav.etterlatte.token.Bruker
+import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.etterlatte.vilkaarsvurdering.klienter.BehandlingKlient
 import no.nav.etterlatte.vilkaarsvurdering.klienter.GrunnlagKlient
 import no.nav.security.mock.oauth2.MockOAuth2Server
@@ -621,7 +621,7 @@ internal class VilkaarsvurderingRoutesTest {
 
     private companion object {
         val behandlingId: UUID = UUID.randomUUID()
-        val oboToken = Bruker.of("token", "s1", null, null, null)
+        val oboToken = BrukerTokenInfo.of("token", "s1", null, null, null)
         const val CLIENT_ID = "azure-id for saksbehandler"
     }
 }

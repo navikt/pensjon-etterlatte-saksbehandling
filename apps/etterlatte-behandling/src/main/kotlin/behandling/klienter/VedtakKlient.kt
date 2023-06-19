@@ -10,11 +10,11 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktorobo.Resource
-import no.nav.etterlatte.token.Bruker
+import no.nav.etterlatte.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
 
 interface VedtakKlient {
-    suspend fun hentVedtak(behandlingId: String, bruker: Bruker): VedtakDto?
+    suspend fun hentVedtak(behandlingId: String, brukerTokenInfo: BrukerTokenInfo): VedtakDto?
 }
 
 class VedtakKlientException(override val message: String, override val cause: Throwable) : Exception(message, cause)
@@ -28,13 +28,13 @@ class VedtakKlientImpl(config: Config, httpClient: HttpClient) : VedtakKlient {
     private val clientId = config.getString("vedtak.client.id")
     private val resourceUrl = config.getString("vedtak.resource.url")
 
-    override suspend fun hentVedtak(behandlingId: String, bruker: Bruker): VedtakDto? {
+    override suspend fun hentVedtak(behandlingId: String, brukerTokenInfo: BrukerTokenInfo): VedtakDto? {
         logger.info("Henter vedtak for behandling med behandlingId=$behandlingId")
 
         try {
             return downstreamResourceClient.get(
                 resource = Resource(clientId, "$resourceUrl/api/vedtak/$behandlingId"),
-                bruker = bruker
+                brukerTokenInfo = brukerTokenInfo
             ).mapBoth(
                 success = { resource -> resource.response?.let { objectMapper.readValue(it.toString()) } },
                 failure = { errorResponse ->

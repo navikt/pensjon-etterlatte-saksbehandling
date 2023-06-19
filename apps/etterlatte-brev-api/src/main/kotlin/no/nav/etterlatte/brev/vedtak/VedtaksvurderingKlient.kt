@@ -8,7 +8,7 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktorobo.Resource
-import no.nav.etterlatte.token.Bruker
+import no.nav.etterlatte.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
 import java.util.*
 
@@ -25,13 +25,13 @@ class VedtaksvurderingKlient(config: Config, httpClient: HttpClient) {
     private val clientId = config.getString("vedtak.client.id")
     private val resourceUrl = config.getString("vedtak.resource.url")
 
-    suspend fun hentVedtak(behandlingId: UUID, bruker: Bruker): VedtakDto {
+    suspend fun hentVedtak(behandlingId: UUID, brukerTokenInfo: BrukerTokenInfo): VedtakDto {
         try {
             logger.info("Henter vedtaksvurdering behandling med behandlingId=$behandlingId")
 
             return downstreamResourceClient.get(
                 Resource(clientId, "$resourceUrl/api/vedtak/$behandlingId"),
-                bruker
+                brukerTokenInfo
             ).mapBoth(
                 success = { resource -> resource.response.let { deserialize(it.toString()) } },
                 failure = { errorResponse -> throw errorResponse }

@@ -13,7 +13,7 @@ import no.nav.etterlatte.behandling.domain.SamsvarMellomKildeOgGrunnlag
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
-import no.nav.etterlatte.libs.ktor.bruker
+import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.oppgave.domain.Handling
 import no.nav.etterlatte.oppgave.domain.Oppgave
 import no.nav.etterlatte.oppgave.domain.OppgaveType
@@ -24,7 +24,7 @@ import java.util.*
 internal fun Route.oppgaveRoutes(service: OppgaveService) {
     route("/api/oppgaver") {
         get {
-            when (bruker) {
+            when (brukerTokenInfo) {
                 is Saksbehandler -> call.respond(
                     tilOppgaveListeDto(
                         service.finnOppgaverForBruker(Kontekst.get().appUserAsSaksbehandler().saksbehandlerMedRoller)

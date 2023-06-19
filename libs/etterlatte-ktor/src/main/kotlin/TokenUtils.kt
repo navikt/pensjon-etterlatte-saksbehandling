@@ -6,7 +6,7 @@ import io.ktor.server.application.call
 import io.ktor.server.auth.parseAuthorizationHeader
 import io.ktor.server.auth.principal
 import io.ktor.util.pipeline.PipelineContext
-import no.nav.etterlatte.token.Bruker
+import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.etterlatte.token.Claims
 import no.nav.security.token.support.core.jwt.JwtTokenClaims
 import no.nav.security.token.support.v2.TokenValidationContextPrincipal
@@ -21,12 +21,12 @@ fun hentAccessToken(call: ApplicationCall) = call.request.parseAuthorizationHead
     }
 }
 
-inline val PipelineContext<*, ApplicationCall>.bruker: Bruker
+inline val PipelineContext<*, ApplicationCall>.brukerTokenInfo: BrukerTokenInfo
     get() {
-        return call.bruker
+        return call.brukerTokenInfo
     }
 
-inline val ApplicationCall.bruker: Bruker
+inline val ApplicationCall.brukerTokenInfo: BrukerTokenInfo
     get() {
         val claims = this.principal<TokenValidationContextPrincipal>()
             ?.context
@@ -39,7 +39,7 @@ inline val ApplicationCall.bruker: Bruker
                 Pair(oid, sub)
             }
         val saksbehandler = claims?.getClaim(Claims.NAVident)
-        return Bruker.of(
+        return BrukerTokenInfo.of(
             accessToken = hentAccessToken(this),
             oid = oidSub?.first,
             sub = oidSub?.second,

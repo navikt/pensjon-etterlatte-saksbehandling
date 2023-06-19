@@ -86,6 +86,7 @@ internal class InnsendtSoeknadRiver(
                 logger.info("Vurdert gyldighet av søknad om omstillingsstønad er fullført")
             } catch (e: Exception) {
                 logger.error("Gyldighetsvurdering av søknad om omstillingsstønad feilet", e)
+                throw e
             }
         }
     }

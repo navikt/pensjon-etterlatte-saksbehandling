@@ -5,6 +5,7 @@ import no.nav.etterlatte.behandling.GenerellBehandlingService
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
+import java.util.*
 
 class KommerBarnetTilGodeService(
     private val behandlingService: GenerellBehandlingService,
@@ -22,4 +23,6 @@ class KommerBarnetTilGodeService(
             }
         }
     }
+
+    fun hentKommerBarnetTilGode(behandlingId: UUID) = kommerBarnetTilGodeDao.hentKommerBarnetTilGode(behandlingId)
 }

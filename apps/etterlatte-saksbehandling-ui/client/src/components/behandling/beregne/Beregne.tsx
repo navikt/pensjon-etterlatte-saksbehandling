@@ -33,13 +33,13 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
   const [beregning, hentBeregningRequest] = useApiCall(hentBeregning)
   const [vedtak, oppdaterVedtakRequest] = useApiCall(upsertVedtak)
   const [visAttesteringsmodal, setVisAttesteringsmodal] = useState(false)
+  const [sisteIverksatte, hentSisteIverksatte] = useApiCall(hentSisteIverksatteBehandling)
+  const [, kall] = useApiCall(kopierBeregningsGrunnlag)
 
   useEffect(() => {
     const kopierBeregningsgrunnlag = () => {
-      const [sisteIverksatte, hentSisteIverksatte] = useApiCall(hentSisteIverksatteBehandling)
       hentSisteIverksatte(behandling.sak)
       if (isSuccess(sisteIverksatte)) {
-        const [, kall] = useApiCall(kopierBeregningsGrunnlag)
         kall({
           behandlingsId: behandling.id,
           forrigeBehandlingsId: sisteIverksatte.data.id,

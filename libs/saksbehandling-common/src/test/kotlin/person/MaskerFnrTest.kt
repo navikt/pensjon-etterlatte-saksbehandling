@@ -1,10 +1,10 @@
-package hendelserpdl.utils
+package person
 
 import no.nav.etterlatte.libs.common.person.maskerFnr
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-class MaskerFnrKtTest {
+class MaskerFnrTest {
 
     @Test
     fun `maskerFnr bytter ut personnummer med xxxxx`() {

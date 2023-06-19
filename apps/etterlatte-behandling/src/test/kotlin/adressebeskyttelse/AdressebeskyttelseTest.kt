@@ -106,9 +106,10 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(
                     Adressebeskyttelse(
+                        hendelseId = "1",
+                        endringstype = Endringstype.OPPRETTET,
                         fnr = fnr,
-                        adressebeskyttelseGradering = AdressebeskyttelseGradering.STRENGT_FORTROLIG,
-                        endringstype = Endringstype.OPPRETTET
+                        adressebeskyttelseGradering = AdressebeskyttelseGradering.STRENGT_FORTROLIG
                     )
                 )
             }
@@ -194,6 +195,7 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(
                     Adressebeskyttelse(
+                        hendelseId = "1",
                         fnr = fnr,
                         adressebeskyttelseGradering = AdressebeskyttelseGradering.STRENGT_FORTROLIG,
                         endringstype = Endringstype.OPPRETTET
@@ -280,6 +282,7 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(
                     Adressebeskyttelse(
+                        hendelseId = "1",
                         fnr = fnr,
                         adressebeskyttelseGradering = AdressebeskyttelseGradering.STRENGT_FORTROLIG,
                         endringstype = Endringstype.OPPRETTET
@@ -326,6 +329,7 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(
                     Adressebeskyttelse(
+                        hendelseId = "1",
                         fnr = fnr,
                         adressebeskyttelseGradering = AdressebeskyttelseGradering.STRENGT_FORTROLIG,
                         endringstype = Endringstype.OPPRETTET

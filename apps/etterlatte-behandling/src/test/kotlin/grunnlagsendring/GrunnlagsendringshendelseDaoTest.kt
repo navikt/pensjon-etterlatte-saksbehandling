@@ -91,7 +91,7 @@ internal class GrunnlagsendringshendelseDaoTest {
             id = uuid,
             sakId = sakid,
             type = GrunnlagsendringsType.DOEDSFALL,
-            fnr = grunnlagsinformasjon.avdoedFnr,
+            fnr = grunnlagsinformasjon.fnr,
             opprettet = Tidspunkt.now().toLocalDatetimeUTC(),
             samsvarMellomKildeOgGrunnlag = samsvarDoedsdatoer(
                 grunnlagsinformasjon.doedsdato,
@@ -127,7 +127,7 @@ internal class GrunnlagsendringshendelseDaoTest {
             id = uuidDoed,
             sakId = sakid,
             type = GrunnlagsendringsType.DOEDSFALL,
-            fnr = grunnlagsinfoDoed.avdoedFnr,
+            fnr = grunnlagsinfoDoed.fnr,
             samsvarMellomKildeOgGrunnlag = samsvarDoed
         )
         val utflyttingsHendelse = grunnlagsendringshendelseMedSamsvar(
@@ -165,31 +165,31 @@ internal class GrunnlagsendringshendelseDaoTest {
             grunnlagsendringshendelseMedSamsvar(
                 sakId = sakid,
                 opprettet = Tidspunkt.now().toLocalDatetimeUTC(),
-                fnr = grunnlagsinformasjonDoedshendelse().avdoedFnr,
+                fnr = grunnlagsinformasjonDoedshendelse().fnr,
                 samsvarMellomKildeOgGrunnlag = null
             ),
             grunnlagsendringshendelseMedSamsvar(
                 sakId = sakid,
                 opprettet = Tidspunkt.now().toLocalDatetimeUTC().minusMinutes(30),
-                fnr = grunnlagsinformasjonDoedshendelse().avdoedFnr,
+                fnr = grunnlagsinformasjonDoedshendelse().fnr,
                 samsvarMellomKildeOgGrunnlag = null
             ),
             grunnlagsendringshendelseMedSamsvar(
                 sakId = sakid,
                 opprettet = Tidspunkt.now().toLocalDatetimeUTC().minusHours(1), // eldre enn en time
-                fnr = grunnlagsinformasjonDoedshendelse().avdoedFnr,
+                fnr = grunnlagsinformasjonDoedshendelse().fnr,
                 samsvarMellomKildeOgGrunnlag = null
             ),
             grunnlagsendringshendelseMedSamsvar(
                 sakId = sakid,
                 opprettet = Tidspunkt.now().toLocalDatetimeUTC().minusDays(4), // eldre enn en time
-                fnr = grunnlagsinformasjonDoedshendelse().avdoedFnr,
+                fnr = grunnlagsinformasjonDoedshendelse().fnr,
                 samsvarMellomKildeOgGrunnlag = null
             ),
             grunnlagsendringshendelseMedSamsvar(
                 sakId = sakid,
                 opprettet = Tidspunkt.now().toLocalDatetimeUTC().minusYears(1), // eldre enn en time
-                fnr = grunnlagsinformasjonDoedshendelse().avdoedFnr,
+                fnr = grunnlagsinformasjonDoedshendelse().fnr,
                 samsvarMellomKildeOgGrunnlag = null
             )
         ).forEach {
@@ -219,7 +219,7 @@ internal class GrunnlagsendringshendelseDaoTest {
                 grunnlagsendringshendelseMedSamsvar(
                     sakId = sakid,
                     opprettet = Tidspunkt.now().toLocalDatetimeUTC(),
-                    fnr = this.avdoedFnr,
+                    fnr = this.fnr,
                     samsvarMellomKildeOgGrunnlag = samsvarDoedsdatoer(this.doedsdato, this.doedsdato)
                 )
             }.copy(status = GrunnlagsendringStatus.FORKASTET),
@@ -227,7 +227,7 @@ internal class GrunnlagsendringshendelseDaoTest {
                 grunnlagsendringshendelseMedSamsvar(
                     sakId = sakid,
                     opprettet = Tidspunkt.now().toLocalDatetimeUTC().minusMinutes(30),
-                    fnr = this.avdoedFnr,
+                    fnr = this.fnr,
                     samsvarMellomKildeOgGrunnlag = samsvarDoedsdatoer(this.doedsdato, this.doedsdato)
                 )
             }.copy(
@@ -239,7 +239,7 @@ internal class GrunnlagsendringshendelseDaoTest {
                 grunnlagsendringshendelseMedSamsvar(
                     sakId = sakid,
                     opprettet = Tidspunkt.now().toLocalDatetimeUTC().minusDays(4),
-                    fnr = this.avdoedFnr,
+                    fnr = this.fnr,
                     samsvarMellomKildeOgGrunnlag = samsvarDoedsdatoer(this.doedsdato, this.doedsdato)
                 )
             }.copy(
@@ -251,7 +251,7 @@ internal class GrunnlagsendringshendelseDaoTest {
                 grunnlagsendringshendelseMedSamsvar(
                     sakId = sakid,
                     opprettet = Tidspunkt.now().toLocalDatetimeUTC().minusYears(1),
-                    fnr = this.avdoedFnr,
+                    fnr = this.fnr,
                     samsvarMellomKildeOgGrunnlag = samsvarDoedsdatoer(this.doedsdato, this.doedsdato)
                 )
             }.copy(
@@ -291,7 +291,7 @@ internal class GrunnlagsendringshendelseDaoTest {
             id = id1,
             type = GrunnlagsendringsType.DOEDSFALL,
             sakId = sak1,
-            fnr = grunnlagsinformasjonDoedshendelse(doedsdato = doedsdato).avdoedFnr,
+            fnr = grunnlagsinformasjonDoedshendelse(doedsdato = doedsdato).fnr,
             samsvarMellomKildeOgGrunnlag = null
         ).also {
             grunnlagsendringshendelsesRepo.opprettGrunnlagsendringshendelse(it)
@@ -332,7 +332,7 @@ internal class GrunnlagsendringshendelseDaoTest {
             grunnlagsendringshendelseMedSamsvar(
                 id = hendelseId,
                 sakId = sak1,
-                fnr = grunnlagsinformasjonDoedshendelse().avdoedFnr,
+                fnr = grunnlagsinformasjonDoedshendelse().fnr,
                 type = grunnlagsendringstype,
                 status = GrunnlagsendringStatus.SJEKKET_AV_JOBB,
                 samsvarMellomKildeOgGrunnlag = null
@@ -384,7 +384,7 @@ internal class GrunnlagsendringshendelseDaoTest {
         val id3 = UUID.randomUUID()
         val doedsdato = LocalDate.of(2022, 7, 21)
         val samsvarMellomPdlOgGrunnlag = ikkeSamsvarMellomPdlOgGrunnlagDoed(doedsdato)
-        val fnrDoedshendelse = grunnlagsinformasjonDoedshendelse().avdoedFnr
+        val fnrDoedshendelse = grunnlagsinformasjonDoedshendelse().fnr
 
         listOf(
             grunnlagsendringshendelseMedSamsvar(
@@ -437,7 +437,7 @@ internal class GrunnlagsendringshendelseDaoTest {
         val id3 = UUID.randomUUID()
         val doedsdato = LocalDate.of(2022, 7, 21)
         val samsvarMellomPdlOgGrunnlag = ikkeSamsvarMellomPdlOgGrunnlagDoed(doedsdato)
-        val fnrDoedshendelse = grunnlagsinformasjonDoedshendelse().avdoedFnr
+        val fnrDoedshendelse = grunnlagsinformasjonDoedshendelse().fnr
 
         listOf(
             grunnlagsendringshendelseMedSamsvar(

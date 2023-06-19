@@ -128,7 +128,8 @@ internal class GrunnlagsendringshendelseServiceTest {
 
         val lagredeGrunnlagsendringshendelser = grunnlagsendringshendelseService.opprettDoedshendelse(
             Doedshendelse(
-                avdoedFnr = fnr,
+                hendelseId = "1",
+                fnr = fnr,
                 doedsdato = LocalDate.of(2022, 1, 1),
                 endringstype = Endringstype.OPPRETTET
             )
@@ -180,6 +181,7 @@ internal class GrunnlagsendringshendelseServiceTest {
 
         grunnlagsendringshendelseService.opprettUtflyttingshendelse(
             utflyttingsHendelse = UtflyttingsHendelse(
+                hendelseId = "1",
                 fnr = fnr,
                 endringstype = Endringstype.OPPRETTET,
                 tilflyttingsLand = null,
@@ -195,6 +197,7 @@ internal class GrunnlagsendringshendelseServiceTest {
 
         grunnlagsendringshendelseService.opprettForelderBarnRelasjonHendelse(
             forelderBarnRelasjonHendelse = ForelderBarnRelasjonHendelse(
+                hendelseId = "1",
                 fnr = fnr,
                 relatertPersonsIdent = null,
                 relatertPersonsRolle = "",
@@ -247,7 +250,8 @@ internal class GrunnlagsendringshendelseServiceTest {
 
         val lagredeGrunnlagsendringshendelser1 = grunnlagsendringshendelseService.opprettDoedshendelse(
             Doedshendelse(
-                avdoedFnr = fnr,
+                hendelseId = "1",
+                fnr = fnr,
                 doedsdato = doedsdato,
                 endringstype = Endringstype.OPPRETTET
             )
@@ -255,6 +259,7 @@ internal class GrunnlagsendringshendelseServiceTest {
         // siden dette er en hendelse av en annen type skal det ikke påvirke filtreringen
         grunnlagsendringshendelseService.opprettUtflyttingshendelse(
             UtflyttingsHendelse(
+                hendelseId = "1",
                 fnr = fnr,
                 tilflyttingsLand = null,
                 tilflyttingsstedIUtlandet = null,
@@ -267,7 +272,8 @@ internal class GrunnlagsendringshendelseServiceTest {
         // denne skal ikke opprette en doedshendelse, siden den allerede eksisterer
         val lagredeGrunnlagsendringshendelser3 = grunnlagsendringshendelseService.opprettDoedshendelse(
             Doedshendelse(
-                avdoedFnr = fnr,
+                hendelseId = "1",
+                fnr = fnr,
                 doedsdato = doedsdato,
                 endringstype = Endringstype.ANNULLERT
             )
@@ -313,6 +319,7 @@ internal class GrunnlagsendringshendelseServiceTest {
 
         val lagredeGrunnlagsendringshendelser1 = grunnlagsendringshendelseService.opprettUtflyttingshendelse(
             UtflyttingsHendelse(
+                hendelseId = "1",
                 fnr = fnr,
                 tilflyttingsLand = tilflyttingsland,
                 tilflyttingsstedIUtlandet = null,
@@ -324,7 +331,8 @@ internal class GrunnlagsendringshendelseServiceTest {
         // siden dette er en hendelse av en annen type skal det ikke påvirke filtreringen
         grunnlagsendringshendelseService.opprettDoedshendelse(
             Doedshendelse(
-                avdoedFnr = fnr,
+                hendelseId = "1",
+                fnr = fnr,
                 doedsdato = utflyttingsdato,
                 endringstype = Endringstype.OPPRETTET
             )
@@ -333,6 +341,7 @@ internal class GrunnlagsendringshendelseServiceTest {
         // denne skal ikke opprette en utflyttingshendelse, siden den allerede eksisterer
         val lagredeGrunnlagsendringshendelser3 = grunnlagsendringshendelseService.opprettUtflyttingshendelse(
             UtflyttingsHendelse(
+                hendelseId = "1",
                 fnr = fnr,
                 tilflyttingsLand = tilflyttingsland,
                 tilflyttingsstedIUtlandet = null,
@@ -378,6 +387,7 @@ internal class GrunnlagsendringshendelseServiceTest {
 
         val lagredeGrunnlagsendringshendelser1 = grunnlagsendringshendelseService.opprettForelderBarnRelasjonHendelse(
             ForelderBarnRelasjonHendelse(
+                hendelseId = "1",
                 fnr = "Soeker",
                 relatertPersonsIdent = "Ny forelder",
                 relatertPersonsRolle = null,
@@ -390,7 +400,8 @@ internal class GrunnlagsendringshendelseServiceTest {
         // siden dette er en hendelse av en annen type skal det ikke påvirke filtreringen
         grunnlagsendringshendelseService.opprettDoedshendelse(
             Doedshendelse(
-                avdoedFnr = "Soeker",
+                hendelseId = "1",
+                fnr = "Soeker",
                 doedsdato = LocalDate.of(2022, 1, 1),
                 endringstype = Endringstype.OPPRETTET
             )
@@ -399,6 +410,7 @@ internal class GrunnlagsendringshendelseServiceTest {
         // denne skal ikke opprette en utflyttingshendelse, siden den allerede eksisterer
         val lagredeGrunnlagsendringshendelser3 = grunnlagsendringshendelseService.opprettForelderBarnRelasjonHendelse(
             ForelderBarnRelasjonHendelse(
+                hendelseId = "1",
                 fnr = "Soeker",
                 relatertPersonsIdent = "Ny forelder",
                 relatertPersonsRolle = null,
@@ -485,7 +497,7 @@ internal class GrunnlagsendringshendelseServiceTest {
         }
         val fnr = "16017919184"
         val adressebeskyttelse =
-            Adressebeskyttelse(fnr, AdressebeskyttelseGradering.STRENGT_FORTROLIG, Endringstype.OPPRETTET)
+            Adressebeskyttelse("1", Endringstype.OPPRETTET, fnr, AdressebeskyttelseGradering.STRENGT_FORTROLIG)
 
         coEvery { grunnlagClient.hentAlleSakIder(any()) } returns sakIder
         every { adressebeskyttelseDaoMock.oppdaterAdresseBeskyttelse(any(), any()) } returns 1
@@ -523,7 +535,7 @@ internal class GrunnlagsendringshendelseServiceTest {
         }
         val fnr = "16017919184"
         val adressebeskyttelse =
-            Adressebeskyttelse(fnr, AdressebeskyttelseGradering.FORTROLIG, Endringstype.OPPRETTET)
+            Adressebeskyttelse("1", Endringstype.OPPRETTET, fnr, AdressebeskyttelseGradering.FORTROLIG)
 
         coEvery { grunnlagClient.hentAlleSakIder(any()) } returns sakIder
         every { adressebeskyttelseDaoMock.oppdaterAdresseBeskyttelse(any(), any()) } returns 1

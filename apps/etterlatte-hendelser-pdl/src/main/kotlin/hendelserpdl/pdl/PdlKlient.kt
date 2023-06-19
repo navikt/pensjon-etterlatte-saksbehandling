@@ -9,32 +9,28 @@ import io.ktor.http.contentType
 import no.nav.etterlatte.libs.common.person.HentPdlIdentRequest
 import no.nav.etterlatte.libs.common.person.PdlIdentifikator
 import no.nav.etterlatte.libs.common.person.PersonIdent
+import no.nav.etterlatte.libs.common.person.maskerFnr
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-interface Pdl {
-    suspend fun hentPdlIdentifikator(fnr: String): PdlIdentifikator
-}
-
-class PdlService(
-    private val pdl_app: HttpClient,
+class PdlKlient(
+    private val httpClient: HttpClient,
     private val url: String
-) : Pdl {
-
-    companion object {
-        val logger: Logger = LoggerFactory.getLogger(PdlService::class.java)
-    }
-
-    override suspend fun hentPdlIdentifikator(fnr: String): PdlIdentifikator {
+) {
+    suspend fun hentPdlIdentifikator(fnr: String): PdlIdentifikator {
         logger.info("Henter folkeregisteridentifikator")
         try {
-            return pdl_app.post("$url/pdlident") {
+            return httpClient.post("$url/pdlident") {
                 contentType(ContentType.Application.Json)
                 setBody(HentPdlIdentRequest(PersonIdent(fnr)))
             }.body()
         } catch (e: Exception) {
-            logger.info("Kunne ikke hente pdlident", e)
+            logger.info("Kunne ikke hente pdlident for fnr=${fnr.maskerFnr()}", e)
             throw e
         }
+    }
+
+    companion object {
+        val logger: Logger = LoggerFactory.getLogger(PdlKlient::class.java)
     }
 }

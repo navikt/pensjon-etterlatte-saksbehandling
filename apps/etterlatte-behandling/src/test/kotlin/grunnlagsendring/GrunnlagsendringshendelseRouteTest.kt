@@ -98,6 +98,7 @@ class GrunnlagsendringshendelseRouteTest : BehandlingIntegrationTest() {
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(
                     Adressebeskyttelse(
+                        hendelseId = "1",
                         fnr = fnr,
                         adressebeskyttelseGradering = AdressebeskyttelseGradering.STRENGT_FORTROLIG,
                         endringstype = Endringstype.OPPRETTET
@@ -112,6 +113,7 @@ class GrunnlagsendringshendelseRouteTest : BehandlingIntegrationTest() {
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(
                     Adressebeskyttelse(
+                        hendelseId = "1",
                         fnr = fnr,
                         adressebeskyttelseGradering = AdressebeskyttelseGradering.FORTROLIG,
                         endringstype = Endringstype.OPPRETTET
@@ -126,6 +128,7 @@ class GrunnlagsendringshendelseRouteTest : BehandlingIntegrationTest() {
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(
                     Adressebeskyttelse(
+                        hendelseId = "1",
                         fnr = fnr,
                         adressebeskyttelseGradering = AdressebeskyttelseGradering.UGRADERT,
                         endringstype = Endringstype.OPPRETTET

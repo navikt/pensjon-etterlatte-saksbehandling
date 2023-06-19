@@ -1,5 +1,6 @@
 package no.nav.etterlatte.hendelserpdl
 
+import com.fasterxml.jackson.module.kotlin.readValue
 import io.confluent.kafka.serializers.KafkaAvroDeserializer
 import io.confluent.kafka.serializers.KafkaAvroDeserializerConfig
 import io.confluent.kafka.serializers.KafkaAvroSerializer
@@ -14,228 +15,96 @@ import io.ktor.serialization.jackson.JacksonConverter
 import io.mockk.spyk
 import io.mockk.verify
 import no.nav.common.KafkaEnvironment
-import no.nav.etterlatte.hendelserpdl.leesah.KafkaConsumerConfiguration
-import no.nav.etterlatte.hendelserpdl.leesah.KafkaConsumerHendelserPdl
-import no.nav.etterlatte.hendelserpdl.leesah.LivsHendelserTilRapid
-import no.nav.etterlatte.hendelserpdl.leesah.PersonHendelseFordeler
-import no.nav.etterlatte.hendelserpdl.pdl.PdlService
+import no.nav.etterlatte.hendelserpdl.common.KafkaKonsument
+import no.nav.etterlatte.hendelserpdl.config.KafkaConsumerConfiguration
+import no.nav.etterlatte.hendelserpdl.pdl.PdlKlient
 import no.nav.etterlatte.kafka.LocalKafkaConfig
 import no.nav.etterlatte.kafka.rapidsAndRiversProducer
+import no.nav.etterlatte.lesHendelserFraLeesah
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
+import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype.OPPRETTET
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.person.pdl.leesah.Endringstype
 import no.nav.person.pdl.leesah.Personhendelse
 import no.nav.person.pdl.leesah.doedsfall.Doedsfall
-import no.nav.person.pdl.leesah.forelderbarnrelasjon.ForelderBarnRelasjon
-import no.nav.person.pdl.leesah.utflytting.UtflyttingFraNorge
 import org.apache.kafka.clients.CommonClientConfigs
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerConfig
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.common.serialization.StringDeserializer
-import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import java.time.Instant
 import java.time.LocalDate
 import java.util.*
-import java.util.concurrent.atomic.AtomicBoolean
-import kotlin.concurrent.thread
 
 @TestInstance(TestInstance.Lifecycle.PER_METHOD)
 class IntegrationTest {
 
-    private lateinit var pdlService: PdlService
+    private lateinit var pdlKlient: PdlKlient
 
-    companion object {
-        val pdlPersonTopic = "pdl.leesah-v1"
-        val kafkaEnv = KafkaEnvironment(
-            noOfBrokers = 1,
-            topicNames = listOf(pdlPersonTopic),
-            withSecurity = false,
-            autoStart = true,
-            withSchemaRegistry = true
-        )
+    @BeforeEach
+    fun setup() {
+        mockPdlResponse()
     }
 
     @Test
-    fun testDoedshendelse() {
-        val leesahKafkaProducer: KafkaProducer<String, Personhendelse> = producerForLeesah()
-        mockEndpoint()
+    fun `skal opprette doedshendelse paa leesah, konsumere den, mappe om og publisere paa rapid`() {
+        val env = mapOf(
+            "KAFKA_BROKERS" to kafkaEnv.brokersURL,
+            "LEESAH_KAFKA_GROUP_ID" to "etterlatte-v1",
+            "KAFKA_SCHEMA_REGISTRY" to kafkaEnv.schemaRegistry?.url!!,
+            "LEESAH_TOPIC_PERSON" to LEESAH_TOPIC_PERSON
+        )
+
+        val leesahKafkaProducer = producerForLeesah()
         val rapidsKafkaProducer = spyk(
             LocalKafkaConfig(kafkaEnv.brokersURL).rapidsAndRiversProducer("etterlatte.dodsmelding")
         )
-        val livsHendelserTilRapid = spyk(LivsHendelserTilRapid(rapidsKafkaProducer))
-        val closed = AtomicBoolean()
-        closed.set(false)
-        val kafkaConsumerWrapper = KafkaConsumerHendelserPdl(
-            PersonHendelseFordeler(livsHendelserTilRapid, pdlService),
-            mapOf(
-                "KAFKA_BROKERS" to kafkaEnv.brokersURL,
-                "LEESAH_KAFKA_GROUP_ID" to "etterlatte-v1",
-                "KAFKA_SCHEMA_REGISTRY" to kafkaEnv.schemaRegistry?.url!!,
-                "LEESAH_TOPIC_PERSON" to pdlPersonTopic
-            ),
-            closed,
-            KafkaConsumerEnvironmentTest()
-        )
 
-        val doedsfall = Doedsfall(LocalDate.of(2022, 1, 1))
-        leesahKafkaProducer.send(
-            ProducerRecord(
-                pdlPersonTopic,
-                1,
-                "x",
-                Personhendelse(
-                    "1",
-                    listOf("1234567"),
-                    "",
-                    Instant.now(),
-                    "DOEDSFALL_V1",
-                    Endringstype.OPPRETTET,
-                    null,
-                    null,
-                    null,
-                    doedsfall,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null
-
-                )
-            )
+        val kafkaKonsument = KafkaKonsument<Personhendelse>(
+            LEESAH_TOPIC_PERSON,
+            KafkaConsumerEnvironmentTest().generateKafkaConsumerProperties(env)
         )
+        val personHendelseFordeler = PersonHendelseFordeler(rapidsKafkaProducer, pdlKlient)
 
-        val utflyttingFraNorge = UtflyttingFraNorge(
-            "Sverige",
-            null,
-            LocalDate.of(2022, 8, 8)
-        )
-        leesahKafkaProducer.send(
-            ProducerRecord(
-                pdlPersonTopic,
-                1,
-                "x",
-                Personhendelse(
-                    "1",
-                    listOf("1234567"),
-                    "",
-                    Instant.now(),
-                    "UTFLYTTING_FRA_NORGE",
-                    Endringstype.OPPRETTET,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    utflyttingFraNorge,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null
-
-                )
-            )
-        )
-
-        val forelderBarnRelasjon = ForelderBarnRelasjon(
-            "12345678911",
-            "MOR",
-            "BARN",
-            null
-        )
-        leesahKafkaProducer.send(
-            ProducerRecord(
-                pdlPersonTopic,
-                Personhendelse(
-                    "1",
-                    listOf("1234567"),
-                    "",
-                    Instant.now(),
-                    "FORELDERBARNRELASJON_V1",
-                    Endringstype.OPPRETTET,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    forelderBarnRelasjon,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null
-                )
-            )
-        )
-        val PDLfnr = "70078749472"
-
-        val thread = thread(start = true) {
-            while (true) {
-                if (kafkaConsumerWrapper.getAntallMeldinger() >= 3) {
-                    closed.set(true)
-                    kafkaConsumerWrapper.getConsumer().wakeup()
-                    return@thread
-                }
-                Thread.sleep(800L) // Må stå så ikke denne spiser all cpu, tester er egentlig single threaded
+        val personHendelse = Personhendelse().apply {
+            hendelseId = "1"
+            endringstype = Endringstype.OPPRETTET
+            master = ""
+            opprettet = Instant.now()
+            personidenter = listOf(FNR.value)
+            opplysningstype = LeesahOpplysningstype.DOEDSFALL_V1.toString()
+            doedsfall = Doedsfall().apply {
+                doedsdato = LocalDate.of(2022, 1, 1)
             }
         }
-        kafkaConsumerWrapper.stream()
-        thread.join()
-        Assertions.assertEquals(kafkaConsumerWrapper.getAntallMeldinger(), 3)
-        verify(exactly = 3) { rapidsKafkaProducer.publiser(any(), any()) }
-        verify {
-            livsHendelserTilRapid.personErDod(
-                PDLfnr,
-                doedsfall.doedsdato.toString(),
-                no.nav.etterlatte.libs.common.pdlhendelse.Endringstype.OPPRETTET
-            )
-        }
 
-        verify {
-            livsHendelserTilRapid.personUtflyttingFraNorge(
-                PDLfnr,
-                utflyttingFraNorge.tilflyttingsland,
-                utflyttingFraNorge.tilflyttingsstedIUtlandet,
-                utflyttingFraNorge.utflyttingsdato.toString(),
-                no.nav.etterlatte.libs.common.pdlhendelse.Endringstype.OPPRETTET
+        val forventetMeldingPaaRapid = MeldingSendtPaaRapid(
+            eventName = "PDL:PERSONHENDELSE",
+            hendelse = LeesahOpplysningstype.DOEDSFALL_V1,
+            hendelse_data = Doedshendelse(
+                hendelseId = personHendelse.hendelseId,
+                endringstype = OPPRETTET,
+                fnr = personHendelse.personidenter.first(),
+                doedsdato = personHendelse.doedsfall?.doedsdato
             )
-        }
+        )
 
-        verify {
-            livsHendelserTilRapid.forelderBarnRelasjon(
-                PDLfnr,
-                forelderBarnRelasjon.relatertPersonsIdent,
-                forelderBarnRelasjon.relatertPersonsRolle,
-                forelderBarnRelasjon.minRolleForPerson,
-                forelderBarnRelasjon.relatertPersonUtenFolkeregisteridentifikator?.toString(),
-                no.nav.etterlatte.libs.common.pdlhendelse.Endringstype.OPPRETTET
+        leesahKafkaProducer.send(ProducerRecord(LEESAH_TOPIC_PERSON, 1, "key", personHendelse))
+
+        lesHendelserFraLeesah(kafkaKonsument, personHendelseFordeler)
+
+        verify(exactly = 1, timeout = 5000) {
+            rapidsKafkaProducer.publiser(
+                any(),
+                match {
+                    val hendelse: MeldingSendtPaaRapid<Doedshendelse> = objectMapper.readValue(it.toJson())
+                    hendelse == forventetMeldingPaaRapid
+                }
             )
         }
     }
@@ -271,13 +140,16 @@ class IntegrationTest {
         )
     )
 
-    private fun mockEndpoint() {
+    private fun mockPdlResponse() {
         val httpClient = HttpClient(MockEngine) {
             engine {
                 addHandler { request ->
                     if (request.url.fullPath.startsWith("/")) {
                         val headers = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
-                        val json = mapOf("folkeregisterident" to "70078749472", "type" to "FOLKEREGISTERIDENT").toJson()
+                        val json = mapOf(
+                            "folkeregisterident" to FNR.value,
+                            "type" to "FOLKEREGISTERIDENT"
+                        ).toJson()
                         respond(json, headers = headers)
                     } else {
                         error(request.url.fullPath)
@@ -287,6 +159,18 @@ class IntegrationTest {
             install(ContentNegotiation) { register(ContentType.Application.Json, JacksonConverter(objectMapper)) }
         }
 
-        pdlService = PdlService(httpClient, "http://etterlatte-pdltjenester")
+        pdlKlient = PdlKlient(httpClient, "http://etterlatte-pdltjenester")
+    }
+
+    companion object {
+        const val LEESAH_TOPIC_PERSON = "pdl.leesah-v1"
+
+        val kafkaEnv = KafkaEnvironment(
+            noOfBrokers = 1,
+            topicNames = listOf(LEESAH_TOPIC_PERSON),
+            withSecurity = false,
+            autoStart = true,
+            withSchemaRegistry = true
+        )
     }
 }

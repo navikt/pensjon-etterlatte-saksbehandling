@@ -3,10 +3,10 @@ package no.nav.etterlatte
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.EnhetService
 import no.nav.etterlatte.common.Enheter
-import no.nav.etterlatte.config.AzureGroup
 import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
 import no.nav.security.token.support.core.context.TokenValidationContext
 import no.nav.security.token.support.v2.TokenValidationContextPrincipal
+import tilgangsstyring.AzureGroup
 import java.sql.Connection
 
 object Kontekst : ThreadLocal<Context>()

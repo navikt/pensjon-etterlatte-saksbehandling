@@ -3,10 +3,8 @@ package behandling
 import com.nimbusds.jwt.JWTClaimsSet
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.etterlatte.SaksbehandlerMedRoller
 import no.nav.etterlatte.behandling.BehandlingStatusServiceImpl
 import no.nav.etterlatte.behandling.GenerellBehandlingService
-import no.nav.etterlatte.config.AzureGroup
 import no.nav.etterlatte.foerstegangsbehandling
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.token.Saksbehandler
@@ -14,6 +12,7 @@ import no.nav.security.token.support.core.jwt.JwtTokenClaims
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
+import tilgangsstyring.SaksbehandlerMedRoller
 import java.util.*
 
 internal class BehandlingStatusServiceTest {
@@ -27,8 +26,7 @@ internal class BehandlingStatusServiceTest {
         assertThrows<IllegalStateException> {
             service.sjekkOmKanAttestere(
                 UUID.randomUUID(),
-                SaksbehandlerMedRoller(bruker),
-                mapOf(AzureGroup.ATTESTANT to "789")
+                SaksbehandlerMedRoller(bruker)
             )
         }
     }
@@ -50,8 +48,7 @@ internal class BehandlingStatusServiceTest {
         assertDoesNotThrow {
             service.sjekkOmKanAttestere(
                 UUID.randomUUID(),
-                SaksbehandlerMedRoller(bruker),
-                mapOf(AzureGroup.ATTESTANT to "123")
+                SaksbehandlerMedRoller(bruker)
             )
         }
     }

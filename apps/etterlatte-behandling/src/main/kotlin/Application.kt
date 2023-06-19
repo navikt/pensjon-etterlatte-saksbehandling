@@ -34,6 +34,7 @@ import no.nav.etterlatte.oppgave.oppgaveRoutes
 import no.nav.etterlatte.sak.sakRoutes
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import tilgangsstyring.adressebeskyttelsePlugin
 import javax.sql.DataSource
 
 val sikkerLogg: Logger = LoggerFactory.getLogger("sikkerLogg")
@@ -97,7 +98,7 @@ fun Application.module(context: ApplicationContext) {
             )
             omregningRoutes(omregningService = omregningService)
             migreringRoutes(migreringService = migreringService)
-            behandlingsstatusRoutes(behandlingsstatusService = behandlingsStatusService, saksbehandlerGroupIdsByKey)
+            behandlingsstatusRoutes(behandlingsstatusService = behandlingsStatusService)
             oppgaveRoutes(service = oppgaveService)
             grunnlagsendringshendelseRoute(grunnlagsendringshendelseService = grunnlagsendringshendelseService)
             egenAnsattRoute(egenAnsattService = EgenAnsattService(sakService, sikkerLogg))

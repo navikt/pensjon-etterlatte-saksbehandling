@@ -9,15 +9,12 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
-import no.nav.etterlatte.SaksbehandlerMedRoller
-import no.nav.etterlatte.config.AzureGroup
 import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.behandlingsId
-import no.nav.etterlatte.libs.ktor.bruker
+import tilgangsstyring.kunAttestant
 
 internal fun Route.behandlingsstatusRoutes(
-    behandlingsstatusService: BehandlingStatusService,
-    saksbehandlerGroupIdsByKey: Map<AzureGroup, String>
+    behandlingsstatusService: BehandlingStatusService
 ) {
     route("/behandlinger/{$BEHANDLINGSID_CALL_PARAMETER}") {
         get("/opprett") {
@@ -92,12 +89,10 @@ internal fun Route.behandlingsstatusRoutes(
         }
 
         get("/attester") {
-            haandterStatusEndring(call) {
-                behandlingsstatusService.sjekkOmKanAttestere(
-                    behandlingsId,
-                    SaksbehandlerMedRoller(bruker),
-                    saksbehandlerGroupIdsByKey
-                )
+            kunAttestant {
+                haandterStatusEndring(call) {
+                    behandlingsstatusService.sjekkOmKanAttestere(behandlingsId)
+                }
             }
         }
         post("/attester") {

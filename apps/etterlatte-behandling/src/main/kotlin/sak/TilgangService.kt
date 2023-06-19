@@ -1,8 +1,7 @@
 package no.nav.etterlatte.sak
 
-import no.nav.etterlatte.SaksbehandlerMedRoller
-import no.nav.etterlatte.config.AzureGroup
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
+import tilgangsstyring.SaksbehandlerMedRoller
 
 interface TilgangService {
     fun harTilgangTilBehandling(behandlingId: String, saksbehandlerMedRoller: SaksbehandlerMedRoller): Boolean
@@ -23,8 +22,7 @@ data class SakMedGradering(
 )
 
 class TilgangServiceImpl(
-    private val dao: SakTilgangDao,
-    private val saksbehandlereGroupIdsByKey: Map<AzureGroup, String>
+    private val dao: SakTilgangDao
 ) : TilgangService {
 
     override fun harTilgangTilPerson(fnr: String, saksbehandlerMedRoller: SaksbehandlerMedRoller): Boolean {
@@ -64,7 +62,7 @@ class TilgangServiceImpl(
         saksbehandlerMedRoller: SaksbehandlerMedRoller
     ): Boolean {
         return when (sak.erSkjermet) {
-            true -> saksbehandlerMedRoller.harRolleEgenAnsatt(saksbehandlereGroupIdsByKey)
+            true -> saksbehandlerMedRoller.harRolleEgenAnsatt()
             false -> true
             null -> true
         }
@@ -75,15 +73,9 @@ class TilgangServiceImpl(
         saksbehandlerMedRoller: SaksbehandlerMedRoller
     ): Boolean {
         return when (sak.adressebeskyttelseGradering) {
-            AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND -> saksbehandlerMedRoller.harRolleStrengtFortrolig(
-                saksbehandlereGroupIdsByKey
-            )
-            AdressebeskyttelseGradering.STRENGT_FORTROLIG -> saksbehandlerMedRoller.harRolleStrengtFortrolig(
-                saksbehandlereGroupIdsByKey
-            )
-            AdressebeskyttelseGradering.FORTROLIG -> saksbehandlerMedRoller.harRolleFortrolig(
-                saksbehandlereGroupIdsByKey
-            )
+            AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND -> saksbehandlerMedRoller.harRolleStrengtFortrolig()
+            AdressebeskyttelseGradering.STRENGT_FORTROLIG -> saksbehandlerMedRoller.harRolleStrengtFortrolig()
+            AdressebeskyttelseGradering.FORTROLIG -> saksbehandlerMedRoller.harRolleFortrolig()
             AdressebeskyttelseGradering.UGRADERT -> true
             else -> true
         }

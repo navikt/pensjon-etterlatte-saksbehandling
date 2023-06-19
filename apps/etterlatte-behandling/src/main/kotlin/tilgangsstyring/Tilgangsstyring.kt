@@ -1,4 +1,4 @@
-package no.nav.etterlatte
+package tilgangsstyring
 
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.ApplicationCall
@@ -12,11 +12,13 @@ import io.ktor.server.request.uri
 import io.ktor.server.response.respond
 import io.ktor.util.pipeline.PipelineContext
 import io.ktor.util.pipeline.PipelinePhase
+import no.nav.etterlatte.User
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.FoedselsNummerMedGraderingDTO
 import no.nav.etterlatte.libs.common.FoedselsnummerDTO
+import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
@@ -128,6 +130,45 @@ suspend inline fun PipelineContext<*, ApplicationCall>.withFoedselsnummerAndGrad
         }
         else -> onSuccess(foedselsnummer, foedselsnummerDTOmedGradering.gradering)
     }
+}
+
+suspend inline fun PipelineContext<*, ApplicationCall>.kunAttestant(
+    onSuccess: () -> Unit
+) {
+    when (bruker) {
+        is Saksbehandler -> {
+            val saksbehandlerMedRoller = SaksbehandlerMedRoller(bruker as Saksbehandler)
+            val erAttestant = saksbehandlerMedRoller.harRolle(AzureGroup.ATTESTANT)
+            if (erAttestant) {
+                onSuccess()
+            } else {
+                call.respond(HttpStatusCode.Unauthorized, "Mangler attestantrolle")
+            }
+        }
+        else -> onSuccess()
+    }
+}
+
+data class SaksbehandlerMedRoller(val saksbehandler: Saksbehandler) {
+
+    companion object {
+        val env: Miljoevariabler = Miljoevariabler(System.getenv())
+        val saksbehandlerGroupIdsByKey = AzureGroup.values().associateWith { env.requireEnvValue(it.envKey) }
+    }
+
+    fun harRolle(rolle: AzureGroup): Boolean {
+        val claims = saksbehandler.getClaims()
+        return claims?.containsClaim("groups", saksbehandlerGroupIdsByKey[rolle]) ?: false
+    }
+
+    fun harRolleStrengtFortrolig() =
+        harRolle(AzureGroup.STRENGT_FORTROLIG)
+
+    fun harRolleFortrolig() =
+        harRolle(AzureGroup.FORTROLIG)
+
+    fun harRolleEgenAnsatt() =
+        harRolle(AzureGroup.EGEN_ANSATT)
 }
 
 fun <T> List<T>.filterForEnheter(

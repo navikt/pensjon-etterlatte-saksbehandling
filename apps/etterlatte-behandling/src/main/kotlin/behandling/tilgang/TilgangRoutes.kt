@@ -7,8 +7,6 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
-import no.nav.etterlatte.SaksbehandlerMedRoller
-import no.nav.etterlatte.TILGANG_ROUTE_PATH
 import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.behandlingsId
@@ -18,57 +16,49 @@ import no.nav.etterlatte.sak.TilgangService
 import no.nav.etterlatte.token.Bruker
 import no.nav.etterlatte.token.Saksbehandler
 import no.nav.etterlatte.token.SystemBruker
+import tilgangsstyring.SaksbehandlerMedRoller
+import tilgangsstyring.TILGANG_ROUTE_PATH
 
 internal fun Route.tilgangRoutes(tilgangService: TilgangService) {
     route("/$TILGANG_ROUTE_PATH") {
         post("/person") {
             val fnr = call.receive<String>()
 
-            val harTilgang = harTilgangBrukertypeSjekk(
-                bruker = bruker,
-                harTilgang = {
-                    tilgangService.harTilgangTilPerson(
-                        fnr,
-                        SaksbehandlerMedRoller(bruker)
-                    )
-                }
-            )
+            val harTilgang = harTilgangBrukertypeSjekk(bruker) { saksbehandler ->
+                tilgangService.harTilgangTilPerson(
+                    fnr,
+                    SaksbehandlerMedRoller(saksbehandler)
+                )
+            }
             call.respond(harTilgang)
         }
 
         get("/behandling/{$BEHANDLINGSID_CALL_PARAMETER}") {
-            val harTilgang = harTilgangBrukertypeSjekk(
-                bruker = bruker,
-                harTilgang = {
-                    tilgangService.harTilgangTilBehandling(
-                        behandlingsId.toString(),
-                        SaksbehandlerMedRoller(bruker)
-                    )
-                }
-            )
-
+            val harTilgang = harTilgangBrukertypeSjekk(bruker) { saksbehandler ->
+                tilgangService.harTilgangTilBehandling(
+                    behandlingsId.toString(),
+                    SaksbehandlerMedRoller(saksbehandler)
+                )
+            }
             call.respond(harTilgang)
         }
 
         get("/sak/{$SAKID_CALL_PARAMETER}") {
-            val harTilgang = harTilgangBrukertypeSjekk(
-                bruker = bruker,
-                harTilgang = {
-                    tilgangService.harTilgangTilSak(
-                        sakId,
-                        SaksbehandlerMedRoller(bruker)
-                    )
-                }
-            )
+            val harTilgang = harTilgangBrukertypeSjekk(bruker) { saksbehandler ->
+                tilgangService.harTilgangTilSak(
+                    sakId,
+                    SaksbehandlerMedRoller(saksbehandler)
+                )
+            }
             call.respond(harTilgang)
         }
     }
 }
 
-fun harTilgangBrukertypeSjekk(bruker: Bruker, harTilgang: () -> Boolean): Boolean {
+fun harTilgangBrukertypeSjekk(bruker: Bruker, harTilgang: (saksbehandler: Saksbehandler) -> Boolean): Boolean {
     return when (bruker) {
         is Saksbehandler -> {
-            harTilgang()
+            harTilgang(bruker)
         }
         is SystemBruker -> true
     }

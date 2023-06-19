@@ -14,7 +14,6 @@ import io.ktor.http.contentType
 import io.ktor.serialization.jackson.jackson
 import io.ktor.server.testing.testApplication
 import no.nav.etterlatte.BehandlingIntegrationTest
-import no.nav.etterlatte.TILGANG_ROUTE_PATH
 import no.nav.etterlatte.behandling.BehandlingsBehov
 import no.nav.etterlatte.libs.common.FoedselsNummerMedGraderingDTO
 import no.nav.etterlatte.libs.common.FoedselsnummerDTO
@@ -33,6 +32,7 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import tilgangsstyring.TILGANG_ROUTE_PATH
 import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_METHOD)

@@ -2,12 +2,12 @@ package no.nav.etterlatte.oppgave
 
 import no.nav.etterlatte.Saksbehandler
 import no.nav.etterlatte.User
-import no.nav.etterlatte.filterForEnheter
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.oppgave.domain.Oppgave
+import tilgangsstyring.filterForEnheter
 
 enum class OppgaveServiceFeatureToggle(private val key: String) : FeatureToggle {
     EnhetFilterOppgaver("pensjon-etterlatte.filter-oppgaver-enhet");

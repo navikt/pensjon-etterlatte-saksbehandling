@@ -38,6 +38,8 @@ data class Saksbehandler(val accessToken: String, val ident: String, val jwtToke
     override fun ident() = ident
 
     override fun accessToken() = accessToken
+
+    fun getClaims() = jwtTokenClaims
 }
 
 enum class Claims {

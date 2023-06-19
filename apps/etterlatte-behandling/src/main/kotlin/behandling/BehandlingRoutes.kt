@@ -80,7 +80,7 @@ internal fun Route.behandlingRoutes(
                 )
 
                 try {
-                    foerstegangsbehandlingService.lagreKommerBarnetTilgode(behandlingsId, kommerBarnetTilgode)
+                    foerstegangsbehandlingService.lagreKommerBarnetTilgode(kommerBarnetTilgode)
                     call.respond(HttpStatusCode.OK, kommerBarnetTilgode)
                 } catch (e: TilstandException.UgyldigTilstand) {
                     call.respond(HttpStatusCode.BadRequest, "Kunne ikke endre på feltet")

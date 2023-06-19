@@ -25,7 +25,6 @@ class MigreringService(
     fun migrer(request: MigreringRequest) = opprettSakOgBehandling(request)?.let {
         val pesys = Vedtaksloesning.PESYS.name
         foerstegangsBehandlingService.lagreKommerBarnetTilgode(
-            it.id,
             KommerBarnetTilgode(
                 JaNei.JA,
                 "Automatisk importert fra Pesys",

@@ -61,7 +61,7 @@ interface FoerstegangsbehandlingService {
     ): GyldighetsResultat?
 
     fun lagreGyldighetsproeving(behandlingId: UUID, gyldighetsproeving: GyldighetsResultat)
-    fun lagreKommerBarnetTilgode(behandlingId: UUID, kommerBarnetTilgode: KommerBarnetTilgode)
+    fun lagreKommerBarnetTilgode(kommerBarnetTilgode: KommerBarnetTilgode)
     fun settOpprettet(behandlingId: UUID, dryRun: Boolean = true)
     fun settVilkaarsvurdert(behandlingId: UUID, dryRun: Boolean = true)
     fun settBeregnet(behandlingId: UUID, dryRun: Boolean = true)
@@ -223,9 +223,9 @@ class FoerstegangsbehandlingServiceImpl(
             }
     }
 
-    override fun lagreKommerBarnetTilgode(behandlingId: UUID, kommerBarnetTilgode: KommerBarnetTilgode) {
+    override fun lagreKommerBarnetTilgode(kommerBarnetTilgode: KommerBarnetTilgode) {
         return inTransaction {
-            hentBehandling(behandlingId)?.lagreKommerBarnetTilgode(kommerBarnetTilgode)
+            kommerBarnetTilgode.behandlingId?.let { hentBehandling(it)?.lagreKommerBarnetTilgode(kommerBarnetTilgode) }
         }
     }
 

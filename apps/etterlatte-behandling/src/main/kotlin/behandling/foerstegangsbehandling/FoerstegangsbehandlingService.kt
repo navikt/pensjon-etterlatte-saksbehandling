@@ -225,14 +225,13 @@ class FoerstegangsbehandlingServiceImpl(
 
     override fun lagreKommerBarnetTilgode(kommerBarnetTilgode: KommerBarnetTilgode) {
         return inTransaction {
-            kommerBarnetTilgode.behandlingId?.let { hentBehandling(it)?.lagreKommerBarnetTilgode(kommerBarnetTilgode) }
+            kommerBarnetTilgode.behandlingId?.let {
+                hentBehandling(it)
+                    ?.tilOpprettet()
+                    ?.also { kommerBarnetTilGodeDao.lagreKommerBarnetTilGode(kommerBarnetTilgode) }
+                    ?.also { behandling -> behandlingDao.lagreStatus(behandling) }
+            }
         }
-    }
-
-    private fun Foerstegangsbehandling.lagreKommerBarnetTilgode(kommerBarnetTilgode: KommerBarnetTilgode) {
-        this.tilOpprettet()
-            .also { kommerBarnetTilGodeDao.lagreKommerBarnetTilGode(kommerBarnetTilgode) }
-            .also { behandlingDao.lagreStatus(it) }
     }
 
     override fun settOpprettet(behandlingId: UUID, dryRun: Boolean) {

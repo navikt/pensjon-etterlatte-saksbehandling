@@ -31,9 +31,10 @@ while getopts ":d:p:u:" opt; do
       PROXY_DB="$OPTARG"
       ;;
     p)
-      LOCAL_PORT="$OPTARG"
-      if [[ $LOCAL_PORT == 5432 ]]; then
+      if [[ "$OPTARG" == 5432 ]]; then
         error "Illegal port 5432 – this port is reserved for the proxy!"
+      else
+        LOCAL_PORT="$OPTARG"
       fi
       ;;
     u)
@@ -67,13 +68,24 @@ if [ "$CURRENT_CONTEXT" != "dev-gcp" ]; then
 fi
 
 NOW=$(date +%s)
-DUMP_FILE="pg_dump_$(date +%s).sql"
+DUMP_FILE="${PROXY_DB}_$(date +%s).sql"
 
-pg_dump -h localhost -p 5432 -U $PROXY_USER -d $PROXY_DB -f $DUMP_FILE
+echo "Starting pg_dump (this can take a minute)"
+pg_dump -x -a -h localhost -p 5432 -U $PROXY_USER -d $PROXY_DB -f $DUMP_FILE &
+DUMP_PID=$!
+
+while ps -p $DUMP_PID &>/dev/null; do
+  echo -ne "."
+  sleep 1
+done
 
 if [ $? -eq 0 ]; then
+  echo -e "\n\npg_dump was successful. Restoring to local database.\n"
   psql -h host.docker.internal -p $LOCAL_PORT -U postgres -d postgres -f $DUMP_FILE
+
+  echo -e "\n\nDump and restore completed!"
 else
-  rm $DUMP_FILE 2> /dev/null
   error "\nUnexpected error occurred while running pg_dump"
 fi
+
+rm $DUMP_FILE 2> /dev/null

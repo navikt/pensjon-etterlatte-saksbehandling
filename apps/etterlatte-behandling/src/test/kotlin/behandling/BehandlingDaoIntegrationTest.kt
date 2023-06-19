@@ -544,7 +544,6 @@ internal class BehandlingDaoIntegrationTest {
         )
 
         foerstegangsbehandling!!
-            .oppdaterKommerBarnetTilgode(kommerBarnetTilgode)
             .oppdaterVirkningstidspunkt(virkningstidspunkt)
             .oppdaterGyldighetsproeving(gyldighetsResultat)
             .tilVilkaarsvurdert()

@@ -500,7 +500,7 @@ internal class BehandlingDaoIntegrationTest {
             Grunnlagsopplysning.Saksbehandler.create("navIdent"),
             opprettBehandling.id
         )
-        behandlingRepo.lagreKommerBarnetTilgode(opprettBehandling.id, kommerBarnetTilgode)
+        behandlingRepo.lagreKommerBarnetTilgode(kommerBarnetTilgode)
 
         with(behandlingRepo.hentBehandling(opprettBehandling.id)) {
             val expected = kommerBarnetTilgode
@@ -548,7 +548,7 @@ internal class BehandlingDaoIntegrationTest {
             .let {
                 behandlingRepo.lagreNyttVirkningstidspunkt(it.id, it.virkningstidspunkt!!)
                 behandlingRepo.lagreGyldighetsproving(it)
-                behandlingRepo.lagreKommerBarnetTilgode(it.id, it.kommerBarnetTilgode!!)
+                behandlingRepo.lagreKommerBarnetTilgode(it.kommerBarnetTilgode!!)
                 behandlingRepo.lagreStatus(it.id, it.status, it.sistEndret)
             }
 

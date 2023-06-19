@@ -229,7 +229,7 @@ class FoerstegangsbehandlingServiceImpl(
 
     private fun Foerstegangsbehandling.lagreKommerBarnetTilgode(kommerBarnetTilgode: KommerBarnetTilgode) {
         this.oppdaterKommerBarnetTilgode(kommerBarnetTilgode)
-            .also { behandlingDao.lagreKommerBarnetTilgode(it.id, kommerBarnetTilgode) }
+            .also { behandlingDao.lagreKommerBarnetTilgode(kommerBarnetTilgode) }
             .also { behandlingDao.lagreStatus(it) }
     }
 

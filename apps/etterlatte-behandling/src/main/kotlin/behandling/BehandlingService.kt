@@ -1,5 +1,6 @@
 package no.nav.etterlatte.behandling
 
+import behandling.kommerbarnettilgode.KommerBarnetTilGodeService
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.Kontekst
@@ -100,7 +101,8 @@ class BehandlingServiceImpl(
     private val hendelseDao: HendelseDao,
     private val grunnlagKlient: GrunnlagKlient,
     private val sporingslogg: Sporingslogg,
-    private val featureToggleService: FeatureToggleService
+    private val featureToggleService: FeatureToggleService,
+    private val kommerBarnetTilGodeService: KommerBarnetTilGodeService
 ) : BehandlingService {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -206,11 +208,11 @@ class BehandlingServiceImpl(
     ): DetaljertBehandlingDto {
         val behandling = hentBehandling(behandlingId)!!
         val hendelserIBehandling = hentHendelserIBehandling(behandlingId)
+        val kommerBarnetTilgode = kommerBarnetTilGodeService.hentKommerBarnetTilGode(behandlingId)
+            .takeIf { detaljertBehandling.sakType == SakType.BARNEPENSJON }
 
         val sakId = behandling.sak.id
         val sakType = behandling.sak.sakType
-
-        val kommerBarnetTilgode = behandling.kommerBarnetTilgode.takeIf { sakType == SakType.BARNEPENSJON }
 
         logger.info("Hentet behandling for $behandlingId")
         return coroutineScope {

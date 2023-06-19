@@ -11,7 +11,7 @@ import { IBehandlingReducer, oppdaterBehandlingsstatus, oppdaterBeregning } from
 import Spinner from '~shared/Spinner'
 import { BehandlingHandlingKnapper } from '~components/behandling/handlinger/BehandlingHandlingKnapper'
 import { Alert, Button, ErrorMessage, Heading } from '@navikt/ds-react'
-import { isFailure, isPending, useApiCall } from '~shared/hooks/useApiCall'
+import { isFailure, isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
 import { upsertVedtak } from '~shared/api/behandling'
 import { IBehandlingStatus, IBehandlingsType } from '~shared/types/IDetaljertBehandling'
 import styled from 'styled-components'
@@ -36,14 +36,15 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
 
   useEffect(() => {
     const kopierBeregningsgrunnlag = () => {
-      const [, hentSisteIverksatte] = useApiCall(hentSisteIverksatteBehandling)
-      hentSisteIverksatte(behandling.sak, (res) => {
+      const [sisteIverksatte, hentSisteIverksatte] = useApiCall(hentSisteIverksatteBehandling)
+      hentSisteIverksatte(behandling.sak)
+      if (isSuccess(sisteIverksatte)) {
         const [, kall] = useApiCall(kopierBeregningsGrunnlag)
         kall({
           behandlingsId: behandling.id,
-          forrigeBehandlingsId: res.id,
+          forrigeBehandlingsId: sisteIverksatte.data.id,
         })
-      })
+      }
     }
 
     if (!beregningFraState) {

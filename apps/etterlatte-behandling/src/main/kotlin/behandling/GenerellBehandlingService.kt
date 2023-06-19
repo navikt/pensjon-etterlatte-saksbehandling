@@ -124,6 +124,7 @@ class RealGenerellBehandlingService(
 
     override fun hentSisteIverksatte(sakId: Long): Behandling? {
         return inTransaction { hentBehandlingerForSakId(sakId) }
+            .also { logger.info("Fant behandling $it") }
             .filter { BehandlingStatus.iverksattEllerAttestert().contains(it.status) }
             .maxByOrNull { it.behandlingOpprettet }
     }

@@ -1,5 +1,7 @@
 package no.nav.etterlatte.behandling.revurdering
 
+import behandling.kommerbarnettilgode.KommerBarnetTilGodeService
+import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.BehandlingHendelseType
@@ -78,7 +80,8 @@ class RevurderingServiceImpl(
     private val featureToggleService: FeatureToggleService,
     private val behandlingDao: BehandlingDao,
     private val hendelseDao: HendelseDao,
-    private val grunnlagsendringshendelseDao: GrunnlagsendringshendelseDao
+    private val grunnlagsendringshendelseDao: GrunnlagsendringshendelseDao,
+    private val kommerBarnetTilGodeService: KommerBarnetTilGodeService
 ) : RevurderingService {
     private val logger = LoggerFactory.getLogger(RevurderingServiceImpl::class.java)
 
@@ -177,6 +180,8 @@ class RevurderingServiceImpl(
                 merknad = merknad
             ).let { opprettBehandling ->
                 behandlingDao.opprettBehandling(opprettBehandling)
+        forrigeBehandling.kommerBarnetTilgode?.copy(behandlingId = opprettBehandling.id)
+            ?.let { kommerBarnetTilGodeService.lagreKommerBarnetTilgode(it) }
                 hendelseDao.behandlingOpprettet(opprettBehandling.toBehandlingOpprettet())
 
                 logger.info("Opprettet behandling ${opprettBehandling.id} i sak ${opprettBehandling.sakId}")

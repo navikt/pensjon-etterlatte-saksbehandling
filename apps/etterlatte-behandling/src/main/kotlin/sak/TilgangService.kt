@@ -1,7 +1,7 @@
 package no.nav.etterlatte.sak
 
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
-import tilgangsstyring.SaksbehandlerMedRoller
+import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
 
 interface TilgangService {
     fun harTilgangTilBehandling(behandlingId: String, saksbehandlerMedRoller: SaksbehandlerMedRoller): Boolean

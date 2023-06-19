@@ -24,6 +24,7 @@ import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.ktor.bruker
 import no.nav.etterlatte.sak.TilgangService
+import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
 import no.nav.etterlatte.token.Saksbehandler
 import no.nav.etterlatte.token.SystemBruker
 
@@ -157,34 +158,6 @@ suspend inline fun PipelineContext<*, ApplicationCall>.kunAttestant(
         }
         else -> onSuccess()
     }
-}
-
-data class SaksbehandlerMedRoller(
-    val saksbehandler: Saksbehandler,
-    val saksbehandlerGroupIdsByKey: Map<AzureGroup, String>
-) {
-
-    fun harRolle(rolle: AzureGroup): Boolean {
-        val claims = saksbehandler.getClaims()
-        if (saksbehandlerGroupIdsByKey[rolle] !== null) {
-            return claims?.containsClaim("groups", saksbehandlerGroupIdsByKey[rolle]) ?: false
-        }
-        return false
-    }
-
-    fun harRolleSaksbehandler() = harRolle(AzureGroup.SAKSBEHANDLER)
-    fun harRolleAttestant() = harRolle(AzureGroup.ATTESTANT)
-
-    fun harRolleStrengtFortrolig() =
-        harRolle(AzureGroup.STRENGT_FORTROLIG)
-
-    fun harRolleFortrolig() =
-        harRolle(AzureGroup.FORTROLIG)
-
-    fun harRolleEgenAnsatt() =
-        harRolle(AzureGroup.EGEN_ANSATT)
-
-    fun harRolleNasjonalTilgang() = harRolle(AzureGroup.NASJONAL_MED_LOGG) || harRolle(AzureGroup.NASJONAL_UTEN_LOGG)
 }
 
 fun <T> List<T>.filterForEnheter(

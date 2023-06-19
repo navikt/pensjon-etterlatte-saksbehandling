@@ -7,7 +7,7 @@ import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.oppgave.domain.Oppgave
-import tilgangsstyring.SaksbehandlerMedRoller
+import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
 import tilgangsstyring.filterForEnheter
 
 enum class OppgaveServiceFeatureToggle(private val key: String) : FeatureToggle {

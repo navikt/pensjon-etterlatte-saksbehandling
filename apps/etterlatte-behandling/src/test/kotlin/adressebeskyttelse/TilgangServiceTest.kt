@@ -15,6 +15,7 @@ import no.nav.etterlatte.sak.SakDao
 import no.nav.etterlatte.sak.SakTilgangDao
 import no.nav.etterlatte.sak.TilgangService
 import no.nav.etterlatte.sak.TilgangServiceImpl
+import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
 import no.nav.etterlatte.token.Saksbehandler
 import no.nav.security.token.support.core.jwt.JwtTokenClaims
 import org.junit.jupiter.api.Assertions
@@ -24,7 +25,6 @@ import org.junit.jupiter.api.TestInstance
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
 import tilgangsstyring.AzureGroup
-import tilgangsstyring.SaksbehandlerMedRoller
 import java.util.*
 import javax.sql.DataSource
 

@@ -17,7 +17,6 @@ import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
-import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
@@ -305,9 +304,6 @@ class BehandlingDao(
         statement.setObject(2, behandlingId)
         statement.executeUpdate()
     }
-
-    fun lagreKommerBarnetTilgode(kommerBarnetTilgode: KommerBarnetTilgode) =
-        kommerBarnetTilGodeDao.lagreKommerBarnetTilGode(kommerBarnetTilgode)
 }
 
 private fun ResultSet.somLocalDateTimeUTC(kolonne: String) = getTidspunkt(kolonne).toLocalDatetimeUTC()

@@ -11,6 +11,7 @@ import no.nav.etterlatte.behandling.domain.OpprettBehandling
 import no.nav.etterlatte.behandling.domain.toBehandlingOpprettet
 import no.nav.etterlatte.behandling.filterBehandlingerForEnheter
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
+import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
 import no.nav.etterlatte.behandling.revurdering.RevurderingService
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.inTransaction
@@ -76,6 +77,7 @@ class FoerstegangsbehandlingServiceImpl(
     private val revurderingService: RevurderingService,
     private val sakDao: SakDao,
     private val behandlingDao: BehandlingDao,
+    private val kommerBarnetTilGodeDao: KommerBarnetTilGodeDao,
     private val hendelseDao: HendelseDao,
     private val behandlingHendelser: BehandlingHendelserKafkaProducer,
     private val featureToggleService: FeatureToggleService,
@@ -228,8 +230,8 @@ class FoerstegangsbehandlingServiceImpl(
     }
 
     private fun Foerstegangsbehandling.lagreKommerBarnetTilgode(kommerBarnetTilgode: KommerBarnetTilgode) {
-        this.oppdaterKommerBarnetTilgode(kommerBarnetTilgode)
-            .also { behandlingDao.lagreKommerBarnetTilgode(kommerBarnetTilgode) }
+        this.tilOpprettet()
+            .also { kommerBarnetTilGodeDao.lagreKommerBarnetTilGode(kommerBarnetTilgode) }
             .also { behandlingDao.lagreStatus(it) }
     }
 

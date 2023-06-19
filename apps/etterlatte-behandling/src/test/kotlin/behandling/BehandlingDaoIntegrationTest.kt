@@ -3,6 +3,7 @@ package no.nav.etterlatte.behandling
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.domain.ManueltOpphoer
 import no.nav.etterlatte.behandling.domain.Revurdering
+import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
 import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerAarsak
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
@@ -53,6 +54,7 @@ internal class BehandlingDaoIntegrationTest {
     private lateinit var dataSource: DataSource
     private lateinit var sakRepo: SakDao
     private lateinit var behandlingRepo: BehandlingDao
+    private lateinit var kommerBarnetTilGodeDao: KommerBarnetTilGodeDao
 
     @BeforeAll
     fun beforeAll() {
@@ -68,7 +70,8 @@ internal class BehandlingDaoIntegrationTest {
 
         val connection = dataSource.connection
         sakRepo = SakDao { connection }
-        behandlingRepo = BehandlingDao { connection }
+        kommerBarnetTilGodeDao = KommerBarnetTilGodeDao { connection }
+        behandlingRepo = BehandlingDao(kommerBarnetTilGodeDao = kommerBarnetTilGodeDao, connection = { connection })
     }
 
     @AfterEach
@@ -500,7 +503,7 @@ internal class BehandlingDaoIntegrationTest {
             Grunnlagsopplysning.Saksbehandler.create("navIdent"),
             opprettBehandling.id
         )
-        behandlingRepo.lagreKommerBarnetTilgode(kommerBarnetTilgode)
+        kommerBarnetTilGodeDao.lagreKommerBarnetTilGode(kommerBarnetTilgode)
 
         with(behandlingRepo.hentBehandling(opprettBehandling.id)) {
             val expected = kommerBarnetTilgode
@@ -548,7 +551,7 @@ internal class BehandlingDaoIntegrationTest {
             .let {
                 behandlingRepo.lagreNyttVirkningstidspunkt(it.id, it.virkningstidspunkt!!)
                 behandlingRepo.lagreGyldighetsproving(it)
-                behandlingRepo.lagreKommerBarnetTilgode(it.kommerBarnetTilgode!!)
+                kommerBarnetTilGodeDao.lagreKommerBarnetTilGode(it.kommerBarnetTilgode!!)
                 behandlingRepo.lagreStatus(it.id, it.status, it.sistEndret)
             }
 

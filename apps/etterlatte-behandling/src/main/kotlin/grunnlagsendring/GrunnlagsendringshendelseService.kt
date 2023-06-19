@@ -308,15 +308,15 @@ class GrunnlagsendringshendelseService(
     private fun verifiserOgHaandterHendelse(
         hendelse: Grunnlagsendringshendelse
     ) {
-        val personRolle = hendelse.hendelseGjelderRolle.toPersonrolle()
         val sak = inTransaction {
             sakService.finnSak(hendelse.sakId)!!
         }
+        val personRolle = hendelse.hendelseGjelderRolle.toPersonrolle(sak.sakType)
         val pdlData = pdlKlient.hentPdlModell(hendelse.gjelderPerson, personRolle, sak.sakType)
         val grunnlag = runBlocking {
             grunnlagKlient.hentGrunnlag(hendelse.sakId)
         }
-        val samsvarMellomPdlOgGrunnlag = finnSamsvarForHendelse(hendelse, pdlData, grunnlag)
+        val samsvarMellomPdlOgGrunnlag = finnSamsvarForHendelse(hendelse, pdlData, grunnlag, personRolle)
         if (!samsvarMellomPdlOgGrunnlag.samsvar) {
             oppdaterHendelseSjekket(hendelse, samsvarMellomPdlOgGrunnlag)
         } else {
@@ -348,7 +348,8 @@ class GrunnlagsendringshendelseService(
     private fun finnSamsvarForHendelse(
         hendelse: Grunnlagsendringshendelse,
         pdlData: PersonDTO,
-        grunnlag: Grunnlag?
+        grunnlag: Grunnlag?,
+        personRolle: PersonRolle
     ): SamsvarMellomKildeOgGrunnlag {
         val rolle = hendelse.hendelseGjelderRolle
         val fnr = hendelse.gjelderPerson
@@ -369,7 +370,7 @@ class GrunnlagsendringshendelseService(
             }
 
             GrunnlagsendringsType.FORELDER_BARN_RELASJON -> {
-                if (rolle.toPersonrolle() == PersonRolle.BARN) {
+                if (personRolle == PersonRolle.BARN) {
                     samsvarAnsvarligeForeldre(
                         ansvarligeForeldrePdl = pdlData.hentAnsvarligeForeldre(),
                         ansvarligeForeldreGrunnlag = grunnlag?.ansvarligeForeldre(rolle, fnr)

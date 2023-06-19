@@ -17,8 +17,6 @@ import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import org.slf4j.LoggerFactory
 
-val hendelseTyper = listOf("DOEDSFALL_V1", "UTFLYTTING_FRA_NORGE", "FORELDERBARNRELASJON_V1")
-
 internal class PdlHendelser(
     rapidsConnection: RapidsConnection,
     private val behandlinger: BehandlingService
@@ -31,8 +29,8 @@ internal class PdlHendelser(
             eventName("PDL:PERSONHENDELSE")
 
             correlationId()
-            validate { it.requireAny("hendelse", hendelseTyper) }
-            validate { it.interestedIn("hendelse_data") }
+            validate { it.requireKey("hendelse") }
+            validate { it.requireKey("hendelse_data") }
         }.register(this)
     }
 

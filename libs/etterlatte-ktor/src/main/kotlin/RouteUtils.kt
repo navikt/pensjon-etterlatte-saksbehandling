@@ -82,25 +82,6 @@ suspend inline fun PipelineContext<*, ApplicationCall>.withFoedselsnummer(
     }
 }
 
-suspend inline fun PipelineContext<*, ApplicationCall>.withFoedselsnummerAndGradering(
-    personTilgangsSjekk: PersonTilgangsSjekk,
-    onSuccess: (fnr: Folkeregisteridentifikator, gradering: AdressebeskyttelseGradering?) -> Unit
-) {
-    val foedselsnummerDTOmedGradering = call.receive<FoedselsNummerMedGraderingDTO>()
-    val foedselsnummer = Folkeregisteridentifikator.of(foedselsnummerDTOmedGradering.foedselsnummer)
-    when (bruker) {
-        is Saksbehandler -> {
-            val harTilgangTilPerson = personTilgangsSjekk.harTilgangTilPerson(foedselsnummer, bruker as Saksbehandler)
-            if (harTilgangTilPerson) {
-                onSuccess(foedselsnummer, foedselsnummerDTOmedGradering.gradering)
-            } else {
-                call.respond(HttpStatusCode.NotFound)
-            }
-        }
-        else -> onSuccess(foedselsnummer, foedselsnummerDTOmedGradering.gradering)
-    }
-}
-
 suspend inline fun PipelineContext<*, ApplicationCall>.kunSystembruker(
     onSuccess: () -> Unit
 ) {

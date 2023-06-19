@@ -7,14 +7,21 @@ import io.ktor.server.application.Hook
 import io.ktor.server.application.RouteScopedPlugin
 import io.ktor.server.application.call
 import io.ktor.server.application.createRouteScopedPlugin
+import io.ktor.server.request.receive
 import io.ktor.server.request.uri
 import io.ktor.server.response.respond
+import io.ktor.util.pipeline.PipelineContext
 import io.ktor.util.pipeline.PipelinePhase
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
+import no.nav.etterlatte.libs.common.FoedselsNummerMedGraderingDTO
+import no.nav.etterlatte.libs.common.FoedselsnummerDTO
 import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
+import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.ktor.bruker
+import no.nav.etterlatte.sak.TilgangService
 import no.nav.etterlatte.token.Saksbehandler
 import no.nav.etterlatte.token.SystemBruker
 
@@ -75,6 +82,51 @@ val adressebeskyttelsePlugin: RouteScopedPlugin<PluginConfiguration> = createRou
         }
 
         return@on
+    }
+}
+
+// Disse extension funksjonene er ikke gjort i hooken ovenfor pga casting overhead
+suspend inline fun PipelineContext<*, ApplicationCall>.withFoedselsnummerInternal(
+    tilgangService: TilgangService,
+    onSuccess: (fnr: Folkeregisteridentifikator) -> Unit
+) {
+    val foedselsnummerDTO = call.receive<FoedselsnummerDTO>()
+    val foedselsnummer = Folkeregisteridentifikator.of(foedselsnummerDTO.foedselsnummer)
+    when (bruker) {
+        is Saksbehandler -> {
+            val harTilgang = tilgangService.harTilgangTilPerson(
+                foedselsnummer.value,
+                SaksbehandlerMedRoller(bruker as Saksbehandler)
+            )
+            if (harTilgang) {
+                onSuccess(foedselsnummer)
+            } else {
+                call.respond(HttpStatusCode.NotFound)
+            }
+        }
+        else -> onSuccess(foedselsnummer)
+    }
+}
+
+suspend inline fun PipelineContext<*, ApplicationCall>.withFoedselsnummerAndGradering(
+    tilgangService: TilgangService,
+    onSuccess: (fnr: Folkeregisteridentifikator, gradering: AdressebeskyttelseGradering?) -> Unit
+) {
+    val foedselsnummerDTOmedGradering = call.receive<FoedselsNummerMedGraderingDTO>()
+    val foedselsnummer = Folkeregisteridentifikator.of(foedselsnummerDTOmedGradering.foedselsnummer)
+    when (bruker) {
+        is Saksbehandler -> {
+            val harTilgangTilPerson = tilgangService.harTilgangTilPerson(
+                foedselsnummer.value,
+                SaksbehandlerMedRoller(bruker as Saksbehandler)
+            )
+            if (harTilgangTilPerson) {
+                onSuccess(foedselsnummer, foedselsnummerDTOmedGradering.gradering)
+            } else {
+                call.respond(HttpStatusCode.NotFound)
+            }
+        }
+        else -> onSuccess(foedselsnummer, foedselsnummerDTOmedGradering.gradering)
     }
 }
 

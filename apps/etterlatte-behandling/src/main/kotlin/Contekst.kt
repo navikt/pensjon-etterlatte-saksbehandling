@@ -7,7 +7,6 @@ import no.nav.etterlatte.config.AzureGroup
 import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
 import no.nav.security.token.support.core.context.TokenValidationContext
 import no.nav.security.token.support.v2.TokenValidationContextPrincipal
-import org.slf4j.LoggerFactory
 import java.sql.Connection
 
 object Kontekst : ThreadLocal<Context>()
@@ -45,10 +44,6 @@ class Saksbehandler(
     private val enhetService: EnhetService
 ) :
     ExternalUser(identifiedBy) {
-    private val logger = LoggerFactory.getLogger(Saksbehandler::class.java)
-
-    init {
-    }
 
     override fun name(): String {
         return identifiedBy.getJwtToken(AZURE_ISSUER).jwtTokenClaims.getStringClaim("NAVident")

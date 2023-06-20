@@ -65,6 +65,7 @@ export const GRUNNLAGSENDRING_STATUS = [
 
 export const STATUS_IRRELEVANT: GrunnlagsendringStatus = 'VURDERT_SOM_IKKE_RELEVANT'
 export const TATT_MED_I_BEHANDLING: GrunnlagsendringStatus = 'TATT_MED_I_BEHANDLING'
+export const HISTORISK_REVURDERING: GrunnlagsendringStatus = 'HISTORISK'
 
 interface Utland {
   utflyttingFraNorge?: {

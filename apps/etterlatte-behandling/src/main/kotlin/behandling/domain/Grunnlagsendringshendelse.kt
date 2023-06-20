@@ -23,7 +23,8 @@ enum class GrunnlagsendringsType {
     FORELDER_BARN_RELASJON,
     VERGEMAAL_ELLER_FREMTIDSFULLMAKT,
     GRUNNBELOEP,
-    INSTITUSJONSOPPHOLD
+    INSTITUSJONSOPPHOLD,
+    SIVILSTAND
 }
 
 enum class GrunnlagsendringStatus {

@@ -113,7 +113,7 @@ internal class GrunnlagsendringshendelseServiceTest {
 
         val opprettGrunnlagsendringshendelse = slot<Grunnlagsendringshendelse>()
 
-        every { grunnlagshendelsesDao.oppdaterGrunnlagsendringStatus(any(), any(), any(), any()) } returns Unit
+        every { grunnlagshendelsesDao.oppdaterGrunnlagsendringStatusOgSamsvar(any(), any(), any(), any()) } returns Unit
         every {
             grunnlagshendelsesDao.opprettGrunnlagsendringshendelse(capture(opprettGrunnlagsendringshendelse))
         } returns grunnlagsendringshendelse
@@ -457,7 +457,7 @@ internal class GrunnlagsendringshendelseServiceTest {
             enhet = Enheter.defaultEnhet.enhetNr
         )
         every {
-            grunnlagshendelsesDao.oppdaterGrunnlagsendringStatus(
+            grunnlagshendelsesDao.oppdaterGrunnlagsendringStatusOgSamsvar(
                 capture(idArg),
                 GrunnlagsendringStatus.VENTER_PAA_JOBB,
                 GrunnlagsendringStatus.SJEKKET_AV_JOBB,

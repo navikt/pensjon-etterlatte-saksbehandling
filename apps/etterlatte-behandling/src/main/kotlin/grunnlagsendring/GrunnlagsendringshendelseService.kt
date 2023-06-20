@@ -77,6 +77,12 @@ class GrunnlagsendringshendelseService(
         }
     }
 
+    fun settHendelseTilHistorisk(behandlingId: UUID) {
+        inTransaction {
+            grunnlagsendringshendelseDao.oppdaterGrunnlagsendringHistorisk(behandlingId)
+        }
+    }
+
     private fun ikkeVurderteHendelser(minutterGamle: Long): List<Grunnlagsendringshendelse> = inTransaction {
         grunnlagsendringshendelseDao.hentIkkeVurderteGrunnlagsendringshendelserEldreEnn(
             minutter = minutterGamle
@@ -325,7 +331,7 @@ class GrunnlagsendringshendelseService(
                     "naa sjekket av jobb, og informasjonen i pdl og grunnlag samsvarer ikke. " +
                     "Hendelsen forkastes derfor ikke."
             )
-            grunnlagsendringshendelseDao.oppdaterGrunnlagsendringStatus(
+            grunnlagsendringshendelseDao.oppdaterGrunnlagsendringStatusOgSamsvar(
                 hendelseId = hendelse.id,
                 foerStatus = GrunnlagsendringStatus.VENTER_PAA_JOBB,
                 etterStatus = GrunnlagsendringStatus.SJEKKET_AV_JOBB,
@@ -389,7 +395,7 @@ class GrunnlagsendringshendelseService(
     private fun forkastHendelse(hendelseId: UUID, samsvarMellomKildeOgGrunnlag: SamsvarMellomKildeOgGrunnlag) =
         inTransaction {
             logger.info("Forkaster grunnlagsendringshendelse med id $hendelseId.")
-            grunnlagsendringshendelseDao.oppdaterGrunnlagsendringStatus(
+            grunnlagsendringshendelseDao.oppdaterGrunnlagsendringStatusOgSamsvar(
                 hendelseId = hendelseId,
                 foerStatus = GrunnlagsendringStatus.VENTER_PAA_JOBB,
                 etterStatus = GrunnlagsendringStatus.FORKASTET,

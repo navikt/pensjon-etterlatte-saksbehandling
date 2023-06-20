@@ -300,7 +300,7 @@ internal class GrunnlagsendringshendelseDaoTest {
         val samsvarMellomPdlOgGrunnlag = samsvarMellomPdlOgGrunnlagDoed(doedsdato)
 
         val hendelserFoerOppdatertStatus = grunnlagsendringshendelsesRepo.hentAlleGrunnlagsendringshendelser()
-        grunnlagsendringshendelsesRepo.oppdaterGrunnlagsendringStatus(
+        grunnlagsendringshendelsesRepo.oppdaterGrunnlagsendringStatusOgSamsvar(
             hendelseId = id1,
             foerStatus = GrunnlagsendringStatus.VENTER_PAA_JOBB,
             etterStatus = GrunnlagsendringStatus.FORKASTET,
@@ -461,19 +461,19 @@ internal class GrunnlagsendringshendelseDaoTest {
         ).forEach {
             grunnlagsendringshendelsesRepo.opprettGrunnlagsendringshendelse(it)
         }
-        grunnlagsendringshendelsesRepo.oppdaterGrunnlagsendringStatus(
+        grunnlagsendringshendelsesRepo.oppdaterGrunnlagsendringStatusOgSamsvar(
             hendelseId = id1,
             foerStatus = GrunnlagsendringStatus.VENTER_PAA_JOBB,
             etterStatus = GrunnlagsendringStatus.SJEKKET_AV_JOBB,
             samsvarMellomKildeOgGrunnlag = samsvarMellomPdlOgGrunnlag
         )
-        grunnlagsendringshendelsesRepo.oppdaterGrunnlagsendringStatus(
+        grunnlagsendringshendelsesRepo.oppdaterGrunnlagsendringStatusOgSamsvar(
             hendelseId = id2,
             foerStatus = GrunnlagsendringStatus.VENTER_PAA_JOBB,
             etterStatus = GrunnlagsendringStatus.SJEKKET_AV_JOBB,
             samsvarMellomKildeOgGrunnlag = samsvarMellomPdlOgGrunnlag
         )
-        grunnlagsendringshendelsesRepo.oppdaterGrunnlagsendringStatus(
+        grunnlagsendringshendelsesRepo.oppdaterGrunnlagsendringStatusOgSamsvar(
             hendelseId = id3,
             foerStatus = GrunnlagsendringStatus.VENTER_PAA_JOBB,
             etterStatus = GrunnlagsendringStatus.SJEKKET_AV_JOBB,

@@ -64,7 +64,7 @@ class GrunnlagsendringshendelseDao(val connection: () -> Connection) {
         }
     }
 
-    fun oppdaterGrunnlagsendringStatus(
+    fun oppdaterGrunnlagsendringStatusOgSamsvar(
         hendelseId: UUID,
         foerStatus: GrunnlagsendringStatus,
         etterStatus: GrunnlagsendringStatus,
@@ -84,6 +84,22 @@ class GrunnlagsendringshendelseDao(val connection: () -> Connection) {
                 it.setJsonb(2, samsvarMellomKildeOgGrunnlag)
                 it.setObject(3, hendelseId)
                 it.setString(4, foerStatus.name)
+                it.executeUpdate()
+            }
+        }
+    }
+
+    fun oppdaterGrunnlagsendringHistorisk(behandlingId: UUID) {
+        with(connection()) {
+            prepareStatement(
+                """
+                   UPDATE grunnlagsendringshendelse
+                   SET status = ?
+                   WHERE behandling_id = ?
+                """.trimIndent()
+            ).use {
+                it.setString(1, GrunnlagsendringStatus.HISTORISK.toString())
+                it.setObject(2, behandlingId)
                 it.executeUpdate()
             }
         }

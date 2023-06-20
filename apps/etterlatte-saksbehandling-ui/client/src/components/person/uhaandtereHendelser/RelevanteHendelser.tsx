@@ -1,6 +1,6 @@
 import { Alert, Heading } from '@navikt/ds-react'
 import styled from 'styled-components'
-import { Grunnlagsendringshendelse, STATUS_IRRELEVANT, TATT_MED_I_BEHANDLING } from '~components/person/typer'
+import { Grunnlagsendringshendelse, STATUS_IRRELEVANT } from '~components/person/typer'
 import { FnrTilNavnMapContext } from '~components/person/uhaandtereHendelser/utils'
 import { isSuccess, Result } from '~shared/hooks/useApiCall'
 import React, { useMemo, useState } from 'react'
@@ -13,14 +13,14 @@ import UhaandtertHendelse from '~components/person/uhaandtereHendelser/Uhaandter
 
 type Props = {
   hendelser: Array<Grunnlagsendringshendelse>
-  disabled: boolean
+  harAapenRevurdering: boolean
   grunnlag: Result<PersonerISakResponse>
   revurderinger: Array<Revurderingsaarsak>
   sakId: number
 }
 
 const RelevanteHendelser = (props: Props) => {
-  const { hendelser, disabled, grunnlag, revurderinger, sakId } = props
+  const { hendelser, harAapenRevurdering, grunnlag, revurderinger, sakId } = props
 
   if (hendelser.length === 0) {
     return revurderinger.length > 0 ? <OpprettNyBehandling revurderinger={revurderinger} sakId={sakId} /> : null
@@ -43,8 +43,6 @@ const RelevanteHendelser = (props: Props) => {
 
   const relevanteHendelser = hendelser.filter((h) => h.status !== STATUS_IRRELEVANT)
   const lukkedeHendelser = hendelser.filter((h) => h.status === STATUS_IRRELEVANT)
-  const tattMedIBehandling = hendelser.filter((h) => h.status === TATT_MED_I_BEHANDLING)
-  const tidligereHendelser = lukkedeHendelser.concat(tattMedIBehandling)
 
   return (
     <>
@@ -61,7 +59,7 @@ const RelevanteHendelser = (props: Props) => {
               <UhaandtertHendelse
                 key={hendelse.id}
                 hendelse={hendelse}
-                disabled={disabled}
+                harAapenRevurdering={harAapenRevurdering}
                 startRevurdering={startRevurdering}
                 revurderinger={revurderinger}
               />
@@ -79,7 +77,7 @@ const RelevanteHendelser = (props: Props) => {
         />
       )}
       <OpprettNyBehandling revurderinger={revurderinger} sakId={sakId} />
-      <HistoriskeHendelser hendelser={tidligereHendelser} />
+      <HistoriskeHendelser hendelser={lukkedeHendelser} />
     </>
   )
 }

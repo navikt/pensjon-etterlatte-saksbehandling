@@ -1,6 +1,6 @@
 import { Alert, Heading } from '@navikt/ds-react'
 import styled from 'styled-components'
-import { Grunnlagsendringshendelse, STATUS_IRRELEVANT } from '~components/person/typer'
+import { Grunnlagsendringshendelse, STATUS_IRRELEVANT, TATT_MED_I_BEHANDLING } from '~components/person/typer'
 import { FnrTilNavnMapContext } from '~components/person/uhaandtereHendelser/utils'
 import { isSuccess, Result } from '~shared/hooks/useApiCall'
 import React, { useMemo, useState } from 'react'
@@ -43,6 +43,8 @@ const RelevanteHendelser = (props: Props) => {
 
   const relevanteHendelser = hendelser.filter((h) => h.status !== STATUS_IRRELEVANT)
   const lukkedeHendelser = hendelser.filter((h) => h.status === STATUS_IRRELEVANT)
+  const tattMedIBehandling = hendelser.filter((h) => h.status === TATT_MED_I_BEHANDLING)
+  const tidligereHendelser = lukkedeHendelser.concat(tattMedIBehandling)
 
   return (
     <>
@@ -77,7 +79,7 @@ const RelevanteHendelser = (props: Props) => {
         />
       )}
       <OpprettNyBehandling revurderinger={revurderinger} sakId={sakId} />
-      <HistoriskeHendelser hendelser={lukkedeHendelser} />
+      <HistoriskeHendelser hendelser={tidligereHendelser} />
     </>
   )
 }

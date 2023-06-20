@@ -31,7 +31,7 @@ const BeregningsgrunnlagOmstillingsstoenad = (props: { behandling: IDetaljertBeh
     <>
       {isFailure(beregning) && <ApiErrorAlert>Kunne ikke opprette ny beregning</ApiErrorAlert>}
 
-      <Trygdetid redigerbar={behandles} />
+      <Trygdetid redigerbar={behandles} utenlandstilsnitt={behandling.utenlandstilsnitt} />
       <Border />
 
       {behandles ? (

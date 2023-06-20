@@ -80,7 +80,7 @@ class RealRevurderingService(
                     kilde
                 )?.also { revurdering ->
                     if (paaGrunnAvHendelse != null) {
-                        grunnlagsendringshendelseDao.settBehandlingIdForTattMedIBehandling(
+                        grunnlagsendringshendelseDao.settBehandlingIdForTattMedIRevurdering(
                             paaGrunnAvHendelse,
                             revurdering.id
                         )

@@ -141,7 +141,7 @@ class GrunnlagsendringshendelseDao(val connection: () -> Connection) {
         }
     }
 
-    fun settBehandlingIdForTattMedIBehandling(
+    fun settBehandlingIdForTattMedIRevurdering(
         grlaghendelseId: UUID,
         behandlingId: UUID
     ) {

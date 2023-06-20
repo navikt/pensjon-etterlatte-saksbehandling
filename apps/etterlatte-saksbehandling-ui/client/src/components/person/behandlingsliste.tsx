@@ -143,6 +143,8 @@ function mapAarsak(aarsak: BehandlingOgRevurderingsAarsakerType) {
       return 'Adopsjon'
     case Revurderingsaarsak.VERGEMAAL_ELLER_FREMTIDSFULLMAKT:
       return 'Institusjonsopphold'
+    case Revurderingsaarsak.SIVILSTAND:
+      return 'Endring av sivilstand'
   }
 }
 

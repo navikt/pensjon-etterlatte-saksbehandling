@@ -49,7 +49,7 @@ import no.nav.etterlatte.sak.RealSakService
 import no.nav.etterlatte.sak.SakDao
 import no.nav.etterlatte.sak.SakTilgangDao
 import no.nav.etterlatte.sak.TilgangServiceImpl
-import tilgangsstyring.AzureGroup
+import no.nav.etterlatte.tilgangsstyring.AzureGroup
 import java.time.Duration
 import java.time.temporal.ChronoUnit
 

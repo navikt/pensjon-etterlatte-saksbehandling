@@ -17,6 +17,7 @@ import no.nav.etterlatte.config.ApplicationContext
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
 import no.nav.etterlatte.module
+import no.nav.etterlatte.tilgangsstyring.AzureGroup
 import no.nav.etterlatte.token.Claims
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
@@ -25,7 +26,6 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import testsupport.buildTestApplicationConfigurationForOauth
-import tilgangsstyring.AzureGroup
 import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)

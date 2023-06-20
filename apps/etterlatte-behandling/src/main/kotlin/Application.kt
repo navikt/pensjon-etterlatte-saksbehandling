@@ -33,9 +33,9 @@ import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.libs.ktor.setReady
 import no.nav.etterlatte.oppgave.oppgaveRoutes
 import no.nav.etterlatte.sak.sakRoutes
+import no.nav.etterlatte.tilgangsstyring.adressebeskyttelsePlugin
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import tilgangsstyring.adressebeskyttelsePlugin
 import javax.sql.DataSource
 
 val sikkerLogg: Logger = LoggerFactory.getLogger("sikkerLogg")

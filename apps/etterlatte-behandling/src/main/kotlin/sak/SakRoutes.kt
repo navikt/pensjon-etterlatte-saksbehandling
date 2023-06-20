@@ -21,8 +21,8 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.kunSystembruker
 import no.nav.etterlatte.libs.common.sak.Saker
 import no.nav.etterlatte.libs.common.sakId
-import tilgangsstyring.withFoedselsnummerAndGradering
-import tilgangsstyring.withFoedselsnummerInternal
+import no.nav.etterlatte.tilgangsstyring.withFoedselsnummerAndGradering
+import no.nav.etterlatte.tilgangsstyring.withFoedselsnummerInternal
 
 internal fun Route.sakRoutes(
     tilgangService: TilgangService,

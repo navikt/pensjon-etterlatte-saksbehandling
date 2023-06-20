@@ -14,17 +14,17 @@ import no.nav.etterlatte.libs.common.behandlingsId
 import no.nav.etterlatte.libs.common.sakId
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.sak.TilgangService
+import no.nav.etterlatte.tilgangsstyring.TILGANG_ROUTE_PATH
 import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.etterlatte.token.Saksbehandler
 import no.nav.etterlatte.token.Systembruker
-import tilgangsstyring.TILGANG_ROUTE_PATH
 
 internal fun Route.tilgangRoutes(tilgangService: TilgangService) {
     route("/$TILGANG_ROUTE_PATH") {
         post("/person") {
             val fnr = call.receive<String>()
 
-            val harTilgang = harTilgangBrukertypeSjekk(brukerTokenInfo) { saksbehandler ->
+            val harTilgang = harTilgangBrukertypeSjekk(brukerTokenInfo) { _ ->
                 tilgangService.harTilgangTilPerson(
                     fnr,
                     Kontekst.get().appUserAsSaksbehandler().saksbehandlerMedRoller
@@ -34,7 +34,7 @@ internal fun Route.tilgangRoutes(tilgangService: TilgangService) {
         }
 
         get("/behandling/{$BEHANDLINGSID_CALL_PARAMETER}") {
-            val harTilgang = harTilgangBrukertypeSjekk(brukerTokenInfo) { saksbehandler ->
+            val harTilgang = harTilgangBrukertypeSjekk(brukerTokenInfo) { _ ->
                 tilgangService.harTilgangTilBehandling(
                     behandlingsId.toString(),
                     Kontekst.get().appUserAsSaksbehandler().saksbehandlerMedRoller
@@ -44,7 +44,7 @@ internal fun Route.tilgangRoutes(tilgangService: TilgangService) {
         }
 
         get("/sak/{$SAKID_CALL_PARAMETER}") {
-            val harTilgang = harTilgangBrukertypeSjekk(brukerTokenInfo) { saksbehandler ->
+            val harTilgang = harTilgangBrukertypeSjekk(brukerTokenInfo) { _ ->
                 tilgangService.harTilgangTilSak(
                     sakId,
                     Kontekst.get().appUserAsSaksbehandler().saksbehandlerMedRoller

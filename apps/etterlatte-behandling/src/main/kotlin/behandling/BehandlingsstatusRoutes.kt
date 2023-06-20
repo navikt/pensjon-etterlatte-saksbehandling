@@ -11,7 +11,7 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.behandlingsId
-import tilgangsstyring.kunAttestant
+import no.nav.etterlatte.tilgangsstyring.kunAttestant
 
 internal fun Route.behandlingsstatusRoutes(
     behandlingsstatusService: BehandlingStatusService

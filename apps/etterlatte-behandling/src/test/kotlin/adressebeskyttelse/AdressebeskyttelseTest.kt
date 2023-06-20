@@ -27,12 +27,12 @@ import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.module
+import no.nav.etterlatte.tilgangsstyring.TILGANG_ROUTE_PATH
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import tilgangsstyring.TILGANG_ROUTE_PATH
 import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_METHOD)

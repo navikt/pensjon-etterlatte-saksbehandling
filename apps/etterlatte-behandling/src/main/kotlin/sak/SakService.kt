@@ -18,8 +18,8 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.tilgangsstyring.filterForEnheter
 import org.slf4j.LoggerFactory
-import tilgangsstyring.filterForEnheter
 
 enum class SakServiceFeatureToggle(private val key: String) : FeatureToggle {
     FiltrerMedEnhetId("pensjon-etterlatte.filtrer-saker-med-enhet-id");

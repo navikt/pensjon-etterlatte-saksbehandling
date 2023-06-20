@@ -1,4 +1,4 @@
-package tilgangsstyring
+package no.nav.etterlatte.tilgangsstyring
 
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.ApplicationCall
@@ -13,6 +13,7 @@ import io.ktor.server.response.respond
 import io.ktor.util.pipeline.PipelineContext
 import io.ktor.util.pipeline.PipelinePhase
 import no.nav.etterlatte.Kontekst
+import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.User
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
@@ -24,7 +25,6 @@ import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.sak.TilgangService
-import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
 import no.nav.etterlatte.token.Saksbehandler
 import no.nav.etterlatte.token.Systembruker
 
@@ -168,7 +168,7 @@ fun <T> List<T>.filterForEnheter(
 ) =
     if (featureToggleService.isEnabled(toggle, false)) {
         when (user) {
-            is no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller -> {
+            is SaksbehandlerMedEnheterOgRoller -> {
                 val enheter = user.enheter()
 
                 this.filter { filter(it, enheter) }

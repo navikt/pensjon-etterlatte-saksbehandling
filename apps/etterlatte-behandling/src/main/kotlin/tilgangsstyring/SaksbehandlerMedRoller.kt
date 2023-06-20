@@ -1,7 +1,6 @@
 package no.nav.etterlatte.tilgangsstyring
 
 import no.nav.etterlatte.token.Saksbehandler
-import tilgangsstyring.AzureGroup
 
 data class SaksbehandlerMedRoller(
     val saksbehandler: Saksbehandler,

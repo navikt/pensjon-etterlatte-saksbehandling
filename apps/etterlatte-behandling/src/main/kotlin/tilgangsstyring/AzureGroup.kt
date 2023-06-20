@@ -1,4 +1,4 @@
-package tilgangsstyring
+package no.nav.etterlatte.tilgangsstyring
 
 enum class AzureGroup(val envKey: String) {
     ATTESTANT("AZUREAD_ATTESTANT_GROUPID"),

@@ -1,13 +1,14 @@
 package no.nav.etterlatte.oppgave
 
-import no.nav.etterlatte.Saksbehandler
+import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.User
-import no.nav.etterlatte.filterForEnheter
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.oppgave.domain.Oppgave
+import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
+import no.nav.etterlatte.tilgangsstyring.filterForEnheter
 
 enum class OppgaveServiceFeatureToggle(private val key: String) : FeatureToggle {
     EnhetFilterOppgaver("pensjon-etterlatte.filter-oppgaver-enhet");
@@ -17,13 +18,13 @@ enum class OppgaveServiceFeatureToggle(private val key: String) : FeatureToggle 
 
 interface OppgaveService {
 
-    fun finnOppgaverForBruker(bruker: Saksbehandler): List<Oppgave>
+    fun finnOppgaverForBruker(bruker: SaksbehandlerMedRoller): List<Oppgave>
 }
 
 class OppgaveServiceImpl(private val oppgaveDao: OppgaveDao, private val featureToggleService: FeatureToggleService) :
     OppgaveService {
 
-    private fun finnAktuelleRoller(bruker: Saksbehandler): List<Rolle> =
+    private fun finnAktuelleRoller(bruker: SaksbehandlerMedRoller): List<Rolle> =
         listOfNotNull(
             Rolle.SAKSBEHANDLER.takeIf { bruker.harRolleSaksbehandler() },
             Rolle.ATTESTANT.takeIf { bruker.harRolleAttestant() }
@@ -37,7 +38,7 @@ class OppgaveServiceImpl(private val oppgaveDao: OppgaveDao, private val feature
         }.distinct()
     }
 
-    override fun finnOppgaverForBruker(bruker: Saksbehandler): List<Oppgave> {
+    override fun finnOppgaverForBruker(bruker: SaksbehandlerMedRoller): List<Oppgave> {
         val rollerSomBrukerHar = finnAktuelleRoller(bruker)
         val aktuelleStatuserForRoller = aktuelleStatuserForRolleTilSaksbehandler(rollerSomBrukerHar)
 
@@ -50,10 +51,10 @@ class OppgaveServiceImpl(private val oppgaveDao: OppgaveDao, private val feature
                 oppgaveDao.finnOppgaverMedStatuser(aktuelleStatuserForRoller) +
                     oppgaveDao.finnOppgaverFraGrunnlagsendringshendelser()
             }.sortedByDescending { it.registrertDato }
-        }.filterForEnheter(bruker)
+        }.filterForEnheter(Kontekst.get().AppUser)
     }
 
-    private fun List<Oppgave>.filterForEnheter(bruker: Saksbehandler) =
+    private fun List<Oppgave>.filterForEnheter(bruker: User) =
         this.filterOppgaverForEnheter(featureToggleService, bruker)
 }
 

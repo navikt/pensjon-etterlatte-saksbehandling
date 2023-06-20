@@ -36,10 +36,7 @@ class SakDaoTest {
         ).apply { migrate() }
         val connection = dataSource.connection
         sakRepo = SakDao { connection }
-        tilgangService = TilgangServiceImpl(
-            SakTilgangDao(dataSource),
-            emptyMap()
-        )
+        tilgangService = TilgangServiceImpl(SakTilgangDao(dataSource))
     }
 
     @Test

@@ -12,17 +12,17 @@ import no.nav.etterlatte.libs.common.retry
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktorobo.Resource
-import no.nav.etterlatte.token.Bruker
+import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.etterlatte.token.Saksbehandler
 import org.slf4j.LoggerFactory
 import java.util.*
 
 interface BehandlingKlient : BehandlingTilgangsSjekk {
-    suspend fun hentBehandling(behandlingId: UUID, bruker: Bruker): DetaljertBehandling
+    suspend fun hentBehandling(behandlingId: UUID, brukerTokenInfo: BrukerTokenInfo): DetaljertBehandling
 
-    suspend fun hentSisteIverksatteBehandling(sakId: Long, bruker: Bruker): DetaljertBehandling
-    suspend fun beregn(behandlingId: UUID, bruker: Bruker, commit: Boolean): Boolean
-    suspend fun avkort(behandlingId: UUID, bruker: Bruker, commit: Boolean): Boolean
+    suspend fun hentSisteIverksatteBehandling(sakId: Long, brukerTokenInfo: BrukerTokenInfo): DetaljertBehandling
+    suspend fun beregn(behandlingId: UUID, brukerTokenInfo: BrukerTokenInfo, commit: Boolean): Boolean
+    suspend fun avkort(behandlingId: UUID, brukerTokenInfo: BrukerTokenInfo, commit: Boolean): Boolean
 }
 
 class BehandlingKlientException(override val message: String, override val cause: Throwable) : Exception(message, cause)
@@ -36,7 +36,7 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
     private val clientId = config.getString("behandling.client.id")
     private val resourceUrl = config.getString("behandling.resource.url")
 
-    override suspend fun hentBehandling(behandlingId: UUID, bruker: Bruker): DetaljertBehandling {
+    override suspend fun hentBehandling(behandlingId: UUID, brukerTokenInfo: BrukerTokenInfo): DetaljertBehandling {
         logger.info("Henter behandling med behandlingId=$behandlingId")
 
         return retry<DetaljertBehandling> {
@@ -46,7 +46,7 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
                         clientId = clientId,
                         url = "$resourceUrl/behandlinger/$behandlingId"
                     ),
-                    bruker = bruker
+                    brukerTokenInfo = brukerTokenInfo
                 )
                 .mapBoth(
                     success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
@@ -65,7 +65,10 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
         }
     }
 
-    override suspend fun hentSisteIverksatteBehandling(sakId: Long, bruker: Bruker): DetaljertBehandling {
+    override suspend fun hentSisteIverksatteBehandling(
+        sakId: Long,
+        brukerTokenInfo: BrukerTokenInfo
+    ): DetaljertBehandling {
         return retry<DetaljertBehandling> {
             downstreamResourceClient
                 .get(
@@ -73,7 +76,7 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
                         clientId = clientId,
                         url = "$resourceUrl/saker/$sakId/behandlinger/sisteIverksatte"
                     ),
-                    bruker = bruker
+                    brukerTokenInfo = brukerTokenInfo
                 )
                 .mapBoth(
                     success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
@@ -92,13 +95,13 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
         }
     }
 
-    override suspend fun beregn(behandlingId: UUID, bruker: Bruker, commit: Boolean): Boolean {
+    override suspend fun beregn(behandlingId: UUID, brukerTokenInfo: BrukerTokenInfo, commit: Boolean): Boolean {
         logger.info("Sjekker om behandling med behandlingId=$behandlingId kan beregnes")
         val resource = Resource(clientId = clientId, url = "$resourceUrl/behandlinger/$behandlingId/beregn")
 
         val response = when (commit) {
-            false -> downstreamResourceClient.get(resource, bruker)
-            true -> downstreamResourceClient.post(resource, bruker, "{}")
+            false -> downstreamResourceClient.get(resource, brukerTokenInfo)
+            true -> downstreamResourceClient.post(resource, brukerTokenInfo, "{}")
         }
 
         return response.mapBoth(
@@ -110,13 +113,13 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
         )
     }
 
-    override suspend fun avkort(behandlingId: UUID, bruker: Bruker, commit: Boolean): Boolean {
+    override suspend fun avkort(behandlingId: UUID, brukerTokenInfo: BrukerTokenInfo, commit: Boolean): Boolean {
         logger.info("Sjekker om behandling med behandlingId=$behandlingId kan avkortes")
         val resource = Resource(clientId = clientId, url = "$resourceUrl/behandlinger/$behandlingId/avkort")
 
         val response = when (commit) {
-            false -> downstreamResourceClient.get(resource, bruker)
-            true -> downstreamResourceClient.post(resource, bruker, "{}")
+            false -> downstreamResourceClient.get(resource, brukerTokenInfo)
+            true -> downstreamResourceClient.post(resource, brukerTokenInfo, "{}")
         }
 
         return response.mapBoth(
@@ -136,7 +139,7 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
                         clientId = clientId,
                         url = "$resourceUrl/tilgang/behandling/$behandlingId"
                     ),
-                    bruker = bruker
+                    brukerTokenInfo = bruker
                 )
                 .mapBoth(
                     success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },

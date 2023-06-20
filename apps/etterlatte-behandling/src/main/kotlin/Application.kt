@@ -28,10 +28,12 @@ import no.nav.etterlatte.grunnlagsendring.grunnlagsendringshendelseRoute
 import no.nav.etterlatte.institusjonsopphold.InstitusjonsoppholdService
 import no.nav.etterlatte.institusjonsopphold.institusjonsoppholdRoute
 import no.nav.etterlatte.libs.database.migrate
+import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.libs.ktor.setReady
 import no.nav.etterlatte.oppgave.oppgaveRoutes
 import no.nav.etterlatte.sak.sakRoutes
+import no.nav.etterlatte.tilgangsstyring.adressebeskyttelsePlugin
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import javax.sql.DataSource
@@ -97,7 +99,7 @@ fun Application.module(context: ApplicationContext) {
             )
             omregningRoutes(omregningService = omregningService)
             migreringRoutes(migreringService = migreringService)
-            behandlingsstatusRoutes(behandlingsstatusService = behandlingsStatusService, saksbehandlerGroupIdsByKey)
+            behandlingsstatusRoutes(behandlingsstatusService = behandlingsStatusService)
             oppgaveRoutes(service = oppgaveService)
             grunnlagsendringshendelseRoute(grunnlagsendringshendelseService = grunnlagsendringshendelseService)
             egenAnsattRoute(egenAnsattService = EgenAnsattService(sakService, sikkerLogg))
@@ -105,6 +107,7 @@ fun Application.module(context: ApplicationContext) {
             tilgangRoutes(tilgangService)
 
             install(adressebeskyttelsePlugin) {
+                saksbehandlerGroupIdsByKey = context.saksbehandlerGroupIdsByKey
                 harTilgangBehandling = { behandlingId, saksbehandlerMedRoller ->
                     tilgangService.harTilgangTilBehandling(behandlingId, saksbehandlerMedRoller)
                 }
@@ -126,7 +129,8 @@ private fun Route.attachContekst(
                 AppUser = decideUser(
                     call.principal() ?: throw Exception("Ingen bruker funnet i jwt token"),
                     context.saksbehandlerGroupIdsByKey,
-                    context.enhetService
+                    context.enhetService,
+                    brukerTokenInfo
                 ),
                 databasecontxt = DatabaseContext(ds)
             )

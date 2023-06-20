@@ -13,7 +13,7 @@ import io.mockk.verify
 import no.nav.etterlatte.Context
 import no.nav.etterlatte.DatabaseKontekst
 import no.nav.etterlatte.Kontekst
-import no.nav.etterlatte.Saksbehandler
+import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.domain.OpprettBehandling
 import no.nav.etterlatte.behandling.foerstegangsbehandling.RealFoerstegangsbehandlingService
@@ -54,7 +54,7 @@ import java.util.*
 
 internal class RealFoerstegangsbehandlingServiceTest {
 
-    private val user = mockk<Saksbehandler>()
+    private val user = mockk<SaksbehandlerMedEnheterOgRoller>()
     private val sakDaoMock = mockk<SakDao>()
     private val behandlingDaoMock = mockk<BehandlingDao>()
     private val hendelseDaoMock = mockk<HendelseDao>()

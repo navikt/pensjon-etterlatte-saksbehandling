@@ -21,8 +21,8 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.kunSystembruker
 import no.nav.etterlatte.libs.common.sak.Saker
 import no.nav.etterlatte.libs.common.sakId
-import no.nav.etterlatte.libs.common.withFoedselsnummer
-import no.nav.etterlatte.libs.common.withFoedselsnummerAndGradering
+import no.nav.etterlatte.tilgangsstyring.withFoedselsnummerAndGradering
+import no.nav.etterlatte.tilgangsstyring.withFoedselsnummerInternal
 
 internal fun Route.sakRoutes(
     tilgangService: TilgangService,
@@ -66,7 +66,7 @@ internal fun Route.sakRoutes(
     }
 
     post("personer/getsak/{type}") {
-        withFoedselsnummer(tilgangService) { fnr ->
+        withFoedselsnummerInternal(tilgangService) { fnr ->
             val type: SakType = enumValueOf(requireNotNull(call.parameters["type"]))
             val sak = inTransaction { sakService.finnSak(fnr.value, type) }
             call.respond(sak ?: HttpStatusCode.NotFound)
@@ -75,7 +75,7 @@ internal fun Route.sakRoutes(
 
     route("/api/personer/") {
         post("behandlinger") {
-            withFoedselsnummer(tilgangService) { fnr ->
+            withFoedselsnummerInternal(tilgangService) { fnr ->
                 val behandlinger = sakService.finnSaker(fnr.value)
                     .map { sak ->
                         generellBehandlingService.hentBehandlingerISak(sak.id).map {
@@ -87,7 +87,7 @@ internal fun Route.sakRoutes(
         }
 
         post("grunnlagsendringshendelser") {
-            withFoedselsnummer(tilgangService) { fnr ->
+            withFoedselsnummerInternal(tilgangService) { fnr ->
                 call.respond(
                     sakService.finnSaker(fnr.value).map { sak ->
                         GrunnlagsendringsListe(grunnlagsendringshendelseService.hentAlleHendelserForSak(sak.id))
@@ -105,12 +105,10 @@ internal fun Route.sakRoutes(
 
     route("/api/sak/{$SAKID_CALL_PARAMETER}") {
         get {
-            withSakIdInternal(tilgangService) { sakId ->
-                val sak = inTransaction {
-                    sakService.finnSak(sakId)
-                }
-                call.respond(sak ?: HttpStatusCode.NotFound)
+            val sak = inTransaction {
+                sakService.finnSak(sakId)
             }
+            call.respond(sak ?: HttpStatusCode.NotFound)
         }
     }
 }

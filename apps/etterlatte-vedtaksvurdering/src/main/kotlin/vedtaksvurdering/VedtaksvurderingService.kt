@@ -24,8 +24,8 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
-import no.nav.etterlatte.token.Bruker
-import no.nav.etterlatte.token.SystemBruker
+import no.nav.etterlatte.token.BrukerTokenInfo
+import no.nav.etterlatte.token.Systembruker
 import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlient
 import no.nav.etterlatte.vedtaksvurdering.klienter.BeregningKlient
 import no.nav.etterlatte.vedtaksvurdering.klienter.VilkaarsvurderingKlient
@@ -62,14 +62,14 @@ class VedtaksvurderingService(
         return Vedtakstidslinje(alleVedtakForSak).erLoependePaa(dato)
     }
 
-    suspend fun opprettEllerOppdaterVedtak(behandlingId: UUID, bruker: Bruker): Vedtak {
+    suspend fun opprettEllerOppdaterVedtak(behandlingId: UUID, brukerTokenInfo: BrukerTokenInfo): Vedtak {
         val vedtak = hentVedtak(behandlingId)
 
         if (vedtak != null) {
             verifiserGyldigVedtakStatus(vedtak.status, listOf(VedtakStatus.OPPRETTET, VedtakStatus.RETURNERT))
         }
 
-        val (behandling, vilkaarsvurdering, beregningOgAvkorting) = hentDataForVedtak(behandlingId, bruker)
+        val (behandling, vilkaarsvurdering, beregningOgAvkorting) = hentDataForVedtak(behandlingId, brukerTokenInfo)
         val vedtakType = vedtakType(behandling.behandlingType, vilkaarsvurdering)
         val virkningstidspunkt = requireNotNull(behandling.virkningstidspunkt?.dato) {
             "Behandling med behandlingId=$behandlingId mangler virkningstidspunkt"
@@ -84,19 +84,19 @@ class VedtaksvurderingService(
         }
     }
 
-    suspend fun fattVedtak(behandlingId: UUID, bruker: Bruker): Vedtak {
+    suspend fun fattVedtak(behandlingId: UUID, brukerTokenInfo: BrukerTokenInfo): Vedtak {
         logger.info("Fatter vedtak for behandling med behandlingId=$behandlingId")
         val vedtak = hentVedtakNonNull(behandlingId)
 
-        verifiserGyldigBehandlingStatus(behandlingKlient.fattVedtak(behandlingId, bruker), vedtak)
+        verifiserGyldigBehandlingStatus(behandlingKlient.fattVedtak(behandlingId, brukerTokenInfo), vedtak)
         verifiserGyldigVedtakStatus(vedtak.status, listOf(VedtakStatus.OPPRETTET, VedtakStatus.RETURNERT))
 
-        val sak = behandlingKlient.hentSak(vedtak.sakId, bruker)
+        val sak = behandlingKlient.hentSak(vedtak.sakId, brukerTokenInfo)
 
         val fattetVedtak = repository.fattVedtak(
             behandlingId,
             VedtakFattet(
-                bruker.ident(),
+                brukerTokenInfo.ident(),
                 sak.enhet,
                 Tidspunkt.now(clock)
             )
@@ -104,7 +104,7 @@ class VedtaksvurderingService(
 
         behandlingKlient.fattVedtak(
             behandlingId = behandlingId,
-            bruker = bruker,
+            brukerTokenInfo = brukerTokenInfo,
             vedtakHendelse = VedtakHendelse(
                 vedtakId = fattetVedtak.id,
                 inntruffet = fattetVedtak.vedtakFattet?.tidspunkt!!,
@@ -124,21 +124,21 @@ class VedtaksvurderingService(
         return fattetVedtak
     }
 
-    suspend fun attesterVedtak(behandlingId: UUID, kommentar: String, bruker: Bruker): Vedtak {
+    suspend fun attesterVedtak(behandlingId: UUID, kommentar: String, brukerTokenInfo: BrukerTokenInfo): Vedtak {
         logger.info("Attesterer vedtak for behandling med behandlingId=$behandlingId")
         val vedtak = hentVedtakNonNull(behandlingId)
 
-        verifiserGyldigBehandlingStatus(behandlingKlient.attester(behandlingId, bruker), vedtak)
+        verifiserGyldigBehandlingStatus(behandlingKlient.attester(behandlingId, brukerTokenInfo), vedtak)
         verifiserGyldigVedtakStatus(vedtak.status, listOf(VedtakStatus.FATTET_VEDTAK))
-        verifiserGyldigAttestant(vedtak.vedtakFattet!!.ansvarligSaksbehandler, bruker)
+        attestantHarAnnenIdentEnnSaksbehandler(vedtak.vedtakFattet!!.ansvarligSaksbehandler, brukerTokenInfo)
 
-        val (behandling, _, _, sak) = hentDataForVedtak(behandlingId, bruker)
+        val (behandling, _, _, sak) = hentDataForVedtak(behandlingId, brukerTokenInfo)
         verifiserGyldigVedtakForRevurdering(behandling, vedtak)
 
         val attestertVedtak = repository.attesterVedtak(
             behandlingId,
             Attestasjon(
-                bruker.ident(),
+                brukerTokenInfo.ident(),
                 sak.enhet,
                 Tidspunkt.now(clock)
             )
@@ -146,7 +146,7 @@ class VedtaksvurderingService(
 
         behandlingKlient.attester(
             behandlingId,
-            bruker,
+            brukerTokenInfo,
             VedtakHendelse(
                 vedtakId = attestertVedtak.id,
                 inntruffet = attestertVedtak.attestasjon?.tidspunkt!!,
@@ -163,7 +163,7 @@ class VedtaksvurderingService(
                 mapOf(
                     SKAL_SENDE_BREV to when {
                         behandling.revurderingsaarsak.skalIkkeSendeBrev() -> false
-                        bruker is SystemBruker -> false
+                        brukerTokenInfo is Systembruker -> false
                         else -> true
                     },
                     REVURDERING_AARSAK to behandling.revurderingsaarsak.toString()
@@ -179,13 +179,13 @@ class VedtaksvurderingService(
 
     suspend fun underkjennVedtak(
         behandlingId: UUID,
-        bruker: Bruker,
+        brukerTokenInfo: BrukerTokenInfo,
         begrunnelse: UnderkjennVedtakDto
     ): Vedtak {
         logger.info("Underkjenner vedtak for behandling med behandlingId=$behandlingId")
         val vedtak = hentVedtakNonNull(behandlingId)
 
-        verifiserGyldigBehandlingStatus(behandlingKlient.underkjenn(behandlingId, bruker), vedtak)
+        verifiserGyldigBehandlingStatus(behandlingKlient.underkjenn(behandlingId, brukerTokenInfo), vedtak)
         verifiserGyldigVedtakStatus(vedtak.status, listOf(VedtakStatus.FATTET_VEDTAK))
 
         val underkjentVedtak = repository.underkjennVedtak(behandlingId)
@@ -193,11 +193,11 @@ class VedtaksvurderingService(
 
         behandlingKlient.underkjenn(
             behandlingId,
-            bruker,
+            brukerTokenInfo,
             VedtakHendelse(
                 vedtakId = underkjentVedtak.id,
                 inntruffet = underkjentTid,
-                saksbehandler = bruker.ident(),
+                saksbehandler = brukerTokenInfo.ident(),
                 kommentar = begrunnelse.kommentar,
                 valgtBegrunnelse = begrunnelse.valgtBegrunnelse
             )
@@ -244,9 +244,12 @@ class VedtaksvurderingService(
         if (gjeldendeStatus !in forventetStatus) throw VedtakTilstandException(gjeldendeStatus, forventetStatus)
     }
 
-    private fun verifiserGyldigAttestant(ansvarligSaksbehandler: String, innloggetBruker: Bruker) {
-        if (!innloggetBruker.kanAttestereFor(ansvarligSaksbehandler)) {
-            throw UgyldigAttestantException(innloggetBruker.ident())
+    private fun attestantHarAnnenIdentEnnSaksbehandler(
+        ansvarligSaksbehandler: String,
+        innloggetBrukerTokenInfo: BrukerTokenInfo
+    ) {
+        if (ansvarligSaksbehandler == innloggetBrukerTokenInfo.ident()) {
+            throw UgyldigAttestantException(innloggetBrukerTokenInfo.ident())
         }
     }
 
@@ -382,22 +385,22 @@ class VedtaksvurderingService(
 
     private suspend fun hentDataForVedtak(
         behandlingId: UUID,
-        bruker: Bruker
+        brukerTokenInfo: BrukerTokenInfo
     ): VedtakData {
         return coroutineScope {
-            val behandling = behandlingKlient.hentBehandling(behandlingId, bruker)
-            val sak = behandlingKlient.hentSak(behandling.sak, bruker)
+            val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
+            val sak = behandlingKlient.hentSak(behandling.sak, brukerTokenInfo)
             when (behandling.behandlingType) {
                 BehandlingType.MANUELT_OPPHOER -> VedtakData(behandling, null, null, sak)
 
                 BehandlingType.FØRSTEGANGSBEHANDLING, BehandlingType.REVURDERING -> {
-                    val vilkaarsvurdering = vilkaarsvurderingKlient.hentVilkaarsvurdering(behandlingId, bruker)
+                    val vilkaarsvurdering = vilkaarsvurderingKlient.hentVilkaarsvurdering(behandlingId, brukerTokenInfo)
                     when (vilkaarsvurdering?.resultat?.utfall) {
                         VilkaarsvurderingUtfall.IKKE_OPPFYLT -> VedtakData(behandling, vilkaarsvurdering, null, sak)
                         VilkaarsvurderingUtfall.OPPFYLT -> {
                             val beregningOgAvkorting = beregningKlient.hentBeregningOgAvkorting(
                                 behandlingId,
-                                bruker,
+                                brukerTokenInfo,
                                 sak.sakType
                             )
                             VedtakData(behandling, vilkaarsvurdering, beregningOgAvkorting, sak)
@@ -430,8 +433,8 @@ class VedtaksvurderingService(
     fun tilbakestillIkkeIverksatteVedtak(behandlingId: UUID): Vedtak? =
         repository.tilbakestillIkkeIverksatteVedtak(behandlingId)
 
-    suspend fun postTilBehandling(behandlingId: UUID, bruker: Bruker, vedtakId: Long) =
-        behandlingKlient.iverksett(behandlingId, bruker, vedtakId)
+    suspend fun postTilBehandling(behandlingId: UUID, brukerTokenInfo: BrukerTokenInfo, vedtakId: Long) =
+        behandlingKlient.iverksett(behandlingId, brukerTokenInfo, vedtakId)
 }
 
 class VedtakTilstandException(gjeldendeStatus: VedtakStatus, forventetStatus: List<VedtakStatus>) :

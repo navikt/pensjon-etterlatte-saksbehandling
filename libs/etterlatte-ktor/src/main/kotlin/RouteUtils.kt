@@ -9,9 +9,9 @@ import io.ktor.server.response.respond
 import io.ktor.util.pipeline.PipelineContext
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
-import no.nav.etterlatte.libs.ktor.bruker
+import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.token.Saksbehandler
-import no.nav.etterlatte.token.SystemBruker
+import no.nav.etterlatte.token.Systembruker
 import no.nav.security.token.support.v2.TokenValidationContextPrincipal
 import java.util.*
 
@@ -32,10 +32,10 @@ suspend inline fun PipelineContext<*, ApplicationCall>.withBehandlingId(
     behandlingTilgangsSjekk: BehandlingTilgangsSjekk,
     onSuccess: (id: UUID) -> Unit
 ) = withParam(BEHANDLINGSID_CALL_PARAMETER) { behandlingId ->
-    when (bruker) {
+    when (brukerTokenInfo) {
         is Saksbehandler -> {
             val harTilgangTilBehandling =
-                behandlingTilgangsSjekk.harTilgangTilBehandling(behandlingId, bruker as Saksbehandler)
+                behandlingTilgangsSjekk.harTilgangTilBehandling(behandlingId, brukerTokenInfo as Saksbehandler)
             if (harTilgangTilBehandling) {
                 onSuccess(behandlingId)
             } else {
@@ -50,9 +50,9 @@ suspend inline fun PipelineContext<*, ApplicationCall>.withSakId(
     sakTilgangsSjekk: SakTilgangsSjekk,
     onSuccess: (id: Long) -> Unit
 ) = call.parameters[SAKID_CALL_PARAMETER]!!.toLong().let { sakId ->
-    when (bruker) {
+    when (brukerTokenInfo) {
         is Saksbehandler -> {
-            val harTilgangTilSak = sakTilgangsSjekk.harTilgangTilSak(sakId, bruker as Saksbehandler)
+            val harTilgangTilSak = sakTilgangsSjekk.harTilgangTilSak(sakId, brukerTokenInfo as Saksbehandler)
             if (harTilgangTilSak) {
                 onSuccess(sakId)
             } else {
@@ -69,9 +69,12 @@ suspend inline fun PipelineContext<*, ApplicationCall>.withFoedselsnummer(
 ) {
     val foedselsnummerDTO = call.receive<FoedselsnummerDTO>()
     val foedselsnummer = Folkeregisteridentifikator.of(foedselsnummerDTO.foedselsnummer)
-    when (bruker) {
+    when (brukerTokenInfo) {
         is Saksbehandler -> {
-            val harTilgangTilPerson = personTilgangsSjekk.harTilgangTilPerson(foedselsnummer, bruker as Saksbehandler)
+            val harTilgangTilPerson = personTilgangsSjekk.harTilgangTilPerson(
+                foedselsnummer,
+                brukerTokenInfo as Saksbehandler
+            )
             if (harTilgangTilPerson) {
                 onSuccess(foedselsnummer)
             } else {
@@ -82,30 +85,11 @@ suspend inline fun PipelineContext<*, ApplicationCall>.withFoedselsnummer(
     }
 }
 
-suspend inline fun PipelineContext<*, ApplicationCall>.withFoedselsnummerAndGradering(
-    personTilgangsSjekk: PersonTilgangsSjekk,
-    onSuccess: (fnr: Folkeregisteridentifikator, gradering: AdressebeskyttelseGradering?) -> Unit
-) {
-    val foedselsnummerDTOmedGradering = call.receive<FoedselsNummerMedGraderingDTO>()
-    val foedselsnummer = Folkeregisteridentifikator.of(foedselsnummerDTOmedGradering.foedselsnummer)
-    when (bruker) {
-        is Saksbehandler -> {
-            val harTilgangTilPerson = personTilgangsSjekk.harTilgangTilPerson(foedselsnummer, bruker as Saksbehandler)
-            if (harTilgangTilPerson) {
-                onSuccess(foedselsnummer, foedselsnummerDTOmedGradering.gradering)
-            } else {
-                call.respond(HttpStatusCode.NotFound)
-            }
-        }
-        else -> onSuccess(foedselsnummer, foedselsnummerDTOmedGradering.gradering)
-    }
-}
-
 suspend inline fun PipelineContext<*, ApplicationCall>.kunSystembruker(
     onSuccess: () -> Unit
 ) {
-    when (bruker) {
-        is SystemBruker -> {
+    when (brukerTokenInfo) {
+        is Systembruker -> {
             onSuccess()
         }
         else -> call.respond(HttpStatusCode.NotFound)

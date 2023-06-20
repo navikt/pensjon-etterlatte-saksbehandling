@@ -10,7 +10,7 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
-import no.nav.etterlatte.token.Bruker
+import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.pensjon.brevbaker.api.model.Kroner
 import java.time.YearMonth
 import java.util.*
@@ -25,17 +25,17 @@ class SakOgBehandlingService(
     suspend fun hentBehandling(
         sakId: Long,
         behandlingId: UUID,
-        bruker: Bruker
+        brukerTokenInfo: BrukerTokenInfo
     ): Behandling = coroutineScope {
-        val vedtak = async { vedtaksvurderingKlient.hentVedtak(behandlingId, bruker) }
-        val grunnlag = async { grunnlagKlient.hentGrunnlag(sakId, bruker) }
-        val sak = async { behandlingKlient.hentSak(sakId, bruker) }
+        val vedtak = async { vedtaksvurderingKlient.hentVedtak(behandlingId, brukerTokenInfo) }
+        val grunnlag = async { grunnlagKlient.hentGrunnlag(sakId, brukerTokenInfo) }
+        val sak = async { behandlingKlient.hentSak(sakId, brukerTokenInfo) }
 
         mapBehandling(
             vedtak.await(),
             grunnlag.await(),
             sak.await(),
-            bruker
+            brukerTokenInfo
         )
     }
 
@@ -43,9 +43,9 @@ class SakOgBehandlingService(
         vedtak: VedtakDto,
         grunnlag: Grunnlag,
         sak: Sak,
-        bruker: Bruker
+        brukerTokenInfo: BrukerTokenInfo
     ): Behandling {
-        val innloggetSaksbehandlerIdent = bruker.ident()
+        val innloggetSaksbehandlerIdent = brukerTokenInfo.ident()
 
         val ansvarligEnhet = vedtak.vedtakFattet?.ansvarligEnhet ?: sak.enhet
         val saksbehandlerIdent = vedtak.vedtakFattet?.ansvarligSaksbehandler ?: innloggetSaksbehandlerIdent
@@ -69,12 +69,12 @@ class SakOgBehandlingService(
                 saksbehandlerIdent,
                 attestantIdent
             ),
-            utbetalingsinfo = finnUtbetalingsinfo(vedtak.behandling.id, vedtak.virkningstidspunkt, bruker),
+            utbetalingsinfo = finnUtbetalingsinfo(vedtak.behandling.id, vedtak.virkningstidspunkt, brukerTokenInfo),
             avkortingsinfo = finnAvkortingsinfo(
                 vedtak.behandling.id,
                 vedtak.sak.sakType,
                 vedtak.virkningstidspunkt,
-                bruker
+                brukerTokenInfo
             ),
             revurderingsaarsak = vedtak.behandling.revurderingsaarsak
         )
@@ -83,9 +83,9 @@ class SakOgBehandlingService(
     private suspend fun finnUtbetalingsinfo(
         behandlingId: UUID,
         virkningstidspunkt: YearMonth,
-        bruker: Bruker
+        brukerTokenInfo: BrukerTokenInfo
     ): Utbetalingsinfo {
-        val beregning = beregningKlient.hentBeregning(behandlingId, bruker)
+        val beregning = beregningKlient.hentBeregning(behandlingId, brukerTokenInfo)
 
         val beregningsperioder = beregning.beregningsperioder.map {
             Beregningsperiode(
@@ -116,10 +116,10 @@ class SakOgBehandlingService(
         behandlingId: UUID,
         sakType: SakType,
         virkningstidspunkt: YearMonth,
-        bruker: Bruker
+        brukerTokenInfo: BrukerTokenInfo
     ): Avkortingsinfo? {
         if (sakType == SakType.BARNEPENSJON) return null // TODO: Fjern når avkorting støttes for barnepensjon
-        val avkorting = beregningKlient.hentAvkorting(behandlingId, bruker)
+        val avkorting = beregningKlient.hentAvkorting(behandlingId, brukerTokenInfo)
 
         val beregningsperioder = avkorting.avkortetYtelse.map {
             AvkortetBeregningsperiode(

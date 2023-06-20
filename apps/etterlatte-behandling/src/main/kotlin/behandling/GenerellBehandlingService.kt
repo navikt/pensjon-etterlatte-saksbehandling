@@ -14,7 +14,6 @@ import no.nav.etterlatte.behandling.hendelse.LagretHendelse
 import no.nav.etterlatte.behandling.hendelse.registrerVedtakHendelseFelles
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
-import no.nav.etterlatte.filterForEnheter
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseDao
@@ -32,7 +31,8 @@ import no.nav.etterlatte.libs.sporingslogg.Decision
 import no.nav.etterlatte.libs.sporingslogg.HttpMethod
 import no.nav.etterlatte.libs.sporingslogg.Sporingslogg
 import no.nav.etterlatte.libs.sporingslogg.Sporingsrequest
-import no.nav.etterlatte.token.Bruker
+import no.nav.etterlatte.tilgangsstyring.filterForEnheter
+import no.nav.etterlatte.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
 import java.time.YearMonth
 import java.util.*
@@ -76,18 +76,18 @@ interface GenerellBehandlingService {
     fun hentDetaljertBehandling(behandlingId: UUID): DetaljertBehandling?
     suspend fun hentDetaljertBehandlingMedTilbehoer(
         behandlingId: UUID,
-        bruker: Bruker
+        brukerTokenInfo: BrukerTokenInfo
     ): DetaljertBehandlingDto
 
     suspend fun hentBehandlingMedEnkelPersonopplysning(
         behandlingId: UUID,
-        bruker: Bruker,
+        brukerTokenInfo: BrukerTokenInfo,
         opplysningstype: Opplysningstype
     ): BehandlingMedGrunnlagsopplysninger<Person>
 
     suspend fun erGyldigVirkningstidspunkt(
         behandlingId: UUID,
-        bruker: Bruker,
+        brukerTokenInfo: BrukerTokenInfo,
         request: VirkningstidspunktRequest
     ): Boolean
 }
@@ -155,7 +155,7 @@ class RealGenerellBehandlingService(
 
     override suspend fun hentBehandlingMedEnkelPersonopplysning(
         behandlingId: UUID,
-        bruker: Bruker,
+        brukerTokenInfo: BrukerTokenInfo,
         opplysningstype: Opplysningstype
     ): BehandlingMedGrunnlagsopplysninger<Person> {
         val behandling = hentBehandling(behandlingId)?.toDetaljertBehandling()!!
@@ -163,20 +163,20 @@ class RealGenerellBehandlingService(
         val personopplysning = grunnlagKlient.finnPersonOpplysning(
             sakId,
             opplysningstype,
-            bruker
+            brukerTokenInfo
         )
         return BehandlingMedGrunnlagsopplysninger(
             id = behandling.id,
             soeknadMottattDato = behandling.soeknadMottattDato,
             personopplysning = personopplysning
         ).also {
-            personopplysning?.fnr?.let { loggRequest(bruker, it) }
+            personopplysning?.fnr?.let { loggRequest(brukerTokenInfo, it) }
         }
     }
 
     override suspend fun erGyldigVirkningstidspunkt(
         behandlingId: UUID,
-        bruker: Bruker,
+        brukerTokenInfo: BrukerTokenInfo,
         request: VirkningstidspunktRequest
     ): Boolean {
         val virkningstidspunkt = request.dato
@@ -185,7 +185,7 @@ class RealGenerellBehandlingService(
 
         val behandlingMedDoedsdato = hentBehandlingMedEnkelPersonopplysning(
             behandlingId,
-            bruker,
+            brukerTokenInfo,
             Opplysningstype.AVDOED_PDL_V1
         )
         val doedsdato = YearMonth.from(behandlingMedDoedsdato.personopplysning?.opplysning?.doedsdato)
@@ -203,7 +203,7 @@ class RealGenerellBehandlingService(
 
     override suspend fun hentDetaljertBehandlingMedTilbehoer(
         behandlingId: UUID,
-        bruker: Bruker
+        brukerTokenInfo: BrukerTokenInfo
     ): DetaljertBehandlingDto {
         val detaljertBehandling = hentBehandling(behandlingId)?.toDetaljertBehandling()!!
         val hendelserIBehandling = hentHendelserIBehandling(behandlingId)
@@ -213,15 +213,15 @@ class RealGenerellBehandlingService(
         val sakId = detaljertBehandling.sak
         logger.info("Hentet behandling for $behandlingId")
         return coroutineScope {
-            val vedtak = async { vedtakKlient.hentVedtak(behandlingId.toString(), bruker) }
+            val vedtak = async { vedtakKlient.hentVedtak(behandlingId.toString(), brukerTokenInfo) }
             logger.info("Hentet vedtak for $behandlingId")
             val avdoed = async {
-                grunnlagKlient.finnPersonOpplysning(sakId, Opplysningstype.AVDOED_PDL_V1, bruker)
+                grunnlagKlient.finnPersonOpplysning(sakId, Opplysningstype.AVDOED_PDL_V1, brukerTokenInfo)
             }
             logger.info("Hentet Opplysningstype.AVDOED_PDL_V1 for $behandlingId")
 
             val soeker = async {
-                grunnlagKlient.finnPersonOpplysning(sakId, Opplysningstype.SOEKER_PDL_V1, bruker)
+                grunnlagKlient.finnPersonOpplysning(sakId, Opplysningstype.SOEKER_PDL_V1, brukerTokenInfo)
             }
             logger.info("Hentet Opplysningstype.SOEKER_PDL_V1 for $behandlingId")
 
@@ -232,7 +232,7 @@ class RealGenerellBehandlingService(
                     grunnlagKlient.finnPersonOpplysning(
                         sakId,
                         Opplysningstype.GJENLEVENDE_FORELDER_PDL_V1,
-                        bruker
+                        brukerTokenInfo
                     )
                 }
             }
@@ -259,18 +259,18 @@ class RealGenerellBehandlingService(
                 søker = soeker.await()?.opplysning,
                 revurderingsaarsak = detaljertBehandling.revurderingsaarsak
             ).also {
-                gjenlevende.await()?.fnr?.let { loggRequest(bruker, it) }
-                soeker.await()?.fnr?.let { loggRequest(bruker, it) }
+                gjenlevende.await()?.fnr?.let { loggRequest(brukerTokenInfo, it) }
+                soeker.await()?.fnr?.let { loggRequest(brukerTokenInfo, it) }
             }
         }
     }
 
-    private fun loggRequest(bruker: Bruker, fnr: Folkeregisteridentifikator) =
+    private fun loggRequest(brukerTokenInfo: BrukerTokenInfo, fnr: Folkeregisteridentifikator) =
         sporingslogg.logg(
             Sporingsrequest(
                 kallendeApplikasjon = "behandling",
                 oppdateringstype = HttpMethod.GET,
-                brukerId = bruker.ident(),
+                brukerId = brukerTokenInfo.ident(),
                 hvemBlirSlaattOpp = fnr.value,
                 endepunkt = "behandling",
                 resultat = Decision.Permit,

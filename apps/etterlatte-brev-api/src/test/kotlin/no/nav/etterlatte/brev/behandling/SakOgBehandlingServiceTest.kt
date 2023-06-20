@@ -31,7 +31,7 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
-import no.nav.etterlatte.token.Bruker
+import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.pensjon.brevbaker.api.model.Kroner
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -68,11 +68,11 @@ internal class SakOgBehandlingServiceTest {
             behandlingKlient.hentSak(any(), any())
         } returns Sak("ident", SakType.BARNEPENSJON, SAK_ID, ENHET)
         coEvery { vedtaksvurderingKlient.hentVedtak(any(), any()) } returns opprettVedtak()
-        coEvery { grunnlagKlient.hentGrunnlag(SAK_ID, BRUKER) } returns opprettGrunnlag()
+        coEvery { grunnlagKlient.hentGrunnlag(SAK_ID, BRUKERTokenInfo) } returns opprettGrunnlag()
         coEvery { beregningKlient.hentBeregning(any(), any()) } returns opprettBeregning()
 
         val behandling = runBlocking {
-            service.hentBehandling(SAK_ID, BEHANDLING_ID, BRUKER)
+            service.hentBehandling(SAK_ID, BEHANDLING_ID, BRUKERTokenInfo)
         }
 
         assertEquals(SAK_ID, behandling.sakId)
@@ -107,7 +107,7 @@ internal class SakOgBehandlingServiceTest {
         coEvery { beregningKlient.hentBeregning(any(), any()) } returns opprettBeregning()
 
         val behandling = runBlocking {
-            service.hentBehandling(SAK_ID, BEHANDLING_ID, BRUKER)
+            service.hentBehandling(SAK_ID, BEHANDLING_ID, BRUKERTokenInfo)
         }
 
         assertEquals(1, behandling.utbetalingsinfo?.antallBarn)
@@ -136,7 +136,7 @@ internal class SakOgBehandlingServiceTest {
         coEvery { beregningKlient.hentBeregning(any(), any()) } returns opprettBeregningSoeskenjustering()
 
         val behandling = runBlocking {
-            service.hentBehandling(SAK_ID, BEHANDLING_ID, BRUKER)
+            service.hentBehandling(SAK_ID, BEHANDLING_ID, BRUKERTokenInfo)
         }
 
         assertEquals(2, behandling.utbetalingsinfo?.antallBarn)
@@ -216,7 +216,7 @@ internal class SakOgBehandlingServiceTest {
         private val BEHANDLING_ID = UUID.randomUUID()
         private const val ENHET = "0000"
         private const val SAKSBEHANDLER_IDENT = "Z1235"
-        private val BRUKER = Bruker.of("321", SAKSBEHANDLER_IDENT, null, null, null)
+        private val BRUKERTokenInfo = BrukerTokenInfo.of("321", SAKSBEHANDLER_IDENT, null, null, null)
         private const val ATTESTANT_IDENT = "Z54321"
         private const val SAK_ID = 123L
         private val BREV_BEREGNINGSPERIODE =

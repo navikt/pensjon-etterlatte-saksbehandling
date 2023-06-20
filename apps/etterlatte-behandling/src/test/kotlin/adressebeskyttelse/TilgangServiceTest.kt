@@ -1,10 +1,8 @@
 package no.nav.etterlatte.adressebeskyttelse
 
 import com.nimbusds.jwt.JWTClaimsSet
-import no.nav.etterlatte.SaksbehandlerMedRoller
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.common.Enheter
-import no.nav.etterlatte.config.AzureGroup
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -17,6 +15,8 @@ import no.nav.etterlatte.sak.SakDao
 import no.nav.etterlatte.sak.SakTilgangDao
 import no.nav.etterlatte.sak.TilgangService
 import no.nav.etterlatte.sak.TilgangServiceImpl
+import no.nav.etterlatte.tilgangsstyring.AzureGroup
+import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
 import no.nav.etterlatte.token.Saksbehandler
 import no.nav.security.token.support.core.jwt.JwtTokenClaims
 import org.junit.jupiter.api.Assertions
@@ -53,14 +53,7 @@ class TilgangServiceTest {
             password = postgreSQLContainer.password
         ).apply { migrate() }
 
-        tilgangService = TilgangServiceImpl(
-            SakTilgangDao(dataSource),
-            mapOf(
-                AzureGroup.STRENGT_FORTROLIG to strengtfortroligDev,
-                AzureGroup.FORTROLIG to fortroligDev,
-                AzureGroup.EGEN_ANSATT to egenAnsattDev
-            )
-        )
+        tilgangService = TilgangServiceImpl(SakTilgangDao(dataSource))
         sakRepo = SakDao { dataSource.connection }
         behandlingRepo = BehandlingDao { dataSource.connection }
     }
@@ -69,7 +62,10 @@ class TilgangServiceTest {
     fun `Skal kunne sette adressebeskyttelse på sak`() {
         val fnr = Folkeregisteridentifikator.of("08071272487").value
         val sakId = sakRepo.opprettSak(fnr, SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr).id
-        val saksbehandlerMedRoller = SaksbehandlerMedRoller(Saksbehandler("", "ident", null))
+        val saksbehandlerMedRoller = SaksbehandlerMedRoller(
+            Saksbehandler("", "ident", null),
+            emptyMap()
+        )
 
         tilgangService.oppdaterAdressebeskyttelse(sakId, AdressebeskyttelseGradering.STRENGT_FORTROLIG)
         val opprettBehandling = opprettBehandling(
@@ -103,8 +99,10 @@ class TilgangServiceTest {
         val fnr = Folkeregisteridentifikator.of("08071272487").value
         val sakId = sakRepo.opprettSak(fnr, SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr).id
         val jwtclaims = JWTClaimsSet.Builder().claim("groups", strengtfortroligDev).build()
+
         val saksbehandlerMedStrengtfortrolig = SaksbehandlerMedRoller(
-            Saksbehandler("", "ident", JwtTokenClaims(jwtclaims))
+            Saksbehandler("", "ident", JwtTokenClaims(jwtclaims)),
+            mapOf(AzureGroup.STRENGT_FORTROLIG to strengtfortroligDev)
         )
 
         tilgangService.oppdaterAdressebeskyttelse(sakId, AdressebeskyttelseGradering.STRENGT_FORTROLIG)
@@ -130,7 +128,8 @@ class TilgangServiceTest {
 
         val jwtclaimsFortrolig = JWTClaimsSet.Builder().claim("groups", fortroligDev).build()
         val saksbehandlerMedFortrolig = SaksbehandlerMedRoller(
-            Saksbehandler("", "ident", JwtTokenClaims(jwtclaimsFortrolig))
+            Saksbehandler("", "ident", JwtTokenClaims(jwtclaimsFortrolig)),
+            mapOf(AzureGroup.FORTROLIG to fortroligDev)
         )
         val harTilgangTilBehandlingSomfortrolig =
             tilgangService.harTilgangTilBehandling(
@@ -147,7 +146,8 @@ class TilgangServiceTest {
         val sakId = sakRepo.opprettSak(fnr, SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr).id
         val jwtclaims = JWTClaimsSet.Builder().claim("groups", strengtfortroligDev).build()
         val saksbehandlerMedStrengtfortrolig = SaksbehandlerMedRoller(
-            Saksbehandler("", "ident", JwtTokenClaims(jwtclaims))
+            Saksbehandler("", "ident", JwtTokenClaims(jwtclaims)),
+            mapOf(AzureGroup.STRENGT_FORTROLIG to strengtfortroligDev)
         )
 
         val opprettBehandling = opprettBehandling(
@@ -182,7 +182,8 @@ class TilgangServiceTest {
 
         val jwtclaimsEgenAnsatt = JWTClaimsSet.Builder().claim("groups", egenAnsattDev).build()
         val saksbehandlerMedEgenansatt = SaksbehandlerMedRoller(
-            Saksbehandler("", "ident", JwtTokenClaims(jwtclaimsEgenAnsatt))
+            Saksbehandler("", "ident", JwtTokenClaims(jwtclaimsEgenAnsatt)),
+            mapOf(AzureGroup.EGEN_ANSATT to egenAnsattDev)
         )
         val harTilgangTilBehandlingMedEgenAnsattRolle =
             tilgangService.harTilgangTilBehandling(

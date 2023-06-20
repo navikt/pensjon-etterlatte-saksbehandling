@@ -12,7 +12,7 @@ import no.nav.etterlatte.libs.common.retry
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktorobo.Resource
-import no.nav.etterlatte.token.Bruker
+import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.etterlatte.token.Saksbehandler
 import org.slf4j.LoggerFactory
 import java.util.*
@@ -37,7 +37,7 @@ class BehandlingKlient(config: Config, httpClient: HttpClient) : BehandlingTilga
                         clientId = clientId,
                         url = "$resourceUrl/tilgang/behandling/$behandlingId"
                     ),
-                    bruker = bruker
+                    brukerTokenInfo = bruker
                 )
                 .mapBoth(
                     success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
@@ -48,11 +48,11 @@ class BehandlingKlient(config: Config, httpClient: HttpClient) : BehandlingTilga
         }
     }
 
-    suspend fun kanBeregnes(behandlingId: UUID, bruker: Bruker): Boolean {
+    suspend fun kanBeregnes(behandlingId: UUID, brukerTokenInfo: BrukerTokenInfo): Boolean {
         logger.info("Sjekker om behandling med behandlingId=$behandlingId kan beregnes")
         val resource = Resource(clientId = clientId, url = "$resourceUrl/behandlinger/$behandlingId/beregn")
 
-        return downstreamResourceClient.get(resource, bruker)
+        return downstreamResourceClient.get(resource, brukerTokenInfo)
             .mapBoth(
                 success = { true },
                 failure = {
@@ -62,12 +62,12 @@ class BehandlingKlient(config: Config, httpClient: HttpClient) : BehandlingTilga
             )
     }
 
-    suspend fun hentSisteIverksatteBehandling(sakId: Long, bruker: Bruker): DetaljertBehandling {
+    suspend fun hentSisteIverksatteBehandling(sakId: Long, brukerTokenInfo: BrukerTokenInfo): DetaljertBehandling {
         logger.info("Henter seneste iverksatte behandling for sak med id $sakId")
 
         val response = downstreamResourceClient.get(
             resource = Resource(clientId = clientId, url = "$resourceUrl/saker/$sakId/behandlinger/sisteIverksatte"),
-            bruker = bruker
+            brukerTokenInfo = brukerTokenInfo
         )
 
         return response.mapBoth(
@@ -81,12 +81,12 @@ class BehandlingKlient(config: Config, httpClient: HttpClient) : BehandlingTilga
 
     suspend fun settBehandlingStatusVilkaarsvurdert(
         behandlingId: UUID,
-        bruker: Bruker
+        brukerTokenInfo: BrukerTokenInfo
     ): Boolean {
         logger.info("Committer vilkaarsvurdering på behandling med id $behandlingId")
         val response = downstreamResourceClient.post(
             resource = Resource(clientId = clientId, url = "$resourceUrl/behandlinger/$behandlingId/vilkaarsvurder"),
-            bruker = bruker,
+            brukerTokenInfo = brukerTokenInfo,
             postBody = "{}"
         )
 
@@ -99,7 +99,7 @@ class BehandlingKlient(config: Config, httpClient: HttpClient) : BehandlingTilga
         )
     }
 
-    suspend fun hentBehandling(behandlingId: UUID, bruker: Bruker): DetaljertBehandling {
+    suspend fun hentBehandling(behandlingId: UUID, brukerTokenInfo: BrukerTokenInfo): DetaljertBehandling {
         logger.info("Henter behandling med behandlingId=$behandlingId")
 
         return retry<DetaljertBehandling> {
@@ -109,7 +109,7 @@ class BehandlingKlient(config: Config, httpClient: HttpClient) : BehandlingTilga
                         clientId = clientId,
                         url = "$resourceUrl/behandlinger/$behandlingId"
                     ),
-                    bruker = bruker
+                    brukerTokenInfo = brukerTokenInfo
                 )
                 .mapBoth(
                     success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },

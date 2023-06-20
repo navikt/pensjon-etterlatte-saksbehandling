@@ -35,7 +35,7 @@ import no.nav.etterlatte.libs.regler.RegelkjoeringResultat
 import no.nav.etterlatte.libs.regler.eksekver
 import no.nav.etterlatte.libs.regler.finnAnvendteRegler
 import no.nav.etterlatte.regler.Beregningstall
-import no.nav.etterlatte.token.Bruker
+import no.nav.etterlatte.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.YearMonth
@@ -58,17 +58,17 @@ class BeregnBarnepensjonService(
 ) {
     private val logger = LoggerFactory.getLogger(BeregnBarnepensjonService::class.java)
 
-    suspend fun beregn(behandling: DetaljertBehandling, bruker: Bruker): Beregning {
-        val grunnlag = grunnlagKlient.hentGrunnlag(behandling.sak, bruker)
+    suspend fun beregn(behandling: DetaljertBehandling, brukerTokenInfo: BrukerTokenInfo): Beregning {
+        val grunnlag = grunnlagKlient.hentGrunnlag(behandling.sak, brukerTokenInfo)
         val behandlingType = behandling.behandlingType
         val virkningstidspunkt = requireNotNull(behandling.virkningstidspunkt?.dato)
 
         val beregningsGrunnlag = requireNotNull(
-            beregningsGrunnlagService.hentBarnepensjonBeregningsGrunnlag(behandling.id, bruker)
+            beregningsGrunnlagService.hentBarnepensjonBeregningsGrunnlag(behandling.id, brukerTokenInfo)
         )
 
         val trygdetid = try {
-            trygdetidKlient.hentTrygdetid(behandling.id, bruker)
+            trygdetidKlient.hentTrygdetid(behandling.id, brukerTokenInfo)
         } catch (e: Exception) {
             logger.warn(
                 "Kunne ikke hente ut trygdetid for behandlingen med id=${behandling.id}. " +
@@ -96,7 +96,7 @@ class BeregnBarnepensjonService(
 
             BehandlingType.REVURDERING -> {
                 val vilkaarsvurderingUtfall =
-                    vilkaarsvurderingKlient.hentVilkaarsvurdering(behandling.id, bruker).resultat?.utfall
+                    vilkaarsvurderingKlient.hentVilkaarsvurdering(behandling.id, brukerTokenInfo).resultat?.utfall
                         ?: throw RuntimeException("Forventa å ha resultat for behandling ${behandling.id}")
 
                 when (vilkaarsvurderingUtfall) {

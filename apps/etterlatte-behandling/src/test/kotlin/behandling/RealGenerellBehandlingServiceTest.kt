@@ -12,7 +12,7 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.Context
 import no.nav.etterlatte.DatabaseKontekst
 import no.nav.etterlatte.Kontekst
-import no.nav.etterlatte.Saksbehandler
+import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
@@ -33,7 +33,7 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.personOpplysning
 import no.nav.etterlatte.revurdering
-import no.nav.etterlatte.token.Bruker
+import no.nav.etterlatte.token.BrukerTokenInfo
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -48,7 +48,7 @@ import java.time.LocalDateTime
 import java.util.*
 
 class RealGenerellBehandlingServiceTest {
-    private val user = mockk<Saksbehandler>()
+    private val user = mockk<SaksbehandlerMedEnheterOgRoller>()
 
     @BeforeEach
     fun before() {
@@ -628,6 +628,6 @@ class RealGenerellBehandlingServiceTest {
     companion object {
         const val SAK_ID = 1L
         val BEHANDLINGS_ID: UUID = UUID.randomUUID()
-        val TOKEN = Bruker.of("a", "b", null, null, null)
+        val TOKEN = BrukerTokenInfo.of("a", "b", null, null, null)
     }
 }

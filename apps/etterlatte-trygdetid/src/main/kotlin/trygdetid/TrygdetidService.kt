@@ -10,7 +10,7 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning.RegelKilde
 import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
 import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsdato
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.token.Bruker
+import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.etterlatte.trygdetid.klienter.BehandlingKlient
 import no.nav.etterlatte.trygdetid.klienter.GrunnlagKlient
 import org.slf4j.LoggerFactory
@@ -27,23 +27,26 @@ class TrygdetidService(
 
     fun hentTrygdetid(behandlingsId: UUID): Trygdetid? = trygdetidRepository.hentTrygdetid(behandlingsId)
 
-    suspend fun opprettTrygdetid(behandlingId: UUID, bruker: Bruker): Trygdetid = tilstandssjekk(behandlingId, bruker) {
+    suspend fun opprettTrygdetid(behandlingId: UUID, brukerTokenInfo: BrukerTokenInfo): Trygdetid = tilstandssjekk(
+        behandlingId,
+        brukerTokenInfo
+    ) {
         trygdetidRepository.hentTrygdetid(behandlingId)?.let {
             throw IllegalArgumentException("Trygdetid finnes allerede for behandling $behandlingId")
         }
-        val behandling = behandlingKlient.hentBehandling(behandlingId, bruker)
+        val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
         when (behandling.behandlingType) {
             BehandlingType.FØRSTEGANGSBEHANDLING -> {
                 logger.info("Oppretter trygdetid for behandling $behandlingId")
-                opprettTrygdetid(behandling, bruker)
+                opprettTrygdetid(behandling, brukerTokenInfo)
             }
 
             BehandlingType.REVURDERING -> {
                 logger.info("Oppretter trygdetid for behandling $behandlingId for revurdering")
-                val forrigeBehandling = behandlingKlient.hentSisteIverksatteBehandling(behandling.sak, bruker)
+                val forrigeBehandling = behandlingKlient.hentSisteIverksatteBehandling(behandling.sak, brukerTokenInfo)
 
                 when (val forrigeTrygdetid = hentTrygdetid(forrigeBehandling.id)) {
-                    null -> opprettTrygdetidForRevurdering(behandling, bruker)
+                    null -> opprettTrygdetidForRevurdering(behandling, brukerTokenInfo)
                     else -> kopierSisteTrygdetidberegning(behandling, forrigeTrygdetid)
                 }
             }
@@ -54,7 +57,10 @@ class TrygdetidService(
         }
     }
 
-    private suspend fun opprettTrygdetidForRevurdering(behandling: DetaljertBehandling, bruker: Bruker) =
+    private suspend fun opprettTrygdetidForRevurdering(
+        behandling: DetaljertBehandling,
+        brukerTokenInfo: BrukerTokenInfo
+    ) =
         if (behandling.revurderingsaarsak == RevurderingAarsak.REGULERING &&
             behandling.prosesstype == Prosesstype.AUTOMATISK
         ) {
@@ -64,14 +70,14 @@ class TrygdetidService(
             )
         } else {
             logger.info("Oppretter trygdetid for behandling ${behandling.id} revurdering")
-            opprettTrygdetid(behandling, bruker)
+            opprettTrygdetid(behandling, brukerTokenInfo)
         }
 
     private suspend fun opprettTrygdetid(
         behandling: DetaljertBehandling,
-        bruker: Bruker
+        brukerTokenInfo: BrukerTokenInfo
     ): Trygdetid {
-        val avdoed = grunnlagKlient.hentGrunnlag(behandling.sak, bruker).hentAvdoed()
+        val avdoed = grunnlagKlient.hentGrunnlag(behandling.sak, brukerTokenInfo).hentAvdoed()
         val trygdetid = Trygdetid(
             sakId = behandling.sak,
             behandlingId = behandling.id,
@@ -82,9 +88,9 @@ class TrygdetidService(
 
     suspend fun lagreTrygdetidGrunnlag(
         behandlingId: UUID,
-        bruker: Bruker,
+        brukerTokenInfo: BrukerTokenInfo,
         trygdetidGrunnlag: TrygdetidGrunnlag
-    ): Trygdetid = tilstandssjekk(behandlingId, bruker) {
+    ): Trygdetid = tilstandssjekk(behandlingId, brukerTokenInfo) {
         val trygdetidGrunnlagBeregnet: TrygdetidGrunnlag = trygdetidGrunnlag.oppdaterBeregnetTrygdetid(
             beregnetTrygdetid = beregnTrygdetidService.beregnTrygdetidGrunnlag(trygdetidGrunnlag)
         )
@@ -104,13 +110,17 @@ class TrygdetidService(
             else -> trygdetidMedOppdatertTrygdetidGrunnlag.oppdaterBeregnetTrygdetid(nyBeregnetTrygdetid)
         }.also { nyTrygdetid ->
             trygdetidRepository.oppdaterTrygdetid(nyTrygdetid).also {
-                behandlingKlient.settBehandlingStatusVilkaarsvurdert(behandlingId, bruker)
+                behandlingKlient.settBehandlingStatusVilkaarsvurdert(behandlingId, brukerTokenInfo)
             }
         }
     }
 
-    suspend fun slettTrygdetidGrunnlag(behandlingId: UUID, trygdetidGrunnlagId: UUID, bruker: Bruker): Trygdetid =
-        tilstandssjekk(behandlingId, bruker) {
+    suspend fun slettTrygdetidGrunnlag(
+        behandlingId: UUID,
+        trygdetidGrunnlagId: UUID,
+        brukerTokenInfo: BrukerTokenInfo
+    ): Trygdetid =
+        tilstandssjekk(behandlingId, brukerTokenInfo) {
             val trygdetid = trygdetidRepository.hentTrygdetid(behandlingId)?.slettTrygdetidGrunnlag(trygdetidGrunnlagId)
                 ?: throw Exception("Fant ikke gjeldende trygdetid for behandlingId=$behandlingId")
 
@@ -119,7 +129,7 @@ class TrygdetidService(
                 else -> trygdetid.oppdaterBeregnetTrygdetid(nyBeregnetTrygdetid)
             }.also { nyTrygdetid ->
                 trygdetidRepository.oppdaterTrygdetid(nyTrygdetid).also {
-                    behandlingKlient.settBehandlingStatusVilkaarsvurdert(behandlingId, bruker)
+                    behandlingKlient.settBehandlingStatusVilkaarsvurdert(behandlingId, brukerTokenInfo)
                 }
             }
         }
@@ -127,9 +137,9 @@ class TrygdetidService(
     suspend fun kopierSisteTrygdetidberegning(
         behandlingId: UUID,
         forrigeBehandlingId: UUID,
-        bruker: Bruker
+        brukerTokenInfo: BrukerTokenInfo
     ): Trygdetid {
-        val behandling = behandlingKlient.hentBehandling(behandlingId, bruker)
+        val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
         return kopierSisteTrygdetidberegning(behandling, forrigeBehandlingId)
     }
 
@@ -198,10 +208,10 @@ class TrygdetidService(
 
     private suspend fun tilstandssjekk(
         behandlingId: UUID,
-        bruker: Bruker,
+        brukerTokenInfo: BrukerTokenInfo,
         block: suspend () -> Trygdetid
     ): Trygdetid {
-        val kanFastsetteTrygdetid = behandlingKlient.kanBeregnes(behandlingId, bruker)
+        val kanFastsetteTrygdetid = behandlingKlient.kanBeregnes(behandlingId, brukerTokenInfo)
         return if (kanFastsetteTrygdetid) {
             block()
         } else {

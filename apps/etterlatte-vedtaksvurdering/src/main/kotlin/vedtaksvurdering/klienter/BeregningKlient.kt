@@ -11,13 +11,17 @@ import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktorobo.Resource
-import no.nav.etterlatte.token.Bruker
+import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.etterlatte.vedtaksvurdering.BeregningOgAvkorting
 import org.slf4j.LoggerFactory
 import java.util.*
 
 interface BeregningKlient {
-    suspend fun hentBeregningOgAvkorting(behandlingId: UUID, bruker: Bruker, saktype: SakType): BeregningOgAvkorting
+    suspend fun hentBeregningOgAvkorting(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+        saktype: SakType
+    ): BeregningOgAvkorting
 }
 
 class BeregningKlientException(override val message: String, override val cause: Throwable) :
@@ -34,16 +38,20 @@ class BeregningKlientImpl(config: Config, httpClient: HttpClient) : BeregningKli
 
     override suspend fun hentBeregningOgAvkorting(
         behandlingId: UUID,
-        bruker: Bruker,
+        brukerTokenInfo: BrukerTokenInfo,
         saktype: SakType
     ): BeregningOgAvkorting {
         return BeregningOgAvkorting(
-            beregning = hentBeregning(behandlingId, bruker),
-            avkorting = if (saktype == SakType.OMSTILLINGSSTOENAD) hentAvkorting(behandlingId, bruker) else null
+            beregning = hentBeregning(behandlingId, brukerTokenInfo),
+            avkorting = if (saktype == SakType.OMSTILLINGSSTOENAD) {
+                hentAvkorting(behandlingId, brukerTokenInfo)
+            } else {
+                null
+            }
         )
     }
 
-    private suspend fun hentBeregning(behandlingId: UUID, bruker: Bruker): BeregningDTO {
+    private suspend fun hentBeregning(behandlingId: UUID, brukerTokenInfo: BrukerTokenInfo): BeregningDTO {
         logger.info("Henter beregning for behandling med behandlingId=$behandlingId")
         try {
             return downstreamResourceClient
@@ -52,7 +60,7 @@ class BeregningKlientImpl(config: Config, httpClient: HttpClient) : BeregningKli
                         clientId = clientId,
                         url = "$resourceUrl/api/beregning/$behandlingId"
                     ),
-                    bruker = bruker
+                    brukerTokenInfo = brukerTokenInfo
                 )
                 .mapBoth(
                     success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
@@ -66,7 +74,7 @@ class BeregningKlientImpl(config: Config, httpClient: HttpClient) : BeregningKli
         }
     }
 
-    private suspend fun hentAvkorting(behandlingId: UUID, bruker: Bruker): AvkortingDto {
+    private suspend fun hentAvkorting(behandlingId: UUID, brukerTokenInfo: BrukerTokenInfo): AvkortingDto {
         logger.info("Henter avkorting for behandling med behandlingId=$behandlingId")
         try {
             return downstreamResourceClient
@@ -75,7 +83,7 @@ class BeregningKlientImpl(config: Config, httpClient: HttpClient) : BeregningKli
                         clientId = clientId,
                         url = "$resourceUrl/api/beregning/avkorting/$behandlingId"
                     ),
-                    bruker = bruker
+                    brukerTokenInfo = brukerTokenInfo
                 )
                 .mapBoth(
                     success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },

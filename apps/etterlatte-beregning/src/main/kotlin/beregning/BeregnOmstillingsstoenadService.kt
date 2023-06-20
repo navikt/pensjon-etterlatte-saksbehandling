@@ -26,7 +26,7 @@ import no.nav.etterlatte.libs.regler.RegelkjoeringResultat
 import no.nav.etterlatte.libs.regler.eksekver
 import no.nav.etterlatte.libs.regler.finnAnvendteRegler
 import no.nav.etterlatte.regler.Beregningstall
-import no.nav.etterlatte.token.Bruker
+import no.nav.etterlatte.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
 import java.time.YearMonth
 import java.util.*
@@ -40,9 +40,9 @@ class BeregnOmstillingsstoenadService(
 ) {
     private val logger = LoggerFactory.getLogger(BeregnOmstillingsstoenadService::class.java)
 
-    suspend fun beregn(behandling: DetaljertBehandling, bruker: Bruker): Beregning {
-        val grunnlag = grunnlagKlient.hentGrunnlag(behandling.sak, bruker)
-        val trygdetid = trygdetidKlient.hentTrygdetid(behandling.id, bruker) ?: throw Exception(
+    suspend fun beregn(behandling: DetaljertBehandling, brukerTokenInfo: BrukerTokenInfo): Beregning {
+        val grunnlag = grunnlagKlient.hentGrunnlag(behandling.sak, brukerTokenInfo)
+        val trygdetid = trygdetidKlient.hentTrygdetid(behandling.id, brukerTokenInfo) ?: throw Exception(
             "Forventa å ha trygdetid for behandlingId=${behandling.id}"
         )
         val behandlingType = behandling.behandlingType
@@ -56,7 +56,10 @@ class BeregnOmstillingsstoenadService(
                 beregnOmstillingsstoenad(behandling.id, grunnlag, beregningsgrunnlag, virkningstidspunkt)
 
             BehandlingType.REVURDERING -> {
-                val vilkaarsvurderingUtfall = vilkaarsvurderingKlient.hentVilkaarsvurdering(behandling.id, bruker)
+                val vilkaarsvurderingUtfall = vilkaarsvurderingKlient.hentVilkaarsvurdering(
+                    behandling.id,
+                    brukerTokenInfo
+                )
                     .resultat?.utfall
                     ?: throw Exception("Forventa å ha vilkårsvurderingsresultat for behandlingId=${behandling.id}")
 

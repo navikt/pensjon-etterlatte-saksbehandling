@@ -6,7 +6,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.token.Bruker
+import no.nav.etterlatte.token.BrukerTokenInfo
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
@@ -32,7 +32,7 @@ internal class DownstreamResourceClientTest {
         runBlocking {
             client.get(
                 resource,
-                Bruker.of(accessToken = "a", oid = "b", sub = "b", saksbehandler = null, claims = null)
+                BrukerTokenInfo.of(accessToken = "a", oid = "b", sub = "b", saksbehandler = null, claims = null)
             )
         }
         verify { runBlocking { azureAdClient.getAccessTokenForResource(any()) } }
@@ -48,7 +48,7 @@ internal class DownstreamResourceClientTest {
         runBlocking {
             client.get(
                 resource,
-                Bruker.of(accessToken = "a", oid = "b", sub = "c", saksbehandler = "s1", claims = null)
+                BrukerTokenInfo.of(accessToken = "a", oid = "b", sub = "c", saksbehandler = "s1", claims = null)
             )
         }
         verify { runBlocking { azureAdClient.getOnBehalfOfAccessTokenForResource(any(), "a") } }

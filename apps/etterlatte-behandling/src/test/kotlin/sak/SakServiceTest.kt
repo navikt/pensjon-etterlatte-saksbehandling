@@ -15,7 +15,7 @@ import io.mockk.verify
 import no.nav.etterlatte.Context
 import no.nav.etterlatte.DatabaseKontekst
 import no.nav.etterlatte.Kontekst
-import no.nav.etterlatte.Saksbehandler
+import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.SystemUser
 import no.nav.etterlatte.TRIVIELL_MIDTPUNKT
 import no.nav.etterlatte.behandling.EnhetService
@@ -26,12 +26,14 @@ import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.common.IngenEnhetFunnetException
 import no.nav.etterlatte.common.klienter.PdlKlient
 import no.nav.etterlatte.common.klienter.SkjermingKlient
-import no.nav.etterlatte.config.AzureGroup
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.GeografiskTilknytning
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.tilgangsstyring.AzureGroup
+import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
+import no.nav.etterlatte.token.Saksbehandler
 import no.nav.security.token.support.core.context.TokenValidationContext
 import no.nav.security.token.support.core.jwt.JwtToken
 import no.nav.security.token.support.core.jwt.JwtTokenClaims
@@ -82,7 +84,14 @@ internal class SakServiceTest {
 
         Kontekst.set(
             Context(
-                Saksbehandler(tokenValidationContext, groups, enhetService),
+                SaksbehandlerMedEnheterOgRoller(
+                    tokenValidationContext,
+                    enhetService,
+                    SaksbehandlerMedRoller(
+                        Saksbehandler("", "Z123456", claims),
+                        groups
+                    )
+                ),
                 object : DatabaseKontekst {
                     override fun activeTx(): Connection {
                         throw IllegalArgumentException()
@@ -365,7 +374,7 @@ internal class SakServiceTest {
     }
 
     @Test
-    fun `enhet filtrering skjer hvis vi har en saksbehandler med nasjonal tilgang`() {
+    fun `filtrerer for saksbehandler med nasjonal tilgang`() {
         saksbehandlerKontekst(nasjonalTilgang = true)
 
         coEvery { enhetService.enheterForIdent(any()) } returns listOf(

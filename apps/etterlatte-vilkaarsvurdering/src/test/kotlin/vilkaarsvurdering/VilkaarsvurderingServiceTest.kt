@@ -30,7 +30,7 @@ import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
-import no.nav.etterlatte.token.Bruker
+import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.etterlatte.vilkaarsvurdering.klienter.BehandlingKlient
 import no.nav.etterlatte.vilkaarsvurdering.klienter.GrunnlagKlient
 import org.junit.jupiter.api.AfterAll
@@ -59,7 +59,7 @@ internal class VilkaarsvurderingServiceTest {
     private val behandlingKlient = mockk<BehandlingKlient>()
     private val grunnlagKlient = mockk<GrunnlagKlient>()
     private val uuid: UUID = UUID.randomUUID()
-    private val bruker = Bruker.of("token", "s1", null, null, null)
+    private val brukerTokenInfo = BrukerTokenInfo.of("token", "s1", null, null, null)
 
     @BeforeAll
     fun beforeAll() {
@@ -111,7 +111,7 @@ internal class VilkaarsvurderingServiceTest {
         val grunnlag: Grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
 
         val vilkaarsvurdering = runBlocking {
-            service.opprettVilkaarsvurdering(uuid, bruker)
+            service.opprettVilkaarsvurdering(uuid, brukerTokenInfo)
         }
 
         vilkaarsvurdering shouldNotBe null
@@ -147,7 +147,7 @@ internal class VilkaarsvurderingServiceTest {
 
         runBlocking {
             val vilkaarsvurderingOppdatert =
-                service.oppdaterVurderingPaaVilkaar(uuid, bruker, vurdertVilkaar)
+                service.oppdaterVurderingPaaVilkaar(uuid, brukerTokenInfo, vurdertVilkaar)
 
             vilkaarsvurderingOppdatert shouldNotBe null
             vilkaarsvurderingOppdatert.vilkaar
@@ -185,7 +185,7 @@ internal class VilkaarsvurderingServiceTest {
         )
 
         runBlocking {
-            val vilkaarsvurderingOppdatert = service.oppdaterVurderingPaaVilkaar(uuid, bruker, vurdertVilkaar)
+            val vilkaarsvurderingOppdatert = service.oppdaterVurderingPaaVilkaar(uuid, brukerTokenInfo, vurdertVilkaar)
 
             vilkaarsvurderingOppdatert shouldNotBe null
             vilkaarsvurderingOppdatert.vilkaar
@@ -220,7 +220,7 @@ internal class VilkaarsvurderingServiceTest {
         )
 
         runBlocking {
-            val vilkaarsvurderingOppdatert = service.oppdaterVurderingPaaVilkaar(uuid, bruker, vurdertVilkaar)
+            val vilkaarsvurderingOppdatert = service.oppdaterVurderingPaaVilkaar(uuid, brukerTokenInfo, vurdertVilkaar)
 
             vilkaarsvurderingOppdatert shouldNotBe null
             vilkaarsvurderingOppdatert.vilkaar
@@ -256,7 +256,7 @@ internal class VilkaarsvurderingServiceTest {
 
         runBlocking {
             assertThrows<IllegalStateException> {
-                service.oppdaterVurderingPaaVilkaar(uuid, bruker, vurdertVilkaar)
+                service.oppdaterVurderingPaaVilkaar(uuid, brukerTokenInfo, vurdertVilkaar)
             }
             val actual = service.hentVilkaarsvurdering(uuid)
             actual shouldBe vilkaarsvurdering
@@ -271,12 +271,12 @@ internal class VilkaarsvurderingServiceTest {
         coEvery { behandlingKlient.settBehandlingStatusVilkaarsvurdert(any(), any()) } returns true
 
         runBlocking {
-            service.opprettVilkaarsvurdering(uuid, bruker)
+            service.opprettVilkaarsvurdering(uuid, brukerTokenInfo)
             val vilkaarsvurdering = service.hentVilkaarsvurdering(uuid)!!
             vilkaarsvurdering.vilkaar.forEach { vilkaar ->
                 service.oppdaterVurderingPaaVilkaar(
                     uuid,
-                    bruker,
+                    brukerTokenInfo,
                     VurdertVilkaar(
                         vilkaar.id,
                         VilkaarTypeOgUtfall(vilkaar.hovedvilkaar.type, Utfall.OPPFYLT),
@@ -287,7 +287,7 @@ internal class VilkaarsvurderingServiceTest {
             }
             service.oppdaterTotalVurdering(
                 uuid,
-                bruker,
+                brukerTokenInfo,
                 VilkaarsvurderingResultat(
                     VilkaarsvurderingUtfall.OPPFYLT,
                     "kommentar",
@@ -299,7 +299,13 @@ internal class VilkaarsvurderingServiceTest {
 
         val vilkaarsvurdering = service.hentVilkaarsvurdering(uuid)!!
         val kopiertVilkaarsvurdering =
-            runBlocking { service.kopierVilkaarsvurdering(nyBehandlingId, vilkaarsvurdering.behandlingId, bruker) }
+            runBlocking {
+                service.kopierVilkaarsvurdering(
+                    nyBehandlingId,
+                    vilkaarsvurdering.behandlingId,
+                    brukerTokenInfo
+                )
+            }
 
         Assertions.assertNotNull(kopiertVilkaarsvurdering.resultat)
         Assertions.assertEquals(vilkaarsvurdering.resultat, kopiertVilkaarsvurdering.resultat)
@@ -331,12 +337,12 @@ internal class VilkaarsvurderingServiceTest {
         coEvery { behandlingKlient.hentSisteIverksatteBehandling(any(), any()) } returns detaljertBehandling
 
         val foerstegangsvilkaar = runBlocking {
-            service.opprettVilkaarsvurdering(uuid, bruker)
+            service.opprettVilkaarsvurdering(uuid, brukerTokenInfo)
             val vilkaarsvurdering = service.hentVilkaarsvurdering(uuid)!!
             vilkaarsvurdering.vilkaar.forEach { vilkaar ->
                 service.oppdaterVurderingPaaVilkaar(
                     uuid,
-                    bruker,
+                    brukerTokenInfo,
                     VurdertVilkaar(
                         vilkaar.id,
                         VilkaarTypeOgUtfall(vilkaar.hovedvilkaar.type, Utfall.OPPFYLT),
@@ -347,7 +353,7 @@ internal class VilkaarsvurderingServiceTest {
             }
             service.oppdaterTotalVurdering(
                 uuid,
-                bruker,
+                brukerTokenInfo,
                 VilkaarsvurderingResultat(
                     VilkaarsvurderingUtfall.OPPFYLT,
                     "kommentar",
@@ -359,15 +365,15 @@ internal class VilkaarsvurderingServiceTest {
             service.hentVilkaarsvurdering(uuid)!!
         }
 
-        val revurderingsvilkaar = runBlocking { service.opprettVilkaarsvurdering(revurderingId, bruker) }
+        val revurderingsvilkaar = runBlocking { service.opprettVilkaarsvurdering(revurderingId, brukerTokenInfo) }
         assertIsSimilar(foerstegangsvilkaar, revurderingsvilkaar)
-        coVerify(exactly = 1) { behandlingKlient.settBehandlingStatusVilkaarsvurdert(revurderingId, bruker) }
+        coVerify(exactly = 1) { behandlingKlient.settBehandlingStatusVilkaarsvurdert(revurderingId, brukerTokenInfo) }
     }
 
     @Test
     fun `kopier vilkaarsvurdering gir NullpointerException hvis det ikke finnes tidligere vilkaarsvurdering`() {
         assertThrows<NullPointerException> {
-            runBlocking { service.kopierVilkaarsvurdering(UUID.randomUUID(), uuid, bruker) }
+            runBlocking { service.kopierVilkaarsvurdering(UUID.randomUUID(), uuid, brukerTokenInfo) }
         }
     }
 
@@ -386,7 +392,7 @@ internal class VilkaarsvurderingServiceTest {
     }
 
     private suspend fun opprettVilkaarsvurdering(): Vilkaarsvurdering {
-        return service.opprettVilkaarsvurdering(uuid, bruker)
+        return service.opprettVilkaarsvurdering(uuid, brukerTokenInfo)
     }
 
     private fun vilkaarsVurderingData() =

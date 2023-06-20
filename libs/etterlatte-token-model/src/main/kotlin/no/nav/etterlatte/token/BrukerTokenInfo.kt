@@ -2,13 +2,10 @@ package no.nav.etterlatte.token
 
 import no.nav.security.token.support.core.jwt.JwtTokenClaims
 
-sealed class Bruker {
+sealed class BrukerTokenInfo {
     abstract fun ident(): String
 
     abstract fun accessToken(): String
-    abstract fun kanAttestereFor(ansvarligSaksbehandler: String): Boolean
-    abstract fun harRolle(rolle: String?): Boolean
-
     companion object {
         private fun erSystembruker(oid: String?, sub: String?) = (oid == sub) && (oid != null)
         fun of(
@@ -17,9 +14,9 @@ sealed class Bruker {
             oid: String?,
             sub: String?,
             claims: JwtTokenClaims?
-        ): Bruker {
+        ): BrukerTokenInfo {
             return if (erSystembruker(oid = oid, sub = sub)) {
-                SystemBruker(oid!!, sub!!)
+                Systembruker(oid!!, sub!!)
             } else if (saksbehandler != null) {
                 Saksbehandler(accessToken, saksbehandler, claims)
             } else {
@@ -31,20 +28,22 @@ sealed class Bruker {
     }
 }
 
-data class SystemBruker(val oid: String, val sub: String) : Bruker() {
+data class Systembruker(val oid: String, val sub: String) : BrukerTokenInfo() {
     override fun ident() = Fagsaksystem.EY.navn
 
     override fun accessToken() = throw NotImplementedError("Kun relevant for saksbehandler")
-    override fun kanAttestereFor(ansvarligSaksbehandler: String) = true
-    override fun harRolle(rolle: String?) = false // Per no ikkje relevant for systembrukar
 }
 
-data class Saksbehandler(val accessToken: String, val ident: String, val jwtTokenClaims: JwtTokenClaims?) : Bruker() {
+data class Saksbehandler(
+    val accessToken: String,
+    val ident: String,
+    val jwtTokenClaims: JwtTokenClaims?
+) : BrukerTokenInfo() {
     override fun ident() = ident
 
     override fun accessToken() = accessToken
-    override fun kanAttestereFor(ansvarligSaksbehandler: String) = ansvarligSaksbehandler != this.ident()
-    override fun harRolle(rolle: String?) = jwtTokenClaims?.harRolle(rolle) ?: false
+
+    fun getClaims() = jwtTokenClaims
 }
 
 enum class Claims {
@@ -52,5 +51,3 @@ enum class Claims {
     oid, // ktlint-disable enum-entry-name-case
     sub // ktlint-disable enum-entry-name-case
 }
-
-private fun JwtTokenClaims.harRolle(rolle: String?) = containsClaim("groups", rolle)

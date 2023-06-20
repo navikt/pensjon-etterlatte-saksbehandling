@@ -11,11 +11,11 @@ import no.nav.etterlatte.libs.common.retry
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktorobo.Resource
-import no.nav.etterlatte.token.Bruker
+import no.nav.etterlatte.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
 
 interface GrunnlagKlient {
-    suspend fun hentGrunnlag(sakId: Long, bruker: Bruker): Grunnlag
+    suspend fun hentGrunnlag(sakId: Long, brukerTokenInfo: BrukerTokenInfo): Grunnlag
 }
 
 class GrunnlagKlientException(override val message: String, override val cause: Throwable) : Exception(message, cause)
@@ -29,7 +29,7 @@ class GrunnlagKlientImpl(config: Config, httpClient: HttpClient) : GrunnlagKlien
     private val clientId = config.getString("grunnlag.client.id")
     private val resourceUrl = config.getString("grunnlag.resource.url")
 
-    override suspend fun hentGrunnlag(sakId: Long, bruker: Bruker): Grunnlag {
+    override suspend fun hentGrunnlag(sakId: Long, brukerTokenInfo: BrukerTokenInfo): Grunnlag {
         logger.info("Henter grunnlag for sak med sakId = $sakId")
 
         return retry<Grunnlag> {
@@ -39,7 +39,7 @@ class GrunnlagKlientImpl(config: Config, httpClient: HttpClient) : GrunnlagKlien
                         clientId = clientId,
                         url = "$resourceUrl/api/grunnlag/$sakId"
                     ),
-                    bruker = bruker
+                    brukerTokenInfo = brukerTokenInfo
                 )
                 .mapBoth(
                     success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },

@@ -16,8 +16,8 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpMessage
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
-import no.nav.etterlatte.token.Bruker
-import no.nav.etterlatte.token.SystemBruker
+import no.nav.etterlatte.token.BrukerTokenInfo
+import no.nav.etterlatte.token.Systembruker
 import org.slf4j.LoggerFactory
 
 private val logger = LoggerFactory.getLogger(DownstreamResourceClient::class.java)
@@ -28,10 +28,10 @@ class DownstreamResourceClient(
 ) {
     suspend fun get(
         resource: Resource,
-        bruker: Bruker
+        brukerTokenInfo: BrukerTokenInfo
     ): Result<Resource, ThrowableErrorMessage> {
         val scopes = listOf("api://${resource.clientId}/.default")
-        return hentTokenFraAD(bruker, scopes)
+        return hentTokenFraAD(brukerTokenInfo, scopes)
             .andThen { oboAccessToken ->
                 fetchFromDownstreamApi(resource, oboAccessToken)
             }
@@ -44,22 +44,22 @@ class DownstreamResourceClient(
     }
 
     private suspend fun hentTokenFraAD(
-        bruker: Bruker,
+        brukerTokenInfo: BrukerTokenInfo,
         scopes: List<String>
-    ): Result<AccessToken, ThrowableErrorMessage> = if (bruker is SystemBruker) {
+    ): Result<AccessToken, ThrowableErrorMessage> = if (brukerTokenInfo is Systembruker) {
         azureAdClient.getAccessTokenForResource(scopes)
     } else {
         azureAdClient
-            .getOnBehalfOfAccessTokenForResource(scopes, bruker.accessToken())
+            .getOnBehalfOfAccessTokenForResource(scopes, brukerTokenInfo.accessToken())
     }
 
     suspend fun post(
         resource: Resource,
-        bruker: Bruker,
+        brukerTokenInfo: BrukerTokenInfo,
         postBody: Any
     ): Result<Resource, ThrowableErrorMessage> {
         val scopes = listOf("api://${resource.clientId}/.default")
-        return hentTokenFraAD(bruker, scopes)
+        return hentTokenFraAD(brukerTokenInfo, scopes)
             .andThen { token ->
                 postToDownstreamApi(resource, token, postBody)
             }
@@ -70,11 +70,11 @@ class DownstreamResourceClient(
 
     suspend fun delete(
         resource: Resource,
-        bruker: Bruker,
+        brukerTokenInfo: BrukerTokenInfo,
         postBody: String
     ): Result<Resource, ThrowableErrorMessage> {
         val scopes = listOf("api://${resource.clientId}/.default")
-        return hentTokenFraAD(bruker, scopes)
+        return hentTokenFraAD(brukerTokenInfo, scopes)
             .andThen { oboAccessToken ->
                 deleteToDownstreamApi(resource, oboAccessToken, postBody)
             }

@@ -12,8 +12,8 @@ import io.ktor.server.routing.route
 import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.withBehandlingId
-import no.nav.etterlatte.libs.ktor.bruker
-import no.nav.etterlatte.token.SystemBruker
+import no.nav.etterlatte.libs.ktor.brukerTokenInfo
+import no.nav.etterlatte.token.Systembruker
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
@@ -22,8 +22,8 @@ private val logger = LoggerFactory.getLogger("BeregningsGrunnlag Route")
 fun Route.beregningsGrunnlag(beregningsGrunnlagService: BeregningsGrunnlagService, behandlingKlient: BehandlingKlient) {
     route("/api/beregning/beregningsgrunnlag") {
         post("/{$BEHANDLINGSID_CALL_PARAMETER}/fra/{forrigeBehandlingId}") {
-            when (bruker) {
-                is SystemBruker -> {
+            when (brukerTokenInfo) {
+                is Systembruker -> {
                     val behandlingId = call.uuid(BEHANDLINGSID_CALL_PARAMETER)
                     val forrigeBehandlingId = call.uuid("forrigeBehandlingId")
 
@@ -44,7 +44,7 @@ fun Route.beregningsGrunnlag(beregningsGrunnlagService: BeregningsGrunnlagServic
                     beregningsGrunnlagService.lagreBarnepensjonBeregningsGrunnlag(
                         behandlingId,
                         body,
-                        bruker
+                        brukerTokenInfo
                     ) -> call.respond(HttpStatusCode.NoContent)
 
                     else -> call.respond(HttpStatusCode.Conflict)
@@ -57,7 +57,7 @@ fun Route.beregningsGrunnlag(beregningsGrunnlagService: BeregningsGrunnlagServic
                 logger.info("Henter grunnlag for behandling $behandlingId")
                 val grunnlag = beregningsGrunnlagService.hentBarnepensjonBeregningsGrunnlag(
                     behandlingId,
-                    bruker
+                    brukerTokenInfo
                 )
 
                 when (grunnlag) {

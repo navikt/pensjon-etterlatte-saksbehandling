@@ -13,7 +13,7 @@ import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.withBehandlingId
-import no.nav.etterlatte.libs.ktor.bruker
+import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import org.slf4j.LoggerFactory
 import kotlin.time.DurationUnit
 import kotlin.time.ExperimentalTime
@@ -44,7 +44,7 @@ fun Route.vedtaksbrevRoute(service: VedtaksbrevService, behandlingKlient: Behand
                 logger.info("Oppretter vedtaksbrev for behandling (sakId=$sakId, behandlingId=$behandlingId)")
 
                 measureTimedValue {
-                    service.opprettVedtaksbrev(sakId, behandlingId, bruker)
+                    service.opprettVedtaksbrev(sakId, behandlingId, brukerTokenInfo)
                 }.let { (brev, varighet) ->
                     logger.info("Oppretting av brev tok ${varighet.toString(DurationUnit.SECONDS, 2)}")
                     call.respond(HttpStatusCode.Created, brev)
@@ -59,7 +59,7 @@ fun Route.vedtaksbrevRoute(service: VedtaksbrevService, behandlingKlient: Behand
                 logger.info("Genererer PDF for vedtaksbrev (id=$brevId)")
 
                 measureTimedValue {
-                    service.genererPdf(brevId, bruker).bytes
+                    service.genererPdf(brevId, brukerTokenInfo).bytes
                 }.let { (pdf, varighet) ->
                     logger.info("Oppretting av innhold/pdf tok ${varighet.toString(DurationUnit.SECONDS, 2)}")
                     call.respond(pdf)

@@ -13,17 +13,19 @@ import InstitusjonsoppholdVurderingBegrunnelse from '~components/person/uhaandte
 
 const UhaandtertHendelse = (props: {
   hendelse: Grunnlagsendringshendelse
-  disabled: boolean
+  harAapenRevurdering: boolean
   startRevurdering: (hendelse: Grunnlagsendringshendelse) => void
   revurderinger: Array<Revurderingsaarsak>
 }) => {
-  const { hendelse, disabled, startRevurdering, revurderinger } = props
+  const { hendelse, harAapenRevurdering, startRevurdering, revurderinger } = props
   const { samsvarMellomKildeOgGrunnlag, opprettet } = hendelse
   const [open, setOpen] = useState(false)
   const [hendelsekommentar, oppdaterKommentar] = useState<string>('')
   const [res, lukkGrunnlagshendelseFunc, resetApiCall] = useApiCall(lukkGrunnlagshendelse)
   const stoetterRevurdering = stoetterRevurderingAvHendelse(hendelse, revurderinger)
   const { type: samsvarType } = samsvarMellomKildeOgGrunnlag
+
+  const tattMedIBehandling = hendelse.status == 'TATT_MED_I_BEHANDLING'
   const lukkGrunnlagshendelseWrapper = () => {
     lukkGrunnlagshendelseFunc(
       { ...hendelse, kommentar: hendelsekommentar },
@@ -47,20 +49,28 @@ const UhaandtertHendelse = (props: {
         <HendelseBeskrivelse hendelse={hendelse} />
 
         <div>
-          {disabled ? (
+          {tattMedIBehandling ? (
             <Alert variant="info" inline>
-              Denne saken har en åpen revurdering, denne må behandles før en ny kan startes.
+              Denne hendelsen har en revurdering knyttet til seg med id {hendelse.behandlingId}
             </Alert>
           ) : (
             <>
-              {stoetterRevurdering ? (
-                <Button disabled={disabled} onClick={() => startRevurdering(hendelse)}>
-                  Start revurdering
-                </Button>
-              ) : (
+              {harAapenRevurdering ? (
                 <Alert variant="info" inline>
-                  Automatisk revurdering støttes ikke for denne hendelsen
+                  Denne saken har en åpen revurdering, denne må behandles før en ny kan startes.
                 </Alert>
+              ) : (
+                <>
+                  {stoetterRevurdering ? (
+                    <Button disabled={harAapenRevurdering} onClick={() => startRevurdering(hendelse)}>
+                      Start revurdering
+                    </Button>
+                  ) : (
+                    <Alert variant="info" inline>
+                      Automatisk revurdering støttes ikke for denne hendelsen
+                    </Alert>
+                  )}
+                </>
               )}
             </>
           )}

@@ -31,7 +31,8 @@ enum class GrunnlagsendringStatus {
     SJEKKET_AV_JOBB, // FØR: MED_I_BEHANDLING
     TATT_MED_I_BEHANDLING, // tatt med i behandling av saksbehandler
     FORKASTET,
-    VURDERT_SOM_IKKE_RELEVANT;
+    VURDERT_SOM_IKKE_RELEVANT,
+    HISTORISK;
 
     companion object {
         fun relevantForSaksbehandler() = listOf(SJEKKET_AV_JOBB, TATT_MED_I_BEHANDLING, VURDERT_SOM_IKKE_RELEVANT)

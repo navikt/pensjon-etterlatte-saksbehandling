@@ -159,6 +159,36 @@ internal class GrunnlagsendringshendelseDaoTest {
     }
 
     @Test
+    fun `skal kunne sette status historisk på en hendelse som er tilknyttet en revurdering`() {
+        val hendelseId = UUID.randomUUID()
+        val sak1 = sakRepo.opprettSak("1234", SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr).id
+        val grunnlagsendringstype = GrunnlagsendringsType.DOEDSFALL
+        val opprettBehandling = opprettBehandling(
+            type = BehandlingType.REVURDERING,
+            sakId = sak1,
+            revurderingAarsak = RevurderingAarsak.REGULERING
+        )
+        behandlingRepo.opprettBehandling(opprettBehandling)
+
+        val grunnlagsendringshendelseMedSamsvar = grunnlagsendringshendelseMedSamsvar(
+            id = hendelseId,
+            sakId = sak1,
+            fnr = grunnlagsinformasjonDoedshendelse().fnr,
+            type = grunnlagsendringstype,
+            status = GrunnlagsendringStatus.SJEKKET_AV_JOBB,
+            samsvarMellomKildeOgGrunnlag = null
+        )
+        grunnlagsendringshendelsesRepo.opprettGrunnlagsendringshendelse(grunnlagsendringshendelseMedSamsvar)
+        grunnlagsendringshendelsesRepo.settBehandlingIdForTattMedIRevurdering(hendelseId, opprettBehandling.id)
+
+        grunnlagsendringshendelsesRepo.oppdaterGrunnlagsendringHistorisk(opprettBehandling.id)
+        val historiskRevurderingsHendelse = grunnlagsendringshendelsesRepo
+            .hentGrunnlagsendringshendelse(hendelseId)
+        assertEquals(GrunnlagsendringStatus.HISTORISK, historiskRevurderingsHendelse?.status)
+        assertEquals(opprettBehandling.id, historiskRevurderingsHendelse?.behandlingId)
+    }
+
+    @Test
     fun `skal hente grunnlagsendringshendelser som er eldre enn en time`() {
         val sakid = sakRepo.opprettSak("1234", SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr).id
         listOf(
@@ -300,7 +330,7 @@ internal class GrunnlagsendringshendelseDaoTest {
         val samsvarMellomPdlOgGrunnlag = samsvarMellomPdlOgGrunnlagDoed(doedsdato)
 
         val hendelserFoerOppdatertStatus = grunnlagsendringshendelsesRepo.hentAlleGrunnlagsendringshendelser()
-        grunnlagsendringshendelsesRepo.oppdaterGrunnlagsendringStatus(
+        grunnlagsendringshendelsesRepo.oppdaterGrunnlagsendringStatusOgSamsvar(
             hendelseId = id1,
             foerStatus = GrunnlagsendringStatus.VENTER_PAA_JOBB,
             etterStatus = GrunnlagsendringStatus.FORKASTET,
@@ -340,7 +370,7 @@ internal class GrunnlagsendringshendelseDaoTest {
         ).forEach {
             grunnlagsendringshendelsesRepo.opprettGrunnlagsendringshendelse(it)
         }
-        grunnlagsendringshendelsesRepo.settBehandlingIdForTattMedIBehandling(hendelseId, opprettBehandling.id)
+        grunnlagsendringshendelsesRepo.settBehandlingIdForTattMedIRevurdering(hendelseId, opprettBehandling.id)
         val lagretHendelse = grunnlagsendringshendelsesRepo.hentGrunnlagsendringshendelse(hendelseId)
         assertEquals(opprettBehandling.id, lagretHendelse?.behandlingId)
     }
@@ -412,8 +442,8 @@ internal class GrunnlagsendringshendelseDaoTest {
             grunnlagsendringshendelsesRepo.opprettGrunnlagsendringshendelse(it)
         }
 
-        grunnlagsendringshendelsesRepo.settBehandlingIdForTattMedIBehandling(id1, behandling1.id)
-        grunnlagsendringshendelsesRepo.settBehandlingIdForTattMedIBehandling(id3, behandling2.id)
+        grunnlagsendringshendelsesRepo.settBehandlingIdForTattMedIRevurdering(id1, behandling1.id)
+        grunnlagsendringshendelsesRepo.settBehandlingIdForTattMedIRevurdering(id3, behandling2.id)
 
         grunnlagsendringshendelsesRepo.kobleGrunnlagsendringshendelserFraBehandlingId(behandling1.id)
 
@@ -461,19 +491,19 @@ internal class GrunnlagsendringshendelseDaoTest {
         ).forEach {
             grunnlagsendringshendelsesRepo.opprettGrunnlagsendringshendelse(it)
         }
-        grunnlagsendringshendelsesRepo.oppdaterGrunnlagsendringStatus(
+        grunnlagsendringshendelsesRepo.oppdaterGrunnlagsendringStatusOgSamsvar(
             hendelseId = id1,
             foerStatus = GrunnlagsendringStatus.VENTER_PAA_JOBB,
             etterStatus = GrunnlagsendringStatus.SJEKKET_AV_JOBB,
             samsvarMellomKildeOgGrunnlag = samsvarMellomPdlOgGrunnlag
         )
-        grunnlagsendringshendelsesRepo.oppdaterGrunnlagsendringStatus(
+        grunnlagsendringshendelsesRepo.oppdaterGrunnlagsendringStatusOgSamsvar(
             hendelseId = id2,
             foerStatus = GrunnlagsendringStatus.VENTER_PAA_JOBB,
             etterStatus = GrunnlagsendringStatus.SJEKKET_AV_JOBB,
             samsvarMellomKildeOgGrunnlag = samsvarMellomPdlOgGrunnlag
         )
-        grunnlagsendringshendelsesRepo.oppdaterGrunnlagsendringStatus(
+        grunnlagsendringshendelsesRepo.oppdaterGrunnlagsendringStatusOgSamsvar(
             hendelseId = id3,
             foerStatus = GrunnlagsendringStatus.VENTER_PAA_JOBB,
             etterStatus = GrunnlagsendringStatus.SJEKKET_AV_JOBB,

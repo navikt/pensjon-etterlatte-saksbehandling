@@ -181,7 +181,6 @@ class ApplicationContext(
             revurderingService = revurderingService
         )
 
-    val behandlingsStatusService = BehandlingStatusServiceImpl(behandlingDao, generellBehandlingService)
     val tilgangService = TilgangServiceImpl(SakTilgangDao(dataSource))
     val sakService = RealSakService(
         sakDao,
@@ -201,6 +200,9 @@ class ApplicationContext(
             tilgangService = tilgangService,
             sakService = sakService
         )
+
+    val behandlingsStatusService =
+        BehandlingStatusServiceImpl(behandlingDao, generellBehandlingService, grunnlagsendringshendelseService)
 
     val migreringService = MigreringService(
         sakService = sakService,

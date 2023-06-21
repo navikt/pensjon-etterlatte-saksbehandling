@@ -3,7 +3,9 @@ package no.nav.etterlatte.behandling
 import io.ktor.server.plugins.NotFoundException
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.hendelse.HendelseType
+import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.inTransaction
+import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.sak.SakIDListe
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
@@ -27,7 +29,8 @@ interface BehandlingStatusService {
 
 class BehandlingStatusServiceImpl constructor(
     private val behandlingDao: BehandlingDao,
-    private val behandlingService: GenerellBehandlingService
+    private val behandlingService: GenerellBehandlingService,
+    private val grunnlagsendringshendelseService: GrunnlagsendringshendelseService
 ) : BehandlingStatusService {
     override fun settOpprettet(behandlingId: UUID, dryRun: Boolean) {
         val behandling = hentBehandling(behandlingId).tilOpprettet()
@@ -98,6 +101,9 @@ class BehandlingStatusServiceImpl constructor(
         inTransaction {
             lagreNyBehandlingStatus(behandling.tilIverksatt(), Tidspunkt.now().toLocalDatetimeUTC())
             registrerVedtakHendelse(behandlingId, vedtakHendelse, HendelseType.IVERKSATT)
+        }
+        if (behandling.type == BehandlingType.REVURDERING) {
+            grunnlagsendringshendelseService.settHendelseTilHistorisk(behandlingId)
         }
     }
 

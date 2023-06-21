@@ -136,7 +136,7 @@ export const Saksoversikt = ({ fnr }: { fnr: string | undefined }) => {
             <RelevanteHendelser
               hendelser={hendelser}
               revurderinger={revurderinger}
-              disabled={harAapenRevurdering}
+              harAapenRevurdering={harAapenRevurdering}
               grunnlag={personerISak}
               sakId={sakId}
             />

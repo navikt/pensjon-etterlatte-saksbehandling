@@ -13,6 +13,8 @@ import {
   DoedsdatoSamsvar,
   Grunnlagsendringshendelse,
   InstitusjonsoppholdSamsvar,
+  Sivilstand,
+  SivilstandSamsvar,
   UtlandSamsvar,
   VergemaalEllerFremtidsfullmakt,
   VergemaalEllerFremtidsfullmaktForholdSamsvar,
@@ -119,6 +121,54 @@ const GrunnlagVergemaal = (props: { vergemaal: VergemaalEllerFremtidsfullmakt })
   )
 }
 
+const Sivilstand = (props: { samsvar: SivilstandSamsvar }) => {
+  const { samsvar } = props
+
+  const sivilstandVisning = (sivilstand: Sivilstand, i) => {
+    return (
+      <ListeWrapper key={i}>
+        <li>
+          <BodySmall>Gyldig fra og med: {sivilstand.gyldigFraOgMed}</BodySmall>
+        </li>
+        <li>
+          <BodySmall>Sivilstatus: {sivilstand.sivilstatus}</BodySmall>
+        </li>
+        <li>
+          <BodySmall>Relatert ved siviltilstand: {sivilstand.relatertVedSiviltilstand}</BodySmall>
+        </li>
+        <li>
+          <BodySmall>Kilde: {sivilstand.kilde}</BodySmall>
+        </li>
+      </ListeWrapper>
+    )
+  }
+
+  return (
+    <GrunnlagSammenligningWrapper>
+      <div>
+        <BodySmall>
+          <strong>Nytt grunnlag (PDL)</strong>
+        </BodySmall>
+        <ListeWrapper>
+          {samsvar.fraPdl?.map((sivilstand, i) => (
+            <li key={i}>{sivilstandVisning(sivilstand, i)}</li>
+          ))}
+        </ListeWrapper>
+      </div>
+      <div>
+        <BodySmall>
+          <strong>Eksisterende grunnlag</strong>
+        </BodySmall>
+        <ListeWrapper>
+          {samsvar.fraGrunnlag?.map((sivilstand, i) => (
+            <li key={i}>{sivilstandVisning(sivilstand, i)}</li>
+          ))}
+        </ListeWrapper>
+      </div>
+    </GrunnlagSammenligningWrapper>
+  )
+}
+
 const Institusjonsopphold = (props: { samsvar: InstitusjonsoppholdSamsvar }) => {
   const { samsvar } = props
   return (
@@ -194,6 +244,13 @@ export const HendelseBeskrivelse = (props: { hendelse: Grunnlagsendringshendelse
           <Barn samsvar={hendelse.samsvarMellomKildeOgGrunnlag} />
         </Header>
       )
+    case 'SIVILSTAND':
+      return (
+        <Header>
+          <HendelseDetaljer hendelse={hendelse} />
+          <Sivilstand samsvar={hendelse.samsvarMellomKildeOgGrunnlag} />
+        </Header>
+      )
     case 'INSTITUSJONSOPPHOLD':
       return (
         <Header>
@@ -234,4 +291,8 @@ const Header = styled.div`
   display: flex;
   flex-direction: column;
   align-self: flex-start;
+`
+
+const ListeWrapper = styled.ul`
+  list-style-type: none;
 `

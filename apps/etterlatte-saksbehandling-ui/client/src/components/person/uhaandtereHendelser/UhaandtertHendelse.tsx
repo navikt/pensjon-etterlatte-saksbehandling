@@ -50,9 +50,9 @@ const UhaandtertHendelse = (props: {
 
         <div>
           {tattMedIBehandling ? (
-            <Alert variant="info">
+            <Alert variant="info" inline>
               Denne hendelsen har en revurdering knyttet til seg.
-              <Link href={`/behandling/${hendelse.behandlingId}/revurderingsoversikt`}>Gå til revurdering</Link>
+              <BlueLink href={`/behandling/${hendelse.behandlingId}/revurderingsoversikt`}>Gå til revurdering</BlueLink>
             </Alert>
           ) : (
             <>
@@ -136,6 +136,10 @@ const UhaandtertHendelse = (props: {
     </Wrapper>
   )
 }
+
+const BlueLink = styled(Link)`
+  color: #0067c5 !important;
+`
 
 const MarginTop15 = styled.div`
   margin-top: 15px;

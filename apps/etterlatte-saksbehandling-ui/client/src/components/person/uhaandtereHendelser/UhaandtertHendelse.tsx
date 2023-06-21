@@ -4,13 +4,12 @@ import React, { useState } from 'react'
 import { isFailure, isPending, useApiCall } from '~shared/hooks/useApiCall'
 import { lukkGrunnlagshendelse } from '~shared/api/behandling'
 import { grunnlagsendringsTittel, stoetterRevurderingAvHendelse } from '~components/person/uhaandtereHendelser/utils'
-import { Alert, BodyShort, Button, Heading, Label, Loader, Modal, Textarea } from '@navikt/ds-react'
+import { Alert, BodyShort, Button, Heading, Label, Link, Loader, Modal, Textarea } from '@navikt/ds-react'
 import { formaterStringDato } from '~utils/formattering'
 import { HendelseBeskrivelse } from '~components/person/uhaandtereHendelser/HendelseBeskrivelse'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import styled from 'styled-components'
 import InstitusjonsoppholdVurderingBegrunnelse from '~components/person/uhaandtereHendelser/InstitusjonsoppholdVurderingBegrunnelse'
-import { useNavigate } from 'react-router'
 
 const UhaandtertHendelse = (props: {
   hendelse: Grunnlagsendringshendelse
@@ -25,7 +24,6 @@ const UhaandtertHendelse = (props: {
   const [res, lukkGrunnlagshendelseFunc, resetApiCall] = useApiCall(lukkGrunnlagshendelse)
   const stoetterRevurdering = stoetterRevurderingAvHendelse(hendelse, revurderinger)
   const { type: samsvarType } = samsvarMellomKildeOgGrunnlag
-  const navigate = useNavigate()
 
   const tattMedIBehandling = hendelse.status == 'TATT_MED_I_BEHANDLING'
   const lukkGrunnlagshendelseWrapper = () => {
@@ -52,14 +50,9 @@ const UhaandtertHendelse = (props: {
 
         <div>
           {tattMedIBehandling ? (
-            <Alert variant="info" inline>
+            <Alert variant="info">
               Denne hendelsen har en revurdering knyttet til seg.
-              <Button
-                variant="secondary"
-                onClick={() => navigate(`/behandling/${hendelse.behandlingId}/revurderingsoversikt`)}
-              >
-                Gå til revurdering
-              </Button>
+              <Link href={`/behandling/${hendelse.behandlingId}/revurderingsoversikt`}>Gå til revurdering</Link>
             </Alert>
           ) : (
             <>

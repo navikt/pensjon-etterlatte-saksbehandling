@@ -47,8 +47,11 @@ fun Grunnlag.barn(saksrolle: Saksrolle) =
         Saksrolle.AVDOED -> {
             hentAvdoed().hentFamilierelasjon()?.verdi?.barn
         }
-        Saksrolle.GJENLEVENDE, Saksrolle.SOEKER -> {
+        Saksrolle.GJENLEVENDE -> {
             hentGjenlevende().hentFamilierelasjon()?.verdi?.barn
+        }
+        Saksrolle.SOEKER -> {
+            soeker.hentFamilierelasjon()?.verdi?.barn
         }
         else -> throw IllegalArgumentException(
             "Proevde aa finne barn for $saksrolle, men det skal ikke kunne skje D:"

@@ -13,7 +13,7 @@ import {
 import { format } from 'date-fns'
 import { Tag } from '@navikt/ds-react'
 import HandlingerKnapp from './handlinger/HandlingerKnapp'
-import BrukeroversiktLenke from './handlinger/BrukeroversiktKnapp'
+import SaksoversiktLenke from './handlinger/BrukeroversiktKnapp'
 import { tagColors } from '~shared/Tags'
 
 const mapEnhetNavn = (enhet?: EnhetFilter): string => {
@@ -43,7 +43,7 @@ export const kolonner: ReadonlyArray<Column<IOppgave>> = [
     Header: 'Fødselsnummer',
     accessor: 'fnr',
     Cell: ({ value: fnr }) => {
-      return <BrukeroversiktLenke fnr={fnr} />
+      return <SaksoversiktLenke fnr={fnr} />
     },
   },
   {

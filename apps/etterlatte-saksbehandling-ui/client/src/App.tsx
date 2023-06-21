@@ -9,6 +9,7 @@ import useInnloggetSaksbehandler from './shared/hooks/useInnloggetSaksbehandler'
 import nb from 'date-fns/locale/nb'
 import { registerLocale } from 'react-datepicker'
 import ErrorBoundary from '~ErrorBoundary'
+import ScrollToTop from '~ScrollTop'
 
 function App() {
   const innloggetbrukerHentet = useInnloggetSaksbehandler()
@@ -19,6 +20,7 @@ function App() {
       {innloggetbrukerHentet && (
         <div className="app">
           <BrowserRouter basename="/">
+            <ScrollToTop />
             <HeaderWrapper />
             <ErrorBoundary>
               <Routes>

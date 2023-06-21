@@ -4,7 +4,7 @@ import React, { useState } from 'react'
 import { isFailure, isPending, useApiCall } from '~shared/hooks/useApiCall'
 import { lukkGrunnlagshendelse } from '~shared/api/behandling'
 import { grunnlagsendringsTittel, stoetterRevurderingAvHendelse } from '~components/person/uhaandtereHendelser/utils'
-import { Alert, BodyShort, Button, Heading, Label, Loader, Modal, Textarea } from '@navikt/ds-react'
+import { Alert, BodyShort, Button, Heading, Label, Link, Loader, Modal, Textarea } from '@navikt/ds-react'
 import { formaterStringDato } from '~utils/formattering'
 import { HendelseBeskrivelse } from '~components/person/uhaandtereHendelser/HendelseBeskrivelse'
 import { ApiErrorAlert } from '~ErrorBoundary'
@@ -51,7 +51,8 @@ const UhaandtertHendelse = (props: {
         <div>
           {tattMedIBehandling ? (
             <Alert variant="info" inline>
-              Denne hendelsen har en revurdering knyttet til seg med id {hendelse.behandlingId}
+              Denne hendelsen har en revurdering knyttet til seg.
+              <BlueLink href={`/behandling/${hendelse.behandlingId}/revurderingsoversikt`}>Gå til revurdering</BlueLink>
             </Alert>
           ) : (
             <>
@@ -135,6 +136,10 @@ const UhaandtertHendelse = (props: {
     </Wrapper>
   )
 }
+
+const BlueLink = styled(Link)`
+  color: #0067c5 !important;
+`
 
 const MarginTop15 = styled.div`
   margin-top: 15px;

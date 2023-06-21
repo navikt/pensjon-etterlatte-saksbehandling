@@ -1,6 +1,6 @@
 import { Link } from '@navikt/ds-react'
 
-const SaksoversiktLenke: React.FC<{ fnr: string }> = ({ fnr }) => {
+const SaksoversiktLenke = ({ fnr }: { fnr: string }) => {
   return <Link href={`person/${fnr}`}>{fnr}</Link>
 }
 

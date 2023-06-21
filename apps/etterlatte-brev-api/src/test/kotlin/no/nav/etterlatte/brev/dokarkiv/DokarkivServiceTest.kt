@@ -16,7 +16,7 @@ import no.nav.etterlatte.brev.journalpost.JournalPostType
 import no.nav.etterlatte.brev.journalpost.JournalpostKoder.Companion.BREV_KODE
 import no.nav.etterlatte.brev.journalpost.JournalpostRequest
 import no.nav.etterlatte.brev.journalpost.JournalpostResponse
-import no.nav.etterlatte.brev.journalpost.Sak
+import no.nav.etterlatte.brev.journalpost.JournalpostSak
 import no.nav.etterlatte.brev.journalpost.Sakstype
 import no.nav.etterlatte.brev.model.BrevInnhold
 import no.nav.etterlatte.brev.model.Pdf
@@ -86,7 +86,7 @@ internal class DokarkivServiceTest {
             journalfoerendeEnhet shouldBe vedtak.ansvarligEnhet
             avsenderMottaker shouldBe AvsenderMottaker(vedtak.sak.ident)
             bruker shouldBe Bruker(vedtak.sak.ident)
-            sak shouldBe Sak(Sakstype.FAGSAK, vedtak.sak.id.toString())
+            sak shouldBe JournalpostSak(Sakstype.FAGSAK, vedtak.sak.id.toString())
             eksternReferanseId shouldBe "${vedtak.behandlingId}.$brevId"
 
             with(dokumenter.single()) {

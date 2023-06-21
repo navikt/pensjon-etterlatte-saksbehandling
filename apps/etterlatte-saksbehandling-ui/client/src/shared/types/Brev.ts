@@ -1,11 +1,11 @@
 export interface IBrev {
   id: number
+  sakId: number
   behandlingId: string
   prosessType: BrevProsessType
-  tittel: string
+  soekerFnr: string
   status: BrevStatus
   mottaker: Mottaker
-  erVedtaksbrev: boolean
 }
 
 export interface Mottaker {

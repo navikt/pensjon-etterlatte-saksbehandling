@@ -66,7 +66,7 @@ data class Mottaker(
 data class Brev(
     val id: BrevID,
     val sakId: Long,
-    val behandlingId: UUID,
+    val behandlingId: UUID?,
     val prosessType: BrevProsessType,
     val soekerFnr: String,
     val status: Status,
@@ -99,7 +99,7 @@ data class BrevInnhold(
 
 data class OpprettNyttBrev(
     val sakId: Long,
-    val behandlingId: UUID,
+    val behandlingId: UUID?,
     val soekerFnr: String,
     val prosessType: BrevProsessType,
     val mottaker: Mottaker,

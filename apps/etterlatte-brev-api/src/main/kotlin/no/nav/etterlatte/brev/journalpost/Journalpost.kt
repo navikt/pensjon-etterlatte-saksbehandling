@@ -8,7 +8,7 @@ data class JournalpostRequest(
     val journalfoerendeEnhet: String?,
     val avsenderMottaker: AvsenderMottaker,
     val bruker: Bruker,
-    val sak: Sak,
+    val sak: JournalpostSak,
     val eksternReferanseId: String,
     val dokumenter: List<JournalpostDokument>
 )
@@ -32,7 +32,7 @@ data class JournalpostDokument(
     val dokumentvarianter: List<DokumentVariant>
 )
 
-data class Sak(
+data class JournalpostSak(
     val sakstype: Sakstype,
     val fagsakId: String? = null,
     val fagsaksystem: String? = "EY"

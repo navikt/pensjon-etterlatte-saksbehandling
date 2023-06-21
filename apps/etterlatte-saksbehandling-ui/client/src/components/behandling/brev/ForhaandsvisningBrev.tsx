@@ -1,33 +1,52 @@
 import { useEffect, useState } from 'react'
-import { genererPdf } from '~shared/api/brev'
-import { PdfVisning } from '~shared/brev/pdf-visning'
 import { IBrev } from '~shared/types/Brev'
+import { isFailure, isPendingOrInitial, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
+import { Alert } from '@navikt/ds-react'
+import Spinner from '~shared/Spinner'
+import styled from 'styled-components'
+import { genererPdf } from '~shared/api/brev'
 
 export default function ForhaandsvisningBrev({ brev }: { brev: IBrev }) {
   const [fileURL, setFileURL] = useState<string>()
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string>()
+  const [pdf, genererBrevPdf] = useApiCall(genererPdf)
 
   useEffect(() => {
-    if (!brev.id || !brev.behandlingId) return
+    if (!!fileURL)
+      setTimeout(() => {
+        URL.revokeObjectURL(fileURL)
+      }, 1000)
+  }, [fileURL])
 
-    genererPdf(brev.id, brev.behandlingId)
-      .then((res) => {
-        if (res.status === 'ok') {
-          return new Blob([res.data], { type: 'application/pdf' })
-        } else {
-          throw Error(res.error)
-        }
-      })
-      .then((file) => URL.createObjectURL(file!!))
-      .then((url) => setFileURL(url))
-      .catch((e) => setError(`Feil ved forhåndsvisning av PDF:\n${e.message}`))
-      .finally(() => {
-        if (fileURL) URL.revokeObjectURL(fileURL)
+  useEffect(() => {
+    genererBrevPdf({ brevId: brev.id, behandlingId: brev.behandlingId, sakId: brev.sakId }, (bytes) => {
+      const blob = new Blob([bytes], { type: 'application/pdf' })
 
-        setLoading(false)
-      })
+      setFileURL(URL.createObjectURL(blob))
+    })
   }, [brev.id, brev.behandlingId])
 
-  return <PdfVisning fileUrl={fileURL} error={error} loading={loading} />
+  return (
+    <Container>
+      {isPendingOrInitial(pdf) && <Spinner visible={true} label={'Klargjør forhåndsvisning av PDF ...'} />}
+      {isSuccess(pdf) && !!fileURL && <PdfViewer src={`${fileURL}#toolbar=0`} />}
+      {isFailure(pdf) && (
+        <Alert variant={'error'}>
+          En feil har oppstått ved henting av PDF: <code>{JSON.stringify(pdf.error)}</code>
+        </Alert>
+      )}
+    </Container>
+  )
 }
+
+const PdfViewer = styled.embed`
+  min-width: 680px;
+  width: 100%;
+  min-height: 600px;
+  height: 100%;
+`
+
+const Container = styled.div`
+  margin: auto;
+  height: 100%;
+  width: 100%;
+`

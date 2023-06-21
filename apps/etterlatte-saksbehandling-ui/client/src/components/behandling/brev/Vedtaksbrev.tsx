@@ -88,7 +88,7 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
         ) : vedtaksbrev.prosessType === BrevProsessType.AUTOMATISK ? (
           <ForhaandsvisningBrev brev={vedtaksbrev} />
         ) : (
-          <RedigerbartBrev brev={vedtaksbrev} behandling={props.behandling} />
+          <RedigerbartBrev brev={vedtaksbrev} kanRedigeres={manueltBrevKanRedigeres(status)} />
         )}
       </BrevContent>
 

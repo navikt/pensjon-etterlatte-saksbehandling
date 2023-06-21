@@ -7,9 +7,7 @@ import { IBrev } from '~shared/types/Brev'
 import { format } from 'date-fns'
 import { hentManuellPayload, lagreManuellPayload } from '~shared/api/brev'
 import ForhaandsvisningBrev from '~components/behandling/brev/ForhaandsvisningBrev'
-import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
-import { manueltBrevKanRedigeres } from '~components/behandling/felles/utils'
-import { isPending, isPendingOrInitial, useApiCall } from '~shared/hooks/useApiCall'
+import { isPending, isPendingOrInitial, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
 import Spinner from '~shared/Spinner'
 
 enum ManueltBrevFane {
@@ -24,12 +22,13 @@ interface LagretStatus {
 
 const formaterTidspunkt = (dato: Date) => format(new Date(dato), 'HH:mm:ss').toString()
 
-export default function RedigerbartBrev({ brev, behandling }: { brev: IBrev; behandling: IDetaljertBehandling }) {
-  const { status } = behandling
+interface RedigerbartBrevProps {
+  brev: IBrev
+  kanRedigeres: boolean
+}
 
-  const brevKanRedigeres = manueltBrevKanRedigeres(status)
-
-  const [fane, setFane] = useState<string>(brevKanRedigeres ? ManueltBrevFane.REDIGER : ManueltBrevFane.FORHAANDSVIS)
+export default function RedigerbartBrev({ brev, kanRedigeres }: RedigerbartBrevProps) {
+  const [fane, setFane] = useState<string>(kanRedigeres ? ManueltBrevFane.REDIGER : ManueltBrevFane.FORHAANDSVIS)
   const [content, setContent] = useState<any[]>([])
   const [lagretStatus, setLagretStatus] = useState<LagretStatus>({ lagret: false })
 
@@ -39,14 +38,13 @@ export default function RedigerbartBrev({ brev, behandling }: { brev: IBrev; beh
   useEffect(() => {
     if (!brev.id) return
 
-    apiHentManuellPayload({ brevId: brev.id, behandlingId: brev.behandlingId }, (payload: any) => {
+    apiHentManuellPayload({ brevId: brev.id, sakId: brev.sakId }, (payload: any) => {
       setContent(payload)
     })
   }, [brev.id])
 
   const lagre = () => {
-    apiLagreManuellPayload({ brevId: brev.id, behandlingId: brev.behandlingId, payload: content }, (success) => {
-      console.log(`success: ${success}`)
+    apiLagreManuellPayload({ brevId: brev.id, sakId: brev.sakId, payload: content }, () => {
       setLagretStatus({ lagret: true, beskrivelse: `Lagret kl. ${formaterTidspunkt(new Date())}` })
     })
   }
@@ -65,7 +63,7 @@ export default function RedigerbartBrev({ brev, behandling }: { brev: IBrev; beh
         <Tabs.List>
           <Tabs.Tab
             value={ManueltBrevFane.REDIGER}
-            label={brevKanRedigeres ? 'Rediger' : 'Innhold'}
+            label={kanRedigeres ? 'Rediger' : 'Innhold'}
             icon={<PencilIcon title="a11y-title" fontSize="1.5rem" />}
           />
 
@@ -77,13 +75,12 @@ export default function RedigerbartBrev({ brev, behandling }: { brev: IBrev; beh
         </Tabs.List>
 
         <Tabs.Panel value={ManueltBrevFane.REDIGER}>
-          {isPendingOrInitial(hentManuellPayloadStatus) ? (
-            <Spinner visible label={'Henter brevinnhold ...'} />
-          ) : (
+          {isPendingOrInitial(hentManuellPayloadStatus) && <Spinner visible label={'Henter brevinnhold ...'} />}
+          {isSuccess(hentManuellPayloadStatus) && (
             <PanelWrapper>
-              <SlateEditor value={content} onChange={onChange} readonly={!brevKanRedigeres} />
+              <SlateEditor value={content} onChange={onChange} readonly={!kanRedigeres} />
 
-              {brevKanRedigeres && (
+              {kanRedigeres && (
                 <ButtonRow>
                   {lagretStatus.beskrivelse && <Detail as="span">{lagretStatus.beskrivelse}</Detail>}
                   <Button

@@ -1,4 +1,4 @@
-import { BrowserRouter, Route, Routes, Navigate } from 'react-router-dom'
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import '@navikt/ds-css'
 import '@navikt/ds-css-internal'
 import Oppgavebenken from './components/oppgavebenken/Oppgavebenken'
@@ -9,6 +9,8 @@ import useInnloggetSaksbehandler from './shared/hooks/useInnloggetSaksbehandler'
 import nb from 'date-fns/locale/nb'
 import { registerLocale } from 'react-datepicker'
 import ErrorBoundary from '~ErrorBoundary'
+import BrevOversikt from '~components/person/brev/BrevOversikt'
+import NyttBrev from '~components/person/brev/NyttBrev'
 
 function App() {
   const innloggetbrukerHentet = useInnloggetSaksbehandler()
@@ -25,6 +27,8 @@ function App() {
                 <Route path="/" element={<Oppgavebenken />} />
                 <Route path="/oppgavebenken" element={<Oppgavebenken />} />
                 <Route path="/person/:fnr" element={<Person />} />
+                <Route path="/person/:fnr/sak/:sakId/brev" element={<BrevOversikt />} />
+                <Route path="/person/:fnr/sak/:sakId/brev/:brevId" element={<NyttBrev />} />
                 <Route path="/behandling/:behandlingId/*" element={<Behandling />} />
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>

@@ -22,7 +22,7 @@ export default function SlateEditor({ value, onChange, readonly }: EditorProps) 
 
   return (
     <BrevEditor>
-      <Slate editor={editor} onChange={onChange} initialValue={value || []}>
+      <Slate editor={editor} onChange={onChange} initialValue={value}>
         {!readonly && (
           <Toolbar>
             <BlockButton format="heading-two" icon="H2" />

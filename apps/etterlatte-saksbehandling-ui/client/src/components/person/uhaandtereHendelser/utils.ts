@@ -40,6 +40,7 @@ export const grunnlagsendringsKilde = (type: GrunnlagendringshendelseSamsvarType
     case 'UTLAND':
     case 'BARN':
     case 'ANSVARLIGE_FORELDRE':
+    case 'SIVILSTAND':
     case 'VERGEMAAL_ELLER_FREMTIDSFULLMAKT':
       return 'Pdl'
   }

@@ -123,7 +123,7 @@ internal class GrunnlagHelperKtTest {
         val gjenlevendesBarn = grunnlag.barn(Saksrolle.GJENLEVENDE)
         assertEquals(barn, avdoedesBarn)
         assertEquals(barn, gjenlevendesBarn)
-        assertThrows<IllegalArgumentException> { grunnlag.barn(Saksrolle.SOEKER) }
+        assertEquals(barn, gjenlevendesBarn)
         assertThrows<IllegalArgumentException> { grunnlag.barn(Saksrolle.SOESKEN) }
         assertThrows<IllegalArgumentException> { grunnlag.barn(Saksrolle.UKJENT) }
     }

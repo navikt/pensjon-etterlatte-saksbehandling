@@ -38,7 +38,7 @@ fun Grunnlag.ansvarligeForeldre(saksrolle: Saksrolle, fnr: String) =
                 ?.hentFamilierelasjon()?.verdi?.ansvarligeForeldre
         }
         else -> throw IllegalArgumentException(
-            "Proevde aa finne doedsdato for $saksrolle, men det skal ikke kunne skje D:"
+            "Proevde aa finne ansvarligeForeldre for $saksrolle, men det skal ikke kunne skje D:"
         )
     }
 
@@ -47,11 +47,11 @@ fun Grunnlag.barn(saksrolle: Saksrolle) =
         Saksrolle.AVDOED -> {
             hentAvdoed().hentFamilierelasjon()?.verdi?.barn
         }
-        Saksrolle.GJENLEVENDE -> {
+        Saksrolle.GJENLEVENDE, Saksrolle.SOEKER -> {
             hentGjenlevende().hentFamilierelasjon()?.verdi?.barn
         }
         else -> throw IllegalArgumentException(
-            "Proevde aa finne doedsdato for $saksrolle, men det skal ikke kunne skje D:"
+            "Proevde aa finne barn for $saksrolle, men det skal ikke kunne skje D:"
         )
     }
 
@@ -70,7 +70,7 @@ fun Grunnlag.utland(saksrolle: Saksrolle, fnr: String) =
             hentGjenlevende().hentUtland()?.verdi
         }
         else -> throw IllegalArgumentException(
-            "Proevde aa finne doedsdato for $saksrolle, men det skal ikke kunne skje D:"
+            "Proevde aa finne utland for $saksrolle, men det skal ikke kunne skje D:"
         )
     }
 

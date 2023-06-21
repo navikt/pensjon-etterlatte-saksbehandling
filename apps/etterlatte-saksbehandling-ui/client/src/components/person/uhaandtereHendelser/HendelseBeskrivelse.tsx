@@ -124,7 +124,7 @@ const GrunnlagVergemaal = (props: { vergemaal: VergemaalEllerFremtidsfullmakt })
 const Sivilstand = (props: { samsvar: SivilstandSamsvar }) => {
   const { samsvar } = props
 
-  const sivilstandVisning = (sivilstand: Sivilstand, i) => {
+  const sivilstandVisning = (sivilstand: Sivilstand, i: number) => {
     return (
       <ListeWrapper key={i}>
         <li>
@@ -134,7 +134,7 @@ const Sivilstand = (props: { samsvar: SivilstandSamsvar }) => {
           <BodySmall>Sivilstatus: {sivilstand.sivilstatus}</BodySmall>
         </li>
         <li>
-          <BodySmall>Relatert ved siviltilstand: {sivilstand.relatertVedSiviltilstand}</BodySmall>
+          <BodySmall>Ektefelle/samboer: {sivilstand.relatertVedSiviltilstand ?? 'ikke angitt'}</BodySmall>
         </li>
         <li>
           <BodySmall>Kilde: {sivilstand.kilde}</BodySmall>

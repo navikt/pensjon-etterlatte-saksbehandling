@@ -8,6 +8,7 @@ import no.nav.etterlatte.trygdetid.KodeverkService
 import no.nav.etterlatte.trygdetid.TrygdetidBeregningService
 import no.nav.etterlatte.trygdetid.TrygdetidRepository
 import no.nav.etterlatte.trygdetid.TrygdetidService
+import no.nav.etterlatte.trygdetid.avtale.AvtaleRepository
 import no.nav.etterlatte.trygdetid.avtale.AvtaleService
 import no.nav.etterlatte.trygdetid.klienter.BehandlingKlient
 import no.nav.etterlatte.trygdetid.klienter.GrunnlagKlient
@@ -31,5 +32,6 @@ class ApplicationContext {
             grunnlagKlient = grunnlagKlient,
             beregnTrygdetidService = TrygdetidBeregningService
         )
-    val avtaleService = AvtaleService()
+    val avtaleRepository = AvtaleRepository(dataSource)
+    val avtaleService = AvtaleService(avtaleRepository)
 }

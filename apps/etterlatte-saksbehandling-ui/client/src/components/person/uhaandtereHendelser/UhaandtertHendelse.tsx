@@ -10,6 +10,7 @@ import { HendelseBeskrivelse } from '~components/person/uhaandtereHendelser/Hend
 import { ApiErrorAlert } from '~ErrorBoundary'
 import styled from 'styled-components'
 import InstitusjonsoppholdVurderingBegrunnelse from '~components/person/uhaandtereHendelser/InstitusjonsoppholdVurderingBegrunnelse'
+import { useNavigate } from 'react-router'
 
 const UhaandtertHendelse = (props: {
   hendelse: Grunnlagsendringshendelse
@@ -24,6 +25,7 @@ const UhaandtertHendelse = (props: {
   const [res, lukkGrunnlagshendelseFunc, resetApiCall] = useApiCall(lukkGrunnlagshendelse)
   const stoetterRevurdering = stoetterRevurderingAvHendelse(hendelse, revurderinger)
   const { type: samsvarType } = samsvarMellomKildeOgGrunnlag
+  const navigate = useNavigate()
 
   const tattMedIBehandling = hendelse.status == 'TATT_MED_I_BEHANDLING'
   const lukkGrunnlagshendelseWrapper = () => {
@@ -51,7 +53,10 @@ const UhaandtertHendelse = (props: {
         <div>
           {tattMedIBehandling ? (
             <Alert variant="info" inline>
-              Denne hendelsen har en revurdering knyttet til seg med id {hendelse.behandlingId}
+              Denne hendelsen har en revurdering knyttet til seg.
+              <Button onClick={() => navigate(`/behandling/${hendelse.behandlingId}/revurderingsoversikt`)}>
+                Gå til revurdering
+              </Button>
             </Alert>
           ) : (
             <>

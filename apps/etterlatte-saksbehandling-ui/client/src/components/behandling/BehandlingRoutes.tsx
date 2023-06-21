@@ -46,7 +46,6 @@ function useRouteNavigation() {
   const goto = (path: behandlingRouteTypes) => {
     setCurrentRoute(path)
     navigate(`/behandling/${match?.params?.behandlingId}/${path}`)
-    window.scrollTo(0, 0)
   }
 
   return { currentRoute, goto }

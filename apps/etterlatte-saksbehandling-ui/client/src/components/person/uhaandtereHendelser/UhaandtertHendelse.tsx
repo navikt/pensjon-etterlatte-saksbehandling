@@ -54,7 +54,10 @@ const UhaandtertHendelse = (props: {
           {tattMedIBehandling ? (
             <Alert variant="info" inline>
               Denne hendelsen har en revurdering knyttet til seg.
-              <Button onClick={() => navigate(`/behandling/${hendelse.behandlingId}/revurderingsoversikt`)}>
+              <Button
+                variant="secondary"
+                onClick={() => navigate(`/behandling/${hendelse.behandlingId}/revurderingsoversikt`)}
+              >
                 Gå til revurdering
               </Button>
             </Alert>

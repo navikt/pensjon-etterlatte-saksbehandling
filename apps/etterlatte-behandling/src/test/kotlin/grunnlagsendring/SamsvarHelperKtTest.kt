@@ -3,6 +3,8 @@ package no.nav.etterlatte.grunnlagsendring
 import no.nav.etterlatte.STOR_SNERK
 import no.nav.etterlatte.TRIVIELL_MIDTPUNKT
 import no.nav.etterlatte.libs.common.person.InnflyttingTilNorge
+import no.nav.etterlatte.libs.common.person.Sivilstand
+import no.nav.etterlatte.libs.common.person.Sivilstatus
 import no.nav.etterlatte.libs.common.person.UtflyttingFraNorge
 import no.nav.etterlatte.libs.common.person.Utland
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -83,6 +85,48 @@ internal class SamsvarHelperKtTest {
             utflyttingFraNorge = listOf(UtflyttingFraNorge("Tyskland", LocalDate.of(2022, 1, 1)))
         )
         val resultat = samsvarUtflytting(utflyttingPdl, utflyttingGrunnlag)
+        assertFalse(resultat.samsvar)
+    }
+
+    @Test
+    fun `samsvarSivilstand med samsvar`() {
+        val sivilstand = listOf(
+            Sivilstand(
+                sivilstatus = Sivilstatus.GIFT,
+                relatertVedSiviltilstand = null,
+                gyldigFraOgMed = LocalDate.now(),
+                bekreftelsesdato = LocalDate.now(),
+                kilde = "test"
+            )
+        )
+
+        val resultat = samsvarSivilstand(sivilstand, sivilstand)
+        assertTrue(resultat.samsvar)
+    }
+
+    @Test
+    fun `samsvarSivilstand uten samsvar`() {
+        val sivilstand1 = listOf(
+            Sivilstand(
+                sivilstatus = Sivilstatus.GIFT,
+                relatertVedSiviltilstand = null,
+                gyldigFraOgMed = LocalDate.now(),
+                bekreftelsesdato = LocalDate.now(),
+                kilde = "test"
+            )
+        )
+
+        val sivilstand2 = listOf(
+            Sivilstand(
+                sivilstatus = Sivilstatus.UGIFT,
+                relatertVedSiviltilstand = null,
+                gyldigFraOgMed = LocalDate.now(),
+                bekreftelsesdato = LocalDate.now(),
+                kilde = "test"
+            )
+        )
+
+        val resultat = samsvarSivilstand(sivilstand1, sivilstand2)
         assertFalse(resultat.samsvar)
     }
 }

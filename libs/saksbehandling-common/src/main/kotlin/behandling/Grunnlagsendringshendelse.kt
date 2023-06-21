@@ -21,12 +21,15 @@ enum class Saksrolle {
     GJENLEVENDE,
     UKJENT;
 
-    fun toPersonrolle(): PersonRolle =
+    fun toPersonrolle(sakType: SakType): PersonRolle =
         when (this) {
-            SOEKER -> PersonRolle.BARN
+            SOEKER -> when (sakType) {
+                SakType.BARNEPENSJON -> PersonRolle.BARN
+                SakType.OMSTILLINGSSTOENAD -> PersonRolle.GJENLEVENDE
+            }
             SOESKEN -> PersonRolle.BARN
             AVDOED -> PersonRolle.AVDOED
-            GJENLEVENDE -> PersonRolle.AVDOED
+            GJENLEVENDE -> PersonRolle.GJENLEVENDE
             UKJENT -> throw Exception("Ukjent Saksrolle kan ikke castes til PersonRolle")
         }
 

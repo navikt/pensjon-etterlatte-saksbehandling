@@ -48,6 +48,13 @@ sealed class SamsvarMellomKildeOgGrunnlag {
         override val samsvar: Boolean
     ) : SamsvarMellomKildeOgGrunnlag()
 
+    @JsonTypeName("SIVILSTAND")
+    data class Sivilstand(
+        val fraPdl: List<no.nav.etterlatte.libs.common.person.Sivilstand>?,
+        val fraGrunnlag: List<no.nav.etterlatte.libs.common.person.Sivilstand>?,
+        override val samsvar: Boolean
+    ) : SamsvarMellomKildeOgGrunnlag()
+
     @JsonTypeName("GRUNNBELOEP")
     data class Grunnbeloep(
         override val samsvar: Boolean

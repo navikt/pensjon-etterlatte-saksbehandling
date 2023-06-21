@@ -6,6 +6,7 @@ import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.pdlhendelse.Adressebeskyttelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
+import no.nav.etterlatte.libs.common.pdlhendelse.SivilstandHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.VergeMaalEllerFremtidsfullmakt
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
@@ -15,8 +16,6 @@ import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import org.slf4j.LoggerFactory
-
-val hendelseTyper = listOf("DOEDSFALL_V1", "UTFLYTTING_FRA_NORGE", "FORELDERBARNRELASJON_V1")
 
 internal class PdlHendelser(
     rapidsConnection: RapidsConnection,
@@ -30,8 +29,8 @@ internal class PdlHendelser(
             eventName("PDL:PERSONHENDELSE")
 
             correlationId()
-            validate { it.requireAny("hendelse", hendelseTyper) }
-            validate { it.interestedIn("hendelse_data") }
+            validate { it.requireKey("hendelse") }
+            validate { it.requireKey("hendelse_data") }
         }.register(this)
     }
 
@@ -67,6 +66,12 @@ internal class PdlHendelser(
                         val vergeMaalEllerFremtidsfullmakt: VergeMaalEllerFremtidsfullmakt =
                             objectMapper.treeToValue(packet["hendelse_data"])
                         behandlinger.sendVergeMaalEllerFremtidsfullmakt(vergeMaalEllerFremtidsfullmakt)
+                    }
+                    "SIVILSTAND_V1" -> {
+                        logger.info("Sivilstand mottatt")
+                        val sivilstandHendelse: SivilstandHendelse =
+                            objectMapper.treeToValue(packet["hendelse_data"])
+                        behandlinger.sendSivilstandHendelse(sivilstandHendelse)
                     }
                     else -> {
                         logger.info("Pdl-hendelsestypen mottatt håndteres ikke av applikasjonen")

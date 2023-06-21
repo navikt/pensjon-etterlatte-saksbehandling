@@ -2,6 +2,7 @@ package no.nav.etterlatte.grunnlagsendring
 
 import no.nav.etterlatte.behandling.domain.SamsvarMellomKildeOgGrunnlag
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.person.Sivilstand
 import no.nav.etterlatte.libs.common.person.Utland
 import java.time.LocalDate
 
@@ -41,6 +42,15 @@ fun samsvarUtflytting(
     samsvar = utflyttingPdl?.utflyttingFraNorge erLikRekkefoelgeIgnorert utflyttingGrunnlag?.utflyttingFraNorge &&
         utflyttingPdl?.innflyttingTilNorge erLikRekkefoelgeIgnorert utflyttingGrunnlag?.innflyttingTilNorge
 
+)
+
+fun samsvarSivilstand(
+    sivilstandPdl: List<Sivilstand>?,
+    sivilstandGrunnlag: List<Sivilstand>?
+) = SamsvarMellomKildeOgGrunnlag.Sivilstand(
+    fraPdl = sivilstandPdl,
+    fraGrunnlag = sivilstandGrunnlag,
+    samsvar = sivilstandPdl erLikRekkefoelgeIgnorert sivilstandGrunnlag
 )
 
 infix fun <T> List<T>?.erLikRekkefoelgeIgnorert(other: List<T>?): Boolean =

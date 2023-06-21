@@ -109,6 +109,7 @@ fun Oppgave.Grunnlagsendringsoppgave.opprettMerknad(): String {
         GrunnlagsendringsType.UTFLYTTING -> "Utflytting"
         GrunnlagsendringsType.FORELDER_BARN_RELASJON -> "Forelder-barn relasjon"
         GrunnlagsendringsType.VERGEMAAL_ELLER_FREMTIDSFULLMAKT -> "Vergemål eller fremtidsfullmakt"
+        GrunnlagsendringsType.SIVILSTAND -> "Sivilstand"
         GrunnlagsendringsType.INSTITUSJONSOPPHOLD -> {
             return when (samsvarMellomKildeOgGrunnlag) {
                 is SamsvarMellomKildeOgGrunnlag.INSTITUSJONSOPPHOLD -> {

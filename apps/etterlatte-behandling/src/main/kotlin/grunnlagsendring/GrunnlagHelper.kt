@@ -5,6 +5,7 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
 import no.nav.etterlatte.libs.common.grunnlag.hentFamilierelasjon
 import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsnummer
+import no.nav.etterlatte.libs.common.grunnlag.hentSivilstand
 import no.nav.etterlatte.libs.common.grunnlag.hentUtland
 import no.nav.etterlatte.libs.common.grunnlag.hentVergemaalellerfremtidsfullmakt
 
@@ -80,5 +81,21 @@ fun Grunnlag.vergemaalellerfremtidsfullmakt(saksrolle: Saksrolle) =
         }
         else -> throw IllegalArgumentException(
             "Prøvde å finne vergemål på en person som ikke er søker, men det er ikke relevant"
+        )
+    }
+
+fun Grunnlag.sivilstand(saksrolle: Saksrolle) =
+    when (saksrolle) {
+        Saksrolle.SOEKER -> {
+            soeker.hentSivilstand()?.verdi
+        }
+        Saksrolle.GJENLEVENDE -> {
+            hentGjenlevende().hentSivilstand()?.verdi
+        }
+        Saksrolle.AVDOED -> {
+            hentAvdoed().hentSivilstand()?.verdi
+        }
+        else -> throw IllegalArgumentException(
+            "Prøvde å finne sivilstand for $saksrolle, men det er ikke relevant for denne rollen"
         )
     }

@@ -12,6 +12,7 @@ import no.nav.etterlatte.common.klienter.PdlKlient
 import no.nav.etterlatte.common.klienter.hentAnsvarligeForeldre
 import no.nav.etterlatte.common.klienter.hentBarn
 import no.nav.etterlatte.common.klienter.hentDoedsdato
+import no.nav.etterlatte.common.klienter.hentSivilstand
 import no.nav.etterlatte.common.klienter.hentUtland
 import no.nav.etterlatte.common.klienter.hentVergemaal
 import no.nav.etterlatte.grunnlagsendring.klienter.GrunnlagKlient
@@ -26,6 +27,7 @@ import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.pdlhendelse.Adressebeskyttelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
+import no.nav.etterlatte.libs.common.pdlhendelse.SivilstandHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.VergeMaalEllerFremtidsfullmakt
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
@@ -112,6 +114,15 @@ class GrunnlagsendringshendelseService(
         return opprettHendelseAvTypeForPerson(
             vergeMaalEllerFremtidsfullmakt.fnr,
             GrunnlagsendringsType.VERGEMAAL_ELLER_FREMTIDSFULLMAKT
+        )
+    }
+
+    fun opprettSivilstandHendelse(
+        sivilstandHendelse: SivilstandHendelse
+    ): List<Grunnlagsendringshendelse> {
+        return opprettHendelseAvTypeForPerson(
+            sivilstandHendelse.fnr,
+            GrunnlagsendringsType.SIVILSTAND
         )
     }
 
@@ -303,15 +314,15 @@ class GrunnlagsendringshendelseService(
     private fun verifiserOgHaandterHendelse(
         hendelse: Grunnlagsendringshendelse
     ) {
-        val personRolle = hendelse.hendelseGjelderRolle.toPersonrolle()
         val sak = inTransaction {
             sakService.finnSak(hendelse.sakId)!!
         }
+        val personRolle = hendelse.hendelseGjelderRolle.toPersonrolle(sak.sakType)
         val pdlData = pdlKlient.hentPdlModell(hendelse.gjelderPerson, personRolle, sak.sakType)
         val grunnlag = runBlocking {
             grunnlagKlient.hentGrunnlag(hendelse.sakId)
         }
-        val samsvarMellomPdlOgGrunnlag = finnSamsvarForHendelse(hendelse, pdlData, grunnlag)
+        val samsvarMellomPdlOgGrunnlag = finnSamsvarForHendelse(hendelse, pdlData, grunnlag, personRolle)
         if (!samsvarMellomPdlOgGrunnlag.samsvar) {
             oppdaterHendelseSjekket(hendelse, samsvarMellomPdlOgGrunnlag)
         } else {
@@ -343,7 +354,8 @@ class GrunnlagsendringshendelseService(
     private fun finnSamsvarForHendelse(
         hendelse: Grunnlagsendringshendelse,
         pdlData: PersonDTO,
-        grunnlag: Grunnlag?
+        grunnlag: Grunnlag?,
+        personRolle: PersonRolle
     ): SamsvarMellomKildeOgGrunnlag {
         val rolle = hendelse.hendelseGjelderRolle
         val fnr = hendelse.gjelderPerson
@@ -364,7 +376,7 @@ class GrunnlagsendringshendelseService(
             }
 
             GrunnlagsendringsType.FORELDER_BARN_RELASJON -> {
-                if (rolle.toPersonrolle() == PersonRolle.BARN) {
+                if (personRolle == PersonRolle.BARN) {
                     samsvarAnsvarligeForeldre(
                         ansvarligeForeldrePdl = pdlData.hentAnsvarligeForeldre(),
                         ansvarligeForeldreGrunnlag = grunnlag?.ansvarligeForeldre(rolle, fnr)
@@ -386,6 +398,13 @@ class GrunnlagsendringshendelseService(
                     samsvar = pdlVergemaal erLikRekkefoelgeIgnorert grunnlagVergemaal
                 )
             }
+
+            GrunnlagsendringsType.SIVILSTAND -> {
+                val pdlSivilstand = pdlData.hentSivilstand()
+                val grunnlagSivilstand = grunnlag?.sivilstand(rolle)
+                samsvarSivilstand(pdlSivilstand, grunnlagSivilstand)
+            }
+
             GrunnlagsendringsType.GRUNNBELOEP -> SamsvarMellomKildeOgGrunnlag.Grunnbeloep(samsvar = false)
             GrunnlagsendringsType.INSTITUSJONSOPPHOLD ->
                 throw IllegalStateException("Denne hendelsen skal gå rett til oppgavelisten og aldri komme hit")

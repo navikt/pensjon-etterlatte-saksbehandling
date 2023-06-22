@@ -37,9 +37,10 @@ export interface Beregningsperiode {
 export interface BeregningsGrunnlagDto {
   behandlingId: string
   kilde: KildeSaksbehandler
-  institusjonsopphold: InstitusjonsoppholdGrunnlag
+  institusjonsoppholdBeregningsgrunnlag: InstitusjonsoppholdGrunnlagDTO
   soeskenMedIBeregning: PeriodisertBeregningsgrunnlagDto<SoeskenMedIBeregning[]>[]
 }
+export type InstitusjonsoppholdGrunnlagDTO = PeriodisertBeregningsgrunnlagDto<InstitusjonsoppholdIBeregning>[]
 
 export interface SoeskenMedIBeregning {
   foedselsnummer: string
@@ -47,11 +48,12 @@ export interface SoeskenMedIBeregning {
 }
 
 export interface BeregningsGrunnlagData {
-  soeskenMedIBeregning: PeriodisertBeregningsgrunnlagDto<SoeskenMedIBeregning[]>[]
-  institusjonsopphold: InstitusjonsoppholdGrunnlag | undefined
+  soeskenMedIBeregning: SoeskenMedIBeregningGrunnlag
+  institusjonsoppholdBeregningsgrunnlag: InstitusjonsoppholdGrunnlagDTO | undefined
 }
 
-export type InstitusjonsoppholdGrunnlag = PeriodisertBeregningsgrunnlag<InstitusjonsoppholdIBeregning>[]
+export type SoeskenMedIBeregningGrunnlag = PeriodisertBeregningsgrunnlagDto<SoeskenMedIBeregning[]>[]
+export type InstitusjonsoppholdGrunnlagData = PeriodisertBeregningsgrunnlag<InstitusjonsoppholdIBeregning>[]
 
 export interface InstitusjonsoppholdIBeregning {
   reduksjon: string

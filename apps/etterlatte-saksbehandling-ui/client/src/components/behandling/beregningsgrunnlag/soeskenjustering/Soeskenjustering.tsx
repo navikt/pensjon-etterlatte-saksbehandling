@@ -1,17 +1,13 @@
-import { isFailure, isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
-import React, { useEffect, useState } from 'react'
-import { IBehandlingReducer, oppdaterBeregingsGrunnlag } from '~store/reducers/BehandlingReducer'
+import React, { useState } from 'react'
+import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
 import { useFieldArray, useForm } from 'react-hook-form'
 import { Button, ErrorSummary, Heading } from '@navikt/ds-react'
 import styled from 'styled-components'
 import { IPdlPerson } from '~shared/types/Person'
 import { addMonths } from 'date-fns'
 import { SoeskenMedIBeregning } from '~shared/types/Beregning'
-import { hentBeregningsGrunnlag } from '~shared/api/beregning'
 import { Barn } from '~components/behandling/soeknadsoversikt/familieforhold/personer/Barn'
 import { Border, HeadingWrapper } from '~components/behandling/soeknadsoversikt/styled'
-import Spinner from '~shared/Spinner'
-import { ApiErrorAlert } from '~ErrorBoundary'
 import { ContentHeader } from '~shared/styled'
 import { FamilieforholdWrapper } from '~components/behandling/soeknadsoversikt/familieforhold/barnepensjon/FamilieforholdBarnepensjon'
 import {
@@ -19,7 +15,6 @@ import {
   PeriodisertBeregningsgrunnlag,
   feilIKomplettePerioderOverIntervall,
 } from '~components/behandling/beregningsgrunnlag/PeriodisertBeregningsgrunnlag'
-import { useAppDispatch } from '~store/Store'
 import { hentBehandlesFraStatus } from '~components/behandling/felles/utils'
 import { SuccessColored } from '@navikt/ds-icons'
 import SoeskenjusteringPeriode from '~components/behandling/beregningsgrunnlag/soeskenjustering/SoeskenjusteringPeriode'
@@ -49,8 +44,11 @@ const nySoeskengrunnlagPeriode = (soesken: IPdlPerson[], fom?: string) => ({
 
 const Soeskenjustering = (props: SoeskenjusteringProps) => {
   const { behandling, onSubmit, setSoeskenJusteringManglerIkke } = props
+  if (!behandling.familieforhold) {
+    return null
+  }
   const [visFeil, setVisFeil] = useState(false)
-  const { handleSubmit, reset, control, watch } = useForm<{
+  const { handleSubmit, control, watch } = useForm<{
     soeskenMedIBeregning: PeriodisertBeregningsgrunnlag<SoeskenKanskjeMedIBeregning[]>[]
   }>({
     defaultValues: { soeskenMedIBeregning: mapListeFraDto(behandling.beregningsGrunnlag?.soeskenMedIBeregning ?? []) },
@@ -60,31 +58,10 @@ const Soeskenjustering = (props: SoeskenjusteringProps) => {
     control,
   })
 
-  const soeskenjustering = behandling.beregningsGrunnlag?.soeskenMedIBeregning
-  const [soeskenjusteringGrunnlag, fetchSoeskengjusteringGrunnlag] = useApiCall(hentBeregningsGrunnlag)
-  const soeskenjusteringErDefinertIRedux = soeskenjustering !== undefined
   const behandles = hentBehandlesFraStatus(behandling?.status)
   const sisteTom = watch(`soeskenMedIBeregning.${fields.length - 1}.tom`)
   const sisteFom = watch(`soeskenMedIBeregning.${fields.length - 1}.fom`)
-  const dispatch = useAppDispatch()
   const [visOkLagret, setVisOkLagret] = useState(false)
-
-  useEffect(() => {
-    if (!soeskenjusteringErDefinertIRedux) {
-      fetchSoeskengjusteringGrunnlag(behandling.id, (result) => {
-        if (result === null) {
-          reset({ soeskenMedIBeregning: [nySoeskengrunnlagPeriode(soesken, behandling.virkningstidspunkt?.dato)] })
-        } else {
-          reset({ soeskenMedIBeregning: mapListeFraDto(result.soeskenMedIBeregning) })
-          dispatch(oppdaterBeregingsGrunnlag(result))
-        }
-      })
-    }
-  }, [])
-
-  if (!behandling.familieforhold) {
-    return null
-  }
 
   const allePerioder = watch('soeskenMedIBeregning')
   const feil: [number, FeilIPeriodeGrunnlagAlle][] = [
@@ -98,6 +75,10 @@ const Soeskenjustering = (props: SoeskenjusteringProps) => {
     behandling.familieforhold.avdoede.opplysning.avdoedesBarn?.filter(
       (barn) => barn.foedselsnummer !== behandling.søker?.foedselsnummer
     ) ?? []
+
+  if (soesken.length === 0) {
+    return null
+  }
 
   const fnrTilSoesken: Record<string, IPdlPerson> = soesken.reduce(
     (acc, next) => ({
@@ -134,47 +115,43 @@ const Soeskenjustering = (props: SoeskenjusteringProps) => {
         </HeadingWrapper>
       </ContentHeader>
       <FamilieforholdWrapper>
-        {behandling.søker && <Barn person={behandling.søker} doedsdato={doedsdato} />}
+        {behandling.søker && <Barn person={behandling.søker} doedsdato={doedsdato!!} />}
         <Border />
-        <Spinner visible={isPending(soeskenjusteringGrunnlag)} label={'Henter beregningsgrunnlag for søsken'} />
-        {isFailure(soeskenjusteringGrunnlag) && <ApiErrorAlert>Søskenjustering kan ikke hentes</ApiErrorAlert>}
       </FamilieforholdWrapper>
       {visFeil && feil.length > 0 && behandles ? <FeilIPerioder feil={feil} /> : null}
       <form id="formsoeskenjustering">
-        {isSuccess(soeskenjusteringGrunnlag) || soeskenjusteringErDefinertIRedux ? (
-          <>
-            <UstiletListe>
-              {fields.map((item, index) => (
-                <SoeskenjusteringPeriode
-                  key={item.id}
-                  behandling={behandling}
-                  control={control}
-                  index={index}
-                  remove={() => remove(index)}
-                  canRemove={fields.length > 1}
-                  fnrTilSoesken={fnrTilSoesken}
-                  watch={watch}
-                  visFeil={visFeil}
-                  feil={feil}
-                />
-              ))}
-            </UstiletListe>
-            {behandles ? (
-              <NyPeriodeButton
-                type="button"
-                onClick={() => append(nySoeskengrunnlagPeriode(soesken, addMonths(sisteTom || sisteFom, 1).toString()))}
-              >
-                Legg til periode
-              </NyPeriodeButton>
-            ) : null}
-            {behandles && (
-              <Button type="submit" onClick={handleSubmit(ferdigstillForm)}>
-                Lagre søskenjustering
-              </Button>
-            )}
-            {visOkLagret && <SuccessColored fontSize={20} />}
-          </>
-        ) : null}
+        <>
+          <UstiletListe>
+            {fields.map((item, index) => (
+              <SoeskenjusteringPeriode
+                key={item.id}
+                behandling={behandling}
+                control={control}
+                index={index}
+                remove={() => remove(index)}
+                canRemove={fields.length > 1}
+                fnrTilSoesken={fnrTilSoesken}
+                watch={watch}
+                visFeil={visFeil}
+                feil={feil}
+              />
+            ))}
+          </UstiletListe>
+          {behandles && (
+            <NyPeriodeButton
+              type="button"
+              onClick={() => append(nySoeskengrunnlagPeriode(soesken, addMonths(sisteTom || sisteFom, 1).toString()))}
+            >
+              Legg til periode
+            </NyPeriodeButton>
+          )}
+          {behandles && (
+            <Button type="submit" onClick={handleSubmit(ferdigstillForm)}>
+              Lagre søskenjustering
+            </Button>
+          )}
+          {visOkLagret && <SuccessColored fontSize={20} />}
+        </>
       </form>
     </>
   )

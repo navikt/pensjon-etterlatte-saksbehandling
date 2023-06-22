@@ -15,6 +15,7 @@ export const grunnlagsendringsTittel: Record<GrunnlagendringshendelseSamsvarType
   BARN: 'Barn',
   ANSVARLIGE_FORELDRE: 'Ansvarlige foreldre',
   VERGEMAAL_ELLER_FREMTIDSFULLMAKT: 'Vergemål eller fremtidsfullmakt',
+  SIVILSTAND: 'Sivilstand',
   INSTITUSJONSOPPHOLD: 'Institusjonsopphold',
 }
 
@@ -25,6 +26,7 @@ export const grunnlagsendringsBeskrivelse: Record<GrunnlagendringshendelseSamsva
   DOEDSDATO: 'ny dødsdato i PDL',
   UTLAND: 'ny ut-/innflytting i PDL',
   VERGEMAAL_ELLER_FREMTIDSFULLMAKT: 'annet vergemål i PDL',
+  SIVILSTAND: 'endring på sivilstand i PDL',
   INSTITUSJONSOPPHOLD: 'INSTITUSJONSOPPHOLD',
 }
 
@@ -38,6 +40,7 @@ export const grunnlagsendringsKilde = (type: GrunnlagendringshendelseSamsvarType
     case 'UTLAND':
     case 'BARN':
     case 'ANSVARLIGE_FORELDRE':
+    case 'SIVILSTAND':
     case 'VERGEMAAL_ELLER_FREMTIDSFULLMAKT':
       return 'Pdl'
   }

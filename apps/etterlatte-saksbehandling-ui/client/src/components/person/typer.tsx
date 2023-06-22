@@ -113,6 +113,21 @@ export interface VergemaalEllerFremtidsfullmaktForholdSamsvar {
   fraGrunnlag?: VergemaalEllerFremtidsfullmakt[]
 }
 
+export interface SivilstandSamsvar {
+  type: 'SIVILSTAND'
+  samsvar: boolean
+  fraPdl?: Sivilstand[]
+  fraGrunnlag?: Sivilstand[]
+}
+
+export interface Sivilstand {
+  sivilstatus: string
+  relatertVedSiviltilstand?: string
+  gyldigFraOgMed?: string
+  bekreftelsesdato?: string
+  kilde: string
+}
+
 export interface VergemaalEllerFremtidsfullmakt {
   embete?: string
   type?: string
@@ -152,6 +167,7 @@ export type SamsvarMellomKildeOgGrunnlag =
   | BarnSamsvar
   | AnsvarligeForeldreSamsvar
   | VergemaalEllerFremtidsfullmaktForholdSamsvar
+  | SivilstandSamsvar
   | ReguleringSamsvar
   | InstitusjonsoppholdSamsvar
 

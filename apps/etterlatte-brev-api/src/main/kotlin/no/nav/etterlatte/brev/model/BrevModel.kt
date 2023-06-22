@@ -3,6 +3,8 @@ package no.nav.etterlatte.brev.model
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonValue
 import no.nav.etterlatte.brev.adresse.RegoppslagResponseDTO
+import no.nav.etterlatte.brev.behandling.Behandling
+import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
@@ -113,25 +115,31 @@ enum class BrevProsessType {
     AUTOMATISK;
 
     companion object {
-        fun fra(sakType: SakType, vedtakType: VedtakType): BrevProsessType {
-            return when (sakType) {
-                SakType.OMSTILLINGSSTOENAD -> {
-                    when (vedtakType) {
-                        VedtakType.INNVILGELSE -> AUTOMATISK
-                        VedtakType.OPPHOER,
-                        VedtakType.AVSLAG,
-                        VedtakType.ENDRING -> MANUELL
-                    }
-                }
+        fun fra(behandling: Behandling): BrevProsessType {
+            return when (behandling.sakType) {
+                SakType.OMSTILLINGSSTOENAD -> omsBrev(behandling)
+                SakType.BARNEPENSJON -> bpBrev(behandling)
+            }
+        }
 
-                SakType.BARNEPENSJON -> {
-                    when (vedtakType) {
-                        VedtakType.INNVILGELSE -> AUTOMATISK
-                        VedtakType.OPPHOER,
-                        VedtakType.AVSLAG,
-                        VedtakType.ENDRING -> MANUELL
-                    }
+        private fun omsBrev(behandling: Behandling): BrevProsessType {
+            return when (behandling.vedtak.type) {
+                VedtakType.INNVILGELSE -> AUTOMATISK
+                VedtakType.OPPHOER,
+                VedtakType.AVSLAG,
+                VedtakType.ENDRING -> MANUELL
+            }
+        }
+
+        private fun bpBrev(behandling: Behandling): BrevProsessType {
+            return when (behandling.vedtak.type) {
+                VedtakType.INNVILGELSE -> AUTOMATISK
+                VedtakType.ENDRING -> when (behandling.revurderingsaarsak) {
+                    RevurderingAarsak.SOESKENJUSTERING -> AUTOMATISK
+                    else -> MANUELL
                 }
+                VedtakType.OPPHOER,
+                VedtakType.AVSLAG -> MANUELL
             }
         }
     }

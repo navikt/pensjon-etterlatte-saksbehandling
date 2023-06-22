@@ -26,8 +26,6 @@ export default function NyttBrev() {
   }, [])
 
   useEffect(() => {
-    console.log('henter brev')
-
     apiHentBrev({ brevId: Number(brevId), sakId: Number(sakId) }, (brev) => {
       if ([BrevStatus.OPPRETTET, BrevStatus.OPPDATERT].includes(brev.status)) {
         setKanRedigeres(true)

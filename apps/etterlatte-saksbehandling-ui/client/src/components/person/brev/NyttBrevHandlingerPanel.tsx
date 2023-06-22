@@ -5,7 +5,6 @@ import { ButtonWrapper } from '~shared/modal/modal'
 import { useState } from 'react'
 import { distribuerBrev, ferdigstillBrev, journalfoerBrev } from '~shared/api/brev'
 import Spinner from '~shared/Spinner'
-import { ApiError } from '~shared/api/apiClient'
 
 interface Props {
   brev: IBrev
@@ -22,8 +21,7 @@ export default function NyttBrevHandlingerPanel({ brev, setKanRedigeres }: Props
   const [loadingMsg, setLoadingMsg] = useState<string>()
   const [error, setError] = useState<string>()
 
-  const handleError = (msg: string, err?: ApiError) => {
-    console.error(err)
+  const handleError = (msg: string) => {
     setError(msg)
     setIsOpen(false)
   }
@@ -35,14 +33,14 @@ export default function NyttBrevHandlingerPanel({ brev, setKanRedigeres }: Props
 
     setLoadingMsg('Forsøker å ferdigstille brev ...')
 
-    apiFerdigstillBrev(idPayload, journalfoer, (err) => handleError('Feil oppsto ved ferdigstilling av brev', err))
+    apiFerdigstillBrev(idPayload, journalfoer, () => handleError('Feil oppsto ved ferdigstilling av brev'))
   }
 
   const journalfoer = () => {
     setLoadingMsg('... journalfører brevet i dokarkiv ...')
 
-    apiJournalfoerBrev({ brevId: brev.id, sakId: brev.sakId }, distribuer, (err) =>
-      handleError('Feil oppsto ved journalføring av brev', err)
+    apiJournalfoerBrev({ brevId: brev.id, sakId: brev.sakId }, distribuer, () =>
+      handleError('Feil oppsto ved journalføring av brev')
     )
   }
 
@@ -55,7 +53,7 @@ export default function NyttBrevHandlingerPanel({ brev, setKanRedigeres }: Props
         setLoadingMsg('Distribuert OK – laster inn på nytt ...')
         setTimeout(() => window.location.reload(), 2000)
       },
-      (err) => handleError('Feil oppsto ved distribusjon av brev', err)
+      () => handleError('Feil oppsto ved distribusjon av brev')
     )
   }
 

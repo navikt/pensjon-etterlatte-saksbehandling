@@ -25,7 +25,7 @@ type Props = {
 }
 
 const initialState = (type: ITrygdetidGrunnlagType) => {
-  return { type: type, bosted: '' }
+  return { type: type, bosted: '', poengInnAar: false, poengUtAar: false, prorata: false }
 }
 
 export const TrygdetidGrunnlag: React.FC<Props> = ({

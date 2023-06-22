@@ -39,13 +39,19 @@ fungere.
 
 ### Feilsøking
 
-- Hvis du får feilmelding `Not logged in or lacking rights. Ensure you're connected to naisdevice and gcp.`
-  og du er sikker på du er koblet både naisdevice og gcp, kan det være at du må sette default namespace på context:\
-  `kubectl config set-context --current --namespace=etterlatte`
+- `Not logged in or lacking rights. Ensure you're connected to naisdevice and gcp.`
+    - Hvis du er sikker på du er tilkoblet både naisdevice og gcp, kan det være at du må sette default namespace på
+      context:\
+      `kubectl config set-context --current --namespace=etterlatte`
+- `Error occurred while proxying request 0.0.0.0:8080/api/... to host.docker.internal:8090 [ECONNREFUSED]`
+    - Kan oppstå hvis protokoll (`http://`) ikke er satt.
 - Run config for backend bruker [EnvFile](https://plugins.jetbrains.com/plugin/7861-envfile) i IntelliJ, så pass på at
   denne pluginen er installert før kjøring.
 
 ### Frontend mot lokal backend
+
+Frontend kommuniserer med backend via `host.docker.internal`. \
+Du må derfor legge til legge til `127.0.0.1 host.docker.internal` i `/etc/hosts`
 
 Om du skal kjøre med frontend og wonderwall mot lokal backend må du overskrive backend-appen sin 
 `*_API_URL` i `./apps/etterlatte-saksbehandling-ui/.env.dev-gcp`. 

@@ -83,7 +83,8 @@ class SakOgBehandlingService(
                 vedtak.virkningstidspunkt,
                 brukerTokenInfo
             ),
-            revurderingsaarsak = vedtak.behandling.revurderingsaarsak
+            revurderingsaarsak = vedtak.behandling.revurderingsaarsak,
+            revurderingInfo = vedtak.behandling.revurderingInfo
         )
     }
 

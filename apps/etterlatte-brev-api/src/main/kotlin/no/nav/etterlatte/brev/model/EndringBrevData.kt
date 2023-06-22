@@ -1,25 +1,39 @@
 package no.nav.etterlatte.brev.model
 
-import no.nav.etterlatte.brev.behandling.Avdoed
 import no.nav.etterlatte.brev.behandling.Behandling
-import no.nav.etterlatte.brev.behandling.Soeker
 import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
+import no.nav.etterlatte.libs.common.behandling.BarnepensjonSoeskenjusteringGrunn
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
+import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
 
-class EndringBrevData(
+abstract class EndringBrevData : BrevData()
+
+data class SoeskenjusteringRevurderingBrevdata(
     val utbetalingsinfo: Utbetalingsinfo,
-    val barn: Soeker,
-    val revurderingsaarsak: RevurderingAarsak,
-    val avdoed: Avdoed
-) : BrevData() {
+    val grunnForSoeskenjustering: BarnepensjonSoeskenjusteringGrunn
+) : EndringBrevData() {
+
     companion object {
-        fun fra(behandling: Behandling): EndringBrevData = EndringBrevData(
-            utbetalingsinfo = behandling.utbetalingsinfo!!,
-            barn = behandling.persongalleri.soeker,
-            avdoed = behandling.persongalleri.avdoed,
-            revurderingsaarsak = requireNotNull(behandling.revurderingsaarsak) {
-                "Endringsbrev trenger en revurderingsaarsak"
+        fun fra(behandling: Behandling): SoeskenjusteringRevurderingBrevdata {
+            if (behandling.revurderingsaarsak != RevurderingAarsak.SOESKENJUSTERING) {
+                throw IllegalArgumentException(
+                    "Kan ikke opprette et revurderingsbrev for søskenjustering når " +
+                        "revurderingsårsak er ${behandling.revurderingsaarsak}"
+                )
             }
-        )
+            if (behandling.revurderingInfo !is RevurderingInfo.Soeskenjustering) {
+                throw IllegalArgumentException(
+                    "Kan ikke opprette et revurderingsbrev for søskenjustering når " +
+                        "revurderingsinfo ikke er Søskenjustering"
+                )
+            }
+
+            return SoeskenjusteringRevurderingBrevdata(
+                utbetalingsinfo = requireNotNull(behandling.utbetalingsinfo) {
+                    "Kan ikke opprette et revurderingsbrev for søksenjustering uten utbetalingsinfo"
+                },
+                grunnForSoeskenjustering = behandling.revurderingInfo.grunnForSoeskenjustering
+            )
+        }
     }
 }

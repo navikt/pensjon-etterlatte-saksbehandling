@@ -20,8 +20,10 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
+import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.behandling.tilVirkningstidspunkt
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.util.*
@@ -42,6 +44,8 @@ interface RevurderingService {
         fraDato: LocalDate,
         kilde: Vedtaksloesning
     ): Revurdering?
+
+    fun lagreRevurderingInfo(behandlingsId: UUID, info: RevurderingInfo, navIdent: String): Boolean
 }
 
 enum class RevurderingServiceFeatureToggle(private val key: String) : FeatureToggle {
@@ -108,6 +112,25 @@ class RealRevurderingService(
                 Prosesstype.AUTOMATISK,
                 kilde
             )
+        }
+    }
+
+    private fun kanLagreRevurderingInfo(behandlingsId: UUID): Boolean {
+        val behandling = hentBehandling(behandlingsId)
+        if (behandling?.type != BehandlingType.REVURDERING) {
+            return false
+        }
+        return behandling.status.kanEndres()
+    }
+
+    override fun lagreRevurderingInfo(behandlingsId: UUID, info: RevurderingInfo, navIdent: String): Boolean {
+        return inTransaction {
+            if (!kanLagreRevurderingInfo(behandlingsId)) {
+                return@inTransaction false
+            }
+            val kilde = Grunnlagsopplysning.Saksbehandler.create(navIdent)
+            behandlingDao.lagreRevurderingInfo(behandlingsId, info, kilde)
+            return@inTransaction true
         }
     }
 

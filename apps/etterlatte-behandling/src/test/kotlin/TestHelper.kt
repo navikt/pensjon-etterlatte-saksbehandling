@@ -21,6 +21,7 @@ import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
+import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.behandling.Utenlandstilsnitt
@@ -130,7 +131,8 @@ fun revurdering(
     boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet? = null,
     prosesstype: Prosesstype = Prosesstype.MANUELL,
     kilde: Vedtaksloesning = Vedtaksloesning.GJENNY,
-    enhet: String = Enheter.defaultEnhet.enhetNr
+    enhet: String = Enheter.defaultEnhet.enhetNr,
+    revurderingInfo: RevurderingInfo? = null
 ) = Revurdering.opprett(
     id = id,
     sak = Sak(
@@ -149,7 +151,8 @@ fun revurdering(
     utenlandstilsnitt = utenlandstilsnitt,
     boddEllerArbeidetUtlandet = boddEllerArbeidetUtlandet,
     prosesstype = prosesstype,
-    kilde = kilde
+    kilde = kilde,
+    revurderingInfo = revurderingInfo
 )
 
 fun manueltOpphoer(

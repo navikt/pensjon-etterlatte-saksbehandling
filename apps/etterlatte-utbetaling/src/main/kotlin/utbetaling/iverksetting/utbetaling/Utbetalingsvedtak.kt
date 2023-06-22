@@ -21,7 +21,8 @@ data class Utbetalingsvedtak(
                 behandling = Behandling(
                     type = vedtak.behandling.type,
                     id = vedtak.behandling.id,
-                    revurderingsaarsak = vedtak.behandling.revurderingsaarsak
+                    revurderingsaarsak = vedtak.behandling.revurderingsaarsak,
+                    revurderingInfo = vedtak.behandling.revurderingInfo
                 ),
                 pensjonTilUtbetaling = vedtak.utbetalingsperioder.map {
                     Utbetalingsperiode(

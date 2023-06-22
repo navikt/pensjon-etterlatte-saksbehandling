@@ -17,6 +17,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
+import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.beregning.AvkortetYtelseDto
@@ -497,7 +498,8 @@ internal class VedtaksvurderingServiceTest {
             utenlandstilsnitt = null,
             boddEllerArbeidetUtlandet = null,
             kommerBarnetTilgode = null,
-            prosesstype = Prosesstype.MANUELL
+            prosesstype = Prosesstype.MANUELL,
+            revurderingInfo = null
         )
         coEvery { behandlingKlientMock.hentSak(any(), any()) } returns Sak(
             SAKSBEHANDLER_1,
@@ -898,7 +900,8 @@ internal class VedtaksvurderingServiceTest {
         virk: YearMonth,
         behandlingId: UUID,
         saktype: SakType = SakType.BARNEPENSJON,
-        revurderingAarsak: RevurderingAarsak? = null
+        revurderingAarsak: RevurderingAarsak? = null,
+        revurderingInfo: RevurderingInfo? = null
     ): DetaljertBehandling =
         DetaljertBehandling(
             id = behandlingId,
@@ -928,6 +931,7 @@ internal class VedtaksvurderingServiceTest {
             boddEllerArbeidetUtlandet = null,
             kommerBarnetTilgode = null,
             revurderingsaarsak = revurderingAarsak,
+            revurderingInfo = revurderingInfo,
             prosesstype = Prosesstype.MANUELL
         )
 

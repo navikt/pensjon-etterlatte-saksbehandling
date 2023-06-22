@@ -167,7 +167,11 @@ internal fun Behandling.toDetaljertBehandling(): DetaljertBehandling {
             is Revurdering -> revurderingsaarsak
             else -> null
         },
-        prosesstype = prosesstype
+        prosesstype = prosesstype,
+        revurderingInfo = when (this) {
+            is Revurdering -> revurderingInfo
+            else -> null
+        }
     )
 }
 

@@ -48,6 +48,7 @@ class DetaljertBehandlingTest {
         boddEllerArbeidetUtlandet = null,
         kommerBarnetTilgode = null,
         revurderingsaarsak = revurderingsaarsak,
-        prosesstype = Prosesstype.MANUELL
+        prosesstype = Prosesstype.MANUELL,
+        revurderingInfo = null
     )
 }

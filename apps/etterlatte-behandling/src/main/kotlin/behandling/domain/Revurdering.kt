@@ -8,6 +8,7 @@ import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
+import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
 import no.nav.etterlatte.libs.common.behandling.Utenlandstilsnitt
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.sak.Sak
@@ -26,6 +27,7 @@ sealed class Revurdering(
     override val utenlandstilsnitt: Utenlandstilsnitt?,
     override val boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet?,
     open val revurderingsaarsak: RevurderingAarsak?,
+    open val revurderingInfo: RevurderingInfo?,
     override val prosesstype: Prosesstype,
     override val kilde: Vedtaksloesning
 ) : Behandling() {
@@ -47,7 +49,8 @@ sealed class Revurdering(
             boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet?,
             revurderingsaarsak: RevurderingAarsak,
             prosesstype: Prosesstype,
-            kilde: Vedtaksloesning
+            kilde: Vedtaksloesning,
+            revurderingInfo: RevurderingInfo?
         ) = when (prosesstype) {
             Prosesstype.MANUELL -> ManuellRevurdering(
                 id = id,
@@ -61,6 +64,7 @@ sealed class Revurdering(
                 utenlandstilsnitt = utenlandstilsnitt,
                 boddEllerArbeidetUtlandet = boddEllerArbeidetUtlandet,
                 revurderingsaarsak = revurderingsaarsak,
+                revurderingInfo = revurderingInfo,
                 kilde = kilde
             )
 
@@ -76,6 +80,7 @@ sealed class Revurdering(
                 utenlandstilsnitt = utenlandstilsnitt,
                 boddEllerArbeidetUtlandet = boddEllerArbeidetUtlandet,
                 revurderingsaarsak = revurderingsaarsak,
+                revurderingInfo = revurderingInfo,
                 kilde = kilde
             )
         }

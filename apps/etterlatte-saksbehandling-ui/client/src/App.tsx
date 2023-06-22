@@ -11,6 +11,7 @@ import { registerLocale } from 'react-datepicker'
 import ErrorBoundary from '~ErrorBoundary'
 import BrevOversikt from '~components/person/brev/BrevOversikt'
 import NyttBrev from '~components/person/brev/NyttBrev'
+import ScrollToTop from '~ScrollTop'
 
 function App() {
   const innloggetbrukerHentet = useInnloggetSaksbehandler()
@@ -21,6 +22,7 @@ function App() {
       {innloggetbrukerHentet && (
         <div className="app">
           <BrowserRouter basename="/">
+            <ScrollToTop />
             <HeaderWrapper />
             <ErrorBoundary>
               <Routes>

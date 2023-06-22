@@ -9,7 +9,7 @@ import {
 import { FormEvent, useState } from 'react'
 import { BodyShort, Button, Heading, Select } from '@navikt/ds-react'
 import { hentBehandlesFraStatus } from '~components/behandling/felles/utils'
-import { isPending, isFailure, useApiCall } from '~shared/hooks/useApiCall'
+import { isPending, isFailure, useApiCall, isSuccess } from '~shared/hooks/useApiCall'
 import { lagreRevurderingInfo } from '~shared/api/revurdering'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { oppdaterRevurderingInfo } from '~store/reducers/BehandlingReducer'
@@ -17,7 +17,7 @@ import styled from 'styled-components'
 
 function hentUndertypeFraBehandling(behandling?: IDetaljertBehandling): SoeskenjusteringInfo | null {
   const revurderinginfo = behandling?.revurderinginfo
-  if (revurderinginfo?.type == 'SOESKENJUSTERING') {
+  if (revurderinginfo?.type === 'SOESKENJUSTERING') {
     return revurderinginfo
   } else {
     return null
@@ -33,8 +33,12 @@ export const GrunnForSoeskenjustering = (props: { behandling: IDetaljertBehandli
   const [feilmelding, setFeilmelding] = useState<string | undefined>(undefined)
   const [lagrestatus, lagre] = useApiCall(lagreRevurderingInfo)
   const redigerbar = hentBehandlesFraStatus(behandling.status)
+  const harEndretInfo =
+    soeskenjusteringInfo?.grunnForSoeskenjustering !== null &&
+    valgtSoeskenjustering !== soeskenjusteringInfo?.grunnForSoeskenjustering
   const handlesubmit = (e: FormEvent) => {
     e.stopPropagation()
+    e.preventDefault()
     setFeilmelding(undefined)
     if (valgtSoeskenjustering === undefined) {
       setFeilmelding('Du må velge hvorfor du gjennomfører en søskenjustering')
@@ -74,6 +78,7 @@ export const GrunnForSoeskenjustering = (props: { behandling: IDetaljertBehandli
           <Button type="submit" loading={isPending(lagrestatus)}>
             Lagre
           </Button>
+          {isSuccess(lagrestatus) && !harEndretInfo ? <span>Lagret!</span> : null}
           {isFailure(lagrestatus) ? <ApiErrorAlert>Kunne ikke lagre grunnen til søskenjustering</ApiErrorAlert> : null}
           {feilmelding ? <ApiErrorAlert>{feilmelding}</ApiErrorAlert> : null}
         </form>

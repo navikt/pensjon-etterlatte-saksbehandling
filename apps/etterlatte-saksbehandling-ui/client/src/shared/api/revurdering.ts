@@ -5,5 +5,5 @@ export const lagreRevurderingInfo = (args: {
   behandlingId: string
   revurderingInfo: RevurderingInfo
 }): Promise<ApiResponse<void>> => {
-  return apiClient.post(`/api/revurdering/${args.behandlingId}/revurderinginfo`, { info: args.revurderingInfo })
+  return apiClient.post(`/revurdering/${args.behandlingId}/revurderinginfo`, { info: args.revurderingInfo })
 }

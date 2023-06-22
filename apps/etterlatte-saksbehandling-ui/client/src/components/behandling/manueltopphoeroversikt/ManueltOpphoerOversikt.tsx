@@ -56,7 +56,7 @@ export const ManueltOpphoerOversikt = (props: { behandling: IBehandlingReducer }
         behandlingsId: behandling.id,
         grunnlag: {
           soeskenMedIBeregning: [],
-          institusjonsoppholdBeregningsgrunnlag: [],
+          institusjonsopphold: [],
         },
       })
       await opprettEllerEndreBeregning(behandling.id)

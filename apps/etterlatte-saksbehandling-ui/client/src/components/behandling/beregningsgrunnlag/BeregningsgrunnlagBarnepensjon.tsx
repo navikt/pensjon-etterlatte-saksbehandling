@@ -63,7 +63,9 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
 
     fetchBeregningsgrunnlag(behandling.id, (result) => {
       if (result) {
-        dispatch(oppdaterBeregingsGrunnlag(result))
+        dispatch(
+          oppdaterBeregingsGrunnlag({ ...result, institusjonsopphold: result.institusjonsoppholdBeregningsgrunnlag })
+        )
       }
     })
   }, [])
@@ -85,9 +87,7 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
       dispatch(resetBeregning())
       const beregningsgrunnlag = {
         soeskenMedIBeregning: soeskenGrunnlagsData ? mapListeTilDto(soeskenGrunnlagsData) : [],
-        institusjonsoppholdBeregningsgrunnlag: institusjonsoppholdsGrunnlagData
-          ? mapListeTilDto(institusjonsoppholdsGrunnlagData)
-          : [],
+        institusjonsopphold: institusjonsoppholdsGrunnlagData ? mapListeTilDto(institusjonsoppholdsGrunnlagData) : [],
       }
 
       postSoeskenMedIBeregning(

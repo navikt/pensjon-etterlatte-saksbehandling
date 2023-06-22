@@ -29,15 +29,10 @@ const Institusjonsopphold = (props: InstitusjonsoppholdProps) => {
     institusjonsOppholdForm: InstitusjonsoppholdGrunnlagData
   }>({
     defaultValues: {
-      institusjonsOppholdForm: mapListeFraDto(
-        behandling.beregningsGrunnlag?.institusjonsoppholdBeregningsgrunnlag ?? []
-      ),
+      institusjonsOppholdForm: mapListeFraDto(behandling.beregningsGrunnlag?.institusjonsopphold ?? []),
     },
   })
-  console.log(
-    'behandling.beregningsGrunnlag?.institusjonsopphold: ',
-    behandling.beregningsGrunnlag?.institusjonsoppholdBeregningsgrunnlag
-  )
+
   const { isValid, errors } = formState
   const { fields, append, remove } = useFieldArray({
     name: 'institusjonsOppholdForm',

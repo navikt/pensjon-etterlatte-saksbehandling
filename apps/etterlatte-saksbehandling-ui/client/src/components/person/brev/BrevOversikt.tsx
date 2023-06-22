@@ -84,7 +84,7 @@ export default function BrevOversikt() {
 
   return (
     <>
-      {isSuccess(personStatus) && <StatusBar theme={StatusBarTheme.gray} personInfo={personStatus.data} />}
+      <StatusBar result={personStatus} />
 
       <Container>
         {isPendingOrInitial(brevListe) ? (

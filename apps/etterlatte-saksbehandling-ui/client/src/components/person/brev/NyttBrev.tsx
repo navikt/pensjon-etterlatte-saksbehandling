@@ -37,12 +37,8 @@ export default function NyttBrev() {
 
   return (
     <>
-      {isSuccess(personStatus) && (
-        <>
-          <StatusBar theme={StatusBarTheme.gray} personInfo={personStatus.data} />
-          <NavigerTilbakeMeny label={'Tilbake til brevoversikt'} path={`/person/${fnr}/sak/${sakId}/brev`} />
-        </>
-      )}
+      <StatusBar result={personStatus} />
+      <NavigerTilbakeMeny label={'Tilbake til brevoversikt'} path={`/person/${fnr}/sak/${sakId}/brev`} />
 
       <GridContainer>
         <Column>

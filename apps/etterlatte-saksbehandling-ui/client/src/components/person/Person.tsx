@@ -34,12 +34,9 @@ export const Person = () => {
 
   return (
     <>
-      {isSuccess(personStatus) && (
-        <>
-          <StatusBar theme={StatusBarTheme.gray} personInfo={personStatus.data} />
-          <NavigerTilbakeMeny label={'Tilbake til oppgavebenken'} path={'/'} />
-        </>
-      )}
+      <StatusBar result={personStatus} />
+      <NavigerTilbakeMeny label={'Tilbake til oppgavebenken'} path={'/'} />
+
       {isPending(personStatus) && <Spinner visible={true} label={'Laster'} />}
       {isSuccess(personStatus) && (
         <Container>

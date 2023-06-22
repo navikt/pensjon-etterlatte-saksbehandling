@@ -4,7 +4,7 @@ import { hentBehandling } from '~shared/api/behandling'
 import { GridContainer, MainContent } from '~shared/styled'
 import { addBehandling, resetBehandling, updateVilkaarsvurdering } from '~store/reducers/BehandlingReducer'
 import Spinner from '~shared/Spinner'
-import { StatusBar, StatusBarTheme } from '~shared/statusbar/Statusbar'
+import { StatusBar } from '~shared/statusbar/Statusbar'
 import { useBehandlingRoutes } from './BehandlingRoutes'
 import { StegMeny } from './StegMeny/stegmeny'
 import { SideMeny } from './SideMeny/SideMeny'
@@ -50,15 +50,18 @@ export const Behandling = () => {
     <>
       {soekerInfo && (
         <StatusBar
-          theme={StatusBarTheme.gray}
-          personInfo={{
-            foedselsnummer: soekerInfo.foedselsnummer,
-            fornavn: soekerInfo.fornavn,
-            mellomnavn: soekerInfo.mellomnavn,
-            etternavn: soekerInfo.etternavn,
+          result={{
+            status: 'success',
+            data: {
+              foedselsnummer: soekerInfo.foedselsnummer,
+              fornavn: soekerInfo.fornavn,
+              mellomnavn: soekerInfo.mellomnavn,
+              etternavn: soekerInfo.etternavn,
+            },
           }}
         />
       )}
+
       {behandling && <StegMeny behandling={behandling} />}
 
       <Spinner

@@ -87,7 +87,7 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
                     "avkorting" to oppdatertVedtak.beregning?.toJson(),
                     "vilkaarsresultat" to oppdatertVedtak.vilkaarsvurdering?.toJson(),
                     "behandlingid" to oppdatertVedtak.behandlingId,
-                    "revurderinginfo" to oppdatertVedtak.revurderingInfo
+                    "revurderinginfo" to oppdatertVedtak.revurderingInfo?.toJson()
                 )
             ).let { query -> tx.run(query.asUpdate) }
 

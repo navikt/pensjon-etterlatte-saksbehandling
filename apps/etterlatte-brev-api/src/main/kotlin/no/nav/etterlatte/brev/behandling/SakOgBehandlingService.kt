@@ -22,6 +22,13 @@ class SakOgBehandlingService(
     private val behandlingKlient: BehandlingKlient
 ) {
 
+    suspend fun hentSak(sakId: Long, bruker: BrukerTokenInfo) =
+        behandlingKlient.hentSak(sakId, bruker)
+
+    suspend fun hentSoeker(sakId: Long, bruker: BrukerTokenInfo): Soeker =
+        grunnlagKlient.hentGrunnlag(sakId, bruker)
+            .mapSoeker()
+
     suspend fun hentBehandling(
         sakId: Long,
         behandlingId: UUID,

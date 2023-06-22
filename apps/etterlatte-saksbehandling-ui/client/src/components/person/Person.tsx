@@ -8,35 +8,38 @@ import { Dokumentoversikt } from './dokumentoversikt'
 import { Saksoversikt } from './saksoversikt'
 import Spinner from '~shared/Spinner'
 import { isFailure, isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
-import { BodyShort, Label } from '@navikt/ds-react'
+import { BodyShort } from '@navikt/ds-react'
 import { getPerson } from '~shared/api/grunnlag'
 import { GYLDIG_FNR } from '~utils/fnr'
+import NavigerTilbakeMeny from '~components/person/NavigerTilbakeMeny'
 
 export const Person = () => {
   const [personStatus, hentPerson] = useApiCall(getPerson)
 
-  const match = useParams<{ fnr: string }>()
+  const { fnr } = useParams()
 
   useEffect(() => {
-    if (match.fnr) {
-      hentPerson(match.fnr)
+    if (GYLDIG_FNR(fnr)) {
+      hentPerson(fnr!!)
     }
-  }, [match.fnr])
+  }, [fnr])
 
   if (isFailure(personStatus)) {
     return (
       <Container>
-        <BodyShort>
-          {!GYLDIG_FNR(match.fnr) ? 'Fødselsnummeret i URLen er ugyldig' : JSON.stringify(personStatus)}
-        </BodyShort>
+        <BodyShort>{!GYLDIG_FNR(fnr) ? 'Fødselsnummeret i URLen er ugyldig' : JSON.stringify(personStatus)}</BodyShort>
       </Container>
     )
   }
 
   return (
     <>
-      {match.fnr === null && <Label>Kan ikke hente fødselsnummer fra URL</Label>}
-      {isSuccess(personStatus) && <StatusBar theme={StatusBarTheme.gray} personInfo={personStatus.data} />}
+      {isSuccess(personStatus) && (
+        <>
+          <StatusBar theme={StatusBarTheme.gray} personInfo={personStatus.data} />
+          <NavigerTilbakeMeny label={'Tilbake til oppgavebenken'} path={'/'} />
+        </>
+      )}
       {isPending(personStatus) && <Spinner visible={true} label={'Laster'} />}
       {isSuccess(personStatus) && (
         <Container>

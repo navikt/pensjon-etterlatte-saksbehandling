@@ -20,7 +20,6 @@ import no.nav.etterlatte.brev.model.BrevProsessType.MANUELL
 import no.nav.etterlatte.brev.model.ManueltBrevData
 import no.nav.etterlatte.brev.model.OpprettNyttBrev
 import no.nav.etterlatte.brev.model.Pdf
-import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.brev.model.SlateHelper
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
@@ -88,7 +87,7 @@ class VedtaksbrevService(
             return requireNotNull(db.hentPdf(brev.id))
         }
 
-        val behandling = sakOgBehandlingService.hentBehandling(brev.sakId, brev.behandlingId, brukerTokenInfo)
+        val behandling = sakOgBehandlingService.hentBehandling(brev.sakId, brev.behandlingId!!, brukerTokenInfo)
         val avsender = adresseService.hentAvsender(behandling.vedtak)
 
         val (brevKode, brevData) = opprettBrevData(brev, behandling)
@@ -140,13 +139,6 @@ class VedtaksbrevService(
                     " og attestant (${brukerTokenInfo.ident()}) er samme person."
             )
         }
-    }
-
-    fun hentManueltBrevPayload(id: BrevID): Slate? = db.hentBrevPayload(id)
-
-    fun lagreManueltBrevPayload(id: BrevID, payload: Slate) {
-        db.oppdaterPayload(id, payload)
-            .also { logger.info("Payload for brev (id=$id) oppdatert") }
     }
 
     fun journalfoerVedtaksbrev(vedtaksbrev: Brev, vedtak: VedtakTilJournalfoering): JournalpostResponse {

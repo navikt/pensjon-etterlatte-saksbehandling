@@ -7,6 +7,7 @@ import no.nav.etterlatte.brev.model.Avsender
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.navansatt.NavansattKlient
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.pensjon.brevbaker.api.model.Telefonnummer
 
 class AdresseService(
@@ -21,6 +22,16 @@ class AdresseService(
             Folkeregisteridentifikator.of(ident),
             regoppslagResponse
         )
+    }
+
+    suspend fun hentAvsender(sak: Sak, saksbehandlerIdent: String): Avsender = coroutineScope {
+        val saksbehandlerNavn = async {
+            navansattKlient.hentSaksbehandlerInfo(saksbehandlerIdent).fornavnEtternavn
+        }
+
+        val saksbehandlerEnhet = async { hentEnhet(sak.enhet) }
+
+        mapTilAvsender(saksbehandlerEnhet.await(), saksbehandlerNavn.await(), attestantNavn = null)
     }
 
     suspend fun hentAvsender(vedtak: ForenkletVedtak): Avsender = coroutineScope {
@@ -44,7 +55,7 @@ class AdresseService(
     private fun mapTilAvsender(
         enhet: Norg2Enhet,
         saksbehandlerNavn: String,
-        attestantNavn: String?,
+        attestantNavn: String?
     ): Avsender {
         val postadresse = enhet.kontaktinfo?.postadresse
 

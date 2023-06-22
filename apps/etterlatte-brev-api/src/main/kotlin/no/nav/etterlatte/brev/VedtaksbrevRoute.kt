@@ -2,15 +2,12 @@ package no.nav.etterlatte.brev
 
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
-import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.brev.behandlingklient.BehandlingKlient
-import no.nav.etterlatte.brev.model.BrevID
-import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.withBehandlingId
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
@@ -61,32 +58,10 @@ fun Route.vedtaksbrevRoute(service: VedtaksbrevService, behandlingKlient: Behand
                 measureTimedValue {
                     service.genererPdf(brevId, brukerTokenInfo).bytes
                 }.let { (pdf, varighet) ->
-                    logger.info("Oppretting av innhold/pdf tok ${varighet.toString(DurationUnit.SECONDS, 2)}")
+                    logger.info("Generering av pdf tok ${varighet.toString(DurationUnit.SECONDS, 2)}")
                     call.respond(pdf)
                 }
             }
         }
-
-        get("vedtak/manuell") {
-            withBehandlingId(behandlingKlient) {
-                val brevId = requireNotNull(call.parameters["brevId"]).toLong()
-
-                call.respond(service.hentManueltBrevPayload(brevId) ?: HttpStatusCode.NoContent)
-            }
-        }
-
-        post("vedtak/manuell") {
-            withBehandlingId(behandlingKlient) {
-                val body = call.receive<OppdaterPayloadRequest>()
-
-                service.lagreManueltBrevPayload(body.id, body.payload)
-                call.respond(HttpStatusCode.OK)
-            }
-        }
     }
 }
-
-data class OppdaterPayloadRequest(
-    val id: BrevID,
-    val payload: Slate
-)

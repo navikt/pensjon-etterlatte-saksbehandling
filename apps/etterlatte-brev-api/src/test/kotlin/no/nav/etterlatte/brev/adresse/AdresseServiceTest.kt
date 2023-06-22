@@ -1,16 +1,23 @@
 package no.nav.etterlatte.brev.adresse
 
 import io.kotest.matchers.shouldBe
-import io.mockk.*
+import io.mockk.clearAllMocks
+import io.mockk.coEvery
+import io.mockk.coVerify
+import io.mockk.confirmVerified
+import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.brev.behandling.ForenkletVedtak
 import no.nav.etterlatte.brev.navansatt.NavansattKlient
 import no.nav.etterlatte.brev.navansatt.SaksbehandlerInfo
+import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import kotlin.random.Random
 
 internal class AdresseServiceTest {
 
@@ -58,6 +65,29 @@ internal class AdresseServiceTest {
             norg2Mock.hentEnhet(vedtak.ansvarligEnhet)
             navansattMock.hentSaksbehandlerInfo(vedtak.saksbehandlerIdent)
             navansattMock.hentSaksbehandlerInfo(vedtak.attestantIdent!!)
+        }
+    }
+
+    @Test
+    fun `Hent avsender med innlogget bruker og sak`() {
+        val zIdent = "Z123456"
+
+        coEvery { norg2Mock.hentEnhet(any()) } returns opprettEnhet()
+        coEvery { navansattMock.hentSaksbehandlerInfo(any()) }
+            .returns(opprettSaksbehandlerInfo(zIdent, "saks", "behandler"))
+
+        val sakId = Random.nextLong()
+        val sak = Sak("ident", SakType.BARNEPENSJON, sakId, "enhet")
+
+        val faktiskAvsender = runBlocking {
+            adresseService.hentAvsender(sak, zIdent)
+        }
+
+        faktiskAvsender.saksbehandler shouldBe "saks behandler"
+
+        coVerify(exactly = 1) {
+            norg2Mock.hentEnhet(sak.enhet)
+            navansattMock.hentSaksbehandlerInfo(zIdent)
         }
     }
 

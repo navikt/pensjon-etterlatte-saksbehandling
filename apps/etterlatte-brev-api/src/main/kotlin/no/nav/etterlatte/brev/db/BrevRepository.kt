@@ -6,6 +6,7 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
 import no.nav.etterlatte.brev.db.BrevRepository.Queries.HENT_BREV_FOR_BEHANDLING_QUERY
+import no.nav.etterlatte.brev.db.BrevRepository.Queries.HENT_BREV_FOR_SAK_QUERY
 import no.nav.etterlatte.brev.db.BrevRepository.Queries.HENT_BREV_QUERY
 import no.nav.etterlatte.brev.db.BrevRepository.Queries.OPPDATER_INNHOLD_PAYLOAD
 import no.nav.etterlatte.brev.db.BrevRepository.Queries.OPPRETT_BREV_QUERY
@@ -53,6 +54,10 @@ class BrevRepository(private val ds: DataSource) {
 
     fun hentBrevForBehandling(behandlingId: UUID): Brev? = using(sessionOf(ds)) {
         it.run(queryOf(HENT_BREV_FOR_BEHANDLING_QUERY, behandlingId).map(tilBrev).asSingle)
+    }
+
+    fun hentBrevForSak(sakId: Long): List<Brev> = using(sessionOf(ds)) {
+        it.run(queryOf(HENT_BREV_FOR_SAK_QUERY, sakId).map(tilBrev).asList)
     }
 
     fun oppdaterPayload(id: BrevID, payload: Slate) = ds.transaction { tx ->
@@ -153,6 +158,13 @@ class BrevRepository(private val ds: DataSource) {
             tx.lagreHendelse(brevId, Status.JOURNALFOERT, journalpostResponse.toJson()) > 0
         }
 
+    fun hentJournalpostId(brevId: BrevID): String? = using(sessionOf(ds)) {
+        it.run(
+            queryOf("SELECT journalpost_id FROM brev WHERE id = ?", brevId)
+                .map { row -> row.string("journalpost_id") }.asSingle
+        )
+    }
+
     fun settBrevDistribuert(brevId: Long, distResponse: DistribuerJournalpostResponse): Boolean =
         ds.transaction { tx ->
             tx.run(
@@ -185,7 +197,7 @@ class BrevRepository(private val ds: DataSource) {
         Brev(
             id = row.long("id"),
             sakId = row.long("sak_id"),
-            behandlingId = row.uuid("behandling_id"),
+            behandlingId = row.uuidOrNull("behandling_id"),
             soekerFnr = row.string("soeker_fnr"),
             prosessType = BrevProsessType.valueOf(row.string("prosess_type")),
             status = row.string("status_id").let { Status.valueOf(it) },
@@ -243,6 +255,19 @@ class BrevRepository(private val ds: DataSource) {
             INNER JOIN mottaker m on b.id = m.brev_id
             INNER JOIN hendelse h on b.id = h.brev_id
             WHERE b.behandling_id = ?
+            AND h.id IN (
+                SELECT DISTINCT ON (brev_id) id
+                FROM hendelse
+                ORDER BY brev_id, opprettet DESC
+            )
+        """
+
+        const val HENT_BREV_FOR_SAK_QUERY = """
+            SELECT b.id, b.sak_id, b.behandling_id, b.prosess_type, b.soeker_fnr, h.status_id, m.*
+            FROM brev b
+            INNER JOIN mottaker m on b.id = m.brev_id
+            INNER JOIN hendelse h on b.id = h.brev_id
+            WHERE b.sak_id = ?
             AND h.id IN (
                 SELECT DISTINCT ON (brev_id) id
                 FROM hendelse

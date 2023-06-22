@@ -29,11 +29,11 @@ import no.nav.etterlatte.brev.journalpost.JournalpostResponse
 import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Avsender
 import no.nav.etterlatte.brev.model.Brev
+import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.OpprettNyttBrev
 import no.nav.etterlatte.brev.model.Pdf
-import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -49,7 +49,6 @@ import no.nav.pensjon.brevbaker.api.model.LetterMetadata
 import no.nav.pensjon.brevbaker.api.model.Telefonnummer
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -229,7 +228,7 @@ internal class VedtaksbrevServiceTest {
             }
 
             coVerify {
-                sakOgBehandlingService.hentBehandling(brev.sakId, brev.behandlingId, SAKSBEHANDLER)
+                sakOgBehandlingService.hentBehandling(brev.sakId, brev.behandlingId!!, SAKSBEHANDLER)
                 adresseService.hentAvsender(any())
                 brevbaker.genererPdf(any())
             }
@@ -255,7 +254,7 @@ internal class VedtaksbrevServiceTest {
             }
 
             coVerify {
-                sakOgBehandlingService.hentBehandling(brev.sakId, brev.behandlingId, ATTESTANT)
+                sakOgBehandlingService.hentBehandling(brev.sakId, brev.behandlingId!!, ATTESTANT)
                 adresseService.hentAvsender(any())
                 brevbaker.genererPdf(any())
             }
@@ -280,7 +279,7 @@ internal class VedtaksbrevServiceTest {
             }
 
             coVerify {
-                sakOgBehandlingService.hentBehandling(brev.sakId, brev.behandlingId, SAKSBEHANDLER)
+                sakOgBehandlingService.hentBehandling(brev.sakId, brev.behandlingId!!, SAKSBEHANDLER)
                 adresseService.hentAvsender(any())
                 brevbaker.genererPdf(any())
             }
@@ -307,7 +306,7 @@ internal class VedtaksbrevServiceTest {
             }
 
             coVerify {
-                sakOgBehandlingService.hentBehandling(brev.sakId, brev.behandlingId, SAKSBEHANDLER)
+                sakOgBehandlingService.hentBehandling(brev.sakId, brev.behandlingId!!, SAKSBEHANDLER)
                 adresseService.hentAvsender(any())
                 brevbaker.genererPdf(any())
             }
@@ -335,7 +334,7 @@ internal class VedtaksbrevServiceTest {
             }
 
             coVerify {
-                sakOgBehandlingService.hentBehandling(brev.sakId, brev.behandlingId, ATTESTANT)
+                sakOgBehandlingService.hentBehandling(brev.sakId, brev.behandlingId!!, ATTESTANT)
                 adresseService.hentAvsender(any())
                 brevbaker.genererPdf(any())
             }
@@ -362,7 +361,7 @@ internal class VedtaksbrevServiceTest {
             }
 
             coVerify {
-                sakOgBehandlingService.hentBehandling(brev.sakId, brev.behandlingId, SAKSBEHANDLER)
+                sakOgBehandlingService.hentBehandling(brev.sakId, brev.behandlingId!!, SAKSBEHANDLER)
                 adresseService.hentAvsender(any())
                 brevbaker.genererPdf(any())
             }
@@ -398,49 +397,13 @@ internal class VedtaksbrevServiceTest {
     }
 
     @Nested
-    inner class PayloadManuelleBrev {
-        @Test
-        fun `Hent payload`() {
-            val brev = opprettBrev(Status.OPPRETTET, mockk())
-            every { db.hentBrev(any()) } returns brev
-
-            val payload = Slate(listOf(Slate.Element(Slate.ElementType.PARAGRAPH)))
-            every { db.hentBrevPayload(any()) } returns payload
-
-            val faktiskPayload = runBlocking {
-                vedtaksbrevService.hentManueltBrevPayload(brev.id)
-            }
-
-            faktiskPayload shouldBe payload
-
-            verify {
-                db.hentBrevPayload(brev.id)
-            }
-        }
-
-        @Test
-        fun `Hent payload - finnes ikke`() {
-            val brev = opprettBrev(Status.OPPRETTET, mockk())
-            every { db.hentBrevPayload(any()) } returns null
-
-            runBlocking {
-                assertNull(vedtaksbrevService.hentManueltBrevPayload(brev.id))
-            }
-
-            verify {
-                db.hentBrevPayload(brev.id)
-            }
-        }
-    }
-
-    @Nested
     inner class JournalfoerVedtaksbrev {
         @Test
         fun `Vedtaksbrev journalfoeres som forventet`() {
             val forventetBrev = opprettBrev(Status.FERDIGSTILT, mockk())
 
             val forventetResponse = JournalpostResponse("1", "OK", "melding", true)
-            every { dokarkivService.journalfoer(any(), any()) } returns forventetResponse
+            every { dokarkivService.journalfoer(any<BrevID>(), any()) } returns forventetResponse
 
             val vedtak = opprettVedtak()
 

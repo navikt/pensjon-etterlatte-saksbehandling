@@ -6,6 +6,8 @@ import com.typesafe.config.Config
 import io.ktor.client.HttpClient
 import no.nav.etterlatte.libs.common.BehandlingTilgangsSjekk
 import no.nav.etterlatte.libs.common.PersonTilgangsSjekk
+import no.nav.etterlatte.libs.common.SakTilgangsSjekk
+import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.Sak
@@ -16,7 +18,10 @@ import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.etterlatte.token.Saksbehandler
 import java.util.*
 
-class BehandlingKlient(config: Config, httpClient: HttpClient) : BehandlingTilgangsSjekk, PersonTilgangsSjekk {
+class BehandlingKlient(
+    config: Config,
+    httpClient: HttpClient
+) : BehandlingTilgangsSjekk, SakTilgangsSjekk, PersonTilgangsSjekk {
 
     private val azureAdClient = AzureAdClient(config)
     private val downstreamResourceClient = DownstreamResourceClient(azureAdClient, httpClient)
@@ -82,6 +87,25 @@ class BehandlingKlient(config: Config, httpClient: HttpClient) : BehandlingTilga
                 )
         } catch (e: Exception) {
             throw BehandlingKlientException("Sjekking av tilgang for person feilet", e)
+        }
+    }
+
+    override suspend fun harTilgangTilSak(sakId: Long, bruker: Saksbehandler): Boolean {
+        try {
+            return downstreamResourceClient
+                .get(
+                    resource = Resource(
+                        clientId = clientId,
+                        url = "$resourceUrl/tilgang/sak/$sakId"
+                    ),
+                    brukerTokenInfo = bruker
+                )
+                .mapBoth(
+                    success = { deserialize(it.response.toString()) },
+                    failure = { throwableErrorMessage -> throw throwableErrorMessage }
+                )
+        } catch (e: Exception) {
+            throw BehandlingKlientException("Sjekking av tilgang for sak feilet", e)
         }
     }
 }

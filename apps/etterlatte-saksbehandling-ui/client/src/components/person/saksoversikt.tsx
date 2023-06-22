@@ -21,6 +21,8 @@ import { isFailure, useApiCall } from '~shared/hooks/useApiCall'
 import { hentPersonerISak } from '~shared/api/grunnlag'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { Revurderingsaarsak } from '~shared/types/Revurderingsaarsak'
+import { BodyShort, Heading, Link } from '@navikt/ds-react'
+import { ExternalLinkIcon } from '@navikt/aksel-icons'
 
 export const Saksoversikt = ({ fnr }: { fnr: string | undefined }) => {
   const [behandlingliste, setBehandlingliste] = useState<IBehandlingsammendrag[]>([])
@@ -142,9 +144,21 @@ export const Saksoversikt = ({ fnr }: { fnr: string | undefined }) => {
             />
           ) : null}
           <div className="behandlinger">
-            <h2>Behandlinger</h2>
+            <Heading size={'large'}>Behandlinger</Heading>
             {behandlingliste !== undefined && <Behandlingsliste behandlinger={behandlingliste} />}
           </div>
+
+          <br />
+          <br />
+
+          <Heading size={'large'} spacing>
+            Brev
+          </Heading>
+          <BodyShort>
+            <Link href={`/person/${fnr}/sak/${sakId}/brev`}>
+              Du finner brev på oversiktssiden her <ExternalLinkIcon />
+            </Link>
+          </BodyShort>
         </SaksoversiktWrapper>
       )}
     </>

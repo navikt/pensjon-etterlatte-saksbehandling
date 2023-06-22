@@ -50,13 +50,13 @@ data class ForenkletVedtak(
 data class Utbetalingsinfo(
     val antallBarn: Int,
     val beloep: Kroner,
-    val grunnbeloep: Kroner,
     val virkningsdato: LocalDate,
     val soeskenjustering: Boolean,
     val beregningsperioder: List<Beregningsperiode>
 )
 
 data class Avkortingsinfo(
+    val grunnbeloep: Kroner,
     val inntekt: Kroner,
     val virkningsdato: LocalDate,
     val beregningsperioder: List<AvkortetBeregningsperiode>

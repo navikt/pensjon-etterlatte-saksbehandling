@@ -62,7 +62,7 @@ class VedtaksbrevService(
 
         val mottaker = adresseService.hentMottakerAdresse(behandling.persongalleri.innsender.fnr.value)
 
-        val prosessType = BrevProsessType.fra(behandling.sakType, behandling.vedtak.type)
+        val prosessType = BrevProsessType.fra(behandling)
 
         val nyttBrev = OpprettNyttBrev(
             sakId = sakId,

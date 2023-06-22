@@ -2,6 +2,8 @@ package no.nav.etterlatte.brev.model
 
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonValue
+import no.nav.etterlatte.brev.behandling.Behandling
+import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
@@ -34,11 +36,20 @@ data class Slate(
 }
 
 object SlateHelper {
-    fun hentInitiellPayload(sakType: SakType, vedtakType: VedtakType): Slate {
+    fun hentInitiellPayload(sakType: SakType, vedtakType: VedtakType, behandling: Behandling): Slate {
+        println(sakType)
+        println(vedtakType)
+        println(behandling)
         return when (sakType) {
             SakType.OMSTILLINGSSTOENAD -> {
                 when (vedtakType) {
                     VedtakType.INNVILGELSE -> getJsonFile("/maler/oms-nasjonal-innvilget.json")
+                    VedtakType.OPPHOER -> {
+                        when (behandling.revurderingsaarsak) {
+                            RevurderingAarsak.SIVILSTAND -> getJsonFile("/maler/oms-revurdering-sivilstand.json")
+                            else -> getJsonFile("/maler/tom-brevmal.json")
+                        }
+                    }
                     else -> getJsonFile("/maler/tom-brevmal.json")
                 }
             }

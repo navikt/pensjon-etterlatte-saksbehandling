@@ -6,7 +6,7 @@ import { Alert, Button, Table, Tag } from '@navikt/ds-react'
 import { BrevStatus, IBrev, Mottaker } from '~shared/types/Brev'
 import { DocPencilIcon, ExternalLinkIcon } from '@navikt/aksel-icons'
 import Spinner from '~shared/Spinner'
-import { StatusBar, StatusBarTheme } from '~shared/statusbar/Statusbar'
+import { StatusBar } from '~shared/statusbar/Statusbar'
 import { getPerson } from '~shared/api/grunnlag'
 import { Container } from '~shared/styled'
 import BrevModal from '~components/person/brev/BrevModal'
@@ -84,7 +84,7 @@ export default function BrevOversikt() {
 
   return (
     <>
-      {isSuccess(personStatus) && <StatusBar theme={StatusBarTheme.gray} personInfo={personStatus.data} />}
+      <StatusBar result={personStatus} />
 
       <Container>
         {isPendingOrInitial(brevListe) ? (

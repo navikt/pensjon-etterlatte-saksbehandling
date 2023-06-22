@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 import { Tab, TabList, TabPanel, Tabs } from 'react-tabs'
 import { useParams } from 'react-router-dom'
 import styled from 'styled-components'
-import { StatusBar, StatusBarTheme } from '~shared/statusbar/Statusbar'
+import { StatusBar } from '~shared/statusbar/Statusbar'
 import { Container } from '~shared/styled'
 import { Dokumentoversikt } from './dokumentoversikt'
 import { Saksoversikt } from './saksoversikt'
@@ -34,12 +34,9 @@ export const Person = () => {
 
   return (
     <>
-      {isSuccess(personStatus) && (
-        <>
-          <StatusBar theme={StatusBarTheme.gray} personInfo={personStatus.data} />
-          <NavigerTilbakeMeny label={'Tilbake til oppgavebenken'} path={'/'} />
-        </>
-      )}
+      <StatusBar result={personStatus} />
+      <NavigerTilbakeMeny label={'Tilbake til oppgavebenken'} path={'/'} />
+
       {isPending(personStatus) && <Spinner visible={true} label={'Laster'} />}
       {isSuccess(personStatus) && (
         <Container>

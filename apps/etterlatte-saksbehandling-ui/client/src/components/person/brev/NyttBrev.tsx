@@ -4,7 +4,7 @@ import { useParams } from 'react-router-dom'
 import { hentBrev } from '~shared/api/brev'
 import { useEffect, useState } from 'react'
 import { Column, GridContainer } from '~shared/styled'
-import { StatusBar, StatusBarTheme } from '~shared/statusbar/Statusbar'
+import { StatusBar } from '~shared/statusbar/Statusbar'
 import { getPerson } from '~shared/api/grunnlag'
 import MottakerPanel from '~components/behandling/brev/detaljer/MottakerPanel'
 import NavigerTilbakeMeny from '~components/person/NavigerTilbakeMeny'
@@ -37,12 +37,8 @@ export default function NyttBrev() {
 
   return (
     <>
-      {isSuccess(personStatus) && (
-        <>
-          <StatusBar theme={StatusBarTheme.gray} personInfo={personStatus.data} />
-          <NavigerTilbakeMeny label={'Tilbake til brevoversikt'} path={`/person/${fnr}/sak/${sakId}/brev`} />
-        </>
-      )}
+      <StatusBar result={personStatus} />
+      <NavigerTilbakeMeny label={'Tilbake til brevoversikt'} path={`/person/${fnr}/sak/${sakId}/brev`} />
 
       <GridContainer>
         <Column>

@@ -1,6 +1,5 @@
 import styled from 'styled-components'
-import { Female } from '@navikt/ds-icons'
-import { Male } from '@navikt/ds-icons'
+import { Female, Male } from '@navikt/ds-icons'
 
 export enum GenderList {
   male = 'male',
@@ -8,17 +7,9 @@ export enum GenderList {
 }
 
 export const GenderIcon = (props: { gender: GenderList }) => {
-  if (props.gender === GenderList.female) {
-    return (
-      <Gender gender={props.gender}>
-        <Female color={'#fff'} />
-      </Gender>
-    )
-  }
-
   return (
     <Gender gender={props.gender}>
-      <Male color={'#fff'} />
+      {props.gender === GenderList.female ? <Female color={'#fff'} /> : <Male color={'#fff'} />}
     </Gender>
   )
 }

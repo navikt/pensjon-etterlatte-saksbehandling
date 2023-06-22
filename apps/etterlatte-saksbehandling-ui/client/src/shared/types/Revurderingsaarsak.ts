@@ -28,6 +28,9 @@ export const tekstRevurderingsaarsak: Record<Revurderingsaarsak, string> = {
 } as const
 
 export const erOpphoer = (revurderingsaarsak: Revurderingsaarsak) =>
-  [Revurderingsaarsak.DOEDSFALL, Revurderingsaarsak.ADOPSJON, Revurderingsaarsak.OMGJOERING_AV_FARSKAP].includes(
-    revurderingsaarsak
-  )
+  [
+    Revurderingsaarsak.DOEDSFALL,
+    Revurderingsaarsak.ADOPSJON,
+    Revurderingsaarsak.OMGJOERING_AV_FARSKAP,
+    Revurderingsaarsak.SIVILSTAND,
+  ].includes(revurderingsaarsak)

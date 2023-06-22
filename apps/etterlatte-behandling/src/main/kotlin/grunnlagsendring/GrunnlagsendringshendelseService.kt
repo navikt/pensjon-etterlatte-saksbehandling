@@ -32,6 +32,7 @@ import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.VergeMaalEllerFremtidsfullmakt
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.PersonRolle
+import no.nav.etterlatte.libs.common.person.maskerFnr
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.sak.SakService
@@ -232,6 +233,10 @@ class GrunnlagsendringshendelseService(
     ): List<Grunnlagsendringshendelse> {
         val tidspunktForMottakAvHendelse = Tidspunkt.now().toLocalDatetimeUTC()
         val sakerOgRoller = runBlocking { grunnlagKlient.hentPersonSakOgRolle(fnr).sakerOgRoller }
+
+        sakerOgRoller.ifEmpty {
+            logger.info("Fikk en hendelse for en person vi ikke har noen sak for: ${fnr.maskerFnr()}")
+        }
 
         return sakerOgRoller.let {
             inTransaction {

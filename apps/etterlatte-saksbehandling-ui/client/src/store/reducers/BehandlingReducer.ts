@@ -11,6 +11,7 @@ import {
   Virkningstidspunkt,
 } from '~shared/types/IDetaljertBehandling'
 import { VedtakSammendrag } from "~components/vedtak/typer";
+import { RevurderingInfo } from '~shared/types/RevurderingInfo'
 
 export const addBehandling = createAction<IDetaljertBehandling>('behandling/add')
 export const resetBehandling = createAction('behandling/reset')
@@ -26,6 +27,7 @@ export const oppdaterBoddEllerArbeidetUtlandet = createAction<IBoddEllerArbeidet
 export const oppdaterBeregning = createAction<Beregning>('behandling/beregning')
 export const oppdaterBehandlingsstatus = createAction<IBehandlingStatus>('behandling/status')
 export const oppdaterBeregingsGrunnlag = createAction<BeregningsGrunnlagPostDto>('behandling/beregningsgrunnlag')
+export const oppdaterRevurderingInfo = createAction<RevurderingInfo>('behandling/revurderinginfo')
 export const resetBeregning = createAction('behandling/beregning/reset')
 export const loggError = createAction<any>('loggError')
 export const loggInfo = createAction<any>('loggInfo')
@@ -77,5 +79,8 @@ export const behandlingReducer = createReducer(initialState, (builder) => {
   })
   builder.addCase(resetBeregning, (state) => {
     state.behandling!!.beregning = undefined
+  })
+  builder.addCase(oppdaterRevurderingInfo, (state, action) => {
+    state.behandling!!.revurderinginfo = action.payload
   })
 })

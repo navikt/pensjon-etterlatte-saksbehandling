@@ -153,6 +153,7 @@ const opprettBehandling = (
     behandlingType: IBehandlingsType.FØRSTEGANGSBEHANDLING,
     prosesstype: IProsesstype.MANUELL,
     revurderingsaarsak: null,
+    revurderinginfo: null,
   }
 }
 

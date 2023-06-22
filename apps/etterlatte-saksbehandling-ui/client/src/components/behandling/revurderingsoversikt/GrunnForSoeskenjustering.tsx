@@ -9,7 +9,7 @@ import {
 import { FormEvent, useState } from 'react'
 import { BodyShort, Button, Heading, Select } from '@navikt/ds-react'
 import { hentBehandlesFraStatus } from '~components/behandling/felles/utils'
-import { isPending, useApiCall } from '~shared/hooks/useApiCall'
+import { isPending, isFailure, useApiCall } from '~shared/hooks/useApiCall'
 import { lagreRevurderingInfo } from '~shared/api/revurdering'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { oppdaterRevurderingInfo } from '~store/reducers/BehandlingReducer'
@@ -24,7 +24,7 @@ function hentUndertypeFraBehandling(behandling?: IDetaljertBehandling): Soeskenj
   }
 }
 
-export const SoeskenjusteringUndertype = (props: { behandling: IDetaljertBehandling }) => {
+export const GrunnForSoeskenjustering = (props: { behandling: IDetaljertBehandling }) => {
   const { behandling } = props
   const soeskenjusteringInfo = hentUndertypeFraBehandling(behandling)
   const [valgtSoeskenjustering, setValgtSoeskenjustering] = useState<BarnepensjonSoeskenjusteringGrunn | undefined>(
@@ -74,6 +74,7 @@ export const SoeskenjusteringUndertype = (props: { behandling: IDetaljertBehandl
           <Button type="submit" loading={isPending(lagrestatus)}>
             Lagre
           </Button>
+          {isFailure(lagrestatus) ? <ApiErrorAlert>Kunne ikke lagre grunnen til søskenjustering</ApiErrorAlert> : null}
           {feilmelding ? <ApiErrorAlert>{feilmelding}</ApiErrorAlert> : null}
         </form>
       ) : (

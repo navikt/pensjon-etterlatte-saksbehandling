@@ -18,6 +18,7 @@ import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.BrevInnhold
 import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.ManueltBrevData
+import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.OpprettNyttBrev
 import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.Slate
@@ -70,6 +71,10 @@ class BrevService(
     fun lagreBrevPayload(id: BrevID, payload: Slate) =
         db.oppdaterPayload(id, payload)
             .also { logger.info("Payload for brev (id=$id) oppdatert") }
+
+    fun oppdaterMottaker(id: BrevID, mottaker: Mottaker) =
+        db.oppdaterMottaker(id, mottaker)
+            .also { logger.info("Mottaker på brev (id=$id) oppdatert") }
 
     suspend fun genererPdf(
         id: BrevID,

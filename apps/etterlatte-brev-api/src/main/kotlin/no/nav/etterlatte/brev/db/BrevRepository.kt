@@ -9,6 +9,7 @@ import no.nav.etterlatte.brev.db.BrevRepository.Queries.HENT_BREV_FOR_BEHANDLING
 import no.nav.etterlatte.brev.db.BrevRepository.Queries.HENT_BREV_FOR_SAK_QUERY
 import no.nav.etterlatte.brev.db.BrevRepository.Queries.HENT_BREV_QUERY
 import no.nav.etterlatte.brev.db.BrevRepository.Queries.OPPDATER_INNHOLD_PAYLOAD
+import no.nav.etterlatte.brev.db.BrevRepository.Queries.OPPDATER_MOTTAKER_QUERY
 import no.nav.etterlatte.brev.db.BrevRepository.Queries.OPPRETT_BREV_QUERY
 import no.nav.etterlatte.brev.db.BrevRepository.Queries.OPPRETT_HENDELSE_QUERY
 import no.nav.etterlatte.brev.db.BrevRepository.Queries.OPPRETT_INNHOLD_QUERY
@@ -73,6 +74,31 @@ class BrevRepository(private val ds: DataSource) {
         ).also { require(it == 1) }
 
         tx.lagreHendelse(id, Status.OPPDATERT, payload.toJson())
+            .also { require(it == 1) }
+    }
+
+    fun oppdaterMottaker(id: BrevID, mottaker: Mottaker) = ds.transaction { tx ->
+        tx.run(
+            queryOf(
+                OPPDATER_MOTTAKER_QUERY,
+                mapOf(
+                    "brev_id" to id,
+                    "foedselsnummer" to mottaker.foedselsnummer?.value,
+                    "orgnummer" to mottaker.orgnummer,
+                    "navn" to mottaker.navn,
+                    "adressetype" to mottaker.adresse.adresseType,
+                    "adresselinje1" to mottaker.adresse.adresselinje1,
+                    "adresselinje2" to mottaker.adresse.adresselinje2,
+                    "adresselinje3" to mottaker.adresse.adresselinje3,
+                    "postnummer" to mottaker.adresse.postnummer,
+                    "poststed" to mottaker.adresse.poststed,
+                    "landkode" to mottaker.adresse.landkode,
+                    "land" to mottaker.adresse.land
+                )
+            ).asUpdate
+        ).also { require(it == 1) }
+
+        tx.lagreHendelse(id, Status.OPPDATERT, mottaker.toJson())
             .also { require(it == 1) }
     }
 
@@ -290,6 +316,22 @@ class BrevRepository(private val ds: DataSource) {
                 :adressetype, :adresselinje1, :adresselinje2, :adresselinje3,
                 :postnummer, :poststed, :landkode, :land
             )
+        """
+
+        const val OPPDATER_MOTTAKER_QUERY = """
+            UPDATE mottaker 
+            SET foedselsnummer = :foedselsnummer,
+                orgnummer = :orgnummer,
+                navn = :navn,
+                adressetype = :adressetype,
+                adresselinje1 = :adresselinje1,
+                adresselinje2 = :adresselinje2,
+                adresselinje3 = :adresselinje3,
+                postnummer = :postnummer,
+                poststed = :poststed,
+                landkode = :landkode,
+                land = :land
+            WHERE brev_id = :brev_id
         """
 
         const val OPPRETT_INNHOLD_QUERY = """

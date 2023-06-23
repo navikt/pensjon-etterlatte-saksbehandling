@@ -44,6 +44,8 @@ const hjemlerOgBeskrivelseOmstillingsstoenad = (revurderingsaarsak: Revurderings
       return [OMS_OPPHOER_HJEMLER, OMS_OPPHOER_BESKRIVELSE]
     case Revurderingsaarsak.INNTEKTSENDRING:
       return [OMS_INNTEKTSENDRING_HJEMLER, OMS_INNTEKTSENDRING_BESKRIVELSE]
+    case Revurderingsaarsak.SIVILSTAND:
+      return [OMS_OPPHOER_HJEMLER, OMS_OPPHOER_BESKRIVELSE]
     default:
       return [OMS_REVURDERING_HJEMLER, OMS_REVURDERING_BESKRIVELSE]
   }

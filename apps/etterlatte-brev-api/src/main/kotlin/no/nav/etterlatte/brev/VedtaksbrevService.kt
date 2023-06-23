@@ -103,7 +103,8 @@ class VedtaksbrevService(
             MANUELL -> {
                 val payload = requireNotNull(db.hentBrevPayload(brev.id))
 
-                Pair(EtterlatteBrevKode.OMS_INNVILGELSE_MANUELL, ManueltBrevData(payload.elements))
+                // TODO: Map brevkode
+                Pair(EtterlatteBrevKode.OMS_OPPHOER_MANUELL, ManueltBrevData(payload.elements))
             }
         }
 
@@ -112,7 +113,7 @@ class VedtaksbrevService(
 
         val payload = when (prosessType) {
             AUTOMATISK -> null
-            MANUELL -> SlateHelper.hentInitiellPayload(behandling.sakType, behandling.vedtak.type)
+            MANUELL -> SlateHelper.hentInitiellPayload(behandling)
         }
 
         return BrevInnhold(tittel, behandling.spraak, payload)

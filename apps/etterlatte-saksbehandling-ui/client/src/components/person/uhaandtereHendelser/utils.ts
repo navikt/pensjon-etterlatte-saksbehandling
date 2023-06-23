@@ -50,8 +50,13 @@ const grunnlagsEndringstyperTilRevurderingsAarsaker: Record<GrunnlagsendringsTyp
   GRUNNBELOEP: [Revurderingsaarsak.REGULERING],
   DOEDSFALL: [Revurderingsaarsak.DOEDSFALL, Revurderingsaarsak.SOESKENJUSTERING],
   UTFLYTTING: [Revurderingsaarsak.UTLAND],
-  FORELDER_BARN_RELASJON: [Revurderingsaarsak.ANSVARLIGE_FORELDRE, Revurderingsaarsak.BARN],
+  FORELDER_BARN_RELASJON: [
+    Revurderingsaarsak.ANSVARLIGE_FORELDRE,
+    Revurderingsaarsak.BARN,
+    Revurderingsaarsak.SIVILSTAND,
+  ],
   VERGEMAAL_ELLER_FREMTIDSFULLMAKT: [Revurderingsaarsak.VERGEMAAL_ELLER_FREMTIDSFULLMAKT],
+  SIVILSTAND: [Revurderingsaarsak.SIVILSTAND],
   INSTITUSJONSOPPHOLD: [Revurderingsaarsak.SOESKENJUSTERING],
 }
 

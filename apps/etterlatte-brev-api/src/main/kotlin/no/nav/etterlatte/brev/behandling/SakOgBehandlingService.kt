@@ -10,6 +10,7 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
+import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.pensjon.brevbaker.api.model.Kroner
 import java.time.YearMonth
@@ -81,6 +82,7 @@ class SakOgBehandlingService(
                 vedtak.behandling.id,
                 vedtak.sak.sakType,
                 vedtak.virkningstidspunkt,
+                vedtak.type,
                 brukerTokenInfo
             ),
             revurderingsaarsak = vedtak.behandling.revurderingsaarsak,
@@ -122,9 +124,11 @@ class SakOgBehandlingService(
         behandlingId: UUID,
         sakType: SakType,
         virkningstidspunkt: YearMonth,
+        vedtakType: VedtakType,
         brukerTokenInfo: BrukerTokenInfo
     ): Avkortingsinfo? {
-        if (sakType == SakType.BARNEPENSJON) return null // TODO: Fjern når avkorting støttes for barnepensjon
+        // TODO: Fjern sjekken når avkorting støttes for barnepensjon
+        if (sakType == SakType.BARNEPENSJON || vedtakType == VedtakType.OPPHOER) return null
 
         val ytelseMedGrunnlag = beregningKlient.hentYtelseMedGrunnlag(behandlingId, brukerTokenInfo)
 

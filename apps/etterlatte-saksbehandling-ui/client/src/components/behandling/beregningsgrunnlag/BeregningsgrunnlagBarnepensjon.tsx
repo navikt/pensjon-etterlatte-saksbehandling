@@ -33,7 +33,7 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
   const { next } = useBehandlingRoutes()
   const behandles = hentBehandlesFraStatus(behandling.status)
   const dispatch = useAppDispatch()
-  const [lagreSoeskenMedIBeregningStatus, postSoeskenMedIBeregning] = useApiCall(lagreBeregningsGrunnlag)
+  const [lagreBeregningsgrunnlag, postBeregningsgrunnlag] = useApiCall(lagreBeregningsGrunnlag)
   const [beregningsgrunnlag, fetchBeregningsgrunnlag] = useApiCall(hentBeregningsGrunnlag)
   const [endreBeregning, postOpprettEllerEndreBeregning] = useApiCall(opprettEllerEndreBeregning)
   const [funksjonsbrytere, postHentFunksjonsbrytere] = useApiCall(hentFunksjonsbrytere)
@@ -80,17 +80,21 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
   const harSoesken = soesken.length > 0
 
   const onSubmit = () => {
-    if (harSoesken && !soeskenGrunnlagsData) {
+    if (harSoesken && !(soeskenGrunnlagsData || behandling.beregningsGrunnlag?.soeskenMedIBeregning)) {
       setSoeskenJusteringMangler(true)
     }
-    if (soeskenGrunnlagsData || !harSoesken) {
+    if (behandling.beregningsGrunnlag?.soeskenMedIBeregning || soeskenGrunnlagsData || !harSoesken) {
       dispatch(resetBeregning())
       const beregningsgrunnlag = {
-        soeskenMedIBeregning: soeskenGrunnlagsData ? mapListeTilDto(soeskenGrunnlagsData) : [],
-        institusjonsopphold: institusjonsoppholdsGrunnlagData ? mapListeTilDto(institusjonsoppholdsGrunnlagData) : [],
+        soeskenMedIBeregning: soeskenGrunnlagsData
+          ? mapListeTilDto(soeskenGrunnlagsData)
+          : behandling.beregningsGrunnlag?.soeskenMedIBeregning ?? [],
+        institusjonsopphold: institusjonsoppholdsGrunnlagData
+          ? mapListeTilDto(institusjonsoppholdsGrunnlagData)
+          : behandling.beregningsGrunnlag?.institusjonsopphold ?? [],
       }
 
-      postSoeskenMedIBeregning(
+      postBeregningsgrunnlag(
         {
           behandlingsId: behandling.id,
           grunnlag: beregningsgrunnlag,
@@ -104,6 +108,7 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
       )
     }
   }
+
   return (
     <>
       {!isPending(funksjonsbrytere) &&
@@ -127,7 +132,7 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
       </>
       {manglerSoeskenJustering && <ApiErrorAlert>Søskenjustering er ikke fylt ut </ApiErrorAlert>}
       {isFailure(endreBeregning) && <ApiErrorAlert>Kunne ikke opprette ny beregning</ApiErrorAlert>}
-      {isFailure(lagreSoeskenMedIBeregningStatus) && <ApiErrorAlert>Kunne ikke lagre beregningsgrunnlag</ApiErrorAlert>}
+      {isFailure(lagreBeregningsgrunnlag) && <ApiErrorAlert>Kunne ikke lagre beregningsgrunnlag</ApiErrorAlert>}
 
       {behandles ? (
         <BehandlingHandlingKnapper>
@@ -135,7 +140,7 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
             variant="primary"
             size="medium"
             onClick={onSubmit}
-            loading={isPending(lagreSoeskenMedIBeregningStatus) || isPending(endreBeregning)}
+            loading={isPending(lagreBeregningsgrunnlag) || isPending(endreBeregning)}
           >
             Beregne og fatte vedtak
           </Button>

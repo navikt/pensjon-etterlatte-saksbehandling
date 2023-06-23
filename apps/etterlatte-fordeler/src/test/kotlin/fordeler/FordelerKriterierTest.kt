@@ -75,6 +75,35 @@ internal class FordelerKriterierTest {
     }
 
     @Test
+    fun `Gjenlevende mangler`() {
+        val barn = mockPerson(
+            bostedsadresse = mockNorskAdresse(),
+            familieRelasjon = FamilieRelasjon(
+                barn = null,
+                ansvarligeForeldre = null,
+                foreldre = listOf(Folkeregisteridentifikator.of(FNR_2))
+            )
+        )
+        val avdoed = mockPerson(
+            fnr = FNR_2,
+            doedsdato = now().plusMonths(11),
+            bostedsadresse = mockNorskAdresse(
+                gyldigTilOgMed = Tidspunkt.now().toLocalDatetimeUTC().plusMonths(11)
+            ),
+            familieRelasjon = FamilieRelasjon(
+                barn = listOf(barn.foedselsnummer),
+                ansvarligeForeldre = null,
+                foreldre = listOf(Folkeregisteridentifikator.of(FNR_2))
+            )
+        )
+
+        val fordelerResultat =
+            fordelerKriterier.sjekkMotKriterier(barn, avdoed, gjenlevende = null, BARNEPENSJON_SOKNAD)
+
+        assertTrue(fordelerResultat.forklaring.contains(FordelerKriterie.GJENLEVENDE_MANGLER))
+    }
+
+    @Test
     fun `Skal godta bokmaal som spraak`() {
         val barn = mockPerson(
             foedselsaar = now().year - 15,
@@ -423,7 +452,7 @@ internal class FordelerKriterierTest {
     fun `innsender som ikke er forelder er ikke en gyldig kandidat`() {
         val barn = mockPerson()
         val avdoed = mockPerson()
-        val gjenlevende = mockPerson()
+        val gjenlevende = null
 
         val fordelerResultat = fordelerKriterier.sjekkMotKriterier(
             barn,

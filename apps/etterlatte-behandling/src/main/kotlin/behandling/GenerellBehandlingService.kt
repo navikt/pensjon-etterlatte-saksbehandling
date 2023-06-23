@@ -13,7 +13,6 @@ import no.nav.etterlatte.behandling.hendelse.HendelseType
 import no.nav.etterlatte.behandling.hendelse.LagretHendelse
 import no.nav.etterlatte.behandling.hendelse.registrerVedtakHendelseFelles
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
-import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseDao
@@ -65,12 +64,12 @@ interface GenerellBehandlingService {
     fun oppdaterUtenlandstilsnitt(
         behandlingId: UUID,
         utenlandstilsnitt: Utenlandstilsnitt
-    ): Unit
+    )
 
     fun oppdaterBoddEllerArbeidetUtlandet(
         behandlingId: UUID,
         boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet
-    ): Unit
+    )
 
     fun hentHendelserIBehandling(behandlingId: UUID): List<LagretHendelse>
     fun hentDetaljertBehandling(behandlingId: UUID): DetaljertBehandling?
@@ -97,7 +96,6 @@ class RealGenerellBehandlingService(
     private val behandlingHendelser: BehandlingHendelserKanal,
     private val grunnlagsendringshendelseDao: GrunnlagsendringshendelseDao,
     private val hendelseDao: HendelseDao,
-    private val vedtakKlient: VedtakKlient,
     private val grunnlagKlient: GrunnlagKlient,
     private val sporingslogg: Sporingslogg,
     private val featureToggleService: FeatureToggleService
@@ -213,7 +211,6 @@ class RealGenerellBehandlingService(
         val sakId = detaljertBehandling.sak
         logger.info("Hentet behandling for $behandlingId")
         return coroutineScope {
-            val vedtak = async { vedtakKlient.hentVedtak(behandlingId.toString(), brukerTokenInfo) }
             logger.info("Hentet vedtak for $behandlingId")
             val avdoed = async {
                 grunnlagKlient.finnPersonOpplysning(sakId, Opplysningstype.AVDOED_PDL_V1, brukerTokenInfo)
@@ -244,10 +241,6 @@ class RealGenerellBehandlingService(
                 sakType = detaljertBehandling.sakType,
                 gyldighetsprøving = detaljertBehandling.gyldighetsproeving,
                 kommerBarnetTilgode = kommerBarnetTilgode,
-                saksbehandlerId = vedtak.await()?.vedtakFattet?.ansvarligSaksbehandler,
-                datoFattet = vedtak.await()?.vedtakFattet?.tidspunkt,
-                datoAttestert = vedtak.await()?.attestasjon?.tidspunkt,
-                attestant = vedtak.await()?.attestasjon?.attestant,
                 soeknadMottattDato = detaljertBehandling.soeknadMottattDato,
                 virkningstidspunkt = detaljertBehandling.virkningstidspunkt,
                 utenlandstilsnitt = detaljertBehandling.utenlandstilsnitt,

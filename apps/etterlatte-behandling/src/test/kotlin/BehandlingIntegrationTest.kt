@@ -20,7 +20,6 @@ import no.nav.etterlatte.behandling.domain.SaksbehandlerTema
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.behandling.klienter.NavAnsattKlient
 import no.nav.etterlatte.behandling.klienter.Norg2Klient
-import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.config.ApplicationContext
 import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
@@ -39,7 +38,6 @@ import no.nav.etterlatte.libs.common.person.GeografiskTilknytning
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.toJson
-import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
 import no.nav.etterlatte.token.BrukerTokenInfo
@@ -101,7 +99,6 @@ abstract class BehandlingIntegrationTest {
             navAnsattKlient = NavAnsattKlientTest(),
             norg2Klient = norg2Klient ?: Norg2KlientTest(),
             grunnlagKlientObo = GrunnlagKlientTest(),
-            vedtakKlientObo = VedtakKlientTest()
         ).also {
             it.dataSource.migrate()
             it.behandlingsHendelser.start()
@@ -305,18 +302,12 @@ abstract class BehandlingIntegrationTest {
     }
 }
 
-class VedtakKlientTest : VedtakKlient {
-    override suspend fun hentVedtak(behandlingId: String, brukerTokenInfo: BrukerTokenInfo): VedtakDto? {
-        TODO("Not yet implemented")
-    }
-}
-
 class GrunnlagKlientTest : GrunnlagKlient {
     override suspend fun finnPersonOpplysning(
         sakId: Long,
         opplysningsType: Opplysningstype,
         brukerTokenInfo: BrukerTokenInfo
-    ): Grunnlagsopplysning<Person>? {
+    ): Grunnlagsopplysning<Person> {
         val personopplysning = personOpplysning(doedsdato = LocalDate.parse("2022-01-01"))
         return grunnlagsOpplysningMedPersonopplysning(personopplysning)
     }

@@ -17,8 +17,6 @@
       <env name="ETTERLATTE_NAVANSATT_OUTBOUND_SCOPE" value="api://dev-fss.teampensjon.navansatt/.default" />
       <env name="GRUNNLAG_AZURE_SCOPE" value="api://dev-gcp.etterlatte.etterlatte-grunnlag/.default" />
       <env name="PDL_AZURE_SCOPE" value="api://dev-gcp.etterlatte.etterlatte-pdltjenester/.default" />
-      <env name="ETTERLATTE_VEDTAK_CLIENT_ID" value="069b1b2c-0a06-4cc9-8418-f100b8ff71be" />
-      <env name="ETTERLATTE_VEDTAK_URL" value="https://etterlatte-vedtak.intern.dev.nav.no" />
       <env name="ETTERLATTE_GRUNNLAG_CLIENT_ID" value="ce96a301-13db-4409-b277-5b27f464d08b" />
       <env name="ETTERLATTE_GRUNNLAG_URL" value="https://etterlatte-grunnlag.intern.dev.nav.no/api" />
       <env name="AZUREAD_ATTESTANT_GROUPID" value="63f46f74-84a8-4d1c-87a8-78532ab3ae60" />

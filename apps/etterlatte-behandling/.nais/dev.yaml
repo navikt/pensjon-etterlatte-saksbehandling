@@ -70,10 +70,6 @@ spec:
       value: ce96a301-13db-4409-b277-5b27f464d08b
     - name: ETTERLATTE_GRUNNLAG_URL
       value: http://etterlatte-grunnlag/api
-    - name: ETTERLATTE_VEDTAK_CLIENT_ID
-      value: 069b1b2c-0a06-4cc9-8418-f100b8ff71be
-    - name: ETTERLATTE_VEDTAK_URL
-      value: http://etterlatte-vedtaksvurdering
     - name: AZUREAD_ATTESTANT_GROUPID
       value: 63f46f74-84a8-4d1c-87a8-78532ab3ae60
     - name: AZUREAD_FORTROLIG_GROUPID
@@ -104,7 +100,6 @@ spec:
         - application: etterlatte-vilkaar
         - application: etterlatte-pdltjenester
         - application: etterlatte-grunnlag
-        - application: etterlatte-vedtaksvurdering
         - application: skjermede-personer-pip
           namespace: nom
       external:

@@ -97,14 +97,19 @@ class FordelerService(
 
         val barn = pdlTjenesterKlient.hentPerson(hentBarnRequest(soeknad))
         val avdoed = pdlTjenesterKlient.hentPerson(hentAvdoedRequest(soeknad))
-        val gjenlevende = pdlTjenesterKlient.hentPerson(hentGjenlevendeRequest(soeknad))
+        val gjenlevende =
+            if (harGjenlevendeForeldre(soeknad)) {
+                pdlTjenesterKlient.hentPerson(hentGjenlevendeRequest(soeknad))
+            } else {
+                null
+            }
 
         fordelerKriterier.sjekkMotKriterier(barn, avdoed, gjenlevende, soeknad).let {
             if (it.kandidat &&
                 fordelerRepository.antallFordeltTil(Vedtaksloesning.GJENNY.name) < maxFordelingTilGjenny
             ) {
                 val adressebeskyttetPerson = finnAdressebeskyttetPerson(
-                    listOf(barn, avdoed, gjenlevende)
+                    mutableListOf(barn, avdoed, gjenlevende).filterNotNull()
                 )
                 Fordeling(
                     event.soeknadId,
@@ -129,6 +134,11 @@ class FordelerService(
 
     private fun hendelseGyldigTil(event: FordelerEvent) =
         event.hendelseGyldigTil.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
+
+    private fun harGjenlevendeForeldre(soeknad: Barnepensjon) =
+        soeknad.foreldre.any {
+            it.type == PersonType.GJENLEVENDE_FORELDER
+        }
 
     private fun hentGjenlevendeRequest(soeknad: Barnepensjon) =
         HentPersonRequest(

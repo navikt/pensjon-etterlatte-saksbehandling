@@ -57,7 +57,7 @@ class FordelerKriterier {
     fun sjekkMotKriterier(
         barn: Person,
         avdoed: Person,
-        gjenlevende: Person,
+        gjenlevende: Person?,
         soeknad: Barnepensjon
     ): FordelerKriterierResultat {
         return fordelerKriterier(barn, avdoed, gjenlevende)
@@ -72,7 +72,7 @@ class FordelerKriterier {
     private fun fordelerKriterier(
         barn: Person,
         avdoed: Person,
-        gjenlevende: Person
+        gjenlevende: Person?
     ) = listOf(
         // Barn (søker)
         Kriterie(FordelerKriterie.BARN_ER_FOR_GAMMELT) { forGammel(barn) },
@@ -97,12 +97,18 @@ class FordelerKriterier {
         },
 
         // Gjenlevende
-        Kriterie(FordelerKriterie.GJENLEVENDE_ER_IKKE_BOSATT_I_NORGE) { ikkeGyldigBostedsAdresseINorge(gjenlevende) },
+        Kriterie(FordelerKriterie.GJENLEVENDE_ER_IKKE_BOSATT_I_NORGE) {
+            gjenlevende?.let {
+                ikkeGyldigBostedsAdresseINorge(
+                    gjenlevende
+                )
+            } ?: false
+        },
         Kriterie(FordelerKriterie.GJENLEVENDE_OG_BARN_HAR_IKKE_SAMME_ADRESSE) {
-            gjenlevendeOgBarnHarIkkeSammeAdresse(gjenlevende, barn)
+            gjenlevende?.let { gjenlevendeOgBarnHarIkkeSammeAdresse(gjenlevende, barn) } ?: false
         },
         Kriterie(FordelerKriterie.GJENLEVENDE_HAR_IKKE_FORELDREANSVAR) {
-            gjenlevendeHarIkkeForeldreansvar(barn, gjenlevende)
+            gjenlevende?.let { gjenlevendeHarIkkeForeldreansvar(barn, gjenlevende) } ?: false
         },
 
         // Innsender

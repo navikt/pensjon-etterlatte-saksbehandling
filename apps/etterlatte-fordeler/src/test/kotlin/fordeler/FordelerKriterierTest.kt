@@ -423,7 +423,7 @@ internal class FordelerKriterierTest {
     fun `innsender som ikke er forelder er ikke en gyldig kandidat`() {
         val barn = mockPerson()
         val avdoed = mockPerson()
-        val gjenlevende = mockPerson()
+        val gjenlevende = null
 
         val fordelerResultat = fordelerKriterier.sjekkMotKriterier(
             barn,

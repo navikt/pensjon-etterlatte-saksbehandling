@@ -10,12 +10,14 @@ import {
   IUtenlandstilsnitt,
   Virkningstidspunkt,
 } from '~shared/types/IDetaljertBehandling'
+import { VedtakSammendrag } from "~components/person/typer";
 
 export const addBehandling = createAction<IDetaljertBehandling>('behandling/add')
 export const resetBehandling = createAction('behandling/reset')
 export const oppdaterGyldighetsproeving = createAction<IGyldighetResultat>('behandling/gyldighetsprøving')
 export const oppdaterVirkningstidspunkt = createAction<Virkningstidspunkt>('behandling/virkningstidspunkt')
 export const updateVilkaarsvurdering = createAction<IVilkaarsvurdering>('behandling/update_vilkaarsvurdering')
+export const updateVedtakSammendrag = createAction<VedtakSammendrag>('behandling/update_vedtaksammendrag')
 export const oppdaterKommerBarnetTilgode = createAction<IKommerBarnetTilgode>('behandling/kommerBarnetTilgode')
 export const oppdaterUtenlandstilsnitt = createAction<IUtenlandstilsnitt>('behandling/utenlandstilsnitt')
 export const oppdaterBoddEllerArbeidetUtlandet = createAction<IBoddEllerArbeidetUtlandet>(
@@ -32,6 +34,7 @@ export interface IBehandlingReducer extends IDetaljertBehandling {
   beregningsGrunnlag?: BeregningsGrunnlagData
   beregning?: Beregning
   vilkårsprøving?: IVilkaarsvurdering
+  vedtak?: VedtakSammendrag
 }
 const initialState: { behandling: IBehandlingReducer | null } = { behandling: null }
 
@@ -41,6 +44,9 @@ export const behandlingReducer = createReducer(initialState, (builder) => {
   })
   builder.addCase(updateVilkaarsvurdering, (state, action) => {
     state.behandling!!.vilkårsprøving = action.payload
+  })
+  builder.addCase(updateVedtakSammendrag, (state, action) => {
+    state.behandling!!.vedtak = action.payload
   })
   builder.addCase(resetBehandling, (state) => {
     state.behandling = null

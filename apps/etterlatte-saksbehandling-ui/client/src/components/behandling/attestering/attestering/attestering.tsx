@@ -5,19 +5,21 @@ import { IBeslutning } from '../types'
 import { Beslutningsvalg } from './beslutningsvalg'
 import { useAppSelector } from '~store/Store'
 import { Alert } from '@navikt/ds-react'
+import { VedtakSammendrag } from "~components/person/typer";
 
 type Props = {
   setBeslutning: (value: IBeslutning) => void
   beslutning: IBeslutning | undefined
   behandling: IDetaljertBehandling
+  vedtak: VedtakSammendrag | undefined
 }
 
-export const Attestering = ({ setBeslutning, beslutning, behandling }: Props) => {
+export const Attestering = ({ setBeslutning, beslutning, behandling, vedtak }: Props) => {
   const { lastPage } = useBehandlingRoutes()
 
   const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.saksbehandler)
 
-  const attestantOgSaksbehandlerErSammePerson = behandling.saksbehandlerId === innloggetSaksbehandler.ident
+  const attestantOgSaksbehandlerErSammePerson = vedtak?.saksbehandlerId === innloggetSaksbehandler.ident
 
   return (
     <AttesteringWrapper>

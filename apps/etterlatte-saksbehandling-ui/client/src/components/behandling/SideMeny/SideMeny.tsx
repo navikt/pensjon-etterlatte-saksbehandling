@@ -13,9 +13,10 @@ import { Dokumentoversikt } from '~components/person/dokumentoversikt'
 import styled from 'styled-components'
 import AnnullerBehandling from '~components/behandling/handlinger/AnnullerBehanding'
 import { SakType } from '~shared/types/sak'
+import { VedtakSammendrag } from "~components/person/typer";
 
-export const SideMeny = (props: { behandling: IDetaljertBehandling }) => {
-  const { behandling } = props
+export const SideMeny = (props: { behandling: IDetaljertBehandling, vedtak: VedtakSammendrag | undefined }) => {
+  const { behandling, vedtak } = props
 
   const saksbehandler = useAppSelector((state) => state.saksbehandlerReducer.saksbehandler)
   const [collapsed, setCollapsed] = useState(false)
@@ -26,11 +27,11 @@ export const SideMeny = (props: { behandling: IDetaljertBehandling }) => {
     sakId: behandling.sak,
     sakType: behandling.sakType,
     status: behandling.status,
-    saksbehandler: behandling.saksbehandlerId,
-    attestant: behandling.attestant,
+    saksbehandler: vedtak?.saksbehandlerId,
+    attestant: vedtak?.attestant,
     virkningsdato: behandling.virkningstidspunkt?.dato,
-    datoFattet: behandling.datoFattet,
-    datoAttestert: behandling.datoAttestert,
+    datoFattet: vedtak?.datoFattet,
+    datoAttestert: vedtak?.datoAttestert,
     underkjentLogg: behandling.hendelser.filter((hendelse) => hendelse.hendelse === IHendelseType.VEDTAK_UNDERKJENT),
     fattetLogg: behandling.hendelser.filter((hendelse) => hendelse.hendelse === IHendelseType.VEDTAK_FATTET),
     attestertLogg: behandling.hendelser.filter((hendelse) => hendelse.hendelse === IHendelseType.VEDTAK_ATTESTERT),
@@ -54,7 +55,7 @@ export const SideMeny = (props: { behandling: IDetaljertBehandling }) => {
           <>
             <Behandlingsoppsummering behandlingsInfo={behandlingsinfo} beslutning={beslutning} />
             {kanAttestere && (
-              <Attestering setBeslutning={setBeslutning} beslutning={beslutning} behandling={behandling} />
+              <Attestering setBeslutning={setBeslutning} beslutning={beslutning} behandling={behandling} vedtak={vedtak} />
             )}
           </>
         )}

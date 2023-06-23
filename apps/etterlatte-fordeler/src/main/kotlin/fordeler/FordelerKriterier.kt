@@ -41,6 +41,7 @@ enum class FordelerKriterie(val forklaring: String) {
     AVDOED_ER_IKKE_FORELDER_TIL_BARN("Avdød er ikke forelder til barnet"),
     AVDOED_HAR_DOEDSDATO_FOR_LANGT_TILBAKE_I_TID("Avdød har dødsdato for langt tilbake i tid"),
 
+    GJENLEVENDE_MANGLER("Søknaden har ingen gjenlevende forelder"),
     GJENLEVENDE_ER_IKKE_BOSATT_I_NORGE("Gjenlevende er ikke bosatt i Norge"),
     GJENLEVENDE_OG_BARN_HAR_IKKE_SAMME_ADRESSE("Gjenlevende har ikke samme adresse som barnet"),
     GJENLEVENDE_HAR_IKKE_FORELDREANSVAR("Gjenlevende har ikke foreldreansvar for barnet"),
@@ -97,18 +98,15 @@ class FordelerKriterier {
         },
 
         // Gjenlevende
+        Kriterie(FordelerKriterie.GJENLEVENDE_MANGLER) { gjenlevende == null },
         Kriterie(FordelerKriterie.GJENLEVENDE_ER_IKKE_BOSATT_I_NORGE) {
-            gjenlevende?.let {
-                ikkeGyldigBostedsAdresseINorge(
-                    gjenlevende
-                )
-            } ?: false
+            gjenlevende == null || ikkeGyldigBostedsAdresseINorge(gjenlevende)
         },
         Kriterie(FordelerKriterie.GJENLEVENDE_OG_BARN_HAR_IKKE_SAMME_ADRESSE) {
-            gjenlevende?.let { gjenlevendeOgBarnHarIkkeSammeAdresse(gjenlevende, barn) } ?: false
+            gjenlevende == null || gjenlevendeOgBarnHarIkkeSammeAdresse(gjenlevende, barn)
         },
         Kriterie(FordelerKriterie.GJENLEVENDE_HAR_IKKE_FORELDREANSVAR) {
-            gjenlevende?.let { gjenlevendeHarIkkeForeldreansvar(barn, gjenlevende) } ?: false
+            gjenlevende == null || gjenlevendeHarIkkeForeldreansvar(barn, gjenlevende)
         },
 
         // Innsender

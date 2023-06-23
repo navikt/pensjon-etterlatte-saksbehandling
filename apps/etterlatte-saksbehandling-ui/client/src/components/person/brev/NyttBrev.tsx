@@ -6,13 +6,13 @@ import { useEffect, useState } from 'react'
 import { Column, GridContainer } from '~shared/styled'
 import { StatusBar } from '~shared/statusbar/Statusbar'
 import { getPerson } from '~shared/api/grunnlag'
-import MottakerPanel from '~components/behandling/brev/detaljer/MottakerPanel'
 import NavigerTilbakeMeny from '~components/person/NavigerTilbakeMeny'
 import { BrevStatus } from '~shared/types/Brev'
 import ForhaandsvisningBrev from '~components/behandling/brev/ForhaandsvisningBrev'
 import styled from 'styled-components'
 import NyttBrevHandlingerPanel from '~components/person/brev/NyttBrevHandlingerPanel'
 import BrevStatusPanel from '~components/person/brev/BrevStatusPanel'
+import NyttBrevMottaker from '~components/person/brev/NyttBrevMottaker'
 
 export default function NyttBrev() {
   const { brevId, sakId, fnr } = useParams()
@@ -41,13 +41,7 @@ export default function NyttBrev() {
       <NavigerTilbakeMeny label={'Tilbake til brevoversikt'} path={`/person/${fnr}/sak/${sakId}/brev`} />
 
       <GridContainer>
-        <Column>
-          {isSuccess(hentetBrev) && (
-            <div style={{ margin: '1rem' }}>
-              <MottakerPanel vedtaksbrev={hentetBrev.data} />
-            </div>
-          )}
-        </Column>
+        <Column>{isSuccess(hentetBrev) && <NyttBrevMottaker brev={hentetBrev.data} />}</Column>
         <Column>
           {isSuccess(hentetBrev) &&
             (hentetBrev.data.status === BrevStatus.DISTRIBUERT ? (

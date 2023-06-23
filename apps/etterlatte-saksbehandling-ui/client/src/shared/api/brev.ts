@@ -1,5 +1,5 @@
 import { apiClient, ApiResponse } from './apiClient'
-import { IBrev } from '~shared/types/Brev'
+import { IBrev, Mottaker } from '~shared/types/Brev'
 
 export const hentBrev = async (props: { brevId: number; sakId: number }): Promise<ApiResponse<IBrev>> =>
   apiClient.get(`/brev/${props.brevId}?sakId=${props.sakId}`)
@@ -15,6 +15,13 @@ export const hentVedtaksbrev = async (behandlingId: string): Promise<ApiResponse
 
 export const opprettVedtaksbrev = async (sakId: number, behandlingId: string): Promise<ApiResponse<IBrev>> =>
   apiClient.post(`/brev/behandling/${behandlingId}/vedtak?sakId=${sakId}`, {})
+
+export const oppdaterMottaker = async (props: {
+  brevId: number
+  sakId: number
+  mottaker: Mottaker
+}): Promise<ApiResponse<IBrev>> =>
+  apiClient.post(`/brev/${props.brevId}/mottaker?sakId=${props.sakId}`, { mottaker: props.mottaker })
 
 export const genererPdf = async (props: {
   brevId: number

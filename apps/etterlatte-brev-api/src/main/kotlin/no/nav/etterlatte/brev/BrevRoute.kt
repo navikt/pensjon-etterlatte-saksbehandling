@@ -9,6 +9,7 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.brev.behandlingklient.BehandlingKlient
+import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.withSakId
@@ -43,6 +44,17 @@ fun Route.brevRoute(service: BrevService, behandlingKlient: BehandlingKlient) {
                     logger.info("Oppretting av pdf tok ${varighet.toString(DurationUnit.SECONDS, 2)}")
                     call.respond(pdf)
                 }
+            }
+        }
+
+        post("mottaker") {
+            withSakId(behandlingKlient) {
+                val brevId = requireNotNull(call.parameters["id"]).toLong()
+                val body = call.receive<OppdaterMottakerRequest>()
+
+                val mottaker = service.oppdaterMottaker(brevId, body.mottaker)
+
+                call.respond(mottaker)
             }
         }
 
@@ -128,4 +140,8 @@ fun Route.brevRoute(service: BrevService, behandlingKlient: BehandlingKlient) {
 
 data class OppdaterPayloadRequest(
     val payload: Slate
+)
+
+data class OppdaterMottakerRequest(
+    val mottaker: Mottaker
 )

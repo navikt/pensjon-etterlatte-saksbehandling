@@ -103,6 +103,7 @@ class VedtaksbrevService(
             MANUELL -> {
                 val payload = requireNotNull(db.hentBrevPayload(brev.id))
 
+                // TODO: Map brevkode
                 Pair(EtterlatteBrevKode.OMS_OPPHOER_MANUELL, ManueltBrevData(payload.elements))
             }
         }

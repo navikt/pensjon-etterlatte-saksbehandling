@@ -37,9 +37,6 @@ data class Slate(
 
 object SlateHelper {
     fun hentInitiellPayload(sakType: SakType, vedtakType: VedtakType, behandling: Behandling): Slate {
-        println(sakType)
-        println(vedtakType)
-        println(behandling)
         return when (sakType) {
             SakType.OMSTILLINGSSTOENAD -> {
                 when (vedtakType) {

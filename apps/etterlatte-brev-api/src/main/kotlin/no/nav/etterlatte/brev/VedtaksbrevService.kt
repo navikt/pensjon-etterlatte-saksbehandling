@@ -103,7 +103,7 @@ class VedtaksbrevService(
             MANUELL -> {
                 val payload = requireNotNull(db.hentBrevPayload(brev.id))
 
-                Pair(EtterlatteBrevKode.OMS_INNVILGELSE_MANUELL, ManueltBrevData(payload.elements))
+                Pair(EtterlatteBrevKode.OMS_OPPHOER_MANUELL, ManueltBrevData(payload.elements))
             }
         }
 

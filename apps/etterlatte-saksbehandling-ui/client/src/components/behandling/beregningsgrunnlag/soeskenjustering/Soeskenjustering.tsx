@@ -48,11 +48,22 @@ const Soeskenjustering = (props: SoeskenjusteringProps) => {
     return null
   }
   const [visFeil, setVisFeil] = useState(false)
+
+  const soesken: IPdlPerson[] =
+    behandling.familieforhold.avdoede.opplysning.avdoedesBarn?.filter(
+      (barn) => barn.foedselsnummer !== behandling.søker?.foedselsnummer
+    ) ?? []
+
   const { handleSubmit, control, watch } = useForm<{
     soeskenMedIBeregning: PeriodisertBeregningsgrunnlag<SoeskenKanskjeMedIBeregning[]>[]
   }>({
-    defaultValues: { soeskenMedIBeregning: mapListeFraDto(behandling.beregningsGrunnlag?.soeskenMedIBeregning ?? []) },
+    defaultValues: {
+      soeskenMedIBeregning: behandling.beregningsGrunnlag?.soeskenMedIBeregning
+        ? mapListeFraDto(behandling.beregningsGrunnlag?.soeskenMedIBeregning)
+        : [nySoeskengrunnlagPeriode(soesken, behandling.virkningstidspunkt?.dato)],
+    },
   })
+
   const { fields, append, remove } = useFieldArray({
     name: 'soeskenMedIBeregning',
     control,
@@ -62,7 +73,6 @@ const Soeskenjustering = (props: SoeskenjusteringProps) => {
   const sisteTom = watch(`soeskenMedIBeregning.${fields.length - 1}.tom`)
   const sisteFom = watch(`soeskenMedIBeregning.${fields.length - 1}.fom`)
   const [visOkLagret, setVisOkLagret] = useState(false)
-
   const allePerioder = watch('soeskenMedIBeregning')
   const feil: [number, FeilIPeriodeGrunnlagAlle][] = [
     ...feilIKomplettePerioderOverIntervall(allePerioder, new Date(behandling.virkningstidspunkt!.dato)),
@@ -70,11 +80,6 @@ const Soeskenjustering = (props: SoeskenjusteringProps) => {
       feilISoeskenjusteringsperiode(periode).map((feil) => [indeks, feil] as [number, FeilIPeriodeGrunnlagAlle])
     ),
   ]
-
-  const soesken: IPdlPerson[] =
-    behandling.familieforhold.avdoede.opplysning.avdoedesBarn?.filter(
-      (barn) => barn.foedselsnummer !== behandling.søker?.foedselsnummer
-    ) ?? []
 
   if (soesken.length === 0) {
     return null

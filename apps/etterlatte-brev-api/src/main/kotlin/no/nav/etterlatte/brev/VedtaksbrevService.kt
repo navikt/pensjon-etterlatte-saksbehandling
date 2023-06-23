@@ -113,7 +113,7 @@ class VedtaksbrevService(
 
         val payload = when (prosessType) {
             AUTOMATISK -> null
-            MANUELL -> SlateHelper.hentInitiellPayload(behandling.sakType, behandling.vedtak.type, behandling)
+            MANUELL -> SlateHelper.hentInitiellPayload(behandling)
         }
 
         return BrevInnhold(tittel, behandling.spraak, payload)

@@ -36,10 +36,10 @@ data class Slate(
 }
 
 object SlateHelper {
-    fun hentInitiellPayload(sakType: SakType, vedtakType: VedtakType, behandling: Behandling): Slate {
-        return when (sakType) {
+    fun hentInitiellPayload(behandling: Behandling): Slate {
+        return when (behandling.sakType) {
             SakType.OMSTILLINGSSTOENAD -> {
-                when (vedtakType) {
+                when (behandling.vedtak.type) {
                     VedtakType.INNVILGELSE -> getJsonFile("/maler/oms-nasjonal-innvilget.json")
                     VedtakType.OPPHOER -> {
                         when (behandling.revurderingsaarsak) {

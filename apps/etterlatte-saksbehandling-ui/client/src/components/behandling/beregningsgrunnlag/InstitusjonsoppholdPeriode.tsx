@@ -10,17 +10,17 @@ import {
 } from 'react-hook-form'
 import MaanedVelger from '~components/behandling/beregningsgrunnlag/MaanedVelger'
 import { Button, Select, TextField } from '@navikt/ds-react'
-import { InstitusjonsoppholdGrunnlag, Reduksjon } from '~shared/types/Beregning'
+import { InstitusjonsoppholdGrunnlagData, Reduksjon } from '~shared/types/Beregning'
 import React from 'react'
 import styled from 'styled-components'
 
 type InstitusjonsoppholdPerioder = {
-  item: FieldArrayWithId<{ institusjonsOppholdForm: InstitusjonsoppholdGrunnlag }, 'institusjonsOppholdForm', 'id'>
+  item: FieldArrayWithId<{ institusjonsOppholdForm: InstitusjonsoppholdGrunnlagData }, 'institusjonsOppholdForm', 'id'>
   index: number
-  control: Control<{ institusjonsOppholdForm: InstitusjonsoppholdGrunnlag }>
-  register: UseFormRegister<{ institusjonsOppholdForm: InstitusjonsoppholdGrunnlag }>
+  control: Control<{ institusjonsOppholdForm: InstitusjonsoppholdGrunnlagData }>
+  register: UseFormRegister<{ institusjonsOppholdForm: InstitusjonsoppholdGrunnlagData }>
   remove: (index: number) => void
-  watch: UseFormWatch<{ institusjonsOppholdForm: InstitusjonsoppholdGrunnlag }>
+  watch: UseFormWatch<{ institusjonsOppholdForm: InstitusjonsoppholdGrunnlagData }>
   setVisFeil: (truefalse: boolean) => void
   errors:
     | Merge<

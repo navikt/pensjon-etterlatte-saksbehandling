@@ -1,6 +1,6 @@
 import { createAction, createReducer } from '@reduxjs/toolkit'
 import { IVilkaarsvurdering } from '~shared/api/vilkaarsvurdering'
-import { Beregning, BeregningsGrunnlagData } from '~shared/types/Beregning'
+import { Beregning, BeregningsGrunnlagPostDto } from '~shared/types/Beregning'
 import {
   IBehandlingStatus,
   IBoddEllerArbeidetUtlandet,
@@ -23,13 +23,13 @@ export const oppdaterBoddEllerArbeidetUtlandet = createAction<IBoddEllerArbeidet
 )
 export const oppdaterBeregning = createAction<Beregning>('behandling/beregning')
 export const oppdaterBehandlingsstatus = createAction<IBehandlingStatus>('behandling/status')
-export const oppdaterBeregingsGrunnlag = createAction<BeregningsGrunnlagData>('behandling/beregningsgrunnlag')
+export const oppdaterBeregingsGrunnlag = createAction<BeregningsGrunnlagPostDto>('behandling/beregningsgrunnlag')
 export const resetBeregning = createAction('behandling/beregning/reset')
 export const loggError = createAction<any>('loggError')
 export const loggInfo = createAction<any>('loggInfo')
 
 export interface IBehandlingReducer extends IDetaljertBehandling {
-  beregningsGrunnlag?: BeregningsGrunnlagData
+  beregningsGrunnlag?: BeregningsGrunnlagPostDto
   beregning?: Beregning
   vilkårsprøving?: IVilkaarsvurdering
 }

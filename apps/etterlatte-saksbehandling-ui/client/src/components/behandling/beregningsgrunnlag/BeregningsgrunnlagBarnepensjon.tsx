@@ -4,8 +4,8 @@ import { useBehandlingRoutes } from '../BehandlingRoutes'
 import { hentBehandlesFraStatus } from '../felles/utils'
 import { NesteOgTilbake } from '../handlinger/NesteOgTilbake'
 import { useAppDispatch } from '~store/Store'
-import { opprettEllerEndreBeregning } from '~shared/api/beregning'
-import { isFailure, isPending, useApiCall } from '~shared/hooks/useApiCall'
+import { hentBeregningsGrunnlag, opprettEllerEndreBeregning } from '~shared/api/beregning'
+import { isFailure, isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
 import { lagreBeregningsGrunnlag } from '~shared/api/beregning'
 import {
   IBehandlingReducer,
@@ -19,26 +19,29 @@ import FastTrygdetid from '~components/behandling/beregningsgrunnlag/Trygdetid'
 import { Trygdetid as BeregnetTrygdetid } from '~components/behandling/trygdetid/Trygdetid'
 import { mapListeTilDto } from '~components/behandling/beregningsgrunnlag/PeriodisertBeregningsgrunnlag'
 import { hentFunksjonsbrytere } from '~shared/api/feature'
-import { useEffect, useState } from 'react'
-import { InstitusjonsoppholdGrunnlag } from '~shared/types/Beregning'
+import React, { useEffect, useState } from 'react'
 import Institusjonsopphold from '~components/behandling/beregningsgrunnlag/Institusjonsopphold'
 import Soeskenjustering, {
   Soeskengrunnlag,
 } from '~components/behandling/beregningsgrunnlag/soeskenjustering/Soeskenjustering'
+import Spinner from '~shared/Spinner'
+import { IPdlPerson } from '~shared/types/Person'
+import { InstitusjonsoppholdGrunnlagData } from '~shared/types/Beregning'
 
 const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer }) => {
   const { behandling } = props
   const { next } = useBehandlingRoutes()
   const behandles = hentBehandlesFraStatus(behandling.status)
   const dispatch = useAppDispatch()
-  const [lagreSoeskenMedIBeregningStatus, postSoeskenMedIBeregning] = useApiCall(lagreBeregningsGrunnlag)
+  const [lagreBeregningsgrunnlag, postBeregningsgrunnlag] = useApiCall(lagreBeregningsGrunnlag)
+  const [beregningsgrunnlag, fetchBeregningsgrunnlag] = useApiCall(hentBeregningsGrunnlag)
   const [endreBeregning, postOpprettEllerEndreBeregning] = useApiCall(opprettEllerEndreBeregning)
   const [funksjonsbrytere, postHentFunksjonsbrytere] = useApiCall(hentFunksjonsbrytere)
   const [beregnTrygdetid, setBeregnTrygdetid] = useState<boolean>(false)
   const [visInstitusjonsopphold, setVisInstitusjonsopphold] = useState<boolean>(false)
   const [soeskenGrunnlagsData, setSoeskenGrunnlagsData] = useState<Soeskengrunnlag | undefined>(undefined)
   const [institusjonsoppholdsGrunnlagData, setInstitusjonsoppholdsGrunnlagData] = useState<
-    InstitusjonsoppholdGrunnlag | undefined
+    InstitusjonsoppholdGrunnlagData | undefined
   >(undefined)
 
   const [manglerSoeskenJustering, setSoeskenJusteringMangler] = useState<boolean>(false)
@@ -57,21 +60,41 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
         setVisInstitusjonsopphold(institusjonsoppholdBryter.enabled)
       }
     })
+
+    fetchBeregningsgrunnlag(behandling.id, (result) => {
+      if (result) {
+        dispatch(
+          oppdaterBeregingsGrunnlag({ ...result, institusjonsopphold: result.institusjonsoppholdBeregningsgrunnlag })
+        )
+      }
+    })
   }, [])
 
   if (behandling.kommerBarnetTilgode == null || behandling.familieforhold?.avdoede == null) {
     return <ApiErrorAlert>Familieforhold kan ikke hentes ut</ApiErrorAlert>
   }
+  const soesken: IPdlPerson[] =
+    behandling.familieforhold.avdoede.opplysning.avdoedesBarn?.filter(
+      (barn) => barn.foedselsnummer !== behandling.søker?.foedselsnummer
+    ) ?? []
+  const harSoesken = soesken.length > 0
 
   const onSubmit = () => {
-    if (soeskenGrunnlagsData) {
+    if (harSoesken && !(soeskenGrunnlagsData || behandling.beregningsGrunnlag?.soeskenMedIBeregning)) {
+      setSoeskenJusteringMangler(true)
+    }
+    if (behandling.beregningsGrunnlag?.soeskenMedIBeregning || soeskenGrunnlagsData || !harSoesken) {
       dispatch(resetBeregning())
       const beregningsgrunnlag = {
-        soeskenMedIBeregning: mapListeTilDto(soeskenGrunnlagsData),
-        institusjonsopphold: institusjonsoppholdsGrunnlagData,
+        soeskenMedIBeregning: soeskenGrunnlagsData
+          ? mapListeTilDto(soeskenGrunnlagsData)
+          : behandling.beregningsGrunnlag?.soeskenMedIBeregning ?? [],
+        institusjonsopphold: institusjonsoppholdsGrunnlagData
+          ? mapListeTilDto(institusjonsoppholdsGrunnlagData)
+          : behandling.beregningsGrunnlag?.institusjonsopphold ?? [],
       }
 
-      postSoeskenMedIBeregning(
+      postBeregningsgrunnlag(
         {
           behandlingsId: behandling.id,
           grunnlag: beregningsgrunnlag,
@@ -83,28 +106,33 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
             next()
           })
       )
-    } else {
-      setSoeskenJusteringMangler(true)
     }
   }
+
   return (
     <>
       {!isPending(funksjonsbrytere) &&
         (beregnTrygdetid ? <BeregnetTrygdetid redigerbar={behandles} /> : <FastTrygdetid />)}
-      <Soeskenjustering
-        behandling={behandling}
-        onSubmit={(soeskenGrunnlag) => setSoeskenGrunnlagsData(soeskenGrunnlag)}
-        setSoeskenJusteringManglerIkke={() => setSoeskenJusteringMangler(false)}
-      />
-      {!isPending(funksjonsbrytere) && !isFailure(funksjonsbrytere) && visInstitusjonsopphold && (
-        <Institusjonsopphold
-          behandling={behandling}
-          onSubmit={(institusjonsoppholdGrunnlag) => setInstitusjonsoppholdsGrunnlagData(institusjonsoppholdGrunnlag)}
-        />
-      )}
+      <>
+        {isSuccess(beregningsgrunnlag) && behandling.familieforhold && (
+          <Soeskenjustering
+            behandling={behandling}
+            onSubmit={(soeskenGrunnlag) => setSoeskenGrunnlagsData(soeskenGrunnlag)}
+            setSoeskenJusteringManglerIkke={() => setSoeskenJusteringMangler(false)}
+          />
+        )}
+        {isSuccess(funksjonsbrytere) && visInstitusjonsopphold && isSuccess(beregningsgrunnlag) && (
+          <Institusjonsopphold
+            behandling={behandling}
+            onSubmit={(institusjonsoppholdGrunnlag) => setInstitusjonsoppholdsGrunnlagData(institusjonsoppholdGrunnlag)}
+          />
+        )}
+        <Spinner visible={isPending(beregningsgrunnlag)} label={'Henter beregningsgrunnlag'} />
+        {isFailure(beregningsgrunnlag) && <ApiErrorAlert>Beregningsgrunnlag kan ikke hentes</ApiErrorAlert>}
+      </>
       {manglerSoeskenJustering && <ApiErrorAlert>Søskenjustering er ikke fylt ut </ApiErrorAlert>}
       {isFailure(endreBeregning) && <ApiErrorAlert>Kunne ikke opprette ny beregning</ApiErrorAlert>}
-      {isFailure(lagreSoeskenMedIBeregningStatus) && <ApiErrorAlert>Kunne ikke lagre beregningsgrunnlag</ApiErrorAlert>}
+      {isFailure(lagreBeregningsgrunnlag) && <ApiErrorAlert>Kunne ikke lagre beregningsgrunnlag</ApiErrorAlert>}
 
       {behandles ? (
         <BehandlingHandlingKnapper>
@@ -112,7 +140,7 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
             variant="primary"
             size="medium"
             onClick={onSubmit}
-            loading={isPending(lagreSoeskenMedIBeregningStatus) || isPending(endreBeregning)}
+            loading={isPending(lagreBeregningsgrunnlag) || isPending(endreBeregning)}
           >
             Beregne og fatte vedtak
           </Button>

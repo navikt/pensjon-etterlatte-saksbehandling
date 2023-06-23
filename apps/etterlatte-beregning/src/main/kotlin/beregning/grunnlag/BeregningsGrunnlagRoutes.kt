@@ -11,6 +11,7 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
+import no.nav.etterlatte.libs.common.behandlingsId
 import no.nav.etterlatte.libs.common.withBehandlingId
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.token.Systembruker
@@ -24,7 +25,7 @@ fun Route.beregningsGrunnlag(beregningsGrunnlagService: BeregningsGrunnlagServic
         post("/{$BEHANDLINGSID_CALL_PARAMETER}/fra/{forrigeBehandlingId}") {
             when (brukerTokenInfo) {
                 is Systembruker -> {
-                    val behandlingId = call.uuid(BEHANDLINGSID_CALL_PARAMETER)
+                    val behandlingId = behandlingsId
                     val forrigeBehandlingId = call.uuid("forrigeBehandlingId")
 
                     beregningsGrunnlagService.dupliserBeregningsGrunnlag(behandlingId, forrigeBehandlingId)

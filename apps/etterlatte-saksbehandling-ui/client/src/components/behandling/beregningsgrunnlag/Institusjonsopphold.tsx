@@ -4,17 +4,20 @@ import { LovtekstMedLenke } from '~components/behandling/soeknadsoversikt/soekna
 import styled from 'styled-components'
 import { Button, ErrorSummary, Heading } from '@navikt/ds-react'
 import { PlusCircleIcon } from '@navikt/aksel-icons'
-import { InstitusjonsoppholdGrunnlag } from '~shared/types/Beregning'
+import { InstitusjonsoppholdGrunnlagData } from '~shared/types/Beregning'
 import { useFieldArray, useForm } from 'react-hook-form'
 import InstitusjonsoppholdPeriode from '~components/behandling/beregningsgrunnlag/InstitusjonsoppholdPeriode'
 import Insthendelser from '~components/behandling/beregningsgrunnlag/Insthendelser'
 import { SuccessColored } from '@navikt/ds-icons'
-import { feilIKomplettePerioderOverIntervallInstitusjonsopphold } from '~components/behandling/beregningsgrunnlag/PeriodisertBeregningsgrunnlag'
+import {
+  feilIKomplettePerioderOverIntervallInstitusjonsopphold,
+  mapListeFraDto,
+} from '~components/behandling/beregningsgrunnlag/PeriodisertBeregningsgrunnlag'
 import { hentBehandlesFraStatus } from '~components/behandling/felles/utils'
 
 type InstitusjonsoppholdProps = {
   behandling: IBehandlingReducer
-  onSubmit: (data: InstitusjonsoppholdGrunnlag) => void
+  onSubmit: (data: InstitusjonsoppholdGrunnlagData) => void
 }
 
 const Institusjonsopphold = (props: InstitusjonsoppholdProps) => {
@@ -23,22 +26,24 @@ const Institusjonsopphold = (props: InstitusjonsoppholdProps) => {
   const [visFeil, setVisFeil] = useState(false)
   const [visOkLagret, setVisOkLagret] = useState(false)
   const { control, register, watch, handleSubmit, formState } = useForm<{
-    institusjonsOppholdForm: InstitusjonsoppholdGrunnlag
+    institusjonsOppholdForm: InstitusjonsoppholdGrunnlagData
   }>({
     defaultValues: {
-      institusjonsOppholdForm: behandling.beregningsGrunnlag?.institusjonsopphold,
+      institusjonsOppholdForm: mapListeFraDto(behandling.beregningsGrunnlag?.institusjonsopphold ?? []),
     },
   })
+
   const { isValid, errors } = formState
   const { fields, append, remove } = useFieldArray({
     name: 'institusjonsOppholdForm',
     control,
   })
+
   const heleSkjemaet = watch('institusjonsOppholdForm')
   const feilOverlappendePerioder: [number, FeilIPeriode][] = [
     ...feilIKomplettePerioderOverIntervallInstitusjonsopphold(heleSkjemaet),
   ]
-  const ferdigstilleForm = (data: { institusjonsOppholdForm: InstitusjonsoppholdGrunnlag }) => {
+  const ferdigstilleForm = (data: { institusjonsOppholdForm: InstitusjonsoppholdGrunnlagData }) => {
     if (validerInstitusjonsopphold(data.institusjonsOppholdForm) && isValid && feilOverlappendePerioder?.length === 0) {
       onSubmit(data.institusjonsOppholdForm)
       setVisFeil(false)
@@ -153,7 +158,7 @@ const FeilIPerioderOppsummering = styled(ErrorSummary)`
   width: 30em;
 `
 
-const validerInstitusjonsopphold = (institusjonsopphold: InstitusjonsoppholdGrunnlag): boolean => {
+const validerInstitusjonsopphold = (institusjonsopphold: InstitusjonsoppholdGrunnlagData): boolean => {
   return !institusjonsopphold.some((e) => e.fom === undefined)
 }
 

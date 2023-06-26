@@ -19,6 +19,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.JaNeiMedBegrunnelse
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
+import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
@@ -155,6 +156,7 @@ class RealFoerstegangsbehandlingService(
                 sakId = sakId,
                 status = BehandlingStatus.OPPRETTET,
                 soeknadMottattDato = mottattDato?.let { LocalDateTime.parse(it) },
+                revurderingsAarsak = RevurderingAarsak.NY_SOEKNAD,
                 persongalleri = persongalleri,
                 kilde = Vedtaksloesning.GJENNY
             ).let { opprettBehandling ->

@@ -1,8 +1,13 @@
-import { Button, Detail, Heading, Table } from '@navikt/ds-react'
+import { BodyShort, Button, Detail, Heading, Table } from '@navikt/ds-react'
 import styled from 'styled-components'
 import React, { useEffect, useState } from 'react'
 import { ChevronDownIcon, ChevronUpIcon } from '@navikt/aksel-icons'
-import { Grunnlagsendringshendelse, GrunnlagsendringsType } from '~components/person/typer'
+import {
+  Grunnlagsendringshendelse,
+  GrunnlagsendringsType,
+  HISTORISK_REVURDERING,
+  STATUS_IRRELEVANT,
+} from '~components/person/typer'
 import { formaterDatoMedTidspunkt, formaterStringDato } from '~utils/formattering'
 import { JaNei } from '~shared/types/ISvar'
 import { KildeSaksbehandler } from '~shared/types/kilde'
@@ -13,42 +18,47 @@ import Spinner from '~shared/Spinner'
 import { SuccessColored } from '@navikt/ds-icons'
 
 type Props = {
-  hendelser: Array<Grunnlagsendringshendelse>
+  hendelser: Grunnlagsendringshendelse[]
 }
 const HistoriskeHendelser = (props: Props) => {
   const [aapenhistorikk, setLastetBehandlingliste] = useState<boolean>(false)
+
+  const lukkedeHendelser = props.hendelser.filter((h) => h.status === STATUS_IRRELEVANT)
+  const historiskRevurderingsHendelse = props.hendelser.filter((h) => h.status === HISTORISK_REVURDERING)
+
+  const historiskeHendelser = lukkedeHendelser.concat(historiskRevurderingsHendelse)
+
   return (
     <HistoriskeHendelserWrapper>
       <Heading spacing size="medium" level="2">
         Tidligere hendelser
       </Heading>
-      <div>
-        <Button variant="tertiary" onClick={() => setLastetBehandlingliste(!aapenhistorikk)}>
-          {aapenhistorikk ? (
+
+      {!historiskeHendelser.length ? (
+        <BodyShort>
+          <i>Ingen historiske hendelser</i>
+        </BodyShort>
+      ) : (
+        <div>
+          <Button variant="tertiary" onClick={() => setLastetBehandlingliste(!aapenhistorikk)}>
             <MarginRightChevron>
-              <ChevronUpIcon fontSize="1.5rem" />
+              {aapenhistorikk ? <ChevronUpIcon fontSize="1.5rem" /> : <ChevronDownIcon fontSize="1.5rem" />}
             </MarginRightChevron>
-          ) : (
-            <MarginRightChevron>
-              <ChevronDownIcon fontSize="1.5rem" />
-            </MarginRightChevron>
-          )}
-          Vis historikk
-        </Button>
-        {aapenhistorikk && (
-          <Table>
-            <Table.Header>
-              <Table.Row>
-                <Table.HeaderCell scope="col">Sakid</Table.HeaderCell>
-                <Table.HeaderCell scope="col">Type</Table.HeaderCell>
-                <Table.HeaderCell scope="col">GjelderPerson</Table.HeaderCell>
-                <Table.HeaderCell scope="col">Opprettet</Table.HeaderCell>
-                <Table.HeaderCell scope="col">Kommentar</Table.HeaderCell>
-              </Table.Row>
-            </Table.Header>
-            <Table.Body>
-              {props.hendelser.map(({ sakId, type, gjelderPerson, id, opprettet, kommentar }) => {
-                return (
+            Vis historikk
+          </Button>
+          {aapenhistorikk && (
+            <Table>
+              <Table.Header>
+                <Table.Row>
+                  <Table.HeaderCell scope="col">Sakid</Table.HeaderCell>
+                  <Table.HeaderCell scope="col">Type</Table.HeaderCell>
+                  <Table.HeaderCell scope="col">GjelderPerson</Table.HeaderCell>
+                  <Table.HeaderCell scope="col">Opprettet</Table.HeaderCell>
+                  <Table.HeaderCell scope="col">Kommentar</Table.HeaderCell>
+                </Table.Row>
+              </Table.Header>
+              <Table.Body>
+                {historiskeHendelser.map(({ sakId, type, gjelderPerson, id, opprettet, kommentar }) => (
                   <Table.Row key={id}>
                     <Table.HeaderCell>{sakId}</Table.HeaderCell>
                     <Table.DataCell>{type}</Table.DataCell>
@@ -56,16 +66,16 @@ const HistoriskeHendelser = (props: Props) => {
                     <Table.DataCell>{formaterStringDato(opprettet)}</Table.DataCell>
                     <Table.DataCell>
                       {type !== GrunnlagsendringsType.INSTITUSJONSOPPHOLD &&
-                        (kommentar ? <p>{kommentar}</p> : <p>Ingen kommentar</p>)}
+                        (kommentar ? kommentar : 'Ingen kommentar')}
                       {type === GrunnlagsendringsType.INSTITUSJONSOPPHOLD && <InstitusjonsoppholdBegrunnelse id={id} />}
                     </Table.DataCell>
                   </Table.Row>
-                )
-              })}
-            </Table.Body>
-          </Table>
-        )}
-      </div>
+                ))}
+              </Table.Body>
+            </Table>
+          )}
+        </div>
+      )}
     </HistoriskeHendelserWrapper>
   )
 }

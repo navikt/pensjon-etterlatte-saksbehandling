@@ -7,7 +7,7 @@ import {
   Virkningstidspunkt,
 } from '~shared/types/IDetaljertBehandling'
 import { Revurderingsaarsak } from '~shared/types/Revurderingsaarsak'
-import { SakType } from '~shared/types/sak'
+import { ISak, SakType } from '~shared/types/sak'
 
 export interface IPersonResult {
   fornavn: string
@@ -17,6 +17,7 @@ export interface IPersonResult {
 }
 
 export interface IBehandlingListe {
+  sak: ISak
   behandlinger: IBehandlingsammendrag[]
 }
 

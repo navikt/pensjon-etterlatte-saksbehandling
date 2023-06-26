@@ -78,9 +78,9 @@ internal fun Route.sakRoutes(
             withFoedselsnummerInternal(tilgangService) { fnr ->
                 val behandlinger = sakService.finnSaker(fnr.value)
                     .map { sak ->
-                        generellBehandlingService.hentBehandlingerISak(sak.id).map {
-                            it.toBehandlingSammendrag()
-                        }.let { BehandlingListe(it) }
+                        generellBehandlingService.hentBehandlingerISak(sak.id)
+                            .map { it.toBehandlingSammendrag() }
+                            .let { BehandlingListe(sak, it) }
                     }
                 call.respond(behandlinger)
             }

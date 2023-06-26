@@ -67,10 +67,12 @@ const OpprettRevurderingModal = (props: Props) => {
           </ModalContentWrapper>
 
           <ButtonContainer>
+            <Button variant={'secondary'} onClick={() => props.setOpen(false)}>
+              Avbryt
+            </Button>
             <Button loading={isPending(opprettRevurderingStatus)} onClick={onSubmit}>
               Opprett
             </Button>
-            <Button onClick={() => props.setOpen(false)}>Avbryt</Button>
           </ButtonContainer>
         </Modal.Content>
       </Modal>
@@ -82,7 +84,7 @@ const ModalContentWrapper = styled.div`
   padding: 0 1em;
 `
 
-const ButtonContainer = styled.div`
+export const ButtonContainer = styled.div`
   display: flex;
   justify-content: flex-end;
   gap: 0.5em;

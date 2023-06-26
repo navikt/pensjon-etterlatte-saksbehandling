@@ -9,7 +9,7 @@ import Virkningstidspunkt, {
 import { Start } from '~components/behandling/handlinger/start'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { Border, Innhold } from '~components/behandling/soeknadsoversikt/styled'
-import { HeadingWrapper } from '~components/person/saksoversikt'
+import { HeadingWrapper } from '~components/person/SakOversikt'
 import {
   BP_OPPHOER_BESKRIVELSE,
   BP_OPPHOER_HJEMLER,

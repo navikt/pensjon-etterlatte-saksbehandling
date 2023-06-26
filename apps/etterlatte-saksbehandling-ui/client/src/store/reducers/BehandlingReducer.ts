@@ -10,7 +10,7 @@ import {
   IUtenlandstilsnitt,
   Virkningstidspunkt,
 } from '~shared/types/IDetaljertBehandling'
-import { VedtakSammendrag } from "~components/person/typer";
+import { VedtakSammendrag } from "~components/vedtak/typer";
 
 export const addBehandling = createAction<IDetaljertBehandling>('behandling/add')
 export const resetBehandling = createAction('behandling/reset')

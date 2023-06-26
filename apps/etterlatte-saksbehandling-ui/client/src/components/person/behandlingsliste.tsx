@@ -1,5 +1,5 @@
 import { Link, Table, Tag } from '@navikt/ds-react'
-import { AarsaksTyper, BehandlingOgRevurderingsAarsakerType, IBehandlingsammendrag, VedtakSammendrag } from './typer'
+import { AarsaksTyper, BehandlingOgRevurderingsAarsakerType, IBehandlingsammendrag } from './typer'
 import {
   formaterBehandlingstype,
   formaterEnumTilLesbarString,
@@ -14,6 +14,7 @@ import { Revurderingsaarsak } from '~shared/types/Revurderingsaarsak'
 import { hentVedtakSammendrag } from '~shared/api/vedtaksvurdering'
 import { tagColors } from '~shared/Tags'
 import styled from 'styled-components'
+import { VedtakSammendrag } from "~components/vedtak/typer";
 
 const kolonner = [
   'Reg. dato',

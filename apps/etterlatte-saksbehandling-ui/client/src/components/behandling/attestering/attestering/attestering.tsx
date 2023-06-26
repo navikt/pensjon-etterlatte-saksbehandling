@@ -5,7 +5,7 @@ import { IBeslutning } from '../types'
 import { Beslutningsvalg } from './beslutningsvalg'
 import { useAppSelector } from '~store/Store'
 import { Alert } from '@navikt/ds-react'
-import { VedtakSammendrag } from "~components/person/typer";
+import { VedtakSammendrag } from "~components/vedtak/typer";
 
 type Props = {
   setBeslutning: (value: IBeslutning) => void

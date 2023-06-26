@@ -13,7 +13,7 @@ import { Dokumentoversikt } from '~components/person/dokumentoversikt'
 import styled from 'styled-components'
 import AnnullerBehandling from '~components/behandling/handlinger/AnnullerBehanding'
 import { SakType } from '~shared/types/sak'
-import { VedtakSammendrag } from "~components/person/typer";
+import { VedtakSammendrag } from "~components/vedtak/typer";
 
 export const SideMeny = (props: { behandling: IDetaljertBehandling, vedtak: VedtakSammendrag | undefined }) => {
   const { behandling, vedtak } = props

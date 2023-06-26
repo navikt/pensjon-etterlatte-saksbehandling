@@ -194,9 +194,3 @@ export interface Grunnlagsendringshendelse {
   samsvarMellomKildeOgGrunnlag: SamsvarMellomKildeOgGrunnlag
   kommentar?: string
 }
-
-export interface VedtakSammendrag {
-  id: string
-  behandlingId: string
-  datoAttestert?: string
-}

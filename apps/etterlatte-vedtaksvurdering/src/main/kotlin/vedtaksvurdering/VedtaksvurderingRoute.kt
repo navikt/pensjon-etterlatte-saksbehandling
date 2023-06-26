@@ -129,6 +129,9 @@ fun Route.vedtaksvurderingRoute(service: VedtaksvurderingService, behandlingKlie
 private fun Vedtak.toVedtakSammendragDto() = VedtakSammendragDto(
     id = id.toString(),
     behandlingId = behandlingId,
+    saksbehandlerId = vedtakFattet?.ansvarligSaksbehandler,
+    datoFattet = vedtakFattet?.tidspunkt?.toNorskTid(),
+    attestant = attestasjon?.attestant,
     datoAttestert = attestasjon?.tidspunkt?.toNorskTid()
 )
 
@@ -139,4 +142,11 @@ private fun LoependeYtelse.toDto() = LoependeYtelseDTO(
 
 data class UnderkjennVedtakDto(val kommentar: String, val valgtBegrunnelse: String)
 
-data class VedtakSammendragDto(val id: String, val behandlingId: UUID, val datoAttestert: ZonedDateTime?)
+data class VedtakSammendragDto(
+    val id: String,
+    val behandlingId: UUID,
+    val saksbehandlerId: String?,
+    val datoFattet: ZonedDateTime?,
+    val attestant: String?,
+    val datoAttestert: ZonedDateTime?
+)

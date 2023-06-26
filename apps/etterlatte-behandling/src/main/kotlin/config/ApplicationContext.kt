@@ -16,8 +16,6 @@ import no.nav.etterlatte.behandling.klienter.NavAnsattKlient
 import no.nav.etterlatte.behandling.klienter.NavAnsattKlientImpl
 import no.nav.etterlatte.behandling.klienter.Norg2Klient
 import no.nav.etterlatte.behandling.klienter.Norg2KlientImpl
-import no.nav.etterlatte.behandling.klienter.VedtakKlient
-import no.nav.etterlatte.behandling.klienter.VedtakKlientImpl
 import no.nav.etterlatte.behandling.manueltopphoer.RealManueltOpphoerService
 import no.nav.etterlatte.behandling.migrering.MigreringRepository
 import no.nav.etterlatte.behandling.omregning.MigreringService
@@ -111,7 +109,6 @@ class ApplicationContext(
     },
     val norg2Klient: Norg2Klient = Norg2KlientImpl(httpClient(), env.getValue("NORG2_URL")),
     val leaderElectionHttpClient: HttpClient = httpClient(),
-    val vedtakKlientObo: VedtakKlient = VedtakKlientImpl(config, httpClient()),
     val grunnlagKlientObo: GrunnlagKlient = GrunnlagKlientObo(config, httpClient())
 ) {
     val httpPort = env.getOrDefault("HTTP_PORT", "8080").toInt()
@@ -143,7 +140,6 @@ class ApplicationContext(
         behandlingHendelser = behandlingsHendelser.hendelserKanal,
         hendelseDao = hendelseDao,
         grunnlagsendringshendelseDao = grunnlagsendringshendelseDao,
-        vedtakKlient = vedtakKlientObo,
         grunnlagKlient = grunnlagKlientObo,
         sporingslogg = sporingslogg,
         featureToggleService = featureToggleService

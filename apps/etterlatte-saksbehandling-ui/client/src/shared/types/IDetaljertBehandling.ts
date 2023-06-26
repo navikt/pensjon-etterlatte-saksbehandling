@@ -12,10 +12,6 @@ export interface IDetaljertBehandling {
   sakType: SakType
   gyldighetsprøving?: IGyldighetResultat
   kommerBarnetTilgode: IKommerBarnetTilgode | null
-  saksbehandlerId?: string
-  datoFattet?: string //kommer som Instant fra backend
-  datoAttestert?: string //kommer som Instant fra backend
-  attestant?: string
   soeknadMottattDato: string
   virkningstidspunkt: Virkningstidspunkt | null
   utenlandstilsnitt: IUtenlandstilsnitt | undefined

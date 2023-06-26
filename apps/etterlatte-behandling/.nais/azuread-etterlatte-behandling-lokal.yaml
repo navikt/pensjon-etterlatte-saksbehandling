@@ -13,9 +13,6 @@ spec:
     - application: etterlatte-saksbehandling-ui-lokal
       cluster: dev-gcp
       namespace: etterlatte
-    - application: etterlatte-vedtak
-      cluster: dev-gcp
-      namespace: etterlatte
     - application: etterlatte-grunnlag
       cluster: dev-gcp
       namespace: etterlatte

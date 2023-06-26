@@ -78,10 +78,6 @@ spec:
       value: prod-gcp.etterlatte.etterlatte-grunnlag
     - name: ETTERLATTE_GRUNNLAG_URL
       value: http://etterlatte-grunnlag/api
-    - name: ETTERLATTE_VEDTAK_CLIENT_ID
-      value: prod-gcp.etterlatte.etterlatte-vedtaksvurdering
-    - name: ETTERLATTE_VEDTAK_URL
-      value: http://etterlatte-vedtaksvurdering
     - name: AZUREAD_ATTESTANT_GROUPID
       value: 11053fd7-e674-4552-9a88-f9fcedfa70b3
     - name: AZUREAD_SAKSBEHANDLER_GROUPID
@@ -112,7 +108,6 @@ spec:
         - application: etterlatte-vilkaar
         - application: etterlatte-pdltjenester
         - application: etterlatte-grunnlag
-        - application: etterlatte-vedtaksvurdering
         - application: skjermede-personer-pip
           namespace: nom
       external:

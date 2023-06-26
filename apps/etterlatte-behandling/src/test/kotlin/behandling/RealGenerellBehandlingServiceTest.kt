@@ -87,7 +87,6 @@ class RealGenerellBehandlingServiceTest {
             behandlingHendelser = hendleseskanal,
             grunnlagsendringshendelseDao = mockk(),
             hendelseDao = hendelserMock,
-            vedtakKlient = mockk(),
             grunnlagKlient = mockk(),
             sporingslogg = mockk(),
             featureToggleService = featureToggleService
@@ -422,7 +421,6 @@ class RealGenerellBehandlingServiceTest {
             behandlingHendelser = hendleseskanal,
             grunnlagsendringshendelseDao = mockk(),
             hendelseDao = hendelserMock,
-            vedtakKlient = mockk(),
             grunnlagKlient = mockk(),
             sporingslogg = mockk(),
             featureToggleService = featureToggleService
@@ -465,7 +463,6 @@ class RealGenerellBehandlingServiceTest {
             behandlingHendelser = hendleseskanal,
             grunnlagsendringshendelseDao = mockk(),
             hendelseDao = hendelserMock,
-            vedtakKlient = mockk(),
             grunnlagKlient = mockk(),
             sporingslogg = mockk(),
             featureToggleService = featureToggleService
@@ -507,7 +504,6 @@ class RealGenerellBehandlingServiceTest {
             behandlingHendelser = mockk(),
             grunnlagsendringshendelseDao = mockk(),
             hendelseDao = mockk(),
-            vedtakKlient = mockk(),
             grunnlagKlient = mockk(),
             sporingslogg = mockk(),
             featureToggleService = featureToggleService
@@ -555,7 +551,6 @@ class RealGenerellBehandlingServiceTest {
 
         val sut = RealGenerellBehandlingService(
             behandlingDaoMock,
-            mockk(),
             mockk(),
             mockk(),
             mockk(),
@@ -619,7 +614,6 @@ class RealGenerellBehandlingServiceTest {
         behandlingHendelser = hendelseKanal ?: mockk(),
         grunnlagsendringshendelseDao = grunnlagsendringshendelseDao,
         hendelseDao = hendelseDao ?: mockk(),
-        vedtakKlient = mockk(),
         grunnlagKlient = grunnlagKlient ?: mockk(),
         sporingslogg = mockk(),
         featureToggleService = featureToggleService

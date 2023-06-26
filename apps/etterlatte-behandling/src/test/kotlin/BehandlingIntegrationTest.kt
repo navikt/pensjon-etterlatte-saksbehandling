@@ -220,7 +220,7 @@ abstract class BehandlingIntegrationTest {
                 Vedtaksloesning.GJENNY
             )
 
-        return Pair(sak, behandling)
+        return Pair(sak, behandling as Foerstegangsbehandling)
     }
 
     protected fun afterAll() {

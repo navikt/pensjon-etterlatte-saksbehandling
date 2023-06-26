@@ -14,6 +14,7 @@ object OmstillingstoenadVilkaar {
         yrkesskade(),
         avdoedesMedlemskap(),
         gjenlevendesMedlemskap(),
+        aktivitetEtter6Maaneder(),
         oevrigeVilkaar()
     )
 
@@ -191,6 +192,47 @@ object OmstillingstoenadVilkaar {
             lovreferanse = Lovreferanse(
                 paragraf = "§ 17-4"
             )
+        )
+    )
+
+    private fun aktivitetEtter6Maaneder() = Vilkaar(
+        hovedvilkaar = Delvilkaar(
+            type = VilkaarType.OMS_AKTIVITET_ETTER_6_MND,
+            tittel = "Krav til aktivitet etter 6 måneder",
+            beskrivelse = """
+                Seks måneder etter dødsfallet er det et vilkår for rett til omstillingsstønad at den gjenlevende:
+
+                a) er i minst 50 % arbeid,
+                b) er reell arbeidssøker,
+                c) gjennomfører nødvendig og hensiktsmessig opplæring eller utdanning, minst 50 %, eller
+                d) etablerer egen virksomhet
+
+                Det finnes unntak som gir fritak for aktivitetskravet, som må vurderes om ikke hovedvilkåret er oppfylt.
+            """.trimIndent(),
+            spoersmaal = "Er vilkåret om krav til aktivitet oppfylt?",
+            lovreferanse = Lovreferanse(
+                paragraf = "§ 17-7"
+            )
+        ),
+        unntaksvilkaar = listOf(
+            aktivitetEtter6MaanederGjenlevendeOver55ogLavInntekt(),
+            aktivitetEtter6MaanederGjenlevendeHarBarnUnder1Aar(),
+        )
+    )
+
+    private fun aktivitetEtter6MaanederGjenlevendeOver55ogLavInntekt() = Delvilkaar(
+        type = VilkaarType.OMS_AKTIVITET_ETTER_6_MND_UNNTAK_GJENLEVENDE_OVER_55_AAR_OG_LAV_INNTEKT,
+        tittel = "Ja, gjenlevende er over 55 år ved dødsfall og har hatt lav inntekt",
+        lovreferanse = Lovreferanse(
+            paragraf = "§ 17-7"
+        )
+    )
+
+    private fun aktivitetEtter6MaanederGjenlevendeHarBarnUnder1Aar() = Delvilkaar(
+        type = VilkaarType.OMS_AKTIVITET_ETTER_6_MND_UNNTAK_GJENLEVENDE_BARN_UNDER_1_AAR,
+        tittel = "Ja, gjenlevende har barn som er under 1 år",
+        lovreferanse = Lovreferanse(
+            paragraf = "§ 17-7"
         )
     )
 }

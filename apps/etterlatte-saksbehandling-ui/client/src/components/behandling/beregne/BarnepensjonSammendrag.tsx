@@ -5,6 +5,7 @@ import { formaterDato, formaterStringDato } from '~utils/formattering'
 import { Beregning } from '~shared/types/Beregning'
 import { BarnepensjonToolTip } from '~components/behandling/beregne/BarnepensjonToolTip'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
+import { Barnepensjonberegningssammendrag } from '~components/behandling/beregne/Barnepensjonberegningssammendrag'
 
 interface Props {
   behandling: IDetaljertBehandling
@@ -35,7 +36,7 @@ export const BarnepensjonSammendrag = ({ behandling, beregning }: Props) => {
         </Table.Header>
         <Table.Body>
           {beregningsperioder?.map((beregningsperiode, key) => (
-            <Table.Row key={key} shadeOnHover={false}>
+            <Table.ExpandableRow key={key} shadeOnHover={false} content={<Barnepensjonberegningssammendrag />}>
               <Table.DataCell>
                 {`${formaterStringDato(beregningsperiode.datoFOM)} - ${
                   beregningsperiode.datoTOM ? formaterDato(lastDayOfMonth(new Date(beregningsperiode.datoTOM))) : ''
@@ -58,7 +59,7 @@ export const BarnepensjonSammendrag = ({ behandling, beregning }: Props) => {
                 )}
               </Table.DataCell>
               <Table.DataCell>{beregningsperiode.utbetaltBeloep} kr</Table.DataCell>
-            </Table.Row>
+            </Table.ExpandableRow>
           ))}
         </Table.Body>
       </Table>

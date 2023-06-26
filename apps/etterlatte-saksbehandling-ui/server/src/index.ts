@@ -1,6 +1,6 @@
 import express, { Request, Response } from 'express'
 import path from 'path'
-import { appConf, ApiConfig } from './config/config'
+import { ApiConfig, appConf } from './config/config'
 import { authenticateUser } from './middleware/auth'
 import { mockRouter } from './routers/mockRouter'
 import { modiaRouter } from './routers/modia'
@@ -73,6 +73,7 @@ if (isDev) {
       '/api/stoettederevurderinger',
       '/api/grunnlagsendringshendelse/:sakid/institusjon',
       '/api/sak/:sakid',
+      '/api/saker/:sakId/behandlinger/sisteIverksatte',
       '/api/institusjonsoppholdbegrunnelse/:sakid',
     ],
     tokenMiddleware(ApiConfig.behandling.scope),

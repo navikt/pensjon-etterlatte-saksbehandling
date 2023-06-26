@@ -61,7 +61,7 @@ internal class FordeltSoeknadRiverTest {
         every {
             behandlingClientMock.finnEllerOpprettSak(any(), any())
         } returns Sak(persongalleri.soeker, SakType.BARNEPENSJON, sakId, "4808")
-        every { behandlingClientMock.initierBehandling(any(), any(), persongalleri) } returns id
+        every { behandlingClientMock.opprettBehandling(any(), any(), persongalleri) } returns id
         every { behandlingClientMock.lagreGyldighetsVurdering(any(), any()) } returns Unit
 
         val inspector = inspector.apply { sendTestMessage(melding) }.inspektør

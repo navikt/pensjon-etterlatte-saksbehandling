@@ -71,7 +71,7 @@ internal class InnsendtSoeknadRiver(
                 )
 
                 val sak = behandlingClient.finnEllerOpprettSak(personGalleri.soeker, SakType.OMSTILLINGSSTOENAD.name)
-                val behandlingId = behandlingClient.initierBehandling(sak.id, soeknad.mottattDato, personGalleri)
+                val behandlingId = behandlingClient.opprettBehandling(sak.id, soeknad.mottattDato, personGalleri)
                 behandlingClient.lagreGyldighetsVurdering(behandlingId, gyldighetsVurdering)
                 logger.info("Behandling {} startet på sak {}", behandlingId, sak.id)
 

@@ -18,13 +18,13 @@ class BehandlingClient(
     private val sakOgBehandlingApp: HttpClient,
     private val url: String
 ) {
-    fun initierBehandling(
+    fun opprettBehandling(
         sak: Long,
         mottattDato: LocalDateTime,
         persongalleri: Persongalleri
     ): UUID {
         return runBlocking {
-            sakOgBehandlingApp.post("$url/behandlinger/foerstegangsbehandling") {
+            sakOgBehandlingApp.post("$url/behandlinger/opprettbehandling") {
                 contentType(ContentType.Application.Json)
                 setBody(NyBehandlingRequest(sak, persongalleri, mottattDato.toString()))
             }.body<String>()

@@ -195,7 +195,7 @@ internal class RealFoerstegangsbehandlingServiceTest {
         every { behandlingDaoMock.lagreGyldighetsproving(any()) } returns Unit
         coEvery { hendelserKanalMock.send(capture(hendelse)) } returns Unit
 
-        val resultat = sut.startFoerstegangsbehandling(
+        val resultat = sut.opprettBehandling(
             1,
             persongalleri,
             datoNaa.toString(),

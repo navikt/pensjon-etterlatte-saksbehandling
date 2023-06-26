@@ -98,7 +98,7 @@ abstract class BehandlingIntegrationTest {
             leaderElectionHttpClient = leaderElection(),
             navAnsattKlient = NavAnsattKlientTest(),
             norg2Klient = norg2Klient ?: Norg2KlientTest(),
-            grunnlagKlientObo = GrunnlagKlientTest(),
+            grunnlagKlientObo = GrunnlagKlientTest()
         ).also {
             it.dataSource.migrate()
             it.behandlingsHendelser.start()
@@ -213,7 +213,7 @@ abstract class BehandlingIntegrationTest {
         }
 
         val behandling = applicationContext.foerstegangsbehandlingService
-            .startFoerstegangsbehandling(
+            .opprettBehandling(
                 sak.id,
                 persongalleri(),
                 LocalDateTime.now().toString(),

@@ -108,7 +108,7 @@ class IntegrationTest : BehandlingIntegrationTest() {
                 assertEquals(SakType.BARNEPENSJON, lestSak.sakType)
             }
 
-            val behandlingId = client.post("/behandlinger/foerstegangsbehandling") {
+            val behandlingId = client.post("/behandlinger/opprettbehandling") {
                 addAuthToken(systemBruker)
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(
@@ -337,7 +337,7 @@ class IntegrationTest : BehandlingIntegrationTest() {
                 assertEquals(HttpStatusCode.OK, it.status)
             }
 
-            val behandlingIdNyFoerstegangsbehandling = client.post("/behandlinger/foerstegangsbehandling") {
+            val behandlingIdNyFoerstegangsbehandling = client.post("/behandlinger/opprettbehandling") {
                 addAuthToken(systemBruker)
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(

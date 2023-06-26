@@ -57,7 +57,7 @@ internal class BehandlingClientTest {
 
         val hendelseJson = objectMapper.readTree(javaClass.getResource("/fordeltmelding.json")!!.readText())
         val soeknad = objectMapper.treeToValue<Barnepensjon>(hendelseJson[FordelerFordelt.skjemaInfoKey])
-        val hentetSaksid = behandlingsservice.initierBehandling(
+        val hentetSaksid = behandlingsservice.opprettBehandling(
             1,
             soeknad.mottattDato,
             persongalleri.hentPersongalleriFraSoeknad(soeknad)

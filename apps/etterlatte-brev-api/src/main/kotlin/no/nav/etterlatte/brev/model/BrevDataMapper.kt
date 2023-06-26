@@ -31,7 +31,13 @@ object BrevDataMapper {
                     )
                     else -> TODO("Revurderingsbrev for ${behandling.revurderingsaarsak} er ikke støttet")
                 }
-                VedtakType.OPPHOER -> TODO("Vedtakstype er ikke støttet: $vedtakType")
+                VedtakType.OPPHOER -> when (behandling.revurderingsaarsak) {
+                    RevurderingAarsak.ADOPSJON -> Pair(
+                        EtterlatteBrevKode.BARNEPENSJON_REVURDERING_ADOPSJON,
+                        AdopsjonRevurderingBrevdata.fra(behandling)
+                    )
+                    else -> TODO("Vedtakstype er ikke støttet: $vedtakType")
+                }
             }
         }
         SakType.OMSTILLINGSSTOENAD -> {

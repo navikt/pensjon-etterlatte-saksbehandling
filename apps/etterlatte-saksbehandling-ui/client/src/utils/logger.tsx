@@ -1,8 +1,9 @@
 import Bowser from 'bowser'
-const browser: any = Bowser.getParser(window.navigator.userAgent)
 import { apiClient } from '~shared/api/apiClient'
 import { store } from '~store/Store'
 import { loggError, loggInfo } from '~store/reducers/BehandlingReducer'
+
+const browser: any = Bowser.getParser(window.navigator.userAgent)
 
 const defaultContext = {
   url: window.location.href,
@@ -50,11 +51,17 @@ export const logger = {
 export const setupWindowOnError = () => {
   addEventListener('error', (event) => {
     const { error, lineno, colno, message } = event
-    logger.error({ lineno, columnno: colno, message, error: JSON.stringify(error) })
-    if (error.stack && error.stack?.indexOf('invokeGuardedCallbackDev') >= 0 && !error.alreadySeen) {
-      error.alreadySeen = true
-      event.preventDefault()
-      return true
+
+    if (import.meta.env.MODE === 'development') {
+      console.error(error.message, error.stack)
+    } else {
+      logger.error({ lineno, columnno: colno, message, error: JSON.stringify(error) })
+
+      if (error.stack && error.stack?.indexOf('invokeGuardedCallbackDev') >= 0 && !error.alreadySeen) {
+        error.alreadySeen = true
+        event.preventDefault()
+        return true
+      }
     }
     return true
   })

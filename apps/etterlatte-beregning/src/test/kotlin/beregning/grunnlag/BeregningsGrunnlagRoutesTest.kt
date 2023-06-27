@@ -287,6 +287,36 @@ internal class BeregningsGrunnlagRoutesTest {
         coEvery { behandlingKlient.beregn(any(), any(), any()) } returns true
         every { repository.finnGrunnlagForBehandling(any()) } returns null
         every { repository.lagre(any()) } returns true
+        coEvery { behandlingKlient.hentBehandling(any(), any()) } returns DetaljertBehandling(
+            id = randomUUID(),
+            sak = 123,
+            sakType = SakType.BARNEPENSJON,
+            behandlingOpprettet = LocalDateTime.now(),
+            sistEndret = LocalDateTime.now(),
+            soeknadMottattDato = null,
+            innsender = null,
+            soeker = "diam",
+            gjenlevende = listOf(),
+            avdoed = listOf(),
+            soesken = listOf(),
+            gyldighetsproeving = null,
+            status = BehandlingStatus.VILKAARSVURDERT,
+            behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+            virkningstidspunkt = Virkningstidspunkt(
+                YearMonth.of(2023, 1),
+                kilde = Grunnlagsopplysning.Saksbehandler(
+                    ident = "",
+                    tidspunkt = Tidspunkt.now()
+                ),
+                ""
+            ),
+            kommerBarnetTilgode = null,
+            revurderingsaarsak = null,
+            prosesstype = Prosesstype.MANUELL,
+            utenlandstilsnitt = null,
+            boddEllerArbeidetUtlandet = null,
+            revurderingInfo = null
+        )
 
         testApplication {
             environment { config = applicationConfig }
@@ -319,6 +349,36 @@ internal class BeregningsGrunnlagRoutesTest {
         coEvery { behandlingKlient.beregn(any(), any(), any()) } returns true
         every { repository.finnGrunnlagForBehandling(any()) } returns null
         every { repository.lagre(any()) } returns false
+        coEvery { behandlingKlient.hentBehandling(any(), any()) } returns DetaljertBehandling(
+            id = randomUUID(),
+            sak = 123,
+            sakType = SakType.BARNEPENSJON,
+            behandlingOpprettet = LocalDateTime.now(),
+            sistEndret = LocalDateTime.now(),
+            soeknadMottattDato = null,
+            innsender = null,
+            soeker = "diam",
+            gjenlevende = listOf(),
+            avdoed = listOf(),
+            soesken = listOf(),
+            gyldighetsproeving = null,
+            status = BehandlingStatus.VILKAARSVURDERT,
+            behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+            virkningstidspunkt = Virkningstidspunkt(
+                YearMonth.of(2023, 1),
+                kilde = Grunnlagsopplysning.Saksbehandler(
+                    ident = "",
+                    tidspunkt = Tidspunkt.now()
+                ),
+                ""
+            ),
+            kommerBarnetTilgode = null,
+            revurderingsaarsak = null,
+            prosesstype = Prosesstype.MANUELL,
+            utenlandstilsnitt = null,
+            boddEllerArbeidetUtlandet = null,
+            revurderingInfo = null
+        )
 
         testApplication {
             environment { config = applicationConfig }

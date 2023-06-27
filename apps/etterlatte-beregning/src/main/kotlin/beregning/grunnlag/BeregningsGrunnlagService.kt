@@ -6,7 +6,7 @@ import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
-import java.util.*
+import java.util.UUID
 
 class BeregningsGrunnlagService(
     private val beregningsGrunnlagRepository: BeregningsGrunnlagRepository,
@@ -30,11 +30,18 @@ class BeregningsGrunnlagService(
                 true
             }
 
+            val soeskenMedIBeregning = barnepensjonBeregningsGrunnlag.soeskenMedIBeregning.ifEmpty {
+                when (val virkningstidspunkt = behandling.virkningstidspunkt) {
+                    null -> throw RuntimeException("Kan ikke lagre default soeskenjustering uten virkningstidspunkt")
+                    else -> listOf(GrunnlagMedPeriode(emptyList(), virkningstidspunkt.dato.atDay(1), null))
+                }
+            }
+
             kanLagreDetteGrunnlaget && beregningsGrunnlagRepository.lagre(
                 BeregningsGrunnlag(
                     behandlingId = behandlingId,
                     kilde = Grunnlagsopplysning.Saksbehandler.create(brukerTokenInfo.ident()),
-                    soeskenMedIBeregning = barnepensjonBeregningsGrunnlag.soeskenMedIBeregning,
+                    soeskenMedIBeregning = soeskenMedIBeregning,
                     institusjonsoppholdBeregningsgrunnlag =
                     barnepensjonBeregningsGrunnlag.institusjonsopphold
                 )

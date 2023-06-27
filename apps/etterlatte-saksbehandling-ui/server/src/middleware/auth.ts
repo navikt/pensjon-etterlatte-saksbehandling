@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from 'express'
 import { AdConfig } from '../config/config'
 import { utcSecondsSinceEpoch } from '../utils/date'
-import { logger } from '../utils/logger'
+import { logger } from '../monitoring/logger'
 import { parseJwt } from '../utils/parsejwt'
 
 export const hasBeenIssued = (issuedAtTime: number) => issuedAtTime < utcSecondsSinceEpoch() // sjekker at issued-date har vært

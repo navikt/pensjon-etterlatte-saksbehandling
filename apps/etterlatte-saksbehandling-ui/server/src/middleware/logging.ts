@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express'
-import { logger } from '../utils/logger'
+import { logger } from '../monitoring/logger'
 
 const requestLoggerIncludeHeaders = (req: Request, res: Response, next: NextFunction) => {
   if (!req.url.includes('health')) {

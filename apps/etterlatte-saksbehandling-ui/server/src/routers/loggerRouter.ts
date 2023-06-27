@@ -1,5 +1,5 @@
 import express from 'express'
-import { frontendLogger } from '../utils/logger'
+import { frontendLogger } from '../monitoring/logger'
 import sourceMap, { NullableMappedPosition } from 'source-map'
 import * as fs from 'fs'
 

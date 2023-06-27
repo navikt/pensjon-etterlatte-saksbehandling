@@ -51,7 +51,7 @@ class MigreringService(
     }
 
     private fun opprettSakOgBehandling(request: MigreringRequest): Behandling? =
-        foerstegangsBehandlingService.startFoerstegangsbehandling(
+        foerstegangsBehandlingService.opprettBehandling(
             finnEllerOpprettSak(request).id,
             request.persongalleri,
             null,

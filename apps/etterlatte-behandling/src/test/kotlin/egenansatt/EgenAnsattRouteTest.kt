@@ -173,7 +173,7 @@ class EgenAnsattRouteTest : BehandlingIntegrationTest() {
             Assertions.assertNotNull(sak.id)
             Assertions.assertEquals(Enheter.PORSGRUNN.enhetNr, sak.enhet)
 
-            val behandlingId = client.post("/behandlinger/foerstegangsbehandling") {
+            val behandlingId = client.post("/behandlinger/opprettbehandling") {
                 addAuthToken(tokenSaksbehandler)
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(

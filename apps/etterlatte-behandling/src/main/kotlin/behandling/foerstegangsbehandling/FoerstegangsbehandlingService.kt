@@ -5,6 +5,7 @@ import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.BehandlingHendelseType
 import no.nav.etterlatte.behandling.BehandlingHendelserKanal
+import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.domain.OpprettBehandling
 import no.nav.etterlatte.behandling.domain.toBehandlingOpprettet
@@ -18,6 +19,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.JaNeiMedBegrunnelse
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
+import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
@@ -40,12 +42,12 @@ import java.util.*
 
 interface FoerstegangsbehandlingService {
     fun hentFoerstegangsbehandling(behandling: UUID): Foerstegangsbehandling?
-    fun startFoerstegangsbehandling(
+    fun opprettBehandling(
         sakId: Long,
         persongalleri: Persongalleri,
         mottattDato: String?,
         kilde: Vedtaksloesning
-    ): Foerstegangsbehandling?
+    ): Behandling?
 
     fun lagreGyldighetsproeving(
         behandlingId: UUID,
@@ -83,25 +85,53 @@ class RealFoerstegangsbehandlingService(
         }
     }
 
-    override fun startFoerstegangsbehandling(
+    override fun opprettBehandling(
         sakId: Long,
         persongalleri: Persongalleri,
         mottattDato: String?,
         kilde: Vedtaksloesning
-    ): Foerstegangsbehandling? {
+    ): Behandling? {
         logger.info("Starter behandling i sak $sakId")
-        return inTransaction {
-            val sak = requireNotNull(
+        val sak = inTransaction {
+            requireNotNull(
                 sakDao.hentSak(sakId)?.let {
                     listOf(it).filterSakerForEnheter(featureToggleService, Kontekst.get().AppUser).firstOrNull()
                 }
             ) {
                 "Fant ingen sak med id=$sakId!"
             }
+        }
+        val harBehandlingerForSak = inTransaction {
+            behandlingDao.alleBehandlingerISak(sak.id)
+        }
+
+        val harIverksattEllerAttestertBehandling = harBehandlingerForSak.filter { behandling ->
+            BehandlingStatus.iverksattEllerAttestert().find { it == behandling.status } != null
+        }
+        return if (harIverksattEllerAttestertBehandling.isNotEmpty()) {
+            opprettRevurdering(sakId, persongalleri, mottattDato)
+        } else {
+            val harBehandlingUnderbehandling = harBehandlingerForSak.filter { behandling ->
+                BehandlingStatus.underBehandling().find { it == behandling.status } != null
+            }
+            opprettFoerstegangsbehandling(harBehandlingUnderbehandling, sak, persongalleri, mottattDato)
+        }
+    }
+
+    private fun opprettFoerstegangsbehandling(
+        harBehandlingUnderbehandling: List<Behandling>,
+        sak: Sak,
+        persongalleri: Persongalleri,
+        mottattDato: String?
+    ): Foerstegangsbehandling? {
+        return inTransaction {
+            harBehandlingUnderbehandling.forEach {
+                behandlingDao.lagreStatus(it.id, BehandlingStatus.AVBRUTT, LocalDateTime.now())
+            }
 
             OpprettBehandling(
                 type = BehandlingType.FØRSTEGANGSBEHANDLING,
-                sakId = sakId,
+                sakId = sak.id,
                 status = BehandlingStatus.OPPRETTET,
                 soeknadMottattDato = mottattDato?.let { LocalDateTime.parse(it) },
                 persongalleri = persongalleri,
@@ -114,11 +144,43 @@ class RealFoerstegangsbehandlingService(
                 logger.info("Opprettet behandling ${opprettBehandling.id} i sak ${opprettBehandling.sakId}")
 
                 hentBehandling(opprettBehandling.id)
+            }.also { behandling ->
+                behandling?.let {
+                    runBlocking {
+                        behandlingHendelser.send(it.id to BehandlingHendelseType.OPPRETTET)
+                    }
+                }
             }
-        }.also { behandling ->
-            behandling?.let {
-                runBlocking {
-                    behandlingHendelser.send(it.id to BehandlingHendelseType.OPPRETTET)
+        }
+    }
+
+    private fun opprettRevurdering(
+        sakId: Long,
+        persongalleri: Persongalleri,
+        mottattDato: String?
+    ): Behandling? {
+        return inTransaction {
+            OpprettBehandling(
+                type = BehandlingType.REVURDERING,
+                sakId = sakId,
+                status = BehandlingStatus.OPPRETTET,
+                soeknadMottattDato = mottattDato?.let { LocalDateTime.parse(it) },
+                revurderingsAarsak = RevurderingAarsak.NY_SOEKNAD,
+                persongalleri = persongalleri,
+                kilde = Vedtaksloesning.GJENNY,
+                merknad = "Oppdatert søknad"
+            ).let { opprettBehandling ->
+                behandlingDao.opprettBehandling(opprettBehandling)
+                hendelseDao.behandlingOpprettet(opprettBehandling.toBehandlingOpprettet())
+
+                logger.info("Opprettet behandling ${opprettBehandling.id} i sak ${opprettBehandling.sakId}")
+
+                behandlingDao.hentBehandling(opprettBehandling.id)
+            }.also { behandling ->
+                behandling?.let {
+                    runBlocking {
+                        behandlingHendelser.send(it.id to BehandlingHendelseType.OPPRETTET)
+                    }
                 }
             }
         }

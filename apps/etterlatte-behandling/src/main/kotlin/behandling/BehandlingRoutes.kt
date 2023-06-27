@@ -222,12 +222,12 @@ internal fun Route.behandlingRoutes(
             }
         }
 
-        route("/foerstegangsbehandling") {
+        route("/opprettbehandling") {
             post {
                 val behandlingsBehov = call.receive<BehandlingsBehov>()
 
                 when (
-                    val behandling = foerstegangsbehandlingService.startFoerstegangsbehandling(
+                    val behandling = foerstegangsbehandlingService.opprettBehandling(
                         behandlingsBehov.sak,
                         behandlingsBehov.persongalleri,
                         behandlingsBehov.mottattDato,

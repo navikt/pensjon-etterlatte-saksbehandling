@@ -52,7 +52,7 @@ internal class FordeltSoeknadRiver(
                 val gyldighetsVurdering = gyldigSoeknadService.vurderGyldighet(personGalleri, sak.sakType)
                 logger.info("Gyldighetsvurdering utført: {}", gyldighetsVurdering)
 
-                val behandlingId = behandlingClient.initierBehandling(sak.id, soeknad.mottattDato, personGalleri)
+                val behandlingId = behandlingClient.opprettBehandling(sak.id, soeknad.mottattDato, personGalleri)
                 behandlingClient.lagreGyldighetsVurdering(behandlingId, gyldighetsVurdering)
                 logger.info("Behandling {} startet på sak {}", behandlingId, sak.id)
 

@@ -33,7 +33,7 @@ internal class InnsendtSoeknadRiverTest {
         every {
             behandlingClientMock.finnEllerOpprettSak(any(), any())
         } returns Sak("21478247343", SakType.OMSTILLINGSSTOENAD, sakId, "4808")
-        every { behandlingClientMock.initierBehandling(any(), any(), any()) } returns id
+        every { behandlingClientMock.opprettBehandling(any(), any(), any()) } returns id
         every { behandlingClientMock.lagreGyldighetsVurdering(any(), any()) } returns Unit
 
         val inspector = inspector.apply { sendTestMessage(melding) }.inspektør

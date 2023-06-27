@@ -16,6 +16,7 @@ import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.domain.OpprettBehandling
+import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.behandling.foerstegangsbehandling.RealFoerstegangsbehandlingService
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.common.Enheter
@@ -26,6 +27,7 @@ import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.JaNeiMedBegrunnelse
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
+import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
@@ -40,11 +42,13 @@ import no.nav.etterlatte.libs.common.tidspunkt.fixedNorskTid
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeNorskTid
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.persongalleri
+import no.nav.etterlatte.revurdering
 import no.nav.etterlatte.sak.SakDao
 import no.nav.etterlatte.sak.SakServiceFeatureToggle
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.sql.Connection
@@ -62,7 +66,7 @@ internal class RealFoerstegangsbehandlingServiceTest {
     private val featureToggleService = mockk<FeatureToggleService>()
 
     private val naaTid = Tidspunkt.now()
-    private val sut = RealFoerstegangsbehandlingService(
+    private val behandlingsService = RealFoerstegangsbehandlingService(
         sakDaoMock,
         behandlingDaoMock,
         hendelseDaoMock,
@@ -134,7 +138,7 @@ internal class RealFoerstegangsbehandlingServiceTest {
             kilde = Vedtaksloesning.GJENNY
         )
 
-        assertEquals("Soeker", sut.hentFoerstegangsbehandling(id)!!.persongalleri.innsender)
+        assertEquals("Soeker", behandlingsService.hentFoerstegangsbehandling(id)!!.persongalleri.innsender)
 
         verify(exactly = 1) { behandlingDaoMock.hentBehandling(id) }
     }
@@ -193,9 +197,11 @@ internal class RealFoerstegangsbehandlingServiceTest {
         every { behandlingDaoMock.hentBehandling(capture(behandlingHentes)) } returns opprettetBehandling
         every { hendelseDaoMock.behandlingOpprettet(any()) } returns Unit
         every { behandlingDaoMock.lagreGyldighetsproving(any()) } returns Unit
+        every { behandlingDaoMock.alleBehandlingerISak(any()) } returns listOf(opprettetBehandling)
+        every { behandlingDaoMock.lagreStatus(any(), any(), any()) } returns Unit
         coEvery { hendelserKanalMock.send(capture(hendelse)) } returns Unit
 
-        val resultat = sut.startFoerstegangsbehandling(
+        val resultat = behandlingsService.opprettBehandling(
             1,
             persongalleri,
             datoNaa.toString(),
@@ -217,8 +223,310 @@ internal class RealFoerstegangsbehandlingServiceTest {
             behandlingDaoMock.hentBehandling(any())
             behandlingDaoMock.opprettBehandling(any())
             hendelseDaoMock.behandlingOpprettet(any())
+            behandlingDaoMock.alleBehandlingerISak(any())
+            behandlingDaoMock.lagreStatus(any(), any(), any())
         }
         coVerify(exactly = 1) { hendelserKanalMock.send(any()) }
+    }
+
+    @Test
+    fun `skal opprette kun foerstegangsbehandling hvis det ikke finnes noen tidligere behandlinger`() {
+        val behandlingOpprettes = slot<OpprettBehandling>()
+        val behandlingHentes = slot<UUID>()
+        val hendelse = slot<Pair<UUID, BehandlingHendelseType>>()
+        val datoNaa = Tidspunkt.now().toLocalDatetimeUTC()
+
+        every { featureToggleService.isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false) } returns false
+        every { featureToggleService.isEnabled(SakServiceFeatureToggle.FiltrerMedEnhetId, false) } returns false
+
+        val opprettetBehandling = Foerstegangsbehandling(
+            id = UUID.randomUUID(),
+            sak = Sak(
+                ident = "Soeker",
+                sakType = SakType.BARNEPENSJON,
+                id = 1,
+                enhet = Enheter.defaultEnhet.enhetNr
+            ),
+            behandlingOpprettet = datoNaa,
+            sistEndret = datoNaa,
+            status = BehandlingStatus.OPPRETTET,
+            soeknadMottattDato = Tidspunkt.now().toLocalDatetimeUTC(),
+            persongalleri = Persongalleri(
+                "Innsender",
+                "Soeker",
+                listOf("Gjenlevende"),
+                listOf("Avdoed"),
+                emptyList()
+            ),
+            gyldighetsproeving = null,
+            virkningstidspunkt = Virkningstidspunkt(
+                YearMonth.of(2022, 1),
+                Grunnlagsopplysning.Saksbehandler.create("ident"),
+                "begrunnelse"
+            ),
+            utenlandstilsnitt = null,
+            boddEllerArbeidetUtlandet = null,
+            kommerBarnetTilgode = null,
+            kilde = Vedtaksloesning.GJENNY
+        )
+
+        val persongalleri = Persongalleri(
+            "Soeker",
+            "Innsender",
+            emptyList(),
+            listOf("Avdoed"),
+            listOf("Gjenlevende")
+        )
+
+        every { sakDaoMock.hentSak(any()) } returns opprettetBehandling.sak
+        every { behandlingDaoMock.opprettBehandling(capture(behandlingOpprettes)) } returns Unit
+        every { behandlingDaoMock.hentBehandling(capture(behandlingHentes)) } returns opprettetBehandling
+        every { behandlingDaoMock.alleBehandlingerISak(any()) } returns emptyList()
+        every { hendelseDaoMock.behandlingOpprettet(any()) } returns Unit
+        coEvery { hendelserKanalMock.send(capture(hendelse)) } returns Unit
+
+        val resultat = behandlingsService.opprettBehandling(
+            1,
+            persongalleri,
+            datoNaa.toString(),
+            Vedtaksloesning.GJENNY
+        )!!
+
+        assertTrue(resultat is Foerstegangsbehandling)
+
+        verify(exactly = 1) {
+            sakDaoMock.hentSak(any())
+            behandlingDaoMock.hentBehandling(any())
+            behandlingDaoMock.opprettBehandling(any())
+            hendelseDaoMock.behandlingOpprettet(any())
+            behandlingDaoMock.alleBehandlingerISak(any())
+        }
+        coVerify(exactly = 1) { hendelserKanalMock.send(any()) }
+    }
+
+    @Test
+    fun `skal avbryte behandling hvis under behandling og opprette en ny`() {
+        val behandlingOpprettes = slot<OpprettBehandling>()
+        val behandlingHentes = slot<UUID>()
+        val hendelse = slot<Pair<UUID, BehandlingHendelseType>>()
+        val datoNaa = Tidspunkt.now().toLocalDatetimeUTC()
+
+        every {
+            featureToggleService.isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false)
+        } returns false
+        every { featureToggleService.isEnabled(SakServiceFeatureToggle.FiltrerMedEnhetId, false) } returns false
+
+        val underArbeidBehandling = Foerstegangsbehandling(
+            id = UUID.randomUUID(),
+            sak = Sak(
+                ident = "Soeker",
+                sakType = SakType.BARNEPENSJON,
+                id = 1,
+                enhet = Enheter.defaultEnhet.enhetNr
+            ),
+            behandlingOpprettet = datoNaa,
+            sistEndret = datoNaa,
+            status = BehandlingStatus.OPPRETTET,
+            soeknadMottattDato = Tidspunkt.now().toLocalDatetimeUTC(),
+            persongalleri = Persongalleri(
+                "Innsender",
+                "Soeker",
+                listOf("Gjenlevende"),
+                listOf("Avdoed"),
+                emptyList()
+            ),
+            gyldighetsproeving = null,
+            virkningstidspunkt = Virkningstidspunkt(
+                YearMonth.of(2022, 1),
+                Grunnlagsopplysning.Saksbehandler.create("ident"),
+                "begrunnelse"
+            ),
+            utenlandstilsnitt = null,
+            boddEllerArbeidetUtlandet = null,
+            kommerBarnetTilgode = null,
+            kilde = Vedtaksloesning.GJENNY
+        )
+
+        val persongalleri = Persongalleri(
+            "Soeker",
+            "Innsender",
+            emptyList(),
+            listOf("Avdoed"),
+            listOf("Gjenlevende")
+        )
+
+        every { sakDaoMock.hentSak(any()) } returns underArbeidBehandling.sak
+        every { behandlingDaoMock.opprettBehandling(capture(behandlingOpprettes)) } returns Unit
+        every { behandlingDaoMock.hentBehandling(capture(behandlingHentes)) } returns underArbeidBehandling
+        every {
+            behandlingDaoMock.alleBehandlingerISak(any())
+        } returns emptyList()
+        every { behandlingDaoMock.lagreStatus(any(), any(), any()) } returns Unit
+        every { hendelseDaoMock.behandlingOpprettet(any()) } returns Unit
+        coEvery { hendelserKanalMock.send(capture(hendelse)) } returns Unit
+
+        val resultat = behandlingsService.opprettBehandling(
+            1,
+            persongalleri,
+            datoNaa.toString(),
+            Vedtaksloesning.GJENNY
+        )!!
+
+        assertTrue(resultat is Foerstegangsbehandling)
+
+        every {
+            behandlingDaoMock.alleBehandlingerISak(any())
+        } returns listOf(underArbeidBehandling)
+
+        val nyfoerstegangsbehandling = behandlingsService.opprettBehandling(
+            1,
+            persongalleri,
+            datoNaa.toString(),
+            Vedtaksloesning.GJENNY
+        )
+        assertTrue(nyfoerstegangsbehandling is Foerstegangsbehandling)
+
+        verify(exactly = 2) {
+            sakDaoMock.hentSak(any())
+            behandlingDaoMock.hentBehandling(any())
+            behandlingDaoMock.opprettBehandling(any())
+            hendelseDaoMock.behandlingOpprettet(any())
+            behandlingDaoMock.alleBehandlingerISak(any())
+        }
+        verify {
+            behandlingDaoMock.lagreStatus(any(), BehandlingStatus.AVBRUTT, any())
+        }
+        coVerify(exactly = 2) { hendelserKanalMock.send(any()) }
+    }
+
+    @Test
+    fun `skal lage ny behandling hvis behandling er satt til iverksatt`() {
+        val behandlingOpprettes = slot<OpprettBehandling>()
+        val behandlingHentes = slot<UUID>()
+        val hendelse = slot<Pair<UUID, BehandlingHendelseType>>()
+        val datoNaa = Tidspunkt.now().toLocalDatetimeUTC()
+
+        every {
+            featureToggleService.isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false)
+        } returns false
+        every { featureToggleService.isEnabled(SakServiceFeatureToggle.FiltrerMedEnhetId, false) } returns false
+
+        val nyBehandling = Foerstegangsbehandling(
+            id = UUID.randomUUID(),
+            sak = Sak(
+                ident = "Soeker",
+                sakType = SakType.BARNEPENSJON,
+                id = 1,
+                enhet = Enheter.defaultEnhet.enhetNr
+            ),
+            behandlingOpprettet = datoNaa,
+            sistEndret = datoNaa,
+            status = BehandlingStatus.OPPRETTET,
+            soeknadMottattDato = Tidspunkt.now().toLocalDatetimeUTC(),
+            persongalleri = Persongalleri(
+                "Innsender",
+                "Soeker",
+                listOf("Gjenlevende"),
+                listOf("Avdoed"),
+                emptyList()
+            ),
+            gyldighetsproeving = null,
+            virkningstidspunkt = Virkningstidspunkt(
+                YearMonth.of(2022, 1),
+                Grunnlagsopplysning.Saksbehandler.create("ident"),
+                "begrunnelse"
+            ),
+            utenlandstilsnitt = null,
+            boddEllerArbeidetUtlandet = null,
+            kommerBarnetTilgode = null,
+            kilde = Vedtaksloesning.GJENNY
+        )
+
+        val persongalleri = Persongalleri(
+            "Soeker",
+            "Innsender",
+            emptyList(),
+            listOf("Avdoed"),
+            listOf("Gjenlevende")
+        )
+
+        every { sakDaoMock.hentSak(any()) } returns nyBehandling.sak
+        every { behandlingDaoMock.opprettBehandling(capture(behandlingOpprettes)) } returns Unit
+        every { behandlingDaoMock.hentBehandling(capture(behandlingHentes)) } returns nyBehandling
+        every {
+            behandlingDaoMock.alleBehandlingerISak(any())
+        } returns emptyList()
+        every { behandlingDaoMock.lagreStatus(any(), any(), any()) } returns Unit
+        every { hendelseDaoMock.behandlingOpprettet(any()) } returns Unit
+        coEvery { hendelserKanalMock.send(capture(hendelse)) } returns Unit
+
+        val resultat = behandlingsService.opprettBehandling(
+            1,
+            persongalleri,
+            datoNaa.toString(),
+            Vedtaksloesning.GJENNY
+        )!!
+
+        assertTrue(resultat is Foerstegangsbehandling)
+
+        val iverksattBehandling = Foerstegangsbehandling(
+            id = UUID.randomUUID(),
+            sak = Sak(
+                ident = "Soeker",
+                sakType = SakType.BARNEPENSJON,
+                id = 1,
+                enhet = Enheter.defaultEnhet.enhetNr
+            ),
+            behandlingOpprettet = datoNaa,
+            sistEndret = datoNaa,
+            status = BehandlingStatus.IVERKSATT,
+            soeknadMottattDato = Tidspunkt.now().toLocalDatetimeUTC(),
+            persongalleri = Persongalleri(
+                "Innsender",
+                "Soeker",
+                listOf("Gjenlevende"),
+                listOf("Avdoed"),
+                emptyList()
+            ),
+            gyldighetsproeving = null,
+            virkningstidspunkt = Virkningstidspunkt(
+                YearMonth.of(2022, 1),
+                Grunnlagsopplysning.Saksbehandler.create("ident"),
+                "begrunnelse"
+            ),
+            utenlandstilsnitt = null,
+            boddEllerArbeidetUtlandet = null,
+            kommerBarnetTilgode = null,
+            kilde = Vedtaksloesning.GJENNY
+        )
+
+        every {
+            behandlingDaoMock.alleBehandlingerISak(any())
+        } returns listOf(iverksattBehandling)
+
+        every { behandlingDaoMock.hentBehandling(any()) } returns revurdering(
+            sakId = 1,
+            revurderingAarsak = RevurderingAarsak.NY_SOEKNAD,
+            enhet = Enheter.defaultEnhet.enhetNr
+        )
+
+        val revurderingsBehandling = behandlingsService.opprettBehandling(
+            1,
+            persongalleri,
+            datoNaa.toString(),
+            Vedtaksloesning.GJENNY
+        )
+        assertTrue(revurderingsBehandling is Revurdering)
+
+        verify(exactly = 2) {
+            sakDaoMock.hentSak(any())
+            behandlingDaoMock.hentBehandling(any())
+            behandlingDaoMock.opprettBehandling(any())
+            hendelseDaoMock.behandlingOpprettet(any())
+            behandlingDaoMock.alleBehandlingerISak(any())
+        }
+
+        coVerify(exactly = 2) { hendelserKanalMock.send(any()) }
     }
 
     @Test
@@ -263,7 +571,11 @@ internal class RealFoerstegangsbehandlingServiceTest {
             vurdertDato = naaTid.toLocalDatetimeNorskTid()
         )
 
-        val resultat = sut.lagreGyldighetsproeving(id, "saksbehandler", JaNeiMedBegrunnelse(JaNei.JA, "begrunnelse"))
+        val resultat = behandlingsService.lagreGyldighetsproeving(
+            id,
+            "saksbehandler",
+            JaNeiMedBegrunnelse(JaNei.JA, "begrunnelse")
+        )
 
         assertEquals(forventetResultat, resultat)
 
@@ -312,7 +624,7 @@ internal class RealFoerstegangsbehandlingServiceTest {
             kilde = Vedtaksloesning.GJENNY
         )
 
-        assertEquals("Soeker", sut.hentFoerstegangsbehandling(id)!!.persongalleri.innsender)
+        assertEquals("Soeker", behandlingsService.hentFoerstegangsbehandling(id)!!.persongalleri.innsender)
 
         verify(exactly = 1) { behandlingDaoMock.hentBehandling(id) }
     }
@@ -360,7 +672,7 @@ internal class RealFoerstegangsbehandlingServiceTest {
             kilde = Vedtaksloesning.GJENNY
         )
 
-        assertEquals("Soeker", sut.hentFoerstegangsbehandling(id)!!.persongalleri.innsender)
+        assertEquals("Soeker", behandlingsService.hentFoerstegangsbehandling(id)!!.persongalleri.innsender)
 
         verify(exactly = 1) { behandlingDaoMock.hentBehandling(id) }
     }
@@ -408,7 +720,7 @@ internal class RealFoerstegangsbehandlingServiceTest {
             kilde = Vedtaksloesning.GJENNY
         )
 
-        assertNull(sut.hentFoerstegangsbehandling(id))
+        assertNull(behandlingsService.hentFoerstegangsbehandling(id))
 
         verify(exactly = 1) { behandlingDaoMock.hentBehandling(id) }
     }

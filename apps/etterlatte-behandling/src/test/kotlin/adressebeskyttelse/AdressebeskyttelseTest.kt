@@ -74,7 +74,7 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
             }
             Assertions.assertNotNull(sak.id)
 
-            val behandlingId = client.post("/behandlinger/foerstegangsbehandling") {
+            val behandlingId = client.post("/behandlinger/opprettbehandling") {
                 addAuthToken(tokenSaksbehandler)
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(
@@ -161,7 +161,7 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
             }
             Assertions.assertNotNull(sak.id)
 
-            val behandlingId = httpClient.post("/behandlinger/foerstegangsbehandling") {
+            val behandlingId = httpClient.post("/behandlinger/opprettbehandling") {
                 addAuthToken(tokenSaksbehandler)
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(
@@ -248,7 +248,7 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
             }
             Assertions.assertNotNull(sak.id)
 
-            val behandlingId = client.post("/behandlinger/foerstegangsbehandling") {
+            val behandlingId = client.post("/behandlinger/opprettbehandling") {
                 addAuthToken(tokenSaksbehandler)
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(

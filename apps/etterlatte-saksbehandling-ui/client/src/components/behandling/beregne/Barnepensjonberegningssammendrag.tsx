@@ -26,12 +26,6 @@ export const Barnepensjonberegningssammendrag = ({
   soeker: BeregningsdetaljerPerson
   behandlingId: string
 }) => {
-  const soeskenFunnet = beregningsperiode.soeskenFlokk.map((fnr) => {
-    const temp = soesken?.find((p) => p.foedselsnummer === fnr)
-    return temp
-  })
-  const soeskenFlokk = [...soeskenFunnet, soeker]
-
   const [beregningsgrunnlag, fetchBeregningsgrunnlag] = useApiCall(hentBeregningsGrunnlag)
   const [beregningsgrunnlagSate, setBeregningsgrunnlag] = useState<BeregningsGrunnlagPostDto>()
 
@@ -58,17 +52,24 @@ export const Barnepensjonberegningssammendrag = ({
                 <strong>§18-5</strong> En forelder død: 40% av G til første barn, 25% av G til resterende. Beløpene slås
                 sammen og fordeles likt.
               </BodyShort>
-              {soesken && soeskenFunnet && soeskenFlokk && (
+              {soesken && (
                 <>
                   <Label>Beregningen gjelder:</Label>
                   <ul>
-                    {soeskenFlokk.map((soeskenIFlokken) => (
-                      <ListWithoutBullet key={soeskenIFlokken.foedselsnummer}>
-                        {`${soeskenIFlokken.fornavn} ${soeskenIFlokken.etternavn} / ${
-                          soeskenIFlokken.foedselsnummer
-                        } / ${differenceInYears(new Date(), new Date(soeskenIFlokken.foedselsdato))} år`}
-                      </ListWithoutBullet>
-                    ))}
+                    {beregningsperiode.soeskenFlokk
+                      .map((fnr) => soesken?.find((p) => p.foedselsnummer === fnr))
+                      .concat([soeker])
+                      .map((soeskenIFlokken) => {
+                        return (
+                          soeskenIFlokken && (
+                            <ListWithoutBullet key={soeskenIFlokken.foedselsnummer}>
+                              {`${soeskenIFlokken.fornavn} ${soeskenIFlokken.etternavn} / ${
+                                soeskenIFlokken.foedselsnummer
+                              } / ${differenceInYears(new Date(), new Date(soeskenIFlokken.foedselsdato))} år`}
+                            </ListWithoutBullet>
+                          )
+                        )
+                      })}
                   </ul>
                 </>
               )}

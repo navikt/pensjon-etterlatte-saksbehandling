@@ -65,6 +65,6 @@ const KildeDatoOpplysning = ({ type, dato }: { type?: KildeType; dato?: string }
   )
 }
 
-const VilkaarStrong = styled.strong`
+export const VilkaarStrong = styled.strong`
     white-space: nowrap;
 `

@@ -1,20 +1,25 @@
 package no.nav.etterlatte.vilkaarsvurdering.vilkaar
 
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
+import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
+import no.nav.etterlatte.libs.common.grunnlag.hentSoeknadMottattDato
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Delvilkaar
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Lovreferanse
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaar
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarOpplysningType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
+import no.nav.etterlatte.vilkaarsvurdering.vilkaar.BarnepensjonVilkaar.toVilkaarsgrunnlag
 
 object OmstillingstoenadVilkaar {
 
-    fun inngangsvilkaar() = listOf(
+    fun inngangsvilkaar(grunnlag: Grunnlag) = listOf(
         etterlatteLever(),
         doedsfall(),
         etterlatteSivilstand(),
         yrkesskade(),
         avdoedesMedlemskap(),
         gjenlevendesMedlemskap(),
-        aktivitetEtter6Maaneder(),
+        aktivitetEtter6Maaneder(grunnlag),
         oevrigeVilkaar()
     )
 
@@ -195,7 +200,7 @@ object OmstillingstoenadVilkaar {
         )
     )
 
-    private fun aktivitetEtter6Maaneder() = Vilkaar(
+    private fun aktivitetEtter6Maaneder(grunnlag: Grunnlag) = Vilkaar(
         hovedvilkaar = Delvilkaar(
             type = VilkaarType.OMS_AKTIVITET_ETTER_6_MND,
             tittel = "Krav til aktivitet etter 6 måneder",
@@ -217,7 +222,12 @@ object OmstillingstoenadVilkaar {
         unntaksvilkaar = listOf(
             aktivitetEtter6MaanederGjenlevendeOver55ogLavInntekt(),
             aktivitetEtter6MaanederGjenlevendeHarBarnUnder1Aar(),
-        )
+        ),
+        grunnlag = with(grunnlag) {
+            val doedsdatoAvdoedGrunnlag = hentAvdoed().hentDoedsdato()?.toVilkaarsgrunnlag(VilkaarOpplysningType.AVDOED_DOEDSDATO)
+            val soeknadMottattDatoGrunnlag = sak.hentSoeknadMottattDato()?.toVilkaarsgrunnlag(VilkaarOpplysningType.SOEKNAD_MOTTATT_DATO)
+            listOfNotNull(doedsdatoAvdoedGrunnlag, soeknadMottattDatoGrunnlag)
+        }
     )
 
     private fun aktivitetEtter6MaanederGjenlevendeOver55ogLavInntekt() = Delvilkaar(

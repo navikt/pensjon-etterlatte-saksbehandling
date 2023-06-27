@@ -184,7 +184,7 @@ class VilkaarsvurderingService(
         SakType.OMSTILLINGSSTOENAD ->
             when (behandlingType) {
                 BehandlingType.FØRSTEGANGSBEHANDLING ->
-                    OmstillingstoenadVilkaar.inngangsvilkaar()
+                    OmstillingstoenadVilkaar.inngangsvilkaar(grunnlag)
 
                 BehandlingType.REVURDERING,
                 BehandlingType.MANUELT_OPPHOER -> throw IllegalArgumentException(

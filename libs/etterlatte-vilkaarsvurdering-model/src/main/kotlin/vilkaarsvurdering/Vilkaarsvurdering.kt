@@ -70,6 +70,7 @@ data class Vilkaarsgrunnlag<T>(
 )
 
 enum class VilkaarOpplysningType {
+    SOEKNAD_MOTTATT_DATO,
     SOEKER_FOEDSELSDATO,
     AVDOED_DOEDSDATO,
     VIRKNINGSTIDSPUNKT

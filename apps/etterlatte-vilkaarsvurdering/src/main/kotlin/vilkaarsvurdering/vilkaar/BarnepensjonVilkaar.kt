@@ -263,7 +263,7 @@ object BarnepensjonVilkaar {
         )
     )
 
-    private fun <T> Opplysning.Konstant<out T?>.toVilkaarsgrunnlag(type: VilkaarOpplysningType) =
+    internal fun <T> Opplysning.Konstant<out T?>.toVilkaarsgrunnlag(type: VilkaarOpplysningType) =
         Vilkaarsgrunnlag(
             id = id,
             opplysningsType = type,

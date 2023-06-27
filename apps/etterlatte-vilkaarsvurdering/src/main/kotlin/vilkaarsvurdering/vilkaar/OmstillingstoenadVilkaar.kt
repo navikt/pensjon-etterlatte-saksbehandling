@@ -1,19 +1,25 @@
 package no.nav.etterlatte.vilkaarsvurdering.vilkaar
 
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
+import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
+import no.nav.etterlatte.libs.common.grunnlag.hentSoeknadMottattDato
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Delvilkaar
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Lovreferanse
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaar
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarOpplysningType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
+import no.nav.etterlatte.vilkaarsvurdering.vilkaar.BarnepensjonVilkaar.toVilkaarsgrunnlag
 
 object OmstillingstoenadVilkaar {
 
-    fun inngangsvilkaar() = listOf(
+    fun inngangsvilkaar(grunnlag: Grunnlag) = listOf(
         etterlatteLever(),
         doedsfall(),
         etterlatteSivilstand(),
         yrkesskade(),
         avdoedesMedlemskap(),
         gjenlevendesMedlemskap(),
+        aktivitetEtter6Maaneder(grunnlag),
         oevrigeVilkaar()
     )
 
@@ -191,6 +197,52 @@ object OmstillingstoenadVilkaar {
             lovreferanse = Lovreferanse(
                 paragraf = "§ 17-4"
             )
+        )
+    )
+
+    private fun aktivitetEtter6Maaneder(grunnlag: Grunnlag) = Vilkaar(
+        hovedvilkaar = Delvilkaar(
+            type = VilkaarType.OMS_AKTIVITET_ETTER_6_MND,
+            tittel = "Krav til aktivitet etter 6 måneder",
+            beskrivelse = """
+                Seks måneder etter dødsfallet er det et vilkår for rett til omstillingsstønad at den gjenlevende:
+
+                a) er i minst 50 % arbeid,
+                b) er reell arbeidssøker,
+                c) gjennomfører nødvendig og hensiktsmessig opplæring eller utdanning, minst 50 %, eller
+                d) etablerer egen virksomhet
+
+                Det finnes unntak som gir fritak for aktivitetskravet, som må vurderes om ikke hovedvilkåret er oppfylt.
+            """.trimIndent(),
+            spoersmaal = "Er vilkåret om krav til aktivitet oppfylt?",
+            lovreferanse = Lovreferanse(
+                paragraf = "§ 17-7"
+            )
+        ),
+        unntaksvilkaar = listOf(
+            aktivitetEtter6MaanederGjenlevendeOver55ogLavInntekt(),
+            aktivitetEtter6MaanederGjenlevendeHarBarnUnder1Aar(),
+        ),
+        grunnlag = with(grunnlag) {
+            val doedsdatoAvdoedGrunnlag = hentAvdoed().hentDoedsdato()?.toVilkaarsgrunnlag(VilkaarOpplysningType.AVDOED_DOEDSDATO)
+            val soeknadMottattDatoGrunnlag = sak.hentSoeknadMottattDato()?.toVilkaarsgrunnlag(VilkaarOpplysningType.SOEKNAD_MOTTATT_DATO)
+            listOfNotNull(doedsdatoAvdoedGrunnlag, soeknadMottattDatoGrunnlag)
+        }
+    )
+
+    private fun aktivitetEtter6MaanederGjenlevendeOver55ogLavInntekt() = Delvilkaar(
+        type = VilkaarType.OMS_AKTIVITET_ETTER_6_MND_UNNTAK_GJENLEVENDE_OVER_55_AAR_OG_LAV_INNTEKT,
+        tittel = "Ja, gjenlevende er over 55 år ved dødsfall og har hatt lav inntekt",
+        lovreferanse = Lovreferanse(
+            paragraf = "§ 17-7"
+        )
+    )
+
+    private fun aktivitetEtter6MaanederGjenlevendeHarBarnUnder1Aar() = Delvilkaar(
+        type = VilkaarType.OMS_AKTIVITET_ETTER_6_MND_UNNTAK_GJENLEVENDE_BARN_UNDER_1_AAR,
+        tittel = "Ja, gjenlevende har barn som er under 1 år",
+        lovreferanse = Lovreferanse(
+            paragraf = "§ 17-7"
         )
     )
 }

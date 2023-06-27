@@ -17,6 +17,7 @@ dependencies {
 
     implementation(libs.database.flywaydb)
     implementation(libs.database.kotliquery)
+    implementation(libs.metrics.micrometer.prometheus)
 
     implementation(libs.ktor2.okhttp)
     implementation(libs.ktor2.servercore)

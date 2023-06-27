@@ -4,6 +4,7 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.slot
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.beregning.grunnlag.BarnepensjonBeregningsGrunnlag
@@ -23,11 +24,11 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeskenMedIBeregn
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import java.lang.RuntimeException
 import java.time.LocalDate
 import java.time.Month
 import java.time.YearMonth
@@ -289,6 +290,51 @@ internal class BeregningsGrunnlagServiceTest {
 
                 verify(exactly = 0) { beregningsGrunnlagRepository.lagre(any()) }
             }
+        }
+    }
+
+    @Test
+    fun `skal lagre default soeksken med i beregning hvis det er tom`() {
+        val soeskenMedIBeregning: List<GrunnlagMedPeriode<List<SoeskenMedIBeregning>>> = emptyList()
+
+        val institusjonsoppholdBeregningsgrunnlag = listOf(
+            GrunnlagMedPeriode(
+                fom = LocalDate.of(2022, 8, 1),
+                tom = null,
+                data = InstitusjonsoppholdBeregningsgrunnlag(Reduksjon.NEI_KORT_OPPHOLD)
+            )
+        )
+
+        val behandling = mockBehandling(SakType.BARNEPENSJON, randomUUID())
+
+        val slot = slot<BeregningsGrunnlag>()
+
+        coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
+        coEvery { behandlingKlient.beregn(any(), any(), any()) } returns true
+        every { beregningsGrunnlagRepository.finnGrunnlagForBehandling(any()) } returns null
+        every { beregningsGrunnlagRepository.lagre(capture(slot)) } returns true
+
+        runBlocking {
+            beregningsGrunnlagService.lagreBarnepensjonBeregningsGrunnlag(
+                randomUUID(),
+                BarnepensjonBeregningsGrunnlag(soeskenMedIBeregning, institusjonsoppholdBeregningsgrunnlag),
+                mockk {
+                    every { ident() } returns "Z123456"
+                }
+            )
+
+            assertEquals(
+                listOf<GrunnlagMedPeriode<List<SoeskenMedIBeregning>>>(
+                    GrunnlagMedPeriode(
+                        fom = behandling.virkningstidspunkt!!.dato.atDay(1),
+                        tom = null,
+                        data = emptyList()
+                    )
+                ),
+                slot.captured.soeskenMedIBeregning
+            )
+
+            verify(exactly = 1) { beregningsGrunnlagRepository.lagre(any()) }
         }
     }
 

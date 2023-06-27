@@ -108,44 +108,53 @@ class RealFoerstegangsbehandlingService(
         val harIverksattEllerAttestertBehandling = harBehandlingerForSak.filter { behandling ->
             BehandlingStatus.iverksattEllerAttestert().find { it == behandling.status } != null
         }
-        if (harIverksattEllerAttestertBehandling.isNotEmpty()) {
-            return opprettRevurdering(sakId, persongalleri, mottattDato)
+        return if (harIverksattEllerAttestertBehandling.isNotEmpty()) {
+            opprettRevurdering(sakId, persongalleri, mottattDato)
         } else {
             val harBehandlingUnderbehandling = harBehandlingerForSak.filter { behandling ->
                 BehandlingStatus.underBehandling().find { it == behandling.status } != null
             }
-            return inTransaction {
-                harBehandlingUnderbehandling.forEach {
-                    behandlingDao.lagreStatus(it.id, BehandlingStatus.AVBRUTT, LocalDateTime.now())
-                }
+            opprettFoerstegangsbehandling(harBehandlingUnderbehandling, sak, persongalleri, mottattDato)
+        }
+    }
 
-                OpprettBehandling(
-                    type = BehandlingType.FØRSTEGANGSBEHANDLING,
-                    sakId = sakId,
-                    status = BehandlingStatus.OPPRETTET,
-                    soeknadMottattDato = mottattDato?.let { LocalDateTime.parse(it) },
-                    persongalleri = persongalleri,
-                    kilde = Vedtaksloesning.GJENNY,
-                    merknad = opprettMerknad(sak, persongalleri)
-                ).let { opprettBehandling ->
-                    behandlingDao.opprettBehandling(opprettBehandling)
-                    hendelseDao.behandlingOpprettet(opprettBehandling.toBehandlingOpprettet())
+    private fun opprettFoerstegangsbehandling(
+        harBehandlingUnderbehandling: List<Behandling>,
+        sak: Sak,
+        persongalleri: Persongalleri,
+        mottattDato: String?
+    ): Foerstegangsbehandling? {
+        return inTransaction {
+            harBehandlingUnderbehandling.forEach {
+                behandlingDao.lagreStatus(it.id, BehandlingStatus.AVBRUTT, LocalDateTime.now())
+            }
 
-                    logger.info("Opprettet behandling ${opprettBehandling.id} i sak ${opprettBehandling.sakId}")
+            OpprettBehandling(
+                type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                sakId = sak.id,
+                status = BehandlingStatus.OPPRETTET,
+                soeknadMottattDato = mottattDato?.let { LocalDateTime.parse(it) },
+                persongalleri = persongalleri,
+                kilde = Vedtaksloesning.GJENNY,
+                merknad = opprettMerknad(sak, persongalleri)
+            ).let { opprettBehandling ->
+                behandlingDao.opprettBehandling(opprettBehandling)
+                hendelseDao.behandlingOpprettet(opprettBehandling.toBehandlingOpprettet())
 
-                    hentBehandling(opprettBehandling.id)
-                }.also { behandling ->
-                    behandling?.let {
-                        runBlocking {
-                            behandlingHendelser.send(it.id to BehandlingHendelseType.OPPRETTET)
-                        }
+                logger.info("Opprettet behandling ${opprettBehandling.id} i sak ${opprettBehandling.sakId}")
+
+                hentBehandling(opprettBehandling.id)
+            }.also { behandling ->
+                behandling?.let {
+                    runBlocking {
+                        behandlingHendelser.send(it.id to BehandlingHendelseType.OPPRETTET)
                     }
                 }
             }
         }
     }
 
-    fun opprettRevurdering(
+    private fun opprettRevurdering(
         sakId: Long,
         persongalleri: Persongalleri,
         mottattDato: String?

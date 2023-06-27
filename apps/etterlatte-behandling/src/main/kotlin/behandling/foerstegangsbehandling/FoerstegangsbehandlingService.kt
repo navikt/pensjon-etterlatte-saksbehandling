@@ -167,7 +167,8 @@ class RealFoerstegangsbehandlingService(
                 soeknadMottattDato = mottattDato?.let { LocalDateTime.parse(it) },
                 revurderingsAarsak = RevurderingAarsak.NY_SOEKNAD,
                 persongalleri = persongalleri,
-                kilde = Vedtaksloesning.GJENNY
+                kilde = Vedtaksloesning.GJENNY,
+                merknad = "Oppdatert søknad"
             ).let { opprettBehandling ->
                 behandlingDao.opprettBehandling(opprettBehandling)
                 hendelseDao.behandlingOpprettet(opprettBehandling.toBehandlingOpprettet())

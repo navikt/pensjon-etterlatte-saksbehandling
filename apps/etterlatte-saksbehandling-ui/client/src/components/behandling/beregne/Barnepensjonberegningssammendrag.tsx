@@ -77,7 +77,10 @@ export const Barnepensjonberegningssammendrag = ({
           )}
           {beregningsgrunnlagSate?.institusjonsopphold && (
             <BodyShort spacing>
-              <strong>§18-8</strong> blablalba institusjon
+              <strong>§18-8</strong> Institusjonsopphold. Barnepensjon beregnes ut fra:
+              {beregningsgrunnlagSate.institusjonsopphold.map((it) => {
+                return <ListWithoutBullet key={`${it.fom}${it.data.reduksjon}`}>{it.data.reduksjon}</ListWithoutBullet>
+              })}
             </BodyShort>
           )}
         </>

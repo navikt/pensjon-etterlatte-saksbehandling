@@ -193,6 +193,8 @@ internal class RealFoerstegangsbehandlingServiceTest {
         every { behandlingDaoMock.hentBehandling(capture(behandlingHentes)) } returns opprettetBehandling
         every { hendelseDaoMock.behandlingOpprettet(any()) } returns Unit
         every { behandlingDaoMock.lagreGyldighetsproving(any()) } returns Unit
+        every { behandlingDaoMock.alleBehandlingerISak(any()) } returns listOf(opprettetBehandling)
+        every { behandlingDaoMock.lagreStatus(any(), any(), any()) } returns Unit
         coEvery { hendelserKanalMock.send(capture(hendelse)) } returns Unit
 
         val resultat = sut.opprettBehandling(
@@ -217,6 +219,8 @@ internal class RealFoerstegangsbehandlingServiceTest {
             behandlingDaoMock.hentBehandling(any())
             behandlingDaoMock.opprettBehandling(any())
             hendelseDaoMock.behandlingOpprettet(any())
+            behandlingDaoMock.alleBehandlingerISak(any())
+            behandlingDaoMock.lagreStatus(any(), any(), any())
         }
         coVerify(exactly = 1) { hendelserKanalMock.send(any()) }
     }

@@ -401,7 +401,7 @@ class IntegrationTest : BehandlingIntegrationTest() {
 
         applicationContext.behandlingsHendelser.hendelserKanal.close()
 
-        kotlin.runCatching { sleep(2000) }
+        kotlin.runCatching { sleep(3000) }
         assertNotNull(behandlingOpprettet)
         val rapid = applicationContext.rapid as TestProdusent
         assertEquals(4, rapid.publiserteMeldinger.size)

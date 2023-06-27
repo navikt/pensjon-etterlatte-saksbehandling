@@ -26,6 +26,7 @@ interface BehandlingKlient : BehandlingTilgangsSjekk {
         brukerTokenInfo: BrukerTokenInfo,
         commit: Boolean
     ): Boolean
+
     suspend fun settBehandlingStatusVilkaarsvurdert(behandlingId: UUID, brukerTokenInfo: BrukerTokenInfo): Boolean
     suspend fun hentSisteIverksatteBehandling(sakId: Long, brukerTokenInfo: BrukerTokenInfo): DetaljertBehandling
 }
@@ -116,7 +117,10 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
         logger.info("Henter seneste iverksatte behandling for sak med id $sakId")
 
         val response = downstreamResourceClient.get(
-            resource = Resource(clientId = clientId, url = "$resourceUrl/saker/$sakId/behandlinger/sisteIverksatte"),
+            resource = Resource(
+                clientId = clientId,
+                url = "$resourceUrl/api/saker/$sakId/behandlinger/sisteIverksatte"
+            ),
             brukerTokenInfo = brukerTokenInfo
         )
 

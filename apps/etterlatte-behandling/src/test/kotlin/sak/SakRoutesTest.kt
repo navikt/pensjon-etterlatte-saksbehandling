@@ -79,7 +79,7 @@ internal class SakRoutesTest {
         val sakId = 1
         coEvery { generellBehandlingService.hentSisteIverksatte(1) } returns null
         withTestApplication { client ->
-            val response = client.get("/saker/$sakId/behandlinger/sisteIverksatte") {
+            val response = client.get("/api/saker/$sakId/behandlinger/sisteIverksatte") {
                 header(HttpHeaders.Authorization, "Bearer $token")
             }
 

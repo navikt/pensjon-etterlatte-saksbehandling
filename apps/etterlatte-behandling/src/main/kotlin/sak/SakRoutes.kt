@@ -32,6 +32,16 @@ internal fun Route.sakSystemRoutes(
 ) {
     val logger = LoggerFactory.getLogger(this::class.java)
 
+    route("/api/saker//{$SAKID_CALL_PARAMETER}/behandlinger/sisteIverksatte") {
+        get {
+            logger.info("Henter siste iverksatte behandling for $sakId")
+            when (val sisteIverksatteBehandling = generellBehandlingService.hentSisteIverksatte(sakId)) {
+                null -> call.respond(HttpStatusCode.NotFound)
+                else -> call.respond(sisteIverksatteBehandling.toDetaljertBehandling())
+            }
+        }
+    }
+
     route("/saker") {
         get {
             kunSystembruker {
@@ -45,14 +55,6 @@ internal fun Route.sakSystemRoutes(
                     sakService.finnSak(sakId)
                 }
                 call.respond(sak ?: HttpStatusCode.NotFound)
-            }
-
-            get("/behandlinger/sisteIverksatte") {
-                logger.info("Henter siste iverksatte behandling for $sakId")
-                when (val sisteIverksatteBehandling = generellBehandlingService.hentSisteIverksatte(sakId)) {
-                    null -> call.respond(HttpStatusCode.NotFound)
-                    else -> call.respond(sisteIverksatteBehandling.toDetaljertBehandling())
-                }
             }
         }
     }

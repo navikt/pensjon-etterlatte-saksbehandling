@@ -1,7 +1,7 @@
 import { Context, Strategy, getFeatureToggleDefinitions, initialize } from 'unleash-client'
 import { FeatureToggleConfig } from '../config/config'
 import GradualRolloutRandomStrategy from 'unleash-client/lib/strategy/gradual-rollout-random'
-import { logger } from './logger'
+import { logger } from '../monitoring/logger'
 
 export const unleashContext = {
   cluster: FeatureToggleConfig.cluster,

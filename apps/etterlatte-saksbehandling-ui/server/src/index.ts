@@ -4,12 +4,13 @@ import { appConf, ApiConfig } from './config/config'
 import { authenticateUser } from './middleware/auth'
 import { mockRouter } from './routers/mockRouter'
 import { modiaRouter } from './routers/modia'
-import { logger } from './utils/logger'
+import { logger } from './monitoring/logger'
 import { requestLogger } from './middleware/logging'
 import { tokenMiddleware } from './middleware/getOboToken'
 import { proxy } from './middleware/proxy'
 import { loggerRouter } from './routers/loggerRouter'
 import { unleashContext, unleash } from './utils/unleash'
+import prometheus from './monitoring/prometheus'
 
 logger.info(`environment: ${process.env.NODE_ENV}`)
 
@@ -23,6 +24,11 @@ app.use(requestLogger(isDev))
 
 app.use(['/health/isAlive', '/health/isReady'], (req: Request, res: Response) => {
   res.send('OK')
+})
+
+app.get('/metrics', async (req: Request, res: Response) => {
+  res.set('Content-Type', prometheus.register.contentType)
+  res.end(await prometheus.register.metrics())
 })
 
 if (isDev) {

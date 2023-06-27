@@ -2,7 +2,7 @@ import express, { Request, Response } from 'express'
 import { parseJwt } from '../utils/parsejwt'
 import { getOboToken } from '../middleware/getOboToken'
 import fetch from 'node-fetch'
-import { logger } from '../utils/logger'
+import { logger } from '../monitoring/logger'
 import { lagEnhetFraString } from '../utils/enhet'
 
 export const modiaRouter = express.Router() // for å støtte dekoratør for innloggede flater

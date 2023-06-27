@@ -1,7 +1,7 @@
 import { createProxyMiddleware } from 'http-proxy-middleware'
 import { ClientRequest } from 'http'
 import { Request, Response } from 'express'
-import { logger } from '../utils/logger'
+import { logger } from '../monitoring/logger'
 
 export const proxy = (host: string) =>
   createProxyMiddleware({

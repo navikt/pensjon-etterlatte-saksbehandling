@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom'
 import { sendInnManueltOpphoer } from '~shared/api/manueltOpphoer'
 import { formaterBehandlingstype, formaterKanskjeStringDato } from '~utils/formattering'
 import { IBehandlingsammendrag } from '~components/person/typer'
+import { harIngenUavbrutteManuelleOpphoer, kunIverksatteBehandlinger } from '~components/behandling/felles/utils'
 
 export const OPPHOERSGRUNNER = [
   'SOEKER_DOED',
@@ -19,7 +20,7 @@ export const OPPHOERSGRUNNER = [
   'ANNET',
 ] as const
 
-export type Opphoersgrunn = typeof OPPHOERSGRUNNER[number]
+export type Opphoersgrunn = (typeof OPPHOERSGRUNNER)[number]
 
 export const OVERSETTELSER_OPPHOERSGRUNNER: Record<Opphoersgrunn, string> = {
   SOEKER_DOED: 'Dødsfall søker',
@@ -35,10 +36,10 @@ export const OVERSETTELSER_OPPHOERSGRUNNER: Record<Opphoersgrunn, string> = {
 
 export const ManueltOpphoerModal = ({
   sakId,
-  iverksatteBehandlinger,
+  behandlingliste,
 }: {
   sakId: number
-  iverksatteBehandlinger: IBehandlingsammendrag[]
+  behandlingliste: IBehandlingsammendrag[]
 }) => {
   const [open, setOpen] = useState(false)
   const [fritekstgrunn, setFritekstgrunn] = useState<string>('')
@@ -50,6 +51,14 @@ export const ManueltOpphoerModal = ({
   useEffect(() => setFeilmelding(''), [open])
 
   const erAnnetValgt = selectedGrunner.includes('ANNET')
+
+  const iverksatteBehandlinger = kunIverksatteBehandlinger(behandlingliste)
+  const kanOppretteManueltOpphoer =
+    iverksatteBehandlinger.length > 0 && harIngenUavbrutteManuelleOpphoer(behandlingliste)
+
+  if (!kanOppretteManueltOpphoer) {
+    return null
+  }
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault()
@@ -81,9 +90,10 @@ export const ManueltOpphoerModal = ({
 
   return (
     <>
-      <Button variant="secondary" onClick={() => setOpen(true)}>
+      <Button variant="danger" onClick={() => setOpen(true)} size={'small'}>
         Annuller saken
       </Button>
+
       <Modal open={open} onClose={() => setOpen(false)}>
         <Modal.Content>
           <ModalSpacing>
@@ -107,7 +117,7 @@ export const ManueltOpphoerModal = ({
               />
               {feilmelding.length > 0 ? <Feilmelding>{feilmelding}</Feilmelding> : null}
               <FormKnapper>
-                <Button loading={loading} type="submit">
+                <Button loading={loading} type="submit" variant={'danger'}>
                   Opphør denne saken
                 </Button>
                 <Button variant="secondary" onClick={() => setOpen(false)}>

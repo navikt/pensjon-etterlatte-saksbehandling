@@ -1,56 +1,41 @@
-import { Link, Table, Tag } from '@navikt/ds-react'
+import { Heading, Link, Table, Tag } from '@navikt/ds-react'
 import { AarsaksTyper, BehandlingOgRevurderingsAarsakerType, IBehandlingsammendrag } from './typer'
-import {
-  formaterBehandlingstype,
-  formaterEnumTilLesbarString,
-  formaterSakstype,
-  formaterStringDato,
-} from '~utils/formattering'
+import { formaterBehandlingstype, formaterEnumTilLesbarString, formaterStringDato } from '~utils/formattering'
 import { IBehandlingStatus, IBehandlingsType, IUtenlandstilsnittType } from '~shared/types/IDetaljertBehandling'
 import { VilkaarsvurderingResultat } from '~shared/api/vilkaarsvurdering'
 import { erFerdigBehandlet } from '~components/behandling/felles/utils'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect } from 'react'
 import { Revurderingsaarsak } from '~shared/types/Revurderingsaarsak'
 import { hentVedtakSammendrag } from '~shared/api/vedtaksvurdering'
 import { tagColors } from '~shared/Tags'
 import styled from 'styled-components'
-import { VedtakSammendrag } from "~components/vedtak/typer";
-
-const kolonner = [
-  'Reg. dato',
-  'Sakid',
-  'Sakstype',
-  'Behandlingstype',
-  'Årsak',
-  'Status',
-  'Virkningstidspunkt',
-  'Vedtaksdato',
-  'Resultat',
-  '',
-]
+import { isFailure, isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
+import Spinner from '~shared/Spinner'
+import { ExclamationmarkTriangleFillIcon } from '@navikt/aksel-icons'
 
 const VedtaksDato = (props: { behandlingsId: string }) => {
-  const [vedtak, setVedtak] = useState<VedtakSammendrag | undefined>(undefined)
+  const [vedtak, apiHentVedtaksammendrag] = useApiCall(hentVedtakSammendrag)
 
   useEffect(() => {
-    const getVedtakSammendrag = async (behandlingsId: string) => {
-      const response = await hentVedtakSammendrag(behandlingsId)
-
-      if (response.status === 'ok') {
-        const responseData: VedtakSammendrag = response?.data
-
-        setVedtak(responseData)
-      } else {
-        setVedtak(response?.error)
-      }
-    }
-
-    getVedtakSammendrag(props.behandlingsId)
+    apiHentVedtaksammendrag(props.behandlingsId)
   }, [])
 
-  const attestertDato = vedtak?.datoAttestert
+  const attestertDato = (dato?: string) => {
+    if (dato) return formaterStringDato(dato)
+    else return ''
+  }
 
-  return <>{attestertDato ? formaterStringDato(attestertDato) : ''}</>
+  return (
+    <>
+      {isPending(vedtak) && <Spinner visible label={''} margin={'0'} />}
+      {isSuccess(vedtak) && <>{attestertDato(vedtak.data?.datoAttestert)}</>}
+      {isFailure(vedtak) && (
+        <ExclamationmarkTriangleFillIcon
+          title={vedtak.error.error || 'Feil oppsto ved henting av sammendrag for behandling'}
+        />
+      )}
+    </>
+  )
 }
 
 const lenkeTilBehandling = (behandlingSammendrag: IBehandlingsammendrag): string => {
@@ -65,34 +50,50 @@ const lenkeTilBehandling = (behandlingSammendrag: IBehandlingsammendrag): string
 }
 
 export const Behandlingsliste = ({ behandlinger }: { behandlinger: IBehandlingsammendrag[] }) => {
+  const sorterteBehandlinger = behandlinger.sort((a, b) =>
+    new Date(b.behandlingOpprettet!) > new Date(a.behandlingOpprettet!) ? 1 : -1
+  )
+
+  /**
+   * TODO:
+   *  Burde ha en form for paginering av behandlinger. Visning av tabellen og henting av vedtakssammendrag henger
+   *  seg opp når det er for mange elementer i listen. Eksempelvis testbruker STOR SNERK som har 210 behandlinger i
+   *  skrivende stund.
+   */
   return (
-    <>
+    <BehandlingPanel>
+      <Heading size={'medium'}>Behandlinger</Heading>
+
       <Table zebraStripes>
         <Table.Header>
           <Table.Row>
-            {kolonner.map((col) => (
-              <Table.HeaderCell key={`header${col}`}>{col}</Table.HeaderCell>
-            ))}
+            <Table.HeaderCell>Reg. dato</Table.HeaderCell>
+            <Table.HeaderCell>Behandlingstype</Table.HeaderCell>
+            <Table.HeaderCell>Utenlandstilsnitt</Table.HeaderCell>
+            <Table.HeaderCell>Årsak</Table.HeaderCell>
+            <Table.HeaderCell>Status</Table.HeaderCell>
+            <Table.HeaderCell>Virkningstidspunkt</Table.HeaderCell>
+            <Table.HeaderCell>Vedtaksdato</Table.HeaderCell>
+            <Table.HeaderCell>Resultat</Table.HeaderCell>
+            <Table.HeaderCell></Table.HeaderCell>
           </Table.Row>
         </Table.Header>
         <Table.Body>
-          {behandlinger.map((behandling, i) => (
+          {sorterteBehandlinger.map((behandling, i) => (
             <Table.Row key={i} shadeOnHover={false}>
               <Table.DataCell key={`data${behandling.behandlingOpprettet}`}>
                 {formaterStringDato(behandling.behandlingOpprettet)}
               </Table.DataCell>
-              <Table.DataCell key={`data${behandling.sak}`}>{behandling.sak}</Table.DataCell>
-              <Table.DataCell key={`data${behandling.sakType}`}>{formaterSakstype(behandling.sakType)}</Table.DataCell>
               <Table.DataCell key={`data${behandling.behandlingType}`}>
-                <BehandlingstypeWrapper>
-                  {formaterBehandlingstype(behandling.behandlingType)}
-                  <Tag
-                    variant={tagColors[behandling.utenlandstilsnitt?.type || IUtenlandstilsnittType.NASJONAL]}
-                    size={'small'}
-                  >
-                    {formaterEnumTilLesbarString(behandling.utenlandstilsnitt?.type || IUtenlandstilsnittType.NASJONAL)}
-                  </Tag>
-                </BehandlingstypeWrapper>
+                <BehandlingstypeWrapper>{formaterBehandlingstype(behandling.behandlingType)}</BehandlingstypeWrapper>
+              </Table.DataCell>
+              <Table.DataCell>
+                <Tag
+                  variant={tagColors[behandling.utenlandstilsnitt?.type || IUtenlandstilsnittType.NASJONAL]}
+                  size={'small'}
+                >
+                  {formaterEnumTilLesbarString(behandling.utenlandstilsnitt?.type || IUtenlandstilsnittType.NASJONAL)}
+                </Tag>
               </Table.DataCell>
               <Table.DataCell key={`data${behandling.aarsak}`}>{mapAarsak(behandling.aarsak)}</Table.DataCell>
               <Table.DataCell key={`data${behandling.status}`}>
@@ -114,7 +115,7 @@ export const Behandlingsliste = ({ behandlinger }: { behandlinger: IBehandlingsa
           ))}
         </Table.Body>
       </Table>
-    </>
+    </BehandlingPanel>
   )
 }
 
@@ -186,6 +187,10 @@ function resultatTekstFoerstegangsbehandling(vilkaarsvurderingResultat?: Vilkaar
       return 'Avslått'
   }
 }
+
+const BehandlingPanel = styled.div`
+  margin: 3rem 0;
+`
 
 const BehandlingstypeWrapper = styled.div`
   display: flex;

@@ -8,17 +8,19 @@ import {
 } from '~shared/types/IDetaljertBehandling'
 import { apiClient, ApiResponse } from './apiClient'
 import { ManueltOpphoerDetaljer } from '~components/behandling/manueltopphoeroversikt/ManueltOpphoerOversikt'
-import { Grunnlagsendringshendelse } from '~components/person/typer'
+import { Grunnlagsendringshendelse, GrunnlagsendringsListe, IBehandlingListe } from '~components/person/typer'
 import { Revurderingsaarsak } from '~shared/types/Revurderingsaarsak'
 import { InstitusjonsoppholdBegrunnelse } from '~components/person/uhaandtereHendelser/InstitusjonsoppholdVurderingBegrunnelse'
 import { ISak, SakType } from '~shared/types/sak'
 import { InstitusjonsoppholdMedKilde } from '~components/person/uhaandtereHendelser/HistoriskeHendelser'
 
-export const hentBehandlingerForPerson = async (fnr: string): Promise<ApiResponse<any>> => {
+export const hentBehandlingerForPerson = async (fnr: string): Promise<ApiResponse<IBehandlingListe[]>> => {
   return apiClient.post(`/personer/behandlinger`, { foedselsnummer: fnr })
 }
 
-export const hentGrunnlagsendringshendelserForPerson = async (fnr: string): Promise<ApiResponse<any>> => {
+export const hentGrunnlagsendringshendelserForPerson = async (
+  fnr: string
+): Promise<ApiResponse<GrunnlagsendringsListe[]>> => {
   return apiClient.post(`/personer/grunnlagsendringshendelser`, { foedselsnummer: fnr })
 }
 

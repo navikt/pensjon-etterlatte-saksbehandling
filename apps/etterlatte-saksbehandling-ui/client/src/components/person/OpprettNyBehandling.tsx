@@ -6,6 +6,7 @@ import { opprettRevurdering as opprettRevurderingApi } from '~shared/api/behandl
 import { Revurderingsaarsak, tekstRevurderingsaarsak } from '~shared/types/Revurderingsaarsak'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { useNavigate } from 'react-router-dom'
+import { ButtonContainer } from '~components/person/OpprettRevurderingModal'
 
 export const OpprettNyBehandling = ({
   sakId,
@@ -39,7 +40,7 @@ export const OpprettNyBehandling = ({
 
   return (
     <OpprettNyBehandlingWrapper>
-      <MaxWidth>
+      <>
         <Button variant="secondary" onClick={() => setOpen(true)}>
           Opprett ny behandling
         </Button>
@@ -63,12 +64,7 @@ export const OpprettNyBehandling = ({
                 )
               })}
             </Select>
-            <MarginTop15>
-              <MarginRight15>
-                <Button loading={isPending(opprettRevurderingStatus)} onClick={opprettBehandling}>
-                  Opprett
-                </Button>
-              </MarginRight15>
+            <ButtonContainer>
               <Button
                 variant="secondary"
                 onClick={() => {
@@ -78,25 +74,17 @@ export const OpprettNyBehandling = ({
               >
                 Avbryt
               </Button>
-            </MarginTop15>
+              <Button loading={isPending(opprettRevurderingStatus)} onClick={opprettBehandling}>
+                Opprett
+              </Button>
+            </ButtonContainer>
           </Modal.Content>
         </Modal>
-      </MaxWidth>
+      </>
     </OpprettNyBehandlingWrapper>
   )
 }
 
 const OpprettNyBehandlingWrapper = styled.div`
   margin-top: 3rem;
-`
-const MarginTop15 = styled.div`
-  margin-top: 15px;
-`
-
-const MarginRight15 = styled.span`
-  margin-right: 15px;
-`
-
-const MaxWidth = styled.p`
-  max-width: 500px;
 `

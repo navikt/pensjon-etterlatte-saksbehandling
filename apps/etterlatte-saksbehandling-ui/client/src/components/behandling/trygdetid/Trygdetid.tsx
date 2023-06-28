@@ -17,12 +17,19 @@ import { BodyShort } from '@navikt/ds-react'
 import { useParams } from 'react-router-dom'
 import { Grunnlagopplysninger } from '~components/behandling/trygdetid/Grunnlagopplysninger'
 import { TrygdetidGrunnlagListe } from '~components/behandling/trygdetid/TrygdetidGrunnlagListe'
+import { TrygdeAvtale } from './avtaler/TrygdeAvtale'
+import { IUtenlandstilsnitt, IUtenlandstilsnittType } from '~shared/types/IDetaljertBehandling'
 
 interface Props {
   redigerbar: boolean
+  utenlandstilsnitt?: IUtenlandstilsnitt
 }
 
-export const Trygdetid: React.FC<Props> = ({ redigerbar }) => {
+const visTrydeavtale = (utenlandstilsnittType?: IUtenlandstilsnittType): Boolean => {
+  return utenlandstilsnittType === IUtenlandstilsnittType.BOSATT_UTLAND
+}
+
+export const Trygdetid = ({ redigerbar, utenlandstilsnitt }: Props) => {
   const { behandlingId } = useParams()
   const [hentTrygdetidRequest, fetchTrygdetid] = useApiCall(hentTrygdetid)
   const [opprettTrygdetidRequest, requestOpprettTrygdetid] = useApiCall(opprettTrygdetid)
@@ -93,6 +100,7 @@ export const Trygdetid: React.FC<Props> = ({ redigerbar }) => {
             redigerbar={redigerbar}
           />
           <TrygdetidBeregnet trygdetid={trygdetid} setTrygdetid={setTrygdetid} />
+          {visTrydeavtale(utenlandstilsnitt?.type) && <TrygdeAvtale redigerbar={redigerbar} />}
         </>
       )}
       {(isPending(hentTrygdetidRequest) || isPending(hentAlleLandRequest)) && (

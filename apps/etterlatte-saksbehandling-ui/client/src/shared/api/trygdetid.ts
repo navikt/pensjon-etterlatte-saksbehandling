@@ -21,6 +21,63 @@ export const slettTrygdetidsgrunnlag = async (args: {
 export const hentAlleLand = async (): Promise<ApiResponse<ILand[]>> =>
   apiClient.get<ILand[]>('/trygdetid/kodeverk/land')
 
+export interface TrygdetidAvtaleOptions {
+  kode: string
+  beskrivelse: string
+}
+
+export interface TrygdetidAvtaleDato extends TrygdetidAvtaleOptions {
+  fraDato: Date
+}
+
+export interface TrygdetidAvtale extends TrygdetidAvtaleOptions {
+  kode: string
+  beskrivelse: string
+  fraDato: Date
+  datoer: TrygdetidAvtaleDato[]
+}
+
+export interface TrygdetidAvtaleKriteria extends TrygdetidAvtaleOptions {
+  kode: string
+  beskrivelse: string
+  fraDato: Date
+}
+
+export interface Trygdeavtale {
+  id: string
+  behandlingId: string
+  avtaleKode: string
+  avtaleDatoKode?: string
+  avtaleKriteriaKode?: string
+  kilde: {
+    tidspunkt: string
+    ident: string
+  }
+}
+
+export interface TrygdeavtaleRequest {
+  id?: string
+  avtaleKode: string
+  avtaleDatoKode?: string
+  avtaleKriteriaKode?: string
+}
+
+export const hentAlleTrygdetidAvtaler = async (): Promise<ApiResponse<TrygdetidAvtale[]>> =>
+  apiClient.get<TrygdetidAvtale[]>('/trygdetid/avtaler')
+
+export const hentAlleTrygdetidAvtaleKriterier = async (): Promise<ApiResponse<TrygdetidAvtaleKriteria[]>> =>
+  apiClient.get<TrygdetidAvtaleKriteria[]>('/trygdetid/avtaler/kriteria')
+
+export const hentTrygdeavtaleForBehandling = async (args: {
+  behandlingId: string
+}): Promise<ApiResponse<Trygdeavtale>> => apiClient.get<Trygdeavtale>(`/trygdetid/avtaler/${args.behandlingId}`)
+
+export const lagreTrygdeavtaleForBehandling = async (args: {
+  behandlingsId: string
+  avtaleRequest: TrygdeavtaleRequest
+}): Promise<ApiResponse<Trygdeavtale>> =>
+  apiClient.post<Trygdeavtale>(`/trygdetid/avtaler/${args.behandlingsId}`, { ...args.avtaleRequest })
+
 export interface ITrygdetid {
   id: string
   behandlingId: string

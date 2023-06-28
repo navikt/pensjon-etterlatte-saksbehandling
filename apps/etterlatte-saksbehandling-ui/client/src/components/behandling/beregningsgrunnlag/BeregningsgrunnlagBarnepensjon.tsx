@@ -112,7 +112,11 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
   return (
     <>
       {!isPending(funksjonsbrytere) &&
-        (beregnTrygdetid ? <BeregnetTrygdetid redigerbar={behandles} /> : <FastTrygdetid />)}
+        (beregnTrygdetid ? (
+          <BeregnetTrygdetid redigerbar={behandles} utenlandstilsnitt={behandling.utenlandstilsnitt} />
+        ) : (
+          <FastTrygdetid />
+        ))}
       <>
         {isSuccess(beregningsgrunnlag) && behandling.familieforhold && (
           <Soeskenjustering

@@ -1,6 +1,7 @@
 import { format } from 'date-fns'
 import { IBehandlingsType } from '~shared/types/IDetaljertBehandling'
 import { SakType } from '~shared/types/sak'
+import { VedtakType } from '~components/vedtak/typer'
 
 export const capitalize = (s?: string) => {
   if (!s) return ''
@@ -44,6 +45,19 @@ export const formaterSakstype = (sakstype: SakType): string => {
       return 'Barnepensjon'
     case SakType.OMSTILLINGSSTOENAD:
       return 'Omstillingsstønad'
+  }
+}
+
+export const formaterVedtakType = (type?: VedtakType): string => {
+  switch (type) {
+    case VedtakType.INNVILGELSE:
+      return 'Innvilgelse'
+    case VedtakType.OPPHOER:
+      return 'Opphør'
+    case VedtakType.AVSLAG:
+      return 'Avslag'
+    case VedtakType.ENDRING:
+      return 'Endring'
   }
 }
 

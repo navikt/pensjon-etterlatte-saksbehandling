@@ -14,6 +14,7 @@ import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.mockk
 import no.nav.etterlatte.behandling.GenerellBehandlingService
+import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
 import no.nav.etterlatte.libs.ktor.restModule
@@ -38,6 +39,7 @@ internal class SakRoutesTest {
     private lateinit var hoconApplicationConfig: HoconApplicationConfig
     private val generellBehandlingService = mockk<GenerellBehandlingService>(relaxUnitFun = true)
     private val sakService = mockk<SakService>(relaxUnitFun = true)
+    private val grunnlagsendringshendelseService = mockk<GrunnlagsendringshendelseService>(relaxUnitFun = true)
     private val tilgangService = mockk<TilgangService>(relaxUnitFun = true)
 
     @BeforeAll
@@ -64,7 +66,7 @@ internal class SakRoutesTest {
         coEvery { generellBehandlingService.hentSisteIverksatte(1) } returns mockk(relaxed = true)
 
         withTestApplication { client ->
-            val response = client.get("/saker/$sakId/behandlinger/sisteIverksatte") {
+            val response = client.get("/api/saker/$sakId/behandlinger/sisteIverksatte") {
                 header(HttpHeaders.Authorization, "Bearer $token")
             }
 

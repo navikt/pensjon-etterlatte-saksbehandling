@@ -96,8 +96,7 @@ internal class SakRoutesTest {
                     sakRoutes(
                         tilgangService,
                         sakService,
-                        generellBehandlingService,
-                        grunnlagsendringshendelseService
+                        generellBehandlingService
                     )
                 }
             }

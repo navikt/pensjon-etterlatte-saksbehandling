@@ -27,8 +27,7 @@ import no.nav.etterlatte.tilgangsstyring.withFoedselsnummerInternal
 internal fun Route.sakRoutes(
     tilgangService: TilgangService,
     sakService: SakService,
-    generellBehandlingService: GenerellBehandlingService,
-    grunnlagsendringshendelseService: GrunnlagsendringshendelseService
+    generellBehandlingService: GenerellBehandlingService
 ) {
     route("/saker") {
         get {
@@ -72,43 +71,51 @@ internal fun Route.sakRoutes(
             call.respond(sak ?: HttpStatusCode.NotFound)
         }
     }
+}
 
-    route("/api/personer/") {
-        post("behandlinger") {
-            withFoedselsnummerInternal(tilgangService) { fnr ->
-                val behandlinger = sakService.finnSaker(fnr.value)
-                    .map { sak ->
-                        generellBehandlingService.hentBehandlingerISak(sak.id)
-                            .map { it.toBehandlingSammendrag() }
-                            .let { BehandlingListe(sak, it) }
-                    }
-                call.respond(behandlinger)
+internal fun Route.sakRoutesApi(
+    tilgangService: TilgangService,
+    sakService: SakService,
+    generellBehandlingService: GenerellBehandlingService,
+    grunnlagsendringshendelseService: GrunnlagsendringshendelseService
+) {
+    route("/api") {
+        route("/sak/{$SAKID_CALL_PARAMETER}") {
+            get {
+                val sak = inTransaction {
+                    sakService.finnSak(sakId)
+                }
+                call.respond(sak ?: HttpStatusCode.NotFound)
             }
         }
-
-        post("grunnlagsendringshendelser") {
-            withFoedselsnummerInternal(tilgangService) { fnr ->
-                call.respond(
-                    sakService.finnSaker(fnr.value).map { sak ->
-                        GrunnlagsendringsListe(grunnlagsendringshendelseService.hentAlleHendelserForSak(sak.id))
-                    }
-                )
+        route("/personer/") {
+            post("behandlinger") {
+                withFoedselsnummerInternal(tilgangService) { fnr ->
+                    val behandlinger = sakService.finnSaker(fnr.value)
+                        .map { sak ->
+                            generellBehandlingService.hentBehandlingerISak(sak.id)
+                                .map { it.toBehandlingSammendrag() }
+                                .let { BehandlingListe(sak, it) }
+                        }
+                    call.respond(behandlinger)
+                }
             }
-        }
 
-        post("lukkgrunnlagsendringshendelse") {
-            val lukketHendelse = call.receive<Grunnlagsendringshendelse>()
-            grunnlagsendringshendelseService.lukkHendelseMedKommentar(hendelse = lukketHendelse)
-            call.respond(HttpStatusCode.OK)
-        }
-    }
-
-    route("/api/sak/{$SAKID_CALL_PARAMETER}") {
-        get {
-            val sak = inTransaction {
-                sakService.finnSak(sakId)
+            post("grunnlagsendringshendelser") {
+                withFoedselsnummerInternal(tilgangService) { fnr ->
+                    call.respond(
+                        sakService.finnSaker(fnr.value).map { sak ->
+                            GrunnlagsendringsListe(grunnlagsendringshendelseService.hentAlleHendelserForSak(sak.id))
+                        }
+                    )
+                }
             }
-            call.respond(sak ?: HttpStatusCode.NotFound)
+
+            post("lukkgrunnlagsendringshendelse") {
+                val lukketHendelse = call.receive<Grunnlagsendringshendelse>()
+                grunnlagsendringshendelseService.lukkHendelseMedKommentar(hendelse = lukketHendelse)
+                call.respond(HttpStatusCode.OK)
+            }
         }
     }
 }

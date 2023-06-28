@@ -33,6 +33,7 @@ import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.libs.ktor.setReady
 import no.nav.etterlatte.oppgave.oppgaveRoutes
 import no.nav.etterlatte.sak.sakRoutes
+import no.nav.etterlatte.sak.sakRoutesApi
 import no.nav.etterlatte.tilgangsstyring.adressebeskyttelsePlugin
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -83,6 +84,11 @@ fun Application.module(context: ApplicationContext) {
         ) {
             attachContekst(dataSource, context)
             sakRoutes(
+                tilgangService = tilgangService,
+                sakService = sakService,
+                generellBehandlingService = generellBehandlingService
+            )
+            sakRoutesApi(
                 tilgangService = tilgangService,
                 sakService = sakService,
                 generellBehandlingService = generellBehandlingService,

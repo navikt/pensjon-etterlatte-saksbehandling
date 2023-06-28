@@ -57,7 +57,7 @@ export type SoeskenMedIBeregningGrunnlagDto = PeriodisertBeregningsgrunnlagDto<S
 export type InstitusjonsoppholdGrunnlagData = PeriodisertBeregningsgrunnlag<InstitusjonsoppholdIBeregning>[]
 
 export interface InstitusjonsoppholdIBeregning {
-  reduksjon: string
+  reduksjon: Reduksjonstypekey
   egenReduksjon?: string | undefined
   begrunnelse?: string | undefined
 }
@@ -68,3 +68,5 @@ export const Reduksjon = {
   JA_EGEN_PROSENT_AV_G: 'Ja, utgifter til bolig(egen % av G)',
   NEI_HOEYE_UTGIFTER_BOLIG: 'Nei, har høye utgifter til bolig',
 }
+
+type Reduksjonstypekey = keyof typeof Reduksjon

@@ -66,7 +66,7 @@ export const Barnepensjonberegningssammendrag = ({
             ))}
             <strong>Beregningen gjelder: </strong>
             <ListWithoutBullet>
-              {Reduksjon[beregningsperiode.institusjonsopphold.reduksjon as keyof typeof Reduksjon]}
+              {Reduksjon[beregningsperiode.institusjonsopphold.reduksjon]}
               {beregningsperiode.institusjonsopphold.egenReduksjon && (
                 <p>Egen reduksjon: {beregningsperiode.institusjonsopphold.egenReduksjon}</p>
               )}

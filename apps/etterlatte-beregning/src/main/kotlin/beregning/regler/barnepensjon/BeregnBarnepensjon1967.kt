@@ -1,6 +1,7 @@
 package no.nav.etterlatte.beregning.regler.barnepensjon
 
-import beregning.regler.barnepensjon.institusjonsoppholdRegel
+import beregning.regler.barnepensjon.erBrukerIInstitusjon
+import beregning.regler.barnepensjon.institusjonsoppholdSatsRegel
 import no.nav.etterlatte.beregning.grunnlag.InstitusjonsoppholdBeregningsgrunnlag
 import no.nav.etterlatte.beregning.regler.barnepensjon.sats.barnepensjonSatsRegel
 import no.nav.etterlatte.beregning.regler.barnepensjon.trygdetidsfaktor.trygdetidsFaktor
@@ -18,8 +19,7 @@ import java.time.LocalDate
 data class PeriodisertBarnepensjonGrunnlag(
     val soeskenKull: PeriodisertGrunnlag<FaktumNode<List<Folkeregisteridentifikator>>>,
     val avdoedForelder: PeriodisertGrunnlag<FaktumNode<AvdoedForelder>>,
-    val institusjonsopphold:
-    PeriodisertGrunnlag<FaktumNode<InstitusjonsoppholdBeregningsgrunnlag?>>
+    val institusjonsopphold: PeriodisertGrunnlag<FaktumNode<InstitusjonsoppholdBeregningsgrunnlag?>>
 ) : PeriodisertGrunnlag<BarnepensjonGrunnlag> {
     override fun finnAlleKnekkpunkter(): Set<LocalDate> {
         return soeskenKull.finnAlleKnekkpunkter() + avdoedForelder.finnAlleKnekkpunkter()
@@ -45,8 +45,7 @@ val beregnBarnepensjon1967Regel = RegelMeta(
     gjelderFra = BP_1967_DATO,
     beskrivelse = "Reduserer ytelsen mot opptjening i folketrygden",
     regelReferanse = RegelReferanse(id = "BP-BEREGNING-1967-REDUSERMOTTRYGDETID")
-) benytter barnepensjonSatsRegel og trygdetidsFaktor med { sats,
-        trygdetidsfaktor ->
+) benytter barnepensjonSatsRegel og trygdetidsFaktor med { sats, trygdetidsfaktor ->
     sats.multiply(trygdetidsfaktor)
 }
 
@@ -58,14 +57,31 @@ val kroneavrundetBarnepensjonRegel = RegelMeta(
     beregnetBarnepensjon.round(decimals = 0).toInteger()
 }
 
+val barnepensjonSatsMedInstitusjonsopphold = RegelMeta(
+    gjelderFra = BP_1967_DATO,
+    beskrivelse = "Sikrer at ytelsen ikke blir større med institusjonsoppholdberegning",
+    regelReferanse = RegelReferanse(id = "BP-BEREGNING-1967-GUNSTIGHET-INSTITUSJON")
+) benytter barnepensjonSatsRegel og institusjonsoppholdSatsRegel med { standardSats, institusjonsoppholdSats ->
+    institusjonsoppholdSats.coerceAtMost(standardSats)
+}
+
+val barnepensjonSats = RegelMeta(
+    gjelderFra = BP_1967_DATO,
+    beskrivelse = "Bruker institusjonsoppholdberegning hvis barnet er i institusjon",
+    regelReferanse = RegelReferanse("BP-BEREGNING-1967-KANSKJEANVENDINSTITUSJON")
+) benytter barnepensjonSatsRegel og barnepensjonSatsMedInstitusjonsopphold og erBrukerIInstitusjon med {
+        satsIkkeInstitusjonsopphold,
+        satsInstitusjonsopphold,
+        harInstitusjonshopphold ->
+    if (harInstitusjonshopphold) satsInstitusjonsopphold else satsIkkeInstitusjonsopphold
+}
+
 val beregnBarnepensjon1967RegelMedInstitusjon = RegelMeta(
     gjelderFra = BP_1967_DATO,
     beskrivelse = "Reduserer ytelsen mot opptjening i folketrygden inkludert institusjonsopphold",
     regelReferanse = RegelReferanse(id = "BP-BEREGNING-1967-REDUSERMOTTRYGDETID-INSTITUSJON")
-) benytter barnepensjonSatsRegel og trygdetidsFaktor og institusjonsoppholdRegel med { sats,
-        trygdetidsfaktor,
-        institusjonsopphold ->
-    sats.multiply(Beregningstall.somBroek(institusjonsopphold)).multiply(trygdetidsfaktor)
+) benytter barnepensjonSats og trygdetidsFaktor med { sats, trygdetidsfaktor ->
+    sats.multiply(trygdetidsfaktor)
 }
 
 val kroneavrundetBarnepensjonRegelMedInstitusjon = RegelMeta(

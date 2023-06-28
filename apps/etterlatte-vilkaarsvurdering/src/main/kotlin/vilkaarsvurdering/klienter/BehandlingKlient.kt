@@ -116,10 +116,7 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
         logger.info("Henter seneste iverksatte behandling for sak med id $sakId")
 
         val response = downstreamResourceClient.get(
-            resource = Resource(
-                clientId = clientId,
-                url = "$resourceUrl/saker/$sakId/behandlinger/sisteIverksatte"
-            ),
+            resource = Resource(clientId = clientId, url = "$resourceUrl/saker/$sakId/behandlinger/sisteIverksatte"),
             brukerTokenInfo = brukerTokenInfo
         )
 

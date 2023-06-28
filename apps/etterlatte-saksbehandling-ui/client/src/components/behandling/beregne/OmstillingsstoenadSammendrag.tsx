@@ -1,6 +1,6 @@
 import { Heading, Table } from '@navikt/ds-react'
 import styled from 'styled-components'
-import { lastDayOfMonth } from 'date-fns'
+import { compareDesc, lastDayOfMonth } from 'date-fns'
 import { formaterDato, formaterStringDato } from '~utils/formattering'
 import { Beregning } from '~shared/types/Beregning'
 import { OmstillingsstoenadToolTip } from '~components/behandling/beregne/OmstillingsstoenadToolTip'
@@ -10,7 +10,9 @@ interface Props {
 }
 
 export const OmstillingsstoenadSammendrag = ({ beregning }: Props) => {
-  const beregningsperioder = beregning.beregningsperioder
+  const beregningsperioder = [...beregning.beregningsperioder].sort((a, b) =>
+    compareDesc(new Date(a.datoFOM), new Date(b.datoFOM))
+  )
 
   return (
     <TableWrapper>

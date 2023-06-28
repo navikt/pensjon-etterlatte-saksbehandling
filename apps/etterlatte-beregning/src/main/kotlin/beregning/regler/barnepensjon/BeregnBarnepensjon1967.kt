@@ -22,7 +22,8 @@ data class PeriodisertBarnepensjonGrunnlag(
     PeriodisertGrunnlag<FaktumNode<InstitusjonsoppholdBeregningsgrunnlag?>>
 ) : PeriodisertGrunnlag<BarnepensjonGrunnlag> {
     override fun finnAlleKnekkpunkter(): Set<LocalDate> {
-        return soeskenKull.finnAlleKnekkpunkter() + avdoedForelder.finnAlleKnekkpunkter()
+        return soeskenKull.finnAlleKnekkpunkter() + avdoedForelder.finnAlleKnekkpunkter() +
+            institusjonsopphold.finnAlleKnekkpunkter()
     }
 
     override fun finnGrunnlagForPeriode(datoIPeriode: LocalDate): BarnepensjonGrunnlag {

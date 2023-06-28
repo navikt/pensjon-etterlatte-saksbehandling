@@ -160,6 +160,9 @@ class BeregnBarnepensjonService(
                         ).verdi.map {
                             it.value
                         },
+                        institusjonsopphold = beregningsgrunnlag.institusjonsopphold.finnGrunnlagForPeriode(
+                            periodisertResultat.periode.fraDato
+                        ).verdi,
                         grunnbelopMnd = grunnbeloep.grunnbeloepPerMaaned,
                         grunnbelop = grunnbeloep.grunnbeloep,
                         trygdetid = beregningsgrunnlag.avdoedForelder.finnGrunnlagForPeriode(

@@ -29,6 +29,7 @@ export interface Beregningsperiode {
   datoTOM: string
   utbetaltBeloep: number
   soeskenFlokk: string[]
+  institusjonsopphold: InstitusjonsoppholdIBeregning | undefined
   grunnbelopMnd: number
   grunnbelop: number
   trygdetid: number
@@ -56,14 +57,17 @@ export type SoeskenMedIBeregningGrunnlagDto = PeriodisertBeregningsgrunnlagDto<S
 export type InstitusjonsoppholdGrunnlagData = PeriodisertBeregningsgrunnlag<InstitusjonsoppholdIBeregning>[]
 
 export interface InstitusjonsoppholdIBeregning {
-  reduksjon: string
+  reduksjon: Reduksjonstypekey
   egenReduksjon?: string | undefined
   begrunnelse?: string | undefined
 }
 
-export enum Reduksjon {
-  JA_VANLIG = 'Ja, etter vanlig sats(10% av G)',
-  NEI_KORT_OPPHOLD = 'Nei, kort opphold',
-  JA_EGEN_PROSENT_AV_G = 'Ja, utgifter til bolig(egen % av G)',
-  NEI_HOEYE_UTGIFTER_BOLIG = 'Nei, har høye utgifter til bolig',
+export const Reduksjon = {
+  VELG_REDUKSJON: 'Velg reduksjon',
+  JA_VANLIG: 'Ja, etter vanlig sats(10% av G)',
+  NEI_KORT_OPPHOLD: 'Nei, kort opphold',
+  JA_EGEN_PROSENT_AV_G: 'Ja, utgifter til bolig(egen % av G)',
+  NEI_HOEYE_UTGIFTER_BOLIG: 'Nei, har høye utgifter til bolig',
 }
+
+type Reduksjonstypekey = keyof typeof Reduksjon

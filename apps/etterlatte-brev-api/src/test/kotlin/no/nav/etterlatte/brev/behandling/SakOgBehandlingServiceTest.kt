@@ -205,6 +205,7 @@ internal class SakOgBehandlingServiceTest {
         tom,
         beloep,
         soeskenFlokk,
+        null,
         1000,
         10000,
         10

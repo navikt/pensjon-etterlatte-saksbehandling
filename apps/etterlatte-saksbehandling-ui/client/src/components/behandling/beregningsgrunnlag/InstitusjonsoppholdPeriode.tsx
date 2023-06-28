@@ -86,7 +86,7 @@ const InstitusjonsoppholdPeriode = (props: InstitusjonsoppholdPerioder) => {
           {item.data.reduksjon === 'JA_EGEN_PROSENT_AV_G' && (
             <TextField
               error={errors?.data?.egenReduksjon?.message}
-              label="Reduksjonsbeløp"
+              label="Reduksjonsbeløp(oppgi i % av G)"
               type="text"
               {...register(`institusjonsOppholdForm.${index}.data.egenReduksjon`, {
                 validate: (beloep) => {

@@ -3,8 +3,8 @@ import styled from 'styled-components'
 import { compareDesc, lastDayOfMonth } from 'date-fns'
 import { formaterDato, formaterStringDato } from '~utils/formattering'
 import { Beregning } from '~shared/types/Beregning'
-import { BarnepensjonToolTip } from '~components/behandling/beregne/BarnepensjonToolTip'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
+import { Barnepensjonberegningssammendrag } from '~components/behandling/beregne/Barnepensjonberegningssammendrag'
 
 interface Props {
   behandling: IDetaljertBehandling
@@ -27,6 +27,7 @@ export const BarnepensjonSammendrag = ({ behandling, beregning }: Props) => {
       <Table className="table" zebraStripes>
         <Table.Header>
           <Table.Row>
+            <Table.HeaderCell />
             <Table.HeaderCell>Periode</Table.HeaderCell>
             <Table.HeaderCell>Ytelse</Table.HeaderCell>
             <Table.HeaderCell>Trygdetid</Table.HeaderCell>
@@ -37,7 +38,21 @@ export const BarnepensjonSammendrag = ({ behandling, beregning }: Props) => {
         </Table.Header>
         <Table.Body>
           {beregningsperioder?.map((beregningsperiode, key) => (
-            <Table.Row key={key} shadeOnHover={false}>
+            <Table.ExpandableRow
+              key={key}
+              shadeOnHover={false}
+              content={
+                <>
+                  {soeker && (
+                    <Barnepensjonberegningssammendrag
+                      beregningsperiode={beregningsperiode}
+                      soeker={soeker}
+                      soesken={soesken}
+                    />
+                  )}
+                </>
+              }
+            >
               <Table.DataCell>
                 {`${formaterStringDato(beregningsperiode.datoFOM)} - ${
                   beregningsperiode.datoTOM ? formaterDato(lastDayOfMonth(new Date(beregningsperiode.datoTOM))) : ''
@@ -47,20 +62,15 @@ export const BarnepensjonSammendrag = ({ behandling, beregning }: Props) => {
               <Table.DataCell>{beregningsperiode.trygdetid} år</Table.DataCell>
               <Table.DataCell>{beregningsperiode.grunnbelop} kr</Table.DataCell>
               <Table.DataCell>
-                {beregningsperiode.soeskenFlokk && soeker ? (
-                  <BarnepensjonToolTip
-                    soesken={beregningsperiode.soeskenFlokk.map((fnr) => {
-                      const soeskenMedData = soesken?.find((p) => p.foedselsnummer === fnr)
-                      return soeskenMedData!!
-                    })}
-                    soeker={soeker}
-                  />
-                ) : (
-                  '-'
-                )}
+                {
+                  <>
+                    {beregningsperiode.soeskenFlokk && `${beregningsperiode.soeskenFlokk.length} barn`}{' '}
+                    {beregningsperiode.institusjonsopphold && ' institusjonsopphold'}
+                  </>
+                }
               </Table.DataCell>
               <Table.DataCell>{beregningsperiode.utbetaltBeloep} kr</Table.DataCell>
-            </Table.Row>
+            </Table.ExpandableRow>
           ))}
         </Table.Body>
       </Table>

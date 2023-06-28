@@ -42,7 +42,6 @@ export const BarnepensjonSammendrag = ({ behandling, beregning }: Props) => {
                 <>
                   {soeker && (
                     <Barnepensjonberegningssammendrag
-                      behandlingId={behandling.id}
                       beregningsperiode={beregningsperiode}
                       soeker={soeker}
                       soesken={soesken}

@@ -1,5 +1,7 @@
 package no.nav.etterlatte.beregning
 
+import no.nav.etterlatte.beregning.grunnlag.InstitusjonsoppholdBeregningsgrunnlag
+import no.nav.etterlatte.beregning.grunnlag.Reduksjon
 import no.nav.etterlatte.beregning.regler.FNR_1
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
 import no.nav.etterlatte.libs.common.beregning.Beregningstype
@@ -95,6 +97,7 @@ internal class BeregningRepositoryTest {
                     datoTOM = null,
                     utbetaltBeloep = 3000,
                     soeskenFlokk = listOf(FNR_1),
+                    institusjonsopphold = InstitusjonsoppholdBeregningsgrunnlag(Reduksjon.JA_VANLIG),
                     grunnbelopMnd = 10_000,
                     grunnbelop = 100_000,
                     trygdetid = 40,

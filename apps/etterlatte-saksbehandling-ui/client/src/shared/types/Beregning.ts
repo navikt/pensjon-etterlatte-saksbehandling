@@ -29,6 +29,7 @@ export interface Beregningsperiode {
   datoTOM: string
   utbetaltBeloep: number
   soeskenFlokk: string[]
+  institusjonsopphold: InstitusjonsoppholdIBeregning | undefined
   grunnbelopMnd: number
   grunnbelop: number
   trygdetid: number

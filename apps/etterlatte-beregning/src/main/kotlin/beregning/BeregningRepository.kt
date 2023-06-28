@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.readValue
 import kotliquery.Row
 import kotliquery.queryOf
+import no.nav.etterlatte.beregning.grunnlag.InstitusjonsoppholdBeregningsgrunnlag
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
 import no.nav.etterlatte.libs.common.beregning.Beregningstype
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
@@ -62,6 +63,7 @@ class BeregningRepository(private val dataSource: DataSource) {
             "datoFOM" to beregningsperiode.datoFOM.toString(),
             "datoTOM" to beregningsperiode.datoTOM?.toString(),
             "utbetaltBeloep" to beregningsperiode.utbetaltBeloep,
+            "institusjonsopphold" to beregningsperiode.institusjonsopphold?.toJson(),
             "soeskenFlokk" to beregningsperiode.soeskenFlokk?.toJson(),
             "grunnbeloepMnd" to beregningsperiode.grunnbelopMnd,
             "grunnbeloep" to beregningsperiode.grunnbelop,
@@ -85,6 +87,9 @@ private fun toBeregningsperiode(row: Row): BeregningsperiodeDAO = with(row) {
         datoTOM = stringOrNull(BeregningsperiodeDatabaseColumns.DatoTOM.navn)?.let { YearMonth.parse(it) },
         utbetaltBeloep = int(BeregningsperiodeDatabaseColumns.UtbetaltBeloep.navn),
         soeskenFlokk = stringOrNull(BeregningsperiodeDatabaseColumns.SoeskenFlokk.navn)?.let {
+            objectMapper.readValue(it)
+        },
+        institusjonsopphold = stringOrNull(BeregningsperiodeDatabaseColumns.Institusjonsopphold.navn)?.let {
             objectMapper.readValue(it)
         },
         grunnbelopMnd = int(BeregningsperiodeDatabaseColumns.GrunnbeloepMnd.navn),
@@ -133,6 +138,7 @@ private fun toBeregning(beregningsperioder: List<BeregningsperiodeDAO>): Beregni
                 datoTOM = it.datoTOM,
                 utbetaltBeloep = it.utbetaltBeloep,
                 soeskenFlokk = it.soeskenFlokk,
+                institusjonsopphold = it.institusjonsopphold,
                 grunnbelopMnd = it.grunnbelopMnd,
                 grunnbelop = it.grunnbelop,
                 trygdetid = it.trygdetid,
@@ -162,7 +168,8 @@ private enum class BeregningsperiodeDatabaseColumns(val navn: String) {
     Trygdetid("trygdetid"),
     RegelResultat("regelResultat"),
     RegelVersjon("regelVersjon"),
-    Kilde("kilde")
+    Kilde("kilde"),
+    Institusjonsopphold("institusjonsopphold")
 }
 
 private object Queries {
@@ -190,11 +197,12 @@ private object Queries {
             ${BeregningsperiodeDatabaseColumns.Trygdetid.navn}, 
             ${BeregningsperiodeDatabaseColumns.RegelResultat.navn}, 
             ${BeregningsperiodeDatabaseColumns.RegelVersjon.navn},
-            ${BeregningsperiodeDatabaseColumns.Kilde.navn}) 
+            ${BeregningsperiodeDatabaseColumns.Kilde.navn},
+            ${BeregningsperiodeDatabaseColumns.Institusjonsopphold.navn})
         VALUES(:id::UUID, :beregningId::UUID, :behandlingId::UUID, :type::TEXT, :beregnetDato::TIMESTAMP, 
             :datoFOM::TEXT, :datoTOM::TEXT, :utbetaltBeloep::BIGINT, :soeskenFlokk::JSONB, :grunnbeloepMnd::BIGINT, 
             :grunnbeloep::BIGINT, :sakId::BIGINT, :grunnlagVersjon::BIGINT, :trygdetid::BIGINT, :regelResultat::JSONB, 
-            :regelVersjon::TEXT, :kilde::TEXT) 
+            :regelVersjon::TEXT, :kilde::TEXT, :institusjonsopphold::JSONB) 
     """
 
     val slettBeregning = """
@@ -212,6 +220,7 @@ private data class BeregningsperiodeDAO(
     val datoTOM: YearMonth?,
     val utbetaltBeloep: Int,
     val soeskenFlokk: List<String>?,
+    val institusjonsopphold: InstitusjonsoppholdBeregningsgrunnlag? = null,
     val grunnbelopMnd: Int,
     val grunnbelop: Int,
     val grunnlagMetadata: Metadata,

@@ -1,6 +1,7 @@
 package no.nav.etterlatte.libs.common.beregning
 
 import com.fasterxml.jackson.databind.JsonNode
+import no.nav.etterlatte.beregning.grunnlag.InstitusjonsoppholdBeregningsgrunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.Metadata
 import no.nav.etterlatte.libs.common.periode.Periode
@@ -23,6 +24,7 @@ data class Beregningsperiode(
     val datoTOM: YearMonth? = null,
     val utbetaltBeloep: Int,
     val soeskenFlokk: List<String>? = null,
+    val institusjonsopphold: InstitusjonsoppholdBeregningsgrunnlag? = null,
     val grunnbelopMnd: Int,
     val grunnbelop: Int,
     val trygdetid: Int,

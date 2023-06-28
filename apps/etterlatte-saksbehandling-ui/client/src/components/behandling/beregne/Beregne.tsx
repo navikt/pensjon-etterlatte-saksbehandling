@@ -47,10 +47,14 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
         })
       }
     }
+
+    const hentBeregning = async () => {
+      await kopierBeregningsgrunnlagHvisOpphoer()
+      hentBeregningRequest(behandling.id, (res) => dispatch(oppdaterBeregning(res)))
+    }
+
     if (!beregningFraState) {
-      kopierBeregningsgrunnlagHvisOpphoer().then(() =>
-        hentBeregningRequest(behandling.id, (res) => dispatch(oppdaterBeregning(res)))
-      )
+      hentBeregning()
     }
   }, [])
 

@@ -48,7 +48,7 @@ export const formaterSakstype = (sakstype: SakType): string => {
   }
 }
 
-export const formaterVedtakType = (type?: VedtakType): string => {
+export const formaterVedtakType = (type: VedtakType): string => {
   switch (type) {
     case VedtakType.INNVILGELSE:
       return 'Innvilgelse'

@@ -73,7 +73,7 @@ if (isDev) {
       '/api/stoettederevurderinger',
       '/api/grunnlagsendringshendelse/:sakid/institusjon',
       '/api/sak/:sakid',
-      '/api/saker/:sakId/behandlinger/sisteIverksatte',
+      '/api/saker/:sakid/behandlinger/sisteIverksatte',
       '/api/institusjonsoppholdbegrunnelse/:sakid',
     ],
     tokenMiddleware(ApiConfig.behandling.scope),

@@ -26,7 +26,6 @@ interface BehandlingKlient : BehandlingTilgangsSjekk {
         brukerTokenInfo: BrukerTokenInfo,
         commit: Boolean
     ): Boolean
-
     suspend fun settBehandlingStatusVilkaarsvurdert(behandlingId: UUID, brukerTokenInfo: BrukerTokenInfo): Boolean
     suspend fun hentSisteIverksatteBehandling(sakId: Long, brukerTokenInfo: BrukerTokenInfo): DetaljertBehandling
 }

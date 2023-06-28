@@ -32,8 +32,8 @@ import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.libs.ktor.setReady
 import no.nav.etterlatte.oppgave.oppgaveRoutes
-import no.nav.etterlatte.sak.sakRoutes
-import no.nav.etterlatte.sak.sakRoutesApi
+import no.nav.etterlatte.sak.sakSystemRoutes
+import no.nav.etterlatte.sak.sakWebRoutes
 import no.nav.etterlatte.tilgangsstyring.adressebeskyttelsePlugin
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -83,12 +83,12 @@ fun Application.module(context: ApplicationContext) {
             sikkerLogg
         ) {
             attachContekst(dataSource, context)
-            sakRoutes(
+            sakSystemRoutes(
                 tilgangService = tilgangService,
                 sakService = sakService,
                 generellBehandlingService = generellBehandlingService
             )
-            sakRoutesApi(
+            sakWebRoutes(
                 tilgangService = tilgangService,
                 sakService = sakService,
                 generellBehandlingService = generellBehandlingService,

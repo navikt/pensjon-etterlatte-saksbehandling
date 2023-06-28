@@ -25,7 +25,7 @@ import no.nav.etterlatte.tilgangsstyring.withFoedselsnummerAndGradering
 import no.nav.etterlatte.tilgangsstyring.withFoedselsnummerInternal
 import org.slf4j.LoggerFactory
 
-internal fun Route.sakRoutes(
+internal fun Route.sakSystemRoutes(
     tilgangService: TilgangService,
     sakService: SakService,
     generellBehandlingService: GenerellBehandlingService
@@ -73,7 +73,7 @@ internal fun Route.sakRoutes(
     }
 }
 
-internal fun Route.sakRoutesApi(
+internal fun Route.sakWebRoutes(
     tilgangService: TilgangService,
     sakService: SakService,
     generellBehandlingService: GenerellBehandlingService,

@@ -48,9 +48,8 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
 
     const kopierGrunnlagetHvisDetIkkeAltErGjort = async (res: IDetaljertBehandling) => {
       await hentBeregningsgrunnlag(behandling.id)
-      const fins = isSuccess(beregningsgrunnlag) && beregningsgrunnlag.data
-
-      if (!fins) {
+      const fins = isSuccess(beregningsgrunnlag) && beregningsgrunnlag.data?.behandlingId
+      if (isSuccess(beregningsgrunnlag) && !fins) {
         kopierGrunnlaget({
           behandlingsId: behandling.id,
           forrigeBehandlingsId: res.id,

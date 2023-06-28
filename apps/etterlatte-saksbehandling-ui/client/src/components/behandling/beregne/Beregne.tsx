@@ -6,14 +6,14 @@ import { formaterVedtaksResultat, useVedtaksResultat } from '../useVedtaksResult
 import { useAppDispatch } from '~store/Store'
 import { useBehandlingRoutes } from '../BehandlingRoutes'
 import { useEffect, useState } from 'react'
-import { hentBeregning, kopierBeregningsGrunnlag } from '~shared/api/beregning'
+import { hentBeregning, hentBeregningsGrunnlag, kopierBeregningsGrunnlag } from '~shared/api/beregning'
 import { IBehandlingReducer, oppdaterBehandlingsstatus, oppdaterBeregning } from '~store/reducers/BehandlingReducer'
 import Spinner from '~shared/Spinner'
 import { BehandlingHandlingKnapper } from '~components/behandling/handlinger/BehandlingHandlingKnapper'
 import { Alert, Button, ErrorMessage, Heading } from '@navikt/ds-react'
-import { isFailure, isPending, useApiCall } from '~shared/hooks/useApiCall'
+import { isFailure, isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
 import { upsertVedtak } from '~shared/api/behandling'
-import { IBehandlingStatus, IBehandlingsType } from '~shared/types/IDetaljertBehandling'
+import { IBehandlingStatus, IBehandlingsType, IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import styled from 'styled-components'
 import { NesteOgTilbake } from '../handlinger/NesteOgTilbake'
 import { SendTilAttesteringModal } from '~components/behandling/handlinger/sendTilAttesteringModal'
@@ -34,16 +34,26 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
   const [vedtak, oppdaterVedtakRequest] = useApiCall(upsertVedtak)
   const [visAttesteringsmodal, setVisAttesteringsmodal] = useState(false)
   const [, hentSisteIverksatte] = useApiCall(hentSisteIverksatteBehandling)
-  const [, kall] = useApiCall(kopierBeregningsGrunnlag)
+  const [beregningsgrunnlag, hentBeregningsgrunnlag] = useApiCall(hentBeregningsGrunnlag)
+  const [, kopierGrunnlaget] = useApiCall(kopierBeregningsGrunnlag)
 
   useEffect(() => {
     const kopierBeregningsgrunnlagHvisOpphoer = async () => {
       if (behandling.revurderingsaarsak && erOpphoer(behandling.revurderingsaarsak)) {
         hentSisteIverksatte(behandling.sak, (res) => {
-          kall({
-            behandlingsId: behandling.id,
-            forrigeBehandlingsId: res.id,
-          })
+          kopierGrunnlagetHvisDetIkkeAltErGjort(res)
+        })
+      }
+    }
+
+    const kopierGrunnlagetHvisDetIkkeAltErGjort = async (res: IDetaljertBehandling) => {
+      await hentBeregningsgrunnlag(behandling.id)
+      const fins = isSuccess(beregningsgrunnlag) && beregningsgrunnlag.data
+
+      if (!fins) {
+        kopierGrunnlaget({
+          behandlingsId: behandling.id,
+          forrigeBehandlingsId: res.id,
         })
       }
     }

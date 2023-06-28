@@ -21,6 +21,7 @@ import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.sak.SakService
 import no.nav.etterlatte.sak.TilgangService
 import no.nav.etterlatte.sak.sakSystemRoutes
+import no.nav.etterlatte.sak.sakWebRoutes
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
@@ -65,7 +66,7 @@ internal class SakRoutesTest {
         coEvery { generellBehandlingService.hentSisteIverksatte(1) } returns mockk(relaxed = true)
 
         withTestApplication { client ->
-            val response = client.get("/saker/$sakId/behandlinger/sisteIverksatte") {
+            val response = client.get("/api/saker/$sakId/behandlinger/sisteIverksatte") {
                 header(HttpHeaders.Authorization, "Bearer $token")
             }
 
@@ -97,6 +98,12 @@ internal class SakRoutesTest {
                         tilgangService,
                         sakService,
                         generellBehandlingService
+                    )
+                    sakWebRoutes(
+                        tilgangService,
+                        sakService,
+                        generellBehandlingService,
+                        grunnlagsendringshendelseService
                     )
                 }
             }

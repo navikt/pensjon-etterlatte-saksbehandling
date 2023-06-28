@@ -3,6 +3,7 @@ package trygdetid
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
+import no.nav.etterlatte.libs.common.trygdetid.avtale.Trygdeavtale
 import no.nav.etterlatte.token.Saksbehandler
 import no.nav.etterlatte.trygdetid.BeregnetTrygdetid
 import no.nav.etterlatte.trygdetid.BeregnetTrygdetidGrunnlag
@@ -55,6 +56,20 @@ fun trygdetidGrunnlag(
     poengUtAar = poengUtAar,
     poengInnAar = poengInnAar,
     prorata = prorata
+)
+
+fun trygdeavtale(
+    behandlingId: UUID,
+    avtaleKode: String,
+    avtaleDatoKode: String? = null,
+    avtaleKriteriaKode: String? = null
+) = Trygdeavtale(
+    id = randomUUID(),
+    behandlingId = behandlingId,
+    avtaleKode = avtaleKode,
+    avtaleDatoKode = avtaleDatoKode,
+    avtaleKriteriaKode = avtaleKriteriaKode,
+    kilde = Grunnlagsopplysning.Saksbehandler(ident = "Z123", tidspunkt = Tidspunkt.now())
 )
 
 fun beregnetTrygdetid(total: Int = 0, tidspunkt: Tidspunkt = Tidspunkt.now()) =

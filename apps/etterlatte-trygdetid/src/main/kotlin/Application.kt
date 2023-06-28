@@ -34,7 +34,7 @@ class Server(private val context: ApplicationContext) {
                 module {
                     restModule(sikkerLogg) {
                         trygdetid(trygdetidService, behandlingKlient)
-                        avtale(avtaleService)
+                        avtale(avtaleService, behandlingKlient)
                         kodeverk(kodeverkService)
                     }
                 }

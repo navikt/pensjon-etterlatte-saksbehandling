@@ -13,6 +13,7 @@ class AvkortingService(
     private val avkortingRepository: AvkortingRepository,
     private val beregningService: BeregningService
 ) {
+
     private val logger = LoggerFactory.getLogger(AvkortingService::class.java)
 
     suspend fun hentAvkorting(behandlingId: UUID, brukerTokenInfo: BrukerTokenInfo): Avkorting? {
@@ -41,12 +42,12 @@ class AvkortingService(
         logger.info("Lagre og beregne avkorting og avkortet ytelse for behandlingId=$behandlingId")
 
         val avkorting = avkortingRepository.hentAvkorting(behandlingId) ?: Avkorting.nyAvkorting()
-
-        val virkningstidspunkt = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo).hentVirk()
+        val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
         val beregning = beregningService.hentBeregningNonnull(behandlingId)
-        val beregnetAvkorting = avkorting.beregnAvkortingNyttEllerEndretGrunnlag(
+        val beregnetAvkorting = avkorting.beregnAvkortingMedNyttGrunnlag(
             avkortingGrunnlag,
-            virkningstidspunkt,
+            behandling.behandlingType,
+            behandling.hentVirk(),
             beregning
         )
 
@@ -61,14 +62,16 @@ class AvkortingService(
         brukerTokenInfo: BrukerTokenInfo
     ): Avkorting {
         logger.info("Kopierer avkorting fra forrige behandling med behandlingId=$forrigeBehandlingId")
-        val forrigeAvkorting = avkortingRepository.hentAvkorting(forrigeBehandlingId) ?: throw Exception(
-            "Fant ikke avkorting for $forrigeBehandlingId"
-        )
-        val nyAvkorting = forrigeAvkorting.kopierAvkorting()
 
-        val virkningstidspunkt = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo).hentVirk()
+        val forrigeAvkorting = avkortingRepository.hentAvkorting(forrigeBehandlingId)
+            ?: throw Exception("Fant ikke avkorting for $forrigeBehandlingId")
+        val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
         val beregning = beregningService.hentBeregningNonnull(behandlingId)
-        val beregnetAvkorting = nyAvkorting.beregnAvkorting(virkningstidspunkt, beregning, forrigeAvkorting)
+        val beregnetAvkorting = forrigeAvkorting.kopierAvkorting().beregnAvkorting(
+            behandling.behandlingType,
+            behandling.hentVirk(),
+            beregning
+        )
 
         val lagretAvkorting = avkortingRepository.lagreAvkorting(behandlingId, beregnetAvkorting)
         behandlingKlient.avkort(behandlingId, brukerTokenInfo, true)

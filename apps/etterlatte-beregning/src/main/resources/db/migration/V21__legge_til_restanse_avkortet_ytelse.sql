@@ -4,8 +4,10 @@ CREATE TABLE avkorting_aarsoppgjoer(
    id UUID PRIMARY KEY,
    behandling_id UUID NOT NULL,
    maaned Date,
-   avkorting_forventet_inntekt BIGINT,
-   tidligere_avkorting BIGINT,
+   beregning BIGINT,
+   avkorting BIGINT,
+   forventet_avkortet_ytelse BIGINT,
    restanse BIGINT,
-   ny_avkorting BIGINT
+   fordelt_restanse BIGINT,
+   faktisk_avkortet_ytelse BIGINT
 );

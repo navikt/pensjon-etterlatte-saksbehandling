@@ -89,8 +89,8 @@ class AvkortingRoutesTest {
         val avkorting = Avkorting(
             avkortingGrunnlag = listOf(avkortingsgrunnlag),
             avkortingsperioder = listOf(avkortingsperiode()),
-            avkortetYtelse = listOf(avkortetYtelse(periode = Periode(fom = dato, tom = dato))),
-            aarsoppgjoer = emptyList()
+            aarsoppgjoer = emptyList(),
+            avkortetYtelse = listOf(avkortetYtelse(periode = Periode(fom = dato, tom = dato)))
         )
         val dto = AvkortingDto(
             avkortingGrunnlag = listOf(
@@ -114,7 +114,7 @@ class AvkortingRoutesTest {
                     tom = dato.atEndOfMonth(),
                     avkortingsbeloep = 200,
                     ytelseEtterAvkorting = 100,
-                    restanse = 0
+                    restanse = 50
                 )
             )
         )

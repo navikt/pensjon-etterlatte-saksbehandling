@@ -3,7 +3,7 @@ package avkorting
 import io.kotest.matchers.shouldBe
 import no.nav.etterlatte.avkorting.Avkorting
 import no.nav.etterlatte.avkorting.AvkortingRepository
-import no.nav.etterlatte.beregning.regler.aarsoppgjoer
+import no.nav.etterlatte.beregning.regler.aarsoppgjoerMaaned
 import no.nav.etterlatte.beregning.regler.avkortetYtelse
 import no.nav.etterlatte.beregning.regler.avkortinggrunnlag
 import no.nav.etterlatte.beregning.regler.avkortingsperiode
@@ -53,15 +53,15 @@ internal class AvkortingRepositoryTest {
         val avkortinggrunnlag = listOf(avkortinggrunnlag())
         val avkortingsperioder = listOf(avkortingsperiode())
         val avkortetYtelse = listOf(avkortetYtelse())
-        val aarsoppgjoer = listOf(aarsoppgjoer())
+        val restanseOppgjoer = listOf(aarsoppgjoerMaaned())
 
         avkortingRepository.lagreAvkorting(
             behandlingId,
             Avkorting(
                 avkortinggrunnlag,
                 avkortingsperioder,
-                avkortetYtelse,
-                aarsoppgjoer = aarsoppgjoer
+                restanseOppgjoer,
+                avkortetYtelse
             )
         )
 
@@ -73,15 +73,15 @@ internal class AvkortingRepositoryTest {
                 restanse = 100
             )
         )
-        val endretAarsoppgjoer = listOf(aarsoppgjoer(restanse = 555))
+        val endretRestanseOppgjoer = listOf(aarsoppgjoerMaaned(restanse = 555))
 
         val avkorting = avkortingRepository.lagreAvkorting(
             behandlingId,
             Avkorting(
                 endretAvkortingGrunnlag,
                 endretAvkortingsperiode,
-                endretAvkortetYtelse,
-                endretAarsoppgjoer
+                endretRestanseOppgjoer,
+                endretAvkortetYtelse
             )
         )
 

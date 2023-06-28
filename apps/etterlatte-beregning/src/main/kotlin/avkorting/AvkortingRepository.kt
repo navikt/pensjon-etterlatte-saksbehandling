@@ -43,8 +43,8 @@ class AvkortingRepository(private val dataSource: DataSource) {
             Avkorting(
                 avkortingGrunnlag = avkortingGrunnlag,
                 avkortingsperioder = avkortingsperioder,
-                avkortetYtelse = avkortetYtelse,
-                aarsoppgjoer = aarsoppgjoer
+                aarsoppgjoer = aarsoppgjoer,
+                avkortetYtelse = avkortetYtelse
             )
         }
     }
@@ -146,30 +146,32 @@ class AvkortingRepository(private val dataSource: DataSource) {
 
     private fun lagreAarsoppgjoer(
         behandlingId: UUID,
-        aarsoppgjoer: List<Aarsoppgjoer>,
+        aarsoppgjoer: List<AarsoppgjoerMaaned>,
         tx: TransactionalSession
     ) =
         aarsoppgjoer.forEach {
             queryOf(
                 statement = """
                     INSERT INTO avkorting_aarsoppgjoer(
-                        id, behandling_id, maaned, avkorting_forventet_inntekt, tidligere_avkorting,
-                         ny_avkorting, restanse
+                        id, behandling_id, maaned,
+                        beregning, avkorting, forventet_avkortet_ytelse, restanse, fordelt_restanse,
+                        faktisk_avkortet_ytelse 
                     ) VALUES (
-                        :id, :behandlingId, :maaned, :avkortingForventetInntekt, :tidligereAvkorting,
-                         :nyAvkorting, :restanse 
+                        :id, :behandlingId, :maaned,
+                        :beregning, :avkorting, :forventet_avkortet_ytelse, :restanse, :fordelt_restanse,
+                        :faktisk_avkortet_ytelse 
                     )
                 """.trimIndent(),
                 paramMap = mapOf(
                     "id" to UUID.randomUUID(),
                     "behandlingId" to behandlingId,
                     "maaned" to it.maaned.atDay(1),
-                    "avkortingForventetInntekt" to it.avkortingForventetInntekt,
-                    "tidligereAvkorting" to it.tidligereAvkorting,
-                    "nyAvkorting" to it.nyAvkorting,
-                    "restanse" to it.restanse
-                    // "regel_resultat" to it.regelResultat.toJson(), TODO EY-2368
-                    // "kilde" to it.kilde.toJson()
+                    "beregning" to it.beregning,
+                    "avkorting" to it.avkorting,
+                    "forventet_avkortet_ytelse" to it.forventetAvkortetYtelse,
+                    "restanse" to it.restanse,
+                    "fordelt_restanse" to it.fordeltRestanse,
+                    "faktisk_avkortet_ytelse" to it.faktiskAvkortetYtelse
                 )
             ).let { query -> tx.run(query.asUpdate) }
         }
@@ -238,18 +240,20 @@ class AvkortingRepository(private val dataSource: DataSource) {
         ytelseEtterAvkorting = int("ytelse_etter_avkorting"),
         avkortingsbeloep = int("avkortingsbeloep"),
         restanse = int("restanse"),
+        ytelseEtterAvkortingFoerRestanse = 0, // TODO EY-2368
         ytelseFoerAvkorting = int("ytelse_foer_avkorting"),
         tidspunkt = sqlTimestamp("tidspunkt").toTidspunkt(),
         regelResultat = objectMapper.readTree(string("regel_resultat")),
         kilde = string("kilde").let { objectMapper.readValue(it) }
     )
 
-    private fun Row.toAarsoppgjoer() = Aarsoppgjoer(
+    private fun Row.toAarsoppgjoer() = AarsoppgjoerMaaned(
         maaned = sqlDate("maaned").let { YearMonth.from(it.toLocalDate()) },
-        avkortingForventetInntekt = int("avkorting_forventet_inntekt"),
-        tidligereAvkorting = int("tidligere_avkorting"),
-        nyAvkorting = int("ny_avkorting"),
-        restanse = int("restanse")
-        // TODO EY-2368 - regel og kilde
+        beregning = int("beregning"),
+        avkorting = int("avkorting"),
+        forventetAvkortetYtelse = int("forventet_avkortet_ytelse"),
+        restanse = int("restanse"),
+        fordeltRestanse = int("fordelt_restanse"),
+        faktiskAvkortetYtelse = int("faktisk_avkortet_ytelse")
     )
 }

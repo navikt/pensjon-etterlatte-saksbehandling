@@ -2,59 +2,33 @@ package avkorting
 
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
-import io.mockk.every
-import io.mockk.mockkObject
-import io.mockk.unmockkObject
 import no.nav.etterlatte.avkorting.AvkortingRegelkjoring
 import no.nav.etterlatte.beregning.grunnlag.PeriodiseringAvGrunnlagFeil
 import no.nav.etterlatte.beregning.regler.avkortinggrunnlag
 import no.nav.etterlatte.beregning.regler.avkortingsperiode
 import no.nav.etterlatte.beregning.regler.beregningsperiode
-import no.nav.etterlatte.grunnbeloep.Grunnbeloep
-import no.nav.etterlatte.grunnbeloep.GrunnbeloepRepository
 import no.nav.etterlatte.libs.common.periode.Periode
-import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import java.math.BigDecimal
 import java.time.YearMonth
 
 class AvkortingRegelkjoringTest {
 
-    @BeforeEach
-    fun before() {
-        mockkObject(GrunnbeloepRepository)
-        every { GrunnbeloepRepository.historiskeGrunnbeloep } returns listOf(
-            Grunnbeloep(
-                dato = YearMonth.of(2022, 5),
-                grunnbeloep = 111477,
-                grunnbeloepPerMaaned = 9290,
-                omregningsfaktor = BigDecimal(1.047726)
-            )
-        )
-    }
-
-    @AfterEach
-    fun after() {
-        unmockkObject(GrunnbeloepRepository)
-    }
-
     @Test
     fun `skal beregne avkorting for inntekt til en foerstegangsbehandling`() {
-        val virkningstidspunkt = YearMonth.of(2023, 1)
+        val virkningstidspunkt = YearMonth.of(2023, 6)
         val avkortingGrunnlag = listOf(
             avkortinggrunnlag(
                 aarsinntekt = 300000,
                 fratrekkInnAar = 50000,
                 relevanteMaanederInnAar = 10,
-                periode = Periode(fom = YearMonth.of(2023, 1), tom = YearMonth.of(2023, 3))
+                periode = Periode(fom = YearMonth.of(2023, 6), tom = YearMonth.of(2023, 8))
             ),
             avkortinggrunnlag(
                 aarsinntekt = 600000,
                 fratrekkInnAar = 100000,
                 relevanteMaanederInnAar = 10,
-                periode = Periode(fom = YearMonth.of(2023, 4), tom = null)
+                periode = Periode(fom = YearMonth.of(2023, 9), tom = null)
             )
         )
 
@@ -66,16 +40,16 @@ class AvkortingRegelkjoringTest {
         with(avkortingsperioder[0]) {
             regelResultat shouldNotBe null
             tidspunkt shouldNotBe null
-            periode.fom shouldBe YearMonth.of(2023, 1)
-            periode.tom shouldBe YearMonth.of(2023, 3)
-            avkorting shouldBe 9160
+            periode.fom shouldBe YearMonth.of(2023, 6)
+            periode.tom shouldBe YearMonth.of(2023, 8)
+            avkorting shouldBe 9026
         }
         with(avkortingsperioder[1]) {
             regelResultat shouldNotBe null
             tidspunkt shouldNotBe null
-            periode.fom shouldBe YearMonth.of(2023, 4)
+            periode.fom shouldBe YearMonth.of(2023, 9)
             periode.tom shouldBe null
-            avkorting shouldBe 20410
+            avkorting shouldBe 20276
         }
     }
 

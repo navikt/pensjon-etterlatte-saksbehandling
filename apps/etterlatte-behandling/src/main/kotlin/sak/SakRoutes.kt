@@ -23,12 +23,15 @@ import no.nav.etterlatte.libs.common.sak.Saker
 import no.nav.etterlatte.libs.common.sakId
 import no.nav.etterlatte.tilgangsstyring.withFoedselsnummerAndGradering
 import no.nav.etterlatte.tilgangsstyring.withFoedselsnummerInternal
+import org.slf4j.LoggerFactory
 
 internal fun Route.sakRoutes(
     tilgangService: TilgangService,
     sakService: SakService,
     generellBehandlingService: GenerellBehandlingService
 ) {
+    val logger = LoggerFactory.getLogger(this::class.java)
+
     route("/saker") {
         get {
             kunSystembruker {
@@ -45,11 +48,8 @@ internal fun Route.sakRoutes(
             }
 
             get("/behandlinger/sisteIverksatte") {
-                val sakId = call.parameters["sakId"] ?: return@get call.respond(
-                    HttpStatusCode.BadRequest,
-                    "Mangler sakId"
-                )
-                when (val sisteIverksatteBehandling = generellBehandlingService.hentSisteIverksatte(sakId.toLong())) {
+                logger.info("Henter siste iverksatte behandling for $sakId")
+                when (val sisteIverksatteBehandling = generellBehandlingService.hentSisteIverksatte(sakId)) {
                     null -> call.respond(HttpStatusCode.NotFound)
                     else -> call.respond(sisteIverksatteBehandling.toDetaljertBehandling())
                 }
@@ -79,7 +79,19 @@ internal fun Route.sakRoutesApi(
     generellBehandlingService: GenerellBehandlingService,
     grunnlagsendringshendelseService: GrunnlagsendringshendelseService
 ) {
+    val logger = LoggerFactory.getLogger(this::class.java)
+
     route("/api") {
+        route("/saker") {
+            get("/behandlinger/sisteIverksatte") {
+                logger.info("Henter siste iverksatte behandling for $sakId")
+                when (val sisteIverksatteBehandling = generellBehandlingService.hentSisteIverksatte(sakId)) {
+                    null -> call.respond(HttpStatusCode.NotFound)
+                    else -> call.respond(sisteIverksatteBehandling.toDetaljertBehandling())
+                }
+            }
+        }
+
         route("/sak/{$SAKID_CALL_PARAMETER}") {
             get {
                 val sak = inTransaction {

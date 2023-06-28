@@ -14,27 +14,20 @@ import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.behandlingsId
 import no.nav.etterlatte.libs.common.withBehandlingId
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
-import no.nav.etterlatte.token.Systembruker
 import org.slf4j.LoggerFactory
-import java.util.UUID
+import java.util.*
 
 private val logger = LoggerFactory.getLogger("BeregningsGrunnlag Route")
 
 fun Route.beregningsGrunnlag(beregningsGrunnlagService: BeregningsGrunnlagService, behandlingKlient: BehandlingKlient) {
     route("/api/beregning/beregningsgrunnlag") {
         post("/{$BEHANDLINGSID_CALL_PARAMETER}/fra/{forrigeBehandlingId}") {
-            when (brukerTokenInfo) {
-                is Systembruker -> {
-                    val behandlingId = behandlingsId
-                    val forrigeBehandlingId = call.uuid("forrigeBehandlingId")
+            val behandlingId = behandlingsId
+            val forrigeBehandlingId = call.uuid("forrigeBehandlingId")
 
-                    beregningsGrunnlagService.dupliserBeregningsGrunnlag(behandlingId, forrigeBehandlingId)
+            beregningsGrunnlagService.dupliserBeregningsGrunnlag(behandlingId, forrigeBehandlingId)
 
-                    call.respond(HttpStatusCode.NoContent)
-                }
-
-                else -> call.respond(HttpStatusCode.Forbidden)
-            }
+            call.respond(HttpStatusCode.NoContent)
         }
 
         post("/{$BEHANDLINGSID_CALL_PARAMETER}/barnepensjon") {

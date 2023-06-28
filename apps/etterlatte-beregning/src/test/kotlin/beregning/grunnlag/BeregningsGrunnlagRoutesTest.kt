@@ -406,18 +406,30 @@ internal class BeregningsGrunnlagRoutesTest {
     }
 
     @Test
-    fun `skal returnere forbidden hvis en ikke system bruker kaller duplisering`() {
+    fun `skal duplisere hvis en saksbehandler kaller duplisering`() {
+        val forrige = randomUUID()
+        val nye = randomUUID()
+
         coEvery { behandlingKlient.harTilgangTilBehandling(any(), any()) } returns true
+        coEvery { behandlingKlient.beregn(any(), any(), any()) } returns true
+        every { repository.finnGrunnlagForBehandling(forrige) } returns BeregningsGrunnlag(
+            forrige,
+            Grunnlagsopplysning.Saksbehandler("Z123456", Tidspunkt.now()),
+            emptyList(),
+            emptyList()
+        )
+        every { repository.finnGrunnlagForBehandling(nye) } returns null
+        every { repository.lagre(any()) } returns true
 
         testApplication {
             environment { config = applicationConfig }
             application { restModule(log) { beregningsGrunnlag(service, behandlingKlient) } }
 
-            client.post("/api/beregning/beregningsgrunnlag/${randomUUID()}/fra/${randomUUID()}") {
+            client.post("/api/beregning/beregningsgrunnlag/$nye/fra/$forrige") {
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 header(HttpHeaders.Authorization, "Bearer $token")
             }.let {
-                it.status shouldBe HttpStatusCode.Forbidden
+                it.status shouldBe HttpStatusCode.NoContent
             }
         }
     }

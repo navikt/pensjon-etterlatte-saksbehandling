@@ -119,7 +119,7 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
         val response = downstreamResourceClient.get(
             resource = Resource(
                 clientId = clientId,
-                url = "$resourceUrl/api/saker/$sakId/behandlinger/sisteIverksatte"
+                url = "$resourceUrl/saker/$sakId/behandlinger/sisteIverksatte"
             ),
             brukerTokenInfo = brukerTokenInfo
         )

@@ -56,6 +56,14 @@ internal fun Route.sakSystemRoutes(
                 }
                 call.respond(sak ?: HttpStatusCode.NotFound)
             }
+
+            get("/behandlinger/sisteIverksatte") {
+                logger.info("Henter siste iverksatte behandling for $sakId")
+                when (val sisteIverksatteBehandling = generellBehandlingService.hentSisteIverksatte(sakId)) {
+                    null -> call.respond(HttpStatusCode.NotFound)
+                    else -> call.respond(sisteIverksatteBehandling.toDetaljertBehandling())
+                }
+            }
         }
     }
 

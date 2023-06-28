@@ -5,6 +5,7 @@ import { IFamilieforhold, IPdlPerson } from '~shared/types/Person'
 import { VurderingsResultat } from '~shared/types/VurderingsResultat'
 import { Revurderingsaarsak } from '~shared/types/Revurderingsaarsak'
 import { SakType } from '~shared/types/sak'
+import { RevurderingInfo } from '~shared/types/RevurderingInfo'
 
 export interface IDetaljertBehandling {
   id: string
@@ -23,6 +24,7 @@ export interface IDetaljertBehandling {
   søker?: IPdlPerson
   prosesstype: IProsesstype
   revurderingsaarsak: Revurderingsaarsak | null
+  revurderinginfo: RevurderingInfo | null
 }
 
 export enum IBehandlingsType {

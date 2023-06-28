@@ -10,7 +10,7 @@ abstract class EndringBrevData : BrevData()
 
 data class SoeskenjusteringRevurderingBrevdata(
     val utbetalingsinfo: Utbetalingsinfo,
-    val grunnForSoeskenjustering: BarnepensjonSoeskenjusteringGrunn
+    val grunnForJustering: BarnepensjonSoeskenjusteringGrunn
 ) : EndringBrevData() {
 
     companion object {
@@ -32,7 +32,7 @@ data class SoeskenjusteringRevurderingBrevdata(
                 utbetalingsinfo = requireNotNull(behandling.utbetalingsinfo) {
                     "Kan ikke opprette et revurderingsbrev for søksenjustering uten utbetalingsinfo"
                 },
-                grunnForSoeskenjustering = behandling.revurderingInfo.grunnForSoeskenjustering
+                grunnForJustering = behandling.revurderingInfo.grunnForSoeskenjustering
             )
         }
     }

@@ -27,7 +27,7 @@ export const Barnepensjonberegningssammendrag = ({
   behandlingId: string
 }) => {
   const [beregningsgrunnlag, fetchBeregningsgrunnlag] = useApiCall(hentBeregningsGrunnlag)
-  const [beregningsgrunnlagSate, setBeregningsgrunnlag] = useState<BeregningsGrunnlagPostDto>()
+  const [beregningsgrunnlagState, setBeregningsgrunnlag] = useState<BeregningsGrunnlagPostDto>()
 
   useEffect(() => {
     fetchBeregningsgrunnlag(behandlingId, (result) => {
@@ -43,7 +43,7 @@ export const Barnepensjonberegningssammendrag = ({
       {isFailure(beregningsgrunnlag) && <ApiErrorAlert>Kunne ikke hente beregningsgrunnlag</ApiErrorAlert>}
       {isSuccess(beregningsgrunnlag) && (
         <>
-          {beregningsgrunnlagSate?.soeskenMedIBeregning && (
+          {beregningsgrunnlagState?.soeskenMedIBeregning && (
             <>
               <Heading level="1" size="small">
                 Søskenjustering
@@ -75,7 +75,7 @@ export const Barnepensjonberegningssammendrag = ({
               )}
             </>
           )}
-          {beregningsgrunnlagSate?.institusjonsopphold?.length ? (
+          {beregningsgrunnlagState?.institusjonsopphold?.length ? (
             <>
               <HeadingWithTopMargin level="1" size="small">
                 Institusjonsopphold
@@ -86,7 +86,7 @@ export const Barnepensjonberegningssammendrag = ({
                   <div key={reduksjonsnoekkel}>{reduksjontekst}</div>
                 ))}
                 <strong>Beregningen gjelder: </strong>
-                {beregningsgrunnlagSate.institusjonsopphold.map((it) => {
+                {beregningsgrunnlagState.institusjonsopphold.map((it) => {
                   return (
                     <ListWithoutBullet key={`${it.fom}${it.data.reduksjon}`}>
                       {Reduksjon[it.data.reduksjon as keyof typeof Reduksjon]}

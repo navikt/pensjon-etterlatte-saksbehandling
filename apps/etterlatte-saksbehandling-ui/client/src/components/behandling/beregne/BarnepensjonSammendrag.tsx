@@ -30,7 +30,6 @@ export const BarnepensjonSammendrag = ({ behandling, beregning }: Props) => {
             <Table.HeaderCell>Ytelse</Table.HeaderCell>
             <Table.HeaderCell>Trygdetid</Table.HeaderCell>
             <Table.HeaderCell>Grunnbeløp</Table.HeaderCell>
-            <Table.HeaderCell>Beregning gjelder</Table.HeaderCell>
             <Table.HeaderCell>Månedelig utbetaling før skatt</Table.HeaderCell>
           </Table.Row>
         </Table.Header>
@@ -60,7 +59,6 @@ export const BarnepensjonSammendrag = ({ behandling, beregning }: Props) => {
               <Table.DataCell>Barnepensjon</Table.DataCell>
               <Table.DataCell>{beregningsperiode.trygdetid} år</Table.DataCell>
               <Table.DataCell>{beregningsperiode.grunnbelop} kr</Table.DataCell>
-              <Table.DataCell>barn</Table.DataCell>
               <Table.DataCell>{beregningsperiode.utbetaltBeloep} kr</Table.DataCell>
             </Table.ExpandableRow>
           ))}

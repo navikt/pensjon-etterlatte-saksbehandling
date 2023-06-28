@@ -11,7 +11,7 @@ import { IBehandlingReducer, oppdaterBehandlingsstatus, oppdaterBeregning } from
 import Spinner from '~shared/Spinner'
 import { BehandlingHandlingKnapper } from '~components/behandling/handlinger/BehandlingHandlingKnapper'
 import { Alert, Button, ErrorMessage, Heading } from '@navikt/ds-react'
-import { isFailure, isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
+import { isFailure, isPending, useApiCall } from '~shared/hooks/useApiCall'
 import { upsertVedtak } from '~shared/api/behandling'
 import { IBehandlingStatus, IBehandlingsType } from '~shared/types/IDetaljertBehandling'
 import styled from 'styled-components'
@@ -33,25 +33,24 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
   const [beregning, hentBeregningRequest] = useApiCall(hentBeregning)
   const [vedtak, oppdaterVedtakRequest] = useApiCall(upsertVedtak)
   const [visAttesteringsmodal, setVisAttesteringsmodal] = useState(false)
-  const [sisteIverksatte, hentSisteIverksatte] = useApiCall(hentSisteIverksatteBehandling)
+  const [, hentSisteIverksatte] = useApiCall(hentSisteIverksatteBehandling)
   const [, kall] = useApiCall(kopierBeregningsGrunnlag)
 
   useEffect(() => {
-    const kopierBeregningsgrunnlag = () => {
-      hentSisteIverksatte(behandling.sak)
-      if (isSuccess(sisteIverksatte)) {
-        kall({
-          behandlingsId: behandling.id,
-          forrigeBehandlingsId: sisteIverksatte.data.id,
+    const kopierBeregningsgrunnlagHvisOpphoer = async () => {
+      if (behandling.revurderingsaarsak && erOpphoer(behandling.revurderingsaarsak)) {
+        hentSisteIverksatte(behandling.sak, (res) => {
+          kall({
+            behandlingsId: behandling.id,
+            forrigeBehandlingsId: res.id,
+          })
         })
       }
     }
-
     if (!beregningFraState) {
-      if (behandling.revurderingsaarsak && erOpphoer(behandling.revurderingsaarsak)) {
-        kopierBeregningsgrunnlag()
-      }
-      hentBeregningRequest(behandling.id, (res) => dispatch(oppdaterBeregning(res)))
+      kopierBeregningsgrunnlagHvisOpphoer().then(() =>
+        hentBeregningRequest(behandling.id, (res) => dispatch(oppdaterBeregning(res)))
+      )
     }
   }, [])
 

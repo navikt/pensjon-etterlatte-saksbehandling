@@ -6,7 +6,12 @@ import { formaterVedtaksResultat, useVedtaksResultat } from '../useVedtaksResult
 import { useAppDispatch } from '~store/Store'
 import { useBehandlingRoutes } from '../BehandlingRoutes'
 import { useEffect, useState } from 'react'
-import { hentBeregning, hentBeregningsGrunnlag, kopierBeregningsGrunnlag } from '~shared/api/beregning'
+import {
+  hentBeregning,
+  hentBeregningsGrunnlag,
+  kopierBeregningsGrunnlag,
+  opprettEllerEndreBeregning,
+} from '~shared/api/beregning'
 import { IBehandlingReducer, oppdaterBehandlingsstatus, oppdaterBeregning } from '~store/reducers/BehandlingReducer'
 import Spinner from '~shared/Spinner'
 import { BehandlingHandlingKnapper } from '~components/behandling/handlinger/BehandlingHandlingKnapper'
@@ -36,6 +41,7 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
   const [, hentSisteIverksatte] = useApiCall(hentSisteIverksatteBehandling)
   const [beregningsgrunnlag, hentBeregningsgrunnlag] = useApiCall(hentBeregningsGrunnlag)
   const [, kopierGrunnlaget] = useApiCall(kopierBeregningsGrunnlag)
+  const [, postOpprettEllerEndreBeregning] = useApiCall(opprettEllerEndreBeregning)
 
   useEffect(() => {
     const kopierBeregningsgrunnlagHvisOpphoer = async () => {
@@ -53,6 +59,9 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
         kopierGrunnlaget({
           behandlingsId: behandling.id,
           forrigeBehandlingsId: res.id,
+        })
+        postOpprettEllerEndreBeregning(behandling.id, () => {
+          dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.BEREGNET))
         })
       }
     }

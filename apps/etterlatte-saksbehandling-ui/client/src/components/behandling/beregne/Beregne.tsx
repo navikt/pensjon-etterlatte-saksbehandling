@@ -56,11 +56,13 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
       await hentBeregningsgrunnlag(behandling.id)
       const fins = isSuccess(beregningsgrunnlag) && beregningsgrunnlag.data?.behandlingId
       if (isSuccess(beregningsgrunnlag) && !fins) {
-        kopierGrunnlaget({
+        await kopierGrunnlaget({
           behandlingsId: behandling.id,
           forrigeBehandlingsId: res.id,
         })
-        postOpprettEllerEndreBeregning(behandling.id, () => {
+      }
+      if (isSuccess(beregningsgrunnlag)) {
+        await postOpprettEllerEndreBeregning(behandling.id, () => {
           dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.BEREGNET))
         })
       }

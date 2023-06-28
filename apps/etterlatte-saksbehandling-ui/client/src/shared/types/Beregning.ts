@@ -61,9 +61,9 @@ export interface InstitusjonsoppholdIBeregning {
   begrunnelse?: string | undefined
 }
 
-export enum Reduksjon {
-  JA_VANLIG = 'Ja, etter vanlig sats(10% av G)',
-  NEI_KORT_OPPHOLD = 'Nei, kort opphold',
-  JA_EGEN_PROSENT_AV_G = 'Ja, utgifter til bolig(egen % av G)',
-  NEI_HOEYE_UTGIFTER_BOLIG = 'Nei, har høye utgifter til bolig',
+export const Reduksjon = {
+  JA_VANLIG: 'Ja, etter vanlig sats(10% av G)',
+  NEI_KORT_OPPHOLD: 'Nei, kort opphold',
+  JA_EGEN_PROSENT_AV_G: 'Ja, utgifter til bolig(egen % av G)',
+  NEI_HOEYE_UTGIFTER_BOLIG: 'Nei, har høye utgifter til bolig',
 }

@@ -1,8 +1,8 @@
 import { BodyShort, Heading, Label } from '@navikt/ds-react'
 import { differenceInYears } from 'date-fns'
 import styled from 'styled-components'
-import { BeregningsGrunnlagPostDto, Beregningsperiode } from '~shared/types/Beregning'
-import { useEffect, useState } from 'react'
+import { BeregningsGrunnlagPostDto, Beregningsperiode, Reduksjon } from '~shared/types/Beregning'
+import React, { useEffect, useState } from 'react'
 import { isFailure, isPending, isPendingOrInitial, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
 import { hentBeregningsGrunnlag } from '~shared/api/beregning'
 import Spinner from '~shared/Spinner'
@@ -75,19 +75,37 @@ export const Barnepensjonberegningssammendrag = ({
               )}
             </>
           )}
-          {beregningsgrunnlagSate?.institusjonsopphold && (
-            <BodyShort spacing>
-              <strong>§18-8</strong> Institusjonsopphold. Barnepensjon beregnes ut fra:
-              {beregningsgrunnlagSate.institusjonsopphold.map((it) => {
-                return <ListWithoutBullet key={`${it.fom}${it.data.reduksjon}`}>{it.data.reduksjon}</ListWithoutBullet>
-              })}
-            </BodyShort>
-          )}
+          {beregningsgrunnlagSate?.institusjonsopphold?.length ? (
+            <>
+              <HeadingWithTopMargin level="1" size="small">
+                Institusjonsopphold
+              </HeadingWithTopMargin>
+              <div>
+                <strong>§18-8</strong> Institusjonsopphold. Barnepensjon kan beregnes ut fra:
+                {Object.entries(Reduksjon).map(([reduksjonsnoekkel, reduksjontekst]) => (
+                  <div key={reduksjonsnoekkel}>{reduksjontekst}</div>
+                ))}
+                <strong>Beregningen gjelder: </strong>
+                {beregningsgrunnlagSate.institusjonsopphold.map((it) => {
+                  return (
+                    <ListWithoutBullet key={`${it.fom}${it.data.reduksjon}`}>
+                      {Reduksjon[it.data.reduksjon as keyof typeof Reduksjon]}
+                      {it.data.egenReduksjon && <p>{it.data.egenReduksjon}</p>}
+                    </ListWithoutBullet>
+                  )
+                })}
+              </div>
+            </>
+          ) : null}
         </>
       )}
     </>
   )
 }
+
+const HeadingWithTopMargin = styled(Heading)`
+  margin-top: 1em;
+`
 
 const ListWithoutBullet = styled.li`
   list-style-type: none;

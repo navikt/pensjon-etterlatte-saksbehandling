@@ -63,25 +63,26 @@ export const GrunnForSoeskenjustering = (props: { behandling: IDetaljertBehandli
         Velg brevmal for søskenjusteringen
       </Heading>
       {redigerbar ? (
-        <form onSubmit={handlesubmit}>
+        <SkjemaWrapper onSubmit={handlesubmit}>
           <Select
             label="Hvorfor søskenjusteres det?"
             onChange={(e) => setValgtSoeskenjustering(e.target.value as BarnepensjonSoeskenjusteringGrunn)}
+            defaultValue={valgtSoeskenjustering}
           >
-            <option value={undefined}>Velg grunn</option>
+            <option value={undefined}>Velg grunn for søksenjustering</option>
             {SOESKENJUSTERING_GRUNNER.map((grunn) => (
               <option key={grunn} value={grunn}>
                 {tekstSoeskenjustering[grunn]}
               </option>
             ))}
           </Select>
-          <Button type="submit" loading={isPending(lagrestatus)}>
+          <Button loading={isPending(lagrestatus)} variant="primary" size="small">
             Lagre
           </Button>
           {isSuccess(lagrestatus) && !harEndretInfo ? <span>Lagret!</span> : null}
           {isFailure(lagrestatus) ? <ApiErrorAlert>Kunne ikke lagre grunnen til søskenjustering</ApiErrorAlert> : null}
           {feilmelding ? <ApiErrorAlert>{feilmelding}</ApiErrorAlert> : null}
-        </form>
+        </SkjemaWrapper>
       ) : (
         <BodyShort>
           Grunn for søskenjustering:{' '}
@@ -91,6 +92,13 @@ export const GrunnForSoeskenjustering = (props: { behandling: IDetaljertBehandli
     </MarginTop>
   )
 }
+
+const SkjemaWrapper = styled.form`
+  max-width: fit-content;
+  & > *:not(:first-child) {
+    margin-top: 1rem;
+  }
+`
 
 const MarginTop = styled.div`
   margin-top: 3em;

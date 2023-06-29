@@ -32,11 +32,12 @@ type InstitusjonsoppholdPerioder = {
         }>
       >
     | undefined
+  behandles: boolean
 }
 
 const InstitusjonsoppholdPeriode = (props: InstitusjonsoppholdPerioder) => {
-  const { item, index, control, register, remove, watch, setVisFeil, errors } = props
-  watch(`institusjonsOppholdForm.${index}.data.reduksjon`)
+  const { item, index, control, register, remove, watch, setVisFeil, errors, behandles } = props
+  const reduksjonValgOppdatert = watch(`institusjonsOppholdForm.${index}.data.reduksjon`)
   return (
     <>
       <div key={item.id} id={`institusjonsopphold.${index}`}>
@@ -69,21 +70,20 @@ const InstitusjonsoppholdPeriode = (props: InstitusjonsoppholdPerioder) => {
             )}
           />
           <Select
-            error={errors?.data?.reduksjon?.message}
+            error={errors?.data?.reduksjon && 'Du må velge et alternativ'}
             label="Reduksjon"
             {...register(`institusjonsOppholdForm.${index}.data.reduksjon`, {
               required: { value: true, message: 'Feltet er påkrevd' },
               validate: { notDefault: (v) => v !== 'VELG_REDUKSJON' },
             })}
           >
-            <option value="">Velg reduksjon</option>
             {Object.entries(Reduksjon).map(([reduksjonsKey, reduksjontekst]) => (
               <option key={reduksjonsKey} value={reduksjonsKey}>
                 {reduksjontekst}
               </option>
             ))}
           </Select>
-          {item.data.reduksjon === 'JA_EGEN_PROSENT_AV_G' && (
+          {reduksjonValgOppdatert === 'JA_EGEN_PROSENT_AV_G' && (
             <TextField
               error={errors?.data?.egenReduksjon?.message}
               label="Reduksjonsbeløp(oppgi i % av G)"
@@ -102,14 +102,16 @@ const InstitusjonsoppholdPeriode = (props: InstitusjonsoppholdPerioder) => {
           label="Begrunnelse for periode(hvis aktuelt)"
           {...register(`institusjonsOppholdForm.${index}.data.begrunnelse`)}
         />
-        <Button
-          onClick={() => {
-            setVisFeil(false)
-            remove(index)
-          }}
-        >
-          Fjern opphold
-        </Button>
+        {behandles && (
+          <Button
+            onClick={() => {
+              setVisFeil(false)
+              remove(index)
+            }}
+          >
+            Fjern opphold
+          </Button>
+        )}
       </div>
     </>
   )

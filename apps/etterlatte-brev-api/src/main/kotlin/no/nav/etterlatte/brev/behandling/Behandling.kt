@@ -89,9 +89,9 @@ fun Grunnlag.mapSoeker(): Soeker = with(this.soeker) {
     val navn = hentNavn()!!.verdi
 
     Soeker(
-        fornavn = navn.fornavn,
-        mellomnavn = navn.mellomnavn,
-        etternavn = navn.etternavn,
+        fornavn = navn.fornavn.capitalize(),
+        mellomnavn = navn.mellomnavn?.capitalize(),
+        etternavn = navn.etternavn.capitalize(),
         fnr = Foedselsnummer(hentFoedselsnummer()!!.verdi.value)
     )
 }
@@ -113,7 +113,7 @@ fun Grunnlag.mapInnsender(): Innsender = with(this.sak) {
     }
 
     Innsender(
-        navn = innsender.let { "${it.fornavn} ${it.etternavn}" },
+        navn = innsender.let { "${it.fornavn.capitalize()} ${it.etternavn.capitalize()}" },
         fnr = Foedselsnummer(innsender.foedselsnummer.value)
     )
 }
@@ -131,4 +131,7 @@ fun List<Beregningsperiode>.hentUtbetaltBeloep(): Int {
     return this.last().utbetaltBeloep.value
 }
 
-private fun Navn.fulltNavn(): String = listOfNotNull(fornavn, mellomnavn, etternavn).joinToString(" ")
+private fun Navn.fulltNavn(): String =
+    listOfNotNull(fornavn, mellomnavn, etternavn).joinToString(" ") { it.capitalize() }
+
+private fun String.capitalize(): String = this.lowercase().replaceFirstChar { c -> c.uppercase() }

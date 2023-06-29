@@ -5,17 +5,17 @@ import { annullerBehandling } from '~shared/api/behandling'
 import { useNavigate } from 'react-router'
 import { ApiResponse } from '~shared/api/apiClient'
 import { ButtonWrapper } from '~shared/modal/modal'
-import { useAppSelector } from '~store/Store'
 import { IBehandlingStatus, IBehandlingsType } from '~shared/types/IDetaljertBehandling'
 import { SidebarPanel } from '~components/behandling/SideMeny/SideMeny'
 import { hentBehandlesFraStatus } from '~components/behandling/felles/utils'
+import { useBehandling } from '~components/behandling/useBehandling'
 
 export default function AnnullerBehandling() {
   const navigate = useNavigate()
   const [isOpen, setIsOpen] = useState(false)
   const [error, setError] = useState(false)
 
-  const behandling = useAppSelector((state) => state.behandlingReducer.behandling)
+  const behandling = useBehandling()
   const erFoerstegangsbehandling = behandling?.behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING
 
   const behandles = hentBehandlesFraStatus(behandling?.status ?? IBehandlingStatus.IVERKSATT)

@@ -2,20 +2,26 @@ import { useEffect } from 'react'
 import { Navigate, Route, Routes, useMatch } from 'react-router-dom'
 import { hentBehandling } from '~shared/api/behandling'
 import { GridContainer, MainContent } from '~shared/styled'
-import { addBehandling, resetBehandling, updateVilkaarsvurdering, updateVedtakSammendrag } from '~store/reducers/BehandlingReducer'
+import {
+  addBehandling,
+  resetBehandling,
+  updateVilkaarsvurdering,
+  updateVedtakSammendrag,
+} from '~store/reducers/BehandlingReducer'
 import Spinner from '~shared/Spinner'
 import { StatusBar } from '~shared/statusbar/Statusbar'
 import { useBehandlingRoutes } from './BehandlingRoutes'
 import { StegMeny } from './StegMeny/stegmeny'
 import { SideMeny } from './SideMeny/SideMeny'
-import { useAppDispatch, useAppSelector } from '~store/Store'
+import { useAppDispatch } from '~store/Store'
 import { isFailure, isPendingOrInitial, useApiCall } from '~shared/hooks/useApiCall'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { hentVilkaarsvurdering } from '~shared/api/vilkaarsvurdering'
-import { hentVedtakSammendrag } from "~shared/api/vedtaksvurdering";
+import { hentVedtakSammendrag } from '~shared/api/vedtaksvurdering'
+import { useBehandling } from '~components/behandling/useBehandling'
 
 export const Behandling = () => {
-  const behandling = useAppSelector((state) => state.behandlingReducer.behandling)
+  const behandling = useBehandling()
   const dispatch = useAppDispatch()
   const match = useMatch('/behandling/:behandlingId/*')
   const { behandlingRoutes } = useBehandlingRoutes()
@@ -73,10 +79,14 @@ export const Behandling = () => {
       {behandling && <StegMeny behandling={behandling} />}
 
       <Spinner
-        visible={isPendingOrInitial(fetchBehandlingStatus) || isPendingOrInitial(fetchVilkaarsvurderingStatus) || isPendingOrInitial(fetchVedtakStatus)}
+        visible={
+          isPendingOrInitial(fetchBehandlingStatus) ||
+          isPendingOrInitial(fetchVilkaarsvurderingStatus) ||
+          isPendingOrInitial(fetchVedtakStatus)
+        }
         label="Laster"
       />
-      {behandling &&  (
+      {behandling && (
         <GridContainer>
           <MainContent>
             <Routes>
@@ -86,7 +96,7 @@ export const Behandling = () => {
               <Route path="*" element={<Navigate to={behandlingRoutes[0].path} replace />} />
             </Routes>
           </MainContent>
-          <SideMeny behandling={behandling} vedtak={behandling.vedtak}/>
+          <SideMeny behandling={behandling} vedtak={behandling.vedtak} />
         </GridContainer>
       )}
       {isFailure(fetchBehandlingStatus) && <ApiErrorAlert>Kunne ikke hente behandling</ApiErrorAlert>}

@@ -26,7 +26,7 @@ data class AdopsjonRevurderingBrevdata(val virkningsdato: LocalDate, val adopter
             }
 
             return AdopsjonRevurderingBrevdata(
-                virkningsdato = behandling.revurderingInfo.virkningsdato,
+                virkningsdato = behandling.virkningsdato!!.atDay(1),
                 adoptertAv = behandling.revurderingInfo.adoptertAv
             )
         }

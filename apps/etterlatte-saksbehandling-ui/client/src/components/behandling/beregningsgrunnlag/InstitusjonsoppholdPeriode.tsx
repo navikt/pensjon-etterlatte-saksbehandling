@@ -38,7 +38,6 @@ type InstitusjonsoppholdPerioder = {
 const InstitusjonsoppholdPeriode = (props: InstitusjonsoppholdPerioder) => {
   const { item, index, control, register, remove, watch, setVisFeil, errors, behandles } = props
   const reduksjonValgOppdatert = watch(`institusjonsOppholdForm.${index}.data.reduksjon`)
-
   return (
     <>
       <div key={item.id} id={`institusjonsopphold.${index}`}>
@@ -71,7 +70,7 @@ const InstitusjonsoppholdPeriode = (props: InstitusjonsoppholdPerioder) => {
             )}
           />
           <Select
-            error={errors?.data?.reduksjon?.message}
+            error={errors?.data?.reduksjon && 'Du må velge et alternativ'}
             label="Reduksjon"
             {...register(`institusjonsOppholdForm.${index}.data.reduksjon`, {
               required: { value: true, message: 'Feltet er påkrevd' },

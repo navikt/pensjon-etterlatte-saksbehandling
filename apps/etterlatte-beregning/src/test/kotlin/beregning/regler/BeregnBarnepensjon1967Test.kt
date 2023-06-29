@@ -13,6 +13,7 @@ import no.nav.etterlatte.beregning.regler.barnepensjonGrunnlag
 import no.nav.etterlatte.beregning.regler.toBeregningstall
 import no.nav.etterlatte.libs.regler.RegelPeriode
 import no.nav.etterlatte.regler.Beregningstall
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.Month
@@ -82,7 +83,7 @@ internal class BeregnBarnepensjon1967Test {
             periode = RegelPeriode(fraDato = LocalDate.of(2023, Month.JANUARY, 1))
         )
 
-        resultat.verdi shouldBe 267.0875.toBeregningstall()
+        resultat.verdi shouldBe 929.toBeregningstall()
     }
 
     @Test
@@ -96,7 +97,54 @@ internal class BeregnBarnepensjon1967Test {
             periode = RegelPeriode(fraDato = LocalDate.of(2023, Month.JANUARY, 1))
         )
 
-        resultat.verdi shouldBe 133.54375.toBeregningstall()
+        resultat.verdi shouldBe 464.5.toBeregningstall()
+    }
+
+    @Test
+    fun `skal ikke gi større beløp med institusjonsopphold ingen reduksjon enn vanlig søskenjustering`() {
+        val resultatMedInst = beregnBarnepensjon1967RegelMedInstitusjon.anvend(
+            grunnlag = barnepensjonGrunnlag(
+                soeskenKull = listOf(FNR_1, FNR_2, FNR_3),
+                trygdeTid = Beregningstall(40),
+                institusjonsopphold = InstitusjonsoppholdBeregningsgrunnlag(Reduksjon.NEI_KORT_OPPHOLD)
+            ),
+            periode = RegelPeriode(fraDato = LocalDate.of(2023, Month.JANUARY, 1))
+        )
+
+        val resultatUtenInst = beregnBarnepensjon1967RegelMedInstitusjon.anvend(
+            grunnlag = barnepensjonGrunnlag(
+                soeskenKull = listOf(FNR_1, FNR_2, FNR_3),
+                trygdeTid = Beregningstall(40),
+                institusjonsopphold = null
+            ),
+            periode = RegelPeriode(fraDato = LocalDate.of(2023, Month.JANUARY, 1))
+        )
+
+        Assertions.assertEquals(resultatMedInst.verdi, resultatUtenInst.verdi)
+    }
+
+    @Test
+    fun `søskenjustering påvirker ikke utbetalt beløp når redusert sats gis (10 % av G)`() {
+        val resultatMedSoeskenjustering = beregnBarnepensjon1967RegelMedInstitusjon.anvend(
+            grunnlag = barnepensjonGrunnlag(
+                soeskenKull = listOf(FNR_1, FNR_2, FNR_3),
+                trygdeTid = Beregningstall(40),
+                institusjonsopphold = InstitusjonsoppholdBeregningsgrunnlag(Reduksjon.JA_VANLIG)
+            ),
+            periode = RegelPeriode(fraDato = LocalDate.of(2023, Month.JANUARY, 1))
+        )
+
+        val resultatUtenSoeskenjustering = beregnBarnepensjon1967RegelMedInstitusjon.anvend(
+            grunnlag = barnepensjonGrunnlag(
+                soeskenKull = listOf(),
+                trygdeTid = Beregningstall(40),
+                institusjonsopphold = InstitusjonsoppholdBeregningsgrunnlag(Reduksjon.JA_VANLIG)
+            ),
+            periode = RegelPeriode(fraDato = LocalDate.of(2023, Month.JANUARY, 1))
+        )
+
+        Assertions.assertEquals(resultatMedSoeskenjustering.verdi, resultatUtenSoeskenjustering.verdi)
+        Assertions.assertEquals(929.0.toBeregningstall(), resultatUtenSoeskenjustering.verdi)
     }
 
     @Test

@@ -57,13 +57,20 @@ class BeregningsGrunnlagService(
         barnepensjonBeregningsGrunnlag: BarnepensjonBeregningsGrunnlag
     ): Boolean {
         val forrigeGrunnlag = beregningsGrunnlagRepository.finnGrunnlagForBehandling(forrigeIverksatte.id)
+        val revurderingVirk = revurdering.virkningstidspunkt!!.dato.atDay(1)
 
-        // TODO: for periodisert institusjonsopphold må dette sjekkes her i tillegg til søskenjusteringen
-        return erGrunnlagLiktFoerEnDato(
+        val soeskenjusteringErLiktFoerVirk = erGrunnlagLiktFoerEnDato(
             barnepensjonBeregningsGrunnlag.soeskenMedIBeregning,
             forrigeGrunnlag!!.soeskenMedIBeregning,
-            revurdering.virkningstidspunkt!!.dato.atDay(1)
+            revurderingVirk
         )
+        val institusjonsoppholdErLiktFoerVirk = erGrunnlagLiktFoerEnDato(
+            barnepensjonBeregningsGrunnlag.institusjonsopphold ?: emptyList(),
+            forrigeGrunnlag.institusjonsoppholdBeregningsgrunnlag ?: emptyList(),
+            revurderingVirk
+        )
+
+        return soeskenjusteringErLiktFoerVirk && institusjonsoppholdErLiktFoerVirk
     }
 
     suspend fun hentBarnepensjonBeregningsGrunnlag(

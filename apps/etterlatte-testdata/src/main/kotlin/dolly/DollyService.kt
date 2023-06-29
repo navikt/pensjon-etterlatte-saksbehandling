@@ -51,7 +51,7 @@ class DollyService(
                             avdoed = avdoed,
                             gjenlevende = gjenlevendeEktefelle,
                             barn = personResponse.person.forelderBarnRelasjon
-                                .filter { it.barn }
+                                .filter { it.relatertPersonsRolle == "BARN" }
                                 .map { it.relatertPersonsIdent }
                         )
                     }

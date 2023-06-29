@@ -44,7 +44,7 @@ data class DollyPerson(
 
 data class ForelderBarnRelasjon(
     val relatertPersonsIdent: String,
-    val barn: Boolean
+    val relatertPersonsRolle: String
 )
 
 data class Sivilstand(val type: String, val relatertVedSivilstand: String?)

@@ -17,6 +17,7 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
 import no.nav.pensjon.brevbaker.api.model.Kroner
 import java.time.LocalDate
+import java.time.YearMonth
 import java.util.*
 
 data class Behandling(
@@ -29,7 +30,8 @@ data class Behandling(
     val utbetalingsinfo: Utbetalingsinfo? = null,
     val avkortingsinfo: Avkortingsinfo? = null,
     val revurderingsaarsak: RevurderingAarsak? = null,
-    val revurderingInfo: RevurderingInfo? = null
+    val revurderingInfo: RevurderingInfo? = null,
+    val virkningsdato: YearMonth? = null
 ) {
     init {
         if (vedtak.type == VedtakType.INNVILGELSE) {

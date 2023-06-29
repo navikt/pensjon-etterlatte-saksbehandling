@@ -138,7 +138,10 @@ enum class BrevProsessType {
                     RevurderingAarsak.SOESKENJUSTERING -> AUTOMATISK
                     else -> MANUELL
                 }
-                VedtakType.OPPHOER,
+                VedtakType.OPPHOER -> when (behandling.revurderingsaarsak) {
+                    RevurderingAarsak.ADOPSJON -> AUTOMATISK
+                    else -> MANUELL
+                }
                 VedtakType.AVSLAG -> MANUELL
             }
         }

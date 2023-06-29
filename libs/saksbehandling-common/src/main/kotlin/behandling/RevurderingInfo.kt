@@ -20,4 +20,9 @@ sealed class RevurderingInfo {
     data class Soeskenjustering(
         val grunnForSoeskenjustering: BarnepensjonSoeskenjusteringGrunn
     ) : RevurderingInfo()
+
+    @JsonTypeName("ADOPSJON")
+    data class Adopsjon(
+        val adoptertAv: Navn
+    ) : RevurderingInfo()
 }

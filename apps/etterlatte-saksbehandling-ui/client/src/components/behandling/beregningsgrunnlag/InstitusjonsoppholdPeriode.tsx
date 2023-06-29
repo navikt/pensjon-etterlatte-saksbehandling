@@ -32,10 +32,11 @@ type InstitusjonsoppholdPerioder = {
         }>
       >
     | undefined
+  behandles: boolean
 }
 
 const InstitusjonsoppholdPeriode = (props: InstitusjonsoppholdPerioder) => {
-  const { item, index, control, register, remove, watch, setVisFeil, errors } = props
+  const { item, index, control, register, remove, watch, setVisFeil, errors, behandles } = props
   const reduksjonValgOppdatert = watch(`institusjonsOppholdForm.${index}.data.reduksjon`)
 
   return (
@@ -103,14 +104,16 @@ const InstitusjonsoppholdPeriode = (props: InstitusjonsoppholdPerioder) => {
           label="Begrunnelse for periode(hvis aktuelt)"
           {...register(`institusjonsOppholdForm.${index}.data.begrunnelse`)}
         />
-        <Button
-          onClick={() => {
-            setVisFeil(false)
-            remove(index)
-          }}
-        >
-          Fjern opphold
-        </Button>
+        {behandles && (
+          <Button
+            onClick={() => {
+              setVisFeil(false)
+              remove(index)
+            }}
+          >
+            Fjern opphold
+          </Button>
+        )}
       </div>
     </>
   )

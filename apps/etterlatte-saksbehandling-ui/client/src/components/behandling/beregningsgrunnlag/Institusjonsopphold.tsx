@@ -96,6 +96,7 @@ const Institusjonsopphold = (props: InstitusjonsoppholdProps) => {
               watch={watch}
               setVisFeil={setVisFeil}
               errors={errors.institusjonsOppholdForm?.[index]}
+              behandles={behandles}
             />
           )
         })}

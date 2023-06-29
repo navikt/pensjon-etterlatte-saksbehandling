@@ -26,6 +26,7 @@ import { SakType } from '~shared/types/sak'
 import { erOpphoer, Revurderingsaarsak, tekstRevurderingsaarsak } from '~shared/types/Revurderingsaarsak'
 import styled from 'styled-components'
 import { GrunnForSoeskenjustering } from '~components/behandling/revurderingsoversikt/GrunnForSoeskenjustering'
+import { AdoptertAv } from '~components/behandling/revurderingsoversikt/AdoptertAv'
 
 const revurderingsaarsakTilTekst = (revurderingsaarsak: Revurderingsaarsak): string =>
   tekstRevurderingsaarsak[revurderingsaarsak]
@@ -87,6 +88,7 @@ export const Revurderingsoversikt = (props: { behandling: IDetaljertBehandling }
         {behandling.revurderingsaarsak === Revurderingsaarsak.SOESKENJUSTERING ? (
           <GrunnForSoeskenjustering behandling={behandling} />
         ) : null}
+        {behandling.revurderingsaarsak === Revurderingsaarsak.ADOPSJON ? <AdoptertAv behandling={behandling} /> : null}
         <Virkningstidspunkt
           redigerbar={behandles}
           virkningstidspunkt={behandling.virkningstidspunkt}

@@ -15,7 +15,18 @@ export interface SoeskenjusteringInfo {
   grunnForSoeskenjustering: BarnepensjonSoeskenjusteringGrunn
 }
 
-export type RevurderingInfo = SoeskenjusteringInfo
+export interface AdopsjonInfo {
+  type: 'ADOPSJON'
+  adoptertAv: Navn
+}
+
+export interface Navn {
+  fornavn: string
+  mellomnavn: string | undefined
+  etternavn: string
+}
+
+export type RevurderingInfo = SoeskenjusteringInfo | AdopsjonInfo
 
 export const tekstSoeskenjustering: Record<BarnepensjonSoeskenjusteringGrunn, string> = {
   FORPLEID_ETTER_BARNEVERNSLOVEN: 'Forpleid etter barnevernsloven',

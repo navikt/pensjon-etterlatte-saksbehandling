@@ -2,12 +2,7 @@ import { useEffect } from 'react'
 import { Navigate, Route, Routes, useMatch } from 'react-router-dom'
 import { hentBehandling } from '~shared/api/behandling'
 import { GridContainer, MainContent } from '~shared/styled'
-import {
-  addBehandling,
-  resetBehandling,
-  updateVilkaarsvurdering,
-  updateVedtakSammendrag,
-} from '~store/reducers/BehandlingReducer'
+import { addBehandling, resetBehandling, updateVedtakSammendrag } from '~store/reducers/BehandlingReducer'
 import Spinner from '~shared/Spinner'
 import { StatusBar } from '~shared/statusbar/Statusbar'
 import { useBehandlingRoutes } from './BehandlingRoutes'
@@ -16,7 +11,6 @@ import { SideMeny } from './SideMeny/SideMeny'
 import { useAppDispatch } from '~store/Store'
 import { isFailure, isPendingOrInitial, useApiCall } from '~shared/hooks/useApiCall'
 import { ApiErrorAlert } from '~ErrorBoundary'
-import { hentVilkaarsvurdering } from '~shared/api/vilkaarsvurdering'
 import { hentVedtakSammendrag } from '~shared/api/vedtaksvurdering'
 import { useBehandling } from '~components/behandling/useBehandling'
 
@@ -26,7 +20,6 @@ export const Behandling = () => {
   const match = useMatch('/behandling/:behandlingId/*')
   const { behandlingRoutes } = useBehandlingRoutes()
   const [fetchBehandlingStatus, fetchBehandling] = useApiCall(hentBehandling)
-  const [fetchVilkaarsvurderingStatus, fetchVilkaarsvurdering] = useApiCall(hentVilkaarsvurdering)
   const [fetchVedtakStatus, fetchVedtakSammendrag] = useApiCall(hentVedtakSammendrag)
 
   const behandlingId = behandling?.id
@@ -40,12 +33,6 @@ export const Behandling = () => {
         behandlingIdFraURL,
         (res) => {
           dispatch(addBehandling(res))
-
-          fetchVilkaarsvurdering(behandlingIdFraURL, (vilkaarsvurdering) => {
-            if (vilkaarsvurdering !== null) {
-              dispatch(updateVilkaarsvurdering(vilkaarsvurdering))
-            }
-          })
 
           fetchVedtakSammendrag(behandlingIdFraURL, (vedtakSammendrag) => {
             if (vedtakSammendrag !== null) {
@@ -79,11 +66,7 @@ export const Behandling = () => {
       {behandling && <StegMeny behandling={behandling} />}
 
       <Spinner
-        visible={
-          isPendingOrInitial(fetchBehandlingStatus) ||
-          isPendingOrInitial(fetchVilkaarsvurderingStatus) ||
-          isPendingOrInitial(fetchVedtakStatus)
-        }
+        visible={isPendingOrInitial(fetchBehandlingStatus) || isPendingOrInitial(fetchVedtakStatus)}
         label="Laster"
       />
       {behandling && (

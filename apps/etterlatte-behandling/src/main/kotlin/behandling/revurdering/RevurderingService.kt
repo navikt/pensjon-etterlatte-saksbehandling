@@ -160,7 +160,7 @@ class RealRevurderingService(
     }.also { revurdering ->
         revurdering?.let {
             runBlocking {
-                behandlingHendelser.send(revurdering.id to BehandlingHendelseType.OPPRETTET)
+                behandlingHendelser.send(Triple(revurdering.id, BehandlingHendelseType.OPPRETTET, revurdering.type))
             }
         }
     }

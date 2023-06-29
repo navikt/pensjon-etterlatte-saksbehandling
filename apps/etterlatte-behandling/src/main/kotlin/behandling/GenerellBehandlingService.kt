@@ -129,7 +129,7 @@ class RealGenerellBehandlingService(
     }
 
     override fun avbrytBehandling(behandlingId: UUID, saksbehandler: String) {
-        inTransaction {
+        val behandling = inTransaction {
             val behandling = hentBehandlingForId(behandlingId)
                 ?: throw BehandlingNotFoundException("Fant ikke behandling med id=$behandlingId som skulle avbrytes")
             if (!behandling.status.kanAvbrytes()) {
@@ -141,9 +141,10 @@ class RealGenerellBehandlingService(
             }.also {
                 grunnlagsendringshendelseDao.kobleGrunnlagsendringshendelserFraBehandlingId(behandlingId)
             }
+            behandling
         }
         runBlocking {
-            behandlingHendelser.send(behandlingId to BehandlingHendelseType.AVBRUTT)
+            behandlingHendelser.send(Triple(behandlingId, BehandlingHendelseType.AVBRUTT, behandling.type))
         }
     }
 

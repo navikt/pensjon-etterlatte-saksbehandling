@@ -147,7 +147,7 @@ class RealFoerstegangsbehandlingService(
             }.also { behandling ->
                 behandling?.let {
                     runBlocking {
-                        behandlingHendelser.send(it.id to BehandlingHendelseType.OPPRETTET)
+                        behandlingHendelser.send(Triple(it.id, BehandlingHendelseType.OPPRETTET, behandling.type))
                     }
                 }
             }
@@ -179,7 +179,7 @@ class RealFoerstegangsbehandlingService(
             }.also { behandling ->
                 behandling?.let {
                     runBlocking {
-                        behandlingHendelser.send(it.id to BehandlingHendelseType.OPPRETTET)
+                        behandlingHendelser.send(Triple(it.id, BehandlingHendelseType.OPPRETTET, behandling.type))
                     }
                 }
             }

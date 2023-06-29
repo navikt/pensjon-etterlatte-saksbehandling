@@ -8,6 +8,7 @@ import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.foerstegangsbehandling.FoerstegangsbehandlingService
 import no.nav.etterlatte.behandling.migrering.MigreringRepository
 import no.nav.etterlatte.libs.common.Vedtaksloesning
+import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.JaNeiMedBegrunnelse
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
@@ -45,7 +46,7 @@ class MigreringService(
             pesys,
             "Automatisk importert fra Pesys"
         )
-        runBlocking { sendHendelse(it.id) }
+        runBlocking { sendHendelse(it.id, it.type) }
         migreringRepository.lagreKoplingTilPesyssaka(pesysSakId = request.pesysId, sakId = it.sak.id)
         it
     }
@@ -61,6 +62,6 @@ class MigreringService(
     private fun finnEllerOpprettSak(request: MigreringRequest) =
         sakService.finnEllerOpprettSak(request.fnr.value, SakType.BARNEPENSJON, request.enhet.nr)
 
-    private suspend fun sendHendelse(behandlingId: UUID) =
-        behandlingsHendelser.send(behandlingId to BehandlingHendelseType.OPPRETTET)
+    private suspend fun sendHendelse(behandlingId: UUID, type: BehandlingType) =
+        behandlingsHendelser.send(Triple(behandlingId, BehandlingHendelseType.OPPRETTET, type))
 }

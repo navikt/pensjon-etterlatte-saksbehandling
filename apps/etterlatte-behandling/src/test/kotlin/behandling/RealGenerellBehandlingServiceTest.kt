@@ -23,6 +23,7 @@ import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlagsOpplysningMedPersonopplysning
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseDao
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
+import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
@@ -205,7 +206,15 @@ class RealGenerellBehandlingServiceTest {
             every { behandlingAvbrutt(any(), any()) } returns Unit
         }
         val hendelseskanalMock = mockk<BehandlingHendelserKanal> {
-            coEvery { send(Pair(nyFoerstegangsbehandling.id, BehandlingHendelseType.AVBRUTT)) } returns Unit
+            coEvery {
+                send(
+                    Triple(
+                        nyFoerstegangsbehandling.id,
+                        BehandlingHendelseType.AVBRUTT,
+                        BehandlingType.FØRSTEGANGSBEHANDLING
+                    )
+                )
+            } returns Unit
         }
         val grunnlagsendringshendelseDaoMock = mockk<GrunnlagsendringshendelseDao> {
             every { kobleGrunnlagsendringshendelserFraBehandlingId(any()) } just runs
@@ -225,7 +234,13 @@ class RealGenerellBehandlingServiceTest {
 
         behandlingService.avbrytBehandling(nyFoerstegangsbehandling.id, "")
         coVerify {
-            hendelseskanalMock.send(Pair(nyFoerstegangsbehandling.id, BehandlingHendelseType.AVBRUTT))
+            hendelseskanalMock.send(
+                Triple(
+                    nyFoerstegangsbehandling.id,
+                    BehandlingHendelseType.AVBRUTT,
+                    BehandlingType.FØRSTEGANGSBEHANDLING
+                )
+            )
         }
     }
 
@@ -242,7 +257,15 @@ class RealGenerellBehandlingServiceTest {
             every { behandlingAvbrutt(any(), any()) } returns Unit
         }
         val hendelseskanalMock = mockk<BehandlingHendelserKanal> {
-            coEvery { send(Pair(nyFoerstegangsbehandling.id, BehandlingHendelseType.AVBRUTT)) } returns Unit
+            coEvery {
+                send(
+                    Triple(
+                        nyFoerstegangsbehandling.id,
+                        BehandlingHendelseType.AVBRUTT,
+                        BehandlingType.FØRSTEGANGSBEHANDLING
+                    )
+                )
+            } returns Unit
         }
         val grunnlagsendringshendelseDaoMock = mockk<GrunnlagsendringshendelseDao> {
             every { kobleGrunnlagsendringshendelserFraBehandlingId(any()) } just runs

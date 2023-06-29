@@ -23,6 +23,7 @@ import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
+import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.JaNeiMedBegrunnelse
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
@@ -147,7 +148,7 @@ internal class RealFoerstegangsbehandlingServiceTest {
     fun startBehandling() {
         val behandlingOpprettes = slot<OpprettBehandling>()
         val behandlingHentes = slot<UUID>()
-        val hendelse = slot<Pair<UUID, BehandlingHendelseType>>()
+        val hendelse = slot<Triple<UUID, BehandlingHendelseType, BehandlingType>>()
         val datoNaa = Tidspunkt.now().toLocalDatetimeUTC()
 
         every { featureToggleService.isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false) } returns false
@@ -233,7 +234,7 @@ internal class RealFoerstegangsbehandlingServiceTest {
     fun `skal opprette kun foerstegangsbehandling hvis det ikke finnes noen tidligere behandlinger`() {
         val behandlingOpprettes = slot<OpprettBehandling>()
         val behandlingHentes = slot<UUID>()
-        val hendelse = slot<Pair<UUID, BehandlingHendelseType>>()
+        val hendelse = slot<Triple<UUID, BehandlingHendelseType, BehandlingType>>()
         val datoNaa = Tidspunkt.now().toLocalDatetimeUTC()
 
         every { featureToggleService.isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false) } returns false
@@ -308,7 +309,7 @@ internal class RealFoerstegangsbehandlingServiceTest {
     fun `skal avbryte behandling hvis under behandling og opprette en ny`() {
         val behandlingOpprettes = slot<OpprettBehandling>()
         val behandlingHentes = slot<UUID>()
-        val hendelse = slot<Pair<UUID, BehandlingHendelseType>>()
+        val hendelse = slot<Triple<UUID, BehandlingHendelseType, BehandlingType>>()
         val datoNaa = Tidspunkt.now().toLocalDatetimeUTC()
 
         every {
@@ -403,7 +404,7 @@ internal class RealFoerstegangsbehandlingServiceTest {
     fun `skal lage ny behandling hvis behandling er satt til iverksatt`() {
         val behandlingOpprettes = slot<OpprettBehandling>()
         val behandlingHentes = slot<UUID>()
-        val hendelse = slot<Pair<UUID, BehandlingHendelseType>>()
+        val hendelse = slot<Triple<UUID, BehandlingHendelseType, BehandlingType>>()
         val datoNaa = Tidspunkt.now().toLocalDatetimeUTC()
 
         every {

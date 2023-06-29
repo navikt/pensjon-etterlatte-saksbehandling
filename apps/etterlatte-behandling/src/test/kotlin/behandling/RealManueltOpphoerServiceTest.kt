@@ -99,12 +99,12 @@ internal class RealManueltOpphoerServiceTest {
             ),
             fritekstAarsak = "Det var enda en opphoersaarsak"
         )
-        val alleBehandlingerISak_sak = slot<Long>()
-        val opprettBehandling_slot = slot<OpprettBehandling>()
-        val hendelse_slot = slot<Pair<UUID, BehandlingHendelseType>>()
+        val alleBehandlingerISakSlot = slot<Long>()
+        val opprettBehandlingSlot = slot<OpprettBehandling>()
+        val hendelseSlot = slot<Triple<UUID, BehandlingHendelseType, BehandlingType>>()
 
         val behandlingDaoMock = mockk<BehandlingDao> {
-            every { alleBehandlingerISak(capture(alleBehandlingerISak_sak)) } returns listOf(
+            every { alleBehandlingerISak(capture(alleBehandlingerISakSlot)) } returns listOf(
                 foerstegangsbehandling(
                     sakId = sak,
                     status = BehandlingStatus.IVERKSATT,
@@ -115,7 +115,7 @@ internal class RealManueltOpphoerServiceTest {
                     )
                 )
             )
-            every { opprettBehandling(capture(opprettBehandling_slot)) } just runs
+            every { opprettBehandling(capture(opprettBehandlingSlot)) } just runs
             every { hentBehandling(any()) } answers {
                 manueltOpphoer(
                     sakId = manueltOpphoerRequest.sak,
@@ -126,7 +126,7 @@ internal class RealManueltOpphoerServiceTest {
             }
         }
         val hendelsesKanal = mockk<BehandlingHendelserKanal> {
-            coEvery { send(capture(hendelse_slot)) } returns Unit
+            coEvery { send(capture(hendelseSlot)) } returns Unit
         }
         val hendelseDaoMock = mockk<HendelseDao> {
             every { behandlingOpprettet(any()) } returns Unit
@@ -146,16 +146,16 @@ internal class RealManueltOpphoerServiceTest {
 
         assertAll(
             "skal starte manuelt opphoer",
-            { assertEquals(manueltOpphoerRequest.sak, alleBehandlingerISak_sak.captured) },
-            { assertEquals(manueltOpphoerRequest.sak, opprettBehandling_slot.captured.sakId) },
-            { assertEquals(manueltOpphoerRequest.opphoerAarsaker, opprettBehandling_slot.captured.opphoerAarsaker) },
-            { assertEquals(manueltOpphoerRequest.fritekstAarsak, opprettBehandling_slot.captured.fritekstAarsak) },
-            { assertEquals(opprettBehandling_slot.captured.virkningstidspunkt?.dato, YearMonth.of(2022, 8)) },
-            { assertEquals(BehandlingType.MANUELT_OPPHOER, opprettBehandling_slot.captured.type) },
-            { assertEquals(manueltOpphoerRequest.sak, opprettBehandling_slot.captured.sakId) },
-            { assertEquals(opprettBehandling_slot.captured.id, hendelse_slot.captured.first) },
-            { assertEquals(BehandlingHendelseType.OPPRETTET, hendelse_slot.captured.second) },
-            { assertEquals(opprettBehandling_slot.captured.id, returnertManueltOpphoer?.id) }
+            { assertEquals(manueltOpphoerRequest.sak, alleBehandlingerISakSlot.captured) },
+            { assertEquals(manueltOpphoerRequest.sak, opprettBehandlingSlot.captured.sakId) },
+            { assertEquals(manueltOpphoerRequest.opphoerAarsaker, opprettBehandlingSlot.captured.opphoerAarsaker) },
+            { assertEquals(manueltOpphoerRequest.fritekstAarsak, opprettBehandlingSlot.captured.fritekstAarsak) },
+            { assertEquals(opprettBehandlingSlot.captured.virkningstidspunkt?.dato, YearMonth.of(2022, 8)) },
+            { assertEquals(BehandlingType.MANUELT_OPPHOER, opprettBehandlingSlot.captured.type) },
+            { assertEquals(manueltOpphoerRequest.sak, opprettBehandlingSlot.captured.sakId) },
+            { assertEquals(opprettBehandlingSlot.captured.id, hendelseSlot.captured.first) },
+            { assertEquals(BehandlingHendelseType.OPPRETTET, hendelseSlot.captured.second) },
+            { assertEquals(opprettBehandlingSlot.captured.id, returnertManueltOpphoer?.id) }
         )
     }
 

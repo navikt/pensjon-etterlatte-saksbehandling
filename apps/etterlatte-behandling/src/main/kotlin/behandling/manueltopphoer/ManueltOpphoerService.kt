@@ -118,7 +118,9 @@ class RealManueltOpphoerService(
             }
         }?.also { lagretManueltOpphoer ->
             runBlocking {
-                behandlingHendelser.send(lagretManueltOpphoer.id to BehandlingHendelseType.OPPRETTET)
+                behandlingHendelser.send(
+                    Triple(lagretManueltOpphoer.id, BehandlingHendelseType.OPPRETTET, lagretManueltOpphoer.type)
+                )
             }
             logger.info("Manuelt opphør med id=${lagretManueltOpphoer.id} er opprettet.")
         }

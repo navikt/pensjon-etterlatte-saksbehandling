@@ -36,7 +36,8 @@ type InstitusjonsoppholdPerioder = {
 
 const InstitusjonsoppholdPeriode = (props: InstitusjonsoppholdPerioder) => {
   const { item, index, control, register, remove, watch, setVisFeil, errors } = props
-  watch(`institusjonsOppholdForm.${index}.data.reduksjon`)
+  const reduksjonValgOppdatert = watch(`institusjonsOppholdForm.${index}.data.reduksjon`)
+
   return (
     <>
       <div key={item.id} id={`institusjonsopphold.${index}`}>
@@ -83,7 +84,7 @@ const InstitusjonsoppholdPeriode = (props: InstitusjonsoppholdPerioder) => {
               </option>
             ))}
           </Select>
-          {item.data.reduksjon === 'JA_EGEN_PROSENT_AV_G' && (
+          {reduksjonValgOppdatert === 'JA_EGEN_PROSENT_AV_G' && (
             <TextField
               error={errors?.data?.egenReduksjon?.message}
               label="Reduksjonsbeløp(oppgi i % av G)"

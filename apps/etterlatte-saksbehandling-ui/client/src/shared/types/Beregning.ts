@@ -57,13 +57,12 @@ export type SoeskenMedIBeregningGrunnlagDto = PeriodisertBeregningsgrunnlagDto<S
 export type InstitusjonsoppholdGrunnlagData = PeriodisertBeregningsgrunnlag<InstitusjonsoppholdIBeregning>[]
 
 export interface InstitusjonsoppholdIBeregning {
-  reduksjon: Reduksjonstypekey
+  reduksjon: Reduksjonstypekey | 'VELG_REDUKSJON'
   egenReduksjon?: string | undefined
   begrunnelse?: string | undefined
 }
 
 export const Reduksjon = {
-  VELG_REDUKSJON: 'Velg reduksjon',
   JA_VANLIG: 'Ja, etter vanlig sats(10% av G)',
   NEI_KORT_OPPHOLD: 'Nei, kort opphold',
   JA_EGEN_PROSENT_AV_G: 'Ja, utgifter til bolig(egen % av G)',

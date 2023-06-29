@@ -29,11 +29,11 @@ object BarnepensjonVilkaar {
     private fun formaal() = Vilkaar(
         Delvilkaar(
             type = VilkaarType.BP_FORMAAL,
-            tittel = "Formål",
+            tittel = "Lever barnet?",
             beskrivelse = """
                 Formålet med barnepensjon er å sikre inntekt for barn når en av foreldrene eller begge er døde. Dette betyr at barnet må være i live for å ha rett på barnepensjon.
             """.trimIndent(),
-            spoersmaal = "Lever barnet det søkes barnepensjon for?",
+            spoersmaal = "Lever barnet det søkes barnepensjon for på virkningstidspunktet?",
             lovreferanse = Lovreferanse(
                 paragraf = "§ 18-1",
                 ledd = 1,

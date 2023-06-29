@@ -21,9 +21,9 @@ export interface AdopsjonInfo {
 }
 
 export interface Navn {
-  fornavn: String
-  mellomnavn: String | undefined
-  etternavn: String
+  fornavn: string
+  mellomnavn: string | undefined
+  etternavn: string
 }
 
 export type RevurderingInfo = SoeskenjusteringInfo | AdopsjonInfo

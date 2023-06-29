@@ -105,7 +105,7 @@ fun Application.module(context: ApplicationContext) {
                 behandlingService = behandlingService,
                 kanBrukeNyOppgaveliste = kanBrukeNyOppgaveliste
             )
-            oppgaveRoutes(service = oppgaveService)
+            oppgaveRoutes(service = oppgaveService, gosysOppgaveKlient)
             oppgaveRoutesNy(
                 service = oppgaveServiceNy,
                 kanBrukeNyOppgaveliste = kanBrukeNyOppgaveliste

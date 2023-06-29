@@ -39,6 +39,8 @@ import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.database.POSTGRES_VERSION
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
+import no.nav.etterlatte.oppgave.GosysOppgaveKlient
+import no.nav.etterlatte.oppgave.GosysOppgaver
 import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.etterlatte.token.Claims
 import no.nav.security.mock.oauth2.MockOAuth2Server
@@ -87,6 +89,8 @@ abstract class BehandlingIntegrationTest {
                 put("NAVANSATT_URL", "http://localhost")
                 put("SKJERMING_URL", "http://localhost")
                 put("KAN_BRUKE_NY_OPPGAVELISTE", "true")
+                put("OPPGAVE_URL", "http://localhost")
+                put("OPPGAVE_SCOPE", "scope")
             }.let { Miljoevariabler(it) },
             config = ConfigFactory.parseMap(hoconApplicationConfig.toMap()),
             rapid = TestProdusent(),
@@ -97,7 +101,8 @@ abstract class BehandlingIntegrationTest {
             leaderElectionHttpClient = leaderElection(),
             navAnsattKlient = NavAnsattKlientTest(),
             norg2Klient = norg2Klient ?: Norg2KlientTest(),
-            grunnlagKlientObo = GrunnlagKlientTest()
+            grunnlagKlientObo = GrunnlagKlientTest(),
+            gosysOppgaveKlient = GosysOppgaveKlientTest()
         ).also {
             it.dataSource.migrate()
         }
@@ -295,6 +300,12 @@ class GrunnlagKlientTest : GrunnlagKlient {
     ): Grunnlagsopplysning<Person> {
         val personopplysning = personOpplysning(doedsdato = LocalDate.parse("2022-01-01"))
         return grunnlagsOpplysningMedPersonopplysning(personopplysning)
+    }
+}
+
+class GosysOppgaveKlientTest : GosysOppgaveKlient {
+    override suspend fun hentOppgaver(brukerTokenInfo: BrukerTokenInfo): GosysOppgaver {
+        return GosysOppgaver(0, emptyList())
     }
 }
 

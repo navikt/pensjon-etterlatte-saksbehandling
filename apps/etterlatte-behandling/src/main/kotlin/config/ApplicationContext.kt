@@ -46,6 +46,8 @@ import no.nav.etterlatte.libs.jobs.LeaderElection
 import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.libs.sporingslogg.Sporingslogg
+import no.nav.etterlatte.oppgave.GosysOppgaveKlient
+import no.nav.etterlatte.oppgave.GosysOppgaveKlientImpl
 import no.nav.etterlatte.oppgave.OppgaveDao
 import no.nav.etterlatte.oppgave.OppgaveServiceImpl
 import no.nav.etterlatte.oppgaveny.OppgaveDaoMedEndringssporingImpl
@@ -117,7 +119,8 @@ class ApplicationContext(
     },
     val norg2Klient: Norg2Klient = Norg2KlientImpl(httpClient(), env.getValue("NORG2_URL")),
     val leaderElectionHttpClient: HttpClient = httpClient(),
-    val grunnlagKlientObo: GrunnlagKlient = GrunnlagKlientObo(config, httpClient())
+    val grunnlagKlientObo: GrunnlagKlient = GrunnlagKlientObo(config, httpClient()),
+    val gosysOppgaveKlient: GosysOppgaveKlient = GosysOppgaveKlientImpl(config, httpClient())
 ) {
     val httpPort = env.getOrDefault("HTTP_PORT", "8080").toInt()
     val saksbehandlerGroupIdsByKey = AzureGroup.values().associateWith { env.requireEnvValue(it.envKey) }

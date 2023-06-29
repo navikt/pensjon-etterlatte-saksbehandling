@@ -1,6 +1,6 @@
-import { useAppSelector } from '~store/Store'
 import { VilkaarsvurderingResultat } from '~shared/api/vilkaarsvurdering'
 import { IBehandlingsType } from '~shared/types/IDetaljertBehandling'
+import { useBehandling } from '~components/behandling/useBehandling'
 
 // Dette er en midlertidig workaround i frontend fram til vi får noe mer rimelig rundt hva er vedtaksresultat i backend
 // Laget som en felles greie slik at
@@ -9,7 +9,7 @@ import { IBehandlingsType } from '~shared/types/IDetaljertBehandling'
 export type VedtakResultat = 'opphoer' | 'innvilget' | 'avslag' | 'endring' | 'uavklart'
 
 export function useVedtaksResultat(): VedtakResultat {
-  const behandling = useAppSelector((state) => state.behandlingReducer.behandling)
+  const behandling = useBehandling()
   const behandlingType = behandling?.behandlingType
   const vilkaarsresultat = behandling?.vilkårsprøving?.resultat?.utfall
 

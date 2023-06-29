@@ -2,12 +2,19 @@ import { useState } from 'react'
 import { BodyLong, Button, Heading, Modal } from '@navikt/ds-react'
 import { useNavigate } from 'react-router'
 import { ButtonWrapper } from '~shared/modal/modal'
+import { erFerdigBehandlet } from '~components/behandling/felles/utils'
+import { useBehandling } from '~components/behandling/useBehandling'
 
 export default function AvbrytBehandling() {
   const navigate = useNavigate()
+  const behandling = useBehandling()
   const [isOpen, setIsOpen] = useState(false)
 
-  return (
+  return behandling?.status && erFerdigBehandlet(behandling.status) ? (
+    <Button variant={'tertiary'} className="textButton" onClick={() => navigate('/')}>
+      Tilbake til oppgavelisten
+    </Button>
+  ) : (
     <>
       <Button variant={'tertiary'} className="textButton" onClick={() => setIsOpen(true)}>
         Avbryt

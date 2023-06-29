@@ -5,12 +5,12 @@ import { Vilkaarsvurdering } from './vilkaarsvurdering/Vilkaarsvurdering'
 import { Soeknadsoversikt } from './soeknadsoversikt/Soeknadoversikt'
 import Beregningsgrunnlag from './beregningsgrunnlag/Beregningsgrunnlag'
 import { IBehandlingStatus, IBehandlingsType } from '~shared/types/IDetaljertBehandling'
-import { useAppSelector } from '~store/Store'
 import { Vedtaksbrev } from './brev/Vedtaksbrev'
 import { ManueltOpphoerOversikt } from './manueltopphoeroversikt/ManueltOpphoerOversikt'
 import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
 import { Revurderingsoversikt } from '~components/behandling/revurderingsoversikt/Revurderingsoversikt'
 import { behandlingSkalSendeBrev } from '~components/behandling/felles/utils'
+import { useBehandling } from '~components/behandling/useBehandling'
 
 type behandlingRouteTypes =
   | 'soeknadsoversikt'
@@ -53,7 +53,7 @@ function useRouteNavigation() {
 
 export const useBehandlingRoutes = () => {
   const { currentRoute, goto } = useRouteNavigation()
-  const behandling = useAppSelector((state) => state.behandlingReducer.behandling)
+  const behandling = useBehandling()
 
   const aktuelleRoutes = hentAktuelleRoutes(behandling)
 

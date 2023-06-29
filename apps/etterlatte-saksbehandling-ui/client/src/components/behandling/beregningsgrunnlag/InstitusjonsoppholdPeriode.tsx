@@ -78,7 +78,6 @@ const InstitusjonsoppholdPeriode = (props: InstitusjonsoppholdPerioder) => {
               validate: { notDefault: (v) => v !== 'VELG_REDUKSJON' },
             })}
           >
-            <option value="">Velg reduksjon</option>
             {Object.entries(Reduksjon).map(([reduksjonsKey, reduksjontekst]) => (
               <option key={reduksjonsKey} value={reduksjonsKey}>
                 {reduksjontekst}

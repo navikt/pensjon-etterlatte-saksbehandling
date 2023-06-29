@@ -1,5 +1,5 @@
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
-import { RevurderingInfo } from '~shared/types/RevurderingInfo'
+import { AdopsjonInfo, RevurderingInfo } from '~shared/types/RevurderingInfo'
 import React, { FormEvent, useState } from 'react'
 import { BodyShort, Button, Heading, TextField } from '@navikt/ds-react'
 import { hentBehandlesFraStatus } from '~components/behandling/felles/utils'
@@ -9,11 +9,21 @@ import { ApiErrorAlert } from '~ErrorBoundary'
 import { oppdaterRevurderingInfo } from '~store/reducers/BehandlingReducer'
 import styled from 'styled-components'
 
+function hentUndertypeFraBehandling(behandling?: IDetaljertBehandling): AdopsjonInfo | null {
+  const revurderinginfo = behandling?.revurderinginfo
+  if (revurderinginfo?.type === 'ADOPSJON') {
+    return revurderinginfo
+  } else {
+    return null
+  }
+}
+
 export const AdoptertAv = (props: { behandling: IDetaljertBehandling }) => {
   const { behandling } = props
-  const [fornavn, setFornavn] = useState<string>('')
-  const [mellomnavn, setMellomnavn] = useState<string>('')
-  const [etternavn, setEtternavn] = useState<string>('')
+  const adopsjonInfo = hentUndertypeFraBehandling(behandling)
+  const [fornavn, setFornavn] = useState(adopsjonInfo?.adoptertAv?.fornavn)
+  const [mellomnavn, setMellomnavn] = useState(adopsjonInfo?.adoptertAv?.mellomnavn)
+  const [etternavn, setEtternavn] = useState(adopsjonInfo?.adoptertAv?.etternavn)
   const [feilmelding, setFeilmelding] = useState<string | undefined>(undefined)
   const [lagrestatus, lagre] = useApiCall(lagreRevurderingInfo)
   const redigerbar = hentBehandlesFraStatus(behandling.status)

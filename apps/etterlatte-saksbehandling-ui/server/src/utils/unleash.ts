@@ -42,7 +42,10 @@ unleash.on('synchronized', () => {
 })
 
 unleash.on('error', (err: Error) => {
-  logger.error(err)
+  logger.error({
+    message: err.message || 'Feil oppsto i unleash: ',
+    stack_trace: err.stack,
+  })
 })
 
 unleash.on('warn', (msg: string) => {

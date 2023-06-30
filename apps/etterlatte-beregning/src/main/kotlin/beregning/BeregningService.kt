@@ -47,16 +47,10 @@ class BeregningService(
     }
 
     suspend fun opprettForOpphoer(behandlingId: UUID, brukerTokenInfo: BrukerTokenInfo) {
-        logger.info("Sjekker om kan beregne ytelse")
         val kanBeregneYtelse = behandlingKlient.beregn(behandlingId, brukerTokenInfo, commit = false)
-        logger.info("Kan beregne ytelse? $kanBeregneYtelse")
         if (kanBeregneYtelse) {
             val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
-            logger.info("Henta behandling $behandlingId")
-            val girOpphoer = behandling.revurderingsaarsak.girOpphoer()
-            logger.info("Gir opphør? $girOpphoer")
-            if (girOpphoer) {
-                logger.info("Klar til å kopiere")
+            if (behandling.revurderingsaarsak.girOpphoer()) {
                 kopierBeregningsgrunnlagOgOpprettBeregning(behandling, brukerTokenInfo, behandlingId)
             }
         }
@@ -68,10 +62,8 @@ class BeregningService(
         behandlingId: UUID
     ) {
         val sistIverksatte = behandlingKlient.hentSisteIverksatteBehandling(behandling.sak, brukerTokenInfo)
-        logger.info("Sist iverksatte: $sistIverksatte")
         val grunnlagDenneBehandlinga =
             beregningsGrunnlagService.hentBarnepensjonBeregningsGrunnlag(behandlingId, brukerTokenInfo)
-        logger.info("Grunnlag denne: $grunnlagDenneBehandlinga")
         if (grunnlagDenneBehandlinga == null || grunnlagDenneBehandlinga.behandlingId != behandlingId) {
             logger.info("Kopierer beregningsgrunnlag og oppretter beregning for $behandlingId")
             beregningsGrunnlagService.dupliserBeregningsGrunnlag(behandlingId, sistIverksatte.id)

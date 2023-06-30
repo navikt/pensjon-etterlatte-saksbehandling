@@ -39,7 +39,6 @@ fun Route.beregning(beregningService: BeregningService, behandlingKlient: Behand
 
         post("/opprettForOpphoer/{$BEHANDLINGSID_CALL_PARAMETER}") {
             withBehandlingId(behandlingKlient) {
-                logger.info("Trefte ruta")
                 beregningService.opprettForOpphoer(it, brukerTokenInfo)
                 call.respond(HttpStatusCode.OK)
             }

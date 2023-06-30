@@ -2,7 +2,7 @@ import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
 import React, { useState } from 'react'
 import { LovtekstMedLenke } from '~components/behandling/soeknadsoversikt/soeknadoversikt/LovtekstMedLenke'
 import styled from 'styled-components'
-import { Button, ErrorSummary, Heading } from '@navikt/ds-react'
+import { Button, ErrorSummary, Heading, ReadMore } from '@navikt/ds-react'
 import { PlusCircleIcon } from '@navikt/aksel-icons'
 import { InstitusjonsoppholdGrunnlagData } from '~shared/types/Beregning'
 import { useFieldArray, useForm } from 'react-hook-form'
@@ -59,30 +59,39 @@ const Institusjonsopphold = (props: InstitusjonsoppholdProps) => {
 
   return (
     <InstitusjonsoppholdsWrapper>
-      <>
-        <LovtekstMedLenke
-          tittel={'Institusjonsopphold'}
-          hjemler={[
-            {
-              tittel: '§ 18-8.Barnepensjon under opphold i institusjon',
-              lenke: 'https://lovdata.no/dokument/NL/lov/1997-02-28-19/KAPITTEL_6-6#%C2%A718-8',
-            },
-          ]}
-          status={null}
-        >
-          <p>
-            Barnepensjonen skal reduseres under opphold i en institusjon med fri kost og losji under statlig ansvar
-            eller tilsvarende institusjon i utlandet. Regelen gjelder ikke ved opphold i somatiske sykehusavdelinger.
-            Oppholdet må vare i tre måneder i tillegg til innleggelsesmåneden for at barnepensjonen skal bli redusert.
-            Dersom barnet har faste og nødvendige utgifter til bolig, kan arbeids- og velferdsetaten bestemme at
-            barnepensjonen ikke skal reduseres eller reduseres mindre enn hovedregelen sier.
-          </p>
-        </LovtekstMedLenke>
-        <Insthendelser sakid={behandling.sak} />
-        <Heading level="3" size="small">
-          Beregningsperiode institusjonsopphold
-        </Heading>
-      </>
+      {(behandling.beregningsGrunnlag?.institusjonsopphold &&
+        behandling.beregningsGrunnlag?.institusjonsopphold?.length > 0) ||
+      behandles ? (
+        <>
+          <LovtekstMedLenke
+            tittel={'Institusjonsopphold'}
+            hjemler={[
+              {
+                tittel: '§ 18-8.Barnepensjon under opphold i institusjon',
+                lenke: 'https://lovdata.no/dokument/NL/lov/1997-02-28-19/KAPITTEL_6-6#%C2%A718-8',
+              },
+            ]}
+            status={null}
+          >
+            <p>
+              Barnepensjonen skal reduseres under opphold i en institusjon med fri kost og losji under statlig ansvar
+              eller tilsvarende institusjon i utlandet. Regelen gjelder ikke ved opphold i somatiske sykehusavdelinger.
+              Oppholdet må vare i tre måneder i tillegg til innleggelsesmåneden for at barnepensjonen skal bli redusert.
+              Dersom barnet har faste og nødvendige utgifter til bolig, kan arbeids- og velferdsetaten bestemme at
+              barnepensjonen ikke skal reduseres eller reduseres mindre enn hovedregelen sier.
+            </p>
+          </LovtekstMedLenke>
+          <Insthendelser sakid={behandling.sak} />
+          <Heading level="3" size="small">
+            Beregningsperiode institusjonsopphold
+          </Heading>
+          <ReadMore header="Hva skal registreres?">
+            Registrer perioden da ytelsen skal reduseres, altså fom-dato fra den 1. i fjerde måneden etter innleggelse
+            (fra måneden etter innleggelse hvis vedkommende innen tre måneder etter utskrivelsen på nytt kommer i
+            institusjon), og siste dato i måneden før utskrivingsmåneden.
+          </ReadMore>
+        </>
+      ) : null}
       <form id="forminstitusjonsopphold">
         {fields.map((item, index) => {
           return (
@@ -121,7 +130,7 @@ const Institusjonsopphold = (props: InstitusjonsoppholdProps) => {
           Legg til beregningsperiode
         </Button>
       )}
-      {behandles && fields.length > 0 && (
+      {behandles && (
         <Button type="submit" onClick={handleSubmit(ferdigstilleForm)}>
           Lagre institusjonsopphold
         </Button>

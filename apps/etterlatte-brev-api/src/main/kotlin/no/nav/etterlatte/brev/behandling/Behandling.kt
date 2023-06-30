@@ -136,5 +136,10 @@ fun List<Beregningsperiode>.hentUtbetaltBeloep(): Int {
 private fun Navn.fulltNavn(): String =
     listOfNotNull(fornavn, mellomnavn, etternavn).joinToString(" ") { it.storForbokstav() }
 
-private fun String.storForbokstav(): String =
-    this.split("-").joinToString("-") { it.lowercase().replaceFirstChar { c -> c.uppercase() } }
+private fun String.storForbokstav(): String {
+    val delim = if ("-" in this) "-" else " "
+
+    return this.split(delim).joinToString(delim) {
+        it.lowercase().replaceFirstChar { c -> c.uppercase() }
+    }
+}

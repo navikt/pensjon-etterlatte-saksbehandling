@@ -16,6 +16,7 @@ import io.ktor.server.testing.testApplication
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlagService
 import no.nav.etterlatte.beregning.regler.FNR_1
 import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -49,11 +50,13 @@ internal class BeregningRoutesTest {
     private val behandlingKlient = mockk<BehandlingKlient>()
     private val beregnBarnepensjonService = mockk<BeregnBarnepensjonService>()
     private val beregnOmstillingsstoenadService = mockk<BeregnOmstillingsstoenadService>()
+    private val beregningsGrunnlagService = mockk<BeregningsGrunnlagService>()
     private val beregningService = BeregningService(
         beregningRepository = beregningRepository,
         behandlingKlient = behandlingKlient,
         beregnBarnepensjonService = beregnBarnepensjonService,
-        beregnOmstillingsstoenadService = beregnOmstillingsstoenadService
+        beregnOmstillingsstoenadService = beregnOmstillingsstoenadService,
+        beregningsGrunnlagService = beregningsGrunnlagService
     )
 
     @BeforeAll

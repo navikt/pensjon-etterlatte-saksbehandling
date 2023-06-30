@@ -9,7 +9,7 @@ import { requestLogger } from './middleware/logging'
 import { tokenMiddleware } from './middleware/getOboToken'
 import { proxy } from './middleware/proxy'
 import { loggerRouter } from './routers/loggerRouter'
-import { unleashContext, unleash } from './utils/unleash'
+import { unleash, unleashContext } from './utils/unleash'
 import prometheus from './monitoring/prometheus'
 
 logger.info(`environment: ${process.env.NODE_ENV}`)
@@ -73,7 +73,6 @@ if (isDev) {
       '/api/stoettederevurderinger',
       '/api/grunnlagsendringshendelse/:sakid/institusjon',
       '/api/sak/:sakid',
-      '/api/saker/:sakid/behandlinger/sisteIverksatte',
       '/api/institusjonsoppholdbegrunnelse/:sakid',
     ],
     tokenMiddleware(ApiConfig.behandling.scope),

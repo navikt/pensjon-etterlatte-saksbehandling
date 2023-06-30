@@ -6,19 +6,14 @@ import { formaterVedtaksResultat, useVedtaksResultat } from '../useVedtaksResult
 import { useAppDispatch } from '~store/Store'
 import { useBehandlingRoutes } from '../BehandlingRoutes'
 import { useEffect, useState } from 'react'
-import {
-  hentBeregning,
-  hentBeregningsGrunnlag,
-  kopierBeregningsGrunnlag,
-  opprettEllerEndreBeregning,
-} from '~shared/api/beregning'
+import { hentBeregning, opprettBeregningForOpphoer } from '~shared/api/beregning'
 import { IBehandlingReducer, oppdaterBehandlingsstatus, oppdaterBeregning } from '~store/reducers/BehandlingReducer'
 import Spinner from '~shared/Spinner'
 import { BehandlingHandlingKnapper } from '~components/behandling/handlinger/BehandlingHandlingKnapper'
 import { Alert, Button, ErrorMessage, Heading } from '@navikt/ds-react'
 import { isFailure, isPending, useApiCall } from '~shared/hooks/useApiCall'
 import { upsertVedtak } from '~shared/api/behandling'
-import { IBehandlingStatus, IBehandlingsType, IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
+import { IBehandlingStatus, IBehandlingsType } from '~shared/types/IDetaljertBehandling'
 import styled from 'styled-components'
 import { NesteOgTilbake } from '../handlinger/NesteOgTilbake'
 import { SendTilAttesteringModal } from '~components/behandling/handlinger/sendTilAttesteringModal'
@@ -28,7 +23,6 @@ import { OmstillingsstoenadSammendrag } from '~components/behandling/beregne/Oms
 import { Avkorting } from '~components/behandling/avkorting/Avkorting'
 import { SakType } from '~shared/types/sak'
 import { erOpphoer } from '~shared/types/Revurderingsaarsak'
-import { hentSisteIverksatteBehandling } from '~shared/api/sak'
 
 export const Beregne = (props: { behandling: IBehandlingReducer }) => {
   const { behandling } = props
@@ -38,37 +32,11 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
   const [beregning, hentBeregningRequest] = useApiCall(hentBeregning)
   const [vedtak, oppdaterVedtakRequest] = useApiCall(upsertVedtak)
   const [visAttesteringsmodal, setVisAttesteringsmodal] = useState(false)
-  const [, hentSisteIverksatte] = useApiCall(hentSisteIverksatteBehandling)
-  const [, hentBeregningsgrunnlag] = useApiCall(hentBeregningsGrunnlag)
-  const [, kopierGrunnlaget] = useApiCall(kopierBeregningsGrunnlag)
-  const [, postOpprettEllerEndreBeregning] = useApiCall(opprettEllerEndreBeregning)
+  const [, opprettForOpphoer] = useApiCall(opprettBeregningForOpphoer)
 
   useEffect(() => {
-    const kopierBeregningsgrunnlagHvisOpphoer = async () => {
-      if (behandling.revurderingsaarsak && erOpphoer(behandling.revurderingsaarsak)) {
-        await hentSisteIverksatte(behandling.sak, (res) => {
-          kopierGrunnlagetHvisDetIkkeAltErGjort(res)
-          postOpprettEllerEndreBeregning(behandling.id, () => {
-            dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.BEREGNET))
-          })
-        })
-      }
-    }
-
-    const kopierGrunnlagetHvisDetIkkeAltErGjort = async (forrigeBehandling: IDetaljertBehandling) => {
-      await hentBeregningsgrunnlag(behandling.id, (grunnlag) => {
-        const fins = grunnlag != null && grunnlag.behandlingId
-        if (!fins) {
-          kopierGrunnlaget({
-            behandlingsId: behandling.id,
-            forrigeBehandlingsId: forrigeBehandling.id,
-          })
-        }
-      })
-    }
-
     const hentBeregning = async () => {
-      await kopierBeregningsgrunnlagHvisOpphoer()
+      await opprettForOpphoer(behandling.id)
       hentBeregningRequest(behandling.id, (res) => dispatch(oppdaterBeregning(res)))
     }
 

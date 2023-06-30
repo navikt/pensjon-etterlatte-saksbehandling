@@ -1,5 +1,5 @@
 import { apiClient, ApiResponse } from '~shared/api/apiClient'
-import { Beregning, BeregningsGrunnlagPostDto, BeregningsGrunnlagDto } from '~shared/types/Beregning'
+import { Beregning, BeregningsGrunnlagDto, BeregningsGrunnlagPostDto } from '~shared/types/Beregning'
 
 export const hentBeregning = async (behandlingId: string): Promise<ApiResponse<Beregning>> => {
   return apiClient.get(`/beregning/${behandlingId}`)
@@ -7,6 +7,10 @@ export const hentBeregning = async (behandlingId: string): Promise<ApiResponse<B
 
 export const opprettEllerEndreBeregning = async (behandlingId: string): Promise<ApiResponse<Beregning>> => {
   return apiClient.post(`/beregning/${behandlingId}`, {})
+}
+
+export const opprettBeregningForOpphoer = async (behandlingId: string): Promise<ApiResponse<Beregning>> => {
+  return apiClient.post(`/beregning/opprettForOpphoer/${behandlingId}`, {})
 }
 
 export const lagreBeregningsGrunnlag = async (args: {

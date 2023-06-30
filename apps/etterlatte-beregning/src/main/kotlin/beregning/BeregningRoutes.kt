@@ -36,5 +36,11 @@ fun Route.beregning(beregningService: BeregningService, behandlingKlient: Behand
                 call.respond(beregning.toDTO())
             }
         }
+
+        post("/opprettForOpphoer/$BEHANDLINGSID_CALL_PARAMETER") {
+            withBehandlingId(behandlingKlient) {
+                beregningService.opprettForOpphoer(it, brukerTokenInfo)
+            }
+        }
     }
 }

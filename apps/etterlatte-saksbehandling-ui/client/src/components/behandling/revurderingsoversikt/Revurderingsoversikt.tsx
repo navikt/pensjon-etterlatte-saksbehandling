@@ -28,6 +28,7 @@ import styled from 'styled-components'
 import { GrunnForSoeskenjustering } from '~components/behandling/revurderingsoversikt/GrunnForSoeskenjustering'
 import { AdoptertAv } from '~components/behandling/revurderingsoversikt/AdoptertAv'
 import { GrunnlagForVirkningstidspunkt } from '~components/behandling/revurderingsoversikt/GrunnlagForVirkningstidspunkt'
+import { OmgjoeringAvFarskap } from '~components/behandling/revurderingsoversikt/OmgjoeringAvFarskap'
 
 const revurderingsaarsakTilTekst = (revurderingsaarsak: Revurderingsaarsak): string =>
   tekstRevurderingsaarsak[revurderingsaarsak]
@@ -90,6 +91,9 @@ export const Revurderingsoversikt = (props: { behandling: IDetaljertBehandling }
           <GrunnForSoeskenjustering behandling={behandling} />
         ) : null}
         {behandling.revurderingsaarsak === Revurderingsaarsak.ADOPSJON ? <AdoptertAv behandling={behandling} /> : null}
+        {behandling.revurderingsaarsak === Revurderingsaarsak.OMGJOERING_AV_FARSKAP ? (
+          <OmgjoeringAvFarskap behandling={behandling} />
+        ) : null}
         <Virkningstidspunkt
           redigerbar={behandles}
           virkningstidspunkt={behandling.virkningstidspunkt}

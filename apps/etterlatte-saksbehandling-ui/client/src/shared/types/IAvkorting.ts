@@ -22,5 +22,6 @@ export interface IAvkortetYtelse {
   fom: string
   tom: string
   avkortingsbeloep: number
+  restanse: number
   ytelseEtterAvkorting: number
 }

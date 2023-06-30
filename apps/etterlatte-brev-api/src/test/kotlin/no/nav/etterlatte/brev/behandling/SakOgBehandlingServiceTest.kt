@@ -79,10 +79,12 @@ internal class SakOgBehandlingServiceTest {
         assertEquals(BEHANDLING_ID, behandling.behandlingId)
         assertEquals(Spraak.NB, behandling.spraak)
         assertEquals("Innsend Innsender", behandling.persongalleri.innsender.navn)
-        assertEquals("Søker", behandling.persongalleri.soeker.fornavn)
-        assertEquals("mellom", behandling.persongalleri.soeker.mellomnavn)
-        assertEquals("Barn", behandling.persongalleri.soeker.etternavn)
-        assertEquals("Død mellom Far", behandling.persongalleri.avdoed.navn)
+        with(behandling.persongalleri.soeker) {
+            assertEquals("Søker", fornavn)
+            assertEquals("Mellom", mellomnavn)
+            assertEquals("Barn", etternavn)
+        }
+        assertEquals("Død Mellom Far", behandling.persongalleri.avdoed.navn)
         assertEquals(VedtakType.INNVILGELSE, behandling.vedtak.type)
         assertEquals(123L, behandling.vedtak.id)
         assertEquals(ENHET, behandling.vedtak.ansvarligEnhet)

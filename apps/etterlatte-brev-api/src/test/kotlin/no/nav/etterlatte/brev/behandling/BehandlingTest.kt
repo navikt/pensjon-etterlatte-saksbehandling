@@ -1,17 +1,18 @@
 package no.nav.etterlatte.brev.behandling
 
 import com.fasterxml.jackson.databind.JsonNode
-import grunnlag.innsenderSoeknad
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.Opplysning
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Navn
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
+import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
 import no.nav.pensjon.brevbaker.api.model.Kroner
-import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.YearMonth
@@ -19,46 +20,77 @@ import java.util.*
 
 internal class BehandlingTest {
 
+    private val innsenderJson =
+        """{"type":"INNSENDER","fornavn":"PRATSOM","etternavn":"TRAFIKKORK","foedselsnummer":"11057523044"}"""
+
     @Test
     fun `MapSoeker mapper til Soeker`() {
         val grunnlag = opprettGrunnlag()
 
-        Assertions.assertEquals(Soeker("Søker", "mellom", "Barn", Foedselsnummer("16021254243")), grunnlag.mapSoeker())
+        assertEquals(Soeker("Unormal", "Frisk", "Herresykkel", Foedselsnummer("16021254243")), grunnlag.mapSoeker())
     }
 
     @Test
     fun `MapAvdoed mapper til Avdoed`() {
         val grunnlag = opprettGrunnlag()
 
-        Assertions.assertEquals(Avdoed("Død mellom Far", LocalDate.of(2022, 8, 17)), grunnlag.mapAvdoed())
+        assertEquals(Avdoed("Frisk Mellomstor Gaupe", LocalDate.of(2022, 8, 17)), grunnlag.mapAvdoed())
+    }
+
+    @Test
+    fun `map med dobbelnavn og bindestrek`() {
+        val grunnlag = opprettGrunnlag(
+            soekerNavn = Navn("UNORMAL-KAR", "FRISK-IS", "HERRESYKKEL"),
+            avdoedNavn = Navn("RIV-JERN", "KUL-KAR", "BADEBALL-SOMMER")
+        )
+
+        assertEquals(
+            Soeker("Unormal-Kar", "Frisk-Is", "Herresykkel", Foedselsnummer("16021254243")),
+            grunnlag.mapSoeker()
+        )
+        assertEquals(Avdoed("Riv-Jern Kul-Kar Badeball-Sommer", LocalDate.of(2022, 8, 17)), grunnlag.mapAvdoed())
+    }
+
+    @Test
+    fun `map med dobbelnavn og mellomrom`() {
+        val grunnlag = opprettGrunnlag(
+            soekerNavn = Navn("UNORMAL KAR", "FRISK IS", "HERRESYKKEL"),
+            avdoedNavn = Navn("RIV JERN", "KUL KAR", "BADEBALL-SOMMER")
+        )
+
+        assertEquals(
+            Soeker("Unormal Kar", "Frisk Is", "Herresykkel", Foedselsnummer("16021254243")),
+            grunnlag.mapSoeker()
+        )
+        assertEquals(Avdoed("Riv Jern Kul Kar Badeball-Sommer", LocalDate.of(2022, 8, 17)), grunnlag.mapAvdoed())
     }
 
     @Test
     fun `MapInnsender mapper til Innsender`() {
         val grunnlag = opprettGrunnlag()
 
-        Assertions.assertEquals(Innsender("Innsend Innsender", Foedselsnummer("11057523044")), grunnlag.mapInnsender())
+        assertEquals(Innsender("Pratsom Trafikkork", Foedselsnummer("11057523044")), grunnlag.mapInnsender())
     }
 
     @Test
     fun `MapSpraak mapper til Spraak`() {
         val grunnlag = opprettGrunnlag()
 
-        Assertions.assertEquals(Spraak.NB, grunnlag.mapSpraak())
+        assertEquals(Spraak.NB, grunnlag.mapSpraak())
     }
 
     @Test
     fun `HentBeloep returnerer korrekt beloep ved kun en periode`() {
         val beregningsperioder = opprettEnkelBeregningsperiode()
 
-        Assertions.assertEquals(3063, beregningsperioder.hentUtbetaltBeloep())
+        assertEquals(3063, beregningsperioder.hentUtbetaltBeloep())
     }
 
     @Test
     fun `HentBeloep returnerer korrekt beloep ved to perioder`() {
         val beregningsperioder = opprettToBeregningsperioder()
 
-        Assertions.assertEquals(3163, beregningsperioder.hentUtbetaltBeloep())
+        assertEquals(3163, beregningsperioder.hentUtbetaltBeloep())
     }
 
     private fun opprettEnkelBeregningsperiode() = listOf(
@@ -89,12 +121,21 @@ internal class BehandlingTest {
         10000
     )
 
-    private fun opprettGrunnlag() = GrunnlagTestData(
+    private fun opprettGrunnlag(
+        soekerNavn: Navn = Navn("UNORMAL", "FRISK", "HERRESYKKEL"),
+        avdoedNavn: Navn = Navn("FRISK", "MELLOMSTOR", "GAUPE")
+    ) = GrunnlagTestData(
         opplysningsmapSakOverrides = mapOf(
             Opplysningstype.SPRAAK to opprettOpplysning(Spraak.NB.toJsonNode()),
             Opplysningstype.INNSENDER_SOEKNAD_V1 to opprettOpplysning(
-                innsenderSoeknad("11057523044").toJsonNode()
+                objectMapper.readTree(innsenderJson)
             )
+        ),
+        opplysningsmapSoekerOverrides = mapOf(
+            Opplysningstype.NAVN to opprettOpplysning(soekerNavn.toJsonNode())
+        ),
+        opplysningsmapAvdoedOverrides = mapOf(
+            Opplysningstype.NAVN to opprettOpplysning(avdoedNavn.toJsonNode())
         )
     ).hentOpplysningsgrunnlag()
 

@@ -60,20 +60,18 @@ export const Barnepensjonberegningssammendrag = ({
             Institusjonsopphold
           </HeadingWithTopMargin>
           <div>
-            <strong>§18-8</strong> Institusjonsopphold. Barnepensjon kan beregnes ut fra:
-            {Object.entries(Reduksjon).map(([reduksjonsnoekkel, reduksjontekst]) => (
-              <div key={reduksjonsnoekkel}>{reduksjontekst}</div>
-            ))}
-            <strong>Beregningen gjelder: </strong>
-            <ListWithoutBullet>
-              {Reduksjon[beregningsperiode.institusjonsopphold.reduksjon]}
-              {beregningsperiode.institusjonsopphold.egenReduksjon && (
-                <p>Egen reduksjon: {beregningsperiode.institusjonsopphold.egenReduksjon}</p>
-              )}
-              {beregningsperiode.institusjonsopphold.begrunnelse && (
-                <p>Begrunnelse: {beregningsperiode.institusjonsopphold.begrunnelse}</p>
-              )}
-            </ListWithoutBullet>
+            <strong>§18-8</strong> En forelder død: Barnepensjonen reduseres til 10 % av G ved lengre
+            institusjonsopphold. Hvis man har utgifter til bolig kan man likevel slippe reduksjon eller få en lavere
+            reduksjon.
+            <div>
+              <strong>Beregningen gjelder: </strong>
+              <ListWithoutBullet>
+                {Reduksjon[beregningsperiode.institusjonsopphold.reduksjon]}
+                {beregningsperiode.institusjonsopphold.egenReduksjon && (
+                  <p>Egen reduksjon: {beregningsperiode.institusjonsopphold.egenReduksjon}</p>
+                )}
+              </ListWithoutBullet>
+            </div>
           </div>
         </>
       )}

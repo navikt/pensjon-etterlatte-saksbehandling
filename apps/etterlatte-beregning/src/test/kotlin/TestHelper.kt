@@ -1,5 +1,6 @@
 package no.nav.etterlatte.beregning.regler
 
+import no.nav.etterlatte.avkorting.AarsoppgjoerMaaned
 import no.nav.etterlatte.avkorting.AvkortetYtelse
 import no.nav.etterlatte.avkorting.Avkorting
 import no.nav.etterlatte.avkorting.AvkortingGrunnlag
@@ -70,10 +71,12 @@ val bruker = Saksbehandler("token", "ident", null)
 fun avkorting(
     avkortingGrunnlag: List<AvkortingGrunnlag> = emptyList(),
     avkortingsperioder: List<Avkortingsperiode> = emptyList(),
-    avkortetYtelse: List<AvkortetYtelse> = emptyList()
+    avkortetYtelse: List<AvkortetYtelse> = emptyList(),
+    aarsoppgjoer: List<AarsoppgjoerMaaned> = emptyList()
 ) = Avkorting(
     avkortingGrunnlag = avkortingGrunnlag,
     avkortingsperioder = avkortingsperioder,
+    aarsoppgjoer = aarsoppgjoer,
     avkortetYtelse = avkortetYtelse
 )
 
@@ -129,6 +132,8 @@ fun avkortetYtelseGrunnlag(beregning: Int, avkorting: Int) = AvkortetYtelseGrunn
 
 fun avkortetYtelse(
     ytelseEtterAvkorting: Int = 100,
+    restanse: Int = 50,
+    ytelseEtterAvkortingFoerRestanse: Int = 0,
     avkortingsbeloep: Int = 200,
     ytelseFoerAvkorting: Int = 300,
     periode: Periode = Periode(
@@ -138,11 +143,31 @@ fun avkortetYtelse(
 ) = AvkortetYtelse(
     periode = periode,
     ytelseEtterAvkorting = ytelseEtterAvkorting,
+    restanse = restanse,
+    ytelseEtterAvkortingFoerRestanse = ytelseEtterAvkortingFoerRestanse,
     avkortingsbeloep = avkortingsbeloep,
     ytelseFoerAvkorting = ytelseFoerAvkorting,
     tidspunkt = Tidspunkt.now(),
     regelResultat = "".toJsonNode(),
     kilde = Grunnlagsopplysning.RegelKilde("regelid", Tidspunkt.now(), "1")
+)
+
+fun aarsoppgjoerMaaned(
+    maaned: YearMonth = YearMonth.of(2023, 1),
+    beregning: Int = 0,
+    avkorting: Int = 0,
+    forventetAvkortetYtelse: Int = 0,
+    restanse: Int = 0,
+    fordeltRestanse: Int = 0,
+    faktiskAvkortetYtelse: Int = 0
+) = AarsoppgjoerMaaned(
+    maaned = maaned,
+    beregning = beregning,
+    avkorting = avkorting,
+    forventetAvkortetYtelse = forventetAvkortetYtelse,
+    restanse = restanse,
+    fordeltRestanse = fordeltRestanse,
+    faktiskAvkortetYtelse = faktiskAvkortetYtelse
 )
 
 fun beregning(

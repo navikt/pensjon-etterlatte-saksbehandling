@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Test
 import java.time.YearMonth
 import java.util.UUID
 
-internal class BruttoYtelseServiceTest {
+internal class YtelseMedGrunnlagServiceTest {
 
     private val avkortingRepository = mockk<AvkortingRepository>()
     private val service = YtelseMedGrunnlagService(avkortingRepository)
@@ -76,7 +76,7 @@ internal class BruttoYtelseServiceTest {
             grunnbelop shouldBe 111477
             grunnbelopMnd shouldBe 9290
         }
-        with(ytelse!!.perioder[1]) {
+        with(ytelse.perioder[1]) {
             periode shouldBe Periode(fom = YearMonth.of(2023, 4), tom = YearMonth.of(2023, 5))
             ytelseEtterAvkorting shouldBe 17000
             ytelseFoerAvkorting shouldBe 20000
@@ -86,7 +86,7 @@ internal class BruttoYtelseServiceTest {
             grunnbelop shouldBe 111477
             grunnbelopMnd shouldBe 9290
         }
-        with(ytelse!!.perioder[2]) {
+        with(ytelse.perioder[2]) {
             periode shouldBe Periode(fom = YearMonth.of(2023, 6), tom = null)
             ytelseEtterAvkorting shouldBe 17000
             ytelseFoerAvkorting shouldBe 21000

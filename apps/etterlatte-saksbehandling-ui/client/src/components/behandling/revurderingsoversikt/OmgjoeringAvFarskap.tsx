@@ -91,6 +91,9 @@ export const OmgjoeringAvFarskap = (props: { behandling: IDetaljertBehandling })
               onChange={(e) => setEtternavnNaavaerendeFar(e.target.value)}
             />
           </NavnWrapper>
+          <Heading size="medium" level="2">
+            Hvem er registrert som far nå?
+          </Heading>
           <NavnWrapper>
             <TextField
               label={'Fornavn'}
@@ -140,10 +143,6 @@ export const OmgjoeringAvFarskap = (props: { behandling: IDetaljertBehandling })
 
 const SkjemaWrapper = styled.form`
   max-width: fit-content;
-
-  & > *:not(:first-child) {
-    margin-top: 1rem;
-  }
 `
 
 const MarginTop = styled.div`
@@ -154,6 +153,7 @@ const NavnWrapper = styled.div`
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
-  gap: 20px;
-  padding-right: 20px;
+  gap: 1rem;
+  padding-right: 1rem;
+  padding-bottom: 2rem;
 `

@@ -14,7 +14,7 @@ export const NavnInput = (props: { navn: Navn | undefined; update: (n: Navn) => 
       <TextField
         label={'Fornavn'}
         value={fornavn}
-        key={`adoptertav-fornavn`}
+        key={`fornavn-input-label`}
         onChange={(e) => {
           setFornavn(e.target.value)
           if (etternavn) {
@@ -29,7 +29,7 @@ export const NavnInput = (props: { navn: Navn | undefined; update: (n: Navn) => 
       <TextField
         label={'Mellomnavn'}
         value={mellomnavn}
-        key={`adoptertav-mellomnavn`}
+        key={`mellomnavn-input-label`}
         onChange={(e) => {
           setMellomnavn(e.target.value)
           if (fornavn && etternavn) {
@@ -44,7 +44,7 @@ export const NavnInput = (props: { navn: Navn | undefined; update: (n: Navn) => 
       <TextField
         label={'Etternavn'}
         value={etternavn}
-        key={`adoptertav-etternavn`}
+        key={`etternavn-input-label`}
         onChange={(e) => {
           setEtternavn(e.target.value)
           if (fornavn && etternavn) {
@@ -67,4 +67,5 @@ const NavnWrapper = styled.div`
   gap: 1rem;
   padding-right: 1rem;
   margin-top: 1rem;
+  padding-bottom: 2rem;
 `

@@ -59,24 +59,26 @@ export const AdoptertAv = (props: { behandling: IDetaljertBehandling }) => {
       </Heading>
       {redigerbar ? (
         <SkjemaWrapper onSubmit={handlesubmit}>
-          <TextField
-            label={'Fornavn'}
-            value={fornavn}
-            key={`adoptertav-fornavn`}
-            onChange={(e) => setFornavn(e.target.value)}
-          />
-          <TextField
-            label={'Mellomnavn'}
-            value={mellomnavn}
-            key={`adoptertav-mellomnavn`}
-            onChange={(e) => setMellomnavn(e.target.value)}
-          />
-          <TextField
-            label={'Etternavn'}
-            value={etternavn}
-            key={`adoptertav-etternavn`}
-            onChange={(e) => setEtternavn(e.target.value)}
-          />
+          <NavnWrapper>
+            <TextField
+              label={'Fornavn'}
+              value={fornavn}
+              key={`adoptertav-fornavn`}
+              onChange={(e) => setFornavn(e.target.value)}
+            />
+            <TextField
+              label={'Mellomnavn'}
+              value={mellomnavn}
+              key={`adoptertav-mellomnavn`}
+              onChange={(e) => setMellomnavn(e.target.value)}
+            />
+            <TextField
+              label={'Etternavn'}
+              value={etternavn}
+              key={`adoptertav-etternavn`}
+              onChange={(e) => setEtternavn(e.target.value)}
+            />
+          </NavnWrapper>
           <Button loading={isPending(lagrestatus)} variant="primary" size="small">
             Lagre
           </Button>
@@ -103,4 +105,13 @@ const SkjemaWrapper = styled.form`
 
 const MarginTop = styled.div`
   margin-top: 3em;
+`
+
+const NavnWrapper = styled.div`
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding-right: 1rem;
+  margin-top: 1rem;
 `

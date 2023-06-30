@@ -134,4 +134,5 @@ fun List<Beregningsperiode>.hentUtbetaltBeloep(): Int {
 private fun Navn.fulltNavn(): String =
     listOfNotNull(fornavn, mellomnavn, etternavn).joinToString(" ") { it.capitalize() }
 
-private fun String.capitalize(): String = this.lowercase().replaceFirstChar { c -> c.uppercase() }
+private fun String.capitalize(): String =
+    this.split("-").joinToString("-") { it.lowercase().replaceFirstChar { c -> c.uppercase() } }

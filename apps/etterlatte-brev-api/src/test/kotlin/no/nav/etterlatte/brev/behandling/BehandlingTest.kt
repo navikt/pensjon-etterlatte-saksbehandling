@@ -20,6 +20,9 @@ import java.util.*
 
 internal class BehandlingTest {
 
+    private val innsenderJson =
+        """{"type":"INNSENDER","fornavn":"PRATSOM","etternavn":"TRAFIKKORK","foedselsnummer":"11057523044"}"""
+
     @Test
     fun `MapSoeker mapper til Soeker`() {
         val grunnlag = opprettGrunnlag()
@@ -32,6 +35,20 @@ internal class BehandlingTest {
         val grunnlag = opprettGrunnlag()
 
         assertEquals(Avdoed("Frisk Mellomstor Gaupe", LocalDate.of(2022, 8, 17)), grunnlag.mapAvdoed())
+    }
+
+    @Test
+    fun `map med dobbelnavn`() {
+        val grunnlag = opprettGrunnlag(
+            soekerNavn = Navn("UNORMAL-KAR", "FRISK-IS", "HERRESYKKEL"),
+            avdoedNavn = Navn("RIV-JERN", "KUL-KAR", "BADEBALL-SOMMER")
+        )
+
+        assertEquals(
+            Soeker("Unormal-Kar", "Frisk-Is", "Herresykkel", Foedselsnummer("16021254243")),
+            grunnlag.mapSoeker()
+        )
+        assertEquals(Avdoed("Riv-Jern Kul-Kar Badeball-Sommer", LocalDate.of(2022, 8, 17)), grunnlag.mapAvdoed())
     }
 
     @Test
@@ -90,18 +107,21 @@ internal class BehandlingTest {
         10000
     )
 
-    private fun opprettGrunnlag() = GrunnlagTestData(
+    private fun opprettGrunnlag(
+        soekerNavn: Navn = Navn("UNORMAL", "FRISK", "HERRESYKKEL"),
+        avdoedNavn: Navn = Navn("FRISK", "MELLOMSTOR", "GAUPE")
+    ) = GrunnlagTestData(
         opplysningsmapSakOverrides = mapOf(
             Opplysningstype.SPRAAK to opprettOpplysning(Spraak.NB.toJsonNode()),
             Opplysningstype.INNSENDER_SOEKNAD_V1 to opprettOpplysning(
-                objectMapper.readTree("""{"type":"INNSENDER","fornavn":"PRATSOM","etternavn":"TRAFIKKORK","foedselsnummer":"11057523044"}""")
+                objectMapper.readTree(innsenderJson)
             )
         ),
         opplysningsmapSoekerOverrides = mapOf(
-            Opplysningstype.NAVN to opprettOpplysning(Navn("UNORMAL", "FRISK", "HERRESYKKEL").toJsonNode())
+            Opplysningstype.NAVN to opprettOpplysning(soekerNavn.toJsonNode())
         ),
         opplysningsmapAvdoedOverrides = mapOf(
-            Opplysningstype.NAVN to opprettOpplysning(Navn("FRISK", "MELLOMSTOR", "GAUPE").toJsonNode())
+            Opplysningstype.NAVN to opprettOpplysning(avdoedNavn.toJsonNode())
         )
     ).hentOpplysningsgrunnlag()
 

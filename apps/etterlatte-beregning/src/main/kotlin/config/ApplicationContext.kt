@@ -4,7 +4,6 @@ import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 import no.nav.etterlatte.avkorting.AvkortingRepository
 import no.nav.etterlatte.avkorting.AvkortingService
-import no.nav.etterlatte.avkorting.InntektAvkortingService
 import no.nav.etterlatte.beregning.BeregnBarnepensjonService
 import no.nav.etterlatte.beregning.BeregnOmstillingsstoenadService
 import no.nav.etterlatte.beregning.BeregningRepository
@@ -71,13 +70,13 @@ class ApplicationContext {
         beregnBarnepensjonService = beregnBarnepensjonService,
         beregnOmstillingsstoenadService = beregnOmstillingsstoenadService
     )
+    val avkortingRepository = AvkortingRepository(dataSource)
     val avkortingService = AvkortingService(
         behandlingKlient = behandlingKlient,
-        inntektAvkortingService = InntektAvkortingService,
-        avkortingRepository = AvkortingRepository(dataSource),
+        avkortingRepository = avkortingRepository,
         beregningService = beregningService
     )
     val ytelseMedGrunnlagService = YtelseMedGrunnlagService(
-        avkortingRepository = AvkortingRepository(dataSource)
+        avkortingRepository = avkortingRepository
     )
 }

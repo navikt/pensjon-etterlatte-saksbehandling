@@ -20,6 +20,7 @@ export const YtelseEtterAvkorting = (props: { ytelser?: IAvkortetYtelse[] }) => 
               <Table.Row>
                 <Table.HeaderCell>Periode</Table.HeaderCell>
                 <Table.HeaderCell>Avkorting</Table.HeaderCell>
+                <Table.HeaderCell>Restanse</Table.HeaderCell>
                 <Table.HeaderCell>Brutto stønad etter avkorting</Table.HeaderCell>
               </Table.Row>
             </Table.Header>
@@ -30,6 +31,7 @@ export const YtelseEtterAvkorting = (props: { ytelser?: IAvkortetYtelse[] }) => 
                     {formaterStringDato(ytelse.fom)} - {ytelse.tom ? formaterStringDato(ytelse.tom) : ''}
                   </Table.DataCell>
                   <Table.DataCell>{ytelse.avkortingsbeloep} kr</Table.DataCell>
+                  <Table.DataCell>{ytelse.restanse} kr</Table.DataCell>
                   <Table.DataCell>
                     <ManglerRegelspesifikasjon>{ytelse.ytelseEtterAvkorting} kr</ManglerRegelspesifikasjon>
                   </Table.DataCell>

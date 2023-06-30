@@ -13,7 +13,7 @@
       <env name="ETTERLATTE_TRYGDETID_CLIENT_ID" value="8385435e-f3d7-45ec-be59-ebd1c71df735" />
       <env name="ETTERLATTE_TRYGDETID_URL" value="https://etterlatte-trygdetid.intern.dev.nav.no" />
       <env name="ETTERLATTE_VILKAARSVURDERING_CLIENT_ID" value="dev-gcp.etterlatte.etterlatte-vilkaarsvurdering" />
-      <env name="ETTERLATTE_VILKAARSVURDERING_URL" value="http://etterlatte-vilkaarsvurdering" />
+      <env name="ETTERLATTE_VILKAARSVURDERING_URL" value="http://etterlatte-vilkaarsvurdering.intern.dev.nav.no" />
       <env name="NAIS_APP_NAME" value="etterlatte-beregning" />
       <env name="NAIS_CLUSTER_NAME" value="dev-gcp" />
       <env name="ELECTOR_PATH" value="localhost" />

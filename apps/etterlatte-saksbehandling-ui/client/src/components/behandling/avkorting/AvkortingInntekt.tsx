@@ -2,7 +2,7 @@ import { BodyShort, Button, ErrorMessage, Heading, Label, ReadMore, Table, TextF
 import styled from 'styled-components'
 import React, { FormEvent, useState } from 'react'
 import { IAvkorting, IAvkortingGrunnlag } from '~shared/types/IAvkorting'
-import { isPending, useApiCall } from '~shared/hooks/useApiCall'
+import { isFailure, isPending, useApiCall } from '~shared/hooks/useApiCall'
 import { lagreAvkortingGrunnlag } from '~shared/api/avkorting'
 import { formaterStringDato } from '~utils/formattering'
 import { HjemmelLenke } from '~components/behandling/felles/HjemmelLenke'
@@ -10,6 +10,7 @@ import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
 import { PencilIcon } from '@navikt/aksel-icons'
 import { hentBehandlesFraStatus } from '~components/behandling/felles/utils'
+import { ApiErrorAlert } from '~ErrorBoundary'
 
 export const AvkortingInntekt = (props: {
   behandling: IBehandlingReducer
@@ -30,7 +31,7 @@ export const AvkortingInntekt = (props: {
       return siste.fom === behandling.virkningstidspunkt?.dato
     }
   }
-  const finnRedigerbartGrunnlag = () => {
+  const finnRedigerbartGrunnlag = (): IAvkortingGrunnlag => {
     if (props.avkortingGrunnlag) {
       if (finnesRedigerbartGrunnlag()) {
         return props.avkortingGrunnlag[props.avkortingGrunnlag.length - 1]
@@ -39,13 +40,14 @@ export const AvkortingInntekt = (props: {
         const siste = props.avkortingGrunnlag[props.avkortingGrunnlag.length - 1]
         return {
           fom: virkningstidspunkt(),
-          fratrekkInnUt: siste.fratrekkInnAar,
-          relevanteMaaneder: siste.relevanteMaanederInnAar,
+          fratrekkInnAar: siste.fratrekkInnAar,
+          relevanteMaanederInnAar: siste.relevanteMaanederInnAar,
         }
       }
     }
     return {
       fom: virkningstidspunkt(),
+      fratrekkInnAar: 0,
     }
   }
 
@@ -96,7 +98,7 @@ export const AvkortingInntekt = (props: {
           <Table className="table" zebraStripes>
             <Table.Header>
               <Table.HeaderCell>Forventet inntekt</Table.HeaderCell>
-              <Table.HeaderCell>Fratrekk inn/ut</Table.HeaderCell>
+              <Table.HeaderCell>Fratrekk inn år</Table.HeaderCell>
               <Table.HeaderCell>F.o.m dato</Table.HeaderCell>
               <Table.HeaderCell>T.o.m dato</Table.HeaderCell>
               <Table.HeaderCell>Spesifikasjon av inntekt</Table.HeaderCell>
@@ -151,11 +153,11 @@ export const AvkortingInntekt = (props: {
                     type="text"
                     inputMode="numeric"
                     pattern="[0-9]*"
-                    value={inntektGrunnlagForm.fratrekkInnAar == null ? '0' : inntektGrunnlagForm.fratrekkInnAar}
+                    value={inntektGrunnlagForm.fratrekkInnAar}
                     onChange={(e) =>
                       setInntektGrunnlagForm({
                         ...inntektGrunnlagForm,
-                        fratrekkInnAar: e.target.value === '' ? 0 : Number(e.target.value),
+                        fratrekkInnAar: Number(e.target.value),
                       })
                     }
                   />
@@ -222,6 +224,7 @@ export const AvkortingInntekt = (props: {
           </Rows>
         </InntektAvkortingForm>
       )}
+      {isFailure(inntektGrunnlagStatus) && <ApiErrorAlert>En feil har oppstått</ApiErrorAlert>}
     </AvkortingInntektWrapper>
   )
 }

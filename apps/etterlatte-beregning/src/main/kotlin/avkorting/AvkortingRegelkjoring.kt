@@ -23,12 +23,12 @@ import org.slf4j.LoggerFactory
 import java.lang.IllegalArgumentException
 import java.time.YearMonth
 
-object InntektAvkortingService {
+object AvkortingRegelkjoring {
 
-    private val logger = LoggerFactory.getLogger(InntektAvkortingService::class.java)
+    private val logger = LoggerFactory.getLogger(AvkortingRegelkjoring::class.java)
 
     fun beregnInntektsavkorting(
-        virkningstidspunkt: YearMonth,
+        periode: Periode,
         avkortingGrunnlag: List<AvkortingGrunnlag>
     ): List<Avkortingsperiode> {
         logger.info("Beregner inntektsavkorting")
@@ -55,8 +55,7 @@ object InntektAvkortingService {
             ) { _, _, _ -> throw IllegalArgumentException("Noe gikk galt ved uthenting av periodiserte beregninger") }
         )
 
-        val resultat =
-            kroneavrundetInntektAvkorting.eksekver(grunnlag, RegelPeriode(virkningstidspunkt.atDay(1)))
+        val resultat = kroneavrundetInntektAvkorting.eksekver(grunnlag, periode.tilRegelPeriode())
         return when (resultat) {
             is RegelkjoeringResultat.Suksess -> {
                 val tidspunkt = Tidspunkt.now()
@@ -83,16 +82,50 @@ object InntektAvkortingService {
         }
     }
 
+    fun beregnRestanse(aarsoppgjoerMaaned: AarsoppgjoerMaaned): AarsoppgjoerMaaned {
+        val regelgrunnlag = PeriodisertAvkortetYtelseGrunnlag(
+            beregningsperioder = periodiserteBeregning(aarsoppgjoerMaaned),
+            avkortingsperioder = periodiserteAvkorting(aarsoppgjoerMaaned)
+        )
+        val nyForventetYtelseEtterAvkorting = beregnAvkortetYtelse(
+            Periode(fom = aarsoppgjoerMaaned.maaned, tom = aarsoppgjoerMaaned.maaned),
+            regelgrunnlag
+        ).first()
+
+        // TODO EY-2368 regel
+        val beregnetRestanse =
+            aarsoppgjoerMaaned.faktiskAvkortetYtelse - nyForventetYtelseEtterAvkorting.ytelseEtterAvkorting
+
+        return aarsoppgjoerMaaned.copy(
+            restanse = beregnetRestanse,
+            forventetAvkortetYtelse = nyForventetYtelseEtterAvkorting.ytelseEtterAvkorting
+        )
+    }
+
+    fun beregnFordeltRestanse(virkningstidspunkt: YearMonth, aarsoppgjoer: List<AarsoppgjoerMaaned>): Int {
+        // TODO EY-2368 regel
+        return aarsoppgjoer.sumOf { it.restanse } / (12 - virkningstidspunkt.monthValue + 1)
+    }
+
     fun beregnAvkortetYtelse(
-        virkningstidspunkt: YearMonth,
+        periode: Periode,
         beregningsperioder: List<Beregningsperiode>,
-        avkortingsperioder: List<Avkortingsperiode>
+        avkortingsperioder: List<Avkortingsperiode>,
+        maanedligRestanse: Int = 0 // TODO EY-2368 - må gjøres om til grunnlag
     ): List<AvkortetYtelse> {
         val regelgrunnlag = PeriodisertAvkortetYtelseGrunnlag(
             beregningsperioder = periodiserteBeregninger(beregningsperioder),
             avkortingsperioder = periodiserteAvkortinger(avkortingsperioder)
         )
-        val resultat = avkorteYtelse.eksekver(regelgrunnlag, RegelPeriode(virkningstidspunkt.atDay(1)))
+        return beregnAvkortetYtelse(periode, regelgrunnlag, maanedligRestanse)
+    }
+
+    private fun beregnAvkortetYtelse(
+        periode: Periode,
+        regelgrunnlag: PeriodisertAvkortetYtelseGrunnlag,
+        maanedligRestanse: Int = 0 // TODO EY-2368 - må gjøres om til grunnlag
+    ): List<AvkortetYtelse> {
+        val resultat = avkorteYtelse.eksekver(regelgrunnlag, periode.tilRegelPeriode())
         when (resultat) {
             is RegelkjoeringResultat.Suksess -> {
                 val tidspunkt = Tidspunkt.now()
@@ -103,7 +136,9 @@ object InntektAvkortingService {
                             fom = YearMonth.from(periodisertResultat.periode.fraDato),
                             tom = periodisertResultat.periode.tilDato?.let { YearMonth.from(it) }
                         ),
-                        ytelseEtterAvkorting = periodisertResultat.resultat.verdi,
+                        ytelseEtterAvkorting = periodisertResultat.resultat.verdi - maanedligRestanse, // TODO EY-2368
+                        restanse = maanedligRestanse,
+                        ytelseEtterAvkortingFoerRestanse = periodisertResultat.resultat.verdi,
                         avkortingsbeloep = regelgrunnlag.finnGrunnlagForPeriode(resultatFom).avkorting.verdi,
                         ytelseFoerAvkorting = regelgrunnlag.finnGrunnlagForPeriode(resultatFom).beregning.verdi,
                         tidspunkt = tidspunkt,
@@ -121,6 +156,24 @@ object InntektAvkortingService {
                 throw RuntimeException("Ugyldig regler for periode: ${resultat.ugyldigeReglerForPeriode}")
         }
     }
+
+    private fun periodiserteBeregning(aarsoppgjoerMaaned: AarsoppgjoerMaaned):
+        PeriodisertGrunnlag<FaktumNode<Int>> =
+        PeriodisertBeregningGrunnlag.lagGrunnlagMedDefaultUtenforPerioder(
+            listOf(
+                GrunnlagMedPeriode(
+                    data = aarsoppgjoerMaaned,
+                    fom = aarsoppgjoerMaaned.maaned.atDay(1),
+                    tom = aarsoppgjoerMaaned.maaned.atEndOfMonth()
+                )
+            ).mapVerdier {
+                FaktumNode(
+                    verdi = it.beregning,
+                    kilde = "", // TODO EY-2368
+                    beskrivelse = ""
+                )
+            }
+        ) { _, _, _ -> throw IllegalArgumentException("Noe gikk galt ved uthenting av periodiserte beregninger") }
 
     private fun periodiserteBeregninger(beregninger: List<Beregningsperiode>): PeriodisertGrunnlag<FaktumNode<Int>> =
         PeriodisertBeregningGrunnlag.lagGrunnlagMedDefaultUtenforPerioder(
@@ -140,6 +193,24 @@ object InntektAvkortingService {
             }
         ) { _, _, _ -> throw IllegalArgumentException("Noe gikk galt ved uthenting av periodiserte beregninger") }
 
+    private fun periodiserteAvkorting(aarsoppgjoerMaaned: AarsoppgjoerMaaned):
+        PeriodisertGrunnlag<FaktumNode<Int>> =
+        PeriodisertBeregningGrunnlag.lagGrunnlagMedDefaultUtenforPerioder(
+            listOf(
+                GrunnlagMedPeriode(
+                    data = aarsoppgjoerMaaned,
+                    fom = aarsoppgjoerMaaned.maaned.atDay(1),
+                    tom = aarsoppgjoerMaaned.maaned.atEndOfMonth()
+                )
+            ).mapVerdier {
+                FaktumNode(
+                    verdi = it.avkorting,
+                    kilde = "", // TODO EY-2368
+                    beskrivelse = ""
+                )
+            }
+        ) { _, _, _ -> throw IllegalArgumentException("Noe gikk galt ved uthenting av periodiserte avkortinger") }
+
     private fun periodiserteAvkortinger(avkortingGrunnlag: List<Avkortingsperiode>):
         PeriodisertGrunnlag<FaktumNode<Int>> =
         PeriodisertBeregningGrunnlag.lagGrunnlagMedDefaultUtenforPerioder(
@@ -158,3 +229,8 @@ object InntektAvkortingService {
             }
         ) { _, _, _ -> throw IllegalArgumentException("Noe gikk galt ved uthenting av periodiserte avkortinger") }
 }
+
+fun Periode.tilRegelPeriode(): RegelPeriode = RegelPeriode(
+    fom.atDay(1),
+    tom?.atEndOfMonth()
+)

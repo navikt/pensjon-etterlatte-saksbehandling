@@ -89,9 +89,9 @@ fun Grunnlag.mapSoeker(): Soeker = with(this.soeker) {
     val navn = hentNavn()!!.verdi
 
     Soeker(
-        fornavn = navn.fornavn.capitalize(),
-        mellomnavn = navn.mellomnavn?.capitalize(),
-        etternavn = navn.etternavn.capitalize(),
+        fornavn = navn.fornavn.storForbokstav(),
+        mellomnavn = navn.mellomnavn?.storForbokstav(),
+        etternavn = navn.etternavn.storForbokstav(),
         fnr = Foedselsnummer(hentFoedselsnummer()!!.verdi.value)
     )
 }
@@ -113,7 +113,7 @@ fun Grunnlag.mapInnsender(): Innsender = with(this.sak) {
     }
 
     Innsender(
-        navn = innsender.let { "${it.fornavn.capitalize()} ${it.etternavn.capitalize()}" },
+        navn = innsender.let { "${it.fornavn.storForbokstav()} ${it.etternavn.storForbokstav()}" },
         fnr = Foedselsnummer(innsender.foedselsnummer.value)
     )
 }
@@ -132,7 +132,7 @@ fun List<Beregningsperiode>.hentUtbetaltBeloep(): Int {
 }
 
 private fun Navn.fulltNavn(): String =
-    listOfNotNull(fornavn, mellomnavn, etternavn).joinToString(" ") { it.capitalize() }
+    listOfNotNull(fornavn, mellomnavn, etternavn).joinToString(" ") { it.storForbokstav() }
 
-private fun String.capitalize(): String =
+private fun String.storForbokstav(): String =
     this.split("-").joinToString("-") { it.lowercase().replaceFirstChar { c -> c.uppercase() } }

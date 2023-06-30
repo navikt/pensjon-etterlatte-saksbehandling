@@ -93,7 +93,7 @@ interface GenerellBehandlingService {
 
 class RealGenerellBehandlingService(
     private val behandlingDao: BehandlingDao,
-    private val behandlingHendelser: BehandlingHendelserKanal,
+    private val behandlingHendelser: BehandlingHendelserKafkaProducer,
     private val grunnlagsendringshendelseDao: GrunnlagsendringshendelseDao,
     private val hendelseDao: HendelseDao,
     private val grunnlagKlient: GrunnlagKlient,
@@ -144,7 +144,7 @@ class RealGenerellBehandlingService(
             behandling
         }
         runBlocking {
-            behandlingHendelser.send(Triple(behandlingId, BehandlingHendelseType.AVBRUTT, behandling.type))
+            behandlingHendelser.sendMeldingForHendelse(behandling, BehandlingHendelseType.AVBRUTT)
         }
     }
 

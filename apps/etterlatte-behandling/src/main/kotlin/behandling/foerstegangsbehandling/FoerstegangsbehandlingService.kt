@@ -1,10 +1,9 @@
 package no.nav.etterlatte.behandling.foerstegangsbehandling
 
-import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.BehandlingHendelseType
-import no.nav.etterlatte.behandling.BehandlingHendelserKanal
+import no.nav.etterlatte.behandling.BehandlingHendelserKafkaProducer
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.domain.OpprettBehandling
@@ -70,7 +69,7 @@ class RealFoerstegangsbehandlingService(
     private val sakDao: SakDao,
     private val behandlingDao: BehandlingDao,
     private val hendelseDao: HendelseDao,
-    private val behandlingHendelser: BehandlingHendelserKanal,
+    private val behandlingHendelser: BehandlingHendelserKafkaProducer,
     private val featureToggleService: FeatureToggleService,
     private val klokke: Clock = utcKlokke()
 ) : FoerstegangsbehandlingService {
@@ -146,9 +145,7 @@ class RealFoerstegangsbehandlingService(
                 hentBehandling(opprettBehandling.id)
             }.also { behandling ->
                 behandling?.let {
-                    runBlocking {
-                        behandlingHendelser.send(Triple(it.id, BehandlingHendelseType.OPPRETTET, behandling.type))
-                    }
+                    behandlingHendelser.sendMeldingForHendelse(it, BehandlingHendelseType.OPPRETTET)
                 }
             }
         }
@@ -178,9 +175,7 @@ class RealFoerstegangsbehandlingService(
                 behandlingDao.hentBehandling(opprettBehandling.id)
             }.also { behandling ->
                 behandling?.let {
-                    runBlocking {
-                        behandlingHendelser.send(Triple(it.id, BehandlingHendelseType.OPPRETTET, behandling.type))
-                    }
+                    behandlingHendelser.sendMeldingForHendelse(it, BehandlingHendelseType.OPPRETTET)
                 }
             }
         }

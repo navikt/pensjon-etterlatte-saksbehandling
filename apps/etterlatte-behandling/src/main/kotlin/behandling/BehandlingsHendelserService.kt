@@ -1,19 +1,6 @@
 package no.nav.etterlatte.behandling
 
-import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.asContextElement
-import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import no.nav.etterlatte.Context
-import no.nav.etterlatte.Kontekst
-import no.nav.etterlatte.Self
 import no.nav.etterlatte.behandling.domain.Behandling
-import no.nav.etterlatte.common.DatabaseContext
-import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.kafka.JsonMessage
 import no.nav.etterlatte.kafka.KafkaProdusent
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -27,61 +14,27 @@ import no.nav.etterlatte.libs.common.rapidsandrivers.CORRELATION_ID_KEY
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.io.Serializable
-import java.util.*
-import javax.sql.DataSource
 
 enum class BehandlingHendelseType {
     OPPRETTET, AVBRUTT
 }
 
-class BehandlingsHendelser(
-    private val rapid: KafkaProdusent<String, String>,
-    private val behandlingDao: BehandlingDao,
-    private val datasource: DataSource
-) {
-    private val kanal: Channel<Triple<UUID, BehandlingHendelseType, BehandlingType>> = Channel(Channel.UNLIMITED)
-    val hendelserKanal: BehandlingHendelserKanal get() = BehandlingHendelserKanal(kanal)
+interface BehandlingHendelserKafkaProducer {
+    fun sendMeldingForHendelse(behandling: Behandling, hendelseType: BehandlingHendelseType)
+}
 
-    private val logger: Logger = LoggerFactory.getLogger(BehandlingsHendelser::class.java)
+class BehandlingsHendelserKafkaProducerImpl(
+    private val rapid: KafkaProdusent<String, String>
+) : BehandlingHendelserKafkaProducer {
+    private val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
-    fun start() {
-        @OptIn(DelicateCoroutinesApi::class)
-        GlobalScope.launch {
-            withContext(
-                Dispatchers.Default + Kontekst.asContextElement(
-                    value = Context(Self("hendelsespubliserer"), DatabaseContext(datasource))
-                )
-            ) {
-                for (hendelse in kanal) {
-                    try {
-                        handleEnHendelse(hendelse)
-                    } catch (ex: Exception) {
-                        logger.warn("Handtering av behandlingshendelse feilet", ex)
-                    }
-                }
-            }
-            Kontekst.remove()
-        }.invokeOnCompletion {
-            rapid.close()
-            if (it == null || it is CancellationException) {
-                logger.info("BehandlingsHendelser finished")
-            } else {
-                logger.error("BehandlingsHendelser ended exeptionally", it)
-            }
-        }
-    }
-
-    private fun handleEnHendelse(hendelse: Triple<UUID, BehandlingHendelseType, BehandlingType>) {
-        val (id, hendelseType, behandlingType) = hendelse
-        val behandling = inTransaction {
-            requireNotNull(behandlingDao.hentBehandling(id))
-        }
+    override fun sendMeldingForHendelse(behandling: Behandling, hendelseType: BehandlingHendelseType) {
         val correlationId = getCorrelationId()
-        if (behandlingType == BehandlingType.REVURDERING && hendelseType == BehandlingHendelseType.OPPRETTET) {
+        if (behandling.type == BehandlingType.REVURDERING && hendelseType == BehandlingHendelseType.OPPRETTET) {
             sendBehovForNyttGrunnlag(behandling)
         }
         rapid.publiser(
-            id.toString(),
+            behandling.id.toString(),
             JsonMessage.newMessage(
                 "BEHANDLING:${hendelseType.name}",
                 mapOf(
@@ -91,7 +44,7 @@ class BehandlingsHendelser(
             ).toJson()
         ).also { (partition, offset) ->
             logger.info(
-                "Posted event BEHANDLING:${hendelse.second.name} for behandling ${hendelse.first}" +
+                "Posted event BEHANDLING:${hendelseType.name} for behandling ${behandling.id}" +
                     " to partiton $partition, offset $offset correlationid: $correlationId"
             )
         }
@@ -103,7 +56,7 @@ class BehandlingsHendelser(
         }
     }
 
-    fun grunnlagsbehov(behandling: Behandling): List<JsonMessage> {
+    private fun grunnlagsbehov(behandling: Behandling): List<JsonMessage> {
         fun behovForSoeker(fellesInfo: Map<String, Serializable>, sakType: SakType, fnr: String): JsonMessage {
             val rolle = when (sakType) {
                 SakType.OMSTILLINGSSTOENAD -> PersonRolle.GJENLEVENDE

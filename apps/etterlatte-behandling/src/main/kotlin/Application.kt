@@ -64,14 +64,12 @@ class Server(private val context: ApplicationContext) {
         dataSource.migrate()
 
         val grunnlagsendringshendelseJobSkedulert = grunnlagsendringshendelseJob.schedule()
-        behandlingsHendelser.start()
         setReady().also { engine.start(true) }
 
         Runtime.getRuntime().addShutdownHook(
             Thread {
                 grunnlagsendringshendelseJob.setClosedTrue()
                 grunnlagsendringshendelseJobSkedulert.cancel()
-                behandlingsHendelser.hendelserKanal.close()
             }
         )
     }

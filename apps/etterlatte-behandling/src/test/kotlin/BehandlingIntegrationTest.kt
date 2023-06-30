@@ -101,7 +101,6 @@ abstract class BehandlingIntegrationTest {
             grunnlagKlientObo = GrunnlagKlientTest()
         ).also {
             it.dataSource.migrate()
-            it.behandlingsHendelser.start()
         }
     }
 

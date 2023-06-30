@@ -1,10 +1,9 @@
 package no.nav.etterlatte.behandling.manueltopphoer
 
-import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.BehandlingHendelseType
-import no.nav.etterlatte.behandling.BehandlingHendelserKanal
+import no.nav.etterlatte.behandling.BehandlingHendelserKafkaProducer
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.domain.ManueltOpphoer
@@ -49,7 +48,7 @@ interface ManueltOpphoerService {
 
 class RealManueltOpphoerService(
     private val behandlingDao: BehandlingDao,
-    private val behandlingHendelser: BehandlingHendelserKanal,
+    private val behandlingHendelser: BehandlingHendelserKafkaProducer,
     private val hendelseDao: HendelseDao,
     private val featureToggleService: FeatureToggleService
 ) : ManueltOpphoerService {
@@ -117,11 +116,10 @@ class RealManueltOpphoerService(
                 (behandlingDao.hentBehandling(id) as ManueltOpphoer).sjekkEnhet()
             }
         }?.also { lagretManueltOpphoer ->
-            runBlocking {
-                behandlingHendelser.send(
-                    Triple(lagretManueltOpphoer.id, BehandlingHendelseType.OPPRETTET, lagretManueltOpphoer.type)
-                )
-            }
+            behandlingHendelser.sendMeldingForHendelse(
+                lagretManueltOpphoer,
+                BehandlingHendelseType.OPPRETTET
+            )
             logger.info("Manuelt opphør med id=${lagretManueltOpphoer.id} er opprettet.")
         }
     }
@@ -162,6 +160,7 @@ class RealManueltOpphoerService(
         featureToggleService,
         Kontekst.get().AppUser
     )
+
     private fun ManueltOpphoer?.sjekkEnhet() = this?.let { behandling ->
         listOf(behandling).filterForEnheter().firstOrNull()
     }

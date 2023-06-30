@@ -105,6 +105,7 @@ internal fun Route.revurderingRoutes(
 
             val stoettedeRevurderinger = RevurderingAarsak.values()
                 .filter { it.kanBrukesIMiljo() && it.gyldigForSakType(sakType) }
+                .filter { it.name !== RevurderingAarsak.NY_SOEKNAD.toString() }
             call.respond(stoettedeRevurderinger)
         }
     }

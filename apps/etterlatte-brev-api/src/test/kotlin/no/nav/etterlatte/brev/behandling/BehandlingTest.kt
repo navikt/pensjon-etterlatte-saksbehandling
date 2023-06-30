@@ -38,7 +38,7 @@ internal class BehandlingTest {
     }
 
     @Test
-    fun `map med dobbelnavn`() {
+    fun `map med dobbelnavn og bindestrek`() {
         val grunnlag = opprettGrunnlag(
             soekerNavn = Navn("UNORMAL-KAR", "FRISK-IS", "HERRESYKKEL"),
             avdoedNavn = Navn("RIV-JERN", "KUL-KAR", "BADEBALL-SOMMER")
@@ -49,6 +49,20 @@ internal class BehandlingTest {
             grunnlag.mapSoeker()
         )
         assertEquals(Avdoed("Riv-Jern Kul-Kar Badeball-Sommer", LocalDate.of(2022, 8, 17)), grunnlag.mapAvdoed())
+    }
+
+    @Test
+    fun `map med dobbelnavn og mellomrom`() {
+        val grunnlag = opprettGrunnlag(
+            soekerNavn = Navn("UNORMAL KAR", "FRISK IS", "HERRESYKKEL"),
+            avdoedNavn = Navn("RIV JERN", "KUL KAR", "BADEBALL-SOMMER")
+        )
+
+        assertEquals(
+            Soeker("Unormal Kar", "Frisk Is", "Herresykkel", Foedselsnummer("16021254243")),
+            grunnlag.mapSoeker()
+        )
+        assertEquals(Avdoed("Riv Jern Kul Kar Badeball-Sommer", LocalDate.of(2022, 8, 17)), grunnlag.mapAvdoed())
     }
 
     @Test

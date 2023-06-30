@@ -2,7 +2,6 @@ package no.nav.etterlatte.behandling
 
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.User
 import no.nav.etterlatte.behandling.domain.Behandling
@@ -129,7 +128,7 @@ class RealGenerellBehandlingService(
     }
 
     override fun avbrytBehandling(behandlingId: UUID, saksbehandler: String) {
-        val behandling = inTransaction {
+        inTransaction {
             val behandling = hentBehandlingForId(behandlingId)
                 ?: throw BehandlingNotFoundException("Fant ikke behandling med id=$behandlingId som skulle avbrytes")
             if (!behandling.status.kanAvbrytes()) {
@@ -141,9 +140,6 @@ class RealGenerellBehandlingService(
             }.also {
                 grunnlagsendringshendelseDao.kobleGrunnlagsendringshendelserFraBehandlingId(behandlingId)
             }
-            behandling
-        }
-        runBlocking {
             behandlingHendelser.sendMeldingForHendelse(behandling, BehandlingHendelseType.AVBRUTT)
         }
     }

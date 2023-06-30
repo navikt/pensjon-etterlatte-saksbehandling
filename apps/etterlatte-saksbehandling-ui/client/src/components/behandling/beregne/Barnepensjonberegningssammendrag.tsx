@@ -70,9 +70,6 @@ export const Barnepensjonberegningssammendrag = ({
                 {beregningsperiode.institusjonsopphold.egenReduksjon && (
                   <p>Egen reduksjon: {beregningsperiode.institusjonsopphold.egenReduksjon}</p>
                 )}
-                {beregningsperiode.institusjonsopphold.begrunnelse && (
-                  <p>Begrunnelse: {beregningsperiode.institusjonsopphold.begrunnelse}</p>
-                )}
               </ListWithoutBullet>
             </div>
           </div>

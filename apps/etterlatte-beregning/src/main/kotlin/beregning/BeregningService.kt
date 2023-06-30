@@ -72,7 +72,7 @@ class BeregningService(
         val grunnlagDenneBehandlinga =
             beregningsGrunnlagService.hentBarnepensjonBeregningsGrunnlag(behandlingId, brukerTokenInfo)
         logger.info("Grunnlag denne: $grunnlagDenneBehandlinga")
-        if (grunnlagDenneBehandlinga == null) {
+        if (grunnlagDenneBehandlinga == null || grunnlagDenneBehandlinga.behandlingId != behandlingId) {
             logger.info("Kopierer beregningsgrunnlag og oppretter beregning for $behandlingId")
             beregningsGrunnlagService.dupliserBeregningsGrunnlag(behandlingId, sistIverksatte.id)
             opprettBeregning(behandlingId, brukerTokenInfo)

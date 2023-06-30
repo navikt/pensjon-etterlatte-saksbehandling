@@ -25,10 +25,3 @@ export const hentBeregningsGrunnlag = async (
 ): Promise<ApiResponse<BeregningsGrunnlagDto | null>> => {
   return apiClient.get<BeregningsGrunnlagDto | null>(`/beregning/beregningsgrunnlag/${behandlingsId}/barnepensjon`)
 }
-
-export const kopierBeregningsGrunnlag = async (args: {
-  behandlingsId: string
-  forrigeBehandlingsId: string
-}): Promise<ApiResponse<void>> => {
-  return apiClient.post(`/beregning/beregningsgrunnlag/${args.behandlingsId}/fra/${args.forrigeBehandlingsId}`, {})
-}

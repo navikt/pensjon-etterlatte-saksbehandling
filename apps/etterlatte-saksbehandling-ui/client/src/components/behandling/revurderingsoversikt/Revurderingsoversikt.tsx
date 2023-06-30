@@ -27,6 +27,7 @@ import { erOpphoer, Revurderingsaarsak, tekstRevurderingsaarsak } from '~shared/
 import styled from 'styled-components'
 import { GrunnForSoeskenjustering } from '~components/behandling/revurderingsoversikt/GrunnForSoeskenjustering'
 import { AdoptertAv } from '~components/behandling/revurderingsoversikt/AdoptertAv'
+import { GrunnlagForVirkningstidspunkt } from '~components/behandling/revurderingsoversikt/GrunnlagForVirkningstidspunkt'
 
 const revurderingsaarsakTilTekst = (revurderingsaarsak: Revurderingsaarsak): string =>
   tekstRevurderingsaarsak[revurderingsaarsak]
@@ -98,7 +99,9 @@ export const Revurderingsoversikt = (props: { behandling: IDetaljertBehandling }
           behandlingId={behandling.id}
           hjemmler={hjemler}
           beskrivelse={beskrivelse}
-        />
+        >
+          {{ info: <GrunnlagForVirkningstidspunkt /> }}
+        </Virkningstidspunkt>
       </Innhold>
       <Border />
       {behandles ? (

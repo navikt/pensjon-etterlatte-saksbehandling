@@ -6,6 +6,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlagService
 import no.nav.etterlatte.beregning.regler.bruker
 import no.nav.etterlatte.klienter.BehandlingKlientImpl
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -25,11 +26,13 @@ internal class BeregningServiceTest {
     }
     private val beregnBarnepensjonService = mockk<BeregnBarnepensjonService>()
     private val beregnOmstillingsstoenadService = mockk<BeregnOmstillingsstoenadService>()
+    private val beregningsGrunnlagService = mockk<BeregningsGrunnlagService>()
     private val beregningService: BeregningService = BeregningService(
         beregningRepository = beregningRepository,
         behandlingKlient = behandlingKlient,
         beregnBarnepensjonService = beregnBarnepensjonService,
-        beregnOmstillingsstoenadService = beregnOmstillingsstoenadService
+        beregnOmstillingsstoenadService = beregnOmstillingsstoenadService,
+        beregningsGrunnlagService = beregningsGrunnlagService
     )
 
     @Test

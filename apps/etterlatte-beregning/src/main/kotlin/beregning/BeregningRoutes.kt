@@ -41,6 +41,7 @@ fun Route.beregning(beregningService: BeregningService, behandlingKlient: Behand
             withBehandlingId(behandlingKlient) {
                 logger.info("Trefte ruta")
                 beregningService.opprettForOpphoer(it, brukerTokenInfo)
+                call.respond(HttpStatusCode.OK)
             }
         }
     }

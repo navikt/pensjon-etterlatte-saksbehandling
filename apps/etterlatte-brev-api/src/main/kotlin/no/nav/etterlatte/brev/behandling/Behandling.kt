@@ -46,7 +46,8 @@ data class ForenkletVedtak(
     val type: VedtakType,
     val ansvarligEnhet: String,
     val saksbehandlerIdent: String,
-    val attestantIdent: String?
+    val attestantIdent: String?,
+    val vedtaksdato: LocalDate?
 )
 
 data class Utbetalingsinfo(

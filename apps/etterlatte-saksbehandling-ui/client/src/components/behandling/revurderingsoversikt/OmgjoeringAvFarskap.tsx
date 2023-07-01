@@ -8,7 +8,7 @@ import { lagreRevurderingInfo } from '~shared/api/revurdering'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { oppdaterRevurderingInfo } from '~store/reducers/BehandlingReducer'
 import styled from 'styled-components'
-import { NavnInput } from '~components/behandling/revurderingsoversikt/NavnInput'
+import { NavnInput, standardnavn } from '~components/behandling/revurderingsoversikt/NavnInput'
 
 function hentUndertypeFraBehandling(behandling?: IDetaljertBehandling): OmgjoeringAvFarskapInfo | null {
   const revurderinginfo = behandling?.revurderinginfo
@@ -63,11 +63,11 @@ export const OmgjoeringAvFarskap = (props: { behandling: IDetaljertBehandling })
       </Heading>
       {redigerbar ? (
         <SkjemaWrapper onSubmit={handlesubmit}>
-          <NavnInput navn={naavaerendeFar} update={(n: Navn) => setNaavaerendeFar(n)} />
+          <NavnInput navn={naavaerendeFar || standardnavn()} update={(n: Navn) => setNaavaerendeFar(n)} />
           <Heading size="medium" level="2">
             Hvem er registrert som far nå?
           </Heading>
-          <NavnInput navn={forrigeFar} update={(n: Navn) => setForrigeFar(n)} />
+          <NavnInput navn={forrigeFar || standardnavn()} update={(n: Navn) => setForrigeFar(n)} />
           <Button loading={isPending(lagrestatus)} variant="primary" size="small">
             Lagre
           </Button>

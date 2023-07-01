@@ -1,59 +1,51 @@
 import { Navn } from '~shared/types/RevurderingInfo'
-import React, { useState } from 'react'
+import React from 'react'
 import { TextField } from '@navikt/ds-react'
 import styled from 'styled-components'
 
-export const NavnInput = (props: { navn: Navn | undefined; update: (n: Navn) => void }) => {
+export function standardnavn(): Navn {
+  return {
+    fornavn: '',
+    mellomnavn: undefined,
+    etternavn: '',
+  }
+}
+export const NavnInput = (props: { navn: Navn; update: (n: Navn) => void }) => {
   const { navn, update } = props
-  const [fornavn, setFornavn] = useState(navn?.fornavn || '')
-  const [mellomnavn, setMellomnavn] = useState(navn?.mellomnavn || '')
-  const [etternavn, setEtternavn] = useState(navn?.etternavn || '')
 
   return (
     <NavnWrapper>
       <TextField
         label={'Fornavn'}
-        value={fornavn}
+        value={navn?.fornavn}
         key={`fornavn-input-label`}
         onChange={(e) => {
-          setFornavn(e.target.value)
-          if (etternavn) {
-            update({
-              fornavn: e.target.value,
-              mellomnavn: mellomnavn,
-              etternavn: etternavn,
-            })
-          }
+          update({
+            ...navn,
+            fornavn: e.target.value,
+          })
         }}
       />
       <TextField
         label={'Mellomnavn'}
-        value={mellomnavn}
+        value={navn?.mellomnavn}
         key={`mellomnavn-input-label`}
         onChange={(e) => {
-          setMellomnavn(e.target.value)
-          if (fornavn && etternavn) {
-            update({
-              fornavn: fornavn,
-              mellomnavn: e.target.value,
-              etternavn: etternavn,
-            })
-          }
+          update({
+            ...navn,
+            mellomnavn: e.target.value,
+          })
         }}
       />
       <TextField
         label={'Etternavn'}
-        value={etternavn}
+        value={navn?.etternavn}
         key={`etternavn-input-label`}
         onChange={(e) => {
-          setEtternavn(e.target.value)
-          if (fornavn && etternavn) {
-            update({
-              fornavn: fornavn,
-              mellomnavn: mellomnavn,
-              etternavn: e.target.value,
-            })
-          }
+          update({
+            ...navn,
+            etternavn: e.target.value,
+          })
         }}
       />
     </NavnWrapper>

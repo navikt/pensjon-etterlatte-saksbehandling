@@ -8,7 +8,7 @@ import { lagreRevurderingInfo } from '~shared/api/revurdering'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { oppdaterRevurderingInfo } from '~store/reducers/BehandlingReducer'
 import styled from 'styled-components'
-import { NavnInput } from '~components/behandling/revurderingsoversikt/NavnInput'
+import { NavnInput, standardnavn } from '~components/behandling/revurderingsoversikt/NavnInput'
 
 function hentUndertypeFraBehandling(behandling?: IDetaljertBehandling): AdopsjonInfo | null {
   const revurderinginfo = behandling?.revurderinginfo
@@ -54,7 +54,7 @@ export const AdoptertAv = (props: { behandling: IDetaljertBehandling }) => {
       </Heading>
       {redigerbar ? (
         <SkjemaWrapper onSubmit={handlesubmit}>
-          <NavnInput navn={adopsjonInfo?.adoptertAv} update={(n: Navn) => setNavn(n)} />
+          <NavnInput navn={adopsjonInfo?.adoptertAv || standardnavn()} update={(n: Navn) => setNavn(n)} />
           <Button loading={isPending(lagrestatus)} variant="primary" size="small">
             Lagre
           </Button>

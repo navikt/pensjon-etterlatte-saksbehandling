@@ -6,7 +6,7 @@
   "devDependencies": {
     "eslint": "8.41.0",
     "husky": "^8.0.1",
-    "lint-staged": "^13.2.2",
+    "lint-staged": "^13.2.3",
     "prettier": "^2.8.8"
   }
 }

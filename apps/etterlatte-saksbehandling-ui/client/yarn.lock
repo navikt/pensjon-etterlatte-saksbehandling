@@ -413,10 +413,10 @@
   resolved "https://registry.yarnpkg.com/@navikt/aksel-icons/-/aksel-icons-2.9.8.tgz#04e4868d2f8f1022b52e9de54668127f6d0f5052"
   integrity sha512-HANk2yejzzQxj4UefLg5Q8YXqkwh98SN98fNJUIlfonnh1bla1XB2h690QZJiY5SghHDnb2RGo/aojc8BwI8kQ==
 
-"@navikt/aksel-icons@^3.3.1":
-  version "3.4.2"
-  resolved "https://registry.yarnpkg.com/@navikt/aksel-icons/-/aksel-icons-3.4.2.tgz#fa858e1a5fb0557d61b62ad7cdf0d75e26fc89d7"
-  integrity sha512-9fj+Jb4UrX3SDDzqJpKP3fvizdxtACIFNXgDiPaP/N/61pbeY4tZz/zrtWGtExLpDeg7dAyaiFH/hfo7nBg6nw==
+"@navikt/aksel-icons@^4.5.0":
+  version "4.5.0"
+  resolved "https://registry.yarnpkg.com/@navikt/aksel-icons/-/aksel-icons-4.5.0.tgz#cdc0003f03c57ee0b070a03b9df37964b6c63d9c"
+  integrity sha512-JLnEzkATTc1b8CmXgD+fGdXsR1Gm5DjcAcljaXD1hoJvNilkAA5E/8ft0hBq9X1wVdI1uQPEmsw2QHCaJDwZ1A==
 
 "@navikt/ds-css-internal@^2.9.8":
   version "2.9.8"

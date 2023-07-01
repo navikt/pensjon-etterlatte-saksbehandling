@@ -91,7 +91,7 @@ test-jupiter-params = { module = "org.junit.jupiter:junit-jupiter-params", versi
 test-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "jupiter-version" }
 test-jupiter-root = { module = "org.junit.jupiter:junit-jupiter", version.ref = "jupiter-version" }
 test-kotest-assertionscore = { module = "io.kotest:kotest-assertions-core", version = "5.5.5" }
-test-mockk = { module = "io.mockk:mockk", version = "1.13.4" }
+test-mockk = { module = "io.mockk:mockk", version = "1.13.5" }
 test-testcontainer-jupiter = { module = "org.testcontainers:junit-jupiter", version.ref = "testcontainer-version" }
 test-testcontainer-postgresql = { module = "org.testcontainers:postgresql", version.ref = "testcontainer-version" }
 test-wiremock = { module = "com.github.tomakehurst:wiremock-jre8", version = "2.35.0" }

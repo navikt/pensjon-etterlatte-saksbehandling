@@ -130,25 +130,16 @@ fun Grunnlag.mapSpraak(): Spraak = with(this.sak) {
 }
 
 fun Grunnlag.mapVerge(sakType: SakType): Verge? = with(this) {
-    val soekerFnr = soeker.hentFoedselsnummer()!!.verdi
     val opplysning = sak.hentVergemaalellerfremtidsfullmakt()
 
     if (opplysning?.verdi != null) {
-        val vergemaalEllerFremtidsfullmakt = opplysning.verdi.firstOrNull {
-            it.vergeEllerFullmektig.motpartsPersonident == soekerFnr
-        }
+        TODO("Støtter ikke annen verge enn forelder – håndtering av annen verge krever ytterligere avklaringer")
+    } else if (sakType == SakType.BARNEPENSJON) {
+        val gjenlevendeNavn = hentGjenlevende().hentNavn()!!.verdi.fulltNavn()
 
-        vergemaalEllerFremtidsfullmakt?.vergeEllerFullmektig?.navn?.let {
-            Verge(it)
-        }
+        Verge(gjenlevendeNavn)
     } else {
-        if (sakType == SakType.BARNEPENSJON) {
-            val gjenlevendeNavn = hentGjenlevende().hentNavn()!!.verdi.fulltNavn()
-
-            Verge(gjenlevendeNavn)
-        } else {
-            null
-        }
+        null
     }
 }
 

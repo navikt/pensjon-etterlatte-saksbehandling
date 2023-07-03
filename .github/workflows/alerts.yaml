@@ -19,11 +19,11 @@ jobs:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: dev-gcp
           RESOURCE: alerts.yaml
-          VAR: LOGS_URL=https://logs.adeo.no/goto/e3cd5dc0-39ee-11ed-b3e8-d969437dd878
+          VAR: LOGS_URL=https://logs.adeo.no/app/r/s/RxEhL
       - name: deploy to prod
         uses: nais/deploy/actions/deploy@v1
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: prod-gcp
           RESOURCE: alerts.yaml
-          VAR: LOGS_URL=https://logs.adeo.no/goto/25018180-3a4a-11ed-b3e8-d969437dd878
+          VAR: LOGS_URL=https://logs.adeo.no/app/r/s/awtWK

@@ -9,3 +9,8 @@ export enum SakType {
   BARNEPENSJON = 'BARNEPENSJON',
   OMSTILLINGSSTOENAD = 'OMSTILLINGSSTOENAD',
 }
+
+export interface FoersteVirk {
+  foersteIverksatteVirkISak: string
+  sakId: number
+}

@@ -24,6 +24,7 @@ import no.nav.etterlatte.libs.common.sakId
 import no.nav.etterlatte.tilgangsstyring.withFoedselsnummerAndGradering
 import no.nav.etterlatte.tilgangsstyring.withFoedselsnummerInternal
 import org.slf4j.LoggerFactory
+import java.time.LocalDate
 
 internal fun Route.sakSystemRoutes(
     tilgangService: TilgangService,
@@ -89,7 +90,16 @@ internal fun Route.sakWebRoutes(
                 }
                 call.respond(sak ?: HttpStatusCode.NotFound)
             }
+
+            get("/behandlinger/foerstevirk") {
+                logger.info("Henter første virkningstidspunkt på en iverksatt behandling i sak med id $sakId")
+                when (val foersteVirk = generellBehandlingService.hentFoersteVirk(sakId)) {
+                    null -> call.respond(HttpStatusCode.NotFound)
+                    else -> call.respond(FoersteVirkDto(foersteVirk.atDay(1), sakId))
+                }
+            }
         }
+
         route("/personer/") {
             post("behandlinger") {
                 withFoedselsnummerInternal(tilgangService) { fnr ->
@@ -121,3 +131,5 @@ internal fun Route.sakWebRoutes(
         }
     }
 }
+
+data class FoersteVirkDto(val foersteIverksatteVirkISak: LocalDate, val sakId: Long)

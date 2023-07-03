@@ -12,6 +12,7 @@ import no.nav.etterlatte.behandling.hendelse.HendelseType
 import no.nav.etterlatte.behandling.hendelse.LagretHendelse
 import no.nav.etterlatte.behandling.hendelse.registrerVedtakHendelseFelles
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
+import no.nav.etterlatte.common.tidligsteIverksatteVirkningstidspunkt
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseDao
@@ -88,6 +89,8 @@ interface GenerellBehandlingService {
         brukerTokenInfo: BrukerTokenInfo,
         request: VirkningstidspunktRequest
     ): Boolean
+
+    fun hentFoersteVirk(sakId: Long): YearMonth?
 }
 
 class RealGenerellBehandlingService(
@@ -194,6 +197,11 @@ class RealGenerellBehandlingService(
         }
 
         return harGyldigFormat && etterMaksTidspunktEllersMinstManedEtterDoedsfall
+    }
+
+    override fun hentFoersteVirk(sakId: Long): YearMonth? {
+        val behandlinger = hentBehandlingerISak(sakId)
+        return behandlinger.tidligsteIverksatteVirkningstidspunkt()?.dato
     }
 
     override suspend fun hentDetaljertBehandlingMedTilbehoer(

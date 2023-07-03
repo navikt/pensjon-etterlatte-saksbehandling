@@ -6,18 +6,24 @@ import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
 import java.time.LocalDate
 
-abstract class OpphoerBrevData : BrevData()
+abstract class OpphoerBrevData : BrevData() {
+    companion object {
+        fun assertRevurderingsaarsakStemmerMedTypen(behandling: Behandling, aarsak: RevurderingAarsak, type: String) {
+            if (behandling.revurderingsaarsak != aarsak) {
+                throw IllegalArgumentException(
+                    "Kan ikke opprette et revurderingsbrev for $type når " +
+                        "revurderingsårsak er $aarsak - mismatch mellom type og årsak, disse må stemme overens."
+                )
+            }
+        }
+    }
+}
 
 data class AdopsjonRevurderingBrevdata(val virkningsdato: LocalDate, val adoptertAv: Navn) :
     OpphoerBrevData() {
     companion object {
         fun fra(behandling: Behandling): AdopsjonRevurderingBrevdata {
-            if (behandling.revurderingsaarsak != RevurderingAarsak.ADOPSJON) {
-                throw IllegalArgumentException(
-                    "Kan ikke opprette et revurderingsbrev for adopsjon når " +
-                        "revurderingsårsak er ${behandling.revurderingsaarsak}"
-                )
-            }
+            assertRevurderingsaarsakStemmerMedTypen(behandling, RevurderingAarsak.ADOPSJON, "adopsjon")
             if (behandling.revurderingInfo !is RevurderingInfo.Adopsjon) {
                 throw IllegalArgumentException(
                     "Kan ikke opprette et revurderingsbrev for adopsjon når " +
@@ -28,6 +34,38 @@ data class AdopsjonRevurderingBrevdata(val virkningsdato: LocalDate, val adopter
             return AdopsjonRevurderingBrevdata(
                 virkningsdato = behandling.virkningsdato!!.atDay(1),
                 adoptertAv = behandling.revurderingInfo.adoptertAv
+            )
+        }
+    }
+}
+
+data class OmgjoeringAvFarskapRevurderingBrevdata(
+    val vedtaksdato: LocalDate,
+    val virkningsdato: LocalDate,
+    val naavaerendeFar: Navn,
+    var forrigeFar: Navn,
+    val forrigeVedtaksdato: LocalDate
+) : OpphoerBrevData() {
+    companion object {
+        fun fra(behandling: Behandling): OmgjoeringAvFarskapRevurderingBrevdata {
+            assertRevurderingsaarsakStemmerMedTypen(
+                behandling,
+                RevurderingAarsak.OMGJOERING_AV_FARSKAP,
+                "omgjøring av farskap"
+            )
+            if (behandling.revurderingInfo !is RevurderingInfo.OmgjoeringAvFarskap) {
+                throw IllegalArgumentException(
+                    "Kan ikke opprette et revurderingsbrev for omgjøring av farskap når " +
+                        "revurderingsinfo ikke er omgjøring av farskap"
+                )
+            }
+
+            return OmgjoeringAvFarskapRevurderingBrevdata(
+                vedtaksdato = behandling.vedtak.vedtaksdato!!,
+                virkningsdato = behandling.virkningsdato!!.atDay(1),
+                naavaerendeFar = behandling.revurderingInfo.naavaerendeFar,
+                forrigeFar = behandling.revurderingInfo.forrigeFar,
+                forrigeVedtaksdato = LocalDate.now() // TODO
             )
         }
     }

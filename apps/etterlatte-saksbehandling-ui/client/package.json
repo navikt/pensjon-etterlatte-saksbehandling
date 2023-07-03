@@ -30,7 +30,7 @@
     "redux": "^4.2.0",
     "slate": "^0.94.1",
     "slate-history": "^0.93.0",
-    "slate-react": "^0.95.0",
+    "slate-react": "^0.97.1",
     "styled-components": "^5.3.10"
   },
   "devDependencies": {
@@ -53,7 +53,7 @@
     "eslint-plugin-jsx-a11y": "^6.6.1",
     "eslint-plugin-react": "^7.31.10",
     "jsdom": "^22.1.0",
-    "prettier": "^2.7.1",
+    "prettier": "^2.8.8",
     "typescript": "^5.0.3",
     "vite": "4.2.3",
     "vite-tsconfig-paths": "4.2.0",

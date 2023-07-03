@@ -1,3 +1,5 @@
+import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
+
 export const SOESKENJUSTERING_GRUNNER = [
   'NYTT_SOESKEN',
   'SOESKEN_DOER',
@@ -20,13 +22,30 @@ export interface AdopsjonInfo {
   adoptertAv: Navn
 }
 
+export interface OmgjoeringAvFarskapInfo {
+  type: 'OMGJOERING_AV_FARSKAP'
+  naavaerendeFar: Navn
+  forrigeFar: Navn
+}
+
 export interface Navn {
   fornavn: string
   mellomnavn: string | undefined
   etternavn: string
 }
 
-export type RevurderingInfo = SoeskenjusteringInfo | AdopsjonInfo
+export type RevurderingInfo = SoeskenjusteringInfo | AdopsjonInfo | OmgjoeringAvFarskapInfo
+
+export function hentUndertypeFraBehandling<T extends RevurderingInfo>(
+  type: T['type'],
+  behandling?: IDetaljertBehandling
+): T | null {
+  const revurderingInfo = behandling?.revurderinginfo
+  if (revurderingInfo?.type === type) {
+    return revurderingInfo as T
+  }
+  return null
+}
 
 export const tekstSoeskenjustering: Record<BarnepensjonSoeskenjusteringGrunn, string> = {
   FORPLEID_ETTER_BARNEVERNSLOVEN: 'Forpleid etter barnevernsloven',

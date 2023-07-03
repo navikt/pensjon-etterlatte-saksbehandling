@@ -36,6 +36,10 @@ object BrevDataMapper {
                         EtterlatteBrevKode.BARNEPENSJON_REVURDERING_ADOPSJON,
                         AdopsjonRevurderingBrevdata.fra(behandling)
                     )
+                    RevurderingAarsak.OMGJOERING_AV_FARSKAP -> Pair(
+                        EtterlatteBrevKode.BARNEPENSJON_REVURDERING_OMGJOERING_AV_FARSKAP,
+                        OmgjoeringAvFarskapRevurderingBrevdata.fra(behandling)
+                    )
                     else -> TODO("Vedtakstype er ikke støttet: $vedtakType")
                 }
             }

@@ -7,7 +7,7 @@ cutterslade-analyze = { id = "ca.cutterslade.analyze", version = "1.9.1" }
 jackson-version = "2.15.2"
 jupiter-version = "5.9.3"
 kotlinx-version = "1.7.2"
-ktor2-version = "2.3.1"
+ktor2-version = "2.3.2"
 navfelles-token-version = "3.1.0"
 prometheus-version = "0.16.0"
 testcontainer-version = "1.18.3"
@@ -70,7 +70,7 @@ logging-slf4japi = { module = "org.slf4j:slf4j-api", version = "2.0.7" }
 logging-logbackclassic = { module = "ch.qos.logback:logback-classic", version = "1.4.7" }
 logging-logstashlogbackencoder = { module = "net.logstash.logback:logstash-logback-encoder", version = "6.6" }
 
-metrics-micrometer-prometheus = { module = "io.micrometer:micrometer-registry-prometheus", version = "1.11.0" }
+metrics-micrometer-prometheus = { module = "io.micrometer:micrometer-registry-prometheus", version = "1.11.1" }
 metrics-prometheus-simpleclientcommon = { module = "io.prometheus:simpleclient_common", version.ref = "prometheus-version" }
 metrics-prometheus-simpleclienthotspot = { module = "io.prometheus:simpleclient_hotspot", version.ref = "prometheus-version" }
 
@@ -84,14 +84,14 @@ navfelles-tjenestespesifikasjoner-oppdragsbehandling = { module = "com.github.na
 navfelles-tjenestespesifikasjoner-tilbakekreving = { module ="com.github.navikt.pensjon-etterlatte-tjenestespesifikasjoner:tilbakekreving-v1-tjenestespesifikasjon", version = "1.78ffd1e" }
 navfelles-tokenclientcore = { module = "no.nav.security:token-client-core", version.ref = "navfelles-token-version" }
 navfelles-tokenvalidationktor2 = { module = "no.nav.security:token-validation-ktor-v2", version.ref = "navfelles-token-version" }
-navfelles-mockoauth2server = { module = "no.nav.security:mock-oauth2-server", version = "0.5.8" }
+navfelles-mockoauth2server = { module = "no.nav.security:mock-oauth2-server", version = "0.5.9" }
 
 test-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "jupiter-version" }
 test-jupiter-params = { module = "org.junit.jupiter:junit-jupiter-params", version.ref = "jupiter-version" }
 test-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "jupiter-version" }
 test-jupiter-root = { module = "org.junit.jupiter:junit-jupiter", version.ref = "jupiter-version" }
 test-kotest-assertionscore = { module = "io.kotest:kotest-assertions-core", version = "5.5.5" }
-test-mockk = { module = "io.mockk:mockk", version = "1.13.4" }
+test-mockk = { module = "io.mockk:mockk", version = "1.13.5" }
 test-testcontainer-jupiter = { module = "org.testcontainers:junit-jupiter", version.ref = "testcontainer-version" }
 test-testcontainer-postgresql = { module = "org.testcontainers:postgresql", version.ref = "testcontainer-version" }
 test-wiremock = { module = "com.github.tomakehurst:wiremock-jre8", version = "2.35.0" }

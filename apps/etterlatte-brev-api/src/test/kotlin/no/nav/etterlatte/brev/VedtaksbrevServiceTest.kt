@@ -493,7 +493,8 @@ internal class VedtaksbrevServiceTest {
             vedtakType,
             PORSGRUNN,
             SAKSBEHANDLER.ident(),
-            attestantIdent = null
+            attestantIdent = null,
+            LocalDate.now()
         ),
         Utbetalingsinfo(
             1,

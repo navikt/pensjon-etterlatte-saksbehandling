@@ -1,6 +1,7 @@
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import {
   BarnepensjonSoeskenjusteringGrunn,
+  hentUndertypeFraBehandling,
   RevurderingInfo,
   SOESKENJUSTERING_GRUNNER,
   SoeskenjusteringInfo,
@@ -15,18 +16,9 @@ import { ApiErrorAlert } from '~ErrorBoundary'
 import { oppdaterRevurderingInfo } from '~store/reducers/BehandlingReducer'
 import styled from 'styled-components'
 
-function hentUndertypeFraBehandling(behandling?: IDetaljertBehandling): SoeskenjusteringInfo | null {
-  const revurderinginfo = behandling?.revurderinginfo
-  if (revurderinginfo?.type === 'SOESKENJUSTERING') {
-    return revurderinginfo
-  } else {
-    return null
-  }
-}
-
 export const GrunnForSoeskenjustering = (props: { behandling: IDetaljertBehandling }) => {
   const { behandling } = props
-  const soeskenjusteringInfo = hentUndertypeFraBehandling(behandling)
+  const soeskenjusteringInfo = hentUndertypeFraBehandling<SoeskenjusteringInfo>('SOESKENJUSTERING', behandling)
   const [valgtSoeskenjustering, setValgtSoeskenjustering] = useState<BarnepensjonSoeskenjusteringGrunn | undefined>(
     soeskenjusteringInfo?.grunnForSoeskenjustering
   )

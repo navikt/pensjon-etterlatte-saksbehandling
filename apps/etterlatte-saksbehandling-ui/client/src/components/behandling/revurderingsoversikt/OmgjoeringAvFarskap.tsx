@@ -1,5 +1,10 @@
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
-import { Navn, OmgjoeringAvFarskapInfo, RevurderingInfo } from '~shared/types/RevurderingInfo'
+import {
+  hentUndertypeFraBehandling,
+  Navn,
+  OmgjoeringAvFarskapInfo,
+  RevurderingInfo,
+} from '~shared/types/RevurderingInfo'
 import React, { FormEvent, useState } from 'react'
 import { BodyShort, Button, Heading } from '@navikt/ds-react'
 import { hentBehandlesFraStatus } from '~components/behandling/felles/utils'
@@ -10,18 +15,12 @@ import { oppdaterRevurderingInfo } from '~store/reducers/BehandlingReducer'
 import styled from 'styled-components'
 import { NavnInput, standardnavn } from '~components/behandling/revurderingsoversikt/NavnInput'
 
-function hentUndertypeFraBehandling(behandling?: IDetaljertBehandling): OmgjoeringAvFarskapInfo | null {
-  const revurderinginfo = behandling?.revurderinginfo
-  if (revurderinginfo?.type === 'OMGJOERING_AV_FARSKAP') {
-    return revurderinginfo
-  } else {
-    return null
-  }
-}
-
 export const OmgjoeringAvFarskap = (props: { behandling: IDetaljertBehandling }) => {
   const { behandling } = props
-  const omgjoeringAvFarskapInfo = hentUndertypeFraBehandling(behandling)
+  const omgjoeringAvFarskapInfo = hentUndertypeFraBehandling<OmgjoeringAvFarskapInfo>(
+    'OMGJOERING_AV_FARSKAP',
+    behandling
+  )
   const [naavaerendeFar, setNaavaerendeFar] = useState(omgjoeringAvFarskapInfo?.naavaerendeFar)
   const [forrigeFar, setForrigeFar] = useState(omgjoeringAvFarskapInfo?.forrigeFar)
   const [feilmelding, setFeilmelding] = useState<string | undefined>(undefined)

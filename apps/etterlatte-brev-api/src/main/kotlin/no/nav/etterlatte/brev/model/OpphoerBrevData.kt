@@ -19,7 +19,11 @@ abstract class OpphoerBrevData : BrevData() {
     }
 }
 
-data class AdopsjonRevurderingBrevdata(val virkningsdato: LocalDate, val adoptertAv: Navn) :
+data class AdopsjonRevurderingBrevdata(
+    val virkningsdato: LocalDate,
+    val adoptertAv1: Navn,
+    val adoptertAv2: Navn? = null
+) :
     OpphoerBrevData() {
     companion object {
         fun fra(behandling: Behandling): AdopsjonRevurderingBrevdata {
@@ -33,7 +37,8 @@ data class AdopsjonRevurderingBrevdata(val virkningsdato: LocalDate, val adopter
 
             return AdopsjonRevurderingBrevdata(
                 virkningsdato = behandling.virkningsdato!!.atDay(1),
-                adoptertAv = behandling.revurderingInfo.adoptertAv
+                adoptertAv1 = behandling.revurderingInfo.adoptertAv1,
+                adoptertAv2 = behandling.revurderingInfo.adoptertAv2
             )
         }
     }

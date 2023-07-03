@@ -19,7 +19,8 @@ export interface SoeskenjusteringInfo {
 
 export interface AdopsjonInfo {
   type: 'ADOPSJON'
-  adoptertAv: Navn
+  adoptertAv1: Navn
+  adoptertAv2: Navn | undefined
 }
 
 export interface OmgjoeringAvFarskapInfo {

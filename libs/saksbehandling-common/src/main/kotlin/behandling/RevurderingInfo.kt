@@ -23,7 +23,8 @@ sealed class RevurderingInfo {
 
     @JsonTypeName("ADOPSJON")
     data class Adopsjon(
-        val adoptertAv: Navn
+        val adoptertAv1: Navn,
+        val adoptertAv2: Navn? = null
     ) : RevurderingInfo()
 
     @JsonTypeName("OMGJOERING_AV_FARSKAP")

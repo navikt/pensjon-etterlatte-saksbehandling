@@ -1,10 +1,9 @@
 package no.nav.etterlatte.behandling.revurdering
 
-import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.BehandlingHendelseType
-import no.nav.etterlatte.behandling.BehandlingHendelserKanal
+import no.nav.etterlatte.behandling.BehandlingHendelserKafkaProducer
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.OpprettBehandling
 import no.nav.etterlatte.behandling.domain.Revurdering
@@ -55,7 +54,7 @@ enum class RevurderingServiceFeatureToggle(private val key: String) : FeatureTog
 }
 
 class RealRevurderingService(
-    private val behandlingHendelser: BehandlingHendelserKanal,
+    private val behandlingHendelser: BehandlingHendelserKafkaProducer,
     private val featureToggleService: FeatureToggleService,
     private val behandlingDao: BehandlingDao,
     private val hendelseDao: HendelseDao,
@@ -157,12 +156,8 @@ class RealRevurderingService(
         logger.info("Opprettet revurdering ${opprettBehandling.id} i sak ${opprettBehandling.sakId}")
 
         hentBehandling(opprettBehandling.id)
-    }.also { revurdering ->
-        revurdering?.let {
-            runBlocking {
-                behandlingHendelser.send(revurdering.id to BehandlingHendelseType.OPPRETTET)
-            }
-        }
+    }?.also { revurdering ->
+        behandlingHendelser.sendMeldingForHendelse(revurdering, BehandlingHendelseType.OPPRETTET)
     }
 
     private fun <T : Behandling> T?.sjekkEnhet() = this?.let { behandling ->

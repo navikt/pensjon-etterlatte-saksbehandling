@@ -2,8 +2,6 @@ package no.nav.etterlatte.behandling
 
 import io.mockk.Runs
 import io.mockk.clearAllMocks
-import io.mockk.coEvery
-import io.mockk.coVerify
 import io.mockk.confirmVerified
 import io.mockk.every
 import io.mockk.just
@@ -62,7 +60,7 @@ internal class RealFoerstegangsbehandlingServiceTest {
     private val sakDaoMock = mockk<SakDao>()
     private val behandlingDaoMock = mockk<BehandlingDao>()
     private val hendelseDaoMock = mockk<HendelseDao>()
-    private val hendelserKanalMock = mockk<BehandlingHendelserKanal>()
+    private val behandlingHendelserKafkaProducerMock = mockk<BehandlingHendelserKafkaProducer>()
     private val featureToggleService = mockk<FeatureToggleService>()
 
     private val naaTid = Tidspunkt.now()
@@ -70,7 +68,7 @@ internal class RealFoerstegangsbehandlingServiceTest {
         sakDaoMock,
         behandlingDaoMock,
         hendelseDaoMock,
-        hendelserKanalMock,
+        behandlingHendelserKafkaProducerMock,
         featureToggleService,
         naaTid.fixedNorskTid()
     )
@@ -95,7 +93,7 @@ internal class RealFoerstegangsbehandlingServiceTest {
 
     @AfterEach
     fun after() {
-        confirmVerified(sakDaoMock, behandlingDaoMock, hendelseDaoMock, hendelserKanalMock)
+        confirmVerified(sakDaoMock, behandlingDaoMock, hendelseDaoMock, behandlingHendelserKafkaProducerMock)
         clearAllMocks()
     }
 
@@ -147,7 +145,6 @@ internal class RealFoerstegangsbehandlingServiceTest {
     fun startBehandling() {
         val behandlingOpprettes = slot<OpprettBehandling>()
         val behandlingHentes = slot<UUID>()
-        val hendelse = slot<Pair<UUID, BehandlingHendelseType>>()
         val datoNaa = Tidspunkt.now().toLocalDatetimeUTC()
 
         every { featureToggleService.isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false) } returns false
@@ -199,7 +196,7 @@ internal class RealFoerstegangsbehandlingServiceTest {
         every { behandlingDaoMock.lagreGyldighetsproving(any()) } returns Unit
         every { behandlingDaoMock.alleBehandlingerISak(any()) } returns listOf(opprettetBehandling)
         every { behandlingDaoMock.lagreStatus(any(), any(), any()) } returns Unit
-        coEvery { hendelserKanalMock.send(capture(hendelse)) } returns Unit
+        every { behandlingHendelserKafkaProducerMock.sendMeldingForHendelse(any(), any()) } returns Unit
 
         val resultat = behandlingsService.opprettBehandling(
             1,
@@ -216,7 +213,6 @@ internal class RealFoerstegangsbehandlingServiceTest {
         assertEquals(opprettetBehandling.behandlingOpprettet, resultat.behandlingOpprettet)
         assertEquals(1, behandlingOpprettes.captured.sakId)
         assertEquals(behandlingHentes.captured, behandlingOpprettes.captured.id)
-        assertEquals(BehandlingHendelseType.OPPRETTET, hendelse.captured.second)
 
         verify(exactly = 1) {
             sakDaoMock.hentSak(any())
@@ -225,15 +221,14 @@ internal class RealFoerstegangsbehandlingServiceTest {
             hendelseDaoMock.behandlingOpprettet(any())
             behandlingDaoMock.alleBehandlingerISak(any())
             behandlingDaoMock.lagreStatus(any(), any(), any())
+            behandlingHendelserKafkaProducerMock.sendMeldingForHendelse(any(), BehandlingHendelseType.OPPRETTET)
         }
-        coVerify(exactly = 1) { hendelserKanalMock.send(any()) }
     }
 
     @Test
     fun `skal opprette kun foerstegangsbehandling hvis det ikke finnes noen tidligere behandlinger`() {
         val behandlingOpprettes = slot<OpprettBehandling>()
         val behandlingHentes = slot<UUID>()
-        val hendelse = slot<Pair<UUID, BehandlingHendelseType>>()
         val datoNaa = Tidspunkt.now().toLocalDatetimeUTC()
 
         every { featureToggleService.isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false) } returns false
@@ -283,7 +278,7 @@ internal class RealFoerstegangsbehandlingServiceTest {
         every { behandlingDaoMock.hentBehandling(capture(behandlingHentes)) } returns opprettetBehandling
         every { behandlingDaoMock.alleBehandlingerISak(any()) } returns emptyList()
         every { hendelseDaoMock.behandlingOpprettet(any()) } returns Unit
-        coEvery { hendelserKanalMock.send(capture(hendelse)) } returns Unit
+        every { behandlingHendelserKafkaProducerMock.sendMeldingForHendelse(any(), any()) } returns Unit
 
         val resultat = behandlingsService.opprettBehandling(
             1,
@@ -300,15 +295,14 @@ internal class RealFoerstegangsbehandlingServiceTest {
             behandlingDaoMock.opprettBehandling(any())
             hendelseDaoMock.behandlingOpprettet(any())
             behandlingDaoMock.alleBehandlingerISak(any())
+            behandlingHendelserKafkaProducerMock.sendMeldingForHendelse(any(), any())
         }
-        coVerify(exactly = 1) { hendelserKanalMock.send(any()) }
     }
 
     @Test
     fun `skal avbryte behandling hvis under behandling og opprette en ny`() {
         val behandlingOpprettes = slot<OpprettBehandling>()
         val behandlingHentes = slot<UUID>()
-        val hendelse = slot<Pair<UUID, BehandlingHendelseType>>()
         val datoNaa = Tidspunkt.now().toLocalDatetimeUTC()
 
         every {
@@ -363,7 +357,7 @@ internal class RealFoerstegangsbehandlingServiceTest {
         } returns emptyList()
         every { behandlingDaoMock.lagreStatus(any(), any(), any()) } returns Unit
         every { hendelseDaoMock.behandlingOpprettet(any()) } returns Unit
-        coEvery { hendelserKanalMock.send(capture(hendelse)) } returns Unit
+        every { behandlingHendelserKafkaProducerMock.sendMeldingForHendelse(any(), any()) } returns Unit
 
         val resultat = behandlingsService.opprettBehandling(
             1,
@@ -392,18 +386,17 @@ internal class RealFoerstegangsbehandlingServiceTest {
             behandlingDaoMock.opprettBehandling(any())
             hendelseDaoMock.behandlingOpprettet(any())
             behandlingDaoMock.alleBehandlingerISak(any())
+            behandlingHendelserKafkaProducerMock.sendMeldingForHendelse(any(), any())
         }
         verify {
             behandlingDaoMock.lagreStatus(any(), BehandlingStatus.AVBRUTT, any())
         }
-        coVerify(exactly = 2) { hendelserKanalMock.send(any()) }
     }
 
     @Test
     fun `skal lage ny behandling hvis behandling er satt til iverksatt`() {
         val behandlingOpprettes = slot<OpprettBehandling>()
         val behandlingHentes = slot<UUID>()
-        val hendelse = slot<Pair<UUID, BehandlingHendelseType>>()
         val datoNaa = Tidspunkt.now().toLocalDatetimeUTC()
 
         every {
@@ -458,7 +451,7 @@ internal class RealFoerstegangsbehandlingServiceTest {
         } returns emptyList()
         every { behandlingDaoMock.lagreStatus(any(), any(), any()) } returns Unit
         every { hendelseDaoMock.behandlingOpprettet(any()) } returns Unit
-        coEvery { hendelserKanalMock.send(capture(hendelse)) } returns Unit
+        every { behandlingHendelserKafkaProducerMock.sendMeldingForHendelse(any(), any()) } returns Unit
 
         val resultat = behandlingsService.opprettBehandling(
             1,
@@ -524,9 +517,8 @@ internal class RealFoerstegangsbehandlingServiceTest {
             behandlingDaoMock.opprettBehandling(any())
             hendelseDaoMock.behandlingOpprettet(any())
             behandlingDaoMock.alleBehandlingerISak(any())
+            behandlingHendelserKafkaProducerMock.sendMeldingForHendelse(any(), any())
         }
-
-        coVerify(exactly = 2) { hendelserKanalMock.send(any()) }
     }
 
     @Test

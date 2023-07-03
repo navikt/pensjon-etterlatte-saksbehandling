@@ -2,7 +2,6 @@ package no.nav.etterlatte.behandling
 
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.User
 import no.nav.etterlatte.behandling.domain.Behandling
@@ -93,7 +92,7 @@ interface GenerellBehandlingService {
 
 class RealGenerellBehandlingService(
     private val behandlingDao: BehandlingDao,
-    private val behandlingHendelser: BehandlingHendelserKanal,
+    private val behandlingHendelser: BehandlingHendelserKafkaProducer,
     private val grunnlagsendringshendelseDao: GrunnlagsendringshendelseDao,
     private val hendelseDao: HendelseDao,
     private val grunnlagKlient: GrunnlagKlient,
@@ -141,9 +140,7 @@ class RealGenerellBehandlingService(
             }.also {
                 grunnlagsendringshendelseDao.kobleGrunnlagsendringshendelserFraBehandlingId(behandlingId)
             }
-        }
-        runBlocking {
-            behandlingHendelser.send(behandlingId to BehandlingHendelseType.AVBRUTT)
+            behandlingHendelser.sendMeldingForHendelse(behandling, BehandlingHendelseType.AVBRUTT)
         }
     }
 

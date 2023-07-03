@@ -5,7 +5,7 @@ import com.typesafe.config.ConfigFactory
 import io.ktor.client.HttpClient
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.BehandlingStatusServiceImpl
-import no.nav.etterlatte.behandling.BehandlingsHendelser
+import no.nav.etterlatte.behandling.BehandlingsHendelserKafkaProducerImpl
 import no.nav.etterlatte.behandling.EnhetServiceImpl
 import no.nav.etterlatte.behandling.RealGenerellBehandlingService
 import no.nav.etterlatte.behandling.foerstegangsbehandling.RealFoerstegangsbehandlingService
@@ -130,14 +130,14 @@ class ApplicationContext(
     val grunnlagKlient = GrunnlagKlientImpl(grunnlagHttpClient, "http://etterlatte-grunnlag")
     val leaderElectionKlient = LeaderElection(env.getValue("ELECTOR_PATH"), leaderElectionHttpClient)
 
-    val behandlingsHendelser = BehandlingsHendelser(rapid, behandlingDao, dataSource)
+    val behandlingsHendelser = BehandlingsHendelserKafkaProducerImpl(rapid)
 
     // Service
     val oppgaveService = OppgaveServiceImpl(oppgaveDao, featureToggleService)
 
     val generellBehandlingService = RealGenerellBehandlingService(
         behandlingDao = behandlingDao,
-        behandlingHendelser = behandlingsHendelser.hendelserKanal,
+        behandlingHendelser = behandlingsHendelser,
         hendelseDao = hendelseDao,
         grunnlagsendringshendelseDao = grunnlagsendringshendelseDao,
         grunnlagKlient = grunnlagKlientObo,
@@ -150,13 +150,13 @@ class ApplicationContext(
             sakDao = sakDao,
             behandlingDao = behandlingDao,
             hendelseDao = hendelseDao,
-            behandlingHendelser = behandlingsHendelser.hendelserKanal,
+            behandlingHendelser = behandlingsHendelser,
             featureToggleService = featureToggleService
         )
 
     val revurderingService =
         RealRevurderingService(
-            behandlingHendelser = behandlingsHendelser.hendelserKanal,
+            behandlingHendelser = behandlingsHendelser,
             featureToggleService = featureToggleService,
             behandlingDao = behandlingDao,
             hendelseDao = hendelseDao,
@@ -166,7 +166,7 @@ class ApplicationContext(
     val manueltOpphoerService =
         RealManueltOpphoerService(
             behandlingDao = behandlingDao,
-            behandlingHendelser = behandlingsHendelser.hendelserKanal,
+            behandlingHendelser = behandlingsHendelser,
             hendelseDao = hendelseDao,
             featureToggleService = featureToggleService
         )
@@ -203,7 +203,7 @@ class ApplicationContext(
     val migreringService = MigreringService(
         sakService = sakService,
         foerstegangsBehandlingService = foerstegangsbehandlingService,
-        behandlingsHendelser = behandlingsHendelser.hendelserKanal,
+        behandlingsHendelser = behandlingsHendelser,
         migreringRepository = MigreringRepository(dataSource),
         generellBehandlingService = generellBehandlingService
     )

@@ -1,7 +1,6 @@
 package no.nav.etterlatte.behandling
 
 import io.mockk.coEvery
-import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
@@ -70,7 +69,7 @@ class RealGenerellBehandlingServiceTest {
 
     @Test
     fun `skal hente behandlinger i sak`() {
-        val hendleseskanal = mockk<BehandlingHendelserKanal>()
+        val behandlingHendelser = mockk<BehandlingHendelserKafkaProducer>()
         val behandlingDaoMock = mockk<BehandlingDao> {
             every { alleBehandlingerISak(1) } returns listOf(
                 revurdering(sakId = 1, revurderingAarsak = RevurderingAarsak.REGULERING),
@@ -84,7 +83,7 @@ class RealGenerellBehandlingServiceTest {
 
         val sut = RealGenerellBehandlingService(
             behandlingDao = behandlingDaoMock,
-            behandlingHendelser = hendleseskanal,
+            behandlingHendelser = behandlingHendelser,
             grunnlagsendringshendelseDao = mockk(),
             hendelseDao = hendelserMock,
             grunnlagKlient = mockk(),
@@ -120,8 +119,8 @@ class RealGenerellBehandlingServiceTest {
         val hendelserMock = mockk<HendelseDao> {
             every { behandlingAvbrutt(any(), any()) } returns Unit
         }
-        val hendelseskanalMock = mockk<BehandlingHendelserKanal> {
-            coEvery { send(any()) } returns Unit
+        val hendelseskanalMock = mockk<BehandlingHendelserKafkaProducer> {
+            every { sendMeldingForHendelse(any(), any()) } returns Unit
         }
         val grunnlagsendringshendelseDaoMock = mockk<GrunnlagsendringshendelseDao> {
             every { kobleGrunnlagsendringshendelserFraBehandlingId(any()) } just runs
@@ -133,7 +132,7 @@ class RealGenerellBehandlingServiceTest {
         val behandlingService =
             lagRealGenerellBehandlingService(
                 behandlingDao = behandlingDaoMock,
-                hendelseKanal = hendelseskanalMock,
+                behandlingHendelserKafkaProducer = hendelseskanalMock,
                 hendelseDao = hendelserMock,
                 grunnlagsendringshendelseDao = grunnlagsendringshendelseDaoMock,
                 featureToggleService = featureToggleService
@@ -167,8 +166,8 @@ class RealGenerellBehandlingServiceTest {
         val hendelserMock = mockk<HendelseDao> {
             every { behandlingAvbrutt(any(), any()) } returns Unit
         }
-        val hendelseskanalMock = mockk<BehandlingHendelserKanal> {
-            coEvery { send(any()) } returns Unit
+        val behandlingHendelserKafkaProducer = mockk<BehandlingHendelserKafkaProducer> {
+            every { sendMeldingForHendelse(any(), any()) } returns Unit
         }
         val grunnlagsendringshendelseDaoMock = mockk<GrunnlagsendringshendelseDao> {
             every { kobleGrunnlagsendringshendelserFraBehandlingId(any()) } just runs
@@ -180,7 +179,7 @@ class RealGenerellBehandlingServiceTest {
         val behandlingService =
             lagRealGenerellBehandlingService(
                 behandlingDao = behandlingDaoMock,
-                hendelseKanal = hendelseskanalMock,
+                behandlingHendelserKafkaProducer = behandlingHendelserKafkaProducer,
                 grunnlagsendringshendelseDao = grunnlagsendringshendelseDaoMock,
                 hendelseDao = hendelserMock,
                 featureToggleService = featureToggleService
@@ -204,8 +203,13 @@ class RealGenerellBehandlingServiceTest {
         val hendelserMock = mockk<HendelseDao> {
             every { behandlingAvbrutt(any(), any()) } returns Unit
         }
-        val hendelseskanalMock = mockk<BehandlingHendelserKanal> {
-            coEvery { send(Pair(nyFoerstegangsbehandling.id, BehandlingHendelseType.AVBRUTT)) } returns Unit
+        val behandlingHendelserKafkaProducerMock = mockk<BehandlingHendelserKafkaProducer> {
+            every {
+                sendMeldingForHendelse(
+                    nyFoerstegangsbehandling,
+                    BehandlingHendelseType.AVBRUTT
+                )
+            } returns Unit
         }
         val grunnlagsendringshendelseDaoMock = mockk<GrunnlagsendringshendelseDao> {
             every { kobleGrunnlagsendringshendelserFraBehandlingId(any()) } just runs
@@ -217,15 +221,18 @@ class RealGenerellBehandlingServiceTest {
         val behandlingService =
             lagRealGenerellBehandlingService(
                 behandlingDao = behandlingDaoMock,
-                hendelseKanal = hendelseskanalMock,
+                behandlingHendelserKafkaProducer = behandlingHendelserKafkaProducerMock,
                 grunnlagsendringshendelseDao = grunnlagsendringshendelseDaoMock,
                 hendelseDao = hendelserMock,
                 featureToggleService = featureToggleService
             )
 
         behandlingService.avbrytBehandling(nyFoerstegangsbehandling.id, "")
-        coVerify {
-            hendelseskanalMock.send(Pair(nyFoerstegangsbehandling.id, BehandlingHendelseType.AVBRUTT))
+        verify {
+            behandlingHendelserKafkaProducerMock.sendMeldingForHendelse(
+                nyFoerstegangsbehandling,
+                BehandlingHendelseType.AVBRUTT
+            )
         }
     }
 
@@ -241,8 +248,13 @@ class RealGenerellBehandlingServiceTest {
         val hendelserMock = mockk<HendelseDao> {
             every { behandlingAvbrutt(any(), any()) } returns Unit
         }
-        val hendelseskanalMock = mockk<BehandlingHendelserKanal> {
-            coEvery { send(Pair(nyFoerstegangsbehandling.id, BehandlingHendelseType.AVBRUTT)) } returns Unit
+        val behandlingHendelserKafkaProducer = mockk<BehandlingHendelserKafkaProducer> {
+            every {
+                sendMeldingForHendelse(
+                    nyFoerstegangsbehandling,
+                    BehandlingHendelseType.AVBRUTT
+                )
+            } returns Unit
         }
         val grunnlagsendringshendelseDaoMock = mockk<GrunnlagsendringshendelseDao> {
             every { kobleGrunnlagsendringshendelserFraBehandlingId(any()) } just runs
@@ -254,7 +266,7 @@ class RealGenerellBehandlingServiceTest {
         val behandlingService =
             lagRealGenerellBehandlingService(
                 behandlingDao = behandlingDaoMock,
-                hendelseKanal = hendelseskanalMock,
+                behandlingHendelserKafkaProducer = behandlingHendelserKafkaProducer,
                 grunnlagsendringshendelseDao = grunnlagsendringshendelseDaoMock,
                 hendelseDao = hendelserMock,
                 featureToggleService = featureToggleService
@@ -400,7 +412,7 @@ class RealGenerellBehandlingServiceTest {
             user.enheter()
         } returns listOf(Enheter.PORSGRUNN.enhetNr)
 
-        val hendleseskanal = mockk<BehandlingHendelserKanal>()
+        val behandlingHendelserKafkaProducerMock = mockk<BehandlingHendelserKafkaProducer>()
         val behandlingDaoMock = mockk<BehandlingDao> {
             every { alleBehandlingerISak(1) } returns listOf(
                 revurdering(
@@ -418,7 +430,7 @@ class RealGenerellBehandlingServiceTest {
 
         val sut = RealGenerellBehandlingService(
             behandlingDao = behandlingDaoMock,
-            behandlingHendelser = hendleseskanal,
+            behandlingHendelser = behandlingHendelserKafkaProducerMock,
             grunnlagsendringshendelseDao = mockk(),
             hendelseDao = hendelserMock,
             grunnlagKlient = mockk(),
@@ -442,7 +454,7 @@ class RealGenerellBehandlingServiceTest {
             user.enheter()
         } returns listOf(Enheter.EGNE_ANSATTE.enhetNr)
 
-        val hendleseskanal = mockk<BehandlingHendelserKanal>()
+        val behandlingHendelserKafkaProducerMock = mockk<BehandlingHendelserKafkaProducer>()
         val behandlingDaoMock = mockk<BehandlingDao> {
             every { alleBehandlingerISak(1) } returns listOf(
                 revurdering(
@@ -460,7 +472,7 @@ class RealGenerellBehandlingServiceTest {
 
         val sut = RealGenerellBehandlingService(
             behandlingDao = behandlingDaoMock,
-            behandlingHendelser = hendleseskanal,
+            behandlingHendelser = behandlingHendelserKafkaProducerMock,
             grunnlagsendringshendelseDao = mockk(),
             hendelseDao = hendelserMock,
             grunnlagKlient = mockk(),
@@ -604,14 +616,14 @@ class RealGenerellBehandlingServiceTest {
 
     private fun lagRealGenerellBehandlingService(
         behandlingDao: BehandlingDao? = null,
-        hendelseKanal: BehandlingHendelserKanal? = null,
+        behandlingHendelserKafkaProducer: BehandlingHendelserKafkaProducer? = null,
         hendelseDao: HendelseDao? = null,
         grunnlagsendringshendelseDao: GrunnlagsendringshendelseDao = mockk(),
         grunnlagKlient: GrunnlagKlient? = null,
         featureToggleService: FeatureToggleService
     ): RealGenerellBehandlingService = RealGenerellBehandlingService(
         behandlingDao = behandlingDao ?: mockk(),
-        behandlingHendelser = hendelseKanal ?: mockk(),
+        behandlingHendelser = behandlingHendelserKafkaProducer ?: mockk(),
         grunnlagsendringshendelseDao = grunnlagsendringshendelseDao,
         hendelseDao = hendelseDao ?: mockk(),
         grunnlagKlient = grunnlagKlient ?: mockk(),

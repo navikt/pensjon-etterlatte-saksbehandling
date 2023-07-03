@@ -9,6 +9,7 @@ import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
 import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsnummer
 import no.nav.etterlatte.libs.common.grunnlag.hentKonstantOpplysning
 import no.nav.etterlatte.libs.common.grunnlag.hentNavn
+import no.nav.etterlatte.libs.common.grunnlag.hentVergemaalellerfremtidsfullmakt
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.InnsenderSoeknad
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Navn
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
@@ -83,8 +84,8 @@ data class Beregningsperiode(
 data class Persongalleri(
     val innsender: Innsender,
     val soeker: Soeker,
-    // TODO: Legge til gjenlevende, men det krever litt logikk siden gjenlevende er null på OMS (søker = gjenlevende)
-    val avdoed: Avdoed
+    val avdoed: Avdoed,
+    val verge: Verge?
 )
 
 fun Grunnlag.mapSoeker(): Soeker = with(this.soeker) {
@@ -125,6 +126,30 @@ fun Grunnlag.mapSpraak(): Spraak = with(this.sak) {
 
     requireNotNull(opplysning?.verdi) {
         "Sak (id=${metadata.sakId}) mangler opplysningstype SPRAAK"
+    }
+}
+
+fun Grunnlag.mapVerge(sakType: SakType): Verge? = with(this) {
+    val soekerFnr = soeker.hentFoedselsnummer()!!.verdi
+    val opplysning = sak.hentVergemaalellerfremtidsfullmakt()
+
+    if (opplysning?.verdi != null) {
+        val vergemaalEllerFremtidsfullmakt = opplysning.verdi.firstOrNull {
+            it.vergeEllerFullmektig.motpartsPersonident == soekerFnr
+        }
+
+        vergemaalEllerFremtidsfullmakt?.vergeEllerFullmektig?.navn?.let {
+            Verge(it)
+        }
+    } else {
+        if (sakType == SakType.BARNEPENSJON) {
+            val gjenlevendeNavn = hentGjenlevende().hentNavn()!!.verdi.fulltNavn()
+
+            Verge(gjenlevendeNavn)
+        } else {
+            // TODO: Må på et punkt støtte verge på OMS
+            null
+        }
     }
 }
 

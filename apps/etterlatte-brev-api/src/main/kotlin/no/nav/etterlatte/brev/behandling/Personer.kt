@@ -5,6 +5,8 @@ import java.time.LocalDate
 
 data class Innsender(val navn: String, val fnr: Foedselsnummer)
 
+data class Verge(val navn: String)
+
 data class Soeker(val fornavn: String, val mellomnavn: String? = null, val etternavn: String, val fnr: Foedselsnummer)
 
 data class Avdoed(val navn: String, val doedsdato: LocalDate)

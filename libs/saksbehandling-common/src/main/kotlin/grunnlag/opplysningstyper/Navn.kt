@@ -5,5 +5,5 @@ data class Navn(
     val mellomnavn: String? = null,
     val etternavn: String
 ) {
-    override fun toString(): String = "$fornavn $etternavn"
+    override fun toString(): String = listOfNotNull(fornavn, mellomnavn, etternavn).joinToString(" ")
 }

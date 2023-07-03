@@ -67,7 +67,8 @@ class SakOgBehandlingService(
             persongalleri = Persongalleri(
                 innsender = grunnlag.mapInnsender(),
                 soeker = grunnlag.mapSoeker(),
-                avdoed = grunnlag.mapAvdoed()
+                avdoed = grunnlag.mapAvdoed(), // TODO: Avdød kan potensielt være liste (begge foreldre døde).
+                verge = grunnlag.mapVerge(vedtak.sak.sakType)
             ),
             vedtak = ForenkletVedtak(
                 vedtak.vedtakId,

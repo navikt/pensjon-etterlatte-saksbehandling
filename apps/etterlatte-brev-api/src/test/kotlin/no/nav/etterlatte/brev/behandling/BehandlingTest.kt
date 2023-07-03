@@ -1,18 +1,26 @@
 package no.nav.etterlatte.brev.behandling
 
 import com.fasterxml.jackson.databind.JsonNode
+import io.mockk.mockk
 import no.nav.etterlatte.brev.model.Spraak
+import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.Opplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Navn
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.person.PersonRolle
+import no.nav.etterlatte.libs.common.person.VergeEllerFullmektig
+import no.nav.etterlatte.libs.common.person.VergemaalEllerFremtidsfullmakt
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
 import no.nav.pensjon.brevbaker.api.model.Kroner
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.YearMonth
@@ -91,6 +99,66 @@ internal class BehandlingTest {
         val beregningsperioder = opprettToBeregningsperioder()
 
         assertEquals(3163, beregningsperioder.hentUtbetaltBeloep())
+    }
+
+    @Test
+    fun `Verge finnes i grunnlag`() {
+        val soekerFnr = Folkeregisteridentifikator.of("16021254243")
+        val forventetVergeNavn = "Test Vergenavn"
+
+        val grunnlag = Grunnlag(
+            soeker = mapOf(
+                Opplysningstype.FOEDSELSNUMMER to opprettOpplysning(
+                    soekerFnr.toJsonNode()
+                )
+            ),
+            familie = emptyList(),
+            sak = mapOf(
+                Opplysningstype.VERGEMAALELLERFREMTIDSFULLMAKT to opprettOpplysning(
+                    listOf(
+                        VergemaalEllerFremtidsfullmakt(
+                            null,
+                            null,
+                            VergeEllerFullmektig(soekerFnr, forventetVergeNavn, null, false)
+                        )
+                    ).toJsonNode()
+                )
+            ),
+            metadata = mockk()
+        )
+
+        val vergeBarnepensjon = grunnlag.mapVerge(SakType.BARNEPENSJON)
+        assertEquals(forventetVergeNavn, vergeBarnepensjon!!.navn)
+
+        val vergeOmstillingsstoenad = grunnlag.mapVerge(SakType.OMSTILLINGSSTOENAD)
+        assertEquals(forventetVergeNavn, vergeOmstillingsstoenad!!.navn)
+    }
+
+    @Test
+    fun `Ingen verge i grunnlag`() {
+        val gjenlevendeNavn = Navn("Elegang", "Mellomstor", "Barnevogn")
+
+        val grunnlag = Grunnlag(
+            soeker = mapOf(
+                Opplysningstype.FOEDSELSNUMMER to opprettOpplysning(
+                    Folkeregisteridentifikator.of("16021254243").toJsonNode()
+                )
+            ),
+            familie = listOf(
+                mapOf(
+                    Opplysningstype.PERSONROLLE to opprettOpplysning(PersonRolle.GJENLEVENDE.toJsonNode()),
+                    Opplysningstype.NAVN to opprettOpplysning(gjenlevendeNavn.toJsonNode())
+                )
+            ),
+            sak = emptyMap(),
+            metadata = mockk()
+        )
+
+        val vergeBarnepensjon = grunnlag.mapVerge(SakType.BARNEPENSJON)
+        assertEquals(gjenlevendeNavn.toString(), vergeBarnepensjon!!.navn)
+
+        val vergeOmstillingsstoenad = grunnlag.mapVerge(SakType.OMSTILLINGSSTOENAD)
+        assertNull(vergeOmstillingsstoenad, "Verge skal ikke settes for OMS når verge mangler i grunnlaget")
     }
 
     private fun opprettEnkelBeregningsperiode() = listOf(

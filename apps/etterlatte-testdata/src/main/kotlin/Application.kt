@@ -131,11 +131,11 @@ fun main() {
                     routing {
                         get("/isalive") { call.respondText("ALIVE", ContentType.Text.Plain) }
                         get("/isready") { call.respondText("READY", ContentType.Text.Plain) }
-                        metricsModule()
                         authenticate {
                             api()
                         }
                     }
+                    metricsModule()
                 }
             }
             connector { port = 8080 }

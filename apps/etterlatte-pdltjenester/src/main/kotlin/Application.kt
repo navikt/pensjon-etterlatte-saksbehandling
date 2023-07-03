@@ -28,7 +28,7 @@ class Server(applicationContext: ApplicationContext) {
         environment = applicationEngineEnvironment {
             config = HoconApplicationConfig(applicationContext.config)
             module {
-                restModule(sikkerLogg) {
+                restModule(sikkerLogg, withMetrics = true) {
                     personRoute(applicationContext.personService)
                 }
             }

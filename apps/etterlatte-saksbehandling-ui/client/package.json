@@ -18,7 +18,7 @@
     "@navikt/navspa": "^6.0.1",
     "@reduxjs/toolkit": "^1.9.5",
     "bowser": "^2.11.0",
-    "date-fns": "^2.29.3",
+    "date-fns": "^2.30.0",
     "error-stack-parser": "^2.1.4",
     "react": "^18.2.0",
     "react-datepicker": "^4.11.0",

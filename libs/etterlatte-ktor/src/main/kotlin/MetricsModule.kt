@@ -17,16 +17,8 @@ import io.micrometer.prometheus.PrometheusMeterRegistry
 import io.prometheus.client.CollectorRegistry
 
 fun Application.metricsModule() {
-    val collectorRegistry = CollectorRegistry.defaultRegistry
-
-    val registrySaksbehandling = PrometheusMeterRegistry(
-        PrometheusConfig.DEFAULT,
-        collectorRegistry,
-        Clock.SYSTEM
-    )
-
     install(MicrometerMetrics) {
-        registry = registrySaksbehandling
+        registry = Metrikker.registrySaksbehandling
         meterBinders = listOf(
             LogbackMetrics(),
             JvmMemoryMetrics(),
@@ -37,7 +29,17 @@ fun Application.metricsModule() {
 
     routing {
         get("/metrics") {
-            call.respond(registrySaksbehandling.scrape())
+            call.respond(Metrikker.registrySaksbehandling.scrape())
         }
     }
+}
+
+object Metrikker {
+    private val collectorRegistry = CollectorRegistry.defaultRegistry
+
+    val registrySaksbehandling = PrometheusMeterRegistry(
+        PrometheusConfig.DEFAULT,
+        collectorRegistry,
+        Clock.SYSTEM
+    )
 }

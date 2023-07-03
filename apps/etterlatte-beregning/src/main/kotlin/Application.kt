@@ -33,7 +33,7 @@ class Server(private val context: ApplicationContext) {
             environment = applicationEngineEnvironment {
                 config = HoconApplicationConfig(context.config)
                 module {
-                    restModule(sikkerLogg) {
+                    restModule(sikkerLogg, withMetrics = true) {
                         beregning(beregningService, behandlingKlient)
                         beregningsGrunnlag(beregningsGrunnlagService, behandlingKlient)
                         avkorting(avkortingService, behandlingKlient)

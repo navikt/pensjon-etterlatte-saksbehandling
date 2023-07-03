@@ -51,7 +51,7 @@ import no.nav.etterlatte.kafka.standardProducer
 import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.ktor.metrics
+import no.nav.etterlatte.libs.ktor.metricsModule
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
 import no.nav.etterlatte.testdata.dolly.DollyClientImpl
 import no.nav.etterlatte.testdata.dolly.DollyService
@@ -131,11 +131,11 @@ fun main() {
                     routing {
                         get("/isalive") { call.respondText("ALIVE", ContentType.Text.Plain) }
                         get("/isready") { call.respondText("READY", ContentType.Text.Plain) }
-                        metrics()
                         authenticate {
                             api()
                         }
                     }
+                    metricsModule()
                 }
             }
             connector { port = 8080 }

@@ -29,11 +29,12 @@ import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.security.token.support.v2.tokenValidationSupport
 import org.slf4j.Logger
 import org.slf4j.event.Level
-import java.util.UUID
+import java.util.*
 
 fun Application.restModule(
     sikkerLogg: Logger,
     routePrefix: String? = null,
+    withMetrics: Boolean = false,
     config: ApplicationConfig = environment.config,
     routes: Route.() -> Unit
 ) {
@@ -84,7 +85,9 @@ fun Application.restModule(
                 routes()
             }
         }
-        metrics()
+    }
+    if (withMetrics) {
+        metricsModule()
     }
 }
 

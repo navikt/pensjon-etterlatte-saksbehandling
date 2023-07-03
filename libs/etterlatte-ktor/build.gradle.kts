@@ -25,9 +25,11 @@ dependencies {
     implementation(libs.ktor2.servercontentnegotiation)
     implementation(libs.ktor2.okhttp)
     implementation(libs.ktor2.clientcontentnegotiation)
+    implementation(libs.ktor2.metricsmicrometer)
 
     implementation(libs.navfelles.tokenvalidationktor2)
 
+    implementation(libs.metrics.micrometer.prometheus)
     implementation(libs.metrics.prometheus.simpleclientcommon)
     implementation(libs.metrics.prometheus.simpleclienthotspot)
 

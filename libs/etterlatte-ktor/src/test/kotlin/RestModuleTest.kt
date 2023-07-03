@@ -236,7 +236,7 @@ class RestModuleTest {
                 config = hoconApplicationConfig
             }
             application {
-                restModule(this.log) { route1() }
+                restModule(this.log, withMetrics = true) { route1() }
             }
 
             client.get("/metrics").also {

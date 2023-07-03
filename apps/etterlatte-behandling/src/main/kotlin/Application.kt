@@ -78,7 +78,8 @@ class Server(private val context: ApplicationContext) {
 fun Application.module(context: ApplicationContext) {
     with(context) {
         restModule(
-            sikkerLogg
+            sikkerLogg,
+            withMetrics = true
         ) {
             attachContekst(dataSource, context)
             sakSystemRoutes(

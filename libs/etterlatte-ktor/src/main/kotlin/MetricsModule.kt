@@ -9,6 +9,14 @@ import io.ktor.server.response.respondTextWriter
 import io.ktor.server.routing.get
 import io.ktor.server.routing.routing
 import io.micrometer.core.instrument.Clock
+import io.micrometer.core.instrument.binder.jvm.ClassLoaderMetrics
+import io.micrometer.core.instrument.binder.jvm.JvmGcMetrics
+import io.micrometer.core.instrument.binder.jvm.JvmMemoryMetrics
+import io.micrometer.core.instrument.binder.jvm.JvmThreadMetrics
+import io.micrometer.core.instrument.binder.logging.LogbackMetrics
+import io.micrometer.core.instrument.binder.system.FileDescriptorMetrics
+import io.micrometer.core.instrument.binder.system.ProcessorMetrics
+import io.micrometer.core.instrument.binder.system.UptimeMetrics
 import io.micrometer.prometheus.PrometheusConfig
 import io.micrometer.prometheus.PrometheusMeterRegistry
 import io.prometheus.client.CollectorRegistry
@@ -26,16 +34,16 @@ fun Application.metricsModule() {
     install(MicrometerMetrics) {
         registry = registrySaks
         meterBinders = listOf(
-            io.micrometer.core.instrument.binder.logging.LogbackMetrics(),
-            io.micrometer.core.instrument.binder.jvm.JvmMemoryMetrics(),
-            io.micrometer.core.instrument.binder.system.ProcessorMetrics(),
-            io.micrometer.core.instrument.binder.system.UptimeMetrics(),
-            io.micrometer.core.instrument.binder.jvm.ClassLoaderMetrics(),
-            io.micrometer.core.instrument.binder.jvm.JvmMemoryMetrics(),
-            io.micrometer.core.instrument.binder.jvm.JvmGcMetrics(),
-            io.micrometer.core.instrument.binder.system.ProcessorMetrics(),
-            io.micrometer.core.instrument.binder.jvm.JvmThreadMetrics(),
-            io.micrometer.core.instrument.binder.system.FileDescriptorMetrics()
+            LogbackMetrics(),
+            JvmMemoryMetrics(),
+            ProcessorMetrics(),
+            UptimeMetrics(),
+            ClassLoaderMetrics(),
+            JvmMemoryMetrics(),
+            JvmGcMetrics(),
+            ProcessorMetrics(),
+            JvmThreadMetrics(),
+            FileDescriptorMetrics()
         )
     }
 

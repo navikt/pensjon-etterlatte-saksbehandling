@@ -7,11 +7,8 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.prometheus.client.CollectorRegistry
 import io.prometheus.client.exporter.common.TextFormat
-import io.prometheus.client.hotspot.DefaultExports
 
 fun Route.metrics() {
-    DefaultExports.initialize()
-
     get("/metrics") {
         val names = call.request.queryParameters.getAll("name[]")?.toSet() ?: emptySet()
 

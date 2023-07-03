@@ -51,7 +51,13 @@ export const AdoptertAv = (props: { behandling: IDetaljertBehandling }) => {
       </Heading>
       {redigerbar ? (
         <SkjemaWrapper onSubmit={handlesubmit}>
+          <Heading size="small" level="3">
+            Den første som adopterer
+          </Heading>
           <NavnInput navn={navn1 || standardnavn()} update={(n: Navn) => setNavn1(n)} />
+          <Heading size="small" level="3">
+            Den andre som adopterer, hvis det er to
+          </Heading>
           <NavnInput navn={navn2 || standardnavn()} update={(n: Navn) => setNavn2(n)} />
           <Button loading={isPending(lagrestatus)} variant="primary" size="small">
             Lagre

@@ -11,7 +11,6 @@ import io.ktor.server.application.log
 import io.ktor.server.auth.Authentication
 import io.ktor.server.auth.authenticate
 import io.ktor.server.config.ApplicationConfig
-import io.ktor.server.metrics.micrometer.MicrometerMetrics
 import io.ktor.server.plugins.callid.CallId
 import io.ktor.server.plugins.callid.callIdMdc
 import io.ktor.server.plugins.callloging.CallLogging
@@ -24,14 +23,6 @@ import io.ktor.server.routing.IgnoreTrailingSlash
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
-import io.micrometer.core.instrument.Clock
-import io.micrometer.core.instrument.binder.jvm.JvmMemoryMetrics
-import io.micrometer.core.instrument.binder.logging.LogbackMetrics
-import io.micrometer.core.instrument.binder.system.ProcessorMetrics
-import io.micrometer.core.instrument.binder.system.UptimeMetrics
-import io.micrometer.prometheus.PrometheusConfig
-import io.micrometer.prometheus.PrometheusMeterRegistry
-import io.prometheus.client.CollectorRegistry
 import isProd
 import no.nav.etterlatte.libs.common.logging.CORRELATION_ID
 import no.nav.etterlatte.libs.common.objectMapper
@@ -87,25 +78,6 @@ fun Application.restModule(
         tokenValidationSupport(config = config)
     }
 
-    if (withMetrics) {
-        val collectorRegistry = CollectorRegistry.defaultRegistry
-
-        val registrySaks = PrometheusMeterRegistry(
-            PrometheusConfig.DEFAULT,
-            collectorRegistry,
-            Clock.SYSTEM
-        )
-        install(MicrometerMetrics) {
-            registry = registrySaks
-            meterBinders = listOf(
-                LogbackMetrics(),
-                JvmMemoryMetrics(),
-                ProcessorMetrics(),
-                UptimeMetrics()
-            )
-        }
-    }
-
     routing {
         healthApi()
         authenticate {
@@ -113,9 +85,9 @@ fun Application.restModule(
                 routes()
             }
         }
-        if (withMetrics) {
-            metrics()
-        }
+    }
+    if (withMetrics) {
+        metricsModule()
     }
 }
 

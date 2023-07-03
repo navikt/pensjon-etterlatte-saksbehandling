@@ -28,7 +28,7 @@ jackson-core = { module = "com.fasterxml.jackson.core:jackson-core", version.ref
 jackson-xml = { module = "com.fasterxml.jackson.dataformat:jackson-dataformat-xml", version.ref = "jackson-version" }
 
 jakartabind-api = { module = "jakarta.xml.bind:jakarta.xml.bind-api", version = "4.0.0" }
-jakartabind-impl = { module = "org.glassfish.jaxb:jaxb-runtime", version = "4.0.2" }
+jakartabind-impl = { module = "org.glassfish.jaxb:jaxb-runtime", version = "4.0.3" }
 
 kafka-clients = { module = "org.apache.kafka:kafka-clients", version = "3.4.0" }
 kafka-avro = { module = "org.apache.avro:avro", version = "1.11.1" }

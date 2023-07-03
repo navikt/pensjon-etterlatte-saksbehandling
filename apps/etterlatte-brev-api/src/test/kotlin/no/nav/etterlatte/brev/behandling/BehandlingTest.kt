@@ -21,6 +21,7 @@ import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
 import no.nav.pensjon.brevbaker.api.model.Kroner
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.YearMonth
@@ -101,7 +102,8 @@ internal class BehandlingTest {
         assertEquals(3163, beregningsperioder.hentUtbetaltBeloep())
     }
 
-    @Test
+    @Test // TODO ...
+    @Disabled("Skrus av inntil håndtering av verge er avklart på tvers av appene i Gjenny")
     fun `Verge finnes i grunnlag`() {
         val soekerFnr = Folkeregisteridentifikator.of("16021254243")
         val forventetVergeNavn = "Test Vergenavn"

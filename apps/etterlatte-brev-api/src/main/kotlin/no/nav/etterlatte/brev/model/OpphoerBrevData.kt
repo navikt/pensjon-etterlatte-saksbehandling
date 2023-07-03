@@ -8,11 +8,11 @@ import java.time.LocalDate
 
 abstract class OpphoerBrevData : BrevData() {
     companion object {
-        fun assertRevurderingsaarsakErRiktig(behandling: Behandling, aarsak: RevurderingAarsak, type: String) {
+        fun assertRevurderingsaarsakStemmerMedTypen(behandling: Behandling, aarsak: RevurderingAarsak, type: String) {
             if (behandling.revurderingsaarsak != aarsak) {
                 throw IllegalArgumentException(
                     "Kan ikke opprette et revurderingsbrev for $type når " +
-                        "revurderingsårsak er $aarsak"
+                        "revurderingsårsak er $aarsak - mismatch mellom type og årsak, disse må stemme overens."
                 )
             }
         }
@@ -23,7 +23,7 @@ data class AdopsjonRevurderingBrevdata(val virkningsdato: LocalDate, val adopter
     OpphoerBrevData() {
     companion object {
         fun fra(behandling: Behandling): AdopsjonRevurderingBrevdata {
-            assertRevurderingsaarsakErRiktig(behandling, RevurderingAarsak.ADOPSJON, "adopsjon")
+            assertRevurderingsaarsakStemmerMedTypen(behandling, RevurderingAarsak.ADOPSJON, "adopsjon")
             if (behandling.revurderingInfo !is RevurderingInfo.Adopsjon) {
                 throw IllegalArgumentException(
                     "Kan ikke opprette et revurderingsbrev for adopsjon når " +
@@ -48,7 +48,7 @@ data class OmgjoeringAvFarskapRevurderingBrevdata(
 ) : OpphoerBrevData() {
     companion object {
         fun fra(behandling: Behandling): OmgjoeringAvFarskapRevurderingBrevdata {
-            assertRevurderingsaarsakErRiktig(
+            assertRevurderingsaarsakStemmerMedTypen(
                 behandling,
                 RevurderingAarsak.OMGJOERING_AV_FARSKAP,
                 "omgjøring av farskap"

@@ -69,7 +69,7 @@ export const AdoptertAv = (props: { behandling: IDetaljertBehandling }) => {
       ) : (
         <BodyShort>
           Adoptert av: <strong>{!!navn1 ? formaterNavn(navn1) : 'Ikke angitt'}</strong>
-          {adopsjonInfo?.adoptertAv2 ? <strong>formaterNavn(adopsjonInfo?.adoptertAv2)</strong> : ''}
+          {adopsjonInfo?.adoptertAv2 ? <strong> og {formaterNavn(adopsjonInfo?.adoptertAv2)}</strong> : ''}
         </BodyShort>
       )}
     </MarginTop>

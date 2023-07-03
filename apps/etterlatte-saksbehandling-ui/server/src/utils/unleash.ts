@@ -25,9 +25,15 @@ export const unleash = initialize({
 })
 
 // Some useful life-cycle events
-unleash.on('ready', logger.info)
-unleash.on('synchronized', logger.info)
-unleash.on('registered', logger.info)
+unleash.on('ready', () => {
+  logger.info('unleash er ready')
+})
+unleash.on('synchronized', () => {
+  logger.info('unleash synchronized')
+})
+unleash.on('registered', () => {
+  logger.info('unleash registrert')
+})
 unleash.on('changed', () => {
   logger.info('Feature toggles har blitt oppdatert')
 })

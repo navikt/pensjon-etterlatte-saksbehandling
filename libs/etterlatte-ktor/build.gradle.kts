@@ -25,14 +25,13 @@ dependencies {
     implementation(libs.ktor2.servercontentnegotiation)
     implementation(libs.ktor2.okhttp)
     implementation(libs.ktor2.clientcontentnegotiation)
+    implementation(libs.ktor2.metricsmicrometer)
 
     implementation(libs.navfelles.tokenvalidationktor2)
 
     implementation(libs.metrics.micrometer.prometheus)
     implementation(libs.metrics.prometheus.simpleclientcommon)
     implementation(libs.metrics.prometheus.simpleclienthotspot)
-    implementation("io.ktor:ktor-server-core-jvm:2.3.1")
-    implementation("io.ktor:ktor-server-metrics-micrometer-jvm:2.3.1")
 
     testImplementation(libs.test.jupiter.engine)
     testImplementation(libs.ktor2.servertests)

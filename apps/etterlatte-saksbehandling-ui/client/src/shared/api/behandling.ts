@@ -11,7 +11,7 @@ import { ManueltOpphoerDetaljer } from '~components/behandling/manueltopphoerove
 import { Grunnlagsendringshendelse, GrunnlagsendringsListe, IBehandlingListe } from '~components/person/typer'
 import { Revurderingsaarsak } from '~shared/types/Revurderingsaarsak'
 import { InstitusjonsoppholdBegrunnelse } from '~components/person/uhaandtereHendelser/InstitusjonsoppholdVurderingBegrunnelse'
-import { ISak, SakType } from '~shared/types/sak'
+import { FoersteVirk, ISak, SakType } from '~shared/types/sak'
 import { InstitusjonsoppholdMedKilde } from '~components/person/uhaandtereHendelser/HistoriskeHendelser'
 
 export const hentBehandlingerForPerson = async (fnr: string): Promise<ApiResponse<IBehandlingListe[]>> => {
@@ -159,3 +159,6 @@ export const hentGrunnlagsendringshendelserInstitusjonsoppholdforSak = async (
 export const hentSak = async (sakId: string): Promise<ApiResponse<ISak>> => {
   return apiClient.get(`/sak/${sakId}`)
 }
+
+export const hentFoersteVirk = async (args: { sakId: number }) =>
+  apiClient.get<FoersteVirk>(`/sak/${args.sakId}/behandlinger/foerstevirk`)

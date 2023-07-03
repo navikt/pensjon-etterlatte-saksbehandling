@@ -14,12 +14,12 @@ import no.nav.etterlatte.behandling.filterBehandlingerForEnheter
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.hendelse.HendelseType
 import no.nav.etterlatte.behandling.hendelse.registrerVedtakHendelseFelles
+import no.nav.etterlatte.common.tidligsteIverksatteVirkningstidspunkt
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
-import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -150,11 +150,6 @@ class RealManueltOpphoerService(
     private fun List<Behandling>.sisteIkkeAvbrutteBehandling(): Behandling? =
         this.sortedByDescending { it.behandlingOpprettet }
             .firstOrNull { it.status in BehandlingStatus.ikkeAvbrutt() }
-
-    private fun List<Behandling>.tidligsteIverksatteVirkningstidspunkt(): Virkningstidspunkt? =
-        this.filter { it.status == BehandlingStatus.IVERKSATT }
-            .mapNotNull { it.virkningstidspunkt }
-            .minByOrNull { it.dato }
 
     private fun <T : Behandling> List<T>.filterForEnheter() = this.filterBehandlingerForEnheter(
         featureToggleService,

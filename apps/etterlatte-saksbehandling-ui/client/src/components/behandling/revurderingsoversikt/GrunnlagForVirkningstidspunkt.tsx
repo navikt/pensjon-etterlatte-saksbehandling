@@ -2,6 +2,11 @@ import { Revurderingsaarsak } from '~shared/types/Revurderingsaarsak'
 import { useBehandling } from '~components/behandling/useBehandling'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import { formaterStringDato } from '~utils/formattering'
+import { mapApiResult, useApiCall } from '~shared/hooks/useApiCall'
+import { useEffect } from 'react'
+import Spinner from '~shared/Spinner'
+import { ApiErrorAlert } from '~ErrorBoundary'
+import { hentFoersteVirk } from '~shared/api/behandling'
 
 const SoekerDoedsdatoGrunnlag = () => {
   const behandling = useBehandling()
@@ -15,10 +20,32 @@ const SoekerDoedsdatoGrunnlag = () => {
   )
 }
 
+const OmgjoeringFarskapGrunnlag = () => {
+  const behandling = useBehandling()
+  const [foersteVirk, hentVirk] = useApiCall(hentFoersteVirk)
+  useEffect(() => {
+    if (behandling?.sak) {
+      hentVirk({ sakId: behandling?.sak })
+    }
+  }, [behandling?.sak])
+
+  return mapApiResult(
+    foersteVirk,
+    <Spinner visible={true} label="Henter første virkningstidspunkt" />,
+    () => <ApiErrorAlert>Kunne ikke hente første virkningstidspunkt</ApiErrorAlert>,
+    (foersteVirk) => (
+      <Info tekst={formaterStringDato(foersteVirk.foersteIverksatteVirkISak)} label="Første virkningstidspunkt i sak" />
+    )
+  )
+}
+
 export const GrunnlagForVirkningstidspunkt = () => {
   const behandling = useBehandling()
-  if (behandling?.revurderingsaarsak === Revurderingsaarsak.DOEDSFALL) {
-    return <SoekerDoedsdatoGrunnlag />
+  switch (behandling?.revurderingsaarsak) {
+    case Revurderingsaarsak.DOEDSFALL:
+      return <SoekerDoedsdatoGrunnlag />
+    case Revurderingsaarsak.OMGJOERING_AV_FARSKAP:
+      return <OmgjoeringFarskapGrunnlag />
   }
   return null
 }

@@ -17,6 +17,7 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 import kotlin.random.Random
 
 internal class AdresseServiceTest {
@@ -51,7 +52,8 @@ internal class AdresseServiceTest {
             VedtakType.INNVILGELSE,
             ANSVARLIG_ENHET,
             SAKSBEHANDLER,
-            ATTESTANT
+            ATTESTANT,
+            LocalDate.now()
         )
 
         val faktiskAvsender = runBlocking {

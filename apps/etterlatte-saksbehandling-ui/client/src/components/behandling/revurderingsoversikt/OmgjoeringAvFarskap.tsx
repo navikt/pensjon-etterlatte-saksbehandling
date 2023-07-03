@@ -1,5 +1,5 @@
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
-import { AdopsjonInfo, Navn, RevurderingInfo } from '~shared/types/RevurderingInfo'
+import { Navn, OmgjoeringAvFarskapInfo, RevurderingInfo } from '~shared/types/RevurderingInfo'
 import React, { FormEvent, useState } from 'react'
 import { BodyShort, Button, Heading } from '@navikt/ds-react'
 import { hentBehandlesFraStatus } from '~components/behandling/felles/utils'
@@ -10,19 +10,20 @@ import { oppdaterRevurderingInfo } from '~store/reducers/BehandlingReducer'
 import styled from 'styled-components'
 import { NavnInput, standardnavn } from '~components/behandling/revurderingsoversikt/NavnInput'
 
-function hentUndertypeFraBehandling(behandling?: IDetaljertBehandling): AdopsjonInfo | null {
+function hentUndertypeFraBehandling(behandling?: IDetaljertBehandling): OmgjoeringAvFarskapInfo | null {
   const revurderinginfo = behandling?.revurderinginfo
-  if (revurderinginfo?.type === 'ADOPSJON') {
+  if (revurderinginfo?.type === 'OMGJOERING_AV_FARSKAP') {
     return revurderinginfo
   } else {
     return null
   }
 }
 
-export const AdoptertAv = (props: { behandling: IDetaljertBehandling }) => {
+export const OmgjoeringAvFarskap = (props: { behandling: IDetaljertBehandling }) => {
   const { behandling } = props
-  const adopsjonInfo = hentUndertypeFraBehandling(behandling)
-  const [navn, setNavn] = useState(adopsjonInfo?.adoptertAv)
+  const omgjoeringAvFarskapInfo = hentUndertypeFraBehandling(behandling)
+  const [naavaerendeFar, setNaavaerendeFar] = useState(omgjoeringAvFarskapInfo?.naavaerendeFar)
+  const [forrigeFar, setForrigeFar] = useState(omgjoeringAvFarskapInfo?.forrigeFar)
   const [feilmelding, setFeilmelding] = useState<string | undefined>(undefined)
   const [lagrestatus, lagre] = useApiCall(lagreRevurderingInfo)
   const redigerbar = hentBehandlesFraStatus(behandling.status)
@@ -30,13 +31,21 @@ export const AdoptertAv = (props: { behandling: IDetaljertBehandling }) => {
     e.stopPropagation()
     e.preventDefault()
     setFeilmelding(undefined)
-    if (!navn || !navn.fornavn || !navn.etternavn) {
-      setFeilmelding('Du må velge hvem som adopterer')
+    if (
+      !naavaerendeFar ||
+      !forrigeFar ||
+      !naavaerendeFar.fornavn ||
+      !naavaerendeFar.etternavn ||
+      !forrigeFar.fornavn ||
+      !forrigeFar.etternavn
+    ) {
+      setFeilmelding('Du må legge inn forrige og nåværende registert far')
       return
     }
     const revurderingInfo: RevurderingInfo = {
-      type: 'ADOPSJON',
-      adoptertAv: navn,
+      type: 'OMGJOERING_AV_FARSKAP',
+      naavaerendeFar: naavaerendeFar,
+      forrigeFar: forrigeFar,
     }
     lagre(
       {
@@ -50,22 +59,34 @@ export const AdoptertAv = (props: { behandling: IDetaljertBehandling }) => {
   return (
     <MarginTop>
       <Heading size="medium" level="2">
-        Hvem er hen adoptert av?
+        Hvem var registrert som far før?
       </Heading>
       {redigerbar ? (
         <SkjemaWrapper onSubmit={handlesubmit}>
-          <NavnInput navn={adopsjonInfo?.adoptertAv || standardnavn()} update={(n: Navn) => setNavn(n)} />
+          <NavnInput navn={naavaerendeFar || standardnavn()} update={(n: Navn) => setNaavaerendeFar(n)} />
+          <Heading size="medium" level="2">
+            Hvem er registrert som far nå?
+          </Heading>
+          <NavnInput navn={forrigeFar || standardnavn()} update={(n: Navn) => setForrigeFar(n)} />
           <Button loading={isPending(lagrestatus)} variant="primary" size="small">
             Lagre
           </Button>
           {isSuccess(lagrestatus) ? <span>Lagret!</span> : null}
-          {isFailure(lagrestatus) ? <ApiErrorAlert>Kunne ikke lagre adoptert av</ApiErrorAlert> : null}
+          {isFailure(lagrestatus) ? <ApiErrorAlert>Kunne ikke lagre navn på far</ApiErrorAlert> : null}
           {feilmelding ? <ApiErrorAlert>{feilmelding}</ApiErrorAlert> : null}
         </SkjemaWrapper>
       ) : (
         <BodyShort>
-          Adoptert av:{' '}
-          <strong>{!!navn ? [navn.fornavn, navn.mellomnavn, navn.etternavn].join(' ') : 'Ikke angitt'}</strong>
+          Nåværende far:{' '}
+          <strong>
+            {!!naavaerendeFar
+              ? [naavaerendeFar.fornavn, naavaerendeFar.mellomnavn, naavaerendeFar.etternavn].join(' ')
+              : 'Ikke angitt'}
+          </strong>
+          Forrige far:{' '}
+          <strong>
+            {!!forrigeFar ? [forrigeFar.fornavn, forrigeFar.mellomnavn, forrigeFar.etternavn].join(' ') : 'Ikke angitt'}
+          </strong>
         </BodyShort>
       )}
     </MarginTop>
@@ -74,10 +95,6 @@ export const AdoptertAv = (props: { behandling: IDetaljertBehandling }) => {
 
 const SkjemaWrapper = styled.form`
   max-width: fit-content;
-
-  & > *:not(:first-child) {
-    margin-top: 1rem;
-  }
 `
 
 const MarginTop = styled.div`

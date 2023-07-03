@@ -82,16 +82,6 @@ internal fun Route.sakWebRoutes(
     val logger = LoggerFactory.getLogger(this::class.java)
 
     route("/api") {
-        route("/saker/{$SAKID_CALL_PARAMETER}/behandlinger") {
-            get("/sisteIverksatte") {
-                logger.info("Henter siste iverksatte behandling for $sakId")
-                when (val sisteIverksatteBehandling = generellBehandlingService.hentSisteIverksatte(sakId)) {
-                    null -> call.respond(HttpStatusCode.NotFound)
-                    else -> call.respond(sisteIverksatteBehandling.toDetaljertBehandling())
-                }
-            }
-        }
-
         route("/sak/{$SAKID_CALL_PARAMETER}") {
             get {
                 val sak = inTransaction {

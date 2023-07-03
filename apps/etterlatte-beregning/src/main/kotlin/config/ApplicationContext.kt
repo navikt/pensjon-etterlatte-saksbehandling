@@ -68,7 +68,8 @@ class ApplicationContext {
         beregningRepository = BeregningRepository(dataSource),
         behandlingKlient = behandlingKlient,
         beregnBarnepensjonService = beregnBarnepensjonService,
-        beregnOmstillingsstoenadService = beregnOmstillingsstoenadService
+        beregnOmstillingsstoenadService = beregnOmstillingsstoenadService,
+        beregningsGrunnlagService = beregningsGrunnlagService
     )
     val avkortingRepository = AvkortingRepository(dataSource)
     val avkortingService = AvkortingService(

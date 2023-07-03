@@ -46,6 +46,9 @@ spec:
     initialDelay: 30
     periodSeconds: 5
     timeout: 5
+  prometheus:
+    enabled: true
+    path: /metrics
   resources:
     limits:
       cpu: 500m

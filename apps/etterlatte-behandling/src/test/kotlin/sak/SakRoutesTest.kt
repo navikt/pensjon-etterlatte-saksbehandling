@@ -66,7 +66,7 @@ internal class SakRoutesTest {
         coEvery { generellBehandlingService.hentSisteIverksatte(1) } returns mockk(relaxed = true)
 
         withTestApplication { client ->
-            val response = client.get("/api/saker/$sakId/behandlinger/sisteIverksatte") {
+            val response = client.get("/saker/$sakId/behandlinger/sisteIverksatte") {
                 header(HttpHeaders.Authorization, "Bearer $token")
             }
 

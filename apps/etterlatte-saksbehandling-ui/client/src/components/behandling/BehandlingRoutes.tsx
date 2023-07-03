@@ -11,6 +11,7 @@ import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
 import { Revurderingsoversikt } from '~components/behandling/revurderingsoversikt/Revurderingsoversikt'
 import { behandlingSkalSendeBrev } from '~components/behandling/felles/utils'
 import { useBehandling } from '~components/behandling/useBehandling'
+import { erOpphoer } from '~shared/types/Revurderingsaarsak'
 
 type behandlingRouteTypes =
   | 'soeknadsoversikt'
@@ -124,20 +125,21 @@ const hentAktuelleRoutes = (behandling: IBehandlingReducer | null) => {
 }
 
 export function revurderingRoutes(behandling: IBehandlingReducer): Array<BehandlingRouteTypes> {
-  const defaultRoutes: Array<BehandlingRouteTypes> = [
-    { path: 'revurderingsoversikt', description: 'Revurderingsoversikt' },
-    {
-      path: 'vilkaarsvurdering',
-      description: 'Vilkårsvurdering',
-      kreverBehandlingsstatus: IBehandlingStatus.VILKAARSVURDERT,
-    },
-    {
-      path: 'beregningsgrunnlag',
-      description: 'Beregningsgrunnlag',
-      kreverBehandlingsstatus: IBehandlingStatus.VILKAARSVURDERT,
-    },
-    { path: 'beregne', description: 'Beregning', kreverBehandlingsstatus: IBehandlingStatus.BEREGNET },
-  ]
+  const revurderingsoversikt = { path: 'revurderingsoversikt', description: 'Revurderingsoversikt' }
+  const vilkaarsvurdering = {
+    path: 'vilkaarsvurdering',
+    description: 'Vilkårsvurdering',
+    kreverBehandlingsstatus: IBehandlingStatus.VILKAARSVURDERT,
+  }
+  const beregningsgrunnlag = {
+    path: 'beregningsgrunnlag',
+    description: 'Beregningsgrunnlag',
+    kreverBehandlingsstatus: IBehandlingStatus.VILKAARSVURDERT,
+  }
+  const beregning = { path: 'beregne', description: 'Beregning', kreverBehandlingsstatus: IBehandlingStatus.BEREGNET }
+  const defaultRoutes: Array<BehandlingRouteTypes> = erOpphoer(behandling.revurderingsaarsak!!)
+    ? [revurderingsoversikt, vilkaarsvurdering, beregning]
+    : [revurderingsoversikt, vilkaarsvurdering, beregningsgrunnlag, beregning]
 
   if (behandlingSkalSendeBrev(behandling)) {
     return [...defaultRoutes, { path: 'brev', description: 'Vedtaksbrev' }]

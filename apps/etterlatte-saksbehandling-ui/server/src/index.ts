@@ -1,6 +1,6 @@
 import express, { Request, Response } from 'express'
 import path from 'path'
-import { appConf, ApiConfig } from './config/config'
+import { ApiConfig, appConf } from './config/config'
 import { authenticateUser } from './middleware/auth'
 import { mockRouter } from './routers/mockRouter'
 import { modiaRouter } from './routers/modia'
@@ -9,7 +9,7 @@ import { requestLogger } from './middleware/logging'
 import { tokenMiddleware } from './middleware/getOboToken'
 import { proxy } from './middleware/proxy'
 import { loggerRouter } from './routers/loggerRouter'
-import { unleashContext, unleash } from './utils/unleash'
+import { unleash, unleashContext } from './utils/unleash'
 import prometheus from './monitoring/prometheus'
 
 logger.info(`environment: ${process.env.NODE_ENV}`)

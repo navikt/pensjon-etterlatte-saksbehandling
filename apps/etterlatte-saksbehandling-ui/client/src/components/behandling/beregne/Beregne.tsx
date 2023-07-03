@@ -6,7 +6,7 @@ import { formaterVedtaksResultat, useVedtaksResultat } from '../useVedtaksResult
 import { useAppDispatch } from '~store/Store'
 import { useBehandlingRoutes } from '../BehandlingRoutes'
 import { useEffect, useState } from 'react'
-import { hentBeregning } from '~shared/api/beregning'
+import { hentBeregning, opprettBeregningForOpphoer } from '~shared/api/beregning'
 import { IBehandlingReducer, oppdaterBehandlingsstatus, oppdaterBeregning } from '~store/reducers/BehandlingReducer'
 import Spinner from '~shared/Spinner'
 import { BehandlingHandlingKnapper } from '~components/behandling/handlinger/BehandlingHandlingKnapper'
@@ -32,10 +32,16 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
   const [beregning, hentBeregningRequest] = useApiCall(hentBeregning)
   const [vedtak, oppdaterVedtakRequest] = useApiCall(upsertVedtak)
   const [visAttesteringsmodal, setVisAttesteringsmodal] = useState(false)
+  const [, opprettForOpphoer] = useApiCall(opprettBeregningForOpphoer)
 
   useEffect(() => {
-    if (!beregningFraState) {
+    const hentBeregning = async () => {
+      await opprettForOpphoer(behandling.id)
       hentBeregningRequest(behandling.id, (res) => dispatch(oppdaterBeregning(res)))
+    }
+
+    if (!beregningFraState) {
+      hentBeregning()
     }
   }, [])
 

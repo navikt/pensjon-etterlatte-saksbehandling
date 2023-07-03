@@ -147,7 +147,6 @@ fun Grunnlag.mapVerge(sakType: SakType): Verge? = with(this) {
 
             Verge(gjenlevendeNavn)
         } else {
-            // TODO: Må på et punkt støtte verge på OMS
             null
         }
     }

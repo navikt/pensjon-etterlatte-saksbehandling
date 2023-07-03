@@ -164,14 +164,14 @@ internal class AvkortingTest {
                     it.shouldContainExactly(
                         aarsoppgjoerMaaned(YearMonth.of(2023, 3), 20902, 9160, 11742, 0, 0, 11742),
                         aarsoppgjoerMaaned(YearMonth.of(2023, 4), 20902, 9160, 11742, 0, 0, 11742),
-                        aarsoppgjoerMaaned(YearMonth.of(2023, 5), 22241, 9026, 13215, 0, 0, 13215),
-                        aarsoppgjoerMaaned(YearMonth.of(2023, 6), 22241, 9026, 13215, 0, 0, 13215),
-                        aarsoppgjoerMaaned(YearMonth.of(2023, 7), 22241, 9026, 13215, 0, 0, 13215),
-                        aarsoppgjoerMaaned(YearMonth.of(2023, 8), 22241, 9026, 13215, 0, 0, 13215),
-                        aarsoppgjoerMaaned(YearMonth.of(2023, 9), 22241, 9026, 13215, 0, 0, 13215),
+                        aarsoppgjoerMaaned(YearMonth.of(2023, 5), 22241, 9026, 13215, 0,0, 13215),
+                        aarsoppgjoerMaaned(YearMonth.of(2023, 6), 22241, 9026, 13215, 0,0, 13215),
+                        aarsoppgjoerMaaned(YearMonth.of(2023, 7), 22241, 9026, 13215, 0,0, 13215),
+                        aarsoppgjoerMaaned(YearMonth.of(2023, 8), 22241, 9026, 13215, 0,0, 13215),
+                        aarsoppgjoerMaaned(YearMonth.of(2023, 9), 22241, 9026, 13215, 0,0, 13215),
                         aarsoppgjoerMaaned(YearMonth.of(2023, 10), 22241, 9026, 13215, 0, 0, 13215),
-                        aarsoppgjoerMaaned(YearMonth.of(2023, 11), 22241, 9026, 13215, 0, 0, 13215),
-                        aarsoppgjoerMaaned(YearMonth.of(2023, 12), 22241, 9026, 13215, 0, 0, 13215)
+                        aarsoppgjoerMaaned(YearMonth.of(2023, 11), 22241, 9026, 13215, 0,0, 13215),
+                        aarsoppgjoerMaaned(YearMonth.of(2023, 12), 22241, 9026, 13215, 0,0, 13215)
                     )
                 }
             }
@@ -282,7 +282,7 @@ internal class AvkortingTest {
                     nyVirk,
                     beregning
                 )
-                beregnetAvkorting.aarsoppgjoer.asClue {
+                beregnetAvkorting.aarsoppgjoer.let {
                     it.shouldContainExactly(
                         aarsoppgjoerMaaned(YearMonth.of(2023, 3), 20902, 13660, 7242, 4500, 0, 11742),
                         aarsoppgjoerMaaned(YearMonth.of(2023, 4), 20902, 13660, 7242, 4500, 0, 11742),
@@ -295,6 +295,34 @@ internal class AvkortingTest {
                         aarsoppgjoerMaaned(YearMonth.of(2023, 11), 22241, 13526, 8715, 0, 1928, 6787),
                         aarsoppgjoerMaaned(YearMonth.of(2023, 12), 22241, 13526, 8715, 0, 1928, 6787)
                     )
+                }
+            }
+
+            @Test
+            fun `Aarsoppgjoer oppdateres med nye beregninger hvis de har endret seg`() {
+                val beregnetAvkorting = avkortingMedNyInntekt.beregnAvkorting(
+                    BehandlingType.REVURDERING,
+                    nyVirk,
+                    beregning.copy(
+                        beregningsperioder = listOf(
+                            beregningsperiode(
+                                datoFOM = YearMonth.of(2023, 6),
+                                utbetaltBeloep = 23000
+                            )
+                        )
+                    )
+                )
+                beregnetAvkorting.aarsoppgjoer.let {
+                    it[0].beregning shouldBe 20902
+                    it[1].beregning shouldBe 20902
+                    it[2].beregning shouldBe 22241
+                    it[3].beregning shouldBe 23000
+                    it[4].beregning shouldBe 23000
+                    it[5].beregning shouldBe 23000
+                    it[6].beregning shouldBe 23000
+                    it[7].beregning shouldBe 23000
+                    it[8].beregning shouldBe 23000
+                    it[9].beregning shouldBe 23000
                 }
             }
 

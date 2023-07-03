@@ -150,6 +150,7 @@ class AvkortingRepository(private val dataSource: DataSource) {
         tx: TransactionalSession
     ) =
         aarsoppgjoer.forEach {
+            // TODO EY-2368 legg til felter regelresultat og kilde for restanse og fordelt restanse
             queryOf(
                 statement = """
                     INSERT INTO avkorting_aarsoppgjoer(
@@ -182,6 +183,7 @@ class AvkortingRepository(private val dataSource: DataSource) {
         tx: TransactionalSession
     ) =
         avkortetYtelse.forEach {
+            // TODO EY-2368 legg til felt ytelseEtterAvkortingFoerRestanse
             queryOf(
                 statement = """
                     INSERT INTO avkortet_ytelse(
@@ -240,7 +242,8 @@ class AvkortingRepository(private val dataSource: DataSource) {
         ytelseEtterAvkorting = int("ytelse_etter_avkorting"),
         avkortingsbeloep = int("avkortingsbeloep"),
         restanse = int("restanse"),
-        ytelseEtterAvkortingFoerRestanse = 0, // TODO EY-2368
+        ytelseEtterAvkortingFoerRestanse = 0,
+        // TODO ytelseEtterAvkortingFoerRestanse = int("ytelse_etter_Avkorting_uten_restanse"),
         ytelseFoerAvkorting = int("ytelse_foer_avkorting"),
         tidspunkt = sqlTimestamp("tidspunkt").toTidspunkt(),
         regelResultat = objectMapper.readTree(string("regel_resultat")),

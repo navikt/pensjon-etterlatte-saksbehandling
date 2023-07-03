@@ -69,8 +69,7 @@ data class Avkorting(
         val beregnetAvkortetYtelse = AvkortingRegelkjoring.beregnAvkortetYtelse(
             Periode(fom = virkningstidspunkt, null),
             beregning.beregningsperioder,
-            avkortingsperioder,
-            0
+            avkortingsperioder
         )
 
         val aarsoppgjoer = mutableListOf<AarsoppgjoerMaaned>()
@@ -104,58 +103,62 @@ data class Avkorting(
             throw IllegalArgumentException("Det må være et oppprettet årsoppgjør for å kunne beregne")
         }
 
-        val avkortingsperioder = with(aarsoppgjoer.first()) {
-            AvkortingRegelkjoring.beregnInntektsavkorting(
-                periode = Periode(fom = maaned, tom = null),
-                listOf(avkortingGrunnlag.last().copy(periode = Periode(fom = maaned, tom = null)))
+        // TODO EY-2368 doc - dokumenter hvorfor inntektsavkorting må beregnes på nytt tilake i tid
+        val fraFoersteMaaned = Periode(fom = aarsoppgjoer.first().maaned, tom = null)
+        val avkortingHeleAaret = AvkortingRegelkjoring.beregnInntektsavkorting(
+            periode = fraFoersteMaaned,
+            avkortingGrunnlag = listOf(avkortingGrunnlag.last().copy(periode = fraFoersteMaaned))
+        )
+
+        val aarsoppgjoerNyBeregningOgAvkorting = aarsoppgjoer.map {
+            it.copy(avkorting = avkortingHeleAaret.avkortingIMaaned(it.maaned))
+        }.oppdaterEtterVirk(virkningstidspunkt) {
+            it.copy(beregning = beregning.beregningsperioder.beregningIMaaned(it.maaned))
+        }
+
+        val avkortetYtelseFoerVirk = AvkortingRegelkjoring.beregnAvkortetYtelsePaaNytt(
+            aarsoppgjoerNyBeregningOgAvkorting.filter { it.maaned < virkningstidspunkt }
+        )
+        val aarsoppgjoerMedNyAvkortetYtelse = aarsoppgjoerNyBeregningOgAvkorting.oppdaterFoerVirk(virkningstidspunkt) {
+            it.copy(
+                forventetAvkortetYtelse = avkortetYtelseFoerVirk.avkortetYtelseIMaaned(it.maaned).ytelseEtterAvkorting,
             )
         }
 
-        val aarsoppgjoerMedNyAvkorting = aarsoppgjoer.map {
-            it.copy(avkorting = avkortingsperioder.avkortingIMaaned(it.maaned))
+        val restanseFoerVirk = AvkortingRegelkjoring.beregnRestanse(
+            aarsoppgjoerMedNyAvkortetYtelse.filter { it.maaned < virkningstidspunkt }
+        )
+        val aarsoppgjoerMedRestanseFoerVirk = aarsoppgjoerMedNyAvkortetYtelse.oppdaterFoerVirk(virkningstidspunkt) {
+            it.copy(
+                restanse = restanseFoerVirk[it.maaned]?.verdi ?: throw Exception("") // TODO EY-2368
+            )
         }
 
-        val restanseFoerVirk = aarsoppgjoerMedNyAvkorting.filter { it.maaned < virkningstidspunkt }.map {
-            AvkortingRegelkjoring.beregnRestanse(it)
+        val fordeltRestanse =
+            AvkortingRegelkjoring.beregnFordeltRestanse(virkningstidspunkt, aarsoppgjoerMedRestanseFoerVirk)
+        val aarsoppgjoerMedFordeltRestanse = aarsoppgjoerMedRestanseFoerVirk.oppdaterEtterVirk(virkningstidspunkt) {
+            it.copy(
+                fordeltRestanse = fordeltRestanse.verdi // TODO EY-2368
+            )
         }
-        val aarsoppgjoerMedUtregnetRestanse = aarsoppgjoerMedNyAvkorting.map { aarsoppgjoerMaaned ->
-            if (aarsoppgjoerMaaned.maaned < virkningstidspunkt) {
-                val beregnetRestanse = restanseFoerVirk.oppgjoerIMaaned(aarsoppgjoerMaaned.maaned)
-                aarsoppgjoerMaaned.copy(
-                    forventetAvkortetYtelse = beregnetRestanse.forventetAvkortetYtelse,
-                    restanse = beregnetRestanse.restanse
-                )
-            } else {
-                aarsoppgjoerMaaned
-            }
-        }
-
-        val maanedligRestanse =
-            AvkortingRegelkjoring.beregnFordeltRestanse(virkningstidspunkt, aarsoppgjoerMedUtregnetRestanse)
 
         val avkortetYtelseFraNyVirk = AvkortingRegelkjoring.beregnAvkortetYtelse(
             Periode(fom = virkningstidspunkt, null),
             beregning.beregningsperioder,
-            avkortingsperioder,
-            maanedligRestanse
+            avkortingHeleAaret,
+            fordeltRestanse
         )
-
-        val aarsoppgjoerMedFordeltRestanse = aarsoppgjoerMedUtregnetRestanse.map {
-            if (it.maaned >= virkningstidspunkt) {
-                val avkortetYtelse = avkortetYtelseFraNyVirk.avkortetYtelseIMaaned(it.maaned)
-                it.copy(
-                    forventetAvkortetYtelse = avkortetYtelse.ytelseEtterAvkortingFoerRestanse,
-                    fordeltRestanse = avkortetYtelse.restanse,
-                    faktiskAvkortetYtelse = avkortetYtelse.ytelseEtterAvkorting
-                )
-            } else {
-                it
-            }
+        val aarsoppgjoerMedYtelseEtterAvkorting = aarsoppgjoerMedFordeltRestanse.oppdaterEtterVirk(virkningstidspunkt) {
+            val avkortetYtelse = avkortetYtelseFraNyVirk.avkortetYtelseIMaaned(it.maaned)
+            it.copy(
+                forventetAvkortetYtelse = avkortetYtelse.ytelseEtterAvkortingFoerRestanse,
+                faktiskAvkortetYtelse = avkortetYtelse.ytelseEtterAvkorting
+            )
         }
 
         return this.copy(
-            avkortingsperioder = avkortingsperioder,
-            aarsoppgjoer = aarsoppgjoerMedFordeltRestanse,
+            avkortingsperioder = avkortingHeleAaret,
+            aarsoppgjoer = aarsoppgjoerMedYtelseEtterAvkorting,
             avkortetYtelse = avkortetYtelseFraNyVirk
         )
     }
@@ -191,20 +194,55 @@ data class Avkortingsperiode(
     val kilde: Grunnlagsopplysning.RegelKilde
 )
 
+// TODO EY-2368 rename til restanseopppgjoer.. for å tydeliggjøre hva det faktisk brukes til
 data class AarsoppgjoerMaaned(
     val maaned: YearMonth,
     val beregning: Int,
     val avkorting: Int,
     val forventetAvkortetYtelse: Int,
-    val restanse: Int, // TODO EY-2368 persistere regelresultat
-    val fordeltRestanse: Int,
+    val restanse: Int, // TODO EY-2368 Restanse, ikke optional men default verdi 0 og regel og kilde optinal istedet
+    val fordeltRestanse: Int, // TODO FordeltRestanse
     val faktiskAvkortetYtelse: Int
+)
+
+fun List<AarsoppgjoerMaaned>.oppdaterFoerVirk(
+    virkningstidspunkt: YearMonth,
+    oppdaterFoerVirk: (maaned: AarsoppgjoerMaaned) -> AarsoppgjoerMaaned
+) = map {
+    if (it.maaned < virkningstidspunkt) {
+        oppdaterFoerVirk(it)
+    } else {
+        it
+    }
+}
+
+fun List<AarsoppgjoerMaaned>.oppdaterEtterVirk(
+    virkningstidspunkt: YearMonth,
+    oppdaterFoerVirk: (maaned: AarsoppgjoerMaaned) -> AarsoppgjoerMaaned
+) = map {
+    if (it.maaned >= virkningstidspunkt) {
+        oppdaterFoerVirk(it)
+    } else {
+        it
+    }
+}
+
+data class Restanse(
+    val verdi: Int,
+    val regelResultat: JsonNode,
+    val kilde: Grunnlagsopplysning.RegelKilde
+)
+
+data class FordeltRestanse(
+    val verdi: Int,
+    val regelResultat: JsonNode,
+    val kilde: Grunnlagsopplysning.RegelKilde
 )
 
 data class AvkortetYtelse(
     val periode: Periode,
     val ytelseEtterAvkorting: Int,
-    val ytelseEtterAvkortingFoerRestanse: Int, // TODO EY-2368 Legge til i DB
+    val ytelseEtterAvkortingFoerRestanse: Int,
     val restanse: Int = 0,
     val avkortingsbeloep: Int,
     val ytelseFoerAvkorting: Int,

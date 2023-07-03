@@ -125,9 +125,10 @@ fun avkortingsperiode(
     kilde = Grunnlagsopplysning.RegelKilde("regelid", Tidspunkt.now(), "1")
 )
 
-fun avkortetYtelseGrunnlag(beregning: Int, avkorting: Int) = AvkortetYtelseGrunnlag(
+fun avkortetYtelseGrunnlag(beregning: Int, avkorting: Int, fordeltRestanse: Int = 0) = AvkortetYtelseGrunnlag(
     beregning = FaktumNode(verdi = beregning, "", ""),
-    avkorting = FaktumNode(verdi = avkorting, "", "")
+    avkorting = FaktumNode(verdi = avkorting, "", ""),
+    fordeltRestanse = FaktumNode(verdi = fordeltRestanse, "", ""),
 )
 
 fun avkortetYtelse(

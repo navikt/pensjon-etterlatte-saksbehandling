@@ -1,10 +1,14 @@
 package no.nav.etterlatte.avkorting
 
+import no.nav.etterlatte.avkorting.regler.FordelRestanseGrunnlag
 import no.nav.etterlatte.avkorting.regler.InntektAvkortingGrunnlag
 import no.nav.etterlatte.avkorting.regler.PeriodisertAvkortetYtelseGrunnlag
 import no.nav.etterlatte.avkorting.regler.PeriodisertInntektAvkortingGrunnlag
-import no.nav.etterlatte.avkorting.regler.avkorteYtelse
+import no.nav.etterlatte.avkorting.regler.PeriodisertRestanseGrunnlag
+import no.nav.etterlatte.avkorting.regler.avkortetYtelseMedRestanse
+import no.nav.etterlatte.avkorting.regler.fordeltRestanse
 import no.nav.etterlatte.avkorting.regler.kroneavrundetInntektAvkorting
+import no.nav.etterlatte.avkorting.regler.restanse
 import no.nav.etterlatte.beregning.grunnlag.GrunnlagMedPeriode
 import no.nav.etterlatte.beregning.grunnlag.PeriodisertBeregningGrunnlag
 import no.nav.etterlatte.beregning.grunnlag.mapVerdier
@@ -14,6 +18,7 @@ import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.regler.FaktumNode
+import no.nav.etterlatte.libs.regler.KonstantGrunnlag
 import no.nav.etterlatte.libs.regler.PeriodisertGrunnlag
 import no.nav.etterlatte.libs.regler.RegelPeriode
 import no.nav.etterlatte.libs.regler.RegelkjoeringResultat
@@ -82,63 +87,153 @@ object AvkortingRegelkjoring {
         }
     }
 
-    fun beregnRestanse(aarsoppgjoerMaaned: AarsoppgjoerMaaned): AarsoppgjoerMaaned {
-        val regelgrunnlag = PeriodisertAvkortetYtelseGrunnlag(
-            beregningsperioder = periodiserteBeregning(aarsoppgjoerMaaned),
-            avkortingsperioder = periodiserteAvkorting(aarsoppgjoerMaaned)
+    // TODO egen fil..
+    fun beregnRestanse(
+        aarsoppgjoerMaaneder: List<AarsoppgjoerMaaned>
+    ): Map<YearMonth, Restanse> {
+        val periode = Periode(fom = aarsoppgjoerMaaneder.first().maaned, tom = aarsoppgjoerMaaneder.last().maaned)
+        val grunnlag = PeriodisertRestanseGrunnlag(
+            tidligereYtelseEtterAvkorting = PeriodisertBeregningGrunnlag.lagGrunnlagMedDefaultUtenforPerioder(
+                aarsoppgjoerMaaneder.map {
+                    GrunnlagMedPeriode(
+                        data = it.faktiskAvkortetYtelse,
+                        fom = it.maaned.atDay(1),
+                        tom = it.maaned.atEndOfMonth()
+                    )
+                }.mapVerdier {
+                    FaktumNode(
+                        verdi = it,
+                        kilde = "", // TODO EY-2368
+                        beskrivelse = "Forventet årsinntekt"
+                    )
+                }
+            ) { _, _, _ -> throw IllegalArgumentException("Noe gikk galt ved uthenting av periodiserte beregninger") },
+            nyForventetYtelseEtterAvkorting = PeriodisertBeregningGrunnlag.lagGrunnlagMedDefaultUtenforPerioder(
+                aarsoppgjoerMaaneder.map {
+                    GrunnlagMedPeriode(
+                        data = it.forventetAvkortetYtelse,
+                        fom = it.maaned.atDay(1),
+                        tom = it.maaned.atEndOfMonth()
+                    )
+                }.mapVerdier {
+                    FaktumNode(
+                        verdi = it,
+                        kilde = "", // TODO EY-2368
+                        beskrivelse = "Forventet årsinntekt"
+                    )
+                }
+            ) { _, _, _ -> throw IllegalArgumentException("Noe gikk galt ved uthenting av periodiserte beregninger") }
         )
-        val nyForventetYtelseEtterAvkorting = beregnAvkortetYtelse(
-            Periode(fom = aarsoppgjoerMaaned.maaned, tom = aarsoppgjoerMaaned.maaned),
-            regelgrunnlag
-        ).first()
 
-        // TODO EY-2368 regel
-        val beregnetRestanse =
-            aarsoppgjoerMaaned.faktiskAvkortetYtelse - nyForventetYtelseEtterAvkorting.ytelseEtterAvkorting
+        val resultat = restanse.eksekver(grunnlag, periode.tilRegelPeriode())
+        return when (resultat) {
+            is RegelkjoeringResultat.Suksess -> {
+                resultat.periodiserteResultater.associate {
+                    YearMonth.from(it.periode.fraDato) to
+                            Restanse(
+                                verdi = it.resultat.verdi,
+                                regelResultat = it.toJsonNode(),
+                                kilde = Grunnlagsopplysning.RegelKilde(
+                                    navn = restanse.regelReferanse.id,
+                                    ts = Tidspunkt.now(),
+                                    versjon = it.reglerVersjon
+                                )
+                            )
+                }
+            }
 
-        return aarsoppgjoerMaaned.copy(
-            restanse = beregnetRestanse,
-            forventetAvkortetYtelse = nyForventetYtelseEtterAvkorting.ytelseEtterAvkorting
-        )
+            is RegelkjoeringResultat.UgyldigPeriode ->
+                throw RuntimeException("Ugyldig regler for periode: ${resultat.ugyldigeReglerForPeriode}")
+        }
     }
 
-    fun beregnFordeltRestanse(virkningstidspunkt: YearMonth, aarsoppgjoer: List<AarsoppgjoerMaaned>): Int {
-        // TODO EY-2368 regel
-        return aarsoppgjoer.sumOf { it.restanse } / (12 - virkningstidspunkt.monthValue + 1)
+    fun beregnFordeltRestanse(virkningstidspunkt: YearMonth, aarsoppgjoer: List<AarsoppgjoerMaaned>): FordeltRestanse {
+        val regelgrunnlag = FordelRestanseGrunnlag(
+            virkningstidspunkt = FaktumNode(
+                verdi = virkningstidspunkt,
+                kilde = "TODO", // TODO EY-2368 kilde - Bytt YearMonth med klasse for å kunne bruke kilde?
+                beskrivelse = "Virkningstidspunkt hvor restanse skal fordeles månedlig fra"
+            ),
+            maanederMedRestanse = FaktumNode(
+                verdi = aarsoppgjoer,
+                kilde = "TODO", // TODO EY-2368 kilde - Hva blir kilde her id til tabell (enten nytt id felt eller ny tabell for å samle)
+                beskrivelse = "All restanse til tidligere måneder i året"
+            )
+        )
+
+        val resultat = fordeltRestanse.eksekver(
+            KonstantGrunnlag(regelgrunnlag),
+            RegelPeriode(fraDato = virkningstidspunkt.atDay(1))
+        )
+        return when (resultat) {
+            is RegelkjoeringResultat.Suksess -> {
+                resultat.periodiserteResultater.map {
+                    FordeltRestanse(
+                        verdi = it.resultat.verdi,
+                        regelResultat = it.toJsonNode(),
+                        kilde = Grunnlagsopplysning.RegelKilde(
+                            navn = fordeltRestanse.regelReferanse.id,
+                            ts = Tidspunkt.now(),
+                            versjon = it.reglerVersjon
+                        )
+                    )
+                }.first()
+            }
+
+            is RegelkjoeringResultat.UgyldigPeriode ->
+                throw RuntimeException("Ugyldig regler for periode: ${resultat.ugyldigeReglerForPeriode}")
+        }
+    }
+
+    fun beregnAvkortetYtelsePaaNytt(aarsoppgjoerMaaneder: List<AarsoppgjoerMaaned>): List<AvkortetYtelse> {
+        val periode = Periode(fom = aarsoppgjoerMaaneder.first().maaned, tom = aarsoppgjoerMaaneder.last().maaned)
+        val avkortetYtelseGrunnlag = PeriodisertAvkortetYtelseGrunnlag(
+            beregningsperioder = maanedligeBeregninger(aarsoppgjoerMaaneder),
+            avkortingsperioder = maanedligeAvkortinger(aarsoppgjoerMaaneder),
+            fordeltRestanse = KonstantGrunnlag(FaktumNode(verdi = 0, kilde = "", beskrivelse = "Tom restanse"))
+        )
+        return beregnAvkortetYtelse(periode, avkortetYtelseGrunnlag)
     }
 
     fun beregnAvkortetYtelse(
         periode: Periode,
         beregningsperioder: List<Beregningsperiode>,
         avkortingsperioder: List<Avkortingsperiode>,
-        maanedligRestanse: Int = 0 // TODO EY-2368 - må gjøres om til grunnlag
+        maanedligRestanse: FordeltRestanse? = null
     ): List<AvkortetYtelse> {
         val regelgrunnlag = PeriodisertAvkortetYtelseGrunnlag(
             beregningsperioder = periodiserteBeregninger(beregningsperioder),
-            avkortingsperioder = periodiserteAvkortinger(avkortingsperioder)
+            avkortingsperioder = periodiserteAvkortinger(avkortingsperioder),
+            fordeltRestanse = KonstantGrunnlag(
+                FaktumNode(
+                    verdi = maanedligRestanse?.verdi ?: 0,
+                    kilde = maanedligRestanse?.kilde ?: "", // TODO EY-2368 kilde
+                    beskrivelse = "Restansebeløp som skal fordeles månedlig"
+                )
+            )
         )
-        return beregnAvkortetYtelse(periode, regelgrunnlag, maanedligRestanse)
+        return beregnAvkortetYtelse(periode, regelgrunnlag)
     }
 
     private fun beregnAvkortetYtelse(
         periode: Periode,
-        regelgrunnlag: PeriodisertAvkortetYtelseGrunnlag,
-        maanedligRestanse: Int = 0 // TODO EY-2368 - må gjøres om til grunnlag
+        regelgrunnlag: PeriodisertAvkortetYtelseGrunnlag
     ): List<AvkortetYtelse> {
-        val resultat = avkorteYtelse.eksekver(regelgrunnlag, periode.tilRegelPeriode())
+        val resultat = avkortetYtelseMedRestanse.eksekver(regelgrunnlag, periode.tilRegelPeriode())
         when (resultat) {
             is RegelkjoeringResultat.Suksess -> {
                 val tidspunkt = Tidspunkt.now()
                 return resultat.periodiserteResultater.map { periodisertResultat ->
                     val resultatFom = periodisertResultat.periode.fraDato
+                    val restanse = regelgrunnlag.finnGrunnlagForPeriode(resultatFom).fordeltRestanse.verdi
                     AvkortetYtelse(
                         periode = Periode(
                             fom = YearMonth.from(periodisertResultat.periode.fraDato),
                             tom = periodisertResultat.periode.tilDato?.let { YearMonth.from(it) }
                         ),
-                        ytelseEtterAvkorting = periodisertResultat.resultat.verdi - maanedligRestanse, // TODO EY-2368
-                        restanse = maanedligRestanse,
-                        ytelseEtterAvkortingFoerRestanse = periodisertResultat.resultat.verdi,
+                        ytelseEtterAvkorting = periodisertResultat.resultat.verdi,
+                        restanse = restanse,
+                        ytelseEtterAvkortingFoerRestanse = periodisertResultat.resultat.verdi + restanse,
                         avkortingsbeloep = regelgrunnlag.finnGrunnlagForPeriode(resultatFom).avkorting.verdi,
                         ytelseFoerAvkorting = regelgrunnlag.finnGrunnlagForPeriode(resultatFom).beregning.verdi,
                         tidspunkt = tidspunkt,
@@ -157,20 +252,21 @@ object AvkortingRegelkjoring {
         }
     }
 
-    private fun periodiserteBeregning(aarsoppgjoerMaaned: AarsoppgjoerMaaned):
-        PeriodisertGrunnlag<FaktumNode<Int>> =
+    private fun maanedligeBeregninger(
+        aarsoppgjoerMaaneder: List<AarsoppgjoerMaaned>
+    ): PeriodisertGrunnlag<FaktumNode<Int>> =
         PeriodisertBeregningGrunnlag.lagGrunnlagMedDefaultUtenforPerioder(
-            listOf(
+            aarsoppgjoerMaaneder.map {
                 GrunnlagMedPeriode(
-                    data = aarsoppgjoerMaaned,
-                    fom = aarsoppgjoerMaaned.maaned.atDay(1),
-                    tom = aarsoppgjoerMaaned.maaned.atEndOfMonth()
+                    data = it,
+                    fom = it.maaned.atDay(1),
+                    tom = it.maaned.atEndOfMonth()
                 )
-            ).mapVerdier {
+            }.mapVerdier {
                 FaktumNode(
                     verdi = it.beregning,
-                    kilde = "", // TODO EY-2368
-                    beskrivelse = ""
+                    kilde = "", // TODO EY-2368 kilde
+                    beskrivelse = "Beregnet ytelse før avkorting i måned"
                 )
             }
         ) { _, _, _ -> throw IllegalArgumentException("Noe gikk galt ved uthenting av periodiserte beregninger") }
@@ -193,26 +289,27 @@ object AvkortingRegelkjoring {
             }
         ) { _, _, _ -> throw IllegalArgumentException("Noe gikk galt ved uthenting av periodiserte beregninger") }
 
-    private fun periodiserteAvkorting(aarsoppgjoerMaaned: AarsoppgjoerMaaned):
-        PeriodisertGrunnlag<FaktumNode<Int>> =
+    private fun maanedligeAvkortinger(
+        aarsoppgjoerMaaneder: List<AarsoppgjoerMaaned>
+    ): PeriodisertGrunnlag<FaktumNode<Int>> =
         PeriodisertBeregningGrunnlag.lagGrunnlagMedDefaultUtenforPerioder(
-            listOf(
+            aarsoppgjoerMaaneder.map {
                 GrunnlagMedPeriode(
-                    data = aarsoppgjoerMaaned,
-                    fom = aarsoppgjoerMaaned.maaned.atDay(1),
-                    tom = aarsoppgjoerMaaned.maaned.atEndOfMonth()
+                    data = it,
+                    fom = it.maaned.atDay(1),
+                    tom = it.maaned.atEndOfMonth()
                 )
-            ).mapVerdier {
+            }.mapVerdier {
                 FaktumNode(
                     verdi = it.avkorting,
-                    kilde = "", // TODO EY-2368
-                    beskrivelse = ""
+                    kilde = "", // TODO EY-2368 kilde
+                    beskrivelse = "Beregnet avkorting i måned"
                 )
             }
         ) { _, _, _ -> throw IllegalArgumentException("Noe gikk galt ved uthenting av periodiserte avkortinger") }
 
     private fun periodiserteAvkortinger(avkortingGrunnlag: List<Avkortingsperiode>):
-        PeriodisertGrunnlag<FaktumNode<Int>> =
+            PeriodisertGrunnlag<FaktumNode<Int>> =
         PeriodisertBeregningGrunnlag.lagGrunnlagMedDefaultUtenforPerioder(
             avkortingGrunnlag.map {
                 GrunnlagMedPeriode(

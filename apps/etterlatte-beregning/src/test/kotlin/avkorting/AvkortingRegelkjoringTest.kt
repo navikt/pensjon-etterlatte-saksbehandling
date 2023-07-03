@@ -109,8 +109,7 @@ class AvkortingRegelkjoringTest {
         val avkortetYtelse = AvkortingRegelkjoring.beregnAvkortetYtelse(
             Periode(fom = virkningstidspunkt, tom = null),
             beregninger,
-            avkortingsperioder,
-            maanedligRestanse = 0
+            avkortingsperioder
         )
 
         avkortetYtelse.size shouldBe 4
@@ -145,4 +144,9 @@ class AvkortingRegelkjoringTest {
             ytelseFoerAvkorting shouldBe 10000
         }
     }
+
+    // TODO EY-2368 unittest restanse
+
+    // TODO EY-2368 unittest fordelt restanse
+
 }

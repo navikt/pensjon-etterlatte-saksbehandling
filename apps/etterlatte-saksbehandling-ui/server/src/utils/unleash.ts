@@ -24,6 +24,13 @@ export const unleash = initialize({
   strategies: [new ByClusterStrategy(), new GradualRolloutRandomStrategy()],
 })
 
+// Some useful life-cycle events
+unleash.on('ready', logger.info)
+unleash.on('synchronized', logger.info)
+unleash.on('registered', logger.info)
+unleash.on('changed', () => {
+  logger.info('Feature toggles har blitt oppdatert')
+})
 unleash.on('error', (err: Error) => {
   logger.error({
     message: err.message || 'Feil oppsto i unleash: ',

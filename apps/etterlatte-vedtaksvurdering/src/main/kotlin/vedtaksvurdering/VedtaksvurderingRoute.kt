@@ -13,6 +13,7 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
+import no.nav.etterlatte.libs.common.sakId
 import no.nav.etterlatte.libs.common.tidspunkt.toNorskTid
 import no.nav.etterlatte.libs.common.vedtak.AttesterVedtakDto
 import no.nav.etterlatte.libs.common.vedtak.LoependeYtelseDTO
@@ -122,6 +123,22 @@ fun Route.vedtaksvurderingRoute(service: VedtaksvurderingService, behandlingKlie
                 logger.info("Tilbakestiller ikke iverksatte vedtak for behandling $behandlingId")
                 service.tilbakestillIkkeIverksatteVedtak(behandlingId)
                 call.respond(HttpStatusCode.OK)
+            }
+        }
+    }
+
+    route("/vedtak") {
+        val logger = application.log
+
+        get("/{$SAKID_CALL_PARAMETER}/behandlinger/nyeste/{resultat}") {
+            val resultat: VedtakType = enumValueOf(requireNotNull(call.parameters["resultat"]))
+            logger.info("Henter siste behandling med resultat $resultat")
+
+            val nyeste = service.hentNyesteBehandlingMedResultat(sakId, resultat)
+            if (nyeste != null) {
+                call.respond(nyeste.toDto())
+            } else {
+                call.respond(HttpStatusCode.NoContent)
             }
         }
     }

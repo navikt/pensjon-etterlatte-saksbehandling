@@ -71,6 +71,7 @@ class BehandlingsHendelserKafkaProducerImpl(
             return fnr.map {
                 JsonMessage.newMessage(
                     mapOf(
+                        CORRELATION_ID_KEY to getCorrelationId(),
                         BEHOV_NAME_KEY to Opplysningstype.AVDOED_PDL_V1,
                         "rolle" to PersonRolle.AVDOED,
                         "fnr" to it
@@ -83,6 +84,7 @@ class BehandlingsHendelserKafkaProducerImpl(
             return fnr.map {
                 JsonMessage.newMessage(
                     mapOf(
+                        CORRELATION_ID_KEY to getCorrelationId(),
                         BEHOV_NAME_KEY to Opplysningstype.GJENLEVENDE_FORELDER_PDL_V1,
                         "rolle" to PersonRolle.AVDOED,
                         "fnr" to it

@@ -1,4 +1,4 @@
-import { Context, Strategy, getFeatureToggleDefinitions, initialize } from 'unleash-client'
+import { Context, Strategy, getFeatureToggleDefinitions, initialize, destroy } from 'unleash-client'
 import { FeatureToggleConfig } from '../config/config'
 import GradualRolloutRandomStrategy from 'unleash-client/lib/strategy/gradual-rollout-random'
 import { logger } from '../monitoring/logger'
@@ -50,4 +50,9 @@ unleash.on('error', (err: Error) => {
 
 unleash.on('warn', (msg: string) => {
   logger.error(msg)
+})
+
+process.on('SIGTERM', () => {
+  logger.info('App is shutting down – destroying unleash client')
+  destroy()
 })

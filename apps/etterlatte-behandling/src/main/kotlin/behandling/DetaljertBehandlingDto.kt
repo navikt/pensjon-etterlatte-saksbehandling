@@ -32,7 +32,8 @@ data class DetaljertBehandlingDto(
     val søker: Person?,
     val kommerBarnetTilgode: KommerBarnetTilgode?,
     val revurderingsaarsak: RevurderingAarsak?,
-    val revurderinginfo: RevurderingInfo?
+    val revurderinginfo: RevurderingInfo?,
+    val enhet: String
 )
 
 data class Familieforhold(

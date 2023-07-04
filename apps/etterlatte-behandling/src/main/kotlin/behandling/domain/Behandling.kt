@@ -171,7 +171,8 @@ internal fun Behandling.toDetaljertBehandling(): DetaljertBehandling {
         revurderingInfo = when (this) {
             is Revurdering -> revurderingInfo
             else -> null
-        }
+        },
+        enhet = sak.enhet
     )
 }
 

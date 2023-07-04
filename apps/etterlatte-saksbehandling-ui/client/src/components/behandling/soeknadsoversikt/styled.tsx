@@ -95,15 +95,6 @@ export const Border = styled.div`
   margin-bottom: 1em;
 `
 
-export const DashedBorder = styled.div`
-  background-image: linear-gradient(to right, #000 10%, rgba(255, 255, 255, 0) 0%);
-  background-size: 10px 1px;
-  background-repeat: repeat-x;
-  width: 100%;
-  padding: 1px;
-  margin-bottom: 1em;
-`
-
 export const VurderingsContainerWrapper = styled(VurderingsContainer)`
   padding-left: 20px;
   width: 10em;

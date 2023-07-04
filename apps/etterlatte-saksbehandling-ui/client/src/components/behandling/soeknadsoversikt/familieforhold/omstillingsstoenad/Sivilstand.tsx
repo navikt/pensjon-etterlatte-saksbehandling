@@ -17,7 +17,7 @@ type Props = {
   avdoed: IPdlPerson
 }
 
-export const Sivilstand: React.FC<Props> = ({ familieforhold, avdoed }) => {
+export const Sivilstand = ({ familieforhold, avdoed }: Props) => {
   const sivilstand = familieforhold.gjenlevende.opplysning.sivilstand
 
   return (

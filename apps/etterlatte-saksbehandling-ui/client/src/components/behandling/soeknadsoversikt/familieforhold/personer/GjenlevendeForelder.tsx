@@ -12,7 +12,7 @@ type Props = {
   doedsdato: string
 }
 
-export const GjenlevendeForelder: React.FC<Props> = ({ person, innsenderErGjenlevendeForelder, doedsdato }) => {
+export const GjenlevendeForelder = ({ person, innsenderErGjenlevendeForelder, doedsdato }: Props) => {
   const adresserEtterDoedsdato = hentAdresserEtterDoedsdato(person.bostedsadresse ?? [], doedsdato)
 
   return (

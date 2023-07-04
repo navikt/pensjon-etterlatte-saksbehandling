@@ -27,7 +27,7 @@ export const BarneListe = ({ familieforhold }: Props) => {
           <Child fontSize={IconSize.DEFAULT} />
         </IconWrapper>
         <Heading size={'small'} level={'3'}>
-          Barn
+          Søsken(avdødes barn)
         </Heading>
       </FlexHeader>
       <TableWrapper>

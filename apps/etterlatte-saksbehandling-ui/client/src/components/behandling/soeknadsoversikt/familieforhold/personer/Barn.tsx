@@ -12,7 +12,7 @@ type Props = {
   doedsdato: string
 }
 
-export const Barn: React.FC<Props> = ({ person, doedsdato }) => {
+export const Barn = ({ person, doedsdato }: Props) => {
   const bostedsadresse = person.bostedsadresse ?? []
   const adresserEtterDoedsdato = hentAdresserEtterDoedsdato(bostedsadresse, doedsdato)
   const aktivAdresse = bostedsadresse.find((adresse) => adresse.aktiv)

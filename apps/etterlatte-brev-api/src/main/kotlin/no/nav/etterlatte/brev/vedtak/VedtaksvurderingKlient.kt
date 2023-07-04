@@ -54,7 +54,12 @@ class VedtaksvurderingKlient(config: Config, httpClient: HttpClient) {
                 Resource(clientId, "$resourceUrl/vedtak/$sakId/behandlinger/nyeste/${VedtakType.INNVILGELSE}"),
                 brukerTokenInfo
             ).mapBoth(
-                success = { resource -> resource.response?.toString()?.let { deserialize(it) } },
+                success = { resource ->
+                    resource.response?.toString()?.let {
+                        val deserialize: VedtakDto? = deserialize(it)
+                        deserialize?.vedtakFattet?.tidspunkt?.toLocalDate()
+                    }
+                },
                 failure = { errorResponse -> throw errorResponse }
             )
         } catch (e: Exception) {

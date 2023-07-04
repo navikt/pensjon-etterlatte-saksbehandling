@@ -8,7 +8,8 @@ import io.kotest.matchers.shouldNotBe
 import no.nav.etterlatte.avkorting.AvkortetYtelse
 import no.nav.etterlatte.avkorting.Avkorting
 import no.nav.etterlatte.avkorting.AvkortingGrunnlag
-import no.nav.etterlatte.beregning.regler.aarsoppgjoerMaaned
+import no.nav.etterlatte.avkorting.YtelseFoerAvkorting
+import no.nav.etterlatte.avkorting.mapTilYtelseFoerAvkorting
 import no.nav.etterlatte.beregning.regler.avkortetYtelse
 import no.nav.etterlatte.beregning.regler.avkorting
 import no.nav.etterlatte.beregning.regler.avkortinggrunnlag
@@ -18,7 +19,6 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.periode.Periode
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import java.time.YearMonth
 import java.util.*
 
@@ -27,31 +27,70 @@ internal class AvkortingTest {
     @Nested
     inner class KopierAvkorting {
 
-        private val avkorting = avkorting(
+        private val virkningstidspunkt = YearMonth.of(2023, 3)
+        private val beregning = beregning(
+            beregninger = listOf(
+                beregningsperiode(
+                    datoFOM = virkningstidspunkt,
+                    datoTOM = null,
+                    utbetaltBeloep = 20902
+                )
+            )
+        )
+        private val avkorting = Avkorting.nyAvkorting(
             avkortingGrunnlag = listOf(avkortinggrunnlag(), avkortinggrunnlag()),
-            aarsoppgjoer = listOf(aarsoppgjoerMaaned())
+            ytelseFoerAvkorting = beregning.mapTilYtelseFoerAvkorting(),
+            tidligereAvkortetYtelse = listOf(
+                avkortetYtelse(periode = Periode(YearMonth.of(2023, 1), YearMonth.of(2023, 1))),
+            ),
+            avkortetYtelse = listOf(
+                avkortetYtelse(periode = Periode(YearMonth.of(2023, 2), null)),
+            )
         )
 
         @Test
         fun `Skal kopiere tidligere grunnlag men erstatte id`() {
-            with(avkorting.kopierAvkorting()) {
-                shouldBeEqualToIgnoringFields(avkorting, Avkorting::avkortingGrunnlag, Avkorting::aarsoppgjoer)
-                with(avkortingGrunnlag) {
-                    size shouldBe 2
-                    get(0).id shouldNotBe avkorting.avkortingGrunnlag[0].id
-                    get(1).id shouldNotBe avkorting.avkortingGrunnlag[1].id
+            with(avkorting.kopierAvkorting(virkningstidspunkt)) {
+                avkortingGrunnlag.asClue {
+                    it.size shouldBe 2
+                    it[0].id shouldNotBe avkorting.avkortingGrunnlag[0].id
+                    it[1].id shouldNotBe avkorting.avkortingGrunnlag[1].id
                 }
-                avkortingsperioder shouldBe emptyList()
+                aarsoppgjoer.avkortingsperioder shouldBe emptyList()
                 avkortetYtelse shouldBe emptyList()
             }
         }
 
         @Test
-        fun `Skal kopiere aarsoppgjoer`() {
-            avkorting.kopierAvkorting().asClue {
-                it.aarsoppgjoer shouldBe avkorting.aarsoppgjoer
+        fun `Skal kopiere ytelse foer avkorting til aarsoppgjoer`() {
+            avkorting.kopierAvkorting(virkningstidspunkt).asClue {
+                it.aarsoppgjoer.ytelseFoerAvkorting.shouldContainExactly(
+                    YtelseFoerAvkorting(
+                        beregning = 20902,
+                        periode = Periode(YearMonth.of(2023, 3), null),
+                        beregningsreferanse = beregning.beregningId
+                    )
+                )
             }
         }
+
+        @Test
+        fun `Skal flytte avkortetYtelse til tidligereAvkortetYtelse for gjeldende aarsoppgjoer og sette til og med`() {
+            with(avkorting.kopierAvkorting(virkningstidspunkt).aarsoppgjoer) {
+                tidligereAvkortetYtelse.size shouldBe 2
+                tidligereAvkortetYtelse[0].asClue {
+                    it shouldBe avkorting.aarsoppgjoer.tidligereAvkortetYtelse[0]
+                }
+                tidligereAvkortetYtelse[1].asClue {
+                    it.shouldBeEqualToIgnoringFields(
+                        avkorting.avkortetYtelse[0],
+                        AvkortetYtelse::periode
+                    )
+                    it.periode shouldBe Periode(YearMonth.of(2023, 2), virkningstidspunkt.minusMonths(1))
+                }
+            }
+        }
+
     }
 
     @Nested
@@ -67,7 +106,6 @@ internal class AvkortingTest {
 
         private val avkorting = avkorting(
             avkortingGrunnlag = listOf(foersteGrunnlag, andreGrunnlag),
-            aarsoppgjoer = listOf(aarsoppgjoerMaaned())
         )
 
         @Test
@@ -130,6 +168,9 @@ internal class AvkortingTest {
         @Nested
         inner class Foerstegangs {
 
+
+            // TODO ytelsefoeravkorting
+
             @Test
             fun `Skal beregne avkortingsperioder fra og med virkningstidspunkt`() {
                 val beregnetAvkorting = avkorting.beregnAvkorting(
@@ -137,7 +178,7 @@ internal class AvkortingTest {
                     virkningstidspunkt,
                     beregning
                 )
-                beregnetAvkorting.avkortingsperioder.asClue {
+                beregnetAvkorting.aarsoppgjoer.avkortingsperioder.asClue {
                     it.size shouldBe 2
                     it[0].asClue { avkortingsperiode ->
                         avkortingsperiode.periode shouldBe Periode(
@@ -150,29 +191,6 @@ internal class AvkortingTest {
                         avkortingsperiode.periode shouldBe Periode(fom = YearMonth.of(2023, 5), tom = null)
                         avkortingsperiode.avkorting shouldBe 9026
                     }
-                }
-            }
-
-            @Test
-            fun `Aarsoppgjoer skal vaere opprettet uten noen restanse`() {
-                val beregnetAvkorting = avkorting.beregnAvkorting(
-                    BehandlingType.FØRSTEGANGSBEHANDLING,
-                    virkningstidspunkt,
-                    beregning
-                )
-                beregnetAvkorting.aarsoppgjoer.asClue {
-                    it.shouldContainExactly(
-                        aarsoppgjoerMaaned(YearMonth.of(2023, 3), 20902, 9160, 11742, 0, 0, 11742),
-                        aarsoppgjoerMaaned(YearMonth.of(2023, 4), 20902, 9160, 11742, 0, 0, 11742),
-                        aarsoppgjoerMaaned(YearMonth.of(2023, 5), 22241, 9026, 13215, 0,0, 13215),
-                        aarsoppgjoerMaaned(YearMonth.of(2023, 6), 22241, 9026, 13215, 0,0, 13215),
-                        aarsoppgjoerMaaned(YearMonth.of(2023, 7), 22241, 9026, 13215, 0,0, 13215),
-                        aarsoppgjoerMaaned(YearMonth.of(2023, 8), 22241, 9026, 13215, 0,0, 13215),
-                        aarsoppgjoerMaaned(YearMonth.of(2023, 9), 22241, 9026, 13215, 0,0, 13215),
-                        aarsoppgjoerMaaned(YearMonth.of(2023, 10), 22241, 9026, 13215, 0, 0, 13215),
-                        aarsoppgjoerMaaned(YearMonth.of(2023, 11), 22241, 9026, 13215, 0,0, 13215),
-                        aarsoppgjoerMaaned(YearMonth.of(2023, 12), 22241, 9026, 13215, 0,0, 13215)
-                    )
                 }
             }
 
@@ -219,38 +237,15 @@ internal class AvkortingTest {
         inner class Revurdering {
 
             private val nyVirk = YearMonth.of(2023, 6)
-            private val avkortingMedNyInntekt = avkorting.copy(
-                aarsoppgjoer = listOf(
-                    aarsoppgjoerMaaned(YearMonth.of(2023, 3), 20902, 9160, 11742, 0, 0, 11742),
-                    aarsoppgjoerMaaned(YearMonth.of(2023, 4), 20902, 9160, 11742, 0, 0, 11742),
-                    aarsoppgjoerMaaned(YearMonth.of(2023, 5), 22241, 9026, 13215, 0, 0, 13215),
-                    aarsoppgjoerMaaned(YearMonth.of(2023, 6), 22241, 9026, 13215, 0, 0, 13215),
-                    aarsoppgjoerMaaned(YearMonth.of(2023, 7), 22241, 9026, 13215, 0, 0, 13215),
-                    aarsoppgjoerMaaned(YearMonth.of(2023, 8), 22241, 9026, 13215, 0, 0, 13215),
-                    aarsoppgjoerMaaned(YearMonth.of(2023, 9), 22241, 9026, 13215, 0, 0, 13215),
-                    aarsoppgjoerMaaned(YearMonth.of(2023, 10), 22241, 9026, 13215, 0, 0, 13215),
-                    aarsoppgjoerMaaned(YearMonth.of(2023, 11), 22241, 9026, 13215, 0, 0, 13215),
-                    aarsoppgjoerMaaned(YearMonth.of(2023, 12), 22241, 9026, 13215, 0, 0, 13215)
-                )
-            ).oppdaterMedInntektsgrunnlag(
-                nyttGrunnlag = avkorting.avkortingGrunnlag.first().copy(
-                    id = UUID.randomUUID(),
-                    aarsinntekt = 400000
-                )
-            )
-
-            @Test
-            fun `Skal ikke kunne beregne uten et opprettet aarsoppjoer`() {
-                assertThrows<IllegalArgumentException> {
-                    avkorting(
-                        aarsoppgjoer = emptyList()
-                    ).beregnAvkorting(
-                        BehandlingType.REVURDERING,
-                        YearMonth.of(2023, 1),
-                        beregning()
+            private val avkortingMedNyInntekt = avkorting
+                .beregnAvkorting(BehandlingType.FØRSTEGANGSBEHANDLING, virkningstidspunkt, beregning)
+                .kopierAvkorting(nyVirk)
+                .oppdaterMedInntektsgrunnlag(
+                    nyttGrunnlag = avkorting.avkortingGrunnlag.first().copy(
+                        id = UUID.randomUUID(),
+                        aarsinntekt = 400000
                     )
-                }
-            }
+                )
 
             @Test
             fun `Skal beregne avkortingsperioder fra og med foerste maaned i aarsoppgjoer med nytt inntektsgrunnlag`() {
@@ -259,7 +254,7 @@ internal class AvkortingTest {
                     nyVirk,
                     beregning
                 )
-                beregnetAvkorting.avkortingsperioder.asClue {
+                beregnetAvkorting.aarsoppgjoer.avkortingsperioder.asClue {
                     it.size shouldBe 2
                     it[0].asClue { avkortingsperiode ->
                         avkortingsperiode.periode shouldBe Periode(
@@ -276,34 +271,13 @@ internal class AvkortingTest {
             }
 
             @Test
-            fun `Aarsoppgjoer beregner restanse foer ny virk og fordele utover resterende maaneder etter ny virk`() {
-                val beregnetAvkorting = avkortingMedNyInntekt.beregnAvkorting(
-                    BehandlingType.REVURDERING,
-                    nyVirk,
-                    beregning
-                )
-                beregnetAvkorting.aarsoppgjoer.let {
-                    it.shouldContainExactly(
-                        aarsoppgjoerMaaned(YearMonth.of(2023, 3), 20902, 13660, 7242, 4500, 0, 11742),
-                        aarsoppgjoerMaaned(YearMonth.of(2023, 4), 20902, 13660, 7242, 4500, 0, 11742),
-                        aarsoppgjoerMaaned(YearMonth.of(2023, 5), 22241, 13526, 8715, 4500, 0, 13215),
-                        aarsoppgjoerMaaned(YearMonth.of(2023, 6), 22241, 13526, 8715, 0, 1928, 6787),
-                        aarsoppgjoerMaaned(YearMonth.of(2023, 7), 22241, 13526, 8715, 0, 1928, 6787),
-                        aarsoppgjoerMaaned(YearMonth.of(2023, 8), 22241, 13526, 8715, 0, 1928, 6787),
-                        aarsoppgjoerMaaned(YearMonth.of(2023, 9), 22241, 13526, 8715, 0, 1928, 6787),
-                        aarsoppgjoerMaaned(YearMonth.of(2023, 10), 22241, 13526, 8715, 0, 1928, 6787),
-                        aarsoppgjoerMaaned(YearMonth.of(2023, 11), 22241, 13526, 8715, 0, 1928, 6787),
-                        aarsoppgjoerMaaned(YearMonth.of(2023, 12), 22241, 13526, 8715, 0, 1928, 6787)
-                    )
-                }
-            }
-
-            @Test
             fun `Aarsoppgjoer oppdateres med nye beregninger hvis de har endret seg`() {
+                val idNyBeregning = UUID.randomUUID()
                 val beregnetAvkorting = avkortingMedNyInntekt.beregnAvkorting(
                     BehandlingType.REVURDERING,
                     nyVirk,
                     beregning.copy(
+                        beregningId = idNyBeregning,
                         beregningsperioder = listOf(
                             beregningsperiode(
                                 datoFOM = YearMonth.of(2023, 6),
@@ -312,19 +286,27 @@ internal class AvkortingTest {
                         )
                     )
                 )
-                beregnetAvkorting.aarsoppgjoer.let {
-                    it[0].beregning shouldBe 20902
-                    it[1].beregning shouldBe 20902
-                    it[2].beregning shouldBe 22241
-                    it[3].beregning shouldBe 23000
-                    it[4].beregning shouldBe 23000
-                    it[5].beregning shouldBe 23000
-                    it[6].beregning shouldBe 23000
-                    it[7].beregning shouldBe 23000
-                    it[8].beregning shouldBe 23000
-                    it[9].beregning shouldBe 23000
+                beregnetAvkorting.aarsoppgjoer.asClue {
+                    it.ytelseFoerAvkorting.shouldContainExactly(
+                        YtelseFoerAvkorting(
+                            beregning = 20902,
+                            periode = Periode(YearMonth.of(2023, 3), YearMonth.of(2023, 4)),
+                            beregningsreferanse = beregning.beregningId
+                        ), YtelseFoerAvkorting(
+                            beregning = 22241,
+                            periode = Periode(YearMonth.of(2023, 5), YearMonth.of(2023, 5)),
+                            beregningsreferanse = beregning.beregningId
+                        ),
+                        YtelseFoerAvkorting(
+                            beregning = 23000,
+                            periode = Periode(YearMonth.of(2023, 6), null),
+                            beregningsreferanse = idNyBeregning
+                        )
+                    )
                 }
             }
+
+            // TODO test for restanse i aarsoppgjoer
 
             @Test
             fun `Skal beregne ytelse etter avkorting og restanse fra nytt virkningstidspunkt`() {
@@ -352,4 +334,5 @@ internal class AvkortingTest {
             }
         }
     }
+
 }

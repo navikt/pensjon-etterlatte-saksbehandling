@@ -1,10 +1,12 @@
 package no.nav.etterlatte.beregning.regler
 
-import no.nav.etterlatte.avkorting.AarsoppgjoerMaaned
+import no.nav.etterlatte.avkorting.Aarsoppgjoer
 import no.nav.etterlatte.avkorting.AvkortetYtelse
 import no.nav.etterlatte.avkorting.Avkorting
 import no.nav.etterlatte.avkorting.AvkortingGrunnlag
 import no.nav.etterlatte.avkorting.Avkortingsperiode
+import no.nav.etterlatte.avkorting.Restanse
+import no.nav.etterlatte.avkorting.YtelseFoerAvkorting
 import no.nav.etterlatte.avkorting.regler.AvkortetYtelseGrunnlag
 import no.nav.etterlatte.avkorting.regler.InntektAvkortingGrunnlag
 import no.nav.etterlatte.avkorting.regler.InntektAvkortingGrunnlagWrapper
@@ -70,13 +72,12 @@ val bruker = Saksbehandler("token", "ident", null)
 
 fun avkorting(
     avkortingGrunnlag: List<AvkortingGrunnlag> = emptyList(),
+    ytelseFoerAvkorting: List<YtelseFoerAvkorting> = emptyList(),
     avkortingsperioder: List<Avkortingsperiode> = emptyList(),
     avkortetYtelse: List<AvkortetYtelse> = emptyList(),
-    aarsoppgjoer: List<AarsoppgjoerMaaned> = emptyList()
 ) = Avkorting(
     avkortingGrunnlag = avkortingGrunnlag,
-    avkortingsperioder = avkortingsperioder,
-    aarsoppgjoer = aarsoppgjoer,
+    aarsoppgjoer = aarsoppgjoer(ytelseFoerAvkorting, avkortingsperioder),
     avkortetYtelse = avkortetYtelse
 )
 
@@ -111,6 +112,19 @@ fun inntektAvkortingGrunnlag(
         kilde = "",
         beskrivelse = ""
     )
+)
+
+fun aarsoppgjoer(
+    ytelseFoerAvkorting: List<YtelseFoerAvkorting> = emptyList(),
+    avkortingsperioder: List<Avkortingsperiode> = emptyList(),
+    tidligereAvkortetYtelse: List<AvkortetYtelse> = emptyList(),
+    reberegnetAvkortetYtelse: List<AvkortetYtelse> = emptyList(),
+) = Aarsoppgjoer(
+    ytelseFoerAvkorting = ytelseFoerAvkorting,
+    avkortingsperioder = avkortingsperioder,
+    tidligereAvkortetYtelse = tidligereAvkortetYtelse,
+    reberegnetAvkortetYtelse = reberegnetAvkortetYtelse,
+    restanse = Restanse(totalRestanse = 0, fordeltRestanse = 0),
 )
 
 fun avkortingsperiode(
@@ -153,23 +167,6 @@ fun avkortetYtelse(
     kilde = Grunnlagsopplysning.RegelKilde("regelid", Tidspunkt.now(), "1")
 )
 
-fun aarsoppgjoerMaaned(
-    maaned: YearMonth = YearMonth.of(2023, 1),
-    beregning: Int = 0,
-    avkorting: Int = 0,
-    forventetAvkortetYtelse: Int = 0,
-    restanse: Int = 0,
-    fordeltRestanse: Int = 0,
-    faktiskAvkortetYtelse: Int = 0
-) = AarsoppgjoerMaaned(
-    maaned = maaned,
-    beregning = beregning,
-    avkorting = avkorting,
-    forventetAvkortetYtelse = forventetAvkortetYtelse,
-    restanse = restanse,
-    fordeltRestanse = fordeltRestanse,
-    faktiskAvkortetYtelse = faktiskAvkortetYtelse
-)
 
 fun beregning(
     beregninger: List<Beregningsperiode> = listOf(beregningsperiode())

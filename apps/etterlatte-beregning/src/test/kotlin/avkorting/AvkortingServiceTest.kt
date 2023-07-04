@@ -107,7 +107,7 @@ internal class AvkortingServiceTest {
                 forrigeBehandlingId
             )
             every { avkortingRepository.hentAvkorting(forrigeBehandlingId) } returns forrigeAvkorting
-            every { forrigeAvkorting.kopierAvkorting() } returns kopiertAvkorting
+            every { forrigeAvkorting.kopierAvkorting(any()) } returns kopiertAvkorting
             every { beregningService.hentBeregningNonnull(any()) } returns beregning
             every { kopiertAvkorting.beregnAvkorting(any(), any(), any()) } returns beregnetAvkorting
             every { avkortingRepository.lagreAvkorting(any(), any()) } returns lagretAvkorting
@@ -122,7 +122,7 @@ internal class AvkortingServiceTest {
                 behandlingKlient.hentBehandling(behandlingId, bruker)
                 behandlingKlient.hentSisteIverksatteBehandling(behandling.sak, bruker)
                 avkortingRepository.hentAvkorting(forrigeBehandlingId)
-                forrigeAvkorting.kopierAvkorting()
+                forrigeAvkorting.kopierAvkorting(behandling.virkningstidspunkt!!.dato)
                 beregningService.hentBeregningNonnull(behandlingId)
                 kopiertAvkorting.beregnAvkorting(
                     behandling.behandlingType,

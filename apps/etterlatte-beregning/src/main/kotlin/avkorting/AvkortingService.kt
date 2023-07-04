@@ -67,9 +67,10 @@ class AvkortingService(
             ?: throw Exception("Fant ikke avkorting for $forrigeBehandlingId")
         val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
         val beregning = beregningService.hentBeregningNonnull(behandlingId)
-        val beregnetAvkorting = forrigeAvkorting.kopierAvkorting().beregnAvkorting(
+        val virkningstidspunkt = behandling.hentVirk()
+        val beregnetAvkorting = forrigeAvkorting.kopierAvkorting(virkningstidspunkt).beregnAvkorting(
             behandling.behandlingType,
-            behandling.hentVirk(),
+            virkningstidspunkt,
             beregning
         )
 

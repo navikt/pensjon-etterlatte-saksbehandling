@@ -27,11 +27,6 @@ class AvkortingRepository(private val dataSource: DataSource) {
             behandlingId
         ).let { query -> tx.run(query.map { row -> row.toAvkortingsperiode() }.asList) }
 
-        val aarsoppgjoer = queryOf(
-            "SELECT * FROM avkorting_aarsoppgjoer WHERE behandling_id = ?",
-            behandlingId
-        ).let { query -> tx.run(query.map { row -> row.toAarsoppgjoer() }.asList) }
-
         val avkortetYtelse = queryOf(
             "SELECT * FROM avkortet_ytelse WHERE behandling_id = ?",
             behandlingId
@@ -42,8 +37,13 @@ class AvkortingRepository(private val dataSource: DataSource) {
         } else {
             Avkorting(
                 avkortingGrunnlag = avkortingGrunnlag,
-                avkortingsperioder = avkortingsperioder,
-                aarsoppgjoer = aarsoppgjoer,
+                aarsoppgjoer = Aarsoppgjoer( // TODO
+                    ytelseFoerAvkorting = emptyList(),
+                    avkortingsperioder = avkortingsperioder,
+                    tidligereAvkortetYtelse = emptyList(),
+                    reberegnetAvkortetYtelse = emptyList(),
+                    restanse = Restanse(totalRestanse = 0, fordeltRestanse = 0),
+                ),
                 avkortetYtelse = avkortetYtelse
             )
         }
@@ -56,8 +56,7 @@ class AvkortingRepository(private val dataSource: DataSource) {
         dataSource.transaction { tx ->
             slettAvkorting(behandlingId, tx)
             lagreAvkortingGrunnlag(behandlingId, avkorting.avkortingGrunnlag, tx)
-            lagreAvkortingsperioder(behandlingId, avkorting.avkortingsperioder, tx)
-            lagreAarsoppgjoer(behandlingId, avkorting.aarsoppgjoer, tx)
+            lagreAvkortingsperioder(behandlingId, avkorting.aarsoppgjoer.avkortingsperioder, tx)
             lagreAvkortetYtelse(behandlingId, avkorting.avkortetYtelse, tx)
         }
         return hentAvkortingUtenNullable(behandlingId)
@@ -144,39 +143,6 @@ class AvkortingRepository(private val dataSource: DataSource) {
         ).let { query -> tx.run(query.asUpdate) }
     }
 
-    private fun lagreAarsoppgjoer(
-        behandlingId: UUID,
-        aarsoppgjoer: List<AarsoppgjoerMaaned>,
-        tx: TransactionalSession
-    ) =
-        aarsoppgjoer.forEach {
-            // TODO EY-2368 legg til felter regelresultat og kilde for restanse og fordelt restanse
-            queryOf(
-                statement = """
-                    INSERT INTO avkorting_aarsoppgjoer(
-                        id, behandling_id, maaned,
-                        beregning, avkorting, forventet_avkortet_ytelse, restanse, fordelt_restanse,
-                        faktisk_avkortet_ytelse 
-                    ) VALUES (
-                        :id, :behandlingId, :maaned,
-                        :beregning, :avkorting, :forventet_avkortet_ytelse, :restanse, :fordelt_restanse,
-                        :faktisk_avkortet_ytelse 
-                    )
-                """.trimIndent(),
-                paramMap = mapOf(
-                    "id" to UUID.randomUUID(),
-                    "behandlingId" to behandlingId,
-                    "maaned" to it.maaned.atDay(1),
-                    "beregning" to it.beregning,
-                    "avkorting" to it.avkorting,
-                    "forventet_avkortet_ytelse" to it.forventetAvkortetYtelse,
-                    "restanse" to it.restanse,
-                    "fordelt_restanse" to it.fordeltRestanse,
-                    "faktisk_avkortet_ytelse" to it.faktiskAvkortetYtelse
-                )
-            ).let { query -> tx.run(query.asUpdate) }
-        }
-
     private fun lagreAvkortetYtelse(
         behandlingId: UUID,
         avkortetYtelse: List<AvkortetYtelse>,
@@ -250,13 +216,4 @@ class AvkortingRepository(private val dataSource: DataSource) {
         kilde = string("kilde").let { objectMapper.readValue(it) }
     )
 
-    private fun Row.toAarsoppgjoer() = AarsoppgjoerMaaned(
-        maaned = sqlDate("maaned").let { YearMonth.from(it.toLocalDate()) },
-        beregning = int("beregning"),
-        avkorting = int("avkorting"),
-        forventetAvkortetYtelse = int("forventet_avkortet_ytelse"),
-        restanse = int("restanse"),
-        fordeltRestanse = int("fordelt_restanse"),
-        faktiskAvkortetYtelse = int("faktisk_avkortet_ytelse")
-    )
 }

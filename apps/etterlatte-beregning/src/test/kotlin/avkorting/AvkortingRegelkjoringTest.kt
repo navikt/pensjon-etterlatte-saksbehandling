@@ -3,14 +3,15 @@ package avkorting
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import no.nav.etterlatte.avkorting.AvkortingRegelkjoring
+import no.nav.etterlatte.avkorting.YtelseFoerAvkorting
 import no.nav.etterlatte.beregning.grunnlag.PeriodiseringAvGrunnlagFeil
 import no.nav.etterlatte.beregning.regler.avkortinggrunnlag
 import no.nav.etterlatte.beregning.regler.avkortingsperiode
-import no.nav.etterlatte.beregning.regler.beregningsperiode
 import no.nav.etterlatte.libs.common.periode.Periode
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.time.YearMonth
+import java.util.UUID
 
 class AvkortingRegelkjoringTest {
 
@@ -78,15 +79,23 @@ class AvkortingRegelkjoringTest {
     @Test
     fun `skal beregne endelig avkortet ytelse`() {
         val virkningstidspunkt = YearMonth.of(2023, 1)
+        val beregningsId = UUID.randomUUID()
         val beregninger = listOf(
-            beregningsperiode(
-                utbetaltBeloep = 5000,
-                datoFOM = YearMonth.of(2023, 1),
-                datoTOM = YearMonth.of(2023, 3)
+            YtelseFoerAvkorting(
+                beregning = 5000,
+                Periode(
+                    fom = YearMonth.of(2023, 1),
+                    tom = YearMonth.of(2023, 3)
+                ),
+                beregningsreferanse = beregningsId
             ),
-            beregningsperiode(
-                utbetaltBeloep = 10000,
-                datoFOM = YearMonth.of(2023, 4)
+            YtelseFoerAvkorting(
+                beregning = 10000,
+                Periode(
+                    fom = YearMonth.of(2023, 4),
+                    tom = null
+                ),
+                beregningsreferanse = beregningsId
             )
         )
         val avkortingsperioder = listOf(
@@ -107,7 +116,7 @@ class AvkortingRegelkjoringTest {
         )
 
         val avkortetYtelse = AvkortingRegelkjoring.beregnAvkortetYtelse(
-            Periode(fom = virkningstidspunkt, tom = null),
+            virkningstidspunkt,
             beregninger,
             avkortingsperioder
         )

@@ -1,9 +1,11 @@
 package avkorting
 
 import io.kotest.matchers.shouldBe
+import no.nav.etterlatte.avkorting.Aarsoppgjoer
 import no.nav.etterlatte.avkorting.Avkorting
 import no.nav.etterlatte.avkorting.AvkortingRepository
-import no.nav.etterlatte.beregning.regler.aarsoppgjoerMaaned
+import no.nav.etterlatte.avkorting.Restanse
+import no.nav.etterlatte.beregning.regler.aarsoppgjoer
 import no.nav.etterlatte.beregning.regler.avkortetYtelse
 import no.nav.etterlatte.beregning.regler.avkortinggrunnlag
 import no.nav.etterlatte.beregning.regler.avkortingsperiode
@@ -53,15 +55,13 @@ internal class AvkortingRepositoryTest {
         val avkortinggrunnlag = listOf(avkortinggrunnlag())
         val avkortingsperioder = listOf(avkortingsperiode())
         val avkortetYtelse = listOf(avkortetYtelse())
-        val restanseOppgjoer = listOf(aarsoppgjoerMaaned())
 
         avkortingRepository.lagreAvkorting(
             behandlingId,
             Avkorting(
-                avkortinggrunnlag,
-                avkortingsperioder,
-                restanseOppgjoer,
-                avkortetYtelse
+                avkortingGrunnlag = avkortinggrunnlag,
+                aarsoppgjoer = aarsoppgjoer(avkortingsperioder = avkortingsperioder,),
+                avkortetYtelse = avkortetYtelse,
             )
         )
 
@@ -73,21 +73,19 @@ internal class AvkortingRepositoryTest {
                 restanse = 100
             )
         )
-        val endretRestanseOppgjoer = listOf(aarsoppgjoerMaaned(restanse = 555))
 
         val avkorting = avkortingRepository.lagreAvkorting(
             behandlingId,
             Avkorting(
-                endretAvkortingGrunnlag,
-                endretAvkortingsperiode,
-                endretRestanseOppgjoer,
-                endretAvkortetYtelse
+                avkortingGrunnlag = endretAvkortingGrunnlag,
+                aarsoppgjoer = aarsoppgjoer(avkortingsperioder = endretAvkortingsperiode),
+                avkortetYtelse = endretAvkortetYtelse
             )
         )
 
         avkorting.avkortingGrunnlag.size shouldBe 1
         avkorting.avkortingGrunnlag shouldBe endretAvkortingGrunnlag
-        avkorting.avkortingsperioder shouldBe endretAvkortingsperiode
+        avkorting.aarsoppgjoer.avkortingsperioder shouldBe endretAvkortingsperiode
         avkorting.avkortetYtelse shouldBe endretAvkortetYtelse
     }
 }

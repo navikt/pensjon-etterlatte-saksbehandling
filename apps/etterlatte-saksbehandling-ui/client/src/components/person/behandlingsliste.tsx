@@ -1,9 +1,12 @@
 import { Heading, Link, Table, Tag } from '@navikt/ds-react'
 import { AarsaksTyper, BehandlingOgRevurderingsAarsakerType, IBehandlingsammendrag } from './typer'
-import { formaterBehandlingstype, formaterEnumTilLesbarString, formaterStringDato } from '~utils/formattering'
+import {
+  formaterBehandlingstype,
+  formaterEnumTilLesbarString,
+  formaterStringDato,
+  formaterVedtakType,
+} from '~utils/formattering'
 import { IBehandlingStatus, IBehandlingsType, IUtenlandstilsnittType } from '~shared/types/IDetaljertBehandling'
-import { VilkaarsvurderingResultat } from '~shared/api/vilkaarsvurdering'
-import { erFerdigBehandlet } from '~components/behandling/felles/utils'
 import React, { useEffect } from 'react'
 import { Revurderingsaarsak } from '~shared/types/Revurderingsaarsak'
 import { hentVedtakSammendrag } from '~shared/api/vedtaksvurdering'
@@ -13,7 +16,7 @@ import { isFailure, isPending, isSuccess, useApiCall } from '~shared/hooks/useAp
 import Spinner from '~shared/Spinner'
 import { ExclamationmarkTriangleFillIcon } from '@navikt/aksel-icons'
 
-const VedtaksDato = (props: { behandlingsId: string }) => {
+const VedtakKolonner = (props: { behandlingsId: string }) => {
   const [vedtak, apiHentVedtaksammendrag] = useApiCall(hentVedtakSammendrag)
 
   useEffect(() => {
@@ -28,7 +31,12 @@ const VedtaksDato = (props: { behandlingsId: string }) => {
   return (
     <>
       {isPending(vedtak) && <Spinner visible label={''} margin={'0'} />}
-      {isSuccess(vedtak) && <>{attestertDato(vedtak.data?.datoAttestert)}</>}
+      {isSuccess(vedtak) && (
+        <>
+          <Table.DataCell>{attestertDato(vedtak.data?.datoAttestert)}</Table.DataCell>
+          <Table.DataCell>{vedtak.data?.type && formaterVedtakType(vedtak.data.type)}</Table.DataCell>
+        </>
+      )}
       {isFailure(vedtak) && (
         <ExclamationmarkTriangleFillIcon
           title={vedtak.error.error || 'Feil oppsto ved henting av sammendrag for behandling'}
@@ -81,10 +89,8 @@ export const Behandlingsliste = ({ behandlinger }: { behandlinger: IBehandlingsa
         <Table.Body>
           {sorterteBehandlinger.map((behandling, i) => (
             <Table.Row key={i} shadeOnHover={false}>
-              <Table.DataCell key={`data${behandling.behandlingOpprettet}`}>
-                {formaterStringDato(behandling.behandlingOpprettet)}
-              </Table.DataCell>
-              <Table.DataCell key={`data${behandling.behandlingType}`}>
+              <Table.DataCell>{formaterStringDato(behandling.behandlingOpprettet)}</Table.DataCell>
+              <Table.DataCell>
                 <BehandlingstypeWrapper>{formaterBehandlingstype(behandling.behandlingType)}</BehandlingstypeWrapper>
               </Table.DataCell>
               <Table.DataCell>
@@ -95,20 +101,13 @@ export const Behandlingsliste = ({ behandlinger }: { behandlinger: IBehandlingsa
                   {formaterEnumTilLesbarString(behandling.utenlandstilsnitt?.type || IUtenlandstilsnittType.NASJONAL)}
                 </Tag>
               </Table.DataCell>
-              <Table.DataCell key={`data${behandling.aarsak}`}>{mapAarsak(behandling.aarsak)}</Table.DataCell>
-              <Table.DataCell key={`data${behandling.status}`}>
-                {formaterEnumTilLesbarString(endringStatusNavn(behandling.status))}
-              </Table.DataCell>
-              <Table.DataCell key={'virkningstidspunkt'}>
+              <Table.DataCell>{mapAarsak(behandling.aarsak)}</Table.DataCell>
+              <Table.DataCell>{formaterEnumTilLesbarString(endringStatusNavn(behandling.status))}</Table.DataCell>
+              <Table.DataCell>
                 {behandling.virkningstidspunkt ? formaterStringDato(behandling.virkningstidspunkt!!.dato) : ''}
               </Table.DataCell>
-              <Table.DataCell key={'vedtaksdato'}>
-                <VedtaksDato behandlingsId={behandling.id} />
-              </Table.DataCell>
-              <Table.DataCell key={'resultat'}>
-                {erFerdigBehandlet(behandling.status) ? resultatTekst(behandling) : ''}
-              </Table.DataCell>
-              <Table.DataCell key={i}>
+              <VedtakKolonner behandlingsId={behandling.id} />
+              <Table.DataCell>
                 <Link href={lenkeTilBehandling(behandling)}>Vis behandling</Link>
               </Table.DataCell>
             </Table.Row>
@@ -162,31 +161,6 @@ function endringStatusNavn(status: IBehandlingStatus) {
       return 'Iverksatt'
     default:
       return status
-  }
-}
-
-function resultatTekst(behandling: IBehandlingsammendrag): string {
-  switch (behandling.behandlingType) {
-    case IBehandlingsType.FØRSTEGANGSBEHANDLING:
-      return behandling.status === IBehandlingStatus.AVBRUTT
-        ? 'Avbrutt'
-        : resultatTekstFoerstegangsbehandling(behandling.vilkaarsvurderingUtfall)
-    case IBehandlingsType.MANUELT_OPPHOER:
-      return behandling.status === IBehandlingStatus.AVBRUTT ? 'Avbrutt' : 'Opphørt: Må behandles i Pesys'
-    case IBehandlingsType.REVURDERING:
-    default:
-      return ''
-  }
-}
-
-function resultatTekstFoerstegangsbehandling(vilkaarsvurderingResultat?: VilkaarsvurderingResultat): string {
-  switch (vilkaarsvurderingResultat) {
-    case undefined:
-      return ''
-    case VilkaarsvurderingResultat.OPPFYLT:
-      return 'Innvilget'
-    case VilkaarsvurderingResultat.IKKE_OPPFYLT:
-      return 'Avslått'
   }
 }
 

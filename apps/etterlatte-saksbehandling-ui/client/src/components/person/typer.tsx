@@ -1,4 +1,3 @@
-import { VilkaarsvurderingResultat } from '~shared/api/vilkaarsvurdering'
 import {
   IBehandlingStatus,
   IBehandlingsType,
@@ -31,7 +30,6 @@ export interface IBehandlingsammendrag {
   behandlingType: IBehandlingsType
   aarsak: BehandlingOgRevurderingsAarsakerType
   virkningstidspunkt?: Virkningstidspunkt
-  vilkaarsvurderingUtfall?: VilkaarsvurderingResultat
   utenlandstilsnitt?: IUtenlandstilsnitt
   boddEllerArbeidetUtlandet?: IBoddEllerArbeidetUtlandet
 }

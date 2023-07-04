@@ -16,6 +16,7 @@ import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.tidspunkt.toNorskTid
 import no.nav.etterlatte.libs.common.vedtak.AttesterVedtakDto
 import no.nav.etterlatte.libs.common.vedtak.LoependeYtelseDTO
+import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.common.withBehandlingId
 import no.nav.etterlatte.libs.common.withSakId
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
@@ -129,6 +130,7 @@ fun Route.vedtaksvurderingRoute(service: VedtaksvurderingService, behandlingKlie
 private fun Vedtak.toVedtakSammendragDto() = VedtakSammendragDto(
     id = id.toString(),
     behandlingId = behandlingId,
+    vedtakType = type,
     saksbehandlerId = vedtakFattet?.ansvarligSaksbehandler,
     datoFattet = vedtakFattet?.tidspunkt?.toNorskTid(),
     attestant = attestasjon?.attestant,
@@ -145,6 +147,7 @@ data class UnderkjennVedtakDto(val kommentar: String, val valgtBegrunnelse: Stri
 data class VedtakSammendragDto(
     val id: String,
     val behandlingId: UUID,
+    val vedtakType: VedtakType?,
     val saksbehandlerId: String?,
     val datoFattet: ZonedDateTime?,
     val attestant: String?,

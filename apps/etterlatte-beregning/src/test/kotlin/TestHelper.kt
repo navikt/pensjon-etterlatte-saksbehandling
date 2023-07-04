@@ -2,6 +2,7 @@ package no.nav.etterlatte.beregning.regler
 
 import no.nav.etterlatte.avkorting.Aarsoppgjoer
 import no.nav.etterlatte.avkorting.AvkortetYtelse
+import no.nav.etterlatte.avkorting.AvkortetYtelseType
 import no.nav.etterlatte.avkorting.Avkorting
 import no.nav.etterlatte.avkorting.AvkortingGrunnlag
 import no.nav.etterlatte.avkorting.Avkortingsperiode
@@ -119,12 +120,22 @@ fun aarsoppgjoer(
     avkortingsperioder: List<Avkortingsperiode> = emptyList(),
     tidligereAvkortetYtelse: List<AvkortetYtelse> = emptyList(),
     reberegnetAvkortetYtelse: List<AvkortetYtelse> = emptyList(),
+    restanse: Restanse = Restanse(totalRestanse = 0, fordeltRestanse = 0)
 ) = Aarsoppgjoer(
     ytelseFoerAvkorting = ytelseFoerAvkorting,
     avkortingsperioder = avkortingsperioder,
     tidligereAvkortetYtelse = tidligereAvkortetYtelse,
     reberegnetAvkortetYtelse = reberegnetAvkortetYtelse,
-    restanse = Restanse(totalRestanse = 0, fordeltRestanse = 0),
+    restanse = restanse,
+)
+fun ytelseFoerAvkorting(
+    beregning: Int = 100,
+    periode: Periode = Periode(fom = YearMonth.of(2023,1), tom = null),
+    beregningsreferanse: UUID = UUID.randomUUID()
+) = YtelseFoerAvkorting(
+    beregning = beregning,
+    periode = periode,
+    beregningsreferanse = beregningsreferanse
 )
 
 fun avkortingsperiode(
@@ -139,6 +150,17 @@ fun avkortingsperiode(
     kilde = Grunnlagsopplysning.RegelKilde("regelid", Tidspunkt.now(), "1")
 )
 
+fun restanse(
+    totalRestanse: Int = 100,
+    fordeltRestanse: Int = 100
+) = Restanse(
+    totalRestanse = totalRestanse,
+    fordeltRestanse = fordeltRestanse,
+    tidspunkt = Tidspunkt.now(),
+    regelResultat = "".toJsonNode(),
+    kilde = Grunnlagsopplysning.RegelKilde("regelid", Tidspunkt.now(), "1")
+)
+
 fun avkortetYtelseGrunnlag(beregning: Int, avkorting: Int, fordeltRestanse: Int = 0) = AvkortetYtelseGrunnlag(
     beregning = FaktumNode(verdi = beregning, "", ""),
     avkorting = FaktumNode(verdi = avkorting, "", ""),
@@ -146,9 +168,10 @@ fun avkortetYtelseGrunnlag(beregning: Int, avkorting: Int, fordeltRestanse: Int 
 )
 
 fun avkortetYtelse(
-    ytelseEtterAvkorting: Int = 100,
+    type: AvkortetYtelseType = AvkortetYtelseType.NY,
+    ytelseEtterAvkorting: Int = 50,
     restanse: Int = 50,
-    ytelseEtterAvkortingFoerRestanse: Int = 0,
+    ytelseEtterAvkortingFoerRestanse: Int = 100,
     avkortingsbeloep: Int = 200,
     ytelseFoerAvkorting: Int = 300,
     periode: Periode = Periode(
@@ -156,6 +179,7 @@ fun avkortetYtelse(
         tom = null
     )
 ) = AvkortetYtelse(
+    type = type,
     periode = periode,
     ytelseEtterAvkorting = ytelseEtterAvkorting,
     restanse = restanse,

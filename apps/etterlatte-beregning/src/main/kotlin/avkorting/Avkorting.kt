@@ -20,10 +20,13 @@ data class Avkorting(
         tidligereAvkortetYtelse = aarsoppgjoer.tidligereAvkortetYtelse + avkortetYtelse.map {
             when (it.periode.tom) {
                 null -> it.copy(
+                    type = AvkortetYtelseType.TIDLIGERE,
                     periode = Periode(fom = it.periode.fom, tom = virkningstidspunkt.minusMonths(1))
                 )
 
-                else -> it
+                else -> it.copy(
+                    type = AvkortetYtelseType.TIDLIGERE
+                )
             }
         },
         ytelseFoerAvkorting = aarsoppgjoer.ytelseFoerAvkorting,
@@ -193,11 +196,13 @@ data class Avkortingsperiode(
 data class Restanse(
     val totalRestanse: Int,
     val fordeltRestanse: Int,
+    val tidspunkt: Tidspunkt? = null,
     val regelResultat: JsonNode? = null,
     val kilde: Grunnlagsopplysning.RegelKilde? = null,
 )
 
 data class AvkortetYtelse(
+    val type: AvkortetYtelseType,
     val periode: Periode,
     val ytelseEtterAvkorting: Int,
     val ytelseEtterAvkortingFoerRestanse: Int,
@@ -208,6 +213,7 @@ data class AvkortetYtelse(
     val regelResultat: JsonNode,
     val kilde: Grunnlagsopplysning.RegelKilde
 )
+enum class AvkortetYtelseType { NY, TIDLIGERE, REBEREGNET }
 
 fun Beregning.mapTilYtelseFoerAvkorting() = beregningsperioder.map {
     YtelseFoerAvkorting(

@@ -6,6 +6,7 @@ import io.kotest.matchers.equality.shouldBeEqualToIgnoringFields
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import no.nav.etterlatte.avkorting.AvkortetYtelse
+import no.nav.etterlatte.avkorting.AvkortetYtelseType
 import no.nav.etterlatte.avkorting.Avkorting
 import no.nav.etterlatte.avkorting.AvkortingGrunnlag
 import no.nav.etterlatte.avkorting.YtelseFoerAvkorting
@@ -41,7 +42,10 @@ internal class AvkortingTest {
             avkortingGrunnlag = listOf(avkortinggrunnlag(), avkortinggrunnlag()),
             ytelseFoerAvkorting = beregning.mapTilYtelseFoerAvkorting(),
             tidligereAvkortetYtelse = listOf(
-                avkortetYtelse(periode = Periode(YearMonth.of(2023, 1), YearMonth.of(2023, 1))),
+                avkortetYtelse(
+                    type = AvkortetYtelseType.TIDLIGERE,
+                    periode = Periode(YearMonth.of(2023, 1), YearMonth.of(2023, 1))
+                ),
             ),
             avkortetYtelse = listOf(
                 avkortetYtelse(periode = Periode(YearMonth.of(2023, 2), null)),
@@ -84,9 +88,11 @@ internal class AvkortingTest {
                 tidligereAvkortetYtelse[1].asClue {
                     it.shouldBeEqualToIgnoringFields(
                         avkorting.avkortetYtelse[0],
-                        AvkortetYtelse::periode
+                        AvkortetYtelse::periode,
+                        AvkortetYtelse::type
                     )
                     it.periode shouldBe Periode(YearMonth.of(2023, 2), virkningstidspunkt.minusMonths(1))
+                    it.type shouldBe AvkortetYtelseType.TIDLIGERE
                 }
             }
         }

@@ -102,7 +102,7 @@ object AvkortingRegelkjoring {
                 )
             )
         )
-        return beregnAvkortetYtelse(periode, regelgrunnlag)
+        return beregnAvkortetYtelse(periode, AvkortetYtelseType.NY, regelgrunnlag)
     }
 
     fun beregnAvkortetYtelsePaaNytt(
@@ -116,11 +116,12 @@ object AvkortingRegelkjoring {
             avkortingsperioder = periodiserteAvkortinger(avkortinger),
             fordeltRestanse = KonstantGrunnlag(FaktumNode(verdi = 0, kilde = "", beskrivelse = "Tom restanse"))
         )
-        return beregnAvkortetYtelse(periode, avkortetYtelseGrunnlag)
+        return beregnAvkortetYtelse(periode, AvkortetYtelseType.REBEREGNET, avkortetYtelseGrunnlag)
     }
 
     private fun beregnAvkortetYtelse(
         periode: Periode,
+        type: AvkortetYtelseType,
         regelgrunnlag: PeriodisertAvkortetYtelseGrunnlag
     ): List<AvkortetYtelse> {
         val resultat = avkortetYtelseMedRestanse.eksekver(regelgrunnlag, periode.tilRegelPeriode())
@@ -131,6 +132,7 @@ object AvkortingRegelkjoring {
                     val resultatFom = periodisertResultat.periode.fraDato
                     val restanse = regelgrunnlag.finnGrunnlagForPeriode(resultatFom).fordeltRestanse.verdi
                     AvkortetYtelse(
+                        type = type,
                         periode = Periode(
                             fom = YearMonth.from(periodisertResultat.periode.fraDato),
                             tom = periodisertResultat.periode.tilDato?.let { YearMonth.from(it) }
@@ -197,7 +199,6 @@ object AvkortingRegelkjoring {
         tidligereYtelseEtterAvkorting: List<AvkortetYtelse>,
         nyYtelseEtterAvkorting: List<AvkortetYtelse>
     ): Restanse {
-
         val grunnlag = RestanseGrunnlag(
             FaktumNode(
                 verdi = tidligereYtelseEtterAvkorting
@@ -227,13 +228,15 @@ object AvkortingRegelkjoring {
         return when (resultat) {
             is RegelkjoeringResultat.Suksess -> {
                 val restanseresultat = resultat.periodiserteResultater.first().resultat.verdi
+                val tidspunkt = Tidspunkt.now()
                 Restanse(
                     totalRestanse = restanseresultat.totalRestanse,
                     fordeltRestanse = restanseresultat.fordeltRestanse,
                     regelResultat = resultat.toJsonNode(),
+                    tidspunkt = tidspunkt,
                     kilde = Grunnlagsopplysning.RegelKilde(
                         navn = restanse.regelReferanse.id,
-                        ts = Tidspunkt.now(),
+                        ts = tidspunkt,
                         versjon = resultat.reglerVersjon,
                     )
                 )

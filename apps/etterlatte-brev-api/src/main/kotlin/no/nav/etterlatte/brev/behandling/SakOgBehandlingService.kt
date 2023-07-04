@@ -87,8 +87,7 @@ class SakOgBehandlingService(
                 vedtak.type,
                 ansvarligEnhet,
                 saksbehandlerIdent,
-                attestantIdent,
-                vedtak.vedtakFattet?.tidspunkt?.toLocalDate()
+                attestantIdent
             ),
             utbetalingsinfo = finnUtbetalingsinfo(vedtak.behandling.id, vedtak.virkningstidspunkt, brukerTokenInfo),
             avkortingsinfo = finnYtelseMedGrunnlag(

@@ -93,7 +93,7 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
           }[beregningFraState.type]}
         {behandlingSkalSendeBrev(behandling) ? null : (
           <InfoAlert variant="info" inline>
-            Det sendes ikke brev for denne behandlingen.
+            Det sendes ikke vedtaksbrev for denne behandlingen.
           </InfoAlert>
         )}
       </ContentHeader>

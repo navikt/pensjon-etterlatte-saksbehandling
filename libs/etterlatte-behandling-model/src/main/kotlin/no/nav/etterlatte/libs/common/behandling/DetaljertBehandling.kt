@@ -26,7 +26,8 @@ data class DetaljertBehandling(
     val kommerBarnetTilgode: KommerBarnetTilgode?,
     val revurderingsaarsak: RevurderingAarsak? = null,
     val revurderingInfo: RevurderingInfo?,
-    val prosesstype: Prosesstype
+    val prosesstype: Prosesstype,
+    val enhet: String
 ) {
     fun kanVedta(type: VedtakType): Boolean {
         if (revurderingsaarsak.girOpphoer() && type != VedtakType.OPPHOER) {

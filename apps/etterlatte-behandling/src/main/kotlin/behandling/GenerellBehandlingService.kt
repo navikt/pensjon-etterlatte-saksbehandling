@@ -256,7 +256,8 @@ class RealGenerellBehandlingService(
                 behandlingType = detaljertBehandling.behandlingType,
                 søker = soeker.await()?.opplysning,
                 revurderingsaarsak = detaljertBehandling.revurderingsaarsak,
-                revurderinginfo = detaljertBehandling.revurderingInfo
+                revurderinginfo = detaljertBehandling.revurderingInfo,
+                enhet = detaljertBehandling.enhet
             ).also {
                 gjenlevende.await()?.fnr?.let { loggRequest(brukerTokenInfo, it) }
                 soeker.await()?.fnr?.let { loggRequest(brukerTokenInfo, it) }

@@ -225,5 +225,6 @@ fun behandling(
     prosesstype = Prosesstype.MANUELL,
     utenlandstilsnitt = null,
     boddEllerArbeidetUtlandet = null,
-    revurderingInfo = null
+    revurderingInfo = null,
+    enhet = "1111"
 )

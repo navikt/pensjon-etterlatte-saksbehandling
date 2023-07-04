@@ -499,7 +499,8 @@ internal class VedtaksvurderingServiceTest {
             boddEllerArbeidetUtlandet = null,
             kommerBarnetTilgode = null,
             prosesstype = Prosesstype.MANUELL,
-            revurderingInfo = null
+            revurderingInfo = null,
+            enhet = "1111"
         )
         coEvery { behandlingKlientMock.hentSak(any(), any()) } returns Sak(
             SAKSBEHANDLER_1,
@@ -933,7 +934,8 @@ internal class VedtaksvurderingServiceTest {
             kommerBarnetTilgode = null,
             revurderingsaarsak = revurderingAarsak,
             revurderingInfo = revurderingInfo,
-            prosesstype = Prosesstype.MANUELL
+            prosesstype = Prosesstype.MANUELL,
+            enhet = "1111"
         )
 
     private companion object {

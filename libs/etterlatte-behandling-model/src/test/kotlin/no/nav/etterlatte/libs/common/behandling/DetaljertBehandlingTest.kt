@@ -49,6 +49,7 @@ class DetaljertBehandlingTest {
         kommerBarnetTilgode = null,
         revurderingsaarsak = revurderingsaarsak,
         prosesstype = Prosesstype.MANUELL,
-        revurderingInfo = null
+        revurderingInfo = null,
+        enhet = "1111"
     )
 }

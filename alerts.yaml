@@ -16,7 +16,7 @@ spec:
              offset 15m) or vector(0)) > 0'
       for: 1s
       annotations:
-        consequence: "*\{{ $labels.log_app }}* har logget en eller flere feilmeldinger siste 15 min"
+        consequence: "*\{{ $labels.app }}* har logget en eller flere feilmeldinger siste 15 min"
         action: "Sjekk logger her: `{{LOGS_URL}}`"
       labels:
         namespace: etterlatte

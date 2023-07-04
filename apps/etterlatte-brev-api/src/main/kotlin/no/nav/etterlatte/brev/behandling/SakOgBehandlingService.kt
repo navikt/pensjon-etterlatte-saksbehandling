@@ -1,5 +1,6 @@
 package no.nav.etterlatte.brev.behandling
 
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.brev.behandlingklient.BehandlingKlient
@@ -13,6 +14,7 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.pensjon.brevbaker.api.model.Kroner
+import java.time.LocalDate
 import java.time.YearMonth
 import java.util.*
 
@@ -38,11 +40,13 @@ class SakOgBehandlingService(
         val vedtak = async { vedtaksvurderingKlient.hentVedtak(behandlingId, brukerTokenInfo) }
         val grunnlag = async { grunnlagKlient.hentGrunnlag(sakId, brukerTokenInfo) }
         val sak = async { behandlingKlient.hentSak(sakId, brukerTokenInfo) }
+        val innvilgelsesdato = { async { vedtaksvurderingKlient.hentInnvilgelsesdato(sakId, brukerTokenInfo) } }
 
         mapBehandling(
             vedtak.await(),
             grunnlag.await(),
             sak.await(),
+            innvilgelsesdato,
             brukerTokenInfo
         )
     }
@@ -51,6 +55,7 @@ class SakOgBehandlingService(
         vedtak: VedtakDto,
         grunnlag: Grunnlag,
         sak: Sak,
+        innvilgelsesdato: () -> Deferred<LocalDate?>,
         brukerTokenInfo: BrukerTokenInfo
     ): Behandling {
         val innloggetSaksbehandlerIdent = brukerTokenInfo.ident()
@@ -58,6 +63,12 @@ class SakOgBehandlingService(
         val ansvarligEnhet = vedtak.vedtakFattet?.ansvarligEnhet ?: sak.enhet
         val saksbehandlerIdent = vedtak.vedtakFattet?.ansvarligSaksbehandler ?: innloggetSaksbehandlerIdent
         val attestantIdent = vedtak.vedtakFattet?.let { vedtak.attestasjon?.attestant ?: innloggetSaksbehandlerIdent }
+
+        val datoInnvilgelse = if (vedtak.behandling.revurderingInfo != null) {
+            innvilgelsesdato().await()
+        } else {
+            null
+        }
 
         return Behandling(
             sakId = vedtak.sak.id,
@@ -76,8 +87,7 @@ class SakOgBehandlingService(
                 vedtak.type,
                 ansvarligEnhet,
                 saksbehandlerIdent,
-                attestantIdent,
-                vedtak.vedtakFattet?.tidspunkt?.toLocalDate()
+                attestantIdent
             ),
             utbetalingsinfo = finnUtbetalingsinfo(vedtak.behandling.id, vedtak.virkningstidspunkt, brukerTokenInfo),
             avkortingsinfo = finnYtelseMedGrunnlag(
@@ -89,7 +99,8 @@ class SakOgBehandlingService(
             ),
             revurderingsaarsak = vedtak.behandling.revurderingsaarsak,
             revurderingInfo = vedtak.behandling.revurderingInfo,
-            virkningsdato = vedtak.virkningstidspunkt
+            virkningsdato = vedtak.virkningstidspunkt,
+            innvilgelsesdato = datoInnvilgelse
         )
     }
 

@@ -49,7 +49,7 @@ data class OmgjoeringAvFarskapRevurderingBrevdata(
     val virkningsdato: LocalDate,
     val naavaerendeFar: Navn,
     var forrigeFar: Navn,
-    val forrigeVedtaksdato: LocalDate
+    val innvilgelsesdato: LocalDate
 ) : OpphoerBrevData() {
     companion object {
         fun fra(behandling: Behandling): OmgjoeringAvFarskapRevurderingBrevdata {
@@ -70,7 +70,7 @@ data class OmgjoeringAvFarskapRevurderingBrevdata(
                 virkningsdato = behandling.virkningsdato!!.atDay(1),
                 naavaerendeFar = behandling.revurderingInfo.naavaerendeFar,
                 forrigeFar = behandling.revurderingInfo.forrigeFar,
-                forrigeVedtaksdato = LocalDate.now() // TODO
+                innvilgelsesdato = LocalDate.now() // TODO
             )
         }
     }

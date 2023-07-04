@@ -10,7 +10,11 @@ data class VilkaarsvurderingDto(
     val vilkaar: List<Vilkaar>,
     val virkningstidspunkt: YearMonth,
     val resultat: VilkaarsvurderingResultat? = null
-)
+) {
+    fun isYrkesskade() = this.vilkaar.filter {
+        VilkaarType.yrkesskadeVilkaarTyper().contains(it.hovedvilkaar.type)
+    }.any { it.hovedvilkaar.resultat == Utfall.OPPFYLT }
+}
 
 data class Vilkaar(
     val hovedvilkaar: Delvilkaar,

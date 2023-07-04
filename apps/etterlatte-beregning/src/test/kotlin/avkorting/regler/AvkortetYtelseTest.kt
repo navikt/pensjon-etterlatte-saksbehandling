@@ -25,5 +25,5 @@ class AvkortetYtelseTest {
         )
         avkortetYtelse.verdi shouldBe 0
     }
-    // TODO EY-2368 flere tester
+
 }

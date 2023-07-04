@@ -9,6 +9,7 @@ import no.nav.etterlatte.avkorting.AvkortetYtelse
 import no.nav.etterlatte.avkorting.AvkortetYtelseType
 import no.nav.etterlatte.avkorting.Avkorting
 import no.nav.etterlatte.avkorting.AvkortingGrunnlag
+import no.nav.etterlatte.avkorting.Restanse
 import no.nav.etterlatte.avkorting.YtelseFoerAvkorting
 import no.nav.etterlatte.avkorting.mapTilYtelseFoerAvkorting
 import no.nav.etterlatte.beregning.regler.avkortetYtelse
@@ -18,6 +19,7 @@ import no.nav.etterlatte.beregning.regler.beregning
 import no.nav.etterlatte.beregning.regler.beregningsperiode
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.periode.Periode
+import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import java.time.YearMonth
@@ -148,11 +150,11 @@ internal class AvkortingTest {
     @Nested
     inner class BeregnAvkorting {
 
-        private val virkningstidspunkt = YearMonth.of(2023, 3)
+        private val virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2023, 3))
         private val beregning = beregning(
             beregninger = listOf(
                 beregningsperiode(
-                    datoFOM = virkningstidspunkt,
+                    datoFOM = virkningstidspunkt.dato,
                     datoTOM = YearMonth.of(2023, 4),
                     utbetaltBeloep = 20902
                 ),
@@ -164,7 +166,7 @@ internal class AvkortingTest {
         )
         val avkorting = Avkorting.nyAvkorting().oppdaterMedInntektsgrunnlag(
             avkortinggrunnlag(
-                periode = Periode(fom = virkningstidspunkt, tom = null),
+                periode = Periode(fom = virkningstidspunkt.dato, tom = null),
                 aarsinntekt = 300000,
                 fratrekkInnAar = 50000,
                 relevanteMaanederInnAar = 10
@@ -174,8 +176,30 @@ internal class AvkortingTest {
         @Nested
         inner class Foerstegangs {
 
-
-            // TODO ytelsefoeravkorting
+            @Test
+            fun `Skal lagre beregninger som ytelse foer avkorting med referanse til beregningen`() {
+                val beregnetAvkorting = avkorting.beregnAvkorting(
+                    BehandlingType.FØRSTEGANGSBEHANDLING,
+                    virkningstidspunkt,
+                    beregning
+                )
+                beregnetAvkorting.aarsoppgjoer.ytelseFoerAvkorting.asClue {
+                    it.size shouldBe 2
+                    it[0] shouldBe YtelseFoerAvkorting(
+                        beregning = 20902,
+                        periode = Periode(
+                            fom = virkningstidspunkt.dato,
+                            tom = YearMonth.of(2023, 4)
+                        ),
+                        beregningsreferanse = beregning.beregningId
+                    )
+                    it[1] shouldBe YtelseFoerAvkorting(
+                        beregning = 22241,
+                        periode = Periode(fom = YearMonth.of(2023, 5), tom = null),
+                        beregningsreferanse = beregning.beregningId
+                    )
+                }
+            }
 
             @Test
             fun `Skal beregne avkortingsperioder fra og med virkningstidspunkt`() {
@@ -188,7 +212,7 @@ internal class AvkortingTest {
                     it.size shouldBe 2
                     it[0].asClue { avkortingsperiode ->
                         avkortingsperiode.periode shouldBe Periode(
-                            fom = virkningstidspunkt,
+                            fom = virkningstidspunkt.dato,
                             tom = YearMonth.of(2023, 4)
                         )
                         avkortingsperiode.avkorting shouldBe 9160
@@ -211,7 +235,7 @@ internal class AvkortingTest {
                     size shouldBe 2
                     get(0).shouldBeEqualToIgnoringFields(
                         avkortetYtelse(
-                            periode = Periode(fom = virkningstidspunkt, tom = YearMonth.of(2023, 4)),
+                            periode = Periode(fom = virkningstidspunkt.dato, tom = YearMonth.of(2023, 4)),
                             ytelseEtterAvkorting = 11742,
                             ytelseEtterAvkortingFoerRestanse = 11742,
                             restanse = 0,
@@ -242,10 +266,10 @@ internal class AvkortingTest {
         @Nested
         inner class Revurdering {
 
-            private val nyVirk = YearMonth.of(2023, 6)
+            private val nyVirk = VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2023, 6))
             private val avkortingMedNyInntekt = avkorting
                 .beregnAvkorting(BehandlingType.FØRSTEGANGSBEHANDLING, virkningstidspunkt, beregning)
-                .kopierAvkorting(nyVirk)
+                .kopierAvkorting(nyVirk.dato)
                 .oppdaterMedInntektsgrunnlag(
                     nyttGrunnlag = avkorting.avkortingGrunnlag.first().copy(
                         id = UUID.randomUUID(),
@@ -264,7 +288,7 @@ internal class AvkortingTest {
                     it.size shouldBe 2
                     it[0].asClue { avkortingsperiode ->
                         avkortingsperiode.periode shouldBe Periode(
-                            fom = virkningstidspunkt,
+                            fom = virkningstidspunkt.dato,
                             tom = YearMonth.of(2023, 4)
                         )
                         avkortingsperiode.avkorting shouldBe 13660
@@ -312,7 +336,86 @@ internal class AvkortingTest {
                 }
             }
 
-            // TODO test for restanse i aarsoppgjoer
+            @Test
+            fun `Beregner restanse ved aa finne diff mellom tidligere avkortet ytelse og avkortet ytelse reberegnet`() {
+                val beregnetAvkorting = avkortingMedNyInntekt.beregnAvkorting(
+                    BehandlingType.REVURDERING,
+                    nyVirk,
+                    beregning
+                )
+                with(beregnetAvkorting.aarsoppgjoer) {
+                    tidligereAvkortetYtelse.asClue {
+                        it.size shouldBe 2
+                        it[0].shouldBeEqualToIgnoringFields(
+                            avkortetYtelse(
+                                type = AvkortetYtelseType.TIDLIGERE,
+                                periode = Periode(fom = YearMonth.of(2023, 3), tom = YearMonth.of(2023, 4)),
+                                ytelseEtterAvkorting = 11742,
+                                ytelseEtterAvkortingFoerRestanse = 11742,
+                                restanse = 0,
+                                avkortingsbeloep = 9160,
+                                ytelseFoerAvkorting = 20902
+                            ),
+                            AvkortetYtelse::tidspunkt,
+                            AvkortetYtelse::regelResultat,
+                            AvkortetYtelse::kilde
+                        )
+                        it[1].shouldBeEqualToIgnoringFields(
+                            avkortetYtelse(
+                                type = AvkortetYtelseType.TIDLIGERE,
+                                periode = Periode(fom = YearMonth.of(2023, 5), tom = YearMonth.of(2023, 5)),
+                                ytelseEtterAvkorting = 13215,
+                                ytelseEtterAvkortingFoerRestanse = 13215,
+                                restanse = 0,
+                                avkortingsbeloep = 9026,
+                                ytelseFoerAvkorting = 22241
+                            ),
+                            AvkortetYtelse::tidspunkt,
+                            AvkortetYtelse::regelResultat,
+                            AvkortetYtelse::kilde
+                        )
+                    }
+                    reberegnetAvkortetYtelse.asClue {
+                        it.size shouldBe 2
+                        it[0].shouldBeEqualToIgnoringFields(
+                            avkortetYtelse(
+                                type = AvkortetYtelseType.REBEREGNET,
+                                periode = Periode(fom = YearMonth.of(2023, 3), tom = YearMonth.of(2023, 4)),
+                                ytelseEtterAvkorting = 7242,
+                                ytelseEtterAvkortingFoerRestanse = 7242,
+                                restanse = 0,
+                                avkortingsbeloep = 13660,
+                                ytelseFoerAvkorting = 20902
+                            ),
+                            AvkortetYtelse::tidspunkt,
+                            AvkortetYtelse::regelResultat,
+                            AvkortetYtelse::kilde
+                        )
+                        it[1].shouldBeEqualToIgnoringFields(
+                            avkortetYtelse(
+                                type = AvkortetYtelseType.REBEREGNET,
+                                periode = Periode(fom = YearMonth.of(2023, 5), tom = YearMonth.of(2023, 5)),
+                                ytelseEtterAvkorting = 8715,
+                                ytelseEtterAvkortingFoerRestanse = 8715,
+                                restanse = 0,
+                                avkortingsbeloep = 13526,
+                                ytelseFoerAvkorting = 22241
+                            ),
+                            AvkortetYtelse::tidspunkt,
+                            AvkortetYtelse::regelResultat,
+                            AvkortetYtelse::kilde
+                        )
+                    }
+                    restanse.asClue {
+                        it.shouldBeEqualToIgnoringFields(
+                            Restanse(13500, 1928),
+                            Restanse::tidspunkt,
+                            Restanse::regelResultat,
+                            Restanse::kilde
+                        )
+                    }
+                }
+            }
 
             @Test
             fun `Skal beregne ytelse etter avkorting og restanse fra nytt virkningstidspunkt`() {
@@ -325,7 +428,7 @@ internal class AvkortingTest {
                     it.size shouldBe 1
                     it[0].shouldBeEqualToIgnoringFields(
                         avkortetYtelse(
-                            periode = Periode(fom = nyVirk, tom = null),
+                            periode = Periode(fom = nyVirk.dato, tom = null),
                             ytelseEtterAvkorting = 6787,
                             ytelseEtterAvkortingFoerRestanse = 8715,
                             restanse = 1928,

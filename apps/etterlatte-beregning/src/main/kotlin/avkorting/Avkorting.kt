@@ -3,6 +3,7 @@ package no.nav.etterlatte.avkorting
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.etterlatte.beregning.Beregning
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
+import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -35,7 +36,7 @@ data class Avkorting(
     fun beregnAvkortingMedNyttGrunnlag(
         nyttGrunnlag: AvkortingGrunnlag,
         behandlingstype: BehandlingType,
-        virkningstidspunkt: YearMonth,
+        virkningstidspunkt: Virkningstidspunkt,
         beregning: Beregning
     ) = oppdaterMedInntektsgrunnlag(nyttGrunnlag).beregnAvkorting(behandlingstype, virkningstidspunkt, beregning)
 
@@ -59,7 +60,7 @@ data class Avkorting(
 
     fun beregnAvkorting(
         behandlingstype: BehandlingType,
-        virkningstidspunkt: YearMonth,
+        virkningstidspunkt: Virkningstidspunkt,
         beregning: Beregning
     ): Avkorting = if (behandlingstype == BehandlingType.FØRSTEGANGSBEHANDLING) {
         beregnAvkortingForstegangs(virkningstidspunkt, beregning)
@@ -68,14 +69,14 @@ data class Avkorting(
     }
 
     private fun beregnAvkortingForstegangs(
-        virkningstidspunkt: YearMonth,
+        virkningstidspunkt: Virkningstidspunkt,
         beregning: Beregning
     ): Avkorting {
 
         val ytelseFoerAvkorting = beregning.mapTilYtelseFoerAvkorting()
 
         val avkortingsperioder = AvkortingRegelkjoring.beregnInntektsavkorting(
-            Periode(fom = virkningstidspunkt, null),
+            Periode(fom = virkningstidspunkt.dato, tom = null),
             avkortingGrunnlag
         )
 
@@ -97,14 +98,14 @@ data class Avkorting(
         )
     }
 
-    private fun beregnAvkortingRevurdering(virkningstidspunkt: YearMonth, beregning: Beregning): Avkorting {
+    private fun beregnAvkortingRevurdering(virkningstidspunkt: Virkningstidspunkt, beregning: Beregning): Avkorting {
 
         val ytelseFoerAvkorting =
-            this.aarsoppgjoer.ytelseFoerAvkorting.leggTilNyeBeregninger(beregning, virkningstidspunkt)
+            this.aarsoppgjoer.ytelseFoerAvkorting.leggTilNyeBeregninger(beregning, virkningstidspunkt.dato)
 
         val fraFoersteMaaned = Periode(fom = this.foersteMaanedDetteAar(), tom = null)
         val avkortingHeleAaret = AvkortingRegelkjoring.beregnInntektsavkorting(
-            periode = fraFoersteMaaned,
+            fraFoersteMaaned,
             avkortingGrunnlag = listOf(avkortingGrunnlag.last().copy(periode = fraFoersteMaaned))
         )
 

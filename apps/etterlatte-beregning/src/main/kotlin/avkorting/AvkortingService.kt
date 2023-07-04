@@ -68,7 +68,7 @@ class AvkortingService(
         val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
         val beregning = beregningService.hentBeregningNonnull(behandlingId)
         val virkningstidspunkt = behandling.hentVirk()
-        val beregnetAvkorting = forrigeAvkorting.kopierAvkorting(virkningstidspunkt).beregnAvkorting(
+        val beregnetAvkorting = forrigeAvkorting.kopierAvkorting(virkningstidspunkt.dato).beregnAvkorting(
             behandling.behandlingType,
             virkningstidspunkt,
             beregning
@@ -94,4 +94,4 @@ class AvkortingService(
 }
 
 private fun DetaljertBehandling.hentVirk() =
-    virkningstidspunkt?.dato ?: throw Exception("Mangler virkningstidspunkt for behandling $id")
+    virkningstidspunkt ?: throw Exception("Mangler virkningstidspunkt for behandling $id")

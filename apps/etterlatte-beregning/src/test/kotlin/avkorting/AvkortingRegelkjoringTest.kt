@@ -8,6 +8,7 @@ import no.nav.etterlatte.beregning.grunnlag.PeriodiseringAvGrunnlagFeil
 import no.nav.etterlatte.beregning.regler.avkortinggrunnlag
 import no.nav.etterlatte.beregning.regler.avkortingsperiode
 import no.nav.etterlatte.libs.common.periode.Periode
+import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.time.YearMonth
@@ -17,7 +18,7 @@ class AvkortingRegelkjoringTest {
 
     @Test
     fun `skal beregne avkorting for inntekt til en foerstegangsbehandling`() {
-        val virkningstidspunkt = YearMonth.of(2023, 6)
+        val virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2023, 6))
         val avkortingGrunnlag = listOf(
             avkortinggrunnlag(
                 aarsinntekt = 300000,
@@ -34,7 +35,7 @@ class AvkortingRegelkjoringTest {
         )
 
         val avkortingsperioder = AvkortingRegelkjoring.beregnInntektsavkorting(
-            Periode(fom = virkningstidspunkt, tom = null),
+            Periode(fom = virkningstidspunkt.dato, tom = null),
             avkortingGrunnlag
         )
 
@@ -56,7 +57,7 @@ class AvkortingRegelkjoringTest {
 
     @Test
     fun `skal ikke tillate aa beregne avkorting for inntekt med feil perioder`() {
-        val virkningstidspunkt = YearMonth.of(2023, 1)
+        val virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2023, 1))
         val avkortingGrunnlag = listOf(
             avkortinggrunnlag(
                 aarsinntekt = 300000,
@@ -70,7 +71,7 @@ class AvkortingRegelkjoringTest {
 
         assertThrows<PeriodiseringAvGrunnlagFeil> {
             AvkortingRegelkjoring.beregnInntektsavkorting(
-                Periode(fom = virkningstidspunkt, tom = null),
+                Periode(fom = virkningstidspunkt.dato, tom = null),
                 avkortingGrunnlag
             )
         }
@@ -78,7 +79,7 @@ class AvkortingRegelkjoringTest {
 
     @Test
     fun `skal beregne endelig avkortet ytelse`() {
-        val virkningstidspunkt = YearMonth.of(2023, 1)
+        val virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2023, 1))
         val beregningsId = UUID.randomUUID()
         val beregninger = listOf(
             YtelseFoerAvkorting(
@@ -153,9 +154,5 @@ class AvkortingRegelkjoringTest {
             ytelseFoerAvkorting shouldBe 10000
         }
     }
-
-    // TODO EY-2368 unittest restanse
-
-    // TODO EY-2368 unittest fordelt restanse
 
 }

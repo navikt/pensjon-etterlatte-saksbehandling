@@ -42,7 +42,7 @@ val virkningstidspunkt: Regel<RestanseGrunnlag, YearMonth> = finnFaktumIGrunnlag
 val totalRestanse = RegelMeta(
     gjelderFra = OMS_GYLDIG_FROM_TEST,
     beskrivelse = "Beregner restanse etter endret ytelse etter avkorting på grunn av endret årsinntekt",
-    regelReferanse = RegelReferanse("RESTANSE-INNTEKTSENDRING") // TODO EY-2368 Confluence
+    regelReferanse = RegelReferanse("RESTANSE-INNTEKTSENDRING")
 ) benytter tidligereYtelse og nyYtelse med { tidligereYtelse, nyYtelse ->
     Beregningstall(tidligereYtelse.sum()).minus(Beregningstall(nyYtelse.sum())).toInteger()
 }
@@ -50,7 +50,7 @@ val totalRestanse = RegelMeta(
 val gjenvaerendeMaaneder = RegelMeta(
     gjelderFra = OMS_GYLDIG_FROM_TEST,
     beskrivelse = "Beregner hvor mange måneder som gjenstår i gjeldende år fra nytt virkningstidspunkt",
-    regelReferanse = RegelReferanse("GJENVAERENDE-MAANEDER-FOR-FORDELT-RESTANSE")// TODO EY-2368 Confluence
+    regelReferanse = RegelReferanse("GJENVAERENDE-MAANEDER-FOR-FORDELT-RESTANSE")
 ) benytter virkningstidspunkt med { virkningstidspunkt ->
     Beregningstall(12)
         .minus(Beregningstall(virkningstidspunkt.monthValue))
@@ -60,7 +60,7 @@ val gjenvaerendeMaaneder = RegelMeta(
 val fordeltRestanse = RegelMeta(
     gjelderFra = OMS_GYLDIG_FROM_TEST,
     beskrivelse = "Fordeler oppsummert restanse over gjenværende måneder av gjeldende år",
-    regelReferanse = RegelReferanse("FORDELT-RESTANSE-INNTEKTSENDRING") // TODO EY-2368 Confluence
+    regelReferanse = RegelReferanse("FORDELT-RESTANSE-INNTEKTSENDRING")
 ) benytter totalRestanse og gjenvaerendeMaaneder med { sumRestanse, gjenvaerendeMaaneder ->
     Beregningstall(sumRestanse).divide(gjenvaerendeMaaneder).toInteger()
 }
@@ -68,7 +68,7 @@ val fordeltRestanse = RegelMeta(
 val restanse = RegelMeta(
     gjelderFra = OMS_GYLDIG_FROM_TEST,
     beskrivelse = "Beregner restanse etter endret ytelse etter avkorting på grunn av endret årsinntekt",
-    regelReferanse = RegelReferanse("RESTANSE-INNTEKTSENDRING") // TODO EY-2368 Confluence
+    regelReferanse = RegelReferanse("RESTANSE-INNTEKTSENDRING")
 ) benytter totalRestanse og fordeltRestanse med { totalRestanse, fordeltRestanse ->
     Restanse(
         totalRestanse = totalRestanse,

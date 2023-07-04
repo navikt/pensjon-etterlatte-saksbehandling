@@ -20,6 +20,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
 import no.nav.etterlatte.libs.common.beregning.Beregningstype
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
@@ -128,9 +129,10 @@ fun aarsoppgjoer(
     reberegnetAvkortetYtelse = reberegnetAvkortetYtelse,
     restanse = restanse,
 )
+
 fun ytelseFoerAvkorting(
     beregning: Int = 100,
-    periode: Periode = Periode(fom = YearMonth.of(2023,1), tom = null),
+    periode: Periode = Periode(fom = YearMonth.of(2023, 1), tom = null),
     beregningsreferanse: UUID = UUID.randomUUID()
 ) = YtelseFoerAvkorting(
     beregning = beregning,
@@ -225,7 +227,7 @@ fun behandling(
     sak: Long = 123,
     sakType: SakType = SakType.OMSTILLINGSSTOENAD,
     behandlingType: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-    virkningstidspunkt: YearMonth = YearMonth.of(2023, 1)
+    virkningstidspunkt: Virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2023, 1))
 ) = DetaljertBehandling(
     id = id,
     sak = sak,
@@ -241,7 +243,7 @@ fun behandling(
     gyldighetsproeving = null,
     status = BehandlingStatus.VILKAARSVURDERT,
     behandlingType = behandlingType,
-    virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(virkningstidspunkt),
+    virkningstidspunkt = virkningstidspunkt,
     kommerBarnetTilgode = null,
     revurderingsaarsak = null,
     prosesstype = Prosesstype.MANUELL,

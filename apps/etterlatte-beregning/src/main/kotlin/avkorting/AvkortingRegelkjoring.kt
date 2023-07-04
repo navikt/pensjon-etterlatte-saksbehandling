@@ -10,6 +10,7 @@ import no.nav.etterlatte.avkorting.regler.restanse
 import no.nav.etterlatte.beregning.grunnlag.GrunnlagMedPeriode
 import no.nav.etterlatte.beregning.grunnlag.PeriodisertBeregningGrunnlag
 import no.nav.etterlatte.beregning.grunnlag.mapVerdier
+import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -85,19 +86,19 @@ object AvkortingRegelkjoring {
     }
 
     fun beregnAvkortetYtelse(
-        virkningstidspunkt: YearMonth,
+        virkningstidspunkt: Virkningstidspunkt,
         beregningsperioder: List<YtelseFoerAvkorting>,
         avkortingsperioder: List<Avkortingsperiode>,
         restanse: Restanse? = null
     ): List<AvkortetYtelse> {
-        val periode = Periode(fom = virkningstidspunkt, tom = null)
+        val periode = Periode(fom = virkningstidspunkt.dato, tom = null)
         val regelgrunnlag = PeriodisertAvkortetYtelseGrunnlag(
             beregningsperioder = periodiserteBeregninger(beregningsperioder),
             avkortingsperioder = periodiserteAvkortinger(avkortingsperioder),
             fordeltRestanse = KonstantGrunnlag(
                 FaktumNode(
                     verdi = restanse?.fordeltRestanse ?: 0,
-                    kilde = restanse?.kilde?: "", // TODO EY-2368 kilde
+                    kilde = restanse?.kilde ?: "",
                     beskrivelse = "Restansebeløp som skal fordeles månedlig"
                 )
             )
@@ -106,11 +107,11 @@ object AvkortingRegelkjoring {
     }
 
     fun beregnAvkortetYtelsePaaNytt(
-        virkningstidspunkt: YearMonth,
+        virkningstidspunkt: Virkningstidspunkt,
         beregninger: List<YtelseFoerAvkorting>,
         avkortinger: List<Avkortingsperiode>
     ): List<AvkortetYtelse> {
-        val periode = Periode(fom = beregninger.first().periode.fom, tom = virkningstidspunkt.minusMonths(1))
+        val periode = Periode(fom = beregninger.first().periode.fom, tom = virkningstidspunkt.dato.minusMonths(1))
         val avkortetYtelseGrunnlag = PeriodisertAvkortetYtelseGrunnlag(
             beregningsperioder = periodiserteBeregninger(beregninger),
             avkortingsperioder = periodiserteAvkortinger(avkortinger),
@@ -187,7 +188,7 @@ object AvkortingRegelkjoring {
             }.mapVerdier {
                 FaktumNode(
                     verdi = it.avkorting,
-                    kilde = it.kilde,
+                    kilde = it.kilde, // TODO EY-2368 Bruke id her?
                     beskrivelse = "Beregnet avkorting for periode"
                 )
             }
@@ -195,28 +196,29 @@ object AvkortingRegelkjoring {
 
     fun beregnRestanse(
         foersteMaaned: YearMonth,
-        virkningstidspunkt: YearMonth,
+        virkningstidspunkt: Virkningstidspunkt,
         tidligereYtelseEtterAvkorting: List<AvkortetYtelse>,
         nyYtelseEtterAvkorting: List<AvkortetYtelse>
     ): Restanse {
         val grunnlag = RestanseGrunnlag(
             FaktumNode(
                 verdi = tidligereYtelseEtterAvkorting
-                    .sprePerMaaned(foersteMaaned, virkningstidspunkt)
+                    .sprePerMaaned(foersteMaaned, virkningstidspunkt.dato)
                     .map { it.ytelseEtterAvkorting },
-                kilde = tidligereYtelseEtterAvkorting.map { it.kilde }, // TODO EY-2361 liste med ider
-                beskrivelse = "TODO" // TODO EY-2361
+                kilde = tidligereYtelseEtterAvkorting.map { it.kilde }, // TODO EY-2368 bruke ider her?
+                beskrivelse = "Ytelse etter avkorting fra tidligere beahndlinge gjeldende år"
+
             ),
             FaktumNode(
                 verdi = nyYtelseEtterAvkorting
-                    .sprePerMaaned(foersteMaaned, virkningstidspunkt)
+                    .sprePerMaaned(foersteMaaned, virkningstidspunkt.dato)
                     .map { it.ytelseEtterAvkorting },
-                kilde = nyYtelseEtterAvkorting.map { it.kilde }, // TODO EY-2361
-                beskrivelse = "TODO" // TODO EY-2361
+                kilde = nyYtelseEtterAvkorting.map { it.kilde }, // TODO EY-2368 bruke id her?
+                beskrivelse = "Reberegnet ytelse etter avkorting før nytt virkningstidspunkt"
             ),
             virkningstidspunkt = FaktumNode(
-                verdi = virkningstidspunkt,
-                kilde = "TODO", // TODO EY-2368 kilde - Bytt YearMonth med klasse for å kunne bruke kilde?
+                verdi = virkningstidspunkt.dato,
+                kilde = virkningstidspunkt.kilde,
                 beskrivelse = "Virkningstidspunkt hvor restanse skal fordeles månedlig fra"
             )
         )
@@ -252,7 +254,7 @@ object AvkortingRegelkjoring {
         virkningstidspunkt: YearMonth
     ): List<AvkortetYtelse> {
         val perMaaned = mutableListOf<AvkortetYtelse>()
-        for (maanednr in foersteMaaned.monthValue ..virkningstidspunkt.minusMonths(1).monthValue) {
+        for (maanednr in foersteMaaned.monthValue..virkningstidspunkt.minusMonths(1).monthValue) {
             val maaned = YearMonth.of(virkningstidspunkt.year, maanednr)
             perMaaned.add(avkortetYtelseIMaaned(maaned))
         }

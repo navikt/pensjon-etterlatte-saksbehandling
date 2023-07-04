@@ -71,7 +71,7 @@ val avkorteYtelse = RegelMeta(
 val avkortetYtelseMedRestanse = RegelMeta(
     gjelderFra = OMS_GYLDIG_FROM_TEST,
     beskrivelse = "Legger til restanse fra endret avkorting til tidligere måneder",
-    regelReferanse = RegelReferanse(id = "REGEL-AVKORTET-YTELSE-MED-RESTANSE") // TODO EY-2368 Confluence
+    regelReferanse = RegelReferanse(id = "REGEL-AVKORTET-YTELSE-MED-RESTANSE")
 ) benytter avkorteYtelse og fordeltRestanseGrunnlag med { avkorteYtelse, fordeltRestanse ->
     avkorteYtelse.minus(Beregningstall(fordeltRestanse))
         .toInteger()

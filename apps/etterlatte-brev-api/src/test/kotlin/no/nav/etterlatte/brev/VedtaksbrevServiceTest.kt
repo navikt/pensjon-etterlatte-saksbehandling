@@ -485,7 +485,8 @@ internal class VedtaksbrevServiceTest {
         Persongalleri(
             Innsender("STOR SNERK", Foedselsnummer("11057523044")),
             Soeker("GRØNN", "MELLOMNAVN", "KOPP", Foedselsnummer("12345612345")),
-            Avdoed("DØD TESTPERSON", LocalDate.now().minusMonths(1))
+            Avdoed("DØD TESTPERSON", LocalDate.now().minusMonths(1)),
+            verge = null
         ),
         ForenkletVedtak(
             1,

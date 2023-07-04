@@ -34,7 +34,8 @@ object BrevbakerHelpers {
     fun mapFelles(
         sakId: Long,
         soeker: Soeker,
-        avsender: Avsender
+        avsender: Avsender,
+        vergeNavn: String? = null
     ) = Felles(
         dokumentDato = LocalDate.now(),
         saksnummer = sakId.toString(),
@@ -53,6 +54,6 @@ object BrevbakerHelpers {
             saksbehandler = avsender.saksbehandler,
             attesterendeSaksbehandler = avsender.attestant
         ),
-        vergeNavn = null
+        vergeNavn = vergeNavn
     )
 }

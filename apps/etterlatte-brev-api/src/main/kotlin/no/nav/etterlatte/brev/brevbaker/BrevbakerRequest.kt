@@ -25,7 +25,8 @@ data class BrevbakerRequest(
                 felles = mapFelles(
                     sakId = behandling.sakId,
                     soeker = behandling.persongalleri.soeker,
-                    avsender = avsender
+                    avsender = avsender,
+                    vergeNavn = behandling.persongalleri.verge?.navn
                 ),
                 language = LanguageCode.spraakToLanguageCode(behandling.spraak)
             )

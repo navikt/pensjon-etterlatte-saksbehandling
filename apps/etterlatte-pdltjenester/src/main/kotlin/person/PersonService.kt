@@ -1,5 +1,6 @@
 package no.nav.etterlatte.person
 
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.GeografiskTilknytning
@@ -50,6 +51,28 @@ class PersonService(
                 )
             }
         }
+    }
+
+    suspend fun hentHistorikkForeldreansvar(fnr: Folkeregisteridentifikator, sakType: SakType) {
+        if (sakType != SakType.BARNEPENSJON) {
+            throw IllegalArgumentException("Nei, forbudt")
+        }
+
+        return pdlKlient.hentPersonHistorikkForeldreansvar(fnr)
+            .let {
+                if (it.data == null) {
+                    val pdlFeil = it.errors?.asFormatertFeil()
+                    if (it.errors?.personIkkeFunnet() == true) {
+                        throw PdlFantIkkePerson("Fant ikke personen $fnr")
+                    } else {
+                        throw PdlForesporselFeilet(
+                            "Kunne ikke hente person med fnr=$fnr fra PDL: $pdlFeil"
+                        )
+                    }
+                } else {
+                    // Mapping
+                }
+            }
     }
 
     suspend fun hentOpplysningsperson(request: HentPersonRequest): PersonDTO {

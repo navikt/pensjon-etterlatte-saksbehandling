@@ -445,3 +445,24 @@ data class PdlGeografiskTilknytningResponse(
     val data: PdlGeografiskTilknytningData? = null,
     val errors: List<PdlResponseError>? = null
 )
+
+data class PdlHentForelderansvarHistorikkVariables(
+    val ident: String
+) {
+    val historikk: Boolean = true
+}
+
+data class PdlHentForeldreansvarHistorikkRequest(
+    val query: String,
+    val variables: PdlHentForelderansvarHistorikkVariables
+)
+
+data class PdlHentForeldreansvarHistorikkResponse(
+    val data: PdlHistorikkForeldreansvar? = null,
+    val errors: List<PdlResponseError>? = null
+)
+
+data class PdlHistorikkForeldreansvar(
+    val foreldreansvar: List<PdlForelderAnsvar>,
+    val forelderBarnRelasjon: List<PdlForelderBarnRelasjon>
+)

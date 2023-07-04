@@ -75,7 +75,8 @@ class StatistikkServiceTest {
             kommerBarnetTilgode = null,
             revurderingsaarsak = null,
             revurderingInfo = null,
-            prosesstype = Prosesstype.MANUELL
+            prosesstype = Prosesstype.MANUELL,
+            enhet = "1111"
         )
         coEvery { behandlingKlient.hentPersongalleri(behandlingId) } returns Persongalleri(
             "12312312312"
@@ -164,7 +165,8 @@ class StatistikkServiceTest {
             kommerBarnetTilgode = null,
             revurderingsaarsak = null,
             prosesstype = Prosesstype.MANUELL,
-            revurderingInfo = null
+            revurderingInfo = null,
+            enhet = "1111"
         )
 
         val beregningKlient = mockk<BeregningKlient>()
@@ -191,7 +193,7 @@ class StatistikkServiceTest {
         Assertions.assertEquals(registrertStatistikk.tekniskTid, tekniskTidForHendelse.toTidspunkt())
         Assertions.assertEquals(registrertStatistikk.behandlingMetode, BehandlingMetode.MANUELL)
         Assertions.assertNull(registrertStatistikk.ansvarligBeslutter)
-        Assertions.assertNull(registrertStatistikk.ansvarligEnhet)
+        Assertions.assertEquals("1111", registrertStatistikk.ansvarligEnhet)
         Assertions.assertNull(registrertStatistikk.saksbehandler)
     }
 

@@ -32,7 +32,8 @@ data class Behandling(
     val avkortingsinfo: Avkortingsinfo? = null,
     val revurderingsaarsak: RevurderingAarsak? = null,
     val revurderingInfo: RevurderingInfo? = null,
-    val virkningsdato: YearMonth? = null
+    val virkningsdato: YearMonth? = null,
+    val innvilgelsesdato: LocalDate? = null
 ) {
     init {
         if (vedtak.type == VedtakType.INNVILGELSE) {

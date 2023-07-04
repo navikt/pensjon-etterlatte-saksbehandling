@@ -70,7 +70,7 @@ data class OmgjoeringAvFarskapRevurderingBrevdata(
                 virkningsdato = behandling.virkningsdato!!.atDay(1),
                 naavaerendeFar = behandling.revurderingInfo.naavaerendeFar,
                 forrigeFar = behandling.revurderingInfo.forrigeFar,
-                innvilgelsesdato = LocalDate.now() // TODO
+                innvilgelsesdato = behandling.innvilgelsesdato!!
             )
         }
     }

@@ -5,7 +5,6 @@ import { opprettRevurdering as opprettRevurderingApi } from '~shared/api/behandl
 import { isPending, useApiCall } from '~shared/hooks/useApiCall'
 import { Grunnlagsendringshendelse } from '~components/person/typer'
 import { Revurderingsaarsak, tekstRevurderingsaarsak } from '~shared/types/Revurderingsaarsak'
-import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { useNavigate } from 'react-router-dom'
 
 type Props = {
@@ -29,8 +28,8 @@ const OpprettRevurderingModal = (props: Props) => {
 
     opprettRevurdering(
       { sakId: props.sakId, aarsak: valgtAarsak, paaGrunnAvHendelseId: valgtHendelse?.id },
-      (revurdering: IDetaljertBehandling) => {
-        navigate(`/behandling/${revurdering.id}/`)
+      (revurderingId: string) => {
+        navigate(`/behandling/${revurderingId}/`)
       },
       () => {
         setError('En feil skjedde ved opprettelse av revurderingen. Prøv igjen senere.')

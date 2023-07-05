@@ -3,7 +3,7 @@ import DatePicker from 'react-datepicker'
 import { ErrorMessage, Label } from '@navikt/ds-react'
 import { useRef, useState } from 'react'
 import { oppdaterBehandlingsstatus, oppdaterVirkningstidspunkt } from '~store/reducers/BehandlingReducer'
-import { Calender } from '@navikt/ds-icons'
+import { CalendarIcon } from '@navikt/aksel-icons'
 import { formaterDatoTilYearMonth, formaterStringDato } from '~utils/formattering'
 import { fastsettVirkningstidspunkt } from '~shared/api/behandling'
 import { useApiCall } from '~shared/hooks/useApiCall'
@@ -154,7 +154,7 @@ const Virkningstidspunkt = (props: Props) => {
                     title="Åpne datovelger"
                     aria-label="Åpne datovelger"
                   >
-                    <Calender color="white" />
+                    <CalendarIcon color="white" />
                   </KalenderIkon>
                 </Datovelger>
 

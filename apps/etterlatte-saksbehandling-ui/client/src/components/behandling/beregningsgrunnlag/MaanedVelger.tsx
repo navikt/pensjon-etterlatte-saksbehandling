@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react'
 import DatePicker from 'react-datepicker'
-import { Calender } from '@navikt/ds-icons'
+import { CalendarIcon } from '@navikt/aksel-icons'
 import styled from 'styled-components'
 import { Label } from '@navikt/ds-react'
 import { setDefaultOptions } from 'date-fns'
@@ -56,7 +56,7 @@ const MaanedVelger = (props: MaanedVelgerProps) => {
           onKeyPress={openDatePicker}
           onClick={openDatePicker}
         >
-          <Calender color="white" />
+          <CalendarIcon color="white" />
         </KalenderIkon>
       </Datovelger>
     </>

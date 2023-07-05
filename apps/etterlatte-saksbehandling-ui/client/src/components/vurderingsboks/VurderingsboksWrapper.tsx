@@ -1,5 +1,5 @@
 import { BodyShort, Button, Detail, Heading } from '@navikt/ds-react'
-import { Delete, Edit } from '@navikt/ds-icons'
+import { TrashIcon, PencilIcon } from '@navikt/aksel-icons'
 import React, { ReactElement, useState } from 'react'
 import styled from 'styled-components'
 import Spinner from '~shared/Spinner'
@@ -65,7 +65,7 @@ export const VurderingsboksWrapper = (props: Props) => {
           {props.redigerbar && (
             <>
               <RedigerWrapper onClick={() => setRediger(true)}>
-                <Edit aria-hidden={'true'} />
+                <PencilIcon aria-hidden={'true'} />
                 <span className={'text'}> Rediger</span>
               </RedigerWrapper>
               {props.slett && (
@@ -80,7 +80,7 @@ export const VurderingsboksWrapper = (props: Props) => {
                   {lagrer ? (
                     <Spinner visible label={''} margin={'0'} variant={'interaction'} />
                   ) : (
-                    <Delete aria-hidden={'true'} />
+                    <TrashIcon aria-hidden={'true'} />
                   )}
                   <span className={'text'}> Slett</span>
                 </RedigerWrapper>

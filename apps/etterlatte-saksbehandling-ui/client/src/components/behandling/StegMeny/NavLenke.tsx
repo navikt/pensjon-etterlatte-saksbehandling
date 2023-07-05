@@ -1,6 +1,6 @@
 import { NavLink } from 'react-router-dom'
 import styled from 'styled-components'
-import { Next } from '@navikt/ds-icons'
+import { ChevronRightIcon } from '@navikt/aksel-icons'
 import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 import classNames from 'classnames'
 import { behandlingSkalSendeBrev, hentGyldigeNavigeringsStatuser } from '~components/behandling/felles/utils'
@@ -41,6 +41,6 @@ export const NavLenke = (props: { pathInfo: BehandlingRouteTypes; behandling: IB
   )
 }
 
-const Separator = styled(Next)`
+const Separator = styled(ChevronRightIcon)`
   vertical-align: middle;
 `

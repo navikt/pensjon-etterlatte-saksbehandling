@@ -1,13 +1,12 @@
 import { IPdlPerson } from '~shared/types/Person'
-import { People } from '@navikt/ds-icons'
+import { PersonIcon } from '@navikt/aksel-icons'
 import { format } from 'date-fns'
 import { PersonInfoAdresse } from '../personer/personinfo/PersonInfoAdresse'
-import { Detail, Heading, Link } from '@navikt/ds-react'
+import { Detail, Heading, Link, CopyButton } from '@navikt/ds-react'
 import styled from 'styled-components'
 import { KildePdl } from '~shared/types/kilde'
 import { DatoFormat, formaterFnr } from '~utils/formattering'
 import { IconSize } from '~shared/types/Icon'
-import { CopyToClipboard } from '@navikt/ds-react-internal'
 
 const PersonBorder = styled.div`
   padding: 1.2em 1em 1em 0em;
@@ -44,7 +43,7 @@ export const Person = ({ person, kilde, avdoed = false, mottaker = false, gjenle
   return (
     <PersonBorder>
       <IconWrapper>
-        <People fontSize={IconSize.DEFAULT} />
+        <PersonIcon fontSize={IconSize.DEFAULT} />
       </IconWrapper>
       <PersonInfoWrapper>
         <Heading size={'small'} level={'3'}>
@@ -56,11 +55,7 @@ export const Person = ({ person, kilde, avdoed = false, mottaker = false, gjenle
             <Link href={`/person/${person.foedselsnummer}`} target="_blank" rel="noreferrer noopener">
               ({formaterFnr(person.foedselsnummer)})
             </Link>
-            <CopyToClipboard
-              copyText={person.foedselsnummer}
-              popoverText={`Kopierte ${person.foedselsnummer}`}
-              size={'small'}
-            />
+            <CopyButton copyText={person.foedselsnummer} size={'small'} />
           </FnrWrapper>
         </div>
         <div>

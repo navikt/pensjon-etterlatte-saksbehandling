@@ -5,7 +5,7 @@ import { parse } from 'date-fns'
 import styled from 'styled-components'
 import { FilterElement } from '../styled'
 import { settFilterVerdi } from './setFilterVerdi'
-import { Calender } from '@navikt/ds-icons'
+import { CalendarIcon } from '@navikt/aksel-icons'
 import { Label } from '@navikt/ds-react'
 
 type Props = {
@@ -46,7 +46,7 @@ const DateColumnFilter: React.FC<Props> = ({ oppgaveFelt, oppgaveFelter, setOppg
             title="Åpne datovelger"
             aria-label="Åpne datovelger"
           >
-            <Calender color="white" />
+            <CalendarIcon color="white" />
           </KalenderIkon>
         </Datovelger>
       </DatoSection>
@@ -87,8 +87,8 @@ const KalenderIkon = styled.div`
 `
 
 const DatoSection = styled.section`
-display: grid;
-gap: 0.5em;
+  display: grid;
+  gap: 0.5em;
 `
 
 export default DateColumnFilter

@@ -225,7 +225,7 @@ class RealFoerstegangsbehandlingService(
         this.oppdaterGyldighetsproeving(gyldighetsproeving)
             .also {
                 behandlingDao.lagreGyldighetsproving(it)
-                logger.info("behandling ${it.id} i sak ${it.sak} er gyldighetsprøvd")
+                logger.info("behandling ${it.id} i sak: ${it.sak.id} er gyldighetsprøvd. Saktype: ${it.sak.sakType}")
             }
     }
 

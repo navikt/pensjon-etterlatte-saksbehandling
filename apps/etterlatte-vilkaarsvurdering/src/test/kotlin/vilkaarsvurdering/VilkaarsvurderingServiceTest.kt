@@ -394,9 +394,7 @@ internal class VilkaarsvurderingServiceTest {
             every { revurderingsaarsak } returns RevurderingAarsak.REGULERING
         }
 
-        val detaljertBehandling = mockk<DetaljertBehandling>()
-        every { detaljertBehandling.id } returns uuid
-        coEvery { behandlingKlient.hentSisteIverksatteBehandling(any(), any()) } returns detaljertBehandling
+        coEvery { behandlingKlient.hentSisteIverksatteBehandling(any(), any()) } returns uuid
 
         val foerstegangsvilkaar = runBlocking {
             service.opprettVilkaarsvurdering(uuid, brukerTokenInfo)

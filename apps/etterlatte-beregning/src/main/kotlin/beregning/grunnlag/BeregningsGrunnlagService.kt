@@ -6,7 +6,7 @@ import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
-import java.util.UUID
+import java.util.*
 
 class BeregningsGrunnlagService(
     private val beregningsGrunnlagRepository: BeregningsGrunnlagRepository,
@@ -53,10 +53,10 @@ class BeregningsGrunnlagService(
 
     private fun grunnlagErIkkeEndretFoerVirk(
         revurdering: DetaljertBehandling,
-        forrigeIverksatte: DetaljertBehandling,
+        forrigeIverksatteBehandlingId: UUID,
         barnepensjonBeregningsGrunnlag: BarnepensjonBeregningsGrunnlag
     ): Boolean {
-        val forrigeGrunnlag = beregningsGrunnlagRepository.finnGrunnlagForBehandling(forrigeIverksatte.id)
+        val forrigeGrunnlag = beregningsGrunnlagRepository.finnGrunnlagForBehandling(forrigeIverksatteBehandlingId)
         val revurderingVirk = revurdering.virkningstidspunkt!!.dato.atDay(1)
 
         val soeskenjusteringErLiktFoerVirk = erGrunnlagLiktFoerEnDato(
@@ -86,11 +86,11 @@ class BeregningsGrunnlagService(
         // Det kan hende behandlingen er en revurdering, og da må vi finne forrige grunnlag for saken
         val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
         return if (behandling.behandlingType == BehandlingType.REVURDERING) {
-            val forrigeIverksatteBehandling = behandlingKlient.hentSisteIverksatteBehandling(
+            val forrigeIverksatteBehandlingId = behandlingKlient.hentSisteIverksatteBehandling(
                 behandling.sak,
                 brukerTokenInfo
             )
-            beregningsGrunnlagRepository.finnGrunnlagForBehandling(forrigeIverksatteBehandling.id)
+            beregningsGrunnlagRepository.finnGrunnlagForBehandling(forrigeIverksatteBehandlingId)
         } else {
             null
         }

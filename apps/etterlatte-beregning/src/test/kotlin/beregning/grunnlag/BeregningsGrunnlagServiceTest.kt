@@ -132,7 +132,7 @@ internal class BeregningsGrunnlagServiceTest {
                 sakId,
                 any()
             )
-        } returns foerstegangsbehandling
+        } returns foerstegangsbehandling.id
         coEvery { behandlingKlient.hentBehandling(revurdering.id, any()) } returns revurdering
 
         every {
@@ -199,7 +199,7 @@ internal class BeregningsGrunnlagServiceTest {
                 sakId,
                 any()
             )
-        } returns foerstegangsbehandling
+        } returns foerstegangsbehandling.id
         coEvery { behandlingKlient.hentBehandling(revurdering.id, any()) } returns revurdering
 
         every {

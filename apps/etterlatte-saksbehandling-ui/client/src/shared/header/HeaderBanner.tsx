@@ -6,9 +6,10 @@ export const HeaderBanner = () => {
   const user = useAppSelector((state) => state.saksbehandlerReducer.saksbehandler)
   return (
     <InternalHeader>
-      <InternalHeader.Title href={'/'} as="h1">
-        Gjenny{' '}
+      <InternalHeader.Title data-theme={'light'} href={'/'}>
+        Gjenny
       </InternalHeader.Title>
+      <div style={{ marginLeft: 'auto' }} />
       <Search />
       <InternalHeader.User name={user.navn} description={user.ident} />
     </InternalHeader>

@@ -1,7 +1,6 @@
 import styled from 'styled-components'
 import { Border } from '../../styled'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
-import { VurderingsResultat } from '~shared/types/VurderingsResultat'
 import { ErrorMessage } from '@navikt/ds-react'
 import { Person } from '~components/behandling/soeknadsoversikt/familieforhold/barnepensjon/Person'
 import { BarneListe } from '~components/behandling/soeknadsoversikt/familieforhold/barnepensjon/BarneListe'
@@ -24,18 +23,12 @@ export const FamilieforholdBarnepensjon = ({ behandling }: PropsFamilieforhold) 
   return (
     <>
       <FamilieforholdWrapper>
-        {behandling.gyldighetsprøving?.resultat === VurderingsResultat.OPPFYLT ? (
-          <>
-            <FamilieforholdVoksne>
-              <Person person={behandling.søker} kilde={gjenlevende.kilde} mottaker />
-              <Person person={avdoede.opplysning} kilde={avdoede.kilde} avdoed />
-              <Person person={gjenlevende.opplysning} kilde={gjenlevende.kilde} gjenlevende />
-            </FamilieforholdVoksne>
-            <BarneListe familieforhold={behandling.familieforhold!!} />
-          </>
-        ) : (
-          <Person person={gjenlevende.opplysning} kilde={gjenlevende.kilde} />
-        )}
+        <FamilieforholdVoksne>
+          <Person person={behandling.søker} kilde={gjenlevende.kilde} mottaker />
+          <Person person={avdoede.opplysning} kilde={avdoede.kilde} avdoed />
+          <Person person={gjenlevende.opplysning} kilde={gjenlevende.kilde} gjenlevende />
+        </FamilieforholdVoksne>
+        <BarneListe familieforhold={behandling.familieforhold!!} />
       </FamilieforholdWrapper>
       <Border />
     </>

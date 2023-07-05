@@ -3,7 +3,7 @@ import '@navikt/ds-css'
 import '@navikt/ds-css-internal'
 import Oppgavebenken from './components/oppgavebenken/Oppgavebenken'
 import { Behandling } from '~components/behandling/Behandling'
-import { HeaderWrapper } from '~shared/header/Header'
+import { HeaderBanner } from '~shared/header/HeaderBanner'
 import { Person } from '~components/person/Person'
 import useInnloggetSaksbehandler from './shared/hooks/useInnloggetSaksbehandler'
 import nb from 'date-fns/locale/nb'
@@ -23,7 +23,7 @@ function App() {
         <div className="app">
           <BrowserRouter basename="/">
             <ScrollToTop />
-            <HeaderWrapper />
+            <HeaderBanner />
             <ErrorBoundary>
               <Routes>
                 <Route path="/" element={<Oppgavebenken />} />

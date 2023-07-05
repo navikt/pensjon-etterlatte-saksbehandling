@@ -1,6 +1,6 @@
 import styled from 'styled-components'
 import { NavLink } from 'react-router-dom'
-import { Back } from '@navikt/ds-icons'
+import { ChevronLeftIcon } from '@navikt/aksel-icons'
 
 export default function NavigerTilbakeMeny({ label, path }: { label: string; path: string }) {
   return (
@@ -31,6 +31,6 @@ const MenyWrapper = styled.ul`
   box-shadow: 0 5px 10px 0 #ddd;
 `
 
-const Separator = styled(Back)`
+const Separator = styled(ChevronLeftIcon)`
   vertical-align: middle;
 `

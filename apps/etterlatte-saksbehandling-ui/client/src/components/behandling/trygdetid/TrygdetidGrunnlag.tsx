@@ -13,7 +13,7 @@ import React, { FormEvent, useRef, useState } from 'react'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import styled from 'styled-components'
 import DatePicker from 'react-datepicker'
-import { Calender } from '@navikt/ds-icons'
+import { CalendarIcon } from '@navikt/aksel-icons'
 import { useParams } from 'react-router-dom'
 
 type Props = {
@@ -121,7 +121,7 @@ export const TrygdetidGrunnlag: React.FC<Props> = ({
                     title="Åpne datovelger"
                     aria-label="Åpne datovelger"
                   >
-                    <Calender color="white" />
+                    <CalendarIcon color="white" />
                   </KalenderIkon>
                 </Datovelger>
               </DatoSection>
@@ -150,7 +150,7 @@ export const TrygdetidGrunnlag: React.FC<Props> = ({
                     title="Åpne datovelger"
                     aria-label="Åpne datovelger"
                   >
-                    <Calender color="white" />
+                    <CalendarIcon color="white" />
                   </KalenderIkon>
                 </Datovelger>
               </DatoSection>

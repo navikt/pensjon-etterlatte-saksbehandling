@@ -16,8 +16,9 @@ import {
   feilIKomplettePerioderOverIntervall,
 } from '~components/behandling/beregningsgrunnlag/PeriodisertBeregningsgrunnlag'
 import { hentBehandlesFraStatus } from '~components/behandling/felles/utils'
-import { SuccessColored } from '@navikt/ds-icons'
 import SoeskenjusteringPeriode from '~components/behandling/beregningsgrunnlag/soeskenjustering/SoeskenjusteringPeriode'
+import { AGreen500 } from '@navikt/ds-tokens/dist/tokens'
+import { CheckmarkCircleIcon } from '@navikt/aksel-icons'
 
 type SoeskenKanskjeMedIBeregning = {
   foedselsnummer: string
@@ -155,7 +156,7 @@ const Soeskenjustering = (props: SoeskenjusteringProps) => {
               Lagre søskenjustering
             </Button>
           )}
-          {visOkLagret && <SuccessColored fontSize={20} />}
+          {visOkLagret && <CheckmarkCircleIcon color={AGreen500} />}
         </>
       </form>
     </>

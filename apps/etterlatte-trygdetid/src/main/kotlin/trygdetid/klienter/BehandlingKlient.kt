@@ -71,7 +71,7 @@ class BehandlingKlient(config: Config, httpClient: HttpClient) : BehandlingTilga
         )
 
         return response.mapBoth(
-            success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
+            success = { UUID.fromString(it.response.toString()) },
             failure = {
                 logger.error("Kunne ikke hente seneste iverksatte behandling for sak med id $sakId")
                 throw it.throwable

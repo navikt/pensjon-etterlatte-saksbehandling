@@ -79,7 +79,7 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
                     brukerTokenInfo = brukerTokenInfo
                 )
                 .mapBoth(
-                    success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
+                    success = { UUID.fromString(it.response.toString()) },
                     failure = { throwableErrorMessage -> throw throwableErrorMessage }
                 )
         }.let {

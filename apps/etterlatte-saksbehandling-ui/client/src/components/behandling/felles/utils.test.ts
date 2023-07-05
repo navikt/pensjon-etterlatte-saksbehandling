@@ -6,7 +6,6 @@ import {
   IDetaljertBehandling,
   IGyldighetResultat,
   IKommerBarnetTilgode,
-  IProsesstype,
   Virkningstidspunkt,
 } from '~shared/types/IDetaljertBehandling'
 import { SakType } from '~shared/types/sak'
@@ -151,7 +150,6 @@ const opprettBehandling = (
     status: IBehandlingStatus.OPPRETTET,
     hendelser: [],
     behandlingType: IBehandlingsType.FØRSTEGANGSBEHANDLING,
-    prosesstype: IProsesstype.MANUELL,
     revurderingsaarsak: null,
     revurderinginfo: null,
   }

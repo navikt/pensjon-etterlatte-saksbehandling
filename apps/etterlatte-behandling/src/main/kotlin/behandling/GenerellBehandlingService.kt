@@ -6,6 +6,10 @@ import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.User
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.BehandlingMedGrunnlagsopplysninger
+import no.nav.etterlatte.behandling.domain.gyldighetsproeving
+import no.nav.etterlatte.behandling.domain.mottattDato
+import no.nav.etterlatte.behandling.domain.revurderingInfo
+import no.nav.etterlatte.behandling.domain.revurderingsaarsak
 import no.nav.etterlatte.behandling.domain.toDetaljertBehandling
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.hendelse.HendelseType
@@ -156,16 +160,12 @@ class RealGenerellBehandlingService(
         brukerTokenInfo: BrukerTokenInfo,
         opplysningstype: Opplysningstype
     ): BehandlingMedGrunnlagsopplysninger<Person> {
-        val behandling = hentBehandling(behandlingId)?.toDetaljertBehandling()!!
-        val sakId = behandling.sak
-        val personopplysning = grunnlagKlient.finnPersonOpplysning(
-            sakId,
-            opplysningstype,
-            brukerTokenInfo
-        )
+        val behandling = requireNotNull(hentBehandling(behandlingId))
+        val personopplysning = grunnlagKlient.finnPersonOpplysning(behandling.sak.id, opplysningstype, brukerTokenInfo)
+
         return BehandlingMedGrunnlagsopplysninger(
             id = behandling.id,
-            soeknadMottattDato = behandling.soeknadMottattDato,
+            soeknadMottattDato = behandling.mottattDato(),
             personopplysning = personopplysning
         ).also {
             personopplysning?.fnr?.let { loggRequest(brukerTokenInfo, it) }
@@ -208,12 +208,14 @@ class RealGenerellBehandlingService(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo
     ): DetaljertBehandlingDto {
-        val detaljertBehandling = hentBehandling(behandlingId)?.toDetaljertBehandling()!!
+        val behandling = hentBehandling(behandlingId)!!
         val hendelserIBehandling = hentHendelserIBehandling(behandlingId)
-        val kommerBarnetTilgode =
-            detaljertBehandling.kommerBarnetTilgode.takeIf { detaljertBehandling.sakType == SakType.BARNEPENSJON }
 
-        val sakId = detaljertBehandling.sak
+        val sakId = behandling.sak.id
+        val sakType = behandling.sak.sakType
+
+        val kommerBarnetTilgode = behandling.kommerBarnetTilgode.takeIf { sakType == SakType.BARNEPENSJON }
+
         logger.info("Hentet behandling for $behandlingId")
         return coroutineScope {
             logger.info("Hentet vedtak for $behandlingId")
@@ -227,7 +229,7 @@ class RealGenerellBehandlingService(
             }
             logger.info("Hentet Opplysningstype.SOEKER_PDL_V1 for $behandlingId")
 
-            val gjenlevende = if (detaljertBehandling.sakType == SakType.OMSTILLINGSSTOENAD) {
+            val gjenlevende = if (sakType == SakType.OMSTILLINGSSTOENAD) {
                 soeker
             } else {
                 async {
@@ -241,23 +243,22 @@ class RealGenerellBehandlingService(
             logger.info("Hentet Opplysningstype.GJENLEVENDE_FORELDER_PDL_V1 for $behandlingId")
 
             DetaljertBehandlingDto(
-                id = detaljertBehandling.id,
-                sak = detaljertBehandling.sak,
-                sakType = detaljertBehandling.sakType,
-                gyldighetsprøving = detaljertBehandling.gyldighetsproeving,
+                id = behandling.id,
+                sak = sakId,
+                sakType = sakType,
+                gyldighetsprøving = behandling.gyldighetsproeving(),
                 kommerBarnetTilgode = kommerBarnetTilgode,
-                soeknadMottattDato = detaljertBehandling.soeknadMottattDato,
-                virkningstidspunkt = detaljertBehandling.virkningstidspunkt,
-                utenlandstilsnitt = detaljertBehandling.utenlandstilsnitt,
-                boddEllerArbeidetUtlandet = detaljertBehandling.boddEllerArbeidetUtlandet,
-                status = detaljertBehandling.status,
+                soeknadMottattDato = behandling.mottattDato(),
+                virkningstidspunkt = behandling.virkningstidspunkt,
+                utenlandstilsnitt = behandling.utenlandstilsnitt,
+                boddEllerArbeidetUtlandet = behandling.boddEllerArbeidetUtlandet,
+                status = behandling.status,
                 hendelser = hendelserIBehandling,
                 familieforhold = Familieforhold(avdoed.await(), gjenlevende.await()),
-                behandlingType = detaljertBehandling.behandlingType,
+                behandlingType = behandling.type,
                 søker = soeker.await()?.opplysning,
-                revurderingsaarsak = detaljertBehandling.revurderingsaarsak,
-                revurderinginfo = detaljertBehandling.revurderingInfo,
-                enhet = detaljertBehandling.enhet
+                revurderingsaarsak = behandling.revurderingsaarsak(),
+                revurderinginfo = behandling.revurderingInfo()
             ).also {
                 gjenlevende.await()?.fnr?.let { loggRequest(brukerTokenInfo, it) }
                 soeker.await()?.fnr?.let { loggRequest(brukerTokenInfo, it) }

@@ -17,8 +17,11 @@ import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
+import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
+import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
 import no.nav.etterlatte.libs.common.behandling.Utenlandstilsnitt
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
+import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.sak.Sak
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -131,47 +134,51 @@ sealed class Behandling {
         throw BehandlingStoetterIkkeStatusEndringException(OPPRETTET)
     }
 
-    class BehandlingStoetterIkkeStatusEndringException constructor(
+    class BehandlingStoetterIkkeStatusEndringException(
         behandlingStatus: BehandlingStatus,
         message: String = "Behandlingen støtter ikke statusendringen til status $behandlingStatus"
     ) : Exception(message)
 }
 
-internal fun Behandling.toDetaljertBehandling(): DetaljertBehandling {
-    val (soeknadMottatDato, gyldighetsproeving) = when (this) {
-        is Foerstegangsbehandling -> this.soeknadMottattDato to this.gyldighetsproeving
-        // TODO øh 24.10.2022 er det riktig at søknadMottatDato er behandlingOpprettet der vi ikke har søknad?
-        else -> this.behandlingOpprettet to null
-    }
+fun Behandling.mottattDato(): LocalDateTime? = when (this) {
+    is Foerstegangsbehandling -> this.soeknadMottattDato
+    else -> this.behandlingOpprettet
+}
 
+fun Behandling.gyldighetsproeving(): GyldighetsResultat? = when (this) {
+    is Foerstegangsbehandling -> this.gyldighetsproeving
+    else -> null
+}
+
+fun Behandling.revurderingsaarsak(): RevurderingAarsak? = when (this) {
+    is Revurdering -> this.revurderingsaarsak
+    else -> null
+}
+
+fun Behandling.revurderingInfo(): RevurderingInfo? = when (this) {
+    is Revurdering -> this.revurderingInfo
+    else -> null
+}
+
+internal fun Behandling.toDetaljertBehandling(): DetaljertBehandling {
     return DetaljertBehandling(
         id = id,
         sak = sak.id,
         sakType = sak.sakType,
         behandlingOpprettet = behandlingOpprettet,
-        sistEndret = sistEndret,
-        soeknadMottattDato = soeknadMottatDato,
+        soeknadMottattDato = this.mottattDato(),
         innsender = persongalleri.innsender,
         soeker = persongalleri.soeker,
         gjenlevende = persongalleri.gjenlevende,
         avdoed = persongalleri.avdoed,
         soesken = persongalleri.soesken,
-        gyldighetsproeving = gyldighetsproeving,
         status = status,
         behandlingType = type,
         virkningstidspunkt = this.virkningstidspunkt,
-        utenlandstilsnitt = this.utenlandstilsnitt,
         boddEllerArbeidetUtlandet = this.boddEllerArbeidetUtlandet,
-        kommerBarnetTilgode = kommerBarnetTilgode,
-        revurderingsaarsak = when (this) {
-            is Revurdering -> revurderingsaarsak
-            else -> null
-        },
+        revurderingsaarsak = this.revurderingsaarsak(),
         prosesstype = prosesstype,
-        revurderingInfo = when (this) {
-            is Revurdering -> revurderingInfo
-            else -> null
-        },
+        revurderingInfo = this.revurderingInfo(),
         enhet = sak.enhet
     )
 }
@@ -181,11 +188,7 @@ fun Behandling.toBehandlingSammendrag() = BehandlingSammendrag(
     sak = this.sak.id,
     sakType = this.sak.sakType,
     status = this.status,
-    soeknadMottattDato = if (this is Foerstegangsbehandling) {
-        this.soeknadMottattDato
-    } else {
-        this.behandlingOpprettet
-    },
+    soeknadMottattDato = this.mottattDato(),
     behandlingOpprettet = this.behandlingOpprettet,
     behandlingType = this.type,
     aarsak = when (this) {

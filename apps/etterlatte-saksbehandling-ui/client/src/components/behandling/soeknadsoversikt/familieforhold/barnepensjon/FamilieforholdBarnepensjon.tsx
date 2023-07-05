@@ -1,23 +1,16 @@
 import styled from 'styled-components'
-import { GjenlevendeForelder } from './../personer/GjenlevendeForelder'
-import { Barn } from '../personer/Barn'
-import { Border, DashedBorder } from '../../styled'
-import { SoeskenListe } from './../personer/Soesken'
-import { GyldigFramsattType, IDetaljertBehandling, IGyldighetproving } from '~shared/types/IDetaljertBehandling'
+import { Border } from '../../styled'
+import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { VurderingsResultat } from '~shared/types/VurderingsResultat'
-import { Foreldre } from '~components/behandling/soeknadsoversikt/familieforhold/personer/Foreldre'
 import { ErrorMessage } from '@navikt/ds-react'
+import { Person } from '~components/behandling/soeknadsoversikt/familieforhold/barnepensjon/Person'
+import { BarneListe } from '~components/behandling/soeknadsoversikt/familieforhold/barnepensjon/BarneListe'
 
 export interface PropsFamilieforhold {
   behandling: IDetaljertBehandling
 }
 
-export const FamilieforholdBarnepensjon: React.FC<PropsFamilieforhold> = ({ behandling }) => {
-  const innsenderErGjenlevende =
-    behandling.gyldighetsprøving?.vurderinger.find(
-      (g: IGyldighetproving) => g.navn === GyldigFramsattType.INNSENDER_ER_FORELDER
-    )?.resultat === VurderingsResultat.OPPFYLT
-
+export const FamilieforholdBarnepensjon = ({ behandling }: PropsFamilieforhold) => {
   if (behandling.familieforhold == null || behandling.søker == null) {
     return (
       <FamilieforholdWrapper>
@@ -25,31 +18,23 @@ export const FamilieforholdBarnepensjon: React.FC<PropsFamilieforhold> = ({ beha
       </FamilieforholdWrapper>
     )
   }
-
-  const doedsdato = behandling.familieforhold.avdoede.opplysning.doedsdato
+  const gjenlevende = behandling.familieforhold.gjenlevende
+  const avdoede = behandling.familieforhold.avdoede
 
   return (
     <>
       <FamilieforholdWrapper>
         {behandling.gyldighetsprøving?.resultat === VurderingsResultat.OPPFYLT ? (
           <>
-            <Barn person={behandling.søker} doedsdato={doedsdato} />
-            <DashedBorder />
-            <Foreldre
-              gjenlevende={behandling.familieforhold.gjenlevende.opplysning}
-              innsenderErGjenlevende={innsenderErGjenlevende}
-              doedsdato={doedsdato}
-              avdoed={behandling.familieforhold.avdoede.opplysning}
-            />
-            <DashedBorder />
-            <SoeskenListe soekerFnr={behandling.søker.foedselsnummer} familieforhold={behandling.familieforhold!!} />
+            <FamilieforholdVoksne>
+              <Person person={behandling.søker} kilde={gjenlevende.kilde} mottaker />
+              <Person person={avdoede.opplysning} kilde={avdoede.kilde} avdoed />
+              <Person person={gjenlevende.opplysning} kilde={gjenlevende.kilde} gjenlevende />
+            </FamilieforholdVoksne>
+            <BarneListe familieforhold={behandling.familieforhold!!} />
           </>
         ) : (
-          <GjenlevendeForelder
-            person={behandling.familieforhold.gjenlevende.opplysning}
-            innsenderErGjenlevendeForelder={innsenderErGjenlevende}
-            doedsdato={doedsdato}
-          />
+          <Person person={gjenlevende.opplysning} kilde={gjenlevende.kilde} />
         )}
       </FamilieforholdWrapper>
       <Border />
@@ -58,5 +43,12 @@ export const FamilieforholdBarnepensjon: React.FC<PropsFamilieforhold> = ({ beha
 }
 
 export const FamilieforholdWrapper = styled.div`
-  padding: 0em 5em;
+  padding: 1em 4em;
+  display: grid;
+  gap: 4rem;
+  margin-bottom: 4rem;
+`
+
+const FamilieforholdVoksne = styled.div`
+  display: flex;
 `

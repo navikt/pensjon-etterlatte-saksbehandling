@@ -11,7 +11,7 @@ export interface PropsFamilieforhold {
   behandling: IDetaljertBehandling
 }
 
-export const FamilieforholdOmstillingsstoenad: React.FC<PropsFamilieforhold> = ({ behandling }) => {
+export const FamilieforholdOmstillingsstoenad = ({ behandling }: PropsFamilieforhold) => {
   if (behandling.familieforhold == null || behandling.søker == null) {
     return (
       <FamilieforholdWrapper>

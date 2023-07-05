@@ -9,7 +9,7 @@ export interface PropsFamilieforhold {
   behandling: IDetaljertBehandling
 }
 
-export const Familieforhold: React.FC<PropsFamilieforhold> = ({ behandling }) => {
+export const Familieforhold = ({ behandling }: PropsFamilieforhold) => {
   return (
     <>
       <ContentHeader>

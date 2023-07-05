@@ -15,6 +15,7 @@
     "@navikt/ds-css-internal": "^2.9.8",
     "@navikt/ds-react": "^4.5.0",
     "@navikt/ds-react-internal": "^2.9.8",
+    "@navikt/ds-tokens": "^4.6.1",
     "@navikt/navspa": "^6.0.1",
     "@reduxjs/toolkit": "^1.9.5",
     "bowser": "^2.11.0",

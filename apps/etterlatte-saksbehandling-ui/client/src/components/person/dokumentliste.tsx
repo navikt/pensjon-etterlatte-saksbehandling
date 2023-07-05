@@ -19,7 +19,7 @@ export const Dokumentliste = ({
   return (
     <TableWrapper>
       <Table zebraStripes>
-        <Table.Header className="test">
+        <Table.Header>
           <Table.Row>
             {colonner.map((col) => (
               <Table.HeaderCell key={`header${col}`}>{col}</Table.HeaderCell>

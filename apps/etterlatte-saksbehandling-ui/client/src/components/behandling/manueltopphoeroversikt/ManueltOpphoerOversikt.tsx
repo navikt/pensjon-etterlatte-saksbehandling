@@ -13,10 +13,10 @@ import { mapApiResult, useApiCall } from '~shared/hooks/useApiCall'
 import { Virkningstidspunkt } from '~shared/types/IDetaljertBehandling'
 import { formaterBehandlingstype, formaterStringDato } from '~utils/formattering'
 import { PersonHeader } from '~components/behandling/soeknadsoversikt/familieforhold/styled'
-import { Child } from '@navikt/ds-icons'
 import differenceInYears from 'date-fns/differenceInYears'
 import { IBehandlingsammendrag } from '~components/person/typer'
 import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
+import { ChildEyesIcon } from '@navikt/aksel-icons'
 
 export interface ManueltOpphoerDetaljer {
   id: string
@@ -88,7 +88,7 @@ export const ManueltOpphoerOversikt = (props: { behandling: IBehandlingReducer }
           {soeker ? (
             <PersonHeader>
               <span className="icon">
-                <Child />
+                <ChildEyesIcon />
               </span>
               {`${soeker.fornavn} ${soeker.etternavn}`}
               <span className="personRolle"> ({differenceInYears(new Date(), new Date(soeker.foedselsdato))} år)</span>

@@ -1,4 +1,3 @@
-import { Child } from '@navikt/ds-icons'
 import { Heading, Link, Table } from '@navikt/ds-react'
 import { IFamilieforhold, IPdlPerson } from '~shared/types/Person'
 import styled from 'styled-components'
@@ -8,6 +7,7 @@ import { CopyToClipboard } from '@navikt/ds-react-internal'
 import { DatoFormat, formaterFnr } from '~utils/formattering'
 import { FlexHeader, IconWrapper, TableWrapper } from '~components/behandling/soeknadsoversikt/familieforhold/styled'
 import { IconSize } from '~shared/types/Icon'
+import { ChildEyesIcon } from '@navikt/aksel-icons'
 
 const FnrWrapper = styled.div`
   display: flex;
@@ -24,7 +24,7 @@ export const BarneListe = ({ familieforhold }: Props) => {
     <div>
       <FlexHeader>
         <IconWrapper>
-          <Child fontSize={IconSize.DEFAULT} />
+          <ChildEyesIcon fontSize={IconSize.DEFAULT} />
         </IconWrapper>
         <Heading size={'small'} level={'3'}>
           Barn

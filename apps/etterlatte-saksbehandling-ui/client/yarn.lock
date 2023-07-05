@@ -505,6 +505,11 @@
     react-day-picker "8.3.4"
     react-modal "3.15.1"
 
+"@navikt/ds-tokens@^4.6.1":
+  version "4.6.1"
+  resolved "https://registry.yarnpkg.com/@navikt/ds-tokens/-/ds-tokens-4.6.1.tgz#d48f7c8bad197297dfb59b20685a6843f41f269e"
+  integrity sha512-pBX5MLUpFftvRGZcbS9wWoMmzeH/iLNvOdMPvMbYTBnU7LUjU3XHLByfc0ogb2eT3gRevpD4DbjzWVx65ZzULw==
+
 "@navikt/navspa@^6.0.1":
   version "6.0.1"
   resolved "https://registry.yarnpkg.com/@navikt/navspa/-/navspa-6.0.1.tgz#f3536207976359e4849f7db7aa9ffa6cfc7fe516"

@@ -15,7 +15,7 @@ import { Vurdering } from './Vurdering'
 import { StatusIcon, StatusIconProps } from '~shared/icons/statusIcon'
 import { VilkaarGrunnlagsStoette } from './vilkaar/VilkaarGrunnlagsStoette'
 import { Link } from '@navikt/ds-react'
-import { ExternalLink } from '@navikt/ds-icons'
+import { ExternalLinkIcon } from '@navikt/aksel-icons'
 
 export interface VilkaarProps {
   vilkaar: Vilkaar
@@ -57,7 +57,7 @@ export const ManueltVilkaar = (props: VilkaarProps) => {
               </Title>
               <Link href={vilkaar.hovedvilkaar.lovreferanse.lenke} target="_blank" rel="noopener noreferrer">
                 {`Folketrygden ${vilkaar.hovedvilkaar.lovreferanse.paragraf}`}
-                <ExternalLink title={vilkaar.hovedvilkaar.tittel} />
+                <ExternalLinkIcon title={vilkaar.hovedvilkaar.tittel} />
               </Link>
               <VilkaarBeskrivelse>{vilkaar.hovedvilkaar.beskrivelse}</VilkaarBeskrivelse>
             </VilkaarColumn>

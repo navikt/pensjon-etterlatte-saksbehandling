@@ -3,7 +3,7 @@ import styled from 'styled-components'
 import { Journalpost } from '../behandling/types'
 import { formaterStringDato } from '~utils/formattering'
 import Spinner from '~shared/Spinner'
-import { ExternalLink } from '@navikt/ds-icons'
+import { ExternalLinkIcon } from '@navikt/aksel-icons'
 
 export const DokumentlisteLiten = ({
   dokumenter,
@@ -27,7 +27,7 @@ export const DokumentlisteLiten = ({
                 rel="noreferrer noopener"
               >
                 {brev.tittel}
-                <ExternalLink title={brev.tittel} />
+                <ExternalLinkIcon title={brev.tittel} />
               </Link>
             </Dokumentnavn>
             <Avsender>

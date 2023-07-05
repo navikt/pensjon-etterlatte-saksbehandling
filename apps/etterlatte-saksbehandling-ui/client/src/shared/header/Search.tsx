@@ -2,7 +2,8 @@ import styled from 'styled-components'
 import { BodyShort, Loader, Search as SearchField } from '@navikt/ds-react'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ErrorColored, InformationColored } from '@navikt/ds-icons'
+import { ANavRed, AGray900, ABlue500 } from '@navikt/ds-tokens/dist/tokens'
+import { XMarkOctagonIcon, InformationSquareIcon } from '@navikt/aksel-icons'
 import { isFailure, isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
 import { getPerson } from '~shared/api/grunnlag'
 import { GYLDIG_FNR } from '~utils/fnr'
@@ -40,7 +41,11 @@ export const Search = () => {
     resetSakSoek()
     if (searchInput.length === 0) {
       setFeilInput(false)
-    } else if (feilInput && (!gyldigInputFnr || !gyldigInputSakId)) {
+    } else if (searchInput.length && searchInput.length === 11 && !gyldigInputFnr) {
+      setFeilInput(true)
+    } else if (searchInput.length && searchInput.length < 11 && !gyldigInputSakId) {
+      setFeilInput(true)
+    } else if (searchInput.length && searchInput.length > 11 && /\D/g.test(searchInput ?? '')) {
       setFeilInput(true)
     } else {
       setFeilInput(false)
@@ -82,7 +87,7 @@ export const Search = () => {
       {feilInput && (
         <Dropdown info={true}>
           <span className="icon">
-            <InformationColored />
+            <InformationSquareIcon stroke={ABlue500} fill={ABlue500} />
           </span>
           <SearchResult>
             <BodyShort className="text">Tast inn gyldig fødselsnummer eller saksid</BodyShort>
@@ -93,7 +98,7 @@ export const Search = () => {
       {isFailure(funnetSak) && (
         <Dropdown error={true}>
           <span className="icon">
-            <ErrorColored />
+            <XMarkOctagonIcon color={ANavRed} fill={AGray900} />
           </span>
           <SearchResult>
             <BodyShort className="text">{feilmelding(funnetSak.error)}</BodyShort>
@@ -103,7 +108,7 @@ export const Search = () => {
       {isFailure(personStatus) && (
         <Dropdown error={true}>
           <span className="icon">
-            <ErrorColored />
+            <XMarkOctagonIcon color={ANavRed} fill={AGray900} />
           </span>
           <SearchResult>
             <BodyShort className="text">{feilmelding(personStatus.error)}</BodyShort>

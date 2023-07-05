@@ -1,5 +1,5 @@
 import { IPdlPerson } from '~shared/types/Person'
-import { People } from '@navikt/ds-icons'
+import { PersonIcon } from '@navikt/aksel-icons'
 import { format } from 'date-fns'
 import { PersonInfoAdresse } from '../personer/personinfo/PersonInfoAdresse'
 import { BodyShort, Detail, Heading } from '@navikt/ds-react'
@@ -32,7 +32,7 @@ export const Person = ({ person, kilde, avdoed = false }: Props) => {
   return (
     <PersonBorder>
       <IconWrapper>
-        <People fontSize={IconSize.DEFAULT} />
+        <PersonIcon fontSize={IconSize.DEFAULT} />
       </IconWrapper>
       <PersonInfoWrapper>
         <Heading size={'small'} level={'3'}>

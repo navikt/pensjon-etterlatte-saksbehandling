@@ -70,8 +70,5 @@ val restanse = RegelMeta(
     beskrivelse = "Beregner restanse etter endret ytelse etter avkorting på grunn av endret årsinntekt",
     regelReferanse = RegelReferanse("RESTANSE-INNTEKTSENDRING")
 ) benytter totalRestanse og fordeltRestanse med { totalRestanse, fordeltRestanse ->
-    Restanse(
-        totalRestanse = totalRestanse,
-        fordeltRestanse = fordeltRestanse
-    )
+    totalRestanse to fordeltRestanse
 }

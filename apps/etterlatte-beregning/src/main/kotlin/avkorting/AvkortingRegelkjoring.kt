@@ -25,6 +25,7 @@ import no.nav.etterlatte.regler.Beregningstall
 import org.slf4j.LoggerFactory
 import java.lang.IllegalArgumentException
 import java.time.YearMonth
+import java.util.*
 
 object AvkortingRegelkjoring {
 
@@ -64,6 +65,7 @@ object AvkortingRegelkjoring {
                 val tidspunkt = Tidspunkt.now()
                 resultat.periodiserteResultater.map { periodisertResultat ->
                     Avkortingsperiode(
+                        id = UUID.randomUUID(),
                         periode = Periode(
                             fom = YearMonth.from(periodisertResultat.periode.fraDato),
                             tom = periodisertResultat.periode.tilDato?.let { YearMonth.from(it) }
@@ -95,13 +97,7 @@ object AvkortingRegelkjoring {
         val regelgrunnlag = PeriodisertAvkortetYtelseGrunnlag(
             beregningsperioder = periodiserteBeregninger(beregningsperioder),
             avkortingsperioder = periodiserteAvkortinger(avkortingsperioder),
-            fordeltRestanse = KonstantGrunnlag(
-                FaktumNode(
-                    verdi = restanse?.fordeltRestanse ?: 0,
-                    kilde = restanse?.kilde ?: "",
-                    beskrivelse = "Restansebeløp som skal fordeles månedlig"
-                )
-            )
+            fordeltRestanse = restansegrunnlag(restanse)
         )
         return beregnAvkortetYtelse(periode, AvkortetYtelseType.NY, regelgrunnlag)
     }
@@ -115,7 +111,7 @@ object AvkortingRegelkjoring {
         val avkortetYtelseGrunnlag = PeriodisertAvkortetYtelseGrunnlag(
             beregningsperioder = periodiserteBeregninger(beregninger),
             avkortingsperioder = periodiserteAvkortinger(avkortinger),
-            fordeltRestanse = KonstantGrunnlag(FaktumNode(verdi = 0, kilde = "", beskrivelse = "Tom restanse"))
+            fordeltRestanse = restansegrunnlag(null)
         )
         return beregnAvkortetYtelse(periode, AvkortetYtelseType.REBEREGNET, avkortetYtelseGrunnlag)
     }
@@ -133,6 +129,7 @@ object AvkortingRegelkjoring {
                     val resultatFom = periodisertResultat.periode.fraDato
                     val restanse = regelgrunnlag.finnGrunnlagForPeriode(resultatFom).fordeltRestanse.verdi
                     AvkortetYtelse(
+                        id = UUID.randomUUID(),
                         type = type,
                         periode = Periode(
                             fom = YearMonth.from(periodisertResultat.periode.fraDato),
@@ -188,11 +185,20 @@ object AvkortingRegelkjoring {
             }.mapVerdier {
                 FaktumNode(
                     verdi = it.avkorting,
-                    kilde = it.kilde, // TODO EY-2368 Bruke id her?
+                    kilde = "Avkorting:${it.id}",
                     beskrivelse = "Beregnet avkorting for periode"
                 )
             }
         ) { _, _, _ -> throw IllegalArgumentException("Noe gikk galt ved uthenting av periodiserte avkortinger") }
+
+    private fun restansegrunnlag(restanse: Restanse?): KonstantGrunnlag<FaktumNode<Int>> =
+        KonstantGrunnlag(
+            FaktumNode(
+                verdi = restanse?.fordeltRestanse ?: 0,
+                kilde = restanse?.id?.let { "Restanse:$it" } ?: "",
+                beskrivelse = "Restansebeløp som skal fordeles månedlig"
+            )
+        )
 
     fun beregnRestanse(
         foersteMaaned: YearMonth,
@@ -205,7 +211,7 @@ object AvkortingRegelkjoring {
                 verdi = tidligereYtelseEtterAvkorting
                     .sprePerMaaned(foersteMaaned, virkningstidspunkt.dato)
                     .map { it.ytelseEtterAvkorting },
-                kilde = tidligereYtelseEtterAvkorting.map { it.kilde }, // TODO EY-2368 bruke ider her?
+                kilde = tidligereYtelseEtterAvkorting.map { "avkortetYtelse:${it.id}" },
                 beskrivelse = "Ytelse etter avkorting fra tidligere beahndlinge gjeldende år"
 
             ),
@@ -213,7 +219,7 @@ object AvkortingRegelkjoring {
                 verdi = nyYtelseEtterAvkorting
                     .sprePerMaaned(foersteMaaned, virkningstidspunkt.dato)
                     .map { it.ytelseEtterAvkorting },
-                kilde = nyYtelseEtterAvkorting.map { it.kilde }, // TODO EY-2368 bruke id her?
+                kilde = nyYtelseEtterAvkorting.map { "avkortetYtelse:${it.id}" },
                 beskrivelse = "Reberegnet ytelse etter avkorting før nytt virkningstidspunkt"
             ),
             virkningstidspunkt = FaktumNode(
@@ -229,11 +235,12 @@ object AvkortingRegelkjoring {
         )
         return when (resultat) {
             is RegelkjoeringResultat.Suksess -> {
-                val restanseresultat = resultat.periodiserteResultater.first().resultat.verdi
+                val (totalRestanse, fordeltRestanse) = resultat.periodiserteResultater.first().resultat.verdi
                 val tidspunkt = Tidspunkt.now()
                 Restanse(
-                    totalRestanse = restanseresultat.totalRestanse,
-                    fordeltRestanse = restanseresultat.fordeltRestanse,
+                    id = UUID.randomUUID(),
+                    totalRestanse = totalRestanse,
+                    fordeltRestanse = fordeltRestanse,
                     regelResultat = resultat.toJsonNode(),
                     tidspunkt = tidspunkt,
                     kilde = Grunnlagsopplysning.RegelKilde(

@@ -65,7 +65,7 @@ class AvkortingRepository(private val dataSource: DataSource) {
                     avkortingsperioder = avkortingsperioder,
                     tidligereAvkortetYtelse = tidligereAvkortetYtelse,
                     reberegnetAvkortetYtelse = reberegnetAvkortetYtelse,
-                    restanse = restanse ?: Restanse(0,0),
+                    restanse = restanse,
                 ),
                 avkortetYtelse = avkortetYtelse
             )
@@ -79,11 +79,13 @@ class AvkortingRepository(private val dataSource: DataSource) {
         dataSource.transaction { tx ->
             slettAvkorting(behandlingId, tx)
             lagreAvkortingGrunnlag(behandlingId, avkorting.avkortingGrunnlag, tx)
-            lagreYtelseFoerAvkorting(behandlingId, avkorting.aarsoppgjoer.ytelseFoerAvkorting, tx)
-            lagreAvkortingsperioder(behandlingId, avkorting.aarsoppgjoer.avkortingsperioder, tx)
-            lagreAvkortetYtelse(behandlingId, avkorting.aarsoppgjoer.tidligereAvkortetYtelse, tx)
-            lagreAvkortetYtelse(behandlingId, avkorting.aarsoppgjoer.reberegnetAvkortetYtelse, tx)
-            lagreRestanse(behandlingId, avkorting.aarsoppgjoer.restanse, tx)
+            with(avkorting.aarsoppgjoer) {
+                lagreYtelseFoerAvkorting(behandlingId, ytelseFoerAvkorting, tx)
+                lagreAvkortingsperioder(behandlingId, avkortingsperioder, tx)
+                lagreAvkortetYtelse(behandlingId, tidligereAvkortetYtelse, tx)
+                lagreAvkortetYtelse(behandlingId, reberegnetAvkortetYtelse, tx)
+                restanse?.let {lagreRestanse(behandlingId, it, tx) }
+            }
             lagreAvkortetYtelse(behandlingId, avkorting.avkortetYtelse, tx)
         }
         return hentAvkortingUtenNullable(behandlingId)
@@ -188,7 +190,7 @@ class AvkortingRepository(private val dataSource: DataSource) {
                 )
             """.trimIndent(),
             paramMap = mapOf(
-                "id" to UUID.randomUUID(),
+                "id" to it.id,
                 "behandlingId" to behandlingId,
                 "fom" to it.periode.fom.atDay(1),
                 "tom" to it.periode.tom?.atDay(1),
@@ -213,7 +215,7 @@ class AvkortingRepository(private val dataSource: DataSource) {
                 )
             """.trimIndent(),
         paramMap = mapOf(
-            "id" to UUID.randomUUID(),
+            "id" to restanse.id,
             "behandlingId" to behandlingId,
             "total_restanse" to restanse.totalRestanse,
             "fordelt_restanse" to restanse.fordeltRestanse,
@@ -240,7 +242,7 @@ class AvkortingRepository(private val dataSource: DataSource) {
                     )
                 """.trimIndent(),
                 paramMap = mapOf(
-                    "id" to UUID.randomUUID(),
+                    "id" to it.id,
                     "type" to it.type.name,
                     "behandlingId" to behandlingId,
                     "fom" to it.periode.fom.atDay(1),
@@ -278,6 +280,7 @@ class AvkortingRepository(private val dataSource: DataSource) {
         beregningsreferanse = uuid("beregningsreferanse")
     )
     private fun Row.toAvkortingsperiode() = Avkortingsperiode(
+        id = uuid("id"),
         periode = Periode(
             fom = sqlDate("fom").let { YearMonth.from(it.toLocalDate()) },
             tom = sqlDateOrNull("tom")?.let { YearMonth.from(it.toLocalDate()) }
@@ -288,13 +291,15 @@ class AvkortingRepository(private val dataSource: DataSource) {
         kilde = string("kilde").let { objectMapper.readValue(it) }
     )
     private fun Row.toRestanse() = Restanse(
+        id = uuid("id"),
         totalRestanse = int("total_restanse"),
         fordeltRestanse = int("fordelt_restanse"),
-        tidspunkt = sqlTimestampOrNull("tidspunkt")?.toTidspunkt() ,
-        regelResultat = stringOrNull("regel_resultat")?.let { objectMapper.readTree(it) },
-        kilde = stringOrNull("kilde")?.let { objectMapper.readValue(it) }
+        tidspunkt = sqlTimestamp("tidspunkt").toTidspunkt() ,
+        regelResultat = string("regel_resultat").let { objectMapper.readTree(it) },
+        kilde = string("kilde").let { objectMapper.readValue(it) }
     )
     private fun Row.toAvkortetYtelse() = AvkortetYtelse(
+        id = uuid("id"),
         type = string("type").let { AvkortetYtelseType.valueOf(it) },
         periode = Periode(
             fom = sqlDate("fom").let { YearMonth.from(it.toLocalDate()) },

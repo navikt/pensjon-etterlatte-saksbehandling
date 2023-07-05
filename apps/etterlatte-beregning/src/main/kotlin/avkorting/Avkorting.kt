@@ -92,7 +92,7 @@ data class Avkorting(
                 avkortingsperioder = avkortingsperioder,
                 tidligereAvkortetYtelse = emptyList(),
                 reberegnetAvkortetYtelse = emptyList(),
-                restanse = Restanse(totalRestanse = 0, fordeltRestanse = 0),
+                restanse = null,
             ),
             avkortetYtelse = beregnetAvkortetYtelse
         )
@@ -155,7 +155,7 @@ data class Avkorting(
                 avkortingsperioder = emptyList(),
                 tidligereAvkortetYtelse = tidligereAvkortetYtelse,
                 reberegnetAvkortetYtelse = emptyList(),
-                restanse = Restanse(totalRestanse = 0, fordeltRestanse = 0),
+                restanse = null,
             ),
             avkortetYtelse = avkortetYtelse,
         )
@@ -177,7 +177,7 @@ data class Aarsoppgjoer(
     val avkortingsperioder: List<Avkortingsperiode>,
     val tidligereAvkortetYtelse: List<AvkortetYtelse>,
     val reberegnetAvkortetYtelse: List<AvkortetYtelse>,
-    val restanse: Restanse,
+    val restanse: Restanse?,
 )
 
 data class YtelseFoerAvkorting(
@@ -187,6 +187,7 @@ data class YtelseFoerAvkorting(
 )
 
 data class Avkortingsperiode(
+    val id: UUID,
     val periode: Periode,
     val avkorting: Int,
     val tidspunkt: Tidspunkt,
@@ -195,14 +196,16 @@ data class Avkortingsperiode(
 )
 
 data class Restanse(
+    val id: UUID,
     val totalRestanse: Int,
     val fordeltRestanse: Int,
-    val tidspunkt: Tidspunkt? = null,
-    val regelResultat: JsonNode? = null,
-    val kilde: Grunnlagsopplysning.RegelKilde? = null,
+    val tidspunkt: Tidspunkt,
+    val regelResultat: JsonNode,
+    val kilde: Grunnlagsopplysning.RegelKilde,
 )
 
 data class AvkortetYtelse(
+    val id: UUID,
     val type: AvkortetYtelseType,
     val periode: Periode,
     val ytelseEtterAvkorting: Int,

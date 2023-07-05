@@ -9,7 +9,6 @@ import no.nav.etterlatte.avkorting.AvkortetYtelse
 import no.nav.etterlatte.avkorting.AvkortetYtelseType
 import no.nav.etterlatte.avkorting.Avkorting
 import no.nav.etterlatte.avkorting.AvkortingGrunnlag
-import no.nav.etterlatte.avkorting.Restanse
 import no.nav.etterlatte.avkorting.YtelseFoerAvkorting
 import no.nav.etterlatte.avkorting.mapTilYtelseFoerAvkorting
 import no.nav.etterlatte.beregning.regler.avkortetYtelse
@@ -242,6 +241,7 @@ internal class AvkortingTest {
                             avkortingsbeloep = 9160,
                             ytelseFoerAvkorting = 20902
                         ),
+                        AvkortetYtelse::id,
                         AvkortetYtelse::tidspunkt,
                         AvkortetYtelse::regelResultat,
                         AvkortetYtelse::kilde
@@ -255,6 +255,7 @@ internal class AvkortingTest {
                             avkortingsbeloep = 9026,
                             ytelseFoerAvkorting = 22241
                         ),
+                        AvkortetYtelse::id,
                         AvkortetYtelse::tidspunkt,
                         AvkortetYtelse::regelResultat,
                         AvkortetYtelse::kilde
@@ -356,6 +357,7 @@ internal class AvkortingTest {
                                 avkortingsbeloep = 9160,
                                 ytelseFoerAvkorting = 20902
                             ),
+                            AvkortetYtelse::id,
                             AvkortetYtelse::tidspunkt,
                             AvkortetYtelse::regelResultat,
                             AvkortetYtelse::kilde
@@ -370,6 +372,7 @@ internal class AvkortingTest {
                                 avkortingsbeloep = 9026,
                                 ytelseFoerAvkorting = 22241
                             ),
+                            AvkortetYtelse::id,
                             AvkortetYtelse::tidspunkt,
                             AvkortetYtelse::regelResultat,
                             AvkortetYtelse::kilde
@@ -387,6 +390,7 @@ internal class AvkortingTest {
                                 avkortingsbeloep = 13660,
                                 ytelseFoerAvkorting = 20902
                             ),
+                            AvkortetYtelse::id,
                             AvkortetYtelse::tidspunkt,
                             AvkortetYtelse::regelResultat,
                             AvkortetYtelse::kilde
@@ -401,18 +405,15 @@ internal class AvkortingTest {
                                 avkortingsbeloep = 13526,
                                 ytelseFoerAvkorting = 22241
                             ),
+                            AvkortetYtelse::id,
                             AvkortetYtelse::tidspunkt,
                             AvkortetYtelse::regelResultat,
                             AvkortetYtelse::kilde
                         )
                     }
                     restanse.asClue {
-                        it.shouldBeEqualToIgnoringFields(
-                            Restanse(13500, 1928),
-                            Restanse::tidspunkt,
-                            Restanse::regelResultat,
-                            Restanse::kilde
-                        )
+                        it!!.totalRestanse shouldBe 13500
+                        it.fordeltRestanse shouldBe 1928
                     }
                 }
             }
@@ -435,6 +436,7 @@ internal class AvkortingTest {
                             avkortingsbeloep = 13526,
                             ytelseFoerAvkorting = 22241
                         ),
+                        AvkortetYtelse::id,
                         AvkortetYtelse::tidspunkt,
                         AvkortetYtelse::regelResultat,
                         AvkortetYtelse::kilde

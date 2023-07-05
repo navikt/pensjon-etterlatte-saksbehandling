@@ -79,7 +79,7 @@ internal class AvkortingRepositoryTest {
         val endretAvkortingsperiode = listOf(aarsoppgjoer.avkortingsperioder[0].copy(avkorting = 333))
         val endretTidligereAvkortetYtelse = listOf(aarsoppgjoer.tidligereAvkortetYtelse[0].copy(avkortingsbeloep = 444))
         val endretReberegnetYtelse = listOf(aarsoppgjoer.reberegnetAvkortetYtelse[0].copy(avkortingsbeloep = 444))
-        val endretRestanse = aarsoppgjoer.restanse.copy(totalRestanse = 333)
+        val endretRestanse = aarsoppgjoer.restanse!!.copy(totalRestanse = 333)
         val endretAvkortetYtelse = listOf(avkortetYtelse[0].copy(avkortingsbeloep = 444, restanse = 100))
 
         val avkorting = avkortingRepository.lagreAvkorting(

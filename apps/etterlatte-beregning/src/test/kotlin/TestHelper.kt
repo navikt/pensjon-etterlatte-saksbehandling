@@ -121,7 +121,7 @@ fun aarsoppgjoer(
     avkortingsperioder: List<Avkortingsperiode> = emptyList(),
     tidligereAvkortetYtelse: List<AvkortetYtelse> = emptyList(),
     reberegnetAvkortetYtelse: List<AvkortetYtelse> = emptyList(),
-    restanse: Restanse = Restanse(totalRestanse = 0, fordeltRestanse = 0)
+    restanse: Restanse? = null
 ) = Aarsoppgjoer(
     ytelseFoerAvkorting = ytelseFoerAvkorting,
     avkortingsperioder = avkortingsperioder,
@@ -145,6 +145,7 @@ fun avkortingsperiode(
     tom: YearMonth? = null,
     avkorting: Int = 10000
 ) = Avkortingsperiode(
+    id = UUID.randomUUID(),
     Periode(fom = fom, tom = tom),
     avkorting = avkorting,
     tidspunkt = Tidspunkt.now(),
@@ -156,6 +157,7 @@ fun restanse(
     totalRestanse: Int = 100,
     fordeltRestanse: Int = 100
 ) = Restanse(
+    id = UUID.randomUUID(),
     totalRestanse = totalRestanse,
     fordeltRestanse = fordeltRestanse,
     tidspunkt = Tidspunkt.now(),
@@ -181,6 +183,7 @@ fun avkortetYtelse(
         tom = null
     )
 ) = AvkortetYtelse(
+    id = UUID.randomUUID(),
     type = type,
     periode = periode,
     ytelseEtterAvkorting = ytelseEtterAvkorting,

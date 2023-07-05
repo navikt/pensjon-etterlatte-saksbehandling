@@ -6,10 +6,12 @@ import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
+import no.nav.etterlatte.libs.common.RetryResult
 import no.nav.etterlatte.libs.common.person.HentPdlIdentRequest
 import no.nav.etterlatte.libs.common.person.PdlIdentifikator
 import no.nav.etterlatte.libs.common.person.PersonIdent
 import no.nav.etterlatte.libs.common.person.maskerFnr
+import no.nav.etterlatte.libs.common.retry
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -18,15 +20,21 @@ class PdlKlient(
     private val url: String
 ) {
     suspend fun hentPdlIdentifikator(fnr: String): PdlIdentifikator {
-        logger.info("Henter folkeregisteridentifikator")
-        try {
-            return httpClient.post("$url/pdlident") {
+        logger.info("Henter ident fra PDL for fnr=${fnr.maskerFnr()}")
+
+        return retry<PdlIdentifikator> {
+            httpClient.post("$url/pdlident") {
                 contentType(ContentType.Application.Json)
                 setBody(HentPdlIdentRequest(PersonIdent(fnr)))
             }.body()
-        } catch (e: Exception) {
-            logger.info("Kunne ikke hente pdlident for fnr=${fnr.maskerFnr()}", e)
-            throw e
+        }.let { result ->
+            when (result) {
+                is RetryResult.Success -> result.content
+                is RetryResult.Failure -> {
+                    logger.error("Feil ved henting av ident fra PDL for fnr=${fnr.maskerFnr()}")
+                    throw result.samlaExceptions()
+                }
+            }
         }
     }
 

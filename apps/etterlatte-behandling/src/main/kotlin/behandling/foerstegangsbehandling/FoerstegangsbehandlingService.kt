@@ -175,6 +175,7 @@ class RealFoerstegangsbehandlingService(
                 behandlingDao.hentBehandling(opprettBehandling.id)
             }.also { behandling ->
                 behandling?.let {
+                    behandlingHendelser.sendBehovForNyttGrunnlag(it)
                     behandlingHendelser.sendMeldingForHendelse(it, BehandlingHendelseType.OPPRETTET)
                 }
             }

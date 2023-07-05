@@ -3,7 +3,6 @@ package no.nav.etterlatte.behandling
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.kafka.JsonMessage
 import no.nav.etterlatte.kafka.KafkaProdusent
-import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.event.BehandlingRiverKey
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
@@ -21,6 +20,7 @@ enum class BehandlingHendelseType {
 
 interface BehandlingHendelserKafkaProducer {
     fun sendMeldingForHendelse(behandling: Behandling, hendelseType: BehandlingHendelseType)
+    fun sendBehovForNyttGrunnlag(behandling: Behandling)
 }
 
 class BehandlingsHendelserKafkaProducerImpl(
@@ -30,9 +30,7 @@ class BehandlingsHendelserKafkaProducerImpl(
 
     override fun sendMeldingForHendelse(behandling: Behandling, hendelseType: BehandlingHendelseType) {
         val correlationId = getCorrelationId()
-        if (behandling.type == BehandlingType.REVURDERING && hendelseType == BehandlingHendelseType.OPPRETTET) {
-            sendBehovForNyttGrunnlag(behandling)
-        }
+
         rapid.publiser(
             behandling.id.toString(),
             JsonMessage.newMessage(
@@ -50,7 +48,7 @@ class BehandlingsHendelserKafkaProducerImpl(
         }
     }
 
-    private fun sendBehovForNyttGrunnlag(behandling: Behandling) {
+    override fun sendBehovForNyttGrunnlag(behandling: Behandling) {
         grunnlagsbehov(behandling).forEach {
             rapid.publiser(behandling.id.toString(), it.toJson())
         }

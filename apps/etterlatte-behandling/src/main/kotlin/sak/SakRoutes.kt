@@ -12,7 +12,6 @@ import no.nav.etterlatte.behandling.BehandlingListe
 import no.nav.etterlatte.behandling.GenerellBehandlingService
 import no.nav.etterlatte.behandling.domain.Grunnlagsendringshendelse
 import no.nav.etterlatte.behandling.domain.toBehandlingSammendrag
-import no.nav.etterlatte.behandling.domain.toDetaljertBehandling
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringsListe
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.inTransaction
@@ -50,10 +49,10 @@ internal fun Route.sakSystemRoutes(
 
             get("/behandlinger/sisteIverksatte") {
                 logger.info("Henter siste iverksatte behandling for $sakId")
-                when (val sisteIverksatteBehandling = generellBehandlingService.hentSisteIverksatte(sakId)) {
-                    null -> call.respond(HttpStatusCode.NotFound)
-                    else -> call.respond(sisteIverksatteBehandling.toDetaljertBehandling())
-                }
+
+                val sisteIverksatteBehandling = generellBehandlingService.hentSisteIverksatte(sakId)
+
+                call.respond(sisteIverksatteBehandling?.id ?: HttpStatusCode.NotFound)
             }
         }
     }

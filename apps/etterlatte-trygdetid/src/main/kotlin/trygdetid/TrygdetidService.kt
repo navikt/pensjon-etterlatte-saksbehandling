@@ -43,9 +43,12 @@ class TrygdetidService(
 
             BehandlingType.REVURDERING -> {
                 logger.info("Oppretter trygdetid for behandling $behandlingId for revurdering")
-                val forrigeBehandling = behandlingKlient.hentSisteIverksatteBehandling(behandling.sak, brukerTokenInfo)
+                val forrigeBehandlingId = behandlingKlient.hentSisteIverksatteBehandling(
+                    behandling.sak,
+                    brukerTokenInfo
+                )
 
-                when (val forrigeTrygdetid = hentTrygdetid(forrigeBehandling.id)) {
+                when (val forrigeTrygdetid = hentTrygdetid(forrigeBehandlingId)) {
                     null -> opprettTrygdetidForRevurdering(behandling, brukerTokenInfo)
                     else -> kopierSisteTrygdetidberegning(behandling, forrigeTrygdetid)
                 }

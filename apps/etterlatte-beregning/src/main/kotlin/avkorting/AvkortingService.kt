@@ -28,8 +28,8 @@ class AvkortingService(
     ): Avkorting? {
         val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
         if (behandling.behandlingType == BehandlingType.REVURDERING) {
-            val forrigeBehandling = behandlingKlient.hentSisteIverksatteBehandling(behandling.sak, brukerTokenInfo)
-            return kopierAvkorting(behandlingId, forrigeBehandling.id, brukerTokenInfo)
+            val forrigeBehandlingId = behandlingKlient.hentSisteIverksatteBehandling(behandling.sak, brukerTokenInfo)
+            return kopierAvkorting(behandlingId, forrigeBehandlingId, brukerTokenInfo)
         }
         return null
     }

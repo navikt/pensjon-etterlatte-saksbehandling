@@ -20,7 +20,7 @@ import java.util.*
 interface BehandlingKlient : BehandlingTilgangsSjekk {
     suspend fun hentBehandling(behandlingId: UUID, brukerTokenInfo: BrukerTokenInfo): DetaljertBehandling
 
-    suspend fun hentSisteIverksatteBehandling(sakId: Long, brukerTokenInfo: BrukerTokenInfo): DetaljertBehandling
+    suspend fun hentSisteIverksatteBehandling(sakId: Long, brukerTokenInfo: BrukerTokenInfo): UUID
     suspend fun beregn(behandlingId: UUID, brukerTokenInfo: BrukerTokenInfo, commit: Boolean): Boolean
     suspend fun avkort(behandlingId: UUID, brukerTokenInfo: BrukerTokenInfo, commit: Boolean): Boolean
 }
@@ -68,8 +68,8 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
     override suspend fun hentSisteIverksatteBehandling(
         sakId: Long,
         brukerTokenInfo: BrukerTokenInfo
-    ): DetaljertBehandling {
-        return retry<DetaljertBehandling> {
+    ): UUID {
+        return retry<UUID> {
             downstreamResourceClient
                 .get(
                     resource = Resource(

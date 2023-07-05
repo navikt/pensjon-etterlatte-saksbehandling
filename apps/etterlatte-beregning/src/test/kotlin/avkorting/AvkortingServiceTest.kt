@@ -27,7 +27,7 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.time.YearMonth
-import java.util.UUID
+import java.util.*
 
 internal class AvkortingServiceTest {
 
@@ -103,9 +103,7 @@ internal class AvkortingServiceTest {
 
             every { avkortingRepository.hentAvkorting(behandlingId) } returns null
             coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
-            coEvery { behandlingKlient.hentSisteIverksatteBehandling(any(), any()) } returns behandling(
-                forrigeBehandlingId
-            )
+            coEvery { behandlingKlient.hentSisteIverksatteBehandling(any(), any()) } returns forrigeBehandlingId
             every { avkortingRepository.hentAvkorting(forrigeBehandlingId) } returns forrigeAvkorting
             every { forrigeAvkorting.kopierAvkorting() } returns kopiertAvkorting
             every { beregningService.hentBeregningNonnull(any()) } returns beregning
@@ -136,7 +134,7 @@ internal class AvkortingServiceTest {
     }
 
     @Nested
-    inner class lagreAvkorting {
+    inner class LagreAvkorting {
 
         @Test
         fun `Foerstegangsbehandling skal opprette og beregne ny avkorting hvis ikke finnes fra foer`() {

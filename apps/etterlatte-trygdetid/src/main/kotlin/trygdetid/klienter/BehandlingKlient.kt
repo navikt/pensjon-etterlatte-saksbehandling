@@ -62,7 +62,7 @@ class BehandlingKlient(config: Config, httpClient: HttpClient) : BehandlingTilga
             )
     }
 
-    suspend fun hentSisteIverksatteBehandling(sakId: Long, brukerTokenInfo: BrukerTokenInfo): DetaljertBehandling {
+    suspend fun hentSisteIverksatteBehandling(sakId: Long, brukerTokenInfo: BrukerTokenInfo): UUID {
         logger.info("Henter seneste iverksatte behandling for sak med id $sakId")
 
         val response = downstreamResourceClient.get(

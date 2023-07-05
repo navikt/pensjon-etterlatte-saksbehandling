@@ -152,11 +152,11 @@ class VilkaarsvurderingService(
 
                 BehandlingType.REVURDERING -> {
                     logger.info("Kopierer vilkårsvurdering for behandling $behandlingId fra forrige behandling")
-                    val forrigeBehandling = behandlingKlient.hentSisteIverksatteBehandling(
+                    val forrigeBehandlingId = behandlingKlient.hentSisteIverksatteBehandling(
                         behandling.sak,
                         brukerTokenInfo
                     )
-                    kopierVilkaarsvurdering(behandlingId, forrigeBehandling.id, brukerTokenInfo)
+                    kopierVilkaarsvurdering(behandlingId, forrigeBehandlingId, brukerTokenInfo)
                 }
 
                 BehandlingType.MANUELT_OPPHOER -> throw RuntimeException(

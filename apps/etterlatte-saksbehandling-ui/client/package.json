@@ -12,7 +12,7 @@
   "dependencies": {
     "@navikt/aksel-icons": "^3.3.1",
     "@navikt/ds-css": "~4.6.1",
-    "@navikt/ds-css-internal": "^2.9.8",
+    "@navikt/ds-css-internal": "^3.4.3",
     "@navikt/ds-react": "~4.6.1",
     "@navikt/ds-tokens": "~4.6.1",
     "@navikt/navspa": "^6.0.1",

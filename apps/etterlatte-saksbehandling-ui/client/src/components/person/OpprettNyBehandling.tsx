@@ -4,7 +4,6 @@ import styled from 'styled-components'
 import { isPending, useApiCall } from '~shared/hooks/useApiCall'
 import { opprettRevurdering as opprettRevurderingApi } from '~shared/api/behandling'
 import { Revurderingsaarsak, tekstRevurderingsaarsak } from '~shared/types/Revurderingsaarsak'
-import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { useNavigate } from 'react-router-dom'
 import { ButtonContainer } from '~components/person/OpprettRevurderingModal'
 
@@ -28,8 +27,8 @@ export const OpprettNyBehandling = ({
     }
     opprettRevurdering(
       { sakId: sakId, aarsak: valgtRevurdering },
-      (behandling: IDetaljertBehandling) => {
-        navigate(`/behandling/${behandling.id}/`)
+      (behandlingId: string) => {
+        navigate(`/behandling/${behandlingId}/`)
       },
       (err) => {
         setError('En feil skjedde ved opprettelse av revurderingen. Prøv igjen senere.')

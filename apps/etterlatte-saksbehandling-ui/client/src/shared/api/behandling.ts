@@ -115,7 +115,7 @@ export const opprettRevurdering = async (args: {
   sakId: number
   aarsak: Revurderingsaarsak
   paaGrunnAvHendelseId?: string
-}): Promise<ApiResponse<IDetaljertBehandling>> => {
+}): Promise<ApiResponse<string>> => {
   return apiClient.post(`/revurdering/${args.sakId}`, {
     aarsak: args.aarsak,
     paaGrunnAvHendelseId: args.paaGrunnAvHendelseId,

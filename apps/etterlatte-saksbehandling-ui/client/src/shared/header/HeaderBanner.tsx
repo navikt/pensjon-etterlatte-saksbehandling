@@ -5,13 +5,11 @@ import { useAppSelector } from '~store/Store'
 export const HeaderBanner = () => {
   const user = useAppSelector((state) => state.saksbehandlerReducer.saksbehandler)
   return (
-    <InternalHeader>
-      <InternalHeader.Title data-theme={'light'} href={'/'}>
-        Gjenny
-      </InternalHeader.Title>
+    <InternalHeader data-theme={'light'}>
+      <InternalHeader.Title href={'/'}>Gjenny</InternalHeader.Title>
       <div style={{ marginLeft: 'auto' }} />
       <Search />
-      <InternalHeader.User name={user.navn} description={user.ident} />
+      <InternalHeader.User data-theme={'dark'} name={user.navn} description={user.ident} />
     </InternalHeader>
   )
 }

@@ -24,7 +24,7 @@ fun main() {
     Server(context).run()
 }
 
-class Server(val context: ApplicationContext) {
+class Server(private val context: ApplicationContext) {
     private val engine = embeddedServer(
         factory = CIO,
         environment = applicationEngineEnvironment {

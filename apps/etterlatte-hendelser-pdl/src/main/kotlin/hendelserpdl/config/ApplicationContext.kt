@@ -11,8 +11,9 @@ import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.person.pdl.leesah.Personhendelse
 
 class ApplicationContext(
-    val env: Map<String, String> = System.getenv(),
-    val pdlKlient: PdlKlient = PdlKlient(
+    private val env: Map<String, String> = System.getenv(),
+
+    private val pdlKlient: PdlKlient = PdlKlient(
         httpClient = httpClientClientCredentials(
             azureAppClientId = env.requireEnvValue("AZURE_APP_CLIENT_ID"),
             azureAppJwk = env.requireEnvValue("AZURE_APP_JWK"),

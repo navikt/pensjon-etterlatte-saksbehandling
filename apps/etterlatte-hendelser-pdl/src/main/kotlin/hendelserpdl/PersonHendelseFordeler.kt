@@ -1,9 +1,11 @@
 package no.nav.etterlatte.hendelserpdl
 
+import no.nav.etterlatte.hendelserpdl.LeesahOpplysningstype.ADRESSEBESKYTTELSE_V1
 import no.nav.etterlatte.hendelserpdl.LeesahOpplysningstype.DOEDSFALL_V1
 import no.nav.etterlatte.hendelserpdl.LeesahOpplysningstype.FORELDERBARNRELASJON_V1
 import no.nav.etterlatte.hendelserpdl.LeesahOpplysningstype.SIVILSTAND_V1
 import no.nav.etterlatte.hendelserpdl.LeesahOpplysningstype.UTFLYTTING_FRA_NORGE
+import no.nav.etterlatte.hendelserpdl.LeesahOpplysningstype.VERGEMAAL_ELLER_FREMTIDSFULLMAKT_V1
 import no.nav.etterlatte.hendelserpdl.pdl.PdlKlient
 import no.nav.etterlatte.kafka.JsonMessage
 import no.nav.etterlatte.kafka.KafkaProdusent
@@ -40,41 +42,40 @@ class PersonHendelseFordeler(
     private val logger: Logger = LoggerFactory.getLogger(PersonHendelseFordeler::class.java)
     private val sikkerLogg: Logger = LoggerFactory.getLogger("sikkerLogg")
 
-    suspend fun haandterHendelse(hendelse: Personhendelse) =
+    suspend fun haandterHendelse(hendelse: Personhendelse) {
+        if (hendelse.opplysningstype !in opplysningstyperSomHaandteres()) {
+            logger.info("Hendelse ${hendelse.opplysningstype} med hendelseId=${hendelse.hendelseId} håndteres ikke")
+            return
+        }
+
+        val ident = hendelse.personidenter.firstOrNull()?.let {
+            pdlKlient.hentPdlIdentifikator(it)
+        }
+
         try {
-            if (hendelse.opplysningstype in opplysningstyperSomHaandteres()) {
-                when (val personnummer = hentPersonnummer(hendelse)) {
-                    null -> "Mottok en hendelse uten personident (hendelseId=${hendelse.hendelseId})".let {
-                        sikkerLogg.info(it, hendelse)
-                        logger.info(it)
-                    }
-                    is PdlIdentifikator.Npid -> loggIgnorererNpid(hendelse.hendelseId)
-                    is PdlIdentifikator.FolkeregisterIdent -> {
-                        when (LeesahOpplysningstype.valueOf(hendelse.opplysningstype)) {
-                            LeesahOpplysningstype.VERGEMAAL_ELLER_FREMTIDSFULLMAKT_V1 -> haandterVergemaal(
-                                hendelse,
-                                personnummer
-                            )
-                            LeesahOpplysningstype.ADRESSEBESKYTTELSE_V1 -> haandterAdressebeskyttelse(
-                                hendelse,
-                                personnummer
-                            )
-                            FORELDERBARNRELASJON_V1 -> haandterForelderBarnRelasjon(hendelse, personnummer)
-                            DOEDSFALL_V1 -> haandterDoedsHendelse(hendelse, personnummer)
-                            UTFLYTTING_FRA_NORGE -> haandterUtflyttingFraNorge(hendelse, personnummer)
-                            SIVILSTAND_V1 -> haandterSivilstand(hendelse, personnummer)
-                        }
+            when (ident) {
+                null -> "Mottok en hendelse uten personident (hendelseId=${hendelse.hendelseId})".let {
+                    sikkerLogg.info(it, hendelse)
+                    logger.info(it)
+                }
+
+                is PdlIdentifikator.Npid -> loggIgnorererNpid(hendelse.hendelseId)
+                is PdlIdentifikator.FolkeregisterIdent -> {
+                    when (LeesahOpplysningstype.valueOf(hendelse.opplysningstype)) {
+                        VERGEMAAL_ELLER_FREMTIDSFULLMAKT_V1 -> haandterVergemaal(hendelse, ident)
+                        ADRESSEBESKYTTELSE_V1 -> haandterAdressebeskyttelse(hendelse, ident)
+                        FORELDERBARNRELASJON_V1 -> haandterForelderBarnRelasjon(hendelse, ident)
+                        DOEDSFALL_V1 -> haandterDoedsHendelse(hendelse, ident)
+                        UTFLYTTING_FRA_NORGE -> haandterUtflyttingFraNorge(hendelse, ident)
+                        SIVILSTAND_V1 -> haandterSivilstand(hendelse, ident)
                     }
                 }
-            } else {
-                logger.info(
-                    "Hendelse ${hendelse.opplysningstype} med hendelseId=${hendelse.hendelseId} håndteres ikke"
-                )
             }
         } catch (e: Exception) {
             loggFeilVedHaandteringAvHendelse(hendelse.hendelseId, hendelse.opplysningstype, e)
             throw e
         }
+    }
 
     private fun haandterVergemaal(hendelse: Personhendelse, personnummer: PdlIdentifikator.FolkeregisterIdent) {
         val type = hendelse.vergemaalEllerFremtidsfullmakt?.type
@@ -91,7 +92,7 @@ class PersonHendelseFordeler(
         }
 
         publiserPaaRapid(
-            opplysningstype = LeesahOpplysningstype.VERGEMAAL_ELLER_FREMTIDSFULLMAKT_V1,
+            opplysningstype = VERGEMAAL_ELLER_FREMTIDSFULLMAKT_V1,
             hendelse = VergeMaalEllerFremtidsfullmakt(
                 hendelseId = hendelse.hendelseId,
                 endringstype = hendelse.endringstype(),
@@ -112,7 +113,7 @@ class PersonHendelseFordeler(
         }
 
         publiserPaaRapid(
-            opplysningstype = LeesahOpplysningstype.ADRESSEBESKYTTELSE_V1,
+            opplysningstype = ADRESSEBESKYTTELSE_V1,
             hendelse = Adressebeskyttelse(
                 hendelseId = hendelse.hendelseId,
                 endringstype = hendelse.endringstype(),
@@ -210,9 +211,6 @@ class PersonHendelseFordeler(
         )
     }
 
-    private suspend fun hentPersonnummer(hendelse: Personhendelse): PdlIdentifikator? =
-        hendelse.personidenter.firstOrNull()?.let { pdlKlient.hentPdlIdentifikator(it) }
-
     private fun Personhendelse.endringstype() = Endringstype.valueOf(this.endringstype.name)
 
     private fun loggIgnorererNpid(hendelseId: String) =
@@ -221,8 +219,7 @@ class PersonHendelseFordeler(
     private fun loggFeilVedHaandteringAvHendelse(hendelseId: String, opplysningstype: String, e: Exception) {
         logger.error(
             "Kunne ikke haandtere $opplysningstype med id=$hendelseId. Dette skyldes sannsynligvis at " +
-                "personhendelsen ser annerledes ut enn forventet, eller at det var problem med henting av " +
-                "personidentifikatoren fra PDL",
+                "personhendelsen ser annerledes ut enn forventet.",
             e
         )
     }

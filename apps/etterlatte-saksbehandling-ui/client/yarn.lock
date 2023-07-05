@@ -428,7 +428,7 @@
   resolved "https://registry.yarnpkg.com/@navikt/ds-css/-/ds-css-2.9.8.tgz#f620f8fc013050d272d89485bb46042819363cc2"
   integrity sha512-6MnIJpH/pX9VYXGcO2hUn9WWqUTk1WdIiPVQQbj3jTZhUKNwnT2bofcB+OrIfCST9o0qDyYeGVfVsuAyQpZxRA==
 
-"@navikt/ds-react@̂4.5.1":
+"@navikt/ds-react@~4.6.1":
   version "4.6.1"
   resolved "https://registry.yarnpkg.com/@navikt/ds-react/-/ds-react-4.6.1.tgz#69bc85d6d91ddac80698909894cbf83d43573392"
   integrity sha512-miZ7AmownZuOnZ1TEOzYctiaMSk6qucExUK9ME3lr76yDVKATHAZUJuK8fcdNy7uT12/93gHYYW/y6wqcYLJ0A==
@@ -442,7 +442,7 @@
     react-day-picker "8.3.4"
     react-modal "3.15.1"
 
-"@navikt/ds-tokens@^4.6.1":
+"@navikt/ds-tokens@~4.6.1":
   version "4.6.1"
   resolved "https://registry.yarnpkg.com/@navikt/ds-tokens/-/ds-tokens-4.6.1.tgz#d48f7c8bad197297dfb59b20685a6843f41f269e"
   integrity sha512-pBX5MLUpFftvRGZcbS9wWoMmzeH/iLNvOdMPvMbYTBnU7LUjU3XHLByfc0ogb2eT3gRevpD4DbjzWVx65ZzULw==

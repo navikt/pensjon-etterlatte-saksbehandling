@@ -34,7 +34,7 @@ const VedtakKolonner = (props: { behandlingsId: string }) => {
       {isSuccess(vedtak) && (
         <>
           <Table.DataCell>{attestertDato(vedtak.data?.datoAttestert)}</Table.DataCell>
-          <Table.DataCell>{vedtak.data?.type && formaterVedtakType(vedtak.data.type)}</Table.DataCell>
+          <Table.DataCell>{vedtak.data?.vedtakType && formaterVedtakType(vedtak.data.vedtakType)}</Table.DataCell>
         </>
       )}
       {isFailure(vedtak) && (

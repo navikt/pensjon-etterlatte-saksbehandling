@@ -13,10 +13,9 @@ import { Dokumentoversikt } from '~components/person/dokumentoversikt'
 import styled from 'styled-components'
 import AnnullerBehandling from '~components/behandling/handlinger/AnnullerBehanding'
 import { SakType } from '~shared/types/sak'
-import { VedtakSammendrag } from '~components/vedtak/typer'
-import { ChevronLeftDoubleIcon, ChevronRightDoubleIcon } from '@navikt/aksel-icons'
+import { VedtakSammendrag } from "~components/vedtak/typer";
 
-export const SideMeny = (props: { behandling: IDetaljertBehandling; vedtak: VedtakSammendrag | undefined }) => {
+export const SideMeny = (props: { behandling: IDetaljertBehandling, vedtak: VedtakSammendrag | undefined }) => {
   const { behandling, vedtak } = props
 
   const saksbehandler = useAppSelector((state) => state.saksbehandlerReducer.saksbehandler)
@@ -46,7 +45,8 @@ export const SideMeny = (props: { behandling: IDetaljertBehandling; vedtak: Vedt
     <CollapsibleSidebar collapsed={collapsed}>
       <SidebarTools>
         <Button variant={collapsed ? 'primary' : 'tertiary'} onClick={() => setCollapsed(!collapsed)}>
-          {collapsed ? <ChevronLeftDoubleIcon /> : <ChevronRightDoubleIcon />}
+          {/* Bruker &laquo; og &raquo; siden ds-icons ikke har dobbel chevron. */}
+          {collapsed ? '«' : '»'}
         </Button>
       </SidebarTools>
 
@@ -55,12 +55,7 @@ export const SideMeny = (props: { behandling: IDetaljertBehandling; vedtak: Vedt
           <>
             <Behandlingsoppsummering behandlingsInfo={behandlingsinfo} beslutning={beslutning} />
             {kanAttestere && (
-              <Attestering
-                setBeslutning={setBeslutning}
-                beslutning={beslutning}
-                behandling={behandling}
-                vedtak={vedtak}
-              />
+              <Attestering setBeslutning={setBeslutning} beslutning={beslutning} behandling={behandling} vedtak={vedtak} />
             )}
           </>
         )}

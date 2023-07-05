@@ -1,7 +1,7 @@
 import { BodyShort, Button, Detail, Heading, Table } from '@navikt/ds-react'
 import styled from 'styled-components'
 import React, { useEffect, useState } from 'react'
-import { CheckmarkCircleIcon, ChevronDownIcon, ChevronUpIcon } from '@navikt/aksel-icons'
+import { ChevronDownIcon, ChevronUpIcon } from '@navikt/aksel-icons'
 import {
   Grunnlagsendringshendelse,
   GrunnlagsendringsType,
@@ -15,7 +15,7 @@ import { isFailure, isPending, isSuccess, useApiCall } from '~shared/hooks/useAp
 import { hentInstitusjonsoppholdData } from '~shared/api/behandling'
 import { VilkaarVurdertInformasjon } from '~components/behandling/vilkaarsvurdering/Vurdering'
 import Spinner from '~shared/Spinner'
-import { AGreen500 } from '@navikt/ds-tokens/dist/tokens'
+import { SuccessColored } from '@navikt/ds-icons'
 
 type Props = {
   hendelser: Grunnlagsendringshendelse[]
@@ -95,7 +95,7 @@ const InstitusjonsoppholdBegrunnelse = ({ id }: { id: string }) => {
         <div>
           <Heading spacing size="small" level="3">
             Institusjonsoppholdshendelsen er vurdert
-            <CheckmarkCircleIcon color={AGreen500} aria-hidden={'true'} />
+            <SuccessColored aria-hidden={'true'} />
           </Heading>
           <p>
             Er dette en institusjon som kan gi reduksjon av ytelsen? - <b>{begrunnelse.data.kanGiReduksjonAvYtelse}</b>

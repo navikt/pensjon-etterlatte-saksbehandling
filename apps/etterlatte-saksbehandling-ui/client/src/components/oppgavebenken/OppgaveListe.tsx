@@ -4,10 +4,11 @@ import 'react-table'
 import { Column, ColumnInstance, useFilters, useGlobalFilter, usePagination, useSortBy, useTable } from 'react-table'
 import { FilterPar, IOppgave, StatusFilter, statusFilter } from './typer/oppgavebenken'
 import { ariaSortMap, FeltSortOrder } from './typer/oppgavefelter'
+import { CollapseFilled, ExpandFilled } from '@navikt/ds-icons'
 import styled from 'styled-components'
 import { Heading, Pagination } from '@navikt/ds-react'
 import { globalFilterFunction } from './filtere/oppgaveListeFiltere'
-import { CaretUpIcon, CaretDownIcon } from '@navikt/aksel-icons'
+
 type Props = {
   columns: ReadonlyArray<Column<IOppgave>>
   data: ReadonlyArray<IOppgave>
@@ -79,9 +80,9 @@ const OppgaveListe: React.FC<Props> = ({ columns, data, globalFilterValue, filte
                   <span>
                     {column.isSorted ? (
                       column.isSortedDesc ? (
-                        <CaretDownIcon color={'var(--navds-button-color-secondary-text)'} />
+                        <ExpandFilled color={'var(--navds-button-color-secondary-text)'} />
                       ) : (
-                        <CaretUpIcon color={'var(--navds-button-color-secondary-text)'} />
+                        <CollapseFilled color={'var(--navds-button-color-secondary-text)'} />
                       )
                     ) : (
                       ''

@@ -11,7 +11,7 @@ import {
 import { VilkaarBorder, VilkaarWrapper } from './styled'
 import { Alert, BodyShort, Button, Heading, Loader, Radio, RadioGroup, Textarea } from '@navikt/ds-react'
 import { svarTilTotalResultat } from './utils'
-import { TrashIcon } from '@navikt/aksel-icons'
+import { Delete } from '@navikt/ds-icons'
 import { StatusIcon } from '~shared/icons/statusIcon'
 import { formaterSakstype, formaterStringDato } from '~utils/formattering'
 import { ISvar } from '~shared/types/ISvar'
@@ -126,11 +126,7 @@ export const Resultat: React.FC<Props> = ({
               )}
               {redigerbar && (
                 <SlettWrapper onClick={slettVilkaarsvurderingResultat}>
-                  {isPending(slettVurderingStatus) ? (
-                    <Loader variant="interaction" />
-                  ) : (
-                    <TrashIcon aria-hidden={'true'} />
-                  )}
+                  {isPending(slettVurderingStatus) ? <Loader variant="interaction" /> : <Delete aria-hidden={'true'} />}
                   <span className={'text'}>Slett vurdering</span>
                 </SlettWrapper>
               )}

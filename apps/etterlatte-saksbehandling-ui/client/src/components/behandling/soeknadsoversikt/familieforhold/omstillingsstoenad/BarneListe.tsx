@@ -1,13 +1,13 @@
+import { Child } from '@navikt/ds-icons'
 import { Heading, Link, Table } from '@navikt/ds-react'
 import { IFamilieforhold, IPdlPerson } from '~shared/types/Person'
 import styled from 'styled-components'
 import { IAdresse } from '~shared/types/IAdresse'
 import { differenceInYears, format, parse } from 'date-fns'
-import { CopyButton } from '@navikt/ds-react'
+import { CopyToClipboard } from '@navikt/ds-react-internal'
 import { DatoFormat, formaterFnr } from '~utils/formattering'
 import { FlexHeader, IconWrapper, TableWrapper } from '~components/behandling/soeknadsoversikt/familieforhold/styled'
 import { IconSize } from '~shared/types/Icon'
-import { ChildEyesIcon } from '@navikt/aksel-icons'
 
 const FnrWrapper = styled.div`
   display: flex;
@@ -24,7 +24,7 @@ export const BarneListe = ({ familieforhold }: Props) => {
     <div>
       <FlexHeader>
         <IconWrapper>
-          <ChildEyesIcon fontSize={IconSize.DEFAULT} />
+          <Child fontSize={IconSize.DEFAULT} />
         </IconWrapper>
         <Heading size={'small'} level={'3'}>
           Barn
@@ -87,7 +87,11 @@ const BarnRow = ({ barn, familieforhold }: { barn: IPdlPerson; familieforhold: I
           <Link href={`/person/${barn.foedselsnummer}`} target="_blank" rel="noreferrer noopener">
             {formaterFnr(barn.foedselsnummer)}
           </Link>
-          <CopyButton copyText={barn.foedselsnummer} size={'small'} />
+          <CopyToClipboard
+            copyText={barn.foedselsnummer}
+            popoverText={`Kopierte ${barn.foedselsnummer}`}
+            size={'small'}
+          />
         </FnrWrapper>
       </Table.DataCell>
       <Table.DataCell>{adresse}</Table.DataCell>

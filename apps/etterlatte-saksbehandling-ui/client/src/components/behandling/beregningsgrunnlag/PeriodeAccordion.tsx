@@ -1,6 +1,6 @@
 import React, { ReactNode, useState } from 'react'
+import { Collapse, Expand } from '@navikt/ds-icons'
 import { Heading } from '@navikt/ds-react'
-import { ChevronUpIcon, ChevronDownIcon } from '@navikt/aksel-icons'
 import AnimateHeight from '@navikt/ds-react/esm/util/AnimateHeight'
 import styled from 'styled-components'
 
@@ -25,7 +25,7 @@ const PeriodeAccordion = (props: PeriodeAccordionProps) => {
     <PeriodeAccordionWrapper {...rest} feilBorder={feilBorder}>
       <PeriodeAccordionHead>
         <ExpandButton onClick={() => setOpen((o) => !o)} aria-expanded={open}>
-          {open ? <ChevronUpIcon fontSize={20} aria-hidden /> : <ChevronDownIcon fontSize={20} aria-hidden />}
+          {open ? <Collapse fontSize={20} aria-hidden /> : <Expand fontSize={20} aria-hidden />}
           <Heading size="small" level={titleHeadingLevel}>
             {title}
           </Heading>

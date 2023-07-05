@@ -1,6 +1,7 @@
 import styled from 'styled-components'
-import { CheckmarkCircleIcon, XMarkOctagonIcon, ExclamationmarkTriangleIcon } from '@navikt/aksel-icons'
-import { AGreen500, ANavRed, AOrange600 } from '@navikt/ds-tokens/dist/tokens'
+import { SuccessColored } from '@navikt/ds-icons'
+import { ErrorColored } from '@navikt/ds-icons'
+import { WarningColored } from '@navikt/ds-icons'
 
 export type StatusIconProps = 'warning' | 'success' | 'error'
 
@@ -10,11 +11,11 @@ export const StatusIcon = (props: { status: StatusIconProps }) => {
   function hentSymbol() {
     switch (props.status) {
       case 'success':
-        return <CheckmarkCircleIcon color={AGreen500} stroke={AGreen500} aria-hidden={'true'} />
+        return <SuccessColored aria-hidden={'true'} /> // Vurder å bruk tittel for å forklare istendenfor å skjule
       case 'error':
-        return <XMarkOctagonIcon color={ANavRed} stroke={ANavRed} fill={ANavRed} aria-hidden={'true'} />
+        return <ErrorColored aria-hidden={'true'} />
       case 'warning':
-        return <ExclamationmarkTriangleIcon color={AOrange600} stroke={AOrange600} aria-hidden={'true'} />
+        return <WarningColored aria-hidden={'true'} />
     }
   }
 

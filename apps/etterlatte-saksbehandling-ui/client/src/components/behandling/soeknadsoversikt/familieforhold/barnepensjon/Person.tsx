@@ -2,7 +2,7 @@ import { IPdlPerson } from '~shared/types/Person'
 import { People } from '@navikt/ds-icons'
 import { format } from 'date-fns'
 import { PersonInfoAdresse } from '../personer/personinfo/PersonInfoAdresse'
-import { BodyShort, Detail, Heading, Link } from '@navikt/ds-react'
+import { Detail, Heading, Link } from '@navikt/ds-react'
 import styled from 'styled-components'
 import { KildePdl } from '~shared/types/kilde'
 import { DatoFormat, formaterFnr } from '~utils/formattering'
@@ -50,7 +50,7 @@ export const Person = ({ person, kilde, avdoed = false, mottaker = false, gjenle
         <Heading size={'small'} level={'3'}>
           {getHeaderTekst()}
         </Heading>
-        <BodyShort>
+        <div>
           {`${person.fornavn} ${person.etternavn}`}
           <FnrWrapper>
             <Link href={`/person/${person.foedselsnummer}`} target="_blank" rel="noreferrer noopener">
@@ -62,7 +62,7 @@ export const Person = ({ person, kilde, avdoed = false, mottaker = false, gjenle
               size={'small'}
             />
           </FnrWrapper>
-        </BodyShort>
+        </div>
         <div>
           <PersonInfoAdresse adresser={person.bostedsadresse} visHistorikk={false} adresseDoedstidspunkt={avdoed} />
           <Detail>{`${kilde.type.toUpperCase()} ${format(

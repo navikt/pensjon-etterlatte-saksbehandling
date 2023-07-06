@@ -21,8 +21,11 @@ import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
+import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.behandling.tilVirkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -50,11 +53,12 @@ interface RevurderingService {
     fun opprettRevurdering(
         sakId: Long,
         persongalleri: Persongalleri,
-        mottattDato: String?,
+        mottattDato: String? = null,
         prosessType: Prosesstype,
         kilde: Vedtaksloesning,
-        merknad: String?,
-        revurderingAarsak: RevurderingAarsak
+        merknad: String? = null,
+        revurderingAarsak: RevurderingAarsak,
+        fraDato: Virkningstidspunkt? = null
     ): Revurdering?
 }
 
@@ -84,17 +88,17 @@ class RevurderingServiceImpl(
         paaGrunnAvHendelse: UUID?
     ): Revurdering? = forrigeBehandling.sjekkEnhet()?.let {
         return if (featureToggleService.isEnabled(RevurderingServiceFeatureToggle.OpprettManuellRevurdering, false)) {
-            inTransaction {
-                opprettRevurdering(
-                    sakId,
-                    forrigeBehandling.persongalleri,
-                    null,
-                    Prosesstype.MANUELL,
-                    kilde,
-                    null,
-                    revurderingAarsak
-                )?.also { revurdering ->
-                    if (paaGrunnAvHendelse != null) {
+            opprettRevurdering(
+                sakId,
+                forrigeBehandling.persongalleri,
+                Tidspunkt.now().toLocalDatetimeUTC().toString(),
+                Prosesstype.MANUELL,
+                kilde,
+                null,
+                revurderingAarsak
+            )?.also { revurdering ->
+                if (paaGrunnAvHendelse != null) {
+                    inTransaction {
                         grunnlagsendringshendelseDao.settBehandlingIdForTattMedIRevurdering(
                             paaGrunnAvHendelse,
                             revurdering.id
@@ -114,17 +118,16 @@ class RevurderingServiceImpl(
         fraDato: LocalDate,
         kilde: Vedtaksloesning
     ) = forrigeBehandling.sjekkEnhet()?.let {
-        inTransaction {
-            opprettRevurdering(
-                sakId,
-                forrigeBehandling.persongalleri,
-                fraDato.tilVirkningstidspunkt("Opprettet automatisk").toString(),
-                Prosesstype.AUTOMATISK,
-                kilde,
-                null,
-                revurderingAarsak
-            )
-        }
+        opprettRevurdering(
+            sakId,
+            forrigeBehandling.persongalleri,
+            null,
+            Prosesstype.AUTOMATISK,
+            kilde,
+            null,
+            revurderingAarsak,
+            fraDato.tilVirkningstidspunkt("Opprettet automatisk")
+        )
     }
 
     private fun kanLagreRevurderingInfo(behandlingsId: UUID): Boolean {
@@ -153,7 +156,8 @@ class RevurderingServiceImpl(
         prosessType: Prosesstype,
         kilde: Vedtaksloesning,
         merknad: String?,
-        revurderingAarsak: RevurderingAarsak
+        revurderingAarsak: RevurderingAarsak,
+        fraDato: Virkningstidspunkt?
     ): Revurdering? {
         return inTransaction {
             OpprettBehandling(

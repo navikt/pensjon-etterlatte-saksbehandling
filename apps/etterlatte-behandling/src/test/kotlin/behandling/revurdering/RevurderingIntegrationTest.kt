@@ -1,10 +1,14 @@
 package no.nav.etterlatte.behandling.revurdering
 
+import io.mockk.confirmVerified
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.spyk
+import io.mockk.verify
 import no.nav.etterlatte.BehandlingIntegrationTest
 import no.nav.etterlatte.Context
 import no.nav.etterlatte.Kontekst
+import no.nav.etterlatte.behandling.BehandlingHendelseType
 import no.nav.etterlatte.behandling.BehandlingServiceFeatureToggle
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringStatus
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringsType
@@ -55,7 +59,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
 
     @Test
     fun `kan opprette ny revurdering og lagre i db`() {
-        val hendelser = applicationContext.behandlingsHendelser
+        val hendelser = spyk(applicationContext.behandlingsHendelser)
         val featureToggleService = mockk<FeatureToggleService>()
 
         every {
@@ -101,12 +105,15 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
 
         inTransaction {
             Assertions.assertEquals(revurdering, applicationContext.behandlingDao.hentBehandling(revurdering!!.id))
+            verify { hendelser.sendMeldingForHendelse(revurdering, BehandlingHendelseType.OPPRETTET) }
+            verify { hendelser.sendBehovForNyttGrunnlag(revurdering) }
+            confirmVerified(hendelser)
         }
     }
 
     @Test
     fun `kan lagre og oppdatere revurderinginfo på en revurdering`() {
-        val hendelser = applicationContext.behandlingsHendelser
+        val hendelser = spyk(applicationContext.behandlingsHendelser)
         val featureToggleService = mockk<FeatureToggleService>()
 
         every {
@@ -194,12 +201,15 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
         inTransaction {
             val ferdigRevurdering = applicationContext.behandlingDao.hentBehandling(revurdering.id) as Revurdering
             Assertions.assertEquals(nyRevurderingInfo, ferdigRevurdering.revurderingInfo)
+            verify { hendelser.sendMeldingForHendelse(revurdering, BehandlingHendelseType.OPPRETTET) }
+            verify { hendelser.sendBehovForNyttGrunnlag(revurdering) }
+            confirmVerified(hendelser)
         }
     }
 
     @Test
     fun `hvis featuretoggle er av saa opprettes ikke revurdering`() {
-        val hendelser = applicationContext.behandlingsHendelser
+        val hendelser = spyk(applicationContext.behandlingsHendelser)
         val featureToggleService = mockk<FeatureToggleService>()
 
         every {
@@ -243,11 +253,13 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
                 paaGrunnAvHendelse = null
             )
         )
+
+        confirmVerified(hendelser)
     }
 
     @Test
     fun `Ny regulering skal håndtere hendelser om nytt grunnbeløp`() {
-        val hendelser = applicationContext.behandlingsHendelser
+        val hendelser = spyk(applicationContext.behandlingsHendelser)
         val featureToggleService = mockk<FeatureToggleService>()
 
         every {
@@ -312,6 +324,10 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
                 hendelse.id
             )
             Assertions.assertEquals(revurdering.id, grunnlaghendelse?.behandlingId)
+
+            verify { hendelser.sendMeldingForHendelse(revurdering, BehandlingHendelseType.OPPRETTET) }
+            verify { hendelser.sendBehovForNyttGrunnlag(revurdering) }
+            confirmVerified(hendelser)
         }
     }
 }

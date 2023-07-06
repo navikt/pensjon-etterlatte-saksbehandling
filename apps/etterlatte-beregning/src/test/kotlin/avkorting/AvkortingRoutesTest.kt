@@ -14,10 +14,13 @@ import io.ktor.server.testing.ApplicationTestBuilder
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
+import no.nav.etterlatte.avkorting.Aarsoppgjoer
 import no.nav.etterlatte.avkorting.Avkorting
 import no.nav.etterlatte.avkorting.AvkortingService
+import no.nav.etterlatte.avkorting.Restanse
 import no.nav.etterlatte.avkorting.avkorting
 import no.nav.etterlatte.avkorting.fromDto
+import no.nav.etterlatte.beregning.regler.aarsoppgjoer
 import no.nav.etterlatte.beregning.regler.avkortetYtelse
 import no.nav.etterlatte.beregning.regler.avkortinggrunnlag
 import no.nav.etterlatte.beregning.regler.avkortingsperiode
@@ -88,8 +91,9 @@ class AvkortingRoutesTest {
         )
         val avkorting = Avkorting(
             avkortingGrunnlag = listOf(avkortingsgrunnlag),
-            avkortingsperioder = listOf(avkortingsperiode()),
-            aarsoppgjoer = emptyList(),
+            aarsoppgjoer = aarsoppgjoer(
+                avkortingsperioder = listOf(avkortingsperiode()),
+            ),
             avkortetYtelse = listOf(avkortetYtelse(periode = Periode(fom = dato, tom = dato)))
         )
         val dto = AvkortingDto(
@@ -113,7 +117,7 @@ class AvkortingRoutesTest {
                     fom = dato.atDay(1),
                     tom = dato.atEndOfMonth(),
                     avkortingsbeloep = 200,
-                    ytelseEtterAvkorting = 100,
+                    ytelseEtterAvkorting = 50,
                     restanse = 50
                 )
             )

@@ -26,11 +26,7 @@ object SlateFletter {
         ?.replace("<navn>", formaterNavn(brevData.adoptertAv1, brevData.adoptertAv2))
 
     private fun formaterNavn(adoptertAv1: Navn, adoptertAv2: Navn?) =
-        adoptertAv1.formaterNavn() + if (adoptertAv2 != null) {
-            " og ${adoptertAv2.formaterNavn()}"
-        } else {
-            ""
-        }
+        adoptertAv1.toString() + if (adoptertAv2 != null) { " og $adoptertAv2" } else { "" }
 
     private fun formaterDato(dato: LocalDate, spraak: Spraak): String =
         dato.format(dateFormatter(spraak)).replace(' ', ' ') // space to non-breaking space

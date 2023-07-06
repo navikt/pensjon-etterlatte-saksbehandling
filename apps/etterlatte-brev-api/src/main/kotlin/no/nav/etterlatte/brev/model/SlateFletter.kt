@@ -1,6 +1,5 @@
 package no.nav.etterlatte.brev.model
 
-import no.nav.etterlatte.libs.common.behandling.Navn
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
@@ -19,13 +18,6 @@ object SlateFletter {
             )
         }
     )
-
-    fun formaterNavn(adoptertAv1: Navn, adoptertAv2: Navn?) =
-        adoptertAv1.toString() + if (adoptertAv2 != null) {
-            " og $adoptertAv2"
-        } else {
-            ""
-        }
 
     fun formaterDato(dato: LocalDate, spraak: Spraak): String =
         dato.format(dateFormatter(spraak)).replace(' ', ' ') // space to non-breaking space

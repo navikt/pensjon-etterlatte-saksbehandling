@@ -60,7 +60,7 @@ internal class AvkortingRepositoryTest {
             ytelseFoerAvkorting = listOf(ytelseFoerAvkorting()),
             avkortingsperioder = listOf(avkortingsperiode()),
             tidligereAvkortetYtelse = listOf(avkortetYtelse(type = AvkortetYtelseType.TIDLIGERE)),
-            reberegnetAvkortetYtelse = listOf(avkortetYtelse(type = AvkortetYtelseType.REBEREGNET)),
+            tidligereAvkortetYtelseReberegnet = listOf(avkortetYtelse(type = AvkortetYtelseType.REBEREGNET)),
             restanse = restanse()
         )
         val avkortetYtelse = listOf(avkortetYtelse())
@@ -78,7 +78,8 @@ internal class AvkortingRepositoryTest {
         val endretYtelseFoerAvkorting = listOf(aarsoppgjoer.ytelseFoerAvkorting[0].copy(beregning = 333))
         val endretAvkortingsperiode = listOf(aarsoppgjoer.avkortingsperioder[0].copy(avkorting = 333))
         val endretTidligereAvkortetYtelse = listOf(aarsoppgjoer.tidligereAvkortetYtelse[0].copy(avkortingsbeloep = 444))
-        val endretReberegnetYtelse = listOf(aarsoppgjoer.reberegnetAvkortetYtelse[0].copy(avkortingsbeloep = 444))
+        val endretReberegnetYtelse =
+            listOf(aarsoppgjoer.tidligereAvkortetYtelseReberegnet[0].copy(avkortingsbeloep = 444))
         val endretRestanse = aarsoppgjoer.restanse!!.copy(totalRestanse = 333)
         val endretAvkortetYtelse = listOf(avkortetYtelse[0].copy(avkortingsbeloep = 444, restanse = 100))
 
@@ -114,7 +115,7 @@ internal class AvkortingRepositoryTest {
                 it.size shouldBe 1
                 it shouldBe endretTidligereAvkortetYtelse
             }
-            reberegnetAvkortetYtelse.asClue {
+            tidligereAvkortetYtelseReberegnet.asClue {
                 it.size shouldBe 1
                 it shouldBe endretReberegnetYtelse
             }

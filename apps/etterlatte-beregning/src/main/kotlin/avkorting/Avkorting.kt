@@ -11,26 +11,28 @@ import java.time.YearMonth
 import java.util.*
 
 data class Avkorting(
-    val avkortingGrunnlag: List<AvkortingGrunnlag>,
-    val aarsoppgjoer: Aarsoppgjoer,
-    val avkortetYtelse: List<AvkortetYtelse>
+    val avkortingGrunnlag: List<AvkortingGrunnlag> = emptyList(),
+    val aarsoppgjoer: Aarsoppgjoer = Aarsoppgjoer(),
+    val avkortetYtelse: List<AvkortetYtelse> = emptyList()
 ) {
 
-    fun kopierAvkorting(virkningstidspunkt: YearMonth): Avkorting = nyAvkorting(
+    fun kopierAvkorting(virkningstidspunkt: YearMonth): Avkorting = Avkorting(
         avkortingGrunnlag = avkortingGrunnlag.map { it.copy(id = UUID.randomUUID()) },
-        tidligereAvkortetYtelse = aarsoppgjoer.tidligereAvkortetYtelse + avkortetYtelse.map {
-            when (it.periode.tom) {
-                null -> it.copy(
-                    type = AvkortetYtelseType.TIDLIGERE,
-                    periode = Periode(fom = it.periode.fom, tom = virkningstidspunkt.minusMonths(1))
-                )
+        aarsoppgjoer = Aarsoppgjoer(
+            tidligereAvkortetYtelse = aarsoppgjoer.tidligereAvkortetYtelse + avkortetYtelse.map {
+                when (it.periode.tom) {
+                    null -> it.copy(
+                        type = AvkortetYtelseType.TIDLIGERE,
+                        periode = Periode(fom = it.periode.fom, tom = virkningstidspunkt.minusMonths(1))
+                    )
 
-                else -> it.copy(
-                    type = AvkortetYtelseType.TIDLIGERE
-                )
-            }
-        },
-        ytelseFoerAvkorting = aarsoppgjoer.ytelseFoerAvkorting,
+                    else -> it.copy(
+                        type = AvkortetYtelseType.TIDLIGERE
+                    )
+                }
+            },
+            ytelseFoerAvkorting = aarsoppgjoer.ytelseFoerAvkorting,
+        ),
     )
 
     fun beregnAvkortingMedNyttGrunnlag(
@@ -91,7 +93,7 @@ data class Avkorting(
                 ytelseFoerAvkorting = ytelseFoerAvkorting,
                 avkortingsperioder = avkortingsperioder,
                 tidligereAvkortetYtelse = emptyList(),
-                reberegnetAvkortetYtelse = emptyList(),
+                tidligereAvkortetYtelseReberegnet = emptyList(),
                 restanse = null,
             ),
             avkortetYtelse = beregnetAvkortetYtelse
@@ -133,7 +135,7 @@ data class Avkorting(
             aarsoppgjoer = this.aarsoppgjoer.copy(
                 ytelseFoerAvkorting = ytelseFoerAvkorting,
                 avkortingsperioder = avkortingHeleAaret,
-                reberegnetAvkortetYtelse = reberegnetYtelseFoerVirk,
+                tidligereAvkortetYtelseReberegnet = reberegnetYtelseFoerVirk,
                 restanse = restanse
             ),
             avkortetYtelse = avkortetYtelseFraNyVirk
@@ -142,24 +144,6 @@ data class Avkorting(
 
     private fun foersteMaanedDetteAar() = this.aarsoppgjoer.ytelseFoerAvkorting.first().periode.fom
 
-    companion object {
-        fun nyAvkorting(
-            avkortingGrunnlag: List<AvkortingGrunnlag> = emptyList(),
-            ytelseFoerAvkorting: List<YtelseFoerAvkorting> = emptyList(),
-            tidligereAvkortetYtelse: List<AvkortetYtelse> = emptyList(),
-            avkortetYtelse: List<AvkortetYtelse> = emptyList(),
-        ) = Avkorting(
-            avkortingGrunnlag = avkortingGrunnlag,
-            aarsoppgjoer = Aarsoppgjoer(
-                ytelseFoerAvkorting = ytelseFoerAvkorting,
-                avkortingsperioder = emptyList(),
-                tidligereAvkortetYtelse = tidligereAvkortetYtelse,
-                reberegnetAvkortetYtelse = emptyList(),
-                restanse = null,
-            ),
-            avkortetYtelse = avkortetYtelse,
-        )
-    }
 }
 
 data class AvkortingGrunnlag(
@@ -173,11 +157,11 @@ data class AvkortingGrunnlag(
 )
 
 data class Aarsoppgjoer(
-    val ytelseFoerAvkorting: List<YtelseFoerAvkorting>,
-    val avkortingsperioder: List<Avkortingsperiode>,
-    val tidligereAvkortetYtelse: List<AvkortetYtelse>,
-    val reberegnetAvkortetYtelse: List<AvkortetYtelse>,
-    val restanse: Restanse?,
+    val ytelseFoerAvkorting: List<YtelseFoerAvkorting> = emptyList(),
+    val avkortingsperioder: List<Avkortingsperiode> = emptyList(),
+    val tidligereAvkortetYtelse: List<AvkortetYtelse> = emptyList(),
+    val tidligereAvkortetYtelseReberegnet: List<AvkortetYtelse> = emptyList(),
+    val restanse: Restanse? = null,
 )
 
 data class YtelseFoerAvkorting(

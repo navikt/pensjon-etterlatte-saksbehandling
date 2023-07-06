@@ -1,6 +1,5 @@
 package no.nav.etterlatte.avkorting.regler
 
-import no.nav.etterlatte.avkorting.Restanse
 import no.nav.etterlatte.beregning.regler.omstillingstoenad.OMS_GYLDIG_FROM_TEST
 import no.nav.etterlatte.libs.regler.FaktumNode
 import no.nav.etterlatte.libs.regler.Regel
@@ -42,7 +41,7 @@ val virkningstidspunkt: Regel<RestanseGrunnlag, YearMonth> = finnFaktumIGrunnlag
 val totalRestanse = RegelMeta(
     gjelderFra = OMS_GYLDIG_FROM_TEST,
     beskrivelse = "Beregner restanse etter endret ytelse etter avkorting på grunn av endret årsinntekt",
-    regelReferanse = RegelReferanse("RESTANSE-INNTEKTSENDRING")
+    regelReferanse = RegelReferanse("TOTAL-RESTANSE-INNTEKTSENDRING")
 ) benytter tidligereYtelse og nyYtelse med { tidligereYtelse, nyYtelse ->
     Beregningstall(tidligereYtelse.sum()).minus(Beregningstall(nyYtelse.sum())).toInteger()
 }

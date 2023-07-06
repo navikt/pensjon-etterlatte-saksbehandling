@@ -64,7 +64,7 @@ class AvkortingRepository(private val dataSource: DataSource) {
                     ytelseFoerAvkorting = ytelseFoerAvkorting,
                     avkortingsperioder = avkortingsperioder,
                     tidligereAvkortetYtelse = tidligereAvkortetYtelse,
-                    reberegnetAvkortetYtelse = reberegnetAvkortetYtelse,
+                    tidligereAvkortetYtelseReberegnet = reberegnetAvkortetYtelse,
                     restanse = restanse,
                 ),
                 avkortetYtelse = avkortetYtelse
@@ -83,7 +83,7 @@ class AvkortingRepository(private val dataSource: DataSource) {
                 lagreYtelseFoerAvkorting(behandlingId, ytelseFoerAvkorting, tx)
                 lagreAvkortingsperioder(behandlingId, avkortingsperioder, tx)
                 lagreAvkortetYtelse(behandlingId, tidligereAvkortetYtelse, tx)
-                lagreAvkortetYtelse(behandlingId, reberegnetAvkortetYtelse, tx)
+                lagreAvkortetYtelse(behandlingId, tidligereAvkortetYtelseReberegnet, tx)
                 restanse?.let {lagreRestanse(behandlingId, it, tx) }
             }
             lagreAvkortetYtelse(behandlingId, avkorting.avkortetYtelse, tx)
@@ -219,9 +219,9 @@ class AvkortingRepository(private val dataSource: DataSource) {
             "behandlingId" to behandlingId,
             "total_restanse" to restanse.totalRestanse,
             "fordelt_restanse" to restanse.fordeltRestanse,
-            "tidspunkt" to restanse.tidspunkt?.toTimestamp(),
-            "regel_resultat" to restanse.regelResultat?.toJson(),
-            "kilde" to restanse.kilde?.toJson()
+            "tidspunkt" to restanse.tidspunkt.toTimestamp(),
+            "regel_resultat" to restanse.regelResultat.toJson(),
+            "kilde" to restanse.kilde.toJson()
         )
     ).let { query -> tx.run(query.asUpdate) }
 
@@ -308,7 +308,7 @@ class AvkortingRepository(private val dataSource: DataSource) {
         ytelseEtterAvkorting = int("ytelse_etter_avkorting"),
         avkortingsbeloep = int("avkortingsbeloep"),
         restanse = int("restanse"),
-        ytelseEtterAvkortingFoerRestanse = int("ytelse_etter_Avkorting_uten_restanse"),
+        ytelseEtterAvkortingFoerRestanse = int("ytelse_etter_avkorting_uten_restanse"),
         ytelseFoerAvkorting = int("ytelse_foer_avkorting"),
         tidspunkt = sqlTimestamp("tidspunkt").toTidspunkt(),
         regelResultat = objectMapper.readTree(string("regel_resultat")),

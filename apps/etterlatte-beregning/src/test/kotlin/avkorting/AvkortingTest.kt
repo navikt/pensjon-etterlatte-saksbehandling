@@ -5,6 +5,7 @@ import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.equality.shouldBeEqualToIgnoringFields
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
+import no.nav.etterlatte.avkorting.Aarsoppgjoer
 import no.nav.etterlatte.avkorting.AvkortetYtelse
 import no.nav.etterlatte.avkorting.AvkortetYtelseType
 import no.nav.etterlatte.avkorting.Avkorting
@@ -39,14 +40,16 @@ internal class AvkortingTest {
                 )
             )
         )
-        private val avkorting = Avkorting.nyAvkorting(
+        private val avkorting = Avkorting(
             avkortingGrunnlag = listOf(avkortinggrunnlag(), avkortinggrunnlag()),
-            ytelseFoerAvkorting = beregning.mapTilYtelseFoerAvkorting(),
-            tidligereAvkortetYtelse = listOf(
-                avkortetYtelse(
-                    type = AvkortetYtelseType.TIDLIGERE,
-                    periode = Periode(YearMonth.of(2023, 1), YearMonth.of(2023, 1))
-                ),
+            aarsoppgjoer = Aarsoppgjoer(
+                ytelseFoerAvkorting = beregning.mapTilYtelseFoerAvkorting(),
+                tidligereAvkortetYtelse = listOf(
+                    avkortetYtelse(
+                        type = AvkortetYtelseType.TIDLIGERE,
+                        periode = Periode(YearMonth.of(2023, 1), YearMonth.of(2023, 1))
+                    ),
+                )
             ),
             avkortetYtelse = listOf(
                 avkortetYtelse(periode = Periode(YearMonth.of(2023, 2), null)),
@@ -163,7 +166,7 @@ internal class AvkortingTest {
                 )
             )
         )
-        val avkorting = Avkorting.nyAvkorting().oppdaterMedInntektsgrunnlag(
+        val avkorting = Avkorting().oppdaterMedInntektsgrunnlag(
             avkortinggrunnlag(
                 periode = Periode(fom = virkningstidspunkt.dato, tom = null),
                 aarsinntekt = 300000,
@@ -378,7 +381,7 @@ internal class AvkortingTest {
                             AvkortetYtelse::kilde
                         )
                     }
-                    reberegnetAvkortetYtelse.asClue {
+                    tidligereAvkortetYtelseReberegnet.asClue {
                         it.size shouldBe 2
                         it[0].shouldBeEqualToIgnoringFields(
                             avkortetYtelse(

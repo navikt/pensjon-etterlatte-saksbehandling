@@ -41,7 +41,7 @@ class AvkortingService(
     ): Avkorting = tilstandssjekk(behandlingId, brukerTokenInfo) {
         logger.info("Lagre og beregne avkorting og avkortet ytelse for behandlingId=$behandlingId")
 
-        val avkorting = avkortingRepository.hentAvkorting(behandlingId) ?: Avkorting.nyAvkorting()
+        val avkorting = avkortingRepository.hentAvkorting(behandlingId) ?: Avkorting()
         val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
         val beregning = beregningService.hentBeregningNonnull(behandlingId)
         val beregnetAvkorting = avkorting.beregnAvkortingMedNyttGrunnlag(

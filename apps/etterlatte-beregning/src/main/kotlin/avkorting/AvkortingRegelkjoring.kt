@@ -208,17 +208,12 @@ object AvkortingRegelkjoring {
     ): Restanse {
         val grunnlag = RestanseGrunnlag(
             FaktumNode(
-                verdi = tidligereYtelseEtterAvkorting
-                    .sprePerMaaned(foersteMaaned, virkningstidspunkt.dato)
-                    .map { it.ytelseEtterAvkorting },
+                verdi = tidligereYtelseEtterAvkorting.spreYtelsePerMaaned(foersteMaaned, virkningstidspunkt.dato),
                 kilde = tidligereYtelseEtterAvkorting.map { "avkortetYtelse:${it.id}" },
                 beskrivelse = "Ytelse etter avkorting fra tidligere beahndlinge gjeldende år"
-
             ),
             FaktumNode(
-                verdi = nyYtelseEtterAvkorting
-                    .sprePerMaaned(foersteMaaned, virkningstidspunkt.dato)
-                    .map { it.ytelseEtterAvkorting },
+                verdi = nyYtelseEtterAvkorting.spreYtelsePerMaaned(foersteMaaned, virkningstidspunkt.dato),
                 kilde = nyYtelseEtterAvkorting.map { "avkortetYtelse:${it.id}" },
                 beskrivelse = "Reberegnet ytelse etter avkorting før nytt virkningstidspunkt"
             ),
@@ -256,14 +251,14 @@ object AvkortingRegelkjoring {
         }
     }
 
-    private fun List<AvkortetYtelse>.sprePerMaaned(
+    private fun List<AvkortetYtelse>.spreYtelsePerMaaned(
         foersteMaaned: YearMonth,
         virkningstidspunkt: YearMonth
-    ): List<AvkortetYtelse> {
-        val perMaaned = mutableListOf<AvkortetYtelse>()
+    ): List<Int> {
+        val perMaaned = mutableListOf<Int>()
         for (maanednr in foersteMaaned.monthValue..virkningstidspunkt.minusMonths(1).monthValue) {
             val maaned = YearMonth.of(virkningstidspunkt.year, maanednr)
-            perMaaned.add(avkortetYtelseIMaaned(maaned))
+            perMaaned.add(avkortetYtelseIMaaned(maaned).ytelseEtterAvkorting)
         }
         return perMaaned
     }

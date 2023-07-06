@@ -126,7 +126,7 @@ fun aarsoppgjoer(
     ytelseFoerAvkorting = ytelseFoerAvkorting,
     avkortingsperioder = avkortingsperioder,
     tidligereAvkortetYtelse = tidligereAvkortetYtelse,
-    reberegnetAvkortetYtelse = reberegnetAvkortetYtelse,
+    tidligereAvkortetYtelseReberegnet = reberegnetAvkortetYtelse,
     restanse = restanse,
 )
 

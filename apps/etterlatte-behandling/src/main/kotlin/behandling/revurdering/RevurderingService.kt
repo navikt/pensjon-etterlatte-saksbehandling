@@ -158,7 +158,7 @@ class RealRevurderingService(
         hentBehandling(opprettBehandling.id)
     }?.also { revurdering ->
         // Ikke oppdater persongrunnlag ved regulering
-        if (prosessType == Prosesstype.MANUELL) {
+        if (revurderingAarsak != RevurderingAarsak.REGULERING) {
             behandlingHendelser.sendBehovForNyttGrunnlag(revurdering)
         }
         behandlingHendelser.sendMeldingForHendelse(revurdering, BehandlingHendelseType.OPPRETTET)

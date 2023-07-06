@@ -106,7 +106,6 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
         inTransaction {
             Assertions.assertEquals(revurdering, applicationContext.behandlingDao.hentBehandling(revurdering!!.id))
             verify { hendelser.sendMeldingForHendelse(revurdering, BehandlingHendelseType.OPPRETTET) }
-            verify { hendelser.sendBehovForNyttGrunnlag(revurdering) }
             confirmVerified(hendelser)
         }
     }
@@ -326,7 +325,6 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
             Assertions.assertEquals(revurdering.id, grunnlaghendelse?.behandlingId)
 
             verify { hendelser.sendMeldingForHendelse(revurdering, BehandlingHendelseType.OPPRETTET) }
-            verify { hendelser.sendBehovForNyttGrunnlag(revurdering) }
             confirmVerified(hendelser)
         }
     }

@@ -8,7 +8,15 @@ import java.time.format.FormatStyle
 object SlateFletter {
     fun erstatt(slate: Slate, second: BrevData) = Slate(
         slate.elements.map {
-            it.copy(children = it.children.map { element -> element.copy(text = erstattFlettefelt(element, second)) })
+            it.copy(
+                children = it.children.map { element ->
+                    if (element.placeholder == true) {
+                        element.copy(text = erstattFlettefelt(element, second))
+                    } else {
+                        element
+                    }
+                }
+            )
         }
     )
 

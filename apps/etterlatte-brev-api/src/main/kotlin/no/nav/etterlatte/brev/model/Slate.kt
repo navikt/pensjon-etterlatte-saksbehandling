@@ -58,8 +58,13 @@ object SlateHelper {
             }
 
             SakType.BARNEPENSJON -> {
-                when (behandling.revurderingsaarsak) {
-                    RevurderingAarsak.ADOPSJON -> getJsonFile("/maler/bp-revurdering-adopsjon.json")
+                when (behandling.vedtak.type) {
+                    VedtakType.AVSLAG -> getJsonFile("/maler/bp-avslag.json")
+                    VedtakType.OPPHOER ->
+                        when (behandling.revurderingsaarsak) {
+                            RevurderingAarsak.ADOPSJON -> getJsonFile("/maler/bp-revurdering-adopsjon.json")
+                            else -> getJsonFile("/maler/tom-brevmal.json")
+                        }
                     else -> getJsonFile("/maler/tom-brevmal.json")
                 }
             }

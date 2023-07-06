@@ -49,6 +49,7 @@ enum class LanguageCode {
 }
 
 enum class EtterlatteBrevKode {
+    BARNEPENSJON_AVSLAG,
     BARNEPENSJON_INNVILGELSE,
     OMS_INNVILGELSE_AUTO,
     OMS_INNVILGELSE_MANUELL,

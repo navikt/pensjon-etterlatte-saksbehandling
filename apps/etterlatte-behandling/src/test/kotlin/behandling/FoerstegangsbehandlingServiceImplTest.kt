@@ -462,7 +462,7 @@ internal class FoerstegangsbehandlingServiceImplTest {
         every { behandlingDaoMock.lagreStatus(any(), any(), any()) } returns Unit
         every { hendelseDaoMock.behandlingOpprettet(any()) } returns Unit
         every { behandlingHendelserKafkaProducerMock.sendMeldingForHendelse(any(), any()) } returns Unit
-        every { behandlingHendelserKafkaProducerMock.sendBehovForNyttGrunnlag(any()) } returns Unit
+        every { behandlingHendelserKafkaProducerMock.leggInnNyttGrunnlag(any()) } returns Unit
 
         val foerstegangsbehandling = behandlingsService.opprettBehandling(
             1,
@@ -522,7 +522,7 @@ internal class FoerstegangsbehandlingServiceImplTest {
         )
         assertTrue(revurderingsBehandling is Revurdering)
         verify {
-            behandlingHendelserKafkaProducerMock.sendBehovForNyttGrunnlag(any())
+            behandlingHendelserKafkaProducerMock.leggInnNyttGrunnlag(any())
         }
         verify(exactly = 2) {
             sakDaoMock.hentSak(any())

@@ -68,7 +68,7 @@ spec:
       value: latest
     - name: GRUNNLAG_AZURE_SCOPE
       value: api://prod-gcp.etterlatte.etterlatte-grunnlag/.default
-    - name: PDL_AZURE_SCOPE
+    - name: PDLTJENESTER_AZURE_SCOPE
       value: api://prod-gcp.etterlatte.etterlatte-pdltjenester/.default
     - name: HENDELSE_JOB_FREKVENS
       value: "1"

@@ -147,6 +147,7 @@ class ApplicationContext(
 
     val revurderingService =
         RevurderingServiceImpl(
+            grunnlagKlient = grunnlagKlient,
             behandlingHendelser = behandlingsHendelser,
             featureToggleService = featureToggleService,
             behandlingDao = behandlingDao,

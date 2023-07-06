@@ -7,8 +7,8 @@ import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 
 class AppBuilder(props: Miljoevariabler) {
 
-    fun createPdlService(): PdlServiceInterface {
-        return PdlService(pdlTjenester, "http://etterlatte-pdltjenester")
+    fun createPdlService(): PdlKlientInterface {
+        return PdlKlient(pdlTjenester, "http://etterlatte-pdltjenester")
     }
 
     private val pdlTjenester: HttpClient by lazy {

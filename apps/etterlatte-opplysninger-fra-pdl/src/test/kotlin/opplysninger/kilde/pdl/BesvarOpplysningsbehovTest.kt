@@ -35,7 +35,7 @@ class BesvarOpplysningsbehovTest {
             )
         ).toJson()
 
-        val pdlServiceInterfaceMock = mockk<PdlServiceInterface>()
+        val pdlKlientInterfaceMock = mockk<PdlKlientInterface>()
         fun readFile(file: String) = Companion::class.java.getResource(file)?.readText()
             ?: throw FileNotFoundException("Fant ikke filen $file")
 
@@ -83,14 +83,14 @@ class BesvarOpplysningsbehovTest {
         )
     }
 
-    private val inspector = TestRapid().apply { BesvarOpplysningsbehov(this, pdlServiceInterfaceMock) }
+    private val inspector = TestRapid().apply { BesvarOpplysningsbehov(this, pdlKlientInterfaceMock) }
 
     @Test
     fun `skal lese melding om opplysningsbehov og returnere info fra PDL`() {
         every {
-            pdlServiceInterfaceMock.hentPerson(any(), any(), any())
+            pdlKlientInterfaceMock.hentPerson(any(), any(), any())
         } answers { mockPerson(fnr = firstArg()).tilPerson() }
-        every { pdlServiceInterfaceMock.hentOpplysningsperson(any(), any(), any()) } answers {
+        every { pdlKlientInterfaceMock.hentOpplysningsperson(any(), any(), any()) } answers {
             mockPerson(
                 fnr = firstArg()
             )
@@ -109,9 +109,9 @@ class BesvarOpplysningsbehovTest {
     @Test
     fun `alle opplysninger har samme tidspunkt for innhenting`() {
         every {
-            pdlServiceInterfaceMock.hentPerson(any(), any(), any())
+            pdlKlientInterfaceMock.hentPerson(any(), any(), any())
         } answers { mockPerson(fnr = firstArg()).tilPerson() }
-        every { pdlServiceInterfaceMock.hentOpplysningsperson(any(), any(), any()) } answers {
+        every { pdlKlientInterfaceMock.hentOpplysningsperson(any(), any(), any()) } answers {
             mockPerson(
                 fnr = firstArg()
             )

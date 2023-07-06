@@ -60,7 +60,7 @@ spec:
       value: etterlatte.dodsmelding
     - name: GRUNNLAG_AZURE_SCOPE
       value: api://dev-gcp.etterlatte.etterlatte-grunnlag/.default
-    - name: PDL_AZURE_SCOPE
+    - name: PDLTJENESTER_AZURE_SCOPE
       value: api://dev-gcp.etterlatte.etterlatte-pdltjenester/.default
     - name: HENDELSE_JOB_FREKVENS
       value: "1"

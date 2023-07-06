@@ -1,5 +1,6 @@
 package no.nav.etterlatte.behandling.revurdering
 
+import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.BehandlingHendelseType
@@ -13,6 +14,7 @@ import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseDao
+import no.nav.etterlatte.grunnlagsendring.klienter.GrunnlagKlientImpl
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
@@ -24,6 +26,7 @@ import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.behandling.tilVirkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.opplysningsbehov.Opplysningsbehov
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import org.slf4j.LoggerFactory
@@ -69,6 +72,7 @@ enum class RevurderingServiceFeatureToggle(private val key: String) : FeatureTog
 }
 
 class RevurderingServiceImpl(
+    private val grunnlagKlient: GrunnlagKlientImpl,
     private val behandlingHendelser: BehandlingHendelserKafkaProducer,
     private val featureToggleService: FeatureToggleService,
     private val behandlingDao: BehandlingDao,
@@ -179,7 +183,7 @@ class RevurderingServiceImpl(
                 behandlingDao.hentBehandling(opprettBehandling.id) as? Revurdering
             }.also { behandling ->
                 behandling?.let {
-                    behandlingHendelser.sendBehovForNyttGrunnlag(it)
+                    leggInnNyttGrunnlag(it)
                     behandlingHendelser.sendMeldingForHendelse(it, BehandlingHendelseType.OPPRETTET)
                 }
             }
@@ -191,5 +195,21 @@ class RevurderingServiceImpl(
             featureToggleService,
             Kontekst.get().AppUser
         ).firstOrNull()
+    }
+
+    private fun leggInnNyttGrunnlag(behandling: Behandling) {
+        val grunnlagsbehov = grunnlagsbehov(behandling)
+        runBlocking {
+            grunnlagKlient.leggInnNyttGrunnlag(grunnlagsbehov)
+        }
+    }
+
+    private fun grunnlagsbehov(behandling: Behandling): Opplysningsbehov {
+        val persongalleri = behandling.persongalleri
+        return Opplysningsbehov(
+            sakid = behandling.sak.id,
+            sakType = behandling.sak.sakType,
+            persongalleri = persongalleri
+        )
     }
 }

@@ -11,18 +11,28 @@ import io.ktor.http.contentType
 import no.nav.etterlatte.libs.common.FoedselsnummerDTO
 import no.nav.etterlatte.libs.common.behandling.PersonMedSakerOgRoller
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
+import no.nav.etterlatte.libs.common.opplysningsbehov.Opplysningsbehov
 
 interface GrunnlagKlient {
 
     suspend fun hentGrunnlag(sakId: Long): Grunnlag?
     suspend fun hentAlleSakIder(fnr: String): Set<Long>
     suspend fun hentPersonSakOgRolle(fnr: String): PersonMedSakerOgRoller
+
+    suspend fun leggInnNyttGrunnlag(opplysningsbehov: Opplysningsbehov)
 }
 
 class GrunnlagKlientImpl(
     private val grunnlagHttpClient: HttpClient,
     private val url: String
 ) : GrunnlagKlient {
+
+    override suspend fun leggInnNyttGrunnlag(opplysningsbehov: Opplysningsbehov) {
+        return grunnlagHttpClient
+            .post("$url/api/grunnlag/person/oppdatergrunnlagforbehandling") {
+                accept(ContentType.Application.Json)
+            }.body()
+    }
 
     override suspend fun hentGrunnlag(sakId: Long): Grunnlag? {
         return grunnlagHttpClient.get("$url/api/grunnlag/$sakId") {

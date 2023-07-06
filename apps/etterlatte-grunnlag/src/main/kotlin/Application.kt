@@ -1,7 +1,9 @@
 package no.nav.etterlatte
 
+import com.fasterxml.jackson.databind.SerializationFeature
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
+import io.ktor.client.HttpClient
 import io.ktor.server.config.HoconApplicationConfig
 import no.nav.etterlatte.grunnlag.GrunnlagHendelser
 import no.nav.etterlatte.grunnlag.MigreringHendelser
@@ -9,9 +11,11 @@ import no.nav.etterlatte.grunnlag.OpplysningDao
 import no.nav.etterlatte.grunnlag.RealGrunnlagService
 import no.nav.etterlatte.grunnlag.grunnlagRoute
 import no.nav.etterlatte.klienter.BehandlingKlientImpl
+import no.nav.etterlatte.klienter.PdlTjenesterKlientImpl
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.ktor.httpClient
+import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.libs.ktor.setReady
 import no.nav.etterlatte.libs.sporingslogg.Sporingslogg
@@ -35,11 +39,20 @@ class ApplicationBuilder {
         put("KAFKA_CONSUMER_GROUP_ID", requireNotNull(get("NAIS_APP_NAME")).replace("-", ""))
     }
     private val ds = DataSourceBuilder.createDataSource(env).also { it.migrate() }
-
     private val config: Config = ConfigFactory.load()
+    private val pdlTjenester: HttpClient by lazy {
+        httpClientClientCredentials(
+            azureAppClientId = config.getString("azure.app.client.id"),
+            azureAppJwk = config.getString("azure.app.jwk"),
+            azureAppWellKnownUrl = config.getString("azure.app.well.known.url"),
+            azureAppScope = config.getString("pdltjenester.azure.scope"),
+            ekstraJacksoninnstillinger = { it.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS) }
+        )
+    }
+    private val pdltjenesterKlient = PdlTjenesterKlientImpl(pdlTjenester, "http://etterlatte-pdltjenester")
     private val opplysningDao = OpplysningDao(ds)
     private val behandlingKlient = BehandlingKlientImpl(config, httpClient())
-    private val grunnlagService = RealGrunnlagService(opplysningDao, Sporingslogg())
+    private val grunnlagService = RealGrunnlagService(pdltjenesterKlient, opplysningDao, Sporingslogg())
 
     private val rapidsConnection = RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(env))
         .withKtorModule {

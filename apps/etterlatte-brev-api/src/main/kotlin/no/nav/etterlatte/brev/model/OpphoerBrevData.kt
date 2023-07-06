@@ -20,6 +20,7 @@ abstract class OpphoerBrevData : BrevData() {
 }
 
 data class AdopsjonRevurderingBrevdata(
+    val innhold: List<Slate.Element>,
     val virkningsdato: LocalDate,
     val adoptertAv1: Navn,
     val adoptertAv2: Navn? = null
@@ -36,12 +37,27 @@ data class AdopsjonRevurderingBrevdata(
             }
 
             return AdopsjonRevurderingBrevdata(
+                innhold = listOf(),
                 virkningsdato = behandling.virkningsdato!!.atDay(1),
                 adoptertAv1 = behandling.revurderingInfo.adoptertAv1,
                 adoptertAv2 = behandling.revurderingInfo.adoptertAv2
             )
         }
     }
+
+    override fun flett(text: String?) = when (text) {
+        "<virkningsdato>" -> SlateFletter.formaterDato(virkningsdato, Spraak.NB)
+        "<adopsjonsdato>" -> "<her skal adopsjonsdato komme automatisk>"
+        "<adoptivforeldre_navn>" -> formaterNavn(adoptertAv1, adoptertAv2)
+        else -> throw IllegalArgumentException("Ugyldig flettefelt $text")
+    }
+
+    private fun formaterNavn(navn1: Navn, navn2: Navn?) =
+        if (navn2 != null) {
+            "$navn1 og $navn2"
+        } else {
+            "$navn1"
+        }
 }
 
 data class OmgjoeringAvFarskapRevurderingBrevdata(

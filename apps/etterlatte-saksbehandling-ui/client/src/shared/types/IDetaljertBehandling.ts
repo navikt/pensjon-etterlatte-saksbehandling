@@ -22,7 +22,6 @@ export interface IDetaljertBehandling {
   familieforhold?: IFamilieforhold
   behandlingType: IBehandlingsType
   søker?: IPdlPerson
-  prosesstype: IProsesstype
   revurderingsaarsak: Revurderingsaarsak | null
   revurderinginfo: RevurderingInfo | null
 }

@@ -16,6 +16,9 @@ import no.nav.etterlatte.libs.common.person.Person
 import java.time.LocalDateTime
 import java.util.*
 
+/**
+ * Brukes av frontend. Se IDetaljertBehandling.ts
+ **/
 data class DetaljertBehandlingDto(
     val id: UUID,
     val sak: Long,
@@ -32,8 +35,7 @@ data class DetaljertBehandlingDto(
     val søker: Person?,
     val kommerBarnetTilgode: KommerBarnetTilgode?,
     val revurderingsaarsak: RevurderingAarsak?,
-    val revurderinginfo: RevurderingInfo?,
-    val enhet: String
+    val revurderinginfo: RevurderingInfo?
 )
 
 data class Familieforhold(

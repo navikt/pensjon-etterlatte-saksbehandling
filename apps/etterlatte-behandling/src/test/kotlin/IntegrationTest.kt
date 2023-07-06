@@ -160,7 +160,6 @@ class IntegrationTest : BehandlingIntegrationTest() {
                 val behandling: DetaljertBehandling = it.body()
                 assertNotNull(behandling.id)
                 assertEquals("innsender", behandling.innsender)
-                assertEquals(VurderingsResultat.OPPFYLT, behandling.gyldighetsproeving?.resultat)
             }
 
             client.post("/api/behandling/$behandlingId/virkningstidspunkt") {

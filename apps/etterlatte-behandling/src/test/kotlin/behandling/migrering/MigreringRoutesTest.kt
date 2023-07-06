@@ -13,9 +13,7 @@ import io.ktor.serialization.jackson.jackson
 import io.ktor.server.testing.testApplication
 import no.nav.etterlatte.BehandlingIntegrationTest
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
-import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
-import no.nav.etterlatte.libs.common.gyldigSoeknad.VurderingsResultat
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.BehandlingOgSak
 import no.nav.etterlatte.module
@@ -82,9 +80,7 @@ class MigreringRoutesTest : BehandlingIntegrationTest() {
                 Assertions.assertEquals(HttpStatusCode.OK, status)
             }.body<DetaljertBehandling>()
 
-            Assertions.assertEquals(JaNei.JA, behandling.kommerBarnetTilgode!!.svar)
             Assertions.assertNotNull(behandling.virkningstidspunkt)
-            Assertions.assertEquals(VurderingsResultat.OPPFYLT, behandling.gyldighetsproeving!!.resultat)
 
             client.get("/saker/${behandling.sak}") {
                 addAuthToken(tokenSaksbehandler)

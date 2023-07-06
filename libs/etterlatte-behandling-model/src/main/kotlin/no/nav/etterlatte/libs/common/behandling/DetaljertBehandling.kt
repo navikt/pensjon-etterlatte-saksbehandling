@@ -1,33 +1,34 @@
 package no.nav.etterlatte.libs.common.behandling
 
-import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import java.time.LocalDateTime
 import java.util.*
 
+/**
+ * TODO:
+ *  8 av 18 felter her brukes KUN av statistikk.
+ *  Burde kanskje vurdere om statistikk skulle hatt sin egen BehandlingDTO...?
+ *  Eventuelt om vi kan fjerne og heller kalle på grunnlag fra statistikk?
+ **/
 data class DetaljertBehandling(
     val id: UUID,
     val sak: Long,
     val sakType: SakType,
-    val behandlingOpprettet: LocalDateTime,
-    val sistEndret: LocalDateTime,
-    val soeknadMottattDato: LocalDateTime?,
-    val innsender: String?,
-    val soeker: String,
-    val gjenlevende: List<String>?,
-    val avdoed: List<String>?,
-    val soesken: List<String>?,
-    val gyldighetsproeving: GyldighetsResultat?,
-    val status: BehandlingStatus,
+    val behandlingOpprettet: LocalDateTime, // kun statistikk
+    val soeknadMottattDato: LocalDateTime?, // kun statistikk
+    val innsender: String?, // kun statistikk
+    val soeker: String, // statistikk og vedtak
+    val gjenlevende: List<String>?, // kun statistikk
+    val avdoed: List<String>?, // kun statistikk
+    val soesken: List<String>?, // kun statistikk
+    val status: BehandlingStatus, // kun statistikk
     val behandlingType: BehandlingType,
     val virkningstidspunkt: Virkningstidspunkt?,
-    val utenlandstilsnitt: Utenlandstilsnitt?,
     val boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet?,
-    val kommerBarnetTilgode: KommerBarnetTilgode?,
     val revurderingsaarsak: RevurderingAarsak? = null,
     val revurderingInfo: RevurderingInfo?,
-    val prosesstype: Prosesstype,
-    val enhet: String
+    val prosesstype: Prosesstype, // statistikk og trygdetid
+    val enhet: String // kun statistikk
 ) {
     fun kanVedta(type: VedtakType): Boolean {
         if (revurderingsaarsak.girOpphoer() && type != VedtakType.OPPHOER) {

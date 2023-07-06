@@ -8,8 +8,12 @@ import { useParams } from 'react-router-dom'
 import { Soeknadsdato } from '../soeknadsoversikt/soeknadoversikt/Soeknadsdato'
 import styled from 'styled-components'
 import { SendTilAttesteringModal } from '../handlinger/sendTilAttesteringModal'
-import { hentBehandlesFraStatus, manueltBrevKanRedigeres } from '~components/behandling/felles/utils'
-import { IBehandlingsType, IDetaljertBehandling, IProsesstype } from '~shared/types/IDetaljertBehandling'
+import {
+  behandlingSkalSendeBrev,
+  hentBehandlesFraStatus,
+  manueltBrevKanRedigeres,
+} from '~components/behandling/felles/utils'
+import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import MottakerPanel from '~components/behandling/brev/detaljer/MottakerPanel'
 import ForhaandsvisningBrev from '~components/behandling/brev/ForhaandsvisningBrev'
 import Spinner from '~shared/Spinner'
@@ -28,10 +32,7 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
     if (!behandlingId || !sak) return
 
     const fetchVedtaksbrev = async () => {
-      const skalIkkeHenteVedtaksbrev =
-        props.behandling.behandlingType === IBehandlingsType.REVURDERING &&
-        props.behandling.prosesstype === IProsesstype.AUTOMATISK
-      if (skalIkkeHenteVedtaksbrev) {
+      if (!behandlingSkalSendeBrev(props.behandling)) {
         return
       }
 

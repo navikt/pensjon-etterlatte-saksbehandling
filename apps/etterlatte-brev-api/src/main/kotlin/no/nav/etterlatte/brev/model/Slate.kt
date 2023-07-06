@@ -13,6 +13,7 @@ data class Slate(
     @JsonValue val elements: List<Element> = emptyList()
 ) {
     fun flettInn(behandling: Behandling): Slate = when (behandling.revurderingsaarsak) {
+        RevurderingAarsak.OMGJOERING_AV_FARSKAP,
         RevurderingAarsak.ADOPSJON -> erstatt(this, BrevDataMapper.fra(behandling).second)
         else -> this
     }
@@ -60,6 +61,8 @@ object SlateHelper {
             SakType.BARNEPENSJON -> {
                 when (behandling.revurderingsaarsak) {
                     RevurderingAarsak.ADOPSJON -> getJsonFile("/maler/bp-revurdering-adopsjon.json")
+                    RevurderingAarsak.OMGJOERING_AV_FARSKAP ->
+                        getJsonFile("/maler/bp-revurdering-omgjoering-av-farskap.json")
                     else -> getJsonFile("/maler/tom-brevmal.json")
                 }
             }

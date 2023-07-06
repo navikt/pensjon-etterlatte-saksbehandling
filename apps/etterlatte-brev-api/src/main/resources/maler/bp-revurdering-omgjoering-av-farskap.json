@@ -1,0 +1,98 @@
+[
+  {
+    "type": "heading-two",
+    "children": [
+      {
+        "text": "Begrunnelse for vedtaket",
+        "placeholder": null
+      }
+    ]
+  },
+  {
+    "type": "paragraph",
+    "children": [
+      {
+        "text": "Vi viser til vedtak av ",
+        "placeholder": null
+      },
+      {
+        "text": "<dato innvilgelsesvedtak>",
+        "placeholder": true
+      },
+      {
+        "text": ". Vi har omgjort dette vedtaket fordi vi har fått informasjon om at det er fastslått at ",
+        "placeholder": null
+      },
+      {
+        "text": "<nåværende far>",
+        "placeholder": true
+      },
+      {
+        "text": " er din far og at dette gjelder fra du ble født. ",
+        "placeholder": null
+      },
+      {
+        "text": "<nåværende far>",
+        "placeholder": true
+      }
+    ]
+  },
+  {
+    "type": "paragraph",
+    "children": [
+      {
+        "text": "Du er ikke lenger gjenlevende barn etter ",
+        "placeholder": null
+      },
+      {
+        "text": "<forrige far>",
+        "placeholder": true
+      },
+      {
+        "text": ". Begge foreldrene dine lever, og du har derfor ikke rett til barnepensjon. Som en følge av dette er tidligere vedtak om innvilget barnepensjon omgjort.",
+        "placeholder": null
+      }
+    ]
+  },
+  {
+    "type": "paragraph",
+    "children": [
+      {
+        "text": "Barnepensjonen din er derfor opphørt fra ",
+        "placeholder": null
+      },
+      {
+        "text": "<opphørsdato>",
+        "placeholder": true
+      },
+      {
+        "text": ".",
+        "placeholder": null
+      }
+    ]
+  },
+  {
+    "type": "paragraph",
+    "children": [
+      {
+        "text": "Vedtaket er gjort etter bestemmelsene i folketrygdloven kapittel 18 og forvaltningsloven § 35 første ledd bokstav c.",
+        "placeholder": null
+      }
+    ]
+  },
+  {
+    "type": "heading-two",
+    "children": [
+      {
+        "text": "Feilutbetaling",
+        "placeholder": null
+      }
+    ]
+  },
+  {
+    "type": "paragraph",
+    "children": [
+
+    ]
+  }
+]

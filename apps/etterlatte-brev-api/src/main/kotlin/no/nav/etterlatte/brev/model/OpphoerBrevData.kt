@@ -1,6 +1,7 @@
 package no.nav.etterlatte.brev.model
 
 import no.nav.etterlatte.brev.behandling.Behandling
+import no.nav.etterlatte.brev.model.SlateFletter.formaterDato
 import no.nav.etterlatte.libs.common.behandling.Navn
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
@@ -87,5 +88,13 @@ data class OmgjoeringAvFarskapRevurderingBrevdata(
                 opprinneligInnvilgelsesdato = behandling.innvilgelsesdato!!
             )
         }
+    }
+
+    override fun flett(text: String?) = when (text) {
+        "<dato innvilgelsesvedtak>" -> formaterDato(opprinneligInnvilgelsesdato, Spraak.NB)
+        "<nåværende far>" -> naavaerendeFar.toString()
+        "<forrige far>" -> forrigeFar.toString()
+        "<opphørsdato>" -> formaterDato(virkningsdato, Spraak.NB)
+        else -> throw IllegalArgumentException("Ugyldig flettefelt $text")
     }
 }

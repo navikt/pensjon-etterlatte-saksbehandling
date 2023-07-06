@@ -57,6 +57,7 @@ data class AvkortingGrunnlagKildeDto(
 data class AvkortetYtelseDto(
     val fom: LocalDate,
     val tom: LocalDate?,
+    val ytelseFoerAvkorting: Int,
     val avkortingsbeloep: Int,
     val ytelseEtterAvkorting: Int,
     val restanse: Int

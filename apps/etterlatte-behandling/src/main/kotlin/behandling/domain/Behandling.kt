@@ -54,6 +54,26 @@ sealed class Behandling {
     private val kanRedigeres: Boolean
         get() = this.status.kanEndres()
 
+    fun mottattDato(): LocalDateTime? = when (this) {
+        is Foerstegangsbehandling -> this.soeknadMottattDato
+        else -> this.behandlingOpprettet
+    }
+
+    fun gyldighetsproeving(): GyldighetsResultat? = when (this) {
+        is Foerstegangsbehandling -> this.gyldighetsproeving
+        else -> null
+    }
+
+    fun revurderingsaarsak(): RevurderingAarsak? = when (this) {
+        is Revurdering -> this.revurderingsaarsak
+        else -> null
+    }
+
+    fun revurderingInfo(): RevurderingInfo? = when (this) {
+        is Revurdering -> this.revurderingInfo
+        else -> null
+    }
+
     open fun oppdaterVirkningstidspunkt(virkningstidspunkt: Virkningstidspunkt): Behandling {
         throw NotImplementedError(
             "Kan ikke oppdatere virkningstidspunkt på behandling $id. " +
@@ -140,33 +160,13 @@ sealed class Behandling {
     ) : Exception(message)
 }
 
-fun Behandling.mottattDato(): LocalDateTime? = when (this) {
-    is Foerstegangsbehandling -> this.soeknadMottattDato
-    else -> this.behandlingOpprettet
-}
-
-fun Behandling.gyldighetsproeving(): GyldighetsResultat? = when (this) {
-    is Foerstegangsbehandling -> this.gyldighetsproeving
-    else -> null
-}
-
-fun Behandling.revurderingsaarsak(): RevurderingAarsak? = when (this) {
-    is Revurdering -> this.revurderingsaarsak
-    else -> null
-}
-
-fun Behandling.revurderingInfo(): RevurderingInfo? = when (this) {
-    is Revurdering -> this.revurderingInfo
-    else -> null
-}
-
 internal fun Behandling.toDetaljertBehandling(): DetaljertBehandling {
     return DetaljertBehandling(
         id = id,
         sak = sak.id,
         sakType = sak.sakType,
         behandlingOpprettet = behandlingOpprettet,
-        soeknadMottattDato = this.mottattDato(),
+        soeknadMottattDato = mottattDato(),
         innsender = persongalleri.innsender,
         soeker = persongalleri.soeker,
         gjenlevende = persongalleri.gjenlevende,
@@ -174,11 +174,11 @@ internal fun Behandling.toDetaljertBehandling(): DetaljertBehandling {
         soesken = persongalleri.soesken,
         status = status,
         behandlingType = type,
-        virkningstidspunkt = this.virkningstidspunkt,
-        boddEllerArbeidetUtlandet = this.boddEllerArbeidetUtlandet,
-        revurderingsaarsak = this.revurderingsaarsak(),
+        virkningstidspunkt = virkningstidspunkt,
+        boddEllerArbeidetUtlandet = boddEllerArbeidetUtlandet,
+        revurderingsaarsak = revurderingsaarsak(),
         prosesstype = prosesstype,
-        revurderingInfo = this.revurderingInfo(),
+        revurderingInfo = revurderingInfo(),
         enhet = sak.enhet
     )
 }

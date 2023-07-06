@@ -6,10 +6,6 @@ import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.User
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.BehandlingMedGrunnlagsopplysninger
-import no.nav.etterlatte.behandling.domain.gyldighetsproeving
-import no.nav.etterlatte.behandling.domain.mottattDato
-import no.nav.etterlatte.behandling.domain.revurderingInfo
-import no.nav.etterlatte.behandling.domain.revurderingsaarsak
 import no.nav.etterlatte.behandling.domain.toDetaljertBehandling
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.hendelse.HendelseType

@@ -7,6 +7,8 @@ import io.ktor.client.HttpClient
 import no.nav.etterlatte.libs.common.BehandlingTilgangsSjekk
 import no.nav.etterlatte.libs.common.RetryResult
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
+import no.nav.etterlatte.libs.common.behandling.SisteIverksatteBehandling
+import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.retry
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
@@ -20,7 +22,7 @@ import java.util.*
 interface BehandlingKlient : BehandlingTilgangsSjekk {
     suspend fun hentBehandling(behandlingId: UUID, brukerTokenInfo: BrukerTokenInfo): DetaljertBehandling
 
-    suspend fun hentSisteIverksatteBehandling(sakId: Long, brukerTokenInfo: BrukerTokenInfo): UUID
+    suspend fun hentSisteIverksatteBehandling(sakId: Long, brukerTokenInfo: BrukerTokenInfo): SisteIverksatteBehandling
     suspend fun beregn(behandlingId: UUID, brukerTokenInfo: BrukerTokenInfo, commit: Boolean): Boolean
     suspend fun avkort(behandlingId: UUID, brukerTokenInfo: BrukerTokenInfo, commit: Boolean): Boolean
 }
@@ -68,8 +70,8 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
     override suspend fun hentSisteIverksatteBehandling(
         sakId: Long,
         brukerTokenInfo: BrukerTokenInfo
-    ): UUID {
-        return retry<UUID> {
+    ): SisteIverksatteBehandling {
+        return retry<SisteIverksatteBehandling> {
             downstreamResourceClient
                 .get(
                     resource = Resource(
@@ -79,7 +81,7 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
                     brukerTokenInfo = brukerTokenInfo
                 )
                 .mapBoth(
-                    success = { UUID.fromString(it.response.toString()) },
+                    success = { deserialize(it.response.toString()) },
                     failure = { throwableErrorMessage -> throw throwableErrorMessage }
                 )
         }.let {

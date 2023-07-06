@@ -13,6 +13,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.behandling.SisteIverksatteBehandling
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Opplysning
 import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
@@ -394,7 +395,7 @@ internal class VilkaarsvurderingServiceTest {
             every { revurderingsaarsak } returns RevurderingAarsak.REGULERING
         }
 
-        coEvery { behandlingKlient.hentSisteIverksatteBehandling(any(), any()) } returns uuid
+        coEvery { behandlingKlient.hentSisteIverksatteBehandling(any(), any()) } returns SisteIverksatteBehandling(uuid)
 
         val foerstegangsvilkaar = runBlocking {
             service.opprettVilkaarsvurdering(uuid, brukerTokenInfo)

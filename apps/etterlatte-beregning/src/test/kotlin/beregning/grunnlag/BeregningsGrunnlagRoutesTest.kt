@@ -25,6 +25,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.behandling.SisteIverksatteBehandling
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.objectMapper
@@ -139,7 +140,9 @@ internal class BeregningsGrunnlagRoutesTest {
             revurderingInfo = null,
             enhet = "1111"
         )
-        coEvery { behandlingKlient.hentSisteIverksatteBehandling(sakId, any()) } returns idForrigeIverksatt
+        coEvery {
+            behandlingKlient.hentSisteIverksatteBehandling(sakId, any())
+        } returns SisteIverksatteBehandling(idForrigeIverksatt)
         every { repository.finnGrunnlagForBehandling(idRevurdering) } returns null
         every { repository.finnGrunnlagForBehandling(idForrigeIverksatt) } returns BeregningsGrunnlag(
             behandlingId = idForrigeIverksatt,

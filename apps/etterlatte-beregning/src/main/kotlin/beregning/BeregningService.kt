@@ -61,12 +61,13 @@ class BeregningService(
         brukerTokenInfo: BrukerTokenInfo,
         behandlingId: UUID
     ) {
-        val sistIverksatteBehandlingId = behandlingKlient.hentSisteIverksatteBehandling(behandling.sak, brukerTokenInfo)
+        val sisteIverksatteBehandling = behandlingKlient.hentSisteIverksatteBehandling(behandling.sak, brukerTokenInfo)
         val grunnlagDenneBehandlinga =
             beregningsGrunnlagService.hentBarnepensjonBeregningsGrunnlag(behandlingId, brukerTokenInfo)
+
         if (grunnlagDenneBehandlinga == null || grunnlagDenneBehandlinga.behandlingId != behandlingId) {
             logger.info("Kopierer beregningsgrunnlag og oppretter beregning for $behandlingId")
-            beregningsGrunnlagService.dupliserBeregningsGrunnlag(behandlingId, sistIverksatteBehandlingId)
+            beregningsGrunnlagService.dupliserBeregningsGrunnlag(behandlingId, sisteIverksatteBehandling.id)
             opprettBeregning(behandlingId, brukerTokenInfo)
         }
     }

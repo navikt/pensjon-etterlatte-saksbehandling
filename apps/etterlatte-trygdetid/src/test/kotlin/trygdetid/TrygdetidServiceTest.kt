@@ -16,6 +16,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
+import no.nav.etterlatte.libs.common.behandling.SisteIverksatteBehandling
 import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
 import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsdato
 import no.nav.etterlatte.libs.common.toJsonNode
@@ -154,7 +155,9 @@ internal class TrygdetidServiceTest {
 
         every { repository.hentTrygdetid(behandlingId) } returns null
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
-        coEvery { behandlingKlient.hentSisteIverksatteBehandling(any(), any()) } returns forrigebehandlingId
+        coEvery { behandlingKlient.hentSisteIverksatteBehandling(any(), any()) } returns SisteIverksatteBehandling(
+            forrigebehandlingId
+        )
         every { repository.hentTrygdetid(forrigebehandlingId) } returns trygdetid
         every { repository.opprettTrygdetid(any()) } returns trygdetid
 
@@ -199,7 +202,9 @@ internal class TrygdetidServiceTest {
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
         every { repository.hentTrygdetid(behandlingId) } returns null
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
-        coEvery { behandlingKlient.hentSisteIverksatteBehandling(any(), any()) } returns forrigeBehandlingId
+        coEvery { behandlingKlient.hentSisteIverksatteBehandling(any(), any()) } returns SisteIverksatteBehandling(
+            forrigeBehandlingId
+        )
         every { repository.hentTrygdetid(forrigeBehandlingId) } returns null
         every { repository.opprettTrygdetid(any()) } returns trygdetid
 
@@ -243,7 +248,9 @@ internal class TrygdetidServiceTest {
         val forrigeBehandlingId = randomUUID()
         every { repository.hentTrygdetid(behandlingId) } returns null
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
-        coEvery { behandlingKlient.hentSisteIverksatteBehandling(any(), any()) } returns forrigeBehandlingId
+        coEvery { behandlingKlient.hentSisteIverksatteBehandling(any(), any()) } returns SisteIverksatteBehandling(
+            forrigeBehandlingId
+        )
         every { repository.hentTrygdetid(forrigeBehandlingId) } returns null
 
         runBlocking {
@@ -288,7 +295,9 @@ internal class TrygdetidServiceTest {
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
         every { repository.hentTrygdetid(behandlingId) } returns null
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
-        coEvery { behandlingKlient.hentSisteIverksatteBehandling(any(), any()) } returns forrigeBehandlingId
+        coEvery { behandlingKlient.hentSisteIverksatteBehandling(any(), any()) } returns SisteIverksatteBehandling(
+            forrigeBehandlingId
+        )
         every { repository.hentTrygdetid(forrigeBehandlingId) } returns null
         every { repository.opprettTrygdetid(any()) } returns trygdetid
 

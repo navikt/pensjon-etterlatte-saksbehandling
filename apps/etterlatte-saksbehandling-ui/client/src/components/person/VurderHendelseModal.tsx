@@ -14,7 +14,7 @@ type Props = {
   revurderinger: Array<Revurderingsaarsak>
   valgtHendelse?: Grunnlagsendringshendelse
 }
-const OpprettRevurderingModal = (props: Props) => {
+const VurderHendelseModal = (props: Props) => {
   const { revurderinger, valgtHendelse } = props
   const [error, setError] = useState<string | null>(null)
   const [valgtAarsak, setValgtAarsak] = useState<Revurderingsaarsak | undefined>(undefined)
@@ -90,4 +90,4 @@ export const ButtonContainer = styled.div`
   padding-top: 2em;
 `
 
-export default OpprettRevurderingModal
+export default VurderHendelseModal

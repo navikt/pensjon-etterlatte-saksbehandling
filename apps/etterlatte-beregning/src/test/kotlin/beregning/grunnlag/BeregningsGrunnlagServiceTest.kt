@@ -18,6 +18,7 @@ import no.nav.etterlatte.klienter.BehandlingKlientImpl
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.behandling.SisteIverksatteBehandling
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeskenMedIBeregning
@@ -132,7 +133,7 @@ internal class BeregningsGrunnlagServiceTest {
                 sakId,
                 any()
             )
-        } returns foerstegangsbehandling.id
+        } returns SisteIverksatteBehandling(foerstegangsbehandling.id)
         coEvery { behandlingKlient.hentBehandling(revurdering.id, any()) } returns revurdering
 
         every {
@@ -199,7 +200,7 @@ internal class BeregningsGrunnlagServiceTest {
                 sakId,
                 any()
             )
-        } returns foerstegangsbehandling.id
+        } returns SisteIverksatteBehandling(foerstegangsbehandling.id)
         coEvery { behandlingKlient.hentBehandling(revurdering.id, any()) } returns revurdering
 
         every {

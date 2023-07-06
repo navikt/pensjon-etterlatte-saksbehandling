@@ -17,6 +17,7 @@ import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.behandling.SisteIverksatteBehandling
 import no.nav.etterlatte.libs.common.kunSystembruker
 import no.nav.etterlatte.libs.common.sak.Saker
 import no.nav.etterlatte.libs.common.sakId
@@ -51,8 +52,9 @@ internal fun Route.sakSystemRoutes(
                 logger.info("Henter siste iverksatte behandling for $sakId")
 
                 val sisteIverksatteBehandling = generellBehandlingService.hentSisteIverksatte(sakId)
+                    ?.let { SisteIverksatteBehandling(it.id) }
 
-                call.respond(sisteIverksatteBehandling?.id ?: HttpStatusCode.NotFound)
+                call.respond(sisteIverksatteBehandling ?: HttpStatusCode.NotFound)
             }
         }
     }

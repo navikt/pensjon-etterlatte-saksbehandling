@@ -24,8 +24,9 @@ class BeregningsGrunnlagService(
             val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
             val kanLagreDetteGrunnlaget = if (behandling.behandlingType == BehandlingType.REVURDERING) {
                 // Her vil vi sjekke opp om det vi lagrer ned ikke er modifisert før virk på revurderingen
-                val forrigeIverksatte = behandlingKlient.hentSisteIverksatteBehandling(behandling.sak, brukerTokenInfo)
-                grunnlagErIkkeEndretFoerVirk(behandling, forrigeIverksatte, barnepensjonBeregningsGrunnlag)
+                val sisteIverksatteBehandling =
+                    behandlingKlient.hentSisteIverksatteBehandling(behandling.sak, brukerTokenInfo)
+                grunnlagErIkkeEndretFoerVirk(behandling, sisteIverksatteBehandling.id, barnepensjonBeregningsGrunnlag)
             } else {
                 true
             }
@@ -86,11 +87,11 @@ class BeregningsGrunnlagService(
         // Det kan hende behandlingen er en revurdering, og da må vi finne forrige grunnlag for saken
         val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
         return if (behandling.behandlingType == BehandlingType.REVURDERING) {
-            val forrigeIverksatteBehandlingId = behandlingKlient.hentSisteIverksatteBehandling(
+            val sisteIverksatteBehandling = behandlingKlient.hentSisteIverksatteBehandling(
                 behandling.sak,
                 brukerTokenInfo
             )
-            beregningsGrunnlagRepository.finnGrunnlagForBehandling(forrigeIverksatteBehandlingId)
+            beregningsGrunnlagRepository.finnGrunnlagForBehandling(sisteIverksatteBehandling.id)
         } else {
             null
         }

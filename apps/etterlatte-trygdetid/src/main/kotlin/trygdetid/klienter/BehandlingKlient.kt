@@ -7,6 +7,8 @@ import io.ktor.client.HttpClient
 import no.nav.etterlatte.libs.common.BehandlingTilgangsSjekk
 import no.nav.etterlatte.libs.common.RetryResult
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
+import no.nav.etterlatte.libs.common.behandling.SisteIverksatteBehandling
+import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.retry
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
@@ -62,7 +64,10 @@ class BehandlingKlient(config: Config, httpClient: HttpClient) : BehandlingTilga
             )
     }
 
-    suspend fun hentSisteIverksatteBehandling(sakId: Long, brukerTokenInfo: BrukerTokenInfo): UUID {
+    suspend fun hentSisteIverksatteBehandling(
+        sakId: Long,
+        brukerTokenInfo: BrukerTokenInfo
+    ): SisteIverksatteBehandling {
         logger.info("Henter seneste iverksatte behandling for sak med id $sakId")
 
         val response = downstreamResourceClient.get(
@@ -71,7 +76,7 @@ class BehandlingKlient(config: Config, httpClient: HttpClient) : BehandlingTilga
         )
 
         return response.mapBoth(
-            success = { UUID.fromString(it.response.toString()) },
+            success = { deserialize(it.response.toString()) },
             failure = {
                 logger.error("Kunne ikke hente seneste iverksatte behandling for sak med id $sakId")
                 throw it.throwable

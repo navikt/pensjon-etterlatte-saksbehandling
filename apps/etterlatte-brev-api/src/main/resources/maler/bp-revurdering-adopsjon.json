@@ -1,0 +1,47 @@
+[
+  {
+    "type": "heading-two",
+    "children": [
+      {
+        "text": "Begrunnelse for vedtaket",
+        "placeholder": null
+      }
+    ]
+  },
+  {
+    "type": "paragraph",
+    "children": [
+      {
+        "text": "Barnepensjonen din opphører fra <dato>.",
+        "placeholder": null
+      }
+    ]
+  },
+  {
+    "type": "paragraph",
+    "children": [
+      {
+        "text": "Vi viser til informasjon fra deg/verge om at du er adoptert av <navn> fra <adopsjonsdato>.",
+        "placeholder": null
+      }
+    ]
+  },
+  {
+    "type": "paragraph",
+    "children": [
+      {
+        "text": "Retten til barnepensjon faller bort dersom barnet blir adoptert av et ektepar, eller dersom en ektefelle adopterer den andre ektefellens barn. Barnepensjonen faller bort fra og med måneden etter at adopsjonen er vedtatt.",
+        "placeholder": null
+      }
+    ]
+  },
+  {
+    "type": "paragraph",
+    "children": [
+      {
+        "text": "Vedtaket er gjort etter bestemmelsene i folketrygdloven § 18-7 og § 22-12.",
+        "placeholder": null
+      }
+    ]
+  }
+]

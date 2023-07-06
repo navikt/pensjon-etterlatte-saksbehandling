@@ -50,8 +50,12 @@ object SlateHelper {
                     else -> getJsonFile("/maler/tom-brevmal.json")
                 }
             }
-
-            else -> getJsonFile("/maler/tom-brevmal.json")
+            SakType.BARNEPENSJON -> {
+                when (behandling.revurderingsaarsak) {
+                    RevurderingAarsak.ADOPSJON -> getJsonFile("/maler/bp-revurdering-adopsjon.json")
+                    else -> getJsonFile("/maler/tom-brevmal.json")
+                }
+            }
         }.let { deserialize(it) }
     }
 

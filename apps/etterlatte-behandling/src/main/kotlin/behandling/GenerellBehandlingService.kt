@@ -240,7 +240,7 @@ class RealGenerellBehandlingService(
 
             DetaljertBehandlingDto(
                 id = behandling.id,
-                sak = sakId,
+                sakId = sakId,
                 sakType = sakType,
                 gyldighetsprøving = behandling.gyldighetsproeving(),
                 kommerBarnetTilgode = kommerBarnetTilgode,

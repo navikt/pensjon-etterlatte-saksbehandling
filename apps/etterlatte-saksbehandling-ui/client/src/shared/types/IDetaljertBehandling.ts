@@ -9,7 +9,7 @@ import { RevurderingInfo } from '~shared/types/RevurderingInfo'
 
 export interface IDetaljertBehandling {
   id: string
-  sak: number
+  sakId: number
   sakType: SakType
   gyldighetsprøving?: IGyldighetResultat
   kommerBarnetTilgode: IKommerBarnetTilgode | null

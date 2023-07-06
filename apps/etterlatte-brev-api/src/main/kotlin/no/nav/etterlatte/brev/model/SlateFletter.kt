@@ -6,12 +6,12 @@ import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 
 object SlateFletter {
-    fun erstatt(slate: Slate, second: BrevData) = Slate(
+    fun erstatt(slate: Slate, brevData: BrevData) = Slate(
         slate.elements.map {
             it.copy(
                 children = it.children.map { element ->
                     if (element.placeholder == true) {
-                        element.copy(text = erstattFlettefelt(element, second))
+                        element.copy(text = brevData.flett(element.text))
                     } else {
                         element
                     }
@@ -20,23 +20,14 @@ object SlateFletter {
         }
     )
 
-    private fun erstattFlettefelt(element: Slate.InnerElement, brevData: BrevData) = when (brevData) {
-        is AdopsjonRevurderingBrevdata -> flettAdopsjonRevurderingBrevdata(element, brevData)
-        else -> element.text
-    }
+    fun formaterNavn(adoptertAv1: Navn, adoptertAv2: Navn?) =
+        adoptertAv1.toString() + if (adoptertAv2 != null) {
+            " og $adoptertAv2"
+        } else {
+            ""
+        }
 
-    private fun flettAdopsjonRevurderingBrevdata(
-        element: Slate.InnerElement,
-        brevData: AdopsjonRevurderingBrevdata
-    ) = element.text
-        ?.replace("<dato>", formaterDato(brevData.virkningsdato, Spraak.NB))
-        ?.replace("<adopsjonsdato>", "<her skal adopsjonsdato komme automatisk>")
-        ?.replace("<navn>", formaterNavn(brevData.adoptertAv1, brevData.adoptertAv2))
-
-    private fun formaterNavn(adoptertAv1: Navn, adoptertAv2: Navn?) =
-        adoptertAv1.toString() + if (adoptertAv2 != null) { " og $adoptertAv2" } else { "" }
-
-    private fun formaterDato(dato: LocalDate, spraak: Spraak): String =
+    fun formaterDato(dato: LocalDate, spraak: Spraak): String =
         dato.format(dateFormatter(spraak)).replace(' ', ' ') // space to non-breaking space
 }
 

@@ -46,9 +46,9 @@ data class AdopsjonRevurderingBrevdata(
     }
 
     override fun flett(text: String?) = when (text) {
-        "<dato>" -> SlateFletter.formaterDato(virkningsdato, Spraak.NB)
+        "<virkningsdato>" -> SlateFletter.formaterDato(virkningsdato, Spraak.NB)
         "<adopsjonsdato>" -> "<her skal adopsjonsdato komme automatisk>"
-        "<navn>" -> formaterNavn(adoptertAv1, adoptertAv2)
+        "<adoptivforeldre_navn>" -> formaterNavn(adoptertAv1, adoptertAv2)
         else -> throw IllegalArgumentException("Ugyldig flettefelt $text")
     }
 

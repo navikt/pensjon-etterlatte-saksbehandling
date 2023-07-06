@@ -16,7 +16,7 @@
         "placeholder": null
       },
       {
-        "text": "<dato>",
+        "text": "<virkningsdato>",
         "placeholder": true
       },
       {
@@ -33,7 +33,7 @@
         "placeholder": null
       },
       {
-        "text": "<navn>",
+        "text": "<adoptivforeldre_navn>",
         "placeholder": true
       },
       {

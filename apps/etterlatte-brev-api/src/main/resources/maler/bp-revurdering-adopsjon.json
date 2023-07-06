@@ -12,7 +12,15 @@
     "type": "paragraph",
     "children": [
       {
-        "text": "Barnepensjonen din opphører fra <dato>.",
+        "text": "Barnepensjonen din opphører fra ",
+        "placeholder": null
+      },
+      {
+        "text": "<dato>",
+        "placeholder": true
+      },
+      {
+        "text": ".",
         "placeholder": null
       }
     ]
@@ -21,7 +29,23 @@
     "type": "paragraph",
     "children": [
       {
-        "text": "Vi viser til informasjon fra deg/verge om at du er adoptert av <navn> fra <adopsjonsdato>.",
+        "text": "Vi viser til informasjon fra deg/verge om at du er adoptert av",
+        "placeholder": null
+      },
+      {
+        "text": "<navn>",
+        "placeholder": true
+      },
+      {
+        "text": " fra ",
+        "placeholder": null
+      },
+      {
+        "text": "<adopsjonsdato>",
+        "placeholder": true
+      },
+      {
+        "text": ".",
         "placeholder": null
       }
     ]

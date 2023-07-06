@@ -35,7 +35,7 @@ class BesvarOpplysningsbehovTest {
             )
         ).toJson()
 
-        val pdlMock = mockk<Pdl>()
+        val pdlServiceInterfaceMock = mockk<PdlServiceInterface>()
         fun readFile(file: String) = Companion::class.java.getResource(file)?.readText()
             ?: throw FileNotFoundException("Fant ikke filen $file")
 
@@ -83,12 +83,18 @@ class BesvarOpplysningsbehovTest {
         )
     }
 
-    private val inspector = TestRapid().apply { BesvarOpplysningsbehov(this, pdlMock) }
+    private val inspector = TestRapid().apply { BesvarOpplysningsbehov(this, pdlServiceInterfaceMock) }
 
     @Test
     fun `skal lese melding om opplysningsbehov og returnere info fra PDL`() {
-        every { pdlMock.hentPerson(any(), any(), any()) } answers { mockPerson(fnr = firstArg()).tilPerson() }
-        every { pdlMock.hentOpplysningsperson(any(), any(), any()) } answers { mockPerson(fnr = firstArg()) }
+        every {
+            pdlServiceInterfaceMock.hentPerson(any(), any(), any())
+        } answers { mockPerson(fnr = firstArg()).tilPerson() }
+        every { pdlServiceInterfaceMock.hentOpplysningsperson(any(), any(), any()) } answers {
+            mockPerson(
+                fnr = firstArg()
+            )
+        }
         val inspector = inspector.apply { sendTestMessage(melding) }.inspektør
 
         Assertions.assertEquals(Opplysningstype.SOEKER_PDL_V1.name, inspector.message(0).get(BEHOV_NAME_KEY).asText())
@@ -102,8 +108,14 @@ class BesvarOpplysningsbehovTest {
 
     @Test
     fun `alle opplysninger har samme tidspunkt for innhenting`() {
-        every { pdlMock.hentPerson(any(), any(), any()) } answers { mockPerson(fnr = firstArg()).tilPerson() }
-        every { pdlMock.hentOpplysningsperson(any(), any(), any()) } answers { mockPerson(fnr = firstArg()) }
+        every {
+            pdlServiceInterfaceMock.hentPerson(any(), any(), any())
+        } answers { mockPerson(fnr = firstArg()).tilPerson() }
+        every { pdlServiceInterfaceMock.hentOpplysningsperson(any(), any(), any()) } answers {
+            mockPerson(
+                fnr = firstArg()
+            )
+        }
         val inspector = inspector.apply { sendTestMessage(melding) }.inspektør
 
         val opplysninger = inspector.message(0).get("opplysning")

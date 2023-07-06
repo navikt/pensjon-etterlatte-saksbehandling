@@ -55,7 +55,6 @@ internal class InnsendtSoeknadRiver(
             try {
                 val soeknad = packet.soeknad()
 
-                // Persongalleri skal utgå
                 val personGalleri = Persongalleri(
                     soeker = soeknad.soeker.foedselsnummer.svar.value,
                     innsender = soeknad.innsender.foedselsnummer.svar.value,

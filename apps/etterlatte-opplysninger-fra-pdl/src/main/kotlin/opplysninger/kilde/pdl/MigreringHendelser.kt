@@ -26,7 +26,7 @@ import rapidsandrivers.SAK_ID_KEY
 
 class MigreringHendelser(
     rapidsConnection: RapidsConnection,
-    private val pdl: Pdl
+    private val pdlServiceInterface: PdlServiceInterface
 ) : River.PacketListener {
     private val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
@@ -47,16 +47,16 @@ class MigreringHendelser(
         logger.info("Behandler migrerings-persongalleri mot PDL")
 
         val soeker = lagEnkelopplysningerFraPDL(
-            person = pdl.hentPerson(persongalleri.soeker, PersonRolle.BARN, sakType),
-            personDTO = pdl.hentOpplysningsperson(persongalleri.soeker, PersonRolle.BARN, sakType),
+            person = pdlServiceInterface.hentPerson(persongalleri.soeker, PersonRolle.BARN, sakType),
+            personDTO = pdlServiceInterface.hentOpplysningsperson(persongalleri.soeker, PersonRolle.BARN, sakType),
             opplysningsbehov = Opplysningstype.SOEKER_PDL_V1,
             fnr = Folkeregisteridentifikator.of(persongalleri.soeker)
         ) as List<Grunnlagsopplysning<JsonNode>>
 
         val gjenlevende = persongalleri.gjenlevende.map {
             it to lagEnkelopplysningerFraPDL(
-                person = pdl.hentPerson(it, PersonRolle.GJENLEVENDE, sakType),
-                personDTO = pdl.hentOpplysningsperson(it, PersonRolle.GJENLEVENDE, sakType),
+                person = pdlServiceInterface.hentPerson(it, PersonRolle.GJENLEVENDE, sakType),
+                personDTO = pdlServiceInterface.hentOpplysningsperson(it, PersonRolle.GJENLEVENDE, sakType),
                 opplysningsbehov = Opplysningstype.GJENLEVENDE_FORELDER_PDL_V1,
                 fnr = Folkeregisteridentifikator.of(it)
             ) as List<Grunnlagsopplysning<JsonNode>>
@@ -64,8 +64,8 @@ class MigreringHendelser(
 
         val avdoede = persongalleri.avdoed.map {
             it to lagEnkelopplysningerFraPDL(
-                person = pdl.hentPerson(it, PersonRolle.AVDOED, sakType),
-                personDTO = pdl.hentOpplysningsperson(it, PersonRolle.AVDOED, sakType),
+                person = pdlServiceInterface.hentPerson(it, PersonRolle.AVDOED, sakType),
+                personDTO = pdlServiceInterface.hentOpplysningsperson(it, PersonRolle.AVDOED, sakType),
                 opplysningsbehov = Opplysningstype.AVDOED_PDL_V1,
                 fnr = Folkeregisteridentifikator.of(it)
             ) as List<Grunnlagsopplysning<JsonNode>>

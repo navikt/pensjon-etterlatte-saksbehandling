@@ -14,12 +14,12 @@ import no.nav.etterlatte.libs.common.person.HentPersonRequest
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.PersonRolle
 
-interface Pdl {
+interface PdlServiceInterface {
     fun hentPerson(foedselsnummer: String, rolle: PersonRolle, sakType: SakType): Person
     fun hentOpplysningsperson(foedselsnummer: String, rolle: PersonRolle, sakType: SakType): PersonDTO
 }
 
-class PdlService(private val pdl: HttpClient, private val url: String) : Pdl {
+class PdlService(private val pdl: HttpClient, private val url: String) : PdlServiceInterface {
     override fun hentPerson(foedselsnummer: String, rolle: PersonRolle, sakType: SakType): Person {
         val personRequest = HentPersonRequest(Folkeregisteridentifikator.of(foedselsnummer), rolle, sakType)
         val response = runBlocking {

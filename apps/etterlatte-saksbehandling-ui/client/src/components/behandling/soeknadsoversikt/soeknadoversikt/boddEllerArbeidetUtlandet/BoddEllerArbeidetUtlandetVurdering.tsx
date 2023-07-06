@@ -57,7 +57,7 @@ export const BoddEllerArbeidetUtlandetVurdering = ({
       subtittelKomponent={
         <>
           <BodyShort spacing>Har avdøde bodd eller arbeidet i utlandet?</BodyShort>
-          {boddEllerArbeidetUtlandet?.boddEllerArbeidetUtlandet ? (
+          {boddEllerArbeidetUtlandet !== undefined ? (
             <Label as={'p'} size="small" style={{ marginBottom: '32px' }}>
               {JaNeiRec[boddEllerArbeidetUtlandet.boddEllerArbeidetUtlandet ? JaNei.JA : JaNei.NEI]}
             </Label>

@@ -1,7 +1,7 @@
 package no.nav.etterlatte.grunnlagsendring
 
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.behandling.GenerellBehandlingService
+import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringStatus
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringsType
@@ -42,7 +42,7 @@ import java.util.*
 
 class GrunnlagsendringshendelseService(
     private val grunnlagsendringshendelseDao: GrunnlagsendringshendelseDao,
-    private val generellBehandlingService: GenerellBehandlingService,
+    private val behandlingService: BehandlingService,
     private val pdlKlient: PdlKlient,
     private val grunnlagKlient: GrunnlagKlient,
     private val tilgangService: TilgangService,
@@ -427,7 +427,7 @@ class GrunnlagsendringshendelseService(
         samsvarMellomKildeOgGrunnlag: SamsvarMellomKildeOgGrunnlag,
         hendelseId: UUID
     ): Behandling? {
-        val behandlingerISak = generellBehandlingService.hentBehandlingerISak(sakId)
+        val behandlingerISak = behandlingService.hentBehandlingerISak(sakId)
         // Har vi en eksisterende behandling som ikke er avbrutt?
         val sisteBehandling = behandlingerISak
             .`siste ikke-avbrutte behandling`()

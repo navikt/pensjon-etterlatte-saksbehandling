@@ -61,7 +61,7 @@ fun Route.grunnlagRoute(grunnlagService: GrunnlagService, behandlingKlient: Beha
             }
         }
 
-        post("person/lagreopplysninger") {
+        post("person/oppdatergrunnlagforbehandling") {
             withSakId(behandlingKlient) { sakId ->
                 /*val opplysninger: List<Grunnlagsopplysning<JsonNode>> =
                     objectMapper.readValue(packet[OPPLYSNING_KEY].toJson())!!

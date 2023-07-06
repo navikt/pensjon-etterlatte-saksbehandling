@@ -85,22 +85,22 @@ fun Application.module(context: ApplicationContext) {
             sakSystemRoutes(
                 tilgangService = tilgangService,
                 sakService = sakService,
-                generellBehandlingService = generellBehandlingService
+                behandlingService = behandlingService
             )
             sakWebRoutes(
                 tilgangService = tilgangService,
                 sakService = sakService,
-                generellBehandlingService = generellBehandlingService,
+                behandlingService = behandlingService,
                 grunnlagsendringshendelseService = grunnlagsendringshendelseService
             )
             behandlingRoutes(
-                generellBehandlingService = generellBehandlingService,
+                behandlingService = behandlingService,
                 foerstegangsbehandlingService = foerstegangsbehandlingService,
                 manueltOpphoerService = manueltOpphoerService
             )
             revurderingRoutes(
                 revurderingService = revurderingService,
-                generellBehandlingService = generellBehandlingService
+                behandlingService = behandlingService
             )
             omregningRoutes(omregningService = omregningService)
             migreringRoutes(migreringService = migreringService)

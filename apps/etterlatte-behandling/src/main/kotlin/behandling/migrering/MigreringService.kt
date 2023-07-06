@@ -2,7 +2,7 @@ package no.nav.etterlatte.behandling.omregning
 
 import no.nav.etterlatte.behandling.BehandlingHendelseType
 import no.nav.etterlatte.behandling.BehandlingHendelserKafkaProducer
-import no.nav.etterlatte.behandling.GenerellBehandlingService
+import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.foerstegangsbehandling.FoerstegangsbehandlingService
 import no.nav.etterlatte.behandling.migrering.MigreringRepository
@@ -20,7 +20,7 @@ class MigreringService(
     private val foerstegangsBehandlingService: FoerstegangsbehandlingService,
     private val behandlingsHendelser: BehandlingHendelserKafkaProducer,
     private val migreringRepository: MigreringRepository,
-    private val generellBehandlingService: GenerellBehandlingService
+    private val behandlingService: BehandlingService
 ) {
     fun migrer(request: MigreringRequest) = opprettSakOgBehandling(request)?.let {
         val pesys = Vedtaksloesning.PESYS.name
@@ -37,7 +37,7 @@ class MigreringService(
             pesys,
             JaNeiMedBegrunnelse(JaNei.JA, "Automatisk importert fra Pesys")
         )
-        generellBehandlingService.oppdaterVirkningstidspunkt(
+        behandlingService.oppdaterVirkningstidspunkt(
             it.id,
             request.virkningstidspunkt,
             pesys,

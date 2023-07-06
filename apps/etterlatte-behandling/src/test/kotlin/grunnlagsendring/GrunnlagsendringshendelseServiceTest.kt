@@ -14,7 +14,7 @@ import no.nav.etterlatte.Context
 import no.nav.etterlatte.DatabaseKontekst
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.TRIVIELL_MIDTPUNKT
-import no.nav.etterlatte.behandling.GenerellBehandlingService
+import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.domain.ArbeidsFordelingEnhet
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringStatus
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringsType
@@ -57,7 +57,7 @@ import java.util.*
 
 internal class GrunnlagsendringshendelseServiceTest {
 
-    private val generellBehandlingService = mockk<GenerellBehandlingService>()
+    private val behandlingService = mockk<BehandlingService>()
     private val grunnlagshendelsesDao = mockk<GrunnlagsendringshendelseDao>()
     private val pdlService = mockk<PdlKlientImpl>()
     private val grunnlagClient = mockk<GrunnlagKlient>(relaxed = true, relaxUnitFun = true)
@@ -67,7 +67,7 @@ internal class GrunnlagsendringshendelseServiceTest {
 
     private val grunnlagsendringshendelseService = GrunnlagsendringshendelseService(
         grunnlagshendelsesDao,
-        generellBehandlingService,
+        behandlingService,
         pdlService,
         grunnlagClient,
         tilgangServiceImpl,
@@ -122,7 +122,7 @@ internal class GrunnlagsendringshendelseServiceTest {
             grunnlagshendelsesDao.hentGrunnlagsendringshendelserMedStatuserISak(any(), any())
         } returns emptyList()
 
-        every { generellBehandlingService.hentBehandlingerISak(1L) } returns foerstegangsbehandlinger
+        every { behandlingService.hentBehandlingerISak(1L) } returns foerstegangsbehandlinger
 
         coEvery { grunnlagClient.hentPersonSakOgRolle(any()) }
             .returns(PersonMedSakerOgRoller(fnr, listOf(SakOgRolle(sakId, Saksrolle.SOEKER))))
@@ -540,7 +540,7 @@ internal class GrunnlagsendringshendelseServiceTest {
         }
         every { pdlService.hentPdlModell(avdoedFnr, personRolle, SakType.BARNEPENSJON) } returns mockPdlModel
 
-        every { generellBehandlingService.hentBehandlingerISak(sakId) } returns listOf(
+        every { behandlingService.hentBehandlingerISak(sakId) } returns listOf(
             mockk {
                 every { status } returns BehandlingStatus.VILKAARSVURDERT
                 every { id } returns UUID.randomUUID()

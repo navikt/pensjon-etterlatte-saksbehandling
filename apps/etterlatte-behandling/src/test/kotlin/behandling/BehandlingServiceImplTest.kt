@@ -46,7 +46,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
-class RealGenerellBehandlingServiceTest {
+class BehandlingServiceImplTest {
     private val user = mockk<SaksbehandlerMedEnheterOgRoller>()
 
     @BeforeEach
@@ -81,7 +81,7 @@ class RealGenerellBehandlingServiceTest {
         val featureToggleService = mockk<FeatureToggleService>()
         every { featureToggleService.isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false) } returns false
 
-        val sut = RealGenerellBehandlingService(
+        val sut = BehandlingServiceImpl(
             behandlingDao = behandlingDaoMock,
             behandlingHendelser = behandlingHendelser,
             grunnlagsendringshendelseDao = mockk(),
@@ -428,7 +428,7 @@ class RealGenerellBehandlingServiceTest {
         val featureToggleService = mockk<FeatureToggleService>()
         every { featureToggleService.isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false) } returns true
 
-        val sut = RealGenerellBehandlingService(
+        val sut = BehandlingServiceImpl(
             behandlingDao = behandlingDaoMock,
             behandlingHendelser = behandlingHendelserKafkaProducerMock,
             grunnlagsendringshendelseDao = mockk(),
@@ -470,7 +470,7 @@ class RealGenerellBehandlingServiceTest {
         val featureToggleService = mockk<FeatureToggleService>()
         every { featureToggleService.isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false) } returns true
 
-        val sut = RealGenerellBehandlingService(
+        val sut = BehandlingServiceImpl(
             behandlingDao = behandlingDaoMock,
             behandlingHendelser = behandlingHendelserKafkaProducerMock,
             grunnlagsendringshendelseDao = mockk(),
@@ -511,7 +511,7 @@ class RealGenerellBehandlingServiceTest {
         val featureToggleService = mockk<FeatureToggleService>()
         every { featureToggleService.isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false) } returns true
 
-        val sut = RealGenerellBehandlingService(
+        val sut = BehandlingServiceImpl(
             behandlingDao = behandlingDaoMock,
             behandlingHendelser = mockk(),
             grunnlagsendringshendelseDao = mockk(),
@@ -561,7 +561,7 @@ class RealGenerellBehandlingServiceTest {
         val featureToggleService = mockk<FeatureToggleService>()
         every { featureToggleService.isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false) } returns true
 
-        val sut = RealGenerellBehandlingService(
+        val sut = BehandlingServiceImpl(
             behandlingDaoMock,
             mockk(),
             mockk(),
@@ -588,7 +588,7 @@ class RealGenerellBehandlingServiceTest {
     private fun behandlingServiceMedMocks(
         doedsdato: LocalDate?,
         soeknadMottatt: LocalDateTime
-    ): RealGenerellBehandlingService {
+    ): BehandlingServiceImpl {
         val behandling = foerstegangsbehandling(
             id = BEHANDLINGS_ID,
             sakId = SAK_ID,
@@ -621,7 +621,7 @@ class RealGenerellBehandlingServiceTest {
         grunnlagsendringshendelseDao: GrunnlagsendringshendelseDao = mockk(),
         grunnlagKlient: GrunnlagKlient? = null,
         featureToggleService: FeatureToggleService
-    ): RealGenerellBehandlingService = RealGenerellBehandlingService(
+    ): BehandlingServiceImpl = BehandlingServiceImpl(
         behandlingDao = behandlingDao ?: mockk(),
         behandlingHendelser = behandlingHendelserKafkaProducer ?: mockk(),
         grunnlagsendringshendelseDao = grunnlagsendringshendelseDao,

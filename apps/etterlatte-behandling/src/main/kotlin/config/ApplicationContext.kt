@@ -4,11 +4,11 @@ import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 import io.ktor.client.HttpClient
 import no.nav.etterlatte.behandling.BehandlingDao
+import no.nav.etterlatte.behandling.BehandlingServiceImpl
 import no.nav.etterlatte.behandling.BehandlingStatusServiceImpl
 import no.nav.etterlatte.behandling.BehandlingsHendelserKafkaProducerImpl
 import no.nav.etterlatte.behandling.EnhetServiceImpl
-import no.nav.etterlatte.behandling.RealGenerellBehandlingService
-import no.nav.etterlatte.behandling.foerstegangsbehandling.RealFoerstegangsbehandlingService
+import no.nav.etterlatte.behandling.foerstegangsbehandling.FoerstegangsbehandlingServiceImpl
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlientObo
@@ -20,7 +20,7 @@ import no.nav.etterlatte.behandling.manueltopphoer.RealManueltOpphoerService
 import no.nav.etterlatte.behandling.migrering.MigreringRepository
 import no.nav.etterlatte.behandling.omregning.MigreringService
 import no.nav.etterlatte.behandling.omregning.OmregningService
-import no.nav.etterlatte.behandling.revurdering.RealRevurderingService
+import no.nav.etterlatte.behandling.revurdering.RevurderingServiceImpl
 import no.nav.etterlatte.common.klienter.PdlKlientImpl
 import no.nav.etterlatte.common.klienter.SkjermingKlient
 import no.nav.etterlatte.databaseContext
@@ -135,7 +135,7 @@ class ApplicationContext(
     // Service
     val oppgaveService = OppgaveServiceImpl(oppgaveDao, featureToggleService)
 
-    val generellBehandlingService = RealGenerellBehandlingService(
+    val behandlingService = BehandlingServiceImpl(
         behandlingDao = behandlingDao,
         behandlingHendelser = behandlingsHendelser,
         hendelseDao = hendelseDao,
@@ -145,22 +145,23 @@ class ApplicationContext(
         featureToggleService = featureToggleService
     )
 
-    val foerstegangsbehandlingService =
-        RealFoerstegangsbehandlingService(
-            sakDao = sakDao,
-            behandlingDao = behandlingDao,
-            hendelseDao = hendelseDao,
-            behandlingHendelser = behandlingsHendelser,
-            featureToggleService = featureToggleService
-        )
-
     val revurderingService =
-        RealRevurderingService(
+        RevurderingServiceImpl(
             behandlingHendelser = behandlingsHendelser,
             featureToggleService = featureToggleService,
             behandlingDao = behandlingDao,
             hendelseDao = hendelseDao,
             grunnlagsendringshendelseDao = grunnlagsendringshendelseDao
+        )
+
+    val foerstegangsbehandlingService =
+        FoerstegangsbehandlingServiceImpl(
+            revurderingService = revurderingService,
+            sakDao = sakDao,
+            behandlingDao = behandlingDao,
+            hendelseDao = hendelseDao,
+            behandlingHendelser = behandlingsHendelser,
+            featureToggleService = featureToggleService
         )
 
     val manueltOpphoerService =
@@ -173,7 +174,7 @@ class ApplicationContext(
 
     val omregningService =
         OmregningService(
-            behandlingService = generellBehandlingService,
+            behandlingService = behandlingService,
             revurderingService = revurderingService
         )
 
@@ -190,7 +191,7 @@ class ApplicationContext(
     val grunnlagsendringshendelseService =
         GrunnlagsendringshendelseService(
             grunnlagsendringshendelseDao = grunnlagsendringshendelseDao,
-            generellBehandlingService = generellBehandlingService,
+            behandlingService = behandlingService,
             pdlKlient = pdlKlient,
             grunnlagKlient = grunnlagKlient,
             tilgangService = tilgangService,
@@ -198,14 +199,14 @@ class ApplicationContext(
         )
 
     val behandlingsStatusService =
-        BehandlingStatusServiceImpl(behandlingDao, generellBehandlingService, grunnlagsendringshendelseService)
+        BehandlingStatusServiceImpl(behandlingDao, behandlingService, grunnlagsendringshendelseService)
 
     val migreringService = MigreringService(
         sakService = sakService,
         foerstegangsBehandlingService = foerstegangsbehandlingService,
         behandlingsHendelser = behandlingsHendelser,
         migreringRepository = MigreringRepository(dataSource),
-        generellBehandlingService = generellBehandlingService
+        behandlingService = behandlingService
     )
 
     // Job

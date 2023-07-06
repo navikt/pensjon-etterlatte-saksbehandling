@@ -89,7 +89,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
         }
 
         val revurdering =
-            RealRevurderingService(
+            RevurderingServiceImpl(
                 hendelser,
                 featureToggleService,
                 applicationContext.behandlingDao,
@@ -140,7 +140,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
                 Tidspunkt.now().toLocalDatetimeUTC()
             )
         }
-        val revurderingService = RealRevurderingService(
+        val revurderingService = RevurderingServiceImpl(
             hendelser,
             featureToggleService,
             applicationContext.behandlingDao,
@@ -238,7 +238,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
         }
 
         assertNull(
-            RealRevurderingService(
+            RevurderingServiceImpl(
                 hendelser,
                 featureToggleService,
                 applicationContext.behandlingDao,
@@ -303,7 +303,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
         }
 
         val revurdering =
-            RealRevurderingService(
+            RevurderingServiceImpl(
                 hendelser,
                 featureToggleService,
                 applicationContext.behandlingDao,

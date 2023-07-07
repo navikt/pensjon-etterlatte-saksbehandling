@@ -16,7 +16,7 @@ export interface IDetaljertBehandling {
   soeknadMottattDato: string
   virkningstidspunkt: Virkningstidspunkt | null
   utenlandstilsnitt: IUtenlandstilsnitt | undefined
-  boddEllerArbeidetUtlandet: IBoddEllerArbeidetUtlandet | undefined
+  boddEllerArbeidetUtlandet: IBoddEllerArbeidetUtlandet | null
   status: IBehandlingStatus
   hendelser: IHendelse[]
   familieforhold?: IFamilieforhold

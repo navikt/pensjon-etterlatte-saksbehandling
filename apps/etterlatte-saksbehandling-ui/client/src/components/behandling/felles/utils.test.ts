@@ -146,7 +146,7 @@ const opprettBehandling = (
     soeknadMottattDato: '01-01-2023',
     virkningstidspunkt,
     utenlandstilsnitt: undefined,
-    boddEllerArbeidetUtlandet: undefined,
+    boddEllerArbeidetUtlandet: null,
     status: IBehandlingStatus.OPPRETTET,
     hendelser: [],
     behandlingType: IBehandlingsType.FØRSTEGANGSBEHANDLING,

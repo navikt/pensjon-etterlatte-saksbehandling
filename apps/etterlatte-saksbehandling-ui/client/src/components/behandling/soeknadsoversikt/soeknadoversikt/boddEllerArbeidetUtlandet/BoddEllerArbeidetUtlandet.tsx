@@ -5,11 +5,11 @@ import { useState } from 'react'
 import { LeggTilVurderingButton } from '../LeggTilVurderingButton'
 import { BoddEllerArbeidetUtlandetVurdering } from './BoddEllerArbeidetUtlandetVurdering'
 
-const statusIkon = (boddEllerArbeidetUtlandet: IBoddEllerArbeidetUtlandet | undefined) => {
-  if (boddEllerArbeidetUtlandet == undefined) {
-    return 'warning'
+const statusIkon = (boddEllerArbeidetUtlandet: IBoddEllerArbeidetUtlandet | null) => {
+  if (boddEllerArbeidetUtlandet) {
+    return 'success'
   }
-  return 'success'
+  return 'warning'
 }
 
 export const BoddEllerArbeidetUtlandet = ({
@@ -19,7 +19,7 @@ export const BoddEllerArbeidetUtlandet = ({
   behandling: IDetaljertBehandling
   redigerbar: boolean
 }) => {
-  const [vurdert, setVurdert] = useState(behandling.boddEllerArbeidetUtlandet !== undefined)
+  const [vurdert, setVurdert] = useState<boolean>(!!behandling.boddEllerArbeidetUtlandet)
 
   return (
     <LovtekstMedLenke tittel="Utenlandsopphold" hjemler={[]} status={statusIkon(behandling.boddEllerArbeidetUtlandet)}>

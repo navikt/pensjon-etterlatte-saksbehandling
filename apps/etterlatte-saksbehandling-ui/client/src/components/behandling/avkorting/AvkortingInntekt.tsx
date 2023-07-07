@@ -90,7 +90,12 @@ export const AvkortingInntekt = (props: {
       />
       <BodyShort>
         Omstillingsstønaden reduseres med 45 prosent av den gjenlevende sin inntekt som på årsbasis overstiger et halvt
-        grunnbeløp. Inntekt avrundes til nærmeste tusen.
+        grunnbeløp. Inntekt rundes ned til nærmeste tusen. Det er forventet årsinntekt for hvert kalenderår som skal
+        legges til grunn.
+      </BodyShort>
+      <BodyShort>
+        I innvilgelsesåret skal inntekt opptjent før innvilgelse trekkes fra, og resterende forventet inntekt omgjøres
+        til årsinntekt. På samme måte skal inntekt etter opphør holdes utenfor i opphørsåret.
       </BodyShort>
 
       {props.avkortingGrunnlag && props.avkortingGrunnlag.length > 0 && (
@@ -99,8 +104,7 @@ export const AvkortingInntekt = (props: {
             <Table.Header>
               <Table.HeaderCell>Forventet inntekt</Table.HeaderCell>
               <Table.HeaderCell>Fratrekk inn år</Table.HeaderCell>
-              <Table.HeaderCell>F.o.m dato</Table.HeaderCell>
-              <Table.HeaderCell>T.o.m dato</Table.HeaderCell>
+              <Table.HeaderCell>Periode</Table.HeaderCell>
               <Table.HeaderCell>Spesifikasjon av inntekt</Table.HeaderCell>
               <Table.HeaderCell>Kilde</Table.HeaderCell>
             </Table.Header>
@@ -109,8 +113,10 @@ export const AvkortingInntekt = (props: {
                 <Table.Row key={index}>
                   <Table.DataCell key="Inntekt">{inntektsgrunnlag.aarsinntekt}</Table.DataCell>
                   <Table.DataCell key="FratrekkInnUt">{inntektsgrunnlag.fratrekkInnAar}</Table.DataCell>
-                  <Table.DataCell key="InntektFom">{inntektsgrunnlag.fom}</Table.DataCell>
-                  <Table.DataCell key="InntektTom">{inntektsgrunnlag.tom}</Table.DataCell>
+                  <Table.DataCell key="Periode">
+                    {inntektsgrunnlag.fom && formaterStringDato(inntektsgrunnlag.fom)} -
+                    {inntektsgrunnlag.tom && formaterStringDato(inntektsgrunnlag.tom)}
+                  </Table.DataCell>
                   <Table.DataCell key="InntektSpesifikasjon">{inntektsgrunnlag.spesifikasjon}</Table.DataCell>
                   <Table.DataCell key="InntektKilde">
                     {inntektsgrunnlag.kilde && (

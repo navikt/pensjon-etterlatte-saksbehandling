@@ -21,6 +21,7 @@ export interface IAvkortingGrunnlag {
 export interface IAvkortetYtelse {
   fom: string
   tom: string
+  ytelseFoerAvkorting: number
   avkortingsbeloep: number
   restanse: number
   ytelseEtterAvkorting: number

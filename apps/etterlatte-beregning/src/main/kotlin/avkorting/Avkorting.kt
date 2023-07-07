@@ -19,19 +19,22 @@ data class Avkorting(
     fun kopierAvkorting(virkningstidspunkt: YearMonth): Avkorting = Avkorting(
         avkortingGrunnlag = avkortingGrunnlag.map { it.copy(id = UUID.randomUUID()) },
         aarsoppgjoer = Aarsoppgjoer(
-            tidligereAvkortetYtelse = aarsoppgjoer.tidligereAvkortetYtelse + avkortetYtelse.map {
-                when (it.periode.tom) {
-                    null -> it.copy(
-                        type = AvkortetYtelseType.TIDLIGERE,
-                        periode = Periode(fom = it.periode.fom, tom = virkningstidspunkt.minusMonths(1))
-                    )
+            tidligereAvkortetYtelse = aarsoppgjoer.tidligereAvkortetYtelse.map { it.copy(id = UUID.randomUUID()) } +
+                    avkortetYtelse.map {
+                        when (it.periode.tom) {
+                            null -> it.copy(
+                                id = UUID.randomUUID(),
+                                type = AvkortetYtelseType.TIDLIGERE,
+                                periode = Periode(fom = it.periode.fom, tom = virkningstidspunkt.minusMonths(1))
+                            )
 
-                    else -> it.copy(
-                        type = AvkortetYtelseType.TIDLIGERE
-                    )
-                }
-            },
-            ytelseFoerAvkorting = aarsoppgjoer.ytelseFoerAvkorting,
+                            else -> it.copy(
+                                id = UUID.randomUUID(),
+                                type = AvkortetYtelseType.TIDLIGERE
+                            )
+                        }
+                    },
+            ytelseFoerAvkorting = aarsoppgjoer.ytelseFoerAvkorting.map { it },
         ),
     )
 
@@ -201,6 +204,7 @@ data class AvkortetYtelse(
     val regelResultat: JsonNode,
     val kilde: Grunnlagsopplysning.RegelKilde
 )
+
 enum class AvkortetYtelseType { NY, TIDLIGERE, REBEREGNET }
 
 fun Beregning.mapTilYtelseFoerAvkorting() = beregningsperioder.map {

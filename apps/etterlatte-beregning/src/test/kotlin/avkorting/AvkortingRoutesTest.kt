@@ -116,6 +116,7 @@ class AvkortingRoutesTest {
                 AvkortetYtelseDto(
                     fom = dato.atDay(1),
                     tom = dato.atEndOfMonth(),
+                    ytelseFoerAvkorting = 300,
                     avkortingsbeloep = 200,
                     ytelseEtterAvkorting = 50,
                     restanse = 50

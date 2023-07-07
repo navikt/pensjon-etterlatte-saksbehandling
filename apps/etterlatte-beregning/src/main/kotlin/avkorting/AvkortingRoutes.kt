@@ -82,6 +82,7 @@ fun AvkortingGrunnlag.toDto() = AvkortingGrunnlagDto(
 fun AvkortetYtelse.toDto() = AvkortetYtelseDto(
     fom = periode.fom.atDay(1),
     tom = periode.tom?.atEndOfMonth(),
+    ytelseFoerAvkorting = ytelseFoerAvkorting,
     avkortingsbeloep = avkortingsbeloep,
     restanse = restanse,
     ytelseEtterAvkorting = ytelseEtterAvkorting

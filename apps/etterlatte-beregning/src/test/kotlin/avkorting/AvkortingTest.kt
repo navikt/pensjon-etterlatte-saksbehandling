@@ -87,14 +87,20 @@ internal class AvkortingTest {
             with(avkorting.kopierAvkorting(virkningstidspunkt).aarsoppgjoer) {
                 tidligereAvkortetYtelse.size shouldBe 2
                 tidligereAvkortetYtelse[0].asClue {
-                    it shouldBe avkorting.aarsoppgjoer.tidligereAvkortetYtelse[0]
+                    it.shouldBeEqualToIgnoringFields(
+                        avkorting.aarsoppgjoer.tidligereAvkortetYtelse[0],
+                        AvkortetYtelse::id,
+                    )
+                    it.id shouldNotBe avkorting.aarsoppgjoer.tidligereAvkortetYtelse[0].id
                 }
                 tidligereAvkortetYtelse[1].asClue {
                     it.shouldBeEqualToIgnoringFields(
                         avkorting.avkortetYtelse[0],
+                        AvkortetYtelse::id,
                         AvkortetYtelse::periode,
                         AvkortetYtelse::type
                     )
+                    it.id shouldNotBe avkorting.avkortetYtelse[0].id
                     it.periode shouldBe Periode(YearMonth.of(2023, 2), virkningstidspunkt.minusMonths(1))
                     it.type shouldBe AvkortetYtelseType.TIDLIGERE
                 }

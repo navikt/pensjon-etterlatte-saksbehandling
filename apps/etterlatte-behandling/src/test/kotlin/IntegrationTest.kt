@@ -401,23 +401,22 @@ class IntegrationTest : BehandlingIntegrationTest() {
         kotlin.runCatching { sleep(3000) }
         assertNotNull(behandlingOpprettet)
         val rapid = applicationContext.rapid as TestProdusent
-        assertEquals(5, rapid.publiserteMeldinger.size)
+        assertEquals(4, rapid.publiserteMeldinger.size)
         assertEquals(
             "BEHANDLING:OPPRETTET",
             objectMapper.readTree(rapid.publiserteMeldinger.first().verdi)["@event_name"].textValue()
         )
-        assertEquals("SOEKER_PDL_V1", objectMapper.readTree(rapid.publiserteMeldinger[1].verdi)["@behov"].textValue())
         assertEquals(
             "BEHANDLING:OPPRETTET",
-            objectMapper.readTree(rapid.publiserteMeldinger[2].verdi)["@event_name"].textValue()
+            objectMapper.readTree(rapid.publiserteMeldinger[1].verdi)["@event_name"].textValue()
         )
         assertEquals(
             "BEHANDLING:AVBRUTT",
-            objectMapper.readTree(rapid.publiserteMeldinger[3].verdi)["@event_name"].textValue()
+            objectMapper.readTree(rapid.publiserteMeldinger[2].verdi)["@event_name"].textValue()
         )
         assertEquals(
             "BEHANDLING:OPPRETTET",
-            objectMapper.readTree(rapid.publiserteMeldinger[4].verdi)["@event_name"].textValue()
+            objectMapper.readTree(rapid.publiserteMeldinger[3].verdi)["@event_name"].textValue()
         )
         applicationContext.dataSource.connection.use {
             HendelseDao { it }.finnHendelserIBehandling(behandlingOpprettet!!).also { println(it) }

@@ -14,11 +14,9 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.opplysningsbehov.Opplysningsbehov
 
 interface GrunnlagKlient {
-
     suspend fun hentGrunnlag(sakId: Long): Grunnlag?
     suspend fun hentAlleSakIder(fnr: String): Set<Long>
     suspend fun hentPersonSakOgRolle(fnr: String): PersonMedSakerOgRoller
-
     suspend fun leggInnNyttGrunnlag(opplysningsbehov: Opplysningsbehov)
 }
 

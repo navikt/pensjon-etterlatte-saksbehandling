@@ -65,7 +65,9 @@ internal class FoerstegangsbehandlingServiceImplTest {
     private val behandlingHendelserKafkaProducerMock = mockk<BehandlingHendelserKafkaProducer>()
     private val featureToggleService = mockk<FeatureToggleService>()
     private val grunnlagsendringshendelseDao = mockk<GrunnlagsendringshendelseDao>()
+    private val grunnlagService = mockk<GrunnlagService>()
     private val revurderingService = RevurderingServiceImpl(
+        grunnlagService,
         behandlingHendelserKafkaProducerMock,
         featureToggleService,
         behandlingDaoMock,
@@ -74,6 +76,7 @@ internal class FoerstegangsbehandlingServiceImplTest {
     )
     private val naaTid = Tidspunkt.now()
     private val behandlingsService = FoerstegangsbehandlingServiceImpl(
+        grunnlagService,
         revurderingService,
         sakDaoMock,
         behandlingDaoMock,
@@ -207,6 +210,7 @@ internal class FoerstegangsbehandlingServiceImplTest {
         every { behandlingDaoMock.alleBehandlingerISak(any()) } returns listOf(opprettetBehandling)
         every { behandlingDaoMock.lagreStatus(any(), any(), any()) } returns Unit
         every { behandlingHendelserKafkaProducerMock.sendMeldingForHendelse(any(), any()) } returns Unit
+        every { grunnlagService.leggInnNyttGrunnlag(any()) } returns Unit
 
         val resultat = behandlingsService.opprettBehandling(
             1,
@@ -232,6 +236,7 @@ internal class FoerstegangsbehandlingServiceImplTest {
             behandlingDaoMock.alleBehandlingerISak(any())
             behandlingDaoMock.lagreStatus(any(), any(), any())
             behandlingHendelserKafkaProducerMock.sendMeldingForHendelse(any(), BehandlingHendelseType.OPPRETTET)
+            grunnlagService.leggInnNyttGrunnlag(any())
         }
     }
 
@@ -289,7 +294,7 @@ internal class FoerstegangsbehandlingServiceImplTest {
         every { behandlingDaoMock.alleBehandlingerISak(any()) } returns emptyList()
         every { hendelseDaoMock.behandlingOpprettet(any()) } returns Unit
         every { behandlingHendelserKafkaProducerMock.sendMeldingForHendelse(any(), any()) } returns Unit
-
+        every { grunnlagService.leggInnNyttGrunnlag(any()) } returns Unit
         val foerstegangsbehandling = behandlingsService.opprettBehandling(
             1,
             persongalleri,
@@ -306,6 +311,7 @@ internal class FoerstegangsbehandlingServiceImplTest {
             hendelseDaoMock.behandlingOpprettet(any())
             behandlingDaoMock.alleBehandlingerISak(any())
             behandlingHendelserKafkaProducerMock.sendMeldingForHendelse(any(), any())
+            grunnlagService.leggInnNyttGrunnlag(any())
         }
     }
 
@@ -368,6 +374,7 @@ internal class FoerstegangsbehandlingServiceImplTest {
         every { behandlingDaoMock.lagreStatus(any(), any(), any()) } returns Unit
         every { hendelseDaoMock.behandlingOpprettet(any()) } returns Unit
         every { behandlingHendelserKafkaProducerMock.sendMeldingForHendelse(any(), any()) } returns Unit
+        every { grunnlagService.leggInnNyttGrunnlag(any()) } returns Unit
 
         val foerstegangsbehandling = behandlingsService.opprettBehandling(
             1,
@@ -397,6 +404,7 @@ internal class FoerstegangsbehandlingServiceImplTest {
             hendelseDaoMock.behandlingOpprettet(any())
             behandlingDaoMock.alleBehandlingerISak(any())
             behandlingHendelserKafkaProducerMock.sendMeldingForHendelse(any(), any())
+            grunnlagService.leggInnNyttGrunnlag(any())
         }
         verify {
             behandlingDaoMock.lagreStatus(any(), BehandlingStatus.AVBRUTT, any())
@@ -462,7 +470,7 @@ internal class FoerstegangsbehandlingServiceImplTest {
         every { behandlingDaoMock.lagreStatus(any(), any(), any()) } returns Unit
         every { hendelseDaoMock.behandlingOpprettet(any()) } returns Unit
         every { behandlingHendelserKafkaProducerMock.sendMeldingForHendelse(any(), any()) } returns Unit
-        every { behandlingHendelserKafkaProducerMock.leggInnNyttGrunnlag(any()) } returns Unit
+        every { grunnlagService.leggInnNyttGrunnlag(any()) } returns Unit
 
         val foerstegangsbehandling = behandlingsService.opprettBehandling(
             1,
@@ -522,7 +530,7 @@ internal class FoerstegangsbehandlingServiceImplTest {
         )
         assertTrue(revurderingsBehandling is Revurdering)
         verify {
-            behandlingHendelserKafkaProducerMock.leggInnNyttGrunnlag(any())
+            grunnlagService.leggInnNyttGrunnlag(any())
         }
         verify(exactly = 2) {
             sakDaoMock.hentSak(any())

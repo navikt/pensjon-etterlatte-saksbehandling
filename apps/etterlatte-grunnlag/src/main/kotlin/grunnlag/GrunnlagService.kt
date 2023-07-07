@@ -141,11 +141,11 @@ class RealGrunnlagService(
 
             val requesterGjenlevende = persongalleri.gjenlevende.map {
                 Pair(
-                    async { pdltjenesterKlient.hentPerson(it, PersonRolle.AVDOED, opplysningsbehov.sakType) },
+                    async { pdltjenesterKlient.hentPerson(it, PersonRolle.GJENLEVENDE, opplysningsbehov.sakType) },
                     async {
                         pdltjenesterKlient.hentOpplysningsperson(
                             it,
-                            PersonRolle.AVDOED,
+                            PersonRolle.GJENLEVENDE,
                             opplysningsbehov.sakType
                         )
                     }
@@ -174,8 +174,9 @@ class RealGrunnlagService(
             val gjenlevendePersonInfo = requesterGjenlevende.map {
                 GrunnlagsopplysningerPersonPdl(it.first.await(), it.second.await(), Opplysningstype.AVDOED_PDL_V1)
             }
-            avdoedePersonInfo + gjenlevendePersonInfo + listOf(soekerPersonInfo)
+            avdoedePersonInfo + gjenlevendePersonInfo.plus(soekerPersonInfo)
         }
+
         pdlPersondatasGrunnlag.forEach {
             val enkenPdlOpplysning = lagEnkelopplysningerFraPDL(
                 it.person,

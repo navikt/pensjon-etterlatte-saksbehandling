@@ -90,6 +90,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
 
         val revurdering =
             RevurderingServiceImpl(
+                applicationContext.grunnlagService,
                 hendelser,
                 featureToggleService,
                 applicationContext.behandlingDao,
@@ -141,6 +142,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
             )
         }
         val revurderingService = RevurderingServiceImpl(
+            applicationContext.grunnlagService,
             hendelser,
             featureToggleService,
             applicationContext.behandlingDao,
@@ -239,6 +241,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
 
         assertNull(
             RevurderingServiceImpl(
+                applicationContext.grunnlagService,
                 hendelser,
                 featureToggleService,
                 applicationContext.behandlingDao,
@@ -304,6 +307,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
 
         val revurdering =
             RevurderingServiceImpl(
+                applicationContext.grunnlagService,
                 hendelser,
                 featureToggleService,
                 applicationContext.behandlingDao,

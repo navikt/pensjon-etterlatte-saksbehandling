@@ -8,6 +8,7 @@ import no.nav.etterlatte.behandling.BehandlingServiceImpl
 import no.nav.etterlatte.behandling.BehandlingStatusServiceImpl
 import no.nav.etterlatte.behandling.BehandlingsHendelserKafkaProducerImpl
 import no.nav.etterlatte.behandling.EnhetServiceImpl
+import no.nav.etterlatte.behandling.GrunnlagService
 import no.nav.etterlatte.behandling.foerstegangsbehandling.FoerstegangsbehandlingServiceImpl
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
@@ -133,6 +134,7 @@ class ApplicationContext(
     val behandlingsHendelser = BehandlingsHendelserKafkaProducerImpl(rapid)
 
     // Service
+    val grunnlagService = GrunnlagService(grunnlagKlient)
     val oppgaveService = OppgaveServiceImpl(oppgaveDao, featureToggleService)
 
     val behandlingService = BehandlingServiceImpl(
@@ -145,9 +147,10 @@ class ApplicationContext(
         featureToggleService = featureToggleService
     )
 
+    val grunnlagsService = GrunnlagService(grunnlagKlient = grunnlagKlient)
     val revurderingService =
         RevurderingServiceImpl(
-            grunnlagKlient = grunnlagKlient,
+            grunnlagService = grunnlagsService,
             behandlingHendelser = behandlingsHendelser,
             featureToggleService = featureToggleService,
             behandlingDao = behandlingDao,
@@ -157,6 +160,7 @@ class ApplicationContext(
 
     val foerstegangsbehandlingService =
         FoerstegangsbehandlingServiceImpl(
+            grunnlagService = grunnlagsService,
             revurderingService = revurderingService,
             sakDao = sakDao,
             behandlingDao = behandlingDao,

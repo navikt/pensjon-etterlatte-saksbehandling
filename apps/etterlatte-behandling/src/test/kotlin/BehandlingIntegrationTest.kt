@@ -4,6 +4,7 @@ import com.typesafe.config.ConfigFactory
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.respond
+import io.ktor.client.engine.mock.respondOk
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.header
@@ -165,6 +166,8 @@ abstract class BehandlingIntegrationTest {
                         setOf(1).toJson(),
                         headers = headers
                     )
+                } else if (request.url.fullPath.endsWith("/oppdatergrunnlagforbehandling")) {
+                    respondOk()
                 } else {
                     error(request.url.fullPath)
                 }

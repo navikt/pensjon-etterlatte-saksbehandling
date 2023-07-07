@@ -47,12 +47,7 @@ internal class BesvarOpplysningsbehov(
                 val saktype = objectMapper.treeToValue(packet["sakType"], SakType::class.java)
                 val person = pdlKlientInterface.hentPerson(fnr, personRolle, saktype)
                 val opplysningsperson = pdlKlientInterface.hentOpplysningsperson(fnr, personRolle, saktype)
-                val lagEnkelopplysningerFraPDL = lagEnkelopplysningerFraPDL(
-                    person = person,
-                    personDTO = opplysningsperson,
-                    opplysningstype = opplysningstype,
-                    fnr = Folkeregisteridentifikator.of(fnr)
-                )
+
                 packet["opplysning"] = lagEnkelopplysningerFraPDL(
                     person = person,
                     personDTO = opplysningsperson,

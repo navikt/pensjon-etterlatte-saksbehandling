@@ -4,6 +4,7 @@ import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.BehandlingHendelseType
 import no.nav.etterlatte.behandling.BehandlingHendelserKafkaProducer
+import no.nav.etterlatte.behandling.GrunnlagService
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.domain.OpprettBehandling
@@ -68,6 +69,7 @@ interface FoerstegangsbehandlingService {
 }
 
 class FoerstegangsbehandlingServiceImpl(
+    private val grunnlagService: GrunnlagService,
     private val revurderingService: RevurderingService,
     private val sakDao: SakDao,
     private val behandlingDao: BehandlingDao,
@@ -156,6 +158,7 @@ class FoerstegangsbehandlingServiceImpl(
                 hentBehandling(opprettBehandling.id)
             }.also { behandling ->
                 behandling?.let {
+                    grunnlagService.leggInnNyttGrunnlag(it)
                     behandlingHendelser.sendMeldingForHendelse(it, BehandlingHendelseType.OPPRETTET)
                 }
             }

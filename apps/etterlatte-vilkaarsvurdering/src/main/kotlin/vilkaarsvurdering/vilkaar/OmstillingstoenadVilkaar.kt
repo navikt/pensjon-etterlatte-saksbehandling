@@ -1,5 +1,6 @@
 package no.nav.etterlatte.vilkaarsvurdering.vilkaar
 
+import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
 import no.nav.etterlatte.libs.common.grunnlag.hentSoeknadMottattDato
@@ -22,6 +23,14 @@ object OmstillingstoenadVilkaar {
         aktivitetEtter6Maaneder(grunnlag),
         oevrigeVilkaar()
     )
+
+    fun loependeVilkaarForRevurdering(grunnlag: Grunnlag, revurderingAarsak: RevurderingAarsak): List<Vilkaar> =
+        when (revurderingAarsak) {
+            RevurderingAarsak.REGULERING, RevurderingAarsak.INNTEKTSENDRING -> emptyList()
+            RevurderingAarsak.DOEDSFALL -> listOf(etterlatteLever())
+            RevurderingAarsak.SIVILSTAND, RevurderingAarsak.BARN -> listOf(etterlatteSivilstand())
+            else -> throw Exception("Ugyldig revurderingsårsak $revurderingAarsak for behandling")
+        }
 
     private fun etterlatteLever() = Vilkaar(
         hovedvilkaar = Delvilkaar(

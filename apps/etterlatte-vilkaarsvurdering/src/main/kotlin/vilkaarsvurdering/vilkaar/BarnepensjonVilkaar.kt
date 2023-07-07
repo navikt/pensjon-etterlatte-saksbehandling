@@ -1,5 +1,6 @@
 package no.nav.etterlatte.vilkaarsvurdering.vilkaar
 
+import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Opplysning
@@ -25,6 +26,20 @@ object BarnepensjonVilkaar {
         barnetsMedlemskap(),
         avdoedesForutgaaendeMedlemskap()
     )
+
+    fun vilkaarForRevurdering(grunnlag: Grunnlag, revurderingAarsak: RevurderingAarsak): List<Vilkaar> =
+        when (revurderingAarsak) {
+            RevurderingAarsak.REGULERING,
+            RevurderingAarsak.BARN,
+            RevurderingAarsak.ANSVARLIGE_FORELDRE,
+            RevurderingAarsak.NY_SOEKNAD,
+            RevurderingAarsak.UTLAND,
+            RevurderingAarsak.SOESKENJUSTERING -> emptyList()
+            RevurderingAarsak.ADOPSJON -> listOf(doedsfallForelder())
+            RevurderingAarsak.OMGJOERING_AV_FARSKAP -> listOf(doedsfallForelder())
+            RevurderingAarsak.DOEDSFALL -> listOf(formaal())
+            else -> throw Exception("Ugyldig revurderingsårsak $revurderingAarsak for behandling")
+        }
 
     private fun formaal() = Vilkaar(
         Delvilkaar(

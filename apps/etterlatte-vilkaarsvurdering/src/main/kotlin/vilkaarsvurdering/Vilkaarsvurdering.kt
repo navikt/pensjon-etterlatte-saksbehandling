@@ -20,7 +20,7 @@ data class Vilkaarsvurdering(
     fun toDto() = VilkaarsvurderingDto(
         behandlingId = this.behandlingId,
         virkningstidspunkt = this.virkningstidspunkt,
-        vilkaar = this.vilkaar,
+        vilkaar = this.vilkaar.filterNot { it.kopiert }, // TODO finne noe smartere her?
         resultat = this.resultat
     )
 }

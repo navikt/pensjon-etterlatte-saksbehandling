@@ -5,6 +5,7 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
+import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
@@ -123,7 +124,6 @@ class VilkaarsvurderingService(
             }
 
             val (behandling, grunnlag) = hentDataForVilkaarsvurdering(behandlingId, brukerTokenInfo)
-
             val virkningstidspunkt = behandling.virkningstidspunkt
                 ?: throw VirkningstidspunktIkkeSattException(behandlingId)
 
@@ -134,16 +134,14 @@ class VilkaarsvurderingService(
 
             when (behandling.behandlingType) {
                 BehandlingType.FØRSTEGANGSBEHANDLING -> {
-                    val vilkaar = finnVilkaarForNyVilkaarsvurdering(
-                        grunnlag,
-                        virkningstidspunkt,
-                        behandling.behandlingType,
-                        behandling.sakType
-                    )
                     vilkaarsvurderingRepository.opprettVilkaarsvurdering(
                         Vilkaarsvurdering(
                             behandlingId = behandlingId,
-                            vilkaar = vilkaar,
+                            vilkaar = vilkaarFoerstegangsbehandling(
+                                grunnlag,
+                                virkningstidspunkt,
+                                behandling.sakType
+                            ),
                             virkningstidspunkt = virkningstidspunkt.dato,
                             grunnlagVersjon = grunnlag.metadata.versjon
                         )
@@ -156,7 +154,42 @@ class VilkaarsvurderingService(
                         behandling.sak,
                         brukerTokenInfo
                     )
-                    kopierVilkaarsvurdering(behandlingId, sisteIverksatteBehandling.id, brukerTokenInfo)
+
+                    val forrigeVilkaarsvurdering = vilkaarsvurderingRepository.hent(sisteIverksatteBehandling.id)
+                        ?: throw NullPointerException(
+                            "Fant ikke vilkårsvurdering fra behandling ${sisteIverksatteBehandling.id}"
+                        )
+
+                    val vilkaar = vilkaarForRevurdering(
+                        behandling.sakType,
+                        behandling.revurderingsaarsak!!,
+                        grunnlag,
+                        forrigeVilkaarsvurdering.vilkaar.kopier()
+                    )
+
+                    val ingenVilkaarTilVurdering = vilkaar.all { it.kopiert }
+
+                    val vilkaarsvurdering = vilkaarsvurderingRepository.kopierVilkaarsvurdering(
+                        nyVilkaarsvurdering = Vilkaarsvurdering(
+                            behandlingId = behandlingId,
+                            vilkaar = vilkaar,
+                            virkningstidspunkt = virkningstidspunkt.dato,
+                            grunnlagVersjon = grunnlag.metadata.versjon,
+                            resultat = if (ingenVilkaarTilVurdering) forrigeVilkaarsvurdering.resultat else null
+                        ),
+                        kopiertFraId = forrigeVilkaarsvurdering.id
+                    )
+
+                    if (ingenVilkaarTilVurdering) {
+                        runBlocking {
+                            behandlingKlient.settBehandlingStatusVilkaarsvurdert(
+                                behandlingId,
+                                brukerTokenInfo
+                            )
+                        }
+                    }
+
+                    vilkaarsvurdering
                 }
 
                 BehandlingType.MANUELT_OPPHOER -> throw RuntimeException(
@@ -165,32 +198,45 @@ class VilkaarsvurderingService(
             }
         }
 
-    private fun finnVilkaarForNyVilkaarsvurdering(
+    private fun vilkaarForRevurdering(
+        sakType: SakType,
+        revurderingsaarsak: RevurderingAarsak,
+        grunnlag: Grunnlag,
+        vilkaarForrigeBehandling: List<Vilkaar>
+    ): List<Vilkaar> = when (sakType) {
+        SakType.OMSTILLINGSSTOENAD -> slaaSammenVilkaar(
+            vilkaarForrigeBehandling = vilkaarForrigeBehandling,
+            vilkaarForRevurdering = OmstillingstoenadVilkaar.loependeVilkaarForRevurdering(grunnlag, revurderingsaarsak)
+        )
+        SakType.BARNEPENSJON -> slaaSammenVilkaar(
+            vilkaarForrigeBehandling = vilkaarForrigeBehandling,
+            vilkaarForRevurdering = BarnepensjonVilkaar.vilkaarForRevurdering(grunnlag, revurderingsaarsak)
+        )
+    }
+
+    /**
+     * Slår sammen tidligere vurderte vilkår og nye vilkår. Dersom hovedvilkårtype er lik,
+     * slettes tidligere vurdert vilkår.
+     */
+    private fun slaaSammenVilkaar(
+        vilkaarForrigeBehandling: List<Vilkaar>,
+        vilkaarForRevurdering: List<Vilkaar>
+    ): List<Vilkaar> {
+        return (vilkaarForrigeBehandling + vilkaarForRevurdering)
+            .groupBy { it.hovedvilkaar.type }
+            .mapValues { (_, values) -> if (values.size > 1) values.filterNot { it.kopiert } else values }
+            .flatMap { it.value }
+    }
+
+    private fun vilkaarFoerstegangsbehandling(
         grunnlag: Grunnlag,
         virkningstidspunkt: Virkningstidspunkt,
-        behandlingType: BehandlingType,
         sakType: SakType
     ): List<Vilkaar> = when (sakType) {
         SakType.BARNEPENSJON ->
-            when (behandlingType) {
-                BehandlingType.FØRSTEGANGSBEHANDLING,
-                BehandlingType.REVURDERING -> BarnepensjonVilkaar.inngangsvilkaar(grunnlag, virkningstidspunkt)
-
-                BehandlingType.MANUELT_OPPHOER -> throw IllegalArgumentException(
-                    "Støtter ikke vilkårsvurdering for behandlingType=$behandlingType"
-                )
-            }
-
+            BarnepensjonVilkaar.inngangsvilkaar(grunnlag, virkningstidspunkt)
         SakType.OMSTILLINGSSTOENAD ->
-            when (behandlingType) {
-                BehandlingType.FØRSTEGANGSBEHANDLING ->
-                    OmstillingstoenadVilkaar.inngangsvilkaar(grunnlag)
-
-                BehandlingType.REVURDERING,
-                BehandlingType.MANUELT_OPPHOER -> throw IllegalArgumentException(
-                    "Støtter ikke vilkårsvurdering for behandlingType=$behandlingType"
-                )
-            }
+            OmstillingstoenadVilkaar.inngangsvilkaar(grunnlag)
     }
 
     private suspend fun tilstandssjekkFoerKjoering(

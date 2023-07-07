@@ -21,10 +21,16 @@ data class Vilkaar(
     val unntaksvilkaar: List<Delvilkaar> = emptyList(),
     val vurdering: VilkaarVurderingData? = null,
     val grunnlag: List<Vilkaarsgrunnlag<out Any?>> = emptyList(),
+    val kopiert: Boolean = false,
     val id: UUID = UUID.randomUUID()
 )
 
-fun List<Vilkaar>.kopier() = this.map { it.copy(id = UUID.randomUUID()) }
+fun List<Vilkaar>.kopier() = this.map {
+    it.copy(
+        id = UUID.randomUUID(),
+        kopiert = true
+    )
+}
 
 data class Delvilkaar(
     val type: VilkaarType,

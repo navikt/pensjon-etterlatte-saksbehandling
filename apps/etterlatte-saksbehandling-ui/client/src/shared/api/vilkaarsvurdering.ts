@@ -35,6 +35,7 @@ export interface IVilkaarsvurdering {
   vilkaar: Vilkaar[]
   resultat?: VilkaarsvurderingVurdertResultat
   virkningstidspunkt: string
+  isYrkesskade: boolean
 }
 
 export interface Vilkaar {

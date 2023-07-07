@@ -1,3 +1,4 @@
+import { BodyShort } from '@navikt/ds-react'
 import styled from 'styled-components'
 import { LovtekstMedLenke } from '~components/behandling/soeknadsoversikt/soeknadoversikt/LovtekstMedLenke'
 
@@ -15,15 +16,15 @@ const Trygdetid = () => {
         status={null}
       >
         <TrygdetidInfo>
-          <p>
+          <BodyShort>
             Trygdetiden er minst 40 år som følge av faktisk trygdetid og fremtidig trygdetid. Faktisk trygdetid er den
             tiden fra avdøde fylte 16 til personen døde. Fremtidig trygdetid er tiden fra dødsfallet til og med
             kalenderåret avdøde hadde blitt 66 år. Saksbehandler bekrefter at følgende stemmer for denne behandlingen
             ved å gå videre til beregning:
-          </p>
-          <p>
+          </BodyShort>
+          <BodyShort>
             Trygdetid: <strong>40 år</strong>
-          </p>
+          </BodyShort>
         </TrygdetidInfo>
       </LovtekstMedLenke>
     </TrygdetidWrapper>

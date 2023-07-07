@@ -73,12 +73,12 @@ class Opplysningsbolk(private val fnr: Folkeregisteridentifikator, private val i
 fun lagEnkelopplysningerFraPDL(
     person: Person,
     personDTO: PersonDTO,
-    opplysningsbehov: Opplysningstype, // AVDOED_PDL_V1 || SOEKER_PDL_V1 || GJENLEVENDE_PDL_V1 || MIGRERING
+    opplysningstype: Opplysningstype, // AVDOED_PDL_V1 || SOEKER_PDL_V1 || GJENLEVENDE_PDL_V1 || MIGRERING
     fnr: Folkeregisteridentifikator
 ): List<Grunnlagsopplysning<*>> {
     val tidspunktForInnhenting = Tidspunkt.now()
     val opplysningsbolk = Opplysningsbolk(fnr, tidspunktForInnhenting)
-    val personRolle = behovNameTilPersonRolle(opplysningsbehov)
+    val personRolle = behovNameTilPersonRolle(opplysningstype)
 
     val opplysningNavn =
         OpplysningDTO(
@@ -107,7 +107,7 @@ fun lagEnkelopplysningerFraPDL(
         leggTilOpplysninger(BOSTEDSADRESSE, personDTO.bostedsadresse)
     }
 
-    val gammalGrunnlagsopplysning = lagPdlOpplysning(opplysningsbehov, person, tidspunktForInnhenting)
+    val gammalGrunnlagsopplysning = lagPdlOpplysning(opplysningstype, person, tidspunktForInnhenting)
 
     return opplysningsbolk.hentOpplysninger() + gammalGrunnlagsopplysning
 }

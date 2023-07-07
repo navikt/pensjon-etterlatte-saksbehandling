@@ -123,7 +123,7 @@ class RealGrunnlagService(
     }
 
     override suspend fun oppdaterGrunnlag(opplysningsbehov: Opplysningsbehov) {
-        coroutineScope {
+        val pdlPersondatasGrunnlag = coroutineScope {
             val persongalleri = opplysningsbehov.persongalleri
             val sakType = opplysningsbehov.sakType
             val requesterAvdoed = persongalleri.avdoed.map {
@@ -163,14 +163,27 @@ class RealGrunnlagService(
                 }
             )
             val soekerPersonInfo =
-                GrunnlagsopplysningPersonPdl(soeker.first.await(), soeker.second.await(), Opplysningstype.SOEKER_PDL_V1)
+                GrunnlagsopplysningerPersonPdl(
+                    soeker.first.await(),
+                    soeker.second.await(),
+                    Opplysningstype.SOEKER_PDL_V1
+                )
             val avdoedePersonInfo = requesterAvdoed.map {
-                GrunnlagsopplysningPersonPdl(it.first.await(), it.second.await(), Opplysningstype.AVDOED_PDL_V1)
+                GrunnlagsopplysningerPersonPdl(it.first.await(), it.second.await(), Opplysningstype.AVDOED_PDL_V1)
             }
             val gjenlevendePersonInfo = requesterGjenlevende.map {
-                GrunnlagsopplysningPersonPdl(it.first.await(), it.second.await(), Opplysningstype.AVDOED_PDL_V1)
+                GrunnlagsopplysningerPersonPdl(it.first.await(), it.second.await(), Opplysningstype.AVDOED_PDL_V1)
             }
-            // TODO: gjøre noe ala lagEnkelopplysningerFraPDL for alle her...
+            avdoedePersonInfo + gjenlevendePersonInfo + listOf(soekerPersonInfo)
+        }
+        pdlPersondatasGrunnlag.forEach {
+            val enkenPdlOpplysning = lagEnkelopplysningerFraPDL(
+                it.person,
+                it.personDto,
+                it.opplysningstype,
+                it.personDto.foedselsnummer.verdi
+            )
+            lagreNyePersonopplysninger(opplysningsbehov.sakid, it.personDto.foedselsnummer.verdi, enkenPdlOpplysning)
         }
     }
 
@@ -260,7 +273,7 @@ class RealGrunnlagService(
     )
 }
 
-data class GrunnlagsopplysningPersonPdl(
+data class GrunnlagsopplysningerPersonPdl(
     val person: Person,
     val personDto: PersonDTO,
     val opplysningstype: Opplysningstype

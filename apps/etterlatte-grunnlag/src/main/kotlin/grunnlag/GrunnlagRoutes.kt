@@ -68,20 +68,6 @@ fun Route.grunnlagRoute(grunnlagService: GrunnlagService, behandlingKlient: Beha
             kunSystembruker {
                 val opplysningsbehov = call.receive<Opplysningsbehov>()
                 grunnlagService.oppdaterGrunnlag(opplysningsbehov)
-                    /*
-                denne skal bli kalt fra behandlingopprettet
-                med 3 roller og skal for alle 3
-                1. kalle pdl tjenester
-                2. legge det til i grunnlag
-                     */
-
-                    /*val opplysninger: List<Grunnlagsopplysning<JsonNode>> =
-                    objectMapper.readValue(packet[OPPLYSNING_KEY].toJson())!!
-                grunnlagService.lagreNyePersonopplysninger(
-                    sakId,
-                    Folkeregisteridentifikator.of(fnr),
-                    opplysninger
-                )*/
             }
         }
 

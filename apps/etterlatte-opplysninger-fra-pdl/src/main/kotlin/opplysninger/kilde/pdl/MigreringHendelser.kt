@@ -49,7 +49,7 @@ class MigreringHendelser(
         val soeker = lagEnkelopplysningerFraPDL(
             person = pdlKlientInterface.hentPerson(persongalleri.soeker, PersonRolle.BARN, sakType),
             personDTO = pdlKlientInterface.hentOpplysningsperson(persongalleri.soeker, PersonRolle.BARN, sakType),
-            opplysningsbehov = Opplysningstype.SOEKER_PDL_V1,
+            opplysningstype = Opplysningstype.SOEKER_PDL_V1,
             fnr = Folkeregisteridentifikator.of(persongalleri.soeker)
         ) as List<Grunnlagsopplysning<JsonNode>>
 
@@ -57,7 +57,7 @@ class MigreringHendelser(
             it to lagEnkelopplysningerFraPDL(
                 person = pdlKlientInterface.hentPerson(it, PersonRolle.GJENLEVENDE, sakType),
                 personDTO = pdlKlientInterface.hentOpplysningsperson(it, PersonRolle.GJENLEVENDE, sakType),
-                opplysningsbehov = Opplysningstype.GJENLEVENDE_FORELDER_PDL_V1,
+                opplysningstype = Opplysningstype.GJENLEVENDE_FORELDER_PDL_V1,
                 fnr = Folkeregisteridentifikator.of(it)
             ) as List<Grunnlagsopplysning<JsonNode>>
         }
@@ -66,7 +66,7 @@ class MigreringHendelser(
             it to lagEnkelopplysningerFraPDL(
                 person = pdlKlientInterface.hentPerson(it, PersonRolle.AVDOED, sakType),
                 personDTO = pdlKlientInterface.hentOpplysningsperson(it, PersonRolle.AVDOED, sakType),
-                opplysningsbehov = Opplysningstype.AVDOED_PDL_V1,
+                opplysningstype = Opplysningstype.AVDOED_PDL_V1,
                 fnr = Folkeregisteridentifikator.of(it)
             ) as List<Grunnlagsopplysning<JsonNode>>
         }

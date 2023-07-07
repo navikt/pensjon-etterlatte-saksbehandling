@@ -47,7 +47,7 @@ export const YtelseEtterAvkortingDetaljer = (props: { ytelse: IAvkortetYtelse })
           <li>
             <h4>Hvordan fungerer avkorting av en omstillingstønad?</h4>
             <ReadMore header="Les mer">
-              <BodyShort>
+              <BodyShort size="small">
                 Omstillingsstønaden avkortes med mottakers forventede årsinntekt/12. Er forventet inntekt satt for
                 lavt/høyt, og en eventuell restanse (se under) ikke klarer å hente inn igjen for mye/lite utbetalt
                 stønad, vil dette bli behandlet i et etteroppgjør.
@@ -57,12 +57,12 @@ export const YtelseEtterAvkortingDetaljer = (props: { ytelse: IAvkortetYtelse })
           <li>
             <h4>Hva er restanse?</h4>
             <ReadMore header="Les mer">
-              <BodyShort spacing={true}>
+              <BodyShort spacing={true} size="small">
                 Hvis man fastsetter en ny forventet inntekt for inneværende år, oppstår det en
                 feilutbetaling/etterbetaling, en restanse. Restansen skal fordeles ut over resterende utbetalingsmåneder
                 for inneværende år. Dette gjøres for å minimere etteroppgjøret.
               </BodyShort>
-              <BodyShort>
+              <BodyShort size="small">
                 Det er antall gjenstående måneder som avgjør hvor stort restansebeløpet blir. Har man f.eks. endret
                 forventet inntekt fra 01.07.2023 og det foreligger en feilutbetaling på 15 000 kroner, skal beløpet
                 fordeles på 6 måneder, og restansebeløpet blir 2 500 kr.

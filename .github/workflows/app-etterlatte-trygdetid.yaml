@@ -18,6 +18,7 @@ on:
       - apps/etterlatte-trygdetid/**
       - libs/saksbehandling-common/**
       - libs/etterlatte-trygdetid-model/**
+      - libs/etterlatte-vilkaarsvurdering-model/**
       - libs/etterlatte-ktor/**
       - libs/etterlatte-behandling-model/**
       - libs/etterlatte-database/**
@@ -31,6 +32,7 @@ on:
       - apps/etterlatte-trygdetid/**
       - libs/saksbehandling-common/**
       - libs/etterlatte-trygdetid-model/**
+      - libs/etterlatte-vilkaarsvurdering-model/**
       - libs/etterlatte-ktor/**
       - libs/etterlatte-behandling-model/**
       - libs/etterlatte-database/**

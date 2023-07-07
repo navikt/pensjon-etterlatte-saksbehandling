@@ -139,7 +139,7 @@ const opprettBehandling = (
 ): IDetaljertBehandling => {
   return {
     id: 'id',
-    sak: 1,
+    sakId: 1,
     sakType,
     gyldighetsprøving,
     kommerBarnetTilgode,

@@ -81,7 +81,7 @@ const Institusjonsopphold = (props: InstitusjonsoppholdProps) => {
               barnepensjonen ikke skal reduseres eller reduseres mindre enn hovedregelen sier.
             </p>
           </LovtekstMedLenke>
-          <Insthendelser sakid={behandling.sak} />
+          <Insthendelser sakid={behandling.sakId} />
           <Heading level="3" size="small">
             Beregningsperiode institusjonsopphold
           </Heading>

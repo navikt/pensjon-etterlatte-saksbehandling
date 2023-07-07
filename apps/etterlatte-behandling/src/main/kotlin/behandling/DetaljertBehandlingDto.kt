@@ -21,7 +21,7 @@ import java.util.*
  **/
 data class DetaljertBehandlingDto(
     val id: UUID,
-    val sak: Long,
+    val sakId: Long,
     val sakType: SakType,
     val gyldighetsprøving: GyldighetsResultat?,
     val soeknadMottattDato: LocalDateTime?,

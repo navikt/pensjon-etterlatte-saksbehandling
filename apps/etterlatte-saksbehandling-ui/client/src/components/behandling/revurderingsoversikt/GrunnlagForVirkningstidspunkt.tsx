@@ -24,10 +24,10 @@ const OmgjoeringFarskapGrunnlag = () => {
   const behandling = useBehandling()
   const [foersteVirk, hentVirk] = useApiCall(hentFoersteVirk)
   useEffect(() => {
-    if (behandling?.sak) {
-      hentVirk({ sakId: behandling?.sak })
+    if (behandling?.sakId) {
+      hentVirk({ sakId: behandling?.sakId })
     }
-  }, [behandling?.sak])
+  }, [behandling?.sakId])
 
   return mapApiResult(
     foersteVirk,

@@ -2,7 +2,6 @@ import { useRef, useState } from 'react'
 import { BodyShort, Button, Popover } from '@navikt/ds-react'
 import styled from 'styled-components'
 import { InformationSquareIcon } from '@navikt/aksel-icons'
-import { ABlue500 } from '@navikt/ds-tokens/dist/tokens'
 
 export const OmstillingsstoenadToolTip = () => {
   const [isOpen, setIsOpen] = useState(false)
@@ -14,7 +13,7 @@ export const OmstillingsstoenadToolTip = () => {
         size="small"
         ref={ref}
         onClick={() => setIsOpen(true)}
-        icon={<InformationSquareIconBlue title="Få mer informasjon om beregningsgrunnlaget" />}
+        icon={<InformationSquareIcon title="Få mer informasjon om beregningsgrunnlaget" />}
         onBlur={() => setIsOpen(false)}
       />
       <Popover anchorEl={ref.current} open={isOpen} onClose={() => setIsOpen(false)} placement="top">
@@ -35,15 +34,11 @@ const PopoverContent = styled(Popover.Content)`
   max-width: 500px;
 `
 
-const IconButton = styled(Button)`
+const IconButton = styled(Button).attrs({ variant: 'tertiary' })`
   height: 1.25rem;
   width: 1.25rem;
-  border-radius: 50%;
   padding: 0;
   min-width: 0;
   vertical-align: sub;
   margin-left: 4px;
-`
-const InformationSquareIconBlue = styled(InformationSquareIcon)`
-  color: ${ABlue500};
 `

@@ -37,7 +37,11 @@ export const YtelseEtterAvkorting = (props: { ytelser?: IAvkortetYtelse[] }) => 
                     {formaterStringDato(ytelse.fom)} - {ytelse.tom ? formaterStringDato(ytelse.tom) : ''}
                   </Table.DataCell>
                   <Table.DataCell>{ytelse.avkortingsbeloep} kr</Table.DataCell>
-                  <Table.DataCell>{ytelse.restanse} kr</Table.DataCell>
+                  {ytelse.restanse < 0 ? (
+                    <Table.DataCell>+ {ytelse.restanse * -1} kr</Table.DataCell>
+                  ) : (
+                    <Table.DataCell>- {ytelse.restanse} kr</Table.DataCell>
+                  )}
                   <Table.DataCell>
                     <ManglerRegelspesifikasjon>{ytelse.ytelseEtterAvkorting} kr</ManglerRegelspesifikasjon>
                   </Table.DataCell>

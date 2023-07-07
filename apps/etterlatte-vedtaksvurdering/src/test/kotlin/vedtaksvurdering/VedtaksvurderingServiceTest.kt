@@ -883,6 +883,7 @@ internal class VedtaksvurderingServiceTest {
             AvkortetYtelseDto(
                 fom = virkningstidspunkt.atDay(1),
                 tom = null,
+                ytelseFoerAvkorting = 100,
                 ytelseEtterAvkorting = 50,
                 avkortingsbeloep = 50,
                 restanse = 0

@@ -92,9 +92,10 @@ export const AvkortingInntekt = (props: {
         Omstillingsstønaden reduseres med 45 prosent av den gjenlevende sin inntekt som på årsbasis overstiger et halvt
         grunnbeløp. Inntekt rundes ned til nærmeste tusen. Det er forventet årsinntekt for hvert kalenderår som skal
         legges til grunn.
-        <br />
-        <br />I innvilgelsesåret skal inntekt opptjent før innvilgelse trekkes fra, og resterende forventet inntekt
-        omgjøres til årsinntekt. På samme måte skal inntekt etter opphør holdes utenfor i opphørsåret.
+      </BodyShort>
+      <BodyShort>
+        I innvilgelsesåret skal inntekt opptjent før innvilgelse trekkes fra, og resterende forventet inntekt omgjøres
+        til årsinntekt. På samme måte skal inntekt etter opphør holdes utenfor i opphørsåret.
       </BodyShort>
 
       {props.avkortingGrunnlag && props.avkortingGrunnlag.length > 0 && (
@@ -113,8 +114,8 @@ export const AvkortingInntekt = (props: {
                   <Table.DataCell key="Inntekt">{inntektsgrunnlag.aarsinntekt}</Table.DataCell>
                   <Table.DataCell key="FratrekkInnUt">{inntektsgrunnlag.fratrekkInnAar}</Table.DataCell>
                   <Table.DataCell key="Periode">
-                    {inntektsgrunnlag.fom ? formaterStringDato(inntektsgrunnlag.fom) : ''} -
-                    {inntektsgrunnlag.tom ? formaterStringDato(inntektsgrunnlag.tom) : ''}
+                    {inntektsgrunnlag.fom && formaterStringDato(inntektsgrunnlag.fom)} -
+                    {inntektsgrunnlag.tom && formaterStringDato(inntektsgrunnlag.tom)}
                   </Table.DataCell>
                   <Table.DataCell key="InntektSpesifikasjon">{inntektsgrunnlag.spesifikasjon}</Table.DataCell>
                   <Table.DataCell key="InntektKilde">

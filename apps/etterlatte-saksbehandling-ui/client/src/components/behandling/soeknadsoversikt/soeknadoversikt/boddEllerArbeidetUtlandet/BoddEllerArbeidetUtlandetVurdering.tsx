@@ -32,9 +32,9 @@ export const BoddEllerArbeidetUtlandetVurdering = ({
     useApiCall(lagreBoddEllerArbeidetUtlandet)
 
   const lagre = (onSuccess?: () => void) => {
-    !svar ? setRadioError('Du må velge et svar') : setRadioError('')
+    svar ? setRadioError('') : setRadioError('Du må velge et svar')
 
-    if (svar !== undefined)
+    if (svar)
       return setBoddEllerArbeidetUtlandet({ behandlingId, begrunnelse, svar: svar === JaNei.JA }, (response) => {
         dispatch(oppdaterBoddEllerArbeidetUtlandet(response))
         dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.OPPRETTET))

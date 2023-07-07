@@ -22,6 +22,8 @@ import no.nav.etterlatte.brev.model.OpprettNyttBrev
 import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.SlateHelper
 import no.nav.etterlatte.brev.model.Status
+import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.rivers.VedtakTilJournalfoering
 import no.nav.etterlatte.token.BrukerTokenInfo
@@ -102,9 +104,18 @@ class VedtaksbrevService(
             AUTOMATISK -> BrevDataMapper.fra(behandling)
             MANUELL -> {
                 val payload = requireNotNull(db.hentBrevPayload(brev.id))
-
                 // TODO: Map brevkode
-                Pair(EtterlatteBrevKode.OMS_OPPHOER_MANUELL, ManueltBrevData(payload.elements))
+                when (behandling.sakType) {
+                    SakType.BARNEPENSJON ->
+                        when (behandling.revurderingsaarsak) {
+                            RevurderingAarsak.ADOPSJON -> BrevDataMapper.fra(behandling)
+                            else -> Pair(EtterlatteBrevKode.OMS_OPPHOER_MANUELL, ManueltBrevData(payload.elements))
+                        }
+                    SakType.OMSTILLINGSSTOENAD -> Pair(
+                        EtterlatteBrevKode.OMS_OPPHOER_MANUELL,
+                        ManueltBrevData(payload.elements)
+                    )
+                }
             }
         }
 

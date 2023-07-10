@@ -151,28 +151,39 @@ class RealGrunnlagService(
                     }
                 )
             }
-            val rolle = when (sakType) {
+            val soekerRolle = when (sakType) {
                 SakType.OMSTILLINGSSTOENAD -> PersonRolle.GJENLEVENDE
                 SakType.BARNEPENSJON -> PersonRolle.BARN
             }
             val soeker = Pair(
-                async { pdltjenesterKlient.hentPerson(persongalleri.soeker, rolle, opplysningsbehov.sakType) },
+                async { pdltjenesterKlient.hentPerson(persongalleri.soeker, soekerRolle, opplysningsbehov.sakType) },
                 async {
                     pdltjenesterKlient
-                        .hentOpplysningsperson(persongalleri.soeker, rolle, opplysningsbehov.sakType)
+                        .hentOpplysningsperson(persongalleri.soeker, soekerRolle, opplysningsbehov.sakType)
                 }
             )
             val soekerPersonInfo =
                 GrunnlagsopplysningerPersonPdl(
                     soeker.first.await(),
                     soeker.second.await(),
-                    Opplysningstype.SOEKER_PDL_V1
+                    Opplysningstype.SOEKER_PDL_V1,
+                    soekerRolle
                 )
             val avdoedePersonInfo = requesterAvdoed.map {
-                GrunnlagsopplysningerPersonPdl(it.first.await(), it.second.await(), Opplysningstype.AVDOED_PDL_V1)
+                GrunnlagsopplysningerPersonPdl(
+                    it.first.await(),
+                    it.second.await(),
+                    Opplysningstype.AVDOED_PDL_V1,
+                    PersonRolle.AVDOED
+                )
             }
             val gjenlevendePersonInfo = requesterGjenlevende.map {
-                GrunnlagsopplysningerPersonPdl(it.first.await(), it.second.await(), Opplysningstype.AVDOED_PDL_V1)
+                GrunnlagsopplysningerPersonPdl(
+                    it.first.await(),
+                    it.second.await(),
+                    Opplysningstype.GJENLEVENDE_FORELDER_PDL_V1,
+                    PersonRolle.GJENLEVENDE
+                )
             }
             avdoedePersonInfo + gjenlevendePersonInfo.plus(soekerPersonInfo)
         }
@@ -182,7 +193,8 @@ class RealGrunnlagService(
                 it.person,
                 it.personDto,
                 it.opplysningstype,
-                it.personDto.foedselsnummer.verdi
+                it.personDto.foedselsnummer.verdi,
+                it.personRolle
             )
             lagreNyePersonopplysninger(opplysningsbehov.sakid, it.personDto.foedselsnummer.verdi, enkenPdlOpplysning)
         }
@@ -277,7 +289,8 @@ class RealGrunnlagService(
 data class GrunnlagsopplysningerPersonPdl(
     val person: Person,
     val personDto: PersonDTO,
-    val opplysningstype: Opplysningstype
+    val opplysningstype: Opplysningstype,
+    val personRolle: PersonRolle
 )
 
 data class NavnOpplysningDTO(

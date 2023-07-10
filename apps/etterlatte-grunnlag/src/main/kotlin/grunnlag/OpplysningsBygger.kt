@@ -18,12 +18,12 @@ import java.util.*
 fun lagEnkelopplysningerFraPDL(
     person: Person,
     personDTO: PersonDTO,
-    opplysningstype: Opplysningstype, // AVDOED_PDL_V1 || SOEKER_PDL_V1 || GJENLEVENDE_PDL_V1
-    fnr: Folkeregisteridentifikator
+    opplysningstype: Opplysningstype,
+    fnr: Folkeregisteridentifikator,
+    personRolle: PersonRolle
 ): List<Grunnlagsopplysning<JsonNode>> {
     val tidspunktForInnhenting = Tidspunkt.now()
     val opplysningsbolk = Opplysningsbolk(fnr, tidspunktForInnhenting)
-    val personRolle = behovNameTilPersonRolle(opplysningstype)
 
     val opplysningNavn =
         OpplysningDTO(
@@ -129,12 +129,4 @@ fun <T> lagPdlPersonopplysning(
         fnr = fnr,
         periode = periode
     )
-}
-
-private fun behovNameTilPersonRolle(opplysningstype: Opplysningstype): PersonRolle = when (opplysningstype) {
-    Opplysningstype.AVDOED_PDL_V1 -> PersonRolle.AVDOED
-    Opplysningstype.GJENLEVENDE_FORELDER_PDL_V1 -> PersonRolle.GJENLEVENDE
-    Opplysningstype.SOEKER_PDL_V1 -> PersonRolle.BARN
-    Opplysningstype.MIGRERING -> PersonRolle.AVDOED
-    else -> throw Exception("Ugyldig opplysningsbehov $opplysningstype")
 }

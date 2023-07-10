@@ -198,6 +198,7 @@ class RealGrunnlagService(
             )
             lagreNyePersonopplysninger(opplysningsbehov.sakid, it.personDto.foedselsnummer.verdi, enkenPdlOpplysning)
         }
+        logger.info("Oppdatert grunnlag for sak ${opplysningsbehov.sakid}")
     }
 
     private fun mapTilRolle(fnr: String, persongalleri: Persongalleri): Saksrolle = when (fnr) {

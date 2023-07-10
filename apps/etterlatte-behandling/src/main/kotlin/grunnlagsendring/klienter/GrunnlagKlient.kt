@@ -29,6 +29,8 @@ class GrunnlagKlientImpl(
         return grunnlagHttpClient
             .post("$url/api/grunnlag/person/oppdater-grunnlag") {
                 accept(ContentType.Application.Json)
+                contentType(ContentType.Application.Json)
+                setBody(opplysningsbehov)
             }.body()
     }
 

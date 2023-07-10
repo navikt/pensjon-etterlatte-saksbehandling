@@ -68,6 +68,7 @@ fun Route.grunnlagRoute(grunnlagService: GrunnlagService, behandlingKlient: Beha
             kunSystembruker {
                 val opplysningsbehov = call.receive<Opplysningsbehov>()
                 grunnlagService.oppdaterGrunnlag(opplysningsbehov)
+                call.respond(HttpStatusCode.OK)
             }
         }
 

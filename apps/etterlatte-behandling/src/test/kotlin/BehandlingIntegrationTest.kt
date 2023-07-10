@@ -166,7 +166,7 @@ abstract class BehandlingIntegrationTest {
                         setOf(1).toJson(),
                         headers = headers
                     )
-                } else if (request.url.fullPath.endsWith("/oppdatergrunnlagforbehandling")) {
+                } else if (request.url.fullPath.endsWith("/oppdater-grunnlag")) {
                     respondOk()
                 } else {
                     error(request.url.fullPath)

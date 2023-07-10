@@ -27,7 +27,7 @@ class GrunnlagKlientImpl(
 
     override suspend fun leggInnNyttGrunnlag(opplysningsbehov: Opplysningsbehov) {
         return grunnlagHttpClient
-            .post("$url/api/grunnlag/person/oppdatergrunnlagforbehandling") {
+            .post("$url/api/grunnlag/person/oppdater-grunnlag") {
                 accept(ContentType.Application.Json)
             }.body()
     }

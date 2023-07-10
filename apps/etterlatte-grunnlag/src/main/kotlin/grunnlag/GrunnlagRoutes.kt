@@ -64,7 +64,7 @@ fun Route.grunnlagRoute(grunnlagService: GrunnlagService, behandlingKlient: Beha
             }
         }
 
-        post("/person/oppdatergrunnlagforbehandling") {
+        post("/person/oppdater-grunnlag") {
             kunSystembruker {
                 val opplysningsbehov = call.receive<Opplysningsbehov>()
                 grunnlagService.oppdaterGrunnlag(opplysningsbehov)

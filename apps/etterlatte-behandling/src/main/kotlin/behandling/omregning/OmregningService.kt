@@ -1,6 +1,6 @@
 package no.nav.etterlatte.behandling.omregning
 
-import no.nav.etterlatte.behandling.GenerellBehandlingService
+import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.revurdering.RevurderingService
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
@@ -10,7 +10,7 @@ import java.time.LocalDate
 import java.util.*
 
 class OmregningService(
-    private val behandlingService: GenerellBehandlingService,
+    private val behandlingService: BehandlingService,
     private val revurderingService: RevurderingService
 ) {
     fun opprettOmregning(

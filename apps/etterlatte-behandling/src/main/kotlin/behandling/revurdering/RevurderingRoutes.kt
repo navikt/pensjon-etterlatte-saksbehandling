@@ -10,7 +10,8 @@ import io.ktor.server.routing.application
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
-import no.nav.etterlatte.behandling.GenerellBehandlingService
+import no.nav.etterlatte.behandling.BehandlingService
+import no.nav.etterlatte.behandling.domain.toDetaljertBehandling
 import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.Vedtaksloesning
@@ -24,7 +25,7 @@ import java.util.*
 
 internal fun Route.revurderingRoutes(
     revurderingService: RevurderingService,
-    generellBehandlingService: GenerellBehandlingService
+    behandlingService: BehandlingService
 ) {
     val logger = application.log
 
@@ -64,7 +65,7 @@ internal fun Route.revurderingRoutes(
                     call.respond(HttpStatusCode.BadRequest, "Feil revurderingsårsak, foreløpig ikke støttet")
                     return@post
                 }
-                generellBehandlingService.hentSisteIverksatte(sakId)?.let { forrigeIverksatteBehandling ->
+                behandlingService.hentSisteIverksatte(sakId)?.let { forrigeIverksatteBehandling ->
                     val sakType = forrigeIverksatteBehandling.sak.sakType
                     if (!body.aarsak.gyldigForSakType(sakType)) {
                         call.respond(HttpStatusCode.BadRequest, "${body.aarsak} er ikke støttet for $sakType")

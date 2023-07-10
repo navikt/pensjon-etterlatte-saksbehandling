@@ -4,12 +4,14 @@ import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.BehandlingHendelseType
 import no.nav.etterlatte.behandling.BehandlingHendelserKafkaProducer
+import no.nav.etterlatte.behandling.GrunnlagService
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.domain.OpprettBehandling
 import no.nav.etterlatte.behandling.domain.toBehandlingOpprettet
 import no.nav.etterlatte.behandling.filterBehandlingerForEnheter
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
+import no.nav.etterlatte.behandling.revurdering.RevurderingService
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.Vedtaksloesning
@@ -18,6 +20,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.JaNeiMedBegrunnelse
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
+import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
@@ -65,7 +68,9 @@ interface FoerstegangsbehandlingService {
     fun settIverksatt(behandlingId: UUID, dryRun: Boolean = true)
 }
 
-class RealFoerstegangsbehandlingService(
+class FoerstegangsbehandlingServiceImpl(
+    private val grunnlagService: GrunnlagService,
+    private val revurderingService: RevurderingService,
     private val sakDao: SakDao,
     private val behandlingDao: BehandlingDao,
     private val hendelseDao: HendelseDao,
@@ -73,7 +78,7 @@ class RealFoerstegangsbehandlingService(
     private val featureToggleService: FeatureToggleService,
     private val klokke: Clock = utcKlokke()
 ) : FoerstegangsbehandlingService {
-    private val logger = LoggerFactory.getLogger(RealFoerstegangsbehandlingService::class.java)
+    private val logger = LoggerFactory.getLogger(FoerstegangsbehandlingServiceImpl::class.java)
 
     fun hentBehandling(id: UUID): Foerstegangsbehandling? =
         (behandlingDao.hentBehandling(id) as? Foerstegangsbehandling)?.sjekkEnhet()
@@ -108,7 +113,15 @@ class RealFoerstegangsbehandlingService(
             BehandlingStatus.iverksattEllerAttestert().find { it == behandling.status } != null
         }
         return if (harIverksattEllerAttestertBehandling.isNotEmpty()) {
-            opprettRevurdering(sakId, persongalleri, mottattDato)
+            revurderingService.opprettRevurdering(
+                sakId,
+                persongalleri,
+                mottattDato,
+                Prosesstype.AUTOMATISK,
+                Vedtaksloesning.GJENNY,
+                "Oppdatert søknad",
+                RevurderingAarsak.NY_SOEKNAD
+            )
         } else {
             val harBehandlingUnderbehandling = harBehandlingerForSak.filter { behandling ->
                 BehandlingStatus.underBehandling().find { it == behandling.status } != null
@@ -145,37 +158,7 @@ class RealFoerstegangsbehandlingService(
                 hentBehandling(opprettBehandling.id)
             }.also { behandling ->
                 behandling?.let {
-                    behandlingHendelser.sendMeldingForHendelse(it, BehandlingHendelseType.OPPRETTET)
-                }
-            }
-        }
-    }
-
-    private fun opprettRevurdering(
-        sakId: Long,
-        persongalleri: Persongalleri,
-        mottattDato: String?
-    ): Behandling? {
-        return inTransaction {
-            OpprettBehandling(
-                type = BehandlingType.REVURDERING,
-                sakId = sakId,
-                status = BehandlingStatus.OPPRETTET,
-                soeknadMottattDato = mottattDato?.let { LocalDateTime.parse(it) },
-                revurderingsAarsak = RevurderingAarsak.NY_SOEKNAD,
-                persongalleri = persongalleri,
-                kilde = Vedtaksloesning.GJENNY,
-                merknad = "Oppdatert søknad"
-            ).let { opprettBehandling ->
-                behandlingDao.opprettBehandling(opprettBehandling)
-                hendelseDao.behandlingOpprettet(opprettBehandling.toBehandlingOpprettet())
-
-                logger.info("Opprettet behandling ${opprettBehandling.id} i sak ${opprettBehandling.sakId}")
-
-                behandlingDao.hentBehandling(opprettBehandling.id)
-            }.also { behandling ->
-                behandling?.let {
-                    behandlingHendelser.sendBehovForNyttGrunnlag(it)
+                    grunnlagService.leggInnNyttGrunnlag(it)
                     behandlingHendelser.sendMeldingForHendelse(it, BehandlingHendelseType.OPPRETTET)
                 }
             }

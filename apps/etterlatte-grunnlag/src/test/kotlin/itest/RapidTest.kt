@@ -5,6 +5,7 @@ import io.mockk.mockk
 import no.nav.etterlatte.grunnlag.GrunnlagHendelser
 import no.nav.etterlatte.grunnlag.OpplysningDao
 import no.nav.etterlatte.grunnlag.RealGrunnlagService
+import no.nav.etterlatte.klienter.PdlTjenesterKlientImpl
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.objectMapper
@@ -48,7 +49,8 @@ internal class RapidTest {
         dataSource.migrate()
 
         opplysningRepo = OpplysningDao(dataSource)
-        grunnlagService = RealGrunnlagService(opplysningRepo, mockk())
+        val pdlTjenesterKlientImpl = mockk<PdlTjenesterKlientImpl>()
+        grunnlagService = RealGrunnlagService(pdlTjenesterKlientImpl, opplysningRepo, mockk())
         inspector = TestRapid().apply {
             GrunnlagHendelser(this, grunnlagService)
         }

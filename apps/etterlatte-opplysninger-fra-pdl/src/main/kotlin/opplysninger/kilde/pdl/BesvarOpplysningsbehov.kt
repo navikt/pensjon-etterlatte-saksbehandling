@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory
 
 internal class BesvarOpplysningsbehov(
     rapidsConnection: RapidsConnection,
-    private val pdl: Pdl
+    private val pdlKlientInterface: PdlKlientInterface
 ) : River.PacketListener {
     private val logger = LoggerFactory.getLogger(BesvarOpplysningsbehov::class.java)
 
@@ -45,13 +45,13 @@ internal class BesvarOpplysningsbehov(
                 val personRolle = objectMapper.treeToValue(packet["rolle"], PersonRolle::class.java)!!
                 val opplysningstype = objectMapper.treeToValue(packet[BEHOV_NAME_KEY], Opplysningstype::class.java)!!
                 val saktype = objectMapper.treeToValue(packet["sakType"], SakType::class.java)
-                val person = pdl.hentPerson(fnr, personRolle, saktype)
-                val opplysningsperson = pdl.hentOpplysningsperson(fnr, personRolle, saktype)
+                val person = pdlKlientInterface.hentPerson(fnr, personRolle, saktype)
+                val opplysningsperson = pdlKlientInterface.hentOpplysningsperson(fnr, personRolle, saktype)
 
                 packet["opplysning"] = lagEnkelopplysningerFraPDL(
                     person = person,
                     personDTO = opplysningsperson,
-                    opplysningsbehov = opplysningstype,
+                    opplysningstype = opplysningstype,
                     fnr = Folkeregisteridentifikator.of(fnr)
                 )
                 context.publish(packet.toJson())

@@ -41,7 +41,7 @@ import java.time.YearMonth
 import java.util.*
 
 internal fun Route.behandlingRoutes(
-    generellBehandlingService: GenerellBehandlingService,
+    behandlingService: BehandlingService,
     foerstegangsbehandlingService: FoerstegangsbehandlingService,
     manueltOpphoerService: ManueltOpphoerService
 ) {
@@ -49,7 +49,7 @@ internal fun Route.behandlingRoutes(
     route("/api/behandling/{$BEHANDLINGSID_CALL_PARAMETER}/") {
         get {
             val detaljertBehandlingDTO =
-                generellBehandlingService.hentDetaljertBehandlingMedTilbehoer(behandlingsId, brukerTokenInfo)
+                behandlingService.hentDetaljertBehandlingMedTilbehoer(behandlingsId, brukerTokenInfo)
             call.respond(detaljertBehandlingDTO)
         }
 
@@ -111,7 +111,7 @@ internal fun Route.behandlingRoutes(
 
         post("/avbryt") {
             hentNavidentFraToken { navIdent ->
-                generellBehandlingService.avbrytBehandling(behandlingsId, navIdent)
+                behandlingService.avbrytBehandling(behandlingsId, navIdent)
                 call.respond(HttpStatusCode.OK)
             }
         }
@@ -121,7 +121,7 @@ internal fun Route.behandlingRoutes(
                 logger.debug("Prøver å fastsette virkningstidspunkt")
                 val body = call.receive<VirkningstidspunktRequest>()
 
-                val erGyldigVirkningstidspunkt = generellBehandlingService.erGyldigVirkningstidspunkt(
+                val erGyldigVirkningstidspunkt = behandlingService.erGyldigVirkningstidspunkt(
                     behandlingsId,
                     brukerTokenInfo,
                     body
@@ -131,7 +131,7 @@ internal fun Route.behandlingRoutes(
                 }
 
                 try {
-                    val virkningstidspunkt = generellBehandlingService.oppdaterVirkningstidspunkt(
+                    val virkningstidspunkt = behandlingService.oppdaterVirkningstidspunkt(
                         behandlingsId,
                         body.dato,
                         navIdent,
@@ -161,7 +161,7 @@ internal fun Route.behandlingRoutes(
                         begrunnelse = body.begrunnelse
                     )
 
-                    generellBehandlingService.oppdaterUtenlandstilsnitt(behandlingsId, utenlandstilsnitt)
+                    behandlingService.oppdaterUtenlandstilsnitt(behandlingsId, utenlandstilsnitt)
 
                     call.respondText(
                         contentType = ContentType.Application.Json,
@@ -187,7 +187,7 @@ internal fun Route.behandlingRoutes(
                         begrunnelse = body.begrunnelse
                     )
 
-                    generellBehandlingService.oppdaterBoddEllerArbeidetUtlandet(
+                    behandlingService.oppdaterBoddEllerArbeidetUtlandet(
                         behandlingsId,
                         boddEllerArbeidetUtlandet
                     )
@@ -209,7 +209,7 @@ internal fun Route.behandlingRoutes(
         route("/{$BEHANDLINGSID_CALL_PARAMETER}") {
             get {
                 logger.info("Henter detaljert behandling for behandling med id=$behandlingsId")
-                when (val behandling = generellBehandlingService.hentDetaljertBehandling(behandlingsId)) {
+                when (val behandling = behandlingService.hentDetaljertBehandling(behandlingsId)) {
                     is DetaljertBehandling -> call.respond(behandling)
                     else -> call.respond(HttpStatusCode.NotFound, "Fant ikke behandling med id=$behandlingsId")
                 }

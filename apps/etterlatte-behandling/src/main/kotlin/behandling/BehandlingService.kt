@@ -42,7 +42,7 @@ enum class BehandlingServiceFeatureToggle(private val key: String) : FeatureTogg
     override fun key() = key
 }
 
-interface GenerellBehandlingService {
+interface BehandlingService {
 
     fun hentBehandling(behandlingId: UUID): Behandling?
     fun hentBehandlingerISak(sakId: Long): List<Behandling>
@@ -93,7 +93,7 @@ interface GenerellBehandlingService {
     fun hentFoersteVirk(sakId: Long): YearMonth?
 }
 
-class RealGenerellBehandlingService(
+class BehandlingServiceImpl(
     private val behandlingDao: BehandlingDao,
     private val behandlingHendelser: BehandlingHendelserKafkaProducer,
     private val grunnlagsendringshendelseDao: GrunnlagsendringshendelseDao,
@@ -101,7 +101,7 @@ class RealGenerellBehandlingService(
     private val grunnlagKlient: GrunnlagKlient,
     private val sporingslogg: Sporingslogg,
     private val featureToggleService: FeatureToggleService
-) : GenerellBehandlingService {
+) : BehandlingService {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     private fun hentBehandlingForId(id: UUID) =

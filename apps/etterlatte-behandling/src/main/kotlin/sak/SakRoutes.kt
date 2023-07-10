@@ -9,7 +9,7 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.behandling.BehandlingListe
-import no.nav.etterlatte.behandling.GenerellBehandlingService
+import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.domain.Grunnlagsendringshendelse
 import no.nav.etterlatte.behandling.domain.toBehandlingSammendrag
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringsListe
@@ -29,7 +29,7 @@ import java.time.LocalDate
 internal fun Route.sakSystemRoutes(
     tilgangService: TilgangService,
     sakService: SakService,
-    generellBehandlingService: GenerellBehandlingService
+    behandlingService: BehandlingService
 ) {
     val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -51,7 +51,7 @@ internal fun Route.sakSystemRoutes(
             get("/behandlinger/sisteIverksatte") {
                 logger.info("Henter siste iverksatte behandling for $sakId")
 
-                val sisteIverksatteBehandling = generellBehandlingService.hentSisteIverksatte(sakId)
+                val sisteIverksatteBehandling = behandlingService.hentSisteIverksatte(sakId)
                     ?.let { SisteIverksatteBehandling(it.id) }
 
                 call.respond(sisteIverksatteBehandling ?: HttpStatusCode.NotFound)
@@ -78,7 +78,7 @@ internal fun Route.sakSystemRoutes(
 internal fun Route.sakWebRoutes(
     tilgangService: TilgangService,
     sakService: SakService,
-    generellBehandlingService: GenerellBehandlingService,
+    behandlingService: BehandlingService,
     grunnlagsendringshendelseService: GrunnlagsendringshendelseService
 ) {
     val logger = LoggerFactory.getLogger(this::class.java)
@@ -94,7 +94,7 @@ internal fun Route.sakWebRoutes(
 
             get("/behandlinger/foerstevirk") {
                 logger.info("Henter første virkningstidspunkt på en iverksatt behandling i sak med id $sakId")
-                when (val foersteVirk = generellBehandlingService.hentFoersteVirk(sakId)) {
+                when (val foersteVirk = behandlingService.hentFoersteVirk(sakId)) {
                     null -> call.respond(HttpStatusCode.NotFound)
                     else -> call.respond(FoersteVirkDto(foersteVirk.atDay(1), sakId))
                 }
@@ -106,7 +106,7 @@ internal fun Route.sakWebRoutes(
                 withFoedselsnummerInternal(tilgangService) { fnr ->
                     val behandlinger = sakService.finnSaker(fnr.value)
                         .map { sak ->
-                            generellBehandlingService.hentBehandlingerISak(sak.id)
+                            behandlingService.hentBehandlingerISak(sak.id)
                                 .map { it.toBehandlingSammendrag() }
                                 .let { BehandlingListe(sak, it) }
                         }

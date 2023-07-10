@@ -48,3 +48,4 @@ spec:
         - application: etterlatte-gyldig-soeknad
         - application: etterlatte-hendelser-pdl
         - application: etterlatte-behandling
+        - application: etterlatte-grunnlag

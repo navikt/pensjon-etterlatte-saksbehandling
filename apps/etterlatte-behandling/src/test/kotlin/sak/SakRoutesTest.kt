@@ -13,7 +13,7 @@ import io.ktor.server.testing.testApplication
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.mockk
-import no.nav.etterlatte.behandling.GenerellBehandlingService
+import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
@@ -37,7 +37,7 @@ internal class SakRoutesTest {
 
     private val mockOAuth2Server = MockOAuth2Server()
     private lateinit var hoconApplicationConfig: HoconApplicationConfig
-    private val generellBehandlingService = mockk<GenerellBehandlingService>(relaxUnitFun = true)
+    private val behandlingService = mockk<BehandlingService>(relaxUnitFun = true)
     private val sakService = mockk<SakService>(relaxUnitFun = true)
     private val grunnlagsendringshendelseService = mockk<GrunnlagsendringshendelseService>(relaxUnitFun = true)
     private val tilgangService = mockk<TilgangService>(relaxUnitFun = true)
@@ -63,7 +63,7 @@ internal class SakRoutesTest {
     @Test
     fun `siste iverksatte route returnerer 200 ok og behandling`() {
         val sakId = 1
-        coEvery { generellBehandlingService.hentSisteIverksatte(1) } returns mockk(relaxed = true)
+        coEvery { behandlingService.hentSisteIverksatte(1) } returns mockk(relaxed = true)
 
         withTestApplication { client ->
             val response = client.get("/saker/$sakId/behandlinger/sisteIverksatte") {
@@ -77,7 +77,7 @@ internal class SakRoutesTest {
     @Test
     fun `siste iverksatte route returnerer 404 naar det ikke finnes noen iverksatt behandling`() {
         val sakId = 1
-        coEvery { generellBehandlingService.hentSisteIverksatte(1) } returns null
+        coEvery { behandlingService.hentSisteIverksatte(1) } returns null
         withTestApplication { client ->
             val response = client.get("/saker/$sakId/behandlinger/sisteIverksatte") {
                 header(HttpHeaders.Authorization, "Bearer $token")
@@ -97,12 +97,12 @@ internal class SakRoutesTest {
                     sakSystemRoutes(
                         tilgangService,
                         sakService,
-                        generellBehandlingService
+                        behandlingService
                     )
                     sakWebRoutes(
                         tilgangService,
                         sakService,
-                        generellBehandlingService,
+                        behandlingService,
                         grunnlagsendringshendelseService
                     )
                 }

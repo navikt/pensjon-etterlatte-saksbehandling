@@ -4,6 +4,7 @@ import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.BehandlingHendelseType
 import no.nav.etterlatte.behandling.BehandlingHendelserKafkaProducer
+import no.nav.etterlatte.behandling.GrunnlagService
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.OpprettBehandling
 import no.nav.etterlatte.behandling.domain.Revurdering
@@ -17,14 +18,18 @@ import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
+import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.behandling.tilVirkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.*
 
 interface RevurderingService {
@@ -45,6 +50,17 @@ interface RevurderingService {
     ): Revurdering?
 
     fun lagreRevurderingInfo(behandlingsId: UUID, info: RevurderingInfo, navIdent: String): Boolean
+
+    fun opprettRevurdering(
+        sakId: Long,
+        persongalleri: Persongalleri,
+        mottattDato: String? = null,
+        prosessType: Prosesstype,
+        kilde: Vedtaksloesning,
+        merknad: String? = null,
+        revurderingAarsak: RevurderingAarsak,
+        fraDato: Virkningstidspunkt? = null
+    ): Revurdering?
 }
 
 enum class RevurderingServiceFeatureToggle(private val key: String) : FeatureToggle {
@@ -53,14 +69,15 @@ enum class RevurderingServiceFeatureToggle(private val key: String) : FeatureTog
     override fun key() = key
 }
 
-class RealRevurderingService(
+class RevurderingServiceImpl(
+    private val grunnlagService: GrunnlagService,
     private val behandlingHendelser: BehandlingHendelserKafkaProducer,
     private val featureToggleService: FeatureToggleService,
     private val behandlingDao: BehandlingDao,
     private val hendelseDao: HendelseDao,
     private val grunnlagsendringshendelseDao: GrunnlagsendringshendelseDao
 ) : RevurderingService {
-    private val logger = LoggerFactory.getLogger(RealRevurderingService::class.java)
+    private val logger = LoggerFactory.getLogger(RevurderingServiceImpl::class.java)
 
     fun hentBehandling(id: UUID): Revurdering? =
         (behandlingDao.hentBehandling(id) as? Revurdering)?.sjekkEnhet()
@@ -73,16 +90,17 @@ class RealRevurderingService(
         paaGrunnAvHendelse: UUID?
     ): Revurdering? = forrigeBehandling.sjekkEnhet()?.let {
         return if (featureToggleService.isEnabled(RevurderingServiceFeatureToggle.OpprettManuellRevurdering, false)) {
-            inTransaction {
-                opprettRevurdering(
-                    sakId,
-                    forrigeBehandling,
-                    revurderingAarsak,
-                    null,
-                    Prosesstype.MANUELL,
-                    kilde
-                )?.also { revurdering ->
-                    if (paaGrunnAvHendelse != null) {
+            opprettRevurdering(
+                sakId,
+                forrigeBehandling.persongalleri,
+                Tidspunkt.now().toLocalDatetimeUTC().toString(),
+                Prosesstype.MANUELL,
+                kilde,
+                null,
+                revurderingAarsak
+            )?.also { revurdering ->
+                if (paaGrunnAvHendelse != null) {
+                    inTransaction {
                         grunnlagsendringshendelseDao.settBehandlingIdForTattMedIRevurdering(
                             paaGrunnAvHendelse,
                             revurdering.id
@@ -102,16 +120,16 @@ class RealRevurderingService(
         fraDato: LocalDate,
         kilde: Vedtaksloesning
     ) = forrigeBehandling.sjekkEnhet()?.let {
-        inTransaction {
-            opprettRevurdering(
-                sakId,
-                forrigeBehandling,
-                revurderingAarsak,
-                fraDato.tilVirkningstidspunkt("Opprettet automatisk"),
-                Prosesstype.AUTOMATISK,
-                kilde
-            )
-        }
+        opprettRevurdering(
+            sakId,
+            forrigeBehandling.persongalleri,
+            null,
+            Prosesstype.AUTOMATISK,
+            kilde,
+            null,
+            revurderingAarsak,
+            fraDato.tilVirkningstidspunkt("Opprettet automatisk")
+        )
     }
 
     private fun kanLagreRevurderingInfo(behandlingsId: UUID): Boolean {
@@ -133,35 +151,41 @@ class RealRevurderingService(
         }
     }
 
-    private fun opprettRevurdering(
+    override fun opprettRevurdering(
         sakId: Long,
-        forrigeBehandling: Behandling,
-        revurderingAarsak: RevurderingAarsak,
-        fraDato: Virkningstidspunkt?,
+        persongalleri: Persongalleri,
+        mottattDato: String?,
         prosessType: Prosesstype,
-        kilde: Vedtaksloesning
-    ) = OpprettBehandling(
-        type = BehandlingType.REVURDERING,
-        sakId = sakId,
-        status = BehandlingStatus.OPPRETTET,
-        persongalleri = forrigeBehandling.persongalleri,
-        revurderingsAarsak = revurderingAarsak,
-        kommerBarnetTilgode = forrigeBehandling.kommerBarnetTilgode,
-        virkningstidspunkt = fraDato,
-        prosesstype = prosessType,
-        kilde = kilde
-    ).let { opprettBehandling ->
-        behandlingDao.opprettBehandling(opprettBehandling)
-        hendelseDao.behandlingOpprettet(opprettBehandling.toBehandlingOpprettet())
-        logger.info("Opprettet revurdering ${opprettBehandling.id} i sak ${opprettBehandling.sakId}")
+        kilde: Vedtaksloesning,
+        merknad: String?,
+        revurderingAarsak: RevurderingAarsak,
+        fraDato: Virkningstidspunkt?
+    ): Revurdering? {
+        return inTransaction {
+            OpprettBehandling(
+                type = BehandlingType.REVURDERING,
+                sakId = sakId,
+                status = BehandlingStatus.OPPRETTET,
+                soeknadMottattDato = mottattDato?.let { LocalDateTime.parse(it) },
+                revurderingsAarsak = revurderingAarsak,
+                persongalleri = persongalleri,
+                kilde = kilde,
+                prosesstype = prosessType,
+                merknad = merknad
+            ).let { opprettBehandling ->
+                behandlingDao.opprettBehandling(opprettBehandling)
+                hendelseDao.behandlingOpprettet(opprettBehandling.toBehandlingOpprettet())
 
-        hentBehandling(opprettBehandling.id)
-    }?.also { revurdering ->
-        // Ikke oppdater persongrunnlag ved regulering
-        if (revurderingAarsak != RevurderingAarsak.REGULERING) {
-            behandlingHendelser.sendBehovForNyttGrunnlag(revurdering)
+                logger.info("Opprettet behandling ${opprettBehandling.id} i sak ${opprettBehandling.sakId}")
+
+                behandlingDao.hentBehandling(opprettBehandling.id) as? Revurdering
+            }.also { behandling ->
+                behandling?.let {
+                    grunnlagService.leggInnNyttGrunnlag(it)
+                    behandlingHendelser.sendMeldingForHendelse(it, BehandlingHendelseType.OPPRETTET)
+                }
+            }
         }
-        behandlingHendelser.sendMeldingForHendelse(revurdering, BehandlingHendelseType.OPPRETTET)
     }
 
     private fun <T : Behandling> T?.sjekkEnhet() = this?.let { behandling ->

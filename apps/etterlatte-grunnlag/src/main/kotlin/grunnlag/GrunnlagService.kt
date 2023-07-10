@@ -1,9 +1,13 @@
 package no.nav.etterlatte.grunnlag
 
 import com.fasterxml.jackson.databind.JsonNode
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
+import no.nav.etterlatte.klienter.PdlTjenesterKlientImpl
 import no.nav.etterlatte.libs.common.behandling.PersonMedSakerOgRoller
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakOgRolle
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
@@ -13,7 +17,11 @@ import no.nav.etterlatte.libs.common.grunnlag.hentNavn
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Navn
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.opplysningsbehov.Opplysningsbehov
+import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.person.Person
+import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.sporingslogg.Decision
 import no.nav.etterlatte.libs.sporingslogg.HttpMethod
@@ -41,9 +49,12 @@ interface GrunnlagService {
     fun hentSakerOgRoller(fnr: Folkeregisteridentifikator): PersonMedSakerOgRoller
     fun hentAlleSakerForFnr(fnr: Folkeregisteridentifikator): Set<Long>
     fun hentPersonerISak(sakId: Long): Map<Folkeregisteridentifikator, PersonMedNavn>?
+
+    suspend fun oppdaterGrunnlag(opplysningsbehov: Opplysningsbehov)
 }
 
 class RealGrunnlagService(
+    private val pdltjenesterKlient: PdlTjenesterKlientImpl,
     private val opplysningDao: OpplysningDao,
     private val sporingslogg: Sporingslogg
 ) : GrunnlagService {
@@ -109,6 +120,85 @@ class RealGrunnlagService(
                 mellomnavn = navn.mellomnavn
             )
         }.associateBy { it.fnr }
+    }
+
+    override suspend fun oppdaterGrunnlag(opplysningsbehov: Opplysningsbehov) {
+        val pdlPersondatasGrunnlag = coroutineScope {
+            val persongalleri = opplysningsbehov.persongalleri
+            val sakType = opplysningsbehov.sakType
+            val requesterAvdoed = persongalleri.avdoed.map {
+                Pair(
+                    async { pdltjenesterKlient.hentPerson(it, PersonRolle.AVDOED, opplysningsbehov.sakType) },
+                    async {
+                        pdltjenesterKlient.hentOpplysningsperson(
+                            it,
+                            PersonRolle.AVDOED,
+                            opplysningsbehov.sakType
+                        )
+                    }
+                )
+            }
+
+            val requesterGjenlevende = persongalleri.gjenlevende.map {
+                Pair(
+                    async { pdltjenesterKlient.hentPerson(it, PersonRolle.GJENLEVENDE, opplysningsbehov.sakType) },
+                    async {
+                        pdltjenesterKlient.hentOpplysningsperson(
+                            it,
+                            PersonRolle.GJENLEVENDE,
+                            opplysningsbehov.sakType
+                        )
+                    }
+                )
+            }
+            val soekerRolle = when (sakType) {
+                SakType.OMSTILLINGSSTOENAD -> PersonRolle.GJENLEVENDE
+                SakType.BARNEPENSJON -> PersonRolle.BARN
+            }
+            val soeker = Pair(
+                async { pdltjenesterKlient.hentPerson(persongalleri.soeker, soekerRolle, opplysningsbehov.sakType) },
+                async {
+                    pdltjenesterKlient
+                        .hentOpplysningsperson(persongalleri.soeker, soekerRolle, opplysningsbehov.sakType)
+                }
+            )
+            val soekerPersonInfo =
+                GrunnlagsopplysningerPersonPdl(
+                    soeker.first.await(),
+                    soeker.second.await(),
+                    Opplysningstype.SOEKER_PDL_V1,
+                    soekerRolle
+                )
+            val avdoedePersonInfo = requesterAvdoed.map {
+                GrunnlagsopplysningerPersonPdl(
+                    it.first.await(),
+                    it.second.await(),
+                    Opplysningstype.AVDOED_PDL_V1,
+                    PersonRolle.AVDOED
+                )
+            }
+            val gjenlevendePersonInfo = requesterGjenlevende.map {
+                GrunnlagsopplysningerPersonPdl(
+                    it.first.await(),
+                    it.second.await(),
+                    Opplysningstype.GJENLEVENDE_FORELDER_PDL_V1,
+                    PersonRolle.GJENLEVENDE
+                )
+            }
+            avdoedePersonInfo + gjenlevendePersonInfo.plus(soekerPersonInfo)
+        }
+
+        pdlPersondatasGrunnlag.forEach {
+            val enkenPdlOpplysning = lagEnkelopplysningerFraPDL(
+                it.person,
+                it.personDto,
+                it.opplysningstype,
+                it.personDto.foedselsnummer.verdi,
+                it.personRolle
+            )
+            lagreNyePersonopplysninger(opplysningsbehov.sakid, it.personDto.foedselsnummer.verdi, enkenPdlOpplysning)
+        }
+        logger.info("Oppdatert grunnlag for sak ${opplysningsbehov.sakid}")
     }
 
     private fun mapTilRolle(fnr: String, persongalleri: Persongalleri): Saksrolle = when (fnr) {
@@ -196,6 +286,13 @@ class RealGrunnlagService(
         melding = "Hent person feilet"
     )
 }
+
+data class GrunnlagsopplysningerPersonPdl(
+    val person: Person,
+    val personDto: PersonDTO,
+    val opplysningstype: Opplysningstype,
+    val personRolle: PersonRolle
+)
 
 data class NavnOpplysningDTO(
     val sakId: Long,

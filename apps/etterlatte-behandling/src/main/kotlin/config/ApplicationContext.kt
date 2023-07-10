@@ -134,7 +134,6 @@ class ApplicationContext(
     val behandlingsHendelser = BehandlingsHendelserKafkaProducerImpl(rapid)
 
     // Service
-    val grunnlagService = GrunnlagService(grunnlagKlient)
     val oppgaveService = OppgaveServiceImpl(oppgaveDao, featureToggleService)
 
     val behandlingService = BehandlingServiceImpl(

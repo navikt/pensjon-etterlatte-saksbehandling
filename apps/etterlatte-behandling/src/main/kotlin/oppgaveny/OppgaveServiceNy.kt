@@ -9,9 +9,9 @@ class OppgaveServiceNy(private val oppgaveDaoNy: OppgaveDaoNy, private val sakDa
         return oppgaveDaoNy.hentOppgaver()
     }
 
-    fun opprettNyOppgaveMedSakOgReferanse(referanse: String, sakId: Long) {
+    fun opprettNyOppgaveMedSakOgReferanse(referanse: String, sakId: Long, oppgaveType: OppgaveType) {
         val sak = sakDao.hentSak(sakId)!!
-        lagreOppgave(opprettNyOppgaveMedReferanseOgSak(referanse = referanse, sak = sak))
+        lagreOppgave(opprettNyOppgaveMedReferanseOgSak(referanse = referanse, sak = sak, oppgaveType = oppgaveType))
     }
 
     fun lagreOppgave(oppgaveNy: OppgaveNy) { // TODO: skal det være noen verifisering her? evt en egen metode for route

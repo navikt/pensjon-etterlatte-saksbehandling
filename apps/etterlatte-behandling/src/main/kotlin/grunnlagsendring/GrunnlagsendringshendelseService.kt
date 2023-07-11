@@ -35,6 +35,7 @@ import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.oppgaveny.OppgaveServiceNy
+import no.nav.etterlatte.oppgaveny.OppgaveType
 import no.nav.etterlatte.sak.SakService
 import no.nav.etterlatte.sak.TilgangService
 import no.nav.etterlatte.sikkerLogg
@@ -210,7 +211,11 @@ class GrunnlagsendringshendelseService(
                         "Oppretter grunnlagsendringshendelse med id=$hendelseId for hendelse av " +
                             "type $grunnlagendringType på sak med id=${rolleOgSak.sakId}"
                     )
-                    oppgaveService.opprettNyOppgaveMedSakOgReferanse(hendelseId.toString(), rolleOgSak.sakId)
+                    oppgaveService.opprettNyOppgaveMedSakOgReferanse(
+                        hendelseId.toString(),
+                        rolleOgSak.sakId,
+                        oppgaveType = OppgaveType.HENDELSE
+                    )
                     grunnlagsendringshendelseDao.opprettGrunnlagsendringshendelse(
                         Grunnlagsendringshendelse(
                             id = hendelseId,
@@ -251,7 +256,11 @@ class GrunnlagsendringshendelseService(
                             "Oppretter grunnlagsendringshendelse med id=$hendelseId for hendelse av " +
                                 "type $grunnlagendringType på sak med id=${rolleOgSak.sakId}"
                         )
-                        oppgaveService.opprettNyOppgaveMedSakOgReferanse(hendelseId.toString(), rolleOgSak.sakId)
+                        oppgaveService.opprettNyOppgaveMedSakOgReferanse(
+                            hendelseId.toString(),
+                            rolleOgSak.sakId,
+                            oppgaveType = OppgaveType.HENDELSE
+                        )
                         grunnlagsendringshendelseDao.opprettGrunnlagsendringshendelse(
                             Grunnlagsendringshendelse(
                                 id = hendelseId,
@@ -282,7 +291,11 @@ class GrunnlagsendringshendelseService(
                     "Oppretter grunnlagsendringshendelse med id=$hendelseId for hendelse av " +
                         "type $grunnlagendringType på sak med id=$sakId"
                 )
-                oppgaveService.opprettNyOppgaveMedSakOgReferanse(hendelseId.toString(), sakId)
+                oppgaveService.opprettNyOppgaveMedSakOgReferanse(
+                    referanse = hendelseId.toString(),
+                    sakId = sakId,
+                    oppgaveType = OppgaveType.HENDELSE
+                )
                 listOf(
                     grunnlagsendringshendelseDao.opprettGrunnlagsendringshendelse(
                         Grunnlagsendringshendelse(

@@ -215,7 +215,7 @@ internal class FoerstegangsbehandlingServiceImplTest {
         every { behandlingDaoMock.lagreStatus(any(), any(), any()) } returns Unit
         every { behandlingHendelserKafkaProducerMock.sendMeldingForHendelse(any(), any()) } returns Unit
         every { grunnlagService.leggInnNyttGrunnlag(any()) } returns Unit
-        every { oppgaveService.opprettNyOppgaveMedSakOgReferanse(any(), any()) } returns Unit
+        every { oppgaveService.opprettNyOppgaveMedSakOgReferanse(any(), any(), any()) } returns Unit
 
         val resultat = behandlingsService.opprettBehandling(
             1,
@@ -242,8 +242,8 @@ internal class FoerstegangsbehandlingServiceImplTest {
             behandlingDaoMock.lagreStatus(any(), any(), any())
             behandlingHendelserKafkaProducerMock.sendMeldingForHendelse(any(), BehandlingHendelseType.OPPRETTET)
             grunnlagService.leggInnNyttGrunnlag(any())
-            oppgaveService.opprettNyOppgaveMedSakOgReferanse(any(), any())
-            oppgaveService.opprettNyOppgaveMedSakOgReferanse(any(), any())
+            oppgaveService.opprettNyOppgaveMedSakOgReferanse(any(), any(), any())
+            oppgaveService.opprettNyOppgaveMedSakOgReferanse(any(), any(), any())
         }
     }
 
@@ -302,7 +302,7 @@ internal class FoerstegangsbehandlingServiceImplTest {
         every { hendelseDaoMock.behandlingOpprettet(any()) } returns Unit
         every { behandlingHendelserKafkaProducerMock.sendMeldingForHendelse(any(), any()) } returns Unit
         every { grunnlagService.leggInnNyttGrunnlag(any()) } returns Unit
-        every { oppgaveService.opprettNyOppgaveMedSakOgReferanse(any(), any()) } returns Unit
+        every { oppgaveService.opprettNyOppgaveMedSakOgReferanse(any(), any(), any()) } returns Unit
 
         val foerstegangsbehandling = behandlingsService.opprettBehandling(
             1,
@@ -321,8 +321,8 @@ internal class FoerstegangsbehandlingServiceImplTest {
             behandlingDaoMock.alleBehandlingerISak(any())
             behandlingHendelserKafkaProducerMock.sendMeldingForHendelse(any(), any())
             grunnlagService.leggInnNyttGrunnlag(any())
-            oppgaveService.opprettNyOppgaveMedSakOgReferanse(any(), any())
-            oppgaveService.opprettNyOppgaveMedSakOgReferanse(any(), any())
+            oppgaveService.opprettNyOppgaveMedSakOgReferanse(any(), any(), any())
+            oppgaveService.opprettNyOppgaveMedSakOgReferanse(any(), any(), any())
         }
     }
 
@@ -386,7 +386,7 @@ internal class FoerstegangsbehandlingServiceImplTest {
         every { hendelseDaoMock.behandlingOpprettet(any()) } returns Unit
         every { behandlingHendelserKafkaProducerMock.sendMeldingForHendelse(any(), any()) } returns Unit
         every { grunnlagService.leggInnNyttGrunnlag(any()) } returns Unit
-        every { oppgaveService.opprettNyOppgaveMedSakOgReferanse(any(), any()) } returns Unit
+        every { oppgaveService.opprettNyOppgaveMedSakOgReferanse(any(), any(), any()) } returns Unit
 
         val foerstegangsbehandling = behandlingsService.opprettBehandling(
             1,
@@ -417,8 +417,8 @@ internal class FoerstegangsbehandlingServiceImplTest {
             behandlingDaoMock.alleBehandlingerISak(any())
             behandlingHendelserKafkaProducerMock.sendMeldingForHendelse(any(), any())
             grunnlagService.leggInnNyttGrunnlag(any())
-            oppgaveService.opprettNyOppgaveMedSakOgReferanse(any(), any())
-            oppgaveService.opprettNyOppgaveMedSakOgReferanse(any(), any())
+            oppgaveService.opprettNyOppgaveMedSakOgReferanse(any(), any(), any())
+            oppgaveService.opprettNyOppgaveMedSakOgReferanse(any(), any(), any())
         }
         verify {
             behandlingDaoMock.lagreStatus(any(), BehandlingStatus.AVBRUTT, any())
@@ -485,7 +485,7 @@ internal class FoerstegangsbehandlingServiceImplTest {
         every { hendelseDaoMock.behandlingOpprettet(any()) } returns Unit
         every { behandlingHendelserKafkaProducerMock.sendMeldingForHendelse(any(), any()) } returns Unit
         every { grunnlagService.leggInnNyttGrunnlag(any()) } returns Unit
-        every { oppgaveService.opprettNyOppgaveMedSakOgReferanse(any(), any()) } returns Unit
+        every { oppgaveService.opprettNyOppgaveMedSakOgReferanse(any(), any(), any()) } returns Unit
 
         val foerstegangsbehandling = behandlingsService.opprettBehandling(
             1,
@@ -554,7 +554,7 @@ internal class FoerstegangsbehandlingServiceImplTest {
             hendelseDaoMock.behandlingOpprettet(any())
             behandlingDaoMock.alleBehandlingerISak(any())
             behandlingHendelserKafkaProducerMock.sendMeldingForHendelse(any(), any())
-            oppgaveService.opprettNyOppgaveMedSakOgReferanse(any(), any())
+            oppgaveService.opprettNyOppgaveMedSakOgReferanse(any(), any(), any())
         }
     }
 

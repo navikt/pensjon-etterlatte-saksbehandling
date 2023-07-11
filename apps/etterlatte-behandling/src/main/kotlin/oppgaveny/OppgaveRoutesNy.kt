@@ -12,21 +12,29 @@ import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.token.Saksbehandler
 
-internal fun Route.oppgaveRoutesNy(service: OppgaveServiceNy) {
+internal fun Route.oppgaveRoutesNy(service: OppgaveServiceNy, kanBrukeNyOppgaveliste: Boolean) {
     route("/api/nyeoppgaver") {
         get("/hent") {
-            when (brukerTokenInfo) {
-                is Saksbehandler -> call.respond(
-                    service.finnOppgaverForBruker(Kontekst.get().appUserAsSaksbehandler().saksbehandlerMedRoller)
-                )
+            if (kanBrukeNyOppgaveliste) {
+                when (brukerTokenInfo) {
+                    is Saksbehandler -> call.respond(
+                        service.finnOppgaverForBruker(Kontekst.get().appUserAsSaksbehandler().saksbehandlerMedRoller)
+                    )
 
-                else -> call.respond(HttpStatusCode.Forbidden)
+                    else -> call.respond(HttpStatusCode.Forbidden)
+                }
+            } else {
+                call.respond(HttpStatusCode.Forbidden)
             }
         }
         post("/lagre") {
-            val oppgave = call.receive<OppgaveNy>()
-            service.lagreOppgave(oppgave)
-            call.respond(HttpStatusCode.Created)
+            if (kanBrukeNyOppgaveliste) {
+                val oppgave = call.receive<OppgaveNy>()
+                service.lagreOppgave(oppgave)
+                call.respond(HttpStatusCode.Created)
+            } else {
+                call.respond(HttpStatusCode.Forbidden)
+            }
         }
     }
 }

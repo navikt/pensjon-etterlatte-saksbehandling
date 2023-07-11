@@ -3,9 +3,7 @@ CREATE TABLE oppgave (
     id UUID PRIMARY KEY,
     status TEXT,
     enhet TEXT,
-    sak_id BIGINT NOT NULL
-        CONSTRAINT behandling_sak_id_fk
-            REFERENCES sak (id),
+    sak_id BIGINT NOT NULL,
     saksbehandler TEXT,
     referanse TEXT,
     merknad TEXT,

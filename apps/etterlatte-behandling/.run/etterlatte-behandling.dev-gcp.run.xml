@@ -31,6 +31,7 @@
       <env name="AZURE_SCOPE_SKJERMEDE_PIP" value="api://dev-gcp.nom.skjermede-personer-pip/.default" />
       <env name="PDLTJENESTER_AZURE_SCOPE" value="api://dev-gcp.etterlatte.etterlatte-pdltjenester/.default" />
       <env name="SKJERMING_URL" value="https://skjermede-personer-pip.intern.dev.nav.no" />
+      <env name="KAN_BRUKE_NY_OPPGAVELISTE" value="true" />
     </envs>
     <option name="MAIN_CLASS_NAME" value="no.nav.etterlatte.ApplicationKt" />
     <module name="pensjon-etterlatte-saksbehandling.apps.etterlatte-behandling.main" />

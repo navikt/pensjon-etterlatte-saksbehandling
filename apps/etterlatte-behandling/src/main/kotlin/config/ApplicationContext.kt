@@ -202,6 +202,7 @@ class ApplicationContext(
     val enhetService = EnhetServiceImpl(navAnsattKlient)
     val grunnlagsendringshendelseService =
         GrunnlagsendringshendelseService(
+            oppgaveService = oppgaveServiceNy,
             grunnlagsendringshendelseDao = grunnlagsendringshendelseDao,
             behandlingService = behandlingService,
             pdlKlient = pdlKlient,

@@ -34,6 +34,7 @@ import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
+import no.nav.etterlatte.oppgaveny.OppgaveServiceNy
 import no.nav.etterlatte.sak.SakService
 import no.nav.etterlatte.sak.TilgangService
 import no.nav.etterlatte.sikkerLogg
@@ -41,6 +42,7 @@ import org.slf4j.LoggerFactory
 import java.util.*
 
 class GrunnlagsendringshendelseService(
+    private val oppgaveService: OppgaveServiceNy,
     private val grunnlagsendringshendelseDao: GrunnlagsendringshendelseDao,
     private val behandlingService: BehandlingService,
     private val pdlKlient: PdlKlient,
@@ -208,6 +210,7 @@ class GrunnlagsendringshendelseService(
                         "Oppretter grunnlagsendringshendelse med id=$hendelseId for hendelse av " +
                             "type $grunnlagendringType på sak med id=${rolleOgSak.sakId}"
                     )
+                    oppgaveService.opprettNyOppgaveMedSakOgReferanse(hendelseId.toString(), rolleOgSak.sakId)
                     grunnlagsendringshendelseDao.opprettGrunnlagsendringshendelse(
                         Grunnlagsendringshendelse(
                             id = hendelseId,
@@ -248,6 +251,7 @@ class GrunnlagsendringshendelseService(
                             "Oppretter grunnlagsendringshendelse med id=$hendelseId for hendelse av " +
                                 "type $grunnlagendringType på sak med id=${rolleOgSak.sakId}"
                         )
+                        oppgaveService.opprettNyOppgaveMedSakOgReferanse(hendelseId.toString(), rolleOgSak.sakId)
                         grunnlagsendringshendelseDao.opprettGrunnlagsendringshendelse(
                             Grunnlagsendringshendelse(
                                 id = hendelseId,
@@ -278,6 +282,7 @@ class GrunnlagsendringshendelseService(
                     "Oppretter grunnlagsendringshendelse med id=$hendelseId for hendelse av " +
                         "type $grunnlagendringType på sak med id=$sakId"
                 )
+                oppgaveService.opprettNyOppgaveMedSakOgReferanse(hendelseId.toString(), sakId)
                 listOf(
                     grunnlagsendringshendelseDao.opprettGrunnlagsendringshendelse(
                         Grunnlagsendringshendelse(

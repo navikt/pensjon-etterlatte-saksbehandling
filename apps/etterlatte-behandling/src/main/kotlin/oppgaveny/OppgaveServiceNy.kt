@@ -14,7 +14,7 @@ class OppgaveServiceNy(private val oppgaveDaoNy: OppgaveDaoNy, private val sakDa
         lagreOppgave(opprettNyOppgaveMedReferanseOgSak(referanse = referanse, sak = sak))
     }
 
-    fun lagreOppgave(oppgaveNy: OppgaveNy) {
+    fun lagreOppgave(oppgaveNy: OppgaveNy) { // TODO: skal det være noen verifisering her? evt en egen metode for route
         oppgaveDaoNy.lagreOppgave(oppgaveNy)
     }
 }

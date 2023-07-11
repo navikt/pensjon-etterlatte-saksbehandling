@@ -44,6 +44,8 @@ import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.libs.sporingslogg.Sporingslogg
 import no.nav.etterlatte.oppgave.OppgaveDao
 import no.nav.etterlatte.oppgave.OppgaveServiceImpl
+import no.nav.etterlatte.oppgaveny.OppgaveDaoNy
+import no.nav.etterlatte.oppgaveny.OppgaveServiceNy
 import no.nav.etterlatte.sak.RealSakService
 import no.nav.etterlatte.sak.SakDao
 import no.nav.etterlatte.sak.SakTilgangDao
@@ -120,6 +122,7 @@ class ApplicationContext(
     // Dao
     val hendelseDao = HendelseDao { databaseContext().activeTx() }
     val oppgaveDao = OppgaveDao { databaseContext().activeTx() }
+    val oppgaveDaoNy = OppgaveDaoNy { databaseContext().activeTx() }
     val behandlingDao = BehandlingDao { databaseContext().activeTx() }
     val sakDao = SakDao { databaseContext().activeTx() }
     val grunnlagsendringshendelseDao = GrunnlagsendringshendelseDao { databaseContext().activeTx() }
@@ -133,9 +136,11 @@ class ApplicationContext(
 
     val behandlingsHendelser = BehandlingsHendelserKafkaProducerImpl(rapid)
 
+    val kanBrukeNyOppgaveliste: Boolean = env.getValue("KAN_BRUKE_NY_OPPGAVELISTE").toBoolean()
+
     // Service
     val oppgaveService = OppgaveServiceImpl(oppgaveDao, featureToggleService)
-
+    val oppgaveServiceNy = OppgaveServiceNy(oppgaveDaoNy)
     val behandlingService = BehandlingServiceImpl(
         behandlingDao = behandlingDao,
         behandlingHendelser = behandlingsHendelser,

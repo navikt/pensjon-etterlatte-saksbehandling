@@ -102,6 +102,8 @@ spec:
       value: https://skjermede-personer-pip.intern.nav.no
     - name: AZURE_SCOPE_SKJERMEDE_PIP
       value: api://prod-gcp.nom.skjermede-personer-pip/.default
+    - name: KAN_BRUKE_NY_OPPGAVELISTE
+      value: 'false'
   accessPolicy:
     outbound:
       rules:

@@ -127,7 +127,7 @@ internal class RealManueltOpphoerServiceTest {
             }
         }
 
-        every { oppgaveService.opprettNyOppgaveMedSakOgReferanse(any(), any()) } returns Unit
+        every { oppgaveService.opprettNyOppgaveMedSakOgReferanse(any(), any(), any()) } returns Unit
 
         val behandlingHendelserKafkaProducer = mockk<BehandlingHendelserKafkaProducer> {
             every { sendMeldingForHendelse(any(), any()) } returns Unit
@@ -230,7 +230,7 @@ internal class RealManueltOpphoerServiceTest {
                 )
             }
         }
-        every { oppgaveService.opprettNyOppgaveMedSakOgReferanse(any(), any()) } returns Unit
+        every { oppgaveService.opprettNyOppgaveMedSakOgReferanse(any(), any(), any()) } returns Unit
 
         val behandlingHendelserKafkaProducer = mockk<BehandlingHendelserKafkaProducer> {
             every { sendMeldingForHendelse(any(), any()) } returns Unit

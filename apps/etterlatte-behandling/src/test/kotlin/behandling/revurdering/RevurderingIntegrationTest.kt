@@ -31,6 +31,7 @@ import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
+import no.nav.etterlatte.oppgaveny.OppgaveType
 import no.nav.etterlatte.persongalleri
 import no.nav.etterlatte.sak.SakServiceFeatureToggle
 import org.junit.jupiter.api.AfterAll
@@ -134,7 +135,13 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
             )
 
         verify { grunnlagService.leggInnNyttGrunnlag(revurdering!!) }
-        verify { oppgaveService.opprettNyOppgaveMedSakOgReferanse(revurdering?.id.toString(), sak.id) }
+        verify {
+            oppgaveService.opprettNyOppgaveMedSakOgReferanse(
+                revurdering?.id.toString(),
+                sak.id,
+                OppgaveType.REVUDERING
+            )
+        }
         verify { oppgaveService.lagreOppgave(any()) }
         inTransaction {
             Assertions.assertEquals(revurdering, applicationContext.behandlingDao.hentBehandling(revurdering!!.id))
@@ -239,7 +246,13 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
             Assertions.assertEquals(nyRevurderingInfo, ferdigRevurdering.revurderingInfo)
             verify { hendelser.sendMeldingForHendelse(revurdering, BehandlingHendelseType.OPPRETTET) }
             verify { grunnlagService.leggInnNyttGrunnlag(revurdering) }
-            verify { oppgaveService.opprettNyOppgaveMedSakOgReferanse(revurdering.id.toString(), sak.id) }
+            verify {
+                oppgaveService.opprettNyOppgaveMedSakOgReferanse(
+                    revurdering.id.toString(),
+                    sak.id,
+                    OppgaveType.REVUDERING
+                )
+            }
             verify { oppgaveService.lagreOppgave(any()) }
             confirmVerified(hendelser, grunnlagService, oppgaveService)
         }
@@ -393,8 +406,20 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
             verify { grunnlagService.leggInnNyttGrunnlag(revurdering) }
             verify { hendelser.sendMeldingForHendelse(revurdering, BehandlingHendelseType.OPPRETTET) }
             verify(exactly = 2) { oppgaveService.lagreOppgave(any()) }
-            verify { oppgaveService.opprettNyOppgaveMedSakOgReferanse(behandling.id.toString(), sak.id) }
-            verify { oppgaveService.opprettNyOppgaveMedSakOgReferanse(revurdering.id.toString(), sak.id) }
+            verify {
+                oppgaveService.opprettNyOppgaveMedSakOgReferanse(
+                    behandling.id.toString(),
+                    sak.id,
+                    OppgaveType.FOERSTEGANGSBEHANDLING
+                )
+            }
+            verify {
+                oppgaveService.opprettNyOppgaveMedSakOgReferanse(
+                    revurdering.id.toString(),
+                    sak.id,
+                    OppgaveType.REVUDERING
+                )
+            }
             verify { hendelser.sendMeldingForHendelse(behandling, BehandlingHendelseType.OPPRETTET) }
             confirmVerified(hendelser, grunnlagService, oppgaveService)
         }

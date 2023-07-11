@@ -9,6 +9,7 @@ data class OppgaveNy(
     val status: Status,
     val enhet: String,
     val sakId: Long,
+    val type: OppgaveType,
     val saksbehandler: String?,
     val referanse: String?,
     val merknad: String?,
@@ -21,12 +22,21 @@ enum class Status {
     FERDIGSTILT
 }
 
-fun opprettNyOppgaveMedReferanseOgSak(referanse: String, sak: Sak): OppgaveNy {
+enum class OppgaveType {
+    FOERSTEGANGSBEHANDLING,
+    REVUDERING,
+    HENDELSE,
+    MANUELT_OPPHOER,
+    EKSTERN
+}
+
+fun opprettNyOppgaveMedReferanseOgSak(referanse: String, sak: Sak, oppgaveType: OppgaveType): OppgaveNy {
     return OppgaveNy(
         id = UUID.randomUUID(),
         status = Status.NY,
         enhet = sak.enhet,
         sakId = sak.id,
+        type = oppgaveType,
         saksbehandler = null,
         referanse = referanse,
         merknad = null,

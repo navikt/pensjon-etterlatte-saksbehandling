@@ -22,6 +22,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.oppgaveny.OppgaveServiceNy
+import no.nav.etterlatte.oppgaveny.OppgaveType
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.util.*
@@ -117,7 +118,8 @@ class RealManueltOpphoerService(
             }?.let { id ->
                 oppgaveService.opprettNyOppgaveMedSakOgReferanse(
                     referanse = id.toString(),
-                    sakId = opphoerRequest.sakId
+                    sakId = opphoerRequest.sakId,
+                    oppgaveType = OppgaveType.MANUELT_OPPHOER
                 )
                 (behandlingDao.hentBehandling(id) as ManueltOpphoer).sjekkEnhet()
             }

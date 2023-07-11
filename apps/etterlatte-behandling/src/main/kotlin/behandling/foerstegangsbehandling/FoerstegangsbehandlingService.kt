@@ -36,6 +36,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.norskKlokke
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeNorskTid
 import no.nav.etterlatte.libs.common.tidspunkt.utcKlokke
 import no.nav.etterlatte.oppgaveny.OppgaveServiceNy
+import no.nav.etterlatte.oppgaveny.OppgaveType
 import no.nav.etterlatte.sak.SakDao
 import no.nav.etterlatte.sak.filterSakerForEnheter
 import org.slf4j.LoggerFactory
@@ -163,7 +164,8 @@ class FoerstegangsbehandlingServiceImpl(
                     grunnlagService.leggInnNyttGrunnlag(it)
                     oppgaveService.opprettNyOppgaveMedSakOgReferanse(
                         referanse = behandling.id.toString(),
-                        sakId = sak.id
+                        sakId = sak.id,
+                        oppgaveType = OppgaveType.FOERSTEGANGSBEHANDLING
                     )
                     behandlingHendelser.sendMeldingForHendelse(it, BehandlingHendelseType.OPPRETTET)
                 }

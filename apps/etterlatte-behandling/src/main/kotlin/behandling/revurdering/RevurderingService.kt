@@ -28,6 +28,7 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.oppgaveny.OppgaveServiceNy
+import no.nav.etterlatte.oppgaveny.OppgaveType
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -186,7 +187,8 @@ class RevurderingServiceImpl(
                     grunnlagService.leggInnNyttGrunnlag(it)
                     oppgaveService.opprettNyOppgaveMedSakOgReferanse(
                         referanse = behandling.id.toString(),
-                        sakId = sakId
+                        sakId = sakId,
+                        oppgaveType = OppgaveType.REVUDERING
                     )
                     behandlingHendelser.sendMeldingForHendelse(it, BehandlingHendelseType.OPPRETTET)
                 }

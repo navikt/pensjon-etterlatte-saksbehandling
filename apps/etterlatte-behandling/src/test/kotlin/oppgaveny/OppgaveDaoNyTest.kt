@@ -62,6 +62,7 @@ internal class OppgaveDaoNyTest {
         Status.NY,
         Enheter.AALESUND.enhetNr,
         1L,
+        OppgaveType.FOERSTEGANGSBEHANDLING,
         "Z1234",
         "referanse",
         "merknad",

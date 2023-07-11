@@ -130,7 +130,7 @@ internal class GrunnlagsendringshendelseServiceTest {
 
         coEvery { grunnlagClient.hentPersonSakOgRolle(any()) }
             .returns(PersonMedSakerOgRoller(fnr, listOf(SakOgRolle(sakId, Saksrolle.SOEKER))))
-        every { oppgaveService.opprettNyOppgaveMedSakOgReferanse(any(), any()) } returns Unit
+        every { oppgaveService.opprettNyOppgaveMedSakOgReferanse(any(), any(), any()) } returns Unit
 
         val lagredeGrunnlagsendringshendelser = grunnlagsendringshendelseService.opprettDoedshendelse(
             Doedshendelse(
@@ -184,7 +184,7 @@ internal class GrunnlagsendringshendelseServiceTest {
         coEvery {
             grunnlagClient.hentPersonSakOgRolle(any())
         } returns PersonMedSakerOgRoller(fnr, listOf(SakOgRolle(sakId, Saksrolle.SOEKER)))
-        every { oppgaveService.opprettNyOppgaveMedSakOgReferanse(any(), any()) } returns Unit
+        every { oppgaveService.opprettNyOppgaveMedSakOgReferanse(any(), any(), any()) } returns Unit
         grunnlagsendringshendelseService.opprettUtflyttingshendelse(
             utflyttingsHendelse = UtflyttingsHendelse(
                 hendelseId = "1",
@@ -253,7 +253,7 @@ internal class GrunnlagsendringshendelseServiceTest {
         coEvery {
             grunnlagClient.hentPersonSakOgRolle(any())
         } returns PersonMedSakerOgRoller(fnr, listOf(SakOgRolle(sakId, Saksrolle.SOEKER)))
-        every { oppgaveService.opprettNyOppgaveMedSakOgReferanse(any(), any()) } returns Unit
+        every { oppgaveService.opprettNyOppgaveMedSakOgReferanse(any(), any(), any()) } returns Unit
         val lagredeGrunnlagsendringshendelser1 = grunnlagsendringshendelseService.opprettDoedshendelse(
             Doedshendelse(
                 hendelseId = "1",
@@ -322,7 +322,7 @@ internal class GrunnlagsendringshendelseServiceTest {
         coEvery {
             grunnlagClient.hentPersonSakOgRolle(any())
         } returns PersonMedSakerOgRoller(fnr, listOf(SakOgRolle(sakId, Saksrolle.SOEKER)))
-        every { oppgaveService.opprettNyOppgaveMedSakOgReferanse(any(), any()) } returns Unit
+        every { oppgaveService.opprettNyOppgaveMedSakOgReferanse(any(), any(), any()) } returns Unit
         val lagredeGrunnlagsendringshendelser1 = grunnlagsendringshendelseService.opprettUtflyttingshendelse(
             UtflyttingsHendelse(
                 hendelseId = "1",
@@ -390,7 +390,7 @@ internal class GrunnlagsendringshendelseServiceTest {
         coEvery {
             grunnlagClient.hentPersonSakOgRolle(any())
         } returns PersonMedSakerOgRoller("Soeker", listOf(SakOgRolle(sakId, Saksrolle.SOEKER)))
-        every { oppgaveService.opprettNyOppgaveMedSakOgReferanse(any(), any()) } returns Unit
+        every { oppgaveService.opprettNyOppgaveMedSakOgReferanse(any(), any(), any()) } returns Unit
 
         val lagredeGrunnlagsendringshendelser1 = grunnlagsendringshendelseService.opprettForelderBarnRelasjonHendelse(
             ForelderBarnRelasjonHendelse(
@@ -462,7 +462,7 @@ internal class GrunnlagsendringshendelseServiceTest {
             grunnlagClient.hentPersonSakOgRolle(any())
         } returns PersonMedSakerOgRoller("Soeker", listOf(SakOgRolle(sakId, Saksrolle.SOEKER)))
 
-        every { oppgaveService.opprettNyOppgaveMedSakOgReferanse(any(), any()) } returns Unit
+        every { oppgaveService.opprettNyOppgaveMedSakOgReferanse(any(), any(), any()) } returns Unit
 
         val lagredeGrunnlagsendringshendelser1 = grunnlagsendringshendelseService.opprettSivilstandHendelse(
             SivilstandHendelse(
@@ -665,7 +665,7 @@ internal class GrunnlagsendringshendelseServiceTest {
         every {
             grunnlagshendelsesDao.hentGrunnlagsendringshendelserMedStatuserISak(sakId, any())
         } returns emptyList()
-        every { oppgaveService.opprettNyOppgaveMedSakOgReferanse(any(), any()) } returns Unit
+        every { oppgaveService.opprettNyOppgaveMedSakOgReferanse(any(), any(), any()) } returns Unit
         grunnlagsendringshendelseService.opprettEndretGrunnbeloepHendelse(sakId)
 
         assertEquals(hendelseSomLagres.captured.type, GrunnlagsendringsType.GRUNNBELOEP)

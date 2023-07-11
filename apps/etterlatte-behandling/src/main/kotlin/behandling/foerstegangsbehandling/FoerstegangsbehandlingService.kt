@@ -35,6 +35,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.norskKlokke
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeNorskTid
 import no.nav.etterlatte.libs.common.tidspunkt.utcKlokke
+import no.nav.etterlatte.oppgaveny.OppgaveServiceNy
 import no.nav.etterlatte.sak.SakDao
 import no.nav.etterlatte.sak.filterSakerForEnheter
 import org.slf4j.LoggerFactory
@@ -69,6 +70,7 @@ interface FoerstegangsbehandlingService {
 }
 
 class FoerstegangsbehandlingServiceImpl(
+    private val oppgaveService: OppgaveServiceNy,
     private val grunnlagService: GrunnlagService,
     private val revurderingService: RevurderingService,
     private val sakDao: SakDao,
@@ -159,6 +161,10 @@ class FoerstegangsbehandlingServiceImpl(
             }.also { behandling ->
                 behandling?.let {
                     grunnlagService.leggInnNyttGrunnlag(it)
+                    oppgaveService.opprettNyOppgaveMedSakOgReferanse(
+                        referanse = behandling.id.toString(),
+                        sakId = sak.id
+                    )
                     behandlingHendelser.sendMeldingForHendelse(it, BehandlingHendelseType.OPPRETTET)
                 }
             }

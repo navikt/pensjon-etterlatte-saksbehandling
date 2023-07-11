@@ -27,6 +27,7 @@ import no.nav.etterlatte.libs.common.behandling.tilVirkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
+import no.nav.etterlatte.oppgaveny.OppgaveServiceNy
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -70,6 +71,7 @@ enum class RevurderingServiceFeatureToggle(private val key: String) : FeatureTog
 }
 
 class RevurderingServiceImpl(
+    private val oppgaveService: OppgaveServiceNy,
     private val grunnlagService: GrunnlagService,
     private val behandlingHendelser: BehandlingHendelserKafkaProducer,
     private val featureToggleService: FeatureToggleService,
@@ -182,6 +184,10 @@ class RevurderingServiceImpl(
             }.also { behandling ->
                 behandling?.let {
                     grunnlagService.leggInnNyttGrunnlag(it)
+                    oppgaveService.opprettNyOppgaveMedSakOgReferanse(
+                        referanse = behandling.id.toString(),
+                        sakId = sakId
+                    )
                     behandlingHendelser.sendMeldingForHendelse(it, BehandlingHendelseType.OPPRETTET)
                 }
             }

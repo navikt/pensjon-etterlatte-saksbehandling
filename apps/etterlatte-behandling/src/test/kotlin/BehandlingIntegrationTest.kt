@@ -15,7 +15,6 @@ import io.ktor.http.headersOf
 import io.ktor.serialization.jackson.JacksonConverter
 import io.ktor.server.config.HoconApplicationConfig
 import no.nav.etterlatte.behandling.domain.ArbeidsFordelingEnhet
-import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.domain.SaksbehandlerEnhet
 import no.nav.etterlatte.behandling.domain.SaksbehandlerTema
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
@@ -26,7 +25,6 @@ import no.nav.etterlatte.config.ApplicationContext
 import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.kafka.TestProdusent
 import no.nav.etterlatte.libs.common.Miljoevariabler
-import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.PersonMedSakerOgRoller
 import no.nav.etterlatte.libs.common.behandling.SakOgRolle
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -37,7 +35,6 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.GeografiskTilknytning
 import no.nav.etterlatte.libs.common.person.Person
-import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
@@ -48,7 +45,6 @@ import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
 import testsupport.buildTestApplicationConfigurationForOauth
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.util.*
 
 abstract class BehandlingIntegrationTest {
@@ -208,22 +204,6 @@ abstract class BehandlingIntegrationTest {
                 """.trimIndent()
             ).execute()
         }
-    }
-
-    fun opprettSakMedFoerstegangsbehandling(fnr: String): Pair<Sak, Foerstegangsbehandling?> {
-        val sak = inTransaction {
-            applicationContext.sakDao.opprettSak(fnr, SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr)
-        }
-
-        val behandling = applicationContext.foerstegangsbehandlingService
-            .opprettBehandling(
-                sak.id,
-                persongalleri(),
-                LocalDateTime.now().toString(),
-                Vedtaksloesning.GJENNY
-            )
-
-        return Pair(sak, behandling as Foerstegangsbehandling)
     }
 
     protected fun afterAll() {

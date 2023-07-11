@@ -1,5 +1,6 @@
 package no.nav.etterlatte.oppgaveny
 
+import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import java.util.*
 
@@ -18,4 +19,17 @@ enum class Status {
     NY,
     UNDER_BEHANDLING,
     FERDIGSTILT
+}
+
+fun opprettNyOppgaveMedReferanseOgSak(referanse: String, sak: Sak): OppgaveNy {
+    return OppgaveNy(
+        id = UUID.randomUUID(),
+        status = Status.NY,
+        enhet = sak.enhet,
+        sakId = sak.id,
+        saksbehandler = null,
+        referanse = referanse,
+        merknad = null,
+        opprettet = Tidspunkt.now()
+    )
 }

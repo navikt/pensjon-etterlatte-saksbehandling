@@ -21,6 +21,7 @@ import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.oppgaveny.OppgaveServiceNy
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.util.*
@@ -47,6 +48,7 @@ interface ManueltOpphoerService {
 }
 
 class RealManueltOpphoerService(
+    private val oppgaveService: OppgaveServiceNy,
     private val behandlingDao: BehandlingDao,
     private val behandlingHendelser: BehandlingHendelserKafkaProducer,
     private val hendelseDao: HendelseDao,
@@ -75,13 +77,13 @@ class RealManueltOpphoerService(
         opphoerRequest: ManueltOpphoerRequest
     ): ManueltOpphoer? {
         return inTransaction {
-            val alleBehandlingerISak = behandlingDao.alleBehandlingerISak(opphoerRequest.sak).filterForEnheter()
+            val alleBehandlingerISak = behandlingDao.alleBehandlingerISak(opphoerRequest.sakId).filterForEnheter()
             val forrigeBehandling = alleBehandlingerISak.sisteIkkeAvbrutteBehandling()
             val virkningstidspunkt = alleBehandlingerISak.tidligsteIverksatteVirkningstidspunkt()
 
             if (virkningstidspunkt == null) {
                 logger.warn(
-                    "Saken med id=${opphoerRequest.sak} har ikke noe tidligste iverksatt virkningstidspunkt, " +
+                    "Saken med id=${opphoerRequest.sakId} har ikke noe tidligste iverksatt virkningstidspunkt, " +
                         "så det er ingenting å opphøre."
                 )
                 return@inTransaction null
@@ -105,7 +107,7 @@ class RealManueltOpphoerService(
                 }
 
                 null -> {
-                    logger.error("En forrige ikke-avbrutt behandling for sak ${opphoerRequest.sak} eksisterer ikke")
+                    logger.error("En forrige ikke-avbrutt behandling for sak ${opphoerRequest.sakId} eksisterer ikke")
                     null
                 }
             }?.let {
@@ -113,6 +115,10 @@ class RealManueltOpphoerService(
                 hendelseDao.behandlingOpprettet(it.toBehandlingOpprettet())
                 it.id
             }?.let { id ->
+                oppgaveService.opprettNyOppgaveMedSakOgReferanse(
+                    referanse = id.toString(),
+                    sakId = opphoerRequest.sakId
+                )
                 (behandlingDao.hentBehandling(id) as ManueltOpphoer).sjekkEnhet()
             }
         }?.also { lagretManueltOpphoer ->

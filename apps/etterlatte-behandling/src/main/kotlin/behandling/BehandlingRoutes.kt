@@ -244,11 +244,11 @@ internal fun Route.behandlingRoutes(
     route("/api/behandlinger/{sakid}/manueltopphoer") {
         post {
             val manueltOpphoerRequest = call.receive<ManueltOpphoerRequest>()
-            logger.info("Mottat forespørsel om å gjennomføre et manuelt opphør på sak ${manueltOpphoerRequest.sak}")
+            logger.info("Mottat forespørsel om å gjennomføre et manuelt opphør på sak ${manueltOpphoerRequest.sakId}")
             when (val manueltOpphoer = manueltOpphoerService.opprettManueltOpphoer(manueltOpphoerRequest)) {
                 is ManueltOpphoer -> {
                     logger.info(
-                        "Manuelt opphør for sak ${manueltOpphoerRequest.sak} er opprettet med behandlingId " +
+                        "Manuelt opphør for sak ${manueltOpphoerRequest.sakId} er opprettet med behandlingId " +
                             "${manueltOpphoer.id}"
                     )
                     call.respond(ManueltOpphoerResponse(behandlingId = manueltOpphoer.id.toString()))
@@ -256,7 +256,7 @@ internal fun Route.behandlingRoutes(
 
                 else -> {
                     logger.info(
-                        "Sak ${manueltOpphoerRequest.sak} hadde ikke gyldig status for manuelt opphør, så" +
+                        "Sak ${manueltOpphoerRequest.sakId} hadde ikke gyldig status for manuelt opphør, så" +
                             "ingen manuelt opphør blir opprettet"
                     )
                     call.respond(HttpStatusCode.Forbidden)

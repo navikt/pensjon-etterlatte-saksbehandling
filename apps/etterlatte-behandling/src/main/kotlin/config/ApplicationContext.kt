@@ -140,7 +140,7 @@ class ApplicationContext(
 
     // Service
     val oppgaveService = OppgaveServiceImpl(oppgaveDao, featureToggleService)
-    val oppgaveServiceNy = OppgaveServiceNy(oppgaveDaoNy)
+    val oppgaveServiceNy = OppgaveServiceNy(oppgaveDaoNy, sakDao)
     val behandlingService = BehandlingServiceImpl(
         behandlingDao = behandlingDao,
         behandlingHendelser = behandlingsHendelser,
@@ -154,6 +154,7 @@ class ApplicationContext(
     val grunnlagsService = GrunnlagService(grunnlagKlient = grunnlagKlient)
     val revurderingService =
         RevurderingServiceImpl(
+            oppgaveService = oppgaveServiceNy,
             grunnlagService = grunnlagsService,
             behandlingHendelser = behandlingsHendelser,
             featureToggleService = featureToggleService,
@@ -164,6 +165,7 @@ class ApplicationContext(
 
     val foerstegangsbehandlingService =
         FoerstegangsbehandlingServiceImpl(
+            oppgaveService = oppgaveServiceNy,
             grunnlagService = grunnlagsService,
             revurderingService = revurderingService,
             sakDao = sakDao,
@@ -175,6 +177,7 @@ class ApplicationContext(
 
     val manueltOpphoerService =
         RealManueltOpphoerService(
+            oppgaveService = oppgaveServiceNy,
             behandlingDao = behandlingDao,
             behandlingHendelser = behandlingsHendelser,
             hendelseDao = hendelseDao,
@@ -199,6 +202,7 @@ class ApplicationContext(
     val enhetService = EnhetServiceImpl(navAnsattKlient)
     val grunnlagsendringshendelseService =
         GrunnlagsendringshendelseService(
+            oppgaveService = oppgaveServiceNy,
             grunnlagsendringshendelseDao = grunnlagsendringshendelseDao,
             behandlingService = behandlingService,
             pdlKlient = pdlKlient,

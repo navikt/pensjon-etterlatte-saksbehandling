@@ -170,10 +170,8 @@ fun <T> List<T>.filterForEnheter(
         when (user) {
             is SaksbehandlerMedEnheterOgRoller -> {
                 val enheter = user.enheter()
-
                 this.filter { filter(it, enheter) }
             }
-
             else -> this
         }
     } else {

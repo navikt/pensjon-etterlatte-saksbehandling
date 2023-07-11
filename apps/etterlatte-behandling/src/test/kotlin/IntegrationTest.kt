@@ -363,7 +363,7 @@ class IntegrationTest : BehandlingIntegrationTest() {
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(
                     ManueltOpphoerRequest(
-                        sak = sak.id,
+                        sakId = sak.id,
                         opphoerAarsaker = listOf(
                             ManueltOpphoerAarsak.SOESKEN_DOED,
                             ManueltOpphoerAarsak.UTFLYTTING_FRA_NORGE

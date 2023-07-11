@@ -10,12 +10,15 @@ import no.nav.etterlatte.Context
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.BehandlingHendelseType
 import no.nav.etterlatte.behandling.BehandlingServiceFeatureToggle
+import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringStatus
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringsType
 import no.nav.etterlatte.behandling.domain.Grunnlagsendringshendelse
 import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.behandling.domain.SamsvarMellomKildeOgGrunnlag
+import no.nav.etterlatte.behandling.foerstegangsbehandling.FoerstegangsbehandlingServiceImpl
 import no.nav.etterlatte.common.DatabaseContext
+import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.Vedtaksloesning
@@ -23,9 +26,13 @@ import no.nav.etterlatte.libs.common.behandling.BarnepensjonSoeskenjusteringGrun
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
+import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
+import no.nav.etterlatte.persongalleri
+import no.nav.etterlatte.sak.SakServiceFeatureToggle
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
@@ -57,11 +64,31 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
 
     val fnr: String = "123"
 
+    fun opprettSakMedFoerstegangsbehandling(
+        fnr: String,
+        foerstegangsbehandlingService: FoerstegangsbehandlingServiceImpl? = null
+    ): Pair<Sak, Foerstegangsbehandling?> {
+        val sak = inTransaction {
+            applicationContext.sakDao.opprettSak(fnr, SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr)
+        }
+        val forstegangsService = foerstegangsbehandlingService ?: applicationContext.foerstegangsbehandlingService
+        val behandling = forstegangsService
+            .opprettBehandling(
+                sak.id,
+                persongalleri(),
+                LocalDateTime.now().toString(),
+                Vedtaksloesning.GJENNY
+            )
+
+        return Pair(sak, behandling as Foerstegangsbehandling)
+    }
+
     @Test
     fun `kan opprette ny revurdering og lagre i db`() {
         val hendelser = spyk(applicationContext.behandlingsHendelser)
         val featureToggleService = mockk<FeatureToggleService>()
         val grunnlagService = spyk(applicationContext.grunnlagsService)
+        val oppgaveService = spyk(applicationContext.oppgaveServiceNy)
 
         every {
             featureToggleService.isEnabled(
@@ -91,6 +118,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
 
         val revurdering =
             RevurderingServiceImpl(
+                oppgaveService,
                 grunnlagService,
                 hendelser,
                 featureToggleService,
@@ -106,12 +134,13 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
             )
 
         verify { grunnlagService.leggInnNyttGrunnlag(revurdering!!) }
-
+        verify { oppgaveService.opprettNyOppgaveMedSakOgReferanse(revurdering?.id.toString(), sak.id) }
+        verify { oppgaveService.lagreOppgave(any()) }
         inTransaction {
             Assertions.assertEquals(revurdering, applicationContext.behandlingDao.hentBehandling(revurdering!!.id))
             verify { hendelser.sendMeldingForHendelse(revurdering, BehandlingHendelseType.OPPRETTET) }
         }
-        confirmVerified(hendelser, grunnlagService)
+        confirmVerified(hendelser, grunnlagService, oppgaveService)
     }
 
     @Test
@@ -119,6 +148,8 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
         val hendelser = spyk(applicationContext.behandlingsHendelser)
         val featureToggleService = mockk<FeatureToggleService>()
         val grunnlagService = spyk(applicationContext.grunnlagsService)
+        val oppgaveService = spyk(applicationContext.oppgaveServiceNy)
+
         every {
             featureToggleService.isEnabled(
                 RevurderingServiceFeatureToggle.OpprettManuellRevurdering,
@@ -145,6 +176,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
             )
         }
         val revurderingService = RevurderingServiceImpl(
+            oppgaveService,
             grunnlagService,
             hendelser,
             featureToggleService,
@@ -207,7 +239,9 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
             Assertions.assertEquals(nyRevurderingInfo, ferdigRevurdering.revurderingInfo)
             verify { hendelser.sendMeldingForHendelse(revurdering, BehandlingHendelseType.OPPRETTET) }
             verify { grunnlagService.leggInnNyttGrunnlag(revurdering) }
-            confirmVerified(hendelser, grunnlagService)
+            verify { oppgaveService.opprettNyOppgaveMedSakOgReferanse(revurdering.id.toString(), sak.id) }
+            verify { oppgaveService.lagreOppgave(any()) }
+            confirmVerified(hendelser, grunnlagService, oppgaveService)
         }
     }
 
@@ -244,6 +278,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
 
         assertNull(
             RevurderingServiceImpl(
+                applicationContext.oppgaveServiceNy,
                 applicationContext.grunnlagsService,
                 hendelser,
                 featureToggleService,
@@ -267,13 +302,14 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
         val hendelser = spyk(applicationContext.behandlingsHendelser)
         val featureToggleService = mockk<FeatureToggleService>()
         val grunnlagService = spyk(applicationContext.grunnlagsService)
+        val oppgaveService = spyk(applicationContext.oppgaveServiceNy)
 
         every {
             featureToggleService.isEnabled(
-                RevurderingServiceFeatureToggle.OpprettManuellRevurdering,
-                any()
+                SakServiceFeatureToggle.FiltrerMedEnhetId,
+                false
             )
-        } returns true
+        } returns false
 
         every {
             featureToggleService.isEnabled(
@@ -282,7 +318,37 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
             )
         } returns false
 
-        val (sak, behandling) = opprettSakMedFoerstegangsbehandling(fnr)
+        every {
+            featureToggleService.isEnabled(
+                RevurderingServiceFeatureToggle.OpprettManuellRevurdering,
+                any()
+            )
+        } returns true
+
+        val revurderingService =
+            RevurderingServiceImpl(
+                oppgaveService,
+                grunnlagService,
+                hendelser,
+                featureToggleService,
+                applicationContext.behandlingDao,
+                applicationContext.hendelseDao,
+                applicationContext.grunnlagsendringshendelseDao
+            )
+
+        val foerstegangsbehandlingService =
+            FoerstegangsbehandlingServiceImpl(
+                oppgaveService = oppgaveService,
+                grunnlagService = grunnlagService,
+                revurderingService = revurderingService,
+                sakDao = applicationContext.sakDao,
+                behandlingDao = applicationContext.behandlingDao,
+                hendelseDao = applicationContext.hendelseDao,
+                behandlingHendelser = hendelser,
+                featureToggleService = featureToggleService
+            )
+
+        val (sak, behandling) = opprettSakMedFoerstegangsbehandling(fnr, foerstegangsbehandlingService)
 
         assertNotNull(behandling)
 
@@ -309,21 +375,13 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
             )
         }
 
-        val revurdering =
-            RevurderingServiceImpl(
-                grunnlagService,
-                hendelser,
-                featureToggleService,
-                applicationContext.behandlingDao,
-                applicationContext.hendelseDao,
-                applicationContext.grunnlagsendringshendelseDao
-            ).opprettManuellRevurdering(
-                sakId = sak.id,
-                forrigeBehandling = behandling!!,
-                revurderingAarsak = RevurderingAarsak.REGULERING,
-                kilde = Vedtaksloesning.GJENNY,
-                paaGrunnAvHendelse = hendelse.id
-            )
+        val revurdering = revurderingService.opprettManuellRevurdering(
+            sakId = sak.id,
+            forrigeBehandling = behandling!!,
+            revurderingAarsak = RevurderingAarsak.REGULERING,
+            kilde = Vedtaksloesning.GJENNY,
+            paaGrunnAvHendelse = hendelse.id
+        )
 
         inTransaction {
             Assertions.assertEquals(revurdering, applicationContext.behandlingDao.hentBehandling(revurdering!!.id))
@@ -331,9 +389,14 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
                 hendelse.id
             )
             Assertions.assertEquals(revurdering.id, grunnlaghendelse?.behandlingId)
+            verify { grunnlagService.leggInnNyttGrunnlag(behandling) }
             verify { grunnlagService.leggInnNyttGrunnlag(revurdering) }
             verify { hendelser.sendMeldingForHendelse(revurdering, BehandlingHendelseType.OPPRETTET) }
-            confirmVerified(hendelser, grunnlagService)
+            verify(exactly = 2) { oppgaveService.lagreOppgave(any()) }
+            verify { oppgaveService.opprettNyOppgaveMedSakOgReferanse(behandling.id.toString(), sak.id) }
+            verify { oppgaveService.opprettNyOppgaveMedSakOgReferanse(revurdering.id.toString(), sak.id) }
+            verify { hendelser.sendMeldingForHendelse(behandling, BehandlingHendelseType.OPPRETTET) }
+            confirmVerified(hendelser, grunnlagService, oppgaveService)
         }
     }
 }

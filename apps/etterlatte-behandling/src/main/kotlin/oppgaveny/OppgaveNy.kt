@@ -8,9 +8,9 @@ data class OppgaveNy(
     val status: Status,
     val enhet: String,
     val sakId: Long,
-    val saksbehandler: String,
-    val referanse: String,
-    val merknad: String,
+    val saksbehandler: String?,
+    val referanse: String?,
+    val merknad: String?,
     val opprettet: Tidspunkt
 )
 

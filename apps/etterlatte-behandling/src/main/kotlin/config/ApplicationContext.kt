@@ -136,6 +136,8 @@ class ApplicationContext(
 
     val behandlingsHendelser = BehandlingsHendelserKafkaProducerImpl(rapid)
 
+    val kanBrukeNyOppgaveliste: Boolean = env.getValue("KAN_BRUKE_NY_OPPGAVELISTE").toBoolean()
+
     // Service
     val oppgaveService = OppgaveServiceImpl(oppgaveDao, featureToggleService)
     val oppgaveServiceNy = OppgaveServiceNy(oppgaveDaoNy)

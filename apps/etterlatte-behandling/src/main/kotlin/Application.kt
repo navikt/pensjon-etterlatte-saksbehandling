@@ -107,7 +107,7 @@ fun Application.module(context: ApplicationContext) {
             migreringRoutes(migreringService = migreringService)
             behandlingsstatusRoutes(behandlingsstatusService = behandlingsStatusService)
             oppgaveRoutes(service = oppgaveService)
-            oppgaveRoutesNy(service = oppgaveServiceNy)
+            oppgaveRoutesNy(service = oppgaveServiceNy, kanBrukeNyOppgaveliste = kanBrukeNyOppgaveliste)
             grunnlagsendringshendelseRoute(grunnlagsendringshendelseService = grunnlagsendringshendelseService)
             egenAnsattRoute(egenAnsattService = EgenAnsattService(sakService, sikkerLogg))
             institusjonsoppholdRoute(institusjonsoppholdService = InstitusjonsoppholdService(institusjonsoppholdDao))

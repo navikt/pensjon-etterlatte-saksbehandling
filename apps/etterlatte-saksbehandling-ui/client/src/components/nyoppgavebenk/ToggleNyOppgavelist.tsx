@@ -9,12 +9,14 @@ const OppgavebenkContainer = styled.div`
   padding: 2rem;
 `
 
+const erIProd = process.env.NAIS_CLUSTER_NAME === 'prod-gcp'
+
 export const ToggleNyOppgaveliste = () => {
   const [visNyListe, setVisNyListe] = useState<boolean>(false)
 
   return (
     <OppgavebenkContainer>
-      {import.meta.env.PROD ? (
+      {erIProd ? (
         <Oppgavebenken />
       ) : (
         <>

@@ -1,6 +1,8 @@
 package no.nav.etterlatte.oppgaveny
 
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.getTidspunktOrNull
 import no.nav.etterlatte.libs.common.tidspunkt.setTidspunkt
 import no.nav.etterlatte.libs.database.toList
 import org.slf4j.LoggerFactory
@@ -14,8 +16,8 @@ class OppgaveDaoNy(private val connection: () -> Connection) {
         with(connection()) {
             val statement = prepareStatement(
                 """
-                INSERT INTO oppgave(id, status, enhet, sak_id, type, saksbehandler, referanse, merknad, opprettet)
-                VALUES(?::UUID, ?, ?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO oppgave(id, status, enhet, sak_id, type, saksbehandler, referanse, merknad, opprettet, saktype, fnr, frist)
+                VALUES(?::UUID, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """.trimIndent()
             )
             statement.setObject(1, oppgaveNy.id)
@@ -27,6 +29,9 @@ class OppgaveDaoNy(private val connection: () -> Connection) {
             statement.setString(7, oppgaveNy.referanse)
             statement.setString(8, oppgaveNy.merknad)
             statement.setTidspunkt(9, oppgaveNy.opprettet)
+            statement.setString(10, oppgaveNy.sakType.toString())
+            statement.setString(11, oppgaveNy.fnr)
+            statement.setTidspunkt(12, oppgaveNy.frist)
             statement.executeUpdate()
             logger.info("lagret oppgave for ${oppgaveNy.id} for sakid ${oppgaveNy.sakId}")
         }
@@ -36,7 +41,7 @@ class OppgaveDaoNy(private val connection: () -> Connection) {
         with(connection()) {
             val statement = prepareStatement(
                 """
-                    SELECT id, status, enhet, sak_id, type, saksbehandler, referanse, merknad, opprettet
+                    SELECT id, status, enhet, sak_id, type, saksbehandler, referanse, merknad, opprettet, saktype, fnr, frist
                     FROM oppgave
                 """.trimIndent()
             )
@@ -50,7 +55,10 @@ class OppgaveDaoNy(private val connection: () -> Connection) {
                     saksbehandler = getString("saksbehandler"),
                     referanse = getString("referanse"),
                     merknad = getString("merknad"),
-                    opprettet = getTidspunkt("opprettet")
+                    opprettet = getTidspunkt("opprettet"),
+                    sakType = SakType.valueOf(getString("saktype")),
+                    fnr = getString("fnr"),
+                    frist = getTidspunktOrNull("frist")
                 )
             }.also {
                 logger.info("Hentet antall nye oppgaver: ${it.size}")

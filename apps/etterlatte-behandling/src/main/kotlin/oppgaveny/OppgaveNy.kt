@@ -1,5 +1,6 @@
 package no.nav.etterlatte.oppgaveny
 
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import java.util.*
@@ -13,7 +14,10 @@ data class OppgaveNy(
     val saksbehandler: String?,
     val referanse: String?,
     val merknad: String?,
-    val opprettet: Tidspunkt
+    val opprettet: Tidspunkt,
+    val sakType: SakType,
+    val fnr: String,
+    val frist: Tidspunkt?
 )
 
 enum class Status {
@@ -30,7 +34,11 @@ enum class OppgaveType {
     EKSTERN
 }
 
-fun opprettNyOppgaveMedReferanseOgSak(referanse: String, sak: Sak, oppgaveType: OppgaveType): OppgaveNy {
+fun opprettNyOppgaveMedReferanseOgSak(
+    referanse: String,
+    sak: Sak,
+    oppgaveType: OppgaveType
+): OppgaveNy {
     return OppgaveNy(
         id = UUID.randomUUID(),
         status = Status.NY,
@@ -40,6 +48,9 @@ fun opprettNyOppgaveMedReferanseOgSak(referanse: String, sak: Sak, oppgaveType: 
         saksbehandler = null,
         referanse = referanse,
         merknad = null,
-        opprettet = Tidspunkt.now()
+        opprettet = Tidspunkt.now(),
+        sakType = sak.sakType,
+        fnr = sak.ident,
+        frist = null
     )
 }

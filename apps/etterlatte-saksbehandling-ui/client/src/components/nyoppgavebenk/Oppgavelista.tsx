@@ -27,25 +27,33 @@ export const Oppgavelista = () => {
         <Table.Header>
           <Table.Row>
             <Table.HeaderCell scope="col">Registreringsdato</Table.HeaderCell>
-            <Table.HeaderCell scope="col">Ytelse</Table.HeaderCell>
+            <Table.HeaderCell scope="col">Fnr</Table.HeaderCell>
+            <Table.HeaderCell scope="col">Oppgavetype</Table.HeaderCell>
             <Table.HeaderCell scope="col">Status</Table.HeaderCell>
             <Table.HeaderCell scope="col">Merknad</Table.HeaderCell>
             <Table.HeaderCell scope="col">Enhet</Table.HeaderCell>
             <Table.HeaderCell scope="col">Saksbehandler</Table.HeaderCell>
+            <Table.HeaderCell scope="col">Ytelse</Table.HeaderCell>
+            <Table.HeaderCell scope="col">Frist</Table.HeaderCell>
           </Table.Row>
         </Table.Header>
         <Table.Body>
           {hentedeOppgaver &&
-            hentedeOppgaver.map(({ id, status, enhet, type, saksbehandler, opprettet, merknad }) => (
-              <Table.Row key={id}>
-                <Table.HeaderCell>{opprettet}</Table.HeaderCell>
-                <Table.DataCell>{type}</Table.DataCell>
-                <Table.DataCell>{status}</Table.DataCell>
-                <Table.DataCell>{merknad}</Table.DataCell>
-                <Table.DataCell>{enhet}</Table.DataCell>
-                <Table.DataCell>{saksbehandler ? saksbehandler : 'Tildel meg'}</Table.DataCell>
-              </Table.Row>
-            ))}
+            hentedeOppgaver.map(
+              ({ id, status, enhet, type, saksbehandler, opprettet, merknad, sakType, fnr, frist }) => (
+                <Table.Row key={id}>
+                  <Table.HeaderCell>{opprettet}</Table.HeaderCell>
+                  <Table.HeaderCell>{fnr}</Table.HeaderCell>
+                  <Table.DataCell>{type}</Table.DataCell>
+                  <Table.DataCell>{status}</Table.DataCell>
+                  <Table.DataCell>{merknad}</Table.DataCell>
+                  <Table.DataCell>{enhet}</Table.DataCell>
+                  <Table.DataCell>{saksbehandler ? saksbehandler : 'Tildel meg'}</Table.DataCell>
+                  <Table.DataCell>{sakType}</Table.DataCell>
+                  <Table.DataCell>{frist ? frist : 'Ingen frist'}</Table.DataCell>
+                </Table.Row>
+              )
+            )}
         </Table.Body>
       </Table>
     </div>

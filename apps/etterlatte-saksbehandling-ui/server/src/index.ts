@@ -74,7 +74,7 @@ if (isDev) {
       '/api/grunnlagsendringshendelse/:sakid/institusjon',
       '/api/sak/:sakid',
       '/api/institusjonsoppholdbegrunnelse/:sakid',
-      '/api/nyeoppgaver/lagre',
+      '/api/nyeoppgaver/hent',
     ],
     tokenMiddleware(ApiConfig.behandling.scope),
     proxy(ApiConfig.behandling.url)

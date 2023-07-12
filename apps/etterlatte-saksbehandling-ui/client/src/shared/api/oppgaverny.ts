@@ -10,6 +10,9 @@ export interface OppgaveDTOny {
   referanse?: string
   merknad?: string
   opprettet: string
+  sakType: string
+  fnr: string
+  frist: string
 }
 
 type Status = 'NY' | 'UNDER_BEHANDLING' | 'FERDIGSTILT'

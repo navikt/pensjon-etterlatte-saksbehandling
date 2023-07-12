@@ -1,6 +1,8 @@
 package no.nav.etterlatte.oppgaveny
 
 import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.migrate
@@ -48,24 +50,28 @@ internal class OppgaveDaoNyTest {
 
     @Test
     fun `legg til oppgaver og hent oppgaver`() {
-        val oppgaveNy = lagNyOppgave()
+        val sakAalesund = Sak("1231244", SakType.BARNEPENSJON, 1L, Enheter.AALESUND.enhetNr)
+        val oppgaveNy = lagNyOppgave(sakAalesund)
         oppgaveDaoNy.lagreOppgave(oppgaveNy)
-        oppgaveDaoNy.lagreOppgave(lagNyOppgave())
-        oppgaveDaoNy.lagreOppgave(lagNyOppgave())
+        oppgaveDaoNy.lagreOppgave(lagNyOppgave(sakAalesund))
+        oppgaveDaoNy.lagreOppgave(lagNyOppgave(sakAalesund))
 
         val hentOppgaver = oppgaveDaoNy.hentOppgaver()
         assertEquals(3, hentOppgaver.size)
     }
 
-    fun lagNyOppgave() = OppgaveNy(
+    fun lagNyOppgave(sak: Sak) = OppgaveNy(
         UUID.randomUUID(),
         Status.NY,
         Enheter.AALESUND.enhetNr,
         1L,
         OppgaveType.FOERSTEGANGSBEHANDLING,
-        "Z1234",
+        null,
         "referanse",
         "merknad",
-        Tidspunkt.now()
+        Tidspunkt.now(),
+        sakType = sak.sakType,
+        fnr = sak.ident,
+        frist = null
     )
 }

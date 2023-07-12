@@ -3,6 +3,7 @@ import { hentNyeOppgaver, OppgaveDTOny } from '~shared/api/oppgaverny'
 import { useEffect, useState } from 'react'
 import Spinner from '~shared/Spinner'
 import { Table } from '@navikt/ds-react'
+import { formaterStringDato } from '~utils/formattering'
 
 export const Oppgavelista = () => {
   const [oppgaver, hentOppgaver] = useApiCall(hentNyeOppgaver)
@@ -42,7 +43,7 @@ export const Oppgavelista = () => {
             hentedeOppgaver.map(
               ({ id, status, enhet, type, saksbehandler, opprettet, merknad, sakType, fnr, frist }) => (
                 <Table.Row key={id}>
-                  <Table.HeaderCell>{opprettet}</Table.HeaderCell>
+                  <Table.HeaderCell>{formaterStringDato(opprettet)}</Table.HeaderCell>
                   <Table.HeaderCell>{fnr}</Table.HeaderCell>
                   <Table.DataCell>{type}</Table.DataCell>
                   <Table.DataCell>{status}</Table.DataCell>

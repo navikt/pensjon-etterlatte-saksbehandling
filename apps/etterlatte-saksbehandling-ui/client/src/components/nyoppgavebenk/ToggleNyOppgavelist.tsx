@@ -12,13 +12,16 @@ const OppgavebenkContainer = styled.div`
 export const ToggleNyOppgaveliste = () => {
   const [visNyListe, setVisNyListe] = useState<boolean>(false)
 
-  //TODO: ha en ekstra && for miljøspesifisert bryter
   return (
     <OppgavebenkContainer>
-      <>
-        <Button onClick={() => setVisNyListe(!visNyListe)}>{visNyListe ? 'Vis gammel liste' : 'Vis ny liste'}</Button>
-      </>
-      {visNyListe ? <Oppgavelista /> : <Oppgavebenken />}
+      {import.meta.env.PROD ? (
+        <Oppgavebenken />
+      ) : (
+        <>
+          <Button onClick={() => setVisNyListe(!visNyListe)}>{visNyListe ? 'Vis gammel liste' : 'Vis ny liste'}</Button>
+          {visNyListe ? <Oppgavelista /> : <Oppgavebenken />}
+        </>
+      )}
     </OppgavebenkContainer>
   )
 }

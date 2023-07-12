@@ -11,7 +11,7 @@ export interface OppgaveDTOny {
   merknad?: string
   opprettet: string
   sakType?: string
-  fnr: string
+  fnr?: string
   frist: string
 }
 

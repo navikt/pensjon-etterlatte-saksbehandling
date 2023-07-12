@@ -16,7 +16,7 @@ data class OppgaveNy(
     val merknad: String? = null,
     val opprettet: Tidspunkt,
     val sakType: SakType? = null,
-    val fnr: String,
+    val fnr: String? = null,
     val frist: Tidspunkt?
 )
 

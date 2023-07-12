@@ -44,13 +44,13 @@ export const Oppgavelista = () => {
               ({ id, status, enhet, type, saksbehandler, opprettet, merknad, sakType, fnr, frist }) => (
                 <Table.Row key={id}>
                   <Table.HeaderCell>{formaterStringDato(opprettet)}</Table.HeaderCell>
-                  <Table.HeaderCell>{fnr}</Table.HeaderCell>
+                  <Table.HeaderCell>{fnr ? fnr : 'ikke fnr, må migreres'}</Table.HeaderCell>
                   <Table.DataCell>{type}</Table.DataCell>
                   <Table.DataCell>{status}</Table.DataCell>
                   <Table.DataCell>{merknad}</Table.DataCell>
                   <Table.DataCell>{enhet}</Table.DataCell>
                   <Table.DataCell>{saksbehandler ? saksbehandler : 'Tildel meg'}</Table.DataCell>
-                  <Table.DataCell>{sakType ? sakType : 'Ingen saktype'}</Table.DataCell>
+                  <Table.DataCell>{sakType ? sakType : 'Ingen saktype, må migreres'}</Table.DataCell>
                   <Table.DataCell>{frist ? frist : 'Ingen frist'}</Table.DataCell>
                 </Table.Row>
               )

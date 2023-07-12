@@ -11,14 +11,14 @@ export const Oppgavelista = () => {
     hentOppgaver(
       {},
       (oppgaver) => {
-        setHentedeOppgaver(oppgaver.oppgaver)
+        setHentedeOppgaver(oppgaver)
       },
       () => {
         console.error('kunne ikke hente oppgaver')
       }
     )
   }, [])
-
+  console.log(hentedeOppgaver)
   return (
     <div>
       {isPending(oppgaver) && <Spinner visible={true} label={'henter nye oppgaver'} />}

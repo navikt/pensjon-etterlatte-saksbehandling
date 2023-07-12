@@ -15,8 +15,5 @@ export interface OppgaveDTOny {
 type Status = 'NY' | 'UNDER_BEHANDLING' | 'FERDIGSTILT'
 type OppgaveType = 'FOERSTEGANGSBEHANDLING' | 'REVUDERING' | 'HENDELSE' | 'MANUELT_OPPHOER' | 'EKSTERN'
 
-export interface OppgaveResponse {
-  oppgaver: ReadonlyArray<OppgaveDTOny>
-}
-export const hentNyeOppgaver = async (): Promise<ApiResponse<OppgaveResponse>> =>
-  apiClient.get<OppgaveResponse>('/nyeoppgaver/hent')
+export const hentNyeOppgaver = async (): Promise<ApiResponse<ReadonlyArray<OppgaveDTOny>>> =>
+  apiClient.get('/nyeoppgaver/hent')

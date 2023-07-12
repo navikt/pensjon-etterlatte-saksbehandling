@@ -11,11 +11,11 @@ data class OppgaveNy(
     val enhet: String,
     val sakId: Long,
     val type: OppgaveType,
-    val saksbehandler: String?,
-    val referanse: String?,
-    val merknad: String?,
+    val saksbehandler: String? = null,
+    val referanse: String? = null,
+    val merknad: String? = null,
     val opprettet: Tidspunkt,
-    val sakType: SakType,
+    val sakType: SakType? = null,
     val fnr: String,
     val frist: Tidspunkt?
 )

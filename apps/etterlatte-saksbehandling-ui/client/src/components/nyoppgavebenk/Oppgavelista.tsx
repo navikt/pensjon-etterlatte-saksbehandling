@@ -50,7 +50,7 @@ export const Oppgavelista = () => {
                   <Table.DataCell>{merknad}</Table.DataCell>
                   <Table.DataCell>{enhet}</Table.DataCell>
                   <Table.DataCell>{saksbehandler ? saksbehandler : 'Tildel meg'}</Table.DataCell>
-                  <Table.DataCell>{sakType}</Table.DataCell>
+                  <Table.DataCell>{sakType ? sakType : 'Ingen saktype'}</Table.DataCell>
                   <Table.DataCell>{frist ? frist : 'Ingen frist'}</Table.DataCell>
                 </Table.Row>
               )

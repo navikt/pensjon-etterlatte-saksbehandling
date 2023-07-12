@@ -56,7 +56,7 @@ class OppgaveDaoNy(private val connection: () -> Connection) {
                     referanse = getString("referanse"),
                     merknad = getString("merknad"),
                     opprettet = getTidspunkt("opprettet"),
-                    sakType = SakType.valueOf(getString("saktype")),
+                    sakType = getString("saktype")?.let { SakType.valueOf(it) },
                     fnr = getString("fnr"),
                     frist = getTidspunktOrNull("frist")
                 )

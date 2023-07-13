@@ -12,6 +12,28 @@ class OppgaveServiceNy(private val oppgaveDaoNy: OppgaveDaoNy, private val sakDa
         }
     }
 
+    fun tildelSaksbehandler(nySaksbehandlerDto: NySaksbehandlerDto) {
+        val hentetOppgave = oppgaveDaoNy.hentOppgave(nySaksbehandlerDto.oppgaveId)
+        if (hentetOppgave != null) {
+            if (hentetOppgave.saksbehandler.isNullOrEmpty()) {
+                oppgaveDaoNy.settNySaksbehandler(nySaksbehandlerDto)
+            } else {
+                throw RuntimeException("Oppgaven har allerede en saksbehandler")
+            }
+        } else {
+            throw RuntimeException("Oppgave finnes ikke")
+        }
+    }
+
+    fun byttSaksbehandler(nySaksbehandlerDto: NySaksbehandlerDto) {
+        val hentetOppgave = oppgaveDaoNy.hentOppgave(nySaksbehandlerDto.oppgaveId)
+        if (hentetOppgave != null) {
+            oppgaveDaoNy.settNySaksbehandler(nySaksbehandlerDto)
+        } else {
+            throw RuntimeException("Oppgave finnes ikke")
+        }
+    }
+
     fun opprettNyOppgaveMedSakOgReferanse(referanse: String, sakId: Long, oppgaveType: OppgaveType) {
         val sak = sakDao.hentSak(sakId)!!
         lagreOppgave(

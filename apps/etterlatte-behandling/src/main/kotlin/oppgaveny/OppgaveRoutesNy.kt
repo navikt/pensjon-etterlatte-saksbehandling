@@ -9,22 +9,42 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.Kontekst
-import no.nav.etterlatte.libs.ktor.brukerTokenInfo
-import no.nav.etterlatte.token.Saksbehandler
+import no.nav.etterlatte.libs.common.kunSaksbehandler
 
 internal fun Route.oppgaveRoutesNy(service: OppgaveServiceNy, kanBrukeNyOppgaveliste: Boolean) {
     route("/api/nyeoppgaver") {
         get("/hent") {
-            if (kanBrukeNyOppgaveliste) {
-                when (brukerTokenInfo) {
-                    is Saksbehandler -> call.respond(
+            kunSaksbehandler {
+                if (kanBrukeNyOppgaveliste) {
+                    call.respond(
                         service.finnOppgaverForBruker(Kontekst.get().appUserAsSaksbehandler().saksbehandlerMedRoller)
                     )
-
-                    else -> call.respond(HttpStatusCode.Forbidden)
+                } else {
+                    call.respond(HttpStatusCode.NotImplemented)
                 }
-            } else {
-                call.respond(HttpStatusCode.Forbidden)
+            }
+        }
+        // TODO: sikre denne med saksid for tilgang?
+        post("tildel-saksbehandler") {
+            kunSaksbehandler {
+                if (kanBrukeNyOppgaveliste) {
+                    val nySaksbehandlerDto = call.receive<NySaksbehandlerDto>()
+                    service.tildelSaksbehandler(nySaksbehandlerDto)
+                    call.respond(HttpStatusCode.OK)
+                } else {
+                    call.respond(HttpStatusCode.NotImplemented)
+                }
+            }
+        }
+        post("bytt-saksbehandler") {
+            kunSaksbehandler {
+                if (kanBrukeNyOppgaveliste) {
+                    val nySaksbehandlerDto = call.receive<NySaksbehandlerDto>()
+                    service.byttSaksbehandler(nySaksbehandlerDto)
+                    call.respond(HttpStatusCode.OK)
+                } else {
+                    call.respond(HttpStatusCode.NotImplemented)
+                }
             }
         }
         post("/lagre") {

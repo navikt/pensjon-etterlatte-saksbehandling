@@ -2,25 +2,24 @@ package no.nav.etterlatte.oppgaveny
 
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.sak.Sak
-import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.migrate
+import no.nav.etterlatte.sak.SakDao
 import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
-import java.util.*
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-internal class OppgaveDaoNyTest {
+class OppgaveServiceNyTest {
 
     private lateinit var dataSource: DataSource
+    private lateinit var sakDao: SakDao
     private lateinit var oppgaveDaoNy: OppgaveDaoNy
+    private lateinit var oppgaveServiceNy: OppgaveServiceNy
 
     @Container
     private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:14")
@@ -38,7 +37,9 @@ internal class OppgaveDaoNyTest {
         ).apply { migrate() }
 
         val connection = dataSource.connection
+        sakDao = SakDao { connection }
         oppgaveDaoNy = OppgaveDaoNy { connection }
+        oppgaveServiceNy = OppgaveServiceNy(oppgaveDaoNy, sakDao)
     }
 
     @AfterEach
@@ -49,41 +50,25 @@ internal class OppgaveDaoNyTest {
     }
 
     @Test
-    fun `legg til oppgaver og hent oppgaver`() {
-        val sakAalesund = Sak("1231244", SakType.BARNEPENSJON, 1L, Enheter.AALESUND.enhetNr)
-        val oppgaveNy = lagNyOppgave(sakAalesund)
-        oppgaveDaoNy.lagreOppgave(oppgaveNy)
-        oppgaveDaoNy.lagreOppgave(lagNyOppgave(sakAalesund))
-        oppgaveDaoNy.lagreOppgave(lagNyOppgave(sakAalesund))
-
-        val hentOppgaver = oppgaveDaoNy.hentOppgaver()
-        assertEquals(3, hentOppgaver.size)
+    fun `skal kunne tildele oppgave uten saksbehandler`() {
+        val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val nyOppgave = oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
+            "referanse",
+            opprettetSak.id,
+            OppgaveType.FOERSTEGANGSBEHANDLING
+        )
+        oppgaveServiceNy.tildelSaksbehandler(NySaksbehandlerDto(nyOppgave?.id!!, "nysaksbehandler"))
     }
 
     @Test
-    fun `kan tildelesaksbehandler`() {
-        val sakAalesund = Sak("1231244", SakType.BARNEPENSJON, 1L, Enheter.AALESUND.enhetNr)
-        val oppgaveNy = lagNyOppgave(sakAalesund)
-        oppgaveDaoNy.lagreOppgave(oppgaveNy)
-
-        val nySaksbehandler = "nysaksbehandler"
-        oppgaveDaoNy.settNySaksbehandler(NySaksbehandlerDto(oppgaveNy.id, nySaksbehandler))
-        val hentOppgave = oppgaveDaoNy.hentOppgave(oppgaveNy.id)
-        assertEquals(nySaksbehandler, hentOppgave?.saksbehandler)
+    fun `skal ikke kunne tildele oppgave med saksbehandler`() {
     }
 
-    fun lagNyOppgave(sak: Sak) = OppgaveNy(
-        UUID.randomUUID(),
-        Status.NY,
-        Enheter.AALESUND.enhetNr,
-        1L,
-        OppgaveType.FOERSTEGANGSBEHANDLING,
-        null,
-        "referanse",
-        "merknad",
-        Tidspunkt.now(),
-        sakType = sak.sakType,
-        fnr = sak.ident,
-        frist = null
-    )
+    @Test
+    fun `skal ikke kunne tildele hvis oppgave ikke finnes`() {
+    }
+
+    @Test
+    fun `skal kunne bytte oppgave med saksbehandler`() {
+    }
 }

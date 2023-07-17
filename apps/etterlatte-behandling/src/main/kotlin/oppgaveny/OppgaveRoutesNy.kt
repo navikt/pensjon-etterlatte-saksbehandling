@@ -28,8 +28,8 @@ internal fun Route.oppgaveRoutesNy(service: OppgaveServiceNy, kanBrukeNyOppgavel
         post("tildel-saksbehandler") {
             kunSaksbehandler {
                 if (kanBrukeNyOppgaveliste) {
-                    val nySaksbehandlerDto = call.receive<NySaksbehandlerDto>()
-                    service.tildelSaksbehandler(nySaksbehandlerDto)
+                    val saksbehandlerEndringDto = call.receive<SaksbehandlerEndringDto>()
+                    service.tildelSaksbehandler(saksbehandlerEndringDto)
                     call.respond(HttpStatusCode.OK)
                 } else {
                     call.respond(HttpStatusCode.NotImplemented)
@@ -39,8 +39,19 @@ internal fun Route.oppgaveRoutesNy(service: OppgaveServiceNy, kanBrukeNyOppgavel
         post("bytt-saksbehandler") {
             kunSaksbehandler {
                 if (kanBrukeNyOppgaveliste) {
-                    val nySaksbehandlerDto = call.receive<NySaksbehandlerDto>()
-                    service.byttSaksbehandler(nySaksbehandlerDto)
+                    val saksbehandlerEndringDto = call.receive<SaksbehandlerEndringDto>()
+                    service.byttSaksbehandler(saksbehandlerEndringDto)
+                    call.respond(HttpStatusCode.OK)
+                } else {
+                    call.respond(HttpStatusCode.NotImplemented)
+                }
+            }
+        }
+        post("fjern-saksbehandler") {
+            kunSaksbehandler {
+                if (kanBrukeNyOppgaveliste) {
+                    val oppgaveId = call.receive<OppgaveId>()
+                    service.fjernSaksbehandler(oppgaveId)
                     call.respond(HttpStatusCode.OK)
                 } else {
                     call.respond(HttpStatusCode.NotImplemented)

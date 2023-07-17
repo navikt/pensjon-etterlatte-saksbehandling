@@ -67,7 +67,7 @@ internal class OppgaveDaoNyTest {
         oppgaveDaoNy.lagreOppgave(oppgaveNy)
 
         val nySaksbehandler = "nysaksbehandler"
-        oppgaveDaoNy.settNySaksbehandler(NySaksbehandlerDto(oppgaveNy.id, nySaksbehandler))
+        oppgaveDaoNy.settNySaksbehandler(SaksbehandlerEndringDto(oppgaveNy.id, nySaksbehandler))
         val hentOppgave = oppgaveDaoNy.hentOppgave(oppgaveNy.id)
         assertEquals(nySaksbehandler, hentOppgave?.saksbehandler)
     }

@@ -34,9 +34,13 @@ enum class OppgaveType {
     EKSTERN
 }
 
-data class NySaksbehandlerDto(
+data class SaksbehandlerEndringDto(
     val oppgaveId: UUID,
     val saksbehandler: String
+)
+
+data class OppgaveId(
+    val oppgaveId: UUID
 )
 
 fun opprettNyOppgaveMedReferanseOgSak(

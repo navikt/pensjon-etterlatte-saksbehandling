@@ -15,13 +15,13 @@ class OppgaveServiceNy(private val oppgaveDaoNy: OppgaveDaoNy, private val sakDa
         }
     }
 
-    fun tildelSaksbehandler(nySaksbehandlerDto: NySaksbehandlerDto) {
+    fun tildelSaksbehandler(saksbehandlerEndringDto: SaksbehandlerEndringDto) {
         inTransaction {
-            val hentetOppgave = oppgaveDaoNy.hentOppgave(nySaksbehandlerDto.oppgaveId)
+            val hentetOppgave = oppgaveDaoNy.hentOppgave(saksbehandlerEndringDto.oppgaveId)
 
             if (hentetOppgave != null) {
                 if (hentetOppgave.saksbehandler.isNullOrEmpty()) {
-                    oppgaveDaoNy.settNySaksbehandler(nySaksbehandlerDto)
+                    oppgaveDaoNy.settNySaksbehandler(saksbehandlerEndringDto)
                 } else {
                     throw BadRequestException("Oppgaven har allerede en saksbehandler")
                 }
@@ -31,11 +31,26 @@ class OppgaveServiceNy(private val oppgaveDaoNy: OppgaveDaoNy, private val sakDa
         }
     }
 
-    fun byttSaksbehandler(nySaksbehandlerDto: NySaksbehandlerDto) {
+    fun byttSaksbehandler(saksbehandlerEndringDto: SaksbehandlerEndringDto) {
         inTransaction {
-            val hentetOppgave = oppgaveDaoNy.hentOppgave(nySaksbehandlerDto.oppgaveId)
+            val hentetOppgave = oppgaveDaoNy.hentOppgave(saksbehandlerEndringDto.oppgaveId)
             if (hentetOppgave != null) {
-                oppgaveDaoNy.settNySaksbehandler(nySaksbehandlerDto)
+                oppgaveDaoNy.settNySaksbehandler(saksbehandlerEndringDto)
+            } else {
+                throw NotFoundException("Oppgaven finnes ikke")
+            }
+        }
+    }
+
+    fun fjernSaksbehandler(oppgaveId: OppgaveId) {
+        inTransaction {
+            val hentetOppgave = oppgaveDaoNy.hentOppgave(oppgaveId.oppgaveId)
+            if (hentetOppgave != null) {
+                if (hentetOppgave.saksbehandler != null) {
+                    oppgaveDaoNy.fjernSaksbehandler(oppgaveId.oppgaveId)
+                } else {
+                    throw BadRequestException("Oppgaven har ingen saksbehandler")
+                }
             } else {
                 throw NotFoundException("Oppgaven finnes ikke")
             }

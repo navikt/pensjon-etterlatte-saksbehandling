@@ -55,7 +55,7 @@ class OppgaveDaoNy(private val connection: () -> Connection) {
         }
     }
 
-    fun settNySaksbehandler(nySaksbehandlerDto: NySaksbehandlerDto) {
+    fun settNySaksbehandler(saksbehandlerEndringDto: SaksbehandlerEndringDto) {
         with(connection()) {
             val statement = prepareStatement(
                 """
@@ -65,8 +65,8 @@ class OppgaveDaoNy(private val connection: () -> Connection) {
                 """.trimIndent()
             )
 
-            statement.setString(1, nySaksbehandlerDto.saksbehandler)
-            statement.setObject(2, nySaksbehandlerDto.oppgaveId)
+            statement.setString(1, saksbehandlerEndringDto.saksbehandler)
+            statement.setObject(2, saksbehandlerEndringDto.oppgaveId)
 
             statement.executeUpdate()
         }
@@ -85,6 +85,22 @@ class OppgaveDaoNy(private val connection: () -> Connection) {
             }.also {
                 logger.info("Hentet antall nye oppgaver: ${it.size}")
             }
+        }
+    }
+
+    fun fjernSaksbehandler(oppgaveId: UUID) {
+        with(connection()) {
+            val statement = prepareStatement(
+                """
+                UPDATE oppgave
+                SET saksbehandler = NULL
+                where id = ?::UUID
+                """.trimIndent()
+            )
+
+            statement.setObject(1, oppgaveId)
+
+            statement.executeUpdate()
         }
     }
 

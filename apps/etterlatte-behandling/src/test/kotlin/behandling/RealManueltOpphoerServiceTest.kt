@@ -22,10 +22,14 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.manueltOpphoer
 import no.nav.etterlatte.oppgaveny.OppgaveServiceNy
+import no.nav.etterlatte.oppgaveny.OppgaveType
+import no.nav.etterlatte.oppgaveny.opprettNyOppgaveMedReferanseOgSak
 import no.nav.etterlatte.revurdering
 import no.nav.etterlatte.saksbehandlerToken
 import org.junit.jupiter.api.Assertions.assertAll
@@ -42,6 +46,11 @@ internal class RealManueltOpphoerServiceTest {
 
     private val user = mockk<SaksbehandlerMedEnheterOgRoller>()
     private val oppgaveService = mockk<OppgaveServiceNy>()
+    private val mockOppgave = opprettNyOppgaveMedReferanseOgSak(
+        "opphør",
+        Sak("ident", SakType.BARNEPENSJON, 1L, Enheter.AALESUND.enhetNr),
+        OppgaveType.MANUELT_OPPHOER
+    )
 
     @BeforeEach
     fun before() {
@@ -127,7 +136,7 @@ internal class RealManueltOpphoerServiceTest {
             }
         }
 
-        every { oppgaveService.opprettNyOppgaveMedSakOgReferanse(any(), any(), any()) } returns Unit
+        every { oppgaveService.opprettNyOppgaveMedSakOgReferanse(any(), any(), any()) } returns mockOppgave
 
         val behandlingHendelserKafkaProducer = mockk<BehandlingHendelserKafkaProducer> {
             every { sendMeldingForHendelse(any(), any()) } returns Unit
@@ -230,7 +239,7 @@ internal class RealManueltOpphoerServiceTest {
                 )
             }
         }
-        every { oppgaveService.opprettNyOppgaveMedSakOgReferanse(any(), any(), any()) } returns Unit
+        every { oppgaveService.opprettNyOppgaveMedSakOgReferanse(any(), any(), any()) } returns mockOppgave
 
         val behandlingHendelserKafkaProducer = mockk<BehandlingHendelserKafkaProducer> {
             every { sendMeldingForHendelse(any(), any()) } returns Unit

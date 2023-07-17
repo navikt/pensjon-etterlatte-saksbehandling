@@ -142,7 +142,6 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
                 OppgaveType.REVUDERING
             )
         }
-        verify { oppgaveService.lagreOppgave(any()) }
         inTransaction {
             Assertions.assertEquals(revurdering, applicationContext.behandlingDao.hentBehandling(revurdering!!.id))
             verify { hendelser.sendMeldingForHendelse(revurdering, BehandlingHendelseType.OPPRETTET) }
@@ -253,7 +252,6 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
                     OppgaveType.REVUDERING
                 )
             }
-            verify { oppgaveService.lagreOppgave(any()) }
             confirmVerified(hendelser, grunnlagService, oppgaveService)
         }
     }
@@ -405,7 +403,6 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
             verify { grunnlagService.leggInnNyttGrunnlag(behandling) }
             verify { grunnlagService.leggInnNyttGrunnlag(revurdering) }
             verify { hendelser.sendMeldingForHendelse(revurdering, BehandlingHendelseType.OPPRETTET) }
-            verify(exactly = 2) { oppgaveService.lagreOppgave(any()) }
             verify {
                 oppgaveService.opprettNyOppgaveMedSakOgReferanse(
                     behandling.id.toString(),

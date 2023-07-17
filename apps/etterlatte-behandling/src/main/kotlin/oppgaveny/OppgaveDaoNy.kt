@@ -4,9 +4,11 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunktOrNull
 import no.nav.etterlatte.libs.common.tidspunkt.setTidspunkt
+import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.database.toList
 import org.slf4j.LoggerFactory
 import java.sql.Connection
+import java.sql.ResultSet
 import java.util.*
 
 class OppgaveDaoNy(private val connection: () -> Connection) {
@@ -37,6 +39,39 @@ class OppgaveDaoNy(private val connection: () -> Connection) {
         }
     }
 
+    fun hentOppgave(oppgaveId: UUID): OppgaveNy? {
+        with(connection()) {
+            val statement = prepareStatement(
+                """
+                    SELECT id, status, enhet, sak_id, type, saksbehandler, referanse, merknad, opprettet, saktype, fnr, frist
+                    FROM oppgave
+                    WHERE id = ?::UUID
+                """.trimIndent()
+            )
+            statement.setObject(1, oppgaveId)
+            return statement.executeQuery().singleOrNull {
+                asOppgaveNy()
+            }
+        }
+    }
+
+    fun settNySaksbehandler(nySaksbehandlerDto: NySaksbehandlerDto) {
+        with(connection()) {
+            val statement = prepareStatement(
+                """
+                UPDATE oppgave
+                SET saksbehandler = ?
+                where id = ?::UUID
+                """.trimIndent()
+            )
+
+            statement.setString(1, nySaksbehandlerDto.saksbehandler)
+            statement.setObject(2, nySaksbehandlerDto.oppgaveId)
+
+            statement.executeUpdate()
+        }
+    }
+
     fun hentOppgaver(): List<OppgaveNy> {
         with(connection()) {
             val statement = prepareStatement(
@@ -46,23 +81,27 @@ class OppgaveDaoNy(private val connection: () -> Connection) {
                 """.trimIndent()
             )
             return statement.executeQuery().toList {
-                OppgaveNy(
-                    id = getObject("id") as UUID,
-                    status = Status.valueOf(getString("status")),
-                    enhet = getString("enhet"),
-                    sakId = getLong("sak_id"),
-                    type = OppgaveType.valueOf(getString("type")),
-                    saksbehandler = getString("saksbehandler"),
-                    referanse = getString("referanse"),
-                    merknad = getString("merknad"),
-                    opprettet = getTidspunkt("opprettet"),
-                    sakType = getString("saktype")?.let { SakType.valueOf(it) },
-                    fnr = getString("fnr"),
-                    frist = getTidspunktOrNull("frist")
-                )
+                asOppgaveNy()
             }.also {
                 logger.info("Hentet antall nye oppgaver: ${it.size}")
             }
         }
+    }
+
+    private fun ResultSet.asOppgaveNy(): OppgaveNy {
+        return OppgaveNy(
+            id = getObject("id") as UUID,
+            status = Status.valueOf(getString("status")),
+            enhet = getString("enhet"),
+            sakId = getLong("sak_id"),
+            type = OppgaveType.valueOf(getString("type")),
+            saksbehandler = getString("saksbehandler"),
+            referanse = getString("referanse"),
+            merknad = getString("merknad"),
+            opprettet = getTidspunkt("opprettet"),
+            sakType = getString("saktype")?.let { SakType.valueOf(it) },
+            fnr = getString("fnr"),
+            frist = getTidspunktOrNull("frist")
+        )
     }
 }

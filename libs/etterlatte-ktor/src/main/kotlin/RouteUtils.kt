@@ -96,6 +96,17 @@ suspend inline fun PipelineContext<*, ApplicationCall>.kunSystembruker(
     }
 }
 
+suspend inline fun PipelineContext<*, ApplicationCall>.kunSaksbehandler(
+    onSuccess: () -> Unit
+) {
+    when (brukerTokenInfo) {
+        is Saksbehandler -> {
+            onSuccess()
+        }
+        else -> call.respond(HttpStatusCode.Forbidden)
+    }
+}
+
 suspend inline fun PipelineContext<*, ApplicationCall>.withParam(
     param: String,
     onSuccess: (value: UUID) -> Unit

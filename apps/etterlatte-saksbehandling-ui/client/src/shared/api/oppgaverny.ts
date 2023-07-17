@@ -20,3 +20,11 @@ type OppgaveType = 'FOERSTEGANGSBEHANDLING' | 'REVUDERING' | 'HENDELSE' | 'MANUE
 
 export const hentNyeOppgaver = async (): Promise<ApiResponse<ReadonlyArray<OppgaveDTOny>>> =>
   apiClient.get('/nyeoppgaver/hent')
+
+export interface NySaksbehandlerDto {
+  oppgaveId: string
+  saksbehandler: string
+}
+
+export const tildelSaksbehandlerApi = async (nysaksbehandler: NySaksbehandlerDto): Promise<ApiResponse<unknown>> =>
+  apiClient.post('/nyeoppgaver/tildel-saksbehandler', { ...nysaksbehandler })

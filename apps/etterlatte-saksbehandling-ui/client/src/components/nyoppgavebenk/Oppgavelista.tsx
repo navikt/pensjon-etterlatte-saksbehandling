@@ -1,9 +1,11 @@
-import { isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
+import { isFailure, isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
 import { hentNyeOppgaver, OppgaveDTOny } from '~shared/api/oppgaverny'
 import { useEffect, useState } from 'react'
 import Spinner from '~shared/Spinner'
 import { Table } from '@navikt/ds-react'
 import { formaterStringDato } from '~utils/formattering'
+import { ApiErrorAlert } from '~ErrorBoundary'
+import { TildelSaksbehandler } from '~components/nyoppgavebenk/TildelSaksbehandler'
 
 export const Oppgavelista = () => {
   const [oppgaver, hentOppgaver] = useApiCall(hentNyeOppgaver)
@@ -19,10 +21,11 @@ export const Oppgavelista = () => {
       }
     )
   }, [])
-  console.log(hentedeOppgaver)
+
   return (
     <div>
       {isPending(oppgaver) && <Spinner visible={true} label={'henter nye oppgaver'} />}
+      {isFailure(oppgaver) && <ApiErrorAlert>Kunne ikke hente oppgaver</ApiErrorAlert>}
       {isSuccess(oppgaver) && <>hentet antall oppgaver: {hentedeOppgaver?.length}</>}
       <Table>
         <Table.Header>
@@ -49,7 +52,7 @@ export const Oppgavelista = () => {
                   <Table.DataCell>{status}</Table.DataCell>
                   <Table.DataCell>{merknad}</Table.DataCell>
                   <Table.DataCell>{enhet}</Table.DataCell>
-                  <Table.DataCell>{saksbehandler ? saksbehandler : 'Tildel meg'}</Table.DataCell>
+                  <Table.DataCell>{saksbehandler ? saksbehandler : <TildelSaksbehandler id={id} />}</Table.DataCell>
                   <Table.DataCell>{sakType ? sakType : 'Ingen saktype, må migreres'}</Table.DataCell>
                   <Table.DataCell>{frist ? frist : 'Ingen frist'}</Table.DataCell>
                 </Table.Row>

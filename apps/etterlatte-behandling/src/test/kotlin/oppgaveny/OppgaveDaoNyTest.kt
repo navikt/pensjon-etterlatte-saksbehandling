@@ -44,7 +44,7 @@ internal class OppgaveDaoNyTest {
     @AfterEach
     fun afterEach() {
         dataSource.connection.use {
-            it.prepareStatement("TRUNCATE sak CASCADE;").execute()
+            it.prepareStatement("TRUNCATE oppgave CASCADE;").execute()
         }
     }
 
@@ -58,6 +58,18 @@ internal class OppgaveDaoNyTest {
 
         val hentOppgaver = oppgaveDaoNy.hentOppgaver()
         assertEquals(3, hentOppgaver.size)
+    }
+
+    @Test
+    fun `kan tildelesaksbehandler`() {
+        val sakAalesund = Sak("1231244", SakType.BARNEPENSJON, 1L, Enheter.AALESUND.enhetNr)
+        val oppgaveNy = lagNyOppgave(sakAalesund)
+        oppgaveDaoNy.lagreOppgave(oppgaveNy)
+
+        val nySaksbehandler = "nysaksbehandler"
+        oppgaveDaoNy.settNySaksbehandler(NySaksbehandlerDto(oppgaveNy.id, nySaksbehandler))
+        val hentOppgave = oppgaveDaoNy.hentOppgave(oppgaveNy.id)
+        assertEquals(nySaksbehandler, hentOppgave?.saksbehandler)
     }
 
     fun lagNyOppgave(sak: Sak) = OppgaveNy(

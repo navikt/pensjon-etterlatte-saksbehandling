@@ -42,6 +42,8 @@ import no.nav.etterlatte.libs.common.tidspunkt.fixedNorskTid
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeNorskTid
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.oppgaveny.OppgaveServiceNy
+import no.nav.etterlatte.oppgaveny.OppgaveType
+import no.nav.etterlatte.oppgaveny.opprettNyOppgaveMedReferanseOgSak
 import no.nav.etterlatte.persongalleri
 import no.nav.etterlatte.revurdering
 import no.nav.etterlatte.sak.SakDao
@@ -68,6 +70,11 @@ internal class FoerstegangsbehandlingServiceImplTest {
     private val grunnlagsendringshendelseDao = mockk<GrunnlagsendringshendelseDao>()
     private val grunnlagService = mockk<GrunnlagService>()
     private val oppgaveService = mockk<OppgaveServiceNy>()
+    private val mockOppgave = opprettNyOppgaveMedReferanseOgSak(
+        "behandling",
+        Sak("ident", SakType.BARNEPENSJON, 1L, Enheter.AALESUND.enhetNr),
+        OppgaveType.FOERSTEGANGSBEHANDLING
+    )
     private val revurderingService = RevurderingServiceImpl(
         oppgaveService,
         grunnlagService,
@@ -215,7 +222,7 @@ internal class FoerstegangsbehandlingServiceImplTest {
         every { behandlingDaoMock.lagreStatus(any(), any(), any()) } returns Unit
         every { behandlingHendelserKafkaProducerMock.sendMeldingForHendelse(any(), any()) } returns Unit
         every { grunnlagService.leggInnNyttGrunnlag(any()) } returns Unit
-        every { oppgaveService.opprettNyOppgaveMedSakOgReferanse(any(), any(), any()) } returns Unit
+        every { oppgaveService.opprettNyOppgaveMedSakOgReferanse(any(), any(), any()) } returns mockOppgave
 
         val resultat = behandlingsService.opprettBehandling(
             1,
@@ -302,7 +309,7 @@ internal class FoerstegangsbehandlingServiceImplTest {
         every { hendelseDaoMock.behandlingOpprettet(any()) } returns Unit
         every { behandlingHendelserKafkaProducerMock.sendMeldingForHendelse(any(), any()) } returns Unit
         every { grunnlagService.leggInnNyttGrunnlag(any()) } returns Unit
-        every { oppgaveService.opprettNyOppgaveMedSakOgReferanse(any(), any(), any()) } returns Unit
+        every { oppgaveService.opprettNyOppgaveMedSakOgReferanse(any(), any(), any()) } returns mockOppgave
 
         val foerstegangsbehandling = behandlingsService.opprettBehandling(
             1,
@@ -386,7 +393,7 @@ internal class FoerstegangsbehandlingServiceImplTest {
         every { hendelseDaoMock.behandlingOpprettet(any()) } returns Unit
         every { behandlingHendelserKafkaProducerMock.sendMeldingForHendelse(any(), any()) } returns Unit
         every { grunnlagService.leggInnNyttGrunnlag(any()) } returns Unit
-        every { oppgaveService.opprettNyOppgaveMedSakOgReferanse(any(), any(), any()) } returns Unit
+        every { oppgaveService.opprettNyOppgaveMedSakOgReferanse(any(), any(), any()) } returns mockOppgave
 
         val foerstegangsbehandling = behandlingsService.opprettBehandling(
             1,
@@ -485,7 +492,7 @@ internal class FoerstegangsbehandlingServiceImplTest {
         every { hendelseDaoMock.behandlingOpprettet(any()) } returns Unit
         every { behandlingHendelserKafkaProducerMock.sendMeldingForHendelse(any(), any()) } returns Unit
         every { grunnlagService.leggInnNyttGrunnlag(any()) } returns Unit
-        every { oppgaveService.opprettNyOppgaveMedSakOgReferanse(any(), any(), any()) } returns Unit
+        every { oppgaveService.opprettNyOppgaveMedSakOgReferanse(any(), any(), any()) } returns mockOppgave
 
         val foerstegangsbehandling = behandlingsService.opprettBehandling(
             1,

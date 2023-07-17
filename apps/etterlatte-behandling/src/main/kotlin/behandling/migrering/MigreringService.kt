@@ -55,7 +55,6 @@ class MigreringService(
             finnEllerOpprettSak(request).id,
             request.persongalleri,
             null,
-            null,
             Vedtaksloesning.PESYS
         )
 

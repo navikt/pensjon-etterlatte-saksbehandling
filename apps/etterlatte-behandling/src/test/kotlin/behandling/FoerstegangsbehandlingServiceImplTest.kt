@@ -26,6 +26,7 @@ import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.JaNeiMedBegrunnelse
+import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
@@ -76,7 +77,9 @@ internal class FoerstegangsbehandlingServiceImplTest {
         Sak("ident", SakType.BARNEPENSJON, 1L, Enheter.AALESUND.enhetNr),
         OppgaveType.FOERSTEGANGSBEHANDLING
     )
-    private val kommerBarnetTilGodeService = mockk<KommerBarnetTilGodeService>()
+    private val kommerBarnetTilGodeService = mockk<KommerBarnetTilGodeService>().also {
+        every { it.hentKommerBarnetTilGode(any()) } returns null
+    }
     private val revurderingService = RevurderingServiceImpl(
         oppgaveService,
         grunnlagService,
@@ -230,7 +233,6 @@ internal class FoerstegangsbehandlingServiceImplTest {
         val resultat = behandlingsService.opprettBehandling(
             1,
             persongalleri,
-            null,
             datoNaa.toString(),
             Vedtaksloesning.GJENNY
         )!!
@@ -318,7 +320,6 @@ internal class FoerstegangsbehandlingServiceImplTest {
         val foerstegangsbehandling = behandlingsService.opprettBehandling(
             1,
             persongalleri,
-            null,
             datoNaa.toString(),
             Vedtaksloesning.GJENNY
         )!!
@@ -403,7 +404,6 @@ internal class FoerstegangsbehandlingServiceImplTest {
         val foerstegangsbehandling = behandlingsService.opprettBehandling(
             1,
             persongalleri,
-            null,
             datoNaa.toString(),
             Vedtaksloesning.GJENNY
         )!!
@@ -417,7 +417,6 @@ internal class FoerstegangsbehandlingServiceImplTest {
         val nyfoerstegangsbehandling = behandlingsService.opprettBehandling(
             1,
             persongalleri,
-            null,
             datoNaa.toString(),
             Vedtaksloesning.GJENNY
         )
@@ -504,15 +503,15 @@ internal class FoerstegangsbehandlingServiceImplTest {
         val foerstegangsbehandling = behandlingsService.opprettBehandling(
             1,
             persongalleri,
-            null,
             datoNaa.toString(),
             Vedtaksloesning.GJENNY
         )!!
 
         assertTrue(foerstegangsbehandling is Foerstegangsbehandling)
 
+        val iverksattBehandlingId = UUID.randomUUID()
         val iverksattBehandling = Foerstegangsbehandling(
-            id = UUID.randomUUID(),
+            id = iverksattBehandlingId,
             sak = Sak(
                 ident = "Soeker",
                 sakType = SakType.BARNEPENSJON,
@@ -538,7 +537,12 @@ internal class FoerstegangsbehandlingServiceImplTest {
             ),
             utenlandstilsnitt = null,
             boddEllerArbeidetUtlandet = null,
-            kommerBarnetTilgode = null,
+            kommerBarnetTilgode = KommerBarnetTilgode(
+                JaNei.JA,
+                "",
+                Grunnlagsopplysning.Saksbehandler.create("saksbehandler"),
+                iverksattBehandlingId
+            ),
             kilde = Vedtaksloesning.GJENNY
         )
 
@@ -555,7 +559,6 @@ internal class FoerstegangsbehandlingServiceImplTest {
         val revurderingsBehandling = behandlingsService.opprettBehandling(
             1,
             persongalleri,
-            null,
             datoNaa.toString(),
             Vedtaksloesning.GJENNY
         )

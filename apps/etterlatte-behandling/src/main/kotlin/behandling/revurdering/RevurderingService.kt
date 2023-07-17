@@ -186,7 +186,7 @@ class RevurderingServiceImpl(
                 forrigeBehandling?.let {
                     kommerBarnetTilGodeService.hentKommerBarnetTilGode(it)
                         ?.copy(behandlingId = opprettBehandling.id)
-                        ?.let { kommerBarnetTilGodeService.lagreKommerBarnetTilgode(it) }
+                        ?.let { kopiert -> kommerBarnetTilGodeService.lagreKommerBarnetTilgode(kopiert) }
                 }
                 hendelseDao.behandlingOpprettet(opprettBehandling.toBehandlingOpprettet())
 

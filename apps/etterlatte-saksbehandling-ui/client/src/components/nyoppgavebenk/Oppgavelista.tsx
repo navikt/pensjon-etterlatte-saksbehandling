@@ -21,7 +21,7 @@ export const Oppgavelista = () => {
       }
     )
   }, [])
-  console.log(hentedeOppgaver)
+
   return (
     <div>
       {isPending(oppgaver) && <Spinner visible={true} label={'henter nye oppgaver'} />}

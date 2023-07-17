@@ -24,7 +24,7 @@ internal fun Route.oppgaveRoutesNy(service: OppgaveServiceNy, kanBrukeNyOppgavel
                 }
             }
         }
-        // TODO: sikre denne med saksid for tilgang?
+
         post("tildel-saksbehandler") {
             kunSaksbehandler {
                 if (kanBrukeNyOppgaveliste) {
@@ -50,7 +50,7 @@ internal fun Route.oppgaveRoutesNy(service: OppgaveServiceNy, kanBrukeNyOppgavel
         post("/lagre") {
             if (kanBrukeNyOppgaveliste) {
                 val oppgave = call.receive<OppgaveNy>()
-                service.lagreOppgave(oppgave)
+                // service.lagreOppgave(oppgave)
                 call.respond(HttpStatusCode.Created)
             } else {
                 call.respond(HttpStatusCode.Forbidden)

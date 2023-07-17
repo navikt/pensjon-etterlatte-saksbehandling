@@ -1,8 +1,11 @@
 package no.nav.etterlatte.oppgaveny
 
+import io.ktor.server.plugins.BadRequestException
+import io.ktor.server.plugins.NotFoundException
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.sak.SakDao
 import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
+import java.util.*
 
 class OppgaveServiceNy(private val oppgaveDaoNy: OppgaveDaoNy, private val sakDao: SakDao) {
     // bruker: SaksbehandlerMedRoller må på en måte inn her
@@ -13,24 +16,29 @@ class OppgaveServiceNy(private val oppgaveDaoNy: OppgaveDaoNy, private val sakDa
     }
 
     fun tildelSaksbehandler(nySaksbehandlerDto: NySaksbehandlerDto) {
-        val hentetOppgave = oppgaveDaoNy.hentOppgave(nySaksbehandlerDto.oppgaveId)
-        if (hentetOppgave != null) {
-            if (hentetOppgave.saksbehandler.isNullOrEmpty()) {
-                oppgaveDaoNy.settNySaksbehandler(nySaksbehandlerDto)
+        inTransaction {
+            val hentetOppgave = oppgaveDaoNy.hentOppgave(nySaksbehandlerDto.oppgaveId)
+
+            if (hentetOppgave != null) {
+                if (hentetOppgave.saksbehandler.isNullOrEmpty()) {
+                    oppgaveDaoNy.settNySaksbehandler(nySaksbehandlerDto)
+                } else {
+                    throw BadRequestException("Oppgaven har allerede en saksbehandler")
+                }
             } else {
-                throw RuntimeException("Oppgaven har allerede en saksbehandler")
+                throw NotFoundException("Oppgaven finnes ikke")
             }
-        } else {
-            throw RuntimeException("Oppgave finnes ikke")
         }
     }
 
     fun byttSaksbehandler(nySaksbehandlerDto: NySaksbehandlerDto) {
-        val hentetOppgave = oppgaveDaoNy.hentOppgave(nySaksbehandlerDto.oppgaveId)
-        if (hentetOppgave != null) {
-            oppgaveDaoNy.settNySaksbehandler(nySaksbehandlerDto)
-        } else {
-            throw RuntimeException("Oppgave finnes ikke")
+        inTransaction {
+            val hentetOppgave = oppgaveDaoNy.hentOppgave(nySaksbehandlerDto.oppgaveId)
+            if (hentetOppgave != null) {
+                oppgaveDaoNy.settNySaksbehandler(nySaksbehandlerDto)
+            } else {
+                throw NotFoundException("Oppgaven finnes ikke")
+            }
         }
     }
 
@@ -45,8 +53,12 @@ class OppgaveServiceNy(private val oppgaveDaoNy: OppgaveDaoNy, private val sakDa
         )
     }
 
-    fun lagreOppgave(oppgaveNy: OppgaveNy): OppgaveNy {
+    private fun lagreOppgave(oppgaveNy: OppgaveNy): OppgaveNy {
         oppgaveDaoNy.lagreOppgave(oppgaveNy)
         return oppgaveDaoNy.hentOppgave(oppgaveNy.id)!!
+    }
+
+    fun hentOppgve(oppgaveId: UUID): OppgaveNy? {
+        return oppgaveDaoNy.hentOppgave(oppgaveId)
     }
 }

@@ -45,6 +45,12 @@ updates:
       ds:
         patterns:
           "@navikt/ds-*"
+      eslint:
+        patterns:
+          "@typescript-eslint/*"
+      slate:
+        patterns:
+          "slate*"
 
 
   # ===============

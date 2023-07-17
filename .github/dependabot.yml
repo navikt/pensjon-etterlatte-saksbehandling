@@ -13,7 +13,7 @@ updates:
     groups:
       tjenestespesifikasjoner:
         patterns:
-          "com.github.navikt.pensjon-etterlatte-tjenestespesifikasjoner*"
+          - "com.github.navikt.pensjon-etterlatte-tjenestespesifikasjoner*"
 
 
   # =============
@@ -41,13 +41,13 @@ updates:
     groups:
       ds:
         patterns:
-          "@navikt/ds-*"
+          - "@navikt/ds-*"
       eslint:
         patterns:
-          "@typescript-eslint/*"
+          - "@typescript-eslint/*"
       slate:
         patterns:
-          "slate*"
+          - "slate*"
 
 
   # ===============

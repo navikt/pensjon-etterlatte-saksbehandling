@@ -1,8 +1,8 @@
 import { useAppSelector } from '~store/Store'
-import { isFailure, isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
+import { isFailure, isInitial, isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
 import { tildelSaksbehandlerApi } from '~shared/api/oppgaverny'
 import { ApiErrorAlert } from '~ErrorBoundary'
-import { Button } from '@navikt/ds-react'
+import { Button, Loader } from '@navikt/ds-react'
 import { PersonIcon } from '@navikt/aksel-icons'
 
 export const TildelSaksbehandler = (props: { id: string }) => {
@@ -14,10 +14,10 @@ export const TildelSaksbehandler = (props: { id: string }) => {
   }
   return (
     <>
-      {isPending(tildelSaksbehandlerSvar) && <>Setter saksbehandler</>}
+      {isPending(tildelSaksbehandlerSvar) && <Loader size="small" title="Setter saksbehandler" />}
       {isSuccess(tildelSaksbehandlerSvar) && 'Saksbehandler er endret'}
       {isFailure(tildelSaksbehandlerSvar) && <ApiErrorAlert>Kunne ikke tildele deg denne oppgaven</ApiErrorAlert>}
-      {!isSuccess(tildelSaksbehandlerSvar) && (
+      {isInitial(tildelSaksbehandlerSvar) && (
         <Button icon={<PersonIcon />} variant="tertiary" onClick={tildelSaksbehandlerWrapper}>
           Tildel meg
         </Button>

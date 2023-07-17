@@ -55,9 +55,9 @@ export const Oppgavelista = () => {
                   <Table.DataCell>{enhet}</Table.DataCell>
                   <Table.DataCell>
                     {saksbehandler ? (
-                      <RedigerSaksbehandler saksbehandler={saksbehandler} />
+                      <RedigerSaksbehandler saksbehandler={saksbehandler} oppgaveId={id} />
                     ) : (
-                      <TildelSaksbehandler id={id} />
+                      <TildelSaksbehandler oppgaveId={id} />
                     )}
                   </Table.DataCell>
                   <Table.DataCell>{sakType ? sakType : 'Ingen saktype, må migreres'}</Table.DataCell>

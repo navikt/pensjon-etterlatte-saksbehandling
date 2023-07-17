@@ -11,7 +11,6 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.behandling.BehandlingService
-import no.nav.etterlatte.behandling.domain.toDetaljertBehandling
 import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.Vedtaksloesning
@@ -62,7 +61,10 @@ internal fun Route.revurderingRoutes(
                     return@post
                 }
                 if (!body.aarsak.kanBrukesIMiljo()) {
-                    call.respond(HttpStatusCode.BadRequest, "Feil revurderingsårsak, foreløpig ikke støttet")
+                    call.respond(
+                        HttpStatusCode.BadRequest,
+                        "Feil revurderingsårsak ${body.aarsak}, foreløpig ikke støttet"
+                    )
                     return@post
                 }
                 behandlingService.hentSisteIverksatte(sakId)?.let { forrigeIverksatteBehandling ->
@@ -86,7 +88,8 @@ internal fun Route.revurderingRoutes(
                         forrigeBehandling = forrigeIverksatteBehandling,
                         revurderingAarsak = body.aarsak,
                         kilde = Vedtaksloesning.GJENNY,
-                        paaGrunnAvHendelse = paaGrunnAvHendelseId
+                        paaGrunnAvHendelse = paaGrunnAvHendelseId,
+                        begrunnelse = body.begrunnelse
                     )
 
                     when (revurdering) {
@@ -111,6 +114,10 @@ internal fun Route.revurderingRoutes(
     }
 }
 
-data class OpprettRevurderingRequest(val aarsak: RevurderingAarsak, val paaGrunnAvHendelseId: String? = null)
+data class OpprettRevurderingRequest(
+    val aarsak: RevurderingAarsak,
+    val paaGrunnAvHendelseId: String? = null,
+    val begrunnelse: String? = null
+)
 
 data class RevurderingInfoDto(val info: RevurderingInfo)

@@ -29,7 +29,7 @@ const VurderHendelseModal = (props: Props) => {
     }
 
     opprettRevurdering(
-      { sakId: props.sakId, aarsak: valgtAarsak, paaGrunnAvHendelseId: valgtHendelse?.id },
+      { sakId: props.sakId, aarsak: valgtAarsak, paaGrunnAvHendelseId: valgtHendelse?.id, begrunnelse: begrunnelse },
       (revurderingId: string) => {
         navigate(`/behandling/${revurderingId}/`)
       },

@@ -41,7 +41,8 @@ interface RevurderingService {
         forrigeBehandling: Behandling,
         revurderingAarsak: RevurderingAarsak,
         kilde: Vedtaksloesning,
-        paaGrunnAvHendelse: UUID?
+        paaGrunnAvHendelse: UUID?,
+        begrunnelse: String?
     ): Revurdering?
 
     fun opprettAutomatiskRevurdering(
@@ -93,7 +94,8 @@ class RevurderingServiceImpl(
         forrigeBehandling: Behandling,
         revurderingAarsak: RevurderingAarsak,
         kilde: Vedtaksloesning,
-        paaGrunnAvHendelse: UUID?
+        paaGrunnAvHendelse: UUID?,
+        begrunnelse: String?
     ): Revurdering? = forrigeBehandling.sjekkEnhet()?.let {
         return if (featureToggleService.isEnabled(RevurderingServiceFeatureToggle.OpprettManuellRevurdering, false)) {
             opprettRevurdering(

@@ -28,3 +28,6 @@ export interface NySaksbehandlerDto {
 
 export const tildelSaksbehandlerApi = async (nysaksbehandler: NySaksbehandlerDto): Promise<ApiResponse<unknown>> =>
   apiClient.post('/nyeoppgaver/tildel-saksbehandler', { ...nysaksbehandler })
+
+export const fjernSaksbehandlerApi = async (oppgaveId: string): Promise<ApiResponse<unknown>> =>
+  apiClient.post('/nyeoppgaver/fjern-saksbehandler', { oppgaveId })

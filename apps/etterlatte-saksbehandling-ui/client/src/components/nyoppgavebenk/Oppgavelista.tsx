@@ -6,6 +6,7 @@ import { Table } from '@navikt/ds-react'
 import { formaterStringDato } from '~utils/formattering'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { TildelSaksbehandler } from '~components/nyoppgavebenk/TildelSaksbehandler'
+import { RedigerSaksbehandler } from '~components/nyoppgavebenk/RedigerSaksbehandler'
 
 export const Oppgavelista = () => {
   const [oppgaver, hentOppgaver] = useApiCall(hentNyeOppgaver)
@@ -52,7 +53,13 @@ export const Oppgavelista = () => {
                   <Table.DataCell>{status}</Table.DataCell>
                   <Table.DataCell>{merknad}</Table.DataCell>
                   <Table.DataCell>{enhet}</Table.DataCell>
-                  <Table.DataCell>{saksbehandler ? saksbehandler : <TildelSaksbehandler id={id} />}</Table.DataCell>
+                  <Table.DataCell>
+                    {saksbehandler ? (
+                      <RedigerSaksbehandler saksbehandler={saksbehandler} />
+                    ) : (
+                      <TildelSaksbehandler id={id} />
+                    )}
+                  </Table.DataCell>
                   <Table.DataCell>{sakType ? sakType : 'Ingen saktype, må migreres'}</Table.DataCell>
                   <Table.DataCell>{frist ? frist : 'Ingen frist'}</Table.DataCell>
                 </Table.Row>

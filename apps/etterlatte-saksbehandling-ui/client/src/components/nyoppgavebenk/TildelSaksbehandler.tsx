@@ -5,12 +5,12 @@ import { ApiErrorAlert } from '~ErrorBoundary'
 import { Button, Loader } from '@navikt/ds-react'
 import { PersonIcon } from '@navikt/aksel-icons'
 
-export const TildelSaksbehandler = (props: { id: string }) => {
-  const { id } = props
+export const TildelSaksbehandler = (props: { oppgaveId: string }) => {
+  const { oppgaveId } = props
   const user = useAppSelector((state) => state.saksbehandlerReducer.saksbehandler)
   const [tildelSaksbehandlerSvar, tildelSaksbehandler] = useApiCall(tildelSaksbehandlerApi)
   const tildelSaksbehandlerWrapper = () => {
-    tildelSaksbehandler({ oppgaveId: id, saksbehandler: user.ident })
+    tildelSaksbehandler({ oppgaveId: oppgaveId, saksbehandler: user.ident })
   }
   return (
     <>

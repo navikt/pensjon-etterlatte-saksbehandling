@@ -233,6 +233,7 @@ internal fun Route.behandlingRoutes(
                     val behandling = foerstegangsbehandlingService.opprettBehandling(
                         behandlingsBehov.sak,
                         behandlingsBehov.persongalleri,
+                        behandlingService.hentSisteIverksatte(behandlingsBehov.sak)?.id,
                         behandlingsBehov.mottattDato,
                         Vedtaksloesning.GJENNY
                     )

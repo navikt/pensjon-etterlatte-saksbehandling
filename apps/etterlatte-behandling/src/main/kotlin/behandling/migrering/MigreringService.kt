@@ -1,7 +1,6 @@
 package no.nav.etterlatte.behandling.omregning
 
 import behandling.kommerbarnettilgode.KommerBarnetTilGodeService
-import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingHendelseType
 import no.nav.etterlatte.behandling.BehandlingHendelserKafkaProducer
 import no.nav.etterlatte.behandling.BehandlingService
@@ -55,6 +54,7 @@ class MigreringService(
         foerstegangsBehandlingService.opprettBehandling(
             finnEllerOpprettSak(request).id,
             request.persongalleri,
+            null,
             null,
             Vedtaksloesning.PESYS
         )

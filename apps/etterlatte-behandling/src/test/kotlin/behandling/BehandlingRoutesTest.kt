@@ -1,5 +1,6 @@
 package behandling
 
+import behandling.kommerbarnettilgode.KommerBarnetTilGodeService
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.header
@@ -52,6 +53,7 @@ internal class BehandlingRoutesTest {
     private lateinit var hoconApplicationConfig: HoconApplicationConfig
     private val behandlingService = mockk<BehandlingService>(relaxUnitFun = true)
     private val foerstegangsbehandlingService = mockk<FoerstegangsbehandlingService>()
+    private val kommerBarnetTilGodeService = mockk<KommerBarnetTilGodeService>()
     private val manueltOpphoerService = mockk<ManueltOpphoerService>()
 
     @BeforeAll
@@ -186,6 +188,7 @@ internal class BehandlingRoutesTest {
                     behandlingRoutes(
                         behandlingService,
                         foerstegangsbehandlingService,
+                        kommerBarnetTilGodeService,
                         manueltOpphoerService
                     )
                 }

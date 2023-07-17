@@ -67,6 +67,7 @@ class OmregningIntegrationTest : BehandlingIntegrationTest() {
                 .opprettBehandling(
                     sak.id,
                     persongalleri(),
+                    null,
                     LocalDateTime.now().toString(),
                     Vedtaksloesning.GJENNY
                 )

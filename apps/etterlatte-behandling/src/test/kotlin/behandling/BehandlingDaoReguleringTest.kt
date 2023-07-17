@@ -1,6 +1,7 @@
 package no.nav.etterlatte.behandling
 
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
+import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -43,7 +44,7 @@ internal class BehandlingDaoReguleringTest {
 
         val connection = dataSource.connection
         sakRepo = SakDao { connection }
-        behandlingRepo = BehandlingDao { connection }
+        behandlingRepo = BehandlingDao(KommerBarnetTilGodeDao { connection }) { connection }
     }
 
     @AfterEach

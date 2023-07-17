@@ -1,14 +1,14 @@
 package behandling.kommerbarnettilgode
 
 import no.nav.etterlatte.behandling.BehandlingDao
-import no.nav.etterlatte.behandling.GenerellBehandlingService
+import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import java.util.*
 
 class KommerBarnetTilGodeService(
-    private val behandlingService: GenerellBehandlingService,
+    private val behandlingService: BehandlingService,
     private val kommerBarnetTilGodeDao: KommerBarnetTilGodeDao,
     private val behandlingDao: BehandlingDao
 ) {

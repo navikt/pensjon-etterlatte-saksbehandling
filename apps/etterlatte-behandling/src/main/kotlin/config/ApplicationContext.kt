@@ -18,8 +18,6 @@ import no.nav.etterlatte.behandling.klienter.NavAnsattKlient
 import no.nav.etterlatte.behandling.klienter.NavAnsattKlientImpl
 import no.nav.etterlatte.behandling.klienter.Norg2Klient
 import no.nav.etterlatte.behandling.klienter.Norg2KlientImpl
-import no.nav.etterlatte.behandling.klienter.VedtakKlient
-import no.nav.etterlatte.behandling.klienter.VedtakKlientImpl
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
 import no.nav.etterlatte.behandling.manueltopphoer.RealManueltOpphoerService
 import no.nav.etterlatte.behandling.migrering.MigreringRepository
@@ -153,25 +151,13 @@ class ApplicationContext(
         grunnlagsendringshendelseDao = grunnlagsendringshendelseDao,
         grunnlagKlient = grunnlagKlientObo,
         sporingslogg = sporingslogg,
-        featureToggleService = featureToggleService
+        featureToggleService = featureToggleService,
+        kommerBarnetTilGodeDao = kommerBarnetTilGodeDao
     )
 
     val kommerBarnetTilGodeService =
-        KommerBarnetTilGodeService(generellBehandlingService, kommerBarnetTilGodeDao, behandlingDao)
+        KommerBarnetTilGodeService(behandlingService, kommerBarnetTilGodeDao, behandlingDao)
     val grunnlagsService = GrunnlagService(grunnlagKlient = grunnlagKlient)
-
-    val foerstegangsbehandlingService =
-        FoerstegangsbehandlingServiceImpl(
-            oppgaveService = oppgaveServiceNy,
-            grunnlagService = grunnlagsService,
-            revurderingService = revurderingService,
-            sakDao = sakDao,
-            behandlingDao = behandlingDao,
-            hendelseDao = hendelseDao,
-            behandlingHendelser = behandlingsHendelser,
-            featureToggleService = featureToggleService
-        )
-
     val revurderingService =
         RevurderingServiceImpl(
             oppgaveService = oppgaveServiceNy,
@@ -180,7 +166,8 @@ class ApplicationContext(
             featureToggleService = featureToggleService,
             behandlingDao = behandlingDao,
             hendelseDao = hendelseDao,
-            grunnlagsendringshendelseDao = grunnlagsendringshendelseDao
+            grunnlagsendringshendelseDao = grunnlagsendringshendelseDao,
+            kommerBarnetTilGodeService = kommerBarnetTilGodeService
         )
 
     val foerstegangsbehandlingService =

@@ -48,6 +48,7 @@ interface FoerstegangsbehandlingService {
     fun opprettBehandling(
         sakId: Long,
         persongalleri: Persongalleri,
+        forrigeBehandlingId: UUID?,
         mottattDato: String?,
         kilde: Vedtaksloesning
     ): Behandling?
@@ -93,6 +94,7 @@ class FoerstegangsbehandlingServiceImpl(
     override fun opprettBehandling(
         sakId: Long,
         persongalleri: Persongalleri,
+        forrigeBehandlingId: UUID?,
         mottattDato: String?,
         kilde: Vedtaksloesning
     ): Behandling? {
@@ -117,6 +119,7 @@ class FoerstegangsbehandlingServiceImpl(
             revurderingService.opprettRevurdering(
                 sakId,
                 persongalleri,
+                forrigeBehandlingId,
                 mottattDato,
                 Prosesstype.AUTOMATISK,
                 Vedtaksloesning.GJENNY,

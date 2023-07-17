@@ -1,5 +1,6 @@
 package no.nav.etterlatte.behandling
 
+import behandling.kommerbarnettilgode.KommerBarnetTilGodeService
 import io.mockk.Runs
 import io.mockk.clearAllMocks
 import io.mockk.confirmVerified
@@ -75,6 +76,7 @@ internal class FoerstegangsbehandlingServiceImplTest {
         Sak("ident", SakType.BARNEPENSJON, 1L, Enheter.AALESUND.enhetNr),
         OppgaveType.FOERSTEGANGSBEHANDLING
     )
+    private val kommerBarnetTilGodeService = mockk<KommerBarnetTilGodeService>()
     private val revurderingService = RevurderingServiceImpl(
         oppgaveService,
         grunnlagService,
@@ -82,7 +84,8 @@ internal class FoerstegangsbehandlingServiceImplTest {
         featureToggleService,
         behandlingDaoMock,
         hendelseDaoMock,
-        grunnlagsendringshendelseDao
+        grunnlagsendringshendelseDao,
+        kommerBarnetTilGodeService
     )
     private val naaTid = Tidspunkt.now()
     private val behandlingsService = FoerstegangsbehandlingServiceImpl(
@@ -227,6 +230,7 @@ internal class FoerstegangsbehandlingServiceImplTest {
         val resultat = behandlingsService.opprettBehandling(
             1,
             persongalleri,
+            null,
             datoNaa.toString(),
             Vedtaksloesning.GJENNY
         )!!
@@ -314,6 +318,7 @@ internal class FoerstegangsbehandlingServiceImplTest {
         val foerstegangsbehandling = behandlingsService.opprettBehandling(
             1,
             persongalleri,
+            null,
             datoNaa.toString(),
             Vedtaksloesning.GJENNY
         )!!
@@ -398,6 +403,7 @@ internal class FoerstegangsbehandlingServiceImplTest {
         val foerstegangsbehandling = behandlingsService.opprettBehandling(
             1,
             persongalleri,
+            null,
             datoNaa.toString(),
             Vedtaksloesning.GJENNY
         )!!
@@ -411,6 +417,7 @@ internal class FoerstegangsbehandlingServiceImplTest {
         val nyfoerstegangsbehandling = behandlingsService.opprettBehandling(
             1,
             persongalleri,
+            null,
             datoNaa.toString(),
             Vedtaksloesning.GJENNY
         )
@@ -497,6 +504,7 @@ internal class FoerstegangsbehandlingServiceImplTest {
         val foerstegangsbehandling = behandlingsService.opprettBehandling(
             1,
             persongalleri,
+            null,
             datoNaa.toString(),
             Vedtaksloesning.GJENNY
         )!!
@@ -547,6 +555,7 @@ internal class FoerstegangsbehandlingServiceImplTest {
         val revurderingsBehandling = behandlingsService.opprettBehandling(
             1,
             persongalleri,
+            null,
             datoNaa.toString(),
             Vedtaksloesning.GJENNY
         )

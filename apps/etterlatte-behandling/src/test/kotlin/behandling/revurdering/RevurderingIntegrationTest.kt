@@ -77,6 +77,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
             .opprettBehandling(
                 sak.id,
                 persongalleri(),
+                null,
                 LocalDateTime.now().toString(),
                 Vedtaksloesning.GJENNY
             )
@@ -125,7 +126,8 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
                 featureToggleService,
                 applicationContext.behandlingDao,
                 applicationContext.hendelseDao,
-                applicationContext.grunnlagsendringshendelseDao
+                applicationContext.grunnlagsendringshendelseDao,
+                applicationContext.kommerBarnetTilGodeService
             ).opprettManuellRevurdering(
                 sakId = sak.id,
                 forrigeBehandling = behandling!!,
@@ -188,7 +190,8 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
             featureToggleService,
             applicationContext.behandlingDao,
             applicationContext.hendelseDao,
-            applicationContext.grunnlagsendringshendelseDao
+            applicationContext.grunnlagsendringshendelseDao,
+            applicationContext.kommerBarnetTilGodeService
         )
         val revurdering = revurderingService.opprettManuellRevurdering(
             sakId = sak.id,
@@ -295,7 +298,8 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
                 featureToggleService,
                 applicationContext.behandlingDao,
                 applicationContext.hendelseDao,
-                applicationContext.grunnlagsendringshendelseDao
+                applicationContext.grunnlagsendringshendelseDao,
+                applicationContext.kommerBarnetTilGodeService
             ).opprettManuellRevurdering(
                 sakId = sak.id,
                 forrigeBehandling = behandling!!,
@@ -344,7 +348,8 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
                 featureToggleService,
                 applicationContext.behandlingDao,
                 applicationContext.hendelseDao,
-                applicationContext.grunnlagsendringshendelseDao
+                applicationContext.grunnlagsendringshendelseDao,
+                applicationContext.kommerBarnetTilGodeService
             )
 
         val foerstegangsbehandlingService =

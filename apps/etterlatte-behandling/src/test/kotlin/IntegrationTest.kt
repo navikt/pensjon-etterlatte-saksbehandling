@@ -19,6 +19,7 @@ import no.nav.etterlatte.behandling.FastsettVirkningstidspunktResponse
 import no.nav.etterlatte.behandling.ManueltOpphoerResponse
 import no.nav.etterlatte.behandling.VedtakHendelse
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
+import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
 import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerAarsak
 import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerRequest
 import no.nav.etterlatte.behandling.objectMapper
@@ -193,7 +194,7 @@ class IntegrationTest : BehandlingIntegrationTest() {
                 addAuthToken(tokenSaksbehandler)
             }.also {
                 applicationContext.dataSource.connection.use {
-                    val actual = BehandlingDao { it }.hentBehandling(behandlingId)!!
+                    val actual = BehandlingDao(KommerBarnetTilGodeDao { it }) { it }.hentBehandling(behandlingId)!!
                     assertEquals(BehandlingStatus.OPPRETTET, actual.status)
                 }
 
@@ -206,7 +207,7 @@ class IntegrationTest : BehandlingIntegrationTest() {
                 setBody("{}")
             }.also {
                 applicationContext.dataSource.connection.use {
-                    val actual = BehandlingDao { it }.hentBehandling(behandlingId)!!
+                    val actual = BehandlingDao(KommerBarnetTilGodeDao { it }) { it }.hentBehandling(behandlingId)!!
                     assertEquals(BehandlingStatus.VILKAARSVURDERT, actual.status)
                 }
 
@@ -217,7 +218,7 @@ class IntegrationTest : BehandlingIntegrationTest() {
                 addAuthToken(tokenSaksbehandler)
             }.also {
                 applicationContext.dataSource.connection.use {
-                    val actual = BehandlingDao { it }.hentBehandling(behandlingId)!!
+                    val actual = BehandlingDao(KommerBarnetTilGodeDao { it }) { it }.hentBehandling(behandlingId)!!
                     assertEquals(BehandlingStatus.BEREGNET, actual.status)
                 }
 
@@ -230,7 +231,7 @@ class IntegrationTest : BehandlingIntegrationTest() {
                 setBody(VedtakHendelse(123L, "saksb", Tidspunkt.now(), null, null))
             }.also {
                 applicationContext.dataSource.connection.use {
-                    val actual = BehandlingDao { it }.hentBehandling(behandlingId)!!
+                    val actual = BehandlingDao(KommerBarnetTilGodeDao { it }) { it }.hentBehandling(behandlingId)!!
                     assertEquals(BehandlingStatus.FATTET_VEDTAK, actual.status)
                 }
 
@@ -253,7 +254,7 @@ class IntegrationTest : BehandlingIntegrationTest() {
                 setBody(VedtakHendelse(123L, "saksb", Tidspunkt.now(), null, null))
             }.also {
                 applicationContext.dataSource.connection.use {
-                    val actual = BehandlingDao { it }.hentBehandling(behandlingId)!!
+                    val actual = BehandlingDao(KommerBarnetTilGodeDao { it }) { it }.hentBehandling(behandlingId)!!
                     assertEquals(BehandlingStatus.ATTESTERT, actual.status)
                 }
 

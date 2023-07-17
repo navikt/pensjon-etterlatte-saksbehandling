@@ -88,7 +88,8 @@ class BehandlingServiceImplTest {
             hendelseDao = hendelserMock,
             grunnlagKlient = mockk(),
             sporingslogg = mockk(),
-            featureToggleService = featureToggleService
+            featureToggleService = featureToggleService,
+            kommerBarnetTilGodeDao = mockk()
         )
 
         val behandlinger = sut.hentBehandlingerISak(1)
@@ -435,7 +436,8 @@ class BehandlingServiceImplTest {
             hendelseDao = hendelserMock,
             grunnlagKlient = mockk(),
             sporingslogg = mockk(),
-            featureToggleService = featureToggleService
+            featureToggleService = featureToggleService,
+            kommerBarnetTilGodeDao = mockk()
         )
 
         val behandlinger = sut.hentBehandlingerISak(1)
@@ -477,7 +479,8 @@ class BehandlingServiceImplTest {
             hendelseDao = hendelserMock,
             grunnlagKlient = mockk(),
             sporingslogg = mockk(),
-            featureToggleService = featureToggleService
+            featureToggleService = featureToggleService,
+            kommerBarnetTilGodeDao = mockk()
         )
 
         val behandlinger = sut.hentBehandlingerISak(1)
@@ -518,7 +521,8 @@ class BehandlingServiceImplTest {
             hendelseDao = mockk(),
             grunnlagKlient = mockk(),
             sporingslogg = mockk(),
-            featureToggleService = featureToggleService
+            featureToggleService = featureToggleService,
+            kommerBarnetTilGodeDao = mockk()
         )
 
         sut.oppdaterUtenlandstilsnitt(
@@ -568,7 +572,8 @@ class BehandlingServiceImplTest {
             mockk(),
             mockk(),
             mockk(),
-            featureToggleService
+            featureToggleService,
+            kommerBarnetTilGodeDao = mockk()
         )
 
         sut.oppdaterBoddEllerArbeidetUtlandet(
@@ -628,7 +633,8 @@ class BehandlingServiceImplTest {
         hendelseDao = hendelseDao ?: mockk(),
         grunnlagKlient = grunnlagKlient ?: mockk(),
         sporingslogg = mockk(),
-        featureToggleService = featureToggleService
+        featureToggleService = featureToggleService,
+        kommerBarnetTilGodeDao = mockk()
     )
 
     companion object {

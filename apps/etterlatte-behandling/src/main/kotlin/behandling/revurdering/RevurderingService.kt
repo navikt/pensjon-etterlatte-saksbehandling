@@ -1,7 +1,6 @@
 package no.nav.etterlatte.behandling.revurdering
 
 import behandling.kommerbarnettilgode.KommerBarnetTilGodeService
-import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.BehandlingHendelseType
@@ -58,6 +57,7 @@ interface RevurderingService {
     fun opprettRevurdering(
         sakId: Long,
         persongalleri: Persongalleri,
+        forrigeBehandling: UUID?,
         mottattDato: String? = null,
         prosessType: Prosesstype,
         kilde: Vedtaksloesning,
@@ -99,6 +99,7 @@ class RevurderingServiceImpl(
             opprettRevurdering(
                 sakId,
                 forrigeBehandling.persongalleri,
+                forrigeBehandling.id,
                 Tidspunkt.now().toLocalDatetimeUTC().toString(),
                 Prosesstype.MANUELL,
                 kilde,
@@ -129,6 +130,7 @@ class RevurderingServiceImpl(
         opprettRevurdering(
             sakId,
             forrigeBehandling.persongalleri,
+            forrigeBehandling.id,
             null,
             Prosesstype.AUTOMATISK,
             kilde,
@@ -160,6 +162,7 @@ class RevurderingServiceImpl(
     override fun opprettRevurdering(
         sakId: Long,
         persongalleri: Persongalleri,
+        forrigeBehandling: UUID?,
         mottattDato: String?,
         prosessType: Prosesstype,
         kilde: Vedtaksloesning,
@@ -180,9 +183,11 @@ class RevurderingServiceImpl(
                 merknad = merknad
             ).let { opprettBehandling ->
                 behandlingDao.opprettBehandling(opprettBehandling)
-        kommerBarnetTilGodeService.hentKommerBarnetTilGode(forrigeBehandling.id)
-            ?.copy(behandlingId = opprettBehandling.id)
-            ?.let { kommerBarnetTilGodeService.lagreKommerBarnetTilgode(it) }
+                forrigeBehandling?.let {
+                    kommerBarnetTilGodeService.hentKommerBarnetTilGode(it)
+                        ?.copy(behandlingId = opprettBehandling.id)
+                        ?.let { kommerBarnetTilGodeService.lagreKommerBarnetTilgode(it) }
+                }
                 hendelseDao.behandlingOpprettet(opprettBehandling.toBehandlingOpprettet())
 
                 logger.info("Opprettet behandling ${opprettBehandling.id} i sak ${opprettBehandling.sakId}")

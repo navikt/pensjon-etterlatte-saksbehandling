@@ -233,7 +233,6 @@ class BehandlingDao(
             stmt.setString(19, merknad)
         }
         require(stmt.executeUpdate() == 1)
-        behandling.kommerBarnetTilgode?.let { kommerBarnetTilGodeDao.lagreKommerBarnetTilGode(it) }
     }
 
     fun lagreGyldighetsproving(behandling: Foerstegangsbehandling) {

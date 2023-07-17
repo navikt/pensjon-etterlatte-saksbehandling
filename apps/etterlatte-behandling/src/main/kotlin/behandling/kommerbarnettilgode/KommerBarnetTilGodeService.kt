@@ -1,7 +1,6 @@
-package behandling.kommerbarnettilgode
+package no.nav.etterlatte.behandling.kommerbarnettilgode
 
 import no.nav.etterlatte.behandling.BehandlingDao
-import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import java.util.*

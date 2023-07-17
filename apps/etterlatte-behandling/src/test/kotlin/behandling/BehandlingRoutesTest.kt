@@ -1,6 +1,5 @@
 package behandling
 
-import behandling.kommerbarnettilgode.KommerBarnetTilGodeService
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.header
@@ -26,6 +25,7 @@ import no.nav.etterlatte.behandling.BoddEllerArbeidetUtlandetRequest
 import no.nav.etterlatte.behandling.UtenlandstilsnittRequest
 import no.nav.etterlatte.behandling.behandlingRoutes
 import no.nav.etterlatte.behandling.foerstegangsbehandling.FoerstegangsbehandlingService
+import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeService
 import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerService
 import no.nav.etterlatte.libs.common.behandling.UtenlandstilsnittType
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt

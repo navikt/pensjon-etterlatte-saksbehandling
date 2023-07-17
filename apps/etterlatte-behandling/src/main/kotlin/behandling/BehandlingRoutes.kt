@@ -1,6 +1,5 @@
 package no.nav.etterlatte.behandling
 
-import behandling.kommerbarnettilgode.KommerBarnetTilGodeService
 import com.fasterxml.jackson.annotation.JsonProperty
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
@@ -18,6 +17,7 @@ import no.nav.etterlatte.behandling.domain.ManueltOpphoer
 import no.nav.etterlatte.behandling.domain.TilstandException
 import no.nav.etterlatte.behandling.domain.toBehandlingSammendrag
 import no.nav.etterlatte.behandling.foerstegangsbehandling.FoerstegangsbehandlingService
+import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeService
 import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerAarsak
 import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerRequest
 import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerService

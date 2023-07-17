@@ -41,6 +41,10 @@ updates:
       interval: "monthly"
       day: "sunday"
     open-pull-requests-limit: 10
+    groups:
+      ds:
+        patterns:
+          "@navikt/ds-*"
 
 
   # ===============

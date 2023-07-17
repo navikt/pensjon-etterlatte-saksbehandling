@@ -418,9 +418,13 @@ class GrunnlagsendringshendelseService(
             }
 
             GrunnlagsendringsType.SIVILSTAND -> {
-                val pdlSivilstand = pdlData.hentSivilstand()
-                val grunnlagSivilstand = grunnlag?.sivilstand(rolle)
-                samsvarSivilstand(pdlSivilstand, grunnlagSivilstand)
+                if (rolle == Saksrolle.SOESKEN) {
+                    SamsvarMellomKildeOgGrunnlag.Sivilstand(null,null,true)
+                } else {
+                    val pdlSivilstand = pdlData.hentSivilstand()
+                    val grunnlagSivilstand = grunnlag?.sivilstand(rolle)
+                    samsvarSivilstand(pdlSivilstand, grunnlagSivilstand)
+                }
             }
 
             GrunnlagsendringsType.GRUNNBELOEP -> SamsvarMellomKildeOgGrunnlag.Grunnbeloep(samsvar = false)

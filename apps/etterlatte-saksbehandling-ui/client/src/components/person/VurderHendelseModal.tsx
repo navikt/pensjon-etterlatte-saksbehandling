@@ -1,4 +1,4 @@
-import { Alert, BodyShort, Button, Heading, Modal, Select } from '@navikt/ds-react'
+import { Alert, BodyShort, Button, Heading, Modal, Select, TextField } from '@navikt/ds-react'
 import React, { useState } from 'react'
 import styled from 'styled-components'
 import { opprettRevurdering as opprettRevurderingApi } from '~shared/api/behandling'
@@ -20,6 +20,7 @@ const VurderHendelseModal = (props: Props) => {
   const [error, setError] = useState<string | null>(null)
   const [valgtAarsak, setValgtAarsak] = useState<Revurderingsaarsak | undefined>(undefined)
   const [opprettRevurderingStatus, opprettRevurdering] = useApiCall(opprettRevurderingApi)
+  const [begrunnelse, setBegrunnelse] = useState('')
   const navigate = useNavigate()
 
   const onSubmit = () => {
@@ -47,9 +48,9 @@ const VurderHendelseModal = (props: Props) => {
               Vurder hendelse
             </Heading>
             <Alert variant={'warning'}>{valgtHendelse ? tekster.get(valgtHendelse.type)!.tittel : ''}</Alert>
-            <p>
+            <BodyShort>
               <HjemmelLenke tittel={'§18-8 Lovparagraf'} lenke={''} />
-            </p>
+            </BodyShort>
             <BodyShort spacing style={{ marginBottom: '2em' }}>
               {valgtHendelse ? tekster.get(valgtHendelse.type)!.beskrivelse : ''}
             </BodyShort>
@@ -67,6 +68,13 @@ const VurderHendelseModal = (props: Props) => {
                   </option>
                 ))}
               </Select>
+              <TextField
+                label="Begrunnelse"
+                size="medium"
+                type="text"
+                value={begrunnelse}
+                onChange={(e) => setBegrunnelse(e.target.value)}
+              />
             </div>
           </ModalContentWrapper>
 

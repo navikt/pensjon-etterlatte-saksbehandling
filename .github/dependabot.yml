@@ -11,9 +11,6 @@ updates:
       day: "sunday"
     open-pull-requests-limit: 10
     groups:
-      jackson:
-        patterns:
-          "com.fasterxml.jackson*"
       tjenestespesifikasjoner:
         patterns:
           "com.github.navikt.pensjon-etterlatte-tjenestespesifikasjoner*"

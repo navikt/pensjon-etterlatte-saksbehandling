@@ -1,0 +1,92 @@
+[
+  {
+    "type" : "heading-two",
+    "children" : [
+      {
+        "text" : "Vedtak",
+        "placeholder" : null
+      }
+    ]
+  },
+  {
+    "type" : "heading-three",
+    "children" : [
+      {
+        "text" : "Ikke-biologisk far er død",
+        "placeholder" : null
+      }
+    ]
+  },
+  {
+    "type" : "paragraph",
+    "children" : [
+      {
+        "text" : "Barnepensjon gis til barn når en eller begge foreldrene er døde. Ifølge Folkeregisteret lever begge dine biologiske foreldre. Vi har derfor avslått søknaden din.",
+        "placeholder" : null
+      }
+    ]
+  },
+  {
+    "type" : "paragraph",
+    "children" : [
+      {
+        "text" : "Vedtaket er gjort etter bestemmelsene i folketrygdloven § 18-4.",
+        "placeholder" : null
+      }
+    ]
+  },
+  {
+    "type" : "heading-three",
+    "children" : [
+      {
+        "text" : "Mangler dødsattest/dom",
+        "placeholder" : null
+      }
+    ]
+  },
+  {
+    "type" : "paragraph",
+    "children" : [
+      {
+        "text" : "Vi har ikke mottatt dokumentasjon som bekrefter at en av foreldrene dine er døde. Vi har derfor avslått søknaden din.",
+        "placeholder" : null
+      }
+    ]
+  },
+  {
+    "type" : "paragraph",
+    "children" : [
+      {
+        "text" : "Du må sende oss en godkjent dødsattest eller en dom som bekrefter dødsfallet.",
+        "placeholder" : null
+      }
+    ]
+  },
+  {
+    "type" : "paragraph",
+    "children" : [
+      {
+        "text" : "Vedtaket er gjort etter bestemmelsene i folketrygdloven § 18-4.",
+        "placeholder" : null
+      }
+    ]
+  },
+  {
+    "type" : "heading-three",
+    "children" : [
+      {
+        "text" : "Utland",
+        "placeholder" : null
+      }
+    ]
+  },
+  {
+    "type" : "paragraph",
+    "children" : [
+      {
+        "text" : "Forelder og forutgående medlemstid og evt mottak av PE/UT (også EØS) \n\nBarnet er ikke medlem i folketrygden og foreldre har mindre enn 20 års botid \n\nEksport",
+        "placeholder" : false
+      }
+    ]
+  }
+]

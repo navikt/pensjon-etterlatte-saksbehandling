@@ -156,7 +156,7 @@ class ApplicationContext(
     )
 
     val kommerBarnetTilGodeService =
-        KommerBarnetTilGodeService(behandlingService, kommerBarnetTilGodeDao, behandlingDao)
+        KommerBarnetTilGodeService(kommerBarnetTilGodeDao, behandlingDao)
     val grunnlagsService = GrunnlagService(grunnlagKlient = grunnlagKlient)
     val revurderingService =
         RevurderingServiceImpl(

@@ -2,10 +2,11 @@ package no.nav.etterlatte.behandling.kommerbarnettilgode
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.behandling.objectMapper
+import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.database.singleOrNull
 import java.sql.Connection
-import java.util.UUID
+import java.util.*
 
 class KommerBarnetTilGodeDao(private val connection: () -> Connection) {
     fun lagreKommerBarnetTilGode(kommerBarnetTilGode: KommerBarnetTilgode) {
@@ -39,7 +40,7 @@ class KommerBarnetTilGodeDao(private val connection: () -> Connection) {
 
         return stmt.executeQuery().singleOrNull {
             KommerBarnetTilgode(
-                svar = getString("svar").let { objectMapper.readValue(it) },
+                svar = getString("svar").let { JaNei.valueOf(it) },
                 begrunnelse = getString("begrunnelse"),
                 kilde = getString("kilde").let { objectMapper.readValue(it) },
                 behandlingId = behandlingId

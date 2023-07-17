@@ -528,14 +528,14 @@ internal class BehandlingDaoIntegrationTest {
             )
         )
         behandlingRepo.opprettBehandling(opprettBehandling)
+        val saksbehandler = Grunnlagsopplysning.Saksbehandler.create("saksbehandler01")
+        val kommerBarnetTilgode = KommerBarnetTilgode(JaNei.JA, "", saksbehandler, opprettBehandling.id)
+        kommerBarnetTilGodeDao.lagreKommerBarnetTilGode(kommerBarnetTilgode)
 
         val foerstegangsbehandling = behandlingRepo.hentBehandling(opprettBehandling.id) as? Foerstegangsbehandling
 
         assertNotNull(foerstegangsbehandling)
 
-        val saksbehandler = Grunnlagsopplysning.Saksbehandler.create("saksbehandler01")
-
-        val kommerBarnetTilgode = KommerBarnetTilgode(JaNei.JA, "", saksbehandler, foerstegangsbehandling!!.id)
         val virkningstidspunkt = Virkningstidspunkt(YearMonth.of(2021, 1), saksbehandler, "")
         val gyldighetsResultat = GyldighetsResultat(
             VurderingsResultat.OPPFYLT,

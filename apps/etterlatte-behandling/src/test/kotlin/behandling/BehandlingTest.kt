@@ -5,6 +5,8 @@ import no.nav.etterlatte.behandling.domain.TilstandException
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
+import no.nav.etterlatte.libs.common.behandling.JaNei
+import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
@@ -22,8 +24,11 @@ import java.util.*
 
 internal class BehandlingTest {
 
+    val id = UUID.randomUUID()
+    private val saksbehandler = Grunnlagsopplysning.Saksbehandler.create("saksbehandler01")
+
     private val behandling = Foerstegangsbehandling(
-        id = UUID.randomUUID(),
+        id = id,
         sak = Sak(
             ident = "",
             sakType = SakType.BARNEPENSJON,
@@ -40,7 +45,7 @@ internal class BehandlingTest {
             avdoed = listOf(),
             gjenlevende = listOf()
         ),
-        kommerBarnetTilgode = null,
+        kommerBarnetTilgode = KommerBarnetTilgode(JaNei.JA, "", saksbehandler, id),
         virkningstidspunkt = null,
         utenlandstilsnitt = null,
         boddEllerArbeidetUtlandet = null,
@@ -48,8 +53,6 @@ internal class BehandlingTest {
         gyldighetsproeving = null,
         kilde = Vedtaksloesning.GJENNY
     )
-
-    private val saksbehandler = Grunnlagsopplysning.Saksbehandler.create("saksbehandler01")
 
     private val virkningstidspunkt = Virkningstidspunkt(YearMonth.of(2021, 1), saksbehandler, "begrunnelse")
     private val gyldighetsResultat = GyldighetsResultat(

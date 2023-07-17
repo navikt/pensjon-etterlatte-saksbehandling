@@ -19,14 +19,16 @@ import no.nav.etterlatte.common.DatabaseContext
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
+import no.nav.etterlatte.libs.common.behandling.JaNei
+import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.Omregningshendelse
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.sak.Sak
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
-import org.junit.jupiter.api.Assumptions.assumeTrue
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -36,6 +38,7 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class OmregningIntegrationTest : BehandlingIntegrationTest() {
@@ -78,14 +81,21 @@ class OmregningIntegrationTest : BehandlingIntegrationTest() {
         @BeforeEach
         fun beforeEach() {
             val (sak, behandling) = opprettSakMedFoerstegangsbehandling("234")
+            val kommerBarnetTilgode = KommerBarnetTilgode(
+                JaNei.JA,
+                "",
+                Grunnlagsopplysning.Saksbehandler.create("A0"),
+                behandling!!.id
+            )
+            applicationContext.kommerBarnetTilGodeService.lagreKommerBarnetTilgode(
+                kommerBarnetTilgode
+            )
 
             sakId = sak.id
 
-            assumeTrue(behandling != null)
-
             val virkningstidspunkt = virkningstidspunktVurdering()
 
-            val iverksattBehandling = behandling!!
+            val iverksattBehandling = behandling.copy(kommerBarnetTilgode = kommerBarnetTilgode)
                 .oppdaterGyldighetsproeving(gyldighetsresultatVurdering())
                 .oppdaterVirkningstidspunkt(virkningstidspunkt)
                 .tilVilkaarsvurdert()

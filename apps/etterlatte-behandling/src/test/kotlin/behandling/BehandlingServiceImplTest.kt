@@ -59,7 +59,7 @@ class BehandlingServiceImplTest {
                         throw IllegalArgumentException()
                     }
 
-                    override fun <T> inTransaction(block: () -> T): T {
+                    override fun <T> inTransaction(gjenbruk: Boolean, block: () -> T): T {
                         return block()
                     }
                 }

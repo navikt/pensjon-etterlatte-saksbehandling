@@ -22,9 +22,9 @@ export const hentNyeOppgaver = async (): Promise<ApiResponse<ReadonlyArray<Oppga
   apiClient.get('/nyeoppgaver/hent')
 
 export interface NySaksbehandlerDto {
-  id: string
+  oppgaveId: string
   saksbehandler: string
 }
 
-export const tildelSaksbehandlerApi = async (nysaksbehandler: NySaksbehandlerDto): Promise<ApiResponse<null>> =>
+export const tildelSaksbehandlerApi = async (nysaksbehandler: NySaksbehandlerDto): Promise<ApiResponse<unknown>> =>
   apiClient.post('/nyeoppgaver/tildel-saksbehandler', { ...nysaksbehandler })

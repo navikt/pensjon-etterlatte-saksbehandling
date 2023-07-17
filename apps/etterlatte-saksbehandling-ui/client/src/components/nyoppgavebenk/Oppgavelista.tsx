@@ -1,11 +1,11 @@
 import { isFailure, isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
-import { hentNyeOppgaver, OppgaveDTOny, tildelSaksbehandlerApi } from '~shared/api/oppgaverny'
+import { hentNyeOppgaver, OppgaveDTOny } from '~shared/api/oppgaverny'
 import { useEffect, useState } from 'react'
 import Spinner from '~shared/Spinner'
-import { Button, Table } from '@navikt/ds-react'
+import { Table } from '@navikt/ds-react'
 import { formaterStringDato } from '~utils/formattering'
-import { useAppSelector } from '~store/Store'
 import { ApiErrorAlert } from '~ErrorBoundary'
+import { TildelSaksbehandler } from '~components/nyoppgavebenk/TildelSaksbehandler'
 
 export const Oppgavelista = () => {
   const [oppgaver, hentOppgaver] = useApiCall(hentNyeOppgaver)
@@ -61,22 +61,5 @@ export const Oppgavelista = () => {
         </Table.Body>
       </Table>
     </div>
-  )
-}
-
-export const TildelSaksbehandler = (props: { id: string }) => {
-  const { id } = props
-  const user = useAppSelector((state) => state.saksbehandlerReducer.saksbehandler)
-  const [tildelSaksbehandlerSvar, tildelSaksbehandler] = useApiCall(tildelSaksbehandlerApi)
-  const tildelSaksbehandlerWrapper = () => {
-    tildelSaksbehandler({ id, saksbehandler: user.ident })
-  }
-  return (
-    <>
-      {isPending(tildelSaksbehandlerSvar) && <>Setter saksbehandler</>}
-      {isSuccess(tildelSaksbehandlerSvar) && 'Saksbehandler er endret'}
-      {isFailure(tildelSaksbehandlerSvar) && <ApiErrorAlert>Kunne ikke tildele deg denne oppgaven</ApiErrorAlert>}
-      {!isSuccess(tildelSaksbehandlerSvar) && <Button onClick={tildelSaksbehandlerWrapper}>Tildel meg</Button>}
-    </>
   )
 }

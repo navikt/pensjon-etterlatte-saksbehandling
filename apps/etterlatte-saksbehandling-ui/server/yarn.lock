@@ -2198,10 +2198,10 @@ safe-stable-stringify@^2.3.1:
   resolved "https://registry.yarnpkg.com/safer-buffer/-/safer-buffer-2.1.2.tgz#44fa161b0187b9549dd84bb91802f9bd8385cd6a"
   integrity sha512-YZo3K82SD7Riyi0E1EQPojLz7kpepnSQI9IyPbHHg1XXXevb5dJI7tpyN2ADxGcQbHG7vcyRHk0cbwqcQriUtg==
 
-semver@^7.3.5, semver@^7.3.7, semver@^7.5.2:
-  version "7.5.3"
-  resolved "https://registry.yarnpkg.com/semver/-/semver-7.5.3.tgz#161ce8c2c6b4b3bdca6caadc9fa3317a4c4fe88e"
-  integrity sha512-QBlUtyVk/5EeHbi7X0fw6liDZc7BBmEaSYn01fMU1OUYbf6GPsbTtd8WmnqbI20SeycoHSeiybkE/q1Q+qlThQ==
+semver@^7.3.5, semver@^7.3.7, semver@^7.5.3:
+  version "7.5.4"
+  resolved "https://registry.yarnpkg.com/semver/-/semver-7.5.4.tgz#483986ec4ed38e1c6c48c34894a9182dbff68a6e"
+  integrity sha512-1bCSESV6Pv+i21Hvpxp3Dx+pSD8lIPt8uVjRrxAUt/nbswYc+tK6Y2btiULjd4+fnq15PX+nqQDC7Oft7WkwcA==
   dependencies:
     lru-cache "^6.0.0"
 
@@ -2573,15 +2573,15 @@ unique-slug@^4.0.0:
   dependencies:
     imurmurhash "^0.1.4"
 
-unleash-client@^4.0.1:
-  version "4.0.1"
-  resolved "https://registry.yarnpkg.com/unleash-client/-/unleash-client-4.0.1.tgz#c1883b77393b0228ba225a0eb6fbd3b42bc9b1be"
-  integrity sha512-yhXfwbxPcy4Tel2jnhhxKCLorVD3E30YT5LEyr0EVhUJ9XwAfRUcI7P/DJ6SDEeGM1dUpfzy9BssWIYQgP5rcg==
+unleash-client@^4.0.2:
+  version "4.0.2"
+  resolved "https://registry.yarnpkg.com/unleash-client/-/unleash-client-4.0.2.tgz#c1b67aa8725876fa1243acbdd0070f4b1eaea997"
+  integrity sha512-wQh16fKR5AnE/tJ8mpDLH+D3LqJKdqp1EwJkt0SJdxJPRD80DNKM4UE7fqVl0lQ4fYn4kke530rLKLHNTaZ/Dg==
   dependencies:
     ip "^1.1.8"
     make-fetch-happen "^11.1.1"
     murmurhash3js "^3.0.1"
-    semver "^7.5.2"
+    semver "^7.5.3"
 
 unpipe@1.0.0, unpipe@~1.0.0:
   version "1.0.0"

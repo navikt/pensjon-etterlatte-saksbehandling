@@ -108,7 +108,7 @@ class OppgaveServiceNyTest {
         val err = assertThrows<BadRequestException> {
             oppgaveServiceNy.tildelSaksbehandler(SaksbehandlerEndringDto(nyOppgave.id, "enda en"))
         }
-        Assertions.assertEquals("Oppgaven har allerede en saksbehandler", err.message)
+        Assertions.assertTrue(err.message!!.startsWith("Oppgaven har allerede en saksbehandler"))
     }
 
     @Test
@@ -117,7 +117,7 @@ class OppgaveServiceNyTest {
         val err = assertThrows<NotFoundException> {
             oppgaveServiceNy.tildelSaksbehandler(SaksbehandlerEndringDto(UUID.randomUUID(), nysaksbehandler))
         }
-        Assertions.assertEquals("Oppgaven finnes ikke", err.message)
+        Assertions.assertTrue(err.message!!.startsWith("Oppgaven finnes ikke"))
     }
 
     @Test
@@ -141,7 +141,7 @@ class OppgaveServiceNyTest {
         val err = assertThrows<NotFoundException> {
             oppgaveServiceNy.byttSaksbehandler(SaksbehandlerEndringDto(UUID.randomUUID(), nysaksbehandler))
         }
-        Assertions.assertEquals("Oppgaven finnes ikke", err.message)
+        Assertions.assertTrue(err.message!!.startsWith("Oppgaven finnes ikke"))
     }
 
     @Test
@@ -171,7 +171,7 @@ class OppgaveServiceNyTest {
         val err = assertThrows<BadRequestException> {
             oppgaveServiceNy.fjernSaksbehandler(FjernSaksbehandlerRequest(nyOppgave.id))
         }
-        Assertions.assertEquals("Oppgaven har ingen saksbehandler", err.message)
+        Assertions.assertTrue(err.message!!.startsWith("Oppgaven har ingen saksbehandler"))
     }
 
     @Test
@@ -179,6 +179,6 @@ class OppgaveServiceNyTest {
         val err = assertThrows<NotFoundException> {
             oppgaveServiceNy.fjernSaksbehandler(FjernSaksbehandlerRequest(UUID.randomUUID()))
         }
-        Assertions.assertEquals("Oppgaven finnes ikke", err.message)
+        Assertions.assertTrue(err.message!!.startsWith("Oppgaven finnes ikke"))
     }
 }

@@ -23,10 +23,12 @@ class OppgaveServiceNy(private val oppgaveDaoNy: OppgaveDaoNy, private val sakDa
                 if (hentetOppgave.saksbehandler.isNullOrEmpty()) {
                     oppgaveDaoNy.settNySaksbehandler(saksbehandlerEndringDto)
                 } else {
-                    throw BadRequestException("Oppgaven har allerede en saksbehandler")
+                    throw BadRequestException(
+                        "Oppgaven har allerede en saksbehandler, id: ${saksbehandlerEndringDto.oppgaveId}"
+                    )
                 }
             } else {
-                throw NotFoundException("Oppgaven finnes ikke")
+                throw NotFoundException("Oppgaven finnes ikke, id: ${saksbehandlerEndringDto.oppgaveId}")
             }
         }
     }
@@ -37,7 +39,7 @@ class OppgaveServiceNy(private val oppgaveDaoNy: OppgaveDaoNy, private val sakDa
             if (hentetOppgave != null) {
                 oppgaveDaoNy.settNySaksbehandler(saksbehandlerEndringDto)
             } else {
-                throw NotFoundException("Oppgaven finnes ikke")
+                throw NotFoundException("Oppgaven finnes ikke, id: ${saksbehandlerEndringDto.oppgaveId}")
             }
         }
     }
@@ -49,10 +51,12 @@ class OppgaveServiceNy(private val oppgaveDaoNy: OppgaveDaoNy, private val sakDa
                 if (hentetOppgave.saksbehandler != null) {
                     oppgaveDaoNy.fjernSaksbehandler(fjernSaksbehandlerRequest.oppgaveId)
                 } else {
-                    throw BadRequestException("Oppgaven har ingen saksbehandler")
+                    throw BadRequestException(
+                        "Oppgaven har ingen saksbehandler, id: ${fjernSaksbehandlerRequest.oppgaveId}"
+                    )
                 }
             } else {
-                throw NotFoundException("Oppgaven finnes ikke")
+                throw NotFoundException("Oppgaven finnes ikke, id: ${fjernSaksbehandlerRequest.oppgaveId}")
             }
         }
     }

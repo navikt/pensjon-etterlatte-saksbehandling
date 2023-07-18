@@ -6,20 +6,19 @@ export interface OppgaveDTOny {
   enhet: string
   sakId: number
   type: OppgaveType
-  saksbehandler?: string
-  referanse?: string
-  merknad?: string
+  saksbehandler: string | null
+  referanse: string | null
+  merknad: string | null
   opprettet: string
-  sakType?: string
-  fnr?: string
+  sakType: string | null
+  fnr: string | null
   frist: string
 }
 
 type Status = 'NY' | 'UNDER_BEHANDLING' | 'FERDIGSTILT'
 type OppgaveType = 'FOERSTEGANGSBEHANDLING' | 'REVUDERING' | 'HENDELSE' | 'MANUELT_OPPHOER' | 'EKSTERN'
 
-export const hentNyeOppgaver = async (): Promise<ApiResponse<ReadonlyArray<OppgaveDTOny>>> =>
-  apiClient.get('/nyeoppgaver/hent')
+export const hentNyeOppgaver = async (): Promise<ApiResponse<OppgaveDTOny[]>> => apiClient.get('/nyeoppgaver/hent')
 
 export interface NySaksbehandlerDto {
   oppgaveId: string

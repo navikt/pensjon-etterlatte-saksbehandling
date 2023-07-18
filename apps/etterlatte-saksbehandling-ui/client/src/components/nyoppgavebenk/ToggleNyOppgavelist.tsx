@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import Oppgavebenken from '~components/oppgavebenken/Oppgavebenken'
-import { Oppgavelista } from '~components/nyoppgavebenk/Oppgavelista'
 import { Button } from '@navikt/ds-react'
 import styled from 'styled-components'
+import { ToggleMinOppgaveliste } from '~components/nyoppgavebenk/ToggleMinOppgaveliste'
 
 const OppgavebenkContainer = styled.div`
   max-width: 60em;
@@ -22,7 +22,7 @@ export const ToggleNyOppgaveliste = () => {
       ) : (
         <>
           <Button onClick={() => setVisNyListe(!visNyListe)}>{visNyListe ? 'Vis gammel liste' : 'Vis ny liste'}</Button>
-          {visNyListe ? <Oppgavelista /> : <Oppgavebenken />}
+          {visNyListe ? <ToggleMinOppgaveliste /> : <Oppgavebenken />}
         </>
       )}
     </OppgavebenkContainer>

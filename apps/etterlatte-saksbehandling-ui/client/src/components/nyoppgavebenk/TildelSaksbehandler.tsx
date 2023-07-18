@@ -4,6 +4,7 @@ import { tildelSaksbehandlerApi } from '~shared/api/oppgaverny'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { Button, Loader } from '@navikt/ds-react'
 import { PersonIcon } from '@navikt/aksel-icons'
+import { Alert } from '@navikt/ds-react'
 
 export const TildelSaksbehandler = (props: { oppgaveId: string }) => {
   const { oppgaveId } = props
@@ -15,7 +16,7 @@ export const TildelSaksbehandler = (props: { oppgaveId: string }) => {
   return (
     <>
       {isPending(tildelSaksbehandlerSvar) && <Loader size="small" title="Setter saksbehandler" />}
-      {isSuccess(tildelSaksbehandlerSvar) && 'Saksbehandler er endret'}
+      {isSuccess(tildelSaksbehandlerSvar) && <Alert variant="success">Oppgaven ble lagt på din oppgveliste</Alert>}
       {isFailure(tildelSaksbehandlerSvar) && <ApiErrorAlert>Kunne ikke tildele deg denne oppgaven</ApiErrorAlert>}
       {isInitial(tildelSaksbehandlerSvar) && (
         <Button icon={<PersonIcon />} variant="tertiary" onClick={tildelSaksbehandlerWrapper}>

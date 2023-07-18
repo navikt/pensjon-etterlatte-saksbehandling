@@ -77,6 +77,7 @@ if (isDev) {
       '/api/nyeoppgaver/hent',
       '/api/nyeoppgaver/tildel-saksbehandler',
       '/api/nyeoppgaver/bytt-saksbehandler',
+      '/api/nyeoppgaver/fjern-saksbehandler',
     ],
     tokenMiddleware(ApiConfig.behandling.scope),
     proxy(ApiConfig.behandling.url)

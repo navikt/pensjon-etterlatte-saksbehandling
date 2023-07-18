@@ -89,7 +89,7 @@ class OppgaveServiceNyTest {
             OppgaveType.FOERSTEGANGSBEHANDLING
         )
         val nysaksbehandler = "nysaksbehandler"
-        oppgaveServiceNy.tildelSaksbehandler(NySaksbehandlerDto(nyOppgave.id, nysaksbehandler))
+        oppgaveServiceNy.tildelSaksbehandler(SaksbehandlerEndringDto(nyOppgave.id, nysaksbehandler))
 
         val oppgaveMedNySaksbehandler = oppgaveServiceNy.hentOppgve(nyOppgave.id)
         Assertions.assertEquals(nysaksbehandler, oppgaveMedNySaksbehandler?.saksbehandler)
@@ -104,20 +104,20 @@ class OppgaveServiceNyTest {
             OppgaveType.FOERSTEGANGSBEHANDLING
         )
         val nysaksbehandler = "nysaksbehandler"
-        oppgaveServiceNy.tildelSaksbehandler(NySaksbehandlerDto(nyOppgave.id, nysaksbehandler))
+        oppgaveServiceNy.tildelSaksbehandler(SaksbehandlerEndringDto(nyOppgave.id, nysaksbehandler))
         val err = assertThrows<BadRequestException> {
-            oppgaveServiceNy.tildelSaksbehandler(NySaksbehandlerDto(nyOppgave.id, "enda en"))
+            oppgaveServiceNy.tildelSaksbehandler(SaksbehandlerEndringDto(nyOppgave.id, "enda en"))
         }
-        Assertions.assertEquals("Oppgaven har allerede en saksbehandler", err.message)
+        Assertions.assertTrue(err.message!!.startsWith("Oppgaven har allerede en saksbehandler"))
     }
 
     @Test
     fun `skal ikke kunne tildele hvis oppgaven ikke finnes`() {
         val nysaksbehandler = "nysaksbehandler"
         val err = assertThrows<NotFoundException> {
-            oppgaveServiceNy.tildelSaksbehandler(NySaksbehandlerDto(UUID.randomUUID(), nysaksbehandler))
+            oppgaveServiceNy.tildelSaksbehandler(SaksbehandlerEndringDto(UUID.randomUUID(), nysaksbehandler))
         }
-        Assertions.assertEquals("Oppgaven finnes ikke", err.message)
+        Assertions.assertTrue(err.message!!.startsWith("Oppgaven finnes ikke"))
     }
 
     @Test
@@ -129,7 +129,7 @@ class OppgaveServiceNyTest {
             OppgaveType.FOERSTEGANGSBEHANDLING
         )
         val nysaksbehandler = "nysaksbehandler"
-        oppgaveServiceNy.byttSaksbehandler(NySaksbehandlerDto(nyOppgave.id, nysaksbehandler))
+        oppgaveServiceNy.byttSaksbehandler(SaksbehandlerEndringDto(nyOppgave.id, nysaksbehandler))
 
         val oppgaveMedNySaksbehandler = oppgaveServiceNy.hentOppgve(nyOppgave.id)
         Assertions.assertEquals(nysaksbehandler, oppgaveMedNySaksbehandler?.saksbehandler)
@@ -139,8 +139,46 @@ class OppgaveServiceNyTest {
     fun `skal ikke kunne bytte saksbehandler på en ikke eksisterende sak`() {
         val nysaksbehandler = "nysaksbehandler"
         val err = assertThrows<NotFoundException> {
-            oppgaveServiceNy.byttSaksbehandler(NySaksbehandlerDto(UUID.randomUUID(), nysaksbehandler))
+            oppgaveServiceNy.byttSaksbehandler(SaksbehandlerEndringDto(UUID.randomUUID(), nysaksbehandler))
         }
-        Assertions.assertEquals("Oppgaven finnes ikke", err.message)
+        Assertions.assertTrue(err.message!!.startsWith("Oppgaven finnes ikke"))
+    }
+
+    @Test
+    fun `skal kunne fjerne saksbehandler fra oppgave`() {
+        val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val nyOppgave = oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
+            "referanse",
+            opprettetSak.id,
+            OppgaveType.FOERSTEGANGSBEHANDLING
+        )
+        val nysaksbehandler = "nysaksbehandler"
+        oppgaveServiceNy.tildelSaksbehandler(SaksbehandlerEndringDto(nyOppgave.id, nysaksbehandler))
+        oppgaveServiceNy.fjernSaksbehandler(FjernSaksbehandlerRequest(nyOppgave.id))
+        val oppgaveUtenSaksbehandler = oppgaveServiceNy.hentOppgve(nyOppgave.id)
+        Assertions.assertNotNull(oppgaveUtenSaksbehandler?.id)
+        Assertions.assertNull(oppgaveUtenSaksbehandler?.saksbehandler)
+    }
+
+    @Test
+    fun `kan ikke fjerne saksbehandler hvis det ikke er satt på oppgaven`() {
+        val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val nyOppgave = oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
+            "referanse",
+            opprettetSak.id,
+            OppgaveType.FOERSTEGANGSBEHANDLING
+        )
+        val err = assertThrows<BadRequestException> {
+            oppgaveServiceNy.fjernSaksbehandler(FjernSaksbehandlerRequest(nyOppgave.id))
+        }
+        Assertions.assertTrue(err.message!!.startsWith("Oppgaven har ingen saksbehandler"))
+    }
+
+    @Test
+    fun `kan ikke fjerne saksbehandler hvis oppgaven ikke finnes`() {
+        val err = assertThrows<NotFoundException> {
+            oppgaveServiceNy.fjernSaksbehandler(FjernSaksbehandlerRequest(UUID.randomUUID()))
+        }
+        Assertions.assertTrue(err.message!!.startsWith("Oppgaven finnes ikke"))
     }
 }

@@ -26,5 +26,8 @@ export interface NySaksbehandlerDto {
   saksbehandler: string
 }
 
-export const tildelSaksbehandlerApi = async (nysaksbehandler: NySaksbehandlerDto): Promise<ApiResponse<unknown>> =>
+export const tildelSaksbehandlerApi = async (nysaksbehandler: NySaksbehandlerDto): Promise<ApiResponse<void>> =>
   apiClient.post('/nyeoppgaver/tildel-saksbehandler', { ...nysaksbehandler })
+
+export const fjernSaksbehandlerApi = async (oppgaveId: string): Promise<ApiResponse<void>> =>
+  apiClient.post('/nyeoppgaver/fjern-saksbehandler', { oppgaveId })

@@ -1,5 +1,5 @@
 [plugins]
-avro = { id = "com.github.davidmc24.gradle.plugin.avro", version = "1.7.0" }
+avro = { id = "com.github.davidmc24.gradle.plugin.avro", version = "1.7.1" }
 analyze = { id = "com.faire.gradle.analyze", version = "1.0.9" }
 cutterslade-analyze = { id = "ca.cutterslade.analyze", version = "1.9.1" }
 

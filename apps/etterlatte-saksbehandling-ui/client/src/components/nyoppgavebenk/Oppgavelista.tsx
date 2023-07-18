@@ -7,10 +7,15 @@ import { Select } from '@navikt/ds-react'
 import { useState } from 'react'
 import styled from 'styled-components'
 
-type SaksbehandlerFilter = 'Alle' | 'Tildelt' | 'IkkeTildelt'
+const SaksbehandlerFilter = {
+  visAlle: 'Vis alle',
+  Tildelt: 'Tildelt saksbehandler ',
+  IkkeTildelt: 'Ikke tildelt saksbehandler',
+}
+type SaksbehandlerFilterKeys = keyof typeof SaksbehandlerFilter
 
-function filtrerSaksbehandler(saksbehandlerFilter: SaksbehandlerFilter, oppgaver: OppgaveDTOny[]): OppgaveDTOny[] {
-  if (saksbehandlerFilter === 'Alle') {
+function filtrerSaksbehandler(saksbehandlerFilter: SaksbehandlerFilterKeys, oppgaver: OppgaveDTOny[]): OppgaveDTOny[] {
+  if (saksbehandlerFilter === 'visAlle') {
     return oppgaver
   } else {
     return oppgaver.filter((o) => {
@@ -33,6 +38,7 @@ const EnhetFilter = {
   E4883: 'Egne ansatte - 4883',
   E2103: 'Vikafossen - 2103',
 }
+
 type enhetKeyTypes = keyof typeof EnhetFilter
 
 function filtrerEnhet(enhetsFilter: enhetKeyTypes, oppgaver: OppgaveDTOny[]): OppgaveDTOny[] {
@@ -52,19 +58,24 @@ export const FilterFlex = styled.div`
 export const Oppgavelista = (props: { oppgaver: ReadonlyArray<OppgaveDTOny> }) => {
   const { oppgaver } = props
 
-  const [saksbehandlerFilter, setSaksbehandlerFilter] = useState<SaksbehandlerFilter>('Alle')
+  const [saksbehandlerFilter, setSaksbehandlerFilter] = useState<SaksbehandlerFilterKeys>('visAlle')
   const [enhetsFilter, setEnhetsFilter] = useState<enhetKeyTypes>('visAlle')
 
   const mutableOppgaver = oppgaver.concat()
-
-  const filtrerteOppgaver = filtrerEnhet(enhetsFilter, filtrerSaksbehandler(saksbehandlerFilter, mutableOppgaver))
+  const saksbehandlerFilterOppgaver = filtrerSaksbehandler(saksbehandlerFilter, mutableOppgaver)
+  const filtrerteOppgaver = filtrerEnhet(enhetsFilter, saksbehandlerFilterOppgaver)
   return (
     <div>
       <FilterFlex>
-        <Select label="Saksbehandler" onChange={(e) => setSaksbehandlerFilter(e.target.value as SaksbehandlerFilter)}>
-          <option value="Alle">Vis alle</option>
-          <option value="Tildelt">Tildelt saksbehandler</option>
-          <option value="IkkeTildelt">Ikke tildelt saksbehandler</option>
+        <Select
+          label="Saksbehandler"
+          onChange={(e) => setSaksbehandlerFilter(e.target.value as SaksbehandlerFilterKeys)}
+        >
+          {Object.entries(SaksbehandlerFilter).map(([key, beskrivelse]) => (
+            <option key={key} value={key}>
+              {beskrivelse}
+            </option>
+          ))}
         </Select>
 
         <Select label="Enhet" onChange={(e) => setEnhetsFilter(e.target.value as enhetKeyTypes)}>

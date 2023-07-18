@@ -12,20 +12,22 @@ class KommerBarnetTilGodeDao(private val connection: () -> Connection) {
     fun lagreKommerBarnetTilGode(kommerBarnetTilGode: KommerBarnetTilgode) {
         if (kommerBarnetTilGode.behandlingId?.let { hentKommerBarnetTilGode(it) } != null) {
             connection().prepareStatement("UPDATE kommerbarnettilgode SET svar = ?, begrunnelse = ?, kilde = ?")
-                .also { it.setString(1, kommerBarnetTilGode.svar.name) }
-                .also { it.setString(2, kommerBarnetTilGode.begrunnelse) }
-                .also { it.setObject(3, kommerBarnetTilGode.kilde.toJson()) }
-                .also { it.executeUpdate() }
+                .also {
+                    it.setString(1, kommerBarnetTilGode.svar.name)
+                    it.setString(2, kommerBarnetTilGode.begrunnelse)
+                    it.setObject(3, kommerBarnetTilGode.kilde.toJson())
+                    it.executeUpdate()
+                }
         } else {
-            val statement =
-                connection().prepareStatement(
-                    "INSERT INTO kommerbarnettilgode(behandling_id, svar, begrunnelse, kilde) VALUES(?,?,?,?)"
-                )
-            statement.setObject(1, kommerBarnetTilGode.behandlingId)
-            statement.setString(2, kommerBarnetTilGode.svar.name)
-            statement.setString(3, kommerBarnetTilGode.begrunnelse)
-            statement.setObject(4, kommerBarnetTilGode.kilde.toJson())
-            statement.executeUpdate()
+            connection().prepareStatement(
+                "INSERT INTO kommerbarnettilgode(behandling_id, svar, begrunnelse, kilde) VALUES(?,?,?,?)"
+            ).also {
+                it.setObject(1, kommerBarnetTilGode.behandlingId)
+                it.setString(2, kommerBarnetTilGode.svar.name)
+                it.setString(3, kommerBarnetTilGode.begrunnelse)
+                it.setObject(4, kommerBarnetTilGode.kilde.toJson())
+                it.executeUpdate()
+            }
         }
     }
 
@@ -33,7 +35,7 @@ class KommerBarnetTilGodeDao(private val connection: () -> Connection) {
         val stmt =
             connection().prepareStatement(
                 """
-                    $kommerbarnettilgode
+                    SELECT k.svar, k.begrunnelse, k.kilde, k.behandling_id FROM kommerbarnettilgode k
                     WHERE k.behandling_id = ?
                     """
             ).also { it.setObject(1, behandlingId) }
@@ -47,7 +49,4 @@ class KommerBarnetTilGodeDao(private val connection: () -> Connection) {
             )
         }
     }
-
-    private val kommerbarnettilgode =
-        "SELECT k.svar, k.begrunnelse, k.kilde, k.behandling_id FROM kommerbarnettilgode k"
 }

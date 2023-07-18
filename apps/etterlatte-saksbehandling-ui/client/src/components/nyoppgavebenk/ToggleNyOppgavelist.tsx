@@ -9,7 +9,6 @@ const OppgavebenkContainer = styled.div`
   padding: 2rem;
 `
 
-//TODO: hvorfor er ikke denne riktig i prod?
 const erIProd = process.env.NAIS_CLUSTER_NAME === 'prod-gcp'
 
 export const ToggleNyOppgaveliste = () => {

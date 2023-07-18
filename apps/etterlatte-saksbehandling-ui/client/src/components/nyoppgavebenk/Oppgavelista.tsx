@@ -24,14 +24,14 @@ function filtrerSaksbehandler(saksbehandlerFilter: SaksbehandlerFilter, oppgaver
 }
 
 const EnhetFilter = {
-  visAlle: 'Vis Alle',
-  E4815: 'Ålesund',
-  E4808: 'Porsgrunn',
-  E4817: 'Steinkjer',
-  E4862: 'Ålesund utland',
-  E0001: 'Utland',
-  E4883: 'Egne ansatte',
-  E2103: 'Vikafossen',
+  visAlle: 'Vis alle',
+  E4815: 'Ålesund - 4815',
+  E4808: 'Porsgrunn - 4808',
+  E4817: 'Steinkjer - 4817',
+  E4862: 'Ålesund utland - 4862',
+  E0001: 'Utland - 0001',
+  E4883: 'Egne ansatte - 4883',
+  E2103: 'Vikafossen - 2103',
 }
 type enhetKeyTypes = keyof typeof EnhetFilter
 
@@ -39,8 +39,8 @@ function filtrerEnhet(enhetsFilter: enhetKeyTypes, oppgaver: OppgaveDTOny[]): Op
   if (enhetsFilter === 'visAlle') {
     return oppgaver
   } else {
-    const utenE = enhetsFilter.substring(1)
-    return oppgaver.filter((o) => o.enhet === utenE)
+    const enhetUtenPrefixE = enhetsFilter.substring(1)
+    return oppgaver.filter((o) => o.enhet === enhetUtenPrefixE)
   }
 }
 
@@ -54,6 +54,7 @@ export const Oppgavelista = (props: { oppgaver: ReadonlyArray<OppgaveDTOny> }) =
 
   const [saksbehandlerFilter, setSaksbehandlerFilter] = useState<SaksbehandlerFilter>('Alle')
   const [enhetsFilter, setEnhetsFilter] = useState<enhetKeyTypes>('visAlle')
+
   const mutableOppgaver = oppgaver.concat()
 
   const filtrerteOppgaver = filtrerEnhet(enhetsFilter, filtrerSaksbehandler(saksbehandlerFilter, mutableOppgaver))

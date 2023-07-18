@@ -39,7 +39,7 @@ data class SaksbehandlerEndringDto(
     val saksbehandler: String
 )
 
-data class OppgaveId(
+data class FjernSaksbehandlerRequest(
     val oppgaveId: UUID
 )
 

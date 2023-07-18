@@ -154,7 +154,7 @@ class OppgaveServiceNyTest {
         )
         val nysaksbehandler = "nysaksbehandler"
         oppgaveServiceNy.tildelSaksbehandler(SaksbehandlerEndringDto(nyOppgave.id, nysaksbehandler))
-        oppgaveServiceNy.fjernSaksbehandler(OppgaveId(nyOppgave.id))
+        oppgaveServiceNy.fjernSaksbehandler(FjernSaksbehandlerRequest(nyOppgave.id))
         val oppgaveUtenSaksbehandler = oppgaveServiceNy.hentOppgve(nyOppgave.id)
         Assertions.assertNotNull(oppgaveUtenSaksbehandler?.id)
         Assertions.assertNull(oppgaveUtenSaksbehandler?.saksbehandler)
@@ -169,7 +169,7 @@ class OppgaveServiceNyTest {
             OppgaveType.FOERSTEGANGSBEHANDLING
         )
         val err = assertThrows<BadRequestException> {
-            oppgaveServiceNy.fjernSaksbehandler(OppgaveId(nyOppgave.id))
+            oppgaveServiceNy.fjernSaksbehandler(FjernSaksbehandlerRequest(nyOppgave.id))
         }
         Assertions.assertEquals("Oppgaven har ingen saksbehandler", err.message)
     }
@@ -177,7 +177,7 @@ class OppgaveServiceNyTest {
     @Test
     fun `kan ikke fjerne saksbehandler hvis oppgaven ikke finnes`() {
         val err = assertThrows<NotFoundException> {
-            oppgaveServiceNy.fjernSaksbehandler(OppgaveId(UUID.randomUUID()))
+            oppgaveServiceNy.fjernSaksbehandler(FjernSaksbehandlerRequest(UUID.randomUUID()))
         }
         Assertions.assertEquals("Oppgaven finnes ikke", err.message)
     }

@@ -42,12 +42,12 @@ class OppgaveServiceNy(private val oppgaveDaoNy: OppgaveDaoNy, private val sakDa
         }
     }
 
-    fun fjernSaksbehandler(oppgaveId: OppgaveId) {
+    fun fjernSaksbehandler(fjernSaksbehandlerRequest: FjernSaksbehandlerRequest) {
         inTransaction {
-            val hentetOppgave = oppgaveDaoNy.hentOppgave(oppgaveId.oppgaveId)
+            val hentetOppgave = oppgaveDaoNy.hentOppgave(fjernSaksbehandlerRequest.oppgaveId)
             if (hentetOppgave != null) {
                 if (hentetOppgave.saksbehandler != null) {
-                    oppgaveDaoNy.fjernSaksbehandler(oppgaveId.oppgaveId)
+                    oppgaveDaoNy.fjernSaksbehandler(fjernSaksbehandlerRequest.oppgaveId)
                 } else {
                     throw BadRequestException("Oppgaven har ingen saksbehandler")
                 }

@@ -50,8 +50,8 @@ internal fun Route.oppgaveRoutesNy(service: OppgaveServiceNy, kanBrukeNyOppgavel
         post("fjern-saksbehandler") {
             kunSaksbehandler {
                 if (kanBrukeNyOppgaveliste) {
-                    val oppgaveId = call.receive<OppgaveId>()
-                    service.fjernSaksbehandler(oppgaveId)
+                    val fjernSaksbehandlerRequest = call.receive<FjernSaksbehandlerRequest>()
+                    service.fjernSaksbehandler(fjernSaksbehandlerRequest)
                     call.respond(HttpStatusCode.OK)
                 } else {
                     call.respond(HttpStatusCode.NotImplemented)

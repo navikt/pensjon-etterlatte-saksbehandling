@@ -10,6 +10,10 @@ updates:
       interval: "monthly" 
       day: "sunday"
     open-pull-requests-limit: 10
+    groups:
+      tjenestespesifikasjoner:
+        patterns:
+          - "com.github.navikt.pensjon-etterlatte-tjenestespesifikasjoner*"
 
 
   # =============
@@ -34,6 +38,16 @@ updates:
       interval: "monthly"
       day: "sunday"
     open-pull-requests-limit: 10
+    groups:
+      ds:
+        patterns:
+          - "@navikt/ds-*"
+      eslint:
+        patterns:
+          - "@typescript-eslint/*"
+      slate:
+        patterns:
+          - "slate*"
 
 
   # ===============

@@ -1,8 +1,9 @@
 import { OppgaveDTOny } from '~shared/api/oppgaverny'
 import { useAppSelector } from '~store/Store'
-import { Table } from '@navikt/ds-react'
+import { Button, Table } from '@navikt/ds-react'
 import { formaterStringDato } from '~utils/formattering'
 import { RedigerSaksbehandler } from '~components/nyoppgavebenk/RedigerSaksbehandler'
+import { CaretRightIcon } from '@navikt/aksel-icons'
 
 export const MinOppgaveliste = (props: { oppgaver: ReadonlyArray<OppgaveDTOny> }) => {
   const user = useAppSelector((state) => state.saksbehandlerReducer.saksbehandler)
@@ -26,6 +27,7 @@ export const MinOppgaveliste = (props: { oppgaver: ReadonlyArray<OppgaveDTOny> }
                 <Table.HeaderCell scope="col">Saksbehandler</Table.HeaderCell>
                 <Table.HeaderCell scope="col">Ytelse</Table.HeaderCell>
                 <Table.HeaderCell scope="col">Frist</Table.HeaderCell>
+                <Table.HeaderCell scope="col">Handlinger</Table.HeaderCell>
               </Table.Row>
             </Table.Header>
             <Table.Body>
@@ -44,6 +46,11 @@ export const MinOppgaveliste = (props: { oppgaver: ReadonlyArray<OppgaveDTOny> }
                       </Table.DataCell>
                       <Table.DataCell>{sakType ? sakType : 'Ingen saktype, må migreres'}</Table.DataCell>
                       <Table.DataCell>{frist ? frist : 'Ingen frist'}</Table.DataCell>
+                      <Table.DataCell>
+                        <Button icon={<CaretRightIcon />} variant="primary" onClick={() => {}}>
+                          Start behandling
+                        </Button>
+                      </Table.DataCell>
                     </Table.Row>
                   )
                 )}

@@ -13,7 +13,7 @@ prometheus-version = "0.16.0"
 testcontainer-version = "1.18.3"
 
 [libraries]
-cache-caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version = "3.1.5" }
+cache-caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version = "3.1.6" }
 
 database-hikaricp = { module = "com.zaxxer:HikariCP", version = "5.0.0" }
 database-flywaydb = { module = "org.flywaydb:flyway-core", version = "9.20.0" }

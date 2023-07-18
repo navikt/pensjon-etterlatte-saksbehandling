@@ -8,7 +8,7 @@
     "node-fetch": "^2.6.12",
     "prom-client": "^14.2.0",
     "source-map": "~0.7.4",
-    "unleash-client": "^4.0.1",
+    "unleash-client": "^4.0.2",
     "winston": "^3.9.0",
     "winston-transport": "^4.5.0"
   },

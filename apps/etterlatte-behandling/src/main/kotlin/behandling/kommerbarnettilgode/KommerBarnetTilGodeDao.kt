@@ -11,11 +11,14 @@ import java.util.*
 class KommerBarnetTilGodeDao(private val connection: () -> Connection) {
     fun lagreKommerBarnetTilGode(kommerBarnetTilGode: KommerBarnetTilgode) {
         if (kommerBarnetTilGode.behandlingId?.let { hentKommerBarnetTilGode(it) } != null) {
-            connection().prepareStatement("UPDATE kommerbarnettilgode SET svar = ?, begrunnelse = ?, kilde = ?")
+            connection().prepareStatement(
+                "UPDATE kommerbarnettilgode SET svar = ?, begrunnelse = ?, kilde = ? WHERE behandling_id = ?"
+            )
                 .also {
                     it.setString(1, kommerBarnetTilGode.svar.name)
                     it.setString(2, kommerBarnetTilGode.begrunnelse)
                     it.setObject(3, kommerBarnetTilGode.kilde.toJson())
+                    it.setObject(1, kommerBarnetTilGode.behandlingId)
                     it.executeUpdate()
                 }
         } else {

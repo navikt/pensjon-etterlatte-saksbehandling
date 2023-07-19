@@ -18,7 +18,7 @@ class KommerBarnetTilGodeDao(private val connection: () -> Connection) {
                     it.setString(1, kommerBarnetTilGode.svar.name)
                     it.setString(2, kommerBarnetTilGode.begrunnelse)
                     it.setObject(3, kommerBarnetTilGode.kilde.toJson())
-                    it.setObject(1, kommerBarnetTilGode.behandlingId)
+                    it.setObject(4, kommerBarnetTilGode.behandlingId)
                     it.executeUpdate()
                 }
         } else {

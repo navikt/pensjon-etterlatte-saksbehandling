@@ -26,7 +26,7 @@ import rapidsandrivers.behandlingId
 import rapidsandrivers.sakId
 import rapidsandrivers.withFeilhaandtering
 
-internal class FortsettMigreringsflyten(
+internal class MigrerEnEnkeltSak(
     rapidsConnection: RapidsConnection,
     private val behandlinger: BehandlingService
 ) :

@@ -208,8 +208,10 @@ class BehandlingServiceImpl(
     ): DetaljertBehandlingDto {
         val behandling = hentBehandling(behandlingId)!!
         val hendelserIBehandling = hentHendelserIBehandling(behandlingId)
-        val kommerBarnetTilgode = kommerBarnetTilGodeDao.hentKommerBarnetTilGode(behandlingId)
-            .takeIf { behandling.sak.sakType == SakType.BARNEPENSJON }
+        val kommerBarnetTilgode = inTransaction {
+            kommerBarnetTilGodeDao.hentKommerBarnetTilGode(behandlingId)
+                .takeIf { behandling.sak.sakType == SakType.BARNEPENSJON }
+        }
 
         val sakId = behandling.sak.id
         val sakType = behandling.sak.sakType

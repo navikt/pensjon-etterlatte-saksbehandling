@@ -7,8 +7,12 @@ import { isFailure, isPending, isSuccess, useApiCall } from '~shared/hooks/useAp
 import { hentNyeOppgaver, OppgaveDTOny } from '~shared/api/oppgaverny'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
+import styled from 'styled-components'
 
 type OppgavelisteToggle = 'Oppgavelista' | 'MinOppgaveliste'
+const TabsWidth = styled(Tabs)`
+  max-width: 20em;
+`
 
 export const ToggleMinOppgaveliste = () => {
   const [oppgaveListeValg, setOppgaveListeValg] = useState<OppgavelisteToggle>('Oppgavelista')
@@ -21,12 +25,12 @@ export const ToggleMinOppgaveliste = () => {
   }, [])
   return (
     <>
-      <Tabs value={oppgaveListeValg} onChange={(e) => setOppgaveListeValg(e as OppgavelisteToggle)}>
+      <TabsWidth value={oppgaveListeValg} onChange={(e) => setOppgaveListeValg(e as OppgavelisteToggle)}>
         <Tabs.List>
           <Tabs.Tab value="Oppgavelista" label="Oppgavelisten" icon={<InboxIcon />} />
           <Tabs.Tab value="MinOppgaveliste" label="Min oppgaeliste" icon={<PersonIcon />} />
         </Tabs.List>
-      </Tabs>
+      </TabsWidth>
       {isPending(oppgaver) && <Spinner visible={true} label={'henter nye oppgaver'} />}
       {isFailure(oppgaver) && <ApiErrorAlert>Kunne ikke hente oppgaver</ApiErrorAlert>}
       {isSuccess(oppgaver) && <>Hentet antall oppgaver: {hentedeOppgaver?.length}</>}

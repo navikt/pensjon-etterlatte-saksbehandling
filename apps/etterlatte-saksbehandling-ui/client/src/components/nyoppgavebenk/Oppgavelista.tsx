@@ -1,127 +1,23 @@
-import { Table } from '@navikt/ds-react'
+import { Select, Table } from '@navikt/ds-react'
 import { formaterStringDato } from '~utils/formattering'
 import { TildelSaksbehandler } from '~components/nyoppgavebenk/TildelSaksbehandler'
 import { RedigerSaksbehandler } from '~components/nyoppgavebenk/RedigerSaksbehandler'
-import { OppgaveDTOny, Oppgavestatus, Oppgavetype } from '~shared/api/oppgaverny'
-import { Select } from '@navikt/ds-react'
+import { OppgaveDTOny } from '~shared/api/oppgaverny'
 import { useState } from 'react'
 import styled from 'styled-components'
-
-const SaksbehandlerFilter = {
-  visAlle: 'Vis alle',
-  Tildelt: 'Tildelt saksbehandler ',
-  IkkeTildelt: 'Ikke tildelt saksbehandler',
-}
-type SaksbehandlerFilterKeys = keyof typeof SaksbehandlerFilter
-
-function filtrerSaksbehandler(saksbehandlerFilter: SaksbehandlerFilterKeys, oppgaver: OppgaveDTOny[]): OppgaveDTOny[] {
-  if (saksbehandlerFilter === 'visAlle') {
-    return oppgaver
-  } else {
-    return oppgaver.filter((o) => {
-      if (saksbehandlerFilter === 'Tildelt') {
-        return o.saksbehandler !== null
-      } else if (saksbehandlerFilter === 'IkkeTildelt') {
-        return o.saksbehandler === null
-      }
-    })
-  }
-}
-
-const EnhetFilter = {
-  visAlle: 'Vis alle',
-  E4815: 'Ålesund - 4815',
-  E4808: 'Porsgrunn - 4808',
-  E4817: 'Steinkjer - 4817',
-  E4862: 'Ålesund utland - 4862',
-  E0001: 'Utland - 0001',
-  E4883: 'Egne ansatte - 4883',
-  E2103: 'Vikafossen - 2103',
-}
-
-type EnhetFilterKeys = keyof typeof EnhetFilter
-
-function filtrerEnhet(enhetsFilter: EnhetFilterKeys, oppgaver: OppgaveDTOny[]): OppgaveDTOny[] {
-  if (enhetsFilter === 'visAlle') {
-    return oppgaver
-  } else {
-    const enhetUtenPrefixE = enhetsFilter.substring(1)
-    return oppgaver.filter((o) => o.enhet === enhetUtenPrefixE)
-  }
-}
-
-const YtelseFilter = {
-  visAlle: 'Vis alle',
-  BARNEPENSJON: 'Barnepensjon',
-  OMSTILLINGSSTOENAD: 'Omstillingsstønad',
-}
-
-type YtelseFilterKeys = keyof typeof YtelseFilter
-
-function filtrerYtelse(ytelseFilter: YtelseFilterKeys, oppgaver: OppgaveDTOny[]): OppgaveDTOny[] {
-  if (ytelseFilter === 'visAlle') {
-    return oppgaver
-  } else {
-    return oppgaver.filter((o) => o.sakType === ytelseFilter)
-  }
-}
-
-type visAlle = 'visAlle'
-type OppgavestatusFilterKeys = Oppgavestatus | visAlle
-
-const OppgavestatusFilter: Record<OppgavestatusFilterKeys, string> = {
-  visAlle: 'Vis alle',
-  NY: 'Ny',
-  UNDER_BEHANDLING: 'Under arbeid',
-  FERDIGSTILT: 'Ferdigstilt',
-  FEILREGISTRERT: 'Feilregistrert',
-}
-
-function filtrerOppgaveStatus(
-  oppgavestatusFilterKeys: OppgavestatusFilterKeys,
-  oppgaver: OppgaveDTOny[]
-): OppgaveDTOny[] {
-  if (oppgavestatusFilterKeys === 'visAlle') {
-    return oppgaver
-  } else {
-    return oppgaver.filter((o) => o.status === oppgavestatusFilterKeys)
-  }
-}
-
-type OppgavetypeFilterKeys = Oppgavetype | visAlle
-const OppgavetypeFilter: Record<OppgavetypeFilterKeys, string> = {
-  visAlle: 'Vis alle',
-  FOERSTEGANGSBEHANDLING: 'Førstegangsbehandling',
-  REVUDERING: 'Revurdering',
-  HENDELSE: 'Hendelse',
-  MANUELT_OPPHOER: 'Manuelt opphør',
-  EKSTERN: 'Ekstern',
-}
-
-function filtrerOppgaveType(oppgavetypeFilterKeys: OppgavetypeFilterKeys, oppgaver: OppgaveDTOny[]): OppgaveDTOny[] {
-  if (oppgavetypeFilterKeys === 'visAlle') {
-    return oppgaver
-  } else {
-    return oppgaver.filter((o) => o.type === oppgavetypeFilterKeys)
-  }
-}
-
-function filtrerOppgaver(
-  enhetsFilter: EnhetFilterKeys,
-  saksbehandlerFilter: SaksbehandlerFilterKeys,
-  ytelseFilter: YtelseFilterKeys,
-  oppgavestatusFilter: OppgavestatusFilterKeys,
-  oppgavetypeFilter: OppgavetypeFilterKeys,
-  oppgaver: OppgaveDTOny[]
-): OppgaveDTOny[] {
-  const enhetFiltrert = filtrerEnhet(enhetsFilter, oppgaver)
-  const saksbehandlerFiltrert = filtrerSaksbehandler(saksbehandlerFilter, enhetFiltrert)
-  const ytelseFiltrert = filtrerYtelse(ytelseFilter, saksbehandlerFiltrert)
-  const oppgaveFiltrert = filtrerOppgaveStatus(oppgavestatusFilter, ytelseFiltrert)
-  const oppgaveTypeFiltrert = filtrerOppgaveType(oppgavetypeFilter, oppgaveFiltrert)
-
-  return oppgaveTypeFiltrert
-}
+import {
+  EnhetFilterKeys,
+  filtrerOppgaver,
+  OppgavestatusFilter,
+  OppgavestatusFilterKeys,
+  OppgavetypeFilter,
+  OppgavetypeFilterKeys,
+  SaksbehandlerFilter,
+  SaksbehandlerFilterKeys,
+  YtelseFilter,
+  YtelseFilterKeys,
+  EnhetFilter,
+} from '~components/nyoppgavebenk/Oppgavelistafiltre'
 
 export const FilterFlex = styled.div`
   display: flex;
@@ -148,7 +44,7 @@ export const Oppgavelista = (props: { oppgaver: ReadonlyArray<OppgaveDTOny> }) =
   )
 
   return (
-    <div>
+    <>
       <FilterFlex>
         <Select
           label="Saksbehandler"
@@ -232,6 +128,6 @@ export const Oppgavelista = (props: { oppgaver: ReadonlyArray<OppgaveDTOny> }) =
             )}
         </Table.Body>
       </Table>
-    </div>
+    </>
   )
 }

@@ -15,15 +15,9 @@ export const ToggleMinOppgaveliste = () => {
   const [oppgaver, hentOppgaver] = useApiCall(hentNyeOppgaver)
   const [hentedeOppgaver, setHentedeOppgaver] = useState<ReadonlyArray<OppgaveDTOny>>([])
   useEffect(() => {
-    hentOppgaver(
-      {},
-      (oppgaver) => {
-        setHentedeOppgaver(oppgaver)
-      },
-      () => {
-        console.error('kunne ikke hente oppgaver')
-      }
-    )
+    hentOppgaver({}, (oppgaver) => {
+      setHentedeOppgaver(oppgaver)
+    })
   }, [])
   return (
     <>
@@ -35,7 +29,7 @@ export const ToggleMinOppgaveliste = () => {
       </Tabs>
       {isPending(oppgaver) && <Spinner visible={true} label={'henter nye oppgaver'} />}
       {isFailure(oppgaver) && <ApiErrorAlert>Kunne ikke hente oppgaver</ApiErrorAlert>}
-      {isSuccess(oppgaver) && <>hentet antall oppgaver: {hentedeOppgaver?.length}</>}
+      {isSuccess(oppgaver) && <>Hentet antall oppgaver: {hentedeOppgaver?.length}</>}
       {isSuccess(oppgaver) && (
         <>
           {oppgaveListeValg === 'Oppgavelista' && <Oppgavelista oppgaver={hentedeOppgaver} />}

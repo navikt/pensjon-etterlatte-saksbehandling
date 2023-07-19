@@ -1,8 +1,6 @@
 package no.nav.etterlatte.vilkaarsvurdering
 
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.logging.withLogContext
-import no.nav.etterlatte.libs.common.rapidsandrivers.BEHOV_NAME_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser
@@ -27,7 +25,6 @@ internal class Migrering(
     init {
         River(rapidsConnection).apply {
             eventName(VILKAARSVURDER)
-            validate { it.demandValue(BEHOV_NAME_KEY, Opplysningstype.MIGRERING.name) }
             validate { it.requireKey(BEHANDLING_ID_KEY) }
             validate { it.rejectKey(VILKAARSVURDERT_KEY) }
             correlationId()

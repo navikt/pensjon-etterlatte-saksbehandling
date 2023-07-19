@@ -40,6 +40,5 @@ enum class Opplysningstype {
     UTENLANDSOPPHOLD, // Bruks kun idag for informasjon fra søknaden
     UTENLANDSADRESSE,
 
-    SOESKEN_I_BEREGNINGEN, // Kun for soeskenjustering
-    MIGRERING // kun brukt for å trigge migrering
+    SOESKEN_I_BEREGNINGEN // Kun for soeskenjustering
 }

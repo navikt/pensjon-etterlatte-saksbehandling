@@ -1,6 +1,8 @@
 package no.nav.etterlatte.migrering
 
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.logging.withLogContext
+import no.nav.etterlatte.libs.common.rapidsandrivers.BEHOV_NAME_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.etterlatte.libs.common.toJson
@@ -43,6 +45,7 @@ internal class Migrering(rapidsConnection: RapidsConnection, private val pesysRe
         val request = tilMigreringsrequest(sak)
         packet.request = request.toJson()
         packet[FNR_KEY] = request.fnr.value
+        packet[BEHOV_NAME_KEY] = Opplysningstype.AVDOED_PDL_V1
         context.publish(packet.toJson())
         logger.info(
             "Migrering starta for pesys-sak ${sak.pesysId} og melding om behandling ble sendt."

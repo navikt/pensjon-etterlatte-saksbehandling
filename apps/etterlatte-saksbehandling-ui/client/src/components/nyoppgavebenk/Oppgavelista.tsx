@@ -39,15 +39,44 @@ const EnhetFilter = {
   E2103: 'Vikafossen - 2103',
 }
 
-type enhetKeyTypes = keyof typeof EnhetFilter
+type enhetFilterKeys = keyof typeof EnhetFilter
 
-function filtrerEnhet(enhetsFilter: enhetKeyTypes, oppgaver: OppgaveDTOny[]): OppgaveDTOny[] {
+function filtrerEnhet(enhetsFilter: enhetFilterKeys, oppgaver: OppgaveDTOny[]): OppgaveDTOny[] {
   if (enhetsFilter === 'visAlle') {
     return oppgaver
   } else {
     const enhetUtenPrefixE = enhetsFilter.substring(1)
     return oppgaver.filter((o) => o.enhet === enhetUtenPrefixE)
   }
+}
+
+const YtelseFilter = {
+  visAlle: 'Vis alle',
+  BARNEPENSJON: 'Barnepensjon',
+  OMSTILLINGSSTOENAD: 'Omstillingsstønad',
+}
+
+type ytelseFilterKeys = keyof typeof YtelseFilter
+
+function filtrerYtelse(ytelseFilter: ytelseFilterKeys, oppgaver: OppgaveDTOny[]): OppgaveDTOny[] {
+  if (ytelseFilter === 'visAlle') {
+    return oppgaver
+  } else {
+    return oppgaver.filter((o) => o.sakType === ytelseFilter)
+  }
+}
+
+function filtrerOppgaver(
+  enhetsFilter: enhetFilterKeys,
+  saksbehandlerFilter: SaksbehandlerFilterKeys,
+  ytelseFilter: ytelseFilterKeys,
+  oppgaver: OppgaveDTOny[]
+): OppgaveDTOny[] {
+  const enhetFiltrert = filtrerEnhet(enhetsFilter, oppgaver)
+  const saksbehandlerFiltrert = filtrerSaksbehandler(saksbehandlerFilter, enhetFiltrert)
+  const ytelseFiltrert = filtrerYtelse(ytelseFilter, saksbehandlerFiltrert)
+
+  return ytelseFiltrert
 }
 
 export const FilterFlex = styled.div`
@@ -59,11 +88,11 @@ export const Oppgavelista = (props: { oppgaver: ReadonlyArray<OppgaveDTOny> }) =
   const { oppgaver } = props
 
   const [saksbehandlerFilter, setSaksbehandlerFilter] = useState<SaksbehandlerFilterKeys>('visAlle')
-  const [enhetsFilter, setEnhetsFilter] = useState<enhetKeyTypes>('visAlle')
+  const [enhetsFilter, setEnhetsFilter] = useState<enhetFilterKeys>('visAlle')
+  const [ytelseFilter, setYtelseFilter] = useState<ytelseFilterKeys>('visAlle')
 
   const mutableOppgaver = oppgaver.concat()
-  const saksbehandlerFilterOppgaver = filtrerSaksbehandler(saksbehandlerFilter, mutableOppgaver)
-  const filtrerteOppgaver = filtrerEnhet(enhetsFilter, saksbehandlerFilterOppgaver)
+  const filtrerteOppgaver = filtrerOppgaver(enhetsFilter, saksbehandlerFilter, ytelseFilter, mutableOppgaver)
   return (
     <div>
       <FilterFlex>
@@ -78,10 +107,17 @@ export const Oppgavelista = (props: { oppgaver: ReadonlyArray<OppgaveDTOny> }) =
           ))}
         </Select>
 
-        <Select label="Enhet" onChange={(e) => setEnhetsFilter(e.target.value as enhetKeyTypes)}>
+        <Select label="Enhet" onChange={(e) => setEnhetsFilter(e.target.value as enhetFilterKeys)}>
           {Object.entries(EnhetFilter).map(([enhetsnummer, enhetBeskrivelse]) => (
             <option key={enhetsnummer} value={enhetsnummer}>
               {enhetBeskrivelse}
+            </option>
+          ))}
+        </Select>
+        <Select label="Ytelse" onChange={(e) => setYtelseFilter(e.target.value as ytelseFilterKeys)}>
+          {Object.entries(YtelseFilter).map(([saktype, saktypetekst]) => (
+            <option key={saktype} value={saktype}>
+              {saktypetekst}
             </option>
           ))}
         </Select>

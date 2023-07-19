@@ -63,7 +63,7 @@ internal class MigrerEnEnkeltSak(
 
                 packet[SAK_TYPE_KEY] = SakType.BARNEPENSJON
                 packet[ROLLE_KEY] = PersonRolle.AVDOED
-                packet.eventName = Migreringshendelser.GRUNNLAG
+                packet.eventName = Migreringshendelser.HENT_PDL
 
                 context.publish(packet.toJson())
                 logger.info("Publiserte oppdatert migreringshendelse")

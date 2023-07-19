@@ -9,7 +9,6 @@ const val REQUEST = "request"
 const val FNR_KEY = "fnr"
 const val ROLLE_KEY = "rolle"
 const val VILKAARSVURDERT_KEY = "vilkaarsvurdert"
-const val FULLSTENDIG_KEY = "fullstendig"
 const val TRYGDETID_KEY = "trygdetid"
 const val MIGRERING_GRUNNLAG_KEY = "migrering_grunnlag"
 

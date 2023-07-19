@@ -5,7 +5,6 @@ import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.rapidsandrivers.BEHOV_NAME_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
-import no.nav.etterlatte.rapidsandrivers.migrering.FULLSTENDIG_KEY
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser.VILKAARSVURDER
 import no.nav.etterlatte.rapidsandrivers.migrering.VILKAARSVURDERT_KEY
@@ -30,7 +29,6 @@ internal class Migrering(
             eventName(VILKAARSVURDER)
             validate { it.demandValue(BEHOV_NAME_KEY, Opplysningstype.MIGRERING.name) }
             validate { it.requireKey(BEHANDLING_ID_KEY) }
-            validate { it.requireKey(FULLSTENDIG_KEY) }
             validate { it.rejectKey(VILKAARSVURDERT_KEY) }
             correlationId()
         }.register(this)

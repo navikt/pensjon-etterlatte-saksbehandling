@@ -24,8 +24,8 @@ export const FilterFlex = styled.div`
   justify-content: space-evenly;
 `
 
-export const Oppgavelista = (props: { oppgaver: ReadonlyArray<OppgaveDTOny> }) => {
-  const { oppgaver } = props
+export const Oppgavelista = (props: { oppgaver: ReadonlyArray<OppgaveDTOny>; hentOppgaver: () => void }) => {
+  const { oppgaver, hentOppgaver } = props
 
   const [saksbehandlerFilter, setSaksbehandlerFilter] = useState<SaksbehandlerFilterKeys>('visAlle')
   const [enhetsFilter, setEnhetsFilter] = useState<EnhetFilterKeys>('visAlle')
@@ -99,6 +99,7 @@ export const Oppgavelista = (props: { oppgaver: ReadonlyArray<OppgaveDTOny> }) =
           ))}
         </Select>
       </FilterFlex>
+      <Button onClick={hentOppgaver}>Hent</Button>
       <Button
         variant="secondary"
         onClick={() => {

@@ -1,4 +1,4 @@
-import { Select, Table } from '@navikt/ds-react'
+import { Button, Select, Table } from '@navikt/ds-react'
 import { formaterStringDato } from '~utils/formattering'
 import { TildelSaksbehandler } from '~components/nyoppgavebenk/TildelSaksbehandler'
 import { RedigerSaksbehandler } from '~components/nyoppgavebenk/RedigerSaksbehandler'
@@ -48,6 +48,7 @@ export const Oppgavelista = (props: { oppgaver: ReadonlyArray<OppgaveDTOny> }) =
       <FilterFlex>
         <Select
           label="Saksbehandler"
+          value={saksbehandlerFilter}
           onChange={(e) => setSaksbehandlerFilter(e.target.value as SaksbehandlerFilterKeys)}
         >
           {Object.entries(SaksbehandlerFilter).map(([key, beskrivelse]) => (
@@ -57,14 +58,18 @@ export const Oppgavelista = (props: { oppgaver: ReadonlyArray<OppgaveDTOny> }) =
           ))}
         </Select>
 
-        <Select label="Enhet" onChange={(e) => setEnhetsFilter(e.target.value as EnhetFilterKeys)}>
+        <Select label="Enhet" value={enhetsFilter} onChange={(e) => setEnhetsFilter(e.target.value as EnhetFilterKeys)}>
           {Object.entries(EnhetFilter).map(([enhetsnummer, enhetBeskrivelse]) => (
             <option key={enhetsnummer} value={enhetsnummer}>
               {enhetBeskrivelse}
             </option>
           ))}
         </Select>
-        <Select label="Ytelse" onChange={(e) => setYtelseFilter(e.target.value as YtelseFilterKeys)}>
+        <Select
+          label="Ytelse"
+          value={ytelseFilter}
+          onChange={(e) => setYtelseFilter(e.target.value as YtelseFilterKeys)}
+        >
           {Object.entries(YtelseFilter).map(([saktype, saktypetekst]) => (
             <option key={saktype} value={saktype}>
               {saktypetekst}
@@ -73,6 +78,7 @@ export const Oppgavelista = (props: { oppgaver: ReadonlyArray<OppgaveDTOny> }) =
         </Select>
         <Select
           label="Oppgavestatus"
+          value={oppgavestatusFilter}
           onChange={(e) => setOppgavestatusFilter(e.target.value as OppgavestatusFilterKeys)}
         >
           {Object.entries(OppgavestatusFilter).map(([status, statusbeskrivelse]) => (
@@ -81,7 +87,11 @@ export const Oppgavelista = (props: { oppgaver: ReadonlyArray<OppgaveDTOny> }) =
             </option>
           ))}
         </Select>
-        <Select label="Oppgavetype" onChange={(e) => setOppgavetypeFilter(e.target.value as OppgavetypeFilterKeys)}>
+        <Select
+          label="Oppgavetype"
+          value={oppgavetypeFilter}
+          onChange={(e) => setOppgavetypeFilter(e.target.value as OppgavetypeFilterKeys)}
+        >
           {Object.entries(OppgavetypeFilter).map(([type, typebeskrivelse]) => (
             <option key={type} value={type}>
               {typebeskrivelse}
@@ -89,6 +99,18 @@ export const Oppgavelista = (props: { oppgaver: ReadonlyArray<OppgaveDTOny> }) =
           ))}
         </Select>
       </FilterFlex>
+      <Button
+        variant="secondary"
+        onClick={() => {
+          setSaksbehandlerFilter('visAlle')
+          setOppgavetypeFilter('visAlle')
+          setEnhetsFilter('visAlle')
+          setOppgavestatusFilter('visAlle')
+          setSaksbehandlerFilter('visAlle')
+        }}
+      >
+        Tilbakestill filtrering
+      </Button>
       <Table>
         <Table.Header>
           <Table.Row>

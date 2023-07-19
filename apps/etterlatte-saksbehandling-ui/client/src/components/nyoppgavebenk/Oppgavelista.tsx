@@ -2,7 +2,7 @@ import { Table } from '@navikt/ds-react'
 import { formaterStringDato } from '~utils/formattering'
 import { TildelSaksbehandler } from '~components/nyoppgavebenk/TildelSaksbehandler'
 import { RedigerSaksbehandler } from '~components/nyoppgavebenk/RedigerSaksbehandler'
-import { OppgaveDTOny } from '~shared/api/oppgaverny'
+import { OppgaveDTOny, Oppgavestatus, Oppgavetype } from '~shared/api/oppgaverny'
 import { Select } from '@navikt/ds-react'
 import { useState } from 'react'
 import styled from 'styled-components'
@@ -39,9 +39,9 @@ const EnhetFilter = {
   E2103: 'Vikafossen - 2103',
 }
 
-type enhetFilterKeys = keyof typeof EnhetFilter
+type EnhetFilterKeys = keyof typeof EnhetFilter
 
-function filtrerEnhet(enhetsFilter: enhetFilterKeys, oppgaver: OppgaveDTOny[]): OppgaveDTOny[] {
+function filtrerEnhet(enhetsFilter: EnhetFilterKeys, oppgaver: OppgaveDTOny[]): OppgaveDTOny[] {
   if (enhetsFilter === 'visAlle') {
     return oppgaver
   } else {
@@ -56,9 +56,9 @@ const YtelseFilter = {
   OMSTILLINGSSTOENAD: 'Omstillingsstønad',
 }
 
-type ytelseFilterKeys = keyof typeof YtelseFilter
+type YtelseFilterKeys = keyof typeof YtelseFilter
 
-function filtrerYtelse(ytelseFilter: ytelseFilterKeys, oppgaver: OppgaveDTOny[]): OppgaveDTOny[] {
+function filtrerYtelse(ytelseFilter: YtelseFilterKeys, oppgaver: OppgaveDTOny[]): OppgaveDTOny[] {
   if (ytelseFilter === 'visAlle') {
     return oppgaver
   } else {
@@ -66,17 +66,61 @@ function filtrerYtelse(ytelseFilter: ytelseFilterKeys, oppgaver: OppgaveDTOny[])
   }
 }
 
+type visAlle = 'visAlle'
+type OppgavestatusFilterKeys = Oppgavestatus | visAlle
+
+const OppgavestatusFilter: Record<OppgavestatusFilterKeys, string> = {
+  visAlle: 'Vis alle',
+  NY: 'Ny',
+  UNDER_BEHANDLING: 'Under arbeid',
+  FERDIGSTILT: 'Ferdigstilt',
+  FEILREGISTRERT: 'Feilregistrert',
+}
+
+function filtrerOppgaveStatus(
+  oppgavestatusFilterKeys: OppgavestatusFilterKeys,
+  oppgaver: OppgaveDTOny[]
+): OppgaveDTOny[] {
+  if (oppgavestatusFilterKeys === 'visAlle') {
+    return oppgaver
+  } else {
+    return oppgaver.filter((o) => o.status === oppgavestatusFilterKeys)
+  }
+}
+
+type OppgavetypeFilterKeys = Oppgavetype | visAlle
+const OppgavetypeFilter: Record<OppgavetypeFilterKeys, string> = {
+  visAlle: 'Vis alle',
+  FOERSTEGANGSBEHANDLING: 'Førstegangsbehandling',
+  REVUDERING: 'Revurdering',
+  HENDELSE: 'Hendelse',
+  MANUELT_OPPHOER: 'Manuelt opphør',
+  EKSTERN: 'Ekstern',
+}
+
+function filtrerOppgaveType(oppgavetypeFilterKeys: OppgavetypeFilterKeys, oppgaver: OppgaveDTOny[]): OppgaveDTOny[] {
+  if (oppgavetypeFilterKeys === 'visAlle') {
+    return oppgaver
+  } else {
+    return oppgaver.filter((o) => o.type === oppgavetypeFilterKeys)
+  }
+}
+
 function filtrerOppgaver(
-  enhetsFilter: enhetFilterKeys,
+  enhetsFilter: EnhetFilterKeys,
   saksbehandlerFilter: SaksbehandlerFilterKeys,
-  ytelseFilter: ytelseFilterKeys,
+  ytelseFilter: YtelseFilterKeys,
+  oppgavestatusFilter: OppgavestatusFilterKeys,
+  oppgavetypeFilter: OppgavetypeFilterKeys,
   oppgaver: OppgaveDTOny[]
 ): OppgaveDTOny[] {
   const enhetFiltrert = filtrerEnhet(enhetsFilter, oppgaver)
   const saksbehandlerFiltrert = filtrerSaksbehandler(saksbehandlerFilter, enhetFiltrert)
   const ytelseFiltrert = filtrerYtelse(ytelseFilter, saksbehandlerFiltrert)
+  const oppgaveFiltrert = filtrerOppgaveStatus(oppgavestatusFilter, ytelseFiltrert)
+  const oppgaveTypeFiltrert = filtrerOppgaveType(oppgavetypeFilter, oppgaveFiltrert)
 
-  return ytelseFiltrert
+  return oppgaveTypeFiltrert
 }
 
 export const FilterFlex = styled.div`
@@ -88,11 +132,21 @@ export const Oppgavelista = (props: { oppgaver: ReadonlyArray<OppgaveDTOny> }) =
   const { oppgaver } = props
 
   const [saksbehandlerFilter, setSaksbehandlerFilter] = useState<SaksbehandlerFilterKeys>('visAlle')
-  const [enhetsFilter, setEnhetsFilter] = useState<enhetFilterKeys>('visAlle')
-  const [ytelseFilter, setYtelseFilter] = useState<ytelseFilterKeys>('visAlle')
+  const [enhetsFilter, setEnhetsFilter] = useState<EnhetFilterKeys>('visAlle')
+  const [ytelseFilter, setYtelseFilter] = useState<YtelseFilterKeys>('visAlle')
+  const [oppgavestatusFilter, setOppgavestatusFilter] = useState<OppgavestatusFilterKeys>('visAlle')
+  const [oppgavetypeFilter, setOppgavetypeFilter] = useState<OppgavetypeFilterKeys>('visAlle')
 
   const mutableOppgaver = oppgaver.concat()
-  const filtrerteOppgaver = filtrerOppgaver(enhetsFilter, saksbehandlerFilter, ytelseFilter, mutableOppgaver)
+  const filtrerteOppgaver = filtrerOppgaver(
+    enhetsFilter,
+    saksbehandlerFilter,
+    ytelseFilter,
+    oppgavestatusFilter,
+    oppgavetypeFilter,
+    mutableOppgaver
+  )
+
   return (
     <div>
       <FilterFlex>
@@ -107,17 +161,34 @@ export const Oppgavelista = (props: { oppgaver: ReadonlyArray<OppgaveDTOny> }) =
           ))}
         </Select>
 
-        <Select label="Enhet" onChange={(e) => setEnhetsFilter(e.target.value as enhetFilterKeys)}>
+        <Select label="Enhet" onChange={(e) => setEnhetsFilter(e.target.value as EnhetFilterKeys)}>
           {Object.entries(EnhetFilter).map(([enhetsnummer, enhetBeskrivelse]) => (
             <option key={enhetsnummer} value={enhetsnummer}>
               {enhetBeskrivelse}
             </option>
           ))}
         </Select>
-        <Select label="Ytelse" onChange={(e) => setYtelseFilter(e.target.value as ytelseFilterKeys)}>
+        <Select label="Ytelse" onChange={(e) => setYtelseFilter(e.target.value as YtelseFilterKeys)}>
           {Object.entries(YtelseFilter).map(([saktype, saktypetekst]) => (
             <option key={saktype} value={saktype}>
               {saktypetekst}
+            </option>
+          ))}
+        </Select>
+        <Select
+          label="Oppgavestatus"
+          onChange={(e) => setOppgavestatusFilter(e.target.value as OppgavestatusFilterKeys)}
+        >
+          {Object.entries(OppgavestatusFilter).map(([status, statusbeskrivelse]) => (
+            <option key={status} value={status}>
+              {statusbeskrivelse}
+            </option>
+          ))}
+        </Select>
+        <Select label="Oppgavetype" onChange={(e) => setOppgavetypeFilter(e.target.value as OppgavetypeFilterKeys)}>
+          {Object.entries(OppgavetypeFilter).map(([type, typebeskrivelse]) => (
+            <option key={type} value={type}>
+              {typebeskrivelse}
             </option>
           ))}
         </Select>

@@ -17,6 +17,8 @@ import no.nav.etterlatte.behandling.klienter.NavAnsattKlient
 import no.nav.etterlatte.behandling.klienter.NavAnsattKlientImpl
 import no.nav.etterlatte.behandling.klienter.Norg2Klient
 import no.nav.etterlatte.behandling.klienter.Norg2KlientImpl
+import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
+import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeService
 import no.nav.etterlatte.behandling.manueltopphoer.RealManueltOpphoerService
 import no.nav.etterlatte.behandling.migrering.MigreringRepository
 import no.nav.etterlatte.behandling.omregning.MigreringService
@@ -122,8 +124,9 @@ class ApplicationContext(
     // Dao
     val hendelseDao = HendelseDao { databaseContext().activeTx() }
     val oppgaveDao = OppgaveDao { databaseContext().activeTx() }
+    val kommerBarnetTilGodeDao = KommerBarnetTilGodeDao { databaseContext().activeTx() }
+    val behandlingDao = BehandlingDao(kommerBarnetTilGodeDao) { databaseContext().activeTx() }
     val oppgaveDaoNy = OppgaveDaoNy { databaseContext().activeTx() }
-    val behandlingDao = BehandlingDao { databaseContext().activeTx() }
     val sakDao = SakDao { databaseContext().activeTx() }
     val grunnlagsendringshendelseDao = GrunnlagsendringshendelseDao { databaseContext().activeTx() }
     val institusjonsoppholdDao = InstitusjonsoppholdDao { databaseContext().activeTx() }
@@ -148,9 +151,12 @@ class ApplicationContext(
         grunnlagsendringshendelseDao = grunnlagsendringshendelseDao,
         grunnlagKlient = grunnlagKlientObo,
         sporingslogg = sporingslogg,
-        featureToggleService = featureToggleService
+        featureToggleService = featureToggleService,
+        kommerBarnetTilGodeDao = kommerBarnetTilGodeDao
     )
 
+    val kommerBarnetTilGodeService =
+        KommerBarnetTilGodeService(kommerBarnetTilGodeDao, behandlingDao)
     val grunnlagsService = GrunnlagService(grunnlagKlient = grunnlagKlient)
     val revurderingService =
         RevurderingServiceImpl(
@@ -160,7 +166,8 @@ class ApplicationContext(
             featureToggleService = featureToggleService,
             behandlingDao = behandlingDao,
             hendelseDao = hendelseDao,
-            grunnlagsendringshendelseDao = grunnlagsendringshendelseDao
+            grunnlagsendringshendelseDao = grunnlagsendringshendelseDao,
+            kommerBarnetTilGodeService = kommerBarnetTilGodeService
         )
 
     val foerstegangsbehandlingService =
@@ -219,7 +226,8 @@ class ApplicationContext(
         foerstegangsBehandlingService = foerstegangsbehandlingService,
         behandlingsHendelser = behandlingsHendelser,
         migreringRepository = MigreringRepository(dataSource),
-        behandlingService = behandlingService
+        behandlingService = behandlingService,
+        kommerBarnetTilGodeService = kommerBarnetTilGodeService
     )
 
     // Job

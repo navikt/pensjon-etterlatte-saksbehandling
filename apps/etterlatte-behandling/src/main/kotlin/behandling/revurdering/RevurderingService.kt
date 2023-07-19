@@ -11,6 +11,7 @@ import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.behandling.domain.toBehandlingOpprettet
 import no.nav.etterlatte.behandling.filterBehandlingerForEnheter
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
+import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeService
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseDao
@@ -56,6 +57,7 @@ interface RevurderingService {
     fun opprettRevurdering(
         sakId: Long,
         persongalleri: Persongalleri,
+        forrigeBehandling: UUID?,
         mottattDato: String? = null,
         prosessType: Prosesstype,
         kilde: Vedtaksloesning,
@@ -78,7 +80,8 @@ class RevurderingServiceImpl(
     private val featureToggleService: FeatureToggleService,
     private val behandlingDao: BehandlingDao,
     private val hendelseDao: HendelseDao,
-    private val grunnlagsendringshendelseDao: GrunnlagsendringshendelseDao
+    private val grunnlagsendringshendelseDao: GrunnlagsendringshendelseDao,
+    private val kommerBarnetTilGodeService: KommerBarnetTilGodeService
 ) : RevurderingService {
     private val logger = LoggerFactory.getLogger(RevurderingServiceImpl::class.java)
 
@@ -96,6 +99,7 @@ class RevurderingServiceImpl(
             opprettRevurdering(
                 sakId,
                 forrigeBehandling.persongalleri,
+                forrigeBehandling.id,
                 Tidspunkt.now().toLocalDatetimeUTC().toString(),
                 Prosesstype.MANUELL,
                 kilde,
@@ -126,6 +130,7 @@ class RevurderingServiceImpl(
         opprettRevurdering(
             sakId,
             forrigeBehandling.persongalleri,
+            forrigeBehandling.id,
             null,
             Prosesstype.AUTOMATISK,
             kilde,
@@ -157,6 +162,7 @@ class RevurderingServiceImpl(
     override fun opprettRevurdering(
         sakId: Long,
         persongalleri: Persongalleri,
+        forrigeBehandling: UUID?,
         mottattDato: String?,
         prosessType: Prosesstype,
         kilde: Vedtaksloesning,
@@ -177,6 +183,11 @@ class RevurderingServiceImpl(
                 merknad = merknad
             ).let { opprettBehandling ->
                 behandlingDao.opprettBehandling(opprettBehandling)
+                forrigeBehandling?.let {
+                    kommerBarnetTilGodeService.hentKommerBarnetTilGode(it)
+                        ?.copy(behandlingId = opprettBehandling.id)
+                        ?.let { kopiert -> kommerBarnetTilGodeService.lagreKommerBarnetTilgode(kopiert) }
+                }
                 hendelseDao.behandlingOpprettet(opprettBehandling.toBehandlingOpprettet())
 
                 logger.info("Opprettet behandling ${opprettBehandling.id} i sak ${opprettBehandling.sakId}")

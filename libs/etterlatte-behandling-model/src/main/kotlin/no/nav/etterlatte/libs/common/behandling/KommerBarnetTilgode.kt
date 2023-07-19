@@ -1,9 +1,11 @@
 package no.nav.etterlatte.libs.common.behandling
 
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import java.util.*
 
 data class KommerBarnetTilgode(
     val svar: JaNei,
     val begrunnelse: String,
-    val kilde: Grunnlagsopplysning.Kilde
+    val kilde: Grunnlagsopplysning.Kilde,
+    val behandlingId: UUID? = null
 )

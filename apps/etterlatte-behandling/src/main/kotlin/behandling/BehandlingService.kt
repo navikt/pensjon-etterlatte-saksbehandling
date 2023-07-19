@@ -12,6 +12,7 @@ import no.nav.etterlatte.behandling.hendelse.HendelseType
 import no.nav.etterlatte.behandling.hendelse.LagretHendelse
 import no.nav.etterlatte.behandling.hendelse.registrerVedtakHendelseFelles
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
+import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
 import no.nav.etterlatte.common.tidligsteIverksatteVirkningstidspunkt
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
@@ -100,7 +101,8 @@ class BehandlingServiceImpl(
     private val hendelseDao: HendelseDao,
     private val grunnlagKlient: GrunnlagKlient,
     private val sporingslogg: Sporingslogg,
-    private val featureToggleService: FeatureToggleService
+    private val featureToggleService: FeatureToggleService,
+    private val kommerBarnetTilGodeDao: KommerBarnetTilGodeDao
 ) : BehandlingService {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -206,11 +208,13 @@ class BehandlingServiceImpl(
     ): DetaljertBehandlingDto {
         val behandling = hentBehandling(behandlingId)!!
         val hendelserIBehandling = hentHendelserIBehandling(behandlingId)
+        val kommerBarnetTilgode = inTransaction {
+            kommerBarnetTilGodeDao.hentKommerBarnetTilGode(behandlingId)
+                .takeIf { behandling.sak.sakType == SakType.BARNEPENSJON }
+        }
 
         val sakId = behandling.sak.id
         val sakType = behandling.sak.sakType
-
-        val kommerBarnetTilgode = behandling.kommerBarnetTilgode.takeIf { sakType == SakType.BARNEPENSJON }
 
         logger.info("Hentet behandling for $behandlingId")
         return coroutineScope {

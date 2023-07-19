@@ -11,12 +11,12 @@ import no.nav.etterlatte.behandling.domain.ManueltOpphoer
 import no.nav.etterlatte.behandling.domain.OpprettBehandling
 import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.behandling.hendelse.getUUID
+import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
 import no.nav.etterlatte.grunnlagsendring.setJsonb
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
-import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
@@ -41,7 +41,10 @@ import java.sql.ResultSet
 import java.time.LocalDateTime
 import java.util.*
 
-class BehandlingDao(private val connection: () -> Connection) {
+class BehandlingDao(
+    private val kommerBarnetTilGodeDao: KommerBarnetTilGodeDao,
+    private val connection: () -> Connection
+) {
 
     private val alleBehandlingerMedSak = """
         SELECT b.*, s.sakType, s.enhet, s.fnr 
@@ -91,22 +94,26 @@ class BehandlingDao(private val connection: () -> Connection) {
         }
     }
 
-    private fun asFoerstegangsbehandling(rs: ResultSet) = Foerstegangsbehandling(
-        id = rs.getObject("id") as UUID,
-        sak = mapSak(rs),
-        behandlingOpprettet = rs.somLocalDateTimeUTC("behandling_opprettet"),
-        sistEndret = rs.somLocalDateTimeUTC("sist_endret"),
-        soeknadMottattDato = rs.getTidspunktOrNull("soeknad_mottatt_dato")?.toLocalDatetimeUTC(),
-        persongalleri = hentPersongalleri(rs),
-        gyldighetsproeving = rs.getString("gyldighetssproving")?.let { objectMapper.readValue(it) },
-        status = rs.getString("status").let { BehandlingStatus.valueOf(it) },
-        virkningstidspunkt = rs.getString("virkningstidspunkt")?.let { objectMapper.readValue(it) },
-        utenlandstilsnitt = rs.getString("utenlandstilsnitt")?.let { objectMapper.readValue(it) },
-        boddEllerArbeidetUtlandet = rs.getString("bodd_eller_arbeidet_utlandet")?.let { objectMapper.readValue(it) },
-        kommerBarnetTilgode = rs.getString("kommer_barnet_tilgode")?.let { objectMapper.readValue(it) },
-        prosesstype = rs.getString("prosesstype").let { Prosesstype.valueOf(it) },
-        kilde = rs.getString("kilde").let { Vedtaksloesning.valueOf(it) }
-    )
+    private fun asFoerstegangsbehandling(rs: ResultSet): Foerstegangsbehandling {
+        val id = rs.getObject("id") as UUID
+        return Foerstegangsbehandling(
+            id = id,
+            sak = mapSak(rs),
+            behandlingOpprettet = rs.somLocalDateTimeUTC("behandling_opprettet"),
+            sistEndret = rs.somLocalDateTimeUTC("sist_endret"),
+            soeknadMottattDato = rs.getTidspunktOrNull("soeknad_mottatt_dato")?.toLocalDatetimeUTC(),
+            persongalleri = hentPersongalleri(rs),
+            gyldighetsproeving = rs.getString("gyldighetssproving")?.let { objectMapper.readValue(it) },
+            status = rs.getString("status").let { BehandlingStatus.valueOf(it) },
+            virkningstidspunkt = rs.getString("virkningstidspunkt")?.let { objectMapper.readValue(it) },
+            utenlandstilsnitt = rs.getString("utenlandstilsnitt")?.let { objectMapper.readValue(it) },
+            boddEllerArbeidetUtlandet = rs.getString("bodd_eller_arbeidet_utlandet")
+                ?.let { objectMapper.readValue(it) },
+            kommerBarnetTilgode = kommerBarnetTilGodeDao.hentKommerBarnetTilGode(id),
+            prosesstype = rs.getString("prosesstype").let { Prosesstype.valueOf(it) },
+            kilde = rs.getString("kilde").let { Vedtaksloesning.valueOf(it) }
+        )
+    }
 
     private fun hentPersongalleri(rs: ResultSet): Persongalleri = Persongalleri(
         innsender = rs.getString("innsender"),
@@ -128,7 +135,7 @@ class BehandlingDao(private val connection: () -> Connection) {
             persongalleri = hentPersongalleri(rs),
             status = rs.getString("status").let { BehandlingStatus.valueOf(it) },
             revurderingsaarsak = rs.getString("revurdering_aarsak").let { RevurderingAarsak.valueOf(it) },
-            kommerBarnetTilgode = rs.getString("kommer_barnet_tilgode")?.let { objectMapper.readValue(it) },
+            kommerBarnetTilgode = kommerBarnetTilGodeDao.hentKommerBarnetTilGode(id),
             virkningstidspunkt = rs.getString("virkningstidspunkt")?.let { objectMapper.readValue(it) },
             utenlandstilsnitt = rs.getString("utenlandstilsnitt")?.let { objectMapper.readValue(it) },
             boddEllerArbeidetUtlandet = rs.getString("bodd_eller_arbeidet_utlandet")?.let {
@@ -195,8 +202,8 @@ class BehandlingDao(private val connection: () -> Connection) {
                 """
                     INSERT INTO behandling(id, sak_id, behandling_opprettet, sist_endret, status, behandlingstype, 
                     soeknad_mottatt_dato, innsender, soeker, gjenlevende, avdoed, soesken, virkningstidspunkt,
-                    kommer_barnet_tilgode, revurdering_aarsak, opphoer_aarsaker, fritekst_aarsak, prosesstype, kilde, merknad)
-                    VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    revurdering_aarsak, opphoer_aarsaker, fritekst_aarsak, prosesstype, kilde, merknad)
+                    VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """.trimIndent()
             )
         with(behandling) {
@@ -218,13 +225,12 @@ class BehandlingDao(private val connection: () -> Connection) {
                 13,
                 virkningstidspunkt?.toJson()
             )
-            stmt.setString(14, kommerBarnetTilgode?.toJson())
-            stmt.setString(15, revurderingsAarsak?.name)
-            stmt.setString(16, opphoerAarsaker?.toJson())
-            stmt.setString(17, fritekstAarsak)
-            stmt.setString(18, prosesstype.toString())
-            stmt.setString(19, kilde.toString())
-            stmt.setString(20, merknad)
+            stmt.setString(14, revurderingsAarsak?.name)
+            stmt.setString(15, opphoerAarsaker?.toJson())
+            stmt.setString(16, fritekstAarsak)
+            stmt.setString(17, prosesstype.toString())
+            stmt.setString(18, kilde.toString())
+            stmt.setString(19, merknad)
         }
         require(stmt.executeUpdate() == 1)
     }
@@ -294,13 +300,6 @@ class BehandlingDao(private val connection: () -> Connection) {
     fun lagreNyttVirkningstidspunkt(behandlingId: UUID, virkningstidspunkt: Virkningstidspunkt) {
         val statement = connection().prepareStatement("UPDATE behandling SET virkningstidspunkt = ? where id = ?")
         statement.setString(1, objectMapper.writeValueAsString(virkningstidspunkt))
-        statement.setObject(2, behandlingId)
-        statement.executeUpdate()
-    }
-
-    fun lagreKommerBarnetTilgode(behandlingId: UUID, kommerBarnetTilgode: KommerBarnetTilgode) {
-        val statement = connection().prepareStatement("UPDATE behandling SET kommer_barnet_tilgode = ? where id = ?")
-        statement.setString(1, kommerBarnetTilgode.toJson())
         statement.setObject(2, behandlingId)
         statement.executeUpdate()
     }

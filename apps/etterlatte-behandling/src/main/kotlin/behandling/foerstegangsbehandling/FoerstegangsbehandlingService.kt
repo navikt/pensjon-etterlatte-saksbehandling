@@ -18,7 +18,6 @@ import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.JaNeiMedBegrunnelse
-import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
@@ -60,7 +59,6 @@ interface FoerstegangsbehandlingService {
     ): GyldighetsResultat?
 
     fun lagreGyldighetsproeving(behandlingId: UUID, gyldighetsproeving: GyldighetsResultat)
-    fun lagreKommerBarnetTilgode(behandlingId: UUID, kommerBarnetTilgode: KommerBarnetTilgode)
     fun settOpprettet(behandlingId: UUID, dryRun: Boolean = true)
     fun settVilkaarsvurdert(behandlingId: UUID, dryRun: Boolean = true)
     fun settBeregnet(behandlingId: UUID, dryRun: Boolean = true)
@@ -119,6 +117,7 @@ class FoerstegangsbehandlingServiceImpl(
             revurderingService.opprettRevurdering(
                 sakId,
                 persongalleri,
+                harIverksattEllerAttestertBehandling.maxBy { it.behandlingOpprettet }.id,
                 mottattDato,
                 Prosesstype.AUTOMATISK,
                 Vedtaksloesning.GJENNY,
@@ -219,18 +218,6 @@ class FoerstegangsbehandlingServiceImpl(
                 behandlingDao.lagreGyldighetsproving(it)
                 logger.info("behandling ${it.id} i sak: ${it.sak.id} er gyldighetsprøvd. Saktype: ${it.sak.sakType}")
             }
-    }
-
-    override fun lagreKommerBarnetTilgode(behandlingId: UUID, kommerBarnetTilgode: KommerBarnetTilgode) {
-        return inTransaction {
-            hentBehandling(behandlingId)?.lagreKommerBarnetTilgode(kommerBarnetTilgode)
-        }
-    }
-
-    private fun Foerstegangsbehandling.lagreKommerBarnetTilgode(kommerBarnetTilgode: KommerBarnetTilgode) {
-        this.oppdaterKommerBarnetTilgode(kommerBarnetTilgode)
-            .also { behandlingDao.lagreKommerBarnetTilgode(it.id, kommerBarnetTilgode) }
-            .also { behandlingDao.lagreStatus(it) }
     }
 
     override fun settOpprettet(behandlingId: UUID, dryRun: Boolean) {

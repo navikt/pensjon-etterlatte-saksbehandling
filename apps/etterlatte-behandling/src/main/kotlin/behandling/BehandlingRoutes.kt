@@ -17,6 +17,7 @@ import no.nav.etterlatte.behandling.domain.ManueltOpphoer
 import no.nav.etterlatte.behandling.domain.TilstandException
 import no.nav.etterlatte.behandling.domain.toBehandlingSammendrag
 import no.nav.etterlatte.behandling.foerstegangsbehandling.FoerstegangsbehandlingService
+import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeService
 import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerAarsak
 import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerRequest
 import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerService
@@ -43,6 +44,7 @@ import java.util.*
 internal fun Route.behandlingRoutes(
     behandlingService: BehandlingService,
     foerstegangsbehandlingService: FoerstegangsbehandlingService,
+    kommerBarnetTilGodeService: KommerBarnetTilGodeService,
     manueltOpphoerService: ManueltOpphoerService
 ) {
     val logger = application.log
@@ -75,11 +77,12 @@ internal fun Route.behandlingRoutes(
                 val kommerBarnetTilgode = KommerBarnetTilgode(
                     body.svar,
                     body.begrunnelse,
-                    Grunnlagsopplysning.Saksbehandler.create(navIdent)
+                    Grunnlagsopplysning.Saksbehandler.create(navIdent),
+                    behandlingsId
                 )
 
                 try {
-                    foerstegangsbehandlingService.lagreKommerBarnetTilgode(behandlingsId, kommerBarnetTilgode)
+                    kommerBarnetTilGodeService.lagreKommerBarnetTilgode(kommerBarnetTilgode)
                     call.respond(HttpStatusCode.OK, kommerBarnetTilgode)
                 } catch (e: TilstandException.UgyldigTilstand) {
                     call.respond(HttpStatusCode.BadRequest, "Kunne ikke endre på feltet")

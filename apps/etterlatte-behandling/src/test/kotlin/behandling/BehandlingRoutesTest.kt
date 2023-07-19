@@ -25,6 +25,7 @@ import no.nav.etterlatte.behandling.BoddEllerArbeidetUtlandetRequest
 import no.nav.etterlatte.behandling.UtenlandstilsnittRequest
 import no.nav.etterlatte.behandling.behandlingRoutes
 import no.nav.etterlatte.behandling.foerstegangsbehandling.FoerstegangsbehandlingService
+import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeService
 import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerService
 import no.nav.etterlatte.libs.common.behandling.UtenlandstilsnittType
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
@@ -52,6 +53,7 @@ internal class BehandlingRoutesTest {
     private lateinit var hoconApplicationConfig: HoconApplicationConfig
     private val behandlingService = mockk<BehandlingService>(relaxUnitFun = true)
     private val foerstegangsbehandlingService = mockk<FoerstegangsbehandlingService>()
+    private val kommerBarnetTilGodeService = mockk<KommerBarnetTilGodeService>()
     private val manueltOpphoerService = mockk<ManueltOpphoerService>()
 
     @BeforeAll
@@ -186,6 +188,7 @@ internal class BehandlingRoutesTest {
                     behandlingRoutes(
                         behandlingService,
                         foerstegangsbehandlingService,
+                        kommerBarnetTilGodeService,
                         manueltOpphoerService
                     )
                 }

@@ -22,5 +22,5 @@ class KommerBarnetTilGodeService(
     }
 
     fun hentKommerBarnetTilGode(behandlingId: UUID) =
-        inTransaction { kommerBarnetTilGodeDao.hentKommerBarnetTilGode(behandlingId) }
+        inTransaction(true) { kommerBarnetTilGodeDao.hentKommerBarnetTilGode(behandlingId) }
 }

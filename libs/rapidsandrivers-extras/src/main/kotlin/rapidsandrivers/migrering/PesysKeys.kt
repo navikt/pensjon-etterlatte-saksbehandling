@@ -13,6 +13,7 @@ const val TRYGDETID_KEY = "trygdetid"
 const val MIGRERING_GRUNNLAG_KEY = "migrering_grunnlag"
 const val SAKTYPE_KEY = "sakType"
 const val OPPLYSNING_KEY = "opplysning"
+const val BEHOV_KEY = "@behov"
 
 var JsonMessage.request: String
     get() = this[REQUEST].toJson()

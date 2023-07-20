@@ -85,7 +85,7 @@ export type OppgavetypeFilterKeys = Oppgavetype | visAlle
 export const OPPGAVETYPEFILTER: Record<OppgavetypeFilterKeys, string> = {
   visAlle: 'Vis alle',
   FOERSTEGANGSBEHANDLING: 'Førstegangsbehandling',
-  REVUDERING: 'Revurdering',
+  REVURDERING: 'Revurdering',
   HENDELSE: 'Hendelse',
   MANUELT_OPPHOER: 'Manuelt opphør',
   EKSTERN: 'Ekstern',

@@ -1,6 +1,5 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import '@navikt/ds-css'
-import '@navikt/ds-css-internal'
 import { Behandling } from '~components/behandling/Behandling'
 import { HeaderBanner } from '~shared/header/HeaderBanner'
 import { Person } from '~components/person/Person'

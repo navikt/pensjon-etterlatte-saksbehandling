@@ -8,15 +8,15 @@ import styled from 'styled-components'
 import {
   EnhetFilterKeys,
   filtrerOppgaver,
-  OppgavestatusFilter,
+  OPPGAVESTATUSFILTER,
   OppgavestatusFilterKeys,
-  OppgavetypeFilter,
+  OPPGAVETYPEFILTER,
   OppgavetypeFilterKeys,
-  SaksbehandlerFilter,
+  SAKSBEHANDLERFILTER,
   SaksbehandlerFilterKeys,
-  YtelseFilter,
+  YTELSEFILTER,
   YtelseFilterKeys,
-  EnhetFilter,
+  ENHETFILTER,
 } from '~components/nyoppgavebenk/Oppgavelistafiltre'
 
 const FilterFlex = styled.div`
@@ -61,7 +61,7 @@ export const Oppgavelista = (props: { oppgaver: ReadonlyArray<OppgaveDTOny>; hen
           value={saksbehandlerFilter}
           onChange={(e) => setSaksbehandlerFilter(e.target.value as SaksbehandlerFilterKeys)}
         >
-          {Object.entries(SaksbehandlerFilter).map(([key, beskrivelse]) => (
+          {Object.entries(SAKSBEHANDLERFILTER).map(([key, beskrivelse]) => (
             <option key={key} value={key}>
               {beskrivelse}
             </option>
@@ -69,7 +69,7 @@ export const Oppgavelista = (props: { oppgaver: ReadonlyArray<OppgaveDTOny>; hen
         </Select>
 
         <Select label="Enhet" value={enhetsFilter} onChange={(e) => setEnhetsFilter(e.target.value as EnhetFilterKeys)}>
-          {Object.entries(EnhetFilter).map(([enhetsnummer, enhetBeskrivelse]) => (
+          {Object.entries(ENHETFILTER).map(([enhetsnummer, enhetBeskrivelse]) => (
             <option key={enhetsnummer} value={enhetsnummer}>
               {enhetBeskrivelse}
             </option>
@@ -80,7 +80,7 @@ export const Oppgavelista = (props: { oppgaver: ReadonlyArray<OppgaveDTOny>; hen
           value={ytelseFilter}
           onChange={(e) => setYtelseFilter(e.target.value as YtelseFilterKeys)}
         >
-          {Object.entries(YtelseFilter).map(([saktype, saktypetekst]) => (
+          {Object.entries(YTELSEFILTER).map(([saktype, saktypetekst]) => (
             <option key={saktype} value={saktype}>
               {saktypetekst}
             </option>
@@ -91,7 +91,7 @@ export const Oppgavelista = (props: { oppgaver: ReadonlyArray<OppgaveDTOny>; hen
           value={oppgavestatusFilter}
           onChange={(e) => setOppgavestatusFilter(e.target.value as OppgavestatusFilterKeys)}
         >
-          {Object.entries(OppgavestatusFilter).map(([status, statusbeskrivelse]) => (
+          {Object.entries(OPPGAVESTATUSFILTER).map(([status, statusbeskrivelse]) => (
             <option key={status} value={status}>
               {statusbeskrivelse}
             </option>
@@ -102,7 +102,7 @@ export const Oppgavelista = (props: { oppgaver: ReadonlyArray<OppgaveDTOny>; hen
           value={oppgavetypeFilter}
           onChange={(e) => setOppgavetypeFilter(e.target.value as OppgavetypeFilterKeys)}
         >
-          {Object.entries(OppgavetypeFilter).map(([type, typebeskrivelse]) => (
+          {Object.entries(OPPGAVETYPEFILTER).map(([type, typebeskrivelse]) => (
             <option key={type} value={type}>
               {typebeskrivelse}
             </option>

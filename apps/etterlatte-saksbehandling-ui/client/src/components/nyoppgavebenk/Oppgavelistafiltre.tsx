@@ -1,11 +1,11 @@
 import { OppgaveDTOny, Oppgavestatus, Oppgavetype } from '~shared/api/oppgaverny'
 
-export const SaksbehandlerFilter = {
+export const SAKSBEHANDLERFILTER = {
   visAlle: 'Vis alle',
   Tildelt: 'Tildelt saksbehandler ',
   IkkeTildelt: 'Ikke tildelt saksbehandler',
 }
-export type SaksbehandlerFilterKeys = keyof typeof SaksbehandlerFilter
+export type SaksbehandlerFilterKeys = keyof typeof SAKSBEHANDLERFILTER
 
 function filtrerSaksbehandler(saksbehandlerFilter: SaksbehandlerFilterKeys, oppgaver: OppgaveDTOny[]): OppgaveDTOny[] {
   if (saksbehandlerFilter === 'visAlle') {
@@ -21,7 +21,7 @@ function filtrerSaksbehandler(saksbehandlerFilter: SaksbehandlerFilterKeys, oppg
   }
 }
 
-export const EnhetFilter = {
+export const ENHETFILTER = {
   visAlle: 'Vis alle',
   E4815: 'Ålesund - 4815',
   E4808: 'Porsgrunn - 4808',
@@ -32,7 +32,7 @@ export const EnhetFilter = {
   E2103: 'Vikafossen - 2103',
 }
 
-export type EnhetFilterKeys = keyof typeof EnhetFilter
+export type EnhetFilterKeys = keyof typeof ENHETFILTER
 
 function filtrerEnhet(enhetsFilter: EnhetFilterKeys, oppgaver: OppgaveDTOny[]): OppgaveDTOny[] {
   if (enhetsFilter === 'visAlle') {
@@ -43,13 +43,13 @@ function filtrerEnhet(enhetsFilter: EnhetFilterKeys, oppgaver: OppgaveDTOny[]): 
   }
 }
 
-export const YtelseFilter = {
+export const YTELSEFILTER = {
   visAlle: 'Vis alle',
   BARNEPENSJON: 'Barnepensjon',
   OMSTILLINGSSTOENAD: 'Omstillingsstønad',
 }
 
-export type YtelseFilterKeys = keyof typeof YtelseFilter
+export type YtelseFilterKeys = keyof typeof YTELSEFILTER
 
 function filtrerYtelse(ytelseFilter: YtelseFilterKeys, oppgaver: OppgaveDTOny[]): OppgaveDTOny[] {
   if (ytelseFilter === 'visAlle') {
@@ -62,7 +62,7 @@ function filtrerYtelse(ytelseFilter: YtelseFilterKeys, oppgaver: OppgaveDTOny[])
 type visAlle = 'visAlle'
 export type OppgavestatusFilterKeys = Oppgavestatus | visAlle
 
-export const OppgavestatusFilter: Record<OppgavestatusFilterKeys, string> = {
+export const OPPGAVESTATUSFILTER: Record<OppgavestatusFilterKeys, string> = {
   visAlle: 'Vis alle',
   NY: 'Ny',
   UNDER_BEHANDLING: 'Under arbeid',
@@ -82,7 +82,7 @@ function filtrerOppgaveStatus(
 }
 
 export type OppgavetypeFilterKeys = Oppgavetype | visAlle
-export const OppgavetypeFilter: Record<OppgavetypeFilterKeys, string> = {
+export const OPPGAVETYPEFILTER: Record<OppgavetypeFilterKeys, string> = {
   visAlle: 'Vis alle',
   FOERSTEGANGSBEHANDLING: 'Førstegangsbehandling',
   REVUDERING: 'Revurdering',

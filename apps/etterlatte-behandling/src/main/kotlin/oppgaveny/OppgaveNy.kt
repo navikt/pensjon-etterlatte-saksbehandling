@@ -23,7 +23,8 @@ data class OppgaveNy(
 enum class Status {
     NY,
     UNDER_BEHANDLING,
-    FERDIGSTILT
+    FERDIGSTILT,
+    FEILREGISTRERT
 }
 
 enum class OppgaveType {

@@ -408,23 +408,23 @@
   resolved "https://registry.yarnpkg.com/@juggle/resize-observer/-/resize-observer-3.4.0.tgz#08d6c5e20cf7e4cc02fd181c4b0c225cd31dbb60"
   integrity sha512-dfLbk+PwWvFzSxwk3n5ySL0hfBog779o8h68wK/7/APo/7cgyWp5jcXockbxdk5kFRkbeXWm4Fbi9FrdN381sA==
 
-"@navikt/aksel-icons@^4.6.1", "@navikt/aksel-icons@^4.7.1":
+"@navikt/aksel-icons@^4.7.1":
   version "4.7.1"
   resolved "https://registry.yarnpkg.com/@navikt/aksel-icons/-/aksel-icons-4.7.1.tgz#ba59886d476ed4de8000b55d66ea8d5a4ffb0496"
   integrity sha512-olk6u+YZW8DzJOHiNFR2gDbARVPz2RsmTfNMNCPzcfSogdpKOnEiXgyeob44O7EH8hotqxJpEtDQUxajkIZtrg==
 
-"@navikt/ds-css@~4.6.1":
-  version "4.6.1"
-  resolved "https://registry.yarnpkg.com/@navikt/ds-css/-/ds-css-4.6.1.tgz#31e1cb6d8c5be36aa20d1e181cd76597caef5156"
-  integrity sha512-5ySUuoKrcRMSvIqcfQSHFeW/NDpnz9M3SIUTXfty7t5BE/lFPnf7DEMOqZ6cHfKxpy7ozKPCbaKZwgxYFXiFsQ==
+"@navikt/ds-css@~4.7.1":
+  version "4.7.1"
+  resolved "https://registry.yarnpkg.com/@navikt/ds-css/-/ds-css-4.7.1.tgz#e9c3c2a9094acbca28e1c1c484786a5334d2489e"
+  integrity sha512-XQLsxL+ftII/rGjWyizb5H0GBwxibQZXwxnlmNntftUOsLrEmL7z3ra8lwXBNIv/nRqVvYzrwg+kDlGF4VHPSQ==
 
-"@navikt/ds-react@~4.6.1":
-  version "4.6.1"
-  resolved "https://registry.yarnpkg.com/@navikt/ds-react/-/ds-react-4.6.1.tgz#69bc85d6d91ddac80698909894cbf83d43573392"
-  integrity sha512-miZ7AmownZuOnZ1TEOzYctiaMSk6qucExUK9ME3lr76yDVKATHAZUJuK8fcdNy7uT12/93gHYYW/y6wqcYLJ0A==
+"@navikt/ds-react@~4.7.1":
+  version "4.7.1"
+  resolved "https://registry.yarnpkg.com/@navikt/ds-react/-/ds-react-4.7.1.tgz#67f06260997746f16f2615684f615b48883f4e3f"
+  integrity sha512-P0X6TKDfWL6won+B6nNVT4QHdMUCUPsgz+Hb4G3SSvWeZwC2ZtvOsRB+vcY3771ks7/zX9v3KxSJwT6JpbXAWQ==
   dependencies:
     "@floating-ui/react" "0.24.1"
-    "@navikt/aksel-icons" "^4.6.1"
+    "@navikt/aksel-icons" "^4.7.1"
     "@radix-ui/react-tabs" "1.0.0"
     "@radix-ui/react-toggle-group" "1.0.0"
     clsx "^1.2.1"
@@ -432,10 +432,10 @@
     react-day-picker "8.3.4"
     react-modal "3.15.1"
 
-"@navikt/ds-tokens@~4.6.1":
-  version "4.6.1"
-  resolved "https://registry.yarnpkg.com/@navikt/ds-tokens/-/ds-tokens-4.6.1.tgz#d48f7c8bad197297dfb59b20685a6843f41f269e"
-  integrity sha512-pBX5MLUpFftvRGZcbS9wWoMmzeH/iLNvOdMPvMbYTBnU7LUjU3XHLByfc0ogb2eT3gRevpD4DbjzWVx65ZzULw==
+"@navikt/ds-tokens@~4.7.1":
+  version "4.7.1"
+  resolved "https://registry.yarnpkg.com/@navikt/ds-tokens/-/ds-tokens-4.7.1.tgz#e523c11bbe54fdb1ca61ffd783b29433ca44f7d5"
+  integrity sha512-XakJBzAgsLUlHHl7JvDN05GdLZ0q8IGrHDfHRYIgyUEBs29KZFj18mKc2WeFE+xmdy2KtUbRTvFobcrgb22ThA==
 
 "@navikt/navspa@^6.0.1":
   version "6.0.1"

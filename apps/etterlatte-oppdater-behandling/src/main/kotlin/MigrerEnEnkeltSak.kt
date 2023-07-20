@@ -65,7 +65,7 @@ internal class MigrerEnEnkeltSak(
                     soeker = hendelse.persongalleri.soeker
                 )
                 packet[PERSONGALLERI] = hendelse.persongalleri
-                packet.eventName = Migreringshendelser.PDLOPPSLAG_UTFOERT
+                packet.eventName = Migreringshendelser.BEHANDLING_OPPRETTET
 
                 context.publish(packet.toJson())
                 logger.info("Publiserte oppdatert migreringshendelse")

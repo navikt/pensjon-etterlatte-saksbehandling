@@ -408,15 +408,10 @@
   resolved "https://registry.yarnpkg.com/@juggle/resize-observer/-/resize-observer-3.4.0.tgz#08d6c5e20cf7e4cc02fd181c4b0c225cd31dbb60"
   integrity sha512-dfLbk+PwWvFzSxwk3n5ySL0hfBog779o8h68wK/7/APo/7cgyWp5jcXockbxdk5kFRkbeXWm4Fbi9FrdN381sA==
 
-"@navikt/aksel-icons@^3.3.1":
-  version "3.4.2"
-  resolved "https://registry.yarnpkg.com/@navikt/aksel-icons/-/aksel-icons-3.4.2.tgz#fa858e1a5fb0557d61b62ad7cdf0d75e26fc89d7"
-  integrity sha512-9fj+Jb4UrX3SDDzqJpKP3fvizdxtACIFNXgDiPaP/N/61pbeY4tZz/zrtWGtExLpDeg7dAyaiFH/hfo7nBg6nw==
-
-"@navikt/aksel-icons@^4.6.1":
-  version "4.6.1"
-  resolved "https://registry.yarnpkg.com/@navikt/aksel-icons/-/aksel-icons-4.6.1.tgz#b3c207959b55ef8e043758e4b42851f25d96868c"
-  integrity sha512-qMUt5oxBfur4LpRbGn0v154OvIn4Z27veIruSxYmLm++EvBhS9CeJtwzjDUQhzqH3ixgn5MDN2YZ/sMVQPlI0Q==
+"@navikt/aksel-icons@^4.6.1", "@navikt/aksel-icons@^4.7.1":
+  version "4.7.1"
+  resolved "https://registry.yarnpkg.com/@navikt/aksel-icons/-/aksel-icons-4.7.1.tgz#ba59886d476ed4de8000b55d66ea8d5a4ffb0496"
+  integrity sha512-olk6u+YZW8DzJOHiNFR2gDbARVPz2RsmTfNMNCPzcfSogdpKOnEiXgyeob44O7EH8hotqxJpEtDQUxajkIZtrg==
 
 "@navikt/ds-css@~4.6.1":
   version "4.6.1"

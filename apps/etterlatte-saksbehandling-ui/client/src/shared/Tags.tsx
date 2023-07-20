@@ -20,18 +20,13 @@ export const tagColors: Record<
   OppgaveTypeFilter | SoeknadTypeFilter | SakType | INasjonalitetsType | IBehandlingsType | IUtenlandstilsnittType,
   Variants
 > = {
-  [OppgaveTypeFilter.ALLE]: Variants.NEUTRAL,
-  [OppgaveTypeFilter.FØRSTEGANGSBEHANDLING]: Variants.ALT3_FILLED,
-  [OppgaveTypeFilter.REVURDERING]: Variants.ALT3_FILLED,
+  [OppgaveTypeFilter.ALLE]: Variants.NEUTRAL, // SoeknadTypeFilter.ALLE
+  [OppgaveTypeFilter.FØRSTEGANGSBEHANDLING]: Variants.ALT3_FILLED, // IBehandlingsType.FØRSTEGANGSBEHANDLING
+  [OppgaveTypeFilter.REVURDERING]: Variants.ALT3_FILLED, // IBehandlingsType.REVURDERING
   [OppgaveTypeFilter.ENDRING_PAA_SAK]: Variants.ALT3_FILLED,
-  [SoeknadTypeFilter.ALLE]: Variants.NEUTRAL,
-  [SoeknadTypeFilter.BARNEPENSJON]: Variants.INFO,
-  [SoeknadTypeFilter.OMSTILLINGSSTOENAD]: Variants.NEUTRAL,
-  [IBehandlingsType.FØRSTEGANGSBEHANDLING]: Variants.ALT3_FILLED,
-  [IBehandlingsType.REVURDERING]: Variants.ALT3_FILLED,
+  [SoeknadTypeFilter.BARNEPENSJON]: Variants.INFO, // SakType.BARNEPENSJON
+  [SoeknadTypeFilter.OMSTILLINGSSTOENAD]: Variants.NEUTRAL, // SakType.OMSTILLINGSSTOENAD
   [IBehandlingsType.MANUELT_OPPHOER]: Variants.ALT3_FILLED,
-  [SakType.BARNEPENSJON]: Variants.INFO,
-  [SakType.OMSTILLINGSSTOENAD]: Variants.NEUTRAL,
   [INasjonalitetsType.NASJONAL]: Variants.INFO_FILLED,
   [INasjonalitetsType.UTLAND]: Variants.ALT3,
   [IUtenlandstilsnittType.NASJONAL]: Variants.INFO_FILLED,

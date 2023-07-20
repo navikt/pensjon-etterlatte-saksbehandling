@@ -13,6 +13,7 @@ import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.rapidsandrivers.migrering.MIGRERING_GRUNNLAG_KEY
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser.BEHANDLING_OPPRETTET
+import no.nav.etterlatte.rapidsandrivers.migrering.PERSONGALLERI
 import no.nav.etterlatte.rapidsandrivers.migrering.persongalleri
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -20,7 +21,6 @@ import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import rapidsandrivers.HENDELSE_DATA_KEY
 import rapidsandrivers.SAK_ID_KEY
 import rapidsandrivers.sakId
 import rapidsandrivers.withFeilhaandtering
@@ -38,7 +38,7 @@ class MigreringHendelser(
             eventName(BEHANDLING_OPPRETTET)
             validate { it.requireKey(SAK_ID_KEY) }
             validate { it.requireKey(MIGRERING_GRUNNLAG_KEY) }
-            validate { it.requireKey(HENDELSE_DATA_KEY) }
+            validate { it.requireKey(PERSONGALLERI) }
         }.register(this)
     }
 

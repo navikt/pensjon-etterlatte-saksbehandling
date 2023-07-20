@@ -418,11 +418,6 @@
   resolved "https://registry.yarnpkg.com/@navikt/aksel-icons/-/aksel-icons-4.6.1.tgz#b3c207959b55ef8e043758e4b42851f25d96868c"
   integrity sha512-qMUt5oxBfur4LpRbGn0v154OvIn4Z27veIruSxYmLm++EvBhS9CeJtwzjDUQhzqH3ixgn5MDN2YZ/sMVQPlI0Q==
 
-"@navikt/ds-css-internal@^3.4.3":
-  version "3.4.3"
-  resolved "https://registry.yarnpkg.com/@navikt/ds-css-internal/-/ds-css-internal-3.4.3.tgz#7c67c4b52264eb7833ca35788a83cc29af01d1ae"
-  integrity sha512-VusM4uwHZoQWiX8N/1zD6ycgNFIzYQ40TXhlP7tqpdH6sVwwzFPWCWXaZtpyjUfHxU9WyNEDYoeRAECkC0qfzg==
-
 "@navikt/ds-css@~4.6.1":
   version "4.6.1"
   resolved "https://registry.yarnpkg.com/@navikt/ds-css/-/ds-css-4.6.1.tgz#31e1cb6d8c5be36aa20d1e181cd76597caef5156"

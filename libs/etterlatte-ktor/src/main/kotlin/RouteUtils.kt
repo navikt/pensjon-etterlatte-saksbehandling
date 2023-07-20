@@ -85,6 +85,15 @@ suspend inline fun PipelineContext<*, ApplicationCall>.withFoedselsnummer(
     }
 }
 
+suspend inline fun <reified T : Any> PipelineContext<*, ApplicationCall>.med(onSuccess: (t: T) -> Unit) {
+    try {
+        val body = call.receive<T>()
+        onSuccess(body)
+    } catch (e: Exception) {
+        call.respond(HttpStatusCode.BadRequest, "Feil under deserialiseringen av objektet")
+    }
+}
+
 suspend inline fun PipelineContext<*, ApplicationCall>.kunSystembruker(
     onSuccess: () -> Unit
 ) {

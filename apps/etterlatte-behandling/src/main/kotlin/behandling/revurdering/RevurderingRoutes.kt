@@ -50,8 +50,7 @@ internal fun Route.revurderingRoutes(
         route("{$SAKID_CALL_PARAMETER}") {
             post {
                 logger.info("Oppretter ny revurdering på sak $sakId")
-                med<OpprettRevurderingRequest> {
-                    val body = it
+                med<OpprettRevurderingRequest> { body ->
                     if (!body.aarsak.kanBrukesIMiljo()) {
                         return@post call.respond(
                             HttpStatusCode.BadRequest,

@@ -31,7 +31,7 @@ export const ToggleMinOppgaveliste = () => {
       <TabsWidth value={oppgaveListeValg} onChange={(e) => setOppgaveListeValg(e as OppgavelisteToggle)}>
         <Tabs.List>
           <Tabs.Tab value="Oppgavelista" label="Oppgavelisten" icon={<InboxIcon />} />
-          <Tabs.Tab value="MinOppgaveliste" label="Min oppgaeliste" icon={<PersonIcon />} />
+          <Tabs.Tab value="MinOppgaveliste" label="Min oppgaveliste" icon={<PersonIcon />} />
         </Tabs.List>
       </TabsWidth>
       {isPending(oppgaver) && <Spinner visible={true} label={'Henter nye oppgaver'} />}

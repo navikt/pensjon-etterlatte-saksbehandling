@@ -12,6 +12,7 @@ import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.rapidsandrivers.BEHOV_NAME_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
+import no.nav.etterlatte.rapidsandrivers.migrering.FNR_KEY
 import no.nav.etterlatte.rapidsandrivers.migrering.MIGRERING_GRUNNLAG_KEY
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser.HENT_PDL
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser.PDLOPPSLAG_UTFOERT
@@ -38,6 +39,7 @@ class MigreringHendelser(
             eventName(HENT_PDL)
             validate { it.requireKey(SAK_ID_KEY) }
             validate { it.requireKey(HENDELSE_DATA_KEY) }
+            validate { it.requireKey(FNR_KEY) }
             validate { it.requireKey("sakType") }
         }.register(this)
     }
@@ -45,7 +47,7 @@ class MigreringHendelser(
     override fun onPacket(packet: JsonMessage, context: MessageContext) {
         withLogContext(packet.correlationId) {
             withFeilhaandtering(packet, context, HENT_PDL) {
-                val fnr = packet["fnr"].textValue()
+                val fnr = packet[FNR_KEY].textValue()
                 val personRolle = objectMapper.treeToValue(packet["rolle"], PersonRolle::class.java)!!
                 val opplysningstype = objectMapper.treeToValue(packet[BEHOV_NAME_KEY], Opplysningstype::class.java)!!
                 val saktype = objectMapper.treeToValue(packet["sakType"], SakType::class.java)

@@ -6,9 +6,8 @@ import { RedigerSaksbehandler } from '~components/nyoppgavebenk/RedigerSaksbehan
 import { CaretRightIcon } from '@navikt/aksel-icons'
 
 export const MinOppgaveliste = (props: { oppgaver: ReadonlyArray<OppgaveDTOny> }) => {
-  const user = useAppSelector((state) => state.saksbehandlerReducer.saksbehandler)
-
   const { oppgaver } = props
+  const user = useAppSelector((state) => state.saksbehandlerReducer.saksbehandler)
 
   const mineOppgaver = oppgaver.filter((o) => o.saksbehandler === user.ident)
   return (

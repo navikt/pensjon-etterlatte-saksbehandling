@@ -19,9 +19,19 @@ import {
   EnhetFilter,
 } from '~components/nyoppgavebenk/Oppgavelistafiltre'
 
-export const FilterFlex = styled.div`
+const FilterFlex = styled.div`
   display: flex;
   justify-content: space-evenly;
+`
+
+const ButtonWrapper = styled.div`
+  display: flex;
+  justify-content: flex-start;
+  margin: 2rem 2rem 2rem 0rem;
+  max-width: 20em;
+  button:first-child {
+    margin-right: 1rem;
+  }
 `
 
 export const Oppgavelista = (props: { oppgaver: ReadonlyArray<OppgaveDTOny>; hentOppgaver: () => void }) => {
@@ -99,19 +109,21 @@ export const Oppgavelista = (props: { oppgaver: ReadonlyArray<OppgaveDTOny>; hen
           ))}
         </Select>
       </FilterFlex>
-      <Button onClick={hentOppgaver}>Hent</Button>
-      <Button
-        variant="secondary"
-        onClick={() => {
-          setSaksbehandlerFilter('visAlle')
-          setOppgavetypeFilter('visAlle')
-          setEnhetsFilter('visAlle')
-          setOppgavestatusFilter('visAlle')
-          setSaksbehandlerFilter('visAlle')
-        }}
-      >
-        Tilbakestill filtrering
-      </Button>
+      <ButtonWrapper>
+        <Button onClick={hentOppgaver}>Hent</Button>
+        <Button
+          variant="secondary"
+          onClick={() => {
+            setSaksbehandlerFilter('visAlle')
+            setOppgavetypeFilter('visAlle')
+            setEnhetsFilter('visAlle')
+            setOppgavestatusFilter('visAlle')
+            setSaksbehandlerFilter('visAlle')
+          }}
+        >
+          Tilbakestill alle filtre
+        </Button>
+      </ButtonWrapper>
       <Table>
         <Table.Header>
           <Table.Row>

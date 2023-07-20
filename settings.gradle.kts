@@ -8,7 +8,6 @@ include(
     "apps:etterlatte-behandling",
     "apps:etterlatte-gyldig-soeknad",
     "apps:etterlatte-opplysninger-fra-soeknad",
-    "apps:etterlatte-opplysninger-fra-pdl",
     "apps:etterlatte-egne-ansatte-lytter",
     "apps:etterlatte-institusjonsopphold",
     "apps:etterlatte-testdata",

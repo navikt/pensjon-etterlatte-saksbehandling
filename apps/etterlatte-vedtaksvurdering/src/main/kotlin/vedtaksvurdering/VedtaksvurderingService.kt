@@ -248,7 +248,7 @@ class VedtaksvurderingService(
         ansvarligSaksbehandler: String,
         innloggetBrukerTokenInfo: BrukerTokenInfo
     ) {
-        if (ansvarligSaksbehandler == innloggetBrukerTokenInfo.ident()) {
+        if (innloggetBrukerTokenInfo.erSammePerson(ansvarligSaksbehandler)) {
             throw UgyldigAttestantException(innloggetBrukerTokenInfo.ident())
         }
     }

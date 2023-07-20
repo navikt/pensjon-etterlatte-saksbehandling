@@ -28,7 +28,7 @@ const ButtonWrapper = styled.div`
   display: flex;
   justify-content: flex-start;
   margin: 2rem 2rem 2rem 0rem;
-  max-width: 20em;
+  max-width: 20rem;
   button:first-child {
     margin-right: 1rem;
   }

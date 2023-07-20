@@ -2,11 +2,9 @@ package no.nav.etterlatte
 
 import com.fasterxml.jackson.module.kotlin.treeToValue
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.PersonRolle
-import no.nav.etterlatte.libs.common.rapidsandrivers.BEHOV_NAME_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.SAK_TYPE_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
@@ -26,7 +24,7 @@ import rapidsandrivers.behandlingId
 import rapidsandrivers.sakId
 import rapidsandrivers.withFeilhaandtering
 
-internal class FortsettMigreringsflyten(
+internal class MigrerEnEnkeltSak(
     rapidsConnection: RapidsConnection,
     private val behandlinger: BehandlingService
 ) :
@@ -59,11 +57,9 @@ internal class FortsettMigreringsflyten(
                 packet.behandlingId = behandlingId
                 packet.sakId = sakId
 
-                packet[BEHOV_NAME_KEY] = Opplysningstype.MIGRERING
-
                 packet[SAK_TYPE_KEY] = SakType.BARNEPENSJON
                 packet[ROLLE_KEY] = PersonRolle.AVDOED
-                packet.eventName = Migreringshendelser.GRUNNLAG
+                packet.eventName = Migreringshendelser.HENT_PDL
 
                 context.publish(packet.toJson())
                 logger.info("Publiserte oppdatert migreringshendelse")

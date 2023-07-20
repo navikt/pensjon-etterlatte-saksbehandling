@@ -5,14 +5,16 @@ import com.fasterxml.jackson.databind.JsonNode
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
+import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.etterlatte.rapidsandrivers.migrering.MIGRERING_GRUNNLAG_KEY
-import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser.PERSONGALLERI
-import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser.PERSONGALLERI_GRUNNLAG
+import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser.HENT_PDL
+import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser.PDLOPPSLAG_UTFOERT
+import no.nav.etterlatte.rapidsandrivers.migrering.SAKTYPE_KEY
 import no.nav.etterlatte.rapidsandrivers.migrering.hendelseData
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -21,8 +23,8 @@ import no.nav.helse.rapids_rivers.River
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import rapidsandrivers.HENDELSE_DATA_KEY
-import rapidsandrivers.OPPLYSNING_KEY
 import rapidsandrivers.SAK_ID_KEY
+import rapidsandrivers.withFeilhaandtering
 
 class MigreringHendelser(
     rapidsConnection: RapidsConnection,
@@ -33,52 +35,59 @@ class MigreringHendelser(
     init {
         River(rapidsConnection).apply {
             correlationId()
-            eventName(PERSONGALLERI)
-            validate { it.requireKey(OPPLYSNING_KEY) }
+            eventName(HENT_PDL)
             validate { it.requireKey(SAK_ID_KEY) }
+            validate { it.requireKey(SAKTYPE_KEY) }
             validate { it.requireKey(HENDELSE_DATA_KEY) }
-            validate { it.requireKey("sakType") }
         }.register(this)
     }
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) {
-        val persongalleri = packet.hendelseData.persongalleri
-        val sakType = objectMapper.treeToValue(packet["sakType"], SakType::class.java)
-        logger.info("Behandler migrerings-persongalleri mot PDL")
+        withLogContext(packet.correlationId) {
+            withFeilhaandtering(packet, context, HENT_PDL) {
+                val persongalleri = packet.hendelseData.persongalleri
+                val sakType = objectMapper.treeToValue(packet[SAKTYPE_KEY], SakType::class.java)
+                logger.info("Behandler migrerings-persongalleri mot PDL")
 
-        val soeker = lagEnkelopplysningerFraPDL(
-            person = pdlKlientInterface.hentPerson(persongalleri.soeker, PersonRolle.BARN, sakType),
-            personDTO = pdlKlientInterface.hentOpplysningsperson(persongalleri.soeker, PersonRolle.BARN, sakType),
-            opplysningstype = Opplysningstype.SOEKER_PDL_V1,
-            fnr = Folkeregisteridentifikator.of(persongalleri.soeker)
-        ) as List<Grunnlagsopplysning<JsonNode>>
+                val soeker = lagEnkelopplysningerFraPDL(
+                    person = pdlKlientInterface.hentPerson(persongalleri.soeker, PersonRolle.BARN, sakType),
+                    personDTO = pdlKlientInterface.hentOpplysningsperson(
+                        persongalleri.soeker,
+                        PersonRolle.BARN,
+                        sakType
+                    ),
+                    opplysningstype = Opplysningstype.SOEKER_PDL_V1,
+                    fnr = Folkeregisteridentifikator.of(persongalleri.soeker)
+                ) as List<Grunnlagsopplysning<JsonNode>>
 
-        val gjenlevende = persongalleri.gjenlevende.map {
-            it to lagEnkelopplysningerFraPDL(
-                person = pdlKlientInterface.hentPerson(it, PersonRolle.GJENLEVENDE, sakType),
-                personDTO = pdlKlientInterface.hentOpplysningsperson(it, PersonRolle.GJENLEVENDE, sakType),
-                opplysningstype = Opplysningstype.GJENLEVENDE_FORELDER_PDL_V1,
-                fnr = Folkeregisteridentifikator.of(it)
-            ) as List<Grunnlagsopplysning<JsonNode>>
+                val gjenlevende = persongalleri.gjenlevende.map {
+                    it to lagEnkelopplysningerFraPDL(
+                        person = pdlKlientInterface.hentPerson(it, PersonRolle.GJENLEVENDE, sakType),
+                        personDTO = pdlKlientInterface.hentOpplysningsperson(it, PersonRolle.GJENLEVENDE, sakType),
+                        opplysningstype = Opplysningstype.GJENLEVENDE_FORELDER_PDL_V1,
+                        fnr = Folkeregisteridentifikator.of(it)
+                    ) as List<Grunnlagsopplysning<JsonNode>>
+                }
+
+                val avdoede = persongalleri.avdoed.map {
+                    it to lagEnkelopplysningerFraPDL(
+                        person = pdlKlientInterface.hentPerson(it, PersonRolle.AVDOED, sakType),
+                        personDTO = pdlKlientInterface.hentOpplysningsperson(it, PersonRolle.AVDOED, sakType),
+                        opplysningstype = Opplysningstype.AVDOED_PDL_V1,
+                        fnr = Folkeregisteridentifikator.of(it)
+                    ) as List<Grunnlagsopplysning<JsonNode>>
+                }
+
+                packet[MIGRERING_GRUNNLAG_KEY] = MigreringGrunnlagRequest(
+                    soeker = Pair(persongalleri.soeker, soeker),
+                    gjenlevende = gjenlevende,
+                    avdoede = avdoede
+                )
+                packet.eventName = PDLOPPSLAG_UTFOERT
+                context.publish(packet.toJson())
+
+                logger.info("Ferdig med å behandle migrering-persongalleri mot PDL")
+            }
         }
-
-        val avdoede = persongalleri.avdoed.map {
-            it to lagEnkelopplysningerFraPDL(
-                person = pdlKlientInterface.hentPerson(it, PersonRolle.AVDOED, sakType),
-                personDTO = pdlKlientInterface.hentOpplysningsperson(it, PersonRolle.AVDOED, sakType),
-                opplysningstype = Opplysningstype.AVDOED_PDL_V1,
-                fnr = Folkeregisteridentifikator.of(it)
-            ) as List<Grunnlagsopplysning<JsonNode>>
-        }
-
-        packet[MIGRERING_GRUNNLAG_KEY] = MigreringGrunnlagRequest(
-            soeker = Pair(persongalleri.soeker, soeker),
-            gjenlevende = gjenlevende,
-            avdoede = avdoede
-        )
-        packet.eventName = PERSONGALLERI_GRUNNLAG
-        context.publish(packet.toJson())
-
-        logger.info("Ferdig med å behandle migrering-persongalleri mot PDL")
     }
 }

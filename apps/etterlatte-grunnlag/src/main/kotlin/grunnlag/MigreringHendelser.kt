@@ -12,7 +12,7 @@ import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.rapidsandrivers.migrering.MIGRERING_GRUNNLAG_KEY
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser
-import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser.PERSONGALLERI_GRUNNLAG
+import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser.PDLOPPSLAG_UTFOERT
 import no.nav.etterlatte.rapidsandrivers.migrering.hendelseData
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -35,7 +35,7 @@ class MigreringHendelser(
     init {
         River(rapidsConnection).apply {
             correlationId()
-            eventName(PERSONGALLERI_GRUNNLAG)
+            eventName(PDLOPPSLAG_UTFOERT)
             validate { it.requireKey(SAK_ID_KEY) }
             validate { it.requireKey(MIGRERING_GRUNNLAG_KEY) }
             validate { it.requireKey(HENDELSE_DATA_KEY) }
@@ -44,7 +44,7 @@ class MigreringHendelser(
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) {
         withLogContext(packet.correlationId) {
-            withFeilhaandtering(packet, context, PERSONGALLERI_GRUNNLAG) {
+            withFeilhaandtering(packet, context, PDLOPPSLAG_UTFOERT) {
                 logger.info("Mottok grunnlagshendelser for migrering")
                 val sakId = packet.sakId
                 val request =

@@ -15,7 +15,6 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.F
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.FOEDSELSNUMMER
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.GJENLEVENDE_FORELDER_PDL_V1
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.KONTAKTADRESSE
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.MIGRERING
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.NAVN
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.OPPHOLDSADRESSE
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.PERSONROLLE
@@ -116,6 +115,5 @@ private fun behovNameTilPersonRolle(opplysningstype: Opplysningstype): PersonRol
     AVDOED_PDL_V1 -> PersonRolle.AVDOED
     GJENLEVENDE_FORELDER_PDL_V1 -> PersonRolle.GJENLEVENDE
     SOEKER_PDL_V1 -> PersonRolle.BARN
-    MIGRERING -> PersonRolle.AVDOED
     else -> throw Exception("Ugyldig opplysningsbehov $opplysningstype")
 }

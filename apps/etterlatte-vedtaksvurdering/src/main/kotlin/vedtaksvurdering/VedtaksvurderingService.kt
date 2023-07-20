@@ -28,6 +28,7 @@ import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.etterlatte.token.Systembruker
 import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlient
 import no.nav.etterlatte.vedtaksvurdering.klienter.BeregningKlient
+import no.nav.etterlatte.vedtaksvurdering.klienter.OppgaveType
 import no.nav.etterlatte.vedtaksvurdering.klienter.VilkaarsvurderingKlient
 import no.nav.helse.rapids_rivers.JsonMessage
 import org.slf4j.LoggerFactory
@@ -110,6 +111,13 @@ class VedtaksvurderingService(
                 inntruffet = fattetVedtak.vedtakFattet?.tidspunkt!!,
                 saksbehandler = fattetVedtak.vedtakFattet.ansvarligSaksbehandler
             )
+        )
+
+        behandlingKlient.opprettOppgave(
+            referanse = behandlingId.toString(),
+            sakId = sak.id,
+            brukerTokenInfo = brukerTokenInfo,
+            oppgaveType = OppgaveType.ATTESTERING
         )
 
         sendToRapid(

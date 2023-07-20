@@ -61,13 +61,14 @@ class OppgaveServiceNy(private val oppgaveDaoNy: OppgaveDaoNy, private val sakDa
         }
     }
 
-    fun opprettNyOppgaveMedSakOgReferanse(referanse: String, sakId: Long, oppgaveType: OppgaveType): OppgaveNy {
+    fun opprettNyOppgaveMedSakOgReferanse(referanse: String, sakId: Long, oppgaveType: OppgaveType, saksbehandler: String? = null): OppgaveNy {
         val sak = sakDao.hentSak(sakId)!!
         return lagreOppgave(
             opprettNyOppgaveMedReferanseOgSak(
                 referanse = referanse,
                 sak = sak,
-                oppgaveType = oppgaveType
+                oppgaveType = oppgaveType,
+                saksbehandler = saksbehandler
             )
         )
     }

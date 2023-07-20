@@ -23,6 +23,7 @@ import java.util.*
 interface BehandlingKlient : BehandlingTilgangsSjekk, SakTilgangsSjekk {
     suspend fun hentBehandling(behandlingId: UUID, brukerTokenInfo: BrukerTokenInfo): DetaljertBehandling
     suspend fun hentSak(sakId: Long, brukerTokenInfo: BrukerTokenInfo): Sak
+    suspend fun opprettOppgave(referanse: String?,sakId: Long, brukerTokenInfo: BrukerTokenInfo,oppgaveType: OppgaveType ): Boolean
     suspend fun fattVedtak(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
@@ -95,6 +96,38 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
             throw BehandlingKlientException("Henting av sak med id=$sakId feilet", e)
         }
     }
+
+    override suspend fun opprettOppgave(
+        referanse: String?,
+        sakId: Long,
+        brukerTokenInfo: BrukerTokenInfo,
+        oppgaveType: OppgaveType
+    ): Boolean {
+        logger.info("Oppretter oppgave av type $oppgaveType for sak med sakId=$sakId")
+
+
+        val resource = Resource(clientId = clientId, url = "$resourceUrl/api/nyeoppgaver/opprett")
+
+        val response = downstreamResourceClient.post(
+            resource = resource,
+            brukerTokenInfo = brukerTokenInfo,
+            postBody = OpprettNyOppgaveRequest(
+                referanse = "tjoho", sakId = sakId, oppgaveType =  oppgaveType
+            )
+        )
+
+        return response.mapBoth(
+            success = { true },
+            failure = {
+                logger.info(
+                    "Kan ikke opprette oppgave av type $oppgaveType for sak med sakId=$sakId",
+                    it.throwable
+                )
+                false
+            }
+        )
+    }
+
 
     override suspend fun fattVedtak(
         behandlingId: UUID,
@@ -246,3 +279,20 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
             else -> throw BehandlingKlientException("Ugyldig status ${status.name}")
         }
 }
+
+
+enum class OppgaveType {
+    FOERSTEGANGSBEHANDLING,
+    REVUDERING,
+    ATTESTERING,
+    HENDELSE,
+    MANUELT_OPPHOER,
+    EKSTERN
+}
+
+data class OpprettNyOppgaveRequest(
+    val referanse: String,
+    val sakId: Long,
+    val oppgaveType: OppgaveType,
+    val saksbehandler: String? = null
+)

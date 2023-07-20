@@ -10,6 +10,9 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.libs.common.kunSaksbehandler
+import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import java.util.*
 
 internal fun Route.oppgaveRoutesNy(service: OppgaveServiceNy, kanBrukeNyOppgaveliste: Boolean) {
     route("/api/nyeoppgaver") {
@@ -62,6 +65,15 @@ internal fun Route.oppgaveRoutesNy(service: OppgaveServiceNy, kanBrukeNyOppgavel
             if (kanBrukeNyOppgaveliste) {
                 val oppgave = call.receive<OppgaveNy>()
                 // service.lagreOppgave(oppgave)
+                call.respond(HttpStatusCode.Created)
+            } else {
+                call.respond(HttpStatusCode.Forbidden)
+            }
+        }
+        post("/opprett") {
+            if (kanBrukeNyOppgaveliste) {
+                val oppgaveRequest = call.receive<OpprettNyOppgaveRequest>()
+                service.opprettNyOppgaveMedSakOgReferanse(oppgaveRequest.referanse,oppgaveRequest.sakId, oppgaveRequest.oppgaveType)
                 call.respond(HttpStatusCode.Created)
             } else {
                 call.respond(HttpStatusCode.Forbidden)

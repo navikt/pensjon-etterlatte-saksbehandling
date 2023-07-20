@@ -219,7 +219,7 @@ class ApplicationContext(
         )
 
     val behandlingsStatusService =
-        BehandlingStatusServiceImpl(behandlingDao, behandlingService, grunnlagsendringshendelseService, oppgaveServiceNy)
+        BehandlingStatusServiceImpl(behandlingDao, behandlingService, grunnlagsendringshendelseService)
 
     val migreringService = MigreringService(
         sakService = sakService,

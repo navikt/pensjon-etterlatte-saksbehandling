@@ -32,8 +32,7 @@ interface BehandlingStatusService {
 class BehandlingStatusServiceImpl constructor(
     private val behandlingDao: BehandlingDao,
     private val behandlingService: BehandlingService,
-    private val grunnlagsendringshendelseService: GrunnlagsendringshendelseService,
-    private val oppgaveService: OppgaveServiceNy,
+    private val grunnlagsendringshendelseService: GrunnlagsendringshendelseService
 ) : BehandlingStatusService {
     override fun settOpprettet(behandlingId: UUID, dryRun: Boolean) {
         val behandling = hentBehandling(behandlingId).tilOpprettet()
@@ -71,11 +70,6 @@ class BehandlingStatusServiceImpl constructor(
         val behandling = hentBehandling(behandlingId)
         inTransaction {
             lagreNyBehandlingStatus(behandling.tilFattetVedtak())
-            oppgaveService.opprettNyOppgaveMedSakOgReferanse(
-                referanse = behandling.id.toString(),
-                sakId = behandling.sak.id,
-                oppgaveType = OppgaveType.ATTESTERING
-            )
             registrerVedtakHendelse(behandlingId, vedtakHendelse, HendelseType.FATTET)
         }
     }

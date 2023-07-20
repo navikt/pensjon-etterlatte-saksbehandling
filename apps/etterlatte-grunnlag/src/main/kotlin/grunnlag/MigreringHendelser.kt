@@ -1,7 +1,7 @@
 package no.nav.etterlatte.grunnlag
 
-import MigreringGrunnlagRequest
 import com.fasterxml.jackson.databind.JsonNode
+import no.nav.etterlatte.MigrerSoekerRequest
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.logging.withLogContext
@@ -48,9 +48,8 @@ class MigreringHendelser(
                 logger.info("Mottok grunnlagshendelser for migrering")
                 val sakId = packet.sakId
                 val request =
-                    objectMapper.treeToValue(packet[MIGRERING_GRUNNLAG_KEY], MigreringGrunnlagRequest::class.java)
+                    objectMapper.treeToValue(packet[MIGRERING_GRUNNLAG_KEY], MigrerSoekerRequest::class.java)
 
-                lagreEnkeltgrunnlag(sakId, request.soeker.second, request.soeker.first)
                 lagreEnkeltgrunnlag(
                     sakId,
                     listOf(
@@ -62,10 +61,8 @@ class MigreringHendelser(
                             packet.hendelseData.persongalleri.toJsonNode()
                         )
                     ),
-                    request.soeker.first
+                    request.soeker
                 )
-                request.gjenlevende.forEach { lagreEnkeltgrunnlag(sakId, it.second, it.first) }
-                request.avdoede.forEach { lagreEnkeltgrunnlag(sakId, it.second, it.first) }
 
                 packet.eventName = Migreringshendelser.VILKAARSVURDER
                 context.publish(packet.toJson())
@@ -78,18 +75,11 @@ class MigreringHendelser(
     private fun lagreEnkeltgrunnlag(
         sakId: Long,
         opplysninger: List<Grunnlagsopplysning<JsonNode>>,
-
-        fnr: String?
-    ) = if (fnr == null) {
-        grunnlagService.lagreNyeSaksopplysninger(
-            sakId,
-            opplysninger
-        )
-    } else {
+        fnr: String
+    ) =
         grunnlagService.lagreNyePersonopplysninger(
             sakId,
             Folkeregisteridentifikator.of(fnr),
             opplysninger
         )
-    }
 }

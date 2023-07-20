@@ -13,7 +13,7 @@ import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.rapidsandrivers.migrering.MIGRERING_GRUNNLAG_KEY
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser.PDLOPPSLAG_UTFOERT
-import no.nav.etterlatte.rapidsandrivers.migrering.hendelseData
+import no.nav.etterlatte.rapidsandrivers.migrering.persongalleri
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -58,7 +58,7 @@ class MigreringHendelser(
                             Grunnlagsopplysning.Pesys.create(),
                             Opplysningstype.PERSONGALLERI_V1,
                             objectMapper.createObjectNode(),
-                            packet.hendelseData.persongalleri.toJsonNode()
+                            packet.persongalleri.toJsonNode()
                         )
                     ),
                     request.soeker

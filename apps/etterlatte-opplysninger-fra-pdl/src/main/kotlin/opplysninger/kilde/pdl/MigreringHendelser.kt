@@ -16,6 +16,9 @@ import no.nav.etterlatte.rapidsandrivers.migrering.FNR_KEY
 import no.nav.etterlatte.rapidsandrivers.migrering.MIGRERING_GRUNNLAG_KEY
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser.HENT_PDL
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser.PDLOPPSLAG_UTFOERT
+import no.nav.etterlatte.rapidsandrivers.migrering.OPPLYSNING_KEY
+import no.nav.etterlatte.rapidsandrivers.migrering.ROLLE_KEY
+import no.nav.etterlatte.rapidsandrivers.migrering.SAKTYPE_KEY
 import no.nav.etterlatte.rapidsandrivers.migrering.hendelseData
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -40,7 +43,9 @@ class MigreringHendelser(
             validate { it.requireKey(SAK_ID_KEY) }
             validate { it.requireKey(HENDELSE_DATA_KEY) }
             validate { it.requireKey(FNR_KEY) }
-            validate { it.requireKey("sakType") }
+            validate { it.requireKey(ROLLE_KEY) }
+            validate { it.requireKey(SAKTYPE_KEY) }
+            validate { it.rejectKey(OPPLYSNING_KEY) }
         }.register(this)
     }
 
@@ -48,13 +53,13 @@ class MigreringHendelser(
         withLogContext(packet.correlationId) {
             withFeilhaandtering(packet, context, HENT_PDL) {
                 val fnr = packet[FNR_KEY].textValue()
-                val personRolle = objectMapper.treeToValue(packet["rolle"], PersonRolle::class.java)!!
+                val personRolle = objectMapper.treeToValue(packet[ROLLE_KEY], PersonRolle::class.java)!!
                 val opplysningstype = objectMapper.treeToValue(packet[BEHOV_NAME_KEY], Opplysningstype::class.java)!!
-                val saktype = objectMapper.treeToValue(packet["sakType"], SakType::class.java)
+                val saktype = objectMapper.treeToValue(packet[SAKTYPE_KEY], SakType::class.java)
                 val person = pdlKlientInterface.hentPerson(fnr, personRolle, saktype)
                 val opplysningsperson = pdlKlientInterface.hentOpplysningsperson(fnr, personRolle, saktype)
 
-                packet["opplysning"] = lagEnkelopplysningerFraPDL(
+                packet[OPPLYSNING_KEY] = lagEnkelopplysningerFraPDL(
                     person = person,
                     personDTO = opplysningsperson,
                     opplysningstype = opplysningstype,
@@ -62,7 +67,7 @@ class MigreringHendelser(
                 )
 
                 val persongalleri = packet.hendelseData.persongalleri
-                val sakType = objectMapper.treeToValue(packet["sakType"], SakType::class.java)
+                val sakType = objectMapper.treeToValue(packet[OPPLYSNING_KEY], SakType::class.java)
                 logger.info("Behandler migrerings-persongalleri mot PDL")
 
                 val soeker = lagEnkelopplysningerFraPDL(

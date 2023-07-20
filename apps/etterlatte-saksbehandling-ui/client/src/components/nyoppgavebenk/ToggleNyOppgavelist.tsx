@@ -5,7 +5,6 @@ import styled from 'styled-components'
 import { ToggleMinOppgaveliste } from '~components/nyoppgavebenk/ToggleMinOppgaveliste'
 
 const OppgavebenkContainer = styled.div`
-  max-width: 60em;
   padding: 2rem;
 `
 

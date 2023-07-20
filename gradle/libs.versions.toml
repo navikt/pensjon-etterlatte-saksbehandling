@@ -1,5 +1,5 @@
 [plugins]
-avro = { id = "com.github.davidmc24.gradle.plugin.avro", version = "1.7.1" }
+avro = { id = "com.github.davidmc24.gradle.plugin.avro", version = "1.8.0" }
 analyze = { id = "com.faire.gradle.analyze", version = "1.0.9" }
 cutterslade-analyze = { id = "ca.cutterslade.analyze", version = "1.9.1" }
 
@@ -30,10 +30,10 @@ jackson-xml = { module = "com.fasterxml.jackson.dataformat:jackson-dataformat-xm
 jakartabind-api = { module = "jakarta.xml.bind:jakarta.xml.bind-api", version = "4.0.0" }
 jakartabind-impl = { module = "org.glassfish.jaxb:jaxb-runtime", version = "4.0.3" }
 
-kafka-clients = { module = "org.apache.kafka:kafka-clients", version = "3.4.0" }
-kafka-avro = { module = "org.apache.avro:avro", version = "1.11.1" }
+kafka-clients = { module = "org.apache.kafka:kafka-clients", version = "3.5.0" }
+kafka-avro = { module = "org.apache.avro:avro", version = "1.11.2" }
 kafka-avroserializer = { module = "io.confluent:kafka-avro-serializer", version = "7.3.1" }
-kafka-embeddedenv = { module = "no.nav:kafka-embedded-env", version = "3.2.2" }
+kafka-embeddedenv = { module = "no.nav:kafka-embedded-env", version = "3.2.3" }
 
 kotlin-result = { module = "com.michael-bull.kotlin-result:kotlin-result", version = "1.1.18" }
 

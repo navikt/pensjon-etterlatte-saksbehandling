@@ -14,7 +14,7 @@ import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.etterlatte.rapidsandrivers.migrering.MIGRERING_GRUNNLAG_KEY
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser.HENT_PDL
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser.PDLOPPSLAG_UTFOERT
-import no.nav.etterlatte.rapidsandrivers.migrering.OPPLYSNING_KEY
+import no.nav.etterlatte.rapidsandrivers.migrering.SAKTYPE_KEY
 import no.nav.etterlatte.rapidsandrivers.migrering.hendelseData
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -37,8 +37,8 @@ class MigreringHendelser(
             correlationId()
             eventName(HENT_PDL)
             validate { it.requireKey(SAK_ID_KEY) }
+            validate { it.requireKey(SAKTYPE_KEY) }
             validate { it.requireKey(HENDELSE_DATA_KEY) }
-            validate { it.rejectKey(OPPLYSNING_KEY) }
         }.register(this)
     }
 
@@ -46,7 +46,7 @@ class MigreringHendelser(
         withLogContext(packet.correlationId) {
             withFeilhaandtering(packet, context, HENT_PDL) {
                 val persongalleri = packet.hendelseData.persongalleri
-                val sakType = objectMapper.treeToValue(packet[OPPLYSNING_KEY], SakType::class.java)
+                val sakType = objectMapper.treeToValue(packet[SAKTYPE_KEY], SakType::class.java)
                 logger.info("Behandler migrerings-persongalleri mot PDL")
 
                 val soeker = lagEnkelopplysningerFraPDL(

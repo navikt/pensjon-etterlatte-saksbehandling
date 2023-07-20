@@ -61,6 +61,17 @@ internal class OppgaveDaoNyTest {
     }
 
     @Test
+    fun `opprett oppgave av type ATTESTERING`() {
+        val sakAalesund = Sak("1231244", SakType.BARNEPENSJON, 1L, Enheter.AALESUND.enhetNr)
+        val oppgaveNy = lagNyOppgave(sakAalesund, OppgaveType.ATTESTERING)
+        oppgaveDaoNy.lagreOppgave(oppgaveNy)
+
+        val hentOppgaver = oppgaveDaoNy.hentOppgaver()
+        assertEquals(1, hentOppgaver.size)
+        assertEquals(OppgaveType.ATTESTERING, hentOppgaver[0].type)
+    }
+
+    @Test
     fun `kan tildelesaksbehandler`() {
         val sakAalesund = Sak("1231244", SakType.BARNEPENSJON, 1L, Enheter.AALESUND.enhetNr)
         val oppgaveNy = lagNyOppgave(sakAalesund)
@@ -72,12 +83,12 @@ internal class OppgaveDaoNyTest {
         assertEquals(nySaksbehandler, hentOppgave?.saksbehandler)
     }
 
-    fun lagNyOppgave(sak: Sak) = OppgaveNy(
+    fun lagNyOppgave(sak: Sak, oppgaveType: OppgaveType = OppgaveType.FOERSTEGANGSBEHANDLING) = OppgaveNy(
         UUID.randomUUID(),
         Status.NY,
         Enheter.AALESUND.enhetNr,
         1L,
-        OppgaveType.FOERSTEGANGSBEHANDLING,
+        type = oppgaveType,
         null,
         "referanse",
         "merknad",

@@ -29,6 +29,7 @@ enum class Status {
 enum class OppgaveType {
     FOERSTEGANGSBEHANDLING,
     REVUDERING,
+    ATTESTERING,
     HENDELSE,
     MANUELT_OPPHOER,
     EKSTERN

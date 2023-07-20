@@ -9,6 +9,8 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.sak.SakIDListe
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
+import no.nav.etterlatte.oppgaveny.OppgaveServiceNy
+import no.nav.etterlatte.oppgaveny.OppgaveType
 import java.time.LocalDateTime
 import java.util.*
 
@@ -30,7 +32,8 @@ interface BehandlingStatusService {
 class BehandlingStatusServiceImpl constructor(
     private val behandlingDao: BehandlingDao,
     private val behandlingService: BehandlingService,
-    private val grunnlagsendringshendelseService: GrunnlagsendringshendelseService
+    private val grunnlagsendringshendelseService: GrunnlagsendringshendelseService,
+    private val oppgaveService: OppgaveServiceNy,
 ) : BehandlingStatusService {
     override fun settOpprettet(behandlingId: UUID, dryRun: Boolean) {
         val behandling = hentBehandling(behandlingId).tilOpprettet()
@@ -68,6 +71,11 @@ class BehandlingStatusServiceImpl constructor(
         val behandling = hentBehandling(behandlingId)
         inTransaction {
             lagreNyBehandlingStatus(behandling.tilFattetVedtak())
+            oppgaveService.opprettNyOppgaveMedSakOgReferanse(
+                referanse = behandling.id.toString(),
+                sakId = behandling.sak.id,
+                oppgaveType = OppgaveType.ATTESTERING
+            )
             registrerVedtakHendelse(behandlingId, vedtakHendelse, HendelseType.FATTET)
         }
     }

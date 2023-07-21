@@ -49,25 +49,15 @@ interface RevurderingService {
         sakId: Long,
         forrigeBehandling: Behandling,
         revurderingAarsak: RevurderingAarsak,
-        virkningstidspunkt: LocalDate,
-        kilde: Vedtaksloesning
+        virkningstidspunkt: LocalDate? = null,
+        kilde: Vedtaksloesning,
+        persongalleri: Persongalleri,
+        mottattDato: String? = null,
+        merknad: String? = null,
+        begrunnelse: String? = null
     ): Revurdering?
 
     fun lagreRevurderingInfo(behandlingsId: UUID, info: RevurderingInfo, navIdent: String): Boolean
-
-    // TODO: Gjer denne privat, kall opprettAutomatiskRevurdering heller
-    fun opprettRevurdering(
-        sakId: Long,
-        persongalleri: Persongalleri,
-        forrigeBehandling: UUID?,
-        mottattDato: String? = null,
-        prosessType: Prosesstype,
-        kilde: Vedtaksloesning,
-        merknad: String? = null,
-        revurderingAarsak: RevurderingAarsak,
-        virkningstidspunkt: Virkningstidspunkt? = null,
-        begrunnelse: String?
-    ): Revurdering?
 }
 
 enum class RevurderingServiceFeatureToggle(private val key: String) : FeatureToggle {
@@ -109,6 +99,7 @@ class RevurderingServiceImpl(
                 kilde,
                 null,
                 revurderingAarsak,
+                virkningstidspunkt = null,
                 begrunnelse = begrunnelse
             )?.also { revurdering ->
                 if (paaGrunnAvHendelse != null) {
@@ -129,20 +120,24 @@ class RevurderingServiceImpl(
         sakId: Long,
         forrigeBehandling: Behandling,
         revurderingAarsak: RevurderingAarsak,
-        virkningstidspunkt: LocalDate,
-        kilde: Vedtaksloesning
+        virkningstidspunkt: LocalDate?,
+        kilde: Vedtaksloesning,
+        persongalleri: Persongalleri,
+        mottattDato: String?,
+        merknad: String?,
+        begrunnelse: String?
     ) = forrigeBehandling.sjekkEnhet()?.let {
         opprettRevurdering(
             sakId,
-            forrigeBehandling.persongalleri,
+            persongalleri,
             forrigeBehandling.id,
-            null,
+            mottattDato,
             Prosesstype.AUTOMATISK,
             kilde,
-            null,
+            merknad,
             revurderingAarsak,
-            virkningstidspunkt.tilVirkningstidspunkt("Opprettet automatisk"),
-            begrunnelse = "Automatisk revurdering - ${revurderingAarsak.name.lowercase()}"
+            virkningstidspunkt?.tilVirkningstidspunkt("Opprettet automatisk"),
+            begrunnelse = begrunnelse ?: "Automatisk revurdering - ${revurderingAarsak.name.lowercase()}"
         )
     }
 
@@ -165,7 +160,7 @@ class RevurderingServiceImpl(
         }
     }
 
-    override fun opprettRevurdering(
+    private fun opprettRevurdering(
         sakId: Long,
         persongalleri: Persongalleri,
         forrigeBehandling: UUID?,

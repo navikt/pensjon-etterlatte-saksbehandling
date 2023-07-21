@@ -49,7 +49,7 @@ interface RevurderingService {
         sakId: Long,
         forrigeBehandling: Behandling,
         revurderingAarsak: RevurderingAarsak,
-        fraDato: LocalDate,
+        virkningstidspunkt: LocalDate,
         kilde: Vedtaksloesning
     ): Revurdering?
 
@@ -65,7 +65,7 @@ interface RevurderingService {
         kilde: Vedtaksloesning,
         merknad: String? = null,
         revurderingAarsak: RevurderingAarsak,
-        fraDato: Virkningstidspunkt? = null,
+        virkningstidspunkt: Virkningstidspunkt? = null,
         begrunnelse: String?
     ): Revurdering?
 }
@@ -129,7 +129,7 @@ class RevurderingServiceImpl(
         sakId: Long,
         forrigeBehandling: Behandling,
         revurderingAarsak: RevurderingAarsak,
-        fraDato: LocalDate,
+        virkningstidspunkt: LocalDate,
         kilde: Vedtaksloesning
     ) = forrigeBehandling.sjekkEnhet()?.let {
         opprettRevurdering(
@@ -141,7 +141,7 @@ class RevurderingServiceImpl(
             kilde,
             null,
             revurderingAarsak,
-            fraDato.tilVirkningstidspunkt("Opprettet automatisk"),
+            virkningstidspunkt.tilVirkningstidspunkt("Opprettet automatisk"),
             begrunnelse = "Automatisk revurdering - ${revurderingAarsak.name.lowercase()}"
         )
     }
@@ -174,7 +174,7 @@ class RevurderingServiceImpl(
         kilde: Vedtaksloesning,
         merknad: String?,
         revurderingAarsak: RevurderingAarsak,
-        fraDato: Virkningstidspunkt?,
+        virkningstidspunkt: Virkningstidspunkt?,
         begrunnelse: String?
     ): Revurdering? {
         return inTransaction {
@@ -185,6 +185,7 @@ class RevurderingServiceImpl(
                 soeknadMottattDato = mottattDato?.let { LocalDateTime.parse(it) },
                 revurderingsAarsak = revurderingAarsak,
                 persongalleri = persongalleri,
+                virkningstidspunkt = virkningstidspunkt,
                 kilde = kilde,
                 prosesstype = prosessType,
                 merknad = merknad

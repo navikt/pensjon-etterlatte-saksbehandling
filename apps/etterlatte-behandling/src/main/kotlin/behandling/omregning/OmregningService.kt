@@ -25,7 +25,7 @@ class OmregningService(
             Prosesstype.AUTOMATISK -> revurderingService.opprettAutomatiskRevurdering(
                 sakId = sakId,
                 forrigeBehandling = forrigeBehandling,
-                fraDato = fraDato,
+                virkningstidspunkt = fraDato,
                 revurderingAarsak = RevurderingAarsak.REGULERING,
                 kilde = Vedtaksloesning.GJENNY
             )

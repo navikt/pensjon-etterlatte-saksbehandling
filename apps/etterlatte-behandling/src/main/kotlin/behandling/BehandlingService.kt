@@ -72,18 +72,11 @@ interface BehandlingService {
         boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet
     )
 
-    fun hentHendelserIBehandling(behandlingId: UUID): List<LagretHendelse>
     fun hentDetaljertBehandling(behandlingId: UUID): DetaljertBehandling?
     suspend fun hentDetaljertBehandlingMedTilbehoer(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo
     ): DetaljertBehandlingDto
-
-    suspend fun hentBehandlingMedEnkelPersonopplysning(
-        behandlingId: UUID,
-        brukerTokenInfo: BrukerTokenInfo,
-        opplysningstype: Opplysningstype
-    ): BehandlingMedGrunnlagsopplysninger<Person>
 
     suspend fun erGyldigVirkningstidspunkt(
         behandlingId: UUID,
@@ -153,7 +146,7 @@ class BehandlingServiceImpl(
         return hentBehandling(behandlingId)?.toDetaljertBehandling()
     }
 
-    override suspend fun hentBehandlingMedEnkelPersonopplysning(
+    private suspend fun hentBehandlingMedEnkelPersonopplysning(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
         opplysningstype: Opplysningstype
@@ -383,7 +376,7 @@ class BehandlingServiceImpl(
         }
     }
 
-    override fun hentHendelserIBehandling(behandlingId: UUID): List<LagretHendelse> {
+    private fun hentHendelserIBehandling(behandlingId: UUID): List<LagretHendelse> {
         return inTransaction {
             hendelseDao.finnHendelserIBehandling(behandlingId)
         }

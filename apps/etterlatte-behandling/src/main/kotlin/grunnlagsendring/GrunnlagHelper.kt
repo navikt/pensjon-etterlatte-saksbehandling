@@ -9,6 +9,8 @@ import no.nav.etterlatte.libs.common.grunnlag.hentSivilstand
 import no.nav.etterlatte.libs.common.grunnlag.hentUtland
 import no.nav.etterlatte.libs.common.grunnlag.hentVergemaalellerfremtidsfullmakt
 
+class GrunnlagRolleException(override val message: String) : Exception(message)
+
 fun Grunnlag.doedsdato(saksrolle: Saksrolle, fnr: String) =
     when (saksrolle) {
         Saksrolle.AVDOED -> {
@@ -23,8 +25,8 @@ fun Grunnlag.doedsdato(saksrolle: Saksrolle, fnr: String) =
         Saksrolle.SOESKEN -> {
             hentSoesken().find { it.hentFoedselsnummer()?.verdi?.value == fnr }?.hentDoedsdato()
         }
-        else -> throw IllegalArgumentException(
-            "Proevde aa finne doedsdato for $saksrolle, men det skal ikke kunne skje D:"
+        else -> throw GrunnlagRolleException(
+            "Proevde aa finne doedsdato for $saksrolle, men det skal ikke kunne skje"
         )
     }
 
@@ -37,8 +39,8 @@ fun Grunnlag.ansvarligeForeldre(saksrolle: Saksrolle, fnr: String) =
             hentSoesken().find { it.hentFoedselsnummer()?.verdi?.value == fnr }
                 ?.hentFamilierelasjon()?.verdi?.ansvarligeForeldre
         }
-        else -> throw IllegalArgumentException(
-            "Proevde aa finne ansvarligeForeldre for $saksrolle, men det skal ikke kunne skje D:"
+        else -> throw GrunnlagRolleException(
+            "Proevde aa finne ansvarligeForeldre for $saksrolle, men det skal ikke kunne skje"
         )
     }
 
@@ -53,8 +55,8 @@ fun Grunnlag.barn(saksrolle: Saksrolle) =
         Saksrolle.SOEKER -> {
             soeker.hentFamilierelasjon()?.verdi?.barn
         }
-        else -> throw IllegalArgumentException(
-            "Proevde aa finne barn for $saksrolle, men det skal ikke kunne skje D:"
+        else -> throw GrunnlagRolleException(
+            "Proevde aa finne barn for $saksrolle, men det skal ikke kunne skje"
         )
     }
 
@@ -72,8 +74,8 @@ fun Grunnlag.utland(saksrolle: Saksrolle, fnr: String) =
         Saksrolle.GJENLEVENDE -> {
             hentGjenlevende().hentUtland()?.verdi
         }
-        else -> throw IllegalArgumentException(
-            "Proevde aa finne utland for $saksrolle, men det skal ikke kunne skje D:"
+        else -> throw GrunnlagRolleException(
+            "Proevde aa finne utland for $saksrolle, men det skal ikke kunne skje"
         )
     }
 
@@ -82,7 +84,7 @@ fun Grunnlag.vergemaalellerfremtidsfullmakt(saksrolle: Saksrolle) =
         Saksrolle.SOEKER -> {
             soeker.hentVergemaalellerfremtidsfullmakt()?.verdi
         }
-        else -> throw IllegalArgumentException(
+        else -> throw GrunnlagRolleException(
             "Prøvde å finne vergemål på en person som ikke er søker, men det er ikke relevant"
         )
     }
@@ -98,7 +100,7 @@ fun Grunnlag.sivilstand(saksrolle: Saksrolle) =
         Saksrolle.AVDOED -> {
             hentAvdoed().hentSivilstand()?.verdi
         }
-        else -> throw IllegalArgumentException(
+        else -> throw GrunnlagRolleException(
             "Prøvde å finne sivilstand for $saksrolle, men det er ikke relevant for denne rollen"
         )
     }

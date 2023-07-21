@@ -340,11 +340,15 @@ class GrunnlagsendringshendelseService(
         val grunnlag = runBlocking {
             grunnlagKlient.hentGrunnlag(hendelse.sakId)
         }
-        val samsvarMellomPdlOgGrunnlag = finnSamsvarForHendelse(hendelse, pdlData, grunnlag, personRolle)
-        if (!samsvarMellomPdlOgGrunnlag.samsvar) {
-            oppdaterHendelseSjekket(hendelse, samsvarMellomPdlOgGrunnlag)
-        } else {
-            forkastHendelse(hendelse.id, samsvarMellomPdlOgGrunnlag)
+        try {
+            val samsvarMellomPdlOgGrunnlag = finnSamsvarForHendelse(hendelse, pdlData, grunnlag, personRolle)
+            if (!samsvarMellomPdlOgGrunnlag.samsvar) {
+                oppdaterHendelseSjekket(hendelse, samsvarMellomPdlOgGrunnlag)
+            } else {
+                forkastHendelse(hendelse.id, samsvarMellomPdlOgGrunnlag)
+            }
+        } catch (e: GrunnlagRolleException) {
+            forkastHendelse(hendelse.id, SamsvarMellomKildeOgGrunnlag.FeilRolle(pdlData, grunnlag, false))
         }
     }
 
@@ -418,13 +422,9 @@ class GrunnlagsendringshendelseService(
             }
 
             GrunnlagsendringsType.SIVILSTAND -> {
-                if (rolle == Saksrolle.SOESKEN) {
-                    SamsvarMellomKildeOgGrunnlag.Sivilstand(null,null,true)
-                } else {
-                    val pdlSivilstand = pdlData.hentSivilstand()
-                    val grunnlagSivilstand = grunnlag?.sivilstand(rolle)
-                    samsvarSivilstand(pdlSivilstand, grunnlagSivilstand)
-                }
+                val pdlSivilstand = pdlData.hentSivilstand()
+                val grunnlagSivilstand = grunnlag?.sivilstand(rolle)
+                samsvarSivilstand(pdlSivilstand, grunnlagSivilstand)
             }
 
             GrunnlagsendringsType.GRUNNBELOEP -> SamsvarMellomKildeOgGrunnlag.Grunnbeloep(samsvar = false)

@@ -1,6 +1,10 @@
-package common
+package no.nav.etterlatte.common
 
-import no.nav.etterlatte.common.DatabaseContext
+import io.mockk.mockk
+import no.nav.etterlatte.Context
+import no.nav.etterlatte.Kontekst
+import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
+import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -10,13 +14,12 @@ import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.assertThrows
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
-import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class DatabaseContextTest {
     @Container
     private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:15")
-    lateinit var dataSource: DataSource
+    private val user = mockk<SaksbehandlerMedEnheterOgRoller>()
 
     @BeforeAll
     fun setUp() {
@@ -24,13 +27,20 @@ class DatabaseContextTest {
         postgreSQLContainer.withUrlParam("user", postgreSQLContainer.username)
         postgreSQLContainer.withUrlParam("password", postgreSQLContainer.password)
 
-        dataSource = DataSourceBuilder.createDataSource(
+        val dataSource = DataSourceBuilder.createDataSource(
             mutableMapOf(
                 "DB_HOST" to postgreSQLContainer.host,
                 "DB_USERNAME" to postgreSQLContainer.username,
                 "DB_PASSWORD" to postgreSQLContainer.password,
                 "DB_PORT" to postgreSQLContainer.firstMappedPort.toString(),
                 "DB_DATABASE" to postgreSQLContainer.databaseName
+            )
+        )
+
+        Kontekst.set(
+            Context(
+                user,
+                DatabaseContext(dataSource)
             )
         )
     }
@@ -40,11 +50,10 @@ class DatabaseContextTest {
 
     @Test
     fun `bevarer transaksjonen med gjenbruksflagget aktivert`() {
-        val kontekst = DatabaseContext(dataSource)
-        kontekst.inTransaction {
-            val activeTx1 = kontekst.activeTx()
-            kontekst.inTransaction(true) {
-                val activeTx2 = kontekst.activeTx()
+        inTransaction {
+            val activeTx1 = Kontekst.get().databasecontxt.activeTx()
+            inTransaction(true) {
+                val activeTx2 = Kontekst.get().databasecontxt.activeTx()
                 assertEquals(activeTx1, activeTx2)
             }
         }
@@ -52,10 +61,9 @@ class DatabaseContextTest {
 
     @Test
     fun `bevarer ikke transaksjonen med gjenbruksflagget deaktivert`() {
-        val kontekst = DatabaseContext(dataSource)
-        kontekst.inTransaction {
+        inTransaction {
             assertThrows<IllegalStateException> {
-                kontekst.inTransaction {}
+                inTransaction {}
             }
         }
     }

@@ -45,7 +45,8 @@ internal fun Route.behandlingRoutes(
     behandlingService: BehandlingService,
     foerstegangsbehandlingService: FoerstegangsbehandlingService,
     kommerBarnetTilGodeService: KommerBarnetTilGodeService,
-    manueltOpphoerService: ManueltOpphoerService
+    manueltOpphoerService: ManueltOpphoerService,
+    behandlingFactory: BehandlingFactory
 ) {
     val logger = application.log
     route("/api/behandling/{$BEHANDLINGSID_CALL_PARAMETER}/") {
@@ -230,7 +231,7 @@ internal fun Route.behandlingRoutes(
                 val behandlingsBehov = call.receive<BehandlingsBehov>()
 
                 when (
-                    val behandling = foerstegangsbehandlingService.opprettBehandling(
+                    val behandling = behandlingFactory.opprettBehandling(
                         behandlingsBehov.sak,
                         behandlingsBehov.persongalleri,
                         behandlingsBehov.mottattDato,

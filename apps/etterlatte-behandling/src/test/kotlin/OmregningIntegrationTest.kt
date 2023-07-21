@@ -66,7 +66,7 @@ class OmregningIntegrationTest : BehandlingIntegrationTest() {
                 applicationContext.sakDao.opprettSak(fnr, SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr)
             }
 
-            val behandling = applicationContext.foerstegangsbehandlingService
+            val behandling = applicationContext.behandlingFactory
                 .opprettBehandling(
                     sak.id,
                     persongalleri(),

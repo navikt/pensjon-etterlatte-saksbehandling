@@ -20,6 +20,7 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
 import io.mockk.verify
+import no.nav.etterlatte.behandling.BehandlingFactory
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.BoddEllerArbeidetUtlandetRequest
 import no.nav.etterlatte.behandling.UtenlandstilsnittRequest
@@ -55,6 +56,7 @@ internal class BehandlingRoutesTest {
     private val foerstegangsbehandlingService = mockk<FoerstegangsbehandlingService>()
     private val kommerBarnetTilGodeService = mockk<KommerBarnetTilGodeService>()
     private val manueltOpphoerService = mockk<ManueltOpphoerService>()
+    private val behandlingFactory = mockk<BehandlingFactory>()
 
     @BeforeAll
     fun before() {
@@ -189,7 +191,8 @@ internal class BehandlingRoutesTest {
                         behandlingService,
                         foerstegangsbehandlingService,
                         kommerBarnetTilGodeService,
-                        manueltOpphoerService
+                        manueltOpphoerService,
+                        behandlingFactory
                     )
                 }
             }

@@ -1,5 +1,6 @@
 package no.nav.etterlatte.behandling.omregning
 
+import no.nav.etterlatte.behandling.BehandlingFactory
 import no.nav.etterlatte.behandling.BehandlingHendelseType
 import no.nav.etterlatte.behandling.BehandlingHendelserKafkaProducer
 import no.nav.etterlatte.behandling.BehandlingService
@@ -19,6 +20,7 @@ import no.nav.etterlatte.sak.SakService
 class MigreringService(
     private val sakService: SakService,
     private val foerstegangsBehandlingService: FoerstegangsbehandlingService,
+    private val behandlingFactory: BehandlingFactory,
     private val kommerBarnetTilGodeService: KommerBarnetTilGodeService,
     private val behandlingsHendelser: BehandlingHendelserKafkaProducer,
     private val migreringRepository: MigreringRepository,
@@ -51,7 +53,7 @@ class MigreringService(
     }
 
     private fun opprettSakOgBehandling(request: MigreringRequest): Behandling? =
-        foerstegangsBehandlingService.opprettBehandling(
+        behandlingFactory.opprettBehandling(
             finnEllerOpprettSak(request).id,
             request.persongalleri,
             null,

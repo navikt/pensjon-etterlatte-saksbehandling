@@ -8,6 +8,7 @@ import io.mockk.verify
 import no.nav.etterlatte.BehandlingIntegrationTest
 import no.nav.etterlatte.Context
 import no.nav.etterlatte.Kontekst
+import no.nav.etterlatte.behandling.BehandlingFactory
 import no.nav.etterlatte.behandling.BehandlingHendelseType
 import no.nav.etterlatte.behandling.BehandlingServiceFeatureToggle
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
@@ -16,7 +17,6 @@ import no.nav.etterlatte.behandling.domain.GrunnlagsendringsType
 import no.nav.etterlatte.behandling.domain.Grunnlagsendringshendelse
 import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.behandling.domain.SamsvarMellomKildeOgGrunnlag
-import no.nav.etterlatte.behandling.foerstegangsbehandling.FoerstegangsbehandlingServiceImpl
 import no.nav.etterlatte.common.DatabaseContext
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
@@ -67,13 +67,12 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
 
     fun opprettSakMedFoerstegangsbehandling(
         fnr: String,
-        foerstegangsbehandlingService: FoerstegangsbehandlingServiceImpl? = null
+        behandlingFactory: BehandlingFactory? = null
     ): Pair<Sak, Foerstegangsbehandling?> {
         val sak = inTransaction {
             applicationContext.sakDao.opprettSak(fnr, SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr)
         }
-        val forstegangsService = foerstegangsbehandlingService ?: applicationContext.foerstegangsbehandlingService
-        val behandling = forstegangsService
+        val behandling = (behandlingFactory ?: applicationContext.behandlingFactory)
             .opprettBehandling(
                 sak.id,
                 persongalleri(),
@@ -351,8 +350,8 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
                 applicationContext.kommerBarnetTilGodeService
             )
 
-        val foerstegangsbehandlingService =
-            FoerstegangsbehandlingServiceImpl(
+        val behandlingFactory =
+            BehandlingFactory(
                 oppgaveService = oppgaveService,
                 grunnlagService = grunnlagService,
                 revurderingService = revurderingService,
@@ -363,7 +362,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
                 featureToggleService = featureToggleService
             )
 
-        val (sak, behandling) = opprettSakMedFoerstegangsbehandling(fnr, foerstegangsbehandlingService)
+        val (sak, behandling) = opprettSakMedFoerstegangsbehandling(fnr, behandlingFactory)
 
         assertNotNull(behandling)
 

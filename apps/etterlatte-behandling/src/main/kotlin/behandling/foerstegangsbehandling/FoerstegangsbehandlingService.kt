@@ -74,7 +74,7 @@ class FoerstegangsbehandlingServiceImpl(
 ) : FoerstegangsbehandlingService {
     private val logger = LoggerFactory.getLogger(FoerstegangsbehandlingServiceImpl::class.java)
 
-    fun hentBehandling(id: UUID): Foerstegangsbehandling? =
+    internal fun hentBehandling(id: UUID): Foerstegangsbehandling? =
         (behandlingDao.hentBehandling(id) as? Foerstegangsbehandling)?.sjekkEnhet()
 
     override fun hentFoerstegangsbehandling(behandling: UUID): Foerstegangsbehandling? {

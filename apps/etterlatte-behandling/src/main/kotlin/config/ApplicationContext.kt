@@ -4,12 +4,13 @@ import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 import io.ktor.client.HttpClient
 import no.nav.etterlatte.behandling.BehandlingDao
+import no.nav.etterlatte.behandling.BehandlingFactory
 import no.nav.etterlatte.behandling.BehandlingServiceImpl
 import no.nav.etterlatte.behandling.BehandlingStatusServiceImpl
 import no.nav.etterlatte.behandling.BehandlingsHendelserKafkaProducerImpl
 import no.nav.etterlatte.behandling.EnhetServiceImpl
 import no.nav.etterlatte.behandling.GrunnlagService
-import no.nav.etterlatte.behandling.foerstegangsbehandling.FoerstegangsbehandlingServiceImpl
+import no.nav.etterlatte.behandling.GyldighetsproevingServiceImpl
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlientObo
@@ -170,15 +171,9 @@ class ApplicationContext(
             kommerBarnetTilGodeService = kommerBarnetTilGodeService
         )
 
-    val foerstegangsbehandlingService =
-        FoerstegangsbehandlingServiceImpl(
-            oppgaveService = oppgaveServiceNy,
-            grunnlagService = grunnlagsService,
-            revurderingService = revurderingService,
-            sakDao = sakDao,
+    val gyldighetsproevingService =
+        GyldighetsproevingServiceImpl(
             behandlingDao = behandlingDao,
-            hendelseDao = hendelseDao,
-            behandlingHendelser = behandlingsHendelser,
             featureToggleService = featureToggleService
         )
 
@@ -221,13 +216,25 @@ class ApplicationContext(
     val behandlingsStatusService =
         BehandlingStatusServiceImpl(behandlingDao, behandlingService, grunnlagsendringshendelseService)
 
+    val behandlingFactory = BehandlingFactory(
+        oppgaveService = oppgaveServiceNy,
+        grunnlagService = grunnlagsService,
+        revurderingService = revurderingService,
+        sakDao = sakDao,
+        behandlingDao = behandlingDao,
+        hendelseDao = hendelseDao,
+        behandlingHendelser = behandlingsHendelser,
+        featureToggleService = featureToggleService
+    )
+
     val migreringService = MigreringService(
         sakService = sakService,
-        foerstegangsBehandlingService = foerstegangsbehandlingService,
+        gyldighetsproevingService = gyldighetsproevingService,
         behandlingsHendelser = behandlingsHendelser,
         migreringRepository = MigreringRepository(dataSource),
         behandlingService = behandlingService,
-        kommerBarnetTilGodeService = kommerBarnetTilGodeService
+        kommerBarnetTilGodeService = kommerBarnetTilGodeService,
+        behandlingFactory = behandlingFactory
     )
 
     // Job

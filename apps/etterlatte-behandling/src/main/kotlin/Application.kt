@@ -96,9 +96,10 @@ fun Application.module(context: ApplicationContext) {
             )
             behandlingRoutes(
                 behandlingService = behandlingService,
-                foerstegangsbehandlingService = foerstegangsbehandlingService,
+                gyldighetsproevingService = gyldighetsproevingService,
                 manueltOpphoerService = manueltOpphoerService,
-                kommerBarnetTilGodeService = kommerBarnetTilGodeService
+                kommerBarnetTilGodeService = kommerBarnetTilGodeService,
+                behandlingFactory = behandlingFactory
             )
             revurderingRoutes(
                 revurderingService = revurderingService,

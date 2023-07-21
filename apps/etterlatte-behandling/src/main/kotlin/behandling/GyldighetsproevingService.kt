@@ -37,7 +37,7 @@ class GyldighetsproevingServiceImpl(
 ) : GyldighetsproevingService {
     private val logger = LoggerFactory.getLogger(GyldighetsproevingServiceImpl::class.java)
 
-    internal fun hentBehandling(id: UUID): Foerstegangsbehandling? =
+    internal fun hentFoerstegangsbehandling(id: UUID): Foerstegangsbehandling? =
         (behandlingDao.hentBehandling(id) as? Foerstegangsbehandling)?.sjekkEnhet()
 
     override fun lagreGyldighetsproeving(
@@ -46,7 +46,7 @@ class GyldighetsproevingServiceImpl(
         svar: JaNeiMedBegrunnelse
     ): GyldighetsResultat? {
         return inTransaction {
-            hentBehandling(behandlingId)?.let { behandling ->
+            hentFoerstegangsbehandling(behandlingId)?.let { behandling ->
                 val resultat =
                     if (svar.erJa()) VurderingsResultat.OPPFYLT else VurderingsResultat.IKKE_OPPFYLT
                 val gyldighetsResultat = GyldighetsResultat(
@@ -76,7 +76,7 @@ class GyldighetsproevingServiceImpl(
 
     override fun lagreGyldighetsproeving(behandlingId: UUID, gyldighetsproeving: GyldighetsResultat) {
         inTransaction {
-            hentBehandling(behandlingId)?.lagreGyldighetsproeving(gyldighetsproeving)
+            hentFoerstegangsbehandling(behandlingId)?.lagreGyldighetsproeving(gyldighetsproeving)
         }
     }
 

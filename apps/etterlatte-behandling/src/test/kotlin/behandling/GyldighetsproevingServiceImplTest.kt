@@ -124,7 +124,7 @@ internal class GyldighetsproevingServiceImplTest {
             kilde = Vedtaksloesning.GJENNY
         )
 
-        assertEquals("Soeker", behandlingsService.hentBehandling(id)!!.persongalleri.innsender)
+        assertEquals("Soeker", behandlingsService.hentFoerstegangsbehandling(id)!!.persongalleri.innsender)
 
         verify(exactly = 1) { behandlingDaoMock.hentBehandling(id) }
     }
@@ -224,7 +224,7 @@ internal class GyldighetsproevingServiceImplTest {
             kilde = Vedtaksloesning.GJENNY
         )
 
-        assertEquals("Soeker", behandlingsService.hentBehandling(id)!!.persongalleri.innsender)
+        assertEquals("Soeker", behandlingsService.hentFoerstegangsbehandling(id)!!.persongalleri.innsender)
 
         verify(exactly = 1) { behandlingDaoMock.hentBehandling(id) }
     }
@@ -272,7 +272,7 @@ internal class GyldighetsproevingServiceImplTest {
             kilde = Vedtaksloesning.GJENNY
         )
 
-        assertEquals("Soeker", behandlingsService.hentBehandling(id)!!.persongalleri.innsender)
+        assertEquals("Soeker", behandlingsService.hentFoerstegangsbehandling(id)!!.persongalleri.innsender)
 
         verify(exactly = 1) { behandlingDaoMock.hentBehandling(id) }
     }
@@ -320,7 +320,7 @@ internal class GyldighetsproevingServiceImplTest {
             kilde = Vedtaksloesning.GJENNY
         )
 
-        assertNull(behandlingsService.hentBehandling(id))
+        assertNull(behandlingsService.hentFoerstegangsbehandling(id))
 
         verify(exactly = 1) { behandlingDaoMock.hentBehandling(id) }
     }

@@ -2,7 +2,6 @@ package no.nav.etterlatte.behandling
 
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.domain.Behandling
-import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.domain.OpprettBehandling
 import no.nav.etterlatte.behandling.domain.toBehandlingOpprettet
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
@@ -24,7 +23,6 @@ import no.nav.etterlatte.sak.SakDao
 import no.nav.etterlatte.sak.filterSakerForEnheter
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
-import java.util.*
 
 class BehandlingFactory(
     private val oppgaveService: OppgaveServiceNy,
@@ -84,7 +82,7 @@ class BehandlingFactory(
         sak: Sak,
         persongalleri: Persongalleri,
         mottattDato: String?
-    ): Foerstegangsbehandling? {
+    ): Behandling? {
         return inTransaction {
             harBehandlingUnderbehandling.forEach {
                 behandlingDao.lagreStatus(it.id, BehandlingStatus.AVBRUTT, LocalDateTime.now())
@@ -104,7 +102,7 @@ class BehandlingFactory(
 
                 logger.info("Opprettet behandling ${opprettBehandling.id} i sak ${opprettBehandling.sakId}")
 
-                hentBehandling(opprettBehandling.id)
+                behandlingDao.hentBehandling(opprettBehandling.id)?.sjekkEnhet()
             }.also { behandling ->
                 behandling?.let {
                     grunnlagService.leggInnNyttGrunnlag(it)
@@ -119,9 +117,6 @@ class BehandlingFactory(
         }
     }
 
-    fun hentBehandling(id: UUID): Foerstegangsbehandling? =
-        (behandlingDao.hentBehandling(id) as? Foerstegangsbehandling)?.sjekkEnhet()
-
     private fun opprettMerknad(sak: Sak, persongalleri: Persongalleri): String? {
         return if (persongalleri.soesken.isEmpty()) {
             null
@@ -135,7 +130,7 @@ class BehandlingFactory(
             null
         }
     }
-    private fun Foerstegangsbehandling?.sjekkEnhet() = this?.let { behandling ->
+    private fun Behandling?.sjekkEnhet() = this?.let { behandling ->
         listOf(behandling).filterBehandlingerForEnheter(
             featureToggleService,
             Kontekst.get().AppUser

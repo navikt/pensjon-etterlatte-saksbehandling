@@ -1,4 +1,4 @@
-import { Button, Select, Table } from '@navikt/ds-react'
+import { Button, Pagination, Select, Table } from '@navikt/ds-react'
 import { formaterStringDato } from '~utils/formattering'
 import { TildelSaksbehandler } from '~components/nyoppgavebenk/TildelSaksbehandler'
 import { RedigerSaksbehandler } from '~components/nyoppgavebenk/RedigerSaksbehandler'
@@ -42,7 +42,8 @@ export const Oppgavelista = (props: { oppgaver: ReadonlyArray<OppgaveDTOny>; hen
   const [ytelseFilter, setYtelseFilter] = useState<YtelseFilterKeys>('visAlle')
   const [oppgavestatusFilter, setOppgavestatusFilter] = useState<OppgavestatusFilterKeys>('visAlle')
   const [oppgavetypeFilter, setOppgavetypeFilter] = useState<OppgavetypeFilterKeys>('visAlle')
-
+  const [page, setPage] = useState<number>(1)
+  const rowsPerPage = 10
   const mutableOppgaver = oppgaver.concat()
   const filtrerteOppgaver = filtrerOppgaver(
     enhetsFilter,
@@ -52,6 +53,9 @@ export const Oppgavelista = (props: { oppgaver: ReadonlyArray<OppgaveDTOny>; hen
     oppgavetypeFilter,
     mutableOppgaver
   )
+
+  let paginerteOppgaver = filtrerteOppgaver
+  paginerteOppgaver = paginerteOppgaver.slice((page - 1) * rowsPerPage, page * rowsPerPage)
 
   return (
     <>
@@ -139,8 +143,8 @@ export const Oppgavelista = (props: { oppgaver: ReadonlyArray<OppgaveDTOny>; hen
           </Table.Row>
         </Table.Header>
         <Table.Body>
-          {filtrerteOppgaver &&
-            filtrerteOppgaver.map(
+          {paginerteOppgaver &&
+            paginerteOppgaver.map(
               ({ id, status, enhet, type, saksbehandler, opprettet, merknad, sakType, fnr, frist }) => (
                 <Table.Row key={id}>
                   <Table.HeaderCell>{formaterStringDato(opprettet)}</Table.HeaderCell>
@@ -163,6 +167,12 @@ export const Oppgavelista = (props: { oppgaver: ReadonlyArray<OppgaveDTOny>; hen
             )}
         </Table.Body>
       </Table>
+      <Pagination
+        page={page}
+        onPageChange={setPage}
+        count={Math.ceil(filtrerteOppgaver.length / rowsPerPage)}
+        size="small"
+      />
     </>
   )
 }

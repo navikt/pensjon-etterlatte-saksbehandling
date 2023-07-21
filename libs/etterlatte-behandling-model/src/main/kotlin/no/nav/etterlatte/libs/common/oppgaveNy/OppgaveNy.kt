@@ -55,7 +55,7 @@ fun opprettNyOppgaveMedReferanseOgSak(
     referanse: String,
     sak: Sak,
     oppgaveType: OppgaveType,
-    saksbehandler: String? = null,
+    saksbehandler: String? = null
 ): OppgaveNy {
     return OppgaveNy(
         id = UUID.randomUUID(),

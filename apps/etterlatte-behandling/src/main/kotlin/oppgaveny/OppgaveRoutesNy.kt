@@ -74,7 +74,11 @@ internal fun Route.oppgaveRoutesNy(service: OppgaveServiceNy, kanBrukeNyOppgavel
         post("/opprett") {
             if (kanBrukeNyOppgaveliste) {
                 val oppgaveRequest = call.receive<OpprettNyOppgaveRequest>()
-                service.opprettNyOppgaveMedSakOgReferanse(oppgaveRequest.referanse,oppgaveRequest.sakId, oppgaveRequest.oppgaveType)
+                service.opprettNyOppgaveMedSakOgReferanse(
+                    oppgaveRequest.referanse,
+                    oppgaveRequest.sakId,
+                    oppgaveRequest.oppgaveType
+                )
                 call.respond(HttpStatusCode.Created)
             } else {
                 call.respond(HttpStatusCode.Forbidden)

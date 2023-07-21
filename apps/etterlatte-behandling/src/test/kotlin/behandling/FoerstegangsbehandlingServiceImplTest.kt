@@ -166,7 +166,7 @@ internal class FoerstegangsbehandlingServiceImplTest {
             kilde = Vedtaksloesning.GJENNY
         )
 
-        assertEquals("Soeker", behandlingsService.hentFoerstegangsbehandling(id)!!.persongalleri.innsender)
+        assertEquals("Soeker", behandlingsService.hentBehandling(id)!!.persongalleri.innsender)
 
         verify(exactly = 1) { behandlingDaoMock.hentBehandling(id) }
     }
@@ -672,7 +672,7 @@ internal class FoerstegangsbehandlingServiceImplTest {
             kilde = Vedtaksloesning.GJENNY
         )
 
-        assertEquals("Soeker", behandlingsService.hentFoerstegangsbehandling(id)!!.persongalleri.innsender)
+        assertEquals("Soeker", behandlingsService.hentBehandling(id)!!.persongalleri.innsender)
 
         verify(exactly = 1) { behandlingDaoMock.hentBehandling(id) }
     }
@@ -720,7 +720,7 @@ internal class FoerstegangsbehandlingServiceImplTest {
             kilde = Vedtaksloesning.GJENNY
         )
 
-        assertEquals("Soeker", behandlingsService.hentFoerstegangsbehandling(id)!!.persongalleri.innsender)
+        assertEquals("Soeker", behandlingsService.hentBehandling(id)!!.persongalleri.innsender)
 
         verify(exactly = 1) { behandlingDaoMock.hentBehandling(id) }
     }
@@ -768,7 +768,7 @@ internal class FoerstegangsbehandlingServiceImplTest {
             kilde = Vedtaksloesning.GJENNY
         )
 
-        assertNull(behandlingsService.hentFoerstegangsbehandling(id))
+        assertNull(behandlingsService.hentBehandling(id))
 
         verify(exactly = 1) { behandlingDaoMock.hentBehandling(id) }
     }

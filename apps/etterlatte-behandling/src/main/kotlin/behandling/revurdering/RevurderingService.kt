@@ -74,7 +74,8 @@ class RevurderingServiceImpl(
     private val behandlingDao: BehandlingDao,
     private val hendelseDao: HendelseDao,
     private val grunnlagsendringshendelseDao: GrunnlagsendringshendelseDao,
-    private val kommerBarnetTilGodeService: KommerBarnetTilGodeService
+    private val kommerBarnetTilGodeService: KommerBarnetTilGodeService,
+    private val revurderingDao: RevurderingDao
 ) : RevurderingService {
     private val logger = LoggerFactory.getLogger(RevurderingServiceImpl::class.java)
 
@@ -155,7 +156,7 @@ class RevurderingServiceImpl(
                 return@inTransaction false
             }
             val kilde = Grunnlagsopplysning.Saksbehandler.create(navIdent)
-            behandlingDao.lagreRevurderingInfo(behandlingsId, info, kilde)
+            revurderingDao.lagreRevurderingInfo(behandlingsId, info, kilde)
             return@inTransaction true
         }
     }

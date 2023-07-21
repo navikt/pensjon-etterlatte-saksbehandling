@@ -37,7 +37,7 @@ const ButtonWrapper = styled.div`
 export const Oppgavelista = (props: { oppgaver: ReadonlyArray<OppgaveDTOny>; hentOppgaver: () => void }) => {
   const { oppgaver, hentOppgaver } = props
 
-  const [saksbehandlerFilter, setSaksbehandlerFilter] = useState<SaksbehandlerFilterKeys>('visAlle')
+  const [saksbehandlerFilter, setSaksbehandlerFilter] = useState<SaksbehandlerFilterKeys>('IkkeTildelt')
   const [enhetsFilter, setEnhetsFilter] = useState<EnhetFilterKeys>('visAlle')
   const [ytelseFilter, setYtelseFilter] = useState<YtelseFilterKeys>('visAlle')
   const [oppgavestatusFilter, setOppgavestatusFilter] = useState<OppgavestatusFilterKeys>('visAlle')

@@ -44,6 +44,11 @@ data class FjernSaksbehandlerRequest(
     val oppgaveId: UUID
 )
 
+data class RedigerFristRequest(
+    val oppgaveId: UUID,
+    val frist: Tidspunkt
+)
+
 fun opprettNyOppgaveMedReferanseOgSak(
     referanse: String,
     sak: Sak,

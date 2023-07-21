@@ -104,6 +104,22 @@ class OppgaveDaoNy(private val connection: () -> Connection) {
         }
     }
 
+    fun redigerFrist(redigerFristRequest: RedigerFristRequest) {
+        with(connection()) {
+            val statement = prepareStatement(
+                """
+                UPDATE oppgave
+                SET frist = ?
+                where id = ?::UUID
+                """.trimIndent()
+            )
+            statement.setTidspunkt(1, redigerFristRequest.frist)
+            statement.setObject(2, redigerFristRequest.oppgaveId)
+
+            statement.executeUpdate()
+        }
+    }
+
     private fun ResultSet.asOppgaveNy(): OppgaveNy {
         return OppgaveNy(
             id = getObject("id") as UUID,

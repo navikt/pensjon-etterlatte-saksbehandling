@@ -58,6 +58,17 @@ internal fun Route.oppgaveRoutesNy(service: OppgaveServiceNy, kanBrukeNyOppgavel
                 }
             }
         }
+        post("/rediger-frist") {
+            kunSaksbehandler {
+                if (kanBrukeNyOppgaveliste) {
+                    val redigerFrist = call.receive<RedigerFristRequest>()
+                    service.redigerFrist(redigerFrist)
+                    call.respond(HttpStatusCode.OK)
+                } else {
+                    call.respond(HttpStatusCode.NotImplemented)
+                }
+            }
+        }
         post("/lagre") {
             if (kanBrukeNyOppgaveliste) {
                 val oppgave = call.receive<OppgaveNy>()

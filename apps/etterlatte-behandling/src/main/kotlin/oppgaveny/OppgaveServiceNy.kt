@@ -3,6 +3,7 @@ package no.nav.etterlatte.oppgaveny
 import io.ktor.server.plugins.BadRequestException
 import io.ktor.server.plugins.NotFoundException
 import no.nav.etterlatte.inTransaction
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.sak.SakDao
@@ -63,6 +64,26 @@ class OppgaveServiceNy(private val oppgaveDaoNy: OppgaveDaoNy, private val sakDa
         }
     }
 
+    fun redigerFrist(redigerFristRequest: RedigerFristRequest) {
+        inTransaction {
+            val hentetOppgave = oppgaveDaoNy.hentOppgave(redigerFristRequest.oppgaveId)
+            if (redigerFristRequest.frist.isBefore(Tidspunkt.now())) {
+                throw BadRequestException("Tidspunkt tilbake i tid id: ${redigerFristRequest.oppgaveId}")
+            }
+            if (hentetOppgave != null) {
+                if (hentetOppgave.saksbehandler != null) {
+                    oppgaveDaoNy.redigerFrist(redigerFristRequest)
+                } else {
+                    throw BadRequestException(
+                        "Oppgaven har ingen saksbehandler, id: ${redigerFristRequest.oppgaveId}"
+                    )
+                }
+            } else {
+                throw NotFoundException("Oppgaven finnes ikke, id: ${redigerFristRequest.oppgaveId}")
+            }
+        }
+    }
+
     fun opprettNyOppgaveMedSakOgReferanse(referanse: String, sakId: Long, oppgaveType: OppgaveType): OppgaveNy {
         val sak = sakDao.hentSak(sakId)!!
         return lagreOppgave(
@@ -83,15 +104,7 @@ class OppgaveServiceNy(private val oppgaveDaoNy: OppgaveDaoNy, private val sakDa
         oppgaveDaoNy.lagreOppgave(oppgaveLagres)
         return oppgaveDaoNy.hentOppgave(oppgaveLagres.id)!!
     }
-    fun hentOppgve(oppgaveId: UUID): OppgaveNy? {
+    fun hentOppgave(oppgaveId: UUID): OppgaveNy? {
         return oppgaveDaoNy.hentOppgave(oppgaveId)
     }
-}
-
-data class User(val name: String, val age: Int)
-
-fun main() {
-    val jack = User(name = "Jack", age = 1)
-    val olderJack = jack.copy(age = 2)
-    println(olderJack.name)
 }

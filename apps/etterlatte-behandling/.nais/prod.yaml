@@ -133,10 +133,6 @@ spec:
           permissions:
             roles:
               - "kan-sette-kilde"
-        - application: etterlatte-opplysninger-fra-pdl
-          permissions:
-            roles:
-              - "kan-sette-kilde"
         - application: etterlatte-grunnlag
         - application: etterlatte-trygdetid
         - application: etterlatte-fordeler

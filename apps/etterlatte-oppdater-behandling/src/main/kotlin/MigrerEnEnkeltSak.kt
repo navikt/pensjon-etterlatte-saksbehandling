@@ -9,8 +9,10 @@ import no.nav.etterlatte.libs.common.rapidsandrivers.SAK_TYPE_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.etterlatte.rapidsandrivers.migrering.FNR_KEY
+import no.nav.etterlatte.rapidsandrivers.migrering.MIGRERING_GRUNNLAG_KEY
 import no.nav.etterlatte.rapidsandrivers.migrering.MigreringRequest
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser
+import no.nav.etterlatte.rapidsandrivers.migrering.PERSONGALLERI
 import no.nav.etterlatte.rapidsandrivers.migrering.ROLLE_KEY
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -59,7 +61,11 @@ internal class MigrerEnEnkeltSak(
 
                 packet[SAK_TYPE_KEY] = SakType.BARNEPENSJON
                 packet[ROLLE_KEY] = PersonRolle.AVDOED
-                packet.eventName = Migreringshendelser.HENT_PDL
+                packet[MIGRERING_GRUNNLAG_KEY] = MigrerSoekerRequest(
+                    soeker = hendelse.persongalleri.soeker
+                )
+                packet[PERSONGALLERI] = hendelse.persongalleri
+                packet.eventName = Migreringshendelser.BEHANDLING_OPPRETTET
 
                 context.publish(packet.toJson())
                 logger.info("Publiserte oppdatert migreringshendelse")

@@ -7,8 +7,7 @@ export enum RelatertPersonsRolle {
 export enum PersonStatus {
   AVDOED = 'Avdød',
   GJENLEVENDE_FORELDER = 'Gjenlevende',
-  BARN = 'Etterlatt', // Barn
-  ETTERLATT = 'Etterlatt', // Etterlatt
+  BARN = 'Etterlatt',
 }
 
 export interface Journalpost {

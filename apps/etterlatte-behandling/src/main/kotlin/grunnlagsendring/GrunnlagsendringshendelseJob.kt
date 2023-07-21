@@ -10,15 +10,16 @@ import no.nav.etterlatte.Context
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.Self
 import no.nav.etterlatte.common.DatabaseContext
+import no.nav.etterlatte.jobs.fixedRateCancellableTimer
+import no.nav.etterlatte.jobs.shuttingDown
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.jobs.LeaderElection
+import no.nav.etterlatte.sikkerLogg
 import org.slf4j.LoggerFactory
 import java.time.Duration
 import java.time.temporal.ChronoUnit
 import java.util.*
-import java.util.concurrent.atomic.AtomicBoolean
 import javax.sql.DataSource
-import kotlin.concurrent.fixedRateTimer
 
 class GrunnlagsendringshendelseJob(
     private val datasource: DataSource,
@@ -30,35 +31,29 @@ class GrunnlagsendringshendelseJob(
 ) {
     private val jobbNavn = this::class.simpleName
     private val logger = LoggerFactory.getLogger(this::class.java)
-    private val closed: AtomicBoolean = AtomicBoolean(false)
 
-    fun setClosedTrue() = closed.set(true)
     fun schedule(): Timer {
-        return fixedRateTimer(
+        return fixedRateCancellableTimer(
             name = jobbNavn,
-            daemon = true,
             initialDelay = initialDelay,
-            period = periode.toMillis()
+            period = periode.toMillis(),
+            logger = logger,
+            sikkerLogg = sikkerLogg
         ) {
-            try {
-                logger.info(
-                    "Setter opp GrunnlagsendringshendelseJob. LeaderElection: ${leaderElection.isLeader()} " +
-                        ", initialDelay: ${Duration.of(1, ChronoUnit.MINUTES).toMillis()}" +
-                        ", periode: ${periode.toMinutes()}" +
-                        ", minutterGamleHendelser: $minutterGamleHendelser "
-                )
-                runBlocking {
-                    SjekkKlareGrunnlagsendringshendelser(
-                        grunnlagsendringshendelseService = grunnlagsendringshendelseService,
-                        leaderElection = leaderElection,
-                        jobbNavn = jobbNavn!!,
-                        minutterGamleHendelser = minutterGamleHendelser,
-                        datasource = datasource,
-                        closed = closed
-                    ).run()
-                }
-            } catch (throwable: Throwable) {
-                logger.error("Jobb for aa sjekke klare grunnlagsendringshendelser feilet", throwable)
+            logger.info(
+                "Setter opp GrunnlagsendringshendelseJob. LeaderElection: ${leaderElection.isLeader()} " +
+                    ", initialDelay: ${Duration.of(1, ChronoUnit.MINUTES).toMillis()}" +
+                    ", periode: ${periode.toMinutes()}" +
+                    ", minutterGamleHendelser: $minutterGamleHendelser "
+            )
+            runBlocking {
+                SjekkKlareGrunnlagsendringshendelser(
+                    grunnlagsendringshendelseService = grunnlagsendringshendelseService,
+                    leaderElection = leaderElection,
+                    jobbNavn = jobbNavn!!,
+                    minutterGamleHendelser = minutterGamleHendelser,
+                    datasource = datasource
+                ).run()
             }
         }
     }
@@ -68,15 +63,14 @@ class GrunnlagsendringshendelseJob(
         val leaderElection: LeaderElection,
         val jobbNavn: String,
         val minutterGamleHendelser: Long,
-        val datasource: DataSource,
-        val closed: AtomicBoolean
+        val datasource: DataSource
     ) {
         private val log = LoggerFactory.getLogger(this::class.java)
 
         suspend fun run() {
             val correlationId = UUID.randomUUID().toString()
 
-            if (leaderElection.isLeader() && !closed.get()) {
+            if (leaderElection.isLeader() && !shuttingDown.get()) {
                 withLogContext(correlationId) { log.info("Starter jobb: $jobbNavn") }
 
                 coroutineScope {

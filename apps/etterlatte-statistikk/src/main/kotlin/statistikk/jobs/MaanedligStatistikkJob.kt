@@ -1,9 +1,11 @@
 package no.nav.etterlatte.statistikk.jobs
 
+import no.nav.etterlatte.jobs.fixedRateCancellableTimer
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.tidspunkt.norskKlokke
 import no.nav.etterlatte.libs.common.tidspunkt.utcKlokke
 import no.nav.etterlatte.libs.jobs.LeaderElection
+import no.nav.etterlatte.statistikk.config.sikkerLogg
 import no.nav.etterlatte.statistikk.database.KjoertStatus
 import no.nav.etterlatte.statistikk.service.StatistikkService
 import org.slf4j.LoggerFactory
@@ -11,7 +13,6 @@ import java.time.Clock
 import java.time.Duration
 import java.time.YearMonth
 import java.util.*
-import kotlin.concurrent.fixedRateTimer
 
 class MaanedligStatistikkJob(
     private val statistikkService: StatistikkService,
@@ -25,22 +26,18 @@ class MaanedligStatistikkJob(
     fun schedule(): Timer {
         logger.info("$jobbNavn er satt til å kjøre med periode $periode")
 
-        return fixedRateTimer(
+        return fixedRateCancellableTimer(
             name = jobbNavn,
-            daemon = true,
             initialDelay = initialDelay,
+            logger = logger,
+            sikkerLogg = sikkerLogg,
             period = periode.toMillis()
         ) {
-            try {
-                ProduserOgLagreMaanedligStatistikk(
-                    leaderElection = leaderElection,
-                    statistikkService = statistikkService,
-                    clock = utcKlokke().norskKlokke()
-                ).run()
-            } catch (e: Throwable) {
-                logger.error("Kunne ikke kjøre jobb for produsering av månedlig stønadsstatistikk på grunn av feil", e)
-                throw e
-            }
+            ProduserOgLagreMaanedligStatistikk(
+                leaderElection = leaderElection,
+                statistikkService = statistikkService,
+                clock = utcKlokke().norskKlokke()
+            ).run()
         }
     }
 
@@ -62,11 +59,13 @@ class MaanedligStatistikkJob(
                         val maanedsstatistikkk = statistikkService.produserStoenadStatistikkForMaaned(maaned)
                         statistikkService.lagreMaanedsstatistikk(maanedsstatistikkk)
                     }
+
                     KjoertStatus.FEIL -> {
                         // TODO: cleanup her og prøv på nytt -- men den trenger litt manuell håndtering for avlevering
                         //      til bigquery. EY-1821
                         logger.error("Har en kjøring med feil. Lagrer ikke ny statistikk for måned $maaned")
                     }
+
                     KjoertStatus.INGEN_FEIL -> logger.info("Statistikk er allerede produsert for måned $maaned")
                 }
             }

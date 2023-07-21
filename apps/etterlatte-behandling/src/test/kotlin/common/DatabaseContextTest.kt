@@ -6,6 +6,8 @@ import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.database.DataSourceBuilder
+import no.nav.etterlatte.libs.database.migrate
+import no.nav.etterlatte.sak.SakDao
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll
@@ -27,20 +29,20 @@ class DatabaseContextTest {
         postgreSQLContainer.withUrlParam("user", postgreSQLContainer.username)
         postgreSQLContainer.withUrlParam("password", postgreSQLContainer.password)
 
-        val dataSource = DataSourceBuilder.createDataSource(
-            mutableMapOf(
-                "DB_HOST" to postgreSQLContainer.host,
-                "DB_USERNAME" to postgreSQLContainer.username,
-                "DB_PASSWORD" to postgreSQLContainer.password,
-                "DB_PORT" to postgreSQLContainer.firstMappedPort.toString(),
-                "DB_DATABASE" to postgreSQLContainer.databaseName
-            )
-        )
-
         Kontekst.set(
             Context(
                 user,
-                DatabaseContext(dataSource)
+                DatabaseContext(
+                    DataSourceBuilder.createDataSource(
+                        mutableMapOf(
+                            "DB_HOST" to postgreSQLContainer.host,
+                            "DB_USERNAME" to postgreSQLContainer.username,
+                            "DB_PASSWORD" to postgreSQLContainer.password,
+                            "DB_PORT" to postgreSQLContainer.firstMappedPort.toString(),
+                            "DB_DATABASE" to postgreSQLContainer.databaseName
+                        )
+                    ).also { it.migrate() }
+                )
             )
         )
     }
@@ -50,10 +52,13 @@ class DatabaseContextTest {
 
     @Test
     fun `bevarer transaksjonen med gjenbruksflagget aktivert`() {
+        val dao = SakDao { activeTransaction() }
         inTransaction {
-            val activeTx1 = Kontekst.get().databasecontxt.activeTx()
+            val activeTx1 = activeTransaction()
+            dao.hentSaker()
             inTransaction(true) {
-                val activeTx2 = Kontekst.get().databasecontxt.activeTx()
+                val activeTx2 = activeTransaction()
+                dao.hentSaker()
                 assertEquals(activeTx1, activeTx2)
             }
         }
@@ -61,10 +66,16 @@ class DatabaseContextTest {
 
     @Test
     fun `bevarer ikke transaksjonen med gjenbruksflagget deaktivert`() {
+        val dao = SakDao { activeTransaction() }
         inTransaction {
+            dao.hentSaker()
             assertThrows<IllegalStateException> {
-                inTransaction {}
+                inTransaction {
+                    dao.hentSaker()
+                }
             }
         }
     }
+
+    private fun activeTransaction() = Kontekst.get().databasecontxt.activeTx()
 }

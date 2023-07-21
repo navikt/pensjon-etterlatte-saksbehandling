@@ -29,7 +29,7 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.oppgaveny.OppgaveServiceNy
-import no.nav.etterlatte.oppgaveny.OppgaveType
+import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveType
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.LocalDateTime

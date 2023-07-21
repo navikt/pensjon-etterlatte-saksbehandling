@@ -82,13 +82,23 @@ function filtrerOppgaveStatus(
 }
 
 export type OppgavetypeFilterKeys = Oppgavetype | visAlle
-export const OPPGAVETYPEFILTER: Record<OppgavetypeFilterKeys, string> = {
-  visAlle: 'Vis alle',
-  FOERSTEGANGSBEHANDLING: 'Førstegangsbehandling',
-  REVURDERING: 'Revurdering',
-  HENDELSE: 'Hendelse',
-  MANUELT_OPPHOER: 'Manuelt opphør',
-  EKSTERN: 'Ekstern',
+export const OPPGAVETYPEFILTER: {
+    MANUELT_OPPHOER: string;
+    FOERSTEGANGSBEHANDLING: string;
+    HENDELSE: string;
+    REVURDERING: string;
+    EKSTERN: string;
+    ATTESTERING: string
+    visAlle: string;
+
+} = {
+    visAlle: 'Vis alle',
+    FOERSTEGANGSBEHANDLING: 'Førstegangsbehandling',
+    REVURDERING: 'Revurdering',
+    HENDELSE: 'Hendelse',
+    MANUELT_OPPHOER: 'Manuelt opphør',
+    EKSTERN: 'Ekstern',
+    ATTESTERING: 'Attestering'
 }
 
 function filtrerOppgaveType(oppgavetypeFilterKeys: OppgavetypeFilterKeys, oppgaver: OppgaveDTOny[]): OppgaveDTOny[] {

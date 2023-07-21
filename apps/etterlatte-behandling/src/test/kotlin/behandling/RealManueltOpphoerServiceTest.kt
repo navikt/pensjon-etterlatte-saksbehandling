@@ -25,11 +25,11 @@ import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveType
+import no.nav.etterlatte.libs.common.oppgaveNy.opprettNyOppgaveMedReferanseOgSak
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.manueltOpphoer
 import no.nav.etterlatte.oppgaveny.OppgaveServiceNy
-import no.nav.etterlatte.oppgaveny.OppgaveType
-import no.nav.etterlatte.oppgaveny.opprettNyOppgaveMedReferanseOgSak
 import no.nav.etterlatte.revurdering
 import no.nav.etterlatte.saksbehandlerToken
 import org.junit.jupiter.api.Assertions.assertAll

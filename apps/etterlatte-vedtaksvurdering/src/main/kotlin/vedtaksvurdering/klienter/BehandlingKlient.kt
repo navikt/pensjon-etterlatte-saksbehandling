@@ -9,6 +9,8 @@ import no.nav.etterlatte.libs.common.SakTilgangsSjekk
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveType
+import no.nav.etterlatte.libs.common.oppgaveNy.OpprettNyOppgaveRequest
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
@@ -23,6 +25,12 @@ import java.util.*
 interface BehandlingKlient : BehandlingTilgangsSjekk, SakTilgangsSjekk {
     suspend fun hentBehandling(behandlingId: UUID, brukerTokenInfo: BrukerTokenInfo): DetaljertBehandling
     suspend fun hentSak(sakId: Long, brukerTokenInfo: BrukerTokenInfo): Sak
+    suspend fun opprettOppgave(
+        referanse: String?,
+        sakId: Long,
+        brukerTokenInfo: BrukerTokenInfo,
+        oppgaveType: OppgaveType
+    ): Boolean
     suspend fun fattVedtak(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
@@ -94,6 +102,36 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
         } catch (e: Exception) {
             throw BehandlingKlientException("Henting av sak med id=$sakId feilet", e)
         }
+    }
+
+    override suspend fun opprettOppgave(
+        referanse: String?,
+        sakId: Long,
+        brukerTokenInfo: BrukerTokenInfo,
+        oppgaveType: OppgaveType
+    ): Boolean {
+        logger.info("Oppretter oppgave av type $oppgaveType for sak med sakId=$sakId")
+        val resource = Resource(clientId = clientId, url = "$resourceUrl/api/nyeoppgaver/opprett")
+        val response = downstreamResourceClient.post(
+            resource = resource,
+            brukerTokenInfo = brukerTokenInfo,
+            postBody = OpprettNyOppgaveRequest(
+                referanse = referanse.toString(),
+                sakId = sakId,
+                oppgaveType = oppgaveType
+            )
+        )
+
+        return response.mapBoth(
+            success = { true },
+            failure = {
+                logger.info(
+                    "Kan ikke opprette oppgave av type $oppgaveType for sak med sakId=$sakId",
+                    it.throwable
+                )
+                false
+            }
+        )
     }
 
     override suspend fun fattVedtak(

@@ -3,6 +3,8 @@ package no.nav.etterlatte.oppgaveny
 import io.ktor.server.plugins.BadRequestException
 import io.ktor.server.plugins.NotFoundException
 import no.nav.etterlatte.inTransaction
+import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
+import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.sak.SakDao
 import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
 import java.util.*
@@ -73,11 +75,23 @@ class OppgaveServiceNy(private val oppgaveDaoNy: OppgaveDaoNy, private val sakDa
     }
 
     private fun lagreOppgave(oppgaveNy: OppgaveNy): OppgaveNy {
-        oppgaveDaoNy.lagreOppgave(oppgaveNy)
-        return oppgaveDaoNy.hentOppgave(oppgaveNy.id)!!
+        var oppgaveLagres = oppgaveNy
+        if (oppgaveNy.frist === null) {
+            val enMaanedFrem = oppgaveNy.opprettet.toLocalDatetimeUTC().plusMonths(1L).toTidspunkt()
+            oppgaveLagres = oppgaveNy.copy(frist = enMaanedFrem)
+        }
+        oppgaveDaoNy.lagreOppgave(oppgaveLagres)
+        return oppgaveDaoNy.hentOppgave(oppgaveLagres.id)!!
     }
-
     fun hentOppgve(oppgaveId: UUID): OppgaveNy? {
         return oppgaveDaoNy.hentOppgave(oppgaveId)
     }
+}
+
+data class User(val name: String, val age: Int)
+
+fun main() {
+    val jack = User(name = "Jack", age = 1)
+    val olderJack = jack.copy(age = 2)
+    println(olderJack.name)
 }

@@ -146,7 +146,7 @@ class BehandlingServiceImpl(
         return hentBehandling(behandlingId)?.toDetaljertBehandling()
     }
 
-    private suspend fun hentBehandlingMedEnkelPersonopplysning(
+    internal suspend fun hentBehandlingMedEnkelPersonopplysning(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
         opplysningstype: Opplysningstype

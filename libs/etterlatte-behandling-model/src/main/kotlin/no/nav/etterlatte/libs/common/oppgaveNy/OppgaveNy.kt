@@ -1,4 +1,4 @@
-package no.nav.etterlatte.oppgaveny
+package no.nav.etterlatte.libs.common.oppgaveNy
 
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.Sak

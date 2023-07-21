@@ -31,7 +31,7 @@ import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
-import no.nav.etterlatte.oppgaveny.OppgaveType
+import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveType
 import no.nav.etterlatte.persongalleri
 import no.nav.etterlatte.sak.SakServiceFeatureToggle
 import org.junit.jupiter.api.AfterAll

@@ -5,6 +5,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveType
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.REVURDERING_AARSAK
@@ -28,7 +29,6 @@ import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.etterlatte.token.Systembruker
 import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlient
 import no.nav.etterlatte.vedtaksvurdering.klienter.BeregningKlient
-import no.nav.etterlatte.vedtaksvurdering.klienter.OppgaveType
 import no.nav.etterlatte.vedtaksvurdering.klienter.VilkaarsvurderingKlient
 import no.nav.helse.rapids_rivers.JsonMessage
 import org.slf4j.LoggerFactory
@@ -103,32 +103,33 @@ class VedtaksvurderingService(
             )
         )
 
-        behandlingKlient.fattVedtak(
-            behandlingId = behandlingId,
-            brukerTokenInfo = brukerTokenInfo,
-            vedtakHendelse = VedtakHendelse(
-                vedtakId = fattetVedtak.id,
-                inntruffet = fattetVedtak.vedtakFattet?.tidspunkt!!,
-                saksbehandler = fattetVedtak.vedtakFattet.ansvarligSaksbehandler
+        coroutineScope {
+            behandlingKlient.fattVedtak(
+                behandlingId = behandlingId,
+                brukerTokenInfo = brukerTokenInfo,
+                vedtakHendelse = VedtakHendelse(
+                    vedtakId = fattetVedtak.id,
+                    inntruffet = fattetVedtak.vedtakFattet?.tidspunkt!!,
+                    saksbehandler = fattetVedtak.vedtakFattet.ansvarligSaksbehandler
+                )
             )
-        )
 
-        behandlingKlient.opprettOppgave(
-            referanse = behandlingId.toString(),
-            sakId = sak.id,
-            brukerTokenInfo = brukerTokenInfo,
-            oppgaveType = OppgaveType.ATTESTERING
-        )
+            behandlingKlient.opprettOppgave(
+                referanse = behandlingId.toString(),
+                sakId = sak.id,
+                brukerTokenInfo = brukerTokenInfo,
+                oppgaveType = OppgaveType.ATTESTERING
+            )
 
-        sendToRapid(
-            lagRiverMelding(
-                vedtakhendelse = KafkaHendelseType.FATTET,
-                vedtak = fattetVedtak,
-                tekniskTid = fattetVedtak.vedtakFattet.tidspunkt.toLocalDatetimeUTC()
-            ),
-            behandlingId
-        )
-
+            sendToRapid(
+                lagRiverMelding(
+                    vedtakhendelse = KafkaHendelseType.FATTET,
+                    vedtak = fattetVedtak,
+                    tekniskTid = fattetVedtak.vedtakFattet.tidspunkt.toLocalDatetimeUTC()
+                ),
+                behandlingId
+            )
+        }
         return fattetVedtak
     }
 

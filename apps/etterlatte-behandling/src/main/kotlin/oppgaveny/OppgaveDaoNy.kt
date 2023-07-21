@@ -1,6 +1,10 @@
 package no.nav.etterlatte.oppgaveny
 
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveNy
+import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveType
+import no.nav.etterlatte.libs.common.oppgaveNy.SaksbehandlerEndringDto
+import no.nav.etterlatte.libs.common.oppgaveNy.Status
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunktOrNull
 import no.nav.etterlatte.libs.common.tidspunkt.setTidspunkt

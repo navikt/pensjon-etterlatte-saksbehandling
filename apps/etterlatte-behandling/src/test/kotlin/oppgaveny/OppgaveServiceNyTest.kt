@@ -9,6 +9,9 @@ import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.oppgaveNy.FjernSaksbehandlerRequest
+import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveType
+import no.nav.etterlatte.libs.common.oppgaveNy.SaksbehandlerEndringDto
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.sak.SakDao

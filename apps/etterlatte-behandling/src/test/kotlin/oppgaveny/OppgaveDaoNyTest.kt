@@ -2,6 +2,10 @@ package no.nav.etterlatte.oppgaveny
 
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveNy
+import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveType
+import no.nav.etterlatte.libs.common.oppgaveNy.SaksbehandlerEndringDto
+import no.nav.etterlatte.libs.common.oppgaveNy.Status
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.database.DataSourceBuilder

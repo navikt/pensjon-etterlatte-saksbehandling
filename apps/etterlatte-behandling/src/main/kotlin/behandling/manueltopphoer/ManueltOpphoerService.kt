@@ -22,7 +22,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.oppgaveny.OppgaveServiceNy
-import no.nav.etterlatte.oppgaveny.OppgaveType
+import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveType
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.util.*

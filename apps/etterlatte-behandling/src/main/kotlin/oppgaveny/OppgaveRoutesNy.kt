@@ -10,9 +10,10 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.libs.common.kunSaksbehandler
-import no.nav.etterlatte.libs.common.sak.Sak
-import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import java.util.*
+import no.nav.etterlatte.libs.common.oppgaveNy.FjernSaksbehandlerRequest
+import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveNy
+import no.nav.etterlatte.libs.common.oppgaveNy.OpprettNyOppgaveRequest
+import no.nav.etterlatte.libs.common.oppgaveNy.SaksbehandlerEndringDto
 
 internal fun Route.oppgaveRoutesNy(service: OppgaveServiceNy, kanBrukeNyOppgaveliste: Boolean) {
     route("/api/nyeoppgaver") {

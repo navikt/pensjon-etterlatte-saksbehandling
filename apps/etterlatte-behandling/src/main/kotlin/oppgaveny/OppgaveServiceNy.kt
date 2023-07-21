@@ -3,6 +3,11 @@ package no.nav.etterlatte.oppgaveny
 import io.ktor.server.plugins.BadRequestException
 import io.ktor.server.plugins.NotFoundException
 import no.nav.etterlatte.inTransaction
+import no.nav.etterlatte.libs.common.oppgaveNy.FjernSaksbehandlerRequest
+import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveNy
+import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveType
+import no.nav.etterlatte.libs.common.oppgaveNy.SaksbehandlerEndringDto
+import no.nav.etterlatte.libs.common.oppgaveNy.opprettNyOppgaveMedReferanseOgSak
 import no.nav.etterlatte.sak.SakDao
 import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
 import java.util.*
@@ -61,7 +66,22 @@ class OppgaveServiceNy(private val oppgaveDaoNy: OppgaveDaoNy, private val sakDa
         }
     }
 
-    fun opprettNyOppgaveMedSakOgReferanse(referanse: String, sakId: Long, oppgaveType: OppgaveType, saksbehandler: String? = null): OppgaveNy {
+    fun opprettNyOppgaveMedSakOgReferanse(referanse: String, sakId: Long, oppgaveType: OppgaveType): OppgaveNy {
+        val sak = sakDao.hentSak(sakId)!!
+        return lagreOppgave(
+            opprettNyOppgaveMedReferanseOgSak(
+                referanse = referanse,
+                sak = sak,
+                oppgaveType = oppgaveType
+            )
+        )
+    }
+    fun opprettNyOppgaveMedSakOgReferanseOgSaksbehandler(
+        referanse: String,
+        sakId: Long,
+        oppgaveType: OppgaveType,
+        saksbehandler: String
+    ): OppgaveNy {
         val sak = sakDao.hentSak(sakId)!!
         return lagreOppgave(
             opprettNyOppgaveMedReferanseOgSak(

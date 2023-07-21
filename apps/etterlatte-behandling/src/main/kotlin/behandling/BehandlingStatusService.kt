@@ -9,8 +9,6 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.sak.SakIDListe
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
-import no.nav.etterlatte.oppgaveny.OppgaveServiceNy
-import no.nav.etterlatte.oppgaveny.OppgaveType
 import java.time.LocalDateTime
 import java.util.*
 

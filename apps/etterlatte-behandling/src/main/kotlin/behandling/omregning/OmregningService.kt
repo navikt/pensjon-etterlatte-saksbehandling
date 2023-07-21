@@ -35,7 +35,8 @@ class OmregningService(
                 forrigeBehandling = forrigeBehandling,
                 revurderingAarsak = RevurderingAarsak.REGULERING,
                 kilde = Vedtaksloesning.GJENNY,
-                paaGrunnAvHendelse = null
+                paaGrunnAvHendelse = null,
+                begrunnelse = null
             )
         } ?: throw Exception("Opprettelse av revurdering feilet for $sakId")
         return Triple(behandling.id, forrigeBehandling.id, behandling.sak.sakType)

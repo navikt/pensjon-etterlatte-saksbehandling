@@ -173,13 +173,7 @@ class ApplicationContext(
 
     val foerstegangsbehandlingService =
         FoerstegangsbehandlingServiceImpl(
-            oppgaveService = oppgaveServiceNy,
-            grunnlagService = grunnlagsService,
-            revurderingService = revurderingService,
-            sakDao = sakDao,
             behandlingDao = behandlingDao,
-            hendelseDao = hendelseDao,
-            behandlingHendelser = behandlingsHendelser,
             featureToggleService = featureToggleService
         )
 

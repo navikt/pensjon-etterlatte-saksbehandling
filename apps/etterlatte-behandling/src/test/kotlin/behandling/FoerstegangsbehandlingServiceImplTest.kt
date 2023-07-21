@@ -77,13 +77,7 @@ internal class FoerstegangsbehandlingServiceImplTest {
     )
     private val naaTid = Tidspunkt.now()
     private val behandlingsService = FoerstegangsbehandlingServiceImpl(
-        oppgaveService,
-        grunnlagService,
-        revurderingService,
-        sakDaoMock,
         behandlingDaoMock,
-        hendelseDaoMock,
-        behandlingHendelserKafkaProducerMock,
         featureToggleService,
         naaTid.fixedNorskTid()
     )

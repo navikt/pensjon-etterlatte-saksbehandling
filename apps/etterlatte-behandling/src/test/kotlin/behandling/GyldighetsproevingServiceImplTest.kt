@@ -13,11 +13,8 @@ import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
-import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeService
-import no.nav.etterlatte.behandling.revurdering.RevurderingServiceImpl
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
-import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseDao
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.JaNei
@@ -37,7 +34,6 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.fixedNorskTid
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeNorskTid
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
-import no.nav.etterlatte.oppgaveny.OppgaveServiceNy
 import no.nav.etterlatte.persongalleri
 import no.nav.etterlatte.sak.SakDao
 import org.junit.jupiter.api.AfterEach
@@ -58,22 +54,6 @@ internal class GyldighetsproevingServiceImplTest {
     private val hendelseDaoMock = mockk<HendelseDao>()
     private val behandlingHendelserKafkaProducerMock = mockk<BehandlingHendelserKafkaProducer>()
     private val featureToggleService = mockk<FeatureToggleService>()
-    private val grunnlagsendringshendelseDao = mockk<GrunnlagsendringshendelseDao>()
-    private val grunnlagService = mockk<GrunnlagService>()
-    private val oppgaveService = mockk<OppgaveServiceNy>()
-    private val kommerBarnetTilGodeService = mockk<KommerBarnetTilGodeService>().also {
-        every { it.hentKommerBarnetTilGode(any()) } returns null
-    }
-    private val revurderingService = RevurderingServiceImpl(
-        oppgaveService,
-        grunnlagService,
-        behandlingHendelserKafkaProducerMock,
-        featureToggleService,
-        behandlingDaoMock,
-        hendelseDaoMock,
-        grunnlagsendringshendelseDao,
-        kommerBarnetTilGodeService
-    )
     private val naaTid = Tidspunkt.now()
     private val behandlingsService = GyldighetsproevingServiceImpl(
         behandlingDaoMock,

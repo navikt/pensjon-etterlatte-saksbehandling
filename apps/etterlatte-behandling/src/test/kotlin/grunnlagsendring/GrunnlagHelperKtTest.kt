@@ -77,19 +77,19 @@ internal class GrunnlagHelperKtTest {
         val ansvarligeForeldreSoesken = grunnlag.ansvarligeForeldre(Saksrolle.SOESKEN, HELSOESKEN_FOEDSELSNUMMER.value)
         assertEquals(ansvarligeForeldre, ansvarligeForeldreSoeker)
         assertEquals(ansvarligeForeldre, ansvarligeForeldreSoesken)
-        assertThrows<IllegalArgumentException> {
+        assertThrows<GrunnlagRolleException> {
             grunnlag.ansvarligeForeldre(
                 Saksrolle.AVDOED,
                 AVDOED_FOEDSELSNUMMER.value
             )
         }
-        assertThrows<IllegalArgumentException> {
+        assertThrows<GrunnlagRolleException> {
             grunnlag.ansvarligeForeldre(
                 Saksrolle.GJENLEVENDE,
                 GJENLEVENDE_FOEDSELSNUMMER.value
             )
         }
-        assertThrows<IllegalArgumentException> { grunnlag.ansvarligeForeldre(Saksrolle.UKJENT, "123") }
+        assertThrows<GrunnlagRolleException> { grunnlag.ansvarligeForeldre(Saksrolle.UKJENT, "123") }
     }
 
     @Test
@@ -123,8 +123,8 @@ internal class GrunnlagHelperKtTest {
         val gjenlevendesBarn = grunnlag.barn(Saksrolle.GJENLEVENDE)
         assertEquals(barn, avdoedesBarn)
         assertEquals(barn, gjenlevendesBarn)
-        assertThrows<IllegalArgumentException> { grunnlag.barn(Saksrolle.SOESKEN) }
-        assertThrows<IllegalArgumentException> { grunnlag.barn(Saksrolle.UKJENT) }
+        assertThrows<GrunnlagRolleException> { grunnlag.barn(Saksrolle.SOESKEN) }
+        assertThrows<GrunnlagRolleException> { grunnlag.barn(Saksrolle.UKJENT) }
     }
 
     @Test

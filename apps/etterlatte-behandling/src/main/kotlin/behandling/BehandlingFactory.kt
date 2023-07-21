@@ -65,7 +65,7 @@ class BehandlingFactory(
                 harIverksattEllerAttestertBehandling.maxBy { it.behandlingOpprettet }.id,
                 mottattDato,
                 Prosesstype.AUTOMATISK,
-                Vedtaksloesning.GJENNY,
+                kilde,
                 "Oppdatert søknad",
                 RevurderingAarsak.NY_SOEKNAD,
                 begrunnelse = null // TODO
@@ -74,7 +74,7 @@ class BehandlingFactory(
             val harBehandlingUnderbehandling = harBehandlingerForSak.filter { behandling ->
                 BehandlingStatus.underBehandling().find { it == behandling.status } != null
             }
-            opprettFoerstegangsbehandling(harBehandlingUnderbehandling, sak, persongalleri, mottattDato)
+            opprettFoerstegangsbehandling(harBehandlingUnderbehandling, sak, persongalleri, mottattDato, kilde)
         }
     }
 
@@ -82,7 +82,8 @@ class BehandlingFactory(
         harBehandlingUnderbehandling: List<Behandling>,
         sak: Sak,
         persongalleri: Persongalleri,
-        mottattDato: String?
+        mottattDato: String?,
+        kilde: Vedtaksloesning
     ): Behandling? {
         return inTransaction {
             harBehandlingUnderbehandling.forEach {
@@ -95,7 +96,7 @@ class BehandlingFactory(
                 status = BehandlingStatus.OPPRETTET,
                 soeknadMottattDato = mottattDato?.let { LocalDateTime.parse(it) },
                 persongalleri = persongalleri,
-                kilde = Vedtaksloesning.GJENNY,
+                kilde = kilde,
                 merknad = opprettMerknad(sak, persongalleri)
             ).let { opprettBehandling ->
                 behandlingDao.opprettBehandling(opprettBehandling)

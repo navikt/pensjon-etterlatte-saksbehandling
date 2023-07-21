@@ -10,7 +10,7 @@ import no.nav.etterlatte.behandling.BehandlingStatusServiceImpl
 import no.nav.etterlatte.behandling.BehandlingsHendelserKafkaProducerImpl
 import no.nav.etterlatte.behandling.EnhetServiceImpl
 import no.nav.etterlatte.behandling.GrunnlagService
-import no.nav.etterlatte.behandling.foerstegangsbehandling.FoerstegangsbehandlingServiceImpl
+import no.nav.etterlatte.behandling.GyldighetsproevingServiceImpl
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlientObo
@@ -171,8 +171,8 @@ class ApplicationContext(
             kommerBarnetTilGodeService = kommerBarnetTilGodeService
         )
 
-    val foerstegangsbehandlingService =
-        FoerstegangsbehandlingServiceImpl(
+    val gyldighetsproevingService =
+        GyldighetsproevingServiceImpl(
             behandlingDao = behandlingDao,
             featureToggleService = featureToggleService
         )
@@ -229,7 +229,7 @@ class ApplicationContext(
 
     val migreringService = MigreringService(
         sakService = sakService,
-        foerstegangsBehandlingService = foerstegangsbehandlingService,
+        gyldighetsproevingService = gyldighetsproevingService,
         behandlingsHendelser = behandlingsHendelser,
         migreringRepository = MigreringRepository(dataSource),
         behandlingService = behandlingService,

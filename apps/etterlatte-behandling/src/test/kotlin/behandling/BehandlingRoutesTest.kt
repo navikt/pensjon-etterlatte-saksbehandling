@@ -23,9 +23,9 @@ import io.mockk.verify
 import no.nav.etterlatte.behandling.BehandlingFactory
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.BoddEllerArbeidetUtlandetRequest
+import no.nav.etterlatte.behandling.GyldighetsproevingService
 import no.nav.etterlatte.behandling.UtenlandstilsnittRequest
 import no.nav.etterlatte.behandling.behandlingRoutes
-import no.nav.etterlatte.behandling.foerstegangsbehandling.FoerstegangsbehandlingService
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeService
 import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerService
 import no.nav.etterlatte.libs.common.behandling.UtenlandstilsnittType
@@ -53,7 +53,7 @@ internal class BehandlingRoutesTest {
     private val mockOAuth2Server = MockOAuth2Server()
     private lateinit var hoconApplicationConfig: HoconApplicationConfig
     private val behandlingService = mockk<BehandlingService>(relaxUnitFun = true)
-    private val foerstegangsbehandlingService = mockk<FoerstegangsbehandlingService>()
+    private val gyldighetsproevingService = mockk<GyldighetsproevingService>()
     private val kommerBarnetTilGodeService = mockk<KommerBarnetTilGodeService>()
     private val manueltOpphoerService = mockk<ManueltOpphoerService>()
     private val behandlingFactory = mockk<BehandlingFactory>()
@@ -189,7 +189,7 @@ internal class BehandlingRoutesTest {
                 restModule(this.log) {
                     behandlingRoutes(
                         behandlingService,
-                        foerstegangsbehandlingService,
+                        gyldighetsproevingService,
                         kommerBarnetTilGodeService,
                         manueltOpphoerService,
                         behandlingFactory

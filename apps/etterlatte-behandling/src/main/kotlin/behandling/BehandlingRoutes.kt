@@ -16,7 +16,6 @@ import io.ktor.server.routing.route
 import no.nav.etterlatte.behandling.domain.ManueltOpphoer
 import no.nav.etterlatte.behandling.domain.TilstandException
 import no.nav.etterlatte.behandling.domain.toBehandlingSammendrag
-import no.nav.etterlatte.behandling.foerstegangsbehandling.FoerstegangsbehandlingService
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeService
 import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerAarsak
 import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerRequest
@@ -43,7 +42,7 @@ import java.util.*
 
 internal fun Route.behandlingRoutes(
     behandlingService: BehandlingService,
-    foerstegangsbehandlingService: FoerstegangsbehandlingService,
+    gyldighetsproevingService: GyldighetsproevingService,
     kommerBarnetTilGodeService: KommerBarnetTilGodeService,
     manueltOpphoerService: ManueltOpphoerService,
     behandlingFactory: BehandlingFactory
@@ -60,7 +59,7 @@ internal fun Route.behandlingRoutes(
             hentNavidentFraToken { navIdent ->
                 val body = call.receive<JaNeiMedBegrunnelse>()
                 when (
-                    val lagretGyldighetsResultat = foerstegangsbehandlingService.lagreGyldighetsproeving(
+                    val lagretGyldighetsResultat = gyldighetsproevingService.lagreGyldighetsproeving(
                         behandlingsId,
                         navIdent,
                         body
@@ -221,7 +220,7 @@ internal fun Route.behandlingRoutes(
 
             post("/gyldigfremsatt") {
                 val body = call.receive<GyldighetsResultat>()
-                foerstegangsbehandlingService.lagreGyldighetsproeving(behandlingsId, body)
+                gyldighetsproevingService.lagreGyldighetsproeving(behandlingsId, body)
                 call.respond(HttpStatusCode.OK)
             }
         }

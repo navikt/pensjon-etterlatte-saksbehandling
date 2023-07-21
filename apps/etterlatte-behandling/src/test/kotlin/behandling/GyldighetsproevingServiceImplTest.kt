@@ -12,7 +12,6 @@ import no.nav.etterlatte.DatabaseKontekst
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
-import no.nav.etterlatte.behandling.foerstegangsbehandling.FoerstegangsbehandlingServiceImpl
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeService
 import no.nav.etterlatte.behandling.revurdering.RevurderingServiceImpl
@@ -51,7 +50,7 @@ import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.*
 
-internal class FoerstegangsbehandlingServiceImplTest {
+internal class GyldighetsproevingServiceImplTest {
 
     private val user = mockk<SaksbehandlerMedEnheterOgRoller>()
     private val sakDaoMock = mockk<SakDao>()
@@ -76,7 +75,7 @@ internal class FoerstegangsbehandlingServiceImplTest {
         kommerBarnetTilGodeService
     )
     private val naaTid = Tidspunkt.now()
-    private val behandlingsService = FoerstegangsbehandlingServiceImpl(
+    private val behandlingsService = GyldighetsproevingServiceImpl(
         behandlingDaoMock,
         featureToggleService,
         naaTid.fixedNorskTid()

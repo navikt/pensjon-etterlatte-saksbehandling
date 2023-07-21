@@ -4,8 +4,8 @@ import no.nav.etterlatte.behandling.BehandlingFactory
 import no.nav.etterlatte.behandling.BehandlingHendelseType
 import no.nav.etterlatte.behandling.BehandlingHendelserKafkaProducer
 import no.nav.etterlatte.behandling.BehandlingService
+import no.nav.etterlatte.behandling.GyldighetsproevingService
 import no.nav.etterlatte.behandling.domain.Behandling
-import no.nav.etterlatte.behandling.foerstegangsbehandling.FoerstegangsbehandlingService
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeService
 import no.nav.etterlatte.behandling.migrering.MigreringRepository
 import no.nav.etterlatte.libs.common.Vedtaksloesning
@@ -19,7 +19,7 @@ import no.nav.etterlatte.sak.SakService
 
 class MigreringService(
     private val sakService: SakService,
-    private val foerstegangsBehandlingService: FoerstegangsbehandlingService,
+    private val gyldighetsproevingService: GyldighetsproevingService,
     private val behandlingFactory: BehandlingFactory,
     private val kommerBarnetTilGodeService: KommerBarnetTilGodeService,
     private val behandlingsHendelser: BehandlingHendelserKafkaProducer,
@@ -36,7 +36,7 @@ class MigreringService(
                 behandlingId = it.id
             )
         )
-        foerstegangsBehandlingService.lagreGyldighetsproeving(
+        gyldighetsproevingService.lagreGyldighetsproeving(
             it.id,
             pesys,
             JaNeiMedBegrunnelse(JaNei.JA, "Automatisk importert fra Pesys")

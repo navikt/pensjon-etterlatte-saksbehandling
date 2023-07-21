@@ -1,9 +1,7 @@
-package no.nav.etterlatte.behandling.foerstegangsbehandling
+package no.nav.etterlatte.behandling
 
 import no.nav.etterlatte.Kontekst
-import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
-import no.nav.etterlatte.behandling.filterBehandlingerForEnheter
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.JaNeiMedBegrunnelse
@@ -21,7 +19,7 @@ import org.slf4j.LoggerFactory
 import java.time.Clock
 import java.util.*
 
-interface FoerstegangsbehandlingService {
+interface GyldighetsproevingService {
 
     fun lagreGyldighetsproeving(
         behandlingId: UUID,
@@ -32,12 +30,12 @@ interface FoerstegangsbehandlingService {
     fun lagreGyldighetsproeving(behandlingId: UUID, gyldighetsproeving: GyldighetsResultat)
 }
 
-class FoerstegangsbehandlingServiceImpl(
+class GyldighetsproevingServiceImpl(
     private val behandlingDao: BehandlingDao,
     private val featureToggleService: FeatureToggleService,
     private val klokke: Clock = utcKlokke()
-) : FoerstegangsbehandlingService {
-    private val logger = LoggerFactory.getLogger(FoerstegangsbehandlingServiceImpl::class.java)
+) : GyldighetsproevingService {
+    private val logger = LoggerFactory.getLogger(GyldighetsproevingServiceImpl::class.java)
 
     internal fun hentBehandling(id: UUID): Foerstegangsbehandling? =
         (behandlingDao.hentBehandling(id) as? Foerstegangsbehandling)?.sjekkEnhet()

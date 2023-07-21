@@ -67,7 +67,8 @@ class BehandlingFactory(
                 Prosesstype.AUTOMATISK,
                 Vedtaksloesning.GJENNY,
                 "Oppdatert søknad",
-                RevurderingAarsak.NY_SOEKNAD
+                RevurderingAarsak.NY_SOEKNAD,
+                begrunnelse = null // TODO
             )
         } else {
             val harBehandlingUnderbehandling = harBehandlingerForSak.filter { behandling ->

@@ -55,6 +55,7 @@ interface RevurderingService {
 
     fun lagreRevurderingInfo(behandlingsId: UUID, info: RevurderingInfo, navIdent: String): Boolean
 
+    // TODO: Gjer denne privat, kall opprettAutomatiskRevurdering heller
     fun opprettRevurdering(
         sakId: Long,
         persongalleri: Persongalleri,
@@ -64,7 +65,8 @@ interface RevurderingService {
         kilde: Vedtaksloesning,
         merknad: String? = null,
         revurderingAarsak: RevurderingAarsak,
-        fraDato: Virkningstidspunkt? = null
+        fraDato: Virkningstidspunkt? = null,
+        begrunnelse: String?
     ): Revurdering?
 }
 
@@ -106,7 +108,8 @@ class RevurderingServiceImpl(
                 Prosesstype.MANUELL,
                 kilde,
                 null,
-                revurderingAarsak
+                revurderingAarsak,
+                begrunnelse = begrunnelse
             )?.also { revurdering ->
                 if (paaGrunnAvHendelse != null) {
                     inTransaction {
@@ -138,7 +141,8 @@ class RevurderingServiceImpl(
             kilde,
             null,
             revurderingAarsak,
-            fraDato.tilVirkningstidspunkt("Opprettet automatisk")
+            fraDato.tilVirkningstidspunkt("Opprettet automatisk"),
+            begrunnelse = "Automatisk revurdering - ${revurderingAarsak.name.lowercase()}"
         )
     }
 
@@ -170,7 +174,8 @@ class RevurderingServiceImpl(
         kilde: Vedtaksloesning,
         merknad: String?,
         revurderingAarsak: RevurderingAarsak,
-        fraDato: Virkningstidspunkt?
+        fraDato: Virkningstidspunkt?,
+        begrunnelse: String?
     ): Revurdering? {
         return inTransaction {
             OpprettBehandling(

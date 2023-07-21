@@ -2,6 +2,7 @@ package no.nav.etterlatte.behandling.revurdering
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.behandling.domain.Revurdering
+import no.nav.etterlatte.behandling.hendelse.getUUID
 import no.nav.etterlatte.behandling.objectMapper
 import no.nav.etterlatte.behandling.somLocalDateTimeUTC
 import no.nav.etterlatte.grunnlagsendring.setJsonb
@@ -26,7 +27,7 @@ class RevurderingDao(private val connection: () -> Connection) {
         persongalleri: Persongalleri,
         kommerBarnetTilGode: (UUID) -> KommerBarnetTilgode?
     ): Revurdering {
-        val id = rs.getObject("id") as UUID
+        val id = rs.getUUID("id")
         val revurderingInfo = hentRevurderingInfoForBehandling(id)
 
         return Revurdering.opprett(

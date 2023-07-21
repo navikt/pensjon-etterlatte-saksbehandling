@@ -92,7 +92,7 @@ class BehandlingDao(
     }
 
     private fun asFoerstegangsbehandling(rs: ResultSet): Foerstegangsbehandling {
-        val id = rs.getObject("id") as UUID
+        val id = rs.getUUID("id")
         return Foerstegangsbehandling(
             id = id,
             sak = mapSak(rs),
@@ -127,7 +127,7 @@ class BehandlingDao(
     ) { i: UUID -> kommerBarnetTilGodeDao.hentKommerBarnetTilGode(i) }
 
     private fun asManueltOpphoer(rs: ResultSet) = ManueltOpphoer(
-        id = rs.getObject("id") as UUID,
+        id = rs.getUUID("id"),
         sak = mapSak(rs),
         behandlingOpprettet = rs.somLocalDateTimeUTC("behandling_opprettet"),
         sistEndret = rs.somLocalDateTimeUTC("sist_endret"),

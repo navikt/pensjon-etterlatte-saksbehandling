@@ -171,41 +171,39 @@ class RevurderingServiceImpl(
         revurderingAarsak: RevurderingAarsak,
         virkningstidspunkt: Virkningstidspunkt?,
         begrunnelse: String?
-    ): Revurdering? {
-        return inTransaction {
-            OpprettBehandling(
-                type = BehandlingType.REVURDERING,
-                sakId = sakId,
-                status = BehandlingStatus.OPPRETTET,
-                soeknadMottattDato = mottattDato?.let { LocalDateTime.parse(it) },
-                revurderingsAarsak = revurderingAarsak,
-                persongalleri = persongalleri,
-                virkningstidspunkt = virkningstidspunkt,
-                kilde = kilde,
-                prosesstype = prosessType,
-                merknad = merknad
-            ).let { opprettBehandling ->
-                behandlingDao.opprettBehandling(opprettBehandling)
-                forrigeBehandling?.let {
-                    kommerBarnetTilGodeService.hentKommerBarnetTilGode(it)
-                        ?.copy(behandlingId = opprettBehandling.id)
-                        ?.let { kopiert -> kommerBarnetTilGodeService.lagreKommerBarnetTilgode(kopiert) }
-                }
-                hendelseDao.behandlingOpprettet(opprettBehandling.toBehandlingOpprettet())
+    ): Revurdering? = inTransaction {
+        OpprettBehandling(
+            type = BehandlingType.REVURDERING,
+            sakId = sakId,
+            status = BehandlingStatus.OPPRETTET,
+            soeknadMottattDato = mottattDato?.let { LocalDateTime.parse(it) },
+            revurderingsAarsak = revurderingAarsak,
+            persongalleri = persongalleri,
+            virkningstidspunkt = virkningstidspunkt,
+            kilde = kilde,
+            prosesstype = prosessType,
+            merknad = merknad
+        ).let { opprettBehandling ->
+            behandlingDao.opprettBehandling(opprettBehandling)
+            forrigeBehandling?.let {
+                kommerBarnetTilGodeService.hentKommerBarnetTilGode(it)
+                    ?.copy(behandlingId = opprettBehandling.id)
+                    ?.let { kopiert -> kommerBarnetTilGodeService.lagreKommerBarnetTilgode(kopiert) }
+            }
+            hendelseDao.behandlingOpprettet(opprettBehandling.toBehandlingOpprettet())
 
-                logger.info("Opprettet behandling ${opprettBehandling.id} i sak ${opprettBehandling.sakId}")
+            logger.info("Opprettet behandling ${opprettBehandling.id} i sak ${opprettBehandling.sakId}")
 
-                behandlingDao.hentBehandling(opprettBehandling.id) as? Revurdering
-            }.also { behandling ->
-                behandling?.let {
-                    grunnlagService.leggInnNyttGrunnlag(it)
-                    oppgaveService.opprettNyOppgaveMedSakOgReferanse(
-                        referanse = behandling.id.toString(),
-                        sakId = sakId,
-                        oppgaveType = OppgaveType.REVUDERING
-                    )
-                    behandlingHendelser.sendMeldingForHendelse(it, BehandlingHendelseType.OPPRETTET)
-                }
+            behandlingDao.hentBehandling(opprettBehandling.id) as? Revurdering
+        }.also { behandling ->
+            behandling?.let {
+                grunnlagService.leggInnNyttGrunnlag(it)
+                oppgaveService.opprettNyOppgaveMedSakOgReferanse(
+                    referanse = behandling.id.toString(),
+                    sakId = sakId,
+                    oppgaveType = OppgaveType.REVUDERING
+                )
+                behandlingHendelser.sendMeldingForHendelse(it, BehandlingHendelseType.OPPRETTET)
             }
         }
     }

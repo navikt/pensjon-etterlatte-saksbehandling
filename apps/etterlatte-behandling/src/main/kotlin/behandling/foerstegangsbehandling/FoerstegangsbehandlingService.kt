@@ -59,13 +59,6 @@ interface FoerstegangsbehandlingService {
     ): GyldighetsResultat?
 
     fun lagreGyldighetsproeving(behandlingId: UUID, gyldighetsproeving: GyldighetsResultat)
-    fun settOpprettet(behandlingId: UUID, dryRun: Boolean = true)
-    fun settVilkaarsvurdert(behandlingId: UUID, dryRun: Boolean = true)
-    fun settBeregnet(behandlingId: UUID, dryRun: Boolean = true)
-    fun settFattetVedtak(behandlingId: UUID, dryRun: Boolean = true)
-    fun settAttestert(behandlingId: UUID, dryRun: Boolean = true)
-    fun settReturnert(behandlingId: UUID, dryRun: Boolean = true)
-    fun settIverksatt(behandlingId: UUID, dryRun: Boolean = true)
 }
 
 class FoerstegangsbehandlingServiceImpl(
@@ -218,56 +211,6 @@ class FoerstegangsbehandlingServiceImpl(
                 behandlingDao.lagreGyldighetsproving(it)
                 logger.info("behandling ${it.id} i sak: ${it.sak.id} er gyldighetsprøvd. Saktype: ${it.sak.sakType}")
             }
-    }
-
-    override fun settOpprettet(behandlingId: UUID, dryRun: Boolean) {
-        hentBehandling(behandlingId)?.tilOpprettet()?.lagreEndring(dryRun)
-    }
-
-    override fun settVilkaarsvurdert(behandlingId: UUID, dryRun: Boolean) {
-        val behandling = hentFoerstegangsbehandling(behandlingId)?.tilVilkaarsvurdert()
-
-        if (!dryRun) {
-            inTransaction {
-                behandling?.let {
-                    behandlingDao.lagreStatus(it.id, it.status, it.sistEndret)
-                }
-            }
-        }
-    }
-
-    override fun settBeregnet(behandlingId: UUID, dryRun: Boolean) {
-        hentFoerstegangsbehandling(behandlingId)?.tilBeregnet()?.lagreEndring(dryRun)
-    }
-
-    override fun settFattetVedtak(behandlingId: UUID, dryRun: Boolean) {
-        hentFoerstegangsbehandling(behandlingId)?.tilFattetVedtak()?.lagreEndring(dryRun)
-    }
-
-    override fun settAttestert(behandlingId: UUID, dryRun: Boolean) {
-        hentFoerstegangsbehandling(behandlingId)?.tilAttestert()?.lagreEndring(dryRun)
-    }
-
-    override fun settReturnert(behandlingId: UUID, dryRun: Boolean) {
-        hentFoerstegangsbehandling(behandlingId)?.tilReturnert()?.lagreEndring(dryRun)
-    }
-
-    override fun settIverksatt(behandlingId: UUID, dryRun: Boolean) {
-        hentFoerstegangsbehandling(behandlingId)?.tilIverksatt()?.lagreEndring(dryRun)
-    }
-
-    private fun Foerstegangsbehandling.lagreEndring(dryRun: Boolean) {
-        if (dryRun) return
-
-        lagreNyBehandlingStatus(this)
-    }
-
-    private fun lagreNyBehandlingStatus(behandling: Foerstegangsbehandling) {
-        inTransaction {
-            behandling.let {
-                behandlingDao.lagreStatus(it.id, it.status, it.sistEndret)
-            }
-        }
     }
 
     private fun opprettMerknad(sak: Sak, persongalleri: Persongalleri): String? {

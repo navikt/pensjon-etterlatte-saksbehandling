@@ -5,18 +5,17 @@ import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.jobs.shuttingDown
 import no.nav.etterlatte.libs.jobs.LeaderElection
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import java.util.concurrent.atomic.AtomicBoolean
 
 internal class GrunnlagsendringshendelseJobTest {
 
     private val grunnlagsendringshendelseService: GrunnlagsendringshendelseService = mockk {
         every { sjekkKlareGrunnlagsendringshendelser(any()) } returns Unit
     }
-    private val closed: AtomicBoolean = AtomicBoolean(false)
     private val leaderElection: LeaderElection = mockk()
     private val dataSource = mockk<HikariDataSource>()
     private val grunnlagsendringshendelseJob = GrunnlagsendringshendelseJob.SjekkKlareGrunnlagsendringshendelser(
@@ -24,8 +23,7 @@ internal class GrunnlagsendringshendelseJobTest {
         leaderElection = leaderElection,
         jobbNavn = "jobb",
         minutterGamleHendelser = 1L,
-        datasource = dataSource,
-        closed = closed
+        datasource = dataSource
     )
 
     @Test
@@ -41,10 +39,11 @@ internal class GrunnlagsendringshendelseJobTest {
     @Test
     fun `skal ikke utfoere jobb siden pod er i shutdown`() {
         every { leaderElection.isLeader() } returns true
-        closed.set(true) // simulerer shutdown
+        shuttingDown.set(true) // simulerer shutdown
         runBlocking { grunnlagsendringshendelseJob.run() }
 
         coVerify(exactly = 0) { grunnlagsendringshendelseService.sjekkKlareGrunnlagsendringshendelser(any()) }
+        shuttingDown.set(false)
     }
 
     @Test

@@ -1,18 +1,24 @@
 import { OppgaveDTOny } from '~shared/api/oppgaverny'
 import { useAppSelector } from '~store/Store'
-import { Button, Table } from '@navikt/ds-react'
+import { Button, Pagination, Table } from '@navikt/ds-react'
 import { formaterStringDato } from '~utils/formattering'
 import { RedigerSaksbehandler } from '~components/nyoppgavebenk/RedigerSaksbehandler'
 import { CaretRightIcon } from '@navikt/aksel-icons'
+import { FristHandlinger } from '~components/nyoppgavebenk/minoppgaveliste/FristHandlinger'
+import { useState } from 'react'
 
 export const MinOppgaveliste = (props: { oppgaver: ReadonlyArray<OppgaveDTOny> }) => {
   const { oppgaver } = props
   const user = useAppSelector((state) => state.saksbehandlerReducer.saksbehandler)
-
+  const [page, setPage] = useState<number>(1)
   const mineOppgaver = oppgaver.filter((o) => o.saksbehandler === user.ident)
+  const rowsPerPage = 20
+  let paginerteOppgaver = mineOppgaver
+  paginerteOppgaver = paginerteOppgaver.slice((page - 1) * rowsPerPage, page * rowsPerPage)
+
   return (
     <>
-      {mineOppgaver.length > 0 ? (
+      {paginerteOppgaver.length > 0 ? (
         <div>
           <Table>
             <Table.Header>
@@ -30,8 +36,8 @@ export const MinOppgaveliste = (props: { oppgaver: ReadonlyArray<OppgaveDTOny> }
               </Table.Row>
             </Table.Header>
             <Table.Body>
-              {mineOppgaver &&
-                mineOppgaver.map(
+              {paginerteOppgaver &&
+                paginerteOppgaver.map(
                   ({ id, status, enhet, type, saksbehandler, opprettet, merknad, sakType, fnr, frist }) => (
                     <Table.Row key={id}>
                       <Table.HeaderCell>{formaterStringDato(opprettet)}</Table.HeaderCell>
@@ -44,7 +50,9 @@ export const MinOppgaveliste = (props: { oppgaver: ReadonlyArray<OppgaveDTOny> }
                         {saksbehandler && <RedigerSaksbehandler saksbehandler={saksbehandler} oppgaveId={id} />}
                       </Table.DataCell>
                       <Table.DataCell>{sakType ? sakType : 'Ingen saktype, må migreres'}</Table.DataCell>
-                      <Table.DataCell>{frist ? frist : 'Ingen frist'}</Table.DataCell>
+                      <Table.DataCell>
+                        <FristHandlinger frist={frist} oppgaveId={id} />
+                      </Table.DataCell>
                       <Table.DataCell>
                         <Button icon={<CaretRightIcon />} variant="primary" onClick={() => {}}>
                           Start behandling
@@ -55,6 +63,12 @@ export const MinOppgaveliste = (props: { oppgaver: ReadonlyArray<OppgaveDTOny> }
                 )}
             </Table.Body>
           </Table>
+          <Pagination
+            page={page}
+            onPageChange={setPage}
+            count={Math.ceil(mineOppgaver.length / rowsPerPage)}
+            size="small"
+          />
         </div>
       ) : (
         <>Du har ingen oppgaver</>

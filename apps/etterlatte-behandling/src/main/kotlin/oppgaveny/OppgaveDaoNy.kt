@@ -3,6 +3,7 @@ package no.nav.etterlatte.oppgaveny
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveNy
 import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveType
+import no.nav.etterlatte.libs.common.oppgaveNy.RedigerFristRequest
 import no.nav.etterlatte.libs.common.oppgaveNy.SaksbehandlerEndringDto
 import no.nav.etterlatte.libs.common.oppgaveNy.Status
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
@@ -103,6 +104,22 @@ class OppgaveDaoNy(private val connection: () -> Connection) {
             )
 
             statement.setObject(1, oppgaveId)
+
+            statement.executeUpdate()
+        }
+    }
+
+    fun redigerFrist(redigerFristRequest: RedigerFristRequest) {
+        with(connection()) {
+            val statement = prepareStatement(
+                """
+                UPDATE oppgave
+                SET frist = ?
+                where id = ?::UUID
+                """.trimIndent()
+            )
+            statement.setTidspunkt(1, redigerFristRequest.frist)
+            statement.setObject(2, redigerFristRequest.oppgaveId)
 
             statement.executeUpdate()
         }

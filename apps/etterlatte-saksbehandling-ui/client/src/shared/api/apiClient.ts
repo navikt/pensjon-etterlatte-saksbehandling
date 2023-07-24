@@ -66,4 +66,5 @@ export const apiClient = {
   post: <T>(url: string, body: Record<string, unknown>, noData = false) =>
     apiFetcher<T>({ url: url, body: body, method: 'POST', noData: noData }),
   delete: <T>(url: string, noData?: boolean) => apiFetcher<T>({ url, method: 'DELETE', noData }),
+  put: <T>(url: string, body: Record<string, unknown>) => apiFetcher<T>({ url, method: 'PUT', body: body }),
 } as const

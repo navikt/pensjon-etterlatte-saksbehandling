@@ -45,6 +45,11 @@ data class FjernSaksbehandlerRequest(
     val oppgaveId: UUID
 )
 
+data class RedigerFristRequest(
+    val oppgaveId: UUID,
+    val frist: Tidspunkt
+)
+
 data class OpprettNyOppgaveRequest(
     val referanse: String,
     val sakId: Long,
@@ -55,8 +60,7 @@ data class OpprettNyOppgaveRequest(
 fun opprettNyOppgaveMedReferanseOgSak(
     referanse: String,
     sak: Sak,
-    oppgaveType: OppgaveType,
-    saksbehandler: String? = null
+    oppgaveType: OppgaveType
 ): OppgaveNy {
     return OppgaveNy(
         id = UUID.randomUUID(),
@@ -64,7 +68,7 @@ fun opprettNyOppgaveMedReferanseOgSak(
         enhet = sak.enhet,
         sakId = sak.id,
         type = oppgaveType,
-        saksbehandler = saksbehandler,
+        saksbehandler = null,
         referanse = referanse,
         merknad = null,
         opprettet = Tidspunkt.now(),

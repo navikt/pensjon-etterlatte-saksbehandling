@@ -1,10 +1,12 @@
 package no.nav.etterlatte
 
+import no.nav.etterlatte.jobs.addShutdownHook
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.utbetaling.config.ApplicationContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.util.*
 
 val sikkerLogg: Logger = LoggerFactory.getLogger("sikkerLogg")
 
@@ -17,18 +19,20 @@ fun main() {
 }
 
 fun jobs(applicationContext: ApplicationContext) {
+    val jobs = mutableSetOf<Timer>()
     with(applicationContext.grensesnittavstemmingJob) {
-        if (applicationContext.properties.grensesnittavstemmingEnabled) schedule()
+        if (applicationContext.properties.grensesnittavstemmingEnabled) schedule().also { jobs.add(it) }
     }
     with(applicationContext.grensesnittavstemmingJobOMS) {
-        if (applicationContext.properties.grensesnittavstemmingOMSEnabled) schedule()
+        if (applicationContext.properties.grensesnittavstemmingOMSEnabled) schedule().also { jobs.add(it) }
     }
     with(applicationContext.konsistensavstemmingJob) {
-        if (applicationContext.properties.konsistensavstemmingEnabled) schedule()
+        if (applicationContext.properties.konsistensavstemmingEnabled) schedule().also { jobs.add(it) }
     }
     with(applicationContext.konsistensavstemmingJobOMS) {
-        if (applicationContext.properties.konsistensavstemmingOMSEnabled) schedule()
+        if (applicationContext.properties.konsistensavstemmingOMSEnabled) schedule().also { jobs.add(it) }
     }
+    addShutdownHook(jobs)
 }
 
 fun rapidApplication(applicationContext: ApplicationContext): RapidsConnection =

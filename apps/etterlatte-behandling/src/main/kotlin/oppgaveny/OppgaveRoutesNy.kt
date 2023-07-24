@@ -7,12 +7,14 @@ import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
+import io.ktor.server.routing.put
 import io.ktor.server.routing.route
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.libs.common.kunSaksbehandler
 import no.nav.etterlatte.libs.common.oppgaveNy.FjernSaksbehandlerRequest
 import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveNy
 import no.nav.etterlatte.libs.common.oppgaveNy.OpprettNyOppgaveRequest
+import no.nav.etterlatte.libs.common.oppgaveNy.RedigerFristRequest
 import no.nav.etterlatte.libs.common.oppgaveNy.SaksbehandlerEndringDto
 
 internal fun Route.oppgaveRoutesNy(service: OppgaveServiceNy, kanBrukeNyOppgaveliste: Boolean) {
@@ -56,6 +58,17 @@ internal fun Route.oppgaveRoutesNy(service: OppgaveServiceNy, kanBrukeNyOppgavel
                 if (kanBrukeNyOppgaveliste) {
                     val fjernSaksbehandlerRequest = call.receive<FjernSaksbehandlerRequest>()
                     service.fjernSaksbehandler(fjernSaksbehandlerRequest)
+                    call.respond(HttpStatusCode.OK)
+                } else {
+                    call.respond(HttpStatusCode.NotImplemented)
+                }
+            }
+        }
+        put("/rediger-frist") {
+            kunSaksbehandler {
+                if (kanBrukeNyOppgaveliste) {
+                    val redigerFrist = call.receive<RedigerFristRequest>()
+                    service.redigerFrist(redigerFrist)
                     call.respond(HttpStatusCode.OK)
                 } else {
                     call.respond(HttpStatusCode.NotImplemented)

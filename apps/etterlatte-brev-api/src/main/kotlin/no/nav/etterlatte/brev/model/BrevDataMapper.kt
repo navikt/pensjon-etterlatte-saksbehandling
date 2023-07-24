@@ -2,6 +2,14 @@ package no.nav.etterlatte.brev.model
 
 import no.nav.etterlatte.brev.behandling.Behandling
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode
+import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_AVSLAG
+import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_INNVILGELSE
+import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_REVURDERING_ADOPSJON
+import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_REVURDERING_OMGJOERING_AV_FARSKAP
+import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_REVURDERING_OPPHOER
+import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_REVURDERING_SOESKENJUSTERING
+import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMS_INNVILGELSE_AUTO
+import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMS_OPPHOER_MANUELL
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
@@ -10,23 +18,26 @@ object BrevDataMapper {
 
     fun brevKode(behandling: Behandling, brevProsessType: BrevProsessType) = when (brevProsessType) {
         BrevProsessType.AUTOMATISK -> brevKodeAutomatisk(behandling)
-        BrevProsessType.MANUELL -> EtterlatteBrevKode.OMS_OPPHOER_MANUELL
+        BrevProsessType.MANUELL -> BrevkodePar(OMS_OPPHOER_MANUELL)
     }
 
-    private fun brevKodeAutomatisk(behandling: Behandling): EtterlatteBrevKode = when (behandling.sakType) {
+    private fun brevKodeAutomatisk(behandling: Behandling): BrevkodePar = when (behandling.sakType) {
         SakType.BARNEPENSJON -> {
             when (val vedtakType = behandling.vedtak.type) {
-                VedtakType.INNVILGELSE -> EtterlatteBrevKode.BARNEPENSJON_INNVILGELSE
-                VedtakType.AVSLAG -> EtterlatteBrevKode.BARNEPENSJON_AVSLAG
+                VedtakType.INNVILGELSE -> BrevkodePar(BARNEPENSJON_INNVILGELSE)
+                VedtakType.AVSLAG -> BrevkodePar(BARNEPENSJON_AVSLAG)
                 VedtakType.ENDRING -> when (behandling.revurderingsaarsak) {
-                    RevurderingAarsak.SOESKENJUSTERING -> EtterlatteBrevKode.BARNEPENSJON_REVURDERING_SOESKENJUSTERING
+                    RevurderingAarsak.SOESKENJUSTERING -> BrevkodePar(BARNEPENSJON_REVURDERING_SOESKENJUSTERING)
                     else -> TODO("Revurderingsbrev for ${behandling.revurderingsaarsak} er ikke støttet")
                 }
 
                 VedtakType.OPPHOER -> when (behandling.revurderingsaarsak) {
-                    RevurderingAarsak.ADOPSJON -> EtterlatteBrevKode.BARNEPENSJON_REVURDERING_ADOPSJON
+                    RevurderingAarsak.ADOPSJON ->
+                        BrevkodePar(BARNEPENSJON_REVURDERING_ADOPSJON, BARNEPENSJON_REVURDERING_OPPHOER)
+
                     RevurderingAarsak.OMGJOERING_AV_FARSKAP ->
-                        EtterlatteBrevKode.BARNEPENSJON_REVURDERING_OMGJOERING_AV_FARSKAP
+                        BrevkodePar(BARNEPENSJON_REVURDERING_OMGJOERING_AV_FARSKAP, BARNEPENSJON_REVURDERING_OPPHOER)
+
                     else -> TODO("Vedtakstype er ikke støttet: $vedtakType")
                 }
             }
@@ -34,7 +45,7 @@ object BrevDataMapper {
 
         SakType.OMSTILLINGSSTOENAD -> {
             when (val vedtakType = behandling.vedtak.type) {
-                VedtakType.INNVILGELSE -> EtterlatteBrevKode.OMS_INNVILGELSE_AUTO
+                VedtakType.INNVILGELSE -> BrevkodePar(OMS_INNVILGELSE_AUTO)
                 VedtakType.AVSLAG -> TODO("Vedtakstype er ikke støttet: $vedtakType")
                 VedtakType.ENDRING -> TODO("Vedtakstype er ikke støttet: $vedtakType")
                 VedtakType.OPPHOER -> TODO("Vedtakstype er ikke støttet: $vedtakType")
@@ -69,4 +80,6 @@ object BrevDataMapper {
             }
         }
     }
+
+    data class BrevkodePar(val redigering: EtterlatteBrevKode, val ferdigstilling: EtterlatteBrevKode = redigering)
 }

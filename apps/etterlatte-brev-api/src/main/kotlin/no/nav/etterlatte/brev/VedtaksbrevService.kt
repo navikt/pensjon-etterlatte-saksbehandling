@@ -93,7 +93,7 @@ class VedtaksbrevService(
 
         val kode = BrevDataMapper.brevKode(behandling, brev.prosessType)
         val brevData = opprettBrevData(brev, behandling)
-        val brevRequest = BrevbakerRequest.fra(kode, brevData, behandling, avsender)
+        val brevRequest = BrevbakerRequest.fra(kode.ferdigstilling, brevData, behandling, avsender)
 
         return genererPdf(brev.id, brevRequest)
             .also { pdf -> ferdigstillHvisVedtakFattet(brev, behandling, pdf, brukerTokenInfo) }
@@ -183,16 +183,13 @@ class VedtaksbrevService(
     }
 
     private suspend fun hentRedigerbarTekstFraBrevbakeren(behandling: Behandling): Slate {
-        val kode = BrevDataMapper.brevKode(behandling, AUTOMATISK)
-        val brevData = BrevDataMapper.brevData(behandling)
-        val brevbakerResponse = brevbaker.genererJSON(
-            BrevbakerRequest.fra(
-                kode,
-                brevData,
-                behandling,
-                adresseService.hentAvsender(behandling.vedtak)
-            )
+        val request = BrevbakerRequest.fra(
+            BrevDataMapper.brevKode(behandling, AUTOMATISK).redigering,
+            BrevDataMapper.brevData(behandling),
+            behandling,
+            adresseService.hentAvsender(behandling.vedtak)
         )
+        val brevbakerResponse = brevbaker.genererJSON(request)
         return BlockTilSlateKonverterer.konverter(brevbakerResponse.json)
     }
 }

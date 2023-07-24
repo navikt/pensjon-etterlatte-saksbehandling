@@ -15,6 +15,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.asContextElement
 import kotlinx.coroutines.withContext
 import no.nav.etterlatte.behandling.behandlingRoutes
+import no.nav.etterlatte.behandling.behandlingVedtakRoute
 import no.nav.etterlatte.behandling.behandlingsstatusRoutes
 import no.nav.etterlatte.behandling.omregning.migreringRoutes
 import no.nav.etterlatte.behandling.omregning.omregningRoutes
@@ -101,6 +102,11 @@ fun Application.module(context: ApplicationContext) {
             omregningRoutes(omregningService = omregningService)
             migreringRoutes(migreringService = migreringService)
             behandlingsstatusRoutes(behandlingsstatusService = behandlingsStatusService)
+            behandlingVedtakRoute(
+                behandlingsstatusService = behandlingsStatusService,
+                oppgaveService = oppgaveServiceNy,
+                behandlingService = behandlingService
+            )
             oppgaveRoutes(service = oppgaveService)
             oppgaveRoutesNy(service = oppgaveServiceNy, kanBrukeNyOppgaveliste = kanBrukeNyOppgaveliste)
             grunnlagsendringshendelseRoute(grunnlagsendringshendelseService = grunnlagsendringshendelseService)

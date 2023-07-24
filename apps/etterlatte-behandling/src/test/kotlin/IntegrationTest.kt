@@ -17,7 +17,6 @@ import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.BehandlingsBehov
 import no.nav.etterlatte.behandling.FastsettVirkningstidspunktResponse
 import no.nav.etterlatte.behandling.ManueltOpphoerResponse
-import no.nav.etterlatte.behandling.VedtakHendelse
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
 import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerAarsak
@@ -48,6 +47,7 @@ import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.oppgave.OppgaveListeDto
+import no.nav.etterlatte.vedtaksvurdering.VedtakHendelse
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -225,10 +225,11 @@ class IntegrationTest : BehandlingIntegrationTest() {
                 assertEquals(HttpStatusCode.OK, it.status)
             }
 
+// TODO: rette denne til nytt endepunkt i behandlingVedtakRoute
             client.post("/behandlinger/$behandlingId/fatteVedtak") {
                 addAuthToken(tokenSaksbehandler)
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                setBody(VedtakHendelse(123L, "saksb", Tidspunkt.now(), null, null))
+                setBody(VedtakHendelse(123L, Tidspunkt.now(), "saksb", null))
             }.also {
                 applicationContext.dataSource.connection.use {
                     val actual = BehandlingDao(KommerBarnetTilGodeDao { it }) { it }.hentBehandling(behandlingId)!!
@@ -251,7 +252,7 @@ class IntegrationTest : BehandlingIntegrationTest() {
             client.post("/behandlinger/$behandlingId/attester") {
                 addAuthToken(tokenSaksbehandler)
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                setBody(VedtakHendelse(123L, "saksb", Tidspunkt.now(), null, null))
+                setBody(VedtakHendelse(123L, Tidspunkt.now(), "saksb", null, null))
             }.also {
                 applicationContext.dataSource.connection.use {
                     val actual = BehandlingDao(KommerBarnetTilGodeDao { it }) { it }.hentBehandling(behandlingId)!!
@@ -267,8 +268,8 @@ class IntegrationTest : BehandlingIntegrationTest() {
                 setBody(
                     VedtakHendelse(
                         12L,
-                        null,
                         Tidspunkt.now(),
+                        null,
                         null,
                         null
                     )

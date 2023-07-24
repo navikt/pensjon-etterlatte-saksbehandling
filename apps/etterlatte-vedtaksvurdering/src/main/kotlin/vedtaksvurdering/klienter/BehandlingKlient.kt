@@ -9,8 +9,7 @@ import no.nav.etterlatte.libs.common.SakTilgangsSjekk
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveType
-import no.nav.etterlatte.libs.common.oppgaveNy.OpprettNyOppgaveRequest
+import no.nav.etterlatte.libs.common.oppgaveNy.AttesterVedtakOppgave
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
@@ -25,16 +24,13 @@ import java.util.*
 interface BehandlingKlient : BehandlingTilgangsSjekk, SakTilgangsSjekk {
     suspend fun hentBehandling(behandlingId: UUID, brukerTokenInfo: BrukerTokenInfo): DetaljertBehandling
     suspend fun hentSak(sakId: Long, brukerTokenInfo: BrukerTokenInfo): Sak
-    suspend fun opprettOppgave(
-        referanse: String,
-        sakId: Long,
+    suspend fun oppgaveAttestering(
         brukerTokenInfo: BrukerTokenInfo,
-        oppgaveType: OppgaveType
+        attesterVedtakOppgave: AttesterVedtakOppgave
     ): Boolean
     suspend fun fattVedtak(
         behandlingId: UUID,
-        brukerTokenInfo: BrukerTokenInfo,
-        vedtakHendelse: VedtakHendelse? = null
+        brukerTokenInfo: BrukerTokenInfo
     ): Boolean
 
     suspend fun attester(
@@ -104,29 +100,28 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
         }
     }
 
-    override suspend fun opprettOppgave(
-        referanse: String,
-        sakId: Long,
+    override suspend fun oppgaveAttestering(
         brukerTokenInfo: BrukerTokenInfo,
-        oppgaveType: OppgaveType
+        attesterVedtakOppgave: AttesterVedtakOppgave
     ): Boolean {
-        logger.info("Oppretter oppgave av type $oppgaveType for sak med sakId=$sakId")
-        val resource = Resource(clientId = clientId, url = "$resourceUrl/api/nyeoppgaver/opprett")
+        logger.info(
+            "Attesterer oppgave og commiter sak for behandling" +
+                " ${attesterVedtakOppgave.attesteringsOppgave.referanse} " +
+                "sakId=${attesterVedtakOppgave.attesteringsOppgave.sakId}"
+        )
+        val resource = Resource(clientId = clientId, url = "$resourceUrl/api/fattvedtak-behandling")
         val response = downstreamResourceClient.post(
             resource = resource,
             brukerTokenInfo = brukerTokenInfo,
-            postBody = OpprettNyOppgaveRequest(
-                referanse = referanse,
-                sakId = sakId,
-                oppgaveType = oppgaveType
-            )
+            postBody = attesterVedtakOppgave
         )
 
         return response.mapBoth(
             success = { true },
             failure = {
                 logger.info(
-                    "Kan ikke opprette oppgave av type $oppgaveType for sak med sakId=$sakId",
+                    "Kan ikke attestere oppgaver og commite vedtak av type for behandling " +
+                        attesterVedtakOppgave.attesteringsOppgave.referanse,
                     it.throwable
                 )
                 false
@@ -136,19 +131,9 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
 
     override suspend fun fattVedtak(
         behandlingId: UUID,
-        brukerTokenInfo: BrukerTokenInfo,
-        vedtakHendelse: VedtakHendelse?
+        brukerTokenInfo: BrukerTokenInfo
     ): Boolean {
-        return if (vedtakHendelse == null) {
-            statussjekkForBehandling(behandlingId, brukerTokenInfo, BehandlingStatus.FATTET_VEDTAK)
-        } else {
-            commitStatussjekkForBehandling(
-                behandlingId,
-                brukerTokenInfo,
-                BehandlingStatus.FATTET_VEDTAK,
-                vedtakHendelse
-            )
-        }
+        return statussjekkForBehandling(behandlingId, brukerTokenInfo, BehandlingStatus.FATTET_VEDTAK)
     }
 
     override suspend fun attester(

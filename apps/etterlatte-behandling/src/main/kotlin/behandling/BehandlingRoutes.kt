@@ -298,14 +298,6 @@ private fun ManueltOpphoer.toManueltOpphoerOppsummmering(
         andreBehandlinger = andreBehandlinger
     )
 
-data class VedtakHendelse(
-    val vedtakId: Long,
-    val saksbehandler: String?,
-    val inntruffet: Tidspunkt,
-    val kommentar: String?,
-    val valgtBegrunnelse: String?
-)
-
 data class ManueltOpphoerResponse(val behandlingId: String)
 
 data class VirkningstidspunktRequest(@JsonProperty("dato") private val _dato: String, val begrunnelse: String?) {

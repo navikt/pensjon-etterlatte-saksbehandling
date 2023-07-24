@@ -3,11 +3,13 @@ package no.nav.etterlatte.oppgaveny
 import io.ktor.server.plugins.BadRequestException
 import io.ktor.server.plugins.NotFoundException
 import no.nav.etterlatte.inTransaction
+import no.nav.etterlatte.libs.common.oppgaveNy.AttesteringsOppgave
 import no.nav.etterlatte.libs.common.oppgaveNy.FjernSaksbehandlerRequest
 import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveNy
 import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveType
 import no.nav.etterlatte.libs.common.oppgaveNy.RedigerFristRequest
 import no.nav.etterlatte.libs.common.oppgaveNy.SaksbehandlerEndringDto
+import no.nav.etterlatte.libs.common.oppgaveNy.Status
 import no.nav.etterlatte.libs.common.oppgaveNy.opprettNyOppgaveMedReferanseOgSak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
@@ -87,6 +89,20 @@ class OppgaveServiceNy(private val oppgaveDaoNy: OppgaveDaoNy, private val sakDa
             } else {
                 throw NotFoundException("Oppgaven finnes ikke, id: ${redigerFristRequest.oppgaveId}")
             }
+        }
+    }
+
+    fun attesterBehandling(attesteringsoppgave: AttesteringsOppgave) {
+        val behandlingsoppgave = oppgaveDaoNy.hentOppgaveForBehandling(attesteringsoppgave.referanse)
+        if (behandlingsoppgave == null) {
+            throw RuntimeException("Må ha en oppgave fra før av for å kunne lage attesteringsoppgave")
+        } else {
+            oppgaveDaoNy.endreStatusPaaOppgave(behandlingsoppgave.id, Status.FERDIGSTILT)
+            opprettNyOppgaveMedSakOgReferanse(
+                attesteringsoppgave.referanse,
+                attesteringsoppgave.sakId,
+                attesteringsoppgave.oppgaveType
+            )
         }
     }
 

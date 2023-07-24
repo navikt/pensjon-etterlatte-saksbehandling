@@ -60,6 +60,22 @@ class OppgaveDaoNy(private val connection: () -> Connection) {
         }
     }
 
+    fun hentOppgaveForBehandling(behandlingid: String): OppgaveNy? {
+        with(connection()) {
+            val statement = prepareStatement(
+                """
+                    SELECT id, status, enhet, sak_id, type, saksbehandler, referanse, merknad, opprettet, saktype, fnr, frist
+                    FROM oppgave
+                    WHERE referanse = ?::UUID
+                """.trimIndent()
+            )
+            statement.setString(1, behandlingid)
+            return statement.executeQuery().singleOrNull {
+                asOppgaveNy()
+            }
+        }
+    }
+
     fun settNySaksbehandler(saksbehandlerEndringDto: SaksbehandlerEndringDto) {
         with(connection()) {
             val statement = prepareStatement(
@@ -72,6 +88,23 @@ class OppgaveDaoNy(private val connection: () -> Connection) {
 
             statement.setString(1, saksbehandlerEndringDto.saksbehandler)
             statement.setObject(2, saksbehandlerEndringDto.oppgaveId)
+
+            statement.executeUpdate()
+        }
+    }
+
+    fun endreStatusPaaOppgave(oppgaveId: UUID, oppgaveStatus: Status) {
+        with(connection()) {
+            val statement = prepareStatement(
+                """
+                UPDATE oppgave
+                SET status = ?
+                where id = ?::UUID
+                """.trimIndent()
+            )
+
+            statement.setString(1, oppgaveStatus.toString())
+            statement.setObject(2, oppgaveId)
 
             statement.executeUpdate()
         }

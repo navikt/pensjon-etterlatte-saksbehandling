@@ -12,6 +12,7 @@ import io.ktor.server.routing.route
 import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.behandlingsId
 import no.nav.etterlatte.tilgangsstyring.kunAttestant
+import no.nav.etterlatte.vedtaksvurdering.VedtakHendelse
 
 internal fun Route.behandlingsstatusRoutes(
     behandlingsstatusService: BehandlingStatusService
@@ -68,12 +69,6 @@ internal fun Route.behandlingsstatusRoutes(
         get("/fatteVedtak") {
             haandterStatusEndring(call) {
                 behandlingsstatusService.sjekkOmKanFatteVedtak(behandlingsId)
-            }
-        }
-        post("/fatteVedtak") {
-            val vedtakHendelse = call.receive<VedtakHendelse>()
-            haandterStatusEndring(call) {
-                behandlingsstatusService.settFattetVedtak(behandlingsId, vedtakHendelse)
             }
         }
         get("/returner") {

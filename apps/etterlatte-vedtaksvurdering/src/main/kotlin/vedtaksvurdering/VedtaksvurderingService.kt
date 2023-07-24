@@ -1,5 +1,6 @@
 package no.nav.etterlatte.vedtaksvurdering
 
+import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
@@ -104,23 +105,13 @@ class VedtaksvurderingService(
         )
 
         coroutineScope {
-            behandlingKlient.fattVedtak(
-sendToRapid(
-            lagRiverMelding(
-                vedtakhendelse = KafkaHendelseType.FATTET,
-                vedtak = fattetVedtak,
-                tekniskTid = fattetVedtak.vedtakFattet?.tidspunkt!!.toLocalDatetimeUTC()
-            ),
-            behandlingId
-        )
-        coroutineScope {
             val fattvedtak = async {
                 behandlingKlient.fattVedtak(
                     behandlingId = behandlingId,
                     brukerTokenInfo = brukerTokenInfo,
                     vedtakHendelse = VedtakHendelse(
                         vedtakId = fattetVedtak.id,
-                        inntruffet = fattetVedtak.vedtakFattet.tidspunkt,
+                        inntruffet = fattetVedtak.vedtakFattet?.tidspunkt!!,
                         saksbehandler = fattetVedtak.vedtakFattet.ansvarligSaksbehandler
                     )
                 )
@@ -134,34 +125,17 @@ sendToRapid(
                     oppgaveType = OppgaveType.ATTESTERING
                 )
             }
-
             opprettOppgave.await()
             fattvedtak.await()
         }
-                brukerTokenInfo = brukerTokenInfo,
-                vedtakHendelse = VedtakHendelse(
-                    vedtakId = fattetVedtak.id,
-                    inntruffet = fattetVedtak.vedtakFattet?.tidspunkt!!,
-                    saksbehandler = fattetVedtak.vedtakFattet.ansvarligSaksbehandler
-                )
-            )
-
-            behandlingKlient.opprettOppgave(
-                referanse = behandlingId.toString(),
-                sakId = sak.id,
-                brukerTokenInfo = brukerTokenInfo,
-                oppgaveType = OppgaveType.ATTESTERING
-            )
-
-            sendToRapid(
-                lagRiverMelding(
-                    vedtakhendelse = KafkaHendelseType.FATTET,
-                    vedtak = fattetVedtak,
-                    tekniskTid = fattetVedtak.vedtakFattet.tidspunkt.toLocalDatetimeUTC()
-                ),
-                behandlingId
-            )
-        }
+        sendToRapid(
+            lagRiverMelding(
+                vedtakhendelse = KafkaHendelseType.FATTET,
+                vedtak = fattetVedtak,
+                tekniskTid = fattetVedtak.vedtakFattet?.tidspunkt!!.toLocalDatetimeUTC()
+            ),
+            behandlingId
+        )
         return fattetVedtak
     }
 

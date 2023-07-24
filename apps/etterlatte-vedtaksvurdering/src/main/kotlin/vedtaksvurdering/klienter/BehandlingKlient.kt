@@ -26,7 +26,7 @@ interface BehandlingKlient : BehandlingTilgangsSjekk, SakTilgangsSjekk {
     suspend fun hentBehandling(behandlingId: UUID, brukerTokenInfo: BrukerTokenInfo): DetaljertBehandling
     suspend fun hentSak(sakId: Long, brukerTokenInfo: BrukerTokenInfo): Sak
     suspend fun opprettOppgave(
-        referanse: String?,
+        referanse: String,
         sakId: Long,
         brukerTokenInfo: BrukerTokenInfo,
         oppgaveType: OppgaveType
@@ -105,7 +105,7 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
     }
 
     override suspend fun opprettOppgave(
-        referanse: String?,
+        referanse: String,
         sakId: Long,
         brukerTokenInfo: BrukerTokenInfo,
         oppgaveType: OppgaveType
@@ -116,7 +116,7 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
             resource = resource,
             brukerTokenInfo = brukerTokenInfo,
             postBody = OpprettNyOppgaveRequest(
-                referanse = referanse.toString(),
+                referanse = referanse,
                 sakId = sakId,
                 oppgaveType = oppgaveType
             )

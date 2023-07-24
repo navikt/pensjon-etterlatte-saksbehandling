@@ -2,7 +2,6 @@ import { Button, Modal, Heading } from '@navikt/ds-react'
 import { useState } from 'react'
 import { hentDokumentPDF } from '~shared/api/dokument'
 import styled from 'styled-components'
-import { Findout } from '@navikt/ds-icons'
 import Spinner from '~shared/Spinner'
 import { PdfVisning } from '~shared/brev/pdf-visning'
 
@@ -49,12 +48,7 @@ export default function DokumentModal({
 
   return (
     <>
-      <Button
-        variant={'secondary'}
-        size={'small'}
-        onClick={() => open(journalpostId, dokumentInfoId)}
-        icon={<Findout />}
-      >
+      <Button variant={'secondary'} size={'small'} onClick={() => open(journalpostId, dokumentInfoId)}>
         Åpne dokument
       </Button>
 

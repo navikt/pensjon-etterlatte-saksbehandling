@@ -79,7 +79,7 @@ internal class RevurderingRoutesTest {
 
     @Test
     fun `returnerer bad request hvis det ikke finnes noen iverksatt behandling tidligere`() {
-        every { applicationContext.generellBehandlingService.hentSisteIverksatte(1) } returns null
+        every { applicationContext.behandlingService.hentSisteIverksatte(1) } returns null
         testApplication {
             environment { config = hoconApplicationConfig }
             application { module(applicationContext) }
@@ -122,7 +122,7 @@ internal class RevurderingRoutesTest {
 
     @Test
     fun `returnerer bad request hvis revurderingaarsak ikke er stoettet for sak`() {
-        every { applicationContext.generellBehandlingService } returns mockk {
+        every { applicationContext.behandlingService } returns mockk {
             every { hentSisteIverksatte(any()) } returns mockk(relaxed = true) {
                 every { sak.sakType } returns SakType.OMSTILLINGSSTOENAD
             }

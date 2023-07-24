@@ -1,14 +1,5 @@
-import { CopyToClipboard } from '@navikt/ds-react-internal'
+import { CopyButton } from '@navikt/ds-react'
 
 export const KopierbarVerdi = (props: { value: string }) => {
-  return (
-    <CopyToClipboard
-      copyText={props.value}
-      popoverText={`Kopierte ${props.value}`}
-      size={'small'}
-      iconPosition={'right'}
-    >
-      {props.value}
-    </CopyToClipboard>
-  )
+  return <CopyButton copyText={props.value} size={'small'} text={props.value} />
 }

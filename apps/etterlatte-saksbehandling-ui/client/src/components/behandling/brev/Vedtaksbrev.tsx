@@ -8,8 +8,12 @@ import { useParams } from 'react-router-dom'
 import { Soeknadsdato } from '../soeknadsoversikt/soeknadoversikt/Soeknadsdato'
 import styled from 'styled-components'
 import { SendTilAttesteringModal } from '../handlinger/sendTilAttesteringModal'
-import { hentBehandlesFraStatus, manueltBrevKanRedigeres } from '~components/behandling/felles/utils'
-import { IBehandlingsType, IDetaljertBehandling, IProsesstype } from '~shared/types/IDetaljertBehandling'
+import {
+  behandlingSkalSendeBrev,
+  hentBehandlesFraStatus,
+  manueltBrevKanRedigeres,
+} from '~components/behandling/felles/utils'
+import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import MottakerPanel from '~components/behandling/brev/detaljer/MottakerPanel'
 import ForhaandsvisningBrev from '~components/behandling/brev/ForhaandsvisningBrev'
 import Spinner from '~shared/Spinner'
@@ -18,20 +22,17 @@ import RedigerbartBrev from '~components/behandling/brev/RedigerbartBrev'
 
 export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
   const { behandlingId } = useParams()
-  const { sak, soeknadMottattDato, status } = props.behandling
+  const { sakId, soeknadMottattDato, status } = props.behandling
 
   const [vedtaksbrev, setVedtaksbrev] = useState<any>(undefined)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string>()
 
   useEffect(() => {
-    if (!behandlingId || !sak) return
+    if (!behandlingId || !sakId) return
 
     const fetchVedtaksbrev = async () => {
-      const skalIkkeHenteVedtaksbrev =
-        props.behandling.behandlingType === IBehandlingsType.REVURDERING &&
-        props.behandling.prosesstype === IProsesstype.AUTOMATISK
-      if (skalIkkeHenteVedtaksbrev) {
+      if (!behandlingSkalSendeBrev(props.behandling)) {
         return
       }
 
@@ -39,7 +40,7 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
       if (brevResponse.status === 'ok' && brevResponse.statusCode === 200) {
         setVedtaksbrev(brevResponse.data)
       } else if (brevResponse.statusCode === 204) {
-        const brevOpprettetResponse = await opprettVedtaksbrev(sak, behandlingId!!)
+        const brevOpprettetResponse = await opprettVedtaksbrev(sakId, behandlingId!!)
 
         if (brevOpprettetResponse.status === 'ok' && brevOpprettetResponse.statusCode === 201) {
           setVedtaksbrev(brevOpprettetResponse.data)
@@ -52,7 +53,7 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
       setLoading(false)
     }
     fetchVedtaksbrev()
-  }, [behandlingId, sak])
+  }, [behandlingId, sakId])
 
   return (
     <Content>

@@ -2,6 +2,7 @@ package no.nav.etterlatte.grunnlag
 
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
+import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
@@ -11,6 +12,8 @@ import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.hentNavidentFraToken
+import no.nav.etterlatte.libs.common.kunSystembruker
+import no.nav.etterlatte.libs.common.opplysningsbehov.Opplysningsbehov
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.InvalidFoedselsnummerException
 import no.nav.etterlatte.libs.common.withFoedselsnummer
@@ -58,6 +61,14 @@ fun Route.grunnlagRoute(grunnlagService: GrunnlagService, behandlingKlient: Beha
                 } else {
                     call.respond(HttpStatusCode.NotFound)
                 }
+            }
+        }
+
+        post("/person/oppdater-grunnlag") {
+            kunSystembruker {
+                val opplysningsbehov = call.receive<Opplysningsbehov>()
+                grunnlagService.oppdaterGrunnlag(opplysningsbehov)
+                call.respond(HttpStatusCode.OK)
             }
         }
 

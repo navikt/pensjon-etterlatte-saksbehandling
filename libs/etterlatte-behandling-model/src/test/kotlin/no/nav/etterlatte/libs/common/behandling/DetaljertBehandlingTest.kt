@@ -33,22 +33,19 @@ class DetaljertBehandlingTest {
         sak = 1L,
         sakType = SakType.BARNEPENSJON,
         behandlingOpprettet = LocalDateTime.now(),
-        sistEndret = LocalDateTime.now(),
         soeknadMottattDato = LocalDateTime.now(),
         innsender = null,
         soeker = "123",
         gjenlevende = listOf(),
         avdoed = listOf(),
         soesken = listOf(),
-        gyldighetsproeving = null,
         status = BehandlingStatus.OPPRETTET,
         behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
         virkningstidspunkt = null,
-        utenlandstilsnitt = null,
         boddEllerArbeidetUtlandet = null,
-        kommerBarnetTilgode = null,
         revurderingsaarsak = revurderingsaarsak,
         prosesstype = Prosesstype.MANUELL,
-        revurderingInfo = null
+        revurderingInfo = null,
+        enhet = "1111"
     )
 }

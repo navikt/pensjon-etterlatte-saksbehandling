@@ -5,6 +5,8 @@ import no.nav.security.token.support.core.jwt.JwtTokenClaims
 sealed class BrukerTokenInfo {
     abstract fun ident(): String
 
+    abstract fun erSammePerson(ident: String): Boolean
+
     abstract fun accessToken(): String
     companion object {
         private fun erSystembruker(oid: String?, sub: String?) = (oid == sub) && (oid != null)
@@ -30,8 +32,8 @@ sealed class BrukerTokenInfo {
 
 data class Systembruker(val oid: String, val sub: String) : BrukerTokenInfo() {
     override fun ident() = Fagsaksystem.EY.navn
-
     override fun accessToken() = throw NotImplementedError("Kun relevant for saksbehandler")
+    override fun erSammePerson(ident: String) = false
 }
 
 data class Saksbehandler(
@@ -40,14 +42,19 @@ data class Saksbehandler(
     val jwtTokenClaims: JwtTokenClaims?
 ) : BrukerTokenInfo() {
     override fun ident() = ident
-
     override fun accessToken() = accessToken
+
+    override fun erSammePerson(ident: String) = ident == this.ident
 
     fun getClaims() = jwtTokenClaims
 }
 
 enum class Claims {
     NAVident,
-    oid, // ktlint-disable enum-entry-name-case
-    sub // ktlint-disable enum-entry-name-case
+
+    @Suppress("ktlint:standard:enum-entry-name-case")
+    oid,
+
+    @Suppress("ktlint:standard:enum-entry-name-case")
+    sub
 }

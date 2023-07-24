@@ -16,6 +16,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
+import no.nav.etterlatte.libs.common.behandling.SisteIverksatteBehandling
 import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
 import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsdato
 import no.nav.etterlatte.libs.common.toJsonNode
@@ -150,14 +151,13 @@ internal class TrygdetidServiceTest {
             every { behandlingType } returns BehandlingType.REVURDERING
         }
         val forrigebehandlingId = randomUUID()
-        val forrigeBehandling = mockk<DetaljertBehandling>().apply {
-            every { id } returns forrigebehandlingId
-        }
         val trygdetid = trygdetid(behandlingId, sakId)
 
         every { repository.hentTrygdetid(behandlingId) } returns null
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
-        coEvery { behandlingKlient.hentSisteIverksatteBehandling(any(), any()) } returns forrigeBehandling
+        coEvery { behandlingKlient.hentSisteIverksatteBehandling(any(), any()) } returns SisteIverksatteBehandling(
+            forrigebehandlingId
+        )
         every { repository.hentTrygdetid(forrigebehandlingId) } returns trygdetid
         every { repository.opprettTrygdetid(any()) } returns trygdetid
 
@@ -182,7 +182,6 @@ internal class TrygdetidServiceTest {
             behandling.id
             behandling.sak
             behandling.behandlingType
-            forrigeBehandling.id
         }
     }
 
@@ -197,16 +196,15 @@ internal class TrygdetidServiceTest {
             every { revurderingsaarsak } returns RevurderingAarsak.SOESKENJUSTERING
         }
         val forrigeBehandlingId = randomUUID()
-        val forrigeBehandling = mockk<DetaljertBehandling>().apply {
-            every { id } returns forrigeBehandlingId
-        }
         val trygdetid = trygdetid(behandlingId, sakId)
         val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
 
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
         every { repository.hentTrygdetid(behandlingId) } returns null
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
-        coEvery { behandlingKlient.hentSisteIverksatteBehandling(any(), any()) } returns forrigeBehandling
+        coEvery { behandlingKlient.hentSisteIverksatteBehandling(any(), any()) } returns SisteIverksatteBehandling(
+            forrigeBehandlingId
+        )
         every { repository.hentTrygdetid(forrigeBehandlingId) } returns null
         every { repository.opprettTrygdetid(any()) } returns trygdetid
 
@@ -233,7 +231,6 @@ internal class TrygdetidServiceTest {
             behandling.id
             behandling.sak
             behandling.behandlingType
-            forrigeBehandling.id
         }
     }
 
@@ -249,12 +246,11 @@ internal class TrygdetidServiceTest {
             every { prosesstype } returns Prosesstype.AUTOMATISK
         }
         val forrigeBehandlingId = randomUUID()
-        val forrigeBehandling = mockk<DetaljertBehandling>().apply {
-            every { id } returns forrigeBehandlingId
-        }
         every { repository.hentTrygdetid(behandlingId) } returns null
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
-        coEvery { behandlingKlient.hentSisteIverksatteBehandling(any(), any()) } returns forrigeBehandling
+        coEvery { behandlingKlient.hentSisteIverksatteBehandling(any(), any()) } returns SisteIverksatteBehandling(
+            forrigeBehandlingId
+        )
         every { repository.hentTrygdetid(forrigeBehandlingId) } returns null
 
         runBlocking {
@@ -278,7 +274,6 @@ internal class TrygdetidServiceTest {
             behandling.id
             behandling.sak
             behandling.behandlingType
-            forrigeBehandling.id
         }
     }
 
@@ -294,16 +289,15 @@ internal class TrygdetidServiceTest {
             every { prosesstype } returns Prosesstype.MANUELL
         }
         val forrigeBehandlingId = randomUUID()
-        val forrigeBehandling = mockk<DetaljertBehandling>().apply {
-            every { id } returns forrigeBehandlingId
-        }
         val trygdetid = trygdetid(behandlingId, sakId)
         val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
 
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
         every { repository.hentTrygdetid(behandlingId) } returns null
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
-        coEvery { behandlingKlient.hentSisteIverksatteBehandling(any(), any()) } returns forrigeBehandling
+        coEvery { behandlingKlient.hentSisteIverksatteBehandling(any(), any()) } returns SisteIverksatteBehandling(
+            forrigeBehandlingId
+        )
         every { repository.hentTrygdetid(forrigeBehandlingId) } returns null
         every { repository.opprettTrygdetid(any()) } returns trygdetid
 
@@ -331,7 +325,6 @@ internal class TrygdetidServiceTest {
             behandling.id
             behandling.sak
             behandling.behandlingType
-            forrigeBehandling.id
         }
     }
 

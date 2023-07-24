@@ -88,11 +88,12 @@ fun decideUser(
 
 interface DatabaseKontekst {
     fun activeTx(): Connection
-    fun <T> inTransaction(block: () -> T): T
+    fun <T> inTransaction(gjenbruk: Boolean = false, block: () -> T): T
 }
 
-fun <T> inTransaction(block: () -> T): T = Kontekst.get().databasecontxt.inTransaction {
-    block()
-}
+fun <T> inTransaction(gjenbruk: Boolean = false, block: () -> T): T =
+    Kontekst.get().databasecontxt.inTransaction(gjenbruk) {
+        block()
+    }
 
 fun databaseContext() = Kontekst.get().databasecontxt

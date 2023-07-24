@@ -8,6 +8,8 @@ import no.nav.etterlatte.libs.common.BehandlingTilgangsSjekk
 import no.nav.etterlatte.libs.common.RetryResult
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus.OPPRETTET
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
+import no.nav.etterlatte.libs.common.behandling.SisteIverksatteBehandling
+import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.retry
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
@@ -26,8 +28,9 @@ interface BehandlingKlient : BehandlingTilgangsSjekk {
         brukerTokenInfo: BrukerTokenInfo,
         commit: Boolean
     ): Boolean
+
     suspend fun settBehandlingStatusVilkaarsvurdert(behandlingId: UUID, brukerTokenInfo: BrukerTokenInfo): Boolean
-    suspend fun hentSisteIverksatteBehandling(sakId: Long, brukerTokenInfo: BrukerTokenInfo): DetaljertBehandling
+    suspend fun hentSisteIverksatteBehandling(sakId: Long, brukerTokenInfo: BrukerTokenInfo): SisteIverksatteBehandling
 }
 
 class BehandlingKlientException(override val message: String, override val cause: Throwable) : Exception(message, cause)
@@ -112,7 +115,7 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
     override suspend fun hentSisteIverksatteBehandling(
         sakId: Long,
         brukerTokenInfo: BrukerTokenInfo
-    ): DetaljertBehandling {
+    ): SisteIverksatteBehandling {
         logger.info("Henter seneste iverksatte behandling for sak med id $sakId")
 
         val response = downstreamResourceClient.get(
@@ -121,7 +124,7 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
         )
 
         return response.mapBoth(
-            success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
+            success = { deserialize(it.response.toString()) },
             failure = {
                 logger.error("Kunne ikke hente seneste iverksatte behandling for sak med id $sakId")
                 throw it.throwable

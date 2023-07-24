@@ -13,15 +13,22 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.serialization.jackson.jackson
 import io.ktor.server.testing.testApplication
 import io.mockk.mockk
+import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.omregning.OpprettOmregningResponse
 import no.nav.etterlatte.common.DatabaseContext
+import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
+import no.nav.etterlatte.libs.common.behandling.JaNei
+import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.Omregningshendelse
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
+import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.sak.Sak
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
-import org.junit.jupiter.api.Assumptions.assumeTrue
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -30,6 +37,8 @@ import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
 import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class OmregningIntegrationTest : BehandlingIntegrationTest() {
@@ -52,18 +61,40 @@ class OmregningIntegrationTest : BehandlingIntegrationTest() {
     inner class KanOmregne {
         private var sakId: Long = 0L
 
+        fun opprettSakMedFoerstegangsbehandling(fnr: String): Pair<Sak, Foerstegangsbehandling?> {
+            val sak = inTransaction {
+                applicationContext.sakDao.opprettSak(fnr, SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr)
+            }
+
+            val behandling = applicationContext.behandlingFactory
+                .opprettBehandling(
+                    sak.id,
+                    persongalleri(),
+                    LocalDateTime.now().toString(),
+                    Vedtaksloesning.GJENNY
+                )
+
+            return Pair(sak, behandling as Foerstegangsbehandling)
+        }
+
         @BeforeEach
         fun beforeEach() {
             val (sak, behandling) = opprettSakMedFoerstegangsbehandling("234")
+            val kommerBarnetTilgode = KommerBarnetTilgode(
+                JaNei.JA,
+                "",
+                Grunnlagsopplysning.Saksbehandler.create("A0"),
+                behandling!!.id
+            )
+            applicationContext.kommerBarnetTilGodeService.lagreKommerBarnetTilgode(
+                kommerBarnetTilgode
+            )
 
             sakId = sak.id
 
-            assumeTrue(behandling != null)
-
             val virkningstidspunkt = virkningstidspunktVurdering()
 
-            val iverksattBehandling = behandling!!
-                .oppdaterKommerBarnetTilgode(kommerBarnetTilGodeVurdering())
+            val iverksattBehandling = behandling.copy(kommerBarnetTilgode = kommerBarnetTilgode)
                 .oppdaterGyldighetsproeving(gyldighetsresultatVurdering())
                 .oppdaterVirkningstidspunkt(virkningstidspunkt)
                 .tilVilkaarsvurdert()

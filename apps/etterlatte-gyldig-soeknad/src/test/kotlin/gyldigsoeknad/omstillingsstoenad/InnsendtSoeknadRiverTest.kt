@@ -6,8 +6,6 @@ import no.nav.etterlatte.gyldigsoeknad.client.BehandlingClient
 import no.nav.etterlatte.gyldigsoeknad.omstillingsstoenad.InnsendtSoeknadRiver
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.event.GyldigSoeknadVurdert
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
-import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
@@ -38,21 +36,13 @@ internal class InnsendtSoeknadRiverTest {
 
         val inspector = inspector.apply { sendTestMessage(melding) }.inspektør
 
-        assertEquals(Opplysningstype.SOEKER_PDL_V1.name, inspector.message(0).get("@behov").asText())
         assertEquals(sakId.toString(), inspector.message(0).get("sakId").asText())
-        assertEquals("26058411891", inspector.message(0).get("fnr").asText())
-        assertEquals(PersonRolle.GJENLEVENDE.name, inspector.message(0).get("rolle").asText())
 
-        assertEquals(Opplysningstype.AVDOED_PDL_V1.name, inspector.message(1).get("@behov").asText())
-        assertEquals(sakId.toString(), inspector.message(1).get("sakId").asText())
-        assertEquals("21478247343", inspector.message(1).get("fnr").asText())
-        assertEquals(PersonRolle.AVDOED.name, inspector.message(1).get("rolle").asText())
+        assertEquals("soeknad_innsendt", inspector.message(0).get(EVENT_NAME_KEY).asText())
+        assertEquals(sakId, inspector.message(0).get(GyldigSoeknadVurdert.sakIdKey).longValue())
+        assertEquals(id.toString(), inspector.message(0).get(GyldigSoeknadVurdert.behandlingIdKey).asText())
 
-        assertEquals("soeknad_innsendt", inspector.message(2).get(EVENT_NAME_KEY).asText())
-        assertEquals(sakId, inspector.message(2).get(GyldigSoeknadVurdert.sakIdKey).longValue())
-        assertEquals(id.toString(), inspector.message(2).get(GyldigSoeknadVurdert.behandlingIdKey).asText())
-
-        assertEquals(3, inspector.size)
+        assertEquals(1, inspector.size)
     }
 
     companion object {

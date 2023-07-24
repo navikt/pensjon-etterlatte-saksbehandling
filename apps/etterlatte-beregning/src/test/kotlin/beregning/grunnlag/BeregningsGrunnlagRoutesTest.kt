@@ -25,6 +25,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.behandling.SisteIverksatteBehandling
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.objectMapper
@@ -73,23 +74,20 @@ internal class BeregningsGrunnlagRoutesTest {
             sak = 123,
             sakType = SakType.BARNEPENSJON,
             behandlingOpprettet = LocalDateTime.now(),
-            sistEndret = LocalDateTime.now(),
             soeknadMottattDato = null,
             innsender = null,
             soeker = "diam",
             gjenlevende = listOf(),
             avdoed = listOf(),
             soesken = listOf(),
-            gyldighetsproeving = null,
             status = BehandlingStatus.VILKAARSVURDERT,
             behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
             virkningstidspunkt = null,
-            kommerBarnetTilgode = null,
             revurderingsaarsak = null,
             prosesstype = Prosesstype.MANUELL,
-            utenlandstilsnitt = null,
             boddEllerArbeidetUtlandet = null,
-            revurderingInfo = null
+            revurderingInfo = null,
+            enhet = "1111"
         )
 
         every { repository.finnGrunnlagForBehandling(any()) } returns null
@@ -112,14 +110,6 @@ internal class BeregningsGrunnlagRoutesTest {
         val idRevurdering = randomUUID()
         val idForrigeIverksatt = randomUUID()
         val sakId = 123L
-        val virkOriginal = Virkningstidspunkt(
-            dato = YearMonth.of(2022, Month.AUGUST),
-            kilde = Grunnlagsopplysning.Saksbehandler(
-                ident = "",
-                tidspunkt = Tidspunkt.now()
-            ),
-            begrunnelse = ""
-        )
         val virkRevurdering = Virkningstidspunkt(
             dato = YearMonth.of(2023, Month.JANUARY),
             kilde = Grunnlagsopplysning.Saksbehandler(
@@ -135,48 +125,24 @@ internal class BeregningsGrunnlagRoutesTest {
             sak = sakId,
             sakType = SakType.BARNEPENSJON,
             behandlingOpprettet = LocalDateTime.now(),
-            sistEndret = LocalDateTime.now(),
             soeknadMottattDato = null,
             innsender = null,
             soeker = "",
             gjenlevende = listOf(),
             avdoed = listOf(),
             soesken = listOf(),
-            gyldighetsproeving = null,
             status = BehandlingStatus.VILKAARSVURDERT,
             behandlingType = BehandlingType.REVURDERING,
             virkningstidspunkt = virkRevurdering,
-            kommerBarnetTilgode = null,
             revurderingsaarsak = null,
             prosesstype = Prosesstype.MANUELL,
-            utenlandstilsnitt = null,
             boddEllerArbeidetUtlandet = null,
-            revurderingInfo = null
+            revurderingInfo = null,
+            enhet = "1111"
         )
-        coEvery { behandlingKlient.hentSisteIverksatteBehandling(sakId, any()) } returns DetaljertBehandling(
-            id = idForrigeIverksatt,
-            sak = sakId,
-            sakType = SakType.BARNEPENSJON,
-            behandlingOpprettet = LocalDateTime.now().minusMonths(2),
-            sistEndret = LocalDateTime.now().minusMonths(1),
-            soeknadMottattDato = null,
-            innsender = null,
-            soeker = "",
-            gjenlevende = listOf(),
-            avdoed = listOf(),
-            soesken = listOf(),
-            gyldighetsproeving = null,
-            status = BehandlingStatus.IVERKSATT,
-            behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-            virkningstidspunkt = virkOriginal,
-            kommerBarnetTilgode = null,
-            revurderingsaarsak = null,
-            prosesstype = Prosesstype.MANUELL,
-            utenlandstilsnitt = null,
-            boddEllerArbeidetUtlandet = null,
-            revurderingInfo = null
-        )
-
+        coEvery {
+            behandlingKlient.hentSisteIverksatteBehandling(sakId, any())
+        } returns SisteIverksatteBehandling(idForrigeIverksatt)
         every { repository.finnGrunnlagForBehandling(idRevurdering) } returns null
         every { repository.finnGrunnlagForBehandling(idForrigeIverksatt) } returns BeregningsGrunnlag(
             behandlingId = idForrigeIverksatt,
@@ -292,14 +258,12 @@ internal class BeregningsGrunnlagRoutesTest {
             sak = 123,
             sakType = SakType.BARNEPENSJON,
             behandlingOpprettet = LocalDateTime.now(),
-            sistEndret = LocalDateTime.now(),
             soeknadMottattDato = null,
             innsender = null,
             soeker = "diam",
             gjenlevende = listOf(),
             avdoed = listOf(),
             soesken = listOf(),
-            gyldighetsproeving = null,
             status = BehandlingStatus.VILKAARSVURDERT,
             behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
             virkningstidspunkt = Virkningstidspunkt(
@@ -310,12 +274,11 @@ internal class BeregningsGrunnlagRoutesTest {
                 ),
                 ""
             ),
-            kommerBarnetTilgode = null,
             revurderingsaarsak = null,
             prosesstype = Prosesstype.MANUELL,
-            utenlandstilsnitt = null,
             boddEllerArbeidetUtlandet = null,
-            revurderingInfo = null
+            revurderingInfo = null,
+            enhet = "1111"
         )
 
         testApplication {
@@ -354,14 +317,12 @@ internal class BeregningsGrunnlagRoutesTest {
             sak = 123,
             sakType = SakType.BARNEPENSJON,
             behandlingOpprettet = LocalDateTime.now(),
-            sistEndret = LocalDateTime.now(),
             soeknadMottattDato = null,
             innsender = null,
             soeker = "diam",
             gjenlevende = listOf(),
             avdoed = listOf(),
             soesken = listOf(),
-            gyldighetsproeving = null,
             status = BehandlingStatus.VILKAARSVURDERT,
             behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
             virkningstidspunkt = Virkningstidspunkt(
@@ -372,12 +333,11 @@ internal class BeregningsGrunnlagRoutesTest {
                 ),
                 ""
             ),
-            kommerBarnetTilgode = null,
             revurderingsaarsak = null,
             prosesstype = Prosesstype.MANUELL,
-            utenlandstilsnitt = null,
             boddEllerArbeidetUtlandet = null,
-            revurderingInfo = null
+            revurderingInfo = null,
+            enhet = "1111"
         )
 
         testApplication {

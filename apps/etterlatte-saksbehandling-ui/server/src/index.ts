@@ -74,6 +74,10 @@ if (isDev) {
       '/api/grunnlagsendringshendelse/:sakid/institusjon',
       '/api/sak/:sakid',
       '/api/institusjonsoppholdbegrunnelse/:sakid',
+      '/api/nyeoppgaver/hent',
+      '/api/nyeoppgaver/tildel-saksbehandler',
+      '/api/nyeoppgaver/bytt-saksbehandler',
+      '/api/nyeoppgaver/fjern-saksbehandler',
     ],
     tokenMiddleware(ApiConfig.behandling.scope),
     proxy(ApiConfig.behandling.url)

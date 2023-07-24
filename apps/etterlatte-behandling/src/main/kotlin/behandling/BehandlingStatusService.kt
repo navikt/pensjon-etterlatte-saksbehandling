@@ -29,7 +29,7 @@ interface BehandlingStatusService {
 
 class BehandlingStatusServiceImpl constructor(
     private val behandlingDao: BehandlingDao,
-    private val behandlingService: GenerellBehandlingService,
+    private val behandlingService: BehandlingService,
     private val grunnlagsendringshendelseService: GrunnlagsendringshendelseService
 ) : BehandlingStatusService {
     override fun settOpprettet(behandlingId: UUID, dryRun: Boolean) {

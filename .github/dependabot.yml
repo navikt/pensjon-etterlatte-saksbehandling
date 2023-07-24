@@ -10,6 +10,24 @@ updates:
       interval: "monthly" 
       day: "sunday"
     open-pull-requests-limit: 10
+    groups:
+      tjenestespesifikasjoner:
+        patterns:
+          - "com.github.navikt.pensjon-etterlatte-tjenestespesifikasjoner*"
+      avro-og-kafka:
+        patterns:
+          - "org.apache.avro*"
+          - "no.nav:kafka*"
+          - "org.apache.kafka*"
+          - "com.github.davidmc24.gradle.plugin.avro"
+      test:
+        patterns:
+          - "org.junit.jupiter*"
+          - "io.kotest*"
+          - "org.testcontainers*"
+          - "com.github.tomakehurst:wiremock-jre8"
+          - "io.mockk:mockk"
+          - "no.nav.security:mock-oauth2-server"
 
 
   # =============
@@ -34,6 +52,28 @@ updates:
       interval: "monthly"
       day: "sunday"
     open-pull-requests-limit: 10
+    groups:
+      ds:
+        patterns:
+          - "@navikt/ds-*"
+      eslint:
+        patterns:
+          - "@typescript-eslint/*"
+          - "prettier"
+          - "eslint"
+          - "eslint*"
+      slate:
+        patterns:
+          - "slate*"
+      test:
+        patterns:
+          - "@testing-library*"
+      vite:
+        patterns:
+          - "vite"
+          - "vite-tsconfig-paths"
+          - "vitest"
+          - "@vitejs/plugin-react-swc"
 
 
   # ===============
@@ -46,6 +86,12 @@ updates:
       interval: "monthly"
       day: "sunday"
     open-pull-requests-limit: 10
+    groups:
+      lint:
+        patterns:
+          - "eslint"
+          - "prettier"
+          - "lint-staged"
 
 
   # ==============

@@ -16,9 +16,12 @@ import no.nav.etterlatte.libs.common.person.Person
 import java.time.LocalDateTime
 import java.util.*
 
+/**
+ * Brukes av frontend. Se IDetaljertBehandling.ts
+ **/
 data class DetaljertBehandlingDto(
     val id: UUID,
-    val sak: Long,
+    val sakId: Long,
     val sakType: SakType,
     val gyldighetsprøving: GyldighetsResultat?,
     val soeknadMottattDato: LocalDateTime?,

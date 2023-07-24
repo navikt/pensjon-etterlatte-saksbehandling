@@ -27,11 +27,13 @@ import no.nav.etterlatte.egenansatt.egenAnsattRoute
 import no.nav.etterlatte.grunnlagsendring.grunnlagsendringshendelseRoute
 import no.nav.etterlatte.institusjonsopphold.InstitusjonsoppholdService
 import no.nav.etterlatte.institusjonsopphold.institusjonsoppholdRoute
+import no.nav.etterlatte.jobs.addShutdownHook
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.libs.ktor.setReady
 import no.nav.etterlatte.oppgave.oppgaveRoutes
+import no.nav.etterlatte.oppgaveny.oppgaveRoutesNy
 import no.nav.etterlatte.sak.sakSystemRoutes
 import no.nav.etterlatte.sak.sakWebRoutes
 import no.nav.etterlatte.tilgangsstyring.adressebeskyttelsePlugin
@@ -62,16 +64,8 @@ class Server(private val context: ApplicationContext) {
 
     fun run() = with(context) {
         dataSource.migrate()
-
-        val grunnlagsendringshendelseJobSkedulert = grunnlagsendringshendelseJob.schedule()
+        grunnlagsendringshendelseJob.schedule().also { addShutdownHook(it) }
         setReady().also { engine.start(true) }
-
-        Runtime.getRuntime().addShutdownHook(
-            Thread {
-                grunnlagsendringshendelseJob.setClosedTrue()
-                grunnlagsendringshendelseJobSkedulert.cancel()
-            }
-        )
     }
 }
 
@@ -85,27 +79,30 @@ fun Application.module(context: ApplicationContext) {
             sakSystemRoutes(
                 tilgangService = tilgangService,
                 sakService = sakService,
-                generellBehandlingService = generellBehandlingService
+                behandlingService = behandlingService
             )
             sakWebRoutes(
                 tilgangService = tilgangService,
                 sakService = sakService,
-                generellBehandlingService = generellBehandlingService,
+                behandlingService = behandlingService,
                 grunnlagsendringshendelseService = grunnlagsendringshendelseService
             )
             behandlingRoutes(
-                generellBehandlingService = generellBehandlingService,
-                foerstegangsbehandlingService = foerstegangsbehandlingService,
-                manueltOpphoerService = manueltOpphoerService
+                behandlingService = behandlingService,
+                gyldighetsproevingService = gyldighetsproevingService,
+                manueltOpphoerService = manueltOpphoerService,
+                kommerBarnetTilGodeService = kommerBarnetTilGodeService,
+                behandlingFactory = behandlingFactory
             )
             revurderingRoutes(
                 revurderingService = revurderingService,
-                generellBehandlingService = generellBehandlingService
+                behandlingService = behandlingService
             )
             omregningRoutes(omregningService = omregningService)
             migreringRoutes(migreringService = migreringService)
             behandlingsstatusRoutes(behandlingsstatusService = behandlingsStatusService)
             oppgaveRoutes(service = oppgaveService)
+            oppgaveRoutesNy(service = oppgaveServiceNy, kanBrukeNyOppgaveliste = kanBrukeNyOppgaveliste)
             grunnlagsendringshendelseRoute(grunnlagsendringshendelseService = grunnlagsendringshendelseService)
             egenAnsattRoute(egenAnsattService = EgenAnsattService(sakService, sikkerLogg))
             institusjonsoppholdRoute(institusjonsoppholdService = InstitusjonsoppholdService(institusjonsoppholdDao))

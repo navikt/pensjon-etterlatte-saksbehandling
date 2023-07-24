@@ -22,9 +22,14 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.manueltOpphoer
+import no.nav.etterlatte.oppgaveny.OppgaveServiceNy
+import no.nav.etterlatte.oppgaveny.OppgaveType
+import no.nav.etterlatte.oppgaveny.opprettNyOppgaveMedReferanseOgSak
 import no.nav.etterlatte.revurdering
 import no.nav.etterlatte.saksbehandlerToken
 import org.junit.jupiter.api.Assertions.assertAll
@@ -40,6 +45,12 @@ import java.util.*
 internal class RealManueltOpphoerServiceTest {
 
     private val user = mockk<SaksbehandlerMedEnheterOgRoller>()
+    private val oppgaveService = mockk<OppgaveServiceNy>()
+    private val mockOppgave = opprettNyOppgaveMedReferanseOgSak(
+        "opphør",
+        Sak("ident", SakType.BARNEPENSJON, 1L, Enheter.AALESUND.enhetNr),
+        OppgaveType.MANUELT_OPPHOER
+    )
 
     @BeforeEach
     fun before() {
@@ -51,7 +62,7 @@ internal class RealManueltOpphoerServiceTest {
                         throw IllegalArgumentException()
                     }
 
-                    override fun <T> inTransaction(block: () -> T): T {
+                    override fun <T> inTransaction(gjenbruk: Boolean, block: () -> T): T {
                         return block()
                     }
                 }
@@ -78,6 +89,7 @@ internal class RealManueltOpphoerServiceTest {
         }
 
         val sut = RealManueltOpphoerService(
+            oppgaveService,
             behandlingDaoMock,
             behandlingHendelserKafkaProducer,
             hendelseDaoMock,
@@ -91,7 +103,7 @@ internal class RealManueltOpphoerServiceTest {
     fun `skal opprette et manuelt opphoer`() {
         val sak = 1L
         val manueltOpphoerRequest = ManueltOpphoerRequest(
-            sak = sak,
+            sakId = sak,
             opphoerAarsaker = listOf(
                 ManueltOpphoerAarsak.GJENLEVENDE_FORELDER_DOED,
                 ManueltOpphoerAarsak.SOESKEN_DOED
@@ -116,13 +128,16 @@ internal class RealManueltOpphoerServiceTest {
             every { opprettBehandling(capture(opprettBehandlingSlot)) } just runs
             every { hentBehandling(any()) } answers {
                 manueltOpphoer(
-                    sakId = manueltOpphoerRequest.sak,
+                    sakId = manueltOpphoerRequest.sakId,
                     behandlingId = firstArg(),
                     opphoerAarsaker = manueltOpphoerRequest.opphoerAarsaker,
                     fritekstAarsak = manueltOpphoerRequest.fritekstAarsak
                 )
             }
         }
+
+        every { oppgaveService.opprettNyOppgaveMedSakOgReferanse(any(), any(), any()) } returns mockOppgave
+
         val behandlingHendelserKafkaProducer = mockk<BehandlingHendelserKafkaProducer> {
             every { sendMeldingForHendelse(any(), any()) } returns Unit
         }
@@ -134,6 +149,7 @@ internal class RealManueltOpphoerServiceTest {
         }
 
         val sut = RealManueltOpphoerService(
+            oppgaveService,
             behandlingDaoMock,
             behandlingHendelserKafkaProducer,
             hendelseDaoMock,
@@ -144,13 +160,13 @@ internal class RealManueltOpphoerServiceTest {
 
         assertAll(
             "skal starte manuelt opphoer",
-            { assertEquals(manueltOpphoerRequest.sak, alleBehandlingerISakSlot.captured) },
-            { assertEquals(manueltOpphoerRequest.sak, opprettBehandlingSlot.captured.sakId) },
+            { assertEquals(manueltOpphoerRequest.sakId, alleBehandlingerISakSlot.captured) },
+            { assertEquals(manueltOpphoerRequest.sakId, opprettBehandlingSlot.captured.sakId) },
             { assertEquals(manueltOpphoerRequest.opphoerAarsaker, opprettBehandlingSlot.captured.opphoerAarsaker) },
             { assertEquals(manueltOpphoerRequest.fritekstAarsak, opprettBehandlingSlot.captured.fritekstAarsak) },
             { assertEquals(opprettBehandlingSlot.captured.virkningstidspunkt?.dato, YearMonth.of(2022, 8)) },
             { assertEquals(BehandlingType.MANUELT_OPPHOER, opprettBehandlingSlot.captured.type) },
-            { assertEquals(manueltOpphoerRequest.sak, opprettBehandlingSlot.captured.sakId) },
+            { assertEquals(manueltOpphoerRequest.sakId, opprettBehandlingSlot.captured.sakId) },
             { assertEquals(opprettBehandlingSlot.captured.id, returnertManueltOpphoer?.id) }
         )
         verify {
@@ -166,7 +182,7 @@ internal class RealManueltOpphoerServiceTest {
         val brukerFnr = "123"
         val sakId = 1L
         val manueltOpphoerRequest = ManueltOpphoerRequest(
-            sak = sakId,
+            sakId = sakId,
             opphoerAarsaker = listOf(
                 ManueltOpphoerAarsak.GJENLEVENDE_FORELDER_DOED,
                 ManueltOpphoerAarsak.SOESKEN_DOED
@@ -216,13 +232,14 @@ internal class RealManueltOpphoerServiceTest {
             every { opprettBehandling(capture(opprettetManueltOpphoerSlot)) } just runs
             every { hentBehandling(any()) } answers {
                 manueltOpphoer(
-                    sakId = manueltOpphoerRequest.sak,
+                    sakId = manueltOpphoerRequest.sakId,
                     behandlingId = firstArg(),
                     opphoerAarsaker = manueltOpphoerRequest.opphoerAarsaker,
                     fritekstAarsak = manueltOpphoerRequest.fritekstAarsak
                 )
             }
         }
+        every { oppgaveService.opprettNyOppgaveMedSakOgReferanse(any(), any(), any()) } returns mockOppgave
 
         val behandlingHendelserKafkaProducer = mockk<BehandlingHendelserKafkaProducer> {
             every { sendMeldingForHendelse(any(), any()) } returns Unit
@@ -235,6 +252,7 @@ internal class RealManueltOpphoerServiceTest {
         }
 
         val sut = RealManueltOpphoerService(
+            oppgaveService,
             behandlingDaoMock,
             behandlingHendelserKafkaProducer,
             hendelseDaoMock,
@@ -249,7 +267,7 @@ internal class RealManueltOpphoerServiceTest {
     fun `skal ikke kunne opphoere en sak som allerede er manuelt opphoert`() {
         val sak = 1L
         val manueltOpphoerRequest = ManueltOpphoerRequest(
-            sak = sak,
+            sakId = sak,
             opphoerAarsaker = listOf(
                 ManueltOpphoerAarsak.GJENLEVENDE_FORELDER_DOED,
                 ManueltOpphoerAarsak.SOESKEN_DOED
@@ -269,6 +287,7 @@ internal class RealManueltOpphoerServiceTest {
         }
 
         val sut = RealManueltOpphoerService(
+            oppgaveService,
             behandlingDaoMock,
             behandlingHendelserKafkaProducer,
             hendelseDaoMock,
@@ -285,7 +304,7 @@ internal class RealManueltOpphoerServiceTest {
     fun `skal ikke kunne opphøre en sak som ikke har noen iverksatte behandlinger`() {
         val sak = 1L
         val manueltOpphoerRequest = ManueltOpphoerRequest(
-            sak = sak,
+            sakId = sak,
             opphoerAarsaker = listOf(
                 ManueltOpphoerAarsak.SOESKEN_DOED,
                 ManueltOpphoerAarsak.SOEKER_DOED
@@ -313,6 +332,7 @@ internal class RealManueltOpphoerServiceTest {
         }
 
         val service = RealManueltOpphoerService(
+            oppgaveService,
             behandlingDaoMock,
             behandlingHendelserKafkaProducer,
             hendelseDaoMock,
@@ -332,6 +352,7 @@ internal class RealManueltOpphoerServiceTest {
             every { hentBehandling(any()) } returns null
         }
         val service = RealManueltOpphoerService(
+            oppgaveService,
             behandlingDaoMock,
             behandlingHendelserKafkaProducer,
             hendelseDaoMock,
@@ -374,6 +395,7 @@ internal class RealManueltOpphoerServiceTest {
         }
 
         val service = RealManueltOpphoerService(
+            oppgaveService,
             behandlingDaoMock,
             behandlingHendelserKafkaProducer,
             hendelseDaoMock,
@@ -412,6 +434,7 @@ internal class RealManueltOpphoerServiceTest {
         }
 
         val sut = RealManueltOpphoerService(
+            oppgaveService,
             behandlingDaoMock,
             behandlingHendelserKafkaProducer,
             hendelseDaoMock,
@@ -445,6 +468,7 @@ internal class RealManueltOpphoerServiceTest {
         }
 
         val sut = RealManueltOpphoerService(
+            oppgaveService,
             behandlingDaoMock,
             behandlingHendelserKafkaProducer,
             hendelseDaoMock,

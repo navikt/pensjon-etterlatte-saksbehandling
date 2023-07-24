@@ -485,21 +485,18 @@ internal class VedtaksvurderingServiceTest {
             behandlingType = BehandlingType.REVURDERING,
             revurderingsaarsak = RevurderingAarsak.REGULERING,
             behandlingOpprettet = Tidspunkt.now().toLocalDatetimeUTC(),
-            sistEndret = Tidspunkt.now().toLocalDatetimeUTC(),
             soeknadMottattDato = null,
             innsender = null,
             soeker = FNR_1,
             gjenlevende = listOf(),
             avdoed = listOf(),
             soesken = listOf(),
-            gyldighetsproeving = null,
             status = BehandlingStatus.VILKAARSVURDERT,
             virkningstidspunkt = null,
-            utenlandstilsnitt = null,
             boddEllerArbeidetUtlandet = null,
-            kommerBarnetTilgode = null,
             prosesstype = Prosesstype.MANUELL,
-            revurderingInfo = null
+            revurderingInfo = null,
+            enhet = "1111"
         )
         coEvery { behandlingKlientMock.hentSak(any(), any()) } returns Sak(
             SAKSBEHANDLER_1,
@@ -886,6 +883,7 @@ internal class VedtaksvurderingServiceTest {
             AvkortetYtelseDto(
                 fom = virkningstidspunkt.atDay(1),
                 tom = null,
+                ytelseFoerAvkorting = 100,
                 ytelseEtterAvkorting = 50,
                 avkortingsbeloep = 50,
                 restanse = 0
@@ -909,14 +907,12 @@ internal class VedtaksvurderingServiceTest {
             sak = 1L,
             sakType = saktype,
             behandlingOpprettet = LocalDateTime.now(),
-            sistEndret = LocalDateTime.now(),
             soeknadMottattDato = LocalDateTime.now(),
             innsender = null,
             soeker = FNR_1,
             gjenlevende = listOf(),
             avdoed = listOf(),
             soesken = listOf(),
-            gyldighetsproeving = null,
             status = BehandlingStatus.OPPRETTET,
             behandlingType = if (revurderingAarsak == null) {
                 BehandlingType.FØRSTEGANGSBEHANDLING
@@ -928,12 +924,11 @@ internal class VedtaksvurderingServiceTest {
                 Grunnlagsopplysning.Saksbehandler(SAKSBEHANDLER_1, Tidspunkt.now()),
                 "enBegrunnelse"
             ),
-            utenlandstilsnitt = null,
             boddEllerArbeidetUtlandet = null,
-            kommerBarnetTilgode = null,
             revurderingsaarsak = revurderingAarsak,
             revurderingInfo = revurderingInfo,
-            prosesstype = Prosesstype.MANUELL
+            prosesstype = Prosesstype.MANUELL,
+            enhet = "1111"
         )
 
     private companion object {

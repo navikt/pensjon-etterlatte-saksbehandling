@@ -20,11 +20,13 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
 import io.mockk.verify
+import no.nav.etterlatte.behandling.BehandlingFactory
+import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.BoddEllerArbeidetUtlandetRequest
-import no.nav.etterlatte.behandling.GenerellBehandlingService
+import no.nav.etterlatte.behandling.GyldighetsproevingService
 import no.nav.etterlatte.behandling.UtenlandstilsnittRequest
 import no.nav.etterlatte.behandling.behandlingRoutes
-import no.nav.etterlatte.behandling.foerstegangsbehandling.FoerstegangsbehandlingService
+import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeService
 import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerService
 import no.nav.etterlatte.libs.common.behandling.UtenlandstilsnittType
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
@@ -50,9 +52,11 @@ internal class BehandlingRoutesTest {
 
     private val mockOAuth2Server = MockOAuth2Server()
     private lateinit var hoconApplicationConfig: HoconApplicationConfig
-    private val generellBehandlingService = mockk<GenerellBehandlingService>(relaxUnitFun = true)
-    private val foerstegangsbehandlingService = mockk<FoerstegangsbehandlingService>()
+    private val behandlingService = mockk<BehandlingService>(relaxUnitFun = true)
+    private val gyldighetsproevingService = mockk<GyldighetsproevingService>()
+    private val kommerBarnetTilGodeService = mockk<KommerBarnetTilGodeService>()
     private val manueltOpphoerService = mockk<ManueltOpphoerService>()
+    private val behandlingFactory = mockk<BehandlingFactory>()
 
     @BeforeAll
     fun before() {
@@ -74,7 +78,7 @@ internal class BehandlingRoutesTest {
     @Test
     fun `kan oppdater utenlandstilsnitt`() {
         coEvery {
-            generellBehandlingService.oppdaterUtenlandstilsnitt(any(), any())
+            behandlingService.oppdaterUtenlandstilsnitt(any(), any())
         } just runs
 
         withTestApplication { client ->
@@ -91,7 +95,7 @@ internal class BehandlingRoutesTest {
     @Test
     fun `kan oppdater bodd eller arbeidet i utlandet`() {
         coEvery {
-            generellBehandlingService.oppdaterBoddEllerArbeidetUtlandet(any(), any())
+            behandlingService.oppdaterBoddEllerArbeidetUtlandet(any(), any())
         } just runs
 
         withTestApplication { client ->
@@ -113,7 +117,7 @@ internal class BehandlingRoutesTest {
         mockBehandlingService(bodyVirkningstidspunkt, bodyBegrunnelse)
 
         coEvery {
-            generellBehandlingService.erGyldigVirkningstidspunkt(any(), any(), any())
+            behandlingService.erGyldigVirkningstidspunkt(any(), any(), any())
         } returns true
 
         withTestApplication { client ->
@@ -142,7 +146,7 @@ internal class BehandlingRoutesTest {
             }
 
             assertEquals(200, response.status.value)
-            verify(exactly = 1) { generellBehandlingService.avbrytBehandling(behandlingId, any()) }
+            verify(exactly = 1) { behandlingService.avbrytBehandling(behandlingId, any()) }
         }
     }
 
@@ -154,7 +158,7 @@ internal class BehandlingRoutesTest {
         mockBehandlingService(bodyVirkningstidspunkt, bodyBegrunnelse)
 
         coEvery {
-            generellBehandlingService.erGyldigVirkningstidspunkt(any(), any(), any())
+            behandlingService.erGyldigVirkningstidspunkt(any(), any(), any())
         } returns false
 
         withTestApplication { client ->
@@ -184,9 +188,11 @@ internal class BehandlingRoutesTest {
             application {
                 restModule(this.log) {
                     behandlingRoutes(
-                        generellBehandlingService,
-                        foerstegangsbehandlingService,
-                        manueltOpphoerService
+                        behandlingService,
+                        gyldighetsproevingService,
+                        kommerBarnetTilGodeService,
+                        manueltOpphoerService,
+                        behandlingFactory
                     )
                 }
             }
@@ -213,7 +219,7 @@ internal class BehandlingRoutesTest {
             bodyBegrunnelse
         )
         every {
-            generellBehandlingService.oppdaterVirkningstidspunkt(
+            behandlingService.oppdaterVirkningstidspunkt(
                 behandlingId,
                 parsetVirkningstidspunkt,
                 NAVident,

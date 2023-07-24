@@ -16,7 +16,7 @@ import io.ktor.server.routing.route
 import no.nav.etterlatte.behandling.domain.ManueltOpphoer
 import no.nav.etterlatte.behandling.domain.TilstandException
 import no.nav.etterlatte.behandling.domain.toBehandlingSammendrag
-import no.nav.etterlatte.behandling.foerstegangsbehandling.FoerstegangsbehandlingService
+import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeService
 import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerAarsak
 import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerRequest
 import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerService
@@ -41,15 +41,17 @@ import java.time.YearMonth
 import java.util.*
 
 internal fun Route.behandlingRoutes(
-    generellBehandlingService: GenerellBehandlingService,
-    foerstegangsbehandlingService: FoerstegangsbehandlingService,
-    manueltOpphoerService: ManueltOpphoerService
+    behandlingService: BehandlingService,
+    gyldighetsproevingService: GyldighetsproevingService,
+    kommerBarnetTilGodeService: KommerBarnetTilGodeService,
+    manueltOpphoerService: ManueltOpphoerService,
+    behandlingFactory: BehandlingFactory
 ) {
     val logger = application.log
     route("/api/behandling/{$BEHANDLINGSID_CALL_PARAMETER}/") {
         get {
             val detaljertBehandlingDTO =
-                generellBehandlingService.hentDetaljertBehandlingMedTilbehoer(behandlingsId, brukerTokenInfo)
+                behandlingService.hentDetaljertBehandlingMedTilbehoer(behandlingsId, brukerTokenInfo)
             call.respond(detaljertBehandlingDTO)
         }
 
@@ -57,7 +59,7 @@ internal fun Route.behandlingRoutes(
             hentNavidentFraToken { navIdent ->
                 val body = call.receive<JaNeiMedBegrunnelse>()
                 when (
-                    val lagretGyldighetsResultat = foerstegangsbehandlingService.lagreGyldighetsproeving(
+                    val lagretGyldighetsResultat = gyldighetsproevingService.lagreGyldighetsproeving(
                         behandlingsId,
                         navIdent,
                         body
@@ -75,11 +77,12 @@ internal fun Route.behandlingRoutes(
                 val kommerBarnetTilgode = KommerBarnetTilgode(
                     body.svar,
                     body.begrunnelse,
-                    Grunnlagsopplysning.Saksbehandler.create(navIdent)
+                    Grunnlagsopplysning.Saksbehandler.create(navIdent),
+                    behandlingsId
                 )
 
                 try {
-                    foerstegangsbehandlingService.lagreKommerBarnetTilgode(behandlingsId, kommerBarnetTilgode)
+                    kommerBarnetTilGodeService.lagreKommerBarnetTilgode(kommerBarnetTilgode)
                     call.respond(HttpStatusCode.OK, kommerBarnetTilgode)
                 } catch (e: TilstandException.UgyldigTilstand) {
                     call.respond(HttpStatusCode.BadRequest, "Kunne ikke endre på feltet")
@@ -111,7 +114,7 @@ internal fun Route.behandlingRoutes(
 
         post("/avbryt") {
             hentNavidentFraToken { navIdent ->
-                generellBehandlingService.avbrytBehandling(behandlingsId, navIdent)
+                behandlingService.avbrytBehandling(behandlingsId, navIdent)
                 call.respond(HttpStatusCode.OK)
             }
         }
@@ -121,7 +124,7 @@ internal fun Route.behandlingRoutes(
                 logger.debug("Prøver å fastsette virkningstidspunkt")
                 val body = call.receive<VirkningstidspunktRequest>()
 
-                val erGyldigVirkningstidspunkt = generellBehandlingService.erGyldigVirkningstidspunkt(
+                val erGyldigVirkningstidspunkt = behandlingService.erGyldigVirkningstidspunkt(
                     behandlingsId,
                     brukerTokenInfo,
                     body
@@ -131,7 +134,7 @@ internal fun Route.behandlingRoutes(
                 }
 
                 try {
-                    val virkningstidspunkt = generellBehandlingService.oppdaterVirkningstidspunkt(
+                    val virkningstidspunkt = behandlingService.oppdaterVirkningstidspunkt(
                         behandlingsId,
                         body.dato,
                         navIdent,
@@ -161,7 +164,7 @@ internal fun Route.behandlingRoutes(
                         begrunnelse = body.begrunnelse
                     )
 
-                    generellBehandlingService.oppdaterUtenlandstilsnitt(behandlingsId, utenlandstilsnitt)
+                    behandlingService.oppdaterUtenlandstilsnitt(behandlingsId, utenlandstilsnitt)
 
                     call.respondText(
                         contentType = ContentType.Application.Json,
@@ -187,7 +190,7 @@ internal fun Route.behandlingRoutes(
                         begrunnelse = body.begrunnelse
                     )
 
-                    generellBehandlingService.oppdaterBoddEllerArbeidetUtlandet(
+                    behandlingService.oppdaterBoddEllerArbeidetUtlandet(
                         behandlingsId,
                         boddEllerArbeidetUtlandet
                     )
@@ -209,7 +212,7 @@ internal fun Route.behandlingRoutes(
         route("/{$BEHANDLINGSID_CALL_PARAMETER}") {
             get {
                 logger.info("Henter detaljert behandling for behandling med id=$behandlingsId")
-                when (val behandling = generellBehandlingService.hentDetaljertBehandling(behandlingsId)) {
+                when (val behandling = behandlingService.hentDetaljertBehandling(behandlingsId)) {
                     is DetaljertBehandling -> call.respond(behandling)
                     else -> call.respond(HttpStatusCode.NotFound, "Fant ikke behandling med id=$behandlingsId")
                 }
@@ -217,7 +220,7 @@ internal fun Route.behandlingRoutes(
 
             post("/gyldigfremsatt") {
                 val body = call.receive<GyldighetsResultat>()
-                foerstegangsbehandlingService.lagreGyldighetsproeving(behandlingsId, body)
+                gyldighetsproevingService.lagreGyldighetsproeving(behandlingsId, body)
                 call.respond(HttpStatusCode.OK)
             }
         }
@@ -227,7 +230,7 @@ internal fun Route.behandlingRoutes(
                 val behandlingsBehov = call.receive<BehandlingsBehov>()
 
                 when (
-                    val behandling = foerstegangsbehandlingService.opprettBehandling(
+                    val behandling = behandlingFactory.opprettBehandling(
                         behandlingsBehov.sak,
                         behandlingsBehov.persongalleri,
                         behandlingsBehov.mottattDato,
@@ -244,11 +247,11 @@ internal fun Route.behandlingRoutes(
     route("/api/behandlinger/{sakid}/manueltopphoer") {
         post {
             val manueltOpphoerRequest = call.receive<ManueltOpphoerRequest>()
-            logger.info("Mottat forespørsel om å gjennomføre et manuelt opphør på sak ${manueltOpphoerRequest.sak}")
+            logger.info("Mottat forespørsel om å gjennomføre et manuelt opphør på sak ${manueltOpphoerRequest.sakId}")
             when (val manueltOpphoer = manueltOpphoerService.opprettManueltOpphoer(manueltOpphoerRequest)) {
                 is ManueltOpphoer -> {
                     logger.info(
-                        "Manuelt opphør for sak ${manueltOpphoerRequest.sak} er opprettet med behandlingId " +
+                        "Manuelt opphør for sak ${manueltOpphoerRequest.sakId} er opprettet med behandlingId " +
                             "${manueltOpphoer.id}"
                     )
                     call.respond(ManueltOpphoerResponse(behandlingId = manueltOpphoer.id.toString()))
@@ -256,7 +259,7 @@ internal fun Route.behandlingRoutes(
 
                 else -> {
                     logger.info(
-                        "Sak ${manueltOpphoerRequest.sak} hadde ikke gyldig status for manuelt opphør, så" +
+                        "Sak ${manueltOpphoerRequest.sakId} hadde ikke gyldig status for manuelt opphør, så" +
                             "ingen manuelt opphør blir opprettet"
                     )
                     call.respond(HttpStatusCode.Forbidden)

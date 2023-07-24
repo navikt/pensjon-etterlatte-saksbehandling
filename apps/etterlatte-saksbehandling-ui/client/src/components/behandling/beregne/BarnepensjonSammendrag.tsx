@@ -64,7 +64,7 @@ export const BarnepensjonSammendrag = ({ behandling, beregning }: Props) => {
               <Table.DataCell>
                 {
                   <>
-                    {beregningsperiode.soeskenFlokk && `${beregningsperiode.soeskenFlokk.length} barn`}{' '}
+                    {beregningsperiode.soeskenFlokk && `${beregningsperiode.soeskenFlokk.length + 1} barn`}{' '}
                     {beregningsperiode.institusjonsopphold && ' institusjonsopphold'}
                   </>
                 }

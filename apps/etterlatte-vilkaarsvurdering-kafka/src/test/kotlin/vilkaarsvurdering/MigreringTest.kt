@@ -29,7 +29,7 @@ internal class MigreringTest {
         val melding = JsonMessage.newMessage(
             mapOf(
                 "@event_name" to Migreringshendelser.VILKAARSVURDER,
-                BEHOV_NAME_KEY to Opplysningstype.MIGRERING.name,
+                BEHOV_NAME_KEY to Opplysningstype.AVDOED_PDL_V1.name,
                 "sakId" to 1,
                 BEHANDLING_ID_KEY to behandlingId,
                 "fullstendig" to true

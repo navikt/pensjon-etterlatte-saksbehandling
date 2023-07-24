@@ -1,10 +1,13 @@
 package no.nav.etterlatte.beregning.regler
 
-import no.nav.etterlatte.avkorting.AarsoppgjoerMaaned
+import no.nav.etterlatte.avkorting.Aarsoppgjoer
 import no.nav.etterlatte.avkorting.AvkortetYtelse
+import no.nav.etterlatte.avkorting.AvkortetYtelseType
 import no.nav.etterlatte.avkorting.Avkorting
 import no.nav.etterlatte.avkorting.AvkortingGrunnlag
 import no.nav.etterlatte.avkorting.Avkortingsperiode
+import no.nav.etterlatte.avkorting.Restanse
+import no.nav.etterlatte.avkorting.YtelseFoerAvkorting
 import no.nav.etterlatte.avkorting.regler.AvkortetYtelseGrunnlag
 import no.nav.etterlatte.avkorting.regler.InntektAvkortingGrunnlag
 import no.nav.etterlatte.avkorting.regler.InntektAvkortingGrunnlagWrapper
@@ -17,6 +20,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
 import no.nav.etterlatte.libs.common.beregning.Beregningstype
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
@@ -70,13 +74,12 @@ val bruker = Saksbehandler("token", "ident", null)
 
 fun avkorting(
     avkortingGrunnlag: List<AvkortingGrunnlag> = emptyList(),
+    ytelseFoerAvkorting: List<YtelseFoerAvkorting> = emptyList(),
     avkortingsperioder: List<Avkortingsperiode> = emptyList(),
     avkortetYtelse: List<AvkortetYtelse> = emptyList(),
-    aarsoppgjoer: List<AarsoppgjoerMaaned> = emptyList()
 ) = Avkorting(
     avkortingGrunnlag = avkortingGrunnlag,
-    avkortingsperioder = avkortingsperioder,
-    aarsoppgjoer = aarsoppgjoer,
+    aarsoppgjoer = aarsoppgjoer(ytelseFoerAvkorting, avkortingsperioder),
     avkortetYtelse = avkortetYtelse
 )
 
@@ -113,11 +116,36 @@ fun inntektAvkortingGrunnlag(
     )
 )
 
+fun aarsoppgjoer(
+    ytelseFoerAvkorting: List<YtelseFoerAvkorting> = emptyList(),
+    avkortingsperioder: List<Avkortingsperiode> = emptyList(),
+    tidligereAvkortetYtelse: List<AvkortetYtelse> = emptyList(),
+    reberegnetAvkortetYtelse: List<AvkortetYtelse> = emptyList(),
+    restanse: Restanse? = null
+) = Aarsoppgjoer(
+    ytelseFoerAvkorting = ytelseFoerAvkorting,
+    avkortingsperioder = avkortingsperioder,
+    tidligereAvkortetYtelse = tidligereAvkortetYtelse,
+    tidligereAvkortetYtelseReberegnet = reberegnetAvkortetYtelse,
+    restanse = restanse,
+)
+
+fun ytelseFoerAvkorting(
+    beregning: Int = 100,
+    periode: Periode = Periode(fom = YearMonth.of(2023, 1), tom = null),
+    beregningsreferanse: UUID = UUID.randomUUID()
+) = YtelseFoerAvkorting(
+    beregning = beregning,
+    periode = periode,
+    beregningsreferanse = beregningsreferanse
+)
+
 fun avkortingsperiode(
     fom: YearMonth = YearMonth.now(),
     tom: YearMonth? = null,
     avkorting: Int = 10000
 ) = Avkortingsperiode(
+    id = UUID.randomUUID(),
     Periode(fom = fom, tom = tom),
     avkorting = avkorting,
     tidspunkt = Tidspunkt.now(),
@@ -125,15 +153,29 @@ fun avkortingsperiode(
     kilde = Grunnlagsopplysning.RegelKilde("regelid", Tidspunkt.now(), "1")
 )
 
-fun avkortetYtelseGrunnlag(beregning: Int, avkorting: Int) = AvkortetYtelseGrunnlag(
+fun restanse(
+    totalRestanse: Int = 100,
+    fordeltRestanse: Int = 100
+) = Restanse(
+    id = UUID.randomUUID(),
+    totalRestanse = totalRestanse,
+    fordeltRestanse = fordeltRestanse,
+    tidspunkt = Tidspunkt.now(),
+    regelResultat = "".toJsonNode(),
+    kilde = Grunnlagsopplysning.RegelKilde("regelid", Tidspunkt.now(), "1")
+)
+
+fun avkortetYtelseGrunnlag(beregning: Int, avkorting: Int, fordeltRestanse: Int = 0) = AvkortetYtelseGrunnlag(
     beregning = FaktumNode(verdi = beregning, "", ""),
-    avkorting = FaktumNode(verdi = avkorting, "", "")
+    avkorting = FaktumNode(verdi = avkorting, "", ""),
+    fordeltRestanse = FaktumNode(verdi = fordeltRestanse, "", ""),
 )
 
 fun avkortetYtelse(
-    ytelseEtterAvkorting: Int = 100,
+    type: AvkortetYtelseType = AvkortetYtelseType.NY,
+    ytelseEtterAvkorting: Int = 50,
     restanse: Int = 50,
-    ytelseEtterAvkortingFoerRestanse: Int = 0,
+    ytelseEtterAvkortingFoerRestanse: Int = 100,
     avkortingsbeloep: Int = 200,
     ytelseFoerAvkorting: Int = 300,
     periode: Periode = Periode(
@@ -141,6 +183,8 @@ fun avkortetYtelse(
         tom = null
     )
 ) = AvkortetYtelse(
+    id = UUID.randomUUID(),
+    type = type,
     periode = periode,
     ytelseEtterAvkorting = ytelseEtterAvkorting,
     restanse = restanse,
@@ -152,23 +196,6 @@ fun avkortetYtelse(
     kilde = Grunnlagsopplysning.RegelKilde("regelid", Tidspunkt.now(), "1")
 )
 
-fun aarsoppgjoerMaaned(
-    maaned: YearMonth = YearMonth.of(2023, 1),
-    beregning: Int = 0,
-    avkorting: Int = 0,
-    forventetAvkortetYtelse: Int = 0,
-    restanse: Int = 0,
-    fordeltRestanse: Int = 0,
-    faktiskAvkortetYtelse: Int = 0
-) = AarsoppgjoerMaaned(
-    maaned = maaned,
-    beregning = beregning,
-    avkorting = avkorting,
-    forventetAvkortetYtelse = forventetAvkortetYtelse,
-    restanse = restanse,
-    fordeltRestanse = fordeltRestanse,
-    faktiskAvkortetYtelse = faktiskAvkortetYtelse
-)
 
 fun beregning(
     beregninger: List<Beregningsperiode> = listOf(beregningsperiode())
@@ -203,27 +230,24 @@ fun behandling(
     sak: Long = 123,
     sakType: SakType = SakType.OMSTILLINGSSTOENAD,
     behandlingType: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-    virkningstidspunkt: YearMonth = YearMonth.of(2023, 1)
+    virkningstidspunkt: Virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2023, 1))
 ) = DetaljertBehandling(
     id = id,
     sak = sak,
     sakType = sakType,
     behandlingOpprettet = LocalDateTime.now(),
-    sistEndret = LocalDateTime.now(),
     soeknadMottattDato = null,
     innsender = null,
     soeker = "12312312321",
     gjenlevende = listOf(),
     avdoed = listOf(),
     soesken = listOf(),
-    gyldighetsproeving = null,
     status = BehandlingStatus.VILKAARSVURDERT,
     behandlingType = behandlingType,
-    virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(virkningstidspunkt),
-    kommerBarnetTilgode = null,
+    virkningstidspunkt = virkningstidspunkt,
     revurderingsaarsak = null,
     prosesstype = Prosesstype.MANUELL,
-    utenlandstilsnitt = null,
     boddEllerArbeidetUtlandet = null,
-    revurderingInfo = null
+    revurderingInfo = null,
+    enhet = "1111"
 )

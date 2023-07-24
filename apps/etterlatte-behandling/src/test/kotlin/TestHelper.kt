@@ -59,7 +59,6 @@ fun opprettBehandling(
     status: BehandlingStatus = BehandlingStatus.OPPRETTET,
     persongalleri: Persongalleri = persongalleri(),
     soeknadMottattDato: LocalDateTime = Tidspunkt.now().toLocalDatetimeUTC(),
-    kommerBarnetTilgode: KommerBarnetTilgode? = null,
     virkningstidspunkt: Virkningstidspunkt? = null,
     revurderingAarsak: RevurderingAarsak? = null,
     opphoerAarsaker: List<ManueltOpphoerAarsak>? = null,
@@ -72,7 +71,6 @@ fun opprettBehandling(
     status = status,
     persongalleri = persongalleri,
     soeknadMottattDato = soeknadMottattDato,
-    kommerBarnetTilgode = kommerBarnetTilgode,
     virkningstidspunkt = virkningstidspunkt,
     revurderingsAarsak = revurderingAarsak,
     opphoerAarsaker = opphoerAarsaker,
@@ -125,7 +123,7 @@ fun revurdering(
     status: BehandlingStatus = BehandlingStatus.OPPRETTET,
     persongalleri: Persongalleri = persongalleri(),
     revurderingAarsak: RevurderingAarsak,
-    kommerBarnetTilgode: KommerBarnetTilgode = kommerBarnetTilgode(),
+    kommerBarnetTilgode: KommerBarnetTilgode = kommerBarnetTilgode(id),
     virkningstidspunkt: Virkningstidspunkt? = null,
     utenlandstilsnitt: Utenlandstilsnitt? = null,
     boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet? = null,
@@ -303,10 +301,11 @@ fun personOpplysning(
 )
 
 fun kommerBarnetTilgode(
+    behandlingId: UUID,
     svar: JaNei = JaNei.JA,
     begrunnelse: String = "En begrunnelse",
     kilde: Grunnlagsopplysning.Saksbehandler = Grunnlagsopplysning.Saksbehandler.create("S01")
-) = KommerBarnetTilgode(svar, begrunnelse, kilde)
+) = KommerBarnetTilgode(svar, begrunnelse, kilde, behandlingId)
 
 val TRIVIELL_MIDTPUNKT = Folkeregisteridentifikator.of("19040550081")
 val STOR_SNERK = Folkeregisteridentifikator.of("11057523044")
@@ -355,10 +354,11 @@ fun mockPerson(
     vergemaalEllerFremtidsfullmakt = vergemaal?.map { OpplysningDTO(it, UUID.randomUUID().toString()) }
 )
 
-fun kommerBarnetTilGodeVurdering() = KommerBarnetTilgode(
+fun kommerBarnetTilGodeVurdering(behandlingId: UUID) = KommerBarnetTilgode(
     svar = JaNei.JA,
     begrunnelse = "begrunnelse",
-    kilde = Grunnlagsopplysning.Saksbehandler(ident = "ident", tidspunkt = Tidspunkt(instant = Instant.now()))
+    kilde = Grunnlagsopplysning.Saksbehandler(ident = "ident", tidspunkt = Tidspunkt(instant = Instant.now())),
+    behandlingId = behandlingId
 )
 
 fun virkningstidspunktVurdering() = Virkningstidspunkt(

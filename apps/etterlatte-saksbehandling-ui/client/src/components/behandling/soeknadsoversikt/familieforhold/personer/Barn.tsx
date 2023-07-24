@@ -1,18 +1,18 @@
 import { PersonInfoFnr } from './personinfo/PersonInfoFnr'
 import { PersonBorder, PersonHeader, PersonInfoWrapper } from '../styled'
-import { Child } from '@navikt/ds-icons'
 import { PersonDetailWrapper } from '../../styled'
 import { IPdlPerson } from '~shared/types/Person'
 import { PersonInfoAdresse } from './personinfo/PersonInfoAdresse'
 import differenceInYears from 'date-fns/differenceInYears'
 import { hentAdresserEtterDoedsdato } from '~components/behandling/felles/utils'
+import { ChildEyesIcon } from '@navikt/aksel-icons'
 
 type Props = {
   person: IPdlPerson
   doedsdato: string
 }
 
-export const Barn: React.FC<Props> = ({ person, doedsdato }) => {
+export const Barn = ({ person, doedsdato }: Props) => {
   const bostedsadresse = person.bostedsadresse ?? []
   const adresserEtterDoedsdato = hentAdresserEtterDoedsdato(bostedsadresse, doedsdato)
   const aktivAdresse = bostedsadresse.find((adresse) => adresse.aktiv)
@@ -21,7 +21,7 @@ export const Barn: React.FC<Props> = ({ person, doedsdato }) => {
     <PersonBorder>
       <PersonHeader>
         <span className="icon">
-          <Child />
+          <ChildEyesIcon />
         </span>
         {`${person.fornavn} ${person.etternavn}`}{' '}
         <span className={'personRolle'}>({differenceInYears(new Date(), new Date(person.foedselsdato))} år)</span>

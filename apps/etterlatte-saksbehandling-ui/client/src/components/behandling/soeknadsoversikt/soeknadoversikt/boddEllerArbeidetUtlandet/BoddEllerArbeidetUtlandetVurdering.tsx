@@ -18,23 +18,23 @@ export const BoddEllerArbeidetUtlandetVurdering = ({
   setVurdert,
   behandlingId,
 }: {
-  boddEllerArbeidetUtlandet: IBoddEllerArbeidetUtlandet | undefined
+  boddEllerArbeidetUtlandet: IBoddEllerArbeidetUtlandet | null
   redigerbar: boolean
   setVurdert: (visVurderingKnapp: boolean) => void
   behandlingId: string
 }) => {
   const dispatch = useAppDispatch()
 
-  const [svar, setSvar] = useState<JaNei | undefined>(finnSvar(boddEllerArbeidetUtlandet))
+  const [svar, setSvar] = useState<JaNei | null>(finnSvar(boddEllerArbeidetUtlandet))
   const [radioError, setRadioError] = useState<string>('')
   const [begrunnelse, setBegrunnelse] = useState<string>(boddEllerArbeidetUtlandet?.begrunnelse || '')
   const [setBoddEllerArbeidetUtlandetStatus, setBoddEllerArbeidetUtlandet, resetToInitial] =
     useApiCall(lagreBoddEllerArbeidetUtlandet)
 
   const lagre = (onSuccess?: () => void) => {
-    !svar ? setRadioError('Du må velge et svar') : setRadioError('')
+    svar ? setRadioError('') : setRadioError('Du må velge et svar')
 
-    if (svar !== undefined)
+    if (svar)
       return setBoddEllerArbeidetUtlandet({ behandlingId, begrunnelse, svar: svar === JaNei.JA }, (response) => {
         dispatch(oppdaterBoddEllerArbeidetUtlandet(response))
         dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.OPPRETTET))
@@ -57,7 +57,7 @@ export const BoddEllerArbeidetUtlandetVurdering = ({
       subtittelKomponent={
         <>
           <BodyShort spacing>Har avdøde bodd eller arbeidet i utlandet?</BodyShort>
-          {boddEllerArbeidetUtlandet?.boddEllerArbeidetUtlandet ? (
+          {boddEllerArbeidetUtlandet ? (
             <Label as={'p'} size="small" style={{ marginBottom: '32px' }}>
               {JaNeiRec[boddEllerArbeidetUtlandet.boddEllerArbeidetUtlandet ? JaNei.JA : JaNei.NEI]}
             </Label>
@@ -118,13 +118,13 @@ export const BoddEllerArbeidetUtlandetVurdering = ({
   )
 }
 
-function finnSvar(boddEllerArbeidetUtlandet: IBoddEllerArbeidetUtlandet | undefined): JaNei | undefined {
+function finnSvar(boddEllerArbeidetUtlandet: IBoddEllerArbeidetUtlandet | null): JaNei | null {
   switch (boddEllerArbeidetUtlandet?.boddEllerArbeidetUtlandet) {
     case true:
       return JaNei.JA
     case false:
       return JaNei.NEI
     default:
-      return undefined
+      return null
   }
 }

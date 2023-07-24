@@ -60,7 +60,7 @@ spec:
       value: etterlatte.dodsmelding
     - name: GRUNNLAG_AZURE_SCOPE
       value: api://dev-gcp.etterlatte.etterlatte-grunnlag/.default
-    - name: PDL_AZURE_SCOPE
+    - name: PDLTJENESTER_AZURE_SCOPE
       value: api://dev-gcp.etterlatte.etterlatte-pdltjenester/.default
     - name: HENDELSE_JOB_FREKVENS
       value: "1"
@@ -94,6 +94,8 @@ spec:
       value: https://skjermede-personer-pip.intern.dev.nav.no
     - name: AZURE_SCOPE_SKJERMEDE_PIP
       value: api://dev-gcp.nom.skjermede-personer-pip/.default
+    - name: KAN_BRUKE_NY_OPPGAVELISTE
+      value: 'true'
   accessPolicy:
     outbound:
       rules:
@@ -121,10 +123,6 @@ spec:
         - application: etterlatte-vedtaksvurdering
         - application: etterlatte-opplysninger-fra-soeknad
         - application: etterlatte-brev-api
-          permissions:
-            roles:
-              - "kan-sette-kilde"
-        - application: etterlatte-opplysninger-fra-pdl
           permissions:
             roles:
               - "kan-sette-kilde"

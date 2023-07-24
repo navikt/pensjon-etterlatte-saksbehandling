@@ -11,7 +11,7 @@ type Props = {
   adresseDoedstidspunkt: boolean
 }
 
-export const PersonInfoAdresse: React.FC<Props> = (props) => {
+export const PersonInfoAdresse = (props: Props) => {
   const [visAdresseHistorikk, setVisAdresseHistorikk] = useState(false)
   const adresser = props.adresser ? [...props.adresser] : []
 

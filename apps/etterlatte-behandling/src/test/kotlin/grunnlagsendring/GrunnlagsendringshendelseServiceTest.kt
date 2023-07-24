@@ -14,7 +14,7 @@ import no.nav.etterlatte.Context
 import no.nav.etterlatte.DatabaseKontekst
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.TRIVIELL_MIDTPUNKT
-import no.nav.etterlatte.behandling.GenerellBehandlingService
+import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.domain.ArbeidsFordelingEnhet
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringStatus
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringsType
@@ -42,6 +42,9 @@ import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
+import no.nav.etterlatte.oppgaveny.OppgaveServiceNy
+import no.nav.etterlatte.oppgaveny.OppgaveType
+import no.nav.etterlatte.oppgaveny.opprettNyOppgaveMedReferanseOgSak
 import no.nav.etterlatte.sak.SakService
 import no.nav.etterlatte.sak.SakTilgangDao
 import no.nav.etterlatte.sak.TilgangServiceImpl
@@ -57,17 +60,24 @@ import java.util.*
 
 internal class GrunnlagsendringshendelseServiceTest {
 
-    private val generellBehandlingService = mockk<GenerellBehandlingService>()
+    private val behandlingService = mockk<BehandlingService>()
     private val grunnlagshendelsesDao = mockk<GrunnlagsendringshendelseDao>()
     private val pdlService = mockk<PdlKlientImpl>()
     private val grunnlagClient = mockk<GrunnlagKlient>(relaxed = true, relaxUnitFun = true)
     private val adressebeskyttelseDaoMock = mockk<SakTilgangDao>()
     private val tilgangServiceImpl = TilgangServiceImpl(adressebeskyttelseDaoMock)
     private val sakService = mockk<SakService>()
+    private val oppgaveService = mockk<OppgaveServiceNy>()
+    private val mockOppgave = opprettNyOppgaveMedReferanseOgSak(
+        "hendelseid",
+        Sak("ident", SakType.BARNEPENSJON, 1L, Enheter.AALESUND.enhetNr),
+        OppgaveType.HENDELSE
+    )
 
     private val grunnlagsendringshendelseService = GrunnlagsendringshendelseService(
+        oppgaveService,
         grunnlagshendelsesDao,
-        generellBehandlingService,
+        behandlingService,
         pdlService,
         grunnlagClient,
         tilgangServiceImpl,
@@ -84,7 +94,7 @@ internal class GrunnlagsendringshendelseServiceTest {
                         throw IllegalArgumentException()
                     }
 
-                    override fun <T> inTransaction(block: () -> T): T {
+                    override fun <T> inTransaction(gjenbruk: Boolean, block: () -> T): T {
                         return block()
                     }
                 }
@@ -114,7 +124,9 @@ internal class GrunnlagsendringshendelseServiceTest {
 
         val opprettGrunnlagsendringshendelse = slot<Grunnlagsendringshendelse>()
 
-        every { grunnlagshendelsesDao.oppdaterGrunnlagsendringStatusOgSamsvar(any(), any(), any(), any()) } returns Unit
+        every {
+            grunnlagshendelsesDao.oppdaterGrunnlagsendringStatusOgSamsvar(any(), any(), any(), any())
+        } returns Unit
         every {
             grunnlagshendelsesDao.opprettGrunnlagsendringshendelse(capture(opprettGrunnlagsendringshendelse))
         } returns grunnlagsendringshendelse
@@ -122,10 +134,11 @@ internal class GrunnlagsendringshendelseServiceTest {
             grunnlagshendelsesDao.hentGrunnlagsendringshendelserMedStatuserISak(any(), any())
         } returns emptyList()
 
-        every { generellBehandlingService.hentBehandlingerISak(1L) } returns foerstegangsbehandlinger
+        every { behandlingService.hentBehandlingerISak(1L) } returns foerstegangsbehandlinger
 
         coEvery { grunnlagClient.hentPersonSakOgRolle(any()) }
             .returns(PersonMedSakerOgRoller(fnr, listOf(SakOgRolle(sakId, Saksrolle.SOEKER))))
+        every { oppgaveService.opprettNyOppgaveMedSakOgReferanse(any(), any(), any()) } returns mockOppgave
 
         val lagredeGrunnlagsendringshendelser = grunnlagsendringshendelseService.opprettDoedshendelse(
             Doedshendelse(
@@ -179,7 +192,7 @@ internal class GrunnlagsendringshendelseServiceTest {
         coEvery {
             grunnlagClient.hentPersonSakOgRolle(any())
         } returns PersonMedSakerOgRoller(fnr, listOf(SakOgRolle(sakId, Saksrolle.SOEKER)))
-
+        every { oppgaveService.opprettNyOppgaveMedSakOgReferanse(any(), any(), any()) } returns mockOppgave
         grunnlagsendringshendelseService.opprettUtflyttingshendelse(
             utflyttingsHendelse = UtflyttingsHendelse(
                 hendelseId = "1",
@@ -248,7 +261,7 @@ internal class GrunnlagsendringshendelseServiceTest {
         coEvery {
             grunnlagClient.hentPersonSakOgRolle(any())
         } returns PersonMedSakerOgRoller(fnr, listOf(SakOgRolle(sakId, Saksrolle.SOEKER)))
-
+        every { oppgaveService.opprettNyOppgaveMedSakOgReferanse(any(), any(), any()) } returns mockOppgave
         val lagredeGrunnlagsendringshendelser1 = grunnlagsendringshendelseService.opprettDoedshendelse(
             Doedshendelse(
                 hendelseId = "1",
@@ -317,7 +330,7 @@ internal class GrunnlagsendringshendelseServiceTest {
         coEvery {
             grunnlagClient.hentPersonSakOgRolle(any())
         } returns PersonMedSakerOgRoller(fnr, listOf(SakOgRolle(sakId, Saksrolle.SOEKER)))
-
+        every { oppgaveService.opprettNyOppgaveMedSakOgReferanse(any(), any(), any()) } returns mockOppgave
         val lagredeGrunnlagsendringshendelser1 = grunnlagsendringshendelseService.opprettUtflyttingshendelse(
             UtflyttingsHendelse(
                 hendelseId = "1",
@@ -385,6 +398,7 @@ internal class GrunnlagsendringshendelseServiceTest {
         coEvery {
             grunnlagClient.hentPersonSakOgRolle(any())
         } returns PersonMedSakerOgRoller("Soeker", listOf(SakOgRolle(sakId, Saksrolle.SOEKER)))
+        every { oppgaveService.opprettNyOppgaveMedSakOgReferanse(any(), any(), any()) } returns mockOppgave
 
         val lagredeGrunnlagsendringshendelser1 = grunnlagsendringshendelseService.opprettForelderBarnRelasjonHendelse(
             ForelderBarnRelasjonHendelse(
@@ -455,6 +469,8 @@ internal class GrunnlagsendringshendelseServiceTest {
         coEvery {
             grunnlagClient.hentPersonSakOgRolle(any())
         } returns PersonMedSakerOgRoller("Soeker", listOf(SakOgRolle(sakId, Saksrolle.SOEKER)))
+
+        every { oppgaveService.opprettNyOppgaveMedSakOgReferanse(any(), any(), any()) } returns mockOppgave
 
         val lagredeGrunnlagsendringshendelser1 = grunnlagsendringshendelseService.opprettSivilstandHendelse(
             SivilstandHendelse(
@@ -540,7 +556,7 @@ internal class GrunnlagsendringshendelseServiceTest {
         }
         every { pdlService.hentPdlModell(avdoedFnr, personRolle, SakType.BARNEPENSJON) } returns mockPdlModel
 
-        every { generellBehandlingService.hentBehandlingerISak(sakId) } returns listOf(
+        every { behandlingService.hentBehandlingerISak(sakId) } returns listOf(
             mockk {
                 every { status } returns BehandlingStatus.VILKAARSVURDERT
                 every { id } returns UUID.randomUUID()
@@ -657,7 +673,7 @@ internal class GrunnlagsendringshendelseServiceTest {
         every {
             grunnlagshendelsesDao.hentGrunnlagsendringshendelserMedStatuserISak(sakId, any())
         } returns emptyList()
-
+        every { oppgaveService.opprettNyOppgaveMedSakOgReferanse(any(), any(), any()) } returns mockOppgave
         grunnlagsendringshendelseService.opprettEndretGrunnbeloepHendelse(sakId)
 
         assertEquals(hendelseSomLagres.captured.type, GrunnlagsendringsType.GRUNNBELOEP)

@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import OppgaveHeader from './OppgaveHeader'
 import OppgaveListe from './OppgaveListe'
-import styled from 'styled-components'
 import {
   FilterPar,
   Handlinger,
@@ -18,11 +17,6 @@ import { hentOppgaver, OppgaveDTO } from '~shared/api/oppgaver'
 import Spinner from '~shared/Spinner'
 import { mapApiResult, useApiCall } from '~shared/hooks/useApiCall'
 import { ApiErrorAlert } from '~ErrorBoundary'
-
-const OppgavebenkContainer = styled.div`
-  max-width: 60em;
-  padding: 2rem;
-`
 
 const Oppgavebenken = () => {
   const [oppgaver, fetchOppgaver] = useApiCall(hentOppgaver)
@@ -51,31 +45,29 @@ const Oppgavebenken = () => {
   const columns: ReadonlyArray<Column<IOppgave>> = React.useMemo(() => kolonner, [])
 
   return (
-    <OppgavebenkContainer>
-      <>
-        <OppgaveHeader
-          oppgaveFelter={oppgaveFelter}
-          setOppgaveFelter={setOppgaveFelter}
-          setGlobalFilter={setGlobalFilter}
-          henterOppgaver={() => fetchOppgaver({})}
-        />
-        {mapApiResult(
-          oppgaver,
-          <Spinner visible label={'Laster oppgaver'} />,
-          () => (
-            <ApiErrorAlert>Kunne ikke hente oppgaver</ApiErrorAlert>
-          ),
-          (data) => (
-            <OppgaveListe
-              columns={columns}
-              data={data.oppgaver.map(mapOppgaveResponse)}
-              globalFilterValue={globalFilter}
-              filterPar={filterPar}
-            />
-          )
-        )}
-      </>
-    </OppgavebenkContainer>
+    <>
+      <OppgaveHeader
+        oppgaveFelter={oppgaveFelter}
+        setOppgaveFelter={setOppgaveFelter}
+        setGlobalFilter={setGlobalFilter}
+        henterOppgaver={() => fetchOppgaver({})}
+      />
+      {mapApiResult(
+        oppgaver,
+        <Spinner visible label={'Laster oppgaver'} />,
+        () => (
+          <ApiErrorAlert>Kunne ikke hente oppgaver</ApiErrorAlert>
+        ),
+        (data) => (
+          <OppgaveListe
+            columns={columns}
+            data={data.oppgaver.map(mapOppgaveResponse)}
+            globalFilterValue={globalFilter}
+            filterPar={filterPar}
+          />
+        )
+      )}
+    </>
   )
 }
 

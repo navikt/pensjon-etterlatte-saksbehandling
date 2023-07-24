@@ -19,10 +19,8 @@ object BrevDataMapper {
                     )
                 )
                 VedtakType.AVSLAG -> Pair(
-                    EtterlatteBrevKode.BARNEPENSJON_INNVILGELSE,
-                    AvslagBrevData.fra(
-                        behandling
-                    )
+                    EtterlatteBrevKode.BARNEPENSJON_AVSLAG,
+                    AvslagBrevData.fra(behandling)
                 )
                 VedtakType.ENDRING -> when (behandling.revurderingsaarsak) {
                     RevurderingAarsak.SOESKENJUSTERING -> Pair(

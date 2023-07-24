@@ -3,12 +3,12 @@ import React, { useState } from 'react'
 import { LovtekstMedLenke } from '~components/behandling/soeknadsoversikt/soeknadoversikt/LovtekstMedLenke'
 import styled from 'styled-components'
 import { Button, ErrorSummary, Heading, ReadMore } from '@navikt/ds-react'
-import { PlusCircleIcon } from '@navikt/aksel-icons'
+import { AGreen500 } from '@navikt/ds-tokens/dist/tokens'
+import { PlusCircleIcon, CheckmarkCircleIcon } from '@navikt/aksel-icons'
 import { InstitusjonsoppholdGrunnlagData } from '~shared/types/Beregning'
 import { useFieldArray, useForm } from 'react-hook-form'
 import InstitusjonsoppholdPeriode from '~components/behandling/beregningsgrunnlag/InstitusjonsoppholdPeriode'
 import Insthendelser from '~components/behandling/beregningsgrunnlag/Insthendelser'
-import { SuccessColored } from '@navikt/ds-icons'
 import {
   feilIKomplettePerioderOverIntervallInstitusjonsopphold,
   mapListeFraDto,
@@ -81,7 +81,7 @@ const Institusjonsopphold = (props: InstitusjonsoppholdProps) => {
               barnepensjonen ikke skal reduseres eller reduseres mindre enn hovedregelen sier.
             </p>
           </LovtekstMedLenke>
-          <Insthendelser sakid={behandling.sak} />
+          <Insthendelser sakid={behandling.sakId} />
           <Heading level="3" size="small">
             Beregningsperiode institusjonsopphold
           </Heading>
@@ -140,7 +140,7 @@ const Institusjonsopphold = (props: InstitusjonsoppholdProps) => {
           <FeilIPerioder feil={feilOverlappendePerioder} />
         </>
       )}
-      {visOkLagret && <SuccessColored fontSize={20} />}
+      {visOkLagret && <CheckmarkCircleIcon color={AGreen500} fontSize={20} />}
     </InstitusjonsoppholdsWrapper>
   )
 }

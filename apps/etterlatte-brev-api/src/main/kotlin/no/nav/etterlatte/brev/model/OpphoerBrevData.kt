@@ -20,6 +20,7 @@ abstract class OpphoerBrevData : BrevData() {
 }
 
 data class AdopsjonRevurderingBrevdata(
+    val innhold: List<Slate.Element>,
     val virkningsdato: LocalDate,
     val adoptertAv1: Navn,
     val adoptertAv2: Navn? = null
@@ -36,20 +37,34 @@ data class AdopsjonRevurderingBrevdata(
             }
 
             return AdopsjonRevurderingBrevdata(
+                innhold = listOf(),
                 virkningsdato = behandling.virkningsdato!!.atDay(1),
                 adoptertAv1 = behandling.revurderingInfo.adoptertAv1,
                 adoptertAv2 = behandling.revurderingInfo.adoptertAv2
             )
         }
     }
+
+    override fun flett(text: String?) = when (text) {
+        "<virkningsdato>" -> SlateFletter.formaterDato(virkningsdato, Spraak.NB)
+        "<adopsjonsdato>" -> "<her skal adopsjonsdato komme automatisk>"
+        "<adoptivforeldre_navn>" -> formaterNavn(adoptertAv1, adoptertAv2)
+        else -> throw IllegalArgumentException("Ugyldig flettefelt $text")
+    }
+
+    private fun formaterNavn(navn1: Navn, navn2: Navn?) =
+        if (navn2 != null) {
+            "$navn1 og $navn2"
+        } else {
+            "$navn1"
+        }
 }
 
 data class OmgjoeringAvFarskapRevurderingBrevdata(
-    val vedtaksdato: LocalDate,
     val virkningsdato: LocalDate,
     val naavaerendeFar: Navn,
     var forrigeFar: Navn,
-    val forrigeVedtaksdato: LocalDate
+    val opprinneligInnvilgelsesdato: LocalDate
 ) : OpphoerBrevData() {
     companion object {
         fun fra(behandling: Behandling): OmgjoeringAvFarskapRevurderingBrevdata {
@@ -66,11 +81,10 @@ data class OmgjoeringAvFarskapRevurderingBrevdata(
             }
 
             return OmgjoeringAvFarskapRevurderingBrevdata(
-                vedtaksdato = behandling.vedtak.vedtaksdato!!,
                 virkningsdato = behandling.virkningsdato!!.atDay(1),
                 naavaerendeFar = behandling.revurderingInfo.naavaerendeFar,
                 forrigeFar = behandling.revurderingInfo.forrigeFar,
-                forrigeVedtaksdato = LocalDate.now() // TODO
+                opprinneligInnvilgelsesdato = behandling.innvilgelsesdato!!
             )
         }
     }

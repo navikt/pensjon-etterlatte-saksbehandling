@@ -1,5 +1,6 @@
 package no.nav.etterlatte.utbetaling.avstemming
 
+import no.nav.etterlatte.jobs.fixedRateCancellableTimer
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.tidspunkt.norskKlokke
 import no.nav.etterlatte.libs.jobs.LeaderElection
@@ -10,7 +11,6 @@ import java.time.Clock
 import java.time.Duration
 import java.time.LocalDate
 import java.util.*
-import kotlin.concurrent.fixedRateTimer
 
 class KonsistensavstemmingJob(
     private val konsistensavstemmingService: KonsistensavstemmingService,
@@ -27,25 +27,21 @@ class KonsistensavstemmingJob(
     fun schedule(): Timer {
         logger.info("$jobbNavn er satt til å kjøre med periode $periode")
 
-        return fixedRateTimer(
+        return fixedRateCancellableTimer(
             name = jobbNavn,
-            daemon = true,
             initialDelay = initialDelay,
-            period = periode.toMillis()
+            period = periode.toMillis(),
+            logger = logger,
+            sikkerLogg = sikkerLogg
         ) {
-            try {
-                Konsistensavstemming(
-                    konsistensavstemmingService = konsistensavstemmingService,
-                    kjoereplan = kjoereplan,
-                    leaderElection = leaderElection,
-                    jobbNavn = jobbNavn!!,
-                    clock = clock,
-                    saktype = saktype
-                ).run()
-            } catch (throwable: Throwable) {
-                logger.error("Konsistensavstemming feilet, se sikker logg for stacktrace")
-                sikkerLogg.error("Konsistensavstemming feilet", throwable)
-            }
+            Konsistensavstemming(
+                konsistensavstemmingService = konsistensavstemmingService,
+                kjoereplan = kjoereplan,
+                leaderElection = leaderElection,
+                jobbNavn = jobbNavn!!,
+                clock = clock,
+                saktype = saktype
+            ).run()
         }
     }
 
@@ -68,7 +64,8 @@ class KonsistensavstemmingJob(
                         if (!konsistensavstemmingService.konsistensavstemmingErKjoertIDag(
                                 saktype = saktype,
                                 idag = idag
-                        )) {
+                            )
+                        ) {
                             konsistensavstemmingService.startKonsistensavstemming(dag = idag, saktype = saktype)
                         } else {
                             log.info("Konsistensavstemming er allerede kjoert for ${saktype.name} i dag ($idag)")

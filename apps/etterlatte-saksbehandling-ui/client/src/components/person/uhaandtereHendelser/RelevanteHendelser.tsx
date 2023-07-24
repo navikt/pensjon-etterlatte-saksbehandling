@@ -52,7 +52,6 @@ export default function RelevanteHendelser(props: Props) {
   useEffect(() => {
     hentHendelser(fnr, (hendelser) => {
       const relevanteHendelser = hendelser[0].hendelser.filter((h) => h.status !== STATUS_IRRELEVANT)
-
       setRelevanteHendelser(relevanteHendelser)
     })
   }, [])

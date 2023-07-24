@@ -13,6 +13,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.behandling.SisteIverksatteBehandling
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Opplysning
 import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
@@ -177,7 +178,9 @@ internal class VilkaarsvurderingServiceTest {
         vilkaarsvurdering.vilkaar.first { it.hovedvilkaar.type == VilkaarType.OMS_ETTERLATTE_LEVER }.let { vilkaar ->
             vilkaar.grunnlag shouldBe emptyList()
         }
-        vilkaarsvurdering.vilkaar.find { it.hovedvilkaar.type == VilkaarType.OMS_AKTIVITET_ETTER_6_MND }?.let { vilkaar ->
+        vilkaarsvurdering.vilkaar.find {
+            it.hovedvilkaar.type == VilkaarType.OMS_AKTIVITET_ETTER_6_MND
+        }?.let { vilkaar ->
             vilkaar.grunnlag shouldNotBe null
             vilkaar.grunnlag shouldHaveSize 2
 
@@ -392,9 +395,7 @@ internal class VilkaarsvurderingServiceTest {
             every { revurderingsaarsak } returns RevurderingAarsak.REGULERING
         }
 
-        val detaljertBehandling = mockk<DetaljertBehandling>()
-        every { detaljertBehandling.id } returns uuid
-        coEvery { behandlingKlient.hentSisteIverksatteBehandling(any(), any()) } returns detaljertBehandling
+        coEvery { behandlingKlient.hentSisteIverksatteBehandling(any(), any()) } returns SisteIverksatteBehandling(uuid)
 
         val foerstegangsvilkaar = runBlocking {
             service.opprettVilkaarsvurdering(uuid, brukerTokenInfo)
@@ -435,6 +436,49 @@ internal class VilkaarsvurderingServiceTest {
         assertThrows<NullPointerException> {
             runBlocking { service.kopierVilkaarsvurdering(UUID.randomUUID(), uuid, brukerTokenInfo) }
         }
+    }
+
+    @Test
+    fun `Er ikke yrkesskade hvis ikke det er en yrkesskade oppfylt delvilkaar`() {
+        val vilkaarsvurdering = runBlocking {
+            service.opprettVilkaarsvurdering(uuid, brukerTokenInfo)
+        }
+
+        vilkaarsvurdering shouldNotBe null
+        vilkaarsvurdering.behandlingId shouldBe uuid
+        vilkaarsvurdering.toDto().isYrkesskade() shouldBe false
+    }
+
+    @Test
+    fun `Er yrkesskade hvis det er en yrkesskade oppfylt delvilkaar`() {
+        val grunnlag: Grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
+
+        val vilkaarsvurdering = runBlocking {
+            service.opprettVilkaarsvurdering(uuid, brukerTokenInfo)
+        }
+
+        val delvilkaar = vilkaarsvurdering.vilkaar.find { it.hovedvilkaar.type == VilkaarType.BP_YRKESSKADE_AVDOED }
+
+        runBlocking {
+            service.oppdaterVurderingPaaVilkaar(
+                uuid,
+                brukerTokenInfo,
+                VurdertVilkaar(
+                    delvilkaar!!.id,
+                    VilkaarTypeOgUtfall(VilkaarType.BP_YRKESSKADE_AVDOED, Utfall.OPPFYLT),
+                    null,
+                    vilkaarsVurderingData()
+                )
+            )
+        }
+
+        val oppdatertVilkaarsvurdering = runBlocking {
+            service.hentVilkaarsvurdering(uuid)
+        }
+
+        oppdatertVilkaarsvurdering shouldNotBe null
+        oppdatertVilkaarsvurdering!!.behandlingId shouldBe uuid
+        oppdatertVilkaarsvurdering.toDto().isYrkesskade() shouldBe true
     }
 
     private fun assertIsSimilar(v1: Vilkaarsvurdering, v2: Vilkaarsvurdering) {

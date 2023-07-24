@@ -1,5 +1,5 @@
 import styled from 'styled-components'
-import { Female, Male } from '@navikt/ds-icons'
+import { FigureInwardIcon, FigureOutwardIcon } from '@navikt/aksel-icons'
 
 export enum GenderList {
   male = 'male',
@@ -9,7 +9,7 @@ export enum GenderList {
 export const GenderIcon = (props: { gender: GenderList }) => {
   return (
     <Gender gender={props.gender}>
-      {props.gender === GenderList.female ? <Female color={'#fff'} /> : <Male color={'#fff'} />}
+      {props.gender === GenderList.female ? <FigureOutwardIcon color={'#fff'} /> : <FigureInwardIcon color={'#fff'} />}
     </Gender>
   )
 }

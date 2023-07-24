@@ -248,7 +248,7 @@ class VedtaksvurderingService(
         ansvarligSaksbehandler: String,
         innloggetBrukerTokenInfo: BrukerTokenInfo
     ) {
-        if (ansvarligSaksbehandler == innloggetBrukerTokenInfo.ident()) {
+        if (innloggetBrukerTokenInfo.erSammePerson(ansvarligSaksbehandler)) {
             throw UgyldigAttestantException(innloggetBrukerTokenInfo.ident())
         }
     }
@@ -437,6 +437,11 @@ class VedtaksvurderingService(
 
     suspend fun postTilBehandling(behandlingId: UUID, brukerTokenInfo: BrukerTokenInfo, vedtakId: Long) =
         behandlingKlient.iverksett(behandlingId, brukerTokenInfo, vedtakId)
+
+    fun hentNyesteBehandlingMedResultat(sakId: Long, resultat: VedtakType) = repository.hentVedtakForSak(sakId)
+        .filter { it.status == VedtakStatus.IVERKSATT }
+        .filter { it.type == resultat }
+        .maxByOrNull { it.id }
 }
 
 class VedtakTilstandException(gjeldendeStatus: VedtakStatus, forventetStatus: List<VedtakStatus>) :

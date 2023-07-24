@@ -50,7 +50,7 @@ data class ManuellRevurdering(
 
     private fun erFyltUt(): Boolean =
         when (sak.sakType) {
-            SakType.BARNEPENSJON -> (virkningstidspunkt != null) && (kommerBarnetTilgode != null)
+            SakType.BARNEPENSJON -> (virkningstidspunkt != null)
             SakType.OMSTILLINGSSTOENAD -> (virkningstidspunkt != null)
         }
 

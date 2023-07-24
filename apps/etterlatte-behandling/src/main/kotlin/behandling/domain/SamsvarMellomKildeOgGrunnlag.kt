@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.fasterxml.jackson.annotation.JsonTypeName
 import no.nav.etterlatte.institusjonsopphold.InstitusjonsoppholdHendelseBeriket
 import no.nav.etterlatte.institusjonsopphold.InstitusjonsoppholdsType
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
+import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.Utland
 import no.nav.etterlatte.libs.common.person.VergemaalEllerFremtidsfullmakt
@@ -12,6 +14,13 @@ import java.time.LocalDate
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
 sealed class SamsvarMellomKildeOgGrunnlag {
     abstract val samsvar: Boolean
+
+    @JsonTypeName("Feilrolle")
+    data class FeilRolle(
+        val person: PersonDTO,
+        val fraGrunnlag: Grunnlag?,
+        override val samsvar: Boolean
+    ) : SamsvarMellomKildeOgGrunnlag()
 
     @JsonTypeName("VERGEMAAL_ELLER_FREMTIDSFULLMAKT")
     data class VergemaalEllerFremtidsfullmaktForhold(

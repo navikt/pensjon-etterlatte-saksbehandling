@@ -78,6 +78,8 @@ spec:
       value: http://etterlatte-behandling
     - name: ETTERLATTE_BEHANDLING_CLIENT_ID
       value: prod-gcp.etterlatte.etterlatte-behandling
+    - name: PDLTJENESTER_AZURE_SCOPE
+      value: api://prod-gcp.etterlatte.etterlatte-pdltjenester/.default
   accessPolicy:
     inbound:
       rules:
@@ -90,3 +92,4 @@ spec:
     outbound:
       rules:
         - application: etterlatte-behandling
+        - application: etterlatte-pdltjenester

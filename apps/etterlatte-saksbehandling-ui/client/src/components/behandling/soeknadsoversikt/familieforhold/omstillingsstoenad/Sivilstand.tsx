@@ -1,4 +1,4 @@
-import { Heart } from '@navikt/ds-icons'
+import { HeartIcon } from '@navikt/aksel-icons'
 import { Heading, Table } from '@navikt/ds-react'
 import { IFamilieforhold, IPdlPerson } from '~shared/types/Person'
 import { FlexHeader, IconWrapper, TableWrapper } from '~components/behandling/soeknadsoversikt/familieforhold/styled'
@@ -17,14 +17,14 @@ type Props = {
   avdoed: IPdlPerson
 }
 
-export const Sivilstand: React.FC<Props> = ({ familieforhold, avdoed }) => {
+export const Sivilstand = ({ familieforhold, avdoed }: Props) => {
   const sivilstand = familieforhold.gjenlevende.opplysning.sivilstand
 
   return (
     <SivilstandWrapper>
       <FlexHeader>
         <IconWrapper>
-          <Heart fontSize={IconSize.DEFAULT} />
+          <HeartIcon fontSize={IconSize.DEFAULT} />
         </IconWrapper>
         <Heading size={'small'} level={'3'}>
           Sivilstand (gjenlevende)

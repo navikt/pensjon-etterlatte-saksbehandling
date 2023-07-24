@@ -9,20 +9,19 @@ import { RevurderingInfo } from '~shared/types/RevurderingInfo'
 
 export interface IDetaljertBehandling {
   id: string
-  sak: number
+  sakId: number
   sakType: SakType
   gyldighetsprøving?: IGyldighetResultat
   kommerBarnetTilgode: IKommerBarnetTilgode | null
   soeknadMottattDato: string
   virkningstidspunkt: Virkningstidspunkt | null
   utenlandstilsnitt: IUtenlandstilsnitt | undefined
-  boddEllerArbeidetUtlandet: IBoddEllerArbeidetUtlandet | undefined
+  boddEllerArbeidetUtlandet: IBoddEllerArbeidetUtlandet | null
   status: IBehandlingStatus
   hendelser: IHendelse[]
   familieforhold?: IFamilieforhold
   behandlingType: IBehandlingsType
   søker?: IPdlPerson
-  prosesstype: IProsesstype
   revurderingsaarsak: Revurderingsaarsak | null
   revurderinginfo: RevurderingInfo | null
 }

@@ -6,7 +6,6 @@ import {
   IDetaljertBehandling,
   IGyldighetResultat,
   IKommerBarnetTilgode,
-  IProsesstype,
   Virkningstidspunkt,
 } from '~shared/types/IDetaljertBehandling'
 import { SakType } from '~shared/types/sak'
@@ -140,18 +139,17 @@ const opprettBehandling = (
 ): IDetaljertBehandling => {
   return {
     id: 'id',
-    sak: 1,
+    sakId: 1,
     sakType,
     gyldighetsprøving,
     kommerBarnetTilgode,
     soeknadMottattDato: '01-01-2023',
     virkningstidspunkt,
     utenlandstilsnitt: undefined,
-    boddEllerArbeidetUtlandet: undefined,
+    boddEllerArbeidetUtlandet: null,
     status: IBehandlingStatus.OPPRETTET,
     hendelser: [],
     behandlingType: IBehandlingsType.FØRSTEGANGSBEHANDLING,
-    prosesstype: IProsesstype.MANUELL,
     revurderingsaarsak: null,
     revurderinginfo: null,
   }

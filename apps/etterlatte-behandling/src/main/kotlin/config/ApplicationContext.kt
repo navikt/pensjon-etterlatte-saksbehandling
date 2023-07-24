@@ -4,11 +4,13 @@ import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 import io.ktor.client.HttpClient
 import no.nav.etterlatte.behandling.BehandlingDao
+import no.nav.etterlatte.behandling.BehandlingFactory
+import no.nav.etterlatte.behandling.BehandlingServiceImpl
 import no.nav.etterlatte.behandling.BehandlingStatusServiceImpl
 import no.nav.etterlatte.behandling.BehandlingsHendelserKafkaProducerImpl
 import no.nav.etterlatte.behandling.EnhetServiceImpl
-import no.nav.etterlatte.behandling.RealGenerellBehandlingService
-import no.nav.etterlatte.behandling.foerstegangsbehandling.RealFoerstegangsbehandlingService
+import no.nav.etterlatte.behandling.GrunnlagService
+import no.nav.etterlatte.behandling.GyldighetsproevingServiceImpl
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlientObo
@@ -16,11 +18,13 @@ import no.nav.etterlatte.behandling.klienter.NavAnsattKlient
 import no.nav.etterlatte.behandling.klienter.NavAnsattKlientImpl
 import no.nav.etterlatte.behandling.klienter.Norg2Klient
 import no.nav.etterlatte.behandling.klienter.Norg2KlientImpl
+import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
+import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeService
 import no.nav.etterlatte.behandling.manueltopphoer.RealManueltOpphoerService
 import no.nav.etterlatte.behandling.migrering.MigreringRepository
 import no.nav.etterlatte.behandling.omregning.MigreringService
 import no.nav.etterlatte.behandling.omregning.OmregningService
-import no.nav.etterlatte.behandling.revurdering.RealRevurderingService
+import no.nav.etterlatte.behandling.revurdering.RevurderingServiceImpl
 import no.nav.etterlatte.common.klienter.PdlKlientImpl
 import no.nav.etterlatte.common.klienter.SkjermingKlient
 import no.nav.etterlatte.databaseContext
@@ -43,6 +47,8 @@ import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.libs.sporingslogg.Sporingslogg
 import no.nav.etterlatte.oppgave.OppgaveDao
 import no.nav.etterlatte.oppgave.OppgaveServiceImpl
+import no.nav.etterlatte.oppgaveny.OppgaveDaoNy
+import no.nav.etterlatte.oppgaveny.OppgaveServiceNy
 import no.nav.etterlatte.sak.RealSakService
 import no.nav.etterlatte.sak.SakDao
 import no.nav.etterlatte.sak.SakTilgangDao
@@ -119,7 +125,9 @@ class ApplicationContext(
     // Dao
     val hendelseDao = HendelseDao { databaseContext().activeTx() }
     val oppgaveDao = OppgaveDao { databaseContext().activeTx() }
-    val behandlingDao = BehandlingDao { databaseContext().activeTx() }
+    val kommerBarnetTilGodeDao = KommerBarnetTilGodeDao { databaseContext().activeTx() }
+    val behandlingDao = BehandlingDao(kommerBarnetTilGodeDao) { databaseContext().activeTx() }
+    val oppgaveDaoNy = OppgaveDaoNy { databaseContext().activeTx() }
     val sakDao = SakDao { databaseContext().activeTx() }
     val grunnlagsendringshendelseDao = GrunnlagsendringshendelseDao { databaseContext().activeTx() }
     val institusjonsoppholdDao = InstitusjonsoppholdDao { databaseContext().activeTx() }
@@ -132,39 +140,46 @@ class ApplicationContext(
 
     val behandlingsHendelser = BehandlingsHendelserKafkaProducerImpl(rapid)
 
+    val kanBrukeNyOppgaveliste: Boolean = env.getValue("KAN_BRUKE_NY_OPPGAVELISTE").toBoolean()
+
     // Service
     val oppgaveService = OppgaveServiceImpl(oppgaveDao, featureToggleService)
-
-    val generellBehandlingService = RealGenerellBehandlingService(
+    val oppgaveServiceNy = OppgaveServiceNy(oppgaveDaoNy, sakDao)
+    val behandlingService = BehandlingServiceImpl(
         behandlingDao = behandlingDao,
         behandlingHendelser = behandlingsHendelser,
         hendelseDao = hendelseDao,
         grunnlagsendringshendelseDao = grunnlagsendringshendelseDao,
         grunnlagKlient = grunnlagKlientObo,
         sporingslogg = sporingslogg,
-        featureToggleService = featureToggleService
+        featureToggleService = featureToggleService,
+        kommerBarnetTilGodeDao = kommerBarnetTilGodeDao
     )
 
-    val foerstegangsbehandlingService =
-        RealFoerstegangsbehandlingService(
-            sakDao = sakDao,
-            behandlingDao = behandlingDao,
-            hendelseDao = hendelseDao,
-            behandlingHendelser = behandlingsHendelser,
-            featureToggleService = featureToggleService
-        )
-
+    val kommerBarnetTilGodeService =
+        KommerBarnetTilGodeService(kommerBarnetTilGodeDao, behandlingDao)
+    val grunnlagsService = GrunnlagService(grunnlagKlient = grunnlagKlient)
     val revurderingService =
-        RealRevurderingService(
+        RevurderingServiceImpl(
+            oppgaveService = oppgaveServiceNy,
+            grunnlagService = grunnlagsService,
             behandlingHendelser = behandlingsHendelser,
             featureToggleService = featureToggleService,
             behandlingDao = behandlingDao,
             hendelseDao = hendelseDao,
-            grunnlagsendringshendelseDao = grunnlagsendringshendelseDao
+            grunnlagsendringshendelseDao = grunnlagsendringshendelseDao,
+            kommerBarnetTilGodeService = kommerBarnetTilGodeService
+        )
+
+    val gyldighetsproevingService =
+        GyldighetsproevingServiceImpl(
+            behandlingDao = behandlingDao,
+            featureToggleService = featureToggleService
         )
 
     val manueltOpphoerService =
         RealManueltOpphoerService(
+            oppgaveService = oppgaveServiceNy,
             behandlingDao = behandlingDao,
             behandlingHendelser = behandlingsHendelser,
             hendelseDao = hendelseDao,
@@ -173,7 +188,7 @@ class ApplicationContext(
 
     val omregningService =
         OmregningService(
-            behandlingService = generellBehandlingService,
+            behandlingService = behandlingService,
             revurderingService = revurderingService
         )
 
@@ -189,8 +204,9 @@ class ApplicationContext(
     val enhetService = EnhetServiceImpl(navAnsattKlient)
     val grunnlagsendringshendelseService =
         GrunnlagsendringshendelseService(
+            oppgaveService = oppgaveServiceNy,
             grunnlagsendringshendelseDao = grunnlagsendringshendelseDao,
-            generellBehandlingService = generellBehandlingService,
+            behandlingService = behandlingService,
             pdlKlient = pdlKlient,
             grunnlagKlient = grunnlagKlient,
             tilgangService = tilgangService,
@@ -198,14 +214,27 @@ class ApplicationContext(
         )
 
     val behandlingsStatusService =
-        BehandlingStatusServiceImpl(behandlingDao, generellBehandlingService, grunnlagsendringshendelseService)
+        BehandlingStatusServiceImpl(behandlingDao, behandlingService, grunnlagsendringshendelseService)
+
+    val behandlingFactory = BehandlingFactory(
+        oppgaveService = oppgaveServiceNy,
+        grunnlagService = grunnlagsService,
+        revurderingService = revurderingService,
+        sakDao = sakDao,
+        behandlingDao = behandlingDao,
+        hendelseDao = hendelseDao,
+        behandlingHendelser = behandlingsHendelser,
+        featureToggleService = featureToggleService
+    )
 
     val migreringService = MigreringService(
         sakService = sakService,
-        foerstegangsBehandlingService = foerstegangsbehandlingService,
+        gyldighetsproevingService = gyldighetsproevingService,
         behandlingsHendelser = behandlingsHendelser,
         migreringRepository = MigreringRepository(dataSource),
-        generellBehandlingService = generellBehandlingService
+        behandlingService = behandlingService,
+        kommerBarnetTilGodeService = kommerBarnetTilGodeService,
+        behandlingFactory = behandlingFactory
     )
 
     // Job

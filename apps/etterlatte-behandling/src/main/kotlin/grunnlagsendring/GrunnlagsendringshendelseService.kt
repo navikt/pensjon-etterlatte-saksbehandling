@@ -1,7 +1,7 @@
 package no.nav.etterlatte.grunnlagsendring
 
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.behandling.GenerellBehandlingService
+import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringStatus
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringsType
@@ -34,6 +34,8 @@ import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
+import no.nav.etterlatte.oppgaveny.OppgaveServiceNy
+import no.nav.etterlatte.oppgaveny.OppgaveType
 import no.nav.etterlatte.sak.SakService
 import no.nav.etterlatte.sak.TilgangService
 import no.nav.etterlatte.sikkerLogg
@@ -41,8 +43,9 @@ import org.slf4j.LoggerFactory
 import java.util.*
 
 class GrunnlagsendringshendelseService(
+    private val oppgaveService: OppgaveServiceNy,
     private val grunnlagsendringshendelseDao: GrunnlagsendringshendelseDao,
-    private val generellBehandlingService: GenerellBehandlingService,
+    private val behandlingService: BehandlingService,
     private val pdlKlient: PdlKlient,
     private val grunnlagKlient: GrunnlagKlient,
     private val tilgangService: TilgangService,
@@ -208,6 +211,11 @@ class GrunnlagsendringshendelseService(
                         "Oppretter grunnlagsendringshendelse med id=$hendelseId for hendelse av " +
                             "type $grunnlagendringType på sak med id=${rolleOgSak.sakId}"
                     )
+                    oppgaveService.opprettNyOppgaveMedSakOgReferanse(
+                        hendelseId.toString(),
+                        rolleOgSak.sakId,
+                        oppgaveType = OppgaveType.HENDELSE
+                    )
                     grunnlagsendringshendelseDao.opprettGrunnlagsendringshendelse(
                         Grunnlagsendringshendelse(
                             id = hendelseId,
@@ -248,6 +256,11 @@ class GrunnlagsendringshendelseService(
                             "Oppretter grunnlagsendringshendelse med id=$hendelseId for hendelse av " +
                                 "type $grunnlagendringType på sak med id=${rolleOgSak.sakId}"
                         )
+                        oppgaveService.opprettNyOppgaveMedSakOgReferanse(
+                            hendelseId.toString(),
+                            rolleOgSak.sakId,
+                            oppgaveType = OppgaveType.HENDELSE
+                        )
                         grunnlagsendringshendelseDao.opprettGrunnlagsendringshendelse(
                             Grunnlagsendringshendelse(
                                 id = hendelseId,
@@ -277,6 +290,11 @@ class GrunnlagsendringshendelseService(
                 logger.info(
                     "Oppretter grunnlagsendringshendelse med id=$hendelseId for hendelse av " +
                         "type $grunnlagendringType på sak med id=$sakId"
+                )
+                oppgaveService.opprettNyOppgaveMedSakOgReferanse(
+                    referanse = hendelseId.toString(),
+                    sakId = sakId,
+                    oppgaveType = OppgaveType.HENDELSE
                 )
                 listOf(
                     grunnlagsendringshendelseDao.opprettGrunnlagsendringshendelse(
@@ -322,11 +340,15 @@ class GrunnlagsendringshendelseService(
         val grunnlag = runBlocking {
             grunnlagKlient.hentGrunnlag(hendelse.sakId)
         }
-        val samsvarMellomPdlOgGrunnlag = finnSamsvarForHendelse(hendelse, pdlData, grunnlag, personRolle)
-        if (!samsvarMellomPdlOgGrunnlag.samsvar) {
-            oppdaterHendelseSjekket(hendelse, samsvarMellomPdlOgGrunnlag)
-        } else {
-            forkastHendelse(hendelse.id, samsvarMellomPdlOgGrunnlag)
+        try {
+            val samsvarMellomPdlOgGrunnlag = finnSamsvarForHendelse(hendelse, pdlData, grunnlag, personRolle)
+            if (!samsvarMellomPdlOgGrunnlag.samsvar) {
+                oppdaterHendelseSjekket(hendelse, samsvarMellomPdlOgGrunnlag)
+            } else {
+                forkastHendelse(hendelse.id, samsvarMellomPdlOgGrunnlag)
+            }
+        } catch (e: GrunnlagRolleException) {
+            forkastHendelse(hendelse.id, SamsvarMellomKildeOgGrunnlag.FeilRolle(pdlData, grunnlag, false))
         }
     }
 
@@ -427,7 +449,7 @@ class GrunnlagsendringshendelseService(
         samsvarMellomKildeOgGrunnlag: SamsvarMellomKildeOgGrunnlag,
         hendelseId: UUID
     ): Behandling? {
-        val behandlingerISak = generellBehandlingService.hentBehandlingerISak(sakId)
+        val behandlingerISak = behandlingService.hentBehandlingerISak(sakId)
         // Har vi en eksisterende behandling som ikke er avbrutt?
         val sisteBehandling = behandlingerISak
             .`siste ikke-avbrutte behandling`()

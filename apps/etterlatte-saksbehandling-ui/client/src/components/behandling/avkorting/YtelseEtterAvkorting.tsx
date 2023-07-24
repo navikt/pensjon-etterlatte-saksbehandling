@@ -4,6 +4,7 @@ import React from 'react'
 import styled from 'styled-components'
 import { ManglerRegelspesifikasjon } from '~components/behandling/felles/ManglerRegelspesifikasjon'
 import { formaterStringDato } from '~utils/formattering'
+import { YtelseEtterAvkortingDetaljer } from '~components/behandling/avkorting/YtelseEtterAvkortingDetaljer'
 
 export const YtelseEtterAvkorting = (props: { ytelser?: IAvkortetYtelse[] }) => {
   const ytelser = props.ytelser
@@ -18,6 +19,7 @@ export const YtelseEtterAvkorting = (props: { ytelser?: IAvkortetYtelse[] }) => 
           <Table className="table" zebraStripes>
             <Table.Header>
               <Table.Row>
+                <Table.HeaderCell />
                 <Table.HeaderCell>Periode</Table.HeaderCell>
                 <Table.HeaderCell>Avkorting</Table.HeaderCell>
                 <Table.HeaderCell>Restanse</Table.HeaderCell>
@@ -26,16 +28,24 @@ export const YtelseEtterAvkorting = (props: { ytelser?: IAvkortetYtelse[] }) => 
             </Table.Header>
             <Table.Body>
               {ytelser?.map((ytelse, key) => (
-                <Table.Row key={key} shadeOnHover={false}>
+                <Table.ExpandableRow
+                  key={key}
+                  shadeOnHover={false}
+                  content={<YtelseEtterAvkortingDetaljer ytelse={ytelse} />}
+                >
                   <Table.DataCell>
                     {formaterStringDato(ytelse.fom)} - {ytelse.tom ? formaterStringDato(ytelse.tom) : ''}
                   </Table.DataCell>
                   <Table.DataCell>{ytelse.avkortingsbeloep} kr</Table.DataCell>
-                  <Table.DataCell>{ytelse.restanse} kr</Table.DataCell>
+                  {ytelse.restanse < 0 ? (
+                    <Table.DataCell>+ {ytelse.restanse * -1} kr</Table.DataCell>
+                  ) : (
+                    <Table.DataCell>- {ytelse.restanse} kr</Table.DataCell>
+                  )}
                   <Table.DataCell>
                     <ManglerRegelspesifikasjon>{ytelse.ytelseEtterAvkorting} kr</ManglerRegelspesifikasjon>
                   </Table.DataCell>
-                </Table.Row>
+                </Table.ExpandableRow>
               ))}
             </Table.Body>
           </Table>

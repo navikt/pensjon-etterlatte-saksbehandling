@@ -138,15 +138,26 @@ enum class BrevProsessType {
                     RevurderingAarsak.SOESKENJUSTERING -> AUTOMATISK
                     else -> MANUELL
                 }
+
                 VedtakType.OPPHOER -> when (behandling.revurderingsaarsak) {
-                    RevurderingAarsak.ADOPSJON -> AUTOMATISK
+                    RevurderingAarsak.ADOPSJON -> MANUELL
                     RevurderingAarsak.OMGJOERING_AV_FARSKAP -> AUTOMATISK
                     else -> MANUELL
                 }
+
                 VedtakType.AVSLAG -> MANUELL
             }
         }
     }
 }
 
-enum class Spraak(@get:JsonValue val verdi: String) { NB("nb"), NN("nn"), EN("en") }
+enum class Spraak(@get:JsonValue val verdi: String) {
+    NB("nb"), NN("nn"), EN("en");
+
+    fun locale(): Locale =
+        when (this) {
+            NB -> Locale.forLanguageTag("no")
+            NN -> Locale.forLanguageTag("no")
+            EN -> Locale.UK
+        }
+}

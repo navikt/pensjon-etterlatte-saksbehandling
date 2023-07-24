@@ -19,6 +19,7 @@ import no.nav.etterlatte.behandling.FastsettVirkningstidspunktResponse
 import no.nav.etterlatte.behandling.ManueltOpphoerResponse
 import no.nav.etterlatte.behandling.VedtakHendelse
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
+import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
 import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerAarsak
 import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerRequest
 import no.nav.etterlatte.behandling.objectMapper
@@ -160,7 +161,6 @@ class IntegrationTest : BehandlingIntegrationTest() {
                 val behandling: DetaljertBehandling = it.body()
                 assertNotNull(behandling.id)
                 assertEquals("innsender", behandling.innsender)
-                assertEquals(VurderingsResultat.OPPFYLT, behandling.gyldighetsproeving?.resultat)
             }
 
             client.post("/api/behandling/$behandlingId/virkningstidspunkt") {
@@ -194,7 +194,7 @@ class IntegrationTest : BehandlingIntegrationTest() {
                 addAuthToken(tokenSaksbehandler)
             }.also {
                 applicationContext.dataSource.connection.use {
-                    val actual = BehandlingDao { it }.hentBehandling(behandlingId)!!
+                    val actual = BehandlingDao(KommerBarnetTilGodeDao { it }) { it }.hentBehandling(behandlingId)!!
                     assertEquals(BehandlingStatus.OPPRETTET, actual.status)
                 }
 
@@ -207,7 +207,7 @@ class IntegrationTest : BehandlingIntegrationTest() {
                 setBody("{}")
             }.also {
                 applicationContext.dataSource.connection.use {
-                    val actual = BehandlingDao { it }.hentBehandling(behandlingId)!!
+                    val actual = BehandlingDao(KommerBarnetTilGodeDao { it }) { it }.hentBehandling(behandlingId)!!
                     assertEquals(BehandlingStatus.VILKAARSVURDERT, actual.status)
                 }
 
@@ -218,7 +218,7 @@ class IntegrationTest : BehandlingIntegrationTest() {
                 addAuthToken(tokenSaksbehandler)
             }.also {
                 applicationContext.dataSource.connection.use {
-                    val actual = BehandlingDao { it }.hentBehandling(behandlingId)!!
+                    val actual = BehandlingDao(KommerBarnetTilGodeDao { it }) { it }.hentBehandling(behandlingId)!!
                     assertEquals(BehandlingStatus.BEREGNET, actual.status)
                 }
 
@@ -231,7 +231,7 @@ class IntegrationTest : BehandlingIntegrationTest() {
                 setBody(VedtakHendelse(123L, "saksb", Tidspunkt.now(), null, null))
             }.also {
                 applicationContext.dataSource.connection.use {
-                    val actual = BehandlingDao { it }.hentBehandling(behandlingId)!!
+                    val actual = BehandlingDao(KommerBarnetTilGodeDao { it }) { it }.hentBehandling(behandlingId)!!
                     assertEquals(BehandlingStatus.FATTET_VEDTAK, actual.status)
                 }
 
@@ -254,7 +254,7 @@ class IntegrationTest : BehandlingIntegrationTest() {
                 setBody(VedtakHendelse(123L, "saksb", Tidspunkt.now(), null, null))
             }.also {
                 applicationContext.dataSource.connection.use {
-                    val actual = BehandlingDao { it }.hentBehandling(behandlingId)!!
+                    val actual = BehandlingDao(KommerBarnetTilGodeDao { it }) { it }.hentBehandling(behandlingId)!!
                     assertEquals(BehandlingStatus.ATTESTERT, actual.status)
                 }
 
@@ -364,7 +364,7 @@ class IntegrationTest : BehandlingIntegrationTest() {
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(
                     ManueltOpphoerRequest(
-                        sak = sak.id,
+                        sakId = sak.id,
                         opphoerAarsaker = listOf(
                             ManueltOpphoerAarsak.SOESKEN_DOED,
                             ManueltOpphoerAarsak.UTFLYTTING_FRA_NORGE
@@ -402,23 +402,22 @@ class IntegrationTest : BehandlingIntegrationTest() {
         kotlin.runCatching { sleep(3000) }
         assertNotNull(behandlingOpprettet)
         val rapid = applicationContext.rapid as TestProdusent
-        assertEquals(5, rapid.publiserteMeldinger.size)
+        assertEquals(4, rapid.publiserteMeldinger.size)
         assertEquals(
             "BEHANDLING:OPPRETTET",
             objectMapper.readTree(rapid.publiserteMeldinger.first().verdi)["@event_name"].textValue()
         )
-        assertEquals("SOEKER_PDL_V1", objectMapper.readTree(rapid.publiserteMeldinger[1].verdi)["@behov"].textValue())
         assertEquals(
             "BEHANDLING:OPPRETTET",
-            objectMapper.readTree(rapid.publiserteMeldinger[2].verdi)["@event_name"].textValue()
+            objectMapper.readTree(rapid.publiserteMeldinger[1].verdi)["@event_name"].textValue()
         )
         assertEquals(
             "BEHANDLING:AVBRUTT",
-            objectMapper.readTree(rapid.publiserteMeldinger[3].verdi)["@event_name"].textValue()
+            objectMapper.readTree(rapid.publiserteMeldinger[2].verdi)["@event_name"].textValue()
         )
         assertEquals(
             "BEHANDLING:OPPRETTET",
-            objectMapper.readTree(rapid.publiserteMeldinger[4].verdi)["@event_name"].textValue()
+            objectMapper.readTree(rapid.publiserteMeldinger[3].verdi)["@event_name"].textValue()
         )
         applicationContext.dataSource.connection.use {
             HendelseDao { it }.finnHendelserIBehandling(behandlingOpprettet!!).also { println(it) }

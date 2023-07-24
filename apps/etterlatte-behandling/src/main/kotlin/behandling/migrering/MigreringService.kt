@@ -1,10 +1,12 @@
 package no.nav.etterlatte.behandling.omregning
 
+import no.nav.etterlatte.behandling.BehandlingFactory
 import no.nav.etterlatte.behandling.BehandlingHendelseType
 import no.nav.etterlatte.behandling.BehandlingHendelserKafkaProducer
-import no.nav.etterlatte.behandling.GenerellBehandlingService
+import no.nav.etterlatte.behandling.BehandlingService
+import no.nav.etterlatte.behandling.GyldighetsproevingService
 import no.nav.etterlatte.behandling.domain.Behandling
-import no.nav.etterlatte.behandling.foerstegangsbehandling.FoerstegangsbehandlingService
+import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeService
 import no.nav.etterlatte.behandling.migrering.MigreringRepository
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.JaNei
@@ -17,27 +19,29 @@ import no.nav.etterlatte.sak.SakService
 
 class MigreringService(
     private val sakService: SakService,
-    private val foerstegangsBehandlingService: FoerstegangsbehandlingService,
+    private val gyldighetsproevingService: GyldighetsproevingService,
+    private val behandlingFactory: BehandlingFactory,
+    private val kommerBarnetTilGodeService: KommerBarnetTilGodeService,
     private val behandlingsHendelser: BehandlingHendelserKafkaProducer,
     private val migreringRepository: MigreringRepository,
-    private val generellBehandlingService: GenerellBehandlingService
+    private val behandlingService: BehandlingService
 ) {
     fun migrer(request: MigreringRequest) = opprettSakOgBehandling(request)?.let {
         val pesys = Vedtaksloesning.PESYS.name
-        foerstegangsBehandlingService.lagreKommerBarnetTilgode(
-            it.id,
+        kommerBarnetTilGodeService.lagreKommerBarnetTilgode(
             KommerBarnetTilgode(
                 JaNei.JA,
                 "Automatisk importert fra Pesys",
-                Grunnlagsopplysning.Pesys.create()
+                Grunnlagsopplysning.Pesys.create(),
+                behandlingId = it.id
             )
         )
-        foerstegangsBehandlingService.lagreGyldighetsproeving(
+        gyldighetsproevingService.lagreGyldighetsproeving(
             it.id,
             pesys,
             JaNeiMedBegrunnelse(JaNei.JA, "Automatisk importert fra Pesys")
         )
-        generellBehandlingService.oppdaterVirkningstidspunkt(
+        behandlingService.oppdaterVirkningstidspunkt(
             it.id,
             request.virkningstidspunkt,
             pesys,
@@ -49,7 +53,7 @@ class MigreringService(
     }
 
     private fun opprettSakOgBehandling(request: MigreringRequest): Behandling? =
-        foerstegangsBehandlingService.opprettBehandling(
+        behandlingFactory.opprettBehandling(
             finnEllerOpprettSak(request).id,
             request.persongalleri,
             null,

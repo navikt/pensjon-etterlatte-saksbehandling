@@ -3,6 +3,7 @@ package no.nav.etterlatte.adressebeskyttelse
 import com.nimbusds.jwt.JWTClaimsSet
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
+import no.nav.etterlatte.behandling.revurdering.RevurderingDao
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
@@ -57,7 +58,12 @@ class TilgangServiceTest {
 
         tilgangService = TilgangServiceImpl(SakTilgangDao(dataSource))
         sakRepo = SakDao { dataSource.connection }
-        behandlingRepo = BehandlingDao(KommerBarnetTilGodeDao { dataSource.connection }) { dataSource.connection }
+        behandlingRepo = BehandlingDao(
+            KommerBarnetTilGodeDao {
+                dataSource.connection
+            },
+            RevurderingDao { dataSource.connection }
+        ) { dataSource.connection }
     }
 
     @Test

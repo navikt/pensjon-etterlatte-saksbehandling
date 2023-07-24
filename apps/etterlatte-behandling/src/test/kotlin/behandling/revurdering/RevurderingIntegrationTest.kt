@@ -125,7 +125,8 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
                 applicationContext.behandlingDao,
                 applicationContext.hendelseDao,
                 applicationContext.grunnlagsendringshendelseDao,
-                applicationContext.kommerBarnetTilGodeService
+                applicationContext.kommerBarnetTilGodeService,
+                applicationContext.revurderingDao
             ).opprettManuellRevurdering(
                 sakId = sak.id,
                 forrigeBehandling = behandling!!,
@@ -190,7 +191,8 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
             applicationContext.behandlingDao,
             applicationContext.hendelseDao,
             applicationContext.grunnlagsendringshendelseDao,
-            applicationContext.kommerBarnetTilGodeService
+            applicationContext.kommerBarnetTilGodeService,
+            applicationContext.revurderingDao
         )
         val revurdering = revurderingService.opprettManuellRevurdering(
             sakId = sak.id,
@@ -299,7 +301,8 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
                 applicationContext.behandlingDao,
                 applicationContext.hendelseDao,
                 applicationContext.grunnlagsendringshendelseDao,
-                applicationContext.kommerBarnetTilGodeService
+                applicationContext.kommerBarnetTilGodeService,
+                applicationContext.revurderingDao
             ).opprettManuellRevurdering(
                 sakId = sak.id,
                 forrigeBehandling = behandling!!,
@@ -350,7 +353,8 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
                 applicationContext.behandlingDao,
                 applicationContext.hendelseDao,
                 applicationContext.grunnlagsendringshendelseDao,
-                applicationContext.kommerBarnetTilGodeService
+                applicationContext.kommerBarnetTilGodeService,
+                applicationContext.revurderingDao
             )
 
         val behandlingFactory =

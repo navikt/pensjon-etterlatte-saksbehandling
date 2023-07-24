@@ -5,6 +5,7 @@ import no.nav.etterlatte.behandling.domain.GrunnlagsendringStatus
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringsType
 import no.nav.etterlatte.behandling.domain.OpprettBehandling
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
+import no.nav.etterlatte.behandling.revurdering.RevurderingDao
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.grunnlagsendringshendelseMedSamsvar
 import no.nav.etterlatte.grunnlagsinformasjonDoedshendelse
@@ -68,7 +69,8 @@ internal class GrunnlagsendringshendelseDaoTest {
 
         val connection = dataSource.connection
         sakRepo = SakDao { connection }
-        behandlingRepo = BehandlingDao(KommerBarnetTilGodeDao { connection }) { connection }
+        behandlingRepo =
+            BehandlingDao(KommerBarnetTilGodeDao { connection }, RevurderingDao { connection }) { connection }
         grunnlagsendringshendelsesRepo = GrunnlagsendringshendelseDao { connection }
     }
 

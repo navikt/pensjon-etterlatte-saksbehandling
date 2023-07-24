@@ -5,6 +5,7 @@ import no.nav.etterlatte.behandling.domain.ManueltOpphoer
 import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
 import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerAarsak
+import no.nav.etterlatte.behandling.revurdering.RevurderingDao
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -72,7 +73,13 @@ internal class BehandlingDaoIntegrationTest {
         val connection = dataSource.connection
         sakRepo = SakDao { connection }
         kommerBarnetTilGodeDao = KommerBarnetTilGodeDao { connection }
-        behandlingRepo = BehandlingDao(kommerBarnetTilGodeDao = kommerBarnetTilGodeDao, connection = { connection })
+        behandlingRepo = BehandlingDao(
+            kommerBarnetTilGodeDao = kommerBarnetTilGodeDao,
+            RevurderingDao {
+                connection
+            },
+            connection = { connection }
+        )
     }
 
     @AfterEach

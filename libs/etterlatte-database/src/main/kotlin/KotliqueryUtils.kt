@@ -1,5 +1,3 @@
-@file:JvmName("KotliqueryUtilsKt")
-
 package no.nav.etterlatte.libs.database
 
 import kotliquery.Row

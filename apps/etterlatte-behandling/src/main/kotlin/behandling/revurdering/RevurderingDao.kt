@@ -46,7 +46,8 @@ class RevurderingDao(private val connection: () -> Connection) {
             },
             prosesstype = rs.getString("prosesstype").let { Prosesstype.valueOf(it) },
             kilde = rs.getString("kilde").let { Vedtaksloesning.valueOf(it) },
-            revurderingInfo = revurderingInfo
+            revurderingInfo = revurderingInfo,
+            begrunnelse = rs.getString("begrunnelse")
         )
     }
 

@@ -183,7 +183,8 @@ class RevurderingServiceImpl(
             virkningstidspunkt = virkningstidspunkt,
             kilde = kilde,
             prosesstype = prosessType,
-            merknad = merknad
+            merknad = merknad,
+            begrunnelse = begrunnelse
         ).let { opprettBehandling ->
             behandlingDao.opprettBehandling(opprettBehandling)
             forrigeBehandling?.let {

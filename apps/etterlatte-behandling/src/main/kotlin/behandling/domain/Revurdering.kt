@@ -36,6 +36,8 @@ sealed class Revurdering(
 
     abstract fun kopier(): Revurdering
 
+    override fun begrunnelse() = begrunnelse
+
     companion object {
         fun opprett(
             id: UUID,

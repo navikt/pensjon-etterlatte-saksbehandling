@@ -74,6 +74,8 @@ sealed class Behandling {
         else -> null
     }
 
+    open fun begrunnelse(): String? = null
+
     open fun oppdaterVirkningstidspunkt(virkningstidspunkt: Virkningstidspunkt): Behandling {
         throw NotImplementedError(
             "Kan ikke oppdatere virkningstidspunkt på behandling $id. " +

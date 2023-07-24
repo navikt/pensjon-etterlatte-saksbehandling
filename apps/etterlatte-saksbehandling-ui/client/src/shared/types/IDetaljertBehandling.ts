@@ -24,6 +24,7 @@ export interface IDetaljertBehandling {
   søker?: IPdlPerson
   revurderingsaarsak: Revurderingsaarsak | null
   revurderinginfo: RevurderingInfo | null
+  begrunnelse: String | null
 }
 
 export enum IBehandlingsType {

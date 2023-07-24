@@ -20,8 +20,10 @@ import no.nav.etterlatte.brev.model.BrevProsessType.MANUELL
 import no.nav.etterlatte.brev.model.ManueltBrevData
 import no.nav.etterlatte.brev.model.OpprettNyttBrev
 import no.nav.etterlatte.brev.model.Pdf
+import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.brev.model.SlateHelper
 import no.nav.etterlatte.brev.model.Status
+import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.rivers.VedtakTilJournalfoering
 import no.nav.etterlatte.token.BrukerTokenInfo
@@ -99,7 +101,24 @@ class VedtaksbrevService(
 
     private fun opprettBrevData(brev: Brev, behandling: Behandling): Pair<EtterlatteBrevKode, BrevData> =
         when (brev.prosessType) {
-            AUTOMATISK -> BrevDataMapper.fra(behandling)
+            AUTOMATISK -> {
+                when (behandling.revurderingsaarsak) {
+                    RevurderingAarsak.OMGJOERING_AV_FARSKAP -> {
+                        Pair(
+                            EtterlatteBrevKode.BARNEPENSJON_REVURDERING_OMGJOERING_AV_FARSKAP,
+                            ManueltBrevData(requireNotNull(db.hentBrevPayload(brev.id)).elements)
+                        )
+                    }
+                    RevurderingAarsak.ADOPSJON -> {
+                        Pair(
+                            EtterlatteBrevKode.BARNEPENSJON_REVURDERING_ADOPSJON,
+                            ManueltBrevData(requireNotNull(db.hentBrevPayload(brev.id)).elements)
+                        )
+                    }
+                    else -> BrevDataMapper.fra(behandling)
+                }
+            }
+
             MANUELL -> {
                 val payload = requireNotNull(db.hentBrevPayload(brev.id))
 
@@ -108,11 +127,20 @@ class VedtaksbrevService(
             }
         }
 
-    private fun opprettInnhold(behandling: Behandling, prosessType: BrevProsessType): BrevInnhold {
+    private suspend fun opprettInnhold(behandling: Behandling, prosessType: BrevProsessType): BrevInnhold {
         val tittel = "Vedtak om ${behandling.vedtak.type.name.lowercase()}"
 
         val payload = when (prosessType) {
-            AUTOMATISK -> null
+            AUTOMATISK -> {
+                when (behandling.revurderingsaarsak) {
+                    RevurderingAarsak.OMGJOERING_AV_FARSKAP, RevurderingAarsak.ADOPSJON -> {
+                        hentRedigerbarTekstFraBrevbakeren(behandling)
+                    }
+
+                    else -> null
+                }
+            }
+
             MANUELL -> SlateHelper.hentInitiellPayload(behandling).flettInn(behandling)
         }
 
@@ -166,5 +194,18 @@ class VedtaksbrevService(
         return Base64.getDecoder().decode(brevbakerResponse.base64pdf)
             .let { Pdf(it) }
             .also { logger.info("Generert brev (id=$brevID) med størrelse: ${it.bytes.size}") }
+    }
+
+    private suspend fun hentRedigerbarTekstFraBrevbakeren(behandling: Behandling): Slate {
+        val (kode, brevData) = BrevDataMapper.fra(behandling)
+        val brevbakerResponse = brevbaker.genererJSON(
+            BrevbakerRequest.fra(
+                kode,
+                brevData,
+                behandling,
+                adresseService.hentAvsender(behandling.vedtak)
+            )
+        )
+        return BlockTilSlateKonverterer.konverter(brevbakerResponse.json)
     }
 }

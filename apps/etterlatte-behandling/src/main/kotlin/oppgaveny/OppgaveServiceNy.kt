@@ -17,32 +17,37 @@ class OppgaveServiceNy(private val oppgaveDaoNy: OppgaveDaoNy, private val sakDa
     private val logger = LoggerFactory.getLogger(OppgaveServiceNy::class.java)
 
     fun migrerSaker() {
-        val oppgaver = inTransaction {
-            oppgaveDaoNy.hentOppgaver()
-        }
-        val sakerTilMigrering = oppgaver.filter { oppgaveNy -> oppgaveNy.fnr === null || oppgaveNy.sakType === null }
-        logger.info("Antall saker til migrering: ${sakerTilMigrering.size}")
-        val alleSaker = sakDao.hentSaker()
-        val sakMap = alleSaker.map { it.id to it }.toMap()
+        inTransaction {
+            val oppgaver = oppgaveDaoNy.hentOppgaver()
 
-        val migrerteSaker: List<Triple<String, SakType?, UUID?>> = sakerTilMigrering.map {
-            val sak = sakMap.get(it.sakId)
-            if (sak != null) {
-                Triple(sak.ident, sak.sakType, it.id)
-            } else {
-                logger.error("Fant ingen sak med id: ${it.sakId} for oppgave ${it.id}")
-                Triple("", null, null)
+            val sakerTilMigrering = oppgaver.filter { oppgaveNy ->
+                oppgaveNy.fnr === null ||
+                    oppgaveNy.sakType === null
             }
+            logger.info("Antall saker til migrering: ${sakerTilMigrering.size}")
+            val alleSaker = sakDao.hentSaker()
+            val sakMap = alleSaker.map { it.id to it }.toMap()
+
+            val migrerteSaker: List<Triple<String, SakType?, UUID?>> = sakerTilMigrering.map {
+                val sak = sakMap.get(it.sakId)
+                if (sak != null) {
+                    Triple(sak.ident, sak.sakType, it.id)
+                } else {
+                    logger.error("Fant ingen sak med id: ${it.sakId} for oppgave ${it.id}")
+                    Triple("", null, null)
+                }
+            }
+            logger.info("antall saker til migrering ${migrerteSaker.size}")
+            migrerteSaker.filter { it.second != null }
+                .forEach {
+                    oppgaveDaoNy.migrerSak(it.first, it.second!!, it.third!!)
+                }
         }
-        logger.info("antall saker til migrering ${migrerteSaker.size}")
-        migrerteSaker.filter { it.second != null }
-            .forEach {
-                oppgaveDaoNy.migrerSak(it.first, it.second!!, it.third!!)
-            }
     }
 
     // bruker: SaksbehandlerMedRoller må på en måte inn her
     fun finnOppgaverForBruker(bruker: SaksbehandlerMedRoller): List<OppgaveNy> {
+        migrerSaker()
         return inTransaction {
             oppgaveDaoNy.hentOppgaver()
         }

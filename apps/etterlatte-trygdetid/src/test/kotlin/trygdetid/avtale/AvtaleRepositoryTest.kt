@@ -5,6 +5,7 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.database.DataSourceBuilder
+import no.nav.etterlatte.libs.database.POSTGRES_VERSION
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.trygdetid.avtale.AvtaleRepository
 import org.junit.jupiter.api.AfterAll
@@ -23,7 +24,7 @@ import javax.sql.DataSource
 internal class AvtaleRepositoryTest {
 
     @Container
-    private val postgres = PostgreSQLContainer<Nothing>("postgres:14")
+    private val postgres = PostgreSQLContainer<Nothing>("postgres:$POSTGRES_VERSION")
     private lateinit var repository: AvtaleRepository
     private lateinit var dataSource: DataSource
 

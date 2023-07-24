@@ -2,6 +2,7 @@ package no.nav.etterlatte.statistikk.database
 
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.database.DataSourceBuilder
+import no.nav.etterlatte.libs.database.POSTGRES_VERSION
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.statistikk.domain.SoeknadStatistikk
 import org.junit.jupiter.api.AfterEach
@@ -17,7 +18,7 @@ import javax.sql.DataSource
 class SoeknadStatistikkRepositoryTest {
 
     @Container
-    private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:14")
+    private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:$POSTGRES_VERSION")
 
     private lateinit var dataSource: DataSource
 

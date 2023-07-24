@@ -32,7 +32,7 @@ import java.util.*
 class MigreringIntegrationTest {
 
     @Container
-    private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:15")
+    private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:14")
 
     @BeforeAll
     fun start() {

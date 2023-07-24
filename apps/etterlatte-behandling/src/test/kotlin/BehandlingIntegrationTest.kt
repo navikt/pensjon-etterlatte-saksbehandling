@@ -50,7 +50,7 @@ import java.util.*
 abstract class BehandlingIntegrationTest {
 
     @Container
-    private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:15")
+    private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:14")
     private val server: MockOAuth2Server = MockOAuth2Server()
     protected lateinit var applicationContext: ApplicationContext
     protected lateinit var hoconApplicationConfig: HoconApplicationConfig

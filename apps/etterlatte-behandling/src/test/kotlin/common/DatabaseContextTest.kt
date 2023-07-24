@@ -20,7 +20,7 @@ import org.testcontainers.junit.jupiter.Container
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class DatabaseContextTest {
     @Container
-    private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:15")
+    private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:14")
     private val user = mockk<SaksbehandlerMedEnheterOgRoller>()
 
     @BeforeAll

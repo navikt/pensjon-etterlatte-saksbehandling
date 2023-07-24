@@ -24,6 +24,7 @@ on:
       - libs/etterlatte-database/**
       - libs/etterlatte-vedtaksvurdering-model/**
       - libs/etterlatte-vilkaarsvurdering-model/**
+      - libs/etterlatte-oppgave-model/**
       - libs/ktor2client-onbehalfof/**
       - libs/ktor2client-auth-clientcredentials/**
       - gradle/libs.versions.toml

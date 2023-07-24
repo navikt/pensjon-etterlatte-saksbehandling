@@ -6,6 +6,7 @@ import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveType
 import no.nav.etterlatte.libs.common.oppgaveNy.RedigerFristRequest
 import no.nav.etterlatte.libs.common.oppgaveNy.SaksbehandlerEndringDto
 import no.nav.etterlatte.libs.common.oppgaveNy.Status
+import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunktOrNull
 import no.nav.etterlatte.libs.common.tidspunkt.setTidspunkt
@@ -113,14 +114,45 @@ class OppgaveDaoNy(private val connection: () -> Connection) {
         }
     }
 
-    fun hentOppgaver(): List<OppgaveNy> {
+    fun hentOppgaver(oppgaveTyper: List<OppgaveType>): List<OppgaveNy> {
+        if (oppgaveTyper.isEmpty()) return emptyList()
+
         with(connection()) {
             val statement = prepareStatement(
                 """
-                    SELECT id, status, enhet, sak_id, type, saksbehandler, referanse, merknad, opprettet, saktype, fnr, frist
-                    FROM oppgave
+                    SELECT o.id, o.status, o.enhet, o.sak_id, o.type, o.saksbehandler, o.referanse, o.merknad, o.opprettet, o.saktype, o.fnr, o.frist
+                    FROM oppgave o INNER JOIN sak s ON o.sak_id = s.id
+                    WHERE o.type = ANY(?)
+                    AND s.adressebeskyttelse is null OR 
+                    (s.adressebeskyttelse is NOT NULL AND (s.adressebeskyttelse != ? AND s.adressebeskyttelse != ?))
                 """.trimIndent()
             )
+            statement.setArray(1, createArrayOf("text", oppgaveTyper.toTypedArray()))
+            statement.setString(2, AdressebeskyttelseGradering.STRENGT_FORTROLIG.toString())
+            statement.setString(3, AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND.toString())
+
+            return statement.executeQuery().toList {
+                asOppgaveNy()
+            }.also {
+                logger.info("Hentet antall nye oppgaver: ${it.size}")
+            }
+        }
+    }
+
+    fun finnOppgaverForStrengtFortroligOgStrengtFortroligUtland(statuser: List<OppgaveType>): List<OppgaveNy> {
+        with(connection()) {
+            val statement = prepareStatement(
+                """
+                    SELECT o.id, o.status, o.enhet, o.sak_id, o.type, o.saksbehandler, o.referanse, o.merknad, o.opprettet, o.saktype, o.fnr, o.frist
+                    FROM oppgave o INNER JOIN sak s ON o.sak_id = s.id
+                    WHERE ((s.adressebeskyttelse = ?) OR (s.adressebeskyttelse = ?))
+                    AND o.type = ANY(?)
+                """.trimIndent()
+            )
+            statement.setString(1, AdressebeskyttelseGradering.STRENGT_FORTROLIG.toString())
+            statement.setString(2, AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND.toString())
+            statement.setArray(3, createArrayOf("text", statuser.toTypedArray()))
+
             return statement.executeQuery().toList {
                 asOppgaveNy()
             }.also {

@@ -92,13 +92,13 @@ class OppgaveServiceNy(private val oppgaveDaoNy: OppgaveDaoNy, private val sakDa
         }
     }
 
-    fun attesterBehandling(attesteringsoppgave: AttesteringsOppgave) {
+    fun haandterFattetvedtak(attesteringsoppgave: AttesteringsOppgave): OppgaveNy {
         val behandlingsoppgave = oppgaveDaoNy.hentOppgaveForBehandling(attesteringsoppgave.referanse)
         if (behandlingsoppgave == null) {
             throw RuntimeException("Må ha en oppgave fra før av for å kunne lage attesteringsoppgave")
         } else {
             oppgaveDaoNy.endreStatusPaaOppgave(behandlingsoppgave.id, Status.FERDIGSTILT)
-            opprettNyOppgaveMedSakOgReferanse(
+            return opprettNyOppgaveMedSakOgReferanse(
                 attesteringsoppgave.referanse,
                 attesteringsoppgave.sakId,
                 attesteringsoppgave.oppgaveType

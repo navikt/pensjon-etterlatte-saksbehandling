@@ -28,7 +28,7 @@ internal fun Route.behandlingVedtakRoute(
             } else {
                 inTransaction {
                     behandlingsstatusService.settFattetVedtak(behandling, attesterVedtakOppgave.vedtakHendelse)
-                    oppgaveService.attesterBehandling(attesterVedtakOppgave.attesteringsOppgave)
+                    oppgaveService.haandterFattetvedtak(attesterVedtakOppgave.attesteringsOppgave)
                 }
                 call.respond(HttpStatusCode.OK)
             }

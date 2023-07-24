@@ -9,10 +9,12 @@ import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.oppgaveNy.AttesteringsOppgave
 import no.nav.etterlatte.libs.common.oppgaveNy.FjernSaksbehandlerRequest
 import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveType
 import no.nav.etterlatte.libs.common.oppgaveNy.RedigerFristRequest
 import no.nav.etterlatte.libs.common.oppgaveNy.SaksbehandlerEndringDto
+import no.nav.etterlatte.libs.common.oppgaveNy.Status
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
@@ -213,6 +215,26 @@ class OppgaveServiceNyTest {
         }
 
         Assertions.assertTrue(err.message!!.startsWith("Tidspunkt tilbake i tid id: "))
+    }
+
+    @Test
+    fun `Håndtering av vedtaksfatting`() {
+        val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val referanse = "referanse"
+        val nyOppgave = oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
+            referanse,
+            opprettetSak.id,
+            OppgaveType.FOERSTEGANGSBEHANDLING
+        )
+
+        val attesteringsOppgave = oppgaveServiceNy.haandterFattetvedtak(
+            AttesteringsOppgave(opprettetSak.id, referanse, OppgaveType.ATTESTERING)
+        )
+
+        val saksbehandlerOppgave = oppgaveServiceNy.hentOppgave(nyOppgave.id)
+        Assertions.assertEquals(Status.FERDIGSTILT, saksbehandlerOppgave?.status)
+        Assertions.assertEquals(OppgaveType.ATTESTERING, attesteringsOppgave.type)
+        Assertions.assertEquals(referanse, attesteringsOppgave.referanse)
     }
 
     @Test

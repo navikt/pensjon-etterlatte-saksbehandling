@@ -72,6 +72,24 @@ class OppgaveDaoNy(private val connection: () -> Connection) {
         }
     }
 
+    fun migrerSak(fnr: String, sakType: SakType, id: UUID) {
+        with(connection()) {
+            val statement = prepareStatement(
+                """
+                UPDATE oppgave
+                SET fnr = ?, saktype = ?
+                where id = ?::UUID
+                """.trimIndent()
+            )
+
+            statement.setString(1, fnr)
+            statement.setString(2, sakType.toString())
+            statement.setObject(3, id)
+
+            statement.executeUpdate()
+        }
+    }
+
     fun hentOppgaver(): List<OppgaveNy> {
         with(connection()) {
             val statement = prepareStatement(

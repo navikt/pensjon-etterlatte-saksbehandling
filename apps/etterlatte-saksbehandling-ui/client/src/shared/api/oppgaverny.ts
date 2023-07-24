@@ -36,4 +36,4 @@ export interface RedigerFristRequest {
   frist: Date
 }
 export const redigerFristApi = async (redigerFristRequest: RedigerFristRequest): Promise<ApiResponse<void>> =>
-  apiClient.post('/nyeoppgaver/rediger-frist', { ...redigerFristRequest })
+  apiClient.put('/nyeoppgaver/rediger-frist', { ...redigerFristRequest })

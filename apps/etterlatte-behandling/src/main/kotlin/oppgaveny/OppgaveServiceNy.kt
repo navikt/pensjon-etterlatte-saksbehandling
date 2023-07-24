@@ -4,9 +4,10 @@ import io.ktor.server.plugins.BadRequestException
 import io.ktor.server.plugins.NotFoundException
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
+import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.sak.SakDao
 import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
-import java.time.temporal.ChronoUnit
 import java.util.*
 
 class OppgaveServiceNy(private val oppgaveDaoNy: OppgaveDaoNy, private val sakDao: SakDao) {
@@ -97,7 +98,8 @@ class OppgaveServiceNy(private val oppgaveDaoNy: OppgaveDaoNy, private val sakDa
     private fun lagreOppgave(oppgaveNy: OppgaveNy): OppgaveNy {
         var oppgaveLagres = oppgaveNy
         if (oppgaveNy.frist === null) {
-            oppgaveLagres = oppgaveNy.copy(frist = oppgaveNy.opprettet.plus(1, ChronoUnit.MONTHS))
+            val enMaanedFrem = oppgaveNy.opprettet.toLocalDatetimeUTC().plusMonths(1L).toTidspunkt()
+            oppgaveLagres = oppgaveNy.copy(frist = enMaanedFrem)
         }
         oppgaveDaoNy.lagreOppgave(oppgaveLagres)
         return oppgaveDaoNy.hentOppgave(oppgaveLagres.id)!!

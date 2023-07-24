@@ -13,6 +13,7 @@ import no.nav.etterlatte.beregning.regler.avkortingsperiode
 import no.nav.etterlatte.beregning.regler.restanse
 import no.nav.etterlatte.beregning.regler.ytelseFoerAvkorting
 import no.nav.etterlatte.libs.database.DataSourceBuilder
+import no.nav.etterlatte.libs.database.POSTGRES_VERSION
 import no.nav.etterlatte.libs.database.migrate
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
@@ -26,7 +27,7 @@ import java.util.*
 internal class AvkortingRepositoryTest {
 
     @Container
-    private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:14")
+    private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:$POSTGRES_VERSION")
     private lateinit var avkortingRepository: AvkortingRepository
 
     @BeforeAll
@@ -70,7 +71,7 @@ internal class AvkortingRepositoryTest {
             Avkorting(
                 avkortingGrunnlag = avkortinggrunnlag,
                 aarsoppgjoer = aarsoppgjoer,
-                avkortetYtelse = avkortetYtelse,
+                avkortetYtelse = avkortetYtelse
             )
         )
 

@@ -21,6 +21,7 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.database.DataSourceBuilder
+import no.nav.etterlatte.libs.database.POSTGRES_VERSION
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.opprettBehandling
 import no.nav.etterlatte.sak.SakDao
@@ -46,7 +47,7 @@ import javax.sql.DataSource
 internal class GrunnlagsendringshendelseDaoTest {
 
     @Container
-    private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:14")
+    private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:$POSTGRES_VERSION")
 
     private lateinit var dataSource: DataSource
     private lateinit var sakRepo: SakDao
@@ -458,8 +459,9 @@ internal class GrunnlagsendringshendelseDaoTest {
         assertNotNull(hendelse3?.behandlingId)
     }
 
+    @Suppress("ktlint:standard:max-line-length")
     @Test
-    fun `hentGyldigeGrunnlagsendringshendelserISak skal hente alle grunnlagsendringshendelser med status SJEKKET_AV_JOBB`() { // ktlint-disable max-line-length
+    fun `hentGyldigeGrunnlagsendringshendelserISak skal hente alle grunnlagsendringshendelser med status SJEKKET_AV_JOBB`() {
         val sak1 = sakRepo.opprettSak("1234", SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr).id
         val sak2 = sakRepo.opprettSak("4321", SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr).id
         val id1 = UUID.randomUUID()

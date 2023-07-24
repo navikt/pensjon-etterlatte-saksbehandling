@@ -18,13 +18,10 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.Delvilkaar
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.Lovreferanse
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Utfall
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaar
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
 import no.nav.etterlatte.libs.database.DataSourceBuilder
+import no.nav.etterlatte.libs.database.POSTGRES_VERSION
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
 import no.nav.etterlatte.libs.ktor.restModule
@@ -56,7 +53,7 @@ import javax.sql.DataSource
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class MigreringTest {
     @Container
-    private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:14")
+    private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:$POSTGRES_VERSION")
     private val server = MockOAuth2Server()
     private lateinit var hoconApplicationConfig: HoconApplicationConfig
     private val behandlingKlient = mockk<BehandlingKlient>()
@@ -65,16 +62,6 @@ class MigreringTest {
     private lateinit var migreringService: MigreringService
     private lateinit var vilkaarsvurderingRepository: VilkaarsvurderingRepository
     private lateinit var vilkaarsvurderingServiceImpl: VilkaarsvurderingService
-
-    private val vilkaar: List<Vilkaar> = listOf(
-        Vilkaar(
-            hovedvilkaar = Delvilkaar(
-                type = VilkaarType.BP_ALDER_BARN,
-                tittel = "Alder barn",
-                lovreferanse = Lovreferanse("1a")
-            )
-        )
-    )
 
     @BeforeAll
     fun before() {

@@ -27,6 +27,7 @@ import no.nav.etterlatte.egenansatt.egenAnsattRoute
 import no.nav.etterlatte.grunnlagsendring.grunnlagsendringshendelseRoute
 import no.nav.etterlatte.institusjonsopphold.InstitusjonsoppholdService
 import no.nav.etterlatte.institusjonsopphold.institusjonsoppholdRoute
+import no.nav.etterlatte.jobs.addShutdownHook
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.libs.ktor.restModule
@@ -63,16 +64,8 @@ class Server(private val context: ApplicationContext) {
 
     fun run() = with(context) {
         dataSource.migrate()
-
-        val grunnlagsendringshendelseJobSkedulert = grunnlagsendringshendelseJob.schedule()
+        grunnlagsendringshendelseJob.schedule().also { addShutdownHook(it) }
         setReady().also { engine.start(true) }
-
-        Runtime.getRuntime().addShutdownHook(
-            Thread {
-                grunnlagsendringshendelseJob.setClosedTrue()
-                grunnlagsendringshendelseJobSkedulert.cancel()
-            }
-        )
     }
 }
 

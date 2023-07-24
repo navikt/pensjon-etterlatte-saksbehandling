@@ -5,7 +5,6 @@ import no.nav.etterlatte.brev.behandling.Behandling
 import no.nav.etterlatte.brev.behandling.SakOgBehandlingService
 import no.nav.etterlatte.brev.brevbaker.BrevbakerKlient
 import no.nav.etterlatte.brev.brevbaker.BrevbakerRequest
-import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.dokarkiv.DokarkivServiceImpl
 import no.nav.etterlatte.brev.journalpost.JournalpostResponse
@@ -92,40 +91,27 @@ class VedtaksbrevService(
         val behandling = sakOgBehandlingService.hentBehandling(brev.sakId, brev.behandlingId!!, brukerTokenInfo)
         val avsender = adresseService.hentAvsender(behandling.vedtak)
 
-        val (brevKode, brevData) = opprettBrevData(brev, behandling)
-        val brevRequest = BrevbakerRequest.fra(brevKode, brevData, behandling, avsender)
+        val kode = BrevDataMapper.brevKode(behandling, brev.prosessType)
+        val brevData = opprettBrevData(brev, behandling)
+        val brevRequest = BrevbakerRequest.fra(kode, brevData, behandling, avsender)
 
         return genererPdf(brev.id, brevRequest)
             .also { pdf -> ferdigstillHvisVedtakFattet(brev, behandling, pdf, brukerTokenInfo) }
     }
 
-    private fun opprettBrevData(brev: Brev, behandling: Behandling): Pair<EtterlatteBrevKode, BrevData> =
+    private fun opprettBrevData(brev: Brev, behandling: Behandling): BrevData =
         when (brev.prosessType) {
             AUTOMATISK -> {
                 when (behandling.revurderingsaarsak) {
-                    RevurderingAarsak.OMGJOERING_AV_FARSKAP -> {
-                        Pair(
-                            EtterlatteBrevKode.BARNEPENSJON_REVURDERING_OMGJOERING_AV_FARSKAP,
-                            ManueltBrevData(requireNotNull(db.hentBrevPayload(brev.id)).elements)
-                        )
-                    }
-                    RevurderingAarsak.ADOPSJON -> {
-                        Pair(
-                            EtterlatteBrevKode.BARNEPENSJON_REVURDERING_ADOPSJON,
-                            ManueltBrevData(requireNotNull(db.hentBrevPayload(brev.id)).elements)
-                        )
-                    }
-                    else -> BrevDataMapper.fra(behandling)
+                    RevurderingAarsak.OMGJOERING_AV_FARSKAP -> manueltBrevData(brev)
+                    RevurderingAarsak.ADOPSJON -> manueltBrevData(brev)
+                    else -> BrevDataMapper.brevData(behandling)
                 }
             }
-
-            MANUELL -> {
-                val payload = requireNotNull(db.hentBrevPayload(brev.id))
-
-                // TODO: Map brevkode
-                Pair(EtterlatteBrevKode.OMS_OPPHOER_MANUELL, ManueltBrevData(payload.elements))
-            }
+            MANUELL -> manueltBrevData(brev)
         }
+
+    private fun manueltBrevData(brev: Brev) = ManueltBrevData(requireNotNull(db.hentBrevPayload(brev.id)).elements)
 
     private suspend fun opprettInnhold(behandling: Behandling, prosessType: BrevProsessType): BrevInnhold {
         val tittel = "Vedtak om ${behandling.vedtak.type.name.lowercase()}"
@@ -197,7 +183,8 @@ class VedtaksbrevService(
     }
 
     private suspend fun hentRedigerbarTekstFraBrevbakeren(behandling: Behandling): Slate {
-        val (kode, brevData) = BrevDataMapper.fra(behandling)
+        val kode = BrevDataMapper.brevKode(behandling, AUTOMATISK)
+        val brevData = BrevDataMapper.brevData(behandling)
         val brevbakerResponse = brevbaker.genererJSON(
             BrevbakerRequest.fra(
                 kode,

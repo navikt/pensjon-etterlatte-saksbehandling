@@ -57,7 +57,7 @@ class BehandlingDao(
             connection().prepareStatement(
                 """
                     $alleBehandlingerMedSak
-                    WHERE b.id = ?
+                    WHERE b.id = ?::UUID
                     """
             )
         stmt.setObject(1, id)

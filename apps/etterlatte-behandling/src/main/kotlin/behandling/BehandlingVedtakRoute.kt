@@ -17,10 +17,12 @@ internal fun Route.behandlingVedtakRoute(
     oppgaveService: OppgaveServiceNy,
     behandlingService: BehandlingService
 ) {
-    route("fattvedtak-behandling") {
+    route("/fattvedtak-behandling") {
         post {
             val attesterVedtakOppgave = call.receive<AttesterVedtakOppgave>()
-            val behandling = behandlingService.hentBehandling(UUID.randomUUID())
+            val behandling = behandlingService.hentBehandling(
+                UUID.fromString(attesterVedtakOppgave.attesteringsOppgave.referanse)
+            )
             if (behandling == null) {
                 call.respond(HttpStatusCode.InternalServerError, "Fant ingen behandling")
             } else {
@@ -28,6 +30,7 @@ internal fun Route.behandlingVedtakRoute(
                     behandlingsstatusService.settFattetVedtak(behandling, attesterVedtakOppgave.vedtakHendelse)
                     oppgaveService.attesterBehandling(attesterVedtakOppgave.attesteringsOppgave)
                 }
+                call.respond(HttpStatusCode.OK)
             }
         }
     }

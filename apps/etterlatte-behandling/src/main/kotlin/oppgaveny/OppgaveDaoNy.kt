@@ -66,7 +66,7 @@ class OppgaveDaoNy(private val connection: () -> Connection) {
                 """
                     SELECT id, status, enhet, sak_id, type, saksbehandler, referanse, merknad, opprettet, saktype, fnr, frist
                     FROM oppgave
-                    WHERE referanse = ?::UUID
+                    WHERE referanse = ?
                 """.trimIndent()
             )
             statement.setString(1, behandlingid)

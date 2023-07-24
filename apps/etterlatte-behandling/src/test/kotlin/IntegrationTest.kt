@@ -36,6 +36,9 @@ import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsTyper
 import no.nav.etterlatte.libs.common.gyldigSoeknad.VurderingsResultat
 import no.nav.etterlatte.libs.common.gyldigSoeknad.VurdertGyldighet
+import no.nav.etterlatte.libs.common.oppgaveNy.AttesterVedtakOppgave
+import no.nav.etterlatte.libs.common.oppgaveNy.AttesteringsOppgave
+import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveType
 import no.nav.etterlatte.libs.common.pdlhendelse.Adressebeskyttelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
@@ -225,11 +228,19 @@ class IntegrationTest : BehandlingIntegrationTest() {
                 assertEquals(HttpStatusCode.OK, it.status)
             }
 
-// TODO: rette denne til nytt endepunkt i behandlingVedtakRoute
-            client.post("/behandlinger/$behandlingId/fatteVedtak") {
+            client.post("/fattvedtak-behandling") {
                 addAuthToken(tokenSaksbehandler)
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                setBody(VedtakHendelse(123L, Tidspunkt.now(), "saksb", null))
+                setBody(
+                    AttesterVedtakOppgave(
+                        attesteringsOppgave = AttesteringsOppgave(
+                            sakId = sak.id,
+                            referanse = behandlingId.toString(),
+                            OppgaveType.ATTESTERING
+                        ),
+                        vedtakHendelse = VedtakHendelse(123L, Tidspunkt.now(), "saksb", null)
+                    )
+                )
             }.also {
                 applicationContext.dataSource.connection.use {
                     val actual = BehandlingDao(KommerBarnetTilGodeDao { it }) { it }.hentBehandling(behandlingId)!!

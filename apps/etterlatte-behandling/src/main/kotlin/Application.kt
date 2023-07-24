@@ -13,6 +13,9 @@ import io.ktor.server.engine.embeddedServer
 import io.ktor.server.routing.Route
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.asContextElement
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import no.nav.etterlatte.behandling.behandlingRoutes
 import no.nav.etterlatte.behandling.behandlingsstatusRoutes
@@ -28,6 +31,7 @@ import no.nav.etterlatte.grunnlagsendring.grunnlagsendringshendelseRoute
 import no.nav.etterlatte.institusjonsopphold.InstitusjonsoppholdService
 import no.nav.etterlatte.institusjonsopphold.institusjonsoppholdRoute
 import no.nav.etterlatte.jobs.addShutdownHook
+import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.libs.ktor.restModule
@@ -39,6 +43,7 @@ import no.nav.etterlatte.sak.sakWebRoutes
 import no.nav.etterlatte.tilgangsstyring.adressebeskyttelsePlugin
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.util.UUID
 import javax.sql.DataSource
 
 val sikkerLogg: Logger = LoggerFactory.getLogger("sikkerLogg")
@@ -65,7 +70,24 @@ class Server(private val context: ApplicationContext) {
     fun run() = with(context) {
         dataSource.migrate()
         grunnlagsendringshendelseJob.schedule().also { addShutdownHook(it) }
+        runBlocking { migrerOppgaver(context) }
         setReady().also { engine.start(true) }
+    }
+}
+
+suspend fun migrerOppgaver(context: ApplicationContext) {
+    coroutineScope {
+        launch {
+            withContext(
+                Dispatchers.Default + Kontekst.asContextElement(
+                    value = Context(Self("migreroppgave"), DatabaseContext(context.dataSource))
+                )
+            ) {
+                withLogContext(UUID.randomUUID().toString()) {
+                    context.oppgaveServiceNy.migrerSaker()
+                }
+            }
+        }
     }
 }
 

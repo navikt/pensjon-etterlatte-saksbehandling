@@ -47,7 +47,6 @@ class OppgaveServiceNy(private val oppgaveDaoNy: OppgaveDaoNy, private val sakDa
 
     // bruker: SaksbehandlerMedRoller må på en måte inn her
     fun finnOppgaverForBruker(bruker: SaksbehandlerMedRoller): List<OppgaveNy> {
-        migrerSaker()
         return inTransaction {
             oppgaveDaoNy.hentOppgaver()
         }

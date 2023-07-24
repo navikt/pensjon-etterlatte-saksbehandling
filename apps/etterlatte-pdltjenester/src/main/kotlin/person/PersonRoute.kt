@@ -27,21 +27,9 @@ fun Route.personRoute(service: PersonService) {
             try {
                 service.hentPerson(hentPersonRequest).let { call.respond(it) }
             } catch (e: PdlFantIkkePerson) {
-                call.respond(
-                    HttpStatusCode.NotFound,
-                    PdlFeil(
-                        aarsak = PdlFeilAarsak.FANT_IKKE_PERSON,
-                        detaljer = "Fnr ${hentPersonRequest.foedselsnummer} finnes ikke i PDL"
-                    )
-                )
+                call.respond(HttpStatusCode.NotFound, e.tilPdlFeil())
             } catch (e: FamilieRelasjonManglerIdent) {
-                call.respond(
-                    HttpStatusCode.InternalServerError,
-                    PdlFeil(
-                        aarsak = PdlFeilAarsak.INGEN_IDENT_FAMILIERELASJON,
-                        detaljer = e.message
-                    )
-                )
+                call.respond(HttpStatusCode.InternalServerError, e.tilPdlFeil())
             }
         }
 
@@ -53,21 +41,9 @@ fun Route.personRoute(service: PersonService) {
                 try {
                     service.hentOpplysningsperson(hentPersonRequest).let { call.respond(it) }
                 } catch (e: PdlFantIkkePerson) {
-                    call.respond(
-                        HttpStatusCode.NotFound,
-                        PdlFeil(
-                            aarsak = PdlFeilAarsak.FANT_IKKE_PERSON,
-                            detaljer = "Fnr ${hentPersonRequest.foedselsnummer} finnes ikke i PDL"
-                        )
-                    )
+                    call.respond(HttpStatusCode.NotFound, e.tilPdlFeil())
                 } catch (e: FamilieRelasjonManglerIdent) {
-                    call.respond(
-                        HttpStatusCode.InternalServerError,
-                        PdlFeil(
-                            aarsak = PdlFeilAarsak.INGEN_IDENT_FAMILIERELASJON,
-                            detaljer = e.message
-                        )
-                    )
+                    call.respond(HttpStatusCode.InternalServerError, e.tilPdlFeil())
                 }
             }
         }
@@ -102,4 +78,24 @@ fun Route.personRoute(service: PersonService) {
             }
         }
     }
+
+    route("foreldreansvar") {
+        val logger = application.log
+
+        post {
+            val identRequest = call.receive<HentPersonRequest>()
+            logger.info("Henter historikk for foreldreansvar for person med fnr=${identRequest.foedselsnummer}")
+            try {
+                service.hentHistorikkForeldreansvar(identRequest).let { call.respond(it) }
+            } catch (e: PdlFantIkkePerson) {
+                call.respond(HttpStatusCode.NotFound, e.tilPdlFeil())
+            } catch (e: FamilieRelasjonManglerIdent) {
+                call.respond(HttpStatusCode.InternalServerError, e.tilPdlFeil())
+            }
+        }
+    }
 }
+
+fun PdlFantIkkePerson.tilPdlFeil(): PdlFeil = PdlFeil(aarsak = PdlFeilAarsak.FANT_IKKE_PERSON, detaljer = this.message)
+fun FamilieRelasjonManglerIdent.tilPdlFeil(): PdlFeil =
+    PdlFeil(aarsak = PdlFeilAarsak.INGEN_IDENT_FAMILIERELASJON, detaljer = this.message)

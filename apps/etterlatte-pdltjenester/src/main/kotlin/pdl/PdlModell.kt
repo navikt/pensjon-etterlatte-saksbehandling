@@ -181,7 +181,8 @@ data class PdlFoedsel(
 )
 
 data class PdlFolkeregistermetadata(
-    val gyldighetstidspunkt: LocalDateTime? = null
+    val gyldighetstidspunkt: LocalDateTime? = null,
+    val opphoerstidspunkt: LocalDateTime? = null
 )
 
 data class PdlMetadata(

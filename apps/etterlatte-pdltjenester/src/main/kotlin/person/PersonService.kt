@@ -11,9 +11,12 @@ import no.nav.etterlatte.libs.common.person.NavPersonIdent
 import no.nav.etterlatte.libs.common.person.PDLIdentGruppeTyper
 import no.nav.etterlatte.libs.common.person.PdlIdentifikator
 import no.nav.etterlatte.libs.common.person.Person
+import no.nav.etterlatte.libs.common.person.PersonRolle
+import no.nav.etterlatte.pdl.HistorikkForeldreansvar
 import no.nav.etterlatte.pdl.ParallelleSannheterKlient
 import no.nav.etterlatte.pdl.PdlKlient
 import no.nav.etterlatte.pdl.PdlResponseError
+import no.nav.etterlatte.pdl.mapper.ForeldreansvarHistorikkMapper
 import no.nav.etterlatte.pdl.mapper.GeografiskTilknytningMapper
 import no.nav.etterlatte.pdl.mapper.PersonMapper
 import org.slf4j.LoggerFactory
@@ -53,10 +56,16 @@ class PersonService(
         }
     }
 
-    suspend fun hentHistorikkForeldreansvar(fnr: Folkeregisteridentifikator, sakType: SakType) {
-        if (sakType != SakType.BARNEPENSJON) {
-            throw IllegalArgumentException("Nei, forbudt")
+    suspend fun hentHistorikkForeldreansvar(
+        hentPersonRequest: HentPersonRequest
+    ): HistorikkForeldreansvar {
+        if (hentPersonRequest.saktype != SakType.BARNEPENSJON) {
+            throw IllegalArgumentException("Kan kun hente historikk i foreldreansvar for barnepensjonssaker")
         }
+        if (hentPersonRequest.rolle != PersonRolle.BARN) {
+            throw IllegalArgumentException("Kan kun hente historikk i foreldreansvar for barn")
+        }
+        val fnr = hentPersonRequest.foedselsnummer
 
         return pdlKlient.hentPersonHistorikkForeldreansvar(fnr)
             .let {
@@ -70,7 +79,7 @@ class PersonService(
                         )
                     }
                 } else {
-                    // Mapping
+                    ForeldreansvarHistorikkMapper.mapForeldreAnsvar(it.data)
                 }
             }
     }

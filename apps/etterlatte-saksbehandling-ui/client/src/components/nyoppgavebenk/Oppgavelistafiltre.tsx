@@ -89,7 +89,9 @@ export const OPPGAVETYPEFILTER: Record<OppgavetypeFilterKeys, string> = {
   HENDELSE: 'Hendelse',
   MANUELT_OPPHOER: 'Manuelt opphør',
   EKSTERN: 'Ekstern',
+  ATTESTERING: 'Attestering'
 }
+
 
 function filtrerOppgaveType(oppgavetypeFilterKeys: OppgavetypeFilterKeys, oppgaver: OppgaveDTOny[]): OppgaveDTOny[] {
   if (oppgavetypeFilterKeys === 'visAlle') {

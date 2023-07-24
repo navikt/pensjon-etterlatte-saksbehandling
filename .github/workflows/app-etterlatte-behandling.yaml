@@ -19,6 +19,7 @@ on:
       - libs/saksbehandling-common/**
       - libs/etterlatte-jobs/**
       - libs/etterlatte-institusjonsopphold-model/**
+      - libs/etterlatte-oppgave-model/**
       - libs/etterlatte-behandling-model/**
       - libs/etterlatte-ktor/**
       - libs/etterlatte-database/**

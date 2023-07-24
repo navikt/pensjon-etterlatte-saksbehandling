@@ -1,4 +1,4 @@
-package no.nav.etterlatte.oppgaveny
+package no.nav.etterlatte.libs.common.oppgaveNy
 
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.Sak
@@ -30,6 +30,7 @@ enum class Status {
 enum class OppgaveType {
     FOERSTEGANGSBEHANDLING,
     REVUDERING,
+    ATTESTERING,
     HENDELSE,
     MANUELT_OPPHOER,
     EKSTERN
@@ -47,6 +48,13 @@ data class FjernSaksbehandlerRequest(
 data class RedigerFristRequest(
     val oppgaveId: UUID,
     val frist: Tidspunkt
+)
+
+data class OpprettNyOppgaveRequest(
+    val referanse: String,
+    val sakId: Long,
+    val oppgaveType: OppgaveType,
+    val saksbehandler: String? = null
 )
 
 fun opprettNyOppgaveMedReferanseOgSak(

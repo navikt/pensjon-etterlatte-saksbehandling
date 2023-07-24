@@ -1,5 +1,5 @@
 import { Alert, BodyShort, Button, Heading, Modal, Select, TextField } from '@navikt/ds-react'
-import React, { useState } from 'react'
+import { useState } from 'react'
 import styled from 'styled-components'
 import { opprettRevurdering as opprettRevurderingApi } from '~shared/api/behandling'
 import { isPending, useApiCall } from '~shared/hooks/useApiCall'

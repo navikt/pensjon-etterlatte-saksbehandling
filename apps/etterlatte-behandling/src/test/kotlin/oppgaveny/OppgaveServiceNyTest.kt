@@ -9,6 +9,9 @@ import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
+import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.sak.SakDao
@@ -91,7 +94,7 @@ class OppgaveServiceNyTest {
         val nysaksbehandler = "nysaksbehandler"
         oppgaveServiceNy.tildelSaksbehandler(SaksbehandlerEndringDto(nyOppgave.id, nysaksbehandler))
 
-        val oppgaveMedNySaksbehandler = oppgaveServiceNy.hentOppgve(nyOppgave.id)
+        val oppgaveMedNySaksbehandler = oppgaveServiceNy.hentOppgave(nyOppgave.id)
         Assertions.assertEquals(nysaksbehandler, oppgaveMedNySaksbehandler?.saksbehandler)
     }
 
@@ -131,7 +134,7 @@ class OppgaveServiceNyTest {
         val nysaksbehandler = "nysaksbehandler"
         oppgaveServiceNy.byttSaksbehandler(SaksbehandlerEndringDto(nyOppgave.id, nysaksbehandler))
 
-        val oppgaveMedNySaksbehandler = oppgaveServiceNy.hentOppgve(nyOppgave.id)
+        val oppgaveMedNySaksbehandler = oppgaveServiceNy.hentOppgave(nyOppgave.id)
         Assertions.assertEquals(nysaksbehandler, oppgaveMedNySaksbehandler?.saksbehandler)
     }
 
@@ -155,7 +158,7 @@ class OppgaveServiceNyTest {
         val nysaksbehandler = "nysaksbehandler"
         oppgaveServiceNy.tildelSaksbehandler(SaksbehandlerEndringDto(nyOppgave.id, nysaksbehandler))
         oppgaveServiceNy.fjernSaksbehandler(FjernSaksbehandlerRequest(nyOppgave.id))
-        val oppgaveUtenSaksbehandler = oppgaveServiceNy.hentOppgve(nyOppgave.id)
+        val oppgaveUtenSaksbehandler = oppgaveServiceNy.hentOppgave(nyOppgave.id)
         Assertions.assertNotNull(oppgaveUtenSaksbehandler?.id)
         Assertions.assertNull(oppgaveUtenSaksbehandler?.saksbehandler)
     }
@@ -172,6 +175,39 @@ class OppgaveServiceNyTest {
             oppgaveServiceNy.fjernSaksbehandler(FjernSaksbehandlerRequest(nyOppgave.id))
         }
         Assertions.assertTrue(err.message!!.startsWith("Oppgaven har ingen saksbehandler"))
+    }
+
+    @Test
+    fun `kan redigere frist`() {
+        val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val nyOppgave = oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
+            "referanse",
+            opprettetSak.id,
+            OppgaveType.FOERSTEGANGSBEHANDLING
+        )
+        oppgaveServiceNy.tildelSaksbehandler(SaksbehandlerEndringDto(nyOppgave.id, "nysaksbehandler"))
+        val nyFrist = Tidspunkt.now().toLocalDatetimeUTC().plusMonths(4L).toTidspunkt()
+        oppgaveServiceNy.redigerFrist(RedigerFristRequest(nyOppgave.id, nyFrist))
+        val oppgaveMedNyFrist = oppgaveServiceNy.hentOppgave(nyOppgave.id)
+        Assertions.assertEquals(nyFrist, oppgaveMedNyFrist?.frist)
+    }
+
+    @Test
+    fun `kan ikke redigere frist tilbake i tid`() {
+        val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val nyOppgave = oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
+            "referanse",
+            opprettetSak.id,
+            OppgaveType.FOERSTEGANGSBEHANDLING
+        )
+        oppgaveServiceNy.tildelSaksbehandler(SaksbehandlerEndringDto(nyOppgave.id, "nysaksbehandler"))
+        val nyFrist = Tidspunkt.now().toLocalDatetimeUTC().minusMonths(1L).toTidspunkt()
+
+        val err = assertThrows<BadRequestException> {
+            oppgaveServiceNy.redigerFrist(RedigerFristRequest(nyOppgave.id, nyFrist))
+        }
+
+        Assertions.assertTrue(err.message!!.startsWith("Tidspunkt tilbake i tid id: "))
     }
 
     @Test

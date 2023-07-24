@@ -4,6 +4,7 @@ import { Button, Pagination, Table } from '@navikt/ds-react'
 import { formaterStringDato } from '~utils/formattering'
 import { RedigerSaksbehandler } from '~components/nyoppgavebenk/RedigerSaksbehandler'
 import { CaretRightIcon } from '@navikt/aksel-icons'
+import { FristHandlinger } from '~components/nyoppgavebenk/minoppgaveliste/FristHandlinger'
 import { useState } from 'react'
 
 export const MinOppgaveliste = (props: { oppgaver: ReadonlyArray<OppgaveDTOny> }) => {
@@ -49,7 +50,9 @@ export const MinOppgaveliste = (props: { oppgaver: ReadonlyArray<OppgaveDTOny> }
                         {saksbehandler && <RedigerSaksbehandler saksbehandler={saksbehandler} oppgaveId={id} />}
                       </Table.DataCell>
                       <Table.DataCell>{sakType ? sakType : 'Ingen saktype, må migreres'}</Table.DataCell>
-                      <Table.DataCell>{frist ? frist : 'Ingen frist'}</Table.DataCell>
+                      <Table.DataCell>
+                        <FristHandlinger frist={frist} oppgaveId={id} />
+                      </Table.DataCell>
                       <Table.DataCell>
                         <Button icon={<CaretRightIcon />} variant="primary" onClick={() => {}}>
                           Start behandling

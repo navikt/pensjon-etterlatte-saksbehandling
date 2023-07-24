@@ -3,6 +3,9 @@ package no.nav.etterlatte.oppgaveny
 import io.ktor.server.plugins.BadRequestException
 import io.ktor.server.plugins.NotFoundException
 import no.nav.etterlatte.inTransaction
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
+import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.sak.SakDao
 import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
 import java.util.*
@@ -61,6 +64,26 @@ class OppgaveServiceNy(private val oppgaveDaoNy: OppgaveDaoNy, private val sakDa
         }
     }
 
+    fun redigerFrist(redigerFristRequest: RedigerFristRequest) {
+        inTransaction {
+            val hentetOppgave = oppgaveDaoNy.hentOppgave(redigerFristRequest.oppgaveId)
+            if (redigerFristRequest.frist.isBefore(Tidspunkt.now())) {
+                throw BadRequestException("Tidspunkt tilbake i tid id: ${redigerFristRequest.oppgaveId}")
+            }
+            if (hentetOppgave != null) {
+                if (hentetOppgave.saksbehandler != null) {
+                    oppgaveDaoNy.redigerFrist(redigerFristRequest)
+                } else {
+                    throw BadRequestException(
+                        "Oppgaven har ingen saksbehandler, id: ${redigerFristRequest.oppgaveId}"
+                    )
+                }
+            } else {
+                throw NotFoundException("Oppgaven finnes ikke, id: ${redigerFristRequest.oppgaveId}")
+            }
+        }
+    }
+
     fun opprettNyOppgaveMedSakOgReferanse(referanse: String, sakId: Long, oppgaveType: OppgaveType): OppgaveNy {
         val sak = sakDao.hentSak(sakId)!!
         return lagreOppgave(
@@ -73,11 +96,15 @@ class OppgaveServiceNy(private val oppgaveDaoNy: OppgaveDaoNy, private val sakDa
     }
 
     private fun lagreOppgave(oppgaveNy: OppgaveNy): OppgaveNy {
-        oppgaveDaoNy.lagreOppgave(oppgaveNy)
-        return oppgaveDaoNy.hentOppgave(oppgaveNy.id)!!
+        var oppgaveLagres = oppgaveNy
+        if (oppgaveNy.frist === null) {
+            val enMaanedFrem = oppgaveNy.opprettet.toLocalDatetimeUTC().plusMonths(1L).toTidspunkt()
+            oppgaveLagres = oppgaveNy.copy(frist = enMaanedFrem)
+        }
+        oppgaveDaoNy.lagreOppgave(oppgaveLagres)
+        return oppgaveDaoNy.hentOppgave(oppgaveLagres.id)!!
     }
-
-    fun hentOppgve(oppgaveId: UUID): OppgaveNy? {
+    fun hentOppgave(oppgaveId: UUID): OppgaveNy? {
         return oppgaveDaoNy.hentOppgave(oppgaveId)
     }
 }

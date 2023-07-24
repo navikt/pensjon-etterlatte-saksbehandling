@@ -30,3 +30,10 @@ export const tildelSaksbehandlerApi = async (nysaksbehandler: NySaksbehandlerDto
 
 export const fjernSaksbehandlerApi = async (oppgaveId: string): Promise<ApiResponse<void>> =>
   apiClient.post('/nyeoppgaver/fjern-saksbehandler', { oppgaveId })
+
+export interface RedigerFristRequest {
+  oppgaveId: string
+  frist: Date
+}
+export const redigerFristApi = async (redigerFristRequest: RedigerFristRequest): Promise<ApiResponse<void>> =>
+  apiClient.put('/nyeoppgaver/rediger-frist', { ...redigerFristRequest })

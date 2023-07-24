@@ -1,10 +1,5 @@
 import { Alert, Heading, Table } from '@navikt/ds-react'
-import {
-  Grunnlagsendringshendelse,
-  GrunnlagsendringsType,
-  IBehandlingsammendrag,
-  STATUS_IRRELEVANT,
-} from '~components/person/typer'
+import { Grunnlagsendringshendelse, IBehandlingsammendrag, STATUS_IRRELEVANT } from '~components/person/typer'
 import { FnrTilNavnMapContext } from '~components/person/uhaandtereHendelser/utils'
 import { isFailure, isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
 import React, { useEffect, useMemo, useState } from 'react'
@@ -57,21 +52,6 @@ export default function RelevanteHendelser(props: Props) {
   useEffect(() => {
     hentHendelser(fnr, (hendelser) => {
       const relevanteHendelser = hendelser[0].hendelser.filter((h) => h.status !== STATUS_IRRELEVANT)
-      if (!relevanteHendelser.length) {
-        relevanteHendelser.push({
-          id: '1',
-          sakId: 527,
-          type: GrunnlagsendringsType.GRUNNBELOEP,
-          status: 'VENTER_PAA_JOBB',
-          opprettet: '21123',
-          hendelseGjelderRolle: 'SOEKER',
-          gjelderPerson: '',
-          samsvarMellomKildeOgGrunnlag: {
-            type: 'UTLAND',
-            samsvar: true,
-          },
-        })
-      }
       setRelevanteHendelser(relevanteHendelser)
     })
   }, [])

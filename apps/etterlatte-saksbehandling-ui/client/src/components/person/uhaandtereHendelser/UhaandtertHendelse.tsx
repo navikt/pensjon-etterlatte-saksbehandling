@@ -75,7 +75,11 @@ const UhaandtertHendelse = (props: {
               <>
                 <div>
                   {!tattMedIBehandling && stoetterRevurdering && (
-                    <Button disabled={false} onClick={() => startRevurdering(hendelse)} icon={<ArrowsCirclepathIcon />}>
+                    <Button
+                      disabled={harAapenRevurdering}
+                      onClick={() => startRevurdering(hendelse)}
+                      icon={<ArrowsCirclepathIcon />}
+                    >
                       Start revurdering
                     </Button>
                   )}

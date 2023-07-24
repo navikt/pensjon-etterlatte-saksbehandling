@@ -7,6 +7,7 @@ import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
+import io.ktor.server.routing.put
 import io.ktor.server.routing.route
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.libs.common.kunSaksbehandler
@@ -58,7 +59,7 @@ internal fun Route.oppgaveRoutesNy(service: OppgaveServiceNy, kanBrukeNyOppgavel
                 }
             }
         }
-        post("/rediger-frist") {
+        put("/rediger-frist") {
             kunSaksbehandler {
                 if (kanBrukeNyOppgaveliste) {
                     val redigerFrist = call.receive<RedigerFristRequest>()

@@ -18,7 +18,7 @@ import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandlingsId
 import no.nav.etterlatte.libs.common.hentNavidentFraToken
-import no.nav.etterlatte.libs.common.med
+import no.nav.etterlatte.libs.common.medBody
 import no.nav.etterlatte.libs.common.sakId
 import java.util.*
 
@@ -34,7 +34,7 @@ internal fun Route.revurderingRoutes(
                 post {
                     hentNavidentFraToken { navIdent ->
                         logger.info("Lagrer revurderinginfo på behandling $behandlingsId")
-                        med<RevurderingInfoDto> {
+                        medBody<RevurderingInfoDto> {
                             val fikkLagret = revurderingService.lagreRevurderingInfo(behandlingsId, it.info, navIdent)
                             if (fikkLagret) {
                                 call.respond(HttpStatusCode.NoContent)
@@ -50,7 +50,7 @@ internal fun Route.revurderingRoutes(
         route("{$SAKID_CALL_PARAMETER}") {
             post {
                 logger.info("Oppretter ny revurdering på sak $sakId")
-                med<OpprettRevurderingRequest> { body ->
+                medBody<OpprettRevurderingRequest> { body ->
                     if (!body.aarsak.kanBrukesIMiljo()) {
                         return@post call.respond(
                             HttpStatusCode.BadRequest,

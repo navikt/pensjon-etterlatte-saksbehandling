@@ -85,7 +85,7 @@ suspend inline fun PipelineContext<*, ApplicationCall>.withFoedselsnummer(
     }
 }
 
-suspend inline fun <reified T : Any> PipelineContext<*, ApplicationCall>.med(onSuccess: (t: T) -> Unit) {
+suspend inline fun <reified T : Any> PipelineContext<*, ApplicationCall>.medBody(onSuccess: (t: T) -> Unit) {
     try {
         val body = call.receive<T>()
         onSuccess(body)

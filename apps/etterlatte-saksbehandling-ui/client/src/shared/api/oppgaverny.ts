@@ -10,13 +10,21 @@ export interface OppgaveDTOny {
   referanse: string | null
   merknad: string | null
   opprettet: string
-  sakType: string | null
+  sakType: Saktype | null
   fnr: string | null
   frist: string
 }
 
+export type Saktype = 'BARNEPENSJON' | 'OMSTILLINGSSTOENAD'
+
 export type Oppgavestatus = 'NY' | 'UNDER_BEHANDLING' | 'FERDIGSTILT' | 'FEILREGISTRERT'
-export type Oppgavetype = 'FOERSTEGANGSBEHANDLING' | 'REVURDERING' | 'HENDELSE' | 'MANUELT_OPPHOER' | 'EKSTERN' | 'ATTESTERING'
+export type Oppgavetype =
+  | 'FOERSTEGANGSBEHANDLING'
+  | 'REVURDERING'
+  | 'HENDELSE'
+  | 'MANUELT_OPPHOER'
+  | 'EKSTERN'
+  | 'ATTESTERING'
 
 export const hentNyeOppgaver = async (): Promise<ApiResponse<OppgaveDTOny[]>> => apiClient.get('/nyeoppgaver/hent')
 

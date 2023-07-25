@@ -4,7 +4,7 @@ import { SakType } from '~shared/types/sak'
 import styled from 'styled-components'
 import { INasjonalitetsType } from '~components/behandling/fargetags/nasjonalitetsType'
 
-enum Variants {
+export enum Variants {
   NEUTRAL = 'neutral',
   INFO = 'info',
   INFO_FILLED = 'info-filled',

@@ -18,6 +18,7 @@ import {
   YtelseFilterKeys,
   ENHETFILTER,
 } from '~components/nyoppgavebenk/Oppgavelistafiltre'
+import { OppgavetypeTag, SaktypeTag } from '~components/nyoppgavebenk/Tags'
 
 const FilterFlex = styled.div`
   display: flex;
@@ -149,7 +150,9 @@ export const Oppgavelista = (props: { oppgaver: ReadonlyArray<OppgaveDTOny>; hen
                 <Table.Row key={id}>
                   <Table.HeaderCell>{formaterStringDato(opprettet)}</Table.HeaderCell>
                   <Table.HeaderCell>{fnr ? fnr : 'ikke fnr, må migreres'}</Table.HeaderCell>
-                  <Table.DataCell>{type}</Table.DataCell>
+                  <Table.DataCell>
+                    <OppgavetypeTag oppgavetype={type} />
+                  </Table.DataCell>
                   <Table.DataCell>{status}</Table.DataCell>
                   <Table.DataCell>{merknad}</Table.DataCell>
                   <Table.DataCell>{enhet}</Table.DataCell>
@@ -160,7 +163,7 @@ export const Oppgavelista = (props: { oppgaver: ReadonlyArray<OppgaveDTOny>; hen
                       <TildelSaksbehandler oppgaveId={id} />
                     )}
                   </Table.DataCell>
-                  <Table.DataCell>{sakType ? sakType : 'Ingen saktype, må migreres'}</Table.DataCell>
+                  <Table.DataCell>{sakType && <SaktypeTag sakType={sakType} />}</Table.DataCell>
                   <Table.DataCell>{frist ? frist : 'Ingen frist'}</Table.DataCell>
                 </Table.Row>
               )

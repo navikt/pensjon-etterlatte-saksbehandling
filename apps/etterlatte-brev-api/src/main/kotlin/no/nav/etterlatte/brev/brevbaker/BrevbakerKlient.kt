@@ -62,7 +62,7 @@ class BrevbakerKlient(private val client: HttpClient, private val apiUrl: String
                 setBody(brevRequest.toJsonNode())
             }.body<BrevbakerJSONResponse>()
         }.let { (result, duration) ->
-            logger.info("Fullført brevbaker HTML OK (${duration.toString(DurationUnit.SECONDS, 2)})")
+            logger.info("Fullført brevbaker JSON OK (${duration.toString(DurationUnit.SECONDS, 2)})")
             result
         }
     } catch (ex: Exception) {

@@ -35,6 +35,7 @@ import no.nav.etterlatte.brev.grunnlag.GrunnlagKlient
 import no.nav.etterlatte.brev.navansatt.NavansattKlient
 import no.nav.etterlatte.brev.vedtak.VedtaksvurderingKlient
 import no.nav.etterlatte.brev.vedtaksbrevRoute
+import no.nav.etterlatte.libs.common.logging.NAV_CALL_ID
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.requireEnvValue
 import no.nav.etterlatte.libs.database.DataSourceBuilder
@@ -172,6 +173,7 @@ class ApplicationBuilder {
         }
         defaultRequest {
             header(XCorrelationId, getCorrelationId())
+            header(NAV_CALL_ID, getCorrelationId())
         }
     }.also { Runtime.getRuntime().addShutdownHook(Thread { it.close() }) }
 }

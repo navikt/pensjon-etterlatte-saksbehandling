@@ -9,10 +9,12 @@ import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.oppgaveNy.AttesteringsOppgave
 import no.nav.etterlatte.libs.common.oppgaveNy.FjernSaksbehandlerRequest
 import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveType
 import no.nav.etterlatte.libs.common.oppgaveNy.RedigerFristRequest
 import no.nav.etterlatte.libs.common.oppgaveNy.SaksbehandlerEndringDto
+import no.nav.etterlatte.libs.common.oppgaveNy.Status
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
@@ -166,6 +168,7 @@ class OppgaveServiceNyTest {
         val oppgaveUtenSaksbehandler = oppgaveServiceNy.hentOppgave(nyOppgave.id)
         Assertions.assertNotNull(oppgaveUtenSaksbehandler?.id)
         Assertions.assertNull(oppgaveUtenSaksbehandler?.saksbehandler)
+        Assertions.assertEquals(Status.NY, oppgaveUtenSaksbehandler?.status)
     }
 
     @Test
@@ -213,6 +216,95 @@ class OppgaveServiceNyTest {
         }
 
         Assertions.assertTrue(err.message!!.startsWith("Tidspunkt tilbake i tid id: "))
+    }
+
+    @Test
+    fun `Håndtering av vedtaksfatting`() {
+        val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val referanse = "referanse"
+        val nyOppgave = oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
+            referanse,
+            opprettetSak.id,
+            OppgaveType.FOERSTEGANGSBEHANDLING
+        )
+
+        oppgaveServiceNy.tildelSaksbehandler(SaksbehandlerEndringDto(nyOppgave.id, "saksbehandler"))
+
+        val attesteringsOppgave = oppgaveServiceNy.haandterFattetvedtak(
+            AttesteringsOppgave(opprettetSak.id, referanse, OppgaveType.ATTESTERING)
+        )
+
+        val saksbehandlerOppgave = oppgaveServiceNy.hentOppgave(nyOppgave.id)
+        Assertions.assertEquals(Status.FERDIGSTILT, saksbehandlerOppgave?.status)
+        Assertions.assertEquals(OppgaveType.ATTESTERING, attesteringsOppgave.type)
+        Assertions.assertEquals(referanse, attesteringsOppgave.referanse)
+    }
+
+    @Test
+    fun `Skal ikke kunne attestere vedtak hvis ingen oppgaver er under behandling altså tildelt en saksbehandler`() {
+        val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val referanse = "referanse"
+        oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
+            referanse,
+            opprettetSak.id,
+            OppgaveType.FOERSTEGANGSBEHANDLING
+        )
+
+        val err = assertThrows<BadRequestException> {
+            oppgaveServiceNy.haandterFattetvedtak(
+                AttesteringsOppgave(opprettetSak.id, referanse, OppgaveType.ATTESTERING)
+            )
+        }
+
+        Assertions.assertTrue(
+            err.message!!.startsWith("Det må finnes en oppgave under behandling, gjelder behandling:")
+        )
+    }
+
+    @Test
+    fun `kan ikke attestere uten at det finnes en oppgave på behandlingen`() {
+        val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val referanse = "referanse"
+
+        val err = assertThrows<BadRequestException> {
+            oppgaveServiceNy.haandterFattetvedtak(
+                AttesteringsOppgave(opprettetSak.id, referanse, OppgaveType.ATTESTERING)
+            )
+        }
+
+        Assertions.assertEquals(
+            "Må ha en oppgave for å kunne lage attesteringsoppgave",
+            err.message!!
+        )
+    }
+
+    @Test
+    fun `Skal ikke kunne attestere vedtak hvis det finnes flere oppgaver under behandling for behandlingen`() {
+        val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val referanse = "referanse"
+        val oppgaveEn = oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
+            referanse,
+            opprettetSak.id,
+            OppgaveType.FOERSTEGANGSBEHANDLING
+        )
+
+        val oppgaveTo = oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
+            referanse,
+            opprettetSak.id,
+            OppgaveType.FOERSTEGANGSBEHANDLING
+        )
+        oppgaveServiceNy.tildelSaksbehandler(SaksbehandlerEndringDto(oppgaveEn.id, "saksbehandler"))
+        oppgaveServiceNy.tildelSaksbehandler(SaksbehandlerEndringDto(oppgaveTo.id, "saksbehandler"))
+
+        val err = assertThrows<BadRequestException> {
+            oppgaveServiceNy.haandterFattetvedtak(
+                AttesteringsOppgave(opprettetSak.id, referanse, OppgaveType.ATTESTERING)
+            )
+        }
+
+        Assertions.assertTrue(
+            err.message!!.startsWith("Skal kun ha en oppgave under behandling, gjelder behandling:")
+        )
     }
 
     @Test

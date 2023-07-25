@@ -33,6 +33,7 @@ import no.nav.etterlatte.libs.sporingslogg.Sporingslogg
 import no.nav.etterlatte.libs.sporingslogg.Sporingsrequest
 import no.nav.etterlatte.tilgangsstyring.filterForEnheter
 import no.nav.etterlatte.token.BrukerTokenInfo
+import no.nav.etterlatte.vedtaksvurdering.VedtakHendelse
 import org.slf4j.LoggerFactory
 import java.time.YearMonth
 import java.util.*

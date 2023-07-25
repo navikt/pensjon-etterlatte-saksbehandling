@@ -3,6 +3,7 @@ package no.nav.etterlatte.libs.common.oppgaveNy
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.vedtaksvurdering.VedtakHendelse
 import java.util.*
 
 data class OppgaveNy(
@@ -50,11 +51,14 @@ data class RedigerFristRequest(
     val frist: Tidspunkt
 )
 
-data class OpprettNyOppgaveRequest(
-    val referanse: String,
+data class AttesteringsOppgave(
     val sakId: Long,
-    val oppgaveType: OppgaveType,
-    val saksbehandler: String? = null
+    val referanse: String,
+    val oppgaveType: OppgaveType
+)
+data class AttesterVedtakOppgave(
+    val attesteringsOppgave: AttesteringsOppgave,
+    val vedtakHendelse: VedtakHendelse
 )
 
 fun opprettNyOppgaveMedReferanseOgSak(

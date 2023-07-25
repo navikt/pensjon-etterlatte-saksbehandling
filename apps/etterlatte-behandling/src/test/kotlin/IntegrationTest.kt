@@ -17,7 +17,6 @@ import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.BehandlingsBehov
 import no.nav.etterlatte.behandling.FastsettVirkningstidspunktResponse
 import no.nav.etterlatte.behandling.ManueltOpphoerResponse
-import no.nav.etterlatte.behandling.VedtakHendelse
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
 import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerAarsak
@@ -38,6 +37,11 @@ import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsTyper
 import no.nav.etterlatte.libs.common.gyldigSoeknad.VurderingsResultat
 import no.nav.etterlatte.libs.common.gyldigSoeknad.VurdertGyldighet
+import no.nav.etterlatte.libs.common.oppgaveNy.AttesterVedtakOppgave
+import no.nav.etterlatte.libs.common.oppgaveNy.AttesteringsOppgave
+import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveNy
+import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveType
+import no.nav.etterlatte.libs.common.oppgaveNy.SaksbehandlerEndringDto
 import no.nav.etterlatte.libs.common.pdlhendelse.Adressebeskyttelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
@@ -49,6 +53,7 @@ import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.oppgave.OppgaveListeDto
+import no.nav.etterlatte.vedtaksvurdering.VedtakHendelse
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -132,6 +137,21 @@ class IntegrationTest : BehandlingIntegrationTest() {
             }.also {
                 assertEquals(HttpStatusCode.OK, it.status)
                 it.body<DetaljertBehandling>()
+            }
+
+            val oppgaver: List<OppgaveNy> = client.get("/api/nyeoppgaver/hent") {
+                addAuthToken(tokenSaksbehandler)
+                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+            }.also {
+                assertEquals(HttpStatusCode.OK, it.status)
+            }.body()
+            val oppgaverforbehandling = oppgaver.filter { it.referanse == behandlingId.toString() }
+            client.post("/api/nyeoppgaver/tildel-saksbehandler") {
+                addAuthToken(tokenSaksbehandler)
+                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                setBody(SaksbehandlerEndringDto(oppgaverforbehandling[0].id, "Saksbehandler01"))
+            }.also {
+                assertEquals(HttpStatusCode.OK, it.status)
             }
 
             client.post("/behandlinger/$behandlingId/gyldigfremsatt") {
@@ -235,10 +255,19 @@ class IntegrationTest : BehandlingIntegrationTest() {
                 assertEquals(HttpStatusCode.OK, it.status)
             }
 
-            client.post("/behandlinger/$behandlingId/fatteVedtak") {
+            client.post("/fattvedtak-behandling") {
                 addAuthToken(tokenSaksbehandler)
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                setBody(VedtakHendelse(123L, "saksb", Tidspunkt.now(), null, null))
+                setBody(
+                    AttesterVedtakOppgave(
+                        attesteringsOppgave = AttesteringsOppgave(
+                            sakId = sak.id,
+                            referanse = behandlingId.toString(),
+                            OppgaveType.ATTESTERING
+                        ),
+                        vedtakHendelse = VedtakHendelse(123L, Tidspunkt.now(), "Saksbehandler01", null)
+                    )
+                )
             }.also {
                 applicationContext.dataSource.connection.use {
                     val actual = BehandlingDao(
@@ -264,7 +293,7 @@ class IntegrationTest : BehandlingIntegrationTest() {
             client.post("/behandlinger/$behandlingId/attester") {
                 addAuthToken(tokenSaksbehandler)
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                setBody(VedtakHendelse(123L, "saksb", Tidspunkt.now(), null, null))
+                setBody(VedtakHendelse(123L, Tidspunkt.now(), "saksb", null, null))
             }.also {
                 applicationContext.dataSource.connection.use {
                     val actual = BehandlingDao(
@@ -283,8 +312,8 @@ class IntegrationTest : BehandlingIntegrationTest() {
                 setBody(
                     VedtakHendelse(
                         12L,
-                        null,
                         Tidspunkt.now(),
+                        null,
                         null,
                         null
                     )

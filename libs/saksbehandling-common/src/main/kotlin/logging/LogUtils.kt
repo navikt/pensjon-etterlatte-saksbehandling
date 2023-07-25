@@ -6,6 +6,7 @@ import java.util.*
 const val X_CORRELATION_ID: String = "X-Correlation-ID"
 const val CORRELATION_ID: String = "correlation_id"
 const val NAV_CALL_ID: String = "Nav_Call_Id"
+const val NAV_CONSUMER_ID: String = "Nav-Consumer-Id"
 
 fun <T> withLogContext(correlationId: String? = null, kv: Map<String, String> = emptyMap(), block: () -> T): T =
     innerLogContext(correlationId, kv, block)

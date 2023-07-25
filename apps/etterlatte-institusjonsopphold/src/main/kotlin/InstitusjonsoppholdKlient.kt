@@ -8,6 +8,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.logging.NAV_CALL_ID
+import no.nav.etterlatte.libs.common.logging.NAV_CONSUMER_ID
 import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.getXCorrelationId
 import java.time.LocalDate
@@ -21,7 +22,7 @@ class InstitusjonsoppholdKlient(val institusjonsoppholdHttpKlient: HttpClient, v
                 contentType(ContentType.Application.Json)
                 header(X_CORRELATION_ID, getXCorrelationId())
                 header(NAV_CALL_ID, getXCorrelationId())
-                header("Nav-Consumer-Id", "etterlatte-institusjonsopphold")
+                header(NAV_CONSUMER_ID, "etterlatte-institusjonsopphold")
             }.body<Institusjonsopphold>()
         }
 }

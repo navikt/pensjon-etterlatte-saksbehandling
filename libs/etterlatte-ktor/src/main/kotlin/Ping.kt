@@ -10,6 +10,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.newSingleThreadContext
 import no.nav.etterlatte.libs.common.logging.NAV_CALL_ID
+import no.nav.etterlatte.libs.common.logging.NAV_CONSUMER_ID
 import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.getXCorrelationId
 import org.slf4j.Logger
@@ -26,7 +27,7 @@ suspend fun HttpClient.ping(
             accept(ContentType.Application.Json)
             header(X_CORRELATION_ID, getXCorrelationId())
             header(NAV_CALL_ID, getXCorrelationId())
-            header("Nav-Consumer-Id", konsument)
+            header(NAV_CONSUMER_ID, konsument)
         }
         logger.info("$serviceName svarer OK")
         PingResultUp(serviceName, endpoint = url, beskrivelse = beskrivelse)

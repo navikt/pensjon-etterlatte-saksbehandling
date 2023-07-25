@@ -18,6 +18,7 @@ import {
   YtelseFilterKeys,
   ENHETFILTER,
 } from '~components/nyoppgavebenk/Oppgavelistafiltre'
+import { HandlingerForOppgave } from '~components/nyoppgavebenk/HandlingerForOppgave'
 import { OppgavetypeTag, SaktypeTag } from '~components/nyoppgavebenk/Tags'
 
 const FilterFlex = styled.div`
@@ -141,12 +142,13 @@ export const Oppgavelista = (props: { oppgaver: ReadonlyArray<OppgaveDTOny>; hen
             <Table.HeaderCell scope="col">Saksbehandler</Table.HeaderCell>
             <Table.HeaderCell scope="col">Ytelse</Table.HeaderCell>
             <Table.HeaderCell scope="col">Frist</Table.HeaderCell>
+            <Table.HeaderCell scope="col">Handlinger</Table.HeaderCell>
           </Table.Row>
         </Table.Header>
         <Table.Body>
           {paginerteOppgaver &&
             paginerteOppgaver.map(
-              ({ id, status, enhet, type, saksbehandler, opprettet, merknad, sakType, fnr, frist }) => (
+              ({ id, status, enhet, type, saksbehandler, opprettet, merknad, sakType, fnr, frist, referanse }) => (
                 <Table.Row key={id}>
                   <Table.HeaderCell>{formaterStringDato(opprettet)}</Table.HeaderCell>
                   <Table.HeaderCell>{fnr ? fnr : 'ikke fnr, må migreres'}</Table.HeaderCell>
@@ -165,6 +167,14 @@ export const Oppgavelista = (props: { oppgaver: ReadonlyArray<OppgaveDTOny>; hen
                   </Table.DataCell>
                   <Table.DataCell>{sakType && <SaktypeTag sakType={sakType} />}</Table.DataCell>
                   <Table.DataCell>{frist ? frist : 'Ingen frist'}</Table.DataCell>
+                  <Table.DataCell>
+                    <HandlingerForOppgave
+                      oppgavetype={type}
+                      fnr={fnr}
+                      saksbehandler={saksbehandler}
+                      referanse={referanse}
+                    />
+                  </Table.DataCell>
                 </Table.Row>
               )
             )}

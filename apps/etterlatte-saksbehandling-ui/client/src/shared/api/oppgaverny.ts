@@ -10,8 +10,8 @@ export interface OppgaveDTOny {
   referanse: string | null
   merknad: string | null
   opprettet: string
-  sakType: Saktype | null
-  fnr: string | null
+  sakType: Saktype
+  fnr: string
   frist: string
 }
 

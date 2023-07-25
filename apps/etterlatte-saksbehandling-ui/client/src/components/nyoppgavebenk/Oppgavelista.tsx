@@ -148,7 +148,7 @@ export const Oppgavelista = (props: { oppgaver: ReadonlyArray<OppgaveDTOny>; hen
         <Table.Body>
           {paginerteOppgaver &&
             paginerteOppgaver.map(
-              ({ id, status, enhet, type, saksbehandler, opprettet, merknad, sakType, fnr, frist, referanse }) => (
+              ({ id, status, enhet, type, saksbehandler, opprettet, merknad, sakType, fnr, frist, sakId, referanse }) => (
                 <Table.Row key={id}>
                   <Table.HeaderCell>{formaterStringDato(opprettet)}</Table.HeaderCell>
                   <Table.HeaderCell>{fnr}</Table.HeaderCell>
@@ -160,9 +160,9 @@ export const Oppgavelista = (props: { oppgaver: ReadonlyArray<OppgaveDTOny>; hen
                   <Table.DataCell>{enhet}</Table.DataCell>
                   <Table.DataCell>
                     {saksbehandler ? (
-                      <RedigerSaksbehandler saksbehandler={saksbehandler} oppgaveId={id} />
+                      <RedigerSaksbehandler saksbehandler={saksbehandler} oppgaveId={id} sakId={sakId} />
                     ) : (
-                      <TildelSaksbehandler oppgaveId={id} />
+                      <TildelSaksbehandler oppgaveId={id} sakId={sakId} />
                     )}
                   </Table.DataCell>
                   <Table.DataCell>{sakType && <SaktypeTag sakType={sakType} />}</Table.DataCell>

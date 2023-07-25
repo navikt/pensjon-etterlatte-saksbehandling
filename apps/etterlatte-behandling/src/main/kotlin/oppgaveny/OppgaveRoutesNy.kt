@@ -10,13 +10,17 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.put
 import io.ktor.server.routing.route
 import no.nav.etterlatte.Kontekst
+import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.kunSaksbehandler
 import no.nav.etterlatte.libs.common.oppgaveNy.FjernSaksbehandlerRequest
 import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveNy
 import no.nav.etterlatte.libs.common.oppgaveNy.RedigerFristRequest
 import no.nav.etterlatte.libs.common.oppgaveNy.SaksbehandlerEndringDto
 
-internal fun Route.oppgaveRoutesNy(service: OppgaveServiceNy, kanBrukeNyOppgaveliste: Boolean) {
+internal fun Route.oppgaveRoutesNy(
+    service: OppgaveServiceNy,
+    kanBrukeNyOppgaveliste: Boolean
+) {
     route("/api/nyeoppgaver") {
         get("/hent") {
             kunSaksbehandler {
@@ -30,7 +34,7 @@ internal fun Route.oppgaveRoutesNy(service: OppgaveServiceNy, kanBrukeNyOppgavel
             }
         }
 
-        post("tildel-saksbehandler") {
+        post("tildel-saksbehandler/{$SAKID_CALL_PARAMETER}") {
             kunSaksbehandler {
                 if (kanBrukeNyOppgaveliste) {
                     val saksbehandlerEndringDto = call.receive<SaksbehandlerEndringDto>()
@@ -41,7 +45,7 @@ internal fun Route.oppgaveRoutesNy(service: OppgaveServiceNy, kanBrukeNyOppgavel
                 }
             }
         }
-        post("bytt-saksbehandler") {
+        post("bytt-saksbehandler/{$SAKID_CALL_PARAMETER}") {
             kunSaksbehandler {
                 if (kanBrukeNyOppgaveliste) {
                     val saksbehandlerEndringDto = call.receive<SaksbehandlerEndringDto>()
@@ -52,7 +56,7 @@ internal fun Route.oppgaveRoutesNy(service: OppgaveServiceNy, kanBrukeNyOppgavel
                 }
             }
         }
-        post("fjern-saksbehandler") {
+        post("fjern-saksbehandler/{$SAKID_CALL_PARAMETER}") {
             kunSaksbehandler {
                 if (kanBrukeNyOppgaveliste) {
                     val fjernSaksbehandlerRequest = call.receive<FjernSaksbehandlerRequest>()
@@ -63,7 +67,7 @@ internal fun Route.oppgaveRoutesNy(service: OppgaveServiceNy, kanBrukeNyOppgavel
                 }
             }
         }
-        put("/rediger-frist") {
+        put("/rediger-frist/{$SAKID_CALL_PARAMETER}") {
             kunSaksbehandler {
                 if (kanBrukeNyOppgaveliste) {
                     val redigerFrist = call.receive<RedigerFristRequest>()

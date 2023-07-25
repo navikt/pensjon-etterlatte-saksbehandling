@@ -1,58 +1,47 @@
 package no.nav.etterlatte.brev
 
-import no.nav.etterlatte.brev.brevbaker.BrevbakerJSONResponse
 import no.nav.etterlatte.brev.model.Slate
+import no.nav.pensjon.brevbaker.api.model.RenderedJsonLetter
 
 object BlockTilSlateKonverterer {
-    fun konverter(it: BrevbakerJSONResponse) = Slate(
+    fun konverter(it: RenderedJsonLetter) = Slate(
         it
             .blocks
             .map { block -> tilSlateElement(block) }
             .toList()
     )
 
-    private fun tilSlateElement(block: BrevbakerJSONResponse.Block) = when (block.type) {
-        BrevbakerJSONResponse.Block.Type.TITLE1 -> Slate.Element(
+    private fun tilSlateElement(block: RenderedJsonLetter.Block) = when (block.type) {
+        RenderedJsonLetter.Block.Type.TITLE1 -> Slate.Element(
             type = Slate.ElementType.HEADING_TWO,
             children = children(block)
         )
-
-        BrevbakerJSONResponse.Block.Type.TITLE2 -> Slate.Element(
+        RenderedJsonLetter.Block.Type.TITLE2 -> Slate.Element(
             type = Slate.ElementType.HEADING_THREE,
             children = children(block)
         )
 
-        BrevbakerJSONResponse.Block.Type.PARAGRAPH -> Slate.Element(
+        RenderedJsonLetter.Block.Type.PARAGRAPH -> Slate.Element(
             type = Slate.ElementType.PARAGRAPH,
             children = children(block)
         )
     }
 
-    private fun children(block: BrevbakerJSONResponse.Block): List<Slate.InnerElement> = when (block.type) {
-        BrevbakerJSONResponse.Block.Type.TITLE1 -> (block as BrevbakerJSONResponse.Block.Title1).content.map {
-            konverter(
-                it
-            )
-        }
-
-        BrevbakerJSONResponse.Block.Type.TITLE2 -> (block as BrevbakerJSONResponse.Block.Title2).content.map {
-            konverter(
-                it
-            )
-        }
-
-        BrevbakerJSONResponse.Block.Type.PARAGRAPH -> (block as BrevbakerJSONResponse.Block.Paragraph).content.map {
+    private fun children(block: RenderedJsonLetter.Block): List<Slate.InnerElement> = when (block.type) {
+        RenderedJsonLetter.Block.Type.TITLE1 -> (block as RenderedJsonLetter.Block.Title1).content.map { konverter(it) }
+        RenderedJsonLetter.Block.Type.TITLE2 -> (block as RenderedJsonLetter.Block.Title2).content.map { konverter(it) }
+        RenderedJsonLetter.Block.Type.PARAGRAPH -> (block as RenderedJsonLetter.Block.Paragraph).content.map {
             konverter(
                 it
             )
         }
     }
 
-    private fun konverter(it: BrevbakerJSONResponse.ParagraphContent): Slate.InnerElement = when (it.type) {
-        BrevbakerJSONResponse.ParagraphContent.Type.ITEM_LIST -> Slate.InnerElement(
+    private fun konverter(it: RenderedJsonLetter.ParagraphContent): Slate.InnerElement = when (it.type) {
+        RenderedJsonLetter.ParagraphContent.Type.ITEM_LIST -> Slate.InnerElement(
             type = Slate.ElementType.BULLETED_LIST,
             children =
-            (it as BrevbakerJSONResponse.ParagraphContent.ItemList).items
+            (it as RenderedJsonLetter.ParagraphContent.ItemList).items
                 .map { item ->
                     Slate.InnerElement(
                         type = Slate.ElementType.LIST_ITEM,
@@ -61,10 +50,10 @@ object BlockTilSlateKonverterer {
                 }
         )
 
-        BrevbakerJSONResponse.ParagraphContent.Type.LITERAL, BrevbakerJSONResponse.ParagraphContent.Type.VARIABLE ->
+        RenderedJsonLetter.ParagraphContent.Type.LITERAL, RenderedJsonLetter.ParagraphContent.Type.VARIABLE ->
             Slate.InnerElement(
                 type = Slate.ElementType.PARAGRAPH,
-                text = (it as BrevbakerJSONResponse.ParagraphContent.Text).text
+                text = (it as RenderedJsonLetter.ParagraphContent.Text).text
             )
     }
 }

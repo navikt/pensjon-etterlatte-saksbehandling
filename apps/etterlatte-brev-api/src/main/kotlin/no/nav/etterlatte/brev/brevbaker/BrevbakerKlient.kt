@@ -59,13 +59,13 @@ class BrevbakerKlient(private val client: HttpClient, private val apiUrl: String
     }
 
     @OptIn(ExperimentalTime::class)
-    suspend fun genererJSON(brevRequest: BrevbakerRequest): BrevbakerJSONResponse = try {
+    suspend fun genererJSON(brevRequest: BrevbakerRequest): RenderedJsonLetter = try {
         measureTimedValue {
             client.post("$apiUrl/etterlatte/json") {
                 contentType(ContentType.Application.Json)
                 header("Nav_Call_Id", getXCorrelationId())
                 setBody(brevRequest.toJsonNode())
-            }.body<BrevbakerJSONResponse>()
+            }.body<RenderedJsonLetter>()
         }.let { (result, duration) ->
             logger.info("Fullført brevbaker JSON OK (${duration.toString(DurationUnit.SECONDS, 2)})")
             result
@@ -80,5 +80,7 @@ class BrevbakerException(msg: String, cause: Throwable) : Exception(msg, cause)
 class BrevbakerPdfResponse(val base64pdf: String, val letterMetadata: LetterMetadata)
 
 class BrevbakerHTMLResponse(val html: Map<String, String>, val letterMetadata: LetterMetadata)
+
+class BrevbakerJSONResponse(val json: RenderedJsonLetter, val letterMetadata: LetterMetadata)
 
 private fun BrevbakerRequest.toJsonNode(): JsonNode = objectMapper.readTree(toJson())

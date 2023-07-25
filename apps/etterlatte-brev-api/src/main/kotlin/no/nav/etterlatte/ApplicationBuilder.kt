@@ -20,6 +20,8 @@ import no.nav.etterlatte.brev.behandling.SakOgBehandlingService
 import no.nav.etterlatte.brev.behandlingklient.BehandlingKlient
 import no.nav.etterlatte.brev.beregning.BeregningKlient
 import no.nav.etterlatte.brev.brevRoute
+import no.nav.etterlatte.brev.brevbaker.BrevbakerJSONBlockMixIn
+import no.nav.etterlatte.brev.brevbaker.BrevbakerJSONParagraphMixIn
 import no.nav.etterlatte.brev.brevbaker.BrevbakerKlient
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.distribusjon.DistribusjonKlient
@@ -46,6 +48,7 @@ import no.nav.etterlatte.rivers.VedtaksbrevUnderkjent
 import no.nav.etterlatte.security.ktor.clientCredential
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
+import no.nav.pensjon.brevbaker.api.model.RenderedJsonLetter
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import rapidsandrivers.getRapidEnv
@@ -154,7 +157,10 @@ class ApplicationBuilder {
     private fun httpClient(scope: String? = null, forventStatusSuccess: Boolean = true) = HttpClient(OkHttp) {
         expectSuccess = forventStatusSuccess
         install(ContentNegotiation) {
-            jackson()
+            jackson() {
+                addMixIn(RenderedJsonLetter.Block::class.java, BrevbakerJSONBlockMixIn::class.java)
+                addMixIn(RenderedJsonLetter.ParagraphContent::class.java, BrevbakerJSONParagraphMixIn::class.java)
+            }
         }
         if (scope != null) {
             install(Auth) {

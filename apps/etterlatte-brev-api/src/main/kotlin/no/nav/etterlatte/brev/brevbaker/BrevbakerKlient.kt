@@ -21,11 +21,6 @@ import kotlin.time.measureTimedValue
 class BrevbakerKlient(private val client: HttpClient, private val apiUrl: String) {
     private val logger = LoggerFactory.getLogger(BrevbakerKlient::class.java)
 
-    init {
-        objectMapper.addMixIn(RenderedJsonLetter.Block::class.java, BrevbakerJSONBlockMixIn::class.java)
-        objectMapper.addMixIn(RenderedJsonLetter.ParagraphContent::class.java, BrevbakerJSONParagraphMixIn::class.java)
-    }
-
     @OptIn(ExperimentalTime::class)
     suspend fun genererPdf(brevRequest: BrevbakerRequest): BrevbakerPdfResponse = try {
         measureTimedValue {

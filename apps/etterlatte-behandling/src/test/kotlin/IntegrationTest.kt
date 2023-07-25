@@ -38,7 +38,9 @@ import no.nav.etterlatte.libs.common.gyldigSoeknad.VurderingsResultat
 import no.nav.etterlatte.libs.common.gyldigSoeknad.VurdertGyldighet
 import no.nav.etterlatte.libs.common.oppgaveNy.AttesterVedtakOppgave
 import no.nav.etterlatte.libs.common.oppgaveNy.AttesteringsOppgave
+import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveNy
 import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveType
+import no.nav.etterlatte.libs.common.oppgaveNy.SaksbehandlerEndringDto
 import no.nav.etterlatte.libs.common.pdlhendelse.Adressebeskyttelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
@@ -134,6 +136,21 @@ class IntegrationTest : BehandlingIntegrationTest() {
             }.also {
                 assertEquals(HttpStatusCode.OK, it.status)
                 it.body<DetaljertBehandling>()
+            }
+
+            val oppgaver: List<OppgaveNy> = client.get("/api/nyeoppgaver/hent") {
+                addAuthToken(tokenSaksbehandler)
+                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+            }.also {
+                assertEquals(HttpStatusCode.OK, it.status)
+            }.body()
+            val oppgaverforbehandling = oppgaver.filter { it.referanse == behandlingId.toString() }
+            client.post("/api/nyeoppgaver/tildel-saksbehandler") {
+                addAuthToken(tokenSaksbehandler)
+                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                setBody(SaksbehandlerEndringDto(oppgaverforbehandling[0].id, "Saksbehandler01"))
+            }.also {
+                assertEquals(HttpStatusCode.OK, it.status)
             }
 
             client.post("/behandlinger/$behandlingId/gyldigfremsatt") {
@@ -238,7 +255,7 @@ class IntegrationTest : BehandlingIntegrationTest() {
                             referanse = behandlingId.toString(),
                             OppgaveType.ATTESTERING
                         ),
-                        vedtakHendelse = VedtakHendelse(123L, Tidspunkt.now(), "saksb", null)
+                        vedtakHendelse = VedtakHendelse(123L, Tidspunkt.now(), "Saksbehandler01", null)
                     )
                 )
             }.also {

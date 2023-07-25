@@ -17,15 +17,13 @@ import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.security.ktor.clientCredential
 
-fun httpClient(forventSuksess: Boolean = false) = httpClientMedAuth(forventSuksess)
-
 fun httpClientClientCredentials(
     azureAppClientId: String,
     azureAppJwk: String,
     azureAppWellKnownUrl: String,
     azureAppScope: String,
     ekstraJacksoninnstillinger: ((o: ObjectMapper) -> Unit) = { }
-) = httpClientMedAuth(
+) = httpClient(
     ekstraJacksoninnstillinger = ekstraJacksoninnstillinger,
     auth = {
         it.install(Auth) {
@@ -42,8 +40,8 @@ fun httpClientClientCredentials(
     forventSuksess = true
 )
 
-private fun httpClientMedAuth(
-    forventSuksess: Boolean,
+fun httpClient(
+    forventSuksess: Boolean = false,
     ekstraJacksoninnstillinger: (o: ObjectMapper) -> Unit = { },
     auth: (cl: HttpClientConfig<OkHttpConfig>) -> Unit? = {}
 ) = HttpClient(OkHttp) {

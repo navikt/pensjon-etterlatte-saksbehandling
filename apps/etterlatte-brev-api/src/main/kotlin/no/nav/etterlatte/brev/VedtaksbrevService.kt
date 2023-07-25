@@ -190,6 +190,6 @@ class VedtaksbrevService(
             adresseService.hentAvsender(behandling.vedtak)
         )
         val brevbakerResponse = brevbaker.genererJSON(request)
-        return BlockTilSlateKonverterer.konverter(brevbakerResponse.json)
+        return BlockTilSlateKonverterer.konverter(brevbakerResponse)
     }
 }

@@ -128,8 +128,8 @@ class OppgaveDaoNy(private val connection: () -> Connection) {
                 """.trimIndent()
             )
             statement.setArray(1, createArrayOf("text", oppgaveTyper.toTypedArray()))
-            statement.setString(2, AdressebeskyttelseGradering.STRENGT_FORTROLIG.toString())
-            statement.setString(3, AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND.toString())
+            statement.setString(2, AdressebeskyttelseGradering.STRENGT_FORTROLIG.name)
+            statement.setString(3, AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND.name)
 
             return statement.executeQuery().toList {
                 asOppgaveNy()
@@ -149,8 +149,8 @@ class OppgaveDaoNy(private val connection: () -> Connection) {
                     AND o.type = ANY(?)
                 """.trimIndent()
             )
-            statement.setString(1, AdressebeskyttelseGradering.STRENGT_FORTROLIG.toString())
-            statement.setString(2, AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND.toString())
+            statement.setString(1, AdressebeskyttelseGradering.STRENGT_FORTROLIG.name)
+            statement.setString(2, AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND.name)
             statement.setArray(3, createArrayOf("text", statuser.toTypedArray()))
 
             return statement.executeQuery().toList {

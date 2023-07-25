@@ -22,12 +22,17 @@ import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.PersonRolle
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJson
+import no.nav.etterlatte.libs.common.toJsonNode
+import no.nav.etterlatte.libs.common.toObjectNode
 import no.nav.etterlatte.libs.sporingslogg.Decision
 import no.nav.etterlatte.libs.sporingslogg.HttpMethod
 import no.nav.etterlatte.libs.sporingslogg.Sporingslogg
 import no.nav.etterlatte.libs.sporingslogg.Sporingsrequest
+import no.nav.etterlatte.pdl.HistorikkForeldreansvar
 import org.slf4j.LoggerFactory
+import java.util.*
 
 interface GrunnlagService {
     fun hentGrunnlagAvType(sak: Long, opplysningstype: Opplysningstype): Grunnlagsopplysning<JsonNode>?
@@ -210,7 +215,20 @@ class RealGrunnlagService(
     }
 
     override fun hentGrunnlagAvType(sak: Long, opplysningstype: Opplysningstype): Grunnlagsopplysning<JsonNode>? {
-        return opplysningDao.finnNyesteGrunnlag(sak, opplysningstype)?.opplysning
+        val opplysning = opplysningDao.finnNyesteGrunnlag(sak, opplysningstype)?.opplysning
+        if (opplysning != null || opplysningstype != Opplysningstype.HISTORISK_FORELDREANSVAR) {
+            return opplysning
+        }
+        val grunnlag = hentOpplysningsgrunnlag(sak)
+        val soekerFnr = grunnlag?.soeker?.hentFoedselsnummer()?.verdi ?: return null
+        val historiskForeldreansvar = pdltjenesterKlient.hentHistoriskForeldreansvar(
+            soekerFnr,
+            PersonRolle.BARN,
+            SakType.BARNEPENSJON
+        )
+            .tilGrunnlagsopplysning(soekerFnr)
+        opplysningDao.leggOpplysningTilGrunnlag(sak, historiskForeldreansvar, soekerFnr)
+        return historiskForeldreansvar
     }
 
     override fun hentOpplysningstypeNavnFraFnr(fnr: Folkeregisteridentifikator, navIdent: String): NavnOpplysningDTO? {
@@ -284,6 +302,21 @@ class RealGrunnlagService(
         endepunkt = "/person",
         resultat = Decision.Deny,
         melding = "Hent person feilet"
+    )
+}
+
+private fun HistorikkForeldreansvar.tilGrunnlagsopplysning(
+    fnr: Folkeregisteridentifikator
+): Grunnlagsopplysning<JsonNode> {
+    return Grunnlagsopplysning(
+        id = UUID.randomUUID(),
+        kilde = Grunnlagsopplysning.Pdl("pdl", Tidspunkt.now(), null, null),
+        opplysningType = Opplysningstype.HISTORISK_FORELDREANSVAR,
+        meta = object {}.toObjectNode(),
+        opplysning = this.toJsonNode(),
+        attestering = null,
+        fnr = fnr,
+        periode = null
     )
 }
 

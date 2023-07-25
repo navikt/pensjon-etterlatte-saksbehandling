@@ -75,7 +75,7 @@ const AdopsjonGrunnlag = () => {
         <Label size="small" as="p">
           Foreldreansvar
         </Label>
-        {foreldreansvar.ansvarligeForeldre.map((forelderPeriode) => {
+        {foreldreansvar.opplysning.ansvarligeForeldre.map((forelderPeriode) => {
           const forelder: IPdlPerson | undefined = foreldre[forelderPeriode.forelder]
           return (
             <HistorikkElement key={`${forelderPeriode.forelder}-${forelderPeriode.fraDato}`}>

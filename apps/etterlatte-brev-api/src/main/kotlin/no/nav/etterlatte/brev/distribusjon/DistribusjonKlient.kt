@@ -8,9 +8,9 @@ import io.ktor.client.request.header
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
+import io.ktor.http.HttpHeaders.XCorrelationId
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
-import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.getXCorrelationId
 import org.slf4j.LoggerFactory
 
@@ -21,7 +21,7 @@ class DistribusjonKlient(private val client: HttpClient, private val url: String
         client.post("$url/distribuerjournalpost") {
             accept(ContentType.Application.Json)
             contentType(ContentType.Application.Json)
-            header(X_CORRELATION_ID, getXCorrelationId())
+            header(XCorrelationId, getXCorrelationId())
             setBody(request)
         }.let {
             when (it.status) {

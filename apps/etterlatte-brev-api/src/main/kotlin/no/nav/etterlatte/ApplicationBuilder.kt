@@ -7,6 +7,7 @@ import io.ktor.client.plugins.auth.Auth
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.defaultRequest
 import io.ktor.client.request.header
+import io.ktor.http.HttpHeaders.XCorrelationId
 import io.ktor.serialization.jackson.jackson
 import io.ktor.server.config.HoconApplicationConfig
 import no.nav.etterlatte.brev.BrevService
@@ -34,7 +35,6 @@ import no.nav.etterlatte.brev.grunnlag.GrunnlagKlient
 import no.nav.etterlatte.brev.navansatt.NavansattKlient
 import no.nav.etterlatte.brev.vedtak.VedtaksvurderingKlient
 import no.nav.etterlatte.brev.vedtaksbrevRoute
-import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.requireEnvValue
 import no.nav.etterlatte.libs.database.DataSourceBuilder
@@ -171,7 +171,7 @@ class ApplicationBuilder {
             }
         }
         defaultRequest {
-            header(X_CORRELATION_ID, getCorrelationId())
+            header(XCorrelationId, getCorrelationId())
         }
     }.also { Runtime.getRuntime().addShutdownHook(Thread { it.close() }) }
 }

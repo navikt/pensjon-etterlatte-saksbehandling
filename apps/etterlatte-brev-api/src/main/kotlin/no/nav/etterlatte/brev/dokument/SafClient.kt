@@ -13,12 +13,12 @@ import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
+import io.ktor.http.HttpHeaders.XCorrelationId
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.content.TextContent
 import io.ktor.http.isSuccess
 import no.nav.etterlatte.brev.journalpost.BrukerIdType
 import no.nav.etterlatte.libs.common.RetryResult
-import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.getXCorrelationId
 import no.nav.etterlatte.libs.common.retry
 import no.nav.etterlatte.libs.common.toJson
@@ -48,7 +48,7 @@ class SafClient(
         httpClient.get("$baseUrl/rest/hentdokument/$journalpostId/$dokumentInfoId/ARKIV") {
             header("Authorization", "Bearer ${getToken(accessToken)}")
             header("Content-Type", "application/json")
-            header(X_CORRELATION_ID, getXCorrelationId())
+            header(XCorrelationId, getXCorrelationId())
         }.body()
     } catch (ex: Exception) {
         throw JournalpostException("Feil ved kall til hentdokument", ex)

@@ -7,11 +7,11 @@ import io.ktor.client.call.body
 import io.ktor.client.plugins.ResponseException
 import io.ktor.client.request.get
 import io.ktor.client.request.header
+import io.ktor.http.HttpHeaders.XCorrelationId
 import io.ktor.http.isSuccess
 import no.nav.etterlatte.behandling.domain.SaksbehandlerEnhet
 import no.nav.etterlatte.behandling.domain.SaksbehandlerTema
 import no.nav.etterlatte.libs.common.logging.NAV_CALL_ID
-import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.getXCorrelationId
 import no.nav.etterlatte.libs.ktor.PingResult
 import no.nav.etterlatte.libs.ktor.Pingable
@@ -70,7 +70,7 @@ class NavAnsattKlientImpl(
                 logger.info("Henter enhet for saksbehandler med ident $ident")
 
                 val response = client.get("$url/navansatt/$ident/${infoType.urlSuffix}") {
-                    header(X_CORRELATION_ID, getXCorrelationId())
+                    header(XCorrelationId, getXCorrelationId())
                     header(NAV_CALL_ID, getXCorrelationId())
                 }
 

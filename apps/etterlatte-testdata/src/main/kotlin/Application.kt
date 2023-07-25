@@ -15,6 +15,7 @@ import io.ktor.client.plugins.defaultRequest
 import io.ktor.client.request.header
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
+import io.ktor.http.HttpHeaders.XCorrelationId
 import io.ktor.http.HttpStatusCode
 import io.ktor.serialization.jackson.JacksonConverter
 import io.ktor.serialization.jackson.jackson
@@ -50,7 +51,6 @@ import no.nav.etterlatte.kafka.LocalKafkaConfig
 import no.nav.etterlatte.kafka.standardProducer
 import no.nav.etterlatte.libs.common.logging.NAV_CALL_ID
 import no.nav.etterlatte.libs.common.logging.NAV_CONSUMER_ID
-import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.ktor.metricsModule
@@ -173,7 +173,7 @@ fun httpClient() = HttpClient(OkHttp) {
         register(ContentType.Application.Json, JacksonConverter(objectMapper))
     }
     defaultRequest {
-        header(X_CORRELATION_ID, getCorrelationId())
+        header(XCorrelationId, getCorrelationId())
         header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
         header(NAV_CONSUMER_ID, "etterlatte-testdata")
         header(NAV_CALL_ID, getCorrelationId())

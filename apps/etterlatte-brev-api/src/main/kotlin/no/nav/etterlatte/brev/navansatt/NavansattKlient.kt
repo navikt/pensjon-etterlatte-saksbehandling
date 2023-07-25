@@ -8,6 +8,7 @@ import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.http.isSuccess
 import no.nav.etterlatte.brev.adresse.AdresseException
+import no.nav.etterlatte.libs.common.logging.NAV_CALL_ID
 import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.getXCorrelationId
 import org.slf4j.LoggerFactory
@@ -34,7 +35,7 @@ class NavansattKlient(
 
             val response = client.get("$url/navansatt/$ident") {
                 header(X_CORRELATION_ID, getXCorrelationId())
-                header("Nav_Call_Id", getXCorrelationId())
+                header(NAV_CALL_ID, getXCorrelationId())
             }
 
             if (response.status.isSuccess()) {

@@ -10,6 +10,7 @@ import io.ktor.client.request.header
 import io.ktor.http.isSuccess
 import no.nav.etterlatte.behandling.domain.SaksbehandlerEnhet
 import no.nav.etterlatte.behandling.domain.SaksbehandlerTema
+import no.nav.etterlatte.libs.common.logging.NAV_CALL_ID
 import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.getXCorrelationId
 import no.nav.etterlatte.libs.ktor.PingResult
@@ -70,7 +71,7 @@ class NavAnsattKlientImpl(
 
                 val response = client.get("$url/navansatt/$ident/${infoType.urlSuffix}") {
                     header(X_CORRELATION_ID, getXCorrelationId())
-                    header("Nav_Call_Id", getXCorrelationId())
+                    header(NAV_CALL_ID, getXCorrelationId())
                 }
 
                 if (response.status.isSuccess()) {

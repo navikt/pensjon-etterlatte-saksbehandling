@@ -9,6 +9,7 @@ import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.newSingleThreadContext
+import no.nav.etterlatte.libs.common.logging.NAV_CALL_ID
 import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.getXCorrelationId
 import org.slf4j.Logger
@@ -24,7 +25,7 @@ suspend fun HttpClient.ping(
         this.get(url) {
             accept(ContentType.Application.Json)
             header(X_CORRELATION_ID, getXCorrelationId())
-            header("Nav_Call_Id", getXCorrelationId())
+            header(NAV_CALL_ID, getXCorrelationId())
             header("Nav-Consumer-Id", konsument)
         }
         logger.info("$serviceName svarer OK")

@@ -7,6 +7,7 @@ import io.ktor.client.request.header
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.libs.common.logging.NAV_CALL_ID
 import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.getXCorrelationId
 import java.time.LocalDate
@@ -19,7 +20,7 @@ class InstitusjonsoppholdKlient(val institusjonsoppholdHttpKlient: HttpClient, v
             institusjonsoppholdHttpKlient.get(proxyUrl.plus("/inst2/$oppholdId?Med-Institusjonsinformasjon=true")) {
                 contentType(ContentType.Application.Json)
                 header(X_CORRELATION_ID, getXCorrelationId())
-                header("Nav_Call_Id", getXCorrelationId())
+                header(NAV_CALL_ID, getXCorrelationId())
                 header("Nav-Consumer-Id", "etterlatte-institusjonsopphold")
             }.body<Institusjonsopphold>()
         }

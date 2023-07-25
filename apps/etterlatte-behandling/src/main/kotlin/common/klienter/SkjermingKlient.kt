@@ -8,6 +8,7 @@ import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
+import no.nav.etterlatte.libs.common.logging.NAV_CALL_ID
 import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.getXCorrelationId
 import no.nav.etterlatte.libs.ktor.PingResult
@@ -26,7 +27,7 @@ class SkjermingKlient(
         return httpClient.post("$url/skjermet") {
             accept(ContentType.Application.Json)
             header(X_CORRELATION_ID, getXCorrelationId())
-            header("Nav_Call_Id", getXCorrelationId())
+            header(NAV_CALL_ID, getXCorrelationId())
             contentType(ContentType.Application.Json)
             setBody(SkjermetDataRequestDTO(personident = fnr))
         }.body()
@@ -37,7 +38,7 @@ class SkjermingKlient(
             val skjermetFalse: Boolean = httpClient.post("$url/skjermet") {
                 accept(ContentType.Application.Json)
                 header(X_CORRELATION_ID, getXCorrelationId())
-                header("Nav_Call_Id", getXCorrelationId())
+                header(NAV_CALL_ID, getXCorrelationId())
                 contentType(ContentType.Application.Json)
                 setBody(SkjermetDataRequestDTO(personident = "dummy")) // Det er meningen å sende inn "dummy"
             }.body()

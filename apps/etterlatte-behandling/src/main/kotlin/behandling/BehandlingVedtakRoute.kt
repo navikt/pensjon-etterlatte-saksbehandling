@@ -24,7 +24,7 @@ internal fun Route.behandlingVedtakRoute(
                 UUID.fromString(attesterVedtakOppgave.attesteringsOppgave.referanse)
             )
             if (behandling == null) {
-                call.respond(HttpStatusCode.InternalServerError, "Fant ingen behandling")
+                call.respond(HttpStatusCode.NotFound, "Fant ingen behandling")
             } else {
                 inTransaction {
                     behandlingsstatusService.settFattetVedtak(behandling, attesterVedtakOppgave.vedtakHendelse)

@@ -60,7 +60,7 @@ class OppgaveDaoNy(private val connection: () -> Connection) {
         }
     }
 
-    fun hentOppgaveForBehandling(behandlingid: String): OppgaveNy? {
+    fun hentOppgaverForBehandling(behandlingid: String): List<OppgaveNy> {
         with(connection()) {
             val statement = prepareStatement(
                 """
@@ -70,8 +70,10 @@ class OppgaveDaoNy(private val connection: () -> Connection) {
                 """.trimIndent()
             )
             statement.setString(1, behandlingid)
-            return statement.executeQuery().singleOrNull {
+            return statement.executeQuery().toList {
                 asOppgaveNy()
+            }.also {
+                logger.info("Hentet antall nye oppgaver for behandling: ${it.size} behandling: $behandlingid")
             }
         }
     }
@@ -81,13 +83,14 @@ class OppgaveDaoNy(private val connection: () -> Connection) {
             val statement = prepareStatement(
                 """
                 UPDATE oppgave
-                SET saksbehandler = ?
+                SET saksbehandler = ?, status = ?
                 where id = ?::UUID
                 """.trimIndent()
             )
 
             statement.setString(1, saksbehandlerEndringDto.saksbehandler)
-            statement.setObject(2, saksbehandlerEndringDto.oppgaveId)
+            statement.setString(2, Status.UNDER_BEHANDLING.name)
+            statement.setObject(3, saksbehandlerEndringDto.oppgaveId)
 
             statement.executeUpdate()
         }
@@ -131,12 +134,12 @@ class OppgaveDaoNy(private val connection: () -> Connection) {
             val statement = prepareStatement(
                 """
                 UPDATE oppgave
-                SET saksbehandler = NULL
+                SET saksbehandler = NULL, status = ?
                 where id = ?::UUID
                 """.trimIndent()
             )
-
-            statement.setObject(1, oppgaveId)
+            statement.setString(1, Status.NY.name)
+            statement.setObject(2, oppgaveId)
 
             statement.executeUpdate()
         }

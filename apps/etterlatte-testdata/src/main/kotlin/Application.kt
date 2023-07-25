@@ -48,6 +48,7 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.kafka.GcpKafkaConfig
 import no.nav.etterlatte.kafka.LocalKafkaConfig
 import no.nav.etterlatte.kafka.standardProducer
+import no.nav.etterlatte.libs.common.logging.NAV_CALL_ID
 import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.objectMapper
@@ -174,7 +175,7 @@ fun httpClient() = HttpClient(OkHttp) {
         header(X_CORRELATION_ID, getCorrelationId())
         header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
         header("Nav-Consumer-Id", "etterlatte-testdata")
-        header("Nav-Call-Id", getCorrelationId())
+        header(NAV_CALL_ID, getCorrelationId())
     }
 }.also { Runtime.getRuntime().addShutdownHook(Thread { it.close() }) }
 

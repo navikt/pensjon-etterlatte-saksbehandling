@@ -1,11 +1,11 @@
 import { OppgaveDTOny } from '~shared/api/oppgaverny'
 import { useAppSelector } from '~store/Store'
-import { Button, Pagination, Table } from '@navikt/ds-react'
+import { Pagination, Table } from '@navikt/ds-react'
 import { formaterStringDato } from '~utils/formattering'
 import { RedigerSaksbehandler } from '~components/nyoppgavebenk/RedigerSaksbehandler'
-import { CaretRightIcon } from '@navikt/aksel-icons'
 import { FristHandlinger } from '~components/nyoppgavebenk/minoppgaveliste/FristHandlinger'
 import { useState } from 'react'
+import { HandlingerForOppgave } from '~components/nyoppgavebenk/HandlingerForOppgave'
 import { OppgavetypeTag, SaktypeTag } from '~components/nyoppgavebenk/Tags'
 
 export const MinOppgaveliste = (props: { oppgaver: ReadonlyArray<OppgaveDTOny> }) => {
@@ -39,10 +39,10 @@ export const MinOppgaveliste = (props: { oppgaver: ReadonlyArray<OppgaveDTOny> }
             <Table.Body>
               {paginerteOppgaver &&
                 paginerteOppgaver.map(
-                  ({ id, status, enhet, type, saksbehandler, opprettet, merknad, sakType, fnr, frist }) => (
+                  ({ id, status, enhet, type, saksbehandler, opprettet, merknad, sakType, fnr, frist, referanse }) => (
                     <Table.Row key={id}>
                       <Table.HeaderCell>{formaterStringDato(opprettet)}</Table.HeaderCell>
-                      <Table.HeaderCell>{fnr ? fnr : 'ikke fnr, må migreres'}</Table.HeaderCell>
+                      <Table.HeaderCell>{fnr}</Table.HeaderCell>
                       <Table.DataCell>
                         <OppgavetypeTag oppgavetype={type} />
                       </Table.DataCell>
@@ -57,9 +57,12 @@ export const MinOppgaveliste = (props: { oppgaver: ReadonlyArray<OppgaveDTOny> }
                         <FristHandlinger frist={frist} oppgaveId={id} />
                       </Table.DataCell>
                       <Table.DataCell>
-                        <Button icon={<CaretRightIcon />} variant="primary" onClick={() => {}}>
-                          Start behandling
-                        </Button>
+                        <HandlingerForOppgave
+                          oppgavetype={type}
+                          fnr={fnr}
+                          saksbehandler={saksbehandler}
+                          referanse={referanse}
+                        />
                       </Table.DataCell>
                     </Table.Row>
                   )

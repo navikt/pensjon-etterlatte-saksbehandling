@@ -12,11 +12,12 @@ object BlockTilSlateKonverterer {
     )
 
     private fun tilSlateElement(block: RenderedJsonLetter.Block) = when (block.type) {
-        RenderedJsonLetter.Block.Type.TITLE1 -> TODO(
-            "Stopper konvertering til slate siden vi fikk Title1 i innhold, som ikke skal skje"
+        RenderedJsonLetter.Block.Type.TITLE1 -> Slate.Element(
+            type = Slate.ElementType.HEADING_TWO,
+            children = children(block)
         )
         RenderedJsonLetter.Block.Type.TITLE2 -> Slate.Element(
-            type = Slate.ElementType.HEADING_TWO,
+            type = Slate.ElementType.HEADING_THREE,
             children = children(block)
         )
 
@@ -27,9 +28,7 @@ object BlockTilSlateKonverterer {
     }
 
     private fun children(block: RenderedJsonLetter.Block): List<Slate.InnerElement> = when (block.type) {
-        RenderedJsonLetter.Block.Type.TITLE1 -> TODO(
-            "Stopper konvertering til slate siden vi fikk Title1 i innhold, som ikke skal skje"
-        )
+        RenderedJsonLetter.Block.Type.TITLE1 -> (block as RenderedJsonLetter.Block.Title1).content.map { konverter(it) }
         RenderedJsonLetter.Block.Type.TITLE2 -> (block as RenderedJsonLetter.Block.Title2).content.map { konverter(it) }
         RenderedJsonLetter.Block.Type.PARAGRAPH -> (block as RenderedJsonLetter.Block.Paragraph).content.map {
             konverter(

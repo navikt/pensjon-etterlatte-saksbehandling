@@ -23,27 +23,19 @@ export const SaktypeTag = (props: { sakType: Saktype }) => {
 export const OppgavetypeTag = (props: { oppgavetype: Oppgavetype }) => {
   const { oppgavetype } = props
 
-  const getVariantAndTExt = (): [Variants, string] => {
-    switch (oppgavetype) {
-      case 'FOERSTEGANGSBEHANDLING':
-        return [Variants.INFO, 'Førstegangsbehandling']
-      case 'REVURDERING':
-        return [Variants.NEUTRAL, 'Revurdering']
-      case 'HENDELSE':
-        return [Variants.ALT1, 'Hendelse']
-      case 'MANUELT_OPPHOER':
-        return [Variants.ALT2, 'Manuelt opphør']
-      case 'EKSTERN':
-        return [Variants.ALT3, 'Ekstern']
-      case 'ATTESTERING':
-        return [Variants.ALT3_FILLED, 'Attestering']
-    }
-  }
+    const OPPGAVETYPE_TIL_TAGDATA: Record<Oppgavetype, { variant: Variants; text: string }> = {
+        FOERSTEGANGSBEHANDLING: { variant: Variants.INFO, text: 'Førstegangsbehandling' },
+        REVURDERING: { variant: Variants.NEUTRAL, text: 'Revurdering' },
+        HENDELSE: { variant: Variants.ALT1, text: 'Hendelse' },
+        MANUELT_OPPHOER: { variant: Variants.ALT2, text: 'Manuelt opphør' },
+        EKSTERN: { variant: Variants.ALT3, text: 'Ekstern' },
+        ATTESTERING: { variant: Variants.ALT3_FILLED, text: 'Attestering' },
+    } as const
 
-  const variant = getVariantAndTExt()
-  return (
-    <>
-      <Tag variant={variant[0]}>{variant[1]}</Tag>
-    </>
-  )
+  const tagdata = OPPGAVETYPE_TIL_TAGDATA[oppgavetype]
+    return (
+      <>
+          <Tag variant={tagdata.variant}>{tagdata.text}</Tag>
+      </>
+    )
 }

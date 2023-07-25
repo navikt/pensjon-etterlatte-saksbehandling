@@ -151,7 +151,7 @@ export const Oppgavelista = (props: { oppgaver: ReadonlyArray<OppgaveDTOny>; hen
               ({ id, status, enhet, type, saksbehandler, opprettet, merknad, sakType, fnr, frist, referanse }) => (
                 <Table.Row key={id}>
                   <Table.HeaderCell>{formaterStringDato(opprettet)}</Table.HeaderCell>
-                  <Table.HeaderCell>{fnr ? fnr : 'ikke fnr, må migreres'}</Table.HeaderCell>
+                  <Table.HeaderCell>{fnr}</Table.HeaderCell>
                   <Table.DataCell>
                     <OppgavetypeTag oppgavetype={type} />
                   </Table.DataCell>

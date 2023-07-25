@@ -6,6 +6,7 @@ import { RedigerSaksbehandler } from '~components/nyoppgavebenk/RedigerSaksbehan
 import { CaretRightIcon } from '@navikt/aksel-icons'
 import { FristHandlinger } from '~components/nyoppgavebenk/minoppgaveliste/FristHandlinger'
 import { useState } from 'react'
+import { OppgavetypeTag, SaktypeTag } from '~components/nyoppgavebenk/Tags'
 
 export const MinOppgaveliste = (props: { oppgaver: ReadonlyArray<OppgaveDTOny> }) => {
   const { oppgaver } = props
@@ -42,14 +43,16 @@ export const MinOppgaveliste = (props: { oppgaver: ReadonlyArray<OppgaveDTOny> }
                     <Table.Row key={id}>
                       <Table.HeaderCell>{formaterStringDato(opprettet)}</Table.HeaderCell>
                       <Table.HeaderCell>{fnr ? fnr : 'ikke fnr, må migreres'}</Table.HeaderCell>
-                      <Table.DataCell>{type}</Table.DataCell>
+                      <Table.DataCell>
+                        <OppgavetypeTag oppgavetype={type} />
+                      </Table.DataCell>
                       <Table.DataCell>{status}</Table.DataCell>
                       <Table.DataCell>{merknad}</Table.DataCell>
                       <Table.DataCell>{enhet}</Table.DataCell>
                       <Table.DataCell>
                         {saksbehandler && <RedigerSaksbehandler saksbehandler={saksbehandler} oppgaveId={id} />}
                       </Table.DataCell>
-                      <Table.DataCell>{sakType ? sakType : 'Ingen saktype, må migreres'}</Table.DataCell>
+                      <Table.DataCell>{sakType && <SaktypeTag sakType={sakType} />}</Table.DataCell>
                       <Table.DataCell>
                         <FristHandlinger frist={frist} oppgaveId={id} />
                       </Table.DataCell>

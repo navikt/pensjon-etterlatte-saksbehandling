@@ -13,7 +13,7 @@ export const HandlingerForOppgave = (props: {
   const user = useAppSelector((state) => state.saksbehandlerReducer.saksbehandler)
   const { oppgavetype, fnr, saksbehandler, referanse } = props
   const navigate = useNavigate()
-  const erMinOppgave = saksbehandler ? saksbehandler === user.ident : false
+  const erInnloggetSaksbehandlerOppgave = saksbehandler ? saksbehandler === user.ident : false
 
   const handling = () => {
     switch (oppgavetype) {
@@ -27,22 +27,34 @@ export const HandlingerForOppgave = (props: {
         )
       case 'FOERSTEGANGSBEHANDLING':
         return (
-          <>{erMinOppgave && <Button onClick={() => navigate(`/behandling/${referanse}`)}>Gå til behandling</Button>}</>
+          <>
+            {erInnloggetSaksbehandlerOppgave && (
+              <Button onClick={() => navigate(`/behandling/${referanse}`)}>Gå til behandling</Button>
+            )}
+          </>
         )
       case 'REVURDERING':
         return (
           <>
-            {erMinOppgave && <Button onClick={() => navigate(`/behandling/${referanse}`)}>Gå til revurdering</Button>}
+            {erInnloggetSaksbehandlerOppgave && (
+              <Button onClick={() => navigate(`/behandling/${referanse}`)}>Gå til revurdering</Button>
+            )}
           </>
         )
       case 'MANUELT_OPPHOER':
         return (
-          <>{erMinOppgave && <Button onClick={() => navigate(`/behandling/${referanse}`)}>Gå til opphør</Button>}</>
+          <>
+            {erInnloggetSaksbehandlerOppgave && (
+              <Button onClick={() => navigate(`/behandling/${referanse}`)}>Gå til opphør</Button>
+            )}
+          </>
         )
       case 'ATTESTERING':
         return (
           <>
-            {erMinOppgave && <Button onClick={() => navigate(`/behandling/${referanse}`)}>Gå til attestering</Button>}
+            {erInnloggetSaksbehandlerOppgave && (
+              <Button onClick={() => navigate(`/behandling/${referanse}`)}>Gå til attestering</Button>
+            )}
           </>
         )
       default:

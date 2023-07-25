@@ -9,15 +9,10 @@ import com.github.michaelbull.result.get
 import com.github.mustachejava.DefaultMustacheFactory
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
-import io.ktor.client.HttpClient
-import io.ktor.client.engine.okhttp.OkHttp
-import io.ktor.client.plugins.defaultRequest
 import io.ktor.client.request.header
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
-import io.ktor.http.HttpHeaders.XCorrelationId
 import io.ktor.http.HttpStatusCode
-import io.ktor.serialization.jackson.JacksonConverter
 import io.ktor.serialization.jackson.jackson
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.call
@@ -49,10 +44,9 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.kafka.GcpKafkaConfig
 import no.nav.etterlatte.kafka.LocalKafkaConfig
 import no.nav.etterlatte.kafka.standardProducer
-import no.nav.etterlatte.libs.common.logging.NAV_CALL_ID
 import no.nav.etterlatte.libs.common.logging.NAV_CONSUMER_ID
-import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.libs.ktor.metricsModule
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
 import no.nav.etterlatte.testdata.dolly.DollyClientImpl
@@ -67,7 +61,6 @@ import no.nav.security.token.support.v2.TokenValidationContextPrincipal
 import no.nav.security.token.support.v2.tokenValidationSupport
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import io.ktor.client.plugins.contentnegotiation.ContentNegotiation as ClientContentNegotiation
 
 private val env = System.getenv()
 
@@ -167,18 +160,13 @@ private fun Route.api() {
     }
 }
 
-fun httpClient() = HttpClient(OkHttp) {
-    expectSuccess = true
-    install(ClientContentNegotiation) {
-        register(ContentType.Application.Json, JacksonConverter(objectMapper))
+fun httpClient() = httpClient(
+    forventSuksess = true,
+    ekstraDefaultHeaders = {
+        it.header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+        it.header(NAV_CONSUMER_ID, "etterlatte-testdata")
     }
-    defaultRequest {
-        header(XCorrelationId, getCorrelationId())
-        header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-        header(NAV_CONSUMER_ID, "etterlatte-testdata")
-        header(NAV_CALL_ID, getCorrelationId())
-    }
-}.also { Runtime.getRuntime().addShutdownHook(Thread { it.close() }) }
+)
 
 fun PipelineContext<Unit, ApplicationCall>.navIdentFraToken() = call.principal<TokenValidationContextPrincipal>()
     ?.context?.firstValidToken?.get()?.jwtTokenClaims?.get("NAVident")?.toString()

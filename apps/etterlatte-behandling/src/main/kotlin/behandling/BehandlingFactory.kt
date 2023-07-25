@@ -12,7 +12,6 @@ import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
-import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveType
@@ -59,21 +58,21 @@ class BehandlingFactory(
             BehandlingStatus.iverksattEllerAttestert().find { it == behandling.status } != null
         }
         return if (harIverksattEllerAttestertBehandling.isNotEmpty()) {
-            revurderingService.opprettRevurdering(
-                sakId,
-                persongalleri,
-                harIverksattEllerAttestertBehandling.maxBy { it.behandlingOpprettet }.id,
-                mottattDato,
-                Prosesstype.AUTOMATISK,
-                Vedtaksloesning.GJENNY,
-                "Oppdatert søknad",
-                RevurderingAarsak.NY_SOEKNAD
+            val forrigeBehandling = harIverksattEllerAttestertBehandling.maxBy { it.behandlingOpprettet }
+            revurderingService.opprettAutomatiskRevurdering(
+                sakId = sakId,
+                persongalleri = persongalleri,
+                forrigeBehandling = forrigeBehandling,
+                mottattDato = mottattDato,
+                kilde = kilde,
+                merknad = "Oppdatert søknad",
+                revurderingAarsak = RevurderingAarsak.NY_SOEKNAD
             )
         } else {
             val harBehandlingUnderbehandling = harBehandlingerForSak.filter { behandling ->
                 BehandlingStatus.underBehandling().find { it == behandling.status } != null
             }
-            opprettFoerstegangsbehandling(harBehandlingUnderbehandling, sak, persongalleri, mottattDato)
+            opprettFoerstegangsbehandling(harBehandlingUnderbehandling, sak, persongalleri, mottattDato, kilde)
         }
     }
 
@@ -81,7 +80,8 @@ class BehandlingFactory(
         harBehandlingUnderbehandling: List<Behandling>,
         sak: Sak,
         persongalleri: Persongalleri,
-        mottattDato: String?
+        mottattDato: String?,
+        kilde: Vedtaksloesning
     ): Behandling? {
         return inTransaction {
             harBehandlingUnderbehandling.forEach {
@@ -94,7 +94,7 @@ class BehandlingFactory(
                 status = BehandlingStatus.OPPRETTET,
                 soeknadMottattDato = mottattDato?.let { LocalDateTime.parse(it) },
                 persongalleri = persongalleri,
-                kilde = Vedtaksloesning.GJENNY,
+                kilde = kilde,
                 merknad = opprettMerknad(sak, persongalleri)
             ).let { opprettBehandling ->
                 behandlingDao.opprettBehandling(opprettBehandling)

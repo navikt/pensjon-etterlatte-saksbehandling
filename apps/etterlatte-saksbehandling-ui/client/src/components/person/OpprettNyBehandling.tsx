@@ -5,7 +5,7 @@ import { isPending, useApiCall } from '~shared/hooks/useApiCall'
 import { opprettRevurdering as opprettRevurderingApi } from '~shared/api/behandling'
 import { Revurderingsaarsak, tekstRevurderingsaarsak } from '~shared/types/Revurderingsaarsak'
 import { useNavigate } from 'react-router-dom'
-import { ButtonContainer } from '~components/person/OpprettRevurderingModal'
+import { ButtonContainer } from '~components/person/VurderHendelseModal'
 
 export const OpprettNyBehandling = ({
   sakId,

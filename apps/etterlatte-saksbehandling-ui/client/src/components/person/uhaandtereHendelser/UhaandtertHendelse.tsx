@@ -11,7 +11,7 @@ import { ApiErrorAlert } from '~ErrorBoundary'
 import styled from 'styled-components'
 import InstitusjonsoppholdVurderingBegrunnelse from '~components/person/uhaandtereHendelser/InstitusjonsoppholdVurderingBegrunnelse'
 import { ArrowsCirclepathIcon, XMarkIcon } from '@navikt/aksel-icons'
-import { ButtonContainer } from '~components/person/OpprettRevurderingModal'
+import { ButtonContainer } from '~components/person/VurderHendelseModal'
 
 const UhaandtertHendelse = (props: {
   hendelse: Grunnlagsendringshendelse

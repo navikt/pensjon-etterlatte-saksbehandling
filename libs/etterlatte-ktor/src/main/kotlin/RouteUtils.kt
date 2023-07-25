@@ -42,6 +42,7 @@ suspend inline fun PipelineContext<*, ApplicationCall>.withBehandlingId(
                 call.respond(HttpStatusCode.NotFound)
             }
         }
+
         else -> onSuccess(behandlingId)
     }
 }
@@ -59,6 +60,7 @@ suspend inline fun PipelineContext<*, ApplicationCall>.withSakId(
                 call.respond(HttpStatusCode.NotFound)
             }
         }
+
         else -> onSuccess(sakId)
     }
 }
@@ -81,8 +83,19 @@ suspend inline fun PipelineContext<*, ApplicationCall>.withFoedselsnummer(
                 call.respond(HttpStatusCode.NotFound)
             }
         }
+
         else -> onSuccess(foedselsnummer)
     }
+}
+
+suspend inline fun <reified T : Any> PipelineContext<*, ApplicationCall>.medBody(onSuccess: (t: T) -> Unit) {
+    val body = try {
+        call.receive<T>()
+    } catch (e: Exception) {
+        call.respond(HttpStatusCode.BadRequest, "Feil under deserialiseringen av objektet")
+        return
+    }
+    onSuccess(body)
 }
 
 suspend inline fun PipelineContext<*, ApplicationCall>.kunSystembruker(
@@ -92,6 +105,7 @@ suspend inline fun PipelineContext<*, ApplicationCall>.kunSystembruker(
         is Systembruker -> {
             onSuccess()
         }
+
         else -> call.respond(HttpStatusCode.NotFound)
     }
 }
@@ -103,6 +117,7 @@ suspend inline fun PipelineContext<*, ApplicationCall>.kunSaksbehandler(
         is Saksbehandler -> {
             onSuccess()
         }
+
         else -> call.respond(HttpStatusCode.Forbidden)
     }
 }
@@ -149,6 +164,7 @@ fun ApplicationCall.uuid(param: String) = this.parameters[param]?.let {
 interface IFoedselsnummerDTO {
     val foedselsnummer: String
 }
+
 data class FoedselsnummerDTO(
     override val foedselsnummer: String
 ) : IFoedselsnummerDTO

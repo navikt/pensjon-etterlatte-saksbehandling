@@ -1,11 +1,12 @@
-import { BodyShort, Button, Heading, Modal, Select } from '@navikt/ds-react'
+import { Alert, BodyShort, Button, Heading, Modal, Select, TextField } from '@navikt/ds-react'
 import { useState } from 'react'
 import styled from 'styled-components'
 import { opprettRevurdering as opprettRevurderingApi } from '~shared/api/behandling'
 import { isPending, useApiCall } from '~shared/hooks/useApiCall'
-import { Grunnlagsendringshendelse } from '~components/person/typer'
+import { Grunnlagsendringshendelse, GrunnlagsendringsType } from '~components/person/typer'
 import { Revurderingsaarsak, tekstRevurderingsaarsak } from '~shared/types/Revurderingsaarsak'
 import { useNavigate } from 'react-router-dom'
+import { HjemmelLenke } from '~components/behandling/felles/HjemmelLenke'
 
 type Props = {
   open: boolean
@@ -14,11 +15,12 @@ type Props = {
   revurderinger: Array<Revurderingsaarsak>
   valgtHendelse?: Grunnlagsendringshendelse
 }
-const OpprettRevurderingModal = (props: Props) => {
+const VurderHendelseModal = (props: Props) => {
   const { revurderinger, valgtHendelse } = props
   const [error, setError] = useState<string | null>(null)
   const [valgtAarsak, setValgtAarsak] = useState<Revurderingsaarsak | undefined>(undefined)
   const [opprettRevurderingStatus, opprettRevurdering] = useApiCall(opprettRevurderingApi)
+  const [begrunnelse, setBegrunnelse] = useState('')
   const navigate = useNavigate()
 
   const onSubmit = () => {
@@ -27,7 +29,7 @@ const OpprettRevurderingModal = (props: Props) => {
     }
 
     opprettRevurdering(
-      { sakId: props.sakId, aarsak: valgtAarsak, paaGrunnAvHendelseId: valgtHendelse?.id },
+      { sakId: props.sakId, aarsak: valgtAarsak, paaGrunnAvHendelseId: valgtHendelse?.id, begrunnelse: begrunnelse },
       (revurderingId: string) => {
         navigate(`/behandling/${revurderingId}/`)
       },
@@ -43,14 +45,18 @@ const OpprettRevurderingModal = (props: Props) => {
         <Modal.Content>
           <ModalContentWrapper>
             <Heading spacing size="large">
-              Opprett ny revurdering
+              Vurder hendelse
             </Heading>
+            <Alert variant={'warning'}>{valgtHendelse ? tekster.get(valgtHendelse.type)!.tittel : ''}</Alert>
+            <BodyShort>
+              <HjemmelLenke tittel={'§18-8 Lovparagraf'} lenke={''} />
+            </BodyShort>
             <BodyShort spacing style={{ marginBottom: '2em' }}>
-              For å opprette en ny revurdering så må du først velge en årsak for revurderingen
+              {valgtHendelse ? tekster.get(valgtHendelse.type)!.beskrivelse : ''}
             </BodyShort>
             <div>
               <Select
-                label="Årsak"
+                label="Velg revurderingsårsak"
                 value={valgtAarsak}
                 onChange={(e) => setValgtAarsak(e.target.value as Revurderingsaarsak)}
                 error={error}
@@ -62,6 +68,13 @@ const OpprettRevurderingModal = (props: Props) => {
                   </option>
                 ))}
               </Select>
+              <TextField
+                label="Begrunnelse"
+                size="medium"
+                type="text"
+                value={begrunnelse}
+                onChange={(e) => setBegrunnelse(e.target.value)}
+              />
             </div>
           </ModalContentWrapper>
 
@@ -70,7 +83,7 @@ const OpprettRevurderingModal = (props: Props) => {
               Avbryt
             </Button>
             <Button loading={isPending(opprettRevurderingStatus)} onClick={onSubmit}>
-              Opprett
+              Start revurdering
             </Button>
           </ButtonContainer>
         </Modal.Content>
@@ -90,4 +103,61 @@ export const ButtonContainer = styled.div`
   padding-top: 2em;
 `
 
-export default OpprettRevurderingModal
+export default VurderHendelseModal
+
+interface Grunnlagsendringstekst {
+  tittel: string
+  beskrivelse: string
+}
+
+const tekster = new Map<GrunnlagsendringsType, Grunnlagsendringstekst>([
+  [
+    GrunnlagsendringsType.DOEDSFALL,
+    {
+      tittel: 'Dødsfall',
+      beskrivelse: 'Dødsfallsbeskrivelse her',
+    },
+  ],
+  [
+    GrunnlagsendringsType.UTFLYTTING,
+    {
+      tittel: 'Utflytting',
+      beskrivelse: 'Utflyttingsbeskrivelse',
+    },
+  ],
+  [
+    GrunnlagsendringsType.FORELDER_BARN_RELASJON,
+    {
+      tittel: 'Foreldre-barn-relasjon',
+      beskrivelse: 'Foreldre-barn-relasjon-beskrivelse',
+    },
+  ],
+  [
+    GrunnlagsendringsType.VERGEMAAL_ELLER_FREMTIDSFULLMAKT,
+    {
+      tittel: 'Vergemål eller fremtidsfullmakt',
+      beskrivelse: 'Vergemål, fremtidsfullmakt, beskrivelse her',
+    },
+  ],
+  [
+    GrunnlagsendringsType.SIVILSTAND,
+    {
+      tittel: 'Sivilstand',
+      beskrivelse: 'Sivilstand-beskrivelse',
+    },
+  ],
+  [
+    GrunnlagsendringsType.GRUNNBELOEP,
+    {
+      tittel: 'Grunnbeløp endra',
+      beskrivelse: 'Grunnbeløpet veldig endra med ein ganske lang tekst her',
+    },
+  ],
+  [
+    GrunnlagsendringsType.INSTITUSJONSOPPHOLD,
+    {
+      tittel: 'Institusjonsopphold',
+      beskrivelse: 'Institusjonsoppholdbeskrivelse her',
+    },
+  ],
+])

@@ -125,13 +125,15 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
                 applicationContext.behandlingDao,
                 applicationContext.hendelseDao,
                 applicationContext.grunnlagsendringshendelseDao,
-                applicationContext.kommerBarnetTilGodeService
+                applicationContext.kommerBarnetTilGodeService,
+                applicationContext.revurderingDao
             ).opprettManuellRevurdering(
                 sakId = sak.id,
                 forrigeBehandling = behandling!!,
                 revurderingAarsak = RevurderingAarsak.REGULERING,
                 kilde = Vedtaksloesning.GJENNY,
-                paaGrunnAvHendelse = null
+                paaGrunnAvHendelse = null,
+                begrunnelse = null
             )
 
         verify { grunnlagService.leggInnNyttGrunnlag(revurdering!!) }
@@ -189,14 +191,16 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
             applicationContext.behandlingDao,
             applicationContext.hendelseDao,
             applicationContext.grunnlagsendringshendelseDao,
-            applicationContext.kommerBarnetTilGodeService
+            applicationContext.kommerBarnetTilGodeService,
+            applicationContext.revurderingDao
         )
         val revurdering = revurderingService.opprettManuellRevurdering(
             sakId = sak.id,
             forrigeBehandling = behandling!!,
             revurderingAarsak = RevurderingAarsak.SOESKENJUSTERING,
             kilde = Vedtaksloesning.GJENNY,
-            paaGrunnAvHendelse = null
+            paaGrunnAvHendelse = null,
+            begrunnelse = null
         )
         val revurderingInfo = RevurderingInfo.Soeskenjustering(BarnepensjonSoeskenjusteringGrunn.SOESKEN_DOER)
         val fikkLagret = revurderingService.lagreRevurderingInfo(
@@ -297,13 +301,15 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
                 applicationContext.behandlingDao,
                 applicationContext.hendelseDao,
                 applicationContext.grunnlagsendringshendelseDao,
-                applicationContext.kommerBarnetTilGodeService
+                applicationContext.kommerBarnetTilGodeService,
+                applicationContext.revurderingDao
             ).opprettManuellRevurdering(
                 sakId = sak.id,
                 forrigeBehandling = behandling!!,
                 revurderingAarsak = RevurderingAarsak.REGULERING,
                 kilde = Vedtaksloesning.GJENNY,
-                paaGrunnAvHendelse = null
+                paaGrunnAvHendelse = null,
+                begrunnelse = null
             )
         )
 
@@ -347,7 +353,8 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
                 applicationContext.behandlingDao,
                 applicationContext.hendelseDao,
                 applicationContext.grunnlagsendringshendelseDao,
-                applicationContext.kommerBarnetTilGodeService
+                applicationContext.kommerBarnetTilGodeService,
+                applicationContext.revurderingDao
             )
 
         val behandlingFactory =
@@ -394,7 +401,8 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
             forrigeBehandling = behandling!!,
             revurderingAarsak = RevurderingAarsak.REGULERING,
             kilde = Vedtaksloesning.GJENNY,
-            paaGrunnAvHendelse = hendelse.id
+            paaGrunnAvHendelse = hendelse.id,
+            begrunnelse = null
         )
 
         inTransaction {

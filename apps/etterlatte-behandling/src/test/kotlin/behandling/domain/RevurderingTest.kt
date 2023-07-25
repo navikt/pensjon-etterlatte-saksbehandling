@@ -46,7 +46,8 @@ internal class RevurderingTest {
             revurderingsaarsak = RevurderingAarsak.REGULERING,
             prosesstype = Prosesstype.MANUELL,
             kilde = Vedtaksloesning.GJENNY,
-            revurderingInfo = null
+            revurderingInfo = null,
+            begrunnelse = null
         ).tilVilkaarsvurdert().tilBeregnet()
             .tilVilkaarsvurdert().tilBeregnet().tilFattetVedtak().tilAttestert()
             .tilIverksatt()
@@ -164,7 +165,8 @@ private fun opprettetRevurdering(prosesstype: Prosesstype): Revurdering {
         boddEllerArbeidetUtlandet = null,
         revurderingsaarsak = RevurderingAarsak.REGULERING,
         prosesstype = prosesstype,
-    kilde = Vedtaksloesning.GJENNY,
-    revurderingInfo = null
+        kilde = Vedtaksloesning.GJENNY,
+        revurderingInfo = null,
+        begrunnelse = null
     )
 }

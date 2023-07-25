@@ -21,6 +21,7 @@ import no.nav.etterlatte.behandling.domain.OpprettBehandling
 import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeService
+import no.nav.etterlatte.behandling.revurdering.RevurderingDao
 import no.nav.etterlatte.behandling.revurdering.RevurderingServiceImpl
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
@@ -70,6 +71,7 @@ class BehandlingFactoryTest {
     private val kommerBarnetTilGodeService = mockk<KommerBarnetTilGodeService>().also {
         every { it.hentKommerBarnetTilGode(any()) } returns null
     }
+    private val revurderingDao = mockk<RevurderingDao>()
     private val revurderingService = RevurderingServiceImpl(
         oppgaveService,
         grunnlagService,
@@ -78,7 +80,8 @@ class BehandlingFactoryTest {
         behandlingDaoMock,
         hendelseDaoMock,
         grunnlagsendringshendelseDao,
-        kommerBarnetTilGodeService
+        kommerBarnetTilGodeService,
+        revurderingDao
     )
     private val behandlingFactory = BehandlingFactory(
         oppgaveService,

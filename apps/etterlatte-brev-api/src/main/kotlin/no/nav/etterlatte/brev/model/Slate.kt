@@ -13,7 +13,7 @@ data class Slate(
     @JsonValue val elements: List<Element> = emptyList()
 ) {
     fun flettInn(behandling: Behandling): Slate = when (behandling.revurderingsaarsak) {
-        RevurderingAarsak.ADOPSJON -> erstatt(this, BrevDataMapper.fra(behandling).second)
+        RevurderingAarsak.ADOPSJON -> erstatt(this, BrevDataMapper.brevData(behandling))
         else -> this
     }
 

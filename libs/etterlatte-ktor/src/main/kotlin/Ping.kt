@@ -5,14 +5,11 @@ import io.ktor.client.request.accept
 import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.http.ContentType
-import io.ktor.http.HttpHeaders.XCorrelationId
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.newSingleThreadContext
-import no.nav.etterlatte.libs.common.logging.NAV_CALL_ID
 import no.nav.etterlatte.libs.common.logging.NAV_CONSUMER_ID
-import no.nav.etterlatte.libs.common.logging.getXCorrelationId
 import org.slf4j.Logger
 
 suspend fun HttpClient.ping(
@@ -25,8 +22,6 @@ suspend fun HttpClient.ping(
     return try {
         this.get(url) {
             accept(ContentType.Application.Json)
-            header(XCorrelationId, getXCorrelationId())
-            header(NAV_CALL_ID, getXCorrelationId())
             header(NAV_CONSUMER_ID, konsument)
         }
         logger.info("$serviceName svarer OK")

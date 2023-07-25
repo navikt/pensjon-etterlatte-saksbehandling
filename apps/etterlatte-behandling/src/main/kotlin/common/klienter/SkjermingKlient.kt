@@ -3,14 +3,10 @@ package no.nav.etterlatte.common.klienter
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.accept
-import io.ktor.client.request.header
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
-import io.ktor.http.HttpHeaders.XCorrelationId
 import io.ktor.http.contentType
-import no.nav.etterlatte.libs.common.logging.NAV_CALL_ID
-import no.nav.etterlatte.libs.common.logging.getXCorrelationId
 import no.nav.etterlatte.libs.ktor.PingResult
 import no.nav.etterlatte.libs.ktor.PingResultDown
 import no.nav.etterlatte.libs.ktor.PingResultUp
@@ -26,8 +22,6 @@ class SkjermingKlient(
     suspend fun personErSkjermet(fnr: String): Boolean {
         return httpClient.post("$url/skjermet") {
             accept(ContentType.Application.Json)
-            header(XCorrelationId, getXCorrelationId())
-            header(NAV_CALL_ID, getXCorrelationId())
             contentType(ContentType.Application.Json)
             setBody(SkjermetDataRequestDTO(personident = fnr))
         }.body()
@@ -37,8 +31,6 @@ class SkjermingKlient(
         try {
             val skjermetFalse: Boolean = httpClient.post("$url/skjermet") {
                 accept(ContentType.Application.Json)
-                header(XCorrelationId, getXCorrelationId())
-                header(NAV_CALL_ID, getXCorrelationId())
                 contentType(ContentType.Application.Json)
                 setBody(SkjermetDataRequestDTO(personident = "dummy")) // Det er meningen å sende inn "dummy"
             }.body()

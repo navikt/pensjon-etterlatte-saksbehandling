@@ -3,13 +3,10 @@ package no.nav.etterlatte.brev.brevbaker
 import com.fasterxml.jackson.databind.JsonNode
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
-import io.ktor.client.request.header
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
-import no.nav.etterlatte.libs.common.logging.NAV_CALL_ID
-import no.nav.etterlatte.libs.common.logging.getXCorrelationId
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.pensjon.brevbaker.api.model.LetterMetadata
@@ -27,7 +24,6 @@ class BrevbakerKlient(private val client: HttpClient, private val apiUrl: String
         measureTimedValue {
             client.post("$apiUrl/etterlatte/pdf") {
                 contentType(ContentType.Application.Json)
-                header(NAV_CALL_ID, getXCorrelationId())
                 setBody(brevRequest.toJsonNode())
             }.body<BrevbakerPdfResponse>()
         }.let { (result, duration) ->
@@ -43,7 +39,6 @@ class BrevbakerKlient(private val client: HttpClient, private val apiUrl: String
         measureTimedValue {
             client.post("$apiUrl/etterlatte/html") {
                 contentType(ContentType.Application.Json)
-                header(NAV_CALL_ID, getXCorrelationId())
                 setBody(brevRequest.toJsonNode())
             }.body<BrevbakerHTMLResponse>()
         }.let { (result, duration) ->
@@ -59,7 +54,6 @@ class BrevbakerKlient(private val client: HttpClient, private val apiUrl: String
         measureTimedValue {
             client.post("$apiUrl/etterlatte/json") {
                 contentType(ContentType.Application.Json)
-                header(NAV_CALL_ID, getXCorrelationId())
                 setBody(brevRequest.toJsonNode())
             }.body<RenderedJsonLetter>()
         }.let { (result, duration) ->

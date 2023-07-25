@@ -5,12 +5,8 @@ import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.plugins.ResponseException
 import io.ktor.client.request.get
-import io.ktor.client.request.header
-import io.ktor.http.HttpHeaders.XCorrelationId
 import io.ktor.http.isSuccess
 import no.nav.etterlatte.brev.adresse.AdresseException
-import no.nav.etterlatte.libs.common.logging.NAV_CALL_ID
-import no.nav.etterlatte.libs.common.logging.getXCorrelationId
 import org.slf4j.LoggerFactory
 import java.time.Duration
 
@@ -33,10 +29,7 @@ class NavansattKlient(
         } else {
             logger.info("Henter info om saksbehandler med ident $ident")
 
-            val response = client.get("$url/navansatt/$ident") {
-                header(XCorrelationId, getXCorrelationId())
-                header(NAV_CALL_ID, getXCorrelationId())
-            }
+            val response = client.get("$url/navansatt/$ident")
 
             if (response.status.isSuccess()) {
                 response.body<SaksbehandlerInfo>()

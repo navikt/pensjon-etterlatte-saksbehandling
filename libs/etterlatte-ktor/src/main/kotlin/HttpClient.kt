@@ -24,6 +24,7 @@ fun httpClient(forventSuksess: Boolean = false) = HttpClient(OkHttp) {
     }
     defaultRequest {
         header(HttpHeaders.XCorrelationId, getCorrelationId())
+        header(NAV_CALL_ID, getCorrelationId())
     }
 }.also { Runtime.getRuntime().addShutdownHook(Thread { it.close() }) }
 

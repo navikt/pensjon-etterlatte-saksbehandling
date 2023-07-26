@@ -3,7 +3,6 @@ package no.nav.etterlatte.brev.model
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonValue
 import no.nav.etterlatte.brev.behandling.Behandling
-import no.nav.etterlatte.brev.model.SlateFletter.erstatt
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.deserialize
@@ -12,10 +11,7 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakType
 data class Slate(
     @JsonValue val elements: List<Element> = emptyList()
 ) {
-    fun flettInn(behandling: Behandling): Slate = when (behandling.revurderingsaarsak) {
-        RevurderingAarsak.ADOPSJON -> erstatt(this, BrevDataMapper.brevData(behandling))
-        else -> this
-    }
+    fun flettInn(behandling: Behandling): Slate = this
 
     data class Element(
         val type: ElementType,
@@ -60,11 +56,6 @@ object SlateHelper {
             SakType.BARNEPENSJON -> {
                 when (behandling.vedtak.type) {
                     VedtakType.AVSLAG -> getJsonFile("/maler/bp-avslag.json")
-                    VedtakType.OPPHOER ->
-                        when (behandling.revurderingsaarsak) {
-                            RevurderingAarsak.ADOPSJON -> getJsonFile("/maler/bp-revurdering-adopsjon.json")
-                            else -> getJsonFile("/maler/tom-brevmal.json")
-                        }
                     else -> getJsonFile("/maler/tom-brevmal.json")
                 }
             }

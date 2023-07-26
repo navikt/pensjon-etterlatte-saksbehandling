@@ -103,8 +103,8 @@ class VedtaksbrevService(
         when (brev.prosessType) {
             AUTOMATISK -> {
                 when (behandling.revurderingsaarsak) {
-                    RevurderingAarsak.OMGJOERING_AV_FARSKAP -> manueltBrevData(brev)
                     RevurderingAarsak.ADOPSJON -> manueltBrevData(brev)
+                    RevurderingAarsak.OMGJOERING_AV_FARSKAP -> manueltBrevData(brev)
                     else -> BrevDataMapper.brevData(behandling)
                 }
             }

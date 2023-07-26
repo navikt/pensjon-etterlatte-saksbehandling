@@ -33,8 +33,12 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
         fun using(datasource: DataSource): VedtaksvurderingRepository = VedtaksvurderingRepository(datasource)
     }
 
-    fun opprettVedtak(opprettVedtak: OpprettVedtak): Vedtak =
-        datasource.transaction(true) { tx ->
+    fun <T> inTransaction(block: (TransactionalSession) -> T): T {
+        return datasource.transaction(true, block)
+    }
+
+    fun opprettVedtak(opprettVedtak: OpprettVedtak, tx: TransactionalSession? = null): Vedtak =
+        tx.session {
             queryOf(
                 statement = """
                         INSERT INTO vedtak(
@@ -61,17 +65,16 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
                     "revurderinginfo" to opprettVedtak.revurderingInfo?.toJson()
                 )
             )
-                .let { query -> tx.run(query.asUpdateAndReturnGeneratedKey) }
+                .let { query -> this.run(query.asUpdateAndReturnGeneratedKey) }
                 ?.let { vedtakId ->
-                    opprettUtbetalingsperioder(vedtakId, opprettVedtak.utbetalingsperioder, tx)
+                    opprettUtbetalingsperioder(vedtakId, opprettVedtak.utbetalingsperioder, this)
                 } ?: throw Exception("Kunne ikke opprette vedtak for behandling ${opprettVedtak.behandlingId}")
-        }.let {
-            hentVedtak(opprettVedtak.behandlingId)
+            return@session hentVedtak(opprettVedtak.behandlingId, this)
                 ?: throw Exception("Kunne ikke opprette vedtak for behandling ${opprettVedtak.behandlingId}")
         }
 
-    fun oppdaterVedtak(oppdatertVedtak: Vedtak): Vedtak =
-        datasource.transaction { tx ->
+    fun oppdaterVedtak(oppdatertVedtak: Vedtak, tx: TransactionalSession? = null): Vedtak =
+        tx.session {
             queryOf(
                 statement = """
                         UPDATE vedtak 
@@ -89,12 +92,12 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
                     "behandlingid" to oppdatertVedtak.behandlingId,
                     "revurderinginfo" to oppdatertVedtak.revurderingInfo?.toJson()
                 )
-            ).let { query -> tx.run(query.asUpdate) }
+            ).let { query -> this.run(query.asUpdate) }
 
-            slettUtbetalingsperioder(oppdatertVedtak.id, tx)
-            opprettUtbetalingsperioder(oppdatertVedtak.id, oppdatertVedtak.utbetalingsperioder, tx)
-        }.let {
-            hentVedtak(oppdatertVedtak.behandlingId)
+            slettUtbetalingsperioder(oppdatertVedtak.id, this)
+            opprettUtbetalingsperioder(oppdatertVedtak.id, oppdatertVedtak.utbetalingsperioder, this)
+
+            return@session hentVedtak(oppdatertVedtak.behandlingId, this)
                 ?: throw Exception("Kunne ikke oppdatere vedtak for behandling ${oppdatertVedtak.behandlingId}")
         }
 
@@ -130,25 +133,27 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
             ).let { query -> tx.run(query.asUpdate) }
         }
 
-    fun hentVedtak(behandlingId: UUID): Vedtak? =
-        datasource.hent(
-            query = """
+    fun hentVedtak(behandlingId: UUID, tx: TransactionalSession? = null): Vedtak? =
+        tx.session {
+            hent(
+                query = """
             SELECT sakid, behandlingId, saksbehandlerId, beregningsresultat, avkorting, vilkaarsresultat, id, fnr, 
                 datoFattet, datoattestert, attestant, datoVirkFom, vedtakstatus, saktype, behandlingtype, 
                 attestertVedtakEnhet, fattetVedtakEnhet, type, revurderingsaarsak, revurderinginfo
             FROM vedtak 
             WHERE behandlingId = :behandlingId
             """,
-            params = mapOf("behandlingId" to behandlingId)
-        ) {
-            val utbetalingsperioder = hentUtbetalingsPerioder(it.long("id"))
-            it.toVedtak(utbetalingsperioder)
+                params = mapOf("behandlingId" to behandlingId)
+            ) {
+                val utbetalingsperioder = hentUtbetalingsPerioder(it.long("id"), this)
+                it.toVedtak(utbetalingsperioder)
+            }
         }
 
-    private fun hentVedtakNonNull(behandlingId: UUID): Vedtak =
-        requireNotNull(hentVedtak(behandlingId)) { "Fant ikke vedtak for behandling $behandlingId" }
+    private fun hentVedtakNonNull(behandlingId: UUID, tx: TransactionalSession? = null): Vedtak =
+        requireNotNull(hentVedtak(behandlingId, tx)) { "Fant ikke vedtak for behandling $behandlingId" }
 
-    fun hentVedtakForSak(sakId: Long): List<Vedtak> {
+    fun hentVedtakForSak(sakId: Long, tx: TransactionalSession? = null): List<Vedtak> {
         val hentVedtak = """
             SELECT sakid, behandlingId, saksbehandlerId, beregningsresultat, avkorting, vilkaarsresultat, id, fnr, 
                 datoFattet, datoattestert, attestant, datoVirkFom, vedtakstatus, saktype, behandlingtype, 
@@ -156,80 +161,92 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
             FROM vedtak  
             WHERE sakId = :sakId
             """
-        return datasource.hentListe(
-            query = hentVedtak,
-            params = { mapOf("sakId" to sakId) }
-        ) {
-            val utbetalingsperioder = hentUtbetalingsPerioder(it.long("id"))
-            it.toVedtak(utbetalingsperioder)
+        return tx.session {
+            hentListe(
+                query = hentVedtak,
+                params = { mapOf("sakId" to sakId) }
+            ) {
+                val utbetalingsperioder = hentUtbetalingsPerioder(it.long("id"), this)
+                it.toVedtak(utbetalingsperioder)
+            }
         }
     }
 
-    private fun hentUtbetalingsPerioder(vedtakId: Long): List<Utbetalingsperiode> =
-        datasource.hentListe(
-            query = "SELECT * FROM utbetalingsperiode WHERE vedtakid = :vedtakid",
-            params = { mapOf("vedtakid" to vedtakId) }
-        ) { it.toUtbetalingsperiode() }
+    private fun hentUtbetalingsPerioder(vedtakId: Long, tx: TransactionalSession? = null): List<Utbetalingsperiode> =
+        tx.session {
+            hentListe(
+                query = "SELECT * FROM utbetalingsperiode WHERE vedtakid = :vedtakid",
+                params = { mapOf("vedtakid" to vedtakId) }
+            ) { it.toUtbetalingsperiode() }
+        }
 
-    fun fattVedtak(behandlingId: UUID, vedtakFattet: VedtakFattet): Vedtak =
-        datasource.oppdater(
-            query = """
+    fun fattVedtak(behandlingId: UUID, vedtakFattet: VedtakFattet, tx: TransactionalSession? = null): Vedtak =
+        tx.session {
+            oppdater(
+                query = """
                 UPDATE vedtak 
                 SET saksbehandlerId = :saksbehandlerId, fattetVedtakEnhet = :saksbehandlerEnhet, datoFattet = now(), 
                     vedtakstatus = :vedtakstatus  
                 WHERE behandlingId = :behandlingId
                 """,
-            params = mapOf(
-                "saksbehandlerId" to vedtakFattet.ansvarligSaksbehandler,
-                "saksbehandlerEnhet" to vedtakFattet.ansvarligEnhet,
-                "vedtakstatus" to VedtakStatus.FATTET_VEDTAK.name,
-                "behandlingId" to behandlingId
-            ),
-            loggtekst = "Fatter vedtok for behandling $behandlingId"
-        )
-            .also { require(it == 1) }
-            .let { hentVedtakNonNull(behandlingId) }
+                params = mapOf(
+                    "saksbehandlerId" to vedtakFattet.ansvarligSaksbehandler,
+                    "saksbehandlerEnhet" to vedtakFattet.ansvarligEnhet,
+                    "vedtakstatus" to VedtakStatus.FATTET_VEDTAK.name,
+                    "behandlingId" to behandlingId
+                ),
+                loggtekst = "Fatter vedtok for behandling $behandlingId"
+            )
+                .also { require(it == 1) }
+                .let { hentVedtakNonNull(behandlingId, this) }
+        }
 
-    fun attesterVedtak(behandlingId: UUID, attestasjon: Attestasjon): Vedtak =
-        datasource.oppdater(
-            query = """
+    fun attesterVedtak(behandlingId: UUID, attestasjon: Attestasjon, tx: TransactionalSession? = null): Vedtak =
+        tx.session {
+            oppdater(
+                query = """
                 UPDATE vedtak 
                 SET attestant = :attestant, attestertVedtakEnhet = :attestertVedtakEnhet, datoAttestert = now(), 
                     vedtakstatus = :vedtakstatus 
                 WHERE behandlingId = :behandlingId
                 """,
-            params = mapOf(
-                "attestant" to attestasjon.attestant,
-                "attestertVedtakEnhet" to attestasjon.attesterendeEnhet,
-                "vedtakstatus" to VedtakStatus.ATTESTERT.name,
-                "behandlingId" to behandlingId
-            ),
-            loggtekst = "Attesterer vedtak $behandlingId"
-        )
-            .also { require(it == 1) }
-            .let { hentVedtakNonNull(behandlingId) }
+                params = mapOf(
+                    "attestant" to attestasjon.attestant,
+                    "attestertVedtakEnhet" to attestasjon.attesterendeEnhet,
+                    "vedtakstatus" to VedtakStatus.ATTESTERT.name,
+                    "behandlingId" to behandlingId
+                ),
+                loggtekst = "Attesterer vedtak $behandlingId"
+            )
+                .also { require(it == 1) }
+            return@session hentVedtakNonNull(behandlingId, this)
+        }
 
-    fun underkjennVedtak(behandlingId: UUID): Vedtak =
-        datasource.oppdater(
-            """
+    fun underkjennVedtak(behandlingId: UUID, tx: TransactionalSession? = null): Vedtak =
+        tx.session {
+            oppdater(
+                """
             UPDATE vedtak 
             SET attestant = null, datoAttestert = null, attestertVedtakEnhet = null, saksbehandlerId = null, 
                 datoFattet = null, fattetVedtakEnhet = null, vedtakstatus = :vedtakstatus 
             WHERE behandlingId = :behandlingId
             """,
-            params = mapOf("vedtakstatus" to VedtakStatus.RETURNERT.name, "behandlingId" to behandlingId),
-            loggtekst = "Underkjenner vedtak for behandling $behandlingId"
+                params = mapOf("vedtakstatus" to VedtakStatus.RETURNERT.name, "behandlingId" to behandlingId),
+                loggtekst = "Underkjenner vedtak for behandling $behandlingId"
+            )
+                .also { require(it == 1) }
+            return@session hentVedtakNonNull(behandlingId, this)
+        }
+
+    fun iverksattVedtak(behandlingId: UUID, tx: TransactionalSession? = null): Vedtak = tx.session {
+        oppdater(
+            query = "UPDATE vedtak SET vedtakstatus = :vedtakstatus WHERE behandlingId = :behandlingId",
+            params = mapOf("vedtakstatus" to VedtakStatus.IVERKSATT.name, "behandlingId" to behandlingId),
+            loggtekst = "Lagrer iverksatt vedtak"
         )
             .also { require(it == 1) }
-            .let { hentVedtakNonNull(behandlingId) }
-
-    fun iverksattVedtak(behandlingId: UUID): Vedtak = datasource.oppdater(
-        query = "UPDATE vedtak SET vedtakstatus = :vedtakstatus WHERE behandlingId = :behandlingId",
-        params = mapOf("vedtakstatus" to VedtakStatus.IVERKSATT.name, "behandlingId" to behandlingId),
-        loggtekst = "Lagrer iverksatt vedtak"
-    )
-        .also { require(it == 1) }
-        .let { hentVedtakNonNull(behandlingId) }
+        return@session hentVedtakNonNull(behandlingId, this)
+    }
 
     private fun Row.toVedtak(utbetalingsperioder: List<Utbetalingsperiode>) = Vedtak(
         id = long("id"),
@@ -274,24 +291,34 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
             type = UtbetalingsperiodeType.valueOf(string("type"))
         )
 
-    fun tilbakestillIkkeIverksatteVedtak(behandlingId: UUID): Vedtak? {
-        val hentVedtak = hentVedtak(behandlingId)
+    fun tilbakestillIkkeIverksatteVedtak(behandlingId: UUID, tx: TransactionalSession? = null): Vedtak? {
+        val hentVedtak = hentVedtak(behandlingId, tx)
         if (hentVedtak?.status != VedtakStatus.FATTET_VEDTAK) {
             return null
         }
-        return datasource.oppdater(
-            query = """
+        return tx.session {
+            oppdater(
+                query = """
                 UPDATE vedtak 
                 SET vedtakstatus = :vedtakstatus 
                 WHERE behandlingId = :behandlingId
                 """,
-            params = mapOf(
-                "vedtakstatus" to VedtakStatus.RETURNERT.name,
-                "behandlingId" to behandlingId
-            ),
-            loggtekst = "Returnerer vedtak $behandlingId"
-        )
-            .also { require(it == 1) }
-            .let { hentVedtakNonNull(behandlingId) }
+                params = mapOf(
+                    "vedtakstatus" to VedtakStatus.RETURNERT.name,
+                    "behandlingId" to behandlingId
+                ),
+                loggtekst = "Returnerer vedtak $behandlingId"
+            )
+                .also { require(it == 1) }
+            return@session hentVedtakNonNull(behandlingId, this)
+        }
+    }
+
+    private fun <T> TransactionalSession?.session(block: TransactionalSession.() -> T): T {
+        return if (this == null) {
+            inTransaction(block)
+        } else {
+            this.let(block)
+        }
     }
 }

@@ -159,17 +159,19 @@ class VilkaarsvurderingRepository(private val ds: DataSource, private val delvil
         behandlingId: UUID,
         vurdertVilkaar: VurdertVilkaar
     ): Vilkaarsvurdering {
-        ds.oppdater(
-            query = Queries.lagreVilkaarResultat,
-            params = mapOf(
-                "id" to vurdertVilkaar.vilkaarId,
-                "resultat_kommentar" to vurdertVilkaar.vurdering.kommentar,
-                "resultat_tidspunkt" to vurdertVilkaar.vurdering.tidspunkt.toTidspunkt().toTimestamp(),
-                "resultat_saksbehandler" to vurdertVilkaar.vurdering.saksbehandler
-            ),
-            loggtekst = "Lagrer vilkårresultat",
-            ekstra = { delvilkaarRepository.oppdaterDelvilkaar(vurdertVilkaar, it) }
-        )
+        ds.transaction { tx ->
+            tx.oppdater(
+                query = Queries.lagreVilkaarResultat,
+                params = mapOf(
+                    "id" to vurdertVilkaar.vilkaarId,
+                    "resultat_kommentar" to vurdertVilkaar.vurdering.kommentar,
+                    "resultat_tidspunkt" to vurdertVilkaar.vurdering.tidspunkt.toTidspunkt().toTimestamp(),
+                    "resultat_saksbehandler" to vurdertVilkaar.vurdering.saksbehandler
+                ),
+                loggtekst = "Lagrer vilkårresultat",
+                ekstra = { delvilkaarRepository.oppdaterDelvilkaar(vurdertVilkaar, tx) }
+            )
+        }
         return hentNonNull(behandlingId)
     }
 

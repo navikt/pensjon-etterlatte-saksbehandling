@@ -133,6 +133,7 @@ class ApplicationContext(
     val sakDao = SakDao { databaseContext().activeTx() }
     val grunnlagsendringshendelseDao = GrunnlagsendringshendelseDao { databaseContext().activeTx() }
     val institusjonsoppholdDao = InstitusjonsoppholdDao { databaseContext().activeTx() }
+    val migreringRepository = MigreringRepository { databaseContext().activeTx() }
 
     // Klient
     val pdlKlient = PdlKlientImpl(pdlHttpClient, "http://etterlatte-pdltjenester")
@@ -234,7 +235,7 @@ class ApplicationContext(
         sakService = sakService,
         gyldighetsproevingService = gyldighetsproevingService,
         behandlingsHendelser = behandlingsHendelser,
-        migreringRepository = MigreringRepository(dataSource),
+        migreringRepository = migreringRepository,
         behandlingService = behandlingService,
         kommerBarnetTilGodeService = kommerBarnetTilGodeService,
         behandlingFactory = behandlingFactory

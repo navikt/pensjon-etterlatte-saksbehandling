@@ -28,18 +28,13 @@ export type Oppgavetype =
 
 export const hentNyeOppgaver = async (): Promise<ApiResponse<OppgaveDTOny[]>> => apiClient.get('/nyeoppgaver/hent')
 
-export interface NySaksbehandlerDto {
-  oppgaveId: string
-  saksbehandler: string
-}
-
 export interface SaksbehandlerEndringDto {
   oppgaveId: string
   saksbehandler: string
 }
 
 export const tildelSaksbehandlerApi = async (args: {
-  nysaksbehandler: NySaksbehandlerDto
+  nysaksbehandler: SaksbehandlerEndringDto
   sakId: number
 }): Promise<ApiResponse<void>> =>
   apiClient.post(`/nyeoppgaver/tildel-saksbehandler/${args.sakId}`, { ...args.nysaksbehandler })

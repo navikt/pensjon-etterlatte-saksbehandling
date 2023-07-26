@@ -95,10 +95,7 @@ fun Application.module(context: ApplicationContext) {
                 kommerBarnetTilGodeService = kommerBarnetTilGodeService,
                 behandlingFactory = behandlingFactory
             )
-            revurderingRoutes(
-                revurderingService = revurderingService,
-                behandlingService = behandlingService
-            )
+            revurderingRoutes(revurderingService = revurderingService)
             omregningRoutes(omregningService = omregningService)
             migreringRoutes(migreringService = migreringService)
             behandlingsstatusRoutes(behandlingsstatusService = behandlingsStatusService)

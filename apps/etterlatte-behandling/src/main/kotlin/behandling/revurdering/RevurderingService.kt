@@ -1,9 +1,11 @@
 package no.nav.etterlatte.behandling.revurdering
 
+import io.ktor.server.plugins.BadRequestException
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.BehandlingHendelseType
 import no.nav.etterlatte.behandling.BehandlingHendelserKafkaProducer
+import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.GrunnlagService
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.OpprettBehandling
@@ -36,13 +38,10 @@ import java.time.LocalDateTime
 import java.util.*
 
 interface RevurderingService {
-    fun opprettManuellRevurdering(
+
+    fun opprettManuellRevurderingWrapper(
         sakId: Long,
-        forrigeBehandling: Behandling,
-        revurderingAarsak: RevurderingAarsak,
-        kilde: Vedtaksloesning,
-        paaGrunnAvHendelse: UUID?,
-        begrunnelse: String?
+        opprettRevurderingRequest: OpprettRevurderingRequest
     ): Revurdering?
 
     fun opprettAutomatiskRevurdering(
@@ -75,18 +74,48 @@ class RevurderingServiceImpl(
     private val hendelseDao: HendelseDao,
     private val grunnlagsendringshendelseDao: GrunnlagsendringshendelseDao,
     private val kommerBarnetTilGodeService: KommerBarnetTilGodeService,
-    private val revurderingDao: RevurderingDao
+    private val revurderingDao: RevurderingDao,
+    private val behandlingService: BehandlingService
 ) : RevurderingService {
     private val logger = LoggerFactory.getLogger(RevurderingServiceImpl::class.java)
 
     fun hentBehandling(id: UUID): Revurdering? =
         (behandlingDao.hentBehandling(id) as? Revurdering)?.sjekkEnhet()
 
-    override fun opprettManuellRevurdering(
+    override fun opprettManuellRevurderingWrapper(
+        sakId: Long,
+        opprettRevurderingRequest: OpprettRevurderingRequest
+    ): Revurdering? {
+        val paaGrunnAvHendelseId = try {
+            opprettRevurderingRequest.paaGrunnAvHendelseId?.let { UUID.fromString(it) }
+        } catch (e: Exception) {
+            throw BadRequestException(
+                "${opprettRevurderingRequest.aarsak} har en ugyldig hendelse id for sakid $sakId. " +
+                    "Hendelsesid: ${opprettRevurderingRequest.paaGrunnAvHendelseId}"
+            )
+        }
+
+        val forrigeIverksatteBehandling = behandlingService.hentSisteIverksatte(sakId)
+        if (forrigeIverksatteBehandling != null) {
+            val sakType = forrigeIverksatteBehandling.sak.sakType
+            if (!opprettRevurderingRequest.aarsak.gyldigForSakType(sakType)) {
+                throw BadRequestException("${opprettRevurderingRequest.aarsak} er ikke støttet for $sakType")
+            }
+            return opprettManuellRevurdering(
+                sakId = forrigeIverksatteBehandling.sak.id,
+                forrigeBehandling = forrigeIverksatteBehandling,
+                revurderingAarsak = opprettRevurderingRequest.aarsak,
+                paaGrunnAvHendelse = paaGrunnAvHendelseId,
+                begrunnelse = opprettRevurderingRequest.begrunnelse
+            )
+        } else {
+            throw BadRequestException("Kan ikke revurdere en sak uten iverksatt behandling sakid: $sakId")
+        }
+    }
+    private fun opprettManuellRevurdering(
         sakId: Long,
         forrigeBehandling: Behandling,
         revurderingAarsak: RevurderingAarsak,
-        kilde: Vedtaksloesning,
         paaGrunnAvHendelse: UUID?,
         begrunnelse: String?
     ): Revurdering? = forrigeBehandling.sjekkEnhet()?.let {
@@ -97,12 +126,12 @@ class RevurderingServiceImpl(
                 forrigeBehandling.id,
                 Tidspunkt.now().toLocalDatetimeUTC().toString(),
                 Prosesstype.MANUELL,
-                kilde,
+                Vedtaksloesning.GJENNY,
                 null,
                 revurderingAarsak,
                 virkningstidspunkt = null,
                 begrunnelse = begrunnelse
-            )?.also { revurdering ->
+            ).also { revurdering ->
                 if (paaGrunnAvHendelse != null) {
                     inTransaction {
                         grunnlagsendringshendelseDao.settBehandlingIdForTattMedIRevurdering(
@@ -172,7 +201,7 @@ class RevurderingServiceImpl(
         revurderingAarsak: RevurderingAarsak,
         virkningstidspunkt: Virkningstidspunkt?,
         begrunnelse: String?
-    ): Revurdering? = inTransaction {
+    ): Revurdering = inTransaction {
         OpprettBehandling(
             type = BehandlingType.REVURDERING,
             sakId = sakId,
@@ -196,9 +225,9 @@ class RevurderingServiceImpl(
 
             logger.info("Opprettet behandling ${opprettBehandling.id} i sak ${opprettBehandling.sakId}")
 
-            behandlingDao.hentBehandling(opprettBehandling.id) as? Revurdering
+            behandlingDao.hentBehandling(opprettBehandling.id)!! as Revurdering
         }.also { behandling ->
-            behandling?.let {
+            behandling.let {
                 grunnlagService.leggInnNyttGrunnlag(it)
                 oppgaveService.opprettNyOppgaveMedSakOgReferanse(
                     referanse = behandling.id.toString(),

@@ -171,7 +171,8 @@ class ApplicationContext(
             hendelseDao = hendelseDao,
             grunnlagsendringshendelseDao = grunnlagsendringshendelseDao,
             kommerBarnetTilGodeService = kommerBarnetTilGodeService,
-            revurderingDao = revurderingDao
+            revurderingDao = revurderingDao,
+            behandlingService = behandlingService
         )
 
     val gyldighetsproevingService =

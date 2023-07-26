@@ -61,7 +61,7 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
       vedtaksbrev.prosessType === BrevProsessType.AUTOMATISK &&
       !(
         props.behandling.revurderingsaarsak != null &&
-        props.behandling.revurderingsaarsak in [Revurderingsaarsak.OMGJOERING_AV_FARSKAP]
+        props.behandling.revurderingsaarsak in [Revurderingsaarsak.OMGJOERING_AV_FARSKAP, Revurderingsaarsak.ADOPSJON]
       )
     )
   }

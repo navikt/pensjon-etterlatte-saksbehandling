@@ -33,6 +33,11 @@ export interface NySaksbehandlerDto {
   saksbehandler: string
 }
 
+export interface SaksbehandlerEndringDto {
+  oppgaveId: string
+  saksbehandler: string
+}
+
 export const tildelSaksbehandlerApi = async (args: {
   nysaksbehandler: NySaksbehandlerDto
   sakId: number
@@ -40,7 +45,7 @@ export const tildelSaksbehandlerApi = async (args: {
   apiClient.post(`/nyeoppgaver/tildel-saksbehandler/${args.sakId}`, { ...args.nysaksbehandler })
 
 export const byttSaksbehandlerApi = async (args: {
-  nysaksbehandler: NySaksbehandlerDto
+  nysaksbehandler: SaksbehandlerEndringDto
   sakId: number
 }): Promise<ApiResponse<void>> =>
   apiClient.post(`/nyeoppgaver/bytt-saksbehandler/${args.sakId}`, { ...args.nysaksbehandler })

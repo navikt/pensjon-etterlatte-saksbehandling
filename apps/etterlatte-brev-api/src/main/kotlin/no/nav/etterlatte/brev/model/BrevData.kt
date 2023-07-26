@@ -2,9 +2,7 @@ package no.nav.etterlatte.brev.model
 
 import no.nav.pensjon.brevbaker.api.model.Telefonnummer
 
-abstract class BrevData {
-    open fun flett(text: String?) = text
-}
+abstract class BrevData
 
 data class Avsender(
     val kontor: String,

@@ -310,7 +310,7 @@ private fun HistorikkForeldreansvar.tilGrunnlagsopplysning(
 ): Grunnlagsopplysning<JsonNode> {
     return Grunnlagsopplysning(
         id = UUID.randomUUID(),
-        kilde = Grunnlagsopplysning.Pdl("pdl", Tidspunkt.now(), null, null),
+        kilde = Grunnlagsopplysning.Pdl(Tidspunkt.now(), null, null),
         opplysningType = Opplysningstype.HISTORISK_FORELDREANSVAR,
         meta = object {}.toObjectNode(),
         opplysning = this.toJsonNode(),

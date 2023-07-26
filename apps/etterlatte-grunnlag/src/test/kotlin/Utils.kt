@@ -11,7 +11,6 @@ import java.util.*
 internal fun lagGrunnlagsopplysning(
     opplysningstype: Opplysningstype,
     kilde: Grunnlagsopplysning.Kilde = Grunnlagsopplysning.Pdl(
-        navn = "pdl",
         tidspunktForInnhenting = Tidspunkt.now(),
         registersReferanse = null,
         opplysningId = UUID.randomUUID().toString()
@@ -37,7 +36,6 @@ internal fun lagGrunnlagHendelse(
     fnr: Folkeregisteridentifikator? = null,
     verdi: JsonNode = objectMapper.createObjectNode(),
     kilde: Grunnlagsopplysning.Kilde = Grunnlagsopplysning.Pdl(
-        navn = "pdl",
         tidspunktForInnhenting = Tidspunkt.now(),
         registersReferanse = null,
         opplysningId = UUID.randomUUID().toString()

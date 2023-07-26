@@ -161,7 +161,6 @@ internal class GrunnlagHelperKtTest {
 
     companion object {
         val KILDE = Grunnlagsopplysning.Pdl(
-            navn = "pdl",
             tidspunktForInnhenting = Tidspunkt.now(),
             registersReferanse = null,
             opplysningId = "opplysningsId1"

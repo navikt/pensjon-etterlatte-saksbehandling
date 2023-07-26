@@ -215,7 +215,7 @@ internal class SakOgBehandlingServiceTest {
 
     private companion object {
         private val FNR = Folkeregisteridentifikator.of("11057523044")
-        private val GRUNNLAGSOPPLYSNING_PDL = Grunnlagsopplysning.Pdl("pdl", Tidspunkt.now(), null, null)
+        private val GRUNNLAGSOPPLYSNING_PDL = Grunnlagsopplysning.Pdl(Tidspunkt.now(), null, null)
         private val STATISK_UUID = UUID.randomUUID()
         private val BEHANDLING_ID = UUID.randomUUID()
         private const val ENHET = "0000"

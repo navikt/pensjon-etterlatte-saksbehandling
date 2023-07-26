@@ -6,11 +6,14 @@ import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveNy
 import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveType
 import no.nav.etterlatte.libs.common.oppgaveNy.SaksbehandlerEndringDto
 import no.nav.etterlatte.libs.common.oppgaveNy.Status
+import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.POSTGRES_VERSION
 import no.nav.etterlatte.libs.database.migrate
+import no.nav.etterlatte.sak.SakDao
+import no.nav.etterlatte.sak.SakTilgangDao
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll
@@ -26,6 +29,8 @@ internal class OppgaveDaoNyTest {
 
     private lateinit var dataSource: DataSource
     private lateinit var oppgaveDaoNy: OppgaveDaoNy
+    private lateinit var sakDao: SakDao
+    private lateinit var saktilgangDao: SakTilgangDao
 
     @Container
     private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:$POSTGRES_VERSION")
@@ -44,6 +49,8 @@ internal class OppgaveDaoNyTest {
 
         val connection = dataSource.connection
         oppgaveDaoNy = OppgaveDaoNy { connection }
+        sakDao = SakDao { connection }
+        saktilgangDao = SakTilgangDao(dataSource)
     }
 
     @AfterEach
@@ -55,30 +62,30 @@ internal class OppgaveDaoNyTest {
 
     @Test
     fun `legg til oppgaver og hent oppgaver`() {
-        val sakAalesund = Sak("1231244", SakType.BARNEPENSJON, 1L, Enheter.AALESUND.enhetNr)
+        val sakAalesund = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         val oppgaveNy = lagNyOppgave(sakAalesund)
         oppgaveDaoNy.lagreOppgave(oppgaveNy)
         oppgaveDaoNy.lagreOppgave(lagNyOppgave(sakAalesund))
         oppgaveDaoNy.lagreOppgave(lagNyOppgave(sakAalesund))
 
-        val hentOppgaver = oppgaveDaoNy.hentOppgaver()
+        val hentOppgaver = oppgaveDaoNy.hentOppgaver(OppgaveType.values().toList())
         assertEquals(3, hentOppgaver.size)
     }
 
     @Test
     fun `opprett oppgave av type ATTESTERING`() {
-        val sakAalesund = Sak("1231244", SakType.BARNEPENSJON, 1L, Enheter.AALESUND.enhetNr)
+        val sakAalesund = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         val oppgaveNy = lagNyOppgave(sakAalesund, OppgaveType.ATTESTERING)
         oppgaveDaoNy.lagreOppgave(oppgaveNy)
 
-        val hentOppgaver = oppgaveDaoNy.hentOppgaver()
+        val hentOppgaver = oppgaveDaoNy.hentOppgaver(OppgaveType.values().toList())
         assertEquals(1, hentOppgaver.size)
         assertEquals(OppgaveType.ATTESTERING, hentOppgaver[0].type)
     }
 
     @Test
     fun `kan tildelesaksbehandler`() {
-        val sakAalesund = Sak("1231244", SakType.BARNEPENSJON, 1L, Enheter.AALESUND.enhetNr)
+        val sakAalesund = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         val oppgaveNy = lagNyOppgave(sakAalesund)
         oppgaveDaoNy.lagreOppgave(oppgaveNy)
 
@@ -89,11 +96,38 @@ internal class OppgaveDaoNyTest {
         assertEquals(Status.UNDER_BEHANDLING, hentOppgave?.status)
     }
 
+    @Test
+    fun `Skal ikke kunne hente adressebeskyttede oppgaver fra vanlig hentoppgaver`() {
+        val sakAalesund = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val oppgaveNy = lagNyOppgave(sakAalesund)
+        oppgaveDaoNy.lagreOppgave(oppgaveNy)
+        saktilgangDao.oppdaterAdresseBeskyttelse(sakAalesund.id, AdressebeskyttelseGradering.STRENGT_FORTROLIG)
+
+        val sakutenbeskyttelse = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val oppgaveUtenbeskyttelse = lagNyOppgave(sakutenbeskyttelse)
+        oppgaveDaoNy.lagreOppgave(oppgaveUtenbeskyttelse)
+
+        val hentetOppgave = oppgaveDaoNy.hentOppgaver(OppgaveType.values().toList())
+        assertEquals(1, hentetOppgave.size)
+    }
+
+    @Test
+    fun `Skal kunne hente adressebeskyttede oppgaver fra finnOppgaverForStrengtFortroligOgStrengtFortroligUtland`() {
+        val sakAalesund = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val oppgaveNy = lagNyOppgave(sakAalesund)
+        oppgaveDaoNy.lagreOppgave(oppgaveNy)
+        saktilgangDao.oppdaterAdresseBeskyttelse(sakAalesund.id, AdressebeskyttelseGradering.STRENGT_FORTROLIG)
+
+        val hentetOppgave = oppgaveDaoNy
+            .finnOppgaverForStrengtFortroligOgStrengtFortroligUtland(OppgaveType.values().toList())
+        assertEquals(1, hentetOppgave.size)
+    }
+
     fun lagNyOppgave(sak: Sak, oppgaveType: OppgaveType = OppgaveType.FOERSTEGANGSBEHANDLING) = OppgaveNy(
         UUID.randomUUID(),
         Status.NY,
         Enheter.AALESUND.enhetNr,
-        1L,
+        sak.id,
         type = oppgaveType,
         null,
         "referanse",

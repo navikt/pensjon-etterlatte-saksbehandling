@@ -6,12 +6,9 @@ import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.plugins.ResponseException
 import io.ktor.client.request.get
-import io.ktor.client.request.header
 import io.ktor.http.isSuccess
 import no.nav.etterlatte.behandling.domain.SaksbehandlerEnhet
 import no.nav.etterlatte.behandling.domain.SaksbehandlerTema
-import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
-import no.nav.etterlatte.libs.common.logging.getXCorrelationId
 import no.nav.etterlatte.libs.ktor.PingResult
 import no.nav.etterlatte.libs.ktor.Pingable
 import no.nav.etterlatte.libs.ktor.ping
@@ -68,10 +65,7 @@ class NavAnsattKlientImpl(
             } else {
                 logger.info("Henter enhet for saksbehandler med ident $ident")
 
-                val response = client.get("$url/navansatt/$ident/${infoType.urlSuffix}") {
-                    header(X_CORRELATION_ID, getXCorrelationId())
-                    header("Nav_Call_Id", getXCorrelationId())
-                }
+                val response = client.get("$url/navansatt/$ident/${infoType.urlSuffix}")
 
                 if (response.status.isSuccess()) {
                     response.body<T>()

@@ -14,17 +14,42 @@ import no.nav.etterlatte.libs.common.oppgaveNy.opprettNyOppgaveMedReferanseOgSak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
+import no.nav.etterlatte.oppgave.Rolle
 import no.nav.etterlatte.sak.SakDao
 import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
 import java.util.*
 
 class OppgaveServiceNy(private val oppgaveDaoNy: OppgaveDaoNy, private val sakDao: SakDao) {
-    // bruker: SaksbehandlerMedRoller må på en måte inn her
+
     fun finnOppgaverForBruker(bruker: SaksbehandlerMedRoller): List<OppgaveNy> {
-        return inTransaction {
-            oppgaveDaoNy.hentOppgaver()
+        val rollerSomBrukerHar = finnAktuelleRoller(bruker)
+        val aktuelleOppgavetyperForRoller = aktuelleOppgavetyperForRolleTilSaksbehandler(rollerSomBrukerHar)
+
+        return if (bruker.harRolleStrengtFortrolig()) {
+            inTransaction {
+                oppgaveDaoNy.finnOppgaverForStrengtFortroligOgStrengtFortroligUtland(aktuelleOppgavetyperForRoller)
+            }
+        } else {
+            inTransaction {
+                oppgaveDaoNy.hentOppgaver(aktuelleOppgavetyperForRoller)
+            }.sortedByDescending { it.opprettet }
         }
     }
+
+    private fun aktuelleOppgavetyperForRolleTilSaksbehandler(roller: List<Rolle>) = roller.flatMap {
+        when (it) {
+            Rolle.SAKSBEHANDLER -> OppgaveType.values().toList() - OppgaveType.ATTESTERING
+            Rolle.ATTESTANT -> listOf(OppgaveType.ATTESTERING)
+            Rolle.STRENGT_FORTROLIG -> OppgaveType.values().toList()
+        }.distinct()
+    }
+
+    private fun finnAktuelleRoller(bruker: SaksbehandlerMedRoller): List<Rolle> =
+        listOfNotNull(
+            Rolle.SAKSBEHANDLER.takeIf { bruker.harRolleSaksbehandler() },
+            Rolle.ATTESTANT.takeIf { bruker.harRolleAttestant() },
+            Rolle.STRENGT_FORTROLIG.takeIf { bruker.harRolleStrengtFortrolig() }
+        )
 
     fun tildelSaksbehandler(saksbehandlerEndringDto: SaksbehandlerEndringDto) {
         inTransaction {
@@ -97,24 +122,25 @@ class OppgaveServiceNy(private val oppgaveDaoNy: OppgaveDaoNy, private val sakDa
         if (behandlingsoppgaver.isEmpty()) {
             throw BadRequestException("Må ha en oppgave for å kunne lage attesteringsoppgave")
         }
-        val oppgaverUnderbehandling = behandlingsoppgaver.filter { it.status == Status.UNDER_BEHANDLING }
-        if (oppgaverUnderbehandling.size > 1) {
-            throw BadRequestException(
-                "Skal kun ha en oppgave under behandling, gjelder behandling:" +
-                    " ${attesteringsoppgave.referanse}"
-            )
-        } else if (oppgaverUnderbehandling.isEmpty()) {
-            throw BadRequestException(
-                "Det må finnes en oppgave under behandling, gjelder behandling:" +
-                    " ${attesteringsoppgave.referanse}"
-            )
-        } else {
-            val oppgaveUnderbehandling = oppgaverUnderbehandling[0]
+        try {
+            val oppgaveUnderbehandling = behandlingsoppgaver.single { it.status == Status.UNDER_BEHANDLING }
             oppgaveDaoNy.endreStatusPaaOppgave(oppgaveUnderbehandling.id, Status.FERDIGSTILT)
             return opprettNyOppgaveMedSakOgReferanse(
                 attesteringsoppgave.referanse,
                 attesteringsoppgave.sakId,
                 attesteringsoppgave.oppgaveType
+            )
+        } catch (e: NoSuchElementException) {
+            throw BadRequestException(
+                "Det må finnes en oppgave under behandling, gjelder behandling:" +
+                    " ${attesteringsoppgave.referanse}",
+                e
+            )
+        } catch (e: IllegalArgumentException) {
+            throw BadRequestException(
+                "Skal kun ha en oppgave under behandling, gjelder behandling:" +
+                    " ${attesteringsoppgave.referanse}",
+                e
             )
         }
     }

@@ -5,11 +5,8 @@ import com.github.benmanes.caffeine.cache.Caffeine
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
-import io.ktor.client.request.header
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.isSuccess
-import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
-import no.nav.etterlatte.libs.common.logging.getXCorrelationId
 import org.slf4j.LoggerFactory
 import java.time.Duration
 
@@ -33,9 +30,7 @@ class Norg2Klient(
                 return enhetCache
             }
 
-            val response = klient.get("$apiUrl/enhet/$enhet") {
-                header(X_CORRELATION_ID, getXCorrelationId())
-            }
+            val response = klient.get("$apiUrl/enhet/$enhet")
 
             if (response.status.isSuccess()) {
                 logger.info("Hentet enhet fra Norg2 for enhet $enhet")

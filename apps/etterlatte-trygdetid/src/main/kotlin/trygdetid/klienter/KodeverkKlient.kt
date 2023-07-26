@@ -8,8 +8,8 @@ import io.ktor.client.request.accept
 import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.http.ContentType
+import no.nav.etterlatte.libs.common.logging.NAV_CONSUMER_ID
 import org.slf4j.LoggerFactory
-import java.util.*
 
 class KodeverkKlient(config: Config, private val httpKlient: HttpClient) {
     private val logger = LoggerFactory.getLogger(KodeverkKlient::class.java)
@@ -20,8 +20,7 @@ class KodeverkKlient(config: Config, private val httpKlient: HttpClient) {
 
         httpKlient.get("$url/Landkoder/koder/betydninger?ekskluderUgyldige=false&spraak=nb") {
             accept(ContentType.Application.Json)
-            header("Nav-Consumer-Id", "etterlatte-trygdetid")
-            header("Nav-Call-Id", UUID.randomUUID())
+            header(NAV_CONSUMER_ID, "etterlatte-trygdetid")
         }.body()
     } catch (e: Exception) {
         logger.error("Henting av landkoder feilet", e)

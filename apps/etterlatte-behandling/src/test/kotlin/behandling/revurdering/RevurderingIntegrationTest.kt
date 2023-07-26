@@ -28,10 +28,10 @@ import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
+import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveType
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
-import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveType
 import no.nav.etterlatte.persongalleri
 import no.nav.etterlatte.sak.SakServiceFeatureToggle
 import org.junit.jupiter.api.AfterAll
@@ -141,7 +141,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
             oppgaveService.opprettNyOppgaveMedSakOgReferanse(
                 revurdering?.id.toString(),
                 sak.id,
-                OppgaveType.REVUDERING
+                OppgaveType.REVURDERING
             )
         }
         inTransaction {
@@ -254,7 +254,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
                 oppgaveService.opprettNyOppgaveMedSakOgReferanse(
                     revurdering.id.toString(),
                     sak.id,
-                    OppgaveType.REVUDERING
+                    OppgaveType.REVURDERING
                 )
             }
             confirmVerified(hendelser, grunnlagService, oppgaveService)
@@ -425,7 +425,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
                 oppgaveService.opprettNyOppgaveMedSakOgReferanse(
                     revurdering.id.toString(),
                     sak.id,
-                    OppgaveType.REVUDERING
+                    OppgaveType.REVURDERING
                 )
             }
             verify { hendelser.sendMeldingForHendelse(behandling, BehandlingHendelseType.OPPRETTET) }

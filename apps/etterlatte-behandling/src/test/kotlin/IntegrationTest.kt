@@ -146,7 +146,7 @@ class IntegrationTest : BehandlingIntegrationTest() {
                 assertEquals(HttpStatusCode.OK, it.status)
             }.body()
             val oppgaverforbehandling = oppgaver.filter { it.referanse == behandlingId.toString() }
-            client.post("/api/nyeoppgaver/tildel-saksbehandler") {
+            client.post("/api/nyeoppgaver/tildel-saksbehandler/${sak.id}") {
                 addAuthToken(tokenSaksbehandler)
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(SaksbehandlerEndringDto(oppgaverforbehandling[0].id, "Saksbehandler01"))

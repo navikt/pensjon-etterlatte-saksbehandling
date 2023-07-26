@@ -38,5 +38,3 @@ private fun <T> innerLogContext(correlationId: String?, kv: Map<String, String> 
 private fun generateCorrelationId() = UUID.randomUUID().toString()
 
 fun getCorrelationId(): String = MDC.get(CORRELATION_ID) ?: generateCorrelationId()
-
-fun getXCorrelationId(): String = MDC.get("X-Correlation-ID") ?: generateCorrelationId()

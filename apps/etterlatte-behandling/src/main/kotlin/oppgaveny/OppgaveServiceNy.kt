@@ -14,17 +14,42 @@ import no.nav.etterlatte.libs.common.oppgaveNy.opprettNyOppgaveMedReferanseOgSak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
+import no.nav.etterlatte.oppgave.Rolle
 import no.nav.etterlatte.sak.SakDao
 import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
 import java.util.*
 
 class OppgaveServiceNy(private val oppgaveDaoNy: OppgaveDaoNy, private val sakDao: SakDao) {
-    // bruker: SaksbehandlerMedRoller må på en måte inn her
+
     fun finnOppgaverForBruker(bruker: SaksbehandlerMedRoller): List<OppgaveNy> {
-        return inTransaction {
-            oppgaveDaoNy.hentOppgaver()
+        val rollerSomBrukerHar = finnAktuelleRoller(bruker)
+        val aktuelleOppgavetyperForRoller = aktuelleOppgavetyperForRolleTilSaksbehandler(rollerSomBrukerHar)
+
+        return if (bruker.harRolleStrengtFortrolig()) {
+            inTransaction {
+                oppgaveDaoNy.finnOppgaverForStrengtFortroligOgStrengtFortroligUtland(aktuelleOppgavetyperForRoller)
+            }
+        } else {
+            inTransaction {
+                oppgaveDaoNy.hentOppgaver(aktuelleOppgavetyperForRoller)
+            }.sortedByDescending { it.opprettet }
         }
     }
+
+    private fun aktuelleOppgavetyperForRolleTilSaksbehandler(roller: List<Rolle>) = roller.flatMap {
+        when (it) {
+            Rolle.SAKSBEHANDLER -> OppgaveType.values().toList() - OppgaveType.ATTESTERING
+            Rolle.ATTESTANT -> listOf(OppgaveType.ATTESTERING)
+            Rolle.STRENGT_FORTROLIG -> OppgaveType.values().toList()
+        }.distinct()
+    }
+
+    private fun finnAktuelleRoller(bruker: SaksbehandlerMedRoller): List<Rolle> =
+        listOfNotNull(
+            Rolle.SAKSBEHANDLER.takeIf { bruker.harRolleSaksbehandler() },
+            Rolle.ATTESTANT.takeIf { bruker.harRolleAttestant() },
+            Rolle.STRENGT_FORTROLIG.takeIf { bruker.harRolleStrengtFortrolig() }
+        )
 
     fun tildelSaksbehandler(saksbehandlerEndringDto: SaksbehandlerEndringDto) {
         inTransaction {

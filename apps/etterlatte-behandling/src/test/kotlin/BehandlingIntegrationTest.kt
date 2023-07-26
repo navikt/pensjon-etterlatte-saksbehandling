@@ -232,7 +232,8 @@ abstract class BehandlingIntegrationTest {
         issueToken(
             mapOf(
                 "navn" to "John Doe",
-                Claims.NAVident.toString() to "Saksbehandler01"
+                Claims.NAVident.toString() to "Saksbehandler01",
+                "groups" to listOf(azureAdSaksbehandlerClaim)
             )
         )
     }

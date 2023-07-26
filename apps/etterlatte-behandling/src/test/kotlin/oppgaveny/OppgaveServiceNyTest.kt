@@ -1,5 +1,6 @@
 package no.nav.etterlatte.oppgaveny
 
+import com.nimbusds.jwt.JWTClaimsSet
 import io.ktor.server.plugins.BadRequestException
 import io.ktor.server.plugins.NotFoundException
 import io.mockk.mockk
@@ -14,6 +15,7 @@ import no.nav.etterlatte.libs.common.oppgaveNy.FjernSaksbehandlerRequest
 import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveType
 import no.nav.etterlatte.libs.common.oppgaveNy.RedigerFristRequest
 import no.nav.etterlatte.libs.common.oppgaveNy.SaksbehandlerEndringDto
+import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.oppgaveNy.Status
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
@@ -22,6 +24,11 @@ import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.POSTGRES_VERSION
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.sak.SakDao
+import no.nav.etterlatte.sak.SakTilgangDao
+import no.nav.etterlatte.tilgangsstyring.AzureGroup
+import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
+import no.nav.etterlatte.token.Saksbehandler
+import no.nav.security.token.support.core.jwt.JwtTokenClaims
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
@@ -42,6 +49,10 @@ class OppgaveServiceNyTest {
     private lateinit var sakDao: SakDao
     private lateinit var oppgaveDaoNy: OppgaveDaoNy
     private lateinit var oppgaveServiceNy: OppgaveServiceNy
+    private lateinit var saktilgangDao: SakTilgangDao
+    private val saksbehandlerRolleDev = "8bb9b8d1-f46a-4ade-8ee8-5895eccdf8cf"
+    private val strengtfortroligDev = "5ef775f2-61f8-4283-bf3d-8d03f428aa14"
+    private val attestantRolleDev = "63f46f74-84a8-4d1c-87a8-78532ab3ae60"
 
     @Container
     private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:$POSTGRES_VERSION")
@@ -62,6 +73,7 @@ class OppgaveServiceNyTest {
         sakDao = SakDao { connection }
         oppgaveDaoNy = OppgaveDaoNy { connection }
         oppgaveServiceNy = OppgaveServiceNy(oppgaveDaoNy, sakDao)
+        saktilgangDao = SakTilgangDao(dataSource)
     }
 
     @BeforeEach
@@ -313,5 +325,91 @@ class OppgaveServiceNyTest {
             oppgaveServiceNy.fjernSaksbehandler(FjernSaksbehandlerRequest(UUID.randomUUID()))
         }
         Assertions.assertTrue(err.message!!.startsWith("Oppgaven finnes ikke"))
+    }
+
+    @Test
+    fun `Skal kun få saker som ikke er adressebeskyttet tilbake hvis saksbehandler ikke har spesialroller`() {
+        val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val nyOppgave = oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
+            "referanse",
+            opprettetSak.id,
+            OppgaveType.FOERSTEGANGSBEHANDLING
+        )
+
+        val adressebeskyttetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val adressebeskyttetOppgave = oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
+            "referanse",
+            adressebeskyttetSak.id,
+            OppgaveType.FOERSTEGANGSBEHANDLING
+        )
+
+        saktilgangDao.oppdaterAdresseBeskyttelse(adressebeskyttetSak.id, AdressebeskyttelseGradering.STRENGT_FORTROLIG)
+        val jwtclaims = JWTClaimsSet.Builder().claim("groups", saksbehandlerRolleDev).build()
+        val saksbehandlerMedRoller = SaksbehandlerMedRoller(
+            Saksbehandler("", "ident", JwtTokenClaims(jwtclaims)),
+            mapOf(AzureGroup.SAKSBEHANDLER to saksbehandlerRolleDev)
+        )
+        val oppgaver = oppgaveServiceNy.finnOppgaverForBruker(saksbehandlerMedRoller)
+        Assertions.assertEquals(1, oppgaver.size)
+        val oppgaveUtenbeskyttelse = oppgaver[0]
+        Assertions.assertEquals(nyOppgave.id, oppgaveUtenbeskyttelse.id)
+        Assertions.assertEquals(nyOppgave.sakId, opprettetSak.id)
+    }
+
+    @Test
+    fun `Skal kun få saker som  er strengt fotrolig tilbake hvis saksbehandler har rolle strengt fortrolig`() {
+        val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val nyOppgave = oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
+            "referanse",
+            opprettetSak.id,
+            OppgaveType.FOERSTEGANGSBEHANDLING
+        )
+
+        val adressebeskyttetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val adressebeskyttetOppgave = oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
+            "referanse",
+            adressebeskyttetSak.id,
+            OppgaveType.FOERSTEGANGSBEHANDLING
+        )
+
+        saktilgangDao.oppdaterAdresseBeskyttelse(adressebeskyttetSak.id, AdressebeskyttelseGradering.STRENGT_FORTROLIG)
+        val jwtclaims = JWTClaimsSet.Builder().claim("groups", strengtfortroligDev).build()
+        val saksbehandlerMedRoller = SaksbehandlerMedRoller(
+            Saksbehandler("", "ident", JwtTokenClaims(jwtclaims)),
+            mapOf(AzureGroup.STRENGT_FORTROLIG to strengtfortroligDev)
+        )
+        val oppgaver = oppgaveServiceNy.finnOppgaverForBruker(saksbehandlerMedRoller)
+        Assertions.assertEquals(1, oppgaver.size)
+        val strengtFortroligOppgave = oppgaver[0]
+        Assertions.assertEquals(adressebeskyttetOppgave.id, strengtFortroligOppgave.id)
+        Assertions.assertEquals(adressebeskyttetOppgave.sakId, adressebeskyttetSak.id)
+    }
+
+    @Test
+    fun `saksbehandler med attestant rolle skal få attestant oppgaver`() {
+        val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val nyOppgave = oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
+            "referanse",
+            opprettetSak.id,
+            OppgaveType.FOERSTEGANGSBEHANDLING
+        )
+
+        val attestantSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val attestantOppgave = oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
+            "referanse",
+            attestantSak.id,
+            OppgaveType.ATTESTERING
+        )
+
+        val jwtclaims = JWTClaimsSet.Builder().claim("groups", attestantRolleDev).build()
+        val saksbehandlerMedRoller = SaksbehandlerMedRoller(
+            Saksbehandler("", "ident", JwtTokenClaims(jwtclaims)),
+            mapOf(AzureGroup.ATTESTANT to attestantRolleDev)
+        )
+        val oppgaver = oppgaveServiceNy.finnOppgaverForBruker(saksbehandlerMedRoller)
+        Assertions.assertEquals(1, oppgaver.size)
+        val strengtFortroligOppgave = oppgaver[0]
+        Assertions.assertEquals(attestantOppgave.id, strengtFortroligOppgave.id)
+        Assertions.assertEquals(attestantOppgave.sakId, attestantSak.id)
     }
 }

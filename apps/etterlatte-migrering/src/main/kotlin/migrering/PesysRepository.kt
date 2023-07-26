@@ -3,6 +3,7 @@ package no.nav.etterlatte.migrering
 import kotliquery.TransactionalSession
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
+import no.nav.etterlatte.libs.database.Transactions
 import no.nav.etterlatte.libs.database.hentListe
 import no.nav.etterlatte.libs.database.oppdater
 import no.nav.etterlatte.libs.database.opprett
@@ -10,10 +11,12 @@ import no.nav.etterlatte.libs.database.transaction
 import java.util.*
 import javax.sql.DataSource
 
-internal class PesysRepository(private val dataSource: DataSource) {
+internal class PesysRepository(private val dataSource: DataSource) : Transactions<PesysRepository> {
 
-    fun <T> inTransaction(block: TransactionalSession.() -> T): T {
-        return dataSource.transaction(true, block)
+    override fun <R> inTransaction(block: PesysRepository.(TransactionalSession) -> R): R {
+        return dataSource.transaction {
+            this.block(it)
+        }
     }
 
     fun hentSaker(tx: TransactionalSession? = null): List<Pesyssak> = tx.session {
@@ -41,12 +44,5 @@ internal class PesysRepository(private val dataSource: DataSource) {
             mapOf("id" to id, "migrert" to true),
             "Markerte $id som migrert"
         )
-    }
-
-    private fun <T> TransactionalSession?.session(block: TransactionalSession.() -> T): T {
-        if (this != null) {
-            return block.invoke(this)
-        }
-        return inTransaction(block)
     }
 }

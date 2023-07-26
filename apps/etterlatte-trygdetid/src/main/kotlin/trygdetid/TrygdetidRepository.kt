@@ -261,7 +261,7 @@ class TrygdetidRepository(private val dataSource: DataSource) {
     private fun hentGrunnlagOpplysninger(trygdetidId: UUID): List<Opplysningsgrunnlag> =
         dataSource.transaction { tx ->
             tx.hentListe(
-                query = """
+                queryString = """
                 SELECT id, trygdetid_id, type, opplysning, kilde
                 FROM opplysningsgrunnlag
                 WHERE trygdetid_id = :trygdetidId

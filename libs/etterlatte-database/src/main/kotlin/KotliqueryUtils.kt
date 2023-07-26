@@ -16,6 +16,18 @@ fun <A> DataSource.transaction(returnGeneratedKey: Boolean = false, operation: (
         session.transaction { operation(it) }
     }
 
+interface Transactions<T> {
+    fun <R> inTransaction(block: T.(TransactionalSession) -> R): R
+
+    fun <R> TransactionalSession?.session(block: TransactionalSession.() -> R): R {
+        return if (this == null) {
+            inTransaction { it.run(block) }
+        } else {
+            this.block()
+        }
+    }
+}
+
 fun TransactionalSession.opprett(query: String, params: Map<String, Any?>, loggtekst: String) =
     this.let { tx ->
         queryOf(
@@ -37,15 +49,15 @@ fun TransactionalSession.oppdater(
         .let { this.run(it.asUpdate) }
         .also { ekstra?.invoke(this) }
 
-fun <T> TransactionalSession.hent(query: String, params: Map<String, Any>, converter: (r: Row) -> T) =
-    queryOf(statement = query, paramMap = params)
+fun <T> TransactionalSession.hent(queryString: String, params: Map<String, Any>, converter: (r: Row) -> T) =
+    queryOf(statement = queryString, paramMap = params)
         .let { query -> this.run(query.map { row -> converter.invoke(row) }.asSingle) }
 
 fun <T> TransactionalSession.hentListe(
-    query: String,
+    queryString: String,
     params: () -> Map<String, Any?> = { mapOf() },
     converter: (r: Row) -> T
-): List<T> = queryOf(statement = query, paramMap = params.invoke())
+): List<T> = queryOf(statement = queryString, paramMap = params.invoke())
     .let { query ->
         this.run(
             query.map { row -> converter.invoke(row) }

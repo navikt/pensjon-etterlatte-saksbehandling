@@ -18,6 +18,7 @@ import no.nav.etterlatte.libs.common.vedtak.UtbetalingsperiodeType
 import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
+import no.nav.etterlatte.libs.database.Transactions
 import no.nav.etterlatte.libs.database.hent
 import no.nav.etterlatte.libs.database.hentListe
 import no.nav.etterlatte.libs.database.oppdater
@@ -27,14 +28,16 @@ import java.time.YearMonth
 import java.util.*
 import javax.sql.DataSource
 
-class VedtaksvurderingRepository(private val datasource: DataSource) {
+class VedtaksvurderingRepository(private val datasource: DataSource) : Transactions<VedtaksvurderingRepository> {
 
     companion object {
         fun using(datasource: DataSource): VedtaksvurderingRepository = VedtaksvurderingRepository(datasource)
     }
 
-    fun <T> inTransaction(block: (TransactionalSession) -> T): T {
-        return datasource.transaction(true, block)
+    override fun <T> inTransaction(block: VedtaksvurderingRepository.(TransactionalSession) -> T): T {
+        return datasource.transaction(true) {
+            this.block(it)
+        }
     }
 
     fun opprettVedtak(opprettVedtak: OpprettVedtak, tx: TransactionalSession? = null): Vedtak =
@@ -136,7 +139,7 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
     fun hentVedtak(behandlingId: UUID, tx: TransactionalSession? = null): Vedtak? =
         tx.session {
             hent(
-                query = """
+                queryString = """
             SELECT sakid, behandlingId, saksbehandlerId, beregningsresultat, avkorting, vilkaarsresultat, id, fnr, 
                 datoFattet, datoattestert, attestant, datoVirkFom, vedtakstatus, saktype, behandlingtype, 
                 attestertVedtakEnhet, fattetVedtakEnhet, type, revurderingsaarsak, revurderinginfo
@@ -163,7 +166,7 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
             """
         return tx.session {
             hentListe(
-                query = hentVedtak,
+                queryString = hentVedtak,
                 params = { mapOf("sakId" to sakId) }
             ) {
                 val utbetalingsperioder = hentUtbetalingsPerioder(it.long("id"), this)
@@ -175,7 +178,7 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
     private fun hentUtbetalingsPerioder(vedtakId: Long, tx: TransactionalSession? = null): List<Utbetalingsperiode> =
         tx.session {
             hentListe(
-                query = "SELECT * FROM utbetalingsperiode WHERE vedtakid = :vedtakid",
+                queryString = "SELECT * FROM utbetalingsperiode WHERE vedtakid = :vedtakid",
                 params = { mapOf("vedtakid" to vedtakId) }
             ) { it.toUtbetalingsperiode() }
         }
@@ -311,14 +314,6 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
             )
                 .also { require(it == 1) }
             return@session hentVedtakNonNull(behandlingId, this)
-        }
-    }
-
-    private fun <T> TransactionalSession?.session(block: TransactionalSession.() -> T): T {
-        return if (this == null) {
-            inTransaction(block)
-        } else {
-            this.let(block)
         }
     }
 }

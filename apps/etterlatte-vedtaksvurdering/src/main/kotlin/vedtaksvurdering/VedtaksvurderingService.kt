@@ -98,7 +98,7 @@ class VedtaksvurderingService(
         val sak = behandlingKlient.hentSak(vedtak.sakId, brukerTokenInfo)
 
         val fattetVedtak = repository.inTransaction { tx ->
-            repository.fattVedtak(
+            fattVedtak(
                 behandlingId,
                 VedtakFattet(
                     brukerTokenInfo.ident(),

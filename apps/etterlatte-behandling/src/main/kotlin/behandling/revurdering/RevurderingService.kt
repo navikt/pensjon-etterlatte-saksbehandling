@@ -26,10 +26,10 @@ import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.behandling.tilVirkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveType
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.oppgaveny.OppgaveServiceNy
-import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveType
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -203,7 +203,7 @@ class RevurderingServiceImpl(
                 oppgaveService.opprettNyOppgaveMedSakOgReferanse(
                     referanse = behandling.id.toString(),
                     sakId = sakId,
-                    oppgaveType = OppgaveType.REVUDERING
+                    oppgaveType = OppgaveType.REVURDERING
                 )
                 behandlingHendelser.sendMeldingForHendelse(it, BehandlingHendelseType.OPPRETTET)
             }

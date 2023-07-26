@@ -97,24 +97,25 @@ class OppgaveServiceNy(private val oppgaveDaoNy: OppgaveDaoNy, private val sakDa
         if (behandlingsoppgaver.isEmpty()) {
             throw BadRequestException("Må ha en oppgave for å kunne lage attesteringsoppgave")
         }
-        val oppgaverUnderbehandling = behandlingsoppgaver.filter { it.status == Status.UNDER_BEHANDLING }
-        if (oppgaverUnderbehandling.size > 1) {
-            throw BadRequestException(
-                "Skal kun ha en oppgave under behandling, gjelder behandling:" +
-                    " ${attesteringsoppgave.referanse}"
-            )
-        } else if (oppgaverUnderbehandling.isEmpty()) {
-            throw BadRequestException(
-                "Det må finnes en oppgave under behandling, gjelder behandling:" +
-                    " ${attesteringsoppgave.referanse}"
-            )
-        } else {
-            val oppgaveUnderbehandling = oppgaverUnderbehandling[0]
+        try {
+            val oppgaveUnderbehandling = behandlingsoppgaver.single { it.status == Status.UNDER_BEHANDLING }
             oppgaveDaoNy.endreStatusPaaOppgave(oppgaveUnderbehandling.id, Status.FERDIGSTILT)
             return opprettNyOppgaveMedSakOgReferanse(
                 attesteringsoppgave.referanse,
                 attesteringsoppgave.sakId,
                 attesteringsoppgave.oppgaveType
+            )
+        } catch (e: NoSuchElementException) {
+            throw BadRequestException(
+                "Det må finnes en oppgave under behandling, gjelder behandling:" +
+                    " ${attesteringsoppgave.referanse}",
+                e
+            )
+        } catch (e: IllegalArgumentException) {
+            throw BadRequestException(
+                "Skal kun ha en oppgave under behandling, gjelder behandling:" +
+                    " ${attesteringsoppgave.referanse}",
+                e
             )
         }
     }

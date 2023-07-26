@@ -2,12 +2,7 @@ package no.nav.etterlatte
 
 import com.typesafe.config.ConfigFactory
 import io.ktor.client.HttpClient
-import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.plugins.auth.Auth
-import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.client.plugins.defaultRequest
-import io.ktor.client.request.header
-import io.ktor.serialization.jackson.jackson
 import io.ktor.server.config.HoconApplicationConfig
 import no.nav.etterlatte.brev.BrevService
 import no.nav.etterlatte.brev.VedtaksbrevService
@@ -34,11 +29,10 @@ import no.nav.etterlatte.brev.grunnlag.GrunnlagKlient
 import no.nav.etterlatte.brev.navansatt.NavansattKlient
 import no.nav.etterlatte.brev.vedtak.VedtaksvurderingKlient
 import no.nav.etterlatte.brev.vedtaksbrevRoute
-import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
-import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.requireEnvValue
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.migrate
+import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.libs.ktor.setReady
@@ -154,24 +148,21 @@ class ApplicationBuilder {
 
     fun start() = setReady().also { rapidsConnection.start() }
 
-    private fun httpClient(scope: String? = null, forventStatusSuccess: Boolean = true) = HttpClient(OkHttp) {
-        expectSuccess = forventStatusSuccess
-        install(ContentNegotiation) {
-            jackson() {
-                addMixIn(RenderedJsonLetter.Block::class.java, BrevbakerJSONBlockMixIn::class.java)
-                addMixIn(RenderedJsonLetter.ParagraphContent::class.java, BrevbakerJSONParagraphMixIn::class.java)
-            }
-        }
-        if (scope != null) {
-            install(Auth) {
-                clientCredential {
-                    config = env.toMutableMap()
-                        .apply { put("AZURE_APP_OUTBOUND_SCOPE", requireNotNull(get(scope))) }
+    private fun httpClient(scope: String? = null, forventStatusSuccess: Boolean = true) = httpClient(
+        forventSuksess = forventStatusSuccess,
+        ekstraJacksoninnstillinger = {
+            it.addMixIn(RenderedJsonLetter.Block::class.java, BrevbakerJSONBlockMixIn::class.java)
+            it.addMixIn(RenderedJsonLetter.ParagraphContent::class.java, BrevbakerJSONParagraphMixIn::class.java)
+        },
+        auth = {
+            if (scope != null) {
+                it.install(Auth) {
+                    clientCredential {
+                        config = env.toMutableMap()
+                            .apply { put("AZURE_APP_OUTBOUND_SCOPE", requireNotNull(get(scope))) }
+                    }
                 }
             }
         }
-        defaultRequest {
-            header(X_CORRELATION_ID, getCorrelationId())
-        }
-    }.also { Runtime.getRuntime().addShutdownHook(Thread { it.close() }) }
+    )
 }

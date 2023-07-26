@@ -6,9 +6,9 @@ import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.request.header
+import io.ktor.http.HttpHeaders.XCorrelationId
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.isSuccess
-import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.getXCorrelationId
 import org.slf4j.LoggerFactory
 import java.time.Duration
@@ -34,7 +34,7 @@ class Norg2Klient(
             }
 
             val response = klient.get("$apiUrl/enhet/$enhet") {
-                header(X_CORRELATION_ID, getXCorrelationId())
+                header(XCorrelationId, getXCorrelationId())
             }
 
             if (response.status.isSuccess()) {

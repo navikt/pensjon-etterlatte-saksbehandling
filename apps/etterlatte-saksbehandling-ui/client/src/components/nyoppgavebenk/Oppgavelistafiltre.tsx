@@ -89,9 +89,8 @@ export const OPPGAVETYPEFILTER: Record<OppgavetypeFilterKeys, string> = {
   HENDELSE: 'Hendelse',
   MANUELT_OPPHOER: 'Manuelt opphør',
   EKSTERN: 'Ekstern',
-  ATTESTERING: 'Attestering'
+  ATTESTERING: 'Attestering',
 }
-
 
 function filtrerOppgaveType(oppgavetypeFilterKeys: OppgavetypeFilterKeys, oppgaver: OppgaveDTOny[]): OppgaveDTOny[] {
   if (oppgavetypeFilterKeys === 'visAlle') {
@@ -101,17 +100,27 @@ function filtrerOppgaveType(oppgavetypeFilterKeys: OppgavetypeFilterKeys, oppgav
   }
 }
 
+function finnFnrIOppgaver(fnr: string, oppgaver: OppgaveDTOny[]): OppgaveDTOny[] {
+  if (fnr && fnr.length > 0) {
+    return oppgaver.filter((o) => o.fnr.includes(fnr))
+  } else {
+    return oppgaver
+  }
+}
+
 export function filtrerOppgaver(
   enhetsFilter: EnhetFilterKeys,
   saksbehandlerFilter: SaksbehandlerFilterKeys,
   ytelseFilter: YtelseFilterKeys,
   oppgavestatusFilter: OppgavestatusFilterKeys,
   oppgavetypeFilter: OppgavetypeFilterKeys,
-  oppgaver: OppgaveDTOny[]
+  oppgaver: OppgaveDTOny[],
+  fnr: string
 ): OppgaveDTOny[] {
   const enhetFiltrert = filtrerEnhet(enhetsFilter, oppgaver)
   const saksbehandlerFiltrert = filtrerSaksbehandler(saksbehandlerFilter, enhetFiltrert)
   const ytelseFiltrert = filtrerYtelse(ytelseFilter, saksbehandlerFiltrert)
   const oppgaveFiltrert = filtrerOppgaveStatus(oppgavestatusFilter, ytelseFiltrert)
-  return filtrerOppgaveType(oppgavetypeFilter, oppgaveFiltrert)
+  const oppgaveTypeFiltrert = filtrerOppgaveType(oppgavetypeFilter, oppgaveFiltrert)
+  return finnFnrIOppgaver(fnr, oppgaveTypeFiltrert)
 }

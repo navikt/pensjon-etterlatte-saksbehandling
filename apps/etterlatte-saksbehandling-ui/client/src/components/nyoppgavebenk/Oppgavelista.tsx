@@ -1,4 +1,4 @@
-import { Button, Pagination, Select, Table } from '@navikt/ds-react'
+import { Button, Pagination, Select, Table, TextField } from '@navikt/ds-react'
 import { formaterStringDato } from '~utils/formattering'
 import { TildelSaksbehandler } from '~components/nyoppgavebenk/TildelSaksbehandler'
 import { RedigerSaksbehandler } from '~components/nyoppgavebenk/RedigerSaksbehandler'
@@ -44,6 +44,7 @@ export const Oppgavelista = (props: { oppgaver: ReadonlyArray<OppgaveDTOny>; hen
   const [ytelseFilter, setYtelseFilter] = useState<YtelseFilterKeys>('visAlle')
   const [oppgavestatusFilter, setOppgavestatusFilter] = useState<OppgavestatusFilterKeys>('visAlle')
   const [oppgavetypeFilter, setOppgavetypeFilter] = useState<OppgavetypeFilterKeys>('visAlle')
+  const [fnr, setFnr] = useState<string>('')
   const [page, setPage] = useState<number>(1)
   const rowsPerPage = 10
   const mutableOppgaver = oppgaver.concat()
@@ -53,7 +54,8 @@ export const Oppgavelista = (props: { oppgaver: ReadonlyArray<OppgaveDTOny>; hen
     ytelseFilter,
     oppgavestatusFilter,
     oppgavetypeFilter,
-    mutableOppgaver
+    mutableOppgaver,
+    fnr
   )
 
   let paginerteOppgaver = filtrerteOppgaver
@@ -62,6 +64,13 @@ export const Oppgavelista = (props: { oppgaver: ReadonlyArray<OppgaveDTOny>; hen
   return (
     <>
       <FilterFlex>
+        <TextField
+          label="Fødselsnummer"
+          value={fnr}
+          onChange={(e) => setFnr(e.target.value)}
+          placeholder={'Søk'}
+          autoComplete="off"
+        />
         <Select
           label="Saksbehandler"
           value={saksbehandlerFilter}
@@ -148,7 +157,20 @@ export const Oppgavelista = (props: { oppgaver: ReadonlyArray<OppgaveDTOny>; hen
         <Table.Body>
           {paginerteOppgaver &&
             paginerteOppgaver.map(
-              ({ id, status, enhet, type, saksbehandler, opprettet, merknad, sakType, fnr, frist, sakId, referanse }) => (
+              ({
+                id,
+                status,
+                enhet,
+                type,
+                saksbehandler,
+                opprettet,
+                merknad,
+                sakType,
+                fnr,
+                frist,
+                sakId,
+                referanse,
+              }) => (
                 <Table.Row key={id}>
                   <Table.HeaderCell>{formaterStringDato(opprettet)}</Table.HeaderCell>
                   <Table.HeaderCell>{fnr}</Table.HeaderCell>

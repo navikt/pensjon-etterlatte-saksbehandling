@@ -109,7 +109,7 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
                 " ${attesterVedtakOppgave.attesteringsOppgave.referanse} " +
                 "sakId=${attesterVedtakOppgave.attesteringsOppgave.sakId}"
         )
-        val resource = Resource(clientId = clientId, url = "$resourceUrl/api/fattvedtak-behandling")
+        val resource = Resource(clientId = clientId, url = "$resourceUrl/fattvedtak-behandling")
         val response = downstreamResourceClient.post(
             resource = resource,
             brukerTokenInfo = brukerTokenInfo,

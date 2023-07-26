@@ -5,8 +5,8 @@ import { Button, Loader } from '@navikt/ds-react'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { TrashIcon } from '@navikt/aksel-icons'
 
-export const RedigerSaksbehandler = (props: { saksbehandler: string; oppgaveId: string }) => {
-  const { saksbehandler, oppgaveId } = props
+export const RedigerSaksbehandler = (props: { saksbehandler: string; oppgaveId: string; sakId: number }) => {
+  const { saksbehandler, oppgaveId, sakId } = props
   const user = useAppSelector((state) => state.saksbehandlerReducer.saksbehandler)
   const [fjernSaksbehandlerSvar, fjernSaksbehandler] = useApiCall(fjernSaksbehandlerApi)
 
@@ -19,7 +19,11 @@ export const RedigerSaksbehandler = (props: { saksbehandler: string; oppgaveId: 
           {isSuccess(fjernSaksbehandlerSvar) && 'Saksbehandler er fjernet'}
           {isFailure(fjernSaksbehandlerSvar) && <ApiErrorAlert>Kunne ikke fjerne deg fra oppgaven</ApiErrorAlert>}
           {isInitial(fjernSaksbehandlerSvar) && (
-            <Button icon={<TrashIcon />} variant="tertiary" onClick={() => fjernSaksbehandler(oppgaveId)}>
+            <Button
+              icon={<TrashIcon />}
+              variant="tertiary"
+              onClick={() => fjernSaksbehandler({ oppgaveId: oppgaveId, sakId: sakId })}
+            >
               Fjern meg som saksbehandler
             </Button>
           )}

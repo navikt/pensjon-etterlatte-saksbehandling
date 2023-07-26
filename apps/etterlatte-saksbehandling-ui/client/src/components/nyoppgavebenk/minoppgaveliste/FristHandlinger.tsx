@@ -13,8 +13,8 @@ const Buttonwrapper = styled.div`
     margin-right: 1rem;
   }
 `
-export const FristHandlinger = (props: { frist: string; oppgaveId: string }) => {
-  const { frist, oppgaveId } = props
+export const FristHandlinger = (props: { frist: string; oppgaveId: string; sakId: number }) => {
+  const { frist, oppgaveId, sakId } = props
   const [open, setOpen] = useState(false)
   const [nyFrist, setnyFrist] = useState<Date>(new Date())
   const [redigerfristSvar, redigerFrist, resetredigerFristApi] = useApiCall(redigerFristApi)
@@ -73,7 +73,7 @@ export const FristHandlinger = (props: { frist: string; oppgaveId: string }) => 
                   loading={isPending(redigerfristSvar)}
                   disabled={!nyFrist}
                   onClick={() => {
-                    redigerFrist({ oppgaveId: oppgaveId, frist: nyFrist })
+                    redigerFrist({ redigerFristRequest: { oppgaveId: oppgaveId, frist: nyFrist }, sakId: sakId })
                   }}
                 >
                   Lagre ny frist

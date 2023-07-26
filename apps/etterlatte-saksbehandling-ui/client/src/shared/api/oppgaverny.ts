@@ -33,15 +33,21 @@ export interface NySaksbehandlerDto {
   saksbehandler: string
 }
 
-export const tildelSaksbehandlerApi = async (nysaksbehandler: NySaksbehandlerDto): Promise<ApiResponse<void>> =>
-  apiClient.post('/nyeoppgaver/tildel-saksbehandler', { ...nysaksbehandler })
+export const tildelSaksbehandlerApi = async (args: {
+  nysaksbehandler: NySaksbehandlerDto
+  sakId: number
+}): Promise<ApiResponse<void>> =>
+  apiClient.post(`/nyeoppgaver/tildel-saksbehandler/${args.sakId}`, { ...args.nysaksbehandler })
 
-export const fjernSaksbehandlerApi = async (oppgaveId: string): Promise<ApiResponse<void>> =>
-  apiClient.post('/nyeoppgaver/fjern-saksbehandler', { oppgaveId })
+export const fjernSaksbehandlerApi = async (args: { oppgaveId: string; sakId: number }): Promise<ApiResponse<void>> =>
+  apiClient.post(`/nyeoppgaver/fjern-saksbehandler/${args.sakId}`, { oppgaveId: args.oppgaveId })
 
 export interface RedigerFristRequest {
   oppgaveId: string
   frist: Date
 }
-export const redigerFristApi = async (redigerFristRequest: RedigerFristRequest): Promise<ApiResponse<void>> =>
-  apiClient.put('/nyeoppgaver/rediger-frist', { ...redigerFristRequest })
+export const redigerFristApi = async (args: {
+  redigerFristRequest: RedigerFristRequest
+  sakId: number
+}): Promise<ApiResponse<void>> =>
+  apiClient.put(`/nyeoppgaver/rediger-frist/${args.sakId}`, { ...args.redigerFristRequest })

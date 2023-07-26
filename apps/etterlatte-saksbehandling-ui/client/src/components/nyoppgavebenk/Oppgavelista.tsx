@@ -23,7 +23,7 @@ import { OppgavetypeTag, SaktypeTag } from '~components/nyoppgavebenk/Tags'
 
 const FilterFlex = styled.div`
   display: flex;
-  justify-content: space-evenly;
+  gap: 2rem;
 `
 
 const ButtonWrapper = styled.div`

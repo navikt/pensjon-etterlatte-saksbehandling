@@ -19,7 +19,11 @@ import no.nav.etterlatte.sak.SakDao
 import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
 import java.util.*
 
-class OppgaveServiceNy(private val oppgaveDaoNy: OppgaveDaoNy, private val sakDao: SakDao) {
+class OppgaveServiceNy(
+    private val oppgaveDaoNy: OppgaveDaoNy,
+    private val sakDao: SakDao,
+    private val oppgaveDaoEndringer: OppgaveDaoEndringer
+) {
 
     fun finnOppgaverForBruker(bruker: SaksbehandlerMedRoller): List<OppgaveNy> {
         val rollerSomBrukerHar = finnAktuelleRoller(bruker)
@@ -161,7 +165,7 @@ class OppgaveServiceNy(private val oppgaveDaoNy: OppgaveDaoNy, private val sakDa
 
     fun lagreEndringerPaaOppgave(oppgaveFoer: OppgaveNy) {
         val oppgaveEtter = oppgaveDaoNy.hentOppgave(oppgaveFoer.id)!!
-        oppgaveDaoNy.lagreEndringerPaaOppgave(oppgaveFoer, oppgaveEtter)
+        oppgaveDaoEndringer.lagreEndringerPaaOppgave(oppgaveFoer, oppgaveEtter)
     }
 
     fun opprettNyOppgaveMedSakOgReferanse(referanse: String, sakId: Long, oppgaveType: OppgaveType): OppgaveNy {

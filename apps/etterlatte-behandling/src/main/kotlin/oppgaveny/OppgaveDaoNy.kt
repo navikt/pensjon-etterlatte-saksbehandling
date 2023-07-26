@@ -1,6 +1,5 @@
 package no.nav.etterlatte.oppgaveny
 
-import no.nav.etterlatte.grunnlagsendring.setJsonb
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveNy
 import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveType
@@ -8,7 +7,6 @@ import no.nav.etterlatte.libs.common.oppgaveNy.RedigerFristRequest
 import no.nav.etterlatte.libs.common.oppgaveNy.SaksbehandlerEndringDto
 import no.nav.etterlatte.libs.common.oppgaveNy.Status
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
-import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunktOrNull
 import no.nav.etterlatte.libs.common.tidspunkt.setTidspunkt
@@ -190,24 +188,6 @@ class OppgaveDaoNy(private val connection: () -> Connection) {
             )
             statement.setTidspunkt(1, redigerFristRequest.frist)
             statement.setObject(2, redigerFristRequest.oppgaveId)
-
-            statement.executeUpdate()
-        }
-    }
-
-    fun lagreEndringerPaaOppgave(oppgaveFoer: OppgaveNy, oppgaveEtter: OppgaveNy) {
-        with(connection()) {
-            val statement = prepareStatement(
-                """
-                INSERT INTO oppgaveendringer(id, oppgaveId, oppgaveFoer, oppgaveEtter, tidspunkt)
-                VALUES(?::UUID, ?::UUID, ?::JSONB, ?::JSONB, ?)
-                """.trimIndent()
-            )
-            statement.setObject(1, UUID.randomUUID())
-            statement.setObject(2, oppgaveEtter.id)
-            statement.setJsonb(3, oppgaveFoer)
-            statement.setJsonb(4, oppgaveEtter)
-            statement.setTidspunkt(5, Tidspunkt.now())
 
             statement.executeUpdate()
         }

@@ -59,7 +59,10 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
   const erReadOnly = () => {
     return (
       vedtaksbrev.prosessType === BrevProsessType.AUTOMATISK &&
-      props.behandling.revurderingsaarsak! in [Revurderingsaarsak.OMGJOERING_AV_FARSKAP]
+      !(
+        props.behandling.revurderingsaarsak != null &&
+        props.behandling.revurderingsaarsak in [Revurderingsaarsak.OMGJOERING_AV_FARSKAP]
+      )
     )
   }
 

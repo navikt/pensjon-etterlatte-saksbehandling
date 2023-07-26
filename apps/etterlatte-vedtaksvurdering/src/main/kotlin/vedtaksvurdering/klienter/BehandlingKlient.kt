@@ -1,6 +1,9 @@
 package no.nav.etterlatte.vedtaksvurdering.klienter
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import com.github.michaelbull.result.Err
+import com.github.michaelbull.result.Ok
+import com.github.michaelbull.result.get
 import com.github.michaelbull.result.mapBoth
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
@@ -115,18 +118,16 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
             brukerTokenInfo = brukerTokenInfo,
             postBody = attesterVedtakOppgave
         )
-
-        return response.mapBoth(
-            success = { true },
-            failure = {
-                logger.info(
+        return when (response) {
+            is Ok -> true
+            is Err -> {
+                logger.error(
                     "Kan ikke attestere oppgaver og commite vedtak av type for behandling " +
-                        attesterVedtakOppgave.attesteringsOppgave.referanse,
-                    it.throwable
+                        attesterVedtakOppgave.attesteringsOppgave.referanse
                 )
-                false
+                throw response.error
             }
-        )
+        }
     }
 
     override suspend fun fattVedtak(

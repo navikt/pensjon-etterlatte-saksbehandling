@@ -259,15 +259,17 @@ class TrygdetidRepository(private val dataSource: DataSource) {
         }
 
     private fun hentGrunnlagOpplysninger(trygdetidId: UUID): List<Opplysningsgrunnlag> =
-        dataSource.hentListe(
-            query = """
+        dataSource.transaction { tx ->
+            tx.hentListe(
+                queryString = """
                 SELECT id, trygdetid_id, type, opplysning, kilde
                 FROM opplysningsgrunnlag
                 WHERE trygdetid_id = :trygdetidId
-            """.trimIndent(),
-            params = { mapOf("trygdetidId" to trygdetidId) },
-            converter = { it.toOpplysningsgrunnlag() }
-        )
+                """.trimIndent(),
+                params = { mapOf("trygdetidId" to trygdetidId) },
+                converter = { it.toOpplysningsgrunnlag() }
+            )
+        }
 
     private fun hentTrygdtidNotNull(behandlingsId: UUID) =
         hentTrygdetid(behandlingsId)

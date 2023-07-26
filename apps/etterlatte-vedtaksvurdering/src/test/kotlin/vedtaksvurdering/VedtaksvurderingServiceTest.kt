@@ -12,6 +12,7 @@ import io.mockk.slot
 import io.mockk.spyk
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
+import kotliquery.queryOf
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
@@ -41,6 +42,7 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.POSTGRES_VERSION
 import no.nav.etterlatte.libs.database.migrate
+import no.nav.etterlatte.libs.database.transaction
 import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlient
 import no.nav.etterlatte.vedtaksvurdering.klienter.BeregningKlient
 import no.nav.etterlatte.vedtaksvurdering.klienter.VilkaarsvurderingKlient
@@ -61,6 +63,7 @@ import vedtaksvurdering.SAKSBEHANDLER_1
 import vedtaksvurdering.attestant
 import vedtaksvurdering.opprettVedtak
 import vedtaksvurdering.saksbehandler
+import java.lang.RuntimeException
 import java.math.BigDecimal
 import java.time.LocalDateTime
 import java.time.Month
@@ -383,6 +386,78 @@ internal class VedtaksvurderingServiceTest {
                 service.fattVedtak(behandlingId, saksbehandler)
             }
         }
+    }
+
+    @Test
+    fun `skal rulle tilbake vedtak som blir fattet hvis attesteringsoppgave feiler`() {
+        val behandlingId = randomUUID()
+        val sakId = 1L
+        val virkningstidspunkt = YearMonth.of(2022, Month.AUGUST)
+        val gjeldendeSaksbehandler = saksbehandler
+
+        coEvery { behandlingKlientMock.fattVedtak(behandlingId, any()) } returns true
+        coEvery {
+            behandlingKlientMock.oppgaveAttestering(any(), any())
+        } throws RuntimeException("Å nei")
+        coEvery { behandlingKlientMock.hentBehandling(behandlingId, any()) } returns mockBehandling(
+            virk = virkningstidspunkt,
+            behandlingId = behandlingId,
+            sakId = sakId
+        )
+        coEvery { behandlingKlientMock.hentSak(sakId, any()) } returns Sak(
+            SAKSBEHANDLER_1,
+            SakType.BARNEPENSJON,
+            sakId,
+            ENHET_2
+        )
+        coEvery {
+            vilkaarsvurderingKlientMock.hentVilkaarsvurdering(
+                behandlingId,
+                any()
+            )
+        } returns mockVilkaarsvurdering()
+        coEvery {
+            beregningKlientMock.hentBeregningOgAvkorting(
+                behandlingId,
+                any(),
+                SakType.BARNEPENSJON
+            )
+        } returns BeregningOgAvkorting(
+            beregning = mockBeregning(virkningstidspunkt = virkningstidspunkt, behandlingId = behandlingId),
+            avkorting = mockAvkorting()
+        )
+
+        val opprettetVedtak = repository.opprettVedtak(
+            opprettVedtak(virkningstidspunkt = virkningstidspunkt, behandlingId = behandlingId, sakId = sakId)
+        )
+
+        assertThrows<Exception> {
+            runBlocking {
+                service.fattVedtak(behandlingId, gjeldendeSaksbehandler)
+            }
+        }
+        val vedtakEtterFeiletFatting = repository.hentVedtak(behandlingId)
+        Assertions.assertEquals(opprettetVedtak, vedtakEtterFeiletFatting)
+
+        // Sjekker også at den respekterer opprinnelig status på vedtak:
+        val returnertVedtak = opprettetVedtak.copy(status = VedtakStatus.RETURNERT)
+        dataSource.transaction { tx ->
+            queryOf(
+                "UPDATE vedtak SET vedtakstatus = :vedtakstatus WHERE behandlingid = :behandlingId",
+                mapOf(
+                    "vedtakstatus" to returnertVedtak.status.name,
+                    "behandlingId" to returnertVedtak.behandlingId
+                )
+            ).let { query -> tx.run(query.asUpdate) }
+        }
+
+        assertThrows<Exception> {
+            runBlocking {
+                service.fattVedtak(behandlingId, gjeldendeSaksbehandler)
+            }
+        }
+        val returnertVedtakEtterFeiletFatting = repository.hentVedtak(behandlingId)
+        Assertions.assertEquals(returnertVedtak, returnertVedtakEtterFeiletFatting)
     }
 
     @Test
@@ -869,10 +944,10 @@ internal class VedtaksvurderingServiceTest {
 
     private fun underkjennVedtakBegrunnelse() = UnderkjennVedtakDto("Vedtaket er ugyldig", "Annet")
 
-    private fun mockBeregning(virkningstidspunkt: YearMonth, behandlingId_: UUID): BeregningDTO =
+    private fun mockBeregning(virkningstidspunkt: YearMonth, behandlingId: UUID): BeregningDTO =
         mockk(relaxed = true) {
             every { beregningId } returns randomUUID()
-            every { behandlingId } returns behandlingId_
+            every { this@mockk.behandlingId } returns behandlingId
             every { type } returns Beregningstype.BP
             every { beregnetDato } returns Tidspunkt.now()
             every { beregningsperioder } returns listOf(
@@ -912,11 +987,12 @@ internal class VedtaksvurderingServiceTest {
         behandlingId: UUID,
         saktype: SakType = SakType.BARNEPENSJON,
         revurderingAarsak: RevurderingAarsak? = null,
-        revurderingInfo: RevurderingInfo? = null
+        revurderingInfo: RevurderingInfo? = null,
+        sakId: Long = 1L
     ): DetaljertBehandling =
         DetaljertBehandling(
             id = behandlingId,
-            sak = 1L,
+            sak = sakId,
             sakType = saktype,
             behandlingOpprettet = LocalDateTime.now(),
             soeknadMottattDato = LocalDateTime.now(),

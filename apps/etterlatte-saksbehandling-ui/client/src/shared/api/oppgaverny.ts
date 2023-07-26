@@ -39,6 +39,12 @@ export const tildelSaksbehandlerApi = async (args: {
 }): Promise<ApiResponse<void>> =>
   apiClient.post(`/nyeoppgaver/tildel-saksbehandler/${args.sakId}`, { ...args.nysaksbehandler })
 
+export const byttSaksbehandlerApi = async (args: {
+  nysaksbehandler: NySaksbehandlerDto
+  sakId: number
+}): Promise<ApiResponse<void>> =>
+  apiClient.post(`/nyeoppgaver/bytt-saksbehandler/${args.sakId}`, { ...args.nysaksbehandler })
+
 export const fjernSaksbehandlerApi = async (args: { oppgaveId: string; sakId: number }): Promise<ApiResponse<void>> =>
   apiClient.post(`/nyeoppgaver/fjern-saksbehandler/${args.sakId}`, { oppgaveId: args.oppgaveId })
 

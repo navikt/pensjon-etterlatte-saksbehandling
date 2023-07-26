@@ -4,16 +4,13 @@ import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.plugins.ResponseException
 import io.ktor.client.request.accept
-import io.ktor.client.request.header
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
-import io.ktor.http.HttpHeaders.XCorrelationId
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import no.nav.etterlatte.brev.journalpost.JournalpostRequest
 import no.nav.etterlatte.brev.journalpost.JournalpostResponse
-import no.nav.etterlatte.libs.common.logging.getXCorrelationId
 import org.slf4j.LoggerFactory
 
 class DokarkivKlient(private val client: HttpClient, private val url: String) {
@@ -23,7 +20,6 @@ class DokarkivKlient(private val client: HttpClient, private val url: String) {
         client.post("$url?forsoekFerdigstill=$ferdigstill") {
             accept(ContentType.Application.Json)
             contentType(ContentType.Application.Json)
-            header(XCorrelationId, getXCorrelationId())
             setBody(request)
         }.body()
     } catch (responseException: ResponseException) {

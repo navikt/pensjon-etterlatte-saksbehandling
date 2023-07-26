@@ -53,8 +53,10 @@ fun httpClient(
     }
     auth.invoke(this)
     defaultRequest {
-        header(HttpHeaders.XCorrelationId, getCorrelationId())
-        header("Nav_Call_Id", getCorrelationId())
+        getCorrelationId().let {
+            header(HttpHeaders.XCorrelationId, it)
+            header("Nav_Call_Id", it)
+        }
         ekstraDefaultHeaders.invoke(this)
     }
 }.also { Runtime.getRuntime().addShutdownHook(Thread { it.close() }) }

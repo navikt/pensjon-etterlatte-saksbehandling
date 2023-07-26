@@ -15,8 +15,8 @@ import no.nav.etterlatte.libs.common.oppgaveNy.FjernSaksbehandlerRequest
 import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveType
 import no.nav.etterlatte.libs.common.oppgaveNy.RedigerFristRequest
 import no.nav.etterlatte.libs.common.oppgaveNy.SaksbehandlerEndringDto
-import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.oppgaveNy.Status
+import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
@@ -337,7 +337,7 @@ class OppgaveServiceNyTest {
         )
 
         val adressebeskyttetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
-        val adressebeskyttetOppgave = oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
+        oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
             "referanse",
             adressebeskyttetSak.id,
             OppgaveType.FOERSTEGANGSBEHANDLING

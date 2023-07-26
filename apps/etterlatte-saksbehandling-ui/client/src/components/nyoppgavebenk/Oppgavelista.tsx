@@ -44,7 +44,7 @@ export const Oppgavelista = (props: { oppgaver: ReadonlyArray<OppgaveDTOny>; hen
   const [ytelseFilter, setYtelseFilter] = useState<YtelseFilterKeys>('visAlle')
   const [oppgavestatusFilter, setOppgavestatusFilter] = useState<OppgavestatusFilterKeys>('visAlle')
   const [oppgavetypeFilter, setOppgavetypeFilter] = useState<OppgavetypeFilterKeys>('visAlle')
-  const [fnr, setFnr] = useState<string>('')
+  const [fnrFilter, setFnrFilter] = useState<string>('')
   const [page, setPage] = useState<number>(1)
   const rowsPerPage = 10
   const mutableOppgaver = oppgaver.concat()
@@ -55,7 +55,7 @@ export const Oppgavelista = (props: { oppgaver: ReadonlyArray<OppgaveDTOny>; hen
     oppgavestatusFilter,
     oppgavetypeFilter,
     mutableOppgaver,
-    fnr
+    fnrFilter
   )
 
   let paginerteOppgaver = filtrerteOppgaver
@@ -66,8 +66,8 @@ export const Oppgavelista = (props: { oppgaver: ReadonlyArray<OppgaveDTOny>; hen
       <FilterFlex>
         <TextField
           label="Fødselsnummer"
-          value={fnr}
-          onChange={(e) => setFnr(e.target.value)}
+          value={fnrFilter}
+          onChange={(e) => setFnrFilter(e.target.value)}
           placeholder={'Søk'}
           autoComplete="off"
         />
@@ -134,6 +134,7 @@ export const Oppgavelista = (props: { oppgaver: ReadonlyArray<OppgaveDTOny>; hen
             setEnhetsFilter('visAlle')
             setOppgavestatusFilter('visAlle')
             setSaksbehandlerFilter('visAlle')
+            setFnrFilter('')
           }}
         >
           Tilbakestill alle filtre

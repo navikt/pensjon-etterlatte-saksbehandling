@@ -140,75 +140,81 @@ export const Oppgavelista = (props: { oppgaver: ReadonlyArray<OppgaveDTOny>; hen
           Tilbakestill alle filtre
         </Button>
       </ButtonWrapper>
-      <Table>
-        <Table.Header>
-          <Table.Row>
-            <Table.HeaderCell scope="col">Registreringsdato</Table.HeaderCell>
-            <Table.HeaderCell scope="col">Fnr</Table.HeaderCell>
-            <Table.HeaderCell scope="col">Oppgavetype</Table.HeaderCell>
-            <Table.HeaderCell scope="col">Status</Table.HeaderCell>
-            <Table.HeaderCell scope="col">Merknad</Table.HeaderCell>
-            <Table.HeaderCell scope="col">Enhet</Table.HeaderCell>
-            <Table.HeaderCell scope="col">Saksbehandler</Table.HeaderCell>
-            <Table.HeaderCell scope="col">Ytelse</Table.HeaderCell>
-            <Table.HeaderCell scope="col">Frist</Table.HeaderCell>
-            <Table.HeaderCell scope="col">Handlinger</Table.HeaderCell>
-          </Table.Row>
-        </Table.Header>
-        <Table.Body>
-          {paginerteOppgaver &&
-            paginerteOppgaver.map(
-              ({
-                id,
-                status,
-                enhet,
-                type,
-                saksbehandler,
-                opprettet,
-                merknad,
-                sakType,
-                fnr,
-                frist,
-                sakId,
-                referanse,
-              }) => (
-                <Table.Row key={id}>
-                  <Table.HeaderCell>{formaterStringDato(opprettet)}</Table.HeaderCell>
-                  <Table.HeaderCell>{fnr}</Table.HeaderCell>
-                  <Table.DataCell>
-                    <OppgavetypeTag oppgavetype={type} />
-                  </Table.DataCell>
-                  <Table.DataCell>{status}</Table.DataCell>
-                  <Table.DataCell>{merknad}</Table.DataCell>
-                  <Table.DataCell>{enhet}</Table.DataCell>
-                  <Table.DataCell>
-                    {saksbehandler ? (
-                      <RedigerSaksbehandler saksbehandler={saksbehandler} oppgaveId={id} sakId={sakId} />
-                    ) : (
-                      <TildelSaksbehandler oppgaveId={id} sakId={sakId} />
-                    )}
-                  </Table.DataCell>
-                  <Table.DataCell>{sakType && <SaktypeTag sakType={sakType} />}</Table.DataCell>
-                  <Table.DataCell>{frist ? frist : 'Ingen frist'}</Table.DataCell>
-                  <Table.DataCell>
-                    <HandlingerForOppgave
-                      oppgavetype={type}
-                      fnr={fnr}
-                      saksbehandler={saksbehandler}
-                      referanse={referanse}
-                    />
-                  </Table.DataCell>
-                </Table.Row>
-              )
-            )}
-        </Table.Body>
-      </Table>
-      <Pagination
-        page={page}
-        onPageChange={setPage}
-        count={Math.ceil(filtrerteOppgaver.length / rowsPerPage)}
-        size="small"
-      />
+      {paginerteOppgaver && paginerteOppgaver.length > 0 ? (
+        <>
+          <Table>
+            <Table.Header>
+              <Table.Row>
+                <Table.HeaderCell scope="col">Registreringsdato</Table.HeaderCell>
+                <Table.HeaderCell scope="col">Fnr</Table.HeaderCell>
+                <Table.HeaderCell scope="col">Oppgavetype</Table.HeaderCell>
+                <Table.HeaderCell scope="col">Status</Table.HeaderCell>
+                <Table.HeaderCell scope="col">Merknad</Table.HeaderCell>
+                <Table.HeaderCell scope="col">Enhet</Table.HeaderCell>
+                <Table.HeaderCell scope="col">Saksbehandler</Table.HeaderCell>
+                <Table.HeaderCell scope="col">Ytelse</Table.HeaderCell>
+                <Table.HeaderCell scope="col">Frist</Table.HeaderCell>
+                <Table.HeaderCell scope="col">Handlinger</Table.HeaderCell>
+              </Table.Row>
+            </Table.Header>
+            <Table.Body>
+              {paginerteOppgaver &&
+                paginerteOppgaver.map(
+                  ({
+                    id,
+                    status,
+                    enhet,
+                    type,
+                    saksbehandler,
+                    opprettet,
+                    merknad,
+                    sakType,
+                    fnr,
+                    frist,
+                    sakId,
+                    referanse,
+                  }) => (
+                    <Table.Row key={id}>
+                      <Table.HeaderCell>{formaterStringDato(opprettet)}</Table.HeaderCell>
+                      <Table.HeaderCell>{fnr}</Table.HeaderCell>
+                      <Table.DataCell>
+                        <OppgavetypeTag oppgavetype={type} />
+                      </Table.DataCell>
+                      <Table.DataCell>{status}</Table.DataCell>
+                      <Table.DataCell>{merknad}</Table.DataCell>
+                      <Table.DataCell>{enhet}</Table.DataCell>
+                      <Table.DataCell>
+                        {saksbehandler ? (
+                          <RedigerSaksbehandler saksbehandler={saksbehandler} oppgaveId={id} sakId={sakId} />
+                        ) : (
+                          <TildelSaksbehandler oppgaveId={id} sakId={sakId} />
+                        )}
+                      </Table.DataCell>
+                      <Table.DataCell>{sakType && <SaktypeTag sakType={sakType} />}</Table.DataCell>
+                      <Table.DataCell>{frist ? frist : 'Ingen frist'}</Table.DataCell>
+                      <Table.DataCell>
+                        <HandlingerForOppgave
+                          oppgavetype={type}
+                          fnr={fnr}
+                          saksbehandler={saksbehandler}
+                          referanse={referanse}
+                        />
+                      </Table.DataCell>
+                    </Table.Row>
+                  )
+                )}
+            </Table.Body>
+          </Table>
+          <Pagination
+            page={page}
+            onPageChange={setPage}
+            count={Math.ceil(filtrerteOppgaver.length / rowsPerPage)}
+            size="small"
+          />
+        </>
+      ) : (
+        <>Ingen oppgaver</>
+      )}
     </>
   )
 }

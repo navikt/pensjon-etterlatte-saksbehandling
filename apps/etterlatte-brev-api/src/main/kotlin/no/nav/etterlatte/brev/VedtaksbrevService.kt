@@ -127,7 +127,7 @@ class VedtaksbrevService(
                 }
             }
 
-            MANUELL -> SlateHelper.hentInitiellPayload(behandling).flettInn(behandling)
+            MANUELL -> SlateHelper.hentInitiellPayload(behandling)
         }
 
         return BrevInnhold(tittel, behandling.spraak, payload)

@@ -11,7 +11,6 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakType
 data class Slate(
     @JsonValue val elements: List<Element> = emptyList()
 ) {
-    fun flettInn(behandling: Behandling): Slate = this
 
     data class Element(
         val type: ElementType,

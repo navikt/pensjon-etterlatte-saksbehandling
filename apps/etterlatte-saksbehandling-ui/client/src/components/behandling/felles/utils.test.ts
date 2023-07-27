@@ -152,6 +152,7 @@ const opprettBehandling = (
     behandlingType: IBehandlingsType.FØRSTEGANGSBEHANDLING,
     revurderingsaarsak: null,
     revurderinginfo: null,
+    begrunnelse: null,
   }
 }
 

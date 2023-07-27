@@ -19,6 +19,7 @@ import ForhaandsvisningBrev from '~components/behandling/brev/ForhaandsvisningBr
 import Spinner from '~shared/Spinner'
 import { BrevProsessType } from '~shared/types/Brev'
 import RedigerbartBrev from '~components/behandling/brev/RedigerbartBrev'
+import { Revurderingsaarsak } from '~shared/types/Revurderingsaarsak'
 
 export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
   const { behandlingId } = useParams()
@@ -55,6 +56,16 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
     fetchVedtaksbrev()
   }, [behandlingId, sakId])
 
+  const erReadOnly = () => {
+    return (
+      vedtaksbrev.prosessType === BrevProsessType.AUTOMATISK &&
+      !(
+        props.behandling.revurderingsaarsak != null &&
+        props.behandling.revurderingsaarsak in [Revurderingsaarsak.OMGJOERING_AV_FARSKAP, Revurderingsaarsak.ADOPSJON]
+      )
+    )
+  }
+
   return (
     <Content>
       <BrevContent>
@@ -86,7 +97,7 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
           </SpinnerContainer>
         ) : error ? (
           <ErrorMessage>{error}</ErrorMessage>
-        ) : vedtaksbrev.prosessType === BrevProsessType.AUTOMATISK ? (
+        ) : erReadOnly() ? (
           <ForhaandsvisningBrev brev={vedtaksbrev} />
         ) : (
           <RedigerbartBrev brev={vedtaksbrev} kanRedigeres={manueltBrevKanRedigeres(status)} />

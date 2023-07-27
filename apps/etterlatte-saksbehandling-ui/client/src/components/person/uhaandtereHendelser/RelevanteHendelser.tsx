@@ -6,7 +6,7 @@ import React, { useEffect, useMemo, useState } from 'react'
 import { hentPersonerISak } from '~shared/api/grunnlag'
 import HistoriskeHendelser from '~components/person/uhaandtereHendelser/HistoriskeHendelser'
 import { OpprettNyBehandling } from '~components/person/OpprettNyBehandling'
-import OpprettRevurderingModal from '~components/person/OpprettRevurderingModal'
+import VurderHendelseModal from '~components/person/VurderHendelseModal'
 import UhaandtertHendelse from '~components/person/uhaandtereHendelser/UhaandtertHendelse'
 import { IBehandlingsType } from '~shared/types/IDetaljertBehandling'
 import { erFerdigBehandlet } from '~components/behandling/felles/utils'
@@ -113,7 +113,7 @@ export default function RelevanteHendelser(props: Props) {
       {isSuccess(revurderingerStatus) && revurderingerStatus.data.length && (
         <>
           {valgtHendelse && (
-            <OpprettRevurderingModal
+            <VurderHendelseModal
               sakId={sak.id}
               valgtHendelse={valgtHendelse}
               open={visOpprettRevurderingsmodal}

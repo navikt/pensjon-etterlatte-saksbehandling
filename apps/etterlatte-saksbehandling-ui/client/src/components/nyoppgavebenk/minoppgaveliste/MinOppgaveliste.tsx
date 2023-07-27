@@ -1,10 +1,12 @@
 import { OppgaveDTOny } from '~shared/api/oppgaverny'
 import { useAppSelector } from '~store/Store'
-import { Button, Pagination, Table } from '@navikt/ds-react'
+import { Pagination, Table } from '@navikt/ds-react'
 import { formaterStringDato } from '~utils/formattering'
 import { RedigerSaksbehandler } from '~components/nyoppgavebenk/RedigerSaksbehandler'
-import { CaretRightIcon } from '@navikt/aksel-icons'
+import { FristHandlinger } from '~components/nyoppgavebenk/minoppgaveliste/FristHandlinger'
 import { useState } from 'react'
+import { HandlingerForOppgave } from '~components/nyoppgavebenk/HandlingerForOppgave'
+import { OppgavetypeTag, SaktypeTag } from '~components/nyoppgavebenk/Tags'
 
 export const MinOppgaveliste = (props: { oppgaver: ReadonlyArray<OppgaveDTOny> }) => {
   const { oppgaver } = props
@@ -37,23 +39,32 @@ export const MinOppgaveliste = (props: { oppgaver: ReadonlyArray<OppgaveDTOny> }
             <Table.Body>
               {paginerteOppgaver &&
                 paginerteOppgaver.map(
-                  ({ id, status, enhet, type, saksbehandler, opprettet, merknad, sakType, fnr, frist }) => (
+                  ({ id, status, enhet, type, saksbehandler, opprettet, merknad, sakType, fnr, frist, sakId, referanse }) => (
                     <Table.Row key={id}>
                       <Table.HeaderCell>{formaterStringDato(opprettet)}</Table.HeaderCell>
-                      <Table.HeaderCell>{fnr ? fnr : 'ikke fnr, må migreres'}</Table.HeaderCell>
-                      <Table.DataCell>{type}</Table.DataCell>
+                      <Table.HeaderCell>{fnr}</Table.HeaderCell>
+                      <Table.DataCell>
+                        <OppgavetypeTag oppgavetype={type} />
+                      </Table.DataCell>
                       <Table.DataCell>{status}</Table.DataCell>
                       <Table.DataCell>{merknad}</Table.DataCell>
                       <Table.DataCell>{enhet}</Table.DataCell>
                       <Table.DataCell>
-                        {saksbehandler && <RedigerSaksbehandler saksbehandler={saksbehandler} oppgaveId={id} />}
+                        {saksbehandler && (
+                          <RedigerSaksbehandler saksbehandler={saksbehandler} oppgaveId={id} sakId={sakId} />
+                        )}
                       </Table.DataCell>
-                      <Table.DataCell>{sakType ? sakType : 'Ingen saktype, må migreres'}</Table.DataCell>
-                      <Table.DataCell>{frist ? frist : 'Ingen frist'}</Table.DataCell>
+                      <Table.DataCell>{sakType && <SaktypeTag sakType={sakType} />}</Table.DataCell>
                       <Table.DataCell>
-                        <Button icon={<CaretRightIcon />} variant="primary" onClick={() => {}}>
-                          Start behandling
-                        </Button>
+                        <FristHandlinger frist={frist} oppgaveId={id} sakId={sakId} />
+                      </Table.DataCell>
+                      <Table.DataCell>
+                        <HandlingerForOppgave
+                          oppgavetype={type}
+                          fnr={fnr}
+                          saksbehandler={saksbehandler}
+                          referanse={referanse}
+                        />
                       </Table.DataCell>
                     </Table.Row>
                   )

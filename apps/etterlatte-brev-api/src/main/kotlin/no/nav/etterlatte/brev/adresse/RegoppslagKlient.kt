@@ -6,10 +6,7 @@ import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.plugins.ResponseException
 import io.ktor.client.request.get
-import io.ktor.client.request.header
 import io.ktor.http.isSuccess
-import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
-import no.nav.etterlatte.libs.common.logging.getXCorrelationId
 import no.nav.etterlatte.sikkerLogg
 import org.slf4j.LoggerFactory
 import java.time.Duration
@@ -33,10 +30,7 @@ class RegoppslagKlient(
         } else {
             logger.info("Ingen cachet mottakeradresse funnet. Henter fra regoppslag")
 
-            val response = client.get("$url/regoppslag/$ident") {
-                header(X_CORRELATION_ID, getXCorrelationId())
-                header("Nav_Call_Id", getXCorrelationId())
-            }
+            val response = client.get("$url/regoppslag/$ident")
 
             if (response.status.isSuccess()) {
                 response.body<RegoppslagResponseDTO>()

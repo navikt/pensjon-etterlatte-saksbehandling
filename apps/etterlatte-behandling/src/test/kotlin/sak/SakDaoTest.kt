@@ -4,6 +4,7 @@ import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.database.DataSourceBuilder
+import no.nav.etterlatte.libs.database.POSTGRES_VERSION
 import no.nav.etterlatte.libs.database.migrate
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
@@ -17,7 +18,7 @@ import javax.sql.DataSource
 class SakDaoTest {
 
     @Container
-    private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:14")
+    private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:$POSTGRES_VERSION")
 
     private lateinit var dataSource: DataSource
     private lateinit var sakRepo: SakDao

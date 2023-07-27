@@ -18,7 +18,7 @@ export function hentGyldighetsTekst(
           'Innsender er ikke gjenlevende forelder eller har foreldreansvar. En annen verge enn forelder er registrert. Send orientering om at søknaden ikke blir behandlet.'
       } else if (ingenAnnenVergeEnnForelder === VurderingsResultat.OPPFYLT) {
         svar =
-          'Innsender er ikke gjenlevende forelder eller har foreldreansvar. Kontakt statsforvalter for å for å avklare mandatet for vergermålet. '
+          'Innsender er ikke gjenlevende forelder eller har foreldreansvar. Kontakt statsforvalter for å avklare mandatet for vergermålet. '
       }
     } else if (innsenderHarForeldreansvar === VurderingsResultat.OPPFYLT) {
       if (ingenAnnenVergeEnnForelder === VurderingsResultat.IKKE_OPPFYLT) {

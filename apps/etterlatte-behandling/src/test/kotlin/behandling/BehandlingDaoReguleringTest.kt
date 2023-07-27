@@ -2,11 +2,13 @@ package no.nav.etterlatte.behandling
 
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
+import no.nav.etterlatte.behandling.revurdering.RevurderingDao
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.database.DataSourceBuilder
+import no.nav.etterlatte.libs.database.POSTGRES_VERSION
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.opprettBehandling
 import no.nav.etterlatte.sak.SakDao
@@ -24,7 +26,7 @@ import javax.sql.DataSource
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class BehandlingDaoReguleringTest {
     @Container
-    private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:14")
+    private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:$POSTGRES_VERSION")
 
     private lateinit var dataSource: DataSource
     private lateinit var sakRepo: SakDao
@@ -44,7 +46,8 @@ internal class BehandlingDaoReguleringTest {
 
         val connection = dataSource.connection
         sakRepo = SakDao { connection }
-        behandlingRepo = BehandlingDao(KommerBarnetTilGodeDao { connection }) { connection }
+        behandlingRepo =
+            BehandlingDao(KommerBarnetTilGodeDao { connection }, RevurderingDao { connection }) { connection }
     }
 
     @AfterEach

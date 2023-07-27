@@ -27,7 +27,8 @@ class OppgaveServiceImpl(private val oppgaveDao: OppgaveDao, private val feature
     private fun finnAktuelleRoller(bruker: SaksbehandlerMedRoller): List<Rolle> =
         listOfNotNull(
             Rolle.SAKSBEHANDLER.takeIf { bruker.harRolleSaksbehandler() },
-            Rolle.ATTESTANT.takeIf { bruker.harRolleAttestant() }
+            Rolle.ATTESTANT.takeIf { bruker.harRolleAttestant() },
+            Rolle.STRENGT_FORTROLIG.takeIf { bruker.harRolleStrengtFortrolig() }
         )
 
     private fun aktuelleStatuserForRolleTilSaksbehandler(roller: List<Rolle>) = roller.flatMap {

@@ -6,6 +6,7 @@ import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.database.DataSourceBuilder
+import no.nav.etterlatte.libs.database.POSTGRES_VERSION
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.sak.SakDao
 import org.junit.jupiter.api.AfterAll
@@ -20,7 +21,7 @@ import org.testcontainers.junit.jupiter.Container
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class DatabaseContextTest {
     @Container
-    private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:15")
+    private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:$POSTGRES_VERSION")
     private val user = mockk<SaksbehandlerMedEnheterOgRoller>()
 
     @BeforeAll

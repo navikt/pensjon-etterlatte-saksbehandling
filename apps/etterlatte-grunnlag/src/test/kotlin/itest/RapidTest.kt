@@ -13,6 +13,7 @@ import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.database.DataSourceBuilder
+import no.nav.etterlatte.libs.database.POSTGRES_VERSION
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.testdata.grunnlag.statiskUuid
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -29,7 +30,7 @@ import org.testcontainers.junit.jupiter.Container
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class RapidTest {
     @Container
-    private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:14")
+    private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:$POSTGRES_VERSION")
 
     private lateinit var opplysningRepo: OpplysningDao
     private lateinit var grunnlagService: RealGrunnlagService

@@ -31,6 +31,8 @@ import no.nav.etterlatte.libs.common.behandling.PersonMedSakerOgRoller
 import no.nav.etterlatte.libs.common.behandling.SakOgRolle
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
+import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveType
+import no.nav.etterlatte.libs.common.oppgaveNy.opprettNyOppgaveMedReferanseOgSak
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.pdlhendelse.Adressebeskyttelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
@@ -43,8 +45,6 @@ import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.oppgaveny.OppgaveServiceNy
-import no.nav.etterlatte.oppgaveny.OppgaveType
-import no.nav.etterlatte.oppgaveny.opprettNyOppgaveMedReferanseOgSak
 import no.nav.etterlatte.sak.SakService
 import no.nav.etterlatte.sak.SakTilgangDao
 import no.nav.etterlatte.sak.TilgangServiceImpl

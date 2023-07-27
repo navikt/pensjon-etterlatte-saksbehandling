@@ -25,9 +25,11 @@ class OmregningService(
             Prosesstype.AUTOMATISK -> revurderingService.opprettAutomatiskRevurdering(
                 sakId = sakId,
                 forrigeBehandling = forrigeBehandling,
-                fraDato = fraDato,
                 revurderingAarsak = RevurderingAarsak.REGULERING,
-                kilde = Vedtaksloesning.GJENNY
+                virkningstidspunkt = fraDato,
+                kilde = Vedtaksloesning.GJENNY,
+                persongalleri = forrigeBehandling.persongalleri,
+                merknad = null
             )
 
             Prosesstype.MANUELL -> revurderingService.opprettManuellRevurdering(
@@ -35,7 +37,8 @@ class OmregningService(
                 forrigeBehandling = forrigeBehandling,
                 revurderingAarsak = RevurderingAarsak.REGULERING,
                 kilde = Vedtaksloesning.GJENNY,
-                paaGrunnAvHendelse = null
+                paaGrunnAvHendelse = null,
+                begrunnelse = null
             )
         } ?: throw Exception("Opprettelse av revurdering feilet for $sakId")
         return Triple(behandling.id, forrigeBehandling.id, behandling.sak.sakType)

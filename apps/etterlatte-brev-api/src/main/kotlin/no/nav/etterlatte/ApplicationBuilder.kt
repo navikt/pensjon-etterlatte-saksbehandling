@@ -2,12 +2,7 @@ package no.nav.etterlatte
 
 import com.typesafe.config.ConfigFactory
 import io.ktor.client.HttpClient
-import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.plugins.auth.Auth
-import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.client.plugins.defaultRequest
-import io.ktor.client.request.header
-import io.ktor.serialization.jackson.jackson
 import io.ktor.server.config.HoconApplicationConfig
 import no.nav.etterlatte.brev.BrevService
 import no.nav.etterlatte.brev.VedtaksbrevService
@@ -20,6 +15,8 @@ import no.nav.etterlatte.brev.behandling.SakOgBehandlingService
 import no.nav.etterlatte.brev.behandlingklient.BehandlingKlient
 import no.nav.etterlatte.brev.beregning.BeregningKlient
 import no.nav.etterlatte.brev.brevRoute
+import no.nav.etterlatte.brev.brevbaker.BrevbakerJSONBlockMixIn
+import no.nav.etterlatte.brev.brevbaker.BrevbakerJSONParagraphMixIn
 import no.nav.etterlatte.brev.brevbaker.BrevbakerKlient
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.distribusjon.DistribusjonKlient
@@ -32,11 +29,10 @@ import no.nav.etterlatte.brev.grunnlag.GrunnlagKlient
 import no.nav.etterlatte.brev.navansatt.NavansattKlient
 import no.nav.etterlatte.brev.vedtak.VedtaksvurderingKlient
 import no.nav.etterlatte.brev.vedtaksbrevRoute
-import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
-import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.requireEnvValue
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.migrate
+import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.libs.ktor.setReady
@@ -46,6 +42,7 @@ import no.nav.etterlatte.rivers.VedtaksbrevUnderkjent
 import no.nav.etterlatte.security.ktor.clientCredential
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
+import no.nav.pensjon.brevbaker.api.model.RenderedJsonLetter
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import rapidsandrivers.getRapidEnv
@@ -151,21 +148,21 @@ class ApplicationBuilder {
 
     fun start() = setReady().also { rapidsConnection.start() }
 
-    private fun httpClient(scope: String? = null, forventStatusSuccess: Boolean = true) = HttpClient(OkHttp) {
-        expectSuccess = forventStatusSuccess
-        install(ContentNegotiation) {
-            jackson()
-        }
-        if (scope != null) {
-            install(Auth) {
-                clientCredential {
-                    config = env.toMutableMap()
-                        .apply { put("AZURE_APP_OUTBOUND_SCOPE", requireNotNull(get(scope))) }
+    private fun httpClient(scope: String? = null, forventStatusSuccess: Boolean = true) = httpClient(
+        forventSuksess = forventStatusSuccess,
+        ekstraJacksoninnstillinger = {
+            it.addMixIn(RenderedJsonLetter.Block::class.java, BrevbakerJSONBlockMixIn::class.java)
+            it.addMixIn(RenderedJsonLetter.ParagraphContent::class.java, BrevbakerJSONParagraphMixIn::class.java)
+        },
+        auth = {
+            if (scope != null) {
+                it.install(Auth) {
+                    clientCredential {
+                        config = env.toMutableMap()
+                            .apply { put("AZURE_APP_OUTBOUND_SCOPE", requireNotNull(get(scope))) }
+                    }
                 }
             }
         }
-        defaultRequest {
-            header(X_CORRELATION_ID, getCorrelationId())
-        }
-    }.also { Runtime.getRuntime().addShutdownHook(Thread { it.close() }) }
+    )
 }

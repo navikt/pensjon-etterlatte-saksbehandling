@@ -24,6 +24,7 @@ import no.nav.etterlatte.behandling.manueltopphoer.RealManueltOpphoerService
 import no.nav.etterlatte.behandling.migrering.MigreringRepository
 import no.nav.etterlatte.behandling.omregning.MigreringService
 import no.nav.etterlatte.behandling.omregning.OmregningService
+import no.nav.etterlatte.behandling.revurdering.RevurderingDao
 import no.nav.etterlatte.behandling.revurdering.RevurderingServiceImpl
 import no.nav.etterlatte.common.klienter.PdlKlientImpl
 import no.nav.etterlatte.common.klienter.SkjermingKlient
@@ -126,11 +127,13 @@ class ApplicationContext(
     val hendelseDao = HendelseDao { databaseContext().activeTx() }
     val oppgaveDao = OppgaveDao { databaseContext().activeTx() }
     val kommerBarnetTilGodeDao = KommerBarnetTilGodeDao { databaseContext().activeTx() }
-    val behandlingDao = BehandlingDao(kommerBarnetTilGodeDao) { databaseContext().activeTx() }
+    val revurderingDao = RevurderingDao { databaseContext().activeTx() }
+    val behandlingDao = BehandlingDao(kommerBarnetTilGodeDao, revurderingDao) { databaseContext().activeTx() }
     val oppgaveDaoNy = OppgaveDaoNy { databaseContext().activeTx() }
     val sakDao = SakDao { databaseContext().activeTx() }
     val grunnlagsendringshendelseDao = GrunnlagsendringshendelseDao { databaseContext().activeTx() }
     val institusjonsoppholdDao = InstitusjonsoppholdDao { databaseContext().activeTx() }
+    val migreringRepository = MigreringRepository { databaseContext().activeTx() }
 
     // Klient
     val pdlKlient = PdlKlientImpl(pdlHttpClient, "http://etterlatte-pdltjenester")
@@ -168,7 +171,8 @@ class ApplicationContext(
             behandlingDao = behandlingDao,
             hendelseDao = hendelseDao,
             grunnlagsendringshendelseDao = grunnlagsendringshendelseDao,
-            kommerBarnetTilGodeService = kommerBarnetTilGodeService
+            kommerBarnetTilGodeService = kommerBarnetTilGodeService,
+            revurderingDao = revurderingDao
         )
 
     val gyldighetsproevingService =
@@ -231,7 +235,7 @@ class ApplicationContext(
         sakService = sakService,
         gyldighetsproevingService = gyldighetsproevingService,
         behandlingsHendelser = behandlingsHendelser,
-        migreringRepository = MigreringRepository(dataSource),
+        migreringRepository = migreringRepository,
         behandlingService = behandlingService,
         kommerBarnetTilGodeService = kommerBarnetTilGodeService,
         behandlingFactory = behandlingFactory

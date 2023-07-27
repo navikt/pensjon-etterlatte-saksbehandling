@@ -21,6 +21,7 @@ import no.nav.etterlatte.behandling.domain.OpprettBehandling
 import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeService
+import no.nav.etterlatte.behandling.revurdering.RevurderingDao
 import no.nav.etterlatte.behandling.revurdering.RevurderingServiceImpl
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
@@ -34,12 +35,12 @@ import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveType
+import no.nav.etterlatte.libs.common.oppgaveNy.opprettNyOppgaveMedReferanseOgSak
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.oppgaveny.OppgaveServiceNy
-import no.nav.etterlatte.oppgaveny.OppgaveType
-import no.nav.etterlatte.oppgaveny.opprettNyOppgaveMedReferanseOgSak
 import no.nav.etterlatte.revurdering
 import no.nav.etterlatte.sak.SakDao
 import no.nav.etterlatte.sak.SakServiceFeatureToggle
@@ -70,6 +71,7 @@ class BehandlingFactoryTest {
     private val kommerBarnetTilGodeService = mockk<KommerBarnetTilGodeService>().also {
         every { it.hentKommerBarnetTilGode(any()) } returns null
     }
+    private val revurderingDao = mockk<RevurderingDao>()
     private val revurderingService = RevurderingServiceImpl(
         oppgaveService,
         grunnlagService,
@@ -78,7 +80,8 @@ class BehandlingFactoryTest {
         behandlingDaoMock,
         hendelseDaoMock,
         grunnlagsendringshendelseDao,
-        kommerBarnetTilGodeService
+        kommerBarnetTilGodeService,
+        revurderingDao
     )
     private val behandlingFactory = BehandlingFactory(
         oppgaveService,

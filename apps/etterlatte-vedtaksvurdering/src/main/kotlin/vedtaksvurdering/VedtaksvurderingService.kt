@@ -1,10 +1,14 @@
 package no.nav.etterlatte.vedtaksvurdering
 
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.oppgaveNy.AttesterVedtakOppgave
+import no.nav.etterlatte.libs.common.oppgaveNy.AttesteringsOppgave
+import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveType
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.REVURDERING_AARSAK
@@ -93,34 +97,43 @@ class VedtaksvurderingService(
 
         val sak = behandlingKlient.hentSak(vedtak.sakId, brukerTokenInfo)
 
-        val fattetVedtak = repository.fattVedtak(
-            behandlingId,
-            VedtakFattet(
-                brukerTokenInfo.ident(),
-                sak.enhet,
-                Tidspunkt.now(clock)
-            )
-        )
-
-        behandlingKlient.fattVedtak(
-            behandlingId = behandlingId,
-            brukerTokenInfo = brukerTokenInfo,
-            vedtakHendelse = VedtakHendelse(
-                vedtakId = fattetVedtak.id,
-                inntruffet = fattetVedtak.vedtakFattet?.tidspunkt!!,
-                saksbehandler = fattetVedtak.vedtakFattet.ansvarligSaksbehandler
-            )
-        )
-
+        val fattetVedtak = repository.inTransaction { tx ->
+            fattVedtak(
+                behandlingId,
+                VedtakFattet(
+                    brukerTokenInfo.ident(),
+                    sak.enhet,
+                    Tidspunkt.now(clock)
+                ),
+                tx
+            ).also { fattetVedtak ->
+                runBlocking {
+                    behandlingKlient.oppgaveAttestering(
+                        brukerTokenInfo = brukerTokenInfo,
+                        attesterVedtakOppgave = AttesterVedtakOppgave(
+                            attesteringsOppgave = AttesteringsOppgave(
+                                sakId = sak.id,
+                                referanse = behandlingId.toString(),
+                                oppgaveType = OppgaveType.ATTESTERING
+                            ),
+                            vedtakHendelse = VedtakHendelse(
+                                vedtakId = fattetVedtak.id,
+                                inntruffet = fattetVedtak.vedtakFattet?.tidspunkt!!,
+                                saksbehandler = fattetVedtak.vedtakFattet.ansvarligSaksbehandler
+                            )
+                        )
+                    )
+                }
+            }
+        }
         sendToRapid(
             lagRiverMelding(
                 vedtakhendelse = KafkaHendelseType.FATTET,
                 vedtak = fattetVedtak,
-                tekniskTid = fattetVedtak.vedtakFattet.tidspunkt.toLocalDatetimeUTC()
+                tekniskTid = fattetVedtak.vedtakFattet!!.tidspunkt.toLocalDatetimeUTC()
             ),
             behandlingId
         )
-
         return fattetVedtak
     }
 

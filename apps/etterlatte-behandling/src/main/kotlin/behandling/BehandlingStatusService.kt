@@ -9,6 +9,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.sak.SakIDListe
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
+import no.nav.etterlatte.vedtaksvurdering.VedtakHendelse
 import java.time.LocalDateTime
 import java.util.*
 
@@ -18,7 +19,7 @@ interface BehandlingStatusService {
     fun settBeregnet(behandlingId: UUID, dryRun: Boolean = true)
     fun settAvkortet(behandlingId: UUID, dryRun: Boolean = true)
     fun sjekkOmKanFatteVedtak(behandlingId: UUID)
-    fun settFattetVedtak(behandlingId: UUID, vedtakHendelse: VedtakHendelse)
+    fun settFattetVedtak(behandling: Behandling, vedtakHendelse: VedtakHendelse)
     fun sjekkOmKanAttestere(behandlingId: UUID)
     fun settAttestertVedtak(behandlingId: UUID, vedtakHendelse: VedtakHendelse)
     fun sjekkOmKanReturnereVedtak(behandlingId: UUID)
@@ -64,12 +65,9 @@ class BehandlingStatusServiceImpl constructor(
         hentBehandling(behandlingId).tilFattetVedtak()
     }
 
-    override fun settFattetVedtak(behandlingId: UUID, vedtakHendelse: VedtakHendelse) {
-        val behandling = hentBehandling(behandlingId)
-        inTransaction {
-            lagreNyBehandlingStatus(behandling.tilFattetVedtak())
-            registrerVedtakHendelse(behandlingId, vedtakHendelse, HendelseType.FATTET)
-        }
+    override fun settFattetVedtak(behandling: Behandling, vedtakHendelse: VedtakHendelse) {
+        lagreNyBehandlingStatus(behandling.tilFattetVedtak())
+        registrerVedtakHendelse(behandling.id, vedtakHendelse, HendelseType.FATTET)
     }
 
     override fun sjekkOmKanAttestere(behandlingId: UUID) {

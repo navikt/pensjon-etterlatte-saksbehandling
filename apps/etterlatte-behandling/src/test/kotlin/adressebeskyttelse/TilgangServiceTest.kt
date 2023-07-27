@@ -3,6 +3,7 @@ package no.nav.etterlatte.adressebeskyttelse
 import com.nimbusds.jwt.JWTClaimsSet
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
+import no.nav.etterlatte.behandling.revurdering.RevurderingDao
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
@@ -10,6 +11,7 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.database.DataSourceBuilder
+import no.nav.etterlatte.libs.database.POSTGRES_VERSION
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.opprettBehandling
 import no.nav.etterlatte.sak.SakDao
@@ -32,7 +34,7 @@ import javax.sql.DataSource
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class TilgangServiceTest {
     @Container
-    private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:14")
+    private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:$POSTGRES_VERSION")
 
     private lateinit var dataSource: DataSource
     private lateinit var tilgangService: TilgangService
@@ -56,7 +58,12 @@ class TilgangServiceTest {
 
         tilgangService = TilgangServiceImpl(SakTilgangDao(dataSource))
         sakRepo = SakDao { dataSource.connection }
-        behandlingRepo = BehandlingDao(KommerBarnetTilGodeDao { dataSource.connection }) { dataSource.connection }
+        behandlingRepo = BehandlingDao(
+            KommerBarnetTilGodeDao {
+                dataSource.connection
+            },
+            RevurderingDao { dataSource.connection }
+        ) { dataSource.connection }
     }
 
     @Test

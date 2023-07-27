@@ -27,6 +27,7 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.libs.database.DataSourceBuilder
+import no.nav.etterlatte.libs.database.POSTGRES_VERSION
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
 import no.nav.etterlatte.libs.ktor.restModule
@@ -55,7 +56,7 @@ import javax.sql.DataSource
 internal class VilkaarsvurderingRoutesTest {
 
     @Container
-    private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:14")
+    private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:$POSTGRES_VERSION")
     private val server = MockOAuth2Server()
     private lateinit var hoconApplicationConfig: HoconApplicationConfig
     private val behandlingKlient = mockk<BehandlingKlient>()

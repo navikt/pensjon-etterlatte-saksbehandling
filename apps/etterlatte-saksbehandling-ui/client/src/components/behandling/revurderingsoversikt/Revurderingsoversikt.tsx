@@ -87,6 +87,12 @@ export const Revurderingsoversikt = (props: { behandling: IDetaljertBehandling }
         </BodyShort>
       </ContentHeader>
       <Innhold>
+        {behandling.begrunnelse !== null ? (
+          <>
+            <Heading size={'small'}>Begrunnelse</Heading>
+            <BodyShort>{behandling.begrunnelse}</BodyShort>
+          </>
+        ) : null}
         {behandling.revurderingsaarsak === Revurderingsaarsak.SOESKENJUSTERING ? (
           <GrunnForSoeskenjustering behandling={behandling} />
         ) : null}

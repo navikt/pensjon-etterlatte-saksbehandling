@@ -100,7 +100,8 @@ class SakOgBehandlingService(
             revurderingsaarsak = vedtak.behandling.revurderingsaarsak,
             revurderingInfo = vedtak.behandling.revurderingInfo,
             virkningsdato = vedtak.virkningstidspunkt,
-            innvilgelsesdato = datoInnvilgelse
+            innvilgelsesdato = datoInnvilgelse,
+            adopsjonsdato = LocalDate.now() // TODO: Denne må vi hente anten frå PDL eller brukarinput
         )
     }
 

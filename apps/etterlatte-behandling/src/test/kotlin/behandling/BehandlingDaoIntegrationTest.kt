@@ -5,6 +5,7 @@ import no.nav.etterlatte.behandling.domain.ManueltOpphoer
 import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
 import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerAarsak
+import no.nav.etterlatte.behandling.revurdering.RevurderingDao
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -27,6 +28,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.database.DataSourceBuilder
+import no.nav.etterlatte.libs.database.POSTGRES_VERSION
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.opprettBehandling
 import no.nav.etterlatte.persongalleri
@@ -49,7 +51,7 @@ import javax.sql.DataSource
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class BehandlingDaoIntegrationTest {
     @Container
-    private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:14")
+    private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:$POSTGRES_VERSION")
 
     private lateinit var dataSource: DataSource
     private lateinit var sakRepo: SakDao
@@ -71,7 +73,13 @@ internal class BehandlingDaoIntegrationTest {
         val connection = dataSource.connection
         sakRepo = SakDao { connection }
         kommerBarnetTilGodeDao = KommerBarnetTilGodeDao { connection }
-        behandlingRepo = BehandlingDao(kommerBarnetTilGodeDao = kommerBarnetTilGodeDao, connection = { connection })
+        behandlingRepo = BehandlingDao(
+            kommerBarnetTilGodeDao = kommerBarnetTilGodeDao,
+            RevurderingDao {
+                connection
+            },
+            connection = { connection }
+        )
     }
 
     @AfterEach

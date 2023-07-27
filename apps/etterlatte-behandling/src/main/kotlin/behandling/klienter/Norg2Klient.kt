@@ -4,7 +4,6 @@ import com.github.benmanes.caffeine.cache.Caffeine
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.plugins.ResponseException
-import io.ktor.client.request.header
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
@@ -13,8 +12,6 @@ import io.ktor.http.isSuccess
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.domain.ArbeidsFordelingEnhet
 import no.nav.etterlatte.behandling.domain.ArbeidsFordelingRequest
-import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
-import no.nav.etterlatte.libs.common.logging.getXCorrelationId
 import org.slf4j.LoggerFactory
 import java.time.Duration
 
@@ -46,8 +43,6 @@ class Norg2KlientImpl(private val client: HttpClient, private val url: String) :
 
                 runBlocking {
                     val response = client.post("$url/arbeidsfordeling/enheter/bestmatch") {
-                        header(X_CORRELATION_ID, getXCorrelationId())
-                        header("Nav_Call_Id", getXCorrelationId())
                         contentType(ContentType.Application.Json)
                         setBody(request)
                     }

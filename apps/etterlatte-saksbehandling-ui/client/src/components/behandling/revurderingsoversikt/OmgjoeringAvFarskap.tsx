@@ -62,11 +62,11 @@ export const OmgjoeringAvFarskap = (props: { behandling: IDetaljertBehandling })
       </Heading>
       {redigerbar ? (
         <SkjemaWrapper onSubmit={handlesubmit}>
-          <NavnInput navn={naavaerendeFar || standardnavn()} update={(n: Navn) => setNaavaerendeFar(n)} />
+          <NavnInput navn={forrigeFar || standardnavn()} update={(n: Navn) => setForrigeFar(n)} />
           <Heading size="medium" level="2">
             Hvem er registrert som far nå?
           </Heading>
-          <NavnInput navn={forrigeFar || standardnavn()} update={(n: Navn) => setForrigeFar(n)} />
+          <NavnInput navn={naavaerendeFar || standardnavn()} update={(n: Navn) => setNaavaerendeFar(n)} />
           <Button loading={isPending(lagrestatus)} variant="primary" size="small">
             Lagre
           </Button>

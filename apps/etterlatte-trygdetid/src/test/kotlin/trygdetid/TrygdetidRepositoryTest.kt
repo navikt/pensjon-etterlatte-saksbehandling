@@ -10,6 +10,7 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.database.DataSourceBuilder
+import no.nav.etterlatte.libs.database.POSTGRES_VERSION
 import no.nav.etterlatte.libs.database.migrate
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
@@ -31,7 +32,7 @@ import javax.sql.DataSource
 internal class TrygdetidRepositoryTest {
 
     @Container
-    private val postgres = PostgreSQLContainer<Nothing>("postgres:14")
+    private val postgres = PostgreSQLContainer<Nothing>("postgres:$POSTGRES_VERSION")
     private lateinit var repository: TrygdetidRepository
     private lateinit var dataSource: DataSource
 

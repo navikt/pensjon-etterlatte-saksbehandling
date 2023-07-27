@@ -1,8 +1,9 @@
-package no.nav.etterlatte.oppgaveny
+package no.nav.etterlatte.libs.common.oppgaveNy
 
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.vedtaksvurdering.VedtakHendelse
 import java.util.*
 
 data class OppgaveNy(
@@ -29,7 +30,8 @@ enum class Status {
 
 enum class OppgaveType {
     FOERSTEGANGSBEHANDLING,
-    REVUDERING,
+    REVURDERING,
+    ATTESTERING,
     HENDELSE,
     MANUELT_OPPHOER,
     EKSTERN
@@ -42,6 +44,21 @@ data class SaksbehandlerEndringDto(
 
 data class FjernSaksbehandlerRequest(
     val oppgaveId: UUID
+)
+
+data class RedigerFristRequest(
+    val oppgaveId: UUID,
+    val frist: Tidspunkt
+)
+
+data class AttesteringsOppgave(
+    val sakId: Long,
+    val referanse: String,
+    val oppgaveType: OppgaveType
+)
+data class AttesterVedtakOppgave(
+    val attesteringsOppgave: AttesteringsOppgave,
+    val vedtakHendelse: VedtakHendelse
 )
 
 fun opprettNyOppgaveMedReferanseOgSak(

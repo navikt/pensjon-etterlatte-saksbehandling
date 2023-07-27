@@ -28,10 +28,10 @@ import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
+import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveType
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
-import no.nav.etterlatte.oppgaveny.OppgaveType
 import no.nav.etterlatte.persongalleri
 import no.nav.etterlatte.sak.SakServiceFeatureToggle
 import org.junit.jupiter.api.AfterAll
@@ -125,13 +125,15 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
                 applicationContext.behandlingDao,
                 applicationContext.hendelseDao,
                 applicationContext.grunnlagsendringshendelseDao,
-                applicationContext.kommerBarnetTilGodeService
+                applicationContext.kommerBarnetTilGodeService,
+                applicationContext.revurderingDao
             ).opprettManuellRevurdering(
                 sakId = sak.id,
                 forrigeBehandling = behandling!!,
                 revurderingAarsak = RevurderingAarsak.REGULERING,
                 kilde = Vedtaksloesning.GJENNY,
-                paaGrunnAvHendelse = null
+                paaGrunnAvHendelse = null,
+                begrunnelse = null
             )
 
         verify { grunnlagService.leggInnNyttGrunnlag(revurdering!!) }
@@ -139,7 +141,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
             oppgaveService.opprettNyOppgaveMedSakOgReferanse(
                 revurdering?.id.toString(),
                 sak.id,
-                OppgaveType.REVUDERING
+                OppgaveType.REVURDERING
             )
         }
         inTransaction {
@@ -189,14 +191,16 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
             applicationContext.behandlingDao,
             applicationContext.hendelseDao,
             applicationContext.grunnlagsendringshendelseDao,
-            applicationContext.kommerBarnetTilGodeService
+            applicationContext.kommerBarnetTilGodeService,
+            applicationContext.revurderingDao
         )
         val revurdering = revurderingService.opprettManuellRevurdering(
             sakId = sak.id,
             forrigeBehandling = behandling!!,
             revurderingAarsak = RevurderingAarsak.SOESKENJUSTERING,
             kilde = Vedtaksloesning.GJENNY,
-            paaGrunnAvHendelse = null
+            paaGrunnAvHendelse = null,
+            begrunnelse = null
         )
         val revurderingInfo = RevurderingInfo.Soeskenjustering(BarnepensjonSoeskenjusteringGrunn.SOESKEN_DOER)
         val fikkLagret = revurderingService.lagreRevurderingInfo(
@@ -250,7 +254,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
                 oppgaveService.opprettNyOppgaveMedSakOgReferanse(
                     revurdering.id.toString(),
                     sak.id,
-                    OppgaveType.REVUDERING
+                    OppgaveType.REVURDERING
                 )
             }
             confirmVerified(hendelser, grunnlagService, oppgaveService)
@@ -297,13 +301,15 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
                 applicationContext.behandlingDao,
                 applicationContext.hendelseDao,
                 applicationContext.grunnlagsendringshendelseDao,
-                applicationContext.kommerBarnetTilGodeService
+                applicationContext.kommerBarnetTilGodeService,
+                applicationContext.revurderingDao
             ).opprettManuellRevurdering(
                 sakId = sak.id,
                 forrigeBehandling = behandling!!,
                 revurderingAarsak = RevurderingAarsak.REGULERING,
                 kilde = Vedtaksloesning.GJENNY,
-                paaGrunnAvHendelse = null
+                paaGrunnAvHendelse = null,
+                begrunnelse = null
             )
         )
 
@@ -347,7 +353,8 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
                 applicationContext.behandlingDao,
                 applicationContext.hendelseDao,
                 applicationContext.grunnlagsendringshendelseDao,
-                applicationContext.kommerBarnetTilGodeService
+                applicationContext.kommerBarnetTilGodeService,
+                applicationContext.revurderingDao
             )
 
         val behandlingFactory =
@@ -394,7 +401,8 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
             forrigeBehandling = behandling!!,
             revurderingAarsak = RevurderingAarsak.REGULERING,
             kilde = Vedtaksloesning.GJENNY,
-            paaGrunnAvHendelse = hendelse.id
+            paaGrunnAvHendelse = hendelse.id,
+            begrunnelse = null
         )
 
         inTransaction {
@@ -417,7 +425,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
                 oppgaveService.opprettNyOppgaveMedSakOgReferanse(
                     revurdering.id.toString(),
                     sak.id,
-                    OppgaveType.REVUDERING
+                    OppgaveType.REVURDERING
                 )
             }
             verify { hendelser.sendMeldingForHendelse(behandling, BehandlingHendelseType.OPPRETTET) }

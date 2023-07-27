@@ -33,6 +33,7 @@ import no.nav.etterlatte.libs.sporingslogg.Sporingslogg
 import no.nav.etterlatte.libs.sporingslogg.Sporingsrequest
 import no.nav.etterlatte.tilgangsstyring.filterForEnheter
 import no.nav.etterlatte.token.BrukerTokenInfo
+import no.nav.etterlatte.vedtaksvurdering.VedtakHendelse
 import org.slf4j.LoggerFactory
 import java.time.YearMonth
 import java.util.*
@@ -251,7 +252,8 @@ class BehandlingServiceImpl(
                 behandlingType = behandling.type,
                 søker = soeker.await()?.opplysning,
                 revurderingsaarsak = behandling.revurderingsaarsak(),
-                revurderinginfo = behandling.revurderingInfo()
+                revurderinginfo = behandling.revurderingInfo(),
+                begrunnelse = behandling.begrunnelse()
             ).also {
                 gjenlevende.await()?.fnr?.let { loggRequest(brukerTokenInfo, it) }
                 soeker.await()?.fnr?.let { loggRequest(brukerTokenInfo, it) }

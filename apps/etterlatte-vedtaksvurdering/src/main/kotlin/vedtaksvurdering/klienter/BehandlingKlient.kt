@@ -1,6 +1,9 @@
 package no.nav.etterlatte.vedtaksvurdering.klienter
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import com.github.michaelbull.result.Err
+import com.github.michaelbull.result.Ok
+import com.github.michaelbull.result.get
 import com.github.michaelbull.result.mapBoth
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
@@ -9,6 +12,7 @@ import no.nav.etterlatte.libs.common.SakTilgangsSjekk
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.oppgaveNy.AttesterVedtakOppgave
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
@@ -23,10 +27,13 @@ import java.util.*
 interface BehandlingKlient : BehandlingTilgangsSjekk, SakTilgangsSjekk {
     suspend fun hentBehandling(behandlingId: UUID, brukerTokenInfo: BrukerTokenInfo): DetaljertBehandling
     suspend fun hentSak(sakId: Long, brukerTokenInfo: BrukerTokenInfo): Sak
+    suspend fun oppgaveAttestering(
+        brukerTokenInfo: BrukerTokenInfo,
+        attesterVedtakOppgave: AttesterVedtakOppgave
+    ): Boolean
     suspend fun fattVedtak(
         behandlingId: UUID,
-        brukerTokenInfo: BrukerTokenInfo,
-        vedtakHendelse: VedtakHendelse? = null
+        brukerTokenInfo: BrukerTokenInfo
     ): Boolean
 
     suspend fun attester(
@@ -96,21 +103,38 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
         }
     }
 
+    override suspend fun oppgaveAttestering(
+        brukerTokenInfo: BrukerTokenInfo,
+        attesterVedtakOppgave: AttesterVedtakOppgave
+    ): Boolean {
+        logger.info(
+            "Attesterer oppgave og commiter sak for behandling" +
+                " ${attesterVedtakOppgave.attesteringsOppgave.referanse} " +
+                "sakId=${attesterVedtakOppgave.attesteringsOppgave.sakId}"
+        )
+        val resource = Resource(clientId = clientId, url = "$resourceUrl/fattvedtak-behandling")
+        val response = downstreamResourceClient.post(
+            resource = resource,
+            brukerTokenInfo = brukerTokenInfo,
+            postBody = attesterVedtakOppgave
+        )
+        return when (response) {
+            is Ok -> true
+            is Err -> {
+                logger.error(
+                    "Kan ikke attestere oppgaver og commite vedtak av type for behandling " +
+                        attesterVedtakOppgave.attesteringsOppgave.referanse
+                )
+                throw response.error
+            }
+        }
+    }
+
     override suspend fun fattVedtak(
         behandlingId: UUID,
-        brukerTokenInfo: BrukerTokenInfo,
-        vedtakHendelse: VedtakHendelse?
+        brukerTokenInfo: BrukerTokenInfo
     ): Boolean {
-        return if (vedtakHendelse == null) {
-            statussjekkForBehandling(behandlingId, brukerTokenInfo, BehandlingStatus.FATTET_VEDTAK)
-        } else {
-            commitStatussjekkForBehandling(
-                behandlingId,
-                brukerTokenInfo,
-                BehandlingStatus.FATTET_VEDTAK,
-                vedtakHendelse
-            )
-        }
+        return statussjekkForBehandling(behandlingId, brukerTokenInfo, BehandlingStatus.FATTET_VEDTAK)
     }
 
     override suspend fun attester(

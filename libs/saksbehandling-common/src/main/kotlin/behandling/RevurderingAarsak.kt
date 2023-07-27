@@ -85,6 +85,8 @@ enum class RevurderingAarsak(
     }
 
     fun gyldigForSakType(sakType: SakType): Boolean = gyldigFor.any { it == sakType }
+
+    fun erStoettaRevurdering(sakType: SakType) = kanBrukesIMiljo() && gyldigForSakType(sakType) && this != NY_SOEKNAD
 }
 
 enum class GcpEnv(val env: String) {

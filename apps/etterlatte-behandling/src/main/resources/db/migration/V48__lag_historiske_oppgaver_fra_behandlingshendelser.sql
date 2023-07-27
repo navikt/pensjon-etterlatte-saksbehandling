@@ -49,7 +49,8 @@ INTO oppgave (select gen_random_uuid()                                as id,
                                          end
                                  else case (SELECT hendelse
                                             from source s1
-                                            where source.behandlingid = s1.behandlingid and s1.motsatt_rekkefolge = 2)
+                                            where source.behandlingid = s1.behandlingid
+                                              and s1.motsatt_rekkefolge = 2)
                                           when 'VEDTAK:UNDERKJENT' then 'RETURNERT'
                                           when 'VEDTAK:ATTESTERT' then 'HENDELSE'
                                           when 'VEDTAK:FATTET' then 'ATTESTERING'
@@ -60,3 +61,42 @@ INTO oppgave (select gen_random_uuid()                                as id,
                      source.fnr                                       as fnr,
                      source.behandling_opprettet + interval '1 month' as frist
               FROM source);
+
+-- få med en åpen oppgave av riktig type for alle behandlinger som ikke er avsluttet. typen oppgave kan utledes
+-- fra den siste behandlingshendelsen som skjedde på denne behandlingen
+WITH hendelser_med_rekkefolge as (select *,
+                                         row_number() over (partition by behandlingid order by opprettet desc) as motsatt_rekkefolge
+                                  from behandlinghendelse hendelser
+                                  order by opprettet asc),
+     siste_hendelse_per_behandling as (select * from hendelser_med_rekkefolge where motsatt_rekkefolge = 1) -- motsatt_rekkefolge = 1 <=> siste hendelse
+INSERT
+INTO oppgave (SELECT gen_random_uuid()                                    as id,
+                     'UNDER_ARBEID'                                       as status,
+                     sak.enhet                                            as enhet,
+                     behandling.sak_id                                    as sak_id,
+                     null                                                 as saksbehandler,
+                     behandling.id                                        as referanse,
+                     null                                                 as merknad,
+                     sisteHendelse.opprettet,
+                     case sisteHendelse.hendelse
+                         when 'BEHANDLING:OPPRETTET'
+                             then case behandling.behandlingstype
+                                      when 'FØRSTEGANGSBEHANDLING' then 'FOERSTEGANGSBEHANDLING'
+                                      else behandling.behandlingstype
+                             end
+                         when 'BEHANDLING:AVBRUTT' then 'SKAL_IKKE_SKJE'
+                         when 'VEDTAK:FATTET' then 'ATTESTERING'
+                         when 'VEDTAK:UNDERKJENT' then 'RETURNERT'
+                         when 'VEDTAK:ATTESTERT' then 'SKAL_IKKE_SKJE'
+                         when 'VEDTAK:IVERKSATT' then 'SKAL_IKKE_SKJE'
+                         end                                              as type,
+                     sak.saktype                                          as saktype,
+                     sak.fnr                                              as fnr,
+                     behandling.behandling_opprettet + interval '1 month' as frist
+              FROM behandling behandling
+                       inner join sak sak on behandling.sak_id = sak.id
+                       inner join siste_hendelse_per_behandling sisteHendelse
+                                  on behandling.id = sisteHendelse.behandlingid
+              where behandling.status not in ('IVERKSATT', 'ATTESTERT', 'AVBRUTT'));
+
+

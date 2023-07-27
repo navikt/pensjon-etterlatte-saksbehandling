@@ -14,7 +14,6 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveType
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.oppgaveny.OppgaveServiceNy
@@ -106,10 +105,9 @@ class BehandlingFactory(
             }.also { behandling ->
                 behandling?.let {
                     grunnlagService.leggInnNyttGrunnlag(it)
-                    oppgaveService.opprettNyOppgaveForInnsendSoeknad(
+                    oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendSoeknad(
                         referanse = behandling.id.toString(),
-                        sakId = sak.id,
-                        oppgaveType = OppgaveType.FOERSTEGANGSBEHANDLING
+                        sakId = sak.id
                     )
                     behandlingHendelser.sendMeldingForHendelse(it, BehandlingHendelseType.OPPRETTET)
                 }

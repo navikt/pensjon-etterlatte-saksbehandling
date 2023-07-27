@@ -177,7 +177,7 @@ class OppgaveServiceNy(
         }
     }
 
-    fun opprettNyOppgaveForInnsendSoeknad(referanse: String, sakId: Long, oppgaveType: OppgaveType): OppgaveNy {
+    fun opprettFoerstegangsbehandlingsOppgaveForInnsendSoeknad(referanse: String, sakId: Long): OppgaveNy {
         val oppgaverForBehandling = oppgaveDaoNy.hentOppgaverForBehandling(referanse)
         val oppgaverSomKanLukkes = oppgaverForBehandling.filter { o ->
             o.status in listOf(
@@ -189,7 +189,7 @@ class OppgaveServiceNy(
             oppgaveDaoNy.endreStatusPaaOppgave(it.id, Status.AVBRUTT)
         }
 
-        return opprettNyOppgaveMedSakOgReferanse(referanse, sakId, oppgaveType)
+        return opprettNyOppgaveMedSakOgReferanse(referanse, sakId, OppgaveType.FOERSTEGANGSBEHANDLING)
     }
 
     fun opprettNyOppgaveMedSakOgReferanse(referanse: String, sakId: Long, oppgaveType: OppgaveType): OppgaveNy {

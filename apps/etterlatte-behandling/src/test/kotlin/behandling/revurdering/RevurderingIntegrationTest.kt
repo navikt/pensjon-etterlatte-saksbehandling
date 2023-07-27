@@ -38,7 +38,6 @@ import no.nav.etterlatte.persongalleri
 import no.nav.etterlatte.sak.SakServiceFeatureToggle
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -150,7 +149,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
             )
         }
         inTransaction {
-            Assertions.assertEquals(revurdering, applicationContext.behandlingDao.hentBehandling(revurdering!!.id))
+            assertEquals(revurdering, applicationContext.behandlingDao.hentBehandling(revurdering!!.id))
             verify { hendelser.sendMeldingForHendelse(revurdering, BehandlingHendelseType.OPPRETTET) }
         }
         confirmVerified(hendelser, grunnlagService, oppgaveService)
@@ -217,7 +216,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
         assertTrue(fikkLagret)
         inTransaction {
             val lagretRevurdering = applicationContext.behandlingDao.hentBehandling(revurdering.id) as Revurdering
-            Assertions.assertEquals(revurderingInfo, lagretRevurdering.revurderingInfo)
+            assertEquals(revurderingInfo, lagretRevurdering.revurderingInfo)
         }
 
         // kan oppdatere
@@ -232,7 +231,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
         )
         inTransaction {
             val oppdatert = applicationContext.behandlingDao.hentBehandling(revurdering.id) as Revurdering
-            Assertions.assertEquals(nyRevurderingInfo, oppdatert.revurderingInfo)
+            assertEquals(nyRevurderingInfo, oppdatert.revurderingInfo)
         }
 
         inTransaction {
@@ -253,7 +252,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
         )
         inTransaction {
             val ferdigRevurdering = applicationContext.behandlingDao.hentBehandling(revurdering.id) as Revurdering
-            Assertions.assertEquals(nyRevurderingInfo, ferdigRevurdering.revurderingInfo)
+            assertEquals(nyRevurderingInfo, ferdigRevurdering.revurderingInfo)
             verify { hendelser.sendMeldingForHendelse(revurdering, BehandlingHendelseType.OPPRETTET) }
             verify { grunnlagService.leggInnNyttGrunnlag(revurdering) }
             verify {
@@ -427,6 +426,12 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
                     behandling!!.id.toString(),
                     sak.id,
                     OppgaveType.FOERSTEGANGSBEHANDLING
+                )
+            }
+            verify {
+                oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendSoeknad(
+                    behandling!!.id.toString(),
+                    sak.id
                 )
             }
             verify {

@@ -17,10 +17,23 @@ import java.sql.Connection
 import java.sql.ResultSet
 import java.util.*
 
-class OppgaveDaoNy(private val connection: () -> Connection) {
+interface OppgaveDaoNy {
+
+    fun lagreOppgave(oppgaveNy: OppgaveNy)
+    fun hentOppgave(oppgaveId: UUID): OppgaveNy?
+    fun hentOppgaverForBehandling(behandlingid: String): List<OppgaveNy>
+    fun hentOppgaver(oppgaveTyper: List<OppgaveType>): List<OppgaveNy>
+    fun finnOppgaverForStrengtFortroligOgStrengtFortroligUtland(statuser: List<OppgaveType>): List<OppgaveNy>
+    fun settNySaksbehandler(saksbehandlerEndringDto: SaksbehandlerEndringDto)
+    fun endreStatusPaaOppgave(oppgaveId: UUID, oppgaveStatus: Status)
+    fun fjernSaksbehandler(oppgaveId: UUID)
+    fun redigerFrist(redigerFristRequest: RedigerFristRequest)
+}
+
+class OppgaveDaoNyImpl(private val connection: () -> Connection) : OppgaveDaoNy {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    fun lagreOppgave(oppgaveNy: OppgaveNy) {
+    override fun lagreOppgave(oppgaveNy: OppgaveNy) {
         with(connection()) {
             val statement = prepareStatement(
                 """
@@ -45,7 +58,7 @@ class OppgaveDaoNy(private val connection: () -> Connection) {
         }
     }
 
-    fun hentOppgave(oppgaveId: UUID): OppgaveNy? {
+    override fun hentOppgave(oppgaveId: UUID): OppgaveNy? {
         with(connection()) {
             val statement = prepareStatement(
                 """
@@ -61,7 +74,7 @@ class OppgaveDaoNy(private val connection: () -> Connection) {
         }
     }
 
-    fun hentOppgaverForBehandling(behandlingid: String): List<OppgaveNy> {
+    override fun hentOppgaverForBehandling(behandlingid: String): List<OppgaveNy> {
         with(connection()) {
             val statement = prepareStatement(
                 """
@@ -79,7 +92,7 @@ class OppgaveDaoNy(private val connection: () -> Connection) {
         }
     }
 
-    fun hentOppgaver(oppgaveTyper: List<OppgaveType>): List<OppgaveNy> {
+    override fun hentOppgaver(oppgaveTyper: List<OppgaveType>): List<OppgaveNy> {
         if (oppgaveTyper.isEmpty()) return emptyList()
 
         with(connection()) {
@@ -104,7 +117,7 @@ class OppgaveDaoNy(private val connection: () -> Connection) {
         }
     }
 
-    fun finnOppgaverForStrengtFortroligOgStrengtFortroligUtland(statuser: List<OppgaveType>): List<OppgaveNy> {
+    override fun finnOppgaverForStrengtFortroligOgStrengtFortroligUtland(statuser: List<OppgaveType>): List<OppgaveNy> {
         with(connection()) {
             val statement = prepareStatement(
                 """
@@ -126,7 +139,7 @@ class OppgaveDaoNy(private val connection: () -> Connection) {
         }
     }
 
-    fun settNySaksbehandler(saksbehandlerEndringDto: SaksbehandlerEndringDto) {
+    override fun settNySaksbehandler(saksbehandlerEndringDto: SaksbehandlerEndringDto) {
         with(connection()) {
             val statement = prepareStatement(
                 """
@@ -144,7 +157,7 @@ class OppgaveDaoNy(private val connection: () -> Connection) {
         }
     }
 
-    fun endreStatusPaaOppgave(oppgaveId: UUID, oppgaveStatus: Status) {
+    override fun endreStatusPaaOppgave(oppgaveId: UUID, oppgaveStatus: Status) {
         with(connection()) {
             val statement = prepareStatement(
                 """
@@ -161,7 +174,7 @@ class OppgaveDaoNy(private val connection: () -> Connection) {
         }
     }
 
-    fun fjernSaksbehandler(oppgaveId: UUID) {
+    override fun fjernSaksbehandler(oppgaveId: UUID) {
         with(connection()) {
             val statement = prepareStatement(
                 """
@@ -177,7 +190,7 @@ class OppgaveDaoNy(private val connection: () -> Connection) {
         }
     }
 
-    fun redigerFrist(redigerFristRequest: RedigerFristRequest) {
+    override fun redigerFrist(redigerFristRequest: RedigerFristRequest) {
         with(connection()) {
             val statement = prepareStatement(
                 """

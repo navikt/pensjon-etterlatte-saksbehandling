@@ -20,9 +20,8 @@ import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
 import java.util.*
 
 class OppgaveServiceNy(
-    private val oppgaveDaoNy: OppgaveDaoNy,
-    private val sakDao: SakDao,
-    private val oppgaveDaoEndringer: OppgaveDaoEndringer
+    private val oppgaveDaoNy: OppgaveDaoMedEndringssporing,
+    private val sakDao: SakDao
 ) {
 
     fun finnOppgaverForBruker(bruker: SaksbehandlerMedRoller): List<OppgaveNy> {
@@ -62,9 +61,6 @@ class OppgaveServiceNy(
             if (hentetOppgave != null) {
                 if (hentetOppgave.saksbehandler.isNullOrEmpty()) {
                     oppgaveDaoNy.settNySaksbehandler(saksbehandlerEndringDto)
-                        .also {
-                            lagreEndringerPaaOppgave(hentetOppgave)
-                        }
                 } else {
                     throw BadRequestException(
                         "Oppgaven har allerede en saksbehandler, id: ${saksbehandlerEndringDto.oppgaveId}"
@@ -81,9 +77,6 @@ class OppgaveServiceNy(
             val hentetOppgave = oppgaveDaoNy.hentOppgave(saksbehandlerEndringDto.oppgaveId)
             if (hentetOppgave != null) {
                 oppgaveDaoNy.settNySaksbehandler(saksbehandlerEndringDto)
-                    .also {
-                        lagreEndringerPaaOppgave(hentetOppgave)
-                    }
             } else {
                 throw NotFoundException("Oppgaven finnes ikke, id: ${saksbehandlerEndringDto.oppgaveId}")
             }
@@ -96,9 +89,6 @@ class OppgaveServiceNy(
             if (hentetOppgave != null) {
                 if (hentetOppgave.saksbehandler != null) {
                     oppgaveDaoNy.fjernSaksbehandler(fjernSaksbehandlerRequest.oppgaveId)
-                        .also {
-                            lagreEndringerPaaOppgave(hentetOppgave)
-                        }
                 } else {
                     throw BadRequestException(
                         "Oppgaven har ingen saksbehandler, id: ${fjernSaksbehandlerRequest.oppgaveId}"
@@ -119,9 +109,6 @@ class OppgaveServiceNy(
             if (hentetOppgave != null) {
                 if (hentetOppgave.saksbehandler != null) {
                     oppgaveDaoNy.redigerFrist(redigerFristRequest)
-                        .also {
-                            lagreEndringerPaaOppgave(hentetOppgave)
-                        }
                 } else {
                     throw BadRequestException(
                         "Oppgaven har ingen saksbehandler, id: ${redigerFristRequest.oppgaveId}"
@@ -140,9 +127,7 @@ class OppgaveServiceNy(
         }
         try {
             val oppgaveUnderbehandling = behandlingsoppgaver.single { it.status == Status.UNDER_BEHANDLING }
-            oppgaveDaoNy.endreStatusPaaOppgave(oppgaveUnderbehandling.id, Status.FERDIGSTILT).also {
-                lagreEndringerPaaOppgave(oppgaveUnderbehandling)
-            }
+            oppgaveDaoNy.endreStatusPaaOppgave(oppgaveUnderbehandling.id, Status.FERDIGSTILT)
             return opprettNyOppgaveMedSakOgReferanse(
                 attesteringsoppgave.referanse,
                 attesteringsoppgave.sakId,
@@ -161,11 +146,6 @@ class OppgaveServiceNy(
                 e
             )
         }
-    }
-
-    fun lagreEndringerPaaOppgave(oppgaveFoer: OppgaveNy) {
-        val oppgaveEtter = oppgaveDaoNy.hentOppgave(oppgaveFoer.id)!!
-        oppgaveDaoEndringer.lagreEndringerPaaOppgave(oppgaveFoer, oppgaveEtter)
     }
 
     fun opprettNyOppgaveMedSakOgReferanse(referanse: String, sakId: Long, oppgaveType: OppgaveType): OppgaveNy {

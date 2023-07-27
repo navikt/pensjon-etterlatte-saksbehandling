@@ -50,7 +50,7 @@ class OppgaveServiceNyTest {
     private lateinit var oppgaveDaoNy: OppgaveDaoNy
     private lateinit var oppgaveServiceNy: OppgaveServiceNy
     private lateinit var saktilgangDao: SakTilgangDao
-    private lateinit var oppgaveDaoEndringer: OppgaveDaoEndringer
+    private lateinit var oppgaveDaoMedEndringssporing: OppgaveDaoMedEndringssporing
     private val saksbehandlerRolleDev = "8bb9b8d1-f46a-4ade-8ee8-5895eccdf8cf"
     private val strengtfortroligDev = "5ef775f2-61f8-4283-bf3d-8d03f428aa14"
     private val attestantRolleDev = "63f46f74-84a8-4d1c-87a8-78532ab3ae60"
@@ -72,9 +72,9 @@ class OppgaveServiceNyTest {
 
         val connection = dataSource.connection
         sakDao = SakDao { connection }
-        oppgaveDaoNy = OppgaveDaoNy { connection }
-        oppgaveDaoEndringer = OppgaveDaoEndringer { connection }
-        oppgaveServiceNy = OppgaveServiceNy(oppgaveDaoNy, sakDao, oppgaveDaoEndringer)
+        oppgaveDaoNy = OppgaveDaoNyImpl { connection }
+        oppgaveDaoMedEndringssporing = OppgaveDaoMedEndringssporingImpl(oppgaveDaoNy) { connection }
+        oppgaveServiceNy = OppgaveServiceNy(oppgaveDaoMedEndringssporing, sakDao)
         saktilgangDao = SakTilgangDao(dataSource)
     }
 
@@ -429,7 +429,7 @@ class OppgaveServiceNyTest {
         val oppgaveMedNySaksbehandler = oppgaveServiceNy.hentOppgave(nyOppgave.id)
         Assertions.assertEquals(nysaksbehandler, oppgaveMedNySaksbehandler?.saksbehandler)
 
-        val hentEndringerForOppgave = oppgaveDaoEndringer.hentEndringerForOppgave(nyOppgave.id)
+        val hentEndringerForOppgave = oppgaveDaoMedEndringssporing.hentEndringerForOppgave(nyOppgave.id)
         Assertions.assertEquals(1, hentEndringerForOppgave.size)
         val endringPaaOppgave = hentEndringerForOppgave[0]
         Assertions.assertNull(endringPaaOppgave.oppgaveFoer.saksbehandler)

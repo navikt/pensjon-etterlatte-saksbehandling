@@ -1,4 +1,5 @@
 import { OppgaveDTOny, Oppgavestatus, Oppgavetype } from '~shared/api/oppgaverny'
+import { isBefore } from 'date-fns'
 
 export const SAKSBEHANDLERFILTER = {
   visAlle: 'Vis alle',
@@ -110,6 +111,7 @@ function finnFnrIOppgaver(fnr: string, oppgaver: OppgaveDTOny[]): OppgaveDTOny[]
 
 export function filtrerOppgaver(
   enhetsFilter: EnhetFilterKeys,
+  fristFilter: FristFilterKeys,
   saksbehandlerFilter: SaksbehandlerFilterKeys,
   ytelseFilter: YtelseFilterKeys,
   oppgavestatusFilter: OppgavestatusFilterKeys,
@@ -122,5 +124,26 @@ export function filtrerOppgaver(
   const ytelseFiltrert = filtrerYtelse(ytelseFilter, saksbehandlerFiltrert)
   const oppgaveFiltrert = filtrerOppgaveStatus(oppgavestatusFilter, ytelseFiltrert)
   const oppgaveTypeFiltrert = filtrerOppgaveType(oppgavetypeFilter, oppgaveFiltrert)
-  return finnFnrIOppgaver(fnr, oppgaveTypeFiltrert)
+  const fristFiltrert = filtrerFrist(fristFilter, oppgaveTypeFiltrert)
+
+  return finnFnrIOppgaver(fnr, fristFiltrert)
+}
+export type FristFilterKeys = keyof typeof FRISTFILTER
+
+export const FRISTFILTER = {
+  visAlle: 'Vis alle',
+  fristHarPassert: 'Frist har passert',
+  manglerFrist: 'Mangler frist',
+}
+
+export function filtrerFrist(fristFilterKeys: FristFilterKeys, oppgaver: OppgaveDTOny[]) {
+  if (fristFilterKeys === 'visAlle') return oppgaver
+  else if (fristFilterKeys === 'manglerFrist') {
+    const oppgaverUtenFrist = oppgaver.filter((o) => !o.frist)
+    return oppgaverUtenFrist
+  } else {
+    const oppgaverMedFrist = oppgaver.filter((o) => o.frist)
+    const sortertEtterFrist = oppgaverMedFrist.sort((a, b) => new Date(a.frist) - new Date(b.frist))
+    return sortertEtterFrist.filter((o) => isBefore(new Date(o.frist), new Date()))
+  }
 }

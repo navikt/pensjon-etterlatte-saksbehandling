@@ -17,9 +17,12 @@ import {
   YTELSEFILTER,
   YtelseFilterKeys,
   ENHETFILTER,
+  FRISTFILTER,
+  FristFilterKeys,
 } from '~components/nyoppgavebenk/Oppgavelistafiltre'
 import { HandlingerForOppgave } from '~components/nyoppgavebenk/HandlingerForOppgave'
 import { OppgavetypeTag, SaktypeTag } from '~components/nyoppgavebenk/Tags'
+import { format, isBefore } from 'date-fns'
 
 const FilterFlex = styled.div`
   display: flex;
@@ -36,10 +39,15 @@ const ButtonWrapper = styled.div`
   }
 `
 
+const FristWrapper = styled.span<{ fristHarPassert: boolean }>`
+  color: ${(p) => p.fristHarPassert && 'red'};
+`
+
 export const Oppgavelista = (props: { oppgaver: ReadonlyArray<OppgaveDTOny>; hentOppgaver: () => void }) => {
   const { oppgaver, hentOppgaver } = props
 
   const [saksbehandlerFilter, setSaksbehandlerFilter] = useState<SaksbehandlerFilterKeys>('IkkeTildelt')
+  const [fristFilter, setFristFilter] = useState<FristFilterKeys>('visAlle')
   const [enhetsFilter, setEnhetsFilter] = useState<EnhetFilterKeys>('visAlle')
   const [ytelseFilter, setYtelseFilter] = useState<YtelseFilterKeys>('visAlle')
   const [oppgavestatusFilter, setOppgavestatusFilter] = useState<OppgavestatusFilterKeys>('visAlle')
@@ -50,6 +58,7 @@ export const Oppgavelista = (props: { oppgaver: ReadonlyArray<OppgaveDTOny>; hen
   const mutableOppgaver = oppgaver.concat()
   const filtrerteOppgaver = filtrerOppgaver(
     enhetsFilter,
+    fristFilter,
     saksbehandlerFilter,
     ytelseFilter,
     oppgavestatusFilter,
@@ -71,6 +80,13 @@ export const Oppgavelista = (props: { oppgaver: ReadonlyArray<OppgaveDTOny>; hen
           placeholder={'Søk'}
           autoComplete="off"
         />
+        <Select label="Frist" value={fristFilter} onChange={(e) => setFristFilter(e.target.value as FristFilterKeys)}>
+          {Object.entries(FRISTFILTER).map(([key, fristBeskrivelse]) => (
+            <option key={key} value={key}>
+              {fristBeskrivelse}
+            </option>
+          ))}
+        </Select>
         <Select
           label="Saksbehandler"
           value={saksbehandlerFilter}
@@ -191,7 +207,11 @@ export const Oppgavelista = (props: { oppgaver: ReadonlyArray<OppgaveDTOny>; hen
                         )}
                       </Table.DataCell>
                       <Table.DataCell>{sakType && <SaktypeTag sakType={sakType} />}</Table.DataCell>
-                      <Table.DataCell>{frist ? frist : 'Ingen frist'}</Table.DataCell>
+                      <Table.DataCell>
+                        <FristWrapper fristHarPassert={!!frist && isBefore(new Date(frist), new Date())}>
+                          {frist ? format(new Date(frist), 'dd.MM.yyyy') : 'Ingen frist'}
+                        </FristWrapper>
+                      </Table.DataCell>
                       <Table.DataCell>
                         <HandlingerForOppgave
                           oppgavetype={type}

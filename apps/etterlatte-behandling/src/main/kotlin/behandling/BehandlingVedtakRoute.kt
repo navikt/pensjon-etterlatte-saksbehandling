@@ -20,17 +20,17 @@ internal fun Route.behandlingVedtakRoute(
 ) {
     route("/fattvedtak") {
         post {
-            val vedtakEndringDTO = call.receive<VedtakEndringDTO>()
+            val fattVedtak = call.receive<VedtakEndringDTO>()
             val behandling = behandlingService.hentBehandling(
-                UUID.fromString(vedtakEndringDTO.vedtakOppgaveDTO.referanse)
+                UUID.fromString(fattVedtak.vedtakOppgaveDTO.referanse)
             )
             if (behandling == null) {
                 call.respond(HttpStatusCode.NotFound, "Fant ingen behandling")
             } else {
                 inTransaction {
-                    behandlingsstatusService.settFattetVedtak(behandling, vedtakEndringDTO.vedtakHendelse)
+                    behandlingsstatusService.settFattetVedtak(behandling, fattVedtak.vedtakHendelse)
                     oppgaveService.lukkOppgaveUnderbehandlingOgLagNyMedType(
-                        vedtakEndringDTO.vedtakOppgaveDTO,
+                        fattVedtak.vedtakOppgaveDTO,
                         OppgaveType.ATTESTERING
                     )
                 }
@@ -60,17 +60,17 @@ internal fun Route.behandlingVedtakRoute(
     }
     route("/attestervedtak") {
         post {
-            val underkjennVedtakOppgave = call.receive<VedtakEndringDTO>()
+            val attesterVedtakOppgave = call.receive<VedtakEndringDTO>()
             val behandling = behandlingService.hentBehandling(
-                UUID.fromString(underkjennVedtakOppgave.vedtakOppgaveDTO.referanse)
+                UUID.fromString(attesterVedtakOppgave.vedtakOppgaveDTO.referanse)
             )
             if (behandling == null) {
                 call.respond(HttpStatusCode.NotFound, "Fant ingen behandling")
             } else {
                 inTransaction {
-                    behandlingsstatusService.settAttestertVedtak(behandling, underkjennVedtakOppgave.vedtakHendelse)
+                    behandlingsstatusService.settAttestertVedtak(behandling, attesterVedtakOppgave.vedtakHendelse)
                     oppgaveService.ferdigStillOppgaveUnderBehandling(
-                        underkjennVedtakOppgave.vedtakOppgaveDTO
+                        attesterVedtakOppgave.vedtakOppgaveDTO
                     )
                 }
                 call.respond(HttpStatusCode.OK)

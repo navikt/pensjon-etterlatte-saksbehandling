@@ -19,7 +19,10 @@ import no.nav.etterlatte.sak.SakDao
 import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
 import java.util.*
 
-class OppgaveServiceNy(private val oppgaveDaoNy: OppgaveDaoNy, private val sakDao: SakDao) {
+class OppgaveServiceNy(
+    private val oppgaveDaoNy: OppgaveDaoMedEndringssporing,
+    private val sakDao: SakDao
+) {
 
     fun finnOppgaverForBruker(bruker: SaksbehandlerMedRoller): List<OppgaveNy> {
         val rollerSomBrukerHar = finnAktuelleRoller(bruker)

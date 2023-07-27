@@ -48,7 +48,8 @@ import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.libs.sporingslogg.Sporingslogg
 import no.nav.etterlatte.oppgave.OppgaveDao
 import no.nav.etterlatte.oppgave.OppgaveServiceImpl
-import no.nav.etterlatte.oppgaveny.OppgaveDaoNy
+import no.nav.etterlatte.oppgaveny.OppgaveDaoMedEndringssporingImpl
+import no.nav.etterlatte.oppgaveny.OppgaveDaoNyImpl
 import no.nav.etterlatte.oppgaveny.OppgaveServiceNy
 import no.nav.etterlatte.sak.RealSakService
 import no.nav.etterlatte.sak.SakDao
@@ -129,7 +130,8 @@ class ApplicationContext(
     val kommerBarnetTilGodeDao = KommerBarnetTilGodeDao { databaseContext().activeTx() }
     val revurderingDao = RevurderingDao { databaseContext().activeTx() }
     val behandlingDao = BehandlingDao(kommerBarnetTilGodeDao, revurderingDao) { databaseContext().activeTx() }
-    val oppgaveDaoNy = OppgaveDaoNy { databaseContext().activeTx() }
+    val oppgaveDaoNy = OppgaveDaoNyImpl { databaseContext().activeTx() }
+    val oppgaveDaoEndringer = OppgaveDaoMedEndringssporingImpl(oppgaveDaoNy) { databaseContext().activeTx() }
     val sakDao = SakDao { databaseContext().activeTx() }
     val grunnlagsendringshendelseDao = GrunnlagsendringshendelseDao { databaseContext().activeTx() }
     val institusjonsoppholdDao = InstitusjonsoppholdDao { databaseContext().activeTx() }
@@ -147,7 +149,7 @@ class ApplicationContext(
 
     // Service
     val oppgaveService = OppgaveServiceImpl(oppgaveDao, featureToggleService)
-    val oppgaveServiceNy = OppgaveServiceNy(oppgaveDaoNy, sakDao)
+    val oppgaveServiceNy = OppgaveServiceNy(oppgaveDaoEndringer, sakDao)
     val behandlingService = BehandlingServiceImpl(
         behandlingDao = behandlingDao,
         behandlingHendelser = behandlingsHendelser,

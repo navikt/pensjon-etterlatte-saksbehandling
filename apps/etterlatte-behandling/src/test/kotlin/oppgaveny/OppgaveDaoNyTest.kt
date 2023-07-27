@@ -48,7 +48,7 @@ internal class OppgaveDaoNyTest {
         ).apply { migrate() }
 
         val connection = dataSource.connection
-        oppgaveDaoNy = OppgaveDaoNy { connection }
+        oppgaveDaoNy = OppgaveDaoNyImpl { connection }
         sakDao = SakDao { connection }
         saktilgangDao = SakTilgangDao(dataSource)
     }

@@ -15,8 +15,8 @@ import no.nav.etterlatte.libs.common.oppgaveNy.FjernSaksbehandlerRequest
 import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveType
 import no.nav.etterlatte.libs.common.oppgaveNy.RedigerFristRequest
 import no.nav.etterlatte.libs.common.oppgaveNy.SaksbehandlerEndringDto
-import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.oppgaveNy.Status
+import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
@@ -50,6 +50,7 @@ class OppgaveServiceNyTest {
     private lateinit var oppgaveDaoNy: OppgaveDaoNy
     private lateinit var oppgaveServiceNy: OppgaveServiceNy
     private lateinit var saktilgangDao: SakTilgangDao
+    private lateinit var oppgaveDaoMedEndringssporing: OppgaveDaoMedEndringssporing
     private val saksbehandlerRolleDev = "8bb9b8d1-f46a-4ade-8ee8-5895eccdf8cf"
     private val strengtfortroligDev = "5ef775f2-61f8-4283-bf3d-8d03f428aa14"
     private val attestantRolleDev = "63f46f74-84a8-4d1c-87a8-78532ab3ae60"
@@ -71,8 +72,9 @@ class OppgaveServiceNyTest {
 
         val connection = dataSource.connection
         sakDao = SakDao { connection }
-        oppgaveDaoNy = OppgaveDaoNy { connection }
-        oppgaveServiceNy = OppgaveServiceNy(oppgaveDaoNy, sakDao)
+        oppgaveDaoNy = OppgaveDaoNyImpl { connection }
+        oppgaveDaoMedEndringssporing = OppgaveDaoMedEndringssporingImpl(oppgaveDaoNy) { connection }
+        oppgaveServiceNy = OppgaveServiceNy(oppgaveDaoMedEndringssporing, sakDao)
         saktilgangDao = SakTilgangDao(dataSource)
     }
 
@@ -337,7 +339,7 @@ class OppgaveServiceNyTest {
         )
 
         val adressebeskyttetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
-        val adressebeskyttetOppgave = oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
+        oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
             "referanse",
             adressebeskyttetSak.id,
             OppgaveType.FOERSTEGANGSBEHANDLING
@@ -359,7 +361,7 @@ class OppgaveServiceNyTest {
     @Test
     fun `Skal kun få saker som  er strengt fotrolig tilbake hvis saksbehandler har rolle strengt fortrolig`() {
         val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
-        val nyOppgave = oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
+        oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
             "referanse",
             opprettetSak.id,
             OppgaveType.FOERSTEGANGSBEHANDLING
@@ -388,7 +390,7 @@ class OppgaveServiceNyTest {
     @Test
     fun `saksbehandler med attestant rolle skal få attestant oppgaver`() {
         val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
-        val nyOppgave = oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
+        oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
             "referanse",
             opprettetSak.id,
             OppgaveType.FOERSTEGANGSBEHANDLING
@@ -411,5 +413,28 @@ class OppgaveServiceNyTest {
         val strengtFortroligOppgave = oppgaver[0]
         Assertions.assertEquals(attestantOppgave.id, strengtFortroligOppgave.id)
         Assertions.assertEquals(attestantOppgave.sakId, attestantSak.id)
+    }
+
+    @Test
+    fun `skal tracke at en tildeling av saksbehandler blir lagret med oppgaveendringer`() {
+        val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val nyOppgave = oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
+            "referanse",
+            opprettetSak.id,
+            OppgaveType.FOERSTEGANGSBEHANDLING
+        )
+        val nysaksbehandler = "nysaksbehandler"
+        oppgaveServiceNy.tildelSaksbehandler(SaksbehandlerEndringDto(nyOppgave.id, nysaksbehandler))
+
+        val oppgaveMedNySaksbehandler = oppgaveServiceNy.hentOppgave(nyOppgave.id)
+        Assertions.assertEquals(nysaksbehandler, oppgaveMedNySaksbehandler?.saksbehandler)
+
+        val hentEndringerForOppgave = oppgaveDaoMedEndringssporing.hentEndringerForOppgave(nyOppgave.id)
+        Assertions.assertEquals(1, hentEndringerForOppgave.size)
+        val endringPaaOppgave = hentEndringerForOppgave[0]
+        Assertions.assertNull(endringPaaOppgave.oppgaveFoer.saksbehandler)
+        Assertions.assertEquals("nysaksbehandler", endringPaaOppgave.oppgaveEtter.saksbehandler)
+        Assertions.assertEquals(Status.NY, endringPaaOppgave.oppgaveFoer.status)
+        Assertions.assertEquals(Status.UNDER_BEHANDLING, endringPaaOppgave.oppgaveEtter.status)
     }
 }

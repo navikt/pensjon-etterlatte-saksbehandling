@@ -68,7 +68,8 @@ WITH hendelser_med_rekkefolge as (select *,
                                          row_number() over (partition by behandlingid order by opprettet desc) as motsatt_rekkefolge
                                   from behandlinghendelse hendelser
                                   order by opprettet asc),
-     siste_hendelse_per_behandling as (select * from hendelser_med_rekkefolge where motsatt_rekkefolge = 1) -- motsatt_rekkefolge = 1 <=> siste hendelse
+     siste_hendelse_per_behandling
+         as (select * from hendelser_med_rekkefolge where motsatt_rekkefolge = 1) -- motsatt_rekkefolge = 1 <=> siste hendelse
 INSERT
 INTO oppgave (SELECT gen_random_uuid()                                    as id,
                      'UNDER_ARBEID'                                       as status,
@@ -77,7 +78,7 @@ INTO oppgave (SELECT gen_random_uuid()                                    as id,
                      null                                                 as saksbehandler,
                      behandling.id                                        as referanse,
                      null                                                 as merknad,
-                     sisteHendelse.opprettet,
+                     sisteHendelse.opprettet                              as opprettet,
                      case sisteHendelse.hendelse
                          when 'BEHANDLING:OPPRETTET'
                              then case behandling.behandlingstype
@@ -98,5 +99,3 @@ INTO oppgave (SELECT gen_random_uuid()                                    as id,
                        inner join siste_hendelse_per_behandling sisteHendelse
                                   on behandling.id = sisteHendelse.behandlingid
               where behandling.status not in ('IVERKSATT', 'ATTESTERT', 'AVBRUTT'));
-
-

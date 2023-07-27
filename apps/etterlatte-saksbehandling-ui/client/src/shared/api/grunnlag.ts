@@ -22,6 +22,6 @@ export const getHistoriskForeldreansvar = (args: {
   sakId: number
 }): Promise<ApiResponse<Grunnlagsopplysning<Foreldreansvar, KildePdl>>> => {
   return apiClient.get<Grunnlagsopplysning<Foreldreansvar, KildePdl>>(
-    `/grunnlag/${args.sakId}/HISTORISK_FORELDREANSVAR`
+    `/grunnlag/${args.sakId}/revurdering/HISTORISK_FORELDREANSVAR`
   )
 }

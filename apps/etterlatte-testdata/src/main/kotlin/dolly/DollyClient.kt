@@ -54,6 +54,7 @@ class DollyClientImpl(config: Config, private val httpClient: HttpClient) : Doll
     override suspend fun opprettTestGruppe(gruppe: OpprettGruppeRequest, accessToken: String): Gruppe =
         httpClient.post("$dollyUrl/gruppe") {
             header(HttpHeaders.Authorization, "Bearer $accessToken")
+            header(HttpHeaders.ContentType, ContentType.Application.Json)
             setBody(gruppe.toJson())
         }.body()
 

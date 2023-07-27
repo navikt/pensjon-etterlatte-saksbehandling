@@ -25,7 +25,7 @@ class OppgaveDaoMedEndringssporingImpl(
     private val connection: () -> Connection
 ) : OppgaveDaoMedEndringssporing {
 
-    private fun hentOgLagreFoerOgEtter(oppgaveId: UUID, block: () -> Unit) {
+    private fun lagreEndringerPaaOppgave(oppgaveId: UUID, block: () -> Unit) {
         val foer = requireNotNull(hentOppgave(oppgaveId)) {
             "Må ha en oppgave for å kunne endre den"
         }
@@ -102,25 +102,25 @@ class OppgaveDaoMedEndringssporingImpl(
     }
 
     override fun settNySaksbehandler(saksbehandlerEndringDto: SaksbehandlerEndringDto) {
-        hentOgLagreFoerOgEtter(saksbehandlerEndringDto.oppgaveId) {
+        lagreEndringerPaaOppgave(saksbehandlerEndringDto.oppgaveId) {
             oppgaveDao.settNySaksbehandler(saksbehandlerEndringDto)
         }
     }
 
     override fun endreStatusPaaOppgave(oppgaveId: UUID, oppgaveStatus: Status) {
-        hentOgLagreFoerOgEtter(oppgaveId) {
+        lagreEndringerPaaOppgave(oppgaveId) {
             oppgaveDao.endreStatusPaaOppgave(oppgaveId, oppgaveStatus)
         }
     }
 
     override fun fjernSaksbehandler(oppgaveId: UUID) {
-        hentOgLagreFoerOgEtter(oppgaveId) {
+        lagreEndringerPaaOppgave(oppgaveId) {
             oppgaveDao.fjernSaksbehandler(oppgaveId)
         }
     }
 
     override fun redigerFrist(redigerFristRequest: RedigerFristRequest) {
-        hentOgLagreFoerOgEtter(redigerFristRequest.oppgaveId) {
+        lagreEndringerPaaOppgave(redigerFristRequest.oppgaveId) {
             oppgaveDao.redigerFrist(redigerFristRequest)
         }
     }

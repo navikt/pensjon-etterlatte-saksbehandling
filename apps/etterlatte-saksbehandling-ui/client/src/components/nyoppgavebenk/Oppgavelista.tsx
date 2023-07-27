@@ -40,7 +40,7 @@ const ButtonWrapper = styled.div`
 `
 
 const FristWrapper = styled.span<{ fristHarPassert: boolean }>`
-  color: ${(p) => p.fristHarPassert && 'red'};
+  color: ${(p) => p.fristHarPassert && 'var(--a-text-danger)'};
 `
 
 export const Oppgavelista = (props: { oppgaver: ReadonlyArray<OppgaveDTOny>; hentOppgaver: () => void }) => {

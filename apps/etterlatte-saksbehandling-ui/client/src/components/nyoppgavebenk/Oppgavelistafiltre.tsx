@@ -143,7 +143,9 @@ export function filtrerFrist(fristFilterKeys: FristFilterKeys, oppgaver: Oppgave
     return oppgaverUtenFrist
   } else {
     const oppgaverMedFrist = oppgaver.filter((o) => o.frist)
-    const sortertEtterFrist = oppgaverMedFrist.sort((a, b) => new Date(a.frist) - new Date(b.frist))
+    const sortertEtterFrist = oppgaverMedFrist.sort((a, b) => {
+      return new Date(a.frist).valueOf() - new Date(b.frist).valueOf()
+    })
     return sortertEtterFrist.filter((o) => isBefore(new Date(o.frist), new Date()))
   }
 }

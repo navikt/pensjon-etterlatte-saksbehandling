@@ -17,7 +17,6 @@ import no.nav.etterlatte.libs.common.oppgaveNy.SaksbehandlerEndringDto
 import no.nav.etterlatte.libs.common.oppgaveNy.Status
 import no.nav.etterlatte.libs.common.oppgaveNy.VedtakOppgaveDTO
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
-import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
@@ -441,5 +440,21 @@ class OppgaveServiceNyTest {
         Assertions.assertEquals("nysaksbehandler", endringPaaOppgave.oppgaveEtter.saksbehandler)
         Assertions.assertEquals(Status.NY, endringPaaOppgave.oppgaveFoer.status)
         Assertions.assertEquals(Status.UNDER_BEHANDLING, endringPaaOppgave.oppgaveEtter.status)
+    }
+
+    @Test
+    fun `skal ferdigstille en oppgave hivs det finnes kun en som er under behandling`() {
+        val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val behandlingsref = UUID.randomUUID().toString()
+        val oppgave = oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
+            behandlingsref,
+            opprettetSak.id,
+            OppgaveType.FOERSTEGANGSBEHANDLING
+        )
+
+        oppgaveServiceNy.tildelSaksbehandler(SaksbehandlerEndringDto(oppgave.id, "saksbehandler01"))
+        oppgaveServiceNy.ferdigStillOppgaveUnderBehandling(VedtakOppgaveDTO(opprettetSak.id, behandlingsref))
+        val ferdigstiltOppgave = oppgaveServiceNy.hentOppgave(oppgave.id)
+        Assertions.assertEquals(Status.FERDIGSTILT, ferdigstiltOppgave?.status)
     }
 }

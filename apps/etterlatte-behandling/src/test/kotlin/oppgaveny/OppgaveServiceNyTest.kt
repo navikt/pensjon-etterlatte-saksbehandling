@@ -10,12 +10,13 @@ import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.oppgaveNy.AttesteringsOppgave
 import no.nav.etterlatte.libs.common.oppgaveNy.FjernSaksbehandlerRequest
 import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveType
 import no.nav.etterlatte.libs.common.oppgaveNy.RedigerFristRequest
 import no.nav.etterlatte.libs.common.oppgaveNy.SaksbehandlerEndringDto
 import no.nav.etterlatte.libs.common.oppgaveNy.Status
+import no.nav.etterlatte.libs.common.oppgaveNy.VedtakOppgaveDTO
+import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
@@ -244,14 +245,15 @@ class OppgaveServiceNyTest {
 
         oppgaveServiceNy.tildelSaksbehandler(SaksbehandlerEndringDto(nyOppgave.id, "saksbehandler"))
 
-        val attesteringsOppgave = oppgaveServiceNy.haandterFattetvedtak(
-            AttesteringsOppgave(opprettetSak.id, referanse, OppgaveType.ATTESTERING)
+        val vedtakOppgaveDTO = oppgaveServiceNy.lukkOppgaveUnderbehandlingOgLagNyMedType(
+            VedtakOppgaveDTO(opprettetSak.id, referanse),
+            OppgaveType.ATTESTERING
         )
 
         val saksbehandlerOppgave = oppgaveServiceNy.hentOppgave(nyOppgave.id)
         Assertions.assertEquals(Status.FERDIGSTILT, saksbehandlerOppgave?.status)
-        Assertions.assertEquals(OppgaveType.ATTESTERING, attesteringsOppgave.type)
-        Assertions.assertEquals(referanse, attesteringsOppgave.referanse)
+        Assertions.assertEquals(OppgaveType.ATTESTERING, vedtakOppgaveDTO.type)
+        Assertions.assertEquals(referanse, vedtakOppgaveDTO.referanse)
     }
 
     @Test
@@ -265,8 +267,9 @@ class OppgaveServiceNyTest {
         )
 
         val err = assertThrows<BadRequestException> {
-            oppgaveServiceNy.haandterFattetvedtak(
-                AttesteringsOppgave(opprettetSak.id, referanse, OppgaveType.ATTESTERING)
+            oppgaveServiceNy.lukkOppgaveUnderbehandlingOgLagNyMedType(
+                VedtakOppgaveDTO(opprettetSak.id, referanse),
+                OppgaveType.ATTESTERING
             )
         }
 
@@ -281,8 +284,9 @@ class OppgaveServiceNyTest {
         val referanse = "referanse"
 
         val err = assertThrows<BadRequestException> {
-            oppgaveServiceNy.haandterFattetvedtak(
-                AttesteringsOppgave(opprettetSak.id, referanse, OppgaveType.ATTESTERING)
+            oppgaveServiceNy.lukkOppgaveUnderbehandlingOgLagNyMedType(
+                VedtakOppgaveDTO(opprettetSak.id, referanse),
+                OppgaveType.ATTESTERING
             )
         }
 
@@ -311,8 +315,9 @@ class OppgaveServiceNyTest {
         oppgaveServiceNy.tildelSaksbehandler(SaksbehandlerEndringDto(oppgaveTo.id, "saksbehandler"))
 
         val err = assertThrows<BadRequestException> {
-            oppgaveServiceNy.haandterFattetvedtak(
-                AttesteringsOppgave(opprettetSak.id, referanse, OppgaveType.ATTESTERING)
+            oppgaveServiceNy.lukkOppgaveUnderbehandlingOgLagNyMedType(
+                VedtakOppgaveDTO(opprettetSak.id, referanse),
+                OppgaveType.ATTESTERING
             )
         }
 

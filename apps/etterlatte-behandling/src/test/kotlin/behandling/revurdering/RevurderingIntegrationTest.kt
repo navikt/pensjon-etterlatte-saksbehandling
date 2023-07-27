@@ -133,8 +133,8 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
                 applicationContext.revurderingDao,
                 applicationContext.behandlingService
             ).opprettManuellRevurderingWrapper(
-                sakId = sak.id,
                 opprettRevurderingRequest = OpprettRevurderingRequest(
+                    sakId = sak.id,
                     aarsak = RevurderingAarsak.REGULERING,
                     paaGrunnAvHendelseId = null,
                     begrunnelse = null
@@ -201,8 +201,8 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
             applicationContext.behandlingService
         )
         val revurdering = revurderingService.opprettManuellRevurderingWrapper(
-            sakId = sak.id,
             opprettRevurderingRequest = OpprettRevurderingRequest(
+                sakId = sak.id,
                 aarsak = RevurderingAarsak.SOESKENJUSTERING,
                 paaGrunnAvHendelseId = null,
                 begrunnelse = null
@@ -311,8 +311,8 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
                 applicationContext.revurderingDao,
                 applicationContext.behandlingService
             ).opprettManuellRevurderingWrapper(
-                sakId = sak.id,
                 opprettRevurderingRequest = OpprettRevurderingRequest(
+                    sakId = sak.id,
                     aarsak = RevurderingAarsak.REGULERING,
                     paaGrunnAvHendelseId = null,
                     begrunnelse = null
@@ -405,8 +405,8 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
         }
 
         val revurdering = revurderingService.opprettManuellRevurderingWrapper(
-            sakId = sak.id,
             opprettRevurderingRequest = OpprettRevurderingRequest(
+                sakId = sak.id,
                 aarsak = RevurderingAarsak.REGULERING,
                 paaGrunnAvHendelseId = hendelse.id.toString(),
                 begrunnelse = null
@@ -471,8 +471,8 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
 
         val err = assertThrows<BadRequestException> {
             revurderingService.opprettManuellRevurderingWrapper(
-                sakId = sak.id,
                 opprettRevurderingRequest = OpprettRevurderingRequest(
+                    sakId = sak.id,
                     aarsak = RevurderingAarsak.REGULERING,
                     paaGrunnAvHendelseId = "124124124",
                     begrunnelse = null
@@ -480,7 +480,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
             )
         }
         assertTrue(
-            err.message!!.startsWith("${RevurderingAarsak.REGULERING} har en ugyldig hendelse id for sakid ${sak.id}")
+            err.message!!.startsWith("${RevurderingAarsak.REGULERING} har en ugyldig hendelse id for sakid")
         )
     }
 
@@ -514,8 +514,8 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
 
         val err = assertThrows<BadRequestException> {
             revurderingService.opprettManuellRevurderingWrapper(
-                sakId = sak.id,
                 opprettRevurderingRequest = OpprettRevurderingRequest(
+                    sakId = sak.id,
                     aarsak = RevurderingAarsak.REGULERING,
                     paaGrunnAvHendelseId = UUID.randomUUID().toString(),
                     begrunnelse = null
@@ -557,8 +557,8 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
 
         val err = assertThrows<BadRequestException> {
             revurderingService.opprettManuellRevurderingWrapper(
-                sakId = sak.id,
                 opprettRevurderingRequest = OpprettRevurderingRequest(
+                    sakId = sak.id,
                     aarsak = RevurderingAarsak.REGULERING,
                     paaGrunnAvHendelseId = UUID.randomUUID().toString(),
                     begrunnelse = null

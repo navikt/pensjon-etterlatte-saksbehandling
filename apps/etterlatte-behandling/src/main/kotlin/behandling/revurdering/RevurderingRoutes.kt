@@ -56,7 +56,6 @@ internal fun Route.revurderingRoutes(
                     }
 
                     val revurdering = revurderingService.opprettManuellRevurderingWrapper(
-                        sakId,
                         opprettRevurderingRequest
                     )
 
@@ -83,6 +82,7 @@ internal fun Route.revurderingRoutes(
 }
 
 data class OpprettRevurderingRequest(
+    val sakId: Long,
     val aarsak: RevurderingAarsak,
     val paaGrunnAvHendelseId: String? = null,
     val begrunnelse: String? = null

@@ -40,7 +40,6 @@ import java.util.*
 interface RevurderingService {
 
     fun opprettManuellRevurderingWrapper(
-        sakId: Long,
         opprettRevurderingRequest: OpprettRevurderingRequest
     ): Revurdering?
 
@@ -83,19 +82,19 @@ class RevurderingServiceImpl(
         (behandlingDao.hentBehandling(id) as? Revurdering)?.sjekkEnhet()
 
     override fun opprettManuellRevurderingWrapper(
-        sakId: Long,
         opprettRevurderingRequest: OpprettRevurderingRequest
     ): Revurdering? {
         val paaGrunnAvHendelseId = try {
             opprettRevurderingRequest.paaGrunnAvHendelseId?.let { UUID.fromString(it) }
         } catch (e: Exception) {
             throw BadRequestException(
-                "${opprettRevurderingRequest.aarsak} har en ugyldig hendelse id for sakid $sakId. " +
+                "${opprettRevurderingRequest.aarsak} har en ugyldig hendelse id for sakid" +
+                    " $opprettRevurderingRequest.sakId. " +
                     "Hendelsesid: ${opprettRevurderingRequest.paaGrunnAvHendelseId}"
             )
         }
 
-        val forrigeIverksatteBehandling = behandlingService.hentSisteIverksatte(sakId)
+        val forrigeIverksatteBehandling = behandlingService.hentSisteIverksatte(opprettRevurderingRequest.sakId)
         if (forrigeIverksatteBehandling != null) {
             val sakType = forrigeIverksatteBehandling.sak.sakType
             if (!opprettRevurderingRequest.aarsak.gyldigForSakType(sakType)) {
@@ -109,7 +108,10 @@ class RevurderingServiceImpl(
                 begrunnelse = opprettRevurderingRequest.begrunnelse
             )
         } else {
-            throw BadRequestException("Kan ikke revurdere en sak uten iverksatt behandling sakid: $sakId")
+            throw BadRequestException(
+                "Kan ikke revurdere en sak uten iverksatt behandling sakid:" +
+                    " ${opprettRevurderingRequest.sakId}"
+            )
         }
     }
     private fun opprettManuellRevurdering(

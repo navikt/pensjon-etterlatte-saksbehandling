@@ -70,7 +70,7 @@ internal class RevurderingRoutesTest {
             val response = client.post("api/revurdering/1") {
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 header(HttpHeaders.Authorization, "Bearer $token")
-                setBody(OpprettRevurderingRequest(RevurderingAarsak.REGULERING))
+                setBody(OpprettRevurderingRequest(sakId = 1L, aarsak = RevurderingAarsak.REGULERING))
             }
 
             assertEquals(HttpStatusCode.OK, response.status)

@@ -34,8 +34,8 @@ class OmregningService(
             )
 
             Prosesstype.MANUELL -> revurderingService.opprettManuellRevurderingWrapper(
-                sakId = sakId,
                 opprettRevurderingRequest = OpprettRevurderingRequest(
+                    sakId = sakId,
                     aarsak = RevurderingAarsak.REGULERING,
                     paaGrunnAvHendelseId = null,
                     begrunnelse = null

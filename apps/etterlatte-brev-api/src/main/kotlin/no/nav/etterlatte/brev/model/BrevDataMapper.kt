@@ -5,6 +5,8 @@ import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_AVSLAG
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_INNVILGELSE
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_REVURDERING_ADOPSJON
+import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_REVURDERING_FENGSELSOPPHOLD
+import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_REVURDERING_HAR_STANSET
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_REVURDERING_OMGJOERING_AV_FARSKAP
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_REVURDERING_OPPHOER
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_REVURDERING_SOESKENJUSTERING
@@ -38,6 +40,9 @@ object BrevDataMapper {
                     RevurderingAarsak.OMGJOERING_AV_FARSKAP ->
                         BrevkodePar(BARNEPENSJON_REVURDERING_OMGJOERING_AV_FARSKAP, BARNEPENSJON_REVURDERING_OPPHOER)
 
+                    RevurderingAarsak.FENGSELSOPPHOLD ->
+                        BrevkodePar(BARNEPENSJON_REVURDERING_FENGSELSOPPHOLD, BARNEPENSJON_REVURDERING_HAR_STANSET)
+
                     else -> TODO("Vedtakstype er ikke støttet: $vedtakType")
                 }
             }
@@ -60,6 +65,7 @@ object BrevDataMapper {
                 VedtakType.AVSLAG -> AvslagBrevData.fra(behandling)
                 VedtakType.ENDRING -> when (behandling.revurderingsaarsak) {
                     RevurderingAarsak.SOESKENJUSTERING -> SoeskenjusteringRevurderingBrevdata.fra(behandling)
+                    RevurderingAarsak.FENGSELSOPPHOLD -> FengselsoppholdBrevdata.fra(behandling)
                     else -> TODO("Revurderingsbrev for ${behandling.revurderingsaarsak} er ikke støttet")
                 }
 

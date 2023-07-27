@@ -103,11 +103,14 @@ class VedtaksbrevService(
         when (brev.prosessType) {
             AUTOMATISK -> {
                 when (behandling.revurderingsaarsak) {
-                    RevurderingAarsak.ADOPSJON -> manueltBrevData(brev)
-                    RevurderingAarsak.OMGJOERING_AV_FARSKAP -> manueltBrevData(brev)
+                    RevurderingAarsak.ADOPSJON,
+                    RevurderingAarsak.OMGJOERING_AV_FARSKAP,
+                    RevurderingAarsak.FENGSELSOPPHOLD -> manueltBrevData(brev)
+
                     else -> BrevDataMapper.brevData(behandling)
                 }
             }
+
             MANUELL -> manueltBrevData(brev)
         }
 
@@ -119,7 +122,9 @@ class VedtaksbrevService(
         val payload = when (prosessType) {
             AUTOMATISK -> {
                 when (behandling.revurderingsaarsak) {
-                    RevurderingAarsak.OMGJOERING_AV_FARSKAP, RevurderingAarsak.ADOPSJON -> {
+                    RevurderingAarsak.OMGJOERING_AV_FARSKAP,
+                    RevurderingAarsak.ADOPSJON,
+                    RevurderingAarsak.FENGSELSOPPHOLD -> {
                         hentRedigerbarTekstFraBrevbakeren(behandling)
                     }
 

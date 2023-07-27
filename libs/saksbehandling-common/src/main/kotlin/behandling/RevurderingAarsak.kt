@@ -74,6 +74,7 @@ enum class RevurderingAarsak(
     OMGJOERING_AV_FARSKAP(SAKTYPE_BP, KunIDev, OpphoerMedBrev),
     ADOPSJON(SAKTYPE_BP, KunIDev, OpphoerMedBrev),
     SIVILSTAND(SAKTYPE_OMS, KunIDev, OpphoerMedBrev),
+    FENGSELSOPPHOLD(SAKTYPE_BP, KunIDev, IkkeOpphoerSkalSendeBrev),
     NY_SOEKNAD(SAKTYPE_BP_OMS, DevOgProd, IkkeOpphoerSkalSendeBrev);
 
     fun kanBrukesIMiljo(): Boolean = when (clusternavn()) {

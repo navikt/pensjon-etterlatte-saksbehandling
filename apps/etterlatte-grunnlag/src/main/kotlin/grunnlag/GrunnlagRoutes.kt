@@ -64,7 +64,7 @@ fun Route.grunnlagRoute(grunnlagService: GrunnlagService, behandlingKlient: Beha
             }
         }
 
-        get("$SAKID_CALL_PARAMETER/revurdering/${Opplysningstype.HISTORISK_FORELDREANSVAR}") {
+        get("$SAKID_CALL_PARAMETER/revurdering/${Opplysningstype.HISTORISK_FORELDREANSVAR.name}") {
             withSakId(behandlingKlient) { sakId ->
                 when (val historisk = grunnlagService.hentHistoriskForeldreansvar(sakId)) {
                     null -> call.respond(HttpStatusCode.NotFound)

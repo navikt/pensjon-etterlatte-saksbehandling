@@ -177,6 +177,21 @@ class OppgaveServiceNy(
         }
     }
 
+    fun opprettNyOppgaveForInnsendSoeknad(referanse: String, sakId: Long, oppgaveType: OppgaveType): OppgaveNy {
+        val oppgaverForBehandling = oppgaveDaoNy.hentOppgaverForBehandling(referanse)
+        val oppgaverSomKanLukkes = oppgaverForBehandling.filter { o ->
+            o.status in listOf(
+                Status.UNDER_BEHANDLING,
+                Status.NY
+            )
+        }
+        oppgaverSomKanLukkes.forEach {
+            oppgaveDaoNy.endreStatusPaaOppgave(it.id, Status.AVBRUTT)
+        }
+
+        return opprettNyOppgaveMedSakOgReferanse(referanse, sakId, oppgaveType)
+    }
+
     fun opprettNyOppgaveMedSakOgReferanse(referanse: String, sakId: Long, oppgaveType: OppgaveType): OppgaveNy {
         val sak = sakDao.hentSak(sakId)!!
         return lagreOppgave(

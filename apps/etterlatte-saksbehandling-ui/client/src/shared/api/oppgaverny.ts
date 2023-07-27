@@ -17,7 +17,7 @@ export interface OppgaveDTOny {
 
 export type Saktype = 'BARNEPENSJON' | 'OMSTILLINGSSTOENAD'
 
-export type Oppgavestatus = 'NY' | 'UNDER_BEHANDLING' | 'FERDIGSTILT' | 'FEILREGISTRERT'
+export type Oppgavestatus = 'NY' | 'UNDER_BEHANDLING' | 'FERDIGSTILT' | 'FEILREGISTRERT' | 'AVBRUTT'
 export type Oppgavetype =
   | 'FOERSTEGANGSBEHANDLING'
   | 'REVURDERING'

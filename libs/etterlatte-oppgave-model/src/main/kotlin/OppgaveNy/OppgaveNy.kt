@@ -25,7 +25,8 @@ enum class Status {
     NY,
     UNDER_BEHANDLING,
     FERDIGSTILT,
-    FEILREGISTRERT
+    FEILREGISTRERT,
+    AVBRUTT
 }
 
 enum class OppgaveType {

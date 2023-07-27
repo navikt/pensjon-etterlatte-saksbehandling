@@ -68,6 +68,7 @@ export const OPPGAVESTATUSFILTER: Record<OppgavestatusFilterKeys, string> = {
   UNDER_BEHANDLING: 'Under arbeid',
   FERDIGSTILT: 'Ferdigstilt',
   FEILREGISTRERT: 'Feilregistrert',
+  AVBRUTT: 'Avbrutt',
 }
 
 function filtrerOppgaveStatus(

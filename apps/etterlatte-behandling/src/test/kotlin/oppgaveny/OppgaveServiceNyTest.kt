@@ -457,4 +457,23 @@ class OppgaveServiceNyTest {
         val ferdigstiltOppgave = oppgaveServiceNy.hentOppgave(oppgave.id)
         Assertions.assertEquals(Status.FERDIGSTILT, ferdigstiltOppgave?.status)
     }
+
+    @Test
+    fun `skal lukke nye ikke ferdige eller feilregistrerte oppgaver hvis ny søknad kommer inn`() {
+        val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val behandlingsref = UUID.randomUUID().toString()
+        val oppgaveSomSkalBliAvbrutt = oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
+            behandlingsref,
+            opprettetSak.id,
+            OppgaveType.FOERSTEGANGSBEHANDLING
+        )
+        oppgaveServiceNy.tildelSaksbehandler(SaksbehandlerEndringDto(oppgaveSomSkalBliAvbrutt.id, "saksbehandler01"))
+
+        oppgaveServiceNy.opprettFoerstegangsbehandlingsOppgaveForInnsendSoeknad(behandlingsref, opprettetSak.id)
+
+        val alleOppgaver = oppgaveDaoNy.hentOppgaverForBehandling(behandlingsref)
+        Assertions.assertEquals(2, alleOppgaver.size)
+        val avbruttOppgave = oppgaveDaoNy.hentOppgave(oppgaveSomSkalBliAvbrutt.id)!!
+        Assertions.assertEquals(avbruttOppgave.status, Status.AVBRUTT)
+    }
 }

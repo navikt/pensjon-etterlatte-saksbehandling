@@ -76,24 +76,12 @@ internal fun Route.behandlingsstatusRoutes(
                 behandlingsstatusService.sjekkOmKanReturnereVedtak(behandlingsId)
             }
         }
-        post("/returner") {
-            val vedtakHendelse = call.receive<VedtakHendelse>()
-            haandterStatusEndring(call) {
-                behandlingsstatusService.settReturnertVedtak(behandlingsId, vedtakHendelse)
-            }
-        }
 
         get("/attester") {
             kunAttestant {
                 haandterStatusEndring(call) {
                     behandlingsstatusService.sjekkOmKanAttestere(behandlingsId)
                 }
-            }
-        }
-        post("/attester") {
-            val vedtakHendelse = call.receive<VedtakHendelse>()
-            haandterStatusEndring(call) {
-                behandlingsstatusService.settAttestertVedtak(behandlingsId, vedtakHendelse)
             }
         }
 

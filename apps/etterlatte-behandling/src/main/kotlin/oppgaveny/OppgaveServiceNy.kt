@@ -3,13 +3,13 @@ package no.nav.etterlatte.oppgaveny
 import io.ktor.server.plugins.BadRequestException
 import io.ktor.server.plugins.NotFoundException
 import no.nav.etterlatte.inTransaction
-import no.nav.etterlatte.libs.common.oppgaveNy.AttesteringsOppgave
 import no.nav.etterlatte.libs.common.oppgaveNy.FjernSaksbehandlerRequest
 import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveNy
 import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveType
 import no.nav.etterlatte.libs.common.oppgaveNy.RedigerFristRequest
 import no.nav.etterlatte.libs.common.oppgaveNy.SaksbehandlerEndringDto
 import no.nav.etterlatte.libs.common.oppgaveNy.Status
+import no.nav.etterlatte.libs.common.oppgaveNy.VedtakOppgaveDTO
 import no.nav.etterlatte.libs.common.oppgaveNy.opprettNyOppgaveMedReferanseOgSak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
@@ -120,8 +120,11 @@ class OppgaveServiceNy(
         }
     }
 
-    fun haandterFattetvedtak(attesteringsoppgave: AttesteringsOppgave): OppgaveNy {
-        val behandlingsoppgaver = oppgaveDaoNy.hentOppgaverForBehandling(attesteringsoppgave.referanse)
+    fun lukkOppgaveUnderbehandlingOgLagNyMedType(
+        fattetoppgave: VedtakOppgaveDTO,
+        oppgaveType: OppgaveType
+    ): OppgaveNy {
+        val behandlingsoppgaver = oppgaveDaoNy.hentOppgaverForBehandling(fattetoppgave.referanse)
         if (behandlingsoppgaver.isEmpty()) {
             throw BadRequestException("Må ha en oppgave for å kunne lage attesteringsoppgave")
         }
@@ -129,10 +132,36 @@ class OppgaveServiceNy(
             val oppgaveUnderbehandling = behandlingsoppgaver.single { it.status == Status.UNDER_BEHANDLING }
             oppgaveDaoNy.endreStatusPaaOppgave(oppgaveUnderbehandling.id, Status.FERDIGSTILT)
             return opprettNyOppgaveMedSakOgReferanse(
-                attesteringsoppgave.referanse,
-                attesteringsoppgave.sakId,
-                attesteringsoppgave.oppgaveType
+                fattetoppgave.referanse,
+                fattetoppgave.sakId,
+                oppgaveType
             )
+        } catch (e: NoSuchElementException) {
+            throw BadRequestException(
+                "Det må finnes en oppgave under behandling, gjelder behandling:" +
+                    " ${fattetoppgave.referanse}",
+                e
+            )
+        } catch (e: IllegalArgumentException) {
+            throw BadRequestException(
+                "Skal kun ha en oppgave under behandling, gjelder behandling:" +
+                    " ${fattetoppgave.referanse}",
+                e
+            )
+        }
+    }
+
+    fun ferdigStillOppgaveUnderBehandling(
+        attesteringsoppgave: VedtakOppgaveDTO
+    ): OppgaveNy {
+        val behandlingsoppgaver = oppgaveDaoNy.hentOppgaverForBehandling(attesteringsoppgave.referanse)
+        if (behandlingsoppgaver.isEmpty()) {
+            throw BadRequestException("Må ha en oppgave for å kunne lage attesteringsoppgave")
+        }
+        try {
+            val oppgaveUnderbehandling = behandlingsoppgaver.single { it.status == Status.UNDER_BEHANDLING }
+            oppgaveDaoNy.endreStatusPaaOppgave(oppgaveUnderbehandling.id, Status.FERDIGSTILT)
+            return oppgaveDaoNy.hentOppgave(oppgaveUnderbehandling.id)!!
         } catch (e: NoSuchElementException) {
             throw BadRequestException(
                 "Det må finnes en oppgave under behandling, gjelder behandling:" +

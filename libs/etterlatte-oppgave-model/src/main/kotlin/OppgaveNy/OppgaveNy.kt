@@ -32,6 +32,7 @@ enum class OppgaveType {
     FOERSTEGANGSBEHANDLING,
     REVURDERING,
     ATTESTERING,
+    UNDERKJENT,
     HENDELSE,
     MANUELT_OPPHOER,
     EKSTERN
@@ -51,13 +52,13 @@ data class RedigerFristRequest(
     val frist: Tidspunkt
 )
 
-data class AttesteringsOppgave(
+data class VedtakOppgaveDTO(
     val sakId: Long,
-    val referanse: String,
-    val oppgaveType: OppgaveType
+    val referanse: String
 )
-data class AttesterVedtakOppgave(
-    val attesteringsOppgave: AttesteringsOppgave,
+
+data class VedtakEndringDTO(
+    val vedtakOppgaveDTO: VedtakOppgaveDTO,
     val vedtakHendelse: VedtakHendelse
 )
 

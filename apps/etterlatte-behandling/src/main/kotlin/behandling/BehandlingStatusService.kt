@@ -21,9 +21,9 @@ interface BehandlingStatusService {
     fun sjekkOmKanFatteVedtak(behandlingId: UUID)
     fun settFattetVedtak(behandling: Behandling, vedtakHendelse: VedtakHendelse)
     fun sjekkOmKanAttestere(behandlingId: UUID)
-    fun settAttestertVedtak(behandlingId: UUID, vedtakHendelse: VedtakHendelse)
+    fun settAttestertVedtak(behandling: Behandling, vedtakHendelse: VedtakHendelse)
     fun sjekkOmKanReturnereVedtak(behandlingId: UUID)
-    fun settReturnertVedtak(behandlingId: UUID, vedtakHendelse: VedtakHendelse)
+    fun settReturnertVedtak(behandling: Behandling, vedtakHendelse: VedtakHendelse)
     fun settIverksattVedtak(behandlingId: UUID, vedtakHendelse: VedtakHendelse)
     fun migrerStatusPaaAlleBehandlingerSomTrengerNyBeregning(): SakIDListe
 }
@@ -74,24 +74,18 @@ class BehandlingStatusServiceImpl constructor(
         hentBehandling(behandlingId).tilAttestert()
     }
 
-    override fun settAttestertVedtak(behandlingId: UUID, vedtakHendelse: VedtakHendelse) {
-        val behandling = hentBehandling(behandlingId)
-        inTransaction {
-            lagreNyBehandlingStatus(behandling.tilAttestert())
-            registrerVedtakHendelse(behandlingId, vedtakHendelse, HendelseType.ATTESTERT)
-        }
+    override fun settAttestertVedtak(behandling: Behandling, vedtakHendelse: VedtakHendelse) {
+        lagreNyBehandlingStatus(behandling.tilAttestert())
+        registrerVedtakHendelse(behandling.id, vedtakHendelse, HendelseType.ATTESTERT)
     }
 
     override fun sjekkOmKanReturnereVedtak(behandlingId: UUID) {
         hentBehandling(behandlingId).tilReturnert()
     }
 
-    override fun settReturnertVedtak(behandlingId: UUID, vedtakHendelse: VedtakHendelse) {
-        val behandling = hentBehandling(behandlingId)
-        inTransaction {
-            lagreNyBehandlingStatus(behandling.tilReturnert())
-            registrerVedtakHendelse(behandlingId, vedtakHendelse, HendelseType.UNDERKJENT)
-        }
+    override fun settReturnertVedtak(behandling: Behandling, vedtakHendelse: VedtakHendelse) {
+        lagreNyBehandlingStatus(behandling.tilReturnert())
+        registrerVedtakHendelse(behandling.id, vedtakHendelse, HendelseType.UNDERKJENT)
     }
 
     override fun settIverksattVedtak(behandlingId: UUID, vedtakHendelse: VedtakHendelse) {

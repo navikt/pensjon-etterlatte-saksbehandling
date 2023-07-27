@@ -37,11 +37,10 @@ import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsTyper
 import no.nav.etterlatte.libs.common.gyldigSoeknad.VurderingsResultat
 import no.nav.etterlatte.libs.common.gyldigSoeknad.VurdertGyldighet
-import no.nav.etterlatte.libs.common.oppgaveNy.AttesterVedtakOppgave
-import no.nav.etterlatte.libs.common.oppgaveNy.AttesteringsOppgave
 import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveNy
-import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveType
 import no.nav.etterlatte.libs.common.oppgaveNy.SaksbehandlerEndringDto
+import no.nav.etterlatte.libs.common.oppgaveNy.VedtakEndringDTO
+import no.nav.etterlatte.libs.common.oppgaveNy.VedtakOppgaveDTO
 import no.nav.etterlatte.libs.common.pdlhendelse.Adressebeskyttelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
@@ -255,15 +254,14 @@ class IntegrationTest : BehandlingIntegrationTest() {
                 assertEquals(HttpStatusCode.OK, it.status)
             }
 
-            client.post("/fattvedtak-behandling") {
+            client.post("/fattvedtak") {
                 addAuthToken(tokenSaksbehandler)
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(
-                    AttesterVedtakOppgave(
-                        attesteringsOppgave = AttesteringsOppgave(
+                    VedtakEndringDTO(
+                        vedtakOppgaveDTO = VedtakOppgaveDTO(
                             sakId = sak.id,
-                            referanse = behandlingId.toString(),
-                            OppgaveType.ATTESTERING
+                            referanse = behandlingId.toString()
                         ),
                         vedtakHendelse = VedtakHendelse(123L, Tidspunkt.now(), "Saksbehandler01", null)
                     )
@@ -280,6 +278,21 @@ class IntegrationTest : BehandlingIntegrationTest() {
                 assertEquals(HttpStatusCode.OK, it.status)
             }
 
+            val oppgaveroppgaveliste: List<OppgaveNy> = client.get("/api/nyeoppgaver/hent") {
+                addAuthToken(tokenAttestant)
+                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+            }.also {
+                assertEquals(HttpStatusCode.OK, it.status)
+            }.body()
+            val oppgaverforattestant = oppgaveroppgaveliste.filter { it.referanse == behandlingId.toString() }
+            client.post("/api/nyeoppgaver/tildel-saksbehandler/${sak.id}") {
+                addAuthToken(tokenAttestant)
+                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                setBody(SaksbehandlerEndringDto(oppgaverforattestant[0].id, "Saksbehandler02"))
+            }.also {
+                assertEquals(HttpStatusCode.OK, it.status)
+            }
+
             client.get("/api/oppgaver") {
                 addAuthToken(tokenAttestant)
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
@@ -290,10 +303,18 @@ class IntegrationTest : BehandlingIntegrationTest() {
                 assertEquals(behandlingId, oppgaver.oppgaver.first().behandlingId)
             }
 
-            client.post("/behandlinger/$behandlingId/attester") {
+            client.post("/attestervedtak") {
                 addAuthToken(tokenSaksbehandler)
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                setBody(VedtakHendelse(123L, Tidspunkt.now(), "saksb", null, null))
+                setBody(
+                    VedtakEndringDTO(
+                        vedtakOppgaveDTO = VedtakOppgaveDTO(
+                            sakId = sak.id,
+                            referanse = behandlingId.toString()
+                        ),
+                        vedtakHendelse = VedtakHendelse(123L, Tidspunkt.now(), "saksb", null, null)
+                    )
+                )
             }.also {
                 applicationContext.dataSource.connection.use {
                     val actual = BehandlingDao(

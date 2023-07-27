@@ -148,6 +148,8 @@ function mapAarsak(aarsak: BehandlingOgRevurderingsAarsakerType) {
       return 'Endring av sivilstand'
     case Revurderingsaarsak.NY_SOEKNAD:
       return 'Ny Søknad'
+    case Revurderingsaarsak.FENGSELSOPPHOLD:
+      return 'Fengselsopphold'
   }
 }
 

@@ -116,20 +116,12 @@ internal class RevurderingRoutesTest {
 
             val revurderingAarsak: List<RevurderingAarsak> = response.body()
             assertEquals(HttpStatusCode.OK, response.status)
-            assertEquals(9, revurderingAarsak.size)
+            val revurderingsaarsakerForBarnepensjon =
+                RevurderingAarsak.values().filter { it.erStoettaRevurdering(SakType.BARNEPENSJON) }
+            assertEquals(revurderingsaarsakerForBarnepensjon.size, revurderingAarsak.size)
             assertTrue(
                 revurderingAarsak.containsAll<Any>(
-                    setOf(
-                        RevurderingAarsak.ANSVARLIGE_FORELDRE,
-                        RevurderingAarsak.SOESKENJUSTERING,
-                        RevurderingAarsak.UTLAND,
-                        RevurderingAarsak.BARN,
-                        RevurderingAarsak.VERGEMAAL_ELLER_FREMTIDSFULLMAKT,
-                        RevurderingAarsak.REGULERING,
-                        RevurderingAarsak.DOEDSFALL,
-                        RevurderingAarsak.OMGJOERING_AV_FARSKAP,
-                        RevurderingAarsak.ADOPSJON
-                    )
+                    revurderingsaarsakerForBarnepensjon
                 )
             )
         }

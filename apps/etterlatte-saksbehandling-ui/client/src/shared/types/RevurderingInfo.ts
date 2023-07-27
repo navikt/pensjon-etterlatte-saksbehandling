@@ -29,13 +29,19 @@ export interface OmgjoeringAvFarskapInfo {
   forrigeFar: Navn
 }
 
+export interface FengselsoppholdInfo {
+  type: 'FENGSELSOPPHOLD'
+  fraDato: Date
+  tilDato: Date
+}
+
 export interface Navn {
   fornavn: string
   mellomnavn: string | undefined
   etternavn: string
 }
 
-export type RevurderingInfo = SoeskenjusteringInfo | AdopsjonInfo | OmgjoeringAvFarskapInfo
+export type RevurderingInfo = SoeskenjusteringInfo | AdopsjonInfo | OmgjoeringAvFarskapInfo | FengselsoppholdInfo
 
 export function hentUndertypeFraBehandling<T extends RevurderingInfo>(
   type: T['type'],

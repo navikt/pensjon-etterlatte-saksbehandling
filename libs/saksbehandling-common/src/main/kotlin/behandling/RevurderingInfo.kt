@@ -2,6 +2,7 @@ package no.nav.etterlatte.libs.common.behandling
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.fasterxml.jackson.annotation.JsonTypeName
+import java.time.LocalDate
 
 enum class BarnepensjonSoeskenjusteringGrunn {
     NYTT_SOESKEN,
@@ -31,5 +32,11 @@ sealed class RevurderingInfo {
     data class OmgjoeringAvFarskap(
         val naavaerendeFar: Navn,
         val forrigeFar: Navn
+    ) : RevurderingInfo()
+
+    @JsonTypeName("FENGSELSOPPHOLD")
+    data class Fengselsopphold(
+        val fraDato: LocalDate,
+        val tilDato: LocalDate
     ) : RevurderingInfo()
 }

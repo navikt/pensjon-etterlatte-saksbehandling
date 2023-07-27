@@ -73,9 +73,7 @@ internal fun Route.revurderingRoutes(
             val sakType = call.parameters["saktype"]?.let { runCatching { SakType.valueOf(it) }.getOrNull() }
                 ?: return@get call.respond(HttpStatusCode.BadRequest, "Ugyldig saktype")
 
-            val stoettedeRevurderinger = RevurderingAarsak.values()
-                .filter { it.kanBrukesIMiljo() && it.gyldigForSakType(sakType) }
-                .filter { it.name !== RevurderingAarsak.NY_SOEKNAD.toString() }
+            val stoettedeRevurderinger = RevurderingAarsak.values().filter { it.erStoettaRevurdering(sakType) }
             call.respond(stoettedeRevurderinger)
         }
     }

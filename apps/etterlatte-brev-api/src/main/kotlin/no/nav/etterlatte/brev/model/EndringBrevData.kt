@@ -5,6 +5,7 @@ import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
 import no.nav.etterlatte.libs.common.behandling.BarnepensjonSoeskenjusteringGrunn
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
+import java.time.LocalDate
 
 abstract class EndringBrevData : BrevData()
 
@@ -33,6 +34,35 @@ data class SoeskenjusteringRevurderingBrevdata(
                     "Kan ikke opprette et revurderingsbrev for søksenjustering uten utbetalingsinfo"
                 },
                 grunnForJustering = behandling.revurderingInfo.grunnForSoeskenjustering
+            )
+        }
+    }
+}
+
+data class FengselsoppholdBrevdata(
+    val virkningsdato: LocalDate,
+    val fraDato: LocalDate,
+    val tilDato: LocalDate
+) : EndringBrevData() {
+
+    companion object {
+        fun fra(behandling: Behandling): FengselsoppholdBrevdata {
+            if (behandling.revurderingsaarsak != RevurderingAarsak.FENGSELSOPPHOLD) {
+                throw IllegalArgumentException(
+                    "Kan ikke opprette et revurderingsbrev for fengselsopphold når " +
+                        "revurderingsårsak er ${behandling.revurderingsaarsak}"
+                )
+            }
+            if (behandling.revurderingInfo !is RevurderingInfo.Fengselsopphold) {
+                throw IllegalArgumentException(
+                    "Kan ikke opprette et revurderingsbrev for fengselsopphold når " +
+                        "revurderingsinfo ikke er fengselsopphold"
+                )
+            }
+            return FengselsoppholdBrevdata(
+                virkningsdato = behandling.virkningsdato!!.atDay(1),
+                fraDato = behandling.revurderingInfo.fraDato,
+                tilDato = behandling.revurderingInfo.tilDato
             )
         }
     }

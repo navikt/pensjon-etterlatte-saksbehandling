@@ -1,5 +1,6 @@
 package no.nav.etterlatte.behandling.revurdering
 
+import io.ktor.server.plugins.BadRequestException
 import io.mockk.confirmVerified
 import io.mockk.every
 import io.mockk.mockk
@@ -11,6 +12,7 @@ import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.BehandlingFactory
 import no.nav.etterlatte.behandling.BehandlingHendelseType
 import no.nav.etterlatte.behandling.BehandlingServiceFeatureToggle
+import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringStatus
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringsType
@@ -37,6 +39,7 @@ import no.nav.etterlatte.sak.SakServiceFeatureToggle
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
@@ -44,6 +47,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.assertThrows
 import java.time.LocalDateTime
 import java.util.*
 
@@ -126,14 +130,15 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
                 applicationContext.hendelseDao,
                 applicationContext.grunnlagsendringshendelseDao,
                 applicationContext.kommerBarnetTilGodeService,
-                applicationContext.revurderingDao
-            ).opprettManuellRevurdering(
-                sakId = sak.id,
-                forrigeBehandling = behandling!!,
-                revurderingAarsak = RevurderingAarsak.REGULERING,
-                kilde = Vedtaksloesning.GJENNY,
-                paaGrunnAvHendelse = null,
-                begrunnelse = null
+                applicationContext.revurderingDao,
+                applicationContext.behandlingService
+            ).opprettManuellRevurderingWrapper(
+                opprettRevurderingRequest = OpprettRevurderingRequest(
+                    sakId = sak.id,
+                    aarsak = RevurderingAarsak.REGULERING,
+                    paaGrunnAvHendelseId = null,
+                    begrunnelse = null
+                )
             )
 
         verify { grunnlagService.leggInnNyttGrunnlag(revurdering!!) }
@@ -192,15 +197,16 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
             applicationContext.hendelseDao,
             applicationContext.grunnlagsendringshendelseDao,
             applicationContext.kommerBarnetTilGodeService,
-            applicationContext.revurderingDao
+            applicationContext.revurderingDao,
+            applicationContext.behandlingService
         )
-        val revurdering = revurderingService.opprettManuellRevurdering(
-            sakId = sak.id,
-            forrigeBehandling = behandling!!,
-            revurderingAarsak = RevurderingAarsak.SOESKENJUSTERING,
-            kilde = Vedtaksloesning.GJENNY,
-            paaGrunnAvHendelse = null,
-            begrunnelse = null
+        val revurdering = revurderingService.opprettManuellRevurderingWrapper(
+            opprettRevurderingRequest = OpprettRevurderingRequest(
+                sakId = sak.id,
+                aarsak = RevurderingAarsak.SOESKENJUSTERING,
+                paaGrunnAvHendelseId = null,
+                begrunnelse = null
+            )
         )
         val revurderingInfo = RevurderingInfo.Soeskenjustering(BarnepensjonSoeskenjusteringGrunn.SOESKEN_DOER)
         val fikkLagret = revurderingService.lagreRevurderingInfo(
@@ -302,14 +308,15 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
                 applicationContext.hendelseDao,
                 applicationContext.grunnlagsendringshendelseDao,
                 applicationContext.kommerBarnetTilGodeService,
-                applicationContext.revurderingDao
-            ).opprettManuellRevurdering(
-                sakId = sak.id,
-                forrigeBehandling = behandling!!,
-                revurderingAarsak = RevurderingAarsak.REGULERING,
-                kilde = Vedtaksloesning.GJENNY,
-                paaGrunnAvHendelse = null,
-                begrunnelse = null
+                applicationContext.revurderingDao,
+                applicationContext.behandlingService
+            ).opprettManuellRevurderingWrapper(
+                opprettRevurderingRequest = OpprettRevurderingRequest(
+                    sakId = sak.id,
+                    aarsak = RevurderingAarsak.REGULERING,
+                    paaGrunnAvHendelseId = null,
+                    begrunnelse = null
+                )
             )
         )
 
@@ -354,7 +361,8 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
                 applicationContext.hendelseDao,
                 applicationContext.grunnlagsendringshendelseDao,
                 applicationContext.kommerBarnetTilGodeService,
-                applicationContext.revurderingDao
+                applicationContext.revurderingDao,
+                applicationContext.behandlingService
             )
 
         val behandlingFactory =
@@ -396,27 +404,27 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
             )
         }
 
-        val revurdering = revurderingService.opprettManuellRevurdering(
-            sakId = sak.id,
-            forrigeBehandling = behandling!!,
-            revurderingAarsak = RevurderingAarsak.REGULERING,
-            kilde = Vedtaksloesning.GJENNY,
-            paaGrunnAvHendelse = hendelse.id,
-            begrunnelse = null
+        val revurdering = revurderingService.opprettManuellRevurderingWrapper(
+            opprettRevurderingRequest = OpprettRevurderingRequest(
+                sakId = sak.id,
+                aarsak = RevurderingAarsak.REGULERING,
+                paaGrunnAvHendelseId = hendelse.id.toString(),
+                begrunnelse = null
+            )
         )
 
         inTransaction {
-            Assertions.assertEquals(revurdering, applicationContext.behandlingDao.hentBehandling(revurdering!!.id))
+            assertEquals(revurdering, applicationContext.behandlingDao.hentBehandling(revurdering!!.id))
             val grunnlaghendelse = applicationContext.grunnlagsendringshendelseDao.hentGrunnlagsendringshendelse(
                 hendelse.id
             )
-            Assertions.assertEquals(revurdering.id, grunnlaghendelse?.behandlingId)
-            verify { grunnlagService.leggInnNyttGrunnlag(behandling) }
+            assertEquals(revurdering.id, grunnlaghendelse?.behandlingId)
+            verify { grunnlagService.leggInnNyttGrunnlag(behandling as Behandling) }
             verify { grunnlagService.leggInnNyttGrunnlag(revurdering) }
             verify { hendelser.sendMeldingForHendelse(revurdering, BehandlingHendelseType.OPPRETTET) }
             verify {
                 oppgaveService.opprettNyOppgaveMedSakOgReferanse(
-                    behandling.id.toString(),
+                    behandling!!.id.toString(),
                     sak.id,
                     OppgaveType.FOERSTEGANGSBEHANDLING
                 )
@@ -428,8 +436,137 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
                     OppgaveType.REVURDERING
                 )
             }
-            verify { hendelser.sendMeldingForHendelse(behandling, BehandlingHendelseType.OPPRETTET) }
+            verify { hendelser.sendMeldingForHendelse(behandling as Behandling, BehandlingHendelseType.OPPRETTET) }
             confirmVerified(hendelser, grunnlagService, oppgaveService)
         }
+    }
+
+    @Test
+    fun `Skal få bad request hvis man mangler hendelsesid`() {
+        val revurderingService = RevurderingServiceImpl(
+            applicationContext.oppgaveServiceNy,
+            applicationContext.grunnlagsService,
+            applicationContext.behandlingsHendelser,
+            applicationContext.featureToggleService,
+            applicationContext.behandlingDao,
+            applicationContext.hendelseDao,
+            applicationContext.grunnlagsendringshendelseDao,
+            applicationContext.kommerBarnetTilGodeService,
+            applicationContext.revurderingDao,
+            applicationContext.behandlingService
+        )
+        val behandlingFactory =
+            BehandlingFactory(
+                oppgaveService = applicationContext.oppgaveServiceNy,
+                grunnlagService = applicationContext.grunnlagsService,
+                revurderingService = applicationContext.revurderingService,
+                sakDao = applicationContext.sakDao,
+                behandlingDao = applicationContext.behandlingDao,
+                hendelseDao = applicationContext.hendelseDao,
+                behandlingHendelser = applicationContext.behandlingsHendelser,
+                featureToggleService = applicationContext.featureToggleService
+            )
+
+        val (sak, behandling) = opprettSakMedFoerstegangsbehandling(fnr, behandlingFactory)
+
+        val err = assertThrows<BadRequestException> {
+            revurderingService.opprettManuellRevurderingWrapper(
+                opprettRevurderingRequest = OpprettRevurderingRequest(
+                    sakId = sak.id,
+                    aarsak = RevurderingAarsak.REGULERING,
+                    paaGrunnAvHendelseId = "124124124",
+                    begrunnelse = null
+                )
+            )
+        }
+        assertTrue(
+            err.message!!.startsWith("${RevurderingAarsak.REGULERING} har en ugyldig hendelse id for sakid")
+        )
+    }
+
+    @Test
+    fun `Skal få bad request hvis man mangler forrige iverksattebehandling`() {
+        val revurderingService = RevurderingServiceImpl(
+            applicationContext.oppgaveServiceNy,
+            applicationContext.grunnlagsService,
+            applicationContext.behandlingsHendelser,
+            applicationContext.featureToggleService,
+            applicationContext.behandlingDao,
+            applicationContext.hendelseDao,
+            applicationContext.grunnlagsendringshendelseDao,
+            applicationContext.kommerBarnetTilGodeService,
+            applicationContext.revurderingDao,
+            applicationContext.behandlingService
+        )
+        val behandlingFactory =
+            BehandlingFactory(
+                oppgaveService = applicationContext.oppgaveServiceNy,
+                grunnlagService = applicationContext.grunnlagsService,
+                revurderingService = applicationContext.revurderingService,
+                sakDao = applicationContext.sakDao,
+                behandlingDao = applicationContext.behandlingDao,
+                hendelseDao = applicationContext.hendelseDao,
+                behandlingHendelser = applicationContext.behandlingsHendelser,
+                featureToggleService = applicationContext.featureToggleService
+            )
+
+        val (sak, behandling) = opprettSakMedFoerstegangsbehandling(fnr, behandlingFactory)
+
+        val err = assertThrows<BadRequestException> {
+            revurderingService.opprettManuellRevurderingWrapper(
+                opprettRevurderingRequest = OpprettRevurderingRequest(
+                    sakId = sak.id,
+                    aarsak = RevurderingAarsak.REGULERING,
+                    paaGrunnAvHendelseId = UUID.randomUUID().toString(),
+                    begrunnelse = null
+                )
+            )
+        }
+        assertTrue(
+            err.message!!.startsWith("Kan ikke revurdere en sak uten iverksatt behandling sakid: ${sak.id}")
+        )
+    }
+
+    @Test
+    fun `returnerer bad request hvis revurderingaarsak ikke er stoettet for sak`() {
+        val revurderingService = RevurderingServiceImpl(
+            applicationContext.oppgaveServiceNy,
+            applicationContext.grunnlagsService,
+            applicationContext.behandlingsHendelser,
+            applicationContext.featureToggleService,
+            applicationContext.behandlingDao,
+            applicationContext.hendelseDao,
+            applicationContext.grunnlagsendringshendelseDao,
+            applicationContext.kommerBarnetTilGodeService,
+            applicationContext.revurderingDao,
+            applicationContext.behandlingService
+        )
+        val behandlingFactory =
+            BehandlingFactory(
+                oppgaveService = applicationContext.oppgaveServiceNy,
+                grunnlagService = applicationContext.grunnlagsService,
+                revurderingService = applicationContext.revurderingService,
+                sakDao = applicationContext.sakDao,
+                behandlingDao = applicationContext.behandlingDao,
+                hendelseDao = applicationContext.hendelseDao,
+                behandlingHendelser = applicationContext.behandlingsHendelser,
+                featureToggleService = applicationContext.featureToggleService
+            )
+
+        val (sak, behandling) = opprettSakMedFoerstegangsbehandling(fnr, behandlingFactory)
+
+        val err = assertThrows<BadRequestException> {
+            revurderingService.opprettManuellRevurderingWrapper(
+                opprettRevurderingRequest = OpprettRevurderingRequest(
+                    sakId = sak.id,
+                    aarsak = RevurderingAarsak.REGULERING,
+                    paaGrunnAvHendelseId = UUID.randomUUID().toString(),
+                    begrunnelse = null
+                )
+            )
+        }
+        assertTrue(
+            err.message!!.startsWith("Kan ikke revurdere en sak uten iverksatt behandling sakid: ${sak.id}")
+        )
     }
 }

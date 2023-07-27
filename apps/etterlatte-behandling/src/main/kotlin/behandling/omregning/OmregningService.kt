@@ -1,6 +1,7 @@
 package no.nav.etterlatte.behandling.omregning
 
 import no.nav.etterlatte.behandling.BehandlingService
+import no.nav.etterlatte.behandling.revurdering.OpprettRevurderingRequest
 import no.nav.etterlatte.behandling.revurdering.RevurderingService
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
@@ -32,13 +33,13 @@ class OmregningService(
                 merknad = null
             )
 
-            Prosesstype.MANUELL -> revurderingService.opprettManuellRevurdering(
-                sakId = sakId,
-                forrigeBehandling = forrigeBehandling,
-                revurderingAarsak = RevurderingAarsak.REGULERING,
-                kilde = Vedtaksloesning.GJENNY,
-                paaGrunnAvHendelse = null,
-                begrunnelse = null
+            Prosesstype.MANUELL -> revurderingService.opprettManuellRevurderingWrapper(
+                opprettRevurderingRequest = OpprettRevurderingRequest(
+                    sakId = sakId,
+                    aarsak = RevurderingAarsak.REGULERING,
+                    paaGrunnAvHendelseId = null,
+                    begrunnelse = null
+                )
             )
         } ?: throw Exception("Opprettelse av revurdering feilet for $sakId")
         return Triple(behandling.id, forrigeBehandling.id, behandling.sak.sakType)

@@ -14,6 +14,7 @@ import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.BehandlingFactory
 import no.nav.etterlatte.behandling.BehandlingHendelseType
 import no.nav.etterlatte.behandling.BehandlingHendelserKafkaProducer
+import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.BehandlingServiceFeatureToggle
 import no.nav.etterlatte.behandling.GrunnlagService
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
@@ -63,6 +64,7 @@ class BehandlingFactoryTest {
     private val grunnlagsendringshendelseDao = mockk<GrunnlagsendringshendelseDao>()
     private val grunnlagService = mockk<GrunnlagService>()
     private val oppgaveService = mockk<OppgaveServiceNy>()
+    private val behandlingService = mockk<BehandlingService>()
     private val mockOppgave = opprettNyOppgaveMedReferanseOgSak(
         "behandling",
         Sak("ident", SakType.BARNEPENSJON, 1L, Enheter.AALESUND.enhetNr),
@@ -81,7 +83,8 @@ class BehandlingFactoryTest {
         hendelseDaoMock,
         grunnlagsendringshendelseDao,
         kommerBarnetTilGodeService,
-        revurderingDao
+        revurderingDao,
+        behandlingService
     )
     private val behandlingFactory = BehandlingFactory(
         oppgaveService,

@@ -1,4 +1,4 @@
-import { OppgaveDTOny, Oppgavestatus, Oppgavetype } from '~shared/api/oppgaverny'
+import { OppgaveDTOny, OppgaveKilde, Oppgavestatus, Oppgavetype } from '~shared/api/oppgaverny'
 import { isBefore } from 'date-fns'
 
 export const SAKSBEHANDLERFILTER = {
@@ -90,8 +90,9 @@ export const OPPGAVETYPEFILTER: Record<OppgavetypeFilterKeys, string> = {
   REVURDERING: 'Revurdering',
   HENDELSE: 'Hendelse',
   MANUELT_OPPHOER: 'Manuelt opphør',
-  EKSTERN: 'Ekstern',
   ATTESTERING: 'Attestering',
+  VURDER_KONSEKVENS: 'Vurder konsekvense for hendelse',
+  UNDERKJENT: 'Underkjent behandling',
 }
 
 function filtrerOppgaveType(oppgavetypeFilterKeys: OppgavetypeFilterKeys, oppgaver: OppgaveDTOny[]): OppgaveDTOny[] {
@@ -99,6 +100,22 @@ function filtrerOppgaveType(oppgavetypeFilterKeys: OppgavetypeFilterKeys, oppgav
     return oppgaver
   } else {
     return oppgaver.filter((o) => o.type === oppgavetypeFilterKeys)
+  }
+}
+
+export type OppgaveKildeFilterKeys = OppgaveKilde | visAlle
+export const OPPGAVEKILDEFILTER: Record<OppgaveKildeFilterKeys, string> = {
+  visAlle: 'Vis alle',
+  HENDELSE: 'Hendelse',
+  BEHANDLING: 'Behandling',
+  EKSTERN: 'Ekstern',
+}
+
+function filtrerOppgavekilde(oppgaveKildeFilterKeys: OppgaveKildeFilterKeys, oppgaver: OppgaveDTOny[]): OppgaveDTOny[] {
+  if (oppgaveKildeFilterKeys === 'visAlle') {
+    return oppgaver
+  } else {
+    return oppgaver.filter((o) => o.kilde === oppgaveKildeFilterKeys)
   }
 }
 
@@ -110,6 +127,28 @@ function finnFnrIOppgaver(fnr: string, oppgaver: OppgaveDTOny[]): OppgaveDTOny[]
   }
 }
 
+export type FristFilterKeys = keyof typeof FRISTFILTER
+
+export const FRISTFILTER = {
+    visAlle: 'Vis alle',
+    fristHarPassert: 'Frist har passert',
+    manglerFrist: 'Mangler frist',
+}
+
+export function filtrerFrist(fristFilterKeys: FristFilterKeys, oppgaver: OppgaveDTOny[]) {
+    if (fristFilterKeys === 'visAlle') return oppgaver
+    else if (fristFilterKeys === 'manglerFrist') {
+        const oppgaverUtenFrist = oppgaver.filter((o) => !o.frist)
+        return oppgaverUtenFrist
+    } else {
+        const oppgaverMedFrist = oppgaver.filter((o) => o.frist)
+        const sortertEtterFrist = oppgaverMedFrist.sort((a, b) => {
+            return new Date(a.frist).valueOf() - new Date(b.frist).valueOf()
+        })
+        return sortertEtterFrist.filter((o) => isBefore(new Date(o.frist), new Date()))
+    }
+}
+
 export function filtrerOppgaver(
   enhetsFilter: EnhetFilterKeys,
   fristFilter: FristFilterKeys,
@@ -117,6 +156,7 @@ export function filtrerOppgaver(
   ytelseFilter: YtelseFilterKeys,
   oppgavestatusFilter: OppgavestatusFilterKeys,
   oppgavetypeFilter: OppgavetypeFilterKeys,
+  oppgaveKildeFilterKeys: OppgaveKildeFilterKeys,
   oppgaver: OppgaveDTOny[],
   fnr: string
 ): OppgaveDTOny[] {
@@ -125,28 +165,9 @@ export function filtrerOppgaver(
   const ytelseFiltrert = filtrerYtelse(ytelseFilter, saksbehandlerFiltrert)
   const oppgaveFiltrert = filtrerOppgaveStatus(oppgavestatusFilter, ytelseFiltrert)
   const oppgaveTypeFiltrert = filtrerOppgaveType(oppgavetypeFilter, oppgaveFiltrert)
-  const fristFiltrert = filtrerFrist(fristFilter, oppgaveTypeFiltrert)
+  const oppgaveKildeFiltrert = filtrerOppgavekilde(oppgaveKildeFilterKeys, oppgaveTypeFiltrert)
+  const fristFiltrert = filtrerFrist(fristFilter, oppgaveKildeFiltrert)
 
   return finnFnrIOppgaver(fnr, fristFiltrert)
 }
-export type FristFilterKeys = keyof typeof FRISTFILTER
 
-export const FRISTFILTER = {
-  visAlle: 'Vis alle',
-  fristHarPassert: 'Frist har passert',
-  manglerFrist: 'Mangler frist',
-}
-
-export function filtrerFrist(fristFilterKeys: FristFilterKeys, oppgaver: OppgaveDTOny[]) {
-  if (fristFilterKeys === 'visAlle') return oppgaver
-  else if (fristFilterKeys === 'manglerFrist') {
-    const oppgaverUtenFrist = oppgaver.filter((o) => !o.frist)
-    return oppgaverUtenFrist
-  } else {
-    const oppgaverMedFrist = oppgaver.filter((o) => o.frist)
-    const sortertEtterFrist = oppgaverMedFrist.sort((a, b) => {
-      return new Date(a.frist).valueOf() - new Date(b.frist).valueOf()
-    })
-    return sortertEtterFrist.filter((o) => isBefore(new Date(o.frist), new Date()))
-  }
-}

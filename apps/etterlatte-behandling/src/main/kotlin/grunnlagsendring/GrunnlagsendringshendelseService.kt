@@ -23,6 +23,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
+import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveType
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.pdlhendelse.Adressebeskyttelse
@@ -214,7 +215,8 @@ class GrunnlagsendringshendelseService(
                     oppgaveService.opprettNyOppgaveMedSakOgReferanse(
                         hendelseId.toString(),
                         rolleOgSak.sakId,
-                        oppgaveType = OppgaveType.HENDELSE
+                        oppgaveKilde = OppgaveKilde.HENDELSE,
+                        oppgaveType = OppgaveType.VURDER_KONSEKVENS
                     )
                     grunnlagsendringshendelseDao.opprettGrunnlagsendringshendelse(
                         Grunnlagsendringshendelse(
@@ -259,7 +261,8 @@ class GrunnlagsendringshendelseService(
                         oppgaveService.opprettNyOppgaveMedSakOgReferanse(
                             hendelseId.toString(),
                             rolleOgSak.sakId,
-                            oppgaveType = OppgaveType.HENDELSE
+                            oppgaveKilde = OppgaveKilde.HENDELSE,
+                            oppgaveType = OppgaveType.VURDER_KONSEKVENS
                         )
                         grunnlagsendringshendelseDao.opprettGrunnlagsendringshendelse(
                             Grunnlagsendringshendelse(
@@ -294,7 +297,8 @@ class GrunnlagsendringshendelseService(
                 oppgaveService.opprettNyOppgaveMedSakOgReferanse(
                     referanse = hendelseId.toString(),
                     sakId = sakId,
-                    oppgaveType = OppgaveType.HENDELSE
+                    oppgaveKilde = OppgaveKilde.HENDELSE,
+                    oppgaveType = OppgaveType.VURDER_KONSEKVENS
                 )
                 listOf(
                     grunnlagsendringshendelseDao.opprettGrunnlagsendringshendelse(

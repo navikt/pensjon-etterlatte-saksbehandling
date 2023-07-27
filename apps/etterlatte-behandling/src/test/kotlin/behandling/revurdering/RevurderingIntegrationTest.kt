@@ -30,6 +30,7 @@ import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
+import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveType
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -145,6 +146,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
             oppgaveService.opprettNyOppgaveMedSakOgReferanse(
                 revurdering?.id.toString(),
                 sak.id,
+                OppgaveKilde.BEHANDLING,
                 OppgaveType.REVURDERING
             )
         }
@@ -259,6 +261,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
                 oppgaveService.opprettNyOppgaveMedSakOgReferanse(
                     revurdering.id.toString(),
                     sak.id,
+                    OppgaveKilde.BEHANDLING,
                     OppgaveType.REVURDERING
                 )
             }
@@ -425,6 +428,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
                 oppgaveService.opprettNyOppgaveMedSakOgReferanse(
                     behandling!!.id.toString(),
                     sak.id,
+                    OppgaveKilde.BEHANDLING,
                     OppgaveType.FOERSTEGANGSBEHANDLING
                 )
             }
@@ -438,6 +442,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
                 oppgaveService.opprettNyOppgaveMedSakOgReferanse(
                     revurdering.id.toString(),
                     sak.id,
+                    OppgaveKilde.BEHANDLING,
                     OppgaveType.REVURDERING
                 )
             }
@@ -472,7 +477,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
                 featureToggleService = applicationContext.featureToggleService
             )
 
-        val (sak, behandling) = opprettSakMedFoerstegangsbehandling(fnr, behandlingFactory)
+        val (sak, _) = opprettSakMedFoerstegangsbehandling(fnr, behandlingFactory)
 
         val err = assertThrows<BadRequestException> {
             revurderingService.opprettManuellRevurderingWrapper(
@@ -515,7 +520,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
                 featureToggleService = applicationContext.featureToggleService
             )
 
-        val (sak, behandling) = opprettSakMedFoerstegangsbehandling(fnr, behandlingFactory)
+        val (sak, _) = opprettSakMedFoerstegangsbehandling(fnr, behandlingFactory)
 
         val err = assertThrows<BadRequestException> {
             revurderingService.opprettManuellRevurderingWrapper(
@@ -558,7 +563,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
                 featureToggleService = applicationContext.featureToggleService
             )
 
-        val (sak, behandling) = opprettSakMedFoerstegangsbehandling(fnr, behandlingFactory)
+        val (sak, _) = opprettSakMedFoerstegangsbehandling(fnr, behandlingFactory)
 
         val err = assertThrows<BadRequestException> {
             revurderingService.opprettManuellRevurderingWrapper(

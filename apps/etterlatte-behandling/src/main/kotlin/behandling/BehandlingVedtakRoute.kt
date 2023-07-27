@@ -16,7 +16,8 @@ import java.util.*
 internal fun Route.behandlingVedtakRoute(
     behandlingsstatusService: BehandlingStatusService,
     oppgaveService: OppgaveServiceNy,
-    behandlingService: BehandlingService
+    behandlingService: BehandlingService,
+    kanBrukeNyOppgaveliste: Boolean
 ) {
     route("/fattvedtak") {
         post {
@@ -29,10 +30,12 @@ internal fun Route.behandlingVedtakRoute(
             } else {
                 inTransaction {
                     behandlingsstatusService.settFattetVedtak(behandling, fattVedtak.vedtakHendelse)
-                    oppgaveService.lukkOppgaveUnderbehandlingOgLagNyMedType(
-                        fattVedtak.vedtakOppgaveDTO,
-                        OppgaveType.ATTESTERING
-                    )
+                    if (kanBrukeNyOppgaveliste) {
+                        oppgaveService.lukkOppgaveUnderbehandlingOgLagNyMedType(
+                            fattVedtak.vedtakOppgaveDTO,
+                            OppgaveType.ATTESTERING
+                        )
+                    }
                 }
                 call.respond(HttpStatusCode.OK)
             }
@@ -49,10 +52,12 @@ internal fun Route.behandlingVedtakRoute(
             } else {
                 inTransaction {
                     behandlingsstatusService.settReturnertVedtak(behandling, underkjennVedtakOppgave.vedtakHendelse)
-                    oppgaveService.lukkOppgaveUnderbehandlingOgLagNyMedType(
-                        underkjennVedtakOppgave.vedtakOppgaveDTO,
-                        OppgaveType.UNDERKJENT
-                    )
+                    if (kanBrukeNyOppgaveliste) {
+                        oppgaveService.lukkOppgaveUnderbehandlingOgLagNyMedType(
+                            underkjennVedtakOppgave.vedtakOppgaveDTO,
+                            OppgaveType.UNDERKJENT
+                        )
+                    }
                 }
                 call.respond(HttpStatusCode.OK)
             }
@@ -69,9 +74,11 @@ internal fun Route.behandlingVedtakRoute(
             } else {
                 inTransaction {
                     behandlingsstatusService.settAttestertVedtak(behandling, attesterVedtakOppgave.vedtakHendelse)
-                    oppgaveService.ferdigStillOppgaveUnderBehandling(
-                        attesterVedtakOppgave.vedtakOppgaveDTO
-                    )
+                    if (kanBrukeNyOppgaveliste) {
+                        oppgaveService.ferdigStillOppgaveUnderBehandling(
+                            attesterVedtakOppgave.vedtakOppgaveDTO
+                        )
+                    }
                 }
                 call.respond(HttpStatusCode.OK)
             }

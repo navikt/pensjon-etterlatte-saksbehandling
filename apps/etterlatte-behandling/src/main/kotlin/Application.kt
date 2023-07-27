@@ -102,7 +102,8 @@ fun Application.module(context: ApplicationContext) {
             behandlingVedtakRoute(
                 behandlingsstatusService = behandlingsStatusService,
                 oppgaveService = oppgaveServiceNy,
-                behandlingService = behandlingService
+                behandlingService = behandlingService,
+                kanBrukeNyOppgaveliste = kanBrukeNyOppgaveliste
             )
             oppgaveRoutes(service = oppgaveService)
             oppgaveRoutesNy(

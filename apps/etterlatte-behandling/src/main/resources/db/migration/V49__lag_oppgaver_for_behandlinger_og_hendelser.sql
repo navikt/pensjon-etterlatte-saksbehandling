@@ -10,10 +10,13 @@ WITH source as (select *,
                          inner join sak s on b.sak_id = s.id
                 where h.hendelse in ('VEDTAK:FATTET', 'VEDTAK:UNDERKJENT', 'VEDTAK:ATTESTERT', 'BEHANDLING:AVBRUTT')
                 order by opprettet asc)
--- id, status, enhet, sak_id, saksbehandler, referanse, merknad, opprettet, type, saktype, fnr, frist
+-- id, status, enhet, sak_id, saksbehandler, referanse, merknad, opprettet, type, saktype, fnr, frist, kilde
 INSERT
 INTO oppgave (select gen_random_uuid()                                as id,
-                     'FERDIGSTILT'                                    as status,
+                     case source.hendelse
+                         when 'BEHANDLING:AVBRUTT' then 'AVBRUTT'
+                         else 'FERDIGSTILT'
+                         end                                          as status,
                      source.enhet                                     as enhet,
                      source.sak_id                                    as sak_id,
                      source.ident                                     as saksbehandler,
@@ -35,7 +38,7 @@ INTO oppgave (select gen_random_uuid()                                as id,
                                          when 'FØRSTEGANGSBEHANDLING' then 'FOERSTEGANGSBEHANDLING'
                                          else source.behandlingstype
                                          end
-                                 else 'RETURNERT'
+                                 else 'UNDERKJENT'
                                  end
                          when 'VEDTAK:UNDERKJENT' then 'ATTESTERING'
                          when 'VEDTAK:ATTESTERT' then 'ATTESTERING'
@@ -50,15 +53,16 @@ INTO oppgave (select gen_random_uuid()                                as id,
                                             from source s1
                                             where source.behandlingid = s1.behandlingid
                                               and s1.motsatt_rekkefolge = 2)
-                                          when 'VEDTAK:UNDERKJENT' then 'RETURNERT'
-                                          when 'VEDTAK:ATTESTERT' then 'HENDELSE'
+                                          when 'VEDTAK:UNDERKJENT' then 'UNDERKJENT'
+                                          when 'VEDTAK:ATTESTERT' then 'SKAL_IKKE_SKJE'
                                           when 'VEDTAK:FATTET' then 'ATTESTERING'
                                      end
                                  end
                          end                                          as type,
                      source.saktype                                   as saktype,
                      source.fnr                                       as fnr,
-                     source.behandling_opprettet + interval '1 month' as frist
+                     source.behandling_opprettet + interval '1 month' as frist,
+                     'BEHANDLING'                                     as kilde
               FROM source);
 
 -- få med en åpen oppgave av riktig type for alle behandlinger som ikke er avsluttet. typen oppgave kan utledes
@@ -87,7 +91,7 @@ INTO oppgave (SELECT gen_random_uuid()                                    as id,
                                       else behandling.behandlingstype
                              end
                          when 'VEDTAK:FATTET' then 'ATTESTERING'
-                         when 'VEDTAK:UNDERKJENT' then 'RETURNERT'
+                         when 'VEDTAK:UNDERKJENT' then 'UNDERKJENT'
 
                          -- Disse skal ikke skje siden disse hendelsene impliserer at behandlingen ikke er åpen
                          when 'BEHANDLING:AVBRUTT' then 'SKAL_IKKE_SKJE'
@@ -96,7 +100,8 @@ INTO oppgave (SELECT gen_random_uuid()                                    as id,
                          end                                              as type,
                      sak.saktype                                          as saktype,
                      sak.fnr                                              as fnr,
-                     behandling.behandling_opprettet + interval '1 month' as frist
+                     behandling.behandling_opprettet + interval '1 month' as frist,
+                     'BEHANDLING'                                         as kilde
               FROM behandling behandling
                        inner join sak sak on behandling.sak_id = sak.id
                        inner join siste_hendelse_per_behandling sisteHendelse
@@ -126,9 +131,9 @@ INTO oppgave (SELECT gen_random_uuid()                     as id,
                                              else concat(': ', source.kommentar)
                          end)                              as merknad,
                      source.opprettet                      as opprettet,
-                     'HENDELSE'                            as type,
+                     'VURDER_KONSEKVENS'                   as type,
                      source.saktype                        as saktype,
                      source.fnr                            as fnr,
-                     source.opprettet + interval '1 month' as opprettet
+                     source.opprettet + interval '1 month' as opprettet,
+                     'HENDELSE'                            as kilde
               FROM source);
-

@@ -11,12 +11,13 @@ data class OppgaveNy(
     val status: Status,
     val enhet: String,
     val sakId: Long,
+    val kilde: OppgaveKilde? = null,
     val type: OppgaveType,
     val saksbehandler: String? = null,
     val referanse: String? = null,
     val merknad: String? = null,
     val opprettet: Tidspunkt,
-    val sakType: SakType? = null,
+    val sakType: SakType,
     val fnr: String? = null,
     val frist: Tidspunkt?
 )
@@ -29,14 +30,19 @@ enum class Status {
     AVBRUTT
 }
 
+enum class OppgaveKilde {
+    HENDELSE,
+    BEHANDLING,
+    EKSTERN
+}
+
 enum class OppgaveType {
     FOERSTEGANGSBEHANDLING,
     REVURDERING,
-    ATTESTERING,
-    UNDERKJENT,
-    HENDELSE,
     MANUELT_OPPHOER,
-    EKSTERN
+    VURDER_KONSEKVENS,
+    ATTESTERING,
+    UNDERKJENT
 }
 
 data class SaksbehandlerEndringDto(
@@ -66,6 +72,7 @@ data class VedtakEndringDTO(
 fun opprettNyOppgaveMedReferanseOgSak(
     referanse: String,
     sak: Sak,
+    oppgaveKilde: OppgaveKilde?,
     oppgaveType: OppgaveType
 ): OppgaveNy {
     return OppgaveNy(
@@ -73,13 +80,14 @@ fun opprettNyOppgaveMedReferanseOgSak(
         status = Status.NY,
         enhet = sak.enhet,
         sakId = sak.id,
-        type = oppgaveType,
+        kilde = oppgaveKilde,
         saksbehandler = null,
         referanse = referanse,
         merknad = null,
         opprettet = Tidspunkt.now(),
         sakType = sak.sakType,
         fnr = sak.ident,
-        frist = null
+        frist = null,
+        type = oppgaveType
     )
 }

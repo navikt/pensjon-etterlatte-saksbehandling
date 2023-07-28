@@ -36,6 +36,7 @@ import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveType
 import no.nav.etterlatte.libs.common.oppgaveNy.opprettNyOppgaveMedReferanseOgSak
 import no.nav.etterlatte.libs.common.sak.Sak
@@ -68,6 +69,7 @@ class BehandlingFactoryTest {
     private val mockOppgave = opprettNyOppgaveMedReferanseOgSak(
         "behandling",
         Sak("ident", SakType.BARNEPENSJON, 1L, Enheter.AALESUND.enhetNr),
+        OppgaveKilde.BEHANDLING,
         OppgaveType.FOERSTEGANGSBEHANDLING
     )
     private val kommerBarnetTilGodeService = mockk<KommerBarnetTilGodeService>().also {
@@ -457,7 +459,7 @@ class BehandlingFactoryTest {
         every {
             oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendSoeknad(any(), any())
         } returns mockOppgave
-        every { oppgaveService.opprettNyOppgaveMedSakOgReferanse(any(), any(), any()) } returns mockOppgave
+        every { oppgaveService.opprettNyOppgaveMedSakOgReferanse(any(), any(), any(), any()) } returns mockOppgave
 
         val foerstegangsbehandling = behandlingFactory.opprettBehandling(
             1,
@@ -525,7 +527,7 @@ class BehandlingFactoryTest {
         verify {
             grunnlagService.leggInnNyttGrunnlag(any())
             oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendSoeknad(any(), any())
-            oppgaveService.opprettNyOppgaveMedSakOgReferanse(any(), any(), any())
+            oppgaveService.opprettNyOppgaveMedSakOgReferanse(any(), any(), any(), any())
         }
         verify(exactly = 2) {
             sakDaoMock.hentSak(any())

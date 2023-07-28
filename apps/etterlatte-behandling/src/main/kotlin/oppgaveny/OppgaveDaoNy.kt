@@ -1,6 +1,7 @@
 package no.nav.etterlatte.oppgaveny
 
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveNy
 import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveType
 import no.nav.etterlatte.libs.common.oppgaveNy.RedigerFristRequest
@@ -22,8 +23,8 @@ interface OppgaveDaoNy {
     fun lagreOppgave(oppgaveNy: OppgaveNy)
     fun hentOppgave(oppgaveId: UUID): OppgaveNy?
     fun hentOppgaverForBehandling(behandlingid: String): List<OppgaveNy>
-    fun hentOppgaver(oppgaveTyper: List<OppgaveType>): List<OppgaveNy>
-    fun finnOppgaverForStrengtFortroligOgStrengtFortroligUtland(statuser: List<OppgaveType>): List<OppgaveNy>
+    fun hentOppgaver(oppgaveTypeTyper: List<OppgaveType>): List<OppgaveNy>
+    fun finnOppgaverForStrengtFortroligOgStrengtFortroligUtland(oppgaveTypeTyper: List<OppgaveType>): List<OppgaveNy>
     fun settNySaksbehandler(saksbehandlerEndringDto: SaksbehandlerEndringDto)
     fun endreStatusPaaOppgave(oppgaveId: UUID, oppgaveStatus: Status)
     fun fjernSaksbehandler(oppgaveId: UUID)
@@ -37,22 +38,23 @@ class OppgaveDaoNyImpl(private val connection: () -> Connection) : OppgaveDaoNy 
         with(connection()) {
             val statement = prepareStatement(
                 """
-                INSERT INTO oppgave(id, status, enhet, sak_id, type, saksbehandler, referanse, merknad, opprettet, saktype, fnr, frist)
-                VALUES(?::UUID, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO oppgave(id, status, enhet, sak_id, type, saksbehandler, referanse, merknad, opprettet, saktype, fnr, frist, kilde)
+                VALUES(?::UUID, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """.trimIndent()
             )
             statement.setObject(1, oppgaveNy.id)
-            statement.setString(2, oppgaveNy.status.toString())
+            statement.setString(2, oppgaveNy.status.name)
             statement.setString(3, oppgaveNy.enhet)
             statement.setLong(4, oppgaveNy.sakId)
-            statement.setString(5, oppgaveNy.type.toString())
+            statement.setString(5, oppgaveNy.type.name)
             statement.setString(6, oppgaveNy.saksbehandler)
             statement.setString(7, oppgaveNy.referanse)
             statement.setString(8, oppgaveNy.merknad)
             statement.setTidspunkt(9, oppgaveNy.opprettet)
-            statement.setString(10, oppgaveNy.sakType.toString())
+            statement.setString(10, oppgaveNy.sakType.name)
             statement.setString(11, oppgaveNy.fnr)
             statement.setTidspunkt(12, oppgaveNy.frist)
+            statement.setString(13, oppgaveNy.kilde?.name)
             statement.executeUpdate()
             logger.info("lagret oppgave for ${oppgaveNy.id} for sakid ${oppgaveNy.sakId}")
         }
@@ -62,7 +64,7 @@ class OppgaveDaoNyImpl(private val connection: () -> Connection) : OppgaveDaoNy 
         with(connection()) {
             val statement = prepareStatement(
                 """
-                    SELECT id, status, enhet, sak_id, type, saksbehandler, referanse, merknad, opprettet, saktype, fnr, frist
+                    SELECT id, status, enhet, sak_id, type, saksbehandler, referanse, merknad, opprettet, saktype, fnr, frist, kilde
                     FROM oppgave
                     WHERE id = ?::UUID
                 """.trimIndent()
@@ -78,7 +80,7 @@ class OppgaveDaoNyImpl(private val connection: () -> Connection) : OppgaveDaoNy 
         with(connection()) {
             val statement = prepareStatement(
                 """
-                    SELECT id, status, enhet, sak_id, type, saksbehandler, referanse, merknad, opprettet, saktype, fnr, frist
+                    SELECT id, status, enhet, sak_id, type, saksbehandler, referanse, merknad, opprettet, saktype, fnr, frist, kilde
                     FROM oppgave
                     WHERE referanse = ?
                 """.trimIndent()
@@ -92,20 +94,20 @@ class OppgaveDaoNyImpl(private val connection: () -> Connection) : OppgaveDaoNy 
         }
     }
 
-    override fun hentOppgaver(oppgaveTyper: List<OppgaveType>): List<OppgaveNy> {
-        if (oppgaveTyper.isEmpty()) return emptyList()
+    override fun hentOppgaver(oppgaveTypeTyper: List<OppgaveType>): List<OppgaveNy> {
+        if (oppgaveTypeTyper.isEmpty()) return emptyList()
 
         with(connection()) {
             val statement = prepareStatement(
                 """
-                    SELECT o.id, o.status, o.enhet, o.sak_id, o.type, o.saksbehandler, o.referanse, o.merknad, o.opprettet, o.saktype, o.fnr, o.frist
+                    SELECT o.id, o.status, o.enhet, o.sak_id, o.type, o.saksbehandler, o.referanse, o.merknad, o.opprettet, o.saktype, o.fnr, o.frist, o.kilde
                     FROM oppgave o INNER JOIN sak s ON o.sak_id = s.id
                     WHERE o.type = ANY(?)
                     AND s.adressebeskyttelse is null OR 
                     (s.adressebeskyttelse is NOT NULL AND (s.adressebeskyttelse != ? AND s.adressebeskyttelse != ?))
                 """.trimIndent()
             )
-            statement.setArray(1, createArrayOf("text", oppgaveTyper.toTypedArray()))
+            statement.setArray(1, createArrayOf("text", oppgaveTypeTyper.toTypedArray()))
             statement.setString(2, AdressebeskyttelseGradering.STRENGT_FORTROLIG.name)
             statement.setString(3, AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND.name)
 
@@ -117,11 +119,13 @@ class OppgaveDaoNyImpl(private val connection: () -> Connection) : OppgaveDaoNy 
         }
     }
 
-    override fun finnOppgaverForStrengtFortroligOgStrengtFortroligUtland(statuser: List<OppgaveType>): List<OppgaveNy> {
+    override fun finnOppgaverForStrengtFortroligOgStrengtFortroligUtland(
+        oppgaveTypeTyper: List<OppgaveType>
+    ): List<OppgaveNy> {
         with(connection()) {
             val statement = prepareStatement(
                 """
-                    SELECT o.id, o.status, o.enhet, o.sak_id, o.type, o.saksbehandler, o.referanse, o.merknad, o.opprettet, o.saktype, o.fnr, o.frist
+                    SELECT o.id, o.status, o.enhet, o.sak_id, o.type, o.saksbehandler, o.referanse, o.merknad, o.opprettet, o.saktype, o.fnr, o.frist, o.kilde
                     FROM oppgave o INNER JOIN sak s ON o.sak_id = s.id
                     WHERE ((s.adressebeskyttelse = ?) OR (s.adressebeskyttelse = ?))
                     AND o.type = ANY(?)
@@ -129,7 +133,7 @@ class OppgaveDaoNyImpl(private val connection: () -> Connection) : OppgaveDaoNy 
             )
             statement.setString(1, AdressebeskyttelseGradering.STRENGT_FORTROLIG.name)
             statement.setString(2, AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND.name)
-            statement.setArray(3, createArrayOf("text", statuser.toTypedArray()))
+            statement.setArray(3, createArrayOf("text", oppgaveTypeTyper.toTypedArray()))
 
             return statement.executeQuery().toList {
                 asOppgaveNy()
@@ -212,12 +216,13 @@ class OppgaveDaoNyImpl(private val connection: () -> Connection) : OppgaveDaoNy 
             status = Status.valueOf(getString("status")),
             enhet = getString("enhet"),
             sakId = getLong("sak_id"),
+            kilde = getString("kilde")?.let { OppgaveKilde.valueOf(it) },
             type = OppgaveType.valueOf(getString("type")),
             saksbehandler = getString("saksbehandler"),
             referanse = getString("referanse"),
             merknad = getString("merknad"),
             opprettet = getTidspunkt("opprettet"),
-            sakType = getString("saktype")?.let { SakType.valueOf(it) },
+            sakType = SakType.valueOf(getString("saktype")),
             fnr = getString("fnr"),
             frist = getTidspunktOrNull("frist")
         )

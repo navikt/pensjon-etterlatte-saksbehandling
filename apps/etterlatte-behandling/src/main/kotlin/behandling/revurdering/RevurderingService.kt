@@ -28,6 +28,7 @@ import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.behandling.tilVirkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveType
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
@@ -234,6 +235,7 @@ class RevurderingServiceImpl(
                 oppgaveService.opprettNyOppgaveMedSakOgReferanse(
                     referanse = behandling.id.toString(),
                     sakId = sakId,
+                    oppgaveKilde = OppgaveKilde.BEHANDLING,
                     oppgaveType = OppgaveType.REVURDERING
                 )
                 behandlingHendelser.sendMeldingForHendelse(it, BehandlingHendelseType.OPPRETTET)

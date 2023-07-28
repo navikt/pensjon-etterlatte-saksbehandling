@@ -25,6 +25,7 @@ import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveType
 import no.nav.etterlatte.libs.common.oppgaveNy.opprettNyOppgaveMedReferanseOgSak
 import no.nav.etterlatte.libs.common.sak.Sak
@@ -49,6 +50,7 @@ internal class RealManueltOpphoerServiceTest {
     private val mockOppgave = opprettNyOppgaveMedReferanseOgSak(
         "opphør",
         Sak("ident", SakType.BARNEPENSJON, 1L, Enheter.AALESUND.enhetNr),
+        OppgaveKilde.BEHANDLING,
         OppgaveType.MANUELT_OPPHOER
     )
 
@@ -136,7 +138,7 @@ internal class RealManueltOpphoerServiceTest {
             }
         }
 
-        every { oppgaveService.opprettNyOppgaveMedSakOgReferanse(any(), any(), any()) } returns mockOppgave
+        every { oppgaveService.opprettNyOppgaveMedSakOgReferanse(any(), any(), any(), any()) } returns mockOppgave
 
         val behandlingHendelserKafkaProducer = mockk<BehandlingHendelserKafkaProducer> {
             every { sendMeldingForHendelse(any(), any()) } returns Unit
@@ -239,7 +241,7 @@ internal class RealManueltOpphoerServiceTest {
                 )
             }
         }
-        every { oppgaveService.opprettNyOppgaveMedSakOgReferanse(any(), any(), any()) } returns mockOppgave
+        every { oppgaveService.opprettNyOppgaveMedSakOgReferanse(any(), any(), any(), any()) } returns mockOppgave
 
         val behandlingHendelserKafkaProducer = mockk<BehandlingHendelserKafkaProducer> {
             every { sendMeldingForHendelse(any(), any()) } returns Unit

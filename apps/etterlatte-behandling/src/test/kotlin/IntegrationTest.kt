@@ -298,9 +298,9 @@ class IntegrationTest : BehandlingIntegrationTest() {
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
             }.also {
                 assertEquals(HttpStatusCode.OK, it.status)
-                val oppgaver: OppgaveListeDto = it.body()
-                assertEquals(1, oppgaver.oppgaver.size)
-                assertEquals(behandlingId, oppgaver.oppgaver.first().behandlingId)
+                val hentetOppgaver: OppgaveListeDto = it.body()
+                assertEquals(1, hentetOppgaver.oppgaver.size)
+                assertEquals(behandlingId, hentetOppgaver.oppgaver.first().behandlingId)
             }
 
             client.post("/attestervedtak") {

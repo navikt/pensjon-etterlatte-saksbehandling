@@ -17,8 +17,10 @@ import {
   YTELSEFILTER,
   YtelseFilterKeys,
   ENHETFILTER,
+  OppgaveKildeFilterKeys,
+  OPPGAVEKILDEFILTER,
   FRISTFILTER,
-  FristFilterKeys,
+  FristFilterKeys
 } from '~components/nyoppgavebenk/Oppgavelistafiltre'
 import { HandlingerForOppgave } from '~components/nyoppgavebenk/HandlingerForOppgave'
 import { OppgavetypeTag, SaktypeTag } from '~components/nyoppgavebenk/Tags'
@@ -52,6 +54,7 @@ export const Oppgavelista = (props: { oppgaver: ReadonlyArray<OppgaveDTOny>; hen
   const [ytelseFilter, setYtelseFilter] = useState<YtelseFilterKeys>('visAlle')
   const [oppgavestatusFilter, setOppgavestatusFilter] = useState<OppgavestatusFilterKeys>('visAlle')
   const [oppgavetypeFilter, setOppgavetypeFilter] = useState<OppgavetypeFilterKeys>('visAlle')
+  const [oppgavekildeFilter, setOppgavekildeFilter] = useState<OppgaveKildeFilterKeys>('visAlle')
   const [fnrFilter, setFnrFilter] = useState<string>('')
   const [page, setPage] = useState<number>(1)
   const rowsPerPage = 10
@@ -63,6 +66,7 @@ export const Oppgavelista = (props: { oppgaver: ReadonlyArray<OppgaveDTOny>; hen
     ytelseFilter,
     oppgavestatusFilter,
     oppgavetypeFilter,
+    oppgavekildeFilter,
     mutableOppgaver,
     fnrFilter
   )
@@ -139,6 +143,17 @@ export const Oppgavelista = (props: { oppgaver: ReadonlyArray<OppgaveDTOny>; hen
             </option>
           ))}
         </Select>
+        <Select
+          label="Kilde"
+          value={oppgavekildeFilter}
+          onChange={(e) => setOppgavekildeFilter(e.target.value as OppgaveKildeFilterKeys)}
+        >
+          {Object.entries(OPPGAVEKILDEFILTER).map(([type, typebeskrivelse]) => (
+            <option key={type} value={type}>
+              {typebeskrivelse}
+            </option>
+          ))}
+        </Select>
       </FilterFlex>
       <ButtonWrapper>
         <Button onClick={hentOppgaver}>Hent</Button>
@@ -150,6 +165,7 @@ export const Oppgavelista = (props: { oppgaver: ReadonlyArray<OppgaveDTOny>; hen
             setEnhetsFilter('visAlle')
             setOppgavestatusFilter('visAlle')
             setSaksbehandlerFilter('visAlle')
+            setOppgavekildeFilter('visAlle')
             setFnrFilter('')
           }}
         >
@@ -194,7 +210,7 @@ export const Oppgavelista = (props: { oppgaver: ReadonlyArray<OppgaveDTOny>; hen
                       <Table.HeaderCell>{formaterStringDato(opprettet)}</Table.HeaderCell>
                       <Table.HeaderCell>{fnr}</Table.HeaderCell>
                       <Table.DataCell>
-                        <OppgavetypeTag oppgavetype={type} />
+                        {type ? <OppgavetypeTag oppgavetype={type} /> : <div>oppgaeveid {id}</div>}
                       </Table.DataCell>
                       <Table.DataCell>{status}</Table.DataCell>
                       <Table.DataCell>{merknad}</Table.DataCell>

@@ -3,8 +3,8 @@ package no.nav.etterlatte.brev
 import no.nav.etterlatte.brev.adresse.AdresseService
 import no.nav.etterlatte.brev.behandling.Behandling
 import no.nav.etterlatte.brev.behandling.SakOgBehandlingService
-import no.nav.etterlatte.brev.brevbaker.BrevbakerKlient
 import no.nav.etterlatte.brev.brevbaker.BrevbakerRequest
+import no.nav.etterlatte.brev.brevbaker.BrevbakerService
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.dokarkiv.DokarkivServiceImpl
 import no.nav.etterlatte.brev.journalpost.JournalpostResponse
@@ -19,7 +19,6 @@ import no.nav.etterlatte.brev.model.BrevProsessType.MANUELL
 import no.nav.etterlatte.brev.model.ManueltBrevData
 import no.nav.etterlatte.brev.model.OpprettNyttBrev
 import no.nav.etterlatte.brev.model.Pdf
-import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.brev.model.SlateHelper
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
@@ -33,7 +32,7 @@ class VedtaksbrevService(
     private val sakOgBehandlingService: SakOgBehandlingService,
     private val adresseService: AdresseService,
     private val dokarkivService: DokarkivServiceImpl,
-    private val brevbaker: BrevbakerKlient
+    private val brevbaker: BrevbakerService
 ) {
     private val logger = LoggerFactory.getLogger(VedtaksbrevService::class.java)
 
@@ -94,7 +93,7 @@ class VedtaksbrevService(
         val brevData = opprettBrevData(brev, behandling)
         val brevRequest = BrevbakerRequest.fra(kode.ferdigstilling, brevData, behandling, avsender)
 
-        return genererPdf(brev.id, brevRequest)
+        return brevbaker.genererPdf(brev.id, brevRequest)
             .also { pdf -> ferdigstillHvisVedtakFattet(brev, behandling, pdf, brukerTokenInfo) }
     }
 
@@ -118,7 +117,7 @@ class VedtaksbrevService(
         val payload = when (prosessType) {
             AUTOMATISK -> {
                 when (behandling.revurderingsaarsak?.redigerbartBrev) {
-                    true -> hentRedigerbarTekstFraBrevbakeren(behandling)
+                    true -> brevbaker.hentRedigerbarTekstFraBrevbakeren(behandling)
                     else -> null
                 }
             }
@@ -168,24 +167,5 @@ class VedtaksbrevService(
         logger.info("Sletter vedtaksbrev (id=$id)")
 
         return db.slett(id)
-    }
-
-    private suspend fun genererPdf(brevID: BrevID, brevRequest: BrevbakerRequest): Pdf {
-        val brevbakerResponse = brevbaker.genererPdf(brevRequest)
-
-        return Base64.getDecoder().decode(brevbakerResponse.base64pdf)
-            .let { Pdf(it) }
-            .also { logger.info("Generert brev (id=$brevID) med størrelse: ${it.bytes.size}") }
-    }
-
-    private suspend fun hentRedigerbarTekstFraBrevbakeren(behandling: Behandling): Slate {
-        val request = BrevbakerRequest.fra(
-            BrevDataMapper.brevKode(behandling, AUTOMATISK).redigering,
-            BrevDataMapper.brevData(behandling),
-            behandling,
-            adresseService.hentAvsender(behandling.vedtak)
-        )
-        val brevbakerResponse = brevbaker.genererJSON(request)
-        return BlockTilSlateKonverterer.konverter(brevbakerResponse)
     }
 }

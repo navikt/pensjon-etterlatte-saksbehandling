@@ -30,11 +30,17 @@ internal fun Route.behandlingVedtakRoute(
             } else {
                 inTransaction {
                     behandlingsstatusService.settFattetVedtak(behandling, fattVedtak.vedtakHendelse)
-                    if (kanBrukeNyOppgaveliste) {
+                    try {
                         oppgaveService.lukkOppgaveUnderbehandlingOgLagNyMedType(
                             fattVedtak.vedtakOppgaveDTO,
-                            OppgaveType.ATTESTERING
+                            OppgaveType.ATTESTERING,
+                            fattVedtak.vedtakHendelse.saksbehandler
                         )
+                    } catch (e: Exception) {
+                        if (kanBrukeNyOppgaveliste) {
+                            throw e
+                        }
+                        Unit
                     }
                 }
                 call.respond(HttpStatusCode.OK)
@@ -52,11 +58,17 @@ internal fun Route.behandlingVedtakRoute(
             } else {
                 inTransaction {
                     behandlingsstatusService.settReturnertVedtak(behandling, underkjennVedtakOppgave.vedtakHendelse)
-                    if (kanBrukeNyOppgaveliste) {
+                    try {
                         oppgaveService.lukkOppgaveUnderbehandlingOgLagNyMedType(
                             underkjennVedtakOppgave.vedtakOppgaveDTO,
-                            OppgaveType.UNDERKJENT
+                            OppgaveType.UNDERKJENT,
+                            underkjennVedtakOppgave.vedtakHendelse.saksbehandler
                         )
+                    } catch (e: Exception) {
+                        if (kanBrukeNyOppgaveliste) {
+                            throw e
+                        }
+                        Unit
                     }
                 }
                 call.respond(HttpStatusCode.OK)
@@ -74,10 +86,15 @@ internal fun Route.behandlingVedtakRoute(
             } else {
                 inTransaction {
                     behandlingsstatusService.settAttestertVedtak(behandling, attesterVedtakOppgave.vedtakHendelse)
-                    if (kanBrukeNyOppgaveliste) {
+                    try {
                         oppgaveService.ferdigStillOppgaveUnderBehandling(
                             attesterVedtakOppgave.vedtakOppgaveDTO
                         )
+                    } catch (e: Exception) {
+                        if (kanBrukeNyOppgaveliste) {
+                            throw e
+                        }
+                        Unit
                     }
                 }
                 call.respond(HttpStatusCode.OK)

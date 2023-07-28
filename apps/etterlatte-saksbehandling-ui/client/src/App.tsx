@@ -10,7 +10,7 @@ import ErrorBoundary, { ApiErrorAlert } from '~ErrorBoundary'
 import BrevOversikt from '~components/person/brev/BrevOversikt'
 import NyttBrev from '~components/person/brev/NyttBrev'
 import ScrollToTop from '~ScrollTop'
-import { ToggleNyOppgaveliste } from '~components/nyoppgavebenk/ToggleNyOppgavelist'
+import { OppgavelistaContainer } from '~components/nyoppgavebenk/ToggleNyOppgavelist'
 import { isFailure, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
 import { useEffect } from 'react'
 import { ConfigContext, hentClientConfig } from '~clientConfig'
@@ -38,11 +38,11 @@ function App() {
                   path="/"
                   element={
                     <ConfigContext.Provider value={hentConfigStatus.data}>
-                      <ToggleNyOppgaveliste />
+                      <OppgavelistaContainer />
                     </ConfigContext.Provider>
                   }
                 />
-                <Route path="/oppgavebenken" element={<ToggleNyOppgaveliste />} />
+                <Route path="/oppgavebenken" element={<OppgavelistaContainer />} />
                 <Route path="/person/:fnr" element={<Person />} />
                 <Route path="/person/:fnr/sak/:sakId/brev" element={<BrevOversikt />} />
                 <Route path="/person/:fnr/sak/:sakId/brev/:brevId" element={<NyttBrev />} />

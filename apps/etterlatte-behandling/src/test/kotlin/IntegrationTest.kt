@@ -51,7 +51,6 @@ import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
-import no.nav.etterlatte.oppgave.OppgaveListeDto
 import no.nav.etterlatte.vedtaksvurdering.VedtakHendelse
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -292,16 +291,6 @@ class IntegrationTest : BehandlingIntegrationTest() {
                 setBody(SaksbehandlerEndringDto(saksbehandler02))
             }.also {
                 assertEquals(HttpStatusCode.OK, it.status)
-            }
-
-            client.get("/api/oppgaver") {
-                addAuthToken(tokenAttestant)
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-            }.also {
-                assertEquals(HttpStatusCode.OK, it.status)
-                val hentetOppgaver: OppgaveListeDto = it.body()
-                assertEquals(1, hentetOppgaver.oppgaver.size)
-                assertEquals(behandlingId, hentetOppgaver.oppgaver.first().behandlingId)
             }
 
             client.post("/attestervedtak") {

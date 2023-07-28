@@ -4,6 +4,7 @@ import io.ktor.server.plugins.BadRequestException
 import io.ktor.server.plugins.NotFoundException
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.User
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveKilde
@@ -15,8 +16,6 @@ import no.nav.etterlatte.libs.common.oppgaveNy.opprettNyOppgaveMedReferanseOgSak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
-import no.nav.etterlatte.oppgave.OppgaveServiceFeatureToggle
-import no.nav.etterlatte.oppgave.Rolle
 import no.nav.etterlatte.sak.SakDao
 import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
 import no.nav.etterlatte.tilgangsstyring.filterForEnheter
@@ -362,4 +361,14 @@ fun List<OppgaveNy>.filterOppgaverForEnheter(
     user
 ) { item, enheter ->
     enheter.contains(item.enhet)
+}
+
+enum class OppgaveServiceFeatureToggle(private val key: String) : FeatureToggle {
+    EnhetFilterOppgaver("pensjon-etterlatte.filter-oppgaver-enhet");
+
+    override fun key() = key
+}
+
+enum class Rolle {
+    SAKSBEHANDLER, ATTESTANT, STRENGT_FORTROLIG
 }

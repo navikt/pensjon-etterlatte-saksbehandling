@@ -34,7 +34,6 @@ import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.libs.ktor.setReady
-import no.nav.etterlatte.oppgave.oppgaveRoutes
 import no.nav.etterlatte.oppgaveny.oppgaveRoutesNy
 import no.nav.etterlatte.sak.sakSystemRoutes
 import no.nav.etterlatte.sak.sakWebRoutes
@@ -107,7 +106,6 @@ fun Application.module(context: ApplicationContext) {
                 behandlingService = behandlingService,
                 kanBrukeNyOppgaveliste = kanBrukeNyOppgaveliste
             )
-            oppgaveRoutes(service = oppgaveService)
             oppgaveRoutesNy(
                 service = oppgaveServiceNy,
                 gosysOppgaveService = gosysOppgaveService,

@@ -21,7 +21,6 @@ import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetalingsvedtak
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
-import org.slf4j.LoggerFactory
 import rapidsandrivers.migrering.ListenerMedLogging
 import java.util.*
 
@@ -156,8 +155,4 @@ class VedtakMottaker(
 
     private fun UtbetalingslinjerForVedtakEksisterer.utbetalingslinjeIDer() =
         this.utbetalingslinjer.joinToString(",") { it.id.value.toString() }
-
-    companion object {
-        private val logger = LoggerFactory.getLogger(VedtakMottaker::class.java)
-    }
 }

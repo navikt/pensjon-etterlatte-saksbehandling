@@ -1,13 +1,11 @@
 package no.nav.etterlatte
 
-import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.etterlatte.rapidsandrivers.EventNames.FINN_LOEPENDE_YTELSER
 import no.nav.etterlatte.rapidsandrivers.EventNames.REGULERING_EVENT_NAME
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
-import no.nav.helse.rapids_rivers.River
 import org.slf4j.LoggerFactory
 import rapidsandrivers.DATO_KEY
 import rapidsandrivers.dato
@@ -22,11 +20,10 @@ internal class Reguleringsforespoersel(
     private val logger = LoggerFactory.getLogger(Reguleringsforespoersel::class.java)
 
     init {
-        River(rapidsConnection).apply {
+        initialiser {
             eventName(hendelsestype)
             validate { it.requireKey(DATO_KEY) }
-            correlationId()
-        }.register(this)
+        }
     }
 
     override fun haandterPakke(packet: JsonMessage, context: MessageContext) {

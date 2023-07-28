@@ -128,7 +128,7 @@ class OppgaveServiceNy(
         if (!kanBrukeNyOppgaveliste && saksbehandler != null) {
             // Vi sikrer at saksbehandler tar oppgaven før de fullfører den
             val oppgaveUnderBehandling = oppgaveDaoNy.hentOppgaverForBehandling(behandlingId)
-                .single { it.status == Status.UNDER_BEHANDLING }
+                .single { it.status == Status.UNDER_BEHANDLING || it.status == Status.NY }
             if (oppgaveUnderBehandling.saksbehandler != saksbehandler) {
                 byttSaksbehandler(
                     SaksbehandlerEndringDto(oppgaveId = oppgaveUnderBehandling.id, saksbehandler = saksbehandler)

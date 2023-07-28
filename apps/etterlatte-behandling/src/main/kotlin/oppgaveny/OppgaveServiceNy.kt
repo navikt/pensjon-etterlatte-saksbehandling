@@ -22,7 +22,8 @@ import java.util.*
 
 class OppgaveServiceNy(
     private val oppgaveDaoNy: OppgaveDaoMedEndringssporing,
-    private val sakDao: SakDao
+    private val sakDao: SakDao,
+    private val kanBrukeNyOppgaveliste: Boolean
 ) {
 
     fun finnOppgaverForBruker(bruker: SaksbehandlerMedRoller): List<OppgaveNy> {
@@ -121,10 +122,29 @@ class OppgaveServiceNy(
         }
     }
 
+    private fun sikreAtSaksbehandlerErSattPaaOppgaveHvisNyOppgavelisteIkkeErStoettet(
+        behandlingId: String,
+        saksbehandler: String?
+    ) {
+        if (!kanBrukeNyOppgaveliste && saksbehandler != null) {
+            // Vi sikrer at saksbehandler tar oppgaven før de fullfører den
+            val oppgaveUnderBehandling = oppgaveDaoNy.hentOppgaverForBehandling(behandlingId)
+                .single { it.status == Status.UNDER_BEHANDLING || it.status == Status.NY }
+            if (oppgaveUnderBehandling.saksbehandler != saksbehandler) {
+                byttSaksbehandler(
+                    SaksbehandlerEndringDto(oppgaveId = oppgaveUnderBehandling.id, saksbehandler = saksbehandler)
+                )
+            }
+        }
+    }
+
     fun lukkOppgaveUnderbehandlingOgLagNyMedType(
         fattetoppgave: VedtakOppgaveDTO,
-        oppgaveType: OppgaveType
+        oppgaveType: OppgaveType,
+        saksbehandler: String? = null
     ): OppgaveNy {
+        sikreAtSaksbehandlerErSattPaaOppgaveHvisNyOppgavelisteIkkeErStoettet(fattetoppgave.referanse, saksbehandler)
+
         val behandlingsoppgaver = oppgaveDaoNy.hentOppgaverForBehandling(fattetoppgave.referanse)
         if (behandlingsoppgaver.isEmpty()) {
             throw BadRequestException("Må ha en oppgave for å kunne lage attesteringsoppgave")
@@ -154,8 +174,13 @@ class OppgaveServiceNy(
     }
 
     fun ferdigStillOppgaveUnderBehandling(
-        attesteringsoppgave: VedtakOppgaveDTO
+        attesteringsoppgave: VedtakOppgaveDTO,
+        saksbehandler: String? = null
     ): OppgaveNy {
+        sikreAtSaksbehandlerErSattPaaOppgaveHvisNyOppgavelisteIkkeErStoettet(
+            attesteringsoppgave.referanse,
+            saksbehandler
+        )
         val behandlingsoppgaver = oppgaveDaoNy.hentOppgaverForBehandling(attesteringsoppgave.referanse)
         if (behandlingsoppgaver.isEmpty()) {
             throw BadRequestException("Må ha en oppgave for å kunne lage attesteringsoppgave")

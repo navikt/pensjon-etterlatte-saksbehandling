@@ -75,7 +75,7 @@ class OppgaveServiceNyTest {
         sakDao = SakDao { connection }
         oppgaveDaoNy = OppgaveDaoNyImpl { connection }
         oppgaveDaoMedEndringssporing = OppgaveDaoMedEndringssporingImpl(oppgaveDaoNy) { connection }
-        oppgaveServiceNy = OppgaveServiceNy(oppgaveDaoMedEndringssporing, sakDao)
+        oppgaveServiceNy = OppgaveServiceNy(oppgaveDaoMedEndringssporing, sakDao, true)
         saktilgangDao = SakTilgangDao(dataSource)
     }
 
@@ -161,6 +161,28 @@ class OppgaveServiceNyTest {
 
         val oppgaveMedNySaksbehandler = oppgaveServiceNy.hentOppgave(nyOppgave.id)
         Assertions.assertEquals(nysaksbehandler, oppgaveMedNySaksbehandler?.saksbehandler)
+    }
+
+    @Test
+    fun `hvis oppgaveListeErAv settes saksbehandler før oppgaver lukkes`() {
+        val saksbehandler = "saksbehandler"
+        val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val referanse = "behandlingId"
+
+        val oppgaveServiceNaarOppgaveIkkeErPaa = OppgaveServiceNy(oppgaveDaoMedEndringssporing, sakDao, false)
+        val nyOppgave = oppgaveServiceNaarOppgaveIkkeErPaa.opprettNyOppgaveMedSakOgReferanse(
+            referanse = referanse,
+            sakId = opprettetSak.id,
+            oppgaveType = OppgaveType.FOERSTEGANGSBEHANDLING,
+            oppgaveKilde = OppgaveKilde.BEHANDLING
+        )
+        oppgaveServiceNaarOppgaveIkkeErPaa.lukkOppgaveUnderbehandlingOgLagNyMedType(
+            fattetoppgave = VedtakOppgaveDTO(sakId = opprettetSak.id, referanse = referanse),
+            oppgaveType = OppgaveType.ATTESTERING,
+            saksbehandler = saksbehandler
+        )
+        val oppgaveEtterLukking = oppgaveServiceNaarOppgaveIkkeErPaa.hentOppgave(nyOppgave.id)
+        Assertions.assertEquals(saksbehandler, oppgaveEtterLukking?.saksbehandler)
     }
 
     @Test

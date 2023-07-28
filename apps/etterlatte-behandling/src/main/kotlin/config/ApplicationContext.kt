@@ -149,7 +149,7 @@ class ApplicationContext(
 
     // Service
     val oppgaveService = OppgaveServiceImpl(oppgaveDao, featureToggleService)
-    val oppgaveServiceNy = OppgaveServiceNy(oppgaveDaoEndringer, sakDao)
+    val oppgaveServiceNy = OppgaveServiceNy(oppgaveDaoEndringer, sakDao, kanBrukeNyOppgaveliste)
     val behandlingService = BehandlingServiceImpl(
         behandlingDao = behandlingDao,
         behandlingHendelser = behandlingsHendelser,

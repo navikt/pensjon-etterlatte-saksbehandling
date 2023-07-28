@@ -83,7 +83,11 @@ class GrunnlagsendringshendelseService(
             try {
                 oppgaveService.ferdigStillOppgaveUnderBehandling(hendelse.id.toString())
             } catch (e: Exception) {
-                // TODO sjekk her om ny oppgaveliste er in action, og fiks dat shit
+                // TODO: Håndter avhengig av om vi bruker ny oppgaveliste
+                logger.error(
+                    "Kunne ikke ferdigstille oppgaven for hendelsen på grunn av feil",
+                    e
+                )
             }
         }
     }
@@ -191,6 +195,7 @@ class GrunnlagsendringshendelseService(
             AdressebeskyttelseGradering.FORTROLIG -> {
                 sakService.finnEnhetForPersonOgTema(fnr, sakType.tema, sakType).enhetNr
             }
+
             AdressebeskyttelseGradering.UGRADERT -> {
                 sakService.finnEnhetForPersonOgTema(fnr, sakType.tema, sakType).enhetNr
             }

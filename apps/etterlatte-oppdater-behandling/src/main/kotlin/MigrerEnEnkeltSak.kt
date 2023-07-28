@@ -2,7 +2,6 @@ package no.nav.etterlatte
 
 import com.fasterxml.jackson.module.kotlin.treeToValue
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.rapidsandrivers.SAK_TYPE_KEY
@@ -23,14 +22,14 @@ import rapidsandrivers.BEHANDLING_ID_KEY
 import rapidsandrivers.HENDELSE_DATA_KEY
 import rapidsandrivers.OPPLYSNING_KEY
 import rapidsandrivers.behandlingId
+import rapidsandrivers.migrering.ListenerMedLoggingOgFeilhaandtering
 import rapidsandrivers.sakId
-import rapidsandrivers.withFeilhaandtering
 
 internal class MigrerEnEnkeltSak(
     rapidsConnection: RapidsConnection,
     private val behandlinger: BehandlingService
 ) :
-    River.PacketListener {
+    ListenerMedLoggingOgFeilhaandtering(Migreringshendelser.MIGRER_SAK) {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -38,7 +37,7 @@ internal class MigrerEnEnkeltSak(
         logger.info("initierer rapid for migreringshendelser")
         River(rapidsConnection).apply {
 
-            eventName(Migreringshendelser.MIGRER_SAK)
+            eventName(hendelsestype)
 
             correlationId()
             validate { it.rejectKey(BEHANDLING_ID_KEY) }
@@ -48,28 +47,24 @@ internal class MigrerEnEnkeltSak(
         }.register(this)
     }
 
-    override fun onPacket(packet: JsonMessage, context: MessageContext) {
-        withLogContext(packet.correlationId) {
-            withFeilhaandtering(packet, context, Migreringshendelser.MIGRER_SAK) {
-                logger.info("Mottatt migreringshendelse")
+    override fun haandterPakke(packet: JsonMessage, context: MessageContext) {
+        logger.info("Mottatt migreringshendelse")
 
-                val hendelse: MigreringRequest = objectMapper.treeToValue(packet[HENDELSE_DATA_KEY])
-                val (behandlingId, sakId) = behandlinger.migrer(hendelse)
+        val hendelse: MigreringRequest = objectMapper.treeToValue(packet[HENDELSE_DATA_KEY])
+        val (behandlingId, sakId) = behandlinger.migrer(hendelse)
 
-                packet.behandlingId = behandlingId
-                packet.sakId = sakId
+        packet.behandlingId = behandlingId
+        packet.sakId = sakId
 
-                packet[SAK_TYPE_KEY] = SakType.BARNEPENSJON
-                packet[ROLLE_KEY] = PersonRolle.AVDOED
-                packet[MIGRERING_GRUNNLAG_KEY] = MigrerSoekerRequest(
-                    soeker = hendelse.persongalleri.soeker
-                )
-                packet[PERSONGALLERI] = hendelse.persongalleri
-                packet.eventName = Migreringshendelser.BEHANDLING_OPPRETTET
+        packet[SAK_TYPE_KEY] = SakType.BARNEPENSJON
+        packet[ROLLE_KEY] = PersonRolle.AVDOED
+        packet[MIGRERING_GRUNNLAG_KEY] = MigrerSoekerRequest(
+            soeker = hendelse.persongalleri.soeker
+        )
+        packet[PERSONGALLERI] = hendelse.persongalleri
+        packet.eventName = Migreringshendelser.BEHANDLING_OPPRETTET
 
-                context.publish(packet.toJson())
-                logger.info("Publiserte oppdatert migreringshendelse")
-            }
-        }
+        context.publish(packet.toJson())
+        logger.info("Publiserte oppdatert migreringshendelse")
     }
 }

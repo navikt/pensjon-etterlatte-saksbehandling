@@ -6,7 +6,6 @@ import no.nav.etterlatte.beregning.grunnlag.BarnepensjonBeregningsGrunnlag
 import no.nav.etterlatte.beregning.grunnlag.GrunnlagMedPeriode
 import no.nav.etterlatte.libs.common.beregning.BeregningDTO
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeskenMedIBeregning
-import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
@@ -22,39 +21,35 @@ import rapidsandrivers.BEHANDLING_ID_KEY
 import rapidsandrivers.BEREGNING_KEY
 import rapidsandrivers.HENDELSE_DATA_KEY
 import rapidsandrivers.behandlingId
-import rapidsandrivers.withFeilhaandtering
+import rapidsandrivers.migrering.ListenerMedLoggingOgFeilhaandtering
 
 internal class MigreringHendelser(rapidsConnection: RapidsConnection, private val beregningService: BeregningService) :
-    River.PacketListener {
+    ListenerMedLoggingOgFeilhaandtering(Migreringshendelser.BEREGN) {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     init {
         River(rapidsConnection).apply {
-            eventName(Migreringshendelser.BEREGN)
+            eventName(hendelsestype)
             validate { it.requireKey(BEHANDLING_ID_KEY) }
             validate { it.requireKey(HENDELSE_DATA_KEY) }
             correlationId()
         }.register(this)
     }
 
-    override fun onPacket(packet: JsonMessage, context: MessageContext) {
-        withLogContext(packet.correlationId) {
-            withFeilhaandtering(packet, context, Migreringshendelser.BEREGN) {
-                val behandlingId = packet.behandlingId
-                logger.info("Mottatt beregnings-migreringshendelse for $BEHANDLING_ID_KEY $behandlingId")
+    override fun haandterPakke(packet: JsonMessage, context: MessageContext) {
+        val behandlingId = packet.behandlingId
+        logger.info("Mottatt beregnings-migreringshendelse for $BEHANDLING_ID_KEY $behandlingId")
 
-                beregningService.opprettBeregningsgrunnlag(behandlingId, tilGrunnlagDTO(packet.hendelseData))
+        beregningService.opprettBeregningsgrunnlag(behandlingId, tilGrunnlagDTO(packet.hendelseData))
 
-                runBlocking {
-                    val beregning = beregningService.beregn(behandlingId).body<BeregningDTO>()
-                    packet[BEREGNING_KEY] = beregning
-                }
-                packet.eventName = Migreringshendelser.VEDTAK
-                context.publish(packet.toJson())
-                logger.info("Publiserte oppdatert migreringshendelse fra beregning for behandling $behandlingId")
-            }
+        runBlocking {
+            val beregning = beregningService.beregn(behandlingId).body<BeregningDTO>()
+            packet[BEREGNING_KEY] = beregning
         }
+        packet.eventName = Migreringshendelser.VEDTAK
+        context.publish(packet.toJson())
+        logger.info("Publiserte oppdatert migreringshendelse fra beregning for behandling $behandlingId")
     }
 
     private fun tilGrunnlagDTO(request: MigreringRequest): BarnepensjonBeregningsGrunnlag =

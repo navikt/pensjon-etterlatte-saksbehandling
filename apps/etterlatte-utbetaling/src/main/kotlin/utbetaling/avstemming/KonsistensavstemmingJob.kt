@@ -1,7 +1,6 @@
 package no.nav.etterlatte.utbetaling.avstemming
 
 import no.nav.etterlatte.jobs.fixedRateCancellableTimer
-import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.tidspunkt.norskKlokke
 import no.nav.etterlatte.libs.jobs.LeaderElection
 import no.nav.etterlatte.sikkerLogg
@@ -56,23 +55,21 @@ class KonsistensavstemmingJob(
         private val log = LoggerFactory.getLogger(this::class.java)
 
         fun run() {
-            withLogContext {
-                val idag = LocalDate.now(clock.norskKlokke())
-                kjoereplan.find { dato -> dato == idag }?.let {
-                    if (leaderElection.isLeader()) {
-                        log.info("Starter $jobbNavn")
-                        if (!konsistensavstemmingService.konsistensavstemmingErKjoertIDag(
-                                saktype = saktype,
-                                idag = idag
-                            )
-                        ) {
-                            konsistensavstemmingService.startKonsistensavstemming(dag = idag, saktype = saktype)
-                        } else {
-                            log.info("Konsistensavstemming er allerede kjoert for ${saktype.name} i dag ($idag)")
-                        }
+            val idag = LocalDate.now(clock.norskKlokke())
+            kjoereplan.find { dato -> dato == idag }?.let {
+                if (leaderElection.isLeader()) {
+                    log.info("Starter $jobbNavn")
+                    if (!konsistensavstemmingService.konsistensavstemmingErKjoertIDag(
+                            saktype = saktype,
+                            idag = idag
+                        )
+                    ) {
+                        konsistensavstemmingService.startKonsistensavstemming(dag = idag, saktype = saktype)
+                    } else {
+                        log.info("Konsistensavstemming er allerede kjoert for ${saktype.name} i dag ($idag)")
                     }
-                } ?: log.info("Denne datoen ($idag) er ikke en del av kjøreplanen for konsistensavstemming")
-            }
+                }
+            } ?: log.info("Denne datoen ($idag) er ikke en del av kjøreplanen for konsistensavstemming")
         }
     }
 }

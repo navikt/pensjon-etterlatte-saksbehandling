@@ -2,7 +2,6 @@ package no.nav.etterlatte.vedtaksvurdering.rivers
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.VedtakService
-import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
@@ -13,11 +12,12 @@ import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import org.slf4j.LoggerFactory
+import rapidsandrivers.migrering.ListenerMedLogging
 
 internal class LagreIverksattVedtak(
     rapidsConnection: RapidsConnection,
     private val vedtaksvurderingService: VedtakService
-) : River.PacketListener {
+) : ListenerMedLogging() {
     init {
         River(rapidsConnection).apply {
             eventName("UTBETALING:OPPDATERT")
@@ -28,27 +28,25 @@ internal class LagreIverksattVedtak(
 
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    override fun onPacket(packet: JsonMessage, context: MessageContext) {
-        withLogContext(packet.correlationId) {
-            val respons = objectMapper.readValue<UtbetalingResponseDto>(packet["utbetaling_response"].toString())
+    override fun haandterPakke(packet: JsonMessage, context: MessageContext) {
+        val respons = objectMapper.readValue<UtbetalingResponseDto>(packet["utbetaling_response"].toString())
 
-            try {
-                when (respons.status) {
-                    UtbetalingStatusDto.GODKJENT, UtbetalingStatusDto.GODKJENT_MED_FEIL -> {
-                        respons.behandlingId?.also { behandlingId ->
-                            vedtaksvurderingService.iverksattVedtak(behandlingId)
-                        }
-                            ?: logger.error(
-                                "Utbetaling mangler behandlingId. " +
-                                    "Kan derfor ikke lagre at vedtaket er iverksatt. Utbetaling: $respons"
-                            )
+        try {
+            when (respons.status) {
+                UtbetalingStatusDto.GODKJENT, UtbetalingStatusDto.GODKJENT_MED_FEIL -> {
+                    respons.behandlingId?.also { behandlingId ->
+                        vedtaksvurderingService.iverksattVedtak(behandlingId)
                     }
-                    // Her kan vi haandtere utbetalingsproblemer om vi oensker
-                    else -> {}
+                        ?: logger.error(
+                            "Utbetaling mangler behandlingId. " +
+                                "Kan derfor ikke lagre at vedtaket er iverksatt. Utbetaling: $respons"
+                        )
                 }
-            } catch (e: Exception) {
-                logger.error("Kunne ikke lagre iverksatt vedtak: $respons", e)
+                // Her kan vi haandtere utbetalingsproblemer om vi oensker
+                else -> {}
             }
+        } catch (e: Exception) {
+            logger.error("Kunne ikke lagre iverksatt vedtak: $respons", e)
         }
     }
 }

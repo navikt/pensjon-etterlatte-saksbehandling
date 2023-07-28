@@ -2,7 +2,6 @@ package no.nav.etterlatte
 
 import com.fasterxml.jackson.module.kotlin.treeToValue
 import no.nav.etterlatte.libs.common.behandling.Omregningshendelse
-import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
@@ -18,17 +17,17 @@ import rapidsandrivers.BEHANDLING_VI_OMREGNER_FRA_KEY
 import rapidsandrivers.HENDELSE_DATA_KEY
 import rapidsandrivers.SAK_TYPE
 import rapidsandrivers.behandlingId
-import rapidsandrivers.withFeilhaandtering
+import rapidsandrivers.migrering.ListenerMedLoggingOgFeilhaandtering
 
 internal class OmregningsHendelser(rapidsConnection: RapidsConnection, private val behandlinger: BehandlingService) :
-    River.PacketListener {
+    ListenerMedLoggingOgFeilhaandtering(OMREGNINGSHENDELSE) {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     init {
         logger.info("initierer rapid for omregningshendelser")
         River(rapidsConnection).apply {
-            eventName(OMREGNINGSHENDELSE)
+            eventName(hendelsestype)
 
             correlationId()
             validate { it.rejectKey(BEHANDLING_ID_KEY) }
@@ -36,20 +35,16 @@ internal class OmregningsHendelser(rapidsConnection: RapidsConnection, private v
         }.register(this)
     }
 
-    override fun onPacket(packet: JsonMessage, context: MessageContext) {
-        withLogContext(packet.correlationId) {
-            withFeilhaandtering(packet, context, OMREGNINGSHENDELSE) {
-                logger.info("Mottatt omregningshendelse")
+    override fun haandterPakke(packet: JsonMessage, context: MessageContext) {
+        logger.info("Mottatt omregningshendelse")
 
-                val hendelse: Omregningshendelse = objectMapper.treeToValue(packet[HENDELSE_DATA_KEY])
-                val (behandlingId, behandlingViOmregnerFra, sakType) = behandlinger.opprettOmregning(hendelse)
-                packet.behandlingId = behandlingId
-                packet[BEHANDLING_VI_OMREGNER_FRA_KEY] = behandlingViOmregnerFra
-                packet[SAK_TYPE] = sakType
-                packet.eventName = VILKAARSVURDER
-                context.publish(packet.toJson())
-                logger.info("Publiserte oppdatert omregningshendelse")
-            }
-        }
+        val hendelse: Omregningshendelse = objectMapper.treeToValue(packet[HENDELSE_DATA_KEY])
+        val (behandlingId, behandlingViOmregnerFra, sakType) = behandlinger.opprettOmregning(hendelse)
+        packet.behandlingId = behandlingId
+        packet[BEHANDLING_VI_OMREGNER_FRA_KEY] = behandlingViOmregnerFra
+        packet[SAK_TYPE] = sakType
+        packet.eventName = VILKAARSVURDER
+        context.publish(packet.toJson())
+        logger.info("Publiserte oppdatert omregningshendelse")
     }
 }

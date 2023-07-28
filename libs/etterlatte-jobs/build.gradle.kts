@@ -1,5 +1,6 @@
 plugins {
     kotlin("jvm")
+    id("etterlatte.libs")
 }
 
 repositories {
@@ -10,6 +11,7 @@ dependencies {
     implementation(libs.ktor2.clientcore)
     implementation(libs.ktor2.clientcontentnegotiation)
     implementation(libs.ktor2.jackson)
+    implementation(project(":libs:saksbehandling-common"))
 
     compileOnly(libs.logging.slf4japi)
 

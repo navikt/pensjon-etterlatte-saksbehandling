@@ -1,7 +1,6 @@
 package no.nav.etterlatte.trygdetid.kafka
 
 import no.nav.etterlatte.libs.common.Vedtaksloesning
-import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
@@ -23,10 +22,11 @@ import org.slf4j.LoggerFactory
 import rapidsandrivers.BEHANDLING_ID_KEY
 import rapidsandrivers.HENDELSE_DATA_KEY
 import rapidsandrivers.behandlingId
+import rapidsandrivers.migrering.ListenerMedLogging
 import rapidsandrivers.withFeilhaandtering
 
 internal class MigreringHendelser(rapidsConnection: RapidsConnection, private val trygdetidService: TrygdetidService) :
-    River.PacketListener {
+    ListenerMedLogging() {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -42,35 +42,33 @@ internal class MigreringHendelser(rapidsConnection: RapidsConnection, private va
         }.register(this)
     }
 
-    override fun onPacket(packet: JsonMessage, context: MessageContext) {
-        withLogContext(packet.correlationId) {
-            withFeilhaandtering(packet, context, Migreringshendelser.TRYGDETID) {
-                val behandlingId = packet.behandlingId
-                logger.info("Mottatt trygdetid-migreringshendelse for behandling $behandlingId")
-                trygdetidService.beregnTrygdetid(behandlingId).also {
-                    logger.info("Oppretta trygdetid for behandling $behandlingId")
-                }
-            }.takeIf { it.isSuccess }
-                ?.let {
-                    withFeilhaandtering(packet, context, Migreringshendelser.TRYGDETID_GRUNNLAG) {
-                        val behandlingId = packet.behandlingId
-                        val request = objectMapper.treeToValue(packet[HENDELSE_DATA_KEY], MigreringRequest::class.java)
-                        logger.info("Oppretter grunnlag for trygdetid for $behandlingId")
+    override fun haandterPakke(packet: JsonMessage, context: MessageContext) {
+        withFeilhaandtering(packet, context, Migreringshendelser.TRYGDETID) {
+            val behandlingId = packet.behandlingId
+            logger.info("Mottatt trygdetid-migreringshendelse for behandling $behandlingId")
+            trygdetidService.beregnTrygdetid(behandlingId).also {
+                logger.info("Oppretta trygdetid for behandling $behandlingId")
+            }
+        }.takeIf { it.isSuccess }
+            ?.let {
+                withFeilhaandtering(packet, context, Migreringshendelser.TRYGDETID_GRUNNLAG) {
+                    val behandlingId = packet.behandlingId
+                    val request = objectMapper.treeToValue(packet[HENDELSE_DATA_KEY], MigreringRequest::class.java)
+                    logger.info("Oppretter grunnlag for trygdetid for $behandlingId")
 
-                        val beregnetTrygdetid =
-                            trygdetidService.beregnTrygdetidGrunnlag(
-                                behandlingId,
-                                tilGrunnlag(request.trygdetidsgrunnlag)
-                            )
-                        packet[TRYGDETID_KEY] = beregnetTrygdetid.toJson()
-                        packet.eventName = Migreringshendelser.BEREGN
-                        context.publish(packet.toJson())
-                        logger.info(
-                            "Publiserte oppdatert migreringshendelse fra trygdetid for behandling $behandlingId"
+                    val beregnetTrygdetid =
+                        trygdetidService.beregnTrygdetidGrunnlag(
+                            behandlingId,
+                            tilGrunnlag(request.trygdetidsgrunnlag)
                         )
-                    }
+                    packet[TRYGDETID_KEY] = beregnetTrygdetid.toJson()
+                    packet.eventName = Migreringshendelser.BEREGN
+                    context.publish(packet.toJson())
+                    logger.info(
+                        "Publiserte oppdatert migreringshendelse fra trygdetid for behandling $behandlingId"
+                    )
                 }
-        }
+            }
     }
 
     private fun tilGrunnlag(trygdetidsgrunnlag: Trygdetidsgrunnlag) = TrygdetidGrunnlagDto(

@@ -12,6 +12,7 @@ import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.rapidsandrivers.CORRELATION_ID_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.sak.VedtakSak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -90,6 +91,7 @@ internal class VedtaksbrevUnderkjentTest {
     private fun opprettMelding(vedtak: VedtakDto): JsonMessage {
         return JsonMessage.newMessage(
             mapOf(
+                CORRELATION_ID_KEY to UUID.randomUUID().toString(),
                 EVENT_NAME_KEY to KafkaHendelseType.UNDERKJENT.toString(),
                 "vedtak" to vedtak
             )

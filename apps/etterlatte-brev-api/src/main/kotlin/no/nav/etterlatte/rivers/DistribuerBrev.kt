@@ -6,8 +6,6 @@ import no.nav.etterlatte.brev.distribusjon.DistribusjonService
 import no.nav.etterlatte.brev.distribusjon.DistribusjonsTidspunktType
 import no.nav.etterlatte.brev.distribusjon.DistribusjonsType
 import no.nav.etterlatte.brev.model.BrevEventTypes
-import no.nav.etterlatte.libs.common.logging.withLogContext
-import no.nav.etterlatte.libs.common.rapidsandrivers.CORRELATION_ID_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
@@ -16,12 +14,13 @@ import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import org.slf4j.LoggerFactory
+import rapidsandrivers.migrering.ListenerMedLogging
 
 internal class DistribuerBrev(
     private val rapidsConnection: RapidsConnection,
     private val vedtaksbrevService: VedtaksbrevService,
     private val distribusjonService: DistribusjonService
-) : River.PacketListener {
+) : ListenerMedLogging() {
     private val logger = LoggerFactory.getLogger(DistribuerBrev::class.java)
 
     init {
@@ -33,22 +32,20 @@ internal class DistribuerBrev(
         }.register(this)
     }
 
-    override fun onPacket(packet: JsonMessage, context: MessageContext) {
-        withLogContext(packet[CORRELATION_ID_KEY].asText()) {
-            logger.info("Starter distribuering av brev.")
+    override fun haandterPakke(packet: JsonMessage, context: MessageContext) {
+        logger.info("Starter distribuering av brev.")
 
-            val brev = vedtaksbrevService.hentBrev(packet["brevId"].asLong())
+        val brev = vedtaksbrevService.hentBrev(packet["brevId"].asLong())
 
-            val bestillingsId = distribusjonService.distribuerJournalpost(
-                brevId = brev.id,
-                journalpostId = packet["journalpostId"].asText(),
-                type = packet.distribusjonType(),
-                tidspunkt = DistribusjonsTidspunktType.KJERNETID,
-                adresse = brev.mottaker.adresse
-            )
+        val bestillingsId = distribusjonService.distribuerJournalpost(
+            brevId = brev.id,
+            journalpostId = packet["journalpostId"].asText(),
+            type = packet.distribusjonType(),
+            tidspunkt = DistribusjonsTidspunktType.KJERNETID,
+            adresse = brev.mottaker.adresse
+        )
 
-            rapidsConnection.svarSuksess(packet, bestillingsId)
-        }
+        rapidsConnection.svarSuksess(packet, bestillingsId)
     }
 
     private fun JsonMessage.distribusjonType(): DistribusjonsType = try {

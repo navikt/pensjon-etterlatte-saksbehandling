@@ -74,7 +74,7 @@ class OppgaveServiceNyTest {
         sakDao = SakDao { connection }
         oppgaveDaoNy = OppgaveDaoNyImpl { connection }
         oppgaveDaoMedEndringssporing = OppgaveDaoMedEndringssporingImpl(oppgaveDaoNy) { connection }
-        oppgaveServiceNy = OppgaveServiceNy(oppgaveDaoMedEndringssporing, sakDao)
+        oppgaveServiceNy = OppgaveServiceNy(oppgaveDaoMedEndringssporing, sakDao, true)
         saktilgangDao = SakTilgangDao(dataSource)
     }
 

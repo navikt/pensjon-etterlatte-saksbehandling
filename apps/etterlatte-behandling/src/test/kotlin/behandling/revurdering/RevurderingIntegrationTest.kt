@@ -30,6 +30,7 @@ import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
+import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveType
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -38,7 +39,6 @@ import no.nav.etterlatte.persongalleri
 import no.nav.etterlatte.sak.SakServiceFeatureToggle
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -146,11 +146,12 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
             oppgaveService.opprettNyOppgaveMedSakOgReferanse(
                 revurdering?.id.toString(),
                 sak.id,
+                OppgaveKilde.BEHANDLING,
                 OppgaveType.REVURDERING
             )
         }
         inTransaction {
-            Assertions.assertEquals(revurdering, applicationContext.behandlingDao.hentBehandling(revurdering!!.id))
+            assertEquals(revurdering, applicationContext.behandlingDao.hentBehandling(revurdering!!.id))
             verify { hendelser.sendMeldingForHendelse(revurdering, BehandlingHendelseType.OPPRETTET) }
         }
         confirmVerified(hendelser, grunnlagService, oppgaveService)
@@ -217,7 +218,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
         assertTrue(fikkLagret)
         inTransaction {
             val lagretRevurdering = applicationContext.behandlingDao.hentBehandling(revurdering.id) as Revurdering
-            Assertions.assertEquals(revurderingInfo, lagretRevurdering.revurderingInfo)
+            assertEquals(revurderingInfo, lagretRevurdering.revurderingInfo)
         }
 
         // kan oppdatere
@@ -232,7 +233,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
         )
         inTransaction {
             val oppdatert = applicationContext.behandlingDao.hentBehandling(revurdering.id) as Revurdering
-            Assertions.assertEquals(nyRevurderingInfo, oppdatert.revurderingInfo)
+            assertEquals(nyRevurderingInfo, oppdatert.revurderingInfo)
         }
 
         inTransaction {
@@ -253,13 +254,14 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
         )
         inTransaction {
             val ferdigRevurdering = applicationContext.behandlingDao.hentBehandling(revurdering.id) as Revurdering
-            Assertions.assertEquals(nyRevurderingInfo, ferdigRevurdering.revurderingInfo)
+            assertEquals(nyRevurderingInfo, ferdigRevurdering.revurderingInfo)
             verify { hendelser.sendMeldingForHendelse(revurdering, BehandlingHendelseType.OPPRETTET) }
             verify { grunnlagService.leggInnNyttGrunnlag(revurdering) }
             verify {
                 oppgaveService.opprettNyOppgaveMedSakOgReferanse(
                     revurdering.id.toString(),
                     sak.id,
+                    OppgaveKilde.BEHANDLING,
                     OppgaveType.REVURDERING
                 )
             }
@@ -426,13 +428,21 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
                 oppgaveService.opprettNyOppgaveMedSakOgReferanse(
                     behandling!!.id.toString(),
                     sak.id,
+                    OppgaveKilde.BEHANDLING,
                     OppgaveType.FOERSTEGANGSBEHANDLING
+                )
+            }
+            verify {
+                oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendSoeknad(
+                    behandling!!.id.toString(),
+                    sak.id
                 )
             }
             verify {
                 oppgaveService.opprettNyOppgaveMedSakOgReferanse(
                     revurdering.id.toString(),
                     sak.id,
+                    OppgaveKilde.BEHANDLING,
                     OppgaveType.REVURDERING
                 )
             }
@@ -467,7 +477,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
                 featureToggleService = applicationContext.featureToggleService
             )
 
-        val (sak, behandling) = opprettSakMedFoerstegangsbehandling(fnr, behandlingFactory)
+        val (sak, _) = opprettSakMedFoerstegangsbehandling(fnr, behandlingFactory)
 
         val err = assertThrows<BadRequestException> {
             revurderingService.opprettManuellRevurderingWrapper(
@@ -510,7 +520,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
                 featureToggleService = applicationContext.featureToggleService
             )
 
-        val (sak, behandling) = opprettSakMedFoerstegangsbehandling(fnr, behandlingFactory)
+        val (sak, _) = opprettSakMedFoerstegangsbehandling(fnr, behandlingFactory)
 
         val err = assertThrows<BadRequestException> {
             revurderingService.opprettManuellRevurderingWrapper(
@@ -553,7 +563,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
                 featureToggleService = applicationContext.featureToggleService
             )
 
-        val (sak, behandling) = opprettSakMedFoerstegangsbehandling(fnr, behandlingFactory)
+        val (sak, _) = opprettSakMedFoerstegangsbehandling(fnr, behandlingFactory)
 
         val err = assertThrows<BadRequestException> {
             revurderingService.opprettManuellRevurderingWrapper(

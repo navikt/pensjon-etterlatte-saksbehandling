@@ -17,9 +17,14 @@ import {
   YTELSEFILTER,
   YtelseFilterKeys,
   ENHETFILTER,
+  OppgaveKildeFilterKeys,
+  OPPGAVEKILDEFILTER,
+  FRISTFILTER,
+  FristFilterKeys
 } from '~components/nyoppgavebenk/Oppgavelistafiltre'
 import { HandlingerForOppgave } from '~components/nyoppgavebenk/HandlingerForOppgave'
 import { OppgavetypeTag, SaktypeTag } from '~components/nyoppgavebenk/Tags'
+import { format, isBefore } from 'date-fns'
 
 const FilterFlex = styled.div`
   display: flex;
@@ -36,24 +41,32 @@ const ButtonWrapper = styled.div`
   }
 `
 
+const FristWrapper = styled.span<{ fristHarPassert: boolean }>`
+  color: ${(p) => p.fristHarPassert && 'var(--a-text-danger)'};
+`
+
 export const Oppgavelista = (props: { oppgaver: ReadonlyArray<OppgaveDTOny>; hentOppgaver: () => void }) => {
   const { oppgaver, hentOppgaver } = props
 
   const [saksbehandlerFilter, setSaksbehandlerFilter] = useState<SaksbehandlerFilterKeys>('IkkeTildelt')
+  const [fristFilter, setFristFilter] = useState<FristFilterKeys>('visAlle')
   const [enhetsFilter, setEnhetsFilter] = useState<EnhetFilterKeys>('visAlle')
   const [ytelseFilter, setYtelseFilter] = useState<YtelseFilterKeys>('visAlle')
   const [oppgavestatusFilter, setOppgavestatusFilter] = useState<OppgavestatusFilterKeys>('visAlle')
   const [oppgavetypeFilter, setOppgavetypeFilter] = useState<OppgavetypeFilterKeys>('visAlle')
+  const [oppgavekildeFilter, setOppgavekildeFilter] = useState<OppgaveKildeFilterKeys>('visAlle')
   const [fnrFilter, setFnrFilter] = useState<string>('')
   const [page, setPage] = useState<number>(1)
   const rowsPerPage = 10
   const mutableOppgaver = oppgaver.concat()
   const filtrerteOppgaver = filtrerOppgaver(
     enhetsFilter,
+    fristFilter,
     saksbehandlerFilter,
     ytelseFilter,
     oppgavestatusFilter,
     oppgavetypeFilter,
+    oppgavekildeFilter,
     mutableOppgaver,
     fnrFilter
   )
@@ -71,6 +84,13 @@ export const Oppgavelista = (props: { oppgaver: ReadonlyArray<OppgaveDTOny>; hen
           placeholder={'Søk'}
           autoComplete="off"
         />
+        <Select label="Frist" value={fristFilter} onChange={(e) => setFristFilter(e.target.value as FristFilterKeys)}>
+          {Object.entries(FRISTFILTER).map(([key, fristBeskrivelse]) => (
+            <option key={key} value={key}>
+              {fristBeskrivelse}
+            </option>
+          ))}
+        </Select>
         <Select
           label="Saksbehandler"
           value={saksbehandlerFilter}
@@ -123,6 +143,17 @@ export const Oppgavelista = (props: { oppgaver: ReadonlyArray<OppgaveDTOny>; hen
             </option>
           ))}
         </Select>
+        <Select
+          label="Kilde"
+          value={oppgavekildeFilter}
+          onChange={(e) => setOppgavekildeFilter(e.target.value as OppgaveKildeFilterKeys)}
+        >
+          {Object.entries(OPPGAVEKILDEFILTER).map(([type, typebeskrivelse]) => (
+            <option key={type} value={type}>
+              {typebeskrivelse}
+            </option>
+          ))}
+        </Select>
       </FilterFlex>
       <ButtonWrapper>
         <Button onClick={hentOppgaver}>Hent</Button>
@@ -134,6 +165,7 @@ export const Oppgavelista = (props: { oppgaver: ReadonlyArray<OppgaveDTOny>; hen
             setEnhetsFilter('visAlle')
             setOppgavestatusFilter('visAlle')
             setSaksbehandlerFilter('visAlle')
+            setOppgavekildeFilter('visAlle')
             setFnrFilter('')
           }}
         >
@@ -178,7 +210,7 @@ export const Oppgavelista = (props: { oppgaver: ReadonlyArray<OppgaveDTOny>; hen
                       <Table.HeaderCell>{formaterStringDato(opprettet)}</Table.HeaderCell>
                       <Table.HeaderCell>{fnr}</Table.HeaderCell>
                       <Table.DataCell>
-                        <OppgavetypeTag oppgavetype={type} />
+                        {type ? <OppgavetypeTag oppgavetype={type} /> : <div>oppgaeveid {id}</div>}
                       </Table.DataCell>
                       <Table.DataCell>{status}</Table.DataCell>
                       <Table.DataCell>{merknad}</Table.DataCell>
@@ -191,7 +223,11 @@ export const Oppgavelista = (props: { oppgaver: ReadonlyArray<OppgaveDTOny>; hen
                         )}
                       </Table.DataCell>
                       <Table.DataCell>{sakType && <SaktypeTag sakType={sakType} />}</Table.DataCell>
-                      <Table.DataCell>{frist ? frist : 'Ingen frist'}</Table.DataCell>
+                      <Table.DataCell>
+                        <FristWrapper fristHarPassert={!!frist && isBefore(new Date(frist), new Date())}>
+                          {frist ? format(new Date(frist), 'dd.MM.yyyy') : 'Ingen frist'}
+                        </FristWrapper>
+                      </Table.DataCell>
                       <Table.DataCell>
                         <HandlingerForOppgave
                           oppgavetype={type}

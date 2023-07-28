@@ -205,7 +205,7 @@ class VedtaksvurderingService(
 
         val underkjentTid = Tidspunkt.now(clock)
         val underkjentVedtak = repository.inTransaction { tx ->
-            val underkjentVedtak = repository.underkjennVedtak(behandlingId)
+            val underkjentVedtak = repository.underkjennVedtak(behandlingId, tx)
             runBlocking {
                 behandlingKlient.underkjennVedtak(
                     brukerTokenInfo,

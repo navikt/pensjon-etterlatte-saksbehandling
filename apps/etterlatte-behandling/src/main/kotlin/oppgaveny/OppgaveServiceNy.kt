@@ -4,6 +4,7 @@ import io.ktor.server.plugins.BadRequestException
 import io.ktor.server.plugins.NotFoundException
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.oppgaveNy.FjernSaksbehandlerRequest
+import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveNy
 import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveType
 import no.nav.etterlatte.libs.common.oppgaveNy.RedigerFristRequest
@@ -134,6 +135,7 @@ class OppgaveServiceNy(
             return opprettNyOppgaveMedSakOgReferanse(
                 fattetoppgave.referanse,
                 fattetoppgave.sakId,
+                oppgaveUnderbehandling.kilde,
                 oppgaveType
             )
         } catch (e: NoSuchElementException) {
@@ -177,12 +179,38 @@ class OppgaveServiceNy(
         }
     }
 
-    fun opprettNyOppgaveMedSakOgReferanse(referanse: String, sakId: Long, oppgaveType: OppgaveType): OppgaveNy {
+    fun opprettFoerstegangsbehandlingsOppgaveForInnsendSoeknad(referanse: String, sakId: Long): OppgaveNy {
+        val oppgaverForBehandling = oppgaveDaoNy.hentOppgaverForBehandling(referanse)
+        val oppgaverSomKanLukkes = oppgaverForBehandling.filter { o ->
+            o.status in listOf(
+                Status.UNDER_BEHANDLING,
+                Status.NY
+            )
+        }
+        oppgaverSomKanLukkes.forEach {
+            oppgaveDaoNy.endreStatusPaaOppgave(it.id, Status.AVBRUTT)
+        }
+
+        return opprettNyOppgaveMedSakOgReferanse(
+            referanse,
+            sakId,
+            OppgaveKilde.BEHANDLING,
+            OppgaveType.FOERSTEGANGSBEHANDLING
+        )
+    }
+
+    fun opprettNyOppgaveMedSakOgReferanse(
+        referanse: String,
+        sakId: Long,
+        oppgaveKilde: OppgaveKilde?,
+        oppgaveType: OppgaveType
+    ): OppgaveNy {
         val sak = sakDao.hentSak(sakId)!!
         return lagreOppgave(
             opprettNyOppgaveMedReferanseOgSak(
                 referanse = referanse,
                 sak = sak,
+                oppgaveKilde = oppgaveKilde,
                 oppgaveType = oppgaveType
             )
         )

@@ -2,6 +2,7 @@ package no.nav.etterlatte.oppgaveny
 
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveNy
 import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveType
 import no.nav.etterlatte.libs.common.oppgaveNy.SaksbehandlerEndringDto
@@ -75,7 +76,7 @@ internal class OppgaveDaoNyTest {
     @Test
     fun `opprett oppgave av type ATTESTERING`() {
         val sakAalesund = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
-        val oppgaveNy = lagNyOppgave(sakAalesund, OppgaveType.ATTESTERING)
+        val oppgaveNy = lagNyOppgave(sakAalesund, OppgaveKilde.BEHANDLING, OppgaveType.ATTESTERING)
         oppgaveDaoNy.lagreOppgave(oppgaveNy)
 
         val hentOppgaver = oppgaveDaoNy.hentOppgaver(OppgaveType.values().toList())
@@ -123,18 +124,22 @@ internal class OppgaveDaoNyTest {
         assertEquals(1, hentetOppgave.size)
     }
 
-    fun lagNyOppgave(sak: Sak, oppgaveType: OppgaveType = OppgaveType.FOERSTEGANGSBEHANDLING) = OppgaveNy(
-        UUID.randomUUID(),
-        Status.NY,
-        Enheter.AALESUND.enhetNr,
-        sak.id,
-        type = oppgaveType,
-        null,
-        "referanse",
-        "merknad",
-        Tidspunkt.now(),
+    fun lagNyOppgave(
+        sak: Sak,
+        oppgaveKilde: OppgaveKilde = OppgaveKilde.BEHANDLING,
+        oppgaveType: OppgaveType = OppgaveType.FOERSTEGANGSBEHANDLING
+    ) = OppgaveNy(
+        id = UUID.randomUUID(),
+        status = Status.NY,
+        enhet = Enheter.AALESUND.enhetNr,
+        sakId = sak.id,
+        kilde = oppgaveKilde,
+        referanse = "referanse",
+        merknad = "merknad",
+        opprettet = Tidspunkt.now(),
         sakType = sak.sakType,
         fnr = sak.ident,
-        frist = null
+        frist = null,
+        type = oppgaveType
     )
 }

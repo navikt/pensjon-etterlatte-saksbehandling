@@ -2,6 +2,9 @@ package no.nav.etterlatte.oppgaveny
 
 import io.ktor.server.plugins.BadRequestException
 import io.ktor.server.plugins.NotFoundException
+import no.nav.etterlatte.Kontekst
+import no.nav.etterlatte.User
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.oppgaveNy.FjernSaksbehandlerRequest
 import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveKilde
@@ -15,15 +18,18 @@ import no.nav.etterlatte.libs.common.oppgaveNy.opprettNyOppgaveMedReferanseOgSak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
+import no.nav.etterlatte.oppgave.OppgaveServiceFeatureToggle
 import no.nav.etterlatte.oppgave.Rolle
 import no.nav.etterlatte.sak.SakDao
 import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
+import no.nav.etterlatte.tilgangsstyring.filterForEnheter
 import java.util.*
 
 class OppgaveServiceNy(
     private val oppgaveDaoNy: OppgaveDaoMedEndringssporing,
     private val sakDao: SakDao,
-    private val kanBrukeNyOppgaveliste: Boolean
+    private val kanBrukeNyOppgaveliste: Boolean,
+    private val featureToggleService: FeatureToggleService
 ) {
 
     fun finnOppgaverForBruker(bruker: SaksbehandlerMedRoller): List<OppgaveNy> {
@@ -38,8 +44,11 @@ class OppgaveServiceNy(
             inTransaction {
                 oppgaveDaoNy.hentOppgaver(aktuelleOppgavetyperForRoller)
             }.sortedByDescending { it.opprettet }
-        }
+        }.filterForEnheter(Kontekst.get().AppUser)
     }
+
+    private fun List<OppgaveNy>.filterForEnheter(bruker: User) =
+        this.filterOppgaverForEnheter(featureToggleService, bruker)
 
     private fun aktuelleOppgavetyperForRolleTilSaksbehandler(roller: List<Rolle>) = roller.flatMap {
         when (it) {
@@ -253,4 +262,15 @@ class OppgaveServiceNy(
     fun hentOppgave(oppgaveId: UUID): OppgaveNy? {
         return oppgaveDaoNy.hentOppgave(oppgaveId)
     }
+}
+
+fun List<OppgaveNy>.filterOppgaverForEnheter(
+    featureToggleService: FeatureToggleService,
+    user: User
+) = this.filterForEnheter(
+    featureToggleService,
+    OppgaveServiceFeatureToggle.EnhetFilterOppgaver,
+    user
+) { item, enheter ->
+    enheter.contains(item.enhet)
 }

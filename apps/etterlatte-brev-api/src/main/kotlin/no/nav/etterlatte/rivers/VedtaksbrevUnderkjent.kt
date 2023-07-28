@@ -2,6 +2,7 @@ package no.nav.etterlatte.rivers
 
 import no.nav.etterlatte.brev.VedtaksbrevService
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
+import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.etterlatte.libs.common.vedtak.KafkaHendelseType
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -27,6 +28,7 @@ internal class VedtaksbrevUnderkjent(
             validate {
                 it.rejectValues("vedtak.behandling.type", listOf(BehandlingType.MANUELT_OPPHOER.name))
             }
+            correlationId()
         }.register(this)
     }
 

@@ -17,7 +17,7 @@ export const HandlingerForOppgave = (props: {
 
   const handling = () => {
     switch (oppgavetype) {
-      case 'HENDELSE':
+      case 'VURDER_KONSEKVENS':
         return (
           <>
             <Button icon={<EyeIcon />} onClick={() => navigate(`/person/${fnr}`)}>

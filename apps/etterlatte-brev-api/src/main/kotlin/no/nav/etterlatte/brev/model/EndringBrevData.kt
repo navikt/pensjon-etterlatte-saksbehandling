@@ -112,9 +112,7 @@ data class FengselsoppholdBrevdata(
 data class UtAvFengselBrevdata(
     val utbetalingsinfo: Utbetalingsinfo,
     val erEtterbetalingMerEnnTreeMaaneder: Boolean,
-    val virkningsdato: LocalDate,
-    val fraDato: LocalDate,
-    val tilDato: LocalDate
+    val virkningsdato: LocalDate
 ) : EndringBrevData() {
 
     companion object {
@@ -134,9 +132,7 @@ data class UtAvFengselBrevdata(
             return UtAvFengselBrevdata(
                 utbetalingsinfo = behandling.utbetalingsinfo!!,
                 erEtterbetalingMerEnnTreeMaaneder = behandling.revurderingInfo.erEtterbetalingMerEnnTreeMaaneder,
-                virkningsdato = behandling.virkningsdato!!.atDay(1),
-                fraDato = behandling.revurderingInfo.fraDato,
-                tilDato = behandling.revurderingInfo.tilDato
+                virkningsdato = behandling.virkningsdato!!.atDay(1)
             )
         }
     }

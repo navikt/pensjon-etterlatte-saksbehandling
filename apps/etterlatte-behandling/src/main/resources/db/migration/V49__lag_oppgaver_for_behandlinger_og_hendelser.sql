@@ -75,7 +75,7 @@ WITH hendelser_med_rekkefolge as (select *,
          as (select * from hendelser_med_rekkefolge where motsatt_rekkefolge = 1) -- motsatt_rekkefolge = 1 <=> siste hendelse
 INSERT
 INTO oppgave (SELECT gen_random_uuid()                                    as id,
-                     'UNDER_ARBEID'                                       as status,
+                     'NY'                                       as status,
                      sak.enhet                                            as enhet,
                      behandling.sak_id                                    as sak_id,
                      null                                                 as saksbehandler,
@@ -115,7 +115,7 @@ WITH source as (SELECT g.id as hendelseid, *
 INSERT
 INTO oppgave (SELECT gen_random_uuid()                     as id,
                      case source.status
-                         when 'SJEKKET_AV_JOBB' then 'UNDER_ARBEID'
+                         when 'SJEKKET_AV_JOBB' then 'NY'
                          when 'VURDERT_SOM_IKKE_RELEVANT' then 'FERDIGSTILT'
                          when 'HISTORISK' then 'FERDIGSTILT'
                          when 'TATT_MED_I_BEHANDLING' then 'FERDIGSTILT'

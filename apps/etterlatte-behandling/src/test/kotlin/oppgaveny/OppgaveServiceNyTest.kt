@@ -175,7 +175,8 @@ class OppgaveServiceNyTest {
         val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         val referanse = "behandlingId"
 
-        val oppgaveServiceNaarOppgaveIkkeErPaa = OppgaveServiceNy(oppgaveDaoMedEndringssporing, sakDao, false)
+        val oppgaveServiceNaarOppgaveIkkeErPaa =
+            OppgaveServiceNy(oppgaveDaoMedEndringssporing, sakDao, false, featureToggleService)
         val nyOppgave = oppgaveServiceNaarOppgaveIkkeErPaa.opprettNyOppgaveMedSakOgReferanse(
             referanse = referanse,
             sakId = opprettetSak.id,

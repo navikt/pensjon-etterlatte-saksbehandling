@@ -11,7 +11,10 @@ import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveType
 import no.nav.etterlatte.libs.common.oppgaveNy.VedtakEndringDTO
 import no.nav.etterlatte.oppgaveny.OppgaveServiceNy
+import org.slf4j.LoggerFactory
 import java.util.*
+
+private val logger = LoggerFactory.getLogger("behandlingVedtakRoute")
 
 internal fun Route.behandlingVedtakRoute(
     behandlingsstatusService: BehandlingStatusService,
@@ -19,6 +22,19 @@ internal fun Route.behandlingVedtakRoute(
     behandlingService: BehandlingService,
     kanBrukeNyOppgaveliste: Boolean
 ) {
+    fun haandterFeilIOppgaveService(e: Exception) {
+        if (kanBrukeNyOppgaveliste) {
+            logger.error("Fikk en feil i ferdigstilling av oppgave som stopper ferdigstilling: ", e)
+            throw e
+        } else {
+            logger.error(
+                "Fikk en feil i ferdigstilling av oppgave som svelges, siden oppgave " +
+                    "ikke er skrudd på: ",
+                e
+            )
+        }
+    }
+
     route("/fattvedtak") {
         post {
             val fattVedtak = call.receive<VedtakEndringDTO>()
@@ -30,11 +46,14 @@ internal fun Route.behandlingVedtakRoute(
             } else {
                 inTransaction {
                     behandlingsstatusService.settFattetVedtak(behandling, fattVedtak.vedtakHendelse)
-                    if (kanBrukeNyOppgaveliste) {
+                    try {
                         oppgaveService.lukkOppgaveUnderbehandlingOgLagNyMedType(
                             fattVedtak.vedtakOppgaveDTO,
-                            OppgaveType.ATTESTERING
+                            OppgaveType.ATTESTERING,
+                            fattVedtak.vedtakHendelse.saksbehandler
                         )
+                    } catch (e: Exception) {
+                        haandterFeilIOppgaveService(e)
                     }
                 }
                 call.respond(HttpStatusCode.OK)
@@ -52,11 +71,14 @@ internal fun Route.behandlingVedtakRoute(
             } else {
                 inTransaction {
                     behandlingsstatusService.settReturnertVedtak(behandling, underkjennVedtakOppgave.vedtakHendelse)
-                    if (kanBrukeNyOppgaveliste) {
+                    try {
                         oppgaveService.lukkOppgaveUnderbehandlingOgLagNyMedType(
                             underkjennVedtakOppgave.vedtakOppgaveDTO,
-                            OppgaveType.UNDERKJENT
+                            OppgaveType.UNDERKJENT,
+                            underkjennVedtakOppgave.vedtakHendelse.saksbehandler
                         )
+                    } catch (e: Exception) {
+                        haandterFeilIOppgaveService(e)
                     }
                 }
                 call.respond(HttpStatusCode.OK)
@@ -74,10 +96,13 @@ internal fun Route.behandlingVedtakRoute(
             } else {
                 inTransaction {
                     behandlingsstatusService.settAttestertVedtak(behandling, attesterVedtakOppgave.vedtakHendelse)
-                    if (kanBrukeNyOppgaveliste) {
+                    try {
                         oppgaveService.ferdigStillOppgaveUnderBehandling(
-                            attesterVedtakOppgave.vedtakOppgaveDTO.referanse
+                            attesterVedtakOppgave.vedtakOppgaveDTO.referanse,
+                            attesterVedtakOppgave.vedtakHendelse.saksbehandler
                         )
+                    } catch (e: Exception) {
+                        haandterFeilIOppgaveService(e)
                     }
                 }
                 call.respond(HttpStatusCode.OK)

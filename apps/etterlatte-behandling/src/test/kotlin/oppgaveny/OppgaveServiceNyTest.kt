@@ -3,12 +3,15 @@ package no.nav.etterlatte.oppgaveny
 import com.nimbusds.jwt.JWTClaimsSet
 import io.ktor.server.plugins.BadRequestException
 import io.ktor.server.plugins.NotFoundException
+import io.mockk.every
 import io.mockk.mockk
 import no.nav.etterlatte.Context
 import no.nav.etterlatte.DatabaseKontekst
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.oppgaveNy.FjernSaksbehandlerRequest
 import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveKilde
@@ -52,9 +55,11 @@ class OppgaveServiceNyTest {
     private lateinit var oppgaveServiceNy: OppgaveServiceNy
     private lateinit var saktilgangDao: SakTilgangDao
     private lateinit var oppgaveDaoMedEndringssporing: OppgaveDaoMedEndringssporing
+    private lateinit var featureToggleService: FeatureToggleService
     private val saksbehandlerRolleDev = "8bb9b8d1-f46a-4ade-8ee8-5895eccdf8cf"
     private val strengtfortroligDev = "5ef775f2-61f8-4283-bf3d-8d03f428aa14"
     private val attestantRolleDev = "63f46f74-84a8-4d1c-87a8-78532ab3ae60"
+    private val saksbehandler = mockk<SaksbehandlerMedEnheterOgRoller>()
 
     @Container
     private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:$POSTGRES_VERSION")
@@ -72,16 +77,17 @@ class OppgaveServiceNyTest {
         ).apply { migrate() }
 
         val connection = dataSource.connection
+        featureToggleService = DummyFeatureToggleService()
         sakDao = SakDao { connection }
         oppgaveDaoNy = OppgaveDaoNyImpl { connection }
         oppgaveDaoMedEndringssporing = OppgaveDaoMedEndringssporingImpl(oppgaveDaoNy) { connection }
-        oppgaveServiceNy = OppgaveServiceNy(oppgaveDaoMedEndringssporing, sakDao)
+        oppgaveServiceNy = OppgaveServiceNy(oppgaveDaoMedEndringssporing, sakDao, true, featureToggleService)
         saktilgangDao = SakTilgangDao(dataSource)
     }
 
     @BeforeEach
     fun beforeEach() {
-        val saksbehandler = mockk<SaksbehandlerMedEnheterOgRoller>()
+        every { saksbehandler.enheter() } returns Enheter.nasjonalTilgangEnheter()
         Kontekst.set(
             Context(
                 saksbehandler,
@@ -161,6 +167,29 @@ class OppgaveServiceNyTest {
 
         val oppgaveMedNySaksbehandler = oppgaveServiceNy.hentOppgave(nyOppgave.id)
         Assertions.assertEquals(nysaksbehandler, oppgaveMedNySaksbehandler?.saksbehandler)
+    }
+
+    @Test
+    fun `hvis oppgaveListeErAv settes saksbehandler før oppgaver lukkes`() {
+        val saksbehandler = "saksbehandler"
+        val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val referanse = "behandlingId"
+
+        val oppgaveServiceNaarOppgaveIkkeErPaa =
+            OppgaveServiceNy(oppgaveDaoMedEndringssporing, sakDao, false, featureToggleService)
+        val nyOppgave = oppgaveServiceNaarOppgaveIkkeErPaa.opprettNyOppgaveMedSakOgReferanse(
+            referanse = referanse,
+            sakId = opprettetSak.id,
+            oppgaveType = OppgaveType.FOERSTEGANGSBEHANDLING,
+            oppgaveKilde = OppgaveKilde.BEHANDLING
+        )
+        oppgaveServiceNaarOppgaveIkkeErPaa.lukkOppgaveUnderbehandlingOgLagNyMedType(
+            fattetoppgave = VedtakOppgaveDTO(sakId = opprettetSak.id, referanse = referanse),
+            oppgaveType = OppgaveType.ATTESTERING,
+            saksbehandler = saksbehandler
+        )
+        val oppgaveEtterLukking = oppgaveServiceNaarOppgaveIkkeErPaa.hentOppgave(nyOppgave.id)
+        Assertions.assertEquals(saksbehandler, oppgaveEtterLukking?.saksbehandler)
     }
 
     @Test
@@ -496,5 +525,57 @@ class OppgaveServiceNyTest {
         Assertions.assertEquals(2, alleOppgaver.size)
         val avbruttOppgave = oppgaveDaoNy.hentOppgave(oppgaveSomSkalBliAvbrutt.id)!!
         Assertions.assertEquals(avbruttOppgave.status, Status.AVBRUTT)
+    }
+
+    @Test
+    fun `Skal filtrere bort oppgaver med annen enhet`() {
+        every { saksbehandler.enheter() } returns listOf(Enheter.AALESUND.enhetNr)
+        Kontekst.set(
+            Context(
+                saksbehandler,
+                object : DatabaseKontekst {
+                    override fun activeTx(): Connection {
+                        throw IllegalArgumentException()
+                    }
+
+                    override fun <T> inTransaction(gjenbruk: Boolean, block: () -> T): T {
+                        return block()
+                    }
+                }
+            )
+        )
+
+        val aalesundSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val behandlingsref = UUID.randomUUID().toString()
+        val oppgaveAalesund = oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
+            behandlingsref,
+            aalesundSak.id,
+            OppgaveKilde.BEHANDLING,
+            OppgaveType.FOERSTEGANGSBEHANDLING
+        )
+        val saksbehandlerid = "saksbehandler01"
+        oppgaveServiceNy.tildelSaksbehandler(SaksbehandlerEndringDto(oppgaveAalesund.id, saksbehandlerid))
+
+        val saksteinskjer = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.STEINKJER.enhetNr)
+        val behrefsteinkjer = UUID.randomUUID().toString()
+        val oppgavesteinskjer = oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
+            behrefsteinkjer,
+            saksteinskjer.id,
+            OppgaveKilde.BEHANDLING,
+            OppgaveType.FOERSTEGANGSBEHANDLING
+        )
+
+        oppgaveServiceNy.tildelSaksbehandler(SaksbehandlerEndringDto(oppgavesteinskjer.id, saksbehandlerid))
+
+        val jwtclaims = JWTClaimsSet.Builder().claim("groups", saksbehandlerRolleDev).build()
+        val saksbehandlerMedRoller = SaksbehandlerMedRoller(
+            Saksbehandler("", "ident", JwtTokenClaims(jwtclaims)),
+            mapOf(AzureGroup.SAKSBEHANDLER to saksbehandlerRolleDev)
+        )
+        val finnOppgaverForBruker = oppgaveServiceNy.finnOppgaverForBruker(saksbehandlerMedRoller)
+
+        Assertions.assertEquals(1, finnOppgaverForBruker.size)
+        val AalesundfunnetOppgave = finnOppgaverForBruker[0]
+        Assertions.assertEquals(Enheter.AALESUND.enhetNr, AalesundfunnetOppgave.enhet)
     }
 }

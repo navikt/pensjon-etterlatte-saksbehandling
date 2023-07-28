@@ -53,7 +53,7 @@ class GrunnlagsendringshendelseJob(
                     jobbNavn = jobbNavn!!,
                     minutterGamleHendelser = minutterGamleHendelser,
                     datasource = datasource
-                ).run()
+                ).run(it)
             }
         }
     }
@@ -67,11 +67,9 @@ class GrunnlagsendringshendelseJob(
     ) {
         private val log = LoggerFactory.getLogger(this::class.java)
 
-        suspend fun run() {
-            val correlationId = UUID.randomUUID().toString()
-
+        suspend fun run(correlationId: String) {
             if (leaderElection.isLeader() && !shuttingDown.get()) {
-                withLogContext(correlationId) { log.info("Starter jobb: $jobbNavn") }
+                log.info("Starter jobb: $jobbNavn")
 
                 coroutineScope {
                     launch {
@@ -89,7 +87,7 @@ class GrunnlagsendringshendelseJob(
                     }
                 }
             } else {
-                withLogContext(correlationId) { log.info("Ikke leader, saa kjoerer ikke jobb: $jobbNavn.") }
+                log.info("Ikke leader, saa kjoerer ikke jobb: $jobbNavn.")
             }
         }
     }

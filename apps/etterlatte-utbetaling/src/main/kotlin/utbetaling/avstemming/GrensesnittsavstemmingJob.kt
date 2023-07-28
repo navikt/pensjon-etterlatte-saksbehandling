@@ -1,7 +1,6 @@
 package no.nav.etterlatte.utbetaling.grensesnittavstemming
 
 import no.nav.etterlatte.jobs.fixedRateCancellableTimer
-import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.jobs.LeaderElection
 import no.nav.etterlatte.sikkerLogg
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Saktype
@@ -48,10 +47,8 @@ class GrensesnittsavstemmingJob(
 
         fun run() {
             log.info("Starter $jobbNavn")
-            withLogContext {
-                if (leaderElection.isLeader()) {
-                    grensesnittsavstemmingService.startGrensesnittsavstemming(saktype)
-                }
+            if (leaderElection.isLeader()) {
+                grensesnittsavstemmingService.startGrensesnittsavstemming(saktype)
             }
         }
     }

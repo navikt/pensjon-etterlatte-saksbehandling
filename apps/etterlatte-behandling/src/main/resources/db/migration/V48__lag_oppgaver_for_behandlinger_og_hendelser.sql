@@ -3,13 +3,13 @@ truncate table oppgave;
 
 -- Migrerer historiske oppgaver for alle fullførte trinn basert på behandlinghendelser
 WITH source as (select *,
-                   row_number() over (partition by behandlingid order by opprettet asc)  as rekkefolge, -- vi trenger å vite om dette er første / siste / nest siste hendelse
-                   row_number() over (partition by behandlingid order by opprettet desc) as motsatt_rekkefolge
-            from behandlinghendelse h
-                     inner join behandling b on h.behandlingid = b.id
-                     inner join sak s on b.sak_id = s.id
-            where h.hendelse in ('VEDTAK:FATTET', 'VEDTAK:UNDERKJENT', 'VEDTAK:ATTESTERT', 'BEHANDLING:AVBRUTT')
-            order by opprettet asc)
+                       row_number() over (partition by behandlingid order by opprettet asc)  as rekkefolge, -- vi trenger å vite om dette er første / siste / nest siste hendelse
+                       row_number() over (partition by behandlingid order by opprettet desc) as motsatt_rekkefolge
+                from behandlinghendelse h
+                         inner join behandling b on h.behandlingid = b.id
+                         inner join sak s on b.sak_id = s.id
+                where h.hendelse in ('VEDTAK:FATTET', 'VEDTAK:UNDERKJENT', 'VEDTAK:ATTESTERT', 'BEHANDLING:AVBRUTT')
+                order by opprettet asc)
 -- id, status, enhet, sak_id, saksbehandler, referanse, merknad, opprettet, type, saktype, fnr, frist
 INSERT
 INTO oppgave (select gen_random_uuid()                                as id,
@@ -22,9 +22,8 @@ INTO oppgave (select gen_random_uuid()                                as id,
                          when 'BEHANDLING:AVBRUTT' then 'Behandlingen ble avbrutt'
                          else
                              case concat(source.valgtbegrunnelse, source.kommentar)
-                                 when null then null
                                  when '' then ''
-                                 else concat(coalesce(source.valgtbegrunnelse, ''), ': ', source.kommentar)
+                                 else concat(source.valgtbegrunnelse, ': ', source.kommentar)
                                  end
                          end                                          as merknad,
                      source.opprettet                                 as opprettet,
@@ -102,7 +101,8 @@ INTO oppgave (SELECT gen_random_uuid()                                    as id,
                        inner join sak sak on behandling.sak_id = sak.id
                        inner join siste_hendelse_per_behandling sisteHendelse
                                   on behandling.id = sisteHendelse.behandlingid
-              where behandling.status not in ('IVERKSATT', 'ATTESTERT', 'AVBRUTT')); -- vi vil kun ha åpne behandlinger
+                   -- vi vil kun ha åpne behandlinger
+              where behandling.status not in ('IVERKSATT', 'ATTESTERT', 'AVBRUTT'));
 
 -- Lager oppgaver basert på hendelser
 WITH source as (SELECT g.id as hendelseid, *
@@ -121,11 +121,10 @@ INTO oppgave (SELECT gen_random_uuid()                     as id,
                      source.sak_id                         as sak_id,
                      null                                  as saksbehandler,
                      source.hendelseid                     as referanse,
-                     concat(source.type, case source.kommentar
-                         when null then null
-                         when '' then ''
-                         else concat(': ', source.kommentar)
-                         end) as merknad,
+                     concat(source.type, case coalesce(source.kommentar, '')
+                                             when '' then ''
+                                             else concat(': ', source.kommentar)
+                         end)                              as merknad,
                      source.opprettet                      as opprettet,
                      'HENDELSE'                            as type,
                      source.saktype                        as saktype,

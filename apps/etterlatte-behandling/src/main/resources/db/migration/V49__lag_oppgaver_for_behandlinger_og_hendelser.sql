@@ -23,11 +23,9 @@ INTO oppgave (select gen_random_uuid()                                as id,
                      source.behandlingid                              as referanse,
                      case source.hendelse
                          when 'BEHANDLING:AVBRUTT' then 'Behandlingen ble avbrutt'
-                         else
-                             case concat(source.valgtbegrunnelse, source.kommentar)
-                                 when '' then ''
-                                 else concat(source.valgtbegrunnelse, ': ', source.kommentar)
-                                 end
+                         when 'VEDTAK:UNDERKJENT' then concat('Vedtak underkjent (', source.valgtbegrunnelse, '): ',
+                                                              source.kommentar)
+                         when 'VEDTAK:ATTESTERT' then concat('Vedtak attestert: ', source.kommentar)
                          end                                          as merknad,
                      source.opprettet                                 as opprettet,
                      case source.hendelse

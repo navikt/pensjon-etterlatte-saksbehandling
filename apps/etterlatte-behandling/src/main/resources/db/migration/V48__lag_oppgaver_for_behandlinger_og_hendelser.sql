@@ -1,15 +1,15 @@
+-- Vi nuker alt som er laget fra før, og gjenskaper det vakkert live. Dette betyr at alle åpne oppgaver mister saksbehandler i dev
+truncate table oppgave;
+
 -- Migrerer historiske oppgaver for alle fullførte trinn basert på behandlinghendelser
-WITH s1 as (select *
+WITH source as (select *,
+                   row_number() over (partition by behandlingid order by opprettet asc)  as rekkefolge, -- vi trenger å vite om dette er første / siste / nest siste hendelse
+                   row_number() over (partition by behandlingid order by opprettet desc) as motsatt_rekkefolge
             from behandlinghendelse h
                      inner join behandling b on h.behandlingid = b.id
                      inner join sak s on b.sak_id = s.id
             where h.hendelse in ('VEDTAK:FATTET', 'VEDTAK:UNDERKJENT', 'VEDTAK:ATTESTERT', 'BEHANDLING:AVBRUTT')
-            order by opprettet asc),
-     source as (select *,
-                       row_number() over (partition by behandlingid order by opprettet asc)  as rekkefolge,
-                       row_number() over (partition by behandlingid order by opprettet desc) as motsatt_rekkefolge
-                from s1)
-
+            order by opprettet asc)
 -- id, status, enhet, sak_id, saksbehandler, referanse, merknad, opprettet, type, saktype, fnr, frist
 INSERT
 INTO oppgave (select gen_random_uuid()                                as id,
@@ -63,7 +63,9 @@ INTO oppgave (select gen_random_uuid()                                as id,
               FROM source);
 
 -- få med en åpen oppgave av riktig type for alle behandlinger som ikke er avsluttet. typen oppgave kan utledes
--- fra den siste behandlingshendelsen som skjedde på denne behandlingen
+-- fra den siste behandlingshendelsen som skjedde på denne behandlingen.
+-- Siden alle behandlinger får hendelsen "'BEHANDLING:OPPRETTET'" med en gang kan vi garantere at vi har
+-- minst en hendelse per behandling
 WITH hendelser_med_rekkefolge as (select *,
                                          row_number() over (partition by behandlingid order by opprettet desc) as motsatt_rekkefolge
                                   from behandlinghendelse hendelser
@@ -85,9 +87,11 @@ INTO oppgave (SELECT gen_random_uuid()                                    as id,
                                       when 'FØRSTEGANGSBEHANDLING' then 'FOERSTEGANGSBEHANDLING'
                                       else behandling.behandlingstype
                              end
-                         when 'BEHANDLING:AVBRUTT' then 'SKAL_IKKE_SKJE'
                          when 'VEDTAK:FATTET' then 'ATTESTERING'
                          when 'VEDTAK:UNDERKJENT' then 'RETURNERT'
+
+                         -- Disse skal ikke skje siden disse hendelsene impliserer at behandlingen ikke er åpen
+                         when 'BEHANDLING:AVBRUTT' then 'SKAL_IKKE_SKJE'
                          when 'VEDTAK:ATTESTERT' then 'SKAL_IKKE_SKJE'
                          when 'VEDTAK:IVERKSATT' then 'SKAL_IKKE_SKJE'
                          end                                              as type,
@@ -98,4 +102,34 @@ INTO oppgave (SELECT gen_random_uuid()                                    as id,
                        inner join sak sak on behandling.sak_id = sak.id
                        inner join siste_hendelse_per_behandling sisteHendelse
                                   on behandling.id = sisteHendelse.behandlingid
-              where behandling.status not in ('IVERKSATT', 'ATTESTERT', 'AVBRUTT'));
+              where behandling.status not in ('IVERKSATT', 'ATTESTERT', 'AVBRUTT')); -- vi vil kun ha åpne behandlinger
+
+-- Lager oppgaver basert på hendelser
+WITH source as (SELECT g.id as hendelseid, *
+                from grunnlagsendringshendelse g
+                         inner join sak s on g.sak_id = s.sak_id
+                where status not in ('FORKASTET', 'VENTER_PAA_JOBB'))
+INSERT
+INTO oppgave (SELECT gen_random_uuid()                     as id,
+                     case source.status
+                         when 'SJEKKET_AV_JOBB' then 'UNDER_ARBEID'
+                         when 'VURDERT_SOM_IKKE_RELEVANT' then 'FERDIGSTILT'
+                         when 'HISTORISK' then 'FERDIGSTILT'
+                         when 'TATT_MED_I_BEHANDLING' then 'FERDIGSTILT'
+                         end                               as status,
+                     source.enhet                          as enhet,
+                     source.sak_id                         as sak_id,
+                     null                                  as saksbehandler,
+                     source.hendelseid                     as referanse,
+                     concat(source.type, case source.kommentar
+                         when null then null
+                         when '' then ''
+                         else concat(': ', source.kommentar)
+                         end) as merknad,
+                     source.opprettet                      as opprettet,
+                     'HENDELSE'                            as type,
+                     source.saktype                        as saktype,
+                     source.fnr                            as fnr,
+                     source.opprettet + interval '1 month' as opprettet
+              FROM source);
+

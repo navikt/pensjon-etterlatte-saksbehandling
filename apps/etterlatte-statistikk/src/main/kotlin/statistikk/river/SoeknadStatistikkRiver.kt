@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.node.MissingNode
 import com.fasterxml.jackson.databind.node.NullNode
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.rapidsandrivers.FEILENDE_KRITERIER_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.GYLDIG_FOR_BEHANDLING_KEY
@@ -19,11 +18,12 @@ import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import org.slf4j.LoggerFactory
+import rapidsandrivers.migrering.ListenerMedLogging
 
 class SoeknadStatistikkRiver(
     rapidsConnection: RapidsConnection,
     private val statistikkService: SoeknadStatistikkService
-) : River.PacketListener {
+) : ListenerMedLogging() {
 
     private val logger = LoggerFactory.getLogger(this.javaClass)
 
@@ -38,26 +38,24 @@ class SoeknadStatistikkRiver(
         }.register(this)
     }
 
-    override fun onPacket(packet: JsonMessage, context: MessageContext) =
-        withLogContext(packet.correlationId) {
-            try {
-                val soeknadId = packet[SOEKNAD_ID_KEY].longValue()
-                val gyldigForBehandling = packet[GYLDIG_FOR_BEHANDLING_KEY].booleanValue()
-                val sakType = enumValueOf<SakType>(packet[SAK_TYPE_KEY].textValue())
-                val feilendeKriterier = when (val feilendeKriterier = packet[FEILENDE_KRITERIER_KEY]) {
-                    is MissingNode, is NullNode -> null
-                    else -> objectMapper.readValue<List<String>>(feilendeKriterier.toString())
-                }
-                statistikkService.registrerSoeknadStatistikk(soeknadId, gyldigForBehandling, sakType, feilendeKriterier)
-            } catch (e: Exception) {
-                logger.error(
-                    """
+    override fun haandterPakke(packet: JsonMessage, context: MessageContext) =
+        try {
+            val soeknadId = packet[SOEKNAD_ID_KEY].longValue()
+            val gyldigForBehandling = packet[GYLDIG_FOR_BEHANDLING_KEY].booleanValue()
+            val sakType = enumValueOf<SakType>(packet[SAK_TYPE_KEY].textValue())
+            val feilendeKriterier = when (val feilendeKriterier = packet[FEILENDE_KRITERIER_KEY]) {
+                is MissingNode, is NullNode -> null
+                else -> objectMapper.readValue<List<String>>(feilendeKriterier.toString())
+            }
+            statistikkService.registrerSoeknadStatistikk(soeknadId, gyldigForBehandling, sakType, feilendeKriterier)
+        } catch (e: Exception) {
+            logger.error(
+                """
                     Kunne ikke mappe ut statisikk for fordelerevent i pakken med korrelasjonsid ${packet.correlationId}.
                     Dette betyr at statistikk for denne søknadens fordeling ikke blir med i oversikten, 
                     så det vil være avvik. Bør fikses raskt, men stopper ikke prosessering av annen statistikk.
-                    """.trimIndent(),
-                    e
-                )
-            }
+                """.trimIndent(),
+                e
+            )
         }
 }

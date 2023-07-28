@@ -173,7 +173,8 @@ class OppgaveServiceNyTest {
         val nyOppgave = oppgaveServiceNaarOppgaveIkkeErPaa.opprettNyOppgaveMedSakOgReferanse(
             referanse = referanse,
             sakId = opprettetSak.id,
-            oppgaveType = OppgaveType.FOERSTEGANGSBEHANDLING
+            oppgaveType = OppgaveType.FOERSTEGANGSBEHANDLING,
+            oppgaveKilde = OppgaveKilde.BEHANDLING
         )
         oppgaveServiceNaarOppgaveIkkeErPaa.lukkOppgaveUnderbehandlingOgLagNyMedType(
             fattetoppgave = VedtakOppgaveDTO(sakId = opprettetSak.id, referanse = referanse),

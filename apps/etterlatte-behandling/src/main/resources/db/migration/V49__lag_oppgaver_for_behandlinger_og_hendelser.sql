@@ -134,6 +134,6 @@ INTO oppgave (SELECT gen_random_uuid()                     as id,
                      'VURDER_KONSEKVENS'                   as type,
                      source.saktype                        as saktype,
                      source.fnr                            as fnr,
-                     source.opprettet + interval '1 month' as opprettet,
+                     source.opprettet + interval '1 month' as frist,
                      'HENDELSE'                            as kilde
               FROM source);

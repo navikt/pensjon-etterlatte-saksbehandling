@@ -5,9 +5,50 @@ import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
 import no.nav.etterlatte.libs.common.behandling.BarnepensjonSoeskenjusteringGrunn
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
+import no.nav.pensjon.brevbaker.api.model.Kroner
 import java.time.LocalDate
 
 abstract class EndringBrevData : BrevData()
+
+data class EtterbetalingDTO(
+    val fraDato: LocalDate,
+    val tilDato: LocalDate,
+    val beregningsperioder: List<Etterbetalingsperiode>
+)
+
+data class Etterbetalingsperiode(
+    val datoFOM: LocalDate,
+    val datoTOM: LocalDate?,
+    val grunnbeloep: Kroner,
+    val stoenadFoerReduksjon: Kroner,
+    var utbetaltBeloep: Kroner
+)
+data class EndringHovedmalBrevData(
+    val erEndret: Boolean,
+    val etterbetaling: EtterbetalingDTO,
+    val innhold: List<Slate.Element>
+) : EndringBrevData() {
+
+    companion object {
+        fun fra(behandling: Behandling, innhold: List<Slate.Element>): BrevData = EndringHovedmalBrevData(
+            erEndret = true, // TODO når resten av fengselsopphold implementerast
+            etterbetaling = EtterbetalingDTO(
+                fraDato = LocalDate.now(), // TODO når resten av fengselsopphold implementerast
+                tilDato = LocalDate.now(), // TODO når resten av fengselsopphold implementerast
+                beregningsperioder = behandling.utbetalingsinfo?.beregningsperioder?.map {
+                    Etterbetalingsperiode(
+                        datoFOM = it.datoFOM,
+                        datoTOM = it.datoTOM,
+                        grunnbeloep = it.grunnbeloep,
+                        stoenadFoerReduksjon = it.utbetaltBeloep, // TODO når resten av fengselsopphold implementerast
+                        utbetaltBeloep = it.utbetaltBeloep
+                    )
+                } ?: listOf()
+            ),
+            innhold = innhold
+        )
+    }
+}
 
 data class SoeskenjusteringRevurderingBrevdata(
     val utbetalingsinfo: Utbetalingsinfo,

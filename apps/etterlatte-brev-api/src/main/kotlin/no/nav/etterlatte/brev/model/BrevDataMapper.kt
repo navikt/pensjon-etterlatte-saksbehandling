@@ -93,5 +93,15 @@ object BrevDataMapper {
         }
     }
 
+    fun brevDataFerdigstilling(behandling: Behandling, innhold: () -> List<Slate.Element>, kode: BrevkodePar) =
+        when (kode.ferdigstilling) {
+            BARNEPENSJON_REVURDERING_ENDRING -> EndringHovedmalBrevData.fra(behandling, innhold())
+            else ->
+                when (behandling.revurderingsaarsak?.redigerbartBrev) {
+                    true -> ManueltBrevData(innhold())
+                    else -> brevData(behandling)
+                }
+        }
+
     data class BrevkodePar(val redigering: EtterlatteBrevKode, val ferdigstilling: EtterlatteBrevKode = redigering)
 }

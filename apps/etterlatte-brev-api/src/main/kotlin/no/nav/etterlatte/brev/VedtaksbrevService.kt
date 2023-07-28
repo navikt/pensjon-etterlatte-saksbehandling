@@ -90,26 +90,20 @@ class VedtaksbrevService(
         val avsender = adresseService.hentAvsender(behandling.vedtak)
 
         val kode = BrevDataMapper.brevKode(behandling, brev.prosessType)
-        val brevData = opprettBrevData(brev, behandling)
+        val brevData = opprettBrevData(brev, behandling, kode)
         val brevRequest = BrevbakerRequest.fra(kode.ferdigstilling, brevData, behandling, avsender)
 
         return brevbaker.genererPdf(brev.id, brevRequest)
             .also { pdf -> ferdigstillHvisVedtakFattet(brev, behandling, pdf, brukerTokenInfo) }
     }
 
-    private fun opprettBrevData(brev: Brev, behandling: Behandling): BrevData =
+    private fun opprettBrevData(brev: Brev, behandling: Behandling, brevkode: BrevDataMapper.BrevkodePar): BrevData =
         when (brev.prosessType) {
-            AUTOMATISK -> {
-                when (behandling.revurderingsaarsak?.redigerbartBrev) {
-                    true -> manueltBrevData(brev)
-                    else -> BrevDataMapper.brevData(behandling)
-                }
-            }
-
-            MANUELL -> manueltBrevData(brev)
+            AUTOMATISK -> BrevDataMapper.brevDataFerdigstilling(behandling, { hentLagretInnhold(brev) }, brevkode)
+            MANUELL -> ManueltBrevData(hentLagretInnhold(brev))
         }
 
-    private fun manueltBrevData(brev: Brev) = ManueltBrevData(requireNotNull(db.hentBrevPayload(brev.id)).elements)
+    private fun hentLagretInnhold(brev: Brev) = requireNotNull(db.hentBrevPayload(brev.id)).elements
 
     private suspend fun opprettInnhold(behandling: Behandling, prosessType: BrevProsessType): BrevInnhold {
         val tittel = "Vedtak om ${behandling.vedtak.type.name.lowercase()}"

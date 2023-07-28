@@ -76,7 +76,7 @@ internal fun Route.behandlingVedtakRoute(
                     behandlingsstatusService.settAttestertVedtak(behandling, attesterVedtakOppgave.vedtakHendelse)
                     if (kanBrukeNyOppgaveliste) {
                         oppgaveService.ferdigStillOppgaveUnderBehandling(
-                            attesterVedtakOppgave.vedtakOppgaveDTO
+                            attesterVedtakOppgave.vedtakOppgaveDTO.referanse
                         )
                     }
                 }

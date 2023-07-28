@@ -153,27 +153,54 @@ class OppgaveServiceNy(
         }
     }
 
-    fun ferdigStillOppgaveUnderBehandling(
-        attesteringsoppgave: VedtakOppgaveDTO
+    fun avbrytOppgaveUnderBehandling(
+        behandlingEllerHendelseId: String
     ): OppgaveNy {
-        val behandlingsoppgaver = oppgaveDaoNy.hentOppgaverForBehandling(attesteringsoppgave.referanse)
-        if (behandlingsoppgaver.isEmpty()) {
-            throw BadRequestException("Må ha en oppgave for å kunne lage attesteringsoppgave")
-        }
         try {
-            val oppgaveUnderbehandling = behandlingsoppgaver.single { it.status == Status.UNDER_BEHANDLING }
-            oppgaveDaoNy.endreStatusPaaOppgave(oppgaveUnderbehandling.id, Status.FERDIGSTILT)
-            return oppgaveDaoNy.hentOppgave(oppgaveUnderbehandling.id)!!
+            val oppgaveUnderbehandling = oppgaveDaoNy.hentOppgaverForBehandling(behandlingEllerHendelseId)
+                .single { it.status == Status.UNDER_BEHANDLING }
+            oppgaveDaoNy.endreStatusPaaOppgave(oppgaveUnderbehandling.id, Status.AVBRUTT)
+            return requireNotNull(oppgaveDaoNy.hentOppgave(oppgaveUnderbehandling.id)) {
+                "Oppgaven vi akkurat avbrøt kunne ikke hentes ut"
+            }
         } catch (e: NoSuchElementException) {
             throw BadRequestException(
-                "Det må finnes en oppgave under behandling, gjelder behandling:" +
-                    " ${attesteringsoppgave.referanse}",
+                "Det må finnes en oppgave under behandling, gjelder behandling / hendelse med ID:" +
+                    " $behandlingEllerHendelseId}",
                 e
             )
         } catch (e: IllegalArgumentException) {
             throw BadRequestException(
-                "Skal kun ha en oppgave under behandling, gjelder behandling:" +
-                    " ${attesteringsoppgave.referanse}",
+                "Skal kun ha en oppgave under behandling, gjelder behandling / hendelse med ID:" +
+                    " $behandlingEllerHendelseId",
+                e
+            )
+        }
+    }
+
+    fun ferdigStillOppgaveUnderBehandling(
+        behandlingEllerHendelseId: String
+    ): OppgaveNy {
+        val behandlingsoppgaver = oppgaveDaoNy.hentOppgaverForBehandling(behandlingEllerHendelseId)
+        if (behandlingsoppgaver.isEmpty()) {
+            throw BadRequestException("Må ha en oppgave for å ferdigstille oppgave")
+        }
+        try {
+            val oppgaveUnderbehandling = behandlingsoppgaver.single { it.status == Status.UNDER_BEHANDLING }
+            oppgaveDaoNy.endreStatusPaaOppgave(oppgaveUnderbehandling.id, Status.FERDIGSTILT)
+            return requireNotNull(oppgaveDaoNy.hentOppgave(oppgaveUnderbehandling.id)) {
+                "Oppgaven vi akkurat ferdigstilte kunne ikke hentes ut"
+            }
+        } catch (e: NoSuchElementException) {
+            throw BadRequestException(
+                "Det må finnes en oppgave under behandling, gjelder behandling / hendelse med ID:" +
+                    " $behandlingEllerHendelseId}",
+                e
+            )
+        } catch (e: IllegalArgumentException) {
+            throw BadRequestException(
+                "Skal kun ha en oppgave under behandling, gjelder behandling / hendelse med ID:" +
+                    " $behandlingEllerHendelseId",
                 e
             )
         }
@@ -225,6 +252,7 @@ class OppgaveServiceNy(
         oppgaveDaoNy.lagreOppgave(oppgaveLagres)
         return oppgaveDaoNy.hentOppgave(oppgaveLagres.id)!!
     }
+
     fun hentOppgave(oppgaveId: UUID): OppgaveNy? {
         return oppgaveDaoNy.hentOppgave(oppgaveId)
     }

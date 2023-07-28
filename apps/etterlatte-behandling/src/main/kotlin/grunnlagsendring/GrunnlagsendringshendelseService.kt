@@ -80,6 +80,11 @@ class GrunnlagsendringshendelseService(
 
         inTransaction {
             grunnlagsendringshendelseDao.lukkGrunnlagsendringStatus(hendelse = hendelse)
+            try {
+                oppgaveService.ferdigStillOppgaveUnderBehandling(hendelse.id.toString())
+            } catch (e: Exception) {
+                // TODO sjekk her om ny oppgaveliste er in action, og fiks dat shit
+            }
         }
     }
 

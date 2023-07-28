@@ -158,7 +158,9 @@ class ApplicationContext(
         grunnlagKlient = grunnlagKlientObo,
         sporingslogg = sporingslogg,
         featureToggleService = featureToggleService,
-        kommerBarnetTilGodeDao = kommerBarnetTilGodeDao
+        kommerBarnetTilGodeDao = kommerBarnetTilGodeDao,
+        oppgaveServiceNy = oppgaveServiceNy,
+        kanBrukeNyOppgaveliste = kanBrukeNyOppgaveliste
     )
 
     val kommerBarnetTilGodeService =
@@ -175,7 +177,8 @@ class ApplicationContext(
             grunnlagsendringshendelseDao = grunnlagsendringshendelseDao,
             kommerBarnetTilGodeService = kommerBarnetTilGodeService,
             revurderingDao = revurderingDao,
-            behandlingService = behandlingService
+            behandlingService = behandlingService,
+            kanBrukeNyOppgaveliste = kanBrukeNyOppgaveliste
         )
 
     val gyldighetsproevingService =

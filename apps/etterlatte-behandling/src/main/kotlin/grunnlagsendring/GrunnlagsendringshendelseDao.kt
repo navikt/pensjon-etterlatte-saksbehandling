@@ -267,6 +267,25 @@ class GrunnlagsendringshendelseDao(val connection: () -> Connection) {
             kommentar = getString("kommentar")
         )
     }
+
+    fun hentGrunnlagsendringshendelseSomErTattMedIBehandling(behandlingId: UUID): List<Grunnlagsendringshendelse> {
+        with(connection()) {
+            prepareStatement(
+                """
+                SELECT id, sak_id, type, opprettet, status, behandling_id, hendelse_gjelder_rolle, 
+                        samsvar_mellom_pdl_og_grunnlag, gjelder_person, kommentar
+                    FROM grunnlagsendringshendelse
+                    WHERE behandling_id = ?
+                """.trimIndent()
+            )
+                .let {
+                    it.setObject(1, behandlingId)
+                    return it.executeQuery().toList {
+                        asGrunnlagsendringshendelse()
+                    }
+                }
+        }
+    }
 }
 
 inline fun <reified T> PreparedStatement.setJsonb(parameterIndex: Int, jsonb: T): PreparedStatement {

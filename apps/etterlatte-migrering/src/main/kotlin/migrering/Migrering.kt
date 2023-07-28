@@ -12,12 +12,10 @@ import no.nav.etterlatte.rapidsandrivers.migrering.request
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
-import org.slf4j.LoggerFactory
 import rapidsandrivers.migrering.ListenerMedLoggingOgFeilhaandtering
 
 internal class Migrering(rapidsConnection: RapidsConnection, private val pesysRepository: PesysRepository) :
     ListenerMedLoggingOgFeilhaandtering(rapidsConnection, START_MIGRERING) {
-    private val logger = LoggerFactory.getLogger(Migrering::class.java)
 
     init {
         initialiser {

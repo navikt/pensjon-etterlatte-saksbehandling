@@ -16,15 +16,12 @@ import no.nav.etterlatte.statistikk.service.SoeknadStatistikkService
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
-import org.slf4j.LoggerFactory
 import rapidsandrivers.migrering.ListenerMedLogging
 
 class SoeknadStatistikkRiver(
     rapidsConnection: RapidsConnection,
     private val statistikkService: SoeknadStatistikkService
 ) : ListenerMedLogging(rapidsConnection) {
-
-    private val logger = LoggerFactory.getLogger(this.javaClass)
 
     init {
         initialiser {

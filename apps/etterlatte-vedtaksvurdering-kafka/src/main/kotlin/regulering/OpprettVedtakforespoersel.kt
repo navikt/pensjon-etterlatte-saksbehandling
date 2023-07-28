@@ -8,7 +8,6 @@ import no.nav.etterlatte.rapidsandrivers.EventNames.OPPRETT_VEDTAK
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
-import org.slf4j.LoggerFactory
 import rapidsandrivers.BEHANDLING_ID_KEY
 import rapidsandrivers.DATO_KEY
 import rapidsandrivers.SAK_ID_KEY
@@ -22,7 +21,6 @@ internal class OpprettVedtakforespoersel(
     rapidsConnection: RapidsConnection,
     private val vedtak: VedtakService
 ) : ListenerMedLogging(rapidsConnection) {
-    private val logger = LoggerFactory.getLogger(OpprettVedtakforespoersel::class.java)
 
     init {
         initialiser {

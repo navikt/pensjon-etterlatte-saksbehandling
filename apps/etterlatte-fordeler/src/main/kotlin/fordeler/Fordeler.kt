@@ -24,7 +24,6 @@ import no.nav.etterlatte.sikkerLogg
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
-import org.slf4j.LoggerFactory
 import rapidsandrivers.migrering.ListenerMedLogging
 import java.time.OffsetDateTime
 
@@ -39,8 +38,6 @@ internal class Fordeler(
     private val fordelerService: FordelerService,
     private val fordelerMetricLogger: FordelerMetricLogger = FordelerMetricLogger()
 ) : ListenerMedLogging(rapidsConnection) {
-
-    private val logger = LoggerFactory.getLogger(Fordeler::class.java)
 
     init {
         initialiser {

@@ -16,8 +16,6 @@ import no.nav.etterlatte.rapidsandrivers.migrering.persongalleri
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import rapidsandrivers.SAK_ID_KEY
 import rapidsandrivers.migrering.ListenerMedLoggingOgFeilhaandtering
 import rapidsandrivers.sakId
@@ -27,7 +25,6 @@ class MigreringHendelser(
     rapidsConnection: RapidsConnection,
     private val grunnlagService: GrunnlagService
 ) : ListenerMedLoggingOgFeilhaandtering(rapidsConnection, BEHANDLING_OPPRETTET) {
-    private val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
     init {
         initialiser {

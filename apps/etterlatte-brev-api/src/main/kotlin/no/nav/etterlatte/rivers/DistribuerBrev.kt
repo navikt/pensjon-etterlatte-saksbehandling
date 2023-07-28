@@ -11,7 +11,6 @@ import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
-import org.slf4j.LoggerFactory
 import rapidsandrivers.migrering.ListenerMedLogging
 
 internal class DistribuerBrev(
@@ -19,7 +18,6 @@ internal class DistribuerBrev(
     private val vedtaksbrevService: VedtaksbrevService,
     private val distribusjonService: DistribusjonService
 ) : ListenerMedLogging(rapidsConnection) {
-    private val logger = LoggerFactory.getLogger(DistribuerBrev::class.java)
 
     init {
         initialiser {

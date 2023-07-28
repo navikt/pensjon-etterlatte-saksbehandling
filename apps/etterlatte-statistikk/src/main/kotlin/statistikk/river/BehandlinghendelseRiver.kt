@@ -15,7 +15,6 @@ import no.nav.etterlatte.statistikk.service.StatistikkService
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
-import org.slf4j.LoggerFactory
 import rapidsandrivers.migrering.ListenerMedLogging
 import java.time.LocalDateTime
 import java.util.*
@@ -28,8 +27,6 @@ class BehandlinghendelseRiver(
         "BEHANDLING:AVBRUTT",
         "BEHANDLING:OPPRETTET"
     )
-
-    private val logger = LoggerFactory.getLogger(this::class.java)
 
     init {
         initialiser {

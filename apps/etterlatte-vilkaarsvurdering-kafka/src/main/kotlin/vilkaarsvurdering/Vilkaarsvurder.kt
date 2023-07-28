@@ -8,7 +8,6 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.toUUID
-import org.slf4j.LoggerFactory
 import rapidsandrivers.BEHANDLING_ID_KEY
 import rapidsandrivers.BEHANDLING_VI_OMREGNER_FRA_KEY
 import rapidsandrivers.SAK_ID_KEY
@@ -20,7 +19,6 @@ internal class Vilkaarsvurder(
     private val vilkaarsvurderingService: VilkaarsvurderingService
 ) :
     ListenerMedLoggingOgFeilhaandtering(rapidsConnection, VILKAARSVURDER) {
-    private val logger = LoggerFactory.getLogger(Vilkaarsvurder::class.java)
 
     init {
         initialiser {

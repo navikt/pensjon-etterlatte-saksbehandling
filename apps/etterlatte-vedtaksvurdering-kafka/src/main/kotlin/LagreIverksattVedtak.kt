@@ -9,7 +9,6 @@ import no.nav.etterlatte.libs.common.utbetaling.UtbetalingStatusDto
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
-import org.slf4j.LoggerFactory
 import rapidsandrivers.migrering.ListenerMedLogging
 
 internal class LagreIverksattVedtak(
@@ -23,8 +22,6 @@ internal class LagreIverksattVedtak(
             validate { it.requireKey("utbetaling_response") }
         }
     }
-
-    private val logger = LoggerFactory.getLogger(this::class.java)
 
     override fun haandterPakke(packet: JsonMessage, context: MessageContext) {
         val respons = objectMapper.readValue<UtbetalingResponseDto>(packet["utbetaling_response"].toString())

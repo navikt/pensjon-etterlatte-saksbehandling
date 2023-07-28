@@ -9,7 +9,6 @@ import no.nav.etterlatte.rapidsandrivers.EventNames.OMREGNINGSHENDELSE
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
-import org.slf4j.LoggerFactory
 import rapidsandrivers.DATO_KEY
 import rapidsandrivers.HENDELSE_DATA_KEY
 import rapidsandrivers.SAK_ID_KEY
@@ -23,7 +22,6 @@ internal class LoependeYtelserforespoersel(
     rapidsConnection: RapidsConnection,
     private val vedtak: VedtakService
 ) : ListenerMedLoggingOgFeilhaandtering(rapidsConnection, FINN_LOEPENDE_YTELSER) {
-    private val logger = LoggerFactory.getLogger(LoependeYtelserforespoersel::class.java)
 
     init {
         initialiser {

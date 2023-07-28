@@ -5,7 +5,6 @@ import no.nav.etterlatte.rapidsandrivers.EventNames.FEILA
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
-import org.slf4j.LoggerFactory
 import rapidsandrivers.SAK_ID_KEY
 import rapidsandrivers.migrering.ListenerMedLogging
 import rapidsandrivers.sakId
@@ -14,7 +13,6 @@ internal class ReguleringFeilet(
     rapidsConnection: RapidsConnection,
     private val behandlingService: BehandlingService
 ) : ListenerMedLogging(rapidsConnection) {
-    private val logger = LoggerFactory.getLogger(ReguleringFeilet::class.java)
 
     init {
         initialiser {

@@ -6,7 +6,6 @@ import no.nav.etterlatte.rapidsandrivers.EventNames.REGULERING_EVENT_NAME
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
-import org.slf4j.LoggerFactory
 import rapidsandrivers.DATO_KEY
 import rapidsandrivers.dato
 import rapidsandrivers.migrering.ListenerMedLoggingOgFeilhaandtering
@@ -17,7 +16,6 @@ internal class Reguleringsforespoersel(
     rapidsConnection: RapidsConnection,
     private val behandlingService: BehandlingService
 ) : ListenerMedLoggingOgFeilhaandtering(rapidsConnection, REGULERING_EVENT_NAME) {
-    private val logger = LoggerFactory.getLogger(Reguleringsforespoersel::class.java)
 
     init {
         initialiser {

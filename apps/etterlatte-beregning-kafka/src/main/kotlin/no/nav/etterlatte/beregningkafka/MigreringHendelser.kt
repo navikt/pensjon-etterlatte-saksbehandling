@@ -14,7 +14,6 @@ import no.nav.etterlatte.rapidsandrivers.migrering.hendelseData
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
-import org.slf4j.LoggerFactory
 import rapidsandrivers.BEHANDLING_ID_KEY
 import rapidsandrivers.BEREGNING_KEY
 import rapidsandrivers.HENDELSE_DATA_KEY
@@ -23,8 +22,6 @@ import rapidsandrivers.migrering.ListenerMedLoggingOgFeilhaandtering
 
 internal class MigreringHendelser(rapidsConnection: RapidsConnection, private val beregningService: BeregningService) :
     ListenerMedLoggingOgFeilhaandtering(rapidsConnection, Migreringshendelser.BEREGN) {
-
-    private val logger = LoggerFactory.getLogger(this::class.java)
 
     init {
         initialiser {

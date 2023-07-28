@@ -12,8 +12,6 @@ import no.nav.etterlatte.statistikk.service.VedtakHendelse
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import rapidsandrivers.migrering.ListenerMedLogging
 
 class VedtakhendelserRiver(
@@ -27,8 +25,6 @@ class VedtakhendelserRiver(
         KafkaHendelseType.UNDERKJENT.toString(),
         KafkaHendelseType.IVERKSATT.toString()
     )
-
-    val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
     init {
         initialiser {

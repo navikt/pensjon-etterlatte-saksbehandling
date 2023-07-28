@@ -9,7 +9,6 @@ import no.nav.etterlatte.rapidsandrivers.EventNames.VILKAARSVURDER
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
-import org.slf4j.LoggerFactory
 import rapidsandrivers.BEHANDLING_ID_KEY
 import rapidsandrivers.BEHANDLING_VI_OMREGNER_FRA_KEY
 import rapidsandrivers.HENDELSE_DATA_KEY
@@ -20,10 +19,7 @@ import rapidsandrivers.migrering.ListenerMedLoggingOgFeilhaandtering
 internal class OmregningsHendelser(rapidsConnection: RapidsConnection, private val behandlinger: BehandlingService) :
     ListenerMedLoggingOgFeilhaandtering(rapidsConnection, OMREGNINGSHENDELSE) {
 
-    private val logger = LoggerFactory.getLogger(this::class.java)
-
     init {
-        logger.info("initierer rapid for omregningshendelser")
         initialiser {
             eventName(hendelsestype)
 

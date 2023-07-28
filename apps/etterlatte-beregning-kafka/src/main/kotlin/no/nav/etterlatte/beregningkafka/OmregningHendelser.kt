@@ -15,7 +15,6 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.toUUID
-import org.slf4j.LoggerFactory
 import rapidsandrivers.AVKORTING_KEY
 import rapidsandrivers.BEHANDLING_ID_KEY
 import rapidsandrivers.BEHANDLING_VI_OMREGNER_FRA_KEY
@@ -32,10 +31,7 @@ internal class OmregningHendelser(
 ) :
     ListenerMedLoggingOgFeilhaandtering(rapidsConnection, BEREGN) {
 
-    private val logger = LoggerFactory.getLogger(this::class.java)
-
     init {
-        logger.info("initierer rapid for omregninghendelser")
         initialiser {
             eventName(hendelsestype)
 

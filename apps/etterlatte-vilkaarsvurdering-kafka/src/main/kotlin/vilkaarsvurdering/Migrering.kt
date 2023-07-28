@@ -8,7 +8,6 @@ import no.nav.etterlatte.vilkaarsvurdering.services.VilkaarsvurderingService
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
-import org.slf4j.LoggerFactory
 import rapidsandrivers.BEHANDLING_ID_KEY
 import rapidsandrivers.behandlingId
 import rapidsandrivers.migrering.ListenerMedLoggingOgFeilhaandtering
@@ -17,7 +16,6 @@ internal class Migrering(
     rapidsConnection: RapidsConnection,
     private val vilkaarsvurderingService: VilkaarsvurderingService
 ) : ListenerMedLoggingOgFeilhaandtering(rapidsConnection, VILKAARSVURDER) {
-    private val logger = LoggerFactory.getLogger(Migrering::class.java)
 
     init {
         initialiser {

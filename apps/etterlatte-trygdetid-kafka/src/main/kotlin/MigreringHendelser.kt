@@ -16,7 +16,6 @@ import no.nav.etterlatte.trygdetid.TrygdetidType
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
-import org.slf4j.LoggerFactory
 import rapidsandrivers.BEHANDLING_ID_KEY
 import rapidsandrivers.HENDELSE_DATA_KEY
 import rapidsandrivers.behandlingId
@@ -25,8 +24,6 @@ import rapidsandrivers.withFeilhaandtering
 
 internal class MigreringHendelser(rapidsConnection: RapidsConnection, private val trygdetidService: TrygdetidService) :
     ListenerMedLogging(rapidsConnection) {
-
-    private val logger = LoggerFactory.getLogger(this::class.java)
 
     init {
         initialiser {

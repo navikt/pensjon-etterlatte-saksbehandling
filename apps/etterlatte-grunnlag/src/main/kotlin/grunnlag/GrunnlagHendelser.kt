@@ -15,8 +15,6 @@ import no.nav.etterlatte.rapidsandrivers.migrering.VILKAARSVURDERT_KEY
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import rapidsandrivers.FNR_KEY
 import rapidsandrivers.GRUNNLAG_OPPDATERT
 import rapidsandrivers.OPPLYSNING_KEY
@@ -27,7 +25,6 @@ class GrunnlagHendelser(
     rapidsConnection: RapidsConnection,
     private val grunnlagService: GrunnlagService
 ) : ListenerMedLogging(rapidsConnection) {
-    private val logger: Logger = LoggerFactory.getLogger(GrunnlagHendelser::class.java)
 
     init {
         initialiser {

@@ -9,7 +9,6 @@ import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser.VEDTAK
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
-import org.slf4j.LoggerFactory
 import rapidsandrivers.BEHANDLING_ID_KEY
 import rapidsandrivers.SAK_ID_KEY
 import rapidsandrivers.behandlingId
@@ -22,7 +21,6 @@ internal class MigreringHendelser(
     rapidsConnection: RapidsConnection,
     private val vedtak: VedtakService
 ) : ListenerMedLogging(rapidsConnection) {
-    private val logger = LoggerFactory.getLogger(this::class.java)
 
     init {
         initialiser {

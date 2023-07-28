@@ -9,15 +9,12 @@ import no.nav.etterlatte.opplysningerfrasoknad.opplysningsuthenter.Opplysningsut
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import rapidsandrivers.migrering.ListenerMedLogging
 
 internal class StartUthentingFraSoeknad(
     rapidsConnection: RapidsConnection,
     private val opplysningsuthenter: Opplysningsuthenter
 ) : ListenerMedLogging(rapidsConnection) {
-    private val logger: Logger = LoggerFactory.getLogger(StartUthentingFraSoeknad::class.java)
     private val rapid = rapidsConnection
 
     init {

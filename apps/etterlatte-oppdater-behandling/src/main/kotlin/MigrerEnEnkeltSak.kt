@@ -15,7 +15,6 @@ import no.nav.etterlatte.rapidsandrivers.migrering.ROLLE_KEY
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
-import org.slf4j.LoggerFactory
 import rapidsandrivers.BEHANDLING_ID_KEY
 import rapidsandrivers.HENDELSE_DATA_KEY
 import rapidsandrivers.OPPLYSNING_KEY
@@ -29,10 +28,7 @@ internal class MigrerEnEnkeltSak(
 ) :
     ListenerMedLoggingOgFeilhaandtering(rapidsConnection, Migreringshendelser.MIGRER_SAK) {
 
-    private val logger = LoggerFactory.getLogger(this::class.java)
-
     init {
-        logger.info("initierer rapid for migreringshendelser")
         initialiser {
             eventName(hendelsestype)
 

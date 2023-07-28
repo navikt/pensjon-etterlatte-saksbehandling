@@ -24,7 +24,7 @@ import rapidsandrivers.behandlingId
 import rapidsandrivers.migrering.ListenerMedLoggingOgFeilhaandtering
 
 internal class MigreringHendelser(rapidsConnection: RapidsConnection, private val beregningService: BeregningService) :
-    ListenerMedLoggingOgFeilhaandtering(Migreringshendelser.BEREGN) {
+    ListenerMedLoggingOgFeilhaandtering(rapidsConnection, Migreringshendelser.BEREGN) {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
 

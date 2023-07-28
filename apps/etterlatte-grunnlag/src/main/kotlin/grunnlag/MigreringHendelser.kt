@@ -28,7 +28,7 @@ import java.util.*
 class MigreringHendelser(
     rapidsConnection: RapidsConnection,
     private val grunnlagService: GrunnlagService
-) : ListenerMedLoggingOgFeilhaandtering(BEHANDLING_OPPRETTET) {
+) : ListenerMedLoggingOgFeilhaandtering(rapidsConnection, BEHANDLING_OPPRETTET) {
     private val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
     init {

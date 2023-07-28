@@ -32,7 +32,7 @@ internal class OmregningHendelser(
     private val beregningService: BeregningService,
     private val trygdetidService: TrygdetidService
 ) :
-    ListenerMedLoggingOgFeilhaandtering(BEREGN) {
+    ListenerMedLoggingOgFeilhaandtering(rapidsConnection, BEREGN) {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
 

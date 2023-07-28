@@ -20,7 +20,7 @@ import rapidsandrivers.behandlingId
 import rapidsandrivers.migrering.ListenerMedLoggingOgFeilhaandtering
 
 internal class OmregningsHendelser(rapidsConnection: RapidsConnection, private val behandlinger: BehandlingService) :
-    ListenerMedLoggingOgFeilhaandtering(OMREGNINGSHENDELSE) {
+    ListenerMedLoggingOgFeilhaandtering(rapidsConnection, OMREGNINGSHENDELSE) {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
 

@@ -18,7 +18,7 @@ import rapidsandrivers.tilbakestilteBehandlinger
 internal class Reguleringsforespoersel(
     rapidsConnection: RapidsConnection,
     private val behandlingService: BehandlingService
-) : ListenerMedLoggingOgFeilhaandtering(REGULERING_EVENT_NAME) {
+) : ListenerMedLoggingOgFeilhaandtering(rapidsConnection, REGULERING_EVENT_NAME) {
     private val logger = LoggerFactory.getLogger(Reguleringsforespoersel::class.java)
 
     init {

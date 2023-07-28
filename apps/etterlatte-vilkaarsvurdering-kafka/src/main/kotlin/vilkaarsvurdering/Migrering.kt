@@ -18,7 +18,7 @@ import rapidsandrivers.migrering.ListenerMedLoggingOgFeilhaandtering
 internal class Migrering(
     rapidsConnection: RapidsConnection,
     private val vilkaarsvurderingService: VilkaarsvurderingService
-) : ListenerMedLoggingOgFeilhaandtering(VILKAARSVURDER) {
+) : ListenerMedLoggingOgFeilhaandtering(rapidsConnection, VILKAARSVURDER) {
     private val logger = LoggerFactory.getLogger(Migrering::class.java)
 
     init {

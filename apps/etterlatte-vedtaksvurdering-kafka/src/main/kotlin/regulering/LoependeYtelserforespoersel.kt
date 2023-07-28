@@ -24,7 +24,7 @@ import rapidsandrivers.tilbakestilteBehandlinger
 internal class LoependeYtelserforespoersel(
     rapidsConnection: RapidsConnection,
     private val vedtak: VedtakService
-) : ListenerMedLoggingOgFeilhaandtering(FINN_LOEPENDE_YTELSER) {
+) : ListenerMedLoggingOgFeilhaandtering(rapidsConnection, FINN_LOEPENDE_YTELSER) {
     private val logger = LoggerFactory.getLogger(LoependeYtelserforespoersel::class.java)
 
     init {

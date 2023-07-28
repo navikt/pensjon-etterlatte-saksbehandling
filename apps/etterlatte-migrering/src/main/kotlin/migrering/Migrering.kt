@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory
 import rapidsandrivers.migrering.ListenerMedLoggingOgFeilhaandtering
 
 internal class Migrering(rapidsConnection: RapidsConnection, private val pesysRepository: PesysRepository) :
-    ListenerMedLoggingOgFeilhaandtering(START_MIGRERING) {
+    ListenerMedLoggingOgFeilhaandtering(rapidsConnection, START_MIGRERING) {
     private val logger = LoggerFactory.getLogger(Migrering::class.java)
 
     init {

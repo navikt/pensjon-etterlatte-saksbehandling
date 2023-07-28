@@ -29,7 +29,7 @@ internal class MigrerEnEnkeltSak(
     rapidsConnection: RapidsConnection,
     private val behandlinger: BehandlingService
 ) :
-    ListenerMedLoggingOgFeilhaandtering(Migreringshendelser.MIGRER_SAK) {
+    ListenerMedLoggingOgFeilhaandtering(rapidsConnection, Migreringshendelser.MIGRER_SAK) {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
 

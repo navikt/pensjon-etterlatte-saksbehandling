@@ -21,7 +21,7 @@ internal class Vilkaarsvurder(
     rapidsConnection: RapidsConnection,
     private val vilkaarsvurderingService: VilkaarsvurderingService
 ) :
-    ListenerMedLoggingOgFeilhaandtering(VILKAARSVURDER) {
+    ListenerMedLoggingOgFeilhaandtering(rapidsConnection, VILKAARSVURDER) {
     private val logger = LoggerFactory.getLogger(Vilkaarsvurder::class.java)
 
     init {

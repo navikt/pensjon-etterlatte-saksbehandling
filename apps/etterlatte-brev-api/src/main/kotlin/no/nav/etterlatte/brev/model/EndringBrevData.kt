@@ -67,3 +67,36 @@ data class FengselsoppholdBrevdata(
         }
     }
 }
+
+data class UtAvFengselBrevdata(
+    val utbetalingsinfo: Utbetalingsinfo,
+    val erEtterbetalingMerEnnTreeMaaneder: Boolean,
+    val virkningsdato: LocalDate,
+    val fraDato: LocalDate,
+    val tilDato: LocalDate
+) : EndringBrevData() {
+
+    companion object {
+        fun fra(behandling: Behandling): UtAvFengselBrevdata {
+            if (behandling.revurderingsaarsak != RevurderingAarsak.UT_AV_FENGSEL) {
+                throw IllegalArgumentException(
+                    "Kan ikke opprette et revurderingsbrev for ut av fengselsopphold når " +
+                        "revurderingsårsak er ${behandling.revurderingsaarsak}"
+                )
+            }
+            if (behandling.revurderingInfo !is RevurderingInfo.UtAvFengsel) {
+                throw IllegalArgumentException(
+                    "Kan ikke opprette et revurderingsbrev for ut av fengselsopphold når " +
+                        "revurderingsinfo ikke er ut av fengselsopphold"
+                )
+            }
+            return UtAvFengselBrevdata(
+                utbetalingsinfo = behandling.utbetalingsinfo!!,
+                erEtterbetalingMerEnnTreeMaaneder = behandling.revurderingInfo.erEtterbetalingMerEnnTreeMaaneder,
+                virkningsdato = behandling.virkningsdato!!.atDay(1),
+                fraDato = behandling.revurderingInfo.fraDato,
+                tilDato = behandling.revurderingInfo.tilDato
+            )
+        }
+    }
+}

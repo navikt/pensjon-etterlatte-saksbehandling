@@ -22,7 +22,6 @@ import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.brev.model.SlateHelper
 import no.nav.etterlatte.brev.model.Status
-import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.rivers.VedtakTilJournalfoering
 import no.nav.etterlatte.token.BrukerTokenInfo
@@ -102,11 +101,8 @@ class VedtaksbrevService(
     private fun opprettBrevData(brev: Brev, behandling: Behandling): BrevData =
         when (brev.prosessType) {
             AUTOMATISK -> {
-                when (behandling.revurderingsaarsak) {
-                    RevurderingAarsak.ADOPSJON,
-                    RevurderingAarsak.OMGJOERING_AV_FARSKAP,
-                    RevurderingAarsak.FENGSELSOPPHOLD -> manueltBrevData(brev)
-
+                when (behandling.revurderingsaarsak?.redigerbartBrev) {
+                    true -> manueltBrevData(brev)
                     else -> BrevDataMapper.brevData(behandling)
                 }
             }
@@ -121,13 +117,8 @@ class VedtaksbrevService(
 
         val payload = when (prosessType) {
             AUTOMATISK -> {
-                when (behandling.revurderingsaarsak) {
-                    RevurderingAarsak.OMGJOERING_AV_FARSKAP,
-                    RevurderingAarsak.ADOPSJON,
-                    RevurderingAarsak.FENGSELSOPPHOLD -> {
-                        hentRedigerbarTekstFraBrevbakeren(behandling)
-                    }
-
+                when (behandling.revurderingsaarsak?.redigerbartBrev) {
+                    true -> hentRedigerbarTekstFraBrevbakeren(behandling)
                     else -> null
                 }
             }

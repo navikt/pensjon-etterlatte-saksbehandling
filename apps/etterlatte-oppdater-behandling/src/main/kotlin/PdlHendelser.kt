@@ -8,30 +8,25 @@ import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.SivilstandHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.VergeMaalEllerFremtidsfullmakt
-import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
-import no.nav.helse.rapids_rivers.River
 import org.slf4j.LoggerFactory
 import rapidsandrivers.migrering.ListenerMedLogging
 
 internal class PdlHendelser(
     rapidsConnection: RapidsConnection,
     private val behandlinger: BehandlingService
-) : ListenerMedLogging() {
+) : ListenerMedLogging(rapidsConnection) {
     private val logger = LoggerFactory.getLogger(PdlHendelser::class.java)
 
     init {
-        logger.info("initierer rapid for pdlHendelser")
-        River(rapidsConnection).apply {
+        initialiser {
             eventName("PDL:PERSONHENDELSE")
-
-            correlationId()
             validate { it.requireKey("hendelse") }
             validate { it.requireKey("hendelse_data") }
-        }.register(this)
+        }
     }
 
     override fun haandterPakke(packet: JsonMessage, context: MessageContext) {

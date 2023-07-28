@@ -2,13 +2,11 @@ package no.nav.etterlatte.rivers
 
 import no.nav.etterlatte.brev.VedtaksbrevService
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
-import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.etterlatte.libs.common.vedtak.KafkaHendelseType
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
-import no.nav.helse.rapids_rivers.River
 import org.slf4j.LoggerFactory
 import rapidsandrivers.migrering.ListenerMedLogging
 import java.util.*
@@ -16,11 +14,11 @@ import java.util.*
 internal class VedtaksbrevUnderkjent(
     rapidsConnection: RapidsConnection,
     private val service: VedtaksbrevService
-) : ListenerMedLogging() {
+) : ListenerMedLogging(rapidsConnection) {
     private val logger = LoggerFactory.getLogger(VedtaksbrevUnderkjent::class.java)
 
     init {
-        River(rapidsConnection).apply {
+        initialiser {
             eventName(KafkaHendelseType.UNDERKJENT.toString())
             validate { it.requireKey("vedtak") }
             validate { it.requireKey("vedtak.vedtakId") }
@@ -28,8 +26,7 @@ internal class VedtaksbrevUnderkjent(
             validate {
                 it.rejectValues("vedtak.behandling.type", listOf(BehandlingType.MANUELT_OPPHOER.name))
             }
-            correlationId()
-        }.register(this)
+        }
     }
 
     override fun haandterPakke(packet: JsonMessage, context: MessageContext) {

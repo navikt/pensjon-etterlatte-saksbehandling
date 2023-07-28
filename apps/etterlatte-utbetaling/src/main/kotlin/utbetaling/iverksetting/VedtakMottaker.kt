@@ -2,7 +2,6 @@ package no.nav.etterlatte.utbetaling.iverksetting
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.utbetaling.UtbetalingResponseDto
@@ -22,7 +21,6 @@ import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetalingsvedtak
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
-import no.nav.helse.rapids_rivers.River
 import org.slf4j.LoggerFactory
 import rapidsandrivers.migrering.ListenerMedLogging
 import java.util.*
@@ -32,10 +30,10 @@ data class KunneIkkeLeseVedtakException(val e: Exception) : RuntimeException(e)
 class VedtakMottaker(
     rapidsConnection: RapidsConnection,
     private val utbetalingService: UtbetalingService
-) : ListenerMedLogging() {
+) : ListenerMedLogging(rapidsConnection) {
 
     init {
-        River(rapidsConnection).apply {
+        initialiser {
             eventName(KafkaHendelseType.ATTESTERT.toString())
             validate { it.requireKey("vedtak") }
             validate {
@@ -44,8 +42,7 @@ class VedtakMottaker(
                     listOf(VedtakType.INNVILGELSE.name, VedtakType.OPPHOER.name, VedtakType.ENDRING.name)
                 )
             }
-            correlationId()
-        }.register(this)
+        }
     }
 
     override fun haandterPakke(packet: JsonMessage, context: MessageContext) {

@@ -12,7 +12,6 @@ import no.nav.etterlatte.statistikk.service.VedtakHendelse
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
-import no.nav.helse.rapids_rivers.River
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import rapidsandrivers.migrering.ListenerMedLogging
@@ -20,7 +19,7 @@ import rapidsandrivers.migrering.ListenerMedLogging
 class VedtakhendelserRiver(
     rapidsConnection: RapidsConnection,
     private val service: StatistikkService
-) : ListenerMedLogging() {
+) : ListenerMedLogging(rapidsConnection) {
 
     private val vedtakshendelser = listOf(
         KafkaHendelseType.FATTET.toString(),
@@ -32,12 +31,11 @@ class VedtakhendelserRiver(
     val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
     init {
-        River(rapidsConnection).apply {
+        initialiser {
             validate { it.demandAny(EVENT_NAME_KEY, vedtakshendelser) }
             validate { it.requireKey("vedtak") }
             validate { it.interestedIn(TEKNISK_TID_KEY) }
-            correlationId()
-        }.register(this)
+        }
     }
 
     override fun haandterPakke(packet: JsonMessage, context: MessageContext) =

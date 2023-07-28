@@ -2,7 +2,6 @@ package no.nav.etterlatte.utbetaling.common
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.utbetaling.grensesnittavstemming.GrensesnittsavstemmingService
@@ -11,7 +10,6 @@ import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingService
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
-import no.nav.helse.rapids_rivers.River
 import org.slf4j.LoggerFactory
 import rapidsandrivers.migrering.ListenerMedLogging
 
@@ -19,14 +17,13 @@ class Oppgavetrigger(
     rapidsConnection: RapidsConnection,
     private val utbetalingService: UtbetalingService,
     private val grensesnittsavstemmingService: GrensesnittsavstemmingService
-) : ListenerMedLogging() {
+) : ListenerMedLogging(rapidsConnection) {
 
     init {
-        River(rapidsConnection).apply {
+        initialiser {
             eventName("okonomi_vedtak_oppgave")
-            correlationId()
             validate { it.interestedIn("oppgave") }
-        }.register(this)
+        }
     }
 
     override fun haandterPakke(packet: JsonMessage, context: MessageContext) {

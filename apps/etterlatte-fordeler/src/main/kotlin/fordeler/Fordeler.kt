@@ -24,7 +24,6 @@ import no.nav.etterlatte.sikkerLogg
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
-import no.nav.helse.rapids_rivers.River
 import org.slf4j.LoggerFactory
 import rapidsandrivers.migrering.ListenerMedLogging
 import java.time.OffsetDateTime
@@ -39,12 +38,12 @@ internal class Fordeler(
     rapidsConnection: RapidsConnection,
     private val fordelerService: FordelerService,
     private val fordelerMetricLogger: FordelerMetricLogger = FordelerMetricLogger()
-) : ListenerMedLogging() {
+) : ListenerMedLogging(rapidsConnection) {
 
     private val logger = LoggerFactory.getLogger(Fordeler::class.java)
 
     init {
-        River(rapidsConnection).apply {
+        initialiser {
             eventName(SoeknadInnsendt.eventNameInnsendt)
             validate { it.demandValue(SoeknadInnsendt.skjemaInfoTypeKey, "BARNEPENSJON") }
             validate { it.demandValue(SoeknadInnsendt.skjemaInfoVersjonKey, "2") }
@@ -57,8 +56,7 @@ internal class Fordeler(
             validate { it.rejectKey(SoeknadInnsendt.dokarkivReturKey) }
             validate { it.rejectKey(GyldigSoeknadVurdert.sakIdKey) }
             validate { it.rejectKey(FordelerFordelt.soeknadFordeltKey) }
-            correlationId()
-        }.register(this)
+        }
     }
 
     override fun haandterPakke(packet: JsonMessage, context: MessageContext) {

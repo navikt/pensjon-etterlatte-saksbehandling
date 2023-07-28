@@ -2,7 +2,6 @@ package no.nav.etterlatte.trygdetid.kafka
 
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJson
@@ -17,7 +16,6 @@ import no.nav.etterlatte.trygdetid.TrygdetidType
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
-import no.nav.helse.rapids_rivers.River
 import org.slf4j.LoggerFactory
 import rapidsandrivers.BEHANDLING_ID_KEY
 import rapidsandrivers.HENDELSE_DATA_KEY
@@ -26,20 +24,17 @@ import rapidsandrivers.migrering.ListenerMedLogging
 import rapidsandrivers.withFeilhaandtering
 
 internal class MigreringHendelser(rapidsConnection: RapidsConnection, private val trygdetidService: TrygdetidService) :
-    ListenerMedLogging() {
+    ListenerMedLogging(rapidsConnection) {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     init {
-        logger.info("initierer rapid for migreringshendelser")
-        River(rapidsConnection).apply {
+        initialiser {
             eventName(Migreringshendelser.TRYGDETID)
-
-            correlationId()
             validate { it.requireKey(BEHANDLING_ID_KEY) }
             validate { it.requireKey(VILKAARSVURDERT_KEY) }
             validate { it.requireKey(HENDELSE_DATA_KEY) }
-        }.register(this)
+        }
     }
 
     override fun haandterPakke(packet: JsonMessage, context: MessageContext) {

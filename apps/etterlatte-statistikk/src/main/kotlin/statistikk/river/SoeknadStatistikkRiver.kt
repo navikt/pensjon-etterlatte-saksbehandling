@@ -16,26 +16,24 @@ import no.nav.etterlatte.statistikk.service.SoeknadStatistikkService
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
-import no.nav.helse.rapids_rivers.River
 import org.slf4j.LoggerFactory
 import rapidsandrivers.migrering.ListenerMedLogging
 
 class SoeknadStatistikkRiver(
     rapidsConnection: RapidsConnection,
     private val statistikkService: SoeknadStatistikkService
-) : ListenerMedLogging() {
+) : ListenerMedLogging(rapidsConnection) {
 
     private val logger = LoggerFactory.getLogger(this.javaClass)
 
     init {
-        River(rapidsConnection).apply {
+        initialiser {
             eventName(EventNames.FORDELER_STATISTIKK)
             validate { it.requireKey(SOEKNAD_ID_KEY) }
             validate { it.requireKey(GYLDIG_FOR_BEHANDLING_KEY) }
             validate { it.requireKey(SAK_TYPE_KEY) }
             validate { it.interestedIn(FEILENDE_KRITERIER_KEY) }
-            correlationId()
-        }.register(this)
+        }
     }
 
     override fun haandterPakke(packet: JsonMessage, context: MessageContext) =

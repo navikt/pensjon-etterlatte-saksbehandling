@@ -5,12 +5,10 @@ import no.nav.etterlatte.libs.common.event.SoeknadInnsendt
 import no.nav.etterlatte.libs.common.innsendtsoeknad.common.SoeknadType
 import no.nav.etterlatte.libs.common.rapidsandrivers.CORRELATION_ID_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
-import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.opplysningerfrasoknad.opplysningsuthenter.Opplysningsuthenter
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
-import no.nav.helse.rapids_rivers.River
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import rapidsandrivers.migrering.ListenerMedLogging
@@ -18,24 +16,23 @@ import rapidsandrivers.migrering.ListenerMedLogging
 internal class StartUthentingFraSoeknad(
     rapidsConnection: RapidsConnection,
     private val opplysningsuthenter: Opplysningsuthenter
-) : ListenerMedLogging() {
+) : ListenerMedLogging(rapidsConnection) {
     private val logger: Logger = LoggerFactory.getLogger(StartUthentingFraSoeknad::class.java)
     private val rapid = rapidsConnection
 
     init {
-        River(rapidsConnection).apply {
+        initialiser {
             validate {
                 it.demandAny(
                     EVENT_NAME_KEY,
                     listOf(SoeknadInnsendt.eventNameInnsendt, SoeknadInnsendt.eventNameBehandlingBehov)
                 )
             }
-            correlationId()
             validate { it.requireKey(GyldigSoeknadVurdert.skjemaInfoKey) }
             validate { it.requireKey(GyldigSoeknadVurdert.sakIdKey) }
             validate { it.requireKey(GyldigSoeknadVurdert.behandlingIdKey) }
             validate { it.requireKey(GyldigSoeknadVurdert.skjemaInfoTypeKey) }
-        }.register(this)
+        }
     }
 
     override fun haandterPakke(packet: JsonMessage, context: MessageContext) {

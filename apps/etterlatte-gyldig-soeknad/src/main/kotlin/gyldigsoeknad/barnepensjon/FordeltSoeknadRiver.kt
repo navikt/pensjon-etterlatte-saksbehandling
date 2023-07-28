@@ -9,12 +9,10 @@ import no.nav.etterlatte.libs.common.event.SoeknadInnsendt
 import no.nav.etterlatte.libs.common.innsendtsoeknad.barnepensjon.Barnepensjon
 import no.nav.etterlatte.libs.common.innsendtsoeknad.common.SoeknadType
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
-import no.nav.helse.rapids_rivers.River
 import org.slf4j.LoggerFactory
 import rapidsandrivers.migrering.ListenerMedLogging
 
@@ -22,17 +20,16 @@ internal class FordeltSoeknadRiver(
     rapidsConnection: RapidsConnection,
     private val gyldigSoeknadService: GyldigSoeknadService,
     private val behandlingClient: BehandlingClient
-) : ListenerMedLogging() {
+) : ListenerMedLogging(rapidsConnection) {
     private val logger = LoggerFactory.getLogger(FordeltSoeknadRiver::class.java)
 
     init {
-        River(rapidsConnection).apply {
+        initialiser {
             eventName(SoeknadInnsendt.eventNameBehandlingBehov)
-            correlationId()
             validate { it.requireKey(FordelerFordelt.skjemaInfoKey) }
             validate { it.demandValue(SoeknadInnsendt.skjemaInfoTypeKey, SoeknadType.BARNEPENSJON.name) }
             validate { it.rejectKey(GyldigSoeknadVurdert.behandlingIdKey) }
-        }.register(this)
+        }
     }
 
     override fun haandterPakke(packet: JsonMessage, context: MessageContext) {

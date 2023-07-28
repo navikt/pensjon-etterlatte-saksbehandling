@@ -12,27 +12,24 @@ import no.nav.etterlatte.libs.common.gyldigSoeknad.VurderingsResultat.KAN_IKKE_V
 import no.nav.etterlatte.libs.common.innsendtsoeknad.common.SoeknadType
 import no.nav.etterlatte.libs.common.innsendtsoeknad.omstillingsstoenad.Omstillingsstoenad
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
-import no.nav.helse.rapids_rivers.River
 import org.slf4j.LoggerFactory
 import rapidsandrivers.migrering.ListenerMedLogging
 
 internal class InnsendtSoeknadRiver(
     rapidsConnection: RapidsConnection,
     private val behandlingClient: BehandlingClient
-) : ListenerMedLogging() {
+) : ListenerMedLogging(rapidsConnection) {
     private val logger = LoggerFactory.getLogger(InnsendtSoeknadRiver::class.java)
 
     init {
-        River(rapidsConnection).apply {
+        initialiser {
             eventName(SoeknadInnsendt.eventNameInnsendt)
-            correlationId()
             validate { it.requireKey(SoeknadInnsendt.skjemaInfoKey) }
             validate { it.demandValue(SoeknadInnsendt.skjemaInfoTypeKey, SoeknadType.OMSTILLINGSSTOENAD.name) }
             validate { it.demandValue(SoeknadInnsendt.skjemaInfoVersjonKey, "1") }
@@ -42,7 +39,7 @@ internal class InnsendtSoeknadRiver(
             validate { it.requireKey(SoeknadInnsendt.fnrSoekerKey) }
             validate { it.rejectKey(SoeknadInnsendt.dokarkivReturKey) }
             validate { it.rejectKey(GyldigSoeknadVurdert.behandlingIdKey) }
-        }.register(this)
+        }
     }
 
     override fun haandterPakke(packet: JsonMessage, context: MessageContext) {

@@ -7,12 +7,10 @@ import no.nav.etterlatte.brev.distribusjon.DistribusjonsTidspunktType
 import no.nav.etterlatte.brev.distribusjon.DistribusjonsType
 import no.nav.etterlatte.brev.model.BrevEventTypes
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
-import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
-import no.nav.helse.rapids_rivers.River
 import org.slf4j.LoggerFactory
 import rapidsandrivers.migrering.ListenerMedLogging
 
@@ -20,16 +18,15 @@ internal class DistribuerBrev(
     private val rapidsConnection: RapidsConnection,
     private val vedtaksbrevService: VedtaksbrevService,
     private val distribusjonService: DistribusjonService
-) : ListenerMedLogging() {
+) : ListenerMedLogging(rapidsConnection) {
     private val logger = LoggerFactory.getLogger(DistribuerBrev::class.java)
 
     init {
-        River(rapidsConnection).apply {
+        initialiser {
             eventName(BrevEventTypes.JOURNALFOERT.toString())
             validate { it.requireKey("brevId", "journalpostId", "distribusjonType") }
             validate { it.rejectKey("bestillingsId") }
-            correlationId()
-        }.register(this)
+        }
     }
 
     override fun haandterPakke(packet: JsonMessage, context: MessageContext) {

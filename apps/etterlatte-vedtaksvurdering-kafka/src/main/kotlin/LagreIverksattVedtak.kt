@@ -3,27 +3,25 @@ package no.nav.etterlatte.vedtaksvurdering.rivers
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.VedtakService
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.etterlatte.libs.common.utbetaling.UtbetalingResponseDto
 import no.nav.etterlatte.libs.common.utbetaling.UtbetalingStatusDto
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
-import no.nav.helse.rapids_rivers.River
 import org.slf4j.LoggerFactory
 import rapidsandrivers.migrering.ListenerMedLogging
 
 internal class LagreIverksattVedtak(
     rapidsConnection: RapidsConnection,
     private val vedtaksvurderingService: VedtakService
-) : ListenerMedLogging() {
+) : ListenerMedLogging(rapidsConnection) {
+
     init {
-        River(rapidsConnection).apply {
+        initialiser {
             eventName("UTBETALING:OPPDATERT")
             validate { it.requireKey("utbetaling_response") }
-            correlationId()
-        }.register(this)
+        }
     }
 
     private val logger = LoggerFactory.getLogger(this::class.java)

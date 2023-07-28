@@ -107,7 +107,7 @@ INTO oppgave (SELECT gen_random_uuid()                                    as id,
 -- Lager oppgaver basert på hendelser
 WITH source as (SELECT g.id as hendelseid, *
                 from grunnlagsendringshendelse g
-                         inner join sak s on g.sak_id = s.sak_id
+                         inner join sak s on g.sak_id = s.id
                 where status not in ('FORKASTET', 'VENTER_PAA_JOBB'))
 INSERT
 INTO oppgave (SELECT gen_random_uuid()                     as id,

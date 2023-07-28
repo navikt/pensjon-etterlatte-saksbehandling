@@ -138,28 +138,26 @@ class RevurderingServiceImpl(
                     begrunnelse = begrunnelse
                 ).also { revurdering ->
                     if (paaGrunnAvHendelse != null) {
-                        inTransaction {
-                            grunnlagsendringshendelseDao.settBehandlingIdForTattMedIRevurdering(
-                                paaGrunnAvHendelse,
-                                revurdering.id
-                            )
-                            try {
-                                oppgaveService.ferdigStillOppgaveUnderBehandling(paaGrunnAvHendelse.toString())
-                            } catch (e: Exception) {
-                                if (kanBrukeNyOppgaveliste) {
-                                    logger.error(
-                                        "Kunne ikke ferdigstille oppgaven til hendelsen, så vi ruller " +
-                                            "tilbake opprettelse av revurderingen",
-                                        e
-                                    )
-                                    throw e
-                                } else {
-                                    logger.error(
-                                        "Kunne ikke ferdigstille oppgaven til hendelsen på grunn av feil, " +
-                                            "men oppgave er ikke i bruk i miljø så feilen svelges.",
-                                        e
-                                    )
-                                }
+                        grunnlagsendringshendelseDao.settBehandlingIdForTattMedIRevurdering(
+                            paaGrunnAvHendelse,
+                            revurdering.id
+                        )
+                        try {
+                            oppgaveService.ferdigStillOppgaveUnderBehandling(paaGrunnAvHendelse.toString())
+                        } catch (e: Exception) {
+                            if (kanBrukeNyOppgaveliste) {
+                                logger.error(
+                                    "Kunne ikke ferdigstille oppgaven til hendelsen, så vi ruller " +
+                                        "tilbake opprettelse av revurderingen",
+                                    e
+                                )
+                                throw e
+                            } else {
+                                logger.error(
+                                    "Kunne ikke ferdigstille oppgaven til hendelsen på grunn av feil, " +
+                                        "men oppgave er ikke i bruk i miljø så feilen svelges.",
+                                    e
+                                )
                             }
                         }
                     }

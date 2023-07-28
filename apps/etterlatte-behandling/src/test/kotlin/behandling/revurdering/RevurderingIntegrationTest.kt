@@ -131,7 +131,8 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
                 applicationContext.grunnlagsendringshendelseDao,
                 applicationContext.kommerBarnetTilGodeService,
                 applicationContext.revurderingDao,
-                applicationContext.behandlingService
+                applicationContext.behandlingService,
+                applicationContext.kanBrukeNyOppgaveliste
             ).opprettManuellRevurderingWrapper(
                 opprettRevurderingRequest = OpprettRevurderingRequest(
                     sakId = sak.id,
@@ -199,7 +200,8 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
             applicationContext.grunnlagsendringshendelseDao,
             applicationContext.kommerBarnetTilGodeService,
             applicationContext.revurderingDao,
-            applicationContext.behandlingService
+            applicationContext.behandlingService,
+            applicationContext.kanBrukeNyOppgaveliste
         )
         val revurdering = revurderingService.opprettManuellRevurderingWrapper(
             opprettRevurderingRequest = OpprettRevurderingRequest(
@@ -311,7 +313,8 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
                 applicationContext.grunnlagsendringshendelseDao,
                 applicationContext.kommerBarnetTilGodeService,
                 applicationContext.revurderingDao,
-                applicationContext.behandlingService
+                applicationContext.behandlingService,
+                applicationContext.kanBrukeNyOppgaveliste
             ).opprettManuellRevurderingWrapper(
                 opprettRevurderingRequest = OpprettRevurderingRequest(
                     sakId = sak.id,
@@ -364,7 +367,8 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
                 applicationContext.grunnlagsendringshendelseDao,
                 applicationContext.kommerBarnetTilGodeService,
                 applicationContext.revurderingDao,
-                applicationContext.behandlingService
+                applicationContext.behandlingService,
+                applicationContext.kanBrukeNyOppgaveliste
             )
 
         val behandlingFactory =
@@ -463,7 +467,8 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
             applicationContext.grunnlagsendringshendelseDao,
             applicationContext.kommerBarnetTilGodeService,
             applicationContext.revurderingDao,
-            applicationContext.behandlingService
+            applicationContext.behandlingService,
+            applicationContext.kanBrukeNyOppgaveliste
         )
         val behandlingFactory =
             BehandlingFactory(
@@ -506,7 +511,8 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
             applicationContext.grunnlagsendringshendelseDao,
             applicationContext.kommerBarnetTilGodeService,
             applicationContext.revurderingDao,
-            applicationContext.behandlingService
+            applicationContext.behandlingService,
+            applicationContext.kanBrukeNyOppgaveliste
         )
         val behandlingFactory =
             BehandlingFactory(
@@ -549,7 +555,8 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
             applicationContext.grunnlagsendringshendelseDao,
             applicationContext.kommerBarnetTilGodeService,
             applicationContext.revurderingDao,
-            applicationContext.behandlingService
+            applicationContext.behandlingService,
+            applicationContext.kanBrukeNyOppgaveliste
         )
         val behandlingFactory =
             BehandlingFactory(

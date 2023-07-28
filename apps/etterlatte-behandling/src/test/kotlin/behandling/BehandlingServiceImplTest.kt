@@ -89,7 +89,9 @@ class BehandlingServiceImplTest {
             grunnlagKlient = mockk(),
             sporingslogg = mockk(),
             featureToggleService = featureToggleService,
-            kommerBarnetTilGodeDao = mockk()
+            kommerBarnetTilGodeDao = mockk(),
+            oppgaveServiceNy = mockk(),
+            true
         )
 
         val behandlinger = sut.hentBehandlingerISak(1)
@@ -437,7 +439,9 @@ class BehandlingServiceImplTest {
             grunnlagKlient = mockk(),
             sporingslogg = mockk(),
             featureToggleService = featureToggleService,
-            kommerBarnetTilGodeDao = mockk()
+            kommerBarnetTilGodeDao = mockk(),
+            oppgaveServiceNy = mockk(),
+            kanBrukeNyOppgaveliste = true
         )
 
         val behandlinger = sut.hentBehandlingerISak(1)
@@ -480,7 +484,9 @@ class BehandlingServiceImplTest {
             grunnlagKlient = mockk(),
             sporingslogg = mockk(),
             featureToggleService = featureToggleService,
-            kommerBarnetTilGodeDao = mockk()
+            kommerBarnetTilGodeDao = mockk(),
+            oppgaveServiceNy = mockk(),
+            kanBrukeNyOppgaveliste = true
         )
 
         val behandlinger = sut.hentBehandlingerISak(1)
@@ -522,7 +528,9 @@ class BehandlingServiceImplTest {
             grunnlagKlient = mockk(),
             sporingslogg = mockk(),
             featureToggleService = featureToggleService,
-            kommerBarnetTilGodeDao = mockk()
+            kommerBarnetTilGodeDao = mockk(),
+            oppgaveServiceNy = mockk(),
+            kanBrukeNyOppgaveliste = true
         )
 
         sut.oppdaterUtenlandstilsnitt(
@@ -573,7 +581,9 @@ class BehandlingServiceImplTest {
             mockk(),
             mockk(),
             featureToggleService,
-            kommerBarnetTilGodeDao = mockk()
+            kommerBarnetTilGodeDao = mockk(),
+            oppgaveServiceNy = mockk(),
+            kanBrukeNyOppgaveliste = true
         )
 
         sut.oppdaterBoddEllerArbeidetUtlandet(
@@ -634,7 +644,9 @@ class BehandlingServiceImplTest {
         grunnlagKlient = grunnlagKlient ?: mockk(),
         sporingslogg = mockk(),
         featureToggleService = featureToggleService,
-        kommerBarnetTilGodeDao = mockk()
+        kommerBarnetTilGodeDao = mockk(),
+        oppgaveServiceNy = mockk(),
+        kanBrukeNyOppgaveliste = true
     )
 
     companion object {

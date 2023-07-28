@@ -2,6 +2,7 @@ package no.nav.etterlatte.brev.model
 
 import no.nav.etterlatte.brev.behandling.Behandling
 import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
+import no.nav.etterlatte.brev.model.AvslagBrevData.valider
 import no.nav.etterlatte.libs.common.behandling.BarnepensjonSoeskenjusteringGrunn
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
@@ -57,24 +58,16 @@ data class SoeskenjusteringRevurderingBrevdata(
 
     companion object {
         fun fra(behandling: Behandling): SoeskenjusteringRevurderingBrevdata {
-            if (behandling.revurderingsaarsak != RevurderingAarsak.SOESKENJUSTERING) {
-                throw IllegalArgumentException(
-                    "Kan ikke opprette et revurderingsbrev for søskenjustering når " +
-                        "revurderingsårsak er ${behandling.revurderingsaarsak}"
-                )
-            }
-            if (behandling.revurderingInfo !is RevurderingInfo.Soeskenjustering) {
-                throw IllegalArgumentException(
-                    "Kan ikke opprette et revurderingsbrev for søskenjustering når " +
-                        "revurderingsinfo ikke er Søskenjustering"
-                )
-            }
+            val revurderingsinfo = valider<RevurderingInfo.Soeskenjustering>(
+                behandling,
+                RevurderingAarsak.SOESKENJUSTERING
+            )
 
             return SoeskenjusteringRevurderingBrevdata(
                 utbetalingsinfo = requireNotNull(behandling.utbetalingsinfo) {
                     "Kan ikke opprette et revurderingsbrev for søksenjustering uten utbetalingsinfo"
                 },
-                grunnForJustering = behandling.revurderingInfo.grunnForSoeskenjustering
+                grunnForJustering = revurderingsinfo.grunnForSoeskenjustering
             )
         }
     }
@@ -88,22 +81,14 @@ data class FengselsoppholdBrevdata(
 
     companion object {
         fun fra(behandling: Behandling): FengselsoppholdBrevdata {
-            if (behandling.revurderingsaarsak != RevurderingAarsak.FENGSELSOPPHOLD) {
-                throw IllegalArgumentException(
-                    "Kan ikke opprette et revurderingsbrev for fengselsopphold når " +
-                        "revurderingsårsak er ${behandling.revurderingsaarsak}"
-                )
-            }
-            if (behandling.revurderingInfo !is RevurderingInfo.Fengselsopphold) {
-                throw IllegalArgumentException(
-                    "Kan ikke opprette et revurderingsbrev for fengselsopphold når " +
-                        "revurderingsinfo ikke er fengselsopphold"
-                )
-            }
+            val revurderingInfo = valider<RevurderingInfo.Fengselsopphold>(
+                behandling,
+                RevurderingAarsak.FENGSELSOPPHOLD
+            )
             return FengselsoppholdBrevdata(
                 virkningsdato = behandling.virkningsdato!!.atDay(1),
-                fraDato = behandling.revurderingInfo.fraDato,
-                tilDato = behandling.revurderingInfo.tilDato
+                fraDato = revurderingInfo.fraDato,
+                tilDato = revurderingInfo.tilDato
             )
         }
     }
@@ -117,21 +102,13 @@ data class UtAvFengselBrevdata(
 
     companion object {
         fun fra(behandling: Behandling): UtAvFengselBrevdata {
-            if (behandling.revurderingsaarsak != RevurderingAarsak.UT_AV_FENGSEL) {
-                throw IllegalArgumentException(
-                    "Kan ikke opprette et revurderingsbrev for ut av fengselsopphold når " +
-                        "revurderingsårsak er ${behandling.revurderingsaarsak}"
-                )
-            }
-            if (behandling.revurderingInfo !is RevurderingInfo.UtAvFengsel) {
-                throw IllegalArgumentException(
-                    "Kan ikke opprette et revurderingsbrev for ut av fengselsopphold når " +
-                        "revurderingsinfo ikke er ut av fengselsopphold"
-                )
-            }
+            val revurderingInfo = valider<RevurderingInfo.UtAvFengsel>(
+                behandling,
+                RevurderingAarsak.UT_AV_FENGSEL
+            )
             return UtAvFengselBrevdata(
                 utbetalingsinfo = behandling.utbetalingsinfo!!,
-                erEtterbetalingMerEnnTreeMaaneder = behandling.revurderingInfo.erEtterbetalingMerEnnTreeMaaneder,
+                erEtterbetalingMerEnnTreeMaaneder = revurderingInfo.erEtterbetalingMerEnnTreeMaaneder,
                 virkningsdato = behandling.virkningsdato!!.atDay(1)
             )
         }

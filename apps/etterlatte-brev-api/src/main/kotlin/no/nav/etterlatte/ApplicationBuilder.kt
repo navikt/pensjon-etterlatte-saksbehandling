@@ -18,6 +18,7 @@ import no.nav.etterlatte.brev.brevRoute
 import no.nav.etterlatte.brev.brevbaker.BrevbakerJSONBlockMixIn
 import no.nav.etterlatte.brev.brevbaker.BrevbakerJSONParagraphMixIn
 import no.nav.etterlatte.brev.brevbaker.BrevbakerKlient
+import no.nav.etterlatte.brev.brevbaker.BrevbakerService
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.distribusjon.DistribusjonKlient
 import no.nav.etterlatte.brev.distribusjon.DistribusjonServiceImpl
@@ -110,8 +111,10 @@ class ApplicationBuilder {
         DistribusjonKlient(httpClient("DOKDIST_SCOPE", false), env.requireEnvValue("DOKDIST_URL"))
     private val distribusjonService = DistribusjonServiceImpl(distribusjonKlient, db)
 
+    private val brevbakerService = BrevbakerService(brevbaker, adresseService)
+
     private val brevService =
-        BrevService(db, sakOgBehandlingService, adresseService, dokarkivService, distribusjonService, brevbaker)
+        BrevService(db, sakOgBehandlingService, adresseService, dokarkivService, distribusjonService, brevbakerService)
 
     private val vedtaksbrevService =
         VedtaksbrevService(
@@ -119,7 +122,7 @@ class ApplicationBuilder {
             sakOgBehandlingService,
             adresseService,
             dokarkivService,
-            brevbaker
+            brevbakerService
         )
 
     private val journalpostService =

@@ -39,4 +39,9 @@ sealed class RevurderingInfo {
         val fraDato: LocalDate,
         val tilDato: LocalDate
     ) : RevurderingInfo()
+
+    @JsonTypeName("UT_AV_FENGSEL")
+    data class UtAvFengsel(
+        val erEtterbetalingMerEnnTreeMaaneder: Boolean
+    ) : RevurderingInfo()
 }

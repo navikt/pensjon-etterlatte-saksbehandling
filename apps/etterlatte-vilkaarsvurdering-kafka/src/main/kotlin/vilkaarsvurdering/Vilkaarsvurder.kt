@@ -1,6 +1,5 @@
 package no.nav.etterlatte.vilkaarsvurdering
 
-import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.etterlatte.rapidsandrivers.EventNames
@@ -16,18 +15,18 @@ import rapidsandrivers.BEHANDLING_ID_KEY
 import rapidsandrivers.BEHANDLING_VI_OMREGNER_FRA_KEY
 import rapidsandrivers.SAK_ID_KEY
 import rapidsandrivers.behandlingId
-import rapidsandrivers.withFeilhaandtering
+import rapidsandrivers.migrering.ListenerMedLoggingOgFeilhaandtering
 
 internal class Vilkaarsvurder(
     rapidsConnection: RapidsConnection,
     private val vilkaarsvurderingService: VilkaarsvurderingService
 ) :
-    River.PacketListener {
+    ListenerMedLoggingOgFeilhaandtering(VILKAARSVURDER) {
     private val logger = LoggerFactory.getLogger(Vilkaarsvurder::class.java)
 
     init {
         River(rapidsConnection).apply {
-            eventName(VILKAARSVURDER)
+            eventName(hendelsestype)
             validate { it.requireKey(SAK_ID_KEY) }
             validate { it.requireKey(BEHANDLING_ID_KEY) }
             validate { it.requireKey(BEHANDLING_VI_OMREGNER_FRA_KEY) }
@@ -35,18 +34,15 @@ internal class Vilkaarsvurder(
         }.register(this)
     }
 
-    override fun onPacket(packet: JsonMessage, context: MessageContext) =
-        withLogContext(packet.correlationId) {
-            withFeilhaandtering(packet, context, VILKAARSVURDER) {
-                val behandlingId = packet.behandlingId
-                val behandlingViOmregnerFra = packet[BEHANDLING_VI_OMREGNER_FRA_KEY].asText().toUUID()
+    override fun haandterPakke(packet: JsonMessage, context: MessageContext) {
+        val behandlingId = packet.behandlingId
+        val behandlingViOmregnerFra = packet[BEHANDLING_VI_OMREGNER_FRA_KEY].asText().toUUID()
 
-                vilkaarsvurderingService.kopierForrigeVilkaarsvurdering(behandlingId, behandlingViOmregnerFra)
-                packet.eventName = EventNames.BEREGN
-                context.publish(packet.toJson())
-                logger.info(
-                    "Vilkaarsvurdert ferdig for behandling $behandlingId og melding beregningsmelding ble sendt."
-                )
-            }
-        }
+        vilkaarsvurderingService.kopierForrigeVilkaarsvurdering(behandlingId, behandlingViOmregnerFra)
+        packet.eventName = EventNames.BEREGN
+        context.publish(packet.toJson())
+        logger.info(
+            "Vilkaarsvurdert ferdig for behandling $behandlingId og melding beregningsmelding ble sendt."
+        )
+    }
 }

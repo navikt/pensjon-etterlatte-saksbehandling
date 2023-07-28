@@ -1,7 +1,6 @@
 package no.nav.etterlatte.regulering
 
 import no.nav.etterlatte.VedtakService
-import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.etterlatte.rapidsandrivers.EventNames
@@ -16,6 +15,7 @@ import rapidsandrivers.BEHANDLING_ID_KEY
 import rapidsandrivers.DATO_KEY
 import rapidsandrivers.SAK_ID_KEY
 import rapidsandrivers.behandlingId
+import rapidsandrivers.migrering.ListenerMedLogging
 import rapidsandrivers.sakId
 import rapidsandrivers.withFeilhaandtering
 import java.util.*
@@ -23,7 +23,7 @@ import java.util.*
 internal class OpprettVedtakforespoersel(
     rapidsConnection: RapidsConnection,
     private val vedtak: VedtakService
-) : River.PacketListener {
+) : ListenerMedLogging() {
     private val logger = LoggerFactory.getLogger(OpprettVedtakforespoersel::class.java)
 
     init {
@@ -36,23 +36,22 @@ internal class OpprettVedtakforespoersel(
         }.register(this)
     }
 
-    override fun onPacket(packet: JsonMessage, context: MessageContext) =
-        withLogContext(packet.correlationId) {
-            val sakId = packet.sakId
-            logger.info("Leser opprett-vedtak forespoersel for sak $sakId")
+    override fun haandterPakke(packet: JsonMessage, context: MessageContext) {
+        val sakId = packet.sakId
+        logger.info("Leser opprett-vedtak forespoersel for sak $sakId")
 
-            val behandlingId = packet.behandlingId
-            withFeilhaandtering(packet, context, OPPRETT_VEDTAK) {
-                val respons = vedtak.upsertVedtak(behandlingId)
-                logger.info("Opprettet vedtak ${respons.vedtakId} for sak: $sakId og behandling: $behandlingId")
-            }
-                .takeIf { it.isSuccess }
-                ?.let {
-                    fattVedtak(packet, context, behandlingId, sakId)
-                        .takeIf { it.isSuccess }
-                        ?.let { attester(packet, context, behandlingId, sakId) }
-                }
+        val behandlingId = packet.behandlingId
+        withFeilhaandtering(packet, context, OPPRETT_VEDTAK) {
+            val respons = vedtak.upsertVedtak(behandlingId)
+            logger.info("Opprettet vedtak ${respons.vedtakId} for sak: $sakId og behandling: $behandlingId")
         }
+            .takeIf { it.isSuccess }
+            ?.let {
+                fattVedtak(packet, context, behandlingId, sakId)
+                    .takeIf { it.isSuccess }
+                    ?.let { attester(packet, context, behandlingId, sakId) }
+            }
+    }
 
     private fun fattVedtak(
         packet: JsonMessage,

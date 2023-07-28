@@ -93,12 +93,14 @@ class OppgaveDaoMedEndringssporingImpl(
         return oppgaveDao.hentOppgaverForBehandling(behandlingid)
     }
 
-    override fun hentOppgaver(oppgaveTyper: List<OppgaveType>): List<OppgaveNy> {
-        return oppgaveDao.hentOppgaver(oppgaveTyper)
+    override fun hentOppgaver(oppgaveTypeTyper: List<OppgaveType>): List<OppgaveNy> {
+        return oppgaveDao.hentOppgaver(oppgaveTypeTyper)
     }
 
-    override fun finnOppgaverForStrengtFortroligOgStrengtFortroligUtland(statuser: List<OppgaveType>): List<OppgaveNy> {
-        return oppgaveDao.finnOppgaverForStrengtFortroligOgStrengtFortroligUtland(statuser)
+    override fun finnOppgaverForStrengtFortroligOgStrengtFortroligUtland(
+        oppgaveTypeTyper: List<OppgaveType>
+    ): List<OppgaveNy> {
+        return oppgaveDao.finnOppgaverForStrengtFortroligOgStrengtFortroligUtland(oppgaveTypeTyper)
     }
 
     override fun settNySaksbehandler(saksbehandlerEndringDto: SaksbehandlerEndringDto) {

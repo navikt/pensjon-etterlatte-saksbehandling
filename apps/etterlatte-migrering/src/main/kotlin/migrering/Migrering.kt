@@ -1,7 +1,6 @@
 package no.nav.etterlatte.migrering
 
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
-import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.rapidsandrivers.BEHOV_NAME_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
@@ -16,25 +15,21 @@ import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import org.slf4j.LoggerFactory
-import rapidsandrivers.withFeilhaandtering
+import rapidsandrivers.migrering.ListenerMedLoggingOgFeilhaandtering
 
 internal class Migrering(rapidsConnection: RapidsConnection, private val pesysRepository: PesysRepository) :
-    River.PacketListener {
+    ListenerMedLoggingOgFeilhaandtering(START_MIGRERING) {
     private val logger = LoggerFactory.getLogger(Migrering::class.java)
 
     init {
         River(rapidsConnection).apply {
-            eventName(START_MIGRERING)
+            eventName(hendelsestype)
             correlationId()
         }.register(this)
     }
 
-    override fun onPacket(packet: JsonMessage, context: MessageContext) =
-        withLogContext(packet.correlationId) {
-            withFeilhaandtering(packet, context, START_MIGRERING) {
-                pesysRepository.hentSaker().forEach { migrerSak(packet, it, context) }
-            }
-        }
+    override fun haandterPakke(packet: JsonMessage, context: MessageContext) =
+        pesysRepository.hentSaker().forEach { migrerSak(packet, it, context) }
 
     private fun migrerSak(
         packet: JsonMessage,

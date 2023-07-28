@@ -11,6 +11,7 @@ import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.oppgaveNy.FjernSaksbehandlerRequest
+import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveType
 import no.nav.etterlatte.libs.common.oppgaveNy.RedigerFristRequest
 import no.nav.etterlatte.libs.common.oppgaveNy.SaksbehandlerEndringDto
@@ -110,6 +111,7 @@ class OppgaveServiceNyTest {
         val nyOppgave = oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
             "referanse",
             opprettetSak.id,
+            OppgaveKilde.BEHANDLING,
             OppgaveType.FOERSTEGANGSBEHANDLING
         )
         val nysaksbehandler = "nysaksbehandler"
@@ -125,6 +127,7 @@ class OppgaveServiceNyTest {
         val nyOppgave = oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
             "referanse",
             opprettetSak.id,
+            OppgaveKilde.BEHANDLING,
             OppgaveType.FOERSTEGANGSBEHANDLING
         )
         val nysaksbehandler = "nysaksbehandler"
@@ -150,6 +153,7 @@ class OppgaveServiceNyTest {
         val nyOppgave = oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
             "referanse",
             opprettetSak.id,
+            OppgaveKilde.BEHANDLING,
             OppgaveType.FOERSTEGANGSBEHANDLING
         )
         val nysaksbehandler = "nysaksbehandler"
@@ -195,6 +199,7 @@ class OppgaveServiceNyTest {
         val nyOppgave = oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
             "referanse",
             opprettetSak.id,
+            OppgaveKilde.BEHANDLING,
             OppgaveType.FOERSTEGANGSBEHANDLING
         )
         val nysaksbehandler = "nysaksbehandler"
@@ -212,6 +217,7 @@ class OppgaveServiceNyTest {
         val nyOppgave = oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
             "referanse",
             opprettetSak.id,
+            OppgaveKilde.BEHANDLING,
             OppgaveType.FOERSTEGANGSBEHANDLING
         )
         val err = assertThrows<BadRequestException> {
@@ -226,6 +232,7 @@ class OppgaveServiceNyTest {
         val nyOppgave = oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
             "referanse",
             opprettetSak.id,
+            OppgaveKilde.BEHANDLING,
             OppgaveType.FOERSTEGANGSBEHANDLING
         )
         oppgaveServiceNy.tildelSaksbehandler(SaksbehandlerEndringDto(nyOppgave.id, "nysaksbehandler"))
@@ -241,6 +248,7 @@ class OppgaveServiceNyTest {
         val nyOppgave = oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
             "referanse",
             opprettetSak.id,
+            OppgaveKilde.BEHANDLING,
             OppgaveType.FOERSTEGANGSBEHANDLING
         )
         oppgaveServiceNy.tildelSaksbehandler(SaksbehandlerEndringDto(nyOppgave.id, "nysaksbehandler"))
@@ -260,6 +268,7 @@ class OppgaveServiceNyTest {
         val nyOppgave = oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
             referanse,
             opprettetSak.id,
+            OppgaveKilde.BEHANDLING,
             OppgaveType.FOERSTEGANGSBEHANDLING
         )
 
@@ -283,6 +292,7 @@ class OppgaveServiceNyTest {
         oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
             referanse,
             opprettetSak.id,
+            OppgaveKilde.BEHANDLING,
             OppgaveType.FOERSTEGANGSBEHANDLING
         )
 
@@ -323,12 +333,14 @@ class OppgaveServiceNyTest {
         val oppgaveEn = oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
             referanse,
             opprettetSak.id,
+            OppgaveKilde.BEHANDLING,
             OppgaveType.FOERSTEGANGSBEHANDLING
         )
 
         val oppgaveTo = oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
             referanse,
             opprettetSak.id,
+            OppgaveKilde.BEHANDLING,
             OppgaveType.FOERSTEGANGSBEHANDLING
         )
         oppgaveServiceNy.tildelSaksbehandler(SaksbehandlerEndringDto(oppgaveEn.id, "saksbehandler"))
@@ -360,6 +372,7 @@ class OppgaveServiceNyTest {
         val nyOppgave = oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
             "referanse",
             opprettetSak.id,
+            OppgaveKilde.BEHANDLING,
             OppgaveType.FOERSTEGANGSBEHANDLING
         )
 
@@ -367,6 +380,7 @@ class OppgaveServiceNyTest {
         oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
             "referanse",
             adressebeskyttetSak.id,
+            OppgaveKilde.BEHANDLING,
             OppgaveType.FOERSTEGANGSBEHANDLING
         )
 
@@ -389,6 +403,7 @@ class OppgaveServiceNyTest {
         oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
             "referanse",
             opprettetSak.id,
+            OppgaveKilde.BEHANDLING,
             OppgaveType.FOERSTEGANGSBEHANDLING
         )
 
@@ -396,6 +411,7 @@ class OppgaveServiceNyTest {
         val adressebeskyttetOppgave = oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
             "referanse",
             adressebeskyttetSak.id,
+            OppgaveKilde.BEHANDLING,
             OppgaveType.FOERSTEGANGSBEHANDLING
         )
 
@@ -418,6 +434,7 @@ class OppgaveServiceNyTest {
         oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
             "referanse",
             opprettetSak.id,
+            OppgaveKilde.BEHANDLING,
             OppgaveType.FOERSTEGANGSBEHANDLING
         )
 
@@ -425,6 +442,7 @@ class OppgaveServiceNyTest {
         val attestantOppgave = oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
             "referanse",
             attestantSak.id,
+            OppgaveKilde.BEHANDLING,
             OppgaveType.ATTESTERING
         )
 
@@ -446,6 +464,7 @@ class OppgaveServiceNyTest {
         val nyOppgave = oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
             "referanse",
             opprettetSak.id,
+            OppgaveKilde.BEHANDLING,
             OppgaveType.FOERSTEGANGSBEHANDLING
         )
         val nysaksbehandler = "nysaksbehandler"
@@ -470,6 +489,7 @@ class OppgaveServiceNyTest {
         val oppgave = oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
             behandlingsref,
             opprettetSak.id,
+            OppgaveKilde.BEHANDLING,
             OppgaveType.FOERSTEGANGSBEHANDLING
         )
 
@@ -486,6 +506,7 @@ class OppgaveServiceNyTest {
         val oppgaveSomSkalBliAvbrutt = oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
             behandlingsref,
             opprettetSak.id,
+            OppgaveKilde.BEHANDLING,
             OppgaveType.FOERSTEGANGSBEHANDLING
         )
         oppgaveServiceNy.tildelSaksbehandler(SaksbehandlerEndringDto(oppgaveSomSkalBliAvbrutt.id, "saksbehandler01"))

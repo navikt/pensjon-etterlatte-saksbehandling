@@ -28,7 +28,7 @@ export const RedigerSaksbehandler = (props: { saksbehandler: string; oppgaveId: 
           {isInitial(fjernSaksbehandlerSvar) && (
             <>
               <SaksbehandlerWrapper>{saksbehandler}</SaksbehandlerWrapper>
-              <Button icon={<PencilIcon />} size={'small'} variant="secondary" onClick={() => setModalIsOpen(true)}>
+              <Button icon={<PencilIcon />} size="small" variant="secondary" onClick={() => setModalIsOpen(true)}>
                 Endre
               </Button>
               <GeneriskModal
@@ -54,7 +54,7 @@ export const RedigerSaksbehandler = (props: { saksbehandler: string; oppgaveId: 
           {isInitial(byttSaksbehandlerSvar) && (
             <>
               <SaksbehandlerWrapper>{saksbehandler}</SaksbehandlerWrapper>
-              <Button icon={<PencilIcon />} size={'small'} variant="secondary" onClick={() => setModalIsOpen(true)}>
+              <Button icon={<PencilIcon />} size="small" variant="secondary" onClick={() => setModalIsOpen(true)}>
                 Endre
               </Button>
               <GeneriskModal

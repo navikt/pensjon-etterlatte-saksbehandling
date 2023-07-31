@@ -44,7 +44,7 @@ export const FristHandlinger = (props: { frist: string; oppgaveId: string; sakId
     }
   }
 
-  const fristErOverskredet = (dato: string) => {
+  const fristErPassert = (dato: string) => {
     const fristDato = new Date(dato)
     const naaDato = new Date()
     if (fristDato.getFullYear() <= naaDato.getFullYear() && fristDato.getMonth() < naaDato.getMonth()) {
@@ -90,7 +90,7 @@ export const FristHandlinger = (props: { frist: string; oppgaveId: string; sakId
             </Modal.Content>
           </Modal>
           <FristWrapper>{formaterStringDato(frist)}</FristWrapper>
-          <FristWrapper>{fristErOverskredet(frist)}</FristWrapper>
+          <FristWrapper>{fristErPassert(frist)}</FristWrapper>
           <Button
             size="small"
             variant="secondary"

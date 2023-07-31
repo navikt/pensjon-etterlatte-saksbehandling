@@ -220,7 +220,8 @@ class ApplicationContext(
             pdlKlient = pdlKlient,
             grunnlagKlient = grunnlagKlient,
             tilgangService = tilgangService,
-            sakService = sakService
+            sakService = sakService,
+            kanBrukeNyOppgaveliste = kanBrukeNyOppgaveliste
         )
 
     val behandlingsStatusService =

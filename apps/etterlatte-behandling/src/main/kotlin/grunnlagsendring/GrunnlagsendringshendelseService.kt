@@ -40,6 +40,7 @@ import no.nav.etterlatte.oppgaveny.OppgaveServiceNy
 import no.nav.etterlatte.sak.SakService
 import no.nav.etterlatte.sak.TilgangService
 import no.nav.etterlatte.sikkerLogg
+import no.nav.etterlatte.token.Saksbehandler
 import org.slf4j.LoggerFactory
 import java.util.*
 
@@ -50,7 +51,8 @@ class GrunnlagsendringshendelseService(
     private val pdlKlient: PdlKlient,
     private val grunnlagKlient: GrunnlagKlient,
     private val tilgangService: TilgangService,
-    private val sakService: SakService
+    private val sakService: SakService,
+    private val kanBrukeNyOppgaveliste: Boolean
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -75,19 +77,30 @@ class GrunnlagsendringshendelseService(
         )
     }
 
-    fun lukkHendelseMedKommentar(hendelse: Grunnlagsendringshendelse) {
+    fun lukkHendelseMedKommentar(hendelse: Grunnlagsendringshendelse, saksbehandler: Saksbehandler) {
         logger.info("Lukker hendelse med id $hendelse.id")
 
         inTransaction {
             grunnlagsendringshendelseDao.lukkGrunnlagsendringStatus(hendelse = hendelse)
             try {
-                oppgaveService.ferdigStillOppgaveUnderBehandling(hendelse.id.toString())
+                oppgaveService.ferdigStillOppgaveUnderBehandling(
+                    hendelse.id.toString(),
+                    saksbehandler = saksbehandler.ident
+                )
             } catch (e: Exception) {
-                // TODO: Håndter avhengig av om vi bruker ny oppgaveliste
                 logger.error(
                     "Kunne ikke ferdigstille oppgaven for hendelsen på grunn av feil",
                     e
                 )
+                if (kanBrukeNyOppgaveliste) {
+                    throw e
+                } else {
+                    logger.error(
+                        "Lukking av hendelsen går igjennom selv om vi ikke kunne lukke oppgaven knyttet" +
+                            "til hendelsen, siden det ikke er skrudd på enda.",
+                        e
+                    )
+                }
             }
         }
     }

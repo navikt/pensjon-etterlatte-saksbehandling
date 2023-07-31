@@ -18,6 +18,7 @@ import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.SisteIverksatteBehandling
+import no.nav.etterlatte.libs.common.kunSaksbehandler
 import no.nav.etterlatte.libs.common.kunSystembruker
 import no.nav.etterlatte.libs.common.sak.Saker
 import no.nav.etterlatte.libs.common.sakId
@@ -125,9 +126,11 @@ internal fun Route.sakWebRoutes(
             }
 
             post("lukkgrunnlagsendringshendelse") {
-                val lukketHendelse = call.receive<Grunnlagsendringshendelse>()
-                grunnlagsendringshendelseService.lukkHendelseMedKommentar(hendelse = lukketHendelse)
-                call.respond(HttpStatusCode.OK)
+                kunSaksbehandler { saksbehandler ->
+                    val lukketHendelse = call.receive<Grunnlagsendringshendelse>()
+                    grunnlagsendringshendelseService.lukkHendelseMedKommentar(hendelse = lukketHendelse, saksbehandler)
+                    call.respond(HttpStatusCode.OK)
+                }
             }
         }
     }

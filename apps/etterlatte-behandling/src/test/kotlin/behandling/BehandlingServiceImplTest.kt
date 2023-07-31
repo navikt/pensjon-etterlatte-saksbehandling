@@ -29,7 +29,9 @@ import no.nav.etterlatte.libs.common.behandling.Utenlandstilsnitt
 import no.nav.etterlatte.libs.common.behandling.UtenlandstilsnittType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
+import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveNy
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.oppgaveny.OppgaveServiceNy
 import no.nav.etterlatte.personOpplysning
 import no.nav.etterlatte.revurdering
 import no.nav.etterlatte.token.BrukerTokenInfo
@@ -91,7 +93,7 @@ class BehandlingServiceImplTest {
             featureToggleService = featureToggleService,
             kommerBarnetTilGodeDao = mockk(),
             oppgaveServiceNy = mockk(),
-            true
+            kanBrukeNyOppgaveliste = true
         )
 
         val behandlinger = sut.hentBehandlingerISak(1)
@@ -127,10 +129,15 @@ class BehandlingServiceImplTest {
         }
         val grunnlagsendringshendelseDaoMock = mockk<GrunnlagsendringshendelseDao> {
             every { kobleGrunnlagsendringshendelserFraBehandlingId(any()) } just runs
+            every { hentGrunnlagsendringshendelseSomErTattMedIBehandling(any()) } returns emptyList()
         }
 
         val featureToggleService = mockk<FeatureToggleService>()
         every { featureToggleService.isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false) } returns false
+
+        val oppgaveServiceNyMock: OppgaveServiceNy = mockk {
+            every { avbrytOppgaveUnderBehandling(any()) } returns mockk<OppgaveNy>()
+        }
 
         val behandlingService =
             lagRealGenerellBehandlingService(
@@ -138,7 +145,8 @@ class BehandlingServiceImplTest {
                 behandlingHendelserKafkaProducer = hendelseskanalMock,
                 hendelseDao = hendelserMock,
                 grunnlagsendringshendelseDao = grunnlagsendringshendelseDaoMock,
-                featureToggleService = featureToggleService
+                featureToggleService = featureToggleService,
+                oppgaveServiceNy = oppgaveServiceNyMock
             )
 
         assertThrows<IllegalStateException> {
@@ -174,10 +182,15 @@ class BehandlingServiceImplTest {
         }
         val grunnlagsendringshendelseDaoMock = mockk<GrunnlagsendringshendelseDao> {
             every { kobleGrunnlagsendringshendelserFraBehandlingId(any()) } just runs
+            every { hentGrunnlagsendringshendelseSomErTattMedIBehandling(any()) } returns emptyList()
         }
 
         val featureToggleService = mockk<FeatureToggleService>()
         every { featureToggleService.isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false) } returns false
+
+        val oppgaveServiceNyMock: OppgaveServiceNy = mockk {
+            every { avbrytOppgaveUnderBehandling(any()) } returns mockk<OppgaveNy>()
+        }
 
         val behandlingService =
             lagRealGenerellBehandlingService(
@@ -185,7 +198,8 @@ class BehandlingServiceImplTest {
                 behandlingHendelserKafkaProducer = behandlingHendelserKafkaProducer,
                 grunnlagsendringshendelseDao = grunnlagsendringshendelseDaoMock,
                 hendelseDao = hendelserMock,
-                featureToggleService = featureToggleService
+                featureToggleService = featureToggleService,
+                oppgaveServiceNy = oppgaveServiceNyMock
             )
 
         behandlingService.avbrytBehandling(nyFoerstegangsbehandling.id, "")
@@ -216,10 +230,15 @@ class BehandlingServiceImplTest {
         }
         val grunnlagsendringshendelseDaoMock = mockk<GrunnlagsendringshendelseDao> {
             every { kobleGrunnlagsendringshendelserFraBehandlingId(any()) } just runs
+            every { hentGrunnlagsendringshendelseSomErTattMedIBehandling(any()) } returns emptyList()
         }
 
         val featureToggleService = mockk<FeatureToggleService>()
         every { featureToggleService.isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false) } returns false
+
+        val oppgaveServiceNyMock: OppgaveServiceNy = mockk {
+            every { avbrytOppgaveUnderBehandling(any()) } returns mockk<OppgaveNy>()
+        }
 
         val behandlingService =
             lagRealGenerellBehandlingService(
@@ -227,7 +246,8 @@ class BehandlingServiceImplTest {
                 behandlingHendelserKafkaProducer = behandlingHendelserKafkaProducerMock,
                 grunnlagsendringshendelseDao = grunnlagsendringshendelseDaoMock,
                 hendelseDao = hendelserMock,
-                featureToggleService = featureToggleService
+                featureToggleService = featureToggleService,
+                oppgaveServiceNy = oppgaveServiceNyMock
             )
 
         behandlingService.avbrytBehandling(nyFoerstegangsbehandling.id, "")
@@ -261,18 +281,23 @@ class BehandlingServiceImplTest {
         }
         val grunnlagsendringshendelseDaoMock = mockk<GrunnlagsendringshendelseDao> {
             every { kobleGrunnlagsendringshendelserFraBehandlingId(any()) } just runs
+            every { hentGrunnlagsendringshendelseSomErTattMedIBehandling(any()) } returns emptyList()
         }
 
         val featureToggleService = mockk<FeatureToggleService>()
         every { featureToggleService.isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false) } returns false
 
+        val oppgaveServiceNyMock: OppgaveServiceNy = mockk {
+            every { avbrytOppgaveUnderBehandling(any()) } returns mockk<OppgaveNy>()
+        }
         val behandlingService =
             lagRealGenerellBehandlingService(
                 behandlingDao = behandlingDaoMock,
                 behandlingHendelserKafkaProducer = behandlingHendelserKafkaProducer,
                 grunnlagsendringshendelseDao = grunnlagsendringshendelseDaoMock,
                 hendelseDao = hendelserMock,
-                featureToggleService = featureToggleService
+                featureToggleService = featureToggleService,
+                oppgaveServiceNy = oppgaveServiceNyMock
             )
 
         behandlingService.avbrytBehandling(nyFoerstegangsbehandling.id, "")
@@ -635,6 +660,7 @@ class BehandlingServiceImplTest {
         hendelseDao: HendelseDao? = null,
         grunnlagsendringshendelseDao: GrunnlagsendringshendelseDao = mockk(),
         grunnlagKlient: GrunnlagKlient? = null,
+        oppgaveServiceNy: OppgaveServiceNy = mockk(),
         featureToggleService: FeatureToggleService
     ): BehandlingServiceImpl = BehandlingServiceImpl(
         behandlingDao = behandlingDao ?: mockk(),
@@ -645,7 +671,7 @@ class BehandlingServiceImplTest {
         sporingslogg = mockk(),
         featureToggleService = featureToggleService,
         kommerBarnetTilGodeDao = mockk(),
-        oppgaveServiceNy = mockk(),
+        oppgaveServiceNy = oppgaveServiceNy,
         kanBrukeNyOppgaveliste = true
     )
 

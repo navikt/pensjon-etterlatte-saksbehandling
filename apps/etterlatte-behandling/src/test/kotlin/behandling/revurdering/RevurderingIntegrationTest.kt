@@ -32,6 +32,7 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveType
+import no.nav.etterlatte.libs.common.oppgaveNy.SaksbehandlerEndringDto
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
@@ -334,6 +335,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
         val featureToggleService = mockk<FeatureToggleService>()
         val grunnlagService = spyk(applicationContext.grunnlagsService)
         val oppgaveService = spyk(applicationContext.oppgaveServiceNy)
+        val saksbehandlerIdent = "saksbehandler"
 
         every {
             featureToggleService.isEnabled(
@@ -410,6 +412,22 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
             )
         }
 
+        val oppgave = inTransaction {
+            applicationContext.oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
+                referanse = hendelse.id.toString(),
+                sakId = sak.id,
+                oppgaveKilde = OppgaveKilde.HENDELSE,
+                oppgaveType = OppgaveType.VURDER_KONSEKVENS
+            )
+        }
+
+        applicationContext.oppgaveServiceNy.tildelSaksbehandler(
+            SaksbehandlerEndringDto(
+                oppgaveId = oppgave.id,
+                saksbehandler = saksbehandlerIdent
+            )
+        )
+
         val revurdering = revurderingService.opprettManuellRevurderingWrapper(
             opprettRevurderingRequest = OpprettRevurderingRequest(
                 sakId = sak.id,
@@ -450,6 +468,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
                     OppgaveType.REVURDERING
                 )
             }
+            verify { oppgaveService.ferdigStillOppgaveUnderBehandling(any(), any()) }
             verify { hendelser.sendMeldingForHendelse(behandling as Behandling, BehandlingHendelseType.OPPRETTET) }
             confirmVerified(hendelser, grunnlagService, oppgaveService)
         }

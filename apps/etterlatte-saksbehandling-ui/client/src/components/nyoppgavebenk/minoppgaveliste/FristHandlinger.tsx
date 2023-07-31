@@ -13,6 +13,11 @@ const Buttonwrapper = styled.div`
     margin-right: 1rem;
   }
 `
+
+const FristWrapper = styled.span`
+  margin-right: 0.5rem;
+`
+
 export const FristHandlinger = (props: { frist: string; oppgaveId: string; sakId: number }) => {
   const { frist, oppgaveId, sakId } = props
   const [open, setOpen] = useState(false)
@@ -39,11 +44,11 @@ export const FristHandlinger = (props: { frist: string; oppgaveId: string; sakId
     }
   }
 
-  const fristErOverskredet = (dato: string) => {
+  const fristErPassert = (dato: string) => {
     const fristDato = new Date(dato)
     const naaDato = new Date()
-    if (fristDato.getFullYear() < naaDato.getFullYear() && fristDato.getMonth() < naaDato.getMonth()) {
-      return 'Frist er overskredet'
+    if (fristDato.getFullYear() <= naaDato.getFullYear() && fristDato.getMonth() < naaDato.getMonth()) {
+      return 'Frist er passert'
     } else {
       return null
     }
@@ -84,8 +89,8 @@ export const FristHandlinger = (props: { frist: string; oppgaveId: string; sakId
               </Buttonwrapper>
             </Modal.Content>
           </Modal>
-          {formaterStringDato(frist)}
-          {fristErOverskredet(frist)}
+          <FristWrapper>{formaterStringDato(frist)}</FristWrapper>
+          <FristWrapper>{fristErPassert(frist)}</FristWrapper>
           <Button
             size="small"
             variant="secondary"

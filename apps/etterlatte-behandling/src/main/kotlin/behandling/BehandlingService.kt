@@ -156,14 +156,14 @@ class BehandlingServiceImpl(
                 } catch (e: Exception) {
                     if (kanBrukeNyOppgaveliste) {
                         logger.error(
-                            "En feil oppstod nunder ryddingen i oppgavene til behandling / hendelse når" +
+                            "En feil oppstod under ryddingen i oppgavene til behandling / hendelse når " +
                                 "vi avbrøt en behandling, og vi får dermed ikke avbrutt riktig",
                             e
                         )
                         throw e
                     } else {
                         logger.error(
-                            "En feil oppstod nunder ryddingen i oppgavene til behandling / hendelse når" +
+                            "En feil oppstod under ryddingen i oppgavene til behandling / hendelse når" +
                                 "vi avbrøt en behandling, men ny oppgaveliste er ikke i bruk og feilen ignorerers",
                             e
                         )

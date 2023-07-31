@@ -179,18 +179,20 @@ class RevurderingServiceImpl(
         merknad: String?,
         begrunnelse: String?
     ) = forrigeBehandling.sjekkEnhet()?.let {
-        opprettRevurdering(
-            sakId,
-            persongalleri,
-            forrigeBehandling.id,
-            mottattDato,
-            Prosesstype.AUTOMATISK,
-            kilde,
-            merknad,
-            revurderingAarsak,
-            virkningstidspunkt?.tilVirkningstidspunkt("Opprettet automatisk"),
-            begrunnelse = begrunnelse ?: "Automatisk revurdering - ${revurderingAarsak.name.lowercase()}"
-        )
+        inTransaction {
+            opprettRevurdering(
+                sakId,
+                persongalleri,
+                forrigeBehandling.id,
+                mottattDato,
+                Prosesstype.AUTOMATISK,
+                kilde,
+                merknad,
+                revurderingAarsak,
+                virkningstidspunkt?.tilVirkningstidspunkt("Opprettet automatisk"),
+                begrunnelse = begrunnelse ?: "Automatisk revurdering - ${revurderingAarsak.name.lowercase()}"
+            )
+        }
     }
 
     private fun kanLagreRevurderingInfo(behandlingsId: UUID): Boolean {

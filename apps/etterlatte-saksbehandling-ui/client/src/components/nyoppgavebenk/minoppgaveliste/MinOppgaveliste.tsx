@@ -7,6 +7,7 @@ import { FristHandlinger } from '~components/nyoppgavebenk/minoppgaveliste/Frist
 import { useState } from 'react'
 import { HandlingerForOppgave } from '~components/nyoppgavebenk/HandlingerForOppgave'
 import { OppgavetypeTag, SaktypeTag } from '~components/nyoppgavebenk/Tags'
+import SaksoversiktLenke from '~components/oppgavebenken/handlinger/BrukeroversiktKnapp'
 
 export const MinOppgaveliste = (props: { oppgaver: ReadonlyArray<OppgaveDTOny> }) => {
   const { oppgaver } = props
@@ -25,6 +26,7 @@ export const MinOppgaveliste = (props: { oppgaver: ReadonlyArray<OppgaveDTOny> }
             <Table.Header>
               <Table.Row>
                 <Table.HeaderCell scope="col">Registreringsdato</Table.HeaderCell>
+                <Table.HeaderCell scope="col">Frist</Table.HeaderCell>
                 <Table.HeaderCell scope="col">Fnr</Table.HeaderCell>
                 <Table.HeaderCell scope="col">Oppgavetype</Table.HeaderCell>
                 <Table.HeaderCell scope="col">Status</Table.HeaderCell>
@@ -32,17 +34,34 @@ export const MinOppgaveliste = (props: { oppgaver: ReadonlyArray<OppgaveDTOny> }
                 <Table.HeaderCell scope="col">Enhet</Table.HeaderCell>
                 <Table.HeaderCell scope="col">Saksbehandler</Table.HeaderCell>
                 <Table.HeaderCell scope="col">Ytelse</Table.HeaderCell>
-                <Table.HeaderCell scope="col">Frist</Table.HeaderCell>
                 <Table.HeaderCell scope="col">Handlinger</Table.HeaderCell>
               </Table.Row>
             </Table.Header>
             <Table.Body>
               {paginerteOppgaver &&
                 paginerteOppgaver.map(
-                  ({ id, status, enhet, type, saksbehandler, opprettet, merknad, sakType, fnr, frist, sakId, referanse }) => (
+                  ({
+                    id,
+                    status,
+                    enhet,
+                    type,
+                    saksbehandler,
+                    opprettet,
+                    merknad,
+                    sakType,
+                    fnr,
+                    frist,
+                    sakId,
+                    referanse,
+                  }) => (
                     <Table.Row key={id}>
                       <Table.HeaderCell>{formaterStringDato(opprettet)}</Table.HeaderCell>
-                      <Table.HeaderCell>{fnr}</Table.HeaderCell>
+                      <Table.DataCell>
+                        <FristHandlinger frist={frist} oppgaveId={id} sakId={sakId} />
+                      </Table.DataCell>
+                      <Table.DataCell>
+                        <SaksoversiktLenke fnr={fnr} />
+                      </Table.DataCell>
                       <Table.DataCell>
                         <OppgavetypeTag oppgavetype={type} />
                       </Table.DataCell>
@@ -55,9 +74,6 @@ export const MinOppgaveliste = (props: { oppgaver: ReadonlyArray<OppgaveDTOny> }
                         )}
                       </Table.DataCell>
                       <Table.DataCell>{sakType && <SaktypeTag sakType={sakType} />}</Table.DataCell>
-                      <Table.DataCell>
-                        <FristHandlinger frist={frist} oppgaveId={id} sakId={sakId} />
-                      </Table.DataCell>
                       <Table.DataCell>
                         <HandlingerForOppgave
                           oppgavetype={type}

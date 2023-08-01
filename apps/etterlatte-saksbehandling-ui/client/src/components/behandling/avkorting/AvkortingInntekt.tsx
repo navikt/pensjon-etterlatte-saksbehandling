@@ -11,6 +11,7 @@ import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
 import { PencilIcon } from '@navikt/aksel-icons'
 import { hentBehandlesFraStatus } from '~components/behandling/felles/utils'
 import { ApiErrorAlert } from '~ErrorBoundary'
+import { TextButton } from '~components/behandling/soeknadsoversikt/familieforhold/personer/personinfo/TextButton'
 
 export const AvkortingInntekt = (props: {
   behandling: IBehandlingReducer
@@ -18,6 +19,8 @@ export const AvkortingInntekt = (props: {
   setAvkorting: (avkorting: IAvkorting) => void
 }) => {
   const behandling = props.behandling
+  props.avkortingGrunnlag?.sort((a, b) => new Date(b.fom!).getTime() - new Date(a.fom!).getTime())
+
   const redigerbar = hentBehandlesFraStatus(behandling.status)
   if (!behandling) throw new Error('Mangler behandling')
 
@@ -56,7 +59,7 @@ export const AvkortingInntekt = (props: {
   const [errorTekst, setErrorTekst] = useState<string | null>(null)
 
   const [formToggle, setFormToggle] = useState(false)
-
+  const [visHistorikk, setVisHistorikk] = useState(false)
   const onSubmit = (e: FormEvent) => {
     e.preventDefault()
 
@@ -79,6 +82,14 @@ export const AvkortingInntekt = (props: {
     )
   }
 
+  function avkortingGrunnlag() {
+    if (props.avkortingGrunnlag) {
+      return visHistorikk ? props.avkortingGrunnlag : [props.avkortingGrunnlag[0]]
+    } else {
+      return []
+    }
+  }
+
   return (
     <AvkortingInntektWrapper>
       <Heading spacing size="small" level="2">
@@ -97,7 +108,6 @@ export const AvkortingInntekt = (props: {
         I innvilgelsesåret skal inntekt opptjent før innvilgelse trekkes fra, og resterende forventet inntekt omgjøres
         til årsinntekt. På samme måte skal inntekt etter opphør holdes utenfor i opphørsåret.
       </BodyShort>
-
       {props.avkortingGrunnlag && props.avkortingGrunnlag.length > 0 && (
         <InntektAvkortingTabell>
           <Table className="table" zebraStripes>
@@ -109,7 +119,7 @@ export const AvkortingInntekt = (props: {
               <Table.HeaderCell>Kilde</Table.HeaderCell>
             </Table.Header>
             <Table.Body>
-              {(props.avkortingGrunnlag ? props.avkortingGrunnlag : []).map((inntektsgrunnlag, index) => (
+              {avkortingGrunnlag().map((inntektsgrunnlag, index) => (
                 <Table.Row key={index}>
                   <Table.DataCell key="Inntekt">{inntektsgrunnlag.aarsinntekt}</Table.DataCell>
                   <Table.DataCell key="FratrekkInnUt">{inntektsgrunnlag.fratrekkInnAar}</Table.DataCell>
@@ -133,6 +143,7 @@ export const AvkortingInntekt = (props: {
           </Table>
         </InntektAvkortingTabell>
       )}
+      <TextButton isOpen={visHistorikk} setIsOpen={setVisHistorikk} />
       {redigerbar && (
         <InntektAvkortingForm onSubmit={onSubmit}>
           <Rows>
@@ -178,9 +189,8 @@ export const AvkortingInntekt = (props: {
                     <ReadMore header={'Hva regnes som inntekt?'}>
                       Med inntekt menes all arbeidsinntekt og ytelser som likestilles med arbeidsinntekt. Likestilt med
                       arbeidsinntekt er dagpenger etter kap 4, sykepenger etter kap 8, stønad ved barns og andre
-                      nærståendes sykdom etter kap 9, arbeidsavklaringspenger etter kap 11, uføretrygd etter kap 12 der
-                      uføregraden er under 100 prosent, svangerskapspenger og foreldrepenger etter kap 14 og
-                      pensjonsytelser etter AFP tilskottloven kapitlene 2 og 3.
+                      nærståendes sykdom etter kap 9, arbeidsavklaringspenger etter kap 11, svangerskapspenger og
+                      foreldrepenger etter kap 14 og pensjonsytelser etter AFP tilskottloven kapitlene 2 og 3.
                     </ReadMore>
                   </SpesifikasjonLabel>
                   <textarea

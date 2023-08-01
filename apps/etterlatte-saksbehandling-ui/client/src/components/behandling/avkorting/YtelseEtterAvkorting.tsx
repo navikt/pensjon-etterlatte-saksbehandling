@@ -7,7 +7,7 @@ import { formaterStringDato } from '~utils/formattering'
 import { YtelseEtterAvkortingDetaljer } from '~components/behandling/avkorting/YtelseEtterAvkortingDetaljer'
 
 export const YtelseEtterAvkorting = (props: { ytelser?: IAvkortetYtelse[] }) => {
-  const ytelser = props.ytelser
+  const ytelser = props.ytelser?.sort((a, b) => new Date(b.fom).getTime() - new Date(a.fom).getTime())
 
   return (
     <>

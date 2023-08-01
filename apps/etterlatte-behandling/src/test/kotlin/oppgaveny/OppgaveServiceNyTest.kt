@@ -154,6 +154,22 @@ class OppgaveServiceNyTest {
     }
 
     @Test
+    fun `skal ikke kunne tildele en lukket oppgave`() {
+        val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val nyOppgave = oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
+            "referanse",
+            opprettetSak.id,
+            OppgaveKilde.BEHANDLING,
+            OppgaveType.FOERSTEGANGSBEHANDLING
+        )
+        oppgaveDaoNy.endreStatusPaaOppgave(nyOppgave.id, Status.FERDIGSTILT)
+        val nysaksbehandler = "nysaksbehandler"
+        assertThrows<IllegalStateException> {
+            oppgaveServiceNy.tildelSaksbehandler(SaksbehandlerEndringDto(nyOppgave.id, nysaksbehandler))
+        }
+    }
+
+    @Test
     fun `skal kunne bytte oppgave med saksbehandler`() {
         val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         val nyOppgave = oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
@@ -167,6 +183,24 @@ class OppgaveServiceNyTest {
 
         val oppgaveMedNySaksbehandler = oppgaveServiceNy.hentOppgave(nyOppgave.id)
         Assertions.assertEquals(nysaksbehandler, oppgaveMedNySaksbehandler?.saksbehandler)
+    }
+
+    @Test
+    fun `skal ikke kunne bytte saksbehandler på lukket oppgave`() {
+        val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val nyOppgave = oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
+            "referanse",
+            opprettetSak.id,
+            OppgaveKilde.BEHANDLING,
+            OppgaveType.FOERSTEGANGSBEHANDLING
+        )
+        oppgaveDaoNy.endreStatusPaaOppgave(nyOppgave.id, Status.FERDIGSTILT)
+        val nysaksbehandler = "nysaksbehandler"
+        assertThrows<IllegalStateException> {
+            oppgaveServiceNy.byttSaksbehandler(SaksbehandlerEndringDto(nyOppgave.id, nysaksbehandler))
+        }
+        val oppgaveMedNySaksbehandler = oppgaveServiceNy.hentOppgave(nyOppgave.id)
+        Assertions.assertEquals(nyOppgave.saksbehandler, oppgaveMedNySaksbehandler?.saksbehandler)
     }
 
     @Test
@@ -235,6 +269,26 @@ class OppgaveServiceNyTest {
     }
 
     @Test
+    fun `skal ikke kunne fjerne saksbehandler på en lukket oppgave`() {
+        val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val nyOppgave = oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
+            "referanse",
+            opprettetSak.id,
+            OppgaveKilde.BEHANDLING,
+            OppgaveType.FOERSTEGANGSBEHANDLING
+        )
+        val saksbehandler = "saksbehandler"
+        oppgaveServiceNy.tildelSaksbehandler(SaksbehandlerEndringDto(nyOppgave.id, saksbehandler))
+        oppgaveDaoNy.endreStatusPaaOppgave(nyOppgave.id, Status.FERDIGSTILT)
+        assertThrows<IllegalStateException> {
+            oppgaveServiceNy.fjernSaksbehandler(FjernSaksbehandlerRequest(nyOppgave.id))
+        }
+        val lagretOppgave = oppgaveServiceNy.hentOppgave(nyOppgave.id)
+
+        Assertions.assertEquals(lagretOppgave?.saksbehandler, saksbehandler)
+    }
+
+    @Test
     fun `kan redigere frist`() {
         val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         val nyOppgave = oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
@@ -267,6 +321,29 @@ class OppgaveServiceNyTest {
         }
 
         Assertions.assertTrue(err.message!!.startsWith("Tidspunkt tilbake i tid id: "))
+    }
+
+    @Test
+    fun `kan ikke redigere frist på en lukket oppgave`() {
+        val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val nyOppgave = oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
+            "referanse",
+            opprettetSak.id,
+            OppgaveKilde.BEHANDLING,
+            OppgaveType.FOERSTEGANGSBEHANDLING
+        )
+
+        oppgaveDaoNy.endreStatusPaaOppgave(nyOppgave.id, Status.FERDIGSTILT)
+        assertThrows<IllegalStateException> {
+            oppgaveServiceNy.redigerFrist(
+                redigerFristRequest = RedigerFristRequest(
+                    oppgaveId = nyOppgave.id,
+                    frist = Tidspunkt.now().toLocalDatetimeUTC().plusMonths(1L).toTidspunkt()
+                )
+            )
+        }
+        val lagretOppgave = oppgaveServiceNy.hentOppgave(nyOppgave.id)
+        Assertions.assertEquals(nyOppgave.frist, lagretOppgave?.frist)
     }
 
     @Test

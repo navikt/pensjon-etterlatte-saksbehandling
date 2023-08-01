@@ -136,7 +136,7 @@ class BehandlingServiceImplTest {
         every { featureToggleService.isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false) } returns false
 
         val oppgaveServiceNyMock: OppgaveServiceNy = mockk {
-            every { avbrytOppgaveUnderBehandling(any()) } returns mockk<OppgaveNy>()
+            every { avbrytOppgaveUnderBehandling(any(), any()) } returns mockk<OppgaveNy>()
         }
 
         val behandlingService =
@@ -189,7 +189,7 @@ class BehandlingServiceImplTest {
         every { featureToggleService.isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false) } returns false
 
         val oppgaveServiceNyMock: OppgaveServiceNy = mockk {
-            every { avbrytOppgaveUnderBehandling(any()) } returns mockk<OppgaveNy>()
+            every { avbrytOppgaveUnderBehandling(any(), any()) } returns mockk<OppgaveNy>()
         }
 
         val behandlingService =
@@ -237,7 +237,7 @@ class BehandlingServiceImplTest {
         every { featureToggleService.isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false) } returns false
 
         val oppgaveServiceNyMock: OppgaveServiceNy = mockk {
-            every { avbrytOppgaveUnderBehandling(any()) } returns mockk<OppgaveNy>()
+            every { avbrytOppgaveUnderBehandling(any(), any()) } returns mockk<OppgaveNy>()
         }
 
         val behandlingService =
@@ -288,7 +288,7 @@ class BehandlingServiceImplTest {
         every { featureToggleService.isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false) } returns false
 
         val oppgaveServiceNyMock: OppgaveServiceNy = mockk {
-            every { avbrytOppgaveUnderBehandling(any()) } returns mockk<OppgaveNy>()
+            every { avbrytOppgaveUnderBehandling(any(), any()) } returns mockk<OppgaveNy>()
         }
         val behandlingService =
             lagRealGenerellBehandlingService(

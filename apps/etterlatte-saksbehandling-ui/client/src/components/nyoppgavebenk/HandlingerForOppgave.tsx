@@ -20,7 +20,7 @@ export const HandlingerForOppgave = (props: {
       case 'VURDER_KONSEKVENS':
         return (
           <>
-            <Button icon={<EyeIcon />} onClick={() => navigate(`/person/${fnr}`)}>
+            <Button size="small" icon={<EyeIcon />} onClick={() => navigate(`/person/${fnr}`)}>
               Se hendelse
             </Button>
           </>
@@ -29,7 +29,9 @@ export const HandlingerForOppgave = (props: {
         return (
           <>
             {erInnloggetSaksbehandlerOppgave && (
-              <Button onClick={() => navigate(`/behandling/${referanse}`)}>Gå til behandling</Button>
+              <Button size="small" onClick={() => navigate(`/behandling/${referanse}`)}>
+                Gå til behandling
+              </Button>
             )}
           </>
         )
@@ -37,7 +39,9 @@ export const HandlingerForOppgave = (props: {
         return (
           <>
             {erInnloggetSaksbehandlerOppgave && (
-              <Button onClick={() => navigate(`/behandling/${referanse}`)}>Gå til revurdering</Button>
+              <Button size="small" onClick={() => navigate(`/behandling/${referanse}`)}>
+                Gå til revurdering
+              </Button>
             )}
           </>
         )
@@ -45,7 +49,9 @@ export const HandlingerForOppgave = (props: {
         return (
           <>
             {erInnloggetSaksbehandlerOppgave && (
-              <Button onClick={() => navigate(`/behandling/${referanse}`)}>Gå til opphør</Button>
+              <Button size="small" onClick={() => navigate(`/behandling/${referanse}`)}>
+                Gå til opphør
+              </Button>
             )}
           </>
         )
@@ -53,7 +59,9 @@ export const HandlingerForOppgave = (props: {
         return (
           <>
             {erInnloggetSaksbehandlerOppgave && (
-              <Button onClick={() => navigate(`/behandling/${referanse}`)}>Gå til attestering</Button>
+              <Button size="small" onClick={() => navigate(`/behandling/${referanse}`)}>
+                Gå til attestering
+              </Button>
             )}
           </>
         )

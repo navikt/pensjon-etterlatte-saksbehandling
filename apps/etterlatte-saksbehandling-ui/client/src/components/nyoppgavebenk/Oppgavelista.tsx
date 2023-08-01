@@ -42,8 +42,9 @@ const ButtonWrapper = styled.div`
   }
 `
 
-const FristWrapper = styled.span<{ fristHarPassert: boolean }>`
+export const FristWrapper = styled.span<{ fristHarPassert: boolean }>`
   color: ${(p) => p.fristHarPassert && 'var(--a-text-danger)'};
+  margin-right: 0.5rem;
 `
 
 export const Oppgavelista = (props: { oppgaver: ReadonlyArray<OppgaveDTOny>; hentOppgaver: () => void }) => {
@@ -214,9 +215,9 @@ export const Oppgavelista = (props: { oppgaver: ReadonlyArray<OppgaveDTOny>; hen
                           {frist ? format(new Date(frist), 'dd.MM.yyyy') : 'Ingen frist'}
                         </FristWrapper>
                       </Table.DataCell>
-                      <Table.HeaderCell>
+                      <Table.DataCell>
                         <SaksoversiktLenke fnr={fnr} />
-                      </Table.HeaderCell>
+                      </Table.DataCell>
                       <Table.DataCell>
                         {type ? <OppgavetypeTag oppgavetype={type} /> : <div>oppgaeveid {id}</div>}
                       </Table.DataCell>

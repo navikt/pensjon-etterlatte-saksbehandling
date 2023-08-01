@@ -57,7 +57,7 @@ export const GosysOppgaveModal = () => {
 
   return (
     <>
-      <Button variant="primary" size="small" icon={<EyeIcon />} onClick={() => setOpen(!open)}>
+      <Button variant="primary" size="small" icon={<EyeIcon />} onClick={() => setOpen(true)}>
         Se oppgave
       </Button>
       <Modal open={open} aria-labelledby="modal-heading" onClose={() => setOpen(false)}>

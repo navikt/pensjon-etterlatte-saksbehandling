@@ -110,7 +110,7 @@ export const GosysOppgaveModal = () => {
             </div>
           </BeskrivelseWrapper>
           <ButtonRow>
-            <Button variant="tertiary" onClick={() => setOpen(!open)}>
+            <Button variant="tertiary" onClick={() => setOpen(false)}>
               Avbryt
             </Button>
             <Button variant="primary" as="a" href={`${gosysUrl}/personoversikt/fnr=${fnr}`} target="_blank">

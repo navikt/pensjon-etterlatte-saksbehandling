@@ -6,12 +6,13 @@ import { ManglerRegelspesifikasjon } from '~components/behandling/felles/Mangler
 import { formaterStringDato } from '~utils/formattering'
 import { YtelseEtterAvkortingDetaljer } from '~components/behandling/avkorting/YtelseEtterAvkortingDetaljer'
 
-export const YtelseEtterAvkorting = (props: { ytelser?: IAvkortetYtelse[] }) => {
-  const ytelser = props.ytelser?.sort((a, b) => new Date(b.fom).getTime() - new Date(a.fom).getTime())
+export const YtelseEtterAvkorting = (props: { ytelser: IAvkortetYtelse[] }) => {
+  const ytelser = [...props.ytelser]
+  ytelser.sort((a, b) => new Date(b.fom).getTime() - new Date(a.fom).getTime())
 
   return (
     <>
-      {ytelser && ytelser.length > 0 && (
+      {ytelser.length > 0 && (
         <TableWrapper>
           <Heading spacing size="small" level="2">
             Beregning etter avkorting
@@ -27,7 +28,7 @@ export const YtelseEtterAvkorting = (props: { ytelser?: IAvkortetYtelse[] }) => 
               </Table.Row>
             </Table.Header>
             <Table.Body>
-              {ytelser?.map((ytelse, key) => (
+              {ytelser.map((ytelse, key) => (
                 <Table.ExpandableRow
                   key={key}
                   shadeOnHover={false}

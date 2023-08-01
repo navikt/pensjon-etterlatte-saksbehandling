@@ -23,15 +23,14 @@ export const Avkorting = (props: { behandling: IBehandlingReducer }) => {
 
   return (
     <AvkortingWrapper>
-      {!['initial', 'pending'].includes(avkortingStatus.status) && (
+      {avkorting && (
         <AvkortingInntekt
           behandling={behandling}
-          avkortingGrunnlag={avkorting?.avkortingGrunnlag}
+          avkortingGrunnlag={avkorting.avkortingGrunnlag}
           setAvkorting={setAvkorting}
         />
       )}
-
-      <YtelseEtterAvkorting ytelser={avkorting?.avkortetYtelse} />
+      {avkorting && <YtelseEtterAvkorting ytelser={avkorting.avkortetYtelse} />}
 
       {isPending(avkortingStatus) && <Spinner visible={true} label={'Henter avkorting'} />}
       {isFailure(avkortingStatus) && avkortingStatus.error.statusCode !== 404 && (

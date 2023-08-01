@@ -15,11 +15,12 @@ import { TextButton } from '~components/behandling/soeknadsoversikt/familieforho
 
 export const AvkortingInntekt = (props: {
   behandling: IBehandlingReducer
-  avkortingGrunnlag?: IAvkortingGrunnlag[]
+  avkortingGrunnlag: IAvkortingGrunnlag[]
   setAvkorting: (avkorting: IAvkorting) => void
 }) => {
   const behandling = props.behandling
-  props.avkortingGrunnlag?.sort((a, b) => new Date(b.fom!).getTime() - new Date(a.fom!).getTime())
+  const avkortingGrunnlag = [...props.avkortingGrunnlag]
+  avkortingGrunnlag?.sort((a, b) => new Date(b.fom!).getTime() - new Date(a.fom!).getTime())
 
   const redigerbar = hentBehandlesFraStatus(behandling.status)
   if (!behandling) throw new Error('Mangler behandling')
@@ -29,23 +30,19 @@ export const AvkortingInntekt = (props: {
     return behandling.virkningstidspunkt.dato
   }
   const finnesRedigerbartGrunnlag = () => {
-    if (props.avkortingGrunnlag) {
-      const siste = props.avkortingGrunnlag[props.avkortingGrunnlag.length - 1]
-      return siste.fom === behandling.virkningstidspunkt?.dato
-    }
+    const siste = avkortingGrunnlag[avkortingGrunnlag.length - 1]
+    return siste.fom === behandling.virkningstidspunkt?.dato
   }
   const finnRedigerbartGrunnlag = (): IAvkortingGrunnlag => {
-    if (props.avkortingGrunnlag) {
-      if (finnesRedigerbartGrunnlag()) {
-        return props.avkortingGrunnlag[props.avkortingGrunnlag.length - 1]
-      }
-      if (props.avkortingGrunnlag.length > 0) {
-        const siste = props.avkortingGrunnlag[props.avkortingGrunnlag.length - 1]
-        return {
-          fom: virkningstidspunkt(),
-          fratrekkInnAar: siste.fratrekkInnAar,
-          relevanteMaanederInnAar: siste.relevanteMaanederInnAar,
-        }
+    if (finnesRedigerbartGrunnlag()) {
+      return avkortingGrunnlag[avkortingGrunnlag.length - 1]
+    }
+    if (avkortingGrunnlag.length > 0) {
+      const siste = avkortingGrunnlag[avkortingGrunnlag.length - 1]
+      return {
+        fom: virkningstidspunkt(),
+        fratrekkInnAar: siste.fratrekkInnAar,
+        relevanteMaanederInnAar: siste.relevanteMaanederInnAar,
       }
     }
     return {
@@ -82,14 +79,6 @@ export const AvkortingInntekt = (props: {
     )
   }
 
-  function avkortingGrunnlag() {
-    if (props.avkortingGrunnlag) {
-      return visHistorikk ? props.avkortingGrunnlag : [props.avkortingGrunnlag[0]]
-    } else {
-      return []
-    }
-  }
-
   return (
     <AvkortingInntektWrapper>
       <Heading spacing size="small" level="2">
@@ -108,7 +97,7 @@ export const AvkortingInntekt = (props: {
         I innvilgelsesåret skal inntekt opptjent før innvilgelse trekkes fra, og resterende forventet inntekt omgjøres
         til årsinntekt. På samme måte skal inntekt etter opphør holdes utenfor i opphørsåret.
       </BodyShort>
-      {props.avkortingGrunnlag && props.avkortingGrunnlag.length > 0 && (
+      {avkortingGrunnlag.length > 0 && (
         <InntektAvkortingTabell>
           <Table className="table" zebraStripes>
             <Table.Header>
@@ -119,7 +108,7 @@ export const AvkortingInntekt = (props: {
               <Table.HeaderCell>Kilde</Table.HeaderCell>
             </Table.Header>
             <Table.Body>
-              {avkortingGrunnlag().map((inntektsgrunnlag, index) => (
+              {(visHistorikk ? avkortingGrunnlag : [avkortingGrunnlag[0]]).map((inntektsgrunnlag, index) => (
                 <Table.Row key={index}>
                   <Table.DataCell key="Inntekt">{inntektsgrunnlag.aarsinntekt}</Table.DataCell>
                   <Table.DataCell key="FratrekkInnUt">{inntektsgrunnlag.fratrekkInnAar}</Table.DataCell>
@@ -143,7 +132,7 @@ export const AvkortingInntekt = (props: {
           </Table>
         </InntektAvkortingTabell>
       )}
-      <TextButton isOpen={visHistorikk} setIsOpen={setVisHistorikk} />
+      {avkortingGrunnlag.length > 1 && <TextButton isOpen={visHistorikk} setIsOpen={setVisHistorikk} />}
       {redigerbar && (
         <InntektAvkortingForm onSubmit={onSubmit}>
           <Rows>

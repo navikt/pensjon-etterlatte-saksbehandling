@@ -6,6 +6,11 @@ import { ApiErrorAlert } from '~ErrorBoundary'
 import { PencilIcon } from '@navikt/aksel-icons'
 import React, { useState } from 'react'
 import { GeneriskModal } from '~shared/modal/modal'
+import styled from 'styled-components'
+
+const SaksbehandlerWrapper = styled.span`
+  margin-right: 0.5rem;
+`
 
 export const RedigerSaksbehandler = (props: { saksbehandler: string; oppgaveId: string; sakId: number }) => {
   const [modalIsOpen, setModalIsOpen] = useState(false)
@@ -22,8 +27,8 @@ export const RedigerSaksbehandler = (props: { saksbehandler: string; oppgaveId: 
         <>
           {isInitial(fjernSaksbehandlerSvar) && (
             <>
-              {saksbehandler}
-              <Button icon={<PencilIcon />} variant="tertiary" onClick={() => setModalIsOpen(true)}>
+              <SaksbehandlerWrapper>{saksbehandler}</SaksbehandlerWrapper>
+              <Button icon={<PencilIcon />} size="small" variant="secondary" onClick={() => setModalIsOpen(true)}>
                 Endre
               </Button>
               <GeneriskModal
@@ -48,8 +53,8 @@ export const RedigerSaksbehandler = (props: { saksbehandler: string; oppgaveId: 
         <>
           {isInitial(byttSaksbehandlerSvar) && (
             <>
-              {saksbehandler}
-              <Button icon={<PencilIcon />} variant="tertiary" onClick={() => setModalIsOpen(true)}>
+              <SaksbehandlerWrapper>{saksbehandler}</SaksbehandlerWrapper>
+              <Button icon={<PencilIcon />} size="small" variant="secondary" onClick={() => setModalIsOpen(true)}>
                 Endre
               </Button>
               <GeneriskModal

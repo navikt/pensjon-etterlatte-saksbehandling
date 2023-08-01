@@ -23,6 +23,7 @@ import no.nav.etterlatte.brev.behandling.Soeker
 import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
 import no.nav.etterlatte.brev.brevbaker.BrevbakerKlient
 import no.nav.etterlatte.brev.brevbaker.BrevbakerPdfResponse
+import no.nav.etterlatte.brev.brevbaker.BrevbakerService
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.dokarkiv.DokarkivServiceImpl
 import no.nav.etterlatte.brev.journalpost.JournalpostResponse
@@ -69,7 +70,13 @@ internal class VedtaksbrevServiceTest {
     private val dokarkivService = mockk<DokarkivServiceImpl>()
 
     private val vedtaksbrevService =
-        VedtaksbrevService(db, sakOgBehandlingService, adresseService, dokarkivService, brevbaker)
+        VedtaksbrevService(
+            db,
+            sakOgBehandlingService,
+            adresseService,
+            dokarkivService,
+            BrevbakerService(brevbaker, adresseService)
+        )
 
     @BeforeEach
     fun before() {

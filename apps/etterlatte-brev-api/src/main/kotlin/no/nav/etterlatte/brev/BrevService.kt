@@ -3,8 +3,8 @@ package no.nav.etterlatte.brev
 import no.nav.etterlatte.brev.adresse.AdresseService
 import no.nav.etterlatte.brev.behandling.SakOgBehandlingService
 import no.nav.etterlatte.brev.brevbaker.BrevbakerHelpers
-import no.nav.etterlatte.brev.brevbaker.BrevbakerKlient
 import no.nav.etterlatte.brev.brevbaker.BrevbakerRequest
+import no.nav.etterlatte.brev.brevbaker.BrevbakerService
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode
 import no.nav.etterlatte.brev.brevbaker.LanguageCode
 import no.nav.etterlatte.brev.db.BrevRepository
@@ -27,7 +27,6 @@ import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
-import java.util.*
 
 class BrevService(
     private val db: BrevRepository,
@@ -35,7 +34,7 @@ class BrevService(
     private val adresseService: AdresseService,
     private val dokarkivService: DokarkivService,
     private val distribusjonService: DistribusjonService,
-    private val brevbakerKlient: BrevbakerKlient
+    private val brevbakerService: BrevbakerService
 ) {
     private val logger = LoggerFactory.getLogger(BrevService::class.java)
 
@@ -103,7 +102,7 @@ class BrevService(
             language = LanguageCode.spraakToLanguageCode(Spraak.NB) // TODO: fikse spraak
         )
 
-        return genererPdf(brev.id, brevRequest)
+        return brevbakerService.genererPdf(brev.id, brevRequest)
     }
 
     suspend fun ferdigstill(id: BrevID, bruker: BrukerTokenInfo) {
@@ -161,13 +160,5 @@ class BrevService(
         val payload = requireNotNull(db.hentBrevPayload(brev.id))
 
         return Pair(EtterlatteBrevKode.OMS_INNVILGELSE_MANUELL, ManueltBrevData(payload.elements))
-    }
-
-    private suspend fun genererPdf(brevID: BrevID, brevRequest: BrevbakerRequest): Pdf {
-        val brevbakerResponse = brevbakerKlient.genererPdf(brevRequest)
-
-        return Base64.getDecoder().decode(brevbakerResponse.base64pdf)
-            .let { Pdf(it) }
-            .also { logger.info("Generert brev (id=$brevID) med størrelse: ${it.bytes.size}") }
     }
 }

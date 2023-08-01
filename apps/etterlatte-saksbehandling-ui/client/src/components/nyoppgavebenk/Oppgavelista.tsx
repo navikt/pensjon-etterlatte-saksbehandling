@@ -20,11 +20,12 @@ import {
   OppgaveKildeFilterKeys,
   OPPGAVEKILDEFILTER,
   FRISTFILTER,
-  FristFilterKeys
+  FristFilterKeys,
 } from '~components/nyoppgavebenk/Oppgavelistafiltre'
 import { HandlingerForOppgave } from '~components/nyoppgavebenk/HandlingerForOppgave'
 import { OppgavetypeTag, SaktypeTag } from '~components/nyoppgavebenk/Tags'
 import { format, isBefore } from 'date-fns'
+import SaksoversiktLenke from '~components/oppgavebenken/handlinger/BrukeroversiktKnapp'
 
 const FilterFlex = styled.div`
   display: flex;
@@ -178,6 +179,7 @@ export const Oppgavelista = (props: { oppgaver: ReadonlyArray<OppgaveDTOny>; hen
             <Table.Header>
               <Table.Row>
                 <Table.HeaderCell scope="col">Registreringsdato</Table.HeaderCell>
+                <Table.HeaderCell scope="col">Frist</Table.HeaderCell>
                 <Table.HeaderCell scope="col">Fnr</Table.HeaderCell>
                 <Table.HeaderCell scope="col">Oppgavetype</Table.HeaderCell>
                 <Table.HeaderCell scope="col">Status</Table.HeaderCell>
@@ -185,7 +187,6 @@ export const Oppgavelista = (props: { oppgaver: ReadonlyArray<OppgaveDTOny>; hen
                 <Table.HeaderCell scope="col">Enhet</Table.HeaderCell>
                 <Table.HeaderCell scope="col">Saksbehandler</Table.HeaderCell>
                 <Table.HeaderCell scope="col">Ytelse</Table.HeaderCell>
-                <Table.HeaderCell scope="col">Frist</Table.HeaderCell>
                 <Table.HeaderCell scope="col">Handlinger</Table.HeaderCell>
               </Table.Row>
             </Table.Header>
@@ -208,7 +209,14 @@ export const Oppgavelista = (props: { oppgaver: ReadonlyArray<OppgaveDTOny>; hen
                   }) => (
                     <Table.Row key={id}>
                       <Table.HeaderCell>{formaterStringDato(opprettet)}</Table.HeaderCell>
-                      <Table.HeaderCell>{fnr}</Table.HeaderCell>
+                      <Table.DataCell>
+                        <FristWrapper fristHarPassert={!!frist && isBefore(new Date(frist), new Date())}>
+                          {frist ? format(new Date(frist), 'dd.MM.yyyy') : 'Ingen frist'}
+                        </FristWrapper>
+                      </Table.DataCell>
+                      <Table.HeaderCell>
+                        <SaksoversiktLenke fnr={fnr} />
+                      </Table.HeaderCell>
                       <Table.DataCell>
                         {type ? <OppgavetypeTag oppgavetype={type} /> : <div>oppgaeveid {id}</div>}
                       </Table.DataCell>
@@ -223,11 +231,6 @@ export const Oppgavelista = (props: { oppgaver: ReadonlyArray<OppgaveDTOny>; hen
                         )}
                       </Table.DataCell>
                       <Table.DataCell>{sakType && <SaktypeTag sakType={sakType} />}</Table.DataCell>
-                      <Table.DataCell>
-                        <FristWrapper fristHarPassert={!!frist && isBefore(new Date(frist), new Date())}>
-                          {frist ? format(new Date(frist), 'dd.MM.yyyy') : 'Ingen frist'}
-                        </FristWrapper>
-                      </Table.DataCell>
                       <Table.DataCell>
                         <HandlingerForOppgave
                           oppgavetype={type}

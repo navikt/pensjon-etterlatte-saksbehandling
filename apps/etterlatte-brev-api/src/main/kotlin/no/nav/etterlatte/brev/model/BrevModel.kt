@@ -136,12 +136,13 @@ enum class BrevProsessType {
                 VedtakType.INNVILGELSE -> AUTOMATISK
                 VedtakType.ENDRING -> when (behandling.revurderingsaarsak) {
                     RevurderingAarsak.SOESKENJUSTERING -> AUTOMATISK
+                    RevurderingAarsak.FENGSELSOPPHOLD -> AUTOMATISK
+                    RevurderingAarsak.UT_AV_FENGSEL -> AUTOMATISK
                     else -> MANUELL
                 }
 
-                VedtakType.OPPHOER -> when (behandling.revurderingsaarsak) {
-                    RevurderingAarsak.ADOPSJON -> AUTOMATISK
-                    RevurderingAarsak.OMGJOERING_AV_FARSKAP -> AUTOMATISK
+                VedtakType.OPPHOER -> when (behandling.revurderingsaarsak?.redigerbartBrev) {
+                    true -> AUTOMATISK
                     else -> MANUELL
                 }
 

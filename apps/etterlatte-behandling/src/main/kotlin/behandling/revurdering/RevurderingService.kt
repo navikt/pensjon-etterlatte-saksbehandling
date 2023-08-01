@@ -107,7 +107,8 @@ class RevurderingServiceImpl(
                 forrigeBehandling = forrigeIverksatteBehandling,
                 revurderingAarsak = opprettRevurderingRequest.aarsak,
                 paaGrunnAvHendelse = paaGrunnAvHendelseId,
-                begrunnelse = opprettRevurderingRequest.begrunnelse
+                begrunnelse = opprettRevurderingRequest.begrunnelse,
+                fritekstAarsak = opprettRevurderingRequest.fritekstAarsak
             )
         } else {
             throw BadRequestException(
@@ -121,7 +122,8 @@ class RevurderingServiceImpl(
         forrigeBehandling: Behandling,
         revurderingAarsak: RevurderingAarsak,
         paaGrunnAvHendelse: UUID?,
-        begrunnelse: String?
+        begrunnelse: String?,
+        fritekstAarsak: String?
     ): Revurdering? = forrigeBehandling.sjekkEnhet()?.let {
         return if (featureToggleService.isEnabled(RevurderingServiceFeatureToggle.OpprettManuellRevurdering, false)) {
             inTransaction {
@@ -135,7 +137,8 @@ class RevurderingServiceImpl(
                     null,
                     revurderingAarsak,
                     virkningstidspunkt = null,
-                    begrunnelse = begrunnelse
+                    begrunnelse = begrunnelse,
+                    fritekstAarsak = fritekstAarsak
                 ).also { revurdering ->
                     if (paaGrunnAvHendelse != null) {
                         grunnlagsendringshendelseDao.settBehandlingIdForTattMedIRevurdering(
@@ -224,7 +227,8 @@ class RevurderingServiceImpl(
         merknad: String?,
         revurderingAarsak: RevurderingAarsak,
         virkningstidspunkt: Virkningstidspunkt?,
-        begrunnelse: String?
+        begrunnelse: String?,
+        fritekstAarsak: String? = null
     ): Revurdering = OpprettBehandling(
         type = BehandlingType.REVURDERING,
         sakId = sakId,
@@ -236,7 +240,8 @@ class RevurderingServiceImpl(
         kilde = kilde,
         prosesstype = prosessType,
         merknad = merknad,
-        begrunnelse = begrunnelse
+        begrunnelse = begrunnelse,
+        fritekstAarsak = fritekstAarsak
     ).let { opprettBehandling ->
         behandlingDao.opprettBehandling(opprettBehandling)
         forrigeBehandling?.let {

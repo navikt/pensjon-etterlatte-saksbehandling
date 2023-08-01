@@ -116,12 +116,14 @@ export const opprettRevurdering = async (args: {
   aarsak: Revurderingsaarsak
   paaGrunnAvHendelseId?: string
   begrunnelse?: string
+  fritekstAarsak?: string
 }): Promise<ApiResponse<string>> => {
   return apiClient.post(`/revurdering/${args.sakId}`, {
     sakId: args.sakId,
     aarsak: args.aarsak,
     paaGrunnAvHendelseId: args.paaGrunnAvHendelseId,
     begrunnelse: args.begrunnelse,
+    fritekstAarsak: args.fritekstAarsak,
   })
 }
 

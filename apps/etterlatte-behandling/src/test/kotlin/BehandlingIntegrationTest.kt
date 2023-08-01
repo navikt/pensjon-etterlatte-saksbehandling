@@ -304,7 +304,7 @@ class GrunnlagKlientTest : GrunnlagKlient {
 }
 
 class GosysOppgaveKlientTest : GosysOppgaveKlient {
-    override suspend fun hentOppgaver(brukerTokenInfo: BrukerTokenInfo): GosysOppgaver {
+    override suspend fun hentOppgaver(tema: String, enhetsnr: String, brukerTokenInfo: BrukerTokenInfo): GosysOppgaver {
         return GosysOppgaver(0, emptyList())
     }
 }

@@ -16,7 +16,7 @@ data class GosysOppgaver(val antallTreffTotalt: Int, val oppgaver: List<GosysOpp
 data class GosysOppgave(val id: Int, val tildeltEnhetsnr: String, val aktoerId: String, val beskrivelse: String)
 
 interface GosysOppgaveKlient {
-    suspend fun hentOppgaver(brukerTokenInfo: BrukerTokenInfo): GosysOppgaver
+    suspend fun hentOppgaver(tema: String, enhetsnr: String, brukerTokenInfo: BrukerTokenInfo): GosysOppgaver
 }
 
 class GosysOppgaveKlientImpl(config: Config, httpClient: HttpClient) : GosysOppgaveKlient {
@@ -29,11 +29,12 @@ class GosysOppgaveKlientImpl(config: Config, httpClient: HttpClient) : GosysOppg
     private val clientId = config.getString("oppgave.client.id")
     private val resourceUrl = config.getString("oppgave.resource.url")
 
-    override suspend fun hentOppgaver(brukerTokenInfo: BrukerTokenInfo): GosysOppgaver {
+    override suspend fun hentOppgaver(tema: String, enhetsnr: String, brukerTokenInfo: BrukerTokenInfo): GosysOppgaver {
         try {
             logger.info("Henter oppgaver fra Gosys")
 
-            val filters = "statuskategori=AAPEN&tema=PEN&tildeltEnhetsnr=4405&tilordnetRessurs=Z994658"
+            val ident = brukerTokenInfo.ident()
+            val filters = "statuskategori=AAPEN&tema=${tema.uppercase()}&tildeltEnhetsnr=$enhetsnr&tilordnetRessurs=$ident"
 
             return downstreamResourceClient
                 .get(

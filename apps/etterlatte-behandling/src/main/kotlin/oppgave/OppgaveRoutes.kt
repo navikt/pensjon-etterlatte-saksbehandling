@@ -38,12 +38,14 @@ internal fun Route.oppgaveRoutes(service: OppgaveService, gosysOppgaveKlient: Go
             }
         }
 
-        // Midlertidig endepunkt for å teste oppgave-integrasjon
-        get("/oppgave-test") {
+        get("/gosys") {
             when (brukerTokenInfo) {
                 is Saksbehandler -> {
+                    val tema = call.request.queryParameters["tema"] as String
+                    val enhetsnr = call.request.queryParameters["enhetsnr"] as String
+
                     val oppgaver = runCatching {
-                        gosysOppgaveKlient.hentOppgaver(brukerTokenInfo)
+                        gosysOppgaveKlient.hentOppgaver(tema, enhetsnr, brukerTokenInfo)
                     }.onFailure { logger.error(it.message, it) }
 
                     call.respond(HttpStatusCode.OK, oppgaver)

@@ -26,10 +26,10 @@ export const OppgavetypeTag = (props: { oppgavetype: Oppgavetype }) => {
     MANUELT_OPPHOER: { variant: Variants.ALT2, text: 'Manuelt opphør' },
     ATTESTERING: { variant: Variants.ALT3_FILLED, text: 'Attestering' },
     UNDERKJENT: { variant: Variants.ALT3, text: 'Underkjent' },
+    GOSYS: { variant: Variants.INFO_FILLED, text: 'Gosys-oppgave' },
   } as const
 
   const tagdata = OPPGAVETYPE_TIL_TAGDATA[oppgavetype]
-  console.log('oppgavetype: ', oppgavetype, '  tagdata: ', tagdata)
   return (
     <>
       <Tag variant={tagdata.variant}>{tagdata.text}</Tag>

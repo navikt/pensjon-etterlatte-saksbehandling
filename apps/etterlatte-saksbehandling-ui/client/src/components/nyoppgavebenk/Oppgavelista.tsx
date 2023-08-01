@@ -24,7 +24,7 @@ import {
 } from '~components/nyoppgavebenk/Oppgavelistafiltre'
 import { HandlingerForOppgave } from '~components/nyoppgavebenk/HandlingerForOppgave'
 import { OppgavetypeTag, SaktypeTag } from '~components/nyoppgavebenk/Tags'
-import { format, isBefore } from 'date-fns'
+import { isBefore } from 'date-fns'
 import SaksoversiktLenke from '~components/oppgavebenken/handlinger/BrukeroversiktKnapp'
 
 const FilterFlex = styled.div`
@@ -42,7 +42,7 @@ const ButtonWrapper = styled.div`
   }
 `
 
-const FristWrapper = styled.span<{ fristHarPassert: boolean }>`
+export const FristWrapper = styled.span<{ fristHarPassert: boolean }>`
   color: ${(p) => p.fristHarPassert && 'var(--a-text-danger)'};
 `
 
@@ -211,7 +211,7 @@ export const Oppgavelista = (props: { oppgaver: ReadonlyArray<OppgaveDTOny>; hen
                       <Table.HeaderCell>{formaterStringDato(opprettet)}</Table.HeaderCell>
                       <Table.DataCell>
                         <FristWrapper fristHarPassert={!!frist && isBefore(new Date(frist), new Date())}>
-                          {frist ? format(new Date(frist), 'dd.MM.yyyy') : 'Ingen frist'}
+                          {frist ? formaterStringDato(frist) : 'Ingen frist'}
                         </FristWrapper>
                       </Table.DataCell>
                       <Table.HeaderCell>

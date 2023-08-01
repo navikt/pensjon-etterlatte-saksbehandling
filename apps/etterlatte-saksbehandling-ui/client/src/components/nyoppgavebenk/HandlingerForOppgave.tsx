@@ -3,6 +3,7 @@ import { Button } from '@navikt/ds-react'
 import { useNavigate } from 'react-router'
 import { EyeIcon } from '@navikt/aksel-icons'
 import { useAppSelector } from '~store/Store'
+import { GosysOppgaveModal } from '~components/nyoppgavebenk/GosysOppgaveModal'
 
 export const HandlingerForOppgave = (props: {
   oppgavetype: Oppgavetype
@@ -57,6 +58,8 @@ export const HandlingerForOppgave = (props: {
             )}
           </>
         )
+      case 'GOSYS':
+        return <GosysOppgaveModal />
       default:
         return null
     }

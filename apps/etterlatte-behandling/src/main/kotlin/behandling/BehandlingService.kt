@@ -25,12 +25,15 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Utenlandstilsnitt
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
+import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveKilde
+import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveType
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.sporingslogg.Decision
 import no.nav.etterlatte.libs.sporingslogg.HttpMethod
 import no.nav.etterlatte.libs.sporingslogg.Sporingslogg
 import no.nav.etterlatte.libs.sporingslogg.Sporingsrequest
+import no.nav.etterlatte.oppgaveny.OppgaveServiceNy
 import no.nav.etterlatte.tilgangsstyring.filterForEnheter
 import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.etterlatte.vedtaksvurdering.VedtakHendelse
@@ -96,7 +99,9 @@ class BehandlingServiceImpl(
     private val grunnlagKlient: GrunnlagKlient,
     private val sporingslogg: Sporingslogg,
     private val featureToggleService: FeatureToggleService,
-    private val kommerBarnetTilGodeDao: KommerBarnetTilGodeDao
+    private val kommerBarnetTilGodeDao: KommerBarnetTilGodeDao,
+    private val oppgaveServiceNy: OppgaveServiceNy,
+    private val kanBrukeNyOppgaveliste: Boolean
 ) : BehandlingService {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -135,8 +140,37 @@ class BehandlingServiceImpl(
             }
 
             behandlingDao.avbrytBehandling(behandlingId).also {
+                val hendelserKnyttetTilBehandling =
+                    grunnlagsendringshendelseDao.hentGrunnlagsendringshendelseSomErTattMedIBehandling(behandlingId)
+                try {
+                    oppgaveServiceNy.avbrytOppgaveUnderBehandling(behandlingId.toString(), saksbehandler)
+
+                    hendelserKnyttetTilBehandling.forEach { hendelse ->
+                        oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
+                            referanse = hendelse.id.toString(),
+                            sakId = behandling.sak.id,
+                            oppgaveKilde = OppgaveKilde.HENDELSE,
+                            oppgaveType = OppgaveType.VURDER_KONSEKVENS
+                        )
+                    }
+                } catch (e: Exception) {
+                    if (kanBrukeNyOppgaveliste) {
+                        logger.error(
+                            "En feil oppstod under ryddingen i oppgavene til behandling / hendelse når " +
+                                "vi avbrøt en behandling, og vi får dermed ikke avbrutt riktig",
+                            e
+                        )
+                        throw e
+                    } else {
+                        logger.error(
+                            "En feil oppstod under ryddingen i oppgavene til behandling / hendelse når" +
+                                "vi avbrøt en behandling, men ny oppgaveliste er ikke i bruk og feilen ignorerers",
+                            e
+                        )
+                    }
+                }
+
                 hendelseDao.behandlingAvbrutt(behandling, saksbehandler)
-            }.also {
                 grunnlagsendringshendelseDao.kobleGrunnlagsendringshendelserFraBehandlingId(behandlingId)
             }
             behandlingHendelser.sendMeldingForHendelse(behandling, BehandlingHendelseType.AVBRUTT)

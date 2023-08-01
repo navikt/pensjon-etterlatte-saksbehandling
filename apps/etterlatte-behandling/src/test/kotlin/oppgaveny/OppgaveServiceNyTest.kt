@@ -502,7 +502,7 @@ class OppgaveServiceNyTest {
         )
 
         oppgaveServiceNy.tildelSaksbehandler(SaksbehandlerEndringDto(oppgave.id, "saksbehandler01"))
-        oppgaveServiceNy.ferdigStillOppgaveUnderBehandling(VedtakOppgaveDTO(opprettetSak.id, behandlingsref))
+        oppgaveServiceNy.ferdigStillOppgaveUnderBehandling(behandlingsref)
         val ferdigstiltOppgave = oppgaveServiceNy.hentOppgave(oppgave.id)
         Assertions.assertEquals(Status.FERDIGSTILT, ferdigstiltOppgave?.status)
     }

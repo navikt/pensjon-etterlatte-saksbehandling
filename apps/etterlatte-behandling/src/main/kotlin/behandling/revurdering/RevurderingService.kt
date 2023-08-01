@@ -75,7 +75,8 @@ class RevurderingServiceImpl(
     private val grunnlagsendringshendelseDao: GrunnlagsendringshendelseDao,
     private val kommerBarnetTilGodeService: KommerBarnetTilGodeService,
     private val revurderingDao: RevurderingDao,
-    private val behandlingService: BehandlingService
+    private val behandlingService: BehandlingService,
+    private val kanBrukeNyOppgaveliste: Boolean
 ) : RevurderingService {
     private val logger = LoggerFactory.getLogger(RevurderingServiceImpl::class.java)
 
@@ -125,25 +126,43 @@ class RevurderingServiceImpl(
         fritekstAarsak: String?
     ): Revurdering? = forrigeBehandling.sjekkEnhet()?.let {
         return if (featureToggleService.isEnabled(RevurderingServiceFeatureToggle.OpprettManuellRevurdering, false)) {
-            opprettRevurdering(
-                sakId,
-                forrigeBehandling.persongalleri,
-                forrigeBehandling.id,
-                Tidspunkt.now().toLocalDatetimeUTC().toString(),
-                Prosesstype.MANUELL,
-                Vedtaksloesning.GJENNY,
-                null,
-                revurderingAarsak,
-                virkningstidspunkt = null,
-                begrunnelse = begrunnelse,
-                fritekstAarsak = fritekstAarsak
-            ).also { revurdering ->
-                if (paaGrunnAvHendelse != null) {
-                    inTransaction {
+            inTransaction {
+                opprettRevurdering(
+                    sakId,
+                    forrigeBehandling.persongalleri,
+                    forrigeBehandling.id,
+                    Tidspunkt.now().toLocalDatetimeUTC().toString(),
+                    Prosesstype.MANUELL,
+                    Vedtaksloesning.GJENNY,
+                    null,
+                    revurderingAarsak,
+                    virkningstidspunkt = null,
+                    begrunnelse = begrunnelse,
+                    fritekstAarsak = fritekstAarsak
+                ).also { revurdering ->
+                    if (paaGrunnAvHendelse != null) {
                         grunnlagsendringshendelseDao.settBehandlingIdForTattMedIRevurdering(
                             paaGrunnAvHendelse,
                             revurdering.id
                         )
+                        try {
+                            oppgaveService.ferdigStillOppgaveUnderBehandling(paaGrunnAvHendelse.toString())
+                        } catch (e: Exception) {
+                            if (kanBrukeNyOppgaveliste) {
+                                logger.error(
+                                    "Kunne ikke ferdigstille oppgaven til hendelsen, så vi ruller " +
+                                        "tilbake opprettelse av revurderingen",
+                                    e
+                                )
+                                throw e
+                            } else {
+                                logger.error(
+                                    "Kunne ikke ferdigstille oppgaven til hendelsen på grunn av feil, " +
+                                        "men oppgave er ikke i bruk i miljø så feilen svelges.",
+                                    e
+                                )
+                            }
+                        }
                     }
                 }
             }
@@ -163,18 +182,20 @@ class RevurderingServiceImpl(
         merknad: String?,
         begrunnelse: String?
     ) = forrigeBehandling.sjekkEnhet()?.let {
-        opprettRevurdering(
-            sakId,
-            persongalleri,
-            forrigeBehandling.id,
-            mottattDato,
-            Prosesstype.AUTOMATISK,
-            kilde,
-            merknad,
-            revurderingAarsak,
-            virkningstidspunkt?.tilVirkningstidspunkt("Opprettet automatisk"),
-            begrunnelse = begrunnelse ?: "Automatisk revurdering - ${revurderingAarsak.name.lowercase()}"
-        )
+        inTransaction {
+            opprettRevurdering(
+                sakId,
+                persongalleri,
+                forrigeBehandling.id,
+                mottattDato,
+                Prosesstype.AUTOMATISK,
+                kilde,
+                merknad,
+                revurderingAarsak,
+                virkningstidspunkt?.tilVirkningstidspunkt("Opprettet automatisk"),
+                begrunnelse = begrunnelse ?: "Automatisk revurdering - ${revurderingAarsak.name.lowercase()}"
+            )
+        }
     }
 
     private fun kanLagreRevurderingInfo(behandlingsId: UUID): Boolean {
@@ -208,43 +229,41 @@ class RevurderingServiceImpl(
         virkningstidspunkt: Virkningstidspunkt?,
         begrunnelse: String?,
         fritekstAarsak: String? = null
-    ): Revurdering = inTransaction {
-        OpprettBehandling(
-            type = BehandlingType.REVURDERING,
-            sakId = sakId,
-            status = BehandlingStatus.OPPRETTET,
-            soeknadMottattDato = mottattDato?.let { LocalDateTime.parse(it) },
-            revurderingsAarsak = revurderingAarsak,
-            persongalleri = persongalleri,
-            virkningstidspunkt = virkningstidspunkt,
-            kilde = kilde,
-            prosesstype = prosessType,
-            merknad = merknad,
-            begrunnelse = begrunnelse,
-            fritekstAarsak = fritekstAarsak
-        ).let { opprettBehandling ->
-            behandlingDao.opprettBehandling(opprettBehandling)
-            forrigeBehandling?.let {
-                kommerBarnetTilGodeService.hentKommerBarnetTilGode(it)
-                    ?.copy(behandlingId = opprettBehandling.id)
-                    ?.let { kopiert -> kommerBarnetTilGodeService.lagreKommerBarnetTilgode(kopiert) }
-            }
-            hendelseDao.behandlingOpprettet(opprettBehandling.toBehandlingOpprettet())
+    ): Revurdering = OpprettBehandling(
+        type = BehandlingType.REVURDERING,
+        sakId = sakId,
+        status = BehandlingStatus.OPPRETTET,
+        soeknadMottattDato = mottattDato?.let { LocalDateTime.parse(it) },
+        revurderingsAarsak = revurderingAarsak,
+        persongalleri = persongalleri,
+        virkningstidspunkt = virkningstidspunkt,
+        kilde = kilde,
+        prosesstype = prosessType,
+        merknad = merknad,
+        begrunnelse = begrunnelse,
+        fritekstAarsak = fritekstAarsak
+    ).let { opprettBehandling ->
+        behandlingDao.opprettBehandling(opprettBehandling)
+        forrigeBehandling?.let {
+            kommerBarnetTilGodeService.hentKommerBarnetTilGode(it)
+                ?.copy(behandlingId = opprettBehandling.id)
+                ?.let { kopiert -> kommerBarnetTilGodeService.lagreKommerBarnetTilgode(kopiert) }
+        }
+        hendelseDao.behandlingOpprettet(opprettBehandling.toBehandlingOpprettet())
 
-            logger.info("Opprettet behandling ${opprettBehandling.id} i sak ${opprettBehandling.sakId}")
+        logger.info("Opprettet behandling ${opprettBehandling.id} i sak ${opprettBehandling.sakId}")
 
-            behandlingDao.hentBehandling(opprettBehandling.id)!! as Revurdering
-        }.also { behandling ->
-            behandling.let {
-                grunnlagService.leggInnNyttGrunnlag(it)
-                oppgaveService.opprettNyOppgaveMedSakOgReferanse(
-                    referanse = behandling.id.toString(),
-                    sakId = sakId,
-                    oppgaveKilde = OppgaveKilde.BEHANDLING,
-                    oppgaveType = OppgaveType.REVURDERING
-                )
-                behandlingHendelser.sendMeldingForHendelse(it, BehandlingHendelseType.OPPRETTET)
-            }
+        behandlingDao.hentBehandling(opprettBehandling.id)!! as Revurdering
+    }.also { behandling ->
+        behandling.let {
+            grunnlagService.leggInnNyttGrunnlag(it)
+            oppgaveService.opprettNyOppgaveMedSakOgReferanse(
+                referanse = behandling.id.toString(),
+                sakId = sakId,
+                oppgaveKilde = OppgaveKilde.BEHANDLING,
+                oppgaveType = OppgaveType.REVURDERING
+            )
+            behandlingHendelser.sendMeldingForHendelse(it, BehandlingHendelseType.OPPRETTET)
         }
     }
 

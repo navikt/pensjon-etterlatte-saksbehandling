@@ -111,11 +111,11 @@ suspend inline fun PipelineContext<*, ApplicationCall>.kunSystembruker(
 }
 
 suspend inline fun PipelineContext<*, ApplicationCall>.kunSaksbehandler(
-    onSuccess: () -> Unit
+    onSuccess: (Saksbehandler) -> Unit
 ) {
-    when (brukerTokenInfo) {
+    when (val token = brukerTokenInfo) {
         is Saksbehandler -> {
-            onSuccess()
+            onSuccess(token)
         }
 
         else -> call.respond(HttpStatusCode.Forbidden)

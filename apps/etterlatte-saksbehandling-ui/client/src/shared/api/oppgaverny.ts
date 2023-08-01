@@ -27,6 +27,7 @@ export type Oppgavetype =
   | 'VURDER_KONSEKVENS'
   | 'ATTESTERING'
   | 'UNDERKJENT'
+  | 'GOSYS'
 
 export const hentNyeOppgaver = async (): Promise<ApiResponse<OppgaveDTOny[]>> => apiClient.get('/nyeoppgaver/hent')
 

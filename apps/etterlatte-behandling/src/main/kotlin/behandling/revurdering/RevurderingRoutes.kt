@@ -18,7 +18,6 @@ import no.nav.etterlatte.libs.common.behandlingsId
 import no.nav.etterlatte.libs.common.hentNavidentFraToken
 import no.nav.etterlatte.libs.common.medBody
 import no.nav.etterlatte.libs.common.sakId
-import java.util.*
 
 internal fun Route.revurderingRoutes(
     revurderingService: RevurderingService
@@ -83,7 +82,8 @@ data class OpprettRevurderingRequest(
     val sakId: Long,
     val aarsak: RevurderingAarsak,
     val paaGrunnAvHendelseId: String? = null,
-    val begrunnelse: String? = null
+    val begrunnelse: String? = null,
+    val fritekstAarsak: String? = null
 )
 
 data class RevurderingInfoDto(val info: RevurderingInfo)

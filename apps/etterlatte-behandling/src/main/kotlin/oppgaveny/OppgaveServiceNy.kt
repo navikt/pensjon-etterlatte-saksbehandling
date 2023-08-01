@@ -68,66 +68,40 @@ class OppgaveServiceNy(
     fun tildelSaksbehandler(saksbehandlerEndringDto: SaksbehandlerEndringDto) {
         inTransaction {
             val hentetOppgave = oppgaveDaoNy.hentOppgave(saksbehandlerEndringDto.oppgaveId)
+                ?: throw NotFoundException("Oppgaven finnes ikke, id: ${saksbehandlerEndringDto.oppgaveId}")
 
-            if (hentetOppgave != null) {
-                if (hentetOppgave.saksbehandler.isNullOrEmpty()) {
-                    oppgaveDaoNy.settNySaksbehandler(saksbehandlerEndringDto)
-                } else {
-                    throw BadRequestException(
-                        "Oppgaven har allerede en saksbehandler, id: ${saksbehandlerEndringDto.oppgaveId}"
-                    )
-                }
-            } else {
-                throw NotFoundException("Oppgaven finnes ikke, id: ${saksbehandlerEndringDto.oppgaveId}")
-            }
+            hentetOppgave.medNySaksbehandler(saksbehandlerEndringDto.saksbehandler)
+                .lagreEndretOppgave()
         }
     }
 
     fun byttSaksbehandler(saksbehandlerEndringDto: SaksbehandlerEndringDto) {
         inTransaction {
             val hentetOppgave = oppgaveDaoNy.hentOppgave(saksbehandlerEndringDto.oppgaveId)
-            if (hentetOppgave != null) {
-                oppgaveDaoNy.settNySaksbehandler(saksbehandlerEndringDto)
-            } else {
-                throw NotFoundException("Oppgaven finnes ikke, id: ${saksbehandlerEndringDto.oppgaveId}")
-            }
+                ?: throw NotFoundException("Oppgaven finnes ikke, id: ${saksbehandlerEndringDto.oppgaveId}")
+            hentetOppgave.medEndretSaksbehandler(saksbehandlerEndringDto.saksbehandler)
+                .lagreEndretOppgave()
         }
     }
 
     fun fjernSaksbehandler(fjernSaksbehandlerRequest: FjernSaksbehandlerRequest) {
         inTransaction {
             val hentetOppgave = oppgaveDaoNy.hentOppgave(fjernSaksbehandlerRequest.oppgaveId)
-            if (hentetOppgave != null) {
-                if (hentetOppgave.saksbehandler != null) {
-                    oppgaveDaoNy.fjernSaksbehandler(fjernSaksbehandlerRequest.oppgaveId)
-                } else {
-                    throw BadRequestException(
-                        "Oppgaven har ingen saksbehandler, id: ${fjernSaksbehandlerRequest.oppgaveId}"
-                    )
-                }
-            } else {
-                throw NotFoundException("Oppgaven finnes ikke, id: ${fjernSaksbehandlerRequest.oppgaveId}")
-            }
+                ?: throw NotFoundException("Oppgaven finnes ikke, id: ${fjernSaksbehandlerRequest.oppgaveId}")
+            hentetOppgave.medFjernetSaksbehandler()
+                .lagreEndretOppgave()
         }
     }
 
     fun redigerFrist(redigerFristRequest: RedigerFristRequest) {
         inTransaction {
-            val hentetOppgave = oppgaveDaoNy.hentOppgave(redigerFristRequest.oppgaveId)
             if (redigerFristRequest.frist.isBefore(Tidspunkt.now())) {
                 throw BadRequestException("Tidspunkt tilbake i tid id: ${redigerFristRequest.oppgaveId}")
             }
-            if (hentetOppgave != null) {
-                if (hentetOppgave.saksbehandler != null) {
-                    oppgaveDaoNy.redigerFrist(redigerFristRequest)
-                } else {
-                    throw BadRequestException(
-                        "Oppgaven har ingen saksbehandler, id: ${redigerFristRequest.oppgaveId}"
-                    )
-                }
-            } else {
-                throw NotFoundException("Oppgaven finnes ikke, id: ${redigerFristRequest.oppgaveId}")
-            }
+            val hentetOppgave = oppgaveDaoNy.hentOppgave(redigerFristRequest.oppgaveId)
+                ?: throw NotFoundException("Oppgaven finnes ikke, id: ${redigerFristRequest.oppgaveId}")
+            hentetOppgave.medEndretFrist(redigerFristRequest.frist)
+                .lagreEndretOppgave()
         }
     }
 
@@ -160,7 +134,8 @@ class OppgaveServiceNy(
         }
         try {
             val oppgaveUnderbehandling = behandlingsoppgaver.single { it.status == Status.UNDER_BEHANDLING }
-            oppgaveDaoNy.endreStatusPaaOppgave(oppgaveUnderbehandling.id, Status.FERDIGSTILT)
+            oppgaveUnderbehandling.medEndretStatus(Status.FERDIGSTILT)
+                .lagreEndretOppgave()
             return opprettNyOppgaveMedSakOgReferanse(
                 fattetoppgave.referanse,
                 fattetoppgave.sakId,
@@ -193,7 +168,8 @@ class OppgaveServiceNy(
         try {
             val oppgaveUnderbehandling = oppgaveDaoNy.hentOppgaverForBehandling(behandlingEllerHendelseId)
                 .single { it.status == Status.UNDER_BEHANDLING }
-            oppgaveDaoNy.endreStatusPaaOppgave(oppgaveUnderbehandling.id, Status.AVBRUTT)
+            oppgaveUnderbehandling.medEndretStatus(Status.AVBRUTT)
+                .lagreEndretOppgave()
             return requireNotNull(oppgaveDaoNy.hentOppgave(oppgaveUnderbehandling.id)) {
                 "Oppgaven vi akkurat avbrøt kunne ikke hentes ut"
             }
@@ -226,7 +202,8 @@ class OppgaveServiceNy(
         }
         try {
             val oppgaveUnderbehandling = behandlingsoppgaver.single { it.status == Status.UNDER_BEHANDLING }
-            oppgaveDaoNy.endreStatusPaaOppgave(oppgaveUnderbehandling.id, Status.FERDIGSTILT)
+            oppgaveUnderbehandling.medEndretStatus(Status.FERDIGSTILT)
+                .lagreEndretOppgave()
             return requireNotNull(oppgaveDaoNy.hentOppgave(oppgaveUnderbehandling.id)) {
                 "Oppgaven vi akkurat ferdigstilte kunne ikke hentes ut"
             }
@@ -253,8 +230,9 @@ class OppgaveServiceNy(
                 Status.NY
             )
         }
-        oppgaverSomKanLukkes.forEach {
-            oppgaveDaoNy.endreStatusPaaOppgave(it.id, Status.AVBRUTT)
+        oppgaverSomKanLukkes.forEach { oppgaveSomKanLukkes ->
+            oppgaveSomKanLukkes.medEndretStatus(Status.AVBRUTT)
+                .lagreEndretOppgave()
         }
 
         return opprettNyOppgaveMedSakOgReferanse(
@@ -294,6 +272,10 @@ class OppgaveServiceNy(
 
     fun hentOppgave(oppgaveId: UUID): OppgaveNy? {
         return oppgaveDaoNy.hentOppgave(oppgaveId)
+    }
+
+    private fun OppgaveNy.lagreEndretOppgave() {
+        oppgaveDaoNy.lagreOppgave(this)
     }
 }
 

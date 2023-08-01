@@ -5,7 +5,6 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveNy
 import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveType
-import no.nav.etterlatte.libs.common.oppgaveNy.SaksbehandlerEndringDto
 import no.nav.etterlatte.libs.common.oppgaveNy.Status
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.sak.Sak
@@ -91,7 +90,8 @@ internal class OppgaveDaoNyTest {
         oppgaveDaoNy.lagreOppgave(oppgaveNy)
 
         val nySaksbehandler = "nysaksbehandler"
-        oppgaveDaoNy.settNySaksbehandler(SaksbehandlerEndringDto(oppgaveNy.id, nySaksbehandler))
+        oppgaveNy.medNySaksbehandler(nySaksbehandler)
+            .let { oppgaveDaoNy.lagreOppgave(it) }
         val hentOppgave = oppgaveDaoNy.hentOppgave(oppgaveNy.id)
         assertEquals(nySaksbehandler, hentOppgave?.saksbehandler)
         assertEquals(Status.UNDER_BEHANDLING, hentOppgave?.status)

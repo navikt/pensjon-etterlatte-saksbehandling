@@ -5,9 +5,6 @@ import no.nav.etterlatte.behandling.objectMapper
 import no.nav.etterlatte.grunnlagsendring.setJsonb
 import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveNy
 import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveType
-import no.nav.etterlatte.libs.common.oppgaveNy.RedigerFristRequest
-import no.nav.etterlatte.libs.common.oppgaveNy.SaksbehandlerEndringDto
-import no.nav.etterlatte.libs.common.oppgaveNy.Status
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.setTidspunkt
@@ -24,17 +21,6 @@ class OppgaveDaoMedEndringssporingImpl(
     private val oppgaveDao: OppgaveDaoNy,
     private val connection: () -> Connection
 ) : OppgaveDaoMedEndringssporing {
-
-    private fun lagreEndringerPaaOppgave(oppgaveId: UUID, block: () -> Unit) {
-        val foer = requireNotNull(hentOppgave(oppgaveId)) {
-            "Må ha en oppgave for å kunne endre den"
-        }
-        block()
-        val etter = requireNotNull(hentOppgave(oppgaveId)) {
-            "Må ha en oppgave etter endring"
-        }
-        lagreEndringerPaaOppgave(foer, etter)
-    }
 
     private fun lagreEndringerPaaOppgave(oppgaveFoer: OppgaveNy, oppgaveEtter: OppgaveNy) {
         with(connection()) {
@@ -82,7 +68,15 @@ class OppgaveDaoMedEndringssporingImpl(
     }
 
     override fun lagreOppgave(oppgaveNy: OppgaveNy) {
+        val foer = hentOppgave(oppgaveNy.id)
         oppgaveDao.lagreOppgave(oppgaveNy)
+        if (foer == null) {
+            return
+        }
+        val etter = requireNotNull(hentOppgave(oppgaveNy.id)) {
+            "Må ha en oppgave etter endring"
+        }
+        lagreEndringerPaaOppgave(foer, etter)
     }
 
     override fun hentOppgave(oppgaveId: UUID): OppgaveNy? {
@@ -101,29 +95,5 @@ class OppgaveDaoMedEndringssporingImpl(
         oppgaveTypeTyper: List<OppgaveType>
     ): List<OppgaveNy> {
         return oppgaveDao.finnOppgaverForStrengtFortroligOgStrengtFortroligUtland(oppgaveTypeTyper)
-    }
-
-    override fun settNySaksbehandler(saksbehandlerEndringDto: SaksbehandlerEndringDto) {
-        lagreEndringerPaaOppgave(saksbehandlerEndringDto.oppgaveId) {
-            oppgaveDao.settNySaksbehandler(saksbehandlerEndringDto)
-        }
-    }
-
-    override fun endreStatusPaaOppgave(oppgaveId: UUID, oppgaveStatus: Status) {
-        lagreEndringerPaaOppgave(oppgaveId) {
-            oppgaveDao.endreStatusPaaOppgave(oppgaveId, oppgaveStatus)
-        }
-    }
-
-    override fun fjernSaksbehandler(oppgaveId: UUID) {
-        lagreEndringerPaaOppgave(oppgaveId) {
-            oppgaveDao.fjernSaksbehandler(oppgaveId)
-        }
-    }
-
-    override fun redigerFrist(redigerFristRequest: RedigerFristRequest) {
-        lagreEndringerPaaOppgave(redigerFristRequest.oppgaveId) {
-            oppgaveDao.redigerFrist(redigerFristRequest)
-        }
     }
 }

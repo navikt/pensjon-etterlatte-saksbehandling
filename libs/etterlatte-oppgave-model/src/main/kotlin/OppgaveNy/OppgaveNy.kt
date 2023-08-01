@@ -20,7 +20,40 @@ data class OppgaveNy(
     val sakType: SakType,
     val fnr: String? = null,
     val frist: Tidspunkt?
-)
+) {
+    fun medNySaksbehandler(saksbehandler: String): OppgaveNy {
+        if (!this.saksbehandler.isNullOrEmpty()) {
+            throw IllegalStateException(
+                "Oppgaven med id=${this.id} har allerede en saksbehandler, kan ikke sette " +
+                    "saksbehandleren=$saksbehandler som ny"
+            )
+        }
+        return this.medEndretSaksbehandler(saksbehandler)
+    }
+
+    fun medEndretSaksbehandler(saksbehandler: String): OppgaveNy {
+        return this.copy(saksbehandler = saksbehandler, status = Status.UNDER_BEHANDLING)
+    }
+
+    fun medFjernetSaksbehandler(): OppgaveNy {
+        if (this.saksbehandler.isNullOrEmpty()) {
+            throw IllegalStateException("Oppgaven med id=${this.id} har allerede ingen saksbehandler")
+        }
+        return this.copy(saksbehandler = null, status = Status.NY)
+    }
+
+    fun medEndretFrist(frist: Tidspunkt): OppgaveNy {
+        if (this.saksbehandler.isNullOrEmpty()) {
+            throw IllegalStateException("Oppgaven med id=${this.id} har ingen saksbehandler")
+        }
+        return this.copy(frist = frist)
+    }
+
+    fun medEndretStatus(nyStatus: Status): OppgaveNy {
+        // Sjekk for overganger her?
+        return this.copy(status = nyStatus)
+    }
+}
 
 enum class Status {
     NY,

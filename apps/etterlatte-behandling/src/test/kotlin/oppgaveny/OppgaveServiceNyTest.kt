@@ -138,10 +138,9 @@ class OppgaveServiceNyTest {
         )
         val nysaksbehandler = "nysaksbehandler"
         oppgaveServiceNy.tildelSaksbehandler(SaksbehandlerEndringDto(nyOppgave.id, nysaksbehandler))
-        val err = assertThrows<BadRequestException> {
+        assertThrows<IllegalStateException> {
             oppgaveServiceNy.tildelSaksbehandler(SaksbehandlerEndringDto(nyOppgave.id, "enda en"))
         }
-        Assertions.assertTrue(err.message!!.startsWith("Oppgaven har allerede en saksbehandler"))
     }
 
     @Test
@@ -228,10 +227,9 @@ class OppgaveServiceNyTest {
             OppgaveKilde.BEHANDLING,
             OppgaveType.FOERSTEGANGSBEHANDLING
         )
-        val err = assertThrows<BadRequestException> {
+        assertThrows<IllegalStateException> {
             oppgaveServiceNy.fjernSaksbehandler(FjernSaksbehandlerRequest(nyOppgave.id))
         }
-        Assertions.assertTrue(err.message!!.startsWith("Oppgaven har ingen saksbehandler"))
     }
 
     @Test
@@ -546,26 +544,26 @@ class OppgaveServiceNyTest {
         )
 
         val aalesundSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
-        val behandlingsref = UUID.randomUUID().toString()
+        val behandlingsreferanseAalesund = UUID.randomUUID().toString()
         val oppgaveAalesund = oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
-            behandlingsref,
+            behandlingsreferanseAalesund,
             aalesundSak.id,
             OppgaveKilde.BEHANDLING,
             OppgaveType.FOERSTEGANGSBEHANDLING
         )
-        val saksbehandlerid = "saksbehandler01"
-        oppgaveServiceNy.tildelSaksbehandler(SaksbehandlerEndringDto(oppgaveAalesund.id, saksbehandlerid))
+        val saksbehandlerId = "saksbehandler01"
+        oppgaveServiceNy.tildelSaksbehandler(SaksbehandlerEndringDto(oppgaveAalesund.id, saksbehandlerId))
 
-        val saksteinskjer = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.STEINKJER.enhetNr)
-        val behrefsteinkjer = UUID.randomUUID().toString()
-        val oppgavesteinskjer = oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
-            behrefsteinkjer,
-            saksteinskjer.id,
+        val sakSteinkjer = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.STEINKJER.enhetNr)
+        val behandlingsreferanseSteinkjer = UUID.randomUUID().toString()
+        val oppgaveSteiskjer = oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
+            behandlingsreferanseSteinkjer,
+            sakSteinkjer.id,
             OppgaveKilde.BEHANDLING,
             OppgaveType.FOERSTEGANGSBEHANDLING
         )
 
-        oppgaveServiceNy.tildelSaksbehandler(SaksbehandlerEndringDto(oppgavesteinskjer.id, saksbehandlerid))
+        oppgaveServiceNy.tildelSaksbehandler(SaksbehandlerEndringDto(oppgaveSteiskjer.id, saksbehandlerId))
 
         val jwtclaims = JWTClaimsSet.Builder().claim("groups", saksbehandlerRolleDev).build()
         val saksbehandlerMedRoller = SaksbehandlerMedRoller(
@@ -575,7 +573,7 @@ class OppgaveServiceNyTest {
         val finnOppgaverForBruker = oppgaveServiceNy.finnOppgaverForBruker(saksbehandlerMedRoller)
 
         Assertions.assertEquals(1, finnOppgaverForBruker.size)
-        val AalesundfunnetOppgave = finnOppgaverForBruker[0]
-        Assertions.assertEquals(Enheter.AALESUND.enhetNr, AalesundfunnetOppgave.enhet)
+        val aalesundFunnetOppgave = finnOppgaverForBruker[0]
+        Assertions.assertEquals(Enheter.AALESUND.enhetNr, aalesundFunnetOppgave.enhet)
     }
 }

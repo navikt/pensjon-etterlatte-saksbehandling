@@ -4,8 +4,6 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveNy
 import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveType
-import no.nav.etterlatte.libs.common.oppgaveNy.RedigerFristRequest
-import no.nav.etterlatte.libs.common.oppgaveNy.SaksbehandlerEndringDto
 import no.nav.etterlatte.libs.common.oppgaveNy.Status
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
@@ -25,10 +23,6 @@ interface OppgaveDaoNy {
     fun hentOppgaverForBehandling(behandlingid: String): List<OppgaveNy>
     fun hentOppgaver(oppgaveTypeTyper: List<OppgaveType>): List<OppgaveNy>
     fun finnOppgaverForStrengtFortroligOgStrengtFortroligUtland(oppgaveTypeTyper: List<OppgaveType>): List<OppgaveNy>
-    fun settNySaksbehandler(saksbehandlerEndringDto: SaksbehandlerEndringDto)
-    fun endreStatusPaaOppgave(oppgaveId: UUID, oppgaveStatus: Status)
-    fun fjernSaksbehandler(oppgaveId: UUID)
-    fun redigerFrist(redigerFristRequest: RedigerFristRequest)
 }
 
 class OppgaveDaoNyImpl(private val connection: () -> Connection) : OppgaveDaoNy {
@@ -40,6 +34,10 @@ class OppgaveDaoNyImpl(private val connection: () -> Connection) : OppgaveDaoNy 
                 """
                 INSERT INTO oppgave(id, status, enhet, sak_id, type, saksbehandler, referanse, merknad, opprettet, saktype, fnr, frist, kilde)
                 VALUES(?::UUID, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ON CONFLICT (id) DO UPDATE 
+                    SET status = excluded.status, enhet = excluded.enhet, sak_id = excluded.sak_id, type = excluded.type,
+                     saksbehandler = excluded.saksbehandler, referanse = excluded.referanse, merknad = excluded.referanse, 
+                     saktype = excluded.saktype, fnr = excluded.fnr, frist = excluded.frist, kilde = excluded.kilde
                 """.trimIndent()
             )
             statement.setObject(1, oppgaveNy.id)
@@ -140,73 +138,6 @@ class OppgaveDaoNyImpl(private val connection: () -> Connection) : OppgaveDaoNy 
             }.also {
                 logger.info("Hentet antall nye oppgaver: ${it.size}")
             }
-        }
-    }
-
-    override fun settNySaksbehandler(saksbehandlerEndringDto: SaksbehandlerEndringDto) {
-        with(connection()) {
-            val statement = prepareStatement(
-                """
-                UPDATE oppgave
-                SET saksbehandler = ?, status = ?
-                where id = ?::UUID
-                """.trimIndent()
-            )
-
-            statement.setString(1, saksbehandlerEndringDto.saksbehandler)
-            statement.setString(2, Status.UNDER_BEHANDLING.name)
-            statement.setObject(3, saksbehandlerEndringDto.oppgaveId)
-
-            statement.executeUpdate()
-        }
-    }
-
-    override fun endreStatusPaaOppgave(oppgaveId: UUID, oppgaveStatus: Status) {
-        with(connection()) {
-            val statement = prepareStatement(
-                """
-                UPDATE oppgave
-                SET status = ?
-                where id = ?::UUID
-                """.trimIndent()
-            )
-
-            statement.setString(1, oppgaveStatus.toString())
-            statement.setObject(2, oppgaveId)
-
-            statement.executeUpdate()
-        }
-    }
-
-    override fun fjernSaksbehandler(oppgaveId: UUID) {
-        with(connection()) {
-            val statement = prepareStatement(
-                """
-                UPDATE oppgave
-                SET saksbehandler = NULL, status = ?
-                where id = ?::UUID
-                """.trimIndent()
-            )
-            statement.setString(1, Status.NY.name)
-            statement.setObject(2, oppgaveId)
-
-            statement.executeUpdate()
-        }
-    }
-
-    override fun redigerFrist(redigerFristRequest: RedigerFristRequest) {
-        with(connection()) {
-            val statement = prepareStatement(
-                """
-                UPDATE oppgave
-                SET frist = ?
-                where id = ?::UUID
-                """.trimIndent()
-            )
-            statement.setTidspunkt(1, redigerFristRequest.frist)
-            statement.setObject(2, redigerFristRequest.oppgaveId)
-
-            statement.executeUpdate()
         }
     }
 

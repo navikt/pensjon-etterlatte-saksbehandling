@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { isFailure, isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
-import { redigerFristApi } from '~shared/api/oppgaverny'
+import { erOppgaveRedigerbar, Oppgavestatus, redigerFristApi } from '~shared/api/oppgaverny'
 import { Alert, Button, Heading, Modal, MonthPicker } from '@navikt/ds-react'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { formaterStringDato } from '~utils/formattering'
@@ -18,11 +18,13 @@ const FristWrapper = styled.span`
   margin-right: 0.5rem;
 `
 
-export const FristHandlinger = (props: { frist: string; oppgaveId: string; sakId: number }) => {
-  const { frist, oppgaveId, sakId } = props
+export const FristHandlinger = (props: { status: Oppgavestatus; frist: string; oppgaveId: string; sakId: number }) => {
+  const { frist, oppgaveId, sakId, status } = props
   const [open, setOpen] = useState(false)
   const [nyFrist, setnyFrist] = useState<Date>(new Date())
   const [redigerfristSvar, redigerFrist, resetredigerFristApi] = useApiCall(redigerFristApi)
+
+  const erRedigerbar = erOppgaveRedigerbar(status)
 
   const generateFromDate = () => {
     const naa = new Date()
@@ -91,14 +93,16 @@ export const FristHandlinger = (props: { frist: string; oppgaveId: string; sakId
           </Modal>
           <FristWrapper>{formaterStringDato(frist)}</FristWrapper>
           <FristWrapper>{fristErPassert(frist)}</FristWrapper>
-          <Button
-            size="small"
-            variant="secondary"
-            icon={<PencilIcon title="a11y-title" fontSize="1.5rem" />}
-            onClick={() => setOpen(!open)}
-          >
-            Rediger frist
-          </Button>
+          {erRedigerbar && (
+            <Button
+              size="small"
+              variant="secondary"
+              icon={<PencilIcon title="a11y-title" fontSize="1.5rem" />}
+              onClick={() => setOpen(!open)}
+            >
+              Rediger frist
+            </Button>
+          )}
         </>
       ) : (
         'Ingen frist'

@@ -225,7 +225,12 @@ export const Oppgavelista = (props: { oppgaver: ReadonlyArray<OppgaveDTOny>; hen
                       <Table.DataCell>{enhet}</Table.DataCell>
                       <Table.DataCell>
                         {saksbehandler ? (
-                          <RedigerSaksbehandler saksbehandler={saksbehandler} oppgaveId={id} sakId={sakId} />
+                          <RedigerSaksbehandler
+                            status={status}
+                            saksbehandler={saksbehandler}
+                            oppgaveId={id}
+                            sakId={sakId}
+                          />
                         ) : (
                           <TildelSaksbehandler oppgaveId={id} sakId={sakId} />
                         )}

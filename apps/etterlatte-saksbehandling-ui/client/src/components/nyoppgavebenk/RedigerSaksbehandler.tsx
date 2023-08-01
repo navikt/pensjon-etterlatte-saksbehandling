@@ -1,6 +1,6 @@
 import { useAppSelector } from '~store/Store'
 import { isFailure, isInitial, isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
-import { fjernSaksbehandlerApi, byttSaksbehandlerApi } from '~shared/api/oppgaverny'
+import { fjernSaksbehandlerApi, byttSaksbehandlerApi, Oppgavestatus, erOppgaveRedigerbar } from '~shared/api/oppgaverny'
 import { Alert, Button, Loader } from '@navikt/ds-react'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { PencilIcon } from '@navikt/aksel-icons'
@@ -12,12 +12,18 @@ const SaksbehandlerWrapper = styled.span`
   margin-right: 0.5rem;
 `
 
-export const RedigerSaksbehandler = (props: { saksbehandler: string; oppgaveId: string; sakId: number }) => {
+export const RedigerSaksbehandler = (props: {
+  saksbehandler: string
+  oppgaveId: string
+  sakId: number
+  status: Oppgavestatus
+}) => {
   const [modalIsOpen, setModalIsOpen] = useState(false)
-  const { saksbehandler, oppgaveId, sakId } = props
+  const { saksbehandler, oppgaveId, sakId, status } = props
   const user = useAppSelector((state) => state.saksbehandlerReducer.saksbehandler)
   const [fjernSaksbehandlerSvar, fjernSaksbehandler] = useApiCall(fjernSaksbehandlerApi)
   const [byttSaksbehandlerSvar, byttSaksbehandler] = useApiCall(byttSaksbehandlerApi)
+  const erRedigerbar = erOppgaveRedigerbar(status)
 
   const brukerErSaksbehandler = user.ident === saksbehandler
 
@@ -28,9 +34,11 @@ export const RedigerSaksbehandler = (props: { saksbehandler: string; oppgaveId: 
           {isInitial(fjernSaksbehandlerSvar) && (
             <>
               <SaksbehandlerWrapper>{saksbehandler}</SaksbehandlerWrapper>
-              <Button icon={<PencilIcon />} size="small" variant="secondary" onClick={() => setModalIsOpen(true)}>
-                Endre
-              </Button>
+              {erRedigerbar && (
+                <Button icon={<PencilIcon />} size="small" variant="secondary" onClick={() => setModalIsOpen(true)}>
+                  Endre
+                </Button>
+              )}
               <GeneriskModal
                 tittel="Endre saksbehandler"
                 beskrivelse="Ønsker du å fjerne deg som saksbehandler?"
@@ -54,9 +62,11 @@ export const RedigerSaksbehandler = (props: { saksbehandler: string; oppgaveId: 
           {isInitial(byttSaksbehandlerSvar) && (
             <>
               <SaksbehandlerWrapper>{saksbehandler}</SaksbehandlerWrapper>
-              <Button icon={<PencilIcon />} size="small" variant="secondary" onClick={() => setModalIsOpen(true)}>
-                Endre
-              </Button>
+              {erRedigerbar && (
+                <Button icon={<PencilIcon />} size="small" variant="secondary" onClick={() => setModalIsOpen(true)}>
+                  Endre
+                </Button>
+              )}
               <GeneriskModal
                 tittel="Endre saksbehandler"
                 beskrivelse={`Ønsker du å fjerne ${saksbehandler} og sette deg som saksbehandler?`}

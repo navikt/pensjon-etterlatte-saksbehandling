@@ -20,14 +20,30 @@ data class OppgaveNy(
     val sakType: SakType,
     val fnr: String? = null,
     val frist: Tidspunkt?
-)
+) {
+    fun erAvsluttet(): Boolean {
+        return Status.erAvsluttet(this.status)
+    }
+}
 
 enum class Status {
     NY,
     UNDER_BEHANDLING,
     FERDIGSTILT,
     FEILREGISTRERT,
-    AVBRUTT
+    AVBRUTT;
+
+    companion object {
+        fun erAvsluttet(status: Status): Boolean {
+            return when (status) {
+                NY,
+                UNDER_BEHANDLING -> false
+                FERDIGSTILT,
+                FEILREGISTRERT,
+                AVBRUTT -> true
+            }
+        }
+    }
 }
 
 enum class OppgaveKilde {

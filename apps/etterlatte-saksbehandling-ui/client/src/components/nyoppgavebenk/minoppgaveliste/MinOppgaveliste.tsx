@@ -39,7 +39,20 @@ export const MinOppgaveliste = (props: { oppgaver: ReadonlyArray<OppgaveDTOny> }
             <Table.Body>
               {paginerteOppgaver &&
                 paginerteOppgaver.map(
-                  ({ id, status, enhet, type, saksbehandler, opprettet, merknad, sakType, fnr, frist, sakId, referanse }) => (
+                  ({
+                    id,
+                    status,
+                    enhet,
+                    type,
+                    saksbehandler,
+                    opprettet,
+                    merknad,
+                    sakType,
+                    fnr,
+                    frist,
+                    sakId,
+                    referanse,
+                  }) => (
                     <Table.Row key={id}>
                       <Table.HeaderCell>{formaterStringDato(opprettet)}</Table.HeaderCell>
                       <Table.HeaderCell>{fnr}</Table.HeaderCell>
@@ -51,12 +64,17 @@ export const MinOppgaveliste = (props: { oppgaver: ReadonlyArray<OppgaveDTOny> }
                       <Table.DataCell>{enhet}</Table.DataCell>
                       <Table.DataCell>
                         {saksbehandler && (
-                          <RedigerSaksbehandler saksbehandler={saksbehandler} oppgaveId={id} sakId={sakId} />
+                          <RedigerSaksbehandler
+                            status={status}
+                            saksbehandler={saksbehandler}
+                            oppgaveId={id}
+                            sakId={sakId}
+                          />
                         )}
                       </Table.DataCell>
                       <Table.DataCell>{sakType && <SaktypeTag sakType={sakType} />}</Table.DataCell>
                       <Table.DataCell>
-                        <FristHandlinger frist={frist} oppgaveId={id} sakId={sakId} />
+                        <FristHandlinger status={status} frist={frist} oppgaveId={id} sakId={sakId} />
                       </Table.DataCell>
                       <Table.DataCell>
                         <HandlingerForOppgave

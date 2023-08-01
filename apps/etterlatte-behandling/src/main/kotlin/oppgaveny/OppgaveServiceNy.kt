@@ -183,8 +183,13 @@ class OppgaveServiceNy(
     }
 
     fun avbrytOppgaveUnderBehandling(
-        behandlingEllerHendelseId: String
+        behandlingEllerHendelseId: String,
+        saksbehandler: String? = null
     ): OppgaveNy {
+        sikreAtSaksbehandlerErSattPaaOppgaveHvisNyOppgavelisteIkkeErStoettet(
+            behandlingEllerHendelseId,
+            saksbehandler
+        )
         try {
             val oppgaveUnderbehandling = oppgaveDaoNy.hentOppgaverForBehandling(behandlingEllerHendelseId)
                 .single { it.status == Status.UNDER_BEHANDLING }

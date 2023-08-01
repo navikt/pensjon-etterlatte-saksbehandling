@@ -143,7 +143,7 @@ class BehandlingServiceImpl(
                 val hendelserKnyttetTilBehandling =
                     grunnlagsendringshendelseDao.hentGrunnlagsendringshendelseSomErTattMedIBehandling(behandlingId)
                 try {
-                    oppgaveServiceNy.avbrytOppgaveUnderBehandling(behandlingId.toString())
+                    oppgaveServiceNy.avbrytOppgaveUnderBehandling(behandlingId.toString(), saksbehandler)
 
                     hendelserKnyttetTilBehandling.forEach { hendelse ->
                         oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(

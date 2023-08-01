@@ -4,7 +4,7 @@ import React, { FormEvent, useState } from 'react'
 import { IAvkorting, IAvkortingGrunnlag } from '~shared/types/IAvkorting'
 import { isFailure, isPending, useApiCall } from '~shared/hooks/useApiCall'
 import { lagreAvkortingGrunnlag } from '~shared/api/avkorting'
-import { formaterStringDato } from '~utils/formattering'
+import { formaterStringDato, NOK } from '~utils/formattering'
 import { HjemmelLenke } from '~components/behandling/felles/HjemmelLenke'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
@@ -111,8 +111,8 @@ export const AvkortingInntekt = (props: {
             <Table.Body>
               {(props.avkortingGrunnlag ? props.avkortingGrunnlag : []).map((inntektsgrunnlag, index) => (
                 <Table.Row key={index}>
-                  <Table.DataCell key="Inntekt">{inntektsgrunnlag.aarsinntekt}</Table.DataCell>
-                  <Table.DataCell key="FratrekkInnUt">{inntektsgrunnlag.fratrekkInnAar}</Table.DataCell>
+                  <Table.DataCell key="Inntekt">{NOK(inntektsgrunnlag.aarsinntekt)}</Table.DataCell>
+                  <Table.DataCell key="FratrekkInnUt">{NOK(inntektsgrunnlag.fratrekkInnAar)}</Table.DataCell>
                   <Table.DataCell key="Periode">
                     {inntektsgrunnlag.fom && formaterStringDato(inntektsgrunnlag.fom)} -
                     {inntektsgrunnlag.tom && formaterStringDato(inntektsgrunnlag.tom)}

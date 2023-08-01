@@ -6,16 +6,14 @@ import { ApiErrorAlert } from '~ErrorBoundary'
 import { formaterStringDato } from '~utils/formattering'
 import { PencilIcon } from '@navikt/aksel-icons'
 import styled from 'styled-components'
+import { FristWrapper } from '~components/nyoppgavebenk/Oppgavelista'
+import { isBefore } from 'date-fns'
 
 const Buttonwrapper = styled.div`
   margin: 4rem 1rem 1rem 1rem;
   button:first-child {
     margin-right: 1rem;
   }
-`
-
-const FristWrapper = styled.span`
-  margin-right: 0.5rem;
 `
 
 export const FristHandlinger = (props: { frist: string; oppgaveId: string; sakId: number }) => {
@@ -41,16 +39,6 @@ export const FristHandlinger = (props: { frist: string; oppgaveId: string; sakId
       datoSomSisteDagIMaaneden.setHours(17)
       setnyFrist(datoSomSisteDagIMaaneden)
       resetredigerFristApi()
-    }
-  }
-
-  const fristErPassert = (dato: string) => {
-    const fristDato = new Date(dato)
-    const naaDato = new Date()
-    if (fristDato.getFullYear() <= naaDato.getFullYear() && fristDato.getMonth() < naaDato.getMonth()) {
-      return 'Frist er passert'
-    } else {
-      return null
     }
   }
 
@@ -89,8 +77,9 @@ export const FristHandlinger = (props: { frist: string; oppgaveId: string; sakId
               </Buttonwrapper>
             </Modal.Content>
           </Modal>
-          <FristWrapper>{formaterStringDato(frist)}</FristWrapper>
-          <FristWrapper>{fristErPassert(frist)}</FristWrapper>
+          <FristWrapper fristHarPassert={isBefore(new Date(frist), new Date())}>
+            {formaterStringDato(frist)}
+          </FristWrapper>
           <Button
             size="small"
             variant="secondary"

@@ -36,7 +36,7 @@ class OppgaveDaoNyImpl(private val connection: () -> Connection) : OppgaveDaoNy 
                 VALUES(?::UUID, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 ON CONFLICT (id) DO UPDATE 
                     SET status = excluded.status, enhet = excluded.enhet, sak_id = excluded.sak_id, type = excluded.type,
-                     saksbehandler = excluded.saksbehandler, referanse = excluded.referanse, merknad = excluded.referanse, 
+                     saksbehandler = excluded.saksbehandler, referanse = excluded.referanse, merknad = excluded.merknad, 
                      saktype = excluded.saktype, fnr = excluded.fnr, frist = excluded.frist, kilde = excluded.kilde
                 """.trimIndent()
             )

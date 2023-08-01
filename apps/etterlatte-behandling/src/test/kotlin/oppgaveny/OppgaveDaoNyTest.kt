@@ -98,6 +98,46 @@ internal class OppgaveDaoNyTest {
     }
 
     @Test
+    fun `lagreOppgave oppdaterer endrede felter`() {
+        val sakAalesund = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val sakPorsgrunn = sakDao.opprettSak("fnr2", SakType.OMSTILLINGSSTOENAD, Enheter.PORSGRUNN.enhetNr)
+        val oppgaveNy = lagNyOppgave(sakAalesund)
+        oppgaveDaoNy.lagreOppgave(oppgaveNy)
+        val lagretOppgaveNy = oppgaveDaoNy.hentOppgave(oppgaveNy.id)
+
+        val oppgaveEndret = oppgaveNy.copy(
+            status = Status.FEILREGISTRERT,
+            enhet = sakPorsgrunn.enhet,
+            sakId = sakPorsgrunn.id,
+            kilde = OppgaveKilde.HENDELSE,
+            referanse = "nyReferanse",
+            merknad = "annenMerknad",
+            sakType = sakPorsgrunn.sakType,
+            fnr = sakPorsgrunn.ident,
+            frist = Tidspunkt.now(),
+            type = OppgaveType.UNDERKJENT
+        )
+        oppgaveDaoNy.lagreOppgave(oppgaveEndret)
+        val lagretOppgaveEndret = oppgaveDaoNy.hentOppgave(oppgaveNy.id)
+
+        assertEquals(oppgaveNy, lagretOppgaveNy)
+        assertEquals(oppgaveEndret, lagretOppgaveEndret)
+    }
+
+    @Test
+    fun `lagreOppgave med samme oppgave endrer ingen felter`() {
+        val sakAalesund = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val oppgaveNy = lagNyOppgave(sakAalesund)
+        oppgaveDaoNy.lagreOppgave(oppgaveNy)
+        val foersteHenting = oppgaveDaoNy.hentOppgave(oppgaveNy.id)!!
+        oppgaveDaoNy.lagreOppgave(foersteHenting)
+
+        val andreHenting = oppgaveDaoNy.hentOppgave(oppgaveNy.id)!!
+        assertEquals(oppgaveNy, foersteHenting)
+        assertEquals(oppgaveNy, andreHenting)
+    }
+
+    @Test
     fun `Skal ikke kunne hente adressebeskyttede oppgaver fra vanlig hentoppgaver`() {
         val sakAalesund = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         val oppgaveNy = lagNyOppgave(sakAalesund)

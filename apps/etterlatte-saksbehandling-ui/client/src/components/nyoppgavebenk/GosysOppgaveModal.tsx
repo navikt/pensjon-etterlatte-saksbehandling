@@ -60,7 +60,7 @@ export const GosysOppgaveModal = () => {
       <Button variant="primary" size="small" icon={<EyeIcon />} onClick={() => setOpen(!open)}>
         Se oppgave
       </Button>
-      <Modal open={open} aria-labelledby="modal-heading" onClose={() => setOpen(!open)}>
+      <Modal open={open} aria-labelledby="modal-heading" onClose={() => setOpen(false)}>
         <Modal.Content>
           <Heading size="medium" id="modal-heading">
             Oppgave fra Gosys

@@ -181,13 +181,13 @@ export const Oppgavelista = (props: { oppgaver: ReadonlyArray<OppgaveDTOny>; hen
               <Table.Row>
                 <Table.HeaderCell scope="col">Registreringsdato</Table.HeaderCell>
                 <Table.HeaderCell scope="col">Frist</Table.HeaderCell>
-                <Table.HeaderCell scope="col">Fnr</Table.HeaderCell>
+                <Table.HeaderCell scope="col">Fødselsnummer</Table.HeaderCell>
                 <Table.HeaderCell scope="col">Oppgavetype</Table.HeaderCell>
-                <Table.HeaderCell scope="col">Status</Table.HeaderCell>
+                <Table.HeaderCell scope="col">Ytelse</Table.HeaderCell>
                 <Table.HeaderCell scope="col">Merknad</Table.HeaderCell>
+                <Table.HeaderCell scope="col">Status</Table.HeaderCell>
                 <Table.HeaderCell scope="col">Enhet</Table.HeaderCell>
                 <Table.HeaderCell scope="col">Saksbehandler</Table.HeaderCell>
-                <Table.HeaderCell scope="col">Ytelse</Table.HeaderCell>
                 <Table.HeaderCell scope="col">Handlinger</Table.HeaderCell>
               </Table.Row>
             </Table.Header>
@@ -221,8 +221,9 @@ export const Oppgavelista = (props: { oppgaver: ReadonlyArray<OppgaveDTOny>; hen
                       <Table.DataCell>
                         {type ? <OppgavetypeTag oppgavetype={type} /> : <div>oppgaeveid {id}</div>}
                       </Table.DataCell>
-                      <Table.DataCell>{status}</Table.DataCell>
+                      <Table.DataCell>{sakType && <SaktypeTag sakType={sakType} />}</Table.DataCell>
                       <Table.DataCell>{merknad}</Table.DataCell>
+                      <Table.DataCell>{status}</Table.DataCell>
                       <Table.DataCell>{enhet}</Table.DataCell>
                       <Table.DataCell>
                         {saksbehandler ? (
@@ -236,7 +237,6 @@ export const Oppgavelista = (props: { oppgaver: ReadonlyArray<OppgaveDTOny>; hen
                           <TildelSaksbehandler oppgaveId={id} sakId={sakId} />
                         )}
                       </Table.DataCell>
-                      <Table.DataCell>{sakType && <SaktypeTag sakType={sakType} />}</Table.DataCell>
                       <Table.DataCell>
                         <HandlingerForOppgave
                           oppgavetype={type}

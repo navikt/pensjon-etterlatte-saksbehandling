@@ -27,13 +27,13 @@ export const MinOppgaveliste = (props: { oppgaver: ReadonlyArray<OppgaveDTOny> }
               <Table.Row>
                 <Table.HeaderCell scope="col">Registreringsdato</Table.HeaderCell>
                 <Table.HeaderCell scope="col">Frist</Table.HeaderCell>
-                <Table.HeaderCell scope="col">Fnr</Table.HeaderCell>
+                <Table.HeaderCell scope="col">Fødselsnummer</Table.HeaderCell>
                 <Table.HeaderCell scope="col">Oppgavetype</Table.HeaderCell>
-                <Table.HeaderCell scope="col">Status</Table.HeaderCell>
+                <Table.HeaderCell scope="col">Ytelse</Table.HeaderCell>
                 <Table.HeaderCell scope="col">Merknad</Table.HeaderCell>
+                <Table.HeaderCell scope="col">Status</Table.HeaderCell>
                 <Table.HeaderCell scope="col">Enhet</Table.HeaderCell>
                 <Table.HeaderCell scope="col">Saksbehandler</Table.HeaderCell>
-                <Table.HeaderCell scope="col">Ytelse</Table.HeaderCell>
                 <Table.HeaderCell scope="col">Handlinger</Table.HeaderCell>
               </Table.Row>
             </Table.Header>
@@ -65,8 +65,9 @@ export const MinOppgaveliste = (props: { oppgaver: ReadonlyArray<OppgaveDTOny> }
                       <Table.DataCell>
                         <OppgavetypeTag oppgavetype={type} />
                       </Table.DataCell>
-                      <Table.DataCell>{status}</Table.DataCell>
+                      <Table.DataCell>{sakType && <SaktypeTag sakType={sakType} />}</Table.DataCell>
                       <Table.DataCell>{merknad}</Table.DataCell>
+                      <Table.DataCell>{status}</Table.DataCell>
                       <Table.DataCell>{enhet}</Table.DataCell>
                       <Table.DataCell>
                         {saksbehandler && (
@@ -78,7 +79,6 @@ export const MinOppgaveliste = (props: { oppgaver: ReadonlyArray<OppgaveDTOny> }
                           />
                         )}
                       </Table.DataCell>
-                      <Table.DataCell>{sakType && <SaktypeTag sakType={sakType} />}</Table.DataCell>
                       <Table.DataCell>
                         <HandlingerForOppgave
                           oppgavetype={type}

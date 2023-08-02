@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { isFailure, isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
 import { erOppgaveRedigerbar, Oppgavestatus, redigerFristApi } from '~shared/api/oppgaverny'
-import { Alert, Button, Heading, Modal, DatePicker } from '@navikt/ds-react'
+import { Alert, Button, Heading, Modal, DatePicker, Label } from '@navikt/ds-react'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { formaterStringDato } from '~utils/formattering'
 import { PencilIcon } from '@navikt/aksel-icons'
@@ -45,7 +45,7 @@ export const FristHandlinger = (props: {
     return naa
   }
 
-  const redigerDatoMedtimerForAAslippetidssoneproblemUTC = (valgtDato: Date) => {
+  const redigerDatoMedtimerForAAslippetidssoneproblemUTC = (valgtDato: Date | undefined) => {
     if (valgtDato) {
       valgtDato.setHours(17)
       setnyFrist(valgtDato)

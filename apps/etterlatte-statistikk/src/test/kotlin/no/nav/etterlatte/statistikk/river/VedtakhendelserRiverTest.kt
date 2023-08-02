@@ -5,6 +5,7 @@ import io.mockk.mockk
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJson
+import no.nav.etterlatte.statistikk.domain.SakUtland
 import no.nav.etterlatte.statistikk.domain.StoenadRad
 import no.nav.etterlatte.statistikk.service.StatistikkService
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
@@ -51,7 +52,8 @@ internal class VedtakhendelserRiverTest {
         vedtakLoependeFom = LocalDate.now(),
         vedtakLoependeTom = null,
         beregning = null,
-        vedtakType = null
+        vedtakType = null,
+        sakUtland = SakUtland.NASJONAL
     )
 
     @Test

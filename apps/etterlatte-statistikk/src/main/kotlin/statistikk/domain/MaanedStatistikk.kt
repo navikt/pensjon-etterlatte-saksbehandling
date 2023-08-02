@@ -25,7 +25,8 @@ data class MaanedStoenadRad(
     val attestant: String?,
     val vedtakLoependeFom: LocalDate,
     val vedtakLoependeTom: LocalDate?,
-    val statistikkMaaned: YearMonth
+    val statistikkMaaned: YearMonth,
+    val sakUtland: SakUtland?,
 )
 
 class MaanedStatistikk(val maaned: YearMonth, stoenadRader: List<StoenadRad>) {
@@ -82,7 +83,8 @@ class MaanedStatistikk(val maaned: YearMonth, stoenadRader: List<StoenadRad>) {
                 attestant = sisteVedtak.attestant,
                 vedtakLoependeFom = sisteVedtak.vedtakLoependeFom,
                 vedtakLoependeTom = vedtakLoependeTom,
-                statistikkMaaned = maaned
+                statistikkMaaned = maaned,
+                sakUtland = SakUtland.NASJONAL
             )
         }
     }

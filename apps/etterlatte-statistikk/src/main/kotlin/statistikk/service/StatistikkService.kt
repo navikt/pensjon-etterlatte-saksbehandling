@@ -64,7 +64,7 @@ class StatistikkService(
     }
 
     fun produserStoenadStatistikkForMaaned(maaned: YearMonth): MaanedStatistikk {
-        val vedtak = stoenadRepository.hentRaderInnenforMaaned(maaned)
+        val vedtak = stoenadRepository.hentStoenadRaderInnenforMaaned(maaned)
         return MaanedStatistikk(maaned, vedtak)
     }
 
@@ -190,7 +190,8 @@ class StatistikkService(
             vedtakLoependeFom = vedtak.virkningstidspunkt.atDay(1),
             vedtakLoependeTom = null,
             beregning = beregning,
-            vedtakType = vedtak.type
+            vedtakType = vedtak.type,
+            sakUtland = SakUtland.NASJONAL
         )
     }
 

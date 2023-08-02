@@ -96,6 +96,10 @@ spec:
       value: api://dev-gcp.nom.skjermede-personer-pip/.default
     - name: KAN_BRUKE_NY_OPPGAVELISTE
       value: 'true'
+    - name: OPPGAVE_CLIENT_ID
+      value: dev-fss.oppgavehandtering.oppgave
+    - name: OPPGAVE_URL
+      value: https://oppgave.dev-fss-pub.nais.io
   accessPolicy:
     outbound:
       rules:
@@ -109,6 +113,7 @@ spec:
         - host: unleash.nais.io
         - host: norg2.dev-fss-pub.nais.io
         - host: navansatt.dev-fss-pub.nais.io
+        - host: oppgave.dev-fss-pub.nais.io
     inbound:
       rules:
         - application: etterlatte-egne-ansatte-lytter

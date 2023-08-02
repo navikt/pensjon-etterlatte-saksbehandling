@@ -2,8 +2,10 @@ package no.nav.etterlatte.oppgave
 
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
+import io.ktor.server.application.log
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
+import io.ktor.server.routing.application
 import io.ktor.server.routing.get
 import io.ktor.server.routing.route
 import no.nav.etterlatte.Kontekst
@@ -21,7 +23,9 @@ import no.nav.etterlatte.token.Saksbehandler
 import org.slf4j.LoggerFactory
 import java.util.*
 
-internal fun Route.oppgaveRoutes(service: OppgaveService) {
+internal fun Route.oppgaveRoutes(service: OppgaveService, gosysOppgaveKlient: GosysOppgaveKlient) {
+    val logger = application.log
+
     route("/api/oppgaver") {
         get {
             when (brukerTokenInfo) {
@@ -30,6 +34,25 @@ internal fun Route.oppgaveRoutes(service: OppgaveService) {
                         service.finnOppgaverForBruker(Kontekst.get().appUserAsSaksbehandler().saksbehandlerMedRoller)
                     )
                 )
+                else -> call.respond(HttpStatusCode.Forbidden)
+            }
+        }
+
+        get("/gosys") {
+            when (brukerTokenInfo) {
+                is Saksbehandler -> {
+                    val tema = call.request.queryParameters["tema"] as String
+                    val enhetsnr = call.request.queryParameters["enhetsnr"] as String
+
+                    runCatching {
+                        gosysOppgaveKlient.hentOppgaver(tema, enhetsnr, brukerTokenInfo)
+                    }.onFailure {
+                        call.respond(HttpStatusCode.InternalServerError)
+                    }.onSuccess {
+                        call.respond(HttpStatusCode.OK, it)
+                    }
+
+                }
                 else -> call.respond(HttpStatusCode.Forbidden)
             }
         }

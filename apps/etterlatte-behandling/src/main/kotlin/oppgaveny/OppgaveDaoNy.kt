@@ -105,7 +105,7 @@ class OppgaveDaoNyImpl(private val connection: () -> Connection) : OppgaveDaoNy 
                     WHERE sak_id = ?
                 """.trimIndent()
             )
-            statement.setString(1, sakId.toString())
+            statement.setLong(1, sakId)
             return statement.executeQuery().toList {
                 asOppgaveNy()
             }.also {

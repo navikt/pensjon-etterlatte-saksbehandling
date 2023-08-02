@@ -200,9 +200,11 @@ class OppgaveServiceNy(
         sakId: Long,
         enhetsID: String
     ) {
-        val oppgaverForbehandling = oppgaveDaoNy.hentOppgaverForSak(sakId)
-        oppgaverForbehandling.forEach {
-            oppgaveDaoNy.endreEnhetPaaOppgave(it.id, enhetsID)
+        inTransaction {
+            val oppgaverForbehandling = oppgaveDaoNy.hentOppgaverForSak(sakId)
+            oppgaverForbehandling.forEach {
+                oppgaveDaoNy.endreEnhetPaaOppgave(it.id, enhetsID)
+            }
         }
     }
 

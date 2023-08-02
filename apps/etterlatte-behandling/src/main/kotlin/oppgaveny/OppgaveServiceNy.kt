@@ -70,6 +70,7 @@ class OppgaveServiceNy(
             val hentetOppgave = oppgaveDaoNy.hentOppgave(saksbehandlerEndringDto.oppgaveId)
 
             if (hentetOppgave != null) {
+                sikreAtOppgaveIkkeErAvsluttet(hentetOppgave)
                 if (hentetOppgave.saksbehandler.isNullOrEmpty()) {
                     oppgaveDaoNy.settNySaksbehandler(saksbehandlerEndringDto)
                 } else {
@@ -87,6 +88,7 @@ class OppgaveServiceNy(
         inTransaction {
             val hentetOppgave = oppgaveDaoNy.hentOppgave(saksbehandlerEndringDto.oppgaveId)
             if (hentetOppgave != null) {
+                sikreAtOppgaveIkkeErAvsluttet(hentetOppgave)
                 oppgaveDaoNy.settNySaksbehandler(saksbehandlerEndringDto)
             } else {
                 throw NotFoundException("Oppgaven finnes ikke, id: ${saksbehandlerEndringDto.oppgaveId}")
@@ -97,7 +99,9 @@ class OppgaveServiceNy(
     fun fjernSaksbehandler(fjernSaksbehandlerRequest: FjernSaksbehandlerRequest) {
         inTransaction {
             val hentetOppgave = oppgaveDaoNy.hentOppgave(fjernSaksbehandlerRequest.oppgaveId)
+
             if (hentetOppgave != null) {
+                sikreAtOppgaveIkkeErAvsluttet(hentetOppgave)
                 if (hentetOppgave.saksbehandler != null) {
                     oppgaveDaoNy.fjernSaksbehandler(fjernSaksbehandlerRequest.oppgaveId)
                 } else {
@@ -111,6 +115,15 @@ class OppgaveServiceNy(
         }
     }
 
+    private fun sikreAtOppgaveIkkeErAvsluttet(oppgave: OppgaveNy) {
+        if (oppgave.erAvsluttet()) {
+            throw IllegalStateException(
+                "Oppgave med id ${oppgave.id} kan ikke endres siden den har " +
+                    "status ${oppgave.status}"
+            )
+        }
+    }
+
     fun redigerFrist(redigerFristRequest: RedigerFristRequest) {
         inTransaction {
             val hentetOppgave = oppgaveDaoNy.hentOppgave(redigerFristRequest.oppgaveId)
@@ -118,6 +131,7 @@ class OppgaveServiceNy(
                 throw BadRequestException("Tidspunkt tilbake i tid id: ${redigerFristRequest.oppgaveId}")
             }
             if (hentetOppgave != null) {
+                sikreAtOppgaveIkkeErAvsluttet(hentetOppgave)
                 if (hentetOppgave.saksbehandler != null) {
                     oppgaveDaoNy.redigerFrist(redigerFristRequest)
                 } else {

@@ -18,8 +18,6 @@ const MaanedVelger = (props: MaanedVelgerProps) => {
     locale: 'nb',
   } as UseMonthPickerOptions)
 
-  console.log(value)
-
   return (
     <MonthPickerWrapper>
       <MonthPicker {...monthpickerProps}>

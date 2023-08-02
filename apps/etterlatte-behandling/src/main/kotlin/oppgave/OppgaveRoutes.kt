@@ -44,11 +44,14 @@ internal fun Route.oppgaveRoutes(service: OppgaveService, gosysOppgaveKlient: Go
                     val tema = call.request.queryParameters["tema"] as String
                     val enhetsnr = call.request.queryParameters["enhetsnr"] as String
 
-                    val oppgaver = runCatching {
+                    runCatching {
                         gosysOppgaveKlient.hentOppgaver(tema, enhetsnr, brukerTokenInfo)
-                    }.onFailure { logger.error(it.message, it) }
+                    }.onFailure {
+                        call.respond(HttpStatusCode.InternalServerError)
+                    }.onSuccess {
+                        call.respond(HttpStatusCode.OK, it)
+                    }
 
-                    call.respond(HttpStatusCode.OK, oppgaver)
                 }
                 else -> call.respond(HttpStatusCode.Forbidden)
             }

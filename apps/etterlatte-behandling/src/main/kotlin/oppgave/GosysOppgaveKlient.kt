@@ -4,7 +4,6 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.michaelbull.result.mapBoth
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
-import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktorobo.DownstreamResourceClient
@@ -21,7 +20,7 @@ interface GosysOppgaveKlient {
 
 class GosysOppgaveKlientImpl(config: Config, httpClient: HttpClient) : GosysOppgaveKlient {
 
-    private val logger = LoggerFactory.getLogger(GrunnlagKlient::class.java)
+    private val logger = LoggerFactory.getLogger(GosysOppgaveKlient::class.java)
 
     private val azureAdClient = AzureAdClient(config)
     private val downstreamResourceClient = DownstreamResourceClient(azureAdClient, httpClient)
@@ -31,7 +30,7 @@ class GosysOppgaveKlientImpl(config: Config, httpClient: HttpClient) : GosysOppg
 
     override suspend fun hentOppgaver(tema: String, enhetsnr: String, brukerTokenInfo: BrukerTokenInfo): GosysOppgaver {
         try {
-            logger.info("Henter oppgaver fra Gosys")
+            logger.info("Henter oppgaver fra Gosys [tema=$tema, enhetsnr=$enhetsnr, ident=${brukerTokenInfo.ident()}]")
 
             val ident = brukerTokenInfo.ident()
             val filters = "statuskategori=AAPEN&tema=${tema.uppercase()}&tildeltEnhetsnr=$enhetsnr&tilordnetRessurs=$ident"
@@ -49,7 +48,7 @@ class GosysOppgaveKlientImpl(config: Config, httpClient: HttpClient) : GosysOppg
                     failure = { errorResponse -> throw errorResponse }
                 )
         } catch (e: Exception) {
-            logger.error("Noe feilet mot Gosys", e)
+            logger.error("Noe feilet mot Gosys [tema=$tema, enhetsnr=$enhetsnr, ident=${brukerTokenInfo.ident()}]", e)
             throw e
         }
     }

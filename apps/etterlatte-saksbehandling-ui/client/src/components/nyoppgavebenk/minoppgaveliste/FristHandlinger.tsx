@@ -92,7 +92,7 @@ export const FristHandlinger = (props: {
                   Lagre ny frist
                 </Button>
                 <Button variant="secondary" onClick={() => setOpen(!open)}>
-                  Lukk
+                  {isSuccess(redigerfristSvar) ? 'Lukk' : 'Avbryt'}
                 </Button>
               </Buttonwrapper>
             </Modal.Content>

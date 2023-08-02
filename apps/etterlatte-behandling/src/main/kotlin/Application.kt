@@ -123,6 +123,12 @@ fun Application.module(context: ApplicationContext) {
                 harTilgangTilSak = { sakId, saksbehandlerMedRoller ->
                     tilgangService.harTilgangTilSak(sakId, saksbehandlerMedRoller)
                 }
+                harTilgangTilOppgave = { oppgaveId, saksbehandlerMedRoller ->
+                    tilgangService.harTilgangTilOppgave(
+                        oppgaveId,
+                        saksbehandlerMedRoller
+                    )
+                }
             }
         }
     }

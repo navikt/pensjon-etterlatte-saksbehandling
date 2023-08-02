@@ -13,11 +13,8 @@ import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.oppgaveNy.FjernSaksbehandlerRequest
 import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveType
-import no.nav.etterlatte.libs.common.oppgaveNy.RedigerFristRequest
-import no.nav.etterlatte.libs.common.oppgaveNy.SaksbehandlerEndringDto
 import no.nav.etterlatte.libs.common.oppgaveNy.Status
 import no.nav.etterlatte.libs.common.oppgaveNy.VedtakOppgaveDTO
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
@@ -121,7 +118,7 @@ class OppgaveServiceNyTest {
             OppgaveType.FOERSTEGANGSBEHANDLING
         )
         val nysaksbehandler = "nysaksbehandler"
-        oppgaveServiceNy.tildelSaksbehandler(SaksbehandlerEndringDto(nyOppgave.id, nysaksbehandler))
+        oppgaveServiceNy.tildelSaksbehandler(nyOppgave.id, nysaksbehandler)
 
         val oppgaveMedNySaksbehandler = oppgaveServiceNy.hentOppgave(nyOppgave.id)
         Assertions.assertEquals(nysaksbehandler, oppgaveMedNySaksbehandler?.saksbehandler)
@@ -137,9 +134,9 @@ class OppgaveServiceNyTest {
             OppgaveType.FOERSTEGANGSBEHANDLING
         )
         val nysaksbehandler = "nysaksbehandler"
-        oppgaveServiceNy.tildelSaksbehandler(SaksbehandlerEndringDto(nyOppgave.id, nysaksbehandler))
+        oppgaveServiceNy.tildelSaksbehandler(nyOppgave.id, nysaksbehandler)
         val err = assertThrows<BadRequestException> {
-            oppgaveServiceNy.tildelSaksbehandler(SaksbehandlerEndringDto(nyOppgave.id, "enda en"))
+            oppgaveServiceNy.tildelSaksbehandler(nyOppgave.id, "enda en")
         }
         Assertions.assertTrue(err.message!!.startsWith("Oppgaven har allerede en saksbehandler"))
     }
@@ -148,7 +145,7 @@ class OppgaveServiceNyTest {
     fun `skal ikke kunne tildele hvis oppgaven ikke finnes`() {
         val nysaksbehandler = "nysaksbehandler"
         val err = assertThrows<NotFoundException> {
-            oppgaveServiceNy.tildelSaksbehandler(SaksbehandlerEndringDto(UUID.randomUUID(), nysaksbehandler))
+            oppgaveServiceNy.tildelSaksbehandler(UUID.randomUUID(), nysaksbehandler)
         }
         Assertions.assertTrue(err.message!!.startsWith("Oppgaven finnes ikke"))
     }
@@ -165,7 +162,7 @@ class OppgaveServiceNyTest {
         oppgaveDaoNy.endreStatusPaaOppgave(nyOppgave.id, Status.FERDIGSTILT)
         val nysaksbehandler = "nysaksbehandler"
         assertThrows<IllegalStateException> {
-            oppgaveServiceNy.tildelSaksbehandler(SaksbehandlerEndringDto(nyOppgave.id, nysaksbehandler))
+            oppgaveServiceNy.tildelSaksbehandler(nyOppgave.id, nysaksbehandler)
         }
     }
 
@@ -179,7 +176,7 @@ class OppgaveServiceNyTest {
             OppgaveType.FOERSTEGANGSBEHANDLING
         )
         val nysaksbehandler = "nysaksbehandler"
-        oppgaveServiceNy.byttSaksbehandler(SaksbehandlerEndringDto(nyOppgave.id, nysaksbehandler))
+        oppgaveServiceNy.byttSaksbehandler(nyOppgave.id, nysaksbehandler)
 
         val oppgaveMedNySaksbehandler = oppgaveServiceNy.hentOppgave(nyOppgave.id)
         Assertions.assertEquals(nysaksbehandler, oppgaveMedNySaksbehandler?.saksbehandler)
@@ -197,7 +194,7 @@ class OppgaveServiceNyTest {
         oppgaveDaoNy.endreStatusPaaOppgave(nyOppgave.id, Status.FERDIGSTILT)
         val nysaksbehandler = "nysaksbehandler"
         assertThrows<IllegalStateException> {
-            oppgaveServiceNy.byttSaksbehandler(SaksbehandlerEndringDto(nyOppgave.id, nysaksbehandler))
+            oppgaveServiceNy.byttSaksbehandler(nyOppgave.id, nysaksbehandler)
         }
         val oppgaveMedNySaksbehandler = oppgaveServiceNy.hentOppgave(nyOppgave.id)
         Assertions.assertEquals(nyOppgave.saksbehandler, oppgaveMedNySaksbehandler?.saksbehandler)
@@ -230,7 +227,7 @@ class OppgaveServiceNyTest {
     fun `skal ikke kunne bytte saksbehandler på en ikke eksisterende sak`() {
         val nysaksbehandler = "nysaksbehandler"
         val err = assertThrows<NotFoundException> {
-            oppgaveServiceNy.byttSaksbehandler(SaksbehandlerEndringDto(UUID.randomUUID(), nysaksbehandler))
+            oppgaveServiceNy.byttSaksbehandler(UUID.randomUUID(), nysaksbehandler)
         }
         Assertions.assertTrue(err.message!!.startsWith("Oppgaven finnes ikke"))
     }
@@ -245,8 +242,8 @@ class OppgaveServiceNyTest {
             OppgaveType.FOERSTEGANGSBEHANDLING
         )
         val nysaksbehandler = "nysaksbehandler"
-        oppgaveServiceNy.tildelSaksbehandler(SaksbehandlerEndringDto(nyOppgave.id, nysaksbehandler))
-        oppgaveServiceNy.fjernSaksbehandler(FjernSaksbehandlerRequest(nyOppgave.id))
+        oppgaveServiceNy.tildelSaksbehandler(nyOppgave.id, nysaksbehandler)
+        oppgaveServiceNy.fjernSaksbehandler(nyOppgave.id)
         val oppgaveUtenSaksbehandler = oppgaveServiceNy.hentOppgave(nyOppgave.id)
         Assertions.assertNotNull(oppgaveUtenSaksbehandler?.id)
         Assertions.assertNull(oppgaveUtenSaksbehandler?.saksbehandler)
@@ -263,7 +260,7 @@ class OppgaveServiceNyTest {
             OppgaveType.FOERSTEGANGSBEHANDLING
         )
         val err = assertThrows<BadRequestException> {
-            oppgaveServiceNy.fjernSaksbehandler(FjernSaksbehandlerRequest(nyOppgave.id))
+            oppgaveServiceNy.fjernSaksbehandler(nyOppgave.id)
         }
         Assertions.assertTrue(err.message!!.startsWith("Oppgaven har ingen saksbehandler"))
     }
@@ -278,10 +275,10 @@ class OppgaveServiceNyTest {
             OppgaveType.FOERSTEGANGSBEHANDLING
         )
         val saksbehandler = "saksbehandler"
-        oppgaveServiceNy.tildelSaksbehandler(SaksbehandlerEndringDto(nyOppgave.id, saksbehandler))
+        oppgaveServiceNy.tildelSaksbehandler(nyOppgave.id, saksbehandler)
         oppgaveDaoNy.endreStatusPaaOppgave(nyOppgave.id, Status.FERDIGSTILT)
         assertThrows<IllegalStateException> {
-            oppgaveServiceNy.fjernSaksbehandler(FjernSaksbehandlerRequest(nyOppgave.id))
+            oppgaveServiceNy.fjernSaksbehandler(nyOppgave.id)
         }
         val lagretOppgave = oppgaveServiceNy.hentOppgave(nyOppgave.id)
 
@@ -297,9 +294,9 @@ class OppgaveServiceNyTest {
             OppgaveKilde.BEHANDLING,
             OppgaveType.FOERSTEGANGSBEHANDLING
         )
-        oppgaveServiceNy.tildelSaksbehandler(SaksbehandlerEndringDto(nyOppgave.id, "nysaksbehandler"))
+        oppgaveServiceNy.tildelSaksbehandler(nyOppgave.id, "nysaksbehandler")
         val nyFrist = Tidspunkt.now().toLocalDatetimeUTC().plusMonths(4L).toTidspunkt()
-        oppgaveServiceNy.redigerFrist(RedigerFristRequest(nyOppgave.id, nyFrist))
+        oppgaveServiceNy.redigerFrist(nyOppgave.id, nyFrist)
         val oppgaveMedNyFrist = oppgaveServiceNy.hentOppgave(nyOppgave.id)
         Assertions.assertEquals(nyFrist, oppgaveMedNyFrist?.frist)
     }
@@ -313,11 +310,11 @@ class OppgaveServiceNyTest {
             OppgaveKilde.BEHANDLING,
             OppgaveType.FOERSTEGANGSBEHANDLING
         )
-        oppgaveServiceNy.tildelSaksbehandler(SaksbehandlerEndringDto(nyOppgave.id, "nysaksbehandler"))
+        oppgaveServiceNy.tildelSaksbehandler(nyOppgave.id, "nysaksbehandler")
         val nyFrist = Tidspunkt.now().toLocalDatetimeUTC().minusMonths(1L).toTidspunkt()
 
         val err = assertThrows<BadRequestException> {
-            oppgaveServiceNy.redigerFrist(RedigerFristRequest(nyOppgave.id, nyFrist))
+            oppgaveServiceNy.redigerFrist(nyOppgave.id, nyFrist)
         }
 
         Assertions.assertTrue(err.message!!.startsWith("Tidspunkt tilbake i tid id: "))
@@ -336,10 +333,8 @@ class OppgaveServiceNyTest {
         oppgaveDaoNy.endreStatusPaaOppgave(nyOppgave.id, Status.FERDIGSTILT)
         assertThrows<IllegalStateException> {
             oppgaveServiceNy.redigerFrist(
-                redigerFristRequest = RedigerFristRequest(
-                    oppgaveId = nyOppgave.id,
-                    frist = Tidspunkt.now().toLocalDatetimeUTC().plusMonths(1L).toTidspunkt()
-                )
+                oppgaveId = nyOppgave.id,
+                frist = Tidspunkt.now().toLocalDatetimeUTC().plusMonths(1L).toTidspunkt()
             )
         }
         val lagretOppgave = oppgaveServiceNy.hentOppgave(nyOppgave.id)
@@ -357,7 +352,7 @@ class OppgaveServiceNyTest {
             OppgaveType.FOERSTEGANGSBEHANDLING
         )
 
-        oppgaveServiceNy.tildelSaksbehandler(SaksbehandlerEndringDto(nyOppgave.id, "saksbehandler"))
+        oppgaveServiceNy.tildelSaksbehandler(nyOppgave.id, "saksbehandler")
 
         val vedtakOppgaveDTO = oppgaveServiceNy.lukkOppgaveUnderbehandlingOgLagNyMedType(
             VedtakOppgaveDTO(opprettetSak.id, referanse),
@@ -428,8 +423,8 @@ class OppgaveServiceNyTest {
             OppgaveKilde.BEHANDLING,
             OppgaveType.FOERSTEGANGSBEHANDLING
         )
-        oppgaveServiceNy.tildelSaksbehandler(SaksbehandlerEndringDto(oppgaveEn.id, "saksbehandler"))
-        oppgaveServiceNy.tildelSaksbehandler(SaksbehandlerEndringDto(oppgaveTo.id, "saksbehandler"))
+        oppgaveServiceNy.tildelSaksbehandler(oppgaveEn.id, "saksbehandler")
+        oppgaveServiceNy.tildelSaksbehandler(oppgaveTo.id, "saksbehandler")
 
         val err = assertThrows<BadRequestException> {
             oppgaveServiceNy.lukkOppgaveUnderbehandlingOgLagNyMedType(
@@ -446,7 +441,7 @@ class OppgaveServiceNyTest {
     @Test
     fun `kan ikke fjerne saksbehandler hvis oppgaven ikke finnes`() {
         val err = assertThrows<NotFoundException> {
-            oppgaveServiceNy.fjernSaksbehandler(FjernSaksbehandlerRequest(UUID.randomUUID()))
+            oppgaveServiceNy.fjernSaksbehandler(UUID.randomUUID())
         }
         Assertions.assertTrue(err.message!!.startsWith("Oppgaven finnes ikke"))
     }
@@ -553,7 +548,7 @@ class OppgaveServiceNyTest {
             OppgaveType.FOERSTEGANGSBEHANDLING
         )
         val nysaksbehandler = "nysaksbehandler"
-        oppgaveServiceNy.tildelSaksbehandler(SaksbehandlerEndringDto(nyOppgave.id, nysaksbehandler))
+        oppgaveServiceNy.tildelSaksbehandler(nyOppgave.id, nysaksbehandler)
 
         val oppgaveMedNySaksbehandler = oppgaveServiceNy.hentOppgave(nyOppgave.id)
         Assertions.assertEquals(nysaksbehandler, oppgaveMedNySaksbehandler?.saksbehandler)
@@ -578,7 +573,7 @@ class OppgaveServiceNyTest {
             OppgaveType.FOERSTEGANGSBEHANDLING
         )
 
-        oppgaveServiceNy.tildelSaksbehandler(SaksbehandlerEndringDto(oppgave.id, "saksbehandler01"))
+        oppgaveServiceNy.tildelSaksbehandler(oppgave.id, "saksbehandler01")
         oppgaveServiceNy.ferdigStillOppgaveUnderBehandling(behandlingsref)
         val ferdigstiltOppgave = oppgaveServiceNy.hentOppgave(oppgave.id)
         Assertions.assertEquals(Status.FERDIGSTILT, ferdigstiltOppgave?.status)
@@ -594,7 +589,7 @@ class OppgaveServiceNyTest {
             OppgaveKilde.BEHANDLING,
             OppgaveType.FOERSTEGANGSBEHANDLING
         )
-        oppgaveServiceNy.tildelSaksbehandler(SaksbehandlerEndringDto(oppgaveSomSkalBliAvbrutt.id, "saksbehandler01"))
+        oppgaveServiceNy.tildelSaksbehandler(oppgaveSomSkalBliAvbrutt.id, "saksbehandler01")
 
         oppgaveServiceNy.opprettFoerstegangsbehandlingsOppgaveForInnsendSoeknad(behandlingsref, opprettetSak.id)
 
@@ -631,7 +626,7 @@ class OppgaveServiceNyTest {
             OppgaveType.FOERSTEGANGSBEHANDLING
         )
         val saksbehandlerid = "saksbehandler01"
-        oppgaveServiceNy.tildelSaksbehandler(SaksbehandlerEndringDto(oppgaveAalesund.id, saksbehandlerid))
+        oppgaveServiceNy.tildelSaksbehandler(oppgaveAalesund.id, saksbehandlerid)
 
         val saksteinskjer = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.STEINKJER.enhetNr)
         val behrefsteinkjer = UUID.randomUUID().toString()
@@ -642,7 +637,7 @@ class OppgaveServiceNyTest {
             OppgaveType.FOERSTEGANGSBEHANDLING
         )
 
-        oppgaveServiceNy.tildelSaksbehandler(SaksbehandlerEndringDto(oppgavesteinskjer.id, saksbehandlerid))
+        oppgaveServiceNy.tildelSaksbehandler(oppgavesteinskjer.id, saksbehandlerid)
 
         val jwtclaims = JWTClaimsSet.Builder().claim("groups", saksbehandlerRolleDev).build()
         val saksbehandlerMedRoller = SaksbehandlerMedRoller(

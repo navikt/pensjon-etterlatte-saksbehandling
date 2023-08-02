@@ -74,8 +74,8 @@ export const RedigerSaksbehandler = (props: {
                 tekstKnappNei="Nei"
                 onYesClick={() =>
                   byttSaksbehandler({
-                    nysaksbehandler: { oppgaveId: oppgaveId, saksbehandler: user.ident },
-                    sakId: sakId,
+                    oppgaveId: oppgaveId,
+                    nysaksbehandler: { saksbehandler: user.ident },
                   })
                 }
                 setModalisOpen={setModalIsOpen}

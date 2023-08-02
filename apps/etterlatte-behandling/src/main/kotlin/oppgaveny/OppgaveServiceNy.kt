@@ -6,12 +6,9 @@ import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.User
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.inTransaction
-import no.nav.etterlatte.libs.common.oppgaveNy.FjernSaksbehandlerRequest
 import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveNy
 import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveType
-import no.nav.etterlatte.libs.common.oppgaveNy.RedigerFristRequest
-import no.nav.etterlatte.libs.common.oppgaveNy.SaksbehandlerEndringDto
 import no.nav.etterlatte.libs.common.oppgaveNy.Status
 import no.nav.etterlatte.libs.common.oppgaveNy.VedtakOppgaveDTO
 import no.nav.etterlatte.libs.common.oppgaveNy.opprettNyOppgaveMedReferanseOgSak
@@ -65,52 +62,46 @@ class OppgaveServiceNy(
             Rolle.STRENGT_FORTROLIG.takeIf { bruker.harRolleStrengtFortrolig() }
         )
 
-    fun tildelSaksbehandler(saksbehandlerEndringDto: SaksbehandlerEndringDto) {
+    fun tildelSaksbehandler(oppgaveId: UUID, saksbehandler: String) {
         inTransaction {
-            val hentetOppgave = oppgaveDaoNy.hentOppgave(saksbehandlerEndringDto.oppgaveId)
+            val hentetOppgave = oppgaveDaoNy.hentOppgave(oppgaveId)
+                ?: throw NotFoundException("Oppgaven finnes ikke, id: $oppgaveId")
 
-            if (hentetOppgave != null) {
-                sikreAtOppgaveIkkeErAvsluttet(hentetOppgave)
-                if (hentetOppgave.saksbehandler.isNullOrEmpty()) {
-                    oppgaveDaoNy.settNySaksbehandler(saksbehandlerEndringDto)
-                } else {
-                    throw BadRequestException(
-                        "Oppgaven har allerede en saksbehandler, id: ${saksbehandlerEndringDto.oppgaveId}"
-                    )
-                }
+            sikreAtOppgaveIkkeErAvsluttet(hentetOppgave)
+            if (hentetOppgave.saksbehandler.isNullOrEmpty()) {
+                oppgaveDaoNy.settNySaksbehandler(oppgaveId, saksbehandler)
             } else {
-                throw NotFoundException("Oppgaven finnes ikke, id: ${saksbehandlerEndringDto.oppgaveId}")
+                throw BadRequestException(
+                    "Oppgaven har allerede en saksbehandler, id: $oppgaveId"
+                )
             }
         }
     }
 
-    fun byttSaksbehandler(saksbehandlerEndringDto: SaksbehandlerEndringDto) {
+    fun byttSaksbehandler(oppgaveId: UUID, saksbehandler: String) {
         inTransaction {
-            val hentetOppgave = oppgaveDaoNy.hentOppgave(saksbehandlerEndringDto.oppgaveId)
+            val hentetOppgave = oppgaveDaoNy.hentOppgave(oppgaveId)
             if (hentetOppgave != null) {
                 sikreAtOppgaveIkkeErAvsluttet(hentetOppgave)
-                oppgaveDaoNy.settNySaksbehandler(saksbehandlerEndringDto)
+                oppgaveDaoNy.settNySaksbehandler(oppgaveId, saksbehandler)
             } else {
-                throw NotFoundException("Oppgaven finnes ikke, id: ${saksbehandlerEndringDto.oppgaveId}")
+                throw NotFoundException("Oppgaven finnes ikke, id: $oppgaveId")
             }
         }
     }
 
-    fun fjernSaksbehandler(fjernSaksbehandlerRequest: FjernSaksbehandlerRequest) {
+    fun fjernSaksbehandler(oppgaveId: UUID) {
         inTransaction {
-            val hentetOppgave = oppgaveDaoNy.hentOppgave(fjernSaksbehandlerRequest.oppgaveId)
+            val hentetOppgave = oppgaveDaoNy.hentOppgave(oppgaveId)
+                ?: throw NotFoundException("Oppgaven finnes ikke, id: $oppgaveId")
 
-            if (hentetOppgave != null) {
-                sikreAtOppgaveIkkeErAvsluttet(hentetOppgave)
-                if (hentetOppgave.saksbehandler != null) {
-                    oppgaveDaoNy.fjernSaksbehandler(fjernSaksbehandlerRequest.oppgaveId)
-                } else {
-                    throw BadRequestException(
-                        "Oppgaven har ingen saksbehandler, id: ${fjernSaksbehandlerRequest.oppgaveId}"
-                    )
-                }
+            sikreAtOppgaveIkkeErAvsluttet(hentetOppgave)
+            if (hentetOppgave.saksbehandler != null) {
+                oppgaveDaoNy.fjernSaksbehandler(oppgaveId)
             } else {
-                throw NotFoundException("Oppgaven finnes ikke, id: ${fjernSaksbehandlerRequest.oppgaveId}")
+                throw BadRequestException(
+                    "Oppgaven har ingen saksbehandler, id: $oppgaveId"
+                )
             }
         }
     }
@@ -124,23 +115,20 @@ class OppgaveServiceNy(
         }
     }
 
-    fun redigerFrist(redigerFristRequest: RedigerFristRequest) {
+    fun redigerFrist(oppgaveId: UUID, frist: Tidspunkt) {
         inTransaction {
-            val hentetOppgave = oppgaveDaoNy.hentOppgave(redigerFristRequest.oppgaveId)
-            if (redigerFristRequest.frist.isBefore(Tidspunkt.now())) {
-                throw BadRequestException("Tidspunkt tilbake i tid id: ${redigerFristRequest.oppgaveId}")
+            if (frist.isBefore(Tidspunkt.now())) {
+                throw BadRequestException("Tidspunkt tilbake i tid id: $oppgaveId")
             }
-            if (hentetOppgave != null) {
-                sikreAtOppgaveIkkeErAvsluttet(hentetOppgave)
-                if (hentetOppgave.saksbehandler != null) {
-                    oppgaveDaoNy.redigerFrist(redigerFristRequest)
-                } else {
-                    throw BadRequestException(
-                        "Oppgaven har ingen saksbehandler, id: ${redigerFristRequest.oppgaveId}"
-                    )
-                }
+            val hentetOppgave = oppgaveDaoNy.hentOppgave(oppgaveId)
+                ?: throw NotFoundException("Oppgaven finnes ikke, id: $oppgaveId")
+            sikreAtOppgaveIkkeErAvsluttet(hentetOppgave)
+            if (hentetOppgave.saksbehandler != null) {
+                oppgaveDaoNy.redigerFrist(oppgaveId, frist)
             } else {
-                throw NotFoundException("Oppgaven finnes ikke, id: ${redigerFristRequest.oppgaveId}")
+                throw BadRequestException(
+                    "Oppgaven har ingen saksbehandler, id: $oppgaveId"
+                )
             }
         }
     }
@@ -155,7 +143,8 @@ class OppgaveServiceNy(
                 .single { it.status == Status.UNDER_BEHANDLING || it.status == Status.NY }
             if (oppgaveUnderBehandling.saksbehandler != saksbehandler) {
                 byttSaksbehandler(
-                    SaksbehandlerEndringDto(oppgaveId = oppgaveUnderBehandling.id, saksbehandler = saksbehandler)
+                    oppgaveId = oppgaveUnderBehandling.id,
+                    saksbehandler = saksbehandler
                 )
             }
         }

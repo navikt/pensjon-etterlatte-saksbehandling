@@ -233,7 +233,7 @@ export const Oppgavelista = (props: { oppgaver: ReadonlyArray<OppgaveDTOny>; hen
                             sakId={sakId}
                           />
                         ) : (
-                          <TildelSaksbehandler oppgaveId={id} sakId={sakId} />
+                          <TildelSaksbehandler oppgaveId={id} />
                         )}
                       </Table.DataCell>
                       <Table.DataCell>{sakType && <SaktypeTag sakType={sakType} />}</Table.DataCell>

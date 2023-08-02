@@ -4,17 +4,18 @@ import { Pagination, Table } from '@navikt/ds-react'
 import { formaterStringDato } from '~utils/formattering'
 import { RedigerSaksbehandler } from '~components/nyoppgavebenk/RedigerSaksbehandler'
 import { FristHandlinger } from '~components/nyoppgavebenk/minoppgaveliste/FristHandlinger'
-import { useState } from 'react'
+import React, { useState } from 'react'
 import { HandlingerForOppgave } from '~components/nyoppgavebenk/HandlingerForOppgave'
 import { OppgavetypeTag, SaktypeTag } from '~components/nyoppgavebenk/Tags'
 import SaksoversiktLenke from '~components/oppgavebenken/handlinger/BrukeroversiktKnapp'
+import { PaginationWrapper } from '~components/nyoppgavebenk/Oppgavelista'
 
 export const MinOppgaveliste = (props: { oppgaver: ReadonlyArray<OppgaveDTOny> }) => {
   const { oppgaver } = props
   const user = useAppSelector((state) => state.saksbehandlerReducer.saksbehandler)
   const [page, setPage] = useState<number>(1)
   const mineOppgaver = oppgaver.filter((o) => o.saksbehandler === user.ident)
-  const rowsPerPage = 20
+  const [rowsPerPage, setRowsPerPage] = useState<number>(10)
   let paginerteOppgaver = mineOppgaver
   paginerteOppgaver = paginerteOppgaver.slice((page - 1) * rowsPerPage, page * rowsPerPage)
 
@@ -92,12 +93,31 @@ export const MinOppgaveliste = (props: { oppgaver: ReadonlyArray<OppgaveDTOny> }
                 )}
             </Table.Body>
           </Table>
-          <Pagination
-            page={page}
-            onPageChange={setPage}
-            count={Math.ceil(mineOppgaver.length / rowsPerPage)}
-            size="small"
-          />
+          <PaginationWrapper>
+            <Pagination
+              page={page}
+              onPageChange={setPage}
+              count={Math.ceil(mineOppgaver.length / rowsPerPage)}
+              size="small"
+            />
+            <p>
+              Viser {(page - 1) * rowsPerPage + 1} - {(page - 1) * rowsPerPage + paginerteOppgaver.length} av{' '}
+              {mineOppgaver.length} oppgaver
+            </p>
+            <select
+              value={rowsPerPage}
+              onChange={(e) => {
+                setRowsPerPage(Number(e.target.value))
+              }}
+              title={'Antall oppgaver som vises'}
+            >
+              {[10, 20, 30, 40, 50].map((rowsPerPage) => (
+                <option key={rowsPerPage} value={rowsPerPage}>
+                  Vis {rowsPerPage} oppgaver
+                </option>
+              ))}
+            </select>
+          </PaginationWrapper>
         </div>
       ) : (
         <>Du har ingen oppgaver</>

@@ -74,7 +74,8 @@ fun stoenadRad(
     vedtakLoependeFom: LocalDate = LocalDate.of(2022, 8, 1),
     vedtakLoependeTom: LocalDate? = null,
     beregning: Beregning? = null,
-    vedtakType: VedtakType = VedtakType.INNVILGELSE
+    vedtakType: VedtakType = VedtakType.INNVILGELSE,
+    sakUtland: SakUtland = SakUtland.NASJONAL
 ): StoenadRad = StoenadRad(
     id = id,
     fnrSoeker = fnrSoeker,
@@ -95,5 +96,6 @@ fun stoenadRad(
     vedtakLoependeFom = vedtakLoependeFom,
     vedtakLoependeTom = vedtakLoependeTom,
     beregning = beregning,
-    vedtakType = vedtakType
+    vedtakType = vedtakType,
+    sakUtland = sakUtland
 )

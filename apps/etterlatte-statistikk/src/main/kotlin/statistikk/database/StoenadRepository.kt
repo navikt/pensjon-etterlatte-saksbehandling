@@ -8,6 +8,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.database.toList
 import no.nav.etterlatte.statistikk.domain.MaanedStoenadRad
+import no.nav.etterlatte.statistikk.domain.SakUtland
 import no.nav.etterlatte.statistikk.domain.StoenadRad
 import org.postgresql.util.PGobject
 import java.sql.Date
@@ -28,19 +29,35 @@ class StoenadRepository(private val datasource: DataSource) {
         }
     }
 
-    fun datapakke(): List<StoenadRad> {
+    fun hentStoenadRader(): List<StoenadRad> {
         return connection.use {
             it.prepareStatement(
                 """
                 SELECT id, fnrSoeker, fnrForeldre, 
                     fnrSoesken, anvendtTrygdetid, nettoYtelse, beregningType, anvendtSats, behandlingId, sakId, 
                     sakNummer, tekniskTid, sakYtelse, versjon, saksbehandler, attestant, vedtakLoependeFom, 
-                    vedtakLoependeTom, beregning, vedtakType
+                    vedtakLoependeTom, beregning, vedtakType, sak_utland
                 FROM stoenad
                 """.trimIndent()
             ).executeQuery().toList {
                 asStoenadRad()
             }
+        }
+    }
+    fun hentStoenadRaderInnenforMaaned(maaned: YearMonth): List<StoenadRad> {
+        return connection.use { conn ->
+            conn.prepareStatement(
+                """
+                SELECT * FROM stoenad 
+                WHERE vedtakLoependeFom <= ? AND COALESCE(vedtakLoependeTom, ?) >= ? 
+                    AND tekniskTid <= ?
+                """.trimIndent()
+            ).apply {
+                setDate(1, Date.valueOf(maaned.atEndOfMonth()))
+                setDate(2, Date.valueOf(maaned.atEndOfMonth()))
+                setDate(3, Date.valueOf(maaned.atEndOfMonth()))
+                setTidspunkt(4, maaned.atEndOfMonth().atTime(LocalTime.MAX).toNorskTidspunkt())
+            }.executeQuery().toList { asStoenadRad() }
         }
     }
 
@@ -52,8 +69,8 @@ class StoenadRepository(private val datasource: DataSource) {
                 INSERT INTO maaned_stoenad(
                     fnrSoeker, fnrForeldre, fnrSoesken, anvendtTrygdetid, nettoYtelse, beregningType, anvendtSats, 
                     behandlingId, sakId, tekniskTid, sakYtelse, versjon, saksbehandler, attestant, 
-                    vedtakLoependeFom, vedtakLoependeTom, statistikkMaaned
-                ) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    vedtakLoependeFom, vedtakLoependeTom, statistikkMaaned, sak_utland
+                ) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?)
                 """.trimIndent()
             ).apply {
                 setString(1, maanedStatistikkRad.fnrSoeker)
@@ -73,6 +90,7 @@ class StoenadRepository(private val datasource: DataSource) {
                 setDate(15, Date.valueOf(maanedStatistikkRad.vedtakLoependeFom))
                 setDate(16, maanedStatistikkRad.vedtakLoependeTom?.let { Date.valueOf(it) })
                 setString(17, maanedStatistikkRad.statistikkMaaned.toString())
+                setString(18, maanedStatistikkRad.sakUtland.toString())
             }.executeUpdate()
         }
     }
@@ -84,8 +102,8 @@ class StoenadRepository(private val datasource: DataSource) {
                 INSERT INTO stoenad(
                     fnrSoeker, fnrForeldre, fnrSoesken, anvendtTrygdetid, nettoYtelse, beregningType, anvendtSats, 
                     behandlingId, sakId, sakNummer, tekniskTid, sakYtelse, versjon, saksbehandler, attestant, 
-                    vedtakLoependeFom, vedtakLoependeTom, beregning, vedtakType
-                ) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    vedtakLoependeFom, vedtakLoependeTom, beregning, vedtakType, sak_utland
+                ) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """.trimIndent(),
                 Statement.RETURN_GENERATED_KEYS
             ).apply {
@@ -102,23 +120,6 @@ class StoenadRepository(private val datasource: DataSource) {
                 }
                 return null
             }
-        }
-    }
-
-    fun hentRaderInnenforMaaned(maaned: YearMonth): List<StoenadRad> {
-        return connection.use { conn ->
-            conn.prepareStatement(
-                """
-                SELECT * FROM stoenad 
-                WHERE vedtakLoependeFom <= ? AND COALESCE(vedtakLoependeTom, ?) >= ? 
-                    AND tekniskTid <= ?
-                """.trimIndent()
-            ).apply {
-                setDate(1, Date.valueOf(maaned.atEndOfMonth()))
-                setDate(2, Date.valueOf(maaned.atEndOfMonth()))
-                setDate(3, Date.valueOf(maaned.atEndOfMonth()))
-                setTidspunkt(4, maaned.atEndOfMonth().atTime(LocalTime.MAX).toNorskTidspunkt())
-            }.executeQuery().toList { asStoenadRad() }
         }
     }
 
@@ -222,6 +223,7 @@ private fun PreparedStatement.setStoenadRad(stoenadsrad: StoenadRad): PreparedSt
     setDate(17, stoenadsrad.vedtakLoependeTom?.let { Date.valueOf(it) })
     setJsonb(18, stoenadsrad.beregning)
     setString(19, stoenadsrad.vedtakType?.toString())
+    setString(20, stoenadsrad.sakUtland?.toString())
 }
 
 private fun ResultSet.asStoenadRad(): StoenadRad = StoenadRad(
@@ -244,5 +246,6 @@ private fun ResultSet.asStoenadRad(): StoenadRad = StoenadRad(
     vedtakLoependeFom = getDate("vedtakLoependeFom").toLocalDate(),
     vedtakLoependeTom = getDate("vedtakLoependeTom")?.toLocalDate(),
     beregning = getString("beregning")?.let { objectMapper.readValue(it) },
-    vedtakType = getString("vedtakType")?.let { enumValueOf<VedtakType>(it) }
+    vedtakType = getString("vedtakType")?.let { enumValueOf<VedtakType>(it) },
+    sakUtland = getString("sak_utland")?.let { enumValueOf<SakUtland>(it) },
 )

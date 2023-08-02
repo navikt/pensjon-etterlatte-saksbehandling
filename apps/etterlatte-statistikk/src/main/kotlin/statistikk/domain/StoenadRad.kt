@@ -25,5 +25,6 @@ data class StoenadRad(
     val vedtakLoependeFom: LocalDate,
     val vedtakLoependeTom: LocalDate?,
     val beregning: Beregning?,
-    val vedtakType: VedtakType?
+    val vedtakType: VedtakType?,
+    val sakUtland: SakUtland?,
 )

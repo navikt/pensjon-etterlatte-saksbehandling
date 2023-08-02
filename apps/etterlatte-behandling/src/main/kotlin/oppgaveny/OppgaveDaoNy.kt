@@ -23,10 +23,12 @@ interface OppgaveDaoNy {
     fun lagreOppgave(oppgaveNy: OppgaveNy)
     fun hentOppgave(oppgaveId: UUID): OppgaveNy?
     fun hentOppgaverForBehandling(behandlingid: String): List<OppgaveNy>
+    fun hentOppgaverForSak(sakId: Long): List<OppgaveNy>
     fun hentOppgaver(oppgaveTypeTyper: List<OppgaveType>): List<OppgaveNy>
     fun finnOppgaverForStrengtFortroligOgStrengtFortroligUtland(oppgaveTypeTyper: List<OppgaveType>): List<OppgaveNy>
     fun settNySaksbehandler(saksbehandlerEndringDto: SaksbehandlerEndringDto)
     fun endreStatusPaaOppgave(oppgaveId: UUID, oppgaveStatus: Status)
+    fun endreEnhetPaaOppgave(oppgaveId: UUID, enhet: String)
     fun fjernSaksbehandler(oppgaveId: UUID)
     fun redigerFrist(redigerFristRequest: RedigerFristRequest)
 }
@@ -90,6 +92,24 @@ class OppgaveDaoNyImpl(private val connection: () -> Connection) : OppgaveDaoNy 
                 asOppgaveNy()
             }.also {
                 logger.info("Hentet antall nye oppgaver for behandling: ${it.size} behandling: $behandlingid")
+            }
+        }
+    }
+
+    override fun hentOppgaverForSak(sakId: Long): List<OppgaveNy> {
+        with(connection()) {
+            val statement = prepareStatement(
+                """
+                    SELECT id, status, enhet, sak_id, type, saksbehandler, referanse, merknad, opprettet, saktype, fnr, frist, kilde
+                    FROM oppgave
+                    WHERE sak_id = ?
+                """.trimIndent()
+            )
+            statement.setString(1, sakId.toString())
+            return statement.executeQuery().toList {
+                asOppgaveNy()
+            }.also {
+                logger.info("Hentet antall nye oppgaver for sak: ${it.size} sak: $sakId")
             }
         }
     }
@@ -172,6 +192,23 @@ class OppgaveDaoNyImpl(private val connection: () -> Connection) : OppgaveDaoNy 
             )
 
             statement.setString(1, oppgaveStatus.toString())
+            statement.setObject(2, oppgaveId)
+
+            statement.executeUpdate()
+        }
+    }
+
+    override fun endreEnhetPaaOppgave(oppgaveId: UUID, enhet: String) {
+        with(connection()) {
+            val statement = prepareStatement(
+                """
+                UPDATE oppgave
+                SET enhet = ?
+                where id = ?::UUID
+                """.trimIndent()
+            )
+
+            statement.setString(1, enhet)
             statement.setObject(2, oppgaveId)
 
             statement.executeUpdate()

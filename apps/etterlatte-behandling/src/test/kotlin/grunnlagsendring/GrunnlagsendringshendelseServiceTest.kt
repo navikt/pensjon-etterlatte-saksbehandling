@@ -592,6 +592,7 @@ internal class GrunnlagsendringshendelseServiceTest {
         coEvery { grunnlagClient.hentAlleSakIder(any()) } returns sakIder
         every { adressebeskyttelseDaoMock.oppdaterAdresseBeskyttelse(any(), any()) } returns 1
         every { sakService.finnSaker(fnr) } returns saker
+        every { oppgaveService.endreEnhetForOppgaverTilknyttetSak(any(),any()) } returns Unit
         every {
             sakService.finnEnhetForPersonOgTema(any(), any(), any())
         } returns ArbeidsFordelingEnhet("NAV Familie- og pensjonsytelser Steinkjer", "4817")
@@ -630,6 +631,7 @@ internal class GrunnlagsendringshendelseServiceTest {
         coEvery { grunnlagClient.hentAlleSakIder(any()) } returns sakIder
         every { adressebeskyttelseDaoMock.oppdaterAdresseBeskyttelse(any(), any()) } returns 1
         every { sakService.finnSaker(fnr) } returns saker
+        every { oppgaveService.endreEnhetForOppgaverTilknyttetSak(any(),any()) } returns Unit
         every {
             sakService.finnEnhetForPersonOgTema(any(), any(), any())
         } returns ArbeidsFordelingEnhet("NAV Familie- og pensjonsytelser Steinkjer", "4817")

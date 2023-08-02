@@ -184,17 +184,28 @@ class OppgaveServiceNy(
         } catch (e: NoSuchElementException) {
             throw BadRequestException(
                 "Det må finnes en oppgave under behandling, gjelder behandling:" +
-                    " ${fattetoppgave.referanse}",
+                        " ${fattetoppgave.referanse}",
                 e
             )
         } catch (e: IllegalArgumentException) {
             throw BadRequestException(
                 "Skal kun ha en oppgave under behandling, gjelder behandling:" +
-                    " ${fattetoppgave.referanse}",
+                        " ${fattetoppgave.referanse}",
                 e
             )
         }
     }
+
+    fun endreEnhetForOppgaverTilknyttetSak(
+        sakId: Long,
+        enhetsID: String
+    ) {
+        val oppgaverForbehandling = oppgaveDaoNy.hentOppgaverForSak(sakId)
+        oppgaverForbehandling.forEach {
+            oppgaveDaoNy.endreEnhetPaaOppgave(it.id, enhetsID)
+        }
+    }
+
 
     fun avbrytOppgaveUnderBehandling(
         behandlingEllerHendelseId: String,
@@ -214,13 +225,13 @@ class OppgaveServiceNy(
         } catch (e: NoSuchElementException) {
             throw BadRequestException(
                 "Det må finnes en oppgave under behandling, gjelder behandling / hendelse med ID:" +
-                    " $behandlingEllerHendelseId}",
+                        " $behandlingEllerHendelseId}",
                 e
             )
         } catch (e: IllegalArgumentException) {
             throw BadRequestException(
                 "Skal kun ha en oppgave under behandling, gjelder behandling / hendelse med ID:" +
-                    " $behandlingEllerHendelseId",
+                        " $behandlingEllerHendelseId",
                 e
             )
         }
@@ -247,13 +258,13 @@ class OppgaveServiceNy(
         } catch (e: NoSuchElementException) {
             throw BadRequestException(
                 "Det må finnes en oppgave under behandling, gjelder behandling / hendelse med ID:" +
-                    " $behandlingEllerHendelseId}",
+                        " $behandlingEllerHendelseId}",
                 e
             )
         } catch (e: IllegalArgumentException) {
             throw BadRequestException(
                 "Skal kun ha en oppgave under behandling, gjelder behandling / hendelse med ID:" +
-                    " $behandlingEllerHendelseId",
+                        " $behandlingEllerHendelseId",
                 e
             )
         }

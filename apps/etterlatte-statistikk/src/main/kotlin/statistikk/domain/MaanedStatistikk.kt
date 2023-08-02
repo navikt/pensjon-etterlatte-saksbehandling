@@ -84,7 +84,7 @@ class MaanedStatistikk(val maaned: YearMonth, stoenadRader: List<StoenadRad>) {
                 vedtakLoependeFom = sisteVedtak.vedtakLoependeFom,
                 vedtakLoependeTom = vedtakLoependeTom,
                 statistikkMaaned = maaned,
-                sakUtland = SakUtland.NASJONAL
+                sakUtland = sisteVedtak.sakUtland
             )
         }
     }

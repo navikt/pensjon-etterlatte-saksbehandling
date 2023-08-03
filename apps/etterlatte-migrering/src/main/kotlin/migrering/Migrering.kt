@@ -39,7 +39,7 @@ internal class Migrering(rapidsConnection: RapidsConnection, private val pesysRe
         packet.eventName = Migreringshendelser.MIGRER_SAK
         val request = tilMigreringsrequest(sak)
         packet.request = request.toJson()
-        packet[FNR_KEY] = request.fnr.value
+        packet[FNR_KEY] = request.soeker.value
         packet[BEHOV_NAME_KEY] = Opplysningstype.AVDOED_PDL_V1
         context.publish(packet.toJson())
         logger.info(
@@ -51,9 +51,11 @@ internal class Migrering(rapidsConnection: RapidsConnection, private val pesysRe
     private fun tilMigreringsrequest(sak: Pesyssak) = MigreringRequest(
         pesysId = sak.pesysId,
         enhet = sak.enhet,
-        fnr = sak.folkeregisteridentifikator,
-        persongalleri = sak.persongalleri,
+        soeker = sak.soeker,
+        gjenlevendeForelder = sak.gjenlevendeForelder,
+        avdoedForelder = sak.avdoedForelder,
         virkningstidspunkt = sak.virkningstidspunkt,
-        trygdetidsgrunnlag = sak.trygdetidPerioder
+        beregning = sak.beregning,
+        trygdetidsPerioder = sak.trygdetidsPerioder
     )
 }

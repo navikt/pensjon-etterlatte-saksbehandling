@@ -239,7 +239,9 @@ export const Oppgavelista = (props: { oppgaver: ReadonlyArray<OppgaveDTOny>; hen
                       </Table.DataCell>
                       <Table.DataCell>{sakType && <SaktypeTag sakType={sakType} />}</Table.DataCell>
                       <Table.DataCell>{merknad}</Table.DataCell>
-                      <Table.DataCell>{status}</Table.DataCell>
+                      <Table.DataCell>
+                        {<span>{status ? OPPGAVESTATUSFILTER[status] ?? status : 'Ukjent'}</span>}
+                      </Table.DataCell>
                       <Table.DataCell>{enhet}</Table.DataCell>
                       <Table.DataCell>
                         {saksbehandler ? (

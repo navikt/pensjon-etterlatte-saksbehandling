@@ -4,17 +4,18 @@ import { Pagination, Table } from '@navikt/ds-react'
 import { formaterStringDato } from '~utils/formattering'
 import { RedigerSaksbehandler } from '~components/nyoppgavebenk/RedigerSaksbehandler'
 import { FristHandlinger } from '~components/nyoppgavebenk/minoppgaveliste/FristHandlinger'
-import { useState } from 'react'
+import React, { useState } from 'react'
 import { HandlingerForOppgave } from '~components/nyoppgavebenk/HandlingerForOppgave'
 import { OppgavetypeTag, SaktypeTag } from '~components/nyoppgavebenk/Tags'
 import SaksoversiktLenke from '~components/oppgavebenken/handlinger/BrukeroversiktKnapp'
+import { PaginationWrapper } from '~components/nyoppgavebenk/Oppgavelista'
 
 export const MinOppgaveliste = (props: { oppgaver: ReadonlyArray<OppgaveDTOny> }) => {
   const { oppgaver } = props
   const user = useAppSelector((state) => state.saksbehandlerReducer.saksbehandler)
   const [page, setPage] = useState<number>(1)
   const mineOppgaver = oppgaver.filter((o) => o.saksbehandler === user.ident)
-  const rowsPerPage = 20
+  const [rowsPerPage, setRowsPerPage] = useState<number>(10)
   let paginerteOppgaver = mineOppgaver
   paginerteOppgaver = paginerteOppgaver.slice((page - 1) * rowsPerPage, page * rowsPerPage)
 
@@ -27,13 +28,13 @@ export const MinOppgaveliste = (props: { oppgaver: ReadonlyArray<OppgaveDTOny> }
               <Table.Row>
                 <Table.HeaderCell scope="col">Registreringsdato</Table.HeaderCell>
                 <Table.HeaderCell scope="col">Frist</Table.HeaderCell>
-                <Table.HeaderCell scope="col">Fnr</Table.HeaderCell>
+                <Table.HeaderCell scope="col">Fødselsnummer</Table.HeaderCell>
                 <Table.HeaderCell scope="col">Oppgavetype</Table.HeaderCell>
-                <Table.HeaderCell scope="col">Status</Table.HeaderCell>
+                <Table.HeaderCell scope="col">Ytelse</Table.HeaderCell>
                 <Table.HeaderCell scope="col">Merknad</Table.HeaderCell>
+                <Table.HeaderCell scope="col">Status</Table.HeaderCell>
                 <Table.HeaderCell scope="col">Enhet</Table.HeaderCell>
                 <Table.HeaderCell scope="col">Saksbehandler</Table.HeaderCell>
-                <Table.HeaderCell scope="col">Ytelse</Table.HeaderCell>
                 <Table.HeaderCell scope="col">Handlinger</Table.HeaderCell>
               </Table.Row>
             </Table.Header>
@@ -65,8 +66,9 @@ export const MinOppgaveliste = (props: { oppgaver: ReadonlyArray<OppgaveDTOny> }
                       <Table.DataCell>
                         <OppgavetypeTag oppgavetype={type} />
                       </Table.DataCell>
-                      <Table.DataCell>{status}</Table.DataCell>
+                      <Table.DataCell>{sakType && <SaktypeTag sakType={sakType} />}</Table.DataCell>
                       <Table.DataCell>{merknad}</Table.DataCell>
+                      <Table.DataCell>{status}</Table.DataCell>
                       <Table.DataCell>{enhet}</Table.DataCell>
                       <Table.DataCell>
                         {saksbehandler && (
@@ -78,7 +80,6 @@ export const MinOppgaveliste = (props: { oppgaver: ReadonlyArray<OppgaveDTOny> }
                           />
                         )}
                       </Table.DataCell>
-                      <Table.DataCell>{sakType && <SaktypeTag sakType={sakType} />}</Table.DataCell>
                       <Table.DataCell>
                         <HandlingerForOppgave
                           oppgavetype={type}
@@ -92,12 +93,31 @@ export const MinOppgaveliste = (props: { oppgaver: ReadonlyArray<OppgaveDTOny> }
                 )}
             </Table.Body>
           </Table>
-          <Pagination
-            page={page}
-            onPageChange={setPage}
-            count={Math.ceil(mineOppgaver.length / rowsPerPage)}
-            size="small"
-          />
+          <PaginationWrapper>
+            <Pagination
+              page={page}
+              onPageChange={setPage}
+              count={Math.ceil(mineOppgaver.length / rowsPerPage)}
+              size="small"
+            />
+            <p>
+              Viser {(page - 1) * rowsPerPage + 1} - {(page - 1) * rowsPerPage + paginerteOppgaver.length} av{' '}
+              {mineOppgaver.length} oppgaver
+            </p>
+            <select
+              value={rowsPerPage}
+              onChange={(e) => {
+                setRowsPerPage(Number(e.target.value))
+              }}
+              title={'Antall oppgaver som vises'}
+            >
+              {[10, 20, 30, 40, 50].map((rowsPerPage) => (
+                <option key={rowsPerPage} value={rowsPerPage}>
+                  Vis {rowsPerPage} oppgaver
+                </option>
+              ))}
+            </select>
+          </PaginationWrapper>
         </div>
       ) : (
         <>Du har ingen oppgaver</>

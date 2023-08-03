@@ -12,6 +12,7 @@ import styled from 'styled-components'
 type OppgavelisteToggle = 'Oppgavelista' | 'MinOppgaveliste'
 const TabsWidth = styled(Tabs)`
   max-width: 20em;
+  margin-bottom: 2rem;
 `
 
 export const ToggleMinOppgaveliste = () => {
@@ -36,7 +37,6 @@ export const ToggleMinOppgaveliste = () => {
       </TabsWidth>
       {isPending(oppgaver) && <Spinner visible={true} label={'Henter nye oppgaver'} />}
       {isFailure(oppgaver) && <ApiErrorAlert>Kunne ikke hente oppgaver</ApiErrorAlert>}
-      {isSuccess(oppgaver) && <>Hentet antall oppgaver: {hentedeOppgaver?.length}</>}
       {isSuccess(oppgaver) && (
         <>
           {oppgaveListeValg === 'Oppgavelista' && (

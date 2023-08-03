@@ -3,7 +3,7 @@ import { formaterStringDato } from '~utils/formattering'
 import { TildelSaksbehandler } from '~components/nyoppgavebenk/TildelSaksbehandler'
 import { RedigerSaksbehandler } from '~components/nyoppgavebenk/RedigerSaksbehandler'
 import { OppgaveDTOny } from '~shared/api/oppgaverny'
-import { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import styled from 'styled-components'
 import {
   EnhetFilterKeys,
@@ -47,6 +47,18 @@ export const FristWrapper = styled.span<{ fristHarPassert: boolean }>`
   margin-right: 0.5rem;
 `
 
+export const PaginationWrapper = styled.div`
+  display: flex;
+  gap: 0.5em;
+  flex-wrap: wrap;
+  margin: 0.5em 0;
+
+  > p {
+    margin: 0;
+    line-height: 32px;
+  }
+`
+
 export const Oppgavelista = (props: { oppgaver: ReadonlyArray<OppgaveDTOny>; hentOppgaver: () => void }) => {
   const { oppgaver, hentOppgaver } = props
 
@@ -59,7 +71,7 @@ export const Oppgavelista = (props: { oppgaver: ReadonlyArray<OppgaveDTOny>; hen
   const [oppgavekildeFilter, setOppgavekildeFilter] = useState<OppgaveKildeFilterKeys>('visAlle')
   const [fnrFilter, setFnrFilter] = useState<string>('')
   const [page, setPage] = useState<number>(1)
-  const rowsPerPage = 10
+  const [rowsPerPage, setRowsPerPage] = useState<number>(10)
   const mutableOppgaver = oppgaver.concat()
   const filtrerteOppgaver = filtrerOppgaver(
     enhetsFilter,
@@ -75,6 +87,10 @@ export const Oppgavelista = (props: { oppgaver: ReadonlyArray<OppgaveDTOny>; hen
 
   let paginerteOppgaver = filtrerteOppgaver
   paginerteOppgaver = paginerteOppgaver.slice((page - 1) * rowsPerPage, page * rowsPerPage)
+
+  useEffect(() => {
+    if (paginerteOppgaver.length === 0 && filtrerteOppgaver.length > 0) setPage(1)
+  }, [paginerteOppgaver, filtrerteOppgaver])
 
   return (
     <>
@@ -181,13 +197,13 @@ export const Oppgavelista = (props: { oppgaver: ReadonlyArray<OppgaveDTOny>; hen
               <Table.Row>
                 <Table.HeaderCell scope="col">Registreringsdato</Table.HeaderCell>
                 <Table.HeaderCell scope="col">Frist</Table.HeaderCell>
-                <Table.HeaderCell scope="col">Fnr</Table.HeaderCell>
+                <Table.HeaderCell scope="col">Fødselsnummer</Table.HeaderCell>
                 <Table.HeaderCell scope="col">Oppgavetype</Table.HeaderCell>
-                <Table.HeaderCell scope="col">Status</Table.HeaderCell>
+                <Table.HeaderCell scope="col">Ytelse</Table.HeaderCell>
                 <Table.HeaderCell scope="col">Merknad</Table.HeaderCell>
+                <Table.HeaderCell scope="col">Status</Table.HeaderCell>
                 <Table.HeaderCell scope="col">Enhet</Table.HeaderCell>
                 <Table.HeaderCell scope="col">Saksbehandler</Table.HeaderCell>
-                <Table.HeaderCell scope="col">Ytelse</Table.HeaderCell>
                 <Table.HeaderCell scope="col">Handlinger</Table.HeaderCell>
               </Table.Row>
             </Table.Header>
@@ -221,8 +237,9 @@ export const Oppgavelista = (props: { oppgaver: ReadonlyArray<OppgaveDTOny>; hen
                       <Table.DataCell>
                         {type ? <OppgavetypeTag oppgavetype={type} /> : <div>oppgaeveid {id}</div>}
                       </Table.DataCell>
-                      <Table.DataCell>{status}</Table.DataCell>
+                      <Table.DataCell>{sakType && <SaktypeTag sakType={sakType} />}</Table.DataCell>
                       <Table.DataCell>{merknad}</Table.DataCell>
+                      <Table.DataCell>{status}</Table.DataCell>
                       <Table.DataCell>{enhet}</Table.DataCell>
                       <Table.DataCell>
                         {saksbehandler ? (
@@ -236,7 +253,6 @@ export const Oppgavelista = (props: { oppgaver: ReadonlyArray<OppgaveDTOny>; hen
                           <TildelSaksbehandler oppgaveId={id} sakId={sakId} />
                         )}
                       </Table.DataCell>
-                      <Table.DataCell>{sakType && <SaktypeTag sakType={sakType} />}</Table.DataCell>
                       <Table.DataCell>
                         <HandlingerForOppgave
                           oppgavetype={type}
@@ -250,12 +266,32 @@ export const Oppgavelista = (props: { oppgaver: ReadonlyArray<OppgaveDTOny>; hen
                 )}
             </Table.Body>
           </Table>
-          <Pagination
-            page={page}
-            onPageChange={setPage}
-            count={Math.ceil(filtrerteOppgaver.length / rowsPerPage)}
-            size="small"
-          />
+
+          <PaginationWrapper>
+            <Pagination
+              page={page}
+              onPageChange={setPage}
+              count={Math.ceil(filtrerteOppgaver.length / rowsPerPage)}
+              size="small"
+            />
+            <p>
+              Viser {(page - 1) * rowsPerPage + 1} - {(page - 1) * rowsPerPage + paginerteOppgaver.length} av{' '}
+              {filtrerteOppgaver.length} oppgaver (totalt {oppgaver.length} oppgaver)
+            </p>
+            <select
+              value={rowsPerPage}
+              onChange={(e) => {
+                setRowsPerPage(Number(e.target.value))
+              }}
+              title={'Antall oppgaver som vises'}
+            >
+              {[10, 20, 30, 40, 50].map((rowsPerPage) => (
+                <option key={rowsPerPage} value={rowsPerPage}>
+                  Vis {rowsPerPage} oppgaver
+                </option>
+              ))}
+            </select>
+          </PaginationWrapper>
         </>
       ) : (
         <>Ingen oppgaver</>

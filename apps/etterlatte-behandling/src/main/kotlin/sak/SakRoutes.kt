@@ -20,8 +20,11 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.SisteIverksatteBehandling
 import no.nav.etterlatte.libs.common.kunSaksbehandler
 import no.nav.etterlatte.libs.common.kunSystembruker
+import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveNy
+import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.Saker
 import no.nav.etterlatte.libs.common.sakId
+import no.nav.etterlatte.oppgaveny.OppgaveServiceNy
 import no.nav.etterlatte.tilgangsstyring.withFoedselsnummerAndGradering
 import no.nav.etterlatte.tilgangsstyring.withFoedselsnummerInternal
 import org.slf4j.LoggerFactory
@@ -80,7 +83,8 @@ internal fun Route.sakWebRoutes(
     tilgangService: TilgangService,
     sakService: SakService,
     behandlingService: BehandlingService,
-    grunnlagsendringshendelseService: GrunnlagsendringshendelseService
+    grunnlagsendringshendelseService: GrunnlagsendringshendelseService,
+    oppgaveServiceNy: OppgaveServiceNy
 ) {
     val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -115,6 +119,16 @@ internal fun Route.sakWebRoutes(
                 }
             }
 
+            post("oppgaver") {
+                withFoedselsnummerInternal(tilgangService) { fnr ->
+                    val oppgaver = sakService.finnSaker(fnr.value)
+                        .map { sak ->
+                            OppgaveListe(sak, oppgaveServiceNy.hentOppgaverForSak(sak.id))
+                        }
+                    call.respond(oppgaver)
+                }
+            }
+
             post("grunnlagsendringshendelser") {
                 withFoedselsnummerInternal(tilgangService) { fnr ->
                     call.respond(
@@ -137,3 +151,4 @@ internal fun Route.sakWebRoutes(
 }
 
 data class FoersteVirkDto(val foersteIverksatteVirkISak: LocalDate, val sakId: Long)
+data class OppgaveListe(val sak: Sak, val oppgaver: List<OppgaveNy>)

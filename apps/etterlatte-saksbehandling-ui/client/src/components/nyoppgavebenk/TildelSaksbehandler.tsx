@@ -5,14 +5,22 @@ import { ApiErrorAlert } from '~ErrorBoundary'
 import { Button, Loader } from '@navikt/ds-react'
 import { PersonIcon } from '@navikt/aksel-icons'
 import { Alert } from '@navikt/ds-react'
+import { useEffect } from 'react'
 
-export const TildelSaksbehandler = (props: { oppgaveId: string }) => {
-  const { oppgaveId } = props
+export const TildelSaksbehandler = (props: { oppgaveId: string; setOppgaveErEndret: (value: boolean) => void }) => {
+  const { oppgaveId, setOppgaveErEndret } = props
   const user = useAppSelector((state) => state.saksbehandlerReducer.saksbehandler)
   const [tildelSaksbehandlerSvar, tildelSaksbehandler] = useApiCall(tildelSaksbehandlerApi)
   const tildelSaksbehandlerWrapper = () => {
     tildelSaksbehandler({ oppgaveId: oppgaveId, nysaksbehandler: { saksbehandler: user.ident } })
   }
+
+  useEffect(() => {
+    if (isSuccess(tildelSaksbehandlerSvar)) {
+      setOppgaveErEndret(true)
+    }
+  }, [tildelSaksbehandlerSvar])
+
   return (
     <>
       {isPending(tildelSaksbehandlerSvar) && <Loader size="small" title="Setter saksbehandler" />}

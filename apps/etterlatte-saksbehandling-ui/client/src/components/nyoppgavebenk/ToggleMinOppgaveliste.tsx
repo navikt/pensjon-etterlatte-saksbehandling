@@ -27,6 +27,7 @@ export const ToggleMinOppgaveliste = () => {
   useEffect(() => {
     hentOppgaverWrapper()
   }, [])
+
   return (
     <>
       <TabsWidth value={oppgaveListeValg} onChange={(e) => setOppgaveListeValg(e as OppgavelisteToggle)}>
@@ -42,7 +43,9 @@ export const ToggleMinOppgaveliste = () => {
           {oppgaveListeValg === 'Oppgavelista' && (
             <Oppgavelista oppgaver={hentedeOppgaver} hentOppgaver={hentOppgaverWrapper} />
           )}
-          {oppgaveListeValg === 'MinOppgaveliste' && <MinOppgaveliste oppgaver={hentedeOppgaver} />}
+          {oppgaveListeValg === 'MinOppgaveliste' && (
+            <MinOppgaveliste oppgaver={hentedeOppgaver} hentOppgaver={hentOppgaverWrapper} />
+          )}
         </>
       )}
     </>

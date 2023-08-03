@@ -4,7 +4,7 @@ import { Pagination, Table } from '@navikt/ds-react'
 import { formaterStringDato } from '~utils/formattering'
 import { RedigerSaksbehandler } from '~components/nyoppgavebenk/RedigerSaksbehandler'
 import { FristHandlinger } from '~components/nyoppgavebenk/minoppgaveliste/FristHandlinger'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { HandlingerForOppgave } from '~components/nyoppgavebenk/HandlingerForOppgave'
 import { OppgavetypeTag, SaktypeTag } from '~components/nyoppgavebenk/Tags'
 import SaksoversiktLenke from '~components/oppgavebenken/handlinger/BrukeroversiktKnapp'
@@ -12,14 +12,25 @@ import { PaginationWrapper } from '~components/nyoppgavebenk/Oppgavelista'
 import { OPPGAVESTATUSFILTER } from '~components/nyoppgavebenk/Oppgavelistafiltre'
 import { HeaderPadding } from '~components/nyoppgavebenk/Oppgavelista'
 
-export const MinOppgaveliste = (props: { oppgaver: ReadonlyArray<OppgaveDTOny> }) => {
-  const { oppgaver } = props
+export const MinOppgaveliste = (props: { oppgaver: ReadonlyArray<OppgaveDTOny>; hentOppgaver: () => void }) => {
+  const { oppgaver, hentOppgaver } = props
   const user = useAppSelector((state) => state.saksbehandlerReducer.saksbehandler)
   const [page, setPage] = useState<number>(1)
   const mineOppgaver = oppgaver.filter((o) => o.saksbehandler === user.ident)
   const [rowsPerPage, setRowsPerPage] = useState<number>(10)
+  const [oppgaveErEndet, setOppgaveErEndret] = useState<boolean>(false)
+
   let paginerteOppgaver = mineOppgaver
   paginerteOppgaver = paginerteOppgaver.slice((page - 1) * rowsPerPage, page * rowsPerPage)
+
+  const setOppgaveErEndretWrapper = (value: boolean) => setOppgaveErEndret(value)
+
+  useEffect(() => {
+    if (oppgaveErEndet) {
+      hentOppgaver()
+      setOppgaveErEndret(false)
+    }
+  }, [oppgaveErEndet])
 
   return (
     <>
@@ -64,7 +75,12 @@ export const MinOppgaveliste = (props: { oppgaver: ReadonlyArray<OppgaveDTOny> }
                     <Table.Row key={id}>
                       <Table.HeaderCell>{formaterStringDato(opprettet)}</Table.HeaderCell>
                       <Table.DataCell>
-                        <FristHandlinger status={status} orginalFrist={frist} oppgaveId={id} />
+                        <FristHandlinger
+                          status={status}
+                          orginalFrist={frist}
+                          oppgaveId={id}
+                          setOppgaveErEndret={setOppgaveErEndretWrapper}
+                        />
                       </Table.DataCell>
                       <Table.DataCell>
                         <SaksoversiktLenke fnr={fnr} />
@@ -85,6 +101,7 @@ export const MinOppgaveliste = (props: { oppgaver: ReadonlyArray<OppgaveDTOny> }
                             saksbehandler={saksbehandler}
                             oppgaveId={id}
                             sakId={sakId}
+                            setOppgaveErEndret={setOppgaveErEndretWrapper}
                           />
                         )}
                       </Table.DataCell>

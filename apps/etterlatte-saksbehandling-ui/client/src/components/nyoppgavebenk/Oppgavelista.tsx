@@ -75,6 +75,7 @@ export const Oppgavelista = (props: { oppgaver: ReadonlyArray<OppgaveDTOny>; hen
   const [fnrFilter, setFnrFilter] = useState<string>('')
   const [page, setPage] = useState<number>(1)
   const [rowsPerPage, setRowsPerPage] = useState<number>(10)
+  const [oppgaveErEndet, setOppgaveErEndret] = useState<boolean>(false)
   const mutableOppgaver = oppgaver.concat()
   const filtrerteOppgaver = filtrerOppgaver(
     enhetsFilter,
@@ -91,9 +92,18 @@ export const Oppgavelista = (props: { oppgaver: ReadonlyArray<OppgaveDTOny>; hen
   let paginerteOppgaver = filtrerteOppgaver
   paginerteOppgaver = paginerteOppgaver.slice((page - 1) * rowsPerPage, page * rowsPerPage)
 
+  const setOppgaveErEndretWrapper = (value: boolean) => setOppgaveErEndret(value)
+
   useEffect(() => {
     if (paginerteOppgaver.length === 0 && filtrerteOppgaver.length > 0) setPage(1)
   }, [paginerteOppgaver, filtrerteOppgaver])
+
+  useEffect(() => {
+    if (oppgaveErEndet) {
+      hentOppgaver()
+      setOppgaveErEndret(false)
+    }
+  }, [oppgaveErEndet])
 
   return (
     <>
@@ -255,9 +265,10 @@ export const Oppgavelista = (props: { oppgaver: ReadonlyArray<OppgaveDTOny>; hen
                             saksbehandler={saksbehandler}
                             oppgaveId={id}
                             sakId={sakId}
+                            setOppgaveErEndret={setOppgaveErEndretWrapper}
                           />
                         ) : (
-                          <TildelSaksbehandler oppgaveId={id} />
+                          <TildelSaksbehandler oppgaveId={id} setOppgaveErEndret={setOppgaveErEndretWrapper} />
                         )}
                       </Table.DataCell>
                       <Table.DataCell>

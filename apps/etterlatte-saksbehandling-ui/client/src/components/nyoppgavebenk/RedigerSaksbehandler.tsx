@@ -4,7 +4,7 @@ import { fjernSaksbehandlerApi, byttSaksbehandlerApi, Oppgavestatus, erOppgaveRe
 import { Alert, Button, Loader, Label } from '@navikt/ds-react'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { PencilIcon } from '@navikt/aksel-icons'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { GeneriskModal } from '~shared/modal/modal'
 import styled from 'styled-components'
 
@@ -18,15 +18,22 @@ export const RedigerSaksbehandler = (props: {
   oppgaveId: string
   sakId: number
   status: Oppgavestatus
+  setOppgaveErEndret: (value: boolean) => void
 }) => {
   const [modalIsOpen, setModalIsOpen] = useState(false)
-  const { saksbehandler, oppgaveId, sakId, status } = props
+  const { saksbehandler, oppgaveId, sakId, status, setOppgaveErEndret } = props
   const user = useAppSelector((state) => state.saksbehandlerReducer.saksbehandler)
   const [fjernSaksbehandlerSvar, fjernSaksbehandler] = useApiCall(fjernSaksbehandlerApi)
   const [byttSaksbehandlerSvar, byttSaksbehandler] = useApiCall(byttSaksbehandlerApi)
   const erRedigerbar = erOppgaveRedigerbar(status)
 
   const brukerErSaksbehandler = user.ident === saksbehandler
+
+  useEffect(() => {
+    if (isSuccess(fjernSaksbehandlerSvar) || isSuccess(byttSaksbehandlerSvar)) {
+      setOppgaveErEndret(true)
+    }
+  }, [fjernSaksbehandlerSvar, byttSaksbehandlerSvar])
 
   return (
     <>

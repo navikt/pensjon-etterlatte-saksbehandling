@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import java.io.FileNotFoundException
 import java.time.LocalDate
+import java.time.YearMonth
 import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -53,7 +54,9 @@ internal class VedtakhendelserRiverTest {
         vedtakLoependeTom = null,
         beregning = null,
         vedtakType = null,
-        sakUtland = SakUtland.NASJONAL
+        sakUtland = SakUtland.NASJONAL,
+        virkningstidspunkt = YearMonth.of(2023, 6),
+        utbetalingsdato = LocalDate.of(2023,7, 20)
     )
 
     @Test

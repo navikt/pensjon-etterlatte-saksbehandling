@@ -170,6 +170,10 @@ class StatistikkService(
     private fun vedtakTilStoenadsrad(vedtak: VedtakDto, tekniskTid: LocalDateTime): StoenadRad {
         val persongalleri = hentPersongalleri(behandlingId = vedtak.behandling.id)
         val beregning = hentBeregningForBehandling(vedtak.behandling.id)
+        val utbetalingsdato = vedtak.vedtakFattet?.tidspunkt?.let {
+            val vedtattDato = it.toLocalDate()
+            YearMonth.of(vedtattDato.year, vedtattDato.monthValue).plusMonths(1).atDay(20)
+        }
         return StoenadRad(
             id = -1,
             fnrSoeker = vedtak.sak.ident,
@@ -191,7 +195,9 @@ class StatistikkService(
             vedtakLoependeTom = null,
             beregning = beregning,
             vedtakType = vedtak.type,
-            sakUtland = SakUtland.NASJONAL
+            sakUtland = SakUtland.NASJONAL,
+            virkningstidspunkt = vedtak.virkningstidspunkt,
+            utbetalingsdato = utbetalingsdato
         )
     }
 

@@ -34,26 +34,36 @@ import no.nav.etterlatte.statistikk.domain.SakUtland
 import no.nav.etterlatte.statistikk.domain.SakYtelsesgruppe
 import no.nav.etterlatte.statistikk.river.BehandlingHendelse
 import no.nav.etterlatte.statistikk.river.BehandlingIntern
-import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.LocalTime
 import java.time.YearMonth
 import java.util.*
 
 class StatistikkServiceTest {
 
+    private val stoenadRepo = mockk<StoenadRepository>()
+    private val sakRepo = mockk<SakRepository>()
+    private val behandlingKlient = mockk<BehandlingKlient>()
+    private val beregningKlient = mockk<BeregningKlient>()
+    private val service = StatistikkService(
+        stoenadRepository = stoenadRepo,
+        sakRepository = sakRepo,
+        behandlingKlient = behandlingKlient,
+        beregningKlient = beregningKlient
+    )
+
     @Test
     fun `mapper vedtakhendelse til både sakRad og stoenadRad riktig`() {
         val behandlingId = UUID.randomUUID()
         val sakId = 1L
+        val virkningstidspunkt = YearMonth.of(2023, 6)
 
-        val stoenadRepo = mockk<StoenadRepository>()
         every { stoenadRepo.lagreStoenadsrad(any()) } returnsArgument 0
-
-        val sakRepo = mockk<SakRepository>()
         every { sakRepo.lagreRad(any()) } returnsArgument 0
-
-        val behandlingKlient = mockk<BehandlingKlient>()
         coEvery { behandlingKlient.hentDetaljertBehandling(behandlingId) } returns DetaljertBehandling(
             id = behandlingId,
             sak = sakId,
@@ -84,23 +94,21 @@ class StatistikkServiceTest {
             beregnetDato = Tidspunkt.now(),
             beregningsperioder = listOf()
         )
-        val beregningKlient = mockk<BeregningKlient>()
         coEvery { beregningKlient.hentBeregningForBehandling(behandlingId) } returns mockBeregning
 
-        val service = StatistikkService(
-            stoenadRepository = stoenadRepo,
-            sakRepository = sakRepo,
-            behandlingKlient = behandlingKlient,
-            beregningKlient = beregningKlient
-        )
+
         val tekniskTidForHendelse = LocalDateTime.of(2023, 2, 1, 8, 30)
 
+
+        val fattetVedtakMaaned = LocalDate.of(2023, 7, 1)
+        val fattetTidspunkt = Tidspunkt.ofNorskTidssone(LocalDate.of(2023, 7, 1), LocalTime.NOON)
         val (registrertSakRad, registrertStoenadRad) = service.registrerStatistikkForVedtak(
             vedtak = vedtak(
                 sakId = sakId,
                 behandlingId = behandlingId,
-                vedtakFattet = VedtakFattet("Saksbehandler", "saksbehandlerEnhet", Tidspunkt.now()),
-                attestasjon = Attestasjon("Attestant", "attestantEnhet", Tidspunkt.now())
+                vedtakFattet = VedtakFattet("Saksbehandler", "saksbehandlerEnhet", fattetTidspunkt),
+                attestasjon = Attestasjon("Attestant", "attestantEnhet", fattetTidspunkt),
+                virk = virkningstidspunkt
             ),
             vedtakHendelse = VedtakHendelse.IVERKSATT,
             tekniskTid = tekniskTidForHendelse
@@ -111,35 +119,35 @@ class StatistikkServiceTest {
             throw NullPointerException("Stønadrad=$registrertStoenadRad eller sakrad=$registrertSakRad var null")
         }
 
-        Assertions.assertEquals(registrertSakRad.sakId, sakId)
-        Assertions.assertEquals(registrertSakRad.sakYtelse, "BARNEPENSJON")
-        Assertions.assertEquals(registrertSakRad.sakUtland, SakUtland.NASJONAL)
-        Assertions.assertEquals(registrertSakRad.behandlingId, behandlingId)
-        Assertions.assertEquals(registrertSakRad.tekniskTid, tekniskTidForHendelse.toTidspunkt())
-        Assertions.assertEquals(registrertSakRad.ansvarligEnhet, "attestantEnhet")
-        Assertions.assertEquals(registrertSakRad.ansvarligBeslutter, "Attestant")
-        Assertions.assertEquals(registrertSakRad.saksbehandler, "Saksbehandler")
-        Assertions.assertEquals(registrertSakRad.beregning, mockBeregning)
+        assertEquals(registrertSakRad.sakId, sakId)
+        assertEquals(registrertSakRad.sakYtelse, "BARNEPENSJON")
+        assertEquals(registrertSakRad.sakUtland, SakUtland.NASJONAL)
+        assertEquals(registrertSakRad.behandlingId, behandlingId)
+        assertEquals(registrertSakRad.tekniskTid, tekniskTidForHendelse.toTidspunkt())
+        assertEquals(registrertSakRad.ansvarligEnhet, "attestantEnhet")
+        assertEquals(registrertSakRad.ansvarligBeslutter, "Attestant")
+        assertEquals(registrertSakRad.saksbehandler, "Saksbehandler")
+        assertEquals(registrertSakRad.beregning, mockBeregning)
 
-        Assertions.assertEquals(registrertStoenadRad.tekniskTid, tekniskTidForHendelse.toTidspunkt())
-        Assertions.assertEquals(registrertStoenadRad.beregning, mockBeregning)
-        Assertions.assertEquals(registrertStoenadRad.behandlingId, behandlingId)
-        Assertions.assertEquals(registrertStoenadRad.sakId, sakId)
-        Assertions.assertEquals(registrertStoenadRad.attestant, "Attestant")
-        Assertions.assertEquals(registrertStoenadRad.saksbehandler, "Saksbehandler")
+        assertEquals(registrertStoenadRad.tekniskTid, tekniskTidForHendelse.toTidspunkt())
+        assertEquals(registrertStoenadRad.beregning, mockBeregning)
+        assertEquals(registrertStoenadRad.behandlingId, behandlingId)
+        assertEquals(registrertStoenadRad.sakId, sakId)
+        assertEquals(registrertStoenadRad.attestant, "Attestant")
+        assertEquals(registrertStoenadRad.saksbehandler, "Saksbehandler")
+
+        assertEquals(registrertStoenadRad.sakUtland, SakUtland.NASJONAL)
+        assertEquals(registrertStoenadRad.virkningstidspunkt, virkningstidspunkt)
+        assertEquals(registrertStoenadRad.utbetalingsdato, fattetVedtakMaaned.plusMonths(1).plusDays(19))
     }
 
     @Test
     fun `mapper behandlinghendelse riktig`() {
         val behandlingId = UUID.randomUUID()
         val sakId = 1L
-        val stoenadRepo = mockk<StoenadRepository>()
         every { stoenadRepo.lagreStoenadsrad(any()) } returnsArgument 0
-
-        val sakRepo = mockk<SakRepository>()
         every { sakRepo.lagreRad(any()) } returnsArgument 0
 
-        val behandlingKlient = mockk<BehandlingKlient>()
         coEvery { behandlingKlient.hentDetaljertBehandling(behandlingId) } returns DetaljertBehandling(
             id = behandlingId,
             sak = sakId,
@@ -161,15 +169,6 @@ class StatistikkServiceTest {
             enhet = "1111"
         )
 
-        val beregningKlient = mockk<BeregningKlient>()
-
-        val service = StatistikkService(
-            stoenadRepository = stoenadRepo,
-            sakRepository = sakRepo,
-            behandlingKlient = behandlingKlient,
-            beregningKlient = beregningKlient
-        )
-
         val tekniskTidForHendelse = LocalDateTime.of(2023, 2, 1, 8, 30)
         val registrertStatistikk = service.registrerStatistikkForBehandlinghendelse(
             behandlingIntern = behandling(id = behandlingId, sakId = sakId),
@@ -177,33 +176,27 @@ class StatistikkServiceTest {
             tekniskTid = tekniskTidForHendelse
         ) ?: throw NullPointerException("Fikk ikke registrert statistikk")
 
-        Assertions.assertEquals(registrertStatistikk.sakId, sakId)
-        Assertions.assertEquals(registrertStatistikk.sakYtelse, "BARNEPENSJON")
-        Assertions.assertEquals(registrertStatistikk.sakUtland, SakUtland.NASJONAL)
-        Assertions.assertEquals(registrertStatistikk.behandlingId, behandlingId)
-        Assertions.assertEquals(registrertStatistikk.sakYtelsesgruppe, SakYtelsesgruppe.EN_AVDOED_FORELDER)
-        Assertions.assertEquals(registrertStatistikk.tekniskTid, tekniskTidForHendelse.toTidspunkt())
-        Assertions.assertEquals(registrertStatistikk.behandlingMetode, BehandlingMetode.MANUELL)
-        Assertions.assertNull(registrertStatistikk.ansvarligBeslutter)
-        Assertions.assertEquals("1111", registrertStatistikk.ansvarligEnhet)
-        Assertions.assertNull(registrertStatistikk.saksbehandler)
+        assertEquals(registrertStatistikk.sakId, sakId)
+        assertEquals(registrertStatistikk.sakYtelse, "BARNEPENSJON")
+        assertEquals(registrertStatistikk.sakUtland, SakUtland.NASJONAL)
+        assertEquals(registrertStatistikk.behandlingId, behandlingId)
+        assertEquals(registrertStatistikk.sakYtelsesgruppe, SakYtelsesgruppe.EN_AVDOED_FORELDER)
+        assertEquals(registrertStatistikk.tekniskTid, tekniskTidForHendelse.toTidspunkt())
+        assertEquals(registrertStatistikk.behandlingMetode, BehandlingMetode.MANUELL)
+        assertNull(registrertStatistikk.ansvarligBeslutter)
+        assertEquals("1111", registrertStatistikk.ansvarligEnhet)
+        assertNull(registrertStatistikk.saksbehandler)
     }
 
     @Test
     fun `lagreMaanedligStoenadstatistikk lagrer ting riktig`() {
         val stoenadRepository: StoenadRepository = mockk(relaxed = true)
-
-        val sakRepository: SakRepository = mockk()
-        val behandlingKlient: BehandlingKlient = mockk()
-        val beregningKlient: BeregningKlient = mockk()
-
         val service = StatistikkService(
             stoenadRepository = stoenadRepository,
-            sakRepository = sakRepository,
+            sakRepository = sakRepo,
             behandlingKlient = behandlingKlient,
             beregningKlient = beregningKlient
         )
-
         service.lagreMaanedsstatistikk(MaanedStatistikk(YearMonth.of(2022, 8), emptyList()))
         verify {
             stoenadRepository.lagreMaanedJobUtfoert(YearMonth.of(2022, 8), 0, 0)

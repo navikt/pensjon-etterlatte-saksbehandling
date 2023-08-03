@@ -10,6 +10,7 @@ import { OppgavetypeTag, SaktypeTag } from '~components/nyoppgavebenk/Tags'
 import SaksoversiktLenke from '~components/oppgavebenken/handlinger/BrukeroversiktKnapp'
 import { PaginationWrapper } from '~components/nyoppgavebenk/Oppgavelista'
 import { OPPGAVESTATUSFILTER } from '~components/nyoppgavebenk/Oppgavelistafiltre'
+import { HeaderPadding } from '~components/nyoppgavebenk/Oppgavelista'
 
 export const MinOppgaveliste = (props: { oppgaver: ReadonlyArray<OppgaveDTOny> }) => {
   const { oppgaver } = props
@@ -28,14 +29,18 @@ export const MinOppgaveliste = (props: { oppgaver: ReadonlyArray<OppgaveDTOny> }
             <Table.Header>
               <Table.Row>
                 <Table.HeaderCell scope="col">Registreringsdato</Table.HeaderCell>
-                <Table.HeaderCell scope="col">Frist</Table.HeaderCell>
+                <Table.HeaderCell scope="col">
+                  <HeaderPadding>Frist</HeaderPadding>
+                </Table.HeaderCell>
                 <Table.HeaderCell scope="col">Fødselsnummer</Table.HeaderCell>
                 <Table.HeaderCell scope="col">Oppgavetype</Table.HeaderCell>
                 <Table.HeaderCell scope="col">Ytelse</Table.HeaderCell>
                 <Table.HeaderCell scope="col">Merknad</Table.HeaderCell>
                 <Table.HeaderCell scope="col">Status</Table.HeaderCell>
                 <Table.HeaderCell scope="col">Enhet</Table.HeaderCell>
-                <Table.HeaderCell scope="col">Saksbehandler</Table.HeaderCell>
+                <Table.HeaderCell scope="col">
+                  <HeaderPadding>Saksbehandler</HeaderPadding>
+                </Table.HeaderCell>
                 <Table.HeaderCell scope="col">Handlinger</Table.HeaderCell>
               </Table.Row>
             </Table.Header>

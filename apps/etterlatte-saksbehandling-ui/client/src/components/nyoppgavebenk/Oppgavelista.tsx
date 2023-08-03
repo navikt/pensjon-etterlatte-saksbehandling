@@ -58,6 +58,10 @@ export const PaginationWrapper = styled.div`
   }
 `
 
+export const HeaderPadding = styled.span`
+  padding-left: 20px;
+`
+
 export const Oppgavelista = (props: { oppgaver: ReadonlyArray<OppgaveDTOny>; hentOppgaver: () => void }) => {
   const { oppgaver, hentOppgaver } = props
 
@@ -202,7 +206,9 @@ export const Oppgavelista = (props: { oppgaver: ReadonlyArray<OppgaveDTOny>; hen
                 <Table.HeaderCell scope="col">Merknad</Table.HeaderCell>
                 <Table.HeaderCell scope="col">Status</Table.HeaderCell>
                 <Table.HeaderCell scope="col">Enhet</Table.HeaderCell>
-                <Table.HeaderCell scope="col">Saksbehandler</Table.HeaderCell>
+                <Table.HeaderCell scope="col">
+                  <HeaderPadding>Saksbehandler</HeaderPadding>
+                </Table.HeaderCell>
                 <Table.HeaderCell scope="col">Handlinger</Table.HeaderCell>
               </Table.Row>
             </Table.Header>

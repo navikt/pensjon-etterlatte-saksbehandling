@@ -1,14 +1,15 @@
 import { useAppSelector } from '~store/Store'
 import { isFailure, isInitial, isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
 import { fjernSaksbehandlerApi, byttSaksbehandlerApi, Oppgavestatus, erOppgaveRedigerbar } from '~shared/api/oppgaverny'
-import { Alert, Button, Loader } from '@navikt/ds-react'
+import { Alert, Button, Loader, Label } from '@navikt/ds-react'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { PencilIcon } from '@navikt/aksel-icons'
 import React, { useState } from 'react'
 import { GeneriskModal } from '~shared/modal/modal'
 import styled from 'styled-components'
 
-const SaksbehandlerWrapper = styled.span`
+const SaksbehandlerWrapper = styled(Label)`
+  padding: 12px 20px;
   margin-right: 0.5rem;
 `
 
@@ -33,11 +34,17 @@ export const RedigerSaksbehandler = (props: {
         <>
           {isInitial(fjernSaksbehandlerSvar) && (
             <>
-              <SaksbehandlerWrapper>{saksbehandler}</SaksbehandlerWrapper>
-              {erRedigerbar && (
-                <Button icon={<PencilIcon />} size="small" variant="secondary" onClick={() => setModalIsOpen(true)}>
-                  Endre
+              {erRedigerbar ? (
+                <Button
+                  icon={<PencilIcon />}
+                  iconPosition="right"
+                  variant="tertiary"
+                  onClick={() => setModalIsOpen(true)}
+                >
+                  {saksbehandler}
                 </Button>
+              ) : (
+                <SaksbehandlerWrapper>{saksbehandler}</SaksbehandlerWrapper>
               )}
               <GeneriskModal
                 tittel="Endre saksbehandler"
@@ -61,11 +68,17 @@ export const RedigerSaksbehandler = (props: {
         <>
           {isInitial(byttSaksbehandlerSvar) && (
             <>
-              <SaksbehandlerWrapper>{saksbehandler}</SaksbehandlerWrapper>
-              {erRedigerbar && (
-                <Button icon={<PencilIcon />} size="small" variant="secondary" onClick={() => setModalIsOpen(true)}>
-                  Endre
+              {erRedigerbar ? (
+                <Button
+                  icon={<PencilIcon />}
+                  iconPosition="right"
+                  variant="tertiary"
+                  onClick={() => setModalIsOpen(true)}
+                >
+                  {saksbehandler}
                 </Button>
+              ) : (
+                <SaksbehandlerWrapper>{saksbehandler}</SaksbehandlerWrapper>
               )}
               <GeneriskModal
                 tittel="Endre saksbehandler"

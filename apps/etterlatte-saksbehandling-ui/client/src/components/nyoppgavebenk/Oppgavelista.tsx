@@ -44,7 +44,6 @@ const ButtonWrapper = styled.div`
 
 export const FristWrapper = styled.span<{ fristHarPassert: boolean }>`
   color: ${(p) => p.fristHarPassert && 'var(--a-text-danger)'};
-  margin-right: 0.5rem;
 `
 
 export const PaginationWrapper = styled.div`
@@ -57,6 +56,10 @@ export const PaginationWrapper = styled.div`
     margin: 0;
     line-height: 32px;
   }
+`
+
+export const HeaderPadding = styled.span`
+  padding-left: 20px;
 `
 
 export const Oppgavelista = (props: { oppgaver: ReadonlyArray<OppgaveDTOny>; hentOppgaver: () => void }) => {
@@ -203,7 +206,9 @@ export const Oppgavelista = (props: { oppgaver: ReadonlyArray<OppgaveDTOny>; hen
                 <Table.HeaderCell scope="col">Merknad</Table.HeaderCell>
                 <Table.HeaderCell scope="col">Status</Table.HeaderCell>
                 <Table.HeaderCell scope="col">Enhet</Table.HeaderCell>
-                <Table.HeaderCell scope="col">Saksbehandler</Table.HeaderCell>
+                <Table.HeaderCell scope="col">
+                  <HeaderPadding>Saksbehandler</HeaderPadding>
+                </Table.HeaderCell>
                 <Table.HeaderCell scope="col">Handlinger</Table.HeaderCell>
               </Table.Row>
             </Table.Header>

@@ -1,12 +1,11 @@
 import React, { useState } from 'react'
 import { isFailure, isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
 import { erOppgaveRedigerbar, Oppgavestatus, redigerFristApi } from '~shared/api/oppgaverny'
-import { Alert, Button, Heading, Modal, MonthPicker } from '@navikt/ds-react'
+import { Alert, Button, Heading, Label, Modal, MonthPicker } from '@navikt/ds-react'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { formaterStringDato } from '~utils/formattering'
 import { PencilIcon } from '@navikt/aksel-icons'
 import styled from 'styled-components'
-import { FristWrapper } from '~components/nyoppgavebenk/Oppgavelista'
 import { isBefore } from 'date-fns'
 
 const Buttonwrapper = styled.div`
@@ -14,6 +13,11 @@ const Buttonwrapper = styled.div`
   button:first-child {
     margin-right: 1rem;
   }
+`
+
+const FristWrapper = styled.span<{ fristHarPassert: boolean; utenKnapp?: boolean }>`
+  color: ${(p) => p.fristHarPassert && 'var(--a-text-danger)'};
+  padding: ${(p) => p.utenKnapp && '12px 20px'};
 `
 
 export const FristHandlinger = (props: { status: Oppgavestatus; frist: string; oppgaveId: string; sakId: number }) => {
@@ -79,18 +83,22 @@ export const FristHandlinger = (props: { status: Oppgavestatus; frist: string; o
               </Buttonwrapper>
             </Modal.Content>
           </Modal>
-          <FristWrapper fristHarPassert={isBefore(new Date(frist), new Date())}>
-            {formaterStringDato(frist)}
-          </FristWrapper>
-          {erRedigerbar && (
+
+          {erRedigerbar ? (
             <Button
-              size="small"
-              variant="secondary"
+              variant="tertiary"
+              iconPosition="right"
               icon={<PencilIcon title="a11y-title" fontSize="1.5rem" />}
               onClick={() => setOpen(!open)}
             >
-              Rediger frist
+              <FristWrapper fristHarPassert={isBefore(new Date(frist), new Date())}>
+                {formaterStringDato(frist)}
+              </FristWrapper>
             </Button>
+          ) : (
+            <FristWrapper fristHarPassert={isBefore(new Date(frist), new Date())} utenKnapp>
+              <Label>{formaterStringDato(frist)}</Label>
+            </FristWrapper>
           )}
         </>
       ) : (

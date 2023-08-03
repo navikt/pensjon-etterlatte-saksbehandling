@@ -51,7 +51,8 @@ internal class RealManueltOpphoerServiceTest {
         "opphør",
         Sak("ident", SakType.BARNEPENSJON, 1L, Enheter.AALESUND.enhetNr),
         OppgaveKilde.BEHANDLING,
-        OppgaveType.MANUELT_OPPHOER
+        OppgaveType.MANUELT_OPPHOER,
+        null
     )
 
     @BeforeEach
@@ -138,7 +139,9 @@ internal class RealManueltOpphoerServiceTest {
             }
         }
 
-        every { oppgaveService.opprettNyOppgaveMedSakOgReferanse(any(), any(), any(), any()) } returns mockOppgave
+        every {
+            oppgaveService.opprettNyOppgaveMedSakOgReferanse(any(), any(), any(), any(), any())
+        } returns mockOppgave
 
         val behandlingHendelserKafkaProducer = mockk<BehandlingHendelserKafkaProducer> {
             every { sendMeldingForHendelse(any(), any()) } returns Unit
@@ -241,7 +244,9 @@ internal class RealManueltOpphoerServiceTest {
                 )
             }
         }
-        every { oppgaveService.opprettNyOppgaveMedSakOgReferanse(any(), any(), any(), any()) } returns mockOppgave
+        every {
+            oppgaveService.opprettNyOppgaveMedSakOgReferanse(any(), any(), any(), any(), any())
+        } returns mockOppgave
 
         val behandlingHendelserKafkaProducer = mockk<BehandlingHendelserKafkaProducer> {
             every { sendMeldingForHendelse(any(), any()) } returns Unit

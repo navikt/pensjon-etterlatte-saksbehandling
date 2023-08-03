@@ -15,7 +15,11 @@ data class Grunnlagsendringshendelse(
     val gjelderPerson: String,
     val samsvarMellomKildeOgGrunnlag: SamsvarMellomKildeOgGrunnlag? = null,
     val kommentar: String? = null
-)
+) {
+    fun beskrivelse(): String {
+        return listOfNotNull(type.beskrivelse(), kommentar).joinToString(separator = ": ")
+    }
+}
 
 enum class GrunnlagsendringsType {
     DOEDSFALL,
@@ -24,7 +28,19 @@ enum class GrunnlagsendringsType {
     VERGEMAAL_ELLER_FREMTIDSFULLMAKT,
     SIVILSTAND,
     GRUNNBELOEP,
-    INSTITUSJONSOPPHOLD
+    INSTITUSJONSOPPHOLD;
+
+    fun beskrivelse(): String {
+        return when (this) {
+            DOEDSFALL -> "Dødsfall"
+            UTFLYTTING -> "Utflytting fra Norge"
+            FORELDER_BARN_RELASJON -> "Forelder- / barn-relasjon"
+            VERGEMAAL_ELLER_FREMTIDSFULLMAKT -> "Vergemål / fremtidsfullmakt"
+            SIVILSTAND -> "Sivilstand"
+            GRUNNBELOEP -> "Grunnbeløp"
+            INSTITUSJONSOPPHOLD -> "Institusjonsopphold"
+        }
+    }
 }
 
 enum class GrunnlagsendringStatus {

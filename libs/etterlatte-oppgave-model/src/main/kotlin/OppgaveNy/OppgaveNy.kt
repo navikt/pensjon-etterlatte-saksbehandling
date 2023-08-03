@@ -83,7 +83,8 @@ fun opprettNyOppgaveMedReferanseOgSak(
     referanse: String,
     sak: Sak,
     oppgaveKilde: OppgaveKilde?,
-    oppgaveType: OppgaveType
+    oppgaveType: OppgaveType,
+    merknad: String?
 ): OppgaveNy {
     return OppgaveNy(
         id = UUID.randomUUID(),
@@ -93,7 +94,7 @@ fun opprettNyOppgaveMedReferanseOgSak(
         kilde = oppgaveKilde,
         saksbehandler = null,
         referanse = referanse,
-        merknad = null,
+        merknad = merknad,
         opprettet = Tidspunkt.now(),
         sakType = sak.sakType,
         fnr = sak.ident,

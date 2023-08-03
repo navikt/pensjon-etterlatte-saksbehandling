@@ -115,7 +115,8 @@ class OppgaveServiceNyTest {
             "referanse",
             opprettetSak.id,
             OppgaveKilde.BEHANDLING,
-            OppgaveType.FOERSTEGANGSBEHANDLING
+            OppgaveType.FOERSTEGANGSBEHANDLING,
+            null
         )
         val nysaksbehandler = "nysaksbehandler"
         oppgaveServiceNy.tildelSaksbehandler(nyOppgave.id, nysaksbehandler)
@@ -131,7 +132,8 @@ class OppgaveServiceNyTest {
             "referanse",
             opprettetSak.id,
             OppgaveKilde.BEHANDLING,
-            OppgaveType.FOERSTEGANGSBEHANDLING
+            OppgaveType.FOERSTEGANGSBEHANDLING,
+            null
         )
         val nysaksbehandler = "nysaksbehandler"
         oppgaveServiceNy.tildelSaksbehandler(nyOppgave.id, nysaksbehandler)
@@ -157,7 +159,8 @@ class OppgaveServiceNyTest {
             "referanse",
             opprettetSak.id,
             OppgaveKilde.BEHANDLING,
-            OppgaveType.FOERSTEGANGSBEHANDLING
+            OppgaveType.FOERSTEGANGSBEHANDLING,
+            null
         )
         oppgaveDaoNy.endreStatusPaaOppgave(nyOppgave.id, Status.FERDIGSTILT)
         val nysaksbehandler = "nysaksbehandler"
@@ -173,7 +176,8 @@ class OppgaveServiceNyTest {
             "referanse",
             opprettetSak.id,
             OppgaveKilde.BEHANDLING,
-            OppgaveType.FOERSTEGANGSBEHANDLING
+            OppgaveType.FOERSTEGANGSBEHANDLING,
+            null
         )
         val nysaksbehandler = "nysaksbehandler"
         oppgaveServiceNy.byttSaksbehandler(nyOppgave.id, nysaksbehandler)
@@ -189,7 +193,8 @@ class OppgaveServiceNyTest {
             "referanse",
             opprettetSak.id,
             OppgaveKilde.BEHANDLING,
-            OppgaveType.FOERSTEGANGSBEHANDLING
+            OppgaveType.FOERSTEGANGSBEHANDLING,
+            null
         )
         oppgaveDaoNy.endreStatusPaaOppgave(nyOppgave.id, Status.FERDIGSTILT)
         val nysaksbehandler = "nysaksbehandler"
@@ -212,12 +217,14 @@ class OppgaveServiceNyTest {
             referanse = referanse,
             sakId = opprettetSak.id,
             oppgaveType = OppgaveType.FOERSTEGANGSBEHANDLING,
-            oppgaveKilde = OppgaveKilde.BEHANDLING
+            oppgaveKilde = OppgaveKilde.BEHANDLING,
+            merknad = null
         )
         oppgaveServiceNaarOppgaveIkkeErPaa.lukkOppgaveUnderbehandlingOgLagNyMedType(
             fattetoppgave = VedtakOppgaveDTO(sakId = opprettetSak.id, referanse = referanse),
             oppgaveType = OppgaveType.ATTESTERING,
-            saksbehandler = saksbehandler
+            saksbehandler = saksbehandler,
+            merknad = null
         )
         val oppgaveEtterLukking = oppgaveServiceNaarOppgaveIkkeErPaa.hentOppgave(nyOppgave.id)
         Assertions.assertEquals(saksbehandler, oppgaveEtterLukking?.saksbehandler)
@@ -239,7 +246,8 @@ class OppgaveServiceNyTest {
             "referanse",
             opprettetSak.id,
             OppgaveKilde.BEHANDLING,
-            OppgaveType.FOERSTEGANGSBEHANDLING
+            OppgaveType.FOERSTEGANGSBEHANDLING,
+            null
         )
         val nysaksbehandler = "nysaksbehandler"
         oppgaveServiceNy.tildelSaksbehandler(nyOppgave.id, nysaksbehandler)
@@ -257,7 +265,8 @@ class OppgaveServiceNyTest {
             "referanse",
             opprettetSak.id,
             OppgaveKilde.BEHANDLING,
-            OppgaveType.FOERSTEGANGSBEHANDLING
+            OppgaveType.FOERSTEGANGSBEHANDLING,
+            null
         )
         val err = assertThrows<BadRequestException> {
             oppgaveServiceNy.fjernSaksbehandler(nyOppgave.id)
@@ -272,7 +281,8 @@ class OppgaveServiceNyTest {
             "referanse",
             opprettetSak.id,
             OppgaveKilde.BEHANDLING,
-            OppgaveType.FOERSTEGANGSBEHANDLING
+            OppgaveType.FOERSTEGANGSBEHANDLING,
+            null
         )
         val saksbehandler = "saksbehandler"
         oppgaveServiceNy.tildelSaksbehandler(nyOppgave.id, saksbehandler)
@@ -292,7 +302,8 @@ class OppgaveServiceNyTest {
             "referanse",
             opprettetSak.id,
             OppgaveKilde.BEHANDLING,
-            OppgaveType.FOERSTEGANGSBEHANDLING
+            OppgaveType.FOERSTEGANGSBEHANDLING,
+            null
         )
         oppgaveServiceNy.tildelSaksbehandler(nyOppgave.id, "nysaksbehandler")
         val nyFrist = Tidspunkt.now().toLocalDatetimeUTC().plusMonths(4L).toTidspunkt()
@@ -308,7 +319,8 @@ class OppgaveServiceNyTest {
             "referanse",
             opprettetSak.id,
             OppgaveKilde.BEHANDLING,
-            OppgaveType.FOERSTEGANGSBEHANDLING
+            OppgaveType.FOERSTEGANGSBEHANDLING,
+            null
         )
         oppgaveServiceNy.tildelSaksbehandler(nyOppgave.id, "nysaksbehandler")
         val nyFrist = Tidspunkt.now().toLocalDatetimeUTC().minusMonths(1L).toTidspunkt()
@@ -327,7 +339,8 @@ class OppgaveServiceNyTest {
             "referanse",
             opprettetSak.id,
             OppgaveKilde.BEHANDLING,
-            OppgaveType.FOERSTEGANGSBEHANDLING
+            OppgaveType.FOERSTEGANGSBEHANDLING,
+            null
         )
 
         oppgaveDaoNy.endreStatusPaaOppgave(nyOppgave.id, Status.FERDIGSTILT)
@@ -349,14 +362,16 @@ class OppgaveServiceNyTest {
             referanse,
             opprettetSak.id,
             OppgaveKilde.BEHANDLING,
-            OppgaveType.FOERSTEGANGSBEHANDLING
+            OppgaveType.FOERSTEGANGSBEHANDLING,
+            null
         )
 
         oppgaveServiceNy.tildelSaksbehandler(nyOppgave.id, "saksbehandler")
 
         val vedtakOppgaveDTO = oppgaveServiceNy.lukkOppgaveUnderbehandlingOgLagNyMedType(
             VedtakOppgaveDTO(opprettetSak.id, referanse),
-            OppgaveType.ATTESTERING
+            OppgaveType.ATTESTERING,
+            null
         )
 
         val saksbehandlerOppgave = oppgaveServiceNy.hentOppgave(nyOppgave.id)
@@ -373,13 +388,15 @@ class OppgaveServiceNyTest {
             referanse,
             opprettetSak.id,
             OppgaveKilde.BEHANDLING,
-            OppgaveType.FOERSTEGANGSBEHANDLING
+            OppgaveType.FOERSTEGANGSBEHANDLING,
+            null
         )
 
         val err = assertThrows<BadRequestException> {
             oppgaveServiceNy.lukkOppgaveUnderbehandlingOgLagNyMedType(
                 VedtakOppgaveDTO(opprettetSak.id, referanse),
-                OppgaveType.ATTESTERING
+                OppgaveType.ATTESTERING,
+                null
             )
         }
 
@@ -396,7 +413,8 @@ class OppgaveServiceNyTest {
         val err = assertThrows<BadRequestException> {
             oppgaveServiceNy.lukkOppgaveUnderbehandlingOgLagNyMedType(
                 VedtakOppgaveDTO(opprettetSak.id, referanse),
-                OppgaveType.ATTESTERING
+                OppgaveType.ATTESTERING,
+                null
             )
         }
 
@@ -414,14 +432,16 @@ class OppgaveServiceNyTest {
             referanse,
             opprettetSak.id,
             OppgaveKilde.BEHANDLING,
-            OppgaveType.FOERSTEGANGSBEHANDLING
+            OppgaveType.FOERSTEGANGSBEHANDLING,
+            null
         )
 
         val oppgaveTo = oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
             referanse,
             opprettetSak.id,
             OppgaveKilde.BEHANDLING,
-            OppgaveType.FOERSTEGANGSBEHANDLING
+            OppgaveType.FOERSTEGANGSBEHANDLING,
+            null
         )
         oppgaveServiceNy.tildelSaksbehandler(oppgaveEn.id, "saksbehandler")
         oppgaveServiceNy.tildelSaksbehandler(oppgaveTo.id, "saksbehandler")
@@ -429,7 +449,8 @@ class OppgaveServiceNyTest {
         val err = assertThrows<BadRequestException> {
             oppgaveServiceNy.lukkOppgaveUnderbehandlingOgLagNyMedType(
                 VedtakOppgaveDTO(opprettetSak.id, referanse),
-                OppgaveType.ATTESTERING
+                OppgaveType.ATTESTERING,
+                null
             )
         }
 
@@ -453,7 +474,8 @@ class OppgaveServiceNyTest {
             "referanse",
             opprettetSak.id,
             OppgaveKilde.BEHANDLING,
-            OppgaveType.FOERSTEGANGSBEHANDLING
+            OppgaveType.FOERSTEGANGSBEHANDLING,
+            null
         )
 
         val adressebeskyttetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
@@ -461,7 +483,8 @@ class OppgaveServiceNyTest {
             "referanse",
             adressebeskyttetSak.id,
             OppgaveKilde.BEHANDLING,
-            OppgaveType.FOERSTEGANGSBEHANDLING
+            OppgaveType.FOERSTEGANGSBEHANDLING,
+            null
         )
 
         saktilgangDao.oppdaterAdresseBeskyttelse(adressebeskyttetSak.id, AdressebeskyttelseGradering.STRENGT_FORTROLIG)
@@ -480,11 +503,12 @@ class OppgaveServiceNyTest {
     @Test
     fun `Skal kunne endre enhet for oppgaver tilknyttet sak`() {
         val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
-        val nyOppgave = oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
-            "referanse",
-            opprettetSak.id,
-            OppgaveKilde.BEHANDLING,
-            OppgaveType.FOERSTEGANGSBEHANDLING
+        oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
+            referanse = "referanse",
+            sakId = opprettetSak.id,
+            oppgaveKilde = OppgaveKilde.BEHANDLING,
+            oppgaveType = OppgaveType.FOERSTEGANGSBEHANDLING,
+            merknad = null
         )
 
         val jwtclaims = JWTClaimsSet.Builder().claim("groups", saksbehandlerRolleDev).build()
@@ -496,7 +520,7 @@ class OppgaveServiceNyTest {
         Assertions.assertEquals(1, oppgaverUtenEndring.size)
         Assertions.assertEquals(Enheter.AALESUND.enhetNr, oppgaverUtenEndring[0].enhet)
 
-        oppgaveServiceNy.endreEnhetForOppgaverTilknyttetSak(opprettetSak.id,Enheter.STEINKJER.enhetNr)
+        oppgaveServiceNy.endreEnhetForOppgaverTilknyttetSak(opprettetSak.id, Enheter.STEINKJER.enhetNr)
         val oppgaverMedEndring = oppgaveServiceNy.finnOppgaverForBruker(saksbehandlerMedRoller)
         Assertions.assertEquals(1, oppgaverMedEndring.size)
         Assertions.assertEquals(Enheter.STEINKJER.enhetNr, oppgaverMedEndring[0].enhet)
@@ -509,7 +533,8 @@ class OppgaveServiceNyTest {
             "referanse",
             opprettetSak.id,
             OppgaveKilde.BEHANDLING,
-            OppgaveType.FOERSTEGANGSBEHANDLING
+            OppgaveType.FOERSTEGANGSBEHANDLING,
+            null
         )
 
         val adressebeskyttetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
@@ -517,7 +542,8 @@ class OppgaveServiceNyTest {
             "referanse",
             adressebeskyttetSak.id,
             OppgaveKilde.BEHANDLING,
-            OppgaveType.FOERSTEGANGSBEHANDLING
+            OppgaveType.FOERSTEGANGSBEHANDLING,
+            null
         )
 
         saktilgangDao.oppdaterAdresseBeskyttelse(adressebeskyttetSak.id, AdressebeskyttelseGradering.STRENGT_FORTROLIG)
@@ -540,7 +566,8 @@ class OppgaveServiceNyTest {
             "referanse",
             opprettetSak.id,
             OppgaveKilde.BEHANDLING,
-            OppgaveType.FOERSTEGANGSBEHANDLING
+            OppgaveType.FOERSTEGANGSBEHANDLING,
+            null
         )
 
         val attestantSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
@@ -548,7 +575,8 @@ class OppgaveServiceNyTest {
             "referanse",
             attestantSak.id,
             OppgaveKilde.BEHANDLING,
-            OppgaveType.ATTESTERING
+            OppgaveType.ATTESTERING,
+            null
         )
 
         val jwtclaims = JWTClaimsSet.Builder().claim("groups", attestantRolleDev).build()
@@ -570,7 +598,8 @@ class OppgaveServiceNyTest {
             "referanse",
             opprettetSak.id,
             OppgaveKilde.BEHANDLING,
-            OppgaveType.FOERSTEGANGSBEHANDLING
+            OppgaveType.FOERSTEGANGSBEHANDLING,
+            null
         )
         val nysaksbehandler = "nysaksbehandler"
         oppgaveServiceNy.tildelSaksbehandler(nyOppgave.id, nysaksbehandler)
@@ -595,7 +624,8 @@ class OppgaveServiceNyTest {
             behandlingsref,
             opprettetSak.id,
             OppgaveKilde.BEHANDLING,
-            OppgaveType.FOERSTEGANGSBEHANDLING
+            OppgaveType.FOERSTEGANGSBEHANDLING,
+            null
         )
 
         oppgaveServiceNy.tildelSaksbehandler(oppgave.id, "saksbehandler01")
@@ -612,7 +642,8 @@ class OppgaveServiceNyTest {
             behandlingsref,
             opprettetSak.id,
             OppgaveKilde.BEHANDLING,
-            OppgaveType.FOERSTEGANGSBEHANDLING
+            OppgaveType.FOERSTEGANGSBEHANDLING,
+            null
         )
         oppgaveServiceNy.tildelSaksbehandler(oppgaveSomSkalBliAvbrutt.id, "saksbehandler01")
 
@@ -648,7 +679,8 @@ class OppgaveServiceNyTest {
             behandlingsref,
             aalesundSak.id,
             OppgaveKilde.BEHANDLING,
-            OppgaveType.FOERSTEGANGSBEHANDLING
+            OppgaveType.FOERSTEGANGSBEHANDLING,
+            null
         )
         val saksbehandlerid = "saksbehandler01"
         oppgaveServiceNy.tildelSaksbehandler(oppgaveAalesund.id, saksbehandlerid)
@@ -659,7 +691,8 @@ class OppgaveServiceNyTest {
             behrefsteinkjer,
             saksteinskjer.id,
             OppgaveKilde.BEHANDLING,
-            OppgaveType.FOERSTEGANGSBEHANDLING
+            OppgaveType.FOERSTEGANGSBEHANDLING,
+            null
         )
 
         oppgaveServiceNy.tildelSaksbehandler(oppgavesteinskjer.id, saksbehandlerid)

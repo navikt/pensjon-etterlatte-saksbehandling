@@ -153,6 +153,7 @@ class OppgaveServiceNy(
     fun lukkOppgaveUnderbehandlingOgLagNyMedType(
         fattetoppgave: VedtakOppgaveDTO,
         oppgaveType: OppgaveType,
+        merknad: String?,
         saksbehandler: String? = null
     ): OppgaveNy {
         sikreAtSaksbehandlerErSattPaaOppgaveHvisNyOppgavelisteIkkeErStoettet(fattetoppgave.referanse, saksbehandler)
@@ -165,21 +166,22 @@ class OppgaveServiceNy(
             val oppgaveUnderbehandling = behandlingsoppgaver.single { it.status == Status.UNDER_BEHANDLING }
             oppgaveDaoNy.endreStatusPaaOppgave(oppgaveUnderbehandling.id, Status.FERDIGSTILT)
             return opprettNyOppgaveMedSakOgReferanse(
-                fattetoppgave.referanse,
-                fattetoppgave.sakId,
-                oppgaveUnderbehandling.kilde,
-                oppgaveType
+                referanse = fattetoppgave.referanse,
+                sakId = fattetoppgave.sakId,
+                oppgaveKilde = oppgaveUnderbehandling.kilde,
+                oppgaveType = oppgaveType,
+                merknad = merknad
             )
         } catch (e: NoSuchElementException) {
             throw BadRequestException(
                 "Det må finnes en oppgave under behandling, gjelder behandling:" +
-                        " ${fattetoppgave.referanse}",
+                    " ${fattetoppgave.referanse}",
                 e
             )
         } catch (e: IllegalArgumentException) {
             throw BadRequestException(
                 "Skal kun ha en oppgave under behandling, gjelder behandling:" +
-                        " ${fattetoppgave.referanse}",
+                    " ${fattetoppgave.referanse}",
                 e
             )
         }
@@ -196,7 +198,6 @@ class OppgaveServiceNy(
             }
         }
     }
-
 
     fun avbrytOppgaveUnderBehandling(
         behandlingEllerHendelseId: String,
@@ -216,13 +217,13 @@ class OppgaveServiceNy(
         } catch (e: NoSuchElementException) {
             throw BadRequestException(
                 "Det må finnes en oppgave under behandling, gjelder behandling / hendelse med ID:" +
-                        " $behandlingEllerHendelseId}",
+                    " $behandlingEllerHendelseId}",
                 e
             )
         } catch (e: IllegalArgumentException) {
             throw BadRequestException(
                 "Skal kun ha en oppgave under behandling, gjelder behandling / hendelse med ID:" +
-                        " $behandlingEllerHendelseId",
+                    " $behandlingEllerHendelseId",
                 e
             )
         }
@@ -249,13 +250,13 @@ class OppgaveServiceNy(
         } catch (e: NoSuchElementException) {
             throw BadRequestException(
                 "Det må finnes en oppgave under behandling, gjelder behandling / hendelse med ID:" +
-                        " $behandlingEllerHendelseId}",
+                    " $behandlingEllerHendelseId}",
                 e
             )
         } catch (e: IllegalArgumentException) {
             throw BadRequestException(
                 "Skal kun ha en oppgave under behandling, gjelder behandling / hendelse med ID:" +
-                        " $behandlingEllerHendelseId",
+                    " $behandlingEllerHendelseId",
                 e
             )
         }
@@ -263,21 +264,17 @@ class OppgaveServiceNy(
 
     fun opprettFoerstegangsbehandlingsOppgaveForInnsendSoeknad(referanse: String, sakId: Long): OppgaveNy {
         val oppgaverForBehandling = oppgaveDaoNy.hentOppgaverForBehandling(referanse)
-        val oppgaverSomKanLukkes = oppgaverForBehandling.filter { o ->
-            o.status in listOf(
-                Status.UNDER_BEHANDLING,
-                Status.NY
-            )
-        }
+        val oppgaverSomKanLukkes = oppgaverForBehandling.filter { !it.erAvsluttet() }
         oppgaverSomKanLukkes.forEach {
             oppgaveDaoNy.endreStatusPaaOppgave(it.id, Status.AVBRUTT)
         }
 
         return opprettNyOppgaveMedSakOgReferanse(
-            referanse,
-            sakId,
-            OppgaveKilde.BEHANDLING,
-            OppgaveType.FOERSTEGANGSBEHANDLING
+            referanse = referanse,
+            sakId = sakId,
+            oppgaveKilde = OppgaveKilde.BEHANDLING,
+            oppgaveType = OppgaveType.FOERSTEGANGSBEHANDLING,
+            merknad = null
         )
     }
 
@@ -285,7 +282,8 @@ class OppgaveServiceNy(
         referanse: String,
         sakId: Long,
         oppgaveKilde: OppgaveKilde?,
-        oppgaveType: OppgaveType
+        oppgaveType: OppgaveType,
+        merknad: String?
     ): OppgaveNy {
         val sak = sakDao.hentSak(sakId)!!
         return lagreOppgave(
@@ -293,7 +291,8 @@ class OppgaveServiceNy(
                 referanse = referanse,
                 sak = sak,
                 oppgaveKilde = oppgaveKilde,
-                oppgaveType = oppgaveType
+                oppgaveType = oppgaveType,
+                merknad = merknad
             )
         )
     }

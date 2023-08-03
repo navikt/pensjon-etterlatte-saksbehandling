@@ -150,7 +150,8 @@ class BehandlingServiceImpl(
                             referanse = hendelse.id.toString(),
                             sakId = behandling.sak.id,
                             oppgaveKilde = OppgaveKilde.HENDELSE,
-                            oppgaveType = OppgaveType.VURDER_KONSEKVENS
+                            oppgaveType = OppgaveType.VURDER_KONSEKVENS,
+                            merknad = hendelse.beskrivelse()
                         )
                     }
                 } catch (e: Exception) {

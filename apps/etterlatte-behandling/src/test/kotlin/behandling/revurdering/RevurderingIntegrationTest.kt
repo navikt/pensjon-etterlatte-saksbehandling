@@ -148,7 +148,8 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
                 revurdering?.id.toString(),
                 sak.id,
                 OppgaveKilde.BEHANDLING,
-                OppgaveType.REVURDERING
+                OppgaveType.REVURDERING,
+                null
             )
         }
         inTransaction {
@@ -264,7 +265,8 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
                     revurdering.id.toString(),
                     sak.id,
                     OppgaveKilde.BEHANDLING,
-                    OppgaveType.REVURDERING
+                    OppgaveType.REVURDERING,
+                    null
                 )
             }
             confirmVerified(hendelser, grunnlagService, oppgaveService)
@@ -416,7 +418,8 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
                 referanse = hendelse.id.toString(),
                 sakId = sak.id,
                 oppgaveKilde = OppgaveKilde.HENDELSE,
-                oppgaveType = OppgaveType.VURDER_KONSEKVENS
+                oppgaveType = OppgaveType.VURDER_KONSEKVENS,
+                merknad = null
             )
         }
 
@@ -448,7 +451,8 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
                     behandling!!.id.toString(),
                     sak.id,
                     OppgaveKilde.BEHANDLING,
-                    OppgaveType.FOERSTEGANGSBEHANDLING
+                    OppgaveType.FOERSTEGANGSBEHANDLING,
+                    null
                 )
             }
             verify {
@@ -462,7 +466,8 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
                     revurdering.id.toString(),
                     sak.id,
                     OppgaveKilde.BEHANDLING,
-                    OppgaveType.REVURDERING
+                    OppgaveType.REVURDERING,
+                    null
                 )
             }
             verify { oppgaveService.ferdigStillOppgaveUnderBehandling(any(), any()) }

@@ -36,7 +36,7 @@ class StoenadRepository(private val datasource: DataSource) {
                 SELECT id, fnrSoeker, fnrForeldre, 
                     fnrSoesken, anvendtTrygdetid, nettoYtelse, beregningType, anvendtSats, behandlingId, sakId, 
                     sakNummer, tekniskTid, sakYtelse, versjon, saksbehandler, attestant, vedtakLoependeFom, 
-                    vedtakLoependeTom, beregning, vedtakType, sak_utland
+                    vedtakLoependeTom, beregning, vedtakType, sak_utland, virkningstidspunkt, utbetalingsdato
                 FROM stoenad
                 """.trimIndent()
             ).executeQuery().toList {
@@ -69,8 +69,9 @@ class StoenadRepository(private val datasource: DataSource) {
                 INSERT INTO maaned_stoenad(
                     fnrSoeker, fnrForeldre, fnrSoesken, anvendtTrygdetid, nettoYtelse, beregningType, anvendtSats, 
                     behandlingId, sakId, tekniskTid, sakYtelse, versjon, saksbehandler, attestant, 
-                    vedtakLoependeFom, vedtakLoependeTom, statistikkMaaned, sak_utland
-                ) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?)
+                    vedtakLoependeFom, vedtakLoependeTom, statistikkMaaned, sak_utland,
+                    virkningstidspunkt, utbetalingsdato
+                ) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """.trimIndent()
             ).apply {
                 setString(1, maanedStatistikkRad.fnrSoeker)
@@ -91,6 +92,8 @@ class StoenadRepository(private val datasource: DataSource) {
                 setDate(16, maanedStatistikkRad.vedtakLoependeTom?.let { Date.valueOf(it) })
                 setString(17, maanedStatistikkRad.statistikkMaaned.toString())
                 setString(18, maanedStatistikkRad.sakUtland.toString())
+                setDate(19, Date.valueOf(maanedStatistikkRad.virkningstidspunkt.atDay(1)))
+                setDate(20, maanedStatistikkRad.utbetalingsdato?.let { Date.valueOf(it) })
             }.executeUpdate()
         }
     }
@@ -102,8 +105,9 @@ class StoenadRepository(private val datasource: DataSource) {
                 INSERT INTO stoenad(
                     fnrSoeker, fnrForeldre, fnrSoesken, anvendtTrygdetid, nettoYtelse, beregningType, anvendtSats, 
                     behandlingId, sakId, sakNummer, tekniskTid, sakYtelse, versjon, saksbehandler, attestant, 
-                    vedtakLoependeFom, vedtakLoependeTom, beregning, vedtakType, sak_utland
-                ) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    vedtakLoependeFom, vedtakLoependeTom, beregning, vedtakType, sak_utland,
+                     virkningstidspunkt, utbetalingsdato
+                ) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """.trimIndent(),
                 Statement.RETURN_GENERATED_KEYS
             ).apply {
@@ -224,6 +228,8 @@ private fun PreparedStatement.setStoenadRad(stoenadsrad: StoenadRad): PreparedSt
     setJsonb(18, stoenadsrad.beregning)
     setString(19, stoenadsrad.vedtakType?.toString())
     setString(20, stoenadsrad.sakUtland?.toString())
+    setDate(21, Date.valueOf(stoenadsrad.virkningstidspunkt.atDay(1)))
+    setDate(22, stoenadsrad.utbetalingsdato?.let { Date.valueOf(it) })
 }
 
 private fun ResultSet.asStoenadRad(): StoenadRad = StoenadRad(
@@ -248,4 +254,6 @@ private fun ResultSet.asStoenadRad(): StoenadRad = StoenadRad(
     beregning = getString("beregning")?.let { objectMapper.readValue(it) },
     vedtakType = getString("vedtakType")?.let { enumValueOf<VedtakType>(it) },
     sakUtland = getString("sak_utland")?.let { enumValueOf<SakUtland>(it) },
+    virkningstidspunkt = getDate("virkningstidspunkt").toLocalDate().let { YearMonth.of(it.year, it.monthValue) },
+    utbetalingsdato = getDate("utbetalingsdato")?.toLocalDate()
 )

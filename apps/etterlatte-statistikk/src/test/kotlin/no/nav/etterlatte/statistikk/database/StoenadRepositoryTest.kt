@@ -99,7 +99,9 @@ class StoenadRepositoryTest {
                 vedtakLoependeTom = null,
                 beregning = mockBeregning,
                 vedtakType = VedtakType.INNVILGELSE,
-                sakUtland = SakUtland.NASJONAL
+                sakUtland = SakUtland.NASJONAL,
+                virkningstidspunkt = YearMonth.of(2023, 6),
+                utbetalingsdato = LocalDate.of(2023,7, 20)
             )
         )
         repo.hentStoenadRader().also {
@@ -141,7 +143,9 @@ class StoenadRepositoryTest {
                 vedtakLoependeTom = null,
                 beregning = null,
                 vedtakType = VedtakType.INNVILGELSE,
-                sakUtland = SakUtland.NASJONAL
+                sakUtland = SakUtland.NASJONAL,
+                virkningstidspunkt = YearMonth.of(2023, 6),
+                utbetalingsdato = LocalDate.of(2023,7, 20)
             )
         )
         repo.hentStoenadRader().also {
@@ -289,7 +293,9 @@ class StoenadRepositoryTest {
             vedtakLoependeFom = LocalDate.of(2022, 8, 1),
             vedtakLoependeTom = null,
             statistikkMaaned = YearMonth.of(2023, Month.FEBRUARY),
-            sakUtland = SakUtland.NASJONAL
+            sakUtland = SakUtland.NASJONAL,
+            virkningstidspunkt = YearMonth.of(2023, 6),
+            utbetalingsdato = LocalDate.of(2023,7, 20)
         )
 
         assertDoesNotThrow {
@@ -322,7 +328,9 @@ class StoenadRepositoryTest {
                 vedtakLoependeTom = null,
                 beregning = null,
                 vedtakType = null,
-                sakUtland = SakUtland.NASJONAL
+                sakUtland = SakUtland.NASJONAL,
+                virkningstidspunkt = YearMonth.of(2023, 6),
+                utbetalingsdato = LocalDate.of(2023,7, 20)
             )
         )
 

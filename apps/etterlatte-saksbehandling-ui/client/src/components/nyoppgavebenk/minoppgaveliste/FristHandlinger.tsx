@@ -1,13 +1,12 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { isFailure, isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
 import { erOppgaveRedigerbar, Oppgavestatus, redigerFristApi } from '~shared/api/oppgaverny'
-import { Alert, Button, Heading, Modal, MonthPicker } from '@navikt/ds-react'
+import { Alert, Button, Heading, Modal, DatePicker, Label } from '@navikt/ds-react'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { formaterStringDato } from '~utils/formattering'
 import { PencilIcon } from '@navikt/aksel-icons'
 import styled from 'styled-components'
-import { FristWrapper } from '~components/nyoppgavebenk/Oppgavelista'
-import { isBefore } from 'date-fns'
+import { add, isBefore } from 'date-fns'
 
 const Buttonwrapper = styled.div`
   margin: 4rem 1rem 1rem 1rem;
@@ -16,17 +15,23 @@ const Buttonwrapper = styled.div`
   }
 `
 
-export const FristHandlinger = (props: { status: Oppgavestatus; frist: string; oppgaveId: string }) => {
-  const { frist, oppgaveId, status } = props
+const FristWrapper = styled.span<{ fristHarPassert: boolean; utenKnapp?: boolean }>`
+  color: ${(p) => p.fristHarPassert && 'var(--a-text-danger)'};
+  padding: ${(p) => p.utenKnapp && '12px 20px'};
+`
+
+export const FristHandlinger = (props: { status: Oppgavestatus; orginalFrist: string; oppgaveId: string }) => {
+  const { orginalFrist, oppgaveId, status } = props
   const [open, setOpen] = useState(false)
+  const [frist, setFrist] = useState<string>()
   const [nyFrist, setnyFrist] = useState<Date>(new Date())
   const [redigerfristSvar, redigerFrist, resetredigerFristApi] = useApiCall(redigerFristApi)
 
   const erRedigerbar = erOppgaveRedigerbar(status)
 
   const generateFromDate = () => {
-    const naa = new Date()
-    naa.setMonth(naa.getMonth() - 1)
+    // Legger til 1 dag siden ny frist må være fremover i tid
+    const naa = add(new Date(), { days: 1 })
     return naa
   }
   const generateToDate = () => {
@@ -35,14 +40,22 @@ export const FristHandlinger = (props: { status: Oppgavestatus; frist: string; o
     return naa
   }
 
-  const redigerDatoMedtimerForAAslippetidssoneproblemUTC = (valgDato: Date) => {
-    if (valgDato) {
-      const datoSomSisteDagIMaaneden = new Date(valgDato.getFullYear(), valgDato.getMonth() + 1, 0)
-      datoSomSisteDagIMaaneden.setHours(17)
-      setnyFrist(datoSomSisteDagIMaaneden)
+  const redigerDatoMedtimerForAAslippetidssoneproblemUTC = (valgtDato: Date | undefined) => {
+    if (valgtDato) {
+      valgtDato.setHours(17)
+      setnyFrist(valgtDato)
       resetredigerFristApi()
     }
   }
+  useEffect(() => {
+    if (isSuccess(redigerfristSvar)) {
+      setFrist(nyFrist.toISOString())
+    }
+  }, [redigerfristSvar])
+
+  useEffect(() => {
+    if (orginalFrist) setFrist(orginalFrist)
+  }, [orginalFrist])
 
   return (
     <>
@@ -53,8 +66,8 @@ export const FristHandlinger = (props: { status: Oppgavestatus; frist: string; o
               <Heading spacing level="2" size="medium" id="modal-heading">
                 Velg ny frist
               </Heading>
-              <MonthPicker.Standalone
-                onMonthSelect={redigerDatoMedtimerForAAslippetidssoneproblemUTC}
+              <DatePicker.Standalone
+                onSelect={redigerDatoMedtimerForAAslippetidssoneproblemUTC}
                 selected={nyFrist}
                 dropdownCaption
                 fromDate={generateFromDate()}
@@ -74,23 +87,27 @@ export const FristHandlinger = (props: { status: Oppgavestatus; frist: string; o
                   Lagre ny frist
                 </Button>
                 <Button variant="secondary" onClick={() => setOpen(!open)}>
-                  Avbryt
+                  {isSuccess(redigerfristSvar) ? 'Lukk' : 'Avbryt'}
                 </Button>
               </Buttonwrapper>
             </Modal.Content>
           </Modal>
-          <FristWrapper fristHarPassert={isBefore(new Date(frist), new Date())}>
-            {formaterStringDato(frist)}
-          </FristWrapper>
-          {erRedigerbar && (
+
+          {erRedigerbar ? (
             <Button
-              size="small"
-              variant="secondary"
+              variant="tertiary"
+              iconPosition="right"
               icon={<PencilIcon title="a11y-title" fontSize="1.5rem" />}
               onClick={() => setOpen(!open)}
             >
-              Rediger frist
+              <FristWrapper fristHarPassert={isBefore(new Date(frist), new Date())}>
+                {formaterStringDato(frist)}
+              </FristWrapper>
             </Button>
+          ) : (
+            <FristWrapper fristHarPassert={isBefore(new Date(frist), new Date())} utenKnapp>
+              <Label>{formaterStringDato(frist)}</Label>
+            </FristWrapper>
           )}
         </>
       ) : (

@@ -197,8 +197,14 @@ class GrunnlagsendringshendelseService(
         val sakerMedNyEnhet = finnSaker.map {
             SakMedEnhet(it.id, finnEnhetFraGradering(fnr, gradering, it.sakType))
         }
-
         sakService.oppdaterEnhetForSaker(sakerMedNyEnhet)
+        oppdaterEnhetForRelaterteOppgaver(sakerMedNyEnhet)
+    }
+
+    private fun oppdaterEnhetForRelaterteOppgaver(sakerMedNyEnhet: List<SakMedEnhet>) {
+        sakerMedNyEnhet.forEach {
+            oppgaveService.endreEnhetForOppgaverTilknyttetSak(it.id, it.enhet)
+        }
     }
 
     private fun finnEnhetFraGradering(fnr: String, gradering: AdressebeskyttelseGradering, sakType: SakType): String {

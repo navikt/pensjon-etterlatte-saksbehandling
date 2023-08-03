@@ -90,6 +90,9 @@ class OppgaveDaoMedEndringssporingImpl(
     override fun hentOppgaverForBehandling(behandlingid: String): List<OppgaveNy> {
         return oppgaveDao.hentOppgaverForBehandling(behandlingid)
     }
+    override fun hentOppgaverForSak(sakId: Long): List<OppgaveNy> {
+        return oppgaveDao.hentOppgaverForSak(sakId)
+    }
 
     override fun hentOppgaver(oppgaveTypeTyper: List<OppgaveType>): List<OppgaveNy> {
         return oppgaveDao.hentOppgaver(oppgaveTypeTyper)
@@ -110,6 +113,12 @@ class OppgaveDaoMedEndringssporingImpl(
     override fun endreStatusPaaOppgave(oppgaveId: UUID, oppgaveStatus: Status) {
         lagreEndringerPaaOppgave(oppgaveId) {
             oppgaveDao.endreStatusPaaOppgave(oppgaveId, oppgaveStatus)
+        }
+    }
+
+    override fun endreEnhetPaaOppgave(oppgaveId: UUID, enhet: String) {
+        lagreEndringerPaaOppgave(oppgaveId) {
+            oppgaveDao.endreEnhetPaaOppgave(oppgaveId, enhet)
         }
     }
 

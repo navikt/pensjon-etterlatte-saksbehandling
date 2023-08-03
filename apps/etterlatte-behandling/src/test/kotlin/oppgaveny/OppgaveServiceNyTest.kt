@@ -478,6 +478,31 @@ class OppgaveServiceNyTest {
     }
 
     @Test
+    fun `Skal kunne endre enhet for oppgaver tilknyttet sak`() {
+        val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val nyOppgave = oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
+            "referanse",
+            opprettetSak.id,
+            OppgaveKilde.BEHANDLING,
+            OppgaveType.FOERSTEGANGSBEHANDLING
+        )
+
+        val jwtclaims = JWTClaimsSet.Builder().claim("groups", saksbehandlerRolleDev).build()
+        val saksbehandlerMedRoller = SaksbehandlerMedRoller(
+            Saksbehandler("", "ident", JwtTokenClaims(jwtclaims)),
+            mapOf(AzureGroup.SAKSBEHANDLER to saksbehandlerRolleDev)
+        )
+        val oppgaverUtenEndring = oppgaveServiceNy.finnOppgaverForBruker(saksbehandlerMedRoller)
+        Assertions.assertEquals(1, oppgaverUtenEndring.size)
+        Assertions.assertEquals(Enheter.AALESUND.enhetNr, oppgaverUtenEndring[0].enhet)
+
+        oppgaveServiceNy.endreEnhetForOppgaverTilknyttetSak(opprettetSak.id,Enheter.STEINKJER.enhetNr)
+        val oppgaverMedEndring = oppgaveServiceNy.finnOppgaverForBruker(saksbehandlerMedRoller)
+        Assertions.assertEquals(1, oppgaverMedEndring.size)
+        Assertions.assertEquals(Enheter.STEINKJER.enhetNr, oppgaverMedEndring[0].enhet)
+    }
+
+    @Test
     fun `Skal kun få saker som  er strengt fotrolig tilbake hvis saksbehandler har rolle strengt fortrolig`() {
         val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(

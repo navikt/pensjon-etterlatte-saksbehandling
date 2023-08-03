@@ -69,8 +69,8 @@ export const RedigerSaksbehandler = (props: {
               )}
               <GeneriskModal
                 tittel="Endre saksbehandler"
-                beskrivelse={`Ønsker du å fjerne ${saksbehandler} og sette deg som saksbehandler?`}
-                tekstKnappJa="Ja, sett meg som saksbehandler"
+                beskrivelse={`Vil du overta oppgaven til ${saksbehandler}?`}
+                tekstKnappJa="Ja, overta oppgaven"
                 tekstKnappNei="Nei"
                 onYesClick={() =>
                   byttSaksbehandler({

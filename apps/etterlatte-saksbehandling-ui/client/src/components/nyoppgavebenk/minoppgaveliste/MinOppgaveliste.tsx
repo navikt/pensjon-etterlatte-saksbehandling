@@ -9,6 +9,7 @@ import { HandlingerForOppgave } from '~components/nyoppgavebenk/HandlingerForOpp
 import { OppgavetypeTag, SaktypeTag } from '~components/nyoppgavebenk/Tags'
 import SaksoversiktLenke from '~components/oppgavebenken/handlinger/BrukeroversiktKnapp'
 import { PaginationWrapper } from '~components/nyoppgavebenk/Oppgavelista'
+import { OPPGAVESTATUSFILTER } from '~components/nyoppgavebenk/Oppgavelistafiltre'
 
 export const MinOppgaveliste = (props: { oppgaver: ReadonlyArray<OppgaveDTOny> }) => {
   const { oppgaver } = props
@@ -68,7 +69,9 @@ export const MinOppgaveliste = (props: { oppgaver: ReadonlyArray<OppgaveDTOny> }
                       </Table.DataCell>
                       <Table.DataCell>{sakType && <SaktypeTag sakType={sakType} />}</Table.DataCell>
                       <Table.DataCell>{merknad}</Table.DataCell>
-                      <Table.DataCell>{status}</Table.DataCell>
+                      <Table.DataCell>
+                        {<span>{status ? OPPGAVESTATUSFILTER[status] ?? status : 'Ukjent'}</span>}
+                      </Table.DataCell>
                       <Table.DataCell>{enhet}</Table.DataCell>
                       <Table.DataCell>
                         {saksbehandler && (

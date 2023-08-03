@@ -6,12 +6,12 @@ import { Button, Loader } from '@navikt/ds-react'
 import { PersonIcon } from '@navikt/aksel-icons'
 import { Alert } from '@navikt/ds-react'
 
-export const TildelSaksbehandler = (props: { oppgaveId: string; sakId: number }) => {
-  const { oppgaveId, sakId } = props
+export const TildelSaksbehandler = (props: { oppgaveId: string }) => {
+  const { oppgaveId } = props
   const user = useAppSelector((state) => state.saksbehandlerReducer.saksbehandler)
   const [tildelSaksbehandlerSvar, tildelSaksbehandler] = useApiCall(tildelSaksbehandlerApi)
   const tildelSaksbehandlerWrapper = () => {
-    tildelSaksbehandler({ nysaksbehandler: { oppgaveId: oppgaveId, saksbehandler: user.ident }, sakId: sakId })
+    tildelSaksbehandler({ oppgaveId: oppgaveId, nysaksbehandler: { saksbehandler: user.ident } })
   }
   return (
     <>

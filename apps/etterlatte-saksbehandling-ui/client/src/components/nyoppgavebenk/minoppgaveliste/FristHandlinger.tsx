@@ -20,13 +20,8 @@ const FristWrapper = styled.span<{ fristHarPassert: boolean; utenKnapp?: boolean
   padding: ${(p) => p.utenKnapp && '12px 20px'};
 `
 
-export const FristHandlinger = (props: {
-  status: Oppgavestatus
-  orginalFrist: string
-  oppgaveId: string
-  sakId: number
-}) => {
-  const { orginalFrist, oppgaveId, sakId, status } = props
+export const FristHandlinger = (props: { status: Oppgavestatus; orginalFrist: string; oppgaveId: string }) => {
+  const { orginalFrist, oppgaveId, status } = props
   const [open, setOpen] = useState(false)
   const [frist, setFrist] = useState<string>()
   const [nyFrist, setnyFrist] = useState<Date>(new Date())
@@ -86,7 +81,7 @@ export const FristHandlinger = (props: {
                   loading={isPending(redigerfristSvar)}
                   disabled={!nyFrist}
                   onClick={() => {
-                    redigerFrist({ redigerFristRequest: { oppgaveId: oppgaveId, frist: nyFrist }, sakId: sakId })
+                    redigerFrist({ oppgaveId, redigerFristRequest: { frist: nyFrist } })
                   }}
                 >
                   Lagre ny frist

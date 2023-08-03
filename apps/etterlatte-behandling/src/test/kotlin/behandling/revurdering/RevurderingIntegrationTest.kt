@@ -32,7 +32,6 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveType
-import no.nav.etterlatte.libs.common.oppgaveNy.SaksbehandlerEndringDto
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
@@ -422,10 +421,8 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
         }
 
         applicationContext.oppgaveServiceNy.tildelSaksbehandler(
-            SaksbehandlerEndringDto(
-                oppgaveId = oppgave.id,
-                saksbehandler = saksbehandlerIdent
-            )
+            oppgaveId = oppgave.id,
+            saksbehandler = saksbehandlerIdent
         )
 
         val revurdering = revurderingService.opprettManuellRevurderingWrapper(

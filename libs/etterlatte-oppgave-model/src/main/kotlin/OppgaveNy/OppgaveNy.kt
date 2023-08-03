@@ -62,16 +62,10 @@ enum class OppgaveType {
 }
 
 data class SaksbehandlerEndringDto(
-    val oppgaveId: UUID,
     val saksbehandler: String
 )
 
-data class FjernSaksbehandlerRequest(
-    val oppgaveId: UUID
-)
-
 data class RedigerFristRequest(
-    val oppgaveId: UUID,
     val frist: Tidspunkt
 )
 

@@ -64,7 +64,7 @@ export const MinOppgaveliste = (props: { oppgaver: ReadonlyArray<OppgaveDTOny> }
                     <Table.Row key={id}>
                       <Table.HeaderCell>{formaterStringDato(opprettet)}</Table.HeaderCell>
                       <Table.DataCell>
-                        <FristHandlinger status={status} orginalFrist={frist} oppgaveId={id} sakId={sakId} />
+                        <FristHandlinger status={status} orginalFrist={frist} oppgaveId={id} />
                       </Table.DataCell>
                       <Table.DataCell>
                         <SaksoversiktLenke fnr={fnr} />

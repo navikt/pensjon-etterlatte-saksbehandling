@@ -44,7 +44,6 @@ const ButtonWrapper = styled.div`
 
 export const FristWrapper = styled.span<{ fristHarPassert: boolean }>`
   color: ${(p) => p.fristHarPassert && 'var(--a-text-danger)'};
-  margin-right: 0.5rem;
 `
 
 export const PaginationWrapper = styled.div`

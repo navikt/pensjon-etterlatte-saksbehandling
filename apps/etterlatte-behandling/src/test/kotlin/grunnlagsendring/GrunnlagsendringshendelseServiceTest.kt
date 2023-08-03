@@ -610,6 +610,9 @@ internal class GrunnlagsendringshendelseServiceTest {
                     adressebeskyttelse.adressebeskyttelseGradering
                 )
             }
+            verify(exactly = 6) {
+                oppgaveService.endreEnhetForOppgaverTilknyttetSak(any(),Enheter.STRENGT_FORTROLIG.enhetNr)
+            }
         }
     }
 
@@ -648,6 +651,9 @@ internal class GrunnlagsendringshendelseServiceTest {
                     it,
                     adressebeskyttelse.adressebeskyttelseGradering
                 )
+            }
+            verify(exactly = 6) {
+                oppgaveService.endreEnhetForOppgaverTilknyttetSak(any(),Enheter.STEINKJER.enhetNr)
             }
         }
     }

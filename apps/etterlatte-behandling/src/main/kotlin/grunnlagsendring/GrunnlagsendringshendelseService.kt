@@ -197,7 +197,6 @@ class GrunnlagsendringshendelseService(
         val sakerMedNyEnhet = finnSaker.map {
             SakMedEnhet(it.id, finnEnhetFraGradering(fnr, gradering, it.sakType))
         }
-        //In transaction?
         sakService.oppdaterEnhetForSaker(sakerMedNyEnhet)
         oppdaterEnhetForRelaterteOppgaver(sakerMedNyEnhet)
     }

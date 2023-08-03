@@ -13,20 +13,21 @@ import io.ktor.serialization.jackson.jackson
 import io.ktor.server.testing.testApplication
 import no.nav.etterlatte.BehandlingIntegrationTest
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
-import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.BehandlingOgSak
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.module
+import no.nav.etterlatte.rapidsandrivers.migrering.AvdoedForelder
+import no.nav.etterlatte.rapidsandrivers.migrering.Beregning
 import no.nav.etterlatte.rapidsandrivers.migrering.Enhet
 import no.nav.etterlatte.rapidsandrivers.migrering.MigreringRequest
 import no.nav.etterlatte.rapidsandrivers.migrering.PesysId
-import no.nav.etterlatte.rapidsandrivers.migrering.Trygdetidsgrunnlag
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import java.time.LocalDate
+import java.math.BigDecimal
 import java.time.YearMonth
 import java.util.*
 
@@ -55,15 +56,22 @@ class MigreringRoutesTest : BehandlingIntegrationTest() {
             val request = MigreringRequest(
                 pesysId = PesysId("1"),
                 enhet = Enhet("4817"),
-                fnr = fnr,
-                persongalleri = Persongalleri(fnr.value, "innsender", emptyList(), emptyList(), emptyList()),
+                soeker = fnr,
+                avdoedForelder = listOf(AvdoedForelder(fnr, Tidspunkt.now())),
+                gjenlevendeForelder = null,
                 virkningstidspunkt = YearMonth.now(),
-                trygdetidsgrunnlag = Trygdetidsgrunnlag(
-                    "Norge",
-                    LocalDate.now().minusYears(40),
-                    LocalDate.now(),
-                    "derfor"
-                )
+                beregning = Beregning(
+                    BigDecimal(1000),
+                    BigDecimal(1000),
+                    BigDecimal(40),
+                    Tidspunkt.now(),
+                    BigDecimal(100000),
+                    "",
+                    "",
+                    "",
+                    ""
+                ),
+                trygdetidsPerioder = emptyList()
             )
 
             val response: BehandlingOgSak = client.post("/migrering") {

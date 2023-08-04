@@ -19,15 +19,16 @@ const TabsWidth = styled(Tabs)`
 
 export const ToggleMinOppgaveliste = () => {
   const [filter, setFilter] = useState<Filter>(initialFilter())
-
   const [oppgaveListeValg, setOppgaveListeValg] = useState<OppgavelisteToggle>('Oppgavelista')
   const [oppgaver, hentOppgaver] = useApiCall(hentNyeOppgaver)
   const [hentedeOppgaver, setHentedeOppgaver] = useState<ReadonlyArray<OppgaveDTOny>>([])
+
   const hentOppgaverWrapper = () => {
     hentOppgaver({}, (oppgaver) => {
       setHentedeOppgaver(oppgaver)
     })
   }
+
   useEffect(() => {
     hentOppgaverWrapper()
   }, [])

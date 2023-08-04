@@ -86,7 +86,8 @@ fun Application.module(context: ApplicationContext) {
                 tilgangService = tilgangService,
                 sakService = sakService,
                 behandlingService = behandlingService,
-                grunnlagsendringshendelseService = grunnlagsendringshendelseService
+                grunnlagsendringshendelseService = grunnlagsendringshendelseService,
+                oppgaveServiceNy = oppgaveServiceNy
             )
             behandlingRoutes(
                 behandlingService = behandlingService,

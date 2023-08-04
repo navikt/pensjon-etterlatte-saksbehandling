@@ -199,6 +199,10 @@ class OppgaveServiceNy(
         }
     }
 
+    fun hentOppgaverForSak(sakId: Long): List<OppgaveNy> {
+        return inTransaction { oppgaveDaoNy.hentOppgaverForSak(sakId) }
+    }
+
     fun avbrytOppgaveUnderBehandling(
         behandlingEllerHendelseId: String,
         saksbehandler: String? = null

@@ -16,9 +16,10 @@ export const MinOppgaveliste = (props: { oppgaver: ReadonlyArray<OppgaveDTOny>; 
   const { oppgaver, hentOppgaver } = props
   const user = useAppSelector((state) => state.saksbehandlerReducer.saksbehandler)
   const [page, setPage] = useState<number>(1)
-  const mineOppgaver = oppgaver.filter((o) => o.saksbehandler === user.ident)
   const [rowsPerPage, setRowsPerPage] = useState<number>(10)
   const [oppgaveErEndet, setOppgaveErEndret] = useState<boolean>(false)
+
+  const mineOppgaver = oppgaver.filter((o) => o.saksbehandler === user.ident)
 
   let paginerteOppgaver = mineOppgaver
   paginerteOppgaver = paginerteOppgaver.slice((page - 1) * rowsPerPage, page * rowsPerPage)

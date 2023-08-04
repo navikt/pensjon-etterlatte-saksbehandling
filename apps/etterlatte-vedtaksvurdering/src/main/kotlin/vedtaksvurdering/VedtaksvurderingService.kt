@@ -156,14 +156,19 @@ class VedtaksvurderingService(
                 tx
             )
             runBlocking {
-                behandlingKlient.kanAttestereVedtak(
-                    behandlingId,
-                    brukerTokenInfo,
-                    VedtakHendelse(
-                        vedtakId = attestertVedtak.id,
-                        inntruffet = attestertVedtak.attestasjon?.tidspunkt!!,
-                        saksbehandler = attestertVedtak.attestasjon.attestant,
-                        kommentar = kommentar
+                behandlingKlient.attesterVedtak(
+                    brukerTokenInfo = brukerTokenInfo,
+                    vedtakEndringDTO = VedtakEndringDTO(
+                        vedtakOppgaveDTO = VedtakOppgaveDTO(
+                            sakId = attestertVedtak.sakId,
+                            referanse = attestertVedtak.behandlingId.toString()
+                        ),
+                        vedtakHendelse = VedtakHendelse(
+                            vedtakId = attestertVedtak.id,
+                            inntruffet = attestertVedtak.attestasjon?.tidspunkt!!,
+                            saksbehandler = attestertVedtak.attestasjon.attestant,
+                            kommentar = kommentar
+                        )
                     )
                 )
             }

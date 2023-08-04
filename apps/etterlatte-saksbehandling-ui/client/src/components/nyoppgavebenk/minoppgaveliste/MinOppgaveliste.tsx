@@ -12,12 +12,14 @@ import { PaginationWrapper } from '~components/nyoppgavebenk/Oppgavelista'
 import { OPPGAVESTATUSFILTER } from '~components/nyoppgavebenk/Oppgavelistafiltre'
 import { HeaderPadding } from '~components/nyoppgavebenk/Oppgavelista'
 
-export const MinOppgaveliste = (props: { oppgaver: ReadonlyArray<OppgaveDTOny> }) => {
-  const { oppgaver } = props
+export const MinOppgaveliste = (props: { oppgaver: ReadonlyArray<OppgaveDTOny>; hentOppgaver: () => void }) => {
+  const { oppgaver, hentOppgaver } = props
   const user = useAppSelector((state) => state.saksbehandlerReducer.saksbehandler)
   const [page, setPage] = useState<number>(1)
-  const mineOppgaver = oppgaver.filter((o) => o.saksbehandler === user.ident)
   const [rowsPerPage, setRowsPerPage] = useState<number>(10)
+
+  const mineOppgaver = oppgaver.filter((o) => o.saksbehandler === user.ident)
+
   let paginerteOppgaver = mineOppgaver
   paginerteOppgaver = paginerteOppgaver.slice((page - 1) * rowsPerPage, page * rowsPerPage)
 
@@ -64,7 +66,12 @@ export const MinOppgaveliste = (props: { oppgaver: ReadonlyArray<OppgaveDTOny> }
                     <Table.Row key={id}>
                       <Table.HeaderCell>{formaterStringDato(opprettet)}</Table.HeaderCell>
                       <Table.DataCell>
-                        <FristHandlinger status={status} orginalFrist={frist} oppgaveId={id} />
+                        <FristHandlinger
+                          status={status}
+                          orginalFrist={frist}
+                          oppgaveId={id}
+                          hentOppgaver={hentOppgaver}
+                        />
                       </Table.DataCell>
                       <Table.DataCell>
                         <SaksoversiktLenke fnr={fnr} />
@@ -85,6 +92,7 @@ export const MinOppgaveliste = (props: { oppgaver: ReadonlyArray<OppgaveDTOny> }
                             saksbehandler={saksbehandler}
                             oppgaveId={id}
                             sakId={sakId}
+                            hentOppgaver={hentOppgaver}
                           />
                         )}
                       </Table.DataCell>

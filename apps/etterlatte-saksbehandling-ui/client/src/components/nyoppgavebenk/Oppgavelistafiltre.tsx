@@ -170,3 +170,27 @@ export function filtrerOppgaver(
 
   return finnFnrIOppgaver(fnr, fristFiltrert)
 }
+
+export interface Filter {
+  enhetsFilter: EnhetFilterKeys
+  fristFilter: FristFilterKeys
+  saksbehandlerFilter: SaksbehandlerFilterKeys
+  ytelseFilter: YtelseFilterKeys
+  oppgavestatusFilter: OppgavestatusFilterKeys
+  oppgavetypeFilter: OppgavetypeFilterKeys
+  oppgavekildeFilter: OppgaveKildeFilterKeys
+  fnrFilter: string
+}
+
+export const initialFilter = (): Filter => {
+  return {
+    enhetsFilter: 'visAlle',
+    fristFilter: 'visAlle',
+    saksbehandlerFilter: 'IkkeTildelt',
+    ytelseFilter: 'visAlle',
+    oppgavestatusFilter: 'visAlle',
+    oppgavetypeFilter: 'visAlle',
+    oppgavekildeFilter: 'visAlle',
+    fnrFilter: '',
+  }
+}

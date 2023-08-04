@@ -20,8 +20,13 @@ const FristWrapper = styled.span<{ fristHarPassert: boolean; utenKnapp?: boolean
   padding: ${(p) => p.utenKnapp && '12px 20px'};
 `
 
-export const FristHandlinger = (props: { status: Oppgavestatus; orginalFrist: string; oppgaveId: string }) => {
-  const { orginalFrist, oppgaveId, status } = props
+export const FristHandlinger = (props: {
+  status: Oppgavestatus
+  orginalFrist: string
+  oppgaveId: string
+  hentOppgaver: () => void
+}) => {
+  const { orginalFrist, oppgaveId, status, hentOppgaver } = props
   const [open, setOpen] = useState(false)
   const [frist, setFrist] = useState<string>()
   const [nyFrist, setnyFrist] = useState<Date>(new Date())
@@ -86,9 +91,22 @@ export const FristHandlinger = (props: { status: Oppgavestatus; orginalFrist: st
                 >
                   Lagre ny frist
                 </Button>
-                <Button variant="secondary" onClick={() => setOpen(!open)}>
-                  {isSuccess(redigerfristSvar) ? 'Lukk' : 'Avbryt'}
-                </Button>
+
+                {isSuccess(redigerfristSvar) ? (
+                  <Button
+                    variant="secondary"
+                    onClick={() => {
+                      hentOppgaver()
+                      setOpen(false)
+                    }}
+                  >
+                    Lukk
+                  </Button>
+                ) : (
+                  <Button variant="secondary" onClick={() => setOpen(false)}>
+                    Avbryt
+                  </Button>
+                )}
               </Buttonwrapper>
             </Modal.Content>
           </Modal>

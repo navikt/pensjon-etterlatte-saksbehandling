@@ -60,15 +60,11 @@ internal class MigreringHendelserTest {
             gjenlevendeForelder = null,
             virkningstidspunkt = YearMonth.now(),
             beregning = Beregning(
-                BigDecimal(1000),
-                BigDecimal(1000),
-                BigDecimal(40),
-                Tidspunkt.now(),
-                BigDecimal(100000),
-                "",
-                "",
-                "",
-                ""
+                brutto = BigDecimal(1000),
+                netto = BigDecimal(1000),
+                anvendtTrygdetid = BigDecimal(40),
+                datoVirkFom = Tidspunkt.now(),
+                g = BigDecimal(100000)
             ),
             trygdetidsPerioder = emptyList()
         )

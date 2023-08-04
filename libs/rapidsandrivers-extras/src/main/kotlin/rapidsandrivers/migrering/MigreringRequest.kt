@@ -35,6 +35,10 @@ data class Beregning(
     val anvendtTrygdetid: BigDecimal,
     val datoVirkFom: Tidspunkt,
     val g: BigDecimal,
+    val meta: BeregningMeta? = null
+)
+
+data class BeregningMeta(
     val resultatType: String,
     val beregningsMetodeType: String,
     val resultatKilde: String,

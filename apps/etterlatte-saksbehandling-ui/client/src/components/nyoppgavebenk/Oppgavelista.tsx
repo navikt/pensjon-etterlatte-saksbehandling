@@ -40,7 +40,6 @@ export const Oppgavelista = (props: {
 
   const [page, setPage] = useState<number>(1)
   const [rowsPerPage, setRowsPerPage] = useState<number>(10)
-  const [oppgaveErEndet, setOppgaveErEndret] = useState<boolean>(false)
 
   let paginerteOppgaver = filtrerteOppgaver
   paginerteOppgaver = paginerteOppgaver.slice((page - 1) * rowsPerPage, page * rowsPerPage)
@@ -48,13 +47,6 @@ export const Oppgavelista = (props: {
   useEffect(() => {
     if (paginerteOppgaver.length === 0 && filtrerteOppgaver.length > 0) setPage(1)
   }, [paginerteOppgaver, filtrerteOppgaver])
-
-  useEffect(() => {
-    if (oppgaveErEndet) {
-      hentOppgaver()
-      setOppgaveErEndret(false)
-    }
-  }, [oppgaveErEndet])
 
   return (
     <>
@@ -120,10 +112,10 @@ export const Oppgavelista = (props: {
                             saksbehandler={saksbehandler}
                             oppgaveId={id}
                             sakId={sakId}
-                            setOppgaveErEndret={setOppgaveErEndret}
+                            hentOppgaver={hentOppgaver}
                           />
                         ) : (
-                          <TildelSaksbehandler oppgaveId={id} setOppgaveErEndret={setOppgaveErEndret} />
+                          <TildelSaksbehandler oppgaveId={id} hentOppgaver={hentOppgaver} />
                         )}
                       </Table.DataCell>
                       <Table.DataCell>

@@ -4,7 +4,7 @@ import { Pagination, Table } from '@navikt/ds-react'
 import { formaterStringDato } from '~utils/formattering'
 import { RedigerSaksbehandler } from '~components/nyoppgavebenk/RedigerSaksbehandler'
 import { FristHandlinger } from '~components/nyoppgavebenk/minoppgaveliste/FristHandlinger'
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { HandlingerForOppgave } from '~components/nyoppgavebenk/HandlingerForOppgave'
 import { OppgavetypeTag, SaktypeTag } from '~components/nyoppgavebenk/Tags'
 import SaksoversiktLenke from '~components/oppgavebenken/handlinger/BrukeroversiktKnapp'
@@ -17,19 +17,11 @@ export const MinOppgaveliste = (props: { oppgaver: ReadonlyArray<OppgaveDTOny>; 
   const user = useAppSelector((state) => state.saksbehandlerReducer.saksbehandler)
   const [page, setPage] = useState<number>(1)
   const [rowsPerPage, setRowsPerPage] = useState<number>(10)
-  const [oppgaveErEndet, setOppgaveErEndret] = useState<boolean>(false)
 
   const mineOppgaver = oppgaver.filter((o) => o.saksbehandler === user.ident)
 
   let paginerteOppgaver = mineOppgaver
   paginerteOppgaver = paginerteOppgaver.slice((page - 1) * rowsPerPage, page * rowsPerPage)
-
-  useEffect(() => {
-    if (oppgaveErEndet) {
-      hentOppgaver()
-      setOppgaveErEndret(false)
-    }
-  }, [oppgaveErEndet])
 
   return (
     <>
@@ -78,7 +70,7 @@ export const MinOppgaveliste = (props: { oppgaver: ReadonlyArray<OppgaveDTOny>; 
                           status={status}
                           orginalFrist={frist}
                           oppgaveId={id}
-                          setOppgaveErEndret={setOppgaveErEndret}
+                          hentOppgaver={hentOppgaver}
                         />
                       </Table.DataCell>
                       <Table.DataCell>
@@ -100,7 +92,7 @@ export const MinOppgaveliste = (props: { oppgaver: ReadonlyArray<OppgaveDTOny>; 
                             saksbehandler={saksbehandler}
                             oppgaveId={id}
                             sakId={sakId}
-                            setOppgaveErEndret={setOppgaveErEndret}
+                            hentOppgaver={hentOppgaver}
                           />
                         )}
                       </Table.DataCell>

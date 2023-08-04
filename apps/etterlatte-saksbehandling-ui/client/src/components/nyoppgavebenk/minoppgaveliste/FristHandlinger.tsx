@@ -24,9 +24,9 @@ export const FristHandlinger = (props: {
   status: Oppgavestatus
   orginalFrist: string
   oppgaveId: string
-  setOppgaveErEndret: (value: boolean) => void
+  hentOppgaver: () => void
 }) => {
-  const { orginalFrist, oppgaveId, status, setOppgaveErEndret } = props
+  const { orginalFrist, oppgaveId, status, hentOppgaver } = props
   const [open, setOpen] = useState(false)
   const [frist, setFrist] = useState<string>()
   const [nyFrist, setnyFrist] = useState<Date>(new Date())
@@ -96,14 +96,14 @@ export const FristHandlinger = (props: {
                   <Button
                     variant="secondary"
                     onClick={() => {
-                      setOppgaveErEndret(true)
-                      setOpen(!open)
+                      hentOppgaver()
+                      setOpen(false)
                     }}
                   >
                     Lukk
                   </Button>
                 ) : (
-                  <Button variant="secondary" onClick={() => setOpen(!open)}>
+                  <Button variant="secondary" onClick={() => setOpen(false)}>
                     Avbryt
                   </Button>
                 )}

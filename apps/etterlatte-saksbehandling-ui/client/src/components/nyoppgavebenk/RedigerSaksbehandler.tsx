@@ -18,10 +18,10 @@ export const RedigerSaksbehandler = (props: {
   oppgaveId: string
   sakId: number
   status: Oppgavestatus
-  setOppgaveErEndret: (value: boolean) => void
+  hentOppgaver: () => void
 }) => {
   const [modalIsOpen, setModalIsOpen] = useState(false)
-  const { saksbehandler, oppgaveId, sakId, status, setOppgaveErEndret } = props
+  const { saksbehandler, oppgaveId, sakId, status, hentOppgaver } = props
   const user = useAppSelector((state) => state.saksbehandlerReducer.saksbehandler)
   const [fjernSaksbehandlerSvar, fjernSaksbehandler] = useApiCall(fjernSaksbehandlerApi)
   const [byttSaksbehandlerSvar, byttSaksbehandler] = useApiCall(byttSaksbehandlerApi)
@@ -31,7 +31,7 @@ export const RedigerSaksbehandler = (props: {
 
   useEffect(() => {
     if (isSuccess(fjernSaksbehandlerSvar) || isSuccess(byttSaksbehandlerSvar)) {
-      setOppgaveErEndret(true)
+      hentOppgaver()
     }
   }, [fjernSaksbehandlerSvar, byttSaksbehandlerSvar])
 

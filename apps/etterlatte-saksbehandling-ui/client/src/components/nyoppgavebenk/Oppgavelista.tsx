@@ -45,8 +45,6 @@ export const Oppgavelista = (props: {
   let paginerteOppgaver = filtrerteOppgaver
   paginerteOppgaver = paginerteOppgaver.slice((page - 1) * rowsPerPage, page * rowsPerPage)
 
-  const setOppgaveErEndretWrapper = (value: boolean) => setOppgaveErEndret(value)
-
   useEffect(() => {
     if (paginerteOppgaver.length === 0 && filtrerteOppgaver.length > 0) setPage(1)
   }, [paginerteOppgaver, filtrerteOppgaver])
@@ -122,10 +120,10 @@ export const Oppgavelista = (props: {
                             saksbehandler={saksbehandler}
                             oppgaveId={id}
                             sakId={sakId}
-                            setOppgaveErEndret={setOppgaveErEndretWrapper}
+                            setOppgaveErEndret={setOppgaveErEndret}
                           />
                         ) : (
-                          <TildelSaksbehandler oppgaveId={id} setOppgaveErEndret={setOppgaveErEndretWrapper} />
+                          <TildelSaksbehandler oppgaveId={id} setOppgaveErEndret={setOppgaveErEndret} />
                         )}
                       </Table.DataCell>
                       <Table.DataCell>

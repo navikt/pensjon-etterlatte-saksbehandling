@@ -24,8 +24,6 @@ export const MinOppgaveliste = (props: { oppgaver: ReadonlyArray<OppgaveDTOny>; 
   let paginerteOppgaver = mineOppgaver
   paginerteOppgaver = paginerteOppgaver.slice((page - 1) * rowsPerPage, page * rowsPerPage)
 
-  const setOppgaveErEndretWrapper = (value: boolean) => setOppgaveErEndret(value)
-
   useEffect(() => {
     if (oppgaveErEndet) {
       hentOppgaver()
@@ -80,7 +78,7 @@ export const MinOppgaveliste = (props: { oppgaver: ReadonlyArray<OppgaveDTOny>; 
                           status={status}
                           orginalFrist={frist}
                           oppgaveId={id}
-                          setOppgaveErEndret={setOppgaveErEndretWrapper}
+                          setOppgaveErEndret={setOppgaveErEndret}
                         />
                       </Table.DataCell>
                       <Table.DataCell>
@@ -102,7 +100,7 @@ export const MinOppgaveliste = (props: { oppgaver: ReadonlyArray<OppgaveDTOny>; 
                             saksbehandler={saksbehandler}
                             oppgaveId={id}
                             sakId={sakId}
-                            setOppgaveErEndret={setOppgaveErEndretWrapper}
+                            setOppgaveErEndret={setOppgaveErEndret}
                           />
                         )}
                       </Table.DataCell>

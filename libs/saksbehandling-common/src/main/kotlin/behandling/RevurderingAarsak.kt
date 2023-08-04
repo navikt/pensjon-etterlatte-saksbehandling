@@ -72,13 +72,14 @@ enum class RevurderingAarsak(
     REGULERING(SAKTYPE_BP_OMS, DevOgProd, IkkeOpphoerSkalIkkeSendeBrev),
     DOEDSFALL(SAKTYPE_BP_OMS, KunIDev, OpphoerUtenBrev),
     INNTEKTSENDRING(SAKTYPE_OMS, KunIDev, IkkeOpphoerSkalSendeBrev),
-    OMGJOERING_AV_FARSKAP(SAKTYPE_BP, KunIDev, OpphoerMedBrev, true),
-    ADOPSJON(SAKTYPE_BP, KunIDev, OpphoerMedBrev, true),
+    OMGJOERING_AV_FARSKAP(SAKTYPE_BP, KunIDev, OpphoerMedBrev, redigerbartBrev = true),
+    ADOPSJON(SAKTYPE_BP, KunIDev, OpphoerMedBrev, redigerbartBrev = true),
     SIVILSTAND(SAKTYPE_OMS, KunIDev, OpphoerMedBrev),
-    FENGSELSOPPHOLD(SAKTYPE_BP, KunIDev, IkkeOpphoerSkalSendeBrev, true),
-    UT_AV_FENGSEL(SAKTYPE_BP, KunIDev, IkkeOpphoerSkalSendeBrev, true),
+    FENGSELSOPPHOLD(SAKTYPE_BP, KunIDev, IkkeOpphoerSkalSendeBrev, redigerbartBrev = true),
+    UT_AV_FENGSEL(SAKTYPE_BP, KunIDev, IkkeOpphoerSkalSendeBrev, redigerbartBrev = true),
     NY_SOEKNAD(SAKTYPE_BP_OMS, DevOgProd, IkkeOpphoerSkalSendeBrev),
-    ANNEN(SAKTYPE_BP_OMS, KunIDev, IkkeOpphoerSkalSendeBrev);
+    ANNEN(SAKTYPE_BP_OMS, KunIDev, IkkeOpphoerSkalSendeBrev),
+    YRKESSKADE(SAKTYPE_BP, KunIDev, IkkeOpphoerSkalSendeBrev, redigerbartBrev = true);
 
     fun kanBrukesIMiljo(): Boolean = when (clusternavn()) {
         null -> true

@@ -14,7 +14,7 @@ import { useAppSelector } from '~store/Store'
 
 type OppgavelisteToggle = 'Oppgavelista' | 'MinOppgaveliste'
 const TabsWidth = styled(Tabs)`
-  max-width: 22em;
+  max-width: fit-content;
   margin-bottom: 2rem;
 `
 

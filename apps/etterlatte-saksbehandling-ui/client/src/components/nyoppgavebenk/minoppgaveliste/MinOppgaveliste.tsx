@@ -1,5 +1,4 @@
 import { OppgaveDTOny } from '~shared/api/oppgaverny'
-import { useAppSelector } from '~store/Store'
 import { Pagination, Table } from '@navikt/ds-react'
 import { formaterStringDato } from '~utils/formattering'
 import { RedigerSaksbehandler } from '~components/nyoppgavebenk/RedigerSaksbehandler'
@@ -14,13 +13,10 @@ import { HeaderPadding } from '~components/nyoppgavebenk/Oppgavelista'
 
 export const MinOppgaveliste = (props: { oppgaver: ReadonlyArray<OppgaveDTOny>; hentOppgaver: () => void }) => {
   const { oppgaver, hentOppgaver } = props
-  const user = useAppSelector((state) => state.saksbehandlerReducer.saksbehandler)
   const [page, setPage] = useState<number>(1)
   const [rowsPerPage, setRowsPerPage] = useState<number>(10)
 
-  const mineOppgaver = oppgaver.filter((o) => o.saksbehandler === user.ident)
-
-  let paginerteOppgaver = mineOppgaver
+  let paginerteOppgaver = oppgaver
   paginerteOppgaver = paginerteOppgaver.slice((page - 1) * rowsPerPage, page * rowsPerPage)
 
   return (
@@ -113,12 +109,12 @@ export const MinOppgaveliste = (props: { oppgaver: ReadonlyArray<OppgaveDTOny>; 
             <Pagination
               page={page}
               onPageChange={setPage}
-              count={Math.ceil(mineOppgaver.length / rowsPerPage)}
+              count={Math.ceil(oppgaver.length / rowsPerPage)}
               size="small"
             />
             <p>
               Viser {(page - 1) * rowsPerPage + 1} - {(page - 1) * rowsPerPage + paginerteOppgaver.length} av{' '}
-              {mineOppgaver.length} oppgaver
+              {oppgaver.length} oppgaver
             </p>
             <select
               value={rowsPerPage}

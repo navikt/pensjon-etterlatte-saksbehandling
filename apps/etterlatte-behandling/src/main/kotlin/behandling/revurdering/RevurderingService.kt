@@ -261,7 +261,8 @@ class RevurderingServiceImpl(
                 referanse = behandling.id.toString(),
                 sakId = sakId,
                 oppgaveKilde = OppgaveKilde.BEHANDLING,
-                oppgaveType = OppgaveType.REVURDERING
+                oppgaveType = OppgaveType.REVURDERING,
+                merknad = begrunnelse
             )
             behandlingHendelser.sendMeldingForHendelse(it, BehandlingHendelseType.OPPRETTET)
         }

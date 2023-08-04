@@ -121,7 +121,8 @@ class RealManueltOpphoerService(
                     referanse = id.toString(),
                     sakId = opphoerRequest.sakId,
                     oppgaveKilde = OppgaveKilde.BEHANDLING,
-                    oppgaveType = OppgaveType.MANUELT_OPPHOER
+                    oppgaveType = OppgaveType.MANUELT_OPPHOER,
+                    merknad = null
                 )
                 (behandlingDao.hentBehandling(id) as ManueltOpphoer).sjekkEnhet()
             }

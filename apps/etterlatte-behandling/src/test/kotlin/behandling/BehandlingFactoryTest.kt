@@ -70,7 +70,8 @@ class BehandlingFactoryTest {
         "behandling",
         Sak("ident", SakType.BARNEPENSJON, 1L, Enheter.AALESUND.enhetNr),
         OppgaveKilde.BEHANDLING,
-        OppgaveType.FOERSTEGANGSBEHANDLING
+        OppgaveType.FOERSTEGANGSBEHANDLING,
+        null
     )
     private val kommerBarnetTilGodeService = mockk<KommerBarnetTilGodeService>().also {
         every { it.hentKommerBarnetTilGode(any()) } returns null
@@ -460,7 +461,9 @@ class BehandlingFactoryTest {
         every {
             oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendSoeknad(any(), any())
         } returns mockOppgave
-        every { oppgaveService.opprettNyOppgaveMedSakOgReferanse(any(), any(), any(), any()) } returns mockOppgave
+        every {
+            oppgaveService.opprettNyOppgaveMedSakOgReferanse(any(), any(), any(), any(), any())
+        } returns mockOppgave
 
         val foerstegangsbehandling = behandlingFactory.opprettBehandling(
             1,
@@ -528,7 +531,7 @@ class BehandlingFactoryTest {
         verify {
             grunnlagService.leggInnNyttGrunnlag(any())
             oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendSoeknad(any(), any())
-            oppgaveService.opprettNyOppgaveMedSakOgReferanse(any(), any(), any(), any())
+            oppgaveService.opprettNyOppgaveMedSakOgReferanse(any(), any(), any(), any(), any())
         }
         verify(exactly = 2) {
             sakDaoMock.hentSak(any())

@@ -367,7 +367,6 @@ class VedtaksvurderingService(
     ): List<Utbetalingsperiode> {
         return when (vedtakType) {
             VedtakType.INNVILGELSE, VedtakType.ENDRING -> {
-                // TODO Skal endres når barnepensjon tar i bruk avkorting
                 if (sakType == SakType.BARNEPENSJON) {
                     val beregningsperioder = requireNotNull(beregningOgAvkorting?.beregning?.beregningsperioder) {
                         "Mangler beregning"

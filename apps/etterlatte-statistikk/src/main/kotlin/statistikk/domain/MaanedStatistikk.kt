@@ -13,6 +13,8 @@ data class MaanedStoenadRad(
     val fnrSoesken: List<String>,
     val anvendtTrygdetid: String,
     val nettoYtelse: String,
+    val avkortingsbeloep: String,
+    val aarsinntekt: String,
     val beregningType: String,
     val anvendtSats: String,
     val behandlingId: UUID,
@@ -41,13 +43,18 @@ class MaanedStatistikk(val maaned: YearMonth, stoenadRader: List<StoenadRad>) {
         rader = vedtakPerSak.mapNotNull { (_, vedtakPaaSak) ->
             val sisteVedtak = vedtakPaaSak.maxBy { it.tekniskTid }
 
-            // finn aktuell utbetalingsperiode for dette vedtaket
-            val aktuellPeriode = when (val beregning = sisteVedtak.beregning) {
-                null -> null
-                else -> beregning.beregningsperioder.find { it.datoFOM <= maaned && (it.datoTOM ?: maaned) >= maaned }
+            // finn aktuell beregnet ytelse for dette vedtaket
+            val aktuellBeregnetYtelse = sisteVedtak.beregning?.let { beregning ->
+                beregning.beregningsperioder.find { it.datoFOM <= maaned && (it.datoTOM ?: maaned) >= maaned }
             }
+            val nettoYtelse = aktuellBeregnetYtelse?.utbetaltBeloep ?: sisteVedtak.nettoYtelse.toInt() // TODO nettoYtelse til skal utbedres?
 
-            val nettoYtelse = aktuellPeriode?.utbetaltBeloep ?: sisteVedtak.nettoYtelse.toInt()
+            val (avkortingsbeloep, aarsinntekt) = sisteVedtak.avkorting?.let { avkorting ->
+                val aktuellAvkorting = avkorting.avkortetYtelse.find { it.fom <= maaned && (it.tom?: maaned) >= maaned }
+                val aktuellAarsinntekt = avkorting.avkortingGrunnlag.find { it.fom <= maaned && (it.tom?: maaned) >= maaned }
+                Pair(aktuellAvkorting?.avkortingsbeloep, aktuellAarsinntekt?.aarsinntekt)
+            } ?: Pair(null, null)
+
             val erOpphoer = when (sisteVedtak.vedtakType) {
                 null -> nettoYtelse == 0
                 else -> sisteVedtak.vedtakType == VedtakType.OPPHOER
@@ -70,11 +77,13 @@ class MaanedStatistikk(val maaned: YearMonth, stoenadRader: List<StoenadRad>) {
                 id = -1,
                 fnrSoeker = sisteVedtak.fnrSoeker,
                 fnrForeldre = sisteVedtak.fnrForeldre,
-                fnrSoesken = aktuellPeriode?.soeskenFlokk ?: sisteVedtak.fnrSoesken,
-                anvendtTrygdetid = aktuellPeriode?.trygdetid?.toString() ?: sisteVedtak.anvendtTrygdetid,
+                fnrSoesken = aktuellBeregnetYtelse?.soeskenFlokk ?: sisteVedtak.fnrSoesken,
+                anvendtTrygdetid = aktuellBeregnetYtelse?.trygdetid?.toString() ?: sisteVedtak.anvendtTrygdetid,
                 nettoYtelse = nettoYtelse.toString(),
+                avkortingsbeloep = avkortingsbeloep.toString(),
+                aarsinntekt = aarsinntekt.toString(),
                 beregningType = sisteVedtak.beregningType,
-                anvendtSats = aktuellPeriode?.grunnbelopMnd?.toString() ?: sisteVedtak.anvendtSats,
+                anvendtSats = aktuellBeregnetYtelse?.grunnbelopMnd?.toString() ?: sisteVedtak.anvendtSats,
                 behandlingId = sisteVedtak.behandlingId,
                 sakId = sisteVedtak.sakId,
                 sakNummer = sisteVedtak.sakNummer,

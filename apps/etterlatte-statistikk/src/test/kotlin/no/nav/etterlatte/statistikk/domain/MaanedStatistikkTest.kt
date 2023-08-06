@@ -51,6 +51,7 @@ class MaanedStatistikkTest {
         val statistikkRad = statistikk.rader[0]
 
         Assertions.assertEquals(statistikkRad.nettoYtelse, "20")
+        // TODO nettoYtelse til skal utbedres?
     }
 }
 
@@ -74,6 +75,7 @@ fun stoenadRad(
     vedtakLoependeFom: LocalDate = LocalDate.of(2022, 8, 1),
     vedtakLoependeTom: LocalDate? = null,
     beregning: Beregning? = null,
+    avkorting: Avkorting? = null,
     vedtakType: VedtakType = VedtakType.INNVILGELSE,
     sakUtland: SakUtland = SakUtland.NASJONAL,
     virknigstidspunkt: YearMonth = YearMonth.of(2023, 6),
@@ -98,6 +100,7 @@ fun stoenadRad(
     vedtakLoependeFom = vedtakLoependeFom,
     vedtakLoependeTom = vedtakLoependeTom,
     beregning = beregning,
+    avkorting = avkorting,
     vedtakType = vedtakType,
     sakUtland = sakUtland,
     virkningstidspunkt = virknigstidspunkt,

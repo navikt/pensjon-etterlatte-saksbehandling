@@ -15,14 +15,14 @@ import no.nav.etterlatte.statistikk.service.StatistikkService
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
-import rapidsandrivers.migrering.ListenerMedLogging
+import rapidsandrivers.migrering.RiverMedLogging
 import java.time.LocalDateTime
 import java.util.*
 
 class BehandlinghendelseRiver(
     rapidsConnection: RapidsConnection,
     private val service: StatistikkService
-) : ListenerMedLogging(rapidsConnection) {
+) : RiverMedLogging(rapidsConnection) {
     private val behandlingshendelser = listOf(
         "BEHANDLING:AVBRUTT",
         "BEHANDLING:OPPRETTET"

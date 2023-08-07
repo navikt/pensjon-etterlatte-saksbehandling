@@ -19,12 +19,12 @@ import rapidsandrivers.FNR_KEY
 import rapidsandrivers.GRUNNLAG_OPPDATERT
 import rapidsandrivers.OPPLYSNING_KEY
 import rapidsandrivers.SAK_ID_KEY
-import rapidsandrivers.migrering.ListenerMedLogging
+import rapidsandrivers.migrering.RiverMedLogging
 
 class GrunnlagHendelser(
     rapidsConnection: RapidsConnection,
     private val grunnlagService: GrunnlagService
-) : ListenerMedLogging(rapidsConnection) {
+) : RiverMedLogging(rapidsConnection) {
 
     init {
         initialiser {

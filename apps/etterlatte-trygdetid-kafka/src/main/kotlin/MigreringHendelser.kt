@@ -19,11 +19,11 @@ import no.nav.helse.rapids_rivers.RapidsConnection
 import rapidsandrivers.BEHANDLING_ID_KEY
 import rapidsandrivers.HENDELSE_DATA_KEY
 import rapidsandrivers.behandlingId
-import rapidsandrivers.migrering.ListenerMedLogging
+import rapidsandrivers.migrering.RiverMedLogging
 import rapidsandrivers.withFeilhaandtering
 
 internal class MigreringHendelser(rapidsConnection: RapidsConnection, private val trygdetidService: TrygdetidService) :
-    ListenerMedLogging(rapidsConnection) {
+    RiverMedLogging(rapidsConnection) {
 
     init {
         initialiser {

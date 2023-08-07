@@ -17,13 +17,13 @@ import no.nav.etterlatte.libs.common.vedtak.KafkaHendelseType
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
-import rapidsandrivers.migrering.ListenerMedLogging
+import rapidsandrivers.migrering.RiverMedLogging
 import java.util.*
 
 internal class JournalfoerVedtaksbrev(
     private val rapidsConnection: RapidsConnection,
     private val service: VedtaksbrevService
-) : ListenerMedLogging(rapidsConnection) {
+) : RiverMedLogging(rapidsConnection) {
 
     init {
         initialiser {

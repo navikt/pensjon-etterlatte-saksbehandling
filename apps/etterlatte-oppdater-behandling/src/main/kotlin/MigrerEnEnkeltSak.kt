@@ -19,14 +19,14 @@ import rapidsandrivers.BEHANDLING_ID_KEY
 import rapidsandrivers.HENDELSE_DATA_KEY
 import rapidsandrivers.OPPLYSNING_KEY
 import rapidsandrivers.behandlingId
-import rapidsandrivers.migrering.ListenerMedLoggingOgFeilhaandtering
+import rapidsandrivers.migrering.RiverMedLoggingOgFeilhaandtering
 import rapidsandrivers.sakId
 
 internal class MigrerEnEnkeltSak(
     rapidsConnection: RapidsConnection,
     private val behandlinger: BehandlingService
 ) :
-    ListenerMedLoggingOgFeilhaandtering(rapidsConnection, Migreringshendelser.MIGRER_SAK) {
+    RiverMedLoggingOgFeilhaandtering(rapidsConnection, Migreringshendelser.MIGRER_SAK) {
 
     init {
         initialiser {

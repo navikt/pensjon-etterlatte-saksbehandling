@@ -9,12 +9,12 @@ import no.nav.etterlatte.libs.common.utbetaling.UtbetalingStatusDto
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
-import rapidsandrivers.migrering.ListenerMedLogging
+import rapidsandrivers.migrering.RiverMedLogging
 
 internal class LagreIverksattVedtak(
     rapidsConnection: RapidsConnection,
     private val vedtaksvurderingService: VedtakService
-) : ListenerMedLogging(rapidsConnection) {
+) : RiverMedLogging(rapidsConnection) {
 
     init {
         initialiser {

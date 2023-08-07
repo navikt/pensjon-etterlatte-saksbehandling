@@ -12,13 +12,13 @@ import rapidsandrivers.BEHANDLING_ID_KEY
 import rapidsandrivers.BEHANDLING_VI_OMREGNER_FRA_KEY
 import rapidsandrivers.SAK_ID_KEY
 import rapidsandrivers.behandlingId
-import rapidsandrivers.migrering.ListenerMedLoggingOgFeilhaandtering
+import rapidsandrivers.migrering.RiverMedLoggingOgFeilhaandtering
 
 internal class Vilkaarsvurder(
     rapidsConnection: RapidsConnection,
     private val vilkaarsvurderingService: VilkaarsvurderingService
 ) :
-    ListenerMedLoggingOgFeilhaandtering(rapidsConnection, VILKAARSVURDER) {
+    RiverMedLoggingOgFeilhaandtering(rapidsConnection, VILKAARSVURDER) {
 
     init {
         initialiser {

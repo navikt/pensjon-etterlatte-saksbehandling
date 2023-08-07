@@ -14,14 +14,14 @@ import rapidsandrivers.HENDELSE_DATA_KEY
 import rapidsandrivers.SAK_ID_KEY
 import rapidsandrivers.TILBAKESTILTE_BEHANDLINGER_KEY
 import rapidsandrivers.dato
-import rapidsandrivers.migrering.ListenerMedLoggingOgFeilhaandtering
+import rapidsandrivers.migrering.RiverMedLoggingOgFeilhaandtering
 import rapidsandrivers.sakId
 import rapidsandrivers.tilbakestilteBehandlinger
 
 internal class LoependeYtelserforespoersel(
     rapidsConnection: RapidsConnection,
     private val vedtak: VedtakService
-) : ListenerMedLoggingOgFeilhaandtering(rapidsConnection, FINN_LOEPENDE_YTELSER) {
+) : RiverMedLoggingOgFeilhaandtering(rapidsConnection, FINN_LOEPENDE_YTELSER) {
 
     init {
         initialiser {

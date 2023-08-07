@@ -6,13 +6,13 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import rapidsandrivers.SAK_ID_KEY
-import rapidsandrivers.migrering.ListenerMedLogging
+import rapidsandrivers.migrering.RiverMedLogging
 import rapidsandrivers.sakId
 
 internal class ReguleringFeilet(
     rapidsConnection: RapidsConnection,
     private val behandlingService: BehandlingService
-) : ListenerMedLogging(rapidsConnection) {
+) : RiverMedLogging(rapidsConnection) {
 
     init {
         initialiser {

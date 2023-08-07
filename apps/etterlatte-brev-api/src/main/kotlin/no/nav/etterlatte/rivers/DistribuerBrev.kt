@@ -11,13 +11,13 @@ import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
-import rapidsandrivers.migrering.ListenerMedLogging
+import rapidsandrivers.migrering.RiverMedLogging
 
 internal class DistribuerBrev(
     private val rapidsConnection: RapidsConnection,
     private val vedtaksbrevService: VedtaksbrevService,
     private val distribusjonService: DistribusjonService
-) : ListenerMedLogging(rapidsConnection) {
+) : RiverMedLogging(rapidsConnection) {
 
     init {
         initialiser {

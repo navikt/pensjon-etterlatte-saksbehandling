@@ -18,10 +18,10 @@ import rapidsandrivers.BEHANDLING_ID_KEY
 import rapidsandrivers.BEREGNING_KEY
 import rapidsandrivers.HENDELSE_DATA_KEY
 import rapidsandrivers.behandlingId
-import rapidsandrivers.migrering.ListenerMedLoggingOgFeilhaandtering
+import rapidsandrivers.migrering.RiverMedLoggingOgFeilhaandtering
 
 internal class MigreringHendelser(rapidsConnection: RapidsConnection, private val beregningService: BeregningService) :
-    ListenerMedLoggingOgFeilhaandtering(rapidsConnection, Migreringshendelser.BEREGN) {
+    RiverMedLoggingOgFeilhaandtering(rapidsConnection, Migreringshendelser.BEREGN) {
 
     init {
         initialiser {

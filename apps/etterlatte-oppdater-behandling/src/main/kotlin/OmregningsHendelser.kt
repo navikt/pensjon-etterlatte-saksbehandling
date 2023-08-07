@@ -14,10 +14,10 @@ import rapidsandrivers.BEHANDLING_VI_OMREGNER_FRA_KEY
 import rapidsandrivers.HENDELSE_DATA_KEY
 import rapidsandrivers.SAK_TYPE
 import rapidsandrivers.behandlingId
-import rapidsandrivers.migrering.ListenerMedLoggingOgFeilhaandtering
+import rapidsandrivers.migrering.RiverMedLoggingOgFeilhaandtering
 
 internal class OmregningsHendelser(rapidsConnection: RapidsConnection, private val behandlinger: BehandlingService) :
-    ListenerMedLoggingOgFeilhaandtering(rapidsConnection, OMREGNINGSHENDELSE) {
+    RiverMedLoggingOgFeilhaandtering(rapidsConnection, OMREGNINGSHENDELSE) {
 
     init {
         initialiser {

@@ -7,10 +7,10 @@ import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import rapidsandrivers.withFeilhaandtering
 
-abstract class ListenerMedLoggingOgFeilhaandtering(
+abstract class RiverMedLoggingOgFeilhaandtering(
     rapidsConnection: RapidsConnection,
     protected val hendelsestype: String
-) : ListenerMedLogging(rapidsConnection) {
+) : RiverMedLogging(rapidsConnection) {
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) =
         withLogContext(packet.correlationId) {

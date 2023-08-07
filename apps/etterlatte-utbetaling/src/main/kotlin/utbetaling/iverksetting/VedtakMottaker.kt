@@ -21,7 +21,7 @@ import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetalingsvedtak
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
-import rapidsandrivers.migrering.ListenerMedLogging
+import rapidsandrivers.migrering.RiverMedLogging
 import java.util.*
 
 data class KunneIkkeLeseVedtakException(val e: Exception) : RuntimeException(e)
@@ -29,7 +29,7 @@ data class KunneIkkeLeseVedtakException(val e: Exception) : RuntimeException(e)
 class VedtakMottaker(
     rapidsConnection: RapidsConnection,
     private val utbetalingService: UtbetalingService
-) : ListenerMedLogging(rapidsConnection) {
+) : RiverMedLogging(rapidsConnection) {
 
     init {
         initialiser {

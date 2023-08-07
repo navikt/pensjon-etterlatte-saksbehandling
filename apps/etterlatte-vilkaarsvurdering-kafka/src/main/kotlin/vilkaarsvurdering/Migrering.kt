@@ -10,12 +10,12 @@ import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import rapidsandrivers.BEHANDLING_ID_KEY
 import rapidsandrivers.behandlingId
-import rapidsandrivers.migrering.ListenerMedLoggingOgFeilhaandtering
+import rapidsandrivers.migrering.RiverMedLoggingOgFeilhaandtering
 
 internal class Migrering(
     rapidsConnection: RapidsConnection,
     private val vilkaarsvurderingService: VilkaarsvurderingService
-) : ListenerMedLoggingOgFeilhaandtering(rapidsConnection, VILKAARSVURDER) {
+) : RiverMedLoggingOgFeilhaandtering(rapidsConnection, VILKAARSVURDER) {
 
     init {
         initialiser {

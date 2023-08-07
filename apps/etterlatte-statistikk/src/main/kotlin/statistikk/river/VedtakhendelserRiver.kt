@@ -12,12 +12,12 @@ import no.nav.etterlatte.statistikk.service.VedtakHendelse
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
-import rapidsandrivers.migrering.ListenerMedLogging
+import rapidsandrivers.migrering.RiverMedLogging
 
 class VedtakhendelserRiver(
     rapidsConnection: RapidsConnection,
     private val service: StatistikkService
-) : ListenerMedLogging(rapidsConnection) {
+) : RiverMedLogging(rapidsConnection) {
 
     private val vedtakshendelser = listOf(
         KafkaHendelseType.FATTET.toString(),

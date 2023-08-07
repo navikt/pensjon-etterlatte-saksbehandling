@@ -12,7 +12,7 @@ import rapidsandrivers.BEHANDLING_ID_KEY
 import rapidsandrivers.DATO_KEY
 import rapidsandrivers.SAK_ID_KEY
 import rapidsandrivers.behandlingId
-import rapidsandrivers.migrering.ListenerMedLogging
+import rapidsandrivers.migrering.RiverMedLogging
 import rapidsandrivers.sakId
 import rapidsandrivers.withFeilhaandtering
 import java.util.*
@@ -20,7 +20,7 @@ import java.util.*
 internal class OpprettVedtakforespoersel(
     rapidsConnection: RapidsConnection,
     private val vedtak: VedtakService
-) : ListenerMedLogging(rapidsConnection) {
+) : RiverMedLogging(rapidsConnection) {
 
     init {
         initialiser {

@@ -18,12 +18,12 @@ import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
-import rapidsandrivers.migrering.ListenerMedLogging
+import rapidsandrivers.migrering.RiverMedLogging
 
 internal class InnsendtSoeknadRiver(
     rapidsConnection: RapidsConnection,
     private val behandlingClient: BehandlingClient
-) : ListenerMedLogging(rapidsConnection) {
+) : RiverMedLogging(rapidsConnection) {
 
     init {
         initialiser {

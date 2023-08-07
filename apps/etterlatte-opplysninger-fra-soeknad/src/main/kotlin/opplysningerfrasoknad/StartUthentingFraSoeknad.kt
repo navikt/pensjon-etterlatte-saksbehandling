@@ -9,12 +9,12 @@ import no.nav.etterlatte.opplysningerfrasoknad.opplysningsuthenter.Opplysningsut
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
-import rapidsandrivers.migrering.ListenerMedLogging
+import rapidsandrivers.migrering.RiverMedLogging
 
 internal class StartUthentingFraSoeknad(
     rapidsConnection: RapidsConnection,
     private val opplysningsuthenter: Opplysningsuthenter
-) : ListenerMedLogging(rapidsConnection) {
+) : RiverMedLogging(rapidsConnection) {
     private val rapid = rapidsConnection
 
     init {

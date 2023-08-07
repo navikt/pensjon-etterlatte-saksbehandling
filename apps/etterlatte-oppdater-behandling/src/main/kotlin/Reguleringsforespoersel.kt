@@ -8,14 +8,14 @@ import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import rapidsandrivers.DATO_KEY
 import rapidsandrivers.dato
-import rapidsandrivers.migrering.ListenerMedLoggingOgFeilhaandtering
+import rapidsandrivers.migrering.RiverMedLoggingOgFeilhaandtering
 import rapidsandrivers.sakId
 import rapidsandrivers.tilbakestilteBehandlinger
 
 internal class Reguleringsforespoersel(
     rapidsConnection: RapidsConnection,
     private val behandlingService: BehandlingService
-) : ListenerMedLoggingOgFeilhaandtering(rapidsConnection, REGULERING_EVENT_NAME) {
+) : RiverMedLoggingOgFeilhaandtering(rapidsConnection, REGULERING_EVENT_NAME) {
 
     init {
         initialiser {

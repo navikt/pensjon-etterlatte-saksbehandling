@@ -22,14 +22,14 @@ import rapidsandrivers.BEREGNING_KEY
 import rapidsandrivers.HENDELSE_DATA_KEY
 import rapidsandrivers.SAK_TYPE
 import rapidsandrivers.behandlingId
-import rapidsandrivers.migrering.ListenerMedLoggingOgFeilhaandtering
+import rapidsandrivers.migrering.RiverMedLoggingOgFeilhaandtering
 
 internal class OmregningHendelser(
     rapidsConnection: RapidsConnection,
     private val beregningService: BeregningService,
     private val trygdetidService: TrygdetidService
 ) :
-    ListenerMedLoggingOgFeilhaandtering(rapidsConnection, BEREGN) {
+    RiverMedLoggingOgFeilhaandtering(rapidsConnection, BEREGN) {
 
     init {
         initialiser {

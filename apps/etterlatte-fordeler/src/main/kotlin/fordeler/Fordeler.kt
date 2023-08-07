@@ -24,7 +24,7 @@ import no.nav.etterlatte.sikkerLogg
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
-import rapidsandrivers.migrering.ListenerMedLogging
+import rapidsandrivers.migrering.RiverMedLogging
 import java.time.OffsetDateTime
 
 data class FordelerEvent(
@@ -37,7 +37,7 @@ internal class Fordeler(
     rapidsConnection: RapidsConnection,
     private val fordelerService: FordelerService,
     private val fordelerMetricLogger: FordelerMetricLogger = FordelerMetricLogger()
-) : ListenerMedLogging(rapidsConnection) {
+) : RiverMedLogging(rapidsConnection) {
 
     init {
         initialiser {

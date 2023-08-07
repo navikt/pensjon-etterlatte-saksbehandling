@@ -16,12 +16,12 @@ import no.nav.etterlatte.statistikk.service.SoeknadStatistikkService
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
-import rapidsandrivers.migrering.ListenerMedLogging
+import rapidsandrivers.migrering.RiverMedLogging
 
 class SoeknadStatistikkRiver(
     rapidsConnection: RapidsConnection,
     private val statistikkService: SoeknadStatistikkService
-) : ListenerMedLogging(rapidsConnection) {
+) : RiverMedLogging(rapidsConnection) {
 
     init {
         initialiser {

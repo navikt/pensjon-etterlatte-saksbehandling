@@ -12,10 +12,10 @@ import no.nav.etterlatte.rapidsandrivers.migrering.request
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
-import rapidsandrivers.migrering.ListenerMedLoggingOgFeilhaandtering
+import rapidsandrivers.migrering.RiverMedLoggingOgFeilhaandtering
 
 internal class Migrering(rapidsConnection: RapidsConnection, private val pesysRepository: PesysRepository) :
-    ListenerMedLoggingOgFeilhaandtering(rapidsConnection, START_MIGRERING) {
+    RiverMedLoggingOgFeilhaandtering(rapidsConnection, START_MIGRERING) {
 
     init {
         initialiser {

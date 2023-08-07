@@ -22,6 +22,7 @@ data class GosysOppgave(
     val oppgavetype: String,
     val opprettetTidspunkt: Tidspunkt,
     val tildeltEnhetsnr: String,
+    val tilordnetRessurs: String?,
     val aktoerId: String,
     val beskrivelse: String,
     val status: String,
@@ -47,10 +48,10 @@ class GosysOppgaveKlientImpl(config: Config, httpClient: HttpClient) : GosysOppg
             logger.info("Henter oppgaver fra Gosys")
 
             val filters = "statuskategori=AAPEN"
-                .plus("&tema=EYB")
+                .plus("&tema=PEN")
                 .plus("&tema=EYO")
                 .plus("&tildeltEnhetsnr=$enhetsnr")
-//                .plus("&tilordnetRessurs=${brukerTokenInfo.ident()}")
+                .plus("&tilordnetRessurs=${brukerTokenInfo.ident()}")
 
             return downstreamResourceClient
                 .get(

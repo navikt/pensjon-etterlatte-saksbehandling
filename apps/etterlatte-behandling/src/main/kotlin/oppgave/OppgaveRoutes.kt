@@ -38,8 +38,10 @@ internal fun Route.oppgaveRoutes(service: OppgaveService, gosysOppgaveService: G
                         )
                     }
 
+                    // FIXME fjern? bare bruke i ny oppgaveliste? (modal visning)
                     val gosysOppgaver = async {
-                        gosysOppgaveService.hentOppgaver(brukerTokenInfo)
+//                        gosysOppgaveService.hentOppgaver(brukerTokenInfo)
+                        emptyList<OppgaveDTO>()
                     }
 
                     call.respond(

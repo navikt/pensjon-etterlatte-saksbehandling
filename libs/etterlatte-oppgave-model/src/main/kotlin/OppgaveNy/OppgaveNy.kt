@@ -58,7 +58,8 @@ enum class OppgaveType {
     MANUELT_OPPHOER,
     VURDER_KONSEKVENS,
     ATTESTERING,
-    UNDERKJENT
+    UNDERKJENT,
+    GOSYS
 }
 
 data class SaksbehandlerEndringDto(

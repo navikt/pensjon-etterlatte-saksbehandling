@@ -109,6 +109,7 @@ fun Application.module(context: ApplicationContext) {
             oppgaveRoutes(service = oppgaveService, gosysOppgaveService = gosysOppgaveService)
             oppgaveRoutesNy(
                 service = oppgaveServiceNy,
+                gosysOppgaveService = gosysOppgaveService,
                 kanBrukeNyOppgaveliste = kanBrukeNyOppgaveliste
             )
             grunnlagsendringshendelseRoute(grunnlagsendringshendelseService = grunnlagsendringshendelseService)

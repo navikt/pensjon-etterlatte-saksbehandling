@@ -79,6 +79,11 @@ data class OppgaveDTO(
     val merknad: String?
 ) {
     companion object {
+        private val temaTilSoeknadType = mapOf(
+            "EYB" to "BARNEPENSJON",
+            "EYO" to "OMSTILLINGSSTOENAD"
+        )
+
         fun fraOppgave(oppgave: Oppgave): OppgaveDTO {
             return when (oppgave) {
                 is Oppgave.Grunnlagsendringsoppgave -> OppgaveDTO(
@@ -118,7 +123,7 @@ data class OppgaveDTO(
                 sakId = 0, // oppgave.sak.id,
                 status = null,
                 oppgaveStatus = OppgaveStatus.NY,
-                soeknadType = "BARNEPENSJON",
+                soeknadType = temaTilSoeknadType.getOrDefault(oppgave.tema, ""),
                 oppgaveType = OppgaveType.GOSYS,
                 regdato = oppgave.opprettetTidspunkt.toLocalDatetimeUTC().toString(),
                 fristdato = oppgave.fristFerdigstillelse.atStartOfDay().toString(),

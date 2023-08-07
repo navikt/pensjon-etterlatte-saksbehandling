@@ -17,6 +17,7 @@ import no.nav.etterlatte.statistikk.clients.BeregningKlient
 import no.nav.etterlatte.statistikk.database.KjoertStatus
 import no.nav.etterlatte.statistikk.database.SakRepository
 import no.nav.etterlatte.statistikk.database.StoenadRepository
+import no.nav.etterlatte.statistikk.domain.Avkorting
 import no.nav.etterlatte.statistikk.domain.BehandlingMetode
 import no.nav.etterlatte.statistikk.domain.BehandlingResultat
 import no.nav.etterlatte.statistikk.domain.Beregning
@@ -50,13 +51,11 @@ class StatistikkService(
         val sakRad = registrerSakStatistikkForVedtak(vedtak, vedtakHendelse, tekniskTid)
         if (vedtakHendelse == VedtakHendelse.IVERKSATT) {
             val stoenadRad = when (vedtak.type) {
-                VedtakType.INNVILGELSE -> stoenadRepository.lagreStoenadsrad(
-                    vedtakTilStoenadsrad(vedtak, tekniskTid)
-                )
+                VedtakType.INNVILGELSE,
+                VedtakType.ENDRING,
+                VedtakType.OPPHOER -> stoenadRepository.lagreStoenadsrad(vedtakTilStoenadsrad(vedtak, tekniskTid))
 
                 VedtakType.AVSLAG -> null
-                VedtakType.ENDRING -> stoenadRepository.lagreStoenadsrad(vedtakTilStoenadsrad(vedtak, tekniskTid))
-                VedtakType.OPPHOER -> stoenadRepository.lagreStoenadsrad(vedtakTilStoenadsrad(vedtak, tekniskTid))
             }
             return sakRad to stoenadRad
         }
@@ -84,6 +83,15 @@ class StatistikkService(
         }
     }
 
+    private fun hentAvkortingForBehandling(vedtak: VedtakDto): Avkorting? {
+        if (vedtak.sak.sakType == SakType.OMSTILLINGSSTOENAD) {
+            return runBlocking {
+                beregningKlient.hentAvkortingForBehandling(vedtak.behandling.id)
+            }
+        }
+        return null
+    }
+
     private fun vedtakshendelseTilSakRad(
         vedtak: VedtakDto,
         hendelse: VedtakHendelse,
@@ -91,15 +99,14 @@ class StatistikkService(
     ): SakRad {
         val detaljertBehandling = hentDetaljertBehandling(vedtak.behandling.id)
         val mottattTid = detaljertBehandling.soeknadMottattDato ?: detaljertBehandling.behandlingOpprettet
-        val beregning = if (hendelse in listOf(
-                VedtakHendelse.FATTET,
-                VedtakHendelse.ATTESTERT,
-                VedtakHendelse.IVERKSATT
+        val (beregning, avkorting) = when (hendelse) {
+            VedtakHendelse.FATTET,
+            VedtakHendelse.ATTESTERT,
+            VedtakHendelse.IVERKSATT -> Pair(
+                hentBeregningForBehandling(detaljertBehandling.id),
+                hentAvkortingForBehandling(vedtak)
             )
-        ) {
-            hentBeregningForBehandling(detaljertBehandling.id)
-        } else {
-            null
+            else -> Pair(null, null)
         }
 
         val foersteUtbetaling = if (vedtak.type == VedtakType.INNVILGELSE) {
@@ -136,6 +143,7 @@ class StatistikkService(
             ansvarligEnhet = vedtak.attestasjon?.attesterendeEnhet,
             sakUtland = SakUtland.NASJONAL,
             beregning = beregning,
+            avkorting = avkorting,
             sakYtelsesgruppe = detaljertBehandling.sakYtelsesgruppe(),
             avdoedeForeldre = detaljertBehandling.avdoed,
             revurderingAarsak = detaljertBehandling.revurderingsaarsak?.name
@@ -169,7 +177,9 @@ class StatistikkService(
 
     private fun vedtakTilStoenadsrad(vedtak: VedtakDto, tekniskTid: LocalDateTime): StoenadRad {
         val persongalleri = hentPersongalleri(behandlingId = vedtak.behandling.id)
+
         val beregning = hentBeregningForBehandling(vedtak.behandling.id)
+        val avkorting = hentAvkortingForBehandling(vedtak)
         val utbetalingsdato = vedtak.vedtakFattet?.tidspunkt?.let {
             val vedtattDato = it.toLocalDate()
             YearMonth.of(vedtattDato.year, vedtattDato.monthValue).plusMonths(1).atDay(20)
@@ -180,7 +190,7 @@ class StatistikkService(
             fnrForeldre = persongalleri.avdoed,
             fnrSoesken = persongalleri.soesken,
             anvendtTrygdetid = "40",
-            nettoYtelse = vedtak.utbetalingsperioder.firstOrNull()?.beloep.toString(),
+            nettoYtelse = vedtak.utbetalingsperioder.firstOrNull()?.beloep.toString(), // TODO  Bør utbedres?
             beregningType = "FOLKETRYGD",
             anvendtSats = "",
             behandlingId = vedtak.behandling.id,
@@ -194,6 +204,7 @@ class StatistikkService(
             vedtakLoependeFom = vedtak.virkningstidspunkt.atDay(1),
             vedtakLoependeTom = null,
             beregning = beregning,
+            avkorting = avkorting,
             vedtakType = vedtak.type,
             sakUtland = SakUtland.NASJONAL,
             virkningstidspunkt = vedtak.virkningstidspunkt,
@@ -234,6 +245,7 @@ class StatistikkService(
             soeknadFormat = SoeknadFormat.DIGITAL,
             sakUtland = SakUtland.NASJONAL,
             beregning = null,
+            avkorting = null,
             sakYtelsesgruppe = detaljertBehandling.sakYtelsesgruppe(),
             avdoedeForeldre = if (detaljertBehandling.sakType == SakType.BARNEPENSJON) {
                 detaljertBehandling.avdoed

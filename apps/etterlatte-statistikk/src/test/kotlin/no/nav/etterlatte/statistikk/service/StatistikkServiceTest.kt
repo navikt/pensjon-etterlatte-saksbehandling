@@ -1,5 +1,8 @@
 package no.nav.etterlatte.statistikk.service
 
+import io.kotest.assertions.asClue
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
@@ -26,6 +29,9 @@ import no.nav.etterlatte.statistikk.clients.BehandlingKlient
 import no.nav.etterlatte.statistikk.clients.BeregningKlient
 import no.nav.etterlatte.statistikk.database.SakRepository
 import no.nav.etterlatte.statistikk.database.StoenadRepository
+import no.nav.etterlatte.statistikk.domain.AvkortetYtelse
+import no.nav.etterlatte.statistikk.domain.Avkorting
+import no.nav.etterlatte.statistikk.domain.AvkortingGrunnlag
 import no.nav.etterlatte.statistikk.domain.BehandlingMetode
 import no.nav.etterlatte.statistikk.domain.Beregning
 import no.nav.etterlatte.statistikk.domain.Beregningstype
@@ -57,7 +63,7 @@ class StatistikkServiceTest {
     )
 
     @Test
-    fun `mapper vedtakhendelse til både sakRad og stoenadRad riktig`() {
+    fun `mapper vedtakhendelse til baade sakRad og stoenadRad riktig`() {
         val behandlingId = UUID.randomUUID()
         val sakId = 1L
         val virkningstidspunkt = YearMonth.of(2023, 6)
@@ -96,12 +102,10 @@ class StatistikkServiceTest {
         )
         coEvery { beregningKlient.hentBeregningForBehandling(behandlingId) } returns mockBeregning
 
-
         val tekniskTidForHendelse = LocalDateTime.of(2023, 2, 1, 8, 30)
 
-
         val fattetVedtakMaaned = LocalDate.of(2023, 7, 1)
-        val fattetTidspunkt = Tidspunkt.ofNorskTidssone(LocalDate.of(2023, 7, 1), LocalTime.NOON)
+        val fattetTidspunkt = Tidspunkt.ofNorskTidssone(fattetVedtakMaaned, LocalTime.NOON)
         val (registrertSakRad, registrertStoenadRad) = service.registrerStatistikkForVedtak(
             vedtak = vedtak(
                 sakId = sakId,
@@ -114,31 +118,124 @@ class StatistikkServiceTest {
             tekniskTid = tekniskTidForHendelse
         )
 
-        // denne gjør at kotlin kan inferre at de ikke er null, så det ikke blir ? i alle assertions under
-        if (registrertStoenadRad == null || registrertSakRad == null) {
-            throw NullPointerException("Stønadrad=$registrertStoenadRad eller sakrad=$registrertSakRad var null")
+        registrertSakRad shouldNotBe null
+        registrertSakRad?.asClue { registrertSak ->
+            registrertSak.sakId shouldBe sakId
+            registrertSak.sakYtelse shouldBe SakType.BARNEPENSJON.name
+            registrertSak.sakUtland shouldBe SakUtland.NASJONAL
+            registrertSak.behandlingId shouldBe behandlingId
+            registrertSak.tekniskTid shouldBe tekniskTidForHendelse.toTidspunkt()
+            registrertSak.ansvarligEnhet shouldBe "attestantEnhet"
+            registrertSak.ansvarligBeslutter shouldBe "Attestant"
+            registrertSak.saksbehandler shouldBe "Saksbehandler"
+            registrertSak.beregning shouldBe mockBeregning
+            registrertSak.avkorting shouldBe null
         }
 
-        assertEquals(registrertSakRad.sakId, sakId)
-        assertEquals(registrertSakRad.sakYtelse, "BARNEPENSJON")
-        assertEquals(registrertSakRad.sakUtland, SakUtland.NASJONAL)
-        assertEquals(registrertSakRad.behandlingId, behandlingId)
-        assertEquals(registrertSakRad.tekniskTid, tekniskTidForHendelse.toTidspunkt())
-        assertEquals(registrertSakRad.ansvarligEnhet, "attestantEnhet")
-        assertEquals(registrertSakRad.ansvarligBeslutter, "Attestant")
-        assertEquals(registrertSakRad.saksbehandler, "Saksbehandler")
-        assertEquals(registrertSakRad.beregning, mockBeregning)
+        registrertStoenadRad shouldNotBe null
+        registrertStoenadRad?.asClue { registrertStoenad ->
+            registrertStoenad.tekniskTid shouldBe tekniskTidForHendelse.toTidspunkt()
+            registrertStoenad.beregning shouldBe mockBeregning
+            registrertStoenad.avkorting shouldBe null
+            registrertStoenad.behandlingId shouldBe behandlingId
+            registrertStoenad.sakId shouldBe sakId
+            registrertStoenad.attestant shouldBe "Attestant"
+            registrertStoenad.saksbehandler shouldBe "Saksbehandler"
 
-        assertEquals(registrertStoenadRad.tekniskTid, tekniskTidForHendelse.toTidspunkt())
-        assertEquals(registrertStoenadRad.beregning, mockBeregning)
-        assertEquals(registrertStoenadRad.behandlingId, behandlingId)
-        assertEquals(registrertStoenadRad.sakId, sakId)
-        assertEquals(registrertStoenadRad.attestant, "Attestant")
-        assertEquals(registrertStoenadRad.saksbehandler, "Saksbehandler")
+            registrertStoenad.sakUtland shouldBe SakUtland.NASJONAL
+            registrertStoenad.virkningstidspunkt shouldBe virkningstidspunkt
+            registrertStoenad.utbetalingsdato shouldBe fattetVedtakMaaned.plusMonths(1).plusDays(19)
+        }
+    }
 
-        assertEquals(registrertStoenadRad.sakUtland, SakUtland.NASJONAL)
-        assertEquals(registrertStoenadRad.virkningstidspunkt, virkningstidspunkt)
-        assertEquals(registrertStoenadRad.utbetalingsdato, fattetVedtakMaaned.plusMonths(1).plusDays(19))
+    @Test
+    fun `mapper vedtakhendelse for omstillingsstoenad`() {
+        val behandlingId = UUID.randomUUID()
+        val sakId = 1L
+        val virkningstidspunkt = YearMonth.of(2023, 6)
+
+        every { stoenadRepo.lagreStoenadsrad(any()) } returnsArgument 0
+        every { sakRepo.lagreRad(any()) } returnsArgument 0
+        coEvery { behandlingKlient.hentDetaljertBehandling(behandlingId) } returns DetaljertBehandling(
+            id = behandlingId,
+            sak = sakId,
+            sakType = SakType.OMSTILLINGSSTOENAD,
+            behandlingOpprettet = Tidspunkt.now().toLocalDatetimeUTC(),
+            soeknadMottattDato = null,
+            innsender = null,
+            soeker = "12312312312",
+            gjenlevende = listOf(),
+            avdoed = listOf(),
+            soesken = listOf(),
+            status = BehandlingStatus.FATTET_VEDTAK,
+            behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+            virkningstidspunkt = null,
+            boddEllerArbeidetUtlandet = null,
+            revurderingsaarsak = null,
+            revurderingInfo = null,
+            prosesstype = Prosesstype.MANUELL,
+            enhet = "1111"
+        )
+        coEvery { behandlingKlient.hentPersongalleri(behandlingId) } returns Persongalleri(
+            "12312312312"
+        )
+        val mockBeregning = Beregning(
+            beregningId = UUID.randomUUID(),
+            behandlingId = behandlingId,
+            type = Beregningstype.OMS,
+            beregnetDato = Tidspunkt.now(),
+            beregningsperioder = listOf()
+        )
+        coEvery { beregningKlient.hentBeregningForBehandling(behandlingId) } returns mockBeregning
+        val mockAvkorting = Avkorting(
+            listOf(
+                AvkortingGrunnlag(
+                    fom = YearMonth.now(),
+                    tom = null,
+                    aarsinntekt = 100,
+                    fratrekkInnAar = 40,
+                    relevanteMaanederInnAar = 2,
+                    spesifikasjon = ""
+                )
+            ), listOf(
+                AvkortetYtelse(
+                    fom = YearMonth.now(),
+                    tom = null,
+                    ytelseFoerAvkorting = 200,
+                    avkortingsbeloep = 50,
+                    ytelseEtterAvkorting = 150,
+                    restanse = 0
+                )
+            )
+        )
+        coEvery { beregningKlient.hentAvkortingForBehandling(behandlingId) } returns mockAvkorting
+
+        val fattetTidspunkt = Tidspunkt.ofNorskTidssone(LocalDate.of(2023, 7, 1), LocalTime.NOON)
+        val (registrertSakRad, registrertStoenadRad) = service.registrerStatistikkForVedtak(
+            vedtak = vedtak(
+                sakId = sakId,
+                sakType = SakType.OMSTILLINGSSTOENAD,
+                behandlingId = behandlingId,
+                vedtakFattet = VedtakFattet("Saksbehandler", "saksbehandlerEnhet", fattetTidspunkt),
+                attestasjon = Attestasjon("Attestant", "attestantEnhet", fattetTidspunkt),
+                virk = virkningstidspunkt
+            ),
+            vedtakHendelse = VedtakHendelse.IVERKSATT,
+            tekniskTid = LocalDateTime.of(2023, 2, 1, 8, 30)
+        )
+
+        registrertSakRad shouldNotBe null
+        registrertSakRad?.asClue { registrertSak ->
+            registrertSak.sakId shouldBe sakId
+            registrertSak.sakYtelse shouldBe SakType.OMSTILLINGSSTOENAD.name
+            registrertSak.beregning shouldBe mockBeregning
+            registrertSak.avkorting shouldBe mockAvkorting
+        }
+        registrertStoenadRad shouldNotBe null
+        registrertStoenadRad?.asClue { registrertStoenad ->
+            registrertStoenad.beregning shouldBe mockBeregning
+            registrertStoenad.avkorting shouldBe mockAvkorting
+        }
     }
 
     @Test
@@ -231,6 +328,7 @@ fun vedtak(
 fun behandling(
     id: UUID = UUID.randomUUID(),
     sakId: Long = 1L,
+    sakType: SakType = SakType.BARNEPENSJON,
     behandlingOpprettet: LocalDateTime = Tidspunkt.now().toLocalDatetimeUTC(),
     sistEndret: LocalDateTime = Tidspunkt.now().toLocalDatetimeUTC(),
     status: BehandlingStatus = BehandlingStatus.OPPRETTET,
@@ -238,7 +336,7 @@ fun behandling(
     soeker: String = "12312312312"
 ) = BehandlingIntern(
     id = id,
-    sak = Sak(soeker, SakType.BARNEPENSJON, sakId, "4808"),
+    sak = Sak(soeker, sakType, sakId, "4808"),
     behandlingOpprettet = behandlingOpprettet,
     sistEndret = sistEndret,
     status = status,

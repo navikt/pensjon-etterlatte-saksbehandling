@@ -6,6 +6,9 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.POSTGRES_VERSION
 import no.nav.etterlatte.libs.database.migrate
+import no.nav.etterlatte.statistikk.domain.AvkortetYtelse
+import no.nav.etterlatte.statistikk.domain.Avkorting
+import no.nav.etterlatte.statistikk.domain.AvkortingGrunnlag
 import no.nav.etterlatte.statistikk.domain.Beregning
 import no.nav.etterlatte.statistikk.domain.Beregningstype
 import no.nav.etterlatte.statistikk.domain.MaanedStoenadRad
@@ -57,6 +60,28 @@ class StoenadRepositoryTest {
         beregningsperioder = listOf()
     )
 
+    val mockAvkorting = Avkorting(
+        listOf(
+            AvkortingGrunnlag(
+                fom = YearMonth.now(),
+                tom = null,
+                aarsinntekt = 100,
+                fratrekkInnAar = 40,
+                relevanteMaanederInnAar = 2,
+                spesifikasjon = ""
+            )
+        ), listOf(
+            AvkortetYtelse(
+                fom = YearMonth.now(),
+                tom = null,
+                ytelseFoerAvkorting = 200,
+                avkortingsbeloep = 50,
+                ytelseEtterAvkorting = 150,
+                restanse = 0
+            )
+        )
+    )
+
     @AfterAll
     fun afterAll() {
         postgreSQLContainer.stop()
@@ -98,10 +123,11 @@ class StoenadRepositoryTest {
                 vedtakLoependeFom = LocalDate.now(),
                 vedtakLoependeTom = null,
                 beregning = mockBeregning,
+                avkorting = mockAvkorting,
                 vedtakType = VedtakType.INNVILGELSE,
                 sakUtland = SakUtland.NASJONAL,
                 virkningstidspunkt = YearMonth.of(2023, 6),
-                utbetalingsdato = LocalDate.of(2023,7, 20)
+                utbetalingsdato = LocalDate.of(2023, 7, 20)
             )
         )
         repo.hentStoenadRader().also {
@@ -113,13 +139,14 @@ class StoenadRepositoryTest {
                 listOf("23427249697", "18458822782")
             )
             assertEquals(stoenadRad.beregning, mockBeregning)
+            assertEquals(stoenadRad.avkorting, mockAvkorting)
             assertEquals(stoenadRad.vedtakType, VedtakType.INNVILGELSE)
             assertEquals(stoenadRad.sakUtland, SakUtland.NASJONAL)
         }
     }
 
     @Test
-    fun `datapakke henter ut null for beregning riktig`() {
+    fun `hentStoenadRader henter ut null for beregning riktig`() {
         val repo = StoenadRepository.using(dataSource)
         repo.lagreStoenadsrad(
             StoenadRad(
@@ -142,10 +169,11 @@ class StoenadRepositoryTest {
                 vedtakLoependeFom = LocalDate.now(),
                 vedtakLoependeTom = null,
                 beregning = null,
+                avkorting = null,
                 vedtakType = VedtakType.INNVILGELSE,
                 sakUtland = SakUtland.NASJONAL,
                 virkningstidspunkt = YearMonth.of(2023, 6),
-                utbetalingsdato = LocalDate.of(2023,7, 20)
+                utbetalingsdato = LocalDate.of(2023, 7, 20)
             )
         )
         repo.hentStoenadRader().also {
@@ -157,6 +185,7 @@ class StoenadRepositoryTest {
                 listOf("23427249697", "18458822782")
             )
             assertNull(stoenadRad.beregning)
+            assertNull(stoenadRad.avkorting)
             assertEquals(stoenadRad.vedtakType, VedtakType.INNVILGELSE)
         }
     }
@@ -280,6 +309,8 @@ class StoenadRepositoryTest {
             fnrSoesken = listOf(),
             anvendtTrygdetid = "40",
             nettoYtelse = "4",
+            avkortingsbeloep = "2",
+            aarsinntekt = "10",
             beregningType = "Moro",
             anvendtSats = "1",
             behandlingId = UUID.randomUUID(),
@@ -295,7 +326,7 @@ class StoenadRepositoryTest {
             statistikkMaaned = YearMonth.of(2023, Month.FEBRUARY),
             sakUtland = SakUtland.NASJONAL,
             virkningstidspunkt = YearMonth.of(2023, 6),
-            utbetalingsdato = LocalDate.of(2023,7, 20)
+            utbetalingsdato = LocalDate.of(2023, 7, 20)
         )
 
         assertDoesNotThrow {
@@ -327,10 +358,11 @@ class StoenadRepositoryTest {
                 vedtakLoependeFom = LocalDate.now(),
                 vedtakLoependeTom = null,
                 beregning = null,
+                avkorting = null,
                 vedtakType = null,
                 sakUtland = SakUtland.NASJONAL,
                 virkningstidspunkt = YearMonth.of(2023, 6),
-                utbetalingsdato = LocalDate.of(2023,7, 20)
+                utbetalingsdato = LocalDate.of(2023, 7, 20)
             )
         )
 

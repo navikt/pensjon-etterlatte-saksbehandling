@@ -978,7 +978,7 @@ internal class VedtaksvurderingServiceTest {
     ): AvkortingDto = mockk(relaxed = true) {
         every { avkortetYtelse } returns listOf(
             AvkortetYtelseDto(
-                fom = virkningstidspunkt.atDay(1),
+                fom = virkningstidspunkt,
                 tom = null,
                 ytelseFoerAvkorting = 100,
                 ytelseEtterAvkorting = 50,

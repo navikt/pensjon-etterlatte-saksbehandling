@@ -1,6 +1,12 @@
 package no.nav.etterlatte.statistikk.domain
 
+import no.nav.etterlatte.libs.common.beregning.AvkortetYtelseDto
+import no.nav.etterlatte.libs.common.beregning.AvkortingDto
+import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagDto
+import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagKildeDto
+import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import java.time.LocalDate
 import java.time.YearMonth
 import java.util.*
 import no.nav.etterlatte.libs.common.beregning.BeregningDTO as CommonBeregningDTO
@@ -58,6 +64,58 @@ data class Beregningsperiode(
             grunnbelopMnd = dto.grunnbelopMnd,
             grunnbelop = dto.grunnbelop,
             trygdetid = dto.trygdetid
+        )
+    }
+}
+
+data class Avkorting(
+    val avkortingGrunnlag: List<AvkortingGrunnlag>,
+    val avkortetYtelse: List<AvkortetYtelse>
+) {
+    companion object {
+        fun fraDTO(dto: AvkortingDto) = Avkorting(
+            avkortingGrunnlag = dto.avkortingGrunnlag.map { AvkortingGrunnlag.fraDTO(it) },
+            avkortetYtelse = dto.avkortetYtelse.map { AvkortetYtelse.fraDTO(it) }
+        )
+    }
+}
+
+data class AvkortingGrunnlag(
+    val fom: YearMonth,
+    val tom: YearMonth?,
+    val aarsinntekt: Int,
+    val fratrekkInnAar: Int,
+    val relevanteMaanederInnAar: Int?,
+    val spesifikasjon: String,
+) {
+    companion object {
+        fun fraDTO(dto: AvkortingGrunnlagDto) = AvkortingGrunnlag(
+            fom = dto.fom,
+            tom = dto.tom,
+            aarsinntekt = dto.aarsinntekt,
+            fratrekkInnAar = dto.fratrekkInnAar,
+            relevanteMaanederInnAar = dto.relevanteMaanederInnAar,
+            spesifikasjon = dto.spesifikasjon,
+        )
+    }
+}
+
+data class AvkortetYtelse(
+    val fom: YearMonth,
+    val tom: YearMonth?,
+    val ytelseFoerAvkorting: Int,
+    val avkortingsbeloep: Int,
+    val ytelseEtterAvkorting: Int,
+    val restanse: Int
+) {
+    companion object {
+        fun fraDTO(dto: AvkortetYtelseDto) = AvkortetYtelse(
+            fom = dto.fom,
+            tom = dto.tom,
+            ytelseFoerAvkorting = dto.ytelseFoerAvkorting,
+            avkortingsbeloep = dto.avkortingsbeloep,
+            ytelseEtterAvkorting = dto.ytelseEtterAvkorting,
+            restanse = dto.restanse,
         )
     }
 }

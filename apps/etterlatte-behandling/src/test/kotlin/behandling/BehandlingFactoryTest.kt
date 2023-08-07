@@ -3,7 +3,9 @@ package behandling
 import io.mockk.clearAllMocks
 import io.mockk.confirmVerified
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
+import io.mockk.runs
 import io.mockk.slot
 import io.mockk.verify
 import no.nav.etterlatte.Context
@@ -464,6 +466,9 @@ class BehandlingFactoryTest {
         every {
             oppgaveService.opprettNyOppgaveMedSakOgReferanse(any(), any(), any(), any(), any())
         } returns mockOppgave
+        every {
+            oppgaveService.tildelSaksbehandler(any(), any())
+        } just runs
 
         val foerstegangsbehandling = behandlingFactory.opprettBehandling(
             1,

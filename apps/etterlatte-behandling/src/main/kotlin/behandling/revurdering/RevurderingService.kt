@@ -41,7 +41,12 @@ import java.util.*
 interface RevurderingService {
 
     fun opprettManuellRevurderingWrapper(
-        opprettRevurderingRequest: OpprettRevurderingRequest
+        sakId: Long,
+        aarsak: RevurderingAarsak,
+        paaGrunnAvHendelseId: String? = null,
+        begrunnelse: String? = null,
+        fritekstAarsak: String? = null,
+        saksbehandlerIdent: String
     ): Revurdering?
 
     fun opprettAutomatiskRevurdering(
@@ -84,36 +89,42 @@ class RevurderingServiceImpl(
         (behandlingDao.hentBehandling(id) as? Revurdering)?.sjekkEnhet()
 
     override fun opprettManuellRevurderingWrapper(
-        opprettRevurderingRequest: OpprettRevurderingRequest
+        sakId: Long,
+        aarsak: RevurderingAarsak,
+        paaGrunnAvHendelseId: String?,
+        begrunnelse: String?,
+        fritekstAarsak: String?,
+        saksbehandlerIdent: String
     ): Revurdering? {
-        val paaGrunnAvHendelseId = try {
-            opprettRevurderingRequest.paaGrunnAvHendelseId?.let { UUID.fromString(it) }
+        val paaGrunnAvHendelseUuid = try {
+            paaGrunnAvHendelseId?.let { UUID.fromString(it) }
         } catch (e: Exception) {
             throw BadRequestException(
-                "${opprettRevurderingRequest.aarsak} har en ugyldig hendelse id for sakid" +
-                    " $opprettRevurderingRequest.sakId. " +
-                    "Hendelsesid: ${opprettRevurderingRequest.paaGrunnAvHendelseId}"
+                "$aarsak har en ugyldig hendelse id for sakid" +
+                    " $sakId. " +
+                    "Hendelsesid: $paaGrunnAvHendelseId"
             )
         }
 
-        val forrigeIverksatteBehandling = behandlingService.hentSisteIverksatte(opprettRevurderingRequest.sakId)
+        val forrigeIverksatteBehandling = behandlingService.hentSisteIverksatte(sakId)
         if (forrigeIverksatteBehandling != null) {
             val sakType = forrigeIverksatteBehandling.sak.sakType
-            if (!opprettRevurderingRequest.aarsak.gyldigForSakType(sakType)) {
-                throw BadRequestException("${opprettRevurderingRequest.aarsak} er ikke støttet for $sakType")
+            if (!aarsak.gyldigForSakType(sakType)) {
+                throw BadRequestException("$aarsak er ikke støttet for $sakType")
             }
             return opprettManuellRevurdering(
                 sakId = forrigeIverksatteBehandling.sak.id,
                 forrigeBehandling = forrigeIverksatteBehandling,
-                revurderingAarsak = opprettRevurderingRequest.aarsak,
-                paaGrunnAvHendelse = paaGrunnAvHendelseId,
-                begrunnelse = opprettRevurderingRequest.begrunnelse,
-                fritekstAarsak = opprettRevurderingRequest.fritekstAarsak
+                revurderingAarsak = aarsak,
+                paaGrunnAvHendelse = paaGrunnAvHendelseUuid,
+                begrunnelse = begrunnelse,
+                fritekstAarsak = fritekstAarsak,
+                saksbehandlerIdent = saksbehandlerIdent
             )
         } else {
             throw BadRequestException(
                 "Kan ikke revurdere en sak uten iverksatt behandling sakid:" +
-                    " ${opprettRevurderingRequest.sakId}"
+                    " $sakId"
             )
         }
     }
@@ -123,7 +134,8 @@ class RevurderingServiceImpl(
         revurderingAarsak: RevurderingAarsak,
         paaGrunnAvHendelse: UUID?,
         begrunnelse: String?,
-        fritekstAarsak: String?
+        fritekstAarsak: String?,
+        saksbehandlerIdent: String
     ): Revurdering? = forrigeBehandling.sjekkEnhet()?.let {
         return if (featureToggleService.isEnabled(RevurderingServiceFeatureToggle.OpprettManuellRevurdering, false)) {
             inTransaction {
@@ -138,7 +150,8 @@ class RevurderingServiceImpl(
                     revurderingAarsak,
                     virkningstidspunkt = null,
                     begrunnelse = begrunnelse,
-                    fritekstAarsak = fritekstAarsak
+                    fritekstAarsak = fritekstAarsak,
+                    saksbehandlerIdent = saksbehandlerIdent
                 ).also { revurdering ->
                     if (paaGrunnAvHendelse != null) {
                         grunnlagsendringshendelseDao.settBehandlingIdForTattMedIRevurdering(
@@ -193,7 +206,8 @@ class RevurderingServiceImpl(
                 merknad,
                 revurderingAarsak,
                 virkningstidspunkt?.tilVirkningstidspunkt("Opprettet automatisk"),
-                begrunnelse = begrunnelse ?: "Automatisk revurdering - ${revurderingAarsak.name.lowercase()}"
+                begrunnelse = begrunnelse ?: "Automatisk revurdering - ${revurderingAarsak.name.lowercase()}",
+                saksbehandlerIdent = "EY"
             )
         }
     }
@@ -228,7 +242,8 @@ class RevurderingServiceImpl(
         revurderingAarsak: RevurderingAarsak,
         virkningstidspunkt: Virkningstidspunkt?,
         begrunnelse: String?,
-        fritekstAarsak: String? = null
+        fritekstAarsak: String? = null,
+        saksbehandlerIdent: String
     ): Revurdering = OpprettBehandling(
         type = BehandlingType.REVURDERING,
         sakId = sakId,
@@ -257,13 +272,14 @@ class RevurderingServiceImpl(
     }.also { behandling ->
         behandling.let {
             grunnlagService.leggInnNyttGrunnlag(it)
-            oppgaveService.opprettNyOppgaveMedSakOgReferanse(
+            val oppgave = oppgaveService.opprettNyOppgaveMedSakOgReferanse(
                 referanse = behandling.id.toString(),
                 sakId = sakId,
                 oppgaveKilde = OppgaveKilde.BEHANDLING,
                 oppgaveType = OppgaveType.REVURDERING,
                 merknad = begrunnelse
             )
+            oppgaveService.tildelSaksbehandler(oppgave.id, saksbehandlerIdent)
             behandlingHendelser.sendMeldingForHendelse(it, BehandlingHendelseType.OPPRETTET)
         }
     }

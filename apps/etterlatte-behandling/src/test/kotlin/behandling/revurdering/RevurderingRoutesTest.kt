@@ -28,7 +28,6 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import testsupport.buildTestApplicationConfigurationForOauth
-import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class RevurderingRoutesTest {
@@ -70,7 +69,7 @@ internal class RevurderingRoutesTest {
             val response = client.post("api/revurdering/1") {
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 header(HttpHeaders.Authorization, "Bearer $token")
-                setBody(OpprettRevurderingRequest(sakId = 1L, aarsak = RevurderingAarsak.REGULERING))
+                setBody(OpprettRevurderingRequest(aarsak = RevurderingAarsak.REGULERING))
             }
 
             assertEquals(HttpStatusCode.OK, response.status)

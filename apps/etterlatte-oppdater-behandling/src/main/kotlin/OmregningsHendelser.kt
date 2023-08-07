@@ -9,6 +9,7 @@ import no.nav.etterlatte.rapidsandrivers.EventNames.VILKAARSVURDER
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
+import no.nav.helse.rapids_rivers.River
 import rapidsandrivers.BEHANDLING_ID_KEY
 import rapidsandrivers.BEHANDLING_VI_OMREGNER_FRA_KEY
 import rapidsandrivers.HENDELSE_DATA_KEY
@@ -19,13 +20,11 @@ import rapidsandrivers.migrering.RiverMedLoggingOgFeilhaandtering
 internal class OmregningsHendelser(rapidsConnection: RapidsConnection, private val behandlinger: BehandlingService) :
     RiverMedLoggingOgFeilhaandtering(rapidsConnection, OMREGNINGSHENDELSE) {
 
-    init {
-        initialiser {
-            eventName(hendelsestype)
+    override fun River.eventName() = eventName(hendelsestype)
 
-            validate { it.rejectKey(BEHANDLING_ID_KEY) }
-            validate { it.requireKey(HENDELSE_DATA_KEY) }
-        }
+    override fun River.validation() {
+        validate { it.rejectKey(BEHANDLING_ID_KEY) }
+        validate { it.requireKey(HENDELSE_DATA_KEY) }
     }
 
     override fun haandterPakke(packet: JsonMessage, context: MessageContext) {

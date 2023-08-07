@@ -11,6 +11,7 @@ import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
+import no.nav.helse.rapids_rivers.River
 import rapidsandrivers.migrering.RiverMedLogging
 
 internal class DistribuerBrev(
@@ -19,12 +20,11 @@ internal class DistribuerBrev(
     private val distribusjonService: DistribusjonService
 ) : RiverMedLogging(rapidsConnection) {
 
-    init {
-        initialiser {
-            eventName(BrevEventTypes.JOURNALFOERT.toString())
-            validate { it.requireKey("brevId", "journalpostId", "distribusjonType") }
-            validate { it.rejectKey("bestillingsId") }
-        }
+    override fun River.eventName() = eventName(BrevEventTypes.JOURNALFOERT.toString())
+
+    override fun River.validation() {
+        validate { it.requireKey("brevId", "journalpostId", "distribusjonType") }
+        validate { it.rejectKey("bestillingsId") }
     }
 
     override fun haandterPakke(packet: JsonMessage, context: MessageContext) {

@@ -16,6 +16,7 @@ import no.nav.etterlatte.rapidsandrivers.migrering.persongalleri
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
+import no.nav.helse.rapids_rivers.River
 import rapidsandrivers.SAK_ID_KEY
 import rapidsandrivers.migrering.RiverMedLoggingOgFeilhaandtering
 import rapidsandrivers.sakId
@@ -26,13 +27,12 @@ class MigreringHendelser(
     private val grunnlagService: GrunnlagService
 ) : RiverMedLoggingOgFeilhaandtering(rapidsConnection, BEHANDLING_OPPRETTET) {
 
-    init {
-        initialiser {
-            eventName(hendelsestype)
-            validate { it.requireKey(SAK_ID_KEY) }
-            validate { it.requireKey(MIGRERING_GRUNNLAG_KEY) }
-            validate { it.requireKey(PERSONGALLERI) }
-        }
+    override fun River.eventName() = eventName(hendelsestype)
+
+    override fun River.validation() {
+        validate { it.requireKey(SAK_ID_KEY) }
+        validate { it.requireKey(MIGRERING_GRUNNLAG_KEY) }
+        validate { it.requireKey(PERSONGALLERI) }
     }
 
     override fun haandterPakke(packet: JsonMessage, context: MessageContext) {

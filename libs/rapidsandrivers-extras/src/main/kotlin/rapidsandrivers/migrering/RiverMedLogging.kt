@@ -12,15 +12,24 @@ import org.slf4j.LoggerFactory
 abstract class RiverMedLogging(private val rapidsConnection: RapidsConnection) : River.PacketListener {
 
     protected val logger: Logger = LoggerFactory.getLogger(this::class.java)
-    fun initialiser(spesifikkInitialisering: River.() -> Unit) {
+
+    init {
+        registerRiver()
+    }
+
+    private fun registerRiver() {
         val navn = this.javaClass.simpleName
         logger.info("Initialiserer rapid for $navn")
         River(rapidsConnection).apply {
             correlationId()
-            spesifikkInitialisering()
+            eventName()
+            validation()
         }.register(this)
         logger.info("Initialisert ferdig rapid for $navn")
     }
+
+    abstract fun River.eventName()
+    abstract fun River.validation()
 
     abstract fun haandterPakke(packet: JsonMessage, context: MessageContext): Any
     override fun onPacket(packet: JsonMessage, context: MessageContext) =

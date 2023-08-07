@@ -12,15 +12,15 @@ import no.nav.etterlatte.rapidsandrivers.migrering.request
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
+import no.nav.helse.rapids_rivers.River
 import rapidsandrivers.migrering.RiverMedLoggingOgFeilhaandtering
 
 internal class Migrering(rapidsConnection: RapidsConnection, private val pesysRepository: PesysRepository) :
     RiverMedLoggingOgFeilhaandtering(rapidsConnection, START_MIGRERING) {
 
-    init {
-        initialiser {
-            eventName(hendelsestype)
-        }
+    override fun River.eventName() = eventName(hendelsestype)
+
+    override fun River.validation() {
     }
 
     override fun haandterPakke(packet: JsonMessage, context: MessageContext) =

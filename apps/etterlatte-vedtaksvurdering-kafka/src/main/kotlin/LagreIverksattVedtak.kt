@@ -9,6 +9,7 @@ import no.nav.etterlatte.libs.common.utbetaling.UtbetalingStatusDto
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
+import no.nav.helse.rapids_rivers.River
 import rapidsandrivers.migrering.RiverMedLogging
 
 internal class LagreIverksattVedtak(
@@ -16,12 +17,9 @@ internal class LagreIverksattVedtak(
     private val vedtaksvurderingService: VedtakService
 ) : RiverMedLogging(rapidsConnection) {
 
-    init {
-        initialiser {
-            eventName("UTBETALING:OPPDATERT")
-            validate { it.requireKey("utbetaling_response") }
-        }
-    }
+    override fun River.eventName() = eventName("UTBETALING:OPPDATERT")
+
+    override fun River.validation() = validate { it.requireKey("utbetaling_response") }
 
     override fun haandterPakke(packet: JsonMessage, context: MessageContext) {
         val respons = objectMapper.readValue<UtbetalingResponseDto>(packet["utbetaling_response"].toString())

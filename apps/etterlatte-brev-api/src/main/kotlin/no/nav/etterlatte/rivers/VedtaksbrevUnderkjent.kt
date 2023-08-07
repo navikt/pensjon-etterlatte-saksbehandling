@@ -7,6 +7,7 @@ import no.nav.etterlatte.libs.common.vedtak.KafkaHendelseType
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
+import no.nav.helse.rapids_rivers.River
 import rapidsandrivers.migrering.RiverMedLogging
 import java.util.*
 
@@ -15,15 +16,14 @@ internal class VedtaksbrevUnderkjent(
     private val service: VedtaksbrevService
 ) : RiverMedLogging(rapidsConnection) {
 
-    init {
-        initialiser {
-            eventName(KafkaHendelseType.UNDERKJENT.toString())
-            validate { it.requireKey("vedtak") }
-            validate { it.requireKey("vedtak.vedtakId") }
-            validate { it.requireKey("vedtak.behandling.id") }
-            validate {
-                it.rejectValues("vedtak.behandling.type", listOf(BehandlingType.MANUELT_OPPHOER.name))
-            }
+    override fun River.eventName() = eventName(KafkaHendelseType.UNDERKJENT.toString())
+
+    override fun River.validation() {
+        validate { it.requireKey("vedtak") }
+        validate { it.requireKey("vedtak.vedtakId") }
+        validate { it.requireKey("vedtak.behandling.id") }
+        validate {
+            it.rejectValues("vedtak.behandling.type", listOf(BehandlingType.MANUELT_OPPHOER.name))
         }
     }
 

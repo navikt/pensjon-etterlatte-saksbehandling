@@ -12,6 +12,7 @@ import no.nav.etterlatte.statistikk.service.VedtakHendelse
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
+import no.nav.helse.rapids_rivers.River
 import rapidsandrivers.migrering.RiverMedLogging
 
 class VedtakhendelserRiver(
@@ -25,13 +26,13 @@ class VedtakhendelserRiver(
         KafkaHendelseType.UNDERKJENT.toString(),
         KafkaHendelseType.IVERKSATT.toString()
     )
+    override fun River.eventName() {
+        validate { it.demandAny(EVENT_NAME_KEY, vedtakshendelser) }
+    }
 
-    init {
-        initialiser {
-            validate { it.demandAny(EVENT_NAME_KEY, vedtakshendelser) }
-            validate { it.requireKey("vedtak") }
-            validate { it.interestedIn(TEKNISK_TID_KEY) }
-        }
+    override fun River.validation() {
+        validate { it.requireKey("vedtak") }
+        validate { it.interestedIn(TEKNISK_TID_KEY) }
     }
 
     override fun haandterPakke(packet: JsonMessage, context: MessageContext) =

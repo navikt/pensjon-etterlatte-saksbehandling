@@ -5,6 +5,7 @@ import no.nav.etterlatte.rapidsandrivers.EventNames.FEILA
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
+import no.nav.helse.rapids_rivers.River
 import rapidsandrivers.SAK_ID_KEY
 import rapidsandrivers.migrering.RiverMedLogging
 import rapidsandrivers.sakId
@@ -14,12 +15,11 @@ internal class ReguleringFeilet(
     private val behandlingService: BehandlingService
 ) : RiverMedLogging(rapidsConnection) {
 
-    init {
-        initialiser {
-            eventName(FEILA)
-            validate { it.requireKey(SAK_ID_KEY) }
-            validate { it.requireValue("aarsak", "REGULERING") }
-        }
+    override fun River.eventName() = eventName(FEILA)
+
+    override fun River.validation() {
+        validate { it.requireKey(SAK_ID_KEY) }
+        validate { it.requireValue("aarsak", "REGULERING") }
     }
 
     override fun haandterPakke(packet: JsonMessage, context: MessageContext) {

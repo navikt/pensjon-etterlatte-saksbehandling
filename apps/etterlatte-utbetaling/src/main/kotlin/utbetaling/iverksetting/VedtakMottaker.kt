@@ -21,6 +21,7 @@ import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetalingsvedtak
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
+import no.nav.helse.rapids_rivers.River
 import rapidsandrivers.migrering.RiverMedLogging
 import java.util.*
 
@@ -31,16 +32,15 @@ class VedtakMottaker(
     private val utbetalingService: UtbetalingService
 ) : RiverMedLogging(rapidsConnection) {
 
-    init {
-        initialiser {
-            eventName(KafkaHendelseType.ATTESTERT.toString())
-            validate { it.requireKey("vedtak") }
-            validate {
-                it.requireAny(
-                    "vedtak.type",
-                    listOf(VedtakType.INNVILGELSE.name, VedtakType.OPPHOER.name, VedtakType.ENDRING.name)
-                )
-            }
+    override fun River.eventName() = eventName(KafkaHendelseType.ATTESTERT.toString())
+
+    override fun River.validation() {
+        validate { it.requireKey("vedtak") }
+        validate {
+            it.requireAny(
+                "vedtak.type",
+                listOf(VedtakType.INNVILGELSE.name, VedtakType.OPPHOER.name, VedtakType.ENDRING.name)
+            )
         }
     }
 

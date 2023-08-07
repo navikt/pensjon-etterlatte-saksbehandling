@@ -9,6 +9,7 @@ import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser.VEDTAK
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
+import no.nav.helse.rapids_rivers.River
 import rapidsandrivers.BEHANDLING_ID_KEY
 import rapidsandrivers.SAK_ID_KEY
 import rapidsandrivers.behandlingId
@@ -22,12 +23,11 @@ internal class MigreringHendelser(
     private val vedtak: VedtakService
 ) : RiverMedLogging(rapidsConnection) {
 
-    init {
-        initialiser {
-            eventName(VEDTAK)
-            validate { it.requireKey(BEHANDLING_ID_KEY) }
-            validate { it.requireKey(SAK_ID_KEY) }
-        }
+    override fun River.eventName() = eventName(VEDTAK)
+
+    override fun River.validation() {
+        validate { it.requireKey(BEHANDLING_ID_KEY) }
+        validate { it.requireKey(SAK_ID_KEY) }
     }
 
     override fun haandterPakke(packet: JsonMessage, context: MessageContext) {

@@ -8,6 +8,7 @@ import no.nav.etterlatte.rapidsandrivers.EventNames.OPPRETT_VEDTAK
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
+import no.nav.helse.rapids_rivers.River
 import rapidsandrivers.BEHANDLING_ID_KEY
 import rapidsandrivers.DATO_KEY
 import rapidsandrivers.SAK_ID_KEY
@@ -22,13 +23,12 @@ internal class OpprettVedtakforespoersel(
     private val vedtak: VedtakService
 ) : RiverMedLogging(rapidsConnection) {
 
-    init {
-        initialiser {
-            eventName(OPPRETT_VEDTAK)
-            validate { it.requireKey(SAK_ID_KEY) }
-            validate { it.requireKey(DATO_KEY) }
-            validate { it.requireKey(BEHANDLING_ID_KEY) }
-        }
+    override fun River.eventName() = eventName(OPPRETT_VEDTAK)
+
+    override fun River.validation() {
+        validate { it.requireKey(SAK_ID_KEY) }
+        validate { it.requireKey(DATO_KEY) }
+        validate { it.requireKey(BEHANDLING_ID_KEY) }
     }
 
     override fun haandterPakke(packet: JsonMessage, context: MessageContext) {

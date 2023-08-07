@@ -17,6 +17,7 @@ import no.nav.etterlatte.libs.common.vedtak.KafkaHendelseType
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
+import no.nav.helse.rapids_rivers.River
 import rapidsandrivers.migrering.RiverMedLogging
 import java.util.*
 
@@ -24,23 +25,21 @@ internal class JournalfoerVedtaksbrev(
     private val rapidsConnection: RapidsConnection,
     private val service: VedtaksbrevService
 ) : RiverMedLogging(rapidsConnection) {
+    override fun River.eventName() = eventName(KafkaHendelseType.ATTESTERT.toString())
 
-    init {
-        initialiser {
-            eventName(KafkaHendelseType.ATTESTERT.toString())
-            validate { it.requireKey("vedtak") }
-            validate { it.requireKey("vedtak.vedtakId") }
-            validate { it.requireKey("vedtak.behandling.id") }
-            validate { it.requireKey("vedtak.sak") }
-            validate { it.requireKey("vedtak.sak.id") }
-            validate { it.requireKey("vedtak.sak.ident") }
-            validate { it.requireKey("vedtak.sak.sakType") }
-            validate { it.requireKey("vedtak.vedtakFattet.ansvarligEnhet") }
-            validate {
-                it.rejectValues("vedtak.behandling.type", listOf(BehandlingType.MANUELT_OPPHOER.name))
-            }
-            validate { it.rejectValue(SKAL_SENDE_BREV, false) }
+    override fun River.validation() {
+        validate { it.requireKey("vedtak") }
+        validate { it.requireKey("vedtak.vedtakId") }
+        validate { it.requireKey("vedtak.behandling.id") }
+        validate { it.requireKey("vedtak.sak") }
+        validate { it.requireKey("vedtak.sak.id") }
+        validate { it.requireKey("vedtak.sak.ident") }
+        validate { it.requireKey("vedtak.sak.sakType") }
+        validate { it.requireKey("vedtak.vedtakFattet.ansvarligEnhet") }
+        validate {
+            it.rejectValues("vedtak.behandling.type", listOf(BehandlingType.MANUELT_OPPHOER.name))
         }
+        validate { it.rejectValue(SKAL_SENDE_BREV, false) }
     }
 
     override fun haandterPakke(packet: JsonMessage, context: MessageContext) {

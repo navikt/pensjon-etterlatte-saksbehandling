@@ -12,6 +12,7 @@ import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
+import no.nav.helse.rapids_rivers.River
 import rapidsandrivers.migrering.RiverMedLogging
 
 internal class PdlHendelser(
@@ -19,12 +20,11 @@ internal class PdlHendelser(
     private val behandlinger: BehandlingService
 ) : RiverMedLogging(rapidsConnection) {
 
-    init {
-        initialiser {
-            eventName("PDL:PERSONHENDELSE")
-            validate { it.requireKey("hendelse") }
-            validate { it.requireKey("hendelse_data") }
-        }
+    override fun River.eventName() = eventName("PDL:PERSONHENDELSE")
+
+    override fun River.validation() {
+        validate { it.requireKey("hendelse") }
+        validate { it.requireKey("hendelse_data") }
     }
 
     override fun haandterPakke(packet: JsonMessage, context: MessageContext) {

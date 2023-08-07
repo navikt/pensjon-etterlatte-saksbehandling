@@ -18,6 +18,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
+import no.nav.helse.rapids_rivers.River
 import rapidsandrivers.migrering.RiverMedLogging
 
 internal class InnsendtSoeknadRiver(
@@ -25,19 +26,18 @@ internal class InnsendtSoeknadRiver(
     private val behandlingClient: BehandlingClient
 ) : RiverMedLogging(rapidsConnection) {
 
-    init {
-        initialiser {
-            eventName(SoeknadInnsendt.eventNameInnsendt)
-            validate { it.requireKey(SoeknadInnsendt.skjemaInfoKey) }
-            validate { it.demandValue(SoeknadInnsendt.skjemaInfoTypeKey, SoeknadType.OMSTILLINGSSTOENAD.name) }
-            validate { it.demandValue(SoeknadInnsendt.skjemaInfoVersjonKey, "1") }
-            validate { it.requireKey(SoeknadInnsendt.lagretSoeknadIdKey) }
-            validate { it.requireKey(SoeknadInnsendt.hendelseGyldigTilKey) }
-            validate { it.requireKey(SoeknadInnsendt.adressebeskyttelseKey) }
-            validate { it.requireKey(SoeknadInnsendt.fnrSoekerKey) }
-            validate { it.rejectKey(SoeknadInnsendt.dokarkivReturKey) }
-            validate { it.rejectKey(GyldigSoeknadVurdert.behandlingIdKey) }
-        }
+    override fun River.eventName() = eventName(SoeknadInnsendt.eventNameInnsendt)
+
+    override fun River.validation() {
+        validate { it.requireKey(SoeknadInnsendt.skjemaInfoKey) }
+        validate { it.demandValue(SoeknadInnsendt.skjemaInfoTypeKey, SoeknadType.OMSTILLINGSSTOENAD.name) }
+        validate { it.demandValue(SoeknadInnsendt.skjemaInfoVersjonKey, "1") }
+        validate { it.requireKey(SoeknadInnsendt.lagretSoeknadIdKey) }
+        validate { it.requireKey(SoeknadInnsendt.hendelseGyldigTilKey) }
+        validate { it.requireKey(SoeknadInnsendt.adressebeskyttelseKey) }
+        validate { it.requireKey(SoeknadInnsendt.fnrSoekerKey) }
+        validate { it.rejectKey(SoeknadInnsendt.dokarkivReturKey) }
+        validate { it.rejectKey(GyldigSoeknadVurdert.behandlingIdKey) }
     }
 
     override fun haandterPakke(packet: JsonMessage, context: MessageContext) {

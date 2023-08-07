@@ -15,6 +15,7 @@ import no.nav.etterlatte.statistikk.service.StatistikkService
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
+import no.nav.helse.rapids_rivers.River
 import rapidsandrivers.migrering.RiverMedLogging
 import java.time.LocalDateTime
 import java.util.*
@@ -28,19 +29,18 @@ class BehandlinghendelseRiver(
         "BEHANDLING:OPPRETTET"
     )
 
-    init {
-        initialiser {
-            validate { it.demandAny(EVENT_NAME_KEY, behandlingshendelser) }
-            validate { it.interestedIn(BehandlingRiverKey.behandlingObjectKey) }
-            validate { it.requireKey("behandling.id") }
-            validate { it.requireKey("behandling.sak.id") }
-            validate { it.requireKey("behandling.sak.ident") }
-            validate { it.requireKey("behandling.behandlingOpprettet") }
-            validate { it.requireKey("behandling.sistEndret") }
-            validate { it.requireKey("behandling.status") }
-            validate { it.requireKey("behandling.type") }
-            validate { it.interestedIn(TEKNISK_TID_KEY) }
-        }
+    override fun River.eventName() = validate { it.demandAny(EVENT_NAME_KEY, behandlingshendelser) }
+
+    override fun River.validation() {
+        validate { it.interestedIn(BehandlingRiverKey.behandlingObjectKey) }
+        validate { it.requireKey("behandling.id") }
+        validate { it.requireKey("behandling.sak.id") }
+        validate { it.requireKey("behandling.sak.ident") }
+        validate { it.requireKey("behandling.behandlingOpprettet") }
+        validate { it.requireKey("behandling.sistEndret") }
+        validate { it.requireKey("behandling.status") }
+        validate { it.requireKey("behandling.type") }
+        validate { it.interestedIn(TEKNISK_TID_KEY) }
     }
 
     override fun haandterPakke(packet: JsonMessage, context: MessageContext) =

@@ -15,6 +15,7 @@ import no.nav.etterlatte.rapidsandrivers.migrering.ROLLE_KEY
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
+import no.nav.helse.rapids_rivers.River
 import rapidsandrivers.BEHANDLING_ID_KEY
 import rapidsandrivers.HENDELSE_DATA_KEY
 import rapidsandrivers.OPPLYSNING_KEY
@@ -28,15 +29,13 @@ internal class MigrerEnEnkeltSak(
 ) :
     RiverMedLoggingOgFeilhaandtering(rapidsConnection, Migreringshendelser.MIGRER_SAK) {
 
-    init {
-        initialiser {
-            eventName(hendelsestype)
+    override fun River.eventName() = eventName(hendelsestype)
 
-            validate { it.rejectKey(BEHANDLING_ID_KEY) }
-            validate { it.requireKey(HENDELSE_DATA_KEY) }
-            validate { it.requireKey(FNR_KEY) }
-            validate { it.rejectKey(OPPLYSNING_KEY) }
-        }
+    override fun River.validation() {
+        validate { it.rejectKey(BEHANDLING_ID_KEY) }
+        validate { it.requireKey(HENDELSE_DATA_KEY) }
+        validate { it.requireKey(FNR_KEY) }
+        validate { it.rejectKey(OPPLYSNING_KEY) }
     }
 
     override fun haandterPakke(packet: JsonMessage, context: MessageContext) {

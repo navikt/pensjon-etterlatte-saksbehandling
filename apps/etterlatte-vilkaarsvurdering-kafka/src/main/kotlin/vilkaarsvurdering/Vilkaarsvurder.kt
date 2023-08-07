@@ -7,6 +7,7 @@ import no.nav.etterlatte.vilkaarsvurdering.services.VilkaarsvurderingService
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
+import no.nav.helse.rapids_rivers.River
 import no.nav.helse.rapids_rivers.toUUID
 import rapidsandrivers.BEHANDLING_ID_KEY
 import rapidsandrivers.BEHANDLING_VI_OMREGNER_FRA_KEY
@@ -20,13 +21,12 @@ internal class Vilkaarsvurder(
 ) :
     RiverMedLoggingOgFeilhaandtering(rapidsConnection, VILKAARSVURDER) {
 
-    init {
-        initialiser {
-            eventName(hendelsestype)
-            validate { it.requireKey(SAK_ID_KEY) }
-            validate { it.requireKey(BEHANDLING_ID_KEY) }
-            validate { it.requireKey(BEHANDLING_VI_OMREGNER_FRA_KEY) }
-        }
+    override fun River.eventName() = eventName(hendelsestype)
+
+    override fun River.validation() {
+        validate { it.requireKey(SAK_ID_KEY) }
+        validate { it.requireKey(BEHANDLING_ID_KEY) }
+        validate { it.requireKey(BEHANDLING_VI_OMREGNER_FRA_KEY) }
     }
 
     override fun haandterPakke(packet: JsonMessage, context: MessageContext) {

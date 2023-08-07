@@ -16,6 +16,7 @@ import no.nav.etterlatte.trygdetid.TrygdetidType
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
+import no.nav.helse.rapids_rivers.River
 import rapidsandrivers.BEHANDLING_ID_KEY
 import rapidsandrivers.HENDELSE_DATA_KEY
 import rapidsandrivers.behandlingId
@@ -25,13 +26,12 @@ import rapidsandrivers.withFeilhaandtering
 internal class MigreringHendelser(rapidsConnection: RapidsConnection, private val trygdetidService: TrygdetidService) :
     RiverMedLogging(rapidsConnection) {
 
-    init {
-        initialiser {
-            eventName(Migreringshendelser.TRYGDETID)
-            validate { it.requireKey(BEHANDLING_ID_KEY) }
-            validate { it.requireKey(VILKAARSVURDERT_KEY) }
-            validate { it.requireKey(HENDELSE_DATA_KEY) }
-        }
+    override fun River.eventName() = eventName(Migreringshendelser.TRYGDETID)
+
+    override fun River.validation() {
+        validate { it.requireKey(BEHANDLING_ID_KEY) }
+        validate { it.requireKey(VILKAARSVURDERT_KEY) }
+        validate { it.requireKey(HENDELSE_DATA_KEY) }
     }
 
     override fun haandterPakke(packet: JsonMessage, context: MessageContext) {

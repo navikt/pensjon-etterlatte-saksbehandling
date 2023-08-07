@@ -13,6 +13,7 @@ import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
+import no.nav.helse.rapids_rivers.River
 import rapidsandrivers.migrering.RiverMedLogging
 
 internal class FordeltSoeknadRiver(
@@ -21,13 +22,12 @@ internal class FordeltSoeknadRiver(
     private val behandlingClient: BehandlingClient
 ) : RiverMedLogging(rapidsConnection) {
 
-    init {
-        initialiser {
-            eventName(SoeknadInnsendt.eventNameBehandlingBehov)
-            validate { it.requireKey(FordelerFordelt.skjemaInfoKey) }
-            validate { it.demandValue(SoeknadInnsendt.skjemaInfoTypeKey, SoeknadType.BARNEPENSJON.name) }
-            validate { it.rejectKey(GyldigSoeknadVurdert.behandlingIdKey) }
-        }
+    override fun River.eventName() = eventName(SoeknadInnsendt.eventNameBehandlingBehov)
+
+    override fun River.validation() {
+        validate { it.requireKey(FordelerFordelt.skjemaInfoKey) }
+        validate { it.demandValue(SoeknadInnsendt.skjemaInfoTypeKey, SoeknadType.BARNEPENSJON.name) }
+        validate { it.rejectKey(GyldigSoeknadVurdert.behandlingIdKey) }
     }
 
     override fun haandterPakke(packet: JsonMessage, context: MessageContext) {

@@ -15,6 +15,7 @@ import no.nav.etterlatte.rapidsandrivers.migrering.VILKAARSVURDERT_KEY
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
+import no.nav.helse.rapids_rivers.River
 import rapidsandrivers.FNR_KEY
 import rapidsandrivers.GRUNNLAG_OPPDATERT
 import rapidsandrivers.OPPLYSNING_KEY
@@ -26,17 +27,18 @@ class GrunnlagHendelser(
     private val grunnlagService: GrunnlagService
 ) : RiverMedLogging(rapidsConnection) {
 
-    init {
-        initialiser {
-            validate { it.interestedIn(EVENT_NAME_KEY) }
-            validate { it.interestedIn(BEHOV_NAME_KEY) }
-            validate { it.interestedIn(FNR_KEY) }
-            validate { it.requireKey(OPPLYSNING_KEY) }
-            validate { it.requireKey(SAK_ID_KEY) }
-            validate { it.rejectValue(EVENT_NAME_KEY, GRUNNLAG_OPPDATERT) }
-            validate { it.rejectValue(EVENT_NAME_KEY, FEILA) }
-            validate { it.rejectValue(VILKAARSVURDERT_KEY, true) }
-        }
+    override fun River.eventName() {
+        validate { it.interestedIn(EVENT_NAME_KEY) }
+    }
+
+    override fun River.validation() {
+        validate { it.interestedIn(BEHOV_NAME_KEY) }
+        validate { it.interestedIn(FNR_KEY) }
+        validate { it.requireKey(OPPLYSNING_KEY) }
+        validate { it.requireKey(SAK_ID_KEY) }
+        validate { it.rejectValue(EVENT_NAME_KEY, GRUNNLAG_OPPDATERT) }
+        validate { it.rejectValue(EVENT_NAME_KEY, FEILA) }
+        validate { it.rejectValue(VILKAARSVURDERT_KEY, true) }
     }
 
     override fun haandterPakke(packet: JsonMessage, context: MessageContext) {

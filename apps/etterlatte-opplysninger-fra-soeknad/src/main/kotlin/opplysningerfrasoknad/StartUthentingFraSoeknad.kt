@@ -9,6 +9,7 @@ import no.nav.etterlatte.opplysningerfrasoknad.opplysningsuthenter.Opplysningsut
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
+import no.nav.helse.rapids_rivers.River
 import rapidsandrivers.migrering.RiverMedLogging
 
 internal class StartUthentingFraSoeknad(
@@ -17,19 +18,20 @@ internal class StartUthentingFraSoeknad(
 ) : RiverMedLogging(rapidsConnection) {
     private val rapid = rapidsConnection
 
-    init {
-        initialiser {
-            validate {
-                it.demandAny(
-                    EVENT_NAME_KEY,
-                    listOf(SoeknadInnsendt.eventNameInnsendt, SoeknadInnsendt.eventNameBehandlingBehov)
-                )
-            }
-            validate { it.requireKey(GyldigSoeknadVurdert.skjemaInfoKey) }
-            validate { it.requireKey(GyldigSoeknadVurdert.sakIdKey) }
-            validate { it.requireKey(GyldigSoeknadVurdert.behandlingIdKey) }
-            validate { it.requireKey(GyldigSoeknadVurdert.skjemaInfoTypeKey) }
+    override fun River.eventName() {
+        validate {
+            it.demandAny(
+                EVENT_NAME_KEY,
+                listOf(SoeknadInnsendt.eventNameInnsendt, SoeknadInnsendt.eventNameBehandlingBehov)
+            )
         }
+    }
+
+    override fun River.validation() {
+        validate { it.requireKey(GyldigSoeknadVurdert.skjemaInfoKey) }
+        validate { it.requireKey(GyldigSoeknadVurdert.sakIdKey) }
+        validate { it.requireKey(GyldigSoeknadVurdert.behandlingIdKey) }
+        validate { it.requireKey(GyldigSoeknadVurdert.skjemaInfoTypeKey) }
     }
 
     override fun haandterPakke(packet: JsonMessage, context: MessageContext) {

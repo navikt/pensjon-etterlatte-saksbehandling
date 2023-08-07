@@ -16,6 +16,7 @@ import no.nav.etterlatte.statistikk.service.SoeknadStatistikkService
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
+import no.nav.helse.rapids_rivers.River
 import rapidsandrivers.migrering.RiverMedLogging
 
 class SoeknadStatistikkRiver(
@@ -23,14 +24,13 @@ class SoeknadStatistikkRiver(
     private val statistikkService: SoeknadStatistikkService
 ) : RiverMedLogging(rapidsConnection) {
 
-    init {
-        initialiser {
-            eventName(EventNames.FORDELER_STATISTIKK)
-            validate { it.requireKey(SOEKNAD_ID_KEY) }
-            validate { it.requireKey(GYLDIG_FOR_BEHANDLING_KEY) }
-            validate { it.requireKey(SAK_TYPE_KEY) }
-            validate { it.interestedIn(FEILENDE_KRITERIER_KEY) }
-        }
+    override fun River.eventName() = eventName(EventNames.FORDELER_STATISTIKK)
+
+    override fun River.validation() {
+        validate { it.requireKey(SOEKNAD_ID_KEY) }
+        validate { it.requireKey(GYLDIG_FOR_BEHANDLING_KEY) }
+        validate { it.requireKey(SAK_TYPE_KEY) }
+        validate { it.interestedIn(FEILENDE_KRITERIER_KEY) }
     }
 
     override fun haandterPakke(packet: JsonMessage, context: MessageContext) =

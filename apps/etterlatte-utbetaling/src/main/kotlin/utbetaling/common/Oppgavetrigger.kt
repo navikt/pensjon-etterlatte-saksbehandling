@@ -10,6 +10,7 @@ import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingService
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
+import no.nav.helse.rapids_rivers.River
 import org.slf4j.LoggerFactory
 import rapidsandrivers.migrering.RiverMedLogging
 
@@ -19,11 +20,10 @@ class Oppgavetrigger(
     private val grensesnittsavstemmingService: GrensesnittsavstemmingService
 ) : RiverMedLogging(rapidsConnection) {
 
-    init {
-        initialiser {
-            eventName("okonomi_vedtak_oppgave")
-            validate { it.interestedIn("oppgave") }
-        }
+    override fun River.eventName() = eventName("okonomi_vedtak_oppgave")
+
+    override fun River.validation() {
+        validate { it.interestedIn("oppgave") }
     }
 
     override fun haandterPakke(packet: JsonMessage, context: MessageContext) {

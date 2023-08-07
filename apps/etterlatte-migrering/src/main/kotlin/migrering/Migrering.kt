@@ -39,6 +39,15 @@ internal class Migrering(rapidsConnection: RapidsConnection, private val pesysRe
         packet.eventName = Migreringshendelser.MIGRER_SAK
         val request = tilMigreringsrequest(sak)
         packet.request = request.toJson()
+        sendSakTilMigrering(packet, request, context, sak)
+    }
+
+    private fun sendSakTilMigrering(
+        packet: JsonMessage,
+        request: MigreringRequest,
+        context: MessageContext,
+        sak: Pesyssak
+    ) {
         packet[FNR_KEY] = request.fnr.value
         packet[BEHOV_NAME_KEY] = Opplysningstype.AVDOED_PDL_V1
         context.publish(packet.toJson())

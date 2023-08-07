@@ -8,6 +8,8 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.application
 import io.ktor.server.routing.get
 import io.ktor.server.routing.route
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.OppgaveStatus
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringsType
@@ -29,20 +31,22 @@ internal fun Route.oppgaveRoutes(service: OppgaveService, gosysOppgaveService: G
     route("/api/oppgaver") {
         get {
             when (brukerTokenInfo) {
-                is Saksbehandler -> {
-                    val oppgaver =
-                        tilOppgaveListeDto(
-                            service.finnOppgaverForBruker(
-                                Kontekst.get().appUserAsSaksbehandler().saksbehandlerMedRoller
-                            )
+                is Saksbehandler -> coroutineScope {
+                    val oppgaver = async {
+                        service.finnOppgaverForBruker(
+                            Kontekst.get().appUserAsSaksbehandler().saksbehandlerMedRoller
                         )
+                    }
 
-                    val gosysOppgaver = gosysOppgaveService.hentOppgaver(brukerTokenInfo)
+                    val gosysOppgaver = async {
+                        gosysOppgaveService.hentOppgaver(brukerTokenInfo)
+                    }
 
                     call.respond(
-                        OppgaveListeDto(oppgaver.oppgaver + gosysOppgaver)
+                        OppgaveListeDto(tilOppgaveListeDto(oppgaver.await()).oppgaver + gosysOppgaver.await())
                     )
                 }
+
                 else -> call.respond(HttpStatusCode.Forbidden)
             }
         }

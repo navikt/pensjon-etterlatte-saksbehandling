@@ -12,6 +12,7 @@ dependencies {
     implementation(project(":libs:saksbehandling-common"))
     implementation(project(":libs:etterlatte-ktor"))
     implementation(project(":libs:etterlatte-database"))
+    implementation(project(":libs:etterlatte-funksjonsbrytere"))
     implementation(project(":libs:ktor2client-onbehalfof"))
 
     implementation(libs.ktor2.servercio)

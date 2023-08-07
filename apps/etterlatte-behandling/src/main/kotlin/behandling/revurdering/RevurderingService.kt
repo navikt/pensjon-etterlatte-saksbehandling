@@ -33,6 +33,7 @@ import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveType
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.oppgaveny.OppgaveServiceNy
+import no.nav.etterlatte.token.Fagsaksystem
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -207,7 +208,7 @@ class RevurderingServiceImpl(
                 revurderingAarsak,
                 virkningstidspunkt?.tilVirkningstidspunkt("Opprettet automatisk"),
                 begrunnelse = begrunnelse ?: "Automatisk revurdering - ${revurderingAarsak.name.lowercase()}",
-                saksbehandlerIdent = "EY"
+                saksbehandlerIdent = Fagsaksystem.EY.navn
             )
         }
     }

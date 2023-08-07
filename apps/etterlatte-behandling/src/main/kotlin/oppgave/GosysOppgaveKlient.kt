@@ -5,14 +5,28 @@ import com.github.michaelbull.result.mapBoth
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktorobo.Resource
 import no.nav.etterlatte.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
+import java.time.LocalDate
 
 data class GosysOppgaver(val antallTreffTotalt: Int, val oppgaver: List<GosysOppgave>)
-data class GosysOppgave(val id: Int, val tildeltEnhetsnr: String, val aktoerId: String, val beskrivelse: String)
+
+data class GosysOppgave(
+    val id: Int,
+    val tema: String,
+    val behandlingstema: String,
+    val oppgavetype: String,
+    val opprettetTidspunkt: Tidspunkt,
+    val tildeltEnhetsnr: String,
+    val aktoerId: String,
+    val beskrivelse: String,
+    val status: String,
+    val fristFerdigstillelse: LocalDate
+)
 
 interface GosysOppgaveKlient {
     suspend fun hentOppgaver(tema: String, enhetsnr: String, brukerTokenInfo: BrukerTokenInfo): GosysOppgaver
@@ -30,10 +44,13 @@ class GosysOppgaveKlientImpl(config: Config, httpClient: HttpClient) : GosysOppg
 
     override suspend fun hentOppgaver(tema: String, enhetsnr: String, brukerTokenInfo: BrukerTokenInfo): GosysOppgaver {
         try {
-            logger.info("Henter oppgaver fra Gosys [tema=$tema, enhetsnr=$enhetsnr, ident=${brukerTokenInfo.ident()}]")
+            logger.info("Henter oppgaver fra Gosys")
 
-            val ident = brukerTokenInfo.ident()
-            val filters = "statuskategori=AAPEN&tema=${tema.uppercase()}&tildeltEnhetsnr=$enhetsnr&tilordnetRessurs=$ident"
+            val filters = "statuskategori=AAPEN"
+                .plus("&tema=EYB")
+                .plus("&tema=EYO")
+                .plus("&tildeltEnhetsnr=$enhetsnr")
+//                .plus("&tilordnetRessurs=${brukerTokenInfo.ident()}")
 
             return downstreamResourceClient
                 .get(

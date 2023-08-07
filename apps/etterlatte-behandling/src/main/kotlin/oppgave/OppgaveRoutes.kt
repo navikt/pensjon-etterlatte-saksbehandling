@@ -23,35 +23,25 @@ import no.nav.etterlatte.token.Saksbehandler
 import org.slf4j.LoggerFactory
 import java.util.*
 
-internal fun Route.oppgaveRoutes(service: OppgaveService, gosysOppgaveKlient: GosysOppgaveKlient) {
+internal fun Route.oppgaveRoutes(service: OppgaveService, gosysOppgaveService: GosysOppgaveService) {
     val logger = application.log
 
     route("/api/oppgaver") {
         get {
             when (brukerTokenInfo) {
-                is Saksbehandler -> call.respond(
-                    tilOppgaveListeDto(
-                        service.finnOppgaverForBruker(Kontekst.get().appUserAsSaksbehandler().saksbehandlerMedRoller)
-                    )
-                )
-                else -> call.respond(HttpStatusCode.Forbidden)
-            }
-        }
-
-        get("/gosys") {
-            when (brukerTokenInfo) {
                 is Saksbehandler -> {
-                    val tema = call.request.queryParameters["tema"] as String
-                    val enhetsnr = call.request.queryParameters["enhetsnr"] as String
+                    val oppgaver =
+                        tilOppgaveListeDto(
+                            service.finnOppgaverForBruker(
+                                Kontekst.get().appUserAsSaksbehandler().saksbehandlerMedRoller
+                            )
+                        )
 
-                    runCatching {
-                        gosysOppgaveKlient.hentOppgaver(tema, enhetsnr, brukerTokenInfo)
-                    }.onFailure {
-                        call.respond(HttpStatusCode.InternalServerError)
-                    }.onSuccess {
-                        call.respond(HttpStatusCode.OK, it)
-                    }
+                    val gosysOppgaver = gosysOppgaveService.hentOppgaver(brukerTokenInfo)
 
+                    call.respond(
+                        OppgaveListeDto(oppgaver.oppgaver + gosysOppgaver)
+                    )
                 }
                 else -> call.respond(HttpStatusCode.Forbidden)
             }
@@ -116,6 +106,23 @@ data class OppgaveDTO(
                     enhet = oppgave.sak.enhet
                 )
             }
+        }
+
+        fun fraGosysOppgave(oppgave: GosysOppgave, fnrByAktoerId: Map<String, String?>): OppgaveDTO {
+            return OppgaveDTO(
+                behandlingId = null,
+                sakId = 0, // oppgave.sak.id,
+                status = null,
+                oppgaveStatus = OppgaveStatus.NY,
+                soeknadType = "BARNEPENSJON",
+                oppgaveType = OppgaveType.GOSYS,
+                regdato = oppgave.opprettetTidspunkt.toLocalDatetimeUTC().toString(),
+                fristdato = oppgave.fristFerdigstillelse.atStartOfDay().toString(),
+                fnr = fnrByAktoerId[oppgave.aktoerId]!!,
+                handling = Handling.VIS_OPPGAVE,
+                merknad = null,
+                enhet = oppgave.tildeltEnhetsnr
+            )
         }
     }
 }

@@ -134,6 +134,10 @@ abstract class BehandlingIntegrationTest {
                     val headers = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
                     val json = GeografiskTilknytning(kommune = "0301").toJson()
                     respond(json, headers = headers)
+                } else if (request.url.fullPath.contains("folkeregisteridenter")) {
+                    val headers = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
+                    val json = emptyMap<String, String>().toJson()
+                    respond(json, headers = headers)
                 } else if (request.url.fullPath.startsWith("/")) {
                     val headers = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
                     val json = javaClass.getResource("")!!.readText() // TODO: endre name

@@ -89,9 +89,20 @@ updates:
     groups:
       lint:
         patterns:
-          - "eslint"
+          - "@typescript-eslint/*"
           - "prettier"
-          - "lint-staged"
+          - "eslint"
+          - "eslint*"
+      test:
+        patterns:
+          - "@types/chai"
+          - "@types/mocha"
+          - "chai"
+          - "mocha"
+      nodefetch:
+        patterns:
+          - "node-fetch"
+          - "@types/node-fetch"
 
 
   # ==============

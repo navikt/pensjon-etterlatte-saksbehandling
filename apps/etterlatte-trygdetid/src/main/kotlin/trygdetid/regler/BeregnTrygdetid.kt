@@ -67,6 +67,12 @@ val dagerPrMaanedTrygdetid = definerKonstant<TotalTrygdetidGrunnlag, Int>(
     verdi = 30
 )
 
+val totalTrygdetidYrkesskade = RegelMeta(
+    gjelderFra = TRYGDETID_DATO,
+    beskrivelse = "Yrkesskade fører altid til 40 år",
+    regelReferanse = RegelReferanse(id = "REGEL-YRKESSKADE-TRYGDETID")
+) benytter maksTrygdetid med { it }
+
 val totalTrygdetidFraPerioder = RegelMeta(
     gjelderFra = TRYGDETID_DATO,
     beskrivelse = "Beregner trygdetid fra perioder",

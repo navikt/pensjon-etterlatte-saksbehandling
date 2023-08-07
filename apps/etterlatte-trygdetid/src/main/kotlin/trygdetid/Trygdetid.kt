@@ -42,6 +42,9 @@ data class Trygdetid(
     fun nullstillBeregnetTrygdetid(): Trygdetid {
         return this.copy(beregnetTrygdetid = null)
     }
+
+    // Må skrives om når vi gjør om til å støtte utenlands og poeng i inn/ut år (relatert til prorata)
+    fun isYrkesskade() = this.beregnetTrygdetid?.regelResultat?.toString()?.contains("yrkesskade", ignoreCase = true)
 }
 
 data class BeregnetTrygdetid(

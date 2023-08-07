@@ -13,6 +13,7 @@ import no.nav.etterlatte.trygdetid.avtale.AvtaleService
 import no.nav.etterlatte.trygdetid.klienter.BehandlingKlient
 import no.nav.etterlatte.trygdetid.klienter.GrunnlagKlient
 import no.nav.etterlatte.trygdetid.klienter.KodeverkKlient
+import no.nav.etterlatte.trygdetid.klienter.VilkaarsvuderingKlient
 
 class ApplicationContext {
     val config: Config = ConfigFactory.load()
@@ -23,6 +24,7 @@ class ApplicationContext {
         password = properties.dbPassword
     )
     private val grunnlagKlient = GrunnlagKlient(config, httpClient())
+    private val vilkaarsvurderingKlient = VilkaarsvuderingKlient(config, httpClient())
     val behandlingKlient = BehandlingKlient(config, httpClient())
     val kodeverkService = KodeverkService(KodeverkKlient(config, httpClient()))
     val trygdetidService =
@@ -30,8 +32,9 @@ class ApplicationContext {
             TrygdetidRepository(dataSource),
             behandlingKlient = behandlingKlient,
             grunnlagKlient = grunnlagKlient,
+            vilkaarsvurderingKlient = vilkaarsvurderingKlient,
             beregnTrygdetidService = TrygdetidBeregningService
         )
-    val avtaleRepository = AvtaleRepository(dataSource)
+    private val avtaleRepository = AvtaleRepository(dataSource)
     val avtaleService = AvtaleService(avtaleRepository)
 }

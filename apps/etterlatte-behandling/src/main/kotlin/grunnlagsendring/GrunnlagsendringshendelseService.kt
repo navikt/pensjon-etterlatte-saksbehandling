@@ -295,13 +295,6 @@ class GrunnlagsendringshendelseService(
                             hendelseGjelderRolle = rolleOgSak.rolle,
                             gjelderPerson = fnr
                         )
-                        oppgaveService.opprettNyOppgaveMedSakOgReferanse(
-                            referanse = hendelseId.toString(),
-                            sakId = rolleOgSak.sakId,
-                            oppgaveKilde = OppgaveKilde.HENDELSE,
-                            oppgaveType = OppgaveType.VURDER_KONSEKVENS,
-                            merknad = hendelse.beskrivelse()
-                        )
                         grunnlagsendringshendelseDao.opprettGrunnlagsendringshendelse(hendelse)
                     }
             }
@@ -310,8 +303,7 @@ class GrunnlagsendringshendelseService(
 
     private fun opprettHendelseAvTypeForSak(
         sakId: Long,
-        grunnlagendringType: GrunnlagsendringsType,
-        grunnlagsEndringsStatus: GrunnlagsendringStatus = GrunnlagsendringStatus.VENTER_PAA_JOBB
+        grunnlagendringType: GrunnlagsendringsType
     ): List<Grunnlagsendringshendelse> {
         return inTransaction {
             if (hendelseEksistererFraFoer(sakId, null, grunnlagendringType)) {
@@ -325,18 +317,11 @@ class GrunnlagsendringshendelseService(
                 val hendelse = Grunnlagsendringshendelse(
                     id = hendelseId,
                     sakId = sakId,
-                    status = grunnlagsEndringsStatus,
+                    status = GrunnlagsendringStatus.VENTER_PAA_JOBB,
                     type = grunnlagendringType,
                     opprettet = Tidspunkt.now().toLocalDatetimeUTC(),
                     hendelseGjelderRolle = Saksrolle.SOEKER,
                     gjelderPerson = sakService.finnSak(sakId)?.ident!!
-                )
-                oppgaveService.opprettNyOppgaveMedSakOgReferanse(
-                    referanse = hendelseId.toString(),
-                    sakId = sakId,
-                    oppgaveKilde = OppgaveKilde.HENDELSE,
-                    oppgaveType = OppgaveType.VURDER_KONSEKVENS,
-                    merknad = hendelse.beskrivelse()
                 )
                 listOf(
                     grunnlagsendringshendelseDao.opprettGrunnlagsendringshendelse(hendelse)
@@ -401,7 +386,15 @@ class GrunnlagsendringshendelseService(
                 etterStatus = GrunnlagsendringStatus.SJEKKET_AV_JOBB,
                 samsvarMellomKildeOgGrunnlag = samsvarMellomKildeOgGrunnlag
             )
-            // Det er her vi må opprette en oppgave, ikke der vi gjorde det før
+            oppgaveService.opprettNyOppgaveMedSakOgReferanse(
+                referanse = hendelse.id.toString(),
+                sakId = hendelse.sakId,
+                oppgaveKilde = OppgaveKilde.HENDELSE,
+                oppgaveType = OppgaveType.VURDER_KONSEKVENS,
+                merknad = hendelse.beskrivelse()
+            ).also {
+                logger.info("Oppgave for hendelsen med id=${hendelse.id} er opprettet med id=${it.id}")
+            }
         }
     }
 

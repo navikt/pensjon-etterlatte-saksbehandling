@@ -528,7 +528,7 @@ internal class GrunnlagsendringshendelseServiceTest {
     }
 
     @Test
-    fun `skal sette status til SJEKKET_AV_JOBB, for hendelser som er sjekket av jobb`() {
+    fun `skal sette status til SJEKKET_AV_JOBB og opprette oppgave, for hendelser som er sjekket av jobb`() {
         val minutter = 60L
         val avdoedFnr = "16017919184"
         val sakId = 1L
@@ -585,6 +585,15 @@ internal class GrunnlagsendringshendelseServiceTest {
         grunnlagsendringshendelseService.sjekkKlareGrunnlagsendringshendelser(minutter)
 
         assertEquals(grlg_id, idArg.captured)
+        verify(exactly = grunnlagsendringshendelser.size) {
+            oppgaveService.opprettNyOppgaveMedSakOgReferanse(
+                any(),
+                any(),
+                OppgaveKilde.HENDELSE,
+                OppgaveType.VURDER_KONSEKVENS,
+                any()
+            )
+        }
     }
 
     @Test

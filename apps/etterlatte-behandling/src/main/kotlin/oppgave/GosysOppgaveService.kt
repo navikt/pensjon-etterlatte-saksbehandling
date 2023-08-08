@@ -14,8 +14,7 @@ import java.time.LocalTime
 import java.util.*
 
 interface GosysOppgaveService {
-    suspend fun hentOppgaver(brukerTokenInfo: BrukerTokenInfo): List<OppgaveDTO>
-    suspend fun hentOppgaverNy(brukerTokenInfo: BrukerTokenInfo): List<OppgaveNy>
+    suspend fun hentOppgaver(brukerTokenInfo: BrukerTokenInfo): List<OppgaveNy>
 }
 
 class GosysOppgaveServiceImpl(
@@ -24,18 +23,7 @@ class GosysOppgaveServiceImpl(
     private val featureToggleService: FeatureToggleService
 ) :
     GosysOppgaveService {
-    override suspend fun hentOppgaver(brukerTokenInfo: BrukerTokenInfo): List<OppgaveDTO> {
-        return hentOppgaverInternal(brukerTokenInfo, GosysOppgaveServiceImpl::fraGosysOppgaverTilDto)
-    }
-
-    override suspend fun hentOppgaverNy(brukerTokenInfo: BrukerTokenInfo): List<OppgaveNy> {
-        return hentOppgaverInternal(brukerTokenInfo, GosysOppgaveServiceImpl::fraGosysOppgaverTilNy)
-    }
-
-    private suspend fun <T> hentOppgaverInternal(
-        brukerTokenInfo: BrukerTokenInfo,
-        mapper: (List<GosysOppgave>, Map<String, String?>) -> List<T>
-    ): List<T> {
+    override suspend fun hentOppgaver(brukerTokenInfo: BrukerTokenInfo): List<OppgaveNy> {
         if (!featureToggleService.isEnabled(GosysOppgaveServiceFeatureToggle.HentGosysOppgaver, false)) {
             return emptyList()
         }
@@ -51,7 +39,7 @@ class GosysOppgaveServiceImpl(
             pdlKlient.hentFolkeregisterIdenterForAktoerIdBolk(aktoerIds)
         }
 
-        return mapper.invoke(gosysOppgaver.oppgaver, fnrByAktoerId)
+        return gosysOppgaver.oppgaver.map { fraGosysOppgaveTilNy(it, fnrByAktoerId) }
     }
 
     companion object {
@@ -60,20 +48,6 @@ class GosysOppgaveServiceImpl(
             "EYB" to SakType.BARNEPENSJON,
             "EYO" to SakType.OMSTILLINGSSTOENAD
         )
-
-        private fun fraGosysOppgaverTilDto(
-            gosysoppgaver: List<GosysOppgave>,
-            fnrByAktoerId: Map<String, String?>
-        ): List<OppgaveDTO> {
-            return gosysoppgaver.map { OppgaveDTO.fraGosysOppgave(it, fnrByAktoerId) }
-        }
-
-        private fun fraGosysOppgaverTilNy(
-            gosysoppgaver: List<GosysOppgave>,
-            fnrByAktoerId: Map<String, String?>
-        ): List<OppgaveNy> {
-            return gosysoppgaver.map { fraGosysOppgaveTilNy(it, fnrByAktoerId) }
-        }
 
         private fun fraGosysOppgaveTilNy(gosysOppgave: GosysOppgave, fnrByAktoerId: Map<String, String?>): OppgaveNy {
             return gosysOppgave.let {

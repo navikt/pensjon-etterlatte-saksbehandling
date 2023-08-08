@@ -8,8 +8,6 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.application
 import io.ktor.server.routing.get
 import io.ktor.server.routing.route
-import kotlinx.coroutines.async
-import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.OppgaveStatus
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringsType
@@ -25,30 +23,17 @@ import no.nav.etterlatte.token.Saksbehandler
 import org.slf4j.LoggerFactory
 import java.util.*
 
-internal fun Route.oppgaveRoutes(service: OppgaveService, gosysOppgaveService: GosysOppgaveService) {
+internal fun Route.oppgaveRoutes(service: OppgaveService) {
     val logger = application.log
 
     route("/api/oppgaver") {
         get {
             when (brukerTokenInfo) {
-                is Saksbehandler -> coroutineScope {
-                    val oppgaver = async {
-                        service.finnOppgaverForBruker(
-                            Kontekst.get().appUserAsSaksbehandler().saksbehandlerMedRoller
-                        )
-                    }
-
-                    // FIXME fjern? bare bruke i ny oppgaveliste? (modal visning)
-                    val gosysOppgaver = async {
-//                        gosysOppgaveService.hentOppgaver(brukerTokenInfo)
-                        emptyList<OppgaveDTO>()
-                    }
-
-                    call.respond(
-                        OppgaveListeDto(tilOppgaveListeDto(oppgaver.await()).oppgaver + gosysOppgaver.await())
+                is Saksbehandler -> call.respond(
+                    tilOppgaveListeDto(
+                        service.finnOppgaverForBruker(Kontekst.get().appUserAsSaksbehandler().saksbehandlerMedRoller)
                     )
-                }
-
+                )
                 else -> call.respond(HttpStatusCode.Forbidden)
             }
         }
@@ -81,11 +66,6 @@ data class OppgaveDTO(
     val merknad: String?
 ) {
     companion object {
-        private val temaTilSoeknadType = mapOf(
-            "EYB" to "BARNEPENSJON",
-            "EYO" to "OMSTILLINGSSTOENAD"
-        )
-
         fun fraOppgave(oppgave: Oppgave): OppgaveDTO {
             return when (oppgave) {
                 is Oppgave.Grunnlagsendringsoppgave -> OppgaveDTO(
@@ -117,23 +97,6 @@ data class OppgaveDTO(
                     enhet = oppgave.sak.enhet
                 )
             }
-        }
-
-        fun fraGosysOppgave(oppgave: GosysOppgave, fnrByAktoerId: Map<String, String?>): OppgaveDTO {
-            return OppgaveDTO(
-                behandlingId = null,
-                sakId = 0, // oppgave.sak.id,
-                status = null,
-                oppgaveStatus = OppgaveStatus.NY,
-                soeknadType = temaTilSoeknadType.getOrDefault(oppgave.tema, ""),
-                oppgaveType = OppgaveType.GOSYS,
-                regdato = oppgave.opprettetTidspunkt.toLocalDatetimeUTC().toString(),
-                fristdato = oppgave.fristFerdigstillelse.atStartOfDay().toString(),
-                fnr = fnrByAktoerId[oppgave.aktoerId]!!,
-                handling = Handling.VIS_OPPGAVE,
-                merknad = null,
-                enhet = oppgave.tildeltEnhetsnr
-            )
         }
     }
 }

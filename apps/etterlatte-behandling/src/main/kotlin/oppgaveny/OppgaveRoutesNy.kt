@@ -37,7 +37,7 @@ internal fun Route.oppgaveRoutesNy(
                             )
                         }
                         val gosysOppgaver = async {
-                            gosysOppgaveService.hentOppgaverNy(brukerTokenInfo)
+                            gosysOppgaveService.hentOppgaver(brukerTokenInfo)
                         }
 
                         call.respond(

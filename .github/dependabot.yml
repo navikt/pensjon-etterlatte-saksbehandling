@@ -28,6 +28,10 @@ updates:
           - "com.github.tomakehurst:wiremock-jre8"
           - "io.mockk:mockk"
           - "no.nav.security:mock-oauth2-server"
+      metrics:
+        patterns:
+          - "io.micrometer*"
+          - "io.prometheus*"
 
 
   # =============
@@ -40,7 +44,13 @@ updates:
       interval: "monthly"
       day: "sunday"
     open-pull-requests-limit: 10
-
+    groups:
+      eslint:
+        patterns:
+          - "prettier"
+          - "eslint"
+          - "husky"
+          - "lint-staged"
 
   # ===============
   # FRONTEND CLIENT
@@ -75,6 +85,12 @@ updates:
           - "vite-tsconfig-paths"
           - "vitest"
           - "@vitejs/plugin-react-swc"
+      react:
+        patterns:
+          - "react"
+          - "react*"
+          - "redux"
+          - "@types/react*"
 
 
   # ===============
@@ -104,6 +120,19 @@ updates:
         patterns:
           - "node-fetch"
           - "@types/node-fetch"
+      winston:
+        patterns:
+          - "winston*"
+      middleware:
+        patterns:
+          - "express"
+          - "http-proxy-middleware"
+          - "@types/express"
+          - "node-fetch"
+          - "@types/node"
+          - "@types/node-fetch"
+          - "ts-node"
+          - "ts-node-dev"
 
 
   # ==============

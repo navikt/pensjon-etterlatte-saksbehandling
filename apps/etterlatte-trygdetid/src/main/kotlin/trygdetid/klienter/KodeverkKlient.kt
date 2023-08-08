@@ -18,10 +18,18 @@ class KodeverkKlient(config: Config, private val httpKlient: HttpClient) {
     suspend fun hentLandkoder(): KodeverkResponse = try {
         logger.info("Henter alle landkoder fra Kodeverk")
 
-        httpKlient.get("$url/Landkoder/koder/betydninger?ekskluderUgyldige=false&spraak=nb") {
+        val response = httpKlient.get("$url/Landkoder/koder/betydninger?ekskluderUgyldige=false&spraak=nb") {
             accept(ContentType.Application.Json)
             header(NAV_CONSUMER_ID, "etterlatte-trygdetid")
-        }.body()
+        }
+
+        if (response.status.value > 299) {
+            logger.warn(
+                "Henting av landkoder feilet med status ${response.status.value} og body ${response.body<String>()}"
+            )
+        }
+
+        response.body()
     } catch (e: Exception) {
         logger.error("Henting av landkoder feilet", e)
         throw e

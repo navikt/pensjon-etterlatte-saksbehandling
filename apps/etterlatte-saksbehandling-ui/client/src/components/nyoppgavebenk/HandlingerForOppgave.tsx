@@ -26,6 +26,7 @@ export const HandlingerForOppgave = (props: {
             </Button>
           </>
         )
+      case 'UNDERKJENT':
       case 'FOERSTEGANGSBEHANDLING':
         return (
           <>

@@ -63,12 +63,14 @@ class VilkaarsvurderingRepository(private val ds: DataSource, private val delvil
     fun kopierVilkaarsvurdering(nyVilkaarsvurdering: Vilkaarsvurdering, kopiertFraId: UUID): Vilkaarsvurdering {
         ds.transaction { tx ->
             opprettVilkaarsvurdering(nyVilkaarsvurdering, tx)
-            lagreVilkaarsvurderingResultat(
-                nyVilkaarsvurdering.behandlingId,
-                nyVilkaarsvurdering.virkningstidspunkt.atDay(1),
-                nyVilkaarsvurdering.resultat ?: throw IllegalStateException("Fant ikke vilkårsvurderingsresultat"),
-                tx
-            )
+            nyVilkaarsvurdering.resultat?.let {
+                lagreVilkaarsvurderingResultat(
+                    nyVilkaarsvurdering.behandlingId,
+                    nyVilkaarsvurdering.virkningstidspunkt.atDay(1),
+                    nyVilkaarsvurdering.resultat,
+                    tx
+                )
+            }
             opprettVilkaarsvurderingKilde(nyVilkaarsvurdering.id, kopiertFraId, tx)
         }
 
@@ -231,6 +233,7 @@ class VilkaarsvurderingRepository(private val ds: DataSource, private val delvil
             paramMap = mapOf(
                 "id" to vilkaar.id,
                 "vilkaarsvurdering_id" to vilkaarsvurderingId,
+                "kopiert" to vilkaar.kopiert,
                 "resultat_kommentar" to vilkaar.vurdering?.kommentar,
                 "resultat_tidspunkt" to vilkaar.vurdering?.tidspunkt?.toTidspunkt()?.toTimestamp(),
                 "resultat_saksbehandler" to vilkaar.vurdering?.saksbehandler
@@ -281,6 +284,7 @@ class VilkaarsvurderingRepository(private val ds: DataSource, private val delvil
             id = uuid("id"),
             hovedvilkaar = hovedvilkaar,
             unntaksvilkaar = unntaksvilkaar,
+            kopiert = boolean("kopiert"),
             vurdering = stringOrNull("resultat_kommentar")?.let { kommentar ->
                 VilkaarVurderingData(
                     kommentar = kommentar,
@@ -310,8 +314,8 @@ class VilkaarsvurderingRepository(private val ds: DataSource, private val delvil
         """
 
         const val lagreVilkaar = """
-            INSERT INTO vilkaar(id, vilkaarsvurdering_id, resultat_kommentar, resultat_tidspunkt, resultat_saksbehandler) 
-            VALUES(:id, :vilkaarsvurdering_id, :resultat_kommentar, :resultat_tidspunkt, :resultat_saksbehandler) 
+            INSERT INTO vilkaar(id, vilkaarsvurdering_id, kopiert, resultat_kommentar, resultat_tidspunkt, resultat_saksbehandler) 
+            VALUES(:id, :vilkaarsvurdering_id, :kopiert, :resultat_kommentar, :resultat_tidspunkt, :resultat_saksbehandler) 
         """
 
         const val lagreGrunnlag = """
@@ -343,7 +347,7 @@ class VilkaarsvurderingRepository(private val ds: DataSource, private val delvil
         """
 
         const val hentVilkaar = """
-            SELECT id, resultat_kommentar, resultat_tidspunkt, resultat_saksbehandler FROM vilkaar 
+            SELECT id, kopiert, resultat_kommentar, resultat_tidspunkt, resultat_saksbehandler FROM vilkaar 
             WHERE vilkaarsvurdering_id = :vilkaarsvurdering_id
         """
 

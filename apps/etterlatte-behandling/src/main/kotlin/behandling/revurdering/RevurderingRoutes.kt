@@ -16,6 +16,7 @@ import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandlingsId
 import no.nav.etterlatte.libs.common.hentNavidentFraToken
+import no.nav.etterlatte.libs.common.kunSaksbehandler
 import no.nav.etterlatte.libs.common.medBody
 import no.nav.etterlatte.libs.common.sakId
 
@@ -45,22 +46,29 @@ internal fun Route.revurderingRoutes(
 
         route("{$SAKID_CALL_PARAMETER}") {
             post {
-                logger.info("Oppretter ny revurdering på sak $sakId")
-                medBody<OpprettRevurderingRequest> { opprettRevurderingRequest ->
-                    if (!opprettRevurderingRequest.aarsak.kanBrukesIMiljo()) {
-                        return@post call.respond(
-                            HttpStatusCode.BadRequest,
-                            "Feil revurderingsårsak ${opprettRevurderingRequest.aarsak}, foreløpig ikke støttet"
+                kunSaksbehandler { saksbehandler ->
+                    logger.info("Oppretter ny revurdering på sak $sakId")
+                    medBody<OpprettRevurderingRequest> { opprettRevurderingRequest ->
+                        if (!opprettRevurderingRequest.aarsak.kanBrukesIMiljo()) {
+                            return@post call.respond(
+                                HttpStatusCode.BadRequest,
+                                "Feil revurderingsårsak ${opprettRevurderingRequest.aarsak}, foreløpig ikke støttet"
+                            )
+                        }
+
+                        val revurdering = revurderingService.opprettManuellRevurderingWrapper(
+                            sakId,
+                            opprettRevurderingRequest.aarsak,
+                            opprettRevurderingRequest.paaGrunnAvHendelseId,
+                            opprettRevurderingRequest.begrunnelse,
+                            opprettRevurderingRequest.fritekstAarsak,
+                            saksbehandler.ident
                         )
-                    }
 
-                    val revurdering = revurderingService.opprettManuellRevurderingWrapper(
-                        opprettRevurderingRequest
-                    )
-
-                    when (revurdering) {
-                        null -> call.respond(HttpStatusCode.NotFound)
-                        else -> call.respond(revurdering.id)
+                        when (revurdering) {
+                            null -> call.respond(HttpStatusCode.NotFound)
+                            else -> call.respond(revurdering.id)
+                        }
                     }
                 }
             }
@@ -79,7 +87,6 @@ internal fun Route.revurderingRoutes(
 }
 
 data class OpprettRevurderingRequest(
-    val sakId: Long,
     val aarsak: RevurderingAarsak,
     val paaGrunnAvHendelseId: String? = null,
     val begrunnelse: String? = null,

@@ -63,7 +63,7 @@ class OppgaveServiceNy(
         )
 
     fun tildelSaksbehandler(oppgaveId: UUID, saksbehandler: String) {
-        inTransaction {
+        inTransaction(gjenbruk = true) {
             val hentetOppgave = oppgaveDaoNy.hentOppgave(oppgaveId)
                 ?: throw NotFoundException("Oppgaven finnes ikke, id: $oppgaveId")
 

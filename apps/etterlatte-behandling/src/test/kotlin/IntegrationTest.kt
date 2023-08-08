@@ -419,24 +419,6 @@ class IntegrationTest : BehandlingIntegrationTest() {
                 UUID.fromString(it.body())
             }
 
-            val oppgaverTo: List<OppgaveNy> = client.get("/api/nyeoppgaver") {
-                addAuthToken(tokenSaksbehandler)
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-            }.also {
-                assertEquals(HttpStatusCode.OK, it.status)
-            }.body()
-            val oppgaveForNyFoerstegangsbehandling = oppgaverTo.filter {
-                it.referanse == behandlingIdNyFoerstegangsbehandling.toString()
-            }
-
-            client.post("/api/nyeoppgaver/${oppgaveForNyFoerstegangsbehandling[0].id}/tildel-saksbehandler") {
-                addAuthToken(tokenSaksbehandler)
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                setBody(SaksbehandlerEndringDto("Saksbehandler01"))
-            }.also {
-                assertEquals(HttpStatusCode.OK, it.status)
-            }
-
             client.post("/api/behandling/$behandlingIdNyFoerstegangsbehandling/avbryt") {
                 addAuthToken(tokenSaksbehandler)
             }.also {

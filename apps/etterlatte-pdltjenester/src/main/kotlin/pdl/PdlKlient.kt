@@ -111,32 +111,33 @@ class PdlKlient(private val httpClient: HttpClient, private val apiUrl: String) 
 
     suspend fun hentFolkeregisterIdenterForAktoerIdBolk(
         request: HentFolkeregisterIdenterForAktoerIdBolkRequest
-    ): PdlFoedselsnumreFraAktoerIdResponse {
-        // Chunking ved > 100?
-
-        val graphqlBolkRequest = PdlFoedselsnumreFraAktoerIdRequest(
-            query = getQuery("/pdl/hentFolkeregisterIdenterBolk.graphql"),
-            variables = IdenterBolkVariables(
-                identer = request.aktoerIds,
-                grupper = setOf(IdentGruppe.FOLKEREGISTERIDENT)
+    ): List<HentIdenterBolkResult> {
+        return request.aktoerIds.chunked(PDL_BULK_SIZE).map { identerChunk ->
+            val graphqlBolkRequest = PdlFoedselsnumreFraAktoerIdRequest(
+                query = getQuery("/pdl/hentFolkeregisterIdenterBolk.graphql"),
+                variables = IdenterBolkVariables(
+                    identer = identerChunk,
+                    grupper = setOf(IdentGruppe.FOLKEREGISTERIDENT)
+                )
             )
-        )
 
-        logger.info("Henter folkeregisterident for ${request.aktoerIds.size} aktørIds fra PDL")
+            logger.info("Henter folkeregisterident for ${request.aktoerIds.size} aktørIds fra PDL")
 
-        return retry<PdlFoedselsnumreFraAktoerIdResponse> {
-            httpClient.post(apiUrl) {
-                header(HEADER_TEMA, HEADER_TEMA_VALUE)
-                accept(Json)
-                contentType(Json)
-                setBody(graphqlBolkRequest)
-            }.body()
-        }.let {
-            when (it) {
-                is RetryResult.Success -> it.content
-                is RetryResult.Failure -> throw it.samlaExceptions()
+            val response = retry<PdlFoedselsnumreFraAktoerIdResponse> {
+                httpClient.post(apiUrl) {
+                    header(HEADER_TEMA, HEADER_TEMA_VALUE)
+                    accept(Json)
+                    contentType(Json)
+                    setBody(graphqlBolkRequest)
+                }.body()
+            }.let {
+                when (it) {
+                    is RetryResult.Success -> it.content
+                    is RetryResult.Failure -> throw it.samlaExceptions()
+                }
             }
-        }
+            response.data
+        }.flatMap { it.hentIdenterBolk }
     }
 
     suspend fun hentGeografiskTilknytning(request: HentGeografiskTilknytningRequest): PdlGeografiskTilknytningResponse {
@@ -224,6 +225,7 @@ class PdlKlient(private val httpClient: HttpClient, private val apiUrl: String) 
         const val HEADER_BEHANDLINGSNUMMER = "behandlingsnummer"
         const val HEADER_TEMA = "Tema"
         const val HEADER_TEMA_VALUE = "PEN"
+        const val PDL_BULK_SIZE = 100
     }
 }
 

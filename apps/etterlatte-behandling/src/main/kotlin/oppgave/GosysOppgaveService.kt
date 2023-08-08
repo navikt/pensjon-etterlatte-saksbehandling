@@ -40,6 +40,7 @@ class GosysOppgaveServiceImpl(
             return emptyList()
         }
 
+        // tmp for testing FIXME remove hardcoding when Oppgave API supports EYB/EYO
         val gosysOppgaver = gosysOppgaveKlient.hentOppgaver("PEN", "4808", brukerTokenInfo)
 
         // Utveksle unike aktørIds til fnr for mapping

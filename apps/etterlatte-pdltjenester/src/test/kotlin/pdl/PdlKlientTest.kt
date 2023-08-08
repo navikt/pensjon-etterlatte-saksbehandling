@@ -109,10 +109,10 @@ internal class PdlKlientTest {
             val identResponse = pdlKlient.hentFolkeregisterIdenterForAktoerIdBolk(
                 HentFolkeregisterIdenterForAktoerIdBolkRequest(setOf("2082995739063"))
             )
-            assertEquals("2082995739063", identResponse.data.hentIdenterBolk.first().ident)
-            assertEquals("03486048831", identResponse.data.hentIdenterBolk.first().identer.first().ident)
-            assertEquals(false, identResponse.data.hentIdenterBolk.first().identer.first().historisk)
-            assertEquals("FOLKEREGISTERIDENT", identResponse.data.hentIdenterBolk.first().identer.first().gruppe.name)
+            assertEquals("2082995739063", identResponse.first().ident)
+            assertEquals("03486048831", identResponse.first().identer.first().ident)
+            assertEquals(false, identResponse.first().identer.first().historisk)
+            assertEquals("FOLKEREGISTERIDENT", identResponse.first().identer.first().gruppe.name)
         }
     }
 

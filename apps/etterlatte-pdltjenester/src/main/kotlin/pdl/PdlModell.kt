@@ -452,7 +452,7 @@ data class PdlFoedselsnumreFraAktoerIdRequest(
 )
 
 data class IdenterBolkVariables(
-    val identer: Set<String>,
+    val identer: List<String>,
     val grupper: Set<IdentGruppe>
 )
 

@@ -11,7 +11,7 @@ const OppgavebenkContainer = styled.div`
 const erIProd = process.env.NAIS_CLUSTER_NAME === 'prod-gcp'
 
 export const ToggleNyOppgaveliste = () => {
-  const [visNyListe, setVisNyListe] = useState<boolean>(false)
+  const [visNyListe, setVisNyListe] = useState<boolean>(true)
 
   return (
     <OppgavebenkContainer>
@@ -19,7 +19,9 @@ export const ToggleNyOppgaveliste = () => {
         <Oppgavebenken />
       ) : (
         <>
-          <Button onClick={() => setVisNyListe(!visNyListe)}>{visNyListe ? 'Vis gammel liste' : 'Vis ny liste'}</Button>
+          <Button onClick={() => setVisNyListe((vis) => !vis)}>
+            {visNyListe ? 'Vis gammel liste' : 'Vis ny liste'}
+          </Button>
           {visNyListe ? <ToggleMinOppgaveliste /> : <Oppgavebenken />}
         </>
       )}

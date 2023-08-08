@@ -28,7 +28,6 @@ class OmregningService(
                 revurderingAarsak = RevurderingAarsak.REGULERING,
                 virkningstidspunkt = fraDato,
                 kilde = Vedtaksloesning.GJENNY,
-                persongalleri = forrigeBehandling.persongalleri,
                 merknad = null
             )
 

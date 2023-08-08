@@ -96,7 +96,6 @@ class RealManueltOpphoerService(
                     type = BehandlingType.MANUELT_OPPHOER,
                     sakId = forrigeBehandling.sak.id,
                     status = BehandlingStatus.OPPRETTET,
-                    persongalleri = forrigeBehandling.persongalleri,
                     opphoerAarsaker = opphoerRequest.opphoerAarsaker,
                     fritekstAarsak = opphoerRequest.fritekstAarsak,
                     virkningstidspunkt = virkningstidspunkt,

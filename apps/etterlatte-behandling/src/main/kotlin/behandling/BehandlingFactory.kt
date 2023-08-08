@@ -60,7 +60,6 @@ class BehandlingFactory(
             val forrigeBehandling = harIverksattEllerAttestertBehandling.maxBy { it.behandlingOpprettet }
             revurderingService.opprettAutomatiskRevurdering(
                 sakId = sakId,
-                persongalleri = persongalleri,
                 forrigeBehandling = forrigeBehandling,
                 mottattDato = mottattDato,
                 kilde = kilde,
@@ -92,7 +91,6 @@ class BehandlingFactory(
                 sakId = sak.id,
                 status = BehandlingStatus.OPPRETTET,
                 soeknadMottattDato = mottattDato?.let { LocalDateTime.parse(it) },
-                persongalleri = persongalleri,
                 kilde = kilde,
                 merknad = opprettMerknad(sak, persongalleri)
             ).let { opprettBehandling ->

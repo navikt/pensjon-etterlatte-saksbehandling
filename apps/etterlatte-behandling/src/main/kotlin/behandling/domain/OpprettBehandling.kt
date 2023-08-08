@@ -4,7 +4,6 @@ import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerAarsak
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
-import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
@@ -16,7 +15,6 @@ data class OpprettBehandling(
     val type: BehandlingType,
     val sakId: Long,
     val status: BehandlingStatus,
-    val persongalleri: Persongalleri,
     val soeknadMottattDato: LocalDateTime? = null,
     val virkningstidspunkt: Virkningstidspunkt? = null,
     val revurderingsAarsak: RevurderingAarsak? = null,

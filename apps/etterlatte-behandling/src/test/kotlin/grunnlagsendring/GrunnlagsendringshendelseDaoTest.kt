@@ -15,7 +15,6 @@ import no.nav.etterlatte.ikkeSamsvarMellomPdlOgGrunnlagDoed
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
-import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -388,13 +387,6 @@ internal class GrunnlagsendringshendelseDaoTest {
             type = BehandlingType.REVURDERING,
             sakId = sak1,
             status = BehandlingStatus.OPPRETTET,
-            persongalleri = Persongalleri(
-                soeker = "12312312312",
-                innsender = null,
-                soesken = listOf(),
-                avdoed = listOf(),
-                gjenlevende = listOf()
-            ),
             soeknadMottattDato = null,
             virkningstidspunkt = null,
             revurderingsAarsak = RevurderingAarsak.SOESKENJUSTERING,

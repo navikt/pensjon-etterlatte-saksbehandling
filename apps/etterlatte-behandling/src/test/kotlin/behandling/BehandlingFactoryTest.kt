@@ -148,13 +148,6 @@ class BehandlingFactoryTest {
             sistEndret = datoNaa,
             status = BehandlingStatus.OPPRETTET,
             soeknadMottattDato = Tidspunkt.now().toLocalDatetimeUTC(),
-            persongalleri = Persongalleri(
-                "Innsender",
-                "Soeker",
-                listOf("Gjenlevende"),
-                listOf("Avdoed"),
-                emptyList()
-            ),
             gyldighetsproeving = null,
             virkningstidspunkt = Virkningstidspunkt(
                 YearMonth.of(2022, 1),
@@ -196,10 +189,8 @@ class BehandlingFactoryTest {
         )!!
 
         Assertions.assertEquals(opprettetBehandling, resultat)
-        Assertions.assertEquals(opprettetBehandling.persongalleri.avdoed, resultat.persongalleri.avdoed)
         Assertions.assertEquals(opprettetBehandling.sak, resultat.sak)
         Assertions.assertEquals(opprettetBehandling.id, resultat.id)
-        Assertions.assertEquals(opprettetBehandling.persongalleri.soeker, resultat.persongalleri.soeker)
         Assertions.assertEquals(opprettetBehandling.behandlingOpprettet, resultat.behandlingOpprettet)
         Assertions.assertEquals(1, behandlingOpprettes.captured.sakId)
         Assertions.assertEquals(behandlingHentes.captured, behandlingOpprettes.captured.id)
@@ -239,13 +230,6 @@ class BehandlingFactoryTest {
             sistEndret = datoNaa,
             status = BehandlingStatus.OPPRETTET,
             soeknadMottattDato = Tidspunkt.now().toLocalDatetimeUTC(),
-            persongalleri = Persongalleri(
-                "Innsender",
-                "Soeker",
-                listOf("Gjenlevende"),
-                listOf("Avdoed"),
-                emptyList()
-            ),
             gyldighetsproeving = null,
             virkningstidspunkt = Virkningstidspunkt(
                 YearMonth.of(2022, 1),
@@ -322,13 +306,6 @@ class BehandlingFactoryTest {
             sistEndret = datoNaa,
             status = BehandlingStatus.OPPRETTET,
             soeknadMottattDato = Tidspunkt.now().toLocalDatetimeUTC(),
-            persongalleri = Persongalleri(
-                "Innsender",
-                "Soeker",
-                listOf("Gjenlevende"),
-                listOf("Avdoed"),
-                emptyList()
-            ),
             gyldighetsproeving = null,
             virkningstidspunkt = Virkningstidspunkt(
                 YearMonth.of(2022, 1),
@@ -423,13 +400,6 @@ class BehandlingFactoryTest {
             sistEndret = datoNaa,
             status = BehandlingStatus.OPPRETTET,
             soeknadMottattDato = Tidspunkt.now().toLocalDatetimeUTC(),
-            persongalleri = Persongalleri(
-                "Innsender",
-                "Soeker",
-                listOf("Gjenlevende"),
-                listOf("Avdoed"),
-                emptyList()
-            ),
             gyldighetsproeving = null,
             virkningstidspunkt = Virkningstidspunkt(
                 YearMonth.of(2022, 1),
@@ -492,13 +462,6 @@ class BehandlingFactoryTest {
             sistEndret = datoNaa,
             status = BehandlingStatus.IVERKSATT,
             soeknadMottattDato = Tidspunkt.now().toLocalDatetimeUTC(),
-            persongalleri = Persongalleri(
-                "Innsender",
-                "Soeker",
-                listOf("Gjenlevende"),
-                listOf("Avdoed"),
-                emptyList()
-            ),
             gyldighetsproeving = null,
             virkningstidspunkt = Virkningstidspunkt(
                 YearMonth.of(2022, 1),

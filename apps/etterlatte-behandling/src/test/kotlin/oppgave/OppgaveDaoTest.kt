@@ -15,7 +15,6 @@ import no.nav.etterlatte.grunnlagsendring.samsvarDoedsdatoer
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
-import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -122,8 +121,8 @@ internal class OppgaveDaoTest {
     fun `manuelle reguleringer vises i oppgavelisten men ikke automatiske`() {
         val fnr = TRIVIELL_MIDTPUNKT.value
         val sak = sakDao.opprettSak(fnr, SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr)
-        val automatisk = lagRegulering(Prosesstype.AUTOMATISK, fnr, sak.id)
-        val manuel = lagRegulering(Prosesstype.MANUELL, fnr, sak.id)
+        val automatisk = lagRegulering(Prosesstype.AUTOMATISK, sak.id)
+        val manuel = lagRegulering(Prosesstype.MANUELL, sak.id)
 
         behandlingDao.opprettBehandling(automatisk)
         behandlingDao.opprettBehandling(manuel)
@@ -137,7 +136,7 @@ internal class OppgaveDaoTest {
     fun `enhet er tilgjengelig hvis det er tilgjengelig paa sak`() {
         val fnr = TRIVIELL_MIDTPUNKT.value
         val sak = sakDao.opprettSak(fnr, SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
-        behandlingDao.opprettBehandling(lagRegulering(Prosesstype.MANUELL, fnr, sak.id))
+        behandlingDao.opprettBehandling(lagRegulering(Prosesstype.MANUELL, sak.id))
         val alleBehandlingsStatuser = BehandlingStatus.values().asList()
         val oppgaver = oppgaveDao.finnOppgaverMedStatuser(alleBehandlingsStatuser)
         assertEquals(1, oppgaver.size)
@@ -150,11 +149,11 @@ internal class OppgaveDaoTest {
         val fnr = STOR_SNERK.value
 
         val sak = sakDao.opprettSak(fnr, SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr)
-        behandlingDao.opprettBehandling(lagRegulering(Prosesstype.MANUELL, fnr, sak.id))
+        behandlingDao.opprettBehandling(lagRegulering(Prosesstype.MANUELL, sak.id))
         sakTilgangDao.oppdaterAdresseBeskyttelse(sak.id, AdressebeskyttelseGradering.STRENGT_FORTROLIG)
 
         val sakk = sakDao.opprettSak(TRIVIELL_MIDTPUNKT.value, SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr)
-        behandlingDao.opprettBehandling(lagRegulering(Prosesstype.MANUELL, TRIVIELL_MIDTPUNKT.value, sakk.id))
+        behandlingDao.opprettBehandling(lagRegulering(Prosesstype.MANUELL, sakk.id))
 
         val alleBehandlingsStatuser = BehandlingStatus.values().asList()
         val oppgaver = oppgaveDao.finnOppgaverMedStatuser(alleBehandlingsStatuser)
@@ -191,7 +190,6 @@ internal class OppgaveDaoTest {
             type = BehandlingType.FØRSTEGANGSBEHANDLING,
             sakId = sak.id,
             status = BehandlingStatus.OPPRETTET,
-            persongalleri = Persongalleri("soeker", "innsender", listOf("soesken"), listOf("avdoed")),
             kilde = Vedtaksloesning.GJENNY,
             merknad = "1 søsken"
         )
@@ -205,19 +203,12 @@ internal class OppgaveDaoTest {
         assertEquals(opprettBehandling.merknad, oppgave.merknad)
     }
 
-    private fun lagRegulering(prosesstype: Prosesstype, fnr: String, sakId: Long): OpprettBehandling {
+    private fun lagRegulering(prosesstype: Prosesstype, sakId: Long): OpprettBehandling {
         return OpprettBehandling(
             type = BehandlingType.REVURDERING,
             revurderingsAarsak = RevurderingAarsak.REGULERING,
             sakId = sakId,
             status = BehandlingStatus.OPPRETTET,
-            persongalleri = Persongalleri(
-                soeker = fnr,
-                innsender = null,
-                soesken = listOf(),
-                avdoed = listOf(),
-                gjenlevende = listOf()
-            ),
             soeknadMottattDato = null,
             virkningstidspunkt = null,
             opphoerAarsaker = listOf(),

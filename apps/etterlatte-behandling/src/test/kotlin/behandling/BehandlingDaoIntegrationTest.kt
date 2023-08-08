@@ -12,7 +12,6 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
 import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
-import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -31,7 +30,6 @@ import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.POSTGRES_VERSION
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.opprettBehandling
-import no.nav.etterlatte.persongalleri
 import no.nav.etterlatte.sak.SakDao
 import no.nav.etterlatte.saksbehandlerToken
 import org.junit.jupiter.api.AfterAll
@@ -95,44 +93,12 @@ internal class BehandlingDaoIntegrationTest {
     }
 
     @Test
-    fun `skal opprette foerstegangsbehandling med persongalleri`() {
-        val sak1 = sakRepo.opprettSak("123", SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr).id
-
-        val persongalleri = persongalleri()
-
-        val opprettBehandlingMedPersongalleri = opprettBehandling(
-            type = BehandlingType.FØRSTEGANGSBEHANDLING,
-            sakId = sak1,
-            persongalleri = persongalleri
-        )
-
-        behandlingRepo.opprettBehandling(opprettBehandlingMedPersongalleri)
-        val opprettetBehandling = requireNotNull(
-            behandlingRepo.hentBehandling(opprettBehandlingMedPersongalleri.id)
-        ) as Foerstegangsbehandling
-        assertEquals(opprettBehandlingMedPersongalleri.id, opprettetBehandling.id)
-        assertEquals(
-            persongalleri.avdoed,
-            opprettetBehandling.persongalleri.avdoed
-        )
-        assertEquals(
-            persongalleri.soesken,
-            opprettetBehandling.persongalleri.soesken
-        )
-        assertEquals(
-            opprettBehandlingMedPersongalleri.opprettet,
-            opprettetBehandling.behandlingOpprettet.toTidspunkt()
-        )
-    }
-
-    @Test
     fun `skal opprette revurdering`() {
         val sak1 = sakRepo.opprettSak("123", SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr).id
 
         val opprettBehandling = opprettBehandling(
             type = BehandlingType.REVURDERING,
             sakId = sak1,
-            persongalleri = persongalleri(),
             revurderingAarsak = RevurderingAarsak.REGULERING,
             prosesstype = Prosesstype.MANUELL
         )
@@ -141,8 +107,6 @@ internal class BehandlingDaoIntegrationTest {
         val opprettetBehandling = requireNotNull(behandlingRepo.hentBehandling(opprettBehandling.id)) as Revurdering
 
         assertEquals(opprettBehandling.id, opprettetBehandling.id)
-        assertEquals(opprettBehandling.persongalleri.avdoed, opprettetBehandling.persongalleri.avdoed)
-        assertEquals(opprettBehandling.persongalleri.soesken, opprettetBehandling.persongalleri.soesken)
         assertEquals(opprettBehandling.opprettet, opprettetBehandling.behandlingOpprettet.toTidspunkt())
     }
 
@@ -154,7 +118,6 @@ internal class BehandlingDaoIntegrationTest {
         val opprettBehandling = opprettBehandling(
             type = BehandlingType.MANUELT_OPPHOER,
             sakId = sakId,
-            persongalleri = persongalleri(),
             virkningstidspunkt = Virkningstidspunkt(
                 virkDato,
                 Grunnlagsopplysning.Saksbehandler.create(
@@ -173,7 +136,6 @@ internal class BehandlingDaoIntegrationTest {
         val opprettetBehandling = requireNotNull(behandlingRepo.hentBehandling(opprettBehandling.id)) as ManueltOpphoer
 
         assertEquals(sakId, opprettetBehandling.sak.id)
-        assertEquals(persongalleri(), opprettetBehandling.persongalleri)
         assertTrue(ManueltOpphoerAarsak.SOESKEN_DOED in opprettetBehandling.opphoerAarsaker)
         assertTrue(ManueltOpphoerAarsak.GJENLEVENDE_FORELDER_DOED in opprettetBehandling.opphoerAarsaker)
         assertEquals(virkDato, opprettetBehandling.virkningstidspunkt?.dato)
@@ -526,14 +488,7 @@ internal class BehandlingDaoIntegrationTest {
         val sak = sakRepo.opprettSak("123", SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr).id
         val opprettBehandling = opprettBehandling(
             type = BehandlingType.FØRSTEGANGSBEHANDLING,
-            sakId = sak,
-            persongalleri = Persongalleri(
-                soeker = "11111",
-                innsender = "22222",
-                soesken = listOf("33333", "44444"),
-                avdoed = listOf("55555"),
-                gjenlevende = listOf("66666")
-            )
+            sakId = sak
         )
         behandlingRepo.opprettBehandling(opprettBehandling)
         val saksbehandler = Grunnlagsopplysning.Saksbehandler.create("saksbehandler01")

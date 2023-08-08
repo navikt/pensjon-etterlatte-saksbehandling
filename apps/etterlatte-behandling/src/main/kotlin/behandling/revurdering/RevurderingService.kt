@@ -21,7 +21,6 @@ import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
-import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
@@ -56,7 +55,6 @@ interface RevurderingService {
         revurderingAarsak: RevurderingAarsak,
         virkningstidspunkt: LocalDate? = null,
         kilde: Vedtaksloesning,
-        persongalleri: Persongalleri,
         mottattDato: String? = null,
         merknad: String? = null,
         begrunnelse: String? = null
@@ -142,7 +140,6 @@ class RevurderingServiceImpl(
             inTransaction {
                 opprettRevurdering(
                     sakId,
-                    forrigeBehandling.persongalleri,
                     forrigeBehandling.id,
                     Tidspunkt.now().toLocalDatetimeUTC().toString(),
                     Prosesstype.MANUELL,
@@ -191,7 +188,6 @@ class RevurderingServiceImpl(
         revurderingAarsak: RevurderingAarsak,
         virkningstidspunkt: LocalDate?,
         kilde: Vedtaksloesning,
-        persongalleri: Persongalleri,
         mottattDato: String?,
         merknad: String?,
         begrunnelse: String?
@@ -199,7 +195,6 @@ class RevurderingServiceImpl(
         inTransaction {
             opprettRevurdering(
                 sakId,
-                persongalleri,
                 forrigeBehandling.id,
                 mottattDato,
                 Prosesstype.AUTOMATISK,
@@ -234,7 +229,6 @@ class RevurderingServiceImpl(
 
     private fun opprettRevurdering(
         sakId: Long,
-        persongalleri: Persongalleri,
         forrigeBehandling: UUID?,
         mottattDato: String?,
         prosessType: Prosesstype,
@@ -251,7 +245,6 @@ class RevurderingServiceImpl(
         status = BehandlingStatus.OPPRETTET,
         soeknadMottattDato = mottattDato?.let { LocalDateTime.parse(it) },
         revurderingsAarsak = revurderingAarsak,
-        persongalleri = persongalleri,
         virkningstidspunkt = virkningstidspunkt,
         kilde = kilde,
         prosesstype = prosessType,

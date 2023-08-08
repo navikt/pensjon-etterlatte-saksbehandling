@@ -26,6 +26,7 @@ data class StoenadRad(
     val vedtakLoependeFom: LocalDate,
     val vedtakLoependeTom: LocalDate?,
     val beregning: Beregning?,
+    val avkorting: Avkorting?,
     val vedtakType: VedtakType?,
     val sakUtland: SakUtland?,
     val virkningstidspunkt: YearMonth,

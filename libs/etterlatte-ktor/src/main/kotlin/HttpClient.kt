@@ -56,6 +56,7 @@ fun httpClient(
         getCorrelationId().let {
             header(HttpHeaders.XCorrelationId, it)
             header("Nav_Call_Id", it)
+            header("Nav-Call-Id", it)
         }
         ekstraDefaultHeaders.invoke(this)
     }

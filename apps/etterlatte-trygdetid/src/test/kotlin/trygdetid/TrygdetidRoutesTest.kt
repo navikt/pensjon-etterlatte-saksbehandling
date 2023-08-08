@@ -10,9 +10,7 @@ import io.ktor.server.application.log
 import io.ktor.server.testing.ApplicationTestBuilder
 import io.mockk.coEvery
 import io.mockk.coVerify
-import io.mockk.every
 import io.mockk.mockk
-import no.nav.etterlatte.libs.common.behandling.Saksrolle.Companion.log
 import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.trygdetid.klienter.BehandlingKlient
@@ -45,7 +43,7 @@ internal class TrygdetidRoutesTest {
 
     @Test
     fun `skal returnere 204 naar trygdetid ikke finnes`() {
-        every { trygdetidService.hentTrygdetid(any()) } returns null
+        coEvery { trygdetidService.hentTrygdetid(any(), any()) } returns null
 
         testApplication(server.config.httpServer.port()) {
             val response = client.get("/api/trygdetid/${randomUUID()}") {
@@ -58,7 +56,7 @@ internal class TrygdetidRoutesTest {
 
         coVerify(exactly = 1) {
             behandlingKlient.harTilgangTilBehandling(any(), any())
-            trygdetidService.hentTrygdetid(any())
+            trygdetidService.hentTrygdetid(any(), any())
         }
     }
 

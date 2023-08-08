@@ -72,6 +72,5 @@ export enum DatoFormat {
 }
 const norskKroneFormat = new Intl.NumberFormat('NO-nb', {
   currency: 'nok',
-  maximumSignificantDigits: 1,
 })
 export const NOK = (beloep: number | undefined) => (beloep == null ? '' : norskKroneFormat.format(beloep) + ' kr')

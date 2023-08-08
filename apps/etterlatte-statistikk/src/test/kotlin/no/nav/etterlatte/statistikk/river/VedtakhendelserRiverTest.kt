@@ -53,6 +53,7 @@ internal class VedtakhendelserRiverTest {
         vedtakLoependeFom = LocalDate.now(),
         vedtakLoependeTom = null,
         beregning = null,
+        avkorting = null,
         vedtakType = null,
         sakUtland = SakUtland.NASJONAL,
         virkningstidspunkt = YearMonth.of(2023, 6),

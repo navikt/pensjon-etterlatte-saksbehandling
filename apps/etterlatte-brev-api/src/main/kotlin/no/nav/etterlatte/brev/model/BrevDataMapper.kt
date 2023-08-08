@@ -3,6 +3,7 @@ package no.nav.etterlatte.brev.model
 import no.nav.etterlatte.brev.behandling.Behandling
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_AVSLAG
+import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_AVSLAG_IKKEYRKESSKADE
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_INNVILGELSE
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_REVURDERING_ADOPSJON
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_REVURDERING_ENDRING
@@ -29,7 +30,11 @@ object BrevDataMapper {
         SakType.BARNEPENSJON -> {
             when (val vedtakType = behandling.vedtak.type) {
                 VedtakType.INNVILGELSE -> BrevkodePar(BARNEPENSJON_INNVILGELSE)
-                VedtakType.AVSLAG -> BrevkodePar(BARNEPENSJON_AVSLAG)
+                VedtakType.AVSLAG -> when (behandling.revurderingsaarsak) {
+                    RevurderingAarsak.YRKESSKADE -> BrevkodePar(BARNEPENSJON_AVSLAG_IKKEYRKESSKADE, BARNEPENSJON_AVSLAG)
+                    else -> BrevkodePar(BARNEPENSJON_AVSLAG)
+                }
+
                 VedtakType.ENDRING -> when (behandling.revurderingsaarsak) {
                     RevurderingAarsak.SOESKENJUSTERING -> BrevkodePar(BARNEPENSJON_REVURDERING_SOESKENJUSTERING)
                     else -> TODO("Revurderingsbrev for ${behandling.revurderingsaarsak} er ikke støttet")
@@ -67,7 +72,11 @@ object BrevDataMapper {
         SakType.BARNEPENSJON -> {
             when (val vedtakType = behandling.vedtak.type) {
                 VedtakType.INNVILGELSE -> InnvilgetBrevData.fra(behandling)
-                VedtakType.AVSLAG -> AvslagBrevData.fra(behandling)
+                VedtakType.AVSLAG -> when (behandling.revurderingsaarsak) {
+                    RevurderingAarsak.YRKESSKADE -> AvslagYrkesskadeBrevData.fra(behandling)
+                    else -> AvslagBrevData.fra(behandling)
+                }
+
                 VedtakType.ENDRING -> when (behandling.revurderingsaarsak) {
                     RevurderingAarsak.SOESKENJUSTERING -> SoeskenjusteringRevurderingBrevdata.fra(behandling)
                     RevurderingAarsak.FENGSELSOPPHOLD -> FengselsoppholdBrevdata.fra(behandling)

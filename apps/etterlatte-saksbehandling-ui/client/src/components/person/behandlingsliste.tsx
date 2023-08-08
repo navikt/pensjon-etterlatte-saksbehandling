@@ -150,6 +150,8 @@ function mapAarsak(aarsak: BehandlingOgRevurderingsAarsakerType) {
       return 'Ny Søknad'
     case Revurderingsaarsak.FENGSELSOPPHOLD:
       return 'Fengselsopphold'
+    case Revurderingsaarsak.YRKESSKADE:
+      return 'Yrkesskade'
   }
 }
 

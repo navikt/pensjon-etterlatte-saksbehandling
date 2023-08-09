@@ -118,7 +118,7 @@ class ApplicationBuilder {
 
     private val featureToggleService = FeatureToggleService.initialiser(featureToggleProperties(config))
 
-    private val brevDataMapper = BrevDataMapper
+    private val brevDataMapper = BrevDataMapper(featureToggleService)
 
     private val brevbakerService = BrevbakerService(brevbaker, adresseService, brevDataMapper)
 

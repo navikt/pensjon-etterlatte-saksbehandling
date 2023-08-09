@@ -15,11 +15,12 @@ import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_REVURDER
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_REVURDERING_UT_AV_FENGSEL
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMS_INNVILGELSE_AUTO
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMS_OPPHOER_MANUELL
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 
-object BrevDataMapper {
+class BrevDataMapper(private val featureToggleService: FeatureToggleService) {
 
     fun brevKode(behandling: Behandling, brevProsessType: BrevProsessType) = when (brevProsessType) {
         BrevProsessType.AUTOMATISK -> brevKodeAutomatisk(behandling)

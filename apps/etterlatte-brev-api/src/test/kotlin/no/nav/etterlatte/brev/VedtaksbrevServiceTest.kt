@@ -38,6 +38,7 @@ import no.nav.etterlatte.brev.model.OpprettNyttBrev
 import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.Status
+import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.VedtakSak
@@ -69,7 +70,8 @@ internal class VedtaksbrevServiceTest {
     private val sakOgBehandlingService = mockk<SakOgBehandlingService>()
     private val adresseService = mockk<AdresseService>()
     private val dokarkivService = mockk<DokarkivServiceImpl>()
-    private val brevDataMapper = mockk<BrevDataMapper>()
+    private val featureToggleService = DummyFeatureToggleService()
+    private val brevDataMapper = BrevDataMapper(featureToggleService)
 
     private val vedtaksbrevService =
         VedtaksbrevService(

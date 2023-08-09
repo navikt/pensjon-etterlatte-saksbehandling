@@ -17,6 +17,7 @@ import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.BrevProsessType.AUTOMATISK
 import no.nav.etterlatte.brev.model.BrevProsessType.MANUELL
 import no.nav.etterlatte.brev.model.BrevProsessType.REDIGERBAR
+import no.nav.etterlatte.brev.model.BrevProsessTypeFactory
 import no.nav.etterlatte.brev.model.ManueltBrevData
 import no.nav.etterlatte.brev.model.OpprettNyttBrev
 import no.nav.etterlatte.brev.model.Pdf
@@ -34,7 +35,8 @@ class VedtaksbrevService(
     private val adresseService: AdresseService,
     private val dokarkivService: DokarkivServiceImpl,
     private val brevbaker: BrevbakerService,
-    private val brevDataMapper: BrevDataMapper
+    private val brevDataMapper: BrevDataMapper,
+    private val brevProsessTypeFactory: BrevProsessTypeFactory
 ) {
     private val logger = LoggerFactory.getLogger(VedtaksbrevService::class.java)
 
@@ -63,7 +65,7 @@ class VedtaksbrevService(
 
         val mottaker = adresseService.hentMottakerAdresse(behandling.persongalleri.innsender.fnr.value)
 
-        val prosessType = BrevProsessType.fra(behandling)
+        val prosessType = brevProsessTypeFactory.fra(behandling)
 
         val nyttBrev = OpprettNyttBrev(
             sakId = sakId,
@@ -112,13 +114,7 @@ class VedtaksbrevService(
         val tittel = "Vedtak om ${behandling.vedtak.type.name.lowercase()}"
 
         val payload = when (prosessType) {
-            REDIGERBAR -> {
-                when (behandling.revurderingsaarsak?.redigerbartBrev) {
-                    true -> brevbaker.hentRedigerbarTekstFraBrevbakeren(behandling)
-                    else -> null
-                }
-            }
-
+            REDIGERBAR -> brevbaker.hentRedigerbarTekstFraBrevbakeren(behandling)
             AUTOMATISK -> null
             MANUELL -> SlateHelper.hentInitiellPayload(behandling)
         }

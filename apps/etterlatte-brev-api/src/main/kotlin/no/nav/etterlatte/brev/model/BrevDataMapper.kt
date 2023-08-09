@@ -5,6 +5,7 @@ import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_AVSLAG
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_AVSLAG_IKKEYRKESSKADE
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_INNVILGELSE
+import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_INNVILGELSE_NY
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_REVURDERING_ADOPSJON
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_REVURDERING_ENDRING
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_REVURDERING_FENGSELSOPPHOLD
@@ -15,10 +16,17 @@ import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_REVURDER
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_REVURDERING_UT_AV_FENGSEL
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMS_INNVILGELSE_AUTO
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMS_OPPHOER_MANUELL
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
+
+enum class BrevDataFeatureToggle(private val key: String) : FeatureToggle {
+    NyMalInnvilgelse("pensjon-etterlatte.bp-ny-mal-innvilgelse");
+
+    override fun key() = key
+}
 
 class BrevDataMapper(private val featureToggleService: FeatureToggleService) {
 
@@ -31,7 +39,16 @@ class BrevDataMapper(private val featureToggleService: FeatureToggleService) {
     private fun brevKodeAutomatisk(behandling: Behandling): BrevkodePar = when (behandling.sakType) {
         SakType.BARNEPENSJON -> {
             when (val vedtakType = behandling.vedtak.type) {
-                VedtakType.INNVILGELSE -> BrevkodePar(BARNEPENSJON_INNVILGELSE)
+                VedtakType.INNVILGELSE -> when (
+                    featureToggleService.isEnabled(
+                        BrevDataFeatureToggle.NyMalInnvilgelse,
+                        false
+                    )
+                ) {
+                    true -> BrevkodePar(BARNEPENSJON_INNVILGELSE_NY)
+                    false -> BrevkodePar(BARNEPENSJON_INNVILGELSE)
+                }
+
                 VedtakType.AVSLAG -> when (behandling.revurderingsaarsak) {
                     RevurderingAarsak.YRKESSKADE -> BrevkodePar(BARNEPENSJON_AVSLAG_IKKEYRKESSKADE, BARNEPENSJON_AVSLAG)
                     else -> BrevkodePar(BARNEPENSJON_AVSLAG)
@@ -73,7 +90,16 @@ class BrevDataMapper(private val featureToggleService: FeatureToggleService) {
     fun brevData(behandling: Behandling): BrevData = when (behandling.sakType) {
         SakType.BARNEPENSJON -> {
             when (val vedtakType = behandling.vedtak.type) {
-                VedtakType.INNVILGELSE -> InnvilgetBrevData.fra(behandling)
+                VedtakType.INNVILGELSE -> when (
+                    featureToggleService.isEnabled(
+                        BrevDataFeatureToggle.NyMalInnvilgelse,
+                        false
+                    )
+                ) {
+                    true -> InnvilgetBrevData.fra(behandling)
+                    false -> InnvilgetBrevData.fra(behandling)
+                }
+
                 VedtakType.AVSLAG -> when (behandling.revurderingsaarsak) {
                     RevurderingAarsak.YRKESSKADE -> AvslagYrkesskadeBrevData.fra(behandling)
                     else -> AvslagBrevData.fra(behandling)

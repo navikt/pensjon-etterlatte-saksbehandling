@@ -29,6 +29,7 @@ import no.nav.etterlatte.brev.dokument.SafClient
 import no.nav.etterlatte.brev.dokument.dokumentRoute
 import no.nav.etterlatte.brev.grunnlag.GrunnlagKlient
 import no.nav.etterlatte.brev.model.BrevDataMapper
+import no.nav.etterlatte.brev.model.BrevProsessTypeFactory
 import no.nav.etterlatte.brev.navansatt.NavansattKlient
 import no.nav.etterlatte.brev.vedtak.VedtaksvurderingKlient
 import no.nav.etterlatte.brev.vedtaksbrevRoute
@@ -122,6 +123,8 @@ class ApplicationBuilder {
 
     private val brevbakerService = BrevbakerService(brevbaker, adresseService, brevDataMapper)
 
+    private val brevProsessTypeFactory = BrevProsessTypeFactory(featureToggleService)
+
     private val brevService =
         BrevService(db, sakOgBehandlingService, adresseService, dokarkivService, distribusjonService, brevbakerService)
 
@@ -132,7 +135,8 @@ class ApplicationBuilder {
             adresseService,
             dokarkivService,
             brevbakerService,
-            brevDataMapper
+            brevDataMapper,
+            brevProsessTypeFactory
         )
 
     private val journalpostService =

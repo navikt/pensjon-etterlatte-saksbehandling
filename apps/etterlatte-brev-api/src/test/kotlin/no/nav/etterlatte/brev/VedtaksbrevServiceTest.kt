@@ -30,9 +30,11 @@ import no.nav.etterlatte.brev.journalpost.JournalpostResponse
 import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Avsender
 import no.nav.etterlatte.brev.model.Brev
+import no.nav.etterlatte.brev.model.BrevDataFeatureToggle
 import no.nav.etterlatte.brev.model.BrevDataMapper
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.BrevProsessType
+import no.nav.etterlatte.brev.model.BrevProsessTypeFactory
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.OpprettNyttBrev
 import no.nav.etterlatte.brev.model.Pdf
@@ -70,8 +72,10 @@ internal class VedtaksbrevServiceTest {
     private val sakOgBehandlingService = mockk<SakOgBehandlingService>()
     private val adresseService = mockk<AdresseService>()
     private val dokarkivService = mockk<DokarkivServiceImpl>()
-    private val featureToggleService = DummyFeatureToggleService()
+    private val featureToggleService =
+        DummyFeatureToggleService().also { it.settBryter(BrevDataFeatureToggle.NyMalInnvilgelse, false) }
     private val brevDataMapper = BrevDataMapper(featureToggleService)
+    private val brevProsessTypeFactory = BrevProsessTypeFactory(featureToggleService)
 
     private val vedtaksbrevService =
         VedtaksbrevService(
@@ -80,7 +84,8 @@ internal class VedtaksbrevServiceTest {
             adresseService,
             dokarkivService,
             BrevbakerService(brevbaker, adresseService, brevDataMapper),
-            brevDataMapper
+            brevDataMapper,
+            brevProsessTypeFactory
         )
 
     @BeforeEach

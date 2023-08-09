@@ -183,8 +183,8 @@ const PeriodeRow = ({
                 {trygdetidGrunnlag.poengUtAar ? 'Ja' : 'Nei'}
               </ExpandableInfo>
               <ExpandableInfo>
-                <Heading size={'small'}>Med i prorata?</Heading>
-                {trygdetidGrunnlag.prorata ? 'Ja' : 'Nei'}
+                <Heading size={'small'}>Ikke med i prorata</Heading>
+                {trygdetidGrunnlag.prorata ? 'Nei' : 'Ja'}
               </ExpandableInfo>
             </>
           )}

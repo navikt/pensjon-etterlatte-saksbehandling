@@ -161,10 +161,10 @@ export const TrygdetidGrunnlag: React.FC<Props> = ({
 
                   <Prorata
                     legend="Prorata"
-                    value={[trygdetidgrunnlag.prorata ? 'PRORATA' : ''].filter((val) => val !== '')}
+                    value={[!trygdetidgrunnlag.prorata ? 'IKKEPRORATA' : ''].filter((val) => val !== '')}
                   >
                     <Checkbox
-                      value="PRORATA"
+                      value="IKKEPRORATA"
                       key={`prorata-${trygdetidGrunnlagType}`}
                       onChange={() => {
                         setTrygdetidgrunnlag({
@@ -173,7 +173,7 @@ export const TrygdetidGrunnlag: React.FC<Props> = ({
                         })
                       }}
                     >
-                      Med i prorata
+                      Ikke med i prorata
                     </Checkbox>
                   </Prorata>
                 </>

@@ -112,6 +112,7 @@ data class OpprettNyttBrev(
 
 enum class BrevProsessType {
     MANUELL,
+    REDIGERBAR,
     AUTOMATISK;
 
     companion object {
@@ -135,14 +136,14 @@ enum class BrevProsessType {
             return when (behandling.vedtak.type) {
                 VedtakType.INNVILGELSE -> AUTOMATISK
                 VedtakType.ENDRING -> when (behandling.revurderingsaarsak) {
-                    RevurderingAarsak.SOESKENJUSTERING -> AUTOMATISK
-                    RevurderingAarsak.FENGSELSOPPHOLD -> AUTOMATISK
-                    RevurderingAarsak.UT_AV_FENGSEL -> AUTOMATISK
+                    RevurderingAarsak.SOESKENJUSTERING -> REDIGERBAR
+                    RevurderingAarsak.FENGSELSOPPHOLD -> REDIGERBAR
+                    RevurderingAarsak.UT_AV_FENGSEL -> REDIGERBAR
                     else -> MANUELL
                 }
 
                 VedtakType.OPPHOER -> when (behandling.revurderingsaarsak?.redigerbartBrev) {
-                    true -> AUTOMATISK
+                    true -> REDIGERBAR
                     else -> MANUELL
                 }
 

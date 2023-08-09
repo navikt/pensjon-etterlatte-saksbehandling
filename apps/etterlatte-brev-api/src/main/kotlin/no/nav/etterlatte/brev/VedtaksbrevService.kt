@@ -16,6 +16,7 @@ import no.nav.etterlatte.brev.model.BrevInnhold
 import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.BrevProsessType.AUTOMATISK
 import no.nav.etterlatte.brev.model.BrevProsessType.MANUELL
+import no.nav.etterlatte.brev.model.BrevProsessType.REDIGERBAR
 import no.nav.etterlatte.brev.model.ManueltBrevData
 import no.nav.etterlatte.brev.model.OpprettNyttBrev
 import no.nav.etterlatte.brev.model.Pdf
@@ -100,7 +101,8 @@ class VedtaksbrevService(
 
     private fun opprettBrevData(brev: Brev, behandling: Behandling, brevkode: BrevDataMapper.BrevkodePar): BrevData =
         when (brev.prosessType) {
-            AUTOMATISK -> brevDataMapper.brevDataFerdigstilling(behandling, { hentLagretInnhold(brev) }, brevkode)
+            REDIGERBAR -> brevDataMapper.brevDataFerdigstilling(behandling, { hentLagretInnhold(brev) }, brevkode)
+            AUTOMATISK -> brevDataMapper.brevData(behandling)
             MANUELL -> ManueltBrevData(hentLagretInnhold(brev))
         }
 
@@ -110,13 +112,14 @@ class VedtaksbrevService(
         val tittel = "Vedtak om ${behandling.vedtak.type.name.lowercase()}"
 
         val payload = when (prosessType) {
-            AUTOMATISK -> {
+            REDIGERBAR -> {
                 when (behandling.revurderingsaarsak?.redigerbartBrev) {
                     true -> brevbaker.hentRedigerbarTekstFraBrevbakeren(behandling)
                     else -> null
                 }
             }
 
+            AUTOMATISK -> null
             MANUELL -> SlateHelper.hentInitiellPayload(behandling)
         }
 

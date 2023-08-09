@@ -39,5 +39,6 @@ export enum BrevStatus {
 
 export enum BrevProsessType {
   AUTOMATISK = 'AUTOMATISK',
+  REDIGERBAR = 'REDIGERBAR',
   MANUELL = 'MANUELL',
 }

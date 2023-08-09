@@ -27,7 +27,7 @@ class BrevbakerService(
 
     suspend fun hentRedigerbarTekstFraBrevbakeren(behandling: Behandling): Slate {
         val request = BrevbakerRequest.fra(
-            brevDataMapper.brevKode(behandling, BrevProsessType.AUTOMATISK).redigering,
+            brevDataMapper.brevKode(behandling, BrevProsessType.REDIGERBAR).redigering,
             brevDataMapper.brevData(behandling),
             behandling,
             adresseService.hentAvsender(behandling.vedtak)

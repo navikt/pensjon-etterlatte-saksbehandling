@@ -24,6 +24,7 @@ class BrevDataMapper(private val featureToggleService: FeatureToggleService) {
 
     fun brevKode(behandling: Behandling, brevProsessType: BrevProsessType) = when (brevProsessType) {
         BrevProsessType.AUTOMATISK -> brevKodeAutomatisk(behandling)
+        BrevProsessType.REDIGERBAR -> brevKodeAutomatisk(behandling)
         BrevProsessType.MANUELL -> BrevkodePar(OMS_OPPHOER_MANUELL)
     }
 

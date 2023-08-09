@@ -57,14 +57,18 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
   }, [behandlingId, sakId])
 
   const erReadOnly = () => {
-    return (
-      vedtaksbrev.prosessType === BrevProsessType.AUTOMATISK &&
-      !(
-        props.behandling.revurderingsaarsak != null &&
-        props.behandling.revurderingsaarsak in
-          [Revurderingsaarsak.OMGJOERING_AV_FARSKAP, Revurderingsaarsak.ADOPSJON, Revurderingsaarsak.FENGSELSOPPHOLD]
-      )
-    )
+    if (vedtaksbrev.prosessType === BrevProsessType.MANUELL) {
+      return false
+    }
+    if (!props.behandling.revurderingsaarsak) {
+      return true
+    }
+    const aarsakerMedManueltBrev = [
+      Revurderingsaarsak.OMGJOERING_AV_FARSKAP,
+      Revurderingsaarsak.ADOPSJON,
+      Revurderingsaarsak.FENGSELSOPPHOLD,
+    ]
+    return !aarsakerMedManueltBrev.includes(props.behandling.revurderingsaarsak)
   }
 
   return (

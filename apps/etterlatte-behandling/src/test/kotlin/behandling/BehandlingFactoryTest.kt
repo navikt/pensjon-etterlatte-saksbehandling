@@ -180,7 +180,7 @@ class BehandlingFactoryTest {
         every { behandlingDaoMock.hentBehandling(capture(behandlingHentes)) } returns opprettetBehandling
         every { hendelseDaoMock.behandlingOpprettet(any()) } returns Unit
         every { behandlingDaoMock.lagreGyldighetsproving(any()) } returns Unit
-        every { behandlingDaoMock.alleBehandlingerISak(any()) } returns listOf(opprettetBehandling)
+        every { behandlingDaoMock.alleBehandlingerISak(any()) } returns emptyList()
         every { behandlingDaoMock.lagreStatus(any(), any(), any()) } returns Unit
         every { behandlingHendelserKafkaProducerMock.sendMeldingForHendelse(any(), any()) } returns Unit
         every { grunnlagService.leggInnNyttGrunnlag(any()) } returns Unit
@@ -210,7 +210,6 @@ class BehandlingFactoryTest {
             behandlingDaoMock.opprettBehandling(any())
             hendelseDaoMock.behandlingOpprettet(any())
             behandlingDaoMock.alleBehandlingerISak(any())
-            behandlingDaoMock.lagreStatus(any(), any(), any())
             behandlingHendelserKafkaProducerMock.sendMeldingForHendelse(any(), BehandlingHendelseType.OPPRETTET)
             grunnlagService.leggInnNyttGrunnlag(any())
             oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendSoeknad(any(), any())

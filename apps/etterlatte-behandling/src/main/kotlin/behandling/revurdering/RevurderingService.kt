@@ -1,6 +1,7 @@
 package no.nav.etterlatte.behandling.revurdering
 
 import io.ktor.server.plugins.BadRequestException
+import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.BehandlingHendelseType
@@ -129,6 +130,7 @@ class RevurderingServiceImpl(
             )
         }
     }
+
     private fun opprettManuellRevurdering(
         sakId: Long,
         forrigeBehandling: Behandling,
@@ -139,10 +141,12 @@ class RevurderingServiceImpl(
         saksbehandlerIdent: String
     ): Revurdering? = forrigeBehandling.sjekkEnhet()?.let {
         return if (featureToggleService.isEnabled(RevurderingServiceFeatureToggle.OpprettManuellRevurdering, false)) {
+            val persongalleri = runBlocking { grunnlagService.hentPersongalleri(sakId) }
+
             inTransaction {
                 opprettRevurdering(
                     sakId,
-                    forrigeBehandling.persongalleri,
+                    persongalleri,
                     forrigeBehandling.id,
                     Tidspunkt.now().toLocalDatetimeUTC().toString(),
                     Prosesstype.MANUELL,
@@ -270,19 +274,18 @@ class RevurderingServiceImpl(
         logger.info("Opprettet behandling ${opprettBehandling.id} i sak ${opprettBehandling.sakId}")
 
         behandlingDao.hentBehandling(opprettBehandling.id)!! as Revurdering
-    }.also { behandling ->
-        behandling.let {
-            grunnlagService.leggInnNyttGrunnlag(it)
-            val oppgave = oppgaveService.opprettNyOppgaveMedSakOgReferanse(
-                referanse = behandling.id.toString(),
-                sakId = sakId,
-                oppgaveKilde = OppgaveKilde.BEHANDLING,
-                oppgaveType = OppgaveType.REVURDERING,
-                merknad = begrunnelse
-            )
-            oppgaveService.tildelSaksbehandler(oppgave.id, saksbehandlerIdent)
-            behandlingHendelser.sendMeldingForHendelse(it, BehandlingHendelseType.OPPRETTET)
-        }
+    }.also { revurdering ->
+        grunnlagService.leggInnNyttGrunnlag(revurdering, persongalleri)
+
+        val oppgave = oppgaveService.opprettNyOppgaveMedSakOgReferanse(
+            referanse = revurdering.id.toString(),
+            sakId = sakId,
+            oppgaveKilde = OppgaveKilde.BEHANDLING,
+            oppgaveType = OppgaveType.REVURDERING,
+            merknad = begrunnelse
+        )
+        oppgaveService.tildelSaksbehandler(oppgave.id, saksbehandlerIdent)
+        behandlingHendelser.sendMeldingForHendelse(revurdering, BehandlingHendelseType.OPPRETTET)
     }
 
     private fun <T : Behandling> T?.sjekkEnhet() = this?.let { behandling ->

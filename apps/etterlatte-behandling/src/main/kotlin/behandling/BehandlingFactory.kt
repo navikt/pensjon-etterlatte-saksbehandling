@@ -104,7 +104,7 @@ class BehandlingFactory(
                 behandlingDao.hentBehandling(opprettBehandling.id)?.sjekkEnhet()
             }.also { behandling ->
                 behandling?.let {
-                    grunnlagService.leggInnNyttGrunnlag(it)
+                    grunnlagService.leggInnNyttGrunnlag(it, persongalleri)
                     oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendSoeknad(
                         referanse = behandling.id.toString(),
                         sakId = sak.id

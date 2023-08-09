@@ -16,7 +16,6 @@ import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
-import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Utenlandstilsnitt
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
@@ -99,7 +98,6 @@ class BehandlingDao(
             behandlingOpprettet = rs.somLocalDateTimeUTC("behandling_opprettet"),
             sistEndret = rs.somLocalDateTimeUTC("sist_endret"),
             soeknadMottattDato = rs.getTidspunktOrNull("soeknad_mottatt_dato")?.toLocalDatetimeUTC(),
-            persongalleri = hentPersongalleri(rs),
             gyldighetsproeving = rs.getString("gyldighetssproving")?.let { objectMapper.readValue(it) },
             status = rs.getString("status").let { BehandlingStatus.valueOf(it) },
             virkningstidspunkt = rs.getString("virkningstidspunkt")?.let { objectMapper.readValue(it) },
@@ -112,18 +110,9 @@ class BehandlingDao(
         )
     }
 
-    private fun hentPersongalleri(rs: ResultSet): Persongalleri = Persongalleri(
-        innsender = rs.getString("innsender"),
-        soeker = rs.getString("soeker"),
-        gjenlevende = rs.getString("gjenlevende").let { objectMapper.readValue(it) },
-        avdoed = rs.getString("avdoed").let { objectMapper.readValue(it) },
-        soesken = rs.getString("soesken").let { objectMapper.readValue(it) }
-    )
-
     private fun asRevurdering(rs: ResultSet) = revurderingDao.asRevurdering(
         rs,
-        mapSak(rs),
-        hentPersongalleri(rs)
+        mapSak(rs)
     ) { i: UUID -> kommerBarnetTilGodeDao.hentKommerBarnetTilGode(i) }
 
     private fun asManueltOpphoer(rs: ResultSet) = ManueltOpphoer(
@@ -131,7 +120,6 @@ class BehandlingDao(
         sak = mapSak(rs),
         behandlingOpprettet = rs.somLocalDateTimeUTC("behandling_opprettet"),
         sistEndret = rs.somLocalDateTimeUTC("sist_endret"),
-        persongalleri = hentPersongalleri(rs),
         status = rs.getString("status").let { BehandlingStatus.valueOf(it) },
         virkningstidspunkt = rs.getString("virkningstidspunkt")?.let { objectMapper.readValue(it) },
         utenlandstilsnitt = rs.getString("utenlandstilsnitt")?.let { objectMapper.readValue(it) },

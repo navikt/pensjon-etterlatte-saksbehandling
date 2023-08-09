@@ -196,12 +196,14 @@ class ApplicationContext(
             behandlingDao = behandlingDao,
             behandlingHendelser = behandlingsHendelser,
             hendelseDao = hendelseDao,
+            grunnlagService = grunnlagsService,
             featureToggleService = featureToggleService
         )
 
     val omregningService =
         OmregningService(
             behandlingService = behandlingService,
+            grunnlagService = grunnlagsService,
             revurderingService = revurderingService
         )
 

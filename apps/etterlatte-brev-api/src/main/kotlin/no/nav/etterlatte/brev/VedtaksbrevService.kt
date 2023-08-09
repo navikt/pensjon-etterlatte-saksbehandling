@@ -32,7 +32,8 @@ class VedtaksbrevService(
     private val sakOgBehandlingService: SakOgBehandlingService,
     private val adresseService: AdresseService,
     private val dokarkivService: DokarkivServiceImpl,
-    private val brevbaker: BrevbakerService
+    private val brevbaker: BrevbakerService,
+    private val brevDataMapper: BrevDataMapper
 ) {
     private val logger = LoggerFactory.getLogger(VedtaksbrevService::class.java)
 
@@ -89,7 +90,7 @@ class VedtaksbrevService(
         val behandling = sakOgBehandlingService.hentBehandling(brev.sakId, brev.behandlingId!!, brukerTokenInfo)
         val avsender = adresseService.hentAvsender(behandling.vedtak)
 
-        val kode = BrevDataMapper.brevKode(behandling, brev.prosessType)
+        val kode = brevDataMapper.brevKode(behandling, brev.prosessType)
         val brevData = opprettBrevData(brev, behandling, kode)
         val brevRequest = BrevbakerRequest.fra(kode.ferdigstilling, brevData, behandling, avsender)
 
@@ -99,7 +100,7 @@ class VedtaksbrevService(
 
     private fun opprettBrevData(brev: Brev, behandling: Behandling, brevkode: BrevDataMapper.BrevkodePar): BrevData =
         when (brev.prosessType) {
-            AUTOMATISK -> BrevDataMapper.brevDataFerdigstilling(behandling, { hentLagretInnhold(brev) }, brevkode)
+            AUTOMATISK -> brevDataMapper.brevDataFerdigstilling(behandling, { hentLagretInnhold(brev) }, brevkode)
             MANUELL -> ManueltBrevData(hentLagretInnhold(brev))
         }
 

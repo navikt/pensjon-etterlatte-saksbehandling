@@ -28,6 +28,7 @@ import no.nav.etterlatte.brev.dokarkiv.DokarkivServiceImpl
 import no.nav.etterlatte.brev.dokument.SafClient
 import no.nav.etterlatte.brev.dokument.dokumentRoute
 import no.nav.etterlatte.brev.grunnlag.GrunnlagKlient
+import no.nav.etterlatte.brev.model.BrevDataMapper
 import no.nav.etterlatte.brev.navansatt.NavansattKlient
 import no.nav.etterlatte.brev.vedtak.VedtaksvurderingKlient
 import no.nav.etterlatte.brev.vedtaksbrevRoute
@@ -117,7 +118,9 @@ class ApplicationBuilder {
 
     private val featureToggleService = FeatureToggleService.initialiser(featureToggleProperties(config))
 
-    private val brevbakerService = BrevbakerService(brevbaker, adresseService)
+    private val brevDataMapper = BrevDataMapper
+
+    private val brevbakerService = BrevbakerService(brevbaker, adresseService, brevDataMapper)
 
     private val brevService =
         BrevService(db, sakOgBehandlingService, adresseService, dokarkivService, distribusjonService, brevbakerService)
@@ -128,7 +131,8 @@ class ApplicationBuilder {
             sakOgBehandlingService,
             adresseService,
             dokarkivService,
-            brevbakerService
+            brevbakerService,
+            brevDataMapper
         )
 
     private val journalpostService =

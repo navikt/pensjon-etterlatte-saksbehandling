@@ -30,6 +30,7 @@ import no.nav.etterlatte.brev.journalpost.JournalpostResponse
 import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Avsender
 import no.nav.etterlatte.brev.model.Brev
+import no.nav.etterlatte.brev.model.BrevDataMapper
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.Mottaker
@@ -68,6 +69,7 @@ internal class VedtaksbrevServiceTest {
     private val sakOgBehandlingService = mockk<SakOgBehandlingService>()
     private val adresseService = mockk<AdresseService>()
     private val dokarkivService = mockk<DokarkivServiceImpl>()
+    private val brevDataMapper = mockk<BrevDataMapper>()
 
     private val vedtaksbrevService =
         VedtaksbrevService(
@@ -75,7 +77,8 @@ internal class VedtaksbrevServiceTest {
             sakOgBehandlingService,
             adresseService,
             dokarkivService,
-            BrevbakerService(brevbaker, adresseService)
+            BrevbakerService(brevbaker, adresseService, brevDataMapper),
+            brevDataMapper
         )
 
     @BeforeEach

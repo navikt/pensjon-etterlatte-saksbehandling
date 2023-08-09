@@ -112,6 +112,7 @@ export const Oppgavelista = (props: {
                             saksbehandler={saksbehandler}
                             oppgaveId={id}
                             sakId={sakId}
+                            type={type}
                             hentOppgaver={hentOppgaver}
                           />
                         ) : (

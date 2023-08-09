@@ -66,6 +66,7 @@ export const MinOppgaveliste = (props: { oppgaver: ReadonlyArray<OppgaveDTOny>; 
                           status={status}
                           orginalFrist={frist}
                           oppgaveId={id}
+                          type={type}
                           hentOppgaver={hentOppgaver}
                         />
                       </Table.DataCell>
@@ -88,6 +89,7 @@ export const MinOppgaveliste = (props: { oppgaver: ReadonlyArray<OppgaveDTOny>; 
                             saksbehandler={saksbehandler}
                             oppgaveId={id}
                             sakId={sakId}
+                            type={type}
                             hentOppgaver={hentOppgaver}
                           />
                         )}

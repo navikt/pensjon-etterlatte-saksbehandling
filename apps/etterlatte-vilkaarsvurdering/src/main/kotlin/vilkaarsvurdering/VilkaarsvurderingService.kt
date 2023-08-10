@@ -160,7 +160,7 @@ class VilkaarsvurderingService(
                             "Fant ikke vilkårsvurdering fra behandling ${sisteIverksatteBehandling.id}"
                         )
 
-                    val vilkaar = vilkaarForRevurdering(
+                    val vilkaar = hentVilkaarForRevurdering(
                         behandling.sakType,
                         behandling.revurderingsaarsak!!,
                         grunnlag,
@@ -198,27 +198,27 @@ class VilkaarsvurderingService(
             }
         }
 
-    private fun vilkaarForRevurdering(
+    private fun hentVilkaarForRevurdering(
         sakType: SakType,
         revurderingsaarsak: RevurderingAarsak,
         grunnlag: Grunnlag,
         vilkaarForrigeBehandling: List<Vilkaar>
-    ): List<Vilkaar> = when (sakType) {
-        SakType.OMSTILLINGSSTOENAD -> slaaSammenVilkaar(
-            vilkaarForrigeBehandling = vilkaarForrigeBehandling,
-            vilkaarForRevurdering = OmstillingstoenadVilkaar.loependeVilkaarForRevurdering(grunnlag, revurderingsaarsak)
-        )
-        SakType.BARNEPENSJON -> slaaSammenVilkaar(
-            vilkaarForrigeBehandling = vilkaarForrigeBehandling,
-            vilkaarForRevurdering = BarnepensjonVilkaar.vilkaarForRevurdering(grunnlag, revurderingsaarsak)
-        )
-    }
+    ): List<Vilkaar> = sammenslaaVilkaar(
+        vilkaarForrigeBehandling = vilkaarForrigeBehandling,
+        vilkaarForRevurdering = when (sakType) {
+            SakType.OMSTILLINGSSTOENAD -> OmstillingstoenadVilkaar.loependeVilkaarForRevurdering(
+                grunnlag,
+                revurderingsaarsak
+            )
+            SakType.BARNEPENSJON -> BarnepensjonVilkaar.vilkaarForRevurdering(grunnlag, revurderingsaarsak)
+        }
+    )
 
     /**
      * Slår sammen tidligere vurderte vilkår og nye vilkår. Dersom hovedvilkårtype er lik,
-     * slettes tidligere vurdert vilkår.
+     * foretrekkes nye vilkår.
      */
-    private fun slaaSammenVilkaar(
+    private fun sammenslaaVilkaar(
         vilkaarForrigeBehandling: List<Vilkaar>,
         vilkaarForRevurdering: List<Vilkaar>
     ): List<Vilkaar> {

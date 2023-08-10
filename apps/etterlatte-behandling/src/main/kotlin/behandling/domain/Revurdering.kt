@@ -5,7 +5,6 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
-import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
@@ -21,7 +20,6 @@ sealed class Revurdering(
     override val behandlingOpprettet: LocalDateTime,
     override val sistEndret: LocalDateTime,
     override val status: BehandlingStatus,
-    override val persongalleri: Persongalleri,
     override val kommerBarnetTilgode: KommerBarnetTilgode?,
     override val virkningstidspunkt: Virkningstidspunkt?,
     override val utenlandstilsnitt: Utenlandstilsnitt?,
@@ -45,7 +43,6 @@ sealed class Revurdering(
             behandlingOpprettet: LocalDateTime,
             sistEndret: LocalDateTime,
             status: BehandlingStatus,
-            persongalleri: Persongalleri,
             kommerBarnetTilgode: KommerBarnetTilgode?,
             virkningstidspunkt: Virkningstidspunkt?,
             utenlandstilsnitt: Utenlandstilsnitt?,
@@ -62,7 +59,6 @@ sealed class Revurdering(
                 behandlingOpprettet = behandlingOpprettet,
                 sistEndret = sistEndret,
                 status = status,
-                persongalleri = persongalleri,
                 kommerBarnetTilgode = kommerBarnetTilgode,
                 virkningstidspunkt = virkningstidspunkt,
                 utenlandstilsnitt = utenlandstilsnitt,
@@ -79,7 +75,6 @@ sealed class Revurdering(
                 behandlingOpprettet = behandlingOpprettet,
                 sistEndret = sistEndret,
                 status = status,
-                persongalleri = persongalleri,
                 kommerBarnetTilgode = kommerBarnetTilgode,
                 virkningstidspunkt = virkningstidspunkt,
                 utenlandstilsnitt = utenlandstilsnitt,

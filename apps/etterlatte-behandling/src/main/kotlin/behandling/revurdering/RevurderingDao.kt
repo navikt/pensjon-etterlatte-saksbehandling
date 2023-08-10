@@ -9,7 +9,6 @@ import no.nav.etterlatte.grunnlagsendring.setJsonb
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
-import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
@@ -24,7 +23,6 @@ class RevurderingDao(private val connection: () -> Connection) {
     fun asRevurdering(
         rs: ResultSet,
         sak: Sak,
-        persongalleri: Persongalleri,
         kommerBarnetTilGode: (UUID) -> KommerBarnetTilgode?
     ): Revurdering {
         val id = rs.getUUID("id")
@@ -35,7 +33,6 @@ class RevurderingDao(private val connection: () -> Connection) {
             sak = sak,
             behandlingOpprettet = rs.somLocalDateTimeUTC("behandling_opprettet"),
             sistEndret = rs.somLocalDateTimeUTC("sist_endret"),
-            persongalleri = persongalleri,
             status = rs.getString("status").let { BehandlingStatus.valueOf(it) },
             revurderingsaarsak = rs.getString("revurdering_aarsak").let { RevurderingAarsak.valueOf(it) },
             kommerBarnetTilgode = kommerBarnetTilGode.invoke(id),

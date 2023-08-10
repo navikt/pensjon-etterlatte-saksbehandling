@@ -21,6 +21,7 @@ import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
+import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Utenlandstilsnitt
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
@@ -76,7 +77,7 @@ interface BehandlingService {
         boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet
     )
 
-    fun hentDetaljertBehandling(behandlingId: UUID): DetaljertBehandling?
+    suspend fun hentDetaljertBehandling(behandlingId: UUID, brukerTokenInfo: BrukerTokenInfo): DetaljertBehandling?
     suspend fun hentDetaljertBehandlingMedTilbehoer(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo
@@ -178,8 +179,17 @@ class BehandlingServiceImpl(
         }
     }
 
-    override fun hentDetaljertBehandling(behandlingId: UUID): DetaljertBehandling? {
-        return hentBehandling(behandlingId)?.toDetaljertBehandling()
+    override suspend fun hentDetaljertBehandling(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo
+    ): DetaljertBehandling? {
+        return hentBehandling(behandlingId)?.let {
+            val persongalleri: Persongalleri = grunnlagKlient.hentPersongalleri(it.sak.id, brukerTokenInfo)
+                ?.opplysning
+                ?: throw NoSuchElementException("Persongalleri mangler for sak ${it.sak.id}")
+
+            it.toDetaljertBehandling(persongalleri)
+        }
     }
 
     internal suspend fun hentBehandlingMedEnkelPersonopplysning(

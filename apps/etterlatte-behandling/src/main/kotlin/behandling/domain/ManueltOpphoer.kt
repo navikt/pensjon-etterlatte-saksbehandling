@@ -6,7 +6,6 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
-import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Utenlandstilsnitt
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
@@ -22,7 +21,6 @@ data class ManueltOpphoer(
     override val behandlingOpprettet: LocalDateTime,
     override val sistEndret: LocalDateTime,
     override val status: BehandlingStatus,
-    override val persongalleri: Persongalleri,
     override val virkningstidspunkt: Virkningstidspunkt?,
     override val utenlandstilsnitt: Utenlandstilsnitt?,
     override val boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet?,
@@ -35,7 +33,6 @@ data class ManueltOpphoer(
 
     constructor(
         sak: Sak,
-        persongalleri: Persongalleri,
         opphoerAarsaker: List<ManueltOpphoerAarsak>,
         fritekstAarsak: String?,
         virkningstidspunkt: Virkningstidspunkt?,
@@ -47,7 +44,6 @@ data class ManueltOpphoer(
         behandlingOpprettet = Tidspunkt.now().toLocalDatetimeUTC(),
         sistEndret = Tidspunkt.now().toLocalDatetimeUTC(),
         status = BehandlingStatus.OPPRETTET,
-        persongalleri = persongalleri,
         opphoerAarsaker = opphoerAarsaker,
         fritekstAarsak = fritekstAarsak,
         virkningstidspunkt = virkningstidspunkt,

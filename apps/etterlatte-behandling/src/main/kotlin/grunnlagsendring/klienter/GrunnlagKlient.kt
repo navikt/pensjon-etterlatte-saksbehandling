@@ -10,7 +10,10 @@ import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import no.nav.etterlatte.libs.common.FoedselsnummerDTO
 import no.nav.etterlatte.libs.common.behandling.PersonMedSakerOgRoller
+import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.opplysningsbehov.Opplysningsbehov
 
 interface GrunnlagKlient {
@@ -18,6 +21,7 @@ interface GrunnlagKlient {
     suspend fun hentAlleSakIder(fnr: String): Set<Long>
     suspend fun hentPersonSakOgRolle(fnr: String): PersonMedSakerOgRoller
     suspend fun leggInnNyttGrunnlag(opplysningsbehov: Opplysningsbehov)
+    suspend fun hentPersongalleri(sakId: Long): Grunnlagsopplysning<Persongalleri>?
 }
 
 class GrunnlagKlientImpl(
@@ -36,6 +40,12 @@ class GrunnlagKlientImpl(
 
     override suspend fun hentGrunnlag(sakId: Long): Grunnlag? {
         return grunnlagHttpClient.get("$url/api/grunnlag/$sakId") {
+            accept(ContentType.Application.Json)
+        }.body()
+    }
+
+    override suspend fun hentPersongalleri(sakId: Long): Grunnlagsopplysning<Persongalleri>? {
+        return grunnlagHttpClient.get("$url/api/grunnlag/$sakId/${Opplysningstype.PERSONGALLERI_V1}") {
             accept(ContentType.Application.Json)
         }.body()
     }

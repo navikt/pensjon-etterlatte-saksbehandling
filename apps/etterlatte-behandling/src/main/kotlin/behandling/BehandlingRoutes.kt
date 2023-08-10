@@ -212,7 +212,7 @@ internal fun Route.behandlingRoutes(
         route("/{$BEHANDLINGSID_CALL_PARAMETER}") {
             get {
                 logger.info("Henter detaljert behandling for behandling med id=$behandlingsId")
-                when (val behandling = behandlingService.hentDetaljertBehandling(behandlingsId)) {
+                when (val behandling = behandlingService.hentDetaljertBehandling(behandlingsId, brukerTokenInfo)) {
                     is DetaljertBehandling -> call.respond(behandling)
                     else -> call.respond(HttpStatusCode.NotFound, "Fant ikke behandling med id=$behandlingsId")
                 }

@@ -19,7 +19,6 @@ import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.JaNeiMedBegrunnelse
-import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
@@ -34,7 +33,6 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.fixedNorskTid
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeNorskTid
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
-import no.nav.etterlatte.persongalleri
 import no.nav.etterlatte.sak.SakDao
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -105,13 +103,6 @@ internal class GyldighetsproevingServiceImplTest {
             sistEndret = Tidspunkt.now().toLocalDatetimeUTC(),
             status = BehandlingStatus.OPPRETTET,
             soeknadMottattDato = Tidspunkt.now().toLocalDatetimeUTC(),
-            persongalleri = Persongalleri(
-                soeker = "Ola Olsen",
-                "Soeker",
-                listOf("Gjenlevende"),
-                listOf("Avdoed"),
-                emptyList()
-            ),
             gyldighetsproeving = null,
             virkningstidspunkt = Virkningstidspunkt(
                 YearMonth.of(2022, 1),
@@ -124,7 +115,7 @@ internal class GyldighetsproevingServiceImplTest {
             kilde = Vedtaksloesning.GJENNY
         )
 
-        assertEquals("Soeker", behandlingsService.hentFoerstegangsbehandling(id)!!.persongalleri.innsender)
+        behandlingsService.hentFoerstegangsbehandling(id)
 
         verify(exactly = 1) { behandlingDaoMock.hentBehandling(id) }
     }
@@ -140,7 +131,6 @@ internal class GyldighetsproevingServiceImplTest {
             behandlingOpprettet = now,
             sistEndret = now,
             status = BehandlingStatus.OPPRETTET,
-            persongalleri = persongalleri(),
             kommerBarnetTilgode = null,
             virkningstidspunkt = null,
             boddEllerArbeidetUtlandet = null,
@@ -205,13 +195,6 @@ internal class GyldighetsproevingServiceImplTest {
             sistEndret = Tidspunkt.now().toLocalDatetimeUTC(),
             status = BehandlingStatus.OPPRETTET,
             soeknadMottattDato = Tidspunkt.now().toLocalDatetimeUTC(),
-            persongalleri = Persongalleri(
-                soeker = "Ola Olsen",
-                "Soeker",
-                listOf("Gjenlevende"),
-                listOf("Avdoed"),
-                emptyList()
-            ),
             gyldighetsproeving = null,
             virkningstidspunkt = Virkningstidspunkt(
                 YearMonth.of(2022, 1),
@@ -224,7 +207,7 @@ internal class GyldighetsproevingServiceImplTest {
             kilde = Vedtaksloesning.GJENNY
         )
 
-        assertEquals("Soeker", behandlingsService.hentFoerstegangsbehandling(id)!!.persongalleri.innsender)
+        behandlingsService.hentFoerstegangsbehandling(id)
 
         verify(exactly = 1) { behandlingDaoMock.hentBehandling(id) }
     }
@@ -253,13 +236,6 @@ internal class GyldighetsproevingServiceImplTest {
             sistEndret = Tidspunkt.now().toLocalDatetimeUTC(),
             status = BehandlingStatus.OPPRETTET,
             soeknadMottattDato = Tidspunkt.now().toLocalDatetimeUTC(),
-            persongalleri = Persongalleri(
-                soeker = "Ola Olsen",
-                "Soeker",
-                listOf("Gjenlevende"),
-                listOf("Avdoed"),
-                emptyList()
-            ),
             gyldighetsproeving = null,
             virkningstidspunkt = Virkningstidspunkt(
                 YearMonth.of(2022, 1),
@@ -272,7 +248,7 @@ internal class GyldighetsproevingServiceImplTest {
             kilde = Vedtaksloesning.GJENNY
         )
 
-        assertEquals("Soeker", behandlingsService.hentFoerstegangsbehandling(id)!!.persongalleri.innsender)
+        behandlingsService.hentFoerstegangsbehandling(id)
 
         verify(exactly = 1) { behandlingDaoMock.hentBehandling(id) }
     }
@@ -301,13 +277,6 @@ internal class GyldighetsproevingServiceImplTest {
             sistEndret = Tidspunkt.now().toLocalDatetimeUTC(),
             status = BehandlingStatus.OPPRETTET,
             soeknadMottattDato = Tidspunkt.now().toLocalDatetimeUTC(),
-            persongalleri = Persongalleri(
-                soeker = "Ola Olsen",
-                "Soeker",
-                listOf("Gjenlevende"),
-                listOf("Avdoed"),
-                emptyList()
-            ),
             gyldighetsproeving = null,
             virkningstidspunkt = Virkningstidspunkt(
                 YearMonth.of(2022, 1),

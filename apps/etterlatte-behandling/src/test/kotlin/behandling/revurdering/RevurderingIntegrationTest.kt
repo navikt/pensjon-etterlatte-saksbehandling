@@ -1,6 +1,7 @@
 package no.nav.etterlatte.behandling.revurdering
 
 import io.ktor.server.plugins.BadRequestException
+import io.mockk.coVerify
 import io.mockk.confirmVerified
 import io.mockk.every
 import io.mockk.mockk
@@ -141,7 +142,8 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
                 saksbehandlerIdent = "Jenny"
             )
 
-        verify { grunnlagService.leggInnNyttGrunnlag(revurdering!!) }
+        verify { grunnlagService.leggInnNyttGrunnlag(revurdering!!, any()) }
+        coVerify { grunnlagService.hentPersongalleri(any()) }
         verify {
             oppgaveService.opprettNyOppgaveMedSakOgReferanse(
                 revurdering?.id.toString(),
@@ -258,7 +260,8 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
             val ferdigRevurdering = applicationContext.behandlingDao.hentBehandling(revurdering.id) as Revurdering
             assertEquals(nyRevurderingInfo, ferdigRevurdering.revurderingInfo)
             verify { hendelser.sendMeldingForHendelse(revurdering, BehandlingHendelseType.OPPRETTET) }
-            verify { grunnlagService.leggInnNyttGrunnlag(revurdering) }
+            verify { grunnlagService.leggInnNyttGrunnlag(revurdering, any()) }
+            coVerify { grunnlagService.hentPersongalleri(any()) }
             verify {
                 oppgaveService.opprettNyOppgaveMedSakOgReferanse(
                     revurdering.id.toString(),
@@ -441,8 +444,9 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
                 hendelse.id
             )
             assertEquals(revurdering.id, grunnlaghendelse?.behandlingId)
-            verify { grunnlagService.leggInnNyttGrunnlag(behandling as Behandling) }
-            verify { grunnlagService.leggInnNyttGrunnlag(revurdering) }
+            coVerify { grunnlagService.hentPersongalleri(any()) }
+            verify { grunnlagService.leggInnNyttGrunnlag(behandling as Behandling, any()) }
+            verify { grunnlagService.leggInnNyttGrunnlag(revurdering, any()) }
             verify { hendelser.sendMeldingForHendelse(revurdering, BehandlingHendelseType.OPPRETTET) }
             verify {
                 oppgaveService.opprettNyOppgaveMedSakOgReferanse(

@@ -41,7 +41,7 @@ class OppgaveServiceNy(
             inTransaction {
                 oppgaveDaoNy.hentOppgaver(aktuelleOppgavetyperForRoller)
             }.sortedByDescending { it.opprettet }
-        }.filterForEnheter(Kontekst.get().AppUser)
+        }.filterForEnheter(Kontekst.get().AppUser).take(3)
     }
 
     private fun List<OppgaveNy>.filterForEnheter(bruker: User) =

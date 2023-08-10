@@ -28,8 +28,9 @@ class GosysOppgaveServiceImplTest {
         coEvery { gosysOppgaveKlient.hentOppgaver(any(), any(), brukerTokenInfo) } returns GosysOppgaver(
             antallTreffTotalt = 3,
             oppgaver = listOf(
-                GosysOppgave(
+                GosysApiOppgave(
                     id = 1,
+                    versjon = 1,
                     tema = "EYB",
                     behandlingstema = "",
                     oppgavetype = "",
@@ -41,8 +42,9 @@ class GosysOppgaveServiceImplTest {
                     status = "NY",
                     fristFerdigstillelse = LocalDate.now().plusDays(7)
                 ),
-                GosysOppgave(
+                GosysApiOppgave(
                     id = 2,
+                    versjon = 4,
                     tema = "EYB",
                     behandlingstema = "",
                     oppgavetype = "",
@@ -54,8 +56,9 @@ class GosysOppgaveServiceImplTest {
                     status = "TIL_ATTESTERING",
                     fristFerdigstillelse = LocalDate.now().plusDays(14)
                 ),
-                GosysOppgave(
+                GosysApiOppgave(
                     id = 3,
+                    versjon = 1,
                     tema = "EYO",
                     behandlingstema = "",
                     oppgavetype = "",

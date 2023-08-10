@@ -6,24 +6,52 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.vedtaksvurdering.VedtakHendelse
 import java.util.*
 
+abstract class Oppgave {
+    abstract val status: Status
+    abstract val type: OppgaveType
+    abstract val enhet: String
+    abstract val saksbehandler: String?
+    abstract val opprettet: Tidspunkt
+    abstract val sakType: SakType
+    abstract val fnr: String?
+    abstract val frist: Tidspunkt?
+}
+
 data class OppgaveNy(
     val id: UUID,
-    val status: Status,
-    val enhet: String,
+    override val status: Status,
+    override val enhet: String,
     val sakId: Long,
     val kilde: OppgaveKilde? = null,
-    val type: OppgaveType,
-    val saksbehandler: String? = null,
+    override val type: OppgaveType,
+    override val saksbehandler: String? = null,
     val referanse: String? = null,
     val merknad: String? = null,
-    val opprettet: Tidspunkt,
-    val sakType: SakType,
-    val fnr: String? = null,
-    val frist: Tidspunkt?
-) {
+    override val opprettet: Tidspunkt,
+    override val sakType: SakType,
+    override val fnr: String? = null,
+    override val frist: Tidspunkt?
+) : Oppgave() {
     fun erAvsluttet(): Boolean {
         return Status.erAvsluttet(this.status)
     }
+}
+
+data class GosysOppgave(
+    val id: Long,
+    val versjon: Long,
+    override val status: Status,
+    override val saksbehandler: String?,
+    override val enhet: String,
+    override val opprettet: Tidspunkt,
+    override val frist: Tidspunkt?,
+    override val sakType: SakType,
+    override val fnr: String,
+    val gjelder: String,
+    val beskrivelse: String
+) : Oppgave() {
+    override val type: OppgaveType
+        get() = OppgaveType.GOSYS
 }
 
 enum class Status {

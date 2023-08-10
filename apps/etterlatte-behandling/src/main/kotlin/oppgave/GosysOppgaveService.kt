@@ -4,17 +4,14 @@ import no.nav.etterlatte.common.klienter.PdlKlient
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveKilde
-import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveNy
-import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveType
+import no.nav.etterlatte.libs.common.oppgaveNy.GosysOppgave
 import no.nav.etterlatte.libs.common.oppgaveNy.Status
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.token.BrukerTokenInfo
 import java.time.LocalTime
-import java.util.*
 
 interface GosysOppgaveService {
-    suspend fun hentOppgaver(brukerTokenInfo: BrukerTokenInfo): List<OppgaveNy>
+    suspend fun hentOppgaver(brukerTokenInfo: BrukerTokenInfo): List<GosysOppgave>
 }
 
 class GosysOppgaveServiceImpl(
@@ -23,7 +20,7 @@ class GosysOppgaveServiceImpl(
     private val featureToggleService: FeatureToggleService
 ) :
     GosysOppgaveService {
-    override suspend fun hentOppgaver(brukerTokenInfo: BrukerTokenInfo): List<OppgaveNy> {
+    override suspend fun hentOppgaver(brukerTokenInfo: BrukerTokenInfo): List<GosysOppgave> {
         if (!featureToggleService.isEnabled(GosysOppgaveServiceFeatureToggle.HentGosysOppgaver, false)) {
             return emptyList()
         }
@@ -39,7 +36,7 @@ class GosysOppgaveServiceImpl(
             pdlKlient.hentFolkeregisterIdenterForAktoerIdBolk(aktoerIds)
         }
 
-        return gosysOppgaver.oppgaver.map { fraGosysOppgaveTilNy(it, fnrByAktoerId) }
+        return gosysOppgaver.oppgaver.map { it.fraGosysOppgaveTilNy(fnrByAktoerId) }
     }
 
     companion object {
@@ -49,24 +46,20 @@ class GosysOppgaveServiceImpl(
             "EYO" to SakType.OMSTILLINGSSTOENAD
         )
 
-        private fun fraGosysOppgaveTilNy(gosysOppgave: GosysOppgave, fnrByAktoerId: Map<String, String?>): OppgaveNy {
-            return gosysOppgave.let {
-                OppgaveNy(
-                    id = UUID.randomUUID(), // : UUID,
-                    status = Status.NY, // tmp?
-                    enhet = it.tildeltEnhetsnr,
-                    sakId = 0L,
-                    kilde = OppgaveKilde.EKSTERN,
-                    type = OppgaveType.GOSYS,
-                    saksbehandler = it.tilordnetRessurs,
-                    referanse = null,
-                    merknad = null,
-                    opprettet = it.opprettetTidspunkt,
-                    sakType = temaTilSakType[it.tema]!!,
-                    fnr = fnrByAktoerId[it.aktoerId],
-                    frist = Tidspunkt.ofNorskTidssone(dato = it.fristFerdigstillelse, tid = LocalTime.MIDNIGHT)
-                )
-            }
+        private fun GosysApiOppgave.fraGosysOppgaveTilNy(fnrByAktoerId: Map<String, String?>): GosysOppgave {
+            return GosysOppgave(
+                id = this.id,
+                versjon = this.versjon,
+                status = Status.NY,
+                opprettet = this.opprettetTidspunkt,
+                frist = Tidspunkt.ofNorskTidssone(dato = this.fristFerdigstillelse, tid = LocalTime.MIDNIGHT),
+                fnr = fnrByAktoerId[this.aktoerId]!!,
+                gjelder = temaTilSakType[this.tema]!!.name,
+                enhet = this.tildeltEnhetsnr,
+                saksbehandler = this.tilordnetRessurs,
+                beskrivelse = this.beskrivelse,
+                sakType = temaTilSakType[this.tema]!!
+            )
         }
     }
 }

@@ -13,10 +13,11 @@ import no.nav.etterlatte.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 
-data class GosysOppgaver(val antallTreffTotalt: Int, val oppgaver: List<GosysOppgave>)
+data class GosysOppgaver(val antallTreffTotalt: Int, val oppgaver: List<GosysApiOppgave>)
 
-data class GosysOppgave(
-    val id: Int,
+data class GosysApiOppgave(
+    val id: Long,
+    val versjon: Long,
     val tema: String,
     val behandlingstema: String,
     val oppgavetype: String,

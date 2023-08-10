@@ -138,6 +138,7 @@ enum class BrevProsessType {
                     RevurderingAarsak.SOESKENJUSTERING -> AUTOMATISK
                     RevurderingAarsak.FENGSELSOPPHOLD -> AUTOMATISK
                     RevurderingAarsak.UT_AV_FENGSEL -> AUTOMATISK
+                    RevurderingAarsak.YRKESSKADE -> AUTOMATISK
                     else -> MANUELL
                 }
 

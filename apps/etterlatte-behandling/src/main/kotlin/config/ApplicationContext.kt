@@ -46,6 +46,8 @@ import no.nav.etterlatte.libs.jobs.LeaderElection
 import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.libs.sporingslogg.Sporingslogg
+import no.nav.etterlatte.metrics.MetrikkerDao
+import no.nav.etterlatte.metrics.OppgaveMetrics
 import no.nav.etterlatte.oppgave.GosysOppgaveKlient
 import no.nav.etterlatte.oppgave.GosysOppgaveKlientImpl
 import no.nav.etterlatte.oppgave.GosysOppgaveServiceImpl
@@ -139,6 +141,7 @@ class ApplicationContext(
     val grunnlagsendringshendelseDao = GrunnlagsendringshendelseDao { databaseContext().activeTx() }
     val institusjonsoppholdDao = InstitusjonsoppholdDao { databaseContext().activeTx() }
     val migreringRepository = MigreringRepository { databaseContext().activeTx() }
+    val metrikkerDao = MetrikkerDao { databaseContext().activeTx() }
 
     // Klient
     val pdlKlient = PdlKlientImpl(pdlHttpClient, "http://etterlatte-pdltjenester")
@@ -149,6 +152,9 @@ class ApplicationContext(
     val behandlingsHendelser = BehandlingsHendelserKafkaProducerImpl(rapid)
 
     val kanBrukeNyOppgaveliste: Boolean = env.getValue("KAN_BRUKE_NY_OPPGAVELISTE").toBoolean()
+
+    // Metrikker
+    val oppgaveMetrikker = OppgaveMetrics(metrikkerDao)
 
     // Service
     val oppgaveService = OppgaveServiceImpl(oppgaveDao, featureToggleService)

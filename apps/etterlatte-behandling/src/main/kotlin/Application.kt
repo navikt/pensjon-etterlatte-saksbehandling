@@ -74,7 +74,8 @@ fun Application.module(context: ApplicationContext) {
     with(context) {
         restModule(
             sikkerLogg,
-            withMetrics = true
+            withMetrics = true,
+            additionalMetrics = listOf(oppgaveMetrikker)
         ) {
             attachContekst(dataSource, context)
             sakSystemRoutes(

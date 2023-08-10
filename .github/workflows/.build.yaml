@@ -10,7 +10,7 @@ on:
 jobs:
   build-and-publish:
     name: Build & publish
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest-8-cores
     permissions:
       contents: 'read'
       id-token: 'write'
@@ -47,7 +47,7 @@ jobs:
         run: echo 'Docker-tag er ${{ steps.docker-build-push.outputs.image }} ' >> $GITHUB_STEP_SUMMARY
   snyk:
     name: Snyk
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest-8-cores
     steps:
       - name: Checkout code
         uses: actions/checkout@v3

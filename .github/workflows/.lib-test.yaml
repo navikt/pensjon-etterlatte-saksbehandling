@@ -6,7 +6,7 @@ on:
 jobs:
   test:
     name: Verify pull request
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest-8-cores
     steps:
       - name: Checkout code
         uses: actions/checkout@v3

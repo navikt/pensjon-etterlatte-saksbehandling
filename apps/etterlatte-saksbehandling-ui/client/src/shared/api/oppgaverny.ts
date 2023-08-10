@@ -14,6 +14,10 @@ export interface OppgaveDTOny {
   sakType: Saktype
   fnr: string
   frist: string
+
+  // GOSYS-spesifikt
+  beskrivelse: string | null
+  gjelder: string | null
 }
 
 export type Saktype = 'BARNEPENSJON' | 'OMSTILLINGSSTOENAD'

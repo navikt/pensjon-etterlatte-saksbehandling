@@ -170,6 +170,66 @@ class OppgaveServiceNyTest {
     }
 
     @Test
+    fun `avbrytAapneOppgaverForBehandling setter alle åpne oppgaver for behandling til avbrutt`() {
+        val sak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val behandlingsId = UUID.randomUUID().toString()
+        val oppgaveBehandling = oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
+            referanse = behandlingsId,
+            sakId = sak.id,
+            oppgaveKilde = OppgaveKilde.BEHANDLING,
+            oppgaveType = OppgaveType.FOERSTEGANGSBEHANDLING,
+            merknad = null
+        )
+        val oppgaveAttestering = oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
+            referanse = behandlingsId,
+            sakId = sak.id,
+            oppgaveKilde = OppgaveKilde.BEHANDLING,
+            oppgaveType = OppgaveType.ATTESTERING,
+            merknad = null
+        )
+        oppgaveServiceNy.tildelSaksbehandler(oppgaveBehandling.id, "saksbehandler")
+        oppgaveServiceNy.avbrytAapneOppgaverForBehandling(behandlingsId)
+        val oppgaveBehandlingEtterAvbryt = oppgaveServiceNy.hentOppgave(oppgaveBehandling.id)
+        val oppgaveAttesteringEtterAvbryt = oppgaveServiceNy.hentOppgave(oppgaveAttestering.id)
+
+        Assertions.assertEquals(Status.AVBRUTT, oppgaveBehandlingEtterAvbryt?.status)
+        Assertions.assertEquals(Status.AVBRUTT, oppgaveAttesteringEtterAvbryt?.status)
+    }
+
+    @Test
+    fun `avbrytAapneOppgaverForBehandling endrer ikke avsluttede oppgaver eller oppgaver til andre behandlinger`() {
+        val sak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val behandlingId = UUID.randomUUID().toString()
+        val annenBehandlingId = UUID.randomUUID().toString()
+        val saksbehandler = "saksbehandler"
+
+        val oppgaveFerdigstilt = oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
+            referanse = behandlingId,
+            sakId = sak.id,
+            oppgaveKilde = OppgaveKilde.BEHANDLING,
+            oppgaveType = OppgaveType.FOERSTEGANGSBEHANDLING,
+            merknad = null
+        )
+        oppgaveServiceNy.tildelSaksbehandler(oppgaveFerdigstilt.id, saksbehandler)
+        oppgaveServiceNy.ferdigStillOppgaveUnderBehandling(behandlingId, saksbehandler)
+
+        val oppgaveUnderBehandlingAnnenBehandling = oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
+            referanse = annenBehandlingId,
+            sakId = sak.id,
+            oppgaveKilde = OppgaveKilde.BEHANDLING,
+            oppgaveType = OppgaveType.ATTESTERING,
+            merknad = null
+        )
+        oppgaveServiceNy.tildelSaksbehandler(oppgaveUnderBehandlingAnnenBehandling.id, saksbehandler)
+        oppgaveServiceNy.avbrytAapneOppgaverForBehandling(behandlingId)
+
+        val oppgaveFerdigstiltEtterAvbryt = oppgaveServiceNy.hentOppgave(oppgaveFerdigstilt.id)
+        val oppgaveUnderBehandlingEtterAvbryt = oppgaveServiceNy.hentOppgave(oppgaveUnderBehandlingAnnenBehandling.id)
+        Assertions.assertEquals(Status.FERDIGSTILT, oppgaveFerdigstiltEtterAvbryt?.status)
+        Assertions.assertEquals(Status.UNDER_BEHANDLING, oppgaveUnderBehandlingEtterAvbryt?.status)
+    }
+
+    @Test
     fun `skal kunne bytte oppgave med saksbehandler`() {
         val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         val nyOppgave = oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(

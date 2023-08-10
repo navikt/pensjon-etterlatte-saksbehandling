@@ -85,6 +85,7 @@ class BehandlingFactory(
         return inTransaction {
             harBehandlingUnderbehandling.forEach {
                 behandlingDao.lagreStatus(it.id, BehandlingStatus.AVBRUTT, LocalDateTime.now())
+                oppgaveService.avbrytAapneOppgaverForBehandling(it.id.toString())
             }
 
             OpprettBehandling(

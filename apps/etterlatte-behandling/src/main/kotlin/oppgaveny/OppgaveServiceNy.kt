@@ -314,6 +314,17 @@ class OppgaveServiceNy(
     fun hentOppgave(oppgaveId: UUID): OppgaveNy? {
         return oppgaveDaoNy.hentOppgave(oppgaveId)
     }
+
+    /**
+     * Skal kun brukes for automatisk avbrudd når vi får erstattende førstegangsbehandling i saken
+     */
+    fun avbrytAapneOppgaverForBehandling(behandlingId: String) {
+        oppgaveDaoNy.hentOppgaverForBehandling(behandlingId)
+            .filter { !it.erAvsluttet() }
+            .forEach {
+                oppgaveDaoNy.endreStatusPaaOppgave(it.id, Status.AVBRUTT)
+            }
+    }
 }
 
 fun List<OppgaveNy>.filterOppgaverForEnheter(

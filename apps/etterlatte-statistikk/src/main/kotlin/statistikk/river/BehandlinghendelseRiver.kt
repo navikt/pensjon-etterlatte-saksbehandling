@@ -29,7 +29,9 @@ class BehandlinghendelseRiver(
         "BEHANDLING:OPPRETTET"
     )
 
-    override fun River.eventName() = validate { it.demandAny(EVENT_NAME_KEY, behandlingshendelser) }
+    override fun River.eventName() {
+        validate { it.demandAny(EVENT_NAME_KEY, behandlingshendelser) }
+    }
 
     override fun River.validation() {
         validate { it.interestedIn(BehandlingRiverKey.behandlingObjectKey) }

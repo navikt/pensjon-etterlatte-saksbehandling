@@ -19,7 +19,9 @@ internal class LagreIverksattVedtak(
 
     override fun River.eventName() = eventName("UTBETALING:OPPDATERT")
 
-    override fun River.validation() = validate { it.requireKey("utbetaling_response") }
+    override fun River.validation() {
+        validate { it.requireKey("utbetaling_response") }
+    }
 
     override fun haandterPakke(packet: JsonMessage, context: MessageContext) {
         val respons = objectMapper.readValue<UtbetalingResponseDto>(packet["utbetaling_response"].toString())

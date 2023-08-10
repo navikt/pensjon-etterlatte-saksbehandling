@@ -14,6 +14,10 @@ export interface OppgaveDTOny {
   sakType: Saktype
   fnr: string
   frist: string
+
+  // GOSYS-spesifikt
+  beskrivelse: string | null
+  gjelder: string | null
 }
 
 export type Saktype = 'BARNEPENSJON' | 'OMSTILLINGSSTOENAD'
@@ -29,7 +33,8 @@ export type Oppgavetype =
   | 'UNDERKJENT'
   | 'GOSYS'
 
-export const erOppgaveRedigerbar = (status: Oppgavestatus): boolean => ['NY', 'UNDER_BEHANDLING'].includes(status)
+export const erOppgaveRedigerbar = (status: Oppgavestatus, type: string): boolean =>
+  ['NY', 'UNDER_BEHANDLING'].includes(status) && !['GOSYS'].includes(type)
 
 export const hentNyeOppgaver = async (): Promise<ApiResponse<OppgaveDTOny[]>> => apiClient.get('/nyeoppgaver')
 

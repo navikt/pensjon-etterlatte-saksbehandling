@@ -6,21 +6,7 @@ import { OppgavetypeTag, SaktypeTag } from '~components/nyoppgavebenk/Tags'
 import { formaterFnr, formaterStringDato } from '~utils/formattering'
 import { FristWrapper } from '~components/nyoppgavebenk/Oppgavelista'
 import { isBefore } from 'date-fns'
-import { SakType } from '~shared/types/sak'
-
-const GosysOppgaveMock = {
-  regdato: '2023-07-27T09:25:08.802267',
-  fristdato: '2023-08-27T00:00',
-  status: 'OPPRETTET',
-  fnr: '09031355831',
-  gjelder: 'Vurder konsekvens',
-  enhet: '4808',
-  saksbehandler: '',
-  beskrivelse:
-    'Lenke videre til gosys for mer detaljer om oppgaven.' +
-    'Informere om at endringer (oppdateringer, endre frist, ferdigstille osv) på oppgave må gjøres i Gosys.',
-  saktype: SakType.OMSTILLINGSSTOENAD,
-}
+import { Oppgavestatus, Saktype } from '~shared/api/oppgaverny'
 
 const TagRow = styled.div`
   display: flex;
@@ -48,12 +34,20 @@ const ButtonRow = styled.div`
   justify-content: flex-end;
 `
 
-export const GosysOppgaveModal = () => {
+export const GosysOppgaveModal = (props: {
+  oppgavestatus: Oppgavestatus
+  fnr: string
+  gjelder: string | null
+  saktype: Saktype
+  regdato: string
+  fristdato: string
+  beskrivelse: string | null
+  enhet: string
+  saksbehandler: string | null
+}) => {
   const [open, setOpen] = useState(false)
+  const { regdato, fristdato, oppgavestatus, fnr, gjelder, enhet, saksbehandler, beskrivelse, saktype } = props
   const gosysUrl = process.env.GOSYS_URL
-
-  // TODO: Hent dette fra props
-  const { regdato, fristdato, status, fnr, gjelder, enhet, saksbehandler, beskrivelse, saktype } = GosysOppgaveMock
 
   return (
     <>
@@ -84,7 +78,7 @@ export const GosysOppgaveModal = () => {
             </div>
             <div>
               <Label>Status</Label>
-              <BodyShort>{status}</BodyShort>
+              <BodyShort>{oppgavestatus}</BodyShort>
             </div>
             <div>
               <Label>Fødselsnummer</Label>
@@ -123,4 +117,4 @@ export const GosysOppgaveModal = () => {
   )
 }
 
-const hyphenIfNull = (inputString: string) => (inputString ? inputString : '-')
+const hyphenIfNull = (inputString: string | null) => (inputString ? inputString : '-')

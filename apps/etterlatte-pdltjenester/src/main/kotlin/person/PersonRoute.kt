@@ -12,6 +12,7 @@ import io.ktor.server.routing.route
 import no.nav.etterlatte.libs.common.pdl.PdlFeil
 import no.nav.etterlatte.libs.common.pdl.PdlFeilAarsak
 import no.nav.etterlatte.libs.common.person.FamilieRelasjonManglerIdent
+import no.nav.etterlatte.libs.common.person.HentFolkeregisterIdenterForAktoerIdBolkRequest
 import no.nav.etterlatte.libs.common.person.HentGeografiskTilknytningRequest
 import no.nav.etterlatte.libs.common.person.HentPdlIdentRequest
 import no.nav.etterlatte.libs.common.person.HentPersonRequest
@@ -82,6 +83,20 @@ fun Route.personRoute(service: PersonService) {
 
             try {
                 service.hentPdlIdentifikator(hentPdlIdentRequest).let { call.respond(it) }
+            } catch (e: PdlFantIkkePerson) {
+                call.respond(HttpStatusCode.NotFound)
+            }
+        }
+    }
+
+    route("folkeregisteridenter") {
+        post {
+            val personIdenterForAktoerIdRequest = call.receive<HentFolkeregisterIdenterForAktoerIdBolkRequest>()
+
+            try {
+                service.hentFolkeregisterIdenterForAktoerIdBolk(
+                    personIdenterForAktoerIdRequest
+                ).let { call.respond(it) }
             } catch (e: PdlFantIkkePerson) {
                 call.respond(HttpStatusCode.NotFound)
             }

@@ -67,6 +67,7 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
       Revurderingsaarsak.OMGJOERING_AV_FARSKAP,
       Revurderingsaarsak.ADOPSJON,
       Revurderingsaarsak.FENGSELSOPPHOLD,
+      Revurderingsaarsak.YRKESSKADE,
     ]
     return !aarsakerMedManueltBrev.includes(props.behandling.revurderingsaarsak)
   }

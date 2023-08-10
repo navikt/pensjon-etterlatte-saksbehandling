@@ -96,7 +96,7 @@ class BrevDataMapper(private val featureToggleService: FeatureToggleService) {
                         false
                     )
                 ) {
-                    true -> InnvilgetBrevData.fra(behandling)
+                    true -> InnvilgetBrevDataNy.fra(behandling)
                     false -> InnvilgetBrevData.fra(behandling)
                 }
 

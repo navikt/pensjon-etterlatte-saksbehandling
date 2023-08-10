@@ -88,11 +88,7 @@ fun Application.restModule(
             }
         }
     }
-    if (additionalMetrics.isNotEmpty() && withMetrics) {
-        throw IllegalArgumentException(
-            "Hei du ber om ekstra metrikker, men har skrudd av metrikker. Ikke gjør det igjen >:("
-        )
-    }
+
     if (withMetrics) {
         metricsModule(additionalMetrics)
     }

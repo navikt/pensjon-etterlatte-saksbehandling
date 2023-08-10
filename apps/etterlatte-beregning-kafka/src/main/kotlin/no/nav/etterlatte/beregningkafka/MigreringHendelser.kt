@@ -10,6 +10,7 @@ import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.etterlatte.rapidsandrivers.migrering.MigreringRequest
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser
+import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser.BEREGN
 import no.nav.etterlatte.rapidsandrivers.migrering.hendelseData
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -22,9 +23,9 @@ import rapidsandrivers.behandlingId
 import rapidsandrivers.migrering.RiverMedLoggingOgFeilhaandtering
 
 internal class MigreringHendelser(rapidsConnection: RapidsConnection, private val beregningService: BeregningService) :
-    RiverMedLoggingOgFeilhaandtering(rapidsConnection, Migreringshendelser.BEREGN) {
+    RiverMedLoggingOgFeilhaandtering(rapidsConnection, BEREGN) {
 
-    override fun River.eventName() = eventName(hendelsestype)
+    override fun River.eventName() = eventName(BEREGN)
 
     override fun River.validation() {
         validate { it.requireKey(BEHANDLING_ID_KEY) }

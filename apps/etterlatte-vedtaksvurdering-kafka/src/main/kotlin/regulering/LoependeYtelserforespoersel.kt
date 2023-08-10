@@ -24,7 +24,7 @@ internal class LoependeYtelserforespoersel(
     private val vedtak: VedtakService
 ) : RiverMedLoggingOgFeilhaandtering(rapidsConnection, FINN_LOEPENDE_YTELSER) {
 
-    override fun River.eventName() = eventName(hendelsestype)
+    override fun River.eventName() = eventName(FINN_LOEPENDE_YTELSER)
 
     override fun River.validation() {
         validate { it.requireKey(SAK_ID_KEY) }

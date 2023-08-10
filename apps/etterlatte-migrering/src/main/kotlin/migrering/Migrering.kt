@@ -18,7 +18,7 @@ import rapidsandrivers.migrering.RiverMedLoggingOgFeilhaandtering
 internal class Migrering(rapidsConnection: RapidsConnection, private val pesysRepository: PesysRepository) :
     RiverMedLoggingOgFeilhaandtering(rapidsConnection, START_MIGRERING) {
 
-    override fun River.eventName() = eventName(hendelsestype)
+    override fun River.eventName() = eventName(START_MIGRERING)
 
     override fun River.validation() {
     }

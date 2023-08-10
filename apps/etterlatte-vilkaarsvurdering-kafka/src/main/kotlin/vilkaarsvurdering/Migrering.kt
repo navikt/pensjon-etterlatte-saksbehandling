@@ -18,7 +18,7 @@ internal class Migrering(
     private val vilkaarsvurderingService: VilkaarsvurderingService
 ) : RiverMedLoggingOgFeilhaandtering(rapidsConnection, VILKAARSVURDER) {
 
-    override fun River.eventName() = eventName(hendelsestype)
+    override fun River.eventName() = eventName(VILKAARSVURDER)
 
     override fun River.validation() {
         validate { it.requireKey(BEHANDLING_ID_KEY) }

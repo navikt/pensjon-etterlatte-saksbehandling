@@ -2,19 +2,15 @@ package rapidsandrivers.migrering
 
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
-import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
-import no.nav.helse.rapids_rivers.River
 import rapidsandrivers.withFeilhaandtering
 
 abstract class RiverMedLoggingOgFeilhaandtering(
     rapidsConnection: RapidsConnection,
     protected val hendelsestype: String
 ) : RiverMedLogging(rapidsConnection) {
-
-    override fun River.eventName() = eventName(hendelsestype)
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) =
         withLogContext(packet.correlationId) {

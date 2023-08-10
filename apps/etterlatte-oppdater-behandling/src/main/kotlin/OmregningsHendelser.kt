@@ -20,7 +20,7 @@ import rapidsandrivers.migrering.RiverMedLoggingOgFeilhaandtering
 internal class OmregningsHendelser(rapidsConnection: RapidsConnection, private val behandlinger: BehandlingService) :
     RiverMedLoggingOgFeilhaandtering(rapidsConnection, OMREGNINGSHENDELSE) {
 
-    override fun River.eventName() = eventName(hendelsestype)
+    override fun River.eventName() = eventName(OMREGNINGSHENDELSE)
 
     override fun River.validation() {
         validate { it.rejectKey(BEHANDLING_ID_KEY) }

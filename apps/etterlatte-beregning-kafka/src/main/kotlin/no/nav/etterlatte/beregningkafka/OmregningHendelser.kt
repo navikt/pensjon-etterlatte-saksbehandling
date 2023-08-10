@@ -8,6 +8,7 @@ import no.nav.etterlatte.libs.common.beregning.AvkortingDto
 import no.nav.etterlatte.libs.common.beregning.BeregningDTO
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
+import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.etterlatte.rapidsandrivers.EventNames.BEREGN
 import no.nav.etterlatte.rapidsandrivers.EventNames.OPPRETT_VEDTAK
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -31,6 +32,7 @@ internal class OmregningHendelser(
 ) :
     RiverMedLoggingOgFeilhaandtering(rapidsConnection, BEREGN) {
 
+    override fun River.eventName() = eventName(BEREGN)
     override fun River.validation() {
         validate { it.requireKey(BEHANDLING_ID_KEY) }
         validate { it.requireKey(SAK_TYPE) }

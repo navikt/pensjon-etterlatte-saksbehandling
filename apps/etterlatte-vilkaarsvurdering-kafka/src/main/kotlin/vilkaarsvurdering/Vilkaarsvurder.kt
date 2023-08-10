@@ -21,7 +21,7 @@ internal class Vilkaarsvurder(
 ) :
     RiverMedLoggingOgFeilhaandtering(rapidsConnection, VILKAARSVURDER) {
 
-    override fun River.eventName() = eventName(hendelsestype)
+    override fun River.eventName() = eventName(VILKAARSVURDER)
 
     override fun River.validation() {
         validate { it.requireKey(SAK_ID_KEY) }

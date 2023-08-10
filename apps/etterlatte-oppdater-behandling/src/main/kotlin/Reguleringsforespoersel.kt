@@ -18,7 +18,7 @@ internal class Reguleringsforespoersel(
     private val behandlingService: BehandlingService
 ) : RiverMedLoggingOgFeilhaandtering(rapidsConnection, REGULERING_EVENT_NAME) {
 
-    override fun River.eventName() = eventName(hendelsestype)
+    override fun River.eventName() = eventName(REGULERING_EVENT_NAME)
 
     override fun River.validation() {
         validate { it.requireKey(DATO_KEY) }

@@ -10,6 +10,7 @@ import no.nav.etterlatte.rapidsandrivers.migrering.FNR_KEY
 import no.nav.etterlatte.rapidsandrivers.migrering.MIGRERING_GRUNNLAG_KEY
 import no.nav.etterlatte.rapidsandrivers.migrering.MigreringRequest
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser
+import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser.MIGRER_SAK
 import no.nav.etterlatte.rapidsandrivers.migrering.PERSONGALLERI
 import no.nav.etterlatte.rapidsandrivers.migrering.ROLLE_KEY
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -27,9 +28,9 @@ internal class MigrerEnEnkeltSak(
     rapidsConnection: RapidsConnection,
     private val behandlinger: BehandlingService
 ) :
-    RiverMedLoggingOgFeilhaandtering(rapidsConnection, Migreringshendelser.MIGRER_SAK) {
+    RiverMedLoggingOgFeilhaandtering(rapidsConnection, MIGRER_SAK) {
 
-    override fun River.eventName() = eventName(hendelsestype)
+    override fun River.eventName() = eventName(MIGRER_SAK)
 
     override fun River.validation() {
         validate { it.rejectKey(BEHANDLING_ID_KEY) }

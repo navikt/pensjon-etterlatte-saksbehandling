@@ -27,7 +27,7 @@ class MigreringHendelser(
     private val grunnlagService: GrunnlagService
 ) : RiverMedLoggingOgFeilhaandtering(rapidsConnection, BEHANDLING_OPPRETTET) {
 
-    override fun River.eventName() = eventName(hendelsestype)
+    override fun River.eventName() = eventName(BEHANDLING_OPPRETTET)
 
     override fun River.validation() {
         validate { it.requireKey(SAK_ID_KEY) }

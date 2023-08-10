@@ -9,7 +9,7 @@ import rapidsandrivers.withFeilhaandtering
 
 abstract class RiverMedLoggingOgFeilhaandtering(
     rapidsConnection: RapidsConnection,
-    protected val hendelsestype: String
+    private val hendelsestype: String
 ) : RiverMedLogging(rapidsConnection) {
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) =

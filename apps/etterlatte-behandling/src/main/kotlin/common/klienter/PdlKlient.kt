@@ -11,6 +11,7 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.GeografiskTilknytning
+import no.nav.etterlatte.libs.common.person.HentFolkeregisterIdenterForAktoerIdBolkRequest
 import no.nav.etterlatte.libs.common.person.HentGeografiskTilknytningRequest
 import no.nav.etterlatte.libs.common.person.HentPersonRequest
 import no.nav.etterlatte.libs.common.person.PersonRolle
@@ -24,6 +25,7 @@ import java.time.LocalDate
 interface PdlKlient {
     fun hentPdlModell(foedselsnummer: String, rolle: PersonRolle, saktype: SakType): PersonDTO
     fun hentGeografiskTilknytning(foedselsnummer: String, saktype: SakType): GeografiskTilknytning
+    fun hentFolkeregisterIdenterForAktoerIdBolk(aktoerIds: Set<String>): Map<String, String?>
 }
 
 class PdlKlientImpl(
@@ -56,6 +58,17 @@ class PdlKlientImpl(
             }.body<GeografiskTilknytning>()
         }
 
+        return response
+    }
+
+    override fun hentFolkeregisterIdenterForAktoerIdBolk(aktoerIds: Set<String>): Map<String, String?> {
+        val request = HentFolkeregisterIdenterForAktoerIdBolkRequest(aktoerIds)
+        val response = runBlocking {
+            pdl_app.post("$url/folkeregisteridenter") {
+                contentType(ContentType.Application.Json)
+                setBody(request)
+            }.body<Map<String, String?>>()
+        }
         return response
     }
 }

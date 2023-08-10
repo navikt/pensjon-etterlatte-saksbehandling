@@ -75,16 +75,18 @@ export const Oppgavelista = (props: {
                   ({
                     id,
                     status,
-                    enhet,
                     type,
-                    saksbehandler,
                     opprettet,
+                    frist,
+                    enhet,
+                    saksbehandler,
                     merknad,
                     sakType,
                     fnr,
-                    frist,
                     sakId,
                     referanse,
+                    beskrivelse,
+                    gjelder,
                   }) => (
                     <Table.Row key={id}>
                       <Table.HeaderCell>{formaterStringDato(opprettet)}</Table.HeaderCell>
@@ -112,6 +114,7 @@ export const Oppgavelista = (props: {
                             saksbehandler={saksbehandler}
                             oppgaveId={id}
                             sakId={sakId}
+                            type={type}
                             hentOppgaver={hentOppgaver}
                           />
                         ) : (
@@ -121,9 +124,16 @@ export const Oppgavelista = (props: {
                       <Table.DataCell>
                         <HandlingerForOppgave
                           oppgavetype={type}
+                          oppgavestatus={status}
+                          opprettet={opprettet}
+                          frist={frist}
                           fnr={fnr}
+                          enhet={enhet}
                           saksbehandler={saksbehandler}
+                          saktype={sakType}
                           referanse={referanse}
+                          beskrivelse={beskrivelse}
+                          gjelder={gjelder}
                         />
                       </Table.DataCell>
                     </Table.Row>

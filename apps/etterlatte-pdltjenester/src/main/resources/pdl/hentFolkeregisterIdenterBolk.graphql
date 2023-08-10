@@ -1,0 +1,14 @@
+query PdlIdenterBolkQuery(
+    $identer: [ID!]!,
+    $grupper: [IdentGruppe!]
+) {
+    hentIdenterBolk(identer: $identer, grupper: $grupper, historikk:false) {
+        ident,
+        identer {
+            ident,
+            historisk,
+            gruppe
+        },
+        code
+    }
+}

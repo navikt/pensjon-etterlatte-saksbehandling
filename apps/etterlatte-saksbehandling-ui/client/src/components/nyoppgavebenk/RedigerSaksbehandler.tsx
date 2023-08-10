@@ -18,14 +18,15 @@ export const RedigerSaksbehandler = (props: {
   oppgaveId: string
   sakId: number
   status: Oppgavestatus
+  type: string
   hentOppgaver: () => void
 }) => {
   const [modalIsOpen, setModalIsOpen] = useState(false)
-  const { saksbehandler, oppgaveId, sakId, status, hentOppgaver } = props
+  const { saksbehandler, oppgaveId, sakId, status, type, hentOppgaver } = props
   const user = useAppSelector((state) => state.saksbehandlerReducer.saksbehandler)
   const [fjernSaksbehandlerSvar, fjernSaksbehandler] = useApiCall(fjernSaksbehandlerApi)
   const [byttSaksbehandlerSvar, byttSaksbehandler] = useApiCall(byttSaksbehandlerApi)
-  const erRedigerbar = erOppgaveRedigerbar(status)
+  const erRedigerbar = erOppgaveRedigerbar(status, type)
 
   const brukerErSaksbehandler = user.ident === saksbehandler
 

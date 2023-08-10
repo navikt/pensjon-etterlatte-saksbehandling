@@ -10,24 +10,40 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.put
 import io.ktor.server.routing.route
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.libs.common.OPPGAVEID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.kunSaksbehandler
 import no.nav.etterlatte.libs.common.oppgaveId
 import no.nav.etterlatte.libs.common.oppgaveNy.RedigerFristRequest
 import no.nav.etterlatte.libs.common.oppgaveNy.SaksbehandlerEndringDto
+import no.nav.etterlatte.libs.ktor.brukerTokenInfo
+import no.nav.etterlatte.oppgave.GosysOppgaveService
 
 internal fun Route.oppgaveRoutesNy(
     service: OppgaveServiceNy,
+    gosysOppgaveService: GosysOppgaveService,
     kanBrukeNyOppgaveliste: Boolean
 ) {
     route("/api/nyeoppgaver") {
         get {
             kunSaksbehandler {
                 if (kanBrukeNyOppgaveliste) {
-                    call.respond(
-                        service.finnOppgaverForBruker(Kontekst.get().appUserAsSaksbehandler().saksbehandlerMedRoller)
-                    )
+                    coroutineScope {
+                        val oppgaver = async {
+                            service.finnOppgaverForBruker(
+                                Kontekst.get().appUserAsSaksbehandler().saksbehandlerMedRoller
+                            )
+                        }
+                        val gosysOppgaver = async {
+                            gosysOppgaveService.hentOppgaver(brukerTokenInfo)
+                        }
+
+                        call.respond(
+                            oppgaver.await() + gosysOppgaver.await()
+                        )
+                    }
                 } else {
                     call.respond(HttpStatusCode.NotImplemented)
                 }

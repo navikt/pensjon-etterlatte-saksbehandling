@@ -12,7 +12,7 @@ import java.time.LocalDate
 import java.util.*
 
 enum class Handling {
-    BEHANDLE, GAA_TIL_SAK
+    BEHANDLE, GAA_TIL_SAK, VIS_OPPGAVE
 }
 
 sealed class Oppgave {

@@ -48,8 +48,8 @@ export const MinOppgaveliste = (props: { oppgaver: ReadonlyArray<OppgaveDTOny>; 
                   ({
                     id,
                     status,
-                    enhet,
                     type,
+                    enhet,
                     saksbehandler,
                     opprettet,
                     merknad,
@@ -58,6 +58,8 @@ export const MinOppgaveliste = (props: { oppgaver: ReadonlyArray<OppgaveDTOny>; 
                     frist,
                     sakId,
                     referanse,
+                    beskrivelse,
+                    gjelder,
                   }) => (
                     <Table.Row key={id}>
                       <Table.HeaderCell>{formaterStringDato(opprettet)}</Table.HeaderCell>
@@ -66,6 +68,7 @@ export const MinOppgaveliste = (props: { oppgaver: ReadonlyArray<OppgaveDTOny>; 
                           status={status}
                           orginalFrist={frist}
                           oppgaveId={id}
+                          type={type}
                           hentOppgaver={hentOppgaver}
                         />
                       </Table.DataCell>
@@ -88,6 +91,7 @@ export const MinOppgaveliste = (props: { oppgaver: ReadonlyArray<OppgaveDTOny>; 
                             saksbehandler={saksbehandler}
                             oppgaveId={id}
                             sakId={sakId}
+                            type={type}
                             hentOppgaver={hentOppgaver}
                           />
                         )}
@@ -95,9 +99,16 @@ export const MinOppgaveliste = (props: { oppgaver: ReadonlyArray<OppgaveDTOny>; 
                       <Table.DataCell>
                         <HandlingerForOppgave
                           oppgavetype={type}
+                          oppgavestatus={status}
+                          opprettet={opprettet}
+                          frist={frist}
                           fnr={fnr}
+                          saktype={sakType}
+                          enhet={enhet}
                           saksbehandler={saksbehandler}
                           referanse={referanse}
+                          beskrivelse={beskrivelse}
+                          gjelder={gjelder}
                         />
                       </Table.DataCell>
                     </Table.Row>

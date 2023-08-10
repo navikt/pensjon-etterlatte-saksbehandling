@@ -50,6 +50,7 @@ import no.nav.etterlatte.metrics.MetrikkerDao
 import no.nav.etterlatte.metrics.OppgaveMetrics
 import no.nav.etterlatte.oppgave.GosysOppgaveKlient
 import no.nav.etterlatte.oppgave.GosysOppgaveKlientImpl
+import no.nav.etterlatte.oppgave.GosysOppgaveServiceImpl
 import no.nav.etterlatte.oppgave.OppgaveDao
 import no.nav.etterlatte.oppgave.OppgaveServiceImpl
 import no.nav.etterlatte.oppgaveny.OppgaveDaoMedEndringssporingImpl
@@ -159,6 +160,7 @@ class ApplicationContext(
     // Service
     val oppgaveService = OppgaveServiceImpl(oppgaveDao, featureToggleService)
     val oppgaveServiceNy = OppgaveServiceNy(oppgaveDaoEndringer, sakDao, kanBrukeNyOppgaveliste, featureToggleService)
+    val gosysOppgaveService = GosysOppgaveServiceImpl(gosysOppgaveKlient, pdlKlient, featureToggleService)
     val behandlingService = BehandlingServiceImpl(
         behandlingDao = behandlingDao,
         behandlingHendelser = behandlingsHendelser,

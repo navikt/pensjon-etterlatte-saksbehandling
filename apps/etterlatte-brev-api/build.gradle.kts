@@ -33,7 +33,6 @@ dependencies {
     implementation(libs.ktor2.authjwt)
     implementation(libs.cache.caffeine)
 
-    implementation(libs.metrics.micrometer.prometheus)
     implementation(libs.bundles.jackson)
 
     implementation(libs.navfelles.tokenclientcore)

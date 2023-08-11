@@ -19,8 +19,6 @@ dependencies {
     implementation(libs.ktor2.clientcontentnegotiation)
     implementation(libs.ktor2.jackson)
 
-    implementation(libs.metrics.micrometer.prometheus)
-
     testImplementation(libs.ktor2.clientmock)
     testImplementation(libs.test.mockk)
     testImplementation(libs.kotlinx.coroutinescore)

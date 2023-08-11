@@ -36,9 +36,7 @@ dependencies {
     implementation(libs.ktor2.calllogging)
     implementation(libs.kotlin.result)
 
-    implementation(libs.metrics.micrometer.prometheus)
     implementation(libs.bundles.jackson)
-
     implementation(libs.bundles.navfelles.token)
 
     testImplementation(libs.ktor2.clientcontentnegotiation)

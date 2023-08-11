@@ -16,6 +16,7 @@ import no.nav.etterlatte.rapidsandrivers.migrering.MigreringRequest
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser
 import no.nav.etterlatte.rapidsandrivers.migrering.PesysId
 import no.nav.etterlatte.rapidsandrivers.migrering.TRYGDETID_KEY
+import no.nav.etterlatte.rapidsandrivers.migrering.Trygdetid
 import no.nav.etterlatte.rapidsandrivers.migrering.Trygdetidsgrunnlag
 import no.nav.etterlatte.rapidsandrivers.migrering.VILKAARSVURDERT_KEY
 import no.nav.etterlatte.trygdetid.kafka.MigreringHendelser
@@ -60,6 +61,7 @@ internal class MigreringHendelserTest {
             avdoedForelder = listOf(AvdoedForelder(fnr, Tidspunkt.now())),
             gjenlevendeForelder = null,
             virkningstidspunkt = YearMonth.now(),
+            foersteVirkningstidspunkt = YearMonth.now().minusYears(10),
             beregning = Beregning(
                 brutto = BigDecimal(1000),
                 netto = BigDecimal(1000),
@@ -67,32 +69,34 @@ internal class MigreringHendelserTest {
                 datoVirkFom = Tidspunkt.now(),
                 g = BigDecimal(100000)
             ),
-            trygdetidsPerioder = listOf(
-                Trygdetidsgrunnlag(
-                    trygdetidGrunnlagId = 1L,
-                    personGrunnlagId = 2L,
-                    landTreBokstaver = "NOR",
-                    datoFom = Tidspunkt.ofNorskTidssone(LocalDate.parse("2000-01-01"), LocalTime.of(0, 0, 0)),
-                    datoTom = Tidspunkt.ofNorskTidssone(LocalDate.parse("2015-01-01"), LocalTime.of(0, 0, 0)),
-                    poengIInnAar = false,
-                    poengIUtAar = false,
-                    ikkeIProrata = false,
-                    faktiskTrygdetid = BigDecimal(20.5),
-                    fremtidigTrygdetid = BigDecimal(15),
-                    anvendtTrygdetid = BigDecimal(35.5)
-                ),
-                Trygdetidsgrunnlag(
-                    trygdetidGrunnlagId = 3L,
-                    personGrunnlagId = 2L,
-                    landTreBokstaver = "SWE",
-                    datoFom = Tidspunkt.ofNorskTidssone(LocalDate.parse("2017-01-01"), LocalTime.of(0, 0, 0)),
-                    datoTom = Tidspunkt.ofNorskTidssone(LocalDate.parse("2020-01-01"), LocalTime.of(0, 0, 0)),
-                    poengIInnAar = false,
-                    poengIUtAar = false,
-                    ikkeIProrata = false,
-                    faktiskTrygdetid = BigDecimal(20.5),
-                    fremtidigTrygdetid = BigDecimal(15),
-                    anvendtTrygdetid = BigDecimal(35.5)
+            trygdetid = Trygdetid(
+                listOf(
+                    Trygdetidsgrunnlag(
+                        trygdetidGrunnlagId = 1L,
+                        personGrunnlagId = 2L,
+                        landTreBokstaver = "NOR",
+                        datoFom = Tidspunkt.ofNorskTidssone(LocalDate.parse("2000-01-01"), LocalTime.of(0, 0, 0)),
+                        datoTom = Tidspunkt.ofNorskTidssone(LocalDate.parse("2015-01-01"), LocalTime.of(0, 0, 0)),
+                        poengIInnAar = false,
+                        poengIUtAar = false,
+                        ikkeIProrata = false,
+                        faktiskTrygdetid = BigDecimal(20.5),
+                        fremtidigTrygdetid = BigDecimal(15),
+                        anvendtTrygdetid = BigDecimal(35.5)
+                    ),
+                    Trygdetidsgrunnlag(
+                        trygdetidGrunnlagId = 3L,
+                        personGrunnlagId = 2L,
+                        landTreBokstaver = "SWE",
+                        datoFom = Tidspunkt.ofNorskTidssone(LocalDate.parse("2017-01-01"), LocalTime.of(0, 0, 0)),
+                        datoTom = Tidspunkt.ofNorskTidssone(LocalDate.parse("2020-01-01"), LocalTime.of(0, 0, 0)),
+                        poengIInnAar = false,
+                        poengIUtAar = false,
+                        ikkeIProrata = false,
+                        faktiskTrygdetid = BigDecimal(20.5),
+                        fremtidigTrygdetid = BigDecimal(15),
+                        anvendtTrygdetid = BigDecimal(35.5)
+                    )
                 )
             )
         )
@@ -148,6 +152,7 @@ internal class MigreringHendelserTest {
             avdoedForelder = listOf(AvdoedForelder(fnr, Tidspunkt.now())),
             gjenlevendeForelder = null,
             virkningstidspunkt = YearMonth.now(),
+            foersteVirkningstidspunkt = YearMonth.now().minusYears(10),
             beregning = Beregning(
                 brutto = BigDecimal(1000),
                 netto = BigDecimal(1000),
@@ -155,7 +160,7 @@ internal class MigreringHendelserTest {
                 datoVirkFom = Tidspunkt.now(),
                 g = BigDecimal(100000)
             ),
-            trygdetidsPerioder = emptyList()
+            trygdetid = Trygdetid(emptyList())
         )
         every { trygdetidService.beregnTrygdetid(capture(behandlingId)) } returns trygdetidDto
         every { trygdetidService.beregnTrygdetidGrunnlag(any(), any()) } returns trygdetidDto

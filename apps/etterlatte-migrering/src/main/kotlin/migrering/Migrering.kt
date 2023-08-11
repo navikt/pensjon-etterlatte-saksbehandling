@@ -55,7 +55,9 @@ internal class Migrering(rapidsConnection: RapidsConnection, private val pesysRe
         gjenlevendeForelder = sak.gjenlevendeForelder,
         avdoedForelder = sak.avdoedForelder,
         virkningstidspunkt = sak.virkningstidspunkt,
+        foersteVirkningstidspunkt = sak.foersteVirkningstidspunkt,
         beregning = sak.beregning,
-        trygdetidsPerioder = sak.trygdetidsPerioder
+        trygdetid = sak.trygdetid,
+        flyktningStatus = sak.flyktningStatus
     )
 }

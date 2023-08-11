@@ -18,6 +18,7 @@ import no.nav.etterlatte.rapidsandrivers.migrering.Enhet
 import no.nav.etterlatte.rapidsandrivers.migrering.MigreringRequest
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser
 import no.nav.etterlatte.rapidsandrivers.migrering.PesysId
+import no.nav.etterlatte.rapidsandrivers.migrering.Trygdetid
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions
@@ -59,6 +60,7 @@ internal class MigreringHendelserTest {
             avdoedForelder = listOf(AvdoedForelder(fnr, Tidspunkt.now())),
             gjenlevendeForelder = null,
             virkningstidspunkt = YearMonth.now(),
+            foersteVirkningstidspunkt = YearMonth.now().minusYears(10),
             beregning = Beregning(
                 brutto = BigDecimal(1000),
                 netto = BigDecimal(1000),
@@ -66,7 +68,7 @@ internal class MigreringHendelserTest {
                 datoVirkFom = Tidspunkt.now(),
                 g = BigDecimal(100000)
             ),
-            trygdetidsPerioder = emptyList()
+            trygdetid = Trygdetid(emptyList())
         )
         every { behandlingService.opprettBeregningsgrunnlag(any(), any()) } returns mockk()
         every { behandlingService.beregn(capture(behandlingId)) } returns returnValue

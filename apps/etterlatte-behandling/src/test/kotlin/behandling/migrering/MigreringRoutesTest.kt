@@ -22,6 +22,7 @@ import no.nav.etterlatte.rapidsandrivers.migrering.Beregning
 import no.nav.etterlatte.rapidsandrivers.migrering.Enhet
 import no.nav.etterlatte.rapidsandrivers.migrering.MigreringRequest
 import no.nav.etterlatte.rapidsandrivers.migrering.PesysId
+import no.nav.etterlatte.rapidsandrivers.migrering.Trygdetid
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
@@ -60,6 +61,7 @@ class MigreringRoutesTest : BehandlingIntegrationTest() {
                 avdoedForelder = listOf(AvdoedForelder(fnr, Tidspunkt.now())),
                 gjenlevendeForelder = null,
                 virkningstidspunkt = YearMonth.now(),
+                foersteVirkningstidspunkt = YearMonth.now().minusYears(10),
                 beregning = Beregning(
                     brutto = BigDecimal(1000),
                     netto = BigDecimal(1000),
@@ -67,7 +69,8 @@ class MigreringRoutesTest : BehandlingIntegrationTest() {
                     datoVirkFom = Tidspunkt.now(),
                     g = BigDecimal(100000)
                 ),
-                trygdetidsPerioder = emptyList()
+                trygdetid = Trygdetid(emptyList()),
+                flyktningStatus = false
             )
 
             val response: BehandlingOgSak = client.post("/migrering") {

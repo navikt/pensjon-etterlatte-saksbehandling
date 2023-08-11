@@ -13,8 +13,10 @@ data class MigreringRequest(
     val gjenlevendeForelder: Folkeregisteridentifikator?,
     val avdoedForelder: List<AvdoedForelder>,
     val virkningstidspunkt: YearMonth,
+    val foersteVirkningstidspunkt: YearMonth,
     val beregning: Beregning,
-    val trygdetidsPerioder: List<Trygdetidsgrunnlag>
+    val trygdetid: Trygdetid,
+    val flyktningStatus: Boolean = false
 ) {
     fun opprettPersongalleri() = Persongalleri(
         soeker = this.soeker.value,
@@ -23,7 +25,11 @@ data class MigreringRequest(
     )
 }
 
-data class AvdoedForelder(val ident: Folkeregisteridentifikator, val doedsdato: Tidspunkt)
+data class AvdoedForelder(
+    val ident: Folkeregisteridentifikator,
+    val doedsdato: Tidspunkt,
+    val yrkesskade: Boolean = false
+)
 
 data class PesysId(val id: String)
 
@@ -36,6 +42,10 @@ data class Beregning(
     val datoVirkFom: Tidspunkt,
     val g: BigDecimal,
     val meta: BeregningMeta? = null
+)
+
+data class Trygdetid(
+    val perioder: List<Trygdetidsgrunnlag>
 )
 
 data class BeregningMeta(

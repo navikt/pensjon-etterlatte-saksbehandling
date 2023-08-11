@@ -5,7 +5,7 @@ import no.nav.etterlatte.rapidsandrivers.migrering.AvdoedForelder
 import no.nav.etterlatte.rapidsandrivers.migrering.Beregning
 import no.nav.etterlatte.rapidsandrivers.migrering.Enhet
 import no.nav.etterlatte.rapidsandrivers.migrering.PesysId
-import no.nav.etterlatte.rapidsandrivers.migrering.Trygdetidsgrunnlag
+import no.nav.etterlatte.rapidsandrivers.migrering.Trygdetid
 import java.time.YearMonth
 import java.util.*
 
@@ -17,6 +17,8 @@ data class Pesyssak(
     val gjenlevendeForelder: Folkeregisteridentifikator?,
     val avdoedForelder: List<AvdoedForelder>,
     val virkningstidspunkt: YearMonth,
+    val foersteVirkningstidspunkt: YearMonth,
     val beregning: Beregning,
-    val trygdetidsPerioder: List<Trygdetidsgrunnlag>
+    val trygdetid: Trygdetid,
+    val flyktningStatus: Boolean
 )

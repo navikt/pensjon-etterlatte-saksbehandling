@@ -16,6 +16,7 @@ import no.nav.etterlatte.rapidsandrivers.migrering.Enhet
 import no.nav.etterlatte.rapidsandrivers.migrering.MigreringRequest
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser
 import no.nav.etterlatte.rapidsandrivers.migrering.PesysId
+import no.nav.etterlatte.rapidsandrivers.migrering.Trygdetid
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.AfterAll
@@ -63,6 +64,7 @@ class MigreringIntegrationTest {
                 Folkeregisteridentifikator.of(syntetiskFnr),
                 emptyList(),
                 YearMonth.now(),
+                YearMonth.now().minusYears(10),
                 Beregning(
                     brutto = BigDecimal(1000),
                     netto = BigDecimal(1000),
@@ -70,7 +72,8 @@ class MigreringIntegrationTest {
                     datoVirkFom = Tidspunkt.now(),
                     g = BigDecimal(100000)
                 ),
-                emptyList()
+                Trygdetid(emptyList()),
+                false
             )
             repository.lagrePesyssak(sakInn)
             val inspector = TestRapid()

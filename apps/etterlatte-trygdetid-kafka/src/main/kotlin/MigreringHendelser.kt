@@ -57,7 +57,7 @@ internal class MigreringHendelser(rapidsConnection: RapidsConnection, private va
                     logger.info("Oppretter grunnlag for trygdetid for $behandlingId")
 
                     // Oppretter alle trygdetidsperioder og beholder siste beregnede trygdetid
-                    val beregnetTrygdetid = request.trygdetidsPerioder.map { periode ->
+                    val beregnetTrygdetid = request.trygdetid.perioder.map { periode ->
                         trygdetidService.beregnTrygdetidGrunnlag(behandlingId, tilGrunnlag(periode))
                     }.lastOrNull() ?: it
 

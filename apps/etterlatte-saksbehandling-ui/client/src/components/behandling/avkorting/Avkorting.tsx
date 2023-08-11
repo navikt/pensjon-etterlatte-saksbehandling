@@ -23,10 +23,10 @@ export const Avkorting = (props: { behandling: IBehandlingReducer }) => {
 
   return (
     <AvkortingWrapper>
-      {avkorting && (
+      {!['initial', 'pending'].includes(avkortingStatus.status) && (
         <AvkortingInntekt
           behandling={behandling}
-          avkortingGrunnlag={avkorting.avkortingGrunnlag}
+          avkortingGrunnlag={avkorting == null ? [] : avkorting.avkortingGrunnlag}
           setAvkorting={setAvkorting}
         />
       )}

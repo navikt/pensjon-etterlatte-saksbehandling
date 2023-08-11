@@ -68,7 +68,7 @@ etterlatte-common = { module = "no.nav.etterlatte:common", version = "2023.03.28
 
 logging-slf4japi = { module = "org.slf4j:slf4j-api", version = "2.0.7" }
 logging-logbackclassic = { module = "ch.qos.logback:logback-classic", version = "1.4.9" }
-logging-logstashlogbackencoder = { module = "net.logstash.logback:logstash-logback-encoder", version = "6.6" }
+logging-logstashlogbackencoder = { module = "net.logstash.logback:logstash-logback-encoder", version = "7.4" }
 
 metrics-micrometer-prometheus = { module = "io.micrometer:micrometer-registry-prometheus", version = "1.11.2" }
 metrics-prometheus-simpleclientcommon = { module = "io.prometheus:simpleclient_common", version.ref = "prometheus-version" }

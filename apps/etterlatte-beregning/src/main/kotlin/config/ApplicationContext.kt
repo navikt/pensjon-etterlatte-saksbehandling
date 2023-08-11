@@ -10,8 +10,8 @@ import no.nav.etterlatte.beregning.BeregningRepository
 import no.nav.etterlatte.beregning.BeregningService
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlagRepository
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlagService
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleProperties
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggleServiceProperties
 import no.nav.etterlatte.klienter.BehandlingKlientImpl
 import no.nav.etterlatte.klienter.GrunnlagKlientImpl
 import no.nav.etterlatte.klienter.TrygdetidKlient
@@ -19,14 +19,13 @@ import no.nav.etterlatte.klienter.VilkaarsvurderingKlientImpl
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.ytelseMedGrunnlag.YtelseMedGrunnlagService
+import java.net.URI
 
-private fun featureToggleProperties(config: Config) = mapOf(
-    FeatureToggleServiceProperties.ENABLED.navn to config.getString("funksjonsbrytere.enabled"),
-    FeatureToggleServiceProperties.APPLICATIONNAME.navn to config.getString(
-        "funksjonsbrytere.unleash.applicationName"
-    ),
-    FeatureToggleServiceProperties.URI.navn to config.getString("funksjonsbrytere.unleash.uri"),
-    FeatureToggleServiceProperties.CLUSTER.navn to config.getString("funksjonsbrytere.unleash.cluster")
+private fun featureToggleProperties(config: Config) = FeatureToggleProperties(
+    enabled = config.getString("funksjonsbrytere.enabled").toBoolean(),
+    applicationName = config.getString("funksjonsbrytere.unleash.applicationName"),
+    uri = URI(config.getString("funksjonsbrytere.unleash.uri")),
+    cluster = config.getString("funksjonsbrytere.unleash.cluster")
 )
 
 class ApplicationContext {

@@ -22,7 +22,6 @@ dependencies {
     implementation(libs.ktor2.calllogging)
     implementation(libs.ktor2.statuspages)
 
-    implementation(libs.metrics.micrometer.prometheus)
     implementation(libs.bundles.jackson)
     implementation(libs.jackson.core)
     implementation(libs.jackson.databind)

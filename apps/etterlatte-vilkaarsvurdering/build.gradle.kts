@@ -31,8 +31,6 @@ dependencies {
     implementation(libs.jackson.modulekotlin)
     implementation(libs.database.kotliquery)
 
-    implementation(libs.metrics.micrometer.prometheus)
-
     testImplementation(libs.navfelles.tokenvalidationktor2)
 
     testImplementation(libs.test.mockk)

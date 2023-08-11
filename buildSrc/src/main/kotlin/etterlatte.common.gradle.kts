@@ -16,6 +16,9 @@ repositories {
 dependencies {
     implementation(kotlin("stdlib"))
 
+    // Metrics
+    implementation(libs.metrics.micrometer.prometheus)
+
     // Logging
     implementation(libs.logging.slf4japi)
     implementation(libs.logging.logbackclassic)

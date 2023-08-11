@@ -12,6 +12,7 @@ import no.nav.etterlatte.kafka.KafkaConsumerEgneAnsatte
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.ktor.healthApi
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
+import no.nav.etterlatte.libs.ktor.metricsModule
 import no.nav.etterlatte.libs.ktor.setReady
 import org.slf4j.LoggerFactory
 import java.util.concurrent.atomic.AtomicBoolean
@@ -31,6 +32,7 @@ class Server {
                 routing {
                     healthApi()
                 }
+                metricsModule()
             }
             connector { port = 8080 }
         }

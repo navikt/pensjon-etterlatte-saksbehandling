@@ -29,7 +29,6 @@ dependencies {
     implementation(libs.ktor2.jackson)
     implementation(libs.ktor2.auth)
 
-    implementation(libs.metrics.micrometer.prometheus)
     implementation(libs.bundles.jackson)
 
     implementation(libs.navfelles.tokenclientcore)

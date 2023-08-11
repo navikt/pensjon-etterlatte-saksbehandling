@@ -106,6 +106,7 @@ object OmstillingstoenadVilkaar {
             avdoedesMedlemskapUnder26(),
             avdoedesMedlemskapOver16(),
             avdoedesMedlemskapPensjon(),
+            avdoedesMedlemskapYrkesskade(),
             avdoedesMedlemskapOpptjening()
         )
     )
@@ -144,6 +145,14 @@ object OmstillingstoenadVilkaar {
         )
     )
 
+    private fun avdoedesMedlemskapYrkesskade() = Delvilkaar(
+        type = VilkaarType.OMS_AVDOEDES_MEDLEMSKAP_UNNTAK_YRKESSKADE,
+        tittel = "Ja, dødsfallet skyldes en godkjent yrkes-skade/sykdom",
+        lovreferanse = Lovreferanse(
+            paragraf = "§ 17-2" // TODO
+        )
+    )
+
     private fun gjenlevendesMedlemskap() = Vilkaar(
         hovedvilkaar = Delvilkaar(
             type = VilkaarType.OMS_GJENLEVENDES_MEDLEMSKAP,
@@ -158,6 +167,7 @@ object OmstillingstoenadVilkaar {
         ),
         unntaksvilkaar = listOf(
             gjenlevendesMedlemskapBotid(),
+            gjenlevendesMedlemskapYrkesskade(),
             gjenlevendesMedlemskapPensjon()
         )
     )
@@ -177,6 +187,14 @@ object OmstillingstoenadVilkaar {
         tittel = "Ja, den avdøde eller den gjenlevende har minst 20 års samlet botid",
         lovreferanse = Lovreferanse(
             paragraf = "§ 17-3" // TODO
+        )
+    )
+
+    private fun gjenlevendesMedlemskapYrkesskade() = Delvilkaar(
+        type = VilkaarType.OMS_GJENLEVENDES_MEDLEMSKAP_UNNTAK_YRKESSKADE,
+        tittel = "Ja, dødsfallet skyldes en godkjent yrkes-skade/sykdom",
+        lovreferanse = Lovreferanse(
+            paragraf = "§ 17-2" // TODO
         )
     )
 
@@ -221,11 +239,15 @@ object OmstillingstoenadVilkaar {
         ),
         unntaksvilkaar = listOf(
             aktivitetEtter6MaanederGjenlevendeOver55ogLavInntekt(),
-            aktivitetEtter6MaanederGjenlevendeHarBarnUnder1Aar(),
+            aktivitetEtter6MaanederGjenlevendeHarBarnUnder1Aar()
         ),
         grunnlag = with(grunnlag) {
-            val doedsdatoAvdoedGrunnlag = hentAvdoed().hentDoedsdato()?.toVilkaarsgrunnlag(VilkaarOpplysningType.AVDOED_DOEDSDATO)
-            val soeknadMottattDatoGrunnlag = sak.hentSoeknadMottattDato()?.toVilkaarsgrunnlag(VilkaarOpplysningType.SOEKNAD_MOTTATT_DATO)
+            val doedsdatoAvdoedGrunnlag = hentAvdoed().hentDoedsdato()?.toVilkaarsgrunnlag(
+                VilkaarOpplysningType.AVDOED_DOEDSDATO
+            )
+            val soeknadMottattDatoGrunnlag = sak.hentSoeknadMottattDato()?.toVilkaarsgrunnlag(
+                VilkaarOpplysningType.SOEKNAD_MOTTATT_DATO
+            )
             listOfNotNull(doedsdatoAvdoedGrunnlag, soeknadMottattDatoGrunnlag)
         }
     )

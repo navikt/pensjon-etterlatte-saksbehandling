@@ -11,7 +11,11 @@ import no.nav.etterlatte.brev.model.Slate
 import org.slf4j.LoggerFactory
 import java.util.*
 
-class BrevbakerService(private val brevbakerKlient: BrevbakerKlient, private val adresseService: AdresseService) {
+class BrevbakerService(
+    private val brevbakerKlient: BrevbakerKlient,
+    private val adresseService: AdresseService,
+    private val brevDataMapper: BrevDataMapper
+) {
     private val logger = LoggerFactory.getLogger(this::class.java)
     suspend fun genererPdf(brevID: BrevID, brevRequest: BrevbakerRequest): Pdf {
         val brevbakerResponse = brevbakerKlient.genererPdf(brevRequest)
@@ -23,8 +27,8 @@ class BrevbakerService(private val brevbakerKlient: BrevbakerKlient, private val
 
     suspend fun hentRedigerbarTekstFraBrevbakeren(behandling: Behandling): Slate {
         val request = BrevbakerRequest.fra(
-            BrevDataMapper.brevKode(behandling, BrevProsessType.AUTOMATISK).redigering,
-            BrevDataMapper.brevData(behandling),
+            brevDataMapper.brevKode(behandling, BrevProsessType.REDIGERBAR).redigering,
+            brevDataMapper.brevData(behandling),
             behandling,
             adresseService.hentAvsender(behandling.vedtak)
         )

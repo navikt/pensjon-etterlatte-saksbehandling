@@ -60,6 +60,9 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
     if (vedtaksbrev.prosessType === BrevProsessType.MANUELL) {
       return false
     }
+    if (vedtaksbrev.prosessType === BrevProsessType.AUTOMATISK) {
+      return true
+    }
     if (!props.behandling.revurderingsaarsak) {
       return true
     }

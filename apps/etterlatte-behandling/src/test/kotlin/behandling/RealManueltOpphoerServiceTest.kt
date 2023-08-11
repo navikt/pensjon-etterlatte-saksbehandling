@@ -47,11 +47,14 @@ internal class RealManueltOpphoerServiceTest {
 
     private val user = mockk<SaksbehandlerMedEnheterOgRoller>()
     private val oppgaveService = mockk<OppgaveServiceNy>()
+    private val grunnlagServiceMock = mockk<GrunnlagService>(relaxed = true)
+
     private val mockOppgave = opprettNyOppgaveMedReferanseOgSak(
         "opphør",
         Sak("ident", SakType.BARNEPENSJON, 1L, Enheter.AALESUND.enhetNr),
         OppgaveKilde.BEHANDLING,
-        OppgaveType.MANUELT_OPPHOER
+        OppgaveType.MANUELT_OPPHOER,
+        null
     )
 
     @BeforeEach
@@ -95,6 +98,7 @@ internal class RealManueltOpphoerServiceTest {
             behandlingDaoMock,
             behandlingHendelserKafkaProducer,
             hendelseDaoMock,
+            grunnlagServiceMock,
             featureToggleService
         )
         val manueltOpphoer = sut.hentManueltOpphoer(id)
@@ -138,7 +142,9 @@ internal class RealManueltOpphoerServiceTest {
             }
         }
 
-        every { oppgaveService.opprettNyOppgaveMedSakOgReferanse(any(), any(), any(), any()) } returns mockOppgave
+        every {
+            oppgaveService.opprettNyOppgaveMedSakOgReferanse(any(), any(), any(), any(), any())
+        } returns mockOppgave
 
         val behandlingHendelserKafkaProducer = mockk<BehandlingHendelserKafkaProducer> {
             every { sendMeldingForHendelse(any(), any()) } returns Unit
@@ -155,6 +161,7 @@ internal class RealManueltOpphoerServiceTest {
             behandlingDaoMock,
             behandlingHendelserKafkaProducer,
             hendelseDaoMock,
+            grunnlagServiceMock,
             featureToggleService
         )
 
@@ -241,7 +248,9 @@ internal class RealManueltOpphoerServiceTest {
                 )
             }
         }
-        every { oppgaveService.opprettNyOppgaveMedSakOgReferanse(any(), any(), any(), any()) } returns mockOppgave
+        every {
+            oppgaveService.opprettNyOppgaveMedSakOgReferanse(any(), any(), any(), any(), any())
+        } returns mockOppgave
 
         val behandlingHendelserKafkaProducer = mockk<BehandlingHendelserKafkaProducer> {
             every { sendMeldingForHendelse(any(), any()) } returns Unit
@@ -258,6 +267,7 @@ internal class RealManueltOpphoerServiceTest {
             behandlingDaoMock,
             behandlingHendelserKafkaProducer,
             hendelseDaoMock,
+            grunnlagServiceMock,
             featureToggleService
         )
 
@@ -293,6 +303,7 @@ internal class RealManueltOpphoerServiceTest {
             behandlingDaoMock,
             behandlingHendelserKafkaProducer,
             hendelseDaoMock,
+            grunnlagServiceMock,
             featureToggleService
         )
 
@@ -338,6 +349,7 @@ internal class RealManueltOpphoerServiceTest {
             behandlingDaoMock,
             behandlingHendelserKafkaProducer,
             hendelseDaoMock,
+            grunnlagServiceMock,
             featureToggleService
         )
 
@@ -358,6 +370,7 @@ internal class RealManueltOpphoerServiceTest {
             behandlingDaoMock,
             behandlingHendelserKafkaProducer,
             hendelseDaoMock,
+            grunnlagServiceMock,
             mockk()
         )
         assertNull(service.hentManueltOpphoer(UUID.randomUUID()))
@@ -401,6 +414,7 @@ internal class RealManueltOpphoerServiceTest {
             behandlingDaoMock,
             behandlingHendelserKafkaProducer,
             hendelseDaoMock,
+            grunnlagServiceMock,
             featureToggleService
         )
         val (hentetOpphoer, andreBehandlinger) = service.hentManueltOpphoerOgAlleIverksatteBehandlingerISak(
@@ -440,6 +454,7 @@ internal class RealManueltOpphoerServiceTest {
             behandlingDaoMock,
             behandlingHendelserKafkaProducer,
             hendelseDaoMock,
+            grunnlagServiceMock,
             featureToggleService
         )
         val manueltOpphoer = sut.hentManueltOpphoer(id)
@@ -474,6 +489,7 @@ internal class RealManueltOpphoerServiceTest {
             behandlingDaoMock,
             behandlingHendelserKafkaProducer,
             hendelseDaoMock,
+            grunnlagServiceMock,
             featureToggleService
         )
         val manueltOpphoer = sut.hentManueltOpphoer(id)

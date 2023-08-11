@@ -1,20 +1,40 @@
 import { useAppSelector } from '~store/Store'
 import { isFailure, isInitial, isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
-import { fjernSaksbehandlerApi, byttSaksbehandlerApi } from '~shared/api/oppgaverny'
-import { Alert, Button, Loader } from '@navikt/ds-react'
+import { fjernSaksbehandlerApi, byttSaksbehandlerApi, Oppgavestatus, erOppgaveRedigerbar } from '~shared/api/oppgaverny'
+import { Alert, Button, Loader, Label } from '@navikt/ds-react'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { PencilIcon } from '@navikt/aksel-icons'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { GeneriskModal } from '~shared/modal/modal'
+import styled from 'styled-components'
 
-export const RedigerSaksbehandler = (props: { saksbehandler: string; oppgaveId: string; sakId: number }) => {
+const SaksbehandlerWrapper = styled(Label)`
+  padding: 12px 20px;
+  margin-right: 0.5rem;
+`
+
+export const RedigerSaksbehandler = (props: {
+  saksbehandler: string
+  oppgaveId: string
+  sakId: number
+  status: Oppgavestatus
+  type: string
+  hentOppgaver: () => void
+}) => {
   const [modalIsOpen, setModalIsOpen] = useState(false)
-  const { saksbehandler, oppgaveId, sakId } = props
+  const { saksbehandler, oppgaveId, sakId, status, type, hentOppgaver } = props
   const user = useAppSelector((state) => state.saksbehandlerReducer.saksbehandler)
   const [fjernSaksbehandlerSvar, fjernSaksbehandler] = useApiCall(fjernSaksbehandlerApi)
   const [byttSaksbehandlerSvar, byttSaksbehandler] = useApiCall(byttSaksbehandlerApi)
+  const erRedigerbar = erOppgaveRedigerbar(status, type)
 
   const brukerErSaksbehandler = user.ident === saksbehandler
+
+  useEffect(() => {
+    if (isSuccess(fjernSaksbehandlerSvar) || isSuccess(byttSaksbehandlerSvar)) {
+      hentOppgaver()
+    }
+  }, [fjernSaksbehandlerSvar, byttSaksbehandlerSvar])
 
   return (
     <>
@@ -22,10 +42,18 @@ export const RedigerSaksbehandler = (props: { saksbehandler: string; oppgaveId: 
         <>
           {isInitial(fjernSaksbehandlerSvar) && (
             <>
-              {saksbehandler}
-              <Button icon={<PencilIcon />} variant="tertiary" onClick={() => setModalIsOpen(true)}>
-                Endre
-              </Button>
+              {erRedigerbar ? (
+                <Button
+                  icon={<PencilIcon />}
+                  iconPosition="right"
+                  variant="tertiary"
+                  onClick={() => setModalIsOpen(true)}
+                >
+                  {saksbehandler}
+                </Button>
+              ) : (
+                <SaksbehandlerWrapper>{saksbehandler}</SaksbehandlerWrapper>
+              )}
               <GeneriskModal
                 tittel="Endre saksbehandler"
                 beskrivelse="Ønsker du å fjerne deg som saksbehandler?"
@@ -48,19 +76,27 @@ export const RedigerSaksbehandler = (props: { saksbehandler: string; oppgaveId: 
         <>
           {isInitial(byttSaksbehandlerSvar) && (
             <>
-              {saksbehandler}
-              <Button icon={<PencilIcon />} variant="tertiary" onClick={() => setModalIsOpen(true)}>
-                Endre
-              </Button>
+              {erRedigerbar ? (
+                <Button
+                  icon={<PencilIcon />}
+                  iconPosition="right"
+                  variant="tertiary"
+                  onClick={() => setModalIsOpen(true)}
+                >
+                  {saksbehandler}
+                </Button>
+              ) : (
+                <SaksbehandlerWrapper>{saksbehandler}</SaksbehandlerWrapper>
+              )}
               <GeneriskModal
                 tittel="Endre saksbehandler"
-                beskrivelse={`Ønsker du å fjerne ${saksbehandler} og sette deg som saksbehandler?`}
-                tekstKnappJa="Ja, sett meg som saksbehandler"
+                beskrivelse={`Vil du overta oppgaven til ${saksbehandler}?`}
+                tekstKnappJa="Ja, overta oppgaven"
                 tekstKnappNei="Nei"
                 onYesClick={() =>
                   byttSaksbehandler({
-                    nysaksbehandler: { oppgaveId: oppgaveId, saksbehandler: user.ident },
-                    sakId: sakId,
+                    oppgaveId: oppgaveId,
+                    nysaksbehandler: { saksbehandler: user.ident },
                   })
                 }
                 setModalisOpen={setModalIsOpen}

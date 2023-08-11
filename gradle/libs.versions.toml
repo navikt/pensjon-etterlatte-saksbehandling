@@ -5,18 +5,18 @@ cutterslade-analyze = { id = "ca.cutterslade.analyze", version = "1.9.1" }
 
 [versions]
 jackson-version = "2.15.2"
-jupiter-version = "5.9.3"
-kotlinx-version = "1.7.2"
-ktor2-version = "2.3.2"
-navfelles-token-version = "3.1.0"
+jupiter-version = "5.10.0"
+kotlinx-version = "1.7.3"
+ktor2-version = "2.3.3"
+navfelles-token-version = "3.1.2"
 prometheus-version = "0.16.0"
 testcontainer-version = "1.18.3"
 
 [libraries]
-cache-caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version = "3.1.6" }
+cache-caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version = "3.1.7" }
 
 database-hikaricp = { module = "com.zaxxer:HikariCP", version = "5.0.0" }
-database-flywaydb = { module = "org.flywaydb:flyway-core", version = "9.21.0" }
+database-flywaydb = { module = "org.flywaydb:flyway-core", version = "9.21.1" }
 database-postgresql = { module = "org.postgresql:postgresql", version = "42.6.0" }
 database-kotliquery = { module = "com.github.seratch:kotliquery", version = "1.9.0" }
 
@@ -67,7 +67,7 @@ ktor2-servertests = { module = "io.ktor:ktor-server-tests", version.ref = "ktor2
 etterlatte-common = { module = "no.nav.etterlatte:common", version = "2023.03.28-16.21.c37f68b0da69" }
 
 logging-slf4japi = { module = "org.slf4j:slf4j-api", version = "2.0.7" }
-logging-logbackclassic = { module = "ch.qos.logback:logback-classic", version = "1.4.8" }
+logging-logbackclassic = { module = "ch.qos.logback:logback-classic", version = "1.4.9" }
 logging-logstashlogbackencoder = { module = "net.logstash.logback:logstash-logback-encoder", version = "6.6" }
 
 metrics-micrometer-prometheus = { module = "io.micrometer:micrometer-registry-prometheus", version = "1.11.2" }
@@ -96,7 +96,7 @@ test-testcontainer-jupiter = { module = "org.testcontainers:junit-jupiter", vers
 test-testcontainer-postgresql = { module = "org.testcontainers:postgresql", version.ref = "testcontainer-version" }
 test-wiremock = { module = "com.github.tomakehurst:wiremock-jre8", version = "2.35.0" }
 
-unleash-client = { module = "io.getunleash:unleash-client-java", version = "8.2.0" }
+unleash-client = { module = "io.getunleash:unleash-client-java", version = "8.2.1" }
 
 [bundles]
 jackson = ["jackson-datatypejsr310", "jackson-datatypejdk8", "jackson-modulekotlin"]

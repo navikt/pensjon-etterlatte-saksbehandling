@@ -67,6 +67,10 @@ spec:
       value: http://etterlatte-grunnlag
     - name: ETTERLATTE_GRUNNLAG_CLIENT_ID
       value: prod-gcp.etterlatte.etterlatte-grunnlag
+    - name: ETTERLATTE_VILKAARSVURDERING_URL
+      value: http://etterlatte-vilkaarsvurdering
+    - name: ETTERLATTE_VILKAARSVURDERING_CLIENT_ID
+      value: prod-gcp.etterlatte.etterlatte-vilkaarsvurdering
     - name: KODEVERK_URL
       value: "https://kodeverk.prod-fss-pub.nais.io/api/v1/kodeverk"
   accessPolicy:
@@ -80,5 +84,6 @@ spec:
       rules:
         - application: etterlatte-behandling
         - application: etterlatte-grunnlag
+        - application: etterlatte-vilkaarsvurdering
       external:
         - host: kodeverk.prod-fss-pub.nais.io

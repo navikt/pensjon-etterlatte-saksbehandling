@@ -6,7 +6,6 @@ import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
 import no.nav.etterlatte.behandling.revurdering.RevurderingDao
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
-import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
@@ -78,14 +77,7 @@ class TilgangServiceTest {
         tilgangService.oppdaterAdressebeskyttelse(sakId, AdressebeskyttelseGradering.STRENGT_FORTROLIG)
         val opprettBehandling = opprettBehandling(
             type = BehandlingType.FØRSTEGANGSBEHANDLING,
-            sakId = sakId,
-            persongalleri = Persongalleri(
-                soeker = "11111",
-                innsender = "11111",
-                soesken = listOf("11111", "04040", "05050"),
-                avdoed = listOf("06060", "11111"),
-                gjenlevende = listOf("11111")
-            )
+            sakId = sakId
         )
         behandlingRepo.opprettBehandling(opprettBehandling)
         val harTilgangTilBehandling =
@@ -116,14 +108,7 @@ class TilgangServiceTest {
         tilgangService.oppdaterAdressebeskyttelse(sakId, AdressebeskyttelseGradering.STRENGT_FORTROLIG)
         val opprettBehandling = opprettBehandling(
             type = BehandlingType.FØRSTEGANGSBEHANDLING,
-            sakId = sakId,
-            persongalleri = Persongalleri(
-                soeker = "11111",
-                innsender = "11111",
-                soesken = listOf("11111", "04040", "05050"),
-                avdoed = listOf("06060", "11111"),
-                gjenlevende = listOf("11111")
-            )
+            sakId = sakId
         )
         behandlingRepo.opprettBehandling(opprettBehandling)
         val harTilgangTilBehandlingSomStrengtFortrolig =
@@ -160,14 +145,7 @@ class TilgangServiceTest {
 
         val opprettBehandling = opprettBehandling(
             type = BehandlingType.FØRSTEGANGSBEHANDLING,
-            sakId = sakId,
-            persongalleri = Persongalleri(
-                soeker = "11111",
-                innsender = "11111",
-                soesken = listOf("11111", "04040", "05050"),
-                avdoed = listOf("06060", "11111"),
-                gjenlevende = listOf("11111")
-            )
+            sakId = sakId
         )
         behandlingRepo.opprettBehandling(opprettBehandling)
         val hartilgangtilvanligsak =

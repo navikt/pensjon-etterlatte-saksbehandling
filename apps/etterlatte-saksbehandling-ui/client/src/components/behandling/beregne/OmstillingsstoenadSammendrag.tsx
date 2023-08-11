@@ -1,7 +1,7 @@
 import { Heading, Table } from '@navikt/ds-react'
 import styled from 'styled-components'
 import { compareDesc, lastDayOfMonth } from 'date-fns'
-import { formaterDato, formaterStringDato } from '~utils/formattering'
+import { formaterDato, formaterStringDato, NOK } from '~utils/formattering'
 import { Beregning } from '~shared/types/Beregning'
 import { OmstillingsstoenadToolTip } from '~components/behandling/beregne/OmstillingsstoenadToolTip'
 
@@ -39,9 +39,9 @@ export const OmstillingsstoenadSammendrag = ({ beregning }: Props) => {
               </Table.DataCell>
               <Table.DataCell>Omstillingsstønad</Table.DataCell>
               <Table.DataCell>{beregningsperiode.trygdetid} år</Table.DataCell>
-              <Table.DataCell>{beregningsperiode.grunnbelop} kr</Table.DataCell>
+              <Table.DataCell>{NOK(beregningsperiode.grunnbelop)}</Table.DataCell>
               <Table.DataCell>
-                {beregningsperiode.utbetaltBeloep} kr <OmstillingsstoenadToolTip />
+                {NOK(beregningsperiode.utbetaltBeloep)} <OmstillingsstoenadToolTip />
               </Table.DataCell>
             </Table.Row>
           ))}

@@ -138,17 +138,17 @@ class IntegrationTest : BehandlingIntegrationTest() {
                 it.body<DetaljertBehandling>()
             }
 
-            val oppgaver: List<OppgaveNy> = client.get("/api/nyeoppgaver/hent") {
+            val oppgaver: List<OppgaveNy> = client.get("/api/nyeoppgaver") {
                 addAuthToken(tokenSaksbehandler)
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
             }.also {
                 assertEquals(HttpStatusCode.OK, it.status)
             }.body()
             val oppgaverforbehandling = oppgaver.filter { it.referanse == behandlingId.toString() }
-            client.post("/api/nyeoppgaver/tildel-saksbehandler/${sak.id}") {
+            client.post("/api/nyeoppgaver/${oppgaverforbehandling[0].id}/tildel-saksbehandler/") {
                 addAuthToken(tokenSaksbehandler)
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                setBody(SaksbehandlerEndringDto(oppgaverforbehandling[0].id, "Saksbehandler01"))
+                setBody(SaksbehandlerEndringDto("Saksbehandler01"))
             }.also {
                 assertEquals(HttpStatusCode.OK, it.status)
             }
@@ -278,17 +278,17 @@ class IntegrationTest : BehandlingIntegrationTest() {
                 assertEquals(HttpStatusCode.OK, it.status)
             }
 
-            val oppgaveroppgaveliste: List<OppgaveNy> = client.get("/api/nyeoppgaver/hent") {
+            val oppgaveroppgaveliste: List<OppgaveNy> = client.get("/api/nyeoppgaver") {
                 addAuthToken(tokenAttestant)
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
             }.also {
                 assertEquals(HttpStatusCode.OK, it.status)
             }.body()
             val oppgaverforattestant = oppgaveroppgaveliste.filter { it.referanse == behandlingId.toString() }
-            client.post("/api/nyeoppgaver/tildel-saksbehandler/${sak.id}") {
+            client.post("/api/nyeoppgaver/${oppgaverforattestant[0].id}/tildel-saksbehandler") {
                 addAuthToken(tokenAttestant)
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                setBody(SaksbehandlerEndringDto(oppgaverforattestant[0].id, "Saksbehandler02"))
+                setBody(SaksbehandlerEndringDto("Saksbehandler02"))
             }.also {
                 assertEquals(HttpStatusCode.OK, it.status)
             }

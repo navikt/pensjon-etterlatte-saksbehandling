@@ -48,9 +48,10 @@ internal fun Route.behandlingVedtakRoute(
                     behandlingsstatusService.settFattetVedtak(behandling, fattVedtak.vedtakHendelse)
                     try {
                         oppgaveService.lukkOppgaveUnderbehandlingOgLagNyMedType(
-                            fattVedtak.vedtakOppgaveDTO,
-                            OppgaveType.ATTESTERING,
-                            fattVedtak.vedtakHendelse.saksbehandler
+                            fattetoppgave = fattVedtak.vedtakOppgaveDTO,
+                            oppgaveType = OppgaveType.ATTESTERING,
+                            saksbehandler = fattVedtak.vedtakHendelse.saksbehandler,
+                            merknad = fattVedtak.vedtakHendelse.kommentar
                         )
                     } catch (e: Exception) {
                         haandterFeilIOppgaveService(e)
@@ -71,11 +72,15 @@ internal fun Route.behandlingVedtakRoute(
             } else {
                 inTransaction {
                     behandlingsstatusService.settReturnertVedtak(behandling, underkjennVedtakOppgave.vedtakHendelse)
+                    val merknadFraAttestant = underkjennVedtakOppgave.vedtakHendelse.let {
+                        listOfNotNull(it.valgtBegrunnelse, it.kommentar).joinToString(separator = ": ")
+                    }
                     try {
                         oppgaveService.lukkOppgaveUnderbehandlingOgLagNyMedType(
-                            underkjennVedtakOppgave.vedtakOppgaveDTO,
-                            OppgaveType.UNDERKJENT,
-                            underkjennVedtakOppgave.vedtakHendelse.saksbehandler
+                            fattetoppgave = underkjennVedtakOppgave.vedtakOppgaveDTO,
+                            oppgaveType = OppgaveType.UNDERKJENT,
+                            merknad = merknadFraAttestant,
+                            saksbehandler = underkjennVedtakOppgave.vedtakHendelse.saksbehandler
                         )
                     } catch (e: Exception) {
                         haandterFeilIOppgaveService(e)
@@ -98,8 +103,8 @@ internal fun Route.behandlingVedtakRoute(
                     behandlingsstatusService.settAttestertVedtak(behandling, attesterVedtakOppgave.vedtakHendelse)
                     try {
                         oppgaveService.ferdigStillOppgaveUnderBehandling(
-                            attesterVedtakOppgave.vedtakOppgaveDTO,
-                            attesterVedtakOppgave.vedtakHendelse.saksbehandler
+                            behandlingEllerHendelseId = attesterVedtakOppgave.vedtakOppgaveDTO.referanse,
+                            saksbehandler = attesterVedtakOppgave.vedtakHendelse.saksbehandler
                         )
                     } catch (e: Exception) {
                         haandterFeilIOppgaveService(e)

@@ -3,15 +3,16 @@ import { Heading, Table } from '@navikt/ds-react'
 import React from 'react'
 import styled from 'styled-components'
 import { ManglerRegelspesifikasjon } from '~components/behandling/felles/ManglerRegelspesifikasjon'
-import { formaterStringDato } from '~utils/formattering'
+import { formaterStringDato, NOK } from '~utils/formattering'
 import { YtelseEtterAvkortingDetaljer } from '~components/behandling/avkorting/YtelseEtterAvkortingDetaljer'
 
-export const YtelseEtterAvkorting = (props: { ytelser?: IAvkortetYtelse[] }) => {
-  const ytelser = props.ytelser
+export const YtelseEtterAvkorting = (props: { ytelser: IAvkortetYtelse[] }) => {
+  const ytelser = [...props.ytelser]
+  ytelser.sort((a, b) => new Date(b.fom).getTime() - new Date(a.fom).getTime())
 
   return (
     <>
-      {ytelser && ytelser.length > 0 && (
+      {ytelser.length > 0 && (
         <TableWrapper>
           <Heading spacing size="small" level="2">
             Beregning etter avkorting
@@ -27,7 +28,7 @@ export const YtelseEtterAvkorting = (props: { ytelser?: IAvkortetYtelse[] }) => 
               </Table.Row>
             </Table.Header>
             <Table.Body>
-              {ytelser?.map((ytelse, key) => (
+              {ytelser.map((ytelse, key) => (
                 <Table.ExpandableRow
                   key={key}
                   shadeOnHover={false}
@@ -36,14 +37,14 @@ export const YtelseEtterAvkorting = (props: { ytelser?: IAvkortetYtelse[] }) => 
                   <Table.DataCell>
                     {formaterStringDato(ytelse.fom)} - {ytelse.tom ? formaterStringDato(ytelse.tom) : ''}
                   </Table.DataCell>
-                  <Table.DataCell>{ytelse.avkortingsbeloep} kr</Table.DataCell>
+                  <Table.DataCell>{NOK(ytelse.avkortingsbeloep)}</Table.DataCell>
                   {ytelse.restanse < 0 ? (
-                    <Table.DataCell>+ {ytelse.restanse * -1} kr</Table.DataCell>
+                    <Table.DataCell>+ {NOK(ytelse.restanse * -1)}</Table.DataCell>
                   ) : (
-                    <Table.DataCell>- {ytelse.restanse} kr</Table.DataCell>
+                    <Table.DataCell>- {NOK(ytelse.restanse)}</Table.DataCell>
                   )}
                   <Table.DataCell>
-                    <ManglerRegelspesifikasjon>{ytelse.ytelseEtterAvkorting} kr</ManglerRegelspesifikasjon>
+                    <ManglerRegelspesifikasjon>{NOK(ytelse.ytelseEtterAvkorting)}</ManglerRegelspesifikasjon>
                   </Table.DataCell>
                 </Table.ExpandableRow>
               ))}

@@ -20,6 +20,7 @@ import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.FoedselsNummerMedGraderingDTO
 import no.nav.etterlatte.libs.common.FoedselsnummerDTO
+import no.nav.etterlatte.libs.common.OPPGAVEID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
@@ -32,6 +33,8 @@ class PluginConfiguration {
     var harTilgangBehandling: (behandlingId: String, saksbehandlerMedRoller: SaksbehandlerMedRoller)
     -> Boolean = { _, _ -> false }
     var harTilgangTilSak: (sakId: Long, saksbehandlerMedRoller: SaksbehandlerMedRoller)
+    -> Boolean = { _, _ -> false }
+    var harTilgangTilOppgave: (oppgaveId: String, saksbehandlerMedRoller: SaksbehandlerMedRoller)
     -> Boolean = { _, _ -> false }
     var saksbehandlerGroupIdsByKey: Map<AzureGroup, String> = emptyMap()
 }
@@ -85,6 +88,18 @@ val adressebeskyttelsePlugin: RouteScopedPlugin<PluginConfiguration> = createRou
             if (!sakId.isNullOrEmpty()) {
                 if (!pluginConfig.harTilgangTilSak(
                         sakId.toLong(),
+                        SaksbehandlerMedRoller(bruker, saksbehandlerGroupIdsByKey)
+                    )
+                ) {
+                    call.respond(HttpStatusCode.NotFound)
+                }
+                return@on
+            }
+
+            val oppgaveId = call.parameters[OPPGAVEID_CALL_PARAMETER]
+            if (!oppgaveId.isNullOrEmpty()) {
+                if (!pluginConfig.harTilgangTilOppgave(
+                        oppgaveId,
                         SaksbehandlerMedRoller(bruker, saksbehandlerGroupIdsByKey)
                     )
                 ) {

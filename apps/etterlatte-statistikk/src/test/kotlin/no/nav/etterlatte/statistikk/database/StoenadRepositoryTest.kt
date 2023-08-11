@@ -6,14 +6,18 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.POSTGRES_VERSION
 import no.nav.etterlatte.libs.database.migrate
+import no.nav.etterlatte.statistikk.domain.AvkortetYtelse
+import no.nav.etterlatte.statistikk.domain.Avkorting
+import no.nav.etterlatte.statistikk.domain.AvkortingGrunnlag
 import no.nav.etterlatte.statistikk.domain.Beregning
 import no.nav.etterlatte.statistikk.domain.Beregningstype
 import no.nav.etterlatte.statistikk.domain.MaanedStoenadRad
+import no.nav.etterlatte.statistikk.domain.SakUtland
 import no.nav.etterlatte.statistikk.domain.StoenadRad
 import no.nav.etterlatte.statistikk.domain.stoenadRad
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -56,6 +60,28 @@ class StoenadRepositoryTest {
         beregningsperioder = listOf()
     )
 
+    val mockAvkorting = Avkorting(
+        listOf(
+            AvkortingGrunnlag(
+                fom = YearMonth.now(),
+                tom = null,
+                aarsinntekt = 100,
+                fratrekkInnAar = 40,
+                relevanteMaanederInnAar = 2,
+                spesifikasjon = ""
+            )
+        ), listOf(
+            AvkortetYtelse(
+                fom = YearMonth.now(),
+                tom = null,
+                ytelseFoerAvkorting = 200,
+                avkortingsbeloep = 50,
+                ytelseEtterAvkorting = 150,
+                restanse = 0
+            )
+        )
+    )
+
     @AfterAll
     fun afterAll() {
         postgreSQLContainer.stop()
@@ -74,7 +100,7 @@ class StoenadRepositoryTest {
     }
 
     @Test
-    fun testStoenadRepository() {
+    fun `lagreStoenadsrad lagrer alle felter til`() {
         val repo = StoenadRepository.using(dataSource)
         repo.lagreStoenadsrad(
             StoenadRad(
@@ -97,24 +123,30 @@ class StoenadRepositoryTest {
                 vedtakLoependeFom = LocalDate.now(),
                 vedtakLoependeTom = null,
                 beregning = mockBeregning,
-                vedtakType = VedtakType.INNVILGELSE
+                avkorting = mockAvkorting,
+                vedtakType = VedtakType.INNVILGELSE,
+                sakUtland = SakUtland.NASJONAL,
+                virkningstidspunkt = YearMonth.of(2023, 6),
+                utbetalingsdato = LocalDate.of(2023, 7, 20)
             )
         )
-        repo.datapakke().also {
-            Assertions.assertEquals(1, it.size)
+        repo.hentStoenadRader().also {
+            assertEquals(1, it.size)
             val stoenadRad = it.first()
-            Assertions.assertEquals(5, stoenadRad.sakId)
-            Assertions.assertEquals(
+            assertEquals(5, stoenadRad.sakId)
+            assertEquals(
                 stoenadRad.fnrForeldre,
                 listOf("23427249697", "18458822782")
             )
-            Assertions.assertEquals(stoenadRad.beregning, mockBeregning)
-            Assertions.assertEquals(stoenadRad.vedtakType, VedtakType.INNVILGELSE)
+            assertEquals(stoenadRad.beregning, mockBeregning)
+            assertEquals(stoenadRad.avkorting, mockAvkorting)
+            assertEquals(stoenadRad.vedtakType, VedtakType.INNVILGELSE)
+            assertEquals(stoenadRad.sakUtland, SakUtland.NASJONAL)
         }
     }
 
     @Test
-    fun `datapakke henter ut null for beregning riktig`() {
+    fun `hentStoenadRader henter ut null for beregning riktig`() {
         val repo = StoenadRepository.using(dataSource)
         repo.lagreStoenadsrad(
             StoenadRad(
@@ -137,19 +169,24 @@ class StoenadRepositoryTest {
                 vedtakLoependeFom = LocalDate.now(),
                 vedtakLoependeTom = null,
                 beregning = null,
-                vedtakType = VedtakType.INNVILGELSE
+                avkorting = null,
+                vedtakType = VedtakType.INNVILGELSE,
+                sakUtland = SakUtland.NASJONAL,
+                virkningstidspunkt = YearMonth.of(2023, 6),
+                utbetalingsdato = LocalDate.of(2023, 7, 20)
             )
         )
-        repo.datapakke().also {
-            Assertions.assertEquals(1, it.size)
+        repo.hentStoenadRader().also {
+            assertEquals(1, it.size)
             val stoenadRad = it.first()
-            Assertions.assertEquals(5, stoenadRad.sakId)
-            Assertions.assertEquals(
+            assertEquals(5, stoenadRad.sakId)
+            assertEquals(
                 stoenadRad.fnrForeldre,
                 listOf("23427249697", "18458822782")
             )
-            Assertions.assertNull(stoenadRad.beregning)
-            Assertions.assertEquals(stoenadRad.vedtakType, VedtakType.INNVILGELSE)
+            assertNull(stoenadRad.beregning)
+            assertNull(stoenadRad.avkorting)
+            assertEquals(stoenadRad.vedtakType, VedtakType.INNVILGELSE)
         }
     }
 
@@ -185,9 +222,9 @@ class StoenadRepositoryTest {
             )
         )
 
-        val maanedsrader = repo.hentRaderInnenforMaaned(maaned)
-        Assertions.assertEquals(maanedsrader.size, 1)
-        Assertions.assertEquals(maanedsrader[0].sakId, 3L)
+        val maanedsrader = repo.hentStoenadRaderInnenforMaaned(maaned)
+        assertEquals(maanedsrader.size, 1)
+        assertEquals(maanedsrader[0].sakId, 3L)
     }
 
     @Test
@@ -223,9 +260,9 @@ class StoenadRepositoryTest {
             )
         )
 
-        val maanedsrader = repo.hentRaderInnenforMaaned(maaned)
-        Assertions.assertEquals(maanedsrader.size, 2)
-        Assertions.assertEquals(maanedsrader.map { it.sakId }.toSet(), setOf(1L, 2L))
+        val maanedsrader = repo.hentStoenadRaderInnenforMaaned(maaned)
+        assertEquals(maanedsrader.size, 2)
+        assertEquals(maanedsrader.map { it.sakId }.toSet(), setOf(1L, 2L))
     }
 
     @Test
@@ -257,9 +294,9 @@ class StoenadRepositoryTest {
             )
         )
 
-        val maanedsrader = repo.hentRaderInnenforMaaned(maaned)
-        Assertions.assertEquals(maanedsrader.size, 3)
-        Assertions.assertEquals(maanedsrader.map { it.sakId }.toSet(), setOf(1L))
+        val maanedsrader = repo.hentStoenadRaderInnenforMaaned(maaned)
+        assertEquals(maanedsrader.size, 3)
+        assertEquals(maanedsrader.map { it.sakId }.toSet(), setOf(1L))
     }
 
     @Test
@@ -272,6 +309,8 @@ class StoenadRepositoryTest {
             fnrSoesken = listOf(),
             anvendtTrygdetid = "40",
             nettoYtelse = "4",
+            avkortingsbeloep = "2",
+            aarsinntekt = "10",
             beregningType = "Moro",
             anvendtSats = "1",
             behandlingId = UUID.randomUUID(),
@@ -284,10 +323,13 @@ class StoenadRepositoryTest {
             attestant = null,
             vedtakLoependeFom = LocalDate.of(2022, 8, 1),
             vedtakLoependeTom = null,
-            statistikkMaaned = YearMonth.of(2023, Month.FEBRUARY)
+            statistikkMaaned = YearMonth.of(2023, Month.FEBRUARY),
+            sakUtland = SakUtland.NASJONAL,
+            virkningstidspunkt = YearMonth.of(2023, 6),
+            utbetalingsdato = LocalDate.of(2023, 7, 20)
         )
 
-        Assertions.assertDoesNotThrow {
+        assertDoesNotThrow {
             repo.lagreMaanedStatistikkRad(maanedStoenadRad)
         }
     }
@@ -316,14 +358,18 @@ class StoenadRepositoryTest {
                 vedtakLoependeFom = LocalDate.now(),
                 vedtakLoependeTom = null,
                 beregning = null,
-                vedtakType = null
+                avkorting = null,
+                vedtakType = null,
+                sakUtland = SakUtland.NASJONAL,
+                virkningstidspunkt = YearMonth.of(2023, 6),
+                utbetalingsdato = LocalDate.of(2023, 7, 20)
             )
         )
 
-        Assertions.assertNotNull(lagretRad)
-        Assertions.assertNull(lagretRad?.beregning)
-        Assertions.assertNull(repo.datapakke()[0].beregning)
-        Assertions.assertNull(repo.datapakke()[0].vedtakType)
+        assertNotNull(lagretRad)
+        assertNull(lagretRad?.beregning)
+        assertNull(repo.hentStoenadRader()[0].beregning)
+        assertNull(repo.hentStoenadRader()[0].vedtakType)
     }
 
     @Test
@@ -337,7 +383,7 @@ class StoenadRepositoryTest {
         )
 
         val kjoertStatus = repo.kjoertStatusForMaanedsstatistikk(maaned = maaned)
-        Assertions.assertEquals(KjoertStatus.INGEN_FEIL, kjoertStatus)
+        assertEquals(KjoertStatus.INGEN_FEIL, kjoertStatus)
     }
 
     @Test
@@ -357,7 +403,7 @@ class StoenadRepositoryTest {
         )
 
         val kjoertStatus = repo.kjoertStatusForMaanedsstatistikk(maaned = maaned)
-        Assertions.assertEquals(KjoertStatus.INGEN_FEIL, kjoertStatus)
+        assertEquals(KjoertStatus.INGEN_FEIL, kjoertStatus)
     }
 
     @Test
@@ -370,7 +416,7 @@ class StoenadRepositoryTest {
             raderRegistrert = 20
         )
         val kjoertStatus = repo.kjoertStatusForMaanedsstatistikk(maaned)
-        Assertions.assertEquals(KjoertStatus.FEIL, kjoertStatus)
+        assertEquals(KjoertStatus.FEIL, kjoertStatus)
     }
 
     @Test
@@ -383,6 +429,6 @@ class StoenadRepositoryTest {
             raderRegistrert = 20
         )
         val kjoertStatus = repo.kjoertStatusForMaanedsstatistikk(maaned.plusMonths(1))
-        Assertions.assertEquals(KjoertStatus.IKKE_KJOERT, kjoertStatus)
+        assertEquals(KjoertStatus.IKKE_KJOERT, kjoertStatus)
     }
 }

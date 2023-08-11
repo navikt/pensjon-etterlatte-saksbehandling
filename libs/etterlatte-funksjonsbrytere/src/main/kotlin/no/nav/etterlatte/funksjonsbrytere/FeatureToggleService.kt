@@ -6,51 +6,34 @@ import io.getunleash.UnleashContextProvider
 import io.getunleash.strategy.GradualRolloutRandomStrategy
 import io.getunleash.util.UnleashConfig
 import org.slf4j.LoggerFactory
-import java.net.URI
 
 interface FeatureToggleService {
     fun isEnabled(toggleId: FeatureToggle, defaultValue: Boolean): Boolean
 
     companion object {
-        fun initialiser(env: Map<String, String>): FeatureToggleService {
-            val enabled = env.getOrDefault(FeatureToggleServiceProperties.ENABLED.navn, "false").toBoolean()
-            return if (enabled) {
-                UnleashFeatureToggleService(
-                    Unleash(
-                        enabled = true,
-                        uri = URI(
-                            env[FeatureToggleServiceProperties.URI.navn] ?: throw IllegalArgumentException(
-                                "Unleash-URI er ikke definert"
-                            )
-                        ),
-                        cluster = env[FeatureToggleServiceProperties.CLUSTER.navn]
-                            ?: throw IllegalArgumentException("Unleash-cluster er ikke definert"),
-                        applicationName = env[FeatureToggleServiceProperties.APPLICATIONNAME.navn]
-                            ?: throw IllegalArgumentException("Unleash-applikasjonsnavn er ikke definert")
-                    )
-                )
-            } else {
-                DummyFeatureToggleService()
-            }
+        fun initialiser(properties: FeatureToggleProperties) = if (properties.enabled) {
+            UnleashFeatureToggleService(properties)
+        } else {
+            DummyFeatureToggleService()
         }
     }
 }
 
-class UnleashFeatureToggleService(private val unleash: Unleash) : FeatureToggleService {
+class UnleashFeatureToggleService(private val properties: FeatureToggleProperties) : FeatureToggleService {
 
     private val defaultUnleash = DefaultUnleash(
         UnleashConfig.builder()
-            .appName(unleash.applicationName)
-            .unleashAPI(unleash.uri)
+            .appName(properties.applicationName)
+            .unleashAPI(properties.uri)
             .unleashContextProvider(lagUnleashContextProvider())
             .build(),
-        ByClusterStrategy(unleash.cluster),
+        ByClusterStrategy(properties.cluster),
         GradualRolloutRandomStrategy()
     )
 
     private fun lagUnleashContextProvider() = UnleashContextProvider {
         UnleashContext.builder()
-            .appName(unleash.applicationName)
+            .appName(properties.applicationName)
             .build()
     }
 
@@ -67,9 +50,11 @@ class DummyFeatureToggleService : FeatureToggleService {
         )
     }
 
-    private val overstyrteBrytere = mapOf(
-        Pair(FellesFeatureToggle.NoOperationToggle, true)
+    private val overstyrteBrytere = mutableMapOf<FeatureToggle, Boolean>(
+        FellesFeatureToggle.NoOperationToggle to true
     )
+
+    fun settBryter(bryter: FeatureToggle, verdi: Boolean) = overstyrteBrytere.put(bryter, verdi)
 
     override fun isEnabled(toggleId: FeatureToggle, defaultValue: Boolean) =
         overstyrteBrytere.getOrDefault(toggleId, true)

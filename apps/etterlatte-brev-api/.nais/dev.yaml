@@ -114,6 +114,7 @@ spec:
         - host: data.brreg.no
         - host: navansatt.dev-fss-pub.nais.io
         - host: pensjon-brevbaker.intern.dev.nav.no
+        - host: unleash.nais.io
 
     inbound:
       rules:

@@ -2,8 +2,10 @@ package no.nav.etterlatte.oppgave
 
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
+import io.ktor.server.application.log
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
+import io.ktor.server.routing.application
 import io.ktor.server.routing.get
 import io.ktor.server.routing.route
 import no.nav.etterlatte.Kontekst
@@ -22,6 +24,8 @@ import org.slf4j.LoggerFactory
 import java.util.*
 
 internal fun Route.oppgaveRoutes(service: OppgaveService) {
+    val logger = application.log
+
     route("/api/oppgaver") {
         get {
             when (brukerTokenInfo) {

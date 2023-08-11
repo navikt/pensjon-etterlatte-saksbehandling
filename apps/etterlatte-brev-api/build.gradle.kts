@@ -11,6 +11,7 @@ dependencies {
     implementation(project(":libs:etterlatte-database"))
     implementation(project(":libs:ktor2client-onbehalfof"))
     implementation(project(":libs:ktor2client-auth-clientcredentials"))
+    implementation(project(":libs:etterlatte-funksjonsbrytere"))
 
     implementation("no.nav.pensjon.brevbaker:brevbaker-api-model-common:1.0.2")
 
@@ -33,7 +34,6 @@ dependencies {
     implementation(libs.ktor2.authjwt)
     implementation(libs.cache.caffeine)
 
-    implementation(libs.metrics.micrometer.prometheus)
     implementation(libs.bundles.jackson)
 
     implementation(libs.navfelles.tokenclientcore)

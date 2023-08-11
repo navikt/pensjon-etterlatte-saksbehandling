@@ -15,7 +15,7 @@ import no.nav.etterlatte.trygdetid.TrygdetidPeriode
 import no.nav.etterlatte.trygdetid.TrygdetidType
 import java.time.LocalDate
 import java.time.Period
-import java.util.*
+import java.util.UUID
 import java.util.UUID.randomUUID
 
 val saksbehandler = Saksbehandler("token", "ident", null)
@@ -83,4 +83,35 @@ fun beregnetTrygdetidGrunnlag(verdi: Period = Period.parse("P2Y2D")) = BeregnetT
     verdi = verdi,
     tidspunkt = Tidspunkt.now(),
     regelResultat = "".toJsonNode()
+)
+
+fun beregnetYrkesskadeTrygdetid() = BeregnetTrygdetid(
+    verdi = 40,
+    tidspunkt = Tidspunkt.now(),
+    regelResultat = """
+        {
+            "verdi": 40,
+            "regel": {
+                "gjelderFra": "1900-01-01",
+                "beskrivelse": "Yrkesskade fører altid til 40 år",
+                "regelReferanse": { "id": "REGEL-YRKESSKADE-TRYGDETID", "versjon": "1" }
+            },
+            "noder": [
+                {
+                    "verdi": 40,
+                    "regel": {
+                    "gjelderFra": "1900-01-01",
+                    "beskrivelse": "Full trygdetidsopptjening er 40 år",
+                    "regelReferanse": {
+                    "id": "REGEL-TOTAL-TRYGDETID-MAKS-ANTALL-ÅR",
+                    "versjon": "1"
+                }
+                },
+                    "noder": [],
+                    "opprettet": "2023-06-30T13:22:15.799453Z"
+                }
+            ],
+            "opprettet": "2023-06-30T13:22:15.799509Z"
+        }
+    """.trimIndent().toJsonNode()
 )

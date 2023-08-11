@@ -20,6 +20,7 @@ import no.nav.etterlatte.libs.common.behandling.SisteIverksatteBehandling
 import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
 import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsdato
 import no.nav.etterlatte.libs.common.toJsonNode
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import no.nav.etterlatte.trygdetid.LandNormalisert
 import no.nav.etterlatte.trygdetid.Opplysningsgrunnlag
@@ -29,6 +30,7 @@ import no.nav.etterlatte.trygdetid.TrygdetidRepository
 import no.nav.etterlatte.trygdetid.TrygdetidService
 import no.nav.etterlatte.trygdetid.klienter.BehandlingKlient
 import no.nav.etterlatte.trygdetid.klienter.GrunnlagKlient
+import no.nav.etterlatte.trygdetid.klienter.VilkaarsvuderingKlient
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -41,8 +43,15 @@ internal class TrygdetidServiceTest {
     private val repository: TrygdetidRepository = mockk()
     private val behandlingKlient: BehandlingKlient = mockk()
     private val grunnlagKlient: GrunnlagKlient = mockk()
+    private val vilkaarsvurderingKlient: VilkaarsvuderingKlient = mockk()
     private val beregningService: TrygdetidBeregningService = spyk(TrygdetidBeregningService)
-    private val service = TrygdetidService(repository, behandlingKlient, grunnlagKlient, beregningService)
+    private val service = TrygdetidService(
+        repository,
+        behandlingKlient,
+        grunnlagKlient,
+        vilkaarsvurderingKlient,
+        beregningService
+    )
 
     @BeforeEach
     fun beforeEach() {
@@ -58,13 +67,25 @@ internal class TrygdetidServiceTest {
     @Test
     fun `skal hente trygdetid`() {
         val behandlingId = randomUUID()
-        every { repository.hentTrygdetid(any()) } returns trygdetid(behandlingId)
 
-        val trygdetid = service.hentTrygdetid(behandlingId)
+        val vilkaarsvurderingDto = mockk<VilkaarsvurderingDto>()
+
+        every { vilkaarsvurderingDto.isYrkesskade() } returns false
+        coEvery { vilkaarsvurderingKlient.hentVilkaarsvurdering(any(), any()) } returns vilkaarsvurderingDto
+        coEvery { repository.hentTrygdetid(any()) } returns trygdetid(behandlingId)
+
+        val trygdetid = runBlocking { service.hentTrygdetid(behandlingId, saksbehandler) }
 
         trygdetid shouldNotBe null
 
-        verify(exactly = 1) { repository.hentTrygdetid(behandlingId) }
+        verify(exactly = 1) {
+            repository.hentTrygdetid(behandlingId)
+            vilkaarsvurderingDto.isYrkesskade()
+        }
+
+        coVerify(exactly = 1) {
+            vilkaarsvurderingKlient.hentVilkaarsvurdering(any(), any())
+        }
     }
 
     @Test
@@ -72,7 +93,7 @@ internal class TrygdetidServiceTest {
         val behandlingId = randomUUID()
         every { repository.hentTrygdetid(any()) } returns null
 
-        val trygdetid = service.hentTrygdetid(behandlingId)
+        val trygdetid = runBlocking { service.hentTrygdetid(behandlingId, saksbehandler) }
 
         trygdetid shouldBe null
 
@@ -153,6 +174,10 @@ internal class TrygdetidServiceTest {
         val forrigebehandlingId = randomUUID()
         val trygdetid = trygdetid(behandlingId, sakId)
 
+        val vilkaarsvurderingDto = mockk<VilkaarsvurderingDto>()
+
+        every { vilkaarsvurderingDto.isYrkesskade() } returns false
+        coEvery { vilkaarsvurderingKlient.hentVilkaarsvurdering(any(), any()) } returns vilkaarsvurderingDto
         every { repository.hentTrygdetid(behandlingId) } returns null
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
         coEvery { behandlingKlient.hentSisteIverksatteBehandling(any(), any()) } returns SisteIverksatteBehandling(
@@ -177,11 +202,13 @@ internal class TrygdetidServiceTest {
                     it.opplysninger shouldBe trygdetid.opplysninger
                 }
             )
+            vilkaarsvurderingKlient.hentVilkaarsvurdering(any(), any())
         }
         verify {
             behandling.id
             behandling.sak
             behandling.behandlingType
+            vilkaarsvurderingDto.isYrkesskade()
         }
     }
 
@@ -364,7 +391,10 @@ internal class TrygdetidServiceTest {
         val behandlingId = randomUUID()
         val trygdetidGrunnlag = trygdetidGrunnlag()
         val eksisterendeTrygdetid = trygdetid(behandlingId)
+        val vilkaarsvurderingDto = mockk<VilkaarsvurderingDto>()
 
+        every { vilkaarsvurderingDto.isYrkesskade() } returns false
+        coEvery { vilkaarsvurderingKlient.hentVilkaarsvurdering(any(), any()) } returns vilkaarsvurderingDto
         coEvery { behandlingKlient.settBehandlingStatusVilkaarsvurdert(any(), any()) } returns true
         every { repository.hentTrygdetid(behandlingId) } returns eksisterendeTrygdetid
         every { repository.oppdaterTrygdetid(any()) } answers { firstArg() }
@@ -394,6 +424,8 @@ internal class TrygdetidServiceTest {
             behandlingKlient.settBehandlingStatusVilkaarsvurdert(behandlingId, saksbehandler)
             beregningService.beregnTrygdetidGrunnlag(any())
             beregningService.beregnTrygdetid(any())
+            vilkaarsvurderingKlient.hentVilkaarsvurdering(any(), any())
+            vilkaarsvurderingDto.isYrkesskade()
         }
     }
 
@@ -402,10 +434,13 @@ internal class TrygdetidServiceTest {
         val behandlingId = randomUUID()
         val trygdetidGrunnlag = trygdetidGrunnlag()
         val eksisterendeTrygdetid = trygdetid(behandlingId)
+        val vilkaarsvurderingDto = mockk<VilkaarsvurderingDto>()
 
         coEvery { behandlingKlient.settBehandlingStatusVilkaarsvurdert(any(), any()) } returns true
         every { repository.hentTrygdetid(behandlingId) } returns eksisterendeTrygdetid
         every { repository.oppdaterTrygdetid(any()) } answers { firstArg() }
+        every { vilkaarsvurderingDto.isYrkesskade() } returns false
+        coEvery { vilkaarsvurderingKlient.hentVilkaarsvurdering(any(), any()) } returns vilkaarsvurderingDto
 
         val trygdetid = runBlocking {
             service.lagreTrygdetidGrunnlag(
@@ -432,6 +467,8 @@ internal class TrygdetidServiceTest {
             behandlingKlient.settBehandlingStatusVilkaarsvurdert(behandlingId, saksbehandler)
             beregningService.beregnTrygdetidGrunnlag(any())
             beregningService.beregnTrygdetid(any())
+            vilkaarsvurderingKlient.hentVilkaarsvurdering(any(), any())
+            vilkaarsvurderingDto.isYrkesskade()
         }
     }
 
@@ -441,10 +478,13 @@ internal class TrygdetidServiceTest {
         val trygdetidGrunnlag = trygdetidGrunnlag()
         val eksisterendeTrygdetid = trygdetid(behandlingId, trygdetidGrunnlag = listOf(trygdetidGrunnlag))
         val endretTrygdetidGrunnlag = trygdetidGrunnlag.copy(bosted = LandNormalisert.NORGE.isoCode)
+        val vilkaarsvurderingDto = mockk<VilkaarsvurderingDto>()
 
         coEvery { behandlingKlient.settBehandlingStatusVilkaarsvurdert(any(), any()) } returns true
         every { repository.hentTrygdetid(behandlingId) } returns eksisterendeTrygdetid
         every { repository.oppdaterTrygdetid(any()) } answers { firstArg() }
+        every { vilkaarsvurderingDto.isYrkesskade() } returns false
+        coEvery { vilkaarsvurderingKlient.hentVilkaarsvurdering(any(), any()) } returns vilkaarsvurderingDto
 
         val trygdetid = runBlocking {
             service.lagreTrygdetidGrunnlag(
@@ -474,6 +514,8 @@ internal class TrygdetidServiceTest {
             beregningService.beregnTrygdetidGrunnlag(any())
             beregningService.beregnTrygdetid(any())
             behandlingKlient.settBehandlingStatusVilkaarsvurdert(behandlingId, saksbehandler)
+            vilkaarsvurderingKlient.hentVilkaarsvurdering(any(), any())
+            vilkaarsvurderingDto.isYrkesskade()
         }
     }
 
@@ -544,6 +586,10 @@ internal class TrygdetidServiceTest {
             every { sak } returns sakId
         }
 
+        val vilkaarsvurderingDto = mockk<VilkaarsvurderingDto>()
+
+        every { vilkaarsvurderingDto.isYrkesskade() } returns false
+        coEvery { vilkaarsvurderingKlient.hentVilkaarsvurdering(any(), any()) } returns vilkaarsvurderingDto
         coEvery { behandlingKlient.hentBehandling(behandlingId, saksbehandler) } returns regulering
         every { repository.hentTrygdetid(forrigeBehandlingId) } returns forrigeTrygdetid
         every { repository.opprettTrygdetid(any()) } answers { firstArg() }
@@ -556,10 +602,222 @@ internal class TrygdetidServiceTest {
             repository.hentTrygdetid(forrigeBehandlingId)
             behandlingKlient.hentBehandling(behandlingId, saksbehandler)
             repository.opprettTrygdetid(match { it.behandlingId == behandlingId })
+            vilkaarsvurderingKlient.hentVilkaarsvurdering(any(), any())
         }
         verify {
             regulering.id
             regulering.sak
+            vilkaarsvurderingDto.isYrkesskade()
+        }
+    }
+
+    @Test
+    fun `henting av trygdetid - yrkesskade true - vilkaar-yrkesskade true`() {
+        val behandlingId = randomUUID()
+
+        val vilkaarsvurderingDto = mockk<VilkaarsvurderingDto>()
+
+        every { vilkaarsvurderingDto.isYrkesskade() } returns true
+        coEvery { vilkaarsvurderingKlient.hentVilkaarsvurdering(any(), any()) } returns vilkaarsvurderingDto
+        coEvery {
+            repository.hentTrygdetid(any())
+        } returns trygdetid(behandlingId).copy(beregnetTrygdetid = beregnetYrkesskadeTrygdetid())
+
+        val trygdetid = runBlocking { service.hentTrygdetid(behandlingId, saksbehandler) }
+
+        trygdetid shouldNotBe null
+        trygdetid?.beregnetTrygdetid?.verdi shouldBe 40
+
+        verify(exactly = 1) {
+            repository.hentTrygdetid(behandlingId)
+            vilkaarsvurderingDto.isYrkesskade()
+        }
+
+        coVerify(exactly = 1) {
+            vilkaarsvurderingKlient.hentVilkaarsvurdering(any(), any())
+        }
+    }
+
+    @Test
+    fun `henting av trygdetid - yrkesskade false - vilkaar-yrkesskade true`() {
+        val behandlingId = randomUUID()
+
+        val vilkaarsvurderingDto = mockk<VilkaarsvurderingDto>()
+
+        every { vilkaarsvurderingDto.isYrkesskade() } returns true
+        coEvery { vilkaarsvurderingKlient.hentVilkaarsvurdering(any(), any()) } returns vilkaarsvurderingDto
+        coEvery {
+            repository.hentTrygdetid(any())
+        } returns trygdetid(behandlingId).copy(beregnetTrygdetid = beregnetTrygdetid(20))
+
+        val trygdetid = runBlocking { service.hentTrygdetid(behandlingId, saksbehandler) }
+
+        trygdetid shouldNotBe null
+        trygdetid?.beregnetTrygdetid shouldBe null
+
+        verify(exactly = 1) {
+            repository.hentTrygdetid(behandlingId)
+            vilkaarsvurderingDto.isYrkesskade()
+        }
+
+        coVerify(exactly = 1) {
+            vilkaarsvurderingKlient.hentVilkaarsvurdering(any(), any())
+        }
+    }
+
+    @Test
+    fun `henting av trygdetid - yrkesskade true - vilkaar-yrkesskade false`() {
+        val behandlingId = randomUUID()
+
+        val vilkaarsvurderingDto = mockk<VilkaarsvurderingDto>()
+
+        every { vilkaarsvurderingDto.isYrkesskade() } returns false
+        coEvery { vilkaarsvurderingKlient.hentVilkaarsvurdering(any(), any()) } returns vilkaarsvurderingDto
+        coEvery {
+            repository.hentTrygdetid(any())
+        } returns trygdetid(behandlingId).copy(beregnetTrygdetid = beregnetYrkesskadeTrygdetid())
+
+        val trygdetid = runBlocking { service.hentTrygdetid(behandlingId, saksbehandler) }
+
+        trygdetid shouldNotBe null
+        trygdetid?.beregnetTrygdetid shouldBe null
+
+        verify(exactly = 1) {
+            repository.hentTrygdetid(behandlingId)
+            vilkaarsvurderingDto.isYrkesskade()
+        }
+
+        coVerify(exactly = 1) {
+            vilkaarsvurderingKlient.hentVilkaarsvurdering(any(), any())
+        }
+    }
+
+    @Test
+    fun `henting av trygdetid - yrkesskade false - vilkaar-yrkesskade false`() {
+        val behandlingId = randomUUID()
+
+        val vilkaarsvurderingDto = mockk<VilkaarsvurderingDto>()
+
+        every { vilkaarsvurderingDto.isYrkesskade() } returns false
+        coEvery { vilkaarsvurderingKlient.hentVilkaarsvurdering(any(), any()) } returns vilkaarsvurderingDto
+        coEvery {
+            repository.hentTrygdetid(any())
+        } returns trygdetid(behandlingId).copy(beregnetTrygdetid = beregnetTrygdetid(20))
+
+        val trygdetid = runBlocking { service.hentTrygdetid(behandlingId, saksbehandler) }
+
+        trygdetid shouldNotBe null
+        trygdetid?.beregnetTrygdetid?.verdi shouldBe 20
+
+        verify(exactly = 1) {
+            repository.hentTrygdetid(behandlingId)
+            vilkaarsvurderingDto.isYrkesskade()
+        }
+
+        coVerify(exactly = 1) {
+            vilkaarsvurderingKlient.hentVilkaarsvurdering(any(), any())
+        }
+    }
+
+    @Test
+    fun `skal lagre nytt yrkesskade trygdetidsgrunnlag`() {
+        val behandlingId = randomUUID()
+        val eksisterendeTrygdetid = trygdetid(behandlingId)
+        val vilkaarsvurderingDto = mockk<VilkaarsvurderingDto>()
+
+        every { vilkaarsvurderingDto.isYrkesskade() } returns true
+        coEvery { vilkaarsvurderingKlient.hentVilkaarsvurdering(any(), any()) } returns vilkaarsvurderingDto
+        coEvery { behandlingKlient.settBehandlingStatusVilkaarsvurdert(any(), any()) } returns true
+        every {
+            repository.hentTrygdetid(behandlingId)
+        } returns eksisterendeTrygdetid
+        every { repository.oppdaterTrygdetid(any()) } answers { firstArg() }
+
+        val trygdetid = runBlocking {
+            service.lagreYrkesskadeTrygdetidGrunnlag(
+                behandlingId,
+                saksbehandler
+            )
+        }
+
+        trygdetid.beregnetTrygdetid?.verdi shouldBe 40
+
+        coVerify(exactly = 1) {
+            behandlingKlient.kanBeregnes(behandlingId, saksbehandler)
+            repository.hentTrygdetid(behandlingId)
+            repository.oppdaterTrygdetid(any())
+            behandlingKlient.settBehandlingStatusVilkaarsvurdert(behandlingId, saksbehandler)
+            beregningService.beregnTrygdetidForYrkesskade(any())
+            vilkaarsvurderingKlient.hentVilkaarsvurdering(any(), any())
+            vilkaarsvurderingDto.isYrkesskade()
+        }
+    }
+
+    @Test
+    fun `skal oppdater yrkesskade trygdetidsgrunnlag selv om det ikke var yrkesskade foer`() {
+        val behandlingId = randomUUID()
+        val eksisterendeTrygdetid = trygdetid(behandlingId)
+        val vilkaarsvurderingDto = mockk<VilkaarsvurderingDto>()
+
+        every { vilkaarsvurderingDto.isYrkesskade() } returns true
+        coEvery { vilkaarsvurderingKlient.hentVilkaarsvurdering(any(), any()) } returns vilkaarsvurderingDto
+        coEvery { behandlingKlient.settBehandlingStatusVilkaarsvurdert(any(), any()) } returns true
+        every {
+            repository.hentTrygdetid(behandlingId)
+        } returns eksisterendeTrygdetid.copy(beregnetTrygdetid = beregnetTrygdetid(20))
+        every { repository.oppdaterTrygdetid(any()) } answers { firstArg() }
+
+        val trygdetid = runBlocking {
+            service.lagreYrkesskadeTrygdetidGrunnlag(
+                behandlingId,
+                saksbehandler
+            )
+        }
+
+        trygdetid.beregnetTrygdetid?.verdi shouldBe 40
+
+        coVerify(exactly = 1) {
+            behandlingKlient.kanBeregnes(behandlingId, saksbehandler)
+            repository.hentTrygdetid(behandlingId)
+            repository.oppdaterTrygdetid(any())
+            behandlingKlient.settBehandlingStatusVilkaarsvurdert(behandlingId, saksbehandler)
+            beregningService.beregnTrygdetidForYrkesskade(any())
+            vilkaarsvurderingKlient.hentVilkaarsvurdering(any(), any())
+            vilkaarsvurderingDto.isYrkesskade()
+        }
+    }
+
+    @Test
+    fun `skal oppdater yrkesskade trygdetidsgrunnlag naar det var yrkesskade foer`() {
+        val behandlingId = randomUUID()
+        val eksisterendeTrygdetid = trygdetid(behandlingId)
+        val vilkaarsvurderingDto = mockk<VilkaarsvurderingDto>()
+
+        every { vilkaarsvurderingDto.isYrkesskade() } returns true
+        coEvery { vilkaarsvurderingKlient.hentVilkaarsvurdering(any(), any()) } returns vilkaarsvurderingDto
+        coEvery { behandlingKlient.settBehandlingStatusVilkaarsvurdert(any(), any()) } returns true
+        every {
+            repository.hentTrygdetid(behandlingId)
+        } returns eksisterendeTrygdetid.copy(beregnetTrygdetid = beregnetYrkesskadeTrygdetid())
+        every { repository.oppdaterTrygdetid(any()) } answers { firstArg() }
+
+        val trygdetid = runBlocking {
+            service.lagreYrkesskadeTrygdetidGrunnlag(
+                behandlingId,
+                saksbehandler
+            )
+        }
+
+        trygdetid.beregnetTrygdetid?.verdi shouldBe 40
+
+        coVerify(exactly = 1) {
+            behandlingKlient.kanBeregnes(behandlingId, saksbehandler)
+            repository.hentTrygdetid(behandlingId)
+            repository.oppdaterTrygdetid(any())
+            behandlingKlient.settBehandlingStatusVilkaarsvurdert(behandlingId, saksbehandler)
+            beregningService.beregnTrygdetidForYrkesskade(any())
+            vilkaarsvurderingKlient.hentVilkaarsvurdering(any(), any())
+            vilkaarsvurderingDto.isYrkesskade()
         }
     }
 }

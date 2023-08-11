@@ -82,7 +82,6 @@ const SoeskenjusteringPeriode = (props: SoeskenjusteringPeriodeProps) => {
                     <MaanedVelger
                       onChange={(val) => tom.field.onChange(val)}
                       label="Til og med"
-                      placeholder="Ingen slutt"
                       value={tom.field.value}
                     />
                     {tom.field.value !== null && tom.field.value !== undefined ? (

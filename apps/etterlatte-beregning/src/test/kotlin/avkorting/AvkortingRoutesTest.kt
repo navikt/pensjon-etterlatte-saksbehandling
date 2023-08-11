@@ -14,10 +14,8 @@ import io.ktor.server.testing.ApplicationTestBuilder
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
-import no.nav.etterlatte.avkorting.Aarsoppgjoer
 import no.nav.etterlatte.avkorting.Avkorting
 import no.nav.etterlatte.avkorting.AvkortingService
-import no.nav.etterlatte.avkorting.Restanse
 import no.nav.etterlatte.avkorting.avkorting
 import no.nav.etterlatte.avkorting.fromDto
 import no.nav.etterlatte.beregning.regler.aarsoppgjoer
@@ -114,8 +112,8 @@ class AvkortingRoutesTest {
             ),
             avkortetYtelse = listOf(
                 AvkortetYtelseDto(
-                    fom = dato.atDay(1),
-                    tom = dato.atEndOfMonth(),
+                    fom = dato,
+                    tom = dato,
                     ytelseFoerAvkorting = 300,
                     avkortingsbeloep = 200,
                     ytelseEtterAvkorting = 50,

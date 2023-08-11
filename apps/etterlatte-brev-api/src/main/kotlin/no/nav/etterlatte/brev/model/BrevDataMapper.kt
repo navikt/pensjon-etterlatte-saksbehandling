@@ -3,7 +3,9 @@ package no.nav.etterlatte.brev.model
 import no.nav.etterlatte.brev.behandling.Behandling
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_AVSLAG
+import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_AVSLAG_IKKEYRKESSKADE
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_INNVILGELSE
+import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_INNVILGELSE_NY
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_REVURDERING_ADOPSJON
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_REVURDERING_ENDRING
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_REVURDERING_FENGSELSOPPHOLD
@@ -14,22 +16,44 @@ import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_REVURDER
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_REVURDERING_UT_AV_FENGSEL
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMS_INNVILGELSE_AUTO
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMS_OPPHOER_MANUELL
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 
-object BrevDataMapper {
+enum class BrevDataFeatureToggle(private val key: String) : FeatureToggle {
+    NyMalInnvilgelse("pensjon-etterlatte.bp-ny-mal-innvilgelse");
+
+    override fun key() = key
+}
+
+class BrevDataMapper(private val featureToggleService: FeatureToggleService) {
 
     fun brevKode(behandling: Behandling, brevProsessType: BrevProsessType) = when (brevProsessType) {
         BrevProsessType.AUTOMATISK -> brevKodeAutomatisk(behandling)
+        BrevProsessType.REDIGERBAR -> brevKodeAutomatisk(behandling)
         BrevProsessType.MANUELL -> BrevkodePar(OMS_OPPHOER_MANUELL)
     }
 
     private fun brevKodeAutomatisk(behandling: Behandling): BrevkodePar = when (behandling.sakType) {
         SakType.BARNEPENSJON -> {
             when (val vedtakType = behandling.vedtak.type) {
-                VedtakType.INNVILGELSE -> BrevkodePar(BARNEPENSJON_INNVILGELSE)
-                VedtakType.AVSLAG -> BrevkodePar(BARNEPENSJON_AVSLAG)
+                VedtakType.INNVILGELSE -> when (
+                    featureToggleService.isEnabled(
+                        BrevDataFeatureToggle.NyMalInnvilgelse,
+                        false
+                    )
+                ) {
+                    true -> BrevkodePar(BARNEPENSJON_INNVILGELSE_NY)
+                    false -> BrevkodePar(BARNEPENSJON_INNVILGELSE)
+                }
+
+                VedtakType.AVSLAG -> when (behandling.revurderingsaarsak) {
+                    RevurderingAarsak.YRKESSKADE -> BrevkodePar(BARNEPENSJON_AVSLAG_IKKEYRKESSKADE, BARNEPENSJON_AVSLAG)
+                    else -> BrevkodePar(BARNEPENSJON_AVSLAG)
+                }
+
                 VedtakType.ENDRING -> when (behandling.revurderingsaarsak) {
                     RevurderingAarsak.SOESKENJUSTERING -> BrevkodePar(BARNEPENSJON_REVURDERING_SOESKENJUSTERING)
                     else -> TODO("Revurderingsbrev for ${behandling.revurderingsaarsak} er ikke støttet")
@@ -66,8 +90,21 @@ object BrevDataMapper {
     fun brevData(behandling: Behandling): BrevData = when (behandling.sakType) {
         SakType.BARNEPENSJON -> {
             when (val vedtakType = behandling.vedtak.type) {
-                VedtakType.INNVILGELSE -> InnvilgetBrevData.fra(behandling)
-                VedtakType.AVSLAG -> AvslagBrevData.fra(behandling)
+                VedtakType.INNVILGELSE -> when (
+                    featureToggleService.isEnabled(
+                        BrevDataFeatureToggle.NyMalInnvilgelse,
+                        false
+                    )
+                ) {
+                    true -> InnvilgetBrevDataNy.fra(behandling)
+                    false -> InnvilgetBrevData.fra(behandling)
+                }
+
+                VedtakType.AVSLAG -> when (behandling.revurderingsaarsak) {
+                    RevurderingAarsak.YRKESSKADE -> AvslagYrkesskadeBrevData.fra(behandling)
+                    else -> AvslagBrevData.fra(behandling)
+                }
+
                 VedtakType.ENDRING -> when (behandling.revurderingsaarsak) {
                     RevurderingAarsak.SOESKENJUSTERING -> SoeskenjusteringRevurderingBrevdata.fra(behandling)
                     RevurderingAarsak.FENGSELSOPPHOLD -> FengselsoppholdBrevdata.fra(behandling)

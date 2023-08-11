@@ -34,11 +34,8 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import org.junit.jupiter.params.ParameterizedTest
-import org.junit.jupiter.params.provider.EnumSource
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class OmregningIntegrationTest : BehandlingIntegrationTest() {
@@ -111,9 +108,8 @@ class OmregningIntegrationTest : BehandlingIntegrationTest() {
             resetDatabase()
         }
 
-        @ParameterizedTest(name = "Kan opprette {0} omregningstype paa sak")
-        @EnumSource(Prosesstype::class)
-        fun `kan opprette omregning paa sak som har iverksatt foerstegangsbehandling`(prosesstype: Prosesstype) {
+        @Test
+        fun `kan opprette omregning paa sak som har iverksatt foerstegangsbehandling`() {
             testApplication {
                 environment {
                     config = hoconApplicationConfig
@@ -133,7 +129,7 @@ class OmregningIntegrationTest : BehandlingIntegrationTest() {
                             sakId,
                             LocalDate.now(),
                             null,
-                            prosesstype
+                            Prosesstype.AUTOMATISK
                         )
                     )
                 }.let {

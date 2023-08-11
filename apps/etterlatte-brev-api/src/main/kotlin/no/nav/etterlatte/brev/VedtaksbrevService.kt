@@ -16,6 +16,8 @@ import no.nav.etterlatte.brev.model.BrevInnhold
 import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.BrevProsessType.AUTOMATISK
 import no.nav.etterlatte.brev.model.BrevProsessType.MANUELL
+import no.nav.etterlatte.brev.model.BrevProsessType.REDIGERBAR
+import no.nav.etterlatte.brev.model.BrevProsessTypeFactory
 import no.nav.etterlatte.brev.model.ManueltBrevData
 import no.nav.etterlatte.brev.model.OpprettNyttBrev
 import no.nav.etterlatte.brev.model.Pdf
@@ -32,7 +34,9 @@ class VedtaksbrevService(
     private val sakOgBehandlingService: SakOgBehandlingService,
     private val adresseService: AdresseService,
     private val dokarkivService: DokarkivServiceImpl,
-    private val brevbaker: BrevbakerService
+    private val brevbaker: BrevbakerService,
+    private val brevDataMapper: BrevDataMapper,
+    private val brevProsessTypeFactory: BrevProsessTypeFactory
 ) {
     private val logger = LoggerFactory.getLogger(VedtaksbrevService::class.java)
 
@@ -61,7 +65,7 @@ class VedtaksbrevService(
 
         val mottaker = adresseService.hentMottakerAdresse(behandling.persongalleri.innsender.fnr.value)
 
-        val prosessType = BrevProsessType.fra(behandling)
+        val prosessType = brevProsessTypeFactory.fra(behandling)
 
         val nyttBrev = OpprettNyttBrev(
             sakId = sakId,
@@ -89,7 +93,7 @@ class VedtaksbrevService(
         val behandling = sakOgBehandlingService.hentBehandling(brev.sakId, brev.behandlingId!!, brukerTokenInfo)
         val avsender = adresseService.hentAvsender(behandling.vedtak)
 
-        val kode = BrevDataMapper.brevKode(behandling, brev.prosessType)
+        val kode = brevDataMapper.brevKode(behandling, brev.prosessType)
         val brevData = opprettBrevData(brev, behandling, kode)
         val brevRequest = BrevbakerRequest.fra(kode.ferdigstilling, brevData, behandling, avsender)
 
@@ -99,7 +103,8 @@ class VedtaksbrevService(
 
     private fun opprettBrevData(brev: Brev, behandling: Behandling, brevkode: BrevDataMapper.BrevkodePar): BrevData =
         when (brev.prosessType) {
-            AUTOMATISK -> BrevDataMapper.brevDataFerdigstilling(behandling, { hentLagretInnhold(brev) }, brevkode)
+            REDIGERBAR -> brevDataMapper.brevDataFerdigstilling(behandling, { hentLagretInnhold(brev) }, brevkode)
+            AUTOMATISK -> brevDataMapper.brevData(behandling)
             MANUELL -> ManueltBrevData(hentLagretInnhold(brev))
         }
 
@@ -109,13 +114,8 @@ class VedtaksbrevService(
         val tittel = "Vedtak om ${behandling.vedtak.type.name.lowercase()}"
 
         val payload = when (prosessType) {
-            AUTOMATISK -> {
-                when (behandling.revurderingsaarsak?.redigerbartBrev) {
-                    true -> brevbaker.hentRedigerbarTekstFraBrevbakeren(behandling)
-                    else -> null
-                }
-            }
-
+            REDIGERBAR -> brevbaker.hentRedigerbarTekstFraBrevbakeren(behandling)
+            AUTOMATISK -> null
             MANUELL -> SlateHelper.hentInitiellPayload(behandling)
         }
 

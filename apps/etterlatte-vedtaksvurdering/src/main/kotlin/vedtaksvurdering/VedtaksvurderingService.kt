@@ -156,14 +156,19 @@ class VedtaksvurderingService(
                 tx
             )
             runBlocking {
-                behandlingKlient.kanAttestereVedtak(
-                    behandlingId,
-                    brukerTokenInfo,
-                    VedtakHendelse(
-                        vedtakId = attestertVedtak.id,
-                        inntruffet = attestertVedtak.attestasjon?.tidspunkt!!,
-                        saksbehandler = attestertVedtak.attestasjon.attestant,
-                        kommentar = kommentar
+                behandlingKlient.attesterVedtak(
+                    brukerTokenInfo = brukerTokenInfo,
+                    vedtakEndringDTO = VedtakEndringDTO(
+                        vedtakOppgaveDTO = VedtakOppgaveDTO(
+                            sakId = attestertVedtak.sakId,
+                            referanse = attestertVedtak.behandlingId.toString()
+                        ),
+                        vedtakHendelse = VedtakHendelse(
+                            vedtakId = attestertVedtak.id,
+                            inntruffet = attestertVedtak.attestasjon?.tidspunkt!!,
+                            saksbehandler = attestertVedtak.attestasjon.attestant,
+                            kommentar = kommentar
+                        )
                     )
                 )
             }
@@ -367,7 +372,6 @@ class VedtaksvurderingService(
     ): List<Utbetalingsperiode> {
         return when (vedtakType) {
             VedtakType.INNVILGELSE, VedtakType.ENDRING -> {
-                // TODO Skal endres når barnepensjon tar i bruk avkorting
                 if (sakType == SakType.BARNEPENSJON) {
                     val beregningsperioder = requireNotNull(beregningOgAvkorting?.beregning?.beregningsperioder) {
                         "Mangler beregning"

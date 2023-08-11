@@ -92,6 +92,7 @@ export const OPPGAVETYPEFILTER: Record<OppgavetypeFilterKeys, string> = {
   ATTESTERING: 'Attestering',
   VURDER_KONSEKVENS: 'Vurder konsekvense for hendelse',
   UNDERKJENT: 'Underkjent behandling',
+  GOSYS: 'Gosys',
 }
 
 function filtrerOppgaveType(oppgavetypeFilterKeys: OppgavetypeFilterKeys, oppgaver: OppgaveDTOny[]): OppgaveDTOny[] {
@@ -168,4 +169,28 @@ export function filtrerOppgaver(
   const fristFiltrert = filtrerFrist(fristFilter, oppgaveKildeFiltrert)
 
   return finnFnrIOppgaver(fnr, fristFiltrert)
+}
+
+export interface Filter {
+  enhetsFilter: EnhetFilterKeys
+  fristFilter: FristFilterKeys
+  saksbehandlerFilter: SaksbehandlerFilterKeys
+  ytelseFilter: YtelseFilterKeys
+  oppgavestatusFilter: OppgavestatusFilterKeys
+  oppgavetypeFilter: OppgavetypeFilterKeys
+  oppgavekildeFilter: OppgaveKildeFilterKeys
+  fnrFilter: string
+}
+
+export const initialFilter = (): Filter => {
+  return {
+    enhetsFilter: 'visAlle',
+    fristFilter: 'visAlle',
+    saksbehandlerFilter: 'IkkeTildelt',
+    ytelseFilter: 'visAlle',
+    oppgavestatusFilter: 'visAlle',
+    oppgavetypeFilter: 'visAlle',
+    oppgavekildeFilter: 'visAlle',
+    fnrFilter: '',
+  }
 }

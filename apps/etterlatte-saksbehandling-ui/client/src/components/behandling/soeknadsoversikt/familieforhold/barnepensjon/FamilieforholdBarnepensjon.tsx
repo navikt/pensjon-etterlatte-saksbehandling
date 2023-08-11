@@ -28,7 +28,7 @@ export const FamilieforholdBarnepensjon = ({ behandling }: PropsFamilieforhold) 
           <Person person={avdoede.opplysning} kilde={avdoede.kilde} avdoed />
           <Person person={gjenlevende.opplysning} kilde={gjenlevende.kilde} gjenlevende />
         </FamilieforholdVoksne>
-        <BarneListe familieforhold={behandling.familieforhold!!} />
+        <BarneListe familieforhold={behandling.familieforhold!!} soekerFnr={behandling.søker.foedselsnummer} />
       </FamilieforholdWrapper>
       <Border />
     </>

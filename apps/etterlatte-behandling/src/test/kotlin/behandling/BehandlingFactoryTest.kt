@@ -3,7 +3,9 @@ package behandling
 import io.mockk.clearAllMocks
 import io.mockk.confirmVerified
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
+import io.mockk.runs
 import io.mockk.slot
 import io.mockk.verify
 import no.nav.etterlatte.Context
@@ -70,7 +72,8 @@ class BehandlingFactoryTest {
         "behandling",
         Sak("ident", SakType.BARNEPENSJON, 1L, Enheter.AALESUND.enhetNr),
         OppgaveKilde.BEHANDLING,
-        OppgaveType.FOERSTEGANGSBEHANDLING
+        OppgaveType.FOERSTEGANGSBEHANDLING,
+        null
     )
     private val kommerBarnetTilGodeService = mockk<KommerBarnetTilGodeService>().also {
         every { it.hentKommerBarnetTilGode(any()) } returns null
@@ -86,7 +89,8 @@ class BehandlingFactoryTest {
         grunnlagsendringshendelseDao,
         kommerBarnetTilGodeService,
         revurderingDao,
-        behandlingService
+        behandlingService,
+        true
     )
     private val behandlingFactory = BehandlingFactory(
         oppgaveService,
@@ -144,13 +148,6 @@ class BehandlingFactoryTest {
             sistEndret = datoNaa,
             status = BehandlingStatus.OPPRETTET,
             soeknadMottattDato = Tidspunkt.now().toLocalDatetimeUTC(),
-            persongalleri = Persongalleri(
-                "Innsender",
-                "Soeker",
-                listOf("Gjenlevende"),
-                listOf("Avdoed"),
-                emptyList()
-            ),
             gyldighetsproeving = null,
             virkningstidspunkt = Virkningstidspunkt(
                 YearMonth.of(2022, 1),
@@ -176,10 +173,10 @@ class BehandlingFactoryTest {
         every { behandlingDaoMock.hentBehandling(capture(behandlingHentes)) } returns opprettetBehandling
         every { hendelseDaoMock.behandlingOpprettet(any()) } returns Unit
         every { behandlingDaoMock.lagreGyldighetsproving(any()) } returns Unit
-        every { behandlingDaoMock.alleBehandlingerISak(any()) } returns listOf(opprettetBehandling)
+        every { behandlingDaoMock.alleBehandlingerISak(any()) } returns emptyList()
         every { behandlingDaoMock.lagreStatus(any(), any(), any()) } returns Unit
         every { behandlingHendelserKafkaProducerMock.sendMeldingForHendelse(any(), any()) } returns Unit
-        every { grunnlagService.leggInnNyttGrunnlag(any()) } returns Unit
+        every { grunnlagService.leggInnNyttGrunnlag(any(), any()) } returns Unit
         every {
             oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendSoeknad(any(), any())
         } returns mockOppgave
@@ -192,10 +189,8 @@ class BehandlingFactoryTest {
         )!!
 
         Assertions.assertEquals(opprettetBehandling, resultat)
-        Assertions.assertEquals(opprettetBehandling.persongalleri.avdoed, resultat.persongalleri.avdoed)
         Assertions.assertEquals(opprettetBehandling.sak, resultat.sak)
         Assertions.assertEquals(opprettetBehandling.id, resultat.id)
-        Assertions.assertEquals(opprettetBehandling.persongalleri.soeker, resultat.persongalleri.soeker)
         Assertions.assertEquals(opprettetBehandling.behandlingOpprettet, resultat.behandlingOpprettet)
         Assertions.assertEquals(1, behandlingOpprettes.captured.sakId)
         Assertions.assertEquals(behandlingHentes.captured, behandlingOpprettes.captured.id)
@@ -206,9 +201,8 @@ class BehandlingFactoryTest {
             behandlingDaoMock.opprettBehandling(any())
             hendelseDaoMock.behandlingOpprettet(any())
             behandlingDaoMock.alleBehandlingerISak(any())
-            behandlingDaoMock.lagreStatus(any(), any(), any())
             behandlingHendelserKafkaProducerMock.sendMeldingForHendelse(any(), BehandlingHendelseType.OPPRETTET)
-            grunnlagService.leggInnNyttGrunnlag(any())
+            grunnlagService.leggInnNyttGrunnlag(any(), any())
             oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendSoeknad(any(), any())
             oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendSoeknad(any(), any())
         }
@@ -235,13 +229,6 @@ class BehandlingFactoryTest {
             sistEndret = datoNaa,
             status = BehandlingStatus.OPPRETTET,
             soeknadMottattDato = Tidspunkt.now().toLocalDatetimeUTC(),
-            persongalleri = Persongalleri(
-                "Innsender",
-                "Soeker",
-                listOf("Gjenlevende"),
-                listOf("Avdoed"),
-                emptyList()
-            ),
             gyldighetsproeving = null,
             virkningstidspunkt = Virkningstidspunkt(
                 YearMonth.of(2022, 1),
@@ -268,7 +255,7 @@ class BehandlingFactoryTest {
         every { behandlingDaoMock.alleBehandlingerISak(any()) } returns emptyList()
         every { hendelseDaoMock.behandlingOpprettet(any()) } returns Unit
         every { behandlingHendelserKafkaProducerMock.sendMeldingForHendelse(any(), any()) } returns Unit
-        every { grunnlagService.leggInnNyttGrunnlag(any()) } returns Unit
+        every { grunnlagService.leggInnNyttGrunnlag(any(), any()) } returns Unit
         every {
             oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendSoeknad(any(), any())
         } returns mockOppgave
@@ -289,7 +276,7 @@ class BehandlingFactoryTest {
             hendelseDaoMock.behandlingOpprettet(any())
             behandlingDaoMock.alleBehandlingerISak(any())
             behandlingHendelserKafkaProducerMock.sendMeldingForHendelse(any(), any())
-            grunnlagService.leggInnNyttGrunnlag(any())
+            grunnlagService.leggInnNyttGrunnlag(any(), any())
             oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendSoeknad(any(), any())
             oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendSoeknad(any(), any())
         }
@@ -318,13 +305,6 @@ class BehandlingFactoryTest {
             sistEndret = datoNaa,
             status = BehandlingStatus.OPPRETTET,
             soeknadMottattDato = Tidspunkt.now().toLocalDatetimeUTC(),
-            persongalleri = Persongalleri(
-                "Innsender",
-                "Soeker",
-                listOf("Gjenlevende"),
-                listOf("Avdoed"),
-                emptyList()
-            ),
             gyldighetsproeving = null,
             virkningstidspunkt = Virkningstidspunkt(
                 YearMonth.of(2022, 1),
@@ -354,10 +334,13 @@ class BehandlingFactoryTest {
         every { behandlingDaoMock.lagreStatus(any(), any(), any()) } returns Unit
         every { hendelseDaoMock.behandlingOpprettet(any()) } returns Unit
         every { behandlingHendelserKafkaProducerMock.sendMeldingForHendelse(any(), any()) } returns Unit
-        every { grunnlagService.leggInnNyttGrunnlag(any()) } returns Unit
+        every { grunnlagService.leggInnNyttGrunnlag(any(), any()) } returns Unit
         every {
             oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendSoeknad(any(), any())
         } returns mockOppgave
+        every {
+            oppgaveService.avbrytAapneOppgaverForBehandling(any())
+        } just runs
 
         val foerstegangsbehandling = behandlingFactory.opprettBehandling(
             1,
@@ -387,12 +370,13 @@ class BehandlingFactoryTest {
             hendelseDaoMock.behandlingOpprettet(any())
             behandlingDaoMock.alleBehandlingerISak(any())
             behandlingHendelserKafkaProducerMock.sendMeldingForHendelse(any(), any())
-            grunnlagService.leggInnNyttGrunnlag(any())
+            grunnlagService.leggInnNyttGrunnlag(any(), any())
             oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendSoeknad(any(), any())
             oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendSoeknad(any(), any())
         }
         verify {
             behandlingDaoMock.lagreStatus(any(), BehandlingStatus.AVBRUTT, any())
+            oppgaveService.avbrytAapneOppgaverForBehandling(nyfoerstegangsbehandling!!.id.toString())
         }
     }
 
@@ -419,13 +403,6 @@ class BehandlingFactoryTest {
             sistEndret = datoNaa,
             status = BehandlingStatus.OPPRETTET,
             soeknadMottattDato = Tidspunkt.now().toLocalDatetimeUTC(),
-            persongalleri = Persongalleri(
-                "Innsender",
-                "Soeker",
-                listOf("Gjenlevende"),
-                listOf("Avdoed"),
-                emptyList()
-            ),
             gyldighetsproeving = null,
             virkningstidspunkt = Virkningstidspunkt(
                 YearMonth.of(2022, 1),
@@ -455,11 +432,16 @@ class BehandlingFactoryTest {
         every { behandlingDaoMock.lagreStatus(any(), any(), any()) } returns Unit
         every { hendelseDaoMock.behandlingOpprettet(any()) } returns Unit
         every { behandlingHendelserKafkaProducerMock.sendMeldingForHendelse(any(), any()) } returns Unit
-        every { grunnlagService.leggInnNyttGrunnlag(any()) } returns Unit
+        every { grunnlagService.leggInnNyttGrunnlag(any(), any()) } returns Unit
         every {
             oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendSoeknad(any(), any())
         } returns mockOppgave
-        every { oppgaveService.opprettNyOppgaveMedSakOgReferanse(any(), any(), any(), any()) } returns mockOppgave
+        every {
+            oppgaveService.opprettNyOppgaveMedSakOgReferanse(any(), any(), any(), any(), any())
+        } returns mockOppgave
+        every {
+            oppgaveService.tildelSaksbehandler(any(), any())
+        } just runs
 
         val foerstegangsbehandling = behandlingFactory.opprettBehandling(
             1,
@@ -483,13 +465,6 @@ class BehandlingFactoryTest {
             sistEndret = datoNaa,
             status = BehandlingStatus.IVERKSATT,
             soeknadMottattDato = Tidspunkt.now().toLocalDatetimeUTC(),
-            persongalleri = Persongalleri(
-                "Innsender",
-                "Soeker",
-                listOf("Gjenlevende"),
-                listOf("Avdoed"),
-                emptyList()
-            ),
             gyldighetsproeving = null,
             virkningstidspunkt = Virkningstidspunkt(
                 YearMonth.of(2022, 1),
@@ -525,9 +500,9 @@ class BehandlingFactoryTest {
         )
         Assertions.assertTrue(revurderingsBehandling is Revurdering)
         verify {
-            grunnlagService.leggInnNyttGrunnlag(any())
+            grunnlagService.leggInnNyttGrunnlag(any(), any())
             oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendSoeknad(any(), any())
-            oppgaveService.opprettNyOppgaveMedSakOgReferanse(any(), any(), any(), any())
+            oppgaveService.opprettNyOppgaveMedSakOgReferanse(any(), any(), any(), any(), any())
         }
         verify(exactly = 2) {
             sakDaoMock.hentSak(any())

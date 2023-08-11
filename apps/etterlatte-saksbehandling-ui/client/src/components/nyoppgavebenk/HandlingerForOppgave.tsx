@@ -1,17 +1,37 @@
-import { Oppgavetype } from '~shared/api/oppgaverny'
+import { Oppgavestatus, Oppgavetype, Saktype } from '~shared/api/oppgaverny'
 import { Button } from '@navikt/ds-react'
 import { useNavigate } from 'react-router'
 import { EyeIcon } from '@navikt/aksel-icons'
 import { useAppSelector } from '~store/Store'
+import { GosysOppgaveModal } from '~components/nyoppgavebenk/GosysOppgaveModal'
 
 export const HandlingerForOppgave = (props: {
   oppgavetype: Oppgavetype
+  oppgavestatus: Oppgavestatus
+  opprettet: string
+  frist: string
   fnr: string
+  enhet: string
   saksbehandler: string | null
+  saktype: Saktype
   referanse: string | null
+  beskrivelse: string | null
+  gjelder: string | null
 }) => {
   const user = useAppSelector((state) => state.saksbehandlerReducer.saksbehandler)
-  const { oppgavetype, fnr, saksbehandler, referanse } = props
+  const {
+    oppgavetype,
+    oppgavestatus,
+    opprettet,
+    frist,
+    fnr,
+    enhet,
+    saksbehandler,
+    saktype,
+    referanse,
+    beskrivelse,
+    gjelder,
+  } = props
   const navigate = useNavigate()
   const erInnloggetSaksbehandlerOppgave = saksbehandler ? saksbehandler === user.ident : false
 
@@ -20,16 +40,19 @@ export const HandlingerForOppgave = (props: {
       case 'VURDER_KONSEKVENS':
         return (
           <>
-            <Button icon={<EyeIcon />} onClick={() => navigate(`/person/${fnr}`)}>
+            <Button size="small" icon={<EyeIcon />} onClick={() => navigate(`/person/${fnr}`)}>
               Se hendelse
             </Button>
           </>
         )
+      case 'UNDERKJENT':
       case 'FOERSTEGANGSBEHANDLING':
         return (
           <>
             {erInnloggetSaksbehandlerOppgave && (
-              <Button onClick={() => navigate(`/behandling/${referanse}`)}>Gå til behandling</Button>
+              <Button size="small" onClick={() => navigate(`/behandling/${referanse}`)}>
+                Gå til behandling
+              </Button>
             )}
           </>
         )
@@ -37,7 +60,9 @@ export const HandlingerForOppgave = (props: {
         return (
           <>
             {erInnloggetSaksbehandlerOppgave && (
-              <Button onClick={() => navigate(`/behandling/${referanse}`)}>Gå til revurdering</Button>
+              <Button size="small" onClick={() => navigate(`/behandling/${referanse}`)}>
+                Gå til revurdering
+              </Button>
             )}
           </>
         )
@@ -45,7 +70,9 @@ export const HandlingerForOppgave = (props: {
         return (
           <>
             {erInnloggetSaksbehandlerOppgave && (
-              <Button onClick={() => navigate(`/behandling/${referanse}`)}>Gå til opphør</Button>
+              <Button size="small" onClick={() => navigate(`/behandling/${referanse}`)}>
+                Gå til opphør
+              </Button>
             )}
           </>
         )
@@ -53,9 +80,25 @@ export const HandlingerForOppgave = (props: {
         return (
           <>
             {erInnloggetSaksbehandlerOppgave && (
-              <Button onClick={() => navigate(`/behandling/${referanse}`)}>Gå til attestering</Button>
+              <Button size="small" onClick={() => navigate(`/behandling/${referanse}`)}>
+                Gå til attestering
+              </Button>
             )}
           </>
+        )
+      case 'GOSYS':
+        return (
+          <GosysOppgaveModal
+            oppgavestatus={oppgavestatus}
+            gjelder={gjelder}
+            saktype={saktype}
+            regdato={opprettet}
+            fristdato={frist}
+            enhet={enhet}
+            saksbehandler={saksbehandler}
+            fnr={fnr}
+            beskrivelse={beskrivelse}
+          />
         )
       default:
         return null

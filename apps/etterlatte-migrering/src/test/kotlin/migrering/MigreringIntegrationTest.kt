@@ -1,6 +1,7 @@
 package migrering
 
 import io.ktor.server.testing.testApplication
+import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
@@ -9,6 +10,7 @@ import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.POSTGRES_VERSION
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.migrering.Migrering
+import no.nav.etterlatte.migrering.MigreringFeatureToggle
 import no.nav.etterlatte.migrering.PesysRepository
 import no.nav.etterlatte.migrering.Pesyssak
 import no.nav.etterlatte.rapidsandrivers.migrering.Beregning
@@ -77,7 +79,15 @@ class MigreringIntegrationTest {
             )
             repository.lagrePesyssak(sakInn)
             val inspector = TestRapid()
-                .apply { Migrering(this, repository) }
+                .apply {
+                    Migrering(
+                        this,
+                        repository,
+                        DummyFeatureToggleService().also {
+                            it.settBryter(MigreringFeatureToggle.SendSakTilMigrering, true)
+                        }
+                    )
+                }
 
             val melding = JsonMessage.newMessage(
                 mapOf(EVENT_NAME_KEY to Migreringshendelser.START_MIGRERING)

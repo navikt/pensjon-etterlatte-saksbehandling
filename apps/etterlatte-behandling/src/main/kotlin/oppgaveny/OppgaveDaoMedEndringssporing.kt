@@ -5,8 +5,6 @@ import no.nav.etterlatte.behandling.objectMapper
 import no.nav.etterlatte.grunnlagsendring.setJsonb
 import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveNy
 import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveType
-import no.nav.etterlatte.libs.common.oppgaveNy.RedigerFristRequest
-import no.nav.etterlatte.libs.common.oppgaveNy.SaksbehandlerEndringDto
 import no.nav.etterlatte.libs.common.oppgaveNy.Status
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
@@ -92,6 +90,9 @@ class OppgaveDaoMedEndringssporingImpl(
     override fun hentOppgaverForBehandling(behandlingid: String): List<OppgaveNy> {
         return oppgaveDao.hentOppgaverForBehandling(behandlingid)
     }
+    override fun hentOppgaverForSak(sakId: Long): List<OppgaveNy> {
+        return oppgaveDao.hentOppgaverForSak(sakId)
+    }
 
     override fun hentOppgaver(oppgaveTypeTyper: List<OppgaveType>): List<OppgaveNy> {
         return oppgaveDao.hentOppgaver(oppgaveTypeTyper)
@@ -103,9 +104,9 @@ class OppgaveDaoMedEndringssporingImpl(
         return oppgaveDao.finnOppgaverForStrengtFortroligOgStrengtFortroligUtland(oppgaveTypeTyper)
     }
 
-    override fun settNySaksbehandler(saksbehandlerEndringDto: SaksbehandlerEndringDto) {
-        lagreEndringerPaaOppgave(saksbehandlerEndringDto.oppgaveId) {
-            oppgaveDao.settNySaksbehandler(saksbehandlerEndringDto)
+    override fun settNySaksbehandler(oppgaveId: UUID, saksbehandler: String) {
+        lagreEndringerPaaOppgave(oppgaveId) {
+            oppgaveDao.settNySaksbehandler(oppgaveId, saksbehandler)
         }
     }
 
@@ -115,15 +116,21 @@ class OppgaveDaoMedEndringssporingImpl(
         }
     }
 
+    override fun endreEnhetPaaOppgave(oppgaveId: UUID, enhet: String) {
+        lagreEndringerPaaOppgave(oppgaveId) {
+            oppgaveDao.endreEnhetPaaOppgave(oppgaveId, enhet)
+        }
+    }
+
     override fun fjernSaksbehandler(oppgaveId: UUID) {
         lagreEndringerPaaOppgave(oppgaveId) {
             oppgaveDao.fjernSaksbehandler(oppgaveId)
         }
     }
 
-    override fun redigerFrist(redigerFristRequest: RedigerFristRequest) {
-        lagreEndringerPaaOppgave(redigerFristRequest.oppgaveId) {
-            oppgaveDao.redigerFrist(redigerFristRequest)
+    override fun redigerFrist(oppgaveId: UUID, frist: Tidspunkt) {
+        lagreEndringerPaaOppgave(oppgaveId) {
+            oppgaveDao.redigerFrist(oppgaveId, frist)
         }
     }
 }

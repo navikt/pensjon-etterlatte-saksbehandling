@@ -4,10 +4,9 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveNy
 import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveType
-import no.nav.etterlatte.libs.common.oppgaveNy.RedigerFristRequest
-import no.nav.etterlatte.libs.common.oppgaveNy.SaksbehandlerEndringDto
 import no.nav.etterlatte.libs.common.oppgaveNy.Status
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunktOrNull
 import no.nav.etterlatte.libs.common.tidspunkt.setTidspunkt
@@ -23,12 +22,14 @@ interface OppgaveDaoNy {
     fun lagreOppgave(oppgaveNy: OppgaveNy)
     fun hentOppgave(oppgaveId: UUID): OppgaveNy?
     fun hentOppgaverForBehandling(behandlingid: String): List<OppgaveNy>
+    fun hentOppgaverForSak(sakId: Long): List<OppgaveNy>
     fun hentOppgaver(oppgaveTypeTyper: List<OppgaveType>): List<OppgaveNy>
     fun finnOppgaverForStrengtFortroligOgStrengtFortroligUtland(oppgaveTypeTyper: List<OppgaveType>): List<OppgaveNy>
-    fun settNySaksbehandler(saksbehandlerEndringDto: SaksbehandlerEndringDto)
+    fun settNySaksbehandler(oppgaveId: UUID, saksbehandler: String)
     fun endreStatusPaaOppgave(oppgaveId: UUID, oppgaveStatus: Status)
+    fun endreEnhetPaaOppgave(oppgaveId: UUID, enhet: String)
     fun fjernSaksbehandler(oppgaveId: UUID)
-    fun redigerFrist(redigerFristRequest: RedigerFristRequest)
+    fun redigerFrist(oppgaveId: UUID, frist: Tidspunkt)
 }
 
 class OppgaveDaoNyImpl(private val connection: () -> Connection) : OppgaveDaoNy {
@@ -94,6 +95,24 @@ class OppgaveDaoNyImpl(private val connection: () -> Connection) : OppgaveDaoNy 
         }
     }
 
+    override fun hentOppgaverForSak(sakId: Long): List<OppgaveNy> {
+        with(connection()) {
+            val statement = prepareStatement(
+                """
+                    SELECT id, status, enhet, sak_id, type, saksbehandler, referanse, merknad, opprettet, saktype, fnr, frist, kilde
+                    FROM oppgave
+                    WHERE sak_id = ?
+                """.trimIndent()
+            )
+            statement.setLong(1, sakId)
+            return statement.executeQuery().toList {
+                asOppgaveNy()
+            }.also {
+                logger.info("Hentet antall nye oppgaver for sak: ${it.size} sak: $sakId")
+            }
+        }
+    }
+
     override fun hentOppgaver(oppgaveTypeTyper: List<OppgaveType>): List<OppgaveNy> {
         if (oppgaveTypeTyper.isEmpty()) return emptyList()
 
@@ -143,7 +162,7 @@ class OppgaveDaoNyImpl(private val connection: () -> Connection) : OppgaveDaoNy 
         }
     }
 
-    override fun settNySaksbehandler(saksbehandlerEndringDto: SaksbehandlerEndringDto) {
+    override fun settNySaksbehandler(oppgaveId: UUID, saksbehandler: String) {
         with(connection()) {
             val statement = prepareStatement(
                 """
@@ -153,9 +172,9 @@ class OppgaveDaoNyImpl(private val connection: () -> Connection) : OppgaveDaoNy 
                 """.trimIndent()
             )
 
-            statement.setString(1, saksbehandlerEndringDto.saksbehandler)
+            statement.setString(1, saksbehandler)
             statement.setString(2, Status.UNDER_BEHANDLING.name)
-            statement.setObject(3, saksbehandlerEndringDto.oppgaveId)
+            statement.setObject(3, oppgaveId)
 
             statement.executeUpdate()
         }
@@ -178,6 +197,23 @@ class OppgaveDaoNyImpl(private val connection: () -> Connection) : OppgaveDaoNy 
         }
     }
 
+    override fun endreEnhetPaaOppgave(oppgaveId: UUID, enhet: String) {
+        with(connection()) {
+            val statement = prepareStatement(
+                """
+                UPDATE oppgave
+                SET enhet = ?
+                where id = ?::UUID
+                """.trimIndent()
+            )
+
+            statement.setString(1, enhet)
+            statement.setObject(2, oppgaveId)
+
+            statement.executeUpdate()
+        }
+    }
+
     override fun fjernSaksbehandler(oppgaveId: UUID) {
         with(connection()) {
             val statement = prepareStatement(
@@ -194,7 +230,7 @@ class OppgaveDaoNyImpl(private val connection: () -> Connection) : OppgaveDaoNy 
         }
     }
 
-    override fun redigerFrist(redigerFristRequest: RedigerFristRequest) {
+    override fun redigerFrist(oppgaveId: UUID, frist: Tidspunkt) {
         with(connection()) {
             val statement = prepareStatement(
                 """
@@ -203,8 +239,8 @@ class OppgaveDaoNyImpl(private val connection: () -> Connection) : OppgaveDaoNy 
                 where id = ?::UUID
                 """.trimIndent()
             )
-            statement.setTidspunkt(1, redigerFristRequest.frist)
-            statement.setObject(2, redigerFristRequest.oppgaveId)
+            statement.setTidspunkt(1, frist)
+            statement.setObject(2, oppgaveId)
 
             statement.executeUpdate()
         }

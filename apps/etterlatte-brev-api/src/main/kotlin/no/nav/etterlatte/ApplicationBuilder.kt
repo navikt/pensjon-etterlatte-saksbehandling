@@ -1,5 +1,6 @@
 package no.nav.etterlatte
 
+import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.auth.Auth
@@ -27,9 +28,13 @@ import no.nav.etterlatte.brev.dokarkiv.DokarkivServiceImpl
 import no.nav.etterlatte.brev.dokument.SafClient
 import no.nav.etterlatte.brev.dokument.dokumentRoute
 import no.nav.etterlatte.brev.grunnlag.GrunnlagKlient
+import no.nav.etterlatte.brev.model.BrevDataMapper
+import no.nav.etterlatte.brev.model.BrevProsessTypeFactory
 import no.nav.etterlatte.brev.navansatt.NavansattKlient
 import no.nav.etterlatte.brev.vedtak.VedtaksvurderingKlient
 import no.nav.etterlatte.brev.vedtaksbrevRoute
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleProperties
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.requireEnvValue
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.migrate
@@ -47,6 +52,7 @@ import no.nav.pensjon.brevbaker.api.model.RenderedJsonLetter
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import rapidsandrivers.getRapidEnv
+import java.net.URI
 
 val sikkerLogg: Logger = LoggerFactory.getLogger("sikkerLogg")
 
@@ -111,7 +117,13 @@ class ApplicationBuilder {
         DistribusjonKlient(httpClient("DOKDIST_SCOPE", false), env.requireEnvValue("DOKDIST_URL"))
     private val distribusjonService = DistribusjonServiceImpl(distribusjonKlient, db)
 
-    private val brevbakerService = BrevbakerService(brevbaker, adresseService)
+    private val featureToggleService = FeatureToggleService.initialiser(featureToggleProperties(config))
+
+    private val brevDataMapper = BrevDataMapper(featureToggleService)
+
+    private val brevbakerService = BrevbakerService(brevbaker, adresseService, brevDataMapper)
+
+    private val brevProsessTypeFactory = BrevProsessTypeFactory(featureToggleService)
 
     private val brevService =
         BrevService(db, sakOgBehandlingService, adresseService, dokarkivService, distribusjonService, brevbakerService)
@@ -122,7 +134,9 @@ class ApplicationBuilder {
             sakOgBehandlingService,
             adresseService,
             dokarkivService,
-            brevbakerService
+            brevbakerService,
+            brevDataMapper,
+            brevProsessTypeFactory
         )
 
     private val journalpostService =
@@ -148,6 +162,13 @@ class ApplicationBuilder {
                 VedtaksbrevUnderkjent(this, vedtaksbrevService)
                 DistribuerBrev(this, vedtaksbrevService, distribusjonService)
             }
+
+    private fun featureToggleProperties(config: Config) = FeatureToggleProperties(
+        enabled = config.getString("funksjonsbrytere.enabled").toBoolean(),
+        applicationName = config.getString("funksjonsbrytere.unleash.applicationName"),
+        uri = URI(config.getString("funksjonsbrytere.unleash.uri")),
+        cluster = config.getString("funksjonsbrytere.unleash.cluster")
+    )
 
     fun start() = setReady().also { rapidsConnection.start() }
 

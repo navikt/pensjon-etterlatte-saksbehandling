@@ -3,6 +3,7 @@ package no.nav.etterlatte.statistikk.domain
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import java.time.LocalDate
+import java.time.YearMonth
 import java.util.*
 
 data class StoenadRad(
@@ -25,5 +26,9 @@ data class StoenadRad(
     val vedtakLoependeFom: LocalDate,
     val vedtakLoependeTom: LocalDate?,
     val beregning: Beregning?,
-    val vedtakType: VedtakType?
+    val avkorting: Avkorting?,
+    val vedtakType: VedtakType?,
+    val sakUtland: SakUtland?,
+    val virkningstidspunkt: YearMonth,
+    val utbetalingsdato: LocalDate?
 )

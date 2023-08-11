@@ -1,4 +1,4 @@
-import { Button, Label, Select, Textarea, Checkbox, CheckboxGroup } from '@navikt/ds-react'
+import { Button, Select, Textarea, Checkbox, CheckboxGroup } from '@navikt/ds-react'
 import { FormKnapper, FormWrapper, Innhold } from '~components/behandling/trygdetid/styled'
 import { isConflict, isFailure, isPending, useApiCall } from '~shared/hooks/useApiCall'
 import {
@@ -9,12 +9,12 @@ import {
   lagreTrygdetidgrunnlag,
   OppdaterTrygdetidGrunnlag,
 } from '~shared/api/trygdetid'
-import React, { FormEvent, useRef, useState } from 'react'
+import React, { FormEvent, useState } from 'react'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import styled from 'styled-components'
-import DatePicker from 'react-datepicker'
-import { CalendarIcon } from '@navikt/aksel-icons'
 import { useParams } from 'react-router-dom'
+import { format } from 'date-fns'
+import { DatoVelger } from '~shared/DatoVelger'
 
 type Props = {
   eksisterendeGrunnlag: ITrygdetidGrunnlag | undefined
@@ -25,7 +25,7 @@ type Props = {
 }
 
 const initialState = (type: ITrygdetidGrunnlagType) => {
-  return { type: type, bosted: '', poengInnAar: false, poengUtAar: false, prorata: false }
+  return { type: type, bosted: '', poengInnAar: false, poengUtAar: false, prorata: true }
 }
 
 export const TrygdetidGrunnlag: React.FC<Props> = ({
@@ -40,15 +40,6 @@ export const TrygdetidGrunnlag: React.FC<Props> = ({
     eksisterendeGrunnlag ? eksisterendeGrunnlag : initialState(trygdetidGrunnlagType)
   )
   const [trygdetidgrunnlagStatus, requestLagreTrygdetidgrunnlag] = useApiCall(lagreTrygdetidgrunnlag)
-  const fraDatoPickerRef: any = useRef(null)
-  const tilDatoPickerRef: any = useRef(null)
-
-  const toggleDatepicker = (ref: any) => {
-    return () => {
-      ref.current.setOpen(true)
-      ref.current.setFocus()
-    }
-  }
 
   const onSubmit = (e: FormEvent) => {
     e.preventDefault()
@@ -97,62 +88,28 @@ export const TrygdetidGrunnlag: React.FC<Props> = ({
               </Land>
 
               <DatoSection>
-                <Label>Fra dato</Label>
-                <Datovelger>
-                  <DatePicker
-                    ref={fraDatoPickerRef}
-                    dateFormat={'dd.MM.yyyy'}
-                    placeholderText={'dd.mm.åååå'}
-                    selected={trygdetidgrunnlag.periodeFra == null ? null : new Date(trygdetidgrunnlag.periodeFra)}
-                    locale="nb"
-                    autoComplete="off"
-                    onChange={(e) =>
-                      setTrygdetidgrunnlag({
-                        ...trygdetidgrunnlag,
-                        periodeFra: e == null ? '' : e.toISOString().split('T')[0],
-                      })
-                    }
-                  />
-                  <KalenderIkon
-                    tabIndex={0}
-                    onKeyPress={toggleDatepicker(fraDatoPickerRef)}
-                    onClick={toggleDatepicker(fraDatoPickerRef)}
-                    role="button"
-                    title="Åpne datovelger"
-                    aria-label="Åpne datovelger"
-                  >
-                    <CalendarIcon color="white" />
-                  </KalenderIkon>
-                </Datovelger>
+                <DatoVelger
+                  value={trygdetidgrunnlag.periodeFra == null ? null : new Date(trygdetidgrunnlag.periodeFra)}
+                  onChange={(date: Date | null) =>
+                    setTrygdetidgrunnlag({
+                      ...trygdetidgrunnlag,
+                      periodeFra: date == null ? '' : format(date, 'yyyy-MM-dd'),
+                    })
+                  }
+                  label="Fra dato"
+                />
               </DatoSection>
               <DatoSection>
-                <Label>Til dato</Label>
-                <Datovelger>
-                  <DatePicker
-                    ref={tilDatoPickerRef}
-                    dateFormat={'dd.MM.yyyy'}
-                    placeholderText={'dd.mm.åååå'}
-                    selected={trygdetidgrunnlag.periodeTil == null ? null : new Date(trygdetidgrunnlag.periodeTil)}
-                    locale="nb"
-                    autoComplete="off"
-                    onChange={(e) =>
-                      setTrygdetidgrunnlag({
-                        ...trygdetidgrunnlag,
-                        periodeTil: e == null ? '' : e.toISOString().split('T')[0],
-                      })
-                    }
-                  />
-                  <KalenderIkon
-                    tabIndex={0}
-                    onKeyPress={toggleDatepicker(tilDatoPickerRef)}
-                    onClick={toggleDatepicker(tilDatoPickerRef)}
-                    role="button"
-                    title="Åpne datovelger"
-                    aria-label="Åpne datovelger"
-                  >
-                    <CalendarIcon color="white" />
-                  </KalenderIkon>
-                </Datovelger>
+                <DatoVelger
+                  value={trygdetidgrunnlag.periodeTil == null ? null : new Date(trygdetidgrunnlag.periodeTil)}
+                  onChange={(date: Date | null) =>
+                    setTrygdetidgrunnlag({
+                      ...trygdetidgrunnlag,
+                      periodeTil: date == null ? '' : format(date, 'yyyy-MM-dd'),
+                    })
+                  }
+                  label="Til dato"
+                />
               </DatoSection>
             </FormWrapper>
 
@@ -204,10 +161,10 @@ export const TrygdetidGrunnlag: React.FC<Props> = ({
 
                   <Prorata
                     legend="Prorata"
-                    value={[trygdetidgrunnlag.prorata ? 'PRORATA' : ''].filter((val) => val !== '')}
+                    value={[!trygdetidgrunnlag.prorata ? 'IKKEPRORATA' : ''].filter((val) => val !== '')}
                   >
                     <Checkbox
-                      value="PRORATA"
+                      value="IKKEPRORATA"
                       key={`prorata-${trygdetidGrunnlagType}`}
                       onChange={() => {
                         setTrygdetidgrunnlag({
@@ -216,7 +173,7 @@ export const TrygdetidGrunnlag: React.FC<Props> = ({
                         })
                       }}
                     >
-                      Med i prorata
+                      Ikke med i prorata
                     </Checkbox>
                   </Prorata>
                 </>
@@ -266,30 +223,6 @@ const Rows = styled.div`
 
 const Land = styled.div`
   width: 250px;
-`
-
-const Datovelger = styled.div`
-  display: flex;
-  align-items: flex-start;
-
-  input {
-    border-right: none;
-    border-width: 1px;
-    border-radius: 4px 0 0 4px;
-    width: 160px;
-    height: 48px;
-    text-indent: 4px;
-  }
-`
-
-const KalenderIkon = styled.div`
-  padding: 4px 10px;
-  cursor: pointer;
-  background-color: #0167c5;
-  border: 1px solid #000;
-  border-radius: 0 4px 4px 0;
-  height: 48px;
-  line-height: 42px;
 `
 
 const DatoSection = styled.section`

@@ -6,7 +6,7 @@ object Migreringshendelser {
 
     const val START_MIGRERING = "${PREFIX}START_MIGRERING"
     const val MIGRER_SAK = "${PREFIX}MIGRER_SAK"
-    const val BEHANDLING_OPPRETTET = "${PREFIX}BEHANDLING_OPPRETTET"
+    const val LAGRE_GRUNNLAG = "${PREFIX}LAGRE_GRUNNLAG"
     const val VILKAARSVURDER = "${PREFIX}VILKAARSVURDER"
     const val BEREGN = "${PREFIX}BEREGN"
     const val TRYGDETID = "${PREFIX}TRYGDETID"

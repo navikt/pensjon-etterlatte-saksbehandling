@@ -1,5 +1,9 @@
 package no.nav.etterlatte
 
+import com.typesafe.config.Config
+import com.typesafe.config.ConfigFactory
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleProperties
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.migrering.ApplicationContext
 import no.nav.etterlatte.migrering.Migrering
@@ -8,6 +12,7 @@ import no.nav.helse.rapids_rivers.RapidApplication
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import rapidsandrivers.getRapidEnv
+import java.net.URI
 
 val sikkerLogg: Logger = LoggerFactory.getLogger("sikkerLogg")
 
@@ -21,8 +26,17 @@ class Server(private val context: ApplicationContext) {
     fun run() = with(context) {
         dataSource.migrate()
         val rapidEnv = getRapidEnv()
+        val featureToggleService: FeatureToggleService =
+            FeatureToggleService.initialiser(featureToggleProperties(ConfigFactory.load()))
         RapidApplication.create(rapidEnv).also { rapidsConnection ->
-            Migrering(rapidsConnection, PesysRepository(dataSource))
+            Migrering(rapidsConnection, PesysRepository(dataSource), featureToggleService)
         }.start()
     }
+
+    private fun featureToggleProperties(config: Config) = FeatureToggleProperties(
+        enabled = config.getString("funksjonsbrytere.enabled").toBoolean(),
+        applicationName = config.getString("funksjonsbrytere.unleash.applicationName"),
+        uri = URI(config.getString("funksjonsbrytere.unleash.uri")),
+        cluster = config.getString("funksjonsbrytere.unleash.cluster")
+    )
 }

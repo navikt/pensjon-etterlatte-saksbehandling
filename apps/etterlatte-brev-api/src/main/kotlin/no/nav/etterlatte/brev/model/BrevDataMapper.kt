@@ -5,6 +5,7 @@ import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_AVSLAG
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_AVSLAG_IKKEYRKESSKADE
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_INNVILGELSE
+import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_INNVILGELSE_ENKEL
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_INNVILGELSE_NY
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_REVURDERING_ADOPSJON
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_REVURDERING_ENDRING
@@ -41,13 +42,8 @@ class BrevDataMapper(private val featureToggleService: FeatureToggleService) {
     private fun brevKodeAutomatisk(behandling: Behandling): BrevkodePar = when (behandling.sakType) {
         SakType.BARNEPENSJON -> {
             when (val vedtakType = behandling.vedtak.type) {
-                VedtakType.INNVILGELSE -> when (
-                    featureToggleService.isEnabled(
-                        BrevDataFeatureToggle.NyMalInnvilgelse,
-                        false
-                    )
-                ) {
-                    true -> BrevkodePar(BARNEPENSJON_INNVILGELSE_NY)
+                VedtakType.INNVILGELSE -> when (brukNyInnvilgelsesmal()) {
+                    true -> BrevkodePar(BARNEPENSJON_INNVILGELSE_ENKEL, BARNEPENSJON_INNVILGELSE_NY)
                     false -> BrevkodePar(BARNEPENSJON_INNVILGELSE)
                 }
 
@@ -98,13 +94,8 @@ class BrevDataMapper(private val featureToggleService: FeatureToggleService) {
     fun brevData(behandling: Behandling): BrevData = when (behandling.sakType) {
         SakType.BARNEPENSJON -> {
             when (val vedtakType = behandling.vedtak.type) {
-                VedtakType.INNVILGELSE -> when (
-                    featureToggleService.isEnabled(
-                        BrevDataFeatureToggle.NyMalInnvilgelse,
-                        false
-                    )
-                ) {
-                    true -> InnvilgetBrevDataNy.fra(behandling)
+                VedtakType.INNVILGELSE -> when (brukNyInnvilgelsesmal()) {
+                    true -> InnvilgetBrevDataEnkel.fra(behandling)
                     false -> InnvilgetBrevData.fra(behandling)
                 }
 
@@ -142,6 +133,7 @@ class BrevDataMapper(private val featureToggleService: FeatureToggleService) {
     fun brevDataFerdigstilling(behandling: Behandling, innhold: () -> List<Slate.Element>, kode: BrevkodePar) =
         when (kode.ferdigstilling) {
             BARNEPENSJON_REVURDERING_ENDRING -> EndringHovedmalBrevData.fra(behandling, innhold())
+            BARNEPENSJON_INNVILGELSE_NY -> InnvilgetHovedmalBrevData.fra(behandling, innhold())
             OMS_FOERSTEGANGSVEDTAK_INNVILGELSE -> InnvilgetBrevDataOMS.fra(behandling, innhold())
             else ->
                 when (behandling.revurderingsaarsak?.redigerbartBrev) {
@@ -151,4 +143,6 @@ class BrevDataMapper(private val featureToggleService: FeatureToggleService) {
         }
 
     data class BrevkodePar(val redigering: EtterlatteBrevKode, val ferdigstilling: EtterlatteBrevKode = redigering)
+
+    private fun brukNyInnvilgelsesmal() = featureToggleService.isEnabled(BrevDataFeatureToggle.NyMalInnvilgelse, false)
 }

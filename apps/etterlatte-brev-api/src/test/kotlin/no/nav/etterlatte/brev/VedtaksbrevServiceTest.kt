@@ -201,7 +201,7 @@ internal class VedtaksbrevServiceTest {
         @ParameterizedTest
         @CsvSource(
             value = [
-                "BARNEPENSJON,YRKESSKADE,AUTOMATISK"
+                "BARNEPENSJON,YRKESSKADE,REDIGERBAR"
             ]
         )
         fun `Vedtaksbrev finnes ikke - skal opprette nytt redigerbart brev`(

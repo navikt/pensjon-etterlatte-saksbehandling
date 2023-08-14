@@ -6,6 +6,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.regler.FaktumNode
 import no.nav.etterlatte.libs.regler.RegelPeriode
 import no.nav.etterlatte.trygdetid.regler.TotalTrygdetidGrunnlag
+import no.nav.etterlatte.trygdetid.regler.TrygdetidPeriodMedPoengAar
 import no.nav.etterlatte.trygdetid.regler.TrygdetidPeriodeGrunnlag
 import no.nav.etterlatte.trygdetid.regler.beregnAntallAarTotalTrygdetid
 import no.nav.etterlatte.trygdetid.regler.beregnTrygdetidForPeriode
@@ -14,16 +15,28 @@ import no.nav.etterlatte.trygdetid.regler.maksTrygdetid
 import no.nav.etterlatte.trygdetid.regler.totalTrygdetidAvrundet
 import no.nav.etterlatte.trygdetid.regler.totalTrygdetidFraPerioder
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.Arguments
+import org.junit.jupiter.params.provider.MethodSource
 import java.time.LocalDate
 import java.time.Period
+import java.util.stream.Stream
 
 internal class BeregnTrygdetidTest {
 
     @Test
     fun `beregnTrygdetidMellomToDatoer skal gi en maaned naar periodeFra er dag 1 og periodeTil er siste dag i mnd`() {
         val grunnlag = TrygdetidPeriodeGrunnlag(
-            periodeFra = FaktumNode(LocalDate.of(2023, 1, 1), "Z1234", "Periode fra"),
-            periodeTil = FaktumNode(LocalDate.of(2023, 1, 31), "Z1234", "Periode til")
+            periode = FaktumNode(
+                verdi = TrygdetidPeriodMedPoengAar(
+                    fra = LocalDate.of(2023, 1, 1),
+                    til = LocalDate.of(2023, 1, 31),
+                    poengInnAar = false,
+                    poengUtAar = false
+                ),
+                kilde = "Z1234",
+                beskrivelse = "Periode"
+            )
         )
 
         val resultat = beregnTrygdetidForPeriode.anvend(grunnlag, RegelPeriode(LocalDate.now()))
@@ -34,8 +47,16 @@ internal class BeregnTrygdetidTest {
     @Test
     fun `beregnTrygdetidMellomToDatoer skal gi en dag naar periodeFra og periodeTil er like`() {
         val grunnlag = TrygdetidPeriodeGrunnlag(
-            periodeFra = FaktumNode(LocalDate.of(2023, 1, 1), "Z1234", "Periode fra"),
-            periodeTil = FaktumNode(LocalDate.of(2023, 1, 1), "Z1234", "Periode til")
+            periode = FaktumNode(
+                verdi = TrygdetidPeriodMedPoengAar(
+                    fra = LocalDate.of(2023, 1, 1),
+                    til = LocalDate.of(2023, 1, 1),
+                    poengInnAar = false,
+                    poengUtAar = false
+                ),
+                kilde = "Z1234",
+                beskrivelse = "Periode"
+            )
         )
 
         val resultat = beregnTrygdetidForPeriode.anvend(grunnlag, RegelPeriode(LocalDate.now()))
@@ -46,13 +67,62 @@ internal class BeregnTrygdetidTest {
     @Test
     fun `beregnTrygdetidMellomToDatoer skal gi ett aar en maaned og en dag`() {
         val grunnlag = TrygdetidPeriodeGrunnlag(
-            periodeFra = FaktumNode(LocalDate.of(2023, 1, 1), "Z1234", "Periode fra"),
-            periodeTil = FaktumNode(LocalDate.of(2024, 2, 1), "Z1234", "Periode til")
+            periode = FaktumNode(
+                verdi = TrygdetidPeriodMedPoengAar(
+                    fra = LocalDate.of(2023, 1, 1),
+                    til = LocalDate.of(2024, 2, 1),
+                    poengInnAar = false,
+                    poengUtAar = false
+                ),
+                kilde = "Z1234",
+                beskrivelse = "Periode"
+            )
         )
 
         val resultat = beregnTrygdetidForPeriode.anvend(grunnlag, RegelPeriode(LocalDate.now()))
 
         resultat.verdi shouldBe Period.of(1, 1, 1)
+    }
+
+    @ParameterizedTest(name = "fra {0} til {1} poengInnAar {2} poengUtAar {3} skal gi periode {4}")
+    @MethodSource("verdierForPoengAarTest")
+    fun `beregnTrygdetidMellomToDatoer skal ta hensyn til poengInnAar og poengUtAar`(
+        fra: LocalDate,
+        til: LocalDate,
+        poengInnAar: Boolean,
+        poengUtAar: Boolean,
+        forventetPeriode: Period
+    ) {
+        val grunnlag = TrygdetidPeriodeGrunnlag(
+            periode = FaktumNode(
+                verdi = TrygdetidPeriodMedPoengAar(
+                    fra = fra,
+                    til = til,
+                    poengInnAar = poengInnAar,
+                    poengUtAar = poengUtAar
+                ),
+                kilde = "Z1234",
+                beskrivelse = "Periode"
+            )
+        )
+
+        val resultat = beregnTrygdetidForPeriode.anvend(grunnlag, RegelPeriode(LocalDate.now()))
+
+        resultat.verdi shouldBe forventetPeriode
+    }
+
+    companion object {
+        @JvmStatic
+        fun verdierForPoengAarTest(): Stream<Arguments> = Stream.of(
+            Arguments.of(LocalDate.of(2023, 5, 10), LocalDate.of(2023, 5, 30), false, false, Period.ofDays(21)),
+            Arguments.of(LocalDate.of(2023, 5, 10), LocalDate.of(2023, 5, 30), false, true, Period.ofYears(1)),
+            Arguments.of(LocalDate.of(2023, 5, 10), LocalDate.of(2023, 5, 30), true, false, Period.ofYears(1)),
+            Arguments.of(LocalDate.of(2023, 5, 10), LocalDate.of(2023, 5, 30), true, true, Period.ofYears(1)),
+            Arguments.of(LocalDate.of(2020, 2, 10), LocalDate.of(2023, 5, 30), false, false, Period.of(3, 3, 21)),
+            Arguments.of(LocalDate.of(2020, 2, 10), LocalDate.of(2023, 5, 30), false, true, Period.of(3, 10, 22)),
+            Arguments.of(LocalDate.of(2020, 2, 10), LocalDate.of(2023, 5, 30), true, false, Period.of(3, 4, 30)),
+            Arguments.of(LocalDate.of(2020, 2, 10), LocalDate.of(2023, 5, 30), true, true, Period.ofYears(4))
+        )
     }
 
     @Test

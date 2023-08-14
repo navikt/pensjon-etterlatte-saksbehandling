@@ -33,7 +33,6 @@ dependencies {
 
     testImplementation(libs.navfelles.tokenvalidationktor2)
 
-    testImplementation(libs.test.mockk)
     testImplementation(libs.ktor2.servertests)
     testImplementation(libs.test.kotest.assertionscore)
     testImplementation(libs.navfelles.mockoauth2server) {

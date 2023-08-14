@@ -20,6 +20,5 @@ dependencies {
     implementation(libs.ktor2.jackson)
 
     testImplementation(libs.ktor2.clientmock)
-    testImplementation(libs.test.mockk)
     testImplementation(libs.kotlinx.coroutinescore)
 }

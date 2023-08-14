@@ -1,4 +1,5 @@
 plugins {
+    id("etterlatte.postgres")
     id("etterlatte.rapids-and-rivers-ktor2")
 }
 
@@ -15,9 +16,6 @@ dependencies {
 
     implementation("no.nav.pensjon.brevbaker:brevbaker-api-model-common:1.0.2")
 
-    implementation(libs.database.hikaricp)
-    implementation(libs.database.flywaydb)
-    implementation(libs.database.postgresql)
     implementation(libs.database.kotliquery)
 
     implementation(libs.ktor2.servercore)
@@ -39,13 +37,10 @@ dependencies {
     implementation(libs.navfelles.tokenclientcore)
     implementation(libs.navfelles.tokenvalidationktor2)
 
-    testImplementation(libs.test.mockk)
     testImplementation(libs.test.kotest.assertionscore)
     testImplementation(libs.ktor2.clientmock)
     testImplementation(libs.ktor2.servertests)
     testImplementation(libs.kotlinx.coroutinescore)
     testImplementation(libs.navfelles.mockoauth2server)
-    testImplementation(libs.test.testcontainer.jupiter)
-    testImplementation(libs.test.testcontainer.postgresql)
     testImplementation(project(":libs:testdata"))
 }

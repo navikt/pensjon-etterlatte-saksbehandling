@@ -18,6 +18,5 @@ dependencies {
     implementation(libs.kafka.avroserializer)
 
     testImplementation(libs.ktor2.clientmock)
-    testImplementation(libs.test.mockk)
     testImplementation(libs.kotlinx.coroutinescore)
 }

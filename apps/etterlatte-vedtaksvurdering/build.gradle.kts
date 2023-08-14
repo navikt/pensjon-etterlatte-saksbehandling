@@ -32,7 +32,6 @@ dependencies {
 
     testImplementation(libs.navfelles.tokenvalidationktor2)
 
-    testImplementation(libs.test.mockk)
     testImplementation(libs.kotlinx.coroutinescore)
     testImplementation(libs.test.kotest.assertionscore)
     testImplementation(libs.ktor2.servertests)

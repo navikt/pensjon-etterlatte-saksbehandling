@@ -1,6 +1,6 @@
 plugins {
     alias(libs.plugins.avro)
-    id("etterlatte.kafka")
+    id("etterlatte.common")
 }
 
 dependencies {
@@ -20,19 +20,17 @@ dependencies {
     implementation(libs.ktor2.servercontentnegotiation)
     implementation(libs.ktor2.calllogging)
     implementation(libs.ktor2.jackson)
+
     implementation(libs.jackson.databind)
     implementation(libs.jackson.modulekotlin)
     implementation(libs.jackson.datatypejsr310)
+
     implementation(libs.kafka.clients)
     implementation(libs.kafka.avro)
     implementation(libs.kafka.avroserializer)
-    implementation(libs.logging.logbackclassic)
 
-    testImplementation(libs.test.jupiter.api)
     testImplementation(libs.kafka.embeddedenv)
-    testImplementation(libs.test.jupiter.engine)
     testImplementation(libs.ktor2.servertests)
-    testImplementation(libs.test.mockk)
     testImplementation(libs.ktor2.clientmock)
 }
 

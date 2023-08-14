@@ -22,9 +22,13 @@ dependencies {
     // Logging
     implementation(libs.logging.slf4japi)
     implementation(libs.logging.logbackclassic)
-    implementation(libs.logging.logstashlogbackencoder)
+    implementation(libs.logging.logstashlogbackencoder) {
+        exclude("com.fasterxml.jackson.core")
+        exclude("com.fasterxml.jackson.dataformat")
+    }
 
-    // JUnit Testing
+    // Testing
+    testImplementation(libs.test.mockk)
     testImplementation(libs.test.jupiter.api)
     testImplementation(libs.test.jupiter.params)
     testRuntimeOnly(libs.test.jupiter.engine)
@@ -51,7 +55,7 @@ tasks {
         }
     }
 
-    tasks.withType<Test> {
+    withType<Test> {
         useJUnitPlatform()
         testLogging {
             events(TestLogEvent.PASSED, TestLogEvent.SKIPPED, TestLogEvent.FAILED)

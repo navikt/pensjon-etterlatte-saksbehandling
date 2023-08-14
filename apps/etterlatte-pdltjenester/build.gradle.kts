@@ -34,7 +34,6 @@ dependencies {
     implementation(libs.navfelles.tokenclientcore)
     implementation(libs.navfelles.tokenvalidationktor2)
 
-    testImplementation(libs.test.mockk)
     testImplementation(libs.ktor2.clientmock)
     testImplementation(libs.ktor2.servertests)
     testImplementation(libs.kotlinx.coroutinescore)

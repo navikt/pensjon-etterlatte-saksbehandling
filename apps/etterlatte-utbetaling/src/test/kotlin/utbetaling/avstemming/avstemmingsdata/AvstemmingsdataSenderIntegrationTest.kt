@@ -1,7 +1,7 @@
 package no.nav.etterlatte.utbetaling.grensesnittavstemming.avstemmingsdata
 
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.utbetaling.ChipsetCheck.erM1
+import no.nav.etterlatte.utbetaling.ChipsetCheck.erM1EllerM2
 import no.nav.etterlatte.utbetaling.TestContainers
 import no.nav.etterlatte.utbetaling.avstemming.avstemmingsdata.KonsistensavstemmingDataMapper
 import no.nav.etterlatte.utbetaling.config.JmsConnectionFactory
@@ -24,7 +24,7 @@ import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@DisabledIf(value = erM1)
+@DisabledIf(value = erM1EllerM2)
 internal class AvstemmingsdataSenderIntegrationTest {
 
     @Container
@@ -59,7 +59,9 @@ internal class AvstemmingsdataSenderIntegrationTest {
             loependeUtbetalinger = listOf(oppdrag),
             sakType = Saktype.BARNEPENSJON
         )
-        val avstemmingsdata = KonsistensavstemmingDataMapper(konsistensavstemming).opprettAvstemmingsmelding(Saktype.BARNEPENSJON)
+        val avstemmingsdata = KonsistensavstemmingDataMapper(
+            konsistensavstemming
+        ).opprettAvstemmingsmelding(Saktype.BARNEPENSJON)
         avstemmingsdata.forEach {
             val xml = avstemmingsdataSender.sendKonsistensavstemming(it)
             assertNotNull(xml)

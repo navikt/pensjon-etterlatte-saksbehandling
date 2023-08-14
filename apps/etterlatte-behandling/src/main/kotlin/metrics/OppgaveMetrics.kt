@@ -5,13 +5,19 @@ import io.micrometer.core.instrument.Gauge
 import io.micrometer.core.instrument.MeterRegistry
 import io.micrometer.core.instrument.binder.MeterBinder
 import no.nav.etterlatte.inTransaction
+import org.slf4j.LoggerFactory
 
 class OppgaveMetrics(private val metrikkerDao: MetrikkerDao) : MeterBinder {
+
+    private val logger = LoggerFactory.getLogger(this::class.java)
     override fun bindTo(registry: MeterRegistry) {
+        val antallOppgaver = inTransaction {
+            metrikkerDao.antallOppgaver()
+        }
+        logger.info("Antall oppgaver: $antallOppgaver")
+        
         Gauge.builder("antall_oppgaver") {
-            inTransaction {
-                metrikkerDao.antallOppgaver()
-            }
+            antallOppgaver
         }.description("Hello antall oppgaver")
             .register(registry)
         Counter.builder("hvor_fine_er_oppgavene")

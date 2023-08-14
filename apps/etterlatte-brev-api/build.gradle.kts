@@ -1,4 +1,5 @@
 plugins {
+    id("etterlatte.common")
     id("etterlatte.postgres")
     id("etterlatte.rapids-and-rivers-ktor2")
 }

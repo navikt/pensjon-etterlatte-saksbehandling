@@ -13,6 +13,7 @@ import io.ktor.server.routing.route
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.Kontekst
+import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.OPPGAVEID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.kunSaksbehandler
 import no.nav.etterlatte.libs.common.oppgaveId
@@ -66,7 +67,9 @@ internal fun Route.oppgaveRoutesNy(
                 kunSaksbehandler {
                     if (kanBrukeNyOppgaveliste) {
                         val saksbehandlerEndringDto = call.receive<SaksbehandlerEndringDto>()
-                        service.byttSaksbehandler(oppgaveId, saksbehandlerEndringDto.saksbehandler)
+                        inTransaction {
+                            service.byttSaksbehandler(oppgaveId, saksbehandlerEndringDto.saksbehandler)
+                        }
                         call.respond(HttpStatusCode.OK)
                     } else {
                         call.respond(HttpStatusCode.NotImplemented)

@@ -47,7 +47,7 @@ export const GosysOppgaveModal = (props: {
 }) => {
   const [open, setOpen] = useState(false)
   const { regdato, fristdato, oppgavestatus, fnr, gjelder, enhet, saksbehandler, beskrivelse, saktype } = props
-  const gosysUrl = process.env.GOSYS_URL
+  const gosysUrl = import.meta.env.VITE_GOSYS_URL
 
   return (
     <>

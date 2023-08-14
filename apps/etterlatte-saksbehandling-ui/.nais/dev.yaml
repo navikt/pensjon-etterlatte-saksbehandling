@@ -85,8 +85,6 @@ spec:
       value: api://dev-gcp.etterlatte.etterlatte-beregning/.default
     - name: TRYGDETID_API_SCOPE
       value: api://dev-gcp.etterlatte.etterlatte-trygdetid/.default
-    - name: GOSYS_URL
-      value: https://gosys.dev.intern.nav.no/gosys
 
   accessPolicy:
     outbound:

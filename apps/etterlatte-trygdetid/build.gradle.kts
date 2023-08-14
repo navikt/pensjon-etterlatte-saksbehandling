@@ -1,5 +1,3 @@
-
-
 plugins {
     id("etterlatte.common")
     id("etterlatte.postgres")
@@ -21,10 +19,8 @@ dependencies {
 
     implementation(libs.ktor2.servercio)
     implementation(libs.database.kotliquery)
-    implementation(libs.metrics.micrometer.prometheus)
 
     testImplementation(libs.navfelles.tokenvalidationktor2)
-    testImplementation(libs.test.mockk)
     testImplementation(libs.ktor2.servertests)
     testImplementation(libs.navfelles.mockoauth2server)
     testImplementation(libs.test.kotest.assertionscore)

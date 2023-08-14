@@ -12,6 +12,7 @@ import no.nav.etterlatte.libs.common.RetryResult
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.Behandlingsnummer
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.person.HentFolkeregisterIdenterForAktoerIdBolkRequest
 import no.nav.etterlatte.libs.common.person.HentGeografiskTilknytningRequest
 import no.nav.etterlatte.libs.common.person.HentPdlIdentRequest
 import no.nav.etterlatte.libs.common.person.HentPersonRequest
@@ -108,6 +109,37 @@ class PdlKlient(private val httpClient: HttpClient, private val apiUrl: String) 
         }
     }
 
+    suspend fun hentFolkeregisterIdenterForAktoerIdBolk(
+        request: HentFolkeregisterIdenterForAktoerIdBolkRequest
+    ): List<HentIdenterBolkResult> {
+        return request.aktoerIds.chunked(PDL_BULK_SIZE).map { identerChunk ->
+            val graphqlBolkRequest = PdlFoedselsnumreFraAktoerIdRequest(
+                query = getQuery("/pdl/hentFolkeregisterIdenterBolk.graphql"),
+                variables = IdenterBolkVariables(
+                    identer = identerChunk,
+                    grupper = setOf(IdentGruppe.FOLKEREGISTERIDENT)
+                )
+            )
+
+            logger.info("Henter folkeregisterident for ${request.aktoerIds.size} aktørIds fra PDL")
+
+            val response = retry<PdlFoedselsnumreFraAktoerIdResponse> {
+                httpClient.post(apiUrl) {
+                    header(HEADER_TEMA, HEADER_TEMA_VALUE)
+                    accept(Json)
+                    contentType(Json)
+                    setBody(graphqlBolkRequest)
+                }.body()
+            }.let {
+                when (it) {
+                    is RetryResult.Success -> it.content
+                    is RetryResult.Failure -> throw it.samlaExceptions()
+                }
+            }
+            response.data
+        }.flatMap { it.hentIdenterBolk }
+    }
+
     suspend fun hentGeografiskTilknytning(request: HentGeografiskTilknytningRequest): PdlGeografiskTilknytningResponse {
         val graphqlRequest = PdlGeografiskTilknytningRequest(
             query = getQuery("/pdl/hentGeografiskTilknytning.graphql"),
@@ -193,6 +225,7 @@ class PdlKlient(private val httpClient: HttpClient, private val apiUrl: String) 
         const val HEADER_BEHANDLINGSNUMMER = "behandlingsnummer"
         const val HEADER_TEMA = "Tema"
         const val HEADER_TEMA_VALUE = "PEN"
+        const val PDL_BULK_SIZE = 100
     }
 }
 

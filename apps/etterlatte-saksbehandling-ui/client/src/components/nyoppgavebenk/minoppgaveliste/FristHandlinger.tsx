@@ -24,15 +24,16 @@ export const FristHandlinger = (props: {
   status: Oppgavestatus
   orginalFrist: string
   oppgaveId: string
+  type: string
   hentOppgaver: () => void
 }) => {
-  const { orginalFrist, oppgaveId, status, hentOppgaver } = props
+  const { orginalFrist, oppgaveId, status, type, hentOppgaver } = props
   const [open, setOpen] = useState(false)
   const [frist, setFrist] = useState<string>()
   const [nyFrist, setnyFrist] = useState<Date>(new Date())
   const [redigerfristSvar, redigerFrist, resetredigerFristApi] = useApiCall(redigerFristApi)
 
-  const erRedigerbar = erOppgaveRedigerbar(status)
+  const erRedigerbar = erOppgaveRedigerbar(status, type)
 
   const generateFromDate = () => {
     // Legger til 1 dag siden ny frist må være fremover i tid

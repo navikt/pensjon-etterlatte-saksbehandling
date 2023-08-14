@@ -41,7 +41,7 @@ class OppgaveServiceNy(
             inTransaction {
                 oppgaveDaoNy.hentOppgaver(aktuelleOppgavetyperForRoller)
             }.sortedByDescending { it.opprettet }
-        }.filterForEnheter(Kontekst.get().AppUser)
+        }.filterForEnheter(Kontekst.get().AppUser).take(3)
     }
 
     private fun List<OppgaveNy>.filterForEnheter(bruker: User) =
@@ -79,14 +79,12 @@ class OppgaveServiceNy(
     }
 
     fun byttSaksbehandler(oppgaveId: UUID, saksbehandler: String) {
-        inTransaction {
-            val hentetOppgave = oppgaveDaoNy.hentOppgave(oppgaveId)
-            if (hentetOppgave != null) {
-                sikreAtOppgaveIkkeErAvsluttet(hentetOppgave)
-                oppgaveDaoNy.settNySaksbehandler(oppgaveId, saksbehandler)
-            } else {
-                throw NotFoundException("Oppgaven finnes ikke, id: $oppgaveId")
-            }
+        val hentetOppgave = oppgaveDaoNy.hentOppgave(oppgaveId)
+        if (hentetOppgave != null) {
+            sikreAtOppgaveIkkeErAvsluttet(hentetOppgave)
+            oppgaveDaoNy.settNySaksbehandler(oppgaveId, saksbehandler)
+        } else {
+            throw NotFoundException("Oppgaven finnes ikke, id: $oppgaveId")
         }
     }
 
@@ -313,6 +311,17 @@ class OppgaveServiceNy(
 
     fun hentOppgave(oppgaveId: UUID): OppgaveNy? {
         return oppgaveDaoNy.hentOppgave(oppgaveId)
+    }
+
+    /**
+     * Skal kun brukes for automatisk avbrudd når vi får erstattende førstegangsbehandling i saken
+     */
+    fun avbrytAapneOppgaverForBehandling(behandlingId: String) {
+        oppgaveDaoNy.hentOppgaverForBehandling(behandlingId)
+            .filter { !it.erAvsluttet() }
+            .forEach {
+                oppgaveDaoNy.endreStatusPaaOppgave(it.id, Status.AVBRUTT)
+            }
     }
 }
 

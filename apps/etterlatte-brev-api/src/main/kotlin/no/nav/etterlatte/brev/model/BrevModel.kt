@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonValue
 import no.nav.etterlatte.brev.adresse.RegoppslagResponseDTO
 import no.nav.etterlatte.brev.behandling.Behandling
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
@@ -112,43 +113,53 @@ data class OpprettNyttBrev(
 
 enum class BrevProsessType {
     MANUELL,
-    AUTOMATISK;
+    REDIGERBAR,
+    AUTOMATISK
+}
 
-    companion object {
-        fun fra(behandling: Behandling): BrevProsessType {
-            return when (behandling.sakType) {
-                SakType.OMSTILLINGSSTOENAD -> omsBrev(behandling)
-                SakType.BARNEPENSJON -> bpBrev(behandling)
-            }
+class BrevProsessTypeFactory(private val featureToggleService: FeatureToggleService) {
+    fun fra(behandling: Behandling): BrevProsessType {
+        return when (behandling.sakType) {
+            SakType.OMSTILLINGSSTOENAD -> omsBrev(behandling)
+            SakType.BARNEPENSJON -> bpBrev(behandling)
         }
+    }
 
-        private fun omsBrev(behandling: Behandling): BrevProsessType {
-            return when (behandling.vedtak.type) {
-                VedtakType.INNVILGELSE -> AUTOMATISK
-                VedtakType.OPPHOER,
-                VedtakType.AVSLAG,
-                VedtakType.ENDRING -> MANUELL
-            }
+    private fun omsBrev(behandling: Behandling): BrevProsessType {
+        return when (behandling.vedtak.type) {
+            VedtakType.INNVILGELSE -> BrevProsessType.AUTOMATISK
+            VedtakType.OPPHOER,
+            VedtakType.AVSLAG,
+            VedtakType.ENDRING -> BrevProsessType.MANUELL
         }
+    }
 
-        private fun bpBrev(behandling: Behandling): BrevProsessType {
-            return when (behandling.vedtak.type) {
-                VedtakType.INNVILGELSE -> AUTOMATISK
-                VedtakType.ENDRING -> when (behandling.revurderingsaarsak) {
-                    RevurderingAarsak.SOESKENJUSTERING -> AUTOMATISK
-                    RevurderingAarsak.FENGSELSOPPHOLD -> AUTOMATISK
-                    RevurderingAarsak.UT_AV_FENGSEL -> AUTOMATISK
-                    RevurderingAarsak.YRKESSKADE -> AUTOMATISK
-                    else -> MANUELL
-                }
-
-                VedtakType.OPPHOER -> when (behandling.revurderingsaarsak?.redigerbartBrev) {
-                    true -> AUTOMATISK
-                    else -> MANUELL
-                }
-
-                VedtakType.AVSLAG -> MANUELL
+    private fun bpBrev(behandling: Behandling): BrevProsessType {
+        return when (behandling.vedtak.type) {
+            VedtakType.INNVILGELSE -> when (
+                featureToggleService.isEnabled(
+                    BrevDataFeatureToggle.NyMalInnvilgelse,
+                    false
+                )
+            ) {
+                true -> BrevProsessType.REDIGERBAR
+                false -> BrevProsessType.AUTOMATISK
             }
+
+            VedtakType.ENDRING -> when (behandling.revurderingsaarsak) {
+                RevurderingAarsak.SOESKENJUSTERING -> BrevProsessType.REDIGERBAR
+                RevurderingAarsak.FENGSELSOPPHOLD -> BrevProsessType.REDIGERBAR
+                RevurderingAarsak.UT_AV_FENGSEL -> BrevProsessType.REDIGERBAR
+                RevurderingAarsak.YRKESSKADE -> BrevProsessType.AUTOMATISK
+                else -> BrevProsessType.MANUELL
+            }
+
+            VedtakType.OPPHOER -> when (behandling.revurderingsaarsak?.redigerbartBrev) {
+                true -> BrevProsessType.REDIGERBAR
+                else -> BrevProsessType.MANUELL
+            }
+
+            VedtakType.AVSLAG -> BrevProsessType.MANUELL
         }
     }
 }

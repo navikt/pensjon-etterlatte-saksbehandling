@@ -15,9 +15,7 @@ dependencies {
     implementation(project(":libs:etterlatte-funksjonsbrytere"))
     implementation(project(":libs:etterlatte-vilkaarsvurdering-model"))
 
-    implementation(libs.database.flywaydb)
     implementation(libs.database.kotliquery)
-    implementation(libs.metrics.micrometer.prometheus)
 
     implementation(libs.ktor2.okhttp)
     implementation(libs.ktor2.servercore)
@@ -33,11 +31,8 @@ dependencies {
     implementation(libs.jackson.datatypejsr310)
     implementation(libs.jackson.modulekotlin)
 
-    testImplementation(libs.test.testcontainer.jupiter)
-    testImplementation(libs.test.testcontainer.postgresql)
     testImplementation(libs.navfelles.tokenvalidationktor2)
 
-    testImplementation(libs.test.mockk)
     testImplementation(libs.test.kotest.assertionscore)
     testImplementation(libs.kotlinx.coroutinescore)
     testImplementation(libs.ktor2.servertests)

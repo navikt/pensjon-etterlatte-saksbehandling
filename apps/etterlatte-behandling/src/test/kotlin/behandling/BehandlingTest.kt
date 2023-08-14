@@ -7,7 +7,6 @@ import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
-import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
@@ -38,13 +37,6 @@ internal class BehandlingTest {
         behandlingOpprettet = Tidspunkt.now().toLocalDatetimeUTC(),
         sistEndret = Tidspunkt.now().toLocalDatetimeUTC(),
         status = BehandlingStatus.OPPRETTET,
-        persongalleri = Persongalleri(
-            soeker = "",
-            innsender = null,
-            soesken = listOf(),
-            avdoed = listOf(),
-            gjenlevende = listOf()
-        ),
         kommerBarnetTilgode = KommerBarnetTilgode(JaNei.JA, "", saksbehandler, id),
         virkningstidspunkt = null,
         utenlandstilsnitt = null,

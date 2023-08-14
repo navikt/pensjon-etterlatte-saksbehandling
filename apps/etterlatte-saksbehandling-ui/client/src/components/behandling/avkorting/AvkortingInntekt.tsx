@@ -30,19 +30,19 @@ export const AvkortingInntekt = (props: {
     return behandling.virkningstidspunkt.dato
   }
   const finnesRedigerbartGrunnlag = () => {
-    const siste = avkortingGrunnlag[avkortingGrunnlag.length - 1]
-    return siste.fom === behandling.virkningstidspunkt?.dato
+    const nyligste = avkortingGrunnlag[0]
+    return nyligste && nyligste.fom === behandling.virkningstidspunkt?.dato
   }
-  const finnRedigerbartGrunnlag = (): IAvkortingGrunnlag => {
+  const finnRedigerbartGrunnlagEllerOpprettNytt = (): IAvkortingGrunnlag => {
     if (finnesRedigerbartGrunnlag()) {
-      return avkortingGrunnlag[avkortingGrunnlag.length - 1]
+      return avkortingGrunnlag[0]
     }
     if (avkortingGrunnlag.length > 0) {
-      const siste = avkortingGrunnlag[avkortingGrunnlag.length - 1]
+      const nyligste = avkortingGrunnlag[0]
       return {
         fom: virkningstidspunkt(),
-        fratrekkInnAar: siste.fratrekkInnAar,
-        relevanteMaanederInnAar: siste.relevanteMaanederInnAar,
+        fratrekkInnAar: nyligste.fratrekkInnAar,
+        relevanteMaanederInnAar: nyligste.relevanteMaanederInnAar,
       }
     }
     return {
@@ -51,7 +51,13 @@ export const AvkortingInntekt = (props: {
     }
   }
 
-  const [inntektGrunnlagForm, setInntektGrunnlagForm] = useState<IAvkortingGrunnlag>(finnRedigerbartGrunnlag())
+  const aktivtGrunnlag = () => {
+    return avkortingGrunnlag.length > 0 ? [avkortingGrunnlag[0]] : []
+  }
+
+  const [inntektGrunnlagForm, setInntektGrunnlagForm] = useState<IAvkortingGrunnlag>(
+    finnRedigerbartGrunnlagEllerOpprettNytt()
+  )
   const [inntektGrunnlagStatus, requestLagreAvkortingGrunnlag] = useApiCall(lagreAvkortingGrunnlag)
   const [errorTekst, setErrorTekst] = useState<string | null>(null)
 
@@ -108,7 +114,7 @@ export const AvkortingInntekt = (props: {
               <Table.HeaderCell>Kilde</Table.HeaderCell>
             </Table.Header>
             <Table.Body>
-              {(visHistorikk ? avkortingGrunnlag : [avkortingGrunnlag[0]]).map((inntektsgrunnlag, index) => (
+              {(visHistorikk ? avkortingGrunnlag : aktivtGrunnlag()).map((inntektsgrunnlag, index) => (
                 <Table.Row key={index}>
                   <Table.DataCell key="Inntekt">{NOK(inntektsgrunnlag.aarsinntekt)}</Table.DataCell>
                   <Table.DataCell key="FratrekkInnUt">{NOK(inntektsgrunnlag.fratrekkInnAar)}</Table.DataCell>

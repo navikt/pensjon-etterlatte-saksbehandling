@@ -9,6 +9,7 @@ import no.nav.etterlatte.libs.regler.RegelPeriode
 import no.nav.etterlatte.libs.regler.RegelkjoeringResultat
 import no.nav.etterlatte.libs.regler.eksekver
 import no.nav.etterlatte.trygdetid.regler.TotalTrygdetidGrunnlag
+import no.nav.etterlatte.trygdetid.regler.TrygdetidPeriodMedPoengAar
 import no.nav.etterlatte.trygdetid.regler.TrygdetidPeriodeGrunnlag
 import no.nav.etterlatte.trygdetid.regler.beregnAntallAarTotalTrygdetid
 import no.nav.etterlatte.trygdetid.regler.beregnTrygdetidForPeriode
@@ -94,15 +95,15 @@ object TrygdetidBeregningService {
         }
 
         val grunnlag = TrygdetidPeriodeGrunnlag(
-            periodeFra = FaktumNode(
-                verdi = trygdetidGrunnlag.periode.fra,
+            periode = FaktumNode(
+                verdi = TrygdetidPeriodMedPoengAar(
+                    fra = trygdetidGrunnlag.periode.fra,
+                    til = trygdetidGrunnlag.periode.til,
+                    poengInnAar = trygdetidGrunnlag.poengInnAar,
+                    poengUtAar = trygdetidGrunnlag.poengUtAar
+                ),
                 kilde = trygdetidGrunnlag.kilde,
-                beskrivelse = "Startdato for trygdetidsperiode"
-            ),
-            periodeTil = FaktumNode(
-                verdi = trygdetidGrunnlag.periode.til,
-                kilde = trygdetidGrunnlag.kilde,
-                beskrivelse = "Sluttdato for trygdetidsperiode"
+                beskrivelse = "Periode (med poeng aar) for trygdetidsperiode"
             )
         )
 

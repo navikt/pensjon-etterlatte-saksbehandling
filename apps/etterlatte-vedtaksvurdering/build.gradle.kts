@@ -25,7 +25,6 @@ dependencies {
     implementation(libs.ktor2.jackson)
     implementation(libs.ktor2.auth)
 
-    implementation(libs.metrics.micrometer.prometheus)
     implementation(libs.bundles.jackson)
 
     implementation(libs.navfelles.tokenvalidationktor2)
@@ -33,7 +32,6 @@ dependencies {
 
     testImplementation(libs.navfelles.tokenvalidationktor2)
 
-    testImplementation(libs.test.mockk)
     testImplementation(libs.kotlinx.coroutinescore)
     testImplementation(libs.test.kotest.assertionscore)
     testImplementation(libs.ktor2.servertests)

@@ -40,7 +40,6 @@ sealed class Behandling {
     abstract val sistEndret: LocalDateTime
     abstract val status: BehandlingStatus
     abstract val type: BehandlingType
-    abstract val persongalleri: Persongalleri
     abstract val kommerBarnetTilgode: KommerBarnetTilgode?
     abstract val virkningstidspunkt: Virkningstidspunkt?
     abstract val utenlandstilsnitt: Utenlandstilsnitt?
@@ -162,7 +161,7 @@ sealed class Behandling {
     ) : Exception(message)
 }
 
-internal fun Behandling.toDetaljertBehandling(): DetaljertBehandling {
+internal fun Behandling.toDetaljertBehandling(persongalleri: Persongalleri): DetaljertBehandling {
     return DetaljertBehandling(
         id = id,
         sak = sak.id,

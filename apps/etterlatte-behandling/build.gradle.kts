@@ -1,5 +1,5 @@
 plugins {
-    id("etterlatte.kafka")
+    id("etterlatte.common")
     id("etterlatte.postgres")
 }
 
@@ -7,6 +7,7 @@ dependencies {
     implementation(project(":libs:saksbehandling-common"))
     implementation(project(":libs:ktor2client-auth-clientcredentials"))
     implementation(project(":libs:ktor2client-onbehalfof"))
+    implementation(project(":libs:etterlatte-kafka"))
     implementation(project(":libs:etterlatte-ktor"))
     implementation(project(":libs:etterlatte-database"))
     implementation(project(":libs:etterlatte-sporingslogg"))
@@ -36,13 +37,10 @@ dependencies {
     implementation(libs.ktor2.calllogging)
     implementation(libs.kotlin.result)
 
-    implementation(libs.metrics.micrometer.prometheus)
     implementation(libs.bundles.jackson)
-
     implementation(libs.bundles.navfelles.token)
 
     testImplementation(libs.ktor2.clientcontentnegotiation)
-    testImplementation(libs.test.mockk)
     testImplementation(libs.ktor2.clientmock)
     testImplementation(libs.ktor2.servertests)
     testImplementation(libs.kotlinx.coroutinescore)

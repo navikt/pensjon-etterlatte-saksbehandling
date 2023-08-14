@@ -85,6 +85,7 @@ class BehandlingFactory(
         return inTransaction {
             harBehandlingUnderbehandling.forEach {
                 behandlingDao.lagreStatus(it.id, BehandlingStatus.AVBRUTT, LocalDateTime.now())
+                oppgaveService.avbrytAapneOppgaverForBehandling(it.id.toString())
             }
 
             OpprettBehandling(
@@ -104,7 +105,7 @@ class BehandlingFactory(
                 behandlingDao.hentBehandling(opprettBehandling.id)?.sjekkEnhet()
             }.also { behandling ->
                 behandling?.let {
-                    grunnlagService.leggInnNyttGrunnlag(it)
+                    grunnlagService.leggInnNyttGrunnlag(it, persongalleri)
                     oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendSoeknad(
                         referanse = behandling.id.toString(),
                         sakId = sak.id

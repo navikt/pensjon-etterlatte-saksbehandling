@@ -56,11 +56,11 @@ internal class MigreringHendelser(rapidsConnection: RapidsConnection, private va
                     val request = objectMapper.treeToValue(packet[HENDELSE_DATA_KEY], MigreringRequest::class.java)
                     logger.info("Oppretter grunnlag for trygdetid for $behandlingId")
 
-                    val beregnetTrygdetid =
-                        trygdetidService.beregnTrygdetidGrunnlag(
-                            behandlingId,
-                            tilGrunnlag(request.trygdetidsgrunnlag)
-                        )
+                    // Oppretter alle trygdetidsperioder og beholder siste beregnede trygdetid
+                    val beregnetTrygdetid = request.trygdetid.perioder.map { periode ->
+                        trygdetidService.beregnTrygdetidGrunnlag(behandlingId, tilGrunnlag(periode))
+                    }.lastOrNull() ?: it
+
                     packet[TRYGDETID_KEY] = beregnetTrygdetid.toJson()
                     packet.eventName = Migreringshendelser.BEREGN
                     context.publish(packet.toJson())
@@ -74,15 +74,15 @@ internal class MigreringHendelser(rapidsConnection: RapidsConnection, private va
     private fun tilGrunnlag(trygdetidsgrunnlag: Trygdetidsgrunnlag) = TrygdetidGrunnlagDto(
         id = null,
         type = TrygdetidType.FAKTISK.name,
-        bosted = trygdetidsgrunnlag.bosted,
-        periodeFra = trygdetidsgrunnlag.fom,
-        periodeTil = trygdetidsgrunnlag.tom,
+        bosted = trygdetidsgrunnlag.landTreBokstaver,
+        periodeFra = trygdetidsgrunnlag.datoFom.toLocalDate(),
+        periodeTil = trygdetidsgrunnlag.datoTom.toLocalDate(),
         kilde = TrygdetidGrunnlagKildeDto(
             tidspunkt = Tidspunkt.now().toString(),
             ident = Vedtaksloesning.PESYS.name
         ),
         beregnet = null,
-        begrunnelse = trygdetidsgrunnlag.begrunnelse,
+        begrunnelse = "Migrert fra pesys",
         poengInnAar = false,
         poengUtAar = false,
         prorata = false

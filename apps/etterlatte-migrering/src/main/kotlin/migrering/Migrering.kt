@@ -1,5 +1,7 @@
 package no.nav.etterlatte.migrering
 
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.rapidsandrivers.BEHOV_NAME_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
@@ -17,7 +19,17 @@ import no.nav.helse.rapids_rivers.River
 import org.slf4j.LoggerFactory
 import rapidsandrivers.migrering.ListenerMedLoggingOgFeilhaandtering
 
-internal class Migrering(rapidsConnection: RapidsConnection, private val pesysRepository: PesysRepository) :
+enum class MigreringFeatureToggle(private val key: String) : FeatureToggle {
+    SendSakTilMigrering("pensjon-etterlatte.bp-send-sak-til-migrering");
+
+    override fun key() = key
+}
+
+internal class Migrering(
+    rapidsConnection: RapidsConnection,
+    private val pesysRepository: PesysRepository,
+    private val featureToggleService: FeatureToggleService
+) :
     ListenerMedLoggingOgFeilhaandtering(START_MIGRERING) {
     private val logger = LoggerFactory.getLogger(Migrering::class.java)
 
@@ -39,7 +51,20 @@ internal class Migrering(rapidsConnection: RapidsConnection, private val pesysRe
         packet.eventName = Migreringshendelser.MIGRER_SAK
         val request = tilMigreringsrequest(sak)
         packet.request = request.toJson()
-        packet[FNR_KEY] = request.fnr.value
+        if (featureToggleService.isEnabled(MigreringFeatureToggle.SendSakTilMigrering, false)) {
+            sendSakTilMigrering(packet, request, context, sak)
+        } else {
+            logger.info("Migrering er skrudd av. Sender ikke pesys-sak ${sak.pesysId} videre.")
+        }
+    }
+
+    private fun sendSakTilMigrering(
+        packet: JsonMessage,
+        request: MigreringRequest,
+        context: MessageContext,
+        sak: Pesyssak
+    ) {
+        packet[FNR_KEY] = request.soeker.value
         packet[BEHOV_NAME_KEY] = Opplysningstype.AVDOED_PDL_V1
         context.publish(packet.toJson())
         logger.info(
@@ -51,9 +76,13 @@ internal class Migrering(rapidsConnection: RapidsConnection, private val pesysRe
     private fun tilMigreringsrequest(sak: Pesyssak) = MigreringRequest(
         pesysId = sak.pesysId,
         enhet = sak.enhet,
-        fnr = sak.folkeregisteridentifikator,
-        persongalleri = sak.persongalleri,
+        soeker = sak.soeker,
+        gjenlevendeForelder = sak.gjenlevendeForelder,
+        avdoedForelder = sak.avdoedForelder,
         virkningstidspunkt = sak.virkningstidspunkt,
-        trygdetidsgrunnlag = sak.trygdetidPerioder
+        foersteVirkningstidspunkt = sak.foersteVirkningstidspunkt,
+        beregning = sak.beregning,
+        trygdetid = sak.trygdetid,
+        flyktningStatus = sak.flyktningStatus
     )
 }

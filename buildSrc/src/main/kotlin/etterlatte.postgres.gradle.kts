@@ -3,7 +3,7 @@ import org.gradle.accessors.dm.LibrariesForLibs
 val libs = the<LibrariesForLibs>()
 
 plugins {
-    id("etterlatte.common")
+    kotlin("jvm") apply false
 }
 
 repositories {

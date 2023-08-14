@@ -7,7 +7,6 @@ import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.kommerBarnetTilGodeVurdering
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
-import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -38,7 +37,6 @@ internal class RevurderingTest {
             behandlingOpprettet = Tidspunkt.now().toLocalDatetimeUTC(),
             sistEndret = Tidspunkt.now().toLocalDatetimeUTC(),
             status = BehandlingStatus.OPPRETTET,
-            persongalleri = Persongalleri(""),
             kommerBarnetTilgode = kommerBarnetTilGodeVurdering(id),
             virkningstidspunkt = virkningstidspunktVurdering(),
             utenlandstilsnitt = null,
@@ -158,7 +156,6 @@ private fun opprettetRevurdering(prosesstype: Prosesstype): Revurdering {
         behandlingOpprettet = Tidspunkt.now().toLocalDatetimeUTC(),
         sistEndret = Tidspunkt.now().toLocalDatetimeUTC(),
         status = BehandlingStatus.OPPRETTET,
-        persongalleri = Persongalleri(""),
         kommerBarnetTilgode = kommerBarnetTilGodeVurdering(id),
         virkningstidspunkt = virkningstidspunktVurdering(),
         utenlandstilsnitt = null,

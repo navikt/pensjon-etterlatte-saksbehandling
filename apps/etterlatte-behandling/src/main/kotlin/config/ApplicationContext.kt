@@ -29,8 +29,8 @@ import no.nav.etterlatte.behandling.revurdering.RevurderingServiceImpl
 import no.nav.etterlatte.common.klienter.PdlKlientImpl
 import no.nav.etterlatte.common.klienter.SkjermingKlient
 import no.nav.etterlatte.databaseContext
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleProperties
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggleServiceProperties
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseDao
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseJob
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
@@ -48,6 +48,7 @@ import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.libs.sporingslogg.Sporingslogg
 import no.nav.etterlatte.oppgave.GosysOppgaveKlient
 import no.nav.etterlatte.oppgave.GosysOppgaveKlientImpl
+import no.nav.etterlatte.oppgave.GosysOppgaveServiceImpl
 import no.nav.etterlatte.oppgave.OppgaveDao
 import no.nav.etterlatte.oppgave.OppgaveServiceImpl
 import no.nav.etterlatte.oppgaveny.OppgaveDaoMedEndringssporingImpl
@@ -58,6 +59,7 @@ import no.nav.etterlatte.sak.SakDao
 import no.nav.etterlatte.sak.SakTilgangDao
 import no.nav.etterlatte.sak.TilgangServiceImpl
 import no.nav.etterlatte.tilgangsstyring.AzureGroup
+import java.net.URI
 import java.time.Duration
 import java.time.temporal.ChronoUnit
 
@@ -89,13 +91,11 @@ private fun navAnsattHttpClient(config: Config) = httpClientClientCredentials(
     azureAppScope = config.getString("navansatt.azure.scope")
 )
 
-private fun featureToggleProperties(config: Config) = mapOf(
-    FeatureToggleServiceProperties.ENABLED.navn to config.getString("funksjonsbrytere.enabled"),
-    FeatureToggleServiceProperties.APPLICATIONNAME.navn to config.getString(
-        "funksjonsbrytere.unleash.applicationName"
-    ),
-    FeatureToggleServiceProperties.URI.navn to config.getString("funksjonsbrytere.unleash.uri"),
-    FeatureToggleServiceProperties.CLUSTER.navn to config.getString("funksjonsbrytere.unleash.cluster")
+private fun featureToggleProperties(config: Config) = FeatureToggleProperties(
+    enabled = config.getString("funksjonsbrytere.enabled").toBoolean(),
+    applicationName = config.getString("funksjonsbrytere.unleash.applicationName"),
+    uri = URI(config.getString("funksjonsbrytere.unleash.uri")),
+    cluster = config.getString("funksjonsbrytere.unleash.cluster")
 )
 
 class ApplicationContext(
@@ -153,6 +153,7 @@ class ApplicationContext(
     // Service
     val oppgaveService = OppgaveServiceImpl(oppgaveDao, featureToggleService)
     val oppgaveServiceNy = OppgaveServiceNy(oppgaveDaoEndringer, sakDao, kanBrukeNyOppgaveliste, featureToggleService)
+    val gosysOppgaveService = GosysOppgaveServiceImpl(gosysOppgaveKlient, pdlKlient, featureToggleService)
     val behandlingService = BehandlingServiceImpl(
         behandlingDao = behandlingDao,
         behandlingHendelser = behandlingsHendelser,
@@ -196,12 +197,14 @@ class ApplicationContext(
             behandlingDao = behandlingDao,
             behandlingHendelser = behandlingsHendelser,
             hendelseDao = hendelseDao,
+            grunnlagService = grunnlagsService,
             featureToggleService = featureToggleService
         )
 
     val omregningService =
         OmregningService(
             behandlingService = behandlingService,
+            grunnlagService = grunnlagsService,
             revurderingService = revurderingService
         )
 

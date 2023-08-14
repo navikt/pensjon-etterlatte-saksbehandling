@@ -10,31 +10,32 @@ import no.nav.etterlatte.libs.regler.finnFaktumIGrunnlag
 import no.nav.etterlatte.libs.regler.med
 import no.nav.etterlatte.libs.regler.og
 import java.time.LocalDate
+import java.time.Month
+import java.time.MonthDay
 import java.time.Period
 
 // TODO dato settes riktig senere
 val TRYGDETID_DATO: LocalDate = LocalDate.of(1900, 1, 1)
 
+data class TrygdetidPeriodMedPoengAar(
+    val fra: LocalDate,
+    val til: LocalDate,
+    val poengInnAar: Boolean,
+    val poengUtAar: Boolean
+)
+
 data class TrygdetidPeriodeGrunnlag(
-    val periodeFra: FaktumNode<LocalDate>,
-    val periodeTil: FaktumNode<LocalDate>
+    val periode: FaktumNode<TrygdetidPeriodMedPoengAar>
 )
 
 data class TotalTrygdetidGrunnlag(
     val beregnetTrygdetidPerioder: FaktumNode<List<Period>>
 )
 
-val periodeFra: Regel<TrygdetidPeriodeGrunnlag, LocalDate> = finnFaktumIGrunnlag(
+val periode: Regel<TrygdetidPeriodeGrunnlag, TrygdetidPeriodMedPoengAar> = finnFaktumIGrunnlag(
     gjelderFra = TRYGDETID_DATO,
-    beskrivelse = "Periode fra",
-    finnFaktum = TrygdetidPeriodeGrunnlag::periodeFra,
-    finnFelt = { it }
-)
-
-val periodeTil: Regel<TrygdetidPeriodeGrunnlag, LocalDate> = finnFaktumIGrunnlag(
-    gjelderFra = TRYGDETID_DATO,
-    beskrivelse = "Periode til",
-    finnFaktum = TrygdetidPeriodeGrunnlag::periodeTil,
+    beskrivelse = "Finner trygdetidsperiode fra grunnlag",
+    finnFaktum = TrygdetidPeriodeGrunnlag::periode,
     finnFelt = { it }
 )
 
@@ -42,8 +43,26 @@ val beregnTrygdetidForPeriode = RegelMeta(
     gjelderFra = TRYGDETID_DATO,
     beskrivelse = "Beregner trygdetid fra og med periodeFra til og med periodeTil i år, måneder og dager",
     regelReferanse = RegelReferanse(id = "REGEL-TRYGDETID-BEREGNE-PERIODE")
-) benytter periodeFra og periodeTil med { periodeFra, periodeTil ->
-    Period.between(periodeFra, periodeTil.plusDays(1))
+) benytter periode med { periode ->
+    fun TrygdetidPeriodMedPoengAar.erEttPoengAar() = fra.year == til.year && (poengInnAar || poengUtAar)
+
+    fun TrygdetidPeriodMedPoengAar.poengJustertFra() = if (poengInnAar) {
+        fra.with(MonthDay.of(Month.JANUARY, 1))
+    } else {
+        fra
+    }
+
+    fun TrygdetidPeriodMedPoengAar.poengJustertTil() = if (poengUtAar) {
+        til.with(MonthDay.of(Month.DECEMBER, 31))
+    } else {
+        til
+    }
+
+    if (periode.erEttPoengAar()) {
+        Period.ofYears(1)
+    } else {
+        Period.between(periode.poengJustertFra(), periode.poengJustertTil().plusDays(1))
+    }
 }
 
 val beregnetTrygdetidPerioder: Regel<TotalTrygdetidGrunnlag, List<Period>> = finnFaktumIGrunnlag(

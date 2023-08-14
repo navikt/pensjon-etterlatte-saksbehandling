@@ -2,10 +2,10 @@ package migrering
 
 import io.ktor.server.testing.testApplication
 import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
-import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.POSTGRES_VERSION
 import no.nav.etterlatte.libs.database.migrate
@@ -13,11 +13,12 @@ import no.nav.etterlatte.migrering.Migrering
 import no.nav.etterlatte.migrering.MigreringFeatureToggle
 import no.nav.etterlatte.migrering.PesysRepository
 import no.nav.etterlatte.migrering.Pesyssak
+import no.nav.etterlatte.rapidsandrivers.migrering.Beregning
 import no.nav.etterlatte.rapidsandrivers.migrering.Enhet
 import no.nav.etterlatte.rapidsandrivers.migrering.MigreringRequest
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser
 import no.nav.etterlatte.rapidsandrivers.migrering.PesysId
-import no.nav.etterlatte.rapidsandrivers.migrering.Trygdetidsgrunnlag
+import no.nav.etterlatte.rapidsandrivers.migrering.Trygdetid
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.AfterAll
@@ -27,7 +28,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
-import java.time.LocalDate
+import java.math.BigDecimal
 import java.time.YearMonth
 import java.util.*
 
@@ -62,14 +63,19 @@ class MigreringIntegrationTest {
                 PesysId("4"),
                 Enhet("4808"),
                 Folkeregisteridentifikator.of(syntetiskFnr),
-                Persongalleri(syntetiskFnr, "innsender", emptyList(), emptyList(), emptyList()),
+                Folkeregisteridentifikator.of(syntetiskFnr),
+                emptyList(),
                 YearMonth.now(),
-                Trygdetidsgrunnlag(
-                    "Pesys",
-                    LocalDate.now().minusYears(40),
-                    LocalDate.now(),
-                    "fordi"
-                )
+                YearMonth.now().minusYears(10),
+                Beregning(
+                    brutto = BigDecimal(1000),
+                    netto = BigDecimal(1000),
+                    anvendtTrygdetid = BigDecimal(40),
+                    datoVirkFom = Tidspunkt.now(),
+                    g = BigDecimal(100000)
+                ),
+                Trygdetid(emptyList()),
+                false
             )
             repository.lagrePesyssak(sakInn)
             val inspector = TestRapid()
@@ -92,7 +98,7 @@ class MigreringIntegrationTest {
 
             val request = objectMapper.readValue(melding1.get("request").asText(), MigreringRequest::class.java)
             Assertions.assertEquals(PesysId("4"), request.pesysId)
-            Assertions.assertEquals(sakInn.folkeregisteridentifikator, request.fnr)
+            Assertions.assertEquals(sakInn.soeker, request.soeker)
         }
     }
 }

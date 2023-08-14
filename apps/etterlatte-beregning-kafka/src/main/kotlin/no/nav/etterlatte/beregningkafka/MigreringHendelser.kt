@@ -5,8 +5,6 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.beregning.grunnlag.BarnepensjonBeregningsGrunnlag
 import no.nav.etterlatte.beregning.grunnlag.GrunnlagMedPeriode
 import no.nav.etterlatte.libs.common.beregning.BeregningDTO
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeskenMedIBeregning
-import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.etterlatte.rapidsandrivers.migrering.MigreringRequest
@@ -56,11 +54,9 @@ internal class MigreringHendelser(rapidsConnection: RapidsConnection, private va
         BarnepensjonBeregningsGrunnlag(
             soeskenMedIBeregning = listOf(
                 GrunnlagMedPeriode(
-                    fom = request.trygdetidsgrunnlag.fom,
+                    fom = request.virkningstidspunkt.atDay(1),
                     tom = null,
-                    data = request.persongalleri.soesken.map {
-                        SoeskenMedIBeregning(foedselsnummer = Folkeregisteridentifikator.of(it), skalBrukes = true)
-                    }
+                    data = emptyList()
                 )
             ),
             institusjonsopphold = emptyList()

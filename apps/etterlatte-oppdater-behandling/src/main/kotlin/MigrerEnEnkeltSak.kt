@@ -59,9 +59,9 @@ internal class MigrerEnEnkeltSak(
         packet[SAK_TYPE_KEY] = SakType.BARNEPENSJON
         packet[ROLLE_KEY] = PersonRolle.AVDOED
         packet[MIGRERING_GRUNNLAG_KEY] = MigrerSoekerRequest(
-            soeker = hendelse.persongalleri.soeker
+            soeker = hendelse.soeker.value
         )
-        packet[PERSONGALLERI] = hendelse.persongalleri
+        packet[PERSONGALLERI] = hendelse.opprettPersongalleri()
         packet.eventName = Migreringshendelser.LAGRE_GRUNNLAG
 
         context.publish(packet.toJson())

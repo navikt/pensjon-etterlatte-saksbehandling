@@ -55,11 +55,11 @@ class MigreringService(
     private fun opprettSakOgBehandling(request: MigreringRequest): Behandling? =
         behandlingFactory.opprettBehandling(
             finnEllerOpprettSak(request).id,
-            request.persongalleri,
+            request.opprettPersongalleri(),
             null,
             Vedtaksloesning.PESYS
         )
 
     private fun finnEllerOpprettSak(request: MigreringRequest) =
-        sakService.finnEllerOpprettSak(request.fnr.value, SakType.BARNEPENSJON, request.enhet.nr)
+        sakService.finnEllerOpprettSak(request.soeker.value, SakType.BARNEPENSJON, request.enhet.nr)
 }

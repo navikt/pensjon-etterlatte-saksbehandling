@@ -64,7 +64,7 @@ internal class Migrering(
         context: MessageContext,
         sak: Pesyssak
     ) {
-        packet[FNR_KEY] = request.fnr.value
+        packet[FNR_KEY] = request.soeker.value
         packet[BEHOV_NAME_KEY] = Opplysningstype.AVDOED_PDL_V1
         context.publish(packet.toJson())
         logger.info(
@@ -76,9 +76,13 @@ internal class Migrering(
     private fun tilMigreringsrequest(sak: Pesyssak) = MigreringRequest(
         pesysId = sak.pesysId,
         enhet = sak.enhet,
-        fnr = sak.folkeregisteridentifikator,
-        persongalleri = sak.persongalleri,
+        soeker = sak.soeker,
+        gjenlevendeForelder = sak.gjenlevendeForelder,
+        avdoedForelder = sak.avdoedForelder,
         virkningstidspunkt = sak.virkningstidspunkt,
-        trygdetidsgrunnlag = sak.trygdetidPerioder
+        foersteVirkningstidspunkt = sak.foersteVirkningstidspunkt,
+        beregning = sak.beregning,
+        trygdetid = sak.trygdetid,
+        flyktningStatus = sak.flyktningStatus
     )
 }

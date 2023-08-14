@@ -9,14 +9,12 @@ import org.slf4j.LoggerFactory
 class OppgaveMetrics(private val metrikkerDao: MetrikkerDao) : MeterBinder {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
-    private var antallOppgaver = metrikkerDao.antallOppgaver()
-
+    private var antallOppgaver = -1.0
     override fun bindTo(registry: MeterRegistry) {
-        logger.info("Antall oppgaver: $antallOppgaver")
-
         Gauge.builder("antall_oppgaver") {
             antallOppgaver.also {
                 antallOppgaver = metrikkerDao.antallOppgaver()
+                logger.info("Antall oppgaver: $antallOppgaver")
             }
         }.description("Hello antall oppgaver")
             .register(registry)

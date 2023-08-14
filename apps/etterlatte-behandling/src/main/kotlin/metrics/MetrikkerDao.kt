@@ -20,6 +20,7 @@ class MetrikkerDao(private val connection: () -> Connection) {
             val saker = statement.executeQuery().toList{
                 getObject("id") as UUID
             }
+            logger.info("Antall saker: ${saker.size}")
             return saker.size.toDouble()
         }
     }

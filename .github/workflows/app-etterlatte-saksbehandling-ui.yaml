@@ -56,6 +56,9 @@ jobs:
       id-token: 'write'
     outputs:
       image: ${{ steps.docker-build-push.outputs.image }}
+    strategy:
+        matrix:
+          environments: [production, development]
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -67,7 +70,7 @@ jobs:
         uses: rlespinasse/github-slug-action@v4
       - name: Install and build client
         working-directory: apps/${{ env.APP_NAME }}
-        run: yarn --cwd client install --frozen-lockfile && yarn --cwd client build
+        run: yarn --cwd client install --frozen-lockfile && yarn --cwd client build --mode ${{ matrix.environments }}
       - name: Install and build server
         working-directory: apps/${{ env.APP_NAME }}
         run: yarn --cwd server install --frozen-lockfile && yarn --cwd server build
@@ -83,7 +86,7 @@ jobs:
           project_id: ${{ vars.NAIS_MANAGEMENT_PROJECT_ID }}
           dockerfile: apps/${{ env.APP_NAME }}/Dockerfile
           docker_context: apps/${{ env.APP_NAME }}/
-          image_suffix: ${{ github.workflow }}
+          image_suffix: ${{ github.workflow }}-${{ matrix.environments }}
           tag: ${{ env.GITHUB_REF_SLUG }}
 
   deploy-to-dev-gcp:

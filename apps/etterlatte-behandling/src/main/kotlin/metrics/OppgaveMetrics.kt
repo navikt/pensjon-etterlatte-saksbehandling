@@ -9,7 +9,7 @@ class OppgaveMetrics(private val metrikkerDao: MetrikkerDao) : MeterBinder {
     override fun bindTo(registry: MeterRegistry) {
         val runtime = Runtime.getRuntime()
         Gauge.builder("antall_oppgaver", runtime) {
-            2.0
+            metrikkerDao.antallOppgaver()
         }.description("Hello antall oppgaver")
             .register(registry)
         Counter.builder("hvor_fine_er_oppgavene")

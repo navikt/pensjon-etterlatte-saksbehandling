@@ -1,4 +1,5 @@
 plugins {
+    id("etterlatte.common")
     id("etterlatte.rapids-and-rivers-ktor2")
 }
 
@@ -18,6 +19,5 @@ dependencies {
     implementation(libs.kafka.avroserializer)
 
     testImplementation(libs.ktor2.clientmock)
-    testImplementation(libs.test.mockk)
     testImplementation(libs.kotlinx.coroutinescore)
 }

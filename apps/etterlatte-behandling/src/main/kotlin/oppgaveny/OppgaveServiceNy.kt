@@ -79,14 +79,12 @@ class OppgaveServiceNy(
     }
 
     fun byttSaksbehandler(oppgaveId: UUID, saksbehandler: String) {
-        inTransaction {
-            val hentetOppgave = oppgaveDaoNy.hentOppgave(oppgaveId)
-            if (hentetOppgave != null) {
-                sikreAtOppgaveIkkeErAvsluttet(hentetOppgave)
-                oppgaveDaoNy.settNySaksbehandler(oppgaveId, saksbehandler)
-            } else {
-                throw NotFoundException("Oppgaven finnes ikke, id: $oppgaveId")
-            }
+        val hentetOppgave = oppgaveDaoNy.hentOppgave(oppgaveId)
+        if (hentetOppgave != null) {
+            sikreAtOppgaveIkkeErAvsluttet(hentetOppgave)
+            oppgaveDaoNy.settNySaksbehandler(oppgaveId, saksbehandler)
+        } else {
+            throw NotFoundException("Oppgaven finnes ikke, id: $oppgaveId")
         }
     }
 

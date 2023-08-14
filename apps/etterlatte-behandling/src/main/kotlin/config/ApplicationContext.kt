@@ -141,7 +141,7 @@ class ApplicationContext(
     val grunnlagsendringshendelseDao = GrunnlagsendringshendelseDao { databaseContext().activeTx() }
     val institusjonsoppholdDao = InstitusjonsoppholdDao { databaseContext().activeTx() }
     val migreringRepository = MigreringRepository { databaseContext().activeTx() }
-    val metrikkerDao = MetrikkerDao { databaseContext().activeTx() }
+    val metrikkerDao = MetrikkerDao(dataSource)
 
     // Klient
     val pdlKlient = PdlKlientImpl(pdlHttpClient, "http://etterlatte-pdltjenester")

@@ -56,9 +56,11 @@ jobs:
       id-token: 'write'
     outputs:
       image: ${{ steps.docker-build-push.outputs.image }}
+      image-dev: ${{ steps.multi-image-output.outputs.dev }}
+      image-prod: ${{ steps.multi-image-output.outputs.production }}
     strategy:
         matrix:
-          environments: [production, development]
+          environments: [production, dev]
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -86,8 +88,11 @@ jobs:
           project_id: ${{ vars.NAIS_MANAGEMENT_PROJECT_ID }}
           dockerfile: apps/${{ env.APP_NAME }}/Dockerfile
           docker_context: apps/${{ env.APP_NAME }}/
-          image_suffix: ${{ github.workflow }}-${{ matrix.environments }}
+          image_suffix: ${{ github.workflow }}.${{ matrix.environments }}
           tag: ${{ env.GITHUB_REF_SLUG }}
+      - name: Set multi image output
+        id: multi-image-output
+        run: echo "${{ matrix.environments }}=${{ steps.docker-build-push.outputs.image }}" >> $GITHUB_OUTPUT
 
   deploy-to-dev-gcp:
     if: github.event_name != 'pull_request'
@@ -101,7 +106,7 @@ jobs:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: dev-gcp
           RESOURCE: apps/${{ env.APP_NAME }}/.nais/dev.yaml
-          VAR: image=${{ needs.build-and-publish.outputs.image }}
+          VAR: image=${{ needs.build-and-publish.outputs.image-dev }}
 
 
   deploy-to-prod-gcp:
@@ -116,4 +121,4 @@ jobs:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: prod-gcp
           RESOURCE: apps/${{ env.APP_NAME }}/.nais/prod.yaml
-          VAR: image=${{ needs.build-and-publish.outputs.image }}
+          VAR: image=${{ needs.build-and-publish.outputs.image-prod }}

@@ -18,11 +18,11 @@ import java.util.*
 
 object BarnepensjonVilkaar {
 
-    fun inngangsvilkaar(grunnlag: Grunnlag, virkningstidspunkt: Virkningstidspunkt) = listOf(
+    fun inngangsvilkaar(grunnlag: Grunnlag) = listOf(
         formaal(),
         doedsfallForelder(),
         yrkesskadeAvdoed(),
-        alderBarn(virkningstidspunkt, grunnlag),
+        alderBarn(grunnlag),
         barnetsMedlemskap(),
         avdoedesForutgaaendeMedlemskap()
     )
@@ -74,7 +74,6 @@ object BarnepensjonVilkaar {
     )
 
     private fun alderBarn(
-        virkningstidspunkt: Virkningstidspunkt,
         grunnlag: Grunnlag
     ): Vilkaar = Vilkaar(
         hovedvilkaar = Delvilkaar(
@@ -92,6 +91,7 @@ object BarnepensjonVilkaar {
             beggeForeldreDoedeUtdanningHovedbeskjeftigelse(),
             beggeForeldreDoedeLaerlingPraktikantInntektUnder2G()
         ),
+        grunnlagVersjon = grunnlag.hentVersjon(),
         grunnlag = with(grunnlag) {
             /**
              * EY-1561: Fjerner virkningstidspunkt fra grunnlaget siden vi ikke har kontroll på om virk. har endret seg.
@@ -100,7 +100,7 @@ object BarnepensjonVilkaar {
             val foedselsdatoBarn = soeker.hentFoedselsdato()?.toVilkaarsgrunnlag(SOEKER_FOEDSELSDATO)
             val doedsdatoAvdoed = hentAvdoed().hentDoedsdato()?.toVilkaarsgrunnlag(AVDOED_DOEDSDATO)
 
-            listOfNotNull(foedselsdatoBarn, doedsdatoAvdoed /*, virkningstidspunktBehandling*/)
+            listOfNotNull(foedselsdatoBarn, doedsdatoAvdoed)
         }
     )
 

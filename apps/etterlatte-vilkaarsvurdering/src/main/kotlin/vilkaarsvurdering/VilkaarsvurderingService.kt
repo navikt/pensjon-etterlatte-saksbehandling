@@ -7,7 +7,6 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaar
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
@@ -66,11 +65,21 @@ class VilkaarsvurderingService(
         brukerTokenInfo: BrukerTokenInfo,
         vurdertVilkaar: VurdertVilkaar
     ): Vilkaarsvurdering = tilstandssjekkFoerKjoering(behandlingId, brukerTokenInfo) {
-        if (vilkaarsvurderingRepository.hent(behandlingId)?.resultat != null) {
+        val vilkaarsvurdering = vilkaarsvurderingRepository.hent(behandlingId)
+        val vilkaarTilVurdering =
+            vilkaarsvurdering?.vilkaar?.first { it.hovedvilkaar.type == vurdertVilkaar.hovedvilkaar.type }
+                ?: throw Exception("Fant ikke angitt vilkår (${vurdertVilkaar.vilkaarId})")
+
+        if (vilkaarsvurdering.resultat != null) {
             throw VilkaarsvurderingTilstandException(
                 "Kan ikke endre et vilkår (${vurdertVilkaar.vilkaarId}) på en vilkårsvurdering som har et resultat"
             )
         }
+
+        if (vilkaarTilVurdering.vilkaarErKopiert()) {
+            throw Exception("Kan ikke endre et vilkår (${vurdertVilkaar.vilkaarId}) som er kopiert")
+        }
+
         vilkaarsvurderingRepository.lagreVilkaarResultat(behandlingId, vurdertVilkaar)
     }
 
@@ -139,7 +148,6 @@ class VilkaarsvurderingService(
                             behandlingId = behandlingId,
                             vilkaar = vilkaarFoerstegangsbehandling(
                                 grunnlag,
-                                virkningstidspunkt,
                                 behandling.sakType
                             ),
                             virkningstidspunkt = virkningstidspunkt.dato,
@@ -167,7 +175,7 @@ class VilkaarsvurderingService(
                         forrigeVilkaarsvurdering.vilkaar.kopier()
                     )
 
-                    val ingenVilkaarTilVurdering = vilkaar.all { it.kopiert }
+                    val ingenVilkaarTilVurdering = vilkaar.all { it.vilkaarErKopiert() }
 
                     val vilkaarsvurdering = vilkaarsvurderingRepository.kopierVilkaarsvurdering(
                         nyVilkaarsvurdering = Vilkaarsvurdering(
@@ -224,17 +232,16 @@ class VilkaarsvurderingService(
     ): List<Vilkaar> {
         return (vilkaarForrigeBehandling + vilkaarForRevurdering)
             .groupBy { it.hovedvilkaar.type }
-            .mapValues { (_, values) -> if (values.size > 1) values.filterNot { it.kopiert } else values }
+            .mapValues { (_, values) -> if (values.size > 1) values.filterNot { it.vilkaarErKopiert() } else values }
             .flatMap { it.value }
     }
 
     private fun vilkaarFoerstegangsbehandling(
         grunnlag: Grunnlag,
-        virkningstidspunkt: Virkningstidspunkt,
         sakType: SakType
     ): List<Vilkaar> = when (sakType) {
         SakType.BARNEPENSJON ->
-            BarnepensjonVilkaar.inngangsvilkaar(grunnlag, virkningstidspunkt)
+            BarnepensjonVilkaar.inngangsvilkaar(grunnlag)
         SakType.OMSTILLINGSSTOENAD ->
             OmstillingstoenadVilkaar.inngangsvilkaar(grunnlag)
     }

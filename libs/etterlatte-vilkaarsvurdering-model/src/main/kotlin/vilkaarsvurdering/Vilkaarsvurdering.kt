@@ -20,15 +20,18 @@ data class Vilkaar(
     val hovedvilkaar: Delvilkaar,
     val unntaksvilkaar: List<Delvilkaar> = emptyList(),
     val vurdering: VilkaarVurderingData? = null,
+    val grunnlagVersjon: Long? = null,
     val grunnlag: List<Vilkaarsgrunnlag<out Any?>> = emptyList(),
-    val kopiert: Boolean = false,
+    val kopiertFraVilkaar: UUID? = null,
     val id: UUID = UUID.randomUUID()
-)
+) {
+    fun vilkaarErKopiert() = kopiertFraVilkaar != null
+}
 
 fun List<Vilkaar>.kopier() = this.map {
     it.copy(
         id = UUID.randomUUID(),
-        kopiert = true
+        kopiertFraVilkaar = it.id
     )
 }
 

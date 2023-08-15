@@ -1,9 +1,9 @@
 import { Content, ContentHeader } from '~shared/styled'
 import React, { useEffect } from 'react'
 import { useLocation, useParams } from 'react-router-dom'
-import { hentVilkaarsvurdering, opprettVilkaarsvurdering } from '~shared/api/vilkaarsvurdering'
+import { hentVilkaarsvurdering, opprettVilkaarsvurdering, Vilkaar } from '~shared/api/vilkaarsvurdering'
 import { ManueltVilkaar } from './ManueltVilkaar'
-import { VilkaarBorderTop } from './styled'
+import { VilkaarBorder, VilkaarBorderTop } from './styled'
 import { Resultat } from './Resultat'
 import Spinner from '~shared/Spinner'
 import {
@@ -13,11 +13,13 @@ import {
 } from '~store/reducers/BehandlingReducer'
 import { useAppDispatch } from '~store/Store'
 import { Heading } from '@navikt/ds-react'
-import { HeadingWrapper } from '../soeknadsoversikt/styled'
+import { HeadingWrapper, Innhold } from '../soeknadsoversikt/styled'
 import { hentBehandlesFraStatus } from '~components/behandling/felles/utils'
 import { isFailure, isInitial, isPending, useApiCall } from '~shared/hooks/useApiCall'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { IBehandlingStatus, IBehandlingsType } from '~shared/types/IDetaljertBehandling'
+import { VilkaarsVurderingKnapper } from '~components/behandling/handlinger/vilkaarsvurderingKnapper'
+import { BehandlingHandlingKnapper } from '~components/behandling/handlinger/BehandlingHandlingKnapper'
 
 export const Vilkaarsvurdering = (props: { behandling: IBehandlingReducer }) => {
   const { behandling } = props
@@ -57,6 +59,8 @@ export const Vilkaarsvurdering = (props: { behandling: IBehandlingReducer }) => 
     })
   }
 
+  const harVilkaarTilVurdering = (vilkaar: Vilkaar[]) => vilkaar.some((v) => v.kopiertFraVilkaar == null)
+
   return (
     <Content>
       <ContentHeader>
@@ -70,26 +74,37 @@ export const Vilkaarsvurdering = (props: { behandling: IBehandlingReducer }) => 
       {behandlingId && vilkaarsvurdering && (
         <>
           <VilkaarBorderTop />
-          {vilkaarsvurdering.vilkaar.map((value, index) => (
-            <ManueltVilkaar
-              key={index}
-              vilkaar={value}
+          {vilkaarsvurdering.vilkaar
+            .filter((vilkaar) => vilkaar.kopiertFraVilkaar == null)
+            .map((vilkaar, index) => (
+              <ManueltVilkaar
+                key={index}
+                vilkaar={vilkaar}
+                oppdaterVilkaar={(vilkaarsvurdering) => dispatch(updateVilkaarsvurdering(vilkaarsvurdering))}
+                behandlingId={behandlingId}
+                redigerbar={behandles && !vilkaarsvurdering.resultat && vilkaar.kopiertFraVilkaar == null}
+              />
+            ))}
+
+          {vilkaarsvurdering.vilkaar.filter((vilkaar) => vilkaar.kopiertFraVilkaar == null).length > 0 ? (
+            <Resultat
+              virkningstidspunktDato={behandling.virkningstidspunkt?.dato}
+              sakstype={behandling.sakType}
+              vilkaarsvurdering={vilkaarsvurdering}
               oppdaterVilkaar={(vilkaarsvurdering) => dispatch(updateVilkaarsvurdering(vilkaarsvurdering))}
               behandlingId={behandlingId}
-              redigerbar={behandles && !vilkaarsvurdering.resultat}
+              redigerbar={behandles && harVilkaarTilVurdering(vilkaarsvurdering.vilkaar)}
+              behandlingstype={behandling.behandlingType}
             />
-          ))}
-          {vilkaarsvurdering.vilkaar.length === 0 && <p>Du har ingen vilkår</p>}
-
-          <Resultat
-            virkningstidspunktDato={behandling.virkningstidspunkt?.dato}
-            sakstype={behandling.sakType}
-            vilkaarsvurdering={vilkaarsvurdering}
-            oppdaterVilkaar={(vilkaarsvurdering) => dispatch(updateVilkaarsvurdering(vilkaarsvurdering))}
-            behandlingId={behandlingId}
-            redigerbar={behandles}
-            behandlingstype={behandling.behandlingType}
-          />
+          ) : (
+            <>
+              <Innhold>Ingen vilkår behøver vurdering i denne behandlingen</Innhold>
+              <VilkaarBorder />
+              <BehandlingHandlingKnapper>
+                <VilkaarsVurderingKnapper />
+              </BehandlingHandlingKnapper>
+            </>
+          )}
         </>
       )}
       {isPending(vilkaarsvurderingStatus) && <Spinner visible={true} label={'Henter vilkårsvurdering'} />}

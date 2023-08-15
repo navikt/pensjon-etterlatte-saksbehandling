@@ -35,13 +35,26 @@ export interface FengselsoppholdInfo {
   tilDato: Date
 }
 
+export interface InstitusjonsoppholdInfo {
+  type: 'INSTITUSJONSOPPHOLD'
+  erEtterbetalingMerEnnTreMaaneder: boolean
+  prosent: number | undefined
+  innlagtdato: Date | undefined
+  utskrevetdato: Date | undefined
+}
+
 export interface Navn {
   fornavn: string
   mellomnavn: string | undefined
   etternavn: string
 }
 
-export type RevurderingInfo = SoeskenjusteringInfo | AdopsjonInfo | OmgjoeringAvFarskapInfo | FengselsoppholdInfo
+export type RevurderingInfo =
+  | SoeskenjusteringInfo
+  | AdopsjonInfo
+  | OmgjoeringAvFarskapInfo
+  | FengselsoppholdInfo
+  | InstitusjonsoppholdInfo
 
 export function hentUndertypeFraBehandling<T extends RevurderingInfo>(
   type: T['type'],

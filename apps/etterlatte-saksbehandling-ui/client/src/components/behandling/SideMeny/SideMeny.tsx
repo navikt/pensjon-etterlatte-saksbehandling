@@ -25,6 +25,7 @@ export const SideMeny = (props: { behandling: IDetaljertBehandling; vedtak: Vedt
 
   const behandlingsinfo: IBehandlingInfo = {
     type: behandling.behandlingType,
+    behandlingId: behandling.id,
     sakId: behandling.sakId,
     sakType: behandling.sakType,
     status: behandling.status,

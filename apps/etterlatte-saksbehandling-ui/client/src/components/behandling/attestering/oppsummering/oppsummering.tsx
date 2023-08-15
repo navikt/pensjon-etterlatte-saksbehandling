@@ -12,7 +12,7 @@ type Props = {
   behandlingsInfo: IBehandlingInfo
 }
 
-export const Behandlingsoppsummering: React.FC<Props> = ({ behandlingsInfo, beslutning }) => {
+export const Behandlingsoppsummering = ({ behandlingsInfo, beslutning }: Props) => {
   if (behandlingsInfo.status === IBehandlingStatus.ATTESTERT || beslutning === IBeslutning.godkjenn) {
     return (
       <Innvilget behandlingsInfo={behandlingsInfo}>

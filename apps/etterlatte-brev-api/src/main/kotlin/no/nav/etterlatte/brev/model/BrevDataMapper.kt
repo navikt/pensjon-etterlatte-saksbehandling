@@ -15,7 +15,8 @@ import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_REVURDER
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_REVURDERING_SOESKENJUSTERING
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_REVURDERING_UT_AV_FENGSEL
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_REVURDERING_YRKESSKADE
-import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMS_INNVILGELSE_AUTO
+import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMS_INNVILGELSE_FOERSTEGANGSVEDTAK
+import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMS_INNVILGELSE_FOERSTEGANGSVEDTAK_UTFALL
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMS_OPPHOER_MANUELL
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
@@ -83,7 +84,10 @@ class BrevDataMapper(private val featureToggleService: FeatureToggleService) {
 
         SakType.OMSTILLINGSSTOENAD -> {
             when (val vedtakType = behandling.vedtak.type) {
-                VedtakType.INNVILGELSE -> BrevkodePar(OMS_INNVILGELSE_AUTO)
+                VedtakType.INNVILGELSE -> BrevkodePar(
+                    OMS_INNVILGELSE_FOERSTEGANGSVEDTAK_UTFALL,
+                    OMS_INNVILGELSE_FOERSTEGANGSVEDTAK
+                )
                 VedtakType.AVSLAG -> TODO("Vedtakstype er ikke støttet: $vedtakType")
                 VedtakType.ENDRING -> TODO("Vedtakstype er ikke støttet: $vedtakType")
                 VedtakType.OPPHOER -> TODO("Vedtakstype er ikke støttet: $vedtakType")
@@ -127,7 +131,7 @@ class BrevDataMapper(private val featureToggleService: FeatureToggleService) {
 
         SakType.OMSTILLINGSSTOENAD -> {
             when (val vedtakType = behandling.vedtak.type) {
-                VedtakType.INNVILGELSE -> InnvilgetBrevData.fra(behandling)
+                VedtakType.INNVILGELSE -> FoerstegangsvedtakUtfallDTO.fra(behandling)
                 VedtakType.AVSLAG -> TODO("Vedtakstype er ikke støttet: $vedtakType")
                 VedtakType.ENDRING -> TODO("Vedtakstype er ikke støttet: $vedtakType")
                 VedtakType.OPPHOER -> TODO("Vedtakstype er ikke støttet: $vedtakType")
@@ -138,6 +142,7 @@ class BrevDataMapper(private val featureToggleService: FeatureToggleService) {
     fun brevDataFerdigstilling(behandling: Behandling, innhold: () -> List<Slate.Element>, kode: BrevkodePar) =
         when (kode.ferdigstilling) {
             BARNEPENSJON_REVURDERING_ENDRING -> EndringHovedmalBrevData.fra(behandling, innhold())
+            OMS_INNVILGELSE_FOERSTEGANGSVEDTAK -> InnvilgetBrevDataOMS.fra(behandling, innhold())
             else ->
                 when (behandling.revurderingsaarsak?.redigerbartBrev) {
                     true -> ManueltBrevData(innhold())

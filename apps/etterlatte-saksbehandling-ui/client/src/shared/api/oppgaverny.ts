@@ -65,5 +65,6 @@ export const redigerFristApi = async (args: {
   redigerFristRequest: RedigerFristRequest
 }): Promise<ApiResponse<void>> => apiClient.put(`/nyeoppgaver/${args.oppgaveId}/frist`, { ...args.redigerFristRequest })
 
-export const hentOppgaveForBehandling = async (args: { behandlingId: string }): Promise<ApiResponse<string>> =>
-  apiClient.get(`/nyeoppgaver/${args.behandlingId}/hentsaksbehandler`)
+export const hentOppgaveForBehandlingUnderBehandling = async (args: {
+  behandlingId: string
+}): Promise<ApiResponse<string>> => apiClient.get(`/nyeoppgaver/${args.behandlingId}/hentsaksbehandler`)

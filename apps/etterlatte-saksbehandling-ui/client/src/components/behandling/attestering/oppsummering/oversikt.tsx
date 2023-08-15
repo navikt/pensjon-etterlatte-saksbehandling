@@ -13,8 +13,8 @@ import { tagColors, TagList } from '~shared/Tags'
 import { INasjonalitetsType } from '~components/behandling/fargetags/nasjonalitetsType'
 import { SidebarPanel } from '~components/behandling/SideMeny/SideMeny'
 import { useEffect, useState } from 'react'
-import { isFailure, isInitial, isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
-import { hentOppgaveForBehandling } from '~shared/api/oppgaverny'
+import { isFailure, isInitial, isPending, isPendingOrInitial, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
+import { hentOppgaveForBehandlingUnderBehandling } from '~shared/api/oppgaverny'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 
@@ -27,10 +27,14 @@ export const Oversikt = ({
 }) => {
   const kommentarFraAttestant = behandlingsInfo.attestertLogg?.slice(-1)[0]?.kommentar
   const [saksbehandlerPaaOppgave, setSaksbehandlerPaaOppgave] = useState<string | null>(null)
-  const [oppgaveForBehandlingStatus, requesthentOppgaveForBehandling] = useApiCall(hentOppgaveForBehandling)
+  const [oppgaveForBehandlingStatus, requesthentOppgaveForBehandling] = useApiCall(
+    hentOppgaveForBehandlingUnderBehandling
+  )
   useEffect(() => {
-    requesthentOppgaveForBehandling({ behandlingId: behandlingsInfo.behandlingId }, (response) => {
-      setSaksbehandlerPaaOppgave(response)
+    requesthentOppgaveForBehandling({ behandlingId: behandlingsInfo.behandlingId }, (saksbehandler, statusCode) => {
+      if (statusCode === 200) {
+        setSaksbehandlerPaaOppgave(saksbehandler)
+      }
     })
   }, [])
 
@@ -83,9 +87,7 @@ export const Oversikt = ({
         {isFailure(oppgaveForBehandlingStatus) && (
           <ApiErrorAlert>Kunne ikke hente saksbehandler fra oppgave</ApiErrorAlert>
         )}
-        {(isInitial(oppgaveForBehandlingStatus) || isPending(oppgaveForBehandlingStatus)) && (
-          <Spinner visible={true} label="Henter saksbehandler" />
-        )}
+        {isPendingOrInitial(oppgaveForBehandlingStatus) && <Spinner visible={true} label="Henter saksbehandler" />}
         {isSuccess(oppgaveForBehandlingStatus) && (
           <Tekst>
             {saksbehandlerPaaOppgave ? saksbehandlerPaaOppgave : 'Ingen saksbehandler har tatt denne oppgaven'}

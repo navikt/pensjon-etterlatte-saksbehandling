@@ -14,7 +14,9 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.inTransaction
+import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.OPPGAVEID_CALL_PARAMETER
+import no.nav.etterlatte.libs.common.behandlingsId
 import no.nav.etterlatte.libs.common.kunSaksbehandler
 import no.nav.etterlatte.libs.common.oppgaveId
 import no.nav.etterlatte.libs.common.oppgaveNy.RedigerFristRequest
@@ -44,6 +46,21 @@ internal fun Route.oppgaveRoutesNy(
                         call.respond(
                             oppgaver.await() + gosysOppgaver.await()
                         )
+                    }
+                } else {
+                    call.respond(HttpStatusCode.NotImplemented)
+                }
+            }
+        }
+
+        get("{$BEHANDLINGSID_CALL_PARAMETER}/hentsaksbehandler") {
+            kunSaksbehandler {
+                if (kanBrukeNyOppgaveliste) {
+                    val saksbehandler = service.hentSaksbehandlerForBehandling(behandlingsId)
+                    if (saksbehandler != null) {
+                        call.respond(saksbehandler)
+                    } else {
+                        call.respond(HttpStatusCode.NoContent)
                     }
                 } else {
                     call.respond(HttpStatusCode.NotImplemented)

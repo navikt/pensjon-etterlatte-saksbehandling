@@ -91,7 +91,8 @@ enum class OppgaveType {
 }
 
 data class SaksbehandlerEndringDto(
-    val saksbehandler: String
+    val saksbehandler: String,
+    val versjon: Long? = null
 )
 
 data class RedigerFristRequest(

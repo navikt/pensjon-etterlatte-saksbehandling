@@ -365,6 +365,15 @@ class GosysOppgaveKlientTest : GosysOppgaveKlient {
     ): GosysOppgaver {
         return GosysOppgaver(0, emptyList())
     }
+
+    override suspend fun tilordneOppgaveTilSaksbehandler(
+        oppgaveId: String,
+        oppgaveVersjon: Long,
+        tilordnes: String,
+        brukerTokenInfo: BrukerTokenInfo
+    ) {
+        // NO-OP
+    }
 }
 
 class Norg2KlientTest : Norg2Klient {

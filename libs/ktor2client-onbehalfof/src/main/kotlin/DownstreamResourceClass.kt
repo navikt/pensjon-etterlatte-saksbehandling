@@ -9,6 +9,7 @@ import io.ktor.client.call.body
 import io.ktor.client.request.delete
 import io.ktor.client.request.get
 import io.ktor.client.request.header
+import io.ktor.client.request.patch
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
@@ -83,6 +84,21 @@ class DownstreamResourceClient(
             }
     }
 
+    suspend fun patch(
+        resource: Resource,
+        brukerTokenInfo: BrukerTokenInfo,
+        patchBody: String
+    ): Result<Resource, ThrowableErrorMessage> {
+        val scopes = listOf("api://${resource.clientId}/.default")
+        return hentTokenFraAD(brukerTokenInfo, scopes)
+            .andThen { oboAccessToken ->
+                patchToDownstreamApi(resource, oboAccessToken, patchBody)
+            }
+            .andThen { response ->
+                Ok(resource.addResponse(response))
+            }
+    }
+
     private suspend fun fetchFromDownstreamApi(
         resource: Resource,
         oboAccessToken: AccessToken
@@ -149,6 +165,30 @@ class DownstreamResourceClient(
                 header(HttpHeaders.Authorization, "Bearer ${oboAccessToken.accessToken}")
                 contentType(ContentType.Application.Json)
                 setBody(postBody)
+            }
+        }
+            .mapCatching { response ->
+                response.checkForError()
+            }
+            .fold(
+                onSuccess = { result ->
+                    Ok(result.body())
+                },
+                onFailure = { error ->
+                    error.toErr(resource.url)
+                }
+            )
+
+    private suspend fun patchToDownstreamApi(
+        resource: Resource,
+        oboAccessToken: AccessToken,
+        patchBody: String
+    ): Result<JsonNode, ThrowableErrorMessage> =
+        runCatching {
+            httpClient.patch(resource.url) {
+                header(HttpHeaders.Authorization, "Bearer ${oboAccessToken.accessToken}")
+                contentType(ContentType.Application.Json)
+                setBody(patchBody)
             }
         }
             .mapCatching { response ->

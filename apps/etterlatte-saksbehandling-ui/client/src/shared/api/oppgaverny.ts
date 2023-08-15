@@ -18,6 +18,7 @@ export interface OppgaveDTOny {
   // GOSYS-spesifikt
   beskrivelse: string | null
   gjelder: string | null
+  versjon: string | null
 }
 
 export type Saktype = 'BARNEPENSJON' | 'OMSTILLINGSSTOENAD'
@@ -34,19 +35,26 @@ export type Oppgavetype =
   | 'GOSYS'
 
 export const erOppgaveRedigerbar = (status: Oppgavestatus, type: string): boolean =>
-  ['NY', 'UNDER_BEHANDLING'].includes(status) && !['GOSYS'].includes(type)
+  ['NY', 'UNDER_BEHANDLING'].includes(status) && type != null
 
 export const hentNyeOppgaver = async (): Promise<ApiResponse<OppgaveDTOny[]>> => apiClient.get('/nyeoppgaver')
 
 export interface SaksbehandlerEndringDto {
   saksbehandler: string
+  versjon: string | null
 }
 
 export const tildelSaksbehandlerApi = async (args: {
   oppgaveId: string
+  type: string
   nysaksbehandler: SaksbehandlerEndringDto
-}): Promise<ApiResponse<void>> =>
-  apiClient.post(`/nyeoppgaver/${args.oppgaveId}/tildel-saksbehandler`, { ...args.nysaksbehandler })
+}): Promise<ApiResponse<void>> => {
+  if (args.type == 'GOSYS') {
+    return apiClient.post(`/nyeoppgaver/gosys/${args.oppgaveId}/tildel-saksbehandler`, { ...args.nysaksbehandler })
+  } else {
+    return apiClient.post(`/nyeoppgaver/${args.oppgaveId}/tildel-saksbehandler`, { ...args.nysaksbehandler })
+  }
+}
 
 export const byttSaksbehandlerApi = async (args: {
   oppgaveId: string

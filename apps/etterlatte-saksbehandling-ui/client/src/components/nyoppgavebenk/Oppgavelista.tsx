@@ -87,6 +87,7 @@ export const Oppgavelista = (props: {
                     referanse,
                     beskrivelse,
                     gjelder,
+                    versjon,
                   }) => (
                     <Table.Row key={id}>
                       <Table.HeaderCell>{formaterStringDato(opprettet)}</Table.HeaderCell>
@@ -115,10 +116,16 @@ export const Oppgavelista = (props: {
                             oppgaveId={id}
                             sakId={sakId}
                             type={type}
+                            versjon={versjon}
                             hentOppgaver={hentOppgaver}
                           />
                         ) : (
-                          <TildelSaksbehandler oppgaveId={id} hentOppgaver={hentOppgaver} />
+                          <TildelSaksbehandler
+                            oppgaveId={id}
+                            type={type}
+                            versjon={versjon}
+                            hentOppgaver={hentOppgaver}
+                          />
                         )}
                       </Table.DataCell>
                       <Table.DataCell>

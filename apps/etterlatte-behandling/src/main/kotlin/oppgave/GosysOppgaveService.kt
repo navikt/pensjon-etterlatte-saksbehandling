@@ -12,6 +12,12 @@ import java.time.LocalTime
 
 interface GosysOppgaveService {
     suspend fun hentOppgaver(brukerTokenInfo: BrukerTokenInfo): List<GosysOppgave>
+    suspend fun tilordneOppgaveTilSaksbehandler(
+        oppgaveId: String,
+        oppgaveVersjon: Long,
+        tilordnes: String,
+        brukerTokenInfo: BrukerTokenInfo
+    )
 }
 
 class GosysOppgaveServiceImpl(
@@ -38,6 +44,15 @@ class GosysOppgaveServiceImpl(
         }
 
         return gosysOppgaver.oppgaver.map { it.fraGosysOppgaveTilNy(fnrByAktoerId) }
+    }
+
+    override suspend fun tilordneOppgaveTilSaksbehandler(
+        oppgaveId: String,
+        oppgaveVersjon: Long,
+        tilordnes: String,
+        brukerTokenInfo: BrukerTokenInfo
+    ) {
+        gosysOppgaveKlient.tilordneOppgaveTilSaksbehandler(oppgaveId, oppgaveVersjon, tilordnes, brukerTokenInfo)
     }
 
     companion object {

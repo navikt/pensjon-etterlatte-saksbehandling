@@ -35,6 +35,12 @@ interface GosysOppgaveKlient {
         enhetsnr: String? = null,
         brukerTokenInfo: BrukerTokenInfo
     ): GosysOppgaver
+    suspend fun tilordneOppgaveTilSaksbehandler(
+        oppgaveId: String,
+        oppgaveVersjon: Long,
+        tilordnes: String,
+        brukerTokenInfo: BrukerTokenInfo
+    )
 }
 
 class GosysOppgaveKlientImpl(config: Config, httpClient: HttpClient) : GosysOppgaveKlient {
@@ -74,6 +80,39 @@ class GosysOppgaveKlientImpl(config: Config, httpClient: HttpClient) : GosysOppg
                 )
         } catch (e: Exception) {
             logger.error("Noe feilet mot Gosys [ident=${brukerTokenInfo.ident()}]", e)
+            throw e
+        }
+    }
+
+    override suspend fun tilordneOppgaveTilSaksbehandler(
+        oppgaveId: String,
+        oppgaveVersjon: Long,
+        tilordnes: String,
+        brukerTokenInfo: BrukerTokenInfo
+    ) {
+        try {
+            logger.info("Tilordner oppgave $oppgaveId til saksbehandler $tilordnes")
+
+            return downstreamResourceClient
+                .patch(
+                    resource = Resource(
+                        clientId = clientId,
+                        url = "$resourceUrl/api/v1/oppgaver/$oppgaveId"
+                    ),
+                    brukerTokenInfo = brukerTokenInfo,
+                    patchBody = """
+                        {
+                          "versjon": "$oppgaveVersjon",
+                          "tilordnetRessurs": "$tilordnes"
+                        }
+                    """.trimIndent()
+                )
+                .mapBoth(
+                    success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
+                    failure = { errorResponse -> throw errorResponse }
+                )
+        } catch (e: Exception) {
+            logger.error("Noe feilet mot Gosys, ident=${brukerTokenInfo.ident()}]", e)
             throw e
         }
     }

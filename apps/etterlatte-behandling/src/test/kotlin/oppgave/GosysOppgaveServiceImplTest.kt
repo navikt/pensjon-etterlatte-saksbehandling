@@ -86,4 +86,17 @@ class GosysOppgaveServiceImplTest {
         resultat.filter { it.fnr == "01010812345" } shouldHaveSize 2
         resultat.filter { it.fnr == "29048012345" } shouldHaveSize 1
     }
+
+    @Test
+    fun `kalle gosys-klient med riktige params`() {
+        coEvery {
+            gosysOppgaveKlient.tilordneOppgaveTilSaksbehandler(
+                oppgaveId = "123", oppgaveVersjon = 2L, tilordnes = "A012345", brukerTokenInfo
+            )
+        } returns Unit
+
+        runBlocking {
+            service.tilordneOppgaveTilSaksbehandler(oppgaveId = "123", oppgaveVersjon = 2L, "A012345", brukerTokenInfo)
+        }
+    }
 }

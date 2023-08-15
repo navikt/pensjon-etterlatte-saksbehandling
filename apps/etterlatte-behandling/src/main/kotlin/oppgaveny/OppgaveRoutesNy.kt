@@ -117,5 +117,23 @@ internal fun Route.oppgaveRoutesNy(
                 }
             }
         }
+
+        route("/gosys/{gosysOppgaveId}") {
+            post("tildel-saksbehandler") {
+                if (kanBrukeNyOppgaveliste) {
+                    val saksbehandlerEndringDto = call.receive<SaksbehandlerEndringDto>()
+                    val gosysOppgaveId = call.parameters["gosysOppgaveId"]!!
+                    gosysOppgaveService.tilordneOppgaveTilSaksbehandler(
+                        gosysOppgaveId,
+                        saksbehandlerEndringDto.versjon!!,
+                        saksbehandlerEndringDto.saksbehandler,
+                        brukerTokenInfo
+                    )
+                    call.respond(HttpStatusCode.OK)
+                } else {
+                    call.respond(HttpStatusCode.NotImplemented)
+                }
+            }
+        }
     }
 }

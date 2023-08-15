@@ -7,12 +7,21 @@ import { PersonIcon } from '@navikt/aksel-icons'
 import { Alert } from '@navikt/ds-react'
 import { useEffect } from 'react'
 
-export const TildelSaksbehandler = (props: { oppgaveId: string; hentOppgaver: () => void }) => {
-  const { oppgaveId, hentOppgaver } = props
+export const TildelSaksbehandler = (props: {
+  oppgaveId: string
+  type: string
+  versjon: string | null
+  hentOppgaver: () => void
+}) => {
+  const { oppgaveId, type, versjon, hentOppgaver } = props
   const user = useAppSelector((state) => state.saksbehandlerReducer.saksbehandler)
   const [tildelSaksbehandlerSvar, tildelSaksbehandler] = useApiCall(tildelSaksbehandlerApi)
   const tildelSaksbehandlerWrapper = () => {
-    tildelSaksbehandler({ oppgaveId: oppgaveId, nysaksbehandler: { saksbehandler: user.ident } })
+    tildelSaksbehandler({
+      oppgaveId: oppgaveId,
+      type: type,
+      nysaksbehandler: { saksbehandler: user.ident, versjon: versjon },
+    })
   }
 
   useEffect(() => {

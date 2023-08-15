@@ -19,10 +19,11 @@ export const RedigerSaksbehandler = (props: {
   sakId: number
   status: Oppgavestatus
   type: string
+  versjon: string | null
   hentOppgaver: () => void
 }) => {
   const [modalIsOpen, setModalIsOpen] = useState(false)
-  const { saksbehandler, oppgaveId, sakId, status, type, hentOppgaver } = props
+  const { saksbehandler, oppgaveId, sakId, status, type, versjon, hentOppgaver } = props
   const user = useAppSelector((state) => state.saksbehandlerReducer.saksbehandler)
   const [fjernSaksbehandlerSvar, fjernSaksbehandler] = useApiCall(fjernSaksbehandlerApi)
   const [byttSaksbehandlerSvar, byttSaksbehandler] = useApiCall(byttSaksbehandlerApi)
@@ -96,7 +97,7 @@ export const RedigerSaksbehandler = (props: {
                 onYesClick={() =>
                   byttSaksbehandler({
                     oppgaveId: oppgaveId,
-                    nysaksbehandler: { saksbehandler: user.ident },
+                    nysaksbehandler: { saksbehandler: user.ident, versjon: versjon },
                   })
                 }
                 setModalisOpen={setModalIsOpen}

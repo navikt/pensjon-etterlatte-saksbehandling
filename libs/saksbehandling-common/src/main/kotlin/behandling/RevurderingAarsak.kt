@@ -80,6 +80,7 @@ enum class RevurderingAarsak(
     UT_AV_FENGSEL(SAKTYPE_BP, KunIDev, IkkeOpphoerSkalSendeBrev, redigerbartBrev = true),
     NY_SOEKNAD(SAKTYPE_BP_OMS, DevOgProd, IkkeOpphoerSkalSendeBrev),
     ANNEN(SAKTYPE_BP_OMS, KunIDev, IkkeOpphoerSkalSendeBrev),
+    INSTITUSJONSOPPHOLD(SAKTYPE_BP, KunIDev, IkkeOpphoerSkalSendeBrev, redigerbartBrev = true),
     YRKESSKADE(SAKTYPE_BP, KunIDev, IkkeOpphoerSkalSendeBrev, redigerbartBrev = true);
 
     fun kanBrukesIMiljo(): Boolean = when (clusternavn()) {

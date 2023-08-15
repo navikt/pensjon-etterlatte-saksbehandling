@@ -50,4 +50,12 @@ sealed class RevurderingInfo {
         val dinForelder: String,
         val yrkesskadeEllerYrkessykdom: String
     ) : RevurderingInfo()
+
+    @JsonTypeName("INSTITUSJONSOPPHOLD")
+    data class Institusjonsopphold(
+        val erEtterbetalingMerEnnTreMaaneder: Boolean,
+        val prosent: Int?,
+        val innlagtdato: LocalDate?,
+        val utskrevetdato: LocalDate?
+    ) : RevurderingInfo()
 }

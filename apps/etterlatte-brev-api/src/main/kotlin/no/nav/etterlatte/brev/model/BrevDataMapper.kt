@@ -11,6 +11,7 @@ import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_REVURDER
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_REVURDERING_ENDRING
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_REVURDERING_FENGSELSOPPHOLD
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_REVURDERING_HAR_STANSET
+import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_REVURDERING_INSTITUSJONSOPPHOLD
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_REVURDERING_OMGJOERING_AV_FARSKAP
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_REVURDERING_OPPHOER
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_REVURDERING_SOESKENJUSTERING
@@ -53,10 +54,14 @@ class BrevDataMapper(private val featureToggleService: FeatureToggleService) {
                 }
 
                 VedtakType.ENDRING -> when (behandling.revurderingsaarsak) {
-                    RevurderingAarsak.SOESKENJUSTERING ->
-                        BrevkodePar(BARNEPENSJON_REVURDERING_SOESKENJUSTERING)
+                    RevurderingAarsak.SOESKENJUSTERING -> BrevkodePar(BARNEPENSJON_REVURDERING_SOESKENJUSTERING)
+                    RevurderingAarsak.INSTITUSJONSOPPHOLD -> BrevkodePar(
+                        BARNEPENSJON_REVURDERING_INSTITUSJONSOPPHOLD,
+                        BARNEPENSJON_REVURDERING_ENDRING
+                    )
                     RevurderingAarsak.YRKESSKADE ->
                         BrevkodePar(BARNEPENSJON_REVURDERING_YRKESSKADE, BARNEPENSJON_REVURDERING_ENDRING)
+
                     else -> TODO("Revurderingsbrev for ${behandling.revurderingsaarsak} er ikke støttet")
                 }
 
@@ -108,6 +113,7 @@ class BrevDataMapper(private val featureToggleService: FeatureToggleService) {
                     RevurderingAarsak.SOESKENJUSTERING -> SoeskenjusteringRevurderingBrevdata.fra(behandling)
                     RevurderingAarsak.FENGSELSOPPHOLD -> FengselsoppholdBrevdata.fra(behandling)
                     RevurderingAarsak.UT_AV_FENGSEL -> UtAvFengselBrevdata.fra(behandling)
+                    RevurderingAarsak.INSTITUSJONSOPPHOLD -> InstitusjonsoppholdRevurderingBrevdata.fra(behandling)
                     RevurderingAarsak.YRKESSKADE -> YrkesskadeRevurderingBrevdata.fra(behandling)
                     else -> TODO("Revurderingsbrev for ${behandling.revurderingsaarsak} er ikke støttet")
                 }

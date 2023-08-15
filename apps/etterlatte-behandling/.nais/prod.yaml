@@ -103,7 +103,7 @@ spec:
     - name: AZURE_SCOPE_SKJERMEDE_PIP
       value: api://prod-gcp.nom.skjermede-personer-pip/.default
     - name: KAN_BRUKE_NY_OPPGAVELISTE
-      value: 'false'
+      value: 'true'
     - name: OPPGAVE_CLIENT_ID
       value: prod-fss.oppgavehandtering.oppgave
     - name: OPPGAVE_URL

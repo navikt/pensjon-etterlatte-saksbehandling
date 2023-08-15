@@ -269,8 +269,7 @@ internal class VilkaarsvurderingRepositoryTest {
             grunnlagVersjon = 1L,
             virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt().dato,
             vilkaar = BarnepensjonVilkaar.inngangsvilkaar(
-                grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag(),
-                virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt()
+                grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
             )
         )
 

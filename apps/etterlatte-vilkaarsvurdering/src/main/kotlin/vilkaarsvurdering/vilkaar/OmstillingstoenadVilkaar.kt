@@ -250,6 +250,7 @@ object OmstillingstoenadVilkaar {
             aktivitetEtter6MaanederGjenlevendeOver55ogLavInntekt(),
             aktivitetEtter6MaanederGjenlevendeHarBarnUnder1Aar()
         ),
+        grunnlagVersjon = grunnlag.hentVersjon(),
         grunnlag = with(grunnlag) {
             val doedsdatoAvdoedGrunnlag = hentAvdoed().hentDoedsdato()?.toVilkaarsgrunnlag(
                 VilkaarOpplysningType.AVDOED_DOEDSDATO

@@ -4,6 +4,7 @@ import { SakType } from '~shared/types/sak'
 
 export interface IBehandlingInfo {
   type: IBehandlingsType
+  behandlingId: string
   sakId: number
   sakType: SakType
   status: IBehandlingStatus

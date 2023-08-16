@@ -3,18 +3,22 @@ import { ApiError, ApiResponse } from '../api/apiClient'
 
 export function useApiCall<T, U>(
   fn: (req: T) => Promise<ApiResponse<U>>
-): [Result<U>, (args: T, onSuccess?: (result: U) => void, onError?: (error: ApiError) => void) => void, () => void] {
+): [
+  Result<U>,
+  (args: T, onSuccess?: (result: U, statusCode: number) => void, onError?: (error: ApiError) => void) => void,
+  () => void,
+] {
   const [apiResult, setApiResult] = useState<Result<U>>(initial)
 
   const callFn = React.useCallback(
-    async (args: T, onSuccess?: (result: U) => void, onError?: (error: any) => void) => {
+    async (args: T, onSuccess?: (result: U, statusCode: number) => void, onError?: (error: any) => void) => {
       if (!isPending(apiResult)) {
         setApiResult(pending)
 
         const res = await fn(args)
         if (res.status === 'ok') {
           setApiResult(success(res.data))
-          onSuccess?.(res.data)
+          onSuccess?.(res.data, res.statusCode)
         } else {
           setApiResult(error(res))
           onError?.(res)

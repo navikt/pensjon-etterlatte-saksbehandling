@@ -4,6 +4,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
+import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -53,6 +54,7 @@ import org.testcontainers.junit.jupiter.Container
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
+import java.util.Collections.emptyList
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -109,6 +111,7 @@ internal class VilkaarsvurderingServiceTest {
 
     @AfterEach
     fun afterEach() {
+        clearAllMocks()
         cleanDatabase()
     }
 
@@ -482,6 +485,94 @@ internal class VilkaarsvurderingServiceTest {
         oppdatertVilkaarsvurdering.toDto().isYrkesskade() shouldBe true
     }
 
+    @Test
+    fun `revurdering kopierer forrige vilkaarsvurdering og overskriver kun vilkaar som er aktuelle for revurdering`() {
+        val grunnlag: Grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
+        val revurderingId = UUID.randomUUID()
+
+        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
+        coEvery { behandlingKlient.hentSisteIverksatteBehandling(any(), any()) } returns SisteIverksatteBehandling(uuid)
+        coEvery { behandlingKlient.settBehandlingStatusVilkaarsvurdert(any(), any()) } returns true
+        coEvery { behandlingKlient.hentBehandling(revurderingId, any()) } returns behandlingMock(
+            revurderingId = revurderingId,
+            sakType_ = SakType.BARNEPENSJON,
+            behandlingType_ = BehandlingType.REVURDERING,
+            revurderingAarsak = RevurderingAarsak.DOEDSFALL
+        )
+
+        runBlocking {
+            service.opprettVilkaarsvurdering(uuid, brukerTokenInfo)
+            service.oppdaterTotalVurdering(
+                uuid,
+                brukerTokenInfo,
+                VilkaarsvurderingResultat(
+                    utfall = VilkaarsvurderingUtfall.OPPFYLT,
+                    kommentar = "kommentar",
+                    tidspunkt = LocalDateTime.now(),
+                    saksbehandler = "saksbehandler"
+                )
+            )
+        }
+
+        val revurderingVilkaarsvurdering =
+            runBlocking { service.opprettVilkaarsvurdering(revurderingId, brukerTokenInfo) }
+        val vilkaarSomMaaVurderes = revurderingVilkaarsvurdering.vilkaar.filterNot { it.vilkaarErKopiert() }
+
+        vilkaarSomMaaVurderes.size shouldBe 1
+        vilkaarSomMaaVurderes.first().let {
+            it.hovedvilkaar.type shouldBe VilkaarType.BP_FORMAAL
+            it.vurdering shouldBe null
+        }
+        revurderingVilkaarsvurdering.resultat shouldBe null
+
+        coVerify(exactly = 2) { grunnlagKlient.hentGrunnlag(any(), any()) }
+        coVerify(exactly = 1) { behandlingKlient.hentSisteIverksatteBehandling(any(), brukerTokenInfo) }
+        coVerify(exactly = 3) { behandlingKlient.hentBehandling(any(), brukerTokenInfo) }
+        coVerify(exactly = 1) { behandlingKlient.settBehandlingStatusVilkaarsvurdert(uuid, brukerTokenInfo) }
+    }
+
+    @Test
+    fun `revurdering kopierer forrige vilkaarsvurdering og lar resultat gjelde dersom ingen vilkaar til vurdering`() {
+        val grunnlag: Grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
+        val revurderingId = UUID.randomUUID()
+
+        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
+        coEvery { behandlingKlient.hentSisteIverksatteBehandling(any(), any()) } returns SisteIverksatteBehandling(uuid)
+        coEvery { behandlingKlient.settBehandlingStatusVilkaarsvurdert(any(), any()) } returns true
+        coEvery { behandlingKlient.hentBehandling(revurderingId, any()) } returns behandlingMock(
+            revurderingId = revurderingId,
+            sakType_ = SakType.BARNEPENSJON,
+            behandlingType_ = BehandlingType.REVURDERING,
+            revurderingAarsak = RevurderingAarsak.REGULERING
+        )
+
+        runBlocking {
+            service.opprettVilkaarsvurdering(uuid, brukerTokenInfo)
+            service.oppdaterTotalVurdering(
+                uuid,
+                brukerTokenInfo,
+                VilkaarsvurderingResultat(
+                    utfall = VilkaarsvurderingUtfall.OPPFYLT,
+                    kommentar = "kommentar",
+                    tidspunkt = LocalDateTime.now(),
+                    saksbehandler = "saksbehandler"
+                )
+            )
+        }
+
+        val revurderingVilkaarsvurdering =
+            runBlocking { service.opprettVilkaarsvurdering(revurderingId, brukerTokenInfo) }
+        val vilkaarSomMaaVurderes = revurderingVilkaarsvurdering.vilkaar.filterNot { it.vilkaarErKopiert() }
+
+        vilkaarSomMaaVurderes.size shouldBe 0
+        revurderingVilkaarsvurdering.resultat shouldNotBe null
+
+        coVerify(exactly = 2) { grunnlagKlient.hentGrunnlag(any(), any()) }
+        coVerify(exactly = 1) { behandlingKlient.hentSisteIverksatteBehandling(any(), brukerTokenInfo) }
+        coVerify(exactly = 3) { behandlingKlient.hentBehandling(any(), brukerTokenInfo) }
+        coVerify(exactly = 1) { behandlingKlient.settBehandlingStatusVilkaarsvurdert(revurderingId, brukerTokenInfo) }
+    }
+
     private fun assertIsSimilar(v1: Vilkaarsvurdering, v2: Vilkaarsvurdering) {
         Assertions.assertEquals(v1.resultat, v2.resultat)
         Assertions.assertEquals(v1.virkningstidspunkt, v2.virkningstidspunkt)
@@ -499,6 +590,22 @@ internal class VilkaarsvurderingServiceTest {
     private suspend fun opprettVilkaarsvurdering(): Vilkaarsvurdering {
         return service.opprettVilkaarsvurdering(uuid, brukerTokenInfo)
     }
+
+    private fun behandlingMock(
+        revurderingId: UUID,
+        sakType_: SakType,
+        behandlingType_: BehandlingType,
+        revurderingAarsak: RevurderingAarsak
+    ): DetaljertBehandling =
+        mockk {
+            every { id } returns revurderingId
+            every { sak } returns 1L
+            every { sakType } returns sakType_
+            every { behandlingType } returns behandlingType_
+            every { soeker } returns "10095512345"
+            every { virkningstidspunkt } returns VirkningstidspunktTestData.virkningstidsunkt()
+            every { revurderingsaarsak } returns revurderingAarsak
+        }
 
     private fun vilkaarsVurderingData() =
         VilkaarVurderingData("en kommentar", Tidspunkt.now().toLocalDatetimeUTC(), "saksbehandler")

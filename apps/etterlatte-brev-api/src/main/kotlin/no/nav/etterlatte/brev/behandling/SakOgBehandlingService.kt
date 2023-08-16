@@ -161,7 +161,8 @@ class SakOgBehandlingService(
                 datoTOM = it.periode.tom?.atEndOfMonth(),
                 inntekt = Kroner(it.aarsinntekt - it.fratrekkInnAar),
                 ytelseFoerAvkorting = Kroner(it.ytelseFoerAvkorting),
-                utbetaltBeloep = Kroner(it.ytelseEtterAvkorting)
+                utbetaltBeloep = Kroner(it.ytelseEtterAvkorting),
+                trygdetid = it.trygdetid
             )
         }
 

@@ -46,7 +46,7 @@ data class InnvilgetBrevDataOMS(
                     beregningsperioder = behandling.avkortingsinfo.beregningsperioder.map {
                         NyBeregningsperiode(
                             inntekt = it.inntekt,
-                            trygdetid = 1, // TODO: Få lagt til denne på avkorting
+                            trygdetid = it.trygdetid,
                             stoenadFoerReduksjon = it.ytelseFoerAvkorting,
                             utbetaltBeloep = it.utbetaltBeloep
                         )

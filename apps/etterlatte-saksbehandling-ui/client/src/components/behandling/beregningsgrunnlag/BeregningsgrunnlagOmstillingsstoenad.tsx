@@ -34,7 +34,6 @@ const BeregningsgrunnlagOmstillingsstoenad = (props: { behandling: IBehandlingRe
   }
 
   useEffect(() => {
-    console.log('bah')
     getVilkaarsvurdering(behandling.id, (vurdering) => {
       setYrkesskadeTrygdetid(vurdering.isYrkesskade)
     })
@@ -52,7 +51,7 @@ const BeregningsgrunnlagOmstillingsstoenad = (props: { behandling: IBehandlingRe
           <FastTrygdetid />
         ))}
       <Border />
-      {isFailure(vilkaarsvurdering) && <ApiErrorAlert>Kunne ikke hente vilkaarsvurdering</ApiErrorAlert>}
+      {isFailure(vilkaarsvurdering) && <ApiErrorAlert>Kunne ikke hente vilkårsvurdering</ApiErrorAlert>}
       {behandles ? (
         <BehandlingHandlingKnapper>
           <Button variant="primary" size="medium" onClick={oppdaterBeregning}>

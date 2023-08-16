@@ -14,7 +14,7 @@ data class InnvilgetBrevData(
     companion object {
         fun fra(behandling: Behandling): InnvilgetBrevData =
             InnvilgetBrevData(
-                utbetalingsinfo = behandling.utbetalingsinfo!!,
+                utbetalingsinfo = behandling.utbetalingsinfo,
                 avdoed = behandling.persongalleri.avdoed,
                 avkortingsinfo = behandling.avkortingsinfo
             )
@@ -32,7 +32,7 @@ data class InnvilgetBrevDataNy(
     companion object {
         fun fra(behandling: Behandling): InnvilgetBrevDataNy =
             InnvilgetBrevDataNy(
-                utbetalingsinfo = behandling.utbetalingsinfo!!,
+                utbetalingsinfo = behandling.utbetalingsinfo,
                 avdoed = behandling.persongalleri.avdoed,
                 avkortingsinfo = behandling.avkortingsinfo,
                 etterbetalingDTO = null,

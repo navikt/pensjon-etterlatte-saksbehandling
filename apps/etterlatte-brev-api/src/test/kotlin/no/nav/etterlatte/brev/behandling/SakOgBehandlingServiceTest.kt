@@ -13,6 +13,7 @@ import no.nav.etterlatte.brev.behandlingklient.BehandlingKlient
 import no.nav.etterlatte.brev.beregning.BeregningKlient
 import no.nav.etterlatte.brev.grunnlag.GrunnlagKlient
 import no.nav.etterlatte.brev.model.Spraak
+import no.nav.etterlatte.brev.trygdetid.TrygdetidKlient
 import no.nav.etterlatte.brev.vedtak.VedtaksvurderingKlient
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.beregning.BeregningDTO
@@ -48,9 +49,16 @@ internal class SakOgBehandlingServiceTest {
     private val grunnlagKlient = mockk<GrunnlagKlient>()
     private val beregningKlient = mockk<BeregningKlient>()
     private val behandlingKlient = mockk<BehandlingKlient>()
+    private val trygdetidKlient = mockk<TrygdetidKlient>()
 
     private val service =
-        SakOgBehandlingService(vedtaksvurderingKlient, grunnlagKlient, beregningKlient, behandlingKlient)
+        SakOgBehandlingService(
+            vedtaksvurderingKlient,
+            grunnlagKlient,
+            beregningKlient,
+            behandlingKlient,
+            trygdetidKlient
+        )
 
     @BeforeEach
     fun before() {

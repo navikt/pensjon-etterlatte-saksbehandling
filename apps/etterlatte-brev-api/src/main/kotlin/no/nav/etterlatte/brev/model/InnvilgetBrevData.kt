@@ -5,7 +5,6 @@ import no.nav.etterlatte.brev.behandling.Avkortingsinfo
 import no.nav.etterlatte.brev.behandling.Behandling
 import no.nav.etterlatte.brev.behandling.Beregningsinfo
 import no.nav.etterlatte.brev.behandling.NyBeregningsperiode
-import no.nav.etterlatte.brev.behandling.Trygdetidsperiode
 import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
 import no.nav.pensjon.brevbaker.api.model.Kroner
 import java.time.LocalDate
@@ -46,20 +45,13 @@ data class InnvilgetBrevDataOMS(
                     grunnbeloep = behandling.avkortingsinfo!!.grunnbeloep,
                     beregningsperioder = behandling.avkortingsinfo.beregningsperioder.map {
                         NyBeregningsperiode(
-                            inntekt = Kroner(650000),
+                            inntekt = it.inntekt,
                             trygdetid = 1, // TODO: Få lagt til denne på avkorting
                             stoenadFoerReduksjon = it.ytelseFoerAvkorting,
                             utbetaltBeloep = it.utbetaltBeloep
                         )
                     },
-                    trygdetidsperioder = behandling.utbetalingsinfo!!.beregningsperioder.map {
-                        Trygdetidsperiode(
-                            datoFOM = it.datoFOM,
-                            datoTOM = it.datoTOM,
-                            land = "Norge", // TODO: Hent land
-                            opptjeningsperiode = it.trygdetid.toString()
-                        )
-                    }
+                    trygdetidsperioder = behandling.trygdetid!!
                 ),
                 innhold = innhold
             )
@@ -76,7 +68,7 @@ data class FoerstegangsvedtakUtfallDTO(
             FoerstegangsvedtakUtfallDTO(
                 virkningsdato = behandling.virkningsdato!!.atDay(1),
                 avdoed = behandling.persongalleri.avdoed,
-                utbetalingsbeloep = behandling.utbetalingsinfo!!.beloep
+                utbetalingsbeloep = behandling.avkortingsinfo!!.beregningsperioder.first().utbetaltBeloep
             )
     }
 }

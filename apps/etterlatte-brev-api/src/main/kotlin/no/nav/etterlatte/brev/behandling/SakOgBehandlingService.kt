@@ -6,6 +6,7 @@ import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.brev.behandlingklient.BehandlingKlient
 import no.nav.etterlatte.brev.beregning.BeregningKlient
 import no.nav.etterlatte.brev.grunnlag.GrunnlagKlient
+import no.nav.etterlatte.brev.trygdetid.TrygdetidKlient
 import no.nav.etterlatte.brev.vedtak.VedtaksvurderingKlient
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
@@ -22,7 +23,8 @@ class SakOgBehandlingService(
     private val vedtaksvurderingKlient: VedtaksvurderingKlient,
     private val grunnlagKlient: GrunnlagKlient,
     private val beregningKlient: BeregningKlient,
-    private val behandlingKlient: BehandlingKlient
+    private val behandlingKlient: BehandlingKlient,
+    private val trygdetidKlient: TrygdetidKlient
 ) {
 
     suspend fun hentSak(sakId: Long, bruker: BrukerTokenInfo) =
@@ -101,7 +103,13 @@ class SakOgBehandlingService(
             revurderingInfo = vedtak.behandling.revurderingInfo,
             virkningsdato = vedtak.virkningstidspunkt,
             innvilgelsesdato = datoInnvilgelse,
-            adopsjonsdato = LocalDate.now() // TODO: Denne må vi hente anten frå PDL eller brukarinput
+            adopsjonsdato = LocalDate.now(), // TODO: Denne må vi hente anten frå PDL eller brukarinput
+            trygdetid = finnTrygdetid(
+                vedtak.behandling.id,
+                vedtak.sak.sakType,
+                vedtak.type,
+                brukerTokenInfo
+            )
         )
     }
 
@@ -166,5 +174,28 @@ class SakOgBehandlingService(
             virkningsdato = virkningstidspunkt.atDay(1),
             beregningsperioder
         )
+    }
+
+    private suspend fun finnTrygdetid(
+        behandlingId: UUID,
+        sakType: SakType,
+        vedtakType: VedtakType,
+        brukerTokenInfo: BrukerTokenInfo
+    ): List<Trygdetidsperiode>? {
+        // TODO: Fjern sjekken når avkorting støttes for barnepensjon
+        if (sakType == SakType.BARNEPENSJON || vedtakType == VedtakType.OPPHOER) return null
+
+        val trygdetidMedGrunnlag = trygdetidKlient.hentTrygdetid(behandlingId, brukerTokenInfo)
+
+        val trygdetidsperioder = trygdetidMedGrunnlag?.trygdetidGrunnlag?.map {
+            Trygdetidsperiode(
+                datoFOM = it.periodeFra,
+                datoTOM = it.periodeTil,
+                land = it.bosted,
+                opptjeningsperiode = it.beregnet?.aar.toString()
+            )
+        }
+
+        return trygdetidsperioder
     }
 }

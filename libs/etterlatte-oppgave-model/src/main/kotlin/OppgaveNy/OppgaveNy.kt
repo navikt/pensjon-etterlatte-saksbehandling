@@ -96,7 +96,8 @@ data class SaksbehandlerEndringDto(
 )
 
 data class RedigerFristRequest(
-    val frist: Tidspunkt
+    val frist: Tidspunkt,
+    val versjon: Long? = null
 )
 
 data class VedtakOppgaveDTO(

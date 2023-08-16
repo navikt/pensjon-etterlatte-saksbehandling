@@ -18,6 +18,12 @@ interface GosysOppgaveService {
         tilordnes: String,
         brukerTokenInfo: BrukerTokenInfo
     )
+    suspend fun endreFrist(
+        oppgaveId: String,
+        oppgaveVersjon: Long,
+        nyFrist: Tidspunkt,
+        brukerTokenInfo: BrukerTokenInfo
+    )
 }
 
 class GosysOppgaveServiceImpl(
@@ -53,6 +59,15 @@ class GosysOppgaveServiceImpl(
         brukerTokenInfo: BrukerTokenInfo
     ) {
         gosysOppgaveKlient.tilordneOppgaveTilSaksbehandler(oppgaveId, oppgaveVersjon, tilordnes, brukerTokenInfo)
+    }
+
+    override suspend fun endreFrist(
+        oppgaveId: String,
+        oppgaveVersjon: Long,
+        nyFrist: Tidspunkt,
+        brukerTokenInfo: BrukerTokenInfo
+    ) {
+        gosysOppgaveKlient.endreFrist(oppgaveId, oppgaveVersjon, nyFrist.toLocalDate(), brukerTokenInfo)
     }
 
     companion object {

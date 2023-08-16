@@ -374,6 +374,15 @@ class GosysOppgaveKlientTest : GosysOppgaveKlient {
     ) {
         // NO-OP
     }
+
+    override suspend fun endreFrist(
+        oppgaveId: String,
+        oppgaveVersjon: Long,
+        nyFrist: LocalDate,
+        brukerTokenInfo: BrukerTokenInfo
+    ) {
+        // NO-OP
+    }
 }
 
 class Norg2KlientTest : Norg2Klient {

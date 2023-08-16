@@ -85,11 +85,19 @@ export const fjernSaksbehandlerApi = async (args: {
 
 export interface RedigerFristRequest {
   frist: Date
+  versjon: string | null
 }
 export const redigerFristApi = async (args: {
   oppgaveId: string
+  type: string
   redigerFristRequest: RedigerFristRequest
-}): Promise<ApiResponse<void>> => apiClient.put(`/nyeoppgaver/${args.oppgaveId}/frist`, { ...args.redigerFristRequest })
+}): Promise<ApiResponse<void>> => {
+  if (args.type == 'GOSYS') {
+    return apiClient.post(`/nyeoppgaver/gosys/${args.oppgaveId}/endre-frist`, { ...args.redigerFristRequest })
+  } else {
+    return apiClient.put(`/nyeoppgaver/${args.oppgaveId}/frist`, { ...args.redigerFristRequest })
+  }
+}
 
 export const hentOppgaveForBehandlingUnderBehandling = async (args: {
   behandlingId: string

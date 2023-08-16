@@ -121,12 +121,27 @@ internal fun Route.oppgaveRoutesNy(
         route("/gosys/{gosysOppgaveId}") {
             post("tildel-saksbehandler") {
                 if (kanBrukeNyOppgaveliste) {
-                    val saksbehandlerEndringDto = call.receive<SaksbehandlerEndringDto>()
                     val gosysOppgaveId = call.parameters["gosysOppgaveId"]!!
+                    val saksbehandlerEndringDto = call.receive<SaksbehandlerEndringDto>()
                     gosysOppgaveService.tilordneOppgaveTilSaksbehandler(
                         gosysOppgaveId,
                         saksbehandlerEndringDto.versjon!!,
                         saksbehandlerEndringDto.saksbehandler,
+                        brukerTokenInfo
+                    )
+                    call.respond(HttpStatusCode.OK)
+                } else {
+                    call.respond(HttpStatusCode.NotImplemented)
+                }
+            }
+            post("endre-frist") {
+                if (kanBrukeNyOppgaveliste) {
+                    val gosysOppgaveId = call.parameters["gosysOppgaveId"]!!
+                    val redigerFristRequest = call.receive<RedigerFristRequest>()
+                    gosysOppgaveService.endreFrist(
+                        gosysOppgaveId,
+                        redigerFristRequest.versjon!!,
+                        redigerFristRequest.frist,
                         brukerTokenInfo
                     )
                     call.respond(HttpStatusCode.OK)

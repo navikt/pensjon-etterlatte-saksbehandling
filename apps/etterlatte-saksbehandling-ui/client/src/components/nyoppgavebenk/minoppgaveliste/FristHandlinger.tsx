@@ -24,9 +24,11 @@ export const FristHandlinger = (props: {
   status: Oppgavestatus
   orginalFrist: string
   oppgaveId: string
+  oppgaveVersjon: string | null
+  type: string
   hentOppgaver: () => void
 }) => {
-  const { orginalFrist, oppgaveId, status, hentOppgaver } = props
+  const { orginalFrist, oppgaveId, status, type, oppgaveVersjon, hentOppgaver } = props
   const [open, setOpen] = useState(false)
   const [frist, setFrist] = useState<string>()
   const [nyFrist, setnyFrist] = useState<Date>(new Date())
@@ -86,7 +88,7 @@ export const FristHandlinger = (props: {
                   loading={isPending(redigerfristSvar)}
                   disabled={!nyFrist}
                   onClick={() => {
-                    redigerFrist({ oppgaveId, redigerFristRequest: { frist: nyFrist } })
+                    redigerFrist({ oppgaveId, type, redigerFristRequest: { frist: nyFrist, versjon: oppgaveVersjon } })
                   }}
                 >
                   Lagre ny frist

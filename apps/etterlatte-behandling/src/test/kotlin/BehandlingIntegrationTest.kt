@@ -26,6 +26,7 @@ import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.kafka.TestProdusent
 import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.common.behandling.PersonMedSakerOgRoller
+import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakOgRolle
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
@@ -35,10 +36,14 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.GeografiskTilknytning
 import no.nav.etterlatte.libs.common.person.Person
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJson
+import no.nav.etterlatte.libs.common.toObjectNode
 import no.nav.etterlatte.libs.database.POSTGRES_VERSION
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
+import no.nav.etterlatte.oppgave.GosysOppgaveKlient
+import no.nav.etterlatte.oppgave.GosysOppgaver
 import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.etterlatte.token.Claims
 import no.nav.security.mock.oauth2.MockOAuth2Server
@@ -87,6 +92,8 @@ abstract class BehandlingIntegrationTest {
                 put("NAVANSATT_URL", "http://localhost")
                 put("SKJERMING_URL", "http://localhost")
                 put("KAN_BRUKE_NY_OPPGAVELISTE", "true")
+                put("OPPGAVE_URL", "http://localhost")
+                put("OPPGAVE_SCOPE", "scope")
             }.let { Miljoevariabler(it) },
             config = ConfigFactory.parseMap(hoconApplicationConfig.toMap()),
             rapid = TestProdusent(),
@@ -97,7 +104,8 @@ abstract class BehandlingIntegrationTest {
             leaderElectionHttpClient = leaderElection(),
             navAnsattKlient = NavAnsattKlientTest(),
             norg2Klient = norg2Klient ?: Norg2KlientTest(),
-            grunnlagKlientObo = GrunnlagKlientTest()
+            grunnlagKlientObo = GrunnlagKlientTest(),
+            gosysOppgaveKlient = GosysOppgaveKlientTest()
         ).also {
             it.dataSource.migrate()
         }
@@ -129,6 +137,10 @@ abstract class BehandlingIntegrationTest {
                     val headers = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
                     val json = GeografiskTilknytning(kommune = "0301").toJson()
                     respond(json, headers = headers)
+                } else if (request.url.fullPath.contains("folkeregisteridenter")) {
+                    val headers = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
+                    val json = emptyMap<String, String>().toJson()
+                    respond(json, headers = headers)
                 } else if (request.url.fullPath.startsWith("/")) {
                     val headers = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
                     val json = javaClass.getResource("")!!.readText() // TODO: endre name
@@ -152,6 +164,24 @@ abstract class BehandlingIntegrationTest {
                 if (request.url.fullPath.matches(Regex("api/grunnlag/[0-9]{11}"))) {
                     val headers = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
                     respond(Grunnlag.empty().toJson(), headers = headers)
+                } else if (request.url.fullPath.endsWith("/PERSONGALLERI_V1")) {
+                    val headers = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
+                    respond(
+                        content = Grunnlagsopplysning(
+                            id = UUID.randomUUID(),
+                            kilde = Grunnlagsopplysning.Privatperson("fnr", Tidspunkt.now()),
+                            meta = emptyMap<String, String>().toObjectNode(),
+                            opplysningType = Opplysningstype.PERSONGALLERI_V1,
+                            opplysning = Persongalleri(
+                                "soeker",
+                                "innsender",
+                                listOf("soesken"),
+                                listOf("avdoed"),
+                                listOf("gjenlevende")
+                            )
+                        ).toJson(),
+                        headers = headers
+                    )
                 } else if (request.url.fullPath.endsWith("/roller")) {
                     val headers = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
                     respond(
@@ -242,7 +272,7 @@ abstract class BehandlingIntegrationTest {
         issueToken(
             mapOf(
                 "navn" to "John Doe",
-                Claims.NAVident.toString() to "Saksbehandler01",
+                Claims.NAVident.toString() to "Saksbehandler02",
                 "groups" to listOf(
                     azureAdAttestantClaim,
                     azureAdSaksbehandlerClaim
@@ -295,6 +325,31 @@ class GrunnlagKlientTest : GrunnlagKlient {
     ): Grunnlagsopplysning<Person> {
         val personopplysning = personOpplysning(doedsdato = LocalDate.parse("2022-01-01"))
         return grunnlagsOpplysningMedPersonopplysning(personopplysning)
+    }
+
+    override suspend fun hentPersongalleri(
+        sakId: Long,
+        brukerTokenInfo: BrukerTokenInfo
+    ): Grunnlagsopplysning<Persongalleri>? {
+        return Grunnlagsopplysning(
+            id = UUID.randomUUID(),
+            kilde = Grunnlagsopplysning.Privatperson("fnr", Tidspunkt.now()),
+            meta = emptyMap<String, String>().toObjectNode(),
+            opplysningType = Opplysningstype.PERSONGALLERI_V1,
+            opplysning = Persongalleri(
+                "soeker",
+                "innsender",
+                listOf("soesken"),
+                listOf("avdoed"),
+                listOf("gjenlevende")
+            )
+        )
+    }
+}
+
+class GosysOppgaveKlientTest : GosysOppgaveKlient {
+    override suspend fun hentOppgaver(tema: String, enhetsnr: String, brukerTokenInfo: BrukerTokenInfo): GosysOppgaver {
+        return GosysOppgaver(0, emptyList())
     }
 }
 

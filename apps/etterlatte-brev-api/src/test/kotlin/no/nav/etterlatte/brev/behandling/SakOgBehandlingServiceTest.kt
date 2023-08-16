@@ -90,7 +90,7 @@ internal class SakOgBehandlingServiceTest {
         assertEquals(ENHET, behandling.vedtak.ansvarligEnhet)
         assertEquals(SAKSBEHANDLER_IDENT, behandling.vedtak.saksbehandlerIdent)
         assertEquals(ATTESTANT_IDENT, behandling.vedtak.attestantIdent)
-        assertEquals(YearMonth.now().atDay(1), behandling.utbetalingsinfo?.virkningsdato)
+        assertEquals(YearMonth.now().atDay(1), behandling.utbetalingsinfo.virkningsdato)
 
         coVerify(exactly = 1) {
             vedtaksvurderingKlient.hentVedtak(BEHANDLING_ID, any())
@@ -112,13 +112,13 @@ internal class SakOgBehandlingServiceTest {
             service.hentBehandling(SAK_ID, BEHANDLING_ID, BRUKERTokenInfo)
         }
 
-        assertEquals(1, behandling.utbetalingsinfo?.antallBarn)
-        assertEquals(Kroner(3063), behandling.utbetalingsinfo?.beloep)
-        assertEquals(YearMonth.now().atDay(1), behandling.utbetalingsinfo?.virkningsdato)
-        assertEquals(false, behandling.utbetalingsinfo?.soeskenjustering)
+        assertEquals(1, behandling.utbetalingsinfo.antallBarn)
+        assertEquals(Kroner(3063), behandling.utbetalingsinfo.beloep)
+        assertEquals(YearMonth.now().atDay(1), behandling.utbetalingsinfo.virkningsdato)
+        assertEquals(false, behandling.utbetalingsinfo.soeskenjustering)
         assertEquals(
             listOf(BREV_BEREGNINGSPERIODE),
-            behandling.utbetalingsinfo?.beregningsperioder
+            behandling.utbetalingsinfo.beregningsperioder
         )
 
         coVerify(exactly = 1) {
@@ -141,8 +141,8 @@ internal class SakOgBehandlingServiceTest {
             service.hentBehandling(SAK_ID, BEHANDLING_ID, BRUKERTokenInfo)
         }
 
-        assertEquals(2, behandling.utbetalingsinfo?.antallBarn)
-        assertTrue(behandling.utbetalingsinfo?.soeskenjustering!!)
+        assertEquals(2, behandling.utbetalingsinfo.antallBarn)
+        assertTrue(behandling.utbetalingsinfo.soeskenjustering)
 
         coVerify(exactly = 1) { vedtaksvurderingKlient.hentVedtak(any(), any()) }
         coVerify(exactly = 1) { grunnlagKlient.hentGrunnlag(any(), any()) }

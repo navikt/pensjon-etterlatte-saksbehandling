@@ -27,6 +27,8 @@ import Soeskenjustering, {
 import Spinner from '~shared/Spinner'
 import { IPdlPerson } from '~shared/types/Person'
 import { InstitusjonsoppholdGrunnlagData } from '~shared/types/Beregning'
+import YrkesskadeTrygdetid from './YrkesskadeTrygdetid'
+import { hentVilkaarsvurdering } from '~shared/api/vilkaarsvurdering'
 
 const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer }) => {
   const { behandling } = props
@@ -38,6 +40,8 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
   const [endreBeregning, postOpprettEllerEndreBeregning] = useApiCall(opprettEllerEndreBeregning)
   const [funksjonsbrytere, postHentFunksjonsbrytere] = useApiCall(hentFunksjonsbrytere)
   const [beregnTrygdetid, setBeregnTrygdetid] = useState<boolean>(false)
+  const [vilkaarsvurdering, getVilkaarsvurdering] = useApiCall(hentVilkaarsvurdering)
+  const [yrkesskadeTrygdetid, setYrkesskadeTrygdetid] = useState<boolean>(false)
   const [visInstitusjonsopphold, setVisInstitusjonsopphold] = useState<boolean>(false)
   const [soeskenGrunnlagsData, setSoeskenGrunnlagsData] = useState<Soeskengrunnlag | undefined>(undefined)
   const [institusjonsoppholdsGrunnlagData, setInstitusjonsoppholdsGrunnlagData] = useState<
@@ -54,6 +58,10 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
 
       if (trygdetidBryter) {
         setBeregnTrygdetid(trygdetidBryter.enabled)
+
+        getVilkaarsvurdering(behandling.id, (vurdering) => {
+          setYrkesskadeTrygdetid(vurdering.isYrkesskade)
+        })
       }
       const institusjonsoppholdBryter = brytere.find((bryter) => bryter.toggle === featureToggleNameInstitusjonsopphold)
       if (institusjonsoppholdBryter) {
@@ -111,8 +119,11 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
 
   return (
     <>
-      {!isPending(funksjonsbrytere) &&
-        (beregnTrygdetid ? (
+      {isSuccess(funksjonsbrytere) &&
+        isSuccess(vilkaarsvurdering) &&
+        (yrkesskadeTrygdetid ? (
+          <YrkesskadeTrygdetid />
+        ) : beregnTrygdetid ? (
           <BeregnetTrygdetid redigerbar={behandles} utenlandstilsnitt={behandling.utenlandstilsnitt} />
         ) : (
           <FastTrygdetid />
@@ -137,6 +148,7 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
       {manglerSoeskenJustering && <ApiErrorAlert>Søskenjustering er ikke fylt ut </ApiErrorAlert>}
       {isFailure(endreBeregning) && <ApiErrorAlert>Kunne ikke opprette ny beregning</ApiErrorAlert>}
       {isFailure(lagreBeregningsgrunnlag) && <ApiErrorAlert>Kunne ikke lagre beregningsgrunnlag</ApiErrorAlert>}
+      {isFailure(vilkaarsvurdering) && <ApiErrorAlert>Kunne ikke hente vilkaarsvurdering</ApiErrorAlert>}
 
       {behandles ? (
         <BehandlingHandlingKnapper>

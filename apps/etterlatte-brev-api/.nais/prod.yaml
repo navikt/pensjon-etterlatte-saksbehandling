@@ -124,6 +124,7 @@ spec:
         - host: data.brreg.no
         - host: navansatt.prod-fss-pub.nais.io
         - host: pensjon-brevbaker.intern.nav.no
+        - host: unleash.nais.io
     inbound:
       rules:
         - application: etterlatte-saksbehandling-ui-lokal

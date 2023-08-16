@@ -13,6 +13,7 @@ import no.nav.etterlatte.hendelserpdl.common.KafkaKonsument
 import no.nav.etterlatte.hendelserpdl.config.ApplicationContext
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.ktor.healthApi
+import no.nav.etterlatte.libs.ktor.metricsModule
 import no.nav.etterlatte.libs.ktor.setReady
 import no.nav.person.pdl.leesah.Personhendelse
 import org.slf4j.LoggerFactory
@@ -33,6 +34,7 @@ class Server(private val context: ApplicationContext) {
                 routing {
                     healthApi()
                 }
+                metricsModule()
             }
             connector { port = context.httpPort }
         }

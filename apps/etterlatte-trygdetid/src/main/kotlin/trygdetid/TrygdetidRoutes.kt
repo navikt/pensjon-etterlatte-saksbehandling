@@ -38,7 +38,7 @@ fun Route.trygdetid(trygdetidService: TrygdetidService, behandlingKlient: Behand
         get {
             withBehandlingId(behandlingKlient) {
                 logger.info("Henter trygdetid for behandling $behandlingsId")
-                val trygdetid = trygdetidService.hentTrygdetid(behandlingsId)
+                val trygdetid = trygdetidService.hentTrygdetid(behandlingsId, brukerTokenInfo)
                 if (trygdetid != null) {
                     call.respond(trygdetid.toDto())
                 } else {
@@ -68,6 +68,23 @@ fun Route.trygdetid(trygdetidService: TrygdetidService, behandlingKlient: Behand
                     ).let { trygdetid -> call.respond(trygdetid.toDto()) }
                 } catch (overlappendePeriodeException: OverlappendePeriodeException) {
                     logger.info("Klarte ikke legge til ny trygdetidsperiode for $behandlingsId pga overlapp.")
+                    call.respond(HttpStatusCode.Conflict)
+                }
+            }
+        }
+
+        post("/grunnlag/yrkesskade") {
+            withBehandlingId(behandlingKlient) {
+                logger.info("Legger til yrkesskade trygdetidsgrunnlag for behandling $behandlingsId")
+                try {
+                    trygdetidService.lagreYrkesskadeTrygdetidGrunnlag(
+                        behandlingsId,
+                        brukerTokenInfo
+                    ).let { trygdetid -> call.respond(trygdetid.toDto()) }
+                } catch (overlappendePeriodeException: OverlappendePeriodeException) {
+                    logger.info(
+                        "Klarte ikke legge til ny yrkesskade trygdetidsperiode for $behandlingsId pga overlapp."
+                    )
                     call.respond(HttpStatusCode.Conflict)
                 }
             }

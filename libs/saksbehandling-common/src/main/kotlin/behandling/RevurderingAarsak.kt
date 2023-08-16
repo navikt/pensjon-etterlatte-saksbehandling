@@ -58,10 +58,12 @@ sealed class Utfall {
     }
 }
 
+// Disse må ha en oversettelse i frontend RevurderingAarsak.ts
 enum class RevurderingAarsak(
     private val gyldigFor: List<SakType>,
     private val miljoe: KanBrukesIMiljoe,
-    val utfall: Utfall
+    val utfall: Utfall,
+    val redigerbartBrev: Boolean = false
 ) {
     ANSVARLIGE_FORELDRE(SAKTYPE_BP, IngenMiljoe, IkkeOpphoerSkalSendeBrev),
     SOESKENJUSTERING(SAKTYPE_BP, KunIDev, IkkeOpphoerSkalSendeBrev),
@@ -71,10 +73,14 @@ enum class RevurderingAarsak(
     REGULERING(SAKTYPE_BP_OMS, DevOgProd, IkkeOpphoerSkalIkkeSendeBrev),
     DOEDSFALL(SAKTYPE_BP_OMS, KunIDev, OpphoerUtenBrev),
     INNTEKTSENDRING(SAKTYPE_OMS, KunIDev, IkkeOpphoerSkalSendeBrev),
-    OMGJOERING_AV_FARSKAP(SAKTYPE_BP, KunIDev, OpphoerMedBrev),
-    ADOPSJON(SAKTYPE_BP, KunIDev, OpphoerMedBrev),
+    OMGJOERING_AV_FARSKAP(SAKTYPE_BP, KunIDev, OpphoerMedBrev, redigerbartBrev = true),
+    ADOPSJON(SAKTYPE_BP, KunIDev, OpphoerMedBrev, redigerbartBrev = true),
     SIVILSTAND(SAKTYPE_OMS, KunIDev, OpphoerMedBrev),
-    NY_SOEKNAD(SAKTYPE_BP_OMS, DevOgProd, IkkeOpphoerSkalSendeBrev);
+    FENGSELSOPPHOLD(SAKTYPE_BP, KunIDev, IkkeOpphoerSkalSendeBrev, redigerbartBrev = true),
+    UT_AV_FENGSEL(SAKTYPE_BP, KunIDev, IkkeOpphoerSkalSendeBrev, redigerbartBrev = true),
+    NY_SOEKNAD(SAKTYPE_BP_OMS, DevOgProd, IkkeOpphoerSkalSendeBrev),
+    ANNEN(SAKTYPE_BP_OMS, KunIDev, IkkeOpphoerSkalSendeBrev),
+    YRKESSKADE(SAKTYPE_BP, KunIDev, IkkeOpphoerSkalSendeBrev, redigerbartBrev = true);
 
     fun kanBrukesIMiljo(): Boolean = when (clusternavn()) {
         null -> true
@@ -84,6 +90,8 @@ enum class RevurderingAarsak(
     }
 
     fun gyldigForSakType(sakType: SakType): Boolean = gyldigFor.any { it == sakType }
+
+    fun erStoettaRevurdering(sakType: SakType) = kanBrukesIMiljo() && gyldigForSakType(sakType) && this != NY_SOEKNAD
 }
 
 enum class GcpEnv(val env: String) {

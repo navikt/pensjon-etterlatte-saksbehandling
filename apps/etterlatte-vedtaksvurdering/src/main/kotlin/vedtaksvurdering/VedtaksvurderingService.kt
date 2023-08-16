@@ -6,9 +6,8 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.oppgaveNy.AttesterVedtakOppgave
-import no.nav.etterlatte.libs.common.oppgaveNy.AttesteringsOppgave
-import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveType
+import no.nav.etterlatte.libs.common.oppgaveNy.VedtakEndringDTO
+import no.nav.etterlatte.libs.common.oppgaveNy.VedtakOppgaveDTO
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.REVURDERING_AARSAK
@@ -92,7 +91,7 @@ class VedtaksvurderingService(
         logger.info("Fatter vedtak for behandling med behandlingId=$behandlingId")
         val vedtak = hentVedtakNonNull(behandlingId)
 
-        verifiserGyldigBehandlingStatus(behandlingKlient.fattVedtak(behandlingId, brukerTokenInfo), vedtak)
+        verifiserGyldigBehandlingStatus(behandlingKlient.kanFatteVedtak(behandlingId, brukerTokenInfo), vedtak)
         verifiserGyldigVedtakStatus(vedtak.status, listOf(VedtakStatus.OPPRETTET, VedtakStatus.RETURNERT))
 
         val sak = behandlingKlient.hentSak(vedtak.sakId, brukerTokenInfo)
@@ -108,13 +107,12 @@ class VedtaksvurderingService(
                 tx
             ).also { fattetVedtak ->
                 runBlocking {
-                    behandlingKlient.oppgaveAttestering(
+                    behandlingKlient.fattVedtakBehandling(
                         brukerTokenInfo = brukerTokenInfo,
-                        attesterVedtakOppgave = AttesterVedtakOppgave(
-                            attesteringsOppgave = AttesteringsOppgave(
+                        vedtakEndringDTO = VedtakEndringDTO(
+                            vedtakOppgaveDTO = VedtakOppgaveDTO(
                                 sakId = sak.id,
-                                referanse = behandlingId.toString(),
-                                oppgaveType = OppgaveType.ATTESTERING
+                                referanse = behandlingId.toString()
                             ),
                             vedtakHendelse = VedtakHendelse(
                                 vedtakId = fattetVedtak.id,
@@ -141,38 +139,47 @@ class VedtaksvurderingService(
         logger.info("Attesterer vedtak for behandling med behandlingId=$behandlingId")
         val vedtak = hentVedtakNonNull(behandlingId)
 
-        verifiserGyldigBehandlingStatus(behandlingKlient.attester(behandlingId, brukerTokenInfo), vedtak)
+        verifiserGyldigBehandlingStatus(behandlingKlient.kanAttestereVedtak(behandlingId, brukerTokenInfo), vedtak)
         verifiserGyldigVedtakStatus(vedtak.status, listOf(VedtakStatus.FATTET_VEDTAK))
         attestantHarAnnenIdentEnnSaksbehandler(vedtak.vedtakFattet!!.ansvarligSaksbehandler, brukerTokenInfo)
 
         val (behandling, _, _, sak) = hentDataForVedtak(behandlingId, brukerTokenInfo)
         verifiserGyldigVedtakForRevurdering(behandling, vedtak)
-
-        val attestertVedtak = repository.attesterVedtak(
-            behandlingId,
-            Attestasjon(
-                brukerTokenInfo.ident(),
-                sak.enhet,
-                Tidspunkt.now(clock)
+        val attestertVedtak = repository.inTransaction { tx ->
+            val attestertVedtak = repository.attesterVedtak(
+                behandlingId,
+                Attestasjon(
+                    brukerTokenInfo.ident(),
+                    sak.enhet,
+                    Tidspunkt.now(clock)
+                ),
+                tx
             )
-        )
-
-        behandlingKlient.attester(
-            behandlingId,
-            brukerTokenInfo,
-            VedtakHendelse(
-                vedtakId = attestertVedtak.id,
-                inntruffet = attestertVedtak.attestasjon?.tidspunkt!!,
-                saksbehandler = attestertVedtak.attestasjon.attestant,
-                kommentar = kommentar
-            )
-        )
+            runBlocking {
+                behandlingKlient.attesterVedtak(
+                    brukerTokenInfo = brukerTokenInfo,
+                    vedtakEndringDTO = VedtakEndringDTO(
+                        vedtakOppgaveDTO = VedtakOppgaveDTO(
+                            sakId = attestertVedtak.sakId,
+                            referanse = attestertVedtak.behandlingId.toString()
+                        ),
+                        vedtakHendelse = VedtakHendelse(
+                            vedtakId = attestertVedtak.id,
+                            inntruffet = attestertVedtak.attestasjon?.tidspunkt!!,
+                            saksbehandler = attestertVedtak.attestasjon.attestant,
+                            kommentar = kommentar
+                        )
+                    )
+                )
+            }
+            attestertVedtak
+        }
 
         sendToRapid(
             lagRiverMelding(
                 vedtakhendelse = KafkaHendelseType.ATTESTERT,
                 vedtak = attestertVedtak,
-                tekniskTid = attestertVedtak.attestasjon.tidspunkt.toLocalDatetimeUTC(),
+                tekniskTid = attestertVedtak.attestasjon!!.tidspunkt.toLocalDatetimeUTC(),
                 mapOf(
                     SKAL_SENDE_BREV to when {
                         behandling.revurderingsaarsak.skalIkkeSendeBrev() -> false
@@ -198,23 +205,29 @@ class VedtaksvurderingService(
         logger.info("Underkjenner vedtak for behandling med behandlingId=$behandlingId")
         val vedtak = hentVedtakNonNull(behandlingId)
 
-        verifiserGyldigBehandlingStatus(behandlingKlient.underkjenn(behandlingId, brukerTokenInfo), vedtak)
+        verifiserGyldigBehandlingStatus(behandlingKlient.kanUnderkjenneVedtak(behandlingId, brukerTokenInfo), vedtak)
         verifiserGyldigVedtakStatus(vedtak.status, listOf(VedtakStatus.FATTET_VEDTAK))
 
-        val underkjentVedtak = repository.underkjennVedtak(behandlingId)
         val underkjentTid = Tidspunkt.now(clock)
-
-        behandlingKlient.underkjenn(
-            behandlingId,
-            brukerTokenInfo,
-            VedtakHendelse(
-                vedtakId = underkjentVedtak.id,
-                inntruffet = underkjentTid,
-                saksbehandler = brukerTokenInfo.ident(),
-                kommentar = begrunnelse.kommentar,
-                valgtBegrunnelse = begrunnelse.valgtBegrunnelse
-            )
-        )
+        val underkjentVedtak = repository.inTransaction { tx ->
+            val underkjentVedtak = repository.underkjennVedtak(behandlingId, tx)
+            runBlocking {
+                behandlingKlient.underkjennVedtak(
+                    brukerTokenInfo,
+                    VedtakEndringDTO(
+                        vedtakOppgaveDTO = VedtakOppgaveDTO(vedtak.sakId, behandlingId.toString()),
+                        vedtakHendelse = VedtakHendelse(
+                            vedtakId = underkjentVedtak.id,
+                            inntruffet = underkjentTid,
+                            saksbehandler = brukerTokenInfo.ident(),
+                            kommentar = begrunnelse.kommentar,
+                            valgtBegrunnelse = begrunnelse.valgtBegrunnelse
+                        )
+                    )
+                )
+            }
+            underkjentVedtak
+        }
 
         sendToRapid(
             lagRiverMelding(
@@ -359,7 +372,6 @@ class VedtaksvurderingService(
     ): List<Utbetalingsperiode> {
         return when (vedtakType) {
             VedtakType.INNVILGELSE, VedtakType.ENDRING -> {
-                // TODO Skal endres når barnepensjon tar i bruk avkorting
                 if (sakType == SakType.BARNEPENSJON) {
                     val beregningsperioder = requireNotNull(beregningOgAvkorting?.beregning?.beregningsperioder) {
                         "Mangler beregning"

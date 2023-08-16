@@ -1,4 +1,4 @@
-import { Button, Heading, Modal, Select } from '@navikt/ds-react'
+import { Button, Heading, Modal, Select, TextField } from '@navikt/ds-react'
 import React, { useState } from 'react'
 import styled from 'styled-components'
 import { isPending, useApiCall } from '~shared/hooks/useApiCall'
@@ -17,6 +17,7 @@ export const OpprettNyBehandling = ({
   const [error, setError] = useState<string | null>(null)
   const [open, setOpen] = useState(false)
   const [valgtRevurdering, setValgtRevurdering] = useState<Revurderingsaarsak | undefined>()
+  const [fritekstgrunn, setFritekstgrunn] = useState<string>('')
   const stoettedeRevurderinger = revurderinger
 
   const [opprettRevurderingStatus, opprettRevurdering, resetApiCall] = useApiCall(opprettRevurderingApi)
@@ -26,7 +27,7 @@ export const OpprettNyBehandling = ({
       return setError('Du må velge en revurdering')
     }
     opprettRevurdering(
-      { sakId: sakId, aarsak: valgtRevurdering },
+      { sakId: sakId, aarsak: valgtRevurdering, fritekstAarsak: fritekstgrunn },
       (behandlingId: string) => {
         navigate(`/behandling/${behandlingId}/`)
       },
@@ -63,6 +64,15 @@ export const OpprettNyBehandling = ({
                 )
               })}
             </Select>
+            {valgtRevurdering === Revurderingsaarsak.ANNEN && (
+              <TextField
+                label="Beskriv hvorfor"
+                size="small"
+                type="text"
+                value={fritekstgrunn}
+                onChange={(e) => setFritekstgrunn(e.target.value)}
+              />
+            )}
             <ButtonContainer>
               <Button
                 variant="secondary"

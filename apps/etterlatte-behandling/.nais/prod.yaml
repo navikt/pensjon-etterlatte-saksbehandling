@@ -103,7 +103,11 @@ spec:
     - name: AZURE_SCOPE_SKJERMEDE_PIP
       value: api://prod-gcp.nom.skjermede-personer-pip/.default
     - name: KAN_BRUKE_NY_OPPGAVELISTE
-      value: 'false'
+      value: 'true'
+    - name: OPPGAVE_CLIENT_ID
+      value: prod-fss.oppgavehandtering.oppgave
+    - name: OPPGAVE_URL
+      value: https://oppgave.prod-fss-pub.nais.io
   accessPolicy:
     outbound:
       rules:
@@ -117,6 +121,7 @@ spec:
         - host: unleash.nais.io
         - host: norg2.prod-fss-pub.nais.io
         - host: navansatt.prod-fss-pub.nais.io
+        - host: oppgave.prod-fss-pub.nais.io
     inbound:
       rules:
         - application: etterlatte-egne-ansatte-lytter

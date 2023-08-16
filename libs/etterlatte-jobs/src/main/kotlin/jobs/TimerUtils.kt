@@ -1,5 +1,6 @@
 package no.nav.etterlatte.jobs
 
+import no.nav.etterlatte.libs.common.logging.withLogContext
 import org.slf4j.Logger
 import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
@@ -11,7 +12,7 @@ fun fixedRateCancellableTimer(
     period: Long,
     logger: Logger,
     sikkerLogg: Logger,
-    action: TimerTask.() -> Unit
+    action: (correlationId: String) -> Unit
 ) = fixedRateTimer(
     name = name,
     daemon = true,
@@ -27,7 +28,7 @@ fun fixedRateCancellableTimer(
     period: Long,
     logger: Logger,
     sikkerLogg: Logger,
-    action: TimerTask.() -> Unit
+    action: (correlationId: String) -> Unit
 ) = fixedRateTimer(
     name = name,
     daemon = true,
@@ -37,17 +38,21 @@ fun fixedRateCancellableTimer(
     run(action, logger, name, sikkerLogg)
 }
 
-private fun TimerTask.run(action: TimerTask.() -> Unit, logger: Logger, name: String?, sikkerLogg: Logger) = try {
-    action()
-} catch (throwable: Throwable) {
-    if (!shuttingDown.get()) {
-        logger.error("Jobb $name feilet, se sikker logg for stacktrace")
-        sikkerLogg.error("Jobb $name feilet", throwable)
-    } else {
-        logger.info("Jobb $name feilet mens applikasjonen avsluttet, se sikker logg for stacktrace")
-        sikkerLogg.info("Jobb $name feilet mens applikasjonen avsluttet", throwable)
+private fun TimerTask.run(action: (correlationID: String) -> Unit, logger: Logger, name: String?, sikkerLogg: Logger) =
+    try {
+        val correlationId = UUID.randomUUID().toString()
+        withLogContext(correlationId) {
+            action(correlationId)
+        }
+    } catch (throwable: Throwable) {
+        if (!shuttingDown.get()) {
+            logger.error("Jobb $name feilet, se sikker logg for stacktrace")
+            sikkerLogg.error("Jobb $name feilet", throwable)
+        } else {
+            logger.info("Jobb $name feilet mens applikasjonen avsluttet, se sikker logg for stacktrace")
+            sikkerLogg.info("Jobb $name feilet mens applikasjonen avsluttet", throwable)
+        }
     }
-}
 
 val shuttingDown: AtomicBoolean = AtomicBoolean(false)
 

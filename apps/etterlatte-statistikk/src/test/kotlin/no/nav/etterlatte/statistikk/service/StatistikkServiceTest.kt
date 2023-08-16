@@ -1,5 +1,8 @@
 package no.nav.etterlatte.statistikk.service
 
+import io.kotest.assertions.asClue
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
@@ -26,6 +29,9 @@ import no.nav.etterlatte.statistikk.clients.BehandlingKlient
 import no.nav.etterlatte.statistikk.clients.BeregningKlient
 import no.nav.etterlatte.statistikk.database.SakRepository
 import no.nav.etterlatte.statistikk.database.StoenadRepository
+import no.nav.etterlatte.statistikk.domain.AvkortetYtelse
+import no.nav.etterlatte.statistikk.domain.Avkorting
+import no.nav.etterlatte.statistikk.domain.AvkortingGrunnlag
 import no.nav.etterlatte.statistikk.domain.BehandlingMetode
 import no.nav.etterlatte.statistikk.domain.Beregning
 import no.nav.etterlatte.statistikk.domain.Beregningstype
@@ -34,26 +40,36 @@ import no.nav.etterlatte.statistikk.domain.SakUtland
 import no.nav.etterlatte.statistikk.domain.SakYtelsesgruppe
 import no.nav.etterlatte.statistikk.river.BehandlingHendelse
 import no.nav.etterlatte.statistikk.river.BehandlingIntern
-import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.LocalTime
 import java.time.YearMonth
 import java.util.*
 
 class StatistikkServiceTest {
 
+    private val stoenadRepo = mockk<StoenadRepository>()
+    private val sakRepo = mockk<SakRepository>()
+    private val behandlingKlient = mockk<BehandlingKlient>()
+    private val beregningKlient = mockk<BeregningKlient>()
+    private val service = StatistikkService(
+        stoenadRepository = stoenadRepo,
+        sakRepository = sakRepo,
+        behandlingKlient = behandlingKlient,
+        beregningKlient = beregningKlient
+    )
+
     @Test
-    fun `mapper vedtakhendelse til både sakRad og stoenadRad riktig`() {
+    fun `mapper vedtakhendelse til baade sakRad og stoenadRad riktig`() {
         val behandlingId = UUID.randomUUID()
         val sakId = 1L
+        val virkningstidspunkt = YearMonth.of(2023, 6)
 
-        val stoenadRepo = mockk<StoenadRepository>()
         every { stoenadRepo.lagreStoenadsrad(any()) } returnsArgument 0
-
-        val sakRepo = mockk<SakRepository>()
         every { sakRepo.lagreRad(any()) } returnsArgument 0
-
-        val behandlingKlient = mockk<BehandlingKlient>()
         coEvery { behandlingKlient.hentDetaljertBehandling(behandlingId) } returns DetaljertBehandling(
             id = behandlingId,
             sak = sakId,
@@ -84,62 +100,152 @@ class StatistikkServiceTest {
             beregnetDato = Tidspunkt.now(),
             beregningsperioder = listOf()
         )
-        val beregningKlient = mockk<BeregningKlient>()
         coEvery { beregningKlient.hentBeregningForBehandling(behandlingId) } returns mockBeregning
 
-        val service = StatistikkService(
-            stoenadRepository = stoenadRepo,
-            sakRepository = sakRepo,
-            behandlingKlient = behandlingKlient,
-            beregningKlient = beregningKlient
-        )
         val tekniskTidForHendelse = LocalDateTime.of(2023, 2, 1, 8, 30)
 
+        val fattetVedtakMaaned = LocalDate.of(2023, 7, 1)
+        val fattetTidspunkt = Tidspunkt.ofNorskTidssone(fattetVedtakMaaned, LocalTime.NOON)
         val (registrertSakRad, registrertStoenadRad) = service.registrerStatistikkForVedtak(
             vedtak = vedtak(
                 sakId = sakId,
                 behandlingId = behandlingId,
-                vedtakFattet = VedtakFattet("Saksbehandler", "saksbehandlerEnhet", Tidspunkt.now()),
-                attestasjon = Attestasjon("Attestant", "attestantEnhet", Tidspunkt.now())
+                vedtakFattet = VedtakFattet("Saksbehandler", "saksbehandlerEnhet", fattetTidspunkt),
+                attestasjon = Attestasjon("Attestant", "attestantEnhet", fattetTidspunkt),
+                virk = virkningstidspunkt
             ),
             vedtakHendelse = VedtakHendelse.IVERKSATT,
             tekniskTid = tekniskTidForHendelse
         )
 
-        // denne gjør at kotlin kan inferre at de ikke er null, så det ikke blir ? i alle assertions under
-        if (registrertStoenadRad == null || registrertSakRad == null) {
-            throw NullPointerException("Stønadrad=$registrertStoenadRad eller sakrad=$registrertSakRad var null")
+        registrertSakRad shouldNotBe null
+        registrertSakRad?.asClue { registrertSak ->
+            registrertSak.sakId shouldBe sakId
+            registrertSak.sakYtelse shouldBe SakType.BARNEPENSJON.name
+            registrertSak.sakUtland shouldBe SakUtland.NASJONAL
+            registrertSak.behandlingId shouldBe behandlingId
+            registrertSak.tekniskTid shouldBe tekniskTidForHendelse.toTidspunkt()
+            registrertSak.ansvarligEnhet shouldBe "attestantEnhet"
+            registrertSak.ansvarligBeslutter shouldBe "Attestant"
+            registrertSak.saksbehandler shouldBe "Saksbehandler"
+            registrertSak.beregning shouldBe mockBeregning
+            registrertSak.avkorting shouldBe null
         }
 
-        Assertions.assertEquals(registrertSakRad.sakId, sakId)
-        Assertions.assertEquals(registrertSakRad.sakYtelse, "BARNEPENSJON")
-        Assertions.assertEquals(registrertSakRad.sakUtland, SakUtland.NASJONAL)
-        Assertions.assertEquals(registrertSakRad.behandlingId, behandlingId)
-        Assertions.assertEquals(registrertSakRad.tekniskTid, tekniskTidForHendelse.toTidspunkt())
-        Assertions.assertEquals(registrertSakRad.ansvarligEnhet, "attestantEnhet")
-        Assertions.assertEquals(registrertSakRad.ansvarligBeslutter, "Attestant")
-        Assertions.assertEquals(registrertSakRad.saksbehandler, "Saksbehandler")
-        Assertions.assertEquals(registrertSakRad.beregning, mockBeregning)
+        registrertStoenadRad shouldNotBe null
+        registrertStoenadRad?.asClue { registrertStoenad ->
+            registrertStoenad.tekniskTid shouldBe tekniskTidForHendelse.toTidspunkt()
+            registrertStoenad.beregning shouldBe mockBeregning
+            registrertStoenad.avkorting shouldBe null
+            registrertStoenad.behandlingId shouldBe behandlingId
+            registrertStoenad.sakId shouldBe sakId
+            registrertStoenad.attestant shouldBe "Attestant"
+            registrertStoenad.saksbehandler shouldBe "Saksbehandler"
 
-        Assertions.assertEquals(registrertStoenadRad.tekniskTid, tekniskTidForHendelse.toTidspunkt())
-        Assertions.assertEquals(registrertStoenadRad.beregning, mockBeregning)
-        Assertions.assertEquals(registrertStoenadRad.behandlingId, behandlingId)
-        Assertions.assertEquals(registrertStoenadRad.sakId, sakId)
-        Assertions.assertEquals(registrertStoenadRad.attestant, "Attestant")
-        Assertions.assertEquals(registrertStoenadRad.saksbehandler, "Saksbehandler")
+            registrertStoenad.sakUtland shouldBe SakUtland.NASJONAL
+            registrertStoenad.virkningstidspunkt shouldBe virkningstidspunkt
+            registrertStoenad.utbetalingsdato shouldBe fattetVedtakMaaned.plusMonths(1).plusDays(19)
+        }
+    }
+
+    @Test
+    fun `mapper vedtakhendelse for omstillingsstoenad`() {
+        val behandlingId = UUID.randomUUID()
+        val sakId = 1L
+        val virkningstidspunkt = YearMonth.of(2023, 6)
+
+        every { stoenadRepo.lagreStoenadsrad(any()) } returnsArgument 0
+        every { sakRepo.lagreRad(any()) } returnsArgument 0
+        coEvery { behandlingKlient.hentDetaljertBehandling(behandlingId) } returns DetaljertBehandling(
+            id = behandlingId,
+            sak = sakId,
+            sakType = SakType.OMSTILLINGSSTOENAD,
+            behandlingOpprettet = Tidspunkt.now().toLocalDatetimeUTC(),
+            soeknadMottattDato = null,
+            innsender = null,
+            soeker = "12312312312",
+            gjenlevende = listOf(),
+            avdoed = listOf(),
+            soesken = listOf(),
+            status = BehandlingStatus.FATTET_VEDTAK,
+            behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+            virkningstidspunkt = null,
+            boddEllerArbeidetUtlandet = null,
+            revurderingsaarsak = null,
+            revurderingInfo = null,
+            prosesstype = Prosesstype.MANUELL,
+            enhet = "1111"
+        )
+        coEvery { behandlingKlient.hentPersongalleri(behandlingId) } returns Persongalleri(
+            "12312312312"
+        )
+        val mockBeregning = Beregning(
+            beregningId = UUID.randomUUID(),
+            behandlingId = behandlingId,
+            type = Beregningstype.OMS,
+            beregnetDato = Tidspunkt.now(),
+            beregningsperioder = listOf()
+        )
+        coEvery { beregningKlient.hentBeregningForBehandling(behandlingId) } returns mockBeregning
+        val mockAvkorting = Avkorting(
+            listOf(
+                AvkortingGrunnlag(
+                    fom = YearMonth.now(),
+                    tom = null,
+                    aarsinntekt = 100,
+                    fratrekkInnAar = 40,
+                    relevanteMaanederInnAar = 2,
+                    spesifikasjon = ""
+                )
+            ),
+            listOf(
+                AvkortetYtelse(
+                    fom = YearMonth.now(),
+                    tom = null,
+                    ytelseFoerAvkorting = 200,
+                    avkortingsbeloep = 50,
+                    ytelseEtterAvkorting = 150,
+                    restanse = 0
+                )
+            )
+        )
+        coEvery { beregningKlient.hentAvkortingForBehandling(behandlingId) } returns mockAvkorting
+
+        val fattetTidspunkt = Tidspunkt.ofNorskTidssone(LocalDate.of(2023, 7, 1), LocalTime.NOON)
+        val (registrertSakRad, registrertStoenadRad) = service.registrerStatistikkForVedtak(
+            vedtak = vedtak(
+                sakId = sakId,
+                sakType = SakType.OMSTILLINGSSTOENAD,
+                behandlingId = behandlingId,
+                vedtakFattet = VedtakFattet("Saksbehandler", "saksbehandlerEnhet", fattetTidspunkt),
+                attestasjon = Attestasjon("Attestant", "attestantEnhet", fattetTidspunkt),
+                virk = virkningstidspunkt
+            ),
+            vedtakHendelse = VedtakHendelse.IVERKSATT,
+            tekniskTid = LocalDateTime.of(2023, 2, 1, 8, 30)
+        )
+
+        registrertSakRad shouldNotBe null
+        registrertSakRad?.asClue { registrertSak ->
+            registrertSak.sakId shouldBe sakId
+            registrertSak.sakYtelse shouldBe SakType.OMSTILLINGSSTOENAD.name
+            registrertSak.beregning shouldBe mockBeregning
+            registrertSak.avkorting shouldBe mockAvkorting
+        }
+        registrertStoenadRad shouldNotBe null
+        registrertStoenadRad?.asClue { registrertStoenad ->
+            registrertStoenad.beregning shouldBe mockBeregning
+            registrertStoenad.avkorting shouldBe mockAvkorting
+        }
     }
 
     @Test
     fun `mapper behandlinghendelse riktig`() {
         val behandlingId = UUID.randomUUID()
         val sakId = 1L
-        val stoenadRepo = mockk<StoenadRepository>()
         every { stoenadRepo.lagreStoenadsrad(any()) } returnsArgument 0
-
-        val sakRepo = mockk<SakRepository>()
         every { sakRepo.lagreRad(any()) } returnsArgument 0
 
-        val behandlingKlient = mockk<BehandlingKlient>()
         coEvery { behandlingKlient.hentDetaljertBehandling(behandlingId) } returns DetaljertBehandling(
             id = behandlingId,
             sak = sakId,
@@ -161,15 +267,6 @@ class StatistikkServiceTest {
             enhet = "1111"
         )
 
-        val beregningKlient = mockk<BeregningKlient>()
-
-        val service = StatistikkService(
-            stoenadRepository = stoenadRepo,
-            sakRepository = sakRepo,
-            behandlingKlient = behandlingKlient,
-            beregningKlient = beregningKlient
-        )
-
         val tekniskTidForHendelse = LocalDateTime.of(2023, 2, 1, 8, 30)
         val registrertStatistikk = service.registrerStatistikkForBehandlinghendelse(
             behandlingIntern = behandling(id = behandlingId, sakId = sakId),
@@ -177,33 +274,27 @@ class StatistikkServiceTest {
             tekniskTid = tekniskTidForHendelse
         ) ?: throw NullPointerException("Fikk ikke registrert statistikk")
 
-        Assertions.assertEquals(registrertStatistikk.sakId, sakId)
-        Assertions.assertEquals(registrertStatistikk.sakYtelse, "BARNEPENSJON")
-        Assertions.assertEquals(registrertStatistikk.sakUtland, SakUtland.NASJONAL)
-        Assertions.assertEquals(registrertStatistikk.behandlingId, behandlingId)
-        Assertions.assertEquals(registrertStatistikk.sakYtelsesgruppe, SakYtelsesgruppe.EN_AVDOED_FORELDER)
-        Assertions.assertEquals(registrertStatistikk.tekniskTid, tekniskTidForHendelse.toTidspunkt())
-        Assertions.assertEquals(registrertStatistikk.behandlingMetode, BehandlingMetode.MANUELL)
-        Assertions.assertNull(registrertStatistikk.ansvarligBeslutter)
-        Assertions.assertEquals("1111", registrertStatistikk.ansvarligEnhet)
-        Assertions.assertNull(registrertStatistikk.saksbehandler)
+        assertEquals(registrertStatistikk.sakId, sakId)
+        assertEquals(registrertStatistikk.sakYtelse, "BARNEPENSJON")
+        assertEquals(registrertStatistikk.sakUtland, SakUtland.NASJONAL)
+        assertEquals(registrertStatistikk.behandlingId, behandlingId)
+        assertEquals(registrertStatistikk.sakYtelsesgruppe, SakYtelsesgruppe.EN_AVDOED_FORELDER)
+        assertEquals(registrertStatistikk.tekniskTid, tekniskTidForHendelse.toTidspunkt())
+        assertEquals(registrertStatistikk.behandlingMetode, BehandlingMetode.MANUELL)
+        assertNull(registrertStatistikk.ansvarligBeslutter)
+        assertEquals("1111", registrertStatistikk.ansvarligEnhet)
+        assertNull(registrertStatistikk.saksbehandler)
     }
 
     @Test
     fun `lagreMaanedligStoenadstatistikk lagrer ting riktig`() {
         val stoenadRepository: StoenadRepository = mockk(relaxed = true)
-
-        val sakRepository: SakRepository = mockk()
-        val behandlingKlient: BehandlingKlient = mockk()
-        val beregningKlient: BeregningKlient = mockk()
-
         val service = StatistikkService(
             stoenadRepository = stoenadRepository,
-            sakRepository = sakRepository,
+            sakRepository = sakRepo,
             behandlingKlient = behandlingKlient,
             beregningKlient = beregningKlient
         )
-
         service.lagreMaanedsstatistikk(MaanedStatistikk(YearMonth.of(2022, 8), emptyList()))
         verify {
             stoenadRepository.lagreMaanedJobUtfoert(YearMonth.of(2022, 8), 0, 0)
@@ -238,6 +329,7 @@ fun vedtak(
 fun behandling(
     id: UUID = UUID.randomUUID(),
     sakId: Long = 1L,
+    sakType: SakType = SakType.BARNEPENSJON,
     behandlingOpprettet: LocalDateTime = Tidspunkt.now().toLocalDatetimeUTC(),
     sistEndret: LocalDateTime = Tidspunkt.now().toLocalDatetimeUTC(),
     status: BehandlingStatus = BehandlingStatus.OPPRETTET,
@@ -245,7 +337,7 @@ fun behandling(
     soeker: String = "12312312312"
 ) = BehandlingIntern(
     id = id,
-    sak = Sak(soeker, SakType.BARNEPENSJON, sakId, "4808"),
+    sak = Sak(soeker, sakType, sakId, "4808"),
     behandlingOpprettet = behandlingOpprettet,
     sistEndret = sistEndret,
     status = status,

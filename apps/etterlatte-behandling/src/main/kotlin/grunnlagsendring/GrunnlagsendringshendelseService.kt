@@ -23,6 +23,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
+import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveType
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.pdlhendelse.Adressebeskyttelse
@@ -39,6 +40,7 @@ import no.nav.etterlatte.oppgaveny.OppgaveServiceNy
 import no.nav.etterlatte.sak.SakService
 import no.nav.etterlatte.sak.TilgangService
 import no.nav.etterlatte.sikkerLogg
+import no.nav.etterlatte.token.Saksbehandler
 import org.slf4j.LoggerFactory
 import java.util.*
 
@@ -49,7 +51,8 @@ class GrunnlagsendringshendelseService(
     private val pdlKlient: PdlKlient,
     private val grunnlagKlient: GrunnlagKlient,
     private val tilgangService: TilgangService,
-    private val sakService: SakService
+    private val sakService: SakService,
+    private val kanBrukeNyOppgaveliste: Boolean
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -74,11 +77,31 @@ class GrunnlagsendringshendelseService(
         )
     }
 
-    fun lukkHendelseMedKommentar(hendelse: Grunnlagsendringshendelse) {
+    fun lukkHendelseMedKommentar(hendelse: Grunnlagsendringshendelse, saksbehandler: Saksbehandler) {
         logger.info("Lukker hendelse med id $hendelse.id")
 
         inTransaction {
             grunnlagsendringshendelseDao.lukkGrunnlagsendringStatus(hendelse = hendelse)
+            try {
+                oppgaveService.ferdigStillOppgaveUnderBehandling(
+                    hendelse.id.toString(),
+                    saksbehandler = saksbehandler.ident
+                )
+            } catch (e: Exception) {
+                logger.error(
+                    "Kunne ikke ferdigstille oppgaven for hendelsen på grunn av feil",
+                    e
+                )
+                if (kanBrukeNyOppgaveliste) {
+                    throw e
+                } else {
+                    logger.error(
+                        "Lukking av hendelsen går igjennom selv om vi ikke kunne lukke oppgaven knyttet" +
+                            "til hendelsen, siden det ikke er skrudd på enda.",
+                        e
+                    )
+                }
+            }
         }
     }
 
@@ -134,7 +157,6 @@ class GrunnlagsendringshendelseService(
     ): List<Grunnlagsendringshendelse> {
         return opprettHendelseInstitusjonsoppholdForPersonSjekketAvJobb(
             fnr = oppholdsHendelse.norskident,
-            grunnlagendringType = GrunnlagsendringsType.INSTITUSJONSOPPHOLD,
             samsvar = SamsvarMellomKildeOgGrunnlag.INSTITUSJONSOPPHOLD(
                 samsvar = false,
                 oppholdstype = oppholdsHendelse.institusjonsoppholdsType,
@@ -174,8 +196,14 @@ class GrunnlagsendringshendelseService(
         val sakerMedNyEnhet = finnSaker.map {
             SakMedEnhet(it.id, finnEnhetFraGradering(fnr, gradering, it.sakType))
         }
-
         sakService.oppdaterEnhetForSaker(sakerMedNyEnhet)
+        oppdaterEnhetForRelaterteOppgaver(sakerMedNyEnhet)
+    }
+
+    private fun oppdaterEnhetForRelaterteOppgaver(sakerMedNyEnhet: List<SakMedEnhet>) {
+        sakerMedNyEnhet.forEach {
+            oppgaveService.endreEnhetForOppgaverTilknyttetSak(it.id, it.enhet)
+        }
     }
 
     private fun finnEnhetFraGradering(fnr: String, gradering: AdressebeskyttelseGradering, sakType: SakType): String {
@@ -185,6 +213,7 @@ class GrunnlagsendringshendelseService(
             AdressebeskyttelseGradering.FORTROLIG -> {
                 sakService.finnEnhetForPersonOgTema(fnr, sakType.tema, sakType).enhetNr
             }
+
             AdressebeskyttelseGradering.UGRADERT -> {
                 sakService.finnEnhetForPersonOgTema(fnr, sakType.tema, sakType).enhetNr
             }
@@ -195,9 +224,9 @@ class GrunnlagsendringshendelseService(
 
     private fun opprettHendelseInstitusjonsoppholdForPersonSjekketAvJobb(
         fnr: String,
-        grunnlagendringType: GrunnlagsendringsType,
         samsvar: SamsvarMellomKildeOgGrunnlag
     ): List<Grunnlagsendringshendelse> {
+        val grunnlagendringType: GrunnlagsendringsType = GrunnlagsendringsType.INSTITUSJONSOPPHOLD
         val tidspunktForMottakAvHendelse = Tidspunkt.now().toLocalDatetimeUTC()
 
         val sakerOgRoller = runBlocking { grunnlagKlient.hentPersonSakOgRolle(fnr).sakerOgRoller }
@@ -211,23 +240,24 @@ class GrunnlagsendringshendelseService(
                         "Oppretter grunnlagsendringshendelse med id=$hendelseId for hendelse av " +
                             "type $grunnlagendringType på sak med id=${rolleOgSak.sakId}"
                     )
+                    val hendelse = Grunnlagsendringshendelse(
+                        id = hendelseId,
+                        sakId = rolleOgSak.sakId,
+                        status = GrunnlagsendringStatus.SJEKKET_AV_JOBB,
+                        type = grunnlagendringType,
+                        opprettet = tidspunktForMottakAvHendelse,
+                        hendelseGjelderRolle = rolleOgSak.rolle,
+                        gjelderPerson = fnr,
+                        samsvarMellomKildeOgGrunnlag = samsvar
+                    )
                     oppgaveService.opprettNyOppgaveMedSakOgReferanse(
-                        hendelseId.toString(),
-                        rolleOgSak.sakId,
-                        oppgaveType = OppgaveType.HENDELSE
+                        referanse = hendelseId.toString(),
+                        sakId = rolleOgSak.sakId,
+                        oppgaveKilde = OppgaveKilde.HENDELSE,
+                        oppgaveType = OppgaveType.VURDER_KONSEKVENS,
+                        merknad = hendelse.beskrivelse()
                     )
-                    grunnlagsendringshendelseDao.opprettGrunnlagsendringshendelse(
-                        Grunnlagsendringshendelse(
-                            id = hendelseId,
-                            sakId = rolleOgSak.sakId,
-                            status = GrunnlagsendringStatus.SJEKKET_AV_JOBB,
-                            type = grunnlagendringType,
-                            opprettet = tidspunktForMottakAvHendelse,
-                            hendelseGjelderRolle = rolleOgSak.rolle,
-                            gjelderPerson = fnr,
-                            samsvarMellomKildeOgGrunnlag = samsvar
-                        )
-                    )
+                    grunnlagsendringshendelseDao.opprettGrunnlagsendringshendelse(hendelse)
                 }
             }
         }
@@ -235,9 +265,9 @@ class GrunnlagsendringshendelseService(
 
     private fun opprettHendelseAvTypeForPerson(
         fnr: String,
-        grunnlagendringType: GrunnlagsendringsType,
-        grunnlagsEndringsStatus: GrunnlagsendringStatus = GrunnlagsendringStatus.VENTER_PAA_JOBB
+        grunnlagendringType: GrunnlagsendringsType
     ): List<Grunnlagsendringshendelse> {
+        val grunnlagsEndringsStatus: GrunnlagsendringStatus = GrunnlagsendringStatus.VENTER_PAA_JOBB
         val tidspunktForMottakAvHendelse = Tidspunkt.now().toLocalDatetimeUTC()
         val sakerOgRoller = runBlocking { grunnlagKlient.hentPersonSakOgRolle(fnr).sakerOgRoller }
 
@@ -256,22 +286,16 @@ class GrunnlagsendringshendelseService(
                             "Oppretter grunnlagsendringshendelse med id=$hendelseId for hendelse av " +
                                 "type $grunnlagendringType på sak med id=${rolleOgSak.sakId}"
                         )
-                        oppgaveService.opprettNyOppgaveMedSakOgReferanse(
-                            hendelseId.toString(),
-                            rolleOgSak.sakId,
-                            oppgaveType = OppgaveType.HENDELSE
+                        val hendelse = Grunnlagsendringshendelse(
+                            id = hendelseId,
+                            sakId = rolleOgSak.sakId,
+                            status = grunnlagsEndringsStatus,
+                            type = grunnlagendringType,
+                            opprettet = tidspunktForMottakAvHendelse,
+                            hendelseGjelderRolle = rolleOgSak.rolle,
+                            gjelderPerson = fnr
                         )
-                        grunnlagsendringshendelseDao.opprettGrunnlagsendringshendelse(
-                            Grunnlagsendringshendelse(
-                                id = hendelseId,
-                                sakId = rolleOgSak.sakId,
-                                status = grunnlagsEndringsStatus,
-                                type = grunnlagendringType,
-                                opprettet = tidspunktForMottakAvHendelse,
-                                hendelseGjelderRolle = rolleOgSak.rolle,
-                                gjelderPerson = fnr
-                            )
-                        )
+                        grunnlagsendringshendelseDao.opprettGrunnlagsendringshendelse(hendelse)
                     }
             }
         }
@@ -279,8 +303,7 @@ class GrunnlagsendringshendelseService(
 
     private fun opprettHendelseAvTypeForSak(
         sakId: Long,
-        grunnlagendringType: GrunnlagsendringsType,
-        grunnlagsEndringsStatus: GrunnlagsendringStatus = GrunnlagsendringStatus.VENTER_PAA_JOBB
+        grunnlagendringType: GrunnlagsendringsType
     ): List<Grunnlagsendringshendelse> {
         return inTransaction {
             if (hendelseEksistererFraFoer(sakId, null, grunnlagendringType)) {
@@ -291,24 +314,17 @@ class GrunnlagsendringshendelseService(
                     "Oppretter grunnlagsendringshendelse med id=$hendelseId for hendelse av " +
                         "type $grunnlagendringType på sak med id=$sakId"
                 )
-                oppgaveService.opprettNyOppgaveMedSakOgReferanse(
-                    referanse = hendelseId.toString(),
+                val hendelse = Grunnlagsendringshendelse(
+                    id = hendelseId,
                     sakId = sakId,
-                    oppgaveType = OppgaveType.HENDELSE
+                    status = GrunnlagsendringStatus.VENTER_PAA_JOBB,
+                    type = grunnlagendringType,
+                    opprettet = Tidspunkt.now().toLocalDatetimeUTC(),
+                    hendelseGjelderRolle = Saksrolle.SOEKER,
+                    gjelderPerson = sakService.finnSak(sakId)?.ident!!
                 )
                 listOf(
-                    grunnlagsendringshendelseDao.opprettGrunnlagsendringshendelse(
-                        Grunnlagsendringshendelse(
-                            id = hendelseId,
-                            sakId = sakId,
-                            status = grunnlagsEndringsStatus,
-                            type = grunnlagendringType,
-                            opprettet = Tidspunkt.now().toLocalDatetimeUTC(),
-                            hendelseGjelderRolle = Saksrolle.SOEKER,
-                            gjelderPerson = sakService.finnSak(sakId)?.ident!!
-                        )
-                    )
-
+                    grunnlagsendringshendelseDao.opprettGrunnlagsendringshendelse(hendelse)
                 )
             }
         }
@@ -370,6 +386,15 @@ class GrunnlagsendringshendelseService(
                 etterStatus = GrunnlagsendringStatus.SJEKKET_AV_JOBB,
                 samsvarMellomKildeOgGrunnlag = samsvarMellomKildeOgGrunnlag
             )
+            oppgaveService.opprettNyOppgaveMedSakOgReferanse(
+                referanse = hendelse.id.toString(),
+                sakId = hendelse.sakId,
+                oppgaveKilde = OppgaveKilde.HENDELSE,
+                oppgaveType = OppgaveType.VURDER_KONSEKVENS,
+                merknad = hendelse.beskrivelse()
+            ).also {
+                logger.info("Oppgave for hendelsen med id=${hendelse.id} er opprettet med id=${it.id}")
+            }
         }
     }
 

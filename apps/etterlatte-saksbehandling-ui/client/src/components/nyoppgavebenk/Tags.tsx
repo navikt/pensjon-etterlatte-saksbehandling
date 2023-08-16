@@ -22,10 +22,11 @@ export const OppgavetypeTag = (props: { oppgavetype: Oppgavetype }) => {
   const OPPGAVETYPE_TIL_TAGDATA: Record<Oppgavetype, { variant: Variants; text: string }> = {
     FOERSTEGANGSBEHANDLING: { variant: Variants.INFO, text: 'Førstegangsbehandling' },
     REVURDERING: { variant: Variants.NEUTRAL, text: 'Revurdering' },
-    HENDELSE: { variant: Variants.ALT1, text: 'Hendelse' },
+    VURDER_KONSEKVENS: { variant: Variants.ALT1, text: 'Hendelse' },
     MANUELT_OPPHOER: { variant: Variants.ALT2, text: 'Manuelt opphør' },
-    EKSTERN: { variant: Variants.ALT3, text: 'Ekstern' },
     ATTESTERING: { variant: Variants.ALT3_FILLED, text: 'Attestering' },
+    UNDERKJENT: { variant: Variants.ALT3, text: 'Underkjent' },
+    GOSYS: { variant: Variants.INFO_FILLED, text: 'Gosys-oppgave' },
   } as const
 
   const tagdata = OPPGAVETYPE_TIL_TAGDATA[oppgavetype]

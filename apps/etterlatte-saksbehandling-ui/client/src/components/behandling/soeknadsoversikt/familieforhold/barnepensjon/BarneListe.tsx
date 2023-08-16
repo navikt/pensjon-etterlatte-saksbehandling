@@ -15,10 +15,13 @@ const FnrWrapper = styled.div`
 
 type Props = {
   familieforhold: IFamilieforhold
+  soekerFnr: string
 }
 
-export const BarneListe = ({ familieforhold }: Props) => {
-  const barneListe = familieforhold.avdoede?.opplysning.avdoedesBarn ?? []
+export const BarneListe = ({ familieforhold, soekerFnr }: Props) => {
+  const barneListe = (familieforhold.avdoede?.opplysning.avdoedesBarn ?? []).filter(
+    (person) => person.foedselsnummer !== soekerFnr
+  )
 
   return (
     <div>
@@ -26,12 +29,12 @@ export const BarneListe = ({ familieforhold }: Props) => {
         <IconWrapper>
           <ChildEyesIcon fontSize={IconSize.DEFAULT} />
         </IconWrapper>
-        <Heading size={'small'} level={'3'}>
-          Søsken(avdødes barn)
+        <Heading size="small" level="3">
+          Avdødes barn (søsken)
         </Heading>
       </FlexHeader>
       <TableWrapper>
-        <Table size={'small'}>
+        <Table size="small">
           <Table.Header>
             <Table.Row>
               <Table.HeaderCell scope={'col'}>Navn</Table.HeaderCell>
@@ -49,7 +52,7 @@ export const BarneListe = ({ familieforhold }: Props) => {
             ) : (
               <Table.Row>
                 <Table.DataCell colSpan={5} aria-colspan={5} align={'center'}>
-                  Avdøde har ingen barn
+                  Avdøde har ingen andre barn enn søker
                 </Table.DataCell>
               </Table.Row>
             )}

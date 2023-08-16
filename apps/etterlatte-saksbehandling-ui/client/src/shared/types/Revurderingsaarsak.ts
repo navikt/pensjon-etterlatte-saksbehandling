@@ -12,6 +12,10 @@ export enum Revurderingsaarsak {
   ADOPSJON = 'ADOPSJON',
   SIVILSTAND = 'SIVILSTAND',
   NY_SOEKNAD = 'NY_SOEKNAD',
+  FENGSELSOPPHOLD = 'FENGSELSOPPHOLD',
+  ANNEN = 'ANNEN',
+  YRKESSKADE = 'YRKESSKADE',
+  UT_AV_FENGSEL = 'UT_AV_FENGSEL',
 }
 
 export const tekstRevurderingsaarsak: Record<Revurderingsaarsak, string> = {
@@ -27,6 +31,10 @@ export const tekstRevurderingsaarsak: Record<Revurderingsaarsak, string> = {
   ADOPSJON: 'Adopsjon',
   SIVILSTAND: 'Endring av sivilstand',
   NY_SOEKNAD: 'Det har kommet inn en ny søknad',
+  FENGSELSOPPHOLD: 'Fengselsopphold',
+  ANNEN: 'Annen',
+  YRKESSKADE: 'Yrkesskade',
+  UT_AV_FENGSEL: 'Ut av fengsel',
 } as const
 
 export const erOpphoer = (revurderingsaarsak: Revurderingsaarsak) =>

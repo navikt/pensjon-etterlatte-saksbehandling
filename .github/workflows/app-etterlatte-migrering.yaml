@@ -17,6 +17,7 @@ on:
     paths:
       - apps/etterlatte-migrering/**
       - libs/saksbehandling-common/**
+      - libs/etterlatte-funksjonsbrytere/**
       - libs/etterlatte-ktor/**
       - libs/etterlatte-database/**
       - libs/ktor2client-onbehalfof/**
@@ -27,6 +28,7 @@ on:
     paths:
       - apps/etterlatte-migrering/**
       - libs/saksbehandling-common/**
+      - libs/etterlatte-funksjonsbrytere/**
       - libs/etterlatte-ktor/**
       - libs/etterlatte-database/**
       - libs/ktor2client-onbehalfof/**

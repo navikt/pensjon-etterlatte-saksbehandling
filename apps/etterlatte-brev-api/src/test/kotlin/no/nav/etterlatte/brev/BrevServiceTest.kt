@@ -13,6 +13,7 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.brev.adresse.AdresseService
 import no.nav.etterlatte.brev.behandling.SakOgBehandlingService
 import no.nav.etterlatte.brev.brevbaker.BrevbakerKlient
+import no.nav.etterlatte.brev.brevbaker.BrevbakerService
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.distribusjon.DistribusjonServiceImpl
 import no.nav.etterlatte.brev.distribusjon.DistribusjonsTidspunktType
@@ -21,6 +22,7 @@ import no.nav.etterlatte.brev.dokarkiv.DokarkivServiceImpl
 import no.nav.etterlatte.brev.journalpost.JournalpostResponse
 import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Brev
+import no.nav.etterlatte.brev.model.BrevDataMapper
 import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.Slate
@@ -48,9 +50,17 @@ internal class BrevServiceTest {
     private val adresseService = mockk<AdresseService>()
     private val dokarkivService = mockk<DokarkivServiceImpl>()
     private val distribusjonService = mockk<DistribusjonServiceImpl>()
+    private val brevDataMapper = mockk<BrevDataMapper>()
 
     private val brevService =
-        BrevService(db, sakOgBehandlingService, adresseService, dokarkivService, distribusjonService, brevbaker)
+        BrevService(
+            db,
+            sakOgBehandlingService,
+            adresseService,
+            dokarkivService,
+            distribusjonService,
+            BrevbakerService(brevbaker, adresseService, brevDataMapper)
+        )
 
     private val bruker = BrukerTokenInfo.of(UUID.randomUUID().toString(), "Z123456", null, null, null)
 

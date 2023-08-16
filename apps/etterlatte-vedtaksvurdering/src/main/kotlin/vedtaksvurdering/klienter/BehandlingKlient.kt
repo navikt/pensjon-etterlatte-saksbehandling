@@ -3,7 +3,6 @@ package no.nav.etterlatte.vedtaksvurdering.klienter
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
-import com.github.michaelbull.result.get
 import com.github.michaelbull.result.mapBoth
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
@@ -12,7 +11,7 @@ import no.nav.etterlatte.libs.common.SakTilgangsSjekk
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.oppgaveNy.AttesterVedtakOppgave
+import no.nav.etterlatte.libs.common.oppgaveNy.VedtakEndringDTO
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
@@ -27,22 +26,33 @@ import java.util.*
 interface BehandlingKlient : BehandlingTilgangsSjekk, SakTilgangsSjekk {
     suspend fun hentBehandling(behandlingId: UUID, brukerTokenInfo: BrukerTokenInfo): DetaljertBehandling
     suspend fun hentSak(sakId: Long, brukerTokenInfo: BrukerTokenInfo): Sak
-    suspend fun oppgaveAttestering(
+    suspend fun fattVedtakBehandling(
         brukerTokenInfo: BrukerTokenInfo,
-        attesterVedtakOppgave: AttesterVedtakOppgave
+        vedtakEndringDTO: VedtakEndringDTO
     ): Boolean
-    suspend fun fattVedtak(
+
+    suspend fun underkjennVedtak(
+        brukerTokenInfo: BrukerTokenInfo,
+        vedtakEndringDTO: VedtakEndringDTO
+    ): Boolean
+
+    suspend fun attesterVedtak(
+        brukerTokenInfo: BrukerTokenInfo,
+        vedtakEndringDTO: VedtakEndringDTO
+    ): Boolean
+
+    suspend fun kanFatteVedtak(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo
     ): Boolean
 
-    suspend fun attester(
+    suspend fun kanAttestereVedtak(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
         vedtakHendelse: VedtakHendelse? = null
     ): Boolean
 
-    suspend fun underkjenn(
+    suspend fun kanUnderkjenneVedtak(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
         vedtakHendelse: VedtakHendelse? = null
@@ -103,62 +113,108 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
         }
     }
 
-    override suspend fun oppgaveAttestering(
+    override suspend fun fattVedtakBehandling(
         brukerTokenInfo: BrukerTokenInfo,
-        attesterVedtakOppgave: AttesterVedtakOppgave
+        vedtakEndringDTO: VedtakEndringDTO
     ): Boolean {
         logger.info(
-            "Attesterer oppgave og commiter sak for behandling" +
-                " ${attesterVedtakOppgave.attesteringsOppgave.referanse} " +
-                "sakId=${attesterVedtakOppgave.attesteringsOppgave.sakId}"
+            "Fatter oppgave og commiter sak for behandling" +
+                " ${vedtakEndringDTO.vedtakOppgaveDTO.referanse} " +
+                "sakId=${vedtakEndringDTO.vedtakOppgaveDTO.sakId}"
         )
-        val resource = Resource(clientId = clientId, url = "$resourceUrl/fattvedtak-behandling")
+        val resource = Resource(clientId = clientId, url = "$resourceUrl/fattvedtak")
         val response = downstreamResourceClient.post(
             resource = resource,
             brukerTokenInfo = brukerTokenInfo,
-            postBody = attesterVedtakOppgave
+            postBody = vedtakEndringDTO
         )
         return when (response) {
             is Ok -> true
             is Err -> {
                 logger.error(
-                    "Kan ikke attestere oppgaver og commite vedtak av type for behandling " +
-                        attesterVedtakOppgave.attesteringsOppgave.referanse
+                    "Kan ikke fatte oppgaver og commite vedtak av type for behandling " +
+                        vedtakEndringDTO.vedtakOppgaveDTO.referanse
                 )
                 throw response.error
             }
         }
     }
 
-    override suspend fun fattVedtak(
+    override suspend fun underkjennVedtak(
+        brukerTokenInfo: BrukerTokenInfo,
+        vedtakEndringDTO: VedtakEndringDTO
+    ): Boolean {
+        logger.info(
+            "Underkjenn oppgave og commiter sak for behandling" +
+                " ${vedtakEndringDTO.vedtakOppgaveDTO.referanse} " +
+                "sakId=${vedtakEndringDTO.vedtakOppgaveDTO.sakId}"
+        )
+        val resource = Resource(clientId = clientId, url = "$resourceUrl/underkjennvedtak")
+        val response = downstreamResourceClient.post(
+            resource = resource,
+            brukerTokenInfo = brukerTokenInfo,
+            postBody = vedtakEndringDTO
+        )
+        return when (response) {
+            is Ok -> true
+            is Err -> {
+                logger.error(
+                    "Kan ikke underkjenne oppgaver og commite vedtak av type for behandling " +
+                        vedtakEndringDTO.vedtakOppgaveDTO.referanse
+                )
+                throw response.error
+            }
+        }
+    }
+
+    override suspend fun attesterVedtak(
+        brukerTokenInfo: BrukerTokenInfo,
+        vedtakEndringDTO: VedtakEndringDTO
+    ): Boolean {
+        logger.info(
+            "Attesterer oppgave og commiter sak for behandling" +
+                " ${vedtakEndringDTO.vedtakOppgaveDTO.referanse} " +
+                "sakId=${vedtakEndringDTO.vedtakOppgaveDTO.sakId}"
+        )
+        val resource = Resource(clientId = clientId, url = "$resourceUrl/attestervedtak")
+        val response = downstreamResourceClient.post(
+            resource = resource,
+            brukerTokenInfo = brukerTokenInfo,
+            postBody = vedtakEndringDTO
+        )
+        return when (response) {
+            is Ok -> true
+            is Err -> {
+                logger.error(
+                    "Kan ikke attestere oppgaver og commite vedtak av type for behandling " +
+                        vedtakEndringDTO.vedtakOppgaveDTO.referanse
+                )
+                throw response.error
+            }
+        }
+    }
+
+    override suspend fun kanFatteVedtak(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo
     ): Boolean {
         return statussjekkForBehandling(behandlingId, brukerTokenInfo, BehandlingStatus.FATTET_VEDTAK)
     }
 
-    override suspend fun attester(
+    override suspend fun kanAttestereVedtak(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
         vedtakHendelse: VedtakHendelse?
     ): Boolean {
-        return if (vedtakHendelse == null) {
-            statussjekkForBehandling(behandlingId, brukerTokenInfo, BehandlingStatus.ATTESTERT)
-        } else {
-            commitStatussjekkForBehandling(behandlingId, brukerTokenInfo, BehandlingStatus.ATTESTERT, vedtakHendelse)
-        }
+        return statussjekkForBehandling(behandlingId, brukerTokenInfo, BehandlingStatus.ATTESTERT)
     }
 
-    override suspend fun underkjenn(
+    override suspend fun kanUnderkjenneVedtak(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
         vedtakHendelse: VedtakHendelse?
     ): Boolean {
-        return if (vedtakHendelse == null) {
-            statussjekkForBehandling(behandlingId, brukerTokenInfo, BehandlingStatus.RETURNERT)
-        } else {
-            commitStatussjekkForBehandling(behandlingId, brukerTokenInfo, BehandlingStatus.RETURNERT, vedtakHendelse)
-        }
+        return statussjekkForBehandling(behandlingId, brukerTokenInfo, BehandlingStatus.RETURNERT)
     }
 
     override suspend fun iverksett(behandlingId: UUID, brukerTokenInfo: BrukerTokenInfo, vedtakId: Long) =
@@ -226,35 +282,6 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
             failure = {
                 logger.info(
                     "Kan ikke sjekke status=$status i behandling med behandlingId=$behandlingId (commit=false)",
-                    it.throwable
-                )
-                false
-            }
-        )
-    }
-
-    private suspend fun commitStatussjekkForBehandling(
-        behandlingId: UUID,
-        brukerTokenInfo: BrukerTokenInfo,
-        status: BehandlingStatus,
-        vedtakHendelse: VedtakHendelse
-    ): Boolean {
-        logger.info("Setter behandling med behandlingId=$behandlingId til status ${status.name} (commit=true)")
-
-        val statusnavn = getStatusNavn(status)
-        val resource = Resource(clientId = clientId, url = "$resourceUrl/behandlinger/$behandlingId/$statusnavn")
-
-        val response = downstreamResourceClient.post(
-            resource = resource,
-            brukerTokenInfo = brukerTokenInfo,
-            postBody = vedtakHendelse
-        )
-
-        return response.mapBoth(
-            success = { true },
-            failure = {
-                logger.info(
-                    "Kan ikke sette status=$status i behandling med behandlingId=$behandlingId (commit=true)",
                     it.throwable
                 )
                 false

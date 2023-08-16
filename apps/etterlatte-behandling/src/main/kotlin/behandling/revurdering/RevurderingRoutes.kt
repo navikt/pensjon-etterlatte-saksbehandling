@@ -9,22 +9,19 @@ import io.ktor.server.routing.application
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
-import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
-import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandlingsId
 import no.nav.etterlatte.libs.common.hentNavidentFraToken
+import no.nav.etterlatte.libs.common.kunSaksbehandler
 import no.nav.etterlatte.libs.common.medBody
 import no.nav.etterlatte.libs.common.sakId
-import java.util.*
 
 internal fun Route.revurderingRoutes(
-    revurderingService: RevurderingService,
-    behandlingService: BehandlingService
+    revurderingService: RevurderingService
 ) {
     val logger = application.log
 
@@ -49,46 +46,30 @@ internal fun Route.revurderingRoutes(
 
         route("{$SAKID_CALL_PARAMETER}") {
             post {
-                logger.info("Oppretter ny revurdering på sak $sakId")
-                medBody<OpprettRevurderingRequest> { body ->
-                    if (!body.aarsak.kanBrukesIMiljo()) {
-                        return@post call.respond(
-                            HttpStatusCode.BadRequest,
-                            "Feil revurderingsårsak ${body.aarsak}, foreløpig ikke støttet"
-                        )
-                    }
-                    behandlingService.hentSisteIverksatte(sakId)?.let { forrigeIverksatteBehandling ->
-                        val sakType = forrigeIverksatteBehandling.sak.sakType
-                        if (!body.aarsak.gyldigForSakType(sakType)) {
+                kunSaksbehandler { saksbehandler ->
+                    logger.info("Oppretter ny revurdering på sak $sakId")
+                    medBody<OpprettRevurderingRequest> { opprettRevurderingRequest ->
+                        if (!opprettRevurderingRequest.aarsak.kanBrukesIMiljo()) {
                             return@post call.respond(
                                 HttpStatusCode.BadRequest,
-                                "${body.aarsak} er ikke støttet for $sakType"
+                                "Feil revurderingsårsak ${opprettRevurderingRequest.aarsak}, foreløpig ikke støttet"
                             )
                         }
 
-                        val paaGrunnAvHendelseId = try {
-                            body.paaGrunnAvHendelseId?.let { UUID.fromString(it) }
-                        } catch (e: Exception) {
-                            return@post call.respond(
-                                HttpStatusCode.BadRequest,
-                                "${body.paaGrunnAvHendelseId} er ikke en gyldig UUID"
-                            )
-                        }
-
-                        val revurdering = revurderingService.opprettManuellRevurdering(
-                            sakId = forrigeIverksatteBehandling.sak.id,
-                            forrigeBehandling = forrigeIverksatteBehandling,
-                            revurderingAarsak = body.aarsak,
-                            kilde = Vedtaksloesning.GJENNY,
-                            paaGrunnAvHendelse = paaGrunnAvHendelseId,
-                            begrunnelse = body.begrunnelse
+                        val revurdering = revurderingService.opprettManuellRevurderingWrapper(
+                            sakId,
+                            opprettRevurderingRequest.aarsak,
+                            opprettRevurderingRequest.paaGrunnAvHendelseId,
+                            opprettRevurderingRequest.begrunnelse,
+                            opprettRevurderingRequest.fritekstAarsak,
+                            saksbehandler.ident
                         )
 
                         when (revurdering) {
                             null -> call.respond(HttpStatusCode.NotFound)
                             else -> call.respond(revurdering.id)
                         }
-                    } ?: call.respond(HttpStatusCode.BadRequest, "Kan ikke revurdere en sak uten iverksatt behandling")
+                    }
                 }
             }
         }
@@ -99,9 +80,7 @@ internal fun Route.revurderingRoutes(
             val sakType = call.parameters["saktype"]?.let { runCatching { SakType.valueOf(it) }.getOrNull() }
                 ?: return@get call.respond(HttpStatusCode.BadRequest, "Ugyldig saktype")
 
-            val stoettedeRevurderinger = RevurderingAarsak.values()
-                .filter { it.kanBrukesIMiljo() && it.gyldigForSakType(sakType) }
-                .filter { it.name !== RevurderingAarsak.NY_SOEKNAD.toString() }
+            val stoettedeRevurderinger = RevurderingAarsak.values().filter { it.erStoettaRevurdering(sakType) }
             call.respond(stoettedeRevurderinger)
         }
     }
@@ -110,7 +89,8 @@ internal fun Route.revurderingRoutes(
 data class OpprettRevurderingRequest(
     val aarsak: RevurderingAarsak,
     val paaGrunnAvHendelseId: String? = null,
-    val begrunnelse: String? = null
+    val begrunnelse: String? = null,
+    val fritekstAarsak: String? = null
 )
 
 data class RevurderingInfoDto(val info: RevurderingInfo)

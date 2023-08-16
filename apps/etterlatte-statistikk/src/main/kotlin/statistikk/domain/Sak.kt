@@ -53,5 +53,6 @@ data class SakRad(
     val revurderingAarsak: String?,
     val vedtakLoependeFom: LocalDate?,
     val vedtakLoependeTom: LocalDate?,
-    val beregning: Beregning?
+    val beregning: Beregning?,
+    val avkorting: Avkorting?
 )

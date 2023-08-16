@@ -1,5 +1,7 @@
 package no.nav.etterlatte.funksjonsbrytere
 
+import java.net.URI
+
 interface FeatureToggle {
     fun key(): String
 }
@@ -10,9 +12,9 @@ enum class FellesFeatureToggle(private val key: String) : FeatureToggle {
     override fun key() = key
 }
 
-enum class FeatureToggleServiceProperties(val navn: String) {
-    ENABLED("funksjonsbrytere.enabled"),
-    URI("funksjonsbrytere.uri"),
-    CLUSTER("NAIS_CLUSTER_NAME"),
-    APPLICATIONNAME("NAIS_APP_NAME")
-}
+data class FeatureToggleProperties(
+    val enabled: Boolean,
+    val applicationName: String,
+    val uri: URI,
+    val cluster: String
+)

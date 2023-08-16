@@ -1,7 +1,6 @@
 package no.nav.etterlatte.statistikk.jobs
 
 import no.nav.etterlatte.jobs.fixedRateCancellableTimer
-import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.tidspunkt.norskKlokke
 import no.nav.etterlatte.libs.common.tidspunkt.utcKlokke
 import no.nav.etterlatte.libs.jobs.LeaderElection
@@ -50,24 +49,22 @@ class MaanedligStatistikkJob(
 
         fun run() {
             val maaned = YearMonth.now(clock).minusMonths(1)
-            withLogContext {
-                if (!leaderElection.isLeader()) {
-                    return@withLogContext
+            if (!leaderElection.isLeader()) {
+                return
+            }
+            when (statistikkService.statistikkProdusertForMaaned(maaned)) {
+                KjoertStatus.IKKE_KJOERT -> {
+                    val maanedsstatistikkk = statistikkService.produserStoenadStatistikkForMaaned(maaned)
+                    statistikkService.lagreMaanedsstatistikk(maanedsstatistikkk)
                 }
-                when (statistikkService.statistikkProdusertForMaaned(maaned)) {
-                    KjoertStatus.IKKE_KJOERT -> {
-                        val maanedsstatistikkk = statistikkService.produserStoenadStatistikkForMaaned(maaned)
-                        statistikkService.lagreMaanedsstatistikk(maanedsstatistikkk)
-                    }
 
-                    KjoertStatus.FEIL -> {
-                        // TODO: cleanup her og prøv på nytt -- men den trenger litt manuell håndtering for avlevering
-                        //      til bigquery. EY-1821
-                        logger.error("Har en kjøring med feil. Lagrer ikke ny statistikk for måned $maaned")
-                    }
-
-                    KjoertStatus.INGEN_FEIL -> logger.info("Statistikk er allerede produsert for måned $maaned")
+                KjoertStatus.FEIL -> {
+                    // TODO: cleanup her og prøv på nytt -- men den trenger litt manuell håndtering for avlevering
+                    //      til bigquery. EY-1821
+                    logger.error("Har en kjøring med feil. Lagrer ikke ny statistikk for måned $maaned")
                 }
+
+                KjoertStatus.INGEN_FEIL -> logger.info("Statistikk er allerede produsert for måned $maaned")
             }
         }
     }

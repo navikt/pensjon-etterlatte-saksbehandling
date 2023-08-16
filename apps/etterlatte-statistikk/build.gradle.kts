@@ -18,6 +18,6 @@ dependencies {
 
     implementation(libs.bundles.jackson)
 
-    testImplementation(libs.test.mockk)
+    testImplementation(libs.test.kotest.assertionscore)
     testImplementation(libs.kotlinx.coroutinescore)
 }

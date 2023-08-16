@@ -5,6 +5,7 @@ import io.mockk.mockk
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJson
+import no.nav.etterlatte.statistikk.domain.SakUtland
 import no.nav.etterlatte.statistikk.domain.StoenadRad
 import no.nav.etterlatte.statistikk.service.StatistikkService
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
@@ -13,6 +14,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import java.io.FileNotFoundException
 import java.time.LocalDate
+import java.time.YearMonth
 import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -51,7 +53,11 @@ internal class VedtakhendelserRiverTest {
         vedtakLoependeFom = LocalDate.now(),
         vedtakLoependeTom = null,
         beregning = null,
-        vedtakType = null
+        avkorting = null,
+        vedtakType = null,
+        sakUtland = SakUtland.NASJONAL,
+        virkningstidspunkt = YearMonth.of(2023, 6),
+        utbetalingsdato = LocalDate.of(2023, 7, 20)
     )
 
     @Test

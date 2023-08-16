@@ -37,8 +37,8 @@ class SakRepository(private val datasource: DataSource) {
                     behandling_type, behandling_status, behandling_resultat, resultat_begrunnelse, behandling_metode, 
                     opprettet_av, ansvarlig_beslutter, aktor_id, dato_foerste_utbetaling, teknisk_tid, sak_ytelse, 
                     vedtak_loepende_fom, vedtak_loepende_tom, saksbehandler, ansvarlig_enhet, soeknad_format, 
-                    sak_utland, beregning, sak_ytelsesgruppe, avdoede_foreldre, revurdering_aarsak
-                ) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    sak_utland, beregning, sak_ytelsesgruppe, avdoede_foreldre, revurdering_aarsak, avkorting
+                ) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """.trimIndent(),
                 Statement.RETURN_GENERATED_KEYS
             ).apply {
@@ -86,7 +86,8 @@ class SakRepository(private val datasource: DataSource) {
         beregning = getString("beregning")?.let { objectMapper.readValue(it) },
         sakYtelsesgruppe = getString("sak_ytelsesgruppe")?.let { enumValueOf<SakYtelsesgruppe>(it) },
         avdoedeForeldre = getString("avdoede_foreldre")?.let { objectMapper.readValue(it) },
-        revurderingAarsak = getString("revurdering_aarsak")
+        revurderingAarsak = getString("revurdering_aarsak"),
+        avkorting = getString("avkorting")?.let { objectMapper.readValue(it) }
     )
 
     fun hentRader(): List<SakRad> {
@@ -96,7 +97,7 @@ class SakRepository(private val datasource: DataSource) {
                 behandling_type, behandling_status, behandling_resultat, resultat_begrunnelse, behandling_metode,
                 opprettet_av, ansvarlig_beslutter, aktor_id, dato_foerste_utbetaling, teknisk_tid, sak_ytelse,
                 vedtak_loepende_fom, vedtak_loepende_tom, saksbehandler, ansvarlig_enhet, soeknad_format, sak_utland,
-                beregning, sak_ytelsesgruppe, avdoede_foreldre, revurdering_aarsak
+                beregning, sak_ytelsesgruppe, avdoede_foreldre, revurdering_aarsak, avkorting
             FROM sak
             """.trimIndent()
         )
@@ -132,4 +133,5 @@ private fun PreparedStatement.setSakRad(sakRad: SakRad): PreparedStatement = thi
     setString(25, sakRad.sakYtelsesgruppe?.name)
     setJsonb(26, sakRad.avdoedeForeldre)
     setString(27, sakRad.revurderingAarsak)
+    setJsonb(28, sakRad.avkorting)
 }

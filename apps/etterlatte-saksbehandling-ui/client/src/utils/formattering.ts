@@ -70,3 +70,7 @@ export enum DatoFormat {
   AAR_MAANED_DAG = 'yyyy-MM-dd',
   DAG_MAANED_AAR = 'dd.MM.yyyy',
 }
+const norskKroneFormat = new Intl.NumberFormat('NO-nb', {
+  currency: 'nok',
+})
+export const NOK = (beloep: number | undefined) => (beloep == null ? '' : norskKroneFormat.format(beloep) + ' kr')

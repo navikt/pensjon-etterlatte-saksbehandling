@@ -1,5 +1,4 @@
 import styled from 'styled-components'
-import { useAppSelector } from '~store/Store'
 import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 import {
   formaterBehandlingstype,
@@ -13,6 +12,11 @@ import { Heading, Tag } from '@navikt/ds-react'
 import { tagColors, TagList } from '~shared/Tags'
 import { INasjonalitetsType } from '~components/behandling/fargetags/nasjonalitetsType'
 import { SidebarPanel } from '~components/behandling/SideMeny/SideMeny'
+import { useEffect, useState } from 'react'
+import { isFailure, isInitial, isPending, isPendingOrInitial, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
+import { hentOppgaveForBehandlingUnderBehandling } from '~shared/api/oppgaverny'
+import Spinner from '~shared/Spinner'
+import { ApiErrorAlert } from '~ErrorBoundary'
 
 export const Oversikt = ({
   behandlingsInfo,
@@ -21,8 +25,18 @@ export const Oversikt = ({
   behandlingsInfo: IBehandlingInfo
   children: JSX.Element
 }) => {
-  const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.saksbehandler.ident)
   const kommentarFraAttestant = behandlingsInfo.attestertLogg?.slice(-1)[0]?.kommentar
+  const [saksbehandlerPaaOppgave, setSaksbehandlerPaaOppgave] = useState<string | null>(null)
+  const [oppgaveForBehandlingStatus, requesthentOppgaveForBehandling] = useApiCall(
+    hentOppgaveForBehandlingUnderBehandling
+  )
+  useEffect(() => {
+    requesthentOppgaveForBehandling({ behandlingId: behandlingsInfo.behandlingId }, (saksbehandler, statusCode) => {
+      if (statusCode === 200) {
+        setSaksbehandlerPaaOppgave(saksbehandler)
+      }
+    })
+  }, [])
 
   const hentStatus = () => {
     switch (behandlingsInfo.status) {
@@ -45,6 +59,10 @@ export const Oversikt = ({
     ? formaterStringDato(behandlingsInfo.datoFattet) + ' kl. ' + formaterStringTidspunkt(behandlingsInfo.datoFattet)
     : null
 
+  if (isInitial(oppgaveForBehandlingStatus) || isPending(oppgaveForBehandlingStatus)) {
+    return <Spinner visible={true} label="Henter saksbehandler" />
+  }
+
   return (
     <SidebarPanel>
       <Heading size={'small'}>{formaterBehandlingstype(behandlingsInfo.type)}</Heading>
@@ -66,7 +84,15 @@ export const Oversikt = ({
       </TagList>
       <div className="info">
         <Info>Saksbehandler</Info>
-        <Tekst>{behandlingsInfo.saksbehandler ? behandlingsInfo.saksbehandler : innloggetSaksbehandler}</Tekst>
+        {isFailure(oppgaveForBehandlingStatus) && (
+          <ApiErrorAlert>Kunne ikke hente saksbehandler fra oppgave</ApiErrorAlert>
+        )}
+        {isPendingOrInitial(oppgaveForBehandlingStatus) && <Spinner visible={true} label="Henter saksbehandler" />}
+        {isSuccess(oppgaveForBehandlingStatus) && (
+          <Tekst>
+            {saksbehandlerPaaOppgave ? saksbehandlerPaaOppgave : 'Ingen saksbehandler har tatt denne oppgaven'}
+          </Tekst>
+        )}
       </div>
       <div className="flex">
         <div>

@@ -30,7 +30,7 @@ internal class GrunnlagsendringshendelseJobTest {
     fun `skal ikke utfoere jobb siden pod ikke er leader`() {
         every { leaderElection.isLeader() } returns false
 
-        runBlocking { grunnlagsendringshendelseJob.run() }
+        runBlocking { grunnlagsendringshendelseJob.run("123") }
 
         coVerify(exactly = 0) { grunnlagsendringshendelseService.sjekkKlareGrunnlagsendringshendelser(any()) }
         assertFalse(leaderElection.isLeader())
@@ -40,7 +40,7 @@ internal class GrunnlagsendringshendelseJobTest {
     fun `skal ikke utfoere jobb siden pod er i shutdown`() {
         every { leaderElection.isLeader() } returns true
         shuttingDown.set(true) // simulerer shutdown
-        runBlocking { grunnlagsendringshendelseJob.run() }
+        runBlocking { grunnlagsendringshendelseJob.run("123") }
 
         coVerify(exactly = 0) { grunnlagsendringshendelseService.sjekkKlareGrunnlagsendringshendelser(any()) }
         shuttingDown.set(false)
@@ -50,7 +50,7 @@ internal class GrunnlagsendringshendelseJobTest {
     fun `skal utfoere jobb siden pod er leader`() {
         every { leaderElection.isLeader() } returns true
 
-        runBlocking { grunnlagsendringshendelseJob.run() }
+        runBlocking { grunnlagsendringshendelseJob.run("123") }
 
         coVerify(exactly = 1) { grunnlagsendringshendelseService.sjekkKlareGrunnlagsendringshendelser(any()) }
         assertTrue(leaderElection.isLeader())

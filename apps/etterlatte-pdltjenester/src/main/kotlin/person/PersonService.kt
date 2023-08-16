@@ -4,6 +4,7 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.GeografiskTilknytning
+import no.nav.etterlatte.libs.common.person.HentFolkeregisterIdenterForAktoerIdBolkRequest
 import no.nav.etterlatte.libs.common.person.HentGeografiskTilknytningRequest
 import no.nav.etterlatte.libs.common.person.HentPdlIdentRequest
 import no.nav.etterlatte.libs.common.person.HentPersonRequest
@@ -146,6 +147,15 @@ class PersonService(
                 }
             }
         }
+    }
+
+    suspend fun hentFolkeregisterIdenterForAktoerIdBolk(
+        request: HentFolkeregisterIdenterForAktoerIdBolkRequest
+    ): Map<String, String?> {
+        logger.info("Henter folkeregisteridenter for aktørIds=${request.aktoerIds}")
+
+        val response = pdlKlient.hentFolkeregisterIdenterForAktoerIdBolk(request)
+        return response.associate { it.ident to it.identer.firstOrNull()?.ident }
     }
 
     suspend fun hentGeografiskTilknytning(request: HentGeografiskTilknytningRequest): GeografiskTilknytning {

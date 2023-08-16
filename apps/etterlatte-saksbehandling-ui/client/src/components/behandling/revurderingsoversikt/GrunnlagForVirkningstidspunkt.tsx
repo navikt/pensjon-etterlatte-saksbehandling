@@ -24,7 +24,7 @@ const SoekerDoedsdatoGrunnlag = () => {
   )
 }
 
-const OmgjoeringFarskapGrunnlag = () => {
+const FoersteVirkGrunnlag = () => {
   const behandling = useBehandling()
   const [foersteVirk, hentVirk] = useApiCall(hentFoersteVirk)
   useEffect(() => {
@@ -102,7 +102,8 @@ export const GrunnlagForVirkningstidspunkt = () => {
     case Revurderingsaarsak.DOEDSFALL:
       return <SoekerDoedsdatoGrunnlag />
     case Revurderingsaarsak.OMGJOERING_AV_FARSKAP:
-      return <OmgjoeringFarskapGrunnlag />
+    case Revurderingsaarsak.YRKESSKADE:
+      return <FoersteVirkGrunnlag />
     case Revurderingsaarsak.ADOPSJON:
       return <AdopsjonGrunnlag />
   }

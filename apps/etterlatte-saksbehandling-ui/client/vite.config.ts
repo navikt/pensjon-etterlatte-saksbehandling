@@ -9,7 +9,7 @@ export default defineConfig(({ mode }) => {
   return {
     plugins: [react(), tsconfigPaths()],
     define: {
-      'process.env.NAIS_CLUSTER_NAME': JSON.stringify(env.NAIS_CLUSTER_NAME),
+      'process.env.GOSYS_URL': JSON.stringify(env.GOSYS_URL),
     },
     server: {
       host: true,

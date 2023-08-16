@@ -10,6 +10,7 @@ import io.ktor.client.request.header
 import io.ktor.client.request.post
 import io.ktor.client.request.put
 import io.ktor.client.request.setBody
+import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
@@ -53,12 +54,14 @@ class DollyClientImpl(config: Config, private val httpClient: HttpClient) : Doll
     override suspend fun opprettTestGruppe(gruppe: OpprettGruppeRequest, accessToken: String): Gruppe =
         httpClient.post("$dollyUrl/gruppe") {
             header(HttpHeaders.Authorization, "Bearer $accessToken")
+            header(HttpHeaders.ContentType, ContentType.Application.Json)
             setBody(gruppe.toJson())
         }.body()
 
     override suspend fun opprettBestilling(bestilling: String, gruppeId: Long, accessToken: String): BestillingStatus =
         httpClient.post("$dollyUrl/gruppe/$gruppeId/bestilling") {
             header(HttpHeaders.Authorization, "Bearer $accessToken")
+            header(HttpHeaders.ContentType, ContentType.Application.Json)
             setBody(objectMapper.readTree(bestilling))
         }.body()
 

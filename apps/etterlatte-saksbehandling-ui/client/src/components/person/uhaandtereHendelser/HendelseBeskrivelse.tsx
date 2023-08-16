@@ -19,9 +19,10 @@ import {
   VergemaalEllerFremtidsfullmakt,
   VergemaalEllerFremtidsfullmaktForholdSamsvar,
 } from '~components/person/typer'
-import { formaterKanskjeStringDatoMedFallback } from '~utils/formattering'
+import { formaterKanskjeStringDatoMedFallback, formaterStringDato } from '~utils/formattering'
 import styled from 'styled-components'
 import { BodyShort } from '@navikt/ds-react'
+import { institusjonstype } from '~components/behandling/beregningsgrunnlag/Insthendelser'
 
 const AnsvarligeForeldreSamsvar = (props: { samsvar: AnsvarligeForeldreSamsvar }) => {
   const navneMap = useContext(FnrTilNavnMapContext)
@@ -169,8 +170,36 @@ const Institusjonsopphold = (props: { samsvar: InstitusjonsoppholdSamsvar }) => 
   const { samsvar } = props
   return (
     <>
-      <BodySmall>Oppholdstype</BodySmall>
-      <BodySmall>{samsvar.oppholdstype}</BodySmall>
+      <BodySmall>Oppholdstype: {samsvar.oppholdstype}</BodySmall>
+      <BodySmall>
+        Startdato:{' '}
+        {samsvar.oppholdBeriket.startdato ? formaterStringDato(samsvar.oppholdBeriket.startdato) : 'Ingen startdato'}
+      </BodySmall>
+      <BodySmall>
+        Faktisk sluttdato:{' '}
+        {samsvar.oppholdBeriket.faktiskSluttdato
+          ? formaterStringDato(samsvar.oppholdBeriket.faktiskSluttdato)
+          : 'Ingen sluttdato'}
+      </BodySmall>
+      <BodySmall>
+        Forventet sluttdato:{' '}
+        {samsvar.oppholdBeriket.forventetSluttdato
+          ? formaterStringDato(samsvar.oppholdBeriket.forventetSluttdato)
+          : 'Ingen forventet sluttdato'}
+      </BodySmall>
+      <BodySmall>
+        Institusjonstype:{' '}
+        {samsvar.oppholdBeriket.institusjonsType
+          ? institusjonstype[samsvar.oppholdBeriket.institusjonsType]
+          : `Ukjent type ${samsvar.oppholdBeriket.institusjonsType}`}
+      </BodySmall>
+      <BodySmall> Institusjonsnavn: {samsvar.oppholdBeriket.institusjonsnavn}</BodySmall>
+      <BodySmall>
+        Organisasjonsnummer:{' '}
+        {samsvar.oppholdBeriket.organisasjonsnummer
+          ? samsvar.oppholdBeriket.organisasjonsnummer
+          : 'Ingen organisasjonsnummer funnet'}
+      </BodySmall>
     </>
   )
 }

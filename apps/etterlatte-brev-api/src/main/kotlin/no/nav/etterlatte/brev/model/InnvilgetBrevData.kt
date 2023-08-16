@@ -14,9 +14,29 @@ data class InnvilgetBrevData(
     companion object {
         fun fra(behandling: Behandling): InnvilgetBrevData =
             InnvilgetBrevData(
-                utbetalingsinfo = behandling.utbetalingsinfo!!,
+                utbetalingsinfo = behandling.utbetalingsinfo,
                 avdoed = behandling.persongalleri.avdoed,
                 avkortingsinfo = behandling.avkortingsinfo
+            )
+    }
+}
+
+data class InnvilgetBrevDataNy(
+    val utbetalingsinfo: Utbetalingsinfo,
+    val avkortingsinfo: Avkortingsinfo? = null,
+    val avdoed: Avdoed,
+    val etterbetalingDTO: EtterbetalingDTO? = null,
+    val innhold: List<Slate.Element>
+) : BrevData() {
+
+    companion object {
+        fun fra(behandling: Behandling): InnvilgetBrevDataNy =
+            InnvilgetBrevDataNy(
+                utbetalingsinfo = behandling.utbetalingsinfo,
+                avdoed = behandling.persongalleri.avdoed,
+                avkortingsinfo = behandling.avkortingsinfo,
+                etterbetalingDTO = null,
+                innhold = listOf()
             )
     }
 }

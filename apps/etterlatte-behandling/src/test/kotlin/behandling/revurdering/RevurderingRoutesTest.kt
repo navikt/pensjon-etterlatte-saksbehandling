@@ -28,7 +28,6 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import testsupport.buildTestApplicationConfigurationForOauth
-import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class RevurderingRoutesTest {
@@ -70,32 +69,10 @@ internal class RevurderingRoutesTest {
             val response = client.post("api/revurdering/1") {
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 header(HttpHeaders.Authorization, "Bearer $token")
-                setBody(OpprettRevurderingRequest(RevurderingAarsak.REGULERING))
+                setBody(OpprettRevurderingRequest(aarsak = RevurderingAarsak.REGULERING))
             }
 
             assertEquals(HttpStatusCode.OK, response.status)
-        }
-    }
-
-    @Test
-    fun `returnerer bad request hvis det ikke finnes noen iverksatt behandling tidligere`() {
-        every { applicationContext.behandlingService.hentSisteIverksatte(1) } returns null
-        testApplication {
-            environment { config = hoconApplicationConfig }
-            application { module(applicationContext) }
-            val client = createClient {
-                install(ContentNegotiation) {
-                    register(ContentType.Application.Json, JacksonConverter(no.nav.etterlatte.libs.common.objectMapper))
-                }
-            }
-
-            val response = client.post("api/revurdering/1") {
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                header(HttpHeaders.Authorization, "Bearer $token")
-                setBody(OpprettRevurderingRequest(RevurderingAarsak.REGULERING))
-            }
-
-            assertEquals(HttpStatusCode.BadRequest, response.status)
         }
     }
 
@@ -121,37 +98,6 @@ internal class RevurderingRoutesTest {
     }
 
     @Test
-    fun `returnerer bad request hvis revurderingaarsak ikke er stoettet for sak`() {
-        every { applicationContext.behandlingService } returns mockk {
-            every { hentSisteIverksatte(any()) } returns mockk(relaxed = true) {
-                every { sak.sakType } returns SakType.OMSTILLINGSSTOENAD
-            }
-        }
-
-        testApplication {
-            environment {
-                config = hoconApplicationConfig
-            }
-            application {
-                module(applicationContext)
-            }
-            val client = createClient {
-                install(ContentNegotiation) {
-                    register(ContentType.Application.Json, JacksonConverter(no.nav.etterlatte.libs.common.objectMapper))
-                }
-            }
-
-            val response = client.post("api/revurdering/1") {
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                header(HttpHeaders.Authorization, "Bearer $token")
-                setBody(OpprettRevurderingRequest(RevurderingAarsak.BARN))
-            }
-
-            assertEquals(HttpStatusCode.BadRequest, response.status)
-        }
-    }
-
-    @Test
     fun `returnerer gyldig revurderingstyper for barnepensjon`() {
         testApplication {
             environment { config = hoconApplicationConfig }
@@ -169,20 +115,12 @@ internal class RevurderingRoutesTest {
 
             val revurderingAarsak: List<RevurderingAarsak> = response.body()
             assertEquals(HttpStatusCode.OK, response.status)
-            assertEquals(9, revurderingAarsak.size)
+            val revurderingsaarsakerForBarnepensjon =
+                RevurderingAarsak.values().filter { it.erStoettaRevurdering(SakType.BARNEPENSJON) }
+            assertEquals(revurderingsaarsakerForBarnepensjon.size, revurderingAarsak.size)
             assertTrue(
                 revurderingAarsak.containsAll<Any>(
-                    setOf(
-                        RevurderingAarsak.ANSVARLIGE_FORELDRE,
-                        RevurderingAarsak.SOESKENJUSTERING,
-                        RevurderingAarsak.UTLAND,
-                        RevurderingAarsak.BARN,
-                        RevurderingAarsak.VERGEMAAL_ELLER_FREMTIDSFULLMAKT,
-                        RevurderingAarsak.REGULERING,
-                        RevurderingAarsak.DOEDSFALL,
-                        RevurderingAarsak.OMGJOERING_AV_FARSKAP,
-                        RevurderingAarsak.ADOPSJON
-                    )
+                    revurderingsaarsakerForBarnepensjon
                 )
             )
         }

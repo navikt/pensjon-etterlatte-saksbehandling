@@ -86,7 +86,8 @@ fun Application.module(context: ApplicationContext) {
                 tilgangService = tilgangService,
                 sakService = sakService,
                 behandlingService = behandlingService,
-                grunnlagsendringshendelseService = grunnlagsendringshendelseService
+                grunnlagsendringshendelseService = grunnlagsendringshendelseService,
+                oppgaveServiceNy = oppgaveServiceNy
             )
             behandlingRoutes(
                 behandlingService = behandlingService,
@@ -95,21 +96,20 @@ fun Application.module(context: ApplicationContext) {
                 kommerBarnetTilGodeService = kommerBarnetTilGodeService,
                 behandlingFactory = behandlingFactory
             )
-            revurderingRoutes(
-                revurderingService = revurderingService,
-                behandlingService = behandlingService
-            )
+            revurderingRoutes(revurderingService = revurderingService)
             omregningRoutes(omregningService = omregningService)
             migreringRoutes(migreringService = migreringService)
             behandlingsstatusRoutes(behandlingsstatusService = behandlingsStatusService)
             behandlingVedtakRoute(
                 behandlingsstatusService = behandlingsStatusService,
                 oppgaveService = oppgaveServiceNy,
-                behandlingService = behandlingService
+                behandlingService = behandlingService,
+                kanBrukeNyOppgaveliste = kanBrukeNyOppgaveliste
             )
             oppgaveRoutes(service = oppgaveService)
             oppgaveRoutesNy(
                 service = oppgaveServiceNy,
+                gosysOppgaveService = gosysOppgaveService,
                 kanBrukeNyOppgaveliste = kanBrukeNyOppgaveliste
             )
             grunnlagsendringshendelseRoute(grunnlagsendringshendelseService = grunnlagsendringshendelseService)
@@ -124,6 +124,12 @@ fun Application.module(context: ApplicationContext) {
                 }
                 harTilgangTilSak = { sakId, saksbehandlerMedRoller ->
                     tilgangService.harTilgangTilSak(sakId, saksbehandlerMedRoller)
+                }
+                harTilgangTilOppgave = { oppgaveId, saksbehandlerMedRoller ->
+                    tilgangService.harTilgangTilOppgave(
+                        oppgaveId,
+                        saksbehandlerMedRoller
+                    )
                 }
             }
         }

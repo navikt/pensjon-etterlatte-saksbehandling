@@ -2,6 +2,8 @@ package trygdetid
 
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.trygdetid.TrygdetidBeregningService
 import no.nav.etterlatte.trygdetid.TrygdetidPeriode
 import org.junit.jupiter.api.Test
@@ -89,6 +91,19 @@ class TrygdetidBeregningServiceTest {
             trygdetidGrunnlag(
                 periode = TrygdetidPeriode(fra = LocalDate.of(2023, 1, 1), til = LocalDate.of(2022, 1, 1))
             )
+        }
+    }
+
+    @Test
+    fun `skal gi 40 aar total trygdetid for yrkesskade`() {
+        val beregnetTrygdetid = TrygdetidBeregningService.beregnTrygdetidForYrkesskade(
+            Grunnlagsopplysning.Saksbehandler(saksbehandler.ident(), Tidspunkt.now())
+        )
+        beregnetTrygdetid shouldNotBe null
+        with(beregnetTrygdetid) {
+            regelResultat shouldNotBe null
+            tidspunkt shouldNotBe null
+            verdi shouldBe 40
         }
     }
 }

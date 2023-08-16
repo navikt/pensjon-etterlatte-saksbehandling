@@ -1,9 +1,11 @@
 package no.nav.etterlatte.behandling.manueltopphoer
 
+import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.BehandlingHendelseType
 import no.nav.etterlatte.behandling.BehandlingHendelserKafkaProducer
+import no.nav.etterlatte.behandling.GrunnlagService
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.domain.ManueltOpphoer
@@ -20,9 +22,10 @@ import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
+import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveKilde
+import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveType
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.oppgaveny.OppgaveServiceNy
-import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveType
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.util.*
@@ -53,6 +56,7 @@ class RealManueltOpphoerService(
     private val behandlingDao: BehandlingDao,
     private val behandlingHendelser: BehandlingHendelserKafkaProducer,
     private val hendelseDao: HendelseDao,
+    private val grunnlagService: GrunnlagService,
     private val featureToggleService: FeatureToggleService
 ) : ManueltOpphoerService {
     val logger: Logger = LoggerFactory.getLogger(this::class.java)
@@ -81,6 +85,7 @@ class RealManueltOpphoerService(
             val alleBehandlingerISak = behandlingDao.alleBehandlingerISak(opphoerRequest.sakId).filterForEnheter()
             val forrigeBehandling = alleBehandlingerISak.sisteIkkeAvbrutteBehandling()
             val virkningstidspunkt = alleBehandlingerISak.tidligsteIverksatteVirkningstidspunkt()
+            val persongalleri = runBlocking { grunnlagService.hentPersongalleri(opphoerRequest.sakId) }
 
             if (virkningstidspunkt == null) {
                 logger.warn(
@@ -95,7 +100,7 @@ class RealManueltOpphoerService(
                     type = BehandlingType.MANUELT_OPPHOER,
                     sakId = forrigeBehandling.sak.id,
                     status = BehandlingStatus.OPPRETTET,
-                    persongalleri = forrigeBehandling.persongalleri,
+                    persongalleri = persongalleri,
                     opphoerAarsaker = opphoerRequest.opphoerAarsaker,
                     fritekstAarsak = opphoerRequest.fritekstAarsak,
                     virkningstidspunkt = virkningstidspunkt,
@@ -119,7 +124,9 @@ class RealManueltOpphoerService(
                 oppgaveService.opprettNyOppgaveMedSakOgReferanse(
                     referanse = id.toString(),
                     sakId = opphoerRequest.sakId,
-                    oppgaveType = OppgaveType.MANUELT_OPPHOER
+                    oppgaveKilde = OppgaveKilde.BEHANDLING,
+                    oppgaveType = OppgaveType.MANUELT_OPPHOER,
+                    merknad = null
                 )
                 (behandlingDao.hentBehandling(id) as ManueltOpphoer).sjekkEnhet()
             }

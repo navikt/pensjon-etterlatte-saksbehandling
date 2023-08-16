@@ -3,6 +3,7 @@ import styled from 'styled-components'
 import { Border } from '~components/behandling/soeknadsoversikt/styled'
 import { IAvkortetYtelse } from '~shared/types/IAvkorting'
 import { BodyShort, ReadMore } from '@navikt/ds-react'
+import { NOK } from '~utils/formattering'
 
 export const YtelseEtterAvkortingDetaljer = (props: { ytelse: IAvkortetYtelse }) => {
   const ytelse = props.ytelse
@@ -14,24 +15,24 @@ export const YtelseEtterAvkortingDetaljer = (props: { ytelse: IAvkortetYtelse })
         <ul>
           <Rad>
             <Navn>Brutto stønad før avkorting</Navn>
-            <Verdi>{ytelse.ytelseFoerAvkorting} kr</Verdi>
+            <Verdi>{NOK(ytelse.ytelseFoerAvkorting)}</Verdi>
           </Rad>
           <Rad>
             <Navn>Månedlig avkortingsbeløp</Navn>
             <Operasjon>-</Operasjon>
-            <Verdi>{ytelse.avkortingsbeloep} kr</Verdi>
+            <Verdi>{NOK(ytelse.avkortingsbeloep)}</Verdi>
           </Rad>
           {ytelse.restanse < 0 ? (
             <Rad>
               <Navn>Månedlig restansebeløp</Navn>
               <Operasjon>+</Operasjon>
-              <Verdi>{ytelse.restanse * -1} kr</Verdi>
+              <Verdi>{NOK(ytelse.restanse * -1)}</Verdi>
             </Rad>
           ) : (
             <Rad>
               <Navn>Månedlig restansebeløp</Navn>
               <Operasjon>-</Operasjon>
-              <Verdi>{ytelse.restanse} kr</Verdi>
+              <Verdi>{NOK(ytelse.restanse)} kr</Verdi>
             </Rad>
           )}
           <Border />
@@ -39,7 +40,7 @@ export const YtelseEtterAvkortingDetaljer = (props: { ytelse: IAvkortetYtelse })
             <Navn>Brutto stønad etter avkorting og restanse</Navn>
             <Operasjon>=</Operasjon>
             <Verdi>
-              <strong>{ytelse.ytelseEtterAvkorting} kr</strong>
+              <strong>{NOK(ytelse.ytelseEtterAvkorting)}</strong>
             </Verdi>
           </Rad>
         </ul>

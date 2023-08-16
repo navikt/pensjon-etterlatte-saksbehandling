@@ -2,24 +2,32 @@ package no.nav.etterlatte.oppgaveny
 
 import io.ktor.server.plugins.BadRequestException
 import io.ktor.server.plugins.NotFoundException
+import no.nav.etterlatte.Kontekst
+import no.nav.etterlatte.User
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.inTransaction
-import no.nav.etterlatte.libs.common.oppgaveNy.AttesteringsOppgave
-import no.nav.etterlatte.libs.common.oppgaveNy.FjernSaksbehandlerRequest
+import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveNy
 import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveType
-import no.nav.etterlatte.libs.common.oppgaveNy.RedigerFristRequest
-import no.nav.etterlatte.libs.common.oppgaveNy.SaksbehandlerEndringDto
 import no.nav.etterlatte.libs.common.oppgaveNy.Status
+import no.nav.etterlatte.libs.common.oppgaveNy.VedtakOppgaveDTO
 import no.nav.etterlatte.libs.common.oppgaveNy.opprettNyOppgaveMedReferanseOgSak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
+import no.nav.etterlatte.oppgave.OppgaveServiceFeatureToggle
 import no.nav.etterlatte.oppgave.Rolle
 import no.nav.etterlatte.sak.SakDao
 import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
+import no.nav.etterlatte.tilgangsstyring.filterForEnheter
 import java.util.*
 
-class OppgaveServiceNy(private val oppgaveDaoNy: OppgaveDaoNy, private val sakDao: SakDao) {
+class OppgaveServiceNy(
+    private val oppgaveDaoNy: OppgaveDaoMedEndringssporing,
+    private val sakDao: SakDao,
+    private val kanBrukeNyOppgaveliste: Boolean,
+    private val featureToggleService: FeatureToggleService
+) {
 
     fun finnOppgaverForBruker(bruker: SaksbehandlerMedRoller): List<OppgaveNy> {
         val rollerSomBrukerHar = finnAktuelleRoller(bruker)
@@ -33,8 +41,11 @@ class OppgaveServiceNy(private val oppgaveDaoNy: OppgaveDaoNy, private val sakDa
             inTransaction {
                 oppgaveDaoNy.hentOppgaver(aktuelleOppgavetyperForRoller)
             }.sortedByDescending { it.opprettet }
-        }
+        }.filterForEnheter(Kontekst.get().AppUser)
     }
+
+    private fun List<OppgaveNy>.filterForEnheter(bruker: User) =
+        this.filterOppgaverForEnheter(featureToggleService, bruker)
 
     private fun aktuelleOppgavetyperForRolleTilSaksbehandler(roller: List<Rolle>) = roller.flatMap {
         when (it) {
@@ -51,74 +62,101 @@ class OppgaveServiceNy(private val oppgaveDaoNy: OppgaveDaoNy, private val sakDa
             Rolle.STRENGT_FORTROLIG.takeIf { bruker.harRolleStrengtFortrolig() }
         )
 
-    fun tildelSaksbehandler(saksbehandlerEndringDto: SaksbehandlerEndringDto) {
-        inTransaction {
-            val hentetOppgave = oppgaveDaoNy.hentOppgave(saksbehandlerEndringDto.oppgaveId)
+    fun tildelSaksbehandler(oppgaveId: UUID, saksbehandler: String) {
+        inTransaction(gjenbruk = true) {
+            val hentetOppgave = oppgaveDaoNy.hentOppgave(oppgaveId)
+                ?: throw NotFoundException("Oppgaven finnes ikke, id: $oppgaveId")
 
-            if (hentetOppgave != null) {
-                if (hentetOppgave.saksbehandler.isNullOrEmpty()) {
-                    oppgaveDaoNy.settNySaksbehandler(saksbehandlerEndringDto)
-                } else {
-                    throw BadRequestException(
-                        "Oppgaven har allerede en saksbehandler, id: ${saksbehandlerEndringDto.oppgaveId}"
-                    )
-                }
+            sikreAtOppgaveIkkeErAvsluttet(hentetOppgave)
+            if (hentetOppgave.saksbehandler.isNullOrEmpty()) {
+                oppgaveDaoNy.settNySaksbehandler(oppgaveId, saksbehandler)
             } else {
-                throw NotFoundException("Oppgaven finnes ikke, id: ${saksbehandlerEndringDto.oppgaveId}")
+                throw BadRequestException(
+                    "Oppgaven har allerede en saksbehandler, id: $oppgaveId"
+                )
             }
         }
     }
 
-    fun byttSaksbehandler(saksbehandlerEndringDto: SaksbehandlerEndringDto) {
+    fun byttSaksbehandler(oppgaveId: UUID, saksbehandler: String) {
+        val hentetOppgave = oppgaveDaoNy.hentOppgave(oppgaveId)
+        if (hentetOppgave != null) {
+            sikreAtOppgaveIkkeErAvsluttet(hentetOppgave)
+            oppgaveDaoNy.settNySaksbehandler(oppgaveId, saksbehandler)
+        } else {
+            throw NotFoundException("Oppgaven finnes ikke, id: $oppgaveId")
+        }
+    }
+
+    fun fjernSaksbehandler(oppgaveId: UUID) {
         inTransaction {
-            val hentetOppgave = oppgaveDaoNy.hentOppgave(saksbehandlerEndringDto.oppgaveId)
-            if (hentetOppgave != null) {
-                oppgaveDaoNy.settNySaksbehandler(saksbehandlerEndringDto)
+            val hentetOppgave = oppgaveDaoNy.hentOppgave(oppgaveId)
+                ?: throw NotFoundException("Oppgaven finnes ikke, id: $oppgaveId")
+
+            sikreAtOppgaveIkkeErAvsluttet(hentetOppgave)
+            if (hentetOppgave.saksbehandler != null) {
+                oppgaveDaoNy.fjernSaksbehandler(oppgaveId)
             } else {
-                throw NotFoundException("Oppgaven finnes ikke, id: ${saksbehandlerEndringDto.oppgaveId}")
+                throw BadRequestException(
+                    "Oppgaven har ingen saksbehandler, id: $oppgaveId"
+                )
             }
         }
     }
 
-    fun fjernSaksbehandler(fjernSaksbehandlerRequest: FjernSaksbehandlerRequest) {
+    private fun sikreAtOppgaveIkkeErAvsluttet(oppgave: OppgaveNy) {
+        if (oppgave.erAvsluttet()) {
+            throw IllegalStateException(
+                "Oppgave med id ${oppgave.id} kan ikke endres siden den har " +
+                    "status ${oppgave.status}"
+            )
+        }
+    }
+
+    fun redigerFrist(oppgaveId: UUID, frist: Tidspunkt) {
         inTransaction {
-            val hentetOppgave = oppgaveDaoNy.hentOppgave(fjernSaksbehandlerRequest.oppgaveId)
-            if (hentetOppgave != null) {
-                if (hentetOppgave.saksbehandler != null) {
-                    oppgaveDaoNy.fjernSaksbehandler(fjernSaksbehandlerRequest.oppgaveId)
-                } else {
-                    throw BadRequestException(
-                        "Oppgaven har ingen saksbehandler, id: ${fjernSaksbehandlerRequest.oppgaveId}"
-                    )
-                }
+            if (frist.isBefore(Tidspunkt.now())) {
+                throw BadRequestException("Tidspunkt tilbake i tid id: $oppgaveId")
+            }
+            val hentetOppgave = oppgaveDaoNy.hentOppgave(oppgaveId)
+                ?: throw NotFoundException("Oppgaven finnes ikke, id: $oppgaveId")
+            sikreAtOppgaveIkkeErAvsluttet(hentetOppgave)
+            if (hentetOppgave.saksbehandler != null) {
+                oppgaveDaoNy.redigerFrist(oppgaveId, frist)
             } else {
-                throw NotFoundException("Oppgaven finnes ikke, id: ${fjernSaksbehandlerRequest.oppgaveId}")
+                throw BadRequestException(
+                    "Oppgaven har ingen saksbehandler, id: $oppgaveId"
+                )
             }
         }
     }
 
-    fun redigerFrist(redigerFristRequest: RedigerFristRequest) {
-        inTransaction {
-            val hentetOppgave = oppgaveDaoNy.hentOppgave(redigerFristRequest.oppgaveId)
-            if (redigerFristRequest.frist.isBefore(Tidspunkt.now())) {
-                throw BadRequestException("Tidspunkt tilbake i tid id: ${redigerFristRequest.oppgaveId}")
-            }
-            if (hentetOppgave != null) {
-                if (hentetOppgave.saksbehandler != null) {
-                    oppgaveDaoNy.redigerFrist(redigerFristRequest)
-                } else {
-                    throw BadRequestException(
-                        "Oppgaven har ingen saksbehandler, id: ${redigerFristRequest.oppgaveId}"
-                    )
-                }
-            } else {
-                throw NotFoundException("Oppgaven finnes ikke, id: ${redigerFristRequest.oppgaveId}")
+    private fun sikreAtSaksbehandlerErSattPaaOppgaveHvisNyOppgavelisteIkkeErStoettet(
+        behandlingId: String,
+        saksbehandler: String?
+    ) {
+        if (!kanBrukeNyOppgaveliste && saksbehandler != null) {
+            // Vi sikrer at saksbehandler tar oppgaven før de fullfører den
+            val oppgaveUnderBehandling = oppgaveDaoNy.hentOppgaverForBehandling(behandlingId)
+                .single { it.status == Status.UNDER_BEHANDLING || it.status == Status.NY }
+            if (oppgaveUnderBehandling.saksbehandler != saksbehandler) {
+                byttSaksbehandler(
+                    oppgaveId = oppgaveUnderBehandling.id,
+                    saksbehandler = saksbehandler
+                )
             }
         }
     }
 
-    fun haandterFattetvedtak(attesteringsoppgave: AttesteringsOppgave): OppgaveNy {
-        val behandlingsoppgaver = oppgaveDaoNy.hentOppgaverForBehandling(attesteringsoppgave.referanse)
+    fun lukkOppgaveUnderbehandlingOgLagNyMedType(
+        fattetoppgave: VedtakOppgaveDTO,
+        oppgaveType: OppgaveType,
+        merknad: String?,
+        saksbehandler: String? = null
+    ): OppgaveNy {
+        sikreAtSaksbehandlerErSattPaaOppgaveHvisNyOppgavelisteIkkeErStoettet(fattetoppgave.referanse, saksbehandler)
+
+        val behandlingsoppgaver = oppgaveDaoNy.hentOppgaverForBehandling(fattetoppgave.referanse)
         if (behandlingsoppgaver.isEmpty()) {
             throw BadRequestException("Må ha en oppgave for å kunne lage attesteringsoppgave")
         }
@@ -126,34 +164,147 @@ class OppgaveServiceNy(private val oppgaveDaoNy: OppgaveDaoNy, private val sakDa
             val oppgaveUnderbehandling = behandlingsoppgaver.single { it.status == Status.UNDER_BEHANDLING }
             oppgaveDaoNy.endreStatusPaaOppgave(oppgaveUnderbehandling.id, Status.FERDIGSTILT)
             return opprettNyOppgaveMedSakOgReferanse(
-                attesteringsoppgave.referanse,
-                attesteringsoppgave.sakId,
-                attesteringsoppgave.oppgaveType
+                referanse = fattetoppgave.referanse,
+                sakId = fattetoppgave.sakId,
+                oppgaveKilde = oppgaveUnderbehandling.kilde,
+                oppgaveType = oppgaveType,
+                merknad = merknad
             )
         } catch (e: NoSuchElementException) {
             throw BadRequestException(
                 "Det må finnes en oppgave under behandling, gjelder behandling:" +
-                    " ${attesteringsoppgave.referanse}",
+                    " ${fattetoppgave.referanse}",
                 e
             )
         } catch (e: IllegalArgumentException) {
             throw BadRequestException(
                 "Skal kun ha en oppgave under behandling, gjelder behandling:" +
-                    " ${attesteringsoppgave.referanse}",
+                    " ${fattetoppgave.referanse}",
                 e
             )
         }
     }
 
-    fun opprettNyOppgaveMedSakOgReferanse(referanse: String, sakId: Long, oppgaveType: OppgaveType): OppgaveNy {
+    fun endreEnhetForOppgaverTilknyttetSak(
+        sakId: Long,
+        enhetsID: String
+    ) {
+        inTransaction {
+            val oppgaverForbehandling = oppgaveDaoNy.hentOppgaverForSak(sakId)
+            oppgaverForbehandling.forEach {
+                oppgaveDaoNy.endreEnhetPaaOppgave(it.id, enhetsID)
+            }
+        }
+    }
+
+    fun hentOppgaverForSak(sakId: Long): List<OppgaveNy> {
+        return inTransaction { oppgaveDaoNy.hentOppgaverForSak(sakId) }
+    }
+
+    fun avbrytOppgaveUnderBehandling(
+        behandlingEllerHendelseId: String,
+        saksbehandler: String? = null
+    ): OppgaveNy {
+        sikreAtSaksbehandlerErSattPaaOppgaveHvisNyOppgavelisteIkkeErStoettet(
+            behandlingEllerHendelseId,
+            saksbehandler
+        )
+        try {
+            val oppgaveUnderbehandling = oppgaveDaoNy.hentOppgaverForBehandling(behandlingEllerHendelseId)
+                .single { it.status == Status.UNDER_BEHANDLING }
+            oppgaveDaoNy.endreStatusPaaOppgave(oppgaveUnderbehandling.id, Status.AVBRUTT)
+            return requireNotNull(oppgaveDaoNy.hentOppgave(oppgaveUnderbehandling.id)) {
+                "Oppgaven vi akkurat avbrøt kunne ikke hentes ut"
+            }
+        } catch (e: NoSuchElementException) {
+            throw BadRequestException(
+                "Det må finnes en oppgave under behandling, gjelder behandling / hendelse med ID:" +
+                    " $behandlingEllerHendelseId}",
+                e
+            )
+        } catch (e: IllegalArgumentException) {
+            throw BadRequestException(
+                "Skal kun ha en oppgave under behandling, gjelder behandling / hendelse med ID:" +
+                    " $behandlingEllerHendelseId",
+                e
+            )
+        }
+    }
+
+    fun ferdigStillOppgaveUnderBehandling(
+        behandlingEllerHendelseId: String,
+        saksbehandler: String? = null
+    ): OppgaveNy {
+        sikreAtSaksbehandlerErSattPaaOppgaveHvisNyOppgavelisteIkkeErStoettet(
+            behandlingEllerHendelseId,
+            saksbehandler
+        )
+        val behandlingsoppgaver = oppgaveDaoNy.hentOppgaverForBehandling(behandlingEllerHendelseId)
+        if (behandlingsoppgaver.isEmpty()) {
+            throw BadRequestException("Må ha en oppgave for å ferdigstille oppgave")
+        }
+        try {
+            val oppgaveUnderbehandling = behandlingsoppgaver.single { it.status == Status.UNDER_BEHANDLING }
+            oppgaveDaoNy.endreStatusPaaOppgave(oppgaveUnderbehandling.id, Status.FERDIGSTILT)
+            return requireNotNull(oppgaveDaoNy.hentOppgave(oppgaveUnderbehandling.id)) {
+                "Oppgaven vi akkurat ferdigstilte kunne ikke hentes ut"
+            }
+        } catch (e: NoSuchElementException) {
+            throw BadRequestException(
+                "Det må finnes en oppgave under behandling, gjelder behandling / hendelse med ID:" +
+                    " $behandlingEllerHendelseId}",
+                e
+            )
+        } catch (e: IllegalArgumentException) {
+            throw BadRequestException(
+                "Skal kun ha en oppgave under behandling, gjelder behandling / hendelse med ID:" +
+                    " $behandlingEllerHendelseId",
+                e
+            )
+        }
+    }
+
+    fun opprettFoerstegangsbehandlingsOppgaveForInnsendSoeknad(referanse: String, sakId: Long): OppgaveNy {
+        val oppgaverForBehandling = oppgaveDaoNy.hentOppgaverForBehandling(referanse)
+        val oppgaverSomKanLukkes = oppgaverForBehandling.filter { !it.erAvsluttet() }
+        oppgaverSomKanLukkes.forEach {
+            oppgaveDaoNy.endreStatusPaaOppgave(it.id, Status.AVBRUTT)
+        }
+
+        return opprettNyOppgaveMedSakOgReferanse(
+            referanse = referanse,
+            sakId = sakId,
+            oppgaveKilde = OppgaveKilde.BEHANDLING,
+            oppgaveType = OppgaveType.FOERSTEGANGSBEHANDLING,
+            merknad = null
+        )
+    }
+
+    fun opprettNyOppgaveMedSakOgReferanse(
+        referanse: String,
+        sakId: Long,
+        oppgaveKilde: OppgaveKilde?,
+        oppgaveType: OppgaveType,
+        merknad: String?
+    ): OppgaveNy {
         val sak = sakDao.hentSak(sakId)!!
         return lagreOppgave(
             opprettNyOppgaveMedReferanseOgSak(
                 referanse = referanse,
                 sak = sak,
-                oppgaveType = oppgaveType
+                oppgaveKilde = oppgaveKilde,
+                oppgaveType = oppgaveType,
+                merknad = merknad
             )
         )
+    }
+
+    fun hentSaksbehandlerForBehandling(behandlingsId: UUID): String? {
+        val oppgaveforBehandling = inTransaction {
+            oppgaveDaoNy.hentOppgaverForBehandling(behandlingsId.toString())
+                .single { it.status == Status.UNDER_BEHANDLING || it.status == Status.NY }
+        }
+        return oppgaveforBehandling.saksbehandler
     }
 
     private fun lagreOppgave(oppgaveNy: OppgaveNy): OppgaveNy {
@@ -165,7 +316,30 @@ class OppgaveServiceNy(private val oppgaveDaoNy: OppgaveDaoNy, private val sakDa
         oppgaveDaoNy.lagreOppgave(oppgaveLagres)
         return oppgaveDaoNy.hentOppgave(oppgaveLagres.id)!!
     }
+
     fun hentOppgave(oppgaveId: UUID): OppgaveNy? {
         return oppgaveDaoNy.hentOppgave(oppgaveId)
     }
+
+    /**
+     * Skal kun brukes for automatisk avbrudd når vi får erstattende førstegangsbehandling i saken
+     */
+    fun avbrytAapneOppgaverForBehandling(behandlingId: String) {
+        oppgaveDaoNy.hentOppgaverForBehandling(behandlingId)
+            .filter { !it.erAvsluttet() }
+            .forEach {
+                oppgaveDaoNy.endreStatusPaaOppgave(it.id, Status.AVBRUTT)
+            }
+    }
+}
+
+fun List<OppgaveNy>.filterOppgaverForEnheter(
+    featureToggleService: FeatureToggleService,
+    user: User
+) = this.filterForEnheter(
+    featureToggleService,
+    OppgaveServiceFeatureToggle.EnhetFilterOppgaver,
+    user
+) { item, enheter ->
+    enheter.contains(item.enhet)
 }

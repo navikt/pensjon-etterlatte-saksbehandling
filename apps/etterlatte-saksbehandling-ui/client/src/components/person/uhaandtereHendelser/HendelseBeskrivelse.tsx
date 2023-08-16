@@ -189,7 +189,7 @@ const Institusjonsopphold = (props: { samsvar: InstitusjonsoppholdSamsvar }) => 
           ? institusjonstype[samsvar.oppholdBeriket.institusjonsType]
           : `Ukjent type ${samsvar.oppholdBeriket.institusjonsType}`}
       </BodySmall>
-      <BodySmall> Institusjonsnavn {samsvar.oppholdBeriket.institusjonsnavn}</BodySmall>
+      <BodySmall> Institusjonsnavn: {samsvar.oppholdBeriket.institusjonsnavn}</BodySmall>
       <BodySmall>
         Organisasjonsnummer:{' '}
         {samsvar.oppholdBeriket.organisasjonsnummer

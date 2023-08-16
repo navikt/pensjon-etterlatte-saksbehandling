@@ -28,7 +28,7 @@ data class Behandling(
     val spraak: Spraak,
     val persongalleri: Persongalleri,
     val vedtak: ForenkletVedtak,
-    val utbetalingsinfo: Utbetalingsinfo? = null,
+    val utbetalingsinfo: Utbetalingsinfo,
     val avkortingsinfo: Avkortingsinfo? = null,
     val revurderingsaarsak: RevurderingAarsak? = null,
     val revurderingInfo: RevurderingInfo? = null,

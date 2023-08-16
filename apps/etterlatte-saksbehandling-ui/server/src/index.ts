@@ -91,7 +91,9 @@ if (isDev) {
   app.use(['/api/brev', '/api/dokumenter'], tokenMiddleware(ApiConfig.brev.scope), proxy(ApiConfig.brev.url))
 }
 
-app.use(/^(?!.*\/(internal|static)\/).*$/, (req: Request, res: Response) => {
+app.get('/api/gosys', (_req: Request, res: Response) => res.send(ApiConfig.gosys.url))
+
+app.use(/^(?!.*\/(internal|static)\/).*$/, (_req: Request, res: Response) => {
   return res.sendFile(`${clientPath}/index.html`)
 })
 

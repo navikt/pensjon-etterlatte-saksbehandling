@@ -36,6 +36,8 @@ export type Oppgavetype =
 export const erOppgaveRedigerbar = (status: Oppgavestatus, type: string): boolean =>
   ['NY', 'UNDER_BEHANDLING'].includes(status) && !['GOSYS'].includes(type)
 
+export const hentGosysUrlApi = async (): Promise<ApiResponse<string>> => apiClient.get('/gosys')
+
 export const hentNyeOppgaver = async (): Promise<ApiResponse<OppgaveDTOny[]>> => apiClient.get('/nyeoppgaver')
 
 export interface SaksbehandlerEndringDto {

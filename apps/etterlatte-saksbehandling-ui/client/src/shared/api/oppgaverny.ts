@@ -34,8 +34,7 @@ export type Oppgavetype =
   | 'UNDERKJENT'
   | 'GOSYS'
 
-export const erOppgaveRedigerbar = (status: Oppgavestatus, type: string): boolean =>
-  ['NY', 'UNDER_BEHANDLING'].includes(status) && type != null
+export const erOppgaveRedigerbar = (status: Oppgavestatus): boolean => ['NY', 'UNDER_BEHANDLING'].includes(status)
 
 export const hentNyeOppgaver = async (): Promise<ApiResponse<OppgaveDTOny[]>> => apiClient.get('/nyeoppgaver')
 
@@ -58,12 +57,31 @@ export const tildelSaksbehandlerApi = async (args: {
 
 export const byttSaksbehandlerApi = async (args: {
   oppgaveId: string
+  type: string
   nysaksbehandler: SaksbehandlerEndringDto
-}): Promise<ApiResponse<void>> =>
-  apiClient.post(`/nyeoppgaver/${args.oppgaveId}/bytt-saksbehandler`, { ...args.nysaksbehandler })
+}): Promise<ApiResponse<void>> => {
+  if (args.type == 'GOSYS') {
+    return apiClient.post(`/nyeoppgaver/gosys/${args.oppgaveId}/tildel-saksbehandler`, { ...args.nysaksbehandler })
+  } else {
+    return apiClient.post(`/nyeoppgaver/${args.oppgaveId}/bytt-saksbehandler`, { ...args.nysaksbehandler })
+  }
+}
 
-export const fjernSaksbehandlerApi = async (args: { oppgaveId: string; sakId: number }): Promise<ApiResponse<void>> =>
-  apiClient.delete(`/nyeoppgaver/${args.oppgaveId}/saksbehandler`)
+export const fjernSaksbehandlerApi = async (args: {
+  oppgaveId: string
+  sakId: number
+  type: string
+  versjon: string | null
+}): Promise<ApiResponse<void>> => {
+  if (args.type == 'GOSYS') {
+    return apiClient.post(`/nyeoppgaver/gosys/${args.oppgaveId}/tildel-saksbehandler`, {
+      saksbehandler: '',
+      versjon: args.versjon,
+    })
+  } else {
+    return apiClient.delete(`/nyeoppgaver/${args.oppgaveId}/saksbehandler`)
+  }
+}
 
 export interface RedigerFristRequest {
   frist: Date

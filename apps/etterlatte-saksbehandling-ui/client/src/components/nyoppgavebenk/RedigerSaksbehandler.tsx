@@ -27,7 +27,7 @@ export const RedigerSaksbehandler = (props: {
   const user = useAppSelector((state) => state.saksbehandlerReducer.saksbehandler)
   const [fjernSaksbehandlerSvar, fjernSaksbehandler] = useApiCall(fjernSaksbehandlerApi)
   const [byttSaksbehandlerSvar, byttSaksbehandler] = useApiCall(byttSaksbehandlerApi)
-  const erRedigerbar = erOppgaveRedigerbar(status, type)
+  const erRedigerbar = erOppgaveRedigerbar(status)
 
   const brukerErSaksbehandler = user.ident === saksbehandler
 
@@ -60,7 +60,9 @@ export const RedigerSaksbehandler = (props: {
                 beskrivelse="Ønsker du å fjerne deg som saksbehandler?"
                 tekstKnappJa="Ja, fjern meg som saksbehandler"
                 tekstKnappNei="Nei"
-                onYesClick={() => fjernSaksbehandler({ oppgaveId: oppgaveId, sakId: sakId })}
+                onYesClick={() =>
+                  fjernSaksbehandler({ oppgaveId: oppgaveId, sakId: sakId, type: type, versjon: versjon })
+                }
                 setModalisOpen={setModalIsOpen}
                 open={modalIsOpen}
               />
@@ -97,6 +99,7 @@ export const RedigerSaksbehandler = (props: {
                 onYesClick={() =>
                   byttSaksbehandler({
                     oppgaveId: oppgaveId,
+                    type: type,
                     nysaksbehandler: { saksbehandler: user.ident, versjon: versjon },
                   })
                 }

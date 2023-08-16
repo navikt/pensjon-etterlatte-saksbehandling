@@ -152,6 +152,8 @@ function mapAarsak(aarsak: BehandlingOgRevurderingsAarsakerType) {
       return 'Fengselsopphold'
     case Revurderingsaarsak.YRKESSKADE:
       return 'Yrkesskade'
+    case Revurderingsaarsak.UT_AV_FENGSEL:
+      return 'Ut av fengsel'
   }
 }
 

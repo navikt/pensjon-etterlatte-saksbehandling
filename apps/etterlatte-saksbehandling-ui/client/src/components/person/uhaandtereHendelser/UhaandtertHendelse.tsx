@@ -27,7 +27,7 @@ const UhaandtertHendelse = (props: {
   const stoetterRevurdering = stoetterRevurderingAvHendelse(hendelse, revurderinger)
   const { type: samsvarType } = samsvarMellomKildeOgGrunnlag
 
-  const tattMedIBehandling = hendelse.status == 'TATT_MED_I_BEHANDLING'
+  const tattMedIBehandling = hendelse.status === 'TATT_MED_I_BEHANDLING'
   const lukkGrunnlagshendelseWrapper = () => {
     lukkGrunnlagshendelseFunc(
       { ...hendelse, kommentar: hendelsekommentar },

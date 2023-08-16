@@ -154,9 +154,10 @@ export interface InstitusjonsoppholdSamsvar {
 }
 
 interface InstitusjonsoppholdHendelseBeriket {
-  startdato: Date
-  faktiskSluttdato: Date
-  forventetSluttdato?: Date
+  startdato: string
+  faktiskSluttdato: string
+  organisasjonsnummer?: string
+  forventetSluttdato?: string
   institusjonsType?: string
   institusjonsnavn?: string
 }

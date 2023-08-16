@@ -58,6 +58,7 @@ sealed class Utfall {
     }
 }
 
+// Disse må ha en oversettelse i frontend RevurderingAarsak.ts
 enum class RevurderingAarsak(
     private val gyldigFor: List<SakType>,
     private val miljoe: KanBrukesIMiljoe,

@@ -4,9 +4,12 @@ import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.etterlatte.avkorting.AvkortingRepository
+import no.nav.etterlatte.beregning.BeregningRepository
 import no.nav.etterlatte.beregning.regler.avkortetYtelse
 import no.nav.etterlatte.beregning.regler.avkorting
 import no.nav.etterlatte.beregning.regler.avkortinggrunnlag
+import no.nav.etterlatte.beregning.regler.beregning
+import no.nav.etterlatte.beregning.regler.beregningsperiode
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.ytelseMedGrunnlag.YtelseMedGrunnlagService
 import org.junit.jupiter.api.Test
@@ -16,17 +19,42 @@ import java.util.UUID
 internal class YtelseMedGrunnlagServiceTest {
 
     private val avkortingRepository = mockk<AvkortingRepository>()
-    private val service = YtelseMedGrunnlagService(avkortingRepository)
+    private val beregningRepository = mockk<BeregningRepository>()
+    private val service = YtelseMedGrunnlagService(
+        beregningRepository,
+        avkortingRepository
+    )
 
     @Test
     fun `returnerer null hvis avkorting ikke finnes`() {
         every { avkortingRepository.hentAvkorting(any()) } returns null
+        every { beregningRepository.hent(any()) } returns null
         service.hentYtelseMedGrunnlag(UUID.randomUUID()) shouldBe null
     }
 
     @Test
     fun `skal hente ytelse oppdelt i perioder med alle grunnlag`() {
         val behandlingsId = UUID.randomUUID()
+        every { beregningRepository.hent(behandlingsId) } returns beregning(
+            beregninger = listOf(
+                beregningsperiode(
+                    datoFOM = YearMonth.of(2023, 2),
+                    datoTOM = YearMonth.of(2023, 5),
+                    utbetaltBeloep = 20000,
+                    trygdetid = 40,
+                    grunnbeloep = 120000,
+                    grunnbeloepMnd = 10000
+                ),
+                beregningsperiode(
+                    datoFOM = YearMonth.of(2023, 6),
+                    datoTOM = null,
+                    utbetaltBeloep = 21000,
+                    trygdetid = 40,
+                    grunnbeloep = 132000,
+                    grunnbeloepMnd = 11000
+                )
+            )
+        )
         every { avkortingRepository.hentAvkorting(behandlingsId) } returns avkorting(
             avkortingGrunnlag = listOf(
                 avkortinggrunnlag(
@@ -73,8 +101,8 @@ internal class YtelseMedGrunnlagServiceTest {
             avkortingsbeloep shouldBe 5000
             aarsinntekt shouldBe 300000
             fratrekkInnAar shouldBe 25000
-            grunnbelop shouldBe 111477
-            grunnbelopMnd shouldBe 9290
+            grunnbelop shouldBe 120000
+            grunnbelopMnd shouldBe 10000
         }
         with(ytelse.perioder[1]) {
             periode shouldBe Periode(fom = YearMonth.of(2023, 4), tom = YearMonth.of(2023, 5))
@@ -83,8 +111,9 @@ internal class YtelseMedGrunnlagServiceTest {
             avkortingsbeloep shouldBe 3000
             aarsinntekt shouldBe 350000
             fratrekkInnAar shouldBe 25000
-            grunnbelop shouldBe 111477
-            grunnbelopMnd shouldBe 9290
+            grunnbelop shouldBe 120000
+            grunnbelopMnd shouldBe 10000
+
         }
         with(ytelse.perioder[2]) {
             periode shouldBe Periode(fom = YearMonth.of(2023, 6), tom = null)
@@ -93,8 +122,9 @@ internal class YtelseMedGrunnlagServiceTest {
             avkortingsbeloep shouldBe 4000
             aarsinntekt shouldBe 350000
             fratrekkInnAar shouldBe 25000
-            grunnbelop shouldBe 118620
-            grunnbelopMnd shouldBe 9885
+            grunnbelop shouldBe 132000
+            grunnbelopMnd shouldBe 11000
+
         }
     }
 }

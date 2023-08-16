@@ -74,6 +74,7 @@ data class YtelseMedGrunnlagPeriodisertDto(
     val ytelseFoerAvkorting: Int,
     val aarsinntekt: Int,
     val fratrekkInnAar: Int,
+    val trygdetid: Int,
     val grunnbelop: Int,
     val grunnbelopMnd: Int
 )

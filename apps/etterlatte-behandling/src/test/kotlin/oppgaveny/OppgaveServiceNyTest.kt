@@ -801,6 +801,27 @@ class OppgaveServiceNyTest {
     }
 
     @Test
+    fun `kan hente saksbehandler på en oppgave fra revurdering`() {
+        val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val revurderingId = UUID.randomUUID().toString()
+        val nyOppgave = oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
+            revurderingId,
+            opprettetSak.id,
+            OppgaveKilde.BEHANDLING,
+            OppgaveType.REVURDERING,
+            null
+        )
+        val saksbehandler = "saksbehandler"
+
+        oppgaveServiceNy.tildelSaksbehandler(nyOppgave.id, saksbehandler)
+
+        val saksbehandlerHentet =
+            oppgaveServiceNy.hentSaksbehandlerForBehandling(UUID.fromString(revurderingId))
+
+        Assertions.assertEquals(saksbehandler, saksbehandlerHentet)
+    }
+
+    @Test
     fun `Skal kunne hente saksbehandler på oppgave for behandling selvom den er ferdigstilt med attestering`() {
         val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         val behandlingId = UUID.randomUUID().toString()

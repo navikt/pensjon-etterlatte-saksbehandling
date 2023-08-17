@@ -181,7 +181,8 @@ data class PdlFoedsel(
 )
 
 data class PdlFolkeregistermetadata(
-    val gyldighetstidspunkt: LocalDateTime? = null
+    val gyldighetstidspunkt: LocalDateTime? = null,
+    val opphoerstidspunkt: LocalDateTime? = null
 )
 
 data class PdlMetadata(
@@ -481,3 +482,24 @@ enum class IdentGruppe {
     FOLKEREGISTERIDENT,
     NPID
 }
+
+data class PdlHentForelderansvarHistorikkVariables(
+    val ident: String
+) {
+    val historikk: Boolean = true
+}
+
+data class PdlHentForeldreansvarHistorikkRequest(
+    val query: String,
+    val variables: PdlHentForelderansvarHistorikkVariables
+)
+
+data class PdlHentForeldreansvarHistorikkResponse(
+    val data: PdlHistorikkForeldreansvar? = null,
+    val errors: List<PdlResponseError>? = null
+)
+
+data class PdlHistorikkForeldreansvar(
+    val foreldreansvar: List<PdlForelderAnsvar>,
+    val forelderBarnRelasjon: List<PdlForelderBarnRelasjon>
+)

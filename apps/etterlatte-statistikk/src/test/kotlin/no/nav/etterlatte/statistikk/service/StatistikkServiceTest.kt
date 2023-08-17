@@ -197,7 +197,8 @@ class StatistikkServiceTest {
                     relevanteMaanederInnAar = 2,
                     spesifikasjon = ""
                 )
-            ), listOf(
+            ),
+            listOf(
                 AvkortetYtelse(
                     fom = YearMonth.now(),
                     tom = null,

@@ -229,7 +229,7 @@ internal class BehandlingTest {
     private fun opprettOpplysning(jsonNode: JsonNode) =
         Opplysning.Konstant(
             UUID.randomUUID(),
-            Grunnlagsopplysning.Pdl("pdl", Tidspunkt.now(), null, null),
+            Grunnlagsopplysning.Pdl(Tidspunkt.now(), null, null),
             jsonNode
         )
 }

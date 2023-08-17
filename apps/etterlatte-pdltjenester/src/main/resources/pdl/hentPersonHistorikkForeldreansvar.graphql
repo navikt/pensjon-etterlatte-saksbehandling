@@ -1,0 +1,57 @@
+fragment metadata on Metadata {
+  master
+  historisk
+  opplysningsId
+  endringer {
+      kilde
+      registrert
+      registrertAv
+      systemkilde
+      type
+  }
+}
+
+fragment folkeregistermetadata on Folkeregistermetadata {
+  ajourholdstidspunkt
+  gyldighetstidspunkt
+  opphoerstidspunkt
+  kilde
+  aarsak
+  sekvens
+
+}
+
+fragment personnavn on Personnavn {
+  etternavn
+  fornavn
+  mellomnavn
+}
+fragment relatertbiperson on RelatertBiPerson {
+  foedselsdato
+  kjoenn
+  navn {...personnavn}
+  statsborgerskap
+}
+
+query(
+  $ident: ID!,
+  $historikk: Boolean!
+) {
+  hentPerson(ident: $ident) {
+      foreldreansvar(historikk: $historikk) {
+          ansvar
+          ansvarlig
+          ansvarligUtenIdentifikator{...relatertbiperson}
+          ansvarssubjekt
+          folkeregistermetadata{...folkeregistermetadata}
+          metadata{...metadata}
+      }
+      forelderBarnRelasjon {
+          folkeregistermetadata{...folkeregistermetadata}
+          metadata{...metadata}
+          minRolleForPerson
+          relatertPersonsIdent
+          relatertPersonsRolle
+      }
+  }
+}

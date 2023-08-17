@@ -40,5 +40,7 @@ enum class Opplysningstype {
     UTENLANDSOPPHOLD, // Bruks kun idag for informasjon fra søknaden
     UTENLANDSADRESSE,
 
-    SOESKEN_I_BEREGNINGEN // Kun for soeskenjustering
+    SOESKEN_I_BEREGNINGEN, // Kun for soeskenjustering
+
+    HISTORISK_FORELDREANSVAR
 }

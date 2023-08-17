@@ -149,13 +149,17 @@ const Sivilstand = (props: { samsvar: SivilstandSamsvar }) => {
       <div>
         <BodySmall>Nytt grunnlag (PDL)</BodySmall>
         <ListeWrapper>
-          {samsvar.fraPdl?.map((sivilstand, i) => <li key={i}>{sivilstandWrapper(sivilstand, i)}</li>)}
+          {samsvar.fraPdl?.map((sivilstand, i) => (
+            <li key={i}>{sivilstandWrapper(sivilstand, i)}</li>
+          ))}
         </ListeWrapper>
       </div>
       <div>
         <BodySmall>Eksisterende grunnlag</BodySmall>
         <ListeWrapper>
-          {samsvar.fraGrunnlag?.map((sivilstand, i) => <li key={i}>{sivilstandWrapper(sivilstand, i)}</li>)}
+          {samsvar.fraGrunnlag?.map((sivilstand, i) => (
+            <li key={i}>{sivilstandWrapper(sivilstand, i)}</li>
+          ))}
         </ListeWrapper>
       </div>
     </GrunnlagSammenligningWrapper>

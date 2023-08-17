@@ -90,7 +90,7 @@ class AvkortingRoutesTest {
         val avkorting = Avkorting(
             avkortingGrunnlag = listOf(avkortingsgrunnlag),
             aarsoppgjoer = aarsoppgjoer(
-                avkortingsperioder = listOf(avkortingsperiode()),
+                avkortingsperioder = listOf(avkortingsperiode())
             ),
             avkortetYtelse = listOf(avkortetYtelse(periode = Periode(fom = dato, tom = dato)))
         )

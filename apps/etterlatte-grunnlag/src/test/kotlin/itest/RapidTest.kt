@@ -64,7 +64,7 @@ internal class RapidTest {
 
     private val fnr = Folkeregisteridentifikator.of("18057404783")
     private val tidspunkt = Tidspunkt.now()
-    private val kilde = Grunnlagsopplysning.Pdl("pdl", tidspunkt, null, null)
+    private val kilde = Grunnlagsopplysning.Pdl(tidspunkt, null, null)
     private val nyOpplysning = Grunnlagsopplysning(
         id = statiskUuid,
         kilde = kilde,

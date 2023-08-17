@@ -1,5 +1,6 @@
 package no.nav.etterlatte.person
 
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.GeografiskTilknytning
@@ -11,9 +12,12 @@ import no.nav.etterlatte.libs.common.person.NavPersonIdent
 import no.nav.etterlatte.libs.common.person.PDLIdentGruppeTyper
 import no.nav.etterlatte.libs.common.person.PdlIdentifikator
 import no.nav.etterlatte.libs.common.person.Person
+import no.nav.etterlatte.libs.common.person.PersonRolle
+import no.nav.etterlatte.pdl.HistorikkForeldreansvar
 import no.nav.etterlatte.pdl.ParallelleSannheterKlient
 import no.nav.etterlatte.pdl.PdlKlient
 import no.nav.etterlatte.pdl.PdlResponseError
+import no.nav.etterlatte.pdl.mapper.ForeldreansvarHistorikkMapper
 import no.nav.etterlatte.pdl.mapper.GeografiskTilknytningMapper
 import no.nav.etterlatte.pdl.mapper.PersonMapper
 import org.slf4j.LoggerFactory
@@ -51,6 +55,34 @@ class PersonService(
                 )
             }
         }
+    }
+
+    suspend fun hentHistorikkForeldreansvar(
+        hentPersonRequest: HentPersonRequest
+    ): HistorikkForeldreansvar {
+        if (hentPersonRequest.saktype != SakType.BARNEPENSJON) {
+            throw IllegalArgumentException("Kan kun hente historikk i foreldreansvar for barnepensjonssaker")
+        }
+        if (hentPersonRequest.rolle != PersonRolle.BARN) {
+            throw IllegalArgumentException("Kan kun hente historikk i foreldreansvar for barn")
+        }
+        val fnr = hentPersonRequest.foedselsnummer
+
+        return pdlKlient.hentPersonHistorikkForeldreansvar(fnr)
+            .let {
+                if (it.data == null) {
+                    val pdlFeil = it.errors?.asFormatertFeil()
+                    if (it.errors?.personIkkeFunnet() == true) {
+                        throw PdlFantIkkePerson("Fant ikke personen $fnr")
+                    } else {
+                        throw PdlForesporselFeilet(
+                            "Kunne ikke hente person med fnr=$fnr fra PDL: $pdlFeil"
+                        )
+                    }
+                } else {
+                    ForeldreansvarHistorikkMapper.mapForeldreAnsvar(it.data)
+                }
+            }
     }
 
     suspend fun hentOpplysningsperson(request: HentPersonRequest): PersonDTO {

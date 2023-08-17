@@ -6,7 +6,7 @@ export function useApiCall<T, U>(
 ): [
   Result<U>,
   (args: T, onSuccess?: (result: U, statusCode: number) => void, onError?: (error: ApiError) => void) => void,
-  () => void,
+  () => void
 ] {
   const [apiResult, setApiResult] = useState<Result<U>>(initial)
 

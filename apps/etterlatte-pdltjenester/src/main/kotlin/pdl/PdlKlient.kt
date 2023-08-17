@@ -47,6 +47,33 @@ class PdlKlient(private val httpClient: HttpClient, private val apiUrl: String) 
         }
     }
 
+    suspend fun hentPersonHistorikkForeldreansvar(
+        fnr: Folkeregisteridentifikator
+    ): PdlHentForeldreansvarHistorikkResponse {
+        val request = PdlHentForeldreansvarHistorikkRequest(
+            query = getQuery("/pdl/hentPersonHistorikkForeldreansvar.graphql"),
+            variables = PdlHentForelderansvarHistorikkVariables(
+                ident = fnr.value
+            )
+        )
+
+        val behandlingsnummer = findBehandlingsnummerFromSaktype(SakType.BARNEPENSJON)
+        return retry<PdlHentForeldreansvarHistorikkResponse>(times = 3) {
+            httpClient.post(apiUrl) {
+                header(HEADER_BEHANDLINGSNUMMER, behandlingsnummer.behandlingsnummer)
+                header(HEADER_TEMA, HEADER_TEMA_VALUE)
+                accept(Json)
+                contentType(Json)
+                setBody(request)
+            }.body()
+        }.let {
+            when (it) {
+                is RetryResult.Success -> it.content
+                is RetryResult.Failure -> throw it.samlaExceptions()
+            }
+        }
+    }
+
     suspend fun hentPersonBolk(fnr: List<Folkeregisteridentifikator>, saktype: SakType): PdlPersonResponseBolk {
         val request = PdlGraphqlBolkRequest(
             query = getQuery("/pdl/hentPersonBolk.graphql"),

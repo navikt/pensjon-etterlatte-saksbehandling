@@ -76,7 +76,7 @@ fun avkorting(
     avkortingGrunnlag: List<AvkortingGrunnlag> = emptyList(),
     ytelseFoerAvkorting: List<YtelseFoerAvkorting> = emptyList(),
     avkortingsperioder: List<Avkortingsperiode> = emptyList(),
-    avkortetYtelse: List<AvkortetYtelse> = emptyList(),
+    avkortetYtelse: List<AvkortetYtelse> = emptyList()
 ) = Avkorting(
     avkortingGrunnlag = avkortingGrunnlag,
     aarsoppgjoer = aarsoppgjoer(ytelseFoerAvkorting, avkortingsperioder),
@@ -127,7 +127,7 @@ fun aarsoppgjoer(
     avkortingsperioder = avkortingsperioder,
     tidligereAvkortetYtelse = tidligereAvkortetYtelse,
     tidligereAvkortetYtelseReberegnet = reberegnetAvkortetYtelse,
-    restanse = restanse,
+    restanse = restanse
 )
 
 fun ytelseFoerAvkorting(
@@ -168,7 +168,7 @@ fun restanse(
 fun avkortetYtelseGrunnlag(beregning: Int, avkorting: Int, fordeltRestanse: Int = 0) = AvkortetYtelseGrunnlag(
     beregning = FaktumNode(verdi = beregning, "", ""),
     avkorting = FaktumNode(verdi = avkorting, "", ""),
-    fordeltRestanse = FaktumNode(verdi = fordeltRestanse, "", ""),
+    fordeltRestanse = FaktumNode(verdi = fordeltRestanse, "", "")
 )
 
 fun avkortetYtelse(
@@ -195,7 +195,6 @@ fun avkortetYtelse(
     regelResultat = "".toJsonNode(),
     kilde = Grunnlagsopplysning.RegelKilde("regelid", Tidspunkt.now(), "1")
 )
-
 
 fun beregning(
     beregninger: List<Beregningsperiode> = listOf(beregningsperiode())

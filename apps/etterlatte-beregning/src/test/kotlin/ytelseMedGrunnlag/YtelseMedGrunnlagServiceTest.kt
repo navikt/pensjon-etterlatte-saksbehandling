@@ -113,7 +113,6 @@ internal class YtelseMedGrunnlagServiceTest {
             fratrekkInnAar shouldBe 25000
             grunnbelop shouldBe 120000
             grunnbelopMnd shouldBe 10000
-
         }
         with(ytelse.perioder[2]) {
             periode shouldBe Periode(fom = YearMonth.of(2023, 6), tom = null)
@@ -124,7 +123,6 @@ internal class YtelseMedGrunnlagServiceTest {
             fratrekkInnAar shouldBe 25000
             grunnbelop shouldBe 132000
             grunnbelopMnd shouldBe 11000
-
         }
     }
 }

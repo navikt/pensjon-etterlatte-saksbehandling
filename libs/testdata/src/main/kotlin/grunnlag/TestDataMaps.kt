@@ -32,7 +32,7 @@ import no.nav.etterlatte.libs.testdata.pdl.personTestData
 import java.time.LocalDateTime
 import java.util.UUID.randomUUID
 
-val kilde = Grunnlagsopplysning.Pdl("pdl", Tidspunkt.now(), null, "opplysningsId1")
+val kilde = Grunnlagsopplysning.Pdl(Tidspunkt.now(), null, "opplysningsId1")
 val statiskUuid = randomUUID()!!
 
 val AVDOED_FOEDSELSNUMMER = Folkeregisteridentifikator.of("01448203510")

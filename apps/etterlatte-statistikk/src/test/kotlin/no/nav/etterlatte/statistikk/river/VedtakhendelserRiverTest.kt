@@ -57,7 +57,7 @@ internal class VedtakhendelserRiverTest {
         vedtakType = null,
         sakUtland = SakUtland.NASJONAL,
         virkningstidspunkt = YearMonth.of(2023, 6),
-        utbetalingsdato = LocalDate.of(2023,7, 20)
+        utbetalingsdato = LocalDate.of(2023, 7, 20)
     )
 
     @Test

@@ -43,7 +43,7 @@ class BeregningKlientImpl(
         } catch (e: Exception) {
             logger.warn(
                 "Kunne ikke hente avkorting for behandlingen med id=$behandlingId " +
-                        "fra beregning"
+                    "fra beregning"
             )
             null
         }

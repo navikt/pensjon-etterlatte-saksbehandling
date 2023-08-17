@@ -1,6 +1,8 @@
 package no.nav.etterlatte.statistikk.database
 
 import io.kotest.assertions.asClue
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.database.DataSourceBuilder
@@ -16,11 +18,8 @@ import no.nav.etterlatte.statistikk.domain.SakRad
 import no.nav.etterlatte.statistikk.domain.SakUtland
 import no.nav.etterlatte.statistikk.domain.SakYtelsesgruppe
 import no.nav.etterlatte.statistikk.service.VedtakHendelse
-import io.kotest.matchers.shouldBe
-import io.kotest.matchers.shouldNotBe
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -72,7 +71,8 @@ class SakRepositoryTest {
                 relevanteMaanederInnAar = 2,
                 spesifikasjon = ""
             )
-        ), listOf(
+        ),
+        listOf(
             AvkortetYtelse(
                 fom = YearMonth.now(),
                 tom = null,
@@ -189,5 +189,4 @@ class SakRepositoryTest {
             rader[0].avkorting shouldBe null
         }
     }
-
 }

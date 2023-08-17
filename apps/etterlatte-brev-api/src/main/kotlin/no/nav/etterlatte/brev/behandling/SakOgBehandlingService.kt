@@ -106,8 +106,6 @@ class SakOgBehandlingService(
             adopsjonsdato = LocalDate.now(), // TODO: Denne må vi hente anten frå PDL eller brukarinput
             trygdetid = finnTrygdetid(
                 vedtak.behandling.id,
-                vedtak.sak.sakType,
-                vedtak.type,
                 brukerTokenInfo
             )
         )
@@ -150,7 +148,6 @@ class SakOgBehandlingService(
         vedtakType: VedtakType,
         brukerTokenInfo: BrukerTokenInfo
     ): Avkortingsinfo? {
-        // TODO: Fjern sjekken når avkorting støttes for barnepensjon
         if (sakType == SakType.BARNEPENSJON || vedtakType == VedtakType.OPPHOER) return null
 
         val ytelseMedGrunnlag = beregningKlient.hentYtelseMedGrunnlag(behandlingId, brukerTokenInfo)
@@ -179,13 +176,8 @@ class SakOgBehandlingService(
 
     private suspend fun finnTrygdetid(
         behandlingId: UUID,
-        sakType: SakType,
-        vedtakType: VedtakType,
         brukerTokenInfo: BrukerTokenInfo
     ): List<Trygdetidsperiode>? {
-        // TODO: Fjern sjekken når avkorting støttes for barnepensjon
-        if (sakType == SakType.BARNEPENSJON || vedtakType == VedtakType.OPPHOER) return null
-
         val trygdetidMedGrunnlag = trygdetidKlient.hentTrygdetid(behandlingId, brukerTokenInfo)
 
         val trygdetidsperioder = trygdetidMedGrunnlag?.trygdetidGrunnlag?.map {

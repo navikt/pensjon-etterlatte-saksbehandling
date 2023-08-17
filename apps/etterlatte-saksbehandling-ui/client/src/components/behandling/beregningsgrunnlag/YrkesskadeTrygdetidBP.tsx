@@ -8,7 +8,7 @@ import Spinner from '~shared/Spinner'
 import { ITrygdetid, hentTrygdetid, opprettTrygdetid, lagreYrkesskadeTrygdetidGrunnlag } from '~shared/api/trygdetid'
 import { isFailure, isPending, useApiCall } from '~shared/hooks/useApiCall'
 
-const YrkesskadeTrygdetid = () => {
+const YrkesskadeTrygdetidBP = () => {
   const { behandlingId } = useParams()
   const [hentTrygdetidRequest, fetchTrygdetid] = useApiCall(hentTrygdetid)
   const [opprettTrygdetidRequest, requestOpprettTrygdetid] = useApiCall(opprettTrygdetid)
@@ -79,4 +79,4 @@ const TrygdetidInfo = styled.div`
   flex-direction: column;
 `
 
-export default YrkesskadeTrygdetid
+export default YrkesskadeTrygdetidBP

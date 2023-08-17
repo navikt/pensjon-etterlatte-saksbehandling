@@ -41,6 +41,7 @@ import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
+import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.VedtakSak
@@ -51,6 +52,7 @@ import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
 import no.nav.pensjon.brevbaker.api.model.Kroner
 import no.nav.pensjon.brevbaker.api.model.LetterMetadata
+import no.nav.pensjon.brevbaker.api.model.RenderedJsonLetter
 import no.nav.pensjon.brevbaker.api.model.Telefonnummer
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -62,6 +64,7 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
 import org.junit.jupiter.params.provider.EnumSource
 import java.time.LocalDate
+import java.time.YearMonth
 import java.util.*
 import kotlin.random.Random
 
@@ -184,6 +187,58 @@ internal class VedtaksbrevServiceTest {
             verify {
                 db.opprettBrev(capture(brevSlot))
                 brevbaker wasNot Called
+                dokarkivService wasNot Called
+            }
+
+            val brev = brevSlot.captured
+            brev.sakId shouldBe sakId
+            brev.behandlingId shouldBe behandling.behandlingId
+            brev.soekerFnr shouldBe behandling.persongalleri.soeker.fnr.value
+            brev.mottaker shouldBe mottaker
+            brev.prosessType shouldBe forventetProsessType
+        }
+
+        @ParameterizedTest
+        @CsvSource(
+            value = [
+                "BARNEPENSJON,YRKESSKADE,REDIGERBAR"
+            ]
+        )
+        fun `Vedtaksbrev finnes ikke - skal opprette nytt redigerbart brev`(
+            sakType: SakType,
+            revurderingsaarsak: RevurderingAarsak,
+            forventetProsessType: BrevProsessType
+        ) {
+            val sakId = Random.nextLong()
+            val behandling = opprettBehandling(sakType, VedtakType.ENDRING, revurderingsaarsak = revurderingsaarsak)
+            val mottaker = opprettMottaker()
+
+            coEvery { brevbaker.genererJSON(any()) } returns opprettRenderedJsonLetter()
+            coEvery { adresseService.hentAvsender(any()) } returns opprettAvsender()
+            every { db.hentBrevForBehandling(behandling.behandlingId) } returns null
+            coEvery { sakOgBehandlingService.hentBehandling(any(), any(), any()) } returns behandling
+            coEvery { adresseService.hentMottakerAdresse(any()) } returns mottaker
+
+            runBlocking {
+                vedtaksbrevService.opprettVedtaksbrev(
+                    sakId,
+                    BEHANDLING_ID,
+                    ATTESTANT
+                )
+            }
+
+            val brevSlot = slot<OpprettNyttBrev>()
+
+            coVerify {
+                db.hentBrevForBehandling(BEHANDLING_ID)
+                sakOgBehandlingService.hentBehandling(sakId, BEHANDLING_ID, any())
+                adresseService.hentMottakerAdresse(behandling.persongalleri.innsender.fnr.value)
+                brevbaker.genererJSON(any())
+                adresseService.hentAvsender(any())
+            }
+
+            verify {
+                db.opprettBrev(capture(brevSlot))
                 dokarkivService wasNot Called
             }
 
@@ -493,7 +548,8 @@ internal class VedtaksbrevServiceTest {
     private fun opprettBehandling(
         sakType: SakType,
         vedtakType: VedtakType,
-        vedtakStatus: VedtakStatus = VedtakStatus.OPPRETTET
+        vedtakStatus: VedtakStatus = VedtakStatus.OPPRETTET,
+        revurderingsaarsak: RevurderingAarsak? = null
     ) = Behandling(
         SAK_ID,
         sakType,
@@ -528,7 +584,9 @@ internal class VedtaksbrevServiceTest {
                     40
                 )
             )
-        )
+        ),
+        revurderingsaarsak = revurderingsaarsak,
+        virkningsdato = YearMonth.of(LocalDate.now().year, LocalDate.now().month)
     )
 
     private fun opprettMottaker() = Mottaker(
@@ -562,6 +620,13 @@ internal class VedtaksbrevServiceTest {
         Telefonnummer("55553333"),
         "Sak Saksbehandler",
         "Per Attestant"
+    )
+
+    private fun opprettRenderedJsonLetter() = RenderedJsonLetter(
+        "",
+        RenderedJsonLetter.Sakspart("", "", "", ""),
+        emptyList(),
+        RenderedJsonLetter.Signatur("", "", "", "", "")
     )
 
     private companion object {

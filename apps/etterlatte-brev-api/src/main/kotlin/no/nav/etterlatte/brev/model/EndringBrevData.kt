@@ -114,3 +114,20 @@ data class UtAvFengselBrevdata(
         }
     }
 }
+
+data class YrkesskadeRevurderingBrevdata(
+    val utbetalingsinfo: Utbetalingsinfo,
+    val yrkesskadeErDokumentert: Boolean,
+    val virkningsdato: LocalDate
+) : EndringBrevData() {
+
+    companion object {
+        fun fra(behandling: Behandling): YrkesskadeRevurderingBrevdata {
+            return YrkesskadeRevurderingBrevdata(
+                utbetalingsinfo = behandling.utbetalingsinfo!!,
+                yrkesskadeErDokumentert = true, // TODO
+                virkningsdato = behandling.virkningsdato!!.atDay(1)
+            )
+        }
+    }
+}

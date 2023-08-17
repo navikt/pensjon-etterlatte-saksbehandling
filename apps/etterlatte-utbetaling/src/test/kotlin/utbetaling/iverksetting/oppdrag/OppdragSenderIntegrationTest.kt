@@ -14,7 +14,7 @@ import org.junit.jupiter.api.condition.DisabledIf
 import org.testcontainers.junit.jupiter.Container
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@DisabledIf(value = ChipsetCheck.erM1)
+@DisabledIf(value = ChipsetCheck.erM1EllerM2)
 internal class OppdragSenderIntegrationTest {
 
     @Container

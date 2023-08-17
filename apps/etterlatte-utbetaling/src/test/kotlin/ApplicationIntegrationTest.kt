@@ -34,7 +34,7 @@ import java.util.*
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@DisabledIf(value = ChipsetCheck.erM1)
+@DisabledIf(value = ChipsetCheck.erM1EllerM2)
 class ApplicationIntegrationTest {
 
     @Container

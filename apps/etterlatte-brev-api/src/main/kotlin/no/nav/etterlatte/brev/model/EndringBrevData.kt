@@ -148,7 +148,7 @@ data class InstitusjonsoppholdRevurderingBrevdata(
                 RevurderingAarsak.INSTITUSJONSOPPHOLD
             )
             return InstitusjonsoppholdRevurderingBrevdata(
-                utbetalingsinfo = behandling.utbetalingsinfo!!,
+                utbetalingsinfo = behandling.utbetalingsinfo,
                 erEtterbetalingMerEnnTreMaaneder = revurderingInfo.erEtterbetalingMerEnnTreMaaneder,
                 virkningsdato = behandling.virkningsdato!!.atDay(1),
                 prosent = revurderingInfo.prosent,

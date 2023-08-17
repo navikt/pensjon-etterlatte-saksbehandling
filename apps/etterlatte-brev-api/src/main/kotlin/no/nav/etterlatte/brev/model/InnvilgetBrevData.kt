@@ -94,7 +94,7 @@ data class InnvilgetBrevDataEnkel(
 
     companion object {
         fun fra(behandling: Behandling) = InnvilgetBrevDataEnkel(
-            utbetalingsinfo = behandling.utbetalingsinfo!!,
+            utbetalingsinfo = behandling.utbetalingsinfo,
             avdoed = behandling.persongalleri.avdoed,
             erEtterbetalingMerEnnTreMaaneder = false, // TODO utled
             erInstitusjonsopphold = false // TODO utled

@@ -299,6 +299,14 @@ class OppgaveServiceNy(
         )
     }
 
+    fun hentSaksbehandlerForBehandling(behandlingsId: UUID): String? {
+        val oppgaveforBehandling = inTransaction {
+            oppgaveDaoNy.hentOppgaverForBehandling(behandlingsId.toString())
+                .single { it.status == Status.UNDER_BEHANDLING || it.status == Status.NY }
+        }
+        return oppgaveforBehandling.saksbehandler
+    }
+
     private fun lagreOppgave(oppgaveNy: OppgaveNy): OppgaveNy {
         var oppgaveLagres = oppgaveNy
         if (oppgaveNy.frist === null) {

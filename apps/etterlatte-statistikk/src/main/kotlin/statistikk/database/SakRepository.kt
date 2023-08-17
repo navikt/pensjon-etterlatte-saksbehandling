@@ -87,7 +87,7 @@ class SakRepository(private val datasource: DataSource) {
         sakYtelsesgruppe = getString("sak_ytelsesgruppe")?.let { enumValueOf<SakYtelsesgruppe>(it) },
         avdoedeForeldre = getString("avdoede_foreldre")?.let { objectMapper.readValue(it) },
         revurderingAarsak = getString("revurdering_aarsak"),
-        avkorting = getString("avkorting")?.let { objectMapper.readValue(it) },
+        avkorting = getString("avkorting")?.let { objectMapper.readValue(it) }
     )
 
     fun hentRader(): List<SakRad> {

@@ -17,10 +17,13 @@ import no.nav.etterlatte.statistikk.domain.StoenadRad
 import no.nav.etterlatte.statistikk.domain.stoenadRad
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.assertDoesNotThrow
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
 import java.time.LocalDate
@@ -70,7 +73,8 @@ class StoenadRepositoryTest {
                 relevanteMaanederInnAar = 2,
                 spesifikasjon = ""
             )
-        ), listOf(
+        ),
+        listOf(
             AvkortetYtelse(
                 fom = YearMonth.now(),
                 tom = null,

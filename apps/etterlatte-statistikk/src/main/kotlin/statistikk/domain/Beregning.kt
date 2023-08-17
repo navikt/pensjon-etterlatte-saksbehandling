@@ -3,10 +3,7 @@ package no.nav.etterlatte.statistikk.domain
 import no.nav.etterlatte.libs.common.beregning.AvkortetYtelseDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagDto
-import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagKildeDto
-import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import java.time.LocalDate
 import java.time.YearMonth
 import java.util.*
 import no.nav.etterlatte.libs.common.beregning.BeregningDTO as CommonBeregningDTO
@@ -86,7 +83,7 @@ data class AvkortingGrunnlag(
     val aarsinntekt: Int,
     val fratrekkInnAar: Int,
     val relevanteMaanederInnAar: Int?,
-    val spesifikasjon: String,
+    val spesifikasjon: String
 ) {
     companion object {
         fun fraDTO(dto: AvkortingGrunnlagDto) = AvkortingGrunnlag(
@@ -95,7 +92,7 @@ data class AvkortingGrunnlag(
             aarsinntekt = dto.aarsinntekt,
             fratrekkInnAar = dto.fratrekkInnAar,
             relevanteMaanederInnAar = dto.relevanteMaanederInnAar,
-            spesifikasjon = dto.spesifikasjon,
+            spesifikasjon = dto.spesifikasjon
         )
     }
 }
@@ -115,7 +112,7 @@ data class AvkortetYtelse(
             ytelseFoerAvkorting = dto.ytelseFoerAvkorting,
             avkortingsbeloep = dto.avkortingsbeloep,
             ytelseEtterAvkorting = dto.ytelseEtterAvkorting,
-            restanse = dto.restanse,
+            restanse = dto.restanse
         )
     }
 }

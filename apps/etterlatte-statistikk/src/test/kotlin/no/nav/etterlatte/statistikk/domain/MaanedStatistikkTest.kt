@@ -79,7 +79,7 @@ fun stoenadRad(
     vedtakType: VedtakType = VedtakType.INNVILGELSE,
     sakUtland: SakUtland = SakUtland.NASJONAL,
     virknigstidspunkt: YearMonth = YearMonth.of(2023, 6),
-    utbetalingsdato: LocalDate = LocalDate.of(2023,7, 20)
+    utbetalingsdato: LocalDate = LocalDate.of(2023, 7, 20)
 ): StoenadRad = StoenadRad(
     id = id,
     fnrSoeker = fnrSoeker,

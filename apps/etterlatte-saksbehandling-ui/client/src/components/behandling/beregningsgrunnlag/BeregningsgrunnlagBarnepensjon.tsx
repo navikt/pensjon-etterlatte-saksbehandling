@@ -27,7 +27,7 @@ import Soeskenjustering, {
 import Spinner from '~shared/Spinner'
 import { IPdlPerson } from '~shared/types/Person'
 import { InstitusjonsoppholdGrunnlagData } from '~shared/types/Beregning'
-import YrkesskadeTrygdetid from './YrkesskadeTrygdetid'
+import YrkesskadeTrygdetidBP from './YrkesskadeTrygdetidBP'
 import { hentVilkaarsvurdering } from '~shared/api/vilkaarsvurdering'
 
 const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer }) => {
@@ -122,7 +122,7 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
       {isSuccess(funksjonsbrytere) &&
         isSuccess(vilkaarsvurdering) &&
         (yrkesskadeTrygdetid ? (
-          <YrkesskadeTrygdetid />
+          <YrkesskadeTrygdetidBP />
         ) : beregnTrygdetid ? (
           <BeregnetTrygdetid redigerbar={behandles} utenlandstilsnitt={behandling.utenlandstilsnitt} />
         ) : (

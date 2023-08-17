@@ -768,4 +768,42 @@ class OppgaveServiceNyTest {
         val AalesundfunnetOppgave = finnOppgaverForBruker[0]
         Assertions.assertEquals(Enheter.AALESUND.enhetNr, AalesundfunnetOppgave.enhet)
     }
+
+    @Test
+    fun `kan hente saksbehandler på en oppgave tilknyttet behandling som er under arbeid`() {
+        val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val behandlingId = UUID.randomUUID().toString()
+        val nyOppgave = oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
+            behandlingId,
+            opprettetSak.id,
+            OppgaveKilde.BEHANDLING,
+            OppgaveType.FOERSTEGANGSBEHANDLING,
+            null
+        )
+        val saksbehandler = "saksbehandler"
+
+        oppgaveServiceNy.tildelSaksbehandler(nyOppgave.id, saksbehandler)
+
+        val saksbehandlerHentet =
+            oppgaveServiceNy.hentSaksbehandlerForBehandling(UUID.fromString(behandlingId))
+
+        Assertions.assertEquals(saksbehandler, saksbehandlerHentet)
+    }
+
+    @Test
+    fun `Får null saksbehandler ved henting på behandling hvis saksbehandler ikke satt`() {
+        val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val behandlingId = UUID.randomUUID().toString()
+        val nyOppgave = oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
+            behandlingId,
+            opprettetSak.id,
+            OppgaveKilde.BEHANDLING,
+            OppgaveType.FOERSTEGANGSBEHANDLING,
+            null
+        )
+        val saksbehandlerHentet =
+            oppgaveServiceNy.hentSaksbehandlerForBehandling(UUID.fromString(behandlingId))
+
+        Assertions.assertNull(saksbehandlerHentet)
+    }
 }

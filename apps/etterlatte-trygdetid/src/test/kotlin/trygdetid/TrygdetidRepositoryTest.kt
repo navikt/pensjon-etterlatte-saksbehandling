@@ -62,7 +62,7 @@ internal class TrygdetidRepositoryTest {
         val seksten = LocalDate.of(2016, 1, 1)
         val seksti = LocalDate.of(2066, 1, 1)
 
-        val pdl = Grunnlagsopplysning.Pdl("pdl", Tidspunkt.now(), null, "opplysningsId1")
+        val pdl = Grunnlagsopplysning.Pdl(Tidspunkt.now(), null, "opplysningsId1")
         val regel = Grunnlagsopplysning.RegelKilde("regel", Tidspunkt.now(), "1")
         val opplysninger = listOf(
             Opplysningsgrunnlag.ny(TrygdetidOpplysningType.FOEDSELSDATO, pdl, foedselsdato),

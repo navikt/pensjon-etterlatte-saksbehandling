@@ -68,3 +68,7 @@ export enum PersonRolle {
   AVDOED = 'AVDOED',
   GJENLEVENDE = 'GJENLEVENDE',
 }
+
+export function formaterNavn(person: IPdlPerson): string {
+  return [person.fornavn, person.mellomnavn, person.etternavn].join(' ')
+}

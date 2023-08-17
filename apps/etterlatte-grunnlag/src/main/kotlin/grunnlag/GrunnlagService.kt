@@ -22,12 +22,16 @@ import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.PersonRolle
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJson
+import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.sporingslogg.Decision
 import no.nav.etterlatte.libs.sporingslogg.HttpMethod
 import no.nav.etterlatte.libs.sporingslogg.Sporingslogg
 import no.nav.etterlatte.libs.sporingslogg.Sporingsrequest
+import no.nav.etterlatte.pdl.HistorikkForeldreansvar
 import org.slf4j.LoggerFactory
+import java.util.*
 
 interface GrunnlagService {
     fun hentGrunnlagAvType(sak: Long, opplysningstype: Opplysningstype): Grunnlagsopplysning<JsonNode>?
@@ -51,6 +55,7 @@ interface GrunnlagService {
     fun hentPersonerISak(sakId: Long): Map<Folkeregisteridentifikator, PersonMedNavn>?
 
     suspend fun oppdaterGrunnlag(opplysningsbehov: Opplysningsbehov)
+    fun hentHistoriskForeldreansvar(sakId: Long): Grunnlagsopplysning<JsonNode>?
 }
 
 class RealGrunnlagService(
@@ -201,6 +206,23 @@ class RealGrunnlagService(
         logger.info("Oppdatert grunnlag for sak ${opplysningsbehov.sakid}")
     }
 
+    override fun hentHistoriskForeldreansvar(sakId: Long): Grunnlagsopplysning<JsonNode>? {
+        val opplysning = opplysningDao.finnNyesteGrunnlag(sakId, Opplysningstype.HISTORISK_FORELDREANSVAR)?.opplysning
+        if (opplysning != null) {
+            return opplysning
+        }
+        val grunnlag = hentOpplysningsgrunnlag(sakId)
+        val soekerFnr = grunnlag?.soeker?.hentFoedselsnummer()?.verdi ?: return null
+        val historiskForeldreansvar = pdltjenesterKlient.hentHistoriskForeldreansvar(
+            soekerFnr,
+            PersonRolle.BARN,
+            SakType.BARNEPENSJON
+        )
+            .tilGrunnlagsopplysning(soekerFnr)
+        opplysningDao.leggOpplysningTilGrunnlag(sakId, historiskForeldreansvar, soekerFnr)
+        return historiskForeldreansvar
+    }
+
     private fun mapTilRolle(fnr: String, persongalleri: Persongalleri): Saksrolle = when (fnr) {
         persongalleri.soeker -> Saksrolle.SOEKER
         in persongalleri.soesken -> Saksrolle.SOESKEN
@@ -284,6 +306,21 @@ class RealGrunnlagService(
         endepunkt = "/person",
         resultat = Decision.Deny,
         melding = "Hent person feilet"
+    )
+}
+
+private fun HistorikkForeldreansvar.tilGrunnlagsopplysning(
+    fnr: Folkeregisteridentifikator
+): Grunnlagsopplysning<JsonNode> {
+    return Grunnlagsopplysning(
+        id = UUID.randomUUID(),
+        kilde = Grunnlagsopplysning.Pdl(Tidspunkt.now(), null, null),
+        opplysningType = Opplysningstype.HISTORISK_FORELDREANSVAR,
+        meta = objectMapper.createObjectNode(),
+        opplysning = this.toJsonNode(),
+        attestering = null,
+        fnr = fnr,
+        periode = null
     )
 }
 

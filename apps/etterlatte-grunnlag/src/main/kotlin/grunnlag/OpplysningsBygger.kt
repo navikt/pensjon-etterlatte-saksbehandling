@@ -101,7 +101,7 @@ fun lagPdlOpplysning(
 ): Grunnlagsopplysning<JsonNode> {
     return Grunnlagsopplysning(
         UUID.randomUUID(),
-        Grunnlagsopplysning.Pdl("pdl", tidspunktForInnhenting, null, null),
+        Grunnlagsopplysning.Pdl(tidspunktForInnhenting, null, null),
         opplysningsType,
         objectMapper.createObjectNode(),
         opplysning.toJsonNode()
@@ -118,7 +118,6 @@ fun <T> lagPdlPersonopplysning(
     return Grunnlagsopplysning(
         id = UUID.randomUUID(),
         kilde = Grunnlagsopplysning.Pdl(
-            navn = "pdl",
             tidspunktForInnhenting = tidspunktForInnhenting,
             registersReferanse = null,
             opplysningId = opplysning.opplysningsid.toString()

@@ -47,11 +47,14 @@ class MaanedStatistikk(val maaned: YearMonth, stoenadRader: List<StoenadRad>) {
             val aktuellBeregnetYtelse = sisteVedtak.beregning?.let { beregning ->
                 beregning.beregningsperioder.find { it.datoFOM <= maaned && (it.datoTOM ?: maaned) >= maaned }
             }
-            val nettoYtelse = aktuellBeregnetYtelse?.utbetaltBeloep ?: sisteVedtak.nettoYtelse.toInt() // TODO nettoYtelse til skal utbedres?
+            val nettoYtelse = aktuellBeregnetYtelse?.utbetaltBeloep
+                ?: sisteVedtak.nettoYtelse.toInt() // TODO nettoYtelse til skal utbedres?
 
             val (avkortingsbeloep, aarsinntekt) = sisteVedtak.avkorting?.let { avkorting ->
-                val aktuellAvkorting = avkorting.avkortetYtelse.find { it.fom <= maaned && (it.tom?: maaned) >= maaned }
-                val aktuellAarsinntekt = avkorting.avkortingGrunnlag.find { it.fom <= maaned && (it.tom?: maaned) >= maaned }
+                val aktuellAvkorting =
+                    avkorting.avkortetYtelse.find { it.fom <= maaned && (it.tom ?: maaned) >= maaned }
+                val aktuellAarsinntekt =
+                    avkorting.avkortingGrunnlag.find { it.fom <= maaned && (it.tom ?: maaned) >= maaned }
                 Pair(aktuellAvkorting?.avkortingsbeloep, aktuellAarsinntekt?.aarsinntekt)
             } ?: Pair(null, null)
 

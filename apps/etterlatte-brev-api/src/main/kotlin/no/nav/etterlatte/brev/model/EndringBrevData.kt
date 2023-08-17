@@ -27,6 +27,7 @@ data class Etterbetalingsperiode(
 data class EndringHovedmalBrevData(
     val erEndret: Boolean,
     val etterbetaling: EtterbetalingDTO,
+    val utbetalingsinfo: Utbetalingsinfo,
     val innhold: List<Slate.Element>
 ) : EndringBrevData() {
 
@@ -36,7 +37,7 @@ data class EndringHovedmalBrevData(
             etterbetaling = EtterbetalingDTO(
                 fraDato = LocalDate.now(), // TODO når resten av fengselsopphold implementerast
                 tilDato = LocalDate.now(), // TODO når resten av fengselsopphold implementerast
-                beregningsperioder = behandling.utbetalingsinfo?.beregningsperioder?.map {
+                beregningsperioder = behandling.utbetalingsinfo.beregningsperioder.map {
                     Etterbetalingsperiode(
                         datoFOM = it.datoFOM,
                         datoTOM = it.datoTOM,
@@ -44,8 +45,9 @@ data class EndringHovedmalBrevData(
                         stoenadFoerReduksjon = it.utbetaltBeloep, // TODO når resten av fengselsopphold implementerast
                         utbetaltBeloep = it.utbetaltBeloep
                     )
-                } ?: listOf()
+                }
             ),
+            utbetalingsinfo = behandling.utbetalingsinfo,
             innhold = innhold
         )
     }
@@ -64,9 +66,7 @@ data class SoeskenjusteringRevurderingBrevdata(
             )
 
             return SoeskenjusteringRevurderingBrevdata(
-                utbetalingsinfo = requireNotNull(behandling.utbetalingsinfo) {
-                    "Kan ikke opprette et revurderingsbrev for søksenjustering uten utbetalingsinfo"
-                },
+                utbetalingsinfo = behandling.utbetalingsinfo,
                 grunnForJustering = revurderingsinfo.grunnForSoeskenjustering
             )
         }
@@ -107,7 +107,7 @@ data class UtAvFengselBrevdata(
                 RevurderingAarsak.UT_AV_FENGSEL
             )
             return UtAvFengselBrevdata(
-                utbetalingsinfo = behandling.utbetalingsinfo!!,
+                utbetalingsinfo = behandling.utbetalingsinfo,
                 erEtterbetalingMerEnnTreeMaaneder = revurderingInfo.erEtterbetalingMerEnnTreeMaaneder,
                 virkningsdato = behandling.virkningsdato!!.atDay(1)
             )

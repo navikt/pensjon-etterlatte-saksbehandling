@@ -76,7 +76,7 @@ fun avkorting(
     avkortingGrunnlag: List<AvkortingGrunnlag> = emptyList(),
     ytelseFoerAvkorting: List<YtelseFoerAvkorting> = emptyList(),
     avkortingsperioder: List<Avkortingsperiode> = emptyList(),
-    avkortetYtelse: List<AvkortetYtelse> = emptyList(),
+    avkortetYtelse: List<AvkortetYtelse> = emptyList()
 ) = Avkorting(
     avkortingGrunnlag = avkortingGrunnlag,
     aarsoppgjoer = aarsoppgjoer(ytelseFoerAvkorting, avkortingsperioder),
@@ -127,7 +127,7 @@ fun aarsoppgjoer(
     avkortingsperioder = avkortingsperioder,
     tidligereAvkortetYtelse = tidligereAvkortetYtelse,
     tidligereAvkortetYtelseReberegnet = reberegnetAvkortetYtelse,
-    restanse = restanse,
+    restanse = restanse
 )
 
 fun ytelseFoerAvkorting(
@@ -168,7 +168,7 @@ fun restanse(
 fun avkortetYtelseGrunnlag(beregning: Int, avkorting: Int, fordeltRestanse: Int = 0) = AvkortetYtelseGrunnlag(
     beregning = FaktumNode(verdi = beregning, "", ""),
     avkorting = FaktumNode(verdi = avkorting, "", ""),
-    fordeltRestanse = FaktumNode(verdi = fordeltRestanse, "", ""),
+    fordeltRestanse = FaktumNode(verdi = fordeltRestanse, "", "")
 )
 
 fun avkortetYtelse(
@@ -196,7 +196,6 @@ fun avkortetYtelse(
     kilde = Grunnlagsopplysning.RegelKilde("regelid", Tidspunkt.now(), "1")
 )
 
-
 fun beregning(
     beregninger: List<Beregningsperiode> = listOf(beregningsperiode())
 ) = Beregning(
@@ -211,15 +210,18 @@ fun beregning(
 fun beregningsperiode(
     datoFOM: YearMonth = YearMonth.now(),
     datoTOM: YearMonth? = null,
-    utbetaltBeloep: Int = 3000
+    utbetaltBeloep: Int = 3000,
+    trygdetid: Int = 40,
+    grunnbeloep: Int = 100_000,
+    grunnbeloepMnd: Int = 10_000
 ) = Beregningsperiode(
     datoFOM = datoFOM,
     datoTOM = datoTOM,
     utbetaltBeloep = utbetaltBeloep,
     soeskenFlokk = listOf(FNR_1),
-    grunnbelopMnd = 10_000,
-    grunnbelop = 100_000,
-    trygdetid = 40,
+    grunnbelopMnd = grunnbeloepMnd,
+    grunnbelop = grunnbeloep,
+    trygdetid = trygdetid,
     regelResultat = mapOf("regel" to "resultat").toObjectNode(),
     regelVersjon = "1",
     kilde = Grunnlagsopplysning.RegelKilde("regelid", Tidspunkt.now(), "1")

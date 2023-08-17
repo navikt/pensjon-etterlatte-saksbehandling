@@ -3,8 +3,7 @@ package no.nav.etterlatte.brev.model
 import no.nav.etterlatte.brev.behandling.Avdoed
 import no.nav.etterlatte.brev.behandling.Avkortingsinfo
 import no.nav.etterlatte.brev.behandling.Behandling
-import no.nav.etterlatte.brev.behandling.Beregningsinfo
-import no.nav.etterlatte.brev.behandling.NyBeregningsperiode
+import no.nav.etterlatte.brev.behandling.Trygdetidsperiode
 import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
 import no.nav.pensjon.brevbaker.api.model.Kroner
 import java.time.LocalDate
@@ -24,6 +23,19 @@ data class InnvilgetBrevData(
             )
     }
 }
+
+data class Beregningsinfo(
+    val grunnbeloep: Kroner,
+    val beregningsperioder: List<NyBeregningsperiode>,
+    val trygdetidsperioder: List<Trygdetidsperiode>
+)
+
+data class NyBeregningsperiode(
+    val inntekt: Kroner,
+    val trygdetid: Int,
+    val stoenadFoerReduksjon: Kroner,
+    var utbetaltBeloep: Kroner
+)
 
 data class InnvilgetBrevDataOMS(
     val utbetalingsinfo: Utbetalingsinfo,
@@ -66,7 +78,7 @@ data class FoerstegangsvedtakUtfallDTO(
     companion object {
         fun fra(behandling: Behandling): FoerstegangsvedtakUtfallDTO =
             FoerstegangsvedtakUtfallDTO(
-                virkningsdato = behandling.virkningsdato!!.atDay(1),
+                virkningsdato = behandling.utbetalingsinfo!!.virkningsdato,
                 avdoed = behandling.persongalleri.avdoed,
                 utbetalingsbeloep = behandling.avkortingsinfo!!.beregningsperioder.first().utbetaltBeloep
             )

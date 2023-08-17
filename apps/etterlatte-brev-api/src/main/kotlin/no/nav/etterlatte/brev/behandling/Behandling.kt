@@ -44,19 +44,6 @@ data class Behandling(
     }
 }
 
-data class Beregningsinfo(
-    val grunnbeloep: Kroner,
-    val beregningsperioder: List<NyBeregningsperiode>,
-    val trygdetidsperioder: List<Trygdetidsperiode>
-)
-
-data class NyBeregningsperiode(
-    val inntekt: Kroner,
-    val trygdetid: Int,
-    val stoenadFoerReduksjon: Kroner,
-    var utbetaltBeloep: Kroner
-)
-
 data class Trygdetidsperiode(
     val datoFOM: LocalDate,
     val datoTOM: LocalDate?,

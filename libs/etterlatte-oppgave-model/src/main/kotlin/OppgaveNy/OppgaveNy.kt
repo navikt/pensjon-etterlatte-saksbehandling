@@ -25,7 +25,7 @@ data class OppgaveNy(
     val kilde: OppgaveKilde? = null,
     override val type: OppgaveType,
     override val saksbehandler: String? = null,
-    val referanse: String? = null,
+    val referanse: String,
     val merknad: String? = null,
     override val opprettet: Tidspunkt,
     override val sakType: SakType,

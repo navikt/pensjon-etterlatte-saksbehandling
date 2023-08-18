@@ -300,11 +300,12 @@ class OppgaveServiceNy(
     }
 
     fun hentSaksbehandlerForBehandling(behandlingsId: UUID): String? {
-        val oppgaveforBehandling = inTransaction {
+        val oppgaverforBehandling = inTransaction {
             oppgaveDaoNy.hentOppgaverForBehandling(behandlingsId.toString())
-                .single { it.status == Status.UNDER_BEHANDLING || it.status == Status.NY }
         }
-        return oppgaveforBehandling.saksbehandler
+
+        val oppgaverForBehandlingUtenAttesterting = oppgaverforBehandling.filter { it.type !== OppgaveType.ATTESTERING }
+        return oppgaverForBehandlingUtenAttesterting.sortedByDescending { it.opprettet }[0].saksbehandler
     }
 
     private fun lagreOppgave(oppgaveNy: OppgaveNy): OppgaveNy {

@@ -34,7 +34,8 @@ data class Behandling(
     val revurderingInfo: RevurderingInfo? = null,
     val virkningsdato: YearMonth? = null,
     val innvilgelsesdato: LocalDate? = null,
-    val adopsjonsdato: LocalDate? = null
+    val adopsjonsdato: LocalDate? = null,
+    val trygdetid: List<Trygdetidsperiode>? = null
 ) {
     init {
         if (vedtak.type == VedtakType.INNVILGELSE) {
@@ -42,6 +43,13 @@ data class Behandling(
         }
     }
 }
+
+data class Trygdetidsperiode(
+    val datoFOM: LocalDate,
+    val datoTOM: LocalDate?,
+    val land: String,
+    val opptjeningsperiode: String
+)
 
 data class ForenkletVedtak(
     val id: Long,
@@ -71,6 +79,8 @@ data class AvkortetBeregningsperiode(
     val datoFOM: LocalDate,
     val datoTOM: LocalDate?,
     val inntekt: Kroner,
+    val ytelseFoerAvkorting: Kroner,
+    val trygdetid: Int,
     val utbetaltBeloep: Kroner
 )
 

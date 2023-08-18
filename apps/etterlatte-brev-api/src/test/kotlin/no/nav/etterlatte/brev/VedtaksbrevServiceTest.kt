@@ -145,7 +145,6 @@ internal class VedtaksbrevServiceTest {
         @ParameterizedTest
         @CsvSource(
             value = [
-                "OMSTILLINGSSTOENAD,INNVILGELSE,AUTOMATISK",
                 "OMSTILLINGSSTOENAD,OPPHOER,MANUELL",
                 "OMSTILLINGSSTOENAD,AVSLAG,MANUELL",
                 "OMSTILLINGSSTOENAD,ENDRING,MANUELL",

@@ -44,25 +44,6 @@ class BeregningKlient(config: Config, httpClient: HttpClient) {
         }
     }
 
-    suspend fun hentAvkorting(behandlingId: UUID, brukerTokenInfo: BrukerTokenInfo): AvkortingDto {
-        try {
-            logger.info("Henter avkorting (behandlingId: $behandlingId)")
-
-            return downstreamResourceClient.get(
-                Resource(clientId, "$resourceUrl/api/beregning/avkorting/$behandlingId"),
-                brukerTokenInfo
-            ).mapBoth(
-                success = { resource -> deserialize(resource.response.toString()) },
-                failure = { errorResponse -> throw errorResponse }
-            )
-        } catch (e: Exception) {
-            throw BeregningKlientException(
-                "Henting av avkorting for behandling med behandlingId=$behandlingId feilet",
-                e
-            )
-        }
-    }
-
     suspend fun hentYtelseMedGrunnlag(behandlingId: UUID, brukerTokenInfo: BrukerTokenInfo): YtelseMedGrunnlagDto {
         try {
             logger.info("Henter utregnet ytelse med grunnlag for behandlingId=$behandlingId")

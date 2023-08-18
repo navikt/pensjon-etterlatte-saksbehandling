@@ -13,6 +13,7 @@ import no.nav.etterlatte.brev.behandlingklient.BehandlingKlient
 import no.nav.etterlatte.brev.beregning.BeregningKlient
 import no.nav.etterlatte.brev.grunnlag.GrunnlagKlient
 import no.nav.etterlatte.brev.model.Spraak
+import no.nav.etterlatte.brev.trygdetid.TrygdetidKlient
 import no.nav.etterlatte.brev.vedtak.VedtaksvurderingKlient
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.beregning.BeregningDTO
@@ -48,9 +49,16 @@ internal class SakOgBehandlingServiceTest {
     private val grunnlagKlient = mockk<GrunnlagKlient>()
     private val beregningKlient = mockk<BeregningKlient>()
     private val behandlingKlient = mockk<BehandlingKlient>()
+    private val trygdetidKlient = mockk<TrygdetidKlient>()
 
     private val service =
-        SakOgBehandlingService(vedtaksvurderingKlient, grunnlagKlient, beregningKlient, behandlingKlient)
+        SakOgBehandlingService(
+            vedtaksvurderingKlient,
+            grunnlagKlient,
+            beregningKlient,
+            behandlingKlient,
+            trygdetidKlient
+        )
 
     @BeforeEach
     fun before() {
@@ -70,6 +78,7 @@ internal class SakOgBehandlingServiceTest {
         coEvery { vedtaksvurderingKlient.hentVedtak(any(), any()) } returns opprettVedtak()
         coEvery { grunnlagKlient.hentGrunnlag(SAK_ID, BRUKERTokenInfo) } returns opprettGrunnlag()
         coEvery { beregningKlient.hentBeregning(any(), any()) } returns opprettBeregning()
+        coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns opprettTrygdetid()
 
         val behandling = runBlocking {
             service.hentBehandling(SAK_ID, BEHANDLING_ID, BRUKERTokenInfo)
@@ -107,6 +116,7 @@ internal class SakOgBehandlingServiceTest {
         coEvery { vedtaksvurderingKlient.hentVedtak(any(), any()) } returns opprettVedtak()
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns opprettGrunnlag()
         coEvery { beregningKlient.hentBeregning(any(), any()) } returns opprettBeregning()
+        coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns opprettTrygdetid()
 
         val behandling = runBlocking {
             service.hentBehandling(SAK_ID, BEHANDLING_ID, BRUKERTokenInfo)
@@ -136,6 +146,7 @@ internal class SakOgBehandlingServiceTest {
         coEvery { vedtaksvurderingKlient.hentVedtak(any(), any()) } returns opprettVedtak()
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns opprettGrunnlag()
         coEvery { beregningKlient.hentBeregning(any(), any()) } returns opprettBeregningSoeskenjustering()
+        coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns opprettTrygdetid()
 
         val behandling = runBlocking {
             service.hentBehandling(SAK_ID, BEHANDLING_ID, BRUKERTokenInfo)
@@ -212,6 +223,8 @@ internal class SakOgBehandlingServiceTest {
         10000,
         10
     )
+
+    private fun opprettTrygdetid() = null
 
     private companion object {
         private val FNR = Folkeregisteridentifikator.of("11057523044")

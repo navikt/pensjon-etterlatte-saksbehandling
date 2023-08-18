@@ -38,7 +38,8 @@ class GrunnlagsendringshendelseJob(
             initialDelay = initialDelay,
             period = periode.toMillis(),
             logger = logger,
-            sikkerLogg = sikkerLogg
+            sikkerLogg = sikkerLogg,
+            loggTilSikkerLogg = false
         ) {
             logger.info(
                 "Setter opp GrunnlagsendringshendelseJob. LeaderElection: ${leaderElection.isLeader()} " +

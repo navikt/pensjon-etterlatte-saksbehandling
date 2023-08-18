@@ -30,6 +30,7 @@ class MaanedligStatistikkJob(
             initialDelay = initialDelay,
             logger = logger,
             sikkerLogg = sikkerLogg,
+            loggTilSikkerLogg = false,
             period = periode.toMillis()
         ) {
             ProduserOgLagreMaanedligStatistikk(

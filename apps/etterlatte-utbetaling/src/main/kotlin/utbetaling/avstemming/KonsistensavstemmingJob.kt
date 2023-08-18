@@ -31,7 +31,8 @@ class KonsistensavstemmingJob(
             initialDelay = initialDelay,
             period = periode.toMillis(),
             logger = logger,
-            sikkerLogg = sikkerLogg
+            sikkerLogg = sikkerLogg,
+            loggTilSikkerLogg = true
         ) {
             Konsistensavstemming(
                 konsistensavstemmingService = konsistensavstemmingService,

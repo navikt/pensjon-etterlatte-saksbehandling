@@ -26,7 +26,8 @@ class GrensesnittsavstemmingJob(
             startAt = starttidspunkt,
             period = periode.toMillis(),
             logger = log,
-            sikkerLogg = sikkerLogg
+            sikkerLogg = sikkerLogg,
+            loggTilSikkerLogg = true
         ) {
             Grensesnittsavstemming(
                 grensesnittsavstemmingService = grensesnittsavstemmingService,

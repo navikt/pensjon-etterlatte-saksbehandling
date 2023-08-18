@@ -11,10 +11,22 @@ import BrevOversikt from '~components/person/brev/BrevOversikt'
 import NyttBrev from '~components/person/brev/NyttBrev'
 import ScrollToTop from '~ScrollTop'
 import { ToggleNyOppgaveliste } from '~components/nyoppgavebenk/ToggleNyOppgavelist'
+import { useApiCall } from '~shared/hooks/useApiCall'
+import { createContext, useEffect, useState } from 'react'
+import { hentGosysUrlApi } from '~shared/api/oppgaverny'
+
+export const GosysUrlContext = createContext('https://gosys.intern.nav.no/gosys')
 
 function App() {
   const innloggetbrukerHentet = useInnloggetSaksbehandler()
   registerLocale('nb', nb)
+
+  const [, hentGosysUrl] = useApiCall(hentGosysUrlApi)
+  const [gosysUrl, setGosysUrl] = useState<string>('')
+
+  useEffect(() => {
+    hentGosysUrl({}, (url) => setGosysUrl(url))
+  }, [])
 
   return (
     <>
@@ -25,7 +37,14 @@ function App() {
             <HeaderBanner />
             <ErrorBoundary>
               <Routes>
-                <Route path="/" element={<ToggleNyOppgaveliste />} />
+                <Route
+                  path="/"
+                  element={
+                    <GosysUrlContext.Provider value={gosysUrl}>
+                      <ToggleNyOppgaveliste />
+                    </GosysUrlContext.Provider>
+                  }
+                />
                 <Route path="/oppgavebenken" element={<ToggleNyOppgaveliste />} />
                 <Route path="/person/:fnr" element={<Person />} />
                 <Route path="/person/:fnr/sak/:sakId/brev" element={<BrevOversikt />} />

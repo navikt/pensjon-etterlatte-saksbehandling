@@ -1,12 +1,13 @@
 import { BodyShort, Button, Heading, Label, Modal } from '@navikt/ds-react'
 import styled from 'styled-components'
 import { EyeIcon } from '@navikt/aksel-icons'
-import { useState } from 'react'
+import { useContext, useState } from 'react'
 import { OppgavetypeTag, SaktypeTag } from '~components/nyoppgavebenk/Tags'
 import { formaterFnr, formaterStringDato } from '~utils/formattering'
 import { FristWrapper } from '~components/nyoppgavebenk/Oppgavelista'
 import { isBefore } from 'date-fns'
-import { hentGosysUrlApi, Oppgavestatus, Saktype } from '~shared/api/oppgaverny'
+import { Oppgavestatus, Saktype } from '~shared/api/oppgaverny'
+import { GosysUrlContext } from '~App'
 
 const TagRow = styled.div`
   display: flex;
@@ -33,14 +34,6 @@ const ButtonRow = styled.div`
   gap: 1rem;
   justify-content: flex-end;
 `
-const gosysUrl = await hentGosysUrlApi().then((res) => {
-  if (res.status === 'ok') {
-    return res.data
-  } else {
-    throw Error(res.error)
-  }
-})
-
 export const GosysOppgaveModal = (props: {
   oppgavestatus: Oppgavestatus
   fnr: string
@@ -54,6 +47,8 @@ export const GosysOppgaveModal = (props: {
 }) => {
   const [open, setOpen] = useState(false)
   const { regdato, fristdato, oppgavestatus, fnr, gjelder, enhet, saksbehandler, beskrivelse, saktype } = props
+
+  const gosysUrl = useContext(GosysUrlContext)
 
   return (
     <>

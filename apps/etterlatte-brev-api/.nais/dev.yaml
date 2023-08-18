@@ -98,7 +98,7 @@ spec:
     - name: ETTERLATTE_BEHANDLING_CLIENT_ID
       value: 59967ac8-009c-492e-a618-e5a0f6b3e4e4
     - name: ETTERLATTE_TRYGDETID_URL
-        value: http://etterlatte-trygdetid
+      value: http://etterlatte-trygdetid
     - name: ETTERLATTE_TRYGDETID_CLIENT_ID
       value: dev-gcp.etterlatte.etterlatte-trygdetid
   accessPolicy:

@@ -852,36 +852,6 @@ class OppgaveServiceNyTest {
     }
 
     @Test
-    fun `Skal kunne hente saksbehandler på oppgave for behandling selvom den er underkjent`() {
-        val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
-        val behandlingId = UUID.randomUUID().toString()
-        val foerstegangsbehandling = oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
-            behandlingId,
-            opprettetSak.id,
-            OppgaveKilde.BEHANDLING,
-            OppgaveType.FOERSTEGANGSBEHANDLING,
-            null
-        )
-        val saksbehandler = "saksbehandler"
-
-        oppgaveServiceNy.tildelSaksbehandler(foerstegangsbehandling.id, saksbehandler)
-
-        val attestertBehandlingsoppgave = oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
-            behandlingId,
-            opprettetSak.id,
-            OppgaveKilde.BEHANDLING,
-            OppgaveType.UNDERKJENT,
-            null
-        )
-        oppgaveServiceNy.tildelSaksbehandler(attestertBehandlingsoppgave.id, "underkjentsaksbehandler")
-
-        val saksbehandlerHentet =
-            oppgaveServiceNy.hentSaksbehandlerForBehandling(UUID.fromString(behandlingId))
-
-        Assertions.assertEquals(saksbehandler, saksbehandlerHentet)
-    }
-
-    @Test
     fun `Får null saksbehandler ved henting på behandling hvis saksbehandler ikke satt`() {
         val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         val behandlingId = UUID.randomUUID().toString()

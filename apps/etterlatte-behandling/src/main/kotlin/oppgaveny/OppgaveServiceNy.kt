@@ -305,7 +305,7 @@ class OppgaveServiceNy(
         }
 
         val oppgaverForBehandlingUtenAttesterting = oppgaverforBehandling.filter { it.type !== OppgaveType.ATTESTERING }
-        return oppgaverForBehandlingUtenAttesterting.sortedBy { it.opprettet }[0].saksbehandler
+        return oppgaverForBehandlingUtenAttesterting.sortedByDescending { it.opprettet }[0].saksbehandler
     }
 
     private fun lagreOppgave(oppgaveNy: OppgaveNy): OppgaveNy {

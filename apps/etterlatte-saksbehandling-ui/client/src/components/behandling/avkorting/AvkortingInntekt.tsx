@@ -12,6 +12,7 @@ import { PencilIcon } from '@navikt/aksel-icons'
 import { hentBehandlesFraStatus } from '~components/behandling/felles/utils'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { TextButton } from '~components/behandling/soeknadsoversikt/familieforhold/personer/personinfo/TextButton'
+import { OmstillingsstoenadToolTip } from '~components/behandling/beregne/OmstillingsstoenadToolTip'
 
 export const AvkortingInntekt = (props: {
   behandling: IBehandlingReducer
@@ -100,40 +101,51 @@ export const AvkortingInntekt = (props: {
         legges til grunn.
       </BodyShort>
       <BodyShort>
-        I innvilgelsesåret skal inntekt opptjent før innvilgelse trekkes fra, og resterende forventet inntekt omgjøres
-        til årsinntekt. På samme måte skal inntekt etter opphør holdes utenfor i opphørsåret.
+        I innvilgelsesåret skal inntekt opptjent før innvilgelse trekkes fra, og resterende forventet inntekt fordeles
+        på gjenværende måneder. På samme måte skal inntekt etter opphør holdes utenfor i opphørsåret.
       </BodyShort>
       {avkortingGrunnlag.length > 0 && (
         <InntektAvkortingTabell>
           <Table className="table" zebraStripes>
             <Table.Header>
               <Table.HeaderCell>Forventet inntekt</Table.HeaderCell>
-              <Table.HeaderCell>Fratrekk inn år</Table.HeaderCell>
+              <Table.HeaderCell>Gjenværende måneder</Table.HeaderCell>
               <Table.HeaderCell>Periode</Table.HeaderCell>
               <Table.HeaderCell>Spesifikasjon av inntekt</Table.HeaderCell>
               <Table.HeaderCell>Kilde</Table.HeaderCell>
             </Table.Header>
             <Table.Body>
-              {(visHistorikk ? avkortingGrunnlag : aktivtGrunnlag()).map((inntektsgrunnlag, index) => (
-                <Table.Row key={index}>
-                  <Table.DataCell key="Inntekt">{NOK(inntektsgrunnlag.aarsinntekt)}</Table.DataCell>
-                  <Table.DataCell key="FratrekkInnUt">{NOK(inntektsgrunnlag.fratrekkInnAar)}</Table.DataCell>
-                  <Table.DataCell key="Periode">
-                    {inntektsgrunnlag.fom && formaterStringDato(inntektsgrunnlag.fom)} -
-                    {inntektsgrunnlag.tom && formaterStringDato(inntektsgrunnlag.tom)}
-                  </Table.DataCell>
-                  <Table.DataCell key="InntektSpesifikasjon">{inntektsgrunnlag.spesifikasjon}</Table.DataCell>
-                  <Table.DataCell key="InntektKilde">
-                    {inntektsgrunnlag.kilde && (
-                      <Info
-                        tekst={inntektsgrunnlag.kilde.ident}
-                        label={''}
-                        undertekst={`saksbehandler: ${formaterStringDato(inntektsgrunnlag.kilde.tidspunkt)}`}
-                      />
-                    )}
-                  </Table.DataCell>
-                </Table.Row>
-              ))}
+              {(visHistorikk ? avkortingGrunnlag : aktivtGrunnlag()).map((inntektsgrunnlag, index) => {
+                const aarsinntekt = inntektsgrunnlag.aarsinntekt ?? 0
+                const fratrekkInnAar = inntektsgrunnlag.fratrekkInnAar ?? 0
+                const forventetInntekt = aarsinntekt - fratrekkInnAar
+                return (
+                  <Table.Row key={index}>
+                    <Table.DataCell key="Inntekt">
+                      {NOK(forventetInntekt)}
+                      <OmstillingsstoenadToolTip title={'Se hva forventet inntekt består av'}>
+                        Forventent inntekt utregnes ved å trekke i fra fratrekk inn år fra årsinntekt:
+                        {` ${NOK(aarsinntekt)} - ${NOK(fratrekkInnAar)} = ${NOK(forventetInntekt)}`}
+                      </OmstillingsstoenadToolTip>
+                    </Table.DataCell>
+                    <Table.DataCell>{inntektsgrunnlag.relevanteMaanederInnAar}</Table.DataCell>
+                    <Table.DataCell key="Periode">
+                      {inntektsgrunnlag.fom && formaterStringDato(inntektsgrunnlag.fom)} -
+                      {inntektsgrunnlag.tom && formaterStringDato(inntektsgrunnlag.tom)}
+                    </Table.DataCell>
+                    <Table.DataCell key="InntektSpesifikasjon">{inntektsgrunnlag.spesifikasjon}</Table.DataCell>
+                    <Table.DataCell key="InntektKilde">
+                      {inntektsgrunnlag.kilde && (
+                        <Info
+                          tekst={inntektsgrunnlag.kilde.ident}
+                          label={''}
+                          undertekst={`saksbehandler: ${formaterStringDato(inntektsgrunnlag.kilde.tidspunkt)}`}
+                        />
+                      )}
+                    </Table.DataCell>
+                  </Table.Row>
+                )
+              })}
             </Table.Body>
           </Table>
         </InntektAvkortingTabell>

@@ -1,0 +1,51 @@
+apiVersion: "nais.io/v1alpha1"
+kind: "Application"
+metadata:
+  name: etterlatte-samordning-vedtak
+  namespace: etterlatte
+  labels:
+    team: etterlatte
+spec:
+  image: {{image}}
+  port: 8080
+  liveness:
+    path: "health/isalive"
+    initialDelay: 10
+    timeout: 1
+    periodSeconds: 5
+    failureThreshold: 10
+  readiness:
+    path: "health/isready"
+    initialDelay: 10
+    timeout: 1
+  prometheus:
+    enabled: true
+    path: /metrics
+  secureLogs:
+    enabled: true
+  replicas:
+    min: 1
+    max: 2
+  maskinporten:
+    enabled: true
+    scopes:
+      exposes:
+        - name: "vedtaksinformasjon.read"
+          enabled: true
+          product: "etterlatteytelser"
+          allowedIntegrations:
+            - maskinporten
+          atMaxAge: 60
+          consumers:
+            - orgno: "123456789"
+  azure:
+    application:
+      enabled: true
+  env:
+    - name: MASKINPORTEN_WELL_KNOWN_URL
+      value: https://maskinporten.no/.well-known/oauth-authorization-server
+  accessPolicy:
+    outbound:
+      rules:
+        - application: etterlatte-beregning
+        - application: etterlatte-vedtaksvurdering

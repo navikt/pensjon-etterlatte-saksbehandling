@@ -36,6 +36,7 @@ import no.nav.etterlatte.brev.vedtak.VedtaksvurderingKlient
 import no.nav.etterlatte.brev.vedtaksbrevRoute
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleProperties
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
+import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstartOgAvslutning
 import no.nav.etterlatte.libs.common.requireEnvValue
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.migrate
@@ -61,7 +62,7 @@ class ApplicationBuilder {
     private val config = ConfigFactory.load()
 
     init {
-        sikkerLogg.info("SikkerLogg: etterlatte-brev-api oppstart")
+        sikkerLoggOppstartOgAvslutning("etterlatte-brev-api")
     }
 
     private val env = getRapidEnv()

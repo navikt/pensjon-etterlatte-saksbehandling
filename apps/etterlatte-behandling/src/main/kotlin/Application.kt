@@ -29,6 +29,7 @@ import no.nav.etterlatte.grunnlagsendring.grunnlagsendringshendelseRoute
 import no.nav.etterlatte.institusjonsopphold.InstitusjonsoppholdService
 import no.nav.etterlatte.institusjonsopphold.institusjonsoppholdRoute
 import no.nav.etterlatte.jobs.addShutdownHook
+import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstartOgAvslutning
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.libs.ktor.restModule
@@ -51,7 +52,7 @@ fun main() {
 class Server(private val context: ApplicationContext) {
 
     init {
-        sikkerLogg.info("SikkerLogg: etterlatte-behandling oppstart")
+        sikkerLoggOppstartOgAvslutning("etterlatte-behandling")
     }
 
     private val engine = embeddedServer(

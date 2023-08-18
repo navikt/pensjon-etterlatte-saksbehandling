@@ -1,15 +1,15 @@
 package no.nav.etterlatte
 
 import no.nav.etterlatte.jobs.addShutdownHook
+import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstartOgAvslutning
 import no.nav.etterlatte.statistikk.config.ApplicationContext
-import no.nav.etterlatte.statistikk.config.sikkerLogg
 import no.nav.helse.rapids_rivers.RapidsConnection
 
 fun main() {
     with(ApplicationContext()) {
         jobs(this)
         rapidApplication(this).start()
-        sikkerLogg.info("Sikkerlogg fra etterlatte-statistikk")
+        sikkerLoggOppstartOgAvslutning("etterlatte-statistikk")
     }
 }
 

@@ -9,6 +9,7 @@ import no.nav.etterlatte.avkorting.avkorting
 import no.nav.etterlatte.beregning.beregning
 import no.nav.etterlatte.beregning.grunnlag.beregningsGrunnlag
 import no.nav.etterlatte.config.ApplicationContext
+import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstartOgAvslutning
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.libs.ktor.setReady
@@ -24,7 +25,7 @@ fun main() {
 
 class Server(private val context: ApplicationContext) {
     init {
-        sikkerLogg.info("SikkerLogg: etterlatte-beregning oppstart")
+        sikkerLoggOppstartOgAvslutning("etterlatte-beregning")
     }
 
     private val engine = with(context) {

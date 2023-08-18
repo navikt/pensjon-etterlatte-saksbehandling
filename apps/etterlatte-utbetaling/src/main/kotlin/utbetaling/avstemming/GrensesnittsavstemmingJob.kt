@@ -1,5 +1,6 @@
 package no.nav.etterlatte.utbetaling.grensesnittavstemming
 
+import no.nav.etterlatte.jobs.LoggerInfo
 import no.nav.etterlatte.jobs.fixedRateCancellableTimer
 import no.nav.etterlatte.libs.jobs.LeaderElection
 import no.nav.etterlatte.sikkerLogg
@@ -25,9 +26,7 @@ class GrensesnittsavstemmingJob(
             name = jobbNavn,
             startAt = starttidspunkt,
             period = periode.toMillis(),
-            logger = log,
-            sikkerLogg = sikkerLogg,
-            loggTilSikkerLogg = true
+            loggerInfo = LoggerInfo(logger = log, sikkerLogg = sikkerLogg, loggTilSikkerLogg = true)
         ) {
             Grensesnittsavstemming(
                 grensesnittsavstemmingService = grensesnittsavstemmingService,

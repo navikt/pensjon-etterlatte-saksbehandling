@@ -1,10 +1,10 @@
 package no.nav.etterlatte.statistikk.jobs
 
+import no.nav.etterlatte.jobs.LoggerInfo
 import no.nav.etterlatte.jobs.fixedRateCancellableTimer
 import no.nav.etterlatte.libs.common.tidspunkt.norskKlokke
 import no.nav.etterlatte.libs.common.tidspunkt.utcKlokke
 import no.nav.etterlatte.libs.jobs.LeaderElection
-import no.nav.etterlatte.statistikk.config.sikkerLogg
 import no.nav.etterlatte.statistikk.database.KjoertStatus
 import no.nav.etterlatte.statistikk.service.StatistikkService
 import org.slf4j.LoggerFactory
@@ -28,9 +28,7 @@ class MaanedligStatistikkJob(
         return fixedRateCancellableTimer(
             name = jobbNavn,
             initialDelay = initialDelay,
-            logger = logger,
-            sikkerLogg = sikkerLogg,
-            loggTilSikkerLogg = false,
+            loggerInfo = LoggerInfo(logger = logger, loggTilSikkerLogg = false),
             period = periode.toMillis()
         ) {
             ProduserOgLagreMaanedligStatistikk(

@@ -6,13 +6,13 @@ import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.concurrent.fixedRateTimer
 
+data class LoggerInfo(val logger: Logger, val sikkerLogg: Logger? = null, val loggTilSikkerLogg: Boolean = false)
+
 fun fixedRateCancellableTimer(
     name: String?,
     initialDelay: Long,
     period: Long,
-    logger: Logger,
-    sikkerLogg: Logger,
-    loggTilSikkerLogg: Boolean,
+    loggerInfo: LoggerInfo,
     action: (correlationId: String) -> Unit
 ) = fixedRateTimer(
     name = name,
@@ -20,16 +20,14 @@ fun fixedRateCancellableTimer(
     initialDelay = initialDelay,
     period = period
 ) {
-    run(action, logger, name, sikkerLogg, loggTilSikkerLogg)
+    run(action, loggerInfo.logger, name, loggerInfo.sikkerLogg, loggerInfo.loggTilSikkerLogg)
 }
 
 fun fixedRateCancellableTimer(
     name: String?,
     startAt: Date,
     period: Long,
-    logger: Logger,
-    sikkerLogg: Logger,
-    loggTilSikkerLogg: Boolean,
+    loggerInfo: LoggerInfo,
     action: (correlationId: String) -> Unit
 ) = fixedRateTimer(
     name = name,
@@ -37,14 +35,14 @@ fun fixedRateCancellableTimer(
     startAt = startAt,
     period = period
 ) {
-    run(action, logger, name, sikkerLogg, loggTilSikkerLogg)
+    run(action, loggerInfo.logger, name, loggerInfo.sikkerLogg, loggerInfo.loggTilSikkerLogg)
 }
 
 private fun run(
     action: (correlationID: String) -> Unit,
     logger: Logger,
     name: String?,
-    sikkerLogg: Logger,
+    sikkerLogg: Logger?,
     loggTilSikkerLogg: Boolean
 ) =
     try {
@@ -56,14 +54,14 @@ private fun run(
         if (!shuttingDown.get()) {
             if (loggTilSikkerLogg) {
                 logger.error("Jobb $name feilet, se sikker logg for stacktrace")
-                sikkerLogg.error("Jobb $name feilet", throwable)
+                sikkerLogg!!.error("Jobb $name feilet", throwable)
             } else {
                 logger.error("Jobb $name feilet", throwable)
             }
         } else {
             if (loggTilSikkerLogg) {
                 logger.info("Jobb $name feilet mens applikasjonen avsluttet, se sikker logg for stacktrace")
-                sikkerLogg.info("Jobb $name feilet mens applikasjonen avsluttet", throwable)
+                sikkerLogg!!.info("Jobb $name feilet mens applikasjonen avsluttet", throwable)
             } else {
                 logger.info("Jobb $name feilet mens applikasjonen avsluttet, se sikker logg for stacktrace", throwable)
             }

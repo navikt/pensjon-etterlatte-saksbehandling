@@ -366,10 +366,10 @@ class GosysOppgaveKlientTest : GosysOppgaveKlient {
         return GosysOppgaver(0, emptyList())
     }
 
-    override suspend fun tilordneOppgaveTilSaksbehandler(
+    override suspend fun tildelOppgaveTilSaksbehandler(
         oppgaveId: String,
         oppgaveVersjon: Long,
-        tilordnes: String,
+        tildeles: String,
         brukerTokenInfo: BrukerTokenInfo
     ) {
         // NO-OP

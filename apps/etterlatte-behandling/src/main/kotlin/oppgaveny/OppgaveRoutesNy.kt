@@ -125,7 +125,7 @@ internal fun Route.oppgaveRoutesNy(
                 if (kanBrukeNyOppgaveliste) {
                     val gosysOppgaveId = call.parameters["gosysOppgaveId"]!!
                     val saksbehandlerEndringDto = call.receive<SaksbehandlerEndringGosysDto>()
-                    gosysOppgaveService.tilordneOppgaveTilSaksbehandler(
+                    gosysOppgaveService.tildelOppgaveTilSaksbehandler(
                         gosysOppgaveId,
                         saksbehandlerEndringDto.versjon,
                         saksbehandlerEndringDto.saksbehandler,

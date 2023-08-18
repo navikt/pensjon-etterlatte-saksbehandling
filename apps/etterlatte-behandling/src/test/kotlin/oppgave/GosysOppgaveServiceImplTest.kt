@@ -90,13 +90,13 @@ class GosysOppgaveServiceImplTest {
     @Test
     fun `kalle gosys-klient med riktige params`() {
         coEvery {
-            gosysOppgaveKlient.tilordneOppgaveTilSaksbehandler(
-                oppgaveId = "123", oppgaveVersjon = 2L, tilordnes = "A012345", brukerTokenInfo
+            gosysOppgaveKlient.tildelOppgaveTilSaksbehandler(
+                oppgaveId = "123", oppgaveVersjon = 2L, tildeles = "A012345", brukerTokenInfo
             )
         } returns Unit
 
         runBlocking {
-            service.tilordneOppgaveTilSaksbehandler(oppgaveId = "123", oppgaveVersjon = 2L, "A012345", brukerTokenInfo)
+            service.tildelOppgaveTilSaksbehandler(oppgaveId = "123", oppgaveVersjon = 2L, "A012345", brukerTokenInfo)
         }
     }
 }

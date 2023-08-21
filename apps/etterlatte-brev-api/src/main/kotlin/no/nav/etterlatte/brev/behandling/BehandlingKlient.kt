@@ -6,10 +6,13 @@ import com.typesafe.config.Config
 import io.ktor.client.HttpClient
 import no.nav.etterlatte.libs.common.BehandlingTilgangsSjekk
 import no.nav.etterlatte.libs.common.PersonTilgangsSjekk
+import no.nav.etterlatte.libs.common.RetryResult
 import no.nav.etterlatte.libs.common.SakTilgangsSjekk
+import no.nav.etterlatte.libs.common.behandling.SisteIverksatteBehandling
 import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.retry
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktorobo.DownstreamResourceClient
@@ -64,6 +67,36 @@ class BehandlingKlient(
                 )
         } catch (e: Exception) {
             throw BehandlingKlientException("Sjekking av tilgang for behandling feilet", e)
+        }
+    }
+
+    suspend fun hentSisteIverksatteBehandling(
+        sakId: Long,
+        brukerTokenInfo: BrukerTokenInfo
+    ): SisteIverksatteBehandling {
+        return retry<SisteIverksatteBehandling> {
+            downstreamResourceClient
+                .get(
+                    resource = Resource(
+                        clientId = clientId,
+                        url = "$resourceUrl/saker/$sakId/behandlinger/sisteIverksatte"
+                    ),
+                    brukerTokenInfo = brukerTokenInfo
+                )
+                .mapBoth(
+                    success = { deserialize(it.response.toString()) },
+                    failure = { throwableErrorMessage -> throw throwableErrorMessage }
+                )
+        }.let {
+            when (it) {
+                is RetryResult.Success -> it.content
+                is RetryResult.Failure -> {
+                    throw BehandlingKlientException(
+                        "Klarte ikke hente siste iverksatte behandling på sak med id=$sakId",
+                        it.samlaExceptions()
+                    )
+                }
+            }
         }
     }
 

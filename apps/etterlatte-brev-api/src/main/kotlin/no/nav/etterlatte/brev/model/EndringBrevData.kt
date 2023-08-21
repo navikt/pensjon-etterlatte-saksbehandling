@@ -117,14 +117,18 @@ data class UtAvFengselBrevdata(
 
 data class YrkesskadeRevurderingBrevdata(
     val utbetalingsinfo: Utbetalingsinfo,
+    val stoenadHarOekt: Boolean,
     val yrkesskadeErDokumentert: Boolean,
     val virkningsdato: LocalDate
 ) : EndringBrevData() {
 
     companion object {
         fun fra(behandling: Behandling): YrkesskadeRevurderingBrevdata {
+            val stonadHarOekt = behandling.utbetalingsinfo.beloep.value >
+                behandling.forrigeUtbetalingsinfo!!.beloep.value
             return YrkesskadeRevurderingBrevdata(
-                utbetalingsinfo = behandling.utbetalingsinfo!!,
+                utbetalingsinfo = behandling.utbetalingsinfo,
+                stoenadHarOekt = stonadHarOekt,
                 yrkesskadeErDokumentert = true, // TODO
                 virkningsdato = behandling.virkningsdato!!.atDay(1)
             )

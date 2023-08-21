@@ -8,6 +8,7 @@ import no.nav.etterlatte.brev.beregning.BeregningKlient
 import no.nav.etterlatte.brev.grunnlag.GrunnlagKlient
 import no.nav.etterlatte.brev.trygdetid.TrygdetidKlient
 import no.nav.etterlatte.brev.vedtak.VedtaksvurderingKlient
+import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.sak.Sak
@@ -43,12 +44,15 @@ class SakOgBehandlingService(
         val grunnlag = async { grunnlagKlient.hentGrunnlag(sakId, brukerTokenInfo) }
         val sak = async { behandlingKlient.hentSak(sakId, brukerTokenInfo) }
         val innvilgelsesdato = { async { vedtaksvurderingKlient.hentInnvilgelsesdato(sakId, brukerTokenInfo) } }
+        val sisteIverksatteBehandlingId =
+            async { behandlingKlient.hentSisteIverksatteBehandling(sakId, brukerTokenInfo).id }
 
         mapBehandling(
             vedtak.await(),
             grunnlag.await(),
             sak.await(),
             innvilgelsesdato,
+            sisteIverksatteBehandlingId,
             brukerTokenInfo
         )
     }
@@ -58,6 +62,7 @@ class SakOgBehandlingService(
         grunnlag: Grunnlag,
         sak: Sak,
         innvilgelsesdato: () -> Deferred<LocalDate?>,
+        sisteIverksatteBehandlingId: Deferred<UUID>,
         brukerTokenInfo: BrukerTokenInfo
     ): Behandling {
         val innloggetSaksbehandlerIdent = brukerTokenInfo.ident()
@@ -68,6 +73,16 @@ class SakOgBehandlingService(
 
         val datoInnvilgelse = if (vedtak.behandling.revurderingInfo != null) {
             innvilgelsesdato().await()
+        } else {
+            null
+        }
+
+        val forrigeUtbetalingsinfo = if (vedtak.behandling.type == BehandlingType.REVURDERING) {
+            finnUtbetalingsinfo(
+                sisteIverksatteBehandlingId.await(),
+                vedtak.virkningstidspunkt,
+                brukerTokenInfo
+            )
         } else {
             null
         }
@@ -92,6 +107,7 @@ class SakOgBehandlingService(
                 attestantIdent
             ),
             utbetalingsinfo = finnUtbetalingsinfo(vedtak.behandling.id, vedtak.virkningstidspunkt, brukerTokenInfo),
+            forrigeUtbetalingsinfo = forrigeUtbetalingsinfo,
             avkortingsinfo = finnYtelseMedGrunnlag(
                 vedtak.behandling.id,
                 vedtak.sak.sakType,

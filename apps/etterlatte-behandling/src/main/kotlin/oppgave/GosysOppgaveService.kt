@@ -25,8 +25,9 @@ class GosysOppgaveServiceImpl(
             return emptyList()
         }
 
-        // tmp for testing FIXME remove hardcoding when Oppgave API supports EYB/EYO
-        val gosysOppgaver = gosysOppgaveKlient.hentOppgaver("PEN", "4808", brukerTokenInfo)
+        val gosysOppgaver = gosysOppgaveKlient.hentOppgaver(
+            brukerTokenInfo = brukerTokenInfo
+        )
 
         // Utveksle unike aktørIds til fnr for mapping
         val fnrByAktoerId = if (gosysOppgaver.oppgaver.isEmpty()) {
@@ -41,7 +42,6 @@ class GosysOppgaveServiceImpl(
 
     companion object {
         private val temaTilSakType = mapOf(
-            "PEN" to SakType.BARNEPENSJON, // tmp for testing FIXME remove when Oppgave API supports EYB/EYO
             "EYB" to SakType.BARNEPENSJON,
             "EYO" to SakType.OMSTILLINGSSTOENAD
         )

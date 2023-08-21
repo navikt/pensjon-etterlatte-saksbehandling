@@ -31,7 +31,10 @@ data class GosysApiOppgave(
 )
 
 interface GosysOppgaveKlient {
-    suspend fun hentOppgaver(tema: String, enhetsnr: String, brukerTokenInfo: BrukerTokenInfo): GosysOppgaver
+    suspend fun hentOppgaver(
+        enhetsnr: String? = null,
+        brukerTokenInfo: BrukerTokenInfo
+    ): GosysOppgaver
 }
 
 class GosysOppgaveKlientImpl(config: Config, httpClient: HttpClient) : GosysOppgaveKlient {
@@ -44,15 +47,18 @@ class GosysOppgaveKlientImpl(config: Config, httpClient: HttpClient) : GosysOppg
     private val clientId = config.getString("oppgave.client.id")
     private val resourceUrl = config.getString("oppgave.resource.url")
 
-    override suspend fun hentOppgaver(tema: String, enhetsnr: String, brukerTokenInfo: BrukerTokenInfo): GosysOppgaver {
+    override suspend fun hentOppgaver(
+        enhetsnr: String?,
+        brukerTokenInfo: BrukerTokenInfo
+    ): GosysOppgaver {
         try {
             logger.info("Henter oppgaver fra Gosys")
 
             val filters = "statuskategori=AAPEN"
-                .plus("&tema=PEN")
+                .plus("&tema=EYB")
                 .plus("&tema=EYO")
-                .plus("&tildeltEnhetsnr=$enhetsnr")
-                .plus("&tilordnetRessurs=${brukerTokenInfo.ident()}")
+                .plus(enhetsnr?.let { "&tildeltEnhetsnr=$it" } ?: "")
+//                .plus("&tilordnetRessurs=${brukerTokenInfo.ident()}")
 
             return downstreamResourceClient
                 .get(
@@ -67,7 +73,7 @@ class GosysOppgaveKlientImpl(config: Config, httpClient: HttpClient) : GosysOppg
                     failure = { errorResponse -> throw errorResponse }
                 )
         } catch (e: Exception) {
-            logger.error("Noe feilet mot Gosys [tema=$tema, enhetsnr=$enhetsnr, ident=${brukerTokenInfo.ident()}]", e)
+            logger.error("Noe feilet mot Gosys [ident=${brukerTokenInfo.ident()}]", e)
             throw e
         }
     }

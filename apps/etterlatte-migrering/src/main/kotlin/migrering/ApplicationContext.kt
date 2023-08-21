@@ -18,7 +18,9 @@ internal class ApplicationContext {
         password = properties.dbPassword
     )
 
-    val penklient = PenKlient(httpClient(), properties.penUrl)
+    private val config = ConfigFactory.load()
+    val penklient = PenKlient(config, httpClient())
+
     private val featureToggleService: FeatureToggleService =
         FeatureToggleService.initialiser(featureToggleProperties(ConfigFactory.load()))
     val pesysRepository = PesysRepository(dataSource)

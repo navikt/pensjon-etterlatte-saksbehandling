@@ -44,6 +44,8 @@ spec:
       value: earliest
     - name: PEN_URL
       value: https://pensjon-pen-proxy-fss-q2.dev-fss-pub.nais.io
+    - name: PEN_CLIENT_ID
+      value: d0883b92-b866-42cd-a216-5a0eec745e05
   accessPolicy:
     outbound:
       external:

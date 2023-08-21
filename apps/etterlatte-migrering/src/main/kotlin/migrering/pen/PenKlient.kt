@@ -1,26 +1,38 @@
 package migrering.pen
 
+import com.fasterxml.jackson.module.kotlin.readValue
+import com.github.michaelbull.result.mapBoth
+import com.typesafe.config.Config
 import io.ktor.client.HttpClient
-import io.ktor.client.call.body
-import io.ktor.client.request.get
-import io.ktor.http.isSuccess
+import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.ktorobo.AzureAdClient
+import no.nav.etterlatte.libs.ktorobo.DownstreamResourceClient
+import no.nav.etterlatte.libs.ktorobo.Resource
 import no.nav.etterlatte.migrering.Pesyssak
+import no.nav.etterlatte.token.Systembruker
 import org.slf4j.LoggerFactory
 
-class PenKlient(
-    private val pen: HttpClient,
-    private val resourceUrl: String
-) {
+class PenKlient(config: Config, pen: HttpClient) {
     private val logger = LoggerFactory.getLogger(this::class.java)
-    suspend fun hentSak(
-        sakid: Long
-    ): Pesyssak {
+    private val azureAdClient = AzureAdClient(config)
+    private val downstreamResourceClient = DownstreamResourceClient(azureAdClient, pen)
+
+    private val clientId = config.getString("pen.client.id")
+    private val resourceUrl = config.getString("pen.resource.url")
+    suspend fun hentSak(sakid: Long): Pesyssak {
         logger.info("Henter sak $sakid fra PEN")
-        val sak = pen.get("$resourceUrl/barnepensjon-migrering/grunnlag/$sakid")
-        return if (sak.status.isSuccess()) {
-            sak.body<Pesyssak>()
-        } else {
-            throw RuntimeException("Kunne ikke hente sak $sakid fra PEN")
-        }
+
+        return downstreamResourceClient
+            .get(
+                resource = Resource(
+                    clientId = clientId,
+                    url = "$resourceUrl/barnepensjon-migrering/grunnlag/$sakid"
+                ),
+                brukerTokenInfo = Systembruker(oid = "TODO", sub = "TODO")
+            )
+            .mapBoth(
+                success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
+                failure = { errorResponse -> throw errorResponse }
+            )
     }
 }

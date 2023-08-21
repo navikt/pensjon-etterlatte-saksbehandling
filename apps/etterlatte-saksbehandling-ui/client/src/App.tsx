@@ -6,12 +6,12 @@ import { Person } from '~components/person/Person'
 import useInnloggetSaksbehandler from './shared/hooks/useInnloggetSaksbehandler'
 import nb from 'date-fns/locale/nb'
 import { registerLocale } from 'react-datepicker'
-import ErrorBoundary from '~ErrorBoundary'
+import ErrorBoundary, { ApiErrorAlert } from '~ErrorBoundary'
 import BrevOversikt from '~components/person/brev/BrevOversikt'
 import NyttBrev from '~components/person/brev/NyttBrev'
 import ScrollToTop from '~ScrollTop'
 import { ToggleNyOppgaveliste } from '~components/nyoppgavebenk/ToggleNyOppgavelist'
-import { useApiCall } from '~shared/hooks/useApiCall'
+import { isFailure, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
 import { useEffect, useState } from 'react'
 import { ConfigContext, hentClientConfig } from '~clientConfig'
 
@@ -19,20 +19,16 @@ function App() {
   const innloggetbrukerHentet = useInnloggetSaksbehandler()
   registerLocale('nb', nb)
 
-  const [, hentConfig] = useApiCall(hentClientConfig)
+  const [fetchConfigResultStatus, hentConfig] = useApiCall(hentClientConfig)
   const [config, setConfig] = useState({})
 
   useEffect(() => {
-    hentConfig(
-      {},
-      (val) => setConfig(val),
-      (error) => error
-    )
+    hentConfig({}, (val) => setConfig(val))
   }, [])
 
   return (
     <>
-      {innloggetbrukerHentet && (
+      {isSuccess(fetchConfigResultStatus) && innloggetbrukerHentet && (
         <div className="app">
           <BrowserRouter basename="/">
             <ScrollToTop />
@@ -58,6 +54,8 @@ function App() {
           </BrowserRouter>
         </div>
       )}
+
+      {isFailure(fetchConfigResultStatus) && <ApiErrorAlert>Kunne ikke hente konfigurasjonsverdier</ApiErrorAlert>}
     </>
   )
 }

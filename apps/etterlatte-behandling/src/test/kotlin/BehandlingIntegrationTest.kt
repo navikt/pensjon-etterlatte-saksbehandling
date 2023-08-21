@@ -330,7 +330,7 @@ class GrunnlagKlientTest : GrunnlagKlient {
     override suspend fun hentPersongalleri(
         sakId: Long,
         brukerTokenInfo: BrukerTokenInfo
-    ): Grunnlagsopplysning<Persongalleri>? {
+    ): Grunnlagsopplysning<Persongalleri> {
         return Grunnlagsopplysning(
             id = UUID.randomUUID(),
             kilde = Grunnlagsopplysning.Privatperson("fnr", Tidspunkt.now()),
@@ -348,7 +348,10 @@ class GrunnlagKlientTest : GrunnlagKlient {
 }
 
 class GosysOppgaveKlientTest : GosysOppgaveKlient {
-    override suspend fun hentOppgaver(tema: String, enhetsnr: String, brukerTokenInfo: BrukerTokenInfo): GosysOppgaver {
+    override suspend fun hentOppgaver(
+        enhetsnr: String?,
+        brukerTokenInfo: BrukerTokenInfo
+    ): GosysOppgaver {
         return GosysOppgaver(0, emptyList())
     }
 }

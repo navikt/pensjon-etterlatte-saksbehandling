@@ -25,7 +25,7 @@ class GosysOppgaveServiceImplTest {
     fun `skal hente oppgaver og deretter folkeregisterIdent for unike identer`() {
         every { featureToggleService.isEnabled(any(), false) } returns true
 
-        coEvery { gosysOppgaveKlient.hentOppgaver(any(), any(), brukerTokenInfo) } returns GosysOppgaver(
+        coEvery { gosysOppgaveKlient.hentOppgaver(any(), brukerTokenInfo) } returns GosysOppgaver(
             antallTreffTotalt = 3,
             oppgaver = listOf(
                 GosysApiOppgave(

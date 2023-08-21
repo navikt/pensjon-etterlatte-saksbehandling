@@ -35,7 +35,7 @@ class Server(private val context: ApplicationContext) {
         val sakmigrerer = Sakmigrerer(pesysRepository, featureToggleService)
         RapidApplication.create(rapidEnv).also { rapidsConnection ->
             Migrering(rapidsConnection, pesysRepository, sakmigrerer)
-            MigrerSpesifikkSak(rapidsConnection, penklient, sakmigrerer)
+            MigrerSpesifikkSak(rapidsConnection, penklient, pesysRepository, sakmigrerer)
         }.start()
     }
 

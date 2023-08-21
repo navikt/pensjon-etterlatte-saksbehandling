@@ -10,7 +10,6 @@ import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.POSTGRES_VERSION
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.migrering.Migrering
-import no.nav.etterlatte.migrering.MigreringFeatureToggle
 import no.nav.etterlatte.migrering.PesysRepository
 import no.nav.etterlatte.migrering.Pesyssak
 import no.nav.etterlatte.rapidsandrivers.migrering.Beregning
@@ -78,16 +77,18 @@ class MigreringIntegrationTest {
                 false
             )
             repository.lagrePesyssak(sakInn)
-            val inspector = TestRapid()
+            val featureToggleService = DummyFeatureToggleService().also {
+                it.settBryter(MigreringFeatureToggle.SendSakTilMigrering, true)
+            }
+            val apply = TestRapid()
                 .apply {
                     Migrering(
                         this,
                         repository,
-                        DummyFeatureToggleService().also {
-                            it.settBryter(MigreringFeatureToggle.SendSakTilMigrering, true)
-                        }
+                        sakmigrerer = Sakmigrerer(repository, featureToggleService)
                     )
                 }
+            val inspector = apply
 
             val melding = JsonMessage.newMessage(
                 mapOf(EVENT_NAME_KEY to Migreringshendelser.START_MIGRERING)

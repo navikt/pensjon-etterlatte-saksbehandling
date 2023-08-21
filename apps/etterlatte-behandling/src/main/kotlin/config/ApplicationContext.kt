@@ -46,7 +46,7 @@ import no.nav.etterlatte.libs.jobs.LeaderElection
 import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.libs.sporingslogg.Sporingslogg
-import no.nav.etterlatte.metrics.MetrikkerDao
+import no.nav.etterlatte.metrics.OppgaveMetrikkerDao
 import no.nav.etterlatte.metrics.OppgaveMetrics
 import no.nav.etterlatte.oppgave.GosysOppgaveKlient
 import no.nav.etterlatte.oppgave.GosysOppgaveKlientImpl
@@ -141,7 +141,7 @@ class ApplicationContext(
     val grunnlagsendringshendelseDao = GrunnlagsendringshendelseDao { databaseContext().activeTx() }
     val institusjonsoppholdDao = InstitusjonsoppholdDao { databaseContext().activeTx() }
     val migreringRepository = MigreringRepository { databaseContext().activeTx() }
-    val metrikkerDao = MetrikkerDao(dataSource)
+    val metrikkerDao = OppgaveMetrikkerDao(dataSource)
 
     // Klient
     val pdlKlient = PdlKlientImpl(pdlHttpClient, "http://etterlatte-pdltjenester")

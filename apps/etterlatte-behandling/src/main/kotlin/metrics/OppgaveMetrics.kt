@@ -5,7 +5,7 @@ import io.micrometer.core.instrument.MeterRegistry
 import io.micrometer.core.instrument.binder.MeterBinder
 import org.slf4j.LoggerFactory
 
-class OppgaveMetrics(private val metrikkerDao: MetrikkerDao) : MeterBinder {
+class OppgaveMetrics(private val metrikkerDao: OppgaveMetrikkerDao) : MeterBinder {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
     private var antallOppgaver = -1.0
@@ -13,14 +13,11 @@ class OppgaveMetrics(private val metrikkerDao: MetrikkerDao) : MeterBinder {
     private var antallAvsluttaOppgaver = -1.0
 
     override fun bindTo(registry: MeterRegistry) {
-        val alleOppgaver = metrikkerDao.hentAlleOppgaver()
-
-        val aktive = alleOppgaver.filter { !it.erAvsluttet() }
-        val avsluttet = alleOppgaver.filter { it.erAvsluttet() }
+        val oppgaveAntall = metrikkerDao.hentOppgaveAntall()
 
         Gauge.builder("antall_oppgaver") {
             antallOppgaver.also {
-                antallOppgaver = alleOppgaver.size.toDouble()
+                antallOppgaver = oppgaveAntall.totalt.toDouble()
                 logger.info("Antall oppgaver: $antallOppgaver")
             }
         }.description("Antall oppgaver")
@@ -28,7 +25,7 @@ class OppgaveMetrics(private val metrikkerDao: MetrikkerDao) : MeterBinder {
 
         Gauge.builder("antall_aktive_oppgaver") {
             antallAktiveOppgaver.also {
-                antallAktiveOppgaver = aktive.size.toDouble()
+                antallAktiveOppgaver = oppgaveAntall.aktive.toDouble()
                 logger.info("Antall aktive oppgaver: $antallAktiveOppgaver")
             }
         }.description("Antall aktive oppgaver")
@@ -36,7 +33,7 @@ class OppgaveMetrics(private val metrikkerDao: MetrikkerDao) : MeterBinder {
 
         Gauge.builder("antall_avslutta_oppgaver") {
             antallAvsluttaOppgaver.also {
-                antallAvsluttaOppgaver = avsluttet.size.toDouble()
+                antallAvsluttaOppgaver = oppgaveAntall.avsluttet.toDouble()
                 logger.info("Antall avslutta oppgaver: $antallAvsluttaOppgaver")
             }
         }.description("Antall avslutta oppgaver")

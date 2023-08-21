@@ -2,6 +2,8 @@ package no.nav.etterlatte
 
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
+import migrering.MigrerSpesifikkSak
+import migrering.Sakmigrerer
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleProperties
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstartOgAvslutning
@@ -29,8 +31,11 @@ class Server(private val context: ApplicationContext) {
         val rapidEnv = getRapidEnv()
         val featureToggleService: FeatureToggleService =
             FeatureToggleService.initialiser(featureToggleProperties(ConfigFactory.load()))
+        val pesysRepository = PesysRepository(dataSource)
+        val sakmigrerer = Sakmigrerer(pesysRepository, featureToggleService)
         RapidApplication.create(rapidEnv).also { rapidsConnection ->
-            Migrering(rapidsConnection, PesysRepository(dataSource), featureToggleService)
+            Migrering(rapidsConnection, pesysRepository, sakmigrerer)
+            MigrerSpesifikkSak(rapidsConnection, penklient, sakmigrerer)
         }.start()
     }
 

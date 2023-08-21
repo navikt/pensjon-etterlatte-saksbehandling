@@ -42,7 +42,10 @@ spec:
     - name: KAFKA_RESET_POLICY
       #sette tilbake til none senere
       value: earliest
+    - name: PEN_URL
+      value: https://pensjon-pen-proxy-fss-q2.dev-fss-pub.nais.io
   accessPolicy:
     outbound:
       external:
         - host: unleash.nais.io
+        - host: pensjon-pen-proxy-fss-q2.dev-fss-pub.nais.io

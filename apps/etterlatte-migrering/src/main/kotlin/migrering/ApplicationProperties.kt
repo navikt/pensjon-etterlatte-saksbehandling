@@ -5,7 +5,8 @@ import no.nav.etterlatte.libs.database.jdbcUrl
 class ApplicationProperties(
     val jdbcUrl: String,
     val dbUsername: String,
-    val dbPassword: String
+    val dbPassword: String,
+    val penUrl: String
 ) {
     companion object {
         fun fromEnv(env: Map<String, String>) = env.run {
@@ -16,7 +17,8 @@ class ApplicationProperties(
                     value("DB_DATABASE")
                 ),
                 dbUsername = value("DB_USERNAME"),
-                dbPassword = value("DB_PASSWORD")
+                dbPassword = value("DB_PASSWORD"),
+                penUrl = value("PEN_URL")
             )
         }
 

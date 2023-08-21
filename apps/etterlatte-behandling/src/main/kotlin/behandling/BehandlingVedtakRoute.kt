@@ -47,10 +47,10 @@ internal fun Route.behandlingVedtakRoute(
                 inTransaction {
                     behandlingsstatusService.settFattetVedtak(behandling, fattVedtak.vedtakHendelse)
                     try {
-                        oppgaveService.lukkOppgaveUnderbehandlingOgLagNyMedType(
+                        oppgaveService.ferigstillOppgaveUnderbehandlingOgLagNyMedType(
                             fattetoppgave = fattVedtak.vedtakOppgaveDTO,
                             oppgaveType = OppgaveType.ATTESTERING,
-                            saksbehandler = fattVedtak.vedtakHendelse.saksbehandler,
+                            saksbehandler = fattVedtak.vedtakHendelse.saksbehandler!!,
                             merknad = fattVedtak.vedtakHendelse.kommentar
                         )
                     } catch (e: Exception) {
@@ -76,11 +76,11 @@ internal fun Route.behandlingVedtakRoute(
                         listOfNotNull(it.valgtBegrunnelse, it.kommentar).joinToString(separator = ": ")
                     }
                     try {
-                        oppgaveService.lukkOppgaveUnderbehandlingOgLagNyMedType(
+                        oppgaveService.ferigstillOppgaveUnderbehandlingOgLagNyMedType(
                             fattetoppgave = underkjennVedtakOppgave.vedtakOppgaveDTO,
                             oppgaveType = OppgaveType.UNDERKJENT,
                             merknad = merknadFraAttestant,
-                            saksbehandler = underkjennVedtakOppgave.vedtakHendelse.saksbehandler
+                            saksbehandler = underkjennVedtakOppgave.vedtakHendelse.saksbehandler!!
                         )
                     } catch (e: Exception) {
                         haandterFeilIOppgaveService(e)
@@ -104,7 +104,7 @@ internal fun Route.behandlingVedtakRoute(
                     try {
                         oppgaveService.ferdigStillOppgaveUnderBehandling(
                             behandlingEllerHendelseId = attesterVedtakOppgave.vedtakOppgaveDTO.referanse,
-                            saksbehandler = attesterVedtakOppgave.vedtakHendelse.saksbehandler
+                            saksbehandler = attesterVedtakOppgave.vedtakHendelse.saksbehandler!!
                         )
                     } catch (e: Exception) {
                         haandterFeilIOppgaveService(e)

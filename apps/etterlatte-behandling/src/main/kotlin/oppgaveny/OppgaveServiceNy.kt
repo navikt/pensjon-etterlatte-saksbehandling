@@ -133,9 +133,9 @@ class OppgaveServiceNy(
 
     private fun sikreAtSaksbehandlerErSattPaaOppgaveHvisNyOppgavelisteIkkeErStoettet(
         behandlingId: String,
-        saksbehandler: String?
+        saksbehandler: String
     ) {
-        if (!kanBrukeNyOppgaveliste && saksbehandler != null) {
+        if (!kanBrukeNyOppgaveliste) {
             // Vi sikrer at saksbehandler tar oppgaven før de fullfører den
             val oppgaveUnderBehandling = oppgaveDaoNy.hentOppgaverForBehandling(behandlingId)
                 .single { it.status == Status.UNDER_BEHANDLING || it.status == Status.NY }
@@ -148,11 +148,11 @@ class OppgaveServiceNy(
         }
     }
 
-    fun lukkOppgaveUnderbehandlingOgLagNyMedType(
+    fun ferigstillOppgaveUnderbehandlingOgLagNyMedType(
         fattetoppgave: VedtakOppgaveDTO,
         oppgaveType: OppgaveType,
         merknad: String?,
-        saksbehandler: String? = null
+        saksbehandler: String
     ): OppgaveNy {
         sikreAtSaksbehandlerErSattPaaOppgaveHvisNyOppgavelisteIkkeErStoettet(fattetoppgave.referanse, saksbehandler)
 
@@ -162,6 +162,7 @@ class OppgaveServiceNy(
         }
         try {
             val oppgaveUnderbehandling = behandlingsoppgaver.single { it.status == Status.UNDER_BEHANDLING }
+            sikreAtSaksbehandlerSomLukkerOppgaveEierOppgaven(oppgaveUnderbehandling, saksbehandler)
             oppgaveDaoNy.endreStatusPaaOppgave(oppgaveUnderbehandling.id, Status.FERDIGSTILT)
             return opprettNyOppgaveMedSakOgReferanse(
                 referanse = fattetoppgave.referanse,
@@ -185,6 +186,18 @@ class OppgaveServiceNy(
         }
     }
 
+    private fun sikreAtSaksbehandlerSomLukkerOppgaveEierOppgaven(
+        oppgaveUnderBehandling: OppgaveNy,
+        saksbehandler: String
+    ) {
+        if (oppgaveUnderBehandling.saksbehandler != saksbehandler) {
+            throw BadRequestException(
+                "Kan ikke lukke oppgave for en annen saksbehandler oppgave:" +
+                    " ${oppgaveUnderBehandling.id}"
+            )
+        }
+    }
+
     fun endreEnhetForOppgaverTilknyttetSak(
         sakId: Long,
         enhetsID: String
@@ -203,7 +216,7 @@ class OppgaveServiceNy(
 
     fun avbrytOppgaveUnderBehandling(
         behandlingEllerHendelseId: String,
-        saksbehandler: String? = null
+        saksbehandler: String
     ): OppgaveNy {
         sikreAtSaksbehandlerErSattPaaOppgaveHvisNyOppgavelisteIkkeErStoettet(
             behandlingEllerHendelseId,
@@ -212,6 +225,7 @@ class OppgaveServiceNy(
         try {
             val oppgaveUnderbehandling = oppgaveDaoNy.hentOppgaverForBehandling(behandlingEllerHendelseId)
                 .single { it.status == Status.UNDER_BEHANDLING }
+            sikreAtSaksbehandlerSomLukkerOppgaveEierOppgaven(oppgaveUnderbehandling, saksbehandler)
             oppgaveDaoNy.endreStatusPaaOppgave(oppgaveUnderbehandling.id, Status.AVBRUTT)
             return requireNotNull(oppgaveDaoNy.hentOppgave(oppgaveUnderbehandling.id)) {
                 "Oppgaven vi akkurat avbrøt kunne ikke hentes ut"
@@ -233,7 +247,7 @@ class OppgaveServiceNy(
 
     fun ferdigStillOppgaveUnderBehandling(
         behandlingEllerHendelseId: String,
-        saksbehandler: String? = null
+        saksbehandler: String
     ): OppgaveNy {
         sikreAtSaksbehandlerErSattPaaOppgaveHvisNyOppgavelisteIkkeErStoettet(
             behandlingEllerHendelseId,
@@ -245,6 +259,7 @@ class OppgaveServiceNy(
         }
         try {
             val oppgaveUnderbehandling = behandlingsoppgaver.single { it.status == Status.UNDER_BEHANDLING }
+            sikreAtSaksbehandlerSomLukkerOppgaveEierOppgaven(oppgaveUnderbehandling, saksbehandler)
             oppgaveDaoNy.endreStatusPaaOppgave(oppgaveUnderbehandling.id, Status.FERDIGSTILT)
             return requireNotNull(oppgaveDaoNy.hentOppgave(oppgaveUnderbehandling.id)) {
                 "Oppgaven vi akkurat ferdigstilte kunne ikke hentes ut"
@@ -304,7 +319,9 @@ class OppgaveServiceNy(
             oppgaveDaoNy.hentOppgaverForBehandling(behandlingsId.toString())
         }
 
-        val oppgaverForBehandlingUtenAttesterting = oppgaverforBehandling.filter { it.type !== OppgaveType.ATTESTERING }
+        val oppgaverForBehandlingUtenAttesterting = oppgaverforBehandling.filter {
+            it.type !== OppgaveType.ATTESTERING
+        }
         return oppgaverForBehandlingUtenAttesterting.sortedByDescending { it.opprettet }[0].saksbehandler
     }
 

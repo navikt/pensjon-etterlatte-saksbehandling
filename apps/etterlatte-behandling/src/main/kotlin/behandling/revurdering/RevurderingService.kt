@@ -164,7 +164,11 @@ class RevurderingServiceImpl(
                             revurdering.id
                         )
                         try {
-                            oppgaveService.ferdigStillOppgaveUnderBehandling(paaGrunnAvHendelse.toString())
+                            // TODO: skal dette være lov?
+                            oppgaveService.ferdigStillOppgaveUnderBehandling(
+                                paaGrunnAvHendelse.toString(),
+                                saksbehandlerIdent
+                            )
                         } catch (e: Exception) {
                             if (kanBrukeNyOppgaveliste) {
                                 logger.error(

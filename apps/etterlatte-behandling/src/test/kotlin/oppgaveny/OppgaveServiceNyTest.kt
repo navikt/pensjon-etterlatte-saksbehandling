@@ -290,7 +290,7 @@ class OppgaveServiceNyTest {
             oppgaveKilde = OppgaveKilde.BEHANDLING,
             merknad = null
         )
-        oppgaveServiceNaarOppgaveIkkeErPaa.lukkOppgaveUnderbehandlingOgLagNyMedType(
+        oppgaveServiceNaarOppgaveIkkeErPaa.ferigstillOppgaveUnderbehandlingOgLagNyMedType(
             fattetoppgave = VedtakOppgaveDTO(sakId = opprettetSak.id, referanse = referanse),
             oppgaveType = OppgaveType.ATTESTERING,
             saksbehandler = saksbehandler,
@@ -436,18 +436,46 @@ class OppgaveServiceNyTest {
             null
         )
 
-        oppgaveServiceNy.tildelSaksbehandler(nyOppgave.id, "saksbehandler")
+        val saksbehandler1 = "saksbehandler"
+        oppgaveServiceNy.tildelSaksbehandler(nyOppgave.id, saksbehandler1)
 
-        val vedtakOppgaveDTO = oppgaveServiceNy.lukkOppgaveUnderbehandlingOgLagNyMedType(
+        val vedtakOppgaveDTO = oppgaveServiceNy.ferigstillOppgaveUnderbehandlingOgLagNyMedType(
             VedtakOppgaveDTO(opprettetSak.id, referanse),
             OppgaveType.ATTESTERING,
-            null
+            null,
+            saksbehandler1
         )
 
         val saksbehandlerOppgave = oppgaveServiceNy.hentOppgave(nyOppgave.id)
         Assertions.assertEquals(Status.FERDIGSTILT, saksbehandlerOppgave?.status)
         Assertions.assertEquals(OppgaveType.ATTESTERING, vedtakOppgaveDTO.type)
         Assertions.assertEquals(referanse, vedtakOppgaveDTO.referanse)
+    }
+
+    @Test
+    fun `Kan ikke lukke oppgave hvis man ikke eier oppgaven under behandling`() {
+        val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val referanse = "referanse"
+        val nyOppgave = oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
+            referanse,
+            opprettetSak.id,
+            OppgaveKilde.BEHANDLING,
+            OppgaveType.FOERSTEGANGSBEHANDLING,
+            null
+        )
+
+        val saksbehandler1 = "saksbehandler"
+        oppgaveServiceNy.tildelSaksbehandler(nyOppgave.id, saksbehandler1)
+        val err = assertThrows<BadRequestException> {
+            oppgaveServiceNy.ferigstillOppgaveUnderbehandlingOgLagNyMedType(
+                VedtakOppgaveDTO(opprettetSak.id, referanse),
+                OppgaveType.ATTESTERING,
+                null,
+                "Feilsaksbehandelr"
+            )
+        }
+
+        Assertions.assertTrue(err.message!!.startsWith("Kan ikke lukke oppgave for en annen saksbehandler oppgave:"))
     }
 
     @Test
@@ -463,10 +491,11 @@ class OppgaveServiceNyTest {
         )
 
         val err = assertThrows<BadRequestException> {
-            oppgaveServiceNy.lukkOppgaveUnderbehandlingOgLagNyMedType(
+            oppgaveServiceNy.ferigstillOppgaveUnderbehandlingOgLagNyMedType(
                 VedtakOppgaveDTO(opprettetSak.id, referanse),
                 OppgaveType.ATTESTERING,
-                null
+                null,
+                "saksbehandler1"
             )
         }
 
@@ -481,10 +510,11 @@ class OppgaveServiceNyTest {
         val referanse = "referanse"
 
         val err = assertThrows<BadRequestException> {
-            oppgaveServiceNy.lukkOppgaveUnderbehandlingOgLagNyMedType(
+            oppgaveServiceNy.ferigstillOppgaveUnderbehandlingOgLagNyMedType(
                 VedtakOppgaveDTO(opprettetSak.id, referanse),
                 OppgaveType.ATTESTERING,
-                null
+                null,
+                "saksbehandler1"
             )
         }
 
@@ -513,14 +543,16 @@ class OppgaveServiceNyTest {
             OppgaveType.FOERSTEGANGSBEHANDLING,
             null
         )
-        oppgaveServiceNy.tildelSaksbehandler(oppgaveEn.id, "saksbehandler")
-        oppgaveServiceNy.tildelSaksbehandler(oppgaveTo.id, "saksbehandler")
+        val saksbehandler1 = "saksbehandler"
+        oppgaveServiceNy.tildelSaksbehandler(oppgaveEn.id, saksbehandler1)
+        oppgaveServiceNy.tildelSaksbehandler(oppgaveTo.id, saksbehandler1)
 
         val err = assertThrows<BadRequestException> {
-            oppgaveServiceNy.lukkOppgaveUnderbehandlingOgLagNyMedType(
+            oppgaveServiceNy.ferigstillOppgaveUnderbehandlingOgLagNyMedType(
                 VedtakOppgaveDTO(opprettetSak.id, referanse),
                 OppgaveType.ATTESTERING,
-                null
+                null,
+                saksbehandler1
             )
         }
 
@@ -698,10 +730,31 @@ class OppgaveServiceNyTest {
             null
         )
 
-        oppgaveServiceNy.tildelSaksbehandler(oppgave.id, "saksbehandler01")
-        oppgaveServiceNy.ferdigStillOppgaveUnderBehandling(behandlingsref)
+        val saksbehandler1 = "saksbehandler01"
+        oppgaveServiceNy.tildelSaksbehandler(oppgave.id, saksbehandler1)
+        oppgaveServiceNy.ferdigStillOppgaveUnderBehandling(behandlingsref, saksbehandler1)
         val ferdigstiltOppgave = oppgaveServiceNy.hentOppgave(oppgave.id)
         Assertions.assertEquals(Status.FERDIGSTILT, ferdigstiltOppgave?.status)
+    }
+
+    @Test
+    fun `Kan ikke ferdigstille oppgave under behandling om man ikke eier den`() {
+        val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val behandlingsref = UUID.randomUUID().toString()
+        val oppgave = oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
+            behandlingsref,
+            opprettetSak.id,
+            OppgaveKilde.BEHANDLING,
+            OppgaveType.FOERSTEGANGSBEHANDLING,
+            null
+        )
+
+        val saksbehandler1 = "saksbehandler01"
+        oppgaveServiceNy.tildelSaksbehandler(oppgave.id, saksbehandler1)
+        val err = assertThrows<BadRequestException> {
+            oppgaveServiceNy.ferdigStillOppgaveUnderBehandling(behandlingsref, "feilSaksbehandler")
+        }
+        Assertions.assertTrue(err.message!!.startsWith("Kan ikke lukke oppgave for en annen saksbehandler oppgave:"))
     }
 
     @Test

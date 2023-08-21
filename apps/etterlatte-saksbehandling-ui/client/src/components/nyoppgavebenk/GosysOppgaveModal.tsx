@@ -1,13 +1,13 @@
 import { BodyShort, Button, Heading, Label, Modal } from '@navikt/ds-react'
 import styled from 'styled-components'
 import { EyeIcon } from '@navikt/aksel-icons'
-import { useContext, useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import { OppgavetypeTag, SaktypeTag } from '~components/nyoppgavebenk/Tags'
 import { formaterFnr, formaterStringDato } from '~utils/formattering'
 import { FristWrapper } from '~components/nyoppgavebenk/Oppgavelista'
 import { isBefore } from 'date-fns'
 import { Oppgavestatus, Saktype } from '~shared/api/oppgaverny'
-import { GosysUrlContext } from '~App'
+import { ConfigContext } from '~clientConfig'
 
 const TagRow = styled.div`
   display: flex;
@@ -47,8 +47,13 @@ export const GosysOppgaveModal = (props: {
 }) => {
   const [open, setOpen] = useState(false)
   const { regdato, fristdato, oppgavestatus, fnr, gjelder, enhet, saksbehandler, beskrivelse, saktype } = props
+  const [gosysUrl, setUrl] = useState<string>('')
 
-  const gosysUrl = useContext(GosysUrlContext)
+  const configContext = useContext(ConfigContext)
+
+  useEffect(() => {
+    setUrl(configContext['gosysUrl'])
+  }, [])
 
   return (
     <>

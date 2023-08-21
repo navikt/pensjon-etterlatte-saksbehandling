@@ -60,9 +60,6 @@ const LOKAL_API_CONFIG = () => {
       url: process.env.TRYGDETID_API_URL || 'https://etterlatte-trygdetid.intern.dev.nav.no',
       scope: process.env.TRYGDETID_API_SCOPE || 'api://dev-gcp.etterlatte.etterlatte-trygdetid/.default',
     },
-    gosys: {
-      url: process.env.GOSYS_URL || 'https://gosys.dev.intern.nav.no/gosys',
-    },
   }
 }
 
@@ -104,10 +101,11 @@ const API_CONFIG_FROM_ENV = () => {
       url: requireEnvValue('TRYGDETID_API_URL'),
       scope: requireEnvValue('TRYGDETID_API_SCOPE'),
     },
-    gosys: {
-      url: requireEnvValue('GOSYS_URL'),
-    },
   }
 }
 
 export const ApiConfig = hentApiConfigFraEnv()
+
+export const ClientConfig = {
+  gosysUrl: requireEnvValue('GOSYS_URL'),
+}

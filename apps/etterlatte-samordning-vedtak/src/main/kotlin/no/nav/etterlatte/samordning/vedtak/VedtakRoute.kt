@@ -21,9 +21,15 @@ data class SamordningVedtakDto(
 )
 
 fun Route.vedtakRoute() {
-    route("vedtak") {
-        val logger = application.log
+    val logger = application.log
 
+    route("ping") {
+        get {
+            call.respond("Tjeneste ok")
+        }
+    }
+
+    route("vedtak") {
         get("{vedtakId}") {
             val vedtakId = requireNotNull(call.parameters["vedtakId"]).toLong()
 

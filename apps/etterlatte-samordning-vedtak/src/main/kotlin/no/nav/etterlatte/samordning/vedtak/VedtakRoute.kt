@@ -7,12 +7,14 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.application
 import io.ktor.server.routing.get
 import io.ktor.server.routing.route
+import no.nav.etterlatte.libs.common.behandling.SakType
 import java.time.LocalDate
 
 data class SamordningVedtakDto(
     val vedtakId: Long,
     val sakstype: String,
     val virkningsdato: LocalDate,
+    val opphorsdato: LocalDate?,
     val resultatkode: String,
     val stoppaarsak: String?,
     val anvendtTrygdetid: Int,
@@ -35,8 +37,9 @@ fun Route.vedtakRoute() {
 
             val vedtaksinfo = SamordningVedtakDto(
                 vedtakId = vedtakId,
-                sakstype = "OMSTILLINGSSTOENAD",
+                sakstype = SakType.OMSTILLINGSSTOENAD.name,
                 virkningsdato = LocalDate.now(),
+                opphorsdato = null,
                 resultatkode = "RESULTATKODE",
                 stoppaarsak = null,
                 anvendtTrygdetid = 40,

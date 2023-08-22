@@ -50,29 +50,25 @@ class GrunnlagHendelser(
         val opplysningType = packet[BEHOV_NAME_KEY].asText()
 
         if (eventName == "OPPLYSNING:NY" || opplysningType in OPPLYSNING_TYPER) {
-            try {
-                val sakId = packet[SAK_ID_KEY].asLong()
-                val opplysninger: List<Grunnlagsopplysning<JsonNode>> =
-                    objectMapper.readValue(packet[OPPLYSNING_KEY].toJson())!!
+            val sakId = packet[SAK_ID_KEY].asLong()
+            val opplysninger: List<Grunnlagsopplysning<JsonNode>> =
+                objectMapper.readValue(packet[OPPLYSNING_KEY].toJson())!!
 
-                val fnr = packet[FNR_KEY].textValue()
-                if (fnr == null) {
-                    grunnlagService.lagreNyeSaksopplysninger(
-                        sakId,
-                        opplysninger
-                    )
-                } else {
-                    grunnlagService.lagreNyePersonopplysninger(
-                        sakId,
-                        Folkeregisteridentifikator.of(fnr),
-                        opplysninger
-                    )
-                }
-                packet.eventName = GRUNNLAG_OPPDATERT
-                context.publish(packet.toJson())
-            } catch (e: Exception) {
-                logger.error("Spiser en melding på grunn av feil", e)
+            val fnr = packet[FNR_KEY].textValue()
+            if (fnr == null) {
+                grunnlagService.lagreNyeSaksopplysninger(
+                    sakId,
+                    opplysninger
+                )
+            } else {
+                grunnlagService.lagreNyePersonopplysninger(
+                    sakId,
+                    Folkeregisteridentifikator.of(fnr),
+                    opplysninger
+                )
             }
+            packet.eventName = GRUNNLAG_OPPDATERT
+            context.publish(packet.toJson())
         }
     }
 

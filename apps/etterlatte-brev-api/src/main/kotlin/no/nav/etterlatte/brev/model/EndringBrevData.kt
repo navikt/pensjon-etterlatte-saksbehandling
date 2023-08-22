@@ -131,3 +131,30 @@ data class YrkesskadeRevurderingBrevdata(
         }
     }
 }
+
+data class InstitusjonsoppholdRevurderingBrevdata(
+    val utbetalingsinfo: Utbetalingsinfo,
+    val erEtterbetalingMerEnnTreMaaneder: Boolean,
+    val virkningsdato: LocalDate,
+    val prosent: Int?,
+    val innlagtdato: LocalDate?,
+    val utskrevetdato: LocalDate?
+) : EndringBrevData() {
+
+    companion object {
+        fun fra(behandling: Behandling): InstitusjonsoppholdRevurderingBrevdata {
+            val revurderingInfo = valider<RevurderingInfo.Institusjonsopphold>(
+                behandling,
+                RevurderingAarsak.INSTITUSJONSOPPHOLD
+            )
+            return InstitusjonsoppholdRevurderingBrevdata(
+                utbetalingsinfo = behandling.utbetalingsinfo,
+                erEtterbetalingMerEnnTreMaaneder = revurderingInfo.erEtterbetalingMerEnnTreMaaneder,
+                virkningsdato = behandling.virkningsdato!!.atDay(1),
+                prosent = revurderingInfo.prosent,
+                innlagtdato = revurderingInfo.innlagtdato,
+                utskrevetdato = revurderingInfo.utskrevetdato
+            )
+        }
+    }
+}

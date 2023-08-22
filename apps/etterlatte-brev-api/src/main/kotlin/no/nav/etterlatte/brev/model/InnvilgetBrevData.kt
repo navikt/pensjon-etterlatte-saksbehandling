@@ -24,6 +24,21 @@ data class InnvilgetBrevData(
     }
 }
 
+data class FoerstegangsvedtakUtfallDTO(
+    val virkningsdato: LocalDate,
+    val avdoed: Avdoed,
+    val utbetalingsbeloep: Kroner
+) : BrevData() {
+    companion object {
+        fun fra(behandling: Behandling): FoerstegangsvedtakUtfallDTO =
+            FoerstegangsvedtakUtfallDTO(
+                virkningsdato = behandling.utbetalingsinfo!!.virkningsdato,
+                avdoed = behandling.persongalleri.avdoed,
+                utbetalingsbeloep = behandling.avkortingsinfo!!.beregningsperioder.first().utbetaltBeloep
+            )
+    }
+}
+
 data class Beregningsinfo(
     val grunnbeloep: Kroner,
     val beregningsperioder: List<NyBeregningsperiode>,
@@ -70,22 +85,24 @@ data class InnvilgetBrevDataOMS(
     }
 }
 
-data class FoerstegangsvedtakUtfallDTO(
-    val virkningsdato: LocalDate,
+data class InnvilgetBrevDataEnkel(
+    val utbetalingsinfo: Utbetalingsinfo,
     val avdoed: Avdoed,
-    val utbetalingsbeloep: Kroner
+    val erEtterbetalingMerEnnTreMaaneder: Boolean,
+    val erInstitusjonsopphold: Boolean
 ) : BrevData() {
+
     companion object {
-        fun fra(behandling: Behandling): FoerstegangsvedtakUtfallDTO =
-            FoerstegangsvedtakUtfallDTO(
-                virkningsdato = behandling.utbetalingsinfo!!.virkningsdato,
-                avdoed = behandling.persongalleri.avdoed,
-                utbetalingsbeloep = behandling.avkortingsinfo!!.beregningsperioder.first().utbetaltBeloep
-            )
+        fun fra(behandling: Behandling) = InnvilgetBrevDataEnkel(
+            utbetalingsinfo = behandling.utbetalingsinfo,
+            avdoed = behandling.persongalleri.avdoed,
+            erEtterbetalingMerEnnTreMaaneder = false, // TODO utled
+            erInstitusjonsopphold = false // TODO utled
+        )
     }
 }
 
-data class InnvilgetBrevDataNy(
+data class InnvilgetHovedmalBrevData(
     val utbetalingsinfo: Utbetalingsinfo,
     val avkortingsinfo: Avkortingsinfo? = null,
     val avdoed: Avdoed,
@@ -94,13 +111,12 @@ data class InnvilgetBrevDataNy(
 ) : BrevData() {
 
     companion object {
-        fun fra(behandling: Behandling): InnvilgetBrevDataNy =
-            InnvilgetBrevDataNy(
-                utbetalingsinfo = behandling.utbetalingsinfo,
-                avdoed = behandling.persongalleri.avdoed,
-                avkortingsinfo = behandling.avkortingsinfo,
-                etterbetalingDTO = null,
-                innhold = listOf()
-            )
+        fun fra(behandling: Behandling, innhold: List<Slate.Element>) = InnvilgetHovedmalBrevData(
+            utbetalingsinfo = behandling.utbetalingsinfo,
+            avdoed = behandling.persongalleri.avdoed,
+            avkortingsinfo = behandling.avkortingsinfo,
+            etterbetalingDTO = null,
+            innhold = innhold
+        )
     }
 }

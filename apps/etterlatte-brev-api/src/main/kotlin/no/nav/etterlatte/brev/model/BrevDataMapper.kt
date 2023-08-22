@@ -5,11 +5,13 @@ import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_AVSLAG
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_AVSLAG_IKKEYRKESSKADE
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_INNVILGELSE
+import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_INNVILGELSE_ENKEL
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_INNVILGELSE_NY
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_REVURDERING_ADOPSJON
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_REVURDERING_ENDRING
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_REVURDERING_FENGSELSOPPHOLD
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_REVURDERING_HAR_STANSET
+import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_REVURDERING_INSTITUSJONSOPPHOLD
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_REVURDERING_OMGJOERING_AV_FARSKAP
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_REVURDERING_OPPHOER
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_REVURDERING_SOESKENJUSTERING
@@ -41,13 +43,8 @@ class BrevDataMapper(private val featureToggleService: FeatureToggleService) {
     private fun brevKodeAutomatisk(behandling: Behandling): BrevkodePar = when (behandling.sakType) {
         SakType.BARNEPENSJON -> {
             when (val vedtakType = behandling.vedtak.type) {
-                VedtakType.INNVILGELSE -> when (
-                    featureToggleService.isEnabled(
-                        BrevDataFeatureToggle.NyMalInnvilgelse,
-                        false
-                    )
-                ) {
-                    true -> BrevkodePar(BARNEPENSJON_INNVILGELSE_NY)
+                VedtakType.INNVILGELSE -> when (brukNyInnvilgelsesmal()) {
+                    true -> BrevkodePar(BARNEPENSJON_INNVILGELSE_ENKEL, BARNEPENSJON_INNVILGELSE_NY)
                     false -> BrevkodePar(BARNEPENSJON_INNVILGELSE)
                 }
 
@@ -57,10 +54,14 @@ class BrevDataMapper(private val featureToggleService: FeatureToggleService) {
                 }
 
                 VedtakType.ENDRING -> when (behandling.revurderingsaarsak) {
-                    RevurderingAarsak.SOESKENJUSTERING ->
-                        BrevkodePar(BARNEPENSJON_REVURDERING_SOESKENJUSTERING)
+                    RevurderingAarsak.SOESKENJUSTERING -> BrevkodePar(BARNEPENSJON_REVURDERING_SOESKENJUSTERING)
+                    RevurderingAarsak.INSTITUSJONSOPPHOLD -> BrevkodePar(
+                        BARNEPENSJON_REVURDERING_INSTITUSJONSOPPHOLD,
+                        BARNEPENSJON_REVURDERING_ENDRING
+                    )
                     RevurderingAarsak.YRKESSKADE ->
                         BrevkodePar(BARNEPENSJON_REVURDERING_YRKESSKADE, BARNEPENSJON_REVURDERING_ENDRING)
+
                     else -> TODO("Revurderingsbrev for ${behandling.revurderingsaarsak} er ikke støttet")
                 }
 
@@ -98,13 +99,8 @@ class BrevDataMapper(private val featureToggleService: FeatureToggleService) {
     fun brevData(behandling: Behandling): BrevData = when (behandling.sakType) {
         SakType.BARNEPENSJON -> {
             when (val vedtakType = behandling.vedtak.type) {
-                VedtakType.INNVILGELSE -> when (
-                    featureToggleService.isEnabled(
-                        BrevDataFeatureToggle.NyMalInnvilgelse,
-                        false
-                    )
-                ) {
-                    true -> InnvilgetBrevDataNy.fra(behandling)
+                VedtakType.INNVILGELSE -> when (brukNyInnvilgelsesmal()) {
+                    true -> InnvilgetBrevDataEnkel.fra(behandling)
                     false -> InnvilgetBrevData.fra(behandling)
                 }
 
@@ -117,6 +113,7 @@ class BrevDataMapper(private val featureToggleService: FeatureToggleService) {
                     RevurderingAarsak.SOESKENJUSTERING -> SoeskenjusteringRevurderingBrevdata.fra(behandling)
                     RevurderingAarsak.FENGSELSOPPHOLD -> FengselsoppholdBrevdata.fra(behandling)
                     RevurderingAarsak.UT_AV_FENGSEL -> UtAvFengselBrevdata.fra(behandling)
+                    RevurderingAarsak.INSTITUSJONSOPPHOLD -> InstitusjonsoppholdRevurderingBrevdata.fra(behandling)
                     RevurderingAarsak.YRKESSKADE -> YrkesskadeRevurderingBrevdata.fra(behandling)
                     else -> TODO("Revurderingsbrev for ${behandling.revurderingsaarsak} er ikke støttet")
                 }
@@ -142,6 +139,7 @@ class BrevDataMapper(private val featureToggleService: FeatureToggleService) {
     fun brevDataFerdigstilling(behandling: Behandling, innhold: () -> List<Slate.Element>, kode: BrevkodePar) =
         when (kode.ferdigstilling) {
             BARNEPENSJON_REVURDERING_ENDRING -> EndringHovedmalBrevData.fra(behandling, innhold())
+            BARNEPENSJON_INNVILGELSE_NY -> InnvilgetHovedmalBrevData.fra(behandling, innhold())
             OMS_FOERSTEGANGSVEDTAK_INNVILGELSE -> InnvilgetBrevDataOMS.fra(behandling, innhold())
             else ->
                 when (behandling.revurderingsaarsak?.redigerbartBrev) {
@@ -151,4 +149,6 @@ class BrevDataMapper(private val featureToggleService: FeatureToggleService) {
         }
 
     data class BrevkodePar(val redigering: EtterlatteBrevKode, val ferdigstilling: EtterlatteBrevKode = redigering)
+
+    private fun brukNyInnvilgelsesmal() = featureToggleService.isEnabled(BrevDataFeatureToggle.NyMalInnvilgelse, false)
 }

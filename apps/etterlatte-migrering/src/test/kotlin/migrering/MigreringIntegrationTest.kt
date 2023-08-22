@@ -26,11 +26,10 @@ import no.nav.etterlatte.rapidsandrivers.migrering.PesysId
 import no.nav.etterlatte.rapidsandrivers.migrering.Trygdetid
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
-import org.junit.jupiter.api.AfterAll
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
 import rapidsandrivers.SAK_ID_KEY
@@ -40,7 +39,6 @@ import java.time.YearMonth
 import java.util.*
 import javax.sql.DataSource
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class MigreringIntegrationTest {
 
     @Container
@@ -48,7 +46,7 @@ class MigreringIntegrationTest {
 
     private lateinit var datasource: DataSource
 
-    @BeforeAll
+    @BeforeEach
     fun start() {
         postgreSQLContainer.start()
         postgreSQLContainer.withUrlParam("user", postgreSQLContainer.username)
@@ -60,7 +58,7 @@ class MigreringIntegrationTest {
         ).also { it.migrate() }
     }
 
-    @AfterAll
+    @AfterEach
     fun stop() = postgreSQLContainer.stop()
 
     @Test
@@ -118,7 +116,7 @@ class MigreringIntegrationTest {
         testApplication {
             val repository = PesysRepository(datasource)
             val featureToggleService = DummyFeatureToggleService().also {
-                it.settBryter(MigreringFeatureToggle.SendSakTilMigrering, true)
+                it.settBryter(MigreringFeatureToggle.SendSakTilMigrering, false)
             }
             val responsFraPEN = objectMapper.readValue<BarnepensjonGrunnlagResponse>(
                 this::class.java.getResource("/penrespons.json")!!.readText()

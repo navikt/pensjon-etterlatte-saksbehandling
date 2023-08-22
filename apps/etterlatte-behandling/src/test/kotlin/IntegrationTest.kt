@@ -285,10 +285,11 @@ class IntegrationTest : BehandlingIntegrationTest() {
                 assertEquals(HttpStatusCode.OK, it.status)
             }.body()
             val oppgaverforattestant = oppgaveroppgaveliste.filter { it.referanse == behandlingId.toString() }
+            val saksbehandler02 = "Saksbehandler02"
             client.post("/api/nyeoppgaver/${oppgaverforattestant[0].id}/tildel-saksbehandler") {
                 addAuthToken(tokenAttestant)
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                setBody(SaksbehandlerEndringDto("Saksbehandler02"))
+                setBody(SaksbehandlerEndringDto(saksbehandler02))
             }.also {
                 assertEquals(HttpStatusCode.OK, it.status)
             }
@@ -312,7 +313,7 @@ class IntegrationTest : BehandlingIntegrationTest() {
                             sakId = sak.id,
                             referanse = behandlingId.toString()
                         ),
-                        vedtakHendelse = VedtakHendelse(123L, Tidspunkt.now(), "saksb", null, null)
+                        vedtakHendelse = VedtakHendelse(123L, Tidspunkt.now(), saksbehandler02, null, null)
                     )
                 )
             }.also {
@@ -420,7 +421,7 @@ class IntegrationTest : BehandlingIntegrationTest() {
             }
 
             client.post("/api/behandling/$behandlingIdNyFoerstegangsbehandling/avbryt") {
-                addAuthToken(tokenSaksbehandler)
+                addAuthToken(fagsystemTokenEY)
             }.also {
                 assertEquals(HttpStatusCode.OK, it.status)
             }

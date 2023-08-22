@@ -435,7 +435,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
             aarsak = RevurderingAarsak.REGULERING,
             paaGrunnAvHendelseId = hendelse.id.toString(),
             begrunnelse = null,
-            saksbehandlerIdent = "Jenny"
+            saksbehandlerIdent = saksbehandlerIdent
         )
 
         inTransaction {
@@ -462,7 +462,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
                     behandling!!.id.toString(),
                     sak.id
                 )
-                oppgaveService.tildelSaksbehandler(any(), "Jenny")
+                oppgaveService.tildelSaksbehandler(any(), saksbehandlerIdent)
             }
             verify {
                 oppgaveService.opprettNyOppgaveMedSakOgReferanse(

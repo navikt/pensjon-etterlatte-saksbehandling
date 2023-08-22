@@ -408,12 +408,12 @@ internal class SakServiceTest {
         saksbehandlerKontekst()
         every { sakDao.finnSaker(TRIVIELL_MIDTPUNKT.value) } returns emptyList()
         every {
-            sakDao.opprettSak(TRIVIELL_MIDTPUNKT.value, SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
+            sakDao.opprettSak(TRIVIELL_MIDTPUNKT.value, SakType.BARNEPENSJON, Enheter.EGNE_ANSATTE.enhetNr)
         } returns Sak(
             id = 1,
             ident = TRIVIELL_MIDTPUNKT.value,
             sakType = SakType.BARNEPENSJON,
-            enhet = Enheter.PORSGRUNN.enhetNr
+            enhet = Enheter.EGNE_ANSATTE.enhetNr
         )
         coEvery { skjermingKlient.personErSkjermet(TRIVIELL_MIDTPUNKT.value) } returns true
         every { sakDao.oppdaterEnheterPaaSaker(any()) } just runs
@@ -422,7 +422,7 @@ internal class SakServiceTest {
             pdlKlient.hentGeografiskTilknytning(TRIVIELL_MIDTPUNKT.value, SakType.BARNEPENSJON)
         } returns GeografiskTilknytning(kommune = "0301", ukjent = false)
         every { norg2Klient.hentEnheterForOmraade(SakType.BARNEPENSJON.tema, "0301") } returns listOf(
-            ArbeidsFordelingEnhet(Enheter.PORSGRUNN.navn, Enheter.PORSGRUNN.enhetNr)
+            ArbeidsFordelingEnhet(Enheter.EGNE_ANSATTE.navn, Enheter.EGNE_ANSATTE.enhetNr)
         )
 
         val service: SakService =
@@ -433,7 +433,7 @@ internal class SakServiceTest {
             ident = TRIVIELL_MIDTPUNKT.value,
             sakType = SakType.BARNEPENSJON,
             id = 1,
-            enhet = Enheter.PORSGRUNN.enhetNr
+            enhet = Enheter.EGNE_ANSATTE.enhetNr
         )
 
         verify(exactly = 1) { sakDao.markerSakerMedSkjerming(any(), any()) }
@@ -441,7 +441,7 @@ internal class SakServiceTest {
         verify(exactly = 1) { pdlKlient.hentGeografiskTilknytning(TRIVIELL_MIDTPUNKT.value, SakType.BARNEPENSJON) }
         verify(exactly = 1) { norg2Klient.hentEnheterForOmraade(SakType.BARNEPENSJON.tema, "0301") }
         verify(exactly = 1) {
-            sakDao.opprettSak(TRIVIELL_MIDTPUNKT.value, SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
+            sakDao.opprettSak(TRIVIELL_MIDTPUNKT.value, SakType.BARNEPENSJON, Enheter.EGNE_ANSATTE.enhetNr)
         }
         verify(exactly = 1) { sakDao.oppdaterEnheterPaaSaker(any()) }
     }

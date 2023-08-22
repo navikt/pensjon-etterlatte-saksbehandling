@@ -18,7 +18,7 @@ class PenKlient(config: Config, pen: HttpClient) {
     private val downstreamResourceClient = DownstreamResourceClient(azureAdClient, pen)
 
     private val clientId = config.getString("pen.client.id")
-    private val resourceUrl = config.getString("pen.resource.url")
+    private val resourceUrl = config.getString("pen.client.url")
     suspend fun hentSak(sakid: Long): Pesyssak {
         logger.info("Henter sak $sakid fra PEN")
 

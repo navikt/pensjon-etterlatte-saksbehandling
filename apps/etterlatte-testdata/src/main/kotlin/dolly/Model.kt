@@ -3,7 +3,7 @@ package no.nav.etterlatte.testdata.dolly
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-data class Bruker(val brukerId: String?, val brukerType: String?, val navIdent: String?, val epost: String?)
+data class Bruker(val brukerId: String?, val brukertype: String?, val navIdent: String?, val epost: String?)
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class Gruppe(val id: Long, val navn: String, val hensikt: String)

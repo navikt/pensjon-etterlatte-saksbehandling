@@ -47,7 +47,7 @@ internal fun Route.behandlingVedtakRoute(
                 inTransaction {
                     behandlingsstatusService.settFattetVedtak(behandling, fattVedtak.vedtakHendelse)
                     try {
-                        oppgaveService.ferigstillOppgaveUnderbehandlingOgLagNyMedType(
+                        oppgaveService.ferdigstillOppgaveUnderbehandlingOgLagNyMedType(
                             fattetoppgave = fattVedtak.vedtakOppgaveDTO,
                             oppgaveType = OppgaveType.ATTESTERING,
                             saksbehandler = fattVedtak.vedtakHendelse.saksbehandler!!,
@@ -76,7 +76,7 @@ internal fun Route.behandlingVedtakRoute(
                         listOfNotNull(it.valgtBegrunnelse, it.kommentar).joinToString(separator = ": ")
                     }
                     try {
-                        oppgaveService.ferigstillOppgaveUnderbehandlingOgLagNyMedType(
+                        oppgaveService.ferdigstillOppgaveUnderbehandlingOgLagNyMedType(
                             fattetoppgave = underkjennVedtakOppgave.vedtakOppgaveDTO,
                             oppgaveType = OppgaveType.UNDERKJENT,
                             merknad = merknadFraAttestant,

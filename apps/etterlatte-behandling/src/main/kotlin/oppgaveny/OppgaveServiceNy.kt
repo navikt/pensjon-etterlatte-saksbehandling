@@ -148,7 +148,7 @@ class OppgaveServiceNy(
         }
     }
 
-    fun ferigstillOppgaveUnderbehandlingOgLagNyMedType(
+    fun ferdigstillOppgaveUnderbehandlingOgLagNyMedType(
         fattetoppgave: VedtakOppgaveDTO,
         oppgaveType: OppgaveType,
         merknad: String?,

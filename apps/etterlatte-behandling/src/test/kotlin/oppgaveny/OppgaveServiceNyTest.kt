@@ -290,7 +290,7 @@ class OppgaveServiceNyTest {
             oppgaveKilde = OppgaveKilde.BEHANDLING,
             merknad = null
         )
-        oppgaveServiceNaarOppgaveIkkeErPaa.ferigstillOppgaveUnderbehandlingOgLagNyMedType(
+        oppgaveServiceNaarOppgaveIkkeErPaa.ferdigstillOppgaveUnderbehandlingOgLagNyMedType(
             fattetoppgave = VedtakOppgaveDTO(sakId = opprettetSak.id, referanse = referanse),
             oppgaveType = OppgaveType.ATTESTERING,
             saksbehandler = saksbehandler,
@@ -439,7 +439,7 @@ class OppgaveServiceNyTest {
         val saksbehandler1 = "saksbehandler"
         oppgaveServiceNy.tildelSaksbehandler(nyOppgave.id, saksbehandler1)
 
-        val vedtakOppgaveDTO = oppgaveServiceNy.ferigstillOppgaveUnderbehandlingOgLagNyMedType(
+        val vedtakOppgaveDTO = oppgaveServiceNy.ferdigstillOppgaveUnderbehandlingOgLagNyMedType(
             VedtakOppgaveDTO(opprettetSak.id, referanse),
             OppgaveType.ATTESTERING,
             null,
@@ -467,7 +467,7 @@ class OppgaveServiceNyTest {
         val saksbehandler1 = "saksbehandler"
         oppgaveServiceNy.tildelSaksbehandler(nyOppgave.id, saksbehandler1)
         val err = assertThrows<BadRequestException> {
-            oppgaveServiceNy.ferigstillOppgaveUnderbehandlingOgLagNyMedType(
+            oppgaveServiceNy.ferdigstillOppgaveUnderbehandlingOgLagNyMedType(
                 VedtakOppgaveDTO(opprettetSak.id, referanse),
                 OppgaveType.ATTESTERING,
                 null,
@@ -491,7 +491,7 @@ class OppgaveServiceNyTest {
         )
 
         val err = assertThrows<BadRequestException> {
-            oppgaveServiceNy.ferigstillOppgaveUnderbehandlingOgLagNyMedType(
+            oppgaveServiceNy.ferdigstillOppgaveUnderbehandlingOgLagNyMedType(
                 VedtakOppgaveDTO(opprettetSak.id, referanse),
                 OppgaveType.ATTESTERING,
                 null,
@@ -510,7 +510,7 @@ class OppgaveServiceNyTest {
         val referanse = "referanse"
 
         val err = assertThrows<BadRequestException> {
-            oppgaveServiceNy.ferigstillOppgaveUnderbehandlingOgLagNyMedType(
+            oppgaveServiceNy.ferdigstillOppgaveUnderbehandlingOgLagNyMedType(
                 VedtakOppgaveDTO(opprettetSak.id, referanse),
                 OppgaveType.ATTESTERING,
                 null,
@@ -548,7 +548,7 @@ class OppgaveServiceNyTest {
         oppgaveServiceNy.tildelSaksbehandler(oppgaveTo.id, saksbehandler1)
 
         val err = assertThrows<BadRequestException> {
-            oppgaveServiceNy.ferigstillOppgaveUnderbehandlingOgLagNyMedType(
+            oppgaveServiceNy.ferdigstillOppgaveUnderbehandlingOgLagNyMedType(
                 VedtakOppgaveDTO(opprettetSak.id, referanse),
                 OppgaveType.ATTESTERING,
                 null,

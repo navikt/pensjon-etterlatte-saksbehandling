@@ -46,6 +46,7 @@ import no.nav.etterlatte.oppgave.GosysOppgaveKlient
 import no.nav.etterlatte.oppgave.GosysOppgaver
 import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.etterlatte.token.Claims
+import no.nav.etterlatte.token.Fagsaksystem
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
@@ -264,6 +265,16 @@ abstract class BehandlingIntegrationTest {
                 "navn" to "John Doe",
                 Claims.NAVident.toString() to "Saksbehandler01",
                 "groups" to listOf(azureAdSaksbehandlerClaim)
+            )
+        )
+    }
+
+    protected val fagsystemTokenEY: String by lazy {
+        issueToken(
+            mapOf(
+                "navn" to "fagsystem",
+                Claims.NAVident.toString() to Fagsaksystem.EY.navn,
+                "groups" to listOf(azureAdSaksbehandlerClaim, azureAdAttestantClaim)
             )
         )
     }

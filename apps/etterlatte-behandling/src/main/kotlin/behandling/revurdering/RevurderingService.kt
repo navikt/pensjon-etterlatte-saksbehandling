@@ -164,7 +164,6 @@ class RevurderingServiceImpl(
                             revurdering.id
                         )
                         try {
-                            // TODO: skal dette være lov?
                             oppgaveService.ferdigStillOppgaveUnderBehandling(
                                 paaGrunnAvHendelse.toString(),
                                 saksbehandlerIdent

@@ -29,7 +29,7 @@ class EgenAnsattService(private val sakService: SakService, val sikkerLogg: Logg
             GrunnlagsendringshendelseService.SakMedEnhet(
                 it.id,
                 if (skjermetHendelse.skjermet) {
-                    Enheter.AALESUND.enhetNr
+                    Enheter.EGNE_ANSATTE.enhetNr
                 } else {
                     sakService.finnEnhetForPersonOgTema(
                         skjermetHendelse.fnr,

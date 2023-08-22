@@ -34,9 +34,10 @@ internal class MigrerSpesifikkSak(
     }
 
     override fun haandterPakke(packet: JsonMessage, context: MessageContext) {
-        logger.info("Prøver å hente sak ${packet.sakId} fra PEN")
-        val sakFraPEN = runBlocking { penKlient.hentSak(packet.sakId) }
-        logger.info("Henta sak $sakFraPEN fra PEN")
+        val sakId = packet.sakId
+        logger.info("Prøver å hente sak $sakId fra PEN")
+        val sakFraPEN = runBlocking { penKlient.hentSak(sakId) }
+        logger.info("Henta sak $sakId fra PEN")
 
         val pesyssak = sakFraPEN.tilVaarModell()
         pesysRepository.lagrePesyssak(pesyssak = pesyssak)

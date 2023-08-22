@@ -22,13 +22,13 @@ class OppgaveMetrics(private val metrikkerDao: MetrikkerDao) : MeterBinder {
             .description("Antall oppgaver, etter status")
             .register(registry)
 
-        Gauge.builder("etterlatte_oppgaver_oppdatert") {
+        Gauge.builder("etterlatte_oppgaver_oppdatert", this) {
             oppgaverGauge?.register(
-                oppgaverPerStatus().map { (status, antall) ->
+                this.oppgaverPerStatus().map { (status, antall) ->
                     MultiGauge.Row.of(Tags.of("status", status.name), antall)
                 }
             )
-            sistHentetOppgaverMedStatus.epochSecond
+            sistHentetOppgaverMedStatus.epochSecond.toDouble()
         }.description("Epochsecond for siste uthenting av oppgaver")
             .register(registry)
     }

@@ -1,6 +1,12 @@
 package migrering
 
+import com.fasterxml.jackson.module.kotlin.readValue
 import io.ktor.server.testing.testApplication
+import io.mockk.every
+import io.mockk.mockk
+import kotlinx.coroutines.runBlocking
+import migrering.pen.BarnepensjonGrunnlagResponse
+import migrering.pen.PenKlient
 import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
@@ -21,15 +27,18 @@ import no.nav.etterlatte.rapidsandrivers.migrering.Trygdetid
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.AfterAll
-import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
+import rapidsandrivers.SAK_ID_KEY
 import java.math.BigDecimal
+import java.time.Month
 import java.time.YearMonth
 import java.util.*
+import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class MigreringIntegrationTest {
@@ -37,11 +46,18 @@ class MigreringIntegrationTest {
     @Container
     private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:$POSTGRES_VERSION")
 
+    private lateinit var datasource: DataSource
+
     @BeforeAll
     fun start() {
         postgreSQLContainer.start()
         postgreSQLContainer.withUrlParam("user", postgreSQLContainer.username)
         postgreSQLContainer.withUrlParam("password", postgreSQLContainer.password)
+        datasource = DataSourceBuilder.createDataSource(
+            postgreSQLContainer.jdbcUrl,
+            postgreSQLContainer.username,
+            postgreSQLContainer.password
+        ).also { it.migrate() }
     }
 
     @AfterAll
@@ -49,11 +65,6 @@ class MigreringIntegrationTest {
 
     @Test
     fun `skal sende migreringsmelding for hver enkelt sak`() {
-        val datasource = DataSourceBuilder.createDataSource(
-            postgreSQLContainer.jdbcUrl,
-            postgreSQLContainer.username,
-            postgreSQLContainer.password
-        ).also { it.migrate() }
         testApplication {
             val repository = PesysRepository(datasource)
             val syntetiskFnr = "19078504903"
@@ -80,7 +91,7 @@ class MigreringIntegrationTest {
             val featureToggleService = DummyFeatureToggleService().also {
                 it.settBryter(MigreringFeatureToggle.SendSakTilMigrering, true)
             }
-            val apply = TestRapid()
+            val inspector = TestRapid()
                 .apply {
                     Migrering(
                         this,
@@ -88,7 +99,6 @@ class MigreringIntegrationTest {
                         sakmigrerer = Sakmigrerer(repository, featureToggleService)
                     )
                 }
-            val inspector = apply
 
             val melding = JsonMessage.newMessage(
                 mapOf(EVENT_NAME_KEY to Migreringshendelser.START_MIGRERING)
@@ -98,8 +108,45 @@ class MigreringIntegrationTest {
             val melding1 = inspector.inspektør.message(0)
 
             val request = objectMapper.readValue(melding1.get("request").asText(), MigreringRequest::class.java)
-            Assertions.assertEquals(PesysId("4"), request.pesysId)
-            Assertions.assertEquals(sakInn.soeker, request.soeker)
+            assertEquals(PesysId("4"), request.pesysId)
+            assertEquals(sakInn.soeker, request.soeker)
+        }
+    }
+
+    @Test
+    fun `kan ta imot og handtere respons fra PEN`() {
+        testApplication {
+            val repository = PesysRepository(datasource)
+            val featureToggleService = DummyFeatureToggleService().also {
+                it.settBryter(MigreringFeatureToggle.SendSakTilMigrering, true)
+            }
+            val responsFraPEN = objectMapper.readValue<BarnepensjonGrunnlagResponse>(
+                this::class.java.getResource("/penrespons.json")!!.readText()
+            )
+
+            val inspector = TestRapid()
+                .apply {
+                    MigrerSpesifikkSak(
+                        rapidsConnection = this,
+                        penKlient = mockk<PenKlient>()
+                            .also { every { runBlocking { it.hentSak(any()) } } returns responsFraPEN },
+                        pesysRepository = repository,
+                        sakmigrerer = Sakmigrerer(repository, featureToggleService)
+                    )
+                }
+            inspector.sendTestMessage(
+                JsonMessage.newMessage(
+                    mapOf(
+                        EVENT_NAME_KEY to Migreringshendelser.MIGRER_SPESIFIKK_SAK,
+                        SAK_ID_KEY to "22974139"
+                    )
+                ).toJson()
+            )
+            with(repository.hentSaker()) {
+                assertEquals(1, size)
+                assertEquals(get(0).pesysId.id, "22974139")
+                assertEquals(get(0).virkningstidspunkt, YearMonth.of(2023, Month.SEPTEMBER))
+            }
         }
     }
 }

@@ -10,6 +10,7 @@ import no.nav.etterlatte.DatabaseKontekst
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.domain.ArbeidsFordelingEnhet
 import no.nav.etterlatte.behandling.klienter.Norg2Klient
+import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.common.klienter.PdlKlient
 import no.nav.etterlatte.common.klienter.SkjermingKlient
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
@@ -103,9 +104,9 @@ class EgenAnsattServiceTest {
     @Test
     fun sjekkAtSettingAvSkjermingFungererEtterOpprettelseAvSak() {
         val fnr = Folkeregisteridentifikator.of("08071272487").value
-        sakService.finnEllerOpprettSak(fnr, SakType.BARNEPENSJON)
+        sakService.finnEllerOpprettSak(fnr, SakType.BARNEPENSJON, enhet = Enheter.EGNE_ANSATTE.enhetNr)
         val fnr2 = Folkeregisteridentifikator.of("19078504903").value
-        sakService.finnEllerOpprettSak(fnr2, SakType.BARNEPENSJON)
+        sakService.finnEllerOpprettSak(fnr2, SakType.BARNEPENSJON, enhet = Enheter.EGNE_ANSATTE.enhetNr)
 
         assertNotNull(sakService.finnSak(fnr, SakType.BARNEPENSJON))
         assertNotNull(sakService.finnSak(fnr2, SakType.BARNEPENSJON))

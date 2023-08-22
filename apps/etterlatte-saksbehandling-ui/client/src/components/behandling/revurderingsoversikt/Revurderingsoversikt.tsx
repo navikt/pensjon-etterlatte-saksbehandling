@@ -91,8 +91,8 @@ export const Revurderingsoversikt = (props: { behandling: IDetaljertBehandling }
         </BodyShort>
         {erOpphoer(revurderingsaarsak) ? (
           <Alert variant="warning">
-            Gjenny støtter ikke tilbakekreving per dags dato, så opphør må ikke gjennomføres hvis opphørstidspunkt er
-            etter siste utbetaling i saken.
+            Gjenny støtter ikke tilbakekreving per dags dato, så opphør må ikke gjennomføres hvis opphøret gjelder fra
+            et tidspunkt før siste utbetaling i saken.
           </Alert>
         ) : null}
       </ContentHeader>

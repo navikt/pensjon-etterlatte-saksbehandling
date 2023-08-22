@@ -40,12 +40,9 @@ class DollyClientImpl(config: Config, private val httpClient: HttpClient) : Doll
 
     override suspend fun hentDollyBrukere(accessToken: String): List<Bruker> {
         logger.info("henter dollyting på url: $dollyUrl")
-        val lol = httpClient.get("$dollyUrl/bruker") {
+        return httpClient.get("$dollyUrl/bruker") {
             header(HttpHeaders.Authorization, "Bearer $accessToken")
-        }
-        val tmp = lol.body<String>()
-        logger.error("brukerresponse dolly: $tmp")
-        return objectMapper.readValue(tmp)
+        }.body()
     }
 
     override suspend fun hentBrukersGrupper(brukerId: String, accessToken: String): HentGruppeResponse =

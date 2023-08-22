@@ -70,7 +70,7 @@ val objectMapper: ObjectMapper = jacksonObjectMapper()
 
 val logger: Logger = LoggerFactory.getLogger("testdata")
 val localDevelopment = env["DEV"].toBoolean()
-val httpClient = httpClient()
+val httpClient = httpClient(forventSuksess = true)
 val config: Config = ConfigFactory.load()
 val azureAdClient = AzureAdClient(config, httpClient)
 

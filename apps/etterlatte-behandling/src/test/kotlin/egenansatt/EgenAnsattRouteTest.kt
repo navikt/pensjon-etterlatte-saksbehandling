@@ -108,7 +108,7 @@ class EgenAnsattRouteTest : BehandlingIntegrationTest() {
 
             Assertions.assertEquals(sak.id, saketterSkjerming.id)
             // Denne skal alltid settes hvis noen blir skjermet hvis de ikke er adressebeskyttet(se test under)
-            Assertions.assertEquals(Enheter.AALESUND.enhetNr, saketterSkjerming.enhet)
+            Assertions.assertEquals(Enheter.EGNE_ANSATTE.enhetNr, saketterSkjerming.enhet)
 
             val steinkjer = ArbeidsFordelingEnhet("NAV Familie- og pensjonsytelser Steinkjer", "4817")
             coEvery { norg2Klient.hentEnheterForOmraade(any(), any()) } returns listOf(steinkjer)

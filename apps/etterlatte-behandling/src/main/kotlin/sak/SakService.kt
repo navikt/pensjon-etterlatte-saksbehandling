@@ -108,7 +108,7 @@ class RealSakService(
         if (erSkjermet) {
             inTransaction {
                 dao.oppdaterEnheterPaaSaker(
-                    listOf(GrunnlagsendringshendelseService.SakMedEnhet(sakId, Enheter.AALESUND.enhetNr))
+                    listOf(GrunnlagsendringshendelseService.SakMedEnhet(sakId, Enheter.EGNE_ANSATTE.enhetNr))
                 )
             }
         }

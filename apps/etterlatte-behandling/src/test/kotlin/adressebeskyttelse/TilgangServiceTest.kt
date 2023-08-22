@@ -136,7 +136,7 @@ class TilgangServiceTest {
     @Test
     fun `Skal kunne se på skjermet sak hvis riktig rolle`() {
         val fnr = Folkeregisteridentifikator.of("08071272487").value
-        val sakId = sakRepo.opprettSak(fnr, SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr).id
+        val sakId = sakRepo.opprettSak(fnr, SakType.BARNEPENSJON, Enheter.EGNE_ANSATTE.enhetNr).id
         val jwtclaims = JWTClaimsSet.Builder().claim("groups", strengtfortroligDev).build()
         val saksbehandlerMedStrengtfortrolig = SaksbehandlerMedRoller(
             Saksbehandler("", "ident", JwtTokenClaims(jwtclaims)),

@@ -6,6 +6,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
+import java.time.YearMonth
 import java.util.*
 
 class AvkortingService(
@@ -68,7 +69,8 @@ class AvkortingService(
         val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
         val beregning = beregningService.hentBeregningNonnull(behandlingId)
         val virkningstidspunkt = behandling.hentVirk()
-        val beregnetAvkorting = forrigeAvkorting.kopierAvkorting(virkningstidspunkt.dato).beregnAvkorting(
+        val iverksettelse = YearMonth.now().plusMonths(1) // TODO EY-2556
+        val beregnetAvkorting = forrigeAvkorting.kopierAvkorting(iverksettelse).beregnAvkorting(
             behandling.behandlingType,
             virkningstidspunkt,
             beregning

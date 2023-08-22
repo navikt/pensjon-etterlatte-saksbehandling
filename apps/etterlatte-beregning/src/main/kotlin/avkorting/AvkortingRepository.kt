@@ -220,7 +220,7 @@ class AvkortingRepository(private val dataSource: DataSource) {
             "total_restanse" to restanse.totalRestanse,
             "fordelt_restanse" to restanse.fordeltRestanse,
             "tidspunkt" to restanse.tidspunkt.toTimestamp(),
-            "regel_resultat" to restanse.regelResultat.toJson(),
+            "regel_resultat" to restanse.regelResultat?.toJson(),
             "kilde" to restanse.kilde.toJson()
         )
     ).let { query -> tx.run(query.asUpdate) }

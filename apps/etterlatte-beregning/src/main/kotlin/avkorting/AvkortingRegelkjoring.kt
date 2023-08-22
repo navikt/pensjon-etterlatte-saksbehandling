@@ -88,32 +88,18 @@ object AvkortingRegelkjoring {
     }
 
     fun beregnAvkortetYtelse(
-        virkningstidspunkt: Virkningstidspunkt,
+        periode: Periode,
         beregningsperioder: List<YtelseFoerAvkorting>,
         avkortingsperioder: List<Avkortingsperiode>,
-        restanse: Restanse? = null
+        restanse: Restanse? = null,
+        type: AvkortetYtelseType = AvkortetYtelseType.NY
     ): List<AvkortetYtelse> {
-        val periode = Periode(fom = virkningstidspunkt.dato, tom = null)
         val regelgrunnlag = PeriodisertAvkortetYtelseGrunnlag(
             beregningsperioder = periodiserteBeregninger(beregningsperioder),
             avkortingsperioder = periodiserteAvkortinger(avkortingsperioder),
             fordeltRestanse = restansegrunnlag(restanse)
         )
-        return beregnAvkortetYtelse(periode, AvkortetYtelseType.NY, regelgrunnlag)
-    }
-
-    fun beregnAvkortetYtelsePaaNytt(
-        virkningstidspunkt: Virkningstidspunkt,
-        beregninger: List<YtelseFoerAvkorting>,
-        avkortinger: List<Avkortingsperiode>
-    ): List<AvkortetYtelse> {
-        val periode = Periode(fom = beregninger.first().periode.fom, tom = virkningstidspunkt.dato.minusMonths(1))
-        val avkortetYtelseGrunnlag = PeriodisertAvkortetYtelseGrunnlag(
-            beregningsperioder = periodiserteBeregninger(beregninger),
-            avkortingsperioder = periodiserteAvkortinger(avkortinger),
-            fordeltRestanse = restansegrunnlag(null)
-        )
-        return beregnAvkortetYtelse(periode, AvkortetYtelseType.REBEREGNET, avkortetYtelseGrunnlag)
+        return beregnAvkortetYtelse(periode, type, regelgrunnlag)
     }
 
     private fun beregnAvkortetYtelse(

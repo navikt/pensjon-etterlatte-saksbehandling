@@ -16,25 +16,29 @@ data class Avkorting(
     val avkortetYtelse: List<AvkortetYtelse> = emptyList()
 ) {
 
-    fun kopierAvkorting(virkningstidspunkt: YearMonth): Avkorting = Avkorting(
+    fun kopierAvkorting(iverksettelse: YearMonth): Avkorting = Avkorting(
         avkortingGrunnlag = avkortingGrunnlag.map { it.copy(id = UUID.randomUUID()) },
         aarsoppgjoer = Aarsoppgjoer(
-            tidligereAvkortetYtelse = aarsoppgjoer.tidligereAvkortetYtelse.map { it.copy(id = UUID.randomUUID()) } +
-                    avkortetYtelse.map {
-                        when (it.periode.tom) {
-                            null -> it.copy(
-                                id = UUID.randomUUID(),
-                                type = AvkortetYtelseType.TIDLIGERE,
-                                periode = Periode(fom = it.periode.fom, tom = virkningstidspunkt.minusMonths(1))
-                            )
+            // TODO EY-2523 - RYDD! Og TEST!
+            tidligereAvkortetYtelse = aarsoppgjoer.tidligereAvkortetYtelse
+                .filter { it.periode.fom < avkortetYtelse[0].periode.fom }
+                .map { it.copy(id = UUID.randomUUID()) } + avkortetYtelse.map {
+                when (it.periode.tom) {
+                    null -> it.copy(
+                        id = UUID.randomUUID(),
+                        type = AvkortetYtelseType.TIDLIGERE,
+                        //periode = Periode(fom = it.periode.fom, tom = iverksettelse.minusMonths(1)) // TODO ??
+                    )
 
-                            else -> it.copy(
-                                id = UUID.randomUUID(),
-                                type = AvkortetYtelseType.TIDLIGERE
-                            )
-                        }
-                    },
+                    else -> it.copy(
+                        id = UUID.randomUUID(),
+                        type = AvkortetYtelseType.TIDLIGERE
+                    )
+                }
+            },
             ytelseFoerAvkorting = aarsoppgjoer.ytelseFoerAvkorting.map { it },
+            tidligereAvkortetYtelseReberegnet = listOf(), // TODO test
+            restanse = null // TODO test
         ),
     )
 
@@ -70,7 +74,12 @@ data class Avkorting(
     ): Avkorting = if (behandlingstype == BehandlingType.FØRSTEGANGSBEHANDLING) {
         beregnAvkortingForstegangs(virkningstidspunkt, beregning)
     } else {
-        beregnAvkortingRevurdering(virkningstidspunkt, beregning)
+        // TODO EY-2556
+        if (virkningstidspunkt.dato > YearMonth.now()) {
+            beregnAvkortingRevurdering(virkningstidspunkt, beregning)
+        } else {
+            beregnAvkortingTilbakeITid(virkningstidspunkt, beregning)
+        }
     }
 
     private fun beregnAvkortingForstegangs(
@@ -86,7 +95,7 @@ data class Avkorting(
         )
 
         val beregnetAvkortetYtelse = AvkortingRegelkjoring.beregnAvkortetYtelse(
-            virkningstidspunkt,
+            Periode(fom = virkningstidspunkt.dato, tom = null),
             ytelseFoerAvkorting,
             avkortingsperioder
         )
@@ -114,10 +123,13 @@ data class Avkorting(
             avkortingGrunnlag = listOf(avkortingGrunnlag.last().copy(periode = fraFoersteMaaned))
         )
 
-        val reberegnetYtelseFoerVirk = AvkortingRegelkjoring.beregnAvkortetYtelsePaaNytt(
-            virkningstidspunkt,
+
+        val periodeFoerVirk = Periode(fom = ytelseFoerAvkorting.first().periode.fom, tom = virkningstidspunkt.dato.minusMonths(1))
+        val reberegnetYtelseFoerVirk = AvkortingRegelkjoring.beregnAvkortetYtelse(
+            periodeFoerVirk,
             ytelseFoerAvkorting,
-            avkortingHeleAaret
+            avkortingHeleAaret,
+            type = AvkortetYtelseType.REBEREGNET
         )
 
         val restanse = AvkortingRegelkjoring.beregnRestanse(
@@ -128,7 +140,7 @@ data class Avkorting(
         )
 
         val avkortetYtelseFraNyVirk = AvkortingRegelkjoring.beregnAvkortetYtelse(
-            virkningstidspunkt,
+            Periode(fom = virkningstidspunkt.dato, tom = null),
             ytelseFoerAvkorting,
             avkortingHeleAaret,
             restanse
@@ -142,6 +154,31 @@ data class Avkorting(
                 restanse = restanse
             ),
             avkortetYtelse = avkortetYtelseFraNyVirk
+        )
+    }
+
+    private fun beregnAvkortingTilbakeITid(virkningstidspunkt: Virkningstidspunkt, beregning: Beregning): Avkorting {
+
+        val ytelseFoerAvkorting =
+            this.aarsoppgjoer.ytelseFoerAvkorting.leggTilNyeBeregninger(beregning, virkningstidspunkt.dato)
+
+        val avkortinger = AvkortingRegelkjoring.beregnInntektsavkorting(
+            Periode(fom = this.foersteMaanedDetteAar(), tom = null),
+            avkortingGrunnlag = this.avkortingGrunnlag
+        )
+
+        val avkortetYtelseTilbakeITid = AvkortingRegelkjoring.beregnAvkortetYtelse(
+            Periode(fom = this.foersteMaanedDetteAar(), tom = null),
+            ytelseFoerAvkorting,
+            avkortinger
+        )
+
+        return this.copy(
+            aarsoppgjoer = this.aarsoppgjoer.copy(
+                ytelseFoerAvkorting = ytelseFoerAvkorting,
+                avkortingsperioder = avkortinger,
+            ),
+            avkortetYtelse = avkortetYtelseTilbakeITid
         )
     }
 
@@ -187,8 +224,8 @@ data class Restanse(
     val totalRestanse: Int,
     val fordeltRestanse: Int,
     val tidspunkt: Tidspunkt,
-    val regelResultat: JsonNode,
-    val kilde: Grunnlagsopplysning.RegelKilde,
+    val regelResultat: JsonNode?,
+    val kilde: Grunnlagsopplysning.RegelKilde
 )
 
 data class AvkortetYtelse(
@@ -205,7 +242,7 @@ data class AvkortetYtelse(
     val kilde: Grunnlagsopplysning.RegelKilde
 )
 
-enum class AvkortetYtelseType { NY, TIDLIGERE, REBEREGNET }
+enum class AvkortetYtelseType { NY, TIDLIGERE, REBEREGNET } // TODO ETTEROPPGJOER
 
 fun Beregning.mapTilYtelseFoerAvkorting() = beregningsperioder.map {
     YtelseFoerAvkorting(

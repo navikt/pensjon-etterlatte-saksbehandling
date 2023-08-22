@@ -117,7 +117,7 @@ class AvkortingRegelkjoringTest {
         )
 
         val avkortetYtelse = AvkortingRegelkjoring.beregnAvkortetYtelse(
-            virkningstidspunkt,
+            Periode(fom = virkningstidspunkt.dato, tom = null),
             beregninger,
             avkortingsperioder
         )

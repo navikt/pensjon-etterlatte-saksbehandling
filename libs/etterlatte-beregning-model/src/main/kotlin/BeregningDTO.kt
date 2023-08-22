@@ -34,7 +34,8 @@ data class Beregningsperiode(
 
 data class AvkortingDto(
     val avkortingGrunnlag: List<AvkortingGrunnlagDto>,
-    val avkortetYtelse: List<AvkortetYtelseDto>
+    val avkortetYtelse: List<AvkortetYtelseDto>,
+    val tidligereAvkortetYtelse: List<AvkortetYtelseDto> = emptyList()
 )
 
 data class AvkortingGrunnlagDto(

@@ -466,7 +466,7 @@ class OppgaveServiceNyTest {
 
         val saksbehandler1 = "saksbehandler"
         oppgaveServiceNy.tildelSaksbehandler(nyOppgave.id, saksbehandler1)
-        val err = assertThrows<BadRequestException> {
+        assertThrows<OppgaveServiceNy.FeilSaksbehandlerPaaOppgaveException> {
             oppgaveServiceNy.ferdigstillOppgaveUnderbehandlingOgLagNyMedType(
                 VedtakOppgaveDTO(opprettetSak.id, referanse),
                 OppgaveType.ATTESTERING,
@@ -474,8 +474,6 @@ class OppgaveServiceNyTest {
                 "Feilsaksbehandelr"
             )
         }
-
-        Assertions.assertTrue(err.message!!.startsWith("Kan ikke lukke oppgave for en annen saksbehandler oppgave:"))
     }
 
     @Test
@@ -751,10 +749,9 @@ class OppgaveServiceNyTest {
 
         val saksbehandler1 = "saksbehandler01"
         oppgaveServiceNy.tildelSaksbehandler(oppgave.id, saksbehandler1)
-        val err = assertThrows<BadRequestException> {
+        assertThrows<OppgaveServiceNy.FeilSaksbehandlerPaaOppgaveException> {
             oppgaveServiceNy.ferdigStillOppgaveUnderBehandling(behandlingsref, "feilSaksbehandler")
         }
-        Assertions.assertTrue(err.message!!.startsWith("Kan ikke lukke oppgave for en annen saksbehandler oppgave:"))
     }
 
     @Test

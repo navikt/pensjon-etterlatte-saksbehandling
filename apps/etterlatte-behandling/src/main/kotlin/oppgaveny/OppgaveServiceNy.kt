@@ -191,12 +191,14 @@ class OppgaveServiceNy(
         saksbehandler: String
     ) {
         if (oppgaveUnderBehandling.saksbehandler != saksbehandler) {
-            throw BadRequestException(
+            throw FeilSaksbehandlerPaaOppgaveException(
                 "Kan ikke lukke oppgave for en annen saksbehandler oppgave:" +
                     " ${oppgaveUnderBehandling.id}"
             )
         }
     }
+
+    class FeilSaksbehandlerPaaOppgaveException(message: String) : Exception(message)
 
     fun endreEnhetForOppgaverTilknyttetSak(
         sakId: Long,

@@ -10,8 +10,6 @@ import no.nav.etterlatte.brev.VedtaksbrevService
 import no.nav.etterlatte.brev.adresse.AdresseService
 import no.nav.etterlatte.brev.adresse.Norg2Klient
 import no.nav.etterlatte.brev.adresse.RegoppslagKlient
-import no.nav.etterlatte.brev.adresse.enhetsregister.BrregKlient
-import no.nav.etterlatte.brev.adresse.enhetsregister.BrregService
 import no.nav.etterlatte.brev.behandling.SakOgBehandlingService
 import no.nav.etterlatte.brev.behandlingklient.BehandlingKlient
 import no.nav.etterlatte.brev.beregning.BeregningKlient
@@ -34,6 +32,7 @@ import no.nav.etterlatte.brev.navansatt.NavansattKlient
 import no.nav.etterlatte.brev.trygdetid.TrygdetidKlient
 import no.nav.etterlatte.brev.vedtak.VedtaksvurderingKlient
 import no.nav.etterlatte.brev.vedtaksbrevRoute
+import no.nav.etterlatte.brev.vilkaarsvurdering.VilkaarsvurderingKlient
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleProperties
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstartOgAvslutning
@@ -93,7 +92,6 @@ class ApplicationBuilder {
             env.requireEnvValue("BREVBAKER_URL")
         )
 
-    private val brregService = BrregService(BrregKlient(httpClient(), env.requireEnvValue("BRREG_URL")))
     private val regoppslagKlient = RegoppslagKlient(proxyClient, env.requireEnvValue("ETTERLATTE_PROXY_URL"))
     private val navansattKlient = NavansattKlient(navansattHttpKlient, env.requireEnvValue("NAVANSATT_URL"))
     private val grunnlagKlient = GrunnlagKlient(config, httpClient())
@@ -101,12 +99,14 @@ class ApplicationBuilder {
     private val beregningKlient = BeregningKlient(config, httpClient())
     private val behandlingKlient = BehandlingKlient(config, httpClient())
     private val trygdetidKlient = TrygdetidKlient(config, httpClient())
+    private val vilkaarsvurderingKlient = VilkaarsvurderingKlient(config, httpClient())
     private val sakOgBehandlingService = SakOgBehandlingService(
         vedtakKlient,
         grunnlagKlient,
         beregningKlient,
         behandlingKlient,
-        trygdetidKlient
+        trygdetidKlient,
+        vilkaarsvurderingKlient
     )
     private val norg2Klient = Norg2Klient(env.requireEnvValue("NORG2_URL"), httpClient())
     private val datasource = DataSourceBuilder.createDataSource(env)

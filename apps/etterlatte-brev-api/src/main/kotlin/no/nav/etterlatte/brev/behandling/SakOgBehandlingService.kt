@@ -8,12 +8,14 @@ import no.nav.etterlatte.brev.beregning.BeregningKlient
 import no.nav.etterlatte.brev.grunnlag.GrunnlagKlient
 import no.nav.etterlatte.brev.trygdetid.TrygdetidKlient
 import no.nav.etterlatte.brev.vedtak.VedtaksvurderingKlient
+import no.nav.etterlatte.brev.vilkaarsvurdering.VilkaarsvurderingKlient
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
 import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.pensjon.brevbaker.api.model.Kroner
 import java.time.LocalDate
@@ -25,7 +27,8 @@ class SakOgBehandlingService(
     private val grunnlagKlient: GrunnlagKlient,
     private val beregningKlient: BeregningKlient,
     private val behandlingKlient: BehandlingKlient,
-    private val trygdetidKlient: TrygdetidKlient
+    private val trygdetidKlient: TrygdetidKlient,
+    private val vilkaarsvurderingKlient: VilkaarsvurderingKlient
 ) {
 
     suspend fun hentSak(sakId: Long, bruker: BrukerTokenInfo) =
@@ -46,12 +49,14 @@ class SakOgBehandlingService(
         val innvilgelsesdato = { async { vedtaksvurderingKlient.hentInnvilgelsesdato(sakId, brukerTokenInfo) } }
         val sisteIverksatteBehandlingId =
             async { behandlingKlient.hentSisteIverksatteBehandling(sakId, brukerTokenInfo).id }
+        val vilkaarsvurdering = async { vilkaarsvurderingKlient.hentVilkaarsvurdering(behandlingId, brukerTokenInfo) }
 
         mapBehandling(
             vedtak.await(),
             grunnlag.await(),
             sak.await(),
             innvilgelsesdato,
+            vilkaarsvurdering.await(),
             sisteIverksatteBehandlingId,
             brukerTokenInfo
         )
@@ -62,6 +67,7 @@ class SakOgBehandlingService(
         grunnlag: Grunnlag,
         sak: Sak,
         innvilgelsesdato: () -> Deferred<LocalDate?>,
+        vilkaarsvurdering: VilkaarsvurderingDto,
         sisteIverksatteBehandlingId: Deferred<UUID>,
         brukerTokenInfo: BrukerTokenInfo
     ): Behandling {
@@ -123,7 +129,8 @@ class SakOgBehandlingService(
             trygdetid = finnTrygdetid(
                 vedtak.behandling.id,
                 brukerTokenInfo
-            )
+            ),
+            vilkaarsvurdering = vilkaarsvurdering
         )
     }
 

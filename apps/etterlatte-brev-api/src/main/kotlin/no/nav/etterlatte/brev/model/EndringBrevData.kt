@@ -129,7 +129,7 @@ data class YrkesskadeRevurderingBrevdata(
             return YrkesskadeRevurderingBrevdata(
                 utbetalingsinfo = behandling.utbetalingsinfo,
                 stoenadHarOekt = stonadHarOekt,
-                yrkesskadeErDokumentert = true, // TODO
+                yrkesskadeErDokumentert = behandling.vilkaarsvurdering.isYrkesskade(),
                 virkningsdato = behandling.virkningsdato!!.atDay(1)
             )
         }

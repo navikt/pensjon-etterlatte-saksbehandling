@@ -13,7 +13,6 @@ enum class FellesFeatureToggle(private val key: String) : FeatureToggle {
 }
 
 data class FeatureToggleProperties(
-    val enabled: Boolean,
     val applicationName: String,
     val uri: URI,
     val cluster: String

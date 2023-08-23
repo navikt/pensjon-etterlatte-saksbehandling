@@ -11,11 +11,7 @@ interface FeatureToggleService {
     fun isEnabled(toggleId: FeatureToggle, defaultValue: Boolean): Boolean
 
     companion object {
-        fun initialiser(properties: FeatureToggleProperties) = if (properties.enabled) {
-            UnleashFeatureToggleService(properties)
-        } else {
-            DummyFeatureToggleService()
-        }
+        fun initialiser(properties: FeatureToggleProperties) = UnleashFeatureToggleService(properties)
     }
 }
 

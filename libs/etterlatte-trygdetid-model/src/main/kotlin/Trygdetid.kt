@@ -3,12 +3,13 @@ package no.nav.etterlatte.libs.common.trygdetid
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import java.time.LocalDate
+import java.time.Period
 import java.util.*
 
 data class TrygdetidDto(
     val id: UUID,
     val behandlingId: UUID,
-    val beregnetTrygdetid: BeregnetTrygdetidDto?,
+    val beregnetTrygdetid: DetaljertBeregnetTrygdetidDto?,
     val trygdetidGrunnlag: List<TrygdetidGrunnlagDto>,
     val opplysninger: GrunnlagOpplysningerDto
 )
@@ -30,8 +31,8 @@ data class OpplysningkildeDto(
     val tidspunkt: String
 )
 
-data class BeregnetTrygdetidDto(
-    val total: Int,
+data class DetaljertBeregnetTrygdetidDto(
+    val resultat: DetaljertBeregnetTrygdetidResultat,
     val tidspunkt: Tidspunkt
 )
 
@@ -58,4 +59,54 @@ data class BeregnetTrygdetidGrunnlagDto(
     val dager: Int,
     val maaneder: Int,
     val aar: Int
+)
+
+data class IntBroek(
+    val teller: Int,
+    val nevner: Int
+) {
+    companion object {
+        fun fra(broek: Pair<Int?, Int?>): IntBroek? {
+            return broek.first?.let { teller ->
+                broek.second?.let { nevner ->
+                    IntBroek(teller, nevner)
+                }
+            }
+        }
+    }
+}
+
+data class DetaljertBeregnetTrygdetidResultat(
+    val faktiskTrygdetidNorge: FaktiskTrygdetid?,
+    val faktiskTrygdetidTeoretisk: FaktiskTrygdetid?,
+    val fremtidigTrygdetidNorge: FremtidigTrygdetid?,
+    val fremtidigTrygdetidTeoretisk: FremtidigTrygdetid?,
+    val samletTrygdetidNorge: Int?,
+    val samletTrygdetidTeoretisk: Int?,
+    val prorataBroek: IntBroek?
+) {
+    companion object {
+        fun fraSamletTrygdetidNorge(verdi: Int) =
+            DetaljertBeregnetTrygdetidResultat(
+                faktiskTrygdetidNorge = null,
+                faktiskTrygdetidTeoretisk = null,
+                fremtidigTrygdetidNorge = null,
+                fremtidigTrygdetidTeoretisk = null,
+                samletTrygdetidNorge = verdi,
+                samletTrygdetidTeoretisk = null,
+                prorataBroek = null
+            )
+    }
+}
+
+data class FaktiskTrygdetid(
+    val periode: Period,
+    val antallMaaneder: Long
+)
+
+data class FremtidigTrygdetid(
+    val periode: Period,
+    val antallMaaneder: Long,
+    val opptjeningstidIMaaneder: Long,
+    val mindreEnnFireFemtedelerAvOpptjeningstiden: Boolean
 )

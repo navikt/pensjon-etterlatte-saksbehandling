@@ -10,3 +10,13 @@ export const lagreAvkortingGrunnlag = async (args: {
   avkortingGrunnlag: IAvkortingGrunnlag
 }): Promise<ApiResponse<IAvkorting>> =>
   apiClient.post(`/beregning/avkorting/${args.behandlingId}`, { ...args.avkortingGrunnlag })
+
+export const lagreManuellRestanse = async (args: {
+  behandlingId: string
+  avkortetYtelseId: string
+  nyRestanse: number
+}): Promise<ApiResponse<IAvkorting>> =>
+  apiClient.post(`/beregning/avkorting/${args.behandlingId}/restanse`, {
+    avkortetYtelseId: args.avkortetYtelseId,
+    nyRestanse: args.nyRestanse,
+  })

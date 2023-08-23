@@ -55,12 +55,19 @@ data class AvkortingGrunnlagKildeDto(
 )
 
 data class AvkortetYtelseDto(
+    val id: UUID? = null,
     val fom: YearMonth,
     val tom: YearMonth?,
+    val type: String = "", // TODO
     val ytelseFoerAvkorting: Int,
     val avkortingsbeloep: Int,
     val ytelseEtterAvkorting: Int,
     val restanse: Int
+)
+
+data class ManuellRestanseDto (
+    val avkortetYtelseId: UUID,
+    val nyRestanse: Int
 )
 
 data class YtelseMedGrunnlagDto(

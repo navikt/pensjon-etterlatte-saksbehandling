@@ -167,7 +167,7 @@ data class Avkorting(
             avkortingGrunnlag = this.avkortingGrunnlag
         )
 
-        val avkortetYtelseTilbakeITid = AvkortingRegelkjoring.beregnAvkortetYtelse(
+        val avkortetYtelseFraVirk = AvkortingRegelkjoring.beregnAvkortetYtelse(
             Periode(fom = this.foersteMaanedDetteAar(), tom = null),
             ytelseFoerAvkorting,
             avkortinger
@@ -177,8 +177,36 @@ data class Avkorting(
             aarsoppgjoer = this.aarsoppgjoer.copy(
                 ytelseFoerAvkorting = ytelseFoerAvkorting,
                 avkortingsperioder = avkortinger,
+                // tidligereAvkortetYtelseReberegnet =
             ),
-            avkortetYtelse = avkortetYtelseTilbakeITid
+            avkortetYtelse = avkortetYtelseFraVirk
+        )
+    }
+
+    fun beregnEnkeltPeriode(
+        avkortetYtelseId: UUID,
+        manuellRestanse: Int,
+        saksbehandler: String
+    ): Avkorting {
+
+        val skalReberegnes = avkortetYtelse.find { it.id == avkortetYtelseId } ?: throw Exception("hoho")
+
+        val reberegnetYtelseIPeriode = AvkortingRegelkjoring.beregnAvkortetYtelse(
+            skalReberegnes.periode,
+            aarsoppgjoer.ytelseFoerAvkorting,
+            aarsoppgjoer.avkortingsperioder,
+            Restanse(
+                id = UUID.randomUUID(), // TODO Fjern
+                totalRestanse = 0, // TODO Fjern
+                fordeltRestanse = manuellRestanse,
+                tidspunkt = Tidspunkt.now(),
+                kilde = Grunnlagsopplysning.Saksbehandler.create(saksbehandler),
+                regelResultat = null
+            )
+        )
+
+        return this.copy(
+            avkortetYtelse = avkortetYtelse.filter { it.id != avkortetYtelseId } + reberegnetYtelseIPeriode
         )
     }
 
@@ -225,7 +253,7 @@ data class Restanse(
     val fordeltRestanse: Int,
     val tidspunkt: Tidspunkt,
     val regelResultat: JsonNode?,
-    val kilde: Grunnlagsopplysning.RegelKilde
+    val kilde: Grunnlagsopplysning.Kilde,
 )
 
 data class AvkortetYtelse(
@@ -242,7 +270,7 @@ data class AvkortetYtelse(
     val kilde: Grunnlagsopplysning.RegelKilde
 )
 
-enum class AvkortetYtelseType { NY, TIDLIGERE, REBEREGNET } // TODO ETTEROPPGJOER
+enum class AvkortetYtelseType { NY, TIDLIGERE, REBEREGNET }
 
 fun Beregning.mapTilYtelseFoerAvkorting() = beregningsperioder.map {
     YtelseFoerAvkorting(

@@ -57,6 +57,18 @@ class AvkortingService(
         lagretAvkorting
     }
 
+    suspend fun lagreRestanseManuelt(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+        avkortetYtelse: UUID,
+        restanse: Int
+    ): Avkorting = tilstandssjekk(behandlingId, brukerTokenInfo) {
+        logger.info("Lagre restanse manuelt for avkortetYtelse=$avkortetYtelse")
+        val avkorting = avkortingRepository.hentAvkortingUtenNullable(behandlingId)
+        val avkortingOppdatertPeriode = avkorting.beregnEnkeltPeriode(avkortetYtelse, restanse, brukerTokenInfo.ident())
+        avkortingRepository.lagreAvkorting(behandlingId, avkortingOppdatertPeriode)
+    }
+
     suspend fun kopierAvkorting(
         behandlingId: UUID,
         forrigeBehandlingId: UUID,

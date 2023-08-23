@@ -2,6 +2,7 @@ export interface IAvkorting {
   behandlingId: string
   avkortingGrunnlag: IAvkortingGrunnlag[]
   avkortetYtelse: IAvkortetYtelse[]
+  tidligereAvkortetYtelse: IAvkortetYtelse[]
 }
 
 export interface IAvkortingGrunnlag {
@@ -19,8 +20,10 @@ export interface IAvkortingGrunnlag {
 }
 
 export interface IAvkortetYtelse {
+  id: string
   fom: string
   tom: string
+  type: string
   ytelseFoerAvkorting: number
   avkortingsbeloep: number
   restanse: number

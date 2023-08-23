@@ -11,6 +11,7 @@ import no.nav.etterlatte.brev.distribusjon.DistribuerJournalpostResponse
 import no.nav.etterlatte.brev.journalpost.JournalpostResponse
 import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.BrevInnhold
+import no.nav.etterlatte.brev.model.BrevInnholdVedlegg
 import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.OpprettNyttBrev
@@ -282,19 +283,98 @@ internal class BrevRepositoryIntegrationTest {
             payload.elements.size shouldBeExactly 1
             payload.elements[0].type shouldBe Slate.ElementType.HEADING_TWO
         }
+
+        @Test
+        fun `Opprett og hent vedlegg payload`() {
+            val ulagretBrevUtenPayload = ulagretBrev(
+                behandlingId = UUID.randomUUID(),
+                innhold = BrevInnhold("tittel", Spraak.NB, payload = null),
+                innhold_vedlegg = null
+            )
+            val brevUtenPayload = db.opprettBrev(ulagretBrevUtenPayload)
+
+            brevUtenPayload.status shouldBe Status.OPPRETTET
+
+            db.hentBrevInnhold(brevUtenPayload.id) shouldBe ulagretBrevUtenPayload.innhold
+            db.hentBrevPayloadVedlegg(brevUtenPayload.id) shouldBe null // Automatisk brev skal IKKE ha payload
+
+            val ulagretBrevMedPayload = ulagretBrev(
+                behandlingId = UUID.randomUUID(),
+                innhold_vedlegg = listOf(
+                    BrevInnholdVedlegg(
+                        tittel = "Tittel",
+                        key = "brev_vedlegg",
+                        payload = Slate(listOf(Slate.Element(Slate.ElementType.PARAGRAPH)))
+                    )
+                )
+            )
+            val brevMedPayload = db.opprettBrev(ulagretBrevMedPayload)
+
+            brevMedPayload.status shouldBe Status.OPPRETTET
+
+            db.hentBrevInnhold(brevMedPayload.id) shouldBe ulagretBrevMedPayload.innhold
+            db.hentBrevPayloadVedlegg(brevMedPayload.id) shouldBe ulagretBrevMedPayload.innholdVedlegg
+        }
+
+        @Test
+        fun `Oppdatering av vedlegg payload`() {
+            val ulagretBrev = ulagretBrev(
+                behandlingId = UUID.randomUUID(),
+                innhold_vedlegg = listOf(
+                    BrevInnholdVedlegg(
+                        tittel = "tittel",
+                        key = "brev_vedlegg",
+                        payload = null
+                    )
+                )
+            )
+            val opprettetBrev = db.opprettBrev(ulagretBrev)
+
+            db.oppdaterPayload(opprettetBrev.id, Slate(emptyList()))
+
+            val initialPayload = db.hentBrevPayloadVedlegg(opprettetBrev.id)
+
+            initialPayload shouldNotBe null
+
+            db.hentBrev(opprettetBrev.id).status shouldBe Status.OPPDATERT
+
+            db.oppdaterPayloadVedlegg(
+                opprettetBrev.id,
+                listOf(
+                    BrevInnholdVedlegg(
+                        tittel = "tittel",
+                        key = "brev_vedlegg",
+                        payload = Slate(
+                            listOf(
+                                Slate.Element(
+                                    Slate.ElementType.HEADING_TWO,
+                                    listOf(Slate.InnerElement(text = "Hello world!"))
+                                )
+                            )
+                        )
+                    )
+                )
+            )
+
+            val vedleggPayload = db.hentBrevPayloadVedlegg(opprettetBrev.id)!!
+            vedleggPayload.first().payload!!.elements.size shouldBeExactly 1
+            vedleggPayload.first().payload!!.elements[0].type shouldBe Slate.ElementType.HEADING_TWO
+        }
     }
 
     private fun ulagretBrev(
         sakId: Long = Random.nextLong(),
         behandlingId: UUID? = null,
-        innhold: BrevInnhold? = null
+        innhold: BrevInnhold? = null,
+        innhold_vedlegg: List<BrevInnholdVedlegg>? = null
     ) = OpprettNyttBrev(
         sakId = sakId,
         behandlingId = behandlingId,
         prosessType = BrevProsessType.AUTOMATISK,
         soekerFnr = "00000012345",
         mottaker = opprettMottaker(),
-        innhold = innhold ?: BrevInnhold("tittel", Spraak.NB)
+        innhold = innhold ?: BrevInnhold("tittel", Spraak.NB),
+        innholdVedlegg = innhold_vedlegg ?: null
     )
 
     private fun opprettMottaker() = Mottaker(

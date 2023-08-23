@@ -23,6 +23,7 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.etterlatte.brev.BrevService.BrevPayload
 import no.nav.etterlatte.brev.behandlingklient.BehandlingKlient
 import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Brev
@@ -124,7 +125,7 @@ internal class BrevRouteTest {
     fun `Endepunkt for henting av manuelt brev`() {
         val brevId = Random.nextLong()
 
-        coEvery { brevService.hentBrevPayload(any()) } returns Slate()
+        coEvery { brevService.hentBrevPayload(any()) } returns BrevPayload(Slate(), null)
         coEvery { behandlingKlient.harTilgangTilSak(any(), any()) } returns true
 
         testApplication {
@@ -149,6 +150,7 @@ internal class BrevRouteTest {
     fun `Endepunkt for lagring av manuelt brev`() {
         val brevId = Random.nextLong()
         coEvery { brevService.lagreBrevPayload(any(), any()) } returns 1
+        coEvery { brevService.lagreBrevPayloadVedlegg(any(), any()) } returns 1
         coEvery { behandlingKlient.harTilgangTilSak(any(), any()) } returns true
 
         testApplication {
@@ -158,7 +160,7 @@ internal class BrevRouteTest {
                 parameter("sakId", SAK_ID)
                 header(HttpHeaders.Authorization, "Bearer $accessToken")
                 contentType(ContentType.Application.Json)
-                setBody(OppdaterPayloadRequest(Slate()))
+                setBody(OppdaterPayloadRequest(Slate(), listOf()))
             }
 
             assertEquals(HttpStatusCode.OK, response.status)

@@ -12,23 +12,22 @@ import NyttBrev from '~components/person/brev/NyttBrev'
 import ScrollToTop from '~ScrollTop'
 import { ToggleNyOppgaveliste } from '~components/nyoppgavebenk/ToggleNyOppgavelist'
 import { isFailure, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { ConfigContext, hentClientConfig } from '~clientConfig'
 
 function App() {
   const innloggetbrukerHentet = useInnloggetSaksbehandler()
   registerLocale('nb', nb)
 
-  const [fetchConfigResultStatus, hentConfig] = useApiCall(hentClientConfig)
-  const [config, setConfig] = useState({})
+  const [hentConfigStatus, hentConfig] = useApiCall(hentClientConfig)
 
   useEffect(() => {
-    hentConfig({}, (val) => setConfig(val))
+    hentConfig({})
   }, [])
 
   return (
     <>
-      {isSuccess(fetchConfigResultStatus) && innloggetbrukerHentet && (
+      {isSuccess(hentConfigStatus) && innloggetbrukerHentet && (
         <div className="app">
           <BrowserRouter basename="/">
             <ScrollToTop />
@@ -38,7 +37,7 @@ function App() {
                 <Route
                   path="/"
                   element={
-                    <ConfigContext.Provider value={config}>
+                    <ConfigContext.Provider value={hentConfigStatus.data}>
                       <ToggleNyOppgaveliste />
                     </ConfigContext.Provider>
                   }
@@ -55,7 +54,7 @@ function App() {
         </div>
       )}
 
-      {isFailure(fetchConfigResultStatus) && <ApiErrorAlert>Kunne ikke hente konfigurasjonsverdier</ApiErrorAlert>}
+      {isFailure(hentConfigStatus) && <ApiErrorAlert>Kunne ikke hente konfigurasjonsverdier</ApiErrorAlert>}
     </>
   )
 }

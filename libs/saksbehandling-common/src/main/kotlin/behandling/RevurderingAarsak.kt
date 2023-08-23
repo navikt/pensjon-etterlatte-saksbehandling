@@ -71,7 +71,7 @@ enum class RevurderingAarsak(
     BARN(SAKTYPE_BP, IngenMiljoe, IkkeOpphoerSkalSendeBrev),
     VERGEMAAL_ELLER_FREMTIDSFULLMAKT(SAKTYPE_BP, IngenMiljoe, IkkeOpphoerSkalSendeBrev),
     REGULERING(SAKTYPE_BP_OMS, DevOgProd, IkkeOpphoerSkalIkkeSendeBrev),
-    DOEDSFALL(SAKTYPE_BP_OMS, KunIDev, OpphoerUtenBrev),
+    DOEDSFALL(SAKTYPE_BP_OMS, DevOgProd, OpphoerUtenBrev),
     INNTEKTSENDRING(SAKTYPE_OMS, KunIDev, IkkeOpphoerSkalSendeBrev),
     OMGJOERING_AV_FARSKAP(SAKTYPE_BP, KunIDev, OpphoerMedBrev, redigerbartBrev = true),
     ADOPSJON(SAKTYPE_BP, KunIDev, OpphoerMedBrev, redigerbartBrev = true),

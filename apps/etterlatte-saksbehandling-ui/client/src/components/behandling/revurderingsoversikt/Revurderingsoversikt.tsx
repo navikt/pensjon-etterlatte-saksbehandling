@@ -1,5 +1,5 @@
 import { Content, ContentHeader } from '~shared/styled'
-import { BodyShort, Heading } from '@navikt/ds-react'
+import { Alert, BodyShort, Heading } from '@navikt/ds-react'
 import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapper'
 import { NesteOgTilbake } from '../handlinger/NesteOgTilbake'
 import { hentBehandlesFraStatus, requireNotNull } from '../felles/utils'
@@ -89,6 +89,12 @@ export const Revurderingsoversikt = (props: { behandling: IDetaljertBehandling }
           {erOpphoer(revurderingsaarsak) ? 'Opphør' : 'Revurdering'} på grunn av{' '}
           <Lowercase>{revurderingsaarsakTilTekst(revurderingsaarsak)}</Lowercase>.
         </BodyShort>
+        {erOpphoer(revurderingsaarsak) ? (
+          <Alert variant="warning">
+            Gjenny støtter ikke tilbakekreving per dags dato, så opphør må ikke gjennomføres hvis opphøret gjelder fra
+            et tidspunkt før siste utbetaling i saken.
+          </Alert>
+        ) : null}
       </ContentHeader>
       <Innhold>
         {behandling.begrunnelse !== null ? (

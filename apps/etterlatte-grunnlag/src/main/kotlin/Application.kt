@@ -12,6 +12,7 @@ import no.nav.etterlatte.grunnlag.RealGrunnlagService
 import no.nav.etterlatte.grunnlag.grunnlagRoute
 import no.nav.etterlatte.klienter.BehandlingKlientImpl
 import no.nav.etterlatte.klienter.PdlTjenesterKlientImpl
+import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstartOgAvslutning
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.ktor.httpClient
@@ -32,7 +33,7 @@ fun main() {
 
 class ApplicationBuilder {
     init {
-        sikkerLogg.info("SikkerLogg: etterlatte-grunnlag oppstart")
+        sikkerLoggOppstartOgAvslutning("etterlatte-grunnlag")
     }
 
     private val env = System.getenv().toMutableMap().apply {

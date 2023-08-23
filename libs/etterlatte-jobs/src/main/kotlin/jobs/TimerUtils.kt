@@ -6,12 +6,13 @@ import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.concurrent.fixedRateTimer
 
+data class LoggerInfo(val logger: Logger, val sikkerLogg: Logger? = null, val loggTilSikkerLogg: Boolean = false)
+
 fun fixedRateCancellableTimer(
     name: String?,
     initialDelay: Long,
     period: Long,
-    logger: Logger,
-    sikkerLogg: Logger,
+    loggerInfo: LoggerInfo,
     action: (correlationId: String) -> Unit
 ) = fixedRateTimer(
     name = name,
@@ -19,15 +20,14 @@ fun fixedRateCancellableTimer(
     initialDelay = initialDelay,
     period = period
 ) {
-    run(action, logger, name, sikkerLogg)
+    run(action, loggerInfo.logger, name, loggerInfo.sikkerLogg, loggerInfo.loggTilSikkerLogg)
 }
 
 fun fixedRateCancellableTimer(
     name: String?,
     startAt: Date,
     period: Long,
-    logger: Logger,
-    sikkerLogg: Logger,
+    loggerInfo: LoggerInfo,
     action: (correlationId: String) -> Unit
 ) = fixedRateTimer(
     name = name,
@@ -35,10 +35,16 @@ fun fixedRateCancellableTimer(
     startAt = startAt,
     period = period
 ) {
-    run(action, logger, name, sikkerLogg)
+    run(action, loggerInfo.logger, name, loggerInfo.sikkerLogg, loggerInfo.loggTilSikkerLogg)
 }
 
-private fun TimerTask.run(action: (correlationID: String) -> Unit, logger: Logger, name: String?, sikkerLogg: Logger) =
+private fun run(
+    action: (correlationID: String) -> Unit,
+    logger: Logger,
+    name: String?,
+    sikkerLogg: Logger?,
+    loggTilSikkerLogg: Boolean
+) =
     try {
         val correlationId = UUID.randomUUID().toString()
         withLogContext(correlationId) {
@@ -46,18 +52,26 @@ private fun TimerTask.run(action: (correlationID: String) -> Unit, logger: Logge
         }
     } catch (throwable: Throwable) {
         if (!shuttingDown.get()) {
-            logger.error("Jobb $name feilet, se sikker logg for stacktrace")
-            sikkerLogg.error("Jobb $name feilet", throwable)
+            if (loggTilSikkerLogg) {
+                logger.error("Jobb $name feilet, se sikker logg for stacktrace")
+                sikkerLogg!!.error("Jobb $name feilet", throwable)
+            } else {
+                logger.error("Jobb $name feilet", throwable)
+            }
         } else {
-            logger.info("Jobb $name feilet mens applikasjonen avsluttet, se sikker logg for stacktrace")
-            sikkerLogg.info("Jobb $name feilet mens applikasjonen avsluttet", throwable)
+            if (loggTilSikkerLogg) {
+                logger.info("Jobb $name feilet mens applikasjonen avsluttet, se sikker logg for stacktrace")
+                sikkerLogg!!.info("Jobb $name feilet mens applikasjonen avsluttet", throwable)
+            } else {
+                logger.info("Jobb $name feilet mens applikasjonen avsluttet, se sikker logg for stacktrace", throwable)
+            }
         }
     }
 
 val shuttingDown: AtomicBoolean = AtomicBoolean(false)
 
 fun addShutdownHook(timers: Set<Timer>) = addShutdownHook(*timers.toTypedArray())
-fun addShutdownHook(vararg timer: Timer) = Runtime.getRuntime().addShutdownHook(
+fun addShutdownHook(vararg timer: Timer): Unit = Runtime.getRuntime().addShutdownHook(
     Thread {
         shuttingDown.set(true)
         timer.forEach { it.cancel() }

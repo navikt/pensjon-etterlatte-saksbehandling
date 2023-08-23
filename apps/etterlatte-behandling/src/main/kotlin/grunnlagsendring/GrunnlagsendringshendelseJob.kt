@@ -10,11 +10,11 @@ import no.nav.etterlatte.Context
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.Self
 import no.nav.etterlatte.common.DatabaseContext
+import no.nav.etterlatte.jobs.LoggerInfo
 import no.nav.etterlatte.jobs.fixedRateCancellableTimer
 import no.nav.etterlatte.jobs.shuttingDown
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.jobs.LeaderElection
-import no.nav.etterlatte.sikkerLogg
 import org.slf4j.LoggerFactory
 import java.time.Duration
 import java.time.temporal.ChronoUnit
@@ -37,8 +37,7 @@ class GrunnlagsendringshendelseJob(
             name = jobbNavn,
             initialDelay = initialDelay,
             period = periode.toMillis(),
-            logger = logger,
-            sikkerLogg = sikkerLogg
+            loggerInfo = LoggerInfo(logger = logger, loggTilSikkerLogg = false)
         ) {
             logger.info(
                 "Setter opp GrunnlagsendringshendelseJob. LeaderElection: ${leaderElection.isLeader()} " +

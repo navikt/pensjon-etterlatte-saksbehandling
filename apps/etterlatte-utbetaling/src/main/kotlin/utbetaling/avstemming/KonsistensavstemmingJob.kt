@@ -1,5 +1,6 @@
 package no.nav.etterlatte.utbetaling.avstemming
 
+import no.nav.etterlatte.jobs.LoggerInfo
 import no.nav.etterlatte.jobs.fixedRateCancellableTimer
 import no.nav.etterlatte.libs.common.tidspunkt.norskKlokke
 import no.nav.etterlatte.libs.jobs.LeaderElection
@@ -30,8 +31,7 @@ class KonsistensavstemmingJob(
             name = jobbNavn,
             initialDelay = initialDelay,
             period = periode.toMillis(),
-            logger = logger,
-            sikkerLogg = sikkerLogg
+            loggerInfo = LoggerInfo(logger = logger, sikkerLogg = sikkerLogg, loggTilSikkerLogg = true)
         ) {
             Konsistensavstemming(
                 konsistensavstemmingService = konsistensavstemmingService,

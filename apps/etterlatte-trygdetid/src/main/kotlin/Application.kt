@@ -5,6 +5,7 @@ import io.ktor.server.config.HoconApplicationConfig
 import io.ktor.server.engine.applicationEngineEnvironment
 import io.ktor.server.engine.connector
 import io.ktor.server.engine.embeddedServer
+import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstartOgAvslutning
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.libs.ktor.setReady
@@ -23,7 +24,7 @@ fun main() {
 
 class Server(private val context: ApplicationContext) {
     init {
-        sikkerLogg.info("SikkerLogg: etterlatte-trygdetid oppstart")
+        sikkerLoggOppstartOgAvslutning("etterlatte-trygdetid")
     }
 
     private val engine = with(context) {

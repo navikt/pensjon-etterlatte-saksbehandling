@@ -1,5 +1,6 @@
 package no.nav.etterlatte.libs.common.logging
 
+import org.slf4j.LoggerFactory
 import org.slf4j.MDC
 import java.util.*
 
@@ -38,3 +39,13 @@ private fun <T> innerLogContext(correlationId: String?, kv: Map<String, String> 
 private fun generateCorrelationId() = UUID.randomUUID().toString()
 
 fun getCorrelationId(): String = MDC.get(CORRELATION_ID) ?: generateCorrelationId()
+
+fun sikkerLoggOppstartOgAvslutning(applikasjonsnavn: String) {
+    val sikkerLogg = LoggerFactory.getLogger("sikkerLogg")
+    sikkerLogg.info("SikkerLogg: $applikasjonsnavn oppstart")
+    Runtime.getRuntime().addShutdownHook(
+        Thread {
+            sikkerLogg.debug("SikkerLogg: $applikasjonsnavn avslutter")
+        }
+    )
+}

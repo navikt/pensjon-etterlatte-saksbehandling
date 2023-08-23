@@ -44,10 +44,12 @@ export const lagreManuellPayload = async (props: {
   brevId: number
   sakId: number
   payload: any
+  payload_vedlegg: any
 }): Promise<ApiResponse<any>> =>
   apiClient.post(`/brev/${props.brevId}/payload?sakId=${props.sakId}`, {
     id: props.brevId,
     payload: props.payload,
+    payload_vedlegg: props.payload_vedlegg,
   })
 
 export const ferdigstillBrev = async (props: { brevId: number; sakId: number }): Promise<ApiResponse<any>> =>

@@ -9,6 +9,7 @@ import no.nav.etterlatte.brev.db.BrevRepository.Queries.HENT_BREV_FOR_BEHANDLING
 import no.nav.etterlatte.brev.db.BrevRepository.Queries.HENT_BREV_FOR_SAK_QUERY
 import no.nav.etterlatte.brev.db.BrevRepository.Queries.HENT_BREV_QUERY
 import no.nav.etterlatte.brev.db.BrevRepository.Queries.OPPDATER_INNHOLD_PAYLOAD
+import no.nav.etterlatte.brev.db.BrevRepository.Queries.OPPDATER_INNHOLD_PAYLOAD_VEDLEGG
 import no.nav.etterlatte.brev.db.BrevRepository.Queries.OPPDATER_MOTTAKER_QUERY
 import no.nav.etterlatte.brev.db.BrevRepository.Queries.OPPRETT_BREV_QUERY
 import no.nav.etterlatte.brev.db.BrevRepository.Queries.OPPRETT_HENDELSE_QUERY
@@ -21,6 +22,7 @@ import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.BrevInnhold
+import no.nav.etterlatte.brev.model.BrevInnholdVedlegg
 import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.OpprettNyttBrev
@@ -53,6 +55,10 @@ class BrevRepository(private val ds: DataSource) {
         it.run(queryOf("SELECT payload FROM innhold WHERE brev_id = ?", id).map(tilPayload).asSingle)
     }
 
+    fun hentBrevPayloadVedlegg(id: BrevID): List<BrevInnholdVedlegg>? = using(sessionOf(ds)) {
+        it.run(queryOf("SELECT payload_vedlegg FROM innhold WHERE brev_id = ?", id).map(tilPayloadVedlegg).asSingle)
+    }
+
     fun hentBrevForBehandling(behandlingId: UUID): Brev? = using(sessionOf(ds)) {
         it.run(queryOf(HENT_BREV_FOR_BEHANDLING_QUERY, behandlingId).map(tilBrev).asSingle)
     }
@@ -69,6 +75,22 @@ class BrevRepository(private val ds: DataSource) {
                     "brev_id" to id,
                     "spraak" to Spraak.NB.name,
                     "payload" to payload.toJson()
+                )
+            ).asUpdate
+        ).also { require(it == 1) }
+
+        tx.lagreHendelse(id, Status.OPPDATERT, payload.toJson())
+            .also { require(it == 1) }
+    }
+
+    fun oppdaterPayloadVedlegg(id: BrevID, payload: List<BrevInnholdVedlegg>) = ds.transaction { tx ->
+        tx.run(
+            queryOf(
+                OPPDATER_INNHOLD_PAYLOAD_VEDLEGG,
+                mapOf(
+                    "brev_id" to id,
+                    "spraak" to Spraak.NB.name,
+                    "payload_vedlegg" to payload.toJson()
                 )
             ).asUpdate
         ).also { require(it == 1) }
@@ -160,7 +182,8 @@ class BrevRepository(private val ds: DataSource) {
                     "brev_id" to id,
                     "tittel" to ulagretBrev.innhold.tittel,
                     "spraak" to ulagretBrev.innhold.spraak.name,
-                    "payload" to ulagretBrev.innhold.payload?.toJson()
+                    "payload" to ulagretBrev.innhold.payload?.toJson(),
+                    "payload_vedlegg" to ulagretBrev.innholdVedlegg?.toJson()
                 )
             ).asUpdate
         ).also { opprettet -> require(opprettet == 1) }
@@ -259,6 +282,10 @@ class BrevRepository(private val ds: DataSource) {
         row.stringOrNull("payload")?.let { deserialize<Slate>(it) }
     }
 
+    private val tilPayloadVedlegg: (Row) -> List<BrevInnholdVedlegg>? = { row ->
+        row.stringOrNull("payload_vedlegg")?.let { deserialize<List<BrevInnholdVedlegg>>(it) }
+    }
+
     // Spesifisere SQL som språk for å sikre formatering/styling i IntelliJ
     // language=SQL
     private object Queries {
@@ -335,8 +362,8 @@ class BrevRepository(private val ds: DataSource) {
         """
 
         const val OPPRETT_INNHOLD_QUERY = """
-            INSERT INTO innhold (brev_id, tittel, spraak, payload) 
-            VALUES (:brev_id, :tittel, :spraak, :payload)
+            INSERT INTO innhold (brev_id, tittel, spraak, payload, payload_vedlegg) 
+            VALUES (:brev_id, :tittel, :spraak, :payload, :payload_vedlegg)
         """
 
         const val OPPRETT_PDF_QUERY = """
@@ -347,6 +374,12 @@ class BrevRepository(private val ds: DataSource) {
         const val OPPDATER_INNHOLD_PAYLOAD = """
             UPDATE innhold
             SET payload = :payload
+            WHERE brev_id = :brev_id
+        """
+
+        const val OPPDATER_INNHOLD_PAYLOAD_VEDLEGG = """
+            UPDATE innhold
+            SET payload_vedlegg = :payload_vedlegg
             WHERE brev_id = :brev_id
         """
 

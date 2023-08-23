@@ -12,17 +12,18 @@ import { isBlockActive, isMarkActive, toggleBlock, toggleMark } from '~component
 interface EditorProps {
   value: any
   readonly: boolean
-  onChange: (value: any) => void
+  onChange: (value: any, key?: string) => void
+  editKey?: string
 }
 
-export default function SlateEditor({ value, onChange, readonly }: EditorProps) {
+export default function SlateEditor({ value, onChange, readonly, editKey = '' }: EditorProps) {
   const renderElement = useCallback((props: any) => <Element {...props} />, [])
   const renderLeaf = useCallback((props: any) => <Leaf {...props} />, [])
   const [editor] = useState(() => withReact(withHistory(createEditor())))
 
   return (
     <BrevEditor>
-      <Slate editor={editor} onChange={onChange} initialValue={value}>
+      <Slate editor={editor} onChange={(text) => onChange(text, editKey)} initialValue={value}>
         {!readonly && (
           <Toolbar>
             <BlockButton format="heading-two" icon="H2" />

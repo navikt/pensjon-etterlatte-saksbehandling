@@ -136,11 +136,16 @@ class BrevDataMapper(private val featureToggleService: FeatureToggleService) {
         }
     }
 
-    fun brevDataFerdigstilling(behandling: Behandling, innhold: () -> List<Slate.Element>, kode: BrevkodePar) =
+    fun brevDataFerdigstilling(
+        behandling: Behandling,
+        innhold: () -> List<Slate.Element>,
+        innholdVedlegg: List<BrevInnholdVedlegg>,
+        kode: BrevkodePar
+    ) =
         when (kode.ferdigstilling) {
             BARNEPENSJON_REVURDERING_ENDRING -> EndringHovedmalBrevData.fra(behandling, innhold())
             BARNEPENSJON_INNVILGELSE_NY -> InnvilgetHovedmalBrevData.fra(behandling, innhold())
-            OMS_FOERSTEGANGSVEDTAK_INNVILGELSE -> InnvilgetBrevDataOMS.fra(behandling, innhold())
+            OMS_FOERSTEGANGSVEDTAK_INNVILGELSE -> InnvilgetBrevDataOMS.fra(behandling, innhold(), innholdVedlegg)
             else ->
                 when (behandling.revurderingsaarsak?.redigerbartBrev) {
                     true -> ManueltBrevData(innhold())

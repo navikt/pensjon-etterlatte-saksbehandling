@@ -13,6 +13,7 @@ import no.nav.etterlatte.brev.model.BrevData
 import no.nav.etterlatte.brev.model.BrevDataMapper
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.BrevInnhold
+import no.nav.etterlatte.brev.model.BrevInnholdVedlegg
 import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.BrevProsessType.AUTOMATISK
 import no.nav.etterlatte.brev.model.BrevProsessType.MANUELL
@@ -73,7 +74,8 @@ class VedtaksbrevService(
             prosessType = prosessType,
             soekerFnr = behandling.persongalleri.soeker.fnr.value,
             mottaker = mottaker,
-            innhold = opprettInnhold(behandling, prosessType)
+            innhold = opprettInnhold(behandling, prosessType),
+            innholdVedlegg = opprettInnholdVedlegg(behandling, prosessType)
         )
 
         return db.opprettBrev(nyttBrev)
@@ -103,12 +105,16 @@ class VedtaksbrevService(
 
     private fun opprettBrevData(brev: Brev, behandling: Behandling, brevkode: BrevDataMapper.BrevkodePar): BrevData =
         when (brev.prosessType) {
-            REDIGERBAR -> brevDataMapper.brevDataFerdigstilling(behandling, { hentLagretInnhold(brev) }, brevkode)
+            REDIGERBAR -> brevDataMapper.brevDataFerdigstilling(behandling, {
+                hentLagretInnhold(brev)
+            }, hentLagretInnholdVedlegg(brev), brevkode)
             AUTOMATISK -> brevDataMapper.brevData(behandling)
             MANUELL -> ManueltBrevData(hentLagretInnhold(brev))
         }
 
     private fun hentLagretInnhold(brev: Brev) = requireNotNull(db.hentBrevPayload(brev.id)).elements
+
+    private fun hentLagretInnholdVedlegg(brev: Brev) = requireNotNull(db.hentBrevPayloadVedlegg(brev.id))
 
     private suspend fun opprettInnhold(behandling: Behandling, prosessType: BrevProsessType): BrevInnhold {
         val tittel = "Vedtak om ${behandling.vedtak.type.name.lowercase()}"
@@ -120,6 +126,16 @@ class VedtaksbrevService(
         }
 
         return BrevInnhold(tittel, behandling.spraak, payload)
+    }
+
+    private fun opprettInnholdVedlegg(behandling: Behandling, prosessType: BrevProsessType): List<BrevInnholdVedlegg>? {
+        val vedlegg = when (prosessType) {
+            REDIGERBAR -> SlateHelper.hentInitiellPayloadVedlegg(behandling)
+            AUTOMATISK -> null
+            MANUELL -> SlateHelper.hentInitiellPayloadVedlegg(behandling)
+        }
+
+        return vedlegg
     }
 
     private fun ferdigstillHvisVedtakFattet(

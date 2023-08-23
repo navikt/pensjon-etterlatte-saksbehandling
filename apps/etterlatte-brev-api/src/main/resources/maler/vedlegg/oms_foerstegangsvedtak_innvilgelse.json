@@ -1,0 +1,24 @@
+[
+  {
+    "tittel": "Utfall ved beregning av omstillingsstønad",
+    "key": "beregning_innhold",
+    "payload": [
+      {
+        "type": "heading-two",
+        "children": [
+          {
+            "text": "Dette er en tom brevmal"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "text": "Det finnes ingen brevmal for denne sak- eller vedtakstypen."
+          }
+        ]
+      }
+    ]
+  }
+]

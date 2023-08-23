@@ -40,6 +40,7 @@ data class FoerstegangsvedtakUtfallDTO(
 }
 
 data class Beregningsinfo(
+    val innhold: List<Slate.Element>,
     val grunnbeloep: Kroner,
     val beregningsperioder: List<NyBeregningsperiode>,
     val trygdetidsperioder: List<Trygdetidsperiode>
@@ -62,13 +63,18 @@ data class InnvilgetBrevDataOMS(
 ) : BrevData() {
 
     companion object {
-        fun fra(behandling: Behandling, innhold: List<Slate.Element>): InnvilgetBrevDataOMS =
+        fun fra(
+            behandling: Behandling,
+            innhold: List<Slate.Element>,
+            innholdVedlegg: List<BrevInnholdVedlegg>
+        ): InnvilgetBrevDataOMS =
             InnvilgetBrevDataOMS(
-                utbetalingsinfo = behandling.utbetalingsinfo!!,
+                utbetalingsinfo = behandling.utbetalingsinfo,
                 avkortingsinfo = behandling.avkortingsinfo,
                 avdoed = behandling.persongalleri.avdoed,
                 etterbetalinginfo = null,
                 beregningsinfo = Beregningsinfo(
+                    innhold = innholdVedlegg.find { vedlegg -> vedlegg.key == "beregning_innhold" }?.payload!!.elements,
                     grunnbeloep = behandling.avkortingsinfo!!.grunnbeloep,
                     beregningsperioder = behandling.avkortingsinfo.beregningsperioder.map {
                         NyBeregningsperiode(

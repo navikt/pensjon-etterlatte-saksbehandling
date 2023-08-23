@@ -33,18 +33,18 @@ class GrunnlagsendringshendelseJob(
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     fun schedule(): Timer {
+        logger.info(
+            "Setter opp GrunnlagsendringshendelseJob. LeaderElection: ${leaderElection.isLeader()} " +
+                ", initialDelay: ${Duration.of(1, ChronoUnit.MINUTES).toMillis()}" +
+                ", periode: ${periode.toMinutes()}" +
+                ", minutterGamleHendelser: $minutterGamleHendelser "
+        )
         return fixedRateCancellableTimer(
             name = jobbNavn,
             initialDelay = initialDelay,
             period = periode.toMillis(),
             loggerInfo = LoggerInfo(logger = logger, loggTilSikkerLogg = false)
         ) {
-            logger.info(
-                "Setter opp GrunnlagsendringshendelseJob. LeaderElection: ${leaderElection.isLeader()} " +
-                    ", initialDelay: ${Duration.of(1, ChronoUnit.MINUTES).toMillis()}" +
-                    ", periode: ${periode.toMinutes()}" +
-                    ", minutterGamleHendelser: $minutterGamleHendelser "
-            )
             runBlocking {
                 SjekkKlareGrunnlagsendringshendelser(
                     grunnlagsendringshendelseService = grunnlagsendringshendelseService,
@@ -86,7 +86,7 @@ class GrunnlagsendringshendelseJob(
                     }
                 }
             } else {
-                log.info("Ikke leader, saa kjoerer ikke jobb: $jobbNavn.")
+                log.debug("Ikke leader, saa kjoerer ikke jobb: $jobbNavn.")
             }
         }
     }

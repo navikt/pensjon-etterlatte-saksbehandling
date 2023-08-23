@@ -62,6 +62,8 @@ spec:
       value: api://dev-gcp.etterlatte.etterlatte-grunnlag/.default
     - name: PDLTJENESTER_AZURE_SCOPE
       value: api://dev-gcp.etterlatte.etterlatte-pdltjenester/.default
+    - name: ETTERLATTE_PDLTJENESTER_URL
+      value: http://etterlatte-pdltjenester
     - name: HENDELSE_JOB_FREKVENS
       value: "1"
     - name: HENDELSE_MINUTTER_GAMLE_HENDELSER

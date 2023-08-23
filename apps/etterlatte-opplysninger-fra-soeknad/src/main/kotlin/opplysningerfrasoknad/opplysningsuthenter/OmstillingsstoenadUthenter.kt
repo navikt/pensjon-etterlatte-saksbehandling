@@ -2,7 +2,6 @@ package no.nav.etterlatte.opplysningerfrasoknad.opplysningsuthenter
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.treeToValue
-import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.AvdoedSoeknad
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.InnsenderSoeknad
@@ -30,8 +29,7 @@ internal object OmstillingsstoenadUthenter {
             samtykke(omstillingsstoenad),
             spraak(omstillingsstoenad),
             soeknadMottattDato(omstillingsstoenad),
-            soeknadsType(omstillingsstoenad),
-            personGalleri(omstillingsstoenad)
+            soeknadsType(omstillingsstoenad)
         )
     }
 
@@ -97,14 +95,5 @@ internal object OmstillingsstoenadUthenter {
 
     private fun soeknadsType(soknad: Omstillingsstoenad): Grunnlagsopplysning<SoeknadstypeOpplysning> {
         return lagOpplysning(Opplysningstype.SOEKNADSTYPE_V1, kilde(soknad), SoeknadstypeOpplysning(soknad.type), null)
-    }
-
-    private fun personGalleri(soknad: Omstillingsstoenad): Grunnlagsopplysning<Persongalleri> {
-        val opplysning = Persongalleri(
-            soeker = soknad.soeker.foedselsnummer.svar.value,
-            innsender = soknad.innsender.foedselsnummer.svar.value,
-            avdoed = listOf(soknad.avdoed.foedselsnummer.svar.value)
-        )
-        return lagOpplysning(Opplysningstype.PERSONGALLERI_V1, kilde(soknad), opplysning, null)
     }
 }

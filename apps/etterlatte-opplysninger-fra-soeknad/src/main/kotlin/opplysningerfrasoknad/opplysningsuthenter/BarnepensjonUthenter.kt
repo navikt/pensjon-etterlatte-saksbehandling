@@ -2,7 +2,6 @@ package no.nav.etterlatte.opplysningerfrasoknad.opplysningsuthenter
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.treeToValue
-import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.AvdoedSoeknad
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.InnsenderSoeknad
@@ -97,8 +96,7 @@ internal object BarnepensjonUthenter {
             samtykke(barnepensjonssoknad, Opplysningstype.SAMTYKKE),
             spraak(barnepensjonssoknad, Opplysningstype.SPRAAK),
             soeknadMottattDato(barnepensjonssoknad, Opplysningstype.SOEKNAD_MOTTATT_DATO),
-            soeknadsType(barnepensjonssoknad, Opplysningstype.SOEKNADSTYPE_V1),
-            personGalleri(barnepensjonssoknad)
+            soeknadsType(barnepensjonssoknad, Opplysningstype.SOEKNADSTYPE_V1)
         )
     }
 
@@ -253,23 +251,5 @@ internal object BarnepensjonUthenter {
         opplysningsType: Opplysningstype
     ): Grunnlagsopplysning<out SoeknadstypeOpplysning> {
         return setBehandlingsopplysninger(barnepensjon, opplysningsType, SoeknadstypeOpplysning(barnepensjon.type))
-    }
-
-    private fun personGalleri(
-        barnepensjon: Barnepensjon
-    ): Grunnlagsopplysning<out Persongalleri> {
-        return setBehandlingsopplysninger(
-            barnepensjon,
-            Opplysningstype.PERSONGALLERI_V1,
-            Persongalleri(
-                soeker = barnepensjon.soeker.foedselsnummer.svar.value,
-                innsender = barnepensjon.innsender.foedselsnummer.svar.value,
-                soesken = barnepensjon.soesken.map { it.foedselsnummer.svar.value },
-                avdoed = barnepensjon.foreldre.filter { it.type == PersonType.AVDOED }
-                    .map { it.foedselsnummer.svar.value },
-                gjenlevende = barnepensjon.foreldre.filter { it.type == PersonType.GJENLEVENDE_FORELDER }
-                    .map { it.foedselsnummer.svar.value }
-            )
-        )
     }
 }

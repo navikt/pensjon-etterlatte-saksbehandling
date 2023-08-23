@@ -203,7 +203,25 @@ class RealGrunnlagService(
             )
             lagreNyePersonopplysninger(opplysningsbehov.sakid, it.personDto.foedselsnummer.verdi, enkenPdlOpplysning)
         }
+
+        lagreNyeSaksopplysninger(
+            opplysningsbehov.sakid,
+            listOf(opplysningsbehov.persongalleri.tilGrunnlagsopplysning())
+        )
         logger.info("Oppdatert grunnlag for sak ${opplysningsbehov.sakid}")
+    }
+
+    private fun Persongalleri.tilGrunnlagsopplysning(): Grunnlagsopplysning<JsonNode> {
+        return Grunnlagsopplysning(
+            id = UUID.randomUUID(),
+            kilde = Grunnlagsopplysning.Privatperson(this.innsender!!, Tidspunkt.now()),
+            opplysningType = Opplysningstype.PERSONGALLERI_V1,
+            meta = objectMapper.createObjectNode(),
+            opplysning = this.toJsonNode(),
+            attestering = null,
+            fnr = null,
+            periode = null
+        )
     }
 
     override fun hentHistoriskForeldreansvar(sakId: Long): Grunnlagsopplysning<JsonNode>? {

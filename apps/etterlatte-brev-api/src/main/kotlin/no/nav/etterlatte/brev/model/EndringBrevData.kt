@@ -131,7 +131,7 @@ data class YrkesskadeRevurderingBrevdata(
                 yrkesskadeErDokumentert = behandling.vilkaarsvurdering.isYrkesskade(),
                 stoenadHarOekt = trygdetid(behandling.utbetalingsinfo) >
                     trygdetid(behandling.forrigeUtbetalingsinfo!!),
-                dinForelder = "<din mor/din far>"
+                dinForelder = "din forelder"
             )
         }
 

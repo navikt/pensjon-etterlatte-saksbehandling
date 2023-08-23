@@ -24,6 +24,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.POSTGRES_VERSION
 import no.nav.etterlatte.libs.database.migrate
+import no.nav.etterlatte.oppgave.OppgaveServiceFeatureToggle
 import no.nav.etterlatte.sak.SakDao
 import no.nav.etterlatte.sak.SakTilgangDao
 import no.nav.etterlatte.tilgangsstyring.AzureGroup
@@ -74,7 +75,9 @@ class OppgaveServiceNyTest {
         ).apply { migrate() }
 
         val connection = dataSource.connection
-        featureToggleService = DummyFeatureToggleService()
+        featureToggleService = DummyFeatureToggleService().also {
+            it.settBryter(OppgaveServiceFeatureToggle.EnhetFilterOppgaver, true)
+        }
         sakDao = SakDao { connection }
         oppgaveDaoNy = OppgaveDaoNyImpl { connection }
         oppgaveDaoMedEndringssporing = OppgaveDaoMedEndringssporingImpl(oppgaveDaoNy) { connection }

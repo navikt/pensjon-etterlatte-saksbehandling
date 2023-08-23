@@ -34,7 +34,6 @@ class Server(private val context: ApplicationContext) {
     }
 
     private fun featureToggleProperties(config: Config) = FeatureToggleProperties(
-        enabled = config.getString("funksjonsbrytere.enabled").toBoolean(),
         applicationName = config.getString("funksjonsbrytere.unleash.applicationName"),
         uri = URI(config.getString("funksjonsbrytere.unleash.uri")),
         cluster = config.getString("funksjonsbrytere.unleash.cluster")

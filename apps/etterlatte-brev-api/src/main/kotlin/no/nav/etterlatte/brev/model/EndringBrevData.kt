@@ -124,15 +124,17 @@ data class YrkesskadeRevurderingBrevdata(
 
     companion object {
         fun fra(behandling: Behandling): YrkesskadeRevurderingBrevdata {
-            val stonadHarOekt = behandling.utbetalingsinfo.beloep.value >
-                behandling.forrigeUtbetalingsinfo!!.beloep.value
             return YrkesskadeRevurderingBrevdata(
                 utbetalingsinfo = behandling.utbetalingsinfo,
-                stoenadHarOekt = stonadHarOekt,
+                virkningsdato = behandling.virkningsdato!!.atDay(1),
                 yrkesskadeErDokumentert = behandling.vilkaarsvurdering.isYrkesskade(),
-                virkningsdato = behandling.virkningsdato!!.atDay(1)
+                stoenadHarOekt = trygdetid(behandling.utbetalingsinfo) >
+                    trygdetid(behandling.forrigeUtbetalingsinfo!!)
             )
         }
+
+        private fun trygdetid(utbetalingsinfo: Utbetalingsinfo) =
+            utbetalingsinfo.beregningsperioder.first().trygdetid
     }
 }
 

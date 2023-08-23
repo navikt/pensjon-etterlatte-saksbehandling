@@ -116,6 +116,7 @@ data class UtAvFengselBrevdata(
 }
 
 data class YrkesskadeRevurderingBrevdata(
+    val dinForelder: String,
     val utbetalingsinfo: Utbetalingsinfo,
     val stoenadHarOekt: Boolean,
     val yrkesskadeErDokumentert: Boolean,
@@ -129,7 +130,8 @@ data class YrkesskadeRevurderingBrevdata(
                 virkningsdato = behandling.virkningsdato!!.atDay(1),
                 yrkesskadeErDokumentert = behandling.vilkaarsvurdering.isYrkesskade(),
                 stoenadHarOekt = trygdetid(behandling.utbetalingsinfo) >
-                    trygdetid(behandling.forrigeUtbetalingsinfo!!)
+                    trygdetid(behandling.forrigeUtbetalingsinfo!!),
+                dinForelder = "<din mor/din far>"
             )
         }
 

@@ -85,7 +85,7 @@ export default function RedigerbartBrev({ brev, kanRedigeres }: RedigerbartBrevP
           {vedlegg && (
             <Tabs.Tab
               value={ManueltBrevFane.REDIGER_VEDLEGG}
-              label={kanRedigeres ? 'Rediger vedlegg' : 'Innhold'}
+              label={kanRedigeres ? 'Rediger vedlegg' : 'Innhold vedlegg'}
               icon={<PencilIcon title="a11y-title" fontSize="1.5rem" />}
             />
           )}
@@ -121,7 +121,7 @@ export default function RedigerbartBrev({ brev, kanRedigeres }: RedigerbartBrevP
         </Tabs.Panel>
 
         <Tabs.Panel value={ManueltBrevFane.REDIGER_VEDLEGG}>
-          {isPendingOrInitial(hentManuellPayloadStatus) && <Spinner visible label={'Henter brevinnhold ...'} />}
+          {isPendingOrInitial(hentManuellPayloadStatus) && <Spinner visible label={'Henter innhold til vedlegg ...'} />}
           {isSuccess(hentManuellPayloadStatus) && (
             <>
               <PanelWrapper>

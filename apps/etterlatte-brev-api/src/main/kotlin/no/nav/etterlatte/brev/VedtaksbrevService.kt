@@ -132,7 +132,7 @@ class VedtaksbrevService(
         val vedlegg = when (prosessType) {
             REDIGERBAR -> SlateHelper.hentInitiellPayloadVedlegg(behandling)
             AUTOMATISK -> null
-            MANUELL -> SlateHelper.hentInitiellPayloadVedlegg(behandling)
+            MANUELL -> null
         }
 
         return vedlegg

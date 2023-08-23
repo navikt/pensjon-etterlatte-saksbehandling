@@ -9,5 +9,5 @@ class DummyFeatureToggleService : FeatureToggleService {
     fun settBryter(bryter: FeatureToggle, verdi: Boolean) = overstyrteBrytere.put(bryter, verdi)
 
     override fun isEnabled(toggleId: FeatureToggle, defaultValue: Boolean) =
-        overstyrteBrytere.getOrDefault(toggleId, true)
+        overstyrteBrytere.getOrDefault(toggleId, defaultValue)
 }

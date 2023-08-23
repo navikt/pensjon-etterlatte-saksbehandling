@@ -1,7 +1,6 @@
 package no.nav.etterlatte.behandlingfrasoknad
 
 import com.fasterxml.jackson.module.kotlin.treeToValue
-import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.AvdoedSoeknad
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.InnsenderSoeknad
@@ -112,15 +111,6 @@ internal class OpplysningsuthenterOmstillingsstoenadTest {
     fun `skal hente opplysning om soeknadstype`() {
         consumeSingle<SoeknadstypeOpplysning>(Opplysningstype.SOEKNADSTYPE_V1).apply {
             assertEquals(SoeknadType.OMSTILLINGSSTOENAD, this.type)
-        }
-    }
-
-    @Test
-    fun `skal hente opplysning om persongalleri`() {
-        consumeSingle<Persongalleri>(Opplysningstype.PERSONGALLERI_V1).apply {
-            assertEquals(soeker, "26058411891")
-            assertEquals(innsender, "03108718357")
-            assertEquals(avdoed.get(0), "22128202440")
         }
     }
 

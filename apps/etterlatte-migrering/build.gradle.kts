@@ -14,6 +14,7 @@ dependencies {
     implementation(project(":libs:etterlatte-database"))
     implementation(project(":libs:etterlatte-funksjonsbrytere"))
     implementation(project(":libs:ktor2client-onbehalfof"))
+    testImplementation(project(":libs:testdata"))
 
     implementation(libs.ktor2.servercio)
     implementation(libs.database.kotliquery)

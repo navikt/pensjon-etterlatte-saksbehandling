@@ -9,6 +9,7 @@ repositories {
 
 dependencies {
     implementation(project(":libs:saksbehandling-common"))
+    implementation(project(":libs:etterlatte-funksjonsbrytere"))
     implementation(libs.etterlatte.common)
 
     testImplementation(libs.test.jupiter.engine)

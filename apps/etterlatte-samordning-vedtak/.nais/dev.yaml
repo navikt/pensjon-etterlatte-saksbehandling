@@ -39,7 +39,30 @@ spec:
             - maskinporten
           atMaxAge: 120
           consumers:
-            - orgno: "123456789"
+            - name: SPK
+              orgno: "982583462"
+            - name: OSLO PENSJONSFORSIKRING AS
+              orgno: "982759412"
+            - name: KLP
+              orgno: "938708606"
+            - name: GABLER PENSJONSTJENESTER AS
+              orgno: "916833520"
+            - name: Storebrand Pensjonstjenester AS
+              orgno: "931936492"
+            - name: Storebrand Livsforsikring AS
+              orgno: "958995369"
+            - name: Viken
+              orgno: "974358603"
+            - name: Arendal kommunale pensjonskasse
+              orgno: "940380014"
+            - name: Elverum kommunale pensjonskasse
+              orgno: "940360293"
+            - name: Tromsø kommunale pensjonskasse
+              orgno: "814115232"
+            - name: Pensjonskassen for helseforetakene (PKH)
+              orgno: "912805174"
+            - name: NAV
+              orgno: "889640782"
   azure:
     application:
       enabled: true

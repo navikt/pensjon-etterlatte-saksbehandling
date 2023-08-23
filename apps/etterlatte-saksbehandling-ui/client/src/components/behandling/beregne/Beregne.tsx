@@ -82,6 +82,7 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
         {!beregningFraState && !isFailure(beregning) && <Spinner visible label="Laster" />}
         {isFailure(beregning) && <ApiErrorAlert>Kunne ikke hente beregning</ApiErrorAlert>}
         {beregningFraState &&
+          !opphoer &&
           {
             [Beregningstype.BP]: <BarnepensjonSammendrag behandling={behandling} beregning={beregningFraState} />,
             [Beregningstype.OMS]: (

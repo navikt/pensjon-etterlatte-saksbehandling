@@ -1,12 +1,13 @@
 import { BodyShort, Button, Heading, Label, Modal } from '@navikt/ds-react'
 import styled from 'styled-components'
 import { EyeIcon } from '@navikt/aksel-icons'
-import { useState } from 'react'
+import { useContext, useState } from 'react'
 import { OppgavetypeTag, SaktypeTag } from '~components/nyoppgavebenk/Tags'
 import { formaterFnr, formaterStringDato } from '~utils/formattering'
 import { FristWrapper } from '~components/nyoppgavebenk/Oppgavelista'
 import { isBefore } from 'date-fns'
 import { Oppgavestatus, Saktype } from '~shared/api/oppgaverny'
+import { ConfigContext } from '~clientConfig'
 
 const TagRow = styled.div`
   display: flex;
@@ -33,7 +34,6 @@ const ButtonRow = styled.div`
   gap: 1rem;
   justify-content: flex-end;
 `
-
 export const GosysOppgaveModal = (props: {
   oppgavestatus: Oppgavestatus
   fnr: string
@@ -47,7 +47,8 @@ export const GosysOppgaveModal = (props: {
 }) => {
   const [open, setOpen] = useState(false)
   const { regdato, fristdato, oppgavestatus, fnr, gjelder, enhet, saksbehandler, beskrivelse, saktype } = props
-  const gosysUrl = process.env.GOSYS_URL
+
+  const configContext = useContext(ConfigContext)
 
   return (
     <>
@@ -107,7 +108,12 @@ export const GosysOppgaveModal = (props: {
             <Button variant="tertiary" onClick={() => setOpen(false)}>
               Avbryt
             </Button>
-            <Button variant="primary" as="a" href={`${gosysUrl}/personoversikt/fnr=${fnr}`} target="_blank">
+            <Button
+              variant="primary"
+              as="a"
+              href={`${configContext['gosysUrl']}/personoversikt/fnr=${fnr}`}
+              target="_blank"
+            >
               Åpne og rediger i Gosys
             </Button>
           </ButtonRow>

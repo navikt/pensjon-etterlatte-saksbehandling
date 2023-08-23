@@ -105,3 +105,7 @@ const API_CONFIG_FROM_ENV = () => {
 }
 
 export const ApiConfig = hentApiConfigFraEnv()
+
+export const ClientConfig = {
+  gosysUrl: requireEnvValue('GOSYS_URL'),
+}

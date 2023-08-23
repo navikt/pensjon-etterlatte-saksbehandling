@@ -6,26 +6,42 @@ import { Person } from '~components/person/Person'
 import useInnloggetSaksbehandler from './shared/hooks/useInnloggetSaksbehandler'
 import nb from 'date-fns/locale/nb'
 import { registerLocale } from 'react-datepicker'
-import ErrorBoundary from '~ErrorBoundary'
+import ErrorBoundary, { ApiErrorAlert } from '~ErrorBoundary'
 import BrevOversikt from '~components/person/brev/BrevOversikt'
 import NyttBrev from '~components/person/brev/NyttBrev'
 import ScrollToTop from '~ScrollTop'
 import { ToggleNyOppgaveliste } from '~components/nyoppgavebenk/ToggleNyOppgavelist'
+import { isFailure, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
+import { useEffect } from 'react'
+import { ConfigContext, hentClientConfig } from '~clientConfig'
 
 function App() {
   const innloggetbrukerHentet = useInnloggetSaksbehandler()
   registerLocale('nb', nb)
 
+  const [hentConfigStatus, hentConfig] = useApiCall(hentClientConfig)
+
+  useEffect(() => {
+    hentConfig({})
+  }, [])
+
   return (
     <>
-      {innloggetbrukerHentet && (
+      {isSuccess(hentConfigStatus) && innloggetbrukerHentet && (
         <div className="app">
           <BrowserRouter basename="/">
             <ScrollToTop />
             <HeaderBanner />
             <ErrorBoundary>
               <Routes>
-                <Route path="/" element={<ToggleNyOppgaveliste />} />
+                <Route
+                  path="/"
+                  element={
+                    <ConfigContext.Provider value={hentConfigStatus.data}>
+                      <ToggleNyOppgaveliste />
+                    </ConfigContext.Provider>
+                  }
+                />
                 <Route path="/oppgavebenken" element={<ToggleNyOppgaveliste />} />
                 <Route path="/person/:fnr" element={<Person />} />
                 <Route path="/person/:fnr/sak/:sakId/brev" element={<BrevOversikt />} />
@@ -37,6 +53,8 @@ function App() {
           </BrowserRouter>
         </div>
       )}
+
+      {isFailure(hentConfigStatus) && <ApiErrorAlert>Kunne ikke hente konfigurasjonsverdier</ApiErrorAlert>}
     </>
   )
 }

@@ -1,6 +1,6 @@
 import express, { Request, Response } from 'express'
 import path from 'path'
-import { ApiConfig, appConf } from './config/config'
+import { ApiConfig, appConf, ClientConfig } from './config/config'
 import { authenticateUser } from './middleware/auth'
 import { mockRouter } from './routers/mockRouter'
 import { modiaRouter } from './routers/modia'
@@ -91,7 +91,9 @@ if (isDev) {
   app.use(['/api/brev', '/api/dokumenter'], tokenMiddleware(ApiConfig.brev.scope), proxy(ApiConfig.brev.url))
 }
 
-app.use(/^(?!.*\/(internal|static)\/).*$/, (req: Request, res: Response) => {
+app.get('/api/config', (_req: Request, res: Response) => res.send(ClientConfig))
+
+app.use(/^(?!.*\/(internal|static)\/).*$/, (_req: Request, res: Response) => {
   return res.sendFile(`${clientPath}/index.html`)
 })
 

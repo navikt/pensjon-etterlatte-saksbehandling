@@ -1,6 +1,7 @@
 package no.nav.etterlatte.common.klienter
 
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.typesafe.config.Config
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.respond
@@ -10,6 +11,7 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.http.fullPath
 import io.ktor.http.headersOf
 import io.ktor.serialization.jackson.jackson
+import io.mockk.mockk
 import no.nav.etterlatte.STOR_SNERK
 import no.nav.etterlatte.TRIVIELL_MIDTPUNKT
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -28,10 +30,12 @@ internal class PdlKlientTest {
 
     private val defaultHeaders = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
 
+    private val config: Config = mockk(relaxed = true)
+
     @Test
     fun `hent pdlModell skal returnere en Person`() {
         val klient = mockHttpClient(mockPerson())
-        val pdlService = PdlKlientImpl(klient, "url")
+        val pdlService = PdlKlientImpl(config, klient)
         val fnr = TRIVIELL_MIDTPUNKT
         val rolle = PersonRolle.BARN
         val resultat = pdlService.hentPdlModell(fnr.value, rolle, SakType.BARNEPENSJON)
@@ -43,7 +47,7 @@ internal class PdlKlientTest {
     @Test
     fun `skal hente doedsdato`() {
         val klient = mockHttpClient(mockPerson())
-        val pdlService = PdlKlientImpl(klient, "url")
+        val pdlService = PdlKlientImpl(config, klient)
         val fnr = TRIVIELL_MIDTPUNKT
         val rolle = PersonRolle.BARN
         val resultat = pdlService.hentPdlModell(fnr.value, rolle, SakType.BARNEPENSJON).hentDoedsdato()
@@ -55,7 +59,7 @@ internal class PdlKlientTest {
         val familierelasjon = FamilieRelasjon(ansvarligeForeldre = listOf(STOR_SNERK), barn = null, foreldre = null)
         val mockperson = mockPerson(familieRelasjon = familierelasjon)
         val klient = mockHttpClient(mockperson)
-        val pdlService = PdlKlientImpl(klient, "url")
+        val pdlService = PdlKlientImpl(config, klient)
         val fnr = TRIVIELL_MIDTPUNKT
         val rolle = PersonRolle.BARN
         val resultat = pdlService.hentPdlModell(fnr.value, rolle, SakType.BARNEPENSJON).hentAnsvarligeForeldre()
@@ -67,7 +71,7 @@ internal class PdlKlientTest {
         val familierelasjon = FamilieRelasjon(barn = listOf(STOR_SNERK), ansvarligeForeldre = null, foreldre = null)
         val mockperson = mockPerson(familieRelasjon = familierelasjon)
         val klient = mockHttpClient(mockperson)
-        val pdlService = PdlKlientImpl(klient, "url")
+        val pdlService = PdlKlientImpl(config, klient)
         val fnr = TRIVIELL_MIDTPUNKT
         val rolle = PersonRolle.BARN
         val resultat = pdlService.hentPdlModell(fnr.value, rolle, SakType.BARNEPENSJON).hentBarn()
@@ -77,7 +81,7 @@ internal class PdlKlientTest {
     @Test
     fun `skal hente geografisk tilknytning`() {
         val klient = mockHttpClient(GeografiskTilknytning(kommune = "0301", ukjent = false))
-        val pdlService = PdlKlientImpl(klient, "url")
+        val pdlService = PdlKlientImpl(config, klient)
         val fnr = TRIVIELL_MIDTPUNKT
         val resultat = pdlService.hentGeografiskTilknytning(fnr.value, SakType.BARNEPENSJON).geografiskTilknytning()
         Assertions.assertEquals("0301", resultat)
@@ -96,7 +100,7 @@ internal class PdlKlientTest {
         )
         val mockperson = mockPerson(utland = utland)
         val klient = mockHttpClient(mockperson)
-        val pdlService = PdlKlientImpl(klient, "url")
+        val pdlService = PdlKlientImpl(config, klient)
         val fnr = TRIVIELL_MIDTPUNKT
         val rolle = PersonRolle.BARN
         val resultat = pdlService.hentPdlModell(fnr.value, rolle, SakType.BARNEPENSJON).hentUtland()
@@ -108,8 +112,8 @@ internal class PdlKlientTest {
             engine {
                 addHandler { request ->
                     when (request.url.fullPath) {
-                        "/url/geografisktilknytning" -> respond(respons.toJson(), HttpStatusCode.OK, defaultHeaders)
-                        "/url/person/v2" -> respond(respons.toJson(), HttpStatusCode.OK, defaultHeaders)
+                        "/geografisktilknytning" -> respond(respons.toJson(), HttpStatusCode.OK, defaultHeaders)
+                        "/person/v2" -> respond(respons.toJson(), HttpStatusCode.OK, defaultHeaders)
                         else -> error("Unhandled ${request.url.fullPath}")
                     }
                 }

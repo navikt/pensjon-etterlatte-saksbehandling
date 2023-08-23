@@ -1,5 +1,6 @@
 package no.nav.etterlatte.grunnlagsendring.klienter
 
+import com.typesafe.config.Config
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.accept
@@ -25,9 +26,11 @@ interface GrunnlagKlient {
 }
 
 class GrunnlagKlientImpl(
-    private val grunnlagHttpClient: HttpClient,
-    private val url: String
+    config: Config,
+    private val grunnlagHttpClient: HttpClient
 ) : GrunnlagKlient {
+
+    private val url = config.getString("grunnlag.resource.url")
 
     override suspend fun leggInnNyttGrunnlag(opplysningsbehov: Opplysningsbehov) {
         return grunnlagHttpClient

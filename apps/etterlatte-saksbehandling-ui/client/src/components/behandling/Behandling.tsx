@@ -9,7 +9,7 @@ import { useBehandlingRoutes } from './BehandlingRoutes'
 import { StegMeny } from './StegMeny/stegmeny'
 import { SideMeny } from './SideMeny/SideMeny'
 import { useAppDispatch } from '~store/Store'
-import { isFailure, isPendingOrInitial, useApiCall } from '~shared/hooks/useApiCall'
+import { isFailure, isPending, isPendingOrInitial, useApiCall } from '~shared/hooks/useApiCall'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { hentVedtakSammendrag } from '~shared/api/vedtaksvurdering'
 import { useBehandling } from '~components/behandling/useBehandling'
@@ -65,10 +65,7 @@ export const Behandling = () => {
 
       {behandling && <StegMeny behandling={behandling} />}
 
-      <Spinner
-        visible={isPendingOrInitial(fetchBehandlingStatus) || isPendingOrInitial(fetchVedtakStatus)}
-        label="Laster"
-      />
+      <Spinner visible={isPendingOrInitial(fetchBehandlingStatus) || isPending(fetchVedtakStatus)} label="Laster" />
       {behandling && (
         <GridContainer>
           <MainContent>

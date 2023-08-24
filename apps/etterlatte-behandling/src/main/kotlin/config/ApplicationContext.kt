@@ -49,8 +49,6 @@ import no.nav.etterlatte.libs.sporingslogg.Sporingslogg
 import no.nav.etterlatte.oppgave.GosysOppgaveKlient
 import no.nav.etterlatte.oppgave.GosysOppgaveKlientImpl
 import no.nav.etterlatte.oppgave.GosysOppgaveServiceImpl
-import no.nav.etterlatte.oppgave.OppgaveDao
-import no.nav.etterlatte.oppgave.OppgaveServiceImpl
 import no.nav.etterlatte.oppgaveny.OppgaveDaoMedEndringssporingImpl
 import no.nav.etterlatte.oppgaveny.OppgaveDaoNyImpl
 import no.nav.etterlatte.oppgaveny.OppgaveServiceNy
@@ -128,7 +126,6 @@ class ApplicationContext(
 
     // Dao
     val hendelseDao = HendelseDao { databaseContext().activeTx() }
-    val oppgaveDao = OppgaveDao { databaseContext().activeTx() }
     val kommerBarnetTilGodeDao = KommerBarnetTilGodeDao { databaseContext().activeTx() }
     val revurderingDao = RevurderingDao { databaseContext().activeTx() }
     val behandlingDao = BehandlingDao(kommerBarnetTilGodeDao, revurderingDao) { databaseContext().activeTx() }
@@ -150,7 +147,6 @@ class ApplicationContext(
     val kanBrukeNyOppgaveliste: Boolean = env.getValue("KAN_BRUKE_NY_OPPGAVELISTE").toBoolean()
 
     // Service
-    val oppgaveService = OppgaveServiceImpl(oppgaveDao, featureToggleService)
     val oppgaveServiceNy = OppgaveServiceNy(oppgaveDaoEndringer, sakDao, kanBrukeNyOppgaveliste, featureToggleService)
     val gosysOppgaveService = GosysOppgaveServiceImpl(gosysOppgaveKlient, pdlKlient, featureToggleService)
     val behandlingService = BehandlingServiceImpl(

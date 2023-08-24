@@ -9,7 +9,7 @@ import { OPPGAVESTATUSFILTER } from '~components/nyoppgavebenk/Oppgavelistafiltr
 import { HandlingerForOppgave } from '~components/nyoppgavebenk/HandlingerForOppgave'
 import { OppgavetypeTag, SaktypeTag } from '~components/nyoppgavebenk/Tags'
 import { isBefore } from 'date-fns'
-import SaksoversiktLenke from '~components/oppgavebenken/handlinger/BrukeroversiktKnapp'
+import SaksoversiktLenke from '~components/nyoppgavebenk/SaksoversiktLenke'
 
 export const FristWrapper = styled.span<{ fristHarPassert: boolean }>`
   color: ${(p) => p.fristHarPassert && 'var(--a-text-danger)'};

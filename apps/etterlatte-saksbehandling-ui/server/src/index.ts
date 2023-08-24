@@ -67,7 +67,6 @@ if (isDev) {
     [
       '/api/behandling',
       '/api/behandlinger/:sakid/manueltopphoer',
-      '/api/oppgaver',
       '/api/personer',
       '/api/revurdering/:sakid',
       '/api/stoettederevurderinger',

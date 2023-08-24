@@ -1,7 +1,6 @@
 package no.nav.etterlatte.behandling.domain
 
 import no.nav.etterlatte.behandling.BehandlingSammendrag
-import no.nav.etterlatte.behandling.OppgaveStatus
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus.ATTESTERT
@@ -48,7 +47,6 @@ sealed class Behandling {
     open val prosesstype: Prosesstype = Prosesstype.MANUELL
 
     protected val logger: Logger = LoggerFactory.getLogger(this.javaClass.name)
-    val oppgaveStatus get() = OppgaveStatus.from(status)
 
     private val kanRedigeres: Boolean
         get() = this.status.kanEndres()

@@ -10,7 +10,6 @@ import no.nav.etterlatte.avkorting.regler.restanse
 import no.nav.etterlatte.beregning.grunnlag.GrunnlagMedPeriode
 import no.nav.etterlatte.beregning.grunnlag.PeriodisertBeregningGrunnlag
 import no.nav.etterlatte.beregning.grunnlag.mapVerdier
-import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -187,32 +186,33 @@ object AvkortingRegelkjoring {
         )
 
     fun beregnRestanse(
-        foersteMaaned: YearMonth,
-        virkningstidspunkt: Virkningstidspunkt,
+        fraOgMed: YearMonth,
+        til: YearMonth,
         tidligereYtelseEtterAvkorting: List<AvkortetYtelse>,
         nyYtelseEtterAvkorting: List<AvkortetYtelse>
     ): Restanse {
         val grunnlag = RestanseGrunnlag(
             FaktumNode(
-                verdi = tidligereYtelseEtterAvkorting.spreYtelsePerMaaned(foersteMaaned, virkningstidspunkt.dato),
+                verdi = tidligereYtelseEtterAvkorting.spreYtelsePerMaaned(fraOgMed, til),
                 kilde = tidligereYtelseEtterAvkorting.map { "avkortetYtelse:${it.id}" },
                 beskrivelse = "Ytelse etter avkorting fra tidligere beahndlinge gjeldende år"
             ),
             FaktumNode(
-                verdi = nyYtelseEtterAvkorting.spreYtelsePerMaaned(foersteMaaned, virkningstidspunkt.dato),
+                verdi = nyYtelseEtterAvkorting.spreYtelsePerMaaned(fraOgMed, til),
                 kilde = nyYtelseEtterAvkorting.map { "avkortetYtelse:${it.id}" },
                 beskrivelse = "Reberegnet ytelse etter avkorting før nytt virkningstidspunkt"
             ),
+            // TODO EY-2556 - Kan ikke være virk - må være fra og med nå
             virkningstidspunkt = FaktumNode(
-                verdi = virkningstidspunkt.dato,
-                kilde = virkningstidspunkt.kilde,
+                verdi = til,
+                kilde = "TODO",
                 beskrivelse = "Virkningstidspunkt hvor restanse skal fordeles månedlig fra"
             )
         )
 
         val resultat = restanse.eksekver(
             KonstantGrunnlag(grunnlag),
-            Periode(fom = foersteMaaned, tom = null).tilRegelPeriode()
+            Periode(fom = fraOgMed, tom = null).tilRegelPeriode()
         )
         return when (resultat) {
             is RegelkjoeringResultat.Suksess -> {
@@ -238,12 +238,12 @@ object AvkortingRegelkjoring {
     }
 
     private fun List<AvkortetYtelse>.spreYtelsePerMaaned(
-        foersteMaaned: YearMonth,
-        virkningstidspunkt: YearMonth
+        fraOgMed: YearMonth,
+        til: YearMonth
     ): List<Int> {
         val perMaaned = mutableListOf<Int>()
-        for (maanednr in foersteMaaned.monthValue..virkningstidspunkt.minusMonths(1).monthValue) {
-            val maaned = YearMonth.of(virkningstidspunkt.year, maanednr)
+        for (maanednr in fraOgMed.monthValue..til.minusMonths(1).monthValue) {
+            val maaned = YearMonth.of(til.year, maanednr)
             perMaaned.add(avkortetYtelseIMaaned(maaned).ytelseEtterAvkorting)
         }
         return perMaaned

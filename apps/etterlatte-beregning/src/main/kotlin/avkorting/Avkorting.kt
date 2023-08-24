@@ -123,8 +123,8 @@ data class Avkorting(
             avkortingGrunnlag = listOf(avkortingGrunnlag.last().copy(periode = fraFoersteMaaned))
         )
 
-
-        val periodeFoerVirk = Periode(fom = ytelseFoerAvkorting.first().periode.fom, tom = virkningstidspunkt.dato.minusMonths(1))
+        val periodeFoerVirk =
+            Periode(fom = ytelseFoerAvkorting.first().periode.fom, tom = virkningstidspunkt.dato.minusMonths(1))
         val reberegnetYtelseFoerVirk = AvkortingRegelkjoring.beregnAvkortetYtelse(
             periodeFoerVirk,
             ytelseFoerAvkorting,
@@ -134,7 +134,7 @@ data class Avkorting(
 
         val restanse = AvkortingRegelkjoring.beregnRestanse(
             this.foersteMaanedDetteAar(),
-            virkningstidspunkt,
+            virkningstidspunkt.dato,
             this.aarsoppgjoer.tidligereAvkortetYtelse,
             reberegnetYtelseFoerVirk,
         )
@@ -149,7 +149,8 @@ data class Avkorting(
         return this.copy(
             aarsoppgjoer = this.aarsoppgjoer.copy(
                 ytelseFoerAvkorting = ytelseFoerAvkorting,
-                avkortingsperioder = avkortingHeleAaret,
+                avkortingsperioder = avkortingHeleAaret, // TODO ikke bruke hele året men brukt tidliger
+                // TODO avkortingsperioderReberegnet
                 tidligereAvkortetYtelseReberegnet = reberegnetYtelseFoerVirk,
                 restanse = restanse
             ),
@@ -168,18 +169,48 @@ data class Avkorting(
         )
 
         val avkortetYtelseFraVirk = AvkortingRegelkjoring.beregnAvkortetYtelse(
-            Periode(fom = this.foersteMaanedDetteAar(), tom = null),
+            Periode(fom = virkningstidspunkt.dato, tom = YearMonth.now()), // TODO EY-2556
             ytelseFoerAvkorting,
             avkortinger
+        )
+
+        val avkortingerSisteInntekt = AvkortingRegelkjoring.beregnInntektsavkorting(
+            Periode(fom = this.foersteMaanedDetteAar(), tom = null),
+            avkortingGrunnlag = listOf(
+                avkortingGrunnlag.last().copy(periode = Periode(fom = this.foersteMaanedDetteAar(), tom = null))
+            )
+        )
+        val reberegnetMedSisteInntekt = AvkortingRegelkjoring.beregnAvkortetYtelse(
+            Periode(fom = this.foersteMaanedDetteAar(), tom = null),
+            ytelseFoerAvkorting,
+            avkortingerSisteInntekt,
+            type = AvkortetYtelseType.REBEREGNET
+        )
+
+        val allAvkortetYtelse =  this.aarsoppgjoer.tidligereAvkortetYtelse.filter {
+            it.periode.fom < virkningstidspunkt.dato
+        } + avkortetYtelseFraVirk
+        val restanse = AvkortingRegelkjoring.beregnRestanse(
+            this.foersteMaanedDetteAar(),
+            YearMonth.now().plusMonths(1),
+            allAvkortetYtelse, // TODO Navngivning
+            reberegnetMedSisteInntekt,
+        )
+
+        val avkortetYtelseFraNaa = AvkortingRegelkjoring.beregnAvkortetYtelse(
+            Periode(fom = YearMonth.now().plusMonths(1), tom = null), // TODO EY-2556
+            ytelseFoerAvkorting,
+            avkortinger,
+            restanse
         )
 
         return this.copy(
             aarsoppgjoer = this.aarsoppgjoer.copy(
                 ytelseFoerAvkorting = ytelseFoerAvkorting,
                 avkortingsperioder = avkortinger,
-                // tidligereAvkortetYtelseReberegnet =
+                tidligereAvkortetYtelseReberegnet = reberegnetMedSisteInntekt
             ),
-            avkortetYtelse = avkortetYtelseFraVirk
+            avkortetYtelse = avkortetYtelseFraVirk + avkortetYtelseFraNaa
         )
     }
 
@@ -189,7 +220,7 @@ data class Avkorting(
         saksbehandler: String
     ): Avkorting {
 
-        val skalReberegnes = avkortetYtelse.find { it.id == avkortetYtelseId } ?: throw Exception("hoho")
+        val skalReberegnes = avkortetYtelse.find { it.id == avkortetYtelseId } ?: throw Exception("hoho") // TODO
 
         val reberegnetYtelseIPeriode = AvkortingRegelkjoring.beregnAvkortetYtelse(
             skalReberegnes.periode,
@@ -204,9 +235,31 @@ data class Avkorting(
                 regelResultat = null
             )
         )
+        val avkortetYtelse = avkortetYtelse.filter { it.id != avkortetYtelseId } + reberegnetYtelseIPeriode
+        val utenSisteFraOgMed = avkortetYtelse.filter { it.periode.fom != YearMonth.now().plusMonths(1) } // TODO EY-2556
+
+        val allAvkortetYtelse =  this.aarsoppgjoer.tidligereAvkortetYtelse.filter {
+            it.periode.fom < YearMonth.of(2023, 7) // TODO EY-2523 Virk
+        } + utenSisteFraOgMed
+        val restanse = AvkortingRegelkjoring.beregnRestanse(
+            this.foersteMaanedDetteAar(),
+            YearMonth.now().plusMonths(1),
+            allAvkortetYtelse, // TODO Navngivning
+            this.aarsoppgjoer.tidligereAvkortetYtelseReberegnet,
+        )
+
+        val avkortetYtelseFraNaa = AvkortingRegelkjoring.beregnAvkortetYtelse(
+            Periode(fom = YearMonth.now().plusMonths(1), tom = null), // TODO EY-2556
+            aarsoppgjoer.ytelseFoerAvkorting,
+            aarsoppgjoer.avkortingsperioder,
+            restanse
+        )
 
         return this.copy(
-            avkortetYtelse = avkortetYtelse.filter { it.id != avkortetYtelseId } + reberegnetYtelseIPeriode
+            avkortetYtelse = utenSisteFraOgMed + avkortetYtelseFraNaa,
+            aarsoppgjoer = this.aarsoppgjoer.copy(
+                restanse = restanse
+            )
         )
     }
 
@@ -227,6 +280,7 @@ data class AvkortingGrunnlag(
 data class Aarsoppgjoer(
     val ytelseFoerAvkorting: List<YtelseFoerAvkorting> = emptyList(),
     val avkortingsperioder: List<Avkortingsperiode> = emptyList(),
+    // TODO avkortingsperioderSisteInntekt / reberegnet
     val tidligereAvkortetYtelse: List<AvkortetYtelse> = emptyList(),
     val tidligereAvkortetYtelseReberegnet: List<AvkortetYtelse> = emptyList(),
     val restanse: Restanse? = null,
@@ -251,6 +305,7 @@ data class Restanse(
     val id: UUID,
     val totalRestanse: Int,
     val fordeltRestanse: Int,
+    // TODO fra og med dato? antall gjenværende?
     val tidspunkt: Tidspunkt,
     val regelResultat: JsonNode?,
     val kilde: Grunnlagsopplysning.Kilde,

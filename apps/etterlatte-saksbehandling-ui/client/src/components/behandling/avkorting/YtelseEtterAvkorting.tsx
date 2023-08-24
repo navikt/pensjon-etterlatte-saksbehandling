@@ -8,6 +8,8 @@ import { YtelseEtterAvkortingDetaljer } from '~components/behandling/avkorting/Y
 import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { lagreManuellRestanse } from '~shared/api/avkorting'
+import { hentBehandlesFraStatus } from '~components/behandling/felles/utils'
+import { IBehandlingsType } from '~shared/types/IDetaljertBehandling'
 
 export const YtelseEtterAvkorting = (props: {
   ytelser: IAvkortetYtelse[]
@@ -36,7 +38,7 @@ export const YtelseEtterAvkorting = (props: {
     const vedtak = props.behandling.vedtak?.datoAttestert
     const virkningstidspunkt = props.behandling.virkningstidspunkt?.dato
     if (!virkningstidspunkt) throw new Error('Mangler virkningstidspunkt')
-    return new Date(virkningstidspunkt).getTime() < (vedtak ? new Date(vedtak) : new Date()).getTime()
+    return new Date(virkningstidspunkt).getTime() < (vedtak ? new Date(vedtak) : new Date()).getTime() // TODO EY-2556
   }
 
   return (
@@ -50,7 +52,11 @@ export const YtelseEtterAvkorting = (props: {
             <Table.Header>
               <Table.Row>
                 <Table.HeaderCell />
-                {erTilbakeITid() ? <Table.HeaderCell>Type</Table.HeaderCell> : ''}
+                {props.behandling.behandlingType === IBehandlingsType.REVURDERING && erTilbakeITid() ? (
+                  <Table.HeaderCell>Type</Table.HeaderCell>
+                ) : (
+                  ''
+                )}
                 <Table.HeaderCell>Periode</Table.HeaderCell>
                 <Table.HeaderCell>Avkorting</Table.HeaderCell>
                 <Table.HeaderCell>Restanse</Table.HeaderCell>
@@ -64,18 +70,18 @@ export const YtelseEtterAvkorting = (props: {
                 return (
                   <>
                     <YtelseRad
-                      key={ytelse.type + '-' + key}
-                      radKey={ytelse.type + '-' + key}
-                      erTilbakeITid={erTilbakeITid()}
+                      key={key}
                       ytelse={ytelse}
+                      behandlingTilbakeITid={erTilbakeITid()}
+                      behandling={props.behandling}
                       submit={submitRestanse}
                     />
-                    {erTilbakeITid() ? (
+                    {erTilbakeITid() && tidligereYtelse ? (
                       <YtelseRad
-                        key={tidligereYtelse!.type + '-' + key}
-                        radKey={tidligereYtelse!.type + '-' + key}
-                        erTilbakeITid={true}
+                        key={key}
                         ytelse={tidligereYtelse!}
+                        behandlingTilbakeITid={true}
+                        behandling={props.behandling}
                         submit={submitRestanse}
                       />
                     ) : (
@@ -93,23 +99,31 @@ export const YtelseEtterAvkorting = (props: {
 }
 
 const YtelseRad = (props: {
-  radKey: string
-  erTilbakeITid: boolean
   ytelse: IAvkortetYtelse
+  behandlingTilbakeITid: boolean
+  behandling: IBehandlingReducer
   submit: (avkortetYtelseId: string, nyRestanse: number) => void
 }) => {
-  const { radKey, erTilbakeITid, ytelse } = props
+  const { ytelse, behandlingTilbakeITid, behandling } = props
   const [manuellRestanse, setManuellRestanse] = useState<number>(ytelse.restanse)
+
+  const redigerbar = hentBehandlesFraStatus(behandling.status)
+  const erRevurdering = behandling.behandlingType === IBehandlingsType.REVURDERING
+  const erNyAvkortetYtelse = ytelse.type.toUpperCase() === 'NY'
+  const periodeErTilbakeITid = new Date(ytelse.fom) < new Date() // TODO EY-2556
+  const restanseRedigerbart =
+    erRevurdering && redigerbar && behandlingTilbakeITid && erNyAvkortetYtelse && periodeErTilbakeITid
+
   const restanseIKroner = ytelse.restanse < 0 ? `+ ${NOK(ytelse.restanse * -1)}` : `- ${NOK(ytelse.restanse)}`
   return (
-    <Table.ExpandableRow key={radKey} shadeOnHover={false} content={<YtelseEtterAvkortingDetaljer ytelse={ytelse} />}>
-      {erTilbakeITid ? <Table.DataCell>{ytelse.type}</Table.DataCell> : ''}
+    <Table.ExpandableRow shadeOnHover={false} content={<YtelseEtterAvkortingDetaljer ytelse={ytelse} />}>
+      {erRevurdering && behandlingTilbakeITid ? <Table.DataCell>{ytelse.type}</Table.DataCell> : ''}
       <Table.DataCell>
         {formaterStringDato(ytelse.fom)} - {ytelse.tom ? formaterStringDato(ytelse.tom) : ''}
       </Table.DataCell>
       <Table.DataCell>{NOK(ytelse.avkortingsbeloep)}</Table.DataCell>
       <Table.DataCell>
-        {erTilbakeITid && ytelse.type.toUpperCase() === 'NY' ? (
+        {restanseRedigerbart ? (
           <>
             <TextField
               label={''}
@@ -120,7 +134,7 @@ const YtelseRad = (props: {
               value={manuellRestanse}
               onChange={(e) => setManuellRestanse(Number(e.target.value))}
             />
-            <button onClick={() => props.submit(ytelse.id, manuellRestanse)}>test</button>
+            <button onClick={() => props.submit(ytelse.id, manuellRestanse)}>Lagre</button>
           </>
         ) : (
           restanseIKroner

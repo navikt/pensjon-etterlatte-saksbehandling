@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { isFailure, isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
-import { redigerFristApi } from '~shared/api/oppgaverny'
+import { Oppgavetype, redigerFristApi } from '~shared/api/oppgaverny'
 import { Alert, Button, Heading, Modal, DatePicker, Label } from '@navikt/ds-react'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { formaterStringDato } from '~utils/formattering'
@@ -24,11 +24,11 @@ export const FristHandlinger = (props: {
   orginalFrist: string
   oppgaveId: string
   oppgaveVersjon: string | null
-  type: string
+  type: Oppgavetype
   hentOppgaver: () => void
   erRedigerbar: boolean
 }) => {
-  const { orginalFrist, oppgaveId, hentOppgaver, erRedigerbar, oppgaveVersjon } = props
+  const { orginalFrist, oppgaveId, hentOppgaver, erRedigerbar, oppgaveVersjon, type } = props
   const [open, setOpen] = useState(false)
   const [frist, setFrist] = useState<string>()
   const [nyFrist, setnyFrist] = useState<Date>(new Date())

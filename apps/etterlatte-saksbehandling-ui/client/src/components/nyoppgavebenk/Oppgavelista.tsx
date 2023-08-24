@@ -89,7 +89,7 @@ export const Oppgavelista = (props: {
                     gjelder,
                     versjon,
                   }) => {
-                    const erRedigerbar = erOppgaveRedigerbar(status, type)
+                    const erRedigerbar = erOppgaveRedigerbar(status)
 
                     return (
                       <Table.Row key={id}>

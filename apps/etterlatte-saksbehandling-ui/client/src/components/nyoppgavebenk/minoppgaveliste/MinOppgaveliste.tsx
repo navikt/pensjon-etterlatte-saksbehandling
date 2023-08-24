@@ -60,9 +60,9 @@ export const MinOppgaveliste = (props: { oppgaver: ReadonlyArray<OppgaveDTOny>; 
                     referanse,
                     beskrivelse,
                     gjelder,
-                       versjon
+                    versjon,
                   }) => {
-                    const erRedigerbar = erOppgaveRedigerbar(status, type)
+                    const erRedigerbar = erOppgaveRedigerbar(status)
                     return (
                       <Table.Row key={id}>
                         <Table.HeaderCell>{formaterStringDato(opprettet)}</Table.HeaderCell>
@@ -73,6 +73,7 @@ export const MinOppgaveliste = (props: { oppgaver: ReadonlyArray<OppgaveDTOny>; 
                             hentOppgaver={hentOppgaver}
                             erRedigerbar={erRedigerbar}
                             oppgaveVersjon={versjon}
+                            type={type}
                           />
                         </Table.DataCell>
                         <Table.DataCell>
@@ -95,7 +96,8 @@ export const MinOppgaveliste = (props: { oppgaver: ReadonlyArray<OppgaveDTOny>; 
                               sakId={sakId}
                               hentOppgaver={hentOppgaver}
                               erRedigerbar={erRedigerbar}
-                              oppgaveVersjon={versjon}
+                              versjon={versjon}
+                              type={type}
                             />
                           )}
                         </Table.DataCell>

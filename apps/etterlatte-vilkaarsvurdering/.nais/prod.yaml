@@ -78,6 +78,7 @@ spec:
         - application: etterlatte-behandling
         - application: etterlatte-vilkaarsvurdering-kafka
         - application: etterlatte-trygdetid
+        - application: etterlatte-brev-api
     outbound:
       rules:
         - application: etterlatte-behandling

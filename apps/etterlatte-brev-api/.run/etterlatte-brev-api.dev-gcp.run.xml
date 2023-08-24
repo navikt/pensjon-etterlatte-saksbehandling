@@ -18,6 +18,10 @@
       <env name="ETTERLATTE_PROXY_URL" value="http://host.docker.internal:9091" />
       <env name="ETTERLATTE_VEDTAK_CLIENT_ID" value="069b1b2c-0a06-4cc9-8418-f100b8ff71be" />
       <env name="ETTERLATTE_VEDTAK_URL" value="https://etterlatte-vedtaksvurdering.intern.dev.nav.no" />
+      <env name="ETTERLATTE_TRYGDETID_CLIENT_ID" value="8385435e-f3d7-45ec-be59-ebd1c71df735" />
+      <env name="ETTERLATTE_TRYGDETID_URL" value="https://etterlatte-trygdetid.intern.dev.nav.no" />
+      <env name="ETTERLATTE_VILKAARSVURDERING_CLIENT_ID" value="dev-gcp.etterlatte.etterlatte-vilkaarsvurdering" />
+      <env name="ETTERLATTE_VILKAARSVURDERING_URL" value="http://etterlatte-vilkaarsvurdering.intern.dev.nav.no" />
       <env name="HTTP_PORT" value="8084" />
       <env name="LOGBACK_APPENDER" value="STDOUT" />
       <env name="KAFKA_BOOTSTRAP_SERVERS" value="host.docker.internal:9092" />
@@ -37,6 +41,7 @@
       <env name="DB_HOST" value="host.docker.internal" />
       <env name="DB_PASSWORD" value="postgres" />
       <env name="DB_PORT" value="5435" />
+      <env name="NAIS_CLUSTER_NAME" value="dev-gcp" />
     </envs>
     <option name="MAIN_CLASS_NAME" value="no.nav.etterlatte.ApplicationKt" />
     <module name="pensjon-etterlatte-saksbehandling.apps.etterlatte-brev-api.main" />

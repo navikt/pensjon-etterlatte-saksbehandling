@@ -10,6 +10,8 @@ installert.
 
 ## Hvordan kjøre en eller flere apper
 
+Forutsetning: Man må installere pluginen [EnvFile](https://plugins.jetbrains.com/plugin/7861-envfile) i IntelliJ.
+
 Det enkleste er å kjøre opp frontend og valgfri backend med docker compose som starter alt man trenger for at APIet skal
 fungere.
 

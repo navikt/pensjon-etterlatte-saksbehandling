@@ -1,5 +1,6 @@
 package no.nav.etterlatte.common.klienter
 
+import com.typesafe.config.Config
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.post
@@ -28,10 +29,8 @@ interface PdlKlient {
     fun hentFolkeregisterIdenterForAktoerIdBolk(aktoerIds: Set<String>): Map<String, String?>
 }
 
-class PdlKlientImpl(
-    private val pdl_app: HttpClient,
-    private val url: String
-) : PdlKlient {
+class PdlKlientImpl(config: Config, private val pdl_app: HttpClient) : PdlKlient {
+    private val url = config.getString("pdltjenester.url")
 
     companion object {
         val logger: Logger = LoggerFactory.getLogger(PdlKlientImpl::class.java)

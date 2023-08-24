@@ -96,7 +96,12 @@ abstract class BehandlingIntegrationTest {
                 put("OPPGAVE_URL", "http://localhost")
                 put("OPPGAVE_SCOPE", "scope")
             }.let { Miljoevariabler(it) },
-            config = ConfigFactory.parseMap(hoconApplicationConfig.toMap()),
+            config = ConfigFactory.parseMap(
+                hoconApplicationConfig.toMap() + mapOf(
+                    "pdltjenester.url" to "http://localhost",
+                    "grunnlag.resource.url" to "http://localhost"
+                )
+            ),
             rapid = TestProdusent(),
             featureToggleService = DummyFeatureToggleService(),
             pdlHttpClient = pdlHttpClient(),

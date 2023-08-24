@@ -140,9 +140,9 @@ class ApplicationContext(
     val migreringRepository = MigreringRepository { databaseContext().activeTx() }
 
     // Klient
-    val pdlKlient = PdlKlientImpl(pdlHttpClient, "http://etterlatte-pdltjenester")
+    val pdlKlient = PdlKlientImpl(config, pdlHttpClient)
     val skjermingKlient = SkjermingKlient(skjermingHttpKlient, env.getValue("SKJERMING_URL"))
-    val grunnlagKlient = GrunnlagKlientImpl(grunnlagHttpClient, "http://etterlatte-grunnlag")
+    val grunnlagKlient = GrunnlagKlientImpl(config, grunnlagHttpClient)
     val leaderElectionKlient = LeaderElection(env.getValue("ELECTOR_PATH"), leaderElectionHttpClient)
 
     val behandlingsHendelser = BehandlingsHendelserKafkaProducerImpl(rapid)

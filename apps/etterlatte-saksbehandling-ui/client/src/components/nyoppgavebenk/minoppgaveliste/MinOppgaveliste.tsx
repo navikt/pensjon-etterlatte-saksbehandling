@@ -6,10 +6,10 @@ import { FristHandlinger } from '~components/nyoppgavebenk/minoppgaveliste/Frist
 import React, { useState } from 'react'
 import { HandlingerForOppgave } from '~components/nyoppgavebenk/HandlingerForOppgave'
 import { OppgavetypeTag, SaktypeTag } from '~components/nyoppgavebenk/Tags'
-import SaksoversiktLenke from '~components/oppgavebenken/handlinger/BrukeroversiktKnapp'
 import { PaginationWrapper } from '~components/nyoppgavebenk/Oppgavelista'
 import { OPPGAVESTATUSFILTER } from '~components/nyoppgavebenk/Oppgavelistafiltre'
 import { HeaderPadding } from '~components/nyoppgavebenk/Oppgavelista'
+import SaksoversiktLenke from '~components/nyoppgavebenk/SaksoversiktLenke'
 
 export const MinOppgaveliste = (props: { oppgaver: ReadonlyArray<OppgaveDTOny>; hentOppgaver: () => void }) => {
   const { oppgaver, hentOppgaver } = props

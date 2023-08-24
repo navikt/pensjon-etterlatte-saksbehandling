@@ -47,8 +47,6 @@ class SakOgBehandlingService(
         val grunnlag = async { grunnlagKlient.hentGrunnlag(sakId, brukerTokenInfo) }
         val sak = async { behandlingKlient.hentSak(sakId, brukerTokenInfo) }
         val innvilgelsesdato = { async { vedtaksvurderingKlient.hentInnvilgelsesdato(sakId, brukerTokenInfo) } }
-        val sisteIverksatteBehandlingId =
-            async { behandlingKlient.hentSisteIverksatteBehandling(sakId, brukerTokenInfo).id }
         val vilkaarsvurdering = async { vilkaarsvurderingKlient.hentVilkaarsvurdering(behandlingId, brukerTokenInfo) }
 
         mapBehandling(
@@ -57,7 +55,6 @@ class SakOgBehandlingService(
             sak.await(),
             innvilgelsesdato,
             vilkaarsvurdering.await(),
-            sisteIverksatteBehandlingId,
             brukerTokenInfo
         )
     }
@@ -68,27 +65,15 @@ class SakOgBehandlingService(
         sak: Sak,
         innvilgelsesdato: () -> Deferred<LocalDate?>,
         vilkaarsvurdering: VilkaarsvurderingDto,
-        sisteIverksatteBehandlingId: Deferred<UUID>,
         brukerTokenInfo: BrukerTokenInfo
     ): Behandling {
         val innloggetSaksbehandlerIdent = brukerTokenInfo.ident()
-
         val ansvarligEnhet = vedtak.vedtakFattet?.ansvarligEnhet ?: sak.enhet
         val saksbehandlerIdent = vedtak.vedtakFattet?.ansvarligSaksbehandler ?: innloggetSaksbehandlerIdent
         val attestantIdent = vedtak.vedtakFattet?.let { vedtak.attestasjon?.attestant ?: innloggetSaksbehandlerIdent }
 
         val datoInnvilgelse = if (vedtak.behandling.revurderingInfo != null) {
             innvilgelsesdato().await()
-        } else {
-            null
-        }
-
-        val forrigeUtbetalingsinfo = if (vedtak.behandling.type == BehandlingType.REVURDERING) {
-            finnUtbetalingsinfo(
-                sisteIverksatteBehandlingId.await(),
-                vedtak.virkningstidspunkt,
-                brukerTokenInfo
-            )
         } else {
             null
         }
@@ -113,7 +98,7 @@ class SakOgBehandlingService(
                 attestantIdent
             ),
             utbetalingsinfo = finnUtbetalingsinfo(vedtak.behandling.id, vedtak.virkningstidspunkt, brukerTokenInfo),
-            forrigeUtbetalingsinfo = forrigeUtbetalingsinfo,
+            forrigeUtbetalingsinfo = finnForrigeUbetalingsinfo(vedtak, sak, brukerTokenInfo),
             avkortingsinfo = finnYtelseMedGrunnlag(
                 vedtak.behandling.id,
                 vedtak.sak.sakType,
@@ -132,6 +117,25 @@ class SakOgBehandlingService(
             ),
             vilkaarsvurdering = vilkaarsvurdering
         )
+    }
+
+    private suspend fun SakOgBehandlingService.finnForrigeUbetalingsinfo(
+        vedtak: VedtakDto,
+        sak: Sak,
+        brukerTokenInfo: BrukerTokenInfo
+    ): Utbetalingsinfo? {
+        val forrigeUtbetalingsinfo = when (vedtak.behandling.type) {
+            BehandlingType.REVURDERING -> {
+                val sisteIverksatteBehandling = behandlingKlient.hentSisteIverksatteBehandling(sak.id, brukerTokenInfo)
+                finnUtbetalingsinfo(
+                    sisteIverksatteBehandling.id,
+                    vedtak.virkningstidspunkt,
+                    brukerTokenInfo
+                )
+            }
+            else -> null
+        }
+        return forrigeUtbetalingsinfo
     }
 
     private suspend fun finnUtbetalingsinfo(

@@ -365,6 +365,24 @@ class GosysOppgaveKlientTest : GosysOppgaveKlient {
     ): GosysOppgaver {
         return GosysOppgaver(0, emptyList())
     }
+
+    override suspend fun tildelOppgaveTilSaksbehandler(
+        oppgaveId: String,
+        oppgaveVersjon: Long,
+        tildeles: String,
+        brukerTokenInfo: BrukerTokenInfo
+    ) {
+        // NO-OP
+    }
+
+    override suspend fun endreFrist(
+        oppgaveId: String,
+        oppgaveVersjon: Long,
+        nyFrist: LocalDate,
+        brukerTokenInfo: BrukerTokenInfo
+    ) {
+        // NO-OP
+    }
 }
 
 class Norg2KlientTest : Norg2Klient {

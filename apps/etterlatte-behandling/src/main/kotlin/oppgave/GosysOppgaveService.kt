@@ -12,6 +12,18 @@ import java.time.LocalTime
 
 interface GosysOppgaveService {
     suspend fun hentOppgaver(brukerTokenInfo: BrukerTokenInfo): List<GosysOppgave>
+    suspend fun tildelOppgaveTilSaksbehandler(
+        oppgaveId: String,
+        oppgaveVersjon: Long,
+        tilordnes: String,
+        brukerTokenInfo: BrukerTokenInfo
+    )
+    suspend fun endreFrist(
+        oppgaveId: String,
+        oppgaveVersjon: Long,
+        nyFrist: Tidspunkt,
+        brukerTokenInfo: BrukerTokenInfo
+    )
 }
 
 class GosysOppgaveServiceImpl(
@@ -38,6 +50,24 @@ class GosysOppgaveServiceImpl(
         }
 
         return gosysOppgaver.oppgaver.map { it.fraGosysOppgaveTilNy(fnrByAktoerId) }
+    }
+
+    override suspend fun tildelOppgaveTilSaksbehandler(
+        oppgaveId: String,
+        oppgaveVersjon: Long,
+        tilordnes: String,
+        brukerTokenInfo: BrukerTokenInfo
+    ) {
+        gosysOppgaveKlient.tildelOppgaveTilSaksbehandler(oppgaveId, oppgaveVersjon, tilordnes, brukerTokenInfo)
+    }
+
+    override suspend fun endreFrist(
+        oppgaveId: String,
+        oppgaveVersjon: Long,
+        nyFrist: Tidspunkt,
+        brukerTokenInfo: BrukerTokenInfo
+    ) {
+        gosysOppgaveKlient.endreFrist(oppgaveId, oppgaveVersjon, nyFrist.toLocalDate(), brukerTokenInfo)
     }
 
     companion object {

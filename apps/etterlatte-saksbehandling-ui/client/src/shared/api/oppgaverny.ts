@@ -18,6 +18,7 @@ export interface OppgaveDTOny {
   // GOSYS-spesifikt
   beskrivelse: string | null
   gjelder: string | null
+  versjon: string | null
 }
 
 export type Saktype = 'BARNEPENSJON' | 'OMSTILLINGSSTOENAD'
@@ -33,37 +34,70 @@ export type Oppgavetype =
   | 'UNDERKJENT'
   | 'GOSYS'
 
-export const erOppgaveRedigerbar = (status: Oppgavestatus, type: string): boolean =>
-  ['NY', 'UNDER_BEHANDLING'].includes(status) && !['GOSYS'].includes(type)
+export const erOppgaveRedigerbar = (status: Oppgavestatus): boolean => ['NY', 'UNDER_BEHANDLING'].includes(status)
 
 export const hentNyeOppgaver = async (): Promise<ApiResponse<OppgaveDTOny[]>> => apiClient.get('/nyeoppgaver')
 
 export interface SaksbehandlerEndringDto {
   saksbehandler: string
+  versjon: string | null
 }
 
 export const tildelSaksbehandlerApi = async (args: {
   oppgaveId: string
+  type: string
   nysaksbehandler: SaksbehandlerEndringDto
-}): Promise<ApiResponse<void>> =>
-  apiClient.post(`/nyeoppgaver/${args.oppgaveId}/tildel-saksbehandler`, { ...args.nysaksbehandler })
+}): Promise<ApiResponse<void>> => {
+  if (args.type == 'GOSYS') {
+    return apiClient.post(`/nyeoppgaver/gosys/${args.oppgaveId}/tildel-saksbehandler`, { ...args.nysaksbehandler })
+  } else {
+    return apiClient.post(`/nyeoppgaver/${args.oppgaveId}/tildel-saksbehandler`, { ...args.nysaksbehandler })
+  }
+}
 
 export const byttSaksbehandlerApi = async (args: {
   oppgaveId: string
+  type: string
   nysaksbehandler: SaksbehandlerEndringDto
-}): Promise<ApiResponse<void>> =>
-  apiClient.post(`/nyeoppgaver/${args.oppgaveId}/bytt-saksbehandler`, { ...args.nysaksbehandler })
+}): Promise<ApiResponse<void>> => {
+  if (args.type == 'GOSYS') {
+    return apiClient.post(`/nyeoppgaver/gosys/${args.oppgaveId}/tildel-saksbehandler`, { ...args.nysaksbehandler })
+  } else {
+    return apiClient.post(`/nyeoppgaver/${args.oppgaveId}/bytt-saksbehandler`, { ...args.nysaksbehandler })
+  }
+}
 
-export const fjernSaksbehandlerApi = async (args: { oppgaveId: string; sakId: number }): Promise<ApiResponse<void>> =>
-  apiClient.delete(`/nyeoppgaver/${args.oppgaveId}/saksbehandler`)
+export const fjernSaksbehandlerApi = async (args: {
+  oppgaveId: string
+  sakId: number
+  type: string
+  versjon: string | null
+}): Promise<ApiResponse<void>> => {
+  if (args.type == 'GOSYS') {
+    return apiClient.post(`/nyeoppgaver/gosys/${args.oppgaveId}/tildel-saksbehandler`, {
+      saksbehandler: '',
+      versjon: args.versjon,
+    })
+  } else {
+    return apiClient.delete(`/nyeoppgaver/${args.oppgaveId}/saksbehandler`)
+  }
+}
 
 export interface RedigerFristRequest {
   frist: Date
+  versjon: string | null
 }
 export const redigerFristApi = async (args: {
   oppgaveId: string
+  type: string
   redigerFristRequest: RedigerFristRequest
-}): Promise<ApiResponse<void>> => apiClient.put(`/nyeoppgaver/${args.oppgaveId}/frist`, { ...args.redigerFristRequest })
+}): Promise<ApiResponse<void>> => {
+  if (args.type == 'GOSYS') {
+    return apiClient.post(`/nyeoppgaver/gosys/${args.oppgaveId}/endre-frist`, { ...args.redigerFristRequest })
+  } else {
+    return apiClient.put(`/nyeoppgaver/${args.oppgaveId}/frist`, { ...args.redigerFristRequest })
+  }
+}
 
 export const hentOppgaveForBehandlingUnderBehandling = async (args: {
   behandlingId: string

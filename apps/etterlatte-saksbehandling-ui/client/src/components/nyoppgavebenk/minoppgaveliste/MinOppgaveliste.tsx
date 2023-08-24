@@ -60,6 +60,7 @@ export const MinOppgaveliste = (props: { oppgaver: ReadonlyArray<OppgaveDTOny>; 
                     referanse,
                     beskrivelse,
                     gjelder,
+                    versjon,
                   }) => (
                     <Table.Row key={id}>
                       <Table.HeaderCell>{formaterStringDato(opprettet)}</Table.HeaderCell>
@@ -68,6 +69,7 @@ export const MinOppgaveliste = (props: { oppgaver: ReadonlyArray<OppgaveDTOny>; 
                           status={status}
                           orginalFrist={frist}
                           oppgaveId={id}
+                          oppgaveVersjon={versjon}
                           type={type}
                           hentOppgaver={hentOppgaver}
                         />
@@ -92,6 +94,7 @@ export const MinOppgaveliste = (props: { oppgaver: ReadonlyArray<OppgaveDTOny>; 
                             oppgaveId={id}
                             sakId={sakId}
                             type={type}
+                            versjon={versjon}
                             hentOppgaver={hentOppgaver}
                           />
                         )}

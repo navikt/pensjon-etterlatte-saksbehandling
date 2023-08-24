@@ -19,8 +19,10 @@ import no.nav.etterlatte.libs.common.OPPGAVEID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.behandlingsId
 import no.nav.etterlatte.libs.common.kunSaksbehandler
 import no.nav.etterlatte.libs.common.oppgaveId
+import no.nav.etterlatte.libs.common.oppgaveNy.RedigerFristGosysRequest
 import no.nav.etterlatte.libs.common.oppgaveNy.RedigerFristRequest
 import no.nav.etterlatte.libs.common.oppgaveNy.SaksbehandlerEndringDto
+import no.nav.etterlatte.libs.common.oppgaveNy.SaksbehandlerEndringGosysDto
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.oppgave.GosysOppgaveService
 
@@ -114,6 +116,39 @@ internal fun Route.oppgaveRoutesNy(
                     } else {
                         call.respond(HttpStatusCode.NotImplemented)
                     }
+                }
+            }
+        }
+
+        route("/gosys/{gosysOppgaveId}") {
+            post("tildel-saksbehandler") {
+                if (kanBrukeNyOppgaveliste) {
+                    val gosysOppgaveId = call.parameters["gosysOppgaveId"]!!
+                    val saksbehandlerEndringDto = call.receive<SaksbehandlerEndringGosysDto>()
+                    gosysOppgaveService.tildelOppgaveTilSaksbehandler(
+                        gosysOppgaveId,
+                        saksbehandlerEndringDto.versjon,
+                        saksbehandlerEndringDto.saksbehandler,
+                        brukerTokenInfo
+                    )
+                    call.respond(HttpStatusCode.OK)
+                } else {
+                    call.respond(HttpStatusCode.NotImplemented)
+                }
+            }
+            post("endre-frist") {
+                if (kanBrukeNyOppgaveliste) {
+                    val gosysOppgaveId = call.parameters["gosysOppgaveId"]!!
+                    val redigerFristRequest = call.receive<RedigerFristGosysRequest>()
+                    gosysOppgaveService.endreFrist(
+                        gosysOppgaveId,
+                        redigerFristRequest.versjon,
+                        redigerFristRequest.frist,
+                        brukerTokenInfo
+                    )
+                    call.respond(HttpStatusCode.OK)
+                } else {
+                    call.respond(HttpStatusCode.NotImplemented)
                 }
             }
         }

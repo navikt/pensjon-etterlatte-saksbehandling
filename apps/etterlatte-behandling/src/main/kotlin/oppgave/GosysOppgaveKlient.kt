@@ -2,6 +2,7 @@ package no.nav.etterlatte.oppgave
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.michaelbull.result.mapBoth
+import com.github.michaelbull.result.mapError
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
 import no.nav.etterlatte.libs.common.objectMapper
@@ -30,11 +31,33 @@ data class GosysApiOppgave(
     val fristFerdigstillelse: LocalDate
 )
 
+data class GosysEndreSaksbehandlerRequest(
+    val versjon: Long,
+    val tilordnetRessurs: String
+)
+
+data class GosysEndreFristRequest(
+    val versjon: Long,
+    val fristFerdigstillelse: LocalDate
+)
+
 interface GosysOppgaveKlient {
     suspend fun hentOppgaver(
         enhetsnr: String? = null,
         brukerTokenInfo: BrukerTokenInfo
     ): GosysOppgaver
+    suspend fun tildelOppgaveTilSaksbehandler(
+        oppgaveId: String,
+        oppgaveVersjon: Long,
+        tildeles: String,
+        brukerTokenInfo: BrukerTokenInfo
+    )
+    suspend fun endreFrist(
+        oppgaveId: String,
+        oppgaveVersjon: Long,
+        nyFrist: LocalDate,
+        brukerTokenInfo: BrukerTokenInfo
+    )
 }
 
 class GosysOppgaveKlientImpl(config: Config, httpClient: HttpClient) : GosysOppgaveKlient {
@@ -76,5 +99,58 @@ class GosysOppgaveKlientImpl(config: Config, httpClient: HttpClient) : GosysOppg
             logger.error("Noe feilet mot Gosys [ident=${brukerTokenInfo.ident()}]", e)
             throw e
         }
+    }
+
+    override suspend fun tildelOppgaveTilSaksbehandler(
+        oppgaveId: String,
+        oppgaveVersjon: Long,
+        tildeles: String,
+        brukerTokenInfo: BrukerTokenInfo
+    ) {
+        try {
+            logger.info("Tilordner oppgave $oppgaveId til saksbehandler $tildeles")
+
+            patchOppgave(
+                oppgaveId,
+                brukerTokenInfo,
+                body = GosysEndreSaksbehandlerRequest(oppgaveVersjon, tildeles)
+            )
+        } catch (e: Exception) {
+            logger.error("Noe feilet mot Gosys, ident=${brukerTokenInfo.ident()}]", e)
+            throw e
+        }
+    }
+
+    override suspend fun endreFrist(
+        oppgaveId: String,
+        oppgaveVersjon: Long,
+        nyFrist: LocalDate,
+        brukerTokenInfo: BrukerTokenInfo
+    ) {
+        try {
+            logger.info("Endrer frist på oppgave $oppgaveId til $nyFrist")
+
+            patchOppgave(
+                oppgaveId,
+                brukerTokenInfo,
+                body = GosysEndreFristRequest(oppgaveVersjon, nyFrist)
+            )
+        } catch (e: Exception) {
+            logger.error("Noe feilet mot Gosys, ident=${brukerTokenInfo.ident()}]", e)
+            throw e
+        }
+    }
+
+    private suspend fun patchOppgave(oppgaveId: String, brukerTokenInfo: BrukerTokenInfo, body: Any) {
+        downstreamResourceClient
+            .patch(
+                resource = Resource(
+                    clientId = clientId,
+                    url = "$resourceUrl/api/v1/oppgaver/$oppgaveId"
+                ),
+                brukerTokenInfo = brukerTokenInfo,
+                patchBody = objectMapper.writeValueAsString(body)
+            )
+            .mapError { errorResponse -> throw errorResponse }
     }
 }

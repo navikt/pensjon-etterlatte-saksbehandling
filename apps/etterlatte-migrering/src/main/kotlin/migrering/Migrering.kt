@@ -1,6 +1,5 @@
 package no.nav.etterlatte.migrering
 
-import migrering.Sakmigrerer
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser.START_MIGRERING

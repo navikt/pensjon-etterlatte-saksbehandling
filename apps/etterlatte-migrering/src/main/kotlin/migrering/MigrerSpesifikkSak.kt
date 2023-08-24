@@ -1,11 +1,10 @@
-package migrering
+package no.nav.etterlatte.migrering
 
 import kotlinx.coroutines.runBlocking
-import migrering.pen.PenKlient
-import migrering.pen.tilVaarModell
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
-import no.nav.etterlatte.migrering.PesysRepository
+import no.nav.etterlatte.migrering.pen.PenKlient
+import no.nav.etterlatte.migrering.pen.tilVaarModell
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser.MIGRER_SPESIFIKK_SAK
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext

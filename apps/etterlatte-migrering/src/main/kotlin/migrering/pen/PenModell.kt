@@ -1,4 +1,4 @@
-package migrering.pen
+package no.nav.etterlatte.migrering.pen
 
 import java.time.LocalDate
 

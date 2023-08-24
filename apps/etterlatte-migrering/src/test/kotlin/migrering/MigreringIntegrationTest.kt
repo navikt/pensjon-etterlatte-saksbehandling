@@ -1,12 +1,10 @@
-package migrering
+package no.nav.etterlatte.migrering
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.ktor.server.testing.testApplication
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
-import migrering.pen.BarnepensjonGrunnlagResponse
-import migrering.pen.PenKlient
 import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
@@ -15,9 +13,8 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.POSTGRES_VERSION
 import no.nav.etterlatte.libs.database.migrate
-import no.nav.etterlatte.migrering.Migrering
-import no.nav.etterlatte.migrering.PesysRepository
-import no.nav.etterlatte.migrering.Pesyssak
+import no.nav.etterlatte.migrering.pen.BarnepensjonGrunnlagResponse
+import no.nav.etterlatte.migrering.pen.PenKlient
 import no.nav.etterlatte.rapidsandrivers.migrering.Beregning
 import no.nav.etterlatte.rapidsandrivers.migrering.Enhet
 import no.nav.etterlatte.rapidsandrivers.migrering.MigreringRequest

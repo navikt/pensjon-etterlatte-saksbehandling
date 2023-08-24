@@ -1,4 +1,4 @@
-package migrering.pen
+package no.nav.etterlatte.migrering.pen
 
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt

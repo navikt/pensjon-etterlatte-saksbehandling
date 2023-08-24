@@ -1,4 +1,4 @@
-package migrering.pen
+package no.nav.etterlatte.migrering.pen
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.michaelbull.result.mapBoth

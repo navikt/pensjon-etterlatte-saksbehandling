@@ -35,9 +35,8 @@ export const ToggleMinOppgaveliste = () => {
     hentOppgaverWrapper()
   }, [])
 
-  const innloggetSaksbehandleroppgaver = hentedeOppgaver.filter((o) => o.saksbehandler === user.ident)
-
   const mutableOppgaver = hentedeOppgaver.concat()
+  const innloggetSaksbehandleroppgaver = mutableOppgaver.filter((o) => o.saksbehandler === user.ident)
   const filtrerteOppgaver = filtrerOppgaver(
     filter.enhetsFilter,
     filter.fristFilter,
@@ -78,7 +77,7 @@ export const ToggleMinOppgaveliste = () => {
             </>
           )}
           {oppgaveListeValg === 'MinOppgaveliste' && (
-            <MinOppgaveliste oppgaver={hentedeOppgaver} hentOppgaver={hentOppgaverWrapper} />
+            <MinOppgaveliste oppgaver={innloggetSaksbehandleroppgaver} hentOppgaver={hentOppgaverWrapper} />
           )}
         </>
       )}

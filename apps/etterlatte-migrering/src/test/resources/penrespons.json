@@ -1,0 +1,37 @@
+{
+  "sakId" : "22974139",
+  "enhet" : "4817",
+  "soeker" : "06421594773",
+  "gjenlevendeForelder" : "20446225937",
+  "avdoedForeldre" : [
+    {
+      "ident" : "29458444836",
+      "doedsdato" : "2023-08-18"
+    }
+  ],
+  "virkningsdato" : "2023-09-01",
+  "beregning" : {
+    "brutto" : 3954,
+    "netto" : 3954,
+    "anvendtTrygdetid" : 40,
+    "datoVirkFom" : "2023-09-01",
+    "g" : 118620,
+    "meta" : {
+      "resultatType" : "BP1",
+      "beregningsMetodeType" : "FOLKETRYGD",
+      "resultatKilde" : "AUTO",
+      "kravVelgType" : "AVODD_MOR"
+    }
+  },
+  "trygdetidsgrunnlagListe" : [],
+  "trygdetidListe" : [
+    {
+      "faktiskTrygdetid" : 279,
+      "fremtidigTrygdetid" : 329,
+      "anvendtTrygdetid" : 40,
+      "virkFom" : "2023-09-01",
+      "virkTom" : null
+    }
+  ]
+}
+

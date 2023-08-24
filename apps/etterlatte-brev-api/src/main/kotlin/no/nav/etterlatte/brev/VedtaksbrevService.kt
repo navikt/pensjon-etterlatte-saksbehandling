@@ -128,15 +128,12 @@ class VedtaksbrevService(
         return BrevInnhold(tittel, behandling.spraak, payload)
     }
 
-    private fun opprettInnholdVedlegg(behandling: Behandling, prosessType: BrevProsessType): List<BrevInnholdVedlegg>? {
-        val vedlegg = when (prosessType) {
+    private fun opprettInnholdVedlegg(behandling: Behandling, prosessType: BrevProsessType): List<BrevInnholdVedlegg>? =
+        when (prosessType) {
             REDIGERBAR -> SlateHelper.hentInitiellPayloadVedlegg(behandling)
             AUTOMATISK -> null
             MANUELL -> null
         }
-
-        return vedlegg
-    }
 
     private fun ferdigstillHvisVedtakFattet(
         brev: Brev,

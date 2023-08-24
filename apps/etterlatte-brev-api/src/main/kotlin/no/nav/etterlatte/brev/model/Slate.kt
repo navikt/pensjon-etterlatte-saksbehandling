@@ -61,6 +61,19 @@ object SlateHelper {
         }.let { deserialize(it) }
     }
 
+    fun hentInitiellPayloadVedlegg(behandling: Behandling): List<BrevInnholdVedlegg>? {
+        return when (behandling.sakType) {
+            SakType.OMSTILLINGSSTOENAD -> {
+                when (behandling.vedtak.type) {
+                    VedtakType.INNVILGELSE -> getJsonFile("/maler/vedlegg/oms_foerstegangsvedtak_innvilgelse.json")
+                    else -> null
+                }
+            }
+
+            SakType.BARNEPENSJON -> null
+        }?.let { deserialize(it) }
+    }
+
     fun opprettTomBrevmal() = deserialize<Slate>(getJsonFile("/maler/tom-brevmal.json"))
 
     private fun getJsonFile(url: String) = javaClass.getResource(url)!!.readText()

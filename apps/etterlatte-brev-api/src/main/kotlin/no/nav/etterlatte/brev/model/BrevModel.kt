@@ -100,13 +100,20 @@ data class BrevInnhold(
     val payload: Slate? = null
 )
 
+data class BrevInnholdVedlegg(
+    val tittel: String,
+    val key: String,
+    val payload: Slate? = null
+)
+
 data class OpprettNyttBrev(
     val sakId: Long,
     val behandlingId: UUID?,
     val soekerFnr: String,
     val prosessType: BrevProsessType,
     val mottaker: Mottaker,
-    val innhold: BrevInnhold
+    val innhold: BrevInnhold,
+    val innholdVedlegg: List<BrevInnholdVedlegg>?
 ) {
     val status: Status = Status.OPPRETTET
 }

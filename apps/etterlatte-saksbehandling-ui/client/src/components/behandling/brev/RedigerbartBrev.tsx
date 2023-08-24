@@ -1,4 +1,4 @@
-import { Button, Detail, Tabs } from '@navikt/ds-react'
+import { Accordion, Button, Detail, Tabs } from '@navikt/ds-react'
 import SlateEditor from '~components/behandling/brev/SlateEditor'
 import { useEffect, useState } from 'react'
 import { FilePdfIcon, FloppydiskIcon, PencilIcon } from '@navikt/aksel-icons'
@@ -12,6 +12,7 @@ import Spinner from '~shared/Spinner'
 
 enum ManueltBrevFane {
   REDIGER = 'REDIGER',
+  REDIGER_VEDLEGG = 'REDIGER VEDLEGG',
   FORHAANDSVIS = 'FORHAANDSVIS',
 }
 
@@ -30,6 +31,7 @@ interface RedigerbartBrevProps {
 export default function RedigerbartBrev({ brev, kanRedigeres }: RedigerbartBrevProps) {
   const [fane, setFane] = useState<string>(kanRedigeres ? ManueltBrevFane.REDIGER : ManueltBrevFane.FORHAANDSVIS)
   const [content, setContent] = useState<any[]>([])
+  const [vedlegg, setVedlegg] = useState<any[]>([])
   const [lagretStatus, setLagretStatus] = useState<LagretStatus>({ lagret: false })
 
   const [hentManuellPayloadStatus, apiHentManuellPayload] = useApiCall(hentManuellPayload)
@@ -39,12 +41,13 @@ export default function RedigerbartBrev({ brev, kanRedigeres }: RedigerbartBrevP
     if (!brev.id) return
 
     apiHentManuellPayload({ brevId: brev.id, sakId: brev.sakId }, (payload: any) => {
-      setContent(payload)
+      setContent(payload.hoveddel)
+      setVedlegg(payload.vedlegg)
     })
   }, [brev.id])
 
   const lagre = () => {
-    apiLagreManuellPayload({ brevId: brev.id, sakId: brev.sakId, payload: content }, () => {
+    apiLagreManuellPayload({ brevId: brev.id, sakId: brev.sakId, payload: content, payload_vedlegg: vedlegg }, () => {
       setLagretStatus({ lagret: true, beskrivelse: `Lagret kl. ${formaterTidspunkt(new Date())}` })
     })
   }
@@ -57,8 +60,21 @@ export default function RedigerbartBrev({ brev, kanRedigeres }: RedigerbartBrevP
     setContent(value)
   }
 
+  const onChangeVedlegg = (value: any[], key?: string) => {
+    if (!key) return
+    setLagretStatus({
+      lagret: false,
+      beskrivelse: `Sist endret kl. ${formaterTidspunkt(new Date())} (ikke lagret)`,
+    })
+    const oppdatertVedlegg = vedlegg.map((ved) => {
+      if (ved.key === key) return { ...ved, payload: value }
+      return ved
+    })
+    setVedlegg(oppdatertVedlegg)
+  }
+
   return (
-    <Container>
+    <Container forhaandsvisning={fane === ManueltBrevFane.FORHAANDSVIS}>
       <Tabs value={fane} onChange={setFane}>
         <Tabs.List>
           <Tabs.Tab
@@ -66,7 +82,13 @@ export default function RedigerbartBrev({ brev, kanRedigeres }: RedigerbartBrevP
             label={kanRedigeres ? 'Rediger' : 'Innhold'}
             icon={<PencilIcon title="a11y-title" fontSize="1.5rem" />}
           />
-
+          {vedlegg && (
+            <Tabs.Tab
+              value={ManueltBrevFane.REDIGER_VEDLEGG}
+              label={kanRedigeres ? 'Rediger vedlegg' : 'Innhold vedlegg'}
+              icon={<PencilIcon title="a11y-title" fontSize="1.5rem" />}
+            />
+          )}
           <Tabs.Tab
             value={ManueltBrevFane.FORHAANDSVIS}
             label={'Forhåndsvisning'}
@@ -98,8 +120,49 @@ export default function RedigerbartBrev({ brev, kanRedigeres }: RedigerbartBrevP
           )}
         </Tabs.Panel>
 
+        <Tabs.Panel value={ManueltBrevFane.REDIGER_VEDLEGG}>
+          {isPendingOrInitial(hentManuellPayloadStatus) && <Spinner visible label={'Henter innhold til vedlegg ...'} />}
+          {isSuccess(hentManuellPayloadStatus) && (
+            <>
+              <PanelWrapper>
+                <Accordion>
+                  {vedlegg &&
+                    vedlegg.map((brevVedlegg) => (
+                      <Accordion.Item key={brevVedlegg.key}>
+                        <Accordion.Header>{brevVedlegg.tittel}</Accordion.Header>
+                        <Accordion.Content>
+                          <SlateEditor
+                            value={brevVedlegg.payload}
+                            onChange={onChangeVedlegg}
+                            readonly={!kanRedigeres}
+                            editKey={brevVedlegg.key}
+                          />
+                        </Accordion.Content>
+                      </Accordion.Item>
+                    ))}
+                </Accordion>
+
+                {kanRedigeres && (
+                  <ButtonRow>
+                    {lagretStatus.beskrivelse && <Detail as="span">{lagretStatus.beskrivelse}</Detail>}
+                    <Button
+                      icon={<FloppydiskIcon title="a11y-title" />}
+                      variant={'secondary'}
+                      onClick={lagre}
+                      disabled={!lagretStatus}
+                      loading={isPending(lagreManuellPayloadStatus)}
+                    >
+                      Lagre endringer
+                    </Button>
+                  </ButtonRow>
+                )}
+              </PanelWrapper>
+            </>
+          )}
+        </Tabs.Panel>
+
         <Tabs.Panel value={ManueltBrevFane.FORHAANDSVIS}>
-          <PanelWrapper>
+          <PanelWrapper forhaandsvisning>
             <ForhaandsvisningBrev brev={brev} />
           </PanelWrapper>
         </Tabs.Panel>
@@ -109,28 +172,39 @@ export default function RedigerbartBrev({ brev, kanRedigeres }: RedigerbartBrevP
 }
 
 const ButtonRow = styled.div`
-  margin: 1rem;
+  padding: 1rem;
   text-align: right;
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 100%;
+  z-index: 9999;
 
   & > button {
     margin-left: 10px;
   }
 `
 
-const Container = styled.div`
+interface StyledProps {
+  forhaandsvisning?: boolean
+}
+
+const Container = styled.div<StyledProps>`
   margin: auto;
   height: 100%;
   width: 100%;
-
+  position: relative;
   .navds-tabs,
   .navds-tabs__tabpanel {
     height: inherit;
     width: inherit;
+    max-height: ${(p) => (p.forhaandsvisning ? '75vh' : 'calc(75vh - 8rem)')};
   }
 `
 
-const PanelWrapper = styled.div`
+const PanelWrapper = styled.div<StyledProps>`
   height: 100%;
   width: 100%;
-  max-height: 955px;
+  max-height: ${(p) => (p.forhaandsvisning ? 'calc(75vh - 3rem)' : 'calc(75vh - 5rem)')};
+  overflow: auto;
 `

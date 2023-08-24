@@ -10,6 +10,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.brev.BrevService.BrevPayload
 import no.nav.etterlatte.brev.adresse.AdresseService
 import no.nav.etterlatte.brev.behandling.SakOgBehandlingService
 import no.nav.etterlatte.brev.brevbaker.BrevbakerKlient
@@ -32,7 +33,6 @@ import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
 import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -116,15 +116,17 @@ internal class BrevServiceTest {
 
             val payload = Slate(listOf(Slate.Element(Slate.ElementType.PARAGRAPH)))
             every { db.hentBrevPayload(any()) } returns payload
+            every { db.hentBrevPayloadVedlegg(any()) } returns null
 
             val faktiskPayload = runBlocking {
                 brevService.hentBrevPayload(brev.id)
             }
 
-            faktiskPayload shouldBe payload
+            faktiskPayload shouldBe BrevPayload(payload, null)
 
             verify {
                 db.hentBrevPayload(brev.id)
+                db.hentBrevPayloadVedlegg(brev.id)
             }
         }
 
@@ -132,13 +134,17 @@ internal class BrevServiceTest {
         fun `Hent payload - finnes ikke`() {
             val brev = opprettBrev(Status.OPPRETTET, mockk())
             every { db.hentBrevPayload(any()) } returns null
+            every { db.hentBrevPayloadVedlegg(any()) } returns null
 
-            runBlocking {
-                Assertions.assertNull(brevService.hentBrevPayload(brev.id))
+            val payload = runBlocking {
+                brevService.hentBrevPayload(brev.id)
             }
+
+            payload shouldBe BrevPayload(null, null)
 
             verify {
                 db.hentBrevPayload(brev.id)
+                db.hentBrevPayloadVedlegg(brev.id)
             }
         }
     }

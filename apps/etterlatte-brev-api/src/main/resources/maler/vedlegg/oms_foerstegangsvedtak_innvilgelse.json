@@ -1,0 +1,17 @@
+[
+  {
+    "tittel": "Utfall ved beregning av omstillingsstønad",
+    "key": "beregning_innhold",
+    "payload": [
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "text": "Gi en god begrunnelse for beregningen",
+            "placeholder": true
+          }
+        ]
+      }
+    ]
+  }
+]

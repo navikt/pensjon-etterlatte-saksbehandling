@@ -9,6 +9,7 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.brev.behandlingklient.BehandlingKlient
+import no.nav.etterlatte.brev.model.BrevInnholdVedlegg
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
@@ -73,6 +74,7 @@ fun Route.brevRoute(service: BrevService, behandlingKlient: BehandlingKlient) {
                     val body = call.receive<OppdaterPayloadRequest>()
 
                     service.lagreBrevPayload(brevId, body.payload)
+                    service.lagreBrevPayloadVedlegg(brevId, body.payload_vedlegg)
                     call.respond(HttpStatusCode.OK)
                 }
             }
@@ -139,7 +141,8 @@ fun Route.brevRoute(service: BrevService, behandlingKlient: BehandlingKlient) {
 }
 
 data class OppdaterPayloadRequest(
-    val payload: Slate
+    val payload: Slate,
+    val payload_vedlegg: List<BrevInnholdVedlegg>
 )
 
 data class OppdaterMottakerRequest(

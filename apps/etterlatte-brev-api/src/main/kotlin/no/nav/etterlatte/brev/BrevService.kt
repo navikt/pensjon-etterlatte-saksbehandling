@@ -16,6 +16,7 @@ import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevData
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.BrevInnhold
+import no.nav.etterlatte.brev.model.BrevInnholdVedlegg
 import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.ManueltBrevData
 import no.nav.etterlatte.brev.model.Mottaker
@@ -57,19 +58,35 @@ class BrevService(
             soekerFnr = sak.ident,
             prosessType = BrevProsessType.MANUELL,
             mottaker = mottaker,
-            innhold = BrevInnhold("Nytt brev", Spraak.NB, SlateHelper.opprettTomBrevmal())
+            innhold = BrevInnhold("Nytt brev", Spraak.NB, SlateHelper.opprettTomBrevmal()),
+            innholdVedlegg = null
         )
 
         return db.opprettBrev(nyttBrev)
     }
 
-    fun hentBrevPayload(id: BrevID): Slate? =
-        db.hentBrevPayload(id)
+    data class BrevPayload(
+        val hoveddel: Slate?,
+        val vedlegg: List<BrevInnholdVedlegg>?
+    )
+
+    fun hentBrevPayload(id: BrevID): BrevPayload {
+        val hoveddel = db.hentBrevPayload(id)
             .also { logger.info("Hentet payload for brev (id=$id)") }
+
+        val vedlegg = db.hentBrevPayloadVedlegg(id)
+            .also { logger.info("Hentet payload til vedlegg for brev (id=$id)") }
+
+        return BrevPayload(hoveddel, vedlegg)
+    }
 
     fun lagreBrevPayload(id: BrevID, payload: Slate) =
         db.oppdaterPayload(id, payload)
             .also { logger.info("Payload for brev (id=$id) oppdatert") }
+
+    fun lagreBrevPayloadVedlegg(id: BrevID, payload: List<BrevInnholdVedlegg>) =
+        db.oppdaterPayloadVedlegg(id, payload)
+            .also { logger.info("Vedlegg payload for brev (id=$id) oppdatert") }
 
     fun oppdaterMottaker(id: BrevID, mottaker: Mottaker) =
         db.oppdaterMottaker(id, mottaker)

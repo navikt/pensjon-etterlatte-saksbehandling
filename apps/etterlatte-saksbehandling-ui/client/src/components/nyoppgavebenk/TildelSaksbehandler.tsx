@@ -1,6 +1,6 @@
 import { useAppSelector } from '~store/Store'
 import { isFailure, isInitial, isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
-import { tildelSaksbehandlerApi } from '~shared/api/oppgaverny'
+import { Oppgavetype, tildelSaksbehandlerApi } from '~shared/api/oppgaverny'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { Button, Loader } from '@navikt/ds-react'
 import { PersonIcon } from '@navikt/aksel-icons'
@@ -9,11 +9,15 @@ import { useEffect } from 'react'
 
 export const TildelSaksbehandler = (props: {
   oppgaveId: string
-  type: string
-  versjon: string | null
   hentOppgaver: () => void
+  erRedigerbar: boolean
+  versjon: string | null
+  type: Oppgavetype
 }) => {
-  const { oppgaveId, type, versjon, hentOppgaver } = props
+  const { oppgaveId, hentOppgaver, erRedigerbar, versjon, type } = props
+  if (!erRedigerbar) {
+    return null
+  }
   const user = useAppSelector((state) => state.saksbehandlerReducer.saksbehandler)
   const [tildelSaksbehandlerSvar, tildelSaksbehandler] = useApiCall(tildelSaksbehandlerApi)
   const tildelSaksbehandlerWrapper = () => {

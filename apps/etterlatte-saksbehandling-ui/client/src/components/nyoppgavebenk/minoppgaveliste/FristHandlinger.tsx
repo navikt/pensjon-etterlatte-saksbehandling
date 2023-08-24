@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { isFailure, isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
-import { erOppgaveRedigerbar, Oppgavestatus, redigerFristApi } from '~shared/api/oppgaverny'
+import { redigerFristApi } from '~shared/api/oppgaverny'
 import { Alert, Button, Heading, Modal, DatePicker, Label } from '@navikt/ds-react'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { formaterStringDato } from '~utils/formattering'
@@ -21,20 +21,18 @@ const FristWrapper = styled.span<{ fristHarPassert: boolean; utenKnapp?: boolean
 `
 
 export const FristHandlinger = (props: {
-  status: Oppgavestatus
   orginalFrist: string
   oppgaveId: string
   oppgaveVersjon: string | null
   type: string
   hentOppgaver: () => void
+  erRedigerbar: boolean
 }) => {
-  const { orginalFrist, oppgaveId, status, type, oppgaveVersjon, hentOppgaver } = props
+  const { orginalFrist, oppgaveId, hentOppgaver, erRedigerbar, oppgaveVersjon } = props
   const [open, setOpen] = useState(false)
   const [frist, setFrist] = useState<string>()
   const [nyFrist, setnyFrist] = useState<Date>(new Date())
   const [redigerfristSvar, redigerFrist, resetredigerFristApi] = useApiCall(redigerFristApi)
-
-  const erRedigerbar = erOppgaveRedigerbar(status)
 
   const generateFromDate = () => {
     // Legger til 1 dag siden ny frist må være fremover i tid

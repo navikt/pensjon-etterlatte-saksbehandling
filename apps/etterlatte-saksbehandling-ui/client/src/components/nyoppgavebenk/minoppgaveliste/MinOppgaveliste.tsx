@@ -1,4 +1,4 @@
-import { OppgaveDTOny } from '~shared/api/oppgaverny'
+import { erOppgaveRedigerbar, OppgaveDTOny } from '~shared/api/oppgaverny'
 import { Pagination, Table } from '@navikt/ds-react'
 import { formaterStringDato } from '~utils/formattering'
 import { RedigerSaksbehandler } from '~components/nyoppgavebenk/RedigerSaksbehandler'
@@ -60,62 +60,63 @@ export const MinOppgaveliste = (props: { oppgaver: ReadonlyArray<OppgaveDTOny>; 
                     referanse,
                     beskrivelse,
                     gjelder,
-                    versjon,
-                  }) => (
-                    <Table.Row key={id}>
-                      <Table.HeaderCell>{formaterStringDato(opprettet)}</Table.HeaderCell>
-                      <Table.DataCell>
-                        <FristHandlinger
-                          status={status}
-                          orginalFrist={frist}
-                          oppgaveId={id}
-                          oppgaveVersjon={versjon}
-                          type={type}
-                          hentOppgaver={hentOppgaver}
-                        />
-                      </Table.DataCell>
-                      <Table.DataCell>
-                        <SaksoversiktLenke fnr={fnr} />
-                      </Table.DataCell>
-                      <Table.DataCell>
-                        <OppgavetypeTag oppgavetype={type} />
-                      </Table.DataCell>
-                      <Table.DataCell>{sakType && <SaktypeTag sakType={sakType} />}</Table.DataCell>
-                      <Table.DataCell>{merknad}</Table.DataCell>
-                      <Table.DataCell>
-                        {<span>{status ? OPPGAVESTATUSFILTER[status] ?? status : 'Ukjent'}</span>}
-                      </Table.DataCell>
-                      <Table.DataCell>{enhet}</Table.DataCell>
-                      <Table.DataCell>
-                        {saksbehandler && (
-                          <RedigerSaksbehandler
-                            status={status}
-                            saksbehandler={saksbehandler}
+                       versjon
+                  }) => {
+                    const erRedigerbar = erOppgaveRedigerbar(status, type)
+                    return (
+                      <Table.Row key={id}>
+                        <Table.HeaderCell>{formaterStringDato(opprettet)}</Table.HeaderCell>
+                        <Table.DataCell>
+                          <FristHandlinger
+                            orginalFrist={frist}
                             oppgaveId={id}
-                            sakId={sakId}
-                            type={type}
-                            versjon={versjon}
                             hentOppgaver={hentOppgaver}
+                            erRedigerbar={erRedigerbar}
+                            oppgaveVersjon={versjon}
                           />
-                        )}
-                      </Table.DataCell>
-                      <Table.DataCell>
-                        <HandlingerForOppgave
-                          oppgavetype={type}
-                          oppgavestatus={status}
-                          opprettet={opprettet}
-                          frist={frist}
-                          fnr={fnr}
-                          saktype={sakType}
-                          enhet={enhet}
-                          saksbehandler={saksbehandler}
-                          referanse={referanse}
-                          beskrivelse={beskrivelse}
-                          gjelder={gjelder}
-                        />
-                      </Table.DataCell>
-                    </Table.Row>
-                  )
+                        </Table.DataCell>
+                        <Table.DataCell>
+                          <SaksoversiktLenke fnr={fnr} />
+                        </Table.DataCell>
+                        <Table.DataCell>
+                          <OppgavetypeTag oppgavetype={type} />
+                        </Table.DataCell>
+                        <Table.DataCell>{sakType && <SaktypeTag sakType={sakType} />}</Table.DataCell>
+                        <Table.DataCell>{merknad}</Table.DataCell>
+                        <Table.DataCell>
+                          {<span>{status ? OPPGAVESTATUSFILTER[status] ?? status : 'Ukjent'}</span>}
+                        </Table.DataCell>
+                        <Table.DataCell>{enhet}</Table.DataCell>
+                        <Table.DataCell>
+                          {saksbehandler && (
+                            <RedigerSaksbehandler
+                              saksbehandler={saksbehandler}
+                              oppgaveId={id}
+                              sakId={sakId}
+                              hentOppgaver={hentOppgaver}
+                              erRedigerbar={erRedigerbar}
+                              oppgaveVersjon={versjon}
+                            />
+                          )}
+                        </Table.DataCell>
+                        <Table.DataCell>
+                          <HandlingerForOppgave
+                            oppgavetype={type}
+                            oppgavestatus={status}
+                            opprettet={opprettet}
+                            frist={frist}
+                            fnr={fnr}
+                            saktype={sakType}
+                            enhet={enhet}
+                            saksbehandler={saksbehandler}
+                            referanse={referanse}
+                            beskrivelse={beskrivelse}
+                            gjelder={gjelder}
+                          />
+                        </Table.DataCell>
+                      </Table.Row>
+                    )
+                  }
                 )}
             </Table.Body>
           </Table>

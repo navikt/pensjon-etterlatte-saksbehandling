@@ -1,0 +1,1 @@
+ALTER TABLE revurdering_info ADD COLUMN begrunnelse TEXT;

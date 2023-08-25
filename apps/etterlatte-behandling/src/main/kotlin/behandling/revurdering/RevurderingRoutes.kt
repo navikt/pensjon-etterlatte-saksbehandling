@@ -15,10 +15,10 @@ import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandlingsId
-import no.nav.etterlatte.libs.common.hentNavidentFraToken
 import no.nav.etterlatte.libs.common.kunSaksbehandler
 import no.nav.etterlatte.libs.common.medBody
 import no.nav.etterlatte.libs.common.sakId
+import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 
 internal fun Route.revurderingRoutes(
     revurderingService: RevurderingService
@@ -29,15 +29,18 @@ internal fun Route.revurderingRoutes(
         route("{$BEHANDLINGSID_CALL_PARAMETER}") {
             route("revurderinginfo") {
                 post {
-                    hentNavidentFraToken { navIdent ->
-                        logger.info("Lagrer revurderinginfo på behandling $behandlingsId")
-                        medBody<RevurderingInfoDto> {
-                            val fikkLagret = revurderingService.lagreRevurderingInfo(behandlingsId, it.info, navIdent)
-                            if (fikkLagret) {
-                                call.respond(HttpStatusCode.NoContent)
-                            } else {
-                                call.respond(HttpStatusCode.Forbidden)
-                            }
+                    logger.info("Lagrer revurderinginfo på behandling $behandlingsId")
+                    medBody<RevurderingInfoDto> {
+                        val fikkLagret = revurderingService.lagreRevurderingInfo(
+                            behandlingsId,
+                            it.begrunnelse,
+                            it.info,
+                            brukerTokenInfo.ident()
+                        )
+                        if (fikkLagret) {
+                            call.respond(HttpStatusCode.NoContent)
+                        } else {
+                            call.respond(HttpStatusCode.Forbidden)
                         }
                     }
                 }
@@ -87,4 +90,4 @@ data class OpprettRevurderingRequest(
     val fritekstAarsak: String? = null
 )
 
-data class RevurderingInfoDto(val info: RevurderingInfo)
+data class RevurderingInfoDto(val begrunnelse: String?, val info: RevurderingInfo)

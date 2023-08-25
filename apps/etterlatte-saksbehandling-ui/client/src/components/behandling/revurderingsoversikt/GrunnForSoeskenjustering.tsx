@@ -7,7 +7,7 @@ import {
   SoeskenjusteringInfo,
   tekstSoeskenjustering,
 } from '~shared/types/RevurderingInfo'
-import { FormEvent, useState } from 'react'
+import React, { FormEvent, useState } from 'react'
 import { BodyShort, Button, Heading, Select } from '@navikt/ds-react'
 import { hentBehandlesFraStatus } from '~components/behandling/felles/utils'
 import { isPending, isFailure, useApiCall, isSuccess } from '~shared/hooks/useApiCall'
@@ -15,6 +15,7 @@ import { lagreRevurderingInfo } from '~shared/api/revurdering'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { oppdaterRevurderingInfo } from '~store/reducers/BehandlingReducer'
 import styled from 'styled-components'
+import { Revurderingsbegrunnelse } from '~components/behandling/revurderingsoversikt/Revurderingsbegrunnelse'
 
 export const GrunnForSoeskenjustering = (props: { behandling: IDetaljertBehandling }) => {
   const { behandling } = props
@@ -23,6 +24,7 @@ export const GrunnForSoeskenjustering = (props: { behandling: IDetaljertBehandli
     soeskenjusteringInfo?.grunnForSoeskenjustering
   )
   const [feilmelding, setFeilmelding] = useState<string | undefined>(undefined)
+  const [begrunnelse, setBegrunnelse] = useState('')
   const [lagrestatus, lagre] = useApiCall(lagreRevurderingInfo)
   const redigerbar = hentBehandlesFraStatus(behandling.status)
   const harEndretInfo =
@@ -43,6 +45,7 @@ export const GrunnForSoeskenjustering = (props: { behandling: IDetaljertBehandli
     lagre(
       {
         behandlingId: behandling.id,
+        begrunnelse: begrunnelse,
         revurderingInfo,
       },
       () => oppdaterRevurderingInfo(revurderingInfo)
@@ -68,6 +71,7 @@ export const GrunnForSoeskenjustering = (props: { behandling: IDetaljertBehandli
               </option>
             ))}
           </Select>
+          <Revurderingsbegrunnelse begrunnelse={begrunnelse} setBegrunnelse={setBegrunnelse} />
           <Button loading={isPending(lagrestatus)} variant="primary" size="small">
             Lagre
           </Button>

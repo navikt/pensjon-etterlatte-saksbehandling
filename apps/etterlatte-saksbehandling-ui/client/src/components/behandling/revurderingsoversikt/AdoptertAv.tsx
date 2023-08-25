@@ -44,6 +44,7 @@ export const AdoptertAv = (props: { behandling: IDetaljertBehandling }) => {
     lagre(
       {
         behandlingId: behandling.id,
+        begrunnelse: begrunnelse,
         revurderingInfo,
       },
       () => oppdaterRevurderingInfo(revurderingInfo)

@@ -51,7 +51,7 @@ class BeregningService(
         if (kanBeregneYtelse) {
             val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
             if (behandling.revurderingsaarsak.girOpphoer()) {
-                if (behandling.sakType.name == SakType.BARNEPENSJON.name) {
+                if (behandling.sakType == SakType.BARNEPENSJON) {
                     kopierBeregningsgrunnlagOgOpprettBeregningBarnepensjon(behandling, brukerTokenInfo, behandlingId)
                 } else {
                     opprettBeregning(behandlingId, brukerTokenInfo)

@@ -25,8 +25,6 @@ export const ToggleMinOppgaveliste = () => {
   const [hentedeOppgaver, setHentedeOppgaver] = useState<ReadonlyArray<OppgaveDTOny>>([])
   const user = useAppSelector((state) => state.saksbehandlerReducer.saksbehandler)
 
-  const mineOppgaver = hentedeOppgaver.filter((o) => o.saksbehandler === user.ident)
-
   const hentOppgaverWrapper = () => {
     hentOppgaver({}, (oppgaver) => {
       setHentedeOppgaver(oppgaver)
@@ -38,7 +36,7 @@ export const ToggleMinOppgaveliste = () => {
   }, [])
 
   const mutableOppgaver = hentedeOppgaver.concat()
-
+  const innloggetSaksbehandleroppgaver = mutableOppgaver.filter((o) => o.saksbehandler === user.ident)
   const filtrerteOppgaver = filtrerOppgaver(
     filter.enhetsFilter,
     filter.fristFilter,
@@ -56,26 +54,30 @@ export const ToggleMinOppgaveliste = () => {
       <TabsWidth value={oppgaveListeValg} onChange={(e) => setOppgaveListeValg(e as OppgavelisteToggle)}>
         <Tabs.List>
           <Tabs.Tab value="Oppgavelista" label="Oppgavelisten" icon={<InboxIcon />} />
-          <Tabs.Tab value="MinOppgaveliste" label={`Min oppgaveliste (${mineOppgaver.length})`} icon={<PersonIcon />} />
+          <Tabs.Tab
+            value="MinOppgaveliste"
+            label={`Min oppgaveliste (${innloggetSaksbehandleroppgaver.length})`}
+            icon={<PersonIcon />}
+          />
         </Tabs.List>
       </TabsWidth>
-      {oppgaveListeValg === 'Oppgavelista' && (
-        <FilterRad hentOppgaver={hentOppgaverWrapper} filter={filter} setFilter={setFilter} />
-      )}
 
       {isPending(oppgaver) && <Spinner visible={true} label={'Henter nye oppgaver'} />}
       {isFailure(oppgaver) && <ApiErrorAlert>Kunne ikke hente oppgaver</ApiErrorAlert>}
       {isSuccess(oppgaver) && (
         <>
           {oppgaveListeValg === 'Oppgavelista' && (
-            <Oppgavelista
-              oppgaver={hentedeOppgaver}
-              filtrerteOppgaver={filtrerteOppgaver}
-              hentOppgaver={hentOppgaverWrapper}
-            />
+            <>
+              <FilterRad hentOppgaver={hentOppgaverWrapper} filter={filter} setFilter={setFilter} />
+              <Oppgavelista
+                oppgaver={hentedeOppgaver}
+                filtrerteOppgaver={filtrerteOppgaver}
+                hentOppgaver={hentOppgaverWrapper}
+              />
+            </>
           )}
           {oppgaveListeValg === 'MinOppgaveliste' && (
-            <MinOppgaveliste oppgaver={mineOppgaver} hentOppgaver={hentOppgaverWrapper} />
+            <MinOppgaveliste oppgaver={innloggetSaksbehandleroppgaver} hentOppgaver={hentOppgaverWrapper} />
           )}
         </>
       )}

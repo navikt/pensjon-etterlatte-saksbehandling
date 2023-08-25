@@ -72,7 +72,7 @@ export const OPPGAVESTATUSFILTER: Record<OppgavestatusFilterKeys, string> = {
   AVBRUTT: 'Avbrutt',
 }
 
-function filtrerOppgaveStatus(
+export function filtrerOppgaveStatus(
   oppgavestatusFilterKeys: OppgavestatusFilterKeys,
   oppgaver: OppgaveDTOny[]
 ): OppgaveDTOny[] {

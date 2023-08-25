@@ -14,7 +14,7 @@ class BeregningsGrunnlagRepository(private val dataSource: DataSource) {
     fun finnGrunnlagForBehandling(id: UUID): BeregningsGrunnlag? = using(sessionOf(dataSource)) { session ->
         session.run(
             queryOf(
-                statement = finnGrunnlagForBehandling,
+                statement = finnBarnepensjonsGrunnlagForBehandling,
                 paramMap = mapOf("behandlings_id" to id)
             ).map { it.asBeregningsGrunnlag() }.asSingle
         )
@@ -65,7 +65,7 @@ class BeregningsGrunnlagRepository(private val dataSource: DataSource) {
             WHERE behandlings_id = :behandlings_id
         """.trimMargin()
 
-        val finnGrunnlagForBehandling = """
+        val finnBarnepensjonsGrunnlagForBehandling = """
             SELECT behandlings_id, soesken_med_i_beregning_perioder, institusjonsopphold, kilde
             FROM bp_beregningsgrunnlag
             WHERE behandlings_id = :behandlings_id

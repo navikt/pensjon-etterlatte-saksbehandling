@@ -51,12 +51,16 @@ class BeregningService(
         if (kanBeregneYtelse) {
             val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
             if (behandling.revurderingsaarsak.girOpphoer()) {
-                kopierBeregningsgrunnlagOgOpprettBeregning(behandling, brukerTokenInfo, behandlingId)
+                if (behandling.sakType.name == SakType.BARNEPENSJON.name) {
+                    kopierBeregningsgrunnlagOgOpprettBeregningBarnepensjon(behandling, brukerTokenInfo, behandlingId)
+                } else {
+                    opprettBeregning(behandlingId, brukerTokenInfo)
+                }
             }
         }
     }
 
-    private suspend fun kopierBeregningsgrunnlagOgOpprettBeregning(
+    private suspend fun kopierBeregningsgrunnlagOgOpprettBeregningBarnepensjon(
         behandling: DetaljertBehandling,
         brukerTokenInfo: BrukerTokenInfo,
         behandlingId: UUID

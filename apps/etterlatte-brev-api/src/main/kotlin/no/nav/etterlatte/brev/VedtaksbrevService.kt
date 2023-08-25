@@ -107,7 +107,7 @@ class VedtaksbrevService(
         when (brev.prosessType) {
             REDIGERBAR -> brevDataMapper.brevDataFerdigstilling(behandling, {
                 hentLagretInnhold(brev)
-            }, hentLagretInnholdVedlegg(brev), brevkode)
+            }, { hentLagretInnholdVedlegg(brev) }, brevkode)
             AUTOMATISK -> brevDataMapper.brevData(behandling)
             MANUELL -> ManueltBrevData(hentLagretInnhold(brev))
         }

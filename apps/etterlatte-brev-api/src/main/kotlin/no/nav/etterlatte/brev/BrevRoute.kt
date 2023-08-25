@@ -74,7 +74,7 @@ fun Route.brevRoute(service: BrevService, behandlingKlient: BehandlingKlient) {
                     val body = call.receive<OppdaterPayloadRequest>()
 
                     service.lagreBrevPayload(brevId, body.payload)
-                    service.lagreBrevPayloadVedlegg(brevId, body.payload_vedlegg)
+                    body.payload_vedlegg?.let { service.lagreBrevPayloadVedlegg(brevId, it) }
                     call.respond(HttpStatusCode.OK)
                 }
             }
@@ -142,7 +142,7 @@ fun Route.brevRoute(service: BrevService, behandlingKlient: BehandlingKlient) {
 
 data class OppdaterPayloadRequest(
     val payload: Slate,
-    val payload_vedlegg: List<BrevInnholdVedlegg>
+    val payload_vedlegg: List<BrevInnholdVedlegg>? = null
 )
 
 data class OppdaterMottakerRequest(

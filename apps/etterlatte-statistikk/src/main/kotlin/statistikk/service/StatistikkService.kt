@@ -140,7 +140,7 @@ class StatistikkService(
             vedtakLoependeFom = vedtak.virkningstidspunkt.atDay(1),
             vedtakLoependeTom = vedtak.virkningstidspunkt.atEndOfMonth(),
             saksbehandler = vedtak.vedtakFattet?.ansvarligSaksbehandler,
-            ansvarligEnhet = vedtak.attestasjon?.attesterendeEnhet,
+            ansvarligEnhet = vedtak.attestasjon?.attesterendeEnhet ?: detaljertBehandling.enhet,
             sakUtland = SakUtland.NASJONAL,
             beregning = beregning,
             avkorting = avkorting,

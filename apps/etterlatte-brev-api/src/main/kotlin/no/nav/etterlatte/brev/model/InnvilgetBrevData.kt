@@ -111,7 +111,6 @@ data class InnvilgetBrevDataEnkel(
 data class InnvilgetHovedmalBrevData(
     val utbetalingsinfo: Utbetalingsinfo,
     val avkortingsinfo: Avkortingsinfo? = null,
-    val avdoed: Avdoed,
     val etterbetalingDTO: EtterbetalingDTO? = null,
     val innhold: List<Slate.Element>
 ) : BrevData() {
@@ -119,7 +118,6 @@ data class InnvilgetHovedmalBrevData(
     companion object {
         fun fra(behandling: Behandling, innhold: List<Slate.Element>) = InnvilgetHovedmalBrevData(
             utbetalingsinfo = behandling.utbetalingsinfo,
-            avdoed = behandling.persongalleri.avdoed,
             avkortingsinfo = behandling.avkortingsinfo,
             etterbetalingDTO = null,
             innhold = innhold

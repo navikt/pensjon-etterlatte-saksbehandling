@@ -31,6 +31,7 @@ import no.nav.etterlatte.libs.common.behandling.tilVirkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveType
+import no.nav.etterlatte.libs.common.oppgaveNy.Status
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.oppgaveny.OppgaveServiceNy
@@ -72,6 +73,12 @@ enum class RevurderingServiceFeatureToggle(private val key: String) : FeatureTog
     override fun key() = key
 }
 
+class MaksEnBehandlingsOppgaveUnderbehandlingException(message: String) : Exception(message)
+
+class RevurderingaarsakIkkeStoettetIMiljoeException(message: String) : Exception(message)
+
+class RevurderingManglerIverksattBehandlingException(message: String) : Exception(message)
+
 class RevurderingServiceImpl(
     private val oppgaveService: OppgaveServiceNy,
     private val grunnlagService: GrunnlagService,
@@ -90,6 +97,21 @@ class RevurderingServiceImpl(
     fun hentBehandling(id: UUID): Revurdering? =
         (behandlingDao.hentBehandling(id) as? Revurdering)?.sjekkEnhet()
 
+    private fun kunEnBehandlingUnderBehandling(sakId: Long) {
+        val oppgaverForSak = oppgaveService.hentOppgaverForSak(sakId)
+        val ingenBehandlingerUnderarbeid = oppgaverForSak.filter {
+            it.kilde == OppgaveKilde.BEHANDLING
+        }.none { it.status === Status.UNDER_BEHANDLING }
+        if (ingenBehandlingerUnderarbeid) {
+            return
+        } else {
+            throw MaksEnBehandlingsOppgaveUnderbehandlingException(
+                "Sak $sakId har allerede en" +
+                    " oppgave under behandling"
+            )
+        }
+    }
+
     override fun opprettManuellRevurderingWrapper(
         sakId: Long,
         aarsak: RevurderingAarsak,
@@ -98,6 +120,11 @@ class RevurderingServiceImpl(
         fritekstAarsak: String?,
         saksbehandlerIdent: String
     ): Revurdering? {
+        if (!aarsak.kanBrukesIMiljo()) {
+            throw RevurderingaarsakIkkeStoettetIMiljoeException(
+                "Feil revurderingsårsak $aarsak, foreløpig ikke støttet"
+            )
+        }
         val paaGrunnAvHendelseUuid = try {
             paaGrunnAvHendelseId?.let { UUID.fromString(it) }
         } catch (e: Exception) {
@@ -107,6 +134,8 @@ class RevurderingServiceImpl(
                     "Hendelsesid: $paaGrunnAvHendelseId"
             )
         }
+
+        kunEnBehandlingUnderBehandling(sakId)
 
         val forrigeIverksatteBehandling = behandlingService.hentSisteIverksatte(sakId)
         if (forrigeIverksatteBehandling != null) {
@@ -124,7 +153,7 @@ class RevurderingServiceImpl(
                 saksbehandlerIdent = saksbehandlerIdent
             )
         } else {
-            throw BadRequestException(
+            throw RevurderingManglerIverksattBehandlingException(
                 "Kan ikke revurdere en sak uten iverksatt behandling sakid:" +
                     " $sakId"
             )

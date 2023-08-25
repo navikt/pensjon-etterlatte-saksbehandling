@@ -235,6 +235,7 @@ abstract class BehandlingIntegrationTest {
                 TRUNCATE behandlinghendelse CASCADE;
                 TRUNCATE grunnlagsendringshendelse CASCADE;
                 TRUNCATE sak CASCADE;
+                TRUNCATE oppgave CASCADE;
                 
                 ALTER SEQUENCE behandlinghendelse_id_seq RESTART WITH 1;
                 ALTER SEQUENCE sak_id_seq RESTART WITH 1;

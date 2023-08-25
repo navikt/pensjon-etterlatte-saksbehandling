@@ -49,12 +49,6 @@ internal fun Route.revurderingRoutes(
                 kunSaksbehandler { saksbehandler ->
                     logger.info("Oppretter ny revurdering på sak $sakId")
                     medBody<OpprettRevurderingRequest> { opprettRevurderingRequest ->
-                        if (!opprettRevurderingRequest.aarsak.kanBrukesIMiljo()) {
-                            return@post call.respond(
-                                HttpStatusCode.BadRequest,
-                                "Feil revurderingsårsak ${opprettRevurderingRequest.aarsak}, foreløpig ikke støttet"
-                            )
-                        }
 
                         val revurdering = revurderingService.opprettManuellRevurderingWrapper(
                             sakId,

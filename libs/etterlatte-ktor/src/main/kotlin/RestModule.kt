@@ -23,6 +23,7 @@ import io.ktor.server.routing.IgnoreTrailingSlash
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
+import io.micrometer.core.instrument.binder.MeterBinder
 import isProd
 import no.nav.etterlatte.libs.common.logging.CORRELATION_ID
 import no.nav.etterlatte.libs.common.objectMapper
@@ -35,6 +36,7 @@ fun Application.restModule(
     sikkerLogg: Logger,
     routePrefix: String? = null,
     withMetrics: Boolean = false,
+    additionalMetrics: List<MeterBinder> = emptyList(),
     config: ApplicationConfig = environment.config,
     routes: Route.() -> Unit
 ) {
@@ -86,8 +88,9 @@ fun Application.restModule(
             }
         }
     }
+
     if (withMetrics) {
-        metricsModule()
+        metricsModule(additionalMetrics)
     }
 }
 

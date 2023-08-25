@@ -11,17 +11,17 @@ import java.util.*
 import javax.sql.DataSource
 
 class BeregningsGrunnlagRepository(private val dataSource: DataSource) {
-    fun finnGrunnlagForBehandling(id: UUID): BeregningsGrunnlag? = using(sessionOf(dataSource)) { session ->
+    fun finnBarnepensjonGrunnlagForBehandling(id: UUID): BeregningsGrunnlag? = using(sessionOf(dataSource)) { session ->
         session.run(
             queryOf(
-                statement = finnGrunnlagForBehandling,
+                statement = finnBarnepensjonsGrunnlagForBehandling,
                 paramMap = mapOf("behandlings_id" to id)
             ).map { it.asBeregningsGrunnlag() }.asSingle
         )
     }
 
     fun lagre(beregningsGrunnlag: BeregningsGrunnlag): Boolean {
-        val query = if (finnGrunnlagForBehandling(beregningsGrunnlag.behandlingId) != null) {
+        val query = if (finnBarnepensjonGrunnlagForBehandling(beregningsGrunnlag.behandlingId) != null) {
             oppdaterGrunnlagQuery
         } else {
             lagreGrunnlagQuery
@@ -65,7 +65,7 @@ class BeregningsGrunnlagRepository(private val dataSource: DataSource) {
             WHERE behandlings_id = :behandlings_id
         """.trimMargin()
 
-        val finnGrunnlagForBehandling = """
+        val finnBarnepensjonsGrunnlagForBehandling = """
             SELECT behandlings_id, soesken_med_i_beregning_perioder, institusjonsopphold, kilde
             FROM bp_beregningsgrunnlag
             WHERE behandlings_id = :behandlings_id

@@ -9,17 +9,19 @@ import { ApiErrorAlert } from '~ErrorBoundary'
 import { oppdaterRevurderingInfo } from '~store/reducers/BehandlingReducer'
 import styled from 'styled-components'
 import { NavnInput, standardnavn } from '~components/behandling/revurderingsoversikt/NavnInput'
+import { Revurderingsbegrunnelse } from '~components/behandling/revurderingsoversikt/Revurderingsbegrunnelse'
 
 function formaterNavn(navn: Navn) {
-    return [navn.fornavn, navn.mellomnavn, navn.etternavn].join(' ')
+  return [navn.fornavn, navn.mellomnavn, navn.etternavn].join(' ')
 }
 
 export const AdoptertAv = (props: { behandling: IDetaljertBehandling }) => {
   const { behandling } = props
-    const adopsjonInfo = hentUndertypeFraBehandling<AdopsjonInfo>('ADOPSJON', behandling)
-    const [navn1, setNavn1] = useState(adopsjonInfo?.adoptertAv1)
-    const [navn2, setNavn2] = useState(adopsjonInfo?.adoptertAv2)
-    const [feilmelding, setFeilmelding] = useState<string | undefined>(undefined)
+  const adopsjonInfo = hentUndertypeFraBehandling<AdopsjonInfo>('ADOPSJON', behandling)
+  const [navn1, setNavn1] = useState(adopsjonInfo?.adoptertAv1)
+  const [navn2, setNavn2] = useState(adopsjonInfo?.adoptertAv2)
+  const [feilmelding, setFeilmelding] = useState<string | undefined>(undefined)
+  const [begrunnelse, setBegrunnelse] = useState('')
   const [lagrestatus, lagre] = useApiCall(lagreRevurderingInfo)
   const redigerbar = hentBehandlesFraStatus(behandling.status)
   const handlesubmit = (e: FormEvent) => {
@@ -28,6 +30,10 @@ export const AdoptertAv = (props: { behandling: IDetaljertBehandling }) => {
     setFeilmelding(undefined)
     if (!navn1 || !navn1.fornavn || !navn1.etternavn) {
       setFeilmelding('Du må velge hvem som adopterer')
+      return
+    }
+    if (!begrunnelse) {
+      setFeilmelding('Begrunnelse mangler')
       return
     }
     const revurderingInfo: RevurderingInfo = {
@@ -59,6 +65,7 @@ export const AdoptertAv = (props: { behandling: IDetaljertBehandling }) => {
             Den andre som adopterer, hvis det er to
           </Heading>
           <NavnInput navn={navn2 || standardnavn()} update={(n: Navn) => setNavn2(n)} />
+          <Revurderingsbegrunnelse begrunnelse={begrunnelse} setBegrunnelse={setBegrunnelse} />
           <Button loading={isPending(lagrestatus)} variant="primary" size="small">
             Lagre
           </Button>

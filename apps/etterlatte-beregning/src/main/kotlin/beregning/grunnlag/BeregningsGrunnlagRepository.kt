@@ -11,7 +11,7 @@ import java.util.*
 import javax.sql.DataSource
 
 class BeregningsGrunnlagRepository(private val dataSource: DataSource) {
-    fun finnGrunnlagForBehandling(id: UUID): BeregningsGrunnlag? = using(sessionOf(dataSource)) { session ->
+    fun finnBarnepensjonGrunnlagForBehandling(id: UUID): BeregningsGrunnlag? = using(sessionOf(dataSource)) { session ->
         session.run(
             queryOf(
                 statement = finnBarnepensjonsGrunnlagForBehandling,
@@ -21,7 +21,7 @@ class BeregningsGrunnlagRepository(private val dataSource: DataSource) {
     }
 
     fun lagre(beregningsGrunnlag: BeregningsGrunnlag): Boolean {
-        val query = if (finnGrunnlagForBehandling(beregningsGrunnlag.behandlingId) != null) {
+        val query = if (finnBarnepensjonGrunnlagForBehandling(beregningsGrunnlag.behandlingId) != null) {
             oppdaterGrunnlagQuery
         } else {
             lagreGrunnlagQuery

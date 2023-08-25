@@ -57,7 +57,9 @@ class BeregningsGrunnlagService(
         forrigeIverksatteBehandlingId: UUID,
         barnepensjonBeregningsGrunnlag: BarnepensjonBeregningsGrunnlag
     ): Boolean {
-        val forrigeGrunnlag = beregningsGrunnlagRepository.finnGrunnlagForBehandling(forrigeIverksatteBehandlingId)
+        val forrigeGrunnlag = beregningsGrunnlagRepository.finnBarnepensjonGrunnlagForBehandling(
+            forrigeIverksatteBehandlingId
+        )
         val revurderingVirk = revurdering.virkningstidspunkt!!.dato.atDay(1)
 
         val soeskenjusteringErLiktFoerVirk = erGrunnlagLiktFoerEnDato(
@@ -79,7 +81,7 @@ class BeregningsGrunnlagService(
         brukerTokenInfo: BrukerTokenInfo
     ): BeregningsGrunnlag? {
         logger.info("Henter grunnlag $behandlingId")
-        val grunnlag = beregningsGrunnlagRepository.finnGrunnlagForBehandling(behandlingId)
+        val grunnlag = beregningsGrunnlagRepository.finnBarnepensjonGrunnlagForBehandling(behandlingId)
         if (grunnlag != null) {
             return grunnlag
         }
@@ -91,22 +93,22 @@ class BeregningsGrunnlagService(
                 behandling.sak,
                 brukerTokenInfo
             )
-            beregningsGrunnlagRepository.finnGrunnlagForBehandling(sisteIverksatteBehandling.id)
+            beregningsGrunnlagRepository.finnBarnepensjonGrunnlagForBehandling(sisteIverksatteBehandling.id)
         } else {
             null
         }
     }
 
-    fun dupliserBeregningsGrunnlag(behandlingId: UUID, forrigeBehandlingId: UUID) {
+    fun dupliserBeregningsGrunnlagBP(behandlingId: UUID, forrigeBehandlingId: UUID) {
         logger.info("Dupliser grunnlag for $behandlingId fra $forrigeBehandlingId")
 
-        val forrigeGrunnlag = beregningsGrunnlagRepository.finnGrunnlagForBehandling(forrigeBehandlingId)
+        val forrigeGrunnlagBP = beregningsGrunnlagRepository.finnBarnepensjonGrunnlagForBehandling(forrigeBehandlingId)
             ?: throw RuntimeException("Ingen grunnlag funnet for $forrigeBehandlingId")
 
-        if (beregningsGrunnlagRepository.finnGrunnlagForBehandling(behandlingId) != null) {
+        if (beregningsGrunnlagRepository.finnBarnepensjonGrunnlagForBehandling(behandlingId) != null) {
             throw RuntimeException("Eksisterende grunnlag funnet for $behandlingId")
         }
 
-        beregningsGrunnlagRepository.lagre(forrigeGrunnlag.copy(behandlingId = behandlingId))
+        beregningsGrunnlagRepository.lagre(forrigeGrunnlagBP.copy(behandlingId = behandlingId))
     }
 }

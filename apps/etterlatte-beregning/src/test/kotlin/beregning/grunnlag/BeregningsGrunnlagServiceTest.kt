@@ -73,7 +73,7 @@ internal class BeregningsGrunnlagServiceTest {
 
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
         coEvery { behandlingKlient.beregn(any(), any(), any()) } returns true
-        every { beregningsGrunnlagRepository.finnGrunnlagForBehandling(any()) } returns null
+        every { beregningsGrunnlagRepository.finnBarnepensjonGrunnlagForBehandling(any()) } returns null
         every { beregningsGrunnlagRepository.lagre(any()) } returns true
 
         runBlocking {
@@ -137,9 +137,11 @@ internal class BeregningsGrunnlagServiceTest {
         coEvery { behandlingKlient.hentBehandling(revurdering.id, any()) } returns revurdering
 
         every {
-            beregningsGrunnlagRepository.finnGrunnlagForBehandling(foerstegangsbehandling.id)
+            beregningsGrunnlagRepository.finnBarnepensjonGrunnlagForBehandling(foerstegangsbehandling.id)
         } returns grunnlagIverksatt
-        every { beregningsGrunnlagRepository.finnGrunnlagForBehandling(revurdering.id) } returns grunnlagEndring
+        every {
+            beregningsGrunnlagRepository.finnBarnepensjonGrunnlagForBehandling(revurdering.id)
+        } returns grunnlagEndring
 
         runBlocking {
             val lagret = beregningsGrunnlagService.lagreBarnepensjonBeregningsGrunnlag(
@@ -204,9 +206,11 @@ internal class BeregningsGrunnlagServiceTest {
         coEvery { behandlingKlient.hentBehandling(revurdering.id, any()) } returns revurdering
 
         every {
-            beregningsGrunnlagRepository.finnGrunnlagForBehandling(foerstegangsbehandling.id)
+            beregningsGrunnlagRepository.finnBarnepensjonGrunnlagForBehandling(foerstegangsbehandling.id)
         } returns grunnlagIverksatt
-        every { beregningsGrunnlagRepository.finnGrunnlagForBehandling(revurdering.id) } returns grunnlagEndring
+        every {
+            beregningsGrunnlagRepository.finnBarnepensjonGrunnlagForBehandling(revurdering.id)
+        } returns grunnlagEndring
         every { beregningsGrunnlagRepository.lagre(any()) } returns true
 
         runBlocking {
@@ -233,8 +237,10 @@ internal class BeregningsGrunnlagServiceTest {
 
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
         coEvery { behandlingKlient.beregn(any(), any(), any()) } returns true
-        every { beregningsGrunnlagRepository.finnGrunnlagForBehandling(omregningsId) } returns null
-        every { beregningsGrunnlagRepository.finnGrunnlagForBehandling(behandlingsId) } returns BeregningsGrunnlag(
+        every { beregningsGrunnlagRepository.finnBarnepensjonGrunnlagForBehandling(omregningsId) } returns null
+        every {
+            beregningsGrunnlagRepository.finnBarnepensjonGrunnlagForBehandling(behandlingsId)
+        } returns BeregningsGrunnlag(
             behandlingsId,
             Grunnlagsopplysning.Saksbehandler("Z123456", Tidspunkt.now()),
             emptyList(),
@@ -244,7 +250,7 @@ internal class BeregningsGrunnlagServiceTest {
         every { beregningsGrunnlagRepository.lagre(any()) } returns true
 
         runBlocking {
-            beregningsGrunnlagService.dupliserBeregningsGrunnlag(omregningsId, behandlingsId)
+            beregningsGrunnlagService.dupliserBeregningsGrunnlagBP(omregningsId, behandlingsId)
 
             verify(exactly = 1) { beregningsGrunnlagRepository.lagre(any()) }
         }
@@ -258,11 +264,11 @@ internal class BeregningsGrunnlagServiceTest {
 
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
         coEvery { behandlingKlient.beregn(any(), any(), any()) } returns true
-        every { beregningsGrunnlagRepository.finnGrunnlagForBehandling(behandlingsId) } returns null
+        every { beregningsGrunnlagRepository.finnBarnepensjonGrunnlagForBehandling(behandlingsId) } returns null
 
         runBlocking {
             assertThrows<RuntimeException> {
-                beregningsGrunnlagService.dupliserBeregningsGrunnlag(randomUUID(), behandlingsId)
+                beregningsGrunnlagService.dupliserBeregningsGrunnlagBP(randomUUID(), behandlingsId)
 
                 verify(exactly = 0) { beregningsGrunnlagRepository.lagre(any()) }
             }
@@ -278,7 +284,7 @@ internal class BeregningsGrunnlagServiceTest {
 
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
         coEvery { behandlingKlient.beregn(any(), any(), any()) } returns true
-        every { beregningsGrunnlagRepository.finnGrunnlagForBehandling(any()) } returns BeregningsGrunnlag(
+        every { beregningsGrunnlagRepository.finnBarnepensjonGrunnlagForBehandling(any()) } returns BeregningsGrunnlag(
             behandlingsId,
             Grunnlagsopplysning.Saksbehandler("Z123456", Tidspunkt.now()),
             emptyList(),
@@ -287,7 +293,7 @@ internal class BeregningsGrunnlagServiceTest {
 
         runBlocking {
             assertThrows<RuntimeException> {
-                beregningsGrunnlagService.dupliserBeregningsGrunnlag(omregningsId, behandlingsId)
+                beregningsGrunnlagService.dupliserBeregningsGrunnlagBP(omregningsId, behandlingsId)
 
                 verify(exactly = 0) { beregningsGrunnlagRepository.lagre(any()) }
             }
@@ -312,7 +318,7 @@ internal class BeregningsGrunnlagServiceTest {
 
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
         coEvery { behandlingKlient.beregn(any(), any(), any()) } returns true
-        every { beregningsGrunnlagRepository.finnGrunnlagForBehandling(any()) } returns null
+        every { beregningsGrunnlagRepository.finnBarnepensjonGrunnlagForBehandling(any()) } returns null
         every { beregningsGrunnlagRepository.lagre(capture(slot)) } returns true
 
         runBlocking {

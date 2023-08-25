@@ -71,7 +71,7 @@ class BeregningService(
 
         if (grunnlagDenneBehandlinga == null || grunnlagDenneBehandlinga.behandlingId != behandlingId) {
             logger.info("Kopierer beregningsgrunnlag og oppretter beregning for $behandlingId")
-            beregningsGrunnlagService.dupliserBeregningsGrunnlag(behandlingId, sisteIverksatteBehandling.id)
+            beregningsGrunnlagService.dupliserBeregningsGrunnlagBP(behandlingId, sisteIverksatteBehandling.id)
             opprettBeregning(behandlingId, brukerTokenInfo)
         }
     }

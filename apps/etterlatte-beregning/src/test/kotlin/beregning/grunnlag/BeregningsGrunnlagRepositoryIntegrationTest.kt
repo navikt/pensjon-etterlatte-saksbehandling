@@ -91,7 +91,7 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest {
             )
         )
 
-        val result = repository.finnGrunnlagForBehandling(id)
+        val result = repository.finnBarnepensjonGrunnlagForBehandling(id)
 
         assertNotNull(result)
 
@@ -150,7 +150,7 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest {
             )
         )
 
-        val result = repository.finnGrunnlagForBehandling(id)
+        val result = repository.finnBarnepensjonGrunnlagForBehandling(id)
 
         assertNotNull(result)
 
@@ -180,7 +180,7 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest {
             )
         )
 
-        val result = repository.finnGrunnlagForBehandling(id)
+        val result = repository.finnBarnepensjonGrunnlagForBehandling(id)
 
         assertNotNull(result)
     }

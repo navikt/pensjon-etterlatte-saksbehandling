@@ -8,11 +8,14 @@ import no.nav.etterlatte.brev.beregning.BeregningKlient
 import no.nav.etterlatte.brev.grunnlag.GrunnlagKlient
 import no.nav.etterlatte.brev.trygdetid.TrygdetidKlient
 import no.nav.etterlatte.brev.vedtak.VedtaksvurderingKlient
+import no.nav.etterlatte.brev.vilkaarsvurdering.VilkaarsvurderingKlient
+import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
 import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.pensjon.brevbaker.api.model.Kroner
 import java.time.LocalDate
@@ -24,7 +27,8 @@ class SakOgBehandlingService(
     private val grunnlagKlient: GrunnlagKlient,
     private val beregningKlient: BeregningKlient,
     private val behandlingKlient: BehandlingKlient,
-    private val trygdetidKlient: TrygdetidKlient
+    private val trygdetidKlient: TrygdetidKlient,
+    private val vilkaarsvurderingKlient: VilkaarsvurderingKlient
 ) {
 
     suspend fun hentSak(sakId: Long, bruker: BrukerTokenInfo) =
@@ -43,12 +47,14 @@ class SakOgBehandlingService(
         val grunnlag = async { grunnlagKlient.hentGrunnlag(sakId, brukerTokenInfo) }
         val sak = async { behandlingKlient.hentSak(sakId, brukerTokenInfo) }
         val innvilgelsesdato = { async { vedtaksvurderingKlient.hentInnvilgelsesdato(sakId, brukerTokenInfo) } }
+        val vilkaarsvurdering = async { vilkaarsvurderingKlient.hentVilkaarsvurdering(behandlingId, brukerTokenInfo) }
 
         mapBehandling(
             vedtak.await(),
             grunnlag.await(),
             sak.await(),
             innvilgelsesdato,
+            vilkaarsvurdering.await(),
             brukerTokenInfo
         )
     }
@@ -58,10 +64,10 @@ class SakOgBehandlingService(
         grunnlag: Grunnlag,
         sak: Sak,
         innvilgelsesdato: () -> Deferred<LocalDate?>,
+        vilkaarsvurdering: VilkaarsvurderingDto,
         brukerTokenInfo: BrukerTokenInfo
     ): Behandling {
         val innloggetSaksbehandlerIdent = brukerTokenInfo.ident()
-
         val ansvarligEnhet = vedtak.vedtakFattet?.ansvarligEnhet ?: sak.enhet
         val saksbehandlerIdent = vedtak.vedtakFattet?.ansvarligSaksbehandler ?: innloggetSaksbehandlerIdent
         val attestantIdent = vedtak.vedtakFattet?.let { vedtak.attestasjon?.attestant ?: innloggetSaksbehandlerIdent }
@@ -92,6 +98,7 @@ class SakOgBehandlingService(
                 attestantIdent
             ),
             utbetalingsinfo = finnUtbetalingsinfo(vedtak.behandling.id, vedtak.virkningstidspunkt, brukerTokenInfo),
+            forrigeUtbetalingsinfo = finnForrigeUbetalingsinfo(vedtak, sak, brukerTokenInfo),
             avkortingsinfo = finnYtelseMedGrunnlag(
                 vedtak.behandling.id,
                 vedtak.sak.sakType,
@@ -107,8 +114,28 @@ class SakOgBehandlingService(
             trygdetid = finnTrygdetid(
                 vedtak.behandling.id,
                 brukerTokenInfo
-            )
+            ),
+            vilkaarsvurdering = vilkaarsvurdering
         )
+    }
+
+    private suspend fun SakOgBehandlingService.finnForrigeUbetalingsinfo(
+        vedtak: VedtakDto,
+        sak: Sak,
+        brukerTokenInfo: BrukerTokenInfo
+    ): Utbetalingsinfo? {
+        val forrigeUtbetalingsinfo = when (vedtak.behandling.type) {
+            BehandlingType.REVURDERING -> {
+                val sisteIverksatteBehandling = behandlingKlient.hentSisteIverksatteBehandling(sak.id, brukerTokenInfo)
+                finnUtbetalingsinfo(
+                    sisteIverksatteBehandling.id,
+                    vedtak.virkningstidspunkt,
+                    brukerTokenInfo
+                )
+            }
+            else -> null
+        }
+        return forrigeUtbetalingsinfo
     }
 
     private suspend fun finnUtbetalingsinfo(

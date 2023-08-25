@@ -47,6 +47,7 @@ import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.VedtakSak
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
 import no.nav.etterlatte.rivers.VedtakTilJournalfoering
 import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
@@ -585,7 +586,24 @@ internal class VedtaksbrevServiceTest {
             )
         ),
         revurderingsaarsak = revurderingsaarsak,
-        virkningsdato = YearMonth.of(LocalDate.now().year, LocalDate.now().month)
+        virkningsdato = YearMonth.of(LocalDate.now().year, LocalDate.now().month),
+        vilkaarsvurdering = VilkaarsvurderingDto(BEHANDLING_ID, emptyList(), YearMonth.now(), null),
+        forrigeUtbetalingsinfo = Utbetalingsinfo(
+            1,
+            Kroner(4320),
+            LocalDate.now(),
+            false,
+            listOf(
+                Beregningsperiode(
+                    LocalDate.now(),
+                    LocalDate.now().plusYears(4),
+                    Kroner(120000),
+                    1,
+                    Kroner(5000),
+                    40
+                )
+            )
+        )
     )
 
     private fun opprettMottaker() = Mottaker(

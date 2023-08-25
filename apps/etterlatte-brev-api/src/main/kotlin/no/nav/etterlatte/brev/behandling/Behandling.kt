@@ -15,6 +15,7 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Navn
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
 import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
 import no.nav.pensjon.brevbaker.api.model.Kroner
 import java.time.LocalDate
@@ -29,6 +30,8 @@ data class Behandling(
     val persongalleri: Persongalleri,
     val vedtak: ForenkletVedtak,
     val utbetalingsinfo: Utbetalingsinfo,
+    val vilkaarsvurdering: VilkaarsvurderingDto,
+    val forrigeUtbetalingsinfo: Utbetalingsinfo? = null,
     val avkortingsinfo: Avkortingsinfo? = null,
     val revurderingsaarsak: RevurderingAarsak? = null,
     val revurderingInfo: RevurderingInfo? = null,

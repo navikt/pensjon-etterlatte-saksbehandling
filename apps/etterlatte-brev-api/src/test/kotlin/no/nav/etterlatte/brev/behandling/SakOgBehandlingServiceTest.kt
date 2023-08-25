@@ -10,12 +10,16 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.brev.behandlingklient.BehandlingKlient
+import no.nav.etterlatte.brev.behandlingklient.BehandlingKlientException
 import no.nav.etterlatte.brev.beregning.BeregningKlient
 import no.nav.etterlatte.brev.grunnlag.GrunnlagKlient
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.trygdetid.TrygdetidKlient
 import no.nav.etterlatte.brev.vedtak.VedtaksvurderingKlient
+import no.nav.etterlatte.brev.vilkaarsvurdering.VilkaarsvurderingKlient
+import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.behandling.SisteIverksatteBehandling
 import no.nav.etterlatte.libs.common.beregning.BeregningDTO
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
@@ -31,6 +35,7 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.pensjon.brevbaker.api.model.Kroner
@@ -50,6 +55,7 @@ internal class SakOgBehandlingServiceTest {
     private val beregningKlient = mockk<BeregningKlient>()
     private val behandlingKlient = mockk<BehandlingKlient>()
     private val trygdetidKlient = mockk<TrygdetidKlient>()
+    private val vilkaarsvurderingKlient = mockk<VilkaarsvurderingKlient>()
 
     private val service =
         SakOgBehandlingService(
@@ -57,7 +63,8 @@ internal class SakOgBehandlingServiceTest {
             grunnlagKlient,
             beregningKlient,
             behandlingKlient,
-            trygdetidKlient
+            trygdetidKlient,
+            vilkaarsvurderingKlient
         )
 
     @BeforeEach
@@ -75,10 +82,14 @@ internal class SakOgBehandlingServiceTest {
         coEvery {
             behandlingKlient.hentSak(any(), any())
         } returns Sak("ident", SakType.BARNEPENSJON, SAK_ID, ENHET)
+        coEvery {
+            behandlingKlient.hentSisteIverksatteBehandling(any(), any())
+        } throws BehandlingKlientException("har ikke tidligere behandling")
         coEvery { vedtaksvurderingKlient.hentVedtak(any(), any()) } returns opprettVedtak()
         coEvery { grunnlagKlient.hentGrunnlag(SAK_ID, BRUKERTokenInfo) } returns opprettGrunnlag()
         coEvery { beregningKlient.hentBeregning(any(), any()) } returns opprettBeregning()
         coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns opprettTrygdetid()
+        coEvery { vilkaarsvurderingKlient.hentVilkaarsvurdering(any(), any()) } returns opprettVilkaarsvurdering()
 
         val behandling = runBlocking {
             service.hentBehandling(SAK_ID, BEHANDLING_ID, BRUKERTokenInfo)
@@ -113,10 +124,14 @@ internal class SakOgBehandlingServiceTest {
         coEvery {
             behandlingKlient.hentSak(any(), any())
         } returns Sak("ident", SakType.BARNEPENSJON, SAK_ID, ENHET)
+        coEvery {
+            behandlingKlient.hentSisteIverksatteBehandling(any(), any())
+        } returns SisteIverksatteBehandling(UUID.randomUUID())
         coEvery { vedtaksvurderingKlient.hentVedtak(any(), any()) } returns opprettVedtak()
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns opprettGrunnlag()
         coEvery { beregningKlient.hentBeregning(any(), any()) } returns opprettBeregning()
         coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns opprettTrygdetid()
+        coEvery { vilkaarsvurderingKlient.hentVilkaarsvurdering(any(), any()) } returns opprettVilkaarsvurdering()
 
         val behandling = runBlocking {
             service.hentBehandling(SAK_ID, BEHANDLING_ID, BRUKERTokenInfo)
@@ -143,10 +158,14 @@ internal class SakOgBehandlingServiceTest {
         coEvery {
             behandlingKlient.hentSak(any(), any())
         } returns Sak("ident", SakType.BARNEPENSJON, SAK_ID, ENHET)
+        coEvery {
+            behandlingKlient.hentSisteIverksatteBehandling(any(), any())
+        } returns SisteIverksatteBehandling(UUID.randomUUID())
         coEvery { vedtaksvurderingKlient.hentVedtak(any(), any()) } returns opprettVedtak()
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns opprettGrunnlag()
         coEvery { beregningKlient.hentBeregning(any(), any()) } returns opprettBeregningSoeskenjustering()
         coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns opprettTrygdetid()
+        coEvery { vilkaarsvurderingKlient.hentVilkaarsvurdering(any(), any()) } returns opprettVilkaarsvurdering()
 
         val behandling = runBlocking {
             service.hentBehandling(SAK_ID, BEHANDLING_ID, BRUKERTokenInfo)
@@ -184,6 +203,7 @@ internal class SakOgBehandlingServiceTest {
         every { behandling.id } returns BEHANDLING_ID
         every { behandling.revurderingsaarsak } returns null
         every { behandling.revurderingInfo } returns null
+        every { behandling.type } returns BehandlingType.FØRSTEGANGSBEHANDLING
         every { vedtakId } returns 123L
         every { type } returns VedtakType.INNVILGELSE
         every { status } returns VedtakStatus.OPPRETTET
@@ -225,6 +245,8 @@ internal class SakOgBehandlingServiceTest {
     )
 
     private fun opprettTrygdetid() = null
+
+    private fun opprettVilkaarsvurdering(): VilkaarsvurderingDto = mockk<VilkaarsvurderingDto>()
 
     private companion object {
         private val FNR = Folkeregisteridentifikator.of("11057523044")

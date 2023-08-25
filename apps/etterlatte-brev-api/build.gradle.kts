@@ -14,6 +14,7 @@ dependencies {
     implementation(project(":libs:etterlatte-trygdetid-model"))
     implementation(project(":libs:ktor2client-onbehalfof"))
     implementation(project(":libs:ktor2client-auth-clientcredentials"))
+    implementation(project(":libs:etterlatte-vilkaarsvurdering-model"))
     implementation(project(":libs:etterlatte-funksjonsbrytere"))
 
     implementation("no.nav.pensjon.brevbaker:brevbaker-api-model-common:1.0.2")

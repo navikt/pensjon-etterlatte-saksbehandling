@@ -111,6 +111,10 @@ spec:
       value: http://etterlatte-trygdetid
     - name: ETTERLATTE_TRYGDETID_CLIENT_ID
       value: prod-gcp.etterlatte.etterlatte-trygdetid
+    - name: ETTERLATTE_VILKAARSVURDERING_URL
+      value: http://etterlatte-vilkaarsvurdering
+    - name: ETTERLATTE_VILKAARSVURDERING_CLIENT_ID
+      value: prod-gcp.etterlatte.etterlatte-vilkaarsvurdering
   accessPolicy:
     outbound:
       rules:
@@ -120,6 +124,7 @@ spec:
         - application: etterlatte-beregning
         - application: etterlatte-behandling
         - application: etterlatte-trygdetid
+        - application: etterlatte-vilkaarsvurdering
       external:
         - host: etterlatte-proxy.prod-fss-pub.nais.io
         - host: norg2.prod-fss-pub.nais.io

@@ -33,6 +33,7 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveType
+import no.nav.etterlatte.libs.common.oppgaveNy.Status
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
@@ -153,6 +154,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
                 null
             )
             oppgaveService.tildelSaksbehandler(any(), "Jenny")
+            oppgaveService.hentOppgaverForSak(sak.id)
         }
         inTransaction {
             assertEquals(revurdering, applicationContext.behandlingDao.hentBehandling(revurdering!!.id))
@@ -261,6 +263,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
             assertEquals(nyRevurderingInfo, ferdigRevurdering.revurderingInfo)
             verify { hendelser.sendMeldingForHendelse(revurdering, BehandlingHendelseType.OPPRETTET) }
             verify { grunnlagService.leggInnNyttGrunnlag(revurdering, any()) }
+            verify { oppgaveService.hentOppgaverForSak(sak.id) }
             coVerify { grunnlagService.hentPersongalleri(any()) }
             verify {
                 oppgaveService.opprettNyOppgaveMedSakOgReferanse(
@@ -447,6 +450,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
             coVerify { grunnlagService.hentPersongalleri(any()) }
             verify { grunnlagService.leggInnNyttGrunnlag(behandling as Behandling, any()) }
             verify { grunnlagService.leggInnNyttGrunnlag(revurdering, any()) }
+            verify { oppgaveService.hentOppgaverForSak(sak.id) }
             verify { hendelser.sendMeldingForHendelse(revurdering, BehandlingHendelseType.OPPRETTET) }
             verify {
                 oppgaveService.opprettNyOppgaveMedSakOgReferanse(
@@ -551,7 +555,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
 
         val (sak, _) = opprettSakMedFoerstegangsbehandling(fnr, behandlingFactory)
 
-        val err = assertThrows<BadRequestException> {
+        assertThrows<RevurderingManglerIverksattBehandlingException> {
             revurderingService.opprettManuellRevurderingWrapper(
                 sakId = sak.id,
                 aarsak = RevurderingAarsak.REGULERING,
@@ -560,13 +564,10 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
                 saksbehandlerIdent = "Jenny"
             )
         }
-        assertTrue(
-            err.message!!.startsWith("Kan ikke revurdere en sak uten iverksatt behandling sakid: ${sak.id}")
-        )
     }
 
     @Test
-    fun `returnerer bad request hvis revurderingaarsak ikke er stoettet for sak`() {
+    fun `Kaster egen exception hvis revurderingaarsak ikke er stoettet for miljoe`() {
         val revurderingService = RevurderingServiceImpl(
             applicationContext.oppgaveServiceNy,
             applicationContext.grunnlagsService,
@@ -593,8 +594,53 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
             )
 
         val (sak, _) = opprettSakMedFoerstegangsbehandling(fnr, behandlingFactory)
+        val revurderingsAarsakIkkeStoettetIMiljoeBarn = mockk<RevurderingAarsak>().also {
+            every { it.kanBrukesIMiljo() } returns false
+            every { it.name } returns RevurderingAarsak.BARN.name
+        }
+        assertThrows<RevurderingaarsakIkkeStoettetIMiljoeException> {
+            revurderingService.opprettManuellRevurderingWrapper(
+                sakId = sak.id,
+                aarsak = revurderingsAarsakIkkeStoettetIMiljoeBarn,
+                paaGrunnAvHendelseId = UUID.randomUUID().toString(),
+                begrunnelse = null,
+                saksbehandlerIdent = "Jenny"
+            )
+        }
+    }
 
-        val err = assertThrows<BadRequestException> {
+    @Test
+    fun `Kan ikke opprette ny manuell revurdering hvis det finnes en oppgave under behandling for sak`() {
+        val revurderingService = RevurderingServiceImpl(
+            applicationContext.oppgaveServiceNy,
+            applicationContext.grunnlagsService,
+            applicationContext.behandlingsHendelser,
+            applicationContext.featureToggleService,
+            applicationContext.behandlingDao,
+            applicationContext.hendelseDao,
+            applicationContext.grunnlagsendringshendelseDao,
+            applicationContext.kommerBarnetTilGodeService,
+            applicationContext.revurderingDao,
+            applicationContext.behandlingService,
+            applicationContext.kanBrukeNyOppgaveliste
+        )
+        val behandlingFactory =
+            BehandlingFactory(
+                oppgaveService = applicationContext.oppgaveServiceNy,
+                grunnlagService = applicationContext.grunnlagsService,
+                revurderingService = applicationContext.revurderingService,
+                sakDao = applicationContext.sakDao,
+                behandlingDao = applicationContext.behandlingDao,
+                hendelseDao = applicationContext.hendelseDao,
+                behandlingHendelser = applicationContext.behandlingsHendelser,
+                featureToggleService = applicationContext.featureToggleService
+            )
+
+        val (sak, _) = opprettSakMedFoerstegangsbehandling(fnr, behandlingFactory)
+        val hentOppgaverForSak = applicationContext.oppgaveServiceNy.hentOppgaverForSak(sak.id)
+        val oppgaveForFoerstegangsbehandling = hentOppgaverForSak.single { it.status == Status.NY }
+        applicationContext.oppgaveServiceNy.tildelSaksbehandler(oppgaveForFoerstegangsbehandling.id, "sakbeahndler")
+        assertThrows<MaksEnBehandlingsOppgaveUnderbehandlingException> {
             revurderingService.opprettManuellRevurderingWrapper(
                 sakId = sak.id,
                 aarsak = RevurderingAarsak.REGULERING,
@@ -603,8 +649,5 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
                 saksbehandlerIdent = "Jenny"
             )
         }
-        assertTrue(
-            err.message!!.startsWith("Kan ikke revurdere en sak uten iverksatt behandling sakid: ${sak.id}")
-        )
     }
 }

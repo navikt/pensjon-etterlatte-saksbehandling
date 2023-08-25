@@ -97,7 +97,7 @@ class RevurderingServiceImpl(
     fun hentBehandling(id: UUID): Revurdering? =
         (behandlingDao.hentBehandling(id) as? Revurdering)?.sjekkEnhet()
 
-    private fun kunEnBehandlingUnderbehandling(sakId: Long) {
+    private fun kunEnBehandlingUnderBehandling(sakId: Long) {
         val oppgaverForSak = oppgaveService.hentOppgaverForSak(sakId)
         val ingenBehandlingerUnderarbeid = oppgaverForSak.filter {
             it.kilde == OppgaveKilde.BEHANDLING
@@ -135,7 +135,7 @@ class RevurderingServiceImpl(
             )
         }
 
-        kunEnBehandlingUnderbehandling(sakId)
+        kunEnBehandlingUnderBehandling(sakId)
 
         val forrigeIverksatteBehandling = behandlingService.hentSisteIverksatte(sakId)
         if (forrigeIverksatteBehandling != null) {

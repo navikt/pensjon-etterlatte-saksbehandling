@@ -88,13 +88,13 @@ object AvkortingRegelkjoring {
 
     fun beregnAvkortetYtelse(
         periode: Periode,
-        beregningsperioder: List<YtelseFoerAvkorting>,
+        ytelseFoerAvkorting: List<YtelseFoerAvkorting>,
         avkortingsperioder: List<Avkortingsperiode>,
         restanse: Restanse? = null,
         type: AvkortetYtelseType = AvkortetYtelseType.NY
     ): List<AvkortetYtelse> {
         val regelgrunnlag = PeriodisertAvkortetYtelseGrunnlag(
-            beregningsperioder = periodiserteBeregninger(beregningsperioder),
+            beregningsperioder = periodiserteBeregninger(ytelseFoerAvkorting),
             avkortingsperioder = periodiserteAvkortinger(avkortingsperioder),
             fordeltRestanse = restansegrunnlag(restanse)
         )

@@ -74,12 +74,7 @@ data class Avkorting(
     ): Avkorting = if (behandlingstype == BehandlingType.FØRSTEGANGSBEHANDLING) {
         beregnAvkortingForstegangs(virkningstidspunkt, beregning)
     } else {
-        // TODO EY-2556
-        if (virkningstidspunkt.dato > YearMonth.now()) {
-            beregnAvkortingRevurdering(virkningstidspunkt, beregning)
-        } else {
-            beregnAvkortingTilbakeITid(virkningstidspunkt, beregning)
-        }
+        beregnAvkortingRevurdering(virkningstidspunkt, beregning)
     }
 
     private fun beregnAvkortingForstegangs(
@@ -117,21 +112,25 @@ data class Avkorting(
         val ytelseFoerAvkorting =
             this.aarsoppgjoer.ytelseFoerAvkorting.leggTilNyeBeregninger(beregning, virkningstidspunkt.dato)
 
-        val fraFoersteMaaned = Periode(fom = this.foersteMaanedDetteAar(), tom = null)
-        val avkortingHeleAaret = AvkortingRegelkjoring.beregnInntektsavkorting(
-            fraFoersteMaaned,
-            avkortingGrunnlag = listOf(avkortingGrunnlag.last().copy(periode = fraFoersteMaaned))
+        val helePeriodeDetteAar = Periode(fom = this.foersteMaanedDetteAar(), tom = null)
+        val periodeFoerVirk = Periode(fom = this.foersteMaanedDetteAar(), tom = virkningstidspunkt.dato.minusMonths(1))
+        val periodeFraVirk = Periode(fom = virkningstidspunkt.dato, tom = null)
+
+        val avkortingerAlleInntekter = AvkortingRegelkjoring.beregnInntektsavkorting(
+            periode = helePeriodeDetteAar,
+            avkortingGrunnlag = avkortingGrunnlag
+        )
+        val avkortingerSisteInntekt = AvkortingRegelkjoring.beregnInntektsavkorting(
+            periode = helePeriodeDetteAar,
+            avkortingGrunnlag = listOf(avkortingGrunnlag.last().copy(periode = helePeriodeDetteAar))
         )
 
-        val periodeFoerVirk =
-            Periode(fom = ytelseFoerAvkorting.first().periode.fom, tom = virkningstidspunkt.dato.minusMonths(1))
         val reberegnetYtelseFoerVirk = AvkortingRegelkjoring.beregnAvkortetYtelse(
-            periodeFoerVirk,
-            ytelseFoerAvkorting,
-            avkortingHeleAaret,
+            periode = periodeFoerVirk,
+            ytelseFoerAvkorting = ytelseFoerAvkorting,
+            avkortingsperioder = avkortingerSisteInntekt,
             type = AvkortetYtelseType.REBEREGNET
         )
-
         val restanse = AvkortingRegelkjoring.beregnRestanse(
             this.foersteMaanedDetteAar(),
             virkningstidspunkt.dato,
@@ -140,77 +139,21 @@ data class Avkorting(
         )
 
         val avkortetYtelseFraNyVirk = AvkortingRegelkjoring.beregnAvkortetYtelse(
-            Periode(fom = virkningstidspunkt.dato, tom = null),
+            periodeFraVirk,
             ytelseFoerAvkorting,
-            avkortingHeleAaret,
+            avkortingerAlleInntekter,
             restanse
         )
 
         return this.copy(
             aarsoppgjoer = this.aarsoppgjoer.copy(
                 ytelseFoerAvkorting = ytelseFoerAvkorting,
-                avkortingsperioder = avkortingHeleAaret, // TODO ikke bruke hele året men brukt tidliger
-                // TODO avkortingsperioderReberegnet
+                avkortingsperioder = avkortingerAlleInntekter,
+                // TODO EY-2523 - avkortinger siste inntekt - legge til typefelt (samme som avkortetYtelse?)
                 tidligereAvkortetYtelseReberegnet = reberegnetYtelseFoerVirk,
                 restanse = restanse
             ),
             avkortetYtelse = avkortetYtelseFraNyVirk
-        )
-    }
-
-    private fun beregnAvkortingTilbakeITid(virkningstidspunkt: Virkningstidspunkt, beregning: Beregning): Avkorting {
-
-        val ytelseFoerAvkorting =
-            this.aarsoppgjoer.ytelseFoerAvkorting.leggTilNyeBeregninger(beregning, virkningstidspunkt.dato)
-
-        val avkortinger = AvkortingRegelkjoring.beregnInntektsavkorting(
-            Periode(fom = this.foersteMaanedDetteAar(), tom = null),
-            avkortingGrunnlag = this.avkortingGrunnlag
-        )
-
-        val avkortetYtelseFraVirk = AvkortingRegelkjoring.beregnAvkortetYtelse(
-            Periode(fom = virkningstidspunkt.dato, tom = YearMonth.now()), // TODO EY-2556
-            ytelseFoerAvkorting,
-            avkortinger
-        )
-
-        val avkortingerSisteInntekt = AvkortingRegelkjoring.beregnInntektsavkorting(
-            Periode(fom = this.foersteMaanedDetteAar(), tom = null),
-            avkortingGrunnlag = listOf(
-                avkortingGrunnlag.last().copy(periode = Periode(fom = this.foersteMaanedDetteAar(), tom = null))
-            )
-        )
-        val reberegnetMedSisteInntekt = AvkortingRegelkjoring.beregnAvkortetYtelse(
-            Periode(fom = this.foersteMaanedDetteAar(), tom = null),
-            ytelseFoerAvkorting,
-            avkortingerSisteInntekt,
-            type = AvkortetYtelseType.REBEREGNET
-        )
-
-        val allAvkortetYtelse =  this.aarsoppgjoer.tidligereAvkortetYtelse.filter {
-            it.periode.fom < virkningstidspunkt.dato
-        } + avkortetYtelseFraVirk
-        val restanse = AvkortingRegelkjoring.beregnRestanse(
-            this.foersteMaanedDetteAar(),
-            YearMonth.now().plusMonths(1),
-            allAvkortetYtelse, // TODO Navngivning
-            reberegnetMedSisteInntekt,
-        )
-
-        val avkortetYtelseFraNaa = AvkortingRegelkjoring.beregnAvkortetYtelse(
-            Periode(fom = YearMonth.now().plusMonths(1), tom = null), // TODO EY-2556
-            ytelseFoerAvkorting,
-            avkortinger,
-            restanse
-        )
-
-        return this.copy(
-            aarsoppgjoer = this.aarsoppgjoer.copy(
-                ytelseFoerAvkorting = ytelseFoerAvkorting,
-                avkortingsperioder = avkortinger,
-                tidligereAvkortetYtelseReberegnet = reberegnetMedSisteInntekt
-            ),
-            avkortetYtelse = avkortetYtelseFraVirk + avkortetYtelseFraNaa
         )
     }
 
@@ -219,16 +162,16 @@ data class Avkorting(
         manuellRestanse: Int,
         saksbehandler: String
     ): Avkorting {
-
-        val skalReberegnes = avkortetYtelse.find { it.id == avkortetYtelseId } ?: throw Exception("hoho") // TODO
+        val skalReberegnes =
+            avkortetYtelse.find { it.id == avkortetYtelseId } ?: throw Exception("Finner ikke avkoret ytelse")
 
         val reberegnetYtelseIPeriode = AvkortingRegelkjoring.beregnAvkortetYtelse(
             skalReberegnes.periode,
             aarsoppgjoer.ytelseFoerAvkorting,
             aarsoppgjoer.avkortingsperioder,
-            Restanse(
-                id = UUID.randomUUID(), // TODO Fjern
-                totalRestanse = 0, // TODO Fjern
+            Restanse( // TODO EY-2523 - Hva gjør vi med enkeltredigering her? Det må jo lagres..
+                id = UUID.randomUUID(),
+                totalRestanse = 0,
                 fordeltRestanse = manuellRestanse,
                 tidspunkt = Tidspunkt.now(),
                 kilde = Grunnlagsopplysning.Saksbehandler.create(saksbehandler),
@@ -236,30 +179,9 @@ data class Avkorting(
             )
         )
         val avkortetYtelse = avkortetYtelse.filter { it.id != avkortetYtelseId } + reberegnetYtelseIPeriode
-        val utenSisteFraOgMed = avkortetYtelse.filter { it.periode.fom != YearMonth.now().plusMonths(1) } // TODO EY-2556
-
-        val allAvkortetYtelse =  this.aarsoppgjoer.tidligereAvkortetYtelse.filter {
-            it.periode.fom < YearMonth.of(2023, 7) // TODO EY-2523 Virk
-        } + utenSisteFraOgMed
-        val restanse = AvkortingRegelkjoring.beregnRestanse(
-            this.foersteMaanedDetteAar(),
-            YearMonth.now().plusMonths(1),
-            allAvkortetYtelse, // TODO Navngivning
-            this.aarsoppgjoer.tidligereAvkortetYtelseReberegnet,
-        )
-
-        val avkortetYtelseFraNaa = AvkortingRegelkjoring.beregnAvkortetYtelse(
-            Periode(fom = YearMonth.now().plusMonths(1), tom = null), // TODO EY-2556
-            aarsoppgjoer.ytelseFoerAvkorting,
-            aarsoppgjoer.avkortingsperioder,
-            restanse
-        )
 
         return this.copy(
-            avkortetYtelse = utenSisteFraOgMed + avkortetYtelseFraNaa,
-            aarsoppgjoer = this.aarsoppgjoer.copy(
-                restanse = restanse
-            )
+            avkortetYtelse = avkortetYtelse,
         )
     }
 

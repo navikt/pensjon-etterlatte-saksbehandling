@@ -120,3 +120,15 @@ Spørsmål knyttet til koden eller prosjektet kan stilles som issues her på Git
 
 Interne henvendelser kan sendes via Slack i kanalen #po-pensjon-team-etterlatte.
 
+# Feature toggling
+
+For å kunne bruke [unleash](https://etterlatte-unleash-web.nav.cloud.nais.io/) så må apiToken ressurs være deployet til
+GCP miljøene med kubectl apply:
+
+`kubectl apply -f unleash-api-token-(development|production).yaml`
+
+Dette oppretter en envFile som lastes i app/*/.nais/(dev|prod).yaml filene og som gir to miljøvariabler:
+
+* UNLEASH_SERVER_API_URL (husk å legge til /api)
+* UNLEASH_SERVER_API_TOKEN (API token for miljøet)
+* 

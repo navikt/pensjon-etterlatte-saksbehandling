@@ -73,6 +73,8 @@ spec:
       value: prod-gcp.etterlatte.etterlatte-vilkaarsvurdering
     - name: KODEVERK_URL
       value: "https://kodeverk.prod-fss-pub.nais.io/api/v1/kodeverk"
+  envFrom:
+    - secret: my-application-unleash-api-token
   accessPolicy:
     inbound:
       rules:
@@ -88,3 +90,4 @@ spec:
         - application: etterlatte-vilkaarsvurdering
       external:
         - host: kodeverk.prod-fss-pub.nais.io
+        - host: etterlatte-unleash-api.nav.cloud.nais.io

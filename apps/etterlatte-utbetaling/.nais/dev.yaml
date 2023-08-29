@@ -66,6 +66,8 @@ spec:
       value: "true"
     - name: KONSISTENSAVSTEMMING_OMS_ENABLED
       value: "true"
+  envFrom:
+    - secret: my-application-unleash-api-token
   accessPolicy:
     outbound:
       external:
@@ -74,3 +76,4 @@ spec:
             - name: mq
               port: 1413
               protocol: TCP
+        - host: etterlatte-unleash-api.nav.cloud.nais.io

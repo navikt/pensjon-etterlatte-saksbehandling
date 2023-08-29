@@ -7,7 +7,6 @@ import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.migrering.pen.PenKlient
-import java.net.URI
 
 internal class ApplicationContext {
     private val properties: ApplicationProperties = ApplicationProperties.fromEnv(System.getenv())
@@ -28,6 +27,6 @@ internal class ApplicationContext {
 
 private fun featureToggleProperties(config: Config) = FeatureToggleProperties(
     applicationName = config.getString("funksjonsbrytere.unleash.applicationName"),
-    uri = URI(config.getString("funksjonsbrytere.unleash.uri")),
-    cluster = config.getString("funksjonsbrytere.unleash.cluster")
+    host = config.getString("funksjonsbrytere.unleash.host"),
+    apiKey = config.getString("funksjonsbrytere.unleash.token")
 )

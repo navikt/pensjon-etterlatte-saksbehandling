@@ -34,7 +34,11 @@ spec:
       value: latest
     - name: BEHANDLING_AZURE_SCOPE
       value: api://prod-gcp.etterlatte.etterlatte-behandling/.default
+  envFrom:
+    - secret: my-application-unleash-api-token
   accessPolicy:
     outbound:
       rules:
         - application: etterlatte-behandling
+    external:
+      - host: etterlatte-unleash-api.nav.cloud.nais.io

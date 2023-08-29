@@ -115,6 +115,8 @@ spec:
       value: http://etterlatte-vilkaarsvurdering
     - name: ETTERLATTE_VILKAARSVURDERING_CLIENT_ID
       value: prod-gcp.etterlatte.etterlatte-vilkaarsvurdering
+  envFrom:
+    - secret: my-application-unleash-api-token
   accessPolicy:
     outbound:
       rules:
@@ -134,7 +136,7 @@ spec:
         - host: data.brreg.no
         - host: navansatt.prod-fss-pub.nais.io
         - host: pensjon-brevbaker.intern.nav.no
-        - host: unleash.nais.io
+        - host: etterlatte-unleash-api.nav.cloud.nais.io
     inbound:
       rules:
         - application: etterlatte-saksbehandling-ui-lokal

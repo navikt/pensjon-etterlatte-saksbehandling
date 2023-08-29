@@ -37,8 +37,12 @@ spec:
       value: api://prod-gcp.etterlatte.etterlatte-behandling/.default
     - name: PDLTJENESTER_AZURE_SCOPE
       value: api://prod-gcp.etterlatte.etterlatte-pdltjenester/.default
+  envFrom:
+    - secret: my-application-unleash-api-token
   accessPolicy:
     outbound:
       rules:
         - application: etterlatte-behandling
         - application: etterlatte-pdltjenester
+    external:
+      - host: etterlatte-unleash-api.nav.cloud.nais.io

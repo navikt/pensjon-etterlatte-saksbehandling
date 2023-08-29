@@ -41,8 +41,12 @@ spec:
       value: api://dev-gcp.etterlatte.etterlatte-behandling/.default
     - name: BEREGNING_AZURE_SCOPE
       value: api://dev-gcp.etterlatte.etterlatte-beregning/.default
+  envFrom:
+    - secret: my-application-unleash-api-token
   accessPolicy:
     outbound:
       rules:
         - application: etterlatte-behandling
         - application: etterlatte-beregning
+    external:
+      - host: etterlatte-unleash-api.nav.cloud.nais.io

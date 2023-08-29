@@ -51,9 +51,13 @@ spec:
       value: http://etterlatte-behandling
     - name: FEATURE_MAX_FORDELING_TIL_GJENNY
       value: "-1"
+  envFrom:
+    - secret: my-application-unleash-api-token
   accessPolicy:
     outbound:
       rules:
         - application: etterlatte-pdltjenester
         - application: etterlatte-gyldig-soeknad
         - application: etterlatte-behandling
+    external:
+      - host: etterlatte-unleash-api.nav.cloud.nais.io

@@ -56,3 +56,8 @@ spec:
       value: Q2_BARNEPENSJON
     - name: OPPDRAG_MQ_MANAGER
       value: MQLS04
+  envFrom:
+    - secret: my-application-unleash-api-token
+  accessPolicy:
+    external:
+      - host: etterlatte-unleash-api.nav.cloud.nais.io

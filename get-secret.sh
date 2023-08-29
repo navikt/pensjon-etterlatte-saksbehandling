@@ -128,6 +128,10 @@ addSecretToEnvFile() {
   echo "" # newline
   read -p "Is this a frontend app (does it use wonderwall)? [y/N] " USING_WONDERWALL
 
+  echo "" # newline
+  read -p "Does the app use unleash? [y/N] " USING_UNLEASH
+
+
   info "Fetching secrets from kubernetes"
 
   if [ "$USING_WONDERWALL" == "y" ]; then
@@ -143,6 +147,12 @@ addSecretToEnvFile() {
     kubectl -n etterlatte get secret $AZURE_SECRET_NAME -o json \
         | jq -r '.data | map_values(@base64d) | to_entries[] | (.key | ascii_upcase) +"=" + .value' \
         > $APP_DIR/.env.dev-gcp
+  fi
+
+  if [ "$USING_UNLEASH" == "y" ]; then
+    kubectl -n etterlatte get secret my-application-unleash-api-token -o json \
+        | jq -r '.data | map_values(@base64d) | to_entries[] | (.key | ascii_upcase) +"=" + .value' \
+        >> $APP_DIR/.env.dev-gcp
   fi
 
   info ".env.dev-gcp created with valid secrets"

@@ -40,7 +40,11 @@ spec:
       value: "pdl.leesah-v1"
     - name: PDL_AZURE_SCOPE
       value: api://dev-gcp.etterlatte.etterlatte-pdltjenester/.default
+  envFrom:
+    - secret: my-application-unleash-api-token
   accessPolicy:
     outbound:
       rules:
         - application: etterlatte-pdltjenester
+    external:
+      - host: etterlatte-unleash-api.nav.cloud.nais.io

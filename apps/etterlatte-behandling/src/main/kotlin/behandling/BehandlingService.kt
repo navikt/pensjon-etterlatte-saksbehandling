@@ -48,6 +48,8 @@ enum class BehandlingServiceFeatureToggle(private val key: String) : FeatureTogg
     override fun key() = key
 }
 
+class BehandlingFinnesIkkeException(message: String) : Exception(message)
+
 interface BehandlingService {
 
     fun hentBehandling(behandlingId: UUID): Behandling?
@@ -245,7 +247,9 @@ class BehandlingServiceImpl(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo
     ): DetaljertBehandlingDto {
-        val behandling = hentBehandling(behandlingId)!!
+        val behandling = hentBehandling(behandlingId)
+            ?: throw BehandlingFinnesIkkeException("Vi kan ikke hente behandling $behandlingId, sjekk enhet")
+
         val hendelserIBehandling = hentHendelserIBehandling(behandlingId)
         val kommerBarnetTilgode = inTransaction {
             kommerBarnetTilGodeDao.hentKommerBarnetTilGode(behandlingId)

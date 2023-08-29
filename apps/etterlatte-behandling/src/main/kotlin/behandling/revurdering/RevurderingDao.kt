@@ -11,7 +11,6 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
-import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.database.singleOrNull
@@ -52,8 +51,7 @@ class RevurderingDao(private val connection: () -> Connection) {
 
     fun lagreRevurderingInfo(
         id: UUID,
-        begrunnelse: String?,
-        revurderingInfo: RevurderingInfo,
+        revurderingMedBegrunnelse: RevurderingMedBegrunnelse,
         kilde: Grunnlagsopplysning.Kilde
     ) {
         connection().prepareStatement(
@@ -63,25 +61,29 @@ class RevurderingDao(private val connection: () -> Connection) {
             """.trimIndent()
         ).let { statement ->
             statement.setObject(1, id)
-            statement.setJsonb(2, revurderingInfo)
+            statement.setJsonb(2, revurderingMedBegrunnelse.revurderingInfo)
             statement.setJsonb(3, kilde)
-            statement.stringOrNull(4, begrunnelse)
+            statement.stringOrNull(4, revurderingMedBegrunnelse.begrunnelse)
             statement.executeUpdate()
         }
     }
 
-    private fun hentRevurderingInfoForBehandling(id: UUID): RevurderingInfo? {
-        return connection().prepareStatement(
+    private fun hentRevurderingInfoForBehandling(id: UUID): RevurderingMedBegrunnelse? =
+        connection().prepareStatement(
             """
-                SELECT info FROM revurdering_info 
+                SELECT info, begrunnelse FROM revurdering_info 
                 WHERE behandling_id = ?
             """.trimIndent()
         ).let { statement ->
             statement.setObject(1, id)
             statement.executeQuery()
-                .singleOrNull { getString("info")?.let { objectMapper.readValue(it) } }
+                .singleOrNull {
+                    RevurderingMedBegrunnelse(
+                        getString("info")?.let { objectMapper.readValue(it) },
+                        getString("begrunnelse")
+                    )
+                }
         }
-    }
 }
 
 fun PreparedStatement.stringOrNull(index: Int, text: String?) = if (text != null) {

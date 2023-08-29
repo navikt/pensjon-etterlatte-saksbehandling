@@ -25,7 +25,6 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
-import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.behandling.tilVirkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
@@ -67,8 +66,7 @@ interface RevurderingService {
 
     fun lagreRevurderingInfo(
         behandlingsId: UUID,
-        begrunnelse: String?,
-        info: RevurderingInfo,
+        revurderingMedBegrunnelse: RevurderingMedBegrunnelse,
         navIdent: String
     ): Boolean
 }
@@ -255,8 +253,7 @@ class RevurderingServiceImpl(
 
     override fun lagreRevurderingInfo(
         behandlingsId: UUID,
-        begrunnelse: String?,
-        info: RevurderingInfo,
+        revurderingMedBegrunnelse: RevurderingMedBegrunnelse,
         navIdent: String
     ): Boolean {
         return inTransaction(true) {
@@ -264,7 +261,7 @@ class RevurderingServiceImpl(
                 return@inTransaction false
             }
             val kilde = Grunnlagsopplysning.Saksbehandler.create(navIdent)
-            revurderingDao.lagreRevurderingInfo(behandlingsId, begrunnelse, info, kilde)
+            revurderingDao.lagreRevurderingInfo(behandlingsId, revurderingMedBegrunnelse, kilde)
             return@inTransaction true
         }
     }

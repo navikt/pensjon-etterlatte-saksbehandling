@@ -1,5 +1,6 @@
 package no.nav.etterlatte.behandling.domain
 
+import no.nav.etterlatte.behandling.revurdering.RevurderingMedBegrunnelse
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -50,7 +51,7 @@ sealed class Revurdering(
             revurderingsaarsak: RevurderingAarsak,
             prosesstype: Prosesstype,
             kilde: Vedtaksloesning,
-            revurderingInfo: RevurderingInfo?,
+            revurderingInfo: RevurderingMedBegrunnelse?,
             begrunnelse: String?
         ) = when (prosesstype) {
             Prosesstype.MANUELL -> ManuellRevurdering(
@@ -64,7 +65,7 @@ sealed class Revurdering(
                 utenlandstilsnitt = utenlandstilsnitt,
                 boddEllerArbeidetUtlandet = boddEllerArbeidetUtlandet,
                 revurderingsaarsak = revurderingsaarsak,
-                revurderingInfo = revurderingInfo,
+                revurderingInfo = revurderingInfo?.revurderingInfo,
                 kilde = kilde,
                 begrunnelse = begrunnelse
             )
@@ -80,7 +81,7 @@ sealed class Revurdering(
                 utenlandstilsnitt = utenlandstilsnitt,
                 boddEllerArbeidetUtlandet = boddEllerArbeidetUtlandet,
                 revurderingsaarsak = revurderingsaarsak,
-                revurderingInfo = revurderingInfo,
+                revurderingInfo = revurderingInfo?.revurderingInfo,
                 kilde = kilde,
                 begrunnelse = begrunnelse
             )

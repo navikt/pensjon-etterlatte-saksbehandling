@@ -33,8 +33,7 @@ internal fun Route.revurderingRoutes(
                     medBody<RevurderingInfoDto> {
                         val fikkLagret = revurderingService.lagreRevurderingInfo(
                             behandlingsId,
-                            it.begrunnelse,
-                            it.info,
+                            RevurderingMedBegrunnelse(it.info, it.begrunnelse),
                             brukerTokenInfo.ident()
                         )
                         if (fikkLagret) {

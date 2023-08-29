@@ -217,7 +217,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
         val revurderingInfo = RevurderingInfo.Soeskenjustering(BarnepensjonSoeskenjusteringGrunn.SOESKEN_DOER)
         val fikkLagret = revurderingService.lagreRevurderingInfo(
             revurdering!!.id,
-            revurderingInfo,
+            RevurderingMedBegrunnelse(revurderingInfo, null),
             "saksbehandler"
         )
         assertTrue(fikkLagret)
@@ -232,7 +232,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
         assertTrue(
             revurderingService.lagreRevurderingInfo(
                 revurdering.id,
-                nyRevurderingInfo,
+                RevurderingMedBegrunnelse(nyRevurderingInfo, null),
                 "saksbehandler"
             )
         )
@@ -253,7 +253,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
         assertFalse(
             revurderingService.lagreRevurderingInfo(
                 revurdering.id,
-                revurderingInfo,
+                RevurderingMedBegrunnelse(revurderingInfo, null),
                 "saksbehandler"
             )
         )

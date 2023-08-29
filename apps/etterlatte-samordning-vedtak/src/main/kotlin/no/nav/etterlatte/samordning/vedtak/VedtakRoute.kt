@@ -31,7 +31,7 @@ fun Route.vedtakRoute() {
         }
     }
 
-    route("vedtak") {
+    route("api/vedtak") {
         get("{vedtakId}") {
             val vedtakId = requireNotNull(call.parameters["vedtakId"]).toLong()
 

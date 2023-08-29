@@ -15,10 +15,10 @@ import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandlingsId
+import no.nav.etterlatte.libs.common.hentNavidentFraToken
 import no.nav.etterlatte.libs.common.kunSaksbehandler
 import no.nav.etterlatte.libs.common.medBody
 import no.nav.etterlatte.libs.common.sakId
-import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 
 internal fun Route.revurderingRoutes(
     revurderingService: RevurderingService
@@ -29,17 +29,19 @@ internal fun Route.revurderingRoutes(
         route("{$BEHANDLINGSID_CALL_PARAMETER}") {
             route("revurderinginfo") {
                 post {
-                    logger.info("Lagrer revurderinginfo på behandling $behandlingsId")
-                    medBody<RevurderingInfoDto> {
-                        val fikkLagret = revurderingService.lagreRevurderingInfo(
-                            behandlingsId,
-                            RevurderingMedBegrunnelse(it.info, it.begrunnelse),
-                            brukerTokenInfo.ident()
-                        )
-                        if (fikkLagret) {
-                            call.respond(HttpStatusCode.NoContent)
-                        } else {
-                            call.respond(HttpStatusCode.Forbidden)
+                    hentNavidentFraToken { navIdent ->
+                        logger.info("Lagrer revurderinginfo på behandling $behandlingsId")
+                        medBody<RevurderingInfoDto> {
+                            val fikkLagret = revurderingService.lagreRevurderingInfo(
+                                behandlingsId,
+                                RevurderingMedBegrunnelse(it.info, it.begrunnelse),
+                                navIdent
+                            )
+                            if (fikkLagret) {
+                                call.respond(HttpStatusCode.NoContent)
+                            } else {
+                                call.respond(HttpStatusCode.Forbidden)
+                            }
                         }
                     }
                 }

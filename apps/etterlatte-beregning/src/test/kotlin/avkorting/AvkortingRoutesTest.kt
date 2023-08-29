@@ -14,6 +14,7 @@ import io.ktor.server.testing.ApplicationTestBuilder
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
+import no.nav.etterlatte.avkorting.AvkortetYtelseType
 import no.nav.etterlatte.avkorting.Avkorting
 import no.nav.etterlatte.avkorting.AvkortingService
 import no.nav.etterlatte.avkorting.avkorting
@@ -87,12 +88,19 @@ class AvkortingRoutesTest {
             periode = Periode(fom = dato, tom = dato),
             kilde = Grunnlagsopplysning.Saksbehandler("Saksbehandler01", tidspunkt)
         )
+        val avkortetYtelseId = UUID.randomUUID()
         val avkorting = Avkorting(
             avkortingGrunnlag = listOf(avkortingsgrunnlag),
             aarsoppgjoer = aarsoppgjoer(
                 avkortingsperioder = listOf(avkortingsperiode())
             ),
-            avkortetYtelse = listOf(avkortetYtelse(periode = Periode(fom = dato, tom = dato)))
+            avkortetYtelse = listOf(
+                avkortetYtelse(
+                    id = avkortetYtelseId,
+                    type = AvkortetYtelseType.NY,
+                    periode = Periode(fom = dato, tom = dato)
+                )
+            )
         )
         val dto = AvkortingDto(
             avkortingGrunnlag = listOf(
@@ -112,6 +120,8 @@ class AvkortingRoutesTest {
             ),
             avkortetYtelse = listOf(
                 AvkortetYtelseDto(
+                    id = avkortetYtelseId,
+                    type = AvkortetYtelseType.NY.name,
                     fom = dato,
                     tom = dato,
                     ytelseFoerAvkorting = 300,

@@ -58,7 +58,7 @@ data class AvkortetYtelseDto(
     val id: UUID? = null,
     val fom: YearMonth,
     val tom: YearMonth?,
-    val type: String = "", // TODO
+    val type: String = "",
     val ytelseFoerAvkorting: Int,
     val avkortingsbeloep: Int,
     val ytelseEtterAvkorting: Int,

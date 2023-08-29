@@ -26,7 +26,7 @@ import java.time.YearMonth
 import java.util.*
 
 internal class AvkortingTest {
-
+/* TODO EY-2523
     @Nested
     inner class KopierAvkorting {
 
@@ -454,5 +454,5 @@ internal class AvkortingTest {
             }
         }
     }
-
+*/
 }

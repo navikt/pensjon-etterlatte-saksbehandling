@@ -112,46 +112,54 @@ data class Avkorting(
         val ytelseFoerAvkorting =
             this.aarsoppgjoer.ytelseFoerAvkorting.leggTilNyeBeregninger(beregning, virkningstidspunkt.dato)
 
-        val helePeriodeDetteAar = Periode(fom = this.foersteMaanedDetteAar(), tom = null)
-        val periodeFoerVirk = Periode(fom = this.foersteMaanedDetteAar(), tom = virkningstidspunkt.dato.minusMonths(1))
-        val periodeFraVirk = Periode(fom = virkningstidspunkt.dato, tom = null)
+        val ytelseEtterAvkortingAlleInntekter = mutableListOf<AvkortetYtelse>()
+        this.avkortingGrunnlag.forEach { inntekt ->
+            val periode = Periode(fom = this.foersteMaanedDetteAar(), tom = inntekt.periode.tom)
 
-        val avkortingerAlleInntekter = AvkortingRegelkjoring.beregnInntektsavkorting(
-            periode = helePeriodeDetteAar,
-            avkortingGrunnlag = avkortingGrunnlag
-        )
-        val avkortingerSisteInntekt = AvkortingRegelkjoring.beregnInntektsavkorting(
-            periode = helePeriodeDetteAar,
-            avkortingGrunnlag = listOf(avkortingGrunnlag.last().copy(periode = helePeriodeDetteAar))
-        )
+            val avkortinger = AvkortingRegelkjoring.beregnInntektsavkorting(
+                periode = Periode(fom = this.foersteMaanedDetteAar(), tom = inntekt.periode.tom),
+                avkortingGrunnlag = listOf(inntekt.copy(periode = periode))
+            )
 
-        val reberegnetYtelseFoerVirk = AvkortingRegelkjoring.beregnAvkortetYtelse(
-            periode = periodeFoerVirk,
-            ytelseFoerAvkorting = ytelseFoerAvkorting,
-            avkortingsperioder = avkortingerSisteInntekt,
-            type = AvkortetYtelseType.REBEREGNET
-        )
-        val restanse = AvkortingRegelkjoring.beregnRestanse(
-            this.foersteMaanedDetteAar(),
-            virkningstidspunkt.dato,
-            this.aarsoppgjoer.tidligereAvkortetYtelse,
-            reberegnetYtelseFoerVirk,
-        )
+            val ytelseEtterAvkortingGjeldendeInntekt = AvkortingRegelkjoring.beregnAvkortetYtelse(
+                periode = periode,
+                ytelseFoerAvkorting = ytelseFoerAvkorting,
+                avkortingsperioder = avkortinger,
+                type = AvkortetYtelseType.REBEREGNET
+            )
 
-        val avkortetYtelseFraNyVirk = AvkortingRegelkjoring.beregnAvkortetYtelse(
-            periodeFraVirk,
-            ytelseFoerAvkorting,
-            avkortingerAlleInntekter,
-            restanse
-        )
+            val restanse = AvkortingRegelkjoring.beregnRestanse(
+                this.foersteMaanedDetteAar(),
+                inntekt.periode.fom,
+                ytelseEtterAvkortingAlleInntekter,
+                ytelseEtterAvkortingGjeldendeInntekt,
+            )
+
+            val ytelse = AvkortingRegelkjoring.beregnAvkortetYtelse(
+                inntekt.periode,
+                ytelseFoerAvkorting,
+                avkortinger,
+                restanse
+            )
+            ytelseEtterAvkortingAlleInntekter.addAll(ytelse) // TODO vil perioder overlappe?
+        }
+
+        val avkortetYtelseFraNyVirk =
+            ytelseEtterAvkortingAlleInntekter.filter { it.periode.fom >= virkningstidspunkt.dato }.map {
+                if (virkningstidspunkt.dato > it.periode.fom && (it.periode.tom == null || virkningstidspunkt.dato <= it.periode.tom)) {
+                    it.copy(periode = Periode(fom = virkningstidspunkt.dato, tom = it.periode.tom))
+                } else {
+                    it
+                }
+            }
 
         return this.copy(
             aarsoppgjoer = this.aarsoppgjoer.copy(
                 ytelseFoerAvkorting = ytelseFoerAvkorting,
-                avkortingsperioder = avkortingerAlleInntekter,
+                //avkortingsperioder = avkortingerAlleInntekter,
                 // TODO EY-2523 - avkortinger siste inntekt - legge til typefelt (samme som avkortetYtelse?)
-                tidligereAvkortetYtelseReberegnet = reberegnetYtelseFoerVirk,
-                restanse = restanse
+                //tidligereAvkortetYtelseReberegnet = ytelseEtterAvkortingGjeldendeInntekt,
+                //restanse = restanse TODO restanse per avkortet ytelse?
             ),
             avkortetYtelse = avkortetYtelseFraNyVirk
         )
@@ -199,12 +207,13 @@ data class AvkortingGrunnlag(
     val kilde: Grunnlagsopplysning.Saksbehandler
 )
 
+
 data class Aarsoppgjoer(
     val ytelseFoerAvkorting: List<YtelseFoerAvkorting> = emptyList(),
     val avkortingsperioder: List<Avkortingsperiode> = emptyList(),
     // TODO avkortingsperioderSisteInntekt / reberegnet
-    val tidligereAvkortetYtelse: List<AvkortetYtelse> = emptyList(),
-    val tidligereAvkortetYtelseReberegnet: List<AvkortetYtelse> = emptyList(),
+    val tidligereAvkortetYtelse: List<AvkortetYtelse> = emptyList(), // TODO endre til alle inntekter og siste inntekt
+    val tidligereAvkortetYtelseReberegnet: List<AvkortetYtelse> = emptyList(), // TODO endre til alle inntekter og siste inntekt
     val restanse: Restanse? = null,
 )
 
@@ -239,7 +248,7 @@ data class AvkortetYtelse(
     val periode: Periode,
     val ytelseEtterAvkorting: Int,
     val ytelseEtterAvkortingFoerRestanse: Int,
-    val restanse: Int = 0,
+    val restanse: Int = 0, // TODO klasse med regelresultat
     val avkortingsbeloep: Int,
     val ytelseFoerAvkorting: Int,
     val tidspunkt: Tidspunkt,
@@ -257,16 +266,31 @@ fun Beregning.mapTilYtelseFoerAvkorting() = beregningsperioder.map {
     )
 }
 
+// TODO EY-2523 unittest!
 fun List<YtelseFoerAvkorting>.leggTilNyeBeregninger(
     beregning: Beregning,
     virkningstidspunkt: YearMonth
 ) = filter { it.periode.fom < virkningstidspunkt }
-    .filter { beregning.beregningId != it.beregningsreferanse }.map {
-        when (it.periode.tom) {
-            null -> it.copy(
-                periode = Periode(fom = it.periode.fom, tom = virkningstidspunkt.minusMonths(1))
+    .filter { beregning.beregningId != it.beregningsreferanse }.map { ytelseFoerAvkorting ->
+        if (ytelseFoerAvkorting.periode.tom != null) {
+            if (virkningstidspunkt == ytelseFoerAvkorting.periode.tom) {
+                ytelseFoerAvkorting.copy(
+                    periode = Periode(
+                        fom = ytelseFoerAvkorting.periode.fom,
+                        tom = virkningstidspunkt.minusMonths(1)
+                    )
+                )
+            } else if (virkningstidspunkt < ytelseFoerAvkorting.periode.tom) {
+                ytelseFoerAvkorting.copy(periode = Periode(fom = ytelseFoerAvkorting.periode.fom, tom = null))
+            } else {
+                ytelseFoerAvkorting
+            }
+        } else {
+            ytelseFoerAvkorting.copy(
+                periode = Periode(
+                    fom = ytelseFoerAvkorting.periode.fom,
+                    tom = virkningstidspunkt.minusMonths(1)
+                )
             )
-
-            else -> it
         }
     } + beregning.mapTilYtelseFoerAvkorting()

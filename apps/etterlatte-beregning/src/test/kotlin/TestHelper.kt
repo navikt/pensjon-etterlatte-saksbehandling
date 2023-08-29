@@ -172,6 +172,7 @@ fun avkortetYtelseGrunnlag(beregning: Int, avkorting: Int, fordeltRestanse: Int 
 )
 
 fun avkortetYtelse(
+    id: UUID = UUID.randomUUID(),
     type: AvkortetYtelseType = AvkortetYtelseType.NY,
     ytelseEtterAvkorting: Int = 50,
     restanse: Int = 50,
@@ -183,7 +184,7 @@ fun avkortetYtelse(
         tom = null
     )
 ) = AvkortetYtelse(
-    id = UUID.randomUUID(),
+    id = id,
     type = type,
     periode = periode,
     ytelseEtterAvkorting = ytelseEtterAvkorting,

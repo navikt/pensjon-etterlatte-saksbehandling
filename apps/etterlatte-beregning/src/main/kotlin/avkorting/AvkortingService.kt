@@ -81,8 +81,7 @@ class AvkortingService(
         val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
         val beregning = beregningService.hentBeregningNonnull(behandlingId)
         val virkningstidspunkt = behandling.hentVirk()
-        val iverksettelse = YearMonth.now().plusMonths(1) // TODO EY-2556
-        val beregnetAvkorting = forrigeAvkorting.kopierAvkorting(iverksettelse).beregnAvkorting(
+        val beregnetAvkorting = forrigeAvkorting.kopierAvkorting(virkningstidspunkt.dato).beregnAvkorting(
             behandling.behandlingType,
             virkningstidspunkt,
             beregning

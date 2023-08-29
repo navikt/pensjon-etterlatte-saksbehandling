@@ -26,6 +26,7 @@ import io.ktor.server.routing.routing
 import isProd
 import no.nav.etterlatte.libs.common.logging.CORRELATION_ID
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.security.token.support.core.context.TokenValidationContext
 import no.nav.security.token.support.v2.tokenValidationSupport
 import org.slf4j.Logger
 import org.slf4j.event.Level
@@ -36,6 +37,7 @@ fun Application.restModule(
     routePrefix: String? = null,
     withMetrics: Boolean = false,
     config: ApplicationConfig = environment.config,
+    additionalValidation: ((TokenValidationContext) -> Boolean)? = null,
     routes: Route.() -> Unit
 ) {
     sikkerLogg.info("Sikkerlogg logger fra restModule")
@@ -75,7 +77,10 @@ fun Application.restModule(
     }
 
     install(Authentication) {
-        tokenValidationSupport(config = config)
+        tokenValidationSupport(
+            config = config,
+            additionalValidation = additionalValidation
+        )
     }
 
     routing {

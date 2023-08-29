@@ -71,7 +71,7 @@ export const GrunnForSoeskenjustering = (props: { behandling: IDetaljertBehandli
               </option>
             ))}
           </Select>
-          <Revurderingsbegrunnelse begrunnelse={begrunnelse} setBegrunnelse={setBegrunnelse} />
+          <Revurderingsbegrunnelse begrunnelse={begrunnelse} setBegrunnelse={setBegrunnelse} redigerbar={true} />
           <Button loading={isPending(lagrestatus)} variant="primary" size="small">
             Lagre
           </Button>
@@ -83,6 +83,7 @@ export const GrunnForSoeskenjustering = (props: { behandling: IDetaljertBehandli
         <BodyShort>
           Grunn for søskenjustering:{' '}
           <strong>{valgtSoeskenjustering ? tekstSoeskenjustering[valgtSoeskenjustering] : 'Ikke angitt'}</strong>
+          <Revurderingsbegrunnelse begrunnelse={begrunnelse} setBegrunnelse={setBegrunnelse} redigerbar={false} />
         </BodyShort>
       )}
     </MarginTop>

@@ -66,7 +66,7 @@ export const AdoptertAv = (props: { behandling: IDetaljertBehandling }) => {
             Den andre som adopterer, hvis det er to
           </Heading>
           <NavnInput navn={navn2 || standardnavn()} update={(n: Navn) => setNavn2(n)} />
-          <Revurderingsbegrunnelse begrunnelse={begrunnelse} setBegrunnelse={setBegrunnelse} />
+          <Revurderingsbegrunnelse begrunnelse={begrunnelse} setBegrunnelse={setBegrunnelse} redigerbar={true} />
           <Button loading={isPending(lagrestatus)} variant="primary" size="small">
             Lagre
           </Button>
@@ -78,6 +78,7 @@ export const AdoptertAv = (props: { behandling: IDetaljertBehandling }) => {
         <BodyShort>
           Adoptert av: <strong>{!!navn1 ? formaterNavn(navn1) : 'Ikke angitt'}</strong>
           {adopsjonInfo?.adoptertAv2 ? <strong> og {formaterNavn(adopsjonInfo?.adoptertAv2)}</strong> : ''}
+          <Revurderingsbegrunnelse begrunnelse={begrunnelse} setBegrunnelse={setBegrunnelse} redigerbar={false} />
         </BodyShort>
       )}
     </MarginTop>

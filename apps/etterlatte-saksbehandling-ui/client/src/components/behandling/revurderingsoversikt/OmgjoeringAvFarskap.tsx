@@ -74,7 +74,7 @@ export const OmgjoeringAvFarskap = (props: { behandling: IDetaljertBehandling })
             Hvem er registrert som far nå?
           </Heading>
           <NavnInput navn={naavaerendeFar || standardnavn()} update={(n: Navn) => setNaavaerendeFar(n)} />
-          <Revurderingsbegrunnelse begrunnelse={begrunnelse} setBegrunnelse={setBegrunnelse} />
+          <Revurderingsbegrunnelse begrunnelse={begrunnelse} setBegrunnelse={setBegrunnelse} redigerbar={true} />
           <Button loading={isPending(lagrestatus)} variant="primary" size="small">
             Lagre
           </Button>
@@ -94,6 +94,7 @@ export const OmgjoeringAvFarskap = (props: { behandling: IDetaljertBehandling })
           <strong>
             {!!forrigeFar ? [forrigeFar.fornavn, forrigeFar.mellomnavn, forrigeFar.etternavn].join(' ') : 'Ikke angitt'}
           </strong>
+          <Revurderingsbegrunnelse begrunnelse={begrunnelse} setBegrunnelse={setBegrunnelse} redigerbar={false} />
         </BodyShort>
       )}
     </MarginTop>

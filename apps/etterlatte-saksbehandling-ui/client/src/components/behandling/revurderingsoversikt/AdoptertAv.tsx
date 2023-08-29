@@ -21,7 +21,7 @@ export const AdoptertAv = (props: { behandling: IDetaljertBehandling }) => {
   const [navn1, setNavn1] = useState(adopsjonInfo?.adoptertAv1)
   const [navn2, setNavn2] = useState(adopsjonInfo?.adoptertAv2)
   const [feilmelding, setFeilmelding] = useState<string | undefined>(undefined)
-  const [begrunnelse, setBegrunnelse] = useState('')
+  const [begrunnelse, setBegrunnelse] = useState(behandling.revurderinginfo?.begrunnelse ?? '')
   const [lagrestatus, lagre] = useApiCall(lagreRevurderingInfo)
   const redigerbar = hentBehandlesFraStatus(behandling.status)
   const handlesubmit = (e: FormEvent) => {

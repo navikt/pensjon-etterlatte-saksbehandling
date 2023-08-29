@@ -24,7 +24,7 @@ export const GrunnForSoeskenjustering = (props: { behandling: IDetaljertBehandli
     soeskenjusteringInfo?.grunnForSoeskenjustering
   )
   const [feilmelding, setFeilmelding] = useState<string | undefined>(undefined)
-  const [begrunnelse, setBegrunnelse] = useState('')
+  const [begrunnelse, setBegrunnelse] = useState(behandling.revurderinginfo?.begrunnelse ?? '')
   const [lagrestatus, lagre] = useApiCall(lagreRevurderingInfo)
   const redigerbar = hentBehandlesFraStatus(behandling.status)
   const harEndretInfo =

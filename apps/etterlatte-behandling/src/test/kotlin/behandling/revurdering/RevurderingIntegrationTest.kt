@@ -217,13 +217,14 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
         val revurderingInfo = RevurderingInfo.Soeskenjustering(BarnepensjonSoeskenjusteringGrunn.SOESKEN_DOER)
         val fikkLagret = revurderingService.lagreRevurderingInfo(
             revurdering!!.id,
-            RevurderingMedBegrunnelse(revurderingInfo, null),
+            RevurderingMedBegrunnelse(revurderingInfo, "abc"),
             "saksbehandler"
         )
         assertTrue(fikkLagret)
         inTransaction {
             val lagretRevurdering = applicationContext.behandlingDao.hentBehandling(revurdering.id) as Revurdering
-            assertEquals(revurderingInfo, lagretRevurdering.revurderingInfo)
+            assertEquals(revurderingInfo, lagretRevurdering.revurderingInfo?.revurderingInfo)
+            assertEquals("abc", lagretRevurdering.revurderingInfo?.begrunnelse)
         }
 
         // kan oppdatere
@@ -238,7 +239,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
         )
         inTransaction {
             val oppdatert = applicationContext.behandlingDao.hentBehandling(revurdering.id) as Revurdering
-            assertEquals(nyRevurderingInfo, oppdatert.revurderingInfo)
+            assertEquals(nyRevurderingInfo, oppdatert.revurderingInfo?.revurderingInfo)
         }
 
         inTransaction {
@@ -259,7 +260,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
         )
         inTransaction {
             val ferdigRevurdering = applicationContext.behandlingDao.hentBehandling(revurdering.id) as Revurdering
-            assertEquals(nyRevurderingInfo, ferdigRevurdering.revurderingInfo)
+            assertEquals(nyRevurderingInfo, ferdigRevurdering.revurderingInfo?.revurderingInfo)
             verify { hendelser.sendMeldingForHendelse(revurdering, BehandlingHendelseType.OPPRETTET) }
             verify { grunnlagService.leggInnNyttGrunnlag(revurdering, any()) }
             verify { oppgaveService.hentOppgaverForSak(sak.id) }

@@ -8,7 +8,6 @@ import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
-import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
 import no.nav.etterlatte.libs.common.behandling.Utenlandstilsnitt
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.sak.Sak
@@ -26,7 +25,7 @@ sealed class Revurdering(
     override val utenlandstilsnitt: Utenlandstilsnitt?,
     override val boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet?,
     open val revurderingsaarsak: RevurderingAarsak?,
-    open val revurderingInfo: RevurderingInfo?,
+    open val revurderingInfo: RevurderingMedBegrunnelse?,
     override val prosesstype: Prosesstype,
     override val kilde: Vedtaksloesning,
     open val begrunnelse: String?
@@ -65,7 +64,7 @@ sealed class Revurdering(
                 utenlandstilsnitt = utenlandstilsnitt,
                 boddEllerArbeidetUtlandet = boddEllerArbeidetUtlandet,
                 revurderingsaarsak = revurderingsaarsak,
-                revurderingInfo = revurderingInfo?.revurderingInfo,
+                revurderingInfo = revurderingInfo,
                 kilde = kilde,
                 begrunnelse = begrunnelse
             )
@@ -81,7 +80,7 @@ sealed class Revurdering(
                 utenlandstilsnitt = utenlandstilsnitt,
                 boddEllerArbeidetUtlandet = boddEllerArbeidetUtlandet,
                 revurderingsaarsak = revurderingsaarsak,
-                revurderingInfo = revurderingInfo?.revurderingInfo,
+                revurderingInfo = revurderingInfo,
                 kilde = kilde,
                 begrunnelse = begrunnelse
             )

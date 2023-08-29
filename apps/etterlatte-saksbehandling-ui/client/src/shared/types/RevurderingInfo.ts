@@ -62,11 +62,16 @@ export type RevurderingInfo =
   | FengselsoppholdInfo
   | InstitusjonsoppholdInfo
 
+export interface RevurderingMedBegrunnelse {
+  revurderingInfo: RevurderingInfo
+  begrunnelse: string | undefined
+}
+
 export function hentUndertypeFraBehandling<T extends RevurderingInfo>(
   type: T['type'],
   behandling?: IDetaljertBehandling
 ): T | null {
-  const revurderingInfo = behandling?.revurderinginfo
+  const revurderingInfo = behandling?.revurderinginfo?.revurderingInfo
   if (revurderingInfo?.type === type) {
     return revurderingInfo as T
   }

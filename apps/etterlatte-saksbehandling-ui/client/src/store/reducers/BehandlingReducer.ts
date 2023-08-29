@@ -91,6 +91,6 @@ export const behandlingReducer = createReducer(initialState, (builder) => {
     state.behandling!!.beregning = undefined
   })
   builder.addCase(oppdaterRevurderingInfo, (state, action) => {
-    state.behandling!!.revurderinginfo = action.payload
+    state.behandling!!.revurderinginfo!!.revurderingInfo = action.payload
   })
 })

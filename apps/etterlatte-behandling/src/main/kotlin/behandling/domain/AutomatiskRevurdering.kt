@@ -1,12 +1,12 @@
 package no.nav.etterlatte.behandling.domain
 
+import no.nav.etterlatte.behandling.revurdering.RevurderingMedBegrunnelse
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
-import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
 import no.nav.etterlatte.libs.common.behandling.Utenlandstilsnitt
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.sak.Sak
@@ -26,7 +26,7 @@ data class AutomatiskRevurdering(
     override val utenlandstilsnitt: Utenlandstilsnitt?,
     override val boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet?,
     override val revurderingsaarsak: RevurderingAarsak,
-    override val revurderingInfo: RevurderingInfo?,
+    override val revurderingInfo: RevurderingMedBegrunnelse?,
     override val kilde: Vedtaksloesning,
     override val begrunnelse: String?
 ) : Revurdering(

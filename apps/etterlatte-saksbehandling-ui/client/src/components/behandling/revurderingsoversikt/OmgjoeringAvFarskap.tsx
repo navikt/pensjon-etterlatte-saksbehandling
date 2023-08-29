@@ -25,7 +25,7 @@ export const OmgjoeringAvFarskap = (props: { behandling: IDetaljertBehandling })
   const [naavaerendeFar, setNaavaerendeFar] = useState(omgjoeringAvFarskapInfo?.naavaerendeFar)
   const [forrigeFar, setForrigeFar] = useState(omgjoeringAvFarskapInfo?.forrigeFar)
   const [feilmelding, setFeilmelding] = useState<string | undefined>(undefined)
-  const [begrunnelse, setBegrunnelse] = useState('')
+  const [begrunnelse, setBegrunnelse] = useState(behandling.revurderinginfo?.begrunnelse ?? '')
   const [lagrestatus, lagre] = useApiCall(lagreRevurderingInfo)
   const redigerbar = hentBehandlesFraStatus(behandling.status)
   const handlesubmit = (e: FormEvent) => {

@@ -8,6 +8,7 @@ import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.etterlatte.libs.common.utbetaling.UtbetalingResponseDto
 import no.nav.etterlatte.libs.common.utbetaling.UtbetalingStatusDto
 import no.nav.etterlatte.utbetaling.common.EVENT_NAME_OPPDATERT
+import no.nav.etterlatte.utbetaling.common.UTBETALING_RESPONSE
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -22,7 +23,7 @@ internal class LagreIverksattVedtak(
     init {
         River(rapidsConnection).apply {
             eventName(EVENT_NAME_OPPDATERT)
-            validate { it.requireKey("utbetaling_response") }
+            validate { it.requireKey(UTBETALING_RESPONSE) }
             correlationId()
         }.register(this)
     }
@@ -30,7 +31,7 @@ internal class LagreIverksattVedtak(
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     override fun haandterPakke(packet: JsonMessage, context: MessageContext) {
-        val respons = objectMapper.readValue<UtbetalingResponseDto>(packet["utbetaling_response"].toString())
+        val respons = objectMapper.readValue<UtbetalingResponseDto>(packet[UTBETALING_RESPONSE].toString())
 
         try {
             when (respons.status) {

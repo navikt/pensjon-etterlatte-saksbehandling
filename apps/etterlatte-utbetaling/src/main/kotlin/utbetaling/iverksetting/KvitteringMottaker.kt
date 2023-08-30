@@ -12,6 +12,7 @@ import no.nav.etterlatte.libs.common.utbetaling.UtbetalingResponseDto
 import no.nav.etterlatte.libs.common.utbetaling.UtbetalingStatusDto
 import no.nav.etterlatte.sikkerLogg
 import no.nav.etterlatte.utbetaling.common.EVENT_NAME_OPPDATERT
+import no.nav.etterlatte.utbetaling.common.UTBETALING_RESPONSE
 import no.nav.etterlatte.utbetaling.common.UtbetalingEventDto
 import no.nav.etterlatte.utbetaling.config.JmsConnectionFactory
 import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.OppdragJaxb
@@ -180,7 +181,7 @@ class KvitteringMottaker(
         return JsonMessage.newMessage(
             mapOf(
                 EVENT_NAME_KEY to EVENT_NAME_OPPDATERT,
-                "utbetaling_response" to this.utbetalingResponse.toMessage()
+                UTBETALING_RESPONSE to this.utbetalingResponse.toMessage()
             )
         ).toJson()
     }

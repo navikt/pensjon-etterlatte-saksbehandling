@@ -7,7 +7,8 @@ import no.nav.etterlatte.beregning.grunnlag.PeriodisertBeregningGrunnlag
 import no.nav.etterlatte.beregning.grunnlag.mapVerdier
 import no.nav.etterlatte.beregning.regler.omstillingstoenad.Avdoed
 import no.nav.etterlatte.beregning.regler.omstillingstoenad.PeriodisertOmstillingstoenadGrunnlag
-import no.nav.etterlatte.beregning.regler.omstillingstoenad.kroneavrundetOmstillingsstoenadRegel
+import no.nav.etterlatte.beregning.regler.omstillingstoenad.kroneavrundetOmstillingstoenadRegel
+import no.nav.etterlatte.beregning.regler.omstillingstoenad.kroneavrundetOmstillingstoenadRegelMedInstitusjon
 import no.nav.etterlatte.beregning.regler.omstillingstoenad.sats.grunnbeloep
 import no.nav.etterlatte.grunnbeloep.GrunnbeloepRepository
 import no.nav.etterlatte.klienter.GrunnlagKlient
@@ -93,7 +94,7 @@ class BeregnOmstillingsstoenadService(
         beregningsgrunnlag: PeriodisertOmstillingstoenadGrunnlag,
         virkningstidspunkt: YearMonth
     ): Beregning {
-        val resultat = kroneavrundetOmstillingsstoenadRegel.eksekver(
+        val resultat = kroneavrundetOmstillingstoenadRegelMedInstitusjon.eksekver(
             grunnlag = beregningsgrunnlag,
             periode = RegelPeriode(virkningstidspunkt.atDay(1))
         )
@@ -137,7 +138,7 @@ class BeregnOmstillingsstoenadService(
                             regelResultat = objectMapper.valueToTree(periodisertResultat),
                             regelVersjon = periodisertResultat.reglerVersjon,
                             kilde = Grunnlagsopplysning.RegelKilde(
-                                navn = kroneavrundetOmstillingsstoenadRegel.regelReferanse.id,
+                                navn = kroneavrundetOmstillingstoenadRegel.regelReferanse.id,
                                 ts = beregnetDato,
                                 versjon = periodisertResultat.reglerVersjon
                             )

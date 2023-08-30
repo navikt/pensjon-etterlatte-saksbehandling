@@ -12,7 +12,7 @@ class MigreringRepository(private val connection: () -> Connection) {
     fun lagreKoplingTilPesyssaka(pesysSakId: PesysId, sakId: Long) = inTransaction {
         connection().prepareStatement("INSERT INTO pesyskopling(pesys_id,sak_id) VALUES(?, ?)")
             .also {
-                it.setString(1, pesysSakId.id)
+                it.setLong(1, pesysSakId.id)
                 it.setLong(2, sakId)
                 it.executeUpdate()
             }

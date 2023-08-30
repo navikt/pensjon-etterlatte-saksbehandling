@@ -133,8 +133,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
                 applicationContext.grunnlagsendringshendelseDao,
                 applicationContext.kommerBarnetTilGodeService,
                 applicationContext.revurderingDao,
-                applicationContext.behandlingService,
-                applicationContext.kanBrukeNyOppgaveliste
+                applicationContext.behandlingService
             ).opprettManuellRevurderingWrapper(
                 sakId = sak.id,
                 aarsak = RevurderingAarsak.REGULERING,
@@ -205,8 +204,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
             applicationContext.grunnlagsendringshendelseDao,
             applicationContext.kommerBarnetTilGodeService,
             applicationContext.revurderingDao,
-            applicationContext.behandlingService,
-            applicationContext.kanBrukeNyOppgaveliste
+            applicationContext.behandlingService
         )
         val revurdering = revurderingService.opprettManuellRevurderingWrapper(
             sakId = sak.id,
@@ -321,8 +319,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
                 applicationContext.grunnlagsendringshendelseDao,
                 applicationContext.kommerBarnetTilGodeService,
                 applicationContext.revurderingDao,
-                applicationContext.behandlingService,
-                applicationContext.kanBrukeNyOppgaveliste
+                applicationContext.behandlingService
             ).opprettManuellRevurderingWrapper(
                 sakId = sak.id,
                 aarsak = RevurderingAarsak.REGULERING,
@@ -375,8 +372,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
                 applicationContext.grunnlagsendringshendelseDao,
                 applicationContext.kommerBarnetTilGodeService,
                 applicationContext.revurderingDao,
-                applicationContext.behandlingService,
-                applicationContext.kanBrukeNyOppgaveliste
+                applicationContext.behandlingService
             )
 
         val behandlingFactory =
@@ -495,8 +491,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
             applicationContext.grunnlagsendringshendelseDao,
             applicationContext.kommerBarnetTilGodeService,
             applicationContext.revurderingDao,
-            applicationContext.behandlingService,
-            applicationContext.kanBrukeNyOppgaveliste
+            applicationContext.behandlingService
         )
         val behandlingFactory =
             BehandlingFactory(
@@ -538,8 +533,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
             applicationContext.grunnlagsendringshendelseDao,
             applicationContext.kommerBarnetTilGodeService,
             applicationContext.revurderingDao,
-            applicationContext.behandlingService,
-            applicationContext.kanBrukeNyOppgaveliste
+            applicationContext.behandlingService
         )
         val behandlingFactory =
             BehandlingFactory(
@@ -578,8 +572,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
             applicationContext.grunnlagsendringshendelseDao,
             applicationContext.kommerBarnetTilGodeService,
             applicationContext.revurderingDao,
-            applicationContext.behandlingService,
-            applicationContext.kanBrukeNyOppgaveliste
+            applicationContext.behandlingService
         )
         val behandlingFactory =
             BehandlingFactory(
@@ -621,8 +614,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
             applicationContext.grunnlagsendringshendelseDao,
             applicationContext.kommerBarnetTilGodeService,
             applicationContext.revurderingDao,
-            applicationContext.behandlingService,
-            applicationContext.kanBrukeNyOppgaveliste
+            applicationContext.behandlingService
         )
         val behandlingFactory =
             BehandlingFactory(

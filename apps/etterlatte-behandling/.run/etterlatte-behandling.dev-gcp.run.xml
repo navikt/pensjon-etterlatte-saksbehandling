@@ -32,7 +32,6 @@
       <env name="PDLTJENESTER_AZURE_SCOPE" value="api://dev-gcp.etterlatte.etterlatte-pdltjenester/.default" />
       <env name="ETTERLATTE_PDLTJENESTER_URL" value="https://etterlatte-pdltjenester.intern.dev.nav.no" />
       <env name="SKJERMING_URL" value="https://skjermede-personer-pip.intern.dev.nav.no" />
-      <env name="KAN_BRUKE_NY_OPPGAVELISTE" value="true" />
       <env name="OPPGAVE_CLIENT_ID" value="dev-fss.oppgavehandtering.oppgave" />
       <env name="OPPGAVE_URL" value="https://oppgave.dev.intern.nav.no" />
     </envs>

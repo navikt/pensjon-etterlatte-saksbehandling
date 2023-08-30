@@ -24,7 +24,6 @@ import java.util.*
 class OppgaveServiceNy(
     private val oppgaveDaoNy: OppgaveDaoMedEndringssporing,
     private val sakDao: SakDao,
-    private val kanBrukeNyOppgaveliste: Boolean,
     private val featureToggleService: FeatureToggleService
 ) {
 
@@ -130,31 +129,12 @@ class OppgaveServiceNy(
         }
     }
 
-    private fun sikreAtSaksbehandlerErSattPaaOppgaveHvisNyOppgavelisteIkkeErStoettet(
-        behandlingId: String,
-        saksbehandler: String
-    ) {
-        if (!kanBrukeNyOppgaveliste) {
-            // Vi sikrer at saksbehandler tar oppgaven før de fullfører den
-            val oppgaveUnderBehandling = oppgaveDaoNy.hentOppgaverForBehandling(behandlingId)
-                .single { it.status == Status.UNDER_BEHANDLING || it.status == Status.NY }
-            if (oppgaveUnderBehandling.saksbehandler != saksbehandler) {
-                byttSaksbehandler(
-                    oppgaveId = oppgaveUnderBehandling.id,
-                    saksbehandler = saksbehandler
-                )
-            }
-        }
-    }
-
     fun ferdigstillOppgaveUnderbehandlingOgLagNyMedType(
         fattetoppgave: VedtakOppgaveDTO,
         oppgaveType: OppgaveType,
         merknad: String?,
         saksbehandler: String
     ): OppgaveNy {
-        sikreAtSaksbehandlerErSattPaaOppgaveHvisNyOppgavelisteIkkeErStoettet(fattetoppgave.referanse, saksbehandler)
-
         val behandlingsoppgaver = oppgaveDaoNy.hentOppgaverForBehandling(fattetoppgave.referanse)
         if (behandlingsoppgaver.isEmpty()) {
             throw BadRequestException("Må ha en oppgave for å kunne lage attesteringsoppgave")
@@ -219,10 +199,6 @@ class OppgaveServiceNy(
         behandlingEllerHendelseId: String,
         saksbehandler: String
     ): OppgaveNy {
-        sikreAtSaksbehandlerErSattPaaOppgaveHvisNyOppgavelisteIkkeErStoettet(
-            behandlingEllerHendelseId,
-            saksbehandler
-        )
         try {
             val oppgaveUnderbehandling = oppgaveDaoNy.hentOppgaverForBehandling(behandlingEllerHendelseId)
                 .single { it.status == Status.UNDER_BEHANDLING }
@@ -250,10 +226,6 @@ class OppgaveServiceNy(
         behandlingEllerHendelseId: String,
         saksbehandler: String
     ): OppgaveNy {
-        sikreAtSaksbehandlerErSattPaaOppgaveHvisNyOppgavelisteIkkeErStoettet(
-            behandlingEllerHendelseId,
-            saksbehandler
-        )
         val behandlingsoppgaver = oppgaveDaoNy.hentOppgaverForBehandling(behandlingEllerHendelseId)
         if (behandlingsoppgaver.isEmpty()) {
             throw BadRequestException("Må ha en oppgave for å ferdigstille oppgave")

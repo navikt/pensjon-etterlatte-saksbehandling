@@ -51,8 +51,7 @@ class GrunnlagsendringshendelseService(
     private val pdlKlient: PdlKlient,
     private val grunnlagKlient: GrunnlagKlient,
     private val tilgangService: TilgangService,
-    private val sakService: SakService,
-    private val kanBrukeNyOppgaveliste: Boolean
+    private val sakService: SakService
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -92,15 +91,7 @@ class GrunnlagsendringshendelseService(
                     "Kunne ikke ferdigstille oppgaven for hendelsen på grunn av feil",
                     e
                 )
-                if (kanBrukeNyOppgaveliste) {
-                    throw e
-                } else {
-                    logger.error(
-                        "Lukking av hendelsen går igjennom selv om vi ikke kunne lukke oppgaven knyttet" +
-                            "til hendelsen, siden det ikke er skrudd på enda.",
-                        e
-                    )
-                }
+                throw e
             }
         }
     }

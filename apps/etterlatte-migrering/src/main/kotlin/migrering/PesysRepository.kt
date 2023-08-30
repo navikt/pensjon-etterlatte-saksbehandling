@@ -1,6 +1,7 @@
 package no.nav.etterlatte.migrering
 
 import kotliquery.TransactionalSession
+import migrering.Migreringsstatus
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.database.Transactions
@@ -21,7 +22,7 @@ internal class PesysRepository(private val dataSource: DataSource) : Transaction
 
     fun hentSaker(tx: TransactionalSession? = null): List<Pesyssak> = tx.session {
         hentListe(
-            "SELECT sak from pesyssak WHERE migrert is false"
+            "SELECT sak from pesyssak WHERE status = '${Migreringsstatus.HENTA.name}'"
         ) {
             tilPesyssak(it.string("sak"))
         }
@@ -32,17 +33,17 @@ internal class PesysRepository(private val dataSource: DataSource) : Transaction
     fun lagrePesyssak(pesyssak: Pesyssak, tx: TransactionalSession? = null) =
         tx.session {
             opprett(
-                "INSERT INTO pesyssak(id,sak,migrert) VALUES(:id,:sak::jsonb,:migrert::boolean)",
-                mapOf("id" to UUID.randomUUID(), "sak" to pesyssak.toJson(), "migrert" to false),
+                "INSERT INTO pesyssak(id,sak,status) VALUES(:id,:sak::jsonb,:status)",
+                mapOf("id" to UUID.randomUUID(), "sak" to pesyssak.toJson(), "status" to Migreringsstatus.HENTA.name),
                 "Lagra pesyssak ${pesyssak.pesysId} i migreringsbasen"
             )
         }
 
-    fun settSakMigrert(id: UUID, tx: TransactionalSession? = null) = tx.session {
+    fun oppdaterStatus(id: UUID, status: Migreringsstatus, tx: TransactionalSession? = null) = tx.session {
         oppdater(
-            "UPDATE pesyssak SET migrert=:migrert WHERE id=:id",
-            mapOf("id" to id, "migrert" to true),
-            "Markerte $id som migrert"
+            "UPDATE pesyssak SET status=:status WHERE id=:id",
+            mapOf("id" to id, "status" to status.name),
+            "Markerte $id med status $status"
         )
     }
 }

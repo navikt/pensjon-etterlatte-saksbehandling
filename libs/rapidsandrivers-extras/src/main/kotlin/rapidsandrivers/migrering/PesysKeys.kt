@@ -13,6 +13,7 @@ const val VILKAARSVURDERT_KEY = "vilkaarsvurdert"
 const val TRYGDETID_KEY = "trygdetid"
 const val MIGRERING_GRUNNLAG_KEY = "migrering_grunnlag"
 const val PERSONGALLERI = "persongalleri"
+const val PESYS_ID = "pesysId"
 
 var JsonMessage.request: String
     get() = this[REQUEST].toJson()
@@ -30,4 +31,10 @@ var JsonMessage.persongalleri: Persongalleri
     get() = objectMapper.treeToValue(this[PERSONGALLERI], Persongalleri::class.java)
     set(name) {
         this[PERSONGALLERI] = name
+    }
+
+var JsonMessage.pesysId: PesysId
+    get() = objectMapper.treeToValue(this[PESYS_ID], PesysId::class.java)
+    set(name) {
+        this[PESYS_ID] = name
     }

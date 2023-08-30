@@ -1,5 +1,6 @@
 package no.nav.etterlatte
 
+import migrering.LagreKopling
 import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstartOgAvslutning
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.migrering.ApplicationContext
@@ -21,6 +22,7 @@ internal class Server(private val context: ApplicationContext) {
         RapidApplication.create(rapidEnv).also { rapidsConnection ->
             Migrering(rapidsConnection, penklient)
             MigrerSpesifikkSak(rapidsConnection, penklient, pesysRepository, sakmigrerer)
+            LagreKopling(rapidsConnection, pesysRepository)
         }.start()
     }
 }

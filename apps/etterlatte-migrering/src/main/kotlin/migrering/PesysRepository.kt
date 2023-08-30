@@ -8,6 +8,7 @@ import no.nav.etterlatte.libs.database.hentListe
 import no.nav.etterlatte.libs.database.oppdater
 import no.nav.etterlatte.libs.database.opprett
 import no.nav.etterlatte.libs.database.transaction
+import no.nav.etterlatte.rapidsandrivers.migrering.PesysId
 import java.util.*
 import javax.sql.DataSource
 
@@ -44,5 +45,15 @@ internal class PesysRepository(private val dataSource: DataSource) : Transaction
             mapOf("id" to id, "status" to status.name),
             "Markerte $id med status $status"
         )
+    }
+
+    fun lagreKoplingTilBehandling(behandlingId: UUID, pesysId: PesysId, tx: TransactionalSession? = null) {
+        tx.session {
+            opprett(
+                "INSERT INTO pesyskopling(id,behandling_id,pesys_id) VALUES(:id,:behandling_id,:pesys_id)",
+                mapOf("id" to UUID.randomUUID(), "behandling_id" to behandlingId, "pesys_id" to pesysId.id),
+                "Lagra koplinga mellom behandling $behandlingId og pesyssak $pesysId i migreringsbasen"
+            )
+        }
     }
 }

@@ -7,7 +7,6 @@ import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.GyldighetsproevingService
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeService
-import no.nav.etterlatte.behandling.migrering.MigreringRepository
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.JaNeiMedBegrunnelse
@@ -23,7 +22,6 @@ class MigreringService(
     private val behandlingFactory: BehandlingFactory,
     private val kommerBarnetTilGodeService: KommerBarnetTilGodeService,
     private val behandlingsHendelser: BehandlingHendelserKafkaProducer,
-    private val migreringRepository: MigreringRepository,
     private val behandlingService: BehandlingService
 ) {
     fun migrer(request: MigreringRequest) = opprettSakOgBehandling(request)?.let {
@@ -48,7 +46,6 @@ class MigreringService(
             "Automatisk importert fra Pesys"
         )
         behandlingsHendelser.sendMeldingForHendelse(it, BehandlingHendelseType.OPPRETTET)
-        migreringRepository.lagreKoplingTilPesyssaka(pesysSakId = request.pesysId, sakId = it.sak.id)
         it
     }
 

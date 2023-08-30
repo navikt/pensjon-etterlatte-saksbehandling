@@ -44,6 +44,8 @@ spec:
           - id: dbe4ad45-320b-4e9a-aaa1-73cca4ee124d # 0000-GA-Egne_ansatte
         extra:
           - NAVident
+  secureLogs:
+    enabled: true
   replicas:
     cpuThresholdPercentage: 90
     max: 1

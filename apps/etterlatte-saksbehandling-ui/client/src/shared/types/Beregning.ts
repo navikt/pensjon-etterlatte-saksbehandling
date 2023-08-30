@@ -53,6 +53,10 @@ export interface BeregningsGrunnlagPostDto {
   institusjonsopphold: InstitusjonsoppholdGrunnlagDTO | undefined
 }
 
+export interface BeregningsGrunnlagOMSPostDto {
+  institusjonsopphold: InstitusjonsoppholdGrunnlagDTO | undefined
+}
+
 export type SoeskenMedIBeregningGrunnlagDto = PeriodisertBeregningsgrunnlagDto<SoeskenMedIBeregning[]>[]
 export type InstitusjonsoppholdGrunnlagData = PeriodisertBeregningsgrunnlag<InstitusjonsoppholdIBeregning>[]
 

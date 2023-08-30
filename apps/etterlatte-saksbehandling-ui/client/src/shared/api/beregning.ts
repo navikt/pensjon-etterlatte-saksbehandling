@@ -1,5 +1,10 @@
 import { apiClient, ApiResponse } from '~shared/api/apiClient'
-import { Beregning, BeregningsGrunnlagDto, BeregningsGrunnlagPostDto } from '~shared/types/Beregning'
+import {
+  Beregning,
+  BeregningsGrunnlagDto,
+  BeregningsGrunnlagOMSPostDto,
+  BeregningsGrunnlagPostDto,
+} from '~shared/types/Beregning'
 
 export const hentBeregning = async (behandlingId: string): Promise<ApiResponse<Beregning>> => {
   return apiClient.get(`/beregning/${behandlingId}`)
@@ -18,6 +23,13 @@ export const lagreBeregningsGrunnlag = async (args: {
   grunnlag: BeregningsGrunnlagPostDto
 }): Promise<ApiResponse<void>> => {
   return apiClient.post(`/beregning/beregningsgrunnlag/${args.behandlingsId}/barnepensjon`, { ...args.grunnlag })
+}
+
+export const lagreBeregningsGrunnlagOMS = async (args: {
+  behandlingsId: string
+  grunnlag: BeregningsGrunnlagOMSPostDto
+}): Promise<ApiResponse<void>> => {
+  return apiClient.post(`/beregning/beregningsgrunnlag/${args.behandlingsId}/omstillingstoenad`, { ...args.grunnlag })
 }
 
 export const hentBeregningsGrunnlag = async (

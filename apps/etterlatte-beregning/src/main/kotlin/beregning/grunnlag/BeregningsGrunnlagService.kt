@@ -52,6 +52,39 @@ class BeregningsGrunnlagService(
         else -> false
     }
 
+    suspend fun lagreOMSBeregningsGrunnlag(
+        behandlingId: UUID,
+        omstillingstoenadBeregningsGrunnlag: OmstillingstoenadBeregningsGrunnlag,
+        brukerTokenInfo: BrukerTokenInfo
+    ): Boolean = when {
+        behandlingKlient.beregn(behandlingId, brukerTokenInfo, false) -> {
+            val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
+            val kanLagreDetteGrunnlaget = if (behandling.behandlingType == BehandlingType.REVURDERING) {
+                // Her vil vi sjekke opp om det vi lagrer ned ikke er modifisert før virk på revurderingen
+                val sisteIverksatteBehandling =
+                    behandlingKlient.hentSisteIverksatteBehandling(behandling.sak, brukerTokenInfo)
+                grunnlagErIkkeEndretFoerVirkOMS(
+                    behandling,
+                    sisteIverksatteBehandling.id,
+                    omstillingstoenadBeregningsGrunnlag
+                )
+            } else {
+                true
+            }
+
+            kanLagreDetteGrunnlaget && beregningsGrunnlagRepository.lagreOMS(
+                BeregningsGrunnlagOMS(
+                    behandlingId = behandlingId,
+                    kilde = Grunnlagsopplysning.Saksbehandler.create(brukerTokenInfo.ident()),
+                    institusjonsoppholdBeregningsgrunnlag =
+                    omstillingstoenadBeregningsGrunnlag.institusjonsopphold
+                )
+            )
+        }
+
+        else -> false
+    }
+
     private fun grunnlagErIkkeEndretFoerVirk(
         revurdering: DetaljertBehandling,
         forrigeIverksatteBehandlingId: UUID,
@@ -74,6 +107,24 @@ class BeregningsGrunnlagService(
         )
 
         return soeskenjusteringErLiktFoerVirk && institusjonsoppholdErLiktFoerVirk
+    }
+
+    private fun grunnlagErIkkeEndretFoerVirkOMS(
+        revurdering: DetaljertBehandling,
+        forrigeIverksatteBehandlingId: UUID,
+        omstillingstoenadBeregningsGrunnlag: OmstillingstoenadBeregningsGrunnlag
+    ): Boolean {
+        val forrigeGrunnlag =
+            beregningsGrunnlagRepository.finnOmstillingstoenadGrunnlagForBehandling(forrigeIverksatteBehandlingId)
+        val revurderingVirk = revurdering.virkningstidspunkt!!.dato.atDay(1)
+
+        val institusjonsoppholdErLiktFoerVirk = erGrunnlagLiktFoerEnDato(
+            omstillingstoenadBeregningsGrunnlag.institusjonsopphold ?: emptyList(),
+            forrigeGrunnlag!!.institusjonsoppholdBeregningsgrunnlag ?: emptyList(),
+            revurderingVirk
+        )
+
+        return institusjonsoppholdErLiktFoerVirk
     }
 
     suspend fun hentBarnepensjonBeregningsGrunnlag(

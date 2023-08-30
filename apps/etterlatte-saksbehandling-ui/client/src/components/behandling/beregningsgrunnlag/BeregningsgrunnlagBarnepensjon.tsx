@@ -20,7 +20,7 @@ import { Trygdetid as BeregnetTrygdetid } from '~components/behandling/trygdetid
 import { mapListeTilDto } from '~components/behandling/beregningsgrunnlag/PeriodisertBeregningsgrunnlag'
 import { hentFunksjonsbrytere } from '~shared/api/feature'
 import React, { useEffect, useState } from 'react'
-import Institusjonsopphold from '~components/behandling/beregningsgrunnlag/Institusjonsopphold'
+import InstitusjonsoppholdBP from '~components/behandling/beregningsgrunnlag/InstitusjonsoppholdBP'
 import Soeskenjustering, {
   Soeskengrunnlag,
 } from '~components/behandling/beregningsgrunnlag/soeskenjustering/Soeskenjustering'
@@ -137,7 +137,7 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
           />
         )}
         {isSuccess(funksjonsbrytere) && visInstitusjonsopphold && isSuccess(beregningsgrunnlag) && (
-          <Institusjonsopphold
+          <InstitusjonsoppholdBP
             behandling={behandling}
             onSubmit={(institusjonsoppholdGrunnlag) => setInstitusjonsoppholdsGrunnlagData(institusjonsoppholdGrunnlag)}
           />

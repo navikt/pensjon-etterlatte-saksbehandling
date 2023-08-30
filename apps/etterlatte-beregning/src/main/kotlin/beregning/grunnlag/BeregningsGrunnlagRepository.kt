@@ -16,7 +16,18 @@ class BeregningsGrunnlagRepository(private val dataSource: DataSource) {
             queryOf(
                 statement = finnBarnepensjonsGrunnlagForBehandling,
                 paramMap = mapOf("behandlings_id" to id)
-            ).map { it.asBeregningsGrunnlag() }.asSingle
+            ).map { it.asBeregningsGrunnlagBP() }.asSingle
+        )
+    }
+
+    fun finnOmstillingstoenadGrunnlagForBehandling(id: UUID): BeregningsGrunnlagOMS? = using(
+        sessionOf(dataSource)
+    ) { session ->
+        session.run(
+            queryOf(
+                statement = finnOmstillingstoenadGrunnlagForBehandling,
+                paramMap = mapOf("behandlings_id" to id)
+            ).map { it.asBeregningsGrunnlagOMS() }.asSingle
         )
     }
 
@@ -38,6 +49,32 @@ class BeregningsGrunnlagRepository(private val dataSource: DataSource) {
                             beregningsGrunnlag.institusjonsoppholdBeregningsgrunnlag
                         ),
                         "kilde" to beregningsGrunnlag.kilde.toJson()
+
+                    )
+                ).asUpdate
+            )
+        }
+
+        return count > 0
+    }
+
+    fun lagreOMS(beregningsGrunnlagOMS: BeregningsGrunnlagOMS): Boolean {
+        val query = if (finnOmstillingstoenadGrunnlagForBehandling(beregningsGrunnlagOMS.behandlingId) != null) {
+            oppdaterGrunnlagQuery
+        } else {
+            lagreGrunnlagQuery
+        }
+
+        val count = using(sessionOf(dataSource)) { session ->
+            session.run(
+                queryOf(
+                    statement = query,
+                    paramMap = mapOf<String, Any>(
+                        "behandlings_id" to beregningsGrunnlagOMS.behandlingId,
+                        "institusjonsopphold" to objectMapper.writeValueAsString(
+                            beregningsGrunnlagOMS.institusjonsoppholdBeregningsgrunnlag
+                        ),
+                        "kilde" to beregningsGrunnlagOMS.kilde.toJson()
 
                     )
                 ).asUpdate
@@ -70,6 +107,12 @@ class BeregningsGrunnlagRepository(private val dataSource: DataSource) {
             FROM bp_beregningsgrunnlag
             WHERE behandlings_id = :behandlings_id
         """.trimIndent()
+
+        val finnOmstillingstoenadGrunnlagForBehandling = """
+            SELECT behandlings_id, institusjonsopphold, kilde
+            FROM bp_beregningsgrunnlag
+            WHERE behandlings_id = :behandlings_id
+        """.trimIndent()
     }
 }
 
@@ -82,10 +125,22 @@ inline fun <reified T> T.somJsonb(): PGobject {
     return jsonObject
 }
 
-private fun Row.asBeregningsGrunnlag(): BeregningsGrunnlag {
+private fun Row.asBeregningsGrunnlagBP(): BeregningsGrunnlag {
     return BeregningsGrunnlag(
         behandlingId = this.uuid("behandlings_id"),
         soeskenMedIBeregning = objectMapper.readValue(this.string("soesken_med_i_beregning_perioder")),
+        institusjonsoppholdBeregningsgrunnlag = this.stringOrNull("institusjonsopphold")?.let {
+            objectMapper.readValue(
+                it
+            )
+        },
+        kilde = objectMapper.readValue(this.string("kilde"))
+    )
+}
+
+private fun Row.asBeregningsGrunnlagOMS(): BeregningsGrunnlagOMS {
+    return BeregningsGrunnlagOMS(
+        behandlingId = this.uuid("behandlings_id"),
         institusjonsoppholdBeregningsgrunnlag = this.stringOrNull("institusjonsopphold")?.let {
             objectMapper.readValue(
                 it

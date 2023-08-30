@@ -19,7 +19,7 @@ internal class Server(private val context: ApplicationContext) {
         dataSource.migrate()
         val rapidEnv = getRapidEnv()
         RapidApplication.create(rapidEnv).also { rapidsConnection ->
-            Migrering(rapidsConnection, pesysRepository, sakmigrerer)
+            Migrering(rapidsConnection, penklient)
             MigrerSpesifikkSak(rapidsConnection, penklient, pesysRepository, sakmigrerer)
         }.start()
     }

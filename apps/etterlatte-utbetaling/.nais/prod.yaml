@@ -45,6 +45,7 @@ spec:
     pool: nav-prod
   envFrom:
     - secret: etterlatte-secrets
+    - secret: my-application-unleash-api-token
   replicas:
     cpuThresholdPercentage: 90
     max: 1
@@ -76,8 +77,6 @@ spec:
       value: "false"
     - name: KONSISTENSAVSTEMMING_OMS_ENABLED
       value: "false"
-  envFrom:
-    - secret: my-application-unleash-api-token
   accessPolicy:
     outbound:
       external:

@@ -54,4 +54,13 @@ internal class PesysRepository(private val dataSource: DataSource) : Transaction
             )
         }
     }
+
+    fun hentPesysId(behandlingId: UUID, tx: TransactionalSession? = null) = tx.session {
+        hent(
+            "SELECT id from pesyskopling WHERE behandling_id = :behandling_id",
+            mapOf("behandling_id" to behandlingId)
+        ) {
+            it.long("id")
+        }
+    }
 }

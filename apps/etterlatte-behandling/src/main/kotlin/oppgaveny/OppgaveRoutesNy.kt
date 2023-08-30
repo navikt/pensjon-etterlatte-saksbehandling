@@ -3,17 +3,13 @@ package no.nav.etterlatte.oppgaveny
 import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
-import io.ktor.server.application.log
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
-import io.ktor.server.routing.application
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.put
 import io.ktor.server.routing.route
-import kotlinx.coroutines.async
-import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
@@ -21,44 +17,36 @@ import no.nav.etterlatte.libs.common.OPPGAVEID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.behandlingsId
 import no.nav.etterlatte.libs.common.kunSaksbehandler
 import no.nav.etterlatte.libs.common.oppgaveId
-import no.nav.etterlatte.libs.common.oppgaveNy.GosysOppgave
 import no.nav.etterlatte.libs.common.oppgaveNy.RedigerFristGosysRequest
 import no.nav.etterlatte.libs.common.oppgaveNy.RedigerFristRequest
 import no.nav.etterlatte.libs.common.oppgaveNy.SaksbehandlerEndringDto
 import no.nav.etterlatte.libs.common.oppgaveNy.SaksbehandlerEndringGosysDto
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.oppgave.GosysOppgaveService
-import java.net.SocketException
 
 internal fun Route.oppgaveRoutesNy(
     service: OppgaveServiceNy,
     gosysOppgaveService: GosysOppgaveService,
     kanBrukeNyOppgaveliste: Boolean
 ) {
-    val logger = application.log
     route("/api/nyeoppgaver") {
         get {
             kunSaksbehandler {
                 if (kanBrukeNyOppgaveliste) {
-                    coroutineScope {
-                        val oppgaver = async {
-                            service.finnOppgaverForBruker(
-                                Kontekst.get().appUserAsSaksbehandler().saksbehandlerMedRoller
-                            )
-                        }
-                        var gosysOppgaver = emptyList<GosysOppgave>()
-                        try {
-                            gosysOppgaver = async {
-                                gosysOppgaveService.hentOppgaver(brukerTokenInfo)
-                            }.await()
-                        } catch (e: SocketException) {
-                            logger.error("Feil mot gosys ved oppgavehenting", e)
-                        }
-
-                        call.respond(
-                            oppgaver.await() + gosysOppgaver
+                    call.respond(
+                        service.finnOppgaverForBruker(
+                            Kontekst.get().appUserAsSaksbehandler().saksbehandlerMedRoller
                         )
-                    }
+                    )
+                } else {
+                    call.respond(HttpStatusCode.NotImplemented)
+                }
+            }
+        }
+        get("gosys") {
+            kunSaksbehandler {
+                if (kanBrukeNyOppgaveliste) {
+                    call.respond(gosysOppgaveService.hentOppgaver(brukerTokenInfo))
                 } else {
                     call.respond(HttpStatusCode.NotImplemented)
                 }

@@ -4,7 +4,7 @@ import { InboxIcon, PersonIcon } from '@navikt/aksel-icons'
 import { Oppgavelista } from '~components/nyoppgavebenk/Oppgavelista'
 import { MinOppgaveliste } from '~components/nyoppgavebenk/minoppgaveliste/MinOppgaveliste'
 import { isFailure, isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
-import { hentNyeOppgaver, OppgaveDTOny } from '~shared/api/oppgaverny'
+import { hentGosysOppgaver, hentNyeOppgaver, OppgaveDTOny } from '~shared/api/oppgaverny'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import styled from 'styled-components'
@@ -22,13 +22,20 @@ export const ToggleMinOppgaveliste = () => {
   const [filter, setFilter] = useState<Filter>(initialFilter())
   const [oppgaveListeValg, setOppgaveListeValg] = useState<OppgavelisteToggle>('Oppgavelista')
   const [oppgaver, hentOppgaver] = useApiCall(hentNyeOppgaver)
-  const [hentedeOppgaver, setHentedeOppgaver] = useState<ReadonlyArray<OppgaveDTOny>>([])
+  const [gosysOppgaver, hentGosysOppgaverFunc] = useApiCall(hentGosysOppgaver)
   const user = useAppSelector((state) => state.saksbehandlerReducer.saksbehandler)
 
+  let hentedeOppgaver: OppgaveDTOny[] = []
+  if (isSuccess(oppgaver)) {
+    hentedeOppgaver = hentedeOppgaver.concat(oppgaver.data)
+  }
+  if (isSuccess(gosysOppgaver)) {
+    hentedeOppgaver = hentedeOppgaver.concat(gosysOppgaver.data)
+  }
+
   const hentOppgaverWrapper = () => {
-    hentOppgaver({}, (oppgaver) => {
-      setHentedeOppgaver(oppgaver)
-    })
+    hentOppgaver({})
+    hentGosysOppgaverFunc({})
   }
 
   useEffect(() => {
@@ -64,6 +71,7 @@ export const ToggleMinOppgaveliste = () => {
 
       {isPending(oppgaver) && <Spinner visible={true} label={'Henter nye oppgaver'} />}
       {isFailure(oppgaver) && <ApiErrorAlert>Kunne ikke hente oppgaver</ApiErrorAlert>}
+      {isFailure(gosysOppgaver) && <ApiErrorAlert>Kunne ikke hente gosys oppgaver</ApiErrorAlert>}
       {isSuccess(oppgaver) && (
         <>
           {oppgaveListeValg === 'Oppgavelista' && (

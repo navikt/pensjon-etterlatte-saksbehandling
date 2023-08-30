@@ -12,12 +12,10 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
-import no.nav.etterlatte.libs.common.behandlingsId
 import no.nav.etterlatte.libs.common.beregning.AvkortetYtelseDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagKildeDto
-import no.nav.etterlatte.libs.common.beregning.ManuellRestanseDto
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -63,26 +61,13 @@ fun Route.avkorting(avkortingService: AvkortingService, behandlingKlient: Behand
             }
         }
 
-        post("/restanse") {
-            withBehandlingId(behandlingKlient) {
-                logger.info("Lagre restanse manuelt for behandling=$behandlingsId og avkortetYtelse=$it")
-                val manuellRestanse = call.receive<ManuellRestanseDto>()
-                val avkorting = avkortingService.lagreRestanseManuelt(
-                    behandlingsId,
-                    brukerTokenInfo,
-                    manuellRestanse.avkortetYtelseId,
-                    manuellRestanse.nyRestanse
-                )
-                call.respond(avkorting.toDto())
-            }
-        }
     }
 }
 
 fun Avkorting.toDto() = AvkortingDto(
-    avkortingGrunnlag = avkortingGrunnlag.map { it.toDto() },
-    avkortetYtelse = avkortetYtelse.map { it.toDto() },
-    tidligereAvkortetYtelse = aarsoppgjoer.tidligereAvkortetYtelse.map { it.toDto() }
+    avkortingGrunnlag = aarsoppgjoer.inntektsavkorting.map { it.grunnlag.toDto() },
+    avkortetYtelse = finnLoependeYtelse().map { it.toDto() },
+    tidligereAvkortetYtelse = aarsoppgjoer.avkortetYtelseForrigeVedtak.map { it.toDto() }
 )
 
 fun AvkortingGrunnlag.toDto() = AvkortingGrunnlagDto(
@@ -93,7 +78,8 @@ fun AvkortingGrunnlag.toDto() = AvkortingGrunnlagDto(
     fratrekkInnAar = fratrekkInnAar,
     relevanteMaanederInnAar = relevanteMaanederInnAar,
     spesifikasjon = spesifikasjon,
-    kilde = AvkortingGrunnlagKildeDto(kilde.tidspunkt.toString(), kilde.ident)
+    kilde = AvkortingGrunnlagKildeDto(kilde.tidspunkt.toString(), kilde.ident),
+    virkningstidspunkt = virkningstidspunkt
 )
 
 fun AvkortetYtelse.toDto() = AvkortetYtelseDto(
@@ -114,5 +100,6 @@ fun AvkortingGrunnlagDto.fromDto(brukerTokenInfo: BrukerTokenInfo) = AvkortingGr
     fratrekkInnAar = fratrekkInnAar,
     relevanteMaanederInnAar = relevanteMaanederInnAar ?: (12 - fom.monthValue + 1),
     spesifikasjon = spesifikasjon,
-    kilde = Grunnlagsopplysning.Saksbehandler(brukerTokenInfo.ident(), Tidspunkt.now())
+    kilde = Grunnlagsopplysning.Saksbehandler(brukerTokenInfo.ident(), Tidspunkt.now()),
+    virkningstidspunkt = virkningstidspunkt
 )

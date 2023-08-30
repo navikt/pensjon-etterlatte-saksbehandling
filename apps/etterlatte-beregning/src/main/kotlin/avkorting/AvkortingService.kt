@@ -6,7 +6,6 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
-import java.time.YearMonth
 import java.util.*
 
 class AvkortingService(
@@ -48,25 +47,12 @@ class AvkortingService(
         val beregnetAvkorting = avkorting.beregnAvkortingMedNyttGrunnlag(
             avkortingGrunnlag,
             behandling.behandlingType,
-            behandling.hentVirk(),
             beregning
         )
 
         val lagretAvkorting = avkortingRepository.lagreAvkorting(behandlingId, beregnetAvkorting)
         behandlingKlient.avkort(behandlingId, brukerTokenInfo, true)
         lagretAvkorting
-    }
-
-    suspend fun lagreRestanseManuelt(
-        behandlingId: UUID,
-        brukerTokenInfo: BrukerTokenInfo,
-        avkortetYtelse: UUID,
-        restanse: Int
-    ): Avkorting = tilstandssjekk(behandlingId, brukerTokenInfo) {
-        logger.info("Lagre restanse manuelt for avkortetYtelse=$avkortetYtelse")
-        val avkorting = avkortingRepository.hentAvkortingUtenNullable(behandlingId)
-        val avkortingOppdatertPeriode = avkorting.beregnEnkeltPeriode(avkortetYtelse, restanse, brukerTokenInfo.ident())
-        avkortingRepository.lagreAvkorting(behandlingId, avkortingOppdatertPeriode)
     }
 
     suspend fun kopierAvkorting(
@@ -80,10 +66,8 @@ class AvkortingService(
             ?: throw Exception("Fant ikke avkorting for $forrigeBehandlingId")
         val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
         val beregning = beregningService.hentBeregningNonnull(behandlingId)
-        val virkningstidspunkt = behandling.hentVirk()
-        val beregnetAvkorting = forrigeAvkorting.kopierAvkorting(virkningstidspunkt.dato).beregnAvkorting(
+        val beregnetAvkorting = forrigeAvkorting.kopierAvkorting(behandling.hentVirk().dato).beregnAvkorting(
             behandling.behandlingType,
-            virkningstidspunkt,
             beregning
         )
 

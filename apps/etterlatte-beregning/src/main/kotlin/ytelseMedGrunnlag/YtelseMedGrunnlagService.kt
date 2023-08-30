@@ -14,16 +14,16 @@ class YtelseMedGrunnlagService(
     fun hentYtelseMedGrunnlag(behandlingId: UUID): YtelseMedGrunnlagDto? {
         val avkorting = avkortingRepository.hentAvkorting(behandlingId)
         val beregning = beregningRepository.hent(behandlingId)
-        val avkortinger = avkorting?.avkortetYtelse?.map { avkortetYtelse ->
+        val avkortinger = avkorting?.finnLoependeYtelse()?.map { avkortetYtelse ->
 
             beregning ?: throw Exception("Mangler beregning for behandling $behandlingId")
             val beregningIPeriode = beregning.beregningsperioder
                 .filter { it.datoFOM <= avkortetYtelse.periode.fom }
                 .maxBy { it.datoFOM }
 
-            val avkortingsgrunnlagIPeriode = avkorting.avkortingGrunnlag
-                .filter { it.periode.fom <= avkortetYtelse.periode.fom }
-                .maxBy { it.periode.fom }
+            val avkortingsgrunnlagIPeriode = avkorting.aarsoppgjoer.inntektsavkorting
+                .filter { it.grunnlag.periode.fom <= avkortetYtelse.periode.fom }
+                .maxBy { it.grunnlag.periode.fom }
 
             YtelseMedGrunnlagPeriodisertDto(
                 periode = avkortetYtelse.periode,
@@ -31,8 +31,8 @@ class YtelseMedGrunnlagService(
                 avkortingsbeloep = avkortetYtelse.avkortingsbeloep,
                 ytelseFoerAvkorting = beregningIPeriode.utbetaltBeloep,
                 trygdetid = beregningIPeriode.trygdetid,
-                aarsinntekt = avkortingsgrunnlagIPeriode.aarsinntekt,
-                fratrekkInnAar = avkortingsgrunnlagIPeriode.fratrekkInnAar,
+                aarsinntekt = avkortingsgrunnlagIPeriode.grunnlag.aarsinntekt,
+                fratrekkInnAar = avkortingsgrunnlagIPeriode.grunnlag.fratrekkInnAar,
                 grunnbelop = beregningIPeriode.grunnbelop,
                 grunnbelopMnd = beregningIPeriode.grunnbelopMnd
             )

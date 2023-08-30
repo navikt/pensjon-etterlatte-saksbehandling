@@ -4,7 +4,9 @@ import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.etterlatte.avkorting.AvkortingRepository
+import no.nav.etterlatte.avkorting.Inntektsavkorting
 import no.nav.etterlatte.beregning.BeregningRepository
+import no.nav.etterlatte.beregning.regler.aarsoppgjoer
 import no.nav.etterlatte.beregning.regler.avkortetYtelse
 import no.nav.etterlatte.beregning.regler.avkorting
 import no.nav.etterlatte.beregning.regler.avkortinggrunnlag
@@ -35,6 +37,7 @@ internal class YtelseMedGrunnlagServiceTest {
     @Test
     fun `skal hente ytelse oppdelt i perioder med alle grunnlag`() {
         val behandlingsId = UUID.randomUUID()
+        val virkningstidspunkt = YearMonth.of(2023, 2)
         every { beregningRepository.hent(behandlingsId) } returns beregning(
             beregninger = listOf(
                 beregningsperiode(
@@ -56,20 +59,25 @@ internal class YtelseMedGrunnlagServiceTest {
             )
         )
         every { avkortingRepository.hentAvkorting(behandlingsId) } returns avkorting(
-            avkortingGrunnlag = listOf(
-                avkortinggrunnlag(
-                    periode = Periode(fom = YearMonth.of(2023, 2), tom = YearMonth.of(2023, 3)),
-                    aarsinntekt = 300000,
-                    fratrekkInnAar = 25000
-
+            inntektsavkorting = listOf(
+                Inntektsavkorting(
+                    grunnlag = avkortinggrunnlag(
+                        periode = Periode(fom = YearMonth.of(2023, 2), tom = YearMonth.of(2023, 3)),
+                        aarsinntekt = 300000,
+                        fratrekkInnAar = 25000,
+                        virkningstidspunkt = virkningstidspunkt
+                    )
                 ),
-                avkortinggrunnlag(
-                    periode = Periode(fom = YearMonth.of(2023, 4), tom = null),
-                    aarsinntekt = 350000,
-                    fratrekkInnAar = 25000
+                Inntektsavkorting(
+                    grunnlag = avkortinggrunnlag(
+                        periode = Periode(fom = YearMonth.of(2023, 4), tom = null),
+                        aarsinntekt = 350000,
+                        fratrekkInnAar = 25000,
+                        virkningstidspunkt = virkningstidspunkt
+                    )
                 )
             ),
-            avkortetYtelse = listOf(
+            avkortetYtelseAar = listOf(
                 avkortetYtelse(
                     periode = Periode(fom = YearMonth.of(2023, 2), tom = YearMonth.of(2023, 3)),
                     ytelseEtterAvkorting = 15000,

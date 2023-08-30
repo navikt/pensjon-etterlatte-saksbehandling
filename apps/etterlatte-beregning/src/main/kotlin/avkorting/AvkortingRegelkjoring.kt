@@ -49,7 +49,8 @@ object AvkortingRegelkjoring {
                         verdi = InntektAvkortingGrunnlag(
                             inntekt = Beregningstall(it.aarsinntekt),
                             fratrekkInnUt = Beregningstall(it.fratrekkInnAar),
-                            relevanteMaaneder = Beregningstall(it.relevanteMaanederInnAar)
+                            relevanteMaaneder = Beregningstall(it.relevanteMaanederInnAar),
+                            it.id
                         ),
                         kilde = it.kilde,
                         beskrivelse = "Forventet årsinntekt"
@@ -63,6 +64,7 @@ object AvkortingRegelkjoring {
             is RegelkjoeringResultat.Suksess -> {
                 val tidspunkt = Tidspunkt.now()
                 resultat.periodiserteResultater.map { periodisertResultat ->
+
                     Avkortingsperiode(
                         id = UUID.randomUUID(),
                         periode = Periode(
@@ -76,8 +78,12 @@ object AvkortingRegelkjoring {
                             navn = kroneavrundetInntektAvkorting.regelReferanse.id,
                             ts = tidspunkt,
                             versjon = periodisertResultat.reglerVersjon
-                        )
+                        ),
+                        inntektsgrunnlag = grunnlag.finnGrunnlagForPeriode(
+                            periodisertResultat.periode.fraDato
+                        ).inntektAvkortingGrunnlag.verdi.grunnlagId
                     )
+
                 }
             }
 
@@ -90,8 +96,8 @@ object AvkortingRegelkjoring {
         periode: Periode,
         ytelseFoerAvkorting: List<YtelseFoerAvkorting>,
         avkortingsperioder: List<Avkortingsperiode>,
+        type: AvkortetYtelseType,
         restanse: Restanse? = null,
-        type: AvkortetYtelseType = AvkortetYtelseType.NY
     ): List<AvkortetYtelse> {
         val regelgrunnlag = PeriodisertAvkortetYtelseGrunnlag(
             beregningsperioder = periodiserteBeregninger(ytelseFoerAvkorting),
@@ -202,7 +208,7 @@ object AvkortingRegelkjoring {
                 kilde = nyYtelseEtterAvkorting.map { "avkortetYtelse:${it.id}" },
                 beskrivelse = "Reberegnet ytelse etter avkorting før nytt virkningstidspunkt"
             ),
-            // TODO EY-2556 - Kan ikke være virk - må være fra og med nå
+            // TODO EY-2523 Kan ikke være virk - må være fra og med nå
             virkningstidspunkt = FaktumNode(
                 verdi = til,
                 kilde = "TODO",

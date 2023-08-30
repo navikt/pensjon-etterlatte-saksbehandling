@@ -6,6 +6,7 @@ import no.nav.etterlatte.avkorting.AvkortetYtelseType
 import no.nav.etterlatte.avkorting.Avkorting
 import no.nav.etterlatte.avkorting.AvkortingGrunnlag
 import no.nav.etterlatte.avkorting.Avkortingsperiode
+import no.nav.etterlatte.avkorting.Inntektsavkorting
 import no.nav.etterlatte.avkorting.Restanse
 import no.nav.etterlatte.avkorting.YtelseFoerAvkorting
 import no.nav.etterlatte.avkorting.regler.AvkortetYtelseGrunnlag
@@ -73,14 +74,17 @@ fun Int.toBeregningstall(
 val bruker = Saksbehandler("token", "ident", null)
 
 fun avkorting(
-    avkortingGrunnlag: List<AvkortingGrunnlag> = emptyList(),
     ytelseFoerAvkorting: List<YtelseFoerAvkorting> = emptyList(),
-    avkortingsperioder: List<Avkortingsperiode> = emptyList(),
-    avkortetYtelse: List<AvkortetYtelse> = emptyList()
+    inntektsavkorting: List<Inntektsavkorting> = emptyList(),
+    avkortetYtelseAar: List<AvkortetYtelse> = emptyList(),
+    avkortetYtelseForrigeVedtak: List<AvkortetYtelse> = emptyList()
 ) = Avkorting(
-    avkortingGrunnlag = avkortingGrunnlag,
-    aarsoppgjoer = aarsoppgjoer(ytelseFoerAvkorting, avkortingsperioder),
-    avkortetYtelse = avkortetYtelse
+    aarsoppgjoer = aarsoppgjoer(
+        ytelseFoerAvkorting,
+        inntektsavkorting,
+        avkortetYtelseAar,
+        avkortetYtelseForrigeVedtak
+    )
 )
 
 fun avkortinggrunnlag(
@@ -89,7 +93,8 @@ fun avkortinggrunnlag(
     fratrekkInnAar: Int = 10000,
     relevanteMaanederInnAar: Int = 12,
     periode: Periode = Periode(fom = YearMonth.now(), tom = null),
-    kilde: Grunnlagsopplysning.Saksbehandler = Grunnlagsopplysning.Saksbehandler.create("Z123456")
+    kilde: Grunnlagsopplysning.Saksbehandler = Grunnlagsopplysning.Saksbehandler.create("Z123456"),
+    virkningstidspunkt: YearMonth = YearMonth.now()
 ) = AvkortingGrunnlag(
     id = id,
     periode = periode,
@@ -97,7 +102,8 @@ fun avkortinggrunnlag(
     fratrekkInnAar = fratrekkInnAar,
     relevanteMaanederInnAar = relevanteMaanederInnAar,
     spesifikasjon = "Spesifikasjon",
-    kilde = kilde
+    kilde = kilde,
+    virkningstidspunkt = virkningstidspunkt
 )
 
 fun inntektAvkortingGrunnlag(
@@ -109,7 +115,8 @@ fun inntektAvkortingGrunnlag(
         verdi = InntektAvkortingGrunnlag(
             inntekt = Beregningstall(inntekt),
             fratrekkInnUt = Beregningstall(fratrekkInnUt),
-            relevanteMaaneder = Beregningstall(relevanteMaaneder)
+            relevanteMaaneder = Beregningstall(relevanteMaaneder),
+            grunnlagId = UUID.randomUUID()
         ),
         kilde = "",
         beskrivelse = ""
@@ -118,16 +125,14 @@ fun inntektAvkortingGrunnlag(
 
 fun aarsoppgjoer(
     ytelseFoerAvkorting: List<YtelseFoerAvkorting> = emptyList(),
-    avkortingsperioder: List<Avkortingsperiode> = emptyList(),
-    tidligereAvkortetYtelse: List<AvkortetYtelse> = emptyList(),
-    reberegnetAvkortetYtelse: List<AvkortetYtelse> = emptyList(),
-    restanse: Restanse? = null
+    inntektsavkorting: List<Inntektsavkorting> = emptyList(),
+    avkortetYtelseAar: List<AvkortetYtelse> = emptyList(),
+    avkortetYtelseForrigeVedtak: List<AvkortetYtelse> = emptyList(),
 ) = Aarsoppgjoer(
     ytelseFoerAvkorting = ytelseFoerAvkorting,
-    avkortingsperioder = avkortingsperioder,
-    tidligereAvkortetYtelse = tidligereAvkortetYtelse,
-    tidligereAvkortetYtelseReberegnet = reberegnetAvkortetYtelse,
-    restanse = restanse
+    inntektsavkorting = inntektsavkorting,
+    avkortetYtelseAar = avkortetYtelseAar,
+    avkortetYtelseForrigeVedtak = avkortetYtelseForrigeVedtak
 )
 
 fun ytelseFoerAvkorting(
@@ -143,14 +148,16 @@ fun ytelseFoerAvkorting(
 fun avkortingsperiode(
     fom: YearMonth = YearMonth.now(),
     tom: YearMonth? = null,
-    avkorting: Int = 10000
+    avkorting: Int = 10000,
+    inntektsgrunnlag: UUID = UUID.randomUUID()
 ) = Avkortingsperiode(
     id = UUID.randomUUID(),
     Periode(fom = fom, tom = tom),
     avkorting = avkorting,
     tidspunkt = Tidspunkt.now(),
     regelResultat = "".toJsonNode(),
-    kilde = Grunnlagsopplysning.RegelKilde("regelid", Tidspunkt.now(), "1")
+    kilde = Grunnlagsopplysning.RegelKilde("regelid", Tidspunkt.now(), "1"),
+    inntektsgrunnlag = inntektsgrunnlag
 )
 
 fun restanse(
@@ -173,7 +180,7 @@ fun avkortetYtelseGrunnlag(beregning: Int, avkorting: Int, fordeltRestanse: Int 
 
 fun avkortetYtelse(
     id: UUID = UUID.randomUUID(),
-    type: AvkortetYtelseType = AvkortetYtelseType.NY,
+    type: AvkortetYtelseType = AvkortetYtelseType.INNTEKT,
     ytelseEtterAvkorting: Int = 50,
     restanse: Int = 50,
     ytelseEtterAvkortingFoerRestanse: Int = 100,
@@ -182,7 +189,8 @@ fun avkortetYtelse(
     periode: Periode = Periode(
         fom = YearMonth.now(),
         tom = null
-    )
+    ),
+    inntektsgrunnlag: UUID? = UUID.randomUUID()
 ) = AvkortetYtelse(
     id = id,
     type = type,
@@ -194,7 +202,8 @@ fun avkortetYtelse(
     ytelseFoerAvkorting = ytelseFoerAvkorting,
     tidspunkt = Tidspunkt.now(),
     regelResultat = "".toJsonNode(),
-    kilde = Grunnlagsopplysning.RegelKilde("regelid", Tidspunkt.now(), "1")
+    kilde = Grunnlagsopplysning.RegelKilde("regelid", Tidspunkt.now(), "1"),
+    inntektsgrunnlag = inntektsgrunnlag
 )
 
 fun beregning(

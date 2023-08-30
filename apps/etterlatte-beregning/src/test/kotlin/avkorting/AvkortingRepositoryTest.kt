@@ -6,11 +6,11 @@ import no.nav.etterlatte.avkorting.Aarsoppgjoer
 import no.nav.etterlatte.avkorting.AvkortetYtelseType
 import no.nav.etterlatte.avkorting.Avkorting
 import no.nav.etterlatte.avkorting.AvkortingRepository
+import no.nav.etterlatte.avkorting.Inntektsavkorting
 import no.nav.etterlatte.beregning.regler.aarsoppgjoer
 import no.nav.etterlatte.beregning.regler.avkortetYtelse
 import no.nav.etterlatte.beregning.regler.avkortinggrunnlag
 import no.nav.etterlatte.beregning.regler.avkortingsperiode
-import no.nav.etterlatte.beregning.regler.restanse
 import no.nav.etterlatte.beregning.regler.ytelseFoerAvkorting
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.POSTGRES_VERSION
@@ -56,77 +56,83 @@ internal class AvkortingRepositoryTest {
     @Test
     fun `Skal lagre og oppdatere avkorting`() {
         val behandlingId: UUID = UUID.randomUUID()
-        val avkortinggrunnlag = listOf(avkortinggrunnlag())
+        val grunnlag = avkortinggrunnlag()
         val aarsoppgjoer = Aarsoppgjoer(
             ytelseFoerAvkorting = listOf(ytelseFoerAvkorting()),
-            avkortingsperioder = listOf(avkortingsperiode()),
-            tidligereAvkortetYtelse = listOf(avkortetYtelse(type = AvkortetYtelseType.TIDLIGERE)),
-            tidligereAvkortetYtelseReberegnet = listOf(avkortetYtelse(type = AvkortetYtelseType.REBEREGNET)),
-            restanse = restanse()
+            inntektsavkorting = listOf(
+                Inntektsavkorting(
+                    grunnlag = grunnlag,
+                    avkortingsperioder = listOf(avkortingsperiode(inntektsgrunnlag = grunnlag.id)),
+                    avkortetYtelse = listOf(avkortetYtelse(type = AvkortetYtelseType.INNTEKT, inntektsgrunnlag = grunnlag.id)),
+                )
+            ),
+            avkortetYtelseAar = listOf(avkortetYtelse(type = AvkortetYtelseType.AARSOPPGJOER)),
+            avkortetYtelseForrigeVedtak = listOf(avkortetYtelse(type = AvkortetYtelseType.FORRIGE_VEDTAK)),
         )
-        val avkortetYtelse = listOf(avkortetYtelse())
 
         avkortingRepository.lagreAvkorting(
             behandlingId,
             Avkorting(
-                avkortingGrunnlag = avkortinggrunnlag,
                 aarsoppgjoer = aarsoppgjoer,
-                avkortetYtelse = avkortetYtelse
             )
         )
+        val endretGrunnlag = aarsoppgjoer.inntektsavkorting[0].grunnlag.copy(spesifikasjon = "Endret")
+        val endretAvkortingsperioder =
+            aarsoppgjoer.inntektsavkorting[0].avkortingsperioder.map { it.copy(avkorting = 333) }
+        val endretAvkortetYtelse =
+            aarsoppgjoer.inntektsavkorting[0].avkortetYtelse.map { it.copy(avkortingsbeloep = 444) }
 
-        val endretAvkortingGrunnlag = listOf(avkortinggrunnlag[0].copy(spesifikasjon = "Endret"))
         val endretYtelseFoerAvkorting = listOf(aarsoppgjoer.ytelseFoerAvkorting[0].copy(beregning = 333))
-        val endretAvkortingsperiode = listOf(aarsoppgjoer.avkortingsperioder[0].copy(avkorting = 333))
-        val endretTidligereAvkortetYtelse = listOf(aarsoppgjoer.tidligereAvkortetYtelse[0].copy(avkortingsbeloep = 444))
-        val endretReberegnetYtelse =
-            listOf(aarsoppgjoer.tidligereAvkortetYtelseReberegnet[0].copy(avkortingsbeloep = 444))
-        val endretRestanse = aarsoppgjoer.restanse!!.copy(totalRestanse = 333)
-        val endretAvkortetYtelse = listOf(avkortetYtelse[0].copy(avkortingsbeloep = 444, restanse = 100))
+        val endretInntektsavkorting = listOf(
+            Inntektsavkorting(
+                grunnlag = endretGrunnlag,
+                avkortingsperioder = endretAvkortingsperioder,
+                avkortetYtelse = endretAvkortetYtelse
+            )
+        )
+        val endretAvkortetYtelseAar = aarsoppgjoer.avkortetYtelseAar.map { it.copy(avkortingsbeloep = 444) }
+        val endretAvkortetYtelseForrigeVedtak =
+            aarsoppgjoer.avkortetYtelseForrigeVedtak.map { it.copy(avkortingsbeloep = 444) }
 
         val avkorting = avkortingRepository.lagreAvkorting(
             behandlingId,
             Avkorting(
-                avkortingGrunnlag = endretAvkortingGrunnlag,
                 aarsoppgjoer = aarsoppgjoer(
                     ytelseFoerAvkorting = endretYtelseFoerAvkorting,
-                    avkortingsperioder = endretAvkortingsperiode,
-                    tidligereAvkortetYtelse = endretTidligereAvkortetYtelse,
-                    reberegnetAvkortetYtelse = endretReberegnetYtelse,
-                    restanse = endretRestanse
+                    inntektsavkorting = endretInntektsavkorting,
+                    avkortetYtelseAar = endretAvkortetYtelseAar,
+                    avkortetYtelseForrigeVedtak = endretAvkortetYtelseForrigeVedtak
                 ),
-                avkortetYtelse = endretAvkortetYtelse
             )
         )
 
-        avkorting.avkortingGrunnlag.asClue {
-            it.size shouldBe 1
-            it shouldBe endretAvkortingGrunnlag
-        }
         with(avkorting.aarsoppgjoer) {
-            avkortingsperioder.asClue {
-                it.size shouldBe 1
-                it shouldBe endretAvkortingsperiode
-            }
             ytelseFoerAvkorting.asClue {
                 it.size shouldBe 1
                 it shouldBe endretYtelseFoerAvkorting
             }
-            tidligereAvkortetYtelse.asClue {
+            inntektsavkorting.asClue {
                 it.size shouldBe 1
-                it shouldBe endretTidligereAvkortetYtelse
+                it[0].asClue { avkorting ->
+                    avkorting.grunnlag shouldBe endretGrunnlag
+                    avkorting.avkortingsperioder shouldBe endretAvkortingsperioder
+                    avkorting.avkortetYtelse shouldBe endretAvkortetYtelse
+                }
             }
-            tidligereAvkortetYtelseReberegnet.asClue {
+            avkortetYtelseAar.asClue {
                 it.size shouldBe 1
-                it shouldBe endretReberegnetYtelse
+                it shouldBe endretAvkortetYtelseAar
             }
-            restanse.asClue {
-                it shouldBe endretRestanse
+            avkortetYtelseForrigeVedtak.asClue {
+                it.size shouldBe 1
+                it shouldBe endretAvkortetYtelseForrigeVedtak
             }
-        }
-        avkorting.avkortetYtelse.asClue {
-            it.size shouldBe 1
-            it shouldBe endretAvkortetYtelse
         }
     }
+
+    @Test
+    fun `fyller lopende ytlisning basert paa aarets oppgjoet`() {
+        // TODO
+    }
+
 }

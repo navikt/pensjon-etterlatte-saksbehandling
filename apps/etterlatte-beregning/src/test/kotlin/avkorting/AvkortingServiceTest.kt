@@ -110,7 +110,7 @@ internal class AvkortingServiceTest {
             every { avkortingRepository.hentAvkorting(forrigeBehandlingId) } returns forrigeAvkorting
             every { forrigeAvkorting.kopierAvkorting(any()) } returns kopiertAvkorting
             every { beregningService.hentBeregningNonnull(any()) } returns beregning
-            every { kopiertAvkorting.beregnAvkorting(any(), any(), any()) } returns beregnetAvkorting
+            every { kopiertAvkorting.beregnAvkorting(any(), any()) } returns beregnetAvkorting
             every { avkortingRepository.lagreAvkorting(any(), any()) } returns lagretAvkorting
             coEvery { behandlingKlient.avkort(any(), any(), any()) } returns true
 
@@ -127,7 +127,6 @@ internal class AvkortingServiceTest {
                 beregningService.hentBeregningNonnull(behandlingId)
                 kopiertAvkorting.beregnAvkorting(
                     behandling.behandlingType,
-                    behandling.virkningstidspunkt!!,
                     beregning
                 )
                 avkortingRepository.lagreAvkorting(behandlingId, beregnetAvkorting)
@@ -142,9 +141,10 @@ internal class AvkortingServiceTest {
         @Test
         fun `Skal beregne og lagre avkorting`() {
             val behandlingId = UUID.randomUUID()
-            val virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2023, 1))
-            val behandling =
-                behandling(behandlingType = BehandlingType.REVURDERING, virkningstidspunkt = virkningstidspunkt)
+            val behandling = behandling(
+                behandlingType = BehandlingType.REVURDERING,
+                virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2023, 1))
+            )
             val endretGrunnlag = mockk<AvkortingGrunnlag>()
             val beregning = mockk<Beregning>()
 
@@ -156,7 +156,7 @@ internal class AvkortingServiceTest {
             coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
             every { beregningService.hentBeregningNonnull(any()) } returns beregning
             every {
-                eksisterendeAvkorting.beregnAvkortingMedNyttGrunnlag(any(), any(), any(), any())
+                eksisterendeAvkorting.beregnAvkortingMedNyttGrunnlag(any(), any(), any())
             } returns beregnetAvkorting
             every { avkortingRepository.lagreAvkorting(any(), any()) } returns lagretAvkorting
             coEvery { behandlingKlient.avkort(any(), any(), any()) } returns true
@@ -173,7 +173,6 @@ internal class AvkortingServiceTest {
                 eksisterendeAvkorting.beregnAvkortingMedNyttGrunnlag(
                     endretGrunnlag,
                     behandling.behandlingType,
-                    virkningstidspunkt,
                     beregning
                 )
                 avkortingRepository.lagreAvkorting(behandlingId, beregnetAvkorting)

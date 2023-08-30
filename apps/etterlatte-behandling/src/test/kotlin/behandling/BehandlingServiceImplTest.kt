@@ -92,8 +92,7 @@ class BehandlingServiceImplTest {
             sporingslogg = mockk(),
             featureToggleService = featureToggleService,
             kommerBarnetTilGodeDao = mockk(),
-            oppgaveServiceNy = mockk(),
-            kanBrukeNyOppgaveliste = true
+            oppgaveServiceNy = mockk()
         )
 
         val behandlinger = sut.hentBehandlingerISak(1)
@@ -465,8 +464,7 @@ class BehandlingServiceImplTest {
             sporingslogg = mockk(),
             featureToggleService = featureToggleService,
             kommerBarnetTilGodeDao = mockk(),
-            oppgaveServiceNy = mockk(),
-            kanBrukeNyOppgaveliste = true
+            oppgaveServiceNy = mockk()
         )
 
         val behandlinger = sut.hentBehandlingerISak(1)
@@ -510,8 +508,7 @@ class BehandlingServiceImplTest {
             sporingslogg = mockk(),
             featureToggleService = featureToggleService,
             kommerBarnetTilGodeDao = mockk(),
-            oppgaveServiceNy = mockk(),
-            kanBrukeNyOppgaveliste = true
+            oppgaveServiceNy = mockk()
         )
 
         val behandlinger = sut.hentBehandlingerISak(1)
@@ -554,8 +551,7 @@ class BehandlingServiceImplTest {
             sporingslogg = mockk(),
             featureToggleService = featureToggleService,
             kommerBarnetTilGodeDao = mockk(),
-            oppgaveServiceNy = mockk(),
-            kanBrukeNyOppgaveliste = true
+            oppgaveServiceNy = mockk()
         )
 
         sut.oppdaterUtenlandstilsnitt(
@@ -607,8 +603,7 @@ class BehandlingServiceImplTest {
             mockk(),
             featureToggleService,
             kommerBarnetTilGodeDao = mockk(),
-            oppgaveServiceNy = mockk(),
-            kanBrukeNyOppgaveliste = true
+            oppgaveServiceNy = mockk()
         )
 
         sut.oppdaterBoddEllerArbeidetUtlandet(
@@ -671,8 +666,7 @@ class BehandlingServiceImplTest {
         sporingslogg = mockk(),
         featureToggleService = featureToggleService,
         kommerBarnetTilGodeDao = mockk(),
-        oppgaveServiceNy = oppgaveServiceNy,
-        kanBrukeNyOppgaveliste = true
+        oppgaveServiceNy = oppgaveServiceNy
     )
 
     companion object {

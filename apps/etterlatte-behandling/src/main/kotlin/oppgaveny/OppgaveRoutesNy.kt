@@ -26,44 +26,31 @@ import no.nav.etterlatte.oppgave.GosysOppgaveService
 
 internal fun Route.oppgaveRoutesNy(
     service: OppgaveServiceNy,
-    gosysOppgaveService: GosysOppgaveService,
-    kanBrukeNyOppgaveliste: Boolean
+    gosysOppgaveService: GosysOppgaveService
 ) {
     route("/api/nyeoppgaver") {
         get {
             kunSaksbehandler {
-                if (kanBrukeNyOppgaveliste) {
-                    call.respond(
-                        service.finnOppgaverForBruker(
-                            Kontekst.get().appUserAsSaksbehandler().saksbehandlerMedRoller
-                        )
+                call.respond(
+                    service.finnOppgaverForBruker(
+                        Kontekst.get().appUserAsSaksbehandler().saksbehandlerMedRoller
                     )
-                } else {
-                    call.respond(HttpStatusCode.NotImplemented)
-                }
+                )
             }
         }
         get("gosys") {
             kunSaksbehandler {
-                if (kanBrukeNyOppgaveliste) {
-                    call.respond(gosysOppgaveService.hentOppgaver(brukerTokenInfo))
-                } else {
-                    call.respond(HttpStatusCode.NotImplemented)
-                }
+                call.respond(gosysOppgaveService.hentOppgaver(brukerTokenInfo))
             }
         }
 
         get("{$BEHANDLINGSID_CALL_PARAMETER}/hentsaksbehandler") {
             kunSaksbehandler {
-                if (kanBrukeNyOppgaveliste) {
-                    val saksbehandler = service.hentSaksbehandlerForBehandling(behandlingsId)
-                    if (saksbehandler != null) {
-                        call.respond(saksbehandler)
-                    } else {
-                        call.respond(HttpStatusCode.NoContent)
-                    }
+                val saksbehandler = service.hentSaksbehandlerForBehandling(behandlingsId)
+                if (saksbehandler != null) {
+                    call.respond(saksbehandler)
                 } else {
-                    call.respond(HttpStatusCode.NotImplemented)
+                    call.respond(HttpStatusCode.NoContent)
                 }
             }
         }
@@ -71,83 +58,59 @@ internal fun Route.oppgaveRoutesNy(
         route("{$OPPGAVEID_CALL_PARAMETER}") {
             post("tildel-saksbehandler") {
                 kunSaksbehandler {
-                    if (kanBrukeNyOppgaveliste) {
-                        val saksbehandlerEndringDto = call.receive<SaksbehandlerEndringDto>()
-                        service.tildelSaksbehandler(oppgaveId, saksbehandlerEndringDto.saksbehandler)
-                        call.respond(HttpStatusCode.OK)
-                    } else {
-                        call.respond(HttpStatusCode.NotImplemented)
-                    }
+                    val saksbehandlerEndringDto = call.receive<SaksbehandlerEndringDto>()
+                    service.tildelSaksbehandler(oppgaveId, saksbehandlerEndringDto.saksbehandler)
+                    call.respond(HttpStatusCode.OK)
                 }
             }
             post("bytt-saksbehandler") {
                 kunSaksbehandler {
-                    if (kanBrukeNyOppgaveliste) {
-                        val saksbehandlerEndringDto = call.receive<SaksbehandlerEndringDto>()
-                        inTransaction {
-                            service.byttSaksbehandler(oppgaveId, saksbehandlerEndringDto.saksbehandler)
-                        }
-                        call.respond(HttpStatusCode.OK)
-                    } else {
-                        call.respond(HttpStatusCode.NotImplemented)
+                    val saksbehandlerEndringDto = call.receive<SaksbehandlerEndringDto>()
+                    inTransaction {
+                        service.byttSaksbehandler(oppgaveId, saksbehandlerEndringDto.saksbehandler)
                     }
+                    call.respond(HttpStatusCode.OK)
                 }
             }
             route("saksbehandler", HttpMethod.Delete) {
                 handle {
                     kunSaksbehandler {
-                        if (kanBrukeNyOppgaveliste) {
-                            service.fjernSaksbehandler(oppgaveId)
-                            call.respond(HttpStatusCode.OK)
-                        } else {
-                            call.respond(HttpStatusCode.NotImplemented)
-                        }
+                        service.fjernSaksbehandler(oppgaveId)
+                        call.respond(HttpStatusCode.OK)
                     }
                 }
             }
             put("frist") {
                 kunSaksbehandler {
-                    if (kanBrukeNyOppgaveliste) {
-                        val redigerFrist = call.receive<RedigerFristRequest>()
-                        service.redigerFrist(oppgaveId, redigerFrist.frist)
-                        call.respond(HttpStatusCode.OK)
-                    } else {
-                        call.respond(HttpStatusCode.NotImplemented)
-                    }
+                    val redigerFrist = call.receive<RedigerFristRequest>()
+                    service.redigerFrist(oppgaveId, redigerFrist.frist)
+                    call.respond(HttpStatusCode.OK)
                 }
             }
         }
 
         route("/gosys/{gosysOppgaveId}") {
             post("tildel-saksbehandler") {
-                if (kanBrukeNyOppgaveliste) {
-                    val gosysOppgaveId = call.parameters["gosysOppgaveId"]!!
-                    val saksbehandlerEndringDto = call.receive<SaksbehandlerEndringGosysDto>()
-                    gosysOppgaveService.tildelOppgaveTilSaksbehandler(
-                        gosysOppgaveId,
-                        saksbehandlerEndringDto.versjon,
-                        saksbehandlerEndringDto.saksbehandler,
-                        brukerTokenInfo
-                    )
-                    call.respond(HttpStatusCode.OK)
-                } else {
-                    call.respond(HttpStatusCode.NotImplemented)
-                }
+                val gosysOppgaveId = call.parameters["gosysOppgaveId"]!!
+                val saksbehandlerEndringDto = call.receive<SaksbehandlerEndringGosysDto>()
+                gosysOppgaveService.tildelOppgaveTilSaksbehandler(
+                    gosysOppgaveId,
+                    saksbehandlerEndringDto.versjon,
+                    saksbehandlerEndringDto.saksbehandler,
+                    brukerTokenInfo
+                )
+                call.respond(HttpStatusCode.OK)
             }
             post("endre-frist") {
-                if (kanBrukeNyOppgaveliste) {
-                    val gosysOppgaveId = call.parameters["gosysOppgaveId"]!!
-                    val redigerFristRequest = call.receive<RedigerFristGosysRequest>()
-                    gosysOppgaveService.endreFrist(
-                        gosysOppgaveId,
-                        redigerFristRequest.versjon,
-                        redigerFristRequest.frist,
-                        brukerTokenInfo
-                    )
-                    call.respond(HttpStatusCode.OK)
-                } else {
-                    call.respond(HttpStatusCode.NotImplemented)
-                }
+                val gosysOppgaveId = call.parameters["gosysOppgaveId"]!!
+                val redigerFristRequest = call.receive<RedigerFristGosysRequest>()
+                gosysOppgaveService.endreFrist(
+                    gosysOppgaveId,
+                    redigerFristRequest.versjon,
+                    redigerFristRequest.frist,
+                    brukerTokenInfo
+                )
+                call.respond(HttpStatusCode.OK)
             }
         }
     }

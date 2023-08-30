@@ -19,20 +19,11 @@ private val logger = LoggerFactory.getLogger("behandlingVedtakRoute")
 internal fun Route.behandlingVedtakRoute(
     behandlingsstatusService: BehandlingStatusService,
     oppgaveService: OppgaveServiceNy,
-    behandlingService: BehandlingService,
-    kanBrukeNyOppgaveliste: Boolean
+    behandlingService: BehandlingService
 ) {
     fun haandterFeilIOppgaveService(e: Exception) {
-        if (kanBrukeNyOppgaveliste) {
-            logger.error("Fikk en feil i ferdigstilling av oppgave som stopper ferdigstilling.", e)
-            throw e
-        } else {
-            logger.error(
-                "Fikk en feil i ferdigstilling av oppgave som svelges, siden oppgave " +
-                    "ikke er skrudd på.",
-                e
-            )
-        }
+        logger.error("Fikk en feil i ferdigstilling av oppgave som stopper ferdigstilling.", e)
+        throw e
     }
 
     route("/fattvedtak") {

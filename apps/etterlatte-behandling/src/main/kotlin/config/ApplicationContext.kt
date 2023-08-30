@@ -146,13 +146,11 @@ class ApplicationContext(
 
     val behandlingsHendelser = BehandlingsHendelserKafkaProducerImpl(rapid)
 
-    val kanBrukeNyOppgaveliste: Boolean = env.getValue("KAN_BRUKE_NY_OPPGAVELISTE").toBoolean()
-
     // Metrikker
     val oppgaveMetrikker = OppgaveMetrics(metrikkerDao)
 
     // Service
-    val oppgaveServiceNy = OppgaveServiceNy(oppgaveDaoEndringer, sakDao, kanBrukeNyOppgaveliste, featureToggleService)
+    val oppgaveServiceNy = OppgaveServiceNy(oppgaveDaoEndringer, sakDao, featureToggleService)
     val gosysOppgaveService = GosysOppgaveServiceImpl(gosysOppgaveKlient, pdlKlient, featureToggleService)
     val behandlingService = BehandlingServiceImpl(
         behandlingDao = behandlingDao,
@@ -163,8 +161,7 @@ class ApplicationContext(
         sporingslogg = sporingslogg,
         featureToggleService = featureToggleService,
         kommerBarnetTilGodeDao = kommerBarnetTilGodeDao,
-        oppgaveServiceNy = oppgaveServiceNy,
-        kanBrukeNyOppgaveliste = kanBrukeNyOppgaveliste
+        oppgaveServiceNy = oppgaveServiceNy
     )
 
     val kommerBarnetTilGodeService =
@@ -181,8 +178,7 @@ class ApplicationContext(
             grunnlagsendringshendelseDao = grunnlagsendringshendelseDao,
             kommerBarnetTilGodeService = kommerBarnetTilGodeService,
             revurderingDao = revurderingDao,
-            behandlingService = behandlingService,
-            kanBrukeNyOppgaveliste = kanBrukeNyOppgaveliste
+            behandlingService = behandlingService
         )
 
     val gyldighetsproevingService =
@@ -226,8 +222,7 @@ class ApplicationContext(
             pdlKlient = pdlKlient,
             grunnlagKlient = grunnlagKlient,
             tilgangService = tilgangService,
-            sakService = sakService,
-            kanBrukeNyOppgaveliste = kanBrukeNyOppgaveliste
+            sakService = sakService
         )
 
     val behandlingsStatusService =

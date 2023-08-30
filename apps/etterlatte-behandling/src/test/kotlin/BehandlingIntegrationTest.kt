@@ -92,7 +92,6 @@ abstract class BehandlingIntegrationTest {
                 put("ELECTOR_PATH", "http://localhost")
                 put("NAVANSATT_URL", "http://localhost")
                 put("SKJERMING_URL", "http://localhost")
-                put("KAN_BRUKE_NY_OPPGAVELISTE", "true")
                 put("OPPGAVE_URL", "http://localhost")
                 put("OPPGAVE_SCOPE", "scope")
             }.let { Miljoevariabler(it) },

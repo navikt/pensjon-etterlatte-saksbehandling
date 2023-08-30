@@ -41,6 +41,13 @@ export interface BeregningsGrunnlagDto {
   institusjonsoppholdBeregningsgrunnlag: InstitusjonsoppholdGrunnlagDTO
   soeskenMedIBeregning: SoeskenMedIBeregningGrunnlagDto
 }
+
+export interface BeregningsGrunnlagOMSDto {
+  behandlingId: string
+  kilde: KildeSaksbehandler
+  institusjonsoppholdBeregningsgrunnlag: InstitusjonsoppholdGrunnlagDTO
+}
+
 export type InstitusjonsoppholdGrunnlagDTO = PeriodisertBeregningsgrunnlagDto<InstitusjonsoppholdIBeregning>[]
 
 export interface SoeskenMedIBeregning {

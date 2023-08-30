@@ -2,6 +2,7 @@ import { apiClient, ApiResponse } from '~shared/api/apiClient'
 import {
   Beregning,
   BeregningsGrunnlagDto,
+  BeregningsGrunnlagOMSDto,
   BeregningsGrunnlagOMSPostDto,
   BeregningsGrunnlagPostDto,
 } from '~shared/types/Beregning'
@@ -36,4 +37,12 @@ export const hentBeregningsGrunnlag = async (
   behandlingsId: string
 ): Promise<ApiResponse<BeregningsGrunnlagDto | null>> => {
   return apiClient.get<BeregningsGrunnlagDto | null>(`/beregning/beregningsgrunnlag/${behandlingsId}/barnepensjon`)
+}
+
+export const hentBeregningsGrunnlagOMS = async (
+  behandlingsId: string
+): Promise<ApiResponse<BeregningsGrunnlagOMSDto | null>> => {
+  return apiClient.get<BeregningsGrunnlagOMSDto | null>(
+    `/beregning/beregningsgrunnlag/${behandlingsId}/omstillingstoenad`
+  )
 }

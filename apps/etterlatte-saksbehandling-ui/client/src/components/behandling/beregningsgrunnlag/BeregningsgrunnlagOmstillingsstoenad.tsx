@@ -4,13 +4,16 @@ import { useBehandlingRoutes } from '../BehandlingRoutes'
 import { hentBehandlesFraStatus } from '../felles/utils'
 import { NesteOgTilbake } from '../handlinger/NesteOgTilbake'
 import { useAppDispatch } from '~store/Store'
-import { hentBeregningsGrunnlag, lagreBeregningsGrunnlagOMS, opprettEllerEndreBeregning } from '~shared/api/beregning'
+import {
+  hentBeregningsGrunnlagOMS,
+  lagreBeregningsGrunnlagOMS,
+  opprettEllerEndreBeregning,
+} from '~shared/api/beregning'
 import { isFailure, isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import {
   IBehandlingReducer,
   oppdaterBehandlingsstatus,
-  oppdaterBeregingsGrunnlag,
   oppdaterBeregingsGrunnlagOMS,
   resetBeregning,
 } from '~store/reducers/BehandlingReducer'
@@ -31,7 +34,7 @@ const BeregningsgrunnlagOmstillingsstoenad = (props: { behandling: IBehandlingRe
   const dispatch = useAppDispatch()
   const behandles = hentBehandlesFraStatus(behandling.status)
   const beregnTrygdetid = useState<boolean>(false)
-  const [beregningsgrunnlag, fetchBeregningsgrunnlag] = useApiCall(hentBeregningsGrunnlag)
+  const [beregningsgrunnlag, fetchBeregningsgrunnlag] = useApiCall(hentBeregningsGrunnlagOMS)
   const [yrkesskadeTrygdetid, setYrkesskadeTrygdetid] = useState<boolean>(false)
   const [vilkaarsvurdering, getVilkaarsvurdering] = useApiCall(hentVilkaarsvurdering)
   const [visInstitusjonsopphold, setVisInstitusjonsopphold] = useState<boolean>(false)
@@ -48,7 +51,7 @@ const BeregningsgrunnlagOmstillingsstoenad = (props: { behandling: IBehandlingRe
     fetchBeregningsgrunnlag(behandling.id, (result) => {
       if (result) {
         dispatch(
-          oppdaterBeregingsGrunnlag({
+          oppdaterBeregingsGrunnlagOMS({
             ...result,
             institusjonsopphold: result.institusjonsoppholdBeregningsgrunnlag,
           })

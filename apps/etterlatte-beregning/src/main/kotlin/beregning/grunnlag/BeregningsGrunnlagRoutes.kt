@@ -76,6 +76,21 @@ fun Route.beregningsGrunnlag(beregningsGrunnlagService: BeregningsGrunnlagServic
                 }
             }
         }
+
+        get("/{$BEHANDLINGSID_CALL_PARAMETER}/omstillingstoenad") {
+            withBehandlingId(behandlingKlient) { behandlingId ->
+                logger.info("Henter grunnlag for behandling $behandlingId")
+                val grunnlag = beregningsGrunnlagService.hentOmstillingstoenadBeregningsGrunnlag(
+                    behandlingId,
+                    brukerTokenInfo
+                )
+
+                when (grunnlag) {
+                    null -> call.respond(HttpStatusCode.NoContent)
+                    else -> call.respond(HttpStatusCode.OK, grunnlag)
+                }
+            }
+        }
     }
 }
 

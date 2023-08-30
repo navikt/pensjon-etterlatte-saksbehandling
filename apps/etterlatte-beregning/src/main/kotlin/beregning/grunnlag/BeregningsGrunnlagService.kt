@@ -150,6 +150,29 @@ class BeregningsGrunnlagService(
         }
     }
 
+    suspend fun hentOmstillingstoenadBeregningsGrunnlag(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo
+    ): BeregningsGrunnlagOMS? {
+        logger.info("Henter grunnlag $behandlingId")
+        val grunnlag = beregningsGrunnlagRepository.finnOmstillingstoenadGrunnlagForBehandling(behandlingId)
+        if (grunnlag != null) {
+            return grunnlag
+        }
+
+        // Det kan hende behandlingen er en revurdering, og da må vi finne forrige grunnlag for saken
+        val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
+        return if (behandling.behandlingType == BehandlingType.REVURDERING) {
+            val sisteIverksatteBehandling = behandlingKlient.hentSisteIverksatteBehandling(
+                behandling.sak,
+                brukerTokenInfo
+            )
+            beregningsGrunnlagRepository.finnOmstillingstoenadGrunnlagForBehandling(sisteIverksatteBehandling.id)
+        } else {
+            null
+        }
+    }
+
     fun dupliserBeregningsGrunnlagBP(behandlingId: UUID, forrigeBehandlingId: UUID) {
         logger.info("Dupliser grunnlag for $behandlingId fra $forrigeBehandlingId")
 

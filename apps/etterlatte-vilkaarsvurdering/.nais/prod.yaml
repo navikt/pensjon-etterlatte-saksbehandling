@@ -68,6 +68,8 @@ spec:
       value: http://etterlatte-grunnlag/api
     - name: ETTERLATTE_GRUNNLAG_CLIENT_ID
       value: prod-gcp.etterlatte.etterlatte-grunnlag
+  envFrom:
+    - secret: my-application-unleash-api-token
   accessPolicy:
     inbound:
       rules:
@@ -83,3 +85,5 @@ spec:
       rules:
         - application: etterlatte-behandling
         - application: etterlatte-grunnlag
+    external:
+      - host: etterlatte-unleash-api.nav.cloud.nais.io

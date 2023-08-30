@@ -63,9 +63,13 @@ spec:
       value: api://prod-gcp.etterlatte.etterlatte-behandling/.default
     - name: BEHANDLING_URL
       value: http://etterlatte-behandling
+  envFrom:
+    - secret: my-application-unleash-api-token
   accessPolicy:
     outbound:
       rules:
         - application: etterlatte-pdltjenester
         - application: etterlatte-gyldig-soeknad
         - application: etterlatte-behandling
+    external:
+      - host: etterlatte-unleash-api.nav.cloud.nais.io

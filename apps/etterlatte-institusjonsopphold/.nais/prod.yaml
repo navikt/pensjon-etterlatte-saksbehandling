@@ -38,9 +38,12 @@ spec:
       value: https://etterlatte-proxy.prod-fss-pub.nais.io/aad
     - name: ETTERLATTE_PROXY_OUTBOUND_SCOPE
       value: api://prod-fss.etterlatte.etterlatte-proxy/.default
+  envFrom:
+    - secret: my-application-unleash-api-token
   accessPolicy:
     outbound:
       rules:
         - application: etterlatte-behandling
       external:
         - host: etterlatte-proxy.prod-fss-pub.nais.io
+        - host: etterlatte-unleash-api.nav.cloud.nais.io

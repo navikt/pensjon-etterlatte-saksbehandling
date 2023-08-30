@@ -53,7 +53,6 @@ import no.nav.pensjon.brevbaker.api.model.RenderedJsonLetter
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import rapidsandrivers.getRapidEnv
-import java.net.URI
 
 val sikkerLogg: Logger = LoggerFactory.getLogger("sikkerLogg")
 
@@ -169,8 +168,8 @@ class ApplicationBuilder {
 
     private fun featureToggleProperties(config: Config) = FeatureToggleProperties(
         applicationName = config.getString("funksjonsbrytere.unleash.applicationName"),
-        uri = URI(config.getString("funksjonsbrytere.unleash.uri")),
-        cluster = config.getString("funksjonsbrytere.unleash.cluster")
+        host = config.getString("funksjonsbrytere.unleash.host"),
+        apiKey = config.getString("funksjonsbrytere.unleash.token")
     )
 
     fun start() = setReady().also { rapidsConnection.start() }

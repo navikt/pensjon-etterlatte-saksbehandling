@@ -46,8 +46,8 @@ import no.nav.etterlatte.libs.jobs.LeaderElection
 import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.libs.sporingslogg.Sporingslogg
-import no.nav.etterlatte.metrics.OppgaveMetrikkerDao
 import no.nav.etterlatte.metrics.OppgaveMetrics
+import no.nav.etterlatte.metrics.OppgaveMetrikkerDao
 import no.nav.etterlatte.oppgave.GosysOppgaveKlient
 import no.nav.etterlatte.oppgave.GosysOppgaveKlientImpl
 import no.nav.etterlatte.oppgave.GosysOppgaveServiceImpl
@@ -59,7 +59,6 @@ import no.nav.etterlatte.sak.SakDao
 import no.nav.etterlatte.sak.SakTilgangDao
 import no.nav.etterlatte.sak.TilgangServiceImpl
 import no.nav.etterlatte.tilgangsstyring.AzureGroup
-import java.net.URI
 import java.time.Duration
 import java.time.temporal.ChronoUnit
 
@@ -93,8 +92,8 @@ private fun navAnsattHttpClient(config: Config) = httpClientClientCredentials(
 
 private fun featureToggleProperties(config: Config) = FeatureToggleProperties(
     applicationName = config.getString("funksjonsbrytere.unleash.applicationName"),
-    uri = URI(config.getString("funksjonsbrytere.unleash.uri")),
-    cluster = config.getString("funksjonsbrytere.unleash.cluster")
+    host = config.getString("funksjonsbrytere.unleash.host"),
+    apiKey = config.getString("funksjonsbrytere.unleash.token")
 )
 
 class ApplicationContext(

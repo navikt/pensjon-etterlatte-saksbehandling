@@ -19,10 +19,10 @@ class UnleashFeatureToggleService(private val properties: FeatureTogglePropertie
     private val defaultUnleash = DefaultUnleash(
         UnleashConfig.builder()
             .appName(properties.applicationName)
-            .unleashAPI(properties.uri)
+            .unleashAPI(properties.uri())
             .unleashContextProvider(lagUnleashContextProvider())
+            .apiKey(properties.apiKey)
             .build(),
-        ByClusterStrategy(properties.cluster),
         GradualRolloutRandomStrategy()
     )
 

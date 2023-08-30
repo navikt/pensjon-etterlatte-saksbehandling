@@ -77,6 +77,8 @@ spec:
       value: http://etterlatte-trygdetid
     - name: ETTERLATTE_TRYGDETID_CLIENT_ID
       value: prod-gcp.etterlatte.etterlatte-trygdetid
+  envFrom:
+    - secret: my-application-unleash-api-token
   accessPolicy:
     outbound:
       rules:
@@ -85,7 +87,7 @@ spec:
         - application: etterlatte-behandling
         - application: etterlatte-trygdetid
       external:
-        - host: unleash.nais.io
+        - host: etterlatte-unleash-api.nav.cloud.nais.io
     inbound:
       rules:
         - application: etterlatte-saksbehandling-ui

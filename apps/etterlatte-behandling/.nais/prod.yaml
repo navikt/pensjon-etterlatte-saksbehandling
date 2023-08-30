@@ -110,6 +110,8 @@ spec:
       value: prod-fss.oppgavehandtering.oppgave
     - name: OPPGAVE_URL
       value: https://oppgave.prod-fss-pub.nais.io
+  envFrom:
+    - secret: my-application-unleash-api-token
   accessPolicy:
     outbound:
       rules:
@@ -124,6 +126,7 @@ spec:
         - host: norg2.prod-fss-pub.nais.io
         - host: navansatt.prod-fss-pub.nais.io
         - host: oppgave.prod-fss-pub.nais.io
+        - host: etterlatte-unleash-api.nav.cloud.nais.io
     inbound:
       rules:
         - application: etterlatte-egne-ansatte-lytter

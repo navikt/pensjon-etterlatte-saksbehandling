@@ -9,7 +9,7 @@ import { requestLogger } from './middleware/logging'
 import { tokenMiddleware } from './middleware/getOboToken'
 import { proxy } from './middleware/proxy'
 import { loggerRouter } from './routers/loggerRouter'
-import { unleash, unleashContext } from './utils/unleash'
+import { unleash } from './utils/unleash'
 import prometheus from './monitoring/prometheus'
 
 logger.info(`environment: ${process.env.NODE_ENV}`)
@@ -42,7 +42,7 @@ if (isDev) {
 
     res.json(
       toggles.map((toggle) => {
-        const enabled = unleash.isEnabled(toggle, unleashContext, false)
+        const enabled = unleash ? unleash.isEnabled(toggle, undefined, false) : false
 
         logger.info(`${toggle} enabled: ${enabled}`)
 

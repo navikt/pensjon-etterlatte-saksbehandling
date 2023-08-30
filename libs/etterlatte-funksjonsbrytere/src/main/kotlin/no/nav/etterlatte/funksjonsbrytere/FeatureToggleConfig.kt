@@ -14,6 +14,8 @@ enum class FellesFeatureToggle(private val key: String) : FeatureToggle {
 
 data class FeatureToggleProperties(
     val applicationName: String,
-    val uri: URI,
-    val cluster: String
-)
+    val host: String,
+    val apiKey: String
+) {
+    fun uri() = URI("$host/api")
+}

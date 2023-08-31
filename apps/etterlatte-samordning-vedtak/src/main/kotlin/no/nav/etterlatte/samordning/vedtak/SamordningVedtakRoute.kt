@@ -12,10 +12,16 @@ data class SamordningVedtakDto(
     val vedtakId: Long,
     val sakstype: String,
     val virkningsdato: LocalDate,
-    val opphorsdato: LocalDate?,
+    val opphoersdato: LocalDate?,
     val resultatkode: String,
     val stoppaarsak: String?,
     val anvendtTrygdetid: Int,
+    val perioder: List<SamordningVedtakPeriode> = listOf()
+)
+
+data class SamordningVedtakPeriode(
+    val fom: LocalDate,
+    val tom: LocalDate? = null,
     val omstillingsstoenadBrutto: Int,
     val omstillingsstoenadNetto: Int
 )
@@ -35,12 +41,17 @@ fun Route.samordningVedtakRoute() {
                 vedtakId = vedtakId,
                 sakstype = SakType.OMSTILLINGSSTOENAD.name,
                 virkningsdato = LocalDate.now(),
-                opphorsdato = null,
-                resultatkode = "RESULTATKODE",
+                opphoersdato = null,
+                resultatkode = "DUMMY RESULTATKODE",
                 stoppaarsak = null,
                 anvendtTrygdetid = 40,
-                omstillingsstoenadBrutto = 12000,
-                omstillingsstoenadNetto = 9500
+                perioder = listOf(
+                    SamordningVedtakPeriode(
+                        fom = LocalDate.now(),
+                        omstillingsstoenadBrutto = 12000,
+                        omstillingsstoenadNetto = 9500
+                    )
+                )
             )
 
             call.respond(vedtaksinfo)

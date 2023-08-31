@@ -5,6 +5,7 @@ import no.nav.etterlatte.avkorting.regler.PeriodisertAvkortetYtelseGrunnlag
 import no.nav.etterlatte.avkorting.regler.PeriodisertInntektAvkortingGrunnlag
 import no.nav.etterlatte.avkorting.regler.RestanseGrunnlag
 import no.nav.etterlatte.avkorting.regler.avkortetYtelseMedRestanse
+import no.nav.etterlatte.avkorting.regler.fordeltRestanse
 import no.nav.etterlatte.avkorting.regler.kroneavrundetInntektAvkorting
 import no.nav.etterlatte.avkorting.regler.restanse
 import no.nav.etterlatte.beregning.grunnlag.GrunnlagMedPeriode
@@ -104,21 +105,13 @@ object AvkortingRegelkjoring {
             avkortingsperioder = periodiserteAvkortinger(avkortingsperioder),
             fordeltRestanse = restansegrunnlag(restanse)
         )
-        return beregnAvkortetYtelse(periode, type, regelgrunnlag)
-    }
-
-    private fun beregnAvkortetYtelse(
-        periode: Periode,
-        type: AvkortetYtelseType,
-        regelgrunnlag: PeriodisertAvkortetYtelseGrunnlag
-    ): List<AvkortetYtelse> {
         val resultat = avkortetYtelseMedRestanse.eksekver(regelgrunnlag, periode.tilRegelPeriode())
         when (resultat) {
             is RegelkjoeringResultat.Suksess -> {
                 val tidspunkt = Tidspunkt.now()
                 return resultat.periodiserteResultater.map { periodisertResultat ->
                     val resultatFom = periodisertResultat.periode.fraDato
-                    val restanse = regelgrunnlag.finnGrunnlagForPeriode(resultatFom).fordeltRestanse.verdi
+                    val fordeltRestanse = restanse?.fordeltRestanse ?: 0
                     AvkortetYtelse(
                         id = UUID.randomUUID(),
                         type = type,
@@ -128,7 +121,7 @@ object AvkortingRegelkjoring {
                         ),
                         ytelseEtterAvkorting = periodisertResultat.resultat.verdi,
                         restanse = restanse,
-                        ytelseEtterAvkortingFoerRestanse = periodisertResultat.resultat.verdi + restanse,
+                        ytelseEtterAvkortingFoerRestanse = periodisertResultat.resultat.verdi + fordeltRestanse,
                         avkortingsbeloep = regelgrunnlag.finnGrunnlagForPeriode(resultatFom).avkorting.verdi,
                         ytelseFoerAvkorting = regelgrunnlag.finnGrunnlagForPeriode(resultatFom).beregning.verdi,
                         tidspunkt = tidspunkt,

@@ -89,7 +89,7 @@ fun AvkortetYtelse.toDto() = AvkortetYtelseDto(
     type = type.name,
     ytelseFoerAvkorting = ytelseFoerAvkorting,
     avkortingsbeloep = avkortingsbeloep,
-    restanse = restanse,
+    restanse = restanse?.fordeltRestanse ?: 0,
     ytelseEtterAvkorting = ytelseEtterAvkorting
 )
 

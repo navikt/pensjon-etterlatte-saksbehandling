@@ -4,6 +4,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import kotliquery.Row
 import kotliquery.TransactionalSession
 import kotliquery.queryOf
+import no.nav.etterlatte.avkorting.regler.restanse
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
@@ -30,6 +31,11 @@ class AvkortingRepository(private val dataSource: DataSource) {
                 behandlingId
             ).let { query -> tx.run(query.map { row -> row.toYtelseFoerAvkorting() }.asList) }
 
+            val restanse = queryOf(
+                "SELECT * FROM avkorting_aarsoppgjoer_restanse WHERE behandling_id = ?",
+                behandlingId
+            ).let { query -> tx.run(query.map { row -> row.toRestanse() }.asList) }
+
             val inntektsavkorting = avkortingGrunnlag.map {
                 val avkortingsperioder = queryOf(
                     "SELECT * FROM avkortingsperioder WHERE inntektsgrunnlag = ?",
@@ -39,7 +45,7 @@ class AvkortingRepository(private val dataSource: DataSource) {
                 val avkortetYtelse = queryOf(
                     "SELECT * FROM avkortet_ytelse WHERE inntektsgrunnlag = ?",
                     it.id,
-                ).let { query -> tx.run(query.map { row -> row.toAvkortetYtelse() }.asList) }
+                ).let { query -> tx.run(query.map { row -> row.toAvkortetYtelse(restanse) }.asList) }
 
                 Inntektsavkorting(
                     grunnlag = it,
@@ -52,20 +58,14 @@ class AvkortingRepository(private val dataSource: DataSource) {
                 "SELECT * FROM avkortet_ytelse WHERE behandling_id = ? AND type = ?",
                 behandlingId,
                 AvkortetYtelseType.AARSOPPGJOER.name
-            ).let { query -> tx.run(query.map { row -> row.toAvkortetYtelse() }.asList) }
+            ).let { query -> tx.run(query.map { row -> row.toAvkortetYtelse(restanse) }.asList) }
 
             val avkortetYtelseForrigeVedtak = queryOf(
                 "SELECT * FROM avkortet_ytelse WHERE behandling_id = ? AND type = ?",
                 behandlingId,
                 AvkortetYtelseType.FORRIGE_VEDTAK.name
-            ).let { query -> tx.run(query.map { row -> row.toAvkortetYtelse() }.asList) }
+            ).let { query -> tx.run(query.map { row -> row.toAvkortetYtelse(restanse) }.asList) }
 
-            /* TODO EY-2523
-        val restanse = queryOf(
-            "SELECT * FROM avkorting_aarsoppgjoer_restanse WHERE behandling_id = ?",
-            behandlingId
-        ).let { query -> tx.run(query.map { row -> row.toRestanse() }.asSingle) }
-         */
             Avkorting(
                 aarsoppgjoer = Aarsoppgjoer(
                     ytelseFoerAvkorting = ytelseFoerAvkorting,
@@ -239,6 +239,7 @@ class AvkortingRepository(private val dataSource: DataSource) {
         tx: TransactionalSession
     ) =
         avkortetYtelse.forEach {
+            it.restanse?.let { restanse -> lagreRestanse(behandlingId, restanse, tx) }
             queryOf(
                 statement = """
                     INSERT INTO avkortet_ytelse(
@@ -259,7 +260,7 @@ class AvkortingRepository(private val dataSource: DataSource) {
                     "tom" to it.periode.tom?.atDay(1),
                     "ytelseEtterAvkorting" to it.ytelseEtterAvkorting,
                     "avkortingsbeloep" to it.avkortingsbeloep,
-                    "restanse" to it.restanse,
+                    "restanse" to it.restanse?.id,
                     "ytelseFoerAvkorting" to it.ytelseFoerAvkorting,
                     "ytelseEtterAvkortingFoerRestanse" to it.ytelseEtterAvkortingFoerRestanse,
                     "tidspunkt" to it.tidspunkt.toTimestamp(),
@@ -315,7 +316,9 @@ class AvkortingRepository(private val dataSource: DataSource) {
         kilde = string("kilde").let { objectMapper.readValue(it) }
     )
 
-    private fun Row.toAvkortetYtelse() = AvkortetYtelse(
+    private fun Row.toAvkortetYtelse(
+        allRestanse: List<Restanse>
+    ) = AvkortetYtelse(
         id = uuid("id"),
         type = string("type").let { AvkortetYtelseType.valueOf(it) },
         periode = Periode(
@@ -324,7 +327,7 @@ class AvkortingRepository(private val dataSource: DataSource) {
         ),
         ytelseEtterAvkorting = int("ytelse_etter_avkorting"),
         avkortingsbeloep = int("avkortingsbeloep"),
-        restanse = int("restanse"),
+        restanse = uuidOrNull("restanse").let { restanseUuid -> allRestanse.find { it.id == restanseUuid } },
         ytelseEtterAvkortingFoerRestanse = int("ytelse_etter_avkorting_uten_restanse"),
         ytelseFoerAvkorting = int("ytelse_foer_avkorting"),
         tidspunkt = sqlTimestamp("tidspunkt").toTidspunkt(),

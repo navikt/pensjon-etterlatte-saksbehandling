@@ -196,7 +196,9 @@ fun avkortetYtelse(
     type = type,
     periode = periode,
     ytelseEtterAvkorting = ytelseEtterAvkorting,
-    restanse = restanse,
+    restanse = restanse(
+        fordeltRestanse = restanse
+    ),
     ytelseEtterAvkortingFoerRestanse = ytelseEtterAvkortingFoerRestanse,
     avkortingsbeloep = avkortingsbeloep,
     ytelseFoerAvkorting = ytelseFoerAvkorting,

@@ -24,7 +24,12 @@ data class Avkorting(
                     )
                 )
             },
-            avkortetYtelseForrigeVedtak = aarsoppgjoer.avkortetYtelseAar.map { it.copy(id = UUID.randomUUID()) }
+            avkortetYtelseForrigeVedtak = aarsoppgjoer.avkortetYtelseAar.map {
+                it.copy(
+                    id = UUID.randomUUID(),
+                    type = AvkortetYtelseType.FORRIGE_VEDTAK
+                )
+            }
         )
     )
 
@@ -82,7 +87,6 @@ data class Avkorting(
 
         val ytelseFoerAvkorting = beregning.mapTilYtelseFoerAvkorting()
 
-
         val grunnlag = aarsoppgjoer.inntektsavkorting.first().grunnlag
 
         val avkortingsperioder = AvkortingRegelkjoring.beregnInntektsavkorting(
@@ -105,7 +109,12 @@ data class Avkorting(
                         avkortetYtelse = beregnetAvkortetYtelse.map { it.copy(inntektsgrunnlag = grunnlag.id) }
                     )
                 },
-                avkortetYtelseAar = beregnetAvkortetYtelse
+                avkortetYtelseAar = beregnetAvkortetYtelse.map {
+                    it.copy(
+                        id = UUID.randomUUID(),
+                        type = AvkortetYtelseType.AARSOPPGJOER
+                    )
+                }
             ),
         )
     }
@@ -212,7 +221,6 @@ data class Restanse(
     val id: UUID,
     val totalRestanse: Int,
     val fordeltRestanse: Int,
-    // TODO fra og med dato? antall gjenværende?
     val tidspunkt: Tidspunkt,
     val regelResultat: JsonNode?,
     val kilde: Grunnlagsopplysning.Kilde,
@@ -224,7 +232,7 @@ data class AvkortetYtelse(
     val periode: Periode,
     val ytelseEtterAvkorting: Int,
     val ytelseEtterAvkortingFoerRestanse: Int,
-    val restanse: Int = 0, // TODO klasse med regelresultat
+    val restanse: Restanse?,
     val avkortingsbeloep: Int,
     val ytelseFoerAvkorting: Int,
     val tidspunkt: Tidspunkt,

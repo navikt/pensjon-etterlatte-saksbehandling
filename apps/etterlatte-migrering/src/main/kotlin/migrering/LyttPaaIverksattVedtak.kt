@@ -6,6 +6,7 @@ import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.etterlatte.libs.common.utbetaling.UtbetalingResponseDto
 import no.nav.etterlatte.libs.common.utbetaling.UtbetalingStatusDto
+import no.nav.etterlatte.migrering.pen.PenKlient
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser
 import no.nav.etterlatte.utbetaling.common.EVENT_NAME_OPPDATERT
 import no.nav.etterlatte.utbetaling.common.UTBETALING_RESPONSE
@@ -19,7 +20,8 @@ import rapidsandrivers.migrering.ListenerMedLoggingOgFeilhaandtering
 
 internal class LyttPaaIverksattVedtak(
     rapidsConnection: RapidsConnection,
-    private val pesysRepository: PesysRepository
+    private val pesysRepository: PesysRepository,
+    private val penKlient: PenKlient
 ) :
     ListenerMedLoggingOgFeilhaandtering(Migreringshendelser.IVERKSATT) {
 
@@ -48,6 +50,7 @@ internal class LyttPaaIverksattVedtak(
         when (respons.status) {
             UtbetalingStatusDto.GODKJENT, UtbetalingStatusDto.GODKJENT_MED_FEIL -> {
                 pesysRepository.oppdaterStatus(behandling.pesysId, Migreringsstatus.FERDIG)
+                penKlient.opphoerSak(behandling.pesysId)
             }
 
             else -> {

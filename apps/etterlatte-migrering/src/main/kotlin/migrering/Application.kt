@@ -24,7 +24,7 @@ internal class Server(private val context: ApplicationContext) {
             Migrering(rapidsConnection, penklient)
             MigrerSpesifikkSak(rapidsConnection, penklient, pesysRepository, sakmigrerer)
             LagreKopling(rapidsConnection, pesysRepository)
-            LyttPaaIverksattVedtak(rapidsConnection, pesysRepository)
+            LyttPaaIverksattVedtak(rapidsConnection, pesysRepository, penklient)
         }.start()
     }
 }

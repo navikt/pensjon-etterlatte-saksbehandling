@@ -71,86 +71,62 @@ export const Oppgavelista = (props: {
             </Table.Header>
             <Table.Body>
               {paginerteOppgaver &&
-                paginerteOppgaver.map(
-                  ({
-                    id,
-                    status,
-                    type,
-                    opprettet,
-                    frist,
-                    enhet,
-                    saksbehandler,
-                    merknad,
-                    sakType,
-                    fnr,
-                    sakId,
-                    referanse,
-                    beskrivelse,
-                    gjelder,
-                    versjon,
-                  }) => {
-                    const erRedigerbar = erOppgaveRedigerbar(status)
+                paginerteOppgaver.map((oppgave) => {
+                  const erRedigerbar = erOppgaveRedigerbar(oppgave.status)
 
-                    return (
-                      <Table.Row key={id}>
-                        <Table.HeaderCell>{formaterStringDato(opprettet)}</Table.HeaderCell>
-                        <Table.DataCell>
-                          <FristWrapper fristHarPassert={!!frist && isBefore(new Date(frist), new Date())}>
-                            {frist ? formaterStringDato(frist) : 'Ingen frist'}
-                          </FristWrapper>
-                        </Table.DataCell>
-                        <Table.DataCell>
-                          <SaksoversiktLenke fnr={fnr} />
-                        </Table.DataCell>
-                        <Table.DataCell>
-                          {type ? <OppgavetypeTag oppgavetype={type} /> : <div>oppgaeveid {id}</div>}
-                        </Table.DataCell>
-                        <Table.DataCell>{sakType && <SaktypeTag sakType={sakType} />}</Table.DataCell>
-                        <Table.DataCell>{merknad}</Table.DataCell>
-                        <Table.DataCell>
-                          {<span>{status ? OPPGAVESTATUSFILTER[status] ?? status : 'Ukjent'}</span>}
-                        </Table.DataCell>
-                        <Table.DataCell>{enhet}</Table.DataCell>
-                        <Table.DataCell>
-                          {saksbehandler ? (
-                            <RedigerSaksbehandler
-                              saksbehandler={saksbehandler}
-                              oppgaveId={id}
-                              sakId={sakId}
-                              hentOppgaver={hentOppgaver}
-                              erRedigerbar={erRedigerbar}
-                              versjon={versjon}
-                              type={type}
-                            />
-                          ) : (
-                            <TildelSaksbehandler
-                              oppgaveId={id}
-                              hentOppgaver={hentOppgaver}
-                              erRedigerbar={erRedigerbar}
-                              versjon={versjon}
-                              type={type}
-                            />
-                          )}
-                        </Table.DataCell>
-                        <Table.DataCell>
-                          <HandlingerForOppgave
-                            oppgavetype={type}
-                            oppgavestatus={status}
-                            opprettet={opprettet}
-                            frist={frist}
-                            fnr={fnr}
-                            enhet={enhet}
-                            saksbehandler={saksbehandler}
-                            saktype={sakType}
-                            referanse={referanse}
-                            beskrivelse={beskrivelse}
-                            gjelder={gjelder}
+                  return (
+                    <Table.Row key={oppgave.id}>
+                      <Table.HeaderCell>{formaterStringDato(oppgave.opprettet)}</Table.HeaderCell>
+                      <Table.DataCell>
+                        <FristWrapper
+                          fristHarPassert={!!oppgave.frist && isBefore(new Date(oppgave.frist), new Date())}
+                        >
+                          {oppgave.frist ? formaterStringDato(oppgave.frist) : 'Ingen frist'}
+                        </FristWrapper>
+                      </Table.DataCell>
+                      <Table.DataCell>
+                        <SaksoversiktLenke fnr={oppgave.fnr} />
+                      </Table.DataCell>
+                      <Table.DataCell>
+                        {oppgave.type ? (
+                          <OppgavetypeTag oppgavetype={oppgave.type} />
+                        ) : (
+                          <div>oppgaveid {oppgave.id}</div>
+                        )}
+                      </Table.DataCell>
+                      <Table.DataCell>{oppgave.sakType && <SaktypeTag sakType={oppgave.sakType} />}</Table.DataCell>
+                      <Table.DataCell>{oppgave.merknad}</Table.DataCell>
+                      <Table.DataCell>
+                        {oppgave.status ? OPPGAVESTATUSFILTER[oppgave.status] ?? oppgave.status : 'Ukjent'}
+                      </Table.DataCell>
+                      <Table.DataCell>{oppgave.enhet}</Table.DataCell>
+                      <Table.DataCell>
+                        {oppgave.saksbehandler ? (
+                          <RedigerSaksbehandler
+                            saksbehandler={oppgave.saksbehandler}
+                            oppgaveId={oppgave.id}
+                            sakId={oppgave.sakId}
+                            hentOppgaver={hentOppgaver}
+                            erRedigerbar={erRedigerbar}
+                            versjon={oppgave.versjon}
+                            type={oppgave.type}
                           />
-                        </Table.DataCell>
-                      </Table.Row>
-                    )
-                  }
-                )}
+                        ) : (
+                          <TildelSaksbehandler
+                            oppgaveId={oppgave.id}
+                            hentOppgaver={hentOppgaver}
+                            erRedigerbar={erRedigerbar}
+                            versjon={oppgave.versjon}
+                            type={oppgave.type}
+                          />
+                        )}
+                      </Table.DataCell>
+                      <Table.DataCell>
+                        <HandlingerForOppgave oppgave={oppgave} />
+                      </Table.DataCell>
+                    </Table.Row>
+                  )
+                })}
             </Table.Body>
           </Table>
 

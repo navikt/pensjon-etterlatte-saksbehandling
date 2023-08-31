@@ -1,10 +1,11 @@
-import { Oppgavetype, Saktype } from '~shared/api/oppgaverny'
+import { Oppgavetype } from '~shared/api/oppgaverny'
 import { Tag } from '@navikt/ds-react'
 import { Variants } from '~shared/Tags'
+import { SakType } from '~shared/types/sak'
 
-export const SaktypeTag = (props: { sakType: Saktype }) => {
+export const SaktypeTag = (props: { sakType: SakType }) => {
   const { sakType } = props
-  const SAKTYPE_TIL_TAGDATA: Record<Saktype, { variant: Variants; text: string }> = {
+  const SAKTYPE_TIL_TAGDATA: Record<SakType, { variant: Variants; text: string }> = {
     BARNEPENSJON: { variant: Variants.INFO, text: 'Barnepensjon' },
     OMSTILLINGSSTOENAD: { variant: Variants.NEUTRAL, text: 'Omstillingsstønad' },
   }

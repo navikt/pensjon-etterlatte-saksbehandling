@@ -1,6 +1,5 @@
 package no.nav.etterlatte.migrering
 
-import migrering.Migreringsstatus
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype

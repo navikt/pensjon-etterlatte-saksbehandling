@@ -1,7 +1,6 @@
 package no.nav.etterlatte.migrering
 
 import kotliquery.TransactionalSession
-import migrering.Migreringsstatus
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.database.Transactions

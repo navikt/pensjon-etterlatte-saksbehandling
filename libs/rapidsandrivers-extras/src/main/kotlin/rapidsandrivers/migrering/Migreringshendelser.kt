@@ -8,6 +8,7 @@ object Migreringshendelser {
     const val MIGRER_SPESIFIKK_SAK = "${PREFIX}MIGRER_SPESIFIKK_SAK"
 
     const val MIGRER_SAK = "${PREFIX}MIGRER_SAK"
+    const val LAGRE_KOPLING = "{PREFIX}LAGRE_KOPLING"
     const val LAGRE_GRUNNLAG = "${PREFIX}LAGRE_GRUNNLAG"
     const val VILKAARSVURDER = "${PREFIX}VILKAARSVURDER"
     const val BEREGN = "${PREFIX}BEREGN"

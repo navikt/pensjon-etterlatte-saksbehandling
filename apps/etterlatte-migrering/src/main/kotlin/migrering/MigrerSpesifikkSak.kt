@@ -34,6 +34,11 @@ internal class MigrerSpesifikkSak(
 
     override fun haandterPakke(packet: JsonMessage, context: MessageContext) {
         val sakId = packet.sakId
+        if (pesysRepository.hentStatus(sakId) != null) {
+            logger.info("Har allerede migrert sak $sakId. Avbryter.")
+            return
+        }
+
         logger.info("Prøver å hente sak $sakId fra PEN")
         val sakFraPEN = runBlocking { penKlient.hentSak(sakId) }
         logger.info("Henta sak $sakId fra PEN")

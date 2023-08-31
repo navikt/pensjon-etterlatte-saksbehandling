@@ -1,10 +1,8 @@
 package no.nav.etterlatte.samordning.vedtak
 
 import io.ktor.server.application.call
-import io.ktor.server.application.log
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
-import io.ktor.server.routing.application
 import io.ktor.server.routing.get
 import io.ktor.server.routing.route
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -22,9 +20,7 @@ data class SamordningVedtakDto(
     val omstillingsstoenadNetto: Int
 )
 
-fun Route.vedtakRoute() {
-    val logger = application.log
-
+fun Route.samordningVedtakRoute() {
     route("ping") {
         get {
             call.respond("Tjeneste ok")

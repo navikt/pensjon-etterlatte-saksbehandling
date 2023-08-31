@@ -5,12 +5,14 @@ import io.ktor.server.testing.testApplication
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
+import kotliquery.TransactionalSession
 import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.POSTGRES_VERSION
+import no.nav.etterlatte.libs.database.hentListe
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.migrering.pen.BarnepensjonGrunnlagResponse
 import no.nav.etterlatte.migrering.pen.PenKlient
@@ -30,7 +32,7 @@ import java.time.Month
 import java.time.YearMonth
 import javax.sql.DataSource
 
-class MigreringIntegrationTest {
+internal class MigreringIntegrationTest {
 
     @Container
     private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:$POSTGRES_VERSION")
@@ -83,7 +85,7 @@ class MigreringIntegrationTest {
             )
             with(repository.hentSaker()) {
                 assertEquals(1, size)
-                assertEquals(get(0).pesysId.id, 22974139)
+                assertEquals(get(0).id, 22974139)
                 assertEquals(get(0).virkningstidspunkt, YearMonth.of(2023, Month.SEPTEMBER))
             }
 
@@ -95,3 +97,13 @@ class MigreringIntegrationTest {
         }
     }
 }
+
+internal fun PesysRepository.hentSaker(tx: TransactionalSession? = null): List<Pesyssak> = tx.session {
+    hentListe(
+        "SELECT sak from pesyssak WHERE status = '${Migreringsstatus.UNDER_MIGRERING.name}'"
+    ) {
+        tilPesyssak(it.string("sak"))
+    }
+}
+
+private fun tilPesyssak(sak: String) = objectMapper.readValue(sak, Pesyssak::class.java)

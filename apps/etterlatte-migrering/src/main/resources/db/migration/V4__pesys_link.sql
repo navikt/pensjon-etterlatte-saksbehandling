@@ -1,6 +1,6 @@
 CREATE TABLE pesyskopling
 (
-    pesys_id UUID UNIQUE NOT NULL
+    pesys_id BIGINT UNIQUE NOT NULL
         CONSTRAINT pesys_sak_id_fk
             REFERENCES pesyssak (id),
     behandling_id UUID UNIQUE NOT NULL,

@@ -3,6 +3,7 @@ package no.nav.etterlatte.migrering
 import kotliquery.TransactionalSession
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.database.Transactions
+import no.nav.etterlatte.libs.database.hent
 import no.nav.etterlatte.libs.database.oppdater
 import no.nav.etterlatte.libs.database.opprett
 import no.nav.etterlatte.libs.database.transaction
@@ -33,6 +34,15 @@ internal class PesysRepository(private val dataSource: DataSource) : Transaction
             mapOf("id" to id, "status" to status.name),
             "Markerte $id med status $status"
         )
+    }
+
+    fun hentStatus(id: Long, tx: TransactionalSession? = null) = tx.session {
+        hent(
+            "SELECT status from pesyssak WHERE id = :id",
+            mapOf("id" to id)
+        ) {
+            Migreringsstatus.valueOf(it.string("status"))
+        }
     }
 
     fun lagreKoplingTilBehandling(behandlingId: UUID, pesysId: PesysId, tx: TransactionalSession? = null) {

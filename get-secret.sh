@@ -1,15 +1,15 @@
 #!/bin/bash
 
 info() {
-    echo -e "INFO: $1"
+    echo -e "\033[1;32mINFO:\033[0m\t$1"
 }
 
 warn() {
-    echo -e "\033[1;33mWARN:\033[0m $1"
+    echo -e "\033[1;33mWARN:\033[0m\t$1"
 }
 
 error() {
-    echo -e "\033[1;31mERROR:\033[0m $1"
+    echo -e "\033[1;31mERROR:\033[0m\t$1"
     exit;
 }
 
@@ -50,23 +50,16 @@ userIsAuthenticated() {
 }
 
 validateAppDir() {
-  if [[ -z "$1" ]]; then
-    ALL_APPS_DIR=$(pwd | sed "s/saksbehandling.*/saksbehandling\/apps/")
-    AVAILABLE_APPS=$(ls $ALL_APPS_DIR)
+  ALL_APPS_DIR=$(pwd | sed "s/saksbehandling.*/saksbehandling\/apps/")
+  APP_NAME=$(ls $ALL_APPS_DIR | fzf)
 
-    error "You must supply app name. \n\nAvailable apps are: \n$AVAILABLE_APPS"
-  fi
+  if [ -n "$APP_NAME" ]; then
+    info "You selected '$APP_NAME'"
 
-  APP_NAME=$1
-  APP_DIR=$(pwd | sed "s/saksbehandling.*/saksbehandling\/apps\/$APP_NAME/")
-
-  if [ ! -d "$APP_DIR" ]; then
-    ALL_APPS_DIR=$(pwd | sed "s/saksbehandling.*/saksbehandling\/apps/")
-    AVAILABLE_APPS=$(ls $ALL_APPS_DIR)
-
-    error "Directory '$APP_DIR' does not exist! \n\nAvailable app dirs are: \n$AVAILABLE_APPS"
+    APP_DIR=$(pwd | sed "s/saksbehandling.*/saksbehandling\/apps\/$APP_NAME/")
   else
-    info "Found directory '$APP_DIR'."
+    warn "No app selected. Exiting script ..."
+    exit;
   fi
 }
 
@@ -84,14 +77,46 @@ userHasJq() {
   fi
 }
 
-getLocalSecretName() {
-  info "Checking if app contains config for azuread secret"
+userHasFzf() {
+  if ! command -v fzf &> /dev/null
+  then
+    warn "Command 'fzf' is missing. Attempting to run 'brew install fzf'..."
+    brew install fzf
 
+    if [ $? -eq 0 ]; then
+      info "fzf installed successfully"
+    else
+      error "Unable to install fzf. Try installing manually"
+    fi
+  fi
+}
+
+userHasSymlink() {
+  if ! command -v get-secret &> /dev/null
+  then
+    warn "Command 'get-secret' is missing. Adding to /usr/local/bin"
+
+    SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+
+    ln -s $SCRIPT_DIR/get-secret.sh /usr/local/bin/get-secret
+
+    if [ $? -eq 0 ]; then
+      info "Command 'get-secret' added to /usr/local/bin successfully!"
+      info "You can now run the command 'get-secret' (without .sh) anywhere on your machine."
+      exit;
+    else
+      error "Unable to create symlink for 'get-secret.sh'. Try adding manually by running: \n\t ln -s get-secret.sh /usr/local/bin/get-secret"
+    fi
+  fi
+}
+
+getLocalSecretName() {
   AZUREAD_FILE_PATH=$(find $APP_DIR -iname "azuread-etterlatte*")
   if [ -z "$AZUREAD_FILE_PATH" ]; then
     error "No azuread secret file found in dir '$APP_DIR'. Please ensure it follows this format:\n\n\t.nais/azuread-etterlatte-<APP_NAME>-lokal.yaml"
   fi
 
+  info "Using local secret ($AZUREAD_FILE_PATH)"
   AZURE_SECRET_NAME=$(grep "secretName" $AZUREAD_FILE_PATH | awk '{print $2}')
 
   if [ -z "$AZURE_SECRET_NAME" ]; then
@@ -100,24 +125,31 @@ getLocalSecretName() {
 }
 
 getRemoteSecretName() {
+  info "Using remote (dev-gcp) secret"
   info "Checking kubernetes for secret for $APP_NAME"
 
   AZURE_SECRET_NAME=$(kubectl get secrets | grep "azure-$APP_NAME" -m1 | awk '{print $1}')
   if [ -z "$AZURE_SECRET_NAME" ]; then
     error "No azuread secret found for app name $APP_NAME"
   fi
+
+  info "Found secret with name '$AZURE_SECRET_NAME'"
 }
 
 getAzureadSecretName() {
-  read -p "Do you want to use 'local' secret (default=remote)? [y/N] " USE_LOKAL_SECRET
+  LOCAL_SECRET=$(ls $APP_DIR/.nais | grep 'lokal')
+
+  if [ -n "$LOCAL_SECRET" ]; then
+    echo ""
+    info "Found file \033[4m$LOCAL_SECRET\033[0m"
+    read -p "Do you want to use this secret? [y/N] " USE_LOKAL_SECRET
+  fi
 
   if [ "$USE_LOKAL_SECRET" == "y" ]; then
     getLocalSecretName
   else
     getRemoteSecretName
   fi
-
-  info "Found secret with name '$AZURE_SECRET_NAME'"
 }
 
 getMaskinportenSecretName() {
@@ -126,26 +158,22 @@ getMaskinportenSecretName() {
   MASKINPORTEN_SECRET_NAME=$(kubectl get secrets | grep "maskinporten-$APP_NAME" -m1 | awk '{print $1}')
   if [ -n "$MASKINPORTEN_SECRET_NAME" ]; then
     info "Found secret with name '$MASKINPORTEN_SECRET_NAME'"
+  else
+    info "No secret for maskinporten found ... continuing without maskinporten secret"
   fi
 }
 
 addSecretToEnvFile() {
-  userHasJq
-
   getAzureadSecretName
 
   getMaskinportenSecretName
 
-  echo "" # newline
-  read -p "Is this a frontend app (does it use wonderwall)? [y/N] " USING_WONDERWALL
+  info "Fetching $APP_NAME secrets from kubernetes"
 
-  echo "" # newline
-  read -p "Does the app use unleash? [y/N] " USING_UNLEASH
+  # Wonderwall / sidecar
+  APP_USING_SIDECAR=$(cat $APP_DIR/.nais/dev.yaml | grep 'sidecar')
 
-
-  info "Fetching secrets from kubernetes"
-
-  if [ "$USING_WONDERWALL" == "y" ]; then
+  if [ -n "$APP_USING_SIDECAR" ]; then
     kubectl -n etterlatte get secret $AZURE_SECRET_NAME -o json \
         | jq -r '.data | map_values(@base64d)
           | .["WONDERWALL_OPENID_CLIENT_ID"] = .AZURE_APP_CLIENT_ID
@@ -166,19 +194,25 @@ addSecretToEnvFile() {
     fi
   fi
 
-  if [ "$USING_UNLEASH" == "y" ]; then
+  APP_USING_UNLEASH=$(cat $APP_DIR/.nais/dev.yaml | grep 'unleash')
+  if [ -n "$APP_USING_UNLEASH" ]; then
     kubectl -n etterlatte get secret my-application-unleash-api-token -o json \
         | jq -r '.data | map_values(@base64d) | to_entries[] | (.key | ascii_upcase) +"=" + .value' \
         >> $APP_DIR/.env.dev-gcp
+    info "Unleash secrets added"
   fi
 
-  info ".env.dev-gcp created with valid secrets"
+  info "\033[4m.env.dev-gcp\033[0m successfully created with valid secrets!"
 }
 
-info "==============="
-info "Starting script ..."
-info "==============="
+info "Initializing ..."
 
+# Ensure user has necessary tools
+userHasJq
+userHasFzf
+userHasSymlink
+
+# Ensure .env files cannot be commited by accident
 validateGitIgnore
 
 # Ensure user is authenticated

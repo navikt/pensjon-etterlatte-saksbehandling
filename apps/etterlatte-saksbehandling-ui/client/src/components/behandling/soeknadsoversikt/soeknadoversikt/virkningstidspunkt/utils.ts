@@ -2,7 +2,7 @@ import { addMonths, isBefore, subYears, startOfMonth } from 'date-fns'
 import { Hjemmel } from '~components/behandling/soeknadsoversikt/soeknadoversikt/virkningstidspunkt/Virkningstidspunkt'
 export function hentMinimumsVirkningstidspunkt(avdoedDoedsdato: string | undefined, soeknadMottattDato: string): Date {
   const doedsdato = new Date(avdoedDoedsdato ?? '')
-
+  //Pga bug i ds-react-month picker så må det være første i måneden.
   const treAarFoerSoeknad = startOfMonth(subYears(new Date(soeknadMottattDato), 3))
   const maanedEtterDoedsdato = startOfMonth(addMonths(doedsdato, 1))
 

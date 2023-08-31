@@ -50,8 +50,8 @@ internal class PesysRepository(private val dataSource: DataSource) : Transaction
     fun lagreKoplingTilBehandling(behandlingId: UUID, pesysId: PesysId, tx: TransactionalSession? = null) {
         tx.session {
             opprett(
-                "INSERT INTO pesyskopling(id,behandling_id,pesys_id) VALUES(:id,:behandling_id,:pesys_id)",
-                mapOf("id" to UUID.randomUUID(), "behandling_id" to behandlingId, "pesys_id" to pesysId.id),
+                "INSERT INTO pesyskopling(behandling_id,pesys_id) VALUES(:behandling_id,:pesys_id)",
+                mapOf("behandling_id" to behandlingId, "pesys_id" to pesysId.id),
                 "Lagra koplinga mellom behandling $behandlingId og pesyssak $pesysId i migreringsbasen"
             )
         }

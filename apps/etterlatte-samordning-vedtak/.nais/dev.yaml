@@ -9,7 +9,7 @@ spec:
   image: {{image}}
   port: 8080
   ingresses:
-    - "https://etterlatte-samordning-vedtak.intern.dev.nav.no"
+    - "https://etterlatte-samordning-vedtak.ekstern.dev.nav.no"
   liveness:
     path: "health/isalive"
     initialDelay: 10

@@ -1,10 +1,14 @@
 # Samordning-vedtak
 
-Omstillingsstønad er en samordningspliktig ytelse. Applikasjonen tilbyr tjenester for å understøtte informasjonsbehovet til tjenestepensjonsleverandørene (KLP, SPK, m.fl.), slik at de kan gjøre sine vurderinger.  
+Omstillingsstønad er en samordningspliktig ytelse. Applikasjonen tilbyr tjenester for å understøtte informasjonsbehovet til tjenestepensjonsleverandørene (KLP, SPK, m.fl.), slik at de kan gjøre sine vurderinger.
 
 ## Autentisering
 
 Tjenesten krever token utstedt av Maskinporten med scope _nav:etterlatteytelser:vedtaksinformasjon.read_
+
+### Autorisasjon
+
+Det må foreligge et tjenestepensjonsforhold i Tjenestepensjonsregisteret som gjelder kallende leverandør, personen vedtaket gjelder og på vedtakets virkningsdato.
 
 ## API
 
@@ -14,16 +18,16 @@ Tjenesten krever token utstedt av Maskinporten med scope _nav:etterlatteytelser:
 
 ##### Samordningsvedtak
 
-| Felt              | Type        | Beskrivelse                |
-|:------------------|:------------|:---------------------------|
-| vedtakId          | int         | samme som forespurt id     |
-| sakstype          | string      | "OMSTILLINGSSTOENAD"       |
-| virkningsdato     | yyyy-MM-dd  | Dato vedtaket gjelder fra  |
-| opphoersdato      | yyyy-MM-dd  | Eventuell sluttdato        |
-| resultatkode      | string      | Start / Endring / Stopp    |
-| stoppaarsak       | string      | Inntekt / Opphør / Annet   |
-| anvendtTrygdetid  | int         | Avdødes trygdetid          |
-| perioder          | Periode[]   | Periodiserte beløp         |
+| Felt             | Type        | Beskrivelse                |
+|:-----------------|:------------|:---------------------------|
+| vedtakId         | int         | samme som forespurt id     |
+| sakstype         | string      | "OMSTILLINGSSTOENAD"       |
+| virkningsdato    | yyyy-MM-dd  | Dato vedtaket gjelder fra  |
+| opphoersdato     | yyyy-MM-dd  | Eventuell sluttdato        |
+| resultatkode*    | string      | Start / Endring / Stopp    |
+| stoppaarsak*     | string      | Inntekt / Opphør / Annet   |
+| anvendtTrygdetid | int         | Avdødes trygdetid          |
+| perioder         | Periode[]   | Periodiserte beløp         |
 
 ##### Periode
 
@@ -34,10 +38,12 @@ Tjenesten krever token utstedt av Maskinporten med scope _nav:etterlatteytelser:
 | omstillingsstoenadBrutto | int        | Omstillingsstønad før inntektsavkorting   |
 | omstillingsstoenadNetto  | int        | Omstillingsstønad etter inntektsavkorting |
 
-     
-#### Autorisasjon
+## Integrasjon
 
-Det må foreligge et tjenestepensjonsforhold i Tjenestepensjonsregisteret som gjelder kallende leverandør, personen vedtaket gjelder og for det aktuelle virkningstidspunktet.
+| Miljø | Ingress                                                  |
+|:------|:---------------------------------------------------------|
+| dev   | https://etterlatte-samordning-vedtak.ekstern.dev.nav.no  |
+| prod  | tbd                                                      |    
 
 ## Kom i gang
 

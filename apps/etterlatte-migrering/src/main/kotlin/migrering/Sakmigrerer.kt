@@ -9,8 +9,8 @@ import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.rapidsandrivers.migrering.FNR_KEY
 import no.nav.etterlatte.rapidsandrivers.migrering.MigreringRequest
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser
-import no.nav.etterlatte.rapidsandrivers.migrering.PESYS_ID
 import no.nav.etterlatte.rapidsandrivers.migrering.PesysId
+import no.nav.etterlatte.rapidsandrivers.migrering.pesysId
 import no.nav.etterlatte.rapidsandrivers.migrering.request
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -51,7 +51,7 @@ internal class Sakmigrerer(
     ) {
         packet[FNR_KEY] = request.soeker.value
         packet[BEHOV_NAME_KEY] = Opplysningstype.AVDOED_PDL_V1
-        packet[PESYS_ID] = sak.id
+        packet.pesysId = PesysId(sak.id)
         context.publish(packet.toJson())
         logger.info(
             "Migrering starta for pesys-sak ${sak.id} og melding om behandling ble sendt."

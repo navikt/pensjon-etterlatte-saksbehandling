@@ -39,7 +39,8 @@ data class AvdoedForelder(val trygdetid: Beregningstall)
 data class BarnepensjonGrunnlag(
     val soeskenKull: FaktumNode<List<Folkeregisteridentifikator>>,
     val avdoedForelder: FaktumNode<AvdoedForelder>,
-    val institusjonsopphold: FaktumNode<InstitusjonsoppholdBeregningsgrunnlag?>
+    val institusjonsopphold: FaktumNode<InstitusjonsoppholdBeregningsgrunnlag?>,
+    val brukNyttRegelverk: FaktumNode<Boolean> = FaktumNode(true, "", "")
 )
 
 val beregnBarnepensjon1967Regel = RegelMeta(

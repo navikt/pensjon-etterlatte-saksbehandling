@@ -45,6 +45,13 @@ val antallSoeskenIKullet = RegelMeta(
     regelReferanse = RegelReferanse(id = "BP-BEREGNING-1967-ANTALL-SOESKEN")
 ) benytter soeskenIKullet med { soesken -> soesken.size }
 
+val brukNyttRegelverkForPeriode: Regel<BarnepensjonGrunnlag, Boolean> = finnFaktumIGrunnlag(
+    gjelderFra = BP_1967_DATO,
+    beskrivelse = "Søskenkull fra grunnlaget",
+    finnFaktum = BarnepensjonGrunnlag::brukNyttRegelverk,
+    finnFelt = { it }
+)
+
 val prosentsatsFoersteBarnKonstant = definerKonstant<BarnepensjonGrunnlag, Beregningstall>(
     gjelderFra = BP_1967_DATO,
     beskrivelse = "Prosentsats benyttet for første barn",
@@ -96,11 +103,22 @@ val barnepensjonSatsRegel2024 = RegelMeta(
         .plus(etterfoelgendeBarnSats.multiply(antallSoesken))
         .divide(antallSoesken.plus(1))
 }
+
+val barnepensjonSatsRegelMedNyttRegelverk = RegelMeta(
+    gjelderFra = BP_1967_DATO,
+    beskrivelse = "Beregn uavkortet barnepensjon basert på størrelsen på barnekullet",
+    regelReferanse = RegelReferanse(id = "BP-BEREGNING-1967-UAVKORTET")
+) velgNyesteGyldige listOf(barnepensjonSatsRegel1967, barnepensjonSatsRegel2024)
+
 val barnepensjonSatsRegel = RegelMeta(
     gjelderFra = BP_1967_DATO,
     beskrivelse = "Beregn uavkortet barnepensjon basert på størrelsen på barnekullet",
     regelReferanse = RegelReferanse(id = "BP-BEREGNING-1967-UAVKORTET")
-) benytter barnepensjonSatsRegel1967 og barnepensjonSatsRegel2024 med {
-        barnepensjonSatsRegel1967, barnepensjonSatsRegel2024 ->
-    barnepensjonSatsRegel1967
+) benytter barnepensjonSatsRegel1967 og barnepensjonSatsRegelMedNyttRegelverk og brukNyttRegelverkForPeriode med {
+        barnepensjonSatsRegel1967, barnepensjonSatsRegelMedNyttRegelverk, brukNyttRegelverkForPeriode ->
+    if (brukNyttRegelverkForPeriode) {
+        barnepensjonSatsRegelMedNyttRegelverk
+    } else {
+        barnepensjonSatsRegel1967
+    }
 }

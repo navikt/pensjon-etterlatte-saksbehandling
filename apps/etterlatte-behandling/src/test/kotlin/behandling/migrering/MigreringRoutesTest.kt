@@ -55,7 +55,7 @@ class MigreringRoutesTest : BehandlingIntegrationTest() {
             application { module(applicationContext) }
             val fnr = Folkeregisteridentifikator.of("08071272487")
             val request = MigreringRequest(
-                pesysId = PesysId("1"),
+                pesysId = PesysId(1),
                 enhet = Enhet("4817"),
                 soeker = fnr,
                 avdoedForelder = listOf(AvdoedForelder(fnr, Tidspunkt.now())),

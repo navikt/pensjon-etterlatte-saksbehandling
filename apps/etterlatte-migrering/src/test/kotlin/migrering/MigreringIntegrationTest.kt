@@ -65,7 +65,7 @@ class MigreringIntegrationTest {
             val syntetiskFnr = "19078504903"
             val sakInn = Pesyssak(
                 UUID.randomUUID(),
-                PesysId("4"),
+                PesysId(4),
                 Enhet("4808"),
                 Folkeregisteridentifikator.of(syntetiskFnr),
                 Folkeregisteridentifikator.of(syntetiskFnr),
@@ -103,7 +103,7 @@ class MigreringIntegrationTest {
             val melding1 = inspector.inspektør.message(0)
 
             val request = objectMapper.readValue(melding1.get("request").asText(), MigreringRequest::class.java)
-            assertEquals(PesysId("4"), request.pesysId)
+            assertEquals(PesysId(4), request.pesysId)
             assertEquals(sakInn.soeker, request.soeker)
         }
     }
@@ -139,7 +139,7 @@ class MigreringIntegrationTest {
             )
             with(repository.hentSaker()) {
                 assertEquals(1, size)
-                assertEquals(get(0).pesysId.id, "22974139")
+                assertEquals(get(0).pesysId.id, 22974139)
                 assertEquals(get(0).virkningstidspunkt, YearMonth.of(2023, Month.SEPTEMBER))
             }
         }

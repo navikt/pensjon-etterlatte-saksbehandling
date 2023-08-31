@@ -1,8 +1,7 @@
-package migrering
+package no.nav.etterlatte.migrering
 
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
-import no.nav.etterlatte.migrering.PesysRepository
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser
 import no.nav.etterlatte.rapidsandrivers.migrering.PESYS_ID
 import no.nav.etterlatte.rapidsandrivers.migrering.pesysId

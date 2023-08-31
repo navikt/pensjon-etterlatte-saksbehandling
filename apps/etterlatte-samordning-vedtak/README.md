@@ -12,17 +12,27 @@ Tjenesten krever token utstedt av Maskinporten med scope _nav:etterlatteytelser:
 
 #### Informasjonsmodell
 
-| Felt             |            | Beskrivelse                               |
-|------------------|------------|-------------------------------------------|
-| vedtakId         | int        | samme som forespurt id                    |
-| sakstype         | string     | "OMSTILLINGSSTOENAD"                      |
-| virkningsdato    | yyyy-MM-dd | Dato vedtaket gjelder fra                 |
-| opphoersdato     | yyyy-MM-dd | Eventuell sluttdato                       |
-| resultatkode     | string     | Start / Endring / Stopp                   |
-| stoppaarsak      | string     | Inntekt / Opphør / Annet                  |
-| anvendtTrygdetid | int        | Avdødes trygdetid                         |
-| brutto           | int        | Omstillingsstønad før inntektsavkorting   |
-| netto            | int        | Omstillingsstønad etter inntektsavkorting |
+##### Samordningsvedtak
+
+| Felt              | Type        | Beskrivelse                |
+|:------------------|:------------|:---------------------------|
+| vedtakId          | int         | samme som forespurt id     |
+| sakstype          | string      | "OMSTILLINGSSTOENAD"       |
+| virkningsdato     | yyyy-MM-dd  | Dato vedtaket gjelder fra  |
+| opphoersdato      | yyyy-MM-dd  | Eventuell sluttdato        |
+| resultatkode      | string      | Start / Endring / Stopp    |
+| stoppaarsak       | string      | Inntekt / Opphør / Annet   |
+| anvendtTrygdetid  | int         | Avdødes trygdetid          |
+| perioder          | Periode[]   | Periodiserte beløp         |
+
+##### Periode
+
+| Felt                     | Type       | Beskrivelse                               |
+|:-------------------------|:-----------|:------------------------------------------|
+| fom                      | yyyy-MM-dd | Periodens start                           |
+| tom                      | yyyy-MM-dd | Periodens slutt (ikke påkrevd)            |
+| omstillingsstoenadBrutto | int        | Omstillingsstønad før inntektsavkorting   |
+| omstillingsstoenadNetto  | int        | Omstillingsstønad etter inntektsavkorting |
 
      
 #### Autorisasjon

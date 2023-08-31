@@ -6,7 +6,7 @@ import { OppgavetypeTag, SaktypeTag } from '~components/nyoppgavebenk/Tags'
 import { formaterFnr, formaterStringDato } from '~utils/formattering'
 import { FristWrapper } from '~components/nyoppgavebenk/Oppgavelista'
 import { isBefore } from 'date-fns'
-import { Oppgavestatus, Saktype } from '~shared/api/oppgaverny'
+import { OppgaveDTOny } from '~shared/api/oppgaverny'
 import { ConfigContext } from '~clientConfig'
 
 const TagRow = styled.div`
@@ -34,19 +34,9 @@ const ButtonRow = styled.div`
   gap: 1rem;
   justify-content: flex-end;
 `
-export const GosysOppgaveModal = (props: {
-  oppgavestatus: Oppgavestatus
-  fnr: string
-  gjelder: string | null
-  saktype: Saktype
-  regdato: string
-  fristdato: string
-  beskrivelse: string | null
-  enhet: string
-  saksbehandler: string | null
-}) => {
+export const GosysOppgaveModal = ({ oppgave }: { oppgave: OppgaveDTOny }) => {
   const [open, setOpen] = useState(false)
-  const { regdato, fristdato, oppgavestatus, fnr, gjelder, enhet, saksbehandler, beskrivelse, saktype } = props
+  const { opprettet, frist, status, fnr, gjelder, enhet, saksbehandler, beskrivelse, sakType } = oppgave
 
   const configContext = useContext(ConfigContext)
 
@@ -61,25 +51,25 @@ export const GosysOppgaveModal = (props: {
             Oppgave fra Gosys
           </Heading>
           <TagRow>
-            <SaktypeTag sakType={saktype} />
+            <SaktypeTag sakType={sakType} />
             <OppgavetypeTag oppgavetype="GOSYS" />
           </TagRow>
           <InfoGrid>
             <div>
               <Label>Reg.dato</Label>
-              <BodyShort>{formaterStringDato(regdato)}</BodyShort>
+              <BodyShort>{formaterStringDato(opprettet)}</BodyShort>
             </div>
             <div>
               <Label>Frist</Label>
               <BodyShort>
-                <FristWrapper fristHarPassert={!!fristdato && isBefore(new Date(fristdato), new Date())}>
-                  {fristdato ? formaterStringDato(fristdato) : 'Ingen frist'}
+                <FristWrapper fristHarPassert={!!frist && isBefore(new Date(frist), new Date())}>
+                  {frist ? formaterStringDato(frist) : 'Ingen frist'}
                 </FristWrapper>
               </BodyShort>
             </div>
             <div>
               <Label>Status</Label>
-              <BodyShort>{oppgavestatus}</BodyShort>
+              <BodyShort>{status}</BodyShort>
             </div>
             <div>
               <Label>Fødselsnummer</Label>

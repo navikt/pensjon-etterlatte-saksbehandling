@@ -1,42 +1,19 @@
-import { Oppgavestatus, Oppgavetype, Saktype } from '~shared/api/oppgaverny'
+import { OppgaveDTOny } from '~shared/api/oppgaverny'
 import { Button } from '@navikt/ds-react'
 import { useNavigate } from 'react-router'
 import { EyeIcon } from '@navikt/aksel-icons'
 import { useAppSelector } from '~store/Store'
 import { GosysOppgaveModal } from '~components/nyoppgavebenk/GosysOppgaveModal'
 
-export const HandlingerForOppgave = (props: {
-  oppgavetype: Oppgavetype
-  oppgavestatus: Oppgavestatus
-  opprettet: string
-  frist: string
-  fnr: string
-  enhet: string
-  saksbehandler: string | null
-  saktype: Saktype
-  referanse: string | null
-  beskrivelse: string | null
-  gjelder: string | null
-}) => {
+export const HandlingerForOppgave = ({ oppgave }: { oppgave: OppgaveDTOny }) => {
   const user = useAppSelector((state) => state.saksbehandlerReducer.saksbehandler)
-  const {
-    oppgavetype,
-    oppgavestatus,
-    opprettet,
-    frist,
-    fnr,
-    enhet,
-    saksbehandler,
-    saktype,
-    referanse,
-    beskrivelse,
-    gjelder,
-  } = props
   const navigate = useNavigate()
+
+  const { type, fnr, saksbehandler, referanse } = oppgave
   const erInnloggetSaksbehandlerOppgave = saksbehandler ? saksbehandler === user.ident : false
 
   const handling = () => {
-    switch (oppgavetype) {
+    switch (type) {
       case 'VURDER_KONSEKVENS':
         return (
           <>
@@ -87,19 +64,7 @@ export const HandlingerForOppgave = (props: {
           </>
         )
       case 'GOSYS':
-        return (
-          <GosysOppgaveModal
-            oppgavestatus={oppgavestatus}
-            gjelder={gjelder}
-            saktype={saktype}
-            regdato={opprettet}
-            fristdato={frist}
-            enhet={enhet}
-            saksbehandler={saksbehandler}
-            fnr={fnr}
-            beskrivelse={beskrivelse}
-          />
-        )
+        return <GosysOppgaveModal oppgave={oppgave} />
       default:
         return null
     }

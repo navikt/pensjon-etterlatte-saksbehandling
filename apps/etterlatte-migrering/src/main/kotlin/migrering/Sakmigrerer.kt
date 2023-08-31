@@ -56,7 +56,7 @@ internal class Sakmigrerer(
         logger.info(
             "Migrering starta for pesys-sak ${sak.id} og melding om behandling ble sendt."
         )
-        pesysRepository.oppdaterStatus(sak.id, Migreringsstatus.UNDER_MIGRERING)
+        pesysRepository.oppdaterStatus(PesysId(sak.id), Migreringsstatus.UNDER_MIGRERING)
     }
 
     private fun tilMigreringsrequest(sak: Pesyssak) = MigreringRequest(

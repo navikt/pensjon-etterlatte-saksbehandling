@@ -47,12 +47,12 @@ internal class LyttPaaIverksattVedtak(
 
         when (respons.status) {
             UtbetalingStatusDto.GODKJENT, UtbetalingStatusDto.GODKJENT_MED_FEIL -> {
-                pesysRepository.oppdaterStatus(behandling, Migreringsstatus.FERDIG)
+                pesysRepository.oppdaterStatus(behandling.pesysId, Migreringsstatus.FERDIG)
             }
 
             else -> {
                 logger.warn("Fikk respons med status ${respons.status} for ${respons.behandlingId}")
-                pesysRepository.oppdaterStatus(behandling, Migreringsstatus.FEILA)
+                pesysRepository.oppdaterStatus(behandling.pesysId, Migreringsstatus.FEILA)
             }
         }
     }

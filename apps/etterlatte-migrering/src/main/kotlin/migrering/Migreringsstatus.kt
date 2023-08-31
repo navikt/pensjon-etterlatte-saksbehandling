@@ -1,4 +1,4 @@
-package migrering
+package no.nav.etterlatte.migrering
 
 enum class Migreringsstatus {
     HENTA,

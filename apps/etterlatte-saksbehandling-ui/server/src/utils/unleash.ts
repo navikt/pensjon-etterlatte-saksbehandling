@@ -1,30 +1,22 @@
-import { Context, Strategy, getFeatureToggleDefinitions, initialize, destroy } from 'unleash-client'
+import { getFeatureToggleDefinitions, initialize, destroy } from 'unleash-client'
 import { FeatureToggleConfig } from '../config/config'
 import GradualRolloutRandomStrategy from 'unleash-client/lib/strategy/gradual-rollout-random'
 import { logger } from '../monitoring/logger'
 
-export const unleashContext = {
-  cluster: FeatureToggleConfig.cluster,
-}
+export const unleash =
+  FeatureToggleConfig.host !== ''
+    ? initialize({
+        url: FeatureToggleConfig.host + '/api',
+        customHeaders: {
+          Authorization: FeatureToggleConfig.token,
+        },
+        appName: FeatureToggleConfig.applicationName,
 
-class ByClusterStrategy extends Strategy {
-  constructor() {
-    super('byCluster')
-  }
+        strategies: [new GradualRolloutRandomStrategy()],
+      })
+    : null
 
-  // eslint-disable-next-line no-unused-vars
-  isEnabled(parameters: any, context: Context) {
-    return parameters['cluster'].includes(FeatureToggleConfig.cluster)
-  }
-}
-
-export const unleash = initialize({
-  url: FeatureToggleConfig.uri,
-  appName: FeatureToggleConfig.applicationName,
-  strategies: [new ByClusterStrategy(), new GradualRolloutRandomStrategy()],
-})
-
-unleash.on('synchronized', () => {
+unleash?.on('synchronized', () => {
   logger.info(`Unleash synchronized`)
 
   const definitions = getFeatureToggleDefinitions()
@@ -41,14 +33,14 @@ unleash.on('synchronized', () => {
   })
 })
 
-unleash.on('error', (err: Error) => {
+unleash?.on('error', (err: Error) => {
   logger.error({
     message: err.message || 'Feil oppsto i unleash: ',
     stack_trace: err.stack,
   })
 })
 
-unleash.on('warn', (msg: string) => {
+unleash?.on('warn', (msg: string) => {
   logger.error(msg)
 })
 

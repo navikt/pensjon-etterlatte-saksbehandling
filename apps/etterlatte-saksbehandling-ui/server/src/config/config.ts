@@ -24,8 +24,8 @@ function hentApiConfigFraEnv() {
 }
 
 export const FeatureToggleConfig = {
-  uri: process.env.UNLEASH_URL || 'https://unleash.nais.io/api/',
-  cluster: process.env.NAIS_CLUSTER_NAME || 'dev-gcp',
+  host: process.env.UNLEASH_SERVER_API_URL || '',
+  token: process.env.UNLEASH_SERVER_API_TOKEN || '',
   applicationName: process.env.NAIS_APP_NAME || 'etterlatte-saksbehandling-ui',
 }
 

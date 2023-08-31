@@ -38,11 +38,14 @@ spec:
       value: api://dev-fss.pdl.pdl-api/.default
     - name: PPS_URL
       value: https://pensjon-parallelle-sannheter.intern.dev.nav.no
+  envFrom:
+    - secret: my-application-unleash-api-token
   accessPolicy:
     outbound:
       external:
         - host: "pdl-api.dev-fss-pub.nais.io"
         - host: "pensjon-parallelle-sannheter.intern.dev.nav.no"
+        - host: etterlatte-unleash-api.nav.cloud.nais.io
     inbound:
       rules:
         - application: etterlatte-fordeler

@@ -11,9 +11,7 @@ spec:
     rules:
     - alert: etterlatte-saksbehandling-error-logg
       expr: 'sum by (app) (max_over_time(log_messages_errors{app=~"etterlatte-.*",level="Error"}[15m])
-              or vector(0)) -
-             sum by (app) (max_over_time(log_messages_errors{app=~"etterlatte-.*",level="Error"}[15m]
-             offset 15m) or vector(0)) > 0'
+              or vector(0))'
       for: 1s
       annotations:
         consequence: "*\{{ $labels.app }}* har logget en eller flere feilmeldinger siste 15 min"

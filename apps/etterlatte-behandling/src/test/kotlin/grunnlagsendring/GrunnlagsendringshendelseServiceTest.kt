@@ -84,8 +84,7 @@ internal class GrunnlagsendringshendelseServiceTest {
         pdlService,
         grunnlagClient,
         tilgangServiceImpl,
-        sakService,
-        kanBrukeNyOppgaveliste = true
+        sakService
     )
 
     @BeforeEach

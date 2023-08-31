@@ -104,13 +104,11 @@ fun Application.module(context: ApplicationContext) {
             behandlingVedtakRoute(
                 behandlingsstatusService = behandlingsStatusService,
                 oppgaveService = oppgaveServiceNy,
-                behandlingService = behandlingService,
-                kanBrukeNyOppgaveliste = kanBrukeNyOppgaveliste
+                behandlingService = behandlingService
             )
             oppgaveRoutesNy(
                 service = oppgaveServiceNy,
-                gosysOppgaveService = gosysOppgaveService,
-                kanBrukeNyOppgaveliste = kanBrukeNyOppgaveliste
+                gosysOppgaveService = gosysOppgaveService
             )
             grunnlagsendringshendelseRoute(grunnlagsendringshendelseService = grunnlagsendringshendelseService)
             egenAnsattRoute(egenAnsattService = EgenAnsattService(sakService, sikkerLogg))

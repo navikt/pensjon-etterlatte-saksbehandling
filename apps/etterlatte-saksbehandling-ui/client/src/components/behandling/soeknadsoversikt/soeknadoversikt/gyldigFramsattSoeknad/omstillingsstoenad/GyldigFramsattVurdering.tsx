@@ -141,7 +141,7 @@ export const GyldigFramsattVurdering = ({
 function finnTittel(gyldigFamsatt: IGyldighetResultat | undefined): string {
   switch (gyldigFamsatt?.resultat) {
     case VurderingsResultat.OPPFYLT:
-      return 'Innsender er gjenlevende forelder'
+      return 'Innsender er gjenlevende'
     case VurderingsResultat.IKKE_OPPFYLT:
       return 'Innsender er ikke gjenlevende'
     default:

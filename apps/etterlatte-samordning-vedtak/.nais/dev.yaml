@@ -1,0 +1,76 @@
+apiVersion: "nais.io/v1alpha1"
+kind: "Application"
+metadata:
+  name: etterlatte-samordning-vedtak
+  namespace: etterlatte
+  labels:
+    team: etterlatte
+spec:
+  image: {{image}}
+  port: 8080
+  ingresses:
+    - "https://etterlatte-samordning-vedtak.intern.dev.nav.no"
+  liveness:
+    path: "health/isalive"
+    initialDelay: 10
+    timeout: 1
+    periodSeconds: 5
+    failureThreshold: 10
+  readiness:
+    path: "health/isready"
+    initialDelay: 10
+    timeout: 1
+  prometheus:
+    enabled: true
+    path: /metrics
+  secureLogs:
+    enabled: true
+  replicas:
+    min: 1
+    max: 2
+  maskinporten:
+    enabled: true
+    scopes:
+      exposes:
+        - name: "vedtaksinformasjon.read"
+          enabled: true
+          product: "etterlatteytelser"
+          allowedIntegrations:
+            - maskinporten
+          atMaxAge: 120
+          consumers:
+            - name: SPK
+              orgno: "982583462"
+            - name: OSLO PENSJONSFORSIKRING AS
+              orgno: "982759412"
+            - name: KLP
+              orgno: "938708606"
+            - name: GABLER PENSJONSTJENESTER AS
+              orgno: "916833520"
+            - name: Storebrand Pensjonstjenester AS
+              orgno: "931936492"
+            - name: Storebrand Livsforsikring AS
+              orgno: "958995369"
+            - name: Viken
+              orgno: "974358603"
+            - name: Arendal kommunale pensjonskasse
+              orgno: "940380014"
+            - name: Elverum kommunale pensjonskasse
+              orgno: "940360293"
+            - name: Tromsø kommunale pensjonskasse
+              orgno: "814115232"
+            - name: Pensjonskassen for helseforetakene (PKH)
+              orgno: "912805174"
+            - name: NAV
+              orgno: "889640782"
+  azure:
+    application:
+      enabled: true
+  env:
+    - name: MASKINPORTEN_WELL_KNOWN_URL
+      value: https://test.maskinporten.no/.well-known/oauth-authorization-server
+  accessPolicy:
+    outbound:
+      rules:
+        - application: etterlatte-beregning
+        - application: etterlatte-vedtaksvurdering

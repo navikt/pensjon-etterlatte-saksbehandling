@@ -1,0 +1,127 @@
+package no.nav.etterlatte.samordning.vedtak
+
+import com.typesafe.config.ConfigFactory
+import io.kotest.matchers.shouldBe
+import io.ktor.client.request.get
+import io.ktor.client.request.header
+import io.ktor.http.ContentType
+import io.ktor.http.HttpHeaders
+import io.ktor.http.HttpStatusCode
+import io.ktor.server.application.Application
+import io.ktor.server.application.log
+import io.ktor.server.config.HoconApplicationConfig
+import io.ktor.server.testing.testApplication
+import io.mockk.clearAllMocks
+import io.mockk.confirmVerified
+import no.nav.etterlatte.libs.ktor.restModule
+import no.nav.etterlatte.validateMaskinportenScope
+import no.nav.security.mock.oauth2.MockOAuth2Server
+import org.junit.jupiter.api.AfterAll
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
+
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+class SamordningVedtakRouteTest {
+    private val server = MockOAuth2Server()
+    private lateinit var applicationConfig: HoconApplicationConfig
+
+    @BeforeAll
+    fun before() {
+        server.start()
+
+        applicationConfig =
+            buildTestApplicationConfigurationForOauth(server.config.httpServer.port(), ISSUER_ID, CLIENT_ID)
+    }
+
+    @Test
+    fun `skal gi 401 naar token mangler`() {
+        testApplication {
+            environment { config = applicationConfig }
+            application { samordningVedtakApi() }
+
+            val response = client.get("/api/vedtak/123") {
+                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+            }
+
+            response.status shouldBe HttpStatusCode.Unauthorized
+        }
+    }
+
+    @Test
+    fun `skal gi 401 med token hvor scope mangler`() {
+        testApplication {
+            environment { config = applicationConfig }
+            application { samordningVedtakApi() }
+
+            val response = client.get("/api/vedtak/123") {
+                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                header(HttpHeaders.Authorization, "Bearer ${token()}")
+            }
+
+            response.status shouldBe HttpStatusCode.Unauthorized
+        }
+    }
+
+    @Test
+    fun `skal gi 200 med gyldig token inkl scope`() {
+        testApplication {
+            environment { config = applicationConfig }
+            application { samordningVedtakApi() }
+
+            val response = client.get("/api/vedtak/123") {
+                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                header(HttpHeaders.Authorization, "Bearer ${token("nav:etterlatteytelser:vedtaksinformasjon.read")}")
+            }
+
+            response.status shouldBe HttpStatusCode.OK
+        }
+    }
+
+    private fun Application.samordningVedtakApi() {
+        restModule(
+            log,
+            additionalValidation = validateMaskinportenScope()
+        ) { samordningVedtakRoute() }
+    }
+
+    private fun token(maskinportenScope: String? = null): String {
+        return server.issueToken(
+            issuerId = ISSUER_ID,
+            claims = maskinportenScope?.let { mapOf("scope" to it) } ?: mapOf()
+        ).serialize()
+    }
+
+    @AfterEach
+    fun afterEach() {
+        confirmVerified()
+        clearAllMocks()
+    }
+
+    @AfterAll
+    fun after() {
+        server.shutdown()
+    }
+
+    companion object {
+        const val ISSUER_ID = "maskinporten"
+        const val CLIENT_ID = "vedtaksinfo-tp"
+    }
+}
+
+fun buildTestApplicationConfigurationForOauth(port: Int, issuerId: String, clientId: String) =
+    HoconApplicationConfig(
+        ConfigFactory.parseMap(
+            mapOf(
+                "no.nav.security.jwt.issuers" to listOf(
+                    mapOf(
+                        "discoveryurl" to "http://localhost:$port/$issuerId/.well-known/openid-configuration",
+                        "issuer_name" to issuerId,
+                        "accepted_audience" to clientId,
+                        "validation.optional_claims" to "aud,nbf,sub"
+                    )
+                )
+            )
+        )
+    )

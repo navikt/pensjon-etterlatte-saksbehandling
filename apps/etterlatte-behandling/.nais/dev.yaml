@@ -96,12 +96,12 @@ spec:
       value: https://skjermede-personer-pip.intern.dev.nav.no
     - name: AZURE_SCOPE_SKJERMEDE_PIP
       value: api://dev-gcp.nom.skjermede-personer-pip/.default
-    - name: KAN_BRUKE_NY_OPPGAVELISTE
-      value: 'true'
     - name: OPPGAVE_CLIENT_ID
       value: dev-fss.oppgavehandtering.oppgave
     - name: OPPGAVE_URL
       value: https://oppgave.dev-fss-pub.nais.io
+  envFrom:
+    - secret: my-application-unleash-api-token
   accessPolicy:
     outbound:
       rules:
@@ -116,6 +116,7 @@ spec:
         - host: norg2.dev-fss-pub.nais.io
         - host: navansatt.dev-fss-pub.nais.io
         - host: oppgave.dev-fss-pub.nais.io
+        - host: etterlatte-unleash-api.nav.cloud.nais.io
     inbound:
       rules:
         - application: etterlatte-egne-ansatte-lytter

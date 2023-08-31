@@ -31,7 +31,7 @@ data class AvdoedForelder(
     val yrkesskade: Boolean = false
 )
 
-data class PesysId(val id: String)
+data class PesysId(val id: Long)
 
 data class Enhet(val nr: String)
 

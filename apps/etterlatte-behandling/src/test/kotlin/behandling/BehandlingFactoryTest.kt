@@ -89,8 +89,7 @@ class BehandlingFactoryTest {
         grunnlagsendringshendelseDao,
         kommerBarnetTilGodeService,
         revurderingDao,
-        behandlingService,
-        true
+        behandlingService
     )
     private val behandlingFactory = BehandlingFactory(
         oppgaveService,

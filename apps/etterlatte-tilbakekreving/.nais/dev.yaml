@@ -36,6 +36,7 @@ spec:
       enabled: true
   envFrom:
     - secret: barnepensjon-secrets
+    - secret: my-application-unleash-api-token
   replicas:
     cpuThresholdPercentage: 90
     max: 1
@@ -56,3 +57,6 @@ spec:
       value: Q2_BARNEPENSJON
     - name: OPPDRAG_MQ_MANAGER
       value: MQLS04
+  accessPolicy:
+    external:
+      - host: etterlatte-unleash-api.nav.cloud.nais.io

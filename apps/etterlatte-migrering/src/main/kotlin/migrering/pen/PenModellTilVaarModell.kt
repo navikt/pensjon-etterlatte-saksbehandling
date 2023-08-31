@@ -17,7 +17,7 @@ import java.util.*
 fun BarnepensjonGrunnlagResponse.tilVaarModell(): Pesyssak {
     val pesyssak = Pesyssak(
         id = UUID.randomUUID(),
-        pesysId = PesysId(sakId.toString()),
+        pesysId = PesysId(sakId),
         enhet = Enhet(enhet),
         soeker = Folkeregisteridentifikator.of(soeker),
         gjenlevendeForelder = gjenlevendeForelder?.let { Folkeregisteridentifikator.of(it) },

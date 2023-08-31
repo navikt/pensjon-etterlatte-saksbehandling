@@ -89,8 +89,7 @@ class RevurderingServiceImpl(
     private val grunnlagsendringshendelseDao: GrunnlagsendringshendelseDao,
     private val kommerBarnetTilGodeService: KommerBarnetTilGodeService,
     private val revurderingDao: RevurderingDao,
-    private val behandlingService: BehandlingService,
-    private val kanBrukeNyOppgaveliste: Boolean
+    private val behandlingService: BehandlingService
 ) : RevurderingService {
     private val logger = LoggerFactory.getLogger(RevurderingServiceImpl::class.java)
 
@@ -198,20 +197,11 @@ class RevurderingServiceImpl(
                                 saksbehandlerIdent
                             )
                         } catch (e: Exception) {
-                            if (kanBrukeNyOppgaveliste) {
-                                logger.error(
-                                    "Kunne ikke ferdigstille oppgaven til hendelsen, så vi ruller " +
-                                        "tilbake opprettelse av revurderingen",
-                                    e
-                                )
-                                throw e
-                            } else {
-                                logger.error(
-                                    "Kunne ikke ferdigstille oppgaven til hendelsen på grunn av feil, " +
-                                        "men oppgave er ikke i bruk i miljø så feilen svelges.",
-                                    e
-                                )
-                            }
+                            logger.error(
+                                "Kunne ikke ferdigstille oppgaven til hendelsen på grunn av feil, " +
+                                    "men oppgave er ikke i bruk i miljø så feilen svelges.",
+                                e
+                            )
                         }
                     }
                 }

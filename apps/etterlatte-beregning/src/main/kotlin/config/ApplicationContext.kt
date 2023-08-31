@@ -19,12 +19,11 @@ import no.nav.etterlatte.klienter.VilkaarsvurderingKlientImpl
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.ytelseMedGrunnlag.YtelseMedGrunnlagService
-import java.net.URI
 
 private fun featureToggleProperties(config: Config) = FeatureToggleProperties(
     applicationName = config.getString("funksjonsbrytere.unleash.applicationName"),
-    uri = URI(config.getString("funksjonsbrytere.unleash.uri")),
-    cluster = config.getString("funksjonsbrytere.unleash.cluster")
+    host = config.getString("funksjonsbrytere.unleash.host"),
+    apiKey = config.getString("funksjonsbrytere.unleash.token")
 )
 
 class ApplicationContext {

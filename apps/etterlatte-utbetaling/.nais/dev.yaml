@@ -34,6 +34,7 @@ spec:
     pool: nav-dev
   envFrom:
     - secret: etterlatte-secrets
+    - secret: my-application-unleash-api-token
   replicas:
     cpuThresholdPercentage: 90
     max: 1
@@ -74,3 +75,4 @@ spec:
             - name: mq
               port: 1413
               protocol: TCP
+        - host: etterlatte-unleash-api.nav.cloud.nais.io

@@ -86,15 +86,16 @@ spec:
     - name: TRYGDETID_API_SCOPE
       value: api://dev-gcp.etterlatte.etterlatte-trygdetid/.default
     - name: GOSYS_URL
-      value: https://gosys.dev.intern.nav.no/gosys
-
+      value: https://gosys-q2.dev.intern.nav.no/gosys
+  envFrom:
+    - secret: my-application-unleash-api-token
   accessPolicy:
     outbound:
       external:
         - host: navikt.github.io
         - host: login.microsoftonline.com
         - host: graph.microsoft.com
-        - host: unleash.nais.io
+        - host: etterlatte-unleash-api.nav.cloud.nais.io
       rules:
         - application: etterlatte-brev-api
         - application: etterlatte-vilkaarsvurdering

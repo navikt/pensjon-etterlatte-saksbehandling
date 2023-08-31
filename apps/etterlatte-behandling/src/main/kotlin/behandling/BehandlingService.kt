@@ -103,8 +103,7 @@ class BehandlingServiceImpl(
     private val sporingslogg: Sporingslogg,
     private val featureToggleService: FeatureToggleService,
     private val kommerBarnetTilGodeDao: KommerBarnetTilGodeDao,
-    private val oppgaveServiceNy: OppgaveServiceNy,
-    private val kanBrukeNyOppgaveliste: Boolean
+    private val oppgaveServiceNy: OppgaveServiceNy
 ) : BehandlingService {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -158,20 +157,11 @@ class BehandlingServiceImpl(
                         )
                     }
                 } catch (e: Exception) {
-                    if (kanBrukeNyOppgaveliste) {
-                        logger.error(
-                            "En feil oppstod under ryddingen i oppgavene til behandling / hendelse når " +
-                                "vi avbrøt en behandling, og vi får dermed ikke avbrutt riktig",
-                            e
-                        )
-                        throw e
-                    } else {
-                        logger.error(
-                            "En feil oppstod under ryddingen i oppgavene til behandling / hendelse når" +
-                                "vi avbrøt en behandling, men ny oppgaveliste er ikke i bruk og feilen ignorerers",
-                            e
-                        )
-                    }
+                    logger.error(
+                        "En feil oppstod under ryddingen i oppgavene til behandling / hendelse når" +
+                            "vi avbrøt en behandling, men ny oppgaveliste er ikke i bruk og feilen ignorerers",
+                        e
+                    )
                 }
 
                 hendelseDao.behandlingAvbrutt(behandling, saksbehandler)

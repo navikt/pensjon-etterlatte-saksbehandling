@@ -120,13 +120,28 @@ getAzureadSecretName() {
   info "Found secret with name '$AZURE_SECRET_NAME'"
 }
 
+getMaskinportenSecretName() {
+  info "Checking kubernetes for Maskinporten secret for $APP_NAME"
+
+  MASKINPORTEN_SECRET_NAME=$(kubectl get secrets | grep "maskinporten-$APP_NAME" -m1 | awk '{print $1}')
+  if [ -n "$MASKINPORTEN_SECRET_NAME" ]; then
+    info "Found secret with name '$MASKINPORTEN_SECRET_NAME'"
+  fi
+}
+
 addSecretToEnvFile() {
   userHasJq
 
   getAzureadSecretName
 
+  getMaskinportenSecretName
+
   echo "" # newline
   read -p "Is this a frontend app (does it use wonderwall)? [y/N] " USING_WONDERWALL
+
+  echo "" # newline
+  read -p "Does the app use unleash? [y/N] " USING_UNLEASH
+
 
   info "Fetching secrets from kubernetes"
 
@@ -143,6 +158,18 @@ addSecretToEnvFile() {
     kubectl -n etterlatte get secret $AZURE_SECRET_NAME -o json \
         | jq -r '.data | map_values(@base64d) | to_entries[] | (.key | ascii_upcase) +"=" + .value' \
         > $APP_DIR/.env.dev-gcp
+
+    if [ -n "$MASKINPORTEN_SECRET_NAME" ]; then
+        kubectl -n etterlatte get secret $MASKINPORTEN_SECRET_NAME -o json \
+            | jq -r '.data | map_values(@base64d) | to_entries[] | (.key | ascii_upcase) +"=" + .value' \
+            >> $APP_DIR/.env.dev-gcp
+    fi
+  fi
+
+  if [ "$USING_UNLEASH" == "y" ]; then
+    kubectl -n etterlatte get secret my-application-unleash-api-token -o json \
+        | jq -r '.data | map_values(@base64d) | to_entries[] | (.key | ascii_upcase) +"=" + .value' \
+        >> $APP_DIR/.env.dev-gcp
   fi
 
   info ".env.dev-gcp created with valid secrets"

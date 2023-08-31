@@ -75,7 +75,7 @@ val belopForEtterfoelgendeBarn = RegelMeta(
     prosentsatsEtterfoelgendeBarn.multiply(grunnbeloep.grunnbeloepPerMaaned)
 }
 
-val barnepensjonSatsRegel = RegelMeta(
+val barnepensjonSatsRegel1967 = RegelMeta(
     gjelderFra = BP_1967_DATO,
     beskrivelse = "Beregn uavkortet barnepensjon basert på størrelsen på barnekullet",
     regelReferanse = RegelReferanse(id = "BP-BEREGNING-1967-UAVKORTET")
@@ -84,4 +84,23 @@ val barnepensjonSatsRegel = RegelMeta(
     foerstebarnSats
         .plus(etterfoelgendeBarnSats.multiply(antallSoesken))
         .divide(antallSoesken.plus(1))
+}
+
+val barnepensjonSatsRegel2024 = RegelMeta(
+    gjelderFra = BP_1967_DATO,
+    beskrivelse = "Beregn uavkortet barnepensjon basert på størrelsen på barnekullet",
+    regelReferanse = RegelReferanse(id = "BP-BEREGNING-1967-UAVKORTET")
+) benytter belopForFoersteBarn og belopForEtterfoelgendeBarn og antallSoeskenIKullet med {
+        foerstebarnSats, etterfoelgendeBarnSats, antallSoesken ->
+    foerstebarnSats
+        .plus(etterfoelgendeBarnSats.multiply(antallSoesken))
+        .divide(antallSoesken.plus(1))
+}
+val barnepensjonSatsRegel = RegelMeta(
+    gjelderFra = BP_1967_DATO,
+    beskrivelse = "Beregn uavkortet barnepensjon basert på størrelsen på barnekullet",
+    regelReferanse = RegelReferanse(id = "BP-BEREGNING-1967-UAVKORTET")
+) benytter barnepensjonSatsRegel1967 og barnepensjonSatsRegel2024 med {
+        barnepensjonSatsRegel1967, barnepensjonSatsRegel2024 ->
+    barnepensjonSatsRegel1967
 }

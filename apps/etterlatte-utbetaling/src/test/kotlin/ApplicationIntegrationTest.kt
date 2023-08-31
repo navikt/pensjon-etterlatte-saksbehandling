@@ -12,6 +12,7 @@ import no.nav.etterlatte.libs.common.vedtak.Behandling
 import no.nav.etterlatte.utbetaling.ChipsetCheck
 import no.nav.etterlatte.utbetaling.TestContainers
 import no.nav.etterlatte.utbetaling.common.EVENT_NAME_OPPDATERT
+import no.nav.etterlatte.utbetaling.common.UTBETALING_RESPONSE
 import no.nav.etterlatte.utbetaling.common.UtbetalingEventDto
 import no.nav.etterlatte.utbetaling.config.ApplicationContext
 import no.nav.etterlatte.utbetaling.config.ApplicationProperties
@@ -362,7 +363,7 @@ class ApplicationIntegrationTest {
         return Pair(
             message[EVENT_NAME_KEY].asText(),
             objectMapper.treeToValue(
-                message["utbetaling_response"]
+                message[UTBETALING_RESPONSE]
             )
         )
     }

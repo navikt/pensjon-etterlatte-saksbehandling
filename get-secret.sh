@@ -59,6 +59,7 @@ validateAppDir() {
     APP_DIR=$(pwd | sed "s/saksbehandling.*/saksbehandling\/apps\/$APP_NAME/")
   else
     warn "No app selected. Exiting script ..."
+    exit;
   fi
 }
 
@@ -86,6 +87,25 @@ userHasFzf() {
       info "fzf installed successfully"
     else
       error "Unable to install fzf. Try installing manually"
+    fi
+  fi
+}
+
+userHasSymlink() {
+  if ! command -v get-secret &> /dev/null
+  then
+    warn "Command 'get-secret' is missing. Adding to /usr/local/bin"
+
+    SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+
+    ln -s $SCRIPT_DIR/get-secret.sh /usr/local/bin/get-secret
+
+    if [ $? -eq 0 ]; then
+      info "Command 'get-secret' added to /usr/local/bin successfully!"
+      info "You can now run the command 'get-secret' (without .sh) anywhere on your machine."
+      exit;
+    else
+      error "Unable to create symlink for 'get-secret.sh'. Try adding manually by running: \n\t ln -s get-secret.sh /usr/local/bin/get-secret"
     fi
   fi
 }
@@ -190,6 +210,7 @@ info "Initializing ..."
 # Ensure user has necessary tools
 userHasJq
 userHasFzf
+userHasSymlink
 
 # Ensure .env files cannot be commited by accident
 validateGitIgnore

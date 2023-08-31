@@ -99,7 +99,7 @@ export const Trygdetid = ({ redigerbar, utenlandstilsnitt }: Props) => {
             trygdetidGrunnlagType={ITrygdetidGrunnlagType.FREMTIDIG}
             redigerbar={redigerbar}
           />
-          <TrygdetidBeregnet trygdetid={trygdetid} setTrygdetid={setTrygdetid} />
+          <TrygdetidBeregnet trygdetid={trygdetid} />
           {visTrydeavtale(utenlandstilsnitt?.type) && <TrygdeAvtale redigerbar={redigerbar} />}
         </>
       )}

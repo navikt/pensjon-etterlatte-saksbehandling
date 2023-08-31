@@ -12,6 +12,7 @@ import { Revurderingsoversikt } from '~components/behandling/revurderingsoversik
 import { behandlingSkalSendeBrev } from '~components/behandling/felles/utils'
 import { useBehandling } from '~components/behandling/useBehandling'
 import { erOpphoer } from '~shared/types/Revurderingsaarsak'
+import TrygdetidVisning from '~components/behandling/trygdetid/TrygdetidVisning'
 
 type behandlingRouteTypes =
   | 'soeknadsoversikt'
@@ -30,6 +31,7 @@ const behandlingRoutes = (
   { path: 'revurderingsoversikt', element: <Revurderingsoversikt behandling={behandling} /> },
   { path: 'opphoeroversikt', element: <ManueltOpphoerOversikt behandling={behandling} /> },
   { path: 'vilkaarsvurdering', element: <Vilkaarsvurdering behandling={behandling} /> },
+  { path: 'trygdetid', element: <TrygdetidVisning behandling={behandling} /> },
   { path: 'beregningsgrunnlag', element: <Beregningsgrunnlag behandling={behandling} /> },
   { path: 'beregne', element: <Beregne behandling={behandling} /> },
   { path: 'brev', element: <Vedtaksbrev behandling={behandling} /> },
@@ -91,6 +93,11 @@ export const soeknadRoutes: Array<BehandlingRouteTypes> = [
     kreverBehandlingsstatus: IBehandlingStatus.VILKAARSVURDERT,
   },
   {
+    path: 'trygdetid',
+    description: 'Trygdetid',
+    kreverBehandlingsstatus: IBehandlingStatus.VILKAARSVURDERT,
+  },
+  {
     path: 'beregningsgrunnlag',
     description: 'Beregningsgrunnlag',
     kreverBehandlingsstatus: IBehandlingStatus.VILKAARSVURDERT,
@@ -131,6 +138,11 @@ export function revurderingRoutes(behandling: IBehandlingReducer): Array<Behandl
     description: 'Vilkårsvurdering',
     kreverBehandlingsstatus: IBehandlingStatus.VILKAARSVURDERT,
   }
+  const trygdetid = {
+    path: 'trygdetid',
+    description: 'Trygdetid',
+    kreverBehandlingsstatus: IBehandlingStatus.VILKAARSVURDERT,
+  }
   const beregningsgrunnlag = {
     path: 'beregningsgrunnlag',
     description: 'Beregningsgrunnlag',
@@ -139,7 +151,7 @@ export function revurderingRoutes(behandling: IBehandlingReducer): Array<Behandl
   const beregning = { path: 'beregne', description: 'Beregning', kreverBehandlingsstatus: IBehandlingStatus.BEREGNET }
   const defaultRoutes: Array<BehandlingRouteTypes> = erOpphoer(behandling.revurderingsaarsak!!)
     ? [revurderingsoversikt, vilkaarsvurdering, beregning]
-    : [revurderingsoversikt, vilkaarsvurdering, beregningsgrunnlag, beregning]
+    : [revurderingsoversikt, vilkaarsvurdering, trygdetid, beregningsgrunnlag, beregning]
 
   if (behandlingSkalSendeBrev(behandling)) {
     return [...defaultRoutes, { path: 'brev', description: 'Vedtaksbrev' }]

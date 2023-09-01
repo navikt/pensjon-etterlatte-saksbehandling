@@ -32,6 +32,8 @@ internal class MigrerSpesifikkSak(
         }.register(this)
     }
 
+    // testendring for å trigge bygg
+
     override fun haandterPakke(packet: JsonMessage, context: MessageContext) {
         val sakId = packet.sakId
         if (pesysRepository.hentStatus(sakId) != null) {

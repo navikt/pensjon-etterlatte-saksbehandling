@@ -13,6 +13,7 @@ import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
+import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.utbetaling.UtbetalingResponseDto
 import no.nav.etterlatte.libs.common.utbetaling.UtbetalingStatusDto
 import no.nav.etterlatte.libs.database.DataSourceBuilder
@@ -36,6 +37,7 @@ import org.junit.jupiter.api.Test
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
 import rapidsandrivers.BEHANDLING_ID_KEY
+import rapidsandrivers.HENDELSE_DATA_KEY
 import rapidsandrivers.SAK_ID_KEY
 import java.time.Month
 import java.time.YearMonth
@@ -101,7 +103,7 @@ internal class MigreringIntegrationTest {
 
             val melding1 = inspector.inspektør.message(0)
 
-            val request = objectMapper.readValue(melding1.get("request").asText(), MigreringRequest::class.java)
+            val request = objectMapper.readValue(melding1.get(HENDELSE_DATA_KEY).toJson(), MigreringRequest::class.java)
             assertEquals(PesysId(22974139), request.pesysId)
             assertEquals(Folkeregisteridentifikator.of("06421594773"), request.soeker)
         }

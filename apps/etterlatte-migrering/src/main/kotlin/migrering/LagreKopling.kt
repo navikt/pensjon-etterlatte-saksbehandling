@@ -29,6 +29,7 @@ internal class LagreKopling(rapidsConnection: RapidsConnection, private val pesy
     }
 
     override fun haandterPakke(packet: JsonMessage, context: MessageContext) {
+        logger.info("Lagrer kopling fra pesyssak ${packet.pesysId} til behandling ${packet.behandlingId}")
         pesysRepository.lagreKoplingTilBehandling(packet.behandlingId, packet.pesysId)
         packet.eventName = Migreringshendelser.LAGRE_GRUNNLAG
         context.publish(packet.toJson())

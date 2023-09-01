@@ -8,9 +8,6 @@ jobs:
     name: Verify pull request
     runs-on: ubuntu-latest-8-cores
     steps:
-      - uses: GitHubSecurityLab/actions-permissions/monitor@v1
-        with:
-          config: ${{ vars.PERMISSIONS_CONFIG }}
       - name: Checkout code
         uses: actions/checkout@v3
       - name: Setup Java v17.x

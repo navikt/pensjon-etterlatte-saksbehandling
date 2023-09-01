@@ -39,4 +39,10 @@ class PenKlient(config: Config, pen: HttpClient) {
                 failure = { errorResponse -> throw errorResponse }
             )
     }
+
+    fun opphoerSak(pesysId: PesysId) {
+        logger.info("Opphører sak $pesysId i PEN")
+        logger.warn("Funksjonaliteten for å kalle PEN for å opphøre sak er ennå ikke implementert")
+        // TODO: Implementer i EY-2615
+    }
 }

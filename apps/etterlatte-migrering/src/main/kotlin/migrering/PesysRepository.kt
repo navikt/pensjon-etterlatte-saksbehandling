@@ -11,6 +11,11 @@ import no.nav.etterlatte.rapidsandrivers.migrering.PesysId
 import java.util.*
 import javax.sql.DataSource
 
+data class Pesyskopling(
+    val pesysId: PesysId,
+    val behandlingId: UUID
+)
+
 internal class PesysRepository(private val dataSource: DataSource) : Transactions<PesysRepository> {
 
     override fun <R> inTransaction(block: PesysRepository.(TransactionalSession) -> R): R {
@@ -28,10 +33,10 @@ internal class PesysRepository(private val dataSource: DataSource) : Transaction
             )
         }
 
-    fun oppdaterStatus(id: Long, status: Migreringsstatus, tx: TransactionalSession? = null) = tx.session {
+    fun oppdaterStatus(id: PesysId, status: Migreringsstatus, tx: TransactionalSession? = null) = tx.session {
         oppdater(
             "UPDATE pesyssak SET status=:status WHERE id=:id",
-            mapOf("id" to id, "status" to status.name),
+            mapOf("id" to id.id, "status" to status.name),
             "Markerte $id med status $status"
         )
     }
@@ -51,6 +56,18 @@ internal class PesysRepository(private val dataSource: DataSource) : Transaction
                 "INSERT INTO pesyskopling(behandling_id,pesys_id) VALUES(:behandling_id,:pesys_id)",
                 mapOf("behandling_id" to behandlingId, "pesys_id" to pesysId.id),
                 "Lagra koplinga mellom behandling $behandlingId og pesyssak $pesysId i migreringsbasen"
+            )
+        }
+    }
+
+    fun hentPesysId(behandlingId: UUID, tx: TransactionalSession? = null) = tx.session {
+        hent(
+            "SELECT pesys_id, behandling_id from pesyskopling WHERE behandling_id = :behandling_id",
+            mapOf("behandling_id" to behandlingId)
+        ) {
+            Pesyskopling(
+                PesysId(it.long("pesys_id")),
+                it.uuid("behandling_id")
             )
         }
     }

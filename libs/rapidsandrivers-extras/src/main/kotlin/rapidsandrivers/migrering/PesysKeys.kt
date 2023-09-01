@@ -34,7 +34,7 @@ var JsonMessage.persongalleri: Persongalleri
     }
 
 var JsonMessage.pesysId: PesysId
-    get() = objectMapper.treeToValue(this[PESYS_ID], PesysId::class.java)
+    get() = PesysId(this[PESYS_ID].asLong())
     set(name) {
         this[PESYS_ID] = name
     }

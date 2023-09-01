@@ -12,6 +12,7 @@ import { Revurderingsoversikt } from '~components/behandling/revurderingsoversik
 import { behandlingSkalSendeBrev } from '~components/behandling/felles/utils'
 import { useBehandling } from '~components/behandling/useBehandling'
 import { erOpphoer } from '~shared/types/Revurderingsaarsak'
+import { Aktivitetsplikt } from '~components/behandling/aktivitetsplikt/Aktivitetsplikt'
 
 type behandlingRouteTypes =
   | 'soeknadsoversikt'
@@ -22,6 +23,7 @@ type behandlingRouteTypes =
   | 'beregningsgrunnlag'
   | 'beregne'
   | 'brev'
+  | 'aktivitetsplikt'
 
 const behandlingRoutes = (
   behandling: IBehandlingReducer
@@ -33,6 +35,7 @@ const behandlingRoutes = (
   { path: 'beregningsgrunnlag', element: <Beregningsgrunnlag behandling={behandling} /> },
   { path: 'beregne', element: <Beregne behandling={behandling} /> },
   { path: 'brev', element: <Vedtaksbrev behandling={behandling} /> },
+  { path: 'aktivitetsplikt', element: <Aktivitetsplikt behandling={behandling} /> },
 ]
 
 function useRouteNavigation() {
@@ -93,6 +96,11 @@ export const soeknadRoutes: Array<BehandlingRouteTypes> = [
   {
     path: 'beregningsgrunnlag',
     description: 'Beregningsgrunnlag',
+    kreverBehandlingsstatus: IBehandlingStatus.VILKAARSVURDERT,
+  },
+  {
+    path: 'aktivitetsplikt',
+    description: 'Oppfølging av aktivitet',
     kreverBehandlingsstatus: IBehandlingStatus.VILKAARSVURDERT,
   },
   { path: 'beregne', description: 'Beregning', kreverBehandlingsstatus: IBehandlingStatus.BEREGNET },

@@ -111,7 +111,7 @@ internal class MigreringIntegrationTest {
 
     @Test
     fun `Migrer hele veien`() {
-        val pesysId: Long = 22974139
+        val pesysId = PesysId(22974139)
         testApplication {
             val repository = PesysRepository(datasource)
             val featureToggleService = DummyFeatureToggleService().also {
@@ -139,15 +139,15 @@ internal class MigreringIntegrationTest {
                 JsonMessage.newMessage(
                     mapOf(
                         EVENT_NAME_KEY to Migreringshendelser.MIGRER_SPESIFIKK_SAK,
-                        SAK_ID_KEY to pesysId
+                        SAK_ID_KEY to pesysId.id
                     )
                 ).toJson()
             )
             with(repository.hentSaker()) {
                 assertEquals(1, size)
-                assertEquals(get(0).id, pesysId)
+                assertEquals(get(0).id, pesysId.id)
                 assertEquals(get(0).virkningstidspunkt, YearMonth.of(2023, Month.SEPTEMBER))
-                assertEquals(repository.hentStatus(pesysId), Migreringsstatus.UNDER_MIGRERING)
+                assertEquals(repository.hentStatus(pesysId.id), Migreringsstatus.UNDER_MIGRERING)
             }
             val behandlingId = UUID.randomUUID()
             inspector.sendTestMessage(
@@ -159,7 +159,7 @@ internal class MigreringIntegrationTest {
                     )
                 ).toJson()
             )
-            assertEquals(repository.hentPesysId(behandlingId)?.pesysId, PesysId(pesysId))
+            assertEquals(repository.hentPesysId(behandlingId)?.pesysId, pesysId)
 
             inspector.sendTestMessage(
                 JsonMessage.newMessage(
@@ -174,8 +174,8 @@ internal class MigreringIntegrationTest {
                     )
                 ).toJson()
             )
-            verify { penKlient.opphoerSak(PesysId(pesysId)) }
-            assertEquals(repository.hentStatus(pesysId), Migreringsstatus.FERDIG)
+            verify { penKlient.opphoerSak(pesysId) }
+            assertEquals(repository.hentStatus(pesysId.id), Migreringsstatus.FERDIG)
         }
     }
 }

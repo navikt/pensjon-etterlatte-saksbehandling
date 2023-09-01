@@ -130,9 +130,4 @@ internal class AvkortingRepositoryTest {
         }
     }
 
-    @Test
-    fun `fyller lopende ytlisning basert paa aarets oppgjoet`() {
-        // TODO EY-2523
-    }
-
 }

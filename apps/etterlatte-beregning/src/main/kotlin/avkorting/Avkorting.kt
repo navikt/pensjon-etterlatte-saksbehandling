@@ -13,6 +13,17 @@ data class Avkorting(
     val aarsoppgjoer: Aarsoppgjoer = Aarsoppgjoer(),
 ) {
 
+    fun loependeYtelse(): List<AvkortetYtelse> {
+        val virkningstidspunkt = virkningstidspunkt()
+        return aarsoppgjoer.avkortetYtelseAar.filter { it.periode.fom >= virkningstidspunkt }.map {
+            if (virkningstidspunkt > it.periode.fom && (it.periode.tom == null || virkningstidspunkt <= it.periode.tom)) {
+                it.copy(periode = Periode(fom = virkningstidspunkt, tom = it.periode.tom))
+            } else {
+                it
+            }
+        }
+    }
+
     fun kopierAvkorting(virkningstidspunkt: YearMonth): Avkorting = Avkorting(
         aarsoppgjoer = aarsoppgjoer.copy(
             ytelseFoerAvkorting = aarsoppgjoer.ytelseFoerAvkorting.map { it },
@@ -71,17 +82,6 @@ data class Avkorting(
         } else {
             beregnAvkortingRevurdering(beregning)
         }
-
-    fun finnLoependeYtelse(): List<AvkortetYtelse> {
-        val virkningstidspunkt = virkningstidspunkt()
-        return aarsoppgjoer.avkortetYtelseAar.filter { it.periode.fom >= virkningstidspunkt }.map {
-            if (virkningstidspunkt > it.periode.fom && (it.periode.tom == null || virkningstidspunkt <= it.periode.tom)) {
-                it.copy(periode = Periode(fom = virkningstidspunkt, tom = it.periode.tom))
-            } else {
-                it
-            }
-        }
-    }
 
     private fun beregnAvkortingForstegangs(beregning: Beregning): Avkorting {
 
@@ -149,9 +149,8 @@ data class Avkorting(
         reberegnetInntektsavkorting.forEach { inntektsavkorting ->
             val restanse = AvkortingRegelkjoring.beregnRestanse(
                 this.foersteMaanedDetteAar(),
-                inntektsavkorting.grunnlag.periode.fom,
-                avkortetYtelseMedAllForventetInntekt,
-                inntektsavkorting.avkortetYtelse
+                inntektsavkorting,
+                avkortetYtelseMedAllForventetInntekt
             )
             val ytelse = AvkortingRegelkjoring.beregnAvkortetYtelse(
                 periode = inntektsavkorting.grunnlag.periode,
@@ -175,6 +174,7 @@ data class Avkorting(
     private fun foersteMaanedDetteAar() = this.aarsoppgjoer.ytelseFoerAvkorting.first().periode.fom
 
     private fun virkningstidspunkt() = this.aarsoppgjoer.inntektsavkorting.first().grunnlag.virkningstidspunkt
+
 }
 
 data class AvkortingGrunnlag(
@@ -251,7 +251,6 @@ fun Beregning.mapTilYtelseFoerAvkorting() = beregningsperioder.map {
     )
 }
 
-// TODO EY-2523 unittest
 fun List<YtelseFoerAvkorting>.leggTilNyeBeregninger(
     beregning: Beregning,
     virkningstidspunkt: YearMonth

@@ -14,7 +14,7 @@ class YtelseMedGrunnlagService(
     fun hentYtelseMedGrunnlag(behandlingId: UUID): YtelseMedGrunnlagDto? {
         val avkorting = avkortingRepository.hentAvkorting(behandlingId)
         val beregning = beregningRepository.hent(behandlingId)
-        val avkortinger = avkorting?.finnLoependeYtelse()?.map { avkortetYtelse ->
+        val avkortinger = avkorting?.loependeYtelse()?.map { avkortetYtelse ->
 
             beregning ?: throw Exception("Mangler beregning for behandling $behandlingId")
             val beregningIPeriode = beregning.beregningsperioder

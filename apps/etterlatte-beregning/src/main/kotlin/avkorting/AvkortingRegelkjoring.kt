@@ -5,7 +5,6 @@ import no.nav.etterlatte.avkorting.regler.PeriodisertAvkortetYtelseGrunnlag
 import no.nav.etterlatte.avkorting.regler.PeriodisertInntektAvkortingGrunnlag
 import no.nav.etterlatte.avkorting.regler.RestanseGrunnlag
 import no.nav.etterlatte.avkorting.regler.avkortetYtelseMedRestanse
-import no.nav.etterlatte.avkorting.regler.fordeltRestanse
 import no.nav.etterlatte.avkorting.regler.kroneavrundetInntektAvkorting
 import no.nav.etterlatte.avkorting.regler.restanse
 import no.nav.etterlatte.beregning.grunnlag.GrunnlagMedPeriode
@@ -186,26 +185,25 @@ object AvkortingRegelkjoring {
 
     fun beregnRestanse(
         fraOgMed: YearMonth,
-        til: YearMonth,
+        nyInntektsavkorting: Inntektsavkorting,
         tidligereYtelseEtterAvkorting: List<AvkortetYtelse>,
-        nyYtelseEtterAvkorting: List<AvkortetYtelse>
     ): Restanse {
+        val til = nyInntektsavkorting.grunnlag.periode.fom
         val grunnlag = RestanseGrunnlag(
             FaktumNode(
                 verdi = tidligereYtelseEtterAvkorting.spreYtelsePerMaaned(fraOgMed, til),
                 kilde = tidligereYtelseEtterAvkorting.map { "avkortetYtelse:${it.id}" },
-                beskrivelse = "Ytelse etter avkorting fra tidligere beahndlinge gjeldende år"
+                beskrivelse = "Ytelse etter avkorting for tidligere oppgitt forventet årsinntekt samme år"
             ),
             FaktumNode(
-                verdi = nyYtelseEtterAvkorting.spreYtelsePerMaaned(fraOgMed, til),
-                kilde = nyYtelseEtterAvkorting.map { "avkortetYtelse:${it.id}" },
-                beskrivelse = "Reberegnet ytelse etter avkorting før nytt virkningstidspunkt"
+                verdi = nyInntektsavkorting.avkortetYtelse.spreYtelsePerMaaned(fraOgMed, til),
+                kilde = nyInntektsavkorting.grunnlag.id,
+                beskrivelse = "Ytelse etter avkorting med ny forventet årsinntekt"
             ),
-            // TODO EY-2523 Kan ikke være virk - må være fra og med nå
-            virkningstidspunkt = FaktumNode(
+            fraOgMedNyForventetInntekt = FaktumNode(
                 verdi = til,
-                kilde = "TODO",
-                beskrivelse = "Virkningstidspunkt hvor restanse skal fordeles månedlig fra"
+                kilde = nyInntektsavkorting.grunnlag.id,
+                beskrivelse = "Tidspunkt ny forventet inntekt inntrer"
             )
         )
 

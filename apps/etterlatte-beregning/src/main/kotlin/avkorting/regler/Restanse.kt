@@ -15,7 +15,7 @@ import java.time.YearMonth
 data class RestanseGrunnlag(
     val tidligereYtelseEtterAvkorting: FaktumNode<List<Int>>,
     val nyForventetYtelseEtterAvkorting: FaktumNode<List<Int>>,
-    val virkningstidspunkt: FaktumNode<YearMonth>,
+    val fraOgMedNyForventetInntekt: FaktumNode<YearMonth>,
 )
 
 val tidligereYtelse: Regel<RestanseGrunnlag, List<Int>> = finnFaktumIGrunnlag(
@@ -34,7 +34,7 @@ val nyYtelse: Regel<RestanseGrunnlag, List<Int>> = finnFaktumIGrunnlag(
 val virkningstidspunkt: Regel<RestanseGrunnlag, YearMonth> = finnFaktumIGrunnlag(
     gjelderFra = OMS_GYLDIG_FROM_TEST,
     beskrivelse = "Virkningstidspunkt til restanse skal gjelde fra",
-    finnFaktum = RestanseGrunnlag::virkningstidspunkt,
+    finnFaktum = RestanseGrunnlag::fraOgMedNyForventetInntekt,
     finnFelt = { it }
 )
 

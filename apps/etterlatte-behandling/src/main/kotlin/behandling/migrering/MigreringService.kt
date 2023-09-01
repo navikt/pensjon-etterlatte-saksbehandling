@@ -13,6 +13,7 @@ import no.nav.etterlatte.libs.common.behandling.JaNeiMedBegrunnelse
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.oppgaveny.OppgaveServiceNy
 import no.nav.etterlatte.rapidsandrivers.migrering.MigreringRequest
 import no.nav.etterlatte.sak.SakService
 
@@ -22,7 +23,8 @@ class MigreringService(
     private val behandlingFactory: BehandlingFactory,
     private val kommerBarnetTilGodeService: KommerBarnetTilGodeService,
     private val behandlingsHendelser: BehandlingHendelserKafkaProducer,
-    private val behandlingService: BehandlingService
+    private val behandlingService: BehandlingService,
+    private val oppgaveServiceNy: OppgaveServiceNy
 ) {
     fun migrer(request: MigreringRequest) = opprettSakOgBehandling(request)?.let {
         val pesys = Vedtaksloesning.PESYS.name
@@ -45,6 +47,10 @@ class MigreringService(
             pesys,
             "Automatisk importert fra Pesys"
         )
+        val nyopprettaOppgave =
+            oppgaveServiceNy.hentOppgaverForSak(it.sak.id).first { o -> o.referanse == it.id.toString() }
+        oppgaveServiceNy.tildelSaksbehandler(nyopprettaOppgave.id, pesys)
+
         behandlingsHendelser.sendMeldingForHendelse(it, BehandlingHendelseType.OPPRETTET)
         it
     }

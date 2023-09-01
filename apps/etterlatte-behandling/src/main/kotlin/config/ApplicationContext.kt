@@ -243,7 +243,8 @@ class ApplicationContext(
         behandlingFactory = behandlingFactory,
         kommerBarnetTilGodeService = kommerBarnetTilGodeService,
         behandlingsHendelser = behandlingsHendelser,
-        behandlingService = behandlingService
+        behandlingService = behandlingService,
+        oppgaveServiceNy = oppgaveServiceNy
     )
 
     // Job

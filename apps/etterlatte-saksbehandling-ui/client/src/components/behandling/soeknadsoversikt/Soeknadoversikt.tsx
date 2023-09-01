@@ -28,7 +28,6 @@ export const Soeknadsoversikt = (props: { behandling: IDetaljertBehandling }) =>
   const { behandling } = props
   const behandles = hentBehandlesFraStatus(behandling.status)
   const erGyldigFremsatt = behandling.gyldighetsprøving?.resultat === VurderingsResultat.OPPFYLT
-
   const avdoedDoedsdato = behandling.familieforhold?.avdoede?.opplysning?.doedsdato
   const avdoedDoedsdatoKilde = behandling.familieforhold?.avdoede?.kilde
 

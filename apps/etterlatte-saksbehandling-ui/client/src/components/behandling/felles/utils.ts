@@ -12,8 +12,9 @@ export function behandlingErUtfylt(behandling: IDetaljertBehandling): boolean {
 
   if (behandling.sakType == SakType.BARNEPENSJON) {
     const kommerBarnetTilgode = !!behandling.kommerBarnetTilgode && behandling.kommerBarnetTilgode?.svar === JaNei.JA
+    const boddEllerArbeidetIUtlandet = !!behandling.boddEllerArbeidetUtlandet
 
-    return gyldigUtfylt && kommerBarnetTilgode
+    return gyldigUtfylt && kommerBarnetTilgode && boddEllerArbeidetIUtlandet
   } else if (behandling.sakType == SakType.OMSTILLINGSSTOENAD) {
     return gyldigUtfylt
   } else {

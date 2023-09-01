@@ -1,17 +1,40 @@
 import { BodyLong, BodyShort, Button, Heading, Textarea } from '@navikt/ds-react'
-import React, { useContext } from 'react'
+import React, { useContext, useEffect } from 'react'
 import { Content, ContentHeader } from '~shared/styled'
 import { Border, HeadingWrapper } from '~components/behandling/soeknadsoversikt/styled'
 import styled from 'styled-components'
 import { ExternalLinkIcon } from '@navikt/aksel-icons'
 import { BehandlingHandlingKnapper } from '~components/behandling/handlinger/BehandlingHandlingKnapper'
 import { ConfigContext } from '~clientConfig'
-import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
+import { IBehandlingReducer, updateVilkaarsvurdering } from '~store/reducers/BehandlingReducer'
+import { useParams } from 'react-router-dom'
+import { isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
+import { hentVilkaarsvurdering } from '~shared/api/vilkaarsvurdering'
+import { useAppDispatch } from '~store/Store'
 
 export const Aktivitetsplikt = (props: { behandling: IBehandlingReducer }) => {
   const { behandling } = props
-
+  const { behandlingId } = useParams()
+  const vilkaarsvurdering = behandling.vilkårsprøving
+  const [vilkaarsvurderingStatus, fetchVilkaarsvurdering] = useApiCall(hentVilkaarsvurdering)
+  const dispatch = useAppDispatch()
   const configContext = useContext(ConfigContext)
+
+  useEffect(() => {
+    if (!behandlingId) throw new Error('Mangler behandlingsid')
+    if (!vilkaarsvurdering) {
+      fetchVilkaarsvurdering(behandlingId, (vilkaarsvurdering) => {
+        dispatch(updateVilkaarsvurdering(vilkaarsvurdering))
+      })
+    }
+  }, [behandlingId])
+
+  function finnDoedsdatoFraGrunnlag() {
+    return behandling.vilkårsprøving?.vilkaar
+      .filter((v) => v.hovedvilkaar.type === 'OMS_AKTIVITET_ETTER_6_MND')
+      ?.map((v) => v.grunnlag.find((grunnlag) => grunnlag.opplysningsType == 'AVDOED_DOEDSDATO'))
+      .map((g) => g?.opplysning)
+  }
 
   return (
     <Content>
@@ -22,7 +45,8 @@ export const Aktivitetsplikt = (props: { behandling: IBehandlingReducer }) => {
           </Heading>
           <BodyShort spacing>
             <strong>Dødsdato: </strong>
-            17.01.2023
+            {isPending(vilkaarsvurderingStatus) && 'Henter grunnlag...'}
+            {isSuccess(vilkaarsvurderingStatus) && finnDoedsdatoFraGrunnlag()}
           </BodyShort>
         </HeadingWrapper>
       </ContentHeader>

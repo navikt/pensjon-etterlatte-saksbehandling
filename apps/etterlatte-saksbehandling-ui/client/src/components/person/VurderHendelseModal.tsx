@@ -1,5 +1,5 @@
 import { Alert, BodyShort, Button, Heading, Modal, Select, TextField } from '@navikt/ds-react'
-import { useState } from 'react'
+import React, { useState } from 'react'
 import styled from 'styled-components'
 import { opprettRevurdering as opprettRevurderingApi } from '~shared/api/behandling'
 import { isPending, useApiCall } from '~shared/hooks/useApiCall'
@@ -21,6 +21,7 @@ const VurderHendelseModal = (props: Props) => {
   const [valgtAarsak, setValgtAarsak] = useState<Revurderingsaarsak | undefined>(undefined)
   const [opprettRevurderingStatus, opprettRevurdering] = useApiCall(opprettRevurderingApi)
   const [begrunnelse, setBegrunnelse] = useState('')
+  const [fritekstgrunn, setFritekstgrunn] = useState<string>('')
   const navigate = useNavigate()
 
   const onSubmit = () => {
@@ -29,7 +30,13 @@ const VurderHendelseModal = (props: Props) => {
     }
 
     opprettRevurdering(
-      { sakId: props.sakId, aarsak: valgtAarsak, paaGrunnAvHendelseId: valgtHendelse?.id, begrunnelse: begrunnelse },
+      {
+        sakId: props.sakId,
+        aarsak: valgtAarsak,
+        paaGrunnAvHendelseId: valgtHendelse?.id,
+        fritekstAarsak: fritekstgrunn,
+        begrunnelse: begrunnelse,
+      },
       (revurderingId: string) => {
         navigate(`/behandling/${revurderingId}/`)
       },
@@ -68,13 +75,26 @@ const VurderHendelseModal = (props: Props) => {
                   </option>
                 ))}
               </Select>
-              <TextField
-                label="Begrunnelse"
-                size="medium"
-                type="text"
-                value={begrunnelse}
-                onChange={(e) => setBegrunnelse(e.target.value)}
-              />
+              {valgtAarsak === Revurderingsaarsak.ANNEN && (
+                <MarginTop>
+                  <TextField
+                    label="Beskriv årsak"
+                    size="small"
+                    type="text"
+                    value={fritekstgrunn}
+                    onChange={(e) => setFritekstgrunn(e.target.value)}
+                  />
+                </MarginTop>
+              )}
+              <MarginTop>
+                <TextField
+                  label="Begrunnelse"
+                  size="medium"
+                  type="text"
+                  value={begrunnelse}
+                  onChange={(e) => setBegrunnelse(e.target.value)}
+                />
+              </MarginTop>
             </div>
           </ModalContentWrapper>
 
@@ -101,6 +121,10 @@ export const ButtonContainer = styled.div`
   justify-content: flex-end;
   gap: 0.5em;
   padding-top: 2em;
+`
+
+const MarginTop = styled.div`
+  margin-top: 1rem;
 `
 
 export default VurderHendelseModal

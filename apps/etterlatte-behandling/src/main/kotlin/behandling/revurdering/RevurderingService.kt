@@ -286,6 +286,11 @@ class RevurderingServiceImpl(
         fritekstAarsak = fritekstAarsak
     ).let { opprettBehandling ->
         behandlingDao.opprettBehandling(opprettBehandling)
+
+        if (fritekstAarsak != null) {
+            lagreRevurderingsaarsakFritekst(fritekstAarsak, opprettBehandling.id, saksbehandlerIdent)
+        }
+
         forrigeBehandling?.let {
             kommerBarnetTilGodeService.hentKommerBarnetTilGode(it)
                 ?.copy(behandlingId = opprettBehandling.id)
@@ -308,6 +313,15 @@ class RevurderingServiceImpl(
         )
         oppgaveService.tildelSaksbehandler(oppgave.id, saksbehandlerIdent)
         behandlingHendelser.sendMeldingForHendelse(revurdering, BehandlingHendelseType.OPPRETTET)
+    }
+
+    private fun lagreRevurderingsaarsakFritekst(
+        fritekstAarsak: String,
+        behandlingId: UUID,
+        saksbehandlerIdent: String
+    ) {
+        val revurderingInfo = RevurderingInfo.RevurderingAarsakAnnen(fritekstAarsak)
+        lagreRevurderingInfo(behandlingId, revurderingInfo, saksbehandlerIdent)
     }
 
     private fun <T : Behandling> T?.sjekkEnhet() = this?.let { behandling ->

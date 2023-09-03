@@ -248,7 +248,7 @@ class RevurderingServiceImpl(
     }
 
     override fun lagreRevurderingInfo(behandlingsId: UUID, info: RevurderingInfo, navIdent: String): Boolean {
-        return inTransaction {
+        return inTransaction(true) {
             if (!kanLagreRevurderingInfo(behandlingsId)) {
                 return@inTransaction false
             }

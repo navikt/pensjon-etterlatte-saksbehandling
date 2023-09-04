@@ -11,6 +11,7 @@ import io.ktor.server.routing.route
 import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.withBehandlingId
+import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 
 fun Route.ytelseMedGrunnlag(ytelseMedGrunnlagService: YtelseMedGrunnlagService, behandlingKlient: BehandlingKlient) {
     route("/api/beregning/ytelse-med-grunnlag/{$BEHANDLINGSID_CALL_PARAMETER}") {
@@ -18,7 +19,7 @@ fun Route.ytelseMedGrunnlag(ytelseMedGrunnlagService: YtelseMedGrunnlagService, 
         get {
             withBehandlingId(behandlingKlient) {
                 logger.info("Henter utregnet ytelse med grunnlag for behandlingId=$it")
-                when (val ytelse = ytelseMedGrunnlagService.hentYtelseMedGrunnlag(it)) {
+                when (val ytelse = ytelseMedGrunnlagService.hentYtelseMedGrunnlag(it, brukerTokenInfo)) {
                     null -> call.response.status(HttpStatusCode.NotFound)
                     else -> call.respond(ytelse)
                 }

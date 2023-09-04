@@ -76,14 +76,12 @@ val bruker = Saksbehandler("token", "ident", null)
 fun avkorting(
     ytelseFoerAvkorting: List<YtelseFoerAvkorting> = emptyList(),
     inntektsavkorting: List<Inntektsavkorting> = emptyList(),
-    avkortetYtelseAar: List<AvkortetYtelse> = emptyList(),
-    avkortetYtelseForrigeVedtak: List<AvkortetYtelse> = emptyList()
+    avkortetYtelseAar: List<AvkortetYtelse> = emptyList()
 ) = Avkorting(
     aarsoppgjoer = aarsoppgjoer(
         ytelseFoerAvkorting,
         inntektsavkorting,
         avkortetYtelseAar,
-        avkortetYtelseForrigeVedtak
     )
 )
 
@@ -102,8 +100,7 @@ fun avkortinggrunnlag(
     fratrekkInnAar = fratrekkInnAar,
     relevanteMaanederInnAar = relevanteMaanederInnAar,
     spesifikasjon = "Spesifikasjon",
-    kilde = kilde,
-    virkningstidspunkt = virkningstidspunkt
+    kilde = kilde
 )
 
 fun inntektAvkortingGrunnlag(
@@ -126,13 +123,11 @@ fun inntektAvkortingGrunnlag(
 fun aarsoppgjoer(
     ytelseFoerAvkorting: List<YtelseFoerAvkorting> = emptyList(),
     inntektsavkorting: List<Inntektsavkorting> = emptyList(),
-    avkortetYtelseAar: List<AvkortetYtelse> = emptyList(),
-    avkortetYtelseForrigeVedtak: List<AvkortetYtelse> = emptyList(),
+    avkortetYtelseAar: List<AvkortetYtelse> = emptyList()
 ) = Aarsoppgjoer(
     ytelseFoerAvkorting = ytelseFoerAvkorting,
     inntektsavkorting = inntektsavkorting,
-    avkortetYtelseAar = avkortetYtelseAar,
-    avkortetYtelseForrigeVedtak = avkortetYtelseForrigeVedtak
+    avkortetYtelseAar = avkortetYtelseAar
 )
 
 fun ytelseFoerAvkorting(
@@ -182,7 +177,7 @@ fun avkortetYtelse(
     id: UUID = UUID.randomUUID(),
     type: AvkortetYtelseType = AvkortetYtelseType.INNTEKT,
     ytelseEtterAvkorting: Int = 50,
-    restanse: Int = 50,
+    restanse: Int? = 50,
     ytelseEtterAvkortingFoerRestanse: Int = 100,
     avkortingsbeloep: Int = 200,
     ytelseFoerAvkorting: Int = 300,
@@ -196,9 +191,11 @@ fun avkortetYtelse(
     type = type,
     periode = periode,
     ytelseEtterAvkorting = ytelseEtterAvkorting,
-    restanse = restanse(
-        fordeltRestanse = restanse
-    ),
+    restanse = restanse?.let {
+        restanse(
+            fordeltRestanse = restanse
+        )
+    },
     ytelseEtterAvkortingFoerRestanse = ytelseEtterAvkortingFoerRestanse,
     avkortingsbeloep = avkortingsbeloep,
     ytelseFoerAvkorting = ytelseFoerAvkorting,
@@ -209,9 +206,10 @@ fun avkortetYtelse(
 )
 
 fun beregning(
+    beregningId: UUID = UUID.randomUUID(),
     beregninger: List<Beregningsperiode> = listOf(beregningsperiode())
 ) = Beregning(
-    beregningId = UUID.randomUUID(),
+    beregningId = beregningId,
     behandlingId = UUID.randomUUID(),
     type = Beregningstype.OMS,
     beregningsperioder = beregninger,

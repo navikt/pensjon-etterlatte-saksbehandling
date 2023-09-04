@@ -11,44 +11,43 @@ import java.util.*
 
 data class Avkorting(
     val aarsoppgjoer: Aarsoppgjoer = Aarsoppgjoer(),
+    val lopendeYtelse: List<AvkortetYtelse> = emptyList(), // Fylles ut av metode medLoependeYtelse
+    val avkortetYtelseForrigeVedtak: List<AvkortetYtelse> = emptyList()
 ) {
 
-    fun loependeYtelse(): List<AvkortetYtelse> {
-        val virkningstidspunkt = virkningstidspunkt()
-        return aarsoppgjoer.avkortetYtelseAar.filter { it.periode.fom >= virkningstidspunkt }.map {
+    /*
+    * Årsoppgjør inneholder ytelsen sine perioder for hele år og for behandlinger/vedtak er det kun
+    * virknigstidspunkt og fremover som er relevant.
+    */
+    fun medLoependeYtelse(
+        virkningstidspunkt: YearMonth,
+        forrigeAvkorting: Avkorting? = null
+    ): Avkorting = this.copy(
+        lopendeYtelse = aarsoppgjoer.avkortetYtelseAar.filter { it.periode.fom >= virkningstidspunkt }.map {
             if (virkningstidspunkt > it.periode.fom && (it.periode.tom == null || virkningstidspunkt <= it.periode.tom)) {
                 it.copy(periode = Periode(fom = virkningstidspunkt, tom = it.periode.tom))
             } else {
                 it
             }
-        }
-    }
+        },
+        avkortetYtelseForrigeVedtak = forrigeAvkorting?.aarsoppgjoer?.avkortetYtelseAar ?: emptyList()
+    )
 
-    fun kopierAvkorting(virkningstidspunkt: YearMonth): Avkorting = Avkorting(
+    fun kopierAvkorting(): Avkorting = Avkorting(
         aarsoppgjoer = aarsoppgjoer.copy(
             ytelseFoerAvkorting = aarsoppgjoer.ytelseFoerAvkorting.map { it },
-            inntektsavkorting = aarsoppgjoer.inntektsavkorting.map {
-                it.copy(
-                    grunnlag = it.grunnlag.copy(
-                        id = UUID.randomUUID(),
-                        virkningstidspunkt = virkningstidspunkt
-                    )
-                )
-            },
-            avkortetYtelseForrigeVedtak = aarsoppgjoer.avkortetYtelseAar.map {
-                it.copy(
-                    id = UUID.randomUUID(),
-                    type = AvkortetYtelseType.FORRIGE_VEDTAK
-                )
+            inntektsavkorting = aarsoppgjoer.inntektsavkorting.map { inntektsavkorting ->
+                inntektsavkorting.copy(grunnlag = inntektsavkorting.grunnlag.copy(id = UUID.randomUUID()))
             }
         )
     )
 
     fun beregnAvkortingMedNyttGrunnlag(
         nyttGrunnlag: AvkortingGrunnlag,
+        virkningstidspunkt: YearMonth,
         behandlingstype: BehandlingType,
         beregning: Beregning
-    ) = oppdaterMedInntektsgrunnlag(nyttGrunnlag).beregnAvkorting(behandlingstype, beregning)
+    ) = oppdaterMedInntektsgrunnlag(nyttGrunnlag).beregnAvkorting(virkningstidspunkt, behandlingstype, beregning)
 
     fun oppdaterMedInntektsgrunnlag(
         nyttGrunnlag: AvkortingGrunnlag
@@ -76,26 +75,29 @@ data class Avkorting(
         )
     }
 
-    fun beregnAvkorting(behandlingstype: BehandlingType, beregning: Beregning): Avkorting =
+    fun beregnAvkorting(
+        virkningstidspunkt: YearMonth,
+        behandlingstype: BehandlingType,
+        beregning: Beregning
+    ): Avkorting =
         if (behandlingstype == BehandlingType.FØRSTEGANGSBEHANDLING) {
-            beregnAvkortingForstegangs(beregning)
+            beregnAvkortingForstegangs(virkningstidspunkt, beregning)
         } else {
-            beregnAvkortingRevurdering(beregning)
+            beregnAvkortingRevurdering(virkningstidspunkt, beregning)
         }
 
-    private fun beregnAvkortingForstegangs(beregning: Beregning): Avkorting {
+    private fun beregnAvkortingForstegangs(virkningstidspunkt: YearMonth, beregning: Beregning): Avkorting {
 
         val ytelseFoerAvkorting = beregning.mapTilYtelseFoerAvkorting()
-
         val grunnlag = aarsoppgjoer.inntektsavkorting.first().grunnlag
 
         val avkortingsperioder = AvkortingRegelkjoring.beregnInntektsavkorting(
-            Periode(fom = grunnlag.virkningstidspunkt, tom = null),
+            Periode(fom = virkningstidspunkt, tom = null),
             listOf(grunnlag)
         )
 
         val beregnetAvkortetYtelse = AvkortingRegelkjoring.beregnAvkortetYtelse(
-            periode = Periode(fom = grunnlag.virkningstidspunkt, tom = null),
+            periode = Periode(fom = virkningstidspunkt, tom = null),
             ytelseFoerAvkorting = ytelseFoerAvkorting,
             avkortingsperioder = avkortingsperioder,
             type = AvkortetYtelseType.INNTEKT
@@ -106,6 +108,7 @@ data class Avkorting(
                 ytelseFoerAvkorting = ytelseFoerAvkorting,
                 inntektsavkorting = this.aarsoppgjoer.inntektsavkorting.map {
                     it.copy(
+                        avkortingsperioder = avkortingsperioder,
                         avkortetYtelse = beregnetAvkortetYtelse.map { it.copy(inntektsgrunnlag = grunnlag.id) }
                     )
                 },
@@ -119,10 +122,10 @@ data class Avkorting(
         )
     }
 
-    private fun beregnAvkortingRevurdering(beregning: Beregning): Avkorting {
+    private fun beregnAvkortingRevurdering(virkningstidspunkt: YearMonth, beregning: Beregning): Avkorting {
 
         val ytelseFoerAvkorting =
-            this.aarsoppgjoer.ytelseFoerAvkorting.leggTilNyeBeregninger(beregning, virkningstidspunkt())
+            this.aarsoppgjoer.ytelseFoerAvkorting.leggTilNyeBeregninger(beregning, virkningstidspunkt)
 
         val reberegnetInntektsavkorting = this.aarsoppgjoer.inntektsavkorting.map { inntektsavkorting ->
             val periode = Periode(fom = this.foersteMaanedDetteAar(), tom = inntektsavkorting.grunnlag.periode.tom)
@@ -173,8 +176,6 @@ data class Avkorting(
 
     private fun foersteMaanedDetteAar() = this.aarsoppgjoer.ytelseFoerAvkorting.first().periode.fom
 
-    private fun virkningstidspunkt() = this.aarsoppgjoer.inntektsavkorting.first().grunnlag.virkningstidspunkt
-
 }
 
 data class AvkortingGrunnlag(
@@ -184,15 +185,13 @@ data class AvkortingGrunnlag(
     val fratrekkInnAar: Int,
     val relevanteMaanederInnAar: Int,
     val spesifikasjon: String,
-    val kilde: Grunnlagsopplysning.Saksbehandler,
-    val virkningstidspunkt: YearMonth
+    val kilde: Grunnlagsopplysning.Saksbehandler
 )
 
 data class Aarsoppgjoer(
     val ytelseFoerAvkorting: List<YtelseFoerAvkorting> = emptyList(),
     val inntektsavkorting: List<Inntektsavkorting> = emptyList(),
-    val avkortetYtelseAar: List<AvkortetYtelse> = emptyList(),
-    val avkortetYtelseForrigeVedtak: List<AvkortetYtelse> = emptyList()
+    val avkortetYtelseAar: List<AvkortetYtelse> = emptyList()
 )
 
 data class Inntektsavkorting(
@@ -241,7 +240,7 @@ data class AvkortetYtelse(
     val inntektsgrunnlag: UUID? = null
 )
 
-enum class AvkortetYtelseType { INNTEKT, AARSOPPGJOER, FORRIGE_VEDTAK, ETTEROPPJOER }
+enum class AvkortetYtelseType { INNTEKT, AARSOPPGJOER, ETTEROPPJOER }
 
 fun Beregning.mapTilYtelseFoerAvkorting() = beregningsperioder.map {
     YtelseFoerAvkorting(

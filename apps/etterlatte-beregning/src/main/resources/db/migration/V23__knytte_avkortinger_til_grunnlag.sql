@@ -1,5 +1,3 @@
-ALTER TABLE avkortingsgrunnlag ADD COLUMN virkningstidspunkt Date;
-
 ALTER TABLE avkortingsperioder ADD COLUMN inntektsgrunnlag UUID;
 
 ALTER TABLE avkortet_ytelse ADD COLUMN inntektsgrunnlag UUID;

@@ -22,7 +22,7 @@ export const YtelseEtterAvkorting = (props: {
 
   const finnTidligereTidligereYtelseIPeriode = (ytelse: IAvkortetYtelse) => {
     return tidligereYtelser.find(
-      (tidligere) => ytelse.fom >= tidligere.fom && (tidligere.tom == null || ytelse.fom < tidligere.tom)
+      (tidligere) => ytelse.fom >= tidligere.fom && (tidligere.tom == null || ytelse.tom <= tidligere.tom)
     )
   }
 

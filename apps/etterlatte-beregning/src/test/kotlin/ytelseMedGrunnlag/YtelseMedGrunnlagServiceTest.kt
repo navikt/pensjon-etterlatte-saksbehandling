@@ -1,8 +1,10 @@
 package no.nav.etterlatte.beregning.regler.ytelseMedGrunnlag
 
 import io.kotest.matchers.shouldBe
+import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.avkorting.AvkortingRepository
 import no.nav.etterlatte.avkorting.Inntektsavkorting
 import no.nav.etterlatte.beregning.BeregningRepository
@@ -10,9 +12,13 @@ import no.nav.etterlatte.beregning.regler.aarsoppgjoer
 import no.nav.etterlatte.beregning.regler.avkortetYtelse
 import no.nav.etterlatte.beregning.regler.avkorting
 import no.nav.etterlatte.beregning.regler.avkortinggrunnlag
+import no.nav.etterlatte.beregning.regler.behandling
 import no.nav.etterlatte.beregning.regler.beregning
 import no.nav.etterlatte.beregning.regler.beregningsperiode
+import no.nav.etterlatte.beregning.regler.bruker
+import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.libs.common.periode.Periode
+import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
 import no.nav.etterlatte.ytelseMedGrunnlag.YtelseMedGrunnlagService
 import org.junit.jupiter.api.Test
 import java.time.YearMonth
@@ -22,22 +28,32 @@ internal class YtelseMedGrunnlagServiceTest {
 
     private val avkortingRepository = mockk<AvkortingRepository>()
     private val beregningRepository = mockk<BeregningRepository>()
+    private val behandlingKlient = mockk<BehandlingKlient>()
     private val service = YtelseMedGrunnlagService(
         beregningRepository,
-        avkortingRepository
+        avkortingRepository,
+        behandlingKlient
     )
 
     @Test
     fun `returnerer null hvis avkorting ikke finnes`() {
         every { avkortingRepository.hentAvkorting(any()) } returns null
         every { beregningRepository.hent(any()) } returns null
-        service.hentYtelseMedGrunnlag(UUID.randomUUID()) shouldBe null
+        runBlocking {
+            service.hentYtelseMedGrunnlag(UUID.randomUUID(), bruker) shouldBe null
+        }
     }
 
     @Test
     fun `skal hente ytelse oppdelt i perioder med alle grunnlag`() {
         val behandlingsId = UUID.randomUUID()
         val virkningstidspunkt = YearMonth.of(2023, 2)
+        coEvery {
+            behandlingKlient.hentBehandling(
+                behandlingsId,
+                bruker
+            )
+        } returns behandling(virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(virkningstidspunkt))
         every { beregningRepository.hent(behandlingsId) } returns beregning(
             beregninger = listOf(
                 beregningsperiode(
@@ -100,7 +116,9 @@ internal class YtelseMedGrunnlagServiceTest {
             )
         )
 
-        val ytelse = service.hentYtelseMedGrunnlag(behandlingsId)
+        val ytelse = runBlocking {
+            service.hentYtelseMedGrunnlag(behandlingsId, bruker)
+        }
 
         with(ytelse!!.perioder[0]) {
             periode shouldBe Periode(fom = YearMonth.of(2023, 2), tom = YearMonth.of(2023, 3))

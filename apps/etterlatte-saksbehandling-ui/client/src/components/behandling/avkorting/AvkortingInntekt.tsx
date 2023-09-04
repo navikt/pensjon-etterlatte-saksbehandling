@@ -44,13 +44,11 @@ export const AvkortingInntekt = (props: {
         fom: virkningstidspunkt(),
         fratrekkInnAar: nyligste.fratrekkInnAar,
         relevanteMaanederInnAar: nyligste.relevanteMaanederInnAar,
-        virkningstidspunkt: virkningstidspunkt(),
       }
     }
     return {
       fom: virkningstidspunkt(),
       fratrekkInnAar: 0,
-      virkningstidspunkt: virkningstidspunkt(),
     }
   }
 

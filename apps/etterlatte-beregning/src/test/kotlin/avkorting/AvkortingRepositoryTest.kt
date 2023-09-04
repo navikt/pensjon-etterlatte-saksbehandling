@@ -63,11 +63,15 @@ internal class AvkortingRepositoryTest {
                 Inntektsavkorting(
                     grunnlag = grunnlag,
                     avkortingsperioder = listOf(avkortingsperiode(inntektsgrunnlag = grunnlag.id)),
-                    avkortetYtelse = listOf(avkortetYtelse(type = AvkortetYtelseType.INNTEKT, inntektsgrunnlag = grunnlag.id)),
+                    avkortetYtelse = listOf(
+                        avkortetYtelse(
+                            type = AvkortetYtelseType.INNTEKT,
+                            inntektsgrunnlag = grunnlag.id
+                        )
+                    ),
                 )
             ),
             avkortetYtelseAar = listOf(avkortetYtelse(type = AvkortetYtelseType.AARSOPPGJOER)),
-            avkortetYtelseForrigeVedtak = listOf(avkortetYtelse(type = AvkortetYtelseType.FORRIGE_VEDTAK)),
         )
 
         avkortingRepository.lagreAvkorting(
@@ -91,22 +95,20 @@ internal class AvkortingRepositoryTest {
             )
         )
         val endretAvkortetYtelseAar = aarsoppgjoer.avkortetYtelseAar.map { it.copy(avkortingsbeloep = 444) }
-        val endretAvkortetYtelseForrigeVedtak =
-            aarsoppgjoer.avkortetYtelseForrigeVedtak.map { it.copy(avkortingsbeloep = 444) }
 
-        val avkorting = avkortingRepository.lagreAvkorting(
+        avkortingRepository.lagreAvkorting(
             behandlingId,
             Avkorting(
                 aarsoppgjoer = aarsoppgjoer(
                     ytelseFoerAvkorting = endretYtelseFoerAvkorting,
                     inntektsavkorting = endretInntektsavkorting,
                     avkortetYtelseAar = endretAvkortetYtelseAar,
-                    avkortetYtelseForrigeVedtak = endretAvkortetYtelseForrigeVedtak
                 ),
             )
         )
+        val avkorting = avkortingRepository.hentAvkorting(behandlingId)
 
-        with(avkorting.aarsoppgjoer) {
+        with(avkorting!!.aarsoppgjoer) {
             ytelseFoerAvkorting.asClue {
                 it.size shouldBe 1
                 it shouldBe endretYtelseFoerAvkorting
@@ -122,10 +124,6 @@ internal class AvkortingRepositoryTest {
             avkortetYtelseAar.asClue {
                 it.size shouldBe 1
                 it shouldBe endretAvkortetYtelseAar
-            }
-            avkortetYtelseForrigeVedtak.asClue {
-                it.size shouldBe 1
-                it shouldBe endretAvkortetYtelseForrigeVedtak
             }
         }
     }

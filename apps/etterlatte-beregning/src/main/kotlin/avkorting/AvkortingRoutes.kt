@@ -66,8 +66,8 @@ fun Route.avkorting(avkortingService: AvkortingService, behandlingKlient: Behand
 
 fun Avkorting.toDto() = AvkortingDto(
     avkortingGrunnlag = aarsoppgjoer.inntektsavkorting.map { it.grunnlag.toDto() },
-    avkortetYtelse = loependeYtelse().map { it.toDto() },
-    tidligereAvkortetYtelse = aarsoppgjoer.avkortetYtelseForrigeVedtak.map { it.toDto() }
+    avkortetYtelse = lopendeYtelse.map { it.toDto() },
+    tidligereAvkortetYtelse = avkortetYtelseForrigeVedtak.map { it.toDto() }
 )
 
 fun AvkortingGrunnlag.toDto() = AvkortingGrunnlagDto(
@@ -78,8 +78,7 @@ fun AvkortingGrunnlag.toDto() = AvkortingGrunnlagDto(
     fratrekkInnAar = fratrekkInnAar,
     relevanteMaanederInnAar = relevanteMaanederInnAar,
     spesifikasjon = spesifikasjon,
-    kilde = AvkortingGrunnlagKildeDto(kilde.tidspunkt.toString(), kilde.ident),
-    virkningstidspunkt = virkningstidspunkt
+    kilde = AvkortingGrunnlagKildeDto(kilde.tidspunkt.toString(), kilde.ident)
 )
 
 fun AvkortetYtelse.toDto() = AvkortetYtelseDto(
@@ -100,6 +99,5 @@ fun AvkortingGrunnlagDto.fromDto(brukerTokenInfo: BrukerTokenInfo) = AvkortingGr
     fratrekkInnAar = fratrekkInnAar,
     relevanteMaanederInnAar = relevanteMaanederInnAar ?: (12 - fom.monthValue + 1),
     spesifikasjon = spesifikasjon,
-    kilde = Grunnlagsopplysning.Saksbehandler(brukerTokenInfo.ident(), Tidspunkt.now()),
-    virkningstidspunkt = virkningstidspunkt
+    kilde = Grunnlagsopplysning.Saksbehandler(brukerTokenInfo.ident(), Tidspunkt.now())
 )

@@ -17,7 +17,6 @@ export interface IAvkortingGrunnlag {
     tidspunkt: ''
     ident: ''
   }
-  virkningstidspunkt: string
 }
 
 export interface IAvkortetYtelse {

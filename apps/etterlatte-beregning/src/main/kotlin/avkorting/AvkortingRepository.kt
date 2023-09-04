@@ -4,7 +4,6 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import kotliquery.Row
 import kotliquery.TransactionalSession
 import kotliquery.queryOf
-import no.nav.etterlatte.avkorting.regler.restanse
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
@@ -60,28 +59,17 @@ class AvkortingRepository(private val dataSource: DataSource) {
                 AvkortetYtelseType.AARSOPPGJOER.name
             ).let { query -> tx.run(query.map { row -> row.toAvkortetYtelse(restanse) }.asList) }
 
-            val avkortetYtelseForrigeVedtak = queryOf(
-                "SELECT * FROM avkortet_ytelse WHERE behandling_id = ? AND type = ?",
-                behandlingId,
-                AvkortetYtelseType.FORRIGE_VEDTAK.name
-            ).let { query -> tx.run(query.map { row -> row.toAvkortetYtelse(restanse) }.asList) }
-
             Avkorting(
                 aarsoppgjoer = Aarsoppgjoer(
                     ytelseFoerAvkorting = ytelseFoerAvkorting,
                     inntektsavkorting = inntektsavkorting,
-                    avkortetYtelseAar = avkortetYtelseAar,
-                    avkortetYtelseForrigeVedtak = avkortetYtelseForrigeVedtak,
+                    avkortetYtelseAar = avkortetYtelseAar
                 )
             )
         }
     }
 
-    fun hentAvkortingUtenNullable(behandlingId: UUID): Avkorting =
-        hentAvkorting(behandlingId)
-            ?: throw Exception("Uthenting av avkorting for behandling $behandlingId feilet")
-
-    fun lagreAvkorting(behandlingId: UUID, avkorting: Avkorting): Avkorting {
+    fun lagreAvkorting(behandlingId: UUID, avkorting: Avkorting) {
         dataSource.transaction { tx ->
             slettAvkorting(behandlingId, tx)
             with(avkorting.aarsoppgjoer) {
@@ -92,10 +80,8 @@ class AvkortingRepository(private val dataSource: DataSource) {
                     lagreAvkortetYtelse(behandlingId, it.avkortetYtelse, tx)
                 }
                 lagreAvkortetYtelse(behandlingId, avkortetYtelseAar, tx)
-                lagreAvkortetYtelse(behandlingId, avkortetYtelseForrigeVedtak, tx)
             }
         }
-        return hentAvkortingUtenNullable(behandlingId)
     }
 
     private fun slettAvkorting(behandlingId: UUID, tx: TransactionalSession) {
@@ -139,10 +125,10 @@ class AvkortingRepository(private val dataSource: DataSource) {
         statement = """
                 INSERT INTO avkortingsgrunnlag(
                     id, behandling_id, fom, tom, aarsinntekt, fratrekk_inn_ut, relevante_maaneder,
-                     spesifikasjon, kilde, virkningstidspunkt
+                     spesifikasjon, kilde
                 ) VALUES (
                     :id, :behandlingId, :fom, :tom, :aarsinntekt, :fratrekkInnAar, :relevanteMaanederInnAar,
-                     :spesifikasjon, :kilde, :virkningstidspunkt
+                     :spesifikasjon, :kilde
                 )
             """.trimIndent(),
         paramMap = mapOf(
@@ -154,8 +140,7 @@ class AvkortingRepository(private val dataSource: DataSource) {
             "fratrekkInnAar" to avkortingsgrunnlag.fratrekkInnAar,
             "relevanteMaanederInnAar" to avkortingsgrunnlag.relevanteMaanederInnAar,
             "spesifikasjon" to avkortingsgrunnlag.spesifikasjon,
-            "kilde" to avkortingsgrunnlag.kilde.toJson(),
-            "virkningstidspunkt" to avkortingsgrunnlag.virkningstidspunkt.atDay(1),
+            "kilde" to avkortingsgrunnlag.kilde.toJson()
         )
     ).let { query -> tx.run(query.asUpdate) }
 
@@ -281,8 +266,7 @@ class AvkortingRepository(private val dataSource: DataSource) {
         fratrekkInnAar = int("fratrekk_inn_ut"),
         relevanteMaanederInnAar = int("relevante_maaneder"),
         spesifikasjon = string("spesifikasjon"),
-        kilde = string("kilde").let { objectMapper.readValue(it) },
-        virkningstidspunkt = sqlDate("virkningstidspunkt").let { YearMonth.from(it.toLocalDate()) }
+        kilde = string("kilde").let { objectMapper.readValue(it) }
     )
 
     private fun Row.toYtelseFoerAvkorting() = YtelseFoerAvkorting(

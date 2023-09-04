@@ -104,10 +104,10 @@ class AvkortingRoutesTest {
         )
         val avkorting = Avkorting(
             aarsoppgjoer = aarsoppgjoer(
-                inntektsavkorting = inntektsavkorting,
-                avkortetYtelseAar = avkortetYtelse,
-                avkortetYtelseForrigeVedtak = avkortetYtelse
+                inntektsavkorting = inntektsavkorting
             ),
+            lopendeYtelse = avkortetYtelse,
+            avkortetYtelseForrigeVedtak = avkortetYtelse,
         )
         val dto = AvkortingDto(
             avkortingGrunnlag = listOf(
@@ -123,7 +123,6 @@ class AvkortingRoutesTest {
                         tidspunkt = tidspunkt.toString(),
                         ident = "Saksbehandler01"
                     ),
-                    dato
                 )
             ),
             avkortetYtelse = listOf(
@@ -193,8 +192,7 @@ class AvkortingRoutesTest {
             kilde = AvkortingGrunnlagKildeDto(
                 tidspunkt = Tidspunkt.now().toString(),
                 ident = "Saksbehandler01"
-            ),
-            virkningstidspunkt = YearMonth.now()
+            )
         )
         val sluttenavAaret = startenAvAaret.copy(fom = YearMonth.of(2023, 12))
 

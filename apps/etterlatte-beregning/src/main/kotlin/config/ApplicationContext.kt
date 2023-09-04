@@ -79,6 +79,7 @@ class ApplicationContext {
     )
     val ytelseMedGrunnlagService = YtelseMedGrunnlagService(
         beregningRepository = beregningRepository,
-        avkortingRepository = avkortingRepository
+        avkortingRepository = avkortingRepository,
+        behandlingKlient = behandlingKlient
     )
 }

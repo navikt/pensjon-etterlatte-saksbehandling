@@ -7,17 +7,14 @@ import no.nav.etterlatte.rapidsandrivers.migrering.AvdoedForelder
 import no.nav.etterlatte.rapidsandrivers.migrering.Beregning
 import no.nav.etterlatte.rapidsandrivers.migrering.BeregningMeta
 import no.nav.etterlatte.rapidsandrivers.migrering.Enhet
-import no.nav.etterlatte.rapidsandrivers.migrering.PesysId
 import no.nav.etterlatte.rapidsandrivers.migrering.Trygdetid
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.YearMonth
-import java.util.*
 
 fun BarnepensjonGrunnlagResponse.tilVaarModell(): Pesyssak {
     val pesyssak = Pesyssak(
-        id = UUID.randomUUID(),
-        pesysId = PesysId(sakId),
+        id = sakId,
         enhet = Enhet(enhet),
         soeker = Folkeregisteridentifikator.of(soeker),
         gjenlevendeForelder = gjenlevendeForelder?.let { Folkeregisteridentifikator.of(it) },

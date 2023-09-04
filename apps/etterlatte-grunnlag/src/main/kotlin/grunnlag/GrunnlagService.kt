@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.klienter.PdlTjenesterKlientImpl
+import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.PersonMedSakerOgRoller
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakOgRolle
@@ -214,7 +215,11 @@ class RealGrunnlagService(
     private fun Persongalleri.tilGrunnlagsopplysning(): Grunnlagsopplysning<JsonNode> {
         return Grunnlagsopplysning(
             id = UUID.randomUUID(),
-            kilde = Grunnlagsopplysning.Privatperson(this.innsender!!, Tidspunkt.now()),
+            kilde = if (this.innsender!! == Vedtaksloesning.PESYS.name) {
+                Grunnlagsopplysning.Pesys.create()
+            } else {
+                Grunnlagsopplysning.Privatperson(this.innsender!!, Tidspunkt.now())
+            },
             opplysningType = Opplysningstype.PERSONGALLERI_V1,
             meta = objectMapper.createObjectNode(),
             opplysning = this.toJsonNode(),

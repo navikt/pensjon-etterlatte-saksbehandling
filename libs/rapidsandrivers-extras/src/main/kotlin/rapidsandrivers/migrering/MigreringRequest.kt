@@ -1,5 +1,6 @@
 package no.nav.etterlatte.rapidsandrivers.migrering
 
+import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -21,7 +22,8 @@ data class MigreringRequest(
     fun opprettPersongalleri() = Persongalleri(
         soeker = this.soeker.value,
         avdoed = this.avdoedForelder.map { it.ident.value },
-        gjenlevende = listOfNotNull(this.gjenlevendeForelder?.value)
+        gjenlevende = listOfNotNull(this.gjenlevendeForelder?.value),
+        innsender = Vedtaksloesning.PESYS.name
     )
 }
 

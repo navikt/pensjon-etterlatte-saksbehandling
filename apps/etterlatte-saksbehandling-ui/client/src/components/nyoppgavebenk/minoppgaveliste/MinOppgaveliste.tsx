@@ -69,82 +69,53 @@ export const MinOppgaveliste = (props: { oppgaver: OppgaveDTOny[]; hentOppgaver:
             </Table.Header>
             <Table.Body>
               {paginerteOppgaver &&
-                paginerteOppgaver.map(
-                  ({
-                    id,
-                    status,
-                    type,
-                    enhet,
-                    saksbehandler,
-                    opprettet,
-                    merknad,
-                    sakType,
-                    fnr,
-                    frist,
-                    sakId,
-                    referanse,
-                    beskrivelse,
-                    gjelder,
-                    versjon,
-                  }) => {
-                    const erRedigerbar = erOppgaveRedigerbar(status)
-                    return (
-                      <Table.Row key={id}>
-                        <Table.HeaderCell>{formaterStringDato(opprettet)}</Table.HeaderCell>
-                        <Table.DataCell>
-                          <FristHandlinger
-                            orginalFrist={frist}
-                            oppgaveId={id}
+                paginerteOppgaver.map((oppgave) => {
+                  const erRedigerbar = erOppgaveRedigerbar(oppgave.status)
+
+                  return (
+                    <Table.Row key={oppgave.id}>
+                      <Table.HeaderCell>{formaterStringDato(oppgave.opprettet)}</Table.HeaderCell>
+                      <Table.DataCell>
+                        <FristHandlinger
+                          orginalFrist={oppgave.frist}
+                          oppgaveId={oppgave.id}
+                          hentOppgaver={hentOppgaver}
+                          erRedigerbar={erRedigerbar}
+                          oppgaveVersjon={oppgave.versjon}
+                          type={oppgave.type}
+                        />
+                      </Table.DataCell>
+                      <Table.DataCell>
+                        <SaksoversiktLenke fnr={oppgave.fnr} />
+                      </Table.DataCell>
+                      <Table.DataCell>
+                        <OppgavetypeTag oppgavetype={oppgave.type} />
+                      </Table.DataCell>
+                      <Table.DataCell>{oppgave.sakType && <SaktypeTag sakType={oppgave.sakType} />}</Table.DataCell>
+                      <Table.DataCell>{oppgave.merknad}</Table.DataCell>
+                      <Table.DataCell>
+                        {oppgave.status ? OPPGAVESTATUSFILTER[oppgave.status] ?? oppgave.status : 'Ukjent'}
+                      </Table.DataCell>
+                      <Table.DataCell>{oppgave.enhet}</Table.DataCell>
+                      <Table.DataCell>
+                        {oppgave.saksbehandler && (
+                          <RedigerSaksbehandler
+                            saksbehandler={oppgave.saksbehandler}
+                            oppgaveId={oppgave.id}
+                            sakId={oppgave.sakId}
                             hentOppgaver={hentOppgaver}
                             erRedigerbar={erRedigerbar}
-                            oppgaveVersjon={versjon}
-                            type={type}
+                            versjon={oppgave.versjon}
+                            type={oppgave.type}
                           />
-                        </Table.DataCell>
-                        <Table.DataCell>
-                          <SaksoversiktLenke fnr={fnr} />
-                        </Table.DataCell>
-                        <Table.DataCell>
-                          <OppgavetypeTag oppgavetype={type} />
-                        </Table.DataCell>
-                        <Table.DataCell>{sakType && <SaktypeTag sakType={sakType} />}</Table.DataCell>
-                        <Table.DataCell>{merknad}</Table.DataCell>
-                        <Table.DataCell>
-                          {<span>{status ? OPPGAVESTATUSFILTER[status] ?? status : 'Ukjent'}</span>}
-                        </Table.DataCell>
-                        <Table.DataCell>{enhet}</Table.DataCell>
-                        <Table.DataCell>
-                          {saksbehandler && (
-                            <RedigerSaksbehandler
-                              saksbehandler={saksbehandler}
-                              oppgaveId={id}
-                              sakId={sakId}
-                              hentOppgaver={hentOppgaver}
-                              erRedigerbar={erRedigerbar}
-                              versjon={versjon}
-                              type={type}
-                            />
-                          )}
-                        </Table.DataCell>
-                        <Table.DataCell>
-                          <HandlingerForOppgave
-                            oppgavetype={type}
-                            oppgavestatus={status}
-                            opprettet={opprettet}
-                            frist={frist}
-                            fnr={fnr}
-                            saktype={sakType}
-                            enhet={enhet}
-                            saksbehandler={saksbehandler}
-                            referanse={referanse}
-                            beskrivelse={beskrivelse}
-                            gjelder={gjelder}
-                          />
-                        </Table.DataCell>
-                      </Table.Row>
-                    )
-                  }
-                )}
+                        )}
+                      </Table.DataCell>
+                      <Table.DataCell>
+                        <HandlingerForOppgave oppgave={oppgave} />
+                      </Table.DataCell>
+                    </Table.Row>
+                  )
+                })}
             </Table.Body>
           </Table>
           <PaginationWrapper>

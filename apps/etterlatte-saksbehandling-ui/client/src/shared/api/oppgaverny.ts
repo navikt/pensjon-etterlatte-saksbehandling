@@ -1,4 +1,5 @@
 import { apiClient, ApiResponse } from '~shared/api/apiClient'
+import { SakType } from '~shared/types/sak'
 
 export interface OppgaveDTOny {
   id: string
@@ -11,7 +12,7 @@ export interface OppgaveDTOny {
   referanse: string | null
   merknad: string | null
   opprettet: string
-  sakType: Saktype
+  sakType: SakType
   fnr: string
   frist: string
 
@@ -20,8 +21,6 @@ export interface OppgaveDTOny {
   gjelder: string | null
   versjon: string | null
 }
-
-export type Saktype = 'BARNEPENSJON' | 'OMSTILLINGSSTOENAD'
 
 export type Oppgavestatus = 'NY' | 'UNDER_BEHANDLING' | 'FERDIGSTILT' | 'FEILREGISTRERT' | 'AVBRUTT'
 export type OppgaveKilde = 'HENDELSE' | 'BEHANDLING' | 'EKSTERN'

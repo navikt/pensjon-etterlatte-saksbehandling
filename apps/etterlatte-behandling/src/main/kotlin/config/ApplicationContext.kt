@@ -21,7 +21,6 @@ import no.nav.etterlatte.behandling.klienter.Norg2KlientImpl
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeService
 import no.nav.etterlatte.behandling.manueltopphoer.RealManueltOpphoerService
-import no.nav.etterlatte.behandling.migrering.MigreringRepository
 import no.nav.etterlatte.behandling.omregning.MigreringService
 import no.nav.etterlatte.behandling.omregning.OmregningService
 import no.nav.etterlatte.behandling.revurdering.RevurderingDao
@@ -135,7 +134,6 @@ class ApplicationContext(
     val sakDao = SakDao { databaseContext().activeTx() }
     val grunnlagsendringshendelseDao = GrunnlagsendringshendelseDao { databaseContext().activeTx() }
     val institusjonsoppholdDao = InstitusjonsoppholdDao { databaseContext().activeTx() }
-    val migreringRepository = MigreringRepository { databaseContext().activeTx() }
     val metrikkerDao = OppgaveMetrikkerDao(dataSource)
 
     // Klient
@@ -242,11 +240,10 @@ class ApplicationContext(
     val migreringService = MigreringService(
         sakService = sakService,
         gyldighetsproevingService = gyldighetsproevingService,
-        behandlingsHendelser = behandlingsHendelser,
-        migreringRepository = migreringRepository,
-        behandlingService = behandlingService,
+        behandlingFactory = behandlingFactory,
         kommerBarnetTilGodeService = kommerBarnetTilGodeService,
-        behandlingFactory = behandlingFactory
+        behandlingsHendelser = behandlingsHendelser,
+        behandlingService = behandlingService
     )
 
     // Job

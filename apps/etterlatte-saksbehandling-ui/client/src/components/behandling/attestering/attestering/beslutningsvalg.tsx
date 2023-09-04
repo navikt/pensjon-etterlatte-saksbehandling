@@ -12,7 +12,7 @@ type Props = {
   disabled: boolean
 }
 
-export const Beslutningsvalg: React.FC<Props> = ({ beslutning, setBeslutning, behandling, disabled }) => {
+export const Beslutningsvalg = ({ beslutning, setBeslutning, behandling, disabled }: Props) => {
   return (
     <>
       <RadioGroupWrapper>

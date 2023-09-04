@@ -19,6 +19,8 @@ import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.sak.SakDao
 import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
 import no.nav.etterlatte.tilgangsstyring.filterForEnheter
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import no.nav.etterlatte.token.BrukerTokenInfo
 import java.util.*
 
@@ -27,6 +29,7 @@ class OppgaveServiceNy(
     private val sakDao: SakDao,
     private val featureToggleService: FeatureToggleService
 ) {
+    private val logger: Logger = LoggerFactory.getLogger(this.javaClass.name)
 
     fun finnOppgaverForBruker(bruker: SaksbehandlerMedRoller): List<OppgaveNy> {
         val rollerSomBrukerHar = finnAktuelleRoller(bruker)
@@ -297,6 +300,22 @@ class OppgaveServiceNy(
             it.type !== OppgaveType.ATTESTERING
         }
         return oppgaverForBehandlingUtenAttesterting.sortedByDescending { it.opprettet }[0].saksbehandler
+    }
+
+    fun hentSaksbehandlerForOppgaveUnderArbeid(behandlingsId: UUID): String? {
+        val oppgaverforBehandling = inTransaction {
+            oppgaveDaoNy.hentOppgaverForBehandling(behandlingsId.toString())
+        }
+        return try {
+            val oppgaveUnderbehandling = oppgaverforBehandling.single { it.status == Status.UNDER_BEHANDLING }
+            oppgaveUnderbehandling.saksbehandler
+        } catch (e: NoSuchElementException) {
+            logger.info("Det må finnes en oppgave under behandling, gjelder behandling: $behandlingsId")
+            return null
+        } catch (e: IllegalArgumentException) {
+            logger.info("Skal kun ha en oppgave under behandling, gjelder behandling: $behandlingsId")
+            return null
+        }
     }
 
     private fun lagreOppgave(oppgaveNy: OppgaveNy): OppgaveNy {

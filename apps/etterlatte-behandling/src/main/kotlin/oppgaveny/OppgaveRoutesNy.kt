@@ -14,7 +14,9 @@ import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.OPPGAVEID_CALL_PARAMETER
+import no.nav.etterlatte.libs.common.OPPGAVEID_GOSYS_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.behandlingsId
+import no.nav.etterlatte.libs.common.gosysOppgaveId
 import no.nav.etterlatte.libs.common.kunSaksbehandler
 import no.nav.etterlatte.libs.common.oppgaveId
 import no.nav.etterlatte.libs.common.oppgaveNy.RedigerFristGosysRequest
@@ -38,15 +40,21 @@ internal fun Route.oppgaveRoutesNy(
                 )
             }
         }
-        get("gosys") {
-            kunSaksbehandler {
-                call.respond(gosysOppgaveService.hentOppgaver(brukerTokenInfo))
-            }
-        }
 
         get("{$BEHANDLINGSID_CALL_PARAMETER}/hentsaksbehandler") {
             kunSaksbehandler {
                 val saksbehandler = service.hentSaksbehandlerForBehandling(behandlingsId)
+                if (saksbehandler != null) {
+                    call.respond(saksbehandler)
+                } else {
+                    call.respond(HttpStatusCode.NoContent)
+                }
+            }
+        }
+
+        get("{$BEHANDLINGSID_CALL_PARAMETER}/oppgaveunderarbeid") {
+            kunSaksbehandler {
+                val saksbehandler = service.hentSaksbehandlerForOppgaveUnderArbeid(behandlingsId)
                 if (saksbehandler != null) {
                     call.respond(saksbehandler)
                 } else {
@@ -89,28 +97,33 @@ internal fun Route.oppgaveRoutesNy(
             }
         }
 
-        route("/gosys/{gosysOppgaveId}") {
-            post("tildel-saksbehandler") {
-                val gosysOppgaveId = call.parameters["gosysOppgaveId"]!!
-                val saksbehandlerEndringDto = call.receive<SaksbehandlerEndringGosysDto>()
-                gosysOppgaveService.tildelOppgaveTilSaksbehandler(
-                    gosysOppgaveId,
-                    saksbehandlerEndringDto.versjon,
-                    saksbehandlerEndringDto.saksbehandler,
-                    brukerTokenInfo
-                )
-                call.respond(HttpStatusCode.OK)
+        route("/gosys") {
+            get {
+                kunSaksbehandler {
+                    call.respond(gosysOppgaveService.hentOppgaver(brukerTokenInfo))
+                }
             }
-            post("endre-frist") {
-                val gosysOppgaveId = call.parameters["gosysOppgaveId"]!!
-                val redigerFristRequest = call.receive<RedigerFristGosysRequest>()
-                gosysOppgaveService.endreFrist(
-                    gosysOppgaveId,
-                    redigerFristRequest.versjon,
-                    redigerFristRequest.frist,
-                    brukerTokenInfo
-                )
-                call.respond(HttpStatusCode.OK)
+            route("{$OPPGAVEID_GOSYS_CALL_PARAMETER}") {
+                post("tildel-saksbehandler") {
+                    val saksbehandlerEndringDto = call.receive<SaksbehandlerEndringGosysDto>()
+                    gosysOppgaveService.tildelOppgaveTilSaksbehandler(
+                        gosysOppgaveId,
+                        saksbehandlerEndringDto.versjon,
+                        saksbehandlerEndringDto.saksbehandler,
+                        brukerTokenInfo
+                    )
+                    call.respond(HttpStatusCode.OK)
+                }
+                post("endre-frist") {
+                    val redigerFristRequest = call.receive<RedigerFristGosysRequest>()
+                    gosysOppgaveService.endreFrist(
+                        gosysOppgaveId,
+                        redigerFristRequest.versjon,
+                        redigerFristRequest.frist,
+                        brukerTokenInfo
+                    )
+                    call.respond(HttpStatusCode.OK)
+                }
             }
         }
     }

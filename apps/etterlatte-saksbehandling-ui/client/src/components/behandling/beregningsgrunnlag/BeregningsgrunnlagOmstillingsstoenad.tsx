@@ -24,7 +24,7 @@ import React, { useEffect, useState } from 'react'
 import { hentVilkaarsvurdering } from '~shared/api/vilkaarsvurdering'
 import YrkesskadeTrygdetidOMS from '~components/behandling/beregningsgrunnlag/YrkesskadeTrygdetidOMS'
 import FastTrygdetid from '~components/behandling/beregningsgrunnlag/Trygdetid'
-import InstitusjonsoppholdOMS from '~components/behandling/beregningsgrunnlag/InstitusjonsoppholdBP'
+import InstitusjonsoppholdOMS from '~components/behandling/beregningsgrunnlag/InstitusjonsoppholdOMS'
 import { InstitusjonsoppholdGrunnlagData } from '~shared/types/Beregning'
 import { mapListeTilDto } from '~components/behandling/beregningsgrunnlag/PeriodisertBeregningsgrunnlag'
 

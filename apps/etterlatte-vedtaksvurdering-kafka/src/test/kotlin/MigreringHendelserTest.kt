@@ -57,11 +57,11 @@ class MigreringHendelserTest {
         val vedtakDto = VedtakDto(
             123, VedtakStatus.OPPRETTET, YearMonth.now(), mockk(), mockk(), VedtakType.INNVILGELSE, null, null, listOf()
         )
-        coEvery { vedtakService.migrer(any()) } returns vedtakDto
+        coEvery { vedtakService.migrer(any(), any()) } returns vedtakDto
 
         inspector.sendTestMessage(melding.toJson())
 
-        coVerify { vedtakService.migrer(any()) }
+        coVerify { vedtakService.migrer(any(), any()) }
 
         Assertions.assertEquals(0, inspector.inspektør.size)
     }

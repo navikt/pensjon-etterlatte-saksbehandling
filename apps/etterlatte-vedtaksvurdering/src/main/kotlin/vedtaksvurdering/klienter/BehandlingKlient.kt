@@ -63,7 +63,7 @@ interface BehandlingKlient : BehandlingTilgangsSjekk, SakTilgangsSjekk {
     suspend fun iverksett(behandlingId: UUID, brukerTokenInfo: BrukerTokenInfo, vedtakId: Long): Boolean
 
     suspend fun hentOppgaverForSak(sakId: Long, brukerTokenInfo: BrukerTokenInfo): OppgaveListe
-    suspend fun tildelSaksbehandler(oppgaveTilAttestering: List<OppgaveNy>, brukerTokenInfo: BrukerTokenInfo): Boolean
+    suspend fun tildelSaksbehandler(oppgaveTilAttestering: OppgaveNy, brukerTokenInfo: BrukerTokenInfo): Boolean
 }
 
 class BehandlingKlientException(override val message: String, override val cause: Throwable? = null) :
@@ -125,7 +125,7 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
                 .get(
                     resource = Resource(
                         clientId = clientId,
-                        url = "$resourceUrl/saker/$sakId/oppgaver"
+                        url = "$resourceUrl/api/sak/$sakId/oppgaver"
                     ),
                     brukerTokenInfo = brukerTokenInfo
                 )
@@ -139,7 +139,7 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
     }
 
     override suspend fun tildelSaksbehandler(
-        oppgaveTilAttestering: List<OppgaveNy>,
+        oppgaveTilAttestering: OppgaveNy,
         brukerTokenInfo: BrukerTokenInfo
     ): Boolean {
         logger.info("Tildeler oppgave $oppgaveTilAttestering til systembruker")
@@ -147,7 +147,7 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
             .post(
                 resource = Resource(
                     clientId = clientId,
-                    url = "$resourceUrl/nyeoppgaver/$oppgaveTilAttestering/tildel-saksbehandler"
+                    url = "$resourceUrl/nyeoppgaver/${oppgaveTilAttestering.id}/tildel-saksbehandler"
                 ),
                 brukerTokenInfo = brukerTokenInfo,
                 postBody = {}

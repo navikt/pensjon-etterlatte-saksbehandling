@@ -21,7 +21,7 @@ fun Route.migreringRoute(service: VedtaksvurderingService, behandlingKlient: Beh
     route("/api/vedtak") {
         val logger = application.log
 
-        post("/${SAKID_CALL_PARAMETER}/{$BEHANDLINGSID_CALL_PARAMETER}/migrer") {
+        post("/{$SAKID_CALL_PARAMETER}/{$BEHANDLINGSID_CALL_PARAMETER}/migrer") {
             withBehandlingId(behandlingKlient) { behandlingId ->
                 logger.info("Migrerer behandling $behandlingId")
                 val nyttVedtak = service.opprettEllerOppdaterVedtak(behandlingId, brukerTokenInfo)
@@ -35,7 +35,7 @@ fun Route.migreringRoute(service: VedtaksvurderingService, behandlingKlient: Beh
                     .filter { it.referanse == behandlingId.toString() }
                     .filter { it.type == OppgaveType.ATTESTERING }
                     .filterNot { it.erAvsluttet() }
-                behandlingKlient.tildelSaksbehandler(oppgaveTilAttestering, brukerTokenInfo)
+                behandlingKlient.tildelSaksbehandler(oppgaveTilAttestering.first(), brukerTokenInfo)
 
                 logger.info("Attesterer vedtak for behandling $behandlingId")
                 service.attesterVedtak(

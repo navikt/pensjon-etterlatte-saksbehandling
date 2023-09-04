@@ -19,7 +19,7 @@ import java.util.*
 interface VedtakService {
     fun harLoependeYtelserFra(sakId: Long, dato: LocalDate): LoependeYtelseDTO
 
-    fun migrer(behandlingId: UUID): VedtakDto
+    fun migrer(sakId: Long, behandlingId: UUID): VedtakDto
     fun upsertVedtak(behandlingId: UUID): VedtakDto
     fun fattVedtak(behandlingId: UUID): VedtakDto
     fun attesterVedtak(behandlingId: UUID): VedtakDto
@@ -33,9 +33,9 @@ class VedtakServiceImpl(private val vedtakKlient: HttpClient, private val url: S
             vedtakKlient.get("$url/api/vedtak/loepende/$sakId?dato=$dato").body()
         }
 
-    override fun migrer(behandlingId: UUID): VedtakDto =
+    override fun migrer(sakId: Long, behandlingId: UUID): VedtakDto =
         runBlocking {
-            vedtakKlient.post("$url/api/vedtak/$behandlingId/migrer").body()
+            vedtakKlient.post("$url/api/vedtak/$sakId/$behandlingId/migrer").body()
         }
 
     override fun upsertVedtak(behandlingId: UUID): VedtakDto =

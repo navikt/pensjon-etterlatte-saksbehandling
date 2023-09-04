@@ -104,8 +104,8 @@ internal fun Route.sakWebRoutes(
                 }
             }
 
-            post("oppgaver") {
-                withFoedselsnummerInternal(tilgangService) { _ ->
+            get("oppgaver") {
+                kunSystembruker {
                     val oppgaver = sakService.finnSak(sakId)!!
                         .let { OppgaveListe(it, oppgaveServiceNy.hentOppgaverForSak(it.id)) }
                     call.respond(oppgaver)

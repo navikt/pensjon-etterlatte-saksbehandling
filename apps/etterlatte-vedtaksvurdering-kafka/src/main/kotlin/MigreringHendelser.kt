@@ -13,6 +13,7 @@ import rapidsandrivers.BEHANDLING_ID_KEY
 import rapidsandrivers.SAK_ID_KEY
 import rapidsandrivers.behandlingId
 import rapidsandrivers.migrering.ListenerMedLogging
+import rapidsandrivers.sakId
 import rapidsandrivers.withFeilhaandtering
 
 internal class MigreringHendelser(
@@ -35,7 +36,7 @@ internal class MigreringHendelser(
         logger.info("Oppretter, fatter og attesterer vedtak for migrer behandling $behandlingId")
 
         withFeilhaandtering(packet, context, OPPRETT_VEDTAK) {
-            val respons = vedtak.migrer(behandlingId)
+            val respons = vedtak.migrer(packet.sakId, behandlingId)
             logger.info("Opprettet vedtak ${respons.vedtakId} for migrert behandling: $behandlingId")
         }
     }

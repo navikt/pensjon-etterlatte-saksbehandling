@@ -7,8 +7,11 @@ import no.nav.etterlatte.beregning.regler.FNR_1
 import no.nav.etterlatte.beregning.regler.FNR_2
 import no.nav.etterlatte.beregning.regler.FNR_3
 import no.nav.etterlatte.beregning.regler.REGEL_PERIODE
+import no.nav.etterlatte.beregning.regler.barnepensjon.sats.aktuelleBarnepensjonSatsRegler
 import no.nav.etterlatte.beregning.regler.barnepensjon.sats.antallSoeskenIKullet
 import no.nav.etterlatte.beregning.regler.barnepensjon.sats.barnepensjonSatsRegel
+import no.nav.etterlatte.beregning.regler.barnepensjon.sats.barnepensjonSatsRegel1967
+import no.nav.etterlatte.beregning.regler.barnepensjon.sats.barnepensjonSatsRegel2024
 import no.nav.etterlatte.beregning.regler.barnepensjon.sats.belopForEtterfoelgendeBarn
 import no.nav.etterlatte.beregning.regler.barnepensjon.sats.belopForFoersteBarn
 import no.nav.etterlatte.beregning.regler.barnepensjon.sats.grunnbeloep
@@ -21,11 +24,19 @@ import no.nav.etterlatte.beregning.regler.toBeregningstall
 import no.nav.etterlatte.libs.regler.RegelPeriode
 import no.nav.etterlatte.regler.Beregningstall
 import no.nav.etterlatte.regler.Beregningstall.Companion.DESIMALER_DELBEREGNING
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.YearMonth
 
 internal class BarnepensjonSatsTest {
+
+    @BeforeEach
+    fun setUp() {
+        aktuelleBarnepensjonSatsRegler.clear()
+        aktuelleBarnepensjonSatsRegler.add(barnepensjonSatsRegel1967)
+        aktuelleBarnepensjonSatsRegler.add(barnepensjonSatsRegel2024)
+    }
 
     @Test
     fun `historiskeGrunnbeloep skal hente alle historiske grunnbeloep`() {
@@ -151,5 +162,15 @@ internal class BarnepensjonSatsTest {
         )
 
         resultat.verdi shouldBe 2670.875.toBeregningstall(DESIMALER_DELBEREGNING)
+    }
+
+    @Test
+    fun `barnepensjonSatsRegel skal returnere 3123716,00 kroner etter nytt regelverk`() {
+        val resultat = barnepensjonSatsRegel.anvend(
+            grunnlag = barnepensjonGrunnlag(),
+            periode = RegelPeriode(LocalDate.of(2024, 1, 1))
+        )
+
+        resultat.verdi shouldBe 9885.toBeregningstall(DESIMALER_DELBEREGNING)
     }
 }

@@ -274,6 +274,16 @@ abstract class BehandlingIntegrationTest {
         )
     }
 
+    protected val tokenSaksbehandler2: String by lazy {
+        issueToken(
+            mapOf(
+                "navn" to "Jane Doe",
+                Claims.NAVident.toString() to "Saksbehandler02",
+                "groups" to listOf(azureAdSaksbehandlerClaim)
+            )
+        )
+    }
+
     protected val fagsystemTokenEY: String by lazy {
         issueToken(
             mapOf(

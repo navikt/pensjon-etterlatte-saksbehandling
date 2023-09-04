@@ -55,7 +55,7 @@ interface BehandlingService {
     fun hentBehandling(behandlingId: UUID): Behandling?
     fun hentBehandlingerISak(sakId: Long): List<Behandling>
     fun hentSisteIverksatte(sakId: Long): Behandling?
-    fun avbrytBehandling(behandlingId: UUID, saksbehandler: String)
+    fun avbrytBehandling(behandlingId: UUID, saksbehandler: BrukerTokenInfo)
     fun registrerVedtakHendelse(
         behandlingId: UUID,
         vedtakHendelse: VedtakHendelse,
@@ -133,7 +133,7 @@ class BehandlingServiceImpl(
             .maxByOrNull { it.behandlingOpprettet }
     }
 
-    override fun avbrytBehandling(behandlingId: UUID, saksbehandler: String) {
+    override fun avbrytBehandling(behandlingId: UUID, saksbehandler: BrukerTokenInfo) {
         inTransaction {
             val behandling = hentBehandlingForId(behandlingId)
                 ?: throw BehandlingNotFoundException("Fant ikke behandling med id=$behandlingId som skulle avbrytes")
@@ -164,7 +164,7 @@ class BehandlingServiceImpl(
                     )
                 }
 
-                hendelseDao.behandlingAvbrutt(behandling, saksbehandler)
+                hendelseDao.behandlingAvbrutt(behandling, saksbehandler.ident())
                 grunnlagsendringshendelseDao.kobleGrunnlagsendringshendelserFraBehandlingId(behandlingId)
             }
             behandlingHendelser.sendMeldingForHendelse(behandling, BehandlingHendelseType.AVBRUTT)

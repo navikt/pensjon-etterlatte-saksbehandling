@@ -19,6 +19,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.sak.SakDao
 import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
 import no.nav.etterlatte.tilgangsstyring.filterForEnheter
+import no.nav.etterlatte.token.BrukerTokenInfo
 import java.util.*
 
 class OppgaveServiceNy(
@@ -133,7 +134,7 @@ class OppgaveServiceNy(
         fattetoppgave: VedtakOppgaveDTO,
         oppgaveType: OppgaveType,
         merknad: String?,
-        saksbehandler: String
+        saksbehandler: BrukerTokenInfo
     ): OppgaveNy {
         val behandlingsoppgaver = oppgaveDaoNy.hentOppgaverForBehandling(fattetoppgave.referanse)
         if (behandlingsoppgaver.isEmpty()) {
@@ -167,9 +168,9 @@ class OppgaveServiceNy(
 
     private fun sikreAtSaksbehandlerSomLukkerOppgaveEierOppgaven(
         oppgaveUnderBehandling: OppgaveNy,
-        saksbehandler: String
+        saksbehandler: BrukerTokenInfo
     ) {
-        if (oppgaveUnderBehandling.saksbehandler != saksbehandler) {
+        if (!saksbehandler.kanEndreOppgaverFor(oppgaveUnderBehandling.saksbehandler)) {
             throw FeilSaksbehandlerPaaOppgaveException(
                 "Kan ikke lukke oppgave for en annen saksbehandler oppgave:" +
                     " ${oppgaveUnderBehandling.id}"
@@ -197,7 +198,7 @@ class OppgaveServiceNy(
 
     fun avbrytOppgaveUnderBehandling(
         behandlingEllerHendelseId: String,
-        saksbehandler: String
+        saksbehandler: BrukerTokenInfo
     ): OppgaveNy {
         try {
             val oppgaveUnderbehandling = oppgaveDaoNy.hentOppgaverForBehandling(behandlingEllerHendelseId)
@@ -224,7 +225,7 @@ class OppgaveServiceNy(
 
     fun ferdigStillOppgaveUnderBehandling(
         behandlingEllerHendelseId: String,
-        saksbehandler: String
+        saksbehandler: BrukerTokenInfo
     ): OppgaveNy {
         val behandlingsoppgaver = oppgaveDaoNy.hentOppgaverForBehandling(behandlingEllerHendelseId)
         if (behandlingsoppgaver.isEmpty()) {

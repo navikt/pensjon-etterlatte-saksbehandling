@@ -294,7 +294,7 @@ class IntegrationTest : BehandlingIntegrationTest() {
             }
 
             client.post("/attestervedtak") {
-                addAuthToken(tokenSaksbehandler)
+                addAuthToken(tokenSaksbehandler2)
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(
                     VedtakEndringDTO(

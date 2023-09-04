@@ -57,14 +57,11 @@ class MigreringHendelserTest {
         val vedtakDto = VedtakDto(
             123, VedtakStatus.OPPRETTET, YearMonth.now(), mockk(), mockk(), VedtakType.INNVILGELSE, null, null, listOf()
         )
-        coEvery { vedtakService.upsertVedtak(any()) } returns vedtakDto
-        coEvery { vedtakService.fattVedtak(any()) } returns vedtakDto.copy(status = VedtakStatus.FATTET_VEDTAK)
-        coEvery { vedtakService.attesterVedtak(any()) } returns vedtakDto.copy(status = VedtakStatus.ATTESTERT)
+        coEvery { vedtakService.migrer(any()) } returns vedtakDto
 
         inspector.sendTestMessage(melding.toJson())
 
-        coVerify { vedtakService.fattVedtak(any()) }
-        coVerify { vedtakService.attesterVedtak(any()) }
+        coVerify { vedtakService.migrer(any()) }
 
         Assertions.assertEquals(0, inspector.inspektør.size)
     }

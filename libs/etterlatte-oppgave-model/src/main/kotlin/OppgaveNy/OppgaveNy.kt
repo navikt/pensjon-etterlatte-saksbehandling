@@ -37,6 +37,8 @@ data class OppgaveNy(
     }
 }
 
+data class OppgaveListe(val sak: Sak, val oppgaver: List<OppgaveNy>)
+
 data class GosysOppgave(
     val id: Long,
     val versjon: Long,

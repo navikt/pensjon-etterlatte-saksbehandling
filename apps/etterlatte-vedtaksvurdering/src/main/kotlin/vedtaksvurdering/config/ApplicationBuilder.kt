@@ -14,6 +14,7 @@ import no.nav.etterlatte.vedtaksvurdering.VedtaksvurderingService
 import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlientImpl
 import no.nav.etterlatte.vedtaksvurdering.klienter.BeregningKlientImpl
 import no.nav.etterlatte.vedtaksvurdering.klienter.VilkaarsvurderingKlientImpl
+import no.nav.etterlatte.vedtaksvurdering.migrering.migreringRoute
 import no.nav.etterlatte.vedtaksvurdering.vedtaksvurderingRoute
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -52,6 +53,7 @@ class ApplicationBuilder {
             .withKtorModule {
                 restModule(sikkerLogg, config = HoconApplicationConfig(config)) {
                     vedtaksvurderingRoute(vedtaksvurderingService, behandlingKlient)
+                    migreringRoute(vedtaksvurderingService, behandlingKlient)
                 }
             }
             .build()

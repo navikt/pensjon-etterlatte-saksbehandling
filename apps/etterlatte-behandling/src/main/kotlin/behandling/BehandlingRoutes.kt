@@ -113,10 +113,8 @@ internal fun Route.behandlingRoutes(
         }
 
         post("/avbryt") {
-            hentNavidentFraToken { navIdent ->
-                behandlingService.avbrytBehandling(behandlingsId, navIdent)
-                call.respond(HttpStatusCode.OK)
-            }
+            behandlingService.avbrytBehandling(behandlingsId, brukerTokenInfo)
+            call.respond(HttpStatusCode.OK)
         }
 
         post("/virkningstidspunkt") {

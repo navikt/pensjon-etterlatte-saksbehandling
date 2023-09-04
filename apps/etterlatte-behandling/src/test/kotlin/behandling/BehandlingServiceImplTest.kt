@@ -35,6 +35,7 @@ import no.nav.etterlatte.oppgaveny.OppgaveServiceNy
 import no.nav.etterlatte.personOpplysning
 import no.nav.etterlatte.revurdering
 import no.nav.etterlatte.token.BrukerTokenInfo
+import no.nav.etterlatte.token.Saksbehandler
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -148,19 +149,20 @@ class BehandlingServiceImplTest {
                 oppgaveServiceNy = oppgaveServiceNyMock
             )
 
+        val saksbehandler = Saksbehandler("", "saksbehandler", null)
         assertThrows<IllegalStateException> {
-            behandlingService.avbrytBehandling(avbruttBehandling.id, "")
+            behandlingService.avbrytBehandling(avbruttBehandling.id, saksbehandler)
         }
 
         assertThrows<IllegalStateException> {
-            behandlingService.avbrytBehandling(iverksattBehandling.id, "")
+            behandlingService.avbrytBehandling(iverksattBehandling.id, saksbehandler)
         }
 
         assertThrows<IllegalStateException> {
-            behandlingService.avbrytBehandling(attestertBehandling.id, "")
+            behandlingService.avbrytBehandling(attestertBehandling.id, saksbehandler)
         }
         assertDoesNotThrow {
-            behandlingService.avbrytBehandling(nyFoerstegangsbehandling.id, "")
+            behandlingService.avbrytBehandling(nyFoerstegangsbehandling.id, saksbehandler)
         }
     }
 
@@ -201,7 +203,7 @@ class BehandlingServiceImplTest {
                 oppgaveServiceNy = oppgaveServiceNyMock
             )
 
-        behandlingService.avbrytBehandling(nyFoerstegangsbehandling.id, "")
+        behandlingService.avbrytBehandling(nyFoerstegangsbehandling.id, Saksbehandler("", "saksbehandler", null))
         verify {
             hendelserMock.behandlingAvbrutt(any(), any())
         }
@@ -249,7 +251,7 @@ class BehandlingServiceImplTest {
                 oppgaveServiceNy = oppgaveServiceNyMock
             )
 
-        behandlingService.avbrytBehandling(nyFoerstegangsbehandling.id, "")
+        behandlingService.avbrytBehandling(nyFoerstegangsbehandling.id, Saksbehandler("", "saksbehandler", null))
         verify {
             behandlingHendelserKafkaProducerMock.sendMeldingForHendelse(
                 nyFoerstegangsbehandling,
@@ -299,7 +301,7 @@ class BehandlingServiceImplTest {
                 oppgaveServiceNy = oppgaveServiceNyMock
             )
 
-        behandlingService.avbrytBehandling(nyFoerstegangsbehandling.id, "")
+        behandlingService.avbrytBehandling(nyFoerstegangsbehandling.id, Saksbehandler("", "saksbehandler", null))
         verify(exactly = 1) {
             grunnlagsendringshendelseDaoMock.kobleGrunnlagsendringshendelserFraBehandlingId(nyFoerstegangsbehandling.id)
         }

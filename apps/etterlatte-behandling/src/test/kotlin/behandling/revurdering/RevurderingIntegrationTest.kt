@@ -39,6 +39,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.persongalleri
 import no.nav.etterlatte.sak.SakServiceFeatureToggle
+import no.nav.etterlatte.token.Saksbehandler
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -139,7 +140,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
                 aarsak = RevurderingAarsak.REGULERING,
                 paaGrunnAvHendelseId = null,
                 begrunnelse = null,
-                saksbehandlerIdent = "Jenny"
+                saksbehandler = Saksbehandler("", "saksbehandler", null)
             )
 
         verify { grunnlagService.leggInnNyttGrunnlag(revurdering!!, any()) }
@@ -152,7 +153,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
                 OppgaveType.REVURDERING,
                 null
             )
-            oppgaveService.tildelSaksbehandler(any(), "Jenny")
+            oppgaveService.tildelSaksbehandler(any(), "saksbehandler")
             oppgaveService.hentOppgaverForSak(sak.id)
         }
         inTransaction {
@@ -211,7 +212,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
             aarsak = RevurderingAarsak.SOESKENJUSTERING,
             paaGrunnAvHendelseId = null,
             begrunnelse = null,
-            saksbehandlerIdent = "Jenny"
+            saksbehandler = Saksbehandler("", "saksbehandler", null)
         )
         val revurderingInfo = RevurderingInfo.Soeskenjustering(BarnepensjonSoeskenjusteringGrunn.SOESKEN_DOER)
         val fikkLagret = revurderingService.lagreRevurderingInfo(
@@ -271,7 +272,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
                     OppgaveType.REVURDERING,
                     null
                 )
-                oppgaveService.tildelSaksbehandler(any(), "Jenny")
+                oppgaveService.tildelSaksbehandler(any(), "saksbehandler")
             }
             confirmVerified(hendelser, grunnlagService, oppgaveService)
         }
@@ -325,7 +326,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
                 aarsak = RevurderingAarsak.REGULERING,
                 paaGrunnAvHendelseId = null,
                 begrunnelse = null,
-                saksbehandlerIdent = "Jenny"
+                saksbehandler = Saksbehandler("", "Jenny", null)
             )
         )
 
@@ -338,7 +339,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
         val featureToggleService = mockk<FeatureToggleService>()
         val grunnlagService = spyk(applicationContext.grunnlagsService)
         val oppgaveService = spyk(applicationContext.oppgaveServiceNy)
-        val saksbehandlerIdent = "saksbehandler"
+        val saksbehandler = Saksbehandler("", "saksbehandler", null)
 
         every {
             featureToggleService.isEnabled(
@@ -426,7 +427,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
 
         applicationContext.oppgaveServiceNy.tildelSaksbehandler(
             oppgaveId = oppgave.id,
-            saksbehandler = saksbehandlerIdent
+            saksbehandler = saksbehandler.ident
         )
 
         val revurdering = revurderingService.opprettManuellRevurderingWrapper(
@@ -434,7 +435,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
             aarsak = RevurderingAarsak.REGULERING,
             paaGrunnAvHendelseId = hendelse.id.toString(),
             begrunnelse = null,
-            saksbehandlerIdent = saksbehandlerIdent
+            saksbehandler = saksbehandler
         )
 
         inTransaction {
@@ -462,7 +463,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
                     behandling!!.id.toString(),
                     sak.id
                 )
-                oppgaveService.tildelSaksbehandler(any(), saksbehandlerIdent)
+                oppgaveService.tildelSaksbehandler(any(), saksbehandler.ident)
             }
             verify {
                 oppgaveService.opprettNyOppgaveMedSakOgReferanse(
@@ -513,7 +514,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
                 aarsak = RevurderingAarsak.REGULERING,
                 paaGrunnAvHendelseId = "124124124",
                 begrunnelse = null,
-                saksbehandlerIdent = "Jenny"
+                saksbehandler = Saksbehandler("", "Jenny", null)
             )
         }
         assertTrue(
@@ -555,7 +556,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
                 aarsak = RevurderingAarsak.REGULERING,
                 paaGrunnAvHendelseId = UUID.randomUUID().toString(),
                 begrunnelse = null,
-                saksbehandlerIdent = "Jenny"
+                saksbehandler = Saksbehandler("", "saksbehandler", null)
             )
         }
     }
@@ -597,7 +598,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
                 aarsak = revurderingsAarsakIkkeStoettetIMiljoeBarn,
                 paaGrunnAvHendelseId = UUID.randomUUID().toString(),
                 begrunnelse = null,
-                saksbehandlerIdent = "Jenny"
+                saksbehandler = Saksbehandler("", "saksbehandler", null)
             )
         }
     }
@@ -638,7 +639,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
                 aarsak = RevurderingAarsak.REGULERING,
                 paaGrunnAvHendelseId = UUID.randomUUID().toString(),
                 begrunnelse = null,
-                saksbehandlerIdent = "Jenny"
+                saksbehandler = Saksbehandler("", "saksbehandler", null)
             )
         }
     }

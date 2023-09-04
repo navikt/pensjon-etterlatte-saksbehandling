@@ -36,6 +36,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.oppgaveny.OppgaveServiceNy
 import no.nav.etterlatte.token.Fagsaksystem
+import no.nav.etterlatte.token.Saksbehandler
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -49,7 +50,7 @@ interface RevurderingService {
         paaGrunnAvHendelseId: String? = null,
         begrunnelse: String? = null,
         fritekstAarsak: String? = null,
-        saksbehandlerIdent: String
+        saksbehandler: Saksbehandler
     ): Revurdering?
 
     fun opprettAutomatiskRevurdering(
@@ -117,7 +118,7 @@ class RevurderingServiceImpl(
         paaGrunnAvHendelseId: String?,
         begrunnelse: String?,
         fritekstAarsak: String?,
-        saksbehandlerIdent: String
+        saksbehandler: Saksbehandler
     ): Revurdering? {
         if (!aarsak.kanBrukesIMiljo()) {
             throw RevurderingaarsakIkkeStoettetIMiljoeException(
@@ -149,7 +150,7 @@ class RevurderingServiceImpl(
                 paaGrunnAvHendelse = paaGrunnAvHendelseUuid,
                 begrunnelse = begrunnelse,
                 fritekstAarsak = fritekstAarsak,
-                saksbehandlerIdent = saksbehandlerIdent
+                saksbehandler = saksbehandler
             )
         } else {
             throw RevurderingManglerIverksattBehandlingException(
@@ -166,7 +167,7 @@ class RevurderingServiceImpl(
         paaGrunnAvHendelse: UUID?,
         begrunnelse: String?,
         fritekstAarsak: String?,
-        saksbehandlerIdent: String
+        saksbehandler: Saksbehandler
     ): Revurdering? = forrigeBehandling.sjekkEnhet()?.let {
         return if (featureToggleService.isEnabled(RevurderingServiceFeatureToggle.OpprettManuellRevurdering, false)) {
             val persongalleri = runBlocking { grunnlagService.hentPersongalleri(sakId) }
@@ -184,7 +185,7 @@ class RevurderingServiceImpl(
                     virkningstidspunkt = null,
                     begrunnelse = begrunnelse,
                     fritekstAarsak = fritekstAarsak,
-                    saksbehandlerIdent = saksbehandlerIdent
+                    saksbehandlerIdent = saksbehandler.ident
                 ).also { revurdering ->
                     if (paaGrunnAvHendelse != null) {
                         grunnlagsendringshendelseDao.settBehandlingIdForTattMedIRevurdering(
@@ -194,7 +195,7 @@ class RevurderingServiceImpl(
                         try {
                             oppgaveService.ferdigStillOppgaveUnderBehandling(
                                 paaGrunnAvHendelse.toString(),
-                                saksbehandlerIdent
+                                saksbehandler
                             )
                         } catch (e: Exception) {
                             logger.error(

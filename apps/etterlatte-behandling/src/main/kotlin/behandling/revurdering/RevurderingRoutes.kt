@@ -56,7 +56,7 @@ internal fun Route.revurderingRoutes(
                             opprettRevurderingRequest.paaGrunnAvHendelseId,
                             opprettRevurderingRequest.begrunnelse,
                             opprettRevurderingRequest.fritekstAarsak,
-                            saksbehandler.ident
+                            saksbehandler
                         )
 
                         when (revurdering) {

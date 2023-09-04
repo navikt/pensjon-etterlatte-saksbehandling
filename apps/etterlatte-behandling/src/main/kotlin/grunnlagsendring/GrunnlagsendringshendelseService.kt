@@ -84,7 +84,7 @@ class GrunnlagsendringshendelseService(
             try {
                 oppgaveService.ferdigStillOppgaveUnderBehandling(
                     hendelse.id.toString(),
-                    saksbehandler = saksbehandler.ident
+                    saksbehandler = saksbehandler
                 )
             } catch (e: Exception) {
                 logger.error(

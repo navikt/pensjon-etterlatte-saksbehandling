@@ -10,6 +10,7 @@ import io.ktor.server.routing.route
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveType
 import no.nav.etterlatte.libs.common.oppgaveNy.VedtakEndringDTO
+import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.oppgaveny.OppgaveServiceNy
 import org.slf4j.LoggerFactory
 import java.util.*
@@ -41,7 +42,7 @@ internal fun Route.behandlingVedtakRoute(
                         oppgaveService.ferdigstillOppgaveUnderbehandlingOgLagNyMedType(
                             fattetoppgave = fattVedtak.vedtakOppgaveDTO,
                             oppgaveType = OppgaveType.ATTESTERING,
-                            saksbehandler = fattVedtak.vedtakHendelse.saksbehandler!!,
+                            saksbehandler = brukerTokenInfo,
                             merknad = fattVedtak.vedtakHendelse.kommentar
                         )
                     } catch (e: Exception) {
@@ -71,7 +72,7 @@ internal fun Route.behandlingVedtakRoute(
                             fattetoppgave = underkjennVedtakOppgave.vedtakOppgaveDTO,
                             oppgaveType = OppgaveType.UNDERKJENT,
                             merknad = merknadFraAttestant,
-                            saksbehandler = underkjennVedtakOppgave.vedtakHendelse.saksbehandler!!
+                            saksbehandler = brukerTokenInfo
                         )
                     } catch (e: Exception) {
                         haandterFeilIOppgaveService(e)
@@ -95,7 +96,7 @@ internal fun Route.behandlingVedtakRoute(
                     try {
                         oppgaveService.ferdigStillOppgaveUnderBehandling(
                             behandlingEllerHendelseId = attesterVedtakOppgave.vedtakOppgaveDTO.referanse,
-                            saksbehandler = attesterVedtakOppgave.vedtakHendelse.saksbehandler!!
+                            saksbehandler = brukerTokenInfo
                         )
                     } catch (e: Exception) {
                         haandterFeilIOppgaveService(e)

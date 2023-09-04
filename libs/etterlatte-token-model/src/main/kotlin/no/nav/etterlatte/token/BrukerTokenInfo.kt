@@ -5,7 +5,7 @@ import no.nav.security.token.support.core.jwt.JwtTokenClaims
 sealed class BrukerTokenInfo {
     abstract fun ident(): String
 
-    abstract fun erSammePerson(ident: String): Boolean
+    abstract fun erSammePerson(ident: String?): Boolean
 
     abstract fun accessToken(): String
     companion object {
@@ -33,7 +33,7 @@ sealed class BrukerTokenInfo {
 data class Systembruker(val oid: String, val sub: String) : BrukerTokenInfo() {
     override fun ident() = Fagsaksystem.EY.navn
     override fun accessToken() = throw NotImplementedError("Kun relevant for saksbehandler")
-    override fun erSammePerson(ident: String) = false
+    override fun erSammePerson(ident: String?) = false
 }
 
 data class Saksbehandler(
@@ -44,7 +44,7 @@ data class Saksbehandler(
     override fun ident() = ident
     override fun accessToken() = accessToken
 
-    override fun erSammePerson(ident: String) = ident == this.ident
+    override fun erSammePerson(ident: String?) = ident == this.ident
 
     fun getClaims() = jwtTokenClaims
 }

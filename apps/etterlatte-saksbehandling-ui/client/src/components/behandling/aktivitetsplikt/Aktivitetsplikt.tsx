@@ -43,7 +43,9 @@ export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => 
           </Button>
         </ButtonWrapper>
 
-        <strong>Lag intern oppfølgingsoppgave med riktig frist</strong>
+        <Heading size={'small'} spacing>
+          Lag intern oppfølgingsoppgave med riktig frist
+        </Heading>
         <BodyLong spacing>
           Etterlatte skal følges opp og minnes på aktivitetskravet når det har gått 3-4 måneder og på nytt når det har
           gått 9-10 måneder etter dødsfall. Om den etterlatte har andre ytelser eller annen grunn til videre oppfølging
@@ -61,7 +63,9 @@ export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => 
           </Button>
         </ButtonWrapper>
 
-        <strong>Er oppfølging av lokalkontor nødvendig?</strong>
+        <Heading size={'small'} spacing>
+          Er oppfølging av lokalkontor nødvendig?
+        </Heading>
         <BodyLong spacing>
           Trenger etterlatte ekstra oppfølging skal man sende oppgave til lokalkontor. Dette gjelder de som er utenfor
           arbeidslivet og/ eller ikke har andre ytelser fra Nav.

@@ -170,7 +170,7 @@ class OppgaveServiceNy(
         oppgaveUnderBehandling: OppgaveNy,
         saksbehandler: BrukerTokenInfo
     ) {
-        if (!saksbehandler.erSammePerson(oppgaveUnderBehandling.saksbehandler)) {
+        if (!saksbehandler.kanEndreOppgaverFor(oppgaveUnderBehandling.saksbehandler)) {
             throw FeilSaksbehandlerPaaOppgaveException(
                 "Kan ikke lukke oppgave for en annen saksbehandler oppgave:" +
                     " ${oppgaveUnderBehandling.id}"

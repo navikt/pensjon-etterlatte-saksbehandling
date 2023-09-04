@@ -8,6 +8,8 @@ sealed class BrukerTokenInfo {
     abstract fun erSammePerson(ident: String?): Boolean
 
     abstract fun accessToken(): String
+    abstract fun kanEndreOppgaverFor(ident: String?): Boolean
+
     companion object {
         private fun erSystembruker(oid: String?, sub: String?) = (oid == sub) && (oid != null)
         fun of(
@@ -34,6 +36,7 @@ data class Systembruker(val oid: String, val sub: String) : BrukerTokenInfo() {
     override fun ident() = Fagsaksystem.EY.navn
     override fun accessToken() = throw NotImplementedError("Kun relevant for saksbehandler")
     override fun erSammePerson(ident: String?) = false
+    override fun kanEndreOppgaverFor(ident: String?) = true
 }
 
 data class Saksbehandler(
@@ -43,6 +46,7 @@ data class Saksbehandler(
 ) : BrukerTokenInfo() {
     override fun ident() = ident
     override fun accessToken() = accessToken
+    override fun kanEndreOppgaverFor(ident: String?) = erSammePerson(ident)
 
     override fun erSammePerson(ident: String?) = ident == this.ident
 

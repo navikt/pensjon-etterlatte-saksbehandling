@@ -4,9 +4,9 @@
     "prepare": "cd ../../ && husky install .husky"
   },
   "devDependencies": {
-    "eslint": "8.46.0",
+    "eslint": "8.48.0",
     "husky": "^8.0.1",
-    "lint-staged": "^13.2.3",
-    "prettier": "^3.0.1"
+    "lint-staged": "^14.0.1",
+    "prettier": "^3.0.3"
   }
 }

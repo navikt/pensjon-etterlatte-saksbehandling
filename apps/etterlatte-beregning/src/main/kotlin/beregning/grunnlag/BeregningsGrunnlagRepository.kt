@@ -32,10 +32,10 @@ class BeregningsGrunnlagRepository(private val dataSource: DataSource) {
     }
 
     fun lagre(beregningsGrunnlag: BeregningsGrunnlag): Boolean {
-        val query = if (finnBarnepensjonGrunnlagForBehandling(beregningsGrunnlag.behandlingId) != null) {
-            oppdaterGrunnlagQuery
-        } else {
+        val query = if (finnBarnepensjonGrunnlagForBehandling(beregningsGrunnlag.behandlingId) == null) {
             lagreGrunnlagQuery
+        } else {
+            oppdaterGrunnlagQuery
         }
 
         val count = using(sessionOf(dataSource)) { session ->
@@ -59,10 +59,10 @@ class BeregningsGrunnlagRepository(private val dataSource: DataSource) {
     }
 
     fun lagreOMS(beregningsGrunnlagOMS: BeregningsGrunnlagOMS): Boolean {
-        val query = if (finnOmstillingstoenadGrunnlagForBehandling(beregningsGrunnlagOMS.behandlingId) != null) {
-            oppdaterGrunnlagQuery
-        } else {
+        val query = if (finnOmstillingstoenadGrunnlagForBehandling(beregningsGrunnlagOMS.behandlingId) == null) {
             lagreGrunnlagQuery
+        } else {
+            oppdaterGrunnlagQuery
         }
 
         val count = using(sessionOf(dataSource)) { session ->

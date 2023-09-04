@@ -8,7 +8,11 @@ import { Revurderingsaarsak } from '~shared/types/Revurderingsaarsak'
 import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
 
 export function behandlingErUtfylt(behandling: IDetaljertBehandling): boolean {
-  const gyldigUtfylt = !!(behandling.gyldighetsprøving && behandling.virkningstidspunkt)
+  const gyldigUtfylt = !!(
+    behandling.gyldighetsprøving &&
+    behandling.virkningstidspunkt &&
+    behandling.boddEllerArbeidetUtlandet
+  )
 
   if (behandling.sakType == SakType.BARNEPENSJON) {
     const kommerBarnetTilgode = !!behandling.kommerBarnetTilgode && behandling.kommerBarnetTilgode?.svar === JaNei.JA

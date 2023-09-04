@@ -3,6 +3,7 @@ import { behandlingErUtfylt, behandlingSkalSendeBrev } from '~components/behandl
 import {
   IBehandlingStatus,
   IBehandlingsType,
+  IBoddEllerArbeidetUtlandet,
   IDetaljertBehandling,
   IGyldighetResultat,
   IKommerBarnetTilgode,
@@ -20,6 +21,7 @@ describe('BARNEPENSJON: utfylt søknad er gyldig', () => {
       SakType.BARNEPENSJON,
       mockKommerBarnetTilgode(JaNei.JA),
       mockVirkningstidspunkt(),
+      mockBoddellerArbeidetIUtlandet(),
       mockGyldighetsprøving()
     )
 
@@ -33,6 +35,7 @@ describe('BARNEPENSJON: utfylt søknad er gyldig', () => {
       SakType.BARNEPENSJON,
       mockKommerBarnetTilgode(JaNei.NEI),
       mockVirkningstidspunkt(),
+      mockBoddellerArbeidetIUtlandet(),
       mockGyldighetsprøving()
     )
 
@@ -42,7 +45,13 @@ describe('BARNEPENSJON: utfylt søknad er gyldig', () => {
   })
 
   it('barnepensjon uten kommerbarnettilgode er ikke gyldig utfylt', () => {
-    const behandling = opprettBehandling(SakType.BARNEPENSJON, null, mockVirkningstidspunkt(), mockGyldighetsprøving())
+    const behandling = opprettBehandling(
+      SakType.BARNEPENSJON,
+      null,
+      mockVirkningstidspunkt(),
+      mockBoddellerArbeidetIUtlandet(),
+      mockGyldighetsprøving()
+    )
 
     const utfylt = behandlingErUtfylt(behandling)
 
@@ -54,6 +63,7 @@ describe('BARNEPENSJON: utfylt søknad er gyldig', () => {
       SakType.BARNEPENSJON,
       mockKommerBarnetTilgode(JaNei.JA),
       null,
+      mockBoddellerArbeidetIUtlandet(),
       mockGyldighetsprøving()
     )
 
@@ -67,6 +77,7 @@ describe('BARNEPENSJON: utfylt søknad er gyldig', () => {
       SakType.BARNEPENSJON,
       mockKommerBarnetTilgode(JaNei.JA),
       mockVirkningstidspunkt(),
+      mockBoddellerArbeidetIUtlandet(),
       undefined
     )
 
@@ -82,6 +93,7 @@ describe('OMSTILLINGSSTOENAD: utfylt søknad er gyldig', () => {
       SakType.OMSTILLINGSSTOENAD,
       null,
       mockVirkningstidspunkt(),
+      mockBoddellerArbeidetIUtlandet(),
       mockGyldighetsprøving()
     )
 
@@ -91,7 +103,13 @@ describe('OMSTILLINGSSTOENAD: utfylt søknad er gyldig', () => {
   })
 
   it('omstillingsstoenad uten virkningstidspunkt er ikke gyldig utfylt', () => {
-    const behandling = opprettBehandling(SakType.OMSTILLINGSSTOENAD, null, null, mockGyldighetsprøving())
+    const behandling = opprettBehandling(
+      SakType.OMSTILLINGSSTOENAD,
+      null,
+      null,
+      mockBoddellerArbeidetIUtlandet(),
+      mockGyldighetsprøving()
+    )
 
     const utfylt = behandlingErUtfylt(behandling)
 
@@ -99,7 +117,41 @@ describe('OMSTILLINGSSTOENAD: utfylt søknad er gyldig', () => {
   })
 
   it('omstillingsstoenad uten gyldighetsprøving er ikke gyldig utfylt', () => {
-    const behandling = opprettBehandling(SakType.OMSTILLINGSSTOENAD, null, mockVirkningstidspunkt(), undefined)
+    const behandling = opprettBehandling(
+      SakType.OMSTILLINGSSTOENAD,
+      null,
+      mockVirkningstidspunkt(),
+      mockBoddellerArbeidetIUtlandet(),
+      undefined
+    )
+
+    const utfylt = behandlingErUtfylt(behandling)
+
+    expect(utfylt).toBeFalsy()
+  })
+
+  it('omstillingsstoenad uten boddellerarbeidetiutlandet er ikke gyldig utfylt', () => {
+    const behandling = opprettBehandling(
+      SakType.OMSTILLINGSSTOENAD,
+      null,
+      mockVirkningstidspunkt(),
+      null,
+      mockGyldighetsprøving()
+    )
+
+    const utfylt = behandlingErUtfylt(behandling)
+
+    expect(utfylt).toBeFalsy()
+  })
+
+  it('barnepensjon uten boddellerarbeidetiutlandet er ikke gyldig utfylt', () => {
+    const behandling = opprettBehandling(
+      SakType.BARNEPENSJON,
+      mockKommerBarnetTilgode(JaNei.JA),
+      mockVirkningstidspunkt(),
+      null,
+      mockGyldighetsprøving()
+    )
 
     const utfylt = behandlingErUtfylt(behandling)
 
@@ -108,7 +160,7 @@ describe('OMSTILLINGSSTOENAD: utfylt søknad er gyldig', () => {
 })
 
 describe('behandlingSkalSendeBrev', () => {
-  const behandling = opprettBehandling(SakType.BARNEPENSJON, null, null, undefined)
+  const behandling = opprettBehandling(SakType.BARNEPENSJON, null, null, mockBoddellerArbeidetIUtlandet(), undefined)
   const revurdering = {
     ...behandling,
     behandlingType: IBehandlingsType.REVURDERING,
@@ -135,6 +187,7 @@ const opprettBehandling = (
   sakType: SakType,
   kommerBarnetTilgode: IKommerBarnetTilgode | null,
   virkningstidspunkt: Virkningstidspunkt | null,
+  boddEllerArbeidetUtlandet: IBoddEllerArbeidetUtlandet | null,
   gyldighetsprøving?: IGyldighetResultat
 ): IDetaljertBehandling => {
   return {
@@ -146,13 +199,25 @@ const opprettBehandling = (
     soeknadMottattDato: '01-01-2023',
     virkningstidspunkt,
     utenlandstilsnitt: undefined,
-    boddEllerArbeidetUtlandet: null,
+    boddEllerArbeidetUtlandet,
     status: IBehandlingStatus.OPPRETTET,
     hendelser: [],
     behandlingType: IBehandlingsType.FØRSTEGANGSBEHANDLING,
     revurderingsaarsak: null,
     revurderinginfo: null,
     begrunnelse: null,
+  }
+}
+
+const mockBoddellerArbeidetIUtlandet = (): IBoddEllerArbeidetUtlandet => {
+  return {
+    boddEllerArbeidetUtlandet: false,
+    kilde: {
+      type: KildeType.saksbehandler,
+      tidspunkt: '01-01-2023',
+      ident: 'Z123456',
+    },
+    begrunnelse: 'begrunelse',
   }
 }
 

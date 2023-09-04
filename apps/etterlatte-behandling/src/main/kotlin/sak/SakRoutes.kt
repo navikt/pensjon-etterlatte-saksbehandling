@@ -106,7 +106,7 @@ internal fun Route.sakWebRoutes(
 
             get("oppgaver") {
                 kunSystembruker {
-                    val oppgaver = sakService.finnSak(sakId)!!
+                    val oppgaver = inTransaction { sakService.finnSak(sakId)!! }
                         .let { OppgaveListe(it, oppgaveServiceNy.hentOppgaverForSak(it.id)) }
                     call.respond(oppgaver)
                 }

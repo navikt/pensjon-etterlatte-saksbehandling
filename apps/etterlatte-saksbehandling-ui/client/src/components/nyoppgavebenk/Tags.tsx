@@ -28,6 +28,7 @@ export const OppgavetypeTag = (props: { oppgavetype: Oppgavetype }) => {
     ATTESTERING: { variant: Variants.ALT3_FILLED, text: 'Attestering' },
     UNDERKJENT: { variant: Variants.ALT3, text: 'Underkjent' },
     GOSYS: { variant: Variants.INFO_FILLED, text: 'Gosys-oppgave' },
+    UTLAND: { variant: Variants.ALT2_FILLED, text: 'Utlandsoppgave' },
   } as const
 
   const tagdata = OPPGAVETYPE_TIL_TAGDATA[oppgavetype]

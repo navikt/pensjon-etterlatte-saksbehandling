@@ -93,6 +93,7 @@ export const OPPGAVETYPEFILTER: Record<OppgavetypeFilterKeys, string> = {
   VURDER_KONSEKVENS: 'Vurder konsekvense for hendelse',
   UNDERKJENT: 'Underkjent behandling',
   GOSYS: 'Gosys',
+  UTLAND: 'Utland',
 }
 
 function filtrerOppgaveType(oppgavetypeFilterKeys: OppgavetypeFilterKeys, oppgaver: OppgaveDTOny[]): OppgaveDTOny[] {

@@ -29,7 +29,7 @@ data class MaanedStoenadRad(
     val vedtakLoependeTom: LocalDate?,
     val statistikkMaaned: YearMonth,
     val sakUtland: SakUtland?,
-    val virkningstidspunkt: YearMonth,
+    val virkningstidspunkt: YearMonth?,
     val utbetalingsdato: LocalDate?
 )
 

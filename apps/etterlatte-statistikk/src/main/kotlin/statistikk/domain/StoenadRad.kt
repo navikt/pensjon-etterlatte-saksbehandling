@@ -29,6 +29,6 @@ data class StoenadRad(
     val avkorting: Avkorting?,
     val vedtakType: VedtakType?,
     val sakUtland: SakUtland?,
-    val virkningstidspunkt: YearMonth,
+    val virkningstidspunkt: YearMonth?,
     val utbetalingsdato: LocalDate?
 )

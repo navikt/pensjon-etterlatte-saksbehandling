@@ -15,14 +15,17 @@ import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.OPPGAVEID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.OPPGAVEID_GOSYS_CALL_PARAMETER
+import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.behandlingsId
 import no.nav.etterlatte.libs.common.gosysOppgaveId
 import no.nav.etterlatte.libs.common.kunSaksbehandler
+import no.nav.etterlatte.libs.common.kunSystembruker
 import no.nav.etterlatte.libs.common.oppgaveId
 import no.nav.etterlatte.libs.common.oppgaveNy.RedigerFristGosysRequest
 import no.nav.etterlatte.libs.common.oppgaveNy.RedigerFristRequest
 import no.nav.etterlatte.libs.common.oppgaveNy.SaksbehandlerEndringDto
 import no.nav.etterlatte.libs.common.oppgaveNy.SaksbehandlerEndringGosysDto
+import no.nav.etterlatte.libs.common.sakId
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.oppgave.GosysOppgaveService
 
@@ -38,6 +41,14 @@ internal fun Route.oppgaveRoutesNy(
                         Kontekst.get().appUserAsSaksbehandler().saksbehandlerMedRoller
                     )
                 )
+            }
+        }
+
+        route("/sak/$SAKID_CALL_PARAMETER") {
+            get("oppgaver") {
+                kunSystembruker {
+                    call.respond(service.hentSakOgOppgaverForSak(sakId))
+                }
             }
         }
 
@@ -65,11 +76,9 @@ internal fun Route.oppgaveRoutesNy(
 
         route("{$OPPGAVEID_CALL_PARAMETER}") {
             post("tildel-saksbehandler") {
-                kunSaksbehandler {
-                    val saksbehandlerEndringDto = call.receive<SaksbehandlerEndringDto>()
-                    service.tildelSaksbehandler(oppgaveId, saksbehandlerEndringDto.saksbehandler)
-                    call.respond(HttpStatusCode.OK)
-                }
+                val saksbehandlerEndringDto = call.receive<SaksbehandlerEndringDto>()
+                service.tildelSaksbehandler(oppgaveId, saksbehandlerEndringDto.saksbehandler)
+                call.respond(HttpStatusCode.OK)
             }
             post("bytt-saksbehandler") {
                 kunSaksbehandler {

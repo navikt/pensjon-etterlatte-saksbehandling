@@ -20,8 +20,7 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.SisteIverksatteBehandling
 import no.nav.etterlatte.libs.common.kunSaksbehandler
 import no.nav.etterlatte.libs.common.kunSystembruker
-import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveNy
-import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveListe
 import no.nav.etterlatte.libs.common.sak.Saker
 import no.nav.etterlatte.libs.common.sakId
 import no.nav.etterlatte.oppgaveny.OppgaveServiceNy
@@ -151,4 +150,3 @@ internal fun Route.sakWebRoutes(
 }
 
 data class FoersteVirkDto(val foersteIverksatteVirkISak: LocalDate, val sakId: Long)
-data class OppgaveListe(val sak: Sak, val oppgaver: List<OppgaveNy>)

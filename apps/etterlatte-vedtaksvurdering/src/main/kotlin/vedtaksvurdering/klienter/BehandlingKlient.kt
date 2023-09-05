@@ -11,6 +11,9 @@ import no.nav.etterlatte.libs.common.SakTilgangsSjekk
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveListe
+import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveNy
+import no.nav.etterlatte.libs.common.oppgaveNy.SaksbehandlerEndringDto
 import no.nav.etterlatte.libs.common.oppgaveNy.VedtakEndringDTO
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -18,6 +21,7 @@ import no.nav.etterlatte.libs.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktorobo.Resource
 import no.nav.etterlatte.token.BrukerTokenInfo
+import no.nav.etterlatte.token.Fagsaksystem
 import no.nav.etterlatte.token.Saksbehandler
 import no.nav.etterlatte.vedtaksvurdering.VedtakHendelse
 import org.slf4j.LoggerFactory
@@ -59,6 +63,9 @@ interface BehandlingKlient : BehandlingTilgangsSjekk, SakTilgangsSjekk {
     ): Boolean
 
     suspend fun iverksett(behandlingId: UUID, brukerTokenInfo: BrukerTokenInfo, vedtakId: Long): Boolean
+
+    suspend fun hentOppgaverForSak(sakId: Long, brukerTokenInfo: BrukerTokenInfo): OppgaveListe
+    suspend fun tildelSaksbehandler(oppgaveTilAttestering: OppgaveNy, brukerTokenInfo: BrukerTokenInfo): Boolean
 }
 
 class BehandlingKlientException(override val message: String, override val cause: Throwable? = null) :
@@ -110,6 +117,53 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
                 )
         } catch (e: Exception) {
             throw BehandlingKlientException("Henting av sak med id=$sakId feilet", e)
+        }
+    }
+
+    override suspend fun hentOppgaverForSak(sakId: Long, brukerTokenInfo: BrukerTokenInfo): OppgaveListe {
+        logger.info("Henter oppgaver for sak med id $sakId")
+        try {
+            return downstreamResourceClient
+                .get(
+                    resource = Resource(
+                        clientId = clientId,
+                        url = "$resourceUrl/api/nyeoppgaver/sak/$sakId/oppgaver"
+                    ),
+                    brukerTokenInfo = brukerTokenInfo
+                )
+                .mapBoth(
+                    success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
+                    failure = { throwableErrorMessage -> throw throwableErrorMessage }
+                )
+        } catch (e: Exception) {
+            throw BehandlingKlientException("Henting av sak med id=$sakId feilet", e)
+        }
+    }
+
+    override suspend fun tildelSaksbehandler(
+        oppgaveTilAttestering: OppgaveNy,
+        brukerTokenInfo: BrukerTokenInfo
+    ): Boolean {
+        logger.info("Tildeler oppgave $oppgaveTilAttestering til systembruker")
+        val response = downstreamResourceClient
+            .post(
+                resource = Resource(
+                    clientId = clientId,
+                    url = "$resourceUrl/api/nyeoppgaver/${oppgaveTilAttestering.id}/tildel-saksbehandler"
+                ),
+                brukerTokenInfo = brukerTokenInfo,
+                postBody = SaksbehandlerEndringDto(saksbehandler = Fagsaksystem.EY.navn)
+            )
+
+        return when (response) {
+            is Ok -> true
+            is Err -> {
+                logger.error(
+                    "Tildeling av $oppgaveTilAttestering til systembruker for attestering feilet",
+                    response.error
+                )
+                throw response.error
+            }
         }
     }
 

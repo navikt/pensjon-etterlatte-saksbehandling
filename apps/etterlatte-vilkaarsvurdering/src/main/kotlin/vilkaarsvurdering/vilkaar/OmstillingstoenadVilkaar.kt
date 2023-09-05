@@ -15,6 +15,7 @@ object OmstillingstoenadVilkaar {
     fun inngangsvilkaar(grunnlag: Grunnlag) = listOf(
         etterlatteLever(),
         doedsfall(),
+        etterlatteOverlappendeYtelser(),
         etterlatteSivilstand(),
         yrkesskade(),
         avdoedesMedlemskap(),
@@ -51,18 +52,34 @@ object OmstillingstoenadVilkaar {
         )
     )
 
+    private fun etterlatteOverlappendeYtelser() = Vilkaar(
+        hovedvilkaar = Delvilkaar(
+            type = VilkaarType.OMS_OVERLAPPENDE_YTELSER,
+            tittel = "Bortfaller av rettigheter etter § 17-11 første ledd",
+            beskrivelse = """
+                Retten til omstillingsstønad faller bort når etterlatte fyller 67 år eller tar ut alderspensjon, får rett til 100 % uføretrygd, mottar AFP fra en offentlig pensjonsordning eller gifter seg igjen, gjelder også samboere etter § 1-5.
+            """.trimIndent(),
+            spoersmaal = "Har etterlatte rett til ytelse utfra § 17-11 første ledd?",
+            lovreferanse = Lovreferanse(
+                paragraf = "§ 17-11",
+                ledd = 1,
+                lenke = "https://lovdata.no/nav/rundskriv/r17-00#ref/lov/1997-02-28-19/%C2%A717-11"
+            )
+        )
+    )
+
     private fun etterlatteSivilstand() = Vilkaar(
         hovedvilkaar = Delvilkaar(
             type = VilkaarType.OMS_SIVILSTAND,
-            tittel = "Har etterlatte rett til omstillingsstønad etter § 17-11? ",
+            tittel = "Rett til omstillingsstønad igjen etter § 17-11 andre ledd?",
             beskrivelse = """
-                Retten til omstillingsstønad faller bort når etterlatte fyller 67 år eller tar ut alderspensjon, får rett til 100 % uføretrygd, mottar AFP fra en offentlig pensjonsordning eller gifter seg igjen, gjelder også samboere etter § 1-5.
-                
-                Hvis en etterlatt som er innvilget omstillingsstønad etter § 17-5 tredje ledd inngår skilsmisse innen to år, får vedkommende rett til omstillingsstønad igjen.
+                Hvis en etterlatt som er innvilget omstillingsstønad etter § 17-5 tredje ledd (hadde rettigheter utover 3-5 år på grunn av lav inntekt siste fem år før dødsfall) inngår skilsmisse innen to år, får vedkommende rett til omstillingsstønad igjen.
             """.trimIndent(),
-            spoersmaal = "Er vilkår oppfylt?",
+            spoersmaal = "Er vilkåret oppfylt?",
             lovreferanse = Lovreferanse(
-                paragraf = "§ 17-11"
+                paragraf = "§ 17-11",
+                ledd = 2,
+                lenke = "https://lovdata.no/nav/rundskriv/r17-00#ref/lov/1997-02-28-19/%C2%A717-11"
             )
         )
     )

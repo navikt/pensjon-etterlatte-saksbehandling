@@ -14,19 +14,21 @@ import no.nav.etterlatte.libs.regler.og
 import no.nav.etterlatte.libs.regler.velgNyesteGyldige
 import no.nav.etterlatte.regler.Beregningstall
 
-val grunnbeloep: Regel<OmstillingstoenadGrunnlag, Grunnbeloep> = RegelMeta(
-    gjelderFra = OMS_GYLDIG_FROM_TEST,
-    beskrivelse = "Finner grunnbeløp for periode i beregning",
-    regelReferanse = RegelReferanse(id = "REGEL-GRUNNBELOEP")
-) velgNyesteGyldige GrunnbeloepRepository.historiskeGrunnbeloep.map { grunnbeloep ->
+val historiskeGrunnbeloep = GrunnbeloepRepository.historiskeGrunnbeloep.map { grunnbeloep ->
     val grunnbeloepGyldigFra = grunnbeloep.dato.atDay(1)
-    definerKonstant(
+    definerKonstant<OmstillingstoenadGrunnlag, Grunnbeloep>(
         gjelderFra = grunnbeloepGyldigFra,
         beskrivelse = "Grunnbeløp gyldig fra $grunnbeloepGyldigFra",
         regelReferanse = RegelReferanse(id = "REGEL-GRUNNBELOEP"),
         verdi = grunnbeloep
     )
 }
+
+val grunnbeloep: Regel<OmstillingstoenadGrunnlag, Grunnbeloep> = RegelMeta(
+    gjelderFra = OMS_GYLDIG_FROM_TEST,
+    beskrivelse = "Finner grunnbeløp for periode i beregning",
+    regelReferanse = RegelReferanse(id = "REGEL-GRUNNBELOEP")
+) velgNyesteGyldige historiskeGrunnbeloep
 
 val faktorKonstant = definerKonstant<OmstillingstoenadGrunnlag, Beregningstall>(
     gjelderFra = OMS_GYLDIG_FROM_TEST,
@@ -35,7 +37,7 @@ val faktorKonstant = definerKonstant<OmstillingstoenadGrunnlag, Beregningstall>(
     verdi = Beregningstall(2.25)
 )
 
-val omstillingsstoenadSatsRegel = RegelMeta(
+val omstillingstoenadSatsRegel = RegelMeta(
     gjelderFra = OMS_GYLDIG_FROM_TEST,
     beskrivelse = "Beregn sats for omstillingsstønad",
     regelReferanse = RegelReferanse(id = "OMS-BEREGNING-2024-SATS")

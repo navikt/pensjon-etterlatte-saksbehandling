@@ -46,6 +46,22 @@ fun Route.beregningsGrunnlag(beregningsGrunnlagService: BeregningsGrunnlagServic
             }
         }
 
+        post("/{$BEHANDLINGSID_CALL_PARAMETER}/omstillingstoenad") {
+            withBehandlingId(behandlingKlient) { behandlingId ->
+                val body = call.receive<OmstillingstoenadBeregningsGrunnlag>()
+
+                when {
+                    beregningsGrunnlagService.lagreOMSBeregningsGrunnlag(
+                        behandlingId,
+                        body,
+                        brukerTokenInfo
+                    ) -> call.respond(HttpStatusCode.NoContent)
+
+                    else -> call.respond(HttpStatusCode.Conflict)
+                }
+            }
+        }
+
         get("/{$BEHANDLINGSID_CALL_PARAMETER}/barnepensjon") {
             withBehandlingId(behandlingKlient) { behandlingId ->
                 logger.info("Henter grunnlag for behandling $behandlingId")
@@ -53,11 +69,18 @@ fun Route.beregningsGrunnlag(beregningsGrunnlagService: BeregningsGrunnlagServic
                     behandlingId,
                     brukerTokenInfo
                 )
+                call.respond(HttpStatusCode.OK, grunnlag ?: HttpStatusCode.NoContent)
+            }
+        }
 
-                when (grunnlag) {
-                    null -> call.respond(HttpStatusCode.NoContent)
-                    else -> call.respond(HttpStatusCode.OK, grunnlag)
-                }
+        get("/{$BEHANDLINGSID_CALL_PARAMETER}/omstillingstoenad") {
+            withBehandlingId(behandlingKlient) { behandlingId ->
+                logger.info("Henter grunnlag for behandling $behandlingId")
+                val grunnlag = beregningsGrunnlagService.hentOmstillingstoenadBeregningsGrunnlag(
+                    behandlingId,
+                    brukerTokenInfo
+                )
+                call.respond(HttpStatusCode.OK, grunnlag ?: HttpStatusCode.NoContent)
             }
         }
     }

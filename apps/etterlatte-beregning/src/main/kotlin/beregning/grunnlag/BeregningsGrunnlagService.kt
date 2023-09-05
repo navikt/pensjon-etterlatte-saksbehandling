@@ -44,7 +44,40 @@ class BeregningsGrunnlagService(
                     kilde = Grunnlagsopplysning.Saksbehandler.create(brukerTokenInfo.ident()),
                     soeskenMedIBeregning = soeskenMedIBeregning,
                     institusjonsoppholdBeregningsgrunnlag =
-                    barnepensjonBeregningsGrunnlag.institusjonsopphold
+                    barnepensjonBeregningsGrunnlag.institusjonsopphold ?: emptyList()
+                )
+            )
+        }
+
+        else -> false
+    }
+
+    suspend fun lagreOMSBeregningsGrunnlag(
+        behandlingId: UUID,
+        omstillingstoenadBeregningsGrunnlag: OmstillingstoenadBeregningsGrunnlag,
+        brukerTokenInfo: BrukerTokenInfo
+    ): Boolean = when {
+        behandlingKlient.beregn(behandlingId, brukerTokenInfo, false) -> {
+            val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
+            val kanLagreDetteGrunnlaget = if (behandling.behandlingType == BehandlingType.REVURDERING) {
+                // Her vil vi sjekke opp om det vi lagrer ned ikke er modifisert før virk på revurderingen
+                val sisteIverksatteBehandling =
+                    behandlingKlient.hentSisteIverksatteBehandling(behandling.sak, brukerTokenInfo)
+                grunnlagErIkkeEndretFoerVirkOMS(
+                    behandling,
+                    sisteIverksatteBehandling.id,
+                    omstillingstoenadBeregningsGrunnlag
+                )
+            } else {
+                true
+            }
+
+            kanLagreDetteGrunnlaget && beregningsGrunnlagRepository.lagreOMS(
+                BeregningsGrunnlagOMS(
+                    behandlingId = behandlingId,
+                    kilde = Grunnlagsopplysning.Saksbehandler.create(brukerTokenInfo.ident()),
+                    institusjonsoppholdBeregningsgrunnlag =
+                    omstillingstoenadBeregningsGrunnlag.institusjonsopphold ?: emptyList()
                 )
             )
         }
@@ -76,6 +109,24 @@ class BeregningsGrunnlagService(
         return soeskenjusteringErLiktFoerVirk && institusjonsoppholdErLiktFoerVirk
     }
 
+    private fun grunnlagErIkkeEndretFoerVirkOMS(
+        revurdering: DetaljertBehandling,
+        forrigeIverksatteBehandlingId: UUID,
+        omstillingstoenadBeregningsGrunnlag: OmstillingstoenadBeregningsGrunnlag
+    ): Boolean {
+        val forrigeGrunnlag =
+            beregningsGrunnlagRepository.finnOmstillingstoenadGrunnlagForBehandling(forrigeIverksatteBehandlingId)
+        val revurderingVirk = revurdering.virkningstidspunkt!!.dato.atDay(1)
+
+        val institusjonsoppholdErLiktFoerVirk = erGrunnlagLiktFoerEnDato(
+            omstillingstoenadBeregningsGrunnlag.institusjonsopphold ?: emptyList(),
+            forrigeGrunnlag!!.institusjonsoppholdBeregningsgrunnlag ?: emptyList(),
+            revurderingVirk
+        )
+
+        return institusjonsoppholdErLiktFoerVirk
+    }
+
     suspend fun hentBarnepensjonBeregningsGrunnlag(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo
@@ -94,6 +145,29 @@ class BeregningsGrunnlagService(
                 brukerTokenInfo
             )
             beregningsGrunnlagRepository.finnBarnepensjonGrunnlagForBehandling(sisteIverksatteBehandling.id)
+        } else {
+            null
+        }
+    }
+
+    suspend fun hentOmstillingstoenadBeregningsGrunnlag(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo
+    ): BeregningsGrunnlagOMS? {
+        logger.info("Henter grunnlag $behandlingId")
+        val grunnlag = beregningsGrunnlagRepository.finnOmstillingstoenadGrunnlagForBehandling(behandlingId)
+        if (grunnlag != null) {
+            return grunnlag
+        }
+
+        // Det kan hende behandlingen er en revurdering, og da må vi finne forrige grunnlag for saken
+        val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
+        return if (behandling.behandlingType == BehandlingType.REVURDERING) {
+            val sisteIverksatteBehandling = behandlingKlient.hentSisteIverksatteBehandling(
+                behandling.sak,
+                brukerTokenInfo
+            )
+            beregningsGrunnlagRepository.finnOmstillingstoenadGrunnlagForBehandling(sisteIverksatteBehandling.id)
         } else {
             null
         }

@@ -1,6 +1,6 @@
 import { createAction, createReducer } from '@reduxjs/toolkit'
 import { IVilkaarsvurdering } from '~shared/api/vilkaarsvurdering'
-import { Beregning, BeregningsGrunnlagPostDto } from '~shared/types/Beregning'
+import { Beregning, BeregningsGrunnlagOMSPostDto, BeregningsGrunnlagPostDto } from '~shared/types/Beregning'
 import {
   IBehandlingStatus,
   IBoddEllerArbeidetUtlandet,
@@ -10,7 +10,7 @@ import {
   IUtenlandstilsnitt,
   Virkningstidspunkt,
 } from '~shared/types/IDetaljertBehandling'
-import { VedtakSammendrag } from "~components/vedtak/typer";
+import { VedtakSammendrag } from '~components/vedtak/typer'
 import { RevurderingInfo } from '~shared/types/RevurderingInfo'
 
 export const addBehandling = createAction<IDetaljertBehandling>('behandling/add')
@@ -27,6 +27,9 @@ export const oppdaterBoddEllerArbeidetUtlandet = createAction<IBoddEllerArbeidet
 export const oppdaterBeregning = createAction<Beregning>('behandling/beregning')
 export const oppdaterBehandlingsstatus = createAction<IBehandlingStatus>('behandling/status')
 export const oppdaterBeregingsGrunnlag = createAction<BeregningsGrunnlagPostDto>('behandling/beregningsgrunnlag')
+export const oppdaterBeregingsGrunnlagOMS = createAction<BeregningsGrunnlagOMSPostDto>(
+  'behandling/beregningsgrunnlagOMS'
+)
 export const oppdaterRevurderingInfo = createAction<RevurderingInfo>('behandling/revurderinginfo')
 export const resetBeregning = createAction('behandling/beregning/reset')
 export const loggError = createAction<any>('loggError')
@@ -34,6 +37,7 @@ export const loggInfo = createAction<any>('loggInfo')
 
 export interface IBehandlingReducer extends IDetaljertBehandling {
   beregningsGrunnlag?: BeregningsGrunnlagPostDto
+  beregningsGrunnlagOMS?: BeregningsGrunnlagOMSPostDto
   beregning?: Beregning
   vilkårsprøving?: IVilkaarsvurdering
   vedtak?: VedtakSammendrag
@@ -76,6 +80,9 @@ export const behandlingReducer = createReducer(initialState, (builder) => {
   })
   builder.addCase(oppdaterBeregingsGrunnlag, (state, action) => {
     state.behandling!!.beregningsGrunnlag = action.payload
+  })
+  builder.addCase(oppdaterBeregingsGrunnlagOMS, (state, action) => {
+    state.behandling!!.beregningsGrunnlagOMS = action.payload
   })
   builder.addCase(resetBeregning, (state) => {
     state.behandling!!.beregning = undefined

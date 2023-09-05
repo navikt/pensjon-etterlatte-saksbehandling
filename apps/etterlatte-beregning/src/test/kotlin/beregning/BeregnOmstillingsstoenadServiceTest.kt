@@ -7,6 +7,11 @@ import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlagOMS
+import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlagService
+import no.nav.etterlatte.beregning.grunnlag.GrunnlagMedPeriode
+import no.nav.etterlatte.beregning.grunnlag.InstitusjonsoppholdBeregningsgrunnlag
+import no.nav.etterlatte.beregning.grunnlag.Reduksjon
 import no.nav.etterlatte.beregning.regler.bruker
 import no.nav.etterlatte.klienter.GrunnlagKlientImpl
 import no.nav.etterlatte.klienter.TrygdetidKlient
@@ -19,8 +24,10 @@ import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.time.LocalDate
 import java.time.Month
 import java.time.YearMonth
 import java.util.*
@@ -31,11 +38,18 @@ internal class BeregnOmstillingsstoenadServiceTest {
     private val vilkaarsvurderingKlient = mockk<VilkaarsvurderingKlient>()
     private val grunnlagKlient = mockk<GrunnlagKlientImpl>()
     private val trygdetidKlient = mockk<TrygdetidKlient>()
-    private val beregnOmstillingsstoenadService = BeregnOmstillingsstoenadService(
-        grunnlagKlient = grunnlagKlient,
-        vilkaarsvurderingKlient = vilkaarsvurderingKlient,
-        trygdetidKlient = trygdetidKlient
-    )
+    private val beregningsGrunnlagService = mockk<BeregningsGrunnlagService>()
+    private lateinit var beregnOmstillingsstoenadService: BeregnOmstillingsstoenadService
+
+    @BeforeEach
+    fun setup() {
+        beregnOmstillingsstoenadService = BeregnOmstillingsstoenadService(
+            grunnlagKlient = grunnlagKlient,
+            vilkaarsvurderingKlient = vilkaarsvurderingKlient,
+            trygdetidKlient = trygdetidKlient,
+            beregningsGrunnlagService = beregningsGrunnlagService
+        )
+    }
 
     @Test
     fun `skal beregne omstillingsstoenad foerstegangsbehandling`() {
@@ -45,6 +59,12 @@ internal class BeregnOmstillingsstoenadServiceTest {
 
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
         coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns trygdetid
+        coEvery {
+            beregningsGrunnlagService.hentOmstillingstoenadBeregningsGrunnlag(
+                any(),
+                any()
+            )
+        } returns omstillingstoenadBeregningsGrunnlag(behandling.id)
 
         runBlocking {
             val beregning = beregnOmstillingsstoenadService.beregn(behandling, bruker)
@@ -82,6 +102,13 @@ internal class BeregnOmstillingsstoenadServiceTest {
         }
         coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns trygdetid
 
+        coEvery {
+            beregningsGrunnlagService.hentOmstillingstoenadBeregningsGrunnlag(
+                any(),
+                any()
+            )
+        } returns omstillingstoenadBeregningsGrunnlag(behandling.id)
+
         runBlocking {
             val beregning = beregnOmstillingsstoenadService.beregn(behandling, bruker)
 
@@ -114,6 +141,12 @@ internal class BeregnOmstillingsstoenadServiceTest {
             every { resultat?.utfall } returns VilkaarsvurderingUtfall.IKKE_OPPFYLT
         }
         coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns trygdetid
+        coEvery {
+            beregningsGrunnlagService.hentOmstillingstoenadBeregningsGrunnlag(
+                any(),
+                any()
+            )
+        } returns omstillingstoenadBeregningsGrunnlag(behandling.id)
 
         runBlocking {
             val beregning = beregnOmstillingsstoenadService.beregn(behandling, bruker)
@@ -144,6 +177,12 @@ internal class BeregnOmstillingsstoenadServiceTest {
 
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
         coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns trygdetid
+        coEvery {
+            beregningsGrunnlagService.hentOmstillingstoenadBeregningsGrunnlag(
+                any(),
+                any()
+            )
+        } returns omstillingstoenadBeregningsGrunnlag(behandling.id)
 
         runBlocking {
             val beregning = beregnOmstillingsstoenadService.beregn(behandling, bruker)
@@ -175,6 +214,12 @@ internal class BeregnOmstillingsstoenadServiceTest {
 
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
         coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns trygdetid
+        coEvery {
+            beregningsGrunnlagService.hentOmstillingstoenadBeregningsGrunnlag(
+                any(),
+                any()
+            )
+        } returns omstillingstoenadBeregningsGrunnlag(behandling.id)
 
         runBlocking {
             assertThrows<IllegalArgumentException> {
@@ -190,6 +235,12 @@ internal class BeregnOmstillingsstoenadServiceTest {
 
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
         coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns null
+        coEvery {
+            beregningsGrunnlagService.hentOmstillingstoenadBeregningsGrunnlag(
+                any(),
+                any()
+            )
+        } returns omstillingstoenadBeregningsGrunnlag(behandling.id)
 
         runBlocking {
             assertThrows<Exception> {
@@ -229,4 +280,20 @@ internal class BeregnOmstillingsstoenadServiceTest {
         const val GRUNNBELOEP_JAN_23: Int = 9290
         const val OMS_BELOEP_JAN_23: Int = 20902
     }
+    private fun omstillingstoenadBeregningsGrunnlag(behandlingId: UUID) =
+        BeregningsGrunnlagOMS(
+            behandlingId,
+            mockk {
+                every { ident } returns "Z123456"
+                every { tidspunkt } returns Tidspunkt.now()
+                every { type } returns ""
+            },
+            institusjonsoppholdBeregningsgrunnlag = listOf(
+                GrunnlagMedPeriode(
+                    fom = LocalDate.of(2022, 8, 1),
+                    tom = null,
+                    data = InstitusjonsoppholdBeregningsgrunnlag(Reduksjon.NEI_KORT_OPPHOLD)
+                )
+            )
+        )
 }

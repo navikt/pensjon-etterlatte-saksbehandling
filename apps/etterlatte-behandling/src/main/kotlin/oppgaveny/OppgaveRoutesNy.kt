@@ -65,11 +65,9 @@ internal fun Route.oppgaveRoutesNy(
 
         route("{$OPPGAVEID_CALL_PARAMETER}") {
             post("tildel-saksbehandler") {
-                kunSaksbehandler {
-                    val saksbehandlerEndringDto = call.receive<SaksbehandlerEndringDto>()
-                    service.tildelSaksbehandler(oppgaveId, saksbehandlerEndringDto.saksbehandler)
-                    call.respond(HttpStatusCode.OK)
-                }
+                val saksbehandlerEndringDto = call.receive<SaksbehandlerEndringDto>()
+                service.tildelSaksbehandler(oppgaveId, saksbehandlerEndringDto.saksbehandler)
+                call.respond(HttpStatusCode.OK)
             }
             post("bytt-saksbehandler") {
                 kunSaksbehandler {

@@ -13,6 +13,7 @@ import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveListe
 import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveNy
+import no.nav.etterlatte.libs.common.oppgaveNy.SaksbehandlerEndringDto
 import no.nav.etterlatte.libs.common.oppgaveNy.VedtakEndringDTO
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -20,6 +21,7 @@ import no.nav.etterlatte.libs.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktorobo.Resource
 import no.nav.etterlatte.token.BrukerTokenInfo
+import no.nav.etterlatte.token.Fagsaksystem
 import no.nav.etterlatte.token.Saksbehandler
 import no.nav.etterlatte.vedtaksvurdering.VedtakHendelse
 import org.slf4j.LoggerFactory
@@ -147,10 +149,10 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
             .post(
                 resource = Resource(
                     clientId = clientId,
-                    url = "$resourceUrl/nyeoppgaver/${oppgaveTilAttestering.id}/tildel-saksbehandler"
+                    url = "$resourceUrl/api/nyeoppgaver/${oppgaveTilAttestering.id}/tildel-saksbehandler"
                 ),
                 brukerTokenInfo = brukerTokenInfo,
-                postBody = {}
+                postBody = SaksbehandlerEndringDto(saksbehandler = Fagsaksystem.EY.navn)
             )
 
         return when (response) {

@@ -56,4 +56,25 @@ class TrygdetidKlient(config: Config, httpClient: HttpClient) {
             }
         }
     }
+
+    suspend fun kopierTrygdetid(
+        behandlingId: UUID,
+        forrigeBehandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo
+    ) {
+        logger.info("Kopierer trygdetid med behandlingid $behandlingId")
+        downstreamResourceClient
+            .post(
+                resource = Resource(
+                    clientId = clientId,
+                    url = "$resourceUrl/api/trygdetid/$behandlingId/kopier/$forrigeBehandlingId"
+                ),
+                brukerTokenInfo = brukerTokenInfo,
+                {}
+            )
+            .mapBoth(
+                success = { true },
+                failure = { throwableErrorMessage -> throw throwableErrorMessage }
+            )
+    }
 }

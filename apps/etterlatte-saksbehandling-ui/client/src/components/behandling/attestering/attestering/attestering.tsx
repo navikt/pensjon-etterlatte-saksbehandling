@@ -62,7 +62,7 @@ export const Attestering = ({ setBeslutning, beslutning, behandling, vedtak }: P
                   beslutning={beslutning}
                   setBeslutning={setBeslutning}
                   behandling={behandling}
-                  disabled={attestantOgSaksbehandlerErSammePerson || innloggetBrukerErSammeSomPaaOppgave}
+                  disabled={attestantOgSaksbehandlerErSammePerson}
                 />
               ) : (
                 <Tekst>Se gjennom alle steg før du tar en beslutning.</Tekst>

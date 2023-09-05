@@ -175,7 +175,7 @@ internal class VilkaarsvurderingServiceTest {
 
         vilkaarsvurdering shouldNotBe null
         vilkaarsvurdering.behandlingId shouldBe uuid
-        vilkaarsvurdering.vilkaar shouldHaveSize 8
+        vilkaarsvurdering.vilkaar shouldHaveSize 9
         vilkaarsvurdering.vilkaar.first { it.hovedvilkaar.type == VilkaarType.OMS_ETTERLATTE_LEVER }.let { vilkaar ->
             vilkaar.grunnlag shouldBe emptyList()
         }

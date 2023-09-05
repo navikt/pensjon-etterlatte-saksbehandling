@@ -14,7 +14,7 @@ import { INasjonalitetsType } from '~components/behandling/fargetags/nasjonalite
 import { SidebarPanel } from '~components/behandling/SideMeny/SideMeny'
 import { useEffect, useState } from 'react'
 import { isFailure, isInitial, isPending, isPendingOrInitial, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
-import { hentOppgaveForBehandlingUnderBehandling } from '~shared/api/oppgaverny'
+import { hentOppgaveForBehandlingUnderBehandlingIkkeattestert } from '~shared/api/oppgaverny'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 
@@ -28,7 +28,7 @@ export const Oversikt = ({
   const kommentarFraAttestant = behandlingsInfo.attestertLogg?.slice(-1)[0]?.kommentar
   const [saksbehandlerPaaOppgave, setSaksbehandlerPaaOppgave] = useState<string | null>(null)
   const [oppgaveForBehandlingStatus, requesthentOppgaveForBehandling] = useApiCall(
-    hentOppgaveForBehandlingUnderBehandling
+    hentOppgaveForBehandlingUnderBehandlingIkkeattestert
   )
   useEffect(() => {
     requesthentOppgaveForBehandling({ behandlingId: behandlingsInfo.behandlingId }, (saksbehandler, statusCode) => {

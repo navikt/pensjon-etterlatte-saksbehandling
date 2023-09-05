@@ -5,7 +5,12 @@ import { IBeslutning } from '../types'
 import { Beslutningsvalg } from './beslutningsvalg'
 import { useAppSelector } from '~store/Store'
 import { Alert } from '@navikt/ds-react'
-import { VedtakSammendrag } from "~components/vedtak/typer";
+import { VedtakSammendrag } from '~components/vedtak/typer'
+import { isFailure, isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
+import { hentOppgaveForBehandlingUnderBehandling } from '~shared/api/oppgaverny'
+import { useEffect, useState } from 'react'
+import Spinner from '~shared/Spinner'
+import { ApiErrorAlert } from '~ErrorBoundary'
 
 type Props = {
   setBeslutning: (value: IBeslutning) => void
@@ -20,28 +25,59 @@ export const Attestering = ({ setBeslutning, beslutning, behandling, vedtak }: P
   const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.saksbehandler)
 
   const attestantOgSaksbehandlerErSammePerson = vedtak?.saksbehandlerId === innloggetSaksbehandler.ident
+  const [saksbehandlerPaaOppgave, setSaksbehandlerPaaOppgave] = useState<string | null>(null)
+
+  const [oppgaveForBehandlingStatus, requestHentUnderbehandlingSaksbehandler] = useApiCall(
+    hentOppgaveForBehandlingUnderBehandling
+  )
+
+  useEffect(() => {
+    requestHentUnderbehandlingSaksbehandler({ behandlingId: behandling.id }, (saksbehandler, statusCode) => {
+      if (statusCode === 200) {
+        setSaksbehandlerPaaOppgave(saksbehandler)
+      }
+    })
+  }, [])
+
+  const innloggetBrukerErSammeSomPaaOppgave = saksbehandlerPaaOppgave === innloggetSaksbehandler.ident
 
   return (
     <AttesteringWrapper>
       <div className="info">
         <Overskrift>Kontroller opplysninger og faglige vurderinger gjort under behandling.</Overskrift>
       </div>
-      <TextWrapper>
-        Beslutning
-        {lastPage ? (
-          <Beslutningsvalg
-            beslutning={beslutning}
-            setBeslutning={setBeslutning}
-            behandling={behandling}
-            disabled={attestantOgSaksbehandlerErSammePerson}
-          />
-        ) : (
-          <Tekst>Se gjennom alle steg før du tar en beslutning.</Tekst>
+      <>
+        {isPending(oppgaveForBehandlingStatus) && <Spinner visible={true} label={'Henter oppgave'} />}
+        {isFailure(oppgaveForBehandlingStatus) && (
+          <ApiErrorAlert>Kunne ikke hente oppgave for behandling</ApiErrorAlert>
         )}
-        {attestantOgSaksbehandlerErSammePerson && (
-          <Alert variant={'warning'}>Du kan ikke attestere en sak som du har saksbehandlet</Alert>
-        )}
-      </TextWrapper>
+      </>
+      {isSuccess(oppgaveForBehandlingStatus) && (
+        <>
+          {innloggetBrukerErSammeSomPaaOppgave ? (
+            <TextWrapper>
+              Beslutning
+              {lastPage ? (
+                <Beslutningsvalg
+                  beslutning={beslutning}
+                  setBeslutning={setBeslutning}
+                  behandling={behandling}
+                  disabled={attestantOgSaksbehandlerErSammePerson || innloggetBrukerErSammeSomPaaOppgave}
+                />
+              ) : (
+                <Tekst>Se gjennom alle steg før du tar en beslutning.</Tekst>
+              )}
+              {attestantOgSaksbehandlerErSammePerson && (
+                <Alert variant={'warning'}>Du kan ikke attestere en sak som du har saksbehandlet</Alert>
+              )}
+            </TextWrapper>
+          ) : (
+            <Alert variant={'warning'}>
+              Oppgaven må være tildelt deg for å kunne godkjenne eller underkjenne behandlingen
+            </Alert>
+          )}
+        </>
+      )}
     </AttesteringWrapper>
   )
 }

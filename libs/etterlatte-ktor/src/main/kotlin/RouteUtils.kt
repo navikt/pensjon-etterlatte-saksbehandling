@@ -18,6 +18,7 @@ import java.util.*
 const val BEHANDLINGSID_CALL_PARAMETER = "behandlingsid"
 const val SAKID_CALL_PARAMETER = "sakId"
 const val OPPGAVEID_CALL_PARAMETER = "oppgaveId"
+const val OPPGAVEID_GOSYS_CALL_PARAMETER = "gosysOppgaveId"
 
 inline val PipelineContext<*, ApplicationCall>.behandlingsId: UUID
     get() = call.parameters[BEHANDLINGSID_CALL_PARAMETER]?.let { UUID.fromString(it) } ?: throw NullPointerException(
@@ -32,6 +33,11 @@ inline val PipelineContext<*, ApplicationCall>.sakId: Long
 inline val PipelineContext<*, ApplicationCall>.oppgaveId: UUID
     get() = requireNotNull(call.parameters[OPPGAVEID_CALL_PARAMETER]?.let { UUID.fromString(it) }) {
         "OppgaveId er ikke i path params"
+    }
+
+inline val PipelineContext<*, ApplicationCall>.gosysOppgaveId: String
+    get() = requireNotNull(call.parameters[OPPGAVEID_GOSYS_CALL_PARAMETER]?.let { it }) {
+        "Gosys oppgaveId er ikke i path params"
     }
 
 suspend inline fun PipelineContext<*, ApplicationCall>.withBehandlingId(

@@ -8,6 +8,7 @@ import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveKilde
+import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveListe
 import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveNy
 import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveType
 import no.nav.etterlatte.libs.common.oppgaveNy.Status
@@ -19,9 +20,9 @@ import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.sak.SakDao
 import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
 import no.nav.etterlatte.tilgangsstyring.filterForEnheter
+import no.nav.etterlatte.token.BrukerTokenInfo
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import no.nav.etterlatte.token.BrukerTokenInfo
 import java.util.*
 
 class OppgaveServiceNy(
@@ -342,6 +343,9 @@ class OppgaveServiceNy(
                 oppgaveDaoNy.endreStatusPaaOppgave(it.id, Status.AVBRUTT)
             }
     }
+
+    fun hentSakOgOppgaverForSak(sakId: Long) = inTransaction { sakDao.hentSak(sakId)!! }
+        .let { OppgaveListe(it, hentOppgaverForSak(it.id)) }
 }
 
 fun List<OppgaveNy>.filterOppgaverForEnheter(

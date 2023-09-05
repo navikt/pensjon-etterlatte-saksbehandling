@@ -127,7 +127,7 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
                 .get(
                     resource = Resource(
                         clientId = clientId,
-                        url = "$resourceUrl/api/sak/$sakId/oppgaver"
+                        url = "$resourceUrl/api/nyeoppgaver/sak/$sakId/oppgaver"
                     ),
                     brukerTokenInfo = brukerTokenInfo
                 )

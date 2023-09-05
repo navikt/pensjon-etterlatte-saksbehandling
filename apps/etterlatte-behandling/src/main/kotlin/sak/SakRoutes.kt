@@ -103,14 +103,6 @@ internal fun Route.sakWebRoutes(
                     else -> call.respond(FoersteVirkDto(foersteVirk.atDay(1), sakId))
                 }
             }
-
-            get("oppgaver") {
-                kunSystembruker {
-                    val oppgaver = inTransaction { sakService.finnSak(sakId)!! }
-                        .let { OppgaveListe(it, oppgaveServiceNy.hentOppgaverForSak(it.id)) }
-                    call.respond(oppgaver)
-                }
-            }
         }
 
         route("/personer/") {

@@ -18,16 +18,16 @@ Det må foreligge et tjenestepensjonsforhold i Tjenestepensjonsregisteret som gj
 
 ##### Samordningsvedtak
 
-| Felt             | Type        | Beskrivelse                |
-|:-----------------|:------------|:---------------------------|
-| vedtakId         | int         | samme som forespurt id     |
-| sakstype         | string      | "OMSTILLINGSSTOENAD"       |
-| virkningsdato    | yyyy-MM-dd  | Dato vedtaket gjelder fra  |
-| opphoersdato     | yyyy-MM-dd  | Eventuell sluttdato        |
-| resultatkode*    | string      | Start / Endring / Stopp    |
-| stoppaarsak*     | string      | Inntekt / Opphør / Annet   |
-| anvendtTrygdetid | int         | Avdødes trygdetid          |
-| perioder         | Periode[]   | Periodiserte beløp         |
+| Felt             | Type       | Beskrivelse                |
+|:-----------------|:-----------|:---------------------------|
+| vedtakId         | int        | Dvs samme som forespurt id |
+| sakstype         | string     | OMS                        |
+| virkningsdato    | yyyy-MM-dd | Dato vedtaket gjelder fra  |
+| opphoersdato     | yyyy-MM-dd | Eventuell sluttdato        |
+| type             | string     | START/ENDRING/OPPHOER      |
+| arsak*           | string     | INNTEKT/ANNET              |
+| anvendtTrygdetid | int        | Avdødes trygdetid          |
+| perioder         | Periode[]  | Periodiserte beløp         |
 
 ##### Periode
 

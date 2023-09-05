@@ -5,7 +5,6 @@ import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.route
-import no.nav.etterlatte.libs.common.behandling.SakType
 import java.time.LocalDate
 
 data class SamordningVedtakDto(
@@ -13,8 +12,8 @@ data class SamordningVedtakDto(
     val sakstype: String,
     val virkningsdato: LocalDate,
     val opphoersdato: LocalDate?,
-    val resultatkode: String,
-    val stoppaarsak: String?,
+    val type: SamordningVedtakType,
+    val aarsak: String?,
     val anvendtTrygdetid: Int,
     val perioder: List<SamordningVedtakPeriode> = listOf()
 )
@@ -25,6 +24,14 @@ data class SamordningVedtakPeriode(
     val omstillingsstoenadBrutto: Int,
     val omstillingsstoenadNetto: Int
 )
+
+enum class SamordningVedtakType {
+    START, ENDRING, OPPHOER
+}
+
+enum class SamordningVedtakAarsak {
+    INNTEKT, ANNET
+}
 
 fun Route.samordningVedtakRoute() {
     route("ping") {
@@ -37,17 +44,18 @@ fun Route.samordningVedtakRoute() {
         get("{vedtakId}") {
             val vedtakId = requireNotNull(call.parameters["vedtakId"]).toLong()
 
+            val dummystart = LocalDate.now().withDayOfMonth(1)
             val vedtaksinfo = SamordningVedtakDto(
                 vedtakId = vedtakId,
-                sakstype = SakType.OMSTILLINGSSTOENAD.name,
-                virkningsdato = LocalDate.now(),
+                sakstype = "OMS",
+                virkningsdato = dummystart,
                 opphoersdato = null,
-                resultatkode = "DUMMY RESULTATKODE",
-                stoppaarsak = null,
+                type = SamordningVedtakType.START,
+                aarsak = null,
                 anvendtTrygdetid = 40,
                 perioder = listOf(
                     SamordningVedtakPeriode(
-                        fom = LocalDate.now(),
+                        fom = dummystart,
                         omstillingsstoenadBrutto = 12000,
                         omstillingsstoenadNetto = 9500
                     )

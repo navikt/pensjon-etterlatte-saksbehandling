@@ -12,6 +12,11 @@ export const SOESKENJUSTERING_GRUNNER = [
 
 export type BarnepensjonSoeskenjusteringGrunn = (typeof SOESKENJUSTERING_GRUNNER)[number]
 
+export interface RevurderingAarsakAnnen {
+  type: 'ANNEN'
+  aarsak: string
+}
+
 export interface SoeskenjusteringInfo {
   type: 'SOESKENJUSTERING'
   grunnForSoeskenjustering: BarnepensjonSoeskenjusteringGrunn
@@ -50,6 +55,7 @@ export interface Navn {
 }
 
 export type RevurderingInfo =
+  | RevurderingAarsakAnnen
   | SoeskenjusteringInfo
   | AdopsjonInfo
   | OmgjoeringAvFarskapInfo

@@ -17,6 +17,11 @@ enum class BarnepensjonSoeskenjusteringGrunn {
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
 sealed class RevurderingInfo {
 
+    @JsonTypeName("ANNEN")
+    data class RevurderingAarsakAnnen(
+        val aarsak: String
+    ) : RevurderingInfo()
+
     @JsonTypeName("SOESKENJUSTERING")
     data class Soeskenjustering(
         val grunnForSoeskenjustering: BarnepensjonSoeskenjusteringGrunn

@@ -67,13 +67,15 @@ export const OpprettNyBehandling = ({
               })}
             </Select>
             {valgtRevurdering === Revurderingsaarsak.ANNEN && (
-              <TextField
-                label="Beskriv hvorfor"
-                size="small"
-                type="text"
-                value={fritekstgrunn}
-                onChange={(e) => setFritekstgrunn(e.target.value)}
-              />
+              <AnnenRevurderingWrapper>
+                <TextField
+                  label="Beskriv årsak"
+                  size="medium"
+                  type="text"
+                  value={fritekstgrunn}
+                  onChange={(e) => setFritekstgrunn(e.target.value)}
+                />
+              </AnnenRevurderingWrapper>
             )}
             <ButtonContainer>
               <Button
@@ -98,4 +100,8 @@ export const OpprettNyBehandling = ({
 
 const OpprettNyBehandlingWrapper = styled.div`
   margin-top: 3rem;
+`
+
+const AnnenRevurderingWrapper = styled.div`
+  margin-top: 1rem;
 `

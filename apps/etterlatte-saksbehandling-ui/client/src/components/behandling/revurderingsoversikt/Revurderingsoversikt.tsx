@@ -31,6 +31,8 @@ import { GrunnForSoeskenjustering } from '~components/behandling/revurderingsove
 import { AdoptertAv } from '~components/behandling/revurderingsoversikt/AdoptertAv'
 import { GrunnlagForVirkningstidspunkt } from '~components/behandling/revurderingsoversikt/GrunnlagForVirkningstidspunkt'
 import { OmgjoeringAvFarskap } from '~components/behandling/revurderingsoversikt/OmgjoeringAvFarskap'
+import { hentUndertypeFraBehandling, RevurderingAarsakAnnen } from '~shared/types/RevurderingInfo'
+import { Info } from '~components/behandling/soeknadsoversikt/Info'
 
 const revurderingsaarsakTilTekst = (revurderingsaarsak: Revurderingsaarsak): string =>
   tekstRevurderingsaarsak[revurderingsaarsak]
@@ -75,6 +77,7 @@ export const Revurderingsoversikt = (props: { behandling: IDetaljertBehandling }
     behandling.revurderingsaarsak,
     'Kan ikke starte en revurdering uten en revurderingsårsak'
   )
+  const revurderingInfo = hentUndertypeFraBehandling<RevurderingAarsakAnnen>('ANNEN', behandling)
 
   const [hjemler, beskrivelse] = hjemlerOgBeskrivelse(behandling.sakType, revurderingsaarsak)
   return (
@@ -85,10 +88,17 @@ export const Revurderingsoversikt = (props: { behandling: IDetaljertBehandling }
             Revurdering
           </Heading>
         </HeadingWrapper>
-        <BodyShort>
-          {erOpphoer(revurderingsaarsak) ? 'Opphør' : 'Revurdering'} på grunn av{' '}
-          <Lowercase>{revurderingsaarsakTilTekst(revurderingsaarsak)}</Lowercase>.
-        </BodyShort>
+        {revurderingsaarsak == Revurderingsaarsak.ANNEN ? (
+          <Info
+            label={`Årsak til revurdering (${revurderingsaarsakTilTekst(revurderingsaarsak)})`}
+            tekst={revurderingInfo?.aarsak ?? 'Ikke oppgitt'}
+          />
+        ) : (
+          <BodyShort>
+            {erOpphoer(revurderingsaarsak) ? 'Opphør' : 'Revurdering'} på grunn av{' '}
+            <Lowercase>{revurderingsaarsakTilTekst(revurderingsaarsak)}</Lowercase>.
+          </BodyShort>
+        )}
         {erOpphoer(revurderingsaarsak) ? (
           <Alert variant="warning">
             Gjenny støtter ikke tilbakekreving per dags dato, så opphør må ikke gjennomføres hvis opphøret gjelder fra

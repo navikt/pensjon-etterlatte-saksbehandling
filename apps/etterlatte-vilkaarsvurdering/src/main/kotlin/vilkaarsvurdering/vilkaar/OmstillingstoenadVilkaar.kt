@@ -15,8 +15,8 @@ object OmstillingstoenadVilkaar {
     fun inngangsvilkaar(grunnlag: Grunnlag) = listOf(
         etterlatteLever(),
         doedsfall(),
-        etterlatteOverlappendeYtelser(),
-        etterlatteSivilstand(),
+        overlappendeYtelser(),
+        sivilstand(),
         yrkesskade(),
         avdoedesMedlemskap(),
         gjenlevendesMedlemskap(),
@@ -52,7 +52,7 @@ object OmstillingstoenadVilkaar {
         )
     )
 
-    private fun etterlatteOverlappendeYtelser() = Vilkaar(
+    private fun overlappendeYtelser() = Vilkaar(
         hovedvilkaar = Delvilkaar(
             type = VilkaarType.OMS_OVERLAPPENDE_YTELSER,
             tittel = "Bortfall av rettigheter etter § 17-11 første ledd",
@@ -68,7 +68,7 @@ object OmstillingstoenadVilkaar {
         )
     )
 
-    private fun etterlatteSivilstand() = Vilkaar(
+    private fun sivilstand() = Vilkaar(
         hovedvilkaar = Delvilkaar(
             type = VilkaarType.OMS_SIVILSTAND,
             tittel = "Rett til omstillingsstønad igjen etter § 17-11 andre ledd?",

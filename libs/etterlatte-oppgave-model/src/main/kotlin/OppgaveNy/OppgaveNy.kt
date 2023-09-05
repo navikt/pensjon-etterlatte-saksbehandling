@@ -87,7 +87,8 @@ enum class OppgaveType {
     VURDER_KONSEKVENS,
     ATTESTERING,
     UNDERKJENT,
-    GOSYS
+    GOSYS,
+    UTLAND
 }
 
 data class SaksbehandlerEndringDto(

@@ -79,7 +79,7 @@ const VurderHendelseModal = (props: Props) => {
                 <MarginTop>
                   <TextField
                     label="Beskriv årsak"
-                    size="small"
+                    size="medium"
                     type="text"
                     value={fritekstgrunn}
                     onChange={(e) => setFritekstgrunn(e.target.value)}
@@ -88,7 +88,7 @@ const VurderHendelseModal = (props: Props) => {
               )}
               <MarginTop>
                 <TextField
-                  label="Begrunnelse"
+                  label="Begrunn valget for hendelsen"
                   size="medium"
                   type="text"
                   value={begrunnelse}

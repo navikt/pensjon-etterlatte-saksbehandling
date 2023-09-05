@@ -68,7 +68,7 @@ export const OpprettNyBehandling = ({
               <AnnenRevurderingWrapper>
                 <TextField
                   label="Beskriv årsak"
-                  size="small"
+                  size="medium"
                   type="text"
                   value={fritekstgrunn}
                   onChange={(e) => setFritekstgrunn(e.target.value)}

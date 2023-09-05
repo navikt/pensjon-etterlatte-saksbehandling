@@ -55,7 +55,7 @@ object OmstillingstoenadVilkaar {
     private fun etterlatteOverlappendeYtelser() = Vilkaar(
         hovedvilkaar = Delvilkaar(
             type = VilkaarType.OMS_OVERLAPPENDE_YTELSER,
-            tittel = "Bortfaller av rettigheter etter § 17-11 første ledd",
+            tittel = "Bortfall av rettigheter etter § 17-11 første ledd",
             beskrivelse = """
                 Retten til omstillingsstønad faller bort når etterlatte fyller 67 år eller tar ut alderspensjon, får rett til 100 % uføretrygd, mottar AFP fra en offentlig pensjonsordning eller gifter seg igjen, gjelder også samboere etter § 1-5.
             """.trimIndent(),

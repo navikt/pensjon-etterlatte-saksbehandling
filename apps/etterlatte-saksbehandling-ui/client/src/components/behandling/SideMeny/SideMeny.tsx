@@ -12,7 +12,6 @@ import { IBehandlingInfo } from '~components/behandling/SideMeny/types'
 import { Dokumentoversikt } from '~components/person/dokumentoversikt'
 import styled from 'styled-components'
 import AnnullerBehandling from '~components/behandling/handlinger/AnnullerBehanding'
-import { SakType } from '~shared/types/sak'
 import { VedtakSammendrag } from '~components/vedtak/typer'
 import { ChevronLeftDoubleIcon, ChevronRightDoubleIcon } from '@navikt/aksel-icons'
 
@@ -70,7 +69,7 @@ export const SideMeny = (props: { behandling: IDetaljertBehandling; vedtak: Vedt
           <Dokumentoversikt fnr={behandling.søker.foedselsnummer} liten />
         )}
 
-        {behandling.sakType == SakType.BARNEPENSJON && <AnnullerBehandling />}
+        <AnnullerBehandling />
       </SidebarContent>
     </CollapsibleSidebar>
   )

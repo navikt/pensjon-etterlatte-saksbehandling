@@ -9,6 +9,7 @@ import { IBehandlingStatus, IBehandlingsType } from '~shared/types/IDetaljertBeh
 import { SidebarPanel } from '~components/behandling/SideMeny/SideMeny'
 import { hentBehandlesFraStatus } from '~components/behandling/felles/utils'
 import { useBehandling } from '~components/behandling/useBehandling'
+import { SakType } from '~shared/types/sak'
 
 export default function AnnullerBehandling() {
   const navigate = useNavigate()
@@ -17,9 +18,11 @@ export default function AnnullerBehandling() {
 
   const behandling = useBehandling()
   const erFoerstegangsbehandling = behandling?.behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING
+  const erFoerstegangsbehandlingOgOmstillingsstoenad =
+    behandling?.sakType == SakType.OMSTILLINGSSTOENAD && erFoerstegangsbehandling
 
   const behandles = hentBehandlesFraStatus(behandling?.status ?? IBehandlingStatus.IVERKSATT)
-  if (!behandles) {
+  if (!behandles || erFoerstegangsbehandlingOgOmstillingsstoenad) {
     return null
   }
 

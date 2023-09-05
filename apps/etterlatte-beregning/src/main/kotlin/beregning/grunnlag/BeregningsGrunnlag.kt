@@ -8,6 +8,6 @@ data class BeregningsGrunnlag(
     val behandlingId: UUID,
     val kilde: Grunnlagsopplysning.Saksbehandler,
     val soeskenMedIBeregning: List<GrunnlagMedPeriode<List<SoeskenMedIBeregning>>>,
-    val institusjonsoppholdBeregningsgrunnlag: List<GrunnlagMedPeriode<InstitusjonsoppholdBeregningsgrunnlag>>? =
+    val institusjonsoppholdBeregningsgrunnlag: List<GrunnlagMedPeriode<InstitusjonsoppholdBeregningsgrunnlag>> =
         emptyList()
 )

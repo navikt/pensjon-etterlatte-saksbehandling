@@ -129,7 +129,7 @@ private fun Row.asBeregningsGrunnlagBP(): BeregningsGrunnlag {
     return BeregningsGrunnlag(
         behandlingId = this.uuid("behandlings_id"),
         soeskenMedIBeregning = objectMapper.readValue(this.string("soesken_med_i_beregning_perioder")),
-        institusjonsoppholdBeregningsgrunnlag = this.stringOrNull("institusjonsopphold")?.let {
+        institusjonsoppholdBeregningsgrunnlag = this.string("institusjonsopphold").let {
             objectMapper.readValue(
                 it
             )
@@ -141,7 +141,7 @@ private fun Row.asBeregningsGrunnlagBP(): BeregningsGrunnlag {
 private fun Row.asBeregningsGrunnlagOMS(): BeregningsGrunnlagOMS {
     return BeregningsGrunnlagOMS(
         behandlingId = this.uuid("behandlings_id"),
-        institusjonsoppholdBeregningsgrunnlag = this.stringOrNull("institusjonsopphold")?.let {
+        institusjonsoppholdBeregningsgrunnlag = this.string("institusjonsopphold").let {
             objectMapper.readValue(
                 it
             )

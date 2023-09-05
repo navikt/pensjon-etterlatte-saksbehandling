@@ -176,7 +176,7 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest {
                     Tidspunkt.now()
                 ),
                 oppdatertSoeskenMedIBeregning,
-                null
+                emptyList()
             )
         )
 

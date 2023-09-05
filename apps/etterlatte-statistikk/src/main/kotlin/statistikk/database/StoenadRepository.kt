@@ -63,7 +63,6 @@ class StoenadRepository(private val datasource: DataSource) {
 
     fun lagreMaanedStatistikkRad(maanedStatistikkRad: MaanedStoenadRad) {
         return connection.use { conn ->
-            maanedStatistikkRad
             conn.prepareStatement(
                 """
                 INSERT INTO maaned_stoenad(
@@ -92,7 +91,7 @@ class StoenadRepository(private val datasource: DataSource) {
                 setDate(16, maanedStatistikkRad.vedtakLoependeTom?.let { Date.valueOf(it) })
                 setString(17, maanedStatistikkRad.statistikkMaaned.toString())
                 setString(18, maanedStatistikkRad.sakUtland.toString())
-                setDate(19, Date.valueOf(maanedStatistikkRad.virkningstidspunkt.atDay(1)))
+                setDate(19, Date.valueOf(maanedStatistikkRad.virkningstidspunkt?.atDay(1)))
                 setDate(20, maanedStatistikkRad.utbetalingsdato?.let { Date.valueOf(it) })
                 setString(21, maanedStatistikkRad.avkortingsbeloep)
                 setString(22, maanedStatistikkRad.aarsinntekt)
@@ -231,7 +230,7 @@ private fun PreparedStatement.setStoenadRad(stoenadsrad: StoenadRad): PreparedSt
     setJsonb(19, stoenadsrad.avkorting)
     setString(20, stoenadsrad.vedtakType?.toString())
     setString(21, stoenadsrad.sakUtland?.toString())
-    setDate(22, Date.valueOf(stoenadsrad.virkningstidspunkt.atDay(1)))
+    setDate(22, Date.valueOf(stoenadsrad.virkningstidspunkt?.atDay(1)))
     setDate(23, stoenadsrad.utbetalingsdato?.let { Date.valueOf(it) })
 }
 
@@ -258,6 +257,6 @@ private fun ResultSet.asStoenadRad(): StoenadRad = StoenadRad(
     avkorting = getString("avkorting")?.let { objectMapper.readValue(it) },
     vedtakType = getString("vedtakType")?.let { enumValueOf<VedtakType>(it) },
     sakUtland = getString("sak_utland")?.let { enumValueOf<SakUtland>(it) },
-    virkningstidspunkt = getDate("virkningstidspunkt").toLocalDate().let { YearMonth.of(it.year, it.monthValue) },
+    virkningstidspunkt = getDate("virkningstidspunkt")?.toLocalDate()?.let { YearMonth.of(it.year, it.monthValue) },
     utbetalingsdato = getDate("utbetalingsdato")?.toLocalDate()
 )

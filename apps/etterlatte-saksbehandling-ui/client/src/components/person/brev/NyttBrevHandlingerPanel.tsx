@@ -89,9 +89,8 @@ export default function NyttBrevHandlingerPanel({ brev, setKanRedigeres }: Props
               onClose={() => setIsOpen(false)}
               aria-labelledby="modal-heading"
               className={'padding-modal'}
-              closeButton={false}
             >
-              <Modal.Content style={{ textAlign: 'center' }}>
+              <Modal.Body style={{ textAlign: 'center' }}>
                 {loadingMsg ? (
                   <Spinner visible label={loadingMsg} />
                 ) : (
@@ -115,7 +114,7 @@ export default function NyttBrevHandlingerPanel({ brev, setKanRedigeres }: Props
                     </ButtonWrapper>
                   </>
                 )}
-              </Modal.Content>
+              </Modal.Body>
             </Modal>
           </>
         )}

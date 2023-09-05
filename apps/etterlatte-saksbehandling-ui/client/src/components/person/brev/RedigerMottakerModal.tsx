@@ -51,7 +51,7 @@ export default function RedigerMottakerModal({ brev, oppdater }: Props) {
       />
 
       <MottakerModal open={isOpen} onClose={avbryt}>
-        <Modal.Content>
+        <Modal.Body>
           <Heading size={'large'} spacing>
             Endre mottaker
           </Heading>
@@ -204,7 +204,7 @@ export default function RedigerMottakerModal({ brev, oppdater }: Props) {
               Lagre
             </Button>
           </ButtonRow>
-        </Modal.Content>
+        </Modal.Body>
       </MottakerModal>
     </>
   )

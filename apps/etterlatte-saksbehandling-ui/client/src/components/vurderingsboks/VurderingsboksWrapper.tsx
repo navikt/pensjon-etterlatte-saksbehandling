@@ -156,5 +156,5 @@ const VurderingKnapper = styled.div`
 
 const Kommentar = styled.div`
   margin-bottom: 1.5em;
-  color: var(--navds-global-color-gray-700);
+  color: var(--a-gray-700);
 `

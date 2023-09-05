@@ -30,7 +30,11 @@ const VedtakKolonner = (props: { behandlingsId: string }) => {
 
   return (
     <>
-      {isPending(vedtak) && <Spinner visible label={''} margin={'0'} />}
+      {isPending(vedtak) && (
+        <Table.DataCell>
+          <Spinner visible label={''} margin={'0'} />
+        </Table.DataCell>
+      )}
       {isSuccess(vedtak) && (
         <>
           <Table.DataCell>{attestertDato(vedtak.data?.datoAttestert)}</Table.DataCell>

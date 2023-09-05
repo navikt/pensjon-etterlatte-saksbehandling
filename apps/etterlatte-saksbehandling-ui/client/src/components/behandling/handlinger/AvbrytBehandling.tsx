@@ -21,7 +21,7 @@ export default function AvbrytBehandling() {
       </Button>
 
       <Modal open={isOpen} onClose={() => setIsOpen(false)} aria-labelledby="modal-heading" className={'padding-modal'}>
-        <Modal.Content style={{ textAlign: 'center' }}>
+        <Modal.Body style={{ textAlign: 'center' }}>
           <Heading level={'1'} spacing size={'medium'} id="modal-heading">
             Er du sikker på at du vil avbryte behandlingen?
           </Heading>
@@ -39,7 +39,7 @@ export default function AvbrytBehandling() {
               Ja, avbryt
             </Button>
           </ButtonWrapper>
-        </Modal.Content>
+        </Modal.Body>
       </Modal>
     </>
   )

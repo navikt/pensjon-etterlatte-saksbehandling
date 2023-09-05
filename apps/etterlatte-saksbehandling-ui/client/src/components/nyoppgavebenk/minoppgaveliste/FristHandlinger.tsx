@@ -66,11 +66,13 @@ export const FristHandlinger = (props: {
     <>
       {frist ? (
         <>
-          <Modal open={open} onClose={() => setOpen((x) => !x)} closeButton={false} aria-labelledby="modal-heading">
-            <Modal.Content>
-              <Heading spacing level="2" size="medium" id="modal-heading">
-                Velg ny frist
-              </Heading>
+          <Modal open={open} onClose={() => setOpen((x) => !x)} aria-labelledby="modal-heading">
+            <Modal.Body>
+              <Modal.Header closeButton={false}>
+                <Heading spacing level="2" size="medium" id="modal-heading">
+                  Velg ny frist
+                </Heading>
+              </Modal.Header>
               <DatePicker.Standalone
                 onSelect={redigerDatoMedtimerForAAslippetidssoneproblemUTC}
                 selected={nyFrist}
@@ -108,7 +110,7 @@ export const FristHandlinger = (props: {
                   </Button>
                 )}
               </Buttonwrapper>
-            </Modal.Content>
+            </Modal.Body>
           </Modal>
 
           {erRedigerbar ? (

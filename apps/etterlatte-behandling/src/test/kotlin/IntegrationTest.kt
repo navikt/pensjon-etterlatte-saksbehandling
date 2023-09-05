@@ -239,6 +239,22 @@ class IntegrationTest : BehandlingIntegrationTest() {
                 assertEquals(HttpStatusCode.OK, it.status)
             }
 
+            client.post("/behandlinger/$behandlingId/oppdaterTrygdetid") {
+                addAuthToken(tokenSaksbehandler)
+                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                setBody("{}")
+            }.also {
+                applicationContext.dataSource.connection.use {
+                    val actual = BehandlingDao(
+                        KommerBarnetTilGodeDao { it },
+                        RevurderingDao { it }
+                    ) { it }.hentBehandling(behandlingId)!!
+                    assertEquals(BehandlingStatus.TRYGDETID_OPPDATERT, actual.status)
+                }
+
+                assertEquals(HttpStatusCode.OK, it.status)
+            }
+
             client.post("/behandlinger/$behandlingId/beregn") {
                 addAuthToken(tokenSaksbehandler)
             }.also {

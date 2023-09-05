@@ -95,6 +95,7 @@ class OmregningIntegrationTest : BehandlingIntegrationTest() {
                 .oppdaterGyldighetsproeving(gyldighetsresultatVurdering())
                 .oppdaterVirkningstidspunkt(virkningstidspunkt)
                 .tilVilkaarsvurdert()
+                .tilTrygdetidOppdatert()
                 .tilBeregnet()
                 .tilFattetVedtak()
                 .tilAttestert()

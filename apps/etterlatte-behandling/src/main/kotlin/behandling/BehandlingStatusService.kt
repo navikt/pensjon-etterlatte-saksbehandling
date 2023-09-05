@@ -21,6 +21,7 @@ import java.util.*
 interface BehandlingStatusService {
     fun settOpprettet(behandlingId: UUID, dryRun: Boolean = true)
     fun settVilkaarsvurdert(behandlingId: UUID, dryRun: Boolean = true)
+    fun settTrygdetidOppdatert(behandlingId: UUID, dryRun: Boolean = true)
     fun settBeregnet(behandlingId: UUID, dryRun: Boolean = true)
     fun settAvkortet(behandlingId: UUID, dryRun: Boolean = true)
     fun sjekkOmKanFatteVedtak(behandlingId: UUID)
@@ -60,6 +61,10 @@ class BehandlingStatusServiceImpl(
                 behandlingDao.lagreStatus(behandling.id, behandling.status, behandling.sistEndret)
             }
         }
+    }
+
+    override fun settTrygdetidOppdatert(behandlingId: UUID, dryRun: Boolean) {
+        hentBehandling(behandlingId).tilTrygdetidOppdatert().lagreEndring(dryRun)
     }
 
     override fun settBeregnet(behandlingId: UUID, dryRun: Boolean) {

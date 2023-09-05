@@ -42,6 +42,17 @@ internal fun Route.behandlingsstatusRoutes(
             }
         }
 
+        get("/oppdaterTrygdetid") {
+            haandterStatusEndring(call) {
+                behandlingsstatusService.settTrygdetidOppdatert(behandlingsId, true)
+            }
+        }
+        post("/oppdaterTrygdetid") {
+            haandterStatusEndring(call) {
+                behandlingsstatusService.settTrygdetidOppdatert(behandlingsId, false)
+            }
+        }
+
         get("/beregn") {
             haandterStatusEndring(call) {
                 behandlingsstatusService.settBeregnet(behandlingsId)

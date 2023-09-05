@@ -11,7 +11,7 @@ import java.util.*
 
 data class Avkorting(
     val aarsoppgjoer: Aarsoppgjoer = Aarsoppgjoer(),
-    val lopendeYtelse: List<AvkortetYtelse> = emptyList(), // Fylles ut av metode medLoependeYtelse
+    val avkortetYtelseFraVirkningstidspunkt: List<AvkortetYtelse> = emptyList(), // Fylles ut av metode medLoependeYtelse
     val avkortetYtelseForrigeVedtak: List<AvkortetYtelse> = emptyList()
 ) {
 
@@ -19,20 +19,25 @@ data class Avkorting(
     * Årsoppgjør inneholder ytelsen sine perioder for hele år og for behandlinger/vedtak er det kun
     * virknigstidspunkt og fremover som er relevant.
     */
-    fun medLoependeYtelse(
+    fun medYtelseFraOgMedVirkningstidspunkt(
         virkningstidspunkt: YearMonth,
         forrigeAvkorting: Avkorting? = null
     ): Avkorting = this.copy(
-        lopendeYtelse = aarsoppgjoer.avkortetYtelseAar.filter { it.periode.fom >= virkningstidspunkt }.map {
-            if (virkningstidspunkt > it.periode.fom && (it.periode.tom == null || virkningstidspunkt <= it.periode.tom)) {
-                it.copy(periode = Periode(fom = virkningstidspunkt, tom = it.periode.tom))
-            } else {
-                it
-            }
-        },
+        avkortetYtelseFraVirkningstidspunkt = aarsoppgjoer.avkortetYtelseAar
+            .filter { it.periode.tom == null || virkningstidspunkt <= it.periode.tom }
+            .map {
+                if (virkningstidspunkt > it.periode.fom && (it.periode.tom == null || virkningstidspunkt <= it.periode.tom)) {
+                    it.copy(periode = Periode(fom = virkningstidspunkt, tom = it.periode.tom))
+                } else {
+                    it
+                }
+            },
         avkortetYtelseForrigeVedtak = forrigeAvkorting?.aarsoppgjoer?.avkortetYtelseAar ?: emptyList()
     )
 
+    /*
+     * Skal kun benyttes ved opprettelse av ny avkorting ved revurdering.
+     */
     fun kopierAvkorting(): Avkorting = Avkorting(
         aarsoppgjoer = aarsoppgjoer.copy(
             ytelseFoerAvkorting = aarsoppgjoer.ytelseFoerAvkorting.map { it },
@@ -47,7 +52,11 @@ data class Avkorting(
         virkningstidspunkt: YearMonth,
         behandlingstype: BehandlingType,
         beregning: Beregning
-    ) = oppdaterMedInntektsgrunnlag(nyttGrunnlag).beregnAvkorting(virkningstidspunkt, behandlingstype, beregning)
+    ) = if (behandlingstype == BehandlingType.FØRSTEGANGSBEHANDLING) {
+        oppdaterMedInntektsgrunnlag(nyttGrunnlag).beregnAvkortingForstegangs(virkningstidspunkt, beregning)
+    } else {
+        oppdaterMedInntektsgrunnlag(nyttGrunnlag).beregnAvkortingRevurdering(beregning)
+    }
 
     fun oppdaterMedInntektsgrunnlag(
         nyttGrunnlag: AvkortingGrunnlag
@@ -74,17 +83,6 @@ data class Avkorting(
             )
         )
     }
-
-    fun beregnAvkorting(
-        virkningstidspunkt: YearMonth,
-        behandlingstype: BehandlingType,
-        beregning: Beregning
-    ): Avkorting =
-        if (behandlingstype == BehandlingType.FØRSTEGANGSBEHANDLING) {
-            beregnAvkortingForstegangs(virkningstidspunkt, beregning)
-        } else {
-            beregnAvkortingRevurdering(virkningstidspunkt, beregning)
-        }
 
     private fun beregnAvkortingForstegangs(virkningstidspunkt: YearMonth, beregning: Beregning): Avkorting {
 
@@ -122,10 +120,8 @@ data class Avkorting(
         )
     }
 
-    private fun beregnAvkortingRevurdering(virkningstidspunkt: YearMonth, beregning: Beregning): Avkorting {
-
-        val ytelseFoerAvkorting =
-            this.aarsoppgjoer.ytelseFoerAvkorting.leggTilNyeBeregninger(beregning, virkningstidspunkt)
+    fun beregnAvkortingRevurdering(beregning: Beregning): Avkorting {
+        val ytelseFoerAvkorting = this.aarsoppgjoer.ytelseFoerAvkorting.leggTilNyeBeregninger(beregning)
 
         val reberegnetInntektsavkorting = this.aarsoppgjoer.inntektsavkorting.map { inntektsavkorting ->
             val periode = Periode(fom = this.foersteMaanedDetteAar(), tom = inntektsavkorting.grunnlag.periode.tom)
@@ -250,30 +246,40 @@ fun Beregning.mapTilYtelseFoerAvkorting() = beregningsperioder.map {
     )
 }
 
-fun List<YtelseFoerAvkorting>.leggTilNyeBeregninger(
-    beregning: Beregning,
-    virkningstidspunkt: YearMonth
-) = filter { it.periode.fom < virkningstidspunkt }
-    .filter { beregning.beregningId != it.beregningsreferanse }.map { ytelseFoerAvkorting ->
-        if (ytelseFoerAvkorting.periode.tom != null) {
-            if (virkningstidspunkt == ytelseFoerAvkorting.periode.tom) {
-                ytelseFoerAvkorting.copy(
-                    periode = Periode(
-                        fom = ytelseFoerAvkorting.periode.fom,
-                        tom = virkningstidspunkt.minusMonths(1)
-                    )
-                )
-            } else if (virkningstidspunkt < ytelseFoerAvkorting.periode.tom) {
-                ytelseFoerAvkorting.copy(periode = Periode(fom = ytelseFoerAvkorting.periode.fom, tom = null))
-            } else {
-                ytelseFoerAvkorting
-            }
-        } else {
+/*
+* Beregnet ytelse (ytelse før avkorting) persisteres for hele året for å kunne beregne ytelse etter avkorting
+* for hele året.
+* Når det kommer nye beregninger skal det legges til eller erstatte de eksisterende i samme periode.
+* Eksisterende perioder som er før nye beregninger skal beholdes.
+*
+* Overlapp mellom eksisterende og nye perioder håndteres ved å sette eksisterende til og med til måned før
+* første nye fra og med.
+*
+* NB! Når siste eksisterende og første nye overlapper kan det føre til at to perioder etter hverandre har
+* helt like verdier. Dette fordi vi ikke sammenligner innhold og slår sammen men kun avslutter eksisterende
+* periode.
+*/
+private fun List<YtelseFoerAvkorting>.leggTilNyeBeregninger(beregning: Beregning): List<YtelseFoerAvkorting> {
+    val nyYtelseFoerAvkorting = beregning.mapTilYtelseFoerAvkorting()
+    val fraOgMedNyYtelse = nyYtelseFoerAvkorting.first().periode.fom
+
+    val eksisterendeFremTilNye = filter { it.periode.fom < fraOgMedNyYtelse }
+        .filter { beregning.beregningId != it.beregningsreferanse }
+
+    val eksisterendeAvrundetPerioder = eksisterendeFremTilNye.map { ytelseFoerAvkorting ->
+        if (ytelseFoerAvkorting.periode.tom == null
+            || fraOgMedNyYtelse <= ytelseFoerAvkorting.periode.tom
+        ) {
             ytelseFoerAvkorting.copy(
                 periode = Periode(
                     fom = ytelseFoerAvkorting.periode.fom,
-                    tom = virkningstidspunkt.minusMonths(1)
+                    tom = fraOgMedNyYtelse.minusMonths(1)
                 )
             )
+        } else {
+            ytelseFoerAvkorting
         }
-    } + beregning.mapTilYtelseFoerAvkorting()
+    }
+
+    return eksisterendeAvrundetPerioder + nyYtelseFoerAvkorting
+}

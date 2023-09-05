@@ -65,7 +65,7 @@ internal class AvkortingServiceTest {
 
             coEvery { behandlingKlient.hentBehandling(behandlingId, bruker) } returns behandling
             every { avkortingRepository.hentAvkorting(behandlingId) } returns avkorting
-            every { avkorting.medLoependeYtelse(YearMonth.of(2023, 1)) } returns avkorting
+            every { avkorting.medYtelseFraOgMedVirkningstidspunkt(YearMonth.of(2023, 1)) } returns avkorting
 
             runBlocking {
                 service.hentAvkorting(behandlingId, bruker) shouldBe avkorting
@@ -73,7 +73,7 @@ internal class AvkortingServiceTest {
             coVerify {
                 behandlingKlient.hentBehandling(behandlingId, bruker)
                 avkortingRepository.hentAvkorting(behandlingId)
-                avkorting.medLoependeYtelse(YearMonth.of(2023, 1))
+                avkorting.medYtelseFraOgMedVirkningstidspunkt(YearMonth.of(2023, 1))
             }
         }
 
@@ -122,9 +122,9 @@ internal class AvkortingServiceTest {
             every { avkortingRepository.hentAvkorting(behandlingId) } returns null andThen lagretAvkorting
             every { beregningService.hentBeregningNonnull(any()) } returns beregning
             every { forrigeAvkorting.kopierAvkorting() } returns kopiertAvkorting
-            every { kopiertAvkorting.beregnAvkorting(any(), any(), any()) } returns beregnetAvkorting
+            every { kopiertAvkorting.beregnAvkortingRevurdering(any()) } returns beregnetAvkorting
             every { avkortingRepository.lagreAvkorting(any(), any()) } returns Unit
-            every { lagretAvkorting.medLoependeYtelse(any(), any()) } returns lagretAvkorting
+            every { lagretAvkorting.medYtelseFraOgMedVirkningstidspunkt(any(), any()) } returns lagretAvkorting
             coEvery { behandlingKlient.avkort(any(), any(), any()) } returns true
 
             runBlocking {
@@ -137,13 +137,9 @@ internal class AvkortingServiceTest {
                 avkortingRepository.hentAvkorting(forrigeBehandlingId)
                 beregningService.hentBeregningNonnull(behandlingId)
                 forrigeAvkorting.kopierAvkorting()
-                kopiertAvkorting.beregnAvkorting(
-                    behandling.virkningstidspunkt!!.dato,
-                    behandling.behandlingType,
-                    beregning
-                )
+                kopiertAvkorting.beregnAvkortingRevurdering(beregning)
                 avkortingRepository.lagreAvkorting(behandlingId, beregnetAvkorting)
-                lagretAvkorting.medLoependeYtelse(YearMonth.of(2023, 1), forrigeAvkorting)
+                lagretAvkorting.medYtelseFraOgMedVirkningstidspunkt(YearMonth.of(2023, 1), forrigeAvkorting)
                 behandlingKlient.avkort(behandlingId, bruker, true)
             }
             coVerify(exactly = 2) {
@@ -179,7 +175,7 @@ internal class AvkortingServiceTest {
             } returns beregnetAvkorting
             every { avkortingRepository.lagreAvkorting(any(), any()) } returns Unit
             coEvery { behandlingKlient.avkort(any(), any(), any()) } returns true
-            every { lagretAvkorting.medLoependeYtelse(any()) } returns lagretAvkorting
+            every { lagretAvkorting.medYtelseFraOgMedVirkningstidspunkt(any()) } returns lagretAvkorting
 
             runBlocking {
                 service.lagreAvkorting(behandlingId, bruker, endretGrunnlag) shouldBe lagretAvkorting
@@ -196,7 +192,7 @@ internal class AvkortingServiceTest {
                     beregning
                 )
                 avkortingRepository.lagreAvkorting(behandlingId, beregnetAvkorting)
-                lagretAvkorting.medLoependeYtelse(YearMonth.of(2023, 1))
+                lagretAvkorting.medYtelseFraOgMedVirkningstidspunkt(YearMonth.of(2023, 1))
                 behandlingKlient.avkort(behandlingId, bruker, true)
             }
             coVerify(exactly = 2) {
@@ -228,7 +224,7 @@ internal class AvkortingServiceTest {
                 forrigeBehandling
             )
             every { avkortingRepository.hentAvkorting(forrigeBehandling) } returns forrigeAvkorting
-            every { lagretAvkorting.medLoependeYtelse(any(), any()) } returns lagretAvkorting
+            every { lagretAvkorting.medYtelseFraOgMedVirkningstidspunkt(any(), any()) } returns lagretAvkorting
             coEvery { behandlingKlient.avkort(any(), any(), any()) } returns true
 
             runBlocking {
@@ -248,7 +244,7 @@ internal class AvkortingServiceTest {
                 avkortingRepository.lagreAvkorting(revurderingId, beregnetAvkorting)
                 behandlingKlient.hentSisteIverksatteBehandling(sakId, bruker)
                 avkortingRepository.hentAvkorting(forrigeBehandling)
-                lagretAvkorting.medLoependeYtelse(YearMonth.of(2023, 3), forrigeAvkorting)
+                lagretAvkorting.medYtelseFraOgMedVirkningstidspunkt(YearMonth.of(2023, 3), forrigeAvkorting)
                 behandlingKlient.avkort(revurderingId, bruker, true)
             }
             coVerify(exactly = 2) {
@@ -272,7 +268,5 @@ internal class AvkortingServiceTest {
             }
         }
     }
-
-    // TODO EY-2523 kopier..
 
 }

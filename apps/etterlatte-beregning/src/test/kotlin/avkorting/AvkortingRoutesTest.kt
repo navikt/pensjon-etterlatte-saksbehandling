@@ -106,7 +106,7 @@ class AvkortingRoutesTest {
             aarsoppgjoer = aarsoppgjoer(
                 inntektsavkorting = inntektsavkorting
             ),
-            lopendeYtelse = avkortetYtelse,
+            avkortetYtelseFraVirkningstidspunkt = avkortetYtelse,
             avkortetYtelseForrigeVedtak = avkortetYtelse,
         )
         val dto = AvkortingDto(

@@ -39,11 +39,10 @@ class AvkortingService(
 
         val avkorting = avkortingRepository.hentAvkorting(behandlingId) ?: Avkorting()
         val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
-        val virk = behandling.hentVirk().dato
         val beregning = beregningService.hentBeregningNonnull(behandlingId)
         val beregnetAvkorting = avkorting.beregnAvkortingMedNyttGrunnlag(
             avkortingGrunnlag,
-            virk,
+            behandling.hentVirk().dato,
             behandling.behandlingType,
             beregning
         )
@@ -77,13 +76,8 @@ class AvkortingService(
         forrigeAvkorting: Avkorting,
         brukerTokenInfo: BrukerTokenInfo
     ): Avkorting {
-        val virk = behandling.hentVirk().dato
         val beregning = beregningService.hentBeregningNonnull(behandling.id)
-        val beregnetAvkorting = forrigeAvkorting.kopierAvkorting().beregnAvkorting(
-            virk,
-            behandling.behandlingType,
-            beregning
-        )
+        val beregnetAvkorting = forrigeAvkorting.kopierAvkorting().beregnAvkortingRevurdering(beregning)
         avkortingRepository.lagreAvkorting(behandling.id, beregnetAvkorting)
         val lagretAvkorting = hentAvkortingNonNull(behandling, forrigeAvkorting)
         behandlingKlient.avkort(behandling.id, brukerTokenInfo, true)
@@ -95,7 +89,7 @@ class AvkortingService(
             ?: throw Exception("Uthenting av avkorting for behandling ${behandling.id} feilet")
 
     private fun hentAvkorting(behandling: DetaljertBehandling, forrigeAvkorting: Avkorting? = null) =
-        avkortingRepository.hentAvkorting(behandling.id)?.medLoependeYtelse(
+        avkortingRepository.hentAvkorting(behandling.id)?.medYtelseFraOgMedVirkningstidspunkt(
             behandling.hentVirk().dato,
             forrigeAvkorting
         )

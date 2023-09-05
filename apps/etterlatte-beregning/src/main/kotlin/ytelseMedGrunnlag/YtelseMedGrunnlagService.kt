@@ -18,11 +18,11 @@ class YtelseMedGrunnlagService(
         val avkortingUtenLoependeYtelse = avkortingRepository.hentAvkorting(behandlingId) ?: return null;
         val virkningstidspunkt = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
             .virkningstidspunkt?.dato ?: throw Exception("Behandling $behandlingId mangler virkningstidspunkt")
-        val avkorting = avkortingUtenLoependeYtelse.medLoependeYtelse(virkningstidspunkt)
+        val avkorting = avkortingUtenLoependeYtelse.medYtelseFraOgMedVirkningstidspunkt(virkningstidspunkt)
 
         val beregning = beregningRepository.hent(behandlingId)
 
-        val avkortinger = avkorting.lopendeYtelse.map { avkortetYtelse ->
+        val avkortinger = avkorting.avkortetYtelseFraVirkningstidspunkt.map { avkortetYtelse ->
             beregning ?: throw Exception("Mangler beregning for behandling $behandlingId")
             val beregningIPeriode = beregning.beregningsperioder
                 .filter { it.datoFOM <= avkortetYtelse.periode.fom }

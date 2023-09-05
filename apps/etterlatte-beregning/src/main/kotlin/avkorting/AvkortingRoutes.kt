@@ -66,7 +66,7 @@ fun Route.avkorting(avkortingService: AvkortingService, behandlingKlient: Behand
 
 fun Avkorting.toDto() = AvkortingDto(
     avkortingGrunnlag = aarsoppgjoer.inntektsavkorting.map { it.grunnlag.toDto() },
-    avkortetYtelse = lopendeYtelse.map { it.toDto() },
+    avkortetYtelse = avkortetYtelseFraVirkningstidspunkt.map { it.toDto() },
     tidligereAvkortetYtelse = avkortetYtelseForrigeVedtak.map { it.toDto() }
 )
 

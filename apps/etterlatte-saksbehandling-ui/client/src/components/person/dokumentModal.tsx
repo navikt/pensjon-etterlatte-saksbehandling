@@ -53,7 +53,7 @@ export default function DokumentModal({
       </Button>
 
       <Modal open={isOpen} onClose={() => setIsOpen(false)}>
-        <Modal.Content>
+        <Modal.Body>
           <Heading spacing level={'2'} size={'medium'}>
             {tittel}
           </Heading>
@@ -66,7 +66,7 @@ export default function DokumentModal({
               Lukk
             </Button>
           </ButtonRow>
-        </Modal.Content>
+        </Modal.Body>
       </Modal>
     </>
   )

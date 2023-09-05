@@ -96,11 +96,10 @@ const UhaandtertHendelse = (props: {
                 <Modal
                   open={open}
                   onClose={() => setOpen((x) => !x)}
-                  closeButton={false}
                   aria-labelledby="modal-heading"
                   style={{ maxWidth: '60rem' }}
                 >
-                  <Modal.Content>
+                  <Modal.Body>
                     <Heading spacing level="2" size="medium" id="modal-heading">
                       Avslutt uten revurdering
                     </Heading>
@@ -148,7 +147,7 @@ const UhaandtertHendelse = (props: {
                     )}
                     {isPending(res) && <Loader />}
                     {isFailure(res) && <ApiErrorAlert>Vi kunne ikke lukke hendelsen</ApiErrorAlert>}
-                  </Modal.Content>
+                  </Modal.Body>
                 </Modal>
               </>
             </div>

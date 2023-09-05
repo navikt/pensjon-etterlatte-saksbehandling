@@ -44,11 +44,13 @@ export const OpprettNyBehandling = ({
         <Button variant="secondary" onClick={() => setOpen(true)}>
           Opprett ny behandling
         </Button>
-        <Modal open={open} onClose={() => setOpen((x) => !x)} closeButton={false} aria-labelledby="modal-heading">
-          <Modal.Content>
-            <Heading spacing level="2" size="medium" id="modal-heading">
-              Opprett ny behandling
-            </Heading>
+        <Modal open={open} onClose={() => setOpen((x) => !x)} aria-labelledby="modal-heading">
+          <Modal.Body>
+            <Modal.Header closeButton={false}>
+              <Heading spacing level="2" size="medium" id="modal-heading">
+                Opprett ny behandling
+              </Heading>
+            </Modal.Header>
             <Select
               label="Årsak til revurdering"
               value={valgtRevurdering}
@@ -87,7 +89,7 @@ export const OpprettNyBehandling = ({
                 Opprett
               </Button>
             </ButtonContainer>
-          </Modal.Content>
+          </Modal.Body>
         </Modal>
       </>
     </OpprettNyBehandlingWrapper>

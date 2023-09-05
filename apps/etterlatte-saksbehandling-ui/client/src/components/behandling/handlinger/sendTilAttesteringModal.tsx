@@ -41,7 +41,7 @@ export const SendTilAttesteringModal: React.FC = () => {
         aria-labelledby="modal-heading"
         className={'padding-modal'}
       >
-        <Modal.Content>
+        <Modal.Body>
           <Heading spacing level="1" id="modal-heading" size="medium">
             Er du sikker på at du vil sende vedtaket til attestering?
           </Heading>
@@ -68,7 +68,7 @@ export const SendTilAttesteringModal: React.FC = () => {
             </Button>
           </ButtonWrapper>
           {isFailure(fattVedtakStatus) && <ApiErrorAlert>En feil skjedde under attestering av vedtaket.</ApiErrorAlert>}
-        </Modal.Content>
+        </Modal.Body>
       </Modal>
     </>
   )

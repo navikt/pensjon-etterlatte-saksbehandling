@@ -31,7 +31,7 @@ export const GeneriskModal: React.FC<Props> = ({
       aria-labelledby="modal-heading"
       className={'padding-modal'}
     >
-      <Modal.Content>
+      <Modal.Body>
         <Heading spacing level="1" id="modal-heading" size="medium">
           {tittel}
         </Heading>
@@ -59,7 +59,7 @@ export const GeneriskModal: React.FC<Props> = ({
             {tekstKnappNei}
           </Button>
         </ButtonWrapper>
-      </Modal.Content>
+      </Modal.Body>
     </Modal>
   )
 }

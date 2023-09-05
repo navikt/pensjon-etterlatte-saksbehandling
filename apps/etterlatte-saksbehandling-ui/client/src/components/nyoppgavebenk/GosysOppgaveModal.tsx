@@ -46,7 +46,7 @@ export const GosysOppgaveModal = ({ oppgave }: { oppgave: OppgaveDTOny }) => {
         Se oppgave
       </Button>
       <Modal open={open} aria-labelledby="modal-heading" onClose={() => setOpen(false)}>
-        <Modal.Content>
+        <Modal.Body>
           <Heading size="medium" id="modal-heading">
             Oppgave fra Gosys
           </Heading>
@@ -107,7 +107,7 @@ export const GosysOppgaveModal = ({ oppgave }: { oppgave: OppgaveDTOny }) => {
               Åpne og rediger i Gosys
             </Button>
           </ButtonRow>
-        </Modal.Content>
+        </Modal.Body>
       </Modal>
     </>
   )

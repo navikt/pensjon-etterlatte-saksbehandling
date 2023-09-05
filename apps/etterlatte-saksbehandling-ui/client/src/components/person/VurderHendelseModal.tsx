@@ -42,7 +42,7 @@ const VurderHendelseModal = (props: Props) => {
   return (
     <>
       <Modal open={props.open} onClose={() => props.setOpen(false)}>
-        <Modal.Content>
+        <Modal.Body>
           <ModalContentWrapper>
             <Heading spacing size="large">
               Vurder hendelse
@@ -86,7 +86,7 @@ const VurderHendelseModal = (props: Props) => {
               Start revurdering
             </Button>
           </ButtonContainer>
-        </Modal.Content>
+        </Modal.Body>
       </Modal>
     </>
   )

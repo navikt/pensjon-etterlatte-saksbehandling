@@ -95,7 +95,7 @@ export const ManueltOpphoerModal = ({
       </Button>
 
       <Modal open={open} onClose={() => setOpen(false)}>
-        <Modal.Content>
+        <Modal.Body>
           <ModalSpacing>
             <Heading size="large">Manuelt opphør</Heading>
             <p>Hvis du annullerer vil utbetalinger fjernes fra oppdragssystemet og du må behandle saken i Pesys</p>
@@ -126,7 +126,7 @@ export const ManueltOpphoerModal = ({
               </FormKnapper>
             </form>
           </ModalSpacing>
-        </Modal.Content>
+        </Modal.Body>
       </Modal>
     </>
   )

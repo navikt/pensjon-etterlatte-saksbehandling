@@ -22,7 +22,7 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.Month
 
-internal class BeregnBarnepensjon1967Test {
+internal class BeregnBarnepensjonTest {
 
     @BeforeEach
     fun setUp() {

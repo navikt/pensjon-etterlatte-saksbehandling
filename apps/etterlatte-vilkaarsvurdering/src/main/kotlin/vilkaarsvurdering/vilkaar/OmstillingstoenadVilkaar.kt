@@ -52,6 +52,7 @@ object OmstillingstoenadVilkaar {
         )
     )
 
+    // TODO: Obs skal egentlig kun være på revurdering men kan sette ikke vurdert på førstegangsbehandling
     private fun overlappendeYtelser() = Vilkaar(
         hovedvilkaar = Delvilkaar(
             type = VilkaarType.OMS_OVERLAPPENDE_YTELSER,

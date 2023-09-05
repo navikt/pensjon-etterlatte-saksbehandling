@@ -29,7 +29,7 @@ dependencies {
 
     testImplementation(libs.navfelles.tokenvalidationktor2)
     testImplementation(libs.kotlinx.coroutinestest)
-    testImplementation("com.github.tomakehurst:wiremock-jre8:2.35.0")
+    testImplementation(libs.test.wiremock)
     testImplementation(libs.test.jupiter.engine)
     testImplementation(libs.test.jupiter.api)
     testImplementation(libs.ktor2.clientmock)

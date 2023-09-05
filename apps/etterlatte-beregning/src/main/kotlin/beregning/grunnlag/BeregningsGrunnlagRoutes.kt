@@ -69,11 +69,7 @@ fun Route.beregningsGrunnlag(beregningsGrunnlagService: BeregningsGrunnlagServic
                     behandlingId,
                     brukerTokenInfo
                 )
-
-                when (grunnlag) {
-                    null -> call.respond(HttpStatusCode.NoContent)
-                    else -> call.respond(HttpStatusCode.OK, grunnlag)
-                }
+                call.respond(HttpStatusCode.OK, grunnlag ?: HttpStatusCode.NoContent)
             }
         }
 
@@ -84,11 +80,7 @@ fun Route.beregningsGrunnlag(beregningsGrunnlagService: BeregningsGrunnlagServic
                     behandlingId,
                     brukerTokenInfo
                 )
-
-                when (grunnlag) {
-                    null -> call.respond(HttpStatusCode.NoContent)
-                    else -> call.respond(HttpStatusCode.OK, grunnlag)
-                }
+                call.respond(HttpStatusCode.OK, grunnlag ?: HttpStatusCode.NoContent)
             }
         }
     }

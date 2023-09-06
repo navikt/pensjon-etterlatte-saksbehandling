@@ -71,7 +71,7 @@ const UhaandtertHendelse = (props: {
               )}
             </BodyShort>
 
-            <div style={{ minHeight: '3rem', marginTop: '1rem' }}>
+            <div style={{ minHeight: '5rem', marginTop: '1rem' }}>
               <>
                 <div>
                   {!tattMedIBehandling && stoetterRevurdering && (

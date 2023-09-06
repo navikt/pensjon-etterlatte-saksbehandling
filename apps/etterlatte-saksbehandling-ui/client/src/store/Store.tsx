@@ -5,11 +5,13 @@ import { configureStore } from '@reduxjs/toolkit'
 import type { TypedUseSelectorHook } from 'react-redux'
 
 import { useSelector, useDispatch } from 'react-redux'
+import { appReducer } from '~store/reducers/AppconfigReducer'
 
 const reducer = {
   menuReducer: menuReducer,
   saksbehandlerReducer: saksbehandlerReducer,
   behandlingReducer: behandlingReducer,
+  appReducer: appReducer,
 }
 export const store = configureStore({
   reducer,

@@ -1,3 +1,5 @@
+const crypto = require('crypto')
+
 interface IAppConf {
   port: string | number
 }
@@ -106,6 +108,9 @@ const API_CONFIG_FROM_ENV = () => {
 
 export const ApiConfig = hentApiConfigFraEnv()
 
+const appVersion = crypto.randomUUID()
+
 export const ClientConfig = {
   gosysUrl: requireEnvValue('GOSYS_URL'),
+  cachebuster: appVersion.toString(),
 }

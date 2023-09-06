@@ -42,7 +42,10 @@ export interface IBehandlingReducer extends IDetaljertBehandling {
   vilkårsprøving?: IVilkaarsvurdering
   vedtak?: VedtakSammendrag
 }
-const initialState: { behandling: IBehandlingReducer | null } = { behandling: null }
+
+const initialState: { behandling: IBehandlingReducer | null } = {
+  behandling: null,
+}
 
 export const behandlingReducer = createReducer(initialState, (builder) => {
   builder.addCase(addBehandling, (state, action) => {

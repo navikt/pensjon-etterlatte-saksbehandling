@@ -17,6 +17,7 @@ import kotlinx.coroutines.withContext
 import no.nav.etterlatte.behandling.behandlingRoutes
 import no.nav.etterlatte.behandling.behandlingVedtakRoute
 import no.nav.etterlatte.behandling.behandlingsstatusRoutes
+import no.nav.etterlatte.behandling.klage.klageRoutes
 import no.nav.etterlatte.behandling.omregning.migreringRoutes
 import no.nav.etterlatte.behandling.omregning.omregningRoutes
 import no.nav.etterlatte.behandling.revurdering.revurderingRoutes
@@ -90,6 +91,7 @@ fun Application.module(context: ApplicationContext) {
                 grunnlagsendringshendelseService = grunnlagsendringshendelseService,
                 oppgaveServiceNy = oppgaveServiceNy
             )
+            klageRoutes(klageService = klageService)
             behandlingRoutes(
                 behandlingService = behandlingService,
                 gyldighetsproevingService = gyldighetsproevingService,

@@ -12,7 +12,7 @@ export type Props = {
   loading?: boolean
 }
 
-export const GeneriskModal: React.FC<Props> = ({
+export const GeneriskModal = ({
   tittel,
   beskrivelse,
   tekstKnappJa,
@@ -21,7 +21,7 @@ export const GeneriskModal: React.FC<Props> = ({
   setModalisOpen,
   open,
   loading,
-}) => {
+}: Props) => {
   return (
     <Modal
       open={open}

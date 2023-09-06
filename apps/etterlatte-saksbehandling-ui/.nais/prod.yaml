@@ -87,6 +87,8 @@ spec:
       value: api://prod-gcp.etterlatte.etterlatte-trygdetid/.default
     - name: GOSYS_URL
       value: https://gosys.intern.nav.no/gosys
+    - name: APP_VERSION
+      value: {{ image }}
   envFrom:
     - secret: my-application-unleash-api-token
   accessPolicy:

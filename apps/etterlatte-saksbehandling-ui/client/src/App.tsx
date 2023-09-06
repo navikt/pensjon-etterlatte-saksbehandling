@@ -14,21 +14,28 @@ import { OppgavelistaContainer } from '~components/nyoppgavebenk/ToggleNyOppgave
 import { isFailure, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
 import { useEffect } from 'react'
 import { ConfigContext, hentClientConfig } from '~clientConfig'
+import { useAppDispatch } from '~store/Store'
+import { settAppversion } from '~store/reducers/AppconfigReducer'
+import Versioncheck from '~Versioncheck'
 
 function App() {
   const innloggetbrukerHentet = useInnloggetSaksbehandler()
   registerLocale('nb', nb)
+  const dispatch = useAppDispatch()
 
   const [hentConfigStatus, hentConfig] = useApiCall(hentClientConfig)
 
   useEffect(() => {
-    hentConfig({})
+    hentConfig({}, (res) => {
+      dispatch(settAppversion(res.cachebuster))
+    })
   }, [])
 
   return (
     <>
       {isSuccess(hentConfigStatus) && innloggetbrukerHentet && (
         <div className="app">
+          <Versioncheck />
           <BrowserRouter basename="/">
             <ScrollToTop />
             <HeaderBanner />

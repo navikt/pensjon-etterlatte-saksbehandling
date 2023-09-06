@@ -94,6 +94,7 @@ data class Beregningsperiode(
     val antallBarn: Int,
     val utbetaltBeloep: Kroner,
     val trygdetid: Int,
+    val institusjon: Boolean,
 )
 
 data class Persongalleri(

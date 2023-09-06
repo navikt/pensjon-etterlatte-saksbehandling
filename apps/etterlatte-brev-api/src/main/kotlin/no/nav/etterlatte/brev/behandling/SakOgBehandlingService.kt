@@ -164,7 +164,8 @@ class SakOgBehandlingService(
                     grunnbeloep = Kroner(it.grunnbelop),
                     antallBarn = (it.soeskenFlokk?.size ?: 0) + 1, // Legger til 1 pga at beregning fjerner soeker
                     utbetaltBeloep = Kroner(it.utbetaltBeloep),
-                    trygdetid = it.trygdetid,
+                trygdetid = it.trygdetid,
+                institusjon = it.institusjonsopphold != null,
                 )
             }
 

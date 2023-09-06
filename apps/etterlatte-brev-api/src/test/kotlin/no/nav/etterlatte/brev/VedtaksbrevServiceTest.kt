@@ -618,6 +618,7 @@ internal class VedtaksbrevServiceTest {
                     1,
                     Kroner(5000),
                     40,
+                    false,
                 ),
             ),
         ),
@@ -637,10 +638,11 @@ internal class VedtaksbrevServiceTest {
                         Kroner(120000),
                         1,
                         Kroner(5000),
-                        40,
-                    ),
+                    40,
+                    false,
                 ),
             ),
+        ),
     )
 
     private fun opprettMottaker() =

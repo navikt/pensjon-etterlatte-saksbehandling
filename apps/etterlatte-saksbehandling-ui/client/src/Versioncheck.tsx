@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { hentClientConfig } from '~clientConfig'
 import { useAppSelector } from '~store/Store'
-import { Alert, Button, Modal } from '@navikt/ds-react'
+import { Alert, BodyLong, Button, Modal } from '@navikt/ds-react'
 
 const Versioncheck = () => {
   const appVersion = useAppSelector((state) => state.appReducer.appversion)
@@ -41,21 +41,31 @@ const Versioncheck = () => {
         header={{
           label: 'Ny oppdatering',
           heading: 'Utdatert web applikasjon',
+          closeButton: false,
         }}
         open={isOutdated}
       >
         <Modal.Body>
           <Alert variant="warning">Web applikasjonen din er utdatert. Laster siden på nytt om 10 sekunder.</Alert>
+          <p>
+            <BodyLong>
+              Har du endringer du ønsker å lagre først? Trykk på avbryt knappen. (Obs! dette kan medføre at du mangler
+              enkelte funksjoner og havner i feilsituasjoner!)
+            </BodyLong>
+          </p>
         </Modal.Body>
         <Modal.Footer>
           <Button
+            variant="secondary"
             onClick={() => {
               setIsOutdated(false)
               timeoutReloadPage && window.clearTimeout(timeoutReloadPage)
             }}
           >
-            Har du endringer du ønsker å lagre først? Trykk her for å avbryte. (Obs! dette kan medføre at du mangler
-            enkelte funksjoner og havner i feilsituasjoner!)
+            Avbryt oppdatering
+          </Button>
+          <Button variant="primary" onClick={() => window.location.reload()}>
+            Last siden på nytt nå
           </Button>
         </Modal.Footer>
       </Modal>

@@ -34,6 +34,8 @@ kafka-clients = { module = "org.apache.kafka:kafka-clients", version = "3.5.1" }
 kafka-avro = { module = "org.apache.avro:avro", version = "1.11.2" }
 kafka-avroserializer = { module = "io.confluent:kafka-avro-serializer", version = "7.3.1" }
 kafka-embeddedenv = { module = "no.nav:kafka-embedded-env", version = "3.2.3" }
+el-api = { module = "javax.el:javax.el-api", version = "3.0.0"}
+el-impl = { module = "org.glassfish:jakarta.el", version = "3.0.4" }
 
 kotlin-result = { module = "com.michael-bull.kotlin-result:kotlin-result", version = "1.1.18" }
 

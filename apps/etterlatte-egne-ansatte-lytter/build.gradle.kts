@@ -24,5 +24,7 @@ dependencies {
     implementation(libs.kafka.avroserializer)
 
     testImplementation(libs.kafka.embeddedenv)
+    testImplementation(libs.el.api)
+    testImplementation(libs.el.impl)
     testImplementation(libs.ktor2.servertests)
 }

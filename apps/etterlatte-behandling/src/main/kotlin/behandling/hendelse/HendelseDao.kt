@@ -70,7 +70,7 @@ class HendelseDao(private val connection: () -> Connection) {
             behandlingId = klageId,
             sakId = sakId,
             ident = saksbehandler,
-            identType = "SAKSBEHANLDER".takeIf { saksbehandler != null },
+            identType = "SAKSBEHANDLER".takeIf { saksbehandler != null },
             kommentar = kommentar,
             valgtBegrunnelse = begrunnelse
         )

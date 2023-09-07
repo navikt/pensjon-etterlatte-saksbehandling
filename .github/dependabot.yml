@@ -20,6 +20,8 @@ updates:
           - "no.nav:kafka*"
           - "org.apache.kafka*"
           - "com.github.davidmc24.gradle.plugin.avro"
+          - "javax.el:javax.el-api"
+          - "org.glassfish:jakarta.el"
       test:
         patterns:
           - "org.junit.jupiter*"

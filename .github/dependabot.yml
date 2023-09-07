@@ -73,18 +73,16 @@ updates:
         patterns:
           - "@navikt/ds-*"
           - "@navikt/aksel-icons"
-      eslint:
+      eslint-og-test:
         patterns:
           - "@typescript-eslint/*"
           - "prettier"
           - "eslint"
           - "eslint*"
+          - "@testing-library*"
       slate:
         patterns:
           - "slate*"
-      test:
-        patterns:
-          - "@testing-library*"
       vite:
         patterns:
           - "vite"
@@ -110,14 +108,12 @@ updates:
       day: "sunday"
     open-pull-requests-limit: 10
     groups:
-      lint:
+      lint-og-test:
         patterns:
           - "@typescript-eslint/*"
           - "prettier"
           - "eslint"
           - "eslint*"
-      test:
-        patterns:
           - "@types/chai"
           - "@types/mocha"
           - "chai"

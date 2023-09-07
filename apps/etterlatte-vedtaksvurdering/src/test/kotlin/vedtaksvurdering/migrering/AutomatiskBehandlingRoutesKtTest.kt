@@ -74,7 +74,7 @@ internal class AutomatiskBehandlingRoutesKtTest {
     }
 
     @Test
-    fun `skal returnere eksisterende vedtaksvurdering`() {
+    fun `skal opprette vedtak, fatte vedtak og attestere`() {
         testApplication {
             val opprettetVedtak = vedtak()
             val behandlingId = UUID.randomUUID()

@@ -110,19 +110,22 @@ class BehandlingStatusServiceImpl(
     }
 
     private fun haandterUtland(behandling: Behandling) {
-        if (behandling.utenlandstilsnitt?.type === UtenlandstilsnittType.UTLANDSTILSNITT) {
-            val oppgaveUtland = oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
-                behandling.id.toString(),
-                behandling.sak.id,
-                OppgaveKilde.BEHANDLING,
-                OppgaveType.UTLAND,
-                null
-            )
-            val saksbehandlerfatting = oppgaveServiceNy.hentSaksbehandlerForBehandling(behandlingsId = behandling.id)
-            if (saksbehandlerfatting !== null) {
-                oppgaveServiceNy.tildelSaksbehandler(oppgaveUtland.id, saksbehandlerfatting)
-            } else {
-                logger.error("Fant ingen saksbehandler for behandling oppgave fatting, id: ${behandling.id}")
+        if (behandling.type == BehandlingType.FØRSTEGANGSBEHANDLING) {
+            if (behandling.utenlandstilsnitt?.type == UtenlandstilsnittType.UTLANDSTILSNITT) {
+                val oppgaveUtland = oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
+                    behandling.id.toString(),
+                    behandling.sak.id,
+                    OppgaveKilde.BEHANDLING,
+                    OppgaveType.UTLAND,
+                    null
+                )
+                val saksbehandlerFoerstegangsbehandling =
+                    oppgaveServiceNy.hentSaksbehandlerFraFoerstegangsbehandling(behandlingsId = behandling.id)
+                if (saksbehandlerFoerstegangsbehandling !== null) {
+                    oppgaveServiceNy.tildelSaksbehandler(oppgaveUtland.id, saksbehandlerFoerstegangsbehandling)
+                } else {
+                    logger.error("Fant ingen saksbehandler for behandling oppgave fatting, id: ${behandling.id}")
+                }
             }
         }
     }

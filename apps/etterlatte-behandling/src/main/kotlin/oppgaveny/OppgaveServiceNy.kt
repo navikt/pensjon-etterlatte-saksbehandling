@@ -303,6 +303,16 @@ class OppgaveServiceNy(
         return oppgaverForBehandlingUtenAttesterting.sortedByDescending { it.opprettet }[0].saksbehandler
     }
 
+    fun hentSaksbehandlerFraFoerstegangsbehandling(behandlingsId: UUID): String? {
+        val oppgaverforBehandling = inTransaction {
+            oppgaveDaoNy.hentOppgaverForBehandling(behandlingsId.toString())
+        }
+        val oppgaverForBehandlingFoerstegangs = oppgaverforBehandling.filter {
+            it.type == OppgaveType.FOERSTEGANGSBEHANDLING
+        }
+        return oppgaverForBehandlingFoerstegangs.sortedByDescending { it.opprettet }[0].saksbehandler
+    }
+
     fun hentSaksbehandlerForOppgaveUnderArbeid(behandlingsId: UUID): String? {
         val oppgaverforBehandling = inTransaction {
             oppgaveDaoNy.hentOppgaverForBehandling(behandlingsId.toString())

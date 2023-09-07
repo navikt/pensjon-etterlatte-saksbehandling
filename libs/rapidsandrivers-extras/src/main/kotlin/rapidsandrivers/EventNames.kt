@@ -8,8 +8,6 @@ object EventNames {
     const val TRYGDETID = "TRYGDETID"
     const val BEREGN = "BEREGN"
     const val OPPRETT_VEDTAK = "OPPRETT_VEDTAK"
-    const val FATT_VEDTAK = "FATT_VEDTAK"
-    const val ATTESTER = "ATTESTER"
     const val FEILA = "FEILA"
     const val FORDELER_STATISTIKK = "FORDELER:STATISTIKK"
 }

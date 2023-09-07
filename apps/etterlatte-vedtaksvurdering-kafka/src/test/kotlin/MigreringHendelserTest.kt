@@ -1,5 +1,4 @@
 
-import io.mockk.called
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
@@ -33,12 +32,11 @@ class MigreringHendelserTest {
                 SAK_ID_KEY to "1"
             )
         )
-        coEvery { vedtakService.upsertVedtak(any()) } throws RuntimeException("Feila under opprett vedtak")
+        coEvery {
+            vedtakService.opprettVedtakFattOgAttester(any(), any())
+        } throws RuntimeException("Feila under opprett vedtak")
 
         inspector.sendTestMessage(melding.toJson())
-
-        coVerify { vedtakService.fattVedtak(any()) wasNot called }
-        coVerify { vedtakService.attesterVedtak(any()) wasNot called }
 
         Assertions.assertEquals(1, inspector.inspektør.size)
         val sendtMelding = inspector.inspektør.message(0)

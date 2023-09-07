@@ -1,12 +1,12 @@
 package no.nav.etterlatte.behandling
 
 import no.nav.etterlatte.behandling.hendelse.LagretHendelse
+import no.nav.etterlatte.behandling.revurdering.RevurderingMedBegrunnelse
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
-import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Utenlandstilsnitt
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
@@ -35,7 +35,7 @@ data class DetaljertBehandlingDto(
     val søker: Person?,
     val kommerBarnetTilgode: KommerBarnetTilgode?,
     val revurderingsaarsak: RevurderingAarsak?,
-    val revurderinginfo: RevurderingInfo?,
+    val revurderinginfo: RevurderingMedBegrunnelse?,
     val begrunnelse: String?
 )
 

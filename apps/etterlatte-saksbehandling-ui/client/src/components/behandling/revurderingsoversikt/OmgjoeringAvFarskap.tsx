@@ -14,6 +14,7 @@ import { ApiErrorAlert } from '~ErrorBoundary'
 import { oppdaterRevurderingInfo } from '~store/reducers/BehandlingReducer'
 import styled from 'styled-components'
 import { NavnInput, standardnavn } from '~components/behandling/revurderingsoversikt/NavnInput'
+import { Revurderingsbegrunnelse } from '~components/behandling/revurderingsoversikt/Revurderingsbegrunnelse'
 
 export const OmgjoeringAvFarskap = (props: { behandling: IDetaljertBehandling }) => {
   const { behandling } = props
@@ -24,6 +25,7 @@ export const OmgjoeringAvFarskap = (props: { behandling: IDetaljertBehandling })
   const [naavaerendeFar, setNaavaerendeFar] = useState(omgjoeringAvFarskapInfo?.naavaerendeFar)
   const [forrigeFar, setForrigeFar] = useState(omgjoeringAvFarskapInfo?.forrigeFar)
   const [feilmelding, setFeilmelding] = useState<string | undefined>(undefined)
+  const [begrunnelse, setBegrunnelse] = useState(behandling.revurderinginfo?.begrunnelse ?? '')
   const [lagrestatus, lagre] = useApiCall(lagreRevurderingInfo)
   const redigerbar = hentBehandlesFraStatus(behandling.status)
   const handlesubmit = (e: FormEvent) => {
@@ -41,6 +43,10 @@ export const OmgjoeringAvFarskap = (props: { behandling: IDetaljertBehandling })
       setFeilmelding('Du må legge inn forrige og nåværende registert far')
       return
     }
+    if (!begrunnelse) {
+      setFeilmelding('Begrunnelse mangler')
+      return
+    }
     const revurderingInfo: RevurderingInfo = {
       type: 'OMGJOERING_AV_FARSKAP',
       naavaerendeFar: naavaerendeFar,
@@ -49,6 +55,7 @@ export const OmgjoeringAvFarskap = (props: { behandling: IDetaljertBehandling })
     lagre(
       {
         behandlingId: behandling.id,
+        begrunnelse: begrunnelse,
         revurderingInfo,
       },
       () => oppdaterRevurderingInfo(revurderingInfo)
@@ -67,6 +74,7 @@ export const OmgjoeringAvFarskap = (props: { behandling: IDetaljertBehandling })
             Hvem er registrert som far nå?
           </Heading>
           <NavnInput navn={naavaerendeFar || standardnavn()} update={(n: Navn) => setNaavaerendeFar(n)} />
+          <Revurderingsbegrunnelse begrunnelse={begrunnelse} setBegrunnelse={setBegrunnelse} redigerbar={true} />
           <Button loading={isPending(lagrestatus)} variant="primary" size="small">
             Lagre
           </Button>
@@ -86,6 +94,7 @@ export const OmgjoeringAvFarskap = (props: { behandling: IDetaljertBehandling })
           <strong>
             {!!forrigeFar ? [forrigeFar.fornavn, forrigeFar.mellomnavn, forrigeFar.etternavn].join(' ') : 'Ikke angitt'}
           </strong>
+          <Revurderingsbegrunnelse begrunnelse={begrunnelse} setBegrunnelse={setBegrunnelse} redigerbar={false} />
         </BodyShort>
       )}
     </MarginTop>

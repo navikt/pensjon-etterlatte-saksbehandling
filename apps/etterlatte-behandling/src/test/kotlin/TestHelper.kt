@@ -10,6 +10,7 @@ import no.nav.etterlatte.behandling.domain.OpprettBehandling
 import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.behandling.domain.SamsvarMellomKildeOgGrunnlag
 import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerAarsak
+import no.nav.etterlatte.behandling.revurdering.RevurderingMedBegrunnelse
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.grunnlagsendring.samsvarDoedsdatoer
 import no.nav.etterlatte.libs.common.Vedtaksloesning
@@ -21,7 +22,6 @@ import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
-import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.behandling.Utenlandstilsnitt
@@ -129,7 +129,7 @@ fun revurdering(
     prosesstype: Prosesstype = Prosesstype.MANUELL,
     kilde: Vedtaksloesning = Vedtaksloesning.GJENNY,
     enhet: String = Enheter.defaultEnhet.enhetNr,
-    revurderingInfo: RevurderingInfo? = null,
+    revurderingInfo: RevurderingMedBegrunnelse? = null,
     begrunnelse: String? = null
 ) = Revurdering.opprett(
     id = id,
@@ -142,11 +142,11 @@ fun revurdering(
     behandlingOpprettet = behandlingOpprettet,
     sistEndret = sistEndret,
     status = status,
-    revurderingsaarsak = revurderingAarsak,
     kommerBarnetTilgode = kommerBarnetTilgode,
     virkningstidspunkt = virkningstidspunkt,
     utenlandstilsnitt = utenlandstilsnitt,
     boddEllerArbeidetUtlandet = boddEllerArbeidetUtlandet,
+    revurderingsaarsak = revurderingAarsak,
     prosesstype = prosesstype,
     kilde = kilde,
     revurderingInfo = revurderingInfo,

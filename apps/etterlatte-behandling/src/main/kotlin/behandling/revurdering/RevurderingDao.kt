@@ -11,13 +11,14 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
-import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.database.singleOrNull
 import java.sql.Connection
+import java.sql.PreparedStatement
 import java.sql.ResultSet
-import java.util.*
+import java.sql.Types
+import java.util.UUID
 
 class RevurderingDao(private val connection: () -> Connection) {
     fun asRevurdering(
@@ -48,30 +49,45 @@ class RevurderingDao(private val connection: () -> Connection) {
         )
     }
 
-    fun lagreRevurderingInfo(id: UUID, revurderingInfo: RevurderingInfo, kilde: Grunnlagsopplysning.Kilde) {
+    fun lagreRevurderingInfo(
+        id: UUID,
+        revurderingMedBegrunnelse: RevurderingMedBegrunnelse,
+        kilde: Grunnlagsopplysning.Kilde
+    ) {
         connection().prepareStatement(
             """
-                INSERT INTO revurdering_info(behandling_id, info, kilde)
-                VALUES(?, ?, ?) ON CONFLICT(behandling_id) DO UPDATE SET info = excluded.info, kilde = excluded.kilde
+                INSERT INTO revurdering_info(behandling_id, info, kilde, begrunnelse)
+                VALUES(?, ?, ?, ?) ON CONFLICT(behandling_id) DO UPDATE SET info = excluded.info, kilde = excluded.kilde, begrunnelse = excluded.begrunnelse
             """.trimIndent()
         ).let { statement ->
             statement.setObject(1, id)
-            statement.setJsonb(2, revurderingInfo)
+            statement.setJsonb(2, revurderingMedBegrunnelse.revurderingInfo)
             statement.setJsonb(3, kilde)
+            statement.stringOrNull(4, revurderingMedBegrunnelse.begrunnelse)
             statement.executeUpdate()
         }
     }
 
-    private fun hentRevurderingInfoForBehandling(id: UUID): RevurderingInfo? {
-        return connection().prepareStatement(
+    private fun hentRevurderingInfoForBehandling(id: UUID): RevurderingMedBegrunnelse? =
+        connection().prepareStatement(
             """
-                SELECT info FROM revurdering_info 
+                SELECT info, begrunnelse FROM revurdering_info 
                 WHERE behandling_id = ?
             """.trimIndent()
         ).let { statement ->
             statement.setObject(1, id)
             statement.executeQuery()
-                .singleOrNull { getString("info")?.let { objectMapper.readValue(it) } }
+                .singleOrNull {
+                    RevurderingMedBegrunnelse(
+                        getString("info")?.let { objectMapper.readValue(it) },
+                        getString("begrunnelse")
+                    )
+                }
         }
-    }
+}
+
+fun PreparedStatement.stringOrNull(index: Int, text: String?) = if (text != null) {
+    setString(index, text)
+} else {
+    setNull(index, Types.VARCHAR)
 }

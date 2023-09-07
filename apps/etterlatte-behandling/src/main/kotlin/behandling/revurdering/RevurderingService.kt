@@ -65,7 +65,11 @@ interface RevurderingService {
         begrunnelse: String? = null
     ): Revurdering?
 
-    fun lagreRevurderingInfo(behandlingsId: UUID, info: RevurderingInfo, navIdent: String): Boolean
+    fun lagreRevurderingInfo(
+        behandlingsId: UUID,
+        revurderingMedBegrunnelse: RevurderingMedBegrunnelse,
+        navIdent: String
+    ): Boolean
 }
 
 enum class RevurderingServiceFeatureToggle(private val key: String) : FeatureToggle {
@@ -248,13 +252,17 @@ class RevurderingServiceImpl(
         return behandling.status.kanEndres()
     }
 
-    override fun lagreRevurderingInfo(behandlingsId: UUID, info: RevurderingInfo, navIdent: String): Boolean {
+    override fun lagreRevurderingInfo(
+        behandlingsId: UUID,
+        revurderingMedBegrunnelse: RevurderingMedBegrunnelse,
+        navIdent: String
+    ): Boolean {
         return inTransaction(true) {
             if (!kanLagreRevurderingInfo(behandlingsId)) {
                 return@inTransaction false
             }
             val kilde = Grunnlagsopplysning.Saksbehandler.create(navIdent)
-            revurderingDao.lagreRevurderingInfo(behandlingsId, info, kilde)
+            revurderingDao.lagreRevurderingInfo(behandlingsId, revurderingMedBegrunnelse, kilde)
             return@inTransaction true
         }
     }
@@ -322,7 +330,7 @@ class RevurderingServiceImpl(
         saksbehandlerIdent: String
     ) {
         val revurderingInfo = RevurderingInfo.RevurderingAarsakAnnen(fritekstAarsak)
-        lagreRevurderingInfo(behandlingId, revurderingInfo, saksbehandlerIdent)
+        lagreRevurderingInfo(behandlingId, RevurderingMedBegrunnelse(revurderingInfo, null), saksbehandlerIdent)
     }
 
     private fun <T : Behandling> T?.sjekkEnhet() = this?.let { behandling ->

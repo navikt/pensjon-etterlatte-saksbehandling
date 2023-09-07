@@ -1,20 +1,20 @@
 import { useState } from 'react'
-import { BodyLong, Button, Heading, Modal } from '@navikt/ds-react'
-import { WarningText } from '~shared/styled'
-import { annullerBehandling } from '~shared/api/behandling'
+import { Alert, BodyLong, Button, Heading, Modal } from '@navikt/ds-react'
+import { avbrytBehandling } from '~shared/api/behandling'
 import { useNavigate } from 'react-router'
-import { ApiResponse } from '~shared/api/apiClient'
 import { ButtonWrapper } from '~shared/modal/modal'
 import { IBehandlingStatus, IBehandlingsType } from '~shared/types/IDetaljertBehandling'
 import { SidebarPanel } from '~components/behandling/SideMeny/SideMeny'
 import { hentBehandlesFraStatus } from '~components/behandling/felles/utils'
 import { useBehandling } from '~components/behandling/useBehandling'
 import { SakType } from '~shared/types/sak'
+import { isFailure, isPending, useApiCall } from '~shared/hooks/useApiCall'
+import { formaterBehandlingstype } from '~utils/formattering'
 
 export default function AnnullerBehandling() {
   const navigate = useNavigate()
   const [isOpen, setIsOpen] = useState(false)
-  const [error, setError] = useState(false)
+  const [status, avbrytBehandlingen] = useApiCall(avbrytBehandling)
 
   const behandling = useBehandling()
   const erFoerstegangsbehandling = behandling?.behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING
@@ -26,46 +26,37 @@ export default function AnnullerBehandling() {
     return null
   }
 
-  const annuller = () => {
-    if (behandling?.id) {
-      annullerBehandling(behandling.id).then((response: ApiResponse<any>) => {
-        if (response.status === 'ok') {
-          navigate('/')
-        } else {
-          setError(true)
-        }
-      })
-    }
+  const avbryt = () => {
+    avbrytBehandlingen(behandling!!.id, () => {
+      if (behandling?.søker?.foedselsnummer) {
+        navigate(`/person/${behandling.søker?.foedselsnummer}`)
+      } else {
+        window.location.reload() // Bare refresh behandling
+      }
+    })
   }
 
   return (
     <>
       <SidebarPanel>
         <Heading size={'small'} spacing>
-          {erFoerstegangsbehandling ? 'Annullering av saken' : 'Avbryte behandling'}.
+          Avbryt {formaterBehandlingstype(behandling!!.behandlingType).toLowerCase()}
         </Heading>
 
         <BodyLong spacing size={'small'}>
-          Dersom behandlingen ikke kan behandles i Gjenny må
-          {erFoerstegangsbehandling ? ' saken annulleres' : ' den avbrytes'}.
+          {erFoerstegangsbehandling
+            ? 'Hvis denne behandlingen ikke kan behandles i Gjenny må sak og behandling avbrytes.'
+            : 'Hvis denne behandlingen er uaktuell, kan du avbryte den her.'}
         </BodyLong>
 
         <div className="flex">
           <Button variant={'danger'} size={'xsmall'} className="textButton" onClick={() => setIsOpen(true)}>
-            {erFoerstegangsbehandling ? 'Avbryt behandling og annuller saken' : 'Avbryt behandling'}
+            Avbryt {formaterBehandlingstype(behandling!!.behandlingType).toLowerCase()}
           </Button>
         </div>
       </SidebarPanel>
 
-      <Modal
-        open={isOpen}
-        onClose={() => {
-          setIsOpen(false)
-          setError(false)
-        }}
-        aria-labelledby="modal-heading"
-        className={'padding-modal'}
-      >
+      <Modal open={isOpen} onClose={() => setIsOpen(false)} aria-labelledby="modal-heading" className={'padding-modal'}>
         <Modal.Body style={{ textAlign: 'center' }}>
           <Heading level={'1'} spacing size={'medium'} id="modal-heading">
             Er du sikker på at du vil avbryte behandlingen?
@@ -81,18 +72,24 @@ export default function AnnullerBehandling() {
               variant="secondary"
               size="medium"
               className="button"
-              onClick={() => {
-                setIsOpen(false)
-                setError(false)
-              }}
+              onClick={() => setIsOpen(false)}
+              disabled={isPending(status)}
             >
-              Nei, fortsett behandling
+              Nei, fortsett {formaterBehandlingstype(behandling!!.behandlingType).toLowerCase()}
             </Button>
-            <Button variant="danger" size="medium" className="button" onClick={annuller}>
-              {erFoerstegangsbehandling ? 'Ja, avbryt behandling og annuller saken' : 'Ja, avbryt behandling'}
+            <Button
+              variant="danger"
+              size="medium"
+              className="button"
+              onClick={avbryt}
+              loading={isPending(status)}
+              disabled={isPending(status)}
+            >
+              Ja, avbryt {formaterBehandlingstype(behandling!!.behandlingType).toLowerCase()}
             </Button>
           </ButtonWrapper>
-          {error && <WarningText>Det oppsto en feil ved avbryting av behandlingen.</WarningText>}
+
+          {isFailure(status) && <Alert variant={'error'}>Det oppsto en feil ved avbryting av behandlingen.</Alert>}
         </Modal.Body>
       </Modal>
     </>

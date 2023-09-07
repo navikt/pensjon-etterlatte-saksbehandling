@@ -1,13 +1,11 @@
 import { OppgaveDTOny } from '~shared/api/oppgaverny'
 import { Button } from '@navikt/ds-react'
-import { useNavigate } from 'react-router'
 import { EyeIcon } from '@navikt/aksel-icons'
 import { useAppSelector } from '~store/Store'
 import { GosysOppgaveModal } from '~components/nyoppgavebenk/GosysOppgaveModal'
 
 export const HandlingerForOppgave = ({ oppgave }: { oppgave: OppgaveDTOny }) => {
   const user = useAppSelector((state) => state.saksbehandlerReducer.saksbehandler)
-  const navigate = useNavigate()
 
   const { type, fnr, saksbehandler, referanse } = oppgave
   const erInnloggetSaksbehandlerOppgave = saksbehandler ? saksbehandler === user.ident : false
@@ -17,7 +15,7 @@ export const HandlingerForOppgave = ({ oppgave }: { oppgave: OppgaveDTOny }) => 
       case 'VURDER_KONSEKVENS':
         return (
           <>
-            <Button size="small" icon={<EyeIcon />} onClick={() => navigate(`/person/${fnr}`)}>
+            <Button size="small" icon={<EyeIcon />} href={`/person/${fnr}`} as={'a'}>
               Se hendelse
             </Button>
           </>
@@ -27,7 +25,7 @@ export const HandlingerForOppgave = ({ oppgave }: { oppgave: OppgaveDTOny }) => 
         return (
           <>
             {erInnloggetSaksbehandlerOppgave && (
-              <Button size="small" onClick={() => navigate(`/behandling/${referanse}`)}>
+              <Button size="small" as={'a'} href={`/behandling/${referanse}`}>
                 Gå til behandling
               </Button>
             )}
@@ -37,7 +35,7 @@ export const HandlingerForOppgave = ({ oppgave }: { oppgave: OppgaveDTOny }) => 
         return (
           <>
             {erInnloggetSaksbehandlerOppgave && (
-              <Button size="small" onClick={() => navigate(`/behandling/${referanse}`)}>
+              <Button size="small" href={`/behandling/${referanse}`} as={'a'}>
                 Gå til revurdering
               </Button>
             )}
@@ -47,7 +45,7 @@ export const HandlingerForOppgave = ({ oppgave }: { oppgave: OppgaveDTOny }) => 
         return (
           <>
             {erInnloggetSaksbehandlerOppgave && (
-              <Button size="small" onClick={() => navigate(`/behandling/${referanse}`)}>
+              <Button size="small" href={`/behandling/${referanse}`} as={'a'}>
                 Gå til opphør
               </Button>
             )}
@@ -57,7 +55,7 @@ export const HandlingerForOppgave = ({ oppgave }: { oppgave: OppgaveDTOny }) => 
         return (
           <>
             {erInnloggetSaksbehandlerOppgave && (
-              <Button size="small" onClick={() => navigate(`/behandling/${referanse}`)}>
+              <Button size="small" href={`/behandling/${referanse}`} as={'a'}>
                 Gå til attestering
               </Button>
             )}

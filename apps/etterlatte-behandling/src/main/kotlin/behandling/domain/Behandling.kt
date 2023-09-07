@@ -1,6 +1,7 @@
 package no.nav.etterlatte.behandling.domain
 
 import no.nav.etterlatte.behandling.BehandlingSammendrag
+import no.nav.etterlatte.behandling.revurdering.RevurderingMedBegrunnelse
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus.ATTESTERT
@@ -17,7 +18,6 @@ import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
-import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
 import no.nav.etterlatte.libs.common.behandling.Utenlandstilsnitt
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
@@ -66,7 +66,7 @@ sealed class Behandling {
         else -> null
     }
 
-    fun revurderingInfo(): RevurderingInfo? = when (this) {
+    fun revurderingInfo(): RevurderingMedBegrunnelse? = when (this) {
         is Revurdering -> this.revurderingInfo
         else -> null
     }
@@ -177,7 +177,7 @@ internal fun Behandling.toDetaljertBehandling(persongalleri: Persongalleri): Det
         boddEllerArbeidetUtlandet = boddEllerArbeidetUtlandet,
         revurderingsaarsak = revurderingsaarsak(),
         prosesstype = prosesstype,
-        revurderingInfo = revurderingInfo(),
+        revurderingInfo = revurderingInfo()?.revurderingInfo,
         enhet = sak.enhet
     )
 }

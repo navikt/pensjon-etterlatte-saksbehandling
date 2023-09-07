@@ -32,7 +32,11 @@ internal fun Route.revurderingRoutes(
                     hentNavidentFraToken { navIdent ->
                         logger.info("Lagrer revurderinginfo på behandling $behandlingsId")
                         medBody<RevurderingInfoDto> {
-                            val fikkLagret = revurderingService.lagreRevurderingInfo(behandlingsId, it.info, navIdent)
+                            val fikkLagret = revurderingService.lagreRevurderingInfo(
+                                behandlingsId,
+                                RevurderingMedBegrunnelse(it.info, it.begrunnelse),
+                                navIdent
+                            )
                             if (fikkLagret) {
                                 call.respond(HttpStatusCode.NoContent)
                             } else {
@@ -87,4 +91,4 @@ data class OpprettRevurderingRequest(
     val fritekstAarsak: String? = null
 )
 
-data class RevurderingInfoDto(val info: RevurderingInfo)
+data class RevurderingInfoDto(val begrunnelse: String?, val info: RevurderingInfo)

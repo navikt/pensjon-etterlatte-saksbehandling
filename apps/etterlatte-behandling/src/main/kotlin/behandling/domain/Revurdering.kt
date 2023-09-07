@@ -1,5 +1,6 @@
 package no.nav.etterlatte.behandling.domain
 
+import no.nav.etterlatte.behandling.revurdering.RevurderingMedBegrunnelse
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -7,7 +8,6 @@ import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
-import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
 import no.nav.etterlatte.libs.common.behandling.Utenlandstilsnitt
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.sak.Sak
@@ -25,7 +25,7 @@ sealed class Revurdering(
     override val utenlandstilsnitt: Utenlandstilsnitt?,
     override val boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet?,
     open val revurderingsaarsak: RevurderingAarsak?,
-    open val revurderingInfo: RevurderingInfo?,
+    open val revurderingInfo: RevurderingMedBegrunnelse?,
     override val prosesstype: Prosesstype,
     override val kilde: Vedtaksloesning,
     open val begrunnelse: String?
@@ -50,7 +50,7 @@ sealed class Revurdering(
             revurderingsaarsak: RevurderingAarsak,
             prosesstype: Prosesstype,
             kilde: Vedtaksloesning,
-            revurderingInfo: RevurderingInfo?,
+            revurderingInfo: RevurderingMedBegrunnelse?,
             begrunnelse: String?
         ) = when (prosesstype) {
             Prosesstype.MANUELL -> ManuellRevurdering(

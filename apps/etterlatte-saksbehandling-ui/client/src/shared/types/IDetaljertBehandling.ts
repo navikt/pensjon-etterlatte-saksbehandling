@@ -5,7 +5,7 @@ import { IFamilieforhold, IPdlPerson } from '~shared/types/Person'
 import { VurderingsResultat } from '~shared/types/VurderingsResultat'
 import { Revurderingsaarsak } from '~shared/types/Revurderingsaarsak'
 import { SakType } from '~shared/types/sak'
-import { RevurderingInfo } from '~shared/types/RevurderingInfo'
+import { RevurderingMedBegrunnelse } from '~shared/types/RevurderingInfo'
 
 export interface IDetaljertBehandling {
   id: string
@@ -23,7 +23,7 @@ export interface IDetaljertBehandling {
   behandlingType: IBehandlingsType
   søker?: IPdlPerson
   revurderingsaarsak: Revurderingsaarsak | null
-  revurderinginfo: RevurderingInfo | null
+  revurderinginfo: RevurderingMedBegrunnelse | null
   begrunnelse: String | null
 }
 

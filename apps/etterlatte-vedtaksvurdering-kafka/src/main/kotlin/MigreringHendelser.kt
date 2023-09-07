@@ -2,7 +2,6 @@ package no.nav.etterlatte
 
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
-import no.nav.etterlatte.rapidsandrivers.EventNames.OPPRETT_VEDTAK
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser.VEDTAK
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -35,7 +34,7 @@ internal class MigreringHendelser(
         val behandlingId = packet.behandlingId
         logger.info("Oppretter, fatter og attesterer vedtak for migrer behandling $behandlingId")
 
-        withFeilhaandtering(packet, context, OPPRETT_VEDTAK) {
+        withFeilhaandtering(packet, context, VEDTAK) {
             val respons = vedtak.opprettVedtakFattOgAttester(packet.sakId, behandlingId)
             logger.info("Opprettet vedtak ${respons.vedtakId} for migrert behandling: $behandlingId")
         }

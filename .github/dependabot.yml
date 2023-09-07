@@ -139,6 +139,7 @@ updates:
           - "@types/node-fetch"
           - "ts-node"
           - "ts-node-dev"
+          - "@types/cors"
 
 
   # ==============

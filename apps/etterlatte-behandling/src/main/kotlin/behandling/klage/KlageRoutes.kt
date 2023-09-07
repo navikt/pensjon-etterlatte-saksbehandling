@@ -24,7 +24,7 @@ enum class KlageFeatureToggle(private val key: String) : FeatureToggle {
 }
 
 internal fun Route.klageRoutes(klageService: KlageService, featureToggleService: FeatureToggleService) {
-    suspend fun PipelineContext<Unit, ApplicationCall>.kunHvisEnabled(
+    suspend fun PipelineContext<Unit, ApplicationCall>.hvisEnabled(
         toggle: FeatureToggle,
         block: suspend PipelineContext<Unit, ApplicationCall>.() -> Unit
     ) {
@@ -37,7 +37,7 @@ internal fun Route.klageRoutes(klageService: KlageService, featureToggleService:
 
     route("/api/klage") {
         post("opprett/{$SAKID_CALL_PARAMETER}") {
-            kunHvisEnabled(KlageFeatureToggle.KanBrukeKlageToggle) {
+            hvisEnabled(KlageFeatureToggle.KanBrukeKlageToggle) {
                 val sakId = sakId
                 val klage = inTransaction {
                     klageService.opprettKlage(sakId)
@@ -47,7 +47,7 @@ internal fun Route.klageRoutes(klageService: KlageService, featureToggleService:
         }
 
         get("{$KLAGEID_CALL_PARAMETER}") {
-            kunHvisEnabled(KlageFeatureToggle.KanBrukeKlageToggle) {
+            hvisEnabled(KlageFeatureToggle.KanBrukeKlageToggle) {
                 val klage = inTransaction {
                     klageService.hentKlage(klageId)
                 }
@@ -59,7 +59,7 @@ internal fun Route.klageRoutes(klageService: KlageService, featureToggleService:
         }
 
         get("sak/{$SAKID_CALL_PARAMETER}") {
-            kunHvisEnabled(KlageFeatureToggle.KanBrukeKlageToggle) {
+            hvisEnabled(KlageFeatureToggle.KanBrukeKlageToggle) {
                 val klager = inTransaction {
                     klageService.hentKlagerISak(sakId)
                 }

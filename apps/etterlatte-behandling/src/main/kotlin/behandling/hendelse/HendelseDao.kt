@@ -2,6 +2,7 @@ package no.nav.etterlatte.behandling.hendelse
 
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.BehandlingOpprettet
+import no.nav.etterlatte.libs.common.behandling.KlageHendelseType
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunktOrNull
@@ -145,10 +146,6 @@ class HendelseDao(private val connection: () -> Connection) {
 
         logger.info("lagret hendelse: $hendelse")
     }
-}
-
-enum class KlageHendelseType {
-    OPPRETTET
 }
 
 fun PreparedStatement.setLong(index: Int, value: Long?) =

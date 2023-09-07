@@ -57,3 +57,7 @@ data class Klage(
 class KlageUtfall
 
 class Formkrav
+
+enum class KlageHendelseType {
+    OPPRETTET
+}

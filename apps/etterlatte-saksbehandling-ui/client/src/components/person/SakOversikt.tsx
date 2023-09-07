@@ -12,6 +12,7 @@ import { Alert, BodyShort, Heading, Link, Tag } from '@navikt/ds-react'
 import { ISak } from '~shared/types/sak'
 import { formaterSakstype } from '~utils/formattering'
 import { ExternalLinkIcon } from '@navikt/aksel-icons'
+import { OpprettKlage } from '~components/person/OpprettKlage'
 
 export const SakOversikt = ({ fnr }: { fnr: string }) => {
   const [sak, setSak] = useState<ISak>()
@@ -38,6 +39,7 @@ export const SakOversikt = ({ fnr }: { fnr: string }) => {
                 {formaterSakstype(sak!!.sakType)}
               </Tag>
               <EkstraHandlinger>
+                <OpprettKlage sakId={sak!!.id} />
                 <ManueltOpphoerModal sakId={sak!!.id} behandlingliste={behandlingerStatus.data[0].behandlinger} />
               </EkstraHandlinger>
             </Heading>

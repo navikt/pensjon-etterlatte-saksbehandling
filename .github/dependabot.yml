@@ -34,6 +34,10 @@ updates:
         patterns:
           - "io.micrometer*"
           - "io.prometheus*"
+      jms-mq:
+        patterns:
+          - "org.messaginghub:pooled-jms"
+          - "com.ibm.mq:com.ibm.mq.jakarta.client"
 
 
   # =============

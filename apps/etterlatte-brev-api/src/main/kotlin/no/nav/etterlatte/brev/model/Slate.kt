@@ -66,6 +66,14 @@ object SlateHelper {
             SakType.OMSTILLINGSSTOENAD -> {
                 when (behandling.vedtak.type) {
                     VedtakType.INNVILGELSE -> getJsonFile("/maler/vedlegg/oms_foerstegangsvedtak_innvilgelse.json")
+                    VedtakType.ENDRING -> {
+                        when (behandling.revurderingsaarsak) {
+                            RevurderingAarsak.INNTEKTSENDRING -> getJsonFile(
+                                "/maler/vedlegg/oms_revurdering_endring.json"
+                            )
+                            else -> null
+                        }
+                    }
                     else -> null
                 }
             }

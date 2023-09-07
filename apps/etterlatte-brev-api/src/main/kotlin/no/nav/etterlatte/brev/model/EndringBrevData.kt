@@ -1,5 +1,6 @@
 package no.nav.etterlatte.brev.model
 
+import no.nav.etterlatte.brev.behandling.Avkortingsinfo
 import no.nav.etterlatte.brev.behandling.Behandling
 import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
 import no.nav.etterlatte.brev.model.AvslagBrevData.valider
@@ -164,5 +165,41 @@ data class InstitusjonsoppholdRevurderingBrevdata(
                 utskrevetdato = revurderingInfo.utskrevetdato
             )
         }
+    }
+}
+
+data class InntektsendringRevurderingOMS(
+    val erEndret: Boolean,
+    val avkortingsinfo: Avkortingsinfo? = null,
+    val etterbetalinginfo: EtterbetalingDTO? = null,
+    val beregningsinfo: Beregningsinfo? = null,
+    val innhold: List<Slate.Element>
+) : BrevData() {
+
+    companion object {
+        fun fra(
+            behandling: Behandling,
+            innhold: List<Slate.Element>,
+            innholdVedlegg: List<BrevInnholdVedlegg>
+        ): InntektsendringRevurderingOMS =
+            InntektsendringRevurderingOMS(
+                erEndret = true,
+                avkortingsinfo = behandling.avkortingsinfo,
+                etterbetalinginfo = null,
+                beregningsinfo = Beregningsinfo(
+                    innhold = innholdVedlegg.find { vedlegg -> vedlegg.key == "beregning_innhold" }?.payload!!.elements,
+                    grunnbeloep = behandling.avkortingsinfo!!.grunnbeloep,
+                    beregningsperioder = behandling.avkortingsinfo.beregningsperioder.map {
+                        NyBeregningsperiode(
+                            inntekt = it.inntekt,
+                            trygdetid = it.trygdetid,
+                            stoenadFoerReduksjon = it.ytelseFoerAvkorting,
+                            utbetaltBeloep = it.utbetaltBeloep
+                        )
+                    },
+                    trygdetidsperioder = behandling.trygdetid!!
+                ),
+                innhold = innhold
+            )
     }
 }

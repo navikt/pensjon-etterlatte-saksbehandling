@@ -63,8 +63,7 @@ export default function AnnullerBehandling() {
           </Heading>
           <BodyLong spacing>
             {erFoerstegangsbehandling
-              ? 'Behandlingen blir avbrutt og kan ikke behandles videre i Gjenny. Saken må annulleres fra ' +
-                'saksoversikten og deretter opprettes på nytt i Pesys.'
+              ? 'Saken blir annullert og kan ikke behandles videre i Gjenny. Saken må manuelt opprettes på nytt i Pesys.'
               : 'Behandlingen blir avsluttet og kan opprettes på nytt.'}
           </BodyLong>
 

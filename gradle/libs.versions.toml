@@ -76,9 +76,9 @@ metrics-micrometer-prometheus = { module = "io.micrometer:micrometer-registry-pr
 metrics-prometheus-simpleclientcommon = { module = "io.prometheus:simpleclient_common", version.ref = "prometheus-version" }
 metrics-prometheus-simpleclienthotspot = { module = "io.prometheus:simpleclient_hotspot", version.ref = "prometheus-version" }
 
-messaginghub-pooled-jms = { module ="org.messaginghub:pooled-jms", version = "3.1.1" }
+messaginghub-pooled-jms = { module ="org.messaginghub:pooled-jms", version = "3.1.2" }
 
-mq-jakarta-client = { module ="com.ibm.mq:com.ibm.mq.jakarta.client", version = "9.3.3.0" }
+mq-jakarta-client = { module ="com.ibm.mq:com.ibm.mq.jakarta.client", version = "9.3.3.1" }
 
 navfelles-rapidandriversktor2 = { module = "com.github.navikt:rapids-and-rivers", version = "2023041310341681374880.67ced5ad4dda" }
 navfelles-tjenestespesifikasjoner-avstemming = { module = "com.github.navikt.pensjon-etterlatte-tjenestespesifikasjoner:avstemming-v1-tjenestespesifikasjon", version = "1.78ffd1e" }

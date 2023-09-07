@@ -36,7 +36,7 @@ internal class MigreringHendelser(
         logger.info("Oppretter, fatter og attesterer vedtak for migrer behandling $behandlingId")
 
         withFeilhaandtering(packet, context, OPPRETT_VEDTAK) {
-            val respons = vedtak.migrer(packet.sakId, behandlingId)
+            val respons = vedtak.opprettVedtakFattOgAttester(packet.sakId, behandlingId)
             logger.info("Opprettet vedtak ${respons.vedtakId} for migrert behandling: $behandlingId")
         }
     }

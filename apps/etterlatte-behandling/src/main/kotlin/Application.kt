@@ -91,7 +91,7 @@ fun Application.module(context: ApplicationContext) {
                 grunnlagsendringshendelseService = grunnlagsendringshendelseService,
                 oppgaveServiceNy = oppgaveServiceNy
             )
-            klageRoutes(klageService = klageService)
+            klageRoutes(klageService = klageService, featureToggleService = featureToggleService)
             behandlingRoutes(
                 behandlingService = behandlingService,
                 gyldighetsproevingService = gyldighetsproevingService,

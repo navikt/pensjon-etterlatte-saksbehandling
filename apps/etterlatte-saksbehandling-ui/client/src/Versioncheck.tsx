@@ -10,7 +10,7 @@ const Versioncheck = () => {
 
   useEffect(() => {
     const timeout5minutesinms = 300000
-    const tisekunderiMs = 10000
+    const tisekunderiMs = 30000
     let intervalVersionCheck: null | number = null
     let timeoutReload: null | number = null
     intervalVersionCheck = window.setInterval(() => {

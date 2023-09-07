@@ -38,13 +38,18 @@ export const OpprettNyBehandling = ({
     )
   }
 
+  const closeAndReset = () => {
+    setOpen(false)
+    resetApiCall()
+  }
+
   return (
     <OpprettNyBehandlingWrapper>
       <>
         <Button variant="secondary" onClick={() => setOpen(true)}>
           Opprett ny behandling
         </Button>
-        <Modal open={open} onClose={() => setOpen(false)} aria-labelledby="modal-heading">
+        <Modal open={open} onClose={closeAndReset} aria-labelledby="modal-heading">
           <Modal.Body>
             <Modal.Header closeButton={false}>
               <Heading spacing level="2" size="medium" id="modal-heading">
@@ -78,13 +83,7 @@ export const OpprettNyBehandling = ({
               </AnnenRevurderingWrapper>
             )}
             <ButtonContainer>
-              <Button
-                variant="secondary"
-                onClick={() => {
-                  setOpen(false)
-                  resetApiCall()
-                }}
-              >
+              <Button variant="secondary" onClick={closeAndReset}>
                 Avbryt
               </Button>
               <Button loading={isPending(opprettRevurderingStatus)} onClick={opprettBehandling}>

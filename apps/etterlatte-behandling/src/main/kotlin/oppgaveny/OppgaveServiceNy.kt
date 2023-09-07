@@ -257,7 +257,7 @@ class OppgaveServiceNy(
         }
     }
 
-    fun opprettFoerstegangsbehandlingsOppgaveForInnsendSoeknad(referanse: String, sakId: Long): OppgaveNy {
+    fun opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(referanse: String, sakId: Long): OppgaveNy {
         val oppgaverForBehandling = oppgaveDaoNy.hentOppgaverForBehandling(referanse)
         val oppgaverSomKanLukkes = oppgaverForBehandling.filter { !it.erAvsluttet() }
         oppgaverSomKanLukkes.forEach {

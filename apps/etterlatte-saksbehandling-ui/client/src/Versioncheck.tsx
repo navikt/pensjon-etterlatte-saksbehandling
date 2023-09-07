@@ -47,7 +47,7 @@ const Versioncheck = () => {
       >
         <Modal.Body>
           <Alert variant="warning">
-            Det er kommet en ny versjon av Gjenny. Nettsida vil automatisk laste på nytt om 10 sekunder for å hente inn
+            Det er kommet en ny versjon av Gjenny. Nettsida vil automatisk laste på nytt om 30 sekunder for å hente inn
             den nyeste versjonen. Har du endringer du ønsker å lagre først? Trykk på avbryt knappen. Denne boksen vil da
             komme opp igjen om fem minutter. (Obs! dette kan medføre at du mangler enkelte funksjoner og havner i
             feilsituasjoner!)

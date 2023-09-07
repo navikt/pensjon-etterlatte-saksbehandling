@@ -35,7 +35,7 @@ class VedtakServiceImpl(private val vedtakKlient: HttpClient, private val url: S
 
     override fun migrer(sakId: Long, behandlingId: UUID): VedtakDto =
         runBlocking {
-            vedtakKlient.post("$url/api/vedtak/$sakId/$behandlingId/migrer").body()
+            vedtakKlient.post("$url/api/vedtak/$sakId/$behandlingId/automatisk").body()
         }
 
     override fun upsertVedtak(behandlingId: UUID): VedtakDto =

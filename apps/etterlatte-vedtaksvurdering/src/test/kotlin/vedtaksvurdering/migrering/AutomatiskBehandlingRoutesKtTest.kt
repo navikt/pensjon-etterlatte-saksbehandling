@@ -1,4 +1,4 @@
-package no.nav.etterlatte.vedtaksvurdering.migrering
+package no.nav.etterlatte.vedtaksvurdering
 
 import io.kotest.matchers.shouldBe
 import io.ktor.client.request.header
@@ -27,7 +27,6 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
 import no.nav.etterlatte.libs.ktor.restModule
-import no.nav.etterlatte.vedtaksvurdering.VedtaksvurderingService
 import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlient
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
@@ -43,7 +42,7 @@ import vedtaksvurdering.vedtak
 import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-internal class MigreringRouteKtTest {
+internal class AutomatiskBehandlingRoutesKtTest {
 
     private val server = MockOAuth2Server()
     private lateinit var applicationConfig: HoconApplicationConfig
@@ -98,9 +97,9 @@ internal class MigreringRouteKtTest {
             } returns opprettetVedtak
 
             environment { config = applicationConfig }
-            application { restModule(log) { migreringRoute(vedtaksvurderingService, behandlingKlient) } }
+            application { restModule(log) { automatiskBehandlingRoutes(vedtaksvurderingService, behandlingKlient) } }
 
-            val vedtak = client.post("/api/vedtak/1/$behandlingId/migrer") {
+            val vedtak = client.post("/api/vedtak/1/$behandlingId/automatisk") {
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 header(HttpHeaders.Authorization, "Bearer $token")
             }.let {

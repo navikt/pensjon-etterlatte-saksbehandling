@@ -1,4 +1,4 @@
-package no.nav.etterlatte.vedtaksvurdering.migrering
+package no.nav.etterlatte.vedtaksvurdering
 
 import io.ktor.server.application.call
 import io.ktor.server.application.log
@@ -14,16 +14,15 @@ import no.nav.etterlatte.libs.common.sakId
 import no.nav.etterlatte.libs.common.withBehandlingId
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.token.Fagsaksystem
-import no.nav.etterlatte.vedtaksvurdering.VedtaksvurderingService
 import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlient
 
-fun Route.migreringRoute(service: VedtaksvurderingService, behandlingKlient: BehandlingKlient) {
+fun Route.automatiskBehandlingRoutes(service: VedtaksvurderingService, behandlingKlient: BehandlingKlient) {
     route("/api/vedtak") {
         val logger = application.log
 
-        post("/{$SAKID_CALL_PARAMETER}/{$BEHANDLINGSID_CALL_PARAMETER}/migrer") {
+        post("/{$SAKID_CALL_PARAMETER}/{$BEHANDLINGSID_CALL_PARAMETER}/automatisk") {
             withBehandlingId(behandlingKlient) { behandlingId ->
-                logger.info("Migrerer behandling $behandlingId")
+                logger.info("Håndterer behandling $behandlingId")
                 val nyttVedtak = service.opprettEllerOppdaterVedtak(behandlingId, brukerTokenInfo)
 
                 logger.info("Fatter vedtak for behandling $behandlingId")

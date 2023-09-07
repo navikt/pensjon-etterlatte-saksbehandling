@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { Alert, BodyLong, Button, Heading, Modal } from '@navikt/ds-react'
 import { avbrytBehandling } from '~shared/api/behandling'
 import { useNavigate } from 'react-router'
@@ -27,15 +27,13 @@ export default function AnnullerBehandling() {
   }
 
   const avbryt = () => {
-    if (behandling?.id) {
-      avbrytBehandlingen(behandling.id, () => {
-        if (behandling.søker?.foedselsnummer) {
-          navigate(`/person/${behandling.søker?.foedselsnummer}`)
-        } else {
-          window.location.reload() // Bare refresh behandling
-        }
-      })
-    }
+    avbrytBehandlingen(behandling!!.id, () => {
+      if (behandling?.søker?.foedselsnummer) {
+        navigate(`/person/${behandling.søker?.foedselsnummer}`)
+      } else {
+        window.location.reload() // Bare refresh behandling
+      }
+    })
   }
 
   return (

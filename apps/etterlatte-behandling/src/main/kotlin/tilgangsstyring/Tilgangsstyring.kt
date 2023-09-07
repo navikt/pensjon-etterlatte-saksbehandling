@@ -20,6 +20,7 @@ import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.FoedselsNummerMedGraderingDTO
 import no.nav.etterlatte.libs.common.FoedselsnummerDTO
+import no.nav.etterlatte.libs.common.KLAGEID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.OPPGAVEID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
@@ -35,6 +36,8 @@ class PluginConfiguration {
     var harTilgangTilSak: (sakId: Long, saksbehandlerMedRoller: SaksbehandlerMedRoller)
     -> Boolean = { _, _ -> false }
     var harTilgangTilOppgave: (oppgaveId: String, saksbehandlerMedRoller: SaksbehandlerMedRoller)
+    -> Boolean = { _, _ -> false }
+    var harTilgangTilKlage: (klageId: String, saksbehandlerMedRoller: SaksbehandlerMedRoller)
     -> Boolean = { _, _ -> false }
     var saksbehandlerGroupIdsByKey: Map<AzureGroup, String> = emptyMap()
 }
@@ -107,6 +110,18 @@ val adressebeskyttelsePlugin: RouteScopedPlugin<PluginConfiguration> = createRou
                 }
                 return@on
             }
+
+            val klageId = call.parameters[KLAGEID_CALL_PARAMETER]
+            if (!klageId.isNullOrEmpty()) {
+                if (!pluginConfig.harTilgangTilKlage(
+                        klageId,
+                        SaksbehandlerMedRoller(bruker, saksbehandlerGroupIdsByKey)
+                    )
+                ) {
+                    call.respond(HttpStatusCode.NotFound)
+                }
+                return@on
+            }
         }
 
         return@on
@@ -132,6 +147,7 @@ suspend inline fun PipelineContext<*, ApplicationCall>.withFoedselsnummerInterna
                 call.respond(HttpStatusCode.NotFound)
             }
         }
+
         else -> onSuccess(foedselsnummer)
     }
 }
@@ -154,6 +170,7 @@ suspend inline fun PipelineContext<*, ApplicationCall>.withFoedselsnummerAndGrad
                 call.respond(HttpStatusCode.NotFound)
             }
         }
+
         else -> onSuccess(foedselsnummer, foedselsnummerDTOmedGradering.gradering)
     }
 }
@@ -171,6 +188,7 @@ suspend inline fun PipelineContext<*, ApplicationCall>.kunAttestant(
                 call.respond(HttpStatusCode.Unauthorized, "Mangler attestantrolle")
             }
         }
+
         else -> onSuccess()
     }
 }
@@ -187,6 +205,7 @@ fun <T> List<T>.filterForEnheter(
                 val enheter = user.enheter()
                 this.filter { filter(it, enheter) }
             }
+
             else -> this
         }
     } else {

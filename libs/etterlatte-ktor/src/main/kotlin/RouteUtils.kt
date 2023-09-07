@@ -42,7 +42,7 @@ inline val PipelineContext<*, ApplicationCall>.gosysOppgaveId: String
     }
 
 inline val PipelineContext<*, ApplicationCall>.klageId: UUID
-    get() = requireNotNull(call.parameters[OPPGAVEID_GOSYS_CALL_PARAMETER]?.let { UUID.fromString(it) }) {
+    get() = requireNotNull(call.parameters[KLAGEID_CALL_PARAMETER]?.let { UUID.fromString(it) }) {
         "KlageId er ikke i path params"
     }
 

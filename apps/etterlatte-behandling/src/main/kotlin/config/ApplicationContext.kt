@@ -250,7 +250,12 @@ class ApplicationContext(
         oppgaveServiceNy = oppgaveServiceNy
     )
 
-    val klageService = KlageServiceImpl(klageDao, sakDao)
+    val klageService = KlageServiceImpl(
+        klageDao = klageDao,
+        sakDao = sakDao,
+        hendelseDao = hendelseDao,
+        oppgaveServiceNy = oppgaveServiceNy
+    )
 
     // Job
     val grunnlagsendringshendelseJob = GrunnlagsendringshendelseJob(

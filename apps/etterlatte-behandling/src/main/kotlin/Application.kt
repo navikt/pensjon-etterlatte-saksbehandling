@@ -131,6 +131,12 @@ fun Application.module(context: ApplicationContext) {
                         saksbehandlerMedRoller
                     )
                 }
+                harTilgangTilKlage = { klageId, saksbehandlerMedRoller ->
+                    tilgangService.harTilgangTilKlage(
+                        klageId,
+                        saksbehandlerMedRoller
+                    )
+                }
             }
         }
     }

@@ -16,7 +16,6 @@ import no.nav.etterlatte.libs.common.sakId
 internal fun Route.klageRoutes(klageService: KlageService) {
     route("/api/klage") {
         post("opprett/{$SAKID_CALL_PARAMETER}") {
-            // opprett en klage
             val sakId = sakId
             val klage = inTransaction {
                 klageService.opprettKlage(sakId)
@@ -34,7 +33,7 @@ internal fun Route.klageRoutes(klageService: KlageService) {
             }
         }
 
-        get("/sak/{$SAKID_CALL_PARAMETER}") {
+        get("sak/{$SAKID_CALL_PARAMETER}") {
             val klager = inTransaction {
                 klageService.hentKlagerISak(sakId)
             }

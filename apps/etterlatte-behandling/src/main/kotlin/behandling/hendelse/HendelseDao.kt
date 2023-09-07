@@ -53,6 +53,28 @@ class HendelseDao(private val connection: () -> Connection) {
         )
     )
 
+    fun klageHendelse(
+        klageId: UUID,
+        sakId: Long,
+        hendelse: KlageHendelseType,
+        inntruffet: Tidspunkt,
+        saksbehandler: String?,
+        kommentar: String?,
+        begrunnelse: String?
+    ) = lagreHendelse(
+        UlagretHendelse(
+            hendelse = "KLAGE:${hendelse.name}",
+            inntruffet = inntruffet,
+            vedtakId = null,
+            behandlingId = klageId,
+            sakId = sakId,
+            ident = saksbehandler,
+            identType = "SAKSBEHANLDER".takeIf { saksbehandler != null },
+            kommentar = kommentar,
+            valgtBegrunnelse = begrunnelse
+        )
+    )
+
     fun vedtakHendelse(
         behandlingId: UUID,
         sakId: Long,
@@ -123,6 +145,10 @@ class HendelseDao(private val connection: () -> Connection) {
 
         logger.info("lagret hendelse: $hendelse")
     }
+}
+
+enum class KlageHendelseType {
+    OPPRETTET
 }
 
 fun PreparedStatement.setLong(index: Int, value: Long?) =

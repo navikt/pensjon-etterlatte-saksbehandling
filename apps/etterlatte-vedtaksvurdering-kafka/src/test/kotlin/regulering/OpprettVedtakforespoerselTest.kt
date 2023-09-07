@@ -1,6 +1,5 @@
 package regulering
 
-import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.etterlatte.VedtakService
@@ -31,19 +30,6 @@ internal class OpprettVedtakforespoerselTest {
     )
 
     @Test
-    fun `kan ta imot opprettVedtak-melding og kalle paa vedtakservice med riktige verdier`() {
-        val behandlingId = UUID.randomUUID()
-        val melding = genererOpprettVedtakforespoersel(behandlingId)
-        val vedtakServiceMock = mockk<VedtakService>(relaxed = true)
-        val inspector = TestRapid().apply { OpprettVedtakforespoersel(this, vedtakServiceMock) }
-        inspector.sendTestMessage(melding.toJson())
-
-        verify(exactly = 1) {
-            vedtakServiceMock.upsertVedtak(behandlingId)
-        }
-    }
-
-    @Test
     fun `skal baade opprette vedtak og fatte det samt attestere`() {
         val behandlingId = UUID.randomUUID()
         val melding = genererOpprettVedtakforespoersel(behandlingId)
@@ -52,38 +38,6 @@ internal class OpprettVedtakforespoerselTest {
 
         inspector.sendTestMessage(melding.toJson())
 
-        verify { vedtakServiceMock.upsertVedtak(behandlingId) }
-        verify { vedtakServiceMock.fattVedtak(behandlingId) }
-        verify { vedtakServiceMock.attesterVedtak(behandlingId) }
-    }
-
-    @Test
-    fun `skal ikke fatte vedtak hvis opprettelse feiler`() {
-        val behandlingId = UUID.randomUUID()
-        val melding = genererOpprettVedtakforespoersel(behandlingId)
-        val vedtakServiceMock = mockk<VedtakService>()
-        val inspector = TestRapid().apply { OpprettVedtakforespoersel(this, vedtakServiceMock) }
-
-        inspector.sendTestMessage(melding.toJson())
-
-        verify(exactly = 1) { vedtakServiceMock.upsertVedtak(behandlingId) }
-        verify(exactly = 0) { vedtakServiceMock.fattVedtak(behandlingId) }
-        verify(exactly = 0) { vedtakServiceMock.attesterVedtak(behandlingId) }
-    }
-
-    @Test
-    fun `skal ikke attestere vedtak hvis aa fattevedtak feiler`() {
-        val behandlingId = UUID.randomUUID()
-        val melding = genererOpprettVedtakforespoersel(behandlingId)
-        val vedtakServiceMock = mockk<VedtakService>(relaxed = true) {
-            every { fattVedtak(any()) } throws RuntimeException()
-        }
-        val inspector = TestRapid().apply { OpprettVedtakforespoersel(this, vedtakServiceMock) }
-
-        inspector.sendTestMessage(melding.toJson())
-
-        verify(exactly = 1) { vedtakServiceMock.upsertVedtak(behandlingId) }
-        verify(exactly = 1) { vedtakServiceMock.fattVedtak(behandlingId) }
-        verify(exactly = 0) { vedtakServiceMock.attesterVedtak(behandlingId) }
+        verify { vedtakServiceMock.opprettVedtakFattOgAttester(sakId, behandlingId) }
     }
 }

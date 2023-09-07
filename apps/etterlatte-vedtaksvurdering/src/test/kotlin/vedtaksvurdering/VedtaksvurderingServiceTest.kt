@@ -706,6 +706,7 @@ internal class VedtaksvurderingServiceTest {
         )
         coEvery { behandlingKlientMock.kanAttestereVedtak(any(), any(), any()) } returns true
         coEvery { behandlingKlientMock.attesterVedtak(any(), any()) } returns true
+        coEvery { behandlingKlientMock.iverksett(any(), any(), any()) } returns true
         coEvery { behandlingKlientMock.fattVedtakBehandling(any(), any()) } returns true
         coEvery { behandlingKlientMock.hentBehandling(any(), any()) } returns mockBehandling(
             virkningstidspunkt,
@@ -723,7 +724,7 @@ internal class VedtaksvurderingServiceTest {
             )
             service.fattVedtak(behandlingId, gjeldendeSaksbehandler)
             service.attesterVedtak(behandlingId, KOMMENTAR, attestant)
-            service.iverksattVedtak(behandlingId)
+            service.iverksattVedtak(behandlingId, attestant)
         }
 
         iverksattVedtak shouldNotBe null
@@ -742,7 +743,7 @@ internal class VedtaksvurderingServiceTest {
             repository.opprettVedtak(opprettVedtak(behandlingId = behandlingId))
 
             assertThrows<VedtakTilstandException> {
-                service.iverksattVedtak(behandlingId)
+                service.iverksattVedtak(behandlingId, attestant)
             }
         }
     }
@@ -760,6 +761,7 @@ internal class VedtaksvurderingServiceTest {
         coEvery { behandlingKlientMock.fattVedtakBehandling(any(), any()) } returns true
         coEvery { behandlingKlientMock.kanAttestereVedtak(any(), any(), any()) } returns true
         coEvery { behandlingKlientMock.attesterVedtak(any(), any()) } returns true
+        coEvery { behandlingKlientMock.iverksett(any(), any(), any()) } returns true
         coEvery {
             behandlingKlientMock.hentBehandling(
                 any(),
@@ -776,10 +778,10 @@ internal class VedtaksvurderingServiceTest {
             repository.opprettVedtak(opprettVedtak(behandlingId = behandlingId))
             service.fattVedtak(behandlingId, saksbehandler)
             service.attesterVedtak(behandlingId, KOMMENTAR, attestant)
-            service.iverksattVedtak(behandlingId)
+            service.iverksattVedtak(behandlingId, attestant)
 
             assertThrows<VedtakTilstandException> {
-                service.iverksattVedtak(behandlingId)
+                service.iverksattVedtak(behandlingId, attestant)
             }
         }
     }

@@ -73,13 +73,14 @@ val adressebeskyttelsePlugin: RouteScopedPlugin<PluginConfiguration> = createRou
         if (bruker is Saksbehandler) {
             val saksbehandlerGroupIdsByKey = pluginConfig.saksbehandlerGroupIdsByKey
             val behandlingId = call.parameters[BEHANDLINGSID_CALL_PARAMETER]
+            call.respond(behandlingId ?: HttpStatusCode.NotFound)
             if (!behandlingId.isNullOrEmpty()) {
                 if (!pluginConfig.harTilgangBehandling(
                         behandlingId,
                         SaksbehandlerMedRoller(bruker, saksbehandlerGroupIdsByKey)
                     )
                 ) {
-                    call.respond(HttpStatusCode.NotFound)
+                    call.respond(behandlingId ?: HttpStatusCode.NotFound)
                 }
                 return@on
             }

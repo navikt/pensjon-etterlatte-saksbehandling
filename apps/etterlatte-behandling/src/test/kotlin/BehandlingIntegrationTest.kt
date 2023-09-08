@@ -23,6 +23,7 @@ import no.nav.etterlatte.behandling.klienter.Norg2Klient
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.config.ApplicationContext
 import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.kafka.TestProdusent
 import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.common.behandling.PersonMedSakerOgRoller
@@ -62,7 +63,10 @@ abstract class BehandlingIntegrationTest {
     protected lateinit var applicationContext: ApplicationContext
     protected lateinit var hoconApplicationConfig: HoconApplicationConfig
 
-    protected fun startServer(norg2Klient: Norg2Klient? = null) {
+    protected fun startServer(
+        norg2Klient: Norg2Klient? = null,
+        featureToggleService: FeatureToggleService = DummyFeatureToggleService()
+    ) {
         server.start()
 
         val httpServer = server.config.httpServer
@@ -102,7 +106,7 @@ abstract class BehandlingIntegrationTest {
                 )
             ),
             rapid = TestProdusent(),
-            featureToggleService = DummyFeatureToggleService(),
+            featureToggleService = featureToggleService,
             pdlHttpClient = pdlHttpClient(),
             skjermingHttpKlient = skjermingHttpClient(),
             grunnlagHttpClient = grunnlagHttpClient(),

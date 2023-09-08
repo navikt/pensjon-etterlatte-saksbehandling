@@ -44,10 +44,10 @@ class KlageDaoImpl(private val connection: () -> Connection) : KlageDao {
         with(connection()) {
             val statement = prepareStatement(
                 """
-                    SELECT k.id as klage_id, s.id as sak_id, saktype, ident, enhet, opprettet, status, 
+                    SELECT k.id, k.sak_id, saktype, fnr, enhet, opprettet, status, 
                         kabalstatus, formkrav, utfall
                     FROM klage k INNER JOIN sak s on k.sak_id = s.id
-                    WHERE klage_id = ?
+                    WHERE k.id = ?
                 """.trimIndent()
             )
             statement.setObject(1, id)
@@ -61,7 +61,7 @@ class KlageDaoImpl(private val connection: () -> Connection) : KlageDao {
         with(connection()) {
             val statement = prepareStatement(
                 """
-                    SELECT k.id as klage_id, s.id as sak_id, saktype, ident, enhet, opprettet, status, 
+                    SELECT k.id, k.sak_id, saktype, fnr, enhet, opprettet, status, 
                         kabalstatus, formkrav, utfall
                     FROM klage k INNER JOIN sak s on k.sak_id = s.id
                     WHERE s.id = ?
@@ -76,9 +76,9 @@ class KlageDaoImpl(private val connection: () -> Connection) : KlageDao {
 
     private fun ResultSet.somKlage(): Klage {
         return Klage(
-            id = getString("klage_id").let { UUID.fromString(it) },
+            id = getString("id").let { UUID.fromString(it) },
             sak = Sak(
-                ident = getString("ident"),
+                ident = getString("fnr"),
                 sakType = enumValueOf(getString("saktype")),
                 id = getLong("sak_id"),
                 enhet = getString("enhet")

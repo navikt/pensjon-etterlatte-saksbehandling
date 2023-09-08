@@ -16,11 +16,13 @@ import io.ktor.server.application.log
 import io.ktor.server.config.HoconApplicationConfig
 import io.ktor.server.testing.testApplication
 import io.mockk.Called
+import io.mockk.Runs
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.confirmVerified
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.etterlatte.klienter.BehandlingKlient
@@ -28,6 +30,7 @@ import no.nav.etterlatte.libs.common.FoedselsnummerDTO
 import no.nav.etterlatte.libs.common.behandling.PersonMedSakerOgRoller
 import no.nav.etterlatte.libs.common.behandling.SakOgRolle
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
+import no.nav.etterlatte.libs.common.grunnlag.NyeSaksopplysninger
 import no.nav.etterlatte.libs.common.serialize
 import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
 import no.nav.etterlatte.libs.ktor.restModule
@@ -42,7 +45,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import testsupport.buildTestApplicationConfigurationForOauth
-import java.util.UUID
+import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class GrunnlagRoutesKtTest {
@@ -238,6 +241,37 @@ internal class GrunnlagRoutesKtTest {
         }
 
         verify(exactly = 1) { grunnlagService.hentAlleSakerForFnr(any()) }
+        coVerify { behandlingKlient wasNot Called }
+    }
+
+    @Test
+    fun `Nye opplysninger`() {
+        every { grunnlagService.lagreNyeSaksopplysninger(any(), any()) } just Runs
+
+        testApplication {
+            environment {
+                config = hoconApplicationConfig
+            }
+            application {
+                restModule(this.log, routePrefix = "api") { grunnlagRoute(grunnlagService, behandlingKlient) }
+            }
+            val httpClient = createClient {
+                install(ContentNegotiation) {
+                    jackson { registerModule(JavaTimeModule()) }
+                }
+            }
+            val actualResponse = httpClient.post("api/grunnlag/12345/nye-opplysninger") {
+                contentType(ContentType.Application.Json)
+                setBody(NyeSaksopplysninger(emptyList()))
+                headers {
+                    append(HttpHeaders.Authorization, "Bearer $systemBruker")
+                }
+            }
+
+            Assertions.assertEquals(HttpStatusCode.OK, actualResponse.status)
+        }
+
+        verify(exactly = 1) { grunnlagService.lagreNyeSaksopplysninger(any(), any()) }
         coVerify { behandlingKlient wasNot Called }
     }
 }

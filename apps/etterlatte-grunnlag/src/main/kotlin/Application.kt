@@ -50,7 +50,7 @@ class ApplicationBuilder {
             ekstraJacksoninnstillinger = { it.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS) }
         )
     }
-    private val pdltjenesterKlient = PdlTjenesterKlientImpl(pdlTjenester, "http://etterlatte-pdltjenester")
+    private val pdltjenesterKlient = PdlTjenesterKlientImpl(pdlTjenester, env["PDLTJENESTER_URL"]!!)
     private val opplysningDao = OpplysningDao(ds)
     private val behandlingKlient = BehandlingKlientImpl(config, httpClient())
     private val grunnlagService = RealGrunnlagService(pdltjenesterKlient, opplysningDao, Sporingslogg())

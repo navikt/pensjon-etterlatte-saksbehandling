@@ -1,4 +1,4 @@
-package behandling.klage
+package no.nav.etterlatte.behandling.klage
 
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -14,7 +14,6 @@ import io.ktor.server.testing.testApplication
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.etterlatte.BehandlingIntegrationTest
-import no.nav.etterlatte.behandling.klage.KlageFeatureToggle
 import no.nav.etterlatte.behandling.objectMapper
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.FoedselsnummerDTO
@@ -74,7 +73,7 @@ class KlageRoutesIntegrationTest : BehandlingIntegrationTest() {
             val hentetKlage = response.body<Klage>()
             assertEquals(klage, hentetKlage)
 
-            // setter adressebeskyttelse for saken
+            // setter skjerming for saken
             client.post("/egenansatt") {
                 addAuthToken(fagsystemTokenEY)
                 contentType(ContentType.Application.Json)
@@ -86,6 +85,12 @@ class KlageRoutesIntegrationTest : BehandlingIntegrationTest() {
                 addAuthToken(tokenSaksbehandler)
             }
             assertEquals(HttpStatusCode.NotFound, responseNotFound.status)
+            // henter med saksbehandler som har tilgang
+            val responseSaksbehandlerMedTilgang = client.get("/api/klage/${klage.id}") {
+                addAuthToken(tokenSaksbehandlerMedEgenAnsattTilgang)
+            }
+            assertEquals(HttpStatusCode.OK, responseSaksbehandlerMedTilgang.status)
+            assertEquals(klage.id, responseSaksbehandlerMedTilgang.body<Klage>().id)
         }
     }
 

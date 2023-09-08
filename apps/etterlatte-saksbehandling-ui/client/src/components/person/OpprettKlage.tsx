@@ -5,7 +5,7 @@ import React, { useEffect } from 'react'
 import { BodyShort, Button } from '@navikt/ds-react'
 import { ApiErrorAlert } from '~ErrorBoundary'
 
-const FEATURE_TOGGLE_KAN_BRUKE_KLAGE = 'pensjon-etterlatte.kan-bruke-klage'
+export const FEATURE_TOGGLE_KAN_BRUKE_KLAGE = 'pensjon-etterlatte.kan-bruke-klage'
 
 export function OpprettKlage(props: { sakId: number }) {
   const [opprettKlageStatus, opprettKlageKall] = useApiCall(opprettNyKlage)

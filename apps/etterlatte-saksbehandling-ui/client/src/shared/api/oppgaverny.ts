@@ -33,6 +33,7 @@ export type Oppgavetype =
   | 'UNDERKJENT'
   | 'GOSYS'
   | 'UTLAND'
+  | 'KLAGE'
 
 export const erOppgaveRedigerbar = (status: Oppgavestatus): boolean => ['NY', 'UNDER_BEHANDLING'].includes(status)
 

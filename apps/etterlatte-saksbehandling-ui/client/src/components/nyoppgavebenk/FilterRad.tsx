@@ -2,23 +2,25 @@ import { Button, Select, TextField } from '@navikt/ds-react'
 import React from 'react'
 import styled from 'styled-components'
 import {
+  ENHETFILTER,
   EnhetFilterKeys,
+  Filter,
+  FRISTFILTER,
+  FristFilterKeys,
+  initialFilter,
+  OPPGAVEKILDEFILTER,
+  OppgaveKildeFilterKeys,
   OPPGAVESTATUSFILTER,
   OppgavestatusFilterKeys,
-  OPPGAVETYPEFILTER,
+  oppgavetypefilter,
   OppgavetypeFilterKeys,
   SAKSBEHANDLERFILTER,
   SaksbehandlerFilterKeys,
   YTELSEFILTER,
   YtelseFilterKeys,
-  ENHETFILTER,
-  OppgaveKildeFilterKeys,
-  OPPGAVEKILDEFILTER,
-  FRISTFILTER,
-  FristFilterKeys,
-  Filter,
-  initialFilter,
 } from '~components/nyoppgavebenk/Oppgavelistafiltre'
+import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
+import { FEATURE_TOGGLE_KAN_BRUKE_KLAGE } from '~components/person/OpprettKlage'
 
 const FilterFlex = styled.div`
   display: flex;
@@ -37,7 +39,7 @@ const ButtonWrapper = styled.div`
 
 export const FilterRad = (props: { hentOppgaver: () => void; filter: Filter; setFilter: (filter: Filter) => void }) => {
   const { hentOppgaver, filter, setFilter } = props
-
+  const kanBrukeKlage = useFeatureEnabledMedDefault(FEATURE_TOGGLE_KAN_BRUKE_KLAGE)
   return (
     <>
       <FilterFlex>
@@ -114,7 +116,7 @@ export const FilterRad = (props: { hentOppgaver: () => void; filter: Filter; set
           value={filter.oppgavetypeFilter}
           onChange={(e) => setFilter({ ...filter, oppgavetypeFilter: e.target.value as OppgavetypeFilterKeys })}
         >
-          {Object.entries(OPPGAVETYPEFILTER).map(([type, typebeskrivelse]) => (
+          {oppgavetypefilter(kanBrukeKlage).map(([type, typebeskrivelse]) => (
             <option key={type} value={type}>
               {typebeskrivelse}
             </option>

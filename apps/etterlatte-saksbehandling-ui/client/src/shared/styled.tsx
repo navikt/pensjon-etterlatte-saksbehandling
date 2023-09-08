@@ -42,6 +42,7 @@ export const CollapsibleSidebar = styled.div<{ collapsed: boolean }>`
 
 export const SidebarContent = styled.div<{ collapsed: boolean }>`
   display: ${(props) => (props.collapsed ? 'none' : 'block')};
+  margin-bottom: 4rem;
 `
 
 export const SidebarTools = styled.div`

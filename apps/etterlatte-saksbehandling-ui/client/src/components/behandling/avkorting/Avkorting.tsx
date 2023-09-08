@@ -30,7 +30,14 @@ export const Avkorting = (props: { behandling: IBehandlingReducer }) => {
           setAvkorting={setAvkorting}
         />
       )}
-      {avkorting && <YtelseEtterAvkorting ytelser={avkorting.avkortetYtelse} />}
+      {avkorting && (
+        <YtelseEtterAvkorting
+          ytelser={avkorting.avkortetYtelse}
+          behandling={behandling}
+          tidligereYtelser={avkorting.tidligereAvkortetYtelse}
+          setAvkorting={setAvkorting}
+        />
+      )}
 
       {isPending(avkortingStatus) && <Spinner visible={true} label={'Henter avkorting'} />}
       {isFailure(avkortingStatus) && avkortingStatus.error.statusCode !== 404 && (

@@ -22,73 +22,66 @@ class AvkortingRepository(private val dataSource: DataSource) {
             behandlingId
         ).let { query -> tx.run(query.map { row -> row.toAvkortingsgrunnlag() }.asList) }
 
-        val ytelseFoerAvkorting = queryOf(
-            "SELECT * FROM avkorting_aarsoppgjoer_ytelse_foer_avkorting WHERE behandling_id = ?",
-            behandlingId
-        ).let { query -> tx.run(query.map { row -> row.toYtelseFoerAvkorting() }.asList) }
-
-        val avkortingsperioder = queryOf(
-            "SELECT * FROM avkortingsperioder WHERE behandling_id = ?",
-            behandlingId
-        ).let { query -> tx.run(query.map { row -> row.toAvkortingsperiode() }.asList) }
-
-        val tidligereAvkortetYtelse = queryOf(
-            "SELECT * FROM avkortet_ytelse WHERE behandling_id = ? AND type = ?",
-            behandlingId,
-            AvkortetYtelseType.TIDLIGERE.name
-        ).let { query -> tx.run(query.map { row -> row.toAvkortetYtelse() }.asList) }
-
-        val reberegnetAvkortetYtelse = queryOf(
-            "SELECT * FROM avkortet_ytelse WHERE behandling_id = ? AND type = ?",
-            behandlingId,
-            AvkortetYtelseType.REBEREGNET.name
-        ).let { query -> tx.run(query.map { row -> row.toAvkortetYtelse() }.asList) }
-
-        val restanse = queryOf(
-            "SELECT * FROM avkorting_aarsoppgjoer_restanse WHERE behandling_id = ?",
-            behandlingId
-        ).let { query -> tx.run(query.map { row -> row.toRestanse() }.asSingle) }
-
-        val avkortetYtelse = queryOf(
-            "SELECT * FROM avkortet_ytelse WHERE behandling_id = ? AND type = ?",
-            behandlingId,
-            AvkortetYtelseType.NY.name
-        ).let { query -> tx.run(query.map { row -> row.toAvkortetYtelse() }.asList) }
-
         if (avkortingGrunnlag.isEmpty()) {
             null
         } else {
+            val ytelseFoerAvkorting = queryOf(
+                "SELECT * FROM avkorting_aarsoppgjoer_ytelse_foer_avkorting WHERE behandling_id = ?",
+                behandlingId
+            ).let { query -> tx.run(query.map { row -> row.toYtelseFoerAvkorting() }.asList) }
+
+            val restanse = queryOf(
+                "SELECT * FROM avkorting_aarsoppgjoer_restanse WHERE behandling_id = ?",
+                behandlingId
+            ).let { query -> tx.run(query.map { row -> row.toRestanse() }.asList) }
+
+            val inntektsavkorting = avkortingGrunnlag.map {
+                val avkortingsperioder = queryOf(
+                    "SELECT * FROM avkortingsperioder WHERE inntektsgrunnlag = ?",
+                    it.id
+                ).let { query -> tx.run(query.map { row -> row.toAvkortingsperiode() }.asList) }
+
+                val avkortetYtelse = queryOf(
+                    "SELECT * FROM avkortet_ytelse WHERE inntektsgrunnlag = ?",
+                    it.id,
+                ).let { query -> tx.run(query.map { row -> row.toAvkortetYtelse(restanse) }.asList) }
+
+                Inntektsavkorting(
+                    grunnlag = it,
+                    avkortingsperioder = avkortingsperioder,
+                    avkortetYtelseForventetInntekt = avkortetYtelse
+                )
+            }
+
+            val avkortetYtelseAar = queryOf(
+                "SELECT * FROM avkortet_ytelse WHERE behandling_id = ? AND type = ?",
+                behandlingId,
+                AvkortetYtelseType.AARSOPPGJOER.name
+            ).let { query -> tx.run(query.map { row -> row.toAvkortetYtelse(restanse) }.asList) }
+
             Avkorting(
-                avkortingGrunnlag = avkortingGrunnlag,
                 aarsoppgjoer = Aarsoppgjoer(
                     ytelseFoerAvkorting = ytelseFoerAvkorting,
-                    avkortingsperioder = avkortingsperioder,
-                    tidligereAvkortetYtelse = tidligereAvkortetYtelse,
-                    tidligereAvkortetYtelseReberegnet = reberegnetAvkortetYtelse,
-                    restanse = restanse,
-                ),
-                avkortetYtelse = avkortetYtelse
+                    inntektsavkorting = inntektsavkorting,
+                    avkortetYtelseAar = avkortetYtelseAar
+                )
             )
         }
     }
 
-    fun hentAvkortingUtenNullable(behandlingId: UUID): Avkorting =
-        hentAvkorting(behandlingId) ?: throw Exception("Uthenting av avkorting for behandling $behandlingId feilet")
-
-    fun lagreAvkorting(behandlingId: UUID, avkorting: Avkorting): Avkorting {
+    fun lagreAvkorting(behandlingId: UUID, avkorting: Avkorting) {
         dataSource.transaction { tx ->
             slettAvkorting(behandlingId, tx)
-            lagreAvkortingGrunnlag(behandlingId, avkorting.avkortingGrunnlag, tx)
             with(avkorting.aarsoppgjoer) {
                 lagreYtelseFoerAvkorting(behandlingId, ytelseFoerAvkorting, tx)
-                lagreAvkortingsperioder(behandlingId, avkortingsperioder, tx)
-                lagreAvkortetYtelse(behandlingId, tidligereAvkortetYtelse, tx)
-                lagreAvkortetYtelse(behandlingId, tidligereAvkortetYtelseReberegnet, tx)
-                restanse?.let {lagreRestanse(behandlingId, it, tx) }
+                inntektsavkorting.forEach {
+                    lagreAvkortingGrunnlag(behandlingId, it.grunnlag, tx)
+                    lagreAvkortingsperioder(behandlingId, it.avkortingsperioder, tx)
+                    lagreAvkortetYtelse(behandlingId, it.avkortetYtelseForventetInntekt, tx)
+                }
+                lagreAvkortetYtelse(behandlingId, avkortetYtelseAar, tx)
             }
-            lagreAvkortetYtelse(behandlingId, avkorting.avkortetYtelse, tx)
         }
-        return hentAvkortingUtenNullable(behandlingId)
     }
 
     private fun slettAvkorting(behandlingId: UUID, tx: TransactionalSession) {
@@ -126,31 +119,30 @@ class AvkortingRepository(private val dataSource: DataSource) {
 
     private fun lagreAvkortingGrunnlag(
         behandlingId: UUID,
-        avkortingsgrunnlag: List<AvkortingGrunnlag>,
+        avkortingsgrunnlag: AvkortingGrunnlag,
         tx: TransactionalSession
-    ) = avkortingsgrunnlag.forEach {
-        queryOf(
-            statement = """
+    ) = queryOf(
+        statement = """
                 INSERT INTO avkortingsgrunnlag(
-                    id, behandling_id, fom, tom, aarsinntekt, fratrekk_inn_ut, relevante_maaneder, spesifikasjon, kilde
+                    id, behandling_id, fom, tom, aarsinntekt, fratrekk_inn_ut, relevante_maaneder,
+                     spesifikasjon, kilde
                 ) VALUES (
                     :id, :behandlingId, :fom, :tom, :aarsinntekt, :fratrekkInnAar, :relevanteMaanederInnAar,
                      :spesifikasjon, :kilde
                 )
             """.trimIndent(),
-            paramMap = mapOf(
-                "id" to it.id,
-                "behandlingId" to behandlingId,
-                "fom" to it.periode.fom.atDay(1),
-                "tom" to it.periode.tom?.atDay(1),
-                "aarsinntekt" to it.aarsinntekt,
-                "fratrekkInnAar" to it.fratrekkInnAar,
-                "relevanteMaanederInnAar" to it.relevanteMaanederInnAar,
-                "spesifikasjon" to it.spesifikasjon,
-                "kilde" to it.kilde.toJson()
-            )
-        ).let { query -> tx.run(query.asUpdate) }
-    }
+        paramMap = mapOf(
+            "id" to avkortingsgrunnlag.id,
+            "behandlingId" to behandlingId,
+            "fom" to avkortingsgrunnlag.periode.fom.atDay(1),
+            "tom" to avkortingsgrunnlag.periode.tom?.atDay(1),
+            "aarsinntekt" to avkortingsgrunnlag.aarsinntekt,
+            "fratrekkInnAar" to avkortingsgrunnlag.fratrekkInnAar,
+            "relevanteMaanederInnAar" to avkortingsgrunnlag.relevanteMaanederInnAar,
+            "spesifikasjon" to avkortingsgrunnlag.spesifikasjon,
+            "kilde" to avkortingsgrunnlag.kilde.toJson()
+        )
+    ).let { query -> tx.run(query.asUpdate) }
 
     private fun lagreYtelseFoerAvkorting(
         behandlingId: UUID,
@@ -184,9 +176,9 @@ class AvkortingRepository(private val dataSource: DataSource) {
         queryOf(
             statement = """
                 INSERT INTO avkortingsperioder(
-                    id, behandling_id, fom, tom, avkorting, tidspunkt, regel_resultat, kilde
+                    id, behandling_id, fom, tom, avkorting, tidspunkt, regel_resultat, kilde, inntektsgrunnlag
                 ) VALUES (
-                    :id, :behandlingId, :fom, :tom, :avkorting,:tidspunkt, :regel_resultat, :kilde
+                    :id, :behandlingId, :fom, :tom, :avkorting,:tidspunkt, :regel_resultat, :kilde, :inntektsgrunnlag
                 )
             """.trimIndent(),
             paramMap = mapOf(
@@ -197,7 +189,8 @@ class AvkortingRepository(private val dataSource: DataSource) {
                 "avkorting" to it.avkorting,
                 "tidspunkt" to it.tidspunkt.toTimestamp(),
                 "regel_resultat" to it.regelResultat.toJson(),
-                "kilde" to it.kilde.toJson()
+                "kilde" to it.kilde.toJson(),
+                "inntektsgrunnlag" to it.inntektsgrunnlag
             )
         ).let { query -> tx.run(query.asUpdate) }
     }
@@ -220,7 +213,7 @@ class AvkortingRepository(private val dataSource: DataSource) {
             "total_restanse" to restanse.totalRestanse,
             "fordelt_restanse" to restanse.fordeltRestanse,
             "tidspunkt" to restanse.tidspunkt.toTimestamp(),
-            "regel_resultat" to restanse.regelResultat.toJson(),
+            "regel_resultat" to restanse.regelResultat?.toJson(),
             "kilde" to restanse.kilde.toJson()
         )
     ).let { query -> tx.run(query.asUpdate) }
@@ -231,14 +224,17 @@ class AvkortingRepository(private val dataSource: DataSource) {
         tx: TransactionalSession
     ) =
         avkortetYtelse.forEach {
+            it.restanse?.let { restanse -> lagreRestanse(behandlingId, restanse, tx) }
             queryOf(
                 statement = """
                     INSERT INTO avkortet_ytelse(
                         id, behandling_id, type, fom, tom, ytelse_etter_avkorting, avkortingsbeloep, restanse, 
-                        ytelse_foer_avkorting, ytelse_etter_avkorting_uten_restanse, tidspunkt, regel_resultat, kilde
+                        ytelse_foer_avkorting, ytelse_etter_avkorting_uten_restanse, tidspunkt, regel_resultat, kilde,
+                        inntektsgrunnlag
                     ) VALUES (
                         :id, :behandlingId, :type, :fom, :tom,:ytelseEtterAvkorting, :avkortingsbeloep, :restanse,
-                        :ytelseFoerAvkorting, :ytelseEtterAvkortingFoerRestanse, :tidspunkt, :regel_resultat, :kilde
+                        :ytelseFoerAvkorting, :ytelseEtterAvkortingFoerRestanse, :tidspunkt, :regel_resultat, :kilde,
+                        :inntektsgrunnlag
                     )
                 """.trimIndent(),
                 paramMap = mapOf(
@@ -249,12 +245,13 @@ class AvkortingRepository(private val dataSource: DataSource) {
                     "tom" to it.periode.tom?.atDay(1),
                     "ytelseEtterAvkorting" to it.ytelseEtterAvkorting,
                     "avkortingsbeloep" to it.avkortingsbeloep,
-                    "restanse" to it.restanse,
+                    "restanse" to it.restanse?.id,
                     "ytelseFoerAvkorting" to it.ytelseFoerAvkorting,
                     "ytelseEtterAvkortingFoerRestanse" to it.ytelseEtterAvkortingFoerRestanse,
                     "tidspunkt" to it.tidspunkt.toTimestamp(),
                     "regel_resultat" to it.regelResultat.toJson(),
-                    "kilde" to it.kilde.toJson()
+                    "kilde" to it.kilde.toJson(),
+                    "inntektsgrunnlag" to it.inntektsgrunnlag
                 )
             ).let { query -> tx.run(query.asUpdate) }
         }
@@ -271,6 +268,7 @@ class AvkortingRepository(private val dataSource: DataSource) {
         spesifikasjon = string("spesifikasjon"),
         kilde = string("kilde").let { objectMapper.readValue(it) }
     )
+
     private fun Row.toYtelseFoerAvkorting() = YtelseFoerAvkorting(
         beregning = int("beregning"),
         periode = Periode(
@@ -279,6 +277,7 @@ class AvkortingRepository(private val dataSource: DataSource) {
         ),
         beregningsreferanse = uuid("beregningsreferanse")
     )
+
     private fun Row.toAvkortingsperiode() = Avkortingsperiode(
         id = uuid("id"),
         periode = Periode(
@@ -288,17 +287,22 @@ class AvkortingRepository(private val dataSource: DataSource) {
         avkorting = int("avkorting"),
         tidspunkt = sqlTimestamp("tidspunkt").toTidspunkt(),
         regelResultat = objectMapper.readTree(string("regel_resultat")),
-        kilde = string("kilde").let { objectMapper.readValue(it) }
+        kilde = string("kilde").let { objectMapper.readValue(it) },
+        inntektsgrunnlag = uuid("inntektsgrunnlag")
     )
+
     private fun Row.toRestanse() = Restanse(
         id = uuid("id"),
         totalRestanse = int("total_restanse"),
         fordeltRestanse = int("fordelt_restanse"),
-        tidspunkt = sqlTimestamp("tidspunkt").toTidspunkt() ,
+        tidspunkt = sqlTimestamp("tidspunkt").toTidspunkt(),
         regelResultat = string("regel_resultat").let { objectMapper.readTree(it) },
         kilde = string("kilde").let { objectMapper.readValue(it) }
     )
-    private fun Row.toAvkortetYtelse() = AvkortetYtelse(
+
+    private fun Row.toAvkortetYtelse(
+        allRestanse: List<Restanse>
+    ) = AvkortetYtelse(
         id = uuid("id"),
         type = string("type").let { AvkortetYtelseType.valueOf(it) },
         periode = Periode(
@@ -307,12 +311,13 @@ class AvkortingRepository(private val dataSource: DataSource) {
         ),
         ytelseEtterAvkorting = int("ytelse_etter_avkorting"),
         avkortingsbeloep = int("avkortingsbeloep"),
-        restanse = int("restanse"),
+        restanse = uuidOrNull("restanse").let { restanseUuid -> allRestanse.find { it.id == restanseUuid } },
         ytelseEtterAvkortingFoerRestanse = int("ytelse_etter_avkorting_uten_restanse"),
         ytelseFoerAvkorting = int("ytelse_foer_avkorting"),
         tidspunkt = sqlTimestamp("tidspunkt").toTidspunkt(),
         regelResultat = objectMapper.readTree(string("regel_resultat")),
-        kilde = string("kilde").let { objectMapper.readValue(it) }
+        kilde = string("kilde").let { objectMapper.readValue(it) },
+        inntektsgrunnlag = uuidOrNull("inntektsgrunnlag")
     )
 
 }

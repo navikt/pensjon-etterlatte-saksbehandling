@@ -14,7 +14,6 @@ import no.nav.etterlatte.avkorting.AvkortingRepository
 import no.nav.etterlatte.avkorting.AvkortingService
 import no.nav.etterlatte.beregning.Beregning
 import no.nav.etterlatte.beregning.BeregningService
-import no.nav.etterlatte.beregning.regler.avkorting
 import no.nav.etterlatte.beregning.regler.avkortinggrunnlag
 import no.nav.etterlatte.beregning.regler.behandling
 import no.nav.etterlatte.beregning.regler.bruker
@@ -56,24 +55,36 @@ internal class AvkortingServiceTest {
     inner class HentAvkorting {
 
         @Test
-        fun `Skal hente avkorting`() {
+        fun `Skal hente avkorting med loepende ytelse`() {
             val behandlingId = UUID.randomUUID()
-            val avkorting = avkorting()
+            val behandling = behandling(
+                id = behandlingId,
+                behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING
+            )
+            val avkorting = mockk<Avkorting>()
+
+            coEvery { behandlingKlient.hentBehandling(behandlingId, bruker) } returns behandling
             every { avkortingRepository.hentAvkorting(behandlingId) } returns avkorting
+            every { avkorting.medYtelseFraOgMedVirkningstidspunkt(YearMonth.of(2023, 1)) } returns avkorting
 
             runBlocking {
                 service.hentAvkorting(behandlingId, bruker) shouldBe avkorting
             }
             coVerify {
+                behandlingKlient.hentBehandling(behandlingId, bruker)
                 avkortingRepository.hentAvkorting(behandlingId)
+                avkorting.medYtelseFraOgMedVirkningstidspunkt(YearMonth.of(2023, 1))
             }
         }
 
         @Test
         fun `Skal returnere null hvis avkorting ikke finnes`() {
             val behandlingId = UUID.randomUUID()
+            val behandling = behandling(
+                id = behandlingId,
+                behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING
+            )
             every { avkortingRepository.hentAvkorting(behandlingId) } returns null
-            val behandling = behandling(behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING)
             coEvery { behandlingKlient.hentBehandling(behandlingId, bruker) } returns behandling
 
             runBlocking {
@@ -91,6 +102,7 @@ internal class AvkortingServiceTest {
         fun `Revurdering skal opprette ny avkorting ved aa kopiere tidligere hvis avkorting ikke finnes fra foer`() {
             val behandlingId = UUID.randomUUID()
             val behandling = behandling(
+                id = behandlingId,
                 behandlingType = BehandlingType.REVURDERING,
                 sak = 123L,
                 virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2023, 1))
@@ -102,36 +114,36 @@ internal class AvkortingServiceTest {
             val beregnetAvkorting = mockk<Avkorting>()
             val lagretAvkorting = mockk<Avkorting>()
 
-            every { avkortingRepository.hentAvkorting(behandlingId) } returns null
             coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
             coEvery { behandlingKlient.hentSisteIverksatteBehandling(any(), any()) } returns SisteIverksatteBehandling(
                 forrigeBehandlingId
             )
             every { avkortingRepository.hentAvkorting(forrigeBehandlingId) } returns forrigeAvkorting
-            every { forrigeAvkorting.kopierAvkorting(any()) } returns kopiertAvkorting
+            every { avkortingRepository.hentAvkorting(behandlingId) } returns null andThen lagretAvkorting
             every { beregningService.hentBeregningNonnull(any()) } returns beregning
-            every { kopiertAvkorting.beregnAvkorting(any(), any(), any()) } returns beregnetAvkorting
-            every { avkortingRepository.lagreAvkorting(any(), any()) } returns lagretAvkorting
+            every { forrigeAvkorting.kopierAvkorting() } returns kopiertAvkorting
+            every { kopiertAvkorting.beregnAvkortingRevurdering(any()) } returns beregnetAvkorting
+            every { avkortingRepository.lagreAvkorting(any(), any()) } returns Unit
+            every { lagretAvkorting.medYtelseFraOgMedVirkningstidspunkt(any(), any()) } returns lagretAvkorting
             coEvery { behandlingKlient.avkort(any(), any(), any()) } returns true
 
             runBlocking {
                 service.hentAvkorting(behandlingId, bruker)
             }
 
-            coVerify {
-                avkortingRepository.hentAvkorting(behandlingId)
+            coVerify(exactly = 1) {
                 behandlingKlient.hentBehandling(behandlingId, bruker)
                 behandlingKlient.hentSisteIverksatteBehandling(behandling.sak, bruker)
                 avkortingRepository.hentAvkorting(forrigeBehandlingId)
-                forrigeAvkorting.kopierAvkorting(behandling.virkningstidspunkt!!.dato)
                 beregningService.hentBeregningNonnull(behandlingId)
-                kopiertAvkorting.beregnAvkorting(
-                    behandling.behandlingType,
-                    behandling.virkningstidspunkt!!,
-                    beregning
-                )
+                forrigeAvkorting.kopierAvkorting()
+                kopiertAvkorting.beregnAvkortingRevurdering(beregning)
                 avkortingRepository.lagreAvkorting(behandlingId, beregnetAvkorting)
+                lagretAvkorting.medYtelseFraOgMedVirkningstidspunkt(YearMonth.of(2023, 1), forrigeAvkorting)
                 behandlingKlient.avkort(behandlingId, bruker, true)
+            }
+            coVerify(exactly = 2) {
+                avkortingRepository.hentAvkorting(behandlingId)
             }
         }
     }
@@ -139,27 +151,31 @@ internal class AvkortingServiceTest {
     @Nested
     inner class LagreAvkorting {
 
+        val endretGrunnlag = mockk<AvkortingGrunnlag>()
+        val beregning = mockk<Beregning>()
+
+        val eksisterendeAvkorting = mockk<Avkorting>()
+        val beregnetAvkorting = mockk<Avkorting>()
+        val lagretAvkorting = mockk<Avkorting>()
+
         @Test
-        fun `Skal beregne og lagre avkorting`() {
+        fun `Skal beregne og lagre avkorting for førstegangsbehandling`() {
             val behandlingId = UUID.randomUUID()
-            val virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2023, 1))
-            val behandling =
-                behandling(behandlingType = BehandlingType.REVURDERING, virkningstidspunkt = virkningstidspunkt)
-            val endretGrunnlag = mockk<AvkortingGrunnlag>()
-            val beregning = mockk<Beregning>()
+            val behandling = behandling(
+                id = behandlingId,
+                behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+                virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2023, 1))
+            )
 
-            val eksisterendeAvkorting = mockk<Avkorting>()
-            val beregnetAvkorting = mockk<Avkorting>()
-            val lagretAvkorting = mockk<Avkorting>()
-
-            every { avkortingRepository.hentAvkorting(any()) } returns eksisterendeAvkorting
+            every { avkortingRepository.hentAvkorting(any()) } returns eksisterendeAvkorting andThen lagretAvkorting
             coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
             every { beregningService.hentBeregningNonnull(any()) } returns beregning
             every {
                 eksisterendeAvkorting.beregnAvkortingMedNyttGrunnlag(any(), any(), any(), any())
             } returns beregnetAvkorting
-            every { avkortingRepository.lagreAvkorting(any(), any()) } returns lagretAvkorting
+            every { avkortingRepository.lagreAvkorting(any(), any()) } returns Unit
             coEvery { behandlingKlient.avkort(any(), any(), any()) } returns true
+            every { lagretAvkorting.medYtelseFraOgMedVirkningstidspunkt(any()) } returns lagretAvkorting
 
             runBlocking {
                 service.lagreAvkorting(behandlingId, bruker, endretGrunnlag) shouldBe lagretAvkorting
@@ -167,17 +183,72 @@ internal class AvkortingServiceTest {
 
             coVerify(exactly = 1) {
                 behandlingKlient.avkort(behandlingId, bruker, false)
-                avkortingRepository.hentAvkorting(behandlingId)
                 behandlingKlient.hentBehandling(behandlingId, bruker)
                 beregningService.hentBeregningNonnull(behandlingId)
                 eksisterendeAvkorting.beregnAvkortingMedNyttGrunnlag(
                     endretGrunnlag,
+                    behandling.virkningstidspunkt!!.dato,
                     behandling.behandlingType,
-                    virkningstidspunkt,
                     beregning
                 )
                 avkortingRepository.lagreAvkorting(behandlingId, beregnetAvkorting)
+                lagretAvkorting.medYtelseFraOgMedVirkningstidspunkt(YearMonth.of(2023, 1))
                 behandlingKlient.avkort(behandlingId, bruker, true)
+            }
+            coVerify(exactly = 2) {
+                avkortingRepository.hentAvkorting(behandlingId)
+            }
+        }
+
+        @Test
+        fun `Lagre avkorting for revurdering henter og legger til avkorting fra forrige vedtak`() {
+            val revurderingId = UUID.randomUUID()
+            val sakId = 123L
+            val revurdering = behandling(
+                id = revurderingId,
+                behandlingType = BehandlingType.REVURDERING,
+                sak = sakId,
+                virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2023, 3))
+            )
+            val forrigeBehandling = UUID.randomUUID()
+            val forrigeAvkorting = mockk<Avkorting>()
+
+            every { avkortingRepository.hentAvkorting(revurderingId) } returns eksisterendeAvkorting andThen lagretAvkorting
+            coEvery { behandlingKlient.hentBehandling(any(), any()) } returns revurdering
+            every { beregningService.hentBeregningNonnull(any()) } returns beregning
+            every {
+                eksisterendeAvkorting.beregnAvkortingMedNyttGrunnlag(any(), any(), any(), any())
+            } returns beregnetAvkorting
+            every { avkortingRepository.lagreAvkorting(any(), any()) } returns Unit
+            coEvery { behandlingKlient.hentSisteIverksatteBehandling(any(), any()) } returns SisteIverksatteBehandling(
+                forrigeBehandling
+            )
+            every { avkortingRepository.hentAvkorting(forrigeBehandling) } returns forrigeAvkorting
+            every { lagretAvkorting.medYtelseFraOgMedVirkningstidspunkt(any(), any()) } returns lagretAvkorting
+            coEvery { behandlingKlient.avkort(any(), any(), any()) } returns true
+
+            runBlocking {
+                service.lagreAvkorting(revurderingId, bruker, endretGrunnlag) shouldBe lagretAvkorting
+            }
+
+            coVerify(exactly = 1) {
+                behandlingKlient.avkort(revurderingId, bruker, false)
+                behandlingKlient.hentBehandling(revurderingId, bruker)
+                beregningService.hentBeregningNonnull(revurderingId)
+                eksisterendeAvkorting.beregnAvkortingMedNyttGrunnlag(
+                    endretGrunnlag,
+                    revurdering.virkningstidspunkt!!.dato,
+                    revurdering.behandlingType,
+                    beregning
+                )
+                avkortingRepository.lagreAvkorting(revurderingId, beregnetAvkorting)
+                behandlingKlient.hentSisteIverksatteBehandling(sakId, bruker)
+                avkortingRepository.hentAvkorting(forrigeBehandling)
+                lagretAvkorting.medYtelseFraOgMedVirkningstidspunkt(YearMonth.of(2023, 3), forrigeAvkorting)
+                behandlingKlient.avkort(revurderingId, bruker, true)
+            }
+            coVerify(exactly = 2) {
+                avkortingRepository.hentAvkorting(revurderingId)
             }
         }
 
@@ -197,4 +268,5 @@ internal class AvkortingServiceTest {
             }
         }
     }
+
 }

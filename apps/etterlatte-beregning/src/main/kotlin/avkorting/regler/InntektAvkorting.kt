@@ -17,11 +17,13 @@ import no.nav.etterlatte.libs.regler.velgNyesteGyldige
 import no.nav.etterlatte.regler.Beregningstall
 import java.math.RoundingMode
 import java.time.LocalDate
+import java.util.*
 
 data class InntektAvkortingGrunnlag(
     val inntekt: Beregningstall,
     val fratrekkInnUt: Beregningstall,
-    val relevanteMaaneder: Beregningstall
+    val relevanteMaaneder: Beregningstall,
+    val grunnlagId: UUID
 )
 
 data class InntektAvkortingGrunnlagWrapper(

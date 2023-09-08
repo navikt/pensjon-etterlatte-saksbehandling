@@ -18,20 +18,16 @@ class AvkortingService(
 
     suspend fun hentAvkorting(behandlingId: UUID, brukerTokenInfo: BrukerTokenInfo): Avkorting? {
         logger.info("Henter avkorting for behandlingId=$behandlingId")
-        return avkortingRepository.hentAvkorting(behandlingId)
-            ?: kopierFraForrigeBehandlingHvisRevurdering(behandlingId, brukerTokenInfo)
-    }
-
-    private suspend fun kopierFraForrigeBehandlingHvisRevurdering(
-        behandlingId: UUID,
-        brukerTokenInfo: BrukerTokenInfo
-    ): Avkorting? {
         val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
-        if (behandling.behandlingType == BehandlingType.REVURDERING) {
+
+        return if (behandling.behandlingType == BehandlingType.FØRSTEGANGSBEHANDLING) {
+            hentAvkorting(behandling)
+        } else {
             val forrigeBehandlingId = behandlingKlient.hentSisteIverksatteBehandling(behandling.sak, brukerTokenInfo).id
-            return kopierAvkorting(behandlingId, forrigeBehandlingId, brukerTokenInfo)
+            val forrigeAvkorting = hentForrigeAvkorting(forrigeBehandlingId)
+            return hentAvkorting(behandling, forrigeAvkorting)
+                ?: kopierAvkorting(behandling, forrigeAvkorting, brukerTokenInfo)
         }
-        return null
     }
 
     suspend fun lagreAvkorting(
@@ -46,12 +42,20 @@ class AvkortingService(
         val beregning = beregningService.hentBeregningNonnull(behandlingId)
         val beregnetAvkorting = avkorting.beregnAvkortingMedNyttGrunnlag(
             avkortingGrunnlag,
+            behandling.hentVirk().dato,
             behandling.behandlingType,
-            behandling.hentVirk(),
             beregning
         )
 
-        val lagretAvkorting = avkortingRepository.lagreAvkorting(behandlingId, beregnetAvkorting)
+        avkortingRepository.lagreAvkorting(behandlingId, beregnetAvkorting)
+        val lagretAvkorting = if (behandling.behandlingType == BehandlingType.FØRSTEGANGSBEHANDLING) {
+            hentAvkortingNonNull(behandling)
+        } else {
+            val forrigeBehandlingId = behandlingKlient.hentSisteIverksatteBehandling(behandling.sak, brukerTokenInfo).id
+            val forrigeAvkorting = hentForrigeAvkorting(forrigeBehandlingId)
+            hentAvkortingNonNull(behandling, forrigeAvkorting)
+        }
+
         behandlingKlient.avkort(behandlingId, brukerTokenInfo, true)
         lagretAvkorting
     }
@@ -62,22 +66,37 @@ class AvkortingService(
         brukerTokenInfo: BrukerTokenInfo
     ): Avkorting {
         logger.info("Kopierer avkorting fra forrige behandling med behandlingId=$forrigeBehandlingId")
-
-        val forrigeAvkorting = avkortingRepository.hentAvkorting(forrigeBehandlingId)
-            ?: throw Exception("Fant ikke avkorting for $forrigeBehandlingId")
+        val forrigeAvkorting = hentForrigeAvkorting(forrigeBehandlingId)
         val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
-        val beregning = beregningService.hentBeregningNonnull(behandlingId)
-        val virkningstidspunkt = behandling.hentVirk()
-        val beregnetAvkorting = forrigeAvkorting.kopierAvkorting(virkningstidspunkt.dato).beregnAvkorting(
-            behandling.behandlingType,
-            virkningstidspunkt,
-            beregning
-        )
+        return kopierAvkorting(behandling, forrigeAvkorting, brukerTokenInfo)
+    }
 
-        val lagretAvkorting = avkortingRepository.lagreAvkorting(behandlingId, beregnetAvkorting)
-        behandlingKlient.avkort(behandlingId, brukerTokenInfo, true)
+    private suspend fun kopierAvkorting(
+        behandling: DetaljertBehandling,
+        forrigeAvkorting: Avkorting,
+        brukerTokenInfo: BrukerTokenInfo
+    ): Avkorting {
+        val beregning = beregningService.hentBeregningNonnull(behandling.id)
+        val beregnetAvkorting = forrigeAvkorting.kopierAvkorting().beregnAvkortingRevurdering(beregning)
+        avkortingRepository.lagreAvkorting(behandling.id, beregnetAvkorting)
+        val lagretAvkorting = hentAvkortingNonNull(behandling, forrigeAvkorting)
+        behandlingKlient.avkort(behandling.id, brukerTokenInfo, true)
         return lagretAvkorting
     }
+
+    private fun hentAvkortingNonNull(behandling: DetaljertBehandling, forrigeAvkorting: Avkorting? = null) =
+        hentAvkorting(behandling, forrigeAvkorting)
+            ?: throw Exception("Uthenting av avkorting for behandling ${behandling.id} feilet")
+
+    private fun hentAvkorting(behandling: DetaljertBehandling, forrigeAvkorting: Avkorting? = null) =
+        avkortingRepository.hentAvkorting(behandling.id)?.medYtelseFraOgMedVirkningstidspunkt(
+            behandling.hentVirk().dato,
+            forrigeAvkorting
+        )
+
+    private fun hentForrigeAvkorting(forrigeBehandlingId: UUID): Avkorting =
+        avkortingRepository.hentAvkorting(forrigeBehandlingId)
+            ?: throw Exception("Fant ikke avkorting for tidligere behandling $forrigeBehandlingId")
 
     private suspend fun tilstandssjekk(
         behandlingId: UUID,

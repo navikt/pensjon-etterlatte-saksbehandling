@@ -25,7 +25,6 @@ class TrygdetidService(
     private val vilkaarsvurderingKlient: VilkaarsvuderingKlient,
     private val beregnTrygdetidService: TrygdetidBeregningService
 ) {
-
     private val logger = LoggerFactory.getLogger(TrygdetidService::class.java)
 
     suspend fun hentTrygdetid(behandlingsId: UUID, brukerTokenInfo: BrukerTokenInfo) =
@@ -63,7 +62,7 @@ class TrygdetidService(
                 "Støtter ikke trygdetid for behandlingType=${behandling.behandlingType}"
             )
         }
-    }
+    }.also { behandlingKlient.settBehandlingStatusTrygdetidOppdatert(behandlingId, brukerTokenInfo) }
 
     private suspend fun opprettTrygdetidForRevurdering(
         behandling: DetaljertBehandling,
@@ -126,7 +125,7 @@ class TrygdetidService(
 
         val nyTrygdetid = sjekketGjeldendeTrygdetid.oppdaterBeregnetTrygdetid(nyBeregnetTrygdetid)
         trygdetidRepository.oppdaterTrygdetid(nyTrygdetid).also {
-            behandlingKlient.settBehandlingStatusVilkaarsvurdert(behandlingId, brukerTokenInfo)
+            behandlingKlient.settBehandlingStatusTrygdetidOppdatert(behandlingId, brukerTokenInfo)
         }
     }
 
@@ -156,7 +155,7 @@ class TrygdetidService(
             else -> trygdetidMedOppdatertTrygdetidGrunnlag.oppdaterBeregnetTrygdetid(nyBeregnetTrygdetid)
         }.also { nyTrygdetid ->
             trygdetidRepository.oppdaterTrygdetid(nyTrygdetid).also {
-                behandlingKlient.settBehandlingStatusVilkaarsvurdert(behandlingId, brukerTokenInfo)
+                behandlingKlient.settBehandlingStatusTrygdetidOppdatert(behandlingId, brukerTokenInfo)
             }
         }
     }
@@ -175,7 +174,7 @@ class TrygdetidService(
                 else -> trygdetid.oppdaterBeregnetTrygdetid(nyBeregnetTrygdetid)
             }.also { nyTrygdetid ->
                 trygdetidRepository.oppdaterTrygdetid(nyTrygdetid).also {
-                    behandlingKlient.settBehandlingStatusVilkaarsvurdert(behandlingId, brukerTokenInfo)
+                    behandlingKlient.settBehandlingStatusTrygdetidOppdatert(behandlingId, brukerTokenInfo)
                 }
             }
         }
@@ -186,7 +185,9 @@ class TrygdetidService(
         brukerTokenInfo: BrukerTokenInfo
     ): Trygdetid {
         val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
-        return kopierSisteTrygdetidberegning(behandling, forrigeBehandlingId, brukerTokenInfo)
+        return kopierSisteTrygdetidberegning(behandling, forrigeBehandlingId, brukerTokenInfo).also {
+            behandlingKlient.settBehandlingStatusTrygdetidOppdatert(behandlingId, brukerTokenInfo)
+        }
     }
 
     private suspend fun kopierSisteTrygdetidberegning(
@@ -258,7 +259,7 @@ class TrygdetidService(
         brukerTokenInfo: BrukerTokenInfo,
         block: suspend () -> Trygdetid
     ): Trygdetid {
-        val kanFastsetteTrygdetid = behandlingKlient.kanBeregnes(behandlingId, brukerTokenInfo)
+        val kanFastsetteTrygdetid = behandlingKlient.kanOppdatereTrygdetid(behandlingId, brukerTokenInfo)
         return if (kanFastsetteTrygdetid) {
             block()
         } else {

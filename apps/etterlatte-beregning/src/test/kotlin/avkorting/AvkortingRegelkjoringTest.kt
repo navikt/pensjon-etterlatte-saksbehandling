@@ -121,7 +121,7 @@ class AvkortingRegelkjoringTest {
             Periode(fom = virkningstidspunkt.dato, tom = null),
             beregninger,
             avkortingsperioder,
-            AvkortetYtelseType.INNTEKT
+            AvkortetYtelseType.FORVENTET_INNTEKT
         )
 
         avkortetYtelse.size shouldBe 4

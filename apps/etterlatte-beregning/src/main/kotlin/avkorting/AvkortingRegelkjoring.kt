@@ -197,7 +197,7 @@ object AvkortingRegelkjoring {
                 beskrivelse = "Ytelse etter avkorting for tidligere oppgitt forventet årsinntekt samme år"
             ),
             FaktumNode(
-                verdi = nyInntektsavkorting.avkortetYtelse.spreYtelsePerMaaned(fraOgMed, til),
+                verdi = nyInntektsavkorting.avkortetYtelseForventetInntekt.spreYtelsePerMaaned(fraOgMed, til),
                 kilde = nyInntektsavkorting.grunnlag.id,
                 beskrivelse = "Ytelse etter avkorting med ny forventet årsinntekt"
             ),

@@ -63,9 +63,9 @@ internal class AvkortingRepositoryTest {
                 Inntektsavkorting(
                     grunnlag = grunnlag,
                     avkortingsperioder = listOf(avkortingsperiode(inntektsgrunnlag = grunnlag.id)),
-                    avkortetYtelse = listOf(
+                    avkortetYtelseForventetInntekt = listOf(
                         avkortetYtelse(
-                            type = AvkortetYtelseType.INNTEKT,
+                            type = AvkortetYtelseType.FORVENTET_INNTEKT,
                             inntektsgrunnlag = grunnlag.id
                         )
                     ),
@@ -84,14 +84,14 @@ internal class AvkortingRepositoryTest {
         val endretAvkortingsperioder =
             aarsoppgjoer.inntektsavkorting[0].avkortingsperioder.map { it.copy(avkorting = 333) }
         val endretAvkortetYtelse =
-            aarsoppgjoer.inntektsavkorting[0].avkortetYtelse.map { it.copy(avkortingsbeloep = 444) }
+            aarsoppgjoer.inntektsavkorting[0].avkortetYtelseForventetInntekt.map { it.copy(avkortingsbeloep = 444) }
 
         val endretYtelseFoerAvkorting = listOf(aarsoppgjoer.ytelseFoerAvkorting[0].copy(beregning = 333))
         val endretInntektsavkorting = listOf(
             Inntektsavkorting(
                 grunnlag = endretGrunnlag,
                 avkortingsperioder = endretAvkortingsperioder,
-                avkortetYtelse = endretAvkortetYtelse
+                avkortetYtelseForventetInntekt = endretAvkortetYtelse
             )
         )
         val endretAvkortetYtelseAar = aarsoppgjoer.avkortetYtelseAar.map { it.copy(avkortingsbeloep = 444) }
@@ -118,7 +118,7 @@ internal class AvkortingRepositoryTest {
                 it[0].asClue { avkorting ->
                     avkorting.grunnlag shouldBe endretGrunnlag
                     avkorting.avkortingsperioder shouldBe endretAvkortingsperioder
-                    avkorting.avkortetYtelse shouldBe endretAvkortetYtelse
+                    avkorting.avkortetYtelseForventetInntekt shouldBe endretAvkortetYtelse
                 }
             }
             avkortetYtelseAar.asClue {

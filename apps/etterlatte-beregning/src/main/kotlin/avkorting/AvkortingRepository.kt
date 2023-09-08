@@ -49,7 +49,7 @@ class AvkortingRepository(private val dataSource: DataSource) {
                 Inntektsavkorting(
                     grunnlag = it,
                     avkortingsperioder = avkortingsperioder,
-                    avkortetYtelse = avkortetYtelse
+                    avkortetYtelseForventetInntekt = avkortetYtelse
                 )
             }
 
@@ -77,7 +77,7 @@ class AvkortingRepository(private val dataSource: DataSource) {
                 inntektsavkorting.forEach {
                     lagreAvkortingGrunnlag(behandlingId, it.grunnlag, tx)
                     lagreAvkortingsperioder(behandlingId, it.avkortingsperioder, tx)
-                    lagreAvkortetYtelse(behandlingId, it.avkortetYtelse, tx)
+                    lagreAvkortetYtelse(behandlingId, it.avkortetYtelseForventetInntekt, tx)
                 }
                 lagreAvkortetYtelse(behandlingId, avkortetYtelseAar, tx)
             }

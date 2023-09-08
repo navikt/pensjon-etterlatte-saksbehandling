@@ -11,7 +11,7 @@ import java.util.*
 
 data class Avkorting(
     val aarsoppgjoer: Aarsoppgjoer = Aarsoppgjoer(),
-    val avkortetYtelseFraVirkningstidspunkt: List<AvkortetYtelse> = emptyList(), // Fylles ut av metode medLoependeYtelse
+    val avkortetYtelseFraVirkningstidspunkt: List<AvkortetYtelse> = emptyList(),
     val avkortetYtelseForrigeVedtak: List<AvkortetYtelse> = emptyList()
 ) {
 
@@ -98,7 +98,7 @@ data class Avkorting(
             periode = Periode(fom = virkningstidspunkt, tom = null),
             ytelseFoerAvkorting = ytelseFoerAvkorting,
             avkortingsperioder = avkortingsperioder,
-            type = AvkortetYtelseType.INNTEKT
+            type = AvkortetYtelseType.FORVENTET_INNTEKT
         )
 
         return this.copy(
@@ -107,7 +107,6 @@ data class Avkorting(
                 inntektsavkorting = this.aarsoppgjoer.inntektsavkorting.map {
                     it.copy(
                         avkortingsperioder = avkortingsperioder,
-                        avkortetYtelse = beregnetAvkortetYtelse.map { it.copy(inntektsgrunnlag = grunnlag.id) }
                     )
                 },
                 avkortetYtelseAar = beregnetAvkortetYtelse.map {
@@ -131,19 +130,56 @@ data class Avkorting(
                 avkortingGrunnlag = listOf(inntektsavkorting.grunnlag.copy(periode = periode))
             )
 
-            val avkortetYtelseMedInntekt = AvkortingRegelkjoring.beregnAvkortetYtelse(
-                periode = periode,
-                ytelseFoerAvkorting = ytelseFoerAvkorting,
-                avkortingsperioder = avkortinger,
-                type = AvkortetYtelseType.INNTEKT
-            )
+            val avkortetYtelseForventetInntekt = if (this.aarsoppgjoer.inntektsavkorting.size > 1) {
+                AvkortingRegelkjoring.beregnAvkortetYtelse(
+                    periode = periode,
+                    ytelseFoerAvkorting = ytelseFoerAvkorting,
+                    avkortingsperioder = avkortinger,
+                    type = AvkortetYtelseType.FORVENTET_INNTEKT
+                )
+            } else emptyList()
 
             inntektsavkorting.copy(
                 avkortingsperioder = avkortinger,
-                avkortetYtelse = avkortetYtelseMedInntekt.map { it.copy(inntektsgrunnlag = inntektsavkorting.grunnlag.id) }
+                avkortetYtelseForventetInntekt = avkortetYtelseForventetInntekt.map {
+                    it.copy(inntektsgrunnlag = inntektsavkorting.grunnlag.id)
+                }
             )
         }
 
+        val avkortetYtelse = if (this.aarsoppgjoer.inntektsavkorting.size > 1) {
+            beregnAvkortetYtelseMedRestanse(ytelseFoerAvkorting, reberegnetInntektsavkorting)
+        } else {
+            reberegnetInntektsavkorting.first().let {
+                AvkortingRegelkjoring.beregnAvkortetYtelse(
+                    periode = it.grunnlag.periode,
+                    ytelseFoerAvkorting = ytelseFoerAvkorting,
+                    avkortingsperioder = it.avkortingsperioder,
+                    type = AvkortetYtelseType.AARSOPPGJOER,
+                    restanse = null,
+                )
+            }
+        }
+
+        return this.copy(
+            aarsoppgjoer = this.aarsoppgjoer.copy(
+                ytelseFoerAvkorting = ytelseFoerAvkorting,
+                inntektsavkorting = reberegnetInntektsavkorting,
+                avkortetYtelseAar = avkortetYtelse
+            ),
+        )
+    }
+
+    /**
+     * Finner avkortet ytelse med opparbeidet [Restanse]
+     * Opparbeidet restanse beregnes ved å sammenligne samtlige forventa inntektsavkortinger med alle måneder frem til
+     * ny oppgitt forventet inntekt.
+     * For hver forventet inntekt som sammenlignes så akkumuleres det mer eller mindre restanse.
+     */
+    private fun beregnAvkortetYtelseMedRestanse(
+        ytelseFoerAvkorting: List<YtelseFoerAvkorting>,
+        reberegnetInntektsavkorting: List<Inntektsavkorting>
+    ): List<AvkortetYtelse> {
         val avkortetYtelseMedAllForventetInntekt = mutableListOf<AvkortetYtelse>()
         reberegnetInntektsavkorting.forEach { inntektsavkorting ->
             val restanse = AvkortingRegelkjoring.beregnRestanse(
@@ -160,20 +196,16 @@ data class Avkorting(
             )
             avkortetYtelseMedAllForventetInntekt.addAll(ytelse)
         }
-
-        return this.copy(
-            aarsoppgjoer = this.aarsoppgjoer.copy(
-                ytelseFoerAvkorting = ytelseFoerAvkorting,
-                inntektsavkorting = reberegnetInntektsavkorting,
-                avkortetYtelseAar = avkortetYtelseMedAllForventetInntekt
-            ),
-        )
+        return avkortetYtelseMedAllForventetInntekt
     }
 
     private fun foersteMaanedDetteAar() = this.aarsoppgjoer.ytelseFoerAvkorting.first().periode.fom
 
 }
 
+/**
+ * Kan være forventet årsinntekt oppgitt av bruker eller faktisk årsinntekt etter skatteoppgjør.
+ */
 data class AvkortingGrunnlag(
     val id: UUID,
     val periode: Periode,
@@ -190,18 +222,33 @@ data class Aarsoppgjoer(
     val avkortetYtelseAar: List<AvkortetYtelse> = emptyList()
 )
 
+/**
+ * [avkortingsperioder] utregnet basert på en årsinntekt ([grunnlag]).
+ *
+ * [avkortetYtelseForventetInntekt] - Benyttes hvis forventet årsinntekt endrer seg i løpet av året for å finne
+ * restansen (se [Avkorting.beregnAvkortetYtelseMedRestanse]). Vil da inneholde ytelse etter avkorting slik
+ * den ville vært med denne årsinntekten.
+ */
 data class Inntektsavkorting(
     val grunnlag: AvkortingGrunnlag,
     val avkortingsperioder: List<Avkortingsperiode> = emptyList(),
-    val avkortetYtelse: List<AvkortetYtelse> = emptyList()
+    val avkortetYtelseForventetInntekt: List<AvkortetYtelse> = emptyList()
 )
 
+/**
+ * Beregnet ytelse (ytelse før avkorting / [Beregning]) persisteres for hele år for å kunne
+ * beregne ytelse etter avkorting for et helt år av gangen. Det er nødvendig for [Restanse] og etteroppgjør.
+ * (se [leggTilNyeBeregninger]).
+ */
 data class YtelseFoerAvkorting(
     val beregning: Int,
     val periode: Periode,
     val beregningsreferanse: UUID
 )
 
+/**
+ * Utregnet avkortingsbeløp basert på årsinntekt som benyttes til å avkorte ytelse
+ */
 data class Avkortingsperiode(
     val id: UUID,
     val periode: Periode,
@@ -212,6 +259,11 @@ data class Avkortingsperiode(
     val inntektsgrunnlag: UUID
 )
 
+/**
+ * Hvis forventet årsinntekt har endret seg i løpet av året vil det ha blitt avkortet for lite eller for mye.
+ * Dette avviket blir "restanse" som fordeles over gjenværende måneder av året for å minimere avvik på etteroppgjøret.
+ * (se [Avkorting.beregnAvkortetYtelseMedRestanse]).
+ */
 data class Restanse(
     val id: UUID,
     val totalRestanse: Int,
@@ -221,6 +273,9 @@ data class Restanse(
     val kilde: Grunnlagsopplysning.Kilde,
 )
 
+/**
+ * Ytelsen etter avkortingsbeløp ([Avkortingsperiode]) er blit trukket ifra [YtelseFoerAvkorting].
+ */
 data class AvkortetYtelse(
     val id: UUID,
     val type: AvkortetYtelseType,
@@ -236,7 +291,14 @@ data class AvkortetYtelse(
     val inntektsgrunnlag: UUID? = null
 )
 
-enum class AvkortetYtelseType { INNTEKT, AARSOPPGJOER, ETTEROPPJOER }
+/**
+ * [FORVENTET_INNTEKT] - Ytelse avkortet etter det som var brukeroppgitt forventet årsinntekt i perioden
+ *
+ * [AARSOPPGJOER] - Iverksatte perioder. Inneholder restanse hvis forventet inntekt endrer seg i løpet av året
+ *
+ * [ETTEROPPJOER] - TODO ikke enda implementert
+ */
+enum class AvkortetYtelseType { FORVENTET_INNTEKT, AARSOPPGJOER, ETTEROPPJOER }
 
 fun Beregning.mapTilYtelseFoerAvkorting() = beregningsperioder.map {
     YtelseFoerAvkorting(
@@ -247,8 +309,6 @@ fun Beregning.mapTilYtelseFoerAvkorting() = beregningsperioder.map {
 }
 
 /*
-* Beregnet ytelse (ytelse før avkorting) persisteres for hele året for å kunne beregne ytelse etter avkorting
-* for hele året.
 * Når det kommer nye beregninger skal det legges til eller erstatte de eksisterende i samme periode.
 * Eksisterende perioder som er før nye beregninger skal beholdes.
 *

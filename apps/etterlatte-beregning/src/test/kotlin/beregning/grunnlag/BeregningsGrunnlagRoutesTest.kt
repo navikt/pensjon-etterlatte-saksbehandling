@@ -41,7 +41,6 @@ import testsupport.buildTestApplicationConfigurationForOauth
 import java.time.LocalDateTime
 import java.time.Month
 import java.time.YearMonth
-import java.util.*
 import java.util.UUID.randomUUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -80,7 +79,7 @@ internal class BeregningsGrunnlagRoutesTest {
             gjenlevende = listOf(),
             avdoed = listOf(),
             soesken = listOf(),
-            status = BehandlingStatus.VILKAARSVURDERT,
+            status = BehandlingStatus.TRYGDETID_OPPDATERT,
             behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
             virkningstidspunkt = null,
             revurderingsaarsak = null,
@@ -131,7 +130,7 @@ internal class BeregningsGrunnlagRoutesTest {
             gjenlevende = listOf(),
             avdoed = listOf(),
             soesken = listOf(),
-            status = BehandlingStatus.VILKAARSVURDERT,
+            status = BehandlingStatus.TRYGDETID_OPPDATERT,
             behandlingType = BehandlingType.REVURDERING,
             virkningstidspunkt = virkRevurdering,
             revurderingsaarsak = null,
@@ -264,7 +263,7 @@ internal class BeregningsGrunnlagRoutesTest {
             gjenlevende = listOf(),
             avdoed = listOf(),
             soesken = listOf(),
-            status = BehandlingStatus.VILKAARSVURDERT,
+            status = BehandlingStatus.TRYGDETID_OPPDATERT,
             behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
             virkningstidspunkt = Virkningstidspunkt(
                 YearMonth.of(2023, 1),
@@ -323,7 +322,7 @@ internal class BeregningsGrunnlagRoutesTest {
             gjenlevende = listOf(),
             avdoed = listOf(),
             soesken = listOf(),
-            status = BehandlingStatus.VILKAARSVURDERT,
+            status = BehandlingStatus.TRYGDETID_OPPDATERT,
             behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
             virkningstidspunkt = Virkningstidspunkt(
                 YearMonth.of(2023, 1),

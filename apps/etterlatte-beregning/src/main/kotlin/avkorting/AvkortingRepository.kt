@@ -124,11 +124,11 @@ class AvkortingRepository(private val dataSource: DataSource) {
     ) = queryOf(
         statement = """
                 INSERT INTO avkortingsgrunnlag(
-                    id, behandling_id, fom, tom, aarsinntekt, fratrekk_inn_ut, relevante_maaneder,
-                     spesifikasjon, kilde
+                    id, behandling_id, fom, tom, aarsinntekt, fratrekk_inn_ut, inntekt_utland, fratrekk_inn_aar_utland,
+                    relevante_maaneder, spesifikasjon, kilde
                 ) VALUES (
-                    :id, :behandlingId, :fom, :tom, :aarsinntekt, :fratrekkInnAar, :relevanteMaanederInnAar,
-                     :spesifikasjon, :kilde
+                    :id, :behandlingId, :fom, :tom, :aarsinntekt, :fratrekkInnAar, :inntektUtland, :fratrekkInnAarUtland,
+                    :relevanteMaanederInnAar, :spesifikasjon, :kilde
                 )
             """.trimIndent(),
         paramMap = mapOf(
@@ -138,6 +138,8 @@ class AvkortingRepository(private val dataSource: DataSource) {
             "tom" to avkortingsgrunnlag.periode.tom?.atDay(1),
             "aarsinntekt" to avkortingsgrunnlag.aarsinntekt,
             "fratrekkInnAar" to avkortingsgrunnlag.fratrekkInnAar,
+            "inntektUtland" to avkortingsgrunnlag.inntektUtland,
+            "fratrekkInnAarUtland" to avkortingsgrunnlag.fratrekkInnAarUtland,
             "relevanteMaanederInnAar" to avkortingsgrunnlag.relevanteMaanederInnAar,
             "spesifikasjon" to avkortingsgrunnlag.spesifikasjon,
             "kilde" to avkortingsgrunnlag.kilde.toJson()
@@ -265,6 +267,8 @@ class AvkortingRepository(private val dataSource: DataSource) {
         aarsinntekt = int("aarsinntekt"),
         fratrekkInnAar = int("fratrekk_inn_ut"),
         relevanteMaanederInnAar = int("relevante_maaneder"),
+        inntektUtland = int("inntekt_utland"),
+        fratrekkInnAarUtland = int("fratrekk_inn_aar_utland"),
         spesifikasjon = string("spesifikasjon"),
         kilde = string("kilde").let { objectMapper.readValue(it) }
     )

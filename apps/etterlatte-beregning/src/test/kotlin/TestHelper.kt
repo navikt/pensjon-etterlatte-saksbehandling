@@ -91,13 +91,14 @@ fun avkortinggrunnlag(
     fratrekkInnAar: Int = 10000,
     relevanteMaanederInnAar: Int = 12,
     periode: Periode = Periode(fom = YearMonth.now(), tom = null),
-    kilde: Grunnlagsopplysning.Saksbehandler = Grunnlagsopplysning.Saksbehandler.create("Z123456"),
-    virkningstidspunkt: YearMonth = YearMonth.now()
+    kilde: Grunnlagsopplysning.Saksbehandler = Grunnlagsopplysning.Saksbehandler.create("Z123456")
 ) = AvkortingGrunnlag(
     id = id,
     periode = periode,
     aarsinntekt = aarsinntekt,
     fratrekkInnAar = fratrekkInnAar,
+    inntektUtland = 0,
+    fratrekkInnAarUtland = 0,
     relevanteMaanederInnAar = relevanteMaanederInnAar,
     spesifikasjon = "Spesifikasjon",
     kilde = kilde
@@ -105,13 +106,16 @@ fun avkortinggrunnlag(
 
 fun inntektAvkortingGrunnlag(
     inntekt: Int = 500000,
-    fratrekkInnUt: Int = 0,
+    fratrekkInnAar: Int = 0,
+    inntektUtland: Int = 0,
     relevanteMaaneder: Int = 12
 ) = InntektAvkortingGrunnlagWrapper(
     inntektAvkortingGrunnlag = FaktumNode(
         verdi = InntektAvkortingGrunnlag(
             inntekt = Beregningstall(inntekt),
-            fratrekkInnUt = Beregningstall(fratrekkInnUt),
+            fratrekkInnAar = Beregningstall(fratrekkInnAar),
+            inntektUtland = Beregningstall(inntektUtland),
+            fratrekkInnAarUtland = Beregningstall(0),
             relevanteMaaneder = Beregningstall(relevanteMaaneder),
             grunnlagId = UUID.randomUUID()
         ),

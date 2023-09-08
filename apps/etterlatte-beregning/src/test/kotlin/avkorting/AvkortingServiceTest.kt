@@ -171,7 +171,7 @@ internal class AvkortingServiceTest {
             coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
             every { beregningService.hentBeregningNonnull(any()) } returns beregning
             every {
-                eksisterendeAvkorting.beregnAvkortingMedNyttGrunnlag(any(), any(), any(), any())
+                eksisterendeAvkorting.beregnAvkortingMedNyttGrunnlag(any(), any(), any())
             } returns beregnetAvkorting
             every { avkortingRepository.lagreAvkorting(any(), any()) } returns Unit
             coEvery { behandlingKlient.avkort(any(), any(), any()) } returns true
@@ -187,7 +187,6 @@ internal class AvkortingServiceTest {
                 beregningService.hentBeregningNonnull(behandlingId)
                 eksisterendeAvkorting.beregnAvkortingMedNyttGrunnlag(
                     endretGrunnlag,
-                    behandling.virkningstidspunkt!!.dato,
                     behandling.behandlingType,
                     beregning
                 )
@@ -217,7 +216,7 @@ internal class AvkortingServiceTest {
             coEvery { behandlingKlient.hentBehandling(any(), any()) } returns revurdering
             every { beregningService.hentBeregningNonnull(any()) } returns beregning
             every {
-                eksisterendeAvkorting.beregnAvkortingMedNyttGrunnlag(any(), any(), any(), any())
+                eksisterendeAvkorting.beregnAvkortingMedNyttGrunnlag(any(), any(), any())
             } returns beregnetAvkorting
             every { avkortingRepository.lagreAvkorting(any(), any()) } returns Unit
             coEvery { behandlingKlient.hentSisteIverksatteBehandling(any(), any()) } returns SisteIverksatteBehandling(
@@ -237,7 +236,6 @@ internal class AvkortingServiceTest {
                 beregningService.hentBeregningNonnull(revurderingId)
                 eksisterendeAvkorting.beregnAvkortingMedNyttGrunnlag(
                     endretGrunnlag,
-                    revurdering.virkningstidspunkt!!.dato,
                     revurdering.behandlingType,
                     beregning
                 )

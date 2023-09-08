@@ -86,8 +86,7 @@ class AvkortingRoutesTest {
         val avkortingsgrunnlag = avkortinggrunnlag(
             id = avkortingsgrunnlagId,
             periode = Periode(fom = dato, tom = dato),
-            kilde = Grunnlagsopplysning.Saksbehandler("Saksbehandler01", tidspunkt),
-            virkningstidspunkt = dato
+            kilde = Grunnlagsopplysning.Saksbehandler("Saksbehandler01", tidspunkt)
         )
         val avkortetYtelseId = UUID.randomUUID()
         val avkortetYtelse = listOf(
@@ -119,6 +118,8 @@ class AvkortingRoutesTest {
                     fratrekkInnAar = 10000,
                     relevanteMaanederInnAar = 12,
                     spesifikasjon = "Spesifikasjon",
+                    inntektUtland = 0,
+                    fratrekkInnAarUtland = 0,
                     kilde = AvkortingGrunnlagKildeDto(
                         tidspunkt = tidspunkt.toString(),
                         ident = "Saksbehandler01"
@@ -188,6 +189,8 @@ class AvkortingRoutesTest {
             tom = null,
             aarsinntekt = 100000,
             fratrekkInnAar = 10000,
+            inntektUtland = 0,
+            fratrekkInnAarUtland = 0,
             spesifikasjon = "Spesifikasjon",
             kilde = AvkortingGrunnlagKildeDto(
                 tidspunkt = Tidspunkt.now().toString(),

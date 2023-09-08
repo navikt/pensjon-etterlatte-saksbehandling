@@ -84,7 +84,7 @@ export function filtrerOppgaveStatus(
 }
 
 export type OppgavetypeFilterKeys = Oppgavetype | visAlle
-export const OPPGAVETYPEFILTER: Record<OppgavetypeFilterKeys, string> = {
+const OPPGAVETYPEFILTER: Record<OppgavetypeFilterKeys, string> = {
   visAlle: 'Vis alle',
   FOERSTEGANGSBEHANDLING: 'Førstegangsbehandling',
   REVURDERING: 'Revurdering',
@@ -94,9 +94,21 @@ export const OPPGAVETYPEFILTER: Record<OppgavetypeFilterKeys, string> = {
   UNDERKJENT: 'Underkjent behandling',
   GOSYS: 'Gosys',
   UTLAND: 'Utland',
+  KLAGE: 'Klage',
+} as const
+
+export const oppgavetypefilter = (kanBrukeKlage: boolean): Array<[OppgavetypeFilterKeys, string]> => {
+  const entries = Object.entries(OPPGAVETYPEFILTER) as Array<[OppgavetypeFilterKeys, string]>
+  if (!kanBrukeKlage) {
+    return entries.filter(([key]) => key !== 'KLAGE')
+  }
+  return entries
 }
 
-function filtrerOppgaveType(oppgavetypeFilterKeys: OppgavetypeFilterKeys, oppgaver: OppgaveDTOny[]): OppgaveDTOny[] {
+export function filtrerOppgaveType(
+  oppgavetypeFilterKeys: OppgavetypeFilterKeys,
+  oppgaver: OppgaveDTOny[]
+): OppgaveDTOny[] {
   if (oppgavetypeFilterKeys === 'visAlle') {
     return oppgaver
   } else {

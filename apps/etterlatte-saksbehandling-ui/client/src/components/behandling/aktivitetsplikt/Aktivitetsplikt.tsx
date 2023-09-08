@@ -1,20 +1,47 @@
-import { BodyLong, BodyShort, Button, Heading, Textarea } from '@navikt/ds-react'
-import React, { useContext } from 'react'
+import { BodyLong, BodyShort, Button, Detail, Heading, Textarea } from '@navikt/ds-react'
+import React, { useContext, useEffect, useState } from 'react'
 import { Content, ContentHeader } from '~shared/styled'
 import { Border, HeadingWrapper } from '~components/behandling/soeknadsoversikt/styled'
 import styled from 'styled-components'
-import { ExternalLinkIcon } from '@navikt/aksel-icons'
+import { ExternalLinkIcon, PencilIcon } from '@navikt/aksel-icons'
 import { BehandlingHandlingKnapper } from '~components/behandling/handlinger/BehandlingHandlingKnapper'
 import { ConfigContext } from '~clientConfig'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
+import { isFailure, isPending, useApiCall } from '~shared/hooks/useApiCall'
+import { hentAktivitetspliktOppfolging, opprettAktivitetspliktOppfolging } from '~shared/api/aktivitetsplikt'
+import Spinner from '~shared/Spinner'
+import { useBehandlingRoutes } from '~components/behandling/BehandlingRoutes'
+import { ApiErrorAlert } from '~ErrorBoundary'
+import { AktivitetspliktOppfolging } from '~shared/types/Aktivitetsplikt'
 
 export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => {
   const { behandling } = props
+  const { next } = useBehandlingRoutes()
+
   const avdoedesDoedsdato = behandling?.familieforhold?.avdoede?.opplysning?.doedsdato
   const configContext = useContext(ConfigContext)
 
+  const [beskrivelse, setBeskrivelse] = useState<string>('')
+  const [aktivitetOppfolging, setAktivitetOppfolging] = useState<AktivitetspliktOppfolging>()
+  const [hentet, hent] = useApiCall(hentAktivitetspliktOppfolging)
+  const [lagret, lagre] = useApiCall(opprettAktivitetspliktOppfolging)
+
+  useEffect(() => {
+    hent({ behandlingId: behandling.id }, (aktivitetOppfolging) => {
+      setAktivitetOppfolging(aktivitetOppfolging)
+      setBeskrivelse(aktivitetOppfolging?.aktivitet)
+    })
+  }, [])
+
+  function edit() {
+    setAktivitetOppfolging(undefined)
+  }
+
   return (
     <Content>
+      {isFailure(hentet) && <ApiErrorAlert>En feil oppsto ved henting av data</ApiErrorAlert>}
+      {isFailure(lagret) && <ApiErrorAlert>En feil oppsto ved lagring av data</ApiErrorAlert>}
+
       <ContentHeader>
         <HeadingWrapper>
           <Heading spacing size="large" level="1">
@@ -36,12 +63,48 @@ export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => 
           aktivitet etter 12 måneder.
         </BodyLong>
 
-        <Textarea label="Beskriv etterlatte sin aktivitet idag" size="medium" />
-        <ButtonWrapper>
-          <Button variant="primary" size="small" className="button" onClick={() => true}>
-            Lagre beskrivelse
-          </Button>
-        </ButtonWrapper>
+        <Heading size={'small'} spacing>
+          Beskriv etterlatte sin aktivitet idag
+        </Heading>
+
+        <Spinner visible={isPending(hentet)} label="Henter data" />
+
+        {!isPending(hentet) && aktivitetOppfolging && (
+          <SpacingWrapper>
+            <BodyLong>{aktivitetOppfolging.aktivitet}</BodyLong>
+            <Button variant="tertiary" icon={<PencilIcon />} onClick={() => edit()}>
+              Rediger
+            </Button>
+            <Detail>Manuelt av {aktivitetOppfolging?.opprettetAv}</Detail>
+            <Detail>Sist endret {aktivitetOppfolging?.opprettet}</Detail>
+          </SpacingWrapper>
+        )}
+
+        {!isPending(hentet) && !aktivitetOppfolging && (
+          <>
+            <Textarea
+              label="Beskriv etterlatte sin aktivitet idag"
+              hideLabel={true}
+              size="medium"
+              value={beskrivelse}
+              onChange={(e) => setBeskrivelse(e.target.value)}
+            />
+            <SpacingWrapper>
+              <Button
+                variant="primary"
+                size="small"
+                className="button"
+                onClick={() =>
+                  lagre({ behandlingId: behandling.id, request: { aktivitet: beskrivelse } }, (lagretElement) =>
+                    setAktivitetOppfolging(lagretElement)
+                  )
+                }
+              >
+                Lagre beskrivelse
+              </Button>
+            </SpacingWrapper>
+          </>
+        )}
 
         <Heading size={'small'} spacing>
           Lag intern oppfølgingsoppgave med riktig frist
@@ -51,7 +114,7 @@ export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => 
           gått 9-10 måneder etter dødsfall. Om den etterlatte har andre ytelser eller annen grunn til videre oppfølging
           bør man vurdere andre frister.
         </BodyLong>
-        <ButtonWrapper>
+        <SpacingWrapper>
           <Button
             variant="primary"
             size="small"
@@ -61,7 +124,7 @@ export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => 
           >
             Lag oppfølgingsoppgave i Gosys <ExternalLinkIcon />
           </Button>
-        </ButtonWrapper>
+        </SpacingWrapper>
 
         <Heading size={'small'} spacing>
           Er oppfølging av lokalkontor nødvendig?
@@ -70,17 +133,17 @@ export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => 
           Trenger etterlatte ekstra oppfølging skal man sende oppgave til lokalkontor. Dette gjelder de som er utenfor
           arbeidslivet og/ eller ikke har andre ytelser fra Nav.
         </BodyLong>
-        <ButtonWrapper>
+        <SpacingWrapper>
           <Button variant="secondary" size="small" className="button" onClick={() => true}>
             Lag oppgave til lokalkontor <ExternalLinkIcon />
           </Button>
-        </ButtonWrapper>
+        </SpacingWrapper>
       </AktivitetspliktWrapper>
 
       <Border />
 
       <BehandlingHandlingKnapper>
-        <Button variant="primary" size="medium" onClick={() => true}>
+        <Button variant="primary" size="medium" onClick={() => next()}>
           Gå videre
         </Button>
       </BehandlingHandlingKnapper>
@@ -92,7 +155,7 @@ const AktivitetspliktWrapper = styled.div`
   padding: 0 4em;
   max-width: 40em;
 `
-const ButtonWrapper = styled.div`
+const SpacingWrapper = styled.div`
   margin-top: 1rem;
   margin-bottom: 2rem;
 `

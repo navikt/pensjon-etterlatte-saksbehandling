@@ -33,9 +33,9 @@ const behandlingRoutes = (
   { path: 'opphoeroversikt', element: <ManueltOpphoerOversikt behandling={behandling} /> },
   { path: 'vilkaarsvurdering', element: <Vilkaarsvurdering behandling={behandling} /> },
   { path: 'beregningsgrunnlag', element: <Beregningsgrunnlag behandling={behandling} /> },
+  { path: 'aktivitetsplikt', element: <Aktivitetsplikt behandling={behandling} /> },
   { path: 'beregne', element: <Beregne behandling={behandling} /> },
   { path: 'brev', element: <Vedtaksbrev behandling={behandling} /> },
-  { path: 'aktivitetsplikt', element: <Aktivitetsplikt behandling={behandling} /> },
 ]
 
 function useRouteNavigation() {

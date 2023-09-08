@@ -74,6 +74,7 @@ if (isDev) {
       '/api/sak/:sakid',
       '/api/institusjonsoppholdbegrunnelse/:sakid',
       '/api/nyeoppgaver',
+      '/api/klage',
     ],
     tokenMiddleware(ApiConfig.behandling.scope),
     proxy(ApiConfig.behandling.url)

@@ -734,6 +734,55 @@ internal class VedtaksvurderingServiceTest {
     }
 
     @Test
+    fun `skal rulle tilbake vedtak ved iverksatt dersom behandling feiler`() {
+        val behandlingId = randomUUID()
+        val virkningstidspunkt = VIRKNINGSTIDSPUNKT_JAN_2023
+        val gjeldendeSaksbehandler = saksbehandler
+        val attestant = attestant
+        coEvery { behandlingKlientMock.kanFatteVedtak(any(), any()) } returns true
+        coEvery { behandlingKlientMock.hentSak(any(), any()) } returns Sak(
+            SAKSBEHANDLER_1,
+            SakType.BARNEPENSJON,
+            1L,
+            ENHET_1
+        )
+        coEvery { behandlingKlientMock.kanAttestereVedtak(any(), any(), any()) } returns true
+        coEvery { behandlingKlientMock.attesterVedtak(any(), any()) } returns true
+        coEvery { behandlingKlientMock.fattVedtakBehandling(any(), any()) } returns true
+        coEvery { behandlingKlientMock.hentBehandling(any(), any()) } returns mockBehandling(
+            virkningstidspunkt,
+            behandlingId
+        )
+        coEvery { vilkaarsvurderingKlientMock.hentVilkaarsvurdering(any(), any()) } returns mockVilkaarsvurdering()
+        coEvery { beregningKlientMock.hentBeregningOgAvkorting(any(), any(), any()) } returns BeregningOgAvkorting(
+            beregning = mockBeregning(virkningstidspunkt, behandlingId),
+            avkorting = mockAvkorting()
+        )
+
+        coEvery { behandlingKlientMock.iverksett(any(), any(), any()) } throws RuntimeException("Behandling feilet")
+
+        val attestertVedtak = runBlocking {
+            repository.opprettVedtak(
+                opprettVedtak(virkningstidspunkt = virkningstidspunkt, behandlingId = behandlingId)
+            )
+            service.fattVedtak(behandlingId, gjeldendeSaksbehandler)
+            service.attesterVedtak(behandlingId, KOMMENTAR, attestant)
+        }
+
+        assertThrows<RuntimeException> {
+            runBlocking {
+                service.iverksattVedtak(behandlingId, attestant)
+            }
+        }
+        val ikkeIverksattVedtak = service.hentVedtak(behandlingId)!!
+        ikkeIverksattVedtak shouldNotBe null
+        ikkeIverksattVedtak.status shouldNotBe VedtakStatus.IVERKSATT
+        ikkeIverksattVedtak.status shouldBe VedtakStatus.ATTESTERT
+
+        verify(exactly = 0) { sendToRapidMock(match { it.contains(KafkaHendelseType.IVERKSATT.name) }, any()) }
+    }
+
+    @Test
     fun `skal ikke sette vedtak til iverksatt naar vedtak ikke er attestert`() {
         val behandlingId = randomUUID()
 

@@ -21,6 +21,6 @@ class KafkaConsumerEgneAnsatte(
     closed = closed
 ) {
     override fun stream() {
-        stream { behandlingKlient.haandterHendelse(it) }
+        stream { meldinger -> meldinger.forEach { behandlingKlient.haandterHendelse(it) } }
     }
 }

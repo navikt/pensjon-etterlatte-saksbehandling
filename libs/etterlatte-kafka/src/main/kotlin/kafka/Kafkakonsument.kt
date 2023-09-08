@@ -1,6 +1,5 @@
 package no.nav.etterlatte.kafka
 
-import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.clients.consumer.ConsumerRecords
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.apache.kafka.common.errors.WakeupException
@@ -21,15 +20,13 @@ abstract class Kafkakonsument<T>(
 
     abstract fun stream()
 
-    fun stream(haandter: (ConsumerRecord<String, T>) -> Unit) {
+    fun stream(haandter: (ConsumerRecords<String, T>) -> Unit) {
         try {
-            logger.info("Starter ${this.javaClass.name}")
+            logger.info("Starter å lese hendelser fra ${this.javaClass.name}")
             consumer.subscribe(listOf(topic))
             while (!closed.get()) {
                 val meldinger: ConsumerRecords<String, T> = consumer.poll(pollTimeoutInSeconds)
-                meldinger.forEach {
-                    haandter(it)
-                }
+                haandter(meldinger)
                 consumer.commitSync()
 
                 antallMeldinger += meldinger.count()
@@ -39,7 +36,7 @@ abstract class Kafkakonsument<T>(
             // Ignorerer exception hvis vi stenger ned
             if (!closed.get()) throw e
         } finally {
-            logger.info("Lukker ${this.javaClass.name}()")
+            logger.info("Ferdig med å lese hendelser fra $${this.javaClass.name} - lukker consumer")
             consumer.close()
         }
     }

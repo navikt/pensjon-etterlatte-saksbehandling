@@ -70,7 +70,7 @@ fun startEgenAnsattLytter(env: Map<String, String>, config: Config) {
                 Runtime.getRuntime().addShutdownHook(
                     Thread {
                         closed.set(true)
-                        kafkaConsumerEgneAnsatte.getConsumer().wakeup(); // trådsikker, aborter konsumer fra polling
+                        kafkaConsumerEgneAnsatte.consumer.wakeup(); // trådsikker, aborter konsumer fra polling
                     }
                 )
 

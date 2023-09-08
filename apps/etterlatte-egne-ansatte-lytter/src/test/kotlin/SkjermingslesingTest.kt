@@ -64,7 +64,7 @@ class SkjermingslesingTest {
             while (true) {
                 if (kafkaConsumerEgneAnsatte.getAntallMeldinger() >= 1) {
                     closed.set(true)
-                    kafkaConsumerEgneAnsatte.getConsumer().wakeup()
+                    kafkaConsumerEgneAnsatte.consumer.wakeup()
                     return@thread
                 }
                 Thread.sleep(800L) // Må stå så ikke denne spiser all cpu, tester er egentlig single threaded

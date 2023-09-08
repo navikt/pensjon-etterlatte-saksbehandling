@@ -19,10 +19,21 @@ import java.time.LocalDate
 data class PeriodisertBarnepensjonGrunnlag(
     val soeskenKull: PeriodisertGrunnlag<FaktumNode<List<Folkeregisteridentifikator>>>,
     val avdoedForelder: PeriodisertGrunnlag<FaktumNode<AvdoedForelder>>,
-    val institusjonsopphold: PeriodisertGrunnlag<FaktumNode<InstitusjonsoppholdBeregningsgrunnlag?>>
+    val institusjonsopphold: PeriodisertGrunnlag<FaktumNode<InstitusjonsoppholdBeregningsgrunnlag?>>,
+    val brukNyttRegelverk: Boolean
 ) : PeriodisertGrunnlag<BarnepensjonGrunnlag> {
     override fun finnAlleKnekkpunkter(): Set<LocalDate> {
-        return soeskenKull.finnAlleKnekkpunkter() + avdoedForelder.finnAlleKnekkpunkter() +
+        val relevanteSoeskenkullKnekkpunkter =
+            if (brukNyttRegelverk) {
+                soeskenKull.finnAlleKnekkpunkter()
+                    .filter { it.isBefore(BP_2024_DATO) }
+                    .toSet()
+            } else {
+                soeskenKull.finnAlleKnekkpunkter()
+            }
+
+        return relevanteSoeskenkullKnekkpunkter +
+            avdoedForelder.finnAlleKnekkpunkter() +
             institusjonsopphold.finnAlleKnekkpunkter()
     }
 

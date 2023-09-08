@@ -579,11 +579,11 @@ internal class BeregnBarnepensjonServiceTest {
                     regelResultat shouldNotBe null
                     regelVersjon shouldNotBe null
                 }
-                with(beregningsperioder.filter { p -> YearMonth.of(2023, 5).equals(p.datoFOM) }.single()) {
+                with(beregningsperioder.single { p -> YearMonth.of(2023, 5).equals(p.datoFOM) }) {
                     utbetaltBeloep shouldBe BP_BELOEP_INGEN_SOESKEN_MAI_23
                     grunnbelopMnd shouldBe GRUNNBELOEP_MAI_23
                 }
-                with(beregningsperioder.filter { p -> YearMonth.of(2023, 10).equals(p.datoFOM) }.single()) {
+                with(beregningsperioder.single { p -> YearMonth.of(2023, 10).equals(p.datoFOM) }) {
                     utbetaltBeloep shouldBe BP_BELOEP_NYTT_REGELVERK
                     grunnbelopMnd shouldBe GRUNNBELOEP_MAI_23
                 }

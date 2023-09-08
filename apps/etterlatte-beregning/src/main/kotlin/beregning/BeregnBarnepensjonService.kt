@@ -96,7 +96,8 @@ class BeregnBarnepensjonService(
             beregningsGrunnlag,
             trygdetid.hvisKanBrukes(),
             virkningstidspunkt.atDay(1),
-            null
+            null,
+            featureToggleService.isEnabled(BrukNyttRegelverkIBeregning, false)
         )
 
         logger.info("Beregner barnepensjon for behandlingId=${behandling.id} med behandlingType=$behandlingType")
@@ -236,7 +237,8 @@ class BeregnBarnepensjonService(
         beregningsGrunnlag: BeregningsGrunnlag,
         trygdetid: TrygdetidDto?,
         fom: LocalDate,
-        tom: LocalDate?
+        tom: LocalDate?,
+        brukNyttRegelverk: Boolean
     ) = PeriodisertBarnepensjonGrunnlag(
         soeskenKull = PeriodisertBeregningGrunnlag.lagKomplettPeriodisertGrunnlag(
             beregningsGrunnlag.soeskenMedIBeregning.mapVerdier { soeskenMedIBeregning ->
@@ -281,7 +283,8 @@ class BeregnBarnepensjonService(
                     beskrivelse = "Institusjonsopphold"
                 )
             } ?: listOf()
-        ) { _, _, _ -> FaktumNode(null, beregningsGrunnlag.kilde, "Institusjonsopphold") }
+        ) { _, _, _ -> FaktumNode(null, beregningsGrunnlag.kilde, "Institusjonsopphold") },
+        brukNyttRegelverk
     )
 
     private fun TrygdetidDto?.hvisKanBrukes() = this.takeIf {

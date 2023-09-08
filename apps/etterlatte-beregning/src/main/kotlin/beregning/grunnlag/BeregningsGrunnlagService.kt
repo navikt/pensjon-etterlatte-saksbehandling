@@ -120,7 +120,7 @@ class BeregningsGrunnlagService(
 
         val institusjonsoppholdErLiktFoerVirk = erGrunnlagLiktFoerEnDato(
             omstillingstoenadBeregningsGrunnlag.institusjonsopphold ?: emptyList(),
-            forrigeGrunnlag!!.institusjonsoppholdBeregningsgrunnlag ?: emptyList(),
+            forrigeGrunnlag?.institusjonsoppholdBeregningsgrunnlag ?: emptyList(),
             revurderingVirk
         )
 

@@ -1,6 +1,7 @@
 package no.nav.etterlatte.avkorting
 
 import com.fasterxml.jackson.databind.JsonNode
+import no.nav.etterlatte.avkorting.regler.inntektAvkorting
 import no.nav.etterlatte.beregning.Beregning
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
@@ -49,11 +50,10 @@ data class Avkorting(
 
     fun beregnAvkortingMedNyttGrunnlag(
         nyttGrunnlag: AvkortingGrunnlag,
-        virkningstidspunkt: YearMonth,
         behandlingstype: BehandlingType,
         beregning: Beregning
     ) = if (behandlingstype == BehandlingType.FØRSTEGANGSBEHANDLING) {
-        oppdaterMedInntektsgrunnlag(nyttGrunnlag).beregnAvkortingForstegangs(virkningstidspunkt, beregning)
+        oppdaterMedInntektsgrunnlag(nyttGrunnlag).beregnAvkortingForstegangs(beregning)
     } else {
         oppdaterMedInntektsgrunnlag(nyttGrunnlag).beregnAvkortingRevurdering(beregning)
     }
@@ -84,18 +84,17 @@ data class Avkorting(
         )
     }
 
-    private fun beregnAvkortingForstegangs(virkningstidspunkt: YearMonth, beregning: Beregning): Avkorting {
-
+    private fun beregnAvkortingForstegangs(beregning: Beregning): Avkorting {
         val ytelseFoerAvkorting = beregning.mapTilYtelseFoerAvkorting()
         val grunnlag = aarsoppgjoer.inntektsavkorting.first().grunnlag
 
         val avkortingsperioder = AvkortingRegelkjoring.beregnInntektsavkorting(
-            Periode(fom = virkningstidspunkt, tom = null),
-            listOf(grunnlag)
+            periode = grunnlag.periode,
+            avkortingGrunnlag = listOf(grunnlag)
         )
 
         val beregnetAvkortetYtelse = AvkortingRegelkjoring.beregnAvkortetYtelse(
-            periode = Periode(fom = virkningstidspunkt, tom = null),
+            periode = grunnlag.periode,
             ytelseFoerAvkorting = ytelseFoerAvkorting,
             avkortingsperioder = avkortingsperioder,
             type = AvkortetYtelseType.FORVENTET_INNTEKT
@@ -212,6 +211,8 @@ data class AvkortingGrunnlag(
     val aarsinntekt: Int,
     val fratrekkInnAar: Int,
     val relevanteMaanederInnAar: Int,
+    val inntektUtland: Int,
+    val fratrekkInnAarUtland: Int,
     val spesifikasjon: String,
     val kilde: Grunnlagsopplysning.Saksbehandler
 )

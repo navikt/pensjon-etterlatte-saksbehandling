@@ -845,7 +845,6 @@ internal class AvkortingTest {
                     fratrekkInnAar = 50000,
                     relevanteMaanederInnAar = 10
                 ),
-                virkningstidspunkt = YearMonth.of(2023, 3),
                 behandlingstype = BehandlingType.FØRSTEGANGSBEHANDLING,
                 beregning = beregning(
                     beregninger = listOf(
@@ -873,7 +872,6 @@ internal class AvkortingTest {
                     fratrekkInnAar = 50000,
                     relevanteMaanederInnAar = 10
                 ),
-                virkningstidspunkt = YearMonth.of(2023, 7),
                 behandlingstype = BehandlingType.REVURDERING,
                 beregning = beregning(
                     beregninger = listOf(
@@ -895,7 +893,6 @@ internal class AvkortingTest {
                     fratrekkInnAar = 50000,
                     relevanteMaanederInnAar = 10
                 ),
-                virkningstidspunkt = YearMonth.of(2023, 9),
                 behandlingstype = BehandlingType.REVURDERING,
                 beregning = beregning(
                     beregninger = listOf(
@@ -935,7 +932,6 @@ internal class AvkortingTest {
                         fratrekkInnAar = 50000,
                         relevanteMaanederInnAar = 10
                     ),
-                    YearMonth.of(2023, 9),
                     BehandlingType.REVURDERING,
                     beregning(
                         beregninger = listOf(

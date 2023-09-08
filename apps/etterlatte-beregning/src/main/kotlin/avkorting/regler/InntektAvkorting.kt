@@ -21,7 +21,9 @@ import java.util.*
 
 data class InntektAvkortingGrunnlag(
     val inntekt: Beregningstall,
-    val fratrekkInnUt: Beregningstall,
+    val fratrekkInnAar: Beregningstall,
+    val inntektUtland: Beregningstall,
+    val fratrekkInnAarUtland: Beregningstall,
     val relevanteMaaneder: Beregningstall,
     val grunnlagId: UUID
 )
@@ -72,8 +74,12 @@ val maanedsinntekt = RegelMeta(
     beskrivelse = "Inntekt for relevant periode nedrundet til nærmeste tusen oppdelt i relevante måneder",
     regelReferanse = RegelReferanse(id = "REGEL-NEDRUNDET-MÅNEDSINNTEKT")
 ) benytter inntektavkortingsgrunnlag med { inntektavkortingsgrunnlag ->
-    val (inntekt, fratrekkInnUt, relevanteMaaneder) = inntektavkortingsgrunnlag
-    inntekt.round(-3, RoundingMode.FLOOR).minus(fratrekkInnUt).divide(relevanteMaaneder)
+    val (inntekt, fratrekkInnAar, inntektutland, fratrekkInnAarUtland, relevanteMaaneder) = inntektavkortingsgrunnlag
+    inntekt.round(-3, RoundingMode.FLOOR)
+        .minus(fratrekkInnAar)
+        .plus(inntektutland)
+        .minus(fratrekkInnAarUtland)
+        .divide(relevanteMaaneder)
 }
 
 val overstegetInntektPerMaaned = RegelMeta(

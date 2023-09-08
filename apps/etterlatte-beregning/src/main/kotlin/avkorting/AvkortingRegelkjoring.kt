@@ -48,7 +48,9 @@ object AvkortingRegelkjoring {
                     FaktumNode(
                         verdi = InntektAvkortingGrunnlag(
                             inntekt = Beregningstall(it.aarsinntekt),
-                            fratrekkInnUt = Beregningstall(it.fratrekkInnAar),
+                            fratrekkInnAar = Beregningstall(it.fratrekkInnAar),
+                            inntektUtland = Beregningstall(it.inntektUtland),
+                            fratrekkInnAarUtland = Beregningstall(it.fratrekkInnAarUtland),
                             relevanteMaaneder = Beregningstall(it.relevanteMaanederInnAar),
                             it.id
                         ),

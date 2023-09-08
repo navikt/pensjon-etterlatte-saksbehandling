@@ -22,7 +22,12 @@ class InntektAvkortingTest {
     @Test
     fun `inntekt rundes opp til naermeste tusen, fratrekkes opptjent utenfor periode og justeres til maanedsinntekt`() {
         val inntekt = maanedsinntekt.anvend(
-            inntektAvkortingGrunnlag(inntekt = 500999, fratrekkInnUt = 50000, relevanteMaaneder = 10),
+            inntektAvkortingGrunnlag(
+                inntekt = 400999,
+                fratrekkInnAar = 50000,
+                inntektUtland = 100000,
+                relevanteMaaneder = 10
+            ),
             RegelPeriode(LocalDate.now())
         )
         inntekt.verdi.toInteger() shouldBe 45000
@@ -49,7 +54,7 @@ class InntektAvkortingTest {
     @Test
     fun `avkortingsbeloep er oversteget inntekt ganget med avkortingsfaktor`() {
         val avkortingsbeloep = kroneavrundetInntektAvkorting.anvend(
-            inntektAvkortingGrunnlag(inntekt = 500000, fratrekkInnUt = 0, relevanteMaaneder = 12),
+            inntektAvkortingGrunnlag(inntekt = 500000, fratrekkInnAar = 0, relevanteMaaneder = 12),
             RegelPeriode(LocalDate.of(2023, 1, 1))
         )
         avkortingsbeloep.verdi shouldBe 16660

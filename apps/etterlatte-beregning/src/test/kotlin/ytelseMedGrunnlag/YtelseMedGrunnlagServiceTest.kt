@@ -80,16 +80,14 @@ internal class YtelseMedGrunnlagServiceTest {
                     grunnlag = avkortinggrunnlag(
                         periode = Periode(fom = YearMonth.of(2023, 2), tom = YearMonth.of(2023, 3)),
                         aarsinntekt = 300000,
-                        fratrekkInnAar = 25000,
-                        virkningstidspunkt = virkningstidspunkt
+                        fratrekkInnAar = 25000
                     )
                 ),
                 Inntektsavkorting(
                     grunnlag = avkortinggrunnlag(
                         periode = Periode(fom = YearMonth.of(2023, 4), tom = null),
                         aarsinntekt = 350000,
-                        fratrekkInnAar = 25000,
-                        virkningstidspunkt = virkningstidspunkt
+                        fratrekkInnAar = 25000
                     )
                 )
             ),

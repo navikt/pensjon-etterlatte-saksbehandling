@@ -109,6 +109,7 @@ export const AvkortingInntekt = (props: {
           <Table className="table" zebraStripes>
             <Table.Header>
               <Table.HeaderCell>Forventet inntekt</Table.HeaderCell>
+              <Table.HeaderCell>Inntekt utland</Table.HeaderCell>
               <Table.HeaderCell>Gjenværende måneder</Table.HeaderCell>
               <Table.HeaderCell>Periode</Table.HeaderCell>
               <Table.HeaderCell>Spesifikasjon av inntekt</Table.HeaderCell>
@@ -119,13 +120,27 @@ export const AvkortingInntekt = (props: {
                 const aarsinntekt = inntektsgrunnlag.aarsinntekt ?? 0
                 const fratrekkInnAar = inntektsgrunnlag.fratrekkInnAar ?? 0
                 const forventetInntekt = aarsinntekt - fratrekkInnAar
+                const inntektutland = inntektsgrunnlag.inntektUtland ?? 0
+                const fratrekkUtland = inntektsgrunnlag.fratrekkInnAarUtland ?? 0
+                const forventetInntektUtland = inntektutland - fratrekkUtland
                 return (
                   <Table.Row key={index}>
                     <Table.DataCell key="Inntekt">
                       {NOK(forventetInntekt)}
                       <OmstillingsstoenadToolTip title={'Se hva forventet inntekt består av'}>
-                        Forventent inntekt utregnes ved å trekke i fra fratrekk inn år fra årsinntekt:
-                        {` ${NOK(aarsinntekt)} - ${NOK(fratrekkInnAar)} = ${NOK(forventetInntekt)}`}
+                        Forventet inntekt beregnes utfra forventet årsinntekt med fratrekk for måneder før innvilgelse.
+                        <br />
+                        Forventet inntekt = forventet årsinntekt - inntekt i måneder før innvilgelse måneder (
+                        {` ${NOK(aarsinntekt)} - ${NOK(fratrekkInnAar)} = ${NOK(forventetInntekt)}`}).
+                      </OmstillingsstoenadToolTip>
+                    </Table.DataCell>
+                    <Table.DataCell key="Inntekt">
+                      {NOK(forventetInntektUtland)}
+                      <OmstillingsstoenadToolTip title={'Se hva forventet inntekt består av'}>
+                        Forventet inntekt utland beregnes utfra inntekt utland med fratrekk for måneder før innvilgelse.
+                        <br />
+                        Forventet inntekt utland = inntekt utland - inntekt i måneder før innvilgelse måneder (
+                        {` ${NOK(inntektutland)} - ${NOK(fratrekkUtland)} = ${NOK(forventetInntektUtland)}`}).
                       </OmstillingsstoenadToolTip>
                     </Table.DataCell>
                     <Table.DataCell>{inntektsgrunnlag.relevanteMaanederInnAar}</Table.DataCell>
@@ -158,7 +173,7 @@ export const AvkortingInntekt = (props: {
               <>
                 <FormWrapper>
                   <TextField
-                    label={'Forventet årsinnekt'}
+                    label={'Forventet årsinntekt'}
                     size="medium"
                     type="text"
                     inputMode="numeric"
@@ -172,7 +187,7 @@ export const AvkortingInntekt = (props: {
                     }
                   />
                   <TextField
-                    label={'Fratrekk inn/ut'}
+                    label={'Fratrekk inn år'}
                     size="medium"
                     type="text"
                     inputMode="numeric"
@@ -182,6 +197,34 @@ export const AvkortingInntekt = (props: {
                       setInntektGrunnlagForm({
                         ...inntektGrunnlagForm,
                         fratrekkInnAar: Number(e.target.value),
+                      })
+                    }
+                  />
+                  <TextField
+                    label={'Inntekt utland'}
+                    size="medium"
+                    type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    value={inntektGrunnlagForm.inntektUtland}
+                    onChange={(e) =>
+                      setInntektGrunnlagForm({
+                        ...inntektGrunnlagForm,
+                        inntektUtland: Number(e.target.value),
+                      })
+                    }
+                  />
+                  <TextField
+                    label={'Fratrekk inn år utland'}
+                    size="medium"
+                    type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    value={inntektGrunnlagForm.fratrekkInnAarUtland}
+                    onChange={(e) =>
+                      setInntektGrunnlagForm({
+                        ...inntektGrunnlagForm,
+                        fratrekkInnAarUtland: Number(e.target.value),
                       })
                     }
                   />

@@ -42,7 +42,6 @@ class AvkortingService(
         val beregning = beregningService.hentBeregningNonnull(behandlingId)
         val beregnetAvkorting = avkorting.beregnAvkortingMedNyttGrunnlag(
             avkortingGrunnlag,
-            behandling.hentVirk().dato,
             behandling.behandlingType,
             beregning
         )

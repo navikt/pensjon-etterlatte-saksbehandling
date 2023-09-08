@@ -12,6 +12,8 @@ export interface IAvkortingGrunnlag {
   aarsinntekt?: number
   fratrekkInnAar?: number
   relevanteMaanederInnAar?: number
+  inntektUtland?: number
+  fratrekkInnAarUtland?: number
   spesifikasjon?: string
   kilde?: {
     tidspunkt: ''

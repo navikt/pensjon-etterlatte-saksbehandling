@@ -38,6 +38,7 @@ export const YtelseEtterAvkorting = (props: {
               <Table.Row>
                 <Table.HeaderCell />
                 <Table.HeaderCell>Periode</Table.HeaderCell>
+                <Table.HeaderCell>Beregning</Table.HeaderCell>
                 <Table.HeaderCell>Avkorting</Table.HeaderCell>
                 <Table.HeaderCell>Restanse</Table.HeaderCell>
                 <Table.HeaderCell>Brutto stønad etter avkorting</Table.HeaderCell>
@@ -55,34 +56,55 @@ export const YtelseEtterAvkorting = (props: {
                     content={<YtelseEtterAvkortingDetaljer ytelse={ytelse} />}
                   >
                     <Table.DataCell>
-                      {formaterStringDato(ytelse.fom)} - {ytelse.tom ? formaterStringDato(ytelse.tom) : ''}
+                      <BredCelle>
+                        {formaterStringDato(ytelse.fom)} - {ytelse.tom ? formaterStringDato(ytelse.tom) : ''}
+                      </BredCelle>
                     </Table.DataCell>
                     <Table.DataCell>
-                      <Info
-                        tekst={NOK(ytelse.avkortingsbeloep)}
-                        label={''}
-                        undertekst={tidligereYtelse ? `${NOK(tidligereYtelse.avkortingsbeloep)} (Forrige vedtak)` : ''}
-                      />
-                    </Table.DataCell>
-                    <Table.DataCell>
-                      <Info
-                        tekst={restanseIKroner(ytelse.restanse)}
-                        label={''}
-                        undertekst={
-                          tidligereYtelse ? `${restanseIKroner(tidligereYtelse.restanse)} (Forrige vedtak)` : ''
-                        }
-                      />
-                    </Table.DataCell>
-                    <Table.DataCell>
-                      <ManglerRegelspesifikasjon>
+                      <SmalCelle>
                         <Info
-                          tekst={NOK(ytelse.ytelseEtterAvkorting)}
+                          tekst={NOK(ytelse.ytelseFoerAvkorting)}
                           label={''}
                           undertekst={
-                            tidligereYtelse ? `${NOK(tidligereYtelse.ytelseEtterAvkorting)} (Forrige vedtak)` : ''
+                            tidligereYtelse ? `${NOK(tidligereYtelse.ytelseFoerAvkorting)} (Forrige vedtak)` : ''
                           }
                         />
-                      </ManglerRegelspesifikasjon>
+                      </SmalCelle>
+                    </Table.DataCell>
+                    <Table.DataCell>
+                      <SmalCelle>
+                        <Info
+                          tekst={NOK(ytelse.avkortingsbeloep)}
+                          label={''}
+                          undertekst={
+                            tidligereYtelse ? `${NOK(tidligereYtelse.avkortingsbeloep)} (Forrige vedtak)` : ''
+                          }
+                        />
+                      </SmalCelle>
+                    </Table.DataCell>
+                    <Table.DataCell>
+                      <SmalCelle>
+                        <Info
+                          tekst={restanseIKroner(ytelse.restanse)}
+                          label={''}
+                          undertekst={
+                            tidligereYtelse ? `${restanseIKroner(tidligereYtelse.restanse)} (Forrige vedtak)` : ''
+                          }
+                        />
+                      </SmalCelle>
+                    </Table.DataCell>
+                    <Table.DataCell>
+                      <BredCelle>
+                        <ManglerRegelspesifikasjon>
+                          <Info
+                            tekst={NOK(ytelse.ytelseEtterAvkorting)}
+                            label={''}
+                            undertekst={
+                              tidligereYtelse ? `${NOK(tidligereYtelse.ytelseEtterAvkorting)} (Forrige vedtak)` : ''
+                            }
+                          />
+                        </ManglerRegelspesifikasjon>
+                      </BredCelle>
                     </Table.DataCell>
                   </Table.ExpandableRow>
                 )
@@ -98,13 +120,12 @@ export const YtelseEtterAvkorting = (props: {
 const TableWrapper = styled.div`
   display: flex;
   flex-wrap: wrap;
-  max-width: 1000px;
+  max-width: 700px;
+`
+const SmalCelle = styled.div`
+  max-width: 150px;
+`
 
-  .table {
-    max-width: 1000px;
-
-    .tableCell {
-      max-width: 100px;
-    }
-  }
+const BredCelle = styled.div`
+  min-width: 225px;
 `

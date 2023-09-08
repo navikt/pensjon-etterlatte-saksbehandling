@@ -1,5 +1,5 @@
 [plugins]
-avro = { id = "com.github.davidmc24.gradle.plugin.avro", version = "1.7.1" }
+avro = { id = "com.github.davidmc24.gradle.plugin.avro", version = "1.8.0" }
 analyze = { id = "com.faire.gradle.analyze", version = "1.0.9" }
 cutterslade-analyze = { id = "ca.cutterslade.analyze", version = "1.9.1" }
 
@@ -13,7 +13,7 @@ prometheus-version = "0.16.0"
 testcontainer-version = "1.19.0"
 
 [libraries]
-cache-caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version = "3.1.7" }
+cache-caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version = "3.1.8" }
 
 database-hikaricp = { module = "com.zaxxer:HikariCP", version = "5.0.0" }
 database-flywaydb = { module = "org.flywaydb:flyway-core", version = "9.22.0" }
@@ -30,10 +30,12 @@ jackson-xml = { module = "com.fasterxml.jackson.dataformat:jackson-dataformat-xm
 jakartabind-api = { module = "jakarta.xml.bind:jakarta.xml.bind-api", version = "4.0.0" }
 jakartabind-impl = { module = "org.glassfish.jaxb:jaxb-runtime", version = "4.0.3" }
 
-kafka-clients = { module = "org.apache.kafka:kafka-clients", version = "3.4.0" }
-kafka-avro = { module = "org.apache.avro:avro", version = "1.11.1" }
+kafka-clients = { module = "org.apache.kafka:kafka-clients", version = "3.5.1" }
+kafka-avro = { module = "org.apache.avro:avro", version = "1.11.2" }
 kafka-avroserializer = { module = "io.confluent:kafka-avro-serializer", version = "7.3.1" }
-kafka-embeddedenv = { module = "no.nav:kafka-embedded-env", version = "3.2.2" }
+kafka-embeddedenv = { module = "no.nav:kafka-embedded-env", version = "3.2.3" }
+el-api = { module = "javax.el:javax.el-api", version = "3.0.0"}
+el-impl = { module = "org.glassfish:jakarta.el", version = "3.0.4" }
 
 kotlin-result = { module = "com.michael-bull.kotlin-result:kotlin-result", version = "1.1.18" }
 
@@ -66,17 +68,17 @@ ktor2-servertests = { module = "io.ktor:ktor-server-tests", version.ref = "ktor2
 
 etterlatte-common = { module = "no.nav.etterlatte:common", version = "2023.03.28-16.21.c37f68b0da69" }
 
-logging-slf4japi = { module = "org.slf4j:slf4j-api", version = "2.0.7" }
-logging-logbackclassic = { module = "ch.qos.logback:logback-classic", version = "1.4.9" }
+logging-slf4japi = { module = "org.slf4j:slf4j-api", version = "2.0.9" }
+logging-logbackclassic = { module = "ch.qos.logback:logback-classic", version = "1.4.11" }
 logging-logstashlogbackencoder = { module = "net.logstash.logback:logstash-logback-encoder", version = "6.6" }
 
 metrics-micrometer-prometheus = { module = "io.micrometer:micrometer-registry-prometheus", version = "1.11.3" }
 metrics-prometheus-simpleclientcommon = { module = "io.prometheus:simpleclient_common", version.ref = "prometheus-version" }
 metrics-prometheus-simpleclienthotspot = { module = "io.prometheus:simpleclient_hotspot", version.ref = "prometheus-version" }
 
-messaginghub-pooled-jms = { module ="org.messaginghub:pooled-jms", version = "3.1.1" }
+messaginghub-pooled-jms = { module ="org.messaginghub:pooled-jms", version = "3.1.2" }
 
-mq-jakarta-client = { module ="com.ibm.mq:com.ibm.mq.jakarta.client", version = "9.3.3.0" }
+mq-jakarta-client = { module ="com.ibm.mq:com.ibm.mq.jakarta.client", version = "9.3.3.1" }
 
 navfelles-rapidandriversktor2 = { module = "com.github.navikt:rapids-and-rivers", version = "2023041310341681374880.67ced5ad4dda" }
 navfelles-tjenestespesifikasjoner-avstemming = { module = "com.github.navikt.pensjon-etterlatte-tjenestespesifikasjoner:avstemming-v1-tjenestespesifikasjon", version = "1.78ffd1e" }
@@ -90,13 +92,13 @@ test-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref
 test-jupiter-params = { module = "org.junit.jupiter:junit-jupiter-params", version.ref = "jupiter-version" }
 test-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "jupiter-version" }
 test-jupiter-root = { module = "org.junit.jupiter:junit-jupiter", version.ref = "jupiter-version" }
-test-kotest-assertionscore = { module = "io.kotest:kotest-assertions-core", version = "5.6.2" }
+test-kotest-assertionscore = { module = "io.kotest:kotest-assertions-core", version = "5.7.2" }
 test-mockk = { module = "io.mockk:mockk", version = "1.13.7" }
 test-testcontainer-jupiter = { module = "org.testcontainers:junit-jupiter", version.ref = "testcontainer-version" }
 test-testcontainer-postgresql = { module = "org.testcontainers:postgresql", version.ref = "testcontainer-version" }
 test-wiremock = { module = "com.github.tomakehurst:wiremock-jre8", version = "3.0.1" }
 
-unleash-client = { module = "io.getunleash:unleash-client-java", version = "8.2.1" }
+unleash-client = { module = "io.getunleash:unleash-client-java", version = "8.3.1" }
 
 [bundles]
 jackson = ["jackson-datatypejsr310", "jackson-datatypejdk8", "jackson-modulekotlin"]

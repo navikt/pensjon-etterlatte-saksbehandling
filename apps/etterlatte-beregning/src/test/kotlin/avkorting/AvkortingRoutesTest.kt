@@ -14,14 +14,15 @@ import io.ktor.server.testing.ApplicationTestBuilder
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
+import no.nav.etterlatte.avkorting.AvkortetYtelseType
 import no.nav.etterlatte.avkorting.Avkorting
 import no.nav.etterlatte.avkorting.AvkortingService
+import no.nav.etterlatte.avkorting.Inntektsavkorting
 import no.nav.etterlatte.avkorting.avkorting
 import no.nav.etterlatte.avkorting.fromDto
 import no.nav.etterlatte.beregning.regler.aarsoppgjoer
 import no.nav.etterlatte.beregning.regler.avkortetYtelse
 import no.nav.etterlatte.beregning.regler.avkortinggrunnlag
-import no.nav.etterlatte.beregning.regler.avkortingsperiode
 import no.nav.etterlatte.beregning.regler.bruker
 import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.libs.common.beregning.AvkortetYtelseDto
@@ -85,14 +86,28 @@ class AvkortingRoutesTest {
         val avkortingsgrunnlag = avkortinggrunnlag(
             id = avkortingsgrunnlagId,
             periode = Periode(fom = dato, tom = dato),
-            kilde = Grunnlagsopplysning.Saksbehandler("Saksbehandler01", tidspunkt)
+            kilde = Grunnlagsopplysning.Saksbehandler("Saksbehandler01", tidspunkt),
+            virkningstidspunkt = dato
+        )
+        val avkortetYtelseId = UUID.randomUUID()
+        val avkortetYtelse = listOf(
+            avkortetYtelse(
+                id = avkortetYtelseId,
+                type = AvkortetYtelseType.AARSOPPGJOER,
+                periode = Periode(fom = dato, tom = dato)
+            )
+        )
+        val inntektsavkorting = listOf(
+            Inntektsavkorting(
+                grunnlag = avkortingsgrunnlag
+            )
         )
         val avkorting = Avkorting(
-            avkortingGrunnlag = listOf(avkortingsgrunnlag),
             aarsoppgjoer = aarsoppgjoer(
-                avkortingsperioder = listOf(avkortingsperiode())
+                inntektsavkorting = inntektsavkorting
             ),
-            avkortetYtelse = listOf(avkortetYtelse(periode = Periode(fom = dato, tom = dato)))
+            avkortetYtelseFraVirkningstidspunkt = avkortetYtelse,
+            avkortetYtelseForrigeVedtak = avkortetYtelse,
         )
         val dto = AvkortingDto(
             avkortingGrunnlag = listOf(
@@ -107,11 +122,25 @@ class AvkortingRoutesTest {
                     kilde = AvkortingGrunnlagKildeDto(
                         tidspunkt = tidspunkt.toString(),
                         ident = "Saksbehandler01"
-                    )
+                    ),
                 )
             ),
             avkortetYtelse = listOf(
                 AvkortetYtelseDto(
+                    id = avkortetYtelseId,
+                    type = AvkortetYtelseType.AARSOPPGJOER.name,
+                    fom = dato,
+                    tom = dato,
+                    ytelseFoerAvkorting = 300,
+                    avkortingsbeloep = 200,
+                    ytelseEtterAvkorting = 50,
+                    restanse = 50
+                )
+            ),
+            tidligereAvkortetYtelse = listOf(
+                AvkortetYtelseDto(
+                    id = avkortetYtelseId,
+                    type = AvkortetYtelseType.AARSOPPGJOER.name,
                     fom = dato,
                     tom = dato,
                     ytelseFoerAvkorting = 300,

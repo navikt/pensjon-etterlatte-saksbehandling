@@ -44,6 +44,7 @@ class StoenadRepository(private val datasource: DataSource) {
             }
         }
     }
+
     fun hentStoenadRaderInnenforMaaned(maaned: YearMonth): List<StoenadRad> {
         return connection.use { conn ->
             conn.prepareStatement(
@@ -91,7 +92,7 @@ class StoenadRepository(private val datasource: DataSource) {
                 setDate(16, maanedStatistikkRad.vedtakLoependeTom?.let { Date.valueOf(it) })
                 setString(17, maanedStatistikkRad.statistikkMaaned.toString())
                 setString(18, maanedStatistikkRad.sakUtland.toString())
-                setDate(19, Date.valueOf(maanedStatistikkRad.virkningstidspunkt?.atDay(1)))
+                setDate(19, maanedStatistikkRad.virkningstidspunkt?.let { Date.valueOf(it.atDay(1)) })
                 setDate(20, maanedStatistikkRad.utbetalingsdato?.let { Date.valueOf(it) })
                 setString(21, maanedStatistikkRad.avkortingsbeloep)
                 setString(22, maanedStatistikkRad.aarsinntekt)

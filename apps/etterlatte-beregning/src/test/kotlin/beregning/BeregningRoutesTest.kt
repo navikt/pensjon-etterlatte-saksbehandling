@@ -19,6 +19,7 @@ import io.mockk.mockk
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlagService
 import no.nav.etterlatte.beregning.regler.FNR_1
 import no.nav.etterlatte.klienter.BehandlingKlient
+import no.nav.etterlatte.klienter.TrygdetidKlient
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -51,12 +52,14 @@ internal class BeregningRoutesTest {
     private val beregnBarnepensjonService = mockk<BeregnBarnepensjonService>()
     private val beregnOmstillingsstoenadService = mockk<BeregnOmstillingsstoenadService>()
     private val beregningsGrunnlagService = mockk<BeregningsGrunnlagService>()
+    private val trygdetidKlient = mockk<TrygdetidKlient>()
     private val beregningService = BeregningService(
         beregningRepository = beregningRepository,
         behandlingKlient = behandlingKlient,
         beregnBarnepensjonService = beregnBarnepensjonService,
         beregnOmstillingsstoenadService = beregnOmstillingsstoenadService,
-        beregningsGrunnlagService = beregningsGrunnlagService
+        beregningsGrunnlagService = beregningsGrunnlagService,
+        trygdetidKlient = trygdetidKlient
     )
 
     @BeforeAll

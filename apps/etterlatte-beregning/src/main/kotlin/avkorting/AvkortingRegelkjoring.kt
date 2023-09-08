@@ -10,7 +10,6 @@ import no.nav.etterlatte.avkorting.regler.restanse
 import no.nav.etterlatte.beregning.grunnlag.GrunnlagMedPeriode
 import no.nav.etterlatte.beregning.grunnlag.PeriodisertBeregningGrunnlag
 import no.nav.etterlatte.beregning.grunnlag.mapVerdier
-import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -50,7 +49,8 @@ object AvkortingRegelkjoring {
                         verdi = InntektAvkortingGrunnlag(
                             inntekt = Beregningstall(it.aarsinntekt),
                             fratrekkInnUt = Beregningstall(it.fratrekkInnAar),
-                            relevanteMaaneder = Beregningstall(it.relevanteMaanederInnAar)
+                            relevanteMaaneder = Beregningstall(it.relevanteMaanederInnAar),
+                            it.id
                         ),
                         kilde = it.kilde,
                         beskrivelse = "Forventet årsinntekt"
@@ -64,6 +64,7 @@ object AvkortingRegelkjoring {
             is RegelkjoeringResultat.Suksess -> {
                 val tidspunkt = Tidspunkt.now()
                 resultat.periodiserteResultater.map { periodisertResultat ->
+
                     Avkortingsperiode(
                         id = UUID.randomUUID(),
                         periode = Periode(
@@ -77,8 +78,12 @@ object AvkortingRegelkjoring {
                             navn = kroneavrundetInntektAvkorting.regelReferanse.id,
                             ts = tidspunkt,
                             versjon = periodisertResultat.reglerVersjon
-                        )
+                        ),
+                        inntektsgrunnlag = grunnlag.finnGrunnlagForPeriode(
+                            periodisertResultat.periode.fraDato
+                        ).inntektAvkortingGrunnlag.verdi.grunnlagId
                     )
+
                 }
             }
 
@@ -88,46 +93,25 @@ object AvkortingRegelkjoring {
     }
 
     fun beregnAvkortetYtelse(
-        virkningstidspunkt: Virkningstidspunkt,
-        beregningsperioder: List<YtelseFoerAvkorting>,
+        periode: Periode,
+        ytelseFoerAvkorting: List<YtelseFoerAvkorting>,
         avkortingsperioder: List<Avkortingsperiode>,
-        restanse: Restanse? = null
+        type: AvkortetYtelseType,
+        restanse: Restanse? = null,
     ): List<AvkortetYtelse> {
-        val periode = Periode(fom = virkningstidspunkt.dato, tom = null)
         val regelgrunnlag = PeriodisertAvkortetYtelseGrunnlag(
-            beregningsperioder = periodiserteBeregninger(beregningsperioder),
+            beregningsperioder = periodiserteBeregninger(ytelseFoerAvkorting),
             avkortingsperioder = periodiserteAvkortinger(avkortingsperioder),
             fordeltRestanse = restansegrunnlag(restanse)
         )
-        return beregnAvkortetYtelse(periode, AvkortetYtelseType.NY, regelgrunnlag)
-    }
-
-    fun beregnAvkortetYtelsePaaNytt(
-        virkningstidspunkt: Virkningstidspunkt,
-        beregninger: List<YtelseFoerAvkorting>,
-        avkortinger: List<Avkortingsperiode>
-    ): List<AvkortetYtelse> {
-        val periode = Periode(fom = beregninger.first().periode.fom, tom = virkningstidspunkt.dato.minusMonths(1))
-        val avkortetYtelseGrunnlag = PeriodisertAvkortetYtelseGrunnlag(
-            beregningsperioder = periodiserteBeregninger(beregninger),
-            avkortingsperioder = periodiserteAvkortinger(avkortinger),
-            fordeltRestanse = restansegrunnlag(null)
-        )
-        return beregnAvkortetYtelse(periode, AvkortetYtelseType.REBEREGNET, avkortetYtelseGrunnlag)
-    }
-
-    private fun beregnAvkortetYtelse(
-        periode: Periode,
-        type: AvkortetYtelseType,
-        regelgrunnlag: PeriodisertAvkortetYtelseGrunnlag
-    ): List<AvkortetYtelse> {
         val resultat = avkortetYtelseMedRestanse.eksekver(regelgrunnlag, periode.tilRegelPeriode())
         when (resultat) {
             is RegelkjoeringResultat.Suksess -> {
                 val tidspunkt = Tidspunkt.now()
                 return resultat.periodiserteResultater.map { periodisertResultat ->
                     val resultatFom = periodisertResultat.periode.fraDato
-                    val restanse = regelgrunnlag.finnGrunnlagForPeriode(resultatFom).fordeltRestanse.verdi
+                    val avkortingsbeloep = regelgrunnlag.finnGrunnlagForPeriode(resultatFom).avkorting.verdi
+                    val ytelseFoerAvkorting = regelgrunnlag.finnGrunnlagForPeriode(resultatFom).beregning.verdi
                     AvkortetYtelse(
                         id = UUID.randomUUID(),
                         type = type,
@@ -137,9 +121,9 @@ object AvkortingRegelkjoring {
                         ),
                         ytelseEtterAvkorting = periodisertResultat.resultat.verdi,
                         restanse = restanse,
-                        ytelseEtterAvkortingFoerRestanse = periodisertResultat.resultat.verdi + restanse,
-                        avkortingsbeloep = regelgrunnlag.finnGrunnlagForPeriode(resultatFom).avkorting.verdi,
-                        ytelseFoerAvkorting = regelgrunnlag.finnGrunnlagForPeriode(resultatFom).beregning.verdi,
+                        ytelseEtterAvkortingFoerRestanse = ytelseFoerAvkorting - avkortingsbeloep,
+                        avkortingsbeloep = avkortingsbeloep,
+                        ytelseFoerAvkorting = ytelseFoerAvkorting,
                         tidspunkt = tidspunkt,
                         regelResultat = periodisertResultat.toJsonNode(),
                         kilde = Grunnlagsopplysning.RegelKilde(
@@ -201,32 +185,32 @@ object AvkortingRegelkjoring {
         )
 
     fun beregnRestanse(
-        foersteMaaned: YearMonth,
-        virkningstidspunkt: Virkningstidspunkt,
+        fraOgMed: YearMonth,
+        nyInntektsavkorting: Inntektsavkorting,
         tidligereYtelseEtterAvkorting: List<AvkortetYtelse>,
-        nyYtelseEtterAvkorting: List<AvkortetYtelse>
     ): Restanse {
+        val til = nyInntektsavkorting.grunnlag.periode.fom
         val grunnlag = RestanseGrunnlag(
             FaktumNode(
-                verdi = tidligereYtelseEtterAvkorting.spreYtelsePerMaaned(foersteMaaned, virkningstidspunkt.dato),
+                verdi = tidligereYtelseEtterAvkorting.spreYtelsePerMaaned(fraOgMed, til),
                 kilde = tidligereYtelseEtterAvkorting.map { "avkortetYtelse:${it.id}" },
-                beskrivelse = "Ytelse etter avkorting fra tidligere beahndlinge gjeldende år"
+                beskrivelse = "Ytelse etter avkorting for tidligere oppgitt forventet årsinntekt samme år"
             ),
             FaktumNode(
-                verdi = nyYtelseEtterAvkorting.spreYtelsePerMaaned(foersteMaaned, virkningstidspunkt.dato),
-                kilde = nyYtelseEtterAvkorting.map { "avkortetYtelse:${it.id}" },
-                beskrivelse = "Reberegnet ytelse etter avkorting før nytt virkningstidspunkt"
+                verdi = nyInntektsavkorting.avkortetYtelseForventetInntekt.spreYtelsePerMaaned(fraOgMed, til),
+                kilde = nyInntektsavkorting.grunnlag.id,
+                beskrivelse = "Ytelse etter avkorting med ny forventet årsinntekt"
             ),
-            virkningstidspunkt = FaktumNode(
-                verdi = virkningstidspunkt.dato,
-                kilde = virkningstidspunkt.kilde,
-                beskrivelse = "Virkningstidspunkt hvor restanse skal fordeles månedlig fra"
+            fraOgMedNyForventetInntekt = FaktumNode(
+                verdi = til,
+                kilde = nyInntektsavkorting.grunnlag.id,
+                beskrivelse = "Tidspunkt ny forventet inntekt inntrer"
             )
         )
 
         val resultat = restanse.eksekver(
             KonstantGrunnlag(grunnlag),
-            Periode(fom = foersteMaaned, tom = null).tilRegelPeriode()
+            Periode(fom = fraOgMed, tom = null).tilRegelPeriode()
         )
         return when (resultat) {
             is RegelkjoeringResultat.Suksess -> {
@@ -252,12 +236,12 @@ object AvkortingRegelkjoring {
     }
 
     private fun List<AvkortetYtelse>.spreYtelsePerMaaned(
-        foersteMaaned: YearMonth,
-        virkningstidspunkt: YearMonth
+        fraOgMed: YearMonth,
+        til: YearMonth
     ): List<Int> {
         val perMaaned = mutableListOf<Int>()
-        for (maanednr in foersteMaaned.monthValue..virkningstidspunkt.minusMonths(1).monthValue) {
-            val maaned = YearMonth.of(virkningstidspunkt.year, maanednr)
+        for (maanednr in fraOgMed.monthValue..til.minusMonths(1).monthValue) {
+            val maaned = YearMonth.of(til.year, maanednr)
             perMaaned.add(avkortetYtelseIMaaned(maaned).ytelseEtterAvkorting)
         }
         return perMaaned

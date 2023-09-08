@@ -106,7 +106,7 @@ class BehandlingFactory(
             }.also { behandling ->
                 behandling?.let {
                     grunnlagService.leggInnNyttGrunnlag(it, persongalleri)
-                    oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendSoeknad(
+                    oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(
                         referanse = behandling.id.toString(),
                         sakId = sak.id
                     )

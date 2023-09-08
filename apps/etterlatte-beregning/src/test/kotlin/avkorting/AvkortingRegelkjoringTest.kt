@@ -2,6 +2,7 @@ package avkorting
 
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
+import no.nav.etterlatte.avkorting.AvkortetYtelseType
 import no.nav.etterlatte.avkorting.AvkortingRegelkjoring
 import no.nav.etterlatte.avkorting.YtelseFoerAvkorting
 import no.nav.etterlatte.beregning.grunnlag.PeriodiseringAvGrunnlagFeil
@@ -117,9 +118,10 @@ class AvkortingRegelkjoringTest {
         )
 
         val avkortetYtelse = AvkortingRegelkjoring.beregnAvkortetYtelse(
-            virkningstidspunkt,
+            Periode(fom = virkningstidspunkt.dato, tom = null),
             beregninger,
-            avkortingsperioder
+            avkortingsperioder,
+            AvkortetYtelseType.FORVENTET_INNTEKT
         )
 
         avkortetYtelse.size shouldBe 4

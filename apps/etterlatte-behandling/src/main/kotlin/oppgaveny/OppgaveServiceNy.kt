@@ -257,7 +257,7 @@ class OppgaveServiceNy(
         }
     }
 
-    fun opprettFoerstegangsbehandlingsOppgaveForInnsendSoeknad(referanse: String, sakId: Long): OppgaveNy {
+    fun opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(referanse: String, sakId: Long): OppgaveNy {
         val oppgaverForBehandling = oppgaveDaoNy.hentOppgaverForBehandling(referanse)
         val oppgaverSomKanLukkes = oppgaverForBehandling.filter { !it.erAvsluttet() }
         oppgaverSomKanLukkes.forEach {
@@ -293,14 +293,21 @@ class OppgaveServiceNy(
     }
 
     fun hentSaksbehandlerForBehandling(behandlingsId: UUID): String? {
-        val oppgaverforBehandling = inTransaction {
+        val oppgaverForBehandlingUtenAttesterting = inTransaction {
             oppgaveDaoNy.hentOppgaverForBehandling(behandlingsId.toString())
-        }
-
-        val oppgaverForBehandlingUtenAttesterting = oppgaverforBehandling.filter {
+        }.filter {
             it.type !== OppgaveType.ATTESTERING
         }
         return oppgaverForBehandlingUtenAttesterting.sortedByDescending { it.opprettet }[0].saksbehandler
+    }
+
+    fun hentSaksbehandlerFraFoerstegangsbehandling(behandlingsId: UUID): String? {
+        val oppgaverForBehandlingFoerstegangs = inTransaction {
+            oppgaveDaoNy.hentOppgaverForBehandling(behandlingsId.toString())
+        }.filter {
+            it.type == OppgaveType.FOERSTEGANGSBEHANDLING
+        }
+        return oppgaverForBehandlingFoerstegangs.sortedByDescending { it.opprettet }[0].saksbehandler
     }
 
     fun hentSaksbehandlerForOppgaveUnderArbeid(behandlingsId: UUID): String? {

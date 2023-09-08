@@ -60,12 +60,14 @@ fun Route.avkorting(avkortingService: AvkortingService, behandlingKlient: Behand
                 call.respond(avkorting.toDto())
             }
         }
+
     }
 }
 
 fun Avkorting.toDto() = AvkortingDto(
-    avkortingGrunnlag = avkortingGrunnlag.map { it.toDto() },
-    avkortetYtelse = avkortetYtelse.map { it.toDto() }
+    avkortingGrunnlag = aarsoppgjoer.inntektsavkorting.map { it.grunnlag.toDto() },
+    avkortetYtelse = avkortetYtelseFraVirkningstidspunkt.map { it.toDto() },
+    tidligereAvkortetYtelse = avkortetYtelseForrigeVedtak.map { it.toDto() }
 )
 
 fun AvkortingGrunnlag.toDto() = AvkortingGrunnlagDto(
@@ -80,11 +82,13 @@ fun AvkortingGrunnlag.toDto() = AvkortingGrunnlagDto(
 )
 
 fun AvkortetYtelse.toDto() = AvkortetYtelseDto(
+    id = id,
     fom = periode.fom,
     tom = periode.tom,
+    type = type.name,
     ytelseFoerAvkorting = ytelseFoerAvkorting,
     avkortingsbeloep = avkortingsbeloep,
-    restanse = restanse,
+    restanse = restanse?.fordeltRestanse ?: 0,
     ytelseEtterAvkorting = ytelseEtterAvkorting
 )
 

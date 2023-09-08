@@ -2,6 +2,7 @@ package no.nav.etterlatte.beregning
 
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlagService
 import no.nav.etterlatte.klienter.BehandlingKlient
+import no.nav.etterlatte.klienter.TrygdetidKlient
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.girOpphoer
@@ -14,7 +15,8 @@ class BeregningService(
     private val behandlingKlient: BehandlingKlient,
     private val beregnBarnepensjonService: BeregnBarnepensjonService,
     private val beregnOmstillingsstoenadService: BeregnOmstillingsstoenadService,
-    private val beregningsGrunnlagService: BeregningsGrunnlagService
+    private val beregningsGrunnlagService: BeregningsGrunnlagService,
+    private val trygdetidKlient: TrygdetidKlient
 ) {
     private val logger = LoggerFactory.getLogger(BeregningService::class.java)
 
@@ -54,7 +56,11 @@ class BeregningService(
                 if (behandling.sakType == SakType.BARNEPENSJON) {
                     kopierBeregningsgrunnlagOgOpprettBeregningBarnepensjon(behandling, brukerTokenInfo, behandlingId)
                 } else {
-                    opprettBeregning(behandlingId, brukerTokenInfo)
+                    kopierTrygdetidOgOpprettBeregningOmstillingsstoenad(
+                        behandling,
+                        brukerTokenInfo,
+                        behandlingId
+                    )
                 }
             }
         }
@@ -74,5 +80,18 @@ class BeregningService(
             beregningsGrunnlagService.dupliserBeregningsGrunnlagBP(behandlingId, sisteIverksatteBehandling.id)
             opprettBeregning(behandlingId, brukerTokenInfo)
         }
+    }
+
+    private suspend fun kopierTrygdetidOgOpprettBeregningOmstillingsstoenad(
+        behandling: DetaljertBehandling,
+        brukerTokenInfo: BrukerTokenInfo,
+        behandlingId: UUID
+    ) {
+        val sisteIverksatteBehandling = behandlingKlient.hentSisteIverksatteBehandling(behandling.sak, brukerTokenInfo)
+        val trygdetidForBehandling = trygdetidKlient.hentTrygdetid(behandlingId, brukerTokenInfo)
+        if (trygdetidForBehandling == null) {
+            trygdetidKlient.kopierTrygdetid(behandlingId, sisteIverksatteBehandling.id, brukerTokenInfo)
+        }
+        opprettBeregning(behandlingId, brukerTokenInfo)
     }
 }

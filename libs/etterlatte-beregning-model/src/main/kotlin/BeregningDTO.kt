@@ -2,6 +2,7 @@ package no.nav.etterlatte.libs.common.beregning
 
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.etterlatte.beregning.grunnlag.InstitusjonsoppholdBeregningsgrunnlag
+import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.Metadata
 import no.nav.etterlatte.libs.common.periode.Periode
@@ -34,7 +35,8 @@ data class Beregningsperiode(
 
 data class AvkortingDto(
     val avkortingGrunnlag: List<AvkortingGrunnlagDto>,
-    val avkortetYtelse: List<AvkortetYtelseDto>
+    val avkortetYtelse: List<AvkortetYtelseDto>,
+    val tidligereAvkortetYtelse: List<AvkortetYtelseDto> = emptyList()
 )
 
 data class AvkortingGrunnlagDto(
@@ -54,12 +56,19 @@ data class AvkortingGrunnlagKildeDto(
 )
 
 data class AvkortetYtelseDto(
+    val id: UUID? = null,
     val fom: YearMonth,
     val tom: YearMonth?,
+    val type: String = "",
     val ytelseFoerAvkorting: Int,
     val avkortingsbeloep: Int,
     val ytelseEtterAvkorting: Int,
     val restanse: Int
+)
+
+data class ManuellRestanseDto (
+    val avkortetYtelseId: UUID,
+    val nyRestanse: Int
 )
 
 data class YtelseMedGrunnlagDto(

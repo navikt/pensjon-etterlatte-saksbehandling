@@ -1,14 +1,30 @@
-import { IAvkortetYtelse } from '~shared/types/IAvkorting'
+import { IAvkortetYtelse, IAvkorting } from '~shared/types/IAvkorting'
 import { Heading, Table } from '@navikt/ds-react'
 import React from 'react'
 import styled from 'styled-components'
 import { ManglerRegelspesifikasjon } from '~components/behandling/felles/ManglerRegelspesifikasjon'
 import { formaterStringDato, NOK } from '~utils/formattering'
 import { YtelseEtterAvkortingDetaljer } from '~components/behandling/avkorting/YtelseEtterAvkortingDetaljer'
+import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
+import { Info } from '~components/behandling/soeknadsoversikt/Info'
 
-export const YtelseEtterAvkorting = (props: { ytelser: IAvkortetYtelse[] }) => {
-  const ytelser = [...props.ytelser]
-  ytelser.sort((a, b) => new Date(b.fom).getTime() - new Date(a.fom).getTime())
+const sorterNyligsteFoerstOgBakover = (a: IAvkortetYtelse, b: IAvkortetYtelse) =>
+  new Date(b.fom).getTime() - new Date(a.fom).getTime()
+
+export const YtelseEtterAvkorting = (props: {
+  ytelser: IAvkortetYtelse[]
+  tidligereYtelser: IAvkortetYtelse[]
+  behandling: IBehandlingReducer
+  setAvkorting: (avkorting: IAvkorting) => void
+}) => {
+  const ytelser = [...props.ytelser].sort(sorterNyligsteFoerstOgBakover)
+  const tidligereYtelser = [...props.tidligereYtelser].sort(sorterNyligsteFoerstOgBakover)
+
+  const finnTidligereTidligereYtelseIPeriode = (ytelse: IAvkortetYtelse) => {
+    return tidligereYtelser.find(
+      (tidligere) => ytelse.fom >= tidligere.fom && (tidligere.tom == null || ytelse.tom <= tidligere.tom)
+    )
+  }
 
   return (
     <>
@@ -28,26 +44,49 @@ export const YtelseEtterAvkorting = (props: { ytelser: IAvkortetYtelse[] }) => {
               </Table.Row>
             </Table.Header>
             <Table.Body>
-              {ytelser.map((ytelse, key) => (
-                <Table.ExpandableRow
-                  key={key}
-                  shadeOnHover={false}
-                  content={<YtelseEtterAvkortingDetaljer ytelse={ytelse} />}
-                >
-                  <Table.DataCell>
-                    {formaterStringDato(ytelse.fom)} - {ytelse.tom ? formaterStringDato(ytelse.tom) : ''}
-                  </Table.DataCell>
-                  <Table.DataCell>{NOK(ytelse.avkortingsbeloep)}</Table.DataCell>
-                  {ytelse.restanse < 0 ? (
-                    <Table.DataCell>+ {NOK(ytelse.restanse * -1)}</Table.DataCell>
-                  ) : (
-                    <Table.DataCell>- {NOK(ytelse.restanse)}</Table.DataCell>
-                  )}
-                  <Table.DataCell>
-                    <ManglerRegelspesifikasjon>{NOK(ytelse.ytelseEtterAvkorting)}</ManglerRegelspesifikasjon>
-                  </Table.DataCell>
-                </Table.ExpandableRow>
-              ))}
+              {ytelser.map((ytelse, key) => {
+                const tidligereYtelse = finnTidligereTidligereYtelseIPeriode(ytelse)
+                const restanseIKroner = (restanse: number) =>
+                  restanse < 0 ? `+ ${NOK(restanse * -1)}` : `- ${NOK(restanse)}`
+                return (
+                  <Table.ExpandableRow
+                    key={key}
+                    shadeOnHover={false}
+                    content={<YtelseEtterAvkortingDetaljer ytelse={ytelse} />}
+                  >
+                    <Table.DataCell>
+                      {formaterStringDato(ytelse.fom)} - {ytelse.tom ? formaterStringDato(ytelse.tom) : ''}
+                    </Table.DataCell>
+                    <Table.DataCell>
+                      <Info
+                        tekst={NOK(ytelse.avkortingsbeloep)}
+                        label={''}
+                        undertekst={tidligereYtelse ? `${NOK(tidligereYtelse.avkortingsbeloep)} (Forrige vedtak)` : ''}
+                      />
+                    </Table.DataCell>
+                    <Table.DataCell>
+                      <Info
+                        tekst={restanseIKroner(ytelse.restanse)}
+                        label={''}
+                        undertekst={
+                          tidligereYtelse ? `${restanseIKroner(tidligereYtelse.restanse)} (Forrige vedtak)` : ''
+                        }
+                      />
+                    </Table.DataCell>
+                    <Table.DataCell>
+                      <ManglerRegelspesifikasjon>
+                        <Info
+                          tekst={NOK(ytelse.ytelseEtterAvkorting)}
+                          label={''}
+                          undertekst={
+                            tidligereYtelse ? `${NOK(tidligereYtelse.ytelseEtterAvkorting)} (Forrige vedtak)` : ''
+                          }
+                        />
+                      </ManglerRegelspesifikasjon>
+                    </Table.DataCell>
+                  </Table.ExpandableRow>
+                )
+              })}
             </Table.Body>
           </Table>
         </TableWrapper>

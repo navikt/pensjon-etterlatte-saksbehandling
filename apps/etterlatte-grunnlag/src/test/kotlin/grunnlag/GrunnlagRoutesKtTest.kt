@@ -1,5 +1,6 @@
 package no.nav.etterlatte.grunnlag
 
+import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import io.ktor.client.call.body
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
@@ -24,14 +25,20 @@ import io.mockk.confirmVerified
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
+import io.mockk.slot
 import io.mockk.verify
+import lagGrunnlagsopplysning
 import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.libs.common.FoedselsnummerDTO
 import no.nav.etterlatte.libs.common.behandling.PersonMedSakerOgRoller
 import no.nav.etterlatte.libs.common.behandling.SakOgRolle
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.NyeSaksopplysninger
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.serialize
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
@@ -39,7 +46,7 @@ import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -115,7 +122,7 @@ internal class GrunnlagRoutesKtTest {
             }
             val response = client.get("api/grunnlag/1")
 
-            Assertions.assertEquals(HttpStatusCode.Unauthorized, response.status)
+            assertEquals(HttpStatusCode.Unauthorized, response.status)
         }
 
         coVerify(exactly = 1) { behandlingKlient wasNot Called }
@@ -139,7 +146,7 @@ internal class GrunnlagRoutesKtTest {
                 }
             }
 
-            Assertions.assertEquals(HttpStatusCode.NotFound, response.status)
+            assertEquals(HttpStatusCode.NotFound, response.status)
         }
 
         verify(exactly = 1) { grunnlagService.hentOpplysningsgrunnlag(any()) }
@@ -165,8 +172,8 @@ internal class GrunnlagRoutesKtTest {
                 }
             }
 
-            Assertions.assertEquals(HttpStatusCode.OK, response.status)
-            Assertions.assertEquals(serialize(testData), response.body<String>())
+            assertEquals(HttpStatusCode.OK, response.status)
+            assertEquals(serialize(testData), response.body<String>())
         }
 
         verify(exactly = 1) { grunnlagService.hentOpplysningsgrunnlag(any()) }
@@ -203,8 +210,8 @@ internal class GrunnlagRoutesKtTest {
                 }
             }
 
-            Assertions.assertEquals(HttpStatusCode.OK, actualResponse.status)
-            Assertions.assertEquals(serialize(response), actualResponse.body<String>())
+            assertEquals(HttpStatusCode.OK, actualResponse.status)
+            assertEquals(serialize(response), actualResponse.body<String>())
         }
 
         verify(exactly = 1) { grunnlagService.hentSakerOgRoller(any()) }
@@ -236,8 +243,8 @@ internal class GrunnlagRoutesKtTest {
                 }
             }
 
-            Assertions.assertEquals(HttpStatusCode.OK, actualResponse.status)
-            Assertions.assertEquals(serialize(response), actualResponse.body<String>())
+            assertEquals(HttpStatusCode.OK, actualResponse.status)
+            assertEquals(serialize(response), actualResponse.body<String>())
         }
 
         verify(exactly = 1) { grunnlagService.hentAlleSakerForFnr(any()) }
@@ -246,6 +253,15 @@ internal class GrunnlagRoutesKtTest {
 
     @Test
     fun `Nye opplysninger`() {
+        val sakId = 12345L
+        val opplysninger = listOf(
+            lagGrunnlagsopplysning(
+                opplysningstype = Opplysningstype.SPRAAK,
+                kilde = Grunnlagsopplysning.Privatperson("fnr", Tidspunkt.now()),
+                verdi = "nb".toJsonNode()
+            )
+        )
+
         every { grunnlagService.lagreNyeSaksopplysninger(any(), any()) } just Runs
 
         testApplication {
@@ -260,18 +276,24 @@ internal class GrunnlagRoutesKtTest {
                     jackson { registerModule(JavaTimeModule()) }
                 }
             }
-            val actualResponse = httpClient.post("api/grunnlag/12345/nye-opplysninger") {
+            val actualResponse = httpClient.post("api/grunnlag/$sakId/nye-opplysninger") {
                 contentType(ContentType.Application.Json)
-                setBody(NyeSaksopplysninger(emptyList()))
+                setBody(NyeSaksopplysninger(opplysninger))
                 headers {
                     append(HttpHeaders.Authorization, "Bearer $systemBruker")
                 }
             }
 
-            Assertions.assertEquals(HttpStatusCode.OK, actualResponse.status)
+            assertEquals(HttpStatusCode.OK, actualResponse.status)
         }
 
-        verify(exactly = 1) { grunnlagService.lagreNyeSaksopplysninger(any(), any()) }
+        val opplysningerSlot = slot<List<Grunnlagsopplysning<JsonNode>>>()
+
+        verify(exactly = 1) { grunnlagService.lagreNyeSaksopplysninger(sakId, capture(opplysningerSlot)) }
         coVerify { behandlingKlient wasNot Called }
+
+        val faktiskOpplysning = opplysningerSlot.captured.single()
+
+        assertEquals(serialize(opplysninger.single()), serialize(faktiskOpplysning))
     }
 }

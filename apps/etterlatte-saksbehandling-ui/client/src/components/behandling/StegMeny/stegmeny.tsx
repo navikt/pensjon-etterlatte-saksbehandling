@@ -25,7 +25,7 @@ export const StegMeny = (props: { behandling: IBehandlingReducer }) => {
   )
 }
 
-const StegMenyWrapper = styled.ul`
+export const StegMenyWrapper = styled.ul`
   display: block;
   list-style: none;
   padding: 1em 0;

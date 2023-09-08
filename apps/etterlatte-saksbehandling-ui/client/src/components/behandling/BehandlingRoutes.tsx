@@ -100,7 +100,7 @@ export const soeknadRoutes: Array<BehandlingRouteTypes> = [
   {
     path: 'beregningsgrunnlag',
     description: 'Beregningsgrunnlag',
-    kreverBehandlingsstatus: IBehandlingStatus.VILKAARSVURDERT,
+    kreverBehandlingsstatus: IBehandlingStatus.TRYGDETID_OPPDATERT,
   },
   { path: 'beregne', description: 'Beregning', kreverBehandlingsstatus: IBehandlingStatus.BEREGNET },
   { path: 'brev', description: 'Vedtaksbrev' },
@@ -146,7 +146,7 @@ export function revurderingRoutes(behandling: IBehandlingReducer): Array<Behandl
   const beregningsgrunnlag = {
     path: 'beregningsgrunnlag',
     description: 'Beregningsgrunnlag',
-    kreverBehandlingsstatus: IBehandlingStatus.VILKAARSVURDERT,
+    kreverBehandlingsstatus: IBehandlingStatus.TRYGDETID_OPPDATERT,
   }
   const beregning = { path: 'beregne', description: 'Beregning', kreverBehandlingsstatus: IBehandlingStatus.BEREGNET }
   const defaultRoutes: Array<BehandlingRouteTypes> = erOpphoer(behandling.revurderingsaarsak!!)

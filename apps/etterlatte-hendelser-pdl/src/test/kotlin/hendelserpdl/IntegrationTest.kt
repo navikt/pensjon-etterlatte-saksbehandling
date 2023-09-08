@@ -65,11 +65,11 @@ class IntegrationTest {
             LocalKafkaConfig(kafkaEnv.brokersURL).rapidsAndRiversProducer("etterlatte.dodsmelding")
         )
 
+        val personHendelseFordeler = PersonHendelseFordeler(rapidsKafkaProducer, pdlKlient)
         val kafkaKonsument = KafkaKonsument<Personhendelse>(
             LEESAH_TOPIC_PERSON,
             KafkaConsumerEnvironmentTest().generateKafkaConsumerProperties(env)
-        )
-        val personHendelseFordeler = PersonHendelseFordeler(rapidsKafkaProducer, pdlKlient)
+        ) { personHendelseFordeler.haandterHendelse(it) }
 
         val personHendelse = Personhendelse().apply {
             hendelseId = "1"
@@ -96,7 +96,7 @@ class IntegrationTest {
 
         leesahKafkaProducer.send(ProducerRecord(LEESAH_TOPIC_PERSON, 1, "key", personHendelse))
 
-        lesHendelserFraLeesah(kafkaKonsument, personHendelseFordeler)
+        lesHendelserFraLeesah(kafkaKonsument)
 
         verify(exactly = 1, timeout = 5000) {
             rapidsKafkaProducer.publiser(

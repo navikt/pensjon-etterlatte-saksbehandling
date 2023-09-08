@@ -31,7 +31,7 @@ class ApplicationContext(
     val leesahKonsument: KafkaKonsument<Personhendelse> = KafkaKonsument(
         env.requireEnvValue("LEESAH_TOPIC_PERSON"),
         KafkaEnvironment().generateKafkaConsumerProperties(env)
-    )
+    ) { personHendelseFordeler.haandterHendelse(it) }
 ) {
     val httpPort = env.getOrDefault("HTTP_PORT", "8080").toInt()
 }

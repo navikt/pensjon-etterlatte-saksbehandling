@@ -3,21 +3,24 @@ package no.nav.etterlatte.hendelserpdl.common
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
-import org.apache.kafka.clients.consumer.ConsumerRecords
+import no.nav.etterlatte.kafka.Kafkakonsument
 import org.apache.kafka.clients.consumer.KafkaConsumer
-import org.apache.kafka.common.errors.WakeupException
 import org.slf4j.LoggerFactory
 import java.time.Duration
 import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
 
 class KafkaKonsument<T>(
-    private val topic: String,
-    kafkaProperties: Properties
+    topic: String,
+    kafkaProperties: Properties,
+    private val haandter: suspend (T) -> Unit
+) : Kafkakonsument<T>(
+    logger = LoggerFactory.getLogger(KafkaConsumer::class.java.name),
+    consumer = KafkaConsumer<String, T>(kafkaProperties),
+    topic = topic,
+    pollTimeoutInSeconds = Duration.ofSeconds(10L),
+    closed = AtomicBoolean(false)
 ) {
-    private val consumer: KafkaConsumer<String, T> = KafkaConsumer<String, T>(kafkaProperties)
-    private val closed = AtomicBoolean(false)
-    private val logger = LoggerFactory.getLogger(KafkaConsumer::class.java)
 
     init {
         Runtime.getRuntime().addShutdownHook(
@@ -28,40 +31,16 @@ class KafkaKonsument<T>(
         )
     }
 
-    private var antallMeldinger = 0
-    private val pollTimeoutSeconds: Duration = Duration.ofSeconds(10L)
-
-    fun konsumer(haandter: suspend (T) -> Unit) {
-        val haandterMeldinger: (it: ConsumerRecords<String, T>) -> Unit = {
+    override fun stream() {
+        stream { hendelser ->
             runBlocking {
-                val ventbareHendelser = it.map {
-                    runBlocking {
-                        async(context = Dispatchers.Default) {
-                            haandter(it.value())
-                        }
+                val ventbareHendelser = hendelser.map {
+                    async(context = Dispatchers.Default) {
+                        haandter(it.value())
                     }
                 }
                 ventbareHendelser.forEach { it.await() }
             }
-        }
-
-        try {
-            logger.info("Starter å lese hendelser fra ${this.javaClass.name}")
-            consumer.subscribe(listOf(topic))
-            while (!closed.get()) {
-                val meldinger: ConsumerRecords<String, T> = consumer.poll(pollTimeoutSeconds)
-                haandterMeldinger(meldinger)
-                consumer.commitSync()
-
-                antallMeldinger += meldinger.count()
-                if (meldinger.isEmpty) Thread.sleep(500L)
-            }
-        } catch (e: WakeupException) {
-            // Ignorerer exception hvis vi stenger ned
-            if (closed.get()) throw e
-        } finally {
-            logger.info("Ferdig med å lese hendelser fra $topic - lukker consumer")
-            consumer.close()
         }
     }
 }

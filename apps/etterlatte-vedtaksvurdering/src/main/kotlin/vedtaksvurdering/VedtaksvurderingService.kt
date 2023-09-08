@@ -247,7 +247,7 @@ class VedtaksvurderingService(
 
         verifiserGyldigVedtakStatus(vedtak.status, listOf(VedtakStatus.ATTESTERT))
         val iverksattVedtak = repository.inTransaction { tx ->
-            val iverksattVedtakLocal = repository.iverksattVedtak(behandlingId)
+            val iverksattVedtakLocal = repository.iverksattVedtak(behandlingId, tx = tx)
             runBlocking {
                 settBehandlingTilIverksatt(behandlingId, brukerTokenInfo, iverksattVedtakLocal.id)
             }

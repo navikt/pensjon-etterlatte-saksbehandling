@@ -9,6 +9,7 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlagService
 import no.nav.etterlatte.beregning.regler.bruker
 import no.nav.etterlatte.klienter.BehandlingKlientImpl
+import no.nav.etterlatte.klienter.TrygdetidKlient
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -27,12 +28,14 @@ internal class BeregningServiceTest {
     private val beregnBarnepensjonService = mockk<BeregnBarnepensjonService>()
     private val beregnOmstillingsstoenadService = mockk<BeregnOmstillingsstoenadService>()
     private val beregningsGrunnlagService = mockk<BeregningsGrunnlagService>()
+    private val trygdetidKlient = mockk<TrygdetidKlient>()
     private val beregningService: BeregningService = BeregningService(
         beregningRepository = beregningRepository,
         behandlingKlient = behandlingKlient,
         beregnBarnepensjonService = beregnBarnepensjonService,
         beregnOmstillingsstoenadService = beregnOmstillingsstoenadService,
-        beregningsGrunnlagService = beregningsGrunnlagService
+        beregningsGrunnlagService = beregningsGrunnlagService,
+        trygdetidKlient = trygdetidKlient
     )
 
     @Test

@@ -16,7 +16,7 @@ class KafkaConsumerEgneAnsatte(
     private val closed: AtomicBoolean,
     kafkaEnvironment: KafkaConsumerConfiguration = KafkaEnvironment(),
     private var pollTimeoutInSeconds: Duration = Duration.ofSeconds(10L)
-) {
+) : Kafkakonsument {
     private val logger = LoggerFactory.getLogger(this.javaClass.name)
     private val kafkaProperties: Properties = kafkaEnvironment.generateKafkaConsumerProperties(env)
     private val skjermingTopic: String = env.requireEnvValue("SKJERMING_TOPIC")
@@ -26,7 +26,7 @@ class KafkaConsumerEgneAnsatte(
     fun getConsumer() = consumer
     fun getAntallMeldinger() = antallMeldinger
 
-    fun stream() {
+    override fun stream() {
         try {
             logger.info("Starter KafkaConsumerEgneAnsatte")
             consumer.subscribe(listOf(skjermingTopic))

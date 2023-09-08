@@ -288,7 +288,10 @@ class GrunnlagsendringshendelseDao(val connection: () -> Connection) {
     }
 }
 
-inline fun <reified T> PreparedStatement.setJsonb(parameterIndex: Int, jsonb: T): PreparedStatement {
+inline fun <reified T : Any> PreparedStatement.setJsonb(parameterIndex: Int, jsonb: T?): PreparedStatement {
+    if (jsonb == null) {
+        this.setNull(parameterIndex, java.sql.Types.NULL)
+    }
     val jsonObject = PGobject()
     jsonObject.type = "json"
     jsonObject.value = objectMapper.writeValueAsString(jsonb)

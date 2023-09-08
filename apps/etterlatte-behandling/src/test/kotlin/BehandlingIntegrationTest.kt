@@ -23,6 +23,7 @@ import no.nav.etterlatte.behandling.klienter.Norg2Klient
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.config.ApplicationContext
 import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.kafka.TestProdusent
 import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.common.behandling.PersonMedSakerOgRoller
@@ -62,7 +63,10 @@ abstract class BehandlingIntegrationTest {
     protected lateinit var applicationContext: ApplicationContext
     protected lateinit var hoconApplicationConfig: HoconApplicationConfig
 
-    protected fun startServer(norg2Klient: Norg2Klient? = null) {
+    protected fun startServer(
+        norg2Klient: Norg2Klient? = null,
+        featureToggleService: FeatureToggleService = DummyFeatureToggleService()
+    ) {
         server.start()
 
         val httpServer = server.config.httpServer
@@ -82,10 +86,10 @@ abstract class BehandlingIntegrationTest {
                 put("AZUREAD_ATTESTANT_GROUPID", azureAdAttestantClaim)
                 put("AZUREAD_SAKSBEHANDLER_GROUPID", azureAdSaksbehandlerClaim)
                 put("AZUREAD_STRENGT_FORTROLIG_GROUPID", azureAdStrengtFortroligClaim)
+                put("AZUREAD_EGEN_ANSATT_GROUPID", azureAdEgenAnsattClaim)
                 put("AZUREAD_FORTROLIG_GROUPID", "ea930b6b-9397-44d9-b9e6-f4cf527a632a")
                 put("AZUREAD_NASJONAL_TILGANG_UTEN_LOGG_GROUPID", "753805ea-65a7-4855-bdc3-e6130348df9f")
                 put("AZUREAD_NASJONAL_TILGANG_MED_LOGG_GROUPID", "ea7411eb-8b48-41a0-bc56-7b521fbf0c25")
-                put("AZUREAD_EGEN_ANSATT_GROUPID", "1")
                 put("HENDELSE_JOB_FREKVENS", "1")
                 put("HENDELSE_MINUTTER_GAMLE_HENDELSER", "1")
                 put("NORG2_URL", "http://localhost")
@@ -102,7 +106,7 @@ abstract class BehandlingIntegrationTest {
                 )
             ),
             rapid = TestProdusent(),
-            featureToggleService = DummyFeatureToggleService(),
+            featureToggleService = featureToggleService,
             pdlHttpClient = pdlHttpClient(),
             skjermingHttpKlient = skjermingHttpClient(),
             grunnlagHttpClient = grunnlagHttpClient(),
@@ -260,6 +264,10 @@ abstract class BehandlingIntegrationTest {
         "63f46f74-84a8-4d1c-87a8-78532ab3ae60"
     }
 
+    private val azureAdEgenAnsattClaim: String by lazy {
+        "dbe4ad45-320b-4e9a-aaa1-73cca4ee124d"
+    }
+
     protected fun HttpRequestBuilder.addAuthToken(token: String) {
         header(HttpHeaders.Authorization, "Bearer $token")
     }
@@ -316,6 +324,20 @@ abstract class BehandlingIntegrationTest {
                     azureAdAttestantClaim,
                     azureAdSaksbehandlerClaim,
                     azureAdStrengtFortroligClaim
+                )
+            )
+        )
+    }
+
+    protected val tokenSaksbehandlerMedEgenAnsattTilgang: String by lazy {
+        issueToken(
+            mapOf(
+                "navn" to "John Doe",
+                Claims.NAVident.toString() to "saksbehandlerskjermet",
+                "groups" to listOf(
+                    azureAdSaksbehandlerClaim,
+                    azureAdEgenAnsattClaim,
+                    azureAdAttestantClaim
                 )
             )
         )

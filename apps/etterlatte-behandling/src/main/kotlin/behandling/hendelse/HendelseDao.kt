@@ -2,6 +2,7 @@ package no.nav.etterlatte.behandling.hendelse
 
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.BehandlingOpprettet
+import no.nav.etterlatte.libs.common.behandling.KlageHendelseType
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunktOrNull
@@ -50,6 +51,28 @@ class HendelseDao(private val connection: () -> Connection) {
             null,
             null,
             null
+        )
+    )
+
+    fun klageHendelse(
+        klageId: UUID,
+        sakId: Long,
+        hendelse: KlageHendelseType,
+        inntruffet: Tidspunkt,
+        saksbehandler: String?,
+        kommentar: String?,
+        begrunnelse: String?
+    ) = lagreHendelse(
+        UlagretHendelse(
+            hendelse = "KLAGE:${hendelse.name}",
+            inntruffet = inntruffet,
+            vedtakId = null,
+            behandlingId = klageId,
+            sakId = sakId,
+            ident = saksbehandler,
+            identType = "SAKSBEHANDLER".takeIf { saksbehandler != null },
+            kommentar = kommentar,
+            valgtBegrunnelse = begrunnelse
         )
     )
 

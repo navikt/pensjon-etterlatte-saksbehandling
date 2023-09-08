@@ -90,7 +90,8 @@ enum class OppgaveType {
     ATTESTERING,
     UNDERKJENT,
     GOSYS,
-    UTLAND
+    UTLAND,
+    KLAGE
 }
 
 data class SaksbehandlerEndringDto(

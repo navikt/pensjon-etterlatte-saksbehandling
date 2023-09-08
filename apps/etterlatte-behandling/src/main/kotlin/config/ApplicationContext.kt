@@ -12,6 +12,8 @@ import no.nav.etterlatte.behandling.EnhetServiceImpl
 import no.nav.etterlatte.behandling.GrunnlagService
 import no.nav.etterlatte.behandling.GyldighetsproevingServiceImpl
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
+import no.nav.etterlatte.behandling.klage.KlageDaoImpl
+import no.nav.etterlatte.behandling.klage.KlageServiceImpl
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlientObo
 import no.nav.etterlatte.behandling.klienter.NavAnsattKlient
@@ -135,6 +137,7 @@ class ApplicationContext(
     val grunnlagsendringshendelseDao = GrunnlagsendringshendelseDao { databaseContext().activeTx() }
     val institusjonsoppholdDao = InstitusjonsoppholdDao { databaseContext().activeTx() }
     val metrikkerDao = OppgaveMetrikkerDao(dataSource)
+    val klageDao = KlageDaoImpl { databaseContext().activeTx() }
 
     // Klient
     val pdlKlient = PdlKlientImpl(config, pdlHttpClient)
@@ -249,6 +252,13 @@ class ApplicationContext(
         kommerBarnetTilGodeService = kommerBarnetTilGodeService,
         behandlingsHendelser = behandlingsHendelser,
         behandlingService = behandlingService,
+        oppgaveServiceNy = oppgaveServiceNy
+    )
+
+    val klageService = KlageServiceImpl(
+        klageDao = klageDao,
+        sakDao = sakDao,
+        hendelseDao = hendelseDao,
         oppgaveServiceNy = oppgaveServiceNy
     )
 

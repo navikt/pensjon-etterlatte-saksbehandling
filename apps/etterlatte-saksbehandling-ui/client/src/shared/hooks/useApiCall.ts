@@ -79,3 +79,10 @@ export const mapApiResult = <T>(
   }
   throw new Error(`Unknown state of result: ${JSON.stringify(result)}`)
 }
+
+export const mapSuccess = <T, R>(result: Result<T>, mapSuccess: (success: T) => R): R | null => {
+  if (isSuccess(result)) {
+    return mapSuccess(result.data)
+  }
+  return null
+}

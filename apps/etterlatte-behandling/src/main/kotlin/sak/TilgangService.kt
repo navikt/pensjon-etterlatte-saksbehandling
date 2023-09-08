@@ -9,6 +9,7 @@ interface TilgangService {
     fun harTilgangTilSak(sakId: Long, saksbehandlerMedRoller: SaksbehandlerMedRoller): Boolean
     fun harTilgangTilPerson(fnr: String, saksbehandlerMedRoller: SaksbehandlerMedRoller): Boolean
     fun harTilgangTilOppgave(oppgaveId: String, saksbehandlerMedRoller: SaksbehandlerMedRoller): Boolean
+    fun harTilgangTilKlage(klageId: String, saksbehandlerMedRoller: SaksbehandlerMedRoller): Boolean
 }
 
 data class SakMedGraderingOgSkjermet(
@@ -38,6 +39,11 @@ class TilgangServiceImpl(
 
     override fun harTilgangTilOppgave(oppgaveId: String, saksbehandlerMedRoller: SaksbehandlerMedRoller): Boolean {
         val sakMedGraderingOgSkjermet = dao.hentSakMedGraderingOgSkjermingPaaOppgave(oppgaveId) ?: return true
+        return harTilgangSjekker(sakMedGraderingOgSkjermet, saksbehandlerMedRoller)
+    }
+
+    override fun harTilgangTilKlage(klageId: String, saksbehandlerMedRoller: SaksbehandlerMedRoller): Boolean {
+        val sakMedGraderingOgSkjermet = dao.hentSakMedGraderingOgSkjermingPaaKlage(klageId) ?: return true
         return harTilgangSjekker(sakMedGraderingOgSkjermet, saksbehandlerMedRoller)
     }
 

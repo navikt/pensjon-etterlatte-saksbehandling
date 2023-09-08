@@ -15,7 +15,7 @@ import io.ktor.serialization.jackson.JacksonConverter
 import io.mockk.spyk
 import io.mockk.verify
 import no.nav.common.KafkaEnvironment
-import no.nav.etterlatte.hendelserpdl.common.KafkaKonsument
+import no.nav.etterlatte.hendelserpdl.common.PersonhendelseKonsument
 import no.nav.etterlatte.hendelserpdl.config.KafkaConsumerConfiguration
 import no.nav.etterlatte.hendelserpdl.pdl.PdlKlient
 import no.nav.etterlatte.kafka.LocalKafkaConfig
@@ -66,10 +66,11 @@ class IntegrationTest {
         )
 
         val personHendelseFordeler = PersonHendelseFordeler(rapidsKafkaProducer, pdlKlient)
-        val kafkaKonsument = KafkaKonsument<Personhendelse>(
+        val personhendelseKonsument = PersonhendelseKonsument(
             LEESAH_TOPIC_PERSON,
-            KafkaConsumerEnvironmentTest().generateKafkaConsumerProperties(env)
-        ) { personHendelseFordeler.haandterHendelse(it) }
+            KafkaConsumerEnvironmentTest().generateKafkaConsumerProperties(env),
+            personHendelseFordeler
+        )
 
         val personHendelse = Personhendelse().apply {
             hendelseId = "1"
@@ -96,7 +97,7 @@ class IntegrationTest {
 
         leesahKafkaProducer.send(ProducerRecord(LEESAH_TOPIC_PERSON, 1, "key", personHendelse))
 
-        lesHendelserFraLeesah(kafkaKonsument)
+        lesHendelserFraLeesah(personhendelseKonsument)
 
         verify(exactly = 1, timeout = 5000) {
             rapidsKafkaProducer.publiser(

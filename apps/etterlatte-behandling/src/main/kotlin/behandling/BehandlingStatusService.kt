@@ -121,7 +121,7 @@ class BehandlingStatusServiceImpl(
                 )
                 val saksbehandlerFoerstegangsbehandling =
                     oppgaveServiceNy.hentSaksbehandlerFraFoerstegangsbehandling(behandlingsId = behandling.id)
-                if (saksbehandlerFoerstegangsbehandling !== null) {
+                if (saksbehandlerFoerstegangsbehandling != null) {
                     oppgaveServiceNy.tildelSaksbehandler(oppgaveUtland.id, saksbehandlerFoerstegangsbehandling)
                 } else {
                     logger.error("Fant ingen saksbehandler for behandling oppgave fatting, id: ${behandling.id}")

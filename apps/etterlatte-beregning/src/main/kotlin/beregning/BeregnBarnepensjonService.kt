@@ -63,9 +63,9 @@ class BeregnBarnepensjonService(
 ) {
     private val logger = LoggerFactory.getLogger(BeregnBarnepensjonService::class.java)
 
-    init {
-        val nyttRegelverkAktivert = featureToggleService.isEnabled(BrukNyttRegelverkIBeregning, false)
+    private val nyttRegelverkAktivert = featureToggleService.isEnabled(BrukNyttRegelverkIBeregning, false)
 
+    init {
         aktuelleBarnepensjonSatsRegler.clear()
         aktuelleBarnepensjonSatsRegler.add(barnepensjonSatsRegel1967)
         if (nyttRegelverkAktivert) {
@@ -97,7 +97,7 @@ class BeregnBarnepensjonService(
             trygdetid.hvisKanBrukes(),
             virkningstidspunkt.atDay(1),
             null,
-            featureToggleService.isEnabled(BrukNyttRegelverkIBeregning, false)
+            nyttRegelverkAktivert
         )
 
         logger.info("Beregner barnepensjon for behandlingId=${behandling.id} med behandlingType=$behandlingType")

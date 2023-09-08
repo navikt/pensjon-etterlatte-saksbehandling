@@ -165,7 +165,7 @@ internal class BarnepensjonSatsTest {
     }
 
     @Test
-    fun `barnepensjonSatsRegel skal returnere 3123716,00 kroner etter nytt regelverk`() {
+    fun `barnepensjonSatsRegel skal returnere grunnbeloep per maned etter nytt regelverk`() {
         val resultat = barnepensjonSatsRegel.anvend(
             grunnlag = barnepensjonGrunnlag(),
             periode = RegelPeriode(LocalDate.of(2024, 1, 1))

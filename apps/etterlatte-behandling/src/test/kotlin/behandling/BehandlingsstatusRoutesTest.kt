@@ -49,7 +49,7 @@ internal class BehandlingsstatusRoutesTest {
         val httpServer = server.config.httpServer
         hoconApplicationConfig = buildTestApplicationConfigurationForOauth(httpServer.port(), AZURE_ISSUER, CLIENT_ID)
 
-        val azureAdGroupIds = mapOf<AzureGroup, String>(
+        val azureAdGroupIds = mapOf(
             Pair(AzureGroup.ATTESTANT, azureAdAttestantClaim),
             Pair(AzureGroup.SAKSBEHANDLER, azureAdSaksbehandlerClaim)
         )

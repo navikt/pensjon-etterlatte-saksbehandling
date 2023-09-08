@@ -241,14 +241,18 @@ class VedtaksvurderingService(
         return repository.hentVedtak(behandlingId)!!
     }
 
-    fun iverksattVedtak(behandlingId: UUID): Vedtak {
+    suspend fun iverksattVedtak(behandlingId: UUID, brukerTokenInfo: BrukerTokenInfo): Vedtak {
         logger.info("Setter vedtak til iverksatt for behandling med behandlingId=$behandlingId")
         val vedtak = hentVedtakNonNull(behandlingId)
 
-        // TODO trenger vi sjekk mot behandling her?
         verifiserGyldigVedtakStatus(vedtak.status, listOf(VedtakStatus.ATTESTERT))
-
-        val iverksattVedtak = repository.iverksattVedtak(behandlingId)
+        val iverksattVedtak = repository.inTransaction { tx ->
+            val iverksattVedtakLocal = repository.iverksattVedtak(behandlingId)
+            runBlocking {
+                settBehandlingTilIverksatt(behandlingId, brukerTokenInfo, iverksattVedtakLocal.id)
+            }
+            iverksattVedtakLocal
+        }
 
         sendToRapid(
             lagRiverMelding(
@@ -460,7 +464,7 @@ class VedtaksvurderingService(
     fun tilbakestillIkkeIverksatteVedtak(behandlingId: UUID): Vedtak? =
         repository.tilbakestillIkkeIverksatteVedtak(behandlingId)
 
-    suspend fun postTilBehandling(behandlingId: UUID, brukerTokenInfo: BrukerTokenInfo, vedtakId: Long) =
+    suspend fun settBehandlingTilIverksatt(behandlingId: UUID, brukerTokenInfo: BrukerTokenInfo, vedtakId: Long) =
         behandlingKlient.iverksett(behandlingId, brukerTokenInfo, vedtakId)
 
     fun hentNyesteBehandlingMedResultat(sakId: Long, resultat: VedtakType) = repository.hentVedtakForSak(sakId)

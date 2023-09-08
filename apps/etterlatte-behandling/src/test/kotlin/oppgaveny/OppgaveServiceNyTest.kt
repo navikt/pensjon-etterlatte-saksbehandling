@@ -747,7 +747,7 @@ class OppgaveServiceNyTest {
         )
         oppgaveServiceNy.tildelSaksbehandler(oppgaveSomSkalBliAvbrutt.id, "saksbehandler01")
 
-        oppgaveServiceNy.opprettFoerstegangsbehandlingsOppgaveForInnsendSoeknad(behandlingsref, opprettetSak.id)
+        oppgaveServiceNy.opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(behandlingsref, opprettetSak.id)
 
         val alleOppgaver = oppgaveDaoNy.hentOppgaverForBehandling(behandlingsref)
         Assertions.assertEquals(2, alleOppgaver.size)

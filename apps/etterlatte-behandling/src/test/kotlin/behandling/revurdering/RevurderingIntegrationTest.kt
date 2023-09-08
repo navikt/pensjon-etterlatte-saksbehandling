@@ -460,7 +460,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
                 )
             }
             verify {
-                oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendSoeknad(
+                oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(
                     behandling!!.id.toString(),
                     sak.id
                 )

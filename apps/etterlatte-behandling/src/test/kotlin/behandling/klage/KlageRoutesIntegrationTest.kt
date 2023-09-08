@@ -53,7 +53,7 @@ class KlageRoutesIntegrationTest : BehandlingIntegrationTest() {
     }
 
     @Test
-    fun `henting av klage gir 404 hvis saksbehandler ikke har tilgang til saken klagen er på`() {
+    fun `opprettelse av klage går bra og henting gir 404 etter at saken blir skjermet`() {
         withTestApplication { client ->
             val fnr = Folkeregisteridentifikator.of("08071272487").value
             val sak: Sak = client.post("/personer/saker/${SakType.BARNEPENSJON}") {
@@ -63,7 +63,6 @@ class KlageRoutesIntegrationTest : BehandlingIntegrationTest() {
             }.apply {
                 assertEquals(HttpStatusCode.OK, status)
             }.body()
-            Enheter.STRENGT_FORTROLIG
 
             val klage: Klage = client.post("/api/klage/opprett/${sak.id}") {
                 addAuthToken(tokenSaksbehandler)
@@ -91,7 +90,7 @@ class KlageRoutesIntegrationTest : BehandlingIntegrationTest() {
     }
 
     @Test
-    fun `henting av klage feiler ikke når saksbehandler har tilgang til saken klagen er på`() {
+    fun `opprettelse av klage går bra og henting gjør tilgangskontroll når saken får adressebeskyttelse`() {
         withTestApplication { client ->
             val fnr = Folkeregisteridentifikator.of("08071272487").value
             val sak: Sak = client.post("/personer/saker/${SakType.BARNEPENSJON}") {

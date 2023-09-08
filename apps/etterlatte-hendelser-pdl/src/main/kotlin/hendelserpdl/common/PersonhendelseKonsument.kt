@@ -28,7 +28,7 @@ class PersonhendelseKonsument(
         Runtime.getRuntime().addShutdownHook(
             Thread {
                 closed.set(true)
-                consumer.wakeup(); // trådsikker, aborter konsumer fra polling
+                consumer.wakeup(); // trådsikker, avbryter konsumer fra polling
             }
         )
     }

@@ -81,7 +81,7 @@ fun startInstitusjonsoppholdLytter(env: Map<String, String>, config: Config) {
                     Thread {
                         closed.set(true)
                         kafkaConsumerInstitusjonsopphold.consumer.wakeup()
-                        // trådsikker, aborterer konsumer fra polling
+                        // trådsikker, avbryter konsumer fra polling
                     }
                 )
 

@@ -76,6 +76,9 @@ fun Grunnlagsdata<JsonNode>.hentUtenlandsopphold() =
 fun Grunnlagsdata<JsonNode>.hentUtenlandsadresse() =
     this.hentKonstantOpplysning<Utenlandsadresse>(UTENLANDSADRESSE)
 
+// TODO:
+//  Dette er duplikat av mottatt dato i behandling.
+//  Vi burde avgjøre hvilken som skal være "master" og fjerne den andre.
 fun Grunnlagsdata<JsonNode>.hentSoeknadMottattDato() =
     this.hentKonstantOpplysning<Map<String, LocalDateTime>>(SOEKNAD_MOTTATT_DATO)
 

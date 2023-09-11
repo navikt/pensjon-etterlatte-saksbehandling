@@ -1,4 +1,5 @@
 import { behandlingReducer } from './reducers/BehandlingReducer'
+import { nyBehandlingReducer } from './reducers/NyBehandlingReducer'
 import { menuReducer } from './reducers/MenuReducer'
 import { saksbehandlerReducer } from './reducers/SaksbehandlerReducer'
 import { configureStore } from '@reduxjs/toolkit'
@@ -13,6 +14,7 @@ const reducer = {
   behandlingReducer: behandlingReducer,
   appReducer: appReducer,
   klageReducer: klageReducer,
+  nyBehandlingReducer: nyBehandlingReducer,
 }
 export const store = configureStore({
   reducer,

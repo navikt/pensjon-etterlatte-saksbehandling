@@ -14,6 +14,7 @@ import { OppgavelistaContainer } from '~components/nyoppgavebenk/ToggleNyOppgave
 import { isFailure, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
 import { useEffect } from 'react'
 import { ConfigContext, hentClientConfig } from '~clientConfig'
+import Oppgavebehandling from '~components/person/oppgavebehandling/Oppgavebehandling'
 import { useAppDispatch } from '~store/Store'
 import { settAppversion } from '~store/reducers/AppconfigReducer'
 import Versioncheck from '~Versioncheck'
@@ -54,6 +55,7 @@ function App() {
                 />
                 <Route path="/oppgavebenken" element={<OppgavelistaContainer />} />
                 <Route path="/person/:fnr" element={<Person />} />
+                <Route path="/oppgave/:id/*" element={<Oppgavebehandling />} />
                 <Route path="/person/:fnr/sak/:sakId/brev" element={<BrevOversikt />} />
                 <Route path="/person/:fnr/sak/:sakId/brev/:brevId" element={<NyttBrev />} />
                 <Route path="/behandling/:behandlingId/*" element={<Behandling />} />

@@ -1,5 +1,6 @@
 package no.nav.etterlatte.oppgave
 
+import com.github.benmanes.caffeine.cache.Caffeine
 import no.nav.etterlatte.common.klienter.PdlKlient
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
@@ -8,10 +9,12 @@ import no.nav.etterlatte.libs.common.oppgaveNy.GosysOppgave
 import no.nav.etterlatte.libs.common.oppgaveNy.Status
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.token.BrukerTokenInfo
+import java.time.Duration
 import java.time.LocalTime
 
 interface GosysOppgaveService {
     suspend fun hentOppgaver(brukerTokenInfo: BrukerTokenInfo): List<GosysOppgave>
+    suspend fun hentOppgave(id: Long, brukerTokenInfo: BrukerTokenInfo): GosysOppgave?
     suspend fun tildelOppgaveTilSaksbehandler(
         oppgaveId: String,
         oppgaveVersjon: Long,
@@ -30,8 +33,12 @@ class GosysOppgaveServiceImpl(
     private val gosysOppgaveKlient: GosysOppgaveKlient,
     private val pdlKlient: PdlKlient,
     private val featureToggleService: FeatureToggleService
-) :
-    GosysOppgaveService {
+) : GosysOppgaveService {
+
+    private val cache = Caffeine.newBuilder()
+        .expireAfterWrite(Duration.ofMinutes(5))
+        .build<Long, GosysOppgave>()
+
     override suspend fun hentOppgaver(brukerTokenInfo: BrukerTokenInfo): List<GosysOppgave> {
         if (!featureToggleService.isEnabled(GosysOppgaveServiceFeatureToggle.HentGosysOppgaver, false)) {
             return emptyList()
@@ -45,11 +52,17 @@ class GosysOppgaveServiceImpl(
         val fnrByAktoerId = if (gosysOppgaver.oppgaver.isEmpty()) {
             emptyMap<String, String>()
         } else {
-            val aktoerIds = gosysOppgaver.oppgaver.map { it.aktoerId }.toSet()
+            val aktoerIds = gosysOppgaver.oppgaver.mapNotNull { it.aktoerId }.toSet()
             pdlKlient.hentFolkeregisterIdenterForAktoerIdBolk(aktoerIds)
         }
 
         return gosysOppgaver.oppgaver.map { it.fraGosysOppgaveTilNy(fnrByAktoerId) }
+    }
+
+    override suspend fun hentOppgave(id: Long, brukerTokenInfo: BrukerTokenInfo): GosysOppgave? {
+        return cache.getIfPresent(id) ?: gosysOppgaveKlient.hentOppgave(id, brukerTokenInfo)?.let {
+            it.fraGosysOppgaveTilNy(pdlKlient.hentFolkeregisterIdenterForAktoerIdBolk(setOf(it.aktoerId!!)))
+        }.also { cache.put(id, it) }
     }
 
     override suspend fun tildelOppgaveTilSaksbehandler(
@@ -72,6 +85,7 @@ class GosysOppgaveServiceImpl(
 
     companion object {
         private val temaTilSakType = mapOf(
+            "PEN" to SakType.BARNEPENSJON,
             "EYB" to SakType.BARNEPENSJON,
             "EYO" to SakType.OMSTILLINGSSTOENAD
         )

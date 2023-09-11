@@ -1,7 +1,7 @@
 import { IHendelse } from '~shared/types/IHendelse'
 import { JaNei } from '~shared/types/ISvar'
 import { KildeSaksbehandler } from '~shared/types/kilde'
-import { IFamilieforhold, IPdlPerson } from '~shared/types/Person'
+import { IFamilieforhold, IPdlPerson, Persongalleri } from '~shared/types/Person'
 import { VurderingsResultat } from '~shared/types/VurderingsResultat'
 import { Revurderingsaarsak } from '~shared/types/Revurderingsaarsak'
 import { SakType } from '~shared/types/sak'
@@ -24,7 +24,14 @@ export interface IDetaljertBehandling {
   søker?: IPdlPerson
   revurderingsaarsak: Revurderingsaarsak | null
   revurderinginfo: RevurderingMedBegrunnelse | null
-  begrunnelse: String | null
+  begrunnelse: string | null
+}
+
+export interface NyBehandlingRequest {
+  sakType?: SakType
+  persongalleri?: Persongalleri
+  mottattDato?: string
+  spraak?: string
 }
 
 export enum IBehandlingsType {

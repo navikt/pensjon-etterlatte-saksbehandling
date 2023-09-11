@@ -40,6 +40,12 @@ export const InfoWrapper = styled.div`
   gap: 20px;
 `
 
+export const InfoList = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+`
+
 export const InfoElement = styled.div`
   width: 15em;
 `

@@ -48,6 +48,13 @@ internal fun Route.behandlingRoutes(
     behandlingFactory: BehandlingFactory
 ) {
     val logger = application.log
+
+    post("/api/behandling") {
+        val request = call.receive<NyBehandlingRequest>()
+        val behandling = behandlingFactory.opprettBehandling(request)
+        call.respondText(behandling.id.toString())
+    }
+
     route("/api/behandling/{$BEHANDLINGSID_CALL_PARAMETER}/") {
         get {
             val detaljertBehandlingDTO =
@@ -229,7 +236,7 @@ internal fun Route.behandlingRoutes(
 
                 when (
                     val behandling = behandlingFactory.opprettBehandling(
-                        behandlingsBehov.sak,
+                        behandlingsBehov.sakId,
                         behandlingsBehov.persongalleri,
                         behandlingsBehov.mottattDato,
                         Vedtaksloesning.GJENNY

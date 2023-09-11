@@ -98,14 +98,21 @@ export const GosysOppgaveModal = ({ oppgave }: { oppgave: OppgaveDTOny }) => {
             <Button variant="tertiary" onClick={() => setOpen(false)}>
               Avbryt
             </Button>
-            <Button
-              variant="primary"
-              as="a"
-              href={`${configContext['gosysUrl']}/personoversikt/fnr=${fnr}`}
-              target="_blank"
-            >
-              Åpne og rediger i Gosys
-            </Button>
+            {/*  TODO: Må sikre at vi får en egen oppgavetype e.l. vi kan sjekke på i stedet */}
+            {oppgave.beskrivelse?.toLowerCase()?.includes('journalfør') ? (
+              <Button variant="primary" as="a" href={`/oppgave/${oppgave.id}`}>
+                Opprett behandling
+              </Button>
+            ) : (
+              <Button
+                variant="primary"
+                as="a"
+                href={`${configContext['gosysUrl']}/personoversikt/fnr=${fnr}`}
+                target="_blank"
+              >
+                Åpne og rediger i Gosys
+              </Button>
+            )}
           </ButtonRow>
         </Modal.Body>
       </Modal>

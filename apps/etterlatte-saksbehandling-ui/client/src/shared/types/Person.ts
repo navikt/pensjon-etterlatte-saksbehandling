@@ -72,3 +72,11 @@ export enum PersonRolle {
 export function formaterNavn(person: IPdlPerson): string {
   return [person.fornavn, person.mellomnavn, person.etternavn].join(' ')
 }
+
+export interface Persongalleri {
+  soeker?: string
+  innsender?: string
+  soesken?: string[]
+  avdoed?: string[]
+  gjenlevende?: string[]
+}

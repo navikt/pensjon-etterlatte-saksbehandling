@@ -19,6 +19,7 @@ import no.nav.etterlatte.behandling.BehandlingHendelserKafkaProducer
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.BehandlingServiceFeatureToggle
 import no.nav.etterlatte.behandling.GrunnlagService
+import no.nav.etterlatte.behandling.GyldighetsproevingService
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.domain.OpprettBehandling
 import no.nav.etterlatte.behandling.domain.Revurdering
@@ -46,6 +47,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.oppgaveny.OppgaveServiceNy
 import no.nav.etterlatte.revurdering
+import no.nav.etterlatte.sak.RealSakService
 import no.nav.etterlatte.sak.SakDao
 import no.nav.etterlatte.sak.SakServiceFeatureToggle
 import org.junit.jupiter.api.AfterEach
@@ -91,11 +93,14 @@ class BehandlingFactoryTest {
         revurderingDao,
         behandlingService
     )
+    private val sakService = RealSakService(sakDaoMock, mockk(), mockk(), featureToggleService, mockk(), mockk())
+    private val gyldighetsproevingService = mockk<GyldighetsproevingService>()
     private val behandlingFactory = BehandlingFactory(
         oppgaveService,
         grunnlagService,
         revurderingService,
-        sakDaoMock,
+        gyldighetsproevingService,
+        sakService,
         behandlingDaoMock,
         hendelseDaoMock,
         behandlingHendelserKafkaProducerMock,

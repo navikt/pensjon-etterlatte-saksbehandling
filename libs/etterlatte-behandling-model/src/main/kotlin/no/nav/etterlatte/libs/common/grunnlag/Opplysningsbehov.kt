@@ -1,4 +1,4 @@
-package no.nav.etterlatte.libs.common.opplysningsbehov
+package no.nav.etterlatte.libs.common.grunnlag
 
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType

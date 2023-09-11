@@ -55,7 +55,7 @@ function mapFormkrav(krav: FilledFormData, vedtakIKlagen: Array<VedtaketKlagenGj
   if (krav.vedtaketKlagenGjelderId !== '-1') {
     const vedtak = vedtakIKlagen.find((v) => v.id === krav.vedtaketKlagenGjelderId)
 
-    // Vurder en mer kritisk feil her? Og ikke bar anta at de har valgt et tomt vedtak
+    // Vurder en mer kritisk feil her? Og ikke bare anta at de har valgt et tomt vedtak
     return { ...krav, vedtaketKlagenGjelder: vedtak ?? null }
   }
   return { ...krav, vedtaketKlagenGjelder: null }
@@ -85,7 +85,6 @@ export function KlageFormkrav() {
       return
     }
     if (!isValidFormkrav(krav)) {
-      // vis en feilmelding?
       return
     }
 
@@ -132,7 +131,7 @@ export function KlageFormkrav() {
         <Innhold>
           {/* Det er litt spesiell håndtering av akkurat hvilket vedtak klagen ligger på, relatert til hvordan React
             tolker controlled vs uncontrolled components. For å kunne håndtere både 1. Ikke valgt vedtak og 2. Valgt
-            at det ikke er noe vedtak, tolkes null | undefined som 1), og vedtakId === -1 som 2). Alle andre vedtakId
+            at det ikke er noe vedtak, tolkes null | undefined som 1), og vedtakId === "-1" som 2). Alle andre vedtakId
             tolkes som id'en til det vedtaket.*/}
           <VurderingWrapper>
             <Controller

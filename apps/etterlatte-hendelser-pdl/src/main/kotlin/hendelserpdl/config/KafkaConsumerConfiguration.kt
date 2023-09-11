@@ -18,6 +18,14 @@ interface KafkaConsumerConfiguration {
 
 class KafkaEnvironment : KafkaConsumerConfiguration {
     override fun generateKafkaConsumerProperties(env: Map<String, String>): Properties {
+        val groupId = "LEESAH_KAFKA_GROUP_ID"
+        val deserializerClass = KafkaAvroDeserializer::class.java
+        val extra: (props: Properties) -> Any? = {
+            it.put(
+                ConsumerConfig.ISOLATION_LEVEL_CONFIG,
+                IsolationLevel.READ_COMMITTED.toString().lowercase(Locale.getDefault())
+            )
+        }
         val properties = Properties().apply {
             put(CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG, env["KAFKA_BROKERS"])
             put(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, SecurityProtocol.SSL.name)
@@ -32,7 +40,7 @@ class KafkaEnvironment : KafkaConsumerConfiguration {
             put(SslConfigs.SSL_KEY_PASSWORD_CONFIG, env["KAFKA_CREDSTORE_PASSWORD"])
             // Nais doc: Password needed to use the keystore and truststore
 
-            put(ConsumerConfig.GROUP_ID_CONFIG, env["LEESAH_KAFKA_GROUP_ID"])
+            put(ConsumerConfig.GROUP_ID_CONFIG, env[groupId])
             put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, 100)
             put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false)
             put(ConsumerConfig.CLIENT_ID_CONFIG, env["NAIS_APP_NAME"])
@@ -41,7 +49,7 @@ class KafkaEnvironment : KafkaConsumerConfiguration {
             put(CommonClientConfigs.SESSION_TIMEOUT_MS_CONFIG, Duration.ofSeconds(20L).toMillis().toInt())
 
             put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer::class.java)
-            put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, KafkaAvroDeserializer::class.java)
+            put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, deserializerClass)
 
             put(KafkaAvroDeserializerConfig.SPECIFIC_AVRO_READER_CONFIG, true)
             put(AbstractKafkaSchemaSerDeConfig.BASIC_AUTH_CREDENTIALS_SOURCE, "USER_INFO")
@@ -55,10 +63,7 @@ class KafkaEnvironment : KafkaConsumerConfiguration {
                 "schema.registry.basic.auth.user.info",
                 "${env["KAFKA_SCHEMA_REGISTRY_USER"]}:${env["KAFKA_SCHEMA_REGISTRY_PASSWORD"]}"
             )
-            put(
-                ConsumerConfig.ISOLATION_LEVEL_CONFIG,
-                IsolationLevel.READ_COMMITTED.toString().lowercase(Locale.getDefault())
-            )
+            extra(this)
         }
         return properties
     }

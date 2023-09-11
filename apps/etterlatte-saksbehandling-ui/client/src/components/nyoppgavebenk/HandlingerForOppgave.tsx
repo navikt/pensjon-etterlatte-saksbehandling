@@ -63,6 +63,12 @@ export const HandlingerForOppgave = ({ oppgave }: { oppgave: OppgaveDTOny }) => 
         )
       case 'GOSYS':
         return <GosysOppgaveModal oppgave={oppgave} />
+      case 'KLAGE':
+        return erInnloggetSaksbehandlerOppgave ? (
+          <Button size="small" href={`/klage/${referanse}`} as="a">
+            Gå til klage
+          </Button>
+        ) : null
       default:
         return null
     }

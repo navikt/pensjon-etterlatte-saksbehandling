@@ -17,12 +17,15 @@ import { ConfigContext, hentClientConfig } from '~clientConfig'
 import { useAppDispatch } from '~store/Store'
 import { settAppversion } from '~store/reducers/AppconfigReducer'
 import Versioncheck from '~Versioncheck'
+import { Klagebehandling } from '~components/klage/Klagebehandling'
+import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
+import { FEATURE_TOGGLE_KAN_BRUKE_KLAGE } from '~components/person/OpprettKlage'
 
 function App() {
   const innloggetbrukerHentet = useInnloggetSaksbehandler()
   registerLocale('nb', nb)
   const dispatch = useAppDispatch()
-
+  const kanBrukeKlage = useFeatureEnabledMedDefault(FEATURE_TOGGLE_KAN_BRUKE_KLAGE)
   const [hentConfigStatus, hentConfig] = useApiCall(hentClientConfig)
 
   useEffect(() => {
@@ -54,6 +57,7 @@ function App() {
                 <Route path="/person/:fnr/sak/:sakId/brev" element={<BrevOversikt />} />
                 <Route path="/person/:fnr/sak/:sakId/brev/:brevId" element={<NyttBrev />} />
                 <Route path="/behandling/:behandlingId/*" element={<Behandling />} />
+                {kanBrukeKlage ? <Route path="/klage/:klageId/*" element={<Klagebehandling />} /> : null}
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>
             </ErrorBoundary>

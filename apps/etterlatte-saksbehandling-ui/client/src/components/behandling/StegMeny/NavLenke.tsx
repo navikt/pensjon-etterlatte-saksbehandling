@@ -41,6 +41,6 @@ export const NavLenke = (props: { pathInfo: BehandlingRouteTypes; behandling: IB
   )
 }
 
-const Separator = styled(ChevronRightIcon)`
+export const Separator = styled(ChevronRightIcon)`
   vertical-align: middle;
 `

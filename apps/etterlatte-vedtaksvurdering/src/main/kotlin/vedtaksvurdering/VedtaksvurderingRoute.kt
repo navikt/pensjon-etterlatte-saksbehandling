@@ -30,6 +30,14 @@ fun Route.vedtaksvurderingRoute(service: VedtaksvurderingService, behandlingKlie
     route("/api/vedtak") {
         val logger = application.log
 
+        get("/sak/{${SAKID_CALL_PARAMETER}}/iverksatte") {
+            withSakId(behandlingKlient) { sakId ->
+                logger.info("Henter iverksatte vedtak for sak $sakId")
+                val iverksatteVedtak = service.hentIverksatteVedtakISak(sakId)
+                call.respond(iverksatteVedtak.map { it.toVedtakSammendragDto() })
+            }
+        }
+
         get("/{$BEHANDLINGSID_CALL_PARAMETER}") {
             withBehandlingId(behandlingKlient) { behandlingId ->
                 logger.info("Henter vedtak for behandling $behandlingId")

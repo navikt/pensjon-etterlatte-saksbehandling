@@ -15,5 +15,5 @@ export function hentKlagerISak(sakId: number): Promise<ApiResponse<Array<Klage>>
 
 export function oppdaterFormkravIKlage(args: { klageId: string; formkrav: Formkrav }): Promise<ApiResponse<Klage>> {
   const { klageId, formkrav } = args
-  return apiClient.post(`/klage/${klageId}/formkrav`, { formkrav })
+  return apiClient.put(`/klage/${klageId}/formkrav`, { formkrav })
 }

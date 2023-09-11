@@ -1,17 +1,21 @@
 package no.nav.etterlatte.brev.dokument
 
+import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
+import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.brev.behandlingklient.BehandlingKlient
+import no.nav.etterlatte.brev.dokarkiv.DokarkivService
 import no.nav.etterlatte.brev.journalpost.BrukerIdType
+import no.nav.etterlatte.brev.journalpost.FerdigstillJournalpostRequest
 import no.nav.etterlatte.libs.common.withFoedselsnummer
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 
-fun Route.dokumentRoute(safService: SafService, behandlingKlient: BehandlingKlient) {
+fun Route.dokumentRoute(safService: SafService, dokarkivService: DokarkivService, behandlingKlient: BehandlingKlient) {
     route("dokumenter") {
         post {
             withFoedselsnummer(behandlingKlient) { foedselsnummer ->
@@ -23,6 +27,13 @@ fun Route.dokumentRoute(safService: SafService, behandlingKlient: BehandlingKlie
                     call.respond(result.error.statusCode, result.error.message)
                 }
             }
+        }
+
+        post("{journalpostId}/ferdigstill") {
+            val request = call.receive<FerdigstillJournalpostRequest>()
+            dokarkivService.ferdigstill(call.parameters["journalpostId"]!!, request)
+
+            call.respond(HttpStatusCode.OK)
         }
 
         get("{journalpostId}/{dokumentInfoId}") {

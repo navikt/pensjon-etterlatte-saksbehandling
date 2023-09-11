@@ -6,7 +6,6 @@ import org.apache.kafka.clients.CommonClientConfigs
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.common.config.SslConfigs
 import org.apache.kafka.common.security.auth.SecurityProtocol
-import org.apache.kafka.common.serialization.Deserializer
 import org.apache.kafka.common.serialization.StringDeserializer
 import java.time.Duration
 import java.util.*
@@ -15,10 +14,10 @@ interface KafkaConsumerConfiguration {
     fun generateKafkaConsumerProperties(env: Map<String, String>): Properties
 }
 
-abstract class Kafkakonfigurasjon<T>(
+abstract class Kafkakonfigurasjon(
     private val groupId: String,
-    private val deserializerClass: Class<Deserializer<T>>,
-    val extra: (props: Properties) -> Any?
+    private val deserializerClass: Any,
+    private val extra: (props: Properties) -> Any? = {}
 ) : KafkaConsumerConfiguration {
 
     override fun generateKafkaConsumerProperties(env: Map<String, String>): Properties {

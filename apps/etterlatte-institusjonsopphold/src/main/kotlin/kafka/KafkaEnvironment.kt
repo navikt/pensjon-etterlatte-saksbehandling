@@ -8,9 +8,9 @@ import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.common.IsolationLevel
 import java.util.*
 
-class KafkaEnvironment : Kafkakonfigurasjon(
+class KafkaEnvironment : Kafkakonfigurasjon<KafkaEnvironment.JsonDeserializer>(
     groupId = "INSTITUSJONSOPPHOLD_GROUP_ID",
-    deserializerClass = JsonDeserializer::class,
+    deserializerClass = JsonDeserializer::class.java,
     extra = {
         it.put(
             ConsumerConfig.ISOLATION_LEVEL_CONFIG,

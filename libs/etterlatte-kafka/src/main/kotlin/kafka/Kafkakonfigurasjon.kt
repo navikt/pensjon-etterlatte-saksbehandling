@@ -13,12 +13,12 @@ interface KafkaConsumerConfiguration {
     fun generateKafkaConsumerProperties(env: Map<String, String>): Properties
 }
 
-abstract class Kafkakonfigurasjon(
+abstract class Kafkakonfigurasjon<T>(
     private val groupId: String,
-    private val deserializerClass: Any,
+    private val deserializerClass: Class<T>,
     private val extra: (props: Properties) -> Any? = {},
-    val userInfoConfigKey: String,
-    val schemaRegistryUrlConfigKey: String
+    private val userInfoConfigKey: String,
+    private val schemaRegistryUrlConfigKey: String
 ) : KafkaConsumerConfiguration {
 
     override fun generateKafkaConsumerProperties(env: Map<String, String>): Properties = Properties().apply {
@@ -43,7 +43,7 @@ abstract class Kafkakonfigurasjon(
         put(ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG, Duration.ofMinutes(8L).toMillis().toInt())
         put(CommonClientConfigs.SESSION_TIMEOUT_MS_CONFIG, Duration.ofSeconds(20L).toMillis().toInt())
         put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer::class.java)
-        put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, deserializerClass::class.java)
+        put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, deserializerClass)
 
         put(AbstractKafkaSchemaSerDeConfig.BASIC_AUTH_CREDENTIALS_SOURCE, "USER_INFO")
 

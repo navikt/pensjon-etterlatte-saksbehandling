@@ -10,12 +10,14 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
+import no.nav.etterlatte.libs.common.grunnlag.NyeSaksopplysninger
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.hentNavidentFraToken
 import no.nav.etterlatte.libs.common.kunSystembruker
 import no.nav.etterlatte.libs.common.opplysningsbehov.Opplysningsbehov
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.InvalidFoedselsnummerException
+import no.nav.etterlatte.libs.common.sakId
 import no.nav.etterlatte.libs.common.withFoedselsnummer
 import no.nav.etterlatte.libs.common.withSakId
 
@@ -64,12 +66,20 @@ fun Route.grunnlagRoute(grunnlagService: GrunnlagService, behandlingKlient: Beha
             }
         }
 
-        get("$SAKID_CALL_PARAMETER/revurdering/${Opplysningstype.HISTORISK_FORELDREANSVAR.name}") {
+        get("{$SAKID_CALL_PARAMETER}/revurdering/${Opplysningstype.HISTORISK_FORELDREANSVAR.name}") {
             withSakId(behandlingKlient) { sakId ->
                 when (val historisk = grunnlagService.hentHistoriskForeldreansvar(sakId)) {
                     null -> call.respond(HttpStatusCode.NotFound)
                     else -> call.respond(historisk)
                 }
+            }
+        }
+
+        post("{$SAKID_CALL_PARAMETER}/nye-opplysninger") {
+            withSakId(behandlingKlient) {
+                val opplysningsbehov = call.receive<NyeSaksopplysninger>()
+                grunnlagService.lagreNyeSaksopplysninger(sakId, opplysningsbehov.opplysninger)
+                call.respond(HttpStatusCode.OK)
             }
         }
 

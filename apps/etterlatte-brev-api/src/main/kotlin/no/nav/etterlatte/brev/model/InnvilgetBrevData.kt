@@ -74,7 +74,10 @@ data class InnvilgetBrevDataOMS(
                 avdoed = behandling.persongalleri.avdoed,
                 etterbetalinginfo = null,
                 beregningsinfo = Beregningsinfo(
-                    innhold = innholdVedlegg.find { vedlegg -> vedlegg.key == "beregning_innhold" }?.payload!!.elements,
+                    innhold = innholdVedlegg.find {
+                            vedlegg ->
+                        vedlegg.key == BrevVedleggKey.BEREGNING_INNHOLD
+                    }?.payload!!.elements,
                     grunnbeloep = behandling.avkortingsinfo!!.grunnbeloep,
                     beregningsperioder = behandling.avkortingsinfo.beregningsperioder.map {
                         NyBeregningsperiode(

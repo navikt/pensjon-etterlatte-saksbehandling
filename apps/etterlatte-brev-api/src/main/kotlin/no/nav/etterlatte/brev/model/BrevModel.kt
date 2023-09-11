@@ -7,6 +7,7 @@ import no.nav.etterlatte.brev.behandling.Behandling
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
@@ -102,9 +103,33 @@ data class BrevInnhold(
 
 data class BrevInnholdVedlegg(
     val tittel: String,
-    val key: String,
+    val key: BrevVedleggKey,
     val payload: Slate? = null
-)
+) {
+    companion object {
+        fun inntektsendringOMS(): List<BrevInnholdVedlegg> =
+            listOf(
+                utfallBeregningOMS()
+            )
+
+        fun innvilgelseOMS(): List<BrevInnholdVedlegg> =
+            listOf(
+                utfallBeregningOMS()
+            )
+
+        private fun utfallBeregningOMS() = BrevInnholdVedlegg(
+            tittel = "Utfall ved beregning av omstillingsstønad",
+            key = BrevVedleggKey.BEREGNING_INNHOLD,
+            payload = getJsonFile("/maler/vedlegg/oms_utfall_beregning.json").let { deserialize<Slate>(it) }
+        )
+
+        private fun getJsonFile(url: String) = javaClass.getResource(url)!!.readText()
+    }
+}
+
+enum class BrevVedleggKey {
+    BEREGNING_INNHOLD
+}
 
 data class OpprettNyttBrev(
     val sakId: Long,

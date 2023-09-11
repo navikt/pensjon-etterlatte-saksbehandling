@@ -63,7 +63,6 @@ fun startEgenAnsattLytter(env: Map<String, String>, config: Config) {
             closed = closed,
             behandlingKlient = behandlingKlient
         ),
-        closed = closed,
         logger = logger
     )
 }

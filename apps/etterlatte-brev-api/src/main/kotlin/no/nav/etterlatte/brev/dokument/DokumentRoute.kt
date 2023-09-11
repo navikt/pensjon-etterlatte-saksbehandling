@@ -31,8 +31,11 @@ fun Route.dokumentRoute(safService: SafService, dokarkivService: DokarkivService
 
         post("{journalpostId}/ferdigstill") {
             val request = call.receive<FerdigstillJournalpostRequest>()
-            dokarkivService.ferdigstill(call.parameters["journalpostId"]!!, request)
+            val journalpostId = requireNotNull(call.parameters["journalpostId"]) {
+                "JournalpostID er påkrevd for å kunne ferdigstille journalposten"
+            }
 
+            dokarkivService.ferdigstill(journalpostId, request)
             call.respond(HttpStatusCode.OK)
         }
 

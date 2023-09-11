@@ -21,11 +21,15 @@ class KafkaEnvironment : KafkaConsumerConfiguration {
         val groupId = "LEESAH_KAFKA_GROUP_ID"
         val deserializerClass = KafkaAvroDeserializer::class.java
         val extra: (props: Properties) -> Any? = {
+            it.put(KafkaAvroDeserializerConfig.SPECIFIC_AVRO_READER_CONFIG, true)
             it.put(
                 ConsumerConfig.ISOLATION_LEVEL_CONFIG,
                 IsolationLevel.READ_COMMITTED.toString().lowercase(Locale.getDefault())
             )
         }
+        val userInfoConfigKey = KafkaAvroDeserializerConfig.USER_INFO_CONFIG
+        val schemaRegistryUrlConfigKey = KafkaAvroDeserializerConfig.SCHEMA_REGISTRY_URL_CONFIG
+
         val properties = Properties().apply {
             put(CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG, env["KAFKA_BROKERS"])
             put(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, SecurityProtocol.SSL.name)
@@ -51,18 +55,18 @@ class KafkaEnvironment : KafkaConsumerConfiguration {
             put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer::class.java)
             put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, deserializerClass)
 
-            put(KafkaAvroDeserializerConfig.SPECIFIC_AVRO_READER_CONFIG, true)
             put(AbstractKafkaSchemaSerDeConfig.BASIC_AUTH_CREDENTIALS_SOURCE, "USER_INFO")
 
             put(
-                KafkaAvroDeserializerConfig.USER_INFO_CONFIG,
+                userInfoConfigKey,
                 "${env["KAFKA_SCHEMA_REGISTRY_USER"]}:${env["KAFKA_SCHEMA_REGISTRY_PASSWORD"]}"
             )
-            put(KafkaAvroDeserializerConfig.SCHEMA_REGISTRY_URL_CONFIG, env["KAFKA_SCHEMA_REGISTRY"])
+            put(schemaRegistryUrlConfigKey, env["KAFKA_SCHEMA_REGISTRY"])
             put(
                 "schema.registry.basic.auth.user.info",
                 "${env["KAFKA_SCHEMA_REGISTRY_USER"]}:${env["KAFKA_SCHEMA_REGISTRY_PASSWORD"]}"
             )
+
             extra(this)
         }
         return properties

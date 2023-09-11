@@ -35,9 +35,10 @@ export default function FullfoerOppgaveModal({ oppgave, behandlingBehov }: Modal
 
   return (
     <>
-      <Button variant="primary" onClick={() => setOpen(true)}>
+      <Button variant="primary" onClick={() => setOpen(true)} className="button">
         Ferdigstill
       </Button>
+
       <Modal open={open} aria-labelledby="modal-heading" onClose={() => setOpen(false)}>
         <Modal.Body>
           <Heading size="medium" id="modal-heading" spacing>
@@ -59,7 +60,7 @@ export default function FullfoerOppgaveModal({ oppgave, behandlingBehov }: Modal
             </Alert>
           ) : (
             <ButtonWrapper>
-              <Button variant="tertiary" onClick={() => setOpen(false)} disabled={isPending(status)}>
+              <Button variant="secondary" onClick={() => setOpen(false)} disabled={isPending(status)}>
                 Avbryt
               </Button>
               <Button

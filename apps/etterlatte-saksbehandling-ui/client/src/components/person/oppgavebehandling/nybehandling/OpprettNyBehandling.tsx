@@ -11,9 +11,9 @@ import { Navigate, useNavigate } from 'react-router-dom'
 import { useAppDispatch } from '~store/Store'
 import { settBehandlingBehov } from '~store/reducers/NyBehandlingReducer'
 import { Persongalleri } from '~shared/types/Person'
-import { GYLDIG_FNR } from '~utils/fnr'
 import { FormWrapper } from '~components/person/oppgavebehandling/styled'
 import styled from 'styled-components'
+import { gyldigPersongalleri } from '~components/person/oppgavebehandling/nybehandling/validator'
 
 export default function OpprettNyBehandling() {
   const { oppgave, behandlingBehov } = useNyBehandling()
@@ -32,24 +32,6 @@ export default function OpprettNyBehandling() {
 
   const neste = () => navigate('../oppsummering', { relative: 'path' })
   const tilbake = () => navigate('..', { relative: 'path' })
-
-  const kanGaaVidere = () => {
-    const persongalleri = behandlingBehov?.persongalleri
-    if (!persongalleri) {
-      return false
-    }
-
-    const avdoede = persongalleri.avdoed?.filter((fnr) => GYLDIG_FNR(fnr)) || []
-    const gjenlevende = persongalleri.gjenlevende?.filter((fnr) => GYLDIG_FNR(fnr)) || []
-    const antallGjenlevOgAvdoed = avdoede.length + gjenlevende.length
-
-    return (
-      !!persongalleri &&
-      GYLDIG_FNR(persongalleri.soeker) &&
-      GYLDIG_FNR(persongalleri.innsender) &&
-      antallGjenlevOgAvdoed == 2
-    )
-  }
 
   return (
     <FormWrapper column>
@@ -72,11 +54,16 @@ export default function OpprettNyBehandling() {
 
       <KnapperWrapper>
         <div>
-          <Button variant="secondary" size="medium" onClick={tilbake}>
+          <Button variant="secondary" className="button" onClick={tilbake}>
             Tilbake
           </Button>
 
-          <Button variant="primary" size="medium" className="button" onClick={neste} disabled={!kanGaaVidere()}>
+          <Button
+            variant="primary"
+            onClick={neste}
+            className="button"
+            disabled={!gyldigPersongalleri(sakType, behandlingBehov?.persongalleri)}
+          >
             Neste
           </Button>
         </div>

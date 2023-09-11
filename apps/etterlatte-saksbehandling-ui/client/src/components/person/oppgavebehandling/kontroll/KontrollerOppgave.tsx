@@ -13,7 +13,7 @@ import { GYLDIG_FNR } from '~utils/fnr'
 import Spinner from '~shared/Spinner'
 import { hentGosysOppgave } from '~shared/api/oppgaverny'
 import { DatoVelger } from '~shared/DatoVelger'
-import { InfoList } from '~components/behandling/soeknadsoversikt/styled'
+import { InfoWrapper } from '~components/behandling/soeknadsoversikt/styled'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import { hentSakForPerson } from '~shared/api/behandling'
 import { FormWrapper } from '../styled'
@@ -39,7 +39,6 @@ export default function KontrollerOppgave() {
           settBehandlingBehov({
             ...behandlingBehov,
             sakType: oppgave.sakType,
-            mottattDato: oppgave.opprettet,
             persongalleri: { ...behandlingBehov?.persongalleri, soeker: oppgave.fnr },
           })
         )
@@ -65,25 +64,27 @@ export default function KontrollerOppgave() {
 
       {oppgave && (
         <>
-          <Heading size={'medium'} spacing>
-            Oppgave {oppgave.id}{' '}
-            <Tag variant={'success'} size={'medium'}>
-              {formaterSakstype(oppgave.sakType)}
-            </Tag>
-          </Heading>
-
           <Panel border>
-            <InfoList>
+            <Heading size={'medium'} spacing>
+              Oppgave
+              <br />
+              <Tag variant={'success'} size={'small'}>
+                {formaterSakstype(oppgave.sakType)}
+              </Tag>
+            </Heading>
+
+            <InfoWrapper>
+              <Info label={'ID'} tekst={oppgave.id} />
               <Info label={'Status'} tekst={oppgave.status} />
               <Info label={'Type'} tekst={oppgave.type} />
               <Info label={'Bruker'} tekst={formaterFnr(oppgave.fnr)} />
               <Info label={'Opprettet'} tekst={formaterStringDato(oppgave.opprettet)} />
               <Info label={'Frist'} tekst={formaterStringDato(oppgave.frist)} />
-            </InfoList>
+            </InfoWrapper>
             <hr />
             <div>
               <Label size="small" as={'p'} spacing>
-                Beskrivelse
+                Beskrivelseshistorikk
               </Label>
               <BodyShort>{oppgave?.beskrivelse || 'Ingen beskrivelse'}</BodyShort>
             </div>
@@ -137,6 +138,7 @@ export default function KontrollerOppgave() {
 
               <DatoVelger
                 label={'Mottatt dato'}
+                description={'Datoen søknaden ble mottatt'}
                 value={behandlingBehov?.mottattDato ? new Date(behandlingBehov?.mottattDato) : null}
                 onChange={(mottattDato) =>
                   dispatch(
@@ -154,7 +156,7 @@ export default function KontrollerOppgave() {
 
       <KnapperWrapper>
         <div>
-          <Button variant="primary" size="medium" className="button" onClick={neste} disabled={!kanGaaVidere}>
+          <Button variant="primary" className="button" onClick={neste} disabled={!kanGaaVidere}>
             Neste
           </Button>
         </div>

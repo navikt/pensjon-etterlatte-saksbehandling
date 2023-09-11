@@ -3,7 +3,7 @@ import { useNyBehandling } from '~components/person/oppgavebehandling/useNyBehan
 import AvbrytOppgavebehandling from '~components/person/oppgavebehandling/AvbrytOppgavebehandling'
 import { KnapperWrapper } from '~components/behandling/handlinger/BehandlingHandlingKnapper'
 import React from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Navigate, useNavigate } from 'react-router-dom'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import { SakType } from '~shared/types/sak'
 import { formaterSakstype } from '~utils/formattering'
@@ -16,11 +16,10 @@ export default function OppsummeringOppgavebehandling() {
 
   const navigate = useNavigate()
 
-  const tilbake = () => navigate('..', { relative: 'path' })
+  const tilbake = () => navigate('../nybehandling', { relative: 'route' })
 
   if (!behandlingBehov || !oppgave) {
-    navigate('..', { relative: 'route' })
-    return null
+    return <Navigate to={'../nybehandling'} relative={'path'} />
   }
 
   return (
@@ -60,7 +59,7 @@ export default function OppsummeringOppgavebehandling() {
 
       <KnapperWrapper>
         <div>
-          <Button variant="secondary" size="medium" onClick={tilbake}>
+          <Button variant="secondary" size="medium" className="button" onClick={tilbake}>
             Tilbake
           </Button>
 

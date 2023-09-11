@@ -19,6 +19,7 @@ include(
     "apps:etterlatte-vedtaksvurdering-kafka",
     "apps:etterlatte-grunnlag",
     "apps:etterlatte-brev-api",
+    "apps:etterlatte-klage",
     "apps:etterlatte-tilbakekreving",
     "apps:etterlatte-hendelser-pdl",
     "apps:etterlatte-migrering",

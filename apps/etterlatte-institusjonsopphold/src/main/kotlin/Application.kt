@@ -64,13 +64,10 @@ fun startInstitusjonsoppholdLytter(env: Map<String, String>, config: Config) {
 
     val behandlingKlient = BehandlingKlient(behandlingHttpClient = behandlingHttpClient, institusjonsoppholdKlient)
 
-    val closed = AtomicBoolean()
-    closed.set(false)
-
     KafkaRunner.startLytting(
         konsument = KafkaConsumerInstitusjonsopphold(
             env = env,
-            closed = closed,
+            closed = AtomicBoolean(false),
             behandlingKlient = behandlingKlient
         ),
         logger = logger

@@ -14,13 +14,6 @@ object KafkaRunner {
         withLogContext {
             Thread {
                 try {
-                    Runtime.getRuntime().addShutdownHook(
-                        Thread {
-                            closed.set(true)
-                            konsument.consumer.wakeup(); // trådsikker, avbryter konsumer fra polling
-                        }
-                    )
-
                     konsument.stream()
                 } catch (e: Exception) {
                     logger.error("App avsluttet med en feil", e)

@@ -15,6 +15,15 @@ abstract class Kafkakonsument<T>(
     val closed: AtomicBoolean
 ) {
 
+    init {
+        Runtime.getRuntime().addShutdownHook(
+            Thread {
+                closed.set(true)
+                consumer.wakeup(); // trådsikker, avbryter konsumer fra polling
+            }
+        )
+    }
+
     private var antallMeldinger = 0
     fun getAntallMeldinger() = antallMeldinger
 

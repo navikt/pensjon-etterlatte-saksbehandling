@@ -23,16 +23,6 @@ class PersonhendelseKonsument(
     pollTimeoutInSeconds = Duration.ofSeconds(10L),
     closed = AtomicBoolean(false)
 ) {
-
-    init {
-        Runtime.getRuntime().addShutdownHook(
-            Thread {
-                closed.set(true)
-                consumer.wakeup(); // trådsikker, avbryter konsumer fra polling
-            }
-        )
-    }
-
     override fun stream() {
         stream { hendelser ->
             runBlocking {

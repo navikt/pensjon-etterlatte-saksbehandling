@@ -13,12 +13,14 @@ import Spinner from '~shared/Spinner'
 import { useBehandlingRoutes } from '~components/behandling/BehandlingRoutes'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { AktivitetspliktOppfolging } from '~shared/types/Aktivitetsplikt'
+import { erFerdigBehandlet } from '~components/behandling/felles/utils'
 
 export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => {
   const { behandling } = props
   const { next } = useBehandlingRoutes()
 
   const avdoedesDoedsdato = behandling?.familieforhold?.avdoede?.opplysning?.doedsdato
+  const ferdigBehandlet = erFerdigBehandlet(behandling.status)
   const configContext = useContext(ConfigContext)
 
   const [beskrivelse, setBeskrivelse] = useState<string>('')
@@ -72,9 +74,11 @@ export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => 
         {!isPending(hentet) && aktivitetOppfolging && (
           <SpacingWrapper>
             <BodyLong>{aktivitetOppfolging.aktivitet}</BodyLong>
-            <Button variant="tertiary" icon={<PencilIcon />} onClick={() => edit()}>
-              Rediger
-            </Button>
+            {!ferdigBehandlet && (
+              <Button variant="tertiary" icon={<PencilIcon />} onClick={() => edit()}>
+                Rediger
+              </Button>
+            )}
             <Detail>Manuelt av {aktivitetOppfolging?.opprettetAv}</Detail>
             <Detail>Sist endret {aktivitetOppfolging?.opprettet}</Detail>
           </SpacingWrapper>

@@ -25,6 +25,7 @@ import io.mockk.verify
 import no.nav.etterlatte.brev.behandlingklient.BehandlingKlient
 import no.nav.etterlatte.brev.dokarkiv.DokarkivService
 import no.nav.etterlatte.brev.journalpost.BrukerIdType
+import no.nav.etterlatte.brev.journalpost.FerdigstillJournalpostRequest
 import no.nav.etterlatte.libs.common.FoedselsnummerDTO
 import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
 import no.nav.etterlatte.libs.ktor.restModule
@@ -133,7 +134,7 @@ internal class DokumentRouteTest {
 
     @Test
     fun `Endepunkt for å ferdigstille journalpost`() {
-        coEvery { dokarkivService.ferdigstill(any(), request) } just Runs
+        coEvery { dokarkivService.ferdigstill(any(), any()) } just Runs
 
         val journalpostId = "111"
 
@@ -151,14 +152,22 @@ internal class DokumentRouteTest {
                 }
             }
 
+            val client = createClient {
+                install(ContentNegotiation) {
+                    jackson()
+                }
+            }
+
             val response = client.post("/api/dokumenter/$journalpostId/ferdigstill") {
                 header(HttpHeaders.Authorization, "Bearer $accessToken")
+                contentType(ContentType.Application.Json)
+                setBody(FerdigstillJournalpostRequest("4808"))
             }
 
             assertEquals(HttpStatusCode.OK, response.status)
         }
 
-        coVerify(exactly = 1) { dokarkivService.ferdigstill(journalpostId, request) }
+        coVerify(exactly = 1) { dokarkivService.ferdigstill(journalpostId, any()) }
     }
 
     @Test

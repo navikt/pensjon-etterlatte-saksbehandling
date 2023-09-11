@@ -1,6 +1,7 @@
 package no.nav.etterlatte.beregning.regler.barnepensjon.sats
 
 import no.nav.etterlatte.beregning.regler.barnepensjon.BP_1967_DATO
+import no.nav.etterlatte.beregning.regler.barnepensjon.BP_2024_DATO
 import no.nav.etterlatte.beregning.regler.barnepensjon.BarnepensjonGrunnlag
 import no.nav.etterlatte.grunnbeloep.Grunnbeloep
 import no.nav.etterlatte.grunnbeloep.GrunnbeloepRepository
@@ -52,6 +53,13 @@ val prosentsatsFoersteBarnKonstant = definerKonstant<BarnepensjonGrunnlag, Bereg
     verdi = Beregningstall(0.40)
 )
 
+val prosentsatsHvertBarnEnForelderAvdoed = definerKonstant<BarnepensjonGrunnlag, Beregningstall>(
+    gjelderFra = BP_2024_DATO,
+    beskrivelse = "Prosentsats benyttet for hvert barn når en forelder er død",
+    regelReferanse = RegelReferanse(id = "BP-BEREGNING-2024-HVERTBARN-EN-FORELDER-AVDOED"),
+    verdi = Beregningstall(1.00)
+)
+
 val belopForFoersteBarn = RegelMeta(
     gjelderFra = BP_1967_DATO,
     beskrivelse = "Satser i kr av for første barn",
@@ -75,7 +83,7 @@ val belopForEtterfoelgendeBarn = RegelMeta(
     prosentsatsEtterfoelgendeBarn.multiply(grunnbeloep.grunnbeloepPerMaaned)
 }
 
-val barnepensjonSatsRegel = RegelMeta(
+val barnepensjonSatsRegel1967 = RegelMeta(
     gjelderFra = BP_1967_DATO,
     beskrivelse = "Beregn uavkortet barnepensjon basert på størrelsen på barnekullet",
     regelReferanse = RegelReferanse(id = "BP-BEREGNING-1967-UAVKORTET")
@@ -85,3 +93,20 @@ val barnepensjonSatsRegel = RegelMeta(
         .plus(etterfoelgendeBarnSats.multiply(antallSoesken))
         .divide(antallSoesken.plus(1))
 }
+
+val barnepensjonSatsRegel2024 = RegelMeta(
+    gjelderFra = BP_2024_DATO,
+    beskrivelse = "Beregn barnepensjon etter 2024-regelverk",
+    regelReferanse = RegelReferanse(id = "BP-BEREGNING-2024-UAVKORTET")
+) benytter prosentsatsHvertBarnEnForelderAvdoed og grunnbeloep med { prosentsats, grunnbeloep ->
+    prosentsats.multiply(grunnbeloep.grunnbeloepPerMaaned)
+}
+
+// Kan populeres basert på feature toggle
+val aktuelleBarnepensjonSatsRegler = mutableListOf<Regel<BarnepensjonGrunnlag, Beregningstall>>()
+
+val barnepensjonSatsRegel = RegelMeta(
+    gjelderFra = BP_1967_DATO,
+    beskrivelse = "Velger nyeste tilgjengelig beregningsregel",
+    regelReferanse = RegelReferanse(id = "BP-BEREGNING-UAVKORTET")
+) velgNyesteGyldige aktuelleBarnepensjonSatsRegler

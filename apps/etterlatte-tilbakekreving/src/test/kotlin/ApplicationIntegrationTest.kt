@@ -6,6 +6,7 @@ import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.testsupport.TestContainers
 import no.nav.etterlatte.testsupport.TestRapid
 import no.nav.etterlatte.testsupport.readFile
+import no.nav.etterlatte.tilbakekreving.ChipsetCheck
 import no.nav.etterlatte.tilbakekreving.TilbakekrevingService
 import no.nav.etterlatte.tilbakekreving.config.ApplicationContext
 import no.nav.etterlatte.tilbakekreving.config.ApplicationProperties
@@ -17,9 +18,11 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.condition.DisabledIf
 import org.testcontainers.junit.jupiter.Container
 import javax.sql.DataSource
 
+@DisabledIf(value = ChipsetCheck.erM1EllerM2)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class ApplicationIntegrationTest {
 

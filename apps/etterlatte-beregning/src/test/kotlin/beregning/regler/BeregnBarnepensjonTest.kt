@@ -9,16 +9,27 @@ import no.nav.etterlatte.beregning.regler.FNR_3
 import no.nav.etterlatte.beregning.regler.barnepensjon.beregnBarnepensjon1967Regel
 import no.nav.etterlatte.beregning.regler.barnepensjon.beregnBarnepensjon1967RegelMedInstitusjon
 import no.nav.etterlatte.beregning.regler.barnepensjon.kroneavrundetBarnepensjonRegel
+import no.nav.etterlatte.beregning.regler.barnepensjon.sats.aktuelleBarnepensjonSatsRegler
+import no.nav.etterlatte.beregning.regler.barnepensjon.sats.barnepensjonSatsRegel1967
+import no.nav.etterlatte.beregning.regler.barnepensjon.sats.barnepensjonSatsRegel2024
 import no.nav.etterlatte.beregning.regler.barnepensjonGrunnlag
 import no.nav.etterlatte.beregning.regler.toBeregningstall
 import no.nav.etterlatte.libs.regler.RegelPeriode
 import no.nav.etterlatte.regler.Beregningstall
 import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.Month
 
-internal class BeregnBarnepensjon1967Test {
+internal class BeregnBarnepensjonTest {
+
+    @BeforeEach
+    fun setUp() {
+        aktuelleBarnepensjonSatsRegler.clear()
+        aktuelleBarnepensjonSatsRegler.add(barnepensjonSatsRegel1967)
+        aktuelleBarnepensjonSatsRegler.add(barnepensjonSatsRegel2024)
+    }
 
     @Test
     fun `beregnBarnepensjon1967Regel skal gi 3716,00 ved 40 aars trygdetid og ingen soesken`() {

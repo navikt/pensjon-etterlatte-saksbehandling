@@ -2,6 +2,7 @@ package no.nav.etterlatte.beregning
 
 import beregning.regler.finnAnvendtGrunnbeloep
 import no.nav.etterlatte.beregning.BeregnBarnepensjonServiceFeatureToggle.BrukInstitusjonsoppholdIBeregning
+import no.nav.etterlatte.beregning.BeregnBarnepensjonServiceFeatureToggle.BrukNyttRegelverkIBeregning
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlag
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlagService
 import no.nav.etterlatte.beregning.grunnlag.PeriodisertBeregningGrunnlag
@@ -10,6 +11,9 @@ import no.nav.etterlatte.beregning.regler.barnepensjon.AvdoedForelder
 import no.nav.etterlatte.beregning.regler.barnepensjon.PeriodisertBarnepensjonGrunnlag
 import no.nav.etterlatte.beregning.regler.barnepensjon.kroneavrundetBarnepensjonRegel
 import no.nav.etterlatte.beregning.regler.barnepensjon.kroneavrundetBarnepensjonRegelMedInstitusjon
+import no.nav.etterlatte.beregning.regler.barnepensjon.sats.aktuelleBarnepensjonSatsRegler
+import no.nav.etterlatte.beregning.regler.barnepensjon.sats.barnepensjonSatsRegel1967
+import no.nav.etterlatte.beregning.regler.barnepensjon.sats.barnepensjonSatsRegel2024
 import no.nav.etterlatte.beregning.regler.barnepensjon.sats.grunnbeloep
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
@@ -43,7 +47,8 @@ import java.util.*
 
 enum class BeregnBarnepensjonServiceFeatureToggle(private val key: String) : FeatureToggle {
     BrukFaktiskTrygdetid("pensjon-etterlatte.bp-bruk-faktisk-trygdetid"),
-    BrukInstitusjonsoppholdIBeregning("pensjon-etterlatte.bp-bruk-institusjonsopphold-i-beregning");
+    BrukInstitusjonsoppholdIBeregning("pensjon-etterlatte.bp-bruk-institusjonsopphold-i-beregning"),
+    BrukNyttRegelverkIBeregning("pensjon-etterlatte.bp-bruk-nytt-regelverk-i-beregning");
 
     override fun key() = key
 }
@@ -57,6 +62,16 @@ class BeregnBarnepensjonService(
     private val featureToggleService: FeatureToggleService
 ) {
     private val logger = LoggerFactory.getLogger(BeregnBarnepensjonService::class.java)
+
+    private val nyttRegelverkAktivert = featureToggleService.isEnabled(BrukNyttRegelverkIBeregning, false)
+
+    init {
+        aktuelleBarnepensjonSatsRegler.clear()
+        aktuelleBarnepensjonSatsRegler.add(barnepensjonSatsRegel1967)
+        if (nyttRegelverkAktivert) {
+            aktuelleBarnepensjonSatsRegler.add(barnepensjonSatsRegel2024)
+        }
+    }
 
     suspend fun beregn(behandling: DetaljertBehandling, brukerTokenInfo: BrukerTokenInfo): Beregning {
         val grunnlag = grunnlagKlient.hentGrunnlag(behandling.sak, brukerTokenInfo)
@@ -81,7 +96,8 @@ class BeregnBarnepensjonService(
             beregningsGrunnlag,
             trygdetid.hvisKanBrukes(),
             virkningstidspunkt.atDay(1),
-            null
+            null,
+            nyttRegelverkAktivert
         )
 
         logger.info("Beregner barnepensjon for behandlingId=${behandling.id} med behandlingType=$behandlingType")
@@ -221,7 +237,8 @@ class BeregnBarnepensjonService(
         beregningsGrunnlag: BeregningsGrunnlag,
         trygdetid: TrygdetidDto?,
         fom: LocalDate,
-        tom: LocalDate?
+        tom: LocalDate?,
+        brukNyttRegelverk: Boolean
     ) = PeriodisertBarnepensjonGrunnlag(
         soeskenKull = PeriodisertBeregningGrunnlag.lagKomplettPeriodisertGrunnlag(
             beregningsGrunnlag.soeskenMedIBeregning.mapVerdier { soeskenMedIBeregning ->
@@ -266,7 +283,8 @@ class BeregnBarnepensjonService(
                     beskrivelse = "Institusjonsopphold"
                 )
             } ?: listOf()
-        ) { _, _, _ -> FaktumNode(null, beregningsGrunnlag.kilde, "Institusjonsopphold") }
+        ) { _, _, _ -> FaktumNode(null, beregningsGrunnlag.kilde, "Institusjonsopphold") },
+        brukNyttRegelverk
     )
 
     private fun TrygdetidDto?.hvisKanBrukes() = this.takeIf {

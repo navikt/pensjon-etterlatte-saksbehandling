@@ -49,6 +49,9 @@ class ReguleringTest {
 
     @BeforeEach
     fun setup() {
+        every {
+            featureToggleService.isEnabled(BeregnBarnepensjonServiceFeatureToggle.BrukNyttRegelverkIBeregning, false)
+        } returns true
         beregnBarnepensjonService = BeregnBarnepensjonService(
             grunnlagKlient = grunnlagKlient,
             vilkaarsvurderingKlient = vilkaarsvurderingKlient,

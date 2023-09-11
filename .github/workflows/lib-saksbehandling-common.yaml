@@ -8,12 +8,14 @@ on:
     paths:
       - libs/saksbehandling-common/**
       - gradle/libs.versions.toml
+      - settings.gradle.kts
   pull_request:
     branches:
       - main
     paths:
       - libs/saksbehandling-common/**
       - gradle/libs.versions.toml
+      - settings.gradle.kts
 
 jobs:
   test:

@@ -15,7 +15,6 @@ import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.libs.ktor.metricsModule
 import no.nav.etterlatte.libs.ktor.setReady
 import org.slf4j.LoggerFactory
-import java.util.concurrent.atomic.AtomicBoolean
 
 fun main() {
     Server().run()
@@ -57,7 +56,6 @@ fun startEgenAnsattLytter(env: Map<String, String>, config: Config) {
     KafkaRunner.startLytting(
         konsument = KafkaConsumerEgneAnsatte(
             env = env,
-            closed = AtomicBoolean(false),
             behandlingKlient = behandlingKlient
         ),
         logger = logger

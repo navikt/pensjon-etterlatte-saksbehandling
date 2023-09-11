@@ -45,8 +45,7 @@ class SkjermingslesingTest {
         val behandlingKlient = mockk<BehandlingKlient>()
         every { behandlingKlient.haandterHendelse(any()) } just runs
 
-        val closed = AtomicBoolean()
-        closed.set(false)
+        val closed = AtomicBoolean(false)
 
         val kafkaConsumerEgneAnsatte = KafkaConsumerEgneAnsatte(
             env = mapOf(

@@ -12,7 +12,7 @@ abstract class Kafkakonsument<T>(
     val consumer: KafkaConsumer<String, T>,
     val topic: String,
     val pollTimeoutInSeconds: Duration,
-    val closed: AtomicBoolean
+    protected val closed: AtomicBoolean = AtomicBoolean(false)
 ) {
 
     init {

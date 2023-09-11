@@ -10,7 +10,6 @@ import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.slf4j.LoggerFactory
 import java.time.Duration
 import java.util.*
-import java.util.concurrent.atomic.AtomicBoolean
 
 class PersonhendelseKonsument(
     topic: String,
@@ -20,8 +19,7 @@ class PersonhendelseKonsument(
     logger = LoggerFactory.getLogger(KafkaConsumer::class.java.name),
     consumer = KafkaConsumer<String, Personhendelse>(kafkaProperties),
     topic = topic,
-    pollTimeoutInSeconds = Duration.ofSeconds(10L),
-    closed = AtomicBoolean(false)
+    pollTimeoutInSeconds = Duration.ofSeconds(10L)
 ) {
     override fun stream() {
         stream { hendelser ->

@@ -10,9 +10,9 @@ import java.util.concurrent.atomic.AtomicBoolean
 class KafkaConsumerEgneAnsatte(
     env: Map<String, String>,
     private val behandlingKlient: BehandlingKlient,
-    closed: AtomicBoolean,
     kafkaEnvironment: KafkaConsumerConfiguration = KafkaEnvironment(),
-    pollTimeoutInSeconds: Duration = Duration.ofSeconds(10L)
+    pollTimeoutInSeconds: Duration = Duration.ofSeconds(10L),
+    closed: AtomicBoolean = AtomicBoolean(false)
 ) : Kafkakonsument<String>(
     logger = LoggerFactory.getLogger(KafkaConsumerEgneAnsatte::class.java.name),
     consumer = KafkaConsumer<String, String>(kafkaEnvironment.generateKafkaConsumerProperties(env)),

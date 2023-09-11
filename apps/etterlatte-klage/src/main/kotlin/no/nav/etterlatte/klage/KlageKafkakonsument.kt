@@ -4,6 +4,7 @@ import io.confluent.kafka.schemaregistry.client.SchemaRegistryClientConfig
 import io.confluent.kafka.serializers.AbstractKafkaSchemaSerDeConfig
 import no.nav.etterlatte.kafka.Kafkakonfigurasjon
 import no.nav.etterlatte.kafka.Kafkakonsument
+import no.nav.etterlatte.klage.modell.BehandlingEvent
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.apache.kafka.common.serialization.StringDeserializer
 import org.slf4j.LoggerFactory
@@ -11,16 +12,17 @@ import java.time.Duration
 
 class KlageKafkakonsument(
     env: Map<String, String>,
-    topic: String
-) : Kafkakonsument<String>(
+    topic: String,
+    private val behandlingKlient: BehandlingKlient
+) : Kafkakonsument<BehandlingEvent>(
     logger = LoggerFactory.getLogger(KlageKafkakonsument::class.java.name),
-    consumer = KafkaConsumer<String, String>(KafkaEnvironment().generateKafkaConsumerProperties(env)),
+    consumer = KafkaConsumer<String, BehandlingEvent>(KafkaEnvironment().generateKafkaConsumerProperties(env)),
     topic = topic,
     pollTimeoutInSeconds = Duration.ofSeconds(10L)
 
 ) {
     override fun stream() {
-        // TODO: Implementerast i ein kommande PR på denne jirameldinga
+        stream { meldinger -> meldinger.forEach { behandlingKlient.haandterHendelse(it) } }
     }
 }
 

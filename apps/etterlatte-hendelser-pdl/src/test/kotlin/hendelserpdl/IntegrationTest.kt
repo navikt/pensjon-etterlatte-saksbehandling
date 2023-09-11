@@ -16,8 +16,8 @@ import io.mockk.spyk
 import io.mockk.verify
 import no.nav.common.KafkaEnvironment
 import no.nav.etterlatte.hendelserpdl.common.PersonhendelseKonsument
-import no.nav.etterlatte.hendelserpdl.config.KafkaConsumerConfiguration
 import no.nav.etterlatte.hendelserpdl.pdl.PdlKlient
+import no.nav.etterlatte.kafka.KafkaConsumerConfiguration
 import no.nav.etterlatte.kafka.LocalKafkaConfig
 import no.nav.etterlatte.kafka.rapidsAndRiversProducer
 import no.nav.etterlatte.lesHendelserFraLeesah

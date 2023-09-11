@@ -9,6 +9,7 @@ import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
+import no.nav.etterlatte.brev.journalpost.FerdigstillJournalpostRequest
 import no.nav.etterlatte.brev.journalpost.JournalpostRequest
 import no.nav.etterlatte.brev.journalpost.JournalpostResponse
 import org.slf4j.LoggerFactory
@@ -31,6 +32,12 @@ class DokarkivKlient(private val client: HttpClient, private val url: String) {
         logger.error("Feil i kall mot Dokarkiv: ", exception)
         throw JournalpostException("Feil i kall mot Dokarkiv", exception)
     }
+
+    suspend fun ferdigstillJournalpost(journalpostId: String, request: FerdigstillJournalpostRequest): String =
+        client.post("$url/$journalpostId/ferdigstill") {
+            contentType(ContentType.Application.Json)
+            setBody(request)
+        }.body()
 }
 
 open class JournalpostException(msg: String, cause: Throwable) : Exception(msg, cause)

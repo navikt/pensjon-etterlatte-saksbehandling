@@ -31,22 +31,22 @@ spec:
     application:
       enabled: true
   envFrom:
-    - secret: barnepensjon-secrets
+    - secret: etterlatte-secrets
     - secret: my-application-unleash-api-token
   replicas:
     cpuThresholdPercentage: 90
     max: 1
     min: 1
   env:
-    - name: OPPDRAG_KRAVGRUNNLAG_MQ_NAME
-      value: TODO
-    - name: OPPDRAG_MQ_HOSTNAME
+    - name: KRAVGRUNNLAG_MQ_NAME
+      value: QA.Q1_ETTERLATTE.KRAVGRUNNLAG
+    - name: MQ_HOSTNAME
       value: b27apvl222.preprod.local
-    - name: OPPDRAG_MQ_PORT
+    - name: MQ_PORT
       value: "1413"
-    - name: OPPDRAG_MQ_CHANNEL
-      value: Q2_BARNEPENSJON
-    - name: OPPDRAG_MQ_MANAGER
+    - name: MQ_CHANNEL
+      value: Q1_ETTERLATTE
+    - name: MQ_MANAGER
       value: MQLS04
   accessPolicy:
     external:

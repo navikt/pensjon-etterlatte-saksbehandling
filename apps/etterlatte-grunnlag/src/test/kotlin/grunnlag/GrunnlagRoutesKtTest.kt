@@ -252,7 +252,7 @@ internal class GrunnlagRoutesKtTest {
     }
 
     @Test
-    fun `Nye opplysninger`() {
+    fun `Teste endepunkt for lagring av nye saksopplysninger`() {
         val sakId = 12345L
         val opplysninger = listOf(
             lagGrunnlagsopplysning(

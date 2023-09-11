@@ -14,7 +14,7 @@ export const StegMeny = (props: { behandling: IBehandlingReducer }) => {
           <NavLenke key={pathInfo.path} pathInfo={pathInfo} behandling={props.behandling} />
         ))}
       {behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING &&
-        soeknadRoutes.map((pathInfo) => (
+        soeknadRoutes(props.behandling).map((pathInfo) => (
           <NavLenke key={pathInfo.path} pathInfo={pathInfo} behandling={props.behandling} />
         ))}
       {behandlingType === IBehandlingsType.REVURDERING &&

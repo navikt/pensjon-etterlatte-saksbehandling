@@ -1,6 +1,5 @@
 package no.nav.etterlatte.kafka
 
-import io.confluent.kafka.schemaregistry.client.SchemaRegistryClientConfig
 import io.confluent.kafka.serializers.AbstractKafkaSchemaSerDeConfig
 import org.apache.kafka.clients.CommonClientConfigs
 import org.apache.kafka.clients.consumer.ConsumerConfig
@@ -17,7 +16,9 @@ interface KafkaConsumerConfiguration {
 abstract class Kafkakonfigurasjon(
     private val groupId: String,
     private val deserializerClass: Any,
-    private val extra: (props: Properties) -> Any? = {}
+    private val extra: (props: Properties) -> Any? = {},
+    val userInfoConfigKey: String,
+    val schemaRegistryUrlConfigKey: String
 ) : KafkaConsumerConfiguration {
 
     override fun generateKafkaConsumerProperties(env: Map<String, String>): Properties = Properties().apply {
@@ -47,10 +48,10 @@ abstract class Kafkakonfigurasjon(
         put(AbstractKafkaSchemaSerDeConfig.BASIC_AUTH_CREDENTIALS_SOURCE, "USER_INFO")
 
         put(
-            SchemaRegistryClientConfig.USER_INFO_CONFIG,
+            userInfoConfigKey,
             "${env["KAFKA_SCHEMA_REGISTRY_USER"]}:${env["KAFKA_SCHEMA_REGISTRY_PASSWORD"]}"
         )
-        put(AbstractKafkaSchemaSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG, env["KAFKA_SCHEMA_REGISTRY"])
+        put(schemaRegistryUrlConfigKey, env["KAFKA_SCHEMA_REGISTRY"])
         put(
             "schema.registry.basic.auth.user.info",
             "${env["KAFKA_SCHEMA_REGISTRY_USER"]}:${env["KAFKA_SCHEMA_REGISTRY_PASSWORD"]}"

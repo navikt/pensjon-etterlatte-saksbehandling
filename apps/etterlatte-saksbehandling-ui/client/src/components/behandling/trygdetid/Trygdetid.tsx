@@ -18,7 +18,9 @@ import { useParams } from 'react-router-dom'
 import { Grunnlagopplysninger } from '~components/behandling/trygdetid/Grunnlagopplysninger'
 import { TrygdetidGrunnlagListe } from '~components/behandling/trygdetid/TrygdetidGrunnlagListe'
 import { TrygdeAvtale } from './avtaler/TrygdeAvtale'
-import { IUtenlandstilsnitt, IUtenlandstilsnittType } from '~shared/types/IDetaljertBehandling'
+import { IBehandlingStatus, IUtenlandstilsnitt, IUtenlandstilsnittType } from '~shared/types/IDetaljertBehandling'
+import { oppdaterBehandlingsstatus } from '~store/reducers/BehandlingReducer'
+import { useAppDispatch } from '~store/Store'
 
 interface Props {
   redigerbar: boolean
@@ -31,18 +33,24 @@ const visTrydeavtale = (utenlandstilsnittType?: IUtenlandstilsnittType): Boolean
 
 export const Trygdetid = ({ redigerbar, utenlandstilsnitt }: Props) => {
   const { behandlingId } = useParams()
+  const dispatch = useAppDispatch()
   const [hentTrygdetidRequest, fetchTrygdetid] = useApiCall(hentTrygdetid)
   const [opprettTrygdetidRequest, requestOpprettTrygdetid] = useApiCall(opprettTrygdetid)
   const [hentAlleLandRequest, fetchAlleLand] = useApiCall(hentAlleLand)
   const [trygdetid, setTrygdetid] = useState<ITrygdetid>()
   const [landListe, setLandListe] = useState<ILand[]>()
 
+  const oppdaterTrygdetid = (trygdetid: ITrygdetid) => {
+    setTrygdetid(trygdetid)
+    dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.TRYGDETID_OPPDATERT))
+  }
+
   useEffect(() => {
     if (!behandlingId) throw new Error('Mangler behandlingsid')
     fetchTrygdetid(behandlingId, (trygdetid: ITrygdetid) => {
       if (trygdetid == null) {
         requestOpprettTrygdetid(behandlingId, (trygdetid: ITrygdetid) => {
-          setTrygdetid(trygdetid)
+          oppdaterTrygdetid(trygdetid)
         })
       } else {
         setTrygdetid(trygdetid)
@@ -87,14 +95,14 @@ export const Trygdetid = ({ redigerbar, utenlandstilsnitt }: Props) => {
 
           <TrygdetidGrunnlagListe
             trygdetid={trygdetid}
-            setTrygdetid={setTrygdetid}
+            setTrygdetid={oppdaterTrygdetid}
             landListe={landListe}
             trygdetidGrunnlagType={ITrygdetidGrunnlagType.FAKTISK}
             redigerbar={redigerbar}
           />
           <TrygdetidGrunnlagListe
             trygdetid={trygdetid}
-            setTrygdetid={setTrygdetid}
+            setTrygdetid={oppdaterTrygdetid}
             landListe={landListe.filter((land) => land.isoLandkode == 'NOR')}
             trygdetidGrunnlagType={ITrygdetidGrunnlagType.FREMTIDIG}
             redigerbar={redigerbar}

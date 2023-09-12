@@ -62,7 +62,7 @@ class BehandlingClient(
 }
 
 data class NyBehandlingRequest(
-    val sak: Long,
+    val sakId: Long,
     val persongalleri: Persongalleri,
     val mottattDato: String
 )

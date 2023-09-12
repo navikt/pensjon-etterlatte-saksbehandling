@@ -85,3 +85,7 @@ class JournalpostKoder {
         const val BREV_KODE = "XX.YY-ZZ"
     }
 }
+
+data class FerdigstillJournalpostRequest(
+    val journalfoerendeEnhet: String
+)

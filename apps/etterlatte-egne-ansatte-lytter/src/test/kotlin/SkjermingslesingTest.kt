@@ -45,8 +45,7 @@ class SkjermingslesingTest {
         val behandlingKlient = mockk<BehandlingKlient>()
         every { behandlingKlient.haandterHendelse(any()) } just runs
 
-        val closed = AtomicBoolean()
-        closed.set(false)
+        val closed = AtomicBoolean(false)
 
         val kafkaConsumerEgneAnsatte = KafkaConsumerEgneAnsatte(
             env = mapOf(
@@ -64,7 +63,7 @@ class SkjermingslesingTest {
             while (true) {
                 if (kafkaConsumerEgneAnsatte.getAntallMeldinger() >= 1) {
                     closed.set(true)
-                    kafkaConsumerEgneAnsatte.getConsumer().wakeup()
+                    kafkaConsumerEgneAnsatte.consumer.wakeup()
                     return@thread
                 }
                 Thread.sleep(800L) // Må stå så ikke denne spiser all cpu, tester er egentlig single threaded

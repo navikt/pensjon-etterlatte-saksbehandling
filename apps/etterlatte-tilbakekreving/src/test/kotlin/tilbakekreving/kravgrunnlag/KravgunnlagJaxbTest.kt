@@ -9,7 +9,7 @@ import java.math.BigInteger
 internal class KravgunnlagJaxbTest {
 
     @Test
-    fun `should generate xml from oppdrag`() {
+    fun `skal lese og mappe kravgrunnlag fra tilbakekrevingskomponenten`() {
         val kravgrunnlagXml = readFile("/kravgrunnlag.xml")
         val kravgrunnlag = KravgrunnlagJaxb.toDetaljertKravgrunnlagDto(kravgrunnlagXml)
 

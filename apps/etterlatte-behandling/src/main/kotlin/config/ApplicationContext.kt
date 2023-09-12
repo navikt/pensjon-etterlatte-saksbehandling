@@ -11,6 +11,8 @@ import no.nav.etterlatte.behandling.BehandlingsHendelserKafkaProducerImpl
 import no.nav.etterlatte.behandling.EnhetServiceImpl
 import no.nav.etterlatte.behandling.GrunnlagService
 import no.nav.etterlatte.behandling.GyldighetsproevingServiceImpl
+import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktDao
+import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktService
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.klage.KlageDaoImpl
 import no.nav.etterlatte.behandling.klage.KlageServiceImpl
@@ -129,6 +131,7 @@ class ApplicationContext(
     // Dao
     val hendelseDao = HendelseDao { databaseContext().activeTx() }
     val kommerBarnetTilGodeDao = KommerBarnetTilGodeDao { databaseContext().activeTx() }
+    private val aktivitetspliktDao = AktivitetspliktDao { databaseContext().activeTx() }
     val revurderingDao = RevurderingDao { databaseContext().activeTx() }
     val behandlingDao = BehandlingDao(kommerBarnetTilGodeDao, revurderingDao) { databaseContext().activeTx() }
     val oppgaveDaoNy = OppgaveDaoNyImpl { databaseContext().activeTx() }
@@ -167,6 +170,7 @@ class ApplicationContext(
 
     val kommerBarnetTilGodeService =
         KommerBarnetTilGodeService(kommerBarnetTilGodeDao, behandlingDao)
+    val aktivtetspliktService = AktivitetspliktService(aktivitetspliktDao)
     val grunnlagsService = GrunnlagService(grunnlagKlient = grunnlagKlient)
     val revurderingService =
         RevurderingServiceImpl(
@@ -238,7 +242,8 @@ class ApplicationContext(
         oppgaveService = oppgaveServiceNy,
         grunnlagService = grunnlagsService,
         revurderingService = revurderingService,
-        sakDao = sakDao,
+        gyldighetsproevingService = gyldighetsproevingService,
+        sakService = sakService,
         behandlingDao = behandlingDao,
         hendelseDao = hendelseDao,
         behandlingHendelser = behandlingsHendelser,

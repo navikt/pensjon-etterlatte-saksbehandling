@@ -1,4 +1,7 @@
 import { ISak } from '~shared/types/sak'
+import { KildeSaksbehandler } from '~shared/types/kilde'
+import { JaNei } from '~shared/types/ISvar'
+import { VedtakType } from '~components/vedtak/typer'
 
 export interface Klage {
   id: string
@@ -6,7 +9,7 @@ export interface Klage {
   opprettet: string
   status: KlageStatus
   kabalStatus?: KabalStatus
-  formkrav?: Formkrav
+  formkrav?: FormkravMedSaksbehandler
   utfall?: KlageUtfall
 }
 
@@ -20,5 +23,25 @@ export enum KlageStatus {
 
 export const enum KabalStatus {}
 
-export type Formkrav = {}
+export interface VedtaketKlagenGjelder {
+  id: string
+  behandlingId: string
+  datoAttestert?: string
+  vedtakType?: VedtakType
+}
+
+export interface Formkrav {
+  vedtaketKlagenGjelder: VedtaketKlagenGjelder | null
+  erKlagerPartISaken: JaNei
+  erKlagenSignert: JaNei
+  gjelderKlagenNoeKonkretIVedtaket: JaNei
+  erKlagenFramsattInnenFrist: JaNei
+  erFormkraveneOppfylt: JaNei
+}
+
+export interface FormkravMedSaksbehandler {
+  saksbehandler: KildeSaksbehandler
+  formkrav: Formkrav
+}
+
 export type KlageUtfall = {}

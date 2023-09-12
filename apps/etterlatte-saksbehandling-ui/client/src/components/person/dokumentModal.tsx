@@ -28,7 +28,7 @@ export default function DokumentModal({
   const open = async (journalpostId: string, dokumentInfoId: string) => {
     setIsOpen(true)
 
-    hentDokumentPDF(journalpostId, dokumentInfoId)
+    hentDokumentPDF({ journalpostId, dokumentInfoId })
       .then((res) => {
         if (res.status === 'ok') {
           return new Blob([res.data], { type: 'application/pdf' })

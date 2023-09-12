@@ -13,6 +13,7 @@ import io.ktor.server.routing.application
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
+import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktService
 import no.nav.etterlatte.behandling.domain.ManueltOpphoer
 import no.nav.etterlatte.behandling.domain.TilstandException
 import no.nav.etterlatte.behandling.domain.toBehandlingSammendrag
@@ -26,6 +27,7 @@ import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.JaNeiMedBegrunnelse
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
+import no.nav.etterlatte.libs.common.behandling.OpprettAktivitetspliktOppfolging
 import no.nav.etterlatte.libs.common.behandling.Utenlandstilsnitt
 import no.nav.etterlatte.libs.common.behandling.UtenlandstilsnittType
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
@@ -33,6 +35,7 @@ import no.nav.etterlatte.libs.common.behandlingsId
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.hentNavidentFraToken
+import no.nav.etterlatte.libs.common.kunSaksbehandler
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toNorskTid
 import no.nav.etterlatte.libs.common.toJson
@@ -45,9 +48,19 @@ internal fun Route.behandlingRoutes(
     gyldighetsproevingService: GyldighetsproevingService,
     kommerBarnetTilGodeService: KommerBarnetTilGodeService,
     manueltOpphoerService: ManueltOpphoerService,
+    aktivitetspliktService: AktivitetspliktService,
     behandlingFactory: BehandlingFactory
 ) {
     val logger = application.log
+
+    post("/api/behandling") {
+        kunSaksbehandler {
+            val request = call.receive<NyBehandlingRequest>()
+            val behandling = behandlingFactory.opprettSakOgBehandlingForOppgave(request)
+            call.respondText(behandling.id.toString())
+        }
+    }
+
     route("/api/behandling/{$BEHANDLINGSID_CALL_PARAMETER}/") {
         get {
             val detaljertBehandlingDTO =
@@ -204,6 +217,30 @@ internal fun Route.behandlingRoutes(
                 }
             }
         }
+
+        route("/aktivitetsplikt") {
+            get {
+                val result = aktivitetspliktService.hentAktivitetspliktOppfolging(behandlingsId)
+                call.respond(result ?: HttpStatusCode.NoContent)
+            }
+
+            post {
+                hentNavidentFraToken { navIdent ->
+                    val oppfolging = call.receive<OpprettAktivitetspliktOppfolging>()
+
+                    try {
+                        val result = aktivitetspliktService.lagreAktivitetspliktOppfolging(
+                            behandlingsId,
+                            oppfolging,
+                            navIdent
+                        )
+                        call.respond(result)
+                    } catch (e: TilstandException.UgyldigTilstand) {
+                        call.respond(HttpStatusCode.BadRequest, "Kunne ikke endre på feltet")
+                    }
+                }
+            }
+        }
     }
 
     route("/behandlinger") {
@@ -229,7 +266,7 @@ internal fun Route.behandlingRoutes(
 
                 when (
                     val behandling = behandlingFactory.opprettBehandling(
-                        behandlingsBehov.sak,
+                        behandlingsBehov.sakId,
                         behandlingsBehov.persongalleri,
                         behandlingsBehov.mottattDato,
                         Vedtaksloesning.GJENNY

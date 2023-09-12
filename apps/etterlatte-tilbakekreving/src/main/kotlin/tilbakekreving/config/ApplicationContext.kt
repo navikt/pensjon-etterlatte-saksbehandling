@@ -1,29 +1,12 @@
 package no.nav.etterlatte.tilbakekreving.config
 
-import no.nav.etterlatte.libs.common.tidspunkt.utcKlokke
-import no.nav.etterlatte.libs.database.DataSourceBuilder
-import no.nav.etterlatte.tilbakekreving.TilbakekrevingDao
-import no.nav.etterlatte.tilbakekreving.TilbakekrevingService
+import no.nav.etterlatte.tilbakekreving.klienter.BehandlingKlient
 import no.nav.etterlatte.tilbakekreving.kravgrunnlag.KravgrunnlagConsumer
-import no.nav.etterlatte.tilbakekreving.kravgrunnlag.KravgrunnlagMapper
-import no.nav.helse.rapids_rivers.RapidsConnection
+import no.nav.etterlatte.tilbakekreving.kravgrunnlag.KravgrunnlagService
 
 class ApplicationContext(
-    val properties: ApplicationProperties = ApplicationProperties.fromEnv(System.getenv())
+    properties: ApplicationProperties = ApplicationProperties.fromEnv(System.getenv())
 ) {
-
-    var clock = utcKlokke()
-
-    var dataSource = DataSourceBuilder.createDataSource(
-        jdbcUrl = jdbcUrl(
-            host = properties.dbHost,
-            port = properties.dbPort,
-            databaseName = properties.dbName
-        ),
-        username = properties.dbUsername,
-        password = properties.dbPassword
-    )
-
     var jmsConnectionFactory = JmsConnectionFactory(
         hostname = properties.mqHost,
         port = properties.mqPort,
@@ -33,24 +16,10 @@ class ApplicationContext(
         password = properties.serviceUserPassword
     )
 
-    var tilbakekrevingDao = TilbakekrevingDao(dataSource)
-
-    var kravgrunnlagMapper = KravgrunnlagMapper()
-
-    var tilbakekrevingService = TilbakekrevingService(
-        tilbakekrevingDao = tilbakekrevingDao,
-        clock = clock,
-        kravgrunnlagMapper = kravgrunnlagMapper
-    )
-
-    fun kravgrunnlagConsumer(rapidsConnection: RapidsConnection) =
+    var kravgrunnlagConsumer =
         KravgrunnlagConsumer(
-            rapidsConnection = rapidsConnection,
-            tilbakekrevingService = tilbakekrevingService,
-            jmsConnectionFactory = jmsConnectionFactory,
-            queue = properties.mqKravgrunnlagQueue
+            connectionFactory = jmsConnectionFactory,
+            queue = properties.mqKravgrunnlagQueue,
+            kravgrunnlagService = KravgrunnlagService(BehandlingKlient())
         )
 }
-
-private fun jdbcUrl(host: String, port: Int, databaseName: String) =
-    "jdbc:postgresql://$host:$port/$databaseName"

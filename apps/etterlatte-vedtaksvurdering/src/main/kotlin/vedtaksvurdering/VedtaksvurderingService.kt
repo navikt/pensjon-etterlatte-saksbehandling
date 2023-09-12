@@ -471,6 +471,11 @@ class VedtaksvurderingService(
         .filter { it.status == VedtakStatus.IVERKSATT }
         .filter { it.type == resultat }
         .maxByOrNull { it.id }
+
+    fun hentIverksatteVedtakISak(sakId: Long): List<Vedtak> {
+        return repository.hentVedtakForSak(sakId)
+            .filter { it.status == VedtakStatus.IVERKSATT }
+    }
 }
 
 class VedtakTilstandException(gjeldendeStatus: VedtakStatus, forventetStatus: List<VedtakStatus>) :

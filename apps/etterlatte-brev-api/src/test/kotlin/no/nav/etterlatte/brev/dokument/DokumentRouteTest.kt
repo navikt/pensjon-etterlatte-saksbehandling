@@ -15,13 +15,17 @@ import io.ktor.server.application.log
 import io.ktor.server.config.HoconApplicationConfig
 import io.ktor.server.testing.testApplication
 import io.mockk.Called
+import io.mockk.Runs
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
+import io.mockk.just
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.etterlatte.brev.behandlingklient.BehandlingKlient
+import no.nav.etterlatte.brev.dokarkiv.DokarkivService
 import no.nav.etterlatte.brev.journalpost.BrukerIdType
+import no.nav.etterlatte.brev.journalpost.FerdigstillJournalpostRequest
 import no.nav.etterlatte.libs.common.FoedselsnummerDTO
 import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
 import no.nav.etterlatte.libs.ktor.restModule
@@ -40,6 +44,7 @@ internal class DokumentRouteTest {
     private val behandlingKlient = mockk<BehandlingKlient>()
     private lateinit var hoconApplicationConfig: HoconApplicationConfig
     private val journalpostService = mockk<SafClient>()
+    private val dokarkivService = mockk<DokarkivService>()
 
     @BeforeAll
     fun before() {
@@ -74,6 +79,7 @@ internal class DokumentRouteTest {
                 restModule(this.log, routePrefix = "api") {
                     dokumentRoute(
                         journalpostService,
+                        dokarkivService,
                         behandlingKlient
                     )
                 }
@@ -110,6 +116,7 @@ internal class DokumentRouteTest {
                 restModule(this.log, routePrefix = "api") {
                     dokumentRoute(
                         journalpostService,
+                        dokarkivService,
                         behandlingKlient
                     )
                 }
@@ -126,6 +133,44 @@ internal class DokumentRouteTest {
     }
 
     @Test
+    fun `Endepunkt for å ferdigstille journalpost`() {
+        coEvery { dokarkivService.ferdigstill(any(), any()) } just Runs
+
+        val journalpostId = "111"
+
+        testApplication {
+            environment {
+                config = hoconApplicationConfig
+            }
+            application {
+                restModule(this.log, routePrefix = "api") {
+                    dokumentRoute(
+                        journalpostService,
+                        dokarkivService,
+                        behandlingKlient
+                    )
+                }
+            }
+
+            val client = createClient {
+                install(ContentNegotiation) {
+                    jackson()
+                }
+            }
+
+            val response = client.post("/api/dokumenter/$journalpostId/ferdigstill") {
+                header(HttpHeaders.Authorization, "Bearer $accessToken")
+                contentType(ContentType.Application.Json)
+                setBody(FerdigstillJournalpostRequest("4808"))
+            }
+
+            assertEquals(HttpStatusCode.OK, response.status)
+        }
+
+        coVerify(exactly = 1) { dokarkivService.ferdigstill(journalpostId, any()) }
+    }
+
+    @Test
     fun `Endepunkt som ikke finnes`() {
         testApplication {
             environment {
@@ -135,6 +180,7 @@ internal class DokumentRouteTest {
                 restModule(this.log, routePrefix = "api") {
                     dokumentRoute(
                         journalpostService,
+                        dokarkivService,
                         behandlingKlient
                     )
                 }

@@ -7,8 +7,6 @@ import com.ibm.msg.client.jakarta.wmq.WMQConstants
 import jakarta.jms.Connection
 import org.messaginghub.pooled.jms.JmsPoolConnectionFactory
 
-private const val UTF_8_WITH_PUA = 1208
-
 class JmsConnectionFactory(
     private val hostname: String,
     private val port: Int,
@@ -38,4 +36,8 @@ class JmsConnectionFactory(
     fun connection(): Connection = connectionFactory.createConnection(username, password)
 
     fun stop() = connectionFactory.stop()
+
+    private companion object {
+        const val UTF_8_WITH_PUA = 1208
+    }
 }

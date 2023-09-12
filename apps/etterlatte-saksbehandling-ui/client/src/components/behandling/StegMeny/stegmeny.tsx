@@ -14,7 +14,7 @@ export const StegMeny = (props: { behandling: IBehandlingReducer }) => {
           <NavLenke key={pathInfo.path} pathInfo={pathInfo} behandling={props.behandling} />
         ))}
       {behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING &&
-        soeknadRoutes.map((pathInfo) => (
+        soeknadRoutes(props.behandling).map((pathInfo) => (
           <NavLenke key={pathInfo.path} pathInfo={pathInfo} behandling={props.behandling} />
         ))}
       {behandlingType === IBehandlingsType.REVURDERING &&
@@ -25,7 +25,7 @@ export const StegMeny = (props: { behandling: IBehandlingReducer }) => {
   )
 }
 
-const StegMenyWrapper = styled.ul`
+export const StegMenyWrapper = styled.ul`
   display: block;
   list-style: none;
   padding: 1em 0;

@@ -43,6 +43,7 @@ import no.nav.etterlatte.libs.common.toObjectNode
 import no.nav.etterlatte.libs.database.POSTGRES_VERSION
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
+import no.nav.etterlatte.oppgave.GosysApiOppgave
 import no.nav.etterlatte.oppgave.GosysOppgaveKlient
 import no.nav.etterlatte.oppgave.GosysOppgaver
 import no.nav.etterlatte.token.BrukerTokenInfo
@@ -401,6 +402,23 @@ class GosysOppgaveKlientTest : GosysOppgaveKlient {
         brukerTokenInfo: BrukerTokenInfo
     ): GosysOppgaver {
         return GosysOppgaver(0, emptyList())
+    }
+
+    override suspend fun hentOppgave(id: Long, brukerTokenInfo: BrukerTokenInfo): GosysApiOppgave {
+        return GosysApiOppgave(
+            1,
+            2,
+            "EYB",
+            "-",
+            "",
+            Tidspunkt.now(),
+            "4808",
+            null,
+            "aktoerId",
+            "beskrivelse",
+            "NY",
+            LocalDate.now()
+        )
     }
 
     override suspend fun tildelOppgaveTilSaksbehandler(

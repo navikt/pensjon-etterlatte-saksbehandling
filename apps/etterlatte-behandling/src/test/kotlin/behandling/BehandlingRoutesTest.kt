@@ -25,6 +25,7 @@ import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.BoddEllerArbeidetUtlandetRequest
 import no.nav.etterlatte.behandling.GyldighetsproevingService
 import no.nav.etterlatte.behandling.UtenlandstilsnittRequest
+import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktService
 import no.nav.etterlatte.behandling.behandlingRoutes
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeService
 import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerService
@@ -36,6 +37,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toNorskTid
 import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
 import no.nav.etterlatte.libs.ktor.restModule
+import no.nav.etterlatte.sak.SakService
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
@@ -52,10 +54,12 @@ internal class BehandlingRoutesTest {
 
     private val mockOAuth2Server = MockOAuth2Server()
     private lateinit var hoconApplicationConfig: HoconApplicationConfig
+    private val sakService = mockk<SakService>(relaxUnitFun = true)
     private val behandlingService = mockk<BehandlingService>(relaxUnitFun = true)
     private val gyldighetsproevingService = mockk<GyldighetsproevingService>()
     private val kommerBarnetTilGodeService = mockk<KommerBarnetTilGodeService>()
     private val manueltOpphoerService = mockk<ManueltOpphoerService>()
+    private val aktivitetspliktService = mockk<AktivitetspliktService>()
     private val behandlingFactory = mockk<BehandlingFactory>()
 
     @BeforeAll
@@ -192,6 +196,7 @@ internal class BehandlingRoutesTest {
                         gyldighetsproevingService,
                         kommerBarnetTilGodeService,
                         manueltOpphoerService,
+                        aktivitetspliktService,
                         behandlingFactory
                     )
                 }

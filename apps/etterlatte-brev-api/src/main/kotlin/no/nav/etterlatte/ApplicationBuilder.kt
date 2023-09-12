@@ -151,7 +151,7 @@ class ApplicationBuilder {
                 restModule(sikkerLogg, routePrefix = "api", config = HoconApplicationConfig(config)) {
                     brevRoute(brevService, behandlingKlient)
                     vedtaksbrevRoute(vedtaksbrevService, behandlingKlient)
-                    dokumentRoute(journalpostService, behandlingKlient)
+                    dokumentRoute(journalpostService, dokarkivService, behandlingKlient)
                 }
             }
             .build()

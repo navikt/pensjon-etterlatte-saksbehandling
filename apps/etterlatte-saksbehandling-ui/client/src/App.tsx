@@ -14,15 +14,22 @@ import { OppgavelistaContainer } from '~components/nyoppgavebenk/ToggleNyOppgave
 import { isFailure, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
 import { useEffect } from 'react'
 import { ConfigContext, hentClientConfig } from '~clientConfig'
+import BehandleJournalfoeringOppgave, {
+  FEATURE_TOGGLE_KAN_BRUKE_OPPGAVEBEHANDLING,
+} from '~components/person/journalfoeringsoppgave/BehandleJournalfoeringOppgave'
 import { useAppDispatch } from '~store/Store'
 import { settAppversion } from '~store/reducers/AppconfigReducer'
 import Versioncheck from '~Versioncheck'
+import { Klagebehandling } from '~components/klage/Klagebehandling'
+import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
+import { FEATURE_TOGGLE_KAN_BRUKE_KLAGE } from '~components/person/OpprettKlage'
 
 function App() {
   const innloggetbrukerHentet = useInnloggetSaksbehandler()
   registerLocale('nb', nb)
   const dispatch = useAppDispatch()
-
+  const kanBrukeKlage = useFeatureEnabledMedDefault(FEATURE_TOGGLE_KAN_BRUKE_KLAGE)
+  const kanBrukeOppgavebehandling = useFeatureEnabledMedDefault(FEATURE_TOGGLE_KAN_BRUKE_OPPGAVEBEHANDLING)
   const [hentConfigStatus, hentConfig] = useApiCall(hentClientConfig)
 
   useEffect(() => {
@@ -40,22 +47,21 @@ function App() {
             <ScrollToTop />
             <HeaderBanner />
             <ErrorBoundary>
-              <Routes>
-                <Route
-                  path="/"
-                  element={
-                    <ConfigContext.Provider value={hentConfigStatus.data}>
-                      <OppgavelistaContainer />
-                    </ConfigContext.Provider>
-                  }
-                />
-                <Route path="/oppgavebenken" element={<OppgavelistaContainer />} />
-                <Route path="/person/:fnr" element={<Person />} />
-                <Route path="/person/:fnr/sak/:sakId/brev" element={<BrevOversikt />} />
-                <Route path="/person/:fnr/sak/:sakId/brev/:brevId" element={<NyttBrev />} />
-                <Route path="/behandling/:behandlingId/*" element={<Behandling />} />
-                <Route path="*" element={<Navigate to="/" replace />} />
-              </Routes>
+              <ConfigContext.Provider value={hentConfigStatus.data}>
+                <Routes>
+                  <Route path="/" element={<OppgavelistaContainer />} />
+                  <Route path="/oppgavebenken" element={<OppgavelistaContainer />} />
+                  <Route path="/person/:fnr" element={<Person />} />
+                  {kanBrukeOppgavebehandling && (
+                    <Route path="/oppgave/:id/*" element={<BehandleJournalfoeringOppgave />} />
+                  )}
+                  <Route path="/person/:fnr/sak/:sakId/brev" element={<BrevOversikt />} />
+                  <Route path="/person/:fnr/sak/:sakId/brev/:brevId" element={<NyttBrev />} />
+                  <Route path="/behandling/:behandlingId/*" element={<Behandling />} />
+                  {kanBrukeKlage ? <Route path="/klage/:klageId/*" element={<Klagebehandling />} /> : null}
+                  <Route path="*" element={<Navigate to="/" replace />} />
+                </Routes>
+              </ConfigContext.Provider>
             </ErrorBoundary>
           </BrowserRouter>
         </div>

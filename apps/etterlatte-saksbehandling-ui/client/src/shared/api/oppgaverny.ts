@@ -39,6 +39,8 @@ export const erOppgaveRedigerbar = (status: Oppgavestatus): boolean => ['NY', 'U
 
 export const hentNyeOppgaver = async (): Promise<ApiResponse<OppgaveDTOny[]>> => apiClient.get('/nyeoppgaver')
 export const hentGosysOppgaver = async (): Promise<ApiResponse<OppgaveDTOny[]>> => apiClient.get('/nyeoppgaver/gosys')
+export const hentGosysOppgave = async (id: number): Promise<ApiResponse<OppgaveDTOny>> =>
+  apiClient.get(`/nyeoppgaver/gosys/${id}`)
 
 export interface SaksbehandlerEndringDto {
   saksbehandler: string

@@ -5,6 +5,7 @@ import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.journalpost.AvsenderMottaker
 import no.nav.etterlatte.brev.journalpost.Bruker
 import no.nav.etterlatte.brev.journalpost.DokumentVariant
+import no.nav.etterlatte.brev.journalpost.FerdigstillJournalpostRequest
 import no.nav.etterlatte.brev.journalpost.JournalPostType
 import no.nav.etterlatte.brev.journalpost.JournalpostDokument
 import no.nav.etterlatte.brev.journalpost.JournalpostKoder.Companion.BREV_KODE
@@ -23,6 +24,7 @@ import java.util.*
 interface DokarkivService {
     fun journalfoer(brevId: BrevID, vedtak: VedtakTilJournalfoering): JournalpostResponse
     fun journalfoer(brev: Brev, sak: Sak): JournalpostResponse
+    fun ferdigstill(journalpostId: String, request: FerdigstillJournalpostRequest)
 }
 
 class DokarkivServiceImpl(
@@ -48,6 +50,14 @@ class DokarkivServiceImpl(
 
         client.opprettJournalpost(request, true).also {
             logger.info("Journalpost opprettet (journalpostId=${it.journalpostId}, status=${it.journalpoststatus})")
+        }
+    }
+
+    override fun ferdigstill(journalpostId: String, request: FerdigstillJournalpostRequest) {
+        runBlocking {
+            client.ferdigstillJournalpost(journalpostId, request).also {
+                logger.info("Journalpost med id=$journalpostId ferdigstilt: \n$it")
+            }
         }
     }
 

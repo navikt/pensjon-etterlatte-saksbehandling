@@ -1,46 +1,46 @@
 package no.nav.etterlatte
 
 import com.typesafe.config.ConfigFactory
+import io.ktor.server.cio.CIO
 import io.ktor.server.config.HoconApplicationConfig
-import no.nav.etterlatte.libs.database.migrate
-import no.nav.etterlatte.libs.ktor.restModule
+import io.ktor.server.engine.applicationEngineEnvironment
+import io.ktor.server.engine.connector
+import io.ktor.server.engine.embeddedServer
+import io.ktor.server.routing.routing
+import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstartOgAvslutning
+import no.nav.etterlatte.libs.ktor.healthApi
+import no.nav.etterlatte.libs.ktor.metricsModule
+import no.nav.etterlatte.libs.ktor.setReady
 import no.nav.etterlatte.tilbakekreving.config.ApplicationContext
-import no.nav.etterlatte.tilbakekreving.tilbakekreving
-import no.nav.helse.rapids_rivers.RapidApplication
-import no.nav.helse.rapids_rivers.RapidsConnection
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
-import rapidsandrivers.getRapidEnv
-
-val sikkerLogg: Logger = LoggerFactory.getLogger("sikkerLogg")
+import no.nav.etterlatte.tilbakekreving.config.ApplicationProperties
 
 fun main() {
-    ApplicationContext().also {
-        rapidApplication(it).start()
-    }
+    val applicationProperties = ApplicationProperties.fromEnv(System.getenv())
+    val context = ApplicationContext(applicationProperties)
+    Server(context).run()
 }
 
-fun rapidApplication(
-    applicationContext: ApplicationContext,
-    rapidsConnection: RapidsConnection =
-        RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(getRapidEnv()))
-            .withKtorModule {
-                restModule(sikkerLogg, config = HoconApplicationConfig(ConfigFactory.load())) {
-                    tilbakekreving(applicationContext.tilbakekrevingService)
-                }
-            }
-            .build()
-): RapidsConnection =
-    with(applicationContext) {
-        rapidsConnection.register(object : RapidsConnection.StatusListener {
-            override fun onStartup(rapidsConnection: RapidsConnection) {
-                dataSource.migrate()
-                // kravgrunnlagConsumer(rapidsConnection).start() TODO trenger å sette opp kø
-            }
-
-            override fun onShutdown(rapidsConnection: RapidsConnection) {
-                jmsConnectionFactory.stop()
-            }
-        })
-        rapidsConnection
+class Server(private val context: ApplicationContext) {
+    init {
+        sikkerLoggOppstartOgAvslutning("etterlatte-tilbakekreving")
     }
+
+    private val engine = embeddedServer(
+        factory = CIO,
+        environment = applicationEngineEnvironment {
+            config = HoconApplicationConfig(ConfigFactory.load())
+            module {
+                routing { healthApi() }
+                metricsModule()
+            }
+            connector { port = 8080 }
+        }
+    )
+
+    fun run() = with(context) {
+        // kravgrunnlagConsumer.start() TODO - må få økonomi til å gjøre oppsett for kø
+
+        setReady()
+        engine.start(true)
+    }
+}

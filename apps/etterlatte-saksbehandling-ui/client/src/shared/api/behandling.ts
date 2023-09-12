@@ -1,4 +1,5 @@
 import {
+  NyBehandlingRequest,
   IBoddEllerArbeidetUtlandet,
   IDetaljertBehandling,
   IGyldighetResultat,
@@ -31,6 +32,12 @@ export const lukkGrunnlagshendelse = async (hendelse: Grunnlagsendringshendelse)
 export const hentBehandling = async (id: string): Promise<ApiResponse<IDetaljertBehandling>> => {
   return apiClient.get(`/behandling/${id}`)
 }
+
+export const hentSakForPerson = async (args: { fnr: string; type: SakType }): Promise<ApiResponse<ISak>> =>
+  apiClient.post(`/personer/sak/${args.type}`, { foedselsnummer: args.fnr })
+
+export const opprettBehandling = async (nyBehandlingRequest: NyBehandlingRequest): Promise<ApiResponse<string>> =>
+  apiClient.post(`/behandling`, { ...nyBehandlingRequest })
 
 export const avbrytBehandling = async (id: string): Promise<ApiResponse<unknown>> => {
   return apiClient.post(`/behandling/${id}/avbryt`, {})

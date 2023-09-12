@@ -26,7 +26,7 @@ services:
       - ALLOW_PLAINTEXT_LISTENER=yes
 
   wiremock:
-    container_name: wiremock
+    container_name: brev-wiremock
     image: wiremock/wiremock
     ports:
       - "9091:8080"

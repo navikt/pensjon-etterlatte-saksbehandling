@@ -7,6 +7,7 @@ import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
+import io.ktor.server.routing.put
 import io.ktor.server.routing.route
 import io.ktor.util.pipeline.PipelineContext
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
@@ -14,7 +15,10 @@ import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.KLAGEID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
+import no.nav.etterlatte.libs.common.behandling.Formkrav
 import no.nav.etterlatte.libs.common.klageId
+import no.nav.etterlatte.libs.common.kunSaksbehandler
+import no.nav.etterlatte.libs.common.medBody
 import no.nav.etterlatte.libs.common.sakId
 
 enum class KlageFeatureToggle(private val key: String) : FeatureToggle {
@@ -46,14 +50,29 @@ internal fun Route.klageRoutes(klageService: KlageService, featureToggleService:
             }
         }
 
-        get("{$KLAGEID_CALL_PARAMETER}") {
-            hvisEnabled(KlageFeatureToggle.KanBrukeKlageToggle) {
-                val klage = inTransaction {
-                    klageService.hentKlage(klageId)
+        route("{$KLAGEID_CALL_PARAMETER}") {
+            get {
+                hvisEnabled(KlageFeatureToggle.KanBrukeKlageToggle) {
+                    val klage = inTransaction {
+                        klageService.hentKlage(klageId)
+                    }
+                    when (klage) {
+                        null -> call.respond(HttpStatusCode.NotFound)
+                        else -> call.respond(klage)
+                    }
                 }
-                when (klage) {
-                    null -> call.respond(HttpStatusCode.NotFound)
-                    else -> call.respond(klage)
+            }
+
+            put("formkrav") {
+                hvisEnabled(KlageFeatureToggle.KanBrukeKlageToggle) {
+                    kunSaksbehandler { saksbehandler ->
+                        medBody<VurdereFormkravDto> { formkravDto ->
+                            val oppdatertKlage = inTransaction {
+                                klageService.lagreFormkravIKlage(klageId, formkravDto.formkrav, saksbehandler)
+                            }
+                            call.respond(oppdatertKlage)
+                        }
+                    }
                 }
             }
         }
@@ -68,3 +87,5 @@ internal fun Route.klageRoutes(klageService: KlageService, featureToggleService:
         }
     }
 }
+
+data class VurdereFormkravDto(val formkrav: Formkrav)

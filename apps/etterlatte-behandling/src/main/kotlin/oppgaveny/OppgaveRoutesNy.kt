@@ -52,6 +52,17 @@ internal fun Route.oppgaveRoutesNy(
             }
         }
 
+        get("gosys/{id}") {
+            kunSaksbehandler {
+                val id = requireNotNull(call.parameters["id"]?.toLong()) {
+                    "Manglet påkrevd oppgave-id"
+                }
+                val oppgave = gosysOppgaveService.hentOppgave(id, brukerTokenInfo)
+
+                call.respond(oppgave ?: HttpStatusCode.NoContent)
+            }
+        }
+
         get("{$BEHANDLINGSID_CALL_PARAMETER}/hentsaksbehandler") {
             kunSaksbehandler {
                 val saksbehandler = service.hentSaksbehandlerForBehandling(behandlingsId)

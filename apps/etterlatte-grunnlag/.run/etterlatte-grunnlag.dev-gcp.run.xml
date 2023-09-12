@@ -13,6 +13,8 @@
         <env name="DB_PASSWORD" value="postgres" />
         <env name="ETTERLATTE_BEHANDLING_CLIENT_ID" value="59967ac8-009c-492e-a618-e5a0f6b3e4e4" />
         <env name="ETTERLATTE_BEHANDLING_URL" value="https://etterlatte-behandling.intern.dev.nav.no" />
+        <env name="PDLTJENESTER_AZURE_SCOPE" value="api://dev-gcp.etterlatte.etterlatte-pdltjenester/.default" />
+        <env name="PDLTJENESTER_URL" value="https://etterlatte-pdltjenester.intern.dev.nav.no" />
     </envs>
     <option name="MAIN_CLASS_NAME" value="no.nav.etterlatte.ApplicationKt" />
     <module name="pensjon-etterlatte-saksbehandling.apps.etterlatte-grunnlag.main" />

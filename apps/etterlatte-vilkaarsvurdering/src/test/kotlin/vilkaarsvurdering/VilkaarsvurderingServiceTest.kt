@@ -15,16 +15,12 @@ import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.SisteIverksatteBehandling
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
-import no.nav.etterlatte.libs.common.grunnlag.Opplysning
 import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
 import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsdato
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.SOEKNAD_MOTTATT_DATO
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeknadMottattDato
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.toJson
-import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Utfall
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarOpplysningType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
@@ -36,7 +32,6 @@ import no.nav.etterlatte.libs.database.POSTGRES_VERSION
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
-import no.nav.etterlatte.libs.testdata.grunnlag.kilde
 import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.etterlatte.vilkaarsvurdering.klienter.BehandlingKlient
 import no.nav.etterlatte.vilkaarsvurdering.klienter.GrunnlagKlient
@@ -157,44 +152,15 @@ internal class VilkaarsvurderingServiceTest {
             every { revurderingsaarsak } returns null
         }
 
-        val soeknadMottattDato = LocalDateTime.now()
-        val soeknadMottattDatoOpplysning = Opplysning.Konstant(
-            UUID.randomUUID(),
-            kilde,
-            SoeknadMottattDato(mottattDato = soeknadMottattDato).toJsonNode()
-        )
-        val grunnlag = GrunnlagTestData(
-            opplysningsmapSakOverrides = mapOf(SOEKNAD_MOTTATT_DATO to soeknadMottattDatoOpplysning)
-        ).hentOpplysningsgrunnlag()
-
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
-
         val vilkaarsvurdering = runBlocking {
             service.opprettVilkaarsvurdering(uuid, brukerTokenInfo)
         }
 
         vilkaarsvurdering shouldNotBe null
         vilkaarsvurdering.behandlingId shouldBe uuid
-        vilkaarsvurdering.vilkaar shouldHaveSize 9
+        vilkaarsvurdering.vilkaar shouldHaveSize 8
         vilkaarsvurdering.vilkaar.first { it.hovedvilkaar.type == VilkaarType.OMS_ETTERLATTE_LEVER }.let { vilkaar ->
             vilkaar.grunnlag shouldBe emptyList()
-        }
-        vilkaarsvurdering.vilkaar.find {
-            it.hovedvilkaar.type == VilkaarType.OMS_AKTIVITET_ETTER_6_MND
-        }?.let { vilkaar ->
-            vilkaar.grunnlag shouldNotBe null
-            vilkaar.grunnlag shouldHaveSize 2
-
-            vilkaar.grunnlag[0].let {
-                it.opplysningsType shouldBe VilkaarOpplysningType.AVDOED_DOEDSDATO
-                val opplysning: LocalDate = objectMapper.readValue(it.opplysning!!.toJson())
-                opplysning shouldBe grunnlag.hentAvdoed().hentDoedsdato()?.verdi
-            }
-            vilkaar.grunnlag[1].let {
-                it.opplysningsType shouldBe VilkaarOpplysningType.SOEKNAD_MOTTATT_DATO
-                val opplysning: SoeknadMottattDato = objectMapper.readValue(it.opplysning!!.toJson())
-                opplysning.mottattDato shouldBe soeknadMottattDato
-            }
         }
     }
 

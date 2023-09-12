@@ -4,7 +4,7 @@ import { Beregne } from './beregne/Beregne'
 import { Vilkaarsvurdering } from './vilkaarsvurdering/Vilkaarsvurdering'
 import { Soeknadsoversikt } from './soeknadsoversikt/Soeknadoversikt'
 import Beregningsgrunnlag from './beregningsgrunnlag/Beregningsgrunnlag'
-import { IBehandlingStatus, IBehandlingsType } from '~shared/types/IDetaljertBehandling'
+import { IBehandlingStatus, IBehandlingsType, IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { Vedtaksbrev } from './brev/Vedtaksbrev'
 import { ManueltOpphoerOversikt } from './manueltopphoeroversikt/ManueltOpphoerOversikt'
 import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
@@ -12,6 +12,8 @@ import { Revurderingsoversikt } from '~components/behandling/revurderingsoversik
 import { behandlingSkalSendeBrev } from '~components/behandling/felles/utils'
 import { useBehandling } from '~components/behandling/useBehandling'
 import { erOpphoer } from '~shared/types/Revurderingsaarsak'
+import { Aktivitetsplikt } from '~components/behandling/aktivitetsplikt/Aktivitetsplikt'
+import { SakType } from '~shared/types/sak'
 
 type behandlingRouteTypes =
   | 'soeknadsoversikt'
@@ -20,6 +22,7 @@ type behandlingRouteTypes =
   | 'vilkaarsvurdering'
   | 'trygdetid'
   | 'beregningsgrunnlag'
+  | 'aktivitetsplikt'
   | 'beregne'
   | 'brev'
 
@@ -31,6 +34,7 @@ const behandlingRoutes = (
   { path: 'opphoeroversikt', element: <ManueltOpphoerOversikt behandling={behandling} /> },
   { path: 'vilkaarsvurdering', element: <Vilkaarsvurdering behandling={behandling} /> },
   { path: 'beregningsgrunnlag', element: <Beregningsgrunnlag behandling={behandling} /> },
+  { path: 'aktivitetsplikt', element: <Aktivitetsplikt behandling={behandling} /> },
   { path: 'beregne', element: <Beregne behandling={behandling} /> },
   { path: 'brev', element: <Vedtaksbrev behandling={behandling} /> },
 ]
@@ -81,23 +85,31 @@ export interface BehandlingRouteTypes {
   path: string
   description: string
   kreverBehandlingsstatus?: IBehandlingStatus
+  sakstype?: SakType
 }
 
-export const soeknadRoutes: Array<BehandlingRouteTypes> = [
-  { path: 'soeknadsoversikt', description: 'Søknadsoversikt' },
-  {
-    path: 'vilkaarsvurdering',
-    description: 'Vilkårsvurdering',
-    kreverBehandlingsstatus: IBehandlingStatus.VILKAARSVURDERT,
-  },
-  {
-    path: 'beregningsgrunnlag',
-    description: 'Beregningsgrunnlag',
-    kreverBehandlingsstatus: IBehandlingStatus.VILKAARSVURDERT,
-  },
-  { path: 'beregne', description: 'Beregning', kreverBehandlingsstatus: IBehandlingStatus.BEREGNET },
-  { path: 'brev', description: 'Vedtaksbrev' },
-]
+export const soeknadRoutes = (behandling: IDetaljertBehandling): Array<BehandlingRouteTypes> =>
+  [
+    { path: 'soeknadsoversikt', description: 'Søknadsoversikt' },
+    {
+      path: 'vilkaarsvurdering',
+      description: 'Vilkårsvurdering',
+      kreverBehandlingsstatus: IBehandlingStatus.VILKAARSVURDERT,
+    },
+    {
+      path: 'beregningsgrunnlag',
+      description: 'Beregningsgrunnlag',
+      kreverBehandlingsstatus: IBehandlingStatus.VILKAARSVURDERT,
+    },
+    {
+      path: 'aktivitetsplikt',
+      description: 'Oppfølging av aktivitet',
+      kreverBehandlingsstatus: IBehandlingStatus.VILKAARSVURDERT,
+      sakstype: SakType.OMSTILLINGSSTOENAD,
+    },
+    { path: 'beregne', description: 'Beregning', kreverBehandlingsstatus: IBehandlingStatus.BEREGNET },
+    { path: 'brev', description: 'Vedtaksbrev' },
+  ].filter((route) => route.sakstype === undefined || route.sakstype === behandling.sakType)
 
 export const manueltOpphoerRoutes: Array<BehandlingRouteTypes> = [
   { path: 'opphoeroversikt', description: 'Opphøroversikt' },
@@ -113,7 +125,9 @@ const hentAktuelleRoutes = (behandling: IBehandlingReducer | null) => {
       )
     case IBehandlingsType.FØRSTEGANGSBEHANDLING:
       return behandlingRoutes(behandling).filter((route) =>
-        soeknadRoutes.map((pathinfo) => pathinfo.path).includes(route.path)
+        soeknadRoutes(behandling)
+          .map((pathinfo) => pathinfo.path)
+          .includes(route.path)
       )
     case IBehandlingsType.REVURDERING:
       return behandlingRoutes(behandling).filter((route) =>

@@ -97,6 +97,7 @@ fun Application.module(context: ApplicationContext) {
                 gyldighetsproevingService = gyldighetsproevingService,
                 manueltOpphoerService = manueltOpphoerService,
                 kommerBarnetTilGodeService = kommerBarnetTilGodeService,
+                aktivitetspliktService = aktivtetspliktService,
                 behandlingFactory = behandlingFactory
             )
             revurderingRoutes(revurderingService = revurderingService)

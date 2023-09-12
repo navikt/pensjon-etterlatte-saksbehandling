@@ -47,26 +47,21 @@ function App() {
             <ScrollToTop />
             <HeaderBanner />
             <ErrorBoundary>
-              <Routes>
-                <Route
-                  path="/"
-                  element={
-                    <ConfigContext.Provider value={hentConfigStatus.data}>
-                      <OppgavelistaContainer />
-                    </ConfigContext.Provider>
-                  }
-                />
-                <Route path="/oppgavebenken" element={<OppgavelistaContainer />} />
-                <Route path="/person/:fnr" element={<Person />} />
-                {kanBrukeOppgavebehandling && (
-                  <Route path="/oppgave/:id/*" element={<BehandleJournalfoeringOppgave />} />
-                )}
-                <Route path="/person/:fnr/sak/:sakId/brev" element={<BrevOversikt />} />
-                <Route path="/person/:fnr/sak/:sakId/brev/:brevId" element={<NyttBrev />} />
-                <Route path="/behandling/:behandlingId/*" element={<Behandling />} />
-                {kanBrukeKlage ? <Route path="/klage/:klageId/*" element={<Klagebehandling />} /> : null}
-                <Route path="*" element={<Navigate to="/" replace />} />
-              </Routes>
+              <ConfigContext.Provider value={hentConfigStatus.data}>
+                <Routes>
+                  <Route path="/" element={<OppgavelistaContainer />} />
+                  <Route path="/oppgavebenken" element={<OppgavelistaContainer />} />
+                  <Route path="/person/:fnr" element={<Person />} />
+                  {kanBrukeOppgavebehandling && (
+                    <Route path="/oppgave/:id/*" element={<BehandleJournalfoeringOppgave />} />
+                  )}
+                  <Route path="/person/:fnr/sak/:sakId/brev" element={<BrevOversikt />} />
+                  <Route path="/person/:fnr/sak/:sakId/brev/:brevId" element={<NyttBrev />} />
+                  <Route path="/behandling/:behandlingId/*" element={<Behandling />} />
+                  {kanBrukeKlage ? <Route path="/klage/:klageId/*" element={<Klagebehandling />} /> : null}
+                  <Route path="*" element={<Navigate to="/" replace />} />
+                </Routes>
+              </ConfigContext.Provider>
             </ErrorBoundary>
           </BrowserRouter>
         </div>

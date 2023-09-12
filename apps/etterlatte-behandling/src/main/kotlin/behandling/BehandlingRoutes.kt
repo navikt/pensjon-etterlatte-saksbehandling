@@ -13,6 +13,7 @@ import io.ktor.server.routing.application
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
+import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktService
 import no.nav.etterlatte.behandling.domain.ManueltOpphoer
 import no.nav.etterlatte.behandling.domain.TilstandException
 import no.nav.etterlatte.behandling.domain.toBehandlingSammendrag
@@ -26,6 +27,7 @@ import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.JaNeiMedBegrunnelse
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
+import no.nav.etterlatte.libs.common.behandling.OpprettAktivitetspliktOppfolging
 import no.nav.etterlatte.libs.common.behandling.Utenlandstilsnitt
 import no.nav.etterlatte.libs.common.behandling.UtenlandstilsnittType
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
@@ -46,6 +48,7 @@ internal fun Route.behandlingRoutes(
     gyldighetsproevingService: GyldighetsproevingService,
     kommerBarnetTilGodeService: KommerBarnetTilGodeService,
     manueltOpphoerService: ManueltOpphoerService,
+    aktivitetspliktService: AktivitetspliktService,
     behandlingFactory: BehandlingFactory
 ) {
     val logger = application.log
@@ -211,6 +214,30 @@ internal fun Route.behandlingRoutes(
                     )
                 } catch (e: TilstandException.UgyldigTilstand) {
                     call.respond(HttpStatusCode.BadRequest, "Kan ikke endre feltet")
+                }
+            }
+        }
+
+        route("/aktivitetsplikt") {
+            get {
+                val result = aktivitetspliktService.hentAktivitetspliktOppfolging(behandlingsId)
+                call.respond(result ?: HttpStatusCode.NoContent)
+            }
+
+            post {
+                hentNavidentFraToken { navIdent ->
+                    val oppfolging = call.receive<OpprettAktivitetspliktOppfolging>()
+
+                    try {
+                        val result = aktivitetspliktService.lagreAktivitetspliktOppfolging(
+                            behandlingsId,
+                            oppfolging,
+                            navIdent
+                        )
+                        call.respond(result)
+                    } catch (e: TilstandException.UgyldigTilstand) {
+                        call.respond(HttpStatusCode.BadRequest, "Kunne ikke endre på feltet")
+                    }
                 }
             }
         }

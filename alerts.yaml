@@ -9,16 +9,6 @@ spec:
   groups:
   - name: alerts
     rules:
-    - alert: etterlatte-saksbehandling-error-logg
-      expr: 'sum(max_over_time(log_messages_errors{app=~"etterlatte-.*",level="Error"}[15m]) or vector(0)) - 
-      (sum(max_over_time(log_messages_errors{app=~"etterlatte-.*",level="Error"}[15m] offset 15m) or vector(0))) > 0'
-      for: 1s
-      annotations:
-        consequence: "Det har blitt logget en eller flere feilmeldinger siste 15 min"
-        action: "Sjekk logger her: `{{LOGS_URL}}`"
-      labels:
-        namespace: etterlatte
-        severity: critical
     - alert: etterlatte-saksbehandling-applikasjon-nede
       expr: sum by(deployment) (kube_deployment_status_replicas_available{deployment=~"etterlatte-.*"} == 0)
       for: 2m

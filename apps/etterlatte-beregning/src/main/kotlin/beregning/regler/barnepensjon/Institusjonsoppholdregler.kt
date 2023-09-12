@@ -31,7 +31,7 @@ val erBrukerIInstitusjon: Regel<BarnepensjonGrunnlag, Boolean> = finnFaktumIGrun
 val institusjonsoppholdSatsRegel = RegelMeta(
     gjelderFra = BP_1967_DATO,
     beskrivelse = "Finner satsen for institusjonsoppholdberegning",
-    regelReferanse = RegelReferanse(id = "Finner sats for bruker, gitt at de skal ha institusjonsoppholdsats")
+    regelReferanse = RegelReferanse(id = "BP-BEREGNING-1967-REDUKSJON-INSTITUSJON")
 ) benytter grunnbeloep og institusjonsoppholdRegel med { grunnbeloep, prosent ->
     Beregningstall.somBroek(prosent).multiply(grunnbeloep.grunnbeloepPerMaaned)
 }

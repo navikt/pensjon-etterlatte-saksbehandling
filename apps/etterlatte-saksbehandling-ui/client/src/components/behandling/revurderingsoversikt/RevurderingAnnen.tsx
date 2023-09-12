@@ -1,6 +1,6 @@
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { hentUndertypeFraBehandling, RevurderingAarsakAnnen, RevurderingInfo } from '~shared/types/RevurderingInfo'
-import React, { FormEvent, useState } from 'react'
+import { FormEvent, useState } from 'react'
 import { BodyShort, Button, Heading, TextField } from '@navikt/ds-react'
 import { hentBehandlesFraStatus } from '~components/behandling/felles/utils'
 import { isFailure, isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
@@ -15,17 +15,17 @@ export const RevurderingAnnen = (props: { behandling: IDetaljertBehandling }) =>
   const revurderingAnnenInfo = hentUndertypeFraBehandling<RevurderingAarsakAnnen>('ANNEN', behandling)
   const [revurderingsaarsak, setRevurderingsaarsak] = useState(revurderingAnnenInfo?.aarsak)
   const [begrunnelse, setBegrunnelse] = useState(behandling.revurderinginfo?.begrunnelse ?? '')
-  const [feilmelding, setFeilmelding] = useState<string | undefined>(undefined)
+  const [feilmelding, setFeilmelding] = useState<string | null>(null)
   const [lagrestatus, lagre] = useApiCall(lagreRevurderingInfo)
   const redigerbar = hentBehandlesFraStatus(behandling.status)
 
   const handlesubmit = (e: FormEvent) => {
     e.stopPropagation()
     e.preventDefault()
-    setFeilmelding(undefined)
+    setFeilmelding(null)
 
     if (!revurderingsaarsak) {
-      setFeilmelding('Revurderingsårsak mangler')
+      setFeilmelding('Årsak mangler')
       return
     }
     if (!begrunnelse) {

@@ -66,7 +66,9 @@ internal class BehandlingClientTest {
         assertEquals(randomUUID, hentetSaksid)
         assertEquals(
             1,
-            objectMapper.readValue<NyBehandlingRequest>((runBlocking { String(requestList[0].body.toByteArray()) })).sak
+            objectMapper.readValue<NyBehandlingRequest>(
+                (runBlocking { String(requestList[0].body.toByteArray()) })
+            ).sakId
         )
     }
 

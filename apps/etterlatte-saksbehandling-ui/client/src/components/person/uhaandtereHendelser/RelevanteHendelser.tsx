@@ -5,7 +5,7 @@ import { isFailure, isPending, isSuccess, useApiCall } from '~shared/hooks/useAp
 import React, { useEffect, useMemo, useState } from 'react'
 import { hentPersonerISak } from '~shared/api/grunnlag'
 import HistoriskeHendelser from '~components/person/uhaandtereHendelser/HistoriskeHendelser'
-import { OpprettNyBehandling } from '~components/person/OpprettNyBehandling'
+import { OpprettNyRevurdering } from '~components/person/OpprettNyRevurdering'
 import VurderHendelseModal from '~components/person/VurderHendelseModal'
 import UhaandtertHendelse from '~components/person/uhaandtereHendelser/UhaandtertHendelse'
 import { IBehandlingsType } from '~shared/types/IDetaljertBehandling'
@@ -121,7 +121,7 @@ export default function RelevanteHendelser(props: Props) {
               revurderinger={revurderingerStatus.data}
             />
           )}
-          <OpprettNyBehandling revurderinger={revurderingerStatus.data} sakId={sak.id} />
+          <OpprettNyRevurdering revurderinger={revurderingerStatus.data} sakId={sak.id} />
         </>
       )}
 

@@ -7,7 +7,7 @@ import { Revurderingsaarsak, tekstRevurderingsaarsak } from '~shared/types/Revur
 import { useNavigate } from 'react-router-dom'
 import { ButtonContainer } from '~components/person/VurderHendelseModal'
 
-export const OpprettNyBehandling = ({
+export const OpprettNyRevurdering = ({
   sakId,
   revurderinger,
 }: {
@@ -18,7 +18,6 @@ export const OpprettNyBehandling = ({
   const [open, setOpen] = useState(false)
   const [valgtRevurdering, setValgtRevurdering] = useState<Revurderingsaarsak | undefined>()
   const [fritekstgrunn, setFritekstgrunn] = useState<string>('')
-  const stoettedeRevurderinger = revurderinger
 
   const [opprettRevurderingStatus, opprettRevurdering, resetApiCall] = useApiCall(opprettRevurderingApi)
   const navigate = useNavigate()
@@ -44,7 +43,7 @@ export const OpprettNyBehandling = ({
   }
 
   return (
-    <OpprettNyBehandlingWrapper>
+    <OpprettRevurderingWrapper>
       <>
         <Button variant="secondary" onClick={() => setOpen(true)}>
           Opprett ny behandling
@@ -63,7 +62,7 @@ export const OpprettNyBehandling = ({
               error={error}
             >
               <option>Velg type</option>
-              {stoettedeRevurderinger.map((revurdering, i) => {
+              {revurderinger.map((revurdering, i) => {
                 return (
                   <option key={`revurdering${i}`} value={revurdering}>
                     {tekstRevurderingsaarsak[revurdering]}
@@ -93,11 +92,11 @@ export const OpprettNyBehandling = ({
           </Modal.Body>
         </Modal>
       </>
-    </OpprettNyBehandlingWrapper>
+    </OpprettRevurderingWrapper>
   )
 }
 
-const OpprettNyBehandlingWrapper = styled.div`
+const OpprettRevurderingWrapper = styled.div`
   margin-top: 3rem;
 `
 

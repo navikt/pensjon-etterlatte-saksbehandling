@@ -14,11 +14,21 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.grunnlag.NyeSaksopplysninger
+import no.nav.etterlatte.libs.common.grunnlag.lagOpplysning
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeknadMottattDato
+import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
+import no.nav.etterlatte.libs.common.gyldigSoeknad.VurderingsResultat
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
+import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
+import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.oppgaveny.OppgaveServiceNy
-import no.nav.etterlatte.sak.SakDao
-import no.nav.etterlatte.sak.filterSakerForEnheter
+import no.nav.etterlatte.sak.SakService
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 
@@ -26,13 +36,48 @@ class BehandlingFactory(
     private val oppgaveService: OppgaveServiceNy,
     private val grunnlagService: GrunnlagService,
     private val revurderingService: RevurderingService,
-    private val sakDao: SakDao,
+    private val gyldighetsproevingService: GyldighetsproevingService,
+    private val sakService: SakService,
     private val behandlingDao: BehandlingDao,
     private val hendelseDao: HendelseDao,
     private val behandlingHendelser: BehandlingHendelserKafkaProducer,
     private val featureToggleService: FeatureToggleService
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
+
+    /*
+     * Brukes av frontend for å kunne opprette sak og behandling for en Gosys-oppgave.
+     */
+    fun opprettSakOgBehandlingForOppgave(request: NyBehandlingRequest): Behandling {
+        val soeker = request.persongalleri.soeker
+
+        val sak = sakService.finnEllerOpprettSak(soeker, request.sakType)
+
+        val behandling = opprettBehandling(
+            sak.id, request.persongalleri, request.mottattDato, Vedtaksloesning.GJENNY
+        ) ?: throw IllegalStateException("Kunne ikke opprette behandling")
+
+        val gyldighetsvurdering = GyldighetsResultat(
+            VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING,
+            emptyList(),
+            Tidspunkt.now().toLocalDatetimeUTC()
+        )
+
+        gyldighetsproevingService.lagreGyldighetsproeving(behandling.id, gyldighetsvurdering)
+
+        val mottattDato = LocalDateTime.parse(request.mottattDato)
+        val kilde = Grunnlagsopplysning.Privatperson(soeker, mottattDato.toTidspunkt())
+
+        val opplysninger = listOf(
+            lagOpplysning(Opplysningstype.SPRAAK, kilde, request.spraak.toJsonNode()),
+            lagOpplysning(Opplysningstype.SOEKNAD_MOTTATT_DATO, kilde, SoeknadMottattDato(mottattDato).toJsonNode())
+        )
+
+        grunnlagService.leggTilNyeOpplysninger(sak.id, NyeSaksopplysninger(opplysninger))
+
+        return behandling
+    }
+
     fun opprettBehandling(
         sakId: Long,
         persongalleri: Persongalleri,
@@ -40,14 +85,8 @@ class BehandlingFactory(
         kilde: Vedtaksloesning
     ): Behandling? {
         logger.info("Starter behandling i sak $sakId")
-        val sak = inTransaction {
-            requireNotNull(
-                sakDao.hentSak(sakId)?.let {
-                    listOf(it).filterSakerForEnheter(featureToggleService, Kontekst.get().AppUser).firstOrNull()
-                }
-            ) {
-                "Fant ingen sak med id=$sakId!"
-            }
+        val sak = inTransaction { sakService.finnSak(sakId) }.let {
+            requireNotNull(it) { "Fant ingen sak med id=$sakId!" }
         }
         val harBehandlingerForSak = inTransaction {
             behandlingDao.alleBehandlingerISak(sak.id)

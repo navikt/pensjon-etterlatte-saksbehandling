@@ -61,7 +61,7 @@ export const formaterVedtakType = (type: VedtakType): string => {
   }
 }
 
-export const formaterFnr = (fnr: String) => {
+export const formaterFnr = (fnr: string) => {
   if (fnr.length === 11) return fnr.replace(/\d{6}(?=.)/g, '$& ')
   return fnr
 }

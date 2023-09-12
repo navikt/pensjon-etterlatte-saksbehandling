@@ -1,15 +1,17 @@
 import { DatePicker, useDatepicker } from '@navikt/ds-react'
 import { UseDatepickerOptions } from '@navikt/ds-react/esm/date/hooks/useDatepicker'
-import React from 'react'
+import React, { ReactNode } from 'react'
 
 export const DatoVelger = ({
   value,
   onChange,
   label,
+  description,
 }: {
   value: Date | null
   onChange: (date: Date | null) => void
   label: string
+  description?: ReactNode
 }) => {
   const { datepickerProps, inputProps } = useDatepicker({
     onDateChange: (date: Date) => onChange(date),
@@ -20,7 +22,7 @@ export const DatoVelger = ({
 
   return (
     <DatePicker {...datepickerProps}>
-      <DatePicker.Input {...inputProps} label={label} />
+      <DatePicker.Input {...inputProps} label={label} description={description} />
     </DatePicker>
   )
 }

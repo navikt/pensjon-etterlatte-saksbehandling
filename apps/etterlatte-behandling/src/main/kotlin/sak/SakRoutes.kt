@@ -106,6 +106,17 @@ internal fun Route.sakWebRoutes(
         }
 
         route("/personer/") {
+            post("sak/{type}") {
+                withFoedselsnummerInternal(tilgangService) { fnr ->
+                    val type: SakType = requireNotNull(call.parameters["type"]) {
+                        "Mangler påkrevd parameter {type} for å hente sak på bruker"
+                    }.let { enumValueOf(it) }
+
+                    val sak = inTransaction { sakService.finnSak(fnr.value, type) }
+                    call.respond(sak ?: HttpStatusCode.NoContent)
+                }
+            }
+
             post("behandlinger") {
                 withFoedselsnummerInternal(tilgangService) { fnr ->
                     val behandlinger = sakService.finnSaker(fnr.value)

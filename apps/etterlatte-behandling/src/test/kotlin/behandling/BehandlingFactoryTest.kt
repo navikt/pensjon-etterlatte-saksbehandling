@@ -1,5 +1,6 @@
 package behandling
 
+import io.mockk.Runs
 import io.mockk.clearAllMocks
 import io.mockk.confirmVerified
 import io.mockk.every
@@ -19,6 +20,8 @@ import no.nav.etterlatte.behandling.BehandlingHendelserKafkaProducer
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.BehandlingServiceFeatureToggle
 import no.nav.etterlatte.behandling.GrunnlagService
+import no.nav.etterlatte.behandling.GyldighetsproevingService
+import no.nav.etterlatte.behandling.NyBehandlingRequest
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.domain.OpprettBehandling
 import no.nav.etterlatte.behandling.domain.Revurdering
@@ -46,28 +49,30 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.oppgaveny.OppgaveServiceNy
 import no.nav.etterlatte.revurdering
-import no.nav.etterlatte.sak.SakDao
+import no.nav.etterlatte.sak.SakService
 import no.nav.etterlatte.sak.SakServiceFeatureToggle
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.sql.Connection
+import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.*
 
 class BehandlingFactoryTest {
 
     private val user = mockk<SaksbehandlerMedEnheterOgRoller>()
-    private val sakDaoMock = mockk<SakDao>()
-    private val behandlingDaoMock = mockk<BehandlingDao>()
-    private val hendelseDaoMock = mockk<HendelseDao>()
-    private val behandlingHendelserKafkaProducerMock = mockk<BehandlingHendelserKafkaProducer>()
+    private val behandlingDaoMock = mockk<BehandlingDao>(relaxUnitFun = true)
+    private val hendelseDaoMock = mockk<HendelseDao>(relaxUnitFun = true)
+    private val behandlingHendelserKafkaProducerMock = mockk<BehandlingHendelserKafkaProducer>(relaxUnitFun = true)
     private val featureToggleService = mockk<FeatureToggleService>()
     private val grunnlagsendringshendelseDao = mockk<GrunnlagsendringshendelseDao>()
-    private val grunnlagService = mockk<GrunnlagService>()
+    private val grunnlagService = mockk<GrunnlagService>(relaxUnitFun = true)
     private val oppgaveService = mockk<OppgaveServiceNy>()
     private val behandlingService = mockk<BehandlingService>()
+    private val sakServiceMock = mockk<SakService>()
+    private val gyldighetsproevingService = mockk<GyldighetsproevingService>(relaxUnitFun = true)
     private val mockOppgave = opprettNyOppgaveMedReferanseOgSak(
         "behandling",
         Sak("ident", SakType.BARNEPENSJON, 1L, Enheter.AALESUND.enhetNr),
@@ -95,7 +100,8 @@ class BehandlingFactoryTest {
         oppgaveService,
         grunnlagService,
         revurderingService,
-        sakDaoMock,
+        gyldighetsproevingService,
+        sakServiceMock,
         behandlingDaoMock,
         hendelseDaoMock,
         behandlingHendelserKafkaProducerMock,
@@ -122,7 +128,13 @@ class BehandlingFactoryTest {
 
     @AfterEach
     fun after() {
-        confirmVerified(sakDaoMock, behandlingDaoMock, hendelseDaoMock, behandlingHendelserKafkaProducerMock)
+        confirmVerified(
+            sakServiceMock,
+            behandlingDaoMock,
+            hendelseDaoMock,
+            behandlingHendelserKafkaProducerMock,
+            grunnlagService
+        )
         clearAllMocks()
     }
 
@@ -167,7 +179,7 @@ class BehandlingFactoryTest {
             listOf("Gjenlevende")
         )
 
-        every { sakDaoMock.hentSak(any()) } returns opprettetBehandling.sak
+        every { sakServiceMock.finnSak(any()) } returns opprettetBehandling.sak
         every { behandlingDaoMock.opprettBehandling(capture(behandlingOpprettes)) } returns Unit
         every { behandlingDaoMock.hentBehandling(capture(behandlingHentes)) } returns opprettetBehandling
         every { hendelseDaoMock.behandlingOpprettet(any()) } returns Unit
@@ -195,7 +207,7 @@ class BehandlingFactoryTest {
         Assertions.assertEquals(behandlingHentes.captured, behandlingOpprettes.captured.id)
 
         verify(exactly = 1) {
-            sakDaoMock.hentSak(any())
+            sakServiceMock.finnSak(any())
             behandlingDaoMock.hentBehandling(any())
             behandlingDaoMock.opprettBehandling(any())
             hendelseDaoMock.behandlingOpprettet(any())
@@ -248,7 +260,7 @@ class BehandlingFactoryTest {
             listOf("Gjenlevende")
         )
 
-        every { sakDaoMock.hentSak(any()) } returns opprettetBehandling.sak
+        every { sakServiceMock.finnSak(any()) } returns opprettetBehandling.sak
         every { behandlingDaoMock.opprettBehandling(capture(behandlingOpprettes)) } returns Unit
         every { behandlingDaoMock.hentBehandling(capture(behandlingHentes)) } returns opprettetBehandling
         every { behandlingDaoMock.alleBehandlingerISak(any()) } returns emptyList()
@@ -269,7 +281,7 @@ class BehandlingFactoryTest {
         Assertions.assertTrue(foerstegangsbehandling is Foerstegangsbehandling)
 
         verify(exactly = 1) {
-            sakDaoMock.hentSak(any())
+            sakServiceMock.finnSak(any())
             behandlingDaoMock.hentBehandling(any())
             behandlingDaoMock.opprettBehandling(any())
             hendelseDaoMock.behandlingOpprettet(any())
@@ -324,7 +336,7 @@ class BehandlingFactoryTest {
             listOf("Gjenlevende")
         )
 
-        every { sakDaoMock.hentSak(any()) } returns underArbeidBehandling.sak
+        every { sakServiceMock.finnSak(any()) } returns underArbeidBehandling.sak
         every { behandlingDaoMock.opprettBehandling(capture(behandlingOpprettes)) } returns Unit
         every { behandlingDaoMock.hentBehandling(capture(behandlingHentes)) } returns underArbeidBehandling
         every {
@@ -363,7 +375,7 @@ class BehandlingFactoryTest {
         Assertions.assertTrue(nyfoerstegangsbehandling is Foerstegangsbehandling)
 
         verify(exactly = 2) {
-            sakDaoMock.hentSak(any())
+            sakServiceMock.finnSak(any())
             behandlingDaoMock.hentBehandling(any())
             behandlingDaoMock.opprettBehandling(any())
             hendelseDaoMock.behandlingOpprettet(any())
@@ -422,7 +434,7 @@ class BehandlingFactoryTest {
             listOf("Gjenlevende")
         )
 
-        every { sakDaoMock.hentSak(any()) } returns nyBehandling.sak
+        every { sakServiceMock.finnSak(any()) } returns nyBehandling.sak
         every { behandlingDaoMock.opprettBehandling(capture(behandlingOpprettes)) } returns Unit
         every { behandlingDaoMock.hentBehandling(capture(behandlingHentes)) } returns nyBehandling
         every {
@@ -504,12 +516,86 @@ class BehandlingFactoryTest {
             oppgaveService.opprettNyOppgaveMedSakOgReferanse(any(), any(), any(), any(), any())
         }
         verify(exactly = 2) {
-            sakDaoMock.hentSak(any())
+            sakServiceMock.finnSak(any())
             behandlingDaoMock.hentBehandling(any())
             behandlingDaoMock.opprettBehandling(any())
             hendelseDaoMock.behandlingOpprettet(any())
             behandlingDaoMock.alleBehandlingerISak(any())
             behandlingHendelserKafkaProducerMock.sendMeldingForHendelse(any(), any())
+        }
+    }
+
+    @Test
+    fun `Opprett ny sak og behandling for journalfoeringsoppgave`() {
+        val datoNaa = Tidspunkt.now().toLocalDatetimeUTC()
+        val behandlingOpprettes = slot<OpprettBehandling>()
+        val behandlingHentes = slot<UUID>()
+
+        every { featureToggleService.isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false) } returns false
+        every { featureToggleService.isEnabled(SakServiceFeatureToggle.FiltrerMedEnhetId, false) } returns false
+
+        val persongalleri = Persongalleri(
+            "11057523044",
+            "Innsender",
+            emptyList(),
+            listOf("Avdoed"),
+            listOf("Gjenlevende")
+        )
+
+        val sak = Sak(persongalleri.soeker, SakType.BARNEPENSJON, 1, Enheter.defaultEnhet.enhetNr)
+
+        val opprettetBehandling = Foerstegangsbehandling(
+            id = UUID.randomUUID(),
+            sak = sak,
+            behandlingOpprettet = datoNaa,
+            sistEndret = datoNaa,
+            status = BehandlingStatus.OPPRETTET,
+            soeknadMottattDato = Tidspunkt.now().toLocalDatetimeUTC(),
+            gyldighetsproeving = null,
+            virkningstidspunkt = Virkningstidspunkt(
+                YearMonth.of(2022, 1),
+                Grunnlagsopplysning.Saksbehandler.create("ident"),
+                "begrunnelse"
+            ),
+            utenlandstilsnitt = null,
+            boddEllerArbeidetUtlandet = null,
+            kommerBarnetTilgode = null,
+            kilde = Vedtaksloesning.GJENNY
+        )
+
+        every { sakServiceMock.finnEllerOpprettSak(any(), any()) } returns sak
+        every { sakServiceMock.finnSak(any<Long>()) } returns sak
+        every { behandlingDaoMock.opprettBehandling(capture(behandlingOpprettes)) } just Runs
+        every { behandlingDaoMock.hentBehandling(capture(behandlingHentes)) } returns opprettetBehandling
+        every { behandlingDaoMock.alleBehandlingerISak(any()) } returns emptyList()
+        every {
+            oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(any(), any())
+        } returns mockOppgave
+
+        val resultat = behandlingFactory.opprettSakOgBehandlingForOppgave(
+            NyBehandlingRequest(sak.sakType, persongalleri, LocalDateTime.now().toString(), "nb")
+        )
+
+        Assertions.assertEquals(opprettetBehandling, resultat)
+        Assertions.assertEquals(opprettetBehandling.sak, resultat.sak)
+        Assertions.assertEquals(opprettetBehandling.id, resultat.id)
+        Assertions.assertEquals(opprettetBehandling.behandlingOpprettet, resultat.behandlingOpprettet)
+        Assertions.assertEquals(1, behandlingOpprettes.captured.sakId)
+        Assertions.assertEquals(behandlingHentes.captured, behandlingOpprettes.captured.id)
+
+        verify(exactly = 1) {
+            sakServiceMock.finnEllerOpprettSak(persongalleri.soeker, SakType.BARNEPENSJON)
+            sakServiceMock.finnSak(sak.id)
+            behandlingDaoMock.opprettBehandling(any())
+            hendelseDaoMock.behandlingOpprettet(any())
+            behandlingDaoMock.hentBehandling(any())
+            behandlingDaoMock.alleBehandlingerISak(any())
+            behandlingHendelserKafkaProducerMock.sendMeldingForHendelse(any(), BehandlingHendelseType.OPPRETTET)
+            grunnlagService.leggInnNyttGrunnlag(any(), any())
+            grunnlagService.leggTilNyeOpplysninger(sak.id, any())
+            grunnlagService.leggTilNyeOpplysninger(sak.id, any())
+            oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(any(), any())
+            oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(any(), any())
         }
     }
 }

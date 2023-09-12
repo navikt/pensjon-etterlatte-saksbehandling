@@ -14,6 +14,9 @@ import { OppgavelistaContainer } from '~components/nyoppgavebenk/ToggleNyOppgave
 import { isFailure, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
 import { useEffect } from 'react'
 import { ConfigContext, hentClientConfig } from '~clientConfig'
+import BehandleJournalfoeringOppgave, {
+  FEATURE_TOGGLE_KAN_BRUKE_OPPGAVEBEHANDLING,
+} from '~components/person/journalfoeringsoppgave/BehandleJournalfoeringOppgave'
 import { useAppDispatch } from '~store/Store'
 import { settAppversion } from '~store/reducers/AppconfigReducer'
 import Versioncheck from '~Versioncheck'
@@ -26,6 +29,7 @@ function App() {
   registerLocale('nb', nb)
   const dispatch = useAppDispatch()
   const kanBrukeKlage = useFeatureEnabledMedDefault(FEATURE_TOGGLE_KAN_BRUKE_KLAGE)
+  const kanBrukeOppgavebehandling = useFeatureEnabledMedDefault(FEATURE_TOGGLE_KAN_BRUKE_OPPGAVEBEHANDLING)
   const [hentConfigStatus, hentConfig] = useApiCall(hentClientConfig)
 
   useEffect(() => {
@@ -54,6 +58,9 @@ function App() {
                 />
                 <Route path="/oppgavebenken" element={<OppgavelistaContainer />} />
                 <Route path="/person/:fnr" element={<Person />} />
+                {kanBrukeOppgavebehandling && (
+                  <Route path="/oppgave/:id/*" element={<BehandleJournalfoeringOppgave />} />
+                )}
                 <Route path="/person/:fnr/sak/:sakId/brev" element={<BrevOversikt />} />
                 <Route path="/person/:fnr/sak/:sakId/brev/:brevId" element={<NyttBrev />} />
                 <Route path="/behandling/:behandlingId/*" element={<Behandling />} />

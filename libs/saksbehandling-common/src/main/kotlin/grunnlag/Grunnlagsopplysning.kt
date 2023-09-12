@@ -110,3 +110,19 @@ open class Grunnlagsopplysning<T>(
 val objectMapperKilde = jacksonObjectMapper().registerModule(JavaTimeModule()).disable(
     SerializationFeature.WRITE_DATES_AS_TIMESTAMPS
 )
+
+fun <T : Any> lagOpplysning(
+    opplysningsType: Opplysningstype,
+    kilde: Grunnlagsopplysning.Kilde,
+    opplysning: T,
+    periode: Periode? = null
+): Grunnlagsopplysning<T> {
+    return Grunnlagsopplysning(
+        id = UUID.randomUUID(),
+        kilde = kilde,
+        opplysningType = opplysningsType,
+        meta = objectMapper.createObjectNode(),
+        opplysning = opplysning,
+        periode = periode
+    )
+}

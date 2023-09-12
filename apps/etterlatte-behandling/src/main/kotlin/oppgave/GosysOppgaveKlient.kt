@@ -58,6 +58,8 @@ interface GosysOppgaveKlient {
         nyFrist: LocalDate,
         brukerTokenInfo: BrukerTokenInfo
     )
+
+    suspend fun hentOppgave(id: Long, brukerTokenInfo: BrukerTokenInfo): GosysApiOppgave
 }
 
 class GosysOppgaveKlientImpl(config: Config, httpClient: HttpClient) : GosysOppgaveKlient {
@@ -99,6 +101,24 @@ class GosysOppgaveKlientImpl(config: Config, httpClient: HttpClient) : GosysOppg
             logger.error("Noe feilet mot Gosys [ident=${brukerTokenInfo.ident()}]", e)
             throw e
         }
+    }
+
+    override suspend fun hentOppgave(id: Long, brukerTokenInfo: BrukerTokenInfo): GosysApiOppgave {
+        return downstreamResourceClient
+            .get(
+                resource = Resource(
+                    clientId = clientId,
+                    url = "$resourceUrl/api/v1/oppgaver/$id"
+                ),
+                brukerTokenInfo = brukerTokenInfo
+            )
+            .mapBoth(
+                success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
+                failure = { errorResponse ->
+                    logger.error("Feil ved henting av Gosys oppgave med id=$id", errorResponse.throwable)
+                    throw errorResponse
+                }
+            )
     }
 
     override suspend fun tildelOppgaveTilSaksbehandler(

@@ -41,7 +41,6 @@ import testsupport.buildTestApplicationConfigurationForOauth
 import java.time.LocalDateTime
 import java.time.Month
 import java.time.YearMonth
-import java.util.*
 import java.util.UUID.randomUUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)

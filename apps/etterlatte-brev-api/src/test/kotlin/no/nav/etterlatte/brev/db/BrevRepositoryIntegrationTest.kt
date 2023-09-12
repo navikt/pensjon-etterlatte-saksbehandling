@@ -13,6 +13,7 @@ import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.BrevInnhold
 import no.nav.etterlatte.brev.model.BrevInnholdVedlegg
 import no.nav.etterlatte.brev.model.BrevProsessType
+import no.nav.etterlatte.brev.model.BrevVedleggKey
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.OpprettNyttBrev
 import no.nav.etterlatte.brev.model.Pdf
@@ -303,7 +304,7 @@ internal class BrevRepositoryIntegrationTest {
                 innhold_vedlegg = listOf(
                     BrevInnholdVedlegg(
                         tittel = "Tittel",
-                        key = "brev_vedlegg",
+                        key = BrevVedleggKey.BEREGNING_INNHOLD,
                         payload = Slate(listOf(Slate.Element(Slate.ElementType.PARAGRAPH)))
                     )
                 )
@@ -323,7 +324,7 @@ internal class BrevRepositoryIntegrationTest {
                 innhold_vedlegg = listOf(
                     BrevInnholdVedlegg(
                         tittel = "tittel",
-                        key = "brev_vedlegg",
+                        key = BrevVedleggKey.BEREGNING_INNHOLD,
                         payload = null
                     )
                 )
@@ -343,7 +344,7 @@ internal class BrevRepositoryIntegrationTest {
                 listOf(
                     BrevInnholdVedlegg(
                         tittel = "tittel",
-                        key = "brev_vedlegg",
+                        key = BrevVedleggKey.BEREGNING_INNHOLD,
                         payload = Slate(
                             listOf(
                                 Slate.Element(

@@ -65,13 +65,19 @@ object SlateHelper {
         return when (behandling.sakType) {
             SakType.OMSTILLINGSSTOENAD -> {
                 when (behandling.vedtak.type) {
-                    VedtakType.INNVILGELSE -> getJsonFile("/maler/vedlegg/oms_foerstegangsvedtak_innvilgelse.json")
+                    VedtakType.INNVILGELSE -> BrevInnholdVedlegg.innvilgelseOMS()
+                    VedtakType.ENDRING -> {
+                        when (behandling.revurderingsaarsak) {
+                            RevurderingAarsak.INNTEKTSENDRING -> BrevInnholdVedlegg.inntektsendringOMS()
+                            else -> null
+                        }
+                    }
                     else -> null
                 }
             }
 
             SakType.BARNEPENSJON -> null
-        }?.let { deserialize(it) }
+        }
     }
 
     fun opprettTomBrevmal() = deserialize<Slate>(getJsonFile("/maler/tom-brevmal.json"))

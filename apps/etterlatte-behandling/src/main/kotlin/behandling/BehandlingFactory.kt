@@ -62,7 +62,7 @@ class BehandlingFactory(
 
         val gyldighetsvurdering = GyldighetsResultat(
             VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING,
-            listOf(),
+            emptyList(),
             Tidspunkt.now().toLocalDatetimeUTC()
         )
 

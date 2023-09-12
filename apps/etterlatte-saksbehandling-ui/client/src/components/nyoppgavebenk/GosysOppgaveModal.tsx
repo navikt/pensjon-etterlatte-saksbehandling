@@ -8,6 +8,8 @@ import { FristWrapper } from '~components/nyoppgavebenk/Oppgavelista'
 import { isBefore } from 'date-fns'
 import { OppgaveDTOny } from '~shared/api/oppgaverny'
 import { ConfigContext } from '~clientConfig'
+import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
+import { FEATURE_TOGGLE_KAN_BRUKE_OPPGAVEBEHANDLING } from '~components/person/oppgavebehandling/Oppgavebehandling'
 
 const TagRow = styled.div`
   display: flex;
@@ -37,6 +39,7 @@ const ButtonRow = styled.div`
 export const GosysOppgaveModal = ({ oppgave }: { oppgave: OppgaveDTOny }) => {
   const [open, setOpen] = useState(false)
   const { opprettet, frist, status, fnr, gjelder, enhet, saksbehandler, beskrivelse, sakType } = oppgave
+  const kanBrukeOppgavebehandling = useFeatureEnabledMedDefault(FEATURE_TOGGLE_KAN_BRUKE_OPPGAVEBEHANDLING)
 
   const configContext = useContext(ConfigContext)
 
@@ -99,7 +102,7 @@ export const GosysOppgaveModal = ({ oppgave }: { oppgave: OppgaveDTOny }) => {
               Avbryt
             </Button>
             {/*  TODO: Må sikre at vi får en egen oppgavetype e.l. vi kan sjekke på i stedet */}
-            {oppgave.beskrivelse?.toLowerCase()?.includes('journalfør') ? (
+            {kanBrukeOppgavebehandling && oppgave.beskrivelse?.toLowerCase()?.includes('journalfør') ? (
               <Button variant="primary" as="a" href={`/oppgave/${oppgave.id}`}>
                 Opprett behandling
               </Button>

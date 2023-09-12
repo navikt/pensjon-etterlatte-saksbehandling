@@ -60,8 +60,8 @@ class GosysOppgaveServiceImpl(
     }
 
     override suspend fun hentOppgave(id: Long, brukerTokenInfo: BrukerTokenInfo): GosysOppgave? {
-        return cache.getIfPresent(id) ?: gosysOppgaveKlient.hentOppgave(id, brukerTokenInfo)?.let {
-            it.fraGosysOppgaveTilNy(pdlKlient.hentFolkeregisterIdenterForAktoerIdBolk(setOf(it.aktoerId!!)))
+        return cache.getIfPresent(id) ?: gosysOppgaveKlient.hentOppgave(id, brukerTokenInfo).let {
+            it.fraGosysOppgaveTilNy(pdlKlient.hentFolkeregisterIdenterForAktoerIdBolk(setOf(it.aktoerId)))
         }.also { cache.put(id, it) }
     }
 

@@ -13,6 +13,8 @@ import { Column, Container, GridContainer } from '~shared/styled'
 import OppsummeringOppgavebehandling from '~components/person/oppgavebehandling/oppsummering/OppsummeringOppgavebehandling'
 import OppgaveStegmeny from '~components/person/oppgavebehandling/OppgaveStegmeny'
 
+export const FEATURE_TOGGLE_KAN_BRUKE_OPPGAVEBEHANDLING = 'pensjon-etterlatte.kan-bruke-oppgavebehandling'
+
 export default function Oppgavebehandling() {
   const { bruker } = useNyBehandling()
 

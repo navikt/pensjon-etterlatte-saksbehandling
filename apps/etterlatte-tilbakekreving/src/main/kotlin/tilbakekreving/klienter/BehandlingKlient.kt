@@ -8,6 +8,6 @@ class BehandlingKlient {
 
     fun opprettTilbakekreving(kravgrunnlag: Kravgrunnlag) {
         logger.info("Oppretter tilbakekreving i behandling")
-        // TODO sett opp kall mot endepunkt når dette er på plass
+        // TODO sett opp kall mot endepunkt når dette er på plass (EY-2662)
     }
 }

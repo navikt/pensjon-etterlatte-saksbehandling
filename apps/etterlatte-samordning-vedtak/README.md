@@ -12,22 +12,26 @@ Det må foreligge et tjenestepensjonsforhold i Tjenestepensjonsregisteret som gj
 
 ## API
 
-### /api/vedtak/{nav-vedtak-id}
+| Endepunkt                      | Responstype         | Beskrivelse                                                                                                                           |
+|:-------------------------------|---------------------|:--------------------------------------------------------------------------------------------------------------------------------------|
+| /api/vedtak?virkFom=YYYY-MM-DD | Samordningsvedtak[] | Henter ut vedtaksinformasjon for gitt person fra og med gitt dato. <br/> Fødselsnummeret angis i en `fnr`-header                      |
+| /api/vedtak/{nav-vedtak-id}    | Samordningsvedtak   | Henter ut informasjon om et spesifikt vedtak. VedtaksIDen kommer fra samordningskøen hvor det varsles løpende om vedtak som gjøres.   |
+
 
 #### Informasjonsmodell
 
 ##### Samordningsvedtak
 
-| Felt             | Type       | Beskrivelse                |
-|:-----------------|:-----------|:---------------------------|
-| vedtakId         | int        | Dvs samme som forespurt id |
-| sakstype         | string     | OMS                        |
-| virkningsdato    | yyyy-MM-dd | Dato vedtaket gjelder fra  |
-| opphoersdato     | yyyy-MM-dd | Eventuell sluttdato        |
-| type             | string     | START/ENDRING/OPPHOER      |
-| arsak*           | string     | INNTEKT/ANNET              |
-| anvendtTrygdetid | int        | Avdødes trygdetid          |
-| perioder         | Periode[]  | Periodiserte beløp         |
+| Felt             | Type        | Beskrivelse               |
+|:-----------------|:------------|:--------------------------|
+| vedtakId         | int         | Vedtakets unike id        |
+| sakstype         | string      | OMS                       |
+| virkningsdato    | YYYY-MM-DD  | Dato vedtaket gjelder fra |
+| opphoersdato     | YYYY-MM-DD  | Eventuell sluttdato       |
+| type             | string      | START/ENDRING/OPPHOER     |
+| arsak*           | string      | INNTEKT/ANNET             |
+| anvendtTrygdetid | int         | Avdødes trygdetid         |
+| perioder         | Periode[]   | Periodiserte beløp        |
 
 ##### Periode
 

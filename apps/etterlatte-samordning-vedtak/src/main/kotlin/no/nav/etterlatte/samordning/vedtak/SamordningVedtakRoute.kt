@@ -1,11 +1,13 @@
 package no.nav.etterlatte.samordning.vedtak
 
+import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.route
 import java.time.LocalDate
+import kotlin.random.Random
 
 data class SamordningVedtakDto(
     val vedtakId: Long,
@@ -26,11 +28,14 @@ data class SamordningVedtakPeriode(
 )
 
 enum class SamordningVedtakType {
-    START, ENDRING, OPPHOER
+    START,
+    ENDRING,
+    OPPHOER
 }
 
 enum class SamordningVedtakAarsak {
-    INNTEKT, ANNET
+    INNTEKT,
+    ANNET
 }
 
 fun Route.samordningVedtakRoute() {
@@ -45,24 +50,44 @@ fun Route.samordningVedtakRoute() {
             val vedtakId = requireNotNull(call.parameters["vedtakId"]).toLong()
 
             val dummystart = LocalDate.now().withDayOfMonth(1)
-            val vedtaksinfo = SamordningVedtakDto(
-                vedtakId = vedtakId,
-                sakstype = "OMS",
-                virkningsdato = dummystart,
-                opphoersdato = null,
-                type = SamordningVedtakType.START,
-                aarsak = null,
-                anvendtTrygdetid = 40,
-                perioder = listOf(
-                    SamordningVedtakPeriode(
-                        fom = dummystart,
-                        omstillingsstoenadBrutto = 12000,
-                        omstillingsstoenadNetto = 9500
-                    )
-                )
-            )
+            val vedtaksinfo = dummySamordningVedtakDto(dummystart, vedtakId)
 
             call.respond(vedtaksinfo)
         }
+
+        get {
+            val virkFom =
+                call.parameters["virkFom"]?.let { runCatching { LocalDate.parse(it) }.getOrNull() }
+                    ?: return@get call.respond(HttpStatusCode.BadRequest, "virkFom ikke angitt")
+
+            val fnr =
+                call.request.headers["fnr"]
+                    ?: return@get call.respond(HttpStatusCode.BadRequest, "fnr ikke angitt")
+
+            val vedtaksinfo = dummySamordningVedtakDto(virkFom, Random.nextLong())
+
+            call.respond(listOf(vedtaksinfo))
+        }
     }
 }
+
+private fun dummySamordningVedtakDto(
+    virkFom: LocalDate,
+    vedtakId: Long
+) = SamordningVedtakDto(
+    vedtakId = vedtakId,
+    sakstype = "OMS",
+    virkningsdato = virkFom,
+    opphoersdato = null,
+    type = SamordningVedtakType.START,
+    aarsak = null,
+    anvendtTrygdetid = 40,
+    perioder =
+        listOf(
+            SamordningVedtakPeriode(
+                fom = virkFom,
+                omstillingsstoenadBrutto = 12000,
+                omstillingsstoenadNetto = 9500
+            )
+        )
+)

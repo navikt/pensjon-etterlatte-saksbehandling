@@ -40,9 +40,8 @@ const BeregningsgrunnlagOmstillingsstoenad = (props: { behandling: IBehandlingRe
   const [visInstitusjonsopphold, setVisInstitusjonsopphold] = useState<boolean>(false)
   const [lagreBeregningsgrunnlagOMS, postBeregningsgrunnlag] = useApiCall(lagreBeregningsGrunnlagOMS)
   const [endreBeregning, postOpprettEllerEndreBeregning] = useApiCall(opprettEllerEndreBeregning)
-  const [institusjonsoppholdsGrunnlagData, setInstitusjonsoppholdsGrunnlagData] = useState<
-    InstitusjonsoppholdGrunnlagData | undefined
-  >(undefined)
+  const [institusjonsoppholdsGrunnlagData, setInstitusjonsoppholdsGrunnlagData] =
+    useState<InstitusjonsoppholdGrunnlagData | null>(null)
 
   useEffect(() => {
     getVilkaarsvurdering(behandling.id, (vurdering) => {

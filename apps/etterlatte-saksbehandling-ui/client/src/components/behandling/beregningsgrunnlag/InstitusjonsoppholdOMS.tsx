@@ -1,8 +1,7 @@
 import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
 import React, { useState } from 'react'
 import { LovtekstMedLenke } from '~components/behandling/soeknadsoversikt/soeknadoversikt/LovtekstMedLenke'
-import styled from 'styled-components'
-import { Button, ErrorSummary, Heading, ReadMore } from '@navikt/ds-react'
+import { Button, Heading, ReadMore } from '@navikt/ds-react'
 import { AGreen500 } from '@navikt/ds-tokens/dist/tokens'
 import { PlusCircleIcon, CheckmarkCircleIcon } from '@navikt/aksel-icons'
 import { InstitusjonsoppholdGrunnlagData } from '~shared/types/Beregning'
@@ -14,6 +13,12 @@ import {
   mapListeFraDto,
 } from '~components/behandling/beregningsgrunnlag/PeriodisertBeregningsgrunnlag'
 import { hentBehandlesFraStatus } from '~components/behandling/felles/utils'
+import { InstitusjonsoppholdsWrapper } from './institusjonsopphold-styling'
+import {
+  FeilIPeriode,
+  FeilIPerioder,
+  validerInstitusjonsopphold,
+} from '~components/behandling/beregningsgrunnlag/InstitusjonsoppholdPerioder'
 
 type InstitusjonsoppholdProps = {
   behandling: IBehandlingReducer
@@ -152,34 +157,3 @@ const Institusjonsopphold = (props: InstitusjonsoppholdProps) => {
 }
 
 export default Institusjonsopphold
-
-const InstitusjonsoppholdsWrapper = styled.div`
-  padding: 0em 2em;
-  max-width: 60em;
-`
-const FeilIPerioder = (props: { feil: [number, FeilIPeriode][] }) => {
-  return (
-    <FeilIPerioderOppsummering heading="Du må fikse feil i periodiseringen før du kan beregne">
-      {props.feil.map(([index, feil]) => (
-        <ErrorSummary.Item key={`${index}${feil}`} href={`#institusjonsopphold.${index}`}>
-          {`${teksterFeilIPeriode[feil]}, opphold nummer ${index}`}
-        </ErrorSummary.Item>
-      ))}
-    </FeilIPerioderOppsummering>
-  )
-}
-
-const FeilIPerioderOppsummering = styled(ErrorSummary)`
-  margin: 2em auto;
-  width: 30em;
-`
-
-const validerInstitusjonsopphold = (institusjonsopphold: InstitusjonsoppholdGrunnlagData): boolean => {
-  return !institusjonsopphold.some((e) => e.fom === undefined)
-}
-
-export type FeilIPeriode = 'PERIODE_OVERLAPPER_MED_NESTE'[number]
-
-const teksterFeilIPeriode: Record<FeilIPeriode, string> = {
-  PERIODE_OVERLAPPER_MED_NESTE: 'Perioden overlapper med neste periode',
-} as const

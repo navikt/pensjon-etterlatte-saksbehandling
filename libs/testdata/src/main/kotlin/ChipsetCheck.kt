@@ -1,8 +1,8 @@
-package no.nav.etterlatte.tilbakekreving
+package no.nav.etterlatte.libs.testdata
 
 object ChipsetCheck {
 
-    const val erM1EllerM2 = "no.nav.etterlatte.tilbakekreving.ChipsetCheck#erM1EllerM2"
+    const val erM1EllerM2 = "no.nav.etterlatte.libs.testdata.ChipsetCheck#erM1EllerM2"
 
     @JvmStatic
     fun erM1EllerM2(): Boolean {

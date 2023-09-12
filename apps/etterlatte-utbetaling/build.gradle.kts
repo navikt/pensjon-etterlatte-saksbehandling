@@ -31,4 +31,5 @@ dependencies {
     testImplementation(libs.ktor2.clientmock)
     testImplementation(libs.kotlinx.coroutinescore)
     testImplementation(libs.test.wiremock)
+    testImplementation(project(":libs:testdata"))
 }

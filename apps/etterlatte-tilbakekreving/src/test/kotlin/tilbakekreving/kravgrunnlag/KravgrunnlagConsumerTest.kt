@@ -3,6 +3,7 @@ package no.nav.etterlatte.tilbakekreving.kravgrunnlag
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.etterlatte.libs.testdata.ChipsetCheck.erM1EllerM2
 import no.nav.etterlatte.testsupport.TestContainers
 import no.nav.etterlatte.testsupport.readFile
 import no.nav.etterlatte.tilbakekreving.config.JmsConnectionFactory
@@ -10,10 +11,12 @@ import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.condition.DisabledIf
 import org.testcontainers.junit.jupiter.Container
 import java.math.BigInteger
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@DisabledIf(value = erM1EllerM2)
 class KravgrunnlagConsumerTest {
 
     @Container

@@ -27,6 +27,10 @@ class KlageDaoImpl(private val connection: () -> Connection) : KlageDao {
                 """
                     INSERT INTO klage(id, sak_id, opprettet, status, kabalstatus, formkrav, utfall)
                     VALUES (?, ?, ?, ?, ?, ?, ?)
+                    ON CONFLICT (id) DO UPDATE SET status = excluded.status, 
+                            formkrav = excluded.formkrav, 
+                            kabalstatus = excluded.kabalstatus, 
+                            utfall = excluded.utfall
                 """.trimIndent()
             )
             statement.setObject(1, klage.id)

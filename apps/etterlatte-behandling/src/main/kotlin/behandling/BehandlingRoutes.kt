@@ -33,6 +33,7 @@ import no.nav.etterlatte.libs.common.behandlingsId
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.hentNavidentFraToken
+import no.nav.etterlatte.libs.common.kunSaksbehandler
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toNorskTid
 import no.nav.etterlatte.libs.common.toJson
@@ -50,9 +51,11 @@ internal fun Route.behandlingRoutes(
     val logger = application.log
 
     post("/api/behandling") {
-        val request = call.receive<NyBehandlingRequest>()
-        val behandling = behandlingFactory.opprettBehandling(request)
-        call.respondText(behandling.id.toString())
+        kunSaksbehandler {
+            val request = call.receive<NyBehandlingRequest>()
+            val behandling = behandlingFactory.opprettSakOgBehandlingForOppgave(request)
+            call.respondText(behandling.id.toString())
+        }
     }
 
     route("/api/behandling/{$BEHANDLINGSID_CALL_PARAMETER}/") {

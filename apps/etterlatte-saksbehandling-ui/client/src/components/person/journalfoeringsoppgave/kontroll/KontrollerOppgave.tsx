@@ -1,13 +1,13 @@
 import React, { useEffect } from 'react'
 import { Alert, BodyShort, Button, Heading, Label, Panel, Radio, RadioGroup, Select, Tag } from '@navikt/ds-react'
-import { useNyBehandling } from '~components/person/oppgavebehandling/useNyBehandling'
+import { useJournalfoeringOppgave } from '~components/person/journalfoeringsoppgave/useJournalfoeringOppgave'
 import { useAppDispatch } from '~store/Store'
 import { useNavigate, useParams } from 'react-router-dom'
 import { JaNei } from '~shared/types/ISvar'
 import { KnapperWrapper } from '~components/behandling/handlinger/BehandlingHandlingKnapper'
-import AvbrytOppgavebehandling from '~components/person/oppgavebehandling/AvbrytOppgavebehandling'
+import AvbrytBehandleJournalfoeringOppgave from '~components/person/journalfoeringsoppgave/AvbrytBehandleJournalfoeringOppgave'
 import { formaterFnr, formaterSakstype, formaterStringDato } from '~utils/formattering'
-import { settBehandlingBehov, settBruker, settOppgave, settSamsvar } from '~store/reducers/NyBehandlingReducer'
+import { settBehandlingBehov, settBruker, settOppgave, settSamsvar } from '~store/reducers/JournalfoeringOppgaveReducer'
 import { isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
 import { GYLDIG_FNR } from '~utils/fnr'
 import Spinner from '~shared/Spinner'
@@ -16,10 +16,10 @@ import { DatoVelger } from '~shared/DatoVelger'
 import { InfoWrapper } from '~components/behandling/soeknadsoversikt/styled'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import { hentSakForPerson } from '~shared/api/behandling'
-import { FormWrapper } from '../styled'
+import { FormWrapper } from '~components/person/journalfoeringsoppgave/BehandleJournalfoeringOppgave'
 
 export default function KontrollerOppgave() {
-  const { bruker, oppgave, samsvar, journalpost, behandlingBehov } = useNyBehandling()
+  const { bruker, oppgave, samsvar, journalpost, behandlingBehov } = useJournalfoeringOppgave()
   const dispatch = useAppDispatch()
   const navigate = useNavigate()
 
@@ -160,7 +160,7 @@ export default function KontrollerOppgave() {
             Neste
           </Button>
         </div>
-        <AvbrytOppgavebehandling />
+        <AvbrytBehandleJournalfoeringOppgave />
       </KnapperWrapper>
     </FormWrapper>
   )

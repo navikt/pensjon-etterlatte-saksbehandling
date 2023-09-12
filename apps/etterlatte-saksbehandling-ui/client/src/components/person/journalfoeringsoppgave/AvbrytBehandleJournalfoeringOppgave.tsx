@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { BodyLong, Button, Heading, Modal } from '@navikt/ds-react'
 import { ButtonWrapper } from '~shared/modal/modal'
 
-export default function AvbrytOppgavebehandling() {
+export default function AvbrytBehandleJournalfoeringOppgave() {
   const navigate = useNavigate()
   const [isOpen, setIsOpen] = useState(false)
 

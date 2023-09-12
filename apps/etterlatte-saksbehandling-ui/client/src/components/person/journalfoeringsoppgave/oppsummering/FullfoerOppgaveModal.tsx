@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { Alert, BodyLong, BodyShort, Button, Heading, Modal } from '@navikt/ds-react'
 import { SaktypeTag } from '~components/nyoppgavebenk/Tags'
 import { ButtonWrapper } from '~shared/modal/modal'

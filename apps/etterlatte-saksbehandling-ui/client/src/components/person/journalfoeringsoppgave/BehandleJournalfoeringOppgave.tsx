@@ -5,18 +5,19 @@ import { getPerson } from '~shared/api/grunnlag'
 import { GYLDIG_FNR } from '~utils/fnr'
 import { StatusBar } from '~shared/statusbar/Statusbar'
 import NavigerTilbakeMeny from '~components/person/NavigerTilbakeMeny'
-import { useNyBehandling } from '~components/person/oppgavebehandling/useNyBehandling'
-import VelgJournalpost from '~components/person/oppgavebehandling/VelgJournalpost'
-import KontrollerOppgave from '~components/person/oppgavebehandling/kontroll/KontrollerOppgave'
-import OpprettNyBehandling from '~components/person/oppgavebehandling/nybehandling/OpprettNyBehandling'
+import { useJournalfoeringOppgave } from '~components/person/journalfoeringsoppgave/useJournalfoeringOppgave'
+import VelgJournalpost from '~components/person/journalfoeringsoppgave/VelgJournalpost'
+import KontrollerOppgave from '~components/person/journalfoeringsoppgave/kontroll/KontrollerOppgave'
+import OpprettNyBehandling from '~components/person/journalfoeringsoppgave/nybehandling/OpprettNyBehandling'
 import { Column, Container, GridContainer } from '~shared/styled'
-import OppsummeringOppgavebehandling from '~components/person/oppgavebehandling/oppsummering/OppsummeringOppgavebehandling'
-import OppgaveStegmeny from '~components/person/oppgavebehandling/OppgaveStegmeny'
+import OppsummeringOppgavebehandling from '~components/person/journalfoeringsoppgave/oppsummering/OppsummeringOppgavebehandling'
+import JournalfoeringOppgaveStegmeny from '~components/person/journalfoeringsoppgave/JournalfoeringOppgaveStegmeny'
+import styled from 'styled-components'
 
 export const FEATURE_TOGGLE_KAN_BRUKE_OPPGAVEBEHANDLING = 'pensjon-etterlatte.kan-bruke-oppgavebehandling'
 
-export default function Oppgavebehandling() {
-  const { bruker } = useNyBehandling()
+export default function BehandleJournalfoeringOppgave() {
+  const { bruker } = useJournalfoeringOppgave()
 
   const [personStatus, hentPerson] = useApiCall(getPerson)
 
@@ -35,7 +36,7 @@ export default function Oppgavebehandling() {
       <StatusBar result={personStatus} />
       <NavigerTilbakeMeny label={'Tilbake til oppgavebenken'} path={'/'} />
 
-      <OppgaveStegmeny />
+      <JournalfoeringOppgaveStegmeny />
       <GridContainer>
         <Column style={{ width: '50rem' }}>
           <Container>
@@ -57,3 +58,9 @@ export default function Oppgavebehandling() {
     </>
   )
 }
+
+export const FormWrapper = styled.div<{ column?: boolean }>`
+  display: flex;
+  flex-direction: ${(props) => (!!props.column ? 'column' : 'row')};
+  gap: 2rem;
+`

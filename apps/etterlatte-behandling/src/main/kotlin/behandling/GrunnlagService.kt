@@ -4,11 +4,8 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.grunnlagsendring.klienter.GrunnlagKlientImpl
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
-import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.NyeSaksopplysninger
 import no.nav.etterlatte.libs.common.grunnlag.Opplysningsbehov
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
-import java.util.*
 
 class GrunnlagService(private val grunnlagKlient: GrunnlagKlientImpl) {
     /**
@@ -41,18 +38,4 @@ class GrunnlagService(private val grunnlagKlient: GrunnlagKlientImpl) {
             persongalleri = persongalleri
         )
     }
-}
-
-internal fun <T : Any> lagOpplysning(
-    opplysningsType: Opplysningstype,
-    kilde: Grunnlagsopplysning.Kilde,
-    opplysning: T
-): Grunnlagsopplysning<T> {
-    return Grunnlagsopplysning(
-        id = UUID.randomUUID(),
-        kilde = kilde,
-        opplysningType = opplysningsType,
-        meta = no.nav.etterlatte.libs.common.objectMapper.createObjectNode(),
-        opplysning = opplysning
-    )
 }

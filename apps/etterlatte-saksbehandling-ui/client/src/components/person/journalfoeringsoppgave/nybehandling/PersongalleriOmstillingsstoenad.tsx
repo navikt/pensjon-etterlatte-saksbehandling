@@ -1,16 +1,22 @@
 import { Button, Heading, Panel, TextField } from '@navikt/ds-react'
-import React from 'react'
 import { PlusIcon, XMarkIcon } from '@navikt/aksel-icons'
 import { Persongalleri } from '~shared/types/Person'
-import { InputList, InputRow } from '~components/person/oppgavebehandling/nybehandling/OpprettNyBehandling'
-import { FormWrapper } from '../styled'
+import { InputList, InputRow } from '~components/person/journalfoeringsoppgave/nybehandling/OpprettNyBehandling'
+import { FormWrapper } from '~components/person/journalfoeringsoppgave/BehandleJournalfoeringOppgave'
+import { settBehandlingBehov } from '~store/reducers/JournalfoeringOppgaveReducer'
+import { useAppDispatch } from '~store/Store'
+import { useJournalfoeringOppgave } from '~components/person/journalfoeringsoppgave/useJournalfoeringOppgave'
 
-interface Props {
-  persongalleri?: Persongalleri
-  oppdaterPersongalleri: (persongalleri: Persongalleri) => void
-}
+export default function PersongalleriOmstillingsstoenad() {
+  const { behandlingBehov } = useJournalfoeringOppgave()
+  const dispatch = useAppDispatch()
 
-export default function PersongalleriOmstillingsstoenad({ persongalleri, oppdaterPersongalleri }: Props) {
+  const persongalleri = behandlingBehov?.persongalleri
+
+  const oppdaterPersongalleri = (persongalleri: Persongalleri) => {
+    dispatch(settBehandlingBehov({ ...behandlingBehov, persongalleri }))
+  }
+
   const oppdater = (fnr: string, index: number) => {
     const nyState = persongalleri ? [...(persongalleri?.soesken || [])] : []
     nyState[index] = fnr

@@ -10,7 +10,7 @@ export const settJournalpost = createAction<Journalpost>('behandling/journalpost
 export const settSamsvar = createAction<JaNei>('behandling/samsvar/sett')
 export const settBehandlingBehov = createAction<NyBehandlingRequest>('behandling/behandlingbehov/sett')
 
-export interface INyBehandlingReducer {
+export interface IJournalfoeringOppgaveReducer {
   bruker?: string
   oppgave?: OppgaveDTOny
   journalpost?: Journalpost
@@ -18,9 +18,9 @@ export interface INyBehandlingReducer {
   behandlingBehov?: NyBehandlingRequest
 }
 
-const initialState: INyBehandlingReducer = {}
+const initialState: IJournalfoeringOppgaveReducer = {}
 
-export const nyBehandlingReducer = createReducer(initialState, (builder) =>
+export const journalfoeringOppgaveReducer = createReducer(initialState, (builder) =>
   builder
     .addCase(settBruker, (state, action) => {
       state.bruker = action.payload

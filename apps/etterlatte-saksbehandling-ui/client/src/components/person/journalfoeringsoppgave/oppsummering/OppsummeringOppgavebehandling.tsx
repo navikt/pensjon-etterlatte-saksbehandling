@@ -1,22 +1,21 @@
 import { Button, Detail, Heading, Tag } from '@navikt/ds-react'
-import { useNyBehandling } from '~components/person/oppgavebehandling/useNyBehandling'
-import AvbrytOppgavebehandling from '~components/person/oppgavebehandling/AvbrytOppgavebehandling'
+import { useJournalfoeringOppgave } from '~components/person/journalfoeringsoppgave/useJournalfoeringOppgave'
+import AvbrytBehandleJournalfoeringOppgave from '~components/person/journalfoeringsoppgave/AvbrytBehandleJournalfoeringOppgave'
 import { KnapperWrapper } from '~components/behandling/handlinger/BehandlingHandlingKnapper'
-import React from 'react'
 import { Navigate, useNavigate } from 'react-router-dom'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import { SakType } from '~shared/types/sak'
 import { formaterSakstype } from '~utils/formattering'
 import { InfoList } from '~components/behandling/soeknadsoversikt/styled'
-import { FormWrapper } from '~components/person/oppgavebehandling/styled'
-import FullfoerOppgaveModal from '~components/person/oppgavebehandling/oppsummering/FullfoerOppgaveModal'
+import { FormWrapper } from '~components/person/journalfoeringsoppgave/BehandleJournalfoeringOppgave'
+import FullfoerOppgaveModal from '~components/person/journalfoeringsoppgave/oppsummering/FullfoerOppgaveModal'
 
 export default function OppsummeringOppgavebehandling() {
-  const { behandlingBehov, oppgave } = useNyBehandling()
+  const { behandlingBehov, oppgave } = useJournalfoeringOppgave()
 
   const navigate = useNavigate()
 
-  const tilbake = () => navigate('../nybehandling', { relative: 'route' })
+  const tilbake = () => navigate('../nybehandling', { relative: 'path' })
 
   if (!behandlingBehov || !oppgave) {
     return <Navigate to={'../nybehandling'} relative={'path'} />
@@ -65,7 +64,7 @@ export default function OppsummeringOppgavebehandling() {
 
           <FullfoerOppgaveModal oppgave={oppgave!!} behandlingBehov={behandlingBehov!!} />
         </div>
-        <AvbrytOppgavebehandling />
+        <AvbrytBehandleJournalfoeringOppgave />
       </KnapperWrapper>
     </FormWrapper>
   )

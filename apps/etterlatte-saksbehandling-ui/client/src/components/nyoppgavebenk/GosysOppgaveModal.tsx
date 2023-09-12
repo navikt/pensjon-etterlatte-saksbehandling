@@ -9,7 +9,7 @@ import { isBefore } from 'date-fns'
 import { OppgaveDTOny } from '~shared/api/oppgaverny'
 import { ConfigContext } from '~clientConfig'
 import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
-import { FEATURE_TOGGLE_KAN_BRUKE_OPPGAVEBEHANDLING } from '~components/person/oppgavebehandling/Oppgavebehandling'
+import { FEATURE_TOGGLE_KAN_BRUKE_OPPGAVEBEHANDLING } from '~components/person/journalfoeringsoppgave/BehandleJournalfoeringOppgave'
 
 const TagRow = styled.div`
   display: flex;

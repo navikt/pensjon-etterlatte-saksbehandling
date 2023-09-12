@@ -18,7 +18,5 @@ export const gyldigPersongalleri = (sakType: SakType, persongalleri?: Persongall
     gyldigGjenlevOgAvdoed = antallGjenlevOgAvdoed === 1
   }
 
-  return (
-    !!persongalleri && GYLDIG_FNR(persongalleri.soeker) && GYLDIG_FNR(persongalleri.innsender) && gyldigGjenlevOgAvdoed
-  )
+  return GYLDIG_FNR(persongalleri.soeker) && GYLDIG_FNR(persongalleri.innsender) && gyldigGjenlevOgAvdoed
 }

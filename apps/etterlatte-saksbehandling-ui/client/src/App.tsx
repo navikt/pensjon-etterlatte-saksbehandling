@@ -14,9 +14,9 @@ import { OppgavelistaContainer } from '~components/nyoppgavebenk/ToggleNyOppgave
 import { isFailure, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
 import { useEffect } from 'react'
 import { ConfigContext, hentClientConfig } from '~clientConfig'
-import Oppgavebehandling, {
+import BehandleJournalfoeringOppgave, {
   FEATURE_TOGGLE_KAN_BRUKE_OPPGAVEBEHANDLING,
-} from '~components/person/oppgavebehandling/Oppgavebehandling'
+} from '~components/person/journalfoeringsoppgave/BehandleJournalfoeringOppgave'
 import { useAppDispatch } from '~store/Store'
 import { settAppversion } from '~store/reducers/AppconfigReducer'
 import Versioncheck from '~Versioncheck'
@@ -58,7 +58,9 @@ function App() {
                 />
                 <Route path="/oppgavebenken" element={<OppgavelistaContainer />} />
                 <Route path="/person/:fnr" element={<Person />} />
-                {kanBrukeOppgavebehandling && <Route path="/oppgave/:id/*" element={<Oppgavebehandling />} />}
+                {kanBrukeOppgavebehandling && (
+                  <Route path="/oppgave/:id/*" element={<BehandleJournalfoeringOppgave />} />
+                )}
                 <Route path="/person/:fnr/sak/:sakId/brev" element={<BrevOversikt />} />
                 <Route path="/person/:fnr/sak/:sakId/brev/:brevId" element={<NyttBrev />} />
                 <Route path="/behandling/:behandlingId/*" element={<Behandling />} />

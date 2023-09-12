@@ -2,17 +2,24 @@ import { Button, Heading, Panel, TextField } from '@navikt/ds-react'
 import { Persongalleri } from '~shared/types/Person'
 import { PlusIcon, XMarkIcon } from '@navikt/aksel-icons'
 import React from 'react'
-import { FormWrapper } from '../styled'
+import { FormWrapper } from '~components/person/journalfoeringsoppgave/BehandleJournalfoeringOppgave'
 import { InputList, InputRow } from './OpprettNyBehandling'
-
-interface Props {
-  persongalleri?: Persongalleri
-  oppdaterPersongalleri: (persongalleri: Persongalleri) => void
-}
+import { useJournalfoeringOppgave } from '~components/person/journalfoeringsoppgave/useJournalfoeringOppgave'
+import { useAppDispatch } from '~store/Store'
+import { settBehandlingBehov } from '~store/reducers/JournalfoeringOppgaveReducer'
 
 type PersonArray = keyof Omit<Persongalleri, 'soeker' | 'innsender'>
 
-export default function PersongalleriBarnepensjon({ persongalleri, oppdaterPersongalleri }: Props) {
+export default function PersongalleriBarnepensjon() {
+  const { behandlingBehov } = useJournalfoeringOppgave()
+  const dispatch = useAppDispatch()
+
+  const persongalleri = behandlingBehov?.persongalleri
+
+  const oppdaterPersongalleri = (persongalleri: Persongalleri) => {
+    dispatch(settBehandlingBehov({ ...behandlingBehov, persongalleri }))
+  }
+
   const oppdater = (field: PersonArray, fnr: string, index: number) => {
     const nyState = persongalleri ? [...(persongalleri[field] || [])] : []
     nyState[index] = fnr

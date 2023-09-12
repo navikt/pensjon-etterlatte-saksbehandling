@@ -2,7 +2,7 @@ import { StegMenyWrapper } from '~components/behandling/StegMeny/stegmeny'
 import { NavLink } from 'react-router-dom'
 import { Separator } from '~components/behandling/StegMeny/NavLenke'
 
-export default function OppgaveStegmeny() {
+export default function JournalfoeringOppgaveStegmeny() {
   return (
     <StegMenyWrapper>
       <li>

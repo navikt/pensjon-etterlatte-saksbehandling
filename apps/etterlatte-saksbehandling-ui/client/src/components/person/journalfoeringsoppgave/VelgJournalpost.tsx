@@ -1,20 +1,20 @@
 import { isFailure, isPending, isPendingOrInitial, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
 import { hentDokumenter, hentDokumentPDF } from '~shared/api/dokument'
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { GYLDIG_FNR } from '~utils/fnr'
 import { Alert, Button, Heading, Table, Tag } from '@navikt/ds-react'
-import { useNyBehandling } from '~components/person/oppgavebehandling/useNyBehandling'
+import { useJournalfoeringOppgave } from '~components/person/journalfoeringsoppgave/useJournalfoeringOppgave'
 import { formaterStringDato } from '~utils/formattering'
 import DokumentModal from '~components/person/dokumentModal'
 import { Journalpost } from '~components/behandling/types'
 import { useAppDispatch } from '~store/Store'
-import { settJournalpost } from '~store/reducers/NyBehandlingReducer'
+import { settJournalpost } from '~store/reducers/JournalfoeringOppgaveReducer'
 import Spinner from '~shared/Spinner'
 import styled from 'styled-components'
 import { ButtonWrapper } from '~components/behandling/attestering/styled'
 
 export default function VelgJournalpost() {
-  const { bruker, journalpost } = useNyBehandling()
+  const { bruker, journalpost } = useJournalfoeringOppgave()
   const dispatch = useAppDispatch()
 
   const [journalposter, hentJournalposter] = useApiCall(hentDokumenter)

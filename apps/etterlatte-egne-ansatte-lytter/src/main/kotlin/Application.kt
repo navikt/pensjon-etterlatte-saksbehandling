@@ -9,14 +9,12 @@ import io.ktor.server.engine.connector
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.routing.routing
 import no.nav.etterlatte.kafka.KafkaConsumerEgneAnsatte
-import no.nav.etterlatte.libs.common.logging.withLogContext
+import no.nav.etterlatte.kafka.startLytting
 import no.nav.etterlatte.libs.ktor.healthApi
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.libs.ktor.metricsModule
 import no.nav.etterlatte.libs.ktor.setReady
 import org.slf4j.LoggerFactory
-import java.util.concurrent.atomic.AtomicBoolean
-import kotlin.system.exitProcess
 
 fun main() {
     Server().run()
@@ -37,6 +35,7 @@ class Server {
             connector { port = 8080 }
         }
     )
+
     fun run() {
         val env = System.getenv().toMutableMap()
         startEgenAnsattLytter(env, defaultConfig)
@@ -55,30 +54,11 @@ fun startEgenAnsattLytter(env: Map<String, String>, config: Config) {
     )
     val behandlingKlient = BehandlingKlient(behandlingHttpClient = behandlingHttpClient)
 
-    val closed = AtomicBoolean()
-    closed.set(false)
-
-    withLogContext {
-        Thread {
-            try {
-                val kafkaConsumerEgneAnsatte = KafkaConsumerEgneAnsatte(
-                    env = env,
-                    closed = closed,
-                    behandlingKlient = behandlingKlient
-                )
-
-                Runtime.getRuntime().addShutdownHook(
-                    Thread {
-                        closed.set(true)
-                        kafkaConsumerEgneAnsatte.consumer.wakeup(); // trådsikker, avbryter konsumer fra polling
-                    }
-                )
-
-                kafkaConsumerEgneAnsatte.stream()
-            } catch (e: Exception) {
-                logger.error("App avsluttet med en feil", e)
-                exitProcess(1)
-            }
-        }.start()
-    }
+    startLytting(
+        konsument = KafkaConsumerEgneAnsatte(
+            env = env,
+            behandlingKlient = behandlingKlient
+        ),
+        logger = logger
+    )
 }

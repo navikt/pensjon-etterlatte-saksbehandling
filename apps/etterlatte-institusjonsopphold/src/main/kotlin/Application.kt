@@ -9,14 +9,12 @@ import io.ktor.server.engine.connector
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.routing.routing
 import no.nav.etterlatte.kafka.KafkaConsumerInstitusjonsopphold
-import no.nav.etterlatte.libs.common.logging.withLogContext
+import no.nav.etterlatte.kafka.startLytting
 import no.nav.etterlatte.libs.ktor.healthApi
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.libs.ktor.metricsModule
 import no.nav.etterlatte.libs.ktor.setReady
 import org.slf4j.LoggerFactory
-import java.util.concurrent.atomic.AtomicBoolean
-import kotlin.system.exitProcess
 
 fun main() {
     Server().run()
@@ -65,31 +63,11 @@ fun startInstitusjonsoppholdLytter(env: Map<String, String>, config: Config) {
 
     val behandlingKlient = BehandlingKlient(behandlingHttpClient = behandlingHttpClient, institusjonsoppholdKlient)
 
-    val closed = AtomicBoolean()
-    closed.set(false)
-
-    withLogContext {
-        Thread {
-            try {
-                val kafkaConsumerInstitusjonsopphold = KafkaConsumerInstitusjonsopphold(
-                    env = env,
-                    closed = closed,
-                    behandlingKlient = behandlingKlient
-                )
-
-                Runtime.getRuntime().addShutdownHook(
-                    Thread {
-                        closed.set(true)
-                        kafkaConsumerInstitusjonsopphold.consumer.wakeup()
-                        // trådsikker, avbryter konsumer fra polling
-                    }
-                )
-
-                kafkaConsumerInstitusjonsopphold.stream()
-            } catch (e: Exception) {
-                logger.error("App avsluttet med en feil", e)
-                exitProcess(1)
-            }
-        }.start()
-    }
+    startLytting(
+        konsument = KafkaConsumerInstitusjonsopphold(
+            env = env,
+            behandlingKlient = behandlingKlient
+        ),
+        logger = logger
+    )
 }

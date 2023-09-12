@@ -92,30 +92,28 @@ export const Revurderingsoversikt = (props: { behandling: IDetaljertBehandling }
             <Lowercase>{revurderingsaarsakTilTekst(revurderingsaarsak)}</Lowercase>.
           </BodyShort>
         )}
-        {erOpphoer(revurderingsaarsak) ? (
+        {erOpphoer(revurderingsaarsak) && (
           <Alert variant="warning">
             Gjenny støtter ikke tilbakekreving per dags dato, så opphør må ikke gjennomføres hvis opphøret gjelder fra
             et tidspunkt før siste utbetaling i saken.
           </Alert>
-        ) : null}
+        )}
       </ContentHeader>
       <Innhold>
-        {behandling.begrunnelse !== null ? (
+        {behandling.begrunnelse !== null && (
           <>
             <Heading size={'small'}>Begrunnelse</Heading>
             <BodyShort>{behandling.begrunnelse}</BodyShort>
           </>
-        ) : null}
-        {behandling.revurderingsaarsak === Revurderingsaarsak.SOESKENJUSTERING ? (
+        )}
+        {behandling.revurderingsaarsak === Revurderingsaarsak.SOESKENJUSTERING && (
           <GrunnForSoeskenjustering behandling={behandling} />
-        ) : null}
-        {behandling.revurderingsaarsak === Revurderingsaarsak.ADOPSJON ? <AdoptertAv behandling={behandling} /> : null}
-        {behandling.revurderingsaarsak === Revurderingsaarsak.OMGJOERING_AV_FARSKAP ? (
+        )}
+        {behandling.revurderingsaarsak === Revurderingsaarsak.ADOPSJON && <AdoptertAv behandling={behandling} />}
+        {behandling.revurderingsaarsak === Revurderingsaarsak.OMGJOERING_AV_FARSKAP && (
           <OmgjoeringAvFarskap behandling={behandling} />
-        ) : null}
-        {behandling.revurderingsaarsak === Revurderingsaarsak.ANNEN ? (
-          <RevurderingAnnen behandling={behandling} />
-        ) : null}
+        )}
+        {behandling.revurderingsaarsak === Revurderingsaarsak.ANNEN && <RevurderingAnnen behandling={behandling} />}
         <Virkningstidspunkt
           redigerbar={behandles}
           virkningstidspunkt={behandling.virkningstidspunkt}

@@ -65,9 +65,9 @@ export const RevurderingAnnen = (props: { behandling: IDetaljertBehandling }) =>
           <Button loading={isPending(lagrestatus)} variant="primary" size="small">
             Lagre
           </Button>
-          {isSuccess(lagrestatus) ? <span>Lagret!</span> : null}
-          {isFailure(lagrestatus) ? <ApiErrorAlert>Kunne ikke lagre</ApiErrorAlert> : null}
-          {feilmelding ? <ApiErrorAlert>{feilmelding}</ApiErrorAlert> : null}
+          {isSuccess(lagrestatus) && <span>Lagret!</span>}
+          {isFailure(lagrestatus) && <ApiErrorAlert>Kunne ikke lagre</ApiErrorAlert>}
+          {feilmelding && <ApiErrorAlert>{feilmelding}</ApiErrorAlert>}
         </SkjemaWrapper>
       ) : (
         <BodyShort>

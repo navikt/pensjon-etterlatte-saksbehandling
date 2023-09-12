@@ -148,7 +148,7 @@ const InstitusjonsoppholdBP = (props: InstitusjonsoppholdProps) => {
 export default InstitusjonsoppholdBP
 
 const InstitusjonsoppholdsWrapper = styled.div`
-  padding: 0em 2em;
+  padding: 0em 4em;
   max-width: 60em;
 `
 const FeilIPerioder = (props: { feil: [number, FeilIPeriode][] }) => {

@@ -9,7 +9,7 @@ import io.ktor.server.engine.connector
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.routing.routing
 import no.nav.etterlatte.kafka.KafkaConsumerInstitusjonsopphold
-import no.nav.etterlatte.kafka.KafkaRunner
+import no.nav.etterlatte.kafka.startLytting
 import no.nav.etterlatte.libs.ktor.healthApi
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.libs.ktor.metricsModule
@@ -63,7 +63,7 @@ fun startInstitusjonsoppholdLytter(env: Map<String, String>, config: Config) {
 
     val behandlingKlient = BehandlingKlient(behandlingHttpClient = behandlingHttpClient, institusjonsoppholdKlient)
 
-    KafkaRunner.startLytting(
+    startLytting(
         konsument = KafkaConsumerInstitusjonsopphold(
             env = env,
             behandlingKlient = behandlingKlient

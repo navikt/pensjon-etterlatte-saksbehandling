@@ -9,7 +9,7 @@ import io.ktor.server.engine.connector
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.routing.routing
 import no.nav.etterlatte.kafka.KafkaConsumerEgneAnsatte
-import no.nav.etterlatte.kafka.KafkaRunner
+import no.nav.etterlatte.kafka.startLytting
 import no.nav.etterlatte.libs.ktor.healthApi
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.libs.ktor.metricsModule
@@ -35,6 +35,7 @@ class Server {
             connector { port = 8080 }
         }
     )
+
     fun run() {
         val env = System.getenv().toMutableMap()
         startEgenAnsattLytter(env, defaultConfig)
@@ -53,7 +54,7 @@ fun startEgenAnsattLytter(env: Map<String, String>, config: Config) {
     )
     val behandlingKlient = BehandlingKlient(behandlingHttpClient = behandlingHttpClient)
 
-    KafkaRunner.startLytting(
+    startLytting(
         konsument = KafkaConsumerEgneAnsatte(
             env = env,
             behandlingKlient = behandlingKlient

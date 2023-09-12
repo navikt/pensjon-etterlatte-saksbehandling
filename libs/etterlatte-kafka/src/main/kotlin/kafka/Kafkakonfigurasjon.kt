@@ -1,6 +1,7 @@
 package no.nav.etterlatte.kafka
 
 import io.confluent.kafka.serializers.AbstractKafkaSchemaSerDeConfig
+import io.confluent.kafka.serializers.KafkaAvroDeserializerConfig
 import org.apache.kafka.clients.CommonClientConfigs
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.common.config.SslConfigs
@@ -16,9 +17,10 @@ interface KafkaConsumerConfiguration {
 abstract class Kafkakonfigurasjon<T>(
     private val groupId: String,
     private val deserializerClass: Class<T>,
-    private val extra: (props: Properties) -> Any? = {},
     private val userInfoConfigKey: String,
-    private val schemaRegistryUrlConfigKey: String
+    private val schemaRegistryUrlConfigKey: String,
+    private val isolationLevelConfig: String? = null,
+    private val specificAvroReaderConfig: Boolean? = null
 ) : KafkaConsumerConfiguration {
 
     override fun generateKafkaConsumerProperties(env: Map<String, String>): Properties = Properties().apply {
@@ -57,6 +59,7 @@ abstract class Kafkakonfigurasjon<T>(
             "${env["KAFKA_SCHEMA_REGISTRY_USER"]}:${env["KAFKA_SCHEMA_REGISTRY_PASSWORD"]}"
         )
 
-        extra(this)
+        isolationLevelConfig?.let { this.put(ConsumerConfig.ISOLATION_LEVEL_CONFIG, it) }
+        specificAvroReaderConfig?.let { this.put(KafkaAvroDeserializerConfig.SPECIFIC_AVRO_READER_CONFIG, it) }
     }
 }

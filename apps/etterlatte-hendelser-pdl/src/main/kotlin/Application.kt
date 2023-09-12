@@ -10,7 +10,7 @@ import io.ktor.server.engine.embeddedServer
 import io.ktor.server.routing.routing
 import no.nav.etterlatte.hendelserpdl.common.PersonhendelseKonsument
 import no.nav.etterlatte.hendelserpdl.config.ApplicationContext
-import no.nav.etterlatte.kafka.KafkaRunner
+import no.nav.etterlatte.kafka.startLytting
 import no.nav.etterlatte.libs.ktor.healthApi
 import no.nav.etterlatte.libs.ktor.metricsModule
 import no.nav.etterlatte.libs.ktor.setReady
@@ -43,5 +43,5 @@ class Server(private val context: ApplicationContext) {
 }
 
 fun lesHendelserFraLeesah(leesahKonsument: PersonhendelseKonsument) {
-    KafkaRunner.startLytting(leesahKonsument, LoggerFactory.getLogger(Application::class.java))
+    startLytting(leesahKonsument, LoggerFactory.getLogger(Application::class.java))
 }

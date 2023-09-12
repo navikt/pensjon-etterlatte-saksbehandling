@@ -15,7 +15,7 @@ enum class BehandlingStatus {
     FERDIGSTILT
 }
 
-enum class Årsak {
+enum class Aarsak {
     FEIL_I_LOVANDVENDELSE,
     FEIL_REGELVERKSFORSTÅELSE,
     FEIL_ELLER_ENDRET_FAKTA,

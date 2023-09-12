@@ -1,22 +1,14 @@
 package no.nav.etterlatte.tilbakekreving.kravgrunnlag
 
-import no.nav.etterlatte.tilbakekreving.kravgrunnlag.Kravgrunnlag.Grunnlagsperiode
-import no.nav.etterlatte.tilbakekreving.kravgrunnlag.Kravgrunnlag.Grunnlagsperiode.Grunnlagsbeloep
-import no.nav.etterlatte.tilbakekreving.kravgrunnlag.Kravgrunnlag.Grunnlagsperiode.Grunnlagsbeloep.KlasseKode
-import no.nav.etterlatte.tilbakekreving.kravgrunnlag.Kravgrunnlag.Grunnlagsperiode.Grunnlagsbeloep.KlasseType
-import no.nav.etterlatte.tilbakekreving.kravgrunnlag.Kravgrunnlag.Grunnlagsperiode.Periode
-import no.nav.etterlatte.tilbakekreving.kravgrunnlag.Kravgrunnlag.Kontrollfelt
-import no.nav.etterlatte.tilbakekreving.kravgrunnlag.Kravgrunnlag.KravgrunnlagStatus
-import no.nav.etterlatte.tilbakekreving.kravgrunnlag.Kravgrunnlag.UUID30
-import no.nav.etterlatte.tilbakekreving.kravgrunnlag.Kravgrunnlag.VedtakId
 import no.nav.tilbakekreving.kravgrunnlag.detalj.v1.DetaljertKravgrunnlagBelopDto
 import no.nav.tilbakekreving.kravgrunnlag.detalj.v1.DetaljertKravgrunnlagDto
 import no.nav.tilbakekreving.kravgrunnlag.detalj.v1.DetaljertKravgrunnlagPeriodeDto
+import java.time.LocalDate
 import javax.xml.datatype.XMLGregorianCalendar
 
-class KravgrunnlagMapper {
+object KravgrunnlagMapper {
 
-    fun toKravgrunnlag(grunnlag: DetaljertKravgrunnlagDto, kravgrunnlagXml: String) = Kravgrunnlag(
+    fun toKravgrunnlag(grunnlag: DetaljertKravgrunnlagDto) = Kravgrunnlag(
         sakId = SakId(grunnlag.fagsystemId.toLong()),
         kravgrunnlagId = KravgrunnlagId(grunnlag.kravgrunnlagId.toLong()),
         vedtakId = VedtakId(grunnlag.vedtakId.toLong()),
@@ -24,7 +16,6 @@ class KravgrunnlagMapper {
         status = KravgrunnlagStatus.valueOf(grunnlag.kodeStatusKrav),
         saksbehandler = NavIdent(grunnlag.saksbehId),
         sisteUtbetalingslinjeId = UUID30(grunnlag.referanse),
-        mottattKravgrunnlagXml = kravgrunnlagXml,
         grunnlagsperioder = grunnlag.tilbakekrevingsPeriode.map { periode ->
             toGrunnlagsperiode(periode)
         }
@@ -54,4 +45,4 @@ class KravgrunnlagMapper {
         )
 }
 
-fun XMLGregorianCalendar.toLocalDate() = this.toGregorianCalendar().toZonedDateTime().toLocalDate()
+fun XMLGregorianCalendar.toLocalDate(): LocalDate = this.toGregorianCalendar().toZonedDateTime().toLocalDate()

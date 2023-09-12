@@ -1,0 +1,33 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="etterlatte-tilbakekreving.dev-gcp" type="JetRunConfigurationType">
+    <envs>
+      <env name="LOGBACK_APPENDER" value="STDOUT" />
+      <env name="NAIS_APP_NAME" value="etterlatte-tilbakekreving" />
+      <env name="KAFKA_RAPID_TOPIC" value="etterlatte" />
+      <env name="KAFKA_BOOTSTRAP_SERVERS" value="0.0.0.0:9092" />
+      <env name="MQ_HOSTNAME" value="localhost" />
+      <env name="MQ_PORT" value="1414" />
+      <env name="MQ_MANAGER" value="QM1" />
+      <env name="MQ_CHANNEL" value="DEV.ADMIN.SVRCONN" />
+      <env name="KRAVGRUNNLAG_MQ_NAME" value="DEV.QUEUE.2" />
+      <env name="srvuser" value="admin" />
+      <env name="srvpwd" value="passw0rd" />
+    </envs>
+    <option name="MAIN_CLASS_NAME" value="no.nav.etterlatte.ApplicationKt" />
+    <module name="pensjon-etterlatte-saksbehandling.apps.etterlatte-tilbakekreving.main" />
+    <shortenClasspath name="NONE" />
+    <extension name="net.ashald.envfile">
+      <option name="IS_ENABLED" value="false" />
+      <option name="IS_SUBST" value="false" />
+      <option name="IS_PATH_MACRO_SUPPORTED" value="false" />
+      <option name="IS_IGNORE_MISSING_FILES" value="false" />
+      <option name="IS_ENABLE_EXPERIMENTAL_INTEGRATIONS" value="false" />
+      <ENTRIES>
+        <ENTRY IS_ENABLED="true" PARSER="runconfig" IS_EXECUTABLE="false" />
+      </ENTRIES>
+    </extension>
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

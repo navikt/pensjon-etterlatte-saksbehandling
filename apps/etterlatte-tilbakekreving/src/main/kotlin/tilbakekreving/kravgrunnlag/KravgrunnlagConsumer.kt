@@ -1,83 +1,56 @@
 package no.nav.etterlatte.tilbakekreving.kravgrunnlag
 
-import com.fasterxml.jackson.annotation.JsonProperty
 import jakarta.jms.ExceptionListener
 import jakarta.jms.Message
 import jakarta.jms.MessageListener
 import jakarta.jms.Session
+import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.etterlatte.libs.common.logging.withLogContext
-import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
-import no.nav.etterlatte.libs.common.toJson
-import no.nav.etterlatte.tilbakekreving.Tilbakekreving
-import no.nav.etterlatte.tilbakekreving.TilbakekrevingService
 import no.nav.etterlatte.tilbakekreving.config.JmsConnectionFactory
-import no.nav.helse.rapids_rivers.RapidsConnection
+import no.nav.etterlatte.tilbakekreving.kravgrunnlag.KravgrunnlagJaxb.toDetaljertKravgrunnlagDto
+import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import kotlin.system.exitProcess
-
-data class TilbakekrevingEvent(
-    @JsonProperty(EVENT_NAME_KEY) val event: String,
-    @JsonProperty("tilbakekreving") val tilbakekreving: Map<String, Any> // TODO finne ut hva som bør sendes her
-)
 
 class KravgrunnlagConsumer(
-    private val rapidsConnection: RapidsConnection,
-    private val tilbakekrevingService: TilbakekrevingService,
-    private val jmsConnectionFactory: JmsConnectionFactory,
-    private val queue: String
+    private val connectionFactory: JmsConnectionFactory,
+    private val queue: String,
+    private val kravgrunnlagService: KravgrunnlagService
 ) : MessageListener {
 
     fun start() {
-        val connection = jmsConnectionFactory.connection()
-            .apply {
-                exceptionListener = ExceptionListener {
-                    logger.error("En feil oppstod med tilkobling mot MQ: ${it.message}", it)
-                    exitProcess(-1) // Restarter appen
-                }
-            }
-            .also { it.start() }
-
+        val connection = connectionFactory.connection().apply { exceptionListener = exceptionListener() }
         val session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE)
         val consumer = session.createConsumer(session.createQueue(queue))
         consumer.messageListener = this
+
+        connection.start()
+        logger.info("Lytter på kravgrunnlag fra tilbakekrevingskomponenten")
     }
 
-    override fun onMessage(message: Message) {
-        withLogContext {
-            val kravgrunnlagXml: String?
-            try {
-                logger.info("Kravgrunnlag for tilbakekreving mottatt - levert ${message.deliveryCount()} ganger")
-                kravgrunnlagXml = message.getBody(String::class.java)
-                val detaljertKravgrunnlag = KravgrunnlagJaxb.toDetaljertKravgrunnlagDto(kravgrunnlagXml)
-                val tilbakekreving =
-                    tilbakekrevingService.opprettTilbakekrevingFraKravgrunnlag(detaljertKravgrunnlag, kravgrunnlagXml)
-                logger.info("Sender event om mottatt kravgrunnlag")
-                sendMottattKravgrunnlagEvent(tilbakekreving)
-            } catch (t: Throwable) {
-                // Log error and throw to trigger redelivery.
-                // Message will be added to the backout queue after x deliveries
-                logger.error("Feilet under mottak av kravgrunnlag", t)
-                throw t
-            }
+    override fun onMessage(message: Message) = withLogContext {
+        var kravgrunnlagPayload: String? = null
+        try {
+            logger.info("Kravgrunnlag (id=${message.jmsMessageID}) mottatt ${message.deliveryCount()} gang(er)")
+            kravgrunnlagPayload = message.getBody(String::class.java)
+            val detaljertKravgrunnlag = toDetaljertKravgrunnlagDto(kravgrunnlagPayload)
+            kravgrunnlagService.opprettTilbakekreving(detaljertKravgrunnlag)
+        } catch (t: Throwable) {
+            logger.error("Feilet under mottak av kravgrunnlag (Sjekk sikkerlogg for payload", t)
+            sikkerLogg.error("Feilet under mottak av kravgrunnlag", kv("kravgrunnlag", kravgrunnlagPayload), t)
+
+            // Exception trigger retry - etter x forsøk vil meldingen legges på backout kø
+            throw t
         }
     }
 
-    private fun sendMottattKravgrunnlagEvent(tilbakekreving: Tilbakekreving.MottattKravgrunnlag) {
-        rapidsConnection.publish(
-            key = tilbakekreving.sakId.value.toString(),
-            message = TilbakekrevingEvent(
-                event = "TILBAKEKREVING:MOTTATT_KRAVGRUNNLAG",
-                tilbakekreving = mapOf(
-                    "kravgrunnlagId" to tilbakekreving.kravgrunnlagId.value,
-                    "behandlingId" to tilbakekreving.behandlingId.value
-                )
-            ).toJson()
-        )
+    private fun exceptionListener() = ExceptionListener {
+        logger.error("En feil oppstod med tilkoblingen mot tilbakekrevingskomponenten: ${it.message}", it)
     }
 
-    fun Message.deliveryCount() = this.getLongProperty("JMSXDeliveryCount")
+    private fun Message.deliveryCount() = this.getLongProperty("JMSXDeliveryCount")
 
     companion object {
         private val logger = LoggerFactory.getLogger(KravgrunnlagConsumer::class.java)
+        private val sikkerLogg: Logger = LoggerFactory.getLogger("sikkerLogg")
     }
 }

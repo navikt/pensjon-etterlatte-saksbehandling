@@ -66,9 +66,9 @@ internal fun Route.klageRoutes(klageService: KlageService, featureToggleService:
             put("formkrav") {
                 hvisEnabled(KlageFeatureToggle.KanBrukeKlageToggle) {
                     kunSaksbehandler { saksbehandler ->
-                        medBody<Formkrav> { formkrav: Formkrav ->
+                        medBody<VurdereFormkravDto> { formkravDto ->
                             val oppdatertKlage = inTransaction {
-                                klageService.lagreFormkravIKlage(klageId, formkrav, saksbehandler)
+                                klageService.lagreFormkravIKlage(klageId, formkravDto.formkrav, saksbehandler)
                             }
                             call.respond(oppdatertKlage)
                         }
@@ -87,3 +87,5 @@ internal fun Route.klageRoutes(klageService: KlageService, featureToggleService:
         }
     }
 }
+
+data class VurdereFormkravDto(val formkrav: Formkrav)

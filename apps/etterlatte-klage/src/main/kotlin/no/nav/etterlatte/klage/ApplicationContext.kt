@@ -53,7 +53,7 @@ private fun startKafkalytter(config: Config) {
         konsument = KlageKafkakonsument(
             env = env,
             topic = env.requireEnvValue("KLAGE_TOPIC"),
-            behandlingKlient = BehandlingKlient(behandlingHttpClient = behandlingHttpClient)
+            behandlingKlient = BehandlingKlient(config, behandlingHttpClient = behandlingHttpClient)
         ),
         logger = LoggerFactory.getLogger(Application::class.java)
     )

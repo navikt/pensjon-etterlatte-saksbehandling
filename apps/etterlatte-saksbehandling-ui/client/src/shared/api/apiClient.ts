@@ -1,4 +1,4 @@
-type ApiSuccess<T> = { status: 'ok'; data: T; statusCode: number }
+export type ApiSuccess<T> = { status: 'ok'; data: T; statusCode: number }
 export type ApiError = { status: 'error'; statusCode: number; error?: any }
 
 export type ApiResponse<T> = ApiSuccess<T> | ApiError

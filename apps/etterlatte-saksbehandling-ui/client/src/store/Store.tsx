@@ -7,6 +7,7 @@ import type { TypedUseSelectorHook } from 'react-redux'
 import { useDispatch, useSelector } from 'react-redux'
 import { appReducer } from '~store/reducers/AppconfigReducer'
 import { klageReducer } from '~store/reducers/KlageReducer'
+import { tilbakekrevingReducer } from '~store/reducers/TilbakekrevingReducer'
 
 const reducer = {
   menuReducer: menuReducer,
@@ -14,6 +15,7 @@ const reducer = {
   behandlingReducer: behandlingReducer,
   appReducer: appReducer,
   klageReducer: klageReducer,
+  tilbakekrevingReducer: tilbakekrevingReducer,
   journalfoeringOppgaveReducer: journalfoeringOppgaveReducer,
 }
 export const store = configureStore({

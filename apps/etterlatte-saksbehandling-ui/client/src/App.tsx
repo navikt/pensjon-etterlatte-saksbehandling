@@ -23,6 +23,7 @@ import { Klagebehandling } from '~components/klage/Klagebehandling'
 import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 import { FEATURE_TOGGLE_KAN_BRUKE_KLAGE } from '~components/person/OpprettKlage'
 import { ToggleMinOppgaveliste } from '~components/nyoppgavebenk/ToggleMinOppgaveliste'
+import { Tilbakekrevingsbehandling } from '~components/tilbakekreving/Tilbakekrevingsbehandling'
 
 function App() {
   const innloggetbrukerHentet = useInnloggetSaksbehandler()
@@ -59,6 +60,7 @@ function App() {
                   <Route path="/person/:fnr/sak/:sakId/brev/:brevId" element={<NyttBrev />} />
                   <Route path="/behandling/:behandlingId/*" element={<Behandling />} />
                   {kanBrukeKlage ? <Route path="/klage/:klageId/*" element={<Klagebehandling />} /> : null}
+                  <Route path="/tilbakekreving/:tilbakekrevingId/*" element={<Tilbakekrevingsbehandling />} />
                   <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>
               </ConfigContext.Provider>

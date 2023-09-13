@@ -41,7 +41,15 @@ import java.time.temporal.ChronoUnit
 
 class ApplicationContext(
     val properties: ApplicationProperties = ApplicationProperties.fromEnv(System.getenv()),
-    val rapidsConnection: RapidsConnection = RapidApplication.create(getRapidEnv())
+    val rapidsConnection: RapidsConnection = RapidApplication.create(getRapidEnv()),
+    val jmsConnectionFactory: EtterlatteJmsConnectionFactory = JmsConnectionFactory(
+        hostname = properties.mqHost,
+        port = properties.mqPort,
+        queueManager = properties.mqQueueManager,
+        channel = properties.mqChannel,
+        username = properties.serviceUserUsername,
+        password = properties.serviceUserPassword
+    )
 ) {
     val clock = utcKlokke()
 
@@ -53,15 +61,6 @@ class ApplicationContext(
         ),
         username = properties.dbUsername,
         password = properties.dbPassword
-    )
-
-    val jmsConnectionFactory = JmsConnectionFactory(
-        hostname = properties.mqHost,
-        port = properties.mqPort,
-        queueManager = properties.mqQueueManager,
-        channel = properties.mqChannel,
-        username = properties.serviceUserUsername,
-        password = properties.serviceUserPassword
     )
 
     val oppdragSender = OppdragSender(

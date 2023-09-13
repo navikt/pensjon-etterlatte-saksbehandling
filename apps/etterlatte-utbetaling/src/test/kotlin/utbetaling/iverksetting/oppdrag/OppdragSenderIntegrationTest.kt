@@ -1,7 +1,6 @@
 package no.nav.etterlatte.utbetaling.iverksetting.oppdrag
 
 import no.nav.etterlatte.utbetaling.DummyJmsConnectionFactory
-import no.nav.etterlatte.utbetaling.TestContainers.ibmMQContainer
 import no.nav.etterlatte.utbetaling.config.EtterlatteJmsConnectionFactory
 import no.nav.etterlatte.utbetaling.oppdrag
 import no.nav.etterlatte.utbetaling.utbetaling
@@ -38,6 +37,5 @@ internal class OppdragSenderIntegrationTest {
     @AfterAll
     fun afterAll() {
         jmsConnectionFactory.stop()
-        ibmMQContainer.stop()
     }
 }

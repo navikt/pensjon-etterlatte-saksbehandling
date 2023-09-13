@@ -9,7 +9,7 @@ import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.utbetaling.UtbetalingResponseDto
 import no.nav.etterlatte.libs.common.utbetaling.UtbetalingStatusDto
 import no.nav.etterlatte.libs.common.vedtak.Behandling
-import no.nav.etterlatte.libs.testdata.ChipsetCheck
+import no.nav.etterlatte.utbetaling.DummyJmsConnectionFactory
 import no.nav.etterlatte.utbetaling.TestContainers
 import no.nav.etterlatte.utbetaling.common.EVENT_NAME_OPPDATERT
 import no.nav.etterlatte.utbetaling.common.UTBETALING_RESPONSE
@@ -29,29 +29,23 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import org.junit.jupiter.api.condition.DisabledIf
 import org.testcontainers.junit.jupiter.Container
 import java.util.*
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@DisabledIf(value = ChipsetCheck.erM1EllerM2)
 class ApplicationIntegrationTest {
 
     @Container
     private val postgreSQLContainer = TestContainers.postgreSQLContainer
 
-    @Container
-    private val ibmMQContainer = TestContainers.ibmMQContainer
-
     private val rapidsConnection: TestRapid = spyk(TestRapid())
-    private lateinit var connectionFactory: EtterlatteJmsConnectionFactory
+    private val connectionFactory: EtterlatteJmsConnectionFactory = DummyJmsConnectionFactory()
     private lateinit var dataSource: DataSource
 
     @BeforeAll
     fun beforeAll() {
         postgreSQLContainer.start()
-        ibmMQContainer.start()
 
         val applicationProperties = ApplicationProperties(
             dbName = postgreSQLContainer.databaseName,
@@ -59,8 +53,8 @@ class ApplicationIntegrationTest {
             dbPort = postgreSQLContainer.firstMappedPort,
             dbUsername = postgreSQLContainer.username,
             dbPassword = postgreSQLContainer.password,
-            mqHost = ibmMQContainer.host,
-            mqPort = ibmMQContainer.firstMappedPort,
+            mqHost = "mqHost",
+            mqPort = -1,
             mqQueueManager = "QM1",
             mqChannel = "DEV.ADMIN.SVRCONN",
             mqSendQueue = "DEV.QUEUE.1",
@@ -75,8 +69,7 @@ class ApplicationIntegrationTest {
             konsistensavstemmingOMSEnabled = false
         )
 
-        ApplicationContext(applicationProperties, rapidsConnection).also {
-            connectionFactory = it.jmsConnectionFactory
+        ApplicationContext(applicationProperties, rapidsConnection, jmsConnectionFactory = connectionFactory).also {
             dataSource = it.dataSource
             rapidApplication(it).start()
         }
@@ -337,7 +330,6 @@ class ApplicationIntegrationTest {
     @AfterAll
     fun afterAll() {
         rapidsConnection.stop()
-        ibmMQContainer.stop()
         postgreSQLContainer.stop()
     }
 
@@ -346,11 +338,7 @@ class ApplicationIntegrationTest {
     }
 
     private fun simulerKvitteringsmeldingFraOppdrag(oppdrag: Oppdrag) {
-        connectionFactory.connection().createSession().use { session ->
-            val producer = session.createProducer(session.createQueue("DEV.QUEUE.2"))
-            val message = session.createTextMessage(OppdragJaxb.toXml(oppdrag))
-            producer.send(message)
-        }
+        connectionFactory.send(queue = "DEV.QUEUE.2", xml = OppdragJaxb.toXml(oppdrag))
     }
 
     companion object {

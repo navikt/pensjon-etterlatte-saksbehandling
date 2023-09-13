@@ -20,6 +20,11 @@ import {
 } from '~components/behandling/beregningsgrunnlag/InstitusjonsoppholdPerioder'
 import { Table } from '@navikt/ds-react'
 import InstitusjonsoppholdTableWrapper from '~components/behandling/beregningsgrunnlag/InstitusjonsoppholdTableWrapper'
+import styled from 'styled-components'
+
+const ReadMoreMarginBottom = styled(ReadMore)`
+  margin-bottom: 1rem;
+`
 
 type InstitusjonsoppholdProps = {
   behandling: IBehandlingReducer
@@ -89,41 +94,43 @@ const InstitusjonsoppholdBP = (props: InstitusjonsoppholdProps) => {
           </LovtekstMedLenke>
           <Insthendelser sakid={behandling.sakId} />
           <Heading level="3" size="small">
-            Beregningsperiode institusjonsopphold
+            Beregningsperioder institusjonsopphold
           </Heading>
-          <ReadMore header="Hva skal registreres?">
+          <ReadMoreMarginBottom header="Hva skal registreres?">
             Registrer perioden da ytelsen skal reduseres, altså fom-dato fra den 1. i fjerde måneden etter innleggelse
             (fra måneden etter innleggelse hvis vedkommende innen tre måneder etter utskrivelsen på nytt kommer i
             institusjon), og siste dato i måneden før utskrivingsmåneden.
-          </ReadMore>
+          </ReadMoreMarginBottom>
         </>
       ) : null}
-      <Table>
-        <Table.Header>
-          <Table.Row>
-            <Table.HeaderCell />
-            <Table.HeaderCell scope="col">Periode</Table.HeaderCell>
-            <Table.HeaderCell scope="col">Reduksjon</Table.HeaderCell>
-            <Table.HeaderCell scope="col">Begrunnelse</Table.HeaderCell>
-          </Table.Row>
-        </Table.Header>
-        <Table.Body id="forminstitusjonsopphold">
-          {fields.map((item, index) => (
-            <InstitusjonsoppholdTableWrapper
-              key={item.id}
-              item={item}
-              index={index}
-              control={control}
-              register={register}
-              remove={remove}
-              watch={watch}
-              setVisFeil={setVisFeil}
-              errors={errors.institusjonsOppholdForm?.[index]}
-              behandles={behandles}
-            />
-          ))}
-        </Table.Body>
-      </Table>
+      {fields.length ? (
+        <Table>
+          <Table.Header>
+            <Table.Row>
+              <Table.HeaderCell />
+              <Table.HeaderCell scope="col">Periode</Table.HeaderCell>
+              <Table.HeaderCell scope="col">Reduksjon</Table.HeaderCell>
+              <Table.HeaderCell scope="col">Begrunnelse</Table.HeaderCell>
+            </Table.Row>
+          </Table.Header>
+          <Table.Body id="forminstitusjonsopphold">
+            {fields.map((item, index) => (
+              <InstitusjonsoppholdTableWrapper
+                key={item.id}
+                item={item}
+                index={index}
+                control={control}
+                register={register}
+                remove={remove}
+                watch={watch}
+                setVisFeil={setVisFeil}
+                errors={errors.institusjonsOppholdForm?.[index]}
+                behandles={behandles}
+              />
+            ))}
+          </Table.Body>
+        </Table>
+      ) : null}
       {behandles && (
         <Button
           type="button"
@@ -144,11 +151,11 @@ const InstitusjonsoppholdBP = (props: InstitusjonsoppholdProps) => {
           Legg til beregningsperiode
         </Button>
       )}
-      {behandles && (
+      {behandles && fields.length ? (
         <Button type="submit" onClick={handleSubmit(ferdigstilleForm)}>
           Lagre institusjonsopphold
         </Button>
-      )}
+      ) : null}
       {visFeil && feilOverlappendePerioder?.length > 0 && (
         <>
           <FeilIPerioder feil={feilOverlappendePerioder} />

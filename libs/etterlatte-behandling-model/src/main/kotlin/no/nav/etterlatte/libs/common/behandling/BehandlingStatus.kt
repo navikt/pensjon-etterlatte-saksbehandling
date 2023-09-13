@@ -3,6 +3,7 @@ package no.nav.etterlatte.libs.common.behandling
 enum class BehandlingStatus {
     OPPRETTET,
     VILKAARSVURDERT,
+    TRYGDETID_OPPDATERT,
     BEREGNET,
     AVKORTET,
     FATTET_VEDTAK,
@@ -21,6 +22,7 @@ enum class BehandlingStatus {
         fun underBehandling() = listOf(
             OPPRETTET,
             VILKAARSVURDERT,
+            TRYGDETID_OPPDATERT,
             BEREGNET,
             AVKORTET,
             RETURNERT,
@@ -36,6 +38,7 @@ enum class BehandlingStatus {
 
         fun ikkeAvbrutt() = iverksattEllerAttestert() + underBehandling()
 
-        fun skalIkkeOmregnesVedGRegulering() = listOf(IVERKSATT, AVBRUTT, ATTESTERT, OPPRETTET, VILKAARSVURDERT)
+        fun skalIkkeOmregnesVedGRegulering() =
+            listOf(IVERKSATT, AVBRUTT, ATTESTERT, OPPRETTET, VILKAARSVURDERT, TRYGDETID_OPPDATERT)
     }
 }

@@ -10,6 +10,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingStatus.BEREGNET
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus.FATTET_VEDTAK
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus.OPPRETTET
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus.RETURNERT
+import no.nav.etterlatte.libs.common.behandling.BehandlingStatus.TRYGDETID_OPPDATERT
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus.VILKAARSVURDERT
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
@@ -127,6 +128,10 @@ sealed class Behandling {
 
     open fun tilVilkaarsvurdert(): Behandling {
         throw BehandlingStoetterIkkeStatusEndringException(VILKAARSVURDERT)
+    }
+
+    open fun tilTrygdetidOppdatert(): Behandling {
+        throw BehandlingStoetterIkkeStatusEndringException(TRYGDETID_OPPDATERT)
     }
 
     open fun tilBeregnet(): Behandling {

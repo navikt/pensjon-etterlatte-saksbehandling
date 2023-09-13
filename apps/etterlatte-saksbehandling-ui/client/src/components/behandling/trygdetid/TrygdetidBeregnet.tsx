@@ -5,7 +5,6 @@ import styled from 'styled-components'
 
 type Props = {
   trygdetid: ITrygdetid
-  setTrygdetid: (trygdetid: ITrygdetid) => void
 }
 export const TrygdetidBeregnet: React.FC<Props> = ({ trygdetid }) => {
   const beregnetTrygdetid = trygdetid.beregnetTrygdetid ? `${trygdetid.beregnetTrygdetid?.total} år` : '-'

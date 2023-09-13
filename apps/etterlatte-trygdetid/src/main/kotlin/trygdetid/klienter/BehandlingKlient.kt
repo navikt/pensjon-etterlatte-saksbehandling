@@ -50,15 +50,15 @@ class BehandlingKlient(config: Config, httpClient: HttpClient) : BehandlingTilga
         }
     }
 
-    suspend fun kanBeregnes(behandlingId: UUID, brukerTokenInfo: BrukerTokenInfo): Boolean {
-        logger.info("Sjekker om behandling med behandlingId=$behandlingId kan beregnes")
-        val resource = Resource(clientId = clientId, url = "$resourceUrl/behandlinger/$behandlingId/beregn")
+    suspend fun kanOppdatereTrygdetid(behandlingId: UUID, brukerTokenInfo: BrukerTokenInfo): Boolean {
+        logger.info("Sjekker om behandling med behandlingId=$behandlingId kan oppdatere trygdetid")
+        val resource = Resource(clientId = clientId, url = "$resourceUrl/behandlinger/$behandlingId/oppdaterTrygdetid")
 
         return downstreamResourceClient.get(resource, brukerTokenInfo)
             .mapBoth(
                 success = { true },
                 failure = {
-                    logger.info("Behandling med id $behandlingId kan ikke beregnes")
+                    logger.info("Behandling med id $behandlingId kan ikke oppdatere trygdetid")
                     false
                 }
             )
@@ -84,13 +84,13 @@ class BehandlingKlient(config: Config, httpClient: HttpClient) : BehandlingTilga
         )
     }
 
-    suspend fun settBehandlingStatusVilkaarsvurdert(
+    suspend fun settBehandlingStatusTrygdetidOppdatert(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo
     ): Boolean {
         logger.info("Committer vilkaarsvurdering på behandling med id $behandlingId")
         val response = downstreamResourceClient.post(
-            resource = Resource(clientId = clientId, url = "$resourceUrl/behandlinger/$behandlingId/vilkaarsvurder"),
+            resource = Resource(clientId = clientId, url = "$resourceUrl/behandlinger/$behandlingId/oppdaterTrygdetid"),
             brukerTokenInfo = brukerTokenInfo,
             postBody = "{}"
         )
@@ -98,7 +98,7 @@ class BehandlingKlient(config: Config, httpClient: HttpClient) : BehandlingTilga
         return response.mapBoth(
             success = { true },
             failure = {
-                logger.info("Kunne ikke committe vilkaarsvurdering på behandling med id $behandlingId", it.throwable)
+                logger.info("Kunne ikke committe trygdetid oppdatert på behandling med id $behandlingId", it.throwable)
                 false
             }
         )

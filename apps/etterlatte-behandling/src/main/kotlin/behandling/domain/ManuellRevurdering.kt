@@ -78,9 +78,19 @@ data class ManuellRevurdering(
         return hvisRedigerbar { endreTilStatus(BehandlingStatus.VILKAARSVURDERT) }
     }
 
-    override fun tilBeregnet() = hvisTilstandEr(
+    override fun tilTrygdetidOppdatert(): Revurdering = hvisTilstandEr(
         listOf(
             BehandlingStatus.VILKAARSVURDERT,
+            BehandlingStatus.TRYGDETID_OPPDATERT,
+            BehandlingStatus.BEREGNET,
+            BehandlingStatus.AVKORTET,
+            BehandlingStatus.RETURNERT
+        )
+    ) { endreTilStatus(BehandlingStatus.TRYGDETID_OPPDATERT) }
+
+    override fun tilBeregnet() = hvisTilstandEr(
+        listOf(
+            BehandlingStatus.TRYGDETID_OPPDATERT,
             BehandlingStatus.BEREGNET,
             BehandlingStatus.RETURNERT
         )

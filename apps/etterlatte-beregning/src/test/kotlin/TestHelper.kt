@@ -258,7 +258,7 @@ fun behandling(
     gjenlevende = listOf(),
     avdoed = listOf(),
     soesken = listOf(),
-    status = BehandlingStatus.VILKAARSVURDERT,
+    status = BehandlingStatus.TRYGDETID_OPPDATERT,
     behandlingType = behandlingType,
     virkningstidspunkt = virkningstidspunkt,
     revurderingsaarsak = null,

@@ -15,8 +15,6 @@ import {
 } from '~store/reducers/BehandlingReducer'
 import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 import { ApiErrorAlert } from '~ErrorBoundary'
-import FastTrygdetid from '~components/behandling/beregningsgrunnlag/Trygdetid'
-import { Trygdetid as BeregnetTrygdetid } from '~components/behandling/trygdetid/Trygdetid'
 import { mapListeTilDto } from '~components/behandling/beregningsgrunnlag/PeriodisertBeregningsgrunnlag'
 import { hentFunksjonsbrytere } from '~shared/api/feature'
 import React, { useEffect, useState } from 'react'
@@ -27,8 +25,6 @@ import Soeskenjustering, {
 import Spinner from '~shared/Spinner'
 import { IPdlPerson } from '~shared/types/Person'
 import { InstitusjonsoppholdGrunnlagData } from '~shared/types/Beregning'
-import YrkesskadeTrygdetidBP from './YrkesskadeTrygdetidBP'
-import { hentVilkaarsvurdering } from '~shared/api/vilkaarsvurdering'
 
 const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer }) => {
   const { behandling } = props
@@ -39,29 +35,16 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
   const [beregningsgrunnlag, fetchBeregningsgrunnlag] = useApiCall(hentBeregningsGrunnlag)
   const [endreBeregning, postOpprettEllerEndreBeregning] = useApiCall(opprettEllerEndreBeregning)
   const [funksjonsbrytere, postHentFunksjonsbrytere] = useApiCall(hentFunksjonsbrytere)
-  const [beregnTrygdetid, setBeregnTrygdetid] = useState<boolean>(false)
-  const [vilkaarsvurdering, getVilkaarsvurdering] = useApiCall(hentVilkaarsvurdering)
-  const [yrkesskadeTrygdetid, setYrkesskadeTrygdetid] = useState<boolean>(false)
   const [visInstitusjonsopphold, setVisInstitusjonsopphold] = useState<boolean>(false)
   const [soeskenGrunnlagsData, setSoeskenGrunnlagsData] = useState<Soeskengrunnlag | null>(null)
   const [institusjonsoppholdsGrunnlagData, setInstitusjonsoppholdsGrunnlagData] =
     useState<InstitusjonsoppholdGrunnlagData | null>(null)
 
   const [manglerSoeskenJustering, setSoeskenJusteringMangler] = useState<boolean>(false)
-  const featureToggleNameTrygdetid = 'pensjon-etterlatte.bp-bruk-faktisk-trygdetid'
   const featureToggleNameInstitusjonsopphold = 'pensjon-etterlatte.bp-bruk-institusjonsopphold'
 
   useEffect(() => {
-    postHentFunksjonsbrytere([featureToggleNameTrygdetid, featureToggleNameInstitusjonsopphold], (brytere) => {
-      const trygdetidBryter = brytere.find((bryter) => bryter.toggle === featureToggleNameTrygdetid)
-
-      if (trygdetidBryter) {
-        setBeregnTrygdetid(trygdetidBryter.enabled)
-
-        getVilkaarsvurdering(behandling.id, (vurdering) => {
-          setYrkesskadeTrygdetid(vurdering.isYrkesskade)
-        })
-      }
+    postHentFunksjonsbrytere([featureToggleNameInstitusjonsopphold], (brytere) => {
       const institusjonsoppholdBryter = brytere.find((bryter) => bryter.toggle === featureToggleNameInstitusjonsopphold)
       if (institusjonsoppholdBryter) {
         setVisInstitusjonsopphold(institusjonsoppholdBryter.enabled)
@@ -118,15 +101,6 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
 
   return (
     <>
-      {isSuccess(funksjonsbrytere) &&
-        isSuccess(vilkaarsvurdering) &&
-        (yrkesskadeTrygdetid ? (
-          <YrkesskadeTrygdetidBP />
-        ) : beregnTrygdetid ? (
-          <BeregnetTrygdetid redigerbar={behandles} utenlandstilsnitt={behandling.utenlandstilsnitt} />
-        ) : (
-          <FastTrygdetid />
-        ))}
       <>
         {isSuccess(beregningsgrunnlag) && behandling.familieforhold && (
           <Soeskenjustering
@@ -147,7 +121,6 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
       {manglerSoeskenJustering && <ApiErrorAlert>Søskenjustering er ikke fylt ut </ApiErrorAlert>}
       {isFailure(endreBeregning) && <ApiErrorAlert>Kunne ikke opprette ny beregning</ApiErrorAlert>}
       {isFailure(lagreBeregningsgrunnlag) && <ApiErrorAlert>Kunne ikke lagre beregningsgrunnlag</ApiErrorAlert>}
-      {isFailure(vilkaarsvurdering) && <ApiErrorAlert>Kunne ikke hente vilkaarsvurdering</ApiErrorAlert>}
 
       {behandles ? (
         <BehandlingHandlingKnapper>

@@ -36,6 +36,7 @@ export const hentGyldigeNavigeringsStatuser = (status: IBehandlingStatus) => {
   const rekkefoelge = [
     IBehandlingStatus.OPPRETTET,
     IBehandlingStatus.VILKAARSVURDERT,
+    IBehandlingStatus.TRYGDETID_OPPDATERT,
     IBehandlingStatus.BEREGNET,
     IBehandlingStatus.FATTET_VEDTAK,
     IBehandlingStatus.ATTESTERT,
@@ -49,6 +50,7 @@ export const hentBehandlesFraStatus = (status: IBehandlingStatus): boolean => {
   return (
     status === IBehandlingStatus.OPPRETTET ||
     status === IBehandlingStatus.VILKAARSVURDERT ||
+    status === IBehandlingStatus.TRYGDETID_OPPDATERT ||
     status === IBehandlingStatus.BEREGNET ||
     status === IBehandlingStatus.AVKORTET ||
     status === IBehandlingStatus.RETURNERT
@@ -90,6 +92,7 @@ export const manueltBrevKanRedigeres = (status: IBehandlingStatus): boolean => {
   switch (status) {
     case IBehandlingStatus.OPPRETTET:
     case IBehandlingStatus.VILKAARSVURDERT:
+    case IBehandlingStatus.TRYGDETID_OPPDATERT:
     case IBehandlingStatus.BEREGNET:
     case IBehandlingStatus.AVKORTET:
     case IBehandlingStatus.RETURNERT:

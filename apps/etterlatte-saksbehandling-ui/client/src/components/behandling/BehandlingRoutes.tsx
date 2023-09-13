@@ -14,6 +14,7 @@ import { useBehandling } from '~components/behandling/useBehandling'
 import { erOpphoer } from '~shared/types/Revurderingsaarsak'
 import { Aktivitetsplikt } from '~components/behandling/aktivitetsplikt/Aktivitetsplikt'
 import { SakType } from '~shared/types/sak'
+import TrygdetidVisning from '~components/behandling/trygdetid/TrygdetidVisning'
 
 type behandlingRouteTypes =
   | 'soeknadsoversikt'
@@ -33,6 +34,7 @@ const behandlingRoutes = (
   { path: 'revurderingsoversikt', element: <Revurderingsoversikt behandling={behandling} /> },
   { path: 'opphoeroversikt', element: <ManueltOpphoerOversikt behandling={behandling} /> },
   { path: 'vilkaarsvurdering', element: <Vilkaarsvurdering behandling={behandling} /> },
+  { path: 'trygdetid', element: <TrygdetidVisning behandling={behandling} /> },
   { path: 'beregningsgrunnlag', element: <Beregningsgrunnlag behandling={behandling} /> },
   { path: 'aktivitetsplikt', element: <Aktivitetsplikt behandling={behandling} /> },
   { path: 'beregne', element: <Beregne behandling={behandling} /> },
@@ -95,16 +97,21 @@ export const soeknadRoutes = (behandling: IDetaljertBehandling): Array<Behandlin
       path: 'vilkaarsvurdering',
       description: 'Vilkårsvurdering',
       kreverBehandlingsstatus: IBehandlingStatus.VILKAARSVURDERT,
+  },
+  {
+    path: 'trygdetid',
+    description: 'Trygdetid',
+    kreverBehandlingsstatus: IBehandlingStatus.VILKAARSVURDERT,
     },
     {
       path: 'beregningsgrunnlag',
       description: 'Beregningsgrunnlag',
-      kreverBehandlingsstatus: IBehandlingStatus.VILKAARSVURDERT,
+    kreverBehandlingsstatus: IBehandlingStatus.TRYGDETID_OPPDATERT,
     },
     {
       path: 'aktivitetsplikt',
       description: 'Oppfølging av aktivitet',
-      kreverBehandlingsstatus: IBehandlingStatus.VILKAARSVURDERT,
+      kreverBehandlingsstatus: IBehandlingStatus.TRYGDETID_OPPDATERT,
       sakstype: SakType.OMSTILLINGSSTOENAD,
     },
     { path: 'beregne', description: 'Beregning', kreverBehandlingsstatus: IBehandlingStatus.BEREGNET },
@@ -145,15 +152,20 @@ export function revurderingRoutes(behandling: IBehandlingReducer): Array<Behandl
     description: 'Vilkårsvurdering',
     kreverBehandlingsstatus: IBehandlingStatus.VILKAARSVURDERT,
   }
+  const trygdetid = {
+    path: 'trygdetid',
+    description: 'Trygdetid',
+    kreverBehandlingsstatus: IBehandlingStatus.VILKAARSVURDERT,
+  }
   const beregningsgrunnlag = {
     path: 'beregningsgrunnlag',
     description: 'Beregningsgrunnlag',
-    kreverBehandlingsstatus: IBehandlingStatus.VILKAARSVURDERT,
+    kreverBehandlingsstatus: IBehandlingStatus.TRYGDETID_OPPDATERT,
   }
   const beregning = { path: 'beregne', description: 'Beregning', kreverBehandlingsstatus: IBehandlingStatus.BEREGNET }
   const defaultRoutes: Array<BehandlingRouteTypes> = erOpphoer(behandling.revurderingsaarsak!!)
     ? [revurderingsoversikt, vilkaarsvurdering, beregning]
-    : [revurderingsoversikt, vilkaarsvurdering, beregningsgrunnlag, beregning]
+    : [revurderingsoversikt, vilkaarsvurdering, trygdetid, beregningsgrunnlag, beregning]
 
   if (behandlingSkalSendeBrev(behandling)) {
     return [...defaultRoutes, { path: 'brev', description: 'Vedtaksbrev' }]

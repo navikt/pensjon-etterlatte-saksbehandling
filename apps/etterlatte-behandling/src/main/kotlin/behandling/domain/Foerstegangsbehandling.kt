@@ -70,9 +70,19 @@ data class Foerstegangsbehandling(
         return hvisRedigerbar { endreTilStatus(BehandlingStatus.VILKAARSVURDERT) }
     }
 
-    override fun tilBeregnet(): Foerstegangsbehandling = hvisTilstandEr(
+    override fun tilTrygdetidOppdatert(): Foerstegangsbehandling = hvisTilstandEr(
         listOf(
             BehandlingStatus.VILKAARSVURDERT,
+            BehandlingStatus.TRYGDETID_OPPDATERT,
+            BehandlingStatus.BEREGNET,
+            BehandlingStatus.AVKORTET,
+            BehandlingStatus.RETURNERT
+        )
+    ) { endreTilStatus(BehandlingStatus.TRYGDETID_OPPDATERT) }
+
+    override fun tilBeregnet(): Foerstegangsbehandling = hvisTilstandEr(
+        listOf(
+            BehandlingStatus.TRYGDETID_OPPDATERT,
             BehandlingStatus.BEREGNET,
             BehandlingStatus.AVKORTET,
             BehandlingStatus.RETURNERT

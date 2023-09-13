@@ -2,7 +2,7 @@ import { BodyShort } from '@navikt/ds-react'
 import styled from 'styled-components'
 import { LovtekstMedLenke } from '~components/behandling/soeknadsoversikt/soeknadoversikt/LovtekstMedLenke'
 
-const Trygdetid = () => {
+const FastTrygdetid = () => {
   return (
     <TrygdetidWrapper>
       <LovtekstMedLenke
@@ -41,4 +41,4 @@ const TrygdetidInfo = styled.div`
   flex-direction: column;
 `
 
-export default Trygdetid
+export default FastTrygdetid

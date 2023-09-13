@@ -1,11 +1,11 @@
 package no.nav.etterlatte.utbetaling.iverksetting.oppdrag
 
-import no.nav.etterlatte.utbetaling.config.JmsConnectionFactory
+import no.nav.etterlatte.mq.EtterlatteJmsConnectionFactory
 import no.trygdeetaten.skjema.oppdrag.Oppdrag
 import org.slf4j.LoggerFactory
 
 class OppdragSender(
-    private val jmsConnectionFactory: JmsConnectionFactory,
+    private val jmsConnectionFactory: EtterlatteJmsConnectionFactory,
     private val queue: String,
     private val replyQueue: String
 ) {
@@ -16,17 +16,13 @@ class OppdragSender(
                 "vedtakId=${oppdrag.oppdrag110.oppdragsLinje150.first().vedtakId} til oppdrag"
         )
 
-        val connection = jmsConnectionFactory.connection()
-        return connection.createSession().use { session ->
-            val producer = session.createProducer(session.createQueue(queue))
-            val oppdragXml = OppdragJaxb.toXml(oppdrag)
-            val message = session.createTextMessage(oppdragXml).apply {
-                jmsReplyTo = session.createQueue(replyQueue)
-            }
-            producer.send(message)
-            logger.info("Utbetaling overført til Oppdrag")
-            oppdragXml
-        }
+        val xml = OppdragJaxb.toXml(oppdrag)
+        jmsConnectionFactory.sendMedSvar(
+            xml = xml,
+            queue = queue,
+            replyQueue = replyQueue
+        ).also { logger.info("Utbetaling overført til oppdrag") }
+        return xml
     }
 
     companion object {

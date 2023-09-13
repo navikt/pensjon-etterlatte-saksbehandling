@@ -12,6 +12,7 @@ dependencies {
     implementation(project(":libs:etterlatte-utbetaling-model"))
     implementation(project(":libs:etterlatte-vedtaksvurdering-model"))
     implementation(project(":libs:etterlatte-kafka"))
+    implementation(project(":libs:etterlatte-mq"))
 
     implementation(libs.ktor2.okhttp)
     implementation(libs.ktor2.clientcore)
@@ -32,4 +33,5 @@ dependencies {
     testImplementation(libs.kotlinx.coroutinescore)
     testImplementation(libs.test.wiremock)
     testImplementation(project(":libs:testdata"))
+    testImplementation(testFixtures(project(":libs:etterlatte-mq")))
 }

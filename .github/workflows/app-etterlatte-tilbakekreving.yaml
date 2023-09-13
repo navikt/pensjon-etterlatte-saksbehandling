@@ -19,6 +19,7 @@ on:
       - libs/saksbehandling-common/**
       - libs/etterlatte-ktor/**
       - libs/etterlatte-database/**
+      - libs/etterlatte-mq/**
       - gradle/libs.versions.toml
   pull_request:
     branches:
@@ -28,6 +29,7 @@ on:
       - libs/saksbehandling-common/**
       - libs/etterlatte-ktor/**
       - libs/etterlatte-database/**
+      - libs/etterlatte-mq/**
       - gradle/libs.versions.toml
 
 jobs:

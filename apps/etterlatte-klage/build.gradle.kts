@@ -4,9 +4,10 @@ plugins {
 }
 
 dependencies {
-    implementation(project(":libs:saksbehandling-common"))
     implementation(project(":libs:etterlatte-kafka"))
     implementation(project(":libs:etterlatte-ktor"))
+    implementation(project(":libs:etterlatte-funksjonsbrytere"))
+    implementation(project(":libs:saksbehandling-common"))
     implementation(libs.kafka.clients)
     implementation(libs.kafka.avroserializer)
     implementation(libs.ktor2.okhttp)

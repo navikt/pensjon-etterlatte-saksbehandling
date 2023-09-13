@@ -9,6 +9,9 @@ import io.ktor.server.engine.applicationEngineEnvironment
 import io.ktor.server.engine.connector
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.routing.routing
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleProperties
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.kafka.startLytting
 import no.nav.etterlatte.libs.common.requireEnvValue
 import no.nav.etterlatte.libs.ktor.healthApi
@@ -50,12 +53,28 @@ private fun startKafkalytter(config: Config, env: Map<String, String>) {
         azureAppScope = config.getString("behandling.azure.scope")
     )
 
-    startLytting(
-        konsument = KlageKafkakonsument(
-            env = env,
-            topic = env.requireEnvValue("KLAGE_TOPIC"),
-            behandlingKlient = BehandlingKlient(config, behandlingHttpClient = behandlingHttpClient)
-        ),
-        logger = LoggerFactory.getLogger(Application::class.java)
+    val featureToggleService: FeatureToggleService = FeatureToggleService.initialiser(
+        FeatureToggleProperties(
+            applicationName = config.getString("funksjonsbrytere.unleash.applicationName"),
+            host = config.getString("funksjonsbrytere.unleash.host"),
+            apiKey = config.getString("funksjonsbrytere.unleash.token")
+        )
     )
+
+    if (featureToggleService.isEnabled(KlageFeatureToggles.LyttPaaKabal, false)) {
+        startLytting(
+            konsument = KlageKafkakonsument(
+                env = env,
+                topic = env.requireEnvValue("KLAGE_TOPIC"),
+                behandlingKlient = BehandlingKlient(config, behandlingHttpClient = behandlingHttpClient)
+            ),
+            logger = LoggerFactory.getLogger(Application::class.java)
+        )
+    }
+}
+
+enum class KlageFeatureToggles(private val key: String) : FeatureToggle {
+    LyttPaaKabal("klage.lytt-paa-kabal");
+
+    override fun key() = key
 }

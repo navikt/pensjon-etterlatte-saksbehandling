@@ -108,22 +108,20 @@ const InstitusjonsoppholdBP = (props: InstitusjonsoppholdProps) => {
           </Table.Row>
         </Table.Header>
         <Table.Body id="forminstitusjonsopphold">
-          {fields.map((item, index) => {
-            return (
-              <InstitusjonsoppholdTableWrapper
-                key={item.id}
-                item={item}
-                index={index}
-                control={control}
-                register={register}
-                remove={remove}
-                watch={watch}
-                setVisFeil={setVisFeil}
-                errors={errors.institusjonsOppholdForm?.[index]}
-                behandles={behandles}
-              />
-            )
-          })}
+          {fields.map((item, index) => (
+            <InstitusjonsoppholdTableWrapper
+              key={item.id}
+              item={item}
+              index={index}
+              control={control}
+              register={register}
+              remove={remove}
+              watch={watch}
+              setVisFeil={setVisFeil}
+              errors={errors.institusjonsOppholdForm?.[index]}
+              behandles={behandles}
+            />
+          ))}
         </Table.Body>
       </Table>
       {behandles && (

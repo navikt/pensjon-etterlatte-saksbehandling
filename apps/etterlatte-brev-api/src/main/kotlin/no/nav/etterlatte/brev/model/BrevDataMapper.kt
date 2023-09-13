@@ -21,6 +21,8 @@ import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMS_FOERSTEGANGSVEDTA
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMS_FOERSTEGANGSVEDTAK_INNVILGELSE_UTFALL
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMS_OPPHOER_MANUELL
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMS_REVURDERING_ENDRING
+import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMS_REVURDERING_OPPHOER
+import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMS_REVURDERING_OPPHOER_GENERELL
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.TOM_MAL
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
@@ -99,7 +101,11 @@ class BrevDataMapper(private val featureToggleService: FeatureToggleService) {
                     )
                     else -> TODO("Revurderingsbrev for ${behandling.revurderingsaarsak} er ikke støttet")
                 }
-                VedtakType.OPPHOER -> TODO("Vedtakstype er ikke støttet: $vedtakType")
+                VedtakType.OPPHOER -> when (behandling.revurderingsaarsak) {
+                    RevurderingAarsak.SIVILSTAND ->
+                        BrevkodePar(OMS_REVURDERING_OPPHOER_GENERELL, OMS_REVURDERING_OPPHOER)
+                    else -> TODO("Vedtakstype er ikke støttet: $vedtakType")
+                }
             }
         }
     }
@@ -139,10 +145,13 @@ class BrevDataMapper(private val featureToggleService: FeatureToggleService) {
                 VedtakType.INNVILGELSE -> FoerstegangsvedtakUtfallDTO.fra(behandling)
                 VedtakType.AVSLAG -> TODO("Vedtakstype er ikke støttet: $vedtakType")
                 VedtakType.ENDRING -> when (behandling.revurderingsaarsak) {
-                    RevurderingAarsak.INNTEKTSENDRING -> ManueltBrevData(listOf())
+                    RevurderingAarsak.INNTEKTSENDRING -> ManueltBrevData(emptyList())
                     else -> TODO("Revurderingsbrev for ${behandling.revurderingsaarsak} er ikke støttet")
                 }
-                VedtakType.OPPHOER -> TODO("Vedtakstype er ikke støttet: $vedtakType")
+                VedtakType.OPPHOER -> when (behandling.revurderingsaarsak) {
+                    RevurderingAarsak.SIVILSTAND -> ManueltBrevData(emptyList())
+                    else -> TODO("Revurderingsbrev for ${behandling.revurderingsaarsak} er ikke støttet")
+                }
             }
         }
     }

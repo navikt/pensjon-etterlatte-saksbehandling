@@ -160,7 +160,10 @@ class BrevProsessTypeFactory(private val featureToggleService: FeatureToggleServ
     private fun omsBrev(behandling: Behandling): BrevProsessType {
         return when (behandling.vedtak.type) {
             VedtakType.INNVILGELSE -> BrevProsessType.REDIGERBAR
-            VedtakType.OPPHOER,
+            VedtakType.OPPHOER -> when (behandling.revurderingsaarsak?.redigerbartBrev) {
+                true -> BrevProsessType.REDIGERBAR
+                else -> BrevProsessType.MANUELL
+            }
             VedtakType.AVSLAG,
             VedtakType.ENDRING -> when (behandling.revurderingsaarsak) {
                 RevurderingAarsak.INNTEKTSENDRING -> BrevProsessType.REDIGERBAR

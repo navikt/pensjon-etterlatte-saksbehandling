@@ -68,7 +68,7 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
             <Soeknadsdato mottattDato={soeknadMottattDato} />
 
             <br />
-            {vedtaksbrev?.prosessType === BrevProsessType.MANUELL && (
+            {vedtaksbrev?.prosessType !== BrevProsessType.AUTOMATISK && (
               <Alert variant={'warning'}>
                 {manueltBrevKanRedigeres(status)
                   ? 'Kan ikke generere brev automatisk. Du må selv redigere innholdet.'

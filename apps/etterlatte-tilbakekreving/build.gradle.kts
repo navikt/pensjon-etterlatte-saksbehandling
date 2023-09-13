@@ -47,4 +47,5 @@ dependencies {
     }
     testImplementation(libs.test.wiremock)
     testImplementation(project(":libs:testdata"))
+    testImplementation(testFixtures(project(":libs:etterlatte-mq")))
 }

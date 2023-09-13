@@ -1,4 +1,4 @@
-package no.nav.etterlatte.tilbakekreving
+package no.nav.etterlatte.mq
 
 import io.mockk.every
 import io.mockk.mockk
@@ -7,7 +7,6 @@ import jakarta.jms.Message
 import jakarta.jms.MessageListener
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.retry
-import no.nav.etterlatte.mq.EtterlatteJmsConnectionFactory
 
 class DummyJmsConnectionFactory : EtterlatteJmsConnectionFactory {
 

@@ -9,8 +9,8 @@ import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.utbetaling.UtbetalingResponseDto
 import no.nav.etterlatte.libs.common.utbetaling.UtbetalingStatusDto
 import no.nav.etterlatte.libs.common.vedtak.Behandling
+import no.nav.etterlatte.mq.DummyJmsConnectionFactory
 import no.nav.etterlatte.mq.EtterlatteJmsConnectionFactory
-import no.nav.etterlatte.utbetaling.DummyJmsConnectionFactory
 import no.nav.etterlatte.utbetaling.TestContainers
 import no.nav.etterlatte.utbetaling.common.EVENT_NAME_OPPDATERT
 import no.nav.etterlatte.utbetaling.common.UTBETALING_RESPONSE

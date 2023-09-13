@@ -1,10 +1,12 @@
 package no.nav.etterlatte.beregning
 
 import beregning.regler.finnAnvendtGrunnbeloep
+import com.fasterxml.jackson.databind.JsonNode
 import no.nav.etterlatte.beregning.BeregnBarnepensjonServiceFeatureToggle.BrukInstitusjonsoppholdIBeregning
 import no.nav.etterlatte.beregning.BeregnBarnepensjonServiceFeatureToggle.BrukNyttRegelverkIBeregning
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlag
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlagService
+import no.nav.etterlatte.beregning.grunnlag.GrunnlagMedPeriode
 import no.nav.etterlatte.beregning.grunnlag.PeriodisertBeregningGrunnlag
 import no.nav.etterlatte.beregning.grunnlag.mapVerdier
 import no.nav.etterlatte.beregning.regler.barnepensjon.AvdoedForelder
@@ -26,9 +28,13 @@ import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
 import no.nav.etterlatte.libs.common.beregning.Beregningstype
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsdata
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.Metadata
+import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
+import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsnummer
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
@@ -40,6 +46,7 @@ import no.nav.etterlatte.libs.regler.eksekver
 import no.nav.etterlatte.libs.regler.finnAnvendteRegler
 import no.nav.etterlatte.regler.Beregningstall
 import no.nav.etterlatte.token.BrukerTokenInfo
+import okhttp3.internal.toImmutableList
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.YearMonth
@@ -97,7 +104,7 @@ class BeregnBarnepensjonService(
             trygdetid.hvisKanBrukes(),
             virkningstidspunkt.atDay(1),
             null,
-            nyttRegelverkAktivert
+            grunnlag
         )
 
         logger.info("Beregner barnepensjon for behandlingId=${behandling.id} med behandlingType=$behandlingType")
@@ -238,7 +245,7 @@ class BeregnBarnepensjonService(
         trygdetid: TrygdetidDto?,
         fom: LocalDate,
         tom: LocalDate?,
-        brukNyttRegelverk: Boolean
+        grunnlag: Grunnlag
     ) = PeriodisertBarnepensjonGrunnlag(
         soeskenKull = PeriodisertBeregningGrunnlag.lagKomplettPeriodisertGrunnlag(
             beregningsGrunnlag.soeskenMedIBeregning.mapVerdier { soeskenMedIBeregning ->
@@ -284,7 +291,18 @@ class BeregnBarnepensjonService(
                 )
             } ?: listOf()
         ) { _, _, _ -> FaktumNode(null, beregningsGrunnlag.kilde, "Institusjonsopphold") },
-        brukNyttRegelverk
+        brukNyttRegelverk = featureToggleService.isEnabled(BrukNyttRegelverkIBeregning, false),
+        avdoedeForeldre = PeriodisertBeregningGrunnlag.lagKomplettPeriodisertGrunnlag(
+            grunnlag.hentAvdoede().toPeriodisertAvdoedeGrunnlag().mapVerdier { fnrListe ->
+                FaktumNode(
+                    verdi = fnrListe,
+                    kilde = beregningsGrunnlag.kilde,
+                    beskrivelse = "Hvilke foreldre er døde"
+                )
+            },
+            fom,
+            tom
+        )
     )
 
     private fun TrygdetidDto?.hvisKanBrukes() = this.takeIf {
@@ -295,4 +313,28 @@ class BeregnBarnepensjonService(
     companion object {
         private const val FASTSATT_TRYGDETID_I_PILOT = 40
     }
+
+    private fun List<Grunnlagsdata<JsonNode>>.toPeriodisertAvdoedeGrunnlag():
+        List<GrunnlagMedPeriode<List<Folkeregisteridentifikator>>> {
+        val doede: MutableList<Folkeregisteridentifikator> = mutableListOf()
+        val resultat: MutableList<GrunnlagMedPeriode<List<Folkeregisteridentifikator>>> = mutableListOf()
+
+        val avdoedeSortert = this.distinctBy { it.hentFoedselsnummer() }
+            .sortedBy { it.hentDoedsdato()!!.verdi!! }
+            .toList()
+        val iterator = avdoedeSortert.listIterator()
+        while (iterator.hasNext()) {
+            val dennePeriode = iterator.next()
+            doede.add(Folkeregisteridentifikator.of(dennePeriode.hentFoedselsnummer()!!.verdi.value))
+
+            val nestePeriode = if (iterator.hasNext()) avdoedeSortert[iterator.nextIndex()] else null
+            val datoFOM = virkAvDoedsfall(dennePeriode.hentDoedsdato()!!.verdi)!!
+            val datoTOM = virkAvDoedsfall(nestePeriode?.hentDoedsdato()?.verdi)?.minusDays(1)
+
+            resultat.add(GrunnlagMedPeriode(doede.toImmutableList(), datoFOM, datoTOM))
+        }
+        return resultat.toImmutableList()
+    }
+
+    private fun virkAvDoedsfall(dato: LocalDate?) = dato?.plusMonths(1)?.withDayOfMonth(1)
 }

@@ -54,11 +54,13 @@ const val MAKS_TRYGDETID: Int = 40
 fun barnepensjonGrunnlag(
     soeskenKull: List<String> = emptyList(),
     trygdeTid: Beregningstall = Beregningstall(MAKS_TRYGDETID),
-    institusjonsopphold: InstitusjonsoppholdBeregningsgrunnlag? = null
+    institusjonsopphold: InstitusjonsoppholdBeregningsgrunnlag? = null,
+    avdoedeForeldre: List<Folkeregisteridentifikator> = listOf(Folkeregisteridentifikator.of("11057523044"))
 ) = BarnepensjonGrunnlag(
     soeskenKull = FaktumNode(soeskenKull.map { Folkeregisteridentifikator.of(it) }, kilde, "søskenkull"),
     avdoedForelder = FaktumNode(AvdoedForelder(trygdetid = trygdeTid), kilde, "trygdetid"),
-    institusjonsopphold = FaktumNode(institusjonsopphold, kilde, "institusjonsopphold")
+    institusjonsopphold = FaktumNode(institusjonsopphold, kilde, "institusjonsopphold"),
+    avdoedeForeldre = FaktumNode(avdoedeForeldre, kilde, "avdøde")
 )
 
 fun Double.toBeregningstall(
@@ -81,7 +83,7 @@ fun avkorting(
     aarsoppgjoer = aarsoppgjoer(
         ytelseFoerAvkorting,
         inntektsavkorting,
-        avkortetYtelseAar,
+        avkortetYtelseAar
     )
 )
 

@@ -70,6 +70,8 @@ private fun startKafkalytter(config: Config, env: Map<String, String>) {
             ),
             logger = LoggerFactory.getLogger(Application::class.java)
         )
+    } else {
+        LoggerFactory.getLogger(Application::class.java).info("Koplinga mot kabal er skrudd av, så kobler ikke opp dit")
     }
 }
 

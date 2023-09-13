@@ -69,8 +69,8 @@ export type InstitusjonsoppholdGrunnlagData = PeriodisertBeregningsgrunnlag<Inst
 
 export interface InstitusjonsoppholdIBeregning {
   reduksjon: Reduksjonstypekey
-  egenReduksjon?: string | undefined
-  begrunnelse?: string | undefined
+  egenReduksjon?: string | null
+  begrunnelse?: string | null
 }
 
 export const Reduksjon = {

@@ -11,10 +11,10 @@ import {
 import MaanedVelger from '~components/behandling/beregningsgrunnlag/MaanedVelger'
 import { Button, Select, TextField } from '@navikt/ds-react'
 import { InstitusjonsoppholdGrunnlagData, Reduksjon } from '~shared/types/Beregning'
-import React from 'react'
 import styled from 'styled-components'
+import { TrashIcon } from '@navikt/aksel-icons'
 
-type InstitusjonsoppholdPerioder = {
+export type InstitusjonsoppholdPerioder = {
   item: FieldArrayWithId<{ institusjonsOppholdForm: InstitusjonsoppholdGrunnlagData }, 'institusjonsOppholdForm', 'id'>
   index: number
   control: Control<{ institusjonsOppholdForm: InstitusjonsoppholdGrunnlagData }>
@@ -103,19 +103,25 @@ const InstitusjonsoppholdPeriode = (props: InstitusjonsoppholdPerioder) => {
           {...register(`institusjonsOppholdForm.${index}.data.begrunnelse`)}
         />
         {behandles && (
-          <Button
+          <ButtonMarginTop
+            icon={<TrashIcon />}
+            variant="tertiary"
             onClick={() => {
               setVisFeil(false)
               remove(index)
             }}
           >
             Fjern opphold
-          </Button>
+          </ButtonMarginTop>
         )}
       </div>
     </>
   )
 }
+
+const ButtonMarginTop = styled(Button)`
+  margin-top: 1rem;
+`
 
 const DatoSection = styled.section`
   display: grid;

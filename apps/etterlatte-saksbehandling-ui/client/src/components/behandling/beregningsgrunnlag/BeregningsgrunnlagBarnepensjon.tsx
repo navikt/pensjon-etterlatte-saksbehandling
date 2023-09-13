@@ -43,10 +43,9 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
   const [vilkaarsvurdering, getVilkaarsvurdering] = useApiCall(hentVilkaarsvurdering)
   const [yrkesskadeTrygdetid, setYrkesskadeTrygdetid] = useState<boolean>(false)
   const [visInstitusjonsopphold, setVisInstitusjonsopphold] = useState<boolean>(false)
-  const [soeskenGrunnlagsData, setSoeskenGrunnlagsData] = useState<Soeskengrunnlag | undefined>(undefined)
-  const [institusjonsoppholdsGrunnlagData, setInstitusjonsoppholdsGrunnlagData] = useState<
-    InstitusjonsoppholdGrunnlagData | undefined
-  >(undefined)
+  const [soeskenGrunnlagsData, setSoeskenGrunnlagsData] = useState<Soeskengrunnlag | null>(null)
+  const [institusjonsoppholdsGrunnlagData, setInstitusjonsoppholdsGrunnlagData] =
+    useState<InstitusjonsoppholdGrunnlagData | null>(null)
 
   const [manglerSoeskenJustering, setSoeskenJusteringMangler] = useState<boolean>(false)
   const featureToggleNameTrygdetid = 'pensjon-etterlatte.bp-bruk-faktisk-trygdetid'

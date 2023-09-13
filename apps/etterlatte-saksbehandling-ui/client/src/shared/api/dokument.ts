@@ -1,4 +1,4 @@
-import { Journalpost } from '~components/behandling/types'
+import { Journalpost } from '~shared/types/Journalpost'
 import { apiClient, ApiResponse } from './apiClient'
 
 export const hentDokumenter = async (fnr: string): Promise<ApiResponse<Journalpost[]>> =>

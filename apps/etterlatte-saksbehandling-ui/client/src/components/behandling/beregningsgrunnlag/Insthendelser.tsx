@@ -1,7 +1,7 @@
 import { isFailure, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
 import { hentGrunnlagsendringshendelserInstitusjonsoppholdforSak } from '~shared/api/behandling'
-import React, { useEffect, useState } from 'react'
-import { Grunnlagsendringshendelse, InstitusjonsoppholdSamsvar } from '~components/person/typer'
+import React, { useEffect } from 'react'
+import { InstitusjonsoppholdSamsvar } from '~components/person/typer'
 import { Table } from '@navikt/ds-react'
 import { formaterStringDato } from '~utils/formattering'
 import { isPending } from '@reduxjs/toolkit'
@@ -10,19 +10,17 @@ import Spinner from '~shared/Spinner'
 
 const Insthendelser = (props: { sakid: number }) => {
   const { sakid } = props
-  const [instHendelser, hentInsthendelser] = useApiCall(hentGrunnlagsendringshendelserInstitusjonsoppholdforSak)
-  const [hendelser, setHendelser] = useState<Grunnlagsendringshendelse[] | undefined>(undefined)
+  const [hendelser, hentInsthendelser] = useApiCall(hentGrunnlagsendringshendelserInstitusjonsoppholdforSak)
 
   useEffect(() => {
-    hentInsthendelser(sakid, (hendelser) => {
-      setHendelser(hendelser)
-    })
+    hentInsthendelser(sakid)
   }, [])
+
   return (
     <>
-      <Spinner visible={isPending(instHendelser)} label={'Henter institusjonshendelser for søsken'} />
-      {isFailure(instHendelser) && <ApiErrorAlert>Institusjonshendelser kan ikke hentes</ApiErrorAlert>}
-      {isSuccess(instHendelser) && hendelser && hendelser.length > 0 && (
+      {isPending(hendelser) && <Spinner visible label={'Henter institusjonshendelser for søsken'} />}
+      {isFailure(hendelser) && <ApiErrorAlert>Institusjonshendelser kan ikke hentes</ApiErrorAlert>}
+      {isSuccess(hendelser) && hendelser.data.length > 0 && (
         <Table>
           <Table.Header>
             <Table.Row>
@@ -34,7 +32,7 @@ const Insthendelser = (props: { sakid: number }) => {
             </Table.Row>
           </Table.Header>
           <Table.Body>
-            {hendelser?.map((hendelse) => {
+            {hendelser.data.map((hendelse) => {
               const inst = hendelse.samsvarMellomKildeOgGrunnlag as InstitusjonsoppholdSamsvar
               return (
                 <Table.Row key={hendelse.id}>

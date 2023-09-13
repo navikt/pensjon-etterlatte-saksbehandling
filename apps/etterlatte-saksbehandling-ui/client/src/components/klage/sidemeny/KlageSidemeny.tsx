@@ -3,8 +3,8 @@ import { CollapsibleSidebar, SidebarContent, SidebarTools } from '~shared/styled
 import { useState } from 'react'
 import { BodyShort, Button } from '@navikt/ds-react'
 import { ChevronLeftDoubleIcon, ChevronRightDoubleIcon } from '@navikt/aksel-icons'
-import { Dokumentoversikt } from '~components/person/dokumentoversikt'
 import { SidebarPanel } from '~components/behandling/SideMeny/SideMeny'
+import { Dokumentoversikt } from '~components/person/dokumenter/dokumentoversikt'
 
 export function KlageSidemeny() {
   const klage = useKlage()

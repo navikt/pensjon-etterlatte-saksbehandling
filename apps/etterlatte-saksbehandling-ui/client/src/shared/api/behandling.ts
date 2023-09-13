@@ -90,11 +90,15 @@ export const attesterVedtak = async (args: {
   return apiClient.post(`/vedtak/${args.behandlingId}/attester`, { kommentar: args.kommentar })
 }
 
-export const underkjennVedtak = async (
-  behandlingId: string,
-  kommentar: string,
+export const underkjennVedtak = async ({
+  behandlingId,
+  kommentar,
+  valgtBegrunnelse,
+}: {
+  behandlingId: string
+  kommentar: string
   valgtBegrunnelse: string
-): Promise<ApiResponse<unknown>> => {
+}): Promise<ApiResponse<unknown>> => {
   return apiClient.post(`/vedtak/${behandlingId}/underkjenn`, { kommentar, valgtBegrunnelse })
 }
 export const lagreGyldighetsproeving = async (args: {

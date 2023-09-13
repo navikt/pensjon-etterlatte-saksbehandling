@@ -9,11 +9,11 @@ import { Behandlingsoppsummering } from '~components/behandling/attestering/opps
 import { Attestering } from '~components/behandling/attestering/attestering/attestering'
 import { IBeslutning } from '~components/behandling/attestering/types'
 import { IBehandlingInfo } from '~components/behandling/SideMeny/types'
-import { Dokumentoversikt } from '~components/person/dokumentoversikt'
 import styled from 'styled-components'
 import AnnullerBehandling from '~components/behandling/handlinger/AnnullerBehanding'
 import { VedtakSammendrag } from '~components/vedtak/typer'
 import { ChevronLeftDoubleIcon, ChevronRightDoubleIcon } from '@navikt/aksel-icons'
+import { Dokumentoversikt } from '~components/person/dokumenter/dokumentoversikt'
 
 export const SideMeny = (props: { behandling: IDetaljertBehandling; vedtak: VedtakSammendrag | undefined }) => {
   const { behandling, vedtak } = props

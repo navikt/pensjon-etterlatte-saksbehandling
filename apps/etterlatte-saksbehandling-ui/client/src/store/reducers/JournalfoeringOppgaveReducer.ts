@@ -1,8 +1,8 @@
 import { createAction, createReducer } from '@reduxjs/toolkit'
 import { OppgaveDTOny } from '~shared/api/oppgaverny'
-import { Journalpost } from '~components/behandling/types'
 import { JaNei } from '~shared/types/ISvar'
 import { NyBehandlingRequest } from '~shared/types/IDetaljertBehandling'
+import { Journalpost } from '~shared/types/Journalpost'
 
 export const settBruker = createAction<string>('behandling/bruker/sett')
 export const settOppgave = createAction<OppgaveDTOny>('behandling/oppgave/sett')

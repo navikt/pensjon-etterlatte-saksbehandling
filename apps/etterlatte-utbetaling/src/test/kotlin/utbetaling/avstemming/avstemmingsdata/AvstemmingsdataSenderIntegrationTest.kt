@@ -1,11 +1,10 @@
 package no.nav.etterlatte.utbetaling.grensesnittavstemming.avstemmingsdata
 
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.testdata.ChipsetCheck.erM1EllerM2
-import no.nav.etterlatte.utbetaling.TestContainers
+import no.nav.etterlatte.utbetaling.DummyJmsConnectionFactory
+import no.nav.etterlatte.utbetaling.TestContainers.ibmMQContainer
 import no.nav.etterlatte.utbetaling.avstemming.avstemmingsdata.KonsistensavstemmingDataMapper
 import no.nav.etterlatte.utbetaling.config.EtterlatteJmsConnectionFactory
-import no.nav.etterlatte.utbetaling.config.JmsConnectionFactory
 import no.nav.etterlatte.utbetaling.grensesnittavstemming.UUIDBase64
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Saktype
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingStatus
@@ -19,33 +18,17 @@ import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import org.junit.jupiter.api.condition.DisabledIf
-import org.testcontainers.junit.jupiter.Container
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@DisabledIf(value = erM1EllerM2)
 internal class AvstemmingsdataSenderIntegrationTest {
 
-    @Container
-    private val ibmMQContainer = TestContainers.ibmMQContainer
-    private lateinit var jmsConnectionFactory: EtterlatteJmsConnectionFactory
+    private val jmsConnectionFactory: EtterlatteJmsConnectionFactory = DummyJmsConnectionFactory()
     private lateinit var avstemmingsdataSender: AvstemmingsdataSender
 
     @BeforeAll
     fun beforeAll() {
-        ibmMQContainer.start()
-
-        jmsConnectionFactory = JmsConnectionFactory(
-            hostname = ibmMQContainer.host,
-            port = ibmMQContainer.firstMappedPort,
-            queueManager = "QM1",
-            channel = "DEV.ADMIN.SVRCONN",
-            username = "admin",
-            password = "passw0rd"
-        )
-
         avstemmingsdataSender = AvstemmingsdataSender(
             jmsConnectionFactory = jmsConnectionFactory,
             queue = "DEV.QUEUE.1"

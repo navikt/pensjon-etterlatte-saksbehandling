@@ -4,6 +4,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.testdata.ChipsetCheck.erM1EllerM2
 import no.nav.etterlatte.utbetaling.TestContainers
 import no.nav.etterlatte.utbetaling.avstemming.avstemmingsdata.KonsistensavstemmingDataMapper
+import no.nav.etterlatte.utbetaling.config.EtterlatteJmsConnectionFactory
 import no.nav.etterlatte.utbetaling.config.JmsConnectionFactory
 import no.nav.etterlatte.utbetaling.grensesnittavstemming.UUIDBase64
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Saktype
@@ -29,7 +30,7 @@ internal class AvstemmingsdataSenderIntegrationTest {
 
     @Container
     private val ibmMQContainer = TestContainers.ibmMQContainer
-    private lateinit var jmsConnectionFactory: JmsConnectionFactory
+    private lateinit var jmsConnectionFactory: EtterlatteJmsConnectionFactory
     private lateinit var avstemmingsdataSender: AvstemmingsdataSender
 
     @BeforeAll

@@ -16,7 +16,7 @@ import no.nav.etterlatte.utbetaling.common.UTBETALING_RESPONSE
 import no.nav.etterlatte.utbetaling.common.UtbetalingEventDto
 import no.nav.etterlatte.utbetaling.config.ApplicationContext
 import no.nav.etterlatte.utbetaling.config.ApplicationProperties
-import no.nav.etterlatte.utbetaling.config.JmsConnectionFactory
+import no.nav.etterlatte.utbetaling.config.EtterlatteJmsConnectionFactory
 import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.OppdragJaxb
 import no.nav.etterlatte.utbetaling.oppdragMedFeiletKvittering
 import no.nav.etterlatte.utbetaling.oppdragMedGodkjentKvittering
@@ -45,7 +45,7 @@ class ApplicationIntegrationTest {
     private val ibmMQContainer = TestContainers.ibmMQContainer
 
     private val rapidsConnection: TestRapid = spyk(TestRapid())
-    private lateinit var connectionFactory: JmsConnectionFactory
+    private lateinit var connectionFactory: EtterlatteJmsConnectionFactory
     private lateinit var dataSource: DataSource
 
     @BeforeAll

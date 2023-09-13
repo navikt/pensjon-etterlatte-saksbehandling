@@ -12,7 +12,7 @@ import no.nav.etterlatte.sikkerLogg
 import no.nav.etterlatte.utbetaling.common.EVENT_NAME_OPPDATERT
 import no.nav.etterlatte.utbetaling.common.UTBETALING_RESPONSE
 import no.nav.etterlatte.utbetaling.common.UtbetalingEventDto
-import no.nav.etterlatte.utbetaling.config.JmsConnectionFactory
+import no.nav.etterlatte.utbetaling.config.EtterlatteJmsConnectionFactory
 import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.OppdragJaxb
 import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.sakId
 import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.vedtakId
@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory
 class KvitteringMottaker(
     private val rapidsConnection: RapidsConnection,
     private val utbetalingService: UtbetalingService,
-    jmsConnectionFactory: JmsConnectionFactory,
+    jmsConnectionFactory: EtterlatteJmsConnectionFactory,
     queue: String
 ) : MessageListener {
 

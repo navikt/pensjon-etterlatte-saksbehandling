@@ -2,6 +2,7 @@ package no.nav.etterlatte.utbetaling.iverksetting.oppdrag
 
 import no.nav.etterlatte.libs.testdata.ChipsetCheck
 import no.nav.etterlatte.utbetaling.TestContainers
+import no.nav.etterlatte.utbetaling.config.EtterlatteJmsConnectionFactory
 import no.nav.etterlatte.utbetaling.config.JmsConnectionFactory
 import no.nav.etterlatte.utbetaling.oppdrag
 import no.nav.etterlatte.utbetaling.utbetaling
@@ -20,7 +21,7 @@ internal class OppdragSenderIntegrationTest {
     @Container
     private val ibmMQContainer = TestContainers.ibmMQContainer
 
-    private lateinit var jmsConnectionFactory: JmsConnectionFactory
+    private lateinit var jmsConnectionFactory: EtterlatteJmsConnectionFactory
     private lateinit var oppdragSender: OppdragSender
 
     @BeforeAll

@@ -12,6 +12,14 @@ import org.messaginghub.pooled.jms.JmsPoolConnectionFactory
 
 private const val UTF_8_WITH_PUA = 1208
 
+interface EtterlatteJmsConnectionFactory {
+    fun connection(): Connection
+    fun start(listener: ExceptionListener, queue: String, messageListener: MessageListener)
+    fun stop()
+    fun send(xml: String, queue: String)
+    fun sendMedSvar(xml: String, queue: String, replyQueue: String)
+}
+
 class JmsConnectionFactory(
     private val hostname: String,
     private val port: Int,
@@ -19,7 +27,7 @@ class JmsConnectionFactory(
     private val channel: String,
     private val username: String,
     private val password: String
-) {
+) : EtterlatteJmsConnectionFactory {
 
     private val connectionFactory = MQConnectionFactory().also {
         it.hostName = hostname
@@ -39,9 +47,9 @@ class JmsConnectionFactory(
         pooledConnectionFactory
     }
 
-    fun connection(): Connection = connectionFactory.createConnection(username, password)
+    override fun connection(): Connection = connectionFactory.createConnection(username, password)
 
-    fun start(listener: ExceptionListener, queue: String, messageListener: MessageListener) {
+    override fun start(listener: ExceptionListener, queue: String, messageListener: MessageListener) {
         val connection = connection().apply { exceptionListener = listener }
         val session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE)
         val consumer = session.createConsumer(session.createQueue(queue))
@@ -50,9 +58,9 @@ class JmsConnectionFactory(
         connection.start()
     }
 
-    fun stop() = connectionFactory.stop()
+    override fun stop() = connectionFactory.stop()
 
-    fun send(xml: String, queue: String) {
+    override fun send(xml: String, queue: String) {
         val connection = connection()
         connection.createSession().use { session ->
             val producer = session.createProducer(session.createQueue(queue))
@@ -61,7 +69,7 @@ class JmsConnectionFactory(
         }
     }
 
-    fun sendMedSvar(xml: String, queue: String, replyQueue: String) {
+    override fun sendMedSvar(xml: String, queue: String, replyQueue: String) {
         connection().createSession().use { session ->
             val producer = session.createProducer(session.createQueue(queue))
             val message = session.createTextMessage(xml).apply {

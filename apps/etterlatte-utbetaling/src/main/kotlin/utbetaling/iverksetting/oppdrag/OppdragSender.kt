@@ -1,11 +1,11 @@
 package no.nav.etterlatte.utbetaling.iverksetting.oppdrag
 
-import no.nav.etterlatte.utbetaling.config.JmsConnectionFactory
+import no.nav.etterlatte.utbetaling.config.EtterlatteJmsConnectionFactory
 import no.trygdeetaten.skjema.oppdrag.Oppdrag
 import org.slf4j.LoggerFactory
 
 class OppdragSender(
-    private val jmsConnectionFactory: JmsConnectionFactory,
+    private val jmsConnectionFactory: EtterlatteJmsConnectionFactory,
     private val queue: String,
     private val replyQueue: String
 ) {

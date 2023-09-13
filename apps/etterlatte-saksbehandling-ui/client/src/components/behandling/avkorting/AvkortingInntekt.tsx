@@ -108,8 +108,9 @@ export const AvkortingInntekt = (props: {
         <InntektAvkortingTabell>
           <Table className="table" zebraStripes>
             <Table.Header>
-              <Table.HeaderCell>Forventet inntekt</Table.HeaderCell>
-              <Table.HeaderCell>Inntekt utland</Table.HeaderCell>
+              <Table.HeaderCell>Forventet inntekt Norge</Table.HeaderCell>
+              <Table.HeaderCell>Forventet inntekt utland</Table.HeaderCell>
+              <Table.HeaderCell>Forventet inntekt totalt</Table.HeaderCell>
               <Table.HeaderCell>Gjenværende måneder</Table.HeaderCell>
               <Table.HeaderCell>Periode</Table.HeaderCell>
               <Table.HeaderCell>Spesifikasjon av inntekt</Table.HeaderCell>
@@ -130,7 +131,7 @@ export const AvkortingInntekt = (props: {
                       <OmstillingsstoenadToolTip title={'Se hva forventet inntekt består av'}>
                         Forventet inntekt beregnes utfra forventet årsinntekt med fratrekk for måneder før innvilgelse.
                         <br />
-                        Forventet inntekt = forventet årsinntekt - inntekt i måneder før innvilgelse måneder (
+                        Forventet inntekt Norge = forventet årsinntekt - inntekt i måneder før innvilgelse måneder (
                         {` ${NOK(aarsinntekt)} - ${NOK(fratrekkInnAar)} = ${NOK(forventetInntekt)}`}).
                       </OmstillingsstoenadToolTip>
                     </Table.DataCell>
@@ -139,9 +140,12 @@ export const AvkortingInntekt = (props: {
                       <OmstillingsstoenadToolTip title={'Se hva forventet inntekt består av'}>
                         Forventet inntekt utland beregnes utfra inntekt utland med fratrekk for måneder før innvilgelse.
                         <br />
-                        Forventet inntekt utland = inntekt utland - inntekt i måneder før innvilgelse måneder (
+                        Forventet inntekt utland = forventet årsinntekt - inntekt i måneder før innvilgelse måneder (
                         {` ${NOK(inntektutland)} - ${NOK(fratrekkUtland)} = ${NOK(forventetInntektUtland)}`}).
                       </OmstillingsstoenadToolTip>
+                    </Table.DataCell>
+                    <Table.DataCell key="InntektTotalt">
+                      {NOK(forventetInntekt + forventetInntektUtland)}
                     </Table.DataCell>
                     <Table.DataCell>{inntektsgrunnlag.relevanteMaanederInnAar}</Table.DataCell>
                     <Table.DataCell key="Periode">
@@ -173,7 +177,7 @@ export const AvkortingInntekt = (props: {
               <>
                 <FormWrapper>
                   <TextField
-                    label={'Forventet årsinntekt'}
+                    label={'Forventet årsinntekt Norge'}
                     size="medium"
                     type="text"
                     inputMode="numeric"
@@ -187,7 +191,7 @@ export const AvkortingInntekt = (props: {
                     }
                   />
                   <TextField
-                    label={'Fratrekk inn år'}
+                    label={'Fratrekk inn-år'}
                     size="medium"
                     type="text"
                     inputMode="numeric"
@@ -201,7 +205,7 @@ export const AvkortingInntekt = (props: {
                     }
                   />
                   <TextField
-                    label={'Inntekt utland'}
+                    label={'Forventet årsinntekt utland'}
                     size="medium"
                     type="text"
                     inputMode="numeric"
@@ -215,7 +219,7 @@ export const AvkortingInntekt = (props: {
                     }
                   />
                   <TextField
-                    label={'Fratrekk inn år utland'}
+                    label={'Fratrekk inn-år'}
                     size="medium"
                     type="text"
                     inputMode="numeric"

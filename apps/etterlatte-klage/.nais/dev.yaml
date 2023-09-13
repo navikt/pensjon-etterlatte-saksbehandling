@@ -32,6 +32,8 @@ spec:
       value: "etterlatte-v1"
     - name: KLAGE_TOPIC
       value: "klage.behandling-events.v1"
+    - name: BEHANDLING_AZURE_SCOPE
+      value: api://dev-gcp.etterlatte.etterlatte-behandling/.default
     - name: ETTERLATTE_BEHANDLING_URL
       value: http://etterlatte-behandling
     - name: ETTERLATTE_BEHANDLING_CLIENT_ID

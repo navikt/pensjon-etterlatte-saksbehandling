@@ -19,9 +19,8 @@ class KravgrunnlagConsumer(
     fun start() = connectionFactory.start(
         listener = exceptionListener(),
         queue = queue,
-        messageListener = this,
-        loggtekst = "Lytter på kravgrunnlag fra tilbakekrevingskomponenten"
-    )
+        messageListener = this
+    ).also { logger.info("Lytter på kravgrunnlag fra tilbakekrevingskomponenten") }
 
     override fun onMessage(message: Message) = withLogContext {
         var kravgrunnlagPayload: String? = null

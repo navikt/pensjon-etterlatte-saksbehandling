@@ -1,9 +1,7 @@
 package no.nav.etterlatte.utbetaling.iverksetting
 
-import jakarta.jms.ExceptionListener
 import jakarta.jms.Message
 import jakarta.jms.MessageListener
-import jakarta.jms.Session
 import kotlinx.coroutines.runBlocking
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.etterlatte.libs.common.logging.withLogContext
@@ -36,15 +34,13 @@ class KvitteringMottaker(
 ) : MessageListener {
 
     init {
-        val connection = jmsConnectionFactory.connection().apply {
-            exceptionListener = ExceptionListener {
+        jmsConnectionFactory.start(
+            listener = {
                 logger.error("En feil oppstod med tilkobling mot MQ: ${it.message}", it)
-            }
-        }.also { it.start() }
-
-        val session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE)
-        val consumer = session.createConsumer(session.createQueue(queue))
-        consumer.messageListener = this
+            },
+            queue = queue,
+            messageListener = this
+        )
     }
 
     override fun onMessage(message: Message) {

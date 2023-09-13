@@ -5,6 +5,9 @@ import com.ibm.mq.jakarta.jms.MQConnectionFactory
 import com.ibm.msg.client.jakarta.jms.JmsConstants
 import com.ibm.msg.client.jakarta.wmq.WMQConstants
 import jakarta.jms.Connection
+import jakarta.jms.ExceptionListener
+import jakarta.jms.MessageListener
+import jakarta.jms.Session
 import org.messaginghub.pooled.jms.JmsPoolConnectionFactory
 
 private const val UTF_8_WITH_PUA = 1208
@@ -17,6 +20,7 @@ class JmsConnectionFactory(
     private val username: String,
     private val password: String
 ) {
+
     private val connectionFactory = MQConnectionFactory().also {
         it.hostName = hostname
         it.port = port
@@ -36,6 +40,15 @@ class JmsConnectionFactory(
     }
 
     fun connection(): Connection = connectionFactory.createConnection(username, password)
+
+    fun start(listener: ExceptionListener, queue: String, messageListener: MessageListener) {
+        val connection = connection().apply { exceptionListener = listener }
+        val session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE)
+        val consumer = session.createConsumer(session.createQueue(queue))
+        consumer.messageListener = messageListener
+
+        connection.start()
+    }
 
     fun stop() = connectionFactory.stop()
 }

@@ -10,30 +10,24 @@ import { JaNei } from '~shared/types/ISvar'
 import React, { useEffect } from 'react'
 import { Control, Controller, Path, useForm } from 'react-hook-form'
 import { Formkrav, Klage, KlageStatus, VedtaketKlagenGjelder } from '~shared/types/Klage'
-import styled from 'styled-components'
 import { useAppDispatch } from '~store/Store'
 import { addKlage } from '~store/reducers/KlageReducer'
 import { hentIverksatteVedtakISak } from '~shared/api/vedtaksvurdering'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { formaterKanskjeStringDato, formaterVedtakType } from '~utils/formattering'
+import { FieldOrNull } from '~shared/types/util'
+import { Feilmelding, VurderingWrapper } from '~components/klage/styled'
 
 // Vi bruker kun id'en til vedtaket i skjemadata, og transformerer fram / tilbake før sending / lasting
-type FilledFormData = Omit<Formkrav, 'vedtaketKlagenGjelder'> & { vedtaketKlagenGjelderId: null | string }
-type FormData = FieldOrNull<FilledFormData>
+type FilledFormDataFormkrav = Omit<Formkrav, 'vedtaketKlagenGjelder'> & { vedtaketKlagenGjelderId: null | string }
+type FormDataFormkrav = FieldOrNull<FilledFormDataFormkrav>
 
-// På grunn av måten React håndterer controlled vs uncontrolled inputs tror React at input med value=undefined
-// er uncontrolled input. Dette stemmer dårlig med hvordan vi vil bruke skjemaet med f.eks. Partial<FilledFormData>,
-// så workarounden med FieldOrNull er brukt i stedet
-type FieldOrNull<T> = {
-  [P in keyof T]: T[P] | null
-}
-
-function isValidFormkrav(formdata: FormData): formdata is FilledFormData {
+function isValidFormkrav(formdata: FormDataFormkrav): formdata is FilledFormDataFormkrav {
   return Object.values(formdata).every((value) => value !== null && value !== undefined)
 }
 
-const klageFormkravTilDefaultFormValues = (klage: Klage | null): FormData => {
+const klageFormkravTilDefaultFormValues = (klage: Klage | null): FormDataFormkrav => {
   if (!klage || !klage.formkrav) {
     return {
       vedtaketKlagenGjelderId: null,
@@ -51,7 +45,7 @@ const klageFormkravTilDefaultFormValues = (klage: Klage | null): FormData => {
   }
 }
 
-function mapFormkrav(krav: FilledFormData, vedtakIKlagen: Array<VedtaketKlagenGjelder>): Formkrav {
+function mapFormkrav(krav: FilledFormDataFormkrav, vedtakIKlagen: Array<VedtaketKlagenGjelder>): Formkrav {
   if (krav.vedtaketKlagenGjelderId !== '-1') {
     const vedtak = vedtakIKlagen.find((v) => v.id === krav.vedtaketKlagenGjelderId)
 
@@ -67,7 +61,9 @@ export function KlageFormkrav() {
   const dispatch = useAppDispatch()
   const [iverksatteVedtak, hentIverksatteVedtak] = useApiCall(hentIverksatteVedtakISak)
 
-  const { control, handleSubmit } = useForm<FormData>({ defaultValues: klageFormkravTilDefaultFormValues(klage) })
+  const { control, handleSubmit } = useForm<FormDataFormkrav>({
+    defaultValues: klageFormkravTilDefaultFormValues(klage),
+  })
 
   const navigate = useNavigate()
 
@@ -80,7 +76,7 @@ export function KlageFormkrav() {
 
   const kjenteVedtak = mapSuccess(iverksatteVedtak, (vedtak) => vedtak) ?? []
 
-  function sendInnFormkrav(krav: FormData) {
+  function sendInnFormkrav(krav: FormDataFormkrav) {
     if (!klage) {
       return
     }
@@ -131,19 +127,20 @@ export function KlageFormkrav() {
         <Innhold>
           {/* Det er litt spesiell håndtering av akkurat hvilket vedtak klagen ligger på, relatert til hvordan React
             tolker controlled vs uncontrolled components. For å kunne håndtere både 1. Ikke valgt vedtak og 2. Valgt
-            at det ikke er noe vedtak, tolkes null | undefined som 1), og vedtakId === "-1" som 2). Alle andre vedtakId
-            tolkes som id'en til det vedtaket.*/}
+            at det ikke er noe vedtak, tolkes null | undefined som ""), og vedtakId === "-1" som 2). Alle andre vedtakId
+            tolkes som id'en til det vedtaket. */}
           <VurderingWrapper>
             <Controller
               rules={{
                 required: true,
+                minLength: 0,
               }}
               render={({ field, fieldState }) => {
                 const { value, ...rest } = field
                 return (
                   <>
-                    <Select label="Hvilket vedtak klages det på?" value={value ?? undefined} {...rest}>
-                      <option value={undefined}>Velg vedtak</option>
+                    <Select label="Hvilket vedtak klages det på?" value={value ?? ''} {...rest}>
+                      <option value="">Velg vedtak</option>
                       {kjenteVedtak.map((vedtak) => (
                         <option key={vedtak.id} value={vedtak.id}>
                           Vedtak {vedtak.id} om {formaterVedtakType(vedtak.vedtakType!!)} -{' '}
@@ -201,8 +198,8 @@ export function KlageFormkrav() {
 }
 
 function JaNeiRadiogruppe(props: {
-  control: Control<FormData>
-  name: Path<FormData>
+  control: Control<FormDataFormkrav>
+  name: Path<FormDataFormkrav>
   legend: string
   errorMessage?: string
 }) {
@@ -230,13 +227,3 @@ function JaNeiRadiogruppe(props: {
     />
   )
 }
-
-const VurderingWrapper = styled.div`
-  margin-bottom: 2rem;
-
-  width: 30rem;
-`
-
-const Feilmelding = styled.div`
-  color: var(--a-text-danger);
-`

@@ -16,6 +16,7 @@ import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.KLAGEID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.behandling.Formkrav
+import no.nav.etterlatte.libs.common.behandling.KlageUtfallUtenBrev
 import no.nav.etterlatte.libs.common.klageId
 import no.nav.etterlatte.libs.common.kunSaksbehandler
 import no.nav.etterlatte.libs.common.medBody
@@ -75,6 +76,19 @@ internal fun Route.klageRoutes(klageService: KlageService, featureToggleService:
                     }
                 }
             }
+
+            put("utfall") {
+                hvisEnabled(KlageFeatureToggle.KanBrukeKlageToggle) {
+                    kunSaksbehandler { saksbehandler ->
+                        medBody<VurdertUtfallDto> { utfall ->
+                            val oppdatertKlage = inTransaction {
+                                klageService.lagreUtfallAvKlage(klageId, utfall.utfall, saksbehandler)
+                            }
+                            call.respond(oppdatertKlage)
+                        }
+                    }
+                }
+            }
         }
 
         get("sak/{$SAKID_CALL_PARAMETER}") {
@@ -89,3 +103,4 @@ internal fun Route.klageRoutes(klageService: KlageService, featureToggleService:
 }
 
 data class VurdereFormkravDto(val formkrav: Formkrav)
+data class VurdertUtfallDto(val utfall: KlageUtfallUtenBrev)

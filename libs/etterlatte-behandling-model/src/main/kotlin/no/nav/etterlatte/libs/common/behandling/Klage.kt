@@ -1,5 +1,7 @@
 package no.nav.etterlatte.libs.common.behandling
 
+import com.fasterxml.jackson.annotation.JsonTypeInfo
+import com.fasterxml.jackson.annotation.JsonTypeName
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -31,6 +33,10 @@ enum class KlageStatus {
     companion object {
         fun kanOppdatereFormkrav(status: KlageStatus): Boolean {
             return status !== FERDIGSTILT
+        }
+
+        fun kanOppdatereUtfall(status: KlageStatus): Boolean {
+            return status === FORMKRAV_OPPFYLT || status === UTFALL_VURDERT
         }
     }
 }
@@ -66,6 +72,19 @@ data class Klage(
         )
     }
 
+    fun oppdaterUtfall(utfallMedBrev: KlageUtfall): Klage {
+        if (!kanOppdatereUtfall(this)) {
+            throw IllegalStateException(
+                "Kan ikke oppdatere utfallet i klagen med id=${this.id} på grunn av statusen" +
+                    "til klagen (${this.status})"
+            )
+        }
+        return this.copy(
+            utfall = utfallMedBrev,
+            status = KlageStatus.UTFALL_VURDERT
+        )
+    }
+
     companion object {
         fun ny(sak: Sak): Klage {
             return Klage(
@@ -82,11 +101,73 @@ data class Klage(
         fun kanOppdatereFormkrav(klage: Klage): Boolean {
             return KlageStatus.kanOppdatereFormkrav(klage.status)
         }
+
+        fun kanOppdatereUtfall(klage: Klage): Boolean {
+            return KlageStatus.kanOppdatereUtfall(klage.status)
+        }
     }
 }
 
-// Placeholdere for utfall / formkravene til klagen.
-class KlageUtfall
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
+sealed class KlageUtfall {
+    abstract val saksbehandler: Grunnlagsopplysning.Saksbehandler
+
+    @JsonTypeName("OMGJOERING")
+    data class Omgjoering(
+        val omgjoering: KlageOmgjoering,
+        override val saksbehandler: Grunnlagsopplysning.Saksbehandler
+    ) : KlageUtfall()
+
+    @JsonTypeName("DELVIS_OMGJOERING")
+    data class DelvisOmgjoering(
+        val omgjoering: KlageOmgjoering,
+        val innstilling: InnstillingTilKabal,
+        override val saksbehandler: Grunnlagsopplysning.Saksbehandler
+    ) : KlageUtfall()
+
+    @JsonTypeName("STADFESTE_VEDTAK")
+    data class StadfesteVedtak(
+        val innstilling: InnstillingTilKabal,
+        override val saksbehandler: Grunnlagsopplysning.Saksbehandler
+    ) : KlageUtfall()
+}
+
+enum class GrunnForOmgjoering {
+    FEIL_LOVANVENDELSE,
+    FEIL_REGELVERKSFORSTAAELSE,
+    FEIL_ELLER_ENDRET_FAKTA,
+    PROSESSUELL_FEIL,
+    SAKEN_HAR_EN_AAPEN_BEHANDLING,
+    ANNET
+}
+
+data class KlageOmgjoering(val grunnForOmgjoering: GrunnForOmgjoering, val begrunnelse: String)
+
+class InnstillingTilKabal(val lovhjemmel: String, val tekst: String, val brev: KlageBrevInnstilling)
+
+data class InnstillingTilKabalUtenBrev(val lovhjemmel: String, val tekst: String)
+
+// Placeholder for å holde på referansen til klagebrevet
+class KlageBrevInnstilling
+
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
+sealed class KlageUtfallUtenBrev {
+    @JsonTypeName("OMGJOERING")
+    data class Omgjoering(
+        val omgjoering: KlageOmgjoering
+    ) : KlageUtfallUtenBrev()
+
+    @JsonTypeName("DELVIS_OMGJOERING")
+    data class DelvisOmgjoering(
+        val omgjoering: KlageOmgjoering,
+        val innstilling: InnstillingTilKabalUtenBrev
+    ) : KlageUtfallUtenBrev()
+
+    @JsonTypeName("STADFESTE_VEDTAK")
+    data class StadfesteVedtak(
+        val innstilling: InnstillingTilKabalUtenBrev
+    ) : KlageUtfallUtenBrev()
+}
 
 data class Formkrav(
     val vedtaketKlagenGjelder: VedtaketKlagenGjelder?,

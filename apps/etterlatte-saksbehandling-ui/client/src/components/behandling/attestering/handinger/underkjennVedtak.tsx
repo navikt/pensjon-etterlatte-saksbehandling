@@ -33,16 +33,11 @@ export const UnderkjennVedtak: React.FC<Props> = ({ behandling, kommentar, valgt
   return (
     <>
       <ButtonWrapper>
-        <Button
-          variant="primary"
-          className="button"
-          onClick={() => setModalisOpen(true)}
-          disabled={isPending(underkjennStatus) || isPending(behandlingStatus)}
-          loading={isPending(underkjennStatus) || isPending(behandlingStatus)}
-        >
+        <Button variant="primary" onClick={() => setModalisOpen(true)}>
           Bekreft og send i retur
         </Button>
       </ButtonWrapper>
+
       <GeneriskModal
         tittel="Er du sikker på at vil underkjenne vedtak og sende i retur til saksbehandler?"
         tekstKnappJa="Ja, send i retur"
@@ -50,6 +45,7 @@ export const UnderkjennVedtak: React.FC<Props> = ({ behandling, kommentar, valgt
         onYesClick={underkjenn}
         setModalisOpen={setModalisOpen}
         open={modalisOpen}
+        loading={isPending(underkjennStatus) || isPending(behandlingStatus)}
       />
     </>
   )

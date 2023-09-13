@@ -1,6 +1,6 @@
 package no.nav.etterlatte.utbetaling.iverksetting.oppdrag
 
-import no.nav.etterlatte.utbetaling.ChipsetCheck
+import no.nav.etterlatte.libs.testdata.ChipsetCheck
 import no.nav.etterlatte.utbetaling.TestContainers
 import no.nav.etterlatte.utbetaling.config.JmsConnectionFactory
 import no.nav.etterlatte.utbetaling.oppdrag

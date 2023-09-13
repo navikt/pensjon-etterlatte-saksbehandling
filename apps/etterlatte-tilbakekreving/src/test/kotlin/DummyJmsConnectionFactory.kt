@@ -2,7 +2,6 @@ package no.nav.etterlatte.tilbakekreving
 
 import io.mockk.every
 import io.mockk.mockk
-import jakarta.jms.Connection
 import jakarta.jms.ExceptionListener
 import jakarta.jms.Message
 import jakarta.jms.MessageListener
@@ -15,8 +14,6 @@ class DummyJmsConnectionFactory : EtterlatteJmsConnectionFactory {
     private var mq: MutableMap<String, String> = mutableMapOf()
     private var listeners = mutableMapOf<String, List<MessageListener>>()
     private var replyListeners = mutableMapOf<String, List<MessageListener>>()
-
-    override fun connection(): Connection = mockk()
 
     override fun start(listener: ExceptionListener, queue: String, messageListener: MessageListener) {
         listeners[queue] = listOf(messageListener)

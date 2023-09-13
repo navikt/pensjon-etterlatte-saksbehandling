@@ -13,7 +13,6 @@ import org.messaginghub.pooled.jms.JmsPoolConnectionFactory
 private const val UTF_8_WITH_PUA = 1208
 
 interface EtterlatteJmsConnectionFactory {
-    fun connection(): Connection
     fun start(listener: ExceptionListener, queue: String, messageListener: MessageListener)
     fun stop()
     fun send(xml: String, queue: String)
@@ -47,7 +46,7 @@ class JmsConnectionFactory(
         pooledConnectionFactory
     }
 
-    override fun connection(): Connection = connectionFactory.createConnection(username, password)
+    private fun connection(): Connection = connectionFactory.createConnection(username, password)
 
     override fun start(listener: ExceptionListener, queue: String, messageListener: MessageListener) {
         val connection = connection().apply { exceptionListener = listener }
@@ -61,8 +60,7 @@ class JmsConnectionFactory(
     override fun stop() = connectionFactory.stop()
 
     override fun send(xml: String, queue: String) {
-        val connection = connection()
-        connection.createSession().use { session ->
+        connection().createSession().use { session ->
             val producer = session.createProducer(session.createQueue(queue))
             val message = session.createTextMessage(xml)
             producer.send(message)

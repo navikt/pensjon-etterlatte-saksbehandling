@@ -20,6 +20,8 @@ import org.slf4j.LoggerFactory
 internal class ApplicationContext {
 
     private val defaultConfig: Config = ConfigFactory.load()
+    private val env = System.getenv()
+    private val httpPort = env.getOrDefault("HTTP_PORT", "8080").toInt()
     private val engine = embeddedServer(
         factory = CIO,
         environment = applicationEngineEnvironment {
@@ -30,17 +32,17 @@ internal class ApplicationContext {
                 }
                 metricsModule()
             }
-            connector { port = 8080 }
+            connector { port = httpPort }
         }
     )
 
     fun run() {
-        startKafkalytter(defaultConfig)
+        startKafkalytter(defaultConfig, env)
         setReady().also { engine.start(true) }
     }
 }
 
-private fun startKafkalytter(config: Config) {
+private fun startKafkalytter(config: Config, env: Map<String, String>) {
     val behandlingHttpClient = httpClientClientCredentials(
         azureAppClientId = config.getString("azure.app.client.id"),
         azureAppJwk = config.getString("azure.app.jwk"),
@@ -48,7 +50,6 @@ private fun startKafkalytter(config: Config) {
         azureAppScope = config.getString("behandling.azure.scope")
     )
 
-    val env = System.getenv()
     startLytting(
         konsument = KlageKafkakonsument(
             env = env,

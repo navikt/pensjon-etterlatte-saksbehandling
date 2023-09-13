@@ -20,7 +20,7 @@ class BehandlingKlient(config: Config, val behandlingHttpClient: HttpClient) {
 
     fun haandterHendelse(record: ConsumerRecord<String, BehandlingEvent>) {
         logger.debug(
-            "Behandler institusjonsopphold record med id: {}, partition {}, offset: {}",
+            "Behandler klage-record med id: {}, partition {}, offset: {}",
             record.key(),
             record.partition(),
             record.offset()
@@ -36,7 +36,6 @@ class BehandlingKlient(config: Config, val behandlingHttpClient: HttpClient) {
     }
 
     private fun postTilBehandling(klageHendelse: BehandlingEvent) = runBlocking {
-        // TODO i neste PR: her treng vi vel fort ein downstreamresourceclient og alt det
         behandlingHttpClient.post(
             "$resourceUrl/klage"
         ) {

@@ -1,7 +1,4 @@
-package no.nav.etterlatte.behandling
-
-import no.nav.etterlatte.libs.common.behandling.Persongalleri
-import no.nav.etterlatte.libs.common.behandling.SakType
+package no.nav.etterlatte.libs.common.behandling
 
 data class BehandlingsBehov(
     val sakId: Long,

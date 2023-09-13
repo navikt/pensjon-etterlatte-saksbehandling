@@ -17,6 +17,7 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.gyldigsoeknad.barnepensjon.GyldigSoeknadService
+import no.nav.etterlatte.libs.common.behandling.BehandlingsBehov
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.event.FordelerFordelt
@@ -66,7 +67,7 @@ internal class BehandlingClientTest {
         assertEquals(randomUUID, hentetSaksid)
         assertEquals(
             1,
-            objectMapper.readValue<NyBehandlingRequest>(
+            objectMapper.readValue<BehandlingsBehov>(
                 (runBlocking { String(requestList[0].body.toByteArray()) })
             ).sakId
         )

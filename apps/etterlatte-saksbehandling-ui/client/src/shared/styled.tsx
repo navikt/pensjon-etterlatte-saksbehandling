@@ -67,8 +67,3 @@ export const ContentHeader = styled.div`
 export const Header = styled.div`
   padding: 1em 2em;
 `
-
-export const WarningText = styled.span`
-  color: #ba3a26;
-  display: block;
-`

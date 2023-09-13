@@ -77,15 +77,6 @@ export function hentGyldighetsTekst(
   return svar
 }
 
-export const svarTilVurderingsstatus = (svar: JaNei) => {
-  switch (svar) {
-    case JaNei.JA:
-      return VurderingsResultat.OPPFYLT
-    case JaNei.NEI:
-      return VurderingsResultat.IKKE_OPPFYLT
-  }
-}
-
 export const svarTilStatusIcon = (svar: JaNei | undefined): StatusIconProps => {
   switch (svar) {
     case JaNei.JA:

@@ -104,8 +104,3 @@ export interface Virkningstidspunkt {
   kilde: KildeSaksbehandler
   begrunnelse: string
 }
-
-export enum IProsesstype {
-  MANUELL = 'MANUELL',
-  AUTOMATISK = 'AUTOMATISK',
-}

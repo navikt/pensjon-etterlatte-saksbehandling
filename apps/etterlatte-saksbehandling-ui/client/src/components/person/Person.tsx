@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { StatusBar } from '~shared/statusbar/Statusbar'
 import { Container } from '~shared/styled'
-import { Dokumentoversikt } from './dokumentoversikt'
 import { SakOversikt } from './SakOversikt'
 import Spinner from '~shared/Spinner'
 import { isFailure, isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
@@ -11,6 +10,7 @@ import { getPerson } from '~shared/api/grunnlag'
 import { GYLDIG_FNR } from '~utils/fnr'
 import NavigerTilbakeMeny from '~components/person/NavigerTilbakeMeny'
 import { BulletListIcon, FileTextIcon } from '@navikt/aksel-icons'
+import { Dokumentoversikt } from './dokumenter/dokumentoversikt'
 
 enum Fane {
   SAKER = 'SAKER',

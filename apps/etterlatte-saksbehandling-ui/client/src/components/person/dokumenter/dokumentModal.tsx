@@ -1,4 +1,4 @@
-import { Button, Modal, Heading } from '@navikt/ds-react'
+import { Button, Heading, Modal } from '@navikt/ds-react'
 import { useState } from 'react'
 import { hentDokumentPDF } from '~shared/api/dokument'
 import styled from 'styled-components'

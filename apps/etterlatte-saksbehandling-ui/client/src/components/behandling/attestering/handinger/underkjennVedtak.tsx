@@ -5,6 +5,7 @@ import { GeneriskModal } from '~shared/modal/modal'
 import { hentBehandling, underkjennVedtak } from '~shared/api/behandling'
 import { useNavigate } from 'react-router'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
+import { isPending, useApiCall } from '~shared/hooks/useApiCall'
 
 type Props = {
   behandling: IDetaljertBehandling
@@ -16,27 +17,27 @@ export const UnderkjennVedtak: React.FC<Props> = ({ behandling, kommentar, valgt
   const [modalisOpen, setModalisOpen] = useState(false)
   const navigate = useNavigate()
 
+  const [underkjennStatus, apiUnderkjennVedtak] = useApiCall(underkjennVedtak)
+  const [behandlingStatus, apiHentBehandling] = useApiCall(hentBehandling)
+
   const underkjenn = () => {
     if (!behandling.id) throw new Error('Mangler behandlingsid')
 
-    underkjennVedtak(behandling.id, kommentar, valgtBegrunnelse).then((response) => {
-      if (response.status === 'ok') {
-        hentBehandling(behandling.id).then((response) => {
-          if (response.status === 'ok') {
-            navigate(`/person/${behandling.søker?.foedselsnummer}`)
-          }
-        })
-      }
+    apiUnderkjennVedtak({ behandlingId: behandling.id, kommentar, valgtBegrunnelse }, () => {
+      apiHentBehandling(behandling.id, (behandling) => {
+        navigate(`/person/${behandling.søker?.foedselsnummer}`)
+      })
     })
   }
 
   return (
     <>
       <ButtonWrapper>
-        <Button variant="primary" size="medium" className="button" onClick={() => setModalisOpen(true)}>
+        <Button variant="primary" onClick={() => setModalisOpen(true)}>
           Bekreft og send i retur
         </Button>
       </ButtonWrapper>
+
       <GeneriskModal
         tittel="Er du sikker på at vil underkjenne vedtak og sende i retur til saksbehandler?"
         tekstKnappJa="Ja, send i retur"
@@ -44,6 +45,7 @@ export const UnderkjennVedtak: React.FC<Props> = ({ behandling, kommentar, valgt
         onYesClick={underkjenn}
         setModalisOpen={setModalisOpen}
         open={modalisOpen}
+        loading={isPending(underkjennStatus) || isPending(behandlingStatus)}
       />
     </>
   )

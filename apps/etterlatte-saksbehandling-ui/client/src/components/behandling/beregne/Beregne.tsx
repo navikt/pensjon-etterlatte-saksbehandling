@@ -37,7 +37,7 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
   useEffect(() => {
     const hentBeregning = async () => {
       if (behandling.behandlingType === IBehandlingsType.REVURDERING) {
-        await opprettForOpphoer(behandling.id)
+        opprettForOpphoer(behandling.id)
       }
       hentBeregningRequest(behandling.id, (res) => dispatch(oppdaterBeregning(res)))
     }

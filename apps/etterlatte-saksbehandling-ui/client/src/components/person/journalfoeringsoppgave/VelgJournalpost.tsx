@@ -5,13 +5,13 @@ import { GYLDIG_FNR } from '~utils/fnr'
 import { Alert, Button, Heading, Table, Tag } from '@navikt/ds-react'
 import { useJournalfoeringOppgave } from '~components/person/journalfoeringsoppgave/useJournalfoeringOppgave'
 import { formaterStringDato } from '~utils/formattering'
-import DokumentModal from '~components/person/dokumentModal'
-import { Journalpost } from '~components/behandling/types'
 import { useAppDispatch } from '~store/Store'
 import { settJournalpost } from '~store/reducers/JournalfoeringOppgaveReducer'
 import Spinner from '~shared/Spinner'
 import styled from 'styled-components'
 import { ButtonWrapper } from '~components/behandling/attestering/styled'
+import DokumentModal from '../dokumenter/dokumentModal'
+import { Journalpost } from '~shared/types/Journalpost'
 
 export default function VelgJournalpost() {
   const { bruker, journalpost } = useJournalfoeringOppgave()

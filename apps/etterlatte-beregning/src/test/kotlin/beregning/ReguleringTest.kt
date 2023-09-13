@@ -1,5 +1,6 @@
 package no.nav.etterlatte.beregning.regler.beregning
 
+import com.fasterxml.jackson.databind.JsonNode
 import io.kotest.matchers.ints.shouldBeGreaterThanOrEqual
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
@@ -25,9 +26,13 @@ import no.nav.etterlatte.klienter.VilkaarsvurderingKlient
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.beregning.Beregningstype
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.grunnlag.Opplysning
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeskenMedIBeregning
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import org.junit.jupiter.api.Assertions
@@ -63,10 +68,10 @@ class ReguleringTest {
 
     @Test
     fun `skal regulere barnepensjon foerstegangsbehandling - ingen soesken`() {
-        val behandling = mockBehandling(
-            BeregnBarnepensjonServiceTest.VIRKNINGSTIDSPUNKT_JAN_23.minusYears(1)
-        )
-        val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
+        val virk = BeregnBarnepensjonServiceTest.VIRKNINGSTIDSPUNKT_JAN_23.minusYears(1)
+        val behandling = mockBehandling(virk)
+        val grunnlag = GrunnlagTestData(opplysningsmapAvdoedOverrides = avdoedOverrides(virk.atDay(1).minusDays(20)))
+            .hentOpplysningsgrunnlag()
 
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
         coEvery {
@@ -132,6 +137,14 @@ class ReguleringTest {
                     faktor grunnbeløp: $faktorGrunnbeloep"""
             )
         }
+    }
+
+    private fun avdoedOverrides(doedsdato: LocalDate): Map<Opplysningstype, Opplysning<JsonNode>> {
+        val kilde = Grunnlagsopplysning.Pdl(Tidspunkt.now(), null, "opplysningsId1")
+        val avdoedOverrides = doedsdato.toJsonNode().let {
+            mapOf(Opplysningstype.DOEDSDATO to Opplysning.Konstant(UUID.randomUUID(), kilde, it))
+        }
+        return avdoedOverrides
     }
 
     private fun barnepensjonBeregningsGrunnlag(

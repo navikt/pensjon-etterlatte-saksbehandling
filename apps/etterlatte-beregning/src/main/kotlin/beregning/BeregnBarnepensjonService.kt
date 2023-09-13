@@ -9,7 +9,6 @@ import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlagService
 import no.nav.etterlatte.beregning.grunnlag.GrunnlagMedPeriode
 import no.nav.etterlatte.beregning.grunnlag.PeriodisertBeregningGrunnlag
 import no.nav.etterlatte.beregning.grunnlag.mapVerdier
-import no.nav.etterlatte.beregning.regler.barnepensjon.AvdoedForelder
 import no.nav.etterlatte.beregning.regler.barnepensjon.PeriodisertBarnepensjonGrunnlag
 import no.nav.etterlatte.beregning.regler.barnepensjon.kroneavrundetBarnepensjonRegel
 import no.nav.etterlatte.beregning.regler.barnepensjon.kroneavrundetBarnepensjonRegelMedInstitusjon
@@ -46,7 +45,6 @@ import no.nav.etterlatte.libs.regler.eksekver
 import no.nav.etterlatte.libs.regler.finnAnvendteRegler
 import no.nav.etterlatte.regler.Beregningstall
 import no.nav.etterlatte.token.BrukerTokenInfo
-import okhttp3.internal.toImmutableList
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.YearMonth
@@ -207,9 +205,9 @@ class BeregnBarnepensjonService(
                                 grunnbelopMnd = grunnbeloep.grunnbeloepPerMaaned,
                                 grunnbelop = grunnbeloep.grunnbeloep,
                                 trygdetid =
-                                    beregningsgrunnlag.avdoedForelder.finnGrunnlagForPeriode(
+                                    beregningsgrunnlag.avdoedesTrygdetid.finnGrunnlagForPeriode(
                                         periodisertResultat.periode.fraDato
-                                    ).verdi.trygdetid.toInteger(),
+                                    ).verdi.toInteger(),
                                 regelResultat = objectMapper.valueToTree(periodisertResultat),
                                 regelVersjon = periodisertResultat.reglerVersjon
                             )
@@ -267,55 +265,50 @@ class BeregnBarnepensjonService(
         tom: LocalDate?,
         grunnlag: Grunnlag
     ) = PeriodisertBarnepensjonGrunnlag(
-        soeskenKull =
-            PeriodisertBeregningGrunnlag.lagKomplettPeriodisertGrunnlag(
-                beregningsGrunnlag.soeskenMedIBeregning.mapVerdier { soeskenMedIBeregning ->
-                    FaktumNode(
-                        verdi = soeskenMedIBeregning.filter { it.skalBrukes }.map { it.foedselsnummer },
-                        kilde = beregningsGrunnlag.kilde,
-                        beskrivelse = "Søsken i kullet"
-                    )
-                },
-                fom,
-                tom
-            ),
-        avdoedForelder =
-            trygdetid?.beregnetTrygdetid?.resultat?.samletTrygdetidNorge.let { trygdetidTotal ->
-                if (trygdetidTotal != null) {
-                    KonstantGrunnlag(
-                        FaktumNode(
-                            verdi = AvdoedForelder(Beregningstall(trygdetidTotal)),
-                            kilde =
-                                Grunnlagsopplysning.RegelKilde(
-                                    "Trygdetid fastsatt av saksbehandler",
-                                    trygdetid?.beregnetTrygdetid?.tidspunkt
-                                        ?: throw Exception("Trygdetid mangler tidspunkt på beregnet trygdetid"),
-                                    "1"
-                                ),
-                            beskrivelse = "Trygdetid avdød forelder"
-                        )
-                    )
-                } else {
-                    KonstantGrunnlag(
-                        FaktumNode(
-                            verdi = AvdoedForelder(Beregningstall(FASTSATT_TRYGDETID_I_PILOT)),
-                            kilde = Grunnlagsopplysning.RegelKilde("MVP hardkodet trygdetid", Tidspunkt.now(), "1"),
-                            beskrivelse = "Trygdetid avdød forelder"
-                        )
-                    )
-                }
+        soeskenKull = PeriodisertBeregningGrunnlag.lagKomplettPeriodisertGrunnlag(
+            beregningsGrunnlag.soeskenMedIBeregning.mapVerdier { soeskenMedIBeregning ->
+                FaktumNode(
+                    verdi = soeskenMedIBeregning.filter { it.skalBrukes }.map { it.foedselsnummer },
+                    kilde = beregningsGrunnlag.kilde,
+                    beskrivelse = "Søsken i kullet"
+                )
             },
-        institusjonsopphold =
-            PeriodisertBeregningGrunnlag.lagPotensieltTomtGrunnlagMedDefaultUtenforPerioder(
-                beregningsGrunnlag.institusjonsoppholdBeregningsgrunnlag?.mapVerdier { institusjonsopphold ->
+            fom,
+            tom
+        ),
+        avdoedForelder = trygdetid?.beregnetTrygdetid?.total.let { trygdetidTotal ->
+            if (trygdetidTotal != null) {
+                KonstantGrunnlag(
                     FaktumNode(
-                        verdi = institusjonsopphold,
-                        kilde = beregningsGrunnlag.kilde,
-                        beskrivelse = "Institusjonsopphold"
+                        verdi = AvdoedForelder(Beregningstall(trygdetidTotal)),
+                        kilde = Grunnlagsopplysning.RegelKilde(
+                            "Trygdetid fastsatt av saksbehandler",
+                            trygdetid?.beregnetTrygdetid?.tidspunkt
+                                ?: throw Exception("Trygdetid mangler tidspunkt på beregnet trygdetid"),
+                            "1"
+                        ),
+                        beskrivelse = "Trygdetid avdød forelder"
                     )
-                } ?: listOf()
-            ) { _, _, _ -> FaktumNode(null, beregningsGrunnlag.kilde, "Institusjonsopphold") },
-        brukNyttRegelverk = featureToggleService.isEnabled(BrukNyttRegelverkIBeregning, false),
+                )
+            } else {
+                KonstantGrunnlag(
+                    FaktumNode(
+                        verdi = AvdoedForelder(Beregningstall(FASTSATT_TRYGDETID_I_PILOT)),
+                        kilde = Grunnlagsopplysning.RegelKilde("MVP hardkodet trygdetid", Tidspunkt.now(), "1"),
+                        beskrivelse = "Trygdetid avdød forelder"
+                    )
+                )
+            }
+        },
+        institusjonsopphold = PeriodisertBeregningGrunnlag.lagPotensieltTomtGrunnlagMedDefaultUtenforPerioder(
+            beregningsGrunnlag.institusjonsoppholdBeregningsgrunnlag?.mapVerdier { institusjonsopphold ->
+                FaktumNode(
+                    verdi = institusjonsopphold,
+                    kilde = beregningsGrunnlag.kilde,
+                    beskrivelse = "Institusjonsopphold"
+                )
+            } ?: listOf()
+        ) { _, _, _ -> FaktumNode(null, beregningsGrunnlag.kilde, "Institusjonsopphold") },
         avdoedeForeldre = PeriodisertBeregningGrunnlag.lagKomplettPeriodisertGrunnlag(
             grunnlag.hentAvdoede().toPeriodisertAvdoedeGrunnlag().mapVerdier { fnrListe ->
                 FaktumNode(
@@ -326,7 +319,8 @@ class BeregnBarnepensjonService(
             },
             fom,
             tom
-        )
+        ),
+        brukNyttRegelverk = featureToggleService.isEnabled(BrukNyttRegelverkIBeregning, false)
     )
 
     companion object {
@@ -335,12 +329,11 @@ class BeregnBarnepensjonService(
 
     private fun List<Grunnlagsdata<JsonNode>>.toPeriodisertAvdoedeGrunnlag():
         List<GrunnlagMedPeriode<List<Folkeregisteridentifikator>>> {
-        val doede: MutableList<Folkeregisteridentifikator> = mutableListOf()
-        val resultat: MutableList<GrunnlagMedPeriode<List<Folkeregisteridentifikator>>> = mutableListOf()
+        val doede = mutableListOf<Folkeregisteridentifikator>()
+        val resultat = mutableListOf<GrunnlagMedPeriode<List<Folkeregisteridentifikator>>>()
 
         val avdoedeSortert = this.distinctBy { it.hentFoedselsnummer() }
             .sortedBy { it.hentDoedsdato()!!.verdi!! }
-            .toList()
         val iterator = avdoedeSortert.listIterator()
         while (iterator.hasNext()) {
             val dennePeriode = iterator.next()
@@ -350,9 +343,9 @@ class BeregnBarnepensjonService(
             val datoFOM = virkAvDoedsfall(dennePeriode.hentDoedsdato()!!.verdi)!!
             val datoTOM = virkAvDoedsfall(nestePeriode?.hentDoedsdato()?.verdi)?.minusDays(1)
 
-            resultat.add(GrunnlagMedPeriode(doede.toImmutableList(), datoFOM, datoTOM))
+            resultat.add(GrunnlagMedPeriode(doede.toList(), datoFOM, datoTOM))
         }
-        return resultat.toImmutableList()
+        return resultat
     }
 
     private fun virkAvDoedsfall(dato: LocalDate?) = dato?.plusMonths(1)?.withDayOfMonth(1)

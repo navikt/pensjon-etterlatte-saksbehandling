@@ -18,10 +18,10 @@ import java.time.LocalDate
 
 data class PeriodisertBarnepensjonGrunnlag(
     val soeskenKull: PeriodisertGrunnlag<FaktumNode<List<Folkeregisteridentifikator>>>,
-    val avdoedForelder: PeriodisertGrunnlag<FaktumNode<AvdoedForelder>>,
+    val avdoedesTrygdetid: PeriodisertGrunnlag<FaktumNode<Beregningstall>>,
     val institusjonsopphold: PeriodisertGrunnlag<FaktumNode<InstitusjonsoppholdBeregningsgrunnlag?>>,
-    val brukNyttRegelverk: Boolean,
-    val avdoedeForeldre: PeriodisertGrunnlag<FaktumNode<List<Folkeregisteridentifikator>>>
+    val avdoedeForeldre: PeriodisertGrunnlag<FaktumNode<List<Folkeregisteridentifikator>>>,
+    val brukNyttRegelverk: Boolean
 ) : PeriodisertGrunnlag<BarnepensjonGrunnlag> {
     override fun finnAlleKnekkpunkter(): Set<LocalDate> {
         val soeskenkullKnekkpunkter =
@@ -43,7 +43,7 @@ data class PeriodisertBarnepensjonGrunnlag(
             }
 
         return soeskenkullKnekkpunkter +
-            avdoedForelder.finnAlleKnekkpunkter() +
+            avdoedesTrygdetid.finnAlleKnekkpunkter() +
             institusjonsopphold.finnAlleKnekkpunkter() +
             avdoedeForeldreKnekkpunkter
     }
@@ -51,17 +51,16 @@ data class PeriodisertBarnepensjonGrunnlag(
     override fun finnGrunnlagForPeriode(datoIPeriode: LocalDate): BarnepensjonGrunnlag {
         return BarnepensjonGrunnlag(
             soeskenKull.finnGrunnlagForPeriode(datoIPeriode),
-            avdoedForelder.finnGrunnlagForPeriode(datoIPeriode),
+            avdoedesTrygdetid.finnGrunnlagForPeriode(datoIPeriode),
             institusjonsopphold.finnGrunnlagForPeriode(datoIPeriode),
             avdoedeForeldre.finnGrunnlagForPeriode(datoIPeriode)
         )
     }
 }
 
-data class AvdoedForelder(val trygdetid: Beregningstall)
 data class BarnepensjonGrunnlag(
     val soeskenKull: FaktumNode<List<Folkeregisteridentifikator>>,
-    val avdoedForelder: FaktumNode<AvdoedForelder>,
+    val avdoedesTrygdetid: FaktumNode<Beregningstall>,
     val institusjonsopphold: FaktumNode<InstitusjonsoppholdBeregningsgrunnlag?>,
     val avdoedeForeldre: FaktumNode<List<Folkeregisteridentifikator>>
 ) {

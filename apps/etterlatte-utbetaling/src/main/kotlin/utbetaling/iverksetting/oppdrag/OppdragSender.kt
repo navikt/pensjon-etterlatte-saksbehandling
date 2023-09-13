@@ -1,6 +1,6 @@
 package no.nav.etterlatte.utbetaling.iverksetting.oppdrag
 
-import no.nav.etterlatte.utbetaling.config.EtterlatteJmsConnectionFactory
+import no.nav.etterlatte.mq.EtterlatteJmsConnectionFactory
 import no.trygdeetaten.skjema.oppdrag.Oppdrag
 import org.slf4j.LoggerFactory
 

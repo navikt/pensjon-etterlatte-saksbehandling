@@ -3,9 +3,9 @@ package no.nav.etterlatte.tilbakekreving.kravgrunnlag
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.etterlatte.mq.EtterlatteJmsConnectionFactory
 import no.nav.etterlatte.testsupport.readFile
 import no.nav.etterlatte.tilbakekreving.DummyJmsConnectionFactory
-import no.nav.etterlatte.tilbakekreving.config.EtterlatteJmsConnectionFactory
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.math.BigInteger

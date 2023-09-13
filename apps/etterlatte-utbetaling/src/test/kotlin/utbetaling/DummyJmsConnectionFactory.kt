@@ -8,7 +8,7 @@ import jakarta.jms.Message
 import jakarta.jms.MessageListener
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.retry
-import no.nav.etterlatte.utbetaling.config.EtterlatteJmsConnectionFactory
+import no.nav.etterlatte.mq.EtterlatteJmsConnectionFactory
 
 class DummyJmsConnectionFactory : EtterlatteJmsConnectionFactory {
 

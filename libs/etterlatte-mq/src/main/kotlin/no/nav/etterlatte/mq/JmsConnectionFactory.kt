@@ -1,4 +1,4 @@
-package no.nav.etterlatte.tilbakekreving.config
+package no.nav.etterlatte.mq
 
 import com.ibm.mq.MQC
 import com.ibm.mq.jakarta.jms.MQConnectionFactory

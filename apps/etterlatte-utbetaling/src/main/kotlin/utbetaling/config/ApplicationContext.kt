@@ -6,6 +6,8 @@ import no.nav.etterlatte.libs.common.tidspunkt.utcKlokke
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.jdbcUrl
 import no.nav.etterlatte.libs.jobs.LeaderElection
+import no.nav.etterlatte.mq.EtterlatteJmsConnectionFactory
+import no.nav.etterlatte.mq.JmsConnectionFactory
 import no.nav.etterlatte.utbetaling.avstemming.KonsistensavstemmingJob
 import no.nav.etterlatte.utbetaling.avstemming.KonsistensavstemmingService
 import no.nav.etterlatte.utbetaling.common.Oppgavetrigger

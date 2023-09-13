@@ -1,7 +1,7 @@
 package no.nav.etterlatte.utbetaling.iverksetting.oppdrag
 
+import no.nav.etterlatte.mq.EtterlatteJmsConnectionFactory
 import no.nav.etterlatte.utbetaling.DummyJmsConnectionFactory
-import no.nav.etterlatte.utbetaling.config.EtterlatteJmsConnectionFactory
 import no.nav.etterlatte.utbetaling.oppdrag
 import no.nav.etterlatte.utbetaling.utbetaling
 import org.junit.jupiter.api.AfterAll

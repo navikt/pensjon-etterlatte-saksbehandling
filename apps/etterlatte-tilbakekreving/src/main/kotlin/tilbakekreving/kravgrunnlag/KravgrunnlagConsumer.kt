@@ -5,7 +5,7 @@ import jakarta.jms.Message
 import jakarta.jms.MessageListener
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.etterlatte.libs.common.logging.withLogContext
-import no.nav.etterlatte.tilbakekreving.config.EtterlatteJmsConnectionFactory
+import no.nav.etterlatte.mq.EtterlatteJmsConnectionFactory
 import no.nav.etterlatte.tilbakekreving.kravgrunnlag.KravgrunnlagJaxb.toDetaljertKravgrunnlagDto
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory

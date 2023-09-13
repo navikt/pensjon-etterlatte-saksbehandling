@@ -1,5 +1,6 @@
 package no.nav.etterlatte.tilbakekreving.config
 
+import no.nav.etterlatte.mq.JmsConnectionFactory
 import no.nav.etterlatte.tilbakekreving.klienter.BehandlingKlient
 import no.nav.etterlatte.tilbakekreving.kravgrunnlag.KravgrunnlagConsumer
 import no.nav.etterlatte.tilbakekreving.kravgrunnlag.KravgrunnlagService

@@ -1,7 +1,7 @@
 package no.nav.etterlatte.utbetaling.grensesnittavstemming.avstemmingsdata
 
 import net.logstash.logback.argument.StructuredArguments.kv
-import no.nav.etterlatte.utbetaling.config.EtterlatteJmsConnectionFactory
+import no.nav.etterlatte.mq.EtterlatteJmsConnectionFactory
 import no.nav.virksomhet.tjenester.avstemming.informasjon.konsistensavstemmingsdata.v1.Konsistensavstemmingsdata
 import no.nav.virksomhet.tjenester.avstemming.meldinger.v1.Avstemmingsdata
 import org.slf4j.LoggerFactory

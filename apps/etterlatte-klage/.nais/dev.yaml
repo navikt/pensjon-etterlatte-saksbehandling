@@ -32,8 +32,10 @@ spec:
       value: "etterlatte-v1"
     - name: KLAGE_TOPIC
       value: "klage.behandling-events.v1"
-    - name: BEHANDLING_AZURE_SCOPE
-      value: api://dev-gcp.etterlatte.etterlatte-behandling/.default
+    - name: ETTERLATTE_BEHANDLING_URL
+      value: http://etterlatte-behandling
+    - name: ETTERLATTE_BEHANDLING_CLIENT_ID
+      value: dev-gcp.etterlatte.etterlatte-behandling
     - name: ETTERLATTE_PROXY_URL
       value: https://etterlatte-proxy.dev-fss-pub.nais.io/aad
     - name: ETTERLATTE_PROXY_OUTBOUND_SCOPE

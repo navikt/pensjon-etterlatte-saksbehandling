@@ -138,3 +138,4 @@ spec:
         - application: etterlatte-fordeler
         - application: etterlatte-trygdetid
         - application: etterlatte-institusjonsopphold
+        - application: etterlatte-klage

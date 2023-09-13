@@ -108,7 +108,7 @@ data class Klage(
     }
 }
 
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "utfall")
 sealed class KlageUtfall {
     abstract val saksbehandler: Grunnlagsopplysning.Saksbehandler
 
@@ -150,7 +150,7 @@ data class InnstillingTilKabalUtenBrev(val lovhjemmel: String, val tekst: String
 // Placeholder for å holde på referansen til klagebrevet
 class KlageBrevInnstilling
 
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "utfall")
 sealed class KlageUtfallUtenBrev {
     @JsonTypeName("OMGJOERING")
     data class Omgjoering(

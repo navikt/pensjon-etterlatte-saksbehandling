@@ -19,6 +19,7 @@ on:
       - libs/saksbehandling-common/**
       - libs/etterlatte-jobs/**
       - libs/etterlatte-database/**
+      - libs/etterlatte-mq/**
       - libs/etterlatte-utbetaling-model/**
       - libs/etterlatte-vedtaksvurdering-model/**
       - gradle/libs.versions.toml
@@ -30,6 +31,7 @@ on:
       - libs/saksbehandling-common/**
       - libs/etterlatte-jobs/**
       - libs/etterlatte-database/**
+      - libs/etterlatte-mq/**
       - libs/etterlatte-utbetaling-model/**
       - libs/etterlatte-vedtaksvurdering-model/**
       - gradle/libs.versions.toml

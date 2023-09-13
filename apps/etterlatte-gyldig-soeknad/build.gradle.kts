@@ -5,6 +5,7 @@ plugins {
 
 dependencies {
     implementation(project(":libs:saksbehandling-common"))
+    implementation(project(":libs:etterlatte-behandling-model"))
     implementation(libs.etterlatte.common)
 
     implementation(project(":libs:ktor2client-auth-clientcredentials"))

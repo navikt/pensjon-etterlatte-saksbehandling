@@ -8,6 +8,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.FoedselsnummerDTO
+import no.nav.etterlatte.libs.common.behandling.BehandlingsBehov
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.sak.Sak
@@ -26,7 +27,7 @@ class BehandlingClient(
         return runBlocking {
             sakOgBehandlingApp.post("$url/behandlinger/opprettbehandling") {
                 contentType(ContentType.Application.Json)
-                setBody(NyBehandlingRequest(sak, persongalleri, mottattDato.toString()))
+                setBody(BehandlingsBehov(sak, persongalleri, mottattDato.toString()))
             }.body<String>()
         }.let {
             UUID.fromString(it)
@@ -60,9 +61,3 @@ class BehandlingClient(
         }
     }
 }
-
-data class NyBehandlingRequest(
-    val sakId: Long,
-    val persongalleri: Persongalleri,
-    val mottattDato: String
-)

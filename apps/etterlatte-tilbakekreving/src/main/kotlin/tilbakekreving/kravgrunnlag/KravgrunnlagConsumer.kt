@@ -3,7 +3,6 @@ package no.nav.etterlatte.tilbakekreving.kravgrunnlag
 import jakarta.jms.ExceptionListener
 import jakarta.jms.Message
 import jakarta.jms.MessageListener
-import jakarta.jms.Session
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.tilbakekreving.config.JmsConnectionFactory
@@ -17,15 +16,12 @@ class KravgrunnlagConsumer(
     private val kravgrunnlagService: KravgrunnlagService
 ) : MessageListener {
 
-    fun start() {
-        val connection = connectionFactory.connection().apply { exceptionListener = exceptionListener() }
-        val session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE)
-        val consumer = session.createConsumer(session.createQueue(queue))
-        consumer.messageListener = this
-
-        connection.start()
-        logger.info("Lytter på kravgrunnlag fra tilbakekrevingskomponenten")
-    }
+    fun start() = connectionFactory.start(
+        listener = exceptionListener(),
+        queue = queue,
+        messageListener = this,
+        loggtekst = "Lytter på kravgrunnlag fra tilbakekrevingskomponenten"
+    )
 
     override fun onMessage(message: Message) = withLogContext {
         var kravgrunnlagPayload: String? = null

@@ -27,13 +27,8 @@ class AvstemmingsdataSender(
     }
 
     private fun sendAvstemmingsdata(xml: String) {
-        val connection = jmsConnectionFactory.connection()
-        connection.createSession().use { session ->
-            // Fjerner JMS-headers med targetClient=1
-            val producer = session.createProducer(session.createQueue("queue:///$queue?targetClient=1"))
-            val message = session.createTextMessage(xml)
-            producer.send(message)
-        }
+        // Fjerner JMS-headers med targetClient=1
+        jmsConnectionFactory.send(xml = xml, queue = "queue:///$queue?targetClient=1")
     }
 
     companion object {

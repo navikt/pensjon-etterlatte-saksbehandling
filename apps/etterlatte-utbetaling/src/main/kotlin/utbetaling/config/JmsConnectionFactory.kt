@@ -51,4 +51,23 @@ class JmsConnectionFactory(
     }
 
     fun stop() = connectionFactory.stop()
+
+    fun send(xml: String, queue: String) {
+        val connection = connection()
+        connection.createSession().use { session ->
+            val producer = session.createProducer(session.createQueue(queue))
+            val message = session.createTextMessage(xml)
+            producer.send(message)
+        }
+    }
+
+    fun sendMedSvar(xml: String, queue: String, replyQueue: String) {
+        connection().createSession().use { session ->
+            val producer = session.createProducer(session.createQueue(queue))
+            val message = session.createTextMessage(xml).apply {
+                jmsReplyTo = session.createQueue(replyQueue)
+            }
+            producer.send(message)
+        }
+    }
 }

@@ -1,12 +1,11 @@
 import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
 import React, { useState } from 'react'
 import { LovtekstMedLenke } from '~components/behandling/soeknadsoversikt/soeknadoversikt/LovtekstMedLenke'
-import { Button, Heading, ReadMore } from '@navikt/ds-react'
+import { Button, Heading, ReadMore, Table } from '@navikt/ds-react'
 import { AGreen500 } from '@navikt/ds-tokens/dist/tokens'
 import { PlusCircleIcon, CheckmarkCircleIcon } from '@navikt/aksel-icons'
 import { InstitusjonsoppholdGrunnlagData } from '~shared/types/Beregning'
 import { useFieldArray, useForm } from 'react-hook-form'
-import InstitusjonsoppholdPeriode from '~components/behandling/beregningsgrunnlag/InstitusjonsoppholdPeriode'
 import Insthendelser from '~components/behandling/beregningsgrunnlag/Insthendelser'
 import {
   feilIKomplettePerioderOverIntervallInstitusjonsopphold,
@@ -19,13 +18,14 @@ import {
   FeilIPerioder,
   validerInstitusjonsopphold,
 } from '~components/behandling/beregningsgrunnlag/InstitusjonsoppholdPerioder'
+import InstitusjonsoppholdTableWrapperOMS from '~components/behandling/beregningsgrunnlag/InstitusjonsoppholdTableWrapperOMS'
 
 type InstitusjonsoppholdProps = {
   behandling: IBehandlingReducer
   onSubmit: (data: InstitusjonsoppholdGrunnlagData) => void
 }
 
-const Institusjonsopphold = (props: InstitusjonsoppholdProps) => {
+const InstitusjonsoppholdOMS = (props: InstitusjonsoppholdProps) => {
   const { behandling, onSubmit } = props
   const behandles = hentBehandlesFraStatus(behandling?.status)
   const [visFeil, setVisFeil] = useState(false)
@@ -103,24 +103,34 @@ const Institusjonsopphold = (props: InstitusjonsoppholdProps) => {
           </ReadMore>
         </>
       ) : null}
-      <form id="forminstitusjonsopphold">
-        {fields.map((item, index) => {
-          return (
-            <InstitusjonsoppholdPeriode
-              key={item.id}
-              item={item}
-              index={index}
-              control={control}
-              register={register}
-              remove={remove}
-              watch={watch}
-              setVisFeil={setVisFeil}
-              errors={errors.institusjonsOppholdForm?.[index]}
-              behandles={behandles}
-            />
-          )
-        })}
-      </form>
+      {fields.length ? (
+        <Table>
+          <Table.Header>
+            <Table.Row>
+              <Table.HeaderCell />
+              <Table.HeaderCell scope="col">Periode</Table.HeaderCell>
+              <Table.HeaderCell scope="col">Reduksjon</Table.HeaderCell>
+              <Table.HeaderCell scope="col">Begrunnelse</Table.HeaderCell>
+            </Table.Row>
+          </Table.Header>
+          <Table.Body id="forminstitusjonsopphold">
+            {fields.map((item, index) => (
+              <InstitusjonsoppholdTableWrapperOMS
+                key={item.id}
+                item={item}
+                index={index}
+                control={control}
+                register={register}
+                remove={remove}
+                watch={watch}
+                setVisFeil={setVisFeil}
+                errors={errors.institusjonsOppholdForm?.[index]}
+                behandles={behandles}
+              />
+            ))}
+          </Table.Body>
+        </Table>
+      ) : null}
       {behandles && (
         <Button
           type="button"
@@ -156,4 +166,4 @@ const Institusjonsopphold = (props: InstitusjonsoppholdProps) => {
   )
 }
 
-export default Institusjonsopphold
+export default InstitusjonsoppholdOMS

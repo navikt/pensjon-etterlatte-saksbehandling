@@ -10,11 +10,11 @@ import {
 } from 'react-hook-form'
 import MaanedVelger from '~components/behandling/beregningsgrunnlag/MaanedVelger'
 import { Button, Select, TextField } from '@navikt/ds-react'
-import { InstitusjonsoppholdGrunnlagData, ReduksjonBP } from '~shared/types/Beregning'
+import { InstitusjonsoppholdGrunnlagData, ReduksjonOMS } from '~shared/types/Beregning'
 import styled from 'styled-components'
 import { TrashIcon } from '@navikt/aksel-icons'
 
-export type InstitusjonsoppholdPerioder = {
+export type InstitusjonsoppholdPerioderOMS = {
   item: FieldArrayWithId<{ institusjonsOppholdForm: InstitusjonsoppholdGrunnlagData }, 'institusjonsOppholdForm', 'id'>
   index: number
   control: Control<{ institusjonsOppholdForm: InstitusjonsoppholdGrunnlagData }>
@@ -28,14 +28,14 @@ export type InstitusjonsoppholdPerioder = {
         FieldErrorsImpl<{
           fom: Date
           tom: Date
-          data: { reduksjon: string; egenReduksjon: number; begrunnelse: string }
+          data: { reduksjonOMS: string; egenReduksjon: number; begrunnelse: string }
         }>
       >
     | undefined
   behandles: boolean
 }
 
-const InstitusjonsoppholdPeriode = (props: InstitusjonsoppholdPerioder) => {
+const InstitusjonsoppholdPeriodeOMS = (props: InstitusjonsoppholdPerioderOMS) => {
   const { item, index, control, register, remove, watch, setVisFeil, errors, behandles } = props
   const reduksjonValgOppdatert = watch(`institusjonsOppholdForm.${index}.data.reduksjon`)
   return (
@@ -70,14 +70,14 @@ const InstitusjonsoppholdPeriode = (props: InstitusjonsoppholdPerioder) => {
             )}
           />
           <Select
-            error={errors?.data?.reduksjon && 'Du må velge et alternativ'}
+            error={errors?.data?.reduksjonOMS && 'Du må velge et alternativ'}
             label="Reduksjon"
             {...register(`institusjonsOppholdForm.${index}.data.reduksjon`, {
               required: { value: true, message: 'Feltet er påkrevd' },
               validate: { notDefault: (v) => v !== 'VELG_REDUKSJON' },
             })}
           >
-            {Object.entries(ReduksjonBP).map(([reduksjonsKey, reduksjontekst]) => (
+            {Object.entries(ReduksjonOMS).map(([reduksjonsKey, reduksjontekst]) => (
               <option key={reduksjonsKey} value={reduksjonsKey}>
                 {reduksjontekst}
               </option>
@@ -135,4 +135,4 @@ const InstitusjonsperioderWrapper = styled.div`
   justify-content: space-between;
 `
 
-export default InstitusjonsoppholdPeriode
+export default InstitusjonsoppholdPeriodeOMS

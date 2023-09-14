@@ -5,6 +5,7 @@ runs:
   using: composite
   steps:
     - uses: actions/setup-node@v3
+      working-directory: apps/etterlatte-saksbehandling-ui
       with:
         node-version: 18
         cache: npm

@@ -5,6 +5,9 @@ import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.libs.common.behandling.Formkrav
 import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.behandling.KlageHendelseType
+import no.nav.etterlatte.libs.common.behandling.KlageUtfall
+import no.nav.etterlatte.libs.common.behandling.KlageUtfallUtenBrev
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveType
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -20,6 +23,7 @@ interface KlageService {
     fun hentKlage(id: UUID): Klage?
     fun hentKlagerISak(sakId: Long): List<Klage>
     fun lagreFormkravIKlage(klageId: UUID, formkrav: Formkrav, saksbehandler: Saksbehandler): Klage
+    fun lagreUtfallAvKlage(klageId: UUID, utfall: KlageUtfallUtenBrev, saksbehandler: Saksbehandler): Klage
 }
 
 class KlageServiceImpl(
@@ -84,5 +88,24 @@ class KlageServiceImpl(
         klageDao.lagreKlage(oppdatertKlage)
 
         return oppdatertKlage
+    }
+
+    override fun lagreUtfallAvKlage(klageId: UUID, utfall: KlageUtfallUtenBrev, saksbehandler: Saksbehandler): Klage {
+        val klage = klageDao.hentKlage(klageId) ?: throw NotFoundException("Fant ikke klage med id=$klageId")
+
+        val utfallMedBrev = when (utfall) {
+            is KlageUtfallUtenBrev.Omgjoering -> KlageUtfall.Omgjoering(
+                omgjoering = utfall.omgjoering,
+                saksbehandler = Grunnlagsopplysning.Saksbehandler.create(saksbehandler.ident)
+            )
+
+            is KlageUtfallUtenBrev.DelvisOmgjoering -> TODO("Mangler riktig håndtering av brev")
+            is KlageUtfallUtenBrev.StadfesteVedtak -> TODO("Mangler riktig håndtering av brev")
+        }
+
+        val klageMedOppdatertUtfall = klage.oppdaterUtfall(utfallMedBrev)
+        klageDao.lagreKlage(klageMedOppdatertUtfall)
+
+        return klageMedOppdatertUtfall
     }
 }

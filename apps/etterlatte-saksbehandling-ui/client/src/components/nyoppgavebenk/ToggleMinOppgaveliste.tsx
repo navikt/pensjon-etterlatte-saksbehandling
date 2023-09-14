@@ -11,6 +11,7 @@ import styled from 'styled-components'
 import { FilterRad } from '~components/nyoppgavebenk/FilterRad'
 import { Filter, filtrerOppgaver, initialFilter } from '~components/nyoppgavebenk/Oppgavelistafiltre'
 import { useAppSelector } from '~store/Store'
+import { Container } from '~shared/styled'
 
 type OppgavelisteToggle = 'Oppgavelista' | 'MinOppgaveliste'
 const TabsWidth = styled(Tabs)`
@@ -19,28 +20,39 @@ const TabsWidth = styled(Tabs)`
 `
 
 export const ToggleMinOppgaveliste = () => {
+  const user = useAppSelector((state) => state.saksbehandlerReducer.saksbehandler)
+
   const [filter, setFilter] = useState<Filter>(initialFilter())
   const [oppgaveListeValg, setOppgaveListeValg] = useState<OppgavelisteToggle>('Oppgavelista')
   const [oppgaver, hentOppgaver] = useApiCall(hentNyeOppgaver)
   const [gosysOppgaver, hentGosysOppgaverFunc] = useApiCall(hentGosysOppgaver)
-  const user = useAppSelector((state) => state.saksbehandlerReducer.saksbehandler)
 
-  let hentedeOppgaver: OppgaveDTOny[] = []
-  if (isSuccess(oppgaver)) {
-    hentedeOppgaver = hentedeOppgaver.concat(oppgaver.data)
-  }
-  if (isSuccess(gosysOppgaver)) {
-    hentedeOppgaver = hentedeOppgaver.concat(gosysOppgaver.data)
-  }
+  const [hentedeOppgaver, setHentedeOppgaver] = useState<OppgaveDTOny[]>([])
 
-  const hentOppgaverWrapper = () => {
+  useEffect(() => {
+    if (isSuccess(oppgaver) && isSuccess(gosysOppgaver)) {
+      const alleOppgaver = [...oppgaver.data, ...gosysOppgaver.data].sort(
+        (a, b) => new Date(b.opprettet).getTime() - new Date(a.opprettet).getTime()
+      )
+      setHentedeOppgaver(alleOppgaver)
+    } else if (isSuccess(oppgaver) && isFailure(gosysOppgaver)) {
+      setHentedeOppgaver(oppgaver.data)
+    }
+  }, [oppgaver, gosysOppgaver])
+
+  const hentAlleOppgaver = () => {
     hentOppgaver({})
     hentGosysOppgaverFunc({})
   }
 
-  useEffect(() => {
-    hentOppgaverWrapper()
-  }, [])
+  useEffect(() => hentAlleOppgaver(), [])
+
+  const oppdaterTildeling = (id: string, saksbehandler: string | null) => {
+    const oppdatertOppgaveState = [...hentedeOppgaver]
+    const index = oppdatertOppgaveState.findIndex((o) => o.id === id)
+    oppdatertOppgaveState[index].saksbehandler = saksbehandler
+    setHentedeOppgaver(oppdatertOppgaveState)
+  }
 
   const mutableOppgaver = hentedeOppgaver.concat()
   const innloggetSaksbehandleroppgaver = mutableOppgaver.filter((o) => o.saksbehandler === user.ident)
@@ -57,7 +69,7 @@ export const ToggleMinOppgaveliste = () => {
   )
 
   return (
-    <>
+    <Container>
       <TabsWidth value={oppgaveListeValg} onChange={(e) => setOppgaveListeValg(e as OppgavelisteToggle)}>
         <Tabs.List>
           <Tabs.Tab value="Oppgavelista" label="Oppgavelisten" icon={<InboxIcon />} />
@@ -76,19 +88,23 @@ export const ToggleMinOppgaveliste = () => {
         <>
           {oppgaveListeValg === 'Oppgavelista' && (
             <>
-              <FilterRad hentOppgaver={hentOppgaverWrapper} filter={filter} setFilter={setFilter} />
+              <FilterRad hentOppgaver={hentAlleOppgaver} filter={filter} setFilter={setFilter} />
               <Oppgavelista
                 oppgaver={hentedeOppgaver}
                 filtrerteOppgaver={filtrerteOppgaver}
-                hentOppgaver={hentOppgaverWrapper}
+                oppdaterTildeling={oppdaterTildeling}
               />
             </>
           )}
           {oppgaveListeValg === 'MinOppgaveliste' && (
-            <MinOppgaveliste oppgaver={innloggetSaksbehandleroppgaver} hentOppgaver={hentOppgaverWrapper} />
+            <MinOppgaveliste
+              oppgaver={innloggetSaksbehandleroppgaver}
+              hentOppgaver={hentAlleOppgaver}
+              oppdaterTildeling={(id) => oppdaterTildeling(id, null)}
+            />
           )}
         </>
       )}
-    </>
+    </Container>
   )
 }

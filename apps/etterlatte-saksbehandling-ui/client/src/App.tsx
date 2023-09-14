@@ -10,7 +10,6 @@ import ErrorBoundary, { ApiErrorAlert } from '~ErrorBoundary'
 import BrevOversikt from '~components/person/brev/BrevOversikt'
 import NyttBrev from '~components/person/brev/NyttBrev'
 import ScrollToTop from '~ScrollTop'
-import { OppgavelistaContainer } from '~components/nyoppgavebenk/ToggleNyOppgavelist'
 import { isFailure, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
 import { useEffect } from 'react'
 import { ConfigContext, hentClientConfig } from '~clientConfig'
@@ -23,6 +22,7 @@ import Versioncheck from '~Versioncheck'
 import { Klagebehandling } from '~components/klage/Klagebehandling'
 import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 import { FEATURE_TOGGLE_KAN_BRUKE_KLAGE } from '~components/person/OpprettKlage'
+import { ToggleMinOppgaveliste } from '~components/nyoppgavebenk/ToggleMinOppgaveliste'
 
 function App() {
   const innloggetbrukerHentet = useInnloggetSaksbehandler()
@@ -49,8 +49,8 @@ function App() {
             <ErrorBoundary>
               <ConfigContext.Provider value={hentConfigStatus.data}>
                 <Routes>
-                  <Route path="/" element={<OppgavelistaContainer />} />
-                  <Route path="/oppgavebenken" element={<OppgavelistaContainer />} />
+                  <Route path="/" element={<ToggleMinOppgaveliste />} />
+                  <Route path="/oppgavebenken" element={<ToggleMinOppgaveliste />} />
                   <Route path="/person/:fnr" element={<Person />} />
                   {kanBrukeOppgavebehandling && (
                     <Route path="/oppgave/:id/*" element={<BehandleJournalfoeringOppgave />} />

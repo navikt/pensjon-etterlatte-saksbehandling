@@ -54,7 +54,6 @@ import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class VedtaksvurderingRouteTest {
-
     private val server = MockOAuth2Server()
     private lateinit var applicationConfig: HoconApplicationConfig
     private val behandlingKlient = mockk<BehandlingKlient>()
@@ -100,7 +99,7 @@ internal class VedtaksvurderingRouteTest {
 
     @Test
     fun `skal returnere 500 ved ukjent feil og returnere generell feilmelding`() {
-        every { vedtaksvurderingService.hentVedtak(any()) } throws Exception("ukjent feil")
+        every { vedtaksvurderingService.hentVedtak(any<UUID>()) } throws Exception("ukjent feil")
 
         testApplication {
             environment { config = applicationConfig }
@@ -117,13 +116,13 @@ internal class VedtaksvurderingRouteTest {
 
         coVerify(exactly = 1) {
             behandlingKlient.harTilgangTilBehandling(any(), any())
-            vedtaksvurderingService.hentVedtak(any())
+            vedtaksvurderingService.hentVedtak(any<UUID>())
         }
     }
 
     @Test
     fun `skal returnere 404 naar vedtaksvurdering ikke finnes`() {
-        every { vedtaksvurderingService.hentVedtak(any()) } returns null
+        every { vedtaksvurderingService.hentVedtak(any<UUID>()) } returns null
 
         testApplication {
             environment { config = applicationConfig }
@@ -139,14 +138,14 @@ internal class VedtaksvurderingRouteTest {
 
         coVerify(exactly = 1) {
             behandlingKlient.harTilgangTilBehandling(any(), any())
-            vedtaksvurderingService.hentVedtak(any())
+            vedtaksvurderingService.hentVedtak(any<UUID>())
         }
     }
 
     @Test
     fun `skal returnere eksisterende vedtaksvurdering`() {
         val opprettetVedtak = vedtak()
-        every { vedtaksvurderingService.hentVedtak(any()) } returns opprettetVedtak
+        every { vedtaksvurderingService.hentVedtak(any<UUID>()) } returns opprettetVedtak
 
         testApplication {
             environment { config = applicationConfig }
@@ -182,7 +181,7 @@ internal class VedtaksvurderingRouteTest {
 
             coVerify(exactly = 1) {
                 behandlingKlient.harTilgangTilBehandling(any(), any())
-                vedtaksvurderingService.hentVedtak(any())
+                vedtaksvurderingService.hentVedtak(any<UUID>())
             }
         }
     }
@@ -193,7 +192,7 @@ internal class VedtaksvurderingRouteTest {
             status = VedtakStatus.ATTESTERT,
             attestasjon = Attestasjon(SAKSBEHANDLER_2, ENHET_2, Tidspunkt.now())
         )
-        every { vedtaksvurderingService.hentVedtak(any()) } returns attestertVedtak
+        every { vedtaksvurderingService.hentVedtak(any<UUID>()) } returns attestertVedtak
 
         testApplication {
             environment { config = applicationConfig }
@@ -215,7 +214,7 @@ internal class VedtaksvurderingRouteTest {
 
             coVerify(exactly = 1) {
                 behandlingKlient.harTilgangTilBehandling(any(), any())
-                vedtaksvurderingService.hentVedtak(any())
+                vedtaksvurderingService.hentVedtak(any<UUID>())
             }
         }
     }

@@ -1,7 +1,7 @@
 import { Info, Overskrift, Tekst, UnderOverskrift, Wrapper } from '../styled'
 import { formaterBehandlingstype, formaterDato, formaterStringDato } from '~utils/formattering'
 import { useAppSelector } from '~store/Store'
-import { IBehandlingInfo } from '~components/behandling/SideMeny/types'
+import { IBehandlingInfo } from '~components/behandling/sidemeny/IBehandlingInfo'
 import { useVedtaksResultat, VedtakResultat } from '~components/behandling/useVedtaksResultat'
 
 function innvilgelsestekst(vedtaksresultat: VedtakResultat): string {

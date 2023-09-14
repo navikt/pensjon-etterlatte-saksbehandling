@@ -2,7 +2,7 @@ import { Dokumentliste } from './dokumentliste'
 import styled from 'styled-components'
 import { useEffect } from 'react'
 import { hentDokumenter } from '~shared/api/dokument'
-import { SidebarPanel } from '~components/behandling/SideMeny/SideMeny'
+import { SidebarPanel } from '~shared/components/Sidebar'
 import { DokumentlisteLiten } from './dokumentlisteLiten'
 import { useApiCall } from '~shared/hooks/useApiCall'
 

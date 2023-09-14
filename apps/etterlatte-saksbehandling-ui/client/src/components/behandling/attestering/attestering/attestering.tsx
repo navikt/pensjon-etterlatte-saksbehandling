@@ -1,30 +1,28 @@
 import styled from 'styled-components'
 import { useBehandlingRoutes } from '~components/behandling/BehandlingRoutes'
-import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { IBeslutning } from '../types'
 import { Beslutningsvalg } from './beslutningsvalg'
 import { useAppSelector } from '~store/Store'
 import { Alert } from '@navikt/ds-react'
-import { VedtakSammendrag } from '~components/vedtak/typer'
 import { isFailure, isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
 import { hentOppgaveForBehandlingUnderBehandling } from '~shared/api/oppgaverny'
 import { useEffect, useState } from 'react'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
+import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
 
 type Props = {
   setBeslutning: (value: IBeslutning) => void
   beslutning: IBeslutning | undefined
-  behandling: IDetaljertBehandling
-  vedtak: VedtakSammendrag | undefined
+  behandling: IBehandlingReducer
 }
 
-export const Attestering = ({ setBeslutning, beslutning, behandling, vedtak }: Props) => {
+export const Attestering = ({ setBeslutning, beslutning, behandling }: Props) => {
   const { lastPage } = useBehandlingRoutes()
 
   const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.saksbehandler)
 
-  const attestantOgSaksbehandlerErSammePerson = vedtak?.saksbehandlerId === innloggetSaksbehandler.ident
+  const attestantOgSaksbehandlerErSammePerson = behandling.vedtak?.saksbehandlerId === innloggetSaksbehandler.ident
   const [saksbehandlerPaaOppgave, setSaksbehandlerPaaOppgave] = useState<string | null>(null)
 
   const [oppgaveForBehandlingStatus, requestHentUnderbehandlingSaksbehandler] = useApiCall(
@@ -46,12 +44,9 @@ export const Attestering = ({ setBeslutning, beslutning, behandling, vedtak }: P
       <div className="info">
         <Overskrift>Kontroller opplysninger og faglige vurderinger gjort under behandling.</Overskrift>
       </div>
-      <>
-        {isPending(oppgaveForBehandlingStatus) && <Spinner visible={true} label={'Henter oppgave'} />}
-        {isFailure(oppgaveForBehandlingStatus) && (
-          <ApiErrorAlert>Kunne ikke hente oppgave for behandling</ApiErrorAlert>
-        )}
-      </>
+
+      {isPending(oppgaveForBehandlingStatus) && <Spinner visible label={'Henter oppgave'} />}
+      {isFailure(oppgaveForBehandlingStatus) && <ApiErrorAlert>Kunne ikke hente oppgave for behandling</ApiErrorAlert>}
       {isSuccess(oppgaveForBehandlingStatus) && (
         <>
           {innloggetBrukerErSammeSomPaaOppgave ? (

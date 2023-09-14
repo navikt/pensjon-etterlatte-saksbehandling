@@ -2,7 +2,7 @@ import { Info, Overskrift, Tekst, UnderOverskrift, Wrapper } from '../styled'
 import { useAppSelector } from '~store/Store'
 import { formaterBehandlingstype, formaterStringDato, formaterStringTidspunkt } from '~utils/formattering'
 import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
-import { IBehandlingInfo } from '~components/behandling/SideMeny/types'
+import { IBehandlingInfo } from '~components/behandling/sidemeny/IBehandlingInfo'
 
 export const Underkjent = ({
   behandlingsInfo,

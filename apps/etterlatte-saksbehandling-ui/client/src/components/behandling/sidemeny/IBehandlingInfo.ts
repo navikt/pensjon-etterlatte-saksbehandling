@@ -9,12 +9,10 @@ export interface IBehandlingInfo {
   sakType: SakType
   status: IBehandlingStatus
   saksbehandler?: string
-  attestant?: string
   virkningsdato?: string
   datoFattet?: string
   datoAttestert?: string
   underkjentLogg?: IHendelse[]
   fattetLogg?: IHendelse[]
   attestertLogg?: IHendelse[]
-  rolle: string
 }

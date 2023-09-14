@@ -4,6 +4,21 @@ import { IPersonResult } from '~components/person/typer'
 import { isPending, isSuccess, Result } from '~shared/hooks/useApiCall'
 import { Link } from '@navikt/ds-react'
 import { KopierbarVerdi } from '~shared/statusbar/kopierbarVerdi'
+import { IPdlPerson } from '~shared/types/Person'
+
+export const PdlPersonStatusBar = ({ person }: { person: IPdlPerson }) => (
+  <StatusBar
+    result={{
+      status: 'success',
+      data: {
+        foedselsnummer: person.foedselsnummer,
+        fornavn: person.fornavn,
+        mellomnavn: person.mellomnavn,
+        etternavn: person.etternavn,
+      },
+    }}
+  />
+)
 
 export const StatusBar = ({ result }: { result: Result<IPersonResult> }) => {
   const gender = (fnr: string): GenderList => {

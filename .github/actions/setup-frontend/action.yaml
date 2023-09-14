@@ -8,7 +8,7 @@ runs:
       with:
         node-version: 18
         cache: npm
-    - run: npm ci
+    - run: yarn install
       shell: bash
     - name: Cache Turborepo
       uses: actions/cache@v3

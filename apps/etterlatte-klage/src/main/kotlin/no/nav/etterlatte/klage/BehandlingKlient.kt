@@ -9,6 +9,7 @@ import io.ktor.http.contentType
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.klage.modell.BehandlingEvent
 import no.nav.etterlatte.libs.common.Vedtaksloesning
+import no.nav.etterlatte.libs.common.toJson
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.slf4j.LoggerFactory
 
@@ -25,6 +26,7 @@ class BehandlingKlient(config: Config, val behandlingHttpClient: HttpClient) {
             record.partition(),
             record.offset()
         )
+        logger.info("Skal behandle record ${record.toJson()}")
         val klageHendelse = record.value()
         logger.info(
             "Håndterer klagehendelse ${klageHendelse.eventId}"

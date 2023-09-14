@@ -1,8 +1,9 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="etterlatte-samordning-vedtak.dev-gcp" type="JetRunConfigurationType">
     <envs>
+      <env name="ETTERLATTE_VEDTAKSVURDERING_URL" value="https://etterlatte-vedtaksvurdering.intern.dev.nav.no" />
+      <env name="ETTERLATTE_VEDTAKSVURDERING_SCOPE" value="api://dev-gcp.etterlatte.etterlatte-vedtaksvurdering/.default" />
       <env name="HTTP_PORT" value="8094" />
-      <env name="ETTERLATTE_VEDTAK_URL" value="https://etterlatte-vedtaksvurdering.intern.dev.nav.no" />
     </envs>
     <option name="MAIN_CLASS_NAME" value="no.nav.etterlatte.ApplicationKt" />
     <module name="pensjon-etterlatte-saksbehandling.apps.etterlatte-samordning-vedtak.main" />

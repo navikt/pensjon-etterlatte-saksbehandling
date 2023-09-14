@@ -6,6 +6,7 @@ import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.route
+import no.nav.etterlatte.libs.ktor.hentAccessToken
 import java.time.LocalDate
 import kotlin.random.Random
 
@@ -38,7 +39,7 @@ enum class SamordningVedtakAarsak {
     ANNET
 }
 
-fun Route.samordningVedtakRoute() {
+fun Route.samordningVedtakRoute(samordningVedtakService: SamordningVedtakService) {
     route("ping") {
         get {
             call.respond("Tjeneste ok")
@@ -48,6 +49,11 @@ fun Route.samordningVedtakRoute() {
     route("api/vedtak") {
         get("{vedtakId}") {
             val vedtakId = requireNotNull(call.parameters["vedtakId"]).toLong()
+
+            // Trekk ut orgID for logging her og downstream
+            val accessToken = hentAccessToken(call)
+
+            val dto = samordningVedtakService.hentVedtak(vedtakId, accessToken)
 
             val dummystart = LocalDate.now().withDayOfMonth(1)
             val vedtaksinfo = dummySamordningVedtakDto(dummystart, vedtakId)

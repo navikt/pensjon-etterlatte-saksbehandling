@@ -12,7 +12,10 @@ import io.ktor.server.application.log
 import io.ktor.server.config.HoconApplicationConfig
 import io.ktor.server.testing.testApplication
 import io.mockk.clearAllMocks
+import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.confirmVerified
+import io.mockk.mockk
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.validateMaskinportenScope
 import no.nav.security.mock.oauth2.MockOAuth2Server
@@ -25,6 +28,7 @@ import org.junit.jupiter.api.TestInstance
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class SamordningVedtakRouteTest {
     private val server = MockOAuth2Server()
+    private val samordningVedtakService = mockk<SamordningVedtakService>()
     private lateinit var applicationConfig: HoconApplicationConfig
 
     @BeforeAll
@@ -68,6 +72,9 @@ class SamordningVedtakRouteTest {
 
     @Test
     fun `skal gi 200 med gyldig token inkl scope`() {
+        coEvery { samordningVedtakService.hentVedtak(any<Long>(), any<String>()) } returns
+            mockk<SamordningVedtakDto>()
+
         testApplication {
             environment { config = applicationConfig }
             application { samordningVedtakApi() }
@@ -82,6 +89,7 @@ class SamordningVedtakRouteTest {
                 }
 
             response.status shouldBe HttpStatusCode.OK
+            coVerify { samordningVedtakService.hentVedtak(any<Long>(), any<String>()) }
         }
     }
 
@@ -89,7 +97,7 @@ class SamordningVedtakRouteTest {
         restModule(
             log,
             additionalValidation = validateMaskinportenScope()
-        ) { samordningVedtakRoute() }
+        ) { samordningVedtakRoute(samordningVedtakService = samordningVedtakService) }
     }
 
     private fun token(maskinportenScope: String? = null): String {

@@ -30,7 +30,13 @@ export const FjernSaksbehandler = (props: RedigerSaksbehandlerProps) => {
       {isInitial(fjernSaksbehandlerSvar) && (
         <>
           {erRedigerbar ? (
-            <Button icon={<PencilIcon />} iconPosition="right" variant="tertiary" onClick={() => setModalIsOpen(true)}>
+            <Button
+              icon={<PencilIcon />}
+              iconPosition="right"
+              variant="tertiary"
+              size="small"
+              onClick={() => setModalIsOpen(true)}
+            >
               {saksbehandler}
             </Button>
           ) : (

@@ -23,9 +23,7 @@ export const TildelSaksbehandler = (props: {
     const nysaksbehandler = { saksbehandler: user.ident, versjon }
 
     tildelSaksbehandler({ oppgaveId, type, nysaksbehandler }, () => {
-      console.log('start timeout')
       setTimeout(() => {
-        console.log('oppdater tildeling')
         oppdaterTildeling(oppgaveId, user.ident)
       }, 3000)
     })
@@ -35,17 +33,17 @@ export const TildelSaksbehandler = (props: {
     <>
       {isPending(tildelSaksbehandlerSvar) && <Loader size="small" title="Setter saksbehandler" />}
       {isSuccess(tildelSaksbehandlerSvar) && (
-        <Alert variant="success" size={'small'}>
+        <Alert variant="success" size="small">
           Oppgave tildelt deg
         </Alert>
       )}
       {isFailure(tildelSaksbehandlerSvar) && (
-        <Alert variant={'error'} size={'small'}>
+        <Alert variant={'error'} size="small">
           Tildeling feilet
         </Alert>
       )}
       {isInitial(tildelSaksbehandlerSvar) && (
-        <Button icon={<PersonIcon />} variant="tertiary" size={'small'} onClick={tildelSaksbehandlerWrapper}>
+        <Button icon={<PersonIcon />} variant="tertiary" size="small" onClick={tildelSaksbehandlerWrapper}>
           Tildel meg
         </Button>
       )}

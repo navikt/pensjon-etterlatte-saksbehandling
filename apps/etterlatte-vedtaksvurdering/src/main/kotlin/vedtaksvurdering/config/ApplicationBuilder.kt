@@ -15,6 +15,7 @@ import no.nav.etterlatte.vedtaksvurdering.automatiskBehandlingRoutes
 import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlientImpl
 import no.nav.etterlatte.vedtaksvurdering.klienter.BeregningKlientImpl
 import no.nav.etterlatte.vedtaksvurdering.klienter.VilkaarsvurderingKlientImpl
+import no.nav.etterlatte.vedtaksvurdering.samordningsvedtakRoute
 import no.nav.etterlatte.vedtaksvurdering.vedtaksvurderingRoute
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -54,6 +55,7 @@ class ApplicationBuilder {
                 restModule(sikkerLogg, config = HoconApplicationConfig(config)) {
                     vedtaksvurderingRoute(vedtaksvurderingService, behandlingKlient)
                     automatiskBehandlingRoutes(vedtaksvurderingService, behandlingKlient)
+                    samordningsvedtakRoute(vedtaksvurderingService)
                 }
             }
             .build()

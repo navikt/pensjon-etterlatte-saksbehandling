@@ -20,6 +20,7 @@ import java.time.YearMonth
 import java.util.*
 
 const val FNR_1 = "11057523044"
+const val FNR_2 = "04417103428"
 const val SAKSBEHANDLER_1 = "saksbehandler1"
 const val SAKSBEHANDLER_2 = "saksbehandler2"
 const val ENHET_1 = "1234"
@@ -30,6 +31,7 @@ val attestant = Saksbehandler("token", SAKSBEHANDLER_2, null)
 
 fun opprettVedtak(
     virkningstidspunkt: YearMonth = YearMonth.of(2023, Month.JANUARY),
+    soeker: Folkeregisteridentifikator = Folkeregisteridentifikator.of(FNR_1),
     sakId: Long = 1L,
     type: VedtakType = VedtakType.INNVILGELSE,
     behandlingId: UUID = UUID.randomUUID(),
@@ -37,7 +39,7 @@ fun opprettVedtak(
     beregning: ObjectNode? = objectMapper.createObjectNode(),
     avkorting: ObjectNode? = objectMapper.createObjectNode()
 ) = OpprettVedtak(
-    soeker = Folkeregisteridentifikator.of(FNR_1),
+    soeker = soeker,
     sakId = sakId,
     sakType = SakType.BARNEPENSJON,
     behandlingId = behandlingId,
@@ -80,13 +82,14 @@ fun vedtak(
     beregning = beregning,
     avkorting = avkorting,
     vilkaarsvurdering = vilkaarsvurdering,
-    utbetalingsperioder = listOf(
-        Utbetalingsperiode(
-            id = 1,
-            periode = Periode(virkningstidspunkt, null),
-            beloep = BigDecimal.valueOf(100),
-            type = UtbetalingsperiodeType.UTBETALING
-        )
-    ),
+    utbetalingsperioder =
+        listOf(
+            Utbetalingsperiode(
+                id = 1,
+                periode = Periode(virkningstidspunkt, null),
+                beloep = BigDecimal.valueOf(100),
+                type = UtbetalingsperiodeType.UTBETALING
+            )
+        ),
     revurderingAarsak = revurderingAarsak
 )

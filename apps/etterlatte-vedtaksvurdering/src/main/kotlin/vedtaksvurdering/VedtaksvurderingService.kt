@@ -50,6 +50,11 @@ class VedtaksvurderingService(
 ) {
     private val logger = LoggerFactory.getLogger(VedtaksvurderingService::class.java)
 
+    fun hentVedtak(vedtakId: Long): Vedtak? {
+        logger.info("Henter vedtak med id=$vedtakId")
+        return repository.hentVedtak(vedtakId)
+    }
+
     fun hentVedtak(behandlingId: UUID): Vedtak? {
         logger.info("Henter vedtak for behandling med behandlingId=$behandlingId")
         return repository.hentVedtak(behandlingId)
@@ -57,6 +62,13 @@ class VedtaksvurderingService(
 
     private fun hentVedtakNonNull(behandlingId: UUID): Vedtak {
         return requireNotNull(hentVedtak(behandlingId)) { "Vedtak for behandling $behandlingId finnes ikke" }
+    }
+
+    fun finnFerdigstilteVedtak(
+        fnr: Folkeregisteridentifikator,
+        virkFom: LocalDate
+    ): List<Vedtak> {
+        return repository.hentFerdigstilteVedtak(fnr, virkFom)
     }
 
     fun sjekkOmVedtakErLoependePaaDato(sakId: Long, dato: LocalDate): LoependeYtelse {

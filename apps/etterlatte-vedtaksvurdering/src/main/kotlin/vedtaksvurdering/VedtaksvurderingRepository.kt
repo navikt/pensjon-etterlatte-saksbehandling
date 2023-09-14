@@ -24,12 +24,12 @@ import no.nav.etterlatte.libs.database.hentListe
 import no.nav.etterlatte.libs.database.oppdater
 import no.nav.etterlatte.libs.database.transaction
 import java.sql.Date
+import java.time.LocalDate
 import java.time.YearMonth
 import java.util.*
 import javax.sql.DataSource
 
 class VedtaksvurderingRepository(private val datasource: DataSource) : Transactions<VedtaksvurderingRepository> {
-
     companion object {
         fun using(datasource: DataSource): VedtaksvurderingRepository = VedtaksvurderingRepository(datasource)
     }
@@ -133,7 +133,27 @@ class VedtaksvurderingRepository(private val datasource: DataSource) : Transacti
                     "type" to it.type.name,
                     "beloep" to it.beloep
                 )
-            ).let { query -> tx.run(query.asUpdate) }
+        ).let { query -> tx.run(query.asUpdate) }
+    }
+
+    fun hentVedtak(
+        vedtakId: Long,
+        tx: TransactionalSession? = null
+    ): Vedtak? =
+        tx.session {
+            hent(
+                queryString = """
+            SELECT sakid, behandlingId, saksbehandlerId, beregningsresultat, avkorting, vilkaarsresultat, id, fnr, 
+                datoFattet, datoattestert, attestant, datoVirkFom, vedtakstatus, saktype, behandlingtype, 
+                attestertVedtakEnhet, fattetVedtakEnhet, type, revurderingsaarsak, revurderinginfo
+            FROM vedtak 
+            WHERE id = :vedtakId
+            """,
+                params = mapOf("vedtakId" to vedtakId)
+            ) {
+                val utbetalingsperioder = hentUtbetalingsPerioder(it.long("id"), this)
+                it.toVedtak(utbetalingsperioder)
+            }
         }
 
     fun hentVedtak(behandlingId: UUID, tx: TransactionalSession? = null): Vedtak? =
@@ -168,6 +188,34 @@ class VedtaksvurderingRepository(private val datasource: DataSource) : Transacti
             hentListe(
                 queryString = hentVedtak,
                 params = { mapOf("sakId" to sakId) }
+            ) {
+                val utbetalingsperioder = hentUtbetalingsPerioder(it.long("id"), this)
+                it.toVedtak(utbetalingsperioder)
+            }
+        }
+    }
+
+    /**
+     * TODO vedtakstatus SAMORDNET e.l.?
+     */
+    fun hentFerdigstilteVedtak(
+        fnr: Folkeregisteridentifikator,
+        virkFom: LocalDate,
+        tx: TransactionalSession? = null
+    ): List<Vedtak> {
+        val hentVedtak = """
+            SELECT sakid, behandlingId, saksbehandlerId, beregningsresultat, avkorting, vilkaarsresultat, id, fnr, 
+                datoFattet, datoattestert, attestant, datoVirkFom, vedtakstatus, saktype, behandlingtype, 
+                attestertVedtakEnhet, fattetVedtakEnhet, type, revurderingsaarsak, revurderinginfo
+            FROM vedtak  
+            WHERE vedtakstatus = 'IVERKSATT'   
+            AND fnr = :fnr
+            AND datoVirkFom >= :virkFom
+            """
+        return tx.session {
+            hentListe(
+                queryString = hentVedtak,
+                params = { mapOf("fnr" to fnr.value, "virkFom" to virkFom) }
             ) {
                 val utbetalingsperioder = hentUtbetalingsPerioder(it.long("id"), this)
                 it.toVedtak(utbetalingsperioder)

@@ -13,6 +13,7 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sakId
 import no.nav.etterlatte.libs.common.tidspunkt.toNorskTid
 import no.nav.etterlatte.libs.common.vedtak.AttesterVedtakDto
@@ -26,7 +27,10 @@ import java.time.LocalDate
 import java.time.ZonedDateTime
 import java.util.*
 
-fun Route.vedtaksvurderingRoute(service: VedtaksvurderingService, behandlingKlient: BehandlingKlient) {
+fun Route.vedtaksvurderingRoute(
+    service: VedtaksvurderingService,
+    behandlingKlient: BehandlingKlient
+) {
     route("/api/vedtak") {
         val logger = application.log
 
@@ -142,6 +146,33 @@ fun Route.vedtaksvurderingRoute(service: VedtaksvurderingService, behandlingKlie
             val nyeste = service.hentNyesteBehandlingMedResultat(sakId, resultat)
             if (nyeste != null) {
                 call.respond(nyeste.toDto())
+            } else {
+                call.respond(HttpStatusCode.NoContent)
+            }
+        }
+    }
+}
+
+fun Route.samordningsvedtakRoute(service: VedtaksvurderingService) {
+    route("/api/samordning/vedtak") {
+        get {
+            val virkFom =
+                call.parameters["virkFom"]?.let { runCatching { LocalDate.parse(it) }.getOrNull() }
+                    ?: return@get call.respond(HttpStatusCode.BadRequest, "virkFom ikke angitt")
+            val fnr =
+                call.request.headers["fnr"]?.let { Folkeregisteridentifikator.of(it) }
+                    ?: return@get call.respond(HttpStatusCode.BadRequest, "fnr ikke angitt")
+
+            val vedtaksliste = service.finnFerdigstilteVedtak(fnr, virkFom)
+            call.respond(vedtaksliste.map { it.toDto() })
+        }
+
+        get("/{vedtakId}") {
+            val vedtakId = requireNotNull(call.parameters["vedtakId"]).toLong()
+
+            val vedtak = service.hentVedtak(vedtakId)
+            if (vedtak != null) {
+                call.respond(vedtak.toDto())
             } else {
                 call.respond(HttpStatusCode.NoContent)
             }

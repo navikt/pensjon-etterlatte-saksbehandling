@@ -1,6 +1,7 @@
 package vedtaksvurdering
 
 import io.kotest.matchers.comparables.shouldBeGreaterThan
+import io.kotest.matchers.comparables.shouldBeGreaterThanOrEqualTo
 import io.kotest.matchers.ints.shouldBeExactly
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
@@ -27,14 +28,13 @@ import org.junit.jupiter.api.TestInstance
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
 import java.math.BigDecimal
+import java.time.LocalDate
 import java.time.Month
 import java.time.YearMonth
-import java.util.*
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class VedtaksvurderingRepositoryTest {
-
     @Container
     private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:$POSTGRES_VERSION")
     private lateinit var dataSource: DataSource
@@ -209,9 +209,10 @@ internal class VedtaksvurderingRepositoryTest {
             VedtakFattet(SAKSBEHANDLER_1, ENHET_1, Tidspunkt.now())
         )
 
-        val underkjentVedtak = repository.underkjennVedtak(
-            vedtak.behandlingId
-        )
+        val underkjentVedtak =
+            repository.underkjennVedtak(
+                vedtak.behandlingId
+            )
 
         underkjentVedtak shouldNotBe null
         underkjentVedtak.vedtakFattet shouldBe null
@@ -222,17 +223,42 @@ internal class VedtaksvurderingRepositoryTest {
     @Test
     fun `skal hente vedtak for sak`() {
         val sakId = 1L
-        val nyeVedtak = listOf(
-            opprettVedtak(sakId = sakId),
-            opprettVedtak(sakId = 2),
-            opprettVedtak(sakId = sakId),
-            opprettVedtak(sakId = sakId)
-        )
+        val nyeVedtak =
+            listOf(
+                opprettVedtak(sakId = sakId),
+                opprettVedtak(sakId = 2),
+                opprettVedtak(sakId = sakId),
+                opprettVedtak(sakId = sakId)
+            )
         nyeVedtak.forEach { repository.opprettVedtak(it) }
 
         val vedtakForSak = repository.hentVedtakForSak(sakId)
 
         vedtakForSak.size shouldBeExactly 3
         vedtakForSak.forEach { it.sakId shouldBe sakId }
+    }
+
+    @Test
+    fun `skal hente vedtak for fnr og fra-og-med angitt dato`() {
+        val person1 = Folkeregisteridentifikator.of(FNR_1)
+        val person2 = Folkeregisteridentifikator.of(FNR_2)
+
+        listOf(
+            opprettVedtak(sakId = 1, soeker = person1, virkningstidspunkt = YearMonth.of(2024, Month.JANUARY)),
+            opprettVedtak(sakId = 2, soeker = person2, virkningstidspunkt = YearMonth.of(2024, Month.JANUARY)),
+            opprettVedtak(sakId = 2, soeker = person2, virkningstidspunkt = YearMonth.of(2024, Month.MARCH)),
+            opprettVedtak(sakId = 1, soeker = person1, virkningstidspunkt = YearMonth.of(2024, Month.APRIL)),
+            opprettVedtak(sakId = 2, soeker = person2, virkningstidspunkt = YearMonth.of(2024, Month.JUNE))
+        )
+            .map { repository.opprettVedtak(it) }
+            .forEach { repository.iverksattVedtak(it.behandlingId) }
+
+        val results = repository.hentFerdigstilteVedtak(person2, LocalDate.of(2024, Month.MARCH, 1))
+
+        results.size shouldBeExactly 2
+        results.forEach {
+            it.soeker shouldBe person2
+            it.virkningstidspunkt shouldBeGreaterThanOrEqualTo YearMonth.of(2024, Month.MARCH)
+        }
     }
 }

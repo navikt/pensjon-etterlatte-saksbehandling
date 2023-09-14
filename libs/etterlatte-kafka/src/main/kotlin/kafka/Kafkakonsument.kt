@@ -35,6 +35,7 @@ abstract class Kafkakonsument<T>(
             consumer.subscribe(listOf(topic))
             while (!closed.get()) {
                 val meldinger: ConsumerRecords<String, T> = consumer.poll(pollTimeoutInSeconds)
+                logger.info("Meldinger: $meldinger")
                 haandter(meldinger)
                 consumer.commitSync()
 

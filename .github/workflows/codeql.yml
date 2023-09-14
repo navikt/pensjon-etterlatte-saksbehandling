@@ -47,6 +47,8 @@ jobs:
 
       - name: Assemble
         run: ./gradlew assemble --no-build-cache --no-configuration-cache
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v2

@@ -90,4 +90,7 @@ export const ReduksjonOMS = {
   NEI_OMSORG_BARN: 'Nei, har omsorg for barn',
 }
 
+export type ReduksjonBPKeys = keyof typeof ReduksjonBP
+export type ReduksjonOMSKeys = keyof typeof ReduksjonOMS
+
 type Reduksjonstypekey = ReduksjonBPKeys | ReduksjonOMSKeys

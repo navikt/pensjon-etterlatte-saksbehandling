@@ -27,9 +27,7 @@ class BehandlingKlient(config: Config, val behandlingHttpClient: HttpClient) {
             record.partition(),
             record.offset()
         )
-        val klageHendelseString = record.value()
-        logger.info("Mottok $klageHendelseString")
-        val klageHendelse = objectMapper.readValue<BehandlingEvent>(klageHendelseString)
+        val klageHendelse = objectMapper.readValue<BehandlingEvent>(record.value())
         logger.info(
             "Håndterer klagehendelse ${klageHendelse.eventId}"
         )

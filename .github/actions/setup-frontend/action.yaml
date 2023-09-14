@@ -9,6 +9,7 @@ runs:
         node-version: 18
         cache: npm
     - run: yarn install
+      working-directory: apps/etterlatte-saksbehandling-ui
       shell: bash
     - name: Cache Turborepo
       uses: actions/cache@v3

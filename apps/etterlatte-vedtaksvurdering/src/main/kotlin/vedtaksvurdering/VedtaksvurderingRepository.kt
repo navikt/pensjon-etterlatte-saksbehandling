@@ -62,7 +62,7 @@ class VedtaksvurderingRepository(private val datasource: DataSource) : Transacti
                     "type" to opprettVedtak.type.name,
                     "datovirkfom" to opprettVedtak.virkningstidspunkt.atDay(1),
                     "beregningsresultat" to opprettVedtak.beregning?.toJson(),
-                    "avkorting" to opprettVedtak.beregning?.toJson(),
+                    "avkorting" to opprettVedtak.avkorting?.toJson(),
                     "vilkaarsresultat" to opprettVedtak.vilkaarsvurdering?.toJson(),
                     "revurderingsaarsak" to opprettVedtak.revurderingsaarsak?.name,
                     "revurderinginfo" to opprettVedtak.revurderingInfo?.toJson()
@@ -90,7 +90,7 @@ class VedtaksvurderingRepository(private val datasource: DataSource) : Transacti
                     "datovirkfom" to oppdatertVedtak.virkningstidspunkt.atDay(1),
                     "type" to oppdatertVedtak.type.name,
                     "beregningsresultat" to oppdatertVedtak.beregning?.toJson(),
-                    "avkorting" to oppdatertVedtak.beregning?.toJson(),
+                    "avkorting" to oppdatertVedtak.avkorting?.toJson(),
                     "vilkaarsresultat" to oppdatertVedtak.vilkaarsvurdering?.toJson(),
                     "behandlingid" to oppdatertVedtak.behandlingId,
                     "revurderinginfo" to oppdatertVedtak.revurderingInfo?.toJson()

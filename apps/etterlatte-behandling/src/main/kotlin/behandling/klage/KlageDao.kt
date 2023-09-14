@@ -2,6 +2,7 @@ package no.nav.etterlatte.behandling.klage
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.libs.common.behandling.KabalStatus
+import no.nav.etterlatte.libs.common.behandling.Kabalrespons
 import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.sak.Sak
@@ -20,6 +21,7 @@ interface KlageDao {
     fun hentKlage(id: UUID): Klage?
 
     fun hentKlagerISak(sakId: Long): List<Klage>
+    fun oppdaterKabalStatus(sakId: Long, kabalrespons: Kabalrespons)
 }
 
 class KlageDaoImpl(private val connection: () -> Connection) : KlageDao {
@@ -80,6 +82,22 @@ class KlageDaoImpl(private val connection: () -> Connection) : KlageDao {
             return statement.executeQuery().toList {
                 somKlage()
             }
+        }
+    }
+
+    override fun oppdaterKabalStatus(sakId: Long, kabalrespons: Kabalrespons) {
+        with(connection()) {
+            val statement = prepareStatement(
+                """
+                    UPDATE klage
+                    SET kabalstatus = ?, kabalresultat = ?
+                    WHERE sak_id = ?
+                """.trimIndent()
+            )
+            statement.setString(1, kabalrespons.kabalStatus.name)
+            statement.setString(2, kabalrespons.resultat.name)
+            statement.setObject(3, sakId)
+            statement.executeUpdate()
         }
     }
 

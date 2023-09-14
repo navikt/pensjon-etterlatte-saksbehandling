@@ -3,6 +3,7 @@ package no.nav.etterlatte.behandling.klage
 import io.ktor.server.plugins.NotFoundException
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.libs.common.behandling.Formkrav
+import no.nav.etterlatte.libs.common.behandling.Kabalrespons
 import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.behandling.KlageHendelseType
 import no.nav.etterlatte.libs.common.behandling.KlageUtfall
@@ -24,6 +25,7 @@ interface KlageService {
     fun hentKlagerISak(sakId: Long): List<Klage>
     fun lagreFormkravIKlage(klageId: UUID, formkrav: Formkrav, saksbehandler: Saksbehandler): Klage
     fun lagreUtfallAvKlage(klageId: UUID, utfall: KlageUtfallUtenBrev, saksbehandler: Saksbehandler): Klage
+    fun oppdaterKabalStatus(sakId: Long, kabalrespons: Kabalrespons)
 }
 
 class KlageServiceImpl(
@@ -108,4 +110,7 @@ class KlageServiceImpl(
 
         return klageMedOppdatertUtfall
     }
+
+    override fun oppdaterKabalStatus(sakId: Long, kabalrespons: Kabalrespons) =
+        klageDao.oppdaterKabalStatus(sakId, kabalrespons)
 }

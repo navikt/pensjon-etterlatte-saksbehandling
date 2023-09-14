@@ -42,7 +42,25 @@ enum class KlageStatus {
 }
 
 // Placeholder til vi vet mer om hvilken flyt vi har her
-enum class KabalStatus
+enum class KabalStatus {
+    OPPRETTET,
+    UTREDES,
+    VENTER,
+    FERDIGSTILT
+}
+
+enum class BehandlingResultat {
+    MEDHOLD,
+    IKKE_MEDHOLD,
+    IKKE_MEDHOLD_FORMKRAV_AVVIST,
+    IKKE_SATT,
+    HENLAGT
+}
+
+data class Kabalrespons(
+    val kabalStatus: KabalStatus,
+    val resultat: BehandlingResultat
+)
 
 data class Klage(
     val id: UUID,

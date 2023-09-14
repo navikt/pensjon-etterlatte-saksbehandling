@@ -6,6 +6,7 @@ import io.ktor.server.application.call
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
+import io.ktor.server.routing.patch
 import io.ktor.server.routing.post
 import io.ktor.server.routing.put
 import io.ktor.server.routing.route
@@ -16,6 +17,7 @@ import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.KLAGEID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.behandling.Formkrav
+import no.nav.etterlatte.libs.common.behandling.Kabalrespons
 import no.nav.etterlatte.libs.common.behandling.KlageUtfallUtenBrev
 import no.nav.etterlatte.libs.common.klageId
 import no.nav.etterlatte.libs.common.kunSaksbehandler
@@ -97,6 +99,17 @@ internal fun Route.klageRoutes(klageService: KlageService, featureToggleService:
                     klageService.hentKlagerISak(sakId)
                 }
                 call.respond(klager)
+            }
+        }
+
+        patch("{{$KLAGEID_CALL_PARAMETER}/kabalstatus") {
+            hvisEnabled(KlageFeatureToggle.KanBrukeKlageToggle) {
+                medBody<Kabalrespons> {
+                    val klager = inTransaction {
+                        klageService.oppdaterKabalStatus(sakId, it)
+                    }
+                    call.respond(HttpStatusCode.OK)
+                }
             }
         }
     }

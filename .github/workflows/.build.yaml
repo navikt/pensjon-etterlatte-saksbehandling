@@ -45,21 +45,3 @@ jobs:
           tag: ${{ env.GITHUB_REF_SLUG }}
       - name: Print docker tag
         run: echo 'Docker-tag er ${{ steps.docker-build-push.outputs.image }} ' >> $GITHUB_STEP_SUMMARY
-  snyk:
-    name: Snyk
-    runs-on: ubuntu-latest-8-cores
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-      - name: Setup Java v17.x
-        uses: actions/setup-java@v3
-        with:
-          distribution: temurin
-          java-version: 17.x
-          cache: gradle
-      - name: Install Snyk CLI
-        uses: snyk/actions/setup@master
-      - name: Test dependencies with Snyk
-        run: snyk monitor --file=apps/${{ github.workflow }}/build.gradle.kts --org=etterlatte
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}

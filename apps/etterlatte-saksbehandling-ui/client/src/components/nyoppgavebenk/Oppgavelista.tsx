@@ -1,7 +1,5 @@
 import { Pagination, Table } from '@navikt/ds-react'
 import { formaterStringDato } from '~utils/formattering'
-import { TildelSaksbehandler } from '~components/nyoppgavebenk/TildelSaksbehandler'
-import { RedigerSaksbehandler } from '~components/nyoppgavebenk/RedigerSaksbehandler'
 import { erOppgaveRedigerbar, OppgaveDTOny } from '~shared/api/oppgaverny'
 import React, { useEffect, useState } from 'react'
 import styled from 'styled-components'
@@ -10,6 +8,7 @@ import { HandlingerForOppgave } from '~components/nyoppgavebenk/HandlingerForOpp
 import { OppgavetypeTag, SaktypeTag } from '~components/nyoppgavebenk/Tags'
 import { isBefore } from 'date-fns'
 import SaksoversiktLenke from '~components/nyoppgavebenk/SaksoversiktLenke'
+import { RedigerSaksbehandler } from './tildeling/RedigerSaksbehandler'
 
 export const FristWrapper = styled.span<{ fristHarPassert: boolean }>`
   color: ${(p) => p.fristHarPassert && 'var(--a-text-danger)'};
@@ -33,10 +32,10 @@ export const HeaderPadding = styled.span`
 
 export const Oppgavelista = (props: {
   oppgaver: ReadonlyArray<OppgaveDTOny>
-  hentOppgaver: () => void
+  oppdaterTildeling: (id: string, saksbehandler: string | null) => void
   filtrerteOppgaver: ReadonlyArray<OppgaveDTOny>
 }) => {
-  const { oppgaver, hentOppgaver, filtrerteOppgaver } = props
+  const { oppgaver, oppdaterTildeling, filtrerteOppgaver } = props
 
   const [page, setPage] = useState<number>(1)
   const [rowsPerPage, setRowsPerPage] = useState<number>(10)
@@ -101,25 +100,15 @@ export const Oppgavelista = (props: {
                       </Table.DataCell>
                       <Table.DataCell>{oppgave.enhet}</Table.DataCell>
                       <Table.DataCell>
-                        {oppgave.saksbehandler ? (
-                          <RedigerSaksbehandler
-                            saksbehandler={oppgave.saksbehandler}
-                            oppgaveId={oppgave.id}
-                            sakId={oppgave.sakId}
-                            hentOppgaver={hentOppgaver}
-                            erRedigerbar={erRedigerbar}
-                            versjon={oppgave.versjon}
-                            type={oppgave.type}
-                          />
-                        ) : (
-                          <TildelSaksbehandler
-                            oppgaveId={oppgave.id}
-                            hentOppgaver={hentOppgaver}
-                            erRedigerbar={erRedigerbar}
-                            versjon={oppgave.versjon}
-                            type={oppgave.type}
-                          />
-                        )}
+                        <RedigerSaksbehandler
+                          saksbehandler={oppgave.saksbehandler}
+                          oppgaveId={oppgave.id}
+                          sakId={oppgave.sakId}
+                          oppdaterTildeling={oppdaterTildeling}
+                          erRedigerbar={erRedigerbar}
+                          versjon={oppgave.versjon}
+                          type={oppgave.type}
+                        />
                       </Table.DataCell>
                       <Table.DataCell>
                         <HandlingerForOppgave oppgave={oppgave} />

@@ -137,6 +137,7 @@ class ApplicationBuilder {
             sakOgBehandlingService,
             adresseService,
             dokarkivService,
+            brevService,
             brevbakerService,
             brevDataMapper,
             brevProsessTypeFactory

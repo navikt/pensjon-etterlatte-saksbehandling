@@ -35,6 +35,7 @@ class VedtaksbrevService(
     private val sakOgBehandlingService: SakOgBehandlingService,
     private val adresseService: AdresseService,
     private val dokarkivService: DokarkivServiceImpl,
+    private val brevService: BrevService,
     private val brevbaker: BrevbakerService,
     private val brevDataMapper: BrevDataMapper,
     private val brevProsessTypeFactory: BrevProsessTypeFactory
@@ -101,6 +102,28 @@ class VedtaksbrevService(
 
         return brevbaker.genererPdf(brev.id, brevRequest)
             .also { pdf -> ferdigstillHvisVedtakFattet(brev, behandling, pdf, brukerTokenInfo) }
+    }
+
+    suspend fun hentNyttInnhold(
+        sakId: Long,
+        brevId: Long,
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo
+    ): BrevService.BrevPayload {
+        val behandling = sakOgBehandlingService.hentBehandling(sakId, behandlingId, brukerTokenInfo)
+        val prosessType = brevProsessTypeFactory.fra(behandling)
+        val innhold = opprettInnhold(behandling, prosessType)
+        val innholdVedlegg = opprettInnholdVedlegg(behandling, prosessType)
+
+        if (innhold.payload != null) {
+            db.oppdaterPayload(brevId, innhold.payload)
+        }
+
+        if (innholdVedlegg != null) {
+            db.oppdaterPayloadVedlegg(brevId, innholdVedlegg)
+        }
+
+        return brevService.hentBrevPayload(brevId)
     }
 
     private fun opprettBrevData(brev: Brev, behandling: Behandling, brevkode: BrevDataMapper.BrevkodePar): BrevData =

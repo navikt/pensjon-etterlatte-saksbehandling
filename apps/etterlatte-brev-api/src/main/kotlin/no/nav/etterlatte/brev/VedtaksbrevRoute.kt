@@ -2,13 +2,16 @@ package no.nav.etterlatte.brev
 
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
+import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
+import io.ktor.server.routing.put
 import io.ktor.server.routing.route
 import no.nav.etterlatte.brev.behandlingklient.BehandlingKlient
 import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
+import no.nav.etterlatte.libs.common.behandlingsId
 import no.nav.etterlatte.libs.common.withBehandlingId
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import org.slf4j.LoggerFactory
@@ -63,5 +66,32 @@ fun Route.vedtaksbrevRoute(service: VedtaksbrevService, behandlingKlient: Behand
                 }
             }
         }
+
+        put("payload/reset") {
+            withBehandlingId(behandlingKlient) {
+                val body = call.receive<ResetPayloadRequest>()
+                val brevId = body.brevId
+                val sakId = body.sakId
+
+                logger.info("Reset payload for vedtaksbrev (id=$brevId)")
+
+                measureTimedValue {
+                    service.hentNyttInnhold(sakId, brevId, behandlingsId, brukerTokenInfo)
+                }.let { (brevPayload, varighet) ->
+                    logger.info(
+                        "Oppretting av nytt innhold til brev (id=$brevId) tok ${varighet.toString(
+                            DurationUnit.SECONDS,
+                            2
+                        )}"
+                    )
+                    call.respond(brevPayload)
+                }
+            }
+        }
     }
 }
+
+data class ResetPayloadRequest(
+    val brevId: Long,
+    val sakId: Long
+)

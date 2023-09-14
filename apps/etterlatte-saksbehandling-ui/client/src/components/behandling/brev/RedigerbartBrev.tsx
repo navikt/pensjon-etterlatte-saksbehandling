@@ -1,14 +1,22 @@
-import { Accordion, Button, Detail, Tabs } from '@navikt/ds-react'
+import { Accordion, Button, Detail, ErrorMessage, Tabs } from '@navikt/ds-react'
 import SlateEditor from '~components/behandling/brev/SlateEditor'
-import { useEffect, useState } from 'react'
-import { FilePdfIcon, FloppydiskIcon, PencilIcon } from '@navikt/aksel-icons'
+import React, { useEffect, useState } from 'react'
+import { FilePdfIcon, FileResetIcon, FloppydiskIcon, PencilIcon } from '@navikt/aksel-icons'
 import styled from 'styled-components'
 import { IBrev } from '~shared/types/Brev'
 import { format } from 'date-fns'
-import { hentManuellPayload, lagreManuellPayload } from '~shared/api/brev'
+import { hentManuellPayload, lagreManuellPayload, resetManuellPayload } from '~shared/api/brev'
 import ForhaandsvisningBrev from '~components/behandling/brev/ForhaandsvisningBrev'
-import { isPending, isPendingOrInitial, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
+import {
+  isFailure,
+  isPending,
+  isPendingOrInitial,
+  isSuccess,
+  isSuccessOrInitial,
+  useApiCall,
+} from '~shared/hooks/useApiCall'
 import Spinner from '~shared/Spinner'
+import { GeneriskModal } from '~shared/modal/modal'
 
 enum ManueltBrevFane {
   REDIGER = 'REDIGER',
@@ -36,6 +44,7 @@ export default function RedigerbartBrev({ brev, kanRedigeres }: RedigerbartBrevP
 
   const [hentManuellPayloadStatus, apiHentManuellPayload] = useApiCall(hentManuellPayload)
   const [lagreManuellPayloadStatus, apiLagreManuellPayload] = useApiCall(lagreManuellPayload)
+  const [resetManuellPayloadStatus, apiResetManuellPayload] = useApiCall(resetManuellPayload)
 
   useEffect(() => {
     if (!brev.id) return
@@ -48,6 +57,14 @@ export default function RedigerbartBrev({ brev, kanRedigeres }: RedigerbartBrevP
 
   const lagre = () => {
     apiLagreManuellPayload({ brevId: brev.id, sakId: brev.sakId, payload: content, payload_vedlegg: vedlegg }, () => {
+      setLagretStatus({ lagret: true, beskrivelse: `Lagret kl. ${formaterTidspunkt(new Date())}` })
+    })
+  }
+
+  const reset = () => {
+    apiResetManuellPayload({ brevId: brev.id, sakId: brev.sakId, behandlingId: brev.behandlingId }, (payload: any) => {
+      setContent(payload.hoveddel)
+      setVedlegg(payload.vedlegg)
       setLagretStatus({ lagret: true, beskrivelse: `Lagret kl. ${formaterTidspunkt(new Date())}` })
     })
   }
@@ -97,32 +114,32 @@ export default function RedigerbartBrev({ brev, kanRedigeres }: RedigerbartBrevP
         </Tabs.List>
 
         <Tabs.Panel value={ManueltBrevFane.REDIGER}>
-          {isPendingOrInitial(hentManuellPayloadStatus) && <Spinner visible label={'Henter brevinnhold ...'} />}
-          {isSuccess(hentManuellPayloadStatus) && (
+          {isPendingOrInitial(hentManuellPayloadStatus) ||
+            (isPending(resetManuellPayloadStatus) && <Spinner visible label={'Henter brevinnhold ...'} />)}
+          {isSuccess(hentManuellPayloadStatus) && isSuccessOrInitial(resetManuellPayloadStatus) && (
             <PanelWrapper>
               <SlateEditor value={content} onChange={onChange} readonly={!kanRedigeres} />
 
               {kanRedigeres && (
-                <ButtonRow>
-                  {lagretStatus.beskrivelse && <Detail as="span">{lagretStatus.beskrivelse}</Detail>}
-                  <Button
-                    icon={<FloppydiskIcon title="a11y-title" />}
-                    variant={'secondary'}
-                    onClick={lagre}
-                    disabled={!lagretStatus}
-                    loading={isPending(lagreManuellPayloadStatus)}
-                  >
-                    Lagre endringer
-                  </Button>
-                </ButtonRow>
+                <ResetOgLagreRad
+                  lagretStatus={lagretStatus}
+                  lagre={lagre}
+                  reset={reset}
+                  resetManuellPayloadStatus={isPending(resetManuellPayloadStatus)}
+                  lagreManuellPayloadStatus={isPending(lagreManuellPayloadStatus)}
+                />
               )}
             </PanelWrapper>
+          )}
+          {isFailure(resetManuellPayloadStatus) && (
+            <ErrorMessage>Det skjedde en feil ved resetting av brev</ErrorMessage>
           )}
         </Tabs.Panel>
 
         <Tabs.Panel value={ManueltBrevFane.REDIGER_VEDLEGG}>
-          {isPendingOrInitial(hentManuellPayloadStatus) && <Spinner visible label={'Henter innhold til vedlegg ...'} />}
-          {isSuccess(hentManuellPayloadStatus) && (
+          {isPendingOrInitial(hentManuellPayloadStatus) ||
+            (isPending(resetManuellPayloadStatus) && <Spinner visible label={'Henter brevinnhold ...'} />)}
+          {isSuccess(hentManuellPayloadStatus) && isSuccessOrInitial(resetManuellPayloadStatus) && (
             <>
               <PanelWrapper>
                 <Accordion>
@@ -143,21 +160,19 @@ export default function RedigerbartBrev({ brev, kanRedigeres }: RedigerbartBrevP
                 </Accordion>
 
                 {kanRedigeres && (
-                  <ButtonRow>
-                    {lagretStatus.beskrivelse && <Detail as="span">{lagretStatus.beskrivelse}</Detail>}
-                    <Button
-                      icon={<FloppydiskIcon title="a11y-title" />}
-                      variant={'secondary'}
-                      onClick={lagre}
-                      disabled={!lagretStatus}
-                      loading={isPending(lagreManuellPayloadStatus)}
-                    >
-                      Lagre endringer
-                    </Button>
-                  </ButtonRow>
+                  <ResetOgLagreRad
+                    lagretStatus={lagretStatus}
+                    lagre={lagre}
+                    reset={reset}
+                    resetManuellPayloadStatus={isPending(resetManuellPayloadStatus)}
+                    lagreManuellPayloadStatus={isPending(lagreManuellPayloadStatus)}
+                  />
                 )}
               </PanelWrapper>
             </>
+          )}
+          {isFailure(resetManuellPayloadStatus) && (
+            <ErrorMessage>Det skjedde en feil ved resetting av brev</ErrorMessage>
           )}
         </Tabs.Panel>
 
@@ -171,6 +186,60 @@ export default function RedigerbartBrev({ brev, kanRedigeres }: RedigerbartBrevP
   )
 }
 
+interface ResetOgLagreRadProps {
+  lagretStatus: LagretStatus
+  lagre: () => void
+  reset: () => void
+  resetManuellPayloadStatus: boolean
+  lagreManuellPayloadStatus: boolean
+}
+const ResetOgLagreRad = ({
+  lagretStatus,
+  lagre,
+  reset,
+  resetManuellPayloadStatus,
+  lagreManuellPayloadStatus,
+}: ResetOgLagreRadProps) => {
+  const [isOpen, setIsOpen] = useState<boolean>(false)
+
+  return (
+    <>
+      <ButtonRow>
+        <Button
+          icon={<FileResetIcon title="a11y-title" />}
+          variant={'secondary'}
+          onClick={() => setIsOpen(true)}
+          disabled={!lagretStatus}
+          loading={resetManuellPayloadStatus}
+        >
+          Resett brev
+        </Button>
+        <div>
+          {lagretStatus.beskrivelse && <Detail as="span">{lagretStatus.beskrivelse}</Detail>}
+          <Button
+            icon={<FloppydiskIcon title="a11y-title" />}
+            variant={'primary'}
+            onClick={lagre}
+            disabled={!lagretStatus}
+            loading={lagreManuellPayloadStatus}
+          >
+            Lagre endringer
+          </Button>
+        </div>
+      </ButtonRow>
+      <GeneriskModal
+        tittel="Resett brev"
+        beskrivelse="Har du gjort en endring tidligere i behandlingen og ønsker å hente oppdatert informasjon til brevet? Dette vil slette alt som er gjort med brevet til nå."
+        tekstKnappJa="Ja, hent alt innhold på nytt"
+        tekstKnappNei="Nei"
+        onYesClick={reset}
+        setModalisOpen={setIsOpen}
+        open={isOpen}
+      />
+    </>
+  )
+}
+
 const ButtonRow = styled.div`
   padding: 1rem;
   text-align: right;
@@ -179,8 +248,10 @@ const ButtonRow = styled.div`
   right: 0;
   width: 100%;
   z-index: 9999;
+  display: flex;
+  justify-content: space-between;
 
-  & > button {
+  & > div > button {
     margin-left: 10px;
   }
 `

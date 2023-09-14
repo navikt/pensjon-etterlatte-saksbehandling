@@ -3,7 +3,7 @@ import { Underkjent } from './underkjent'
 import { Oversikt } from './oversikt'
 import { IBeslutning } from '../types'
 import { Innvilget } from './innvilget'
-import { IBehandlingInfo } from '~components/behandling/SideMeny/types'
+import { IBehandlingInfo } from '~components/behandling/sidemeny/IBehandlingInfo'
 import { KopierbarVerdi } from '~shared/statusbar/kopierbarVerdi'
 import styled from 'styled-components'
 

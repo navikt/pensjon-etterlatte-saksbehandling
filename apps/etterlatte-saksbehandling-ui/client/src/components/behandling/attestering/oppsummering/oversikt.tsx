@@ -7,11 +7,11 @@ import {
   formaterStringDato,
   formaterStringTidspunkt,
 } from '~utils/formattering'
-import { IBehandlingInfo } from '~components/behandling/SideMeny/types'
+import { IBehandlingInfo } from '~components/behandling/sidemeny/IBehandlingInfo'
 import { Heading, Tag } from '@navikt/ds-react'
 import { tagColors, TagList } from '~shared/Tags'
 import { INasjonalitetsType } from '~components/behandling/fargetags/nasjonalitetsType'
-import { SidebarPanel } from '~components/behandling/SideMeny/SideMeny'
+import { SidebarPanel } from '~shared/components/Sidebar'
 import { useEffect, useState } from 'react'
 import { isFailure, isInitial, isPending, isPendingOrInitial, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
 import { hentOppgaveForBehandlingUnderBehandlingIkkeattestert } from '~shared/api/oppgaverny'

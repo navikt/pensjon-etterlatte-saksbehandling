@@ -1,72 +1,46 @@
 import { useEffect } from 'react'
-import { Navigate, Route, Routes, useMatch } from 'react-router-dom'
+import { Navigate, Route, Routes, useParams } from 'react-router-dom'
 import { hentBehandling } from '~shared/api/behandling'
 import { GridContainer, MainContent } from '~shared/styled'
-import { addBehandling, resetBehandling, updateVedtakSammendrag } from '~store/reducers/BehandlingReducer'
-import Spinner from '~shared/Spinner'
-import { StatusBar } from '~shared/statusbar/Statusbar'
+import { addBehandling, resetBehandling } from '~store/reducers/BehandlingReducer'
+import { PdlPersonStatusBar } from '~shared/statusbar/Statusbar'
 import { useBehandlingRoutes } from './BehandlingRoutes'
 import { StegMeny } from './StegMeny/stegmeny'
-import { SideMeny } from './SideMeny/SideMeny'
 import { useAppDispatch } from '~store/Store'
-import { isFailure, isPending, isPendingOrInitial, useApiCall } from '~shared/hooks/useApiCall'
+import { isFailure, isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
 import { ApiErrorAlert } from '~ErrorBoundary'
-import { hentVedtakSammendrag } from '~shared/api/vedtaksvurdering'
 import { useBehandling } from '~components/behandling/useBehandling'
+import { BehandlingSidemeny } from '~components/behandling/sidemeny/BehandlingSidemeny'
+import Spinner from '~shared/Spinner'
 
 export const Behandling = () => {
   const behandling = useBehandling()
   const dispatch = useAppDispatch()
-  const match = useMatch('/behandling/:behandlingId/*')
+  const { behandlingId: behandlingIdFraURL } = useParams()
   const { behandlingRoutes } = useBehandlingRoutes()
   const [fetchBehandlingStatus, fetchBehandling] = useApiCall(hentBehandling)
-  const [fetchVedtakStatus, fetchVedtakSammendrag] = useApiCall(hentVedtakSammendrag)
-
-  const behandlingId = behandling?.id
 
   useEffect(() => {
-    const behandlingIdFraURL = match?.params.behandlingId
-    if (!behandlingIdFraURL) return
+    if (!behandlingIdFraURL) {
+      return
+    }
 
-    if (behandlingIdFraURL !== behandlingId) {
+    if (behandlingIdFraURL !== behandling?.id) {
       fetchBehandling(
         behandlingIdFraURL,
-        (res) => {
-          dispatch(addBehandling(res))
-
-          fetchVedtakSammendrag(behandlingIdFraURL, (vedtakSammendrag) => {
-            if (vedtakSammendrag !== null) {
-              dispatch(updateVedtakSammendrag(vedtakSammendrag))
-            }
-          })
-        },
+        (behandling) => dispatch(addBehandling(behandling)),
         () => dispatch(resetBehandling())
       )
     }
-  }, [match?.params.behandlingId, behandlingId])
-
-  const soekerInfo = behandling?.søker
+  }, [behandlingIdFraURL, behandling?.id])
 
   return (
     <>
-      {soekerInfo && (
-        <StatusBar
-          result={{
-            status: 'success',
-            data: {
-              foedselsnummer: soekerInfo.foedselsnummer,
-              fornavn: soekerInfo.fornavn,
-              mellomnavn: soekerInfo.mellomnavn,
-              etternavn: soekerInfo.etternavn,
-            },
-          }}
-        />
-      )}
-
+      {behandling?.søker && <PdlPersonStatusBar person={behandling?.søker} />}
       {behandling && <StegMeny behandling={behandling} />}
 
-      <Spinner visible={isPendingOrInitial(fetchBehandlingStatus) || isPending(fetchVedtakStatus)} label="Laster" />
-      {behandling && (
+      {isPending(fetchBehandlingStatus) && <Spinner label={'Henter behandling ...'} visible />}
+      {isSuccess(fetchBehandlingStatus) && (
         <GridContainer>
           <MainContent>
             <Routes>
@@ -76,11 +50,11 @@ export const Behandling = () => {
               <Route path="*" element={<Navigate to={behandlingRoutes[0].path} replace />} />
             </Routes>
           </MainContent>
-          <SideMeny behandling={behandling} vedtak={behandling.vedtak} />
+
+          <BehandlingSidemeny />
         </GridContainer>
       )}
       {isFailure(fetchBehandlingStatus) && <ApiErrorAlert>Kunne ikke hente behandling</ApiErrorAlert>}
-      {isFailure(fetchVedtakStatus) && <ApiErrorAlert>Kunne ikke hente vedtak</ApiErrorAlert>}
     </>
   )
 }

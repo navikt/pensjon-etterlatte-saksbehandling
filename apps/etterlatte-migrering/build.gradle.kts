@@ -20,4 +20,5 @@ dependencies {
     implementation(libs.ktor2.servercio)
     implementation(libs.database.kotliquery)
     testImplementation(libs.ktor2.servertests)
+    testImplementation(testFixtures((project(":libs:etterlatte-database"))))
 }

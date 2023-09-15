@@ -45,7 +45,7 @@ class LyttPaaIverksattVedtakTest {
     fun stop() = postgreSQLContainer.stop()
 
     @Test
-    fun `sender opphoersmelding til PEN`() {
+    fun `sender opphoersmelding til PEN ved godkjent utbetaling`() {
         testApplication {
             val behandlingId = UUID.randomUUID()
             val pesysid = PesysId(1L)
@@ -78,6 +78,43 @@ class LyttPaaIverksattVedtakTest {
                 )
 
             verify { penKlient.opphoerSak(pesysid) }
+        }
+    }
+
+    @Test
+    fun `sender ikke opphoersmelding til PEN ved avvist utbetaling`() {
+        testApplication {
+            val behandlingId = UUID.randomUUID()
+            val pesysid = PesysId(1L)
+            val repository =
+                spyk(PesysRepository(datasource)).also {
+                    every { it.hentPesysId(behandlingId) } returns Pesyskopling(
+                        behandlingId = behandlingId,
+                        pesysId = pesysid
+                    )
+                }
+
+            val penKlient = mockk<PenKlient>().also { every { it.opphoerSak(pesysid) } just runs }
+            TestRapid()
+                .apply {
+                    LyttPaaIverksattVedtak(
+                        rapidsConnection = this,
+                        pesysRepository = repository,
+                        penKlient = penKlient
+                    )
+                }.sendTestMessage(
+                    JsonMessage.newMessage(
+                        mapOf(
+                            EVENT_NAME_KEY to EVENT_NAME_OPPDATERT,
+                            UTBETALING_RESPONSE to UtbetalingResponseDto(
+                                status = UtbetalingStatusDto.AVVIST,
+                                behandlingId = behandlingId
+                            )
+                        )
+                    ).toJson()
+                )
+
+            verify(exactly = 0) { penKlient.opphoerSak(any()) }
         }
     }
 }

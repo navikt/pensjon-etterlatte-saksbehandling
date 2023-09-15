@@ -9,6 +9,7 @@ import { KnapperWrapper } from '~components/behandling/handlinger/BehandlingHand
 import {
   AARSAKER_OMGJOERING,
   InnstillingTilKabalUtenBrev,
+  Klage,
   KlageUtfallUtenBrev,
   LOVHJEMLER_KLAGE,
   Omgjoering,
@@ -61,6 +62,21 @@ function mapFraFormdataTilKlageUtfall(skjema: FilledFormDataVurdering): KlageUtf
   }
 }
 
+function mapKlageTilFormdata(klage: Klage | null): FormdataVurdering {
+  if (!klage || !klage.utfall) {
+    return { utfall: null, omgjoering: null, innstilling: null }
+  }
+  const utfall = klage.utfall
+  switch (utfall.utfall) {
+    case 'DELVIS_OMGJOERING':
+      return { utfall: Utfall.DELVIS_OMGJOERING, omgjoering: utfall.omgjoering, innstilling: utfall.innstilling }
+    case 'OMGJOERING':
+      return { utfall: Utfall.OMGJOERING, omgjoering: utfall.omgjoering }
+    case 'STADFESTE_VEDTAK':
+      return { utfall: Utfall.STADFESTE_VEDTAK, innstilling: utfall.innstilling }
+  }
+}
+
 export function KlageVurdering() {
   const navigate = useNavigate()
   const klage = useKlage()
@@ -68,7 +84,7 @@ export function KlageVurdering() {
   const dispatch = useAppDispatch()
 
   const { control, handleSubmit, watch } = useForm<FormdataVurdering>({
-    defaultValues: { utfall: null, omgjoering: null, innstilling: null },
+    defaultValues: mapKlageTilFormdata(klage),
   })
 
   const valgtUtfall = watch('utfall')

@@ -30,9 +30,11 @@ internal fun Route.generellbehandlingRoutes(
             }
             val id = UUID.randomUUID()
             generellBehandlingService.opprettBehandling(
-                GenerellBehandling(id, sakId, request.type, request.innhold)
+                GenerellBehandling(id, sakId, request.innhold)
             )
-            logger.info("Opprettet generell behandling for sak $sakId av typen ${request.type}, id: $id")
+            logger.info(
+                "Opprettet generell behandling for sak $sakId av typen ${request.innhold::class.simpleName}, id: $id"
+            )
             call.respond(HttpStatusCode.OK)
         }
     }
@@ -54,6 +56,5 @@ internal fun Route.generellbehandlingRoutes(
 }
 
 data class OpprettGenerellBehandlingRequest(
-    val type: GenerellBehandlingType,
     val innhold: Innhold
 )

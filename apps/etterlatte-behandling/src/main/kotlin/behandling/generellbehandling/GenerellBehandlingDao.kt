@@ -16,14 +16,13 @@ class GenerellBehandlingDao(private val connection: () -> Connection) {
             val statement =
                 prepareStatement(
                     """
-                    INSERT INTO generellbehandling(id, type, innhold, sak_id)
-                    VALUES(?::UUID, ?, ?, ?)
+                    INSERT INTO generellbehandling(id, innhold, sak_id)
+                    VALUES(?::UUID, ?, ?)
                     """.trimIndent()
                 )
             statement.setObject(1, generellBehandling.id)
-            statement.setString(2, generellBehandling.type.name)
-            statement.setJsonb(3, generellBehandling.innhold)
-            statement.setLong(4, generellBehandling.sakId)
+            statement.setJsonb(2, generellBehandling.innhold)
+            statement.setLong(3, generellBehandling.sakId)
 
             statement.executeUpdate()
         }
@@ -65,7 +64,6 @@ class GenerellBehandlingDao(private val connection: () -> Connection) {
         GenerellBehandling(
             id = getUUID("id"),
             sakId = getLong("sak_id"),
-            type = GenerellBehandlingType.valueOf(getString("type")),
             innhold = getString("innhold").let { objectMapper.readValue(it) }
         )
 }

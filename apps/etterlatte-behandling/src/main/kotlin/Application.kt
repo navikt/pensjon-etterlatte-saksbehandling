@@ -17,6 +17,7 @@ import kotlinx.coroutines.withContext
 import no.nav.etterlatte.behandling.behandlingRoutes
 import no.nav.etterlatte.behandling.behandlingVedtakRoute
 import no.nav.etterlatte.behandling.behandlingsstatusRoutes
+import no.nav.etterlatte.behandling.generellbehandling.generellbehandlingRoutes
 import no.nav.etterlatte.behandling.klage.klageRoutes
 import no.nav.etterlatte.behandling.omregning.migreringRoutes
 import no.nav.etterlatte.behandling.omregning.omregningRoutes
@@ -50,25 +51,27 @@ fun main() {
 }
 
 class Server(private val context: ApplicationContext) {
-
     init {
         sikkerLoggOppstartOgAvslutning("etterlatte-behandling")
     }
 
-    private val engine = embeddedServer(
-        factory = CIO,
-        environment = applicationEngineEnvironment {
-            config = HoconApplicationConfig(context.config)
-            module { module(context) }
-            connector { port = context.httpPort }
-        }
-    )
+    private val engine =
+        embeddedServer(
+            factory = CIO,
+            environment =
+                applicationEngineEnvironment {
+                    config = HoconApplicationConfig(context.config)
+                    module { module(context) }
+                    connector { port = context.httpPort }
+                }
+        )
 
-    fun run() = with(context) {
-        dataSource.migrate()
-        grunnlagsendringshendelseJob.schedule().also { addShutdownHook(it) }
-        setReady().also { engine.start(true) }
-    }
+    fun run() =
+        with(context) {
+            dataSource.migrate()
+            grunnlagsendringshendelseJob.schedule().also { addShutdownHook(it) }
+            setReady().also { engine.start(true) }
+        }
 }
 
 fun Application.module(context: ApplicationContext) {
@@ -99,6 +102,10 @@ fun Application.module(context: ApplicationContext) {
                 kommerBarnetTilGodeService = kommerBarnetTilGodeService,
                 aktivitetspliktService = aktivtetspliktService,
                 behandlingFactory = behandlingFactory
+            )
+            generellbehandlingRoutes(
+                generellBehandlingService = generellBehandlingService,
+                sakService = sakService
             )
             revurderingRoutes(revurderingService = revurderingService)
             omregningRoutes(omregningService = omregningService)
@@ -150,19 +157,21 @@ private fun Route.attachContekst(
     intercept(ApplicationCallPipeline.Call) {
         val requestContekst =
             Context(
-                AppUser = decideUser(
-                    call.principal() ?: throw Exception("Ingen bruker funnet i jwt token"),
-                    context.saksbehandlerGroupIdsByKey,
-                    context.enhetService,
-                    brukerTokenInfo
-                ),
+                AppUser =
+                    decideUser(
+                        call.principal() ?: throw Exception("Ingen bruker funnet i jwt token"),
+                        context.saksbehandlerGroupIdsByKey,
+                        context.enhetService,
+                        brukerTokenInfo
+                    ),
                 databasecontxt = DatabaseContext(ds)
             )
 
         withContext(
-            Dispatchers.Default + Kontekst.asContextElement(
-                value = requestContekst
-            )
+            Dispatchers.Default +
+                Kontekst.asContextElement(
+                    value = requestContekst
+                )
         ) {
             proceed()
         }

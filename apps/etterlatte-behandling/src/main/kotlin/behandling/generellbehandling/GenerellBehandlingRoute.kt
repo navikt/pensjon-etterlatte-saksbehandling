@@ -42,7 +42,7 @@ internal fun Route.generellbehandlingRoutes(
         }
     }
 
-    get("api/generellbehandling/{generellbehandlingId}") {
+    get("/api/generellbehandling/{generellbehandlingId}") {
         kunSaksbehandler {
             val id =
                 call.parameters["generellbehandlingId"]
@@ -51,7 +51,7 @@ internal fun Route.generellbehandlingRoutes(
             call.respond(hentetBehandling ?: HttpStatusCode.NotFound)
         }
     }
-    get("api/generellbehandling/{$SAKID_CALL_PARAMETER}") {
+    get("/api/generellbehandlingForSak/{$SAKID_CALL_PARAMETER}") {
         kunSaksbehandler {
             call.respond(generellBehandlingService.hentBehandlingForSak(sakId))
         }

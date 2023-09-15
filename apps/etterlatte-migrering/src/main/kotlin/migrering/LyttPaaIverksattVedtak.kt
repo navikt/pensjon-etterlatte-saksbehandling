@@ -1,6 +1,7 @@
 package no.nav.etterlatte.migrering
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
@@ -50,7 +51,7 @@ internal class LyttPaaIverksattVedtak(
         when (respons.status) {
             UtbetalingStatusDto.GODKJENT, UtbetalingStatusDto.GODKJENT_MED_FEIL -> {
                 pesysRepository.oppdaterStatus(behandling.pesysId, Migreringsstatus.FERDIG)
-                penKlient.opphoerSak(behandling.pesysId)
+                runBlocking { penKlient.opphoerSak(behandling.pesysId) }
             }
 
             else -> {

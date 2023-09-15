@@ -7,6 +7,7 @@ import io.mockk.mockk
 import io.mockk.runs
 import io.mockk.spyk
 import io.mockk.verify
+import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.utbetaling.UtbetalingResponseDto
 import no.nav.etterlatte.libs.common.utbetaling.UtbetalingStatusDto
@@ -57,7 +58,7 @@ class LyttPaaIverksattVedtakTest {
                     )
                 }
 
-            val penKlient = mockk<PenKlient>().also { every { it.opphoerSak(pesysid) } just runs }
+            val penKlient = mockk<PenKlient>().also { every { runBlocking { it.opphoerSak(pesysid) } } just runs }
             TestRapid()
                 .apply {
                     LyttPaaIverksattVedtak(
@@ -77,7 +78,7 @@ class LyttPaaIverksattVedtakTest {
                     ).toJson()
                 )
 
-            verify { penKlient.opphoerSak(pesysid) }
+            verify { runBlocking { penKlient.opphoerSak(pesysid) } }
         }
     }
 
@@ -94,7 +95,7 @@ class LyttPaaIverksattVedtakTest {
                     )
                 }
 
-            val penKlient = mockk<PenKlient>().also { every { it.opphoerSak(pesysid) } just runs }
+            val penKlient = mockk<PenKlient>().also { every { runBlocking { it.opphoerSak(pesysid) } } just runs }
             TestRapid()
                 .apply {
                     LyttPaaIverksattVedtak(
@@ -114,7 +115,7 @@ class LyttPaaIverksattVedtakTest {
                     ).toJson()
                 )
 
-            verify(exactly = 0) { penKlient.opphoerSak(any()) }
+            verify(exactly = 0) { runBlocking { penKlient.opphoerSak(any()) } }
         }
     }
 }

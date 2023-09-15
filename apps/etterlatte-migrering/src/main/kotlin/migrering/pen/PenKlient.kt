@@ -32,7 +32,7 @@ class PenKlient(config: Config, pen: HttpClient) {
                     clientId = clientId,
                     url = "$resourceUrl/barnepensjon-migrering/grunnlag?sakId=$sakid"
                 ),
-                brukerTokenInfo = Systembruker(oid = "TODO", sub = "TODO")
+                brukerTokenInfo = migreringssystembruker
             )
             .mapBoth(
                 success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
@@ -40,9 +40,22 @@ class PenKlient(config: Config, pen: HttpClient) {
             )
     }
 
-    fun opphoerSak(pesysId: PesysId) {
+    suspend fun opphoerSak(pesysId: PesysId) {
         logger.info("Opphører sak $pesysId i PEN")
-        logger.warn("Funksjonaliteten for å kalle PEN for å opphøre sak er ennå ikke implementert")
-        // TODO: Implementer i EY-2615
+        downstreamResourceClient
+            .post(
+                resource = Resource(
+                    clientId = clientId,
+                    url = "$resourceUrl/barnepensjon-migrering/opphoer?sakId=${pesysId.id}"
+                ),
+                brukerTokenInfo = migreringssystembruker,
+                postBody = {}
+            )
+            .mapBoth(
+                success = { logger.info("Opphørte sak $pesysId mot PEN") },
+                failure = { errorResponse -> throw errorResponse }
+            )
     }
 }
+
+val migreringssystembruker = Systembruker(oid = "TODO", sub = "TODO")

@@ -166,7 +166,7 @@ internal class MigreringIntegrationTest {
                     )
                 ).toJson()
             )
-            verify { penKlient.opphoerSak(pesysId) }
+            verify { runBlocking { penKlient.opphoerSak(pesysId) } }
             assertEquals(repository.hentStatus(pesysId.id), Migreringsstatus.FERDIG)
         }
     }

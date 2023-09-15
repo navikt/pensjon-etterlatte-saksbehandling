@@ -254,12 +254,14 @@ val summerFaktiskNorge =
             trygdetidPerioder,
             dagerPrMaaned ->
 
-        val summert = trygdetidPerioder.summer(dagerPrMaaned).oppjustertMaaneder()
+        trygdetidPerioder.takeIf { it.isNotEmpty() }?.let { perioder ->
+            val summert = perioder.summer(dagerPrMaaned).oppjustertMaaneder()
 
-        FaktiskTrygdetid(
-            periode = Period.ofMonths(summert.toInt()).normalized(),
-            antallMaaneder = summert
-        )
+            FaktiskTrygdetid(
+                periode = Period.ofMonths(summert.toInt()).normalized(),
+                antallMaaneder = summert
+            )
+        }
     }
 
 val summerFaktiskTeoretisk =
@@ -271,12 +273,14 @@ val summerFaktiskTeoretisk =
             trygdetidPerioder,
             dagerPrMaaned ->
 
-        val summert = trygdetidPerioder.summer(dagerPrMaaned).oppjustertMaaneder()
+        trygdetidPerioder.takeIf { it.isNotEmpty() }?.let { perioder ->
+            val summert = perioder.summer(dagerPrMaaned).oppjustertMaaneder()
 
-        FaktiskTrygdetid(
-            periode = Period.ofMonths(summert.toInt()).normalized(),
-            antallMaaneder = summert
-        )
+            FaktiskTrygdetid(
+                periode = Period.ofMonths(summert.toInt()).normalized(),
+                antallMaaneder = summert
+            )
+        }
     }
 
 val opptjeningsTidIMnd =
@@ -296,7 +300,7 @@ val fremtidigTrygdetidForNasjonal =
     ) benytter summerFaktiskNorge og fremtidigTrygdetid og opptjeningsTidIMnd med { faktisk, fremtidig, opptjening ->
 
         if (fremtidig != null) {
-            val mindreEnnFireFemtedelerAvOpptjeningstiden = (faktisk.antallMaaneder / opptjening) < 0.8
+            val mindreEnnFireFemtedelerAvOpptjeningstiden = ((faktisk?.antallMaaneder ?: 0) / opptjening) < 0.8
 
             val fremtidigPeriode =
                 fremtidig.justertForOpptjeningstiden(opptjening, mindreEnnFireFemtedelerAvOpptjeningstiden)
@@ -322,7 +326,7 @@ val fremtidigTrygdetidForTeoretisk =
             fremtidig,
             opptjening ->
         if (fremtidig != null) {
-            val mindreEnnFireFemtedelerAvOpptjeningstiden = (teoretisk.antallMaaneder / opptjening) < 0.8
+            val mindreEnnFireFemtedelerAvOpptjeningstiden = ((teoretisk?.antallMaaneder ?: 0) / opptjening) < 0.8
 
             val fremtidigPeriode =
                 fremtidig.justertForOpptjeningstiden(opptjening, mindreEnnFireFemtedelerAvOpptjeningstiden)
@@ -363,15 +367,18 @@ val beregnDetaljertBeregnetTrygdetid =
                 fremtidigTrygdetidTeoretisk = fremtidig.second,
                 samletTrygdetidNorge =
                     minOf(
-                        nasjonal.periode.plus(fremtidig.first.verdiOrZero()).normalized().years, 40
+                        nasjonal.verdiOrZero().plus(fremtidig.first.verdiOrZero()).normalized().years, 40
                     ),
                 samletTrygdetidTeoretisk =
                     minOf(
-                        teoretisk.periode.plus(fremtidig.second.verdiOrZero()).normalized().years, 40
+                        teoretisk.verdiOrZero().plus(fremtidig.second.verdiOrZero()).normalized().years, 40
                     ),
                 prorataBroek =
-                    if (nasjonal.antallMaaneder != teoretisk.antallMaaneder) {
-                        IntBroek(nasjonal.antallMaaneder.toInt(), teoretisk.antallMaaneder.toInt())
+                    if (nasjonal?.antallMaaneder != teoretisk?.antallMaaneder) {
+                        IntBroek(
+                            nasjonal?.antallMaaneder?.toInt() ?: 0,
+                            teoretisk?.antallMaaneder?.toInt() ?: 0
+                        )
                     } else {
                         null
                     }
@@ -382,6 +389,8 @@ val beregnDetaljertBeregnetTrygdetid =
 // Subsumsjonsverdi for regler som kalle disse skal fortsatt være korrekt.
 
 private fun FremtidigTrygdetid?.verdiOrZero() = this?.periode ?: Period.ZERO
+
+private fun FaktiskTrygdetid?.verdiOrZero() = this?.periode ?: Period.ZERO
 
 private fun List<TrygdetidGrunnlag>.normaliser() =
     this.mapIndexed { idx, trygdetidGrunnlag ->

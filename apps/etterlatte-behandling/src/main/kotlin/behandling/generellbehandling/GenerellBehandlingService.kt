@@ -1,5 +1,6 @@
 package no.nav.etterlatte.behandling.generellbehandling
 
+import no.nav.etterlatte.libs.common.generellbehandling.GenerellBehandling
 import java.util.UUID
 
 class GenerellBehandlingService(private val generellBehandlingDao: GenerellBehandlingDao) {

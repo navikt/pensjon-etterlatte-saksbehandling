@@ -1,5 +1,8 @@
 package no.nav.etterlatte.behandling.generellbehandling
 
+import no.nav.etterlatte.libs.common.generellbehandling.GenerellBehandling
+import no.nav.etterlatte.libs.common.generellbehandling.Innhold
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.POSTGRES_VERSION
 import no.nav.etterlatte.libs.database.migrate
@@ -57,14 +60,13 @@ internal class GenerellBehandlingDaoTest {
             GenerellBehandling(
                 UUID.randomUUID(),
                 1L,
-                type = GenerellBehandlingType.ANNEN,
-                Innhold.Utland("vlabla", UUID.randomUUID())
+                Innhold.Utland("vlabla", UUID.randomUUID()),
+                Tidspunkt.now()
             )
         dao.opprettGenerellbehandling(generellBehandlingUtland)
         val hentetGenBehandling = dao.hentGenerellBehandlingMedId(generellBehandlingUtland.id)
 
         Assertions.assertEquals(generellBehandlingUtland.id, hentetGenBehandling!!.id)
-        Assertions.assertEquals(generellBehandlingUtland.type, hentetGenBehandling.type)
         Assertions.assertEquals(generellBehandlingUtland.innhold, hentetGenBehandling.innhold)
     }
 
@@ -75,23 +77,23 @@ internal class GenerellBehandlingDaoTest {
             GenerellBehandling(
                 UUID.randomUUID(),
                 sakId,
-                type = GenerellBehandlingType.UTLAND,
-                Innhold.Utland("vlabla", UUID.randomUUID())
+                Innhold.Utland("vlabla", UUID.randomUUID()),
+                Tidspunkt.now()
             )
         val annengenerebehandling =
             GenerellBehandling(
                 UUID.randomUUID(),
                 1L,
-                GenerellBehandlingType.ANNEN,
-                Innhold.Annen("innhold")
+                Innhold.Annen("innhold"),
+                Tidspunkt.now()
             )
+
         dao.opprettGenerellbehandling(generellBehandlingUtland)
         dao.opprettGenerellbehandling(annengenerebehandling)
         val hentetGenBehandling = dao.hentGenerellBehandlingForSak(sakId)
         Assertions.assertEquals(2, hentetGenBehandling.size)
-        val generellBehandling = hentetGenBehandling.single { it.type == GenerellBehandlingType.UTLAND }
+        val generellBehandling = hentetGenBehandling.single { it.innhold is Innhold.Utland }
         Assertions.assertEquals(generellBehandlingUtland.id, generellBehandling.id)
-        Assertions.assertEquals(generellBehandlingUtland.type, generellBehandling.type)
         Assertions.assertEquals(generellBehandlingUtland.innhold, generellBehandling.innhold)
     }
 }

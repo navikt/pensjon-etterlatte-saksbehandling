@@ -2,7 +2,10 @@ package no.nav.etterlatte.behandling.generellbehandling
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.behandling.hendelse.getUUID
+import no.nav.etterlatte.libs.common.generellbehandling.GenerellBehandling
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.setTidspunkt
 import no.nav.etterlatte.libs.database.setJsonb
 import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.database.toList
@@ -16,13 +19,14 @@ class GenerellBehandlingDao(private val connection: () -> Connection) {
             val statement =
                 prepareStatement(
                     """
-                    INSERT INTO generellbehandling(id, innhold, sak_id)
-                    VALUES(?::UUID, ?, ?)
+                    INSERT INTO generellbehandling(id, innhold, sak_id, opprettet)
+                    VALUES(?::UUID, ?, ?, ?)
                     """.trimIndent()
                 )
             statement.setObject(1, generellBehandling.id)
             statement.setJsonb(2, generellBehandling.innhold)
             statement.setLong(3, generellBehandling.sakId)
+            statement.setTidspunkt(4, generellBehandling.opprettet)
 
             statement.executeUpdate()
         }
@@ -64,6 +68,7 @@ class GenerellBehandlingDao(private val connection: () -> Connection) {
         GenerellBehandling(
             id = getUUID("id"),
             sakId = getLong("sak_id"),
-            innhold = getString("innhold").let { objectMapper.readValue(it) }
+            innhold = getString("innhold").let { objectMapper.readValue(it) },
+            opprettet = getTidspunkt("opprettet")
         )
 }

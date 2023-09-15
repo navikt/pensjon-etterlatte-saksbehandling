@@ -5,7 +5,6 @@ import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.behandling.hendelse.getUUID
 import no.nav.etterlatte.behandling.objectMapper
 import no.nav.etterlatte.behandling.somLocalDateTimeUTC
-import no.nav.etterlatte.grunnlagsendring.setJsonb
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
@@ -13,6 +12,7 @@ import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.database.setJsonb
 import no.nav.etterlatte.libs.database.singleOrNull
 import java.sql.Connection
 import java.sql.PreparedStatement
@@ -39,9 +39,10 @@ class RevurderingDao(private val connection: () -> Connection) {
             kommerBarnetTilgode = kommerBarnetTilGode.invoke(id),
             virkningstidspunkt = rs.getString("virkningstidspunkt")?.let { objectMapper.readValue(it) },
             utenlandstilsnitt = rs.getString("utenlandstilsnitt")?.let { objectMapper.readValue(it) },
-            boddEllerArbeidetUtlandet = rs.getString("bodd_eller_arbeidet_utlandet")?.let {
-                objectMapper.readValue(it)
-            },
+            boddEllerArbeidetUtlandet =
+                rs.getString("bodd_eller_arbeidet_utlandet")?.let {
+                    objectMapper.readValue(it)
+                },
             prosesstype = rs.getString("prosesstype").let { Prosesstype.valueOf(it) },
             kilde = rs.getString("kilde").let { Vedtaksloesning.valueOf(it) },
             revurderingInfo = revurderingInfo,
@@ -56,8 +57,8 @@ class RevurderingDao(private val connection: () -> Connection) {
     ) {
         connection().prepareStatement(
             """
-                INSERT INTO revurdering_info(behandling_id, info, kilde, begrunnelse)
-                VALUES(?, ?, ?, ?) ON CONFLICT(behandling_id) DO UPDATE SET info = excluded.info, kilde = excluded.kilde, begrunnelse = excluded.begrunnelse
+            INSERT INTO revurdering_info(behandling_id, info, kilde, begrunnelse)
+            VALUES(?, ?, ?, ?) ON CONFLICT(behandling_id) DO UPDATE SET info = excluded.info, kilde = excluded.kilde, begrunnelse = excluded.begrunnelse
             """.trimIndent()
         ).let { statement ->
             statement.setObject(1, id)
@@ -71,8 +72,8 @@ class RevurderingDao(private val connection: () -> Connection) {
     private fun hentRevurderingInfoForBehandling(id: UUID): RevurderingMedBegrunnelse? =
         connection().prepareStatement(
             """
-                SELECT info, begrunnelse FROM revurdering_info 
-                WHERE behandling_id = ?
+            SELECT info, begrunnelse FROM revurdering_info 
+            WHERE behandling_id = ?
             """.trimIndent()
         ).let { statement ->
             statement.setObject(1, id)
@@ -86,7 +87,10 @@ class RevurderingDao(private val connection: () -> Connection) {
         }
 }
 
-fun PreparedStatement.stringOrNull(index: Int, text: String?) = if (text != null) {
+fun PreparedStatement.stringOrNull(
+    index: Int,
+    text: String?
+) = if (text != null) {
     setString(index, text)
 } else {
     setNull(index, Types.VARCHAR)

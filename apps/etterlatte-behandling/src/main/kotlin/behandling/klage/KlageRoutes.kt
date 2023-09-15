@@ -102,10 +102,10 @@ internal fun Route.klageRoutes(klageService: KlageService, featureToggleService:
             }
         }
 
-        patch("{{$KLAGEID_CALL_PARAMETER}/kabalstatus") {
+        patch("{$KLAGEID_CALL_PARAMETER}/kabalstatus") {
             hvisEnabled(KlageFeatureToggle.KanBrukeKlageToggle) {
                 medBody<Kabalrespons> {
-                    val klager = inTransaction {
+                    inTransaction {
                         klageService.oppdaterKabalStatus(sakId, it)
                     }
                     call.respond(HttpStatusCode.OK)

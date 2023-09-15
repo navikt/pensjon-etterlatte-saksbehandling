@@ -24,7 +24,22 @@ type FilledFormDataFormkrav = Omit<Formkrav, 'vedtaketKlagenGjelder'> & { vedtak
 type FormDataFormkrav = FieldOrNull<FilledFormDataFormkrav>
 
 function isValidFormkrav(formdata: FormDataFormkrav): formdata is FilledFormDataFormkrav {
-  return Object.values(formdata).every((value) => value !== null && value !== undefined)
+  const {
+    erKlagenFramsattInnenFrist,
+    erKlagenSignert,
+    erFormkraveneOppfylt,
+    erKlagerPartISaken,
+    vedtaketKlagenGjelderId,
+    gjelderKlagenNoeKonkretIVedtaket,
+  } = formdata
+  return [
+    erKlagerPartISaken,
+    erKlagenSignert,
+    erKlagenFramsattInnenFrist,
+    erFormkraveneOppfylt,
+    vedtaketKlagenGjelderId,
+    gjelderKlagenNoeKonkretIVedtaket,
+  ].every((value) => value !== null)
 }
 
 const klageFormkravTilDefaultFormValues = (klage: Klage | null): FormDataFormkrav => {
@@ -38,9 +53,10 @@ const klageFormkravTilDefaultFormValues = (klage: Klage | null): FormDataFormkra
       gjelderKlagenNoeKonkretIVedtaket: null,
     }
   } else {
+    const { vedtaketKlagenGjelder, ...skjemafelter } = klage.formkrav.formkrav
     return {
-      ...klage.formkrav.formkrav,
-      vedtaketKlagenGjelderId: klage.formkrav.formkrav.vedtaketKlagenGjelder?.id ?? null,
+      ...skjemafelter,
+      vedtaketKlagenGjelderId: vedtaketKlagenGjelder?.id ?? null,
     }
   }
 }

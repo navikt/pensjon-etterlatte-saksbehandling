@@ -37,6 +37,14 @@ export const formaterBeregnetTrygdetid = (beregnetTT: IBeregnetTrygdetidAarMaane
 
 export const TrygdetidTabell = styled.div`
   margin-top: 2em;
+  thead {
+    th {
+      width: 200px;
+    }
+    th:first-child {
+      width: 400px;
+    }
+  }
 `
 const TrygdetidBeregnet = styled.div`
   padding: 2em 0 4em 0;

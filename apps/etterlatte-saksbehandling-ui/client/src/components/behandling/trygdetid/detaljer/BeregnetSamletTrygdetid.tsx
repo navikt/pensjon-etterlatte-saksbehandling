@@ -11,9 +11,9 @@ export const BeregnetSamletTrygdetid: React.FC<Props> = ({ beregnetTrygdetid }) 
     <Table size={'small'}>
       <Table.Header>
         <Table.Row>
-          <Table.HeaderCell style={{ width: '400px' }}>Samlet trygdetid</Table.HeaderCell>
-          <Table.HeaderCell style={{ width: '200px' }} />
-          <Table.HeaderCell style={{ width: '200px' }} />
+          <Table.HeaderCell>Samlet trygdetid</Table.HeaderCell>
+          <Table.HeaderCell />
+          <Table.HeaderCell />
         </Table.Row>
       </Table.Header>
       <Table.Body>

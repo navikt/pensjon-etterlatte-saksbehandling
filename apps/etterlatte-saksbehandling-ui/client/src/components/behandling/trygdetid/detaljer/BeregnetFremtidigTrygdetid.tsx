@@ -11,9 +11,9 @@ export const BeregnetFremtidigTrygdetid: React.FC<Props> = ({ beregnetTrygdetid 
     <Table size={'small'}>
       <Table.Header>
         <Table.Row>
-          <Table.HeaderCell style={{ width: '400px' }}>Fremtidig trygdetid</Table.HeaderCell>
-          <Table.HeaderCell style={{ width: '200px' }}>I Norge</Table.HeaderCell>
-          <Table.HeaderCell style={{ width: '200px' }}>I Norge og avtaleland</Table.HeaderCell>
+          <Table.HeaderCell>Fremtidig trygdetid</Table.HeaderCell>
+          <Table.HeaderCell>I Norge</Table.HeaderCell>
+          <Table.HeaderCell>I Norge og avtaleland</Table.HeaderCell>
         </Table.Row>
       </Table.Header>
       <Table.Body>

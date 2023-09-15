@@ -10,7 +10,6 @@ import {
 } from '~shared/api/trygdetid'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
-import { TrygdetidBeregnet } from '~components/behandling/trygdetid/TrygdetidBeregnet'
 import { LovtekstMedLenke } from '~components/behandling/soeknadsoversikt/soeknadoversikt/LovtekstMedLenke'
 import styled from 'styled-components'
 import { BodyShort } from '@navikt/ds-react'
@@ -21,6 +20,7 @@ import { TrygdeAvtale } from './avtaler/TrygdeAvtale'
 import { IBehandlingStatus, IUtenlandstilsnitt, IUtenlandstilsnittType } from '~shared/types/IDetaljertBehandling'
 import { oppdaterBehandlingsstatus } from '~store/reducers/BehandlingReducer'
 import { useAppDispatch } from '~store/Store'
+import { TrygdetidDetaljer } from '~components/behandling/trygdetid/detaljer/TrygdetidDetaljer'
 
 interface Props {
   redigerbar: boolean
@@ -107,7 +107,7 @@ export const Trygdetid = ({ redigerbar, utenlandstilsnitt }: Props) => {
             trygdetidGrunnlagType={ITrygdetidGrunnlagType.FREMTIDIG}
             redigerbar={redigerbar}
           />
-          <TrygdetidBeregnet trygdetid={trygdetid} />
+          {trygdetid.beregnetTrygdetid && <TrygdetidDetaljer beregnetTrygdetid={trygdetid.beregnetTrygdetid} />}
           {visTrydeavtale(utenlandstilsnitt?.type) && <TrygdeAvtale redigerbar={redigerbar} />}
         </>
       )}

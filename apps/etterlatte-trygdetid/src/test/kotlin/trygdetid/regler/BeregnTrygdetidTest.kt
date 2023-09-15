@@ -581,6 +581,62 @@ internal class BeregnTrygdetidTest {
                         LocalDate.of(1981, 2, 21),
                         LocalDate.of(2023, 3, 15)
                     )
+                ),
+                Arguments.of(
+                    "Utland 3",
+                    listOf(
+                        byggTrygdetidGrunnlag(
+                            TrygdetidType.FAKTISK,
+                            LandNormalisert.SVERIGE.isoCode,
+                            TrygdetidPeriode(
+                                fra = LocalDate.of(2011, 1, 1),
+                                til = LocalDate.of(2023, 2, 28)
+                            ),
+                            poengInnAar = false,
+                            poengUtAar = false,
+                            medIProrata = true
+                        ),
+                        byggTrygdetidGrunnlag(
+                            TrygdetidType.FREMTIDIG,
+                            LandNormalisert.NORGE.isoCode,
+                            TrygdetidPeriode(
+                                fra = LocalDate.of(2023, 3, 15),
+                                til = LocalDate.of(2047, 12, 31)
+                            ),
+                            poengInnAar = false,
+                            poengUtAar = false,
+                            medIProrata = true
+                        )
+                    ),
+                    DetaljertBeregnetTrygdetidResultat(
+                        faktiskTrygdetidNorge = null,
+                        faktiskTrygdetidTeoretisk =
+                            FaktiskTrygdetid(
+                                periode = Period.of(12, 2, 0),
+                                antallMaaneder = 146
+                            ),
+                        fremtidigTrygdetidNorge =
+                            FremtidigTrygdetid(
+                                periode = Period.of(19, 2, 0),
+                                antallMaaneder = 230,
+                                opptjeningstidIMaaneder = 312,
+                                mindreEnnFireFemtedelerAvOpptjeningstiden = true
+                            ),
+                        fremtidigTrygdetidTeoretisk =
+                            FremtidigTrygdetid(
+                                periode = Period.of(19, 2, 0),
+                                antallMaaneder = 230,
+                                opptjeningstidIMaaneder = 312,
+                                mindreEnnFireFemtedelerAvOpptjeningstiden = true
+                            ),
+                        samletTrygdetidNorge = 19,
+                        samletTrygdetidTeoretisk = 31,
+                        prorataBroek = IntBroek(0, 146)
+                    ),
+                    Pair(
+                        LocalDate.of(1981, 2, 21),
+                        LocalDate.of(2023, 3, 15)
+                    )
                 )
             )
 

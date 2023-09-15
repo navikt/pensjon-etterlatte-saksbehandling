@@ -85,7 +85,7 @@ export const lagreTrygdeavtaleForBehandling = async (args: {
 export interface ITrygdetid {
   id: string
   behandlingId: string
-  beregnetTrygdetid?: IBeregnetTrygdetid
+  beregnetTrygdetid?: IDetaljertBeregnetTrygdetid
   trygdetidGrunnlag: ITrygdetidGrunnlag[]
   opplysninger: IGrunnlagOpplysninger
 }
@@ -105,8 +105,12 @@ export type IOpplysningsgrunnlag = {
   }
 }
 
-export interface IBeregnetTrygdetid {
-  total: number
+export interface IDetaljertBeregnetTrygdetidResultat {
+  samletTrygdetidNorge: number
+}
+
+export interface IDetaljertBeregnetTrygdetid {
+  resultat: IDetaljertBeregnetTrygdetidResultat
 }
 
 export interface ITrygdetidGrunnlag {

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
+import no.nav.etterlatte.libs.common.trygdetid.DetaljertBeregnetTrygdetidResultat
 import java.time.LocalDate
 import java.time.Period
 import java.util.*
@@ -15,27 +16,29 @@ data class Trygdetid(
     val behandlingId: UUID,
     val trygdetidGrunnlag: List<TrygdetidGrunnlag> = emptyList(),
     val opplysninger: List<Opplysningsgrunnlag> = emptyList(),
-    val beregnetTrygdetid: BeregnetTrygdetid? = null
+    val beregnetTrygdetid: DetaljertBeregnetTrygdetid? = null
 ) {
     fun leggTilEllerOppdaterTrygdetidGrunnlag(nyttTrygdetidGrunnlag: TrygdetidGrunnlag): Trygdetid {
-        val oppdatertGrunnlagListe = trygdetidGrunnlag.toMutableList().apply {
-            removeAll { it.id == nyttTrygdetidGrunnlag.id }
+        val oppdatertGrunnlagListe =
+            trygdetidGrunnlag.toMutableList().apply {
+                removeAll { it.id == nyttTrygdetidGrunnlag.id }
 
-            find { it.periode.overlapperMed(nyttTrygdetidGrunnlag.periode) }?.let {
-                throw OverlappendePeriodeException("Trygdetidsperioder kan ikke være overlappende")
+                find { it.periode.overlapperMed(nyttTrygdetidGrunnlag.periode) }?.let {
+                    throw OverlappendePeriodeException("Trygdetidsperioder kan ikke være overlappende")
+                }
+
+                add(nyttTrygdetidGrunnlag)
             }
-
-            add(nyttTrygdetidGrunnlag)
-        }
 
         return this.copy(trygdetidGrunnlag = oppdatertGrunnlagListe)
     }
 
-    fun slettTrygdetidGrunnlag(trygdetidGrunnlagId: UUID): Trygdetid = this.copy(
-        trygdetidGrunnlag = this.trygdetidGrunnlag.filter { it.id != trygdetidGrunnlagId }
-    )
+    fun slettTrygdetidGrunnlag(trygdetidGrunnlagId: UUID): Trygdetid =
+        this.copy(
+            trygdetidGrunnlag = this.trygdetidGrunnlag.filter { it.id != trygdetidGrunnlagId }
+        )
 
-    fun oppdaterBeregnetTrygdetid(beregnetTrygdetid: BeregnetTrygdetid): Trygdetid {
+    fun oppdaterBeregnetTrygdetid(beregnetTrygdetid: DetaljertBeregnetTrygdetid): Trygdetid {
         return this.copy(beregnetTrygdetid = beregnetTrygdetid)
     }
 
@@ -47,8 +50,8 @@ data class Trygdetid(
     fun isYrkesskade() = this.beregnetTrygdetid?.regelResultat?.toString()?.contains("yrkesskade", ignoreCase = true)
 }
 
-data class BeregnetTrygdetid(
-    val verdi: Int,
+data class DetaljertBeregnetTrygdetid(
+    val resultat: DetaljertBeregnetTrygdetidResultat,
     val tidspunkt: Tidspunkt,
     val regelResultat: JsonNode
 )

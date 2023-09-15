@@ -6,7 +6,8 @@ import io.mockk.slot
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.common.trygdetid.BeregnetTrygdetidDto
+import no.nav.etterlatte.libs.common.trygdetid.DetaljertBeregnetTrygdetidDto
+import no.nav.etterlatte.libs.common.trygdetid.DetaljertBeregnetTrygdetidResultat
 import no.nav.etterlatte.libs.common.trygdetid.GrunnlagOpplysningerDto
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import no.nav.etterlatte.rapidsandrivers.migrering.AvdoedForelder
@@ -34,72 +35,96 @@ import java.time.YearMonth
 import java.util.*
 
 internal class MigreringHendelserTest {
-
     private val trygdetidService = mockk<TrygdetidService>()
     private val inspector = TestRapid().apply { MigreringHendelser(this, trygdetidService) }
 
     @Test
     fun `skal oppdatere og beregne trygdetid og returnere siste beregning`() {
         val behandlingId = slot<UUID>()
-        val trygdetidDto = TrygdetidDto(
-            id = UUID.randomUUID(),
-            behandlingId = UUID.randomUUID(),
-            beregnetTrygdetid = BeregnetTrygdetidDto(40, Tidspunkt.now()),
-            trygdetidGrunnlag = emptyList(),
-            opplysninger = GrunnlagOpplysningerDto(
-                avdoedDoedsdato = null,
-                avdoedFoedselsdato = null,
-                avdoedFylteSeksten = null,
-                avdoedFyllerSeksti = null
-            )
-        )
-        val fnr = Folkeregisteridentifikator.of("12101376212")
-        val request = MigreringRequest(
-            pesysId = PesysId(1),
-            enhet = Enhet("4817"),
-            soeker = fnr,
-            avdoedForelder = listOf(AvdoedForelder(fnr, Tidspunkt.now())),
-            gjenlevendeForelder = null,
-            virkningstidspunkt = YearMonth.now(),
-            foersteVirkningstidspunkt = YearMonth.now().minusYears(10),
-            beregning = Beregning(
-                brutto = BigDecimal(1000),
-                netto = BigDecimal(1000),
-                anvendtTrygdetid = BigDecimal(40),
-                datoVirkFom = Tidspunkt.now(),
-                g = BigDecimal(100000)
-            ),
-            trygdetid = Trygdetid(
-                listOf(
-                    Trygdetidsgrunnlag(
-                        trygdetidGrunnlagId = 1L,
-                        personGrunnlagId = 2L,
-                        landTreBokstaver = "NOR",
-                        datoFom = Tidspunkt.ofNorskTidssone(LocalDate.parse("2000-01-01"), LocalTime.of(0, 0, 0)),
-                        datoTom = Tidspunkt.ofNorskTidssone(LocalDate.parse("2015-01-01"), LocalTime.of(0, 0, 0)),
-                        poengIInnAar = false,
-                        poengIUtAar = false,
-                        ikkeIProrata = false,
-                        faktiskTrygdetid = BigDecimal(20.5),
-                        fremtidigTrygdetid = BigDecimal(15),
-                        anvendtTrygdetid = BigDecimal(35.5)
+        val trygdetidDto =
+            TrygdetidDto(
+                id = UUID.randomUUID(),
+                behandlingId = UUID.randomUUID(),
+                beregnetTrygdetid =
+                    DetaljertBeregnetTrygdetidDto(
+                        DetaljertBeregnetTrygdetidResultat.fraSamletTrygdetidNorge(40),
+                        Tidspunkt.now()
                     ),
-                    Trygdetidsgrunnlag(
-                        trygdetidGrunnlagId = 3L,
-                        personGrunnlagId = 2L,
-                        landTreBokstaver = "SWE",
-                        datoFom = Tidspunkt.ofNorskTidssone(LocalDate.parse("2017-01-01"), LocalTime.of(0, 0, 0)),
-                        datoTom = Tidspunkt.ofNorskTidssone(LocalDate.parse("2020-01-01"), LocalTime.of(0, 0, 0)),
-                        poengIInnAar = false,
-                        poengIUtAar = false,
-                        ikkeIProrata = false,
-                        faktiskTrygdetid = BigDecimal(20.5),
-                        fremtidigTrygdetid = BigDecimal(15),
-                        anvendtTrygdetid = BigDecimal(35.5)
+                trygdetidGrunnlag = emptyList(),
+                opplysninger =
+                    GrunnlagOpplysningerDto(
+                        avdoedDoedsdato = null,
+                        avdoedFoedselsdato = null,
+                        avdoedFylteSeksten = null,
+                        avdoedFyllerSeksti = null
                     )
-                )
             )
-        )
+        val fnr = Folkeregisteridentifikator.of("12101376212")
+        val request =
+            MigreringRequest(
+                pesysId = PesysId(1),
+                enhet = Enhet("4817"),
+                soeker = fnr,
+                avdoedForelder = listOf(AvdoedForelder(fnr, Tidspunkt.now())),
+                gjenlevendeForelder = null,
+                virkningstidspunkt = YearMonth.now(),
+                foersteVirkningstidspunkt = YearMonth.now().minusYears(10),
+                beregning =
+                    Beregning(
+                        brutto = BigDecimal(1000),
+                        netto = BigDecimal(1000),
+                        anvendtTrygdetid = BigDecimal(40),
+                        datoVirkFom = Tidspunkt.now(),
+                        g = BigDecimal(100000)
+                    ),
+                trygdetid =
+                    Trygdetid(
+                        listOf(
+                            Trygdetidsgrunnlag(
+                                trygdetidGrunnlagId = 1L,
+                                personGrunnlagId = 2L,
+                                landTreBokstaver = "NOR",
+                                datoFom =
+                                    Tidspunkt.ofNorskTidssone(
+                                        LocalDate.parse("2000-01-01"),
+                                        LocalTime.of(0, 0, 0)
+                                    ),
+                                datoTom =
+                                    Tidspunkt.ofNorskTidssone(
+                                        LocalDate.parse("2015-01-01"),
+                                        LocalTime.of(0, 0, 0)
+                                    ),
+                                poengIInnAar = false,
+                                poengIUtAar = false,
+                                ikkeIProrata = false,
+                                faktiskTrygdetid = BigDecimal(20.5),
+                                fremtidigTrygdetid = BigDecimal(15),
+                                anvendtTrygdetid = BigDecimal(35.5)
+                            ),
+                            Trygdetidsgrunnlag(
+                                trygdetidGrunnlagId = 3L,
+                                personGrunnlagId = 2L,
+                                landTreBokstaver = "SWE",
+                                datoFom =
+                                    Tidspunkt.ofNorskTidssone(
+                                        LocalDate.parse("2017-01-01"),
+                                        LocalTime.of(0, 0, 0)
+                                    ),
+                                datoTom =
+                                    Tidspunkt.ofNorskTidssone(
+                                        LocalDate.parse("2020-01-01"),
+                                        LocalTime.of(0, 0, 0)
+                                    ),
+                                poengIInnAar = false,
+                                poengIUtAar = false,
+                                ikkeIProrata = false,
+                                faktiskTrygdetid = BigDecimal(20.5),
+                                fremtidigTrygdetid = BigDecimal(15),
+                                anvendtTrygdetid = BigDecimal(35.5)
+                            )
+                        )
+                    )
+            )
         every { trygdetidService.beregnTrygdetid(capture(behandlingId)) } returns mockk()
         every {
             trygdetidService.beregnTrygdetidGrunnlag(
@@ -108,14 +133,15 @@ internal class MigreringHendelserTest {
             )
         } returns trygdetidDto
 
-        val melding = JsonMessage.newMessage(
-            Migreringshendelser.TRYGDETID,
-            mapOf(
-                BEHANDLING_ID_KEY to "a9d42eb9-561f-4320-8bba-2ba600e66e21",
-                VILKAARSVURDERT_KEY to "vilkaarsvurdert",
-                HENDELSE_DATA_KEY to request
+        val melding =
+            JsonMessage.newMessage(
+                Migreringshendelser.TRYGDETID,
+                mapOf(
+                    BEHANDLING_ID_KEY to "a9d42eb9-561f-4320-8bba-2ba600e66e21",
+                    VILKAARSVURDERT_KEY to "vilkaarsvurdert",
+                    HENDELSE_DATA_KEY to request
+                )
             )
-        )
 
         inspector.sendTestMessage(melding.toJson())
 
@@ -132,47 +158,56 @@ internal class MigreringHendelserTest {
     @Test
     fun `skal ikke opprette grunnlagsperioder dersom det ikke finnes perioder`() {
         val behandlingId = slot<UUID>()
-        val trygdetidDto = TrygdetidDto(
-            id = UUID.randomUUID(),
-            behandlingId = UUID.randomUUID(),
-            beregnetTrygdetid = BeregnetTrygdetidDto(40, Tidspunkt.now()),
-            trygdetidGrunnlag = emptyList(),
-            opplysninger = GrunnlagOpplysningerDto(
-                avdoedDoedsdato = null,
-                avdoedFoedselsdato = null,
-                avdoedFylteSeksten = null,
-                avdoedFyllerSeksti = null
+        val trygdetidDto =
+            TrygdetidDto(
+                id = UUID.randomUUID(),
+                behandlingId = UUID.randomUUID(),
+                beregnetTrygdetid =
+                    DetaljertBeregnetTrygdetidDto(
+                        DetaljertBeregnetTrygdetidResultat.fraSamletTrygdetidNorge(40),
+                        Tidspunkt.now()
+                    ),
+                trygdetidGrunnlag = emptyList(),
+                opplysninger =
+                    GrunnlagOpplysningerDto(
+                        avdoedDoedsdato = null,
+                        avdoedFoedselsdato = null,
+                        avdoedFylteSeksten = null,
+                        avdoedFyllerSeksti = null
+                    )
             )
-        )
         val fnr = Folkeregisteridentifikator.of("12101376212")
-        val request = MigreringRequest(
-            pesysId = PesysId(1),
-            enhet = Enhet("4817"),
-            soeker = fnr,
-            avdoedForelder = listOf(AvdoedForelder(fnr, Tidspunkt.now())),
-            gjenlevendeForelder = null,
-            virkningstidspunkt = YearMonth.now(),
-            foersteVirkningstidspunkt = YearMonth.now().minusYears(10),
-            beregning = Beregning(
-                brutto = BigDecimal(1000),
-                netto = BigDecimal(1000),
-                anvendtTrygdetid = BigDecimal(40),
-                datoVirkFom = Tidspunkt.now(),
-                g = BigDecimal(100000)
-            ),
-            trygdetid = Trygdetid(emptyList())
-        )
+        val request =
+            MigreringRequest(
+                pesysId = PesysId(1),
+                enhet = Enhet("4817"),
+                soeker = fnr,
+                avdoedForelder = listOf(AvdoedForelder(fnr, Tidspunkt.now())),
+                gjenlevendeForelder = null,
+                virkningstidspunkt = YearMonth.now(),
+                foersteVirkningstidspunkt = YearMonth.now().minusYears(10),
+                beregning =
+                    Beregning(
+                        brutto = BigDecimal(1000),
+                        netto = BigDecimal(1000),
+                        anvendtTrygdetid = BigDecimal(40),
+                        datoVirkFom = Tidspunkt.now(),
+                        g = BigDecimal(100000)
+                    ),
+                trygdetid = Trygdetid(emptyList())
+            )
         every { trygdetidService.beregnTrygdetid(capture(behandlingId)) } returns trygdetidDto
         every { trygdetidService.beregnTrygdetidGrunnlag(any(), any()) } returns trygdetidDto
 
-        val melding = JsonMessage.newMessage(
-            Migreringshendelser.TRYGDETID,
-            mapOf(
-                BEHANDLING_ID_KEY to "a9d42eb9-561f-4320-8bba-2ba600e66e21",
-                VILKAARSVURDERT_KEY to "vilkaarsvurdert",
-                HENDELSE_DATA_KEY to request
+        val melding =
+            JsonMessage.newMessage(
+                Migreringshendelser.TRYGDETID,
+                mapOf(
+                    BEHANDLING_ID_KEY to "a9d42eb9-561f-4320-8bba-2ba600e66e21",
+                    VILKAARSVURDERT_KEY to "vilkaarsvurdert",
+                    HENDELSE_DATA_KEY to request
+                )
             )
-        )
 
         inspector.sendTestMessage(melding.toJson())
 

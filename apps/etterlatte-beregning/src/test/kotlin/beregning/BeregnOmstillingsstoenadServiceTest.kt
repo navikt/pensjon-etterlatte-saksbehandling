@@ -34,7 +34,6 @@ import java.util.*
 import java.util.UUID.randomUUID
 
 internal class BeregnOmstillingsstoenadServiceTest {
-
     private val vilkaarsvurderingKlient = mockk<VilkaarsvurderingKlient>()
     private val grunnlagKlient = mockk<GrunnlagKlientImpl>()
     private val trygdetidKlient = mockk<TrygdetidKlient>()
@@ -43,12 +42,13 @@ internal class BeregnOmstillingsstoenadServiceTest {
 
     @BeforeEach
     fun setup() {
-        beregnOmstillingsstoenadService = BeregnOmstillingsstoenadService(
-            grunnlagKlient = grunnlagKlient,
-            vilkaarsvurderingKlient = vilkaarsvurderingKlient,
-            trygdetidKlient = trygdetidKlient,
-            beregningsGrunnlagService = beregningsGrunnlagService
-        )
+        beregnOmstillingsstoenadService =
+            BeregnOmstillingsstoenadService(
+                grunnlagKlient = grunnlagKlient,
+                vilkaarsvurderingKlient = vilkaarsvurderingKlient,
+                trygdetidKlient = trygdetidKlient,
+                beregningsGrunnlagService = beregningsGrunnlagService
+            )
     }
 
     @Test
@@ -97,9 +97,10 @@ internal class BeregnOmstillingsstoenadServiceTest {
         val trygdetid = mockTrygdetid(behandling.id)
 
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
-        coEvery { vilkaarsvurderingKlient.hentVilkaarsvurdering(any(), any()) } returns mockk {
-            every { resultat?.utfall } returns VilkaarsvurderingUtfall.OPPFYLT
-        }
+        coEvery { vilkaarsvurderingKlient.hentVilkaarsvurdering(any(), any()) } returns
+            mockk {
+                every { resultat?.utfall } returns VilkaarsvurderingUtfall.OPPFYLT
+            }
         coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns trygdetid
 
         coEvery {
@@ -137,9 +138,10 @@ internal class BeregnOmstillingsstoenadServiceTest {
         val trygdetid = mockTrygdetid(behandling.id)
 
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
-        coEvery { vilkaarsvurderingKlient.hentVilkaarsvurdering(any(), any()) } returns mockk {
-            every { resultat?.utfall } returns VilkaarsvurderingUtfall.IKKE_OPPFYLT
-        }
+        coEvery { vilkaarsvurderingKlient.hentVilkaarsvurdering(any(), any()) } returns
+            mockk {
+                every { resultat?.utfall } returns VilkaarsvurderingUtfall.IKKE_OPPFYLT
+            }
         coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns trygdetid
         coEvery {
             beregningsGrunnlagService.hentOmstillingstoenadBeregningsGrunnlag(
@@ -249,7 +251,10 @@ internal class BeregnOmstillingsstoenadServiceTest {
         }
     }
 
-    private fun mockBehandling(type: BehandlingType, virk: YearMonth = VIRKNINGSTIDSPUNKT_JAN_23): DetaljertBehandling =
+    private fun mockBehandling(
+        type: BehandlingType,
+        virk: YearMonth = VIRKNINGSTIDSPUNKT_JAN_23
+    ): DetaljertBehandling =
         mockk<DetaljertBehandling>().apply {
             every { id } returns randomUUID()
             every { sak } returns 1
@@ -261,10 +266,14 @@ internal class BeregnOmstillingsstoenadServiceTest {
         mockk<TrygdetidDto>().apply {
             every { id } returns randomUUID()
             every { behandlingId } returns behandlingId_
-            every { beregnetTrygdetid } returns mockk {
-                every { total } returns TRYGDETID_40_AAR
-                every { tidspunkt } returns Tidspunkt.now()
-            }
+            every { beregnetTrygdetid } returns
+                mockk {
+                    every { resultat } returns
+                        mockk {
+                            every { samletTrygdetidNorge } returns TRYGDETID_40_AAR
+                        }
+                    every { tidspunkt } returns Tidspunkt.now()
+                }
         }
 
     private fun mockTrygdetidUtenBeregnetTrygdetid(behandlingId_: UUID): TrygdetidDto =
@@ -280,6 +289,7 @@ internal class BeregnOmstillingsstoenadServiceTest {
         const val GRUNNBELOEP_JAN_23: Int = 9290
         const val OMS_BELOEP_JAN_23: Int = 20902
     }
+
     private fun omstillingstoenadBeregningsGrunnlag(behandlingId: UUID) =
         BeregningsGrunnlagOMS(
             behandlingId,
@@ -288,12 +298,13 @@ internal class BeregnOmstillingsstoenadServiceTest {
                 every { tidspunkt } returns Tidspunkt.now()
                 every { type } returns ""
             },
-            institusjonsoppholdBeregningsgrunnlag = listOf(
-                GrunnlagMedPeriode(
-                    fom = LocalDate.of(2022, 8, 1),
-                    tom = null,
-                    data = InstitusjonsoppholdBeregningsgrunnlag(Reduksjon.NEI_KORT_OPPHOLD)
+            institusjonsoppholdBeregningsgrunnlag =
+                listOf(
+                    GrunnlagMedPeriode(
+                        fom = LocalDate.of(2022, 8, 1),
+                        tom = null,
+                        data = InstitusjonsoppholdBeregningsgrunnlag(Reduksjon.NEI_KORT_OPPHOLD)
+                    )
                 )
-            )
         )
 }

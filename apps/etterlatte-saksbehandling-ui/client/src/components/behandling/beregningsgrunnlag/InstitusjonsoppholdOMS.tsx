@@ -4,7 +4,7 @@ import { LovtekstMedLenke } from '~components/behandling/soeknadsoversikt/soekna
 import { Button, Heading, ReadMore, Table } from '@navikt/ds-react'
 import { AGreen500 } from '@navikt/ds-tokens/dist/tokens'
 import { PlusCircleIcon, CheckmarkCircleIcon } from '@navikt/aksel-icons'
-import { InstitusjonsoppholdGrunnlagData } from '~shared/types/Beregning'
+import { InstitusjonsoppholdGrunnlagData, ReduksjonOMS } from '~shared/types/Beregning'
 import { useFieldArray, useForm } from 'react-hook-form'
 import Insthendelser from '~components/behandling/beregningsgrunnlag/Insthendelser'
 import {
@@ -18,7 +18,7 @@ import {
   FeilIPerioder,
   validerInstitusjonsopphold,
 } from '~components/behandling/beregningsgrunnlag/InstitusjonsoppholdPerioder'
-import InstitusjonsoppholdTableWrapperOMS from '~components/behandling/beregningsgrunnlag/InstitusjonsoppholdTableWrapperOMS'
+import InstitusjonsoppholdTableWrapper from './InstitusjonsoppholdTableWrapper'
 
 type InstitusjonsoppholdProps = {
   behandling: IBehandlingReducer
@@ -115,7 +115,7 @@ const InstitusjonsoppholdOMS = (props: InstitusjonsoppholdProps) => {
           </Table.Header>
           <Table.Body id="forminstitusjonsopphold">
             {fields.map((item, index) => (
-              <InstitusjonsoppholdTableWrapperOMS
+              <InstitusjonsoppholdTableWrapper
                 key={item.id}
                 item={item}
                 index={index}
@@ -126,6 +126,7 @@ const InstitusjonsoppholdOMS = (props: InstitusjonsoppholdProps) => {
                 setVisFeil={setVisFeil}
                 errors={errors.institusjonsOppholdForm?.[index]}
                 behandles={behandles}
+                reduksjon={ReduksjonOMS}
               />
             ))}
           </Table.Body>

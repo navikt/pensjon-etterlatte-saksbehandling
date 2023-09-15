@@ -1,7 +1,7 @@
 import { BodyShort, Heading, Label } from '@navikt/ds-react'
 import { differenceInYears } from 'date-fns'
 import styled from 'styled-components'
-import { Beregningsperiode, ReduksjonBP, ReduksjonBPKeys } from '~shared/types/Beregning'
+import { Beregningsperiode, ReduksjonBP } from '~shared/types/Beregning'
 import React from 'react'
 
 interface BeregningsdetaljerPerson {
@@ -66,7 +66,7 @@ export const Barnepensjonberegningssammendrag = ({
             <div>
               <strong>Beregningen gjelder: </strong>
               <ListWithoutBullet>
-                {ReduksjonBP[beregningsperiode.institusjonsopphold.reduksjon as ReduksjonBPKeys]}
+                {ReduksjonBP[beregningsperiode.institusjonsopphold.reduksjon]}
                 {beregningsperiode.institusjonsopphold.egenReduksjon && (
                   <p>Egen reduksjon: {beregningsperiode.institusjonsopphold.egenReduksjon}</p>
                 )}

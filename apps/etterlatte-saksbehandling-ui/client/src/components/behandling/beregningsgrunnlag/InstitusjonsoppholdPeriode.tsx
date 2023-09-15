@@ -10,7 +10,7 @@ import {
 } from 'react-hook-form'
 import MaanedVelger from '~components/behandling/beregningsgrunnlag/MaanedVelger'
 import { Button, Select, TextField } from '@navikt/ds-react'
-import { InstitusjonsoppholdGrunnlagData, ReduksjonBP } from '~shared/types/Beregning'
+import { InstitusjonsoppholdGrunnlagData, ReduksjonType } from '~shared/types/Beregning'
 import styled from 'styled-components'
 import { TrashIcon } from '@navikt/aksel-icons'
 
@@ -33,10 +33,11 @@ export type InstitusjonsoppholdPerioder = {
       >
     | undefined
   behandles: boolean
+  reduksjon: ReduksjonType
 }
 
 const InstitusjonsoppholdPeriode = (props: InstitusjonsoppholdPerioder) => {
-  const { item, index, control, register, remove, watch, setVisFeil, errors, behandles } = props
+  const { item, index, control, register, remove, watch, setVisFeil, errors, behandles, reduksjon } = props
   const reduksjonValgOppdatert = watch(`institusjonsOppholdForm.${index}.data.reduksjon`)
   return (
     <>
@@ -77,9 +78,9 @@ const InstitusjonsoppholdPeriode = (props: InstitusjonsoppholdPerioder) => {
               validate: { notDefault: (v) => v !== 'VELG_REDUKSJON' },
             })}
           >
-            {Object.entries(ReduksjonBP).map(([reduksjonsKey, reduksjontekst]) => (
-              <option key={reduksjonsKey} value={reduksjonsKey}>
-                {reduksjontekst}
+            {Object.entries(reduksjon).map(([key, value]) => (
+              <option key={key} value={key}>
+                {value}
               </option>
             ))}
           </Select>

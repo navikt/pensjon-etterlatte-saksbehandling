@@ -4,10 +4,9 @@ import InstitusjonsoppholdPeriode, {
 import { useEffect, useState } from 'react'
 import { Table } from '@navikt/ds-react'
 import { PeriodeVisning } from '~components/behandling/beregningsgrunnlag/InstitusjonsoppholdPerioder'
-import { ReduksjonBP, ReduksjonBPKeys } from '~shared/types/Beregning'
 
 const InstitusjonsoppholdTableWrapper = (props: InstitusjonsoppholdPerioder) => {
-  const { item, index, control, register, remove, watch, setVisFeil, errors, behandles } = props
+  const { item, index, control, register, remove, watch, setVisFeil, errors, behandles, reduksjon } = props
   const content = (
     <InstitusjonsoppholdPeriode
       key={item.id}
@@ -20,6 +19,7 @@ const InstitusjonsoppholdTableWrapper = (props: InstitusjonsoppholdPerioder) => 
       setVisFeil={setVisFeil}
       errors={errors}
       behandles={behandles}
+      reduksjon={reduksjon}
     />
   )
 
@@ -42,7 +42,7 @@ const InstitusjonsoppholdTableWrapper = (props: InstitusjonsoppholdPerioder) => 
           <PeriodeVisning fom={item.fom} tom={item.tom} />
         </Table.DataCell>
         <Table.DataCell>
-          {ReduksjonBP[item.data.reduksjon as ReduksjonBPKeys]}
+          {reduksjon[item.data.reduksjon]}
           {item.data.egenReduksjon && <p>Egen reduksjon: {item.data.egenReduksjon}</p>}
         </Table.DataCell>
         <Table.DataCell>{item.data.begrunnelse}</Table.DataCell>

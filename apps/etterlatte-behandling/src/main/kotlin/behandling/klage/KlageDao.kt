@@ -1,13 +1,13 @@
 package no.nav.etterlatte.behandling.klage
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.etterlatte.grunnlagsendring.setJsonb
 import no.nav.etterlatte.libs.common.behandling.KabalStatus
 import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.setTidspunkt
+import no.nav.etterlatte.libs.database.setJsonb
 import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.database.toList
 import java.sql.Connection
@@ -16,23 +16,26 @@ import java.util.*
 
 interface KlageDao {
     fun lagreKlage(klage: Klage)
+
     fun hentKlage(id: UUID): Klage?
+
     fun hentKlagerISak(sakId: Long): List<Klage>
 }
 
 class KlageDaoImpl(private val connection: () -> Connection) : KlageDao {
     override fun lagreKlage(klage: Klage) {
         with(connection()) {
-            val statement = prepareStatement(
-                """
+            val statement =
+                prepareStatement(
+                    """
                     INSERT INTO klage(id, sak_id, opprettet, status, kabalstatus, formkrav, utfall)
                     VALUES (?, ?, ?, ?, ?, ?, ?)
                     ON CONFLICT (id) DO UPDATE SET status = excluded.status, 
                             formkrav = excluded.formkrav, 
                             kabalstatus = excluded.kabalstatus, 
                             utfall = excluded.utfall
-                """.trimIndent()
-            )
+                    """.trimIndent()
+                )
             statement.setObject(1, klage.id)
             statement.setLong(2, klage.sak.id)
             statement.setTidspunkt(3, klage.opprettet)
@@ -46,14 +49,15 @@ class KlageDaoImpl(private val connection: () -> Connection) : KlageDao {
 
     override fun hentKlage(id: UUID): Klage? {
         with(connection()) {
-            val statement = prepareStatement(
-                """
+            val statement =
+                prepareStatement(
+                    """
                     SELECT k.id, k.sak_id, saktype, fnr, enhet, opprettet, status, 
                         kabalstatus, formkrav, utfall
                     FROM klage k INNER JOIN sak s on k.sak_id = s.id
                     WHERE k.id = ?
-                """.trimIndent()
-            )
+                    """.trimIndent()
+                )
             statement.setObject(1, id)
             return statement.executeQuery().singleOrNull {
                 somKlage()
@@ -63,14 +67,15 @@ class KlageDaoImpl(private val connection: () -> Connection) : KlageDao {
 
     override fun hentKlagerISak(sakId: Long): List<Klage> {
         with(connection()) {
-            val statement = prepareStatement(
-                """
+            val statement =
+                prepareStatement(
+                    """
                     SELECT k.id, k.sak_id, saktype, fnr, enhet, opprettet, status, 
                         kabalstatus, formkrav, utfall
                     FROM klage k INNER JOIN sak s on k.sak_id = s.id
                     WHERE s.id = ?
-                """.trimIndent()
-            )
+                    """.trimIndent()
+                )
             statement.setLong(1, sakId)
             return statement.executeQuery().toList {
                 somKlage()
@@ -81,12 +86,13 @@ class KlageDaoImpl(private val connection: () -> Connection) : KlageDao {
     private fun ResultSet.somKlage(): Klage {
         return Klage(
             id = getString("id").let { UUID.fromString(it) },
-            sak = Sak(
-                ident = getString("fnr"),
-                sakType = enumValueOf(getString("saktype")),
-                id = getLong("sak_id"),
-                enhet = getString("enhet")
-            ),
+            sak =
+                Sak(
+                    ident = getString("fnr"),
+                    sakType = enumValueOf(getString("saktype")),
+                    id = getLong("sak_id"),
+                    enhet = getString("enhet")
+                ),
             opprettet = getTidspunkt("opprettet"),
             status = enumValueOf(getString("status")),
             kabalStatus = getString("kabalstatus")?.let { enumValueOf<KabalStatus>(it) },

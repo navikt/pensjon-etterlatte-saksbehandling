@@ -46,13 +46,13 @@ export const OpprettNyRevurdering = ({
     <OpprettRevurderingWrapper>
       <>
         <Button variant="secondary" onClick={() => setOpen(true)}>
-          Opprett ny behandling
+          Opprett ny revurdering
         </Button>
         <Modal open={open} onClose={closeAndReset} aria-labelledby="modal-heading">
           <Modal.Body>
             <Modal.Header closeButton={false}>
               <Heading spacing level="2" size="medium" id="modal-heading">
-                Opprett ny behandling
+                Opprett ny revurdering
               </Heading>
             </Modal.Header>
             <Select

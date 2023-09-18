@@ -68,12 +68,31 @@ export type SoeskenMedIBeregningGrunnlagDto = PeriodisertBeregningsgrunnlagDto<S
 export type InstitusjonsoppholdGrunnlagData = PeriodisertBeregningsgrunnlag<InstitusjonsoppholdIBeregning>[]
 
 export interface InstitusjonsoppholdIBeregning {
-  reduksjon: Reduksjonstypekey
+  reduksjon: ReduksjonKey
   egenReduksjon?: string | null
   begrunnelse?: string | null
 }
 
-export const Reduksjon = {
+type ReduksjonKeyBP =
+  | 'VELG_REDUKSJON'
+  | 'JA_VANLIG'
+  | 'NEI_KORT_OPPHOLD'
+  | 'JA_EGEN_PROSENT_AV_G'
+  | 'NEI_HOEYE_UTGIFTER_BOLIG'
+
+type ReduksjonKeyOMS =
+  | 'VELG_REDUKSJON'
+  | 'JA_VANLIG_OMS'
+  | 'NEI_KORT_OPPHOLD'
+  | 'JA_EGEN_PROSENT_AV_G'
+  | 'NEI_HOEYE_UTGIFTER_BOLIG'
+  | 'NEI_OMSORG_BARN'
+
+type ReduksjonKey = ReduksjonKeyBP | ReduksjonKeyOMS
+
+export type ReduksjonType = Record<string, string>
+
+export const ReduksjonBP: ReduksjonType = {
   VELG_REDUKSJON: 'Velg reduksjon',
   JA_VANLIG: 'Ja, etter vanlig sats(10% av G)',
   NEI_KORT_OPPHOLD: 'Nei, kort opphold',
@@ -81,4 +100,11 @@ export const Reduksjon = {
   NEI_HOEYE_UTGIFTER_BOLIG: 'Nei, har høye utgifter til bolig',
 }
 
-type Reduksjonstypekey = keyof typeof Reduksjon
+export const ReduksjonOMS: ReduksjonType = {
+  VELG_REDUKSJON: 'Velg reduksjon',
+  JA_VANLIG_OMS: 'Ja, etter vanlig sats(45% av G)',
+  NEI_KORT_OPPHOLD: 'Nei, kort opphold',
+  JA_EGEN_PROSENT_AV_G: 'Ja, utgifter til bolig(egen % av G)',
+  NEI_HOEYE_UTGIFTER_BOLIG: 'Nei, har høye utgifter til bolig',
+  NEI_OMSORG_BARN: 'Nei, har omsorg for barn',
+}

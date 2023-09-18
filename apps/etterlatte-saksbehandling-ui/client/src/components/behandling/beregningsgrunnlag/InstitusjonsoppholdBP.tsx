@@ -4,7 +4,7 @@ import { LovtekstMedLenke } from '~components/behandling/soeknadsoversikt/soekna
 import { Button, Heading, ReadMore } from '@navikt/ds-react'
 import { AGreen500 } from '@navikt/ds-tokens/dist/tokens'
 import { PlusCircleIcon, CheckmarkCircleIcon } from '@navikt/aksel-icons'
-import { InstitusjonsoppholdGrunnlagData } from '~shared/types/Beregning'
+import { InstitusjonsoppholdGrunnlagData, ReduksjonBP } from '~shared/types/Beregning'
 import { useFieldArray, useForm } from 'react-hook-form'
 import Insthendelser from '~components/behandling/beregningsgrunnlag/Insthendelser'
 import {
@@ -126,6 +126,7 @@ const InstitusjonsoppholdBP = (props: InstitusjonsoppholdProps) => {
                 setVisFeil={setVisFeil}
                 errors={errors.institusjonsOppholdForm?.[index]}
                 behandles={behandles}
+                reduksjon={ReduksjonBP}
               />
             ))}
           </Table.Body>

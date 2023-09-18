@@ -32,16 +32,17 @@ export const TrygdetidDetaljer: React.FC<Props> = ({ beregnetTrygdetid }) => {
 }
 
 export const formaterBeregnetTrygdetid = (periode?: string) => {
-  if (periode) {
-    const inneholderAar = periode.includes('Y')
-    const aar = inneholderAar ? periode.substring(1, periode.indexOf('Y')) : 0
-    const maaneder = periode.includes('M')
-      ? periode.substring(periode.indexOf(inneholderAar ? 'Y' : 'P') + 1, periode.indexOf('M'))
-      : null
-
-    return `${aar} år${maaneder ? ` ${maaneder} måneder` : ''}`
+  if (!periode) {
+    return ''
   }
-  return ''
+
+  // Legger til 0 år eksplisitt dersom perioden er under ett år
+  const periodeMedAntallAar = periode.includes('Y') ? periode : 'P0Y' + periode.slice(1)
+
+  // formatet på periode matcher /\d+Y(\d+M)?/, så en split på Y|M vil gi en array med
+  // 1. år-strengen og 2. tom streng eller måned-strengen
+  const [aar, maaneder] = periodeMedAntallAar.slice(1).split(/Y|M/)
+  return `${aar} år${maaneder ? ` ${maaneder} måneder` : ''}`
 }
 
 export const TrygdetidTabell = styled.div`

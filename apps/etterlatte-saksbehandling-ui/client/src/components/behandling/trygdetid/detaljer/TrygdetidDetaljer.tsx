@@ -31,18 +31,20 @@ export const TrygdetidDetaljer: React.FC<Props> = ({ beregnetTrygdetid }) => {
   )
 }
 
+// formatet på periode er /P[aar:\d+Y][maaneder:\d+M]/, der aar og maaneder ikke er med
+// hvis de er 0. Denne regex'en legger tallene før Y i første match-gruppe og
+// tallene før M i andre match-gruppe. Siden matchene er optional (?) er de undefined
+// hvis de ikke er med
+const PERIODE_MATCHER = /P(?:(\d+)Y)?(?:(\d+)M)?/i // casing skal være uppercase, men legger på 'i' i tilfelle
+
 export const formaterBeregnetTrygdetid = (periode?: string) => {
-  if (!periode) {
+  const periodeMatch = periode?.match(PERIODE_MATCHER)
+  if (!periodeMatch) {
     return ''
   }
 
-  // Legger til 0 år eksplisitt dersom perioden er under ett år
-  const periodeMedAntallAar = periode.includes('Y') ? periode : 'P0Y' + periode.slice(1)
-
-  // formatet på periode matcher /\d+Y(\d+M)?/, så en split på Y|M vil gi en array med
-  // 1. år-strengen og 2. tom streng eller måned-strengen
-  const [aar, maaneder] = periodeMedAntallAar.slice(1).split(/Y|M/)
-  return `${aar} år${maaneder ? ` ${maaneder} måneder` : ''}`
+  const [, aar, maaneder] = periodeMatch
+  return `${aar || '0'} år${maaneder ? ` ${maaneder} måneder` : ''}`
 }
 
 export const TrygdetidTabell = styled.div`

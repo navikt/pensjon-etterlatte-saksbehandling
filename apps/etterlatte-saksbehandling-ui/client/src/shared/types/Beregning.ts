@@ -82,7 +82,7 @@ type ReduksjonKeyBP =
 
 type ReduksjonKeyOMS =
   | 'VELG_REDUKSJON'
-  | 'JA_VANLIG'
+  | 'JA_VANLIG_OMS'
   | 'NEI_KORT_OPPHOLD'
   | 'JA_EGEN_PROSENT_AV_G'
   | 'NEI_HOEYE_UTGIFTER_BOLIG'
@@ -102,7 +102,7 @@ export const ReduksjonBP: ReduksjonType = {
 
 export const ReduksjonOMS: ReduksjonType = {
   VELG_REDUKSJON: 'Velg reduksjon',
-  JA_VANLIG: 'Ja, etter vanlig sats(45% av G)',
+  JA_VANLIG_OMS: 'Ja, etter vanlig sats(45% av G)',
   NEI_KORT_OPPHOLD: 'Nei, kort opphold',
   JA_EGEN_PROSENT_AV_G: 'Ja, utgifter til bolig(egen % av G)',
   NEI_HOEYE_UTGIFTER_BOLIG: 'Nei, har høye utgifter til bolig',

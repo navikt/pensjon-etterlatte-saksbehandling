@@ -1,10 +1,10 @@
 import React from 'react'
 import { Table } from '@navikt/ds-react'
-import { IDetaljertBeregnetTrygdetid } from '~shared/api/trygdetid'
-import { formaterBeregnetTrygdetid, TrygdetidTabell } from '~components/behandling/trygdetid/detaljer/TrygdetidDetaljer'
+import { IDetaljertBeregnetTrygdetidResultat } from '~shared/api/trygdetid'
+import { TrygdetidTabell } from '~components/behandling/trygdetid/detaljer/TrygdetidDetaljer'
 
 type Props = {
-  beregnetTrygdetid: IDetaljertBeregnetTrygdetid
+  beregnetTrygdetid: IDetaljertBeregnetTrygdetidResultat
 }
 export const BeregnetSamletTrygdetid: React.FC<Props> = ({ beregnetTrygdetid }) => (
   <TrygdetidTabell>
@@ -19,18 +19,24 @@ export const BeregnetSamletTrygdetid: React.FC<Props> = ({ beregnetTrygdetid }) 
       <Table.Body>
         <Table.Row>
           <Table.DataCell>Samlet trygdetid for nasjonal beregning</Table.DataCell>
-          <Table.DataCell>{formaterBeregnetTrygdetid(beregnetTrygdetid.samletTrygdetidNasjonal)}</Table.DataCell>
+          <Table.DataCell>{beregnetTrygdetid.samletTrygdetidNorge}</Table.DataCell>
           <Table.DataCell />
         </Table.Row>
         <Table.Row>
           <Table.DataCell>Samlet trygdetid for beregning av teoretisk beløp</Table.DataCell>
-          <Table.DataCell>{formaterBeregnetTrygdetid(beregnetTrygdetid.samletTrygdetidTeoretisk)}</Table.DataCell>
+          <Table.DataCell>{beregnetTrygdetid.samletTrygdetidTeoretisk}</Table.DataCell>
           <Table.DataCell />
         </Table.Row>
         <Table.Row>
           <Table.DataCell>Pro rata brøk</Table.DataCell>
           <Table.DataCell>
-            {beregnetTrygdetid.prorataBroek.teller}/{beregnetTrygdetid.prorataBroek.nevner}
+            {beregnetTrygdetid.prorataBroek ? (
+              <span>
+                {beregnetTrygdetid.prorataBroek.teller}/{beregnetTrygdetid.prorataBroek.nevner}
+              </span>
+            ) : (
+              '-'
+            )}
           </Table.DataCell>
           <Table.DataCell />
         </Table.Row>

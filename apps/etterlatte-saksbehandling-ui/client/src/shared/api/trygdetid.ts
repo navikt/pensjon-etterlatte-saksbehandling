@@ -106,31 +106,31 @@ export type IOpplysningsgrunnlag = {
 }
 
 export interface IDetaljertBeregnetTrygdetid {
+  resultat: IDetaljertBeregnetTrygdetidResultat
+  tidspunkt: Date
+}
+
+export interface IDetaljertBeregnetTrygdetidResultat {
   faktiskTrygdetidNorge: IFaktiskTrygdetid
-  faktiskTrygdetidTeoretiskBeloep: IFaktiskTrygdetid
+  faktiskTrygdetidTeoretisk: IFaktiskTrygdetid
   fremtidigTrygdetidNorge: IFremtidigTrygdetid
-  fremtidigTrygdetidTeoretiskBeloep: IFremtidigTrygdetid
-  samletTrygdetidNorge: IBeregnetTrygdetidAarMaaneder
-  samletTrygdetidTeoretisk: IBeregnetTrygdetidAarMaaneder
-  prorataBroek: IProrataBroek
+  fremtidigTrygdetidTeoretisk: IFremtidigTrygdetid
+  samletTrygdetidNorge: number
+  samletTrygdetidTeoretisk: number
+  prorataBroek?: IProrataBroek
 }
 
 export interface IFaktiskTrygdetid {
-  verdi: IBeregnetTrygdetidAarMaaneder
-  antallMaaneder: number
+  periode?: string
+  antallMaaneder?: number
 }
 
 export interface IFremtidigTrygdetid {
-  verdi: IBeregnetTrygdetidAarMaaneder
-  antallMaaneder: number
-  opptjeningstidIMaaneder: number
-  mindreEnnFireFemtedelerAvOpptjeningstiden: Boolean
+  periode?: string
+  antallMaaneder?: number
+  opptjeningstidIMaaneder?: number
+  mindreEnnFireFemtedelerAvOpptjeningstiden?: Boolean
   nordiskKonvensjon?: Boolean
-}
-
-export interface IBeregnetTrygdetidAarMaaneder {
-  aar: number
-  maaneder: number
 }
 
 export interface IProrataBroek {

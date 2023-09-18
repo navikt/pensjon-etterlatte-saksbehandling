@@ -1,10 +1,10 @@
 import React from 'react'
 import { Table } from '@navikt/ds-react'
-import { IDetaljertBeregnetTrygdetid } from '~shared/api/trygdetid'
+import { IDetaljertBeregnetTrygdetidResultat } from '~shared/api/trygdetid'
 import { formaterBeregnetTrygdetid, TrygdetidTabell } from '~components/behandling/trygdetid/detaljer/TrygdetidDetaljer'
 
 type Props = {
-  beregnetTrygdetid: IDetaljertBeregnetTrygdetid
+  beregnetTrygdetid: IDetaljertBeregnetTrygdetidResultat
 }
 export const BeregnetFremtidigTrygdetid: React.FC<Props> = ({ beregnetTrygdetid }) => (
   <TrygdetidTabell>
@@ -19,35 +19,35 @@ export const BeregnetFremtidigTrygdetid: React.FC<Props> = ({ beregnetTrygdetid 
       <Table.Body>
         <Table.Row>
           <Table.DataCell>Opptjeningstid i måneder</Table.DataCell>
-          <Table.DataCell>{beregnetTrygdetid.fremtidigTrygdetidNorge.opptjeningstidIMaaneder}</Table.DataCell>
-          <Table.DataCell>{beregnetTrygdetid.fremtidigTrygdetidTeoretiskBeloep.opptjeningstidIMaaneder}</Table.DataCell>
+          <Table.DataCell>{beregnetTrygdetid.fremtidigTrygdetidNorge?.opptjeningstidIMaaneder}</Table.DataCell>
+          <Table.DataCell>{beregnetTrygdetid.fremtidigTrygdetidTeoretisk?.opptjeningstidIMaaneder}</Table.DataCell>
         </Table.Row>
         <Table.Row>
           <Table.DataCell>Faktisk trygdetid mindre enn 4/5 av opptjeningstiden</Table.DataCell>
           <Table.DataCell>
-            {beregnetTrygdetid.fremtidigTrygdetidNorge.mindreEnnFireFemtedelerAvOpptjeningstiden ? 'Ja' : 'Nei'}
+            {beregnetTrygdetid.fremtidigTrygdetidNorge?.mindreEnnFireFemtedelerAvOpptjeningstiden ? 'Ja' : 'Nei'}
           </Table.DataCell>
           <Table.DataCell>
-            {beregnetTrygdetid.fremtidigTrygdetidTeoretiskBeloep.mindreEnnFireFemtedelerAvOpptjeningstiden
-              ? 'Ja'
-              : 'Nei'}
+            {beregnetTrygdetid.fremtidigTrygdetidTeoretisk?.mindreEnnFireFemtedelerAvOpptjeningstiden ? 'Ja' : 'Nei'}
           </Table.DataCell>
         </Table.Row>
         <Table.Row>
           <Table.DataCell>Fremtidig trygdetid</Table.DataCell>
-          <Table.DataCell>{formaterBeregnetTrygdetid(beregnetTrygdetid.fremtidigTrygdetidNorge.verdi)}</Table.DataCell>
           <Table.DataCell>
-            {formaterBeregnetTrygdetid(beregnetTrygdetid.fremtidigTrygdetidTeoretiskBeloep.verdi)}
+            {formaterBeregnetTrygdetid(beregnetTrygdetid.fremtidigTrygdetidNorge?.periode)}
+          </Table.DataCell>
+          <Table.DataCell>
+            {formaterBeregnetTrygdetid(beregnetTrygdetid.fremtidigTrygdetidTeoretisk?.periode)}
           </Table.DataCell>
         </Table.Row>
         <Table.Row>
           <Table.DataCell>Fremtidig trygdetid i måneder</Table.DataCell>
-          <Table.DataCell>{beregnetTrygdetid.fremtidigTrygdetidNorge.antallMaaneder}</Table.DataCell>
-          <Table.DataCell>{beregnetTrygdetid.fremtidigTrygdetidTeoretiskBeloep.antallMaaneder}</Table.DataCell>
+          <Table.DataCell>{beregnetTrygdetid.fremtidigTrygdetidNorge?.antallMaaneder}</Table.DataCell>
+          <Table.DataCell>{beregnetTrygdetid.fremtidigTrygdetidTeoretisk?.antallMaaneder}</Table.DataCell>
         </Table.Row>
         <Table.Row>
           <Table.DataCell>Nordisk konvensjon artikkel 10</Table.DataCell>
-          <Table.DataCell>{beregnetTrygdetid.fremtidigTrygdetidNorge.nordiskKonvensjon ? 'Ja' : 'Nei'}</Table.DataCell>
+          <Table.DataCell>{beregnetTrygdetid.fremtidigTrygdetidNorge?.nordiskKonvensjon ? 'Ja' : 'Nei'}</Table.DataCell>
           <Table.DataCell>-</Table.DataCell>
         </Table.Row>
       </Table.Body>

@@ -46,12 +46,21 @@ val antallSoeskenIKullet1967 = RegelMeta(
     regelReferanse = RegelReferanse(id = "BP-BEREGNING-1967-ANTALL-SOESKEN")
 ) benytter soeskenIKullet1967 med { soesken -> soesken.size }
 
-val harToAvdodeForeldre2024: Regel<BarnepensjonGrunnlag, Boolean> = finnFaktumIGrunnlag(
+val avdodeForeldre2024: Regel<BarnepensjonGrunnlag, List<Folkeregisteridentifikator>> =
+    finnFaktumIGrunnlag(
+        gjelderFra = BP_2024_DATO,
+        beskrivelse = "Finner om søker har to avdøde foreldre",
+        finnFaktum = BarnepensjonGrunnlag::avdoedeForeldre,
+        finnFelt = { it }
+    )
+
+val harToAvdodeForeldre2024 = RegelMeta(
     gjelderFra = BP_2024_DATO,
-    beskrivelse = "Finner om søker har to avdøde foreldre",
-    finnFaktum = BarnepensjonGrunnlag::harToAvdoedeForeldre,
-    finnFelt = { it }
-)
+    beskrivelse = "Finner om barnet har to avdøde foreldre",
+    regelReferanse = RegelReferanse(id = "BP-BEREGNING-2024-HAR-TO-AVDOEDE")
+) benytter avdodeForeldre2024 med { avdoedeForeldre ->
+    avdoedeForeldre.size >= 2
+}
 
 val prosentsatsFoersteBarnKonstant1967 = definerKonstant<BarnepensjonGrunnlag, Beregningstall>(
     gjelderFra = BP_1967_DATO,
@@ -131,8 +140,8 @@ val barnepensjonSatsRegel2024 = RegelMeta(
     beskrivelse = "Beregn barnepensjon etter 2024-regelverk",
     regelReferanse = RegelReferanse(id = "BP-BEREGNING-2024-UAVKORTET")
 ) benytter harToAvdodeForeldre2024 og beloepHvertBarnEnForelderAvdoed2024 og beloepHvertBarnToForeldreAvdoed2024 med {
-        harToAvdodeForeldre, beloepEnAvdoedForelder, beloepToAvdoedeForeldre ->
-    if (harToAvdodeForeldre) {
+        harToAvdodeForeldre2024, beloepEnAvdoedForelder, beloepToAvdoedeForeldre ->
+    if (harToAvdodeForeldre2024) {
         beloepToAvdoedeForeldre
     } else {
         beloepEnAvdoedForelder

@@ -63,13 +63,7 @@ data class BarnepensjonGrunnlag(
     val avdoedesTrygdetid: FaktumNode<Beregningstall>,
     val institusjonsopphold: FaktumNode<InstitusjonsoppholdBeregningsgrunnlag?>,
     val avdoedeForeldre: FaktumNode<List<Folkeregisteridentifikator>>
-) {
-    fun harToAvdoedeForeldre(): FaktumNode<Boolean> = FaktumNode(
-        avdoedeForeldre.verdi.size >= 2,
-        avdoedeForeldre.kilde,
-        avdoedeForeldre.beskrivelse
-    )
-}
+)
 
 val beregnBarnepensjon1967Regel = RegelMeta(
     gjelderFra = BP_1967_DATO,

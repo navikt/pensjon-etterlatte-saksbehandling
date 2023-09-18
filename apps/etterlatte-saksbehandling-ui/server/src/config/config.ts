@@ -109,4 +109,5 @@ export const ApiConfig = hentApiConfigFraEnv()
 export const ClientConfig = {
   gosysUrl: requireEnvValue('GOSYS_URL'),
   cachebuster: requireEnvValue('APP_VERSION'),
+  generellBehandling: process.env.NAIS_CLUSTER_NAME,
 }

@@ -9,12 +9,11 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.application
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
+import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.generellbehandling.GenerellBehandling
-import no.nav.etterlatte.libs.common.generellbehandling.Innhold
 import no.nav.etterlatte.libs.common.kunSaksbehandler
 import no.nav.etterlatte.libs.common.sakId
-import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.sak.SakService
 import java.util.*
 
@@ -27,16 +26,17 @@ internal fun Route.generellbehandlingRoutes(
     post("/api/generellbehandling/{$SAKID_CALL_PARAMETER}") {
         kunSaksbehandler {
             val request = call.receive<OpprettGenerellBehandlingRequest>()
-            val finnSak = sakService.finnSak(sakId)
+            val finnSak = inTransaction { sakService.finnSak(sakId) }
             if (finnSak == null) {
                 call.respond(HttpStatusCode.BadRequest, "Saken finnes ikke")
             }
-            val id = UUID.randomUUID()
-            generellBehandlingService.opprettBehandling(
-                GenerellBehandling(id, sakId, request.innhold, Tidspunkt.now())
-            )
+            inTransaction {
+                generellBehandlingService.opprettBehandling(
+                    GenerellBehandling.opprettFraType(request.type, sakId)
+                )
+            }
             logger.info(
-                "Opprettet generell behandling for sak $sakId av typen ${request.innhold::class.simpleName}, id: $id"
+                "Opprettet generell behandling for sak $sakId av typen ${request.type}"
             )
             call.respond(HttpStatusCode.OK)
         }
@@ -59,5 +59,5 @@ internal fun Route.generellbehandlingRoutes(
 }
 
 data class OpprettGenerellBehandlingRequest(
-    val innhold: Innhold
+    val type: GenerellBehandling.GenerellBehandlingType
 )

@@ -55,13 +55,31 @@ internal class GenerellBehandlingDaoTest {
     }
 
     @Test
+    fun `opprette kun med type `() {
+        val generellBehandlingUtland =
+            GenerellBehandling(
+                UUID.randomUUID(),
+                1L,
+                Tidspunkt.now(),
+                GenerellBehandling.GenerellBehandlingType.UTLAND,
+                null
+            )
+        dao.opprettGenerellbehandling(generellBehandlingUtland)
+        val hentetGenBehandling = dao.hentGenerellBehandlingMedId(generellBehandlingUtland.id)
+
+        Assertions.assertEquals(generellBehandlingUtland.id, hentetGenBehandling!!.id)
+        Assertions.assertEquals(generellBehandlingUtland.innhold, hentetGenBehandling.innhold)
+    }
+
+    @Test
     fun `Kan opprette og hente en generell behandling utland`() {
         val generellBehandlingUtland =
             GenerellBehandling(
                 UUID.randomUUID(),
                 1L,
-                Innhold.Utland("vlabla", UUID.randomUUID()),
-                Tidspunkt.now()
+                Tidspunkt.now(),
+                GenerellBehandling.GenerellBehandlingType.UTLAND,
+                Innhold.Utland("vlabla", UUID.randomUUID())
             )
         dao.opprettGenerellbehandling(generellBehandlingUtland)
         val hentetGenBehandling = dao.hentGenerellBehandlingMedId(generellBehandlingUtland.id)
@@ -76,16 +94,18 @@ internal class GenerellBehandlingDaoTest {
         val generellBehandlingUtland =
             GenerellBehandling(
                 UUID.randomUUID(),
-                sakId,
-                Innhold.Utland("vlabla", UUID.randomUUID()),
-                Tidspunkt.now()
+                1L,
+                Tidspunkt.now(),
+                GenerellBehandling.GenerellBehandlingType.UTLAND,
+                Innhold.Utland("vlabla", UUID.randomUUID())
             )
         val annengenerebehandling =
             GenerellBehandling(
                 UUID.randomUUID(),
                 1L,
-                Innhold.Annen("innhold"),
-                Tidspunkt.now()
+                Tidspunkt.now(),
+                GenerellBehandling.GenerellBehandlingType.ANNEN,
+                Innhold.Annen("vlabla")
             )
 
         dao.opprettGenerellbehandling(generellBehandlingUtland)

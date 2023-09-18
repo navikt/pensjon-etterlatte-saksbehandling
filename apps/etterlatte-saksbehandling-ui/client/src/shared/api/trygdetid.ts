@@ -115,8 +115,8 @@ export interface IDetaljertBeregnetTrygdetidResultat {
   faktiskTrygdetidTeoretisk: IFaktiskTrygdetid
   fremtidigTrygdetidNorge: IFremtidigTrygdetid
   fremtidigTrygdetidTeoretisk: IFremtidigTrygdetid
-  samletTrygdetidNorge: number
-  samletTrygdetidTeoretisk: number
+  samletTrygdetidNorge?: number
+  samletTrygdetidTeoretisk?: number
   prorataBroek?: IProrataBroek
 }
 

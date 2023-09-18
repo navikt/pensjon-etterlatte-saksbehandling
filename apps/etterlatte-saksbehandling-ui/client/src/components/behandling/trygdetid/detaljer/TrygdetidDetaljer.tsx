@@ -33,8 +33,11 @@ export const TrygdetidDetaljer: React.FC<Props> = ({ beregnetTrygdetid }) => {
 
 export const formaterBeregnetTrygdetid = (periode?: string) => {
   if (periode) {
-    const aar = periode.substring(1, periode.indexOf('Y'))
-    const maaneder = periode.includes('M') ? periode.substring(periode.indexOf('Y') + 1, periode.indexOf('M')) : null
+    const inneholderAar = periode.includes('Y')
+    const aar = inneholderAar ? periode.substring(1, periode.indexOf('Y')) : 0
+    const maaneder = periode.includes('M')
+      ? periode.substring(periode.indexOf(inneholderAar ? 'Y' : 'P') + 1, periode.indexOf('M'))
+      : null
 
     return `${aar} år${maaneder ? ` ${maaneder} måneder` : ''}`
   }

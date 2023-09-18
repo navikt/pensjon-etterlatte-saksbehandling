@@ -32,7 +32,7 @@ class SamordningVedtakRouteTest {
         server.start()
 
         applicationConfig =
-            buildTestApplicationConfigurationForOauth(server.config.httpServer.port(), ISSUER_ID, CLIENT_ID)
+            buildTestApplicationConfigurationForOauth(server.config.httpServer.port(), ISSUER_ID)
     }
 
     @Test
@@ -41,9 +41,10 @@ class SamordningVedtakRouteTest {
             environment { config = applicationConfig }
             application { samordningVedtakApi() }
 
-            val response = client.get("/api/vedtak/123") {
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-            }
+            val response =
+                client.get("/api/vedtak/123") {
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                }
 
             response.status shouldBe HttpStatusCode.Unauthorized
         }
@@ -55,10 +56,11 @@ class SamordningVedtakRouteTest {
             environment { config = applicationConfig }
             application { samordningVedtakApi() }
 
-            val response = client.get("/api/vedtak/123") {
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                header(HttpHeaders.Authorization, "Bearer ${token()}")
-            }
+            val response =
+                client.get("/api/vedtak/123") {
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    header(HttpHeaders.Authorization, "Bearer ${token()}")
+                }
 
             response.status shouldBe HttpStatusCode.Unauthorized
         }
@@ -70,10 +72,14 @@ class SamordningVedtakRouteTest {
             environment { config = applicationConfig }
             application { samordningVedtakApi() }
 
-            val response = client.get("/api/vedtak/123") {
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                header(HttpHeaders.Authorization, "Bearer ${token("nav:etterlatteytelser:vedtaksinformasjon.read")}")
-            }
+            val response =
+                client.get("/api/vedtak/123") {
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    header(
+                        HttpHeaders.Authorization,
+                        "Bearer ${token("nav:etterlatteytelser:vedtaksinformasjon.read")}"
+                    )
+                }
 
             response.status shouldBe HttpStatusCode.OK
         }
@@ -106,22 +112,23 @@ class SamordningVedtakRouteTest {
 
     companion object {
         const val ISSUER_ID = "maskinporten"
-        const val CLIENT_ID = "vedtaksinfo-tp"
     }
 }
 
-fun buildTestApplicationConfigurationForOauth(port: Int, issuerId: String, clientId: String) =
-    HoconApplicationConfig(
-        ConfigFactory.parseMap(
-            mapOf(
-                "no.nav.security.jwt.issuers" to listOf(
+fun buildTestApplicationConfigurationForOauth(
+    port: Int,
+    issuerId: String
+) = HoconApplicationConfig(
+    ConfigFactory.parseMap(
+        mapOf(
+            "no.nav.security.jwt.issuers" to
+                listOf(
                     mapOf(
                         "discoveryurl" to "http://localhost:$port/$issuerId/.well-known/openid-configuration",
                         "issuer_name" to issuerId,
-                        "accepted_audience" to clientId,
                         "validation.optional_claims" to "aud,nbf,sub"
                     )
                 )
-            )
         )
     )
+)

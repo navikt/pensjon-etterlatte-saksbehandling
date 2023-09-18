@@ -25,10 +25,20 @@ export const BeregnetFremtidigTrygdetid: React.FC<Props> = ({ beregnetTrygdetid 
         <Table.Row>
           <Table.DataCell>Faktisk trygdetid mindre enn 4/5 av opptjeningstiden</Table.DataCell>
           <Table.DataCell>
-            {beregnetTrygdetid.fremtidigTrygdetidNorge?.mindreEnnFireFemtedelerAvOpptjeningstiden ? 'Ja' : 'Nei'}
+            {beregnetTrygdetid.fremtidigTrygdetidNorge && (
+              <span>
+                {beregnetTrygdetid.fremtidigTrygdetidNorge?.mindreEnnFireFemtedelerAvOpptjeningstiden ? 'Ja' : 'Nei'}
+              </span>
+            )}
           </Table.DataCell>
           <Table.DataCell>
-            {beregnetTrygdetid.fremtidigTrygdetidTeoretisk?.mindreEnnFireFemtedelerAvOpptjeningstiden ? 'Ja' : 'Nei'}
+            {beregnetTrygdetid.fremtidigTrygdetidTeoretisk && (
+              <span>
+                {beregnetTrygdetid.fremtidigTrygdetidTeoretisk?.mindreEnnFireFemtedelerAvOpptjeningstiden
+                  ? 'Ja'
+                  : 'Nei'}
+              </span>
+            )}
           </Table.DataCell>
         </Table.Row>
         <Table.Row>

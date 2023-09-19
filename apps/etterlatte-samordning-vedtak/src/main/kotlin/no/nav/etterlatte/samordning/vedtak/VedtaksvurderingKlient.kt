@@ -24,7 +24,7 @@ class VedtaksvurderingKlient(config: Config, httpClient: HttpClient, azureAdClie
 
     suspend fun hentVedtak(
         vedtakId: Long,
-        accessToken: String
+        organisasjonsnummer: String
     ): VedtakDto {
         try {
             logger.info("Henter vedtaksvurdering med vedtakId=$vedtakId")
@@ -34,7 +34,7 @@ class VedtaksvurderingKlient(config: Config, httpClient: HttpClient, azureAdClie
                     resource =
                         Resource(
                             clientId = clientId,
-                            url = "$vedtaksvurderingUrl/api/samordning/vedtak/$vedtakId"
+                            url = "$vedtaksvurderingUrl/api/samordning/vedtak/$vedtakId?orgnr=$organisasjonsnummer"
                         ),
                     brukerTokenInfo = Systembruker(oid = "etterlatte-samordning", sub = "etterlatte-samordning")
                 )

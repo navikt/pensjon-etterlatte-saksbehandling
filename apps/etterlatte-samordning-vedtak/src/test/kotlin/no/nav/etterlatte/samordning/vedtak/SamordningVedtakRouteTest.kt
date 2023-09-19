@@ -101,9 +101,13 @@ class SamordningVedtakRouteTest {
     }
 
     private fun token(maskinportenScope: String? = null): String {
+        val claims = mutableMapOf<String, Any>()
+        claims.put("consumer", mapOf("ID" to "0192:0123456789"))
+        maskinportenScope?.let { claims.put("scope", maskinportenScope) }
+
         return server.issueToken(
             issuerId = ISSUER_ID,
-            claims = maskinportenScope?.let { mapOf("scope" to it) } ?: mapOf()
+            claims = claims
         ).serialize()
     }
 

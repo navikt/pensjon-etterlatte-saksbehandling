@@ -11,9 +11,9 @@ class SamordningVedtakService(
 ) {
     suspend fun hentVedtak(
         vedtakId: Long,
-        accessToken: String
+        organisasjonsnummer: String
     ): SamordningVedtakDto {
-        val vedtak = vedtaksvurderingKlient.hentVedtak(vedtakId, accessToken)
+        val vedtak = vedtaksvurderingKlient.hentVedtak(vedtakId, organisasjonsnummer)
 
         if (vedtak.sak.sakType != SakType.OMSTILLINGSSTOENAD) {
             throw IllegalArgumentException("Ikke tilgang til vedtak")

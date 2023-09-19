@@ -28,7 +28,6 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.token.BrukerTokenInfo
-import no.nav.etterlatte.token.Systembruker
 import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlient
 import no.nav.etterlatte.vedtaksvurdering.klienter.BeregningKlient
 import no.nav.etterlatte.vedtaksvurdering.klienter.VilkaarsvurderingKlient
@@ -195,7 +194,6 @@ class VedtaksvurderingService(
                 mapOf(
                     SKAL_SENDE_BREV to when {
                         behandling.revurderingsaarsak.skalIkkeSendeBrev() -> false
-                        brukerTokenInfo is Systembruker -> false
                         else -> true
                     },
                     REVURDERING_AARSAK to behandling.revurderingsaarsak.toString()

@@ -48,7 +48,7 @@ const OpprettGenerellBehandling = (props: { sakId: number }) => {
         </Modal.Header>
         <Modal.Body>
           <Select
-            label="Velg generell behandling type"
+            label=""
             value={generellBehandlingType}
             onChange={(e) => setGenerellBehandlingType(e.target.value as GenerellBehandlingType)}
           >

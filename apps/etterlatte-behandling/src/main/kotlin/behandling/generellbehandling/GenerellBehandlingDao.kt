@@ -3,7 +3,6 @@ package no.nav.etterlatte.behandling.generellbehandling
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.behandling.hendelse.getUUID
 import no.nav.etterlatte.libs.common.generellbehandling.GenerellBehandling
-import no.nav.etterlatte.libs.common.generellbehandling.Innhold
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.setTidspunkt
@@ -67,18 +66,11 @@ class GenerellBehandlingDao(private val connection: () -> Connection) {
     }
 
     private fun ResultSet.toGenerellBehandling(): GenerellBehandling {
-        val type = GenerellBehandling.GenerellBehandlingType.valueOf(getString("type"))
-        val innholdTmp = getString("innhold")
-        val innhold =
-            when (type) {
-                GenerellBehandling.GenerellBehandlingType.ANNEN -> objectMapper.readValue<Innhold.Annen>(innholdTmp)
-                GenerellBehandling.GenerellBehandlingType.UTLAND -> objectMapper.readValue<Innhold.Utland>(innholdTmp)
-            }
         return GenerellBehandling(
             id = getUUID("id"),
             sakId = getLong("sak_id"),
-            type = type,
-            innhold = innhold,
+            type = GenerellBehandling.GenerellBehandlingType.valueOf(getString("type")),
+            innhold = getString("innhold").let { objectMapper.readValue(it) },
             opprettet = getTidspunkt("opprettet")
         )
     }

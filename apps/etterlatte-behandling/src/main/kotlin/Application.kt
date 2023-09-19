@@ -105,7 +105,8 @@ fun Application.module(context: ApplicationContext) {
             )
             generellbehandlingRoutes(
                 generellBehandlingService = generellBehandlingService,
-                sakService = sakService
+                sakService = sakService,
+                featureToggleService = featureToggleService
             )
             revurderingRoutes(revurderingService = revurderingService)
             omregningRoutes(omregningService = omregningService)

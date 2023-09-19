@@ -2,6 +2,8 @@ export interface Generellbehandling {
   id: string
   sakId: number
   innhold: Innhold
+  type: GenerellBehandlingType
+  opprettet: Date
 }
 
 export const Innholdstyper: Record<GenerellBehandlingType, string> = {

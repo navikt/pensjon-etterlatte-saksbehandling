@@ -70,7 +70,7 @@ internal fun Route.generellbehandlingRoutes(
             kunSaksbehandler {
                 val id =
                     call.parameters["generellbehandlingId"]
-                        ?: return@get call.respond(HttpStatusCode.BadRequest, "Saken finnes ikke")
+                        ?: return@hvisEnabled call.respond(HttpStatusCode.BadRequest, "Saken finnes ikke")
                 val hentetBehandling = generellBehandlingService.hentBehandlingMedId(UUID.fromString(id))
                 call.respond(hentetBehandling ?: HttpStatusCode.NotFound)
             }

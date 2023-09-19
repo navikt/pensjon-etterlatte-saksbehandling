@@ -10,6 +10,15 @@ data class GenerellBehandling(
     val type: GenerellBehandlingType,
     val innhold: Innhold? = null
 ) {
+    init {
+        if (innhold !== null) {
+            when (type) {
+                GenerellBehandlingType.ANNEN -> assert(innhold is Innhold.Annen)
+                GenerellBehandlingType.UTLAND -> assert(innhold is Innhold.Utland)
+            }
+        }
+    }
+
     companion object {
         fun opprettFraType(
             type: GenerellBehandlingType,

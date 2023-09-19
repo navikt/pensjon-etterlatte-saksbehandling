@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.assertThrows
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
 import java.util.*
@@ -55,7 +56,7 @@ internal class GenerellBehandlingDaoTest {
     }
 
     @Test
-    fun `opprette kun med type `() {
+    fun `opprette kun med type`() {
         val generellBehandlingUtland =
             GenerellBehandling(
                 UUID.randomUUID(),
@@ -69,6 +70,19 @@ internal class GenerellBehandlingDaoTest {
 
         Assertions.assertEquals(generellBehandlingUtland.id, hentetGenBehandling!!.id)
         Assertions.assertEquals(generellBehandlingUtland.innhold, hentetGenBehandling.innhold)
+    }
+
+    @Test
+    fun `Assert skal catche at man oppretter med feil type`() {
+        assertThrows<AssertionError> {
+            GenerellBehandling(
+                UUID.randomUUID(),
+                1L,
+                Tidspunkt.now(),
+                GenerellBehandling.GenerellBehandlingType.UTLAND,
+                Innhold.Annen("content")
+            )
+        }
     }
 
     @Test

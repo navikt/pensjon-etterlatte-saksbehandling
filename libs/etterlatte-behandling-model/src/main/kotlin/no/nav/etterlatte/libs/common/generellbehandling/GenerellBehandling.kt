@@ -8,7 +8,7 @@ data class GenerellBehandling(
     val sakId: Long,
     val opprettet: Tidspunkt,
     val type: GenerellBehandlingType,
-    val innhold: Innhold? = null
+    val innhold: Innhold?
 ) {
     init {
         if (innhold !== null) {
@@ -23,7 +23,7 @@ data class GenerellBehandling(
         fun opprettFraType(
             type: GenerellBehandlingType,
             sakId: Long
-        ) = GenerellBehandling(UUID.randomUUID(), sakId, Tidspunkt.now(), type)
+        ) = GenerellBehandling(UUID.randomUUID(), sakId, Tidspunkt.now(), type, null)
     }
 
     enum class GenerellBehandlingType {

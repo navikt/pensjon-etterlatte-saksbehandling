@@ -13,8 +13,19 @@ data class GenerellBehandling(
     init {
         if (innhold !== null) {
             when (type) {
-                GenerellBehandlingType.ANNEN -> assert(innhold is Innhold.Annen)
-                GenerellBehandlingType.UTLAND -> assert(innhold is Innhold.Utland)
+                GenerellBehandlingType.ANNEN ->
+                    assert(innhold is Innhold.Annen) {
+                        throw IllegalArgumentException(
+                            "Type $type matcher " +
+                                "ikke innhold navn: ${innhold.javaClass.simpleName}"
+                        )
+                    }
+                GenerellBehandlingType.UTLAND ->
+                    assert(innhold is Innhold.Utland) {
+                        throw IllegalArgumentException(
+                            "Type $type matcher ikke innhold navn: ${innhold.javaClass.simpleName}"
+                        )
+                    }
             }
         }
     }

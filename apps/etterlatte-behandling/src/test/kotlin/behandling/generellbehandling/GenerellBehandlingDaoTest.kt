@@ -74,7 +74,7 @@ internal class GenerellBehandlingDaoTest {
 
     @Test
     fun `Assert skal catche at man oppretter med feil type`() {
-        assertThrows<AssertionError> {
+        assertThrows<IllegalArgumentException> {
             GenerellBehandling(
                 UUID.randomUUID(),
                 1L,

@@ -3,6 +3,7 @@ package no.nav.etterlatte.migrering
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
+import no.nav.etterlatte.migrering.pen.BarnepensjonGrunnlagResponse
 import no.nav.etterlatte.migrering.pen.PenKlient
 import no.nav.etterlatte.migrering.pen.tilVaarModell
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser.MIGRER_SPESIFIKK_SAK
@@ -39,12 +40,17 @@ internal class MigrerSpesifikkSak(
             return
         }
 
+        val pesyssak = hentSak(sakId).tilVaarModell().also {
+            pesysRepository.lagrePesyssak(pesyssak = it)
+        }
+
+        sakmigrerer.migrerSak(packet, pesyssak, context)
+    }
+
+    private fun hentSak(sakId: Long): BarnepensjonGrunnlagResponse {
         logger.info("Prøver å hente sak $sakId fra PEN")
         val sakFraPEN = runBlocking { penKlient.hentSak(sakId) }
         logger.info("Henta sak $sakId fra PEN")
-
-        val pesyssak = sakFraPEN.tilVaarModell()
-        pesysRepository.lagrePesyssak(pesyssak = pesyssak)
-        sakmigrerer.migrerSak(packet, pesyssak, context)
+        return sakFraPEN
     }
 }

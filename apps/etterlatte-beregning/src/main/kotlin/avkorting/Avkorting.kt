@@ -1,7 +1,6 @@
 package no.nav.etterlatte.avkorting
 
 import com.fasterxml.jackson.databind.JsonNode
-import no.nav.etterlatte.avkorting.regler.inntektAvkorting
 import no.nav.etterlatte.beregning.Beregning
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning

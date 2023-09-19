@@ -52,6 +52,7 @@ include(
     "libs:etterlatte-utbetaling-model",
     "libs:etterlatte-vedtaksvurdering-model",
     "libs:etterlatte-vilkaarsvurdering-model",
+    "libs:etterlatte-tilbakekreving-model",
     "jobs:test-fordeler",
     "jobs:start-regulering"
 )

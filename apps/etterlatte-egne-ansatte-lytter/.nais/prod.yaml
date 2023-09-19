@@ -34,6 +34,8 @@ spec:
       value: "nom.skjermede-personer-status-v1"
     - name: BEHANDLING_AZURE_SCOPE
       value: api://prod-gcp.etterlatte.etterlatte-behandling/.default
+    - name: ETTERLATTE_BEHANDLING_URL
+      value: http://etterlatte-behandling
   envFrom:
     - secret: my-application-unleash-api-token
   accessPolicy:

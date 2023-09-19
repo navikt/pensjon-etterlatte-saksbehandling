@@ -22,19 +22,22 @@ fun main() {
 
 class Server {
     private val defaultConfig: Config = ConfigFactory.load()
-    private val engine = embeddedServer(
-        factory = io.ktor.server.cio.CIO,
-        environment = applicationEngineEnvironment {
-            config = HoconApplicationConfig(defaultConfig)
-            module {
-                routing {
-                    healthApi()
+    private val engine =
+        embeddedServer(
+            factory = io.ktor.server.cio.CIO,
+            environment =
+                applicationEngineEnvironment {
+                    config = HoconApplicationConfig(defaultConfig)
+                    module {
+                        routing {
+                            healthApi()
+                        }
+                        metricsModule()
+                    }
+                    connector { port = 8080 }
                 }
-                metricsModule()
-            }
-            connector { port = 8080 }
-        }
-    )
+        )
+
     fun run() {
         val env = System.getenv().toMutableMap()
         startInstitusjonsoppholdLytter(env, defaultConfig)
@@ -42,32 +45,43 @@ class Server {
     }
 }
 
-fun startInstitusjonsoppholdLytter(env: Map<String, String>, config: Config) {
+fun startInstitusjonsoppholdLytter(
+    env: Map<String, String>,
+    config: Config
+) {
     val logger = LoggerFactory.getLogger(Application::class.java)
 
-    val proxyHttpKlient = httpClientClientCredentials(
-        azureAppClientId = config.getString("azure.app.client.id"),
-        azureAppJwk = config.getString("azure.app.jwk"),
-        azureAppWellKnownUrl = config.getString("azure.app.well.known.url"),
-        azureAppScope = config.getString("azure.proxy.outbound.scope")
-    )
+    val proxyHttpKlient =
+        httpClientClientCredentials(
+            azureAppClientId = config.getString("azure.app.client.id"),
+            azureAppJwk = config.getString("azure.app.jwk"),
+            azureAppWellKnownUrl = config.getString("azure.app.well.known.url"),
+            azureAppScope = config.getString("azure.proxy.outbound.scope")
+        )
 
     val institusjonsoppholdKlient = InstitusjonsoppholdKlient(proxyHttpKlient, config.getString("proxy.url"))
 
-    val behandlingHttpClient = httpClientClientCredentials(
-        azureAppClientId = config.getString("azure.app.client.id"),
-        azureAppJwk = config.getString("azure.app.jwk"),
-        azureAppWellKnownUrl = config.getString("azure.app.well.known.url"),
-        azureAppScope = config.getString("behandling.azure.scope")
-    )
+    val behandlingHttpClient =
+        httpClientClientCredentials(
+            azureAppClientId = config.getString("azure.app.client.id"),
+            azureAppJwk = config.getString("azure.app.jwk"),
+            azureAppWellKnownUrl = config.getString("azure.app.well.known.url"),
+            azureAppScope = config.getString("behandling.azure.scope")
+        )
 
-    val behandlingKlient = BehandlingKlient(behandlingHttpClient = behandlingHttpClient, institusjonsoppholdKlient)
+    val behandlingKlient =
+        BehandlingKlient(
+            behandlingHttpClient = behandlingHttpClient,
+            institusjonsoppholdKlient = institusjonsoppholdKlient,
+            resourceUrl = config.getString("behandling.resource.url")
+        )
 
     startLytting(
-        konsument = KafkaConsumerInstitusjonsopphold(
-            env = env,
-            behandlingKlient = behandlingKlient
-        ),
+        konsument =
+            KafkaConsumerInstitusjonsopphold(
+                env = env,
+                behandlingKlient = behandlingKlient
+            ),
         logger = logger
     )
 }

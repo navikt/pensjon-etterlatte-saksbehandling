@@ -22,19 +22,21 @@ fun main() {
 
 class Server {
     private val defaultConfig: Config = ConfigFactory.load()
-    private val engine = embeddedServer(
-        factory = io.ktor.server.cio.CIO,
-        environment = applicationEngineEnvironment {
-            config = HoconApplicationConfig(defaultConfig)
-            module {
-                routing {
-                    healthApi()
+    private val engine =
+        embeddedServer(
+            factory = io.ktor.server.cio.CIO,
+            environment =
+                applicationEngineEnvironment {
+                    config = HoconApplicationConfig(defaultConfig)
+                    module {
+                        routing {
+                            healthApi()
+                        }
+                        metricsModule()
+                    }
+                    connector { port = 8080 }
                 }
-                metricsModule()
-            }
-            connector { port = 8080 }
-        }
-    )
+        )
 
     fun run() {
         val env = System.getenv().toMutableMap()
@@ -43,22 +45,31 @@ class Server {
     }
 }
 
-fun startEgenAnsattLytter(env: Map<String, String>, config: Config) {
+fun startEgenAnsattLytter(
+    env: Map<String, String>,
+    config: Config
+) {
     val logger = LoggerFactory.getLogger(Application::class.java)
 
-    val behandlingHttpClient = httpClientClientCredentials(
-        azureAppClientId = config.getString("azure.app.client.id"),
-        azureAppJwk = config.getString("azure.app.jwk"),
-        azureAppWellKnownUrl = config.getString("azure.app.well.known.url"),
-        azureAppScope = config.getString("behandling.azure.scope")
-    )
-    val behandlingKlient = BehandlingKlient(behandlingHttpClient = behandlingHttpClient)
+    val behandlingHttpClient =
+        httpClientClientCredentials(
+            azureAppClientId = config.getString("azure.app.client.id"),
+            azureAppJwk = config.getString("azure.app.jwk"),
+            azureAppWellKnownUrl = config.getString("azure.app.well.known.url"),
+            azureAppScope = config.getString("behandling.azure.scope")
+        )
+    val behandlingKlient =
+        BehandlingKlient(
+            behandlingHttpClient = behandlingHttpClient,
+            url = config.getString("etterlatte.behandling.url")
+        )
 
     startLytting(
-        konsument = KafkaConsumerEgneAnsatte(
-            env = env,
-            behandlingKlient = behandlingKlient
-        ),
+        konsument =
+            KafkaConsumerEgneAnsatte(
+                env = env,
+                behandlingKlient = behandlingKlient
+            ),
         logger = logger
     )
 }

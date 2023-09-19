@@ -59,6 +59,7 @@ function KlageTabell(props: { klager: Array<Klage> }) {
             <Table.HeaderCell>Resultat Gjenny</Table.HeaderCell>
             <Table.HeaderCell>Status Kabal</Table.HeaderCell>
             <Table.HeaderCell>Resultat Kabal</Table.HeaderCell>
+            <Table.HeaderCell>Handling</Table.HeaderCell>
           </Table.Row>
         </Table.Header>
         <Table.Body>

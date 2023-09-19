@@ -40,12 +40,12 @@ export const genererPdf = async (props: {
 export const hentManuellPayload = async (props: { brevId: number; sakId: number }): Promise<ApiResponse<any>> =>
   apiClient.get(`/brev/${props.brevId}/payload?sakId=${props.sakId}`)
 
-export const resetManuellPayload = async (props: {
+export const tilbakestillManuellPayload = async (props: {
   brevId: number
   sakId: number
   behandlingId: string
 }): Promise<ApiResponse<any>> =>
-  apiClient.put(`/brev/behandling/${props.behandlingId}/payload/reset`, {
+  apiClient.put(`/brev/behandling/${props.behandlingId}/payload/tilbakestill`, {
     brevId: props.brevId,
     sakId: props.sakId,
   })

@@ -67,13 +67,13 @@ fun Route.vedtaksbrevRoute(service: VedtaksbrevService, behandlingKlient: Behand
             }
         }
 
-        put("payload/reset") {
+        put("payload/tilbakestill") {
             withBehandlingId(behandlingKlient) {
                 val body = call.receive<ResetPayloadRequest>()
                 val brevId = body.brevId
                 val sakId = body.sakId
 
-                logger.info("Reset payload for vedtaksbrev (id=$brevId)")
+                logger.info("Tilbakestiller payload for vedtaksbrev (id=$brevId)")
 
                 measureTimedValue {
                     service.hentNyttInnhold(sakId, brevId, behandlingsId, brukerTokenInfo)

@@ -50,7 +50,7 @@ internal fun Route.generellbehandlingRoutes(
                 val request = call.receive<OpprettGenerellBehandlingRequest>()
                 val finnSak = inTransaction { sakService.finnSak(sakId) }
                 if (finnSak == null) {
-                    call.respond(HttpStatusCode.BadRequest, "Saken finnes ikke")
+                    call.respond(HttpStatusCode.NotFound, "Saken finnes ikke")
                 }
                 inTransaction {
                     generellBehandlingService.opprettBehandling(
@@ -70,7 +70,7 @@ internal fun Route.generellbehandlingRoutes(
             kunSaksbehandler {
                 val id =
                     call.parameters["generellbehandlingId"]
-                        ?: return@hvisEnabled call.respond(HttpStatusCode.BadRequest, "Saken finnes ikke")
+                        ?: return@hvisEnabled call.respond(HttpStatusCode.NotFound, "Saken finnes ikke")
                 val hentetBehandling = generellBehandlingService.hentBehandlingMedId(UUID.fromString(id))
                 call.respond(hentetBehandling ?: HttpStatusCode.NotFound)
             }

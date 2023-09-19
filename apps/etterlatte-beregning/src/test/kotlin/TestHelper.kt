@@ -14,7 +14,6 @@ import no.nav.etterlatte.avkorting.regler.InntektAvkortingGrunnlag
 import no.nav.etterlatte.avkorting.regler.InntektAvkortingGrunnlagWrapper
 import no.nav.etterlatte.beregning.Beregning
 import no.nav.etterlatte.beregning.grunnlag.InstitusjonsoppholdBeregningsgrunnlag
-import no.nav.etterlatte.beregning.regler.barnepensjon.AvdoedForelder
 import no.nav.etterlatte.beregning.regler.barnepensjon.BarnepensjonGrunnlag
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -54,11 +53,13 @@ const val MAKS_TRYGDETID: Int = 40
 fun barnepensjonGrunnlag(
     soeskenKull: List<String> = emptyList(),
     trygdeTid: Beregningstall = Beregningstall(MAKS_TRYGDETID),
-    institusjonsopphold: InstitusjonsoppholdBeregningsgrunnlag? = null
+    institusjonsopphold: InstitusjonsoppholdBeregningsgrunnlag? = null,
+    avdoedeForeldre: List<Folkeregisteridentifikator> = listOf(Folkeregisteridentifikator.of("11057523044"))
 ) = BarnepensjonGrunnlag(
     soeskenKull = FaktumNode(soeskenKull.map { Folkeregisteridentifikator.of(it) }, kilde, "søskenkull"),
-    avdoedForelder = FaktumNode(AvdoedForelder(trygdetid = trygdeTid), kilde, "trygdetid"),
-    institusjonsopphold = FaktumNode(institusjonsopphold, kilde, "institusjonsopphold")
+    avdoedesTrygdetid = FaktumNode(trygdeTid, kilde, "trygdetid"),
+    institusjonsopphold = FaktumNode(institusjonsopphold, kilde, "institusjonsopphold"),
+    avdoedeForeldre = FaktumNode(avdoedeForeldre, kilde, "avdøde")
 )
 
 fun Double.toBeregningstall(
@@ -81,7 +82,7 @@ fun avkorting(
     aarsoppgjoer = aarsoppgjoer(
         ytelseFoerAvkorting,
         inntektsavkorting,
-        avkortetYtelseAar,
+        avkortetYtelseAar
     )
 )
 

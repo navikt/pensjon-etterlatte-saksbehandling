@@ -18,12 +18,13 @@ import java.time.LocalDate
 
 data class PeriodisertBarnepensjonGrunnlag(
     val soeskenKull: PeriodisertGrunnlag<FaktumNode<List<Folkeregisteridentifikator>>>,
-    val avdoedForelder: PeriodisertGrunnlag<FaktumNode<AvdoedForelder>>,
+    val avdoedesTrygdetid: PeriodisertGrunnlag<FaktumNode<Beregningstall>>,
     val institusjonsopphold: PeriodisertGrunnlag<FaktumNode<InstitusjonsoppholdBeregningsgrunnlag?>>,
+    val avdoedeForeldre: PeriodisertGrunnlag<FaktumNode<List<Folkeregisteridentifikator>>>,
     val brukNyttRegelverk: Boolean
 ) : PeriodisertGrunnlag<BarnepensjonGrunnlag> {
     override fun finnAlleKnekkpunkter(): Set<LocalDate> {
-        val relevanteSoeskenkullKnekkpunkter =
+        val soeskenkullKnekkpunkter =
             if (brukNyttRegelverk) {
                 soeskenKull.finnAlleKnekkpunkter()
                     .filter { it.isBefore(BP_2024_DATO) }
@@ -32,25 +33,36 @@ data class PeriodisertBarnepensjonGrunnlag(
                 soeskenKull.finnAlleKnekkpunkter()
             }
 
-        return relevanteSoeskenkullKnekkpunkter +
-            avdoedForelder.finnAlleKnekkpunkter() +
-            institusjonsopphold.finnAlleKnekkpunkter()
+        val avdoedeForeldreKnekkpunkter =
+            if (brukNyttRegelverk) {
+                avdoedeForeldre.finnAlleKnekkpunkter()
+                    .filter { it.isAfter(BP_2024_DATO) }
+                    .toSet()
+            } else {
+                emptySet()
+            }
+
+        return soeskenkullKnekkpunkter +
+            avdoedesTrygdetid.finnAlleKnekkpunkter() +
+            institusjonsopphold.finnAlleKnekkpunkter() +
+            avdoedeForeldreKnekkpunkter
     }
 
     override fun finnGrunnlagForPeriode(datoIPeriode: LocalDate): BarnepensjonGrunnlag {
         return BarnepensjonGrunnlag(
             soeskenKull.finnGrunnlagForPeriode(datoIPeriode),
-            avdoedForelder.finnGrunnlagForPeriode(datoIPeriode),
-            institusjonsopphold.finnGrunnlagForPeriode(datoIPeriode)
+            avdoedesTrygdetid.finnGrunnlagForPeriode(datoIPeriode),
+            institusjonsopphold.finnGrunnlagForPeriode(datoIPeriode),
+            avdoedeForeldre.finnGrunnlagForPeriode(datoIPeriode)
         )
     }
 }
 
-data class AvdoedForelder(val trygdetid: Beregningstall)
 data class BarnepensjonGrunnlag(
     val soeskenKull: FaktumNode<List<Folkeregisteridentifikator>>,
-    val avdoedForelder: FaktumNode<AvdoedForelder>,
-    val institusjonsopphold: FaktumNode<InstitusjonsoppholdBeregningsgrunnlag?>
+    val avdoedesTrygdetid: FaktumNode<Beregningstall>,
+    val institusjonsopphold: FaktumNode<InstitusjonsoppholdBeregningsgrunnlag?>,
+    val avdoedeForeldre: FaktumNode<List<Folkeregisteridentifikator>>
 )
 
 val beregnBarnepensjon1967Regel = RegelMeta(

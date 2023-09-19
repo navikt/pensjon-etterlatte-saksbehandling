@@ -1,5 +1,6 @@
 package no.nav.etterlatte.beregning
 
+import com.fasterxml.jackson.databind.JsonNode
 import io.kotest.matchers.ints.shouldBeGreaterThanOrEqual
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
@@ -27,10 +28,16 @@ import no.nav.etterlatte.klienter.VilkaarsvurderingKlient
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.beregning.Beregningstype
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsdata
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.grunnlag.Opplysning
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeskenMedIBeregning
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.person.PersonRolle.AVDOED
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
@@ -576,11 +583,73 @@ internal class BeregnBarnepensjonServiceTest {
                     grunnbelopMnd shouldBe GRUNNBELOEP_MAI_23
                 }
                 with(beregningsperioder.single { p -> YearMonth.of(2023, 10).equals(p.datoFOM) }) {
-                    utbetaltBeloep shouldBe BP_BELOEP_NYTT_REGELVERK
+                    utbetaltBeloep shouldBe BP_BELOEP_NYTT_REGELVERK_EN_DOED_FORELDER
                     grunnbelopMnd shouldBe GRUNNBELOEP_MAI_23
                 }
             }
         }
+    }
+
+    @Test
+    fun `skal beregne barnepensjon foerstegangsbehandling - med flere avdøde foreldre og nytt regelverk`() {
+        val behandling = mockBehandling(BehandlingType.FØRSTEGANGSBEHANDLING)
+        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns
+                grunnlagMedEkstraAvdoedForelder(LocalDate.of(2023, 11, 12))
+        coEvery {
+            beregningsGrunnlagService.hentBarnepensjonBeregningsGrunnlag(
+                any(),
+                any()
+            )
+        } returns barnepensjonBeregningsGrunnlag(behandling.id, emptyList())
+        coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns null
+        featureToggleService.settBryter(BrukNyttRegelverkIBeregning, true)
+
+        runBlocking {
+            val beregning = beregnBarnepensjonService().beregn(behandling, bruker)
+            beregning.beregningsperioder.size shouldBeGreaterThanOrEqual 4
+
+            with(beregning.beregningsperioder[0]) {
+                datoFOM shouldBe YearMonth.of(2023, 1)
+                datoTOM shouldBe YearMonth.of(2023, 4)
+            }
+            with(beregning.beregningsperioder[1]) {
+                datoFOM shouldBe YearMonth.of(2023, 5)
+                datoTOM shouldBe YearMonth.of(2023, 9)
+            }
+            with(beregning.beregningsperioder[2]) {
+                datoFOM shouldBe YearMonth.of(2023, 10)
+                datoTOM shouldBe YearMonth.of(2023, 11)
+                utbetaltBeloep shouldBe BP_BELOEP_NYTT_REGELVERK_EN_DOED_FORELDER
+            }
+            with(beregning.beregningsperioder[3]) {
+                datoFOM shouldBe YearMonth.of(2023, 12)
+                datoTOM shouldBe null
+                utbetaltBeloep shouldBe BP_BELOEP_NYTT_REGELVERK_TO_DOEDE_FORELDRE
+            }
+        }
+    }
+
+    private fun grunnlagMedEkstraAvdoedForelder(doedsdato: LocalDate): Grunnlag {
+        val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
+        val nyligAvdoedFoedselsnummer = Folkeregisteridentifikator.of("15447924940")
+        val nyligAvdoed: List<Grunnlagsdata<JsonNode>> = listOf(
+            mapOf(
+                Opplysningstype.DOEDSDATO to konstantOpplysning(doedsdato),
+                Opplysningstype.PERSONROLLE to konstantOpplysning(AVDOED),
+                Opplysningstype.FOEDSELSNUMMER to konstantOpplysning(nyligAvdoedFoedselsnummer)
+            )
+        )
+        return Grunnlag(
+            grunnlag.soeker,
+            grunnlag.familie + nyligAvdoed,
+            grunnlag.sak,
+            grunnlag.metadata
+        )
+    }
+
+    private fun <T : Any> konstantOpplysning(a: T): Opplysning.Konstant<JsonNode> {
+        val kilde = Grunnlagsopplysning.Pdl(Tidspunkt.now(), "", "")
+        return Opplysning.Konstant(randomUUID(), kilde, a.toJsonNode())
     }
 
     private fun barnepensjonBeregningsGrunnlag(
@@ -590,7 +659,7 @@ internal class BeregnBarnepensjonServiceTest {
         behandlingId,
         defaultKilde(),
         soeskenMedIBeregning =
-            listOf(
+        listOf(
                 GrunnlagMedPeriode(
                     fom = VIRKNINGSTIDSPUNKT_JAN_23.minusMonths(1).atDay(1),
                     tom = null,
@@ -678,6 +747,7 @@ internal class BeregnBarnepensjonServiceTest {
         const val BP_BELOEP_ETT_SOESKEN_JAN_23: Int = 3019
         const val BP_BELOEP_TO_SOESKEN_JAN_23: Int = 2787
         const val BP_BELOEP_ETT_SOESKEN_MAI_23: Int = 3213
-        const val BP_BELOEP_NYTT_REGELVERK: Int = GRUNNBELOEP_MAI_23
+        const val BP_BELOEP_NYTT_REGELVERK_EN_DOED_FORELDER: Int = GRUNNBELOEP_MAI_23
+        const val BP_BELOEP_NYTT_REGELVERK_TO_DOEDE_FORELDRE: Int = 22_241
     }
 }

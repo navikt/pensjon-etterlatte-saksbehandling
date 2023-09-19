@@ -33,7 +33,7 @@ internal class Sakmigrerer(
         context: MessageContext
     ) {
         packet.eventName = Migreringshendelser.MIGRER_SAK
-        val request = tilMigreringsrequest(sak)
+        val request = sak.tilMigreringsrequest()
         packet.hendelseData = request
         if (featureToggleService.isEnabled(MigreringFeatureToggle.SendSakTilMigrering, false)) {
             sendSakTilMigrering(packet, request, context, sak)
@@ -57,17 +57,4 @@ internal class Sakmigrerer(
         )
         pesysRepository.oppdaterStatus(PesysId(sak.id), Migreringsstatus.UNDER_MIGRERING)
     }
-
-    private fun tilMigreringsrequest(sak: Pesyssak) = MigreringRequest(
-        pesysId = PesysId(sak.id),
-        enhet = sak.enhet,
-        soeker = sak.soeker,
-        gjenlevendeForelder = sak.gjenlevendeForelder,
-        avdoedForelder = sak.avdoedForelder,
-        virkningstidspunkt = sak.virkningstidspunkt,
-        foersteVirkningstidspunkt = sak.foersteVirkningstidspunkt,
-        beregning = sak.beregning,
-        trygdetid = sak.trygdetid,
-        flyktningStatus = sak.flyktningStatus
-    )
 }

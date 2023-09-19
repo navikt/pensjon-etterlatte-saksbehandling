@@ -8,6 +8,7 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.POSTGRES_VERSION
 import no.nav.etterlatte.libs.database.migrate
+import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
@@ -18,7 +19,7 @@ import java.util.*
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class InstitusjonsoppholdDaoTest {
+internal class InstitusjonsoppholdDaoTest {
     @Container
     private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:$POSTGRES_VERSION")
     private lateinit var dataSource: DataSource
@@ -37,6 +38,11 @@ class InstitusjonsoppholdDaoTest {
         ).apply { migrate() }
         val connection = dataSource.connection
         institusjonsoppholdDao = InstitusjonsoppholdDao { connection }
+    }
+
+    @AfterAll
+    fun afterAll() {
+        postgreSQLContainer.stop()
     }
 
     @Test

@@ -15,16 +15,15 @@ import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.metrics.OppgaveMetrikkerDao
 import no.nav.etterlatte.oppgaveny.OppgaveDaoNy
 import no.nav.etterlatte.oppgaveny.OppgaveDaoNyImpl
+import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
-import java.util.*
+import java.util.UUID
 import javax.sql.DataSource
-
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class MetrikkerDaoTest {
@@ -59,6 +58,11 @@ internal class MetrikkerDaoTest {
         }
     }
 
+    @AfterAll
+    fun afterAll() {
+        postgreSQLContainer.stop()
+    }
+
     @Test
     fun `Skal returnere antall for totalt, aktive og inaktive oppgaver`() {
         val oppgaver = listOf(
@@ -66,7 +70,7 @@ internal class MetrikkerDaoTest {
             lagNyOppgave(status = Status.UNDER_BEHANDLING),
             lagNyOppgave(status = Status.AVBRUTT),
             lagNyOppgave(status = Status.FERDIGSTILT),
-            lagNyOppgave(status = Status.FEILREGISTRERT),
+            lagNyOppgave(status = Status.FEILREGISTRERT)
         )
         oppgaver.forEach {
             oppgaveDaoNy.lagreOppgave(it)
@@ -84,7 +88,7 @@ internal class MetrikkerDaoTest {
         sakType: SakType = SakType.BARNEPENSJON,
         oppgaveKilde: OppgaveKilde = OppgaveKilde.BEHANDLING,
         oppgaveType: OppgaveType = OppgaveType.FOERSTEGANGSBEHANDLING,
-        status: Status = Status.NY,
+        status: Status = Status.NY
     ) = OppgaveNy(
         id = UUID.randomUUID(),
         status = status,

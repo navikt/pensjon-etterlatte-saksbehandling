@@ -12,13 +12,15 @@ import { Alert, BodyShort, Heading, Link, Tag } from '@navikt/ds-react'
 import { ISak } from '~shared/types/sak'
 import { formaterSakstype } from '~utils/formattering'
 import { ExternalLinkIcon } from '@navikt/aksel-icons'
-import { OpprettKlage } from '~components/person/OpprettKlage'
 import OpprettGenerellBehandling from '~components/person/OpprettGenerellBehandling'
+import { FEATURE_TOGGLE_KAN_BRUKE_KLAGE, OpprettKlage } from '~components/person/OpprettKlage'
 import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
+import { KlageListe } from '~components/person/KlageListe'
 
 export const FEATURE_TOGGLE_KAN_BRUKE_GENERELL_BEHANDLING = 'pensjon-etterlatte.kan-bruke-generell-behandling'
 export const SakOversikt = ({ fnr }: { fnr: string }) => {
   const [sak, setSak] = useState<ISak>()
+  const skalBrukeKlage = useFeatureEnabledMedDefault(FEATURE_TOGGLE_KAN_BRUKE_KLAGE)
   const [behandlingerStatus, hentBehandlinger] = useApiCall(hentBehandlingerForPerson)
   const kanBrukeGenerllBehandling = useFeatureEnabledMedDefault(FEATURE_TOGGLE_KAN_BRUKE_GENERELL_BEHANDLING, false)
 
@@ -59,6 +61,7 @@ export const SakOversikt = ({ fnr }: { fnr: string }) => {
             <hr />
 
             <Behandlingsliste behandlinger={behandlingerStatus.data[0].behandlinger} />
+            {sak && skalBrukeKlage ? <KlageListe sakId={sak.id} /> : null}
           </>
         )}
       </MainContent>

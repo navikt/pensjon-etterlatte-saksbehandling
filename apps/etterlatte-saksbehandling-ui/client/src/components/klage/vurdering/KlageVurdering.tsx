@@ -83,7 +83,12 @@ export function KlageVurdering() {
   const [lagreUtfallStatus, lagreUtfall] = useApiCall(oppdaterUtfallForKlage)
   const dispatch = useAppDispatch()
 
-  const { control, handleSubmit, watch } = useForm<FormdataVurdering>({
+  const {
+    control,
+    handleSubmit,
+    watch,
+    formState: { isDirty },
+  } = useForm<FormdataVurdering>({
     defaultValues: mapKlageTilFormdata(klage),
   })
 
@@ -97,6 +102,11 @@ export function KlageVurdering() {
       // Gjør noe bedre håndtering her
       return
     }
+    if (!isDirty) {
+      // Skjema er fylt ut men med samme innhold som starten => skip lagring og gå videre
+      navigate(`/klage/${klage.id}/oppsummering`)
+    }
+
     const utfall = mapFraFormdataTilKlageUtfall(skjema)
     lagreUtfall({ klageId: klage.id, utfall }, (oppdatertKlage) => {
       dispatch(addKlage(oppdatertKlage))

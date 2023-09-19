@@ -35,6 +35,10 @@ data class OppgaveNy(
     fun erAvsluttet(): Boolean {
         return Status.erAvsluttet(this.status)
     }
+
+    fun erAttestering(): Boolean {
+        return OppgaveType.ATTESTERING === type
+    }
 }
 
 data class OppgaveListe(val sak: Sak, val oppgaver: List<OppgaveNy>)

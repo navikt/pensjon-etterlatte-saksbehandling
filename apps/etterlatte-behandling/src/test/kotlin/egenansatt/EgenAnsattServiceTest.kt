@@ -26,6 +26,7 @@ import no.nav.etterlatte.sak.RealSakService
 import no.nav.etterlatte.sak.SakDao
 import no.nav.etterlatte.sak.SakService
 import no.nav.etterlatte.sak.TilgangService
+import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
@@ -39,7 +40,7 @@ import java.sql.Connection
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class EgenAnsattServiceTest {
+internal class EgenAnsattServiceTest {
     val sikkerLogg: Logger = LoggerFactory.getLogger("sikkerLogg")
 
     @Container
@@ -99,6 +100,11 @@ class EgenAnsattServiceTest {
                 }
             )
         )
+    }
+
+    @AfterAll
+    fun afterAll() {
+        postgreSQLContainer.stop()
     }
 
     @Test

@@ -30,6 +30,7 @@ import no.nav.etterlatte.tilgangsstyring.AzureGroup
 import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
 import no.nav.etterlatte.token.Saksbehandler
 import no.nav.security.token.support.core.jwt.JwtTokenClaims
+import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
@@ -44,7 +45,7 @@ import java.util.*
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class OppgaveServiceNyTest {
+internal class OppgaveServiceNyTest {
 
     private lateinit var dataSource: DataSource
     private lateinit var sakDao: SakDao
@@ -108,6 +109,11 @@ class OppgaveServiceNyTest {
         dataSource.connection.use {
             it.prepareStatement("TRUNCATE oppgave CASCADE;").execute()
         }
+    }
+
+    @AfterAll
+    fun afterAll() {
+        postgreSQLContainer.stop()
     }
 
     @Test

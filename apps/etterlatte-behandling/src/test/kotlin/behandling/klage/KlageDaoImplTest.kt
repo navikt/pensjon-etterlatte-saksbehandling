@@ -13,6 +13,7 @@ import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.POSTGRES_VERSION
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.sak.SakDao
+import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
@@ -23,7 +24,7 @@ import org.testcontainers.junit.jupiter.Container
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class KlageDaoImplTest {
+internal class KlageDaoImplTest {
 
     private lateinit var dataSource: DataSource
     private lateinit var sakRepo: SakDao
@@ -55,6 +56,11 @@ class KlageDaoImplTest {
             .executeUpdate()
         dataSource.connection.prepareStatement("""TRUNCATE TABLE sak CASCADE """)
             .executeUpdate()
+    }
+
+    @AfterAll
+    fun afterAll() {
+        postgreSQLContainer.stop()
     }
 
     @Test

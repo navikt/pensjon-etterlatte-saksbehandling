@@ -9,6 +9,8 @@ import io.mockk.runs
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import kotliquery.TransactionalSession
+import migrering.verifisering.PDLKlient
+import migrering.verifisering.Verifiserer
 import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
@@ -76,7 +78,17 @@ internal class MigreringIntegrationTest {
                         penKlient = mockk<PenKlient>()
                             .also { every { runBlocking { it.hentSak(any()) } } returns responsFraPEN },
                         pesysRepository = repository,
-                        featureToggleService = featureToggleService
+                        featureToggleService = featureToggleService,
+                        verifiserer = Verifiserer(
+                            mockk<PDLKlient>().also {
+                                every {
+                                    it.hentPerson(
+                                        any(),
+                                        any()
+                                    )
+                                } returns mockk()
+                            }
+                        )
                     )
                 }
             inspector.sendTestMessage(
@@ -122,7 +134,17 @@ internal class MigreringIntegrationTest {
                         rapidsConnection = this,
                         penKlient = penKlient,
                         pesysRepository = repository,
-                        featureToggleService = featureToggleService
+                        featureToggleService = featureToggleService,
+                        verifiserer = Verifiserer(
+                            mockk<PDLKlient>().also {
+                                every {
+                                    it.hentPerson(
+                                        any(),
+                                        any()
+                                    )
+                                } returns mockk()
+                            }
+                        )
                     )
                     LagreKopling(this, repository)
                     LyttPaaIverksattVedtak(this, repository, penKlient)

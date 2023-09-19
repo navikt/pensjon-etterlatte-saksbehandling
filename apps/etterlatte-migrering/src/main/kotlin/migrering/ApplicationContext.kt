@@ -2,10 +2,13 @@ package no.nav.etterlatte.migrering
 
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
+import migrering.verifisering.PDLKlient
+import migrering.verifisering.Verifiserer
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleProperties
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.ktor.httpClient
+import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.migrering.pen.PenKlient
 
 internal class ApplicationContext {
@@ -22,6 +25,17 @@ internal class ApplicationContext {
     val featureToggleService: FeatureToggleService =
         FeatureToggleService.initialiser(featureToggleProperties(ConfigFactory.load()))
     val pesysRepository = PesysRepository(dataSource)
+
+    val pdlKlient = PDLKlient(
+        config,
+        httpClientClientCredentials(
+            azureAppClientId = config.getString("azure.app.client.id"),
+            azureAppJwk = config.getString("azure.app.jwk"),
+            azureAppWellKnownUrl = config.getString("azure.app.well.known.url"),
+            azureAppScope = config.getString("pdl.azure.scope")
+        )
+    )
+    val verifiserer = Verifiserer(pdlKlient = pdlKlient)
 }
 
 private fun featureToggleProperties(config: Config) = FeatureToggleProperties(

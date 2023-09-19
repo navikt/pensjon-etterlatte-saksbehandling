@@ -22,7 +22,7 @@ internal class Server(private val context: ApplicationContext) {
         val rapidEnv = getRapidEnv()
         RapidApplication.create(rapidEnv).also { rapidsConnection ->
             Migrering(rapidsConnection, penklient)
-            MigrerSpesifikkSak(rapidsConnection, penklient, pesysRepository, featureToggleService)
+            MigrerSpesifikkSak(rapidsConnection, penklient, pesysRepository, featureToggleService, verifiserer)
             LagreKopling(rapidsConnection, pesysRepository)
             LyttPaaIverksattVedtak(rapidsConnection, pesysRepository, penklient)
         }.start()

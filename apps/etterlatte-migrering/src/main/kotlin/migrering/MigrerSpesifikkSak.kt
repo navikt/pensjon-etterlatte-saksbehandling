@@ -1,6 +1,7 @@
 package no.nav.etterlatte.migrering
 
 import kotlinx.coroutines.runBlocking
+import migrering.verifisering.Verifiserer
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
@@ -30,7 +31,8 @@ internal class MigrerSpesifikkSak(
     rapidsConnection: RapidsConnection,
     private val penKlient: PenKlient,
     private val pesysRepository: PesysRepository,
-    private val featureToggleService: FeatureToggleService
+    private val featureToggleService: FeatureToggleService,
+    private val verifiserer: Verifiserer
 ) : ListenerMedLoggingOgFeilhaandtering(MIGRER_SPESIFIKK_SAK) {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
@@ -56,6 +58,7 @@ internal class MigrerSpesifikkSak(
         packet.eventName = Migreringshendelser.MIGRER_SAK
         val request = pesyssak.tilMigreringsrequest()
         packet.hendelseData = request
+        verifiserer.verifiserRequest(request)
 
         if (featureToggleService.isEnabled(MigreringFeatureToggle.SendSakTilMigrering, false)) {
             sendSakTilMigrering(packet, request, context, pesyssak)

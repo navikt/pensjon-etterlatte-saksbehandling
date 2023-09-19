@@ -9,9 +9,7 @@ import com.github.michaelbull.result.get
 import com.github.mustachejava.DefaultMustacheFactory
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
-import io.ktor.client.request.header
 import io.ktor.http.ContentType
-import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.serialization.jackson.jackson
 import io.ktor.server.application.ApplicationCall
@@ -43,7 +41,6 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.kafka.GcpKafkaConfig
 import no.nav.etterlatte.kafka.LocalKafkaConfig
 import no.nav.etterlatte.kafka.standardProducer
-import no.nav.etterlatte.libs.common.logging.NAV_CONSUMER_ID
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.ktor.firstValidTokenClaims
 import no.nav.etterlatte.libs.ktor.httpClient
@@ -158,14 +155,6 @@ private fun Route.api() {
         }
     }
 }
-
-fun httpClient() = httpClient(
-    forventSuksess = true,
-    ekstraDefaultHeaders = {
-        it.header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-        it.header(NAV_CONSUMER_ID, "etterlatte-testdata")
-    }
-)
 
 fun PipelineContext<Unit, ApplicationCall>.navIdentFraToken() =
     call.firstValidTokenClaims()?.get("NAVident")?.toString()

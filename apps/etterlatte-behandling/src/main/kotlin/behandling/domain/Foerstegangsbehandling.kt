@@ -80,22 +80,33 @@ data class Foerstegangsbehandling(
         )
     ) { endreTilStatus(BehandlingStatus.TRYGDETID_OPPDATERT) }
 
-    override fun tilBeregnet(): Foerstegangsbehandling = hvisTilstandEr(
-        listOf(
-            BehandlingStatus.TRYGDETID_OPPDATERT,
-            BehandlingStatus.BEREGNET,
-            BehandlingStatus.AVKORTET,
-            BehandlingStatus.RETURNERT
-        )
-    ) { endreTilStatus(BehandlingStatus.BEREGNET) }
+    override fun tilBeregnet(fastTrygdetid: Boolean): Foerstegangsbehandling =
+        hvisTilstandEr(
+            if (fastTrygdetid) {
+                listOf(
+                    BehandlingStatus.VILKAARSVURDERT,
+                    BehandlingStatus.BEREGNET,
+                    BehandlingStatus.AVKORTET,
+                    BehandlingStatus.RETURNERT
+                )
+            } else {
+                listOf(
+                    BehandlingStatus.TRYGDETID_OPPDATERT,
+                    BehandlingStatus.BEREGNET,
+                    BehandlingStatus.AVKORTET,
+                    BehandlingStatus.RETURNERT
+                )
+            }
+        ) { endreTilStatus(BehandlingStatus.BEREGNET) }
 
-    override fun tilAvkortet(): Foerstegangsbehandling = hvisTilstandEr(
-        listOf(
-            BehandlingStatus.BEREGNET,
-            BehandlingStatus.AVKORTET,
-            BehandlingStatus.RETURNERT
-        )
-    ) { endreTilStatus(BehandlingStatus.AVKORTET) }
+    override fun tilAvkortet(): Foerstegangsbehandling =
+        hvisTilstandEr(
+            listOf(
+                BehandlingStatus.BEREGNET,
+                BehandlingStatus.AVKORTET,
+                BehandlingStatus.RETURNERT
+            )
+        ) { endreTilStatus(BehandlingStatus.AVKORTET) }
 
     override fun tilFattetVedtak(): Foerstegangsbehandling {
         if (!erFyltUt()) {

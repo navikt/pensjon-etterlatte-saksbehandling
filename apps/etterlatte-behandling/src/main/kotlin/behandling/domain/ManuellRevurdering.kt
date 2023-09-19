@@ -88,13 +88,22 @@ data class ManuellRevurdering(
         )
     ) { endreTilStatus(BehandlingStatus.TRYGDETID_OPPDATERT) }
 
-    override fun tilBeregnet() = hvisTilstandEr(
-        listOf(
-            BehandlingStatus.TRYGDETID_OPPDATERT,
-            BehandlingStatus.BEREGNET,
-            BehandlingStatus.RETURNERT
-        )
-    ) { endreTilStatus(BehandlingStatus.BEREGNET) }
+    override fun tilBeregnet(fastTrygdetid: Boolean) =
+        hvisTilstandEr(
+            if (fastTrygdetid) {
+                listOf(
+                    BehandlingStatus.VILKAARSVURDERT,
+                    BehandlingStatus.BEREGNET,
+                    BehandlingStatus.RETURNERT
+                )
+            } else {
+                listOf(
+                    BehandlingStatus.TRYGDETID_OPPDATERT,
+                    BehandlingStatus.BEREGNET,
+                    BehandlingStatus.RETURNERT
+                )
+            }
+        ) { endreTilStatus(BehandlingStatus.BEREGNET) }
 
     override fun tilAvkortet() = hvisTilstandEr(
         listOf(

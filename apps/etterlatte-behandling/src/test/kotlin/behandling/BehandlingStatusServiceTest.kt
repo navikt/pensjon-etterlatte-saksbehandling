@@ -13,6 +13,7 @@ import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.behandling.hendelse.HendelseType
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.foerstegangsbehandling
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -70,8 +71,19 @@ internal class BehandlingStatusServiceTest {
         }
         val grlService = mockk<GrunnlagsendringshendelseService>()
         val oppgaveService = mockk<OppgaveServiceNy>()
+        val featureToggleService =
+            mockk<FeatureToggleService> {
+                every { isEnabled(any(), any()) } returns true
+            }
 
-        val sut = BehandlingStatusServiceImpl(behandlingdao, behandlingService, grlService, oppgaveService)
+        val sut =
+            BehandlingStatusServiceImpl(
+                behandlingdao,
+                behandlingService,
+                grlService,
+                oppgaveService,
+                featureToggleService
+            )
 
         sut.settIverksattVedtak(behandlingId, iverksettVedtak)
 
@@ -136,7 +148,19 @@ internal class BehandlingStatusServiceTest {
             every { hentSaksbehandlerFraFoerstegangsbehandling(behandlingId) } returns saksbehandler
         }
 
-        val sut = BehandlingStatusServiceImpl(behandlingdao, behandlingService, grlService, oppgaveService)
+        val featureToggleService =
+            mockk<FeatureToggleService> {
+                every { isEnabled(any(), any()) } returns true
+            }
+
+        val sut =
+            BehandlingStatusServiceImpl(
+                behandlingdao,
+                behandlingService,
+                grlService,
+                oppgaveService,
+                featureToggleService
+            )
 
         sut.settIverksattVedtak(behandlingId, iverksettVedtak)
 

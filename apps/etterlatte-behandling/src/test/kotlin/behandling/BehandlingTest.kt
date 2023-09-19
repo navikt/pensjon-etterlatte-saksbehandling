@@ -66,13 +66,14 @@ internal class BehandlingTest {
 
     @Test
     fun `kan ikke oppdatere behandlingen når den er til attestering`() {
-        val behandlingTilAttestering = behandling
-            .oppdaterVirkningstidspunkt(virkningstidspunkt)
-            .oppdaterGyldighetsproeving(gyldighetsResultat)
-            .tilVilkaarsvurdert()
-            .tilTrygdetidOppdatert()
-            .tilBeregnet()
-            .tilFattetVedtak()
+        val behandlingTilAttestering =
+            behandling
+                .oppdaterVirkningstidspunkt(virkningstidspunkt)
+                .oppdaterGyldighetsproeving(gyldighetsResultat)
+                .tilVilkaarsvurdert()
+                .tilTrygdetidOppdatert()
+                .tilBeregnet(false)
+                .tilFattetVedtak()
 
         assertThrows<TilstandException.UgyldigTilstand> {
             behandlingTilAttestering.oppdaterVirkningstidspunkt(virkningstidspunkt)
@@ -81,15 +82,16 @@ internal class BehandlingTest {
 
     @Test
     fun `kan ikke oppdatere behandling når den er iverksatt`() {
-        val iverksattBehandling = behandling
-            .oppdaterVirkningstidspunkt(virkningstidspunkt)
-            .oppdaterGyldighetsproeving(gyldighetsResultat)
-            .tilVilkaarsvurdert()
-            .tilTrygdetidOppdatert()
-            .tilBeregnet()
-            .tilFattetVedtak()
-            .tilAttestert()
-            .tilIverksatt()
+        val iverksattBehandling =
+            behandling
+                .oppdaterVirkningstidspunkt(virkningstidspunkt)
+                .oppdaterGyldighetsproeving(gyldighetsResultat)
+                .tilVilkaarsvurdert()
+                .tilTrygdetidOppdatert()
+                .tilBeregnet(false)
+                .tilFattetVedtak()
+                .tilAttestert()
+                .tilIverksatt()
 
         assertThrows<TilstandException.UgyldigTilstand> { iverksattBehandling.tilReturnert() }
         assertThrows<TilstandException.UgyldigTilstand> {
@@ -126,14 +128,15 @@ internal class BehandlingTest {
 
     @Test
     fun `behandling kan endres igjen etter den har blitt returnet av attestant`() {
-        val returnertBehandling = behandling
-            .oppdaterVirkningstidspunkt(virkningstidspunkt)
-            .oppdaterGyldighetsproeving(gyldighetsResultat)
-            .tilVilkaarsvurdert()
-            .tilTrygdetidOppdatert()
-            .tilBeregnet()
-            .tilFattetVedtak()
-            .tilReturnert()
+        val returnertBehandling =
+            behandling
+                .oppdaterVirkningstidspunkt(virkningstidspunkt)
+                .oppdaterGyldighetsproeving(gyldighetsResultat)
+                .tilVilkaarsvurdert()
+                .tilTrygdetidOppdatert()
+                .tilBeregnet(false)
+                .tilFattetVedtak()
+                .tilReturnert()
 
         val nyttVirkningstidspunkt = Virkningstidspunkt(YearMonth.of(2022, 2), saksbehandler, "begrunnelse")
 
@@ -146,10 +149,11 @@ internal class BehandlingTest {
 
     @Test
     fun `man maa gjennom hele loeypen paa nytt dersom man gjoer operasjoner i tidligere steg`() {
-        val vilkaarsvurdertBehandling = behandling
-            .oppdaterVirkningstidspunkt(virkningstidspunkt)
-            .oppdaterGyldighetsproeving(gyldighetsResultat)
-            .tilVilkaarsvurdert()
+        val vilkaarsvurdertBehandling =
+            behandling
+                .oppdaterVirkningstidspunkt(virkningstidspunkt)
+                .oppdaterGyldighetsproeving(gyldighetsResultat)
+                .tilVilkaarsvurdert()
         val nyttVirkningstidspunkt = Virkningstidspunkt(YearMonth.of(2022, 2), saksbehandler, "begrunnelse")
 
         vilkaarsvurdertBehandling
@@ -161,16 +165,17 @@ internal class BehandlingTest {
 
     @Test
     fun `kan gaa fra RETURNERT til alle redigerbare states`() {
-        val initialBehandling = behandling
-            .oppdaterVirkningstidspunkt(virkningstidspunkt)
-            .oppdaterGyldighetsproeving(gyldighetsResultat)
-            .tilVilkaarsvurdert()
-            .tilTrygdetidOppdatert()
-            .tilBeregnet()
-            .tilFattetVedtak()
+        val initialBehandling =
+            behandling
+                .oppdaterVirkningstidspunkt(virkningstidspunkt)
+                .oppdaterGyldighetsproeving(gyldighetsResultat)
+                .tilVilkaarsvurdert()
+                .tilTrygdetidOppdatert()
+                .tilBeregnet(false)
+                .tilFattetVedtak()
 
         initialBehandling.tilReturnert().tilFattetVedtak()
-        initialBehandling.tilReturnert().tilBeregnet()
+        initialBehandling.tilReturnert().tilBeregnet(false)
         initialBehandling.tilReturnert().tilVilkaarsvurdert()
         initialBehandling.tilReturnert().tilTrygdetidOppdatert()
         initialBehandling.tilReturnert().tilOpprettet()
@@ -178,14 +183,15 @@ internal class BehandlingTest {
 
     @Test
     fun `kan ikke gaa fra RETURNERT til ATTESTERT`() {
-        val behandling = behandling
-            .oppdaterVirkningstidspunkt(virkningstidspunkt)
-            .oppdaterGyldighetsproeving(gyldighetsResultat)
-            .tilVilkaarsvurdert()
-            .tilTrygdetidOppdatert()
-            .tilBeregnet()
-            .tilFattetVedtak()
-            .tilReturnert()
+        val behandling =
+            behandling
+                .oppdaterVirkningstidspunkt(virkningstidspunkt)
+                .oppdaterGyldighetsproeving(gyldighetsResultat)
+                .tilVilkaarsvurdert()
+                .tilTrygdetidOppdatert()
+                .tilBeregnet(false)
+                .tilFattetVedtak()
+                .tilReturnert()
 
         assertThrows<TilstandException.UgyldigTilstand> {
             behandling.tilAttestert()
@@ -194,17 +200,60 @@ internal class BehandlingTest {
 
     @Test
     fun `kan ikke gaa fra RETURNERT til IVERKSATT`() {
-        val behandling = behandling
+        val behandling =
+            behandling
+                .oppdaterVirkningstidspunkt(virkningstidspunkt)
+                .oppdaterGyldighetsproeving(gyldighetsResultat)
+                .tilVilkaarsvurdert()
+                .tilTrygdetidOppdatert()
+                .tilBeregnet(false)
+                .tilFattetVedtak()
+                .tilReturnert()
+
+        assertThrows<TilstandException.UgyldigTilstand> {
+            behandling.tilIverksatt()
+        }
+    }
+
+    @Test
+    fun `kan gaa fra VILKAARSVURDERT til BEREGNET ved fast trygdetid`() {
+        behandling
+            .oppdaterVirkningstidspunkt(virkningstidspunkt)
+            .oppdaterGyldighetsproeving(gyldighetsResultat)
+            .tilVilkaarsvurdert()
+            .tilBeregnet(true)
+    }
+
+    @Test
+    fun `kan ikke gaa fra VILKAARSVURDERT til TRYGDETID_OPPRETTET ved fast trygdetid`() {
+        assertThrows<TilstandException.UgyldigTilstand> {
+            behandling
+                .oppdaterVirkningstidspunkt(virkningstidspunkt)
+                .oppdaterGyldighetsproeving(gyldighetsResultat)
+                .tilVilkaarsvurdert()
+                .tilTrygdetidOppdatert()
+                .tilBeregnet(true)
+        }
+    }
+
+    @Test
+    fun `kan gaa fra VILKAARSVURDERT til TRYGDETID_OPPRETTET ved faktisk trygdetid`() {
+        behandling
             .oppdaterVirkningstidspunkt(virkningstidspunkt)
             .oppdaterGyldighetsproeving(gyldighetsResultat)
             .tilVilkaarsvurdert()
             .tilTrygdetidOppdatert()
-            .tilBeregnet()
-            .tilFattetVedtak()
-            .tilReturnert()
+            .tilBeregnet(false)
+    }
 
+    @Test
+    fun `kan ikke gaa fra VILKAARSVURDERT til BEREGNET ved faktisk trygdetid`() {
         assertThrows<TilstandException.UgyldigTilstand> {
-            behandling.tilIverksatt()
+            behandling
+                .oppdaterVirkningstidspunkt(virkningstidspunkt)
+                .oppdaterGyldighetsproeving(gyldighetsResultat)
+                .tilVilkaarsvurdert()
+                .tilBeregnet(false)
         }
     }
 }

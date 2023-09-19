@@ -134,7 +134,7 @@ sealed class Behandling {
         throw BehandlingStoetterIkkeStatusEndringException(TRYGDETID_OPPDATERT)
     }
 
-    open fun tilBeregnet(): Behandling {
+    open fun tilBeregnet(fastTrygdetid: Boolean): Behandling {
         throw BehandlingStoetterIkkeStatusEndringException(BEREGNET)
     }
 

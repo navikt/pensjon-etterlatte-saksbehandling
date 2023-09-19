@@ -69,8 +69,6 @@ spec:
   env:
     - name: MASKINPORTEN_WELL_KNOWN_URL
       value: https://test.maskinporten.no/.well-known/oauth-authorization-server
-    - name: ETTERLATTE_VEDTAKSVURDERING_CLIENT_ID
-      value: 069b1b2c-0a06-4cc9-8418-f100b8ff71be
     - name: ETTERLATTE_VEDTAKSVURDERING_URL
       value: http://etterlatte-vedtaksvurdering
     - name: ETTERLATTE_VEDTAKSVURDERING_SCOPE

@@ -60,9 +60,10 @@ export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => 
           Gjenlevende sin situasjon
         </Heading>
         <BodyLong spacing>
-          Ut ifra tid etter dødsfall stilles det ulike krav til aktivitet hos søker. Innen det har gått 6 måneder etter
-          dødsfall skal søker være i minst 50 % aktivitet for å motta omstillingstønad. Videre kan det forventes 100%
-          aktivitet etter 12 måneder.
+          Det stilles ulike krav til aktivitet utifra tid etter dødsfallet. Seks måneder etter dødsfallet må gjenlevende
+          være i minst 50 % aktivitet for å ha rett til omstillingsstønad. Videre kan det stilles krav til 100 %
+          aktivitet etter 12 måneder. I visse tilfeller kan man ha rett på omstillingsstønad selv om aktivitetskravet
+          ikke er oppfylt.
         </BodyLong>
 
         <Heading size={'small'} spacing>
@@ -138,7 +139,14 @@ export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => 
           arbeidslivet og/ eller ikke har andre ytelser fra Nav.
         </BodyLong>
         <SpacingWrapper>
-          <Button variant="secondary" size="small" className="button" onClick={() => true}>
+          <Button
+            variant="secondary"
+            size="small"
+            className="button"
+            as="a"
+            href={`${configContext['gosysUrl']}/personoversikt/fnr=${behandling.søker?.foedselsnummer}`}
+            target="_blank"
+          >
             Lag oppgave til lokalkontor <ExternalLinkIcon />
           </Button>
         </SpacingWrapper>

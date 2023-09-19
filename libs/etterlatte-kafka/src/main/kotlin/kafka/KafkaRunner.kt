@@ -11,6 +11,7 @@ fun <T> startLytting(
     withLogContext {
         Thread {
             try {
+                logger.info("Starter å lytte på ${konsument.topic}")
                 konsument.stream()
             } catch (e: Exception) {
                 logger.error("App avsluttet med en feil", e)

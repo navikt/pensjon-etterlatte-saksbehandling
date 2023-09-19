@@ -1,20 +1,5 @@
 package no.nav.etterlatte.klage.modell
 
-enum class BehandlingResultat() {
-    MEDHOLD,
-    IKKE_MEDHOLD,
-    IKKE_MEDHOLD_FORMKRAV_AVVIST,
-    IKKE_SATT,
-    HENLAGT
-}
-
-enum class BehandlingStatus {
-    OPPRETTET,
-    UTREDES,
-    VENTER,
-    FERDIGSTILT
-}
-
 enum class Aarsak {
     FEIL_I_LOVANDVENDELSE,
     FEIL_REGELVERKSFORSTÅELSE,

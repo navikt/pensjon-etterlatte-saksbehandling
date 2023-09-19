@@ -4,6 +4,7 @@ plugins {
 }
 
 dependencies {
+    implementation(project(":libs:etterlatte-behandling-model"))
     implementation(project(":libs:etterlatte-kafka"))
     implementation(project(":libs:etterlatte-ktor"))
     implementation(project(":libs:etterlatte-funksjonsbrytere"))

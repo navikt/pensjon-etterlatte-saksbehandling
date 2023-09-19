@@ -117,8 +117,9 @@ export default function RedigerbartBrev({ brev, kanRedigeres }: RedigerbartBrevP
         </Tabs.List>
 
         <Tabs.Panel value={ManueltBrevFane.REDIGER}>
-          {isPendingOrInitial(hentManuellPayloadStatus) ||
-            (isPending(tilbakestillManuellPayloadStatus) && <Spinner visible label={'Henter brevinnhold ...'} />)}
+          {(isPendingOrInitial(hentManuellPayloadStatus) || isPending(tilbakestillManuellPayloadStatus)) && (
+            <Spinner visible label={'Henter brevinnhold ...'} />
+          )}
           {isSuccess(hentManuellPayloadStatus) && isSuccessOrInitial(tilbakestillManuellPayloadStatus) && (
             <PanelWrapper>
               <SlateEditor value={content} onChange={onChange} readonly={!kanRedigeres} />

@@ -89,7 +89,6 @@ internal class VedtaksbrevServiceTest {
             sakOgBehandlingService,
             adresseService,
             dokarkivService,
-            brevService,
             BrevbakerService(brevbaker, adresseService, brevDataMapper),
             brevDataMapper,
             brevProsessTypeFactory
@@ -448,19 +447,25 @@ internal class VedtaksbrevServiceTest {
                 opprettBehandling(SakType.OMSTILLINGSSTOENAD, VedtakType.OPPHOER, VedtakStatus.FATTET_VEDTAK)
 
             val brev = opprettBrev(Status.OPPRETTET, BrevProsessType.REDIGERBAR)
-            val payload = opprettOpphoerPayload()
+            val opphoerPayload = opprettOpphoerPayload()
+            val tomPayload = Slate(listOf(Slate.Element(Slate.ElementType.PARAGRAPH)))
             every { db.hentBrev(any()) } returns brev
             coEvery { sakOgBehandlingService.hentBehandling(any(), any(), any()) } returns behandling
-            coEvery { brevService.hentBrevPayload(any()) } returns BrevService.BrevPayload(payload, null)
+
+            runBlocking {
+                db.oppdaterPayload(brev.id, tomPayload)
+            }
 
             val nyttInnhold = runBlocking {
                 vedtaksbrevService.hentNyttInnhold(brev.sakId, brev.id, brev.behandlingId!!, SAKSBEHANDLER)
             }
 
-            nyttInnhold shouldBe BrevService.BrevPayload(payload, null)
+            nyttInnhold shouldBe BrevService.BrevPayload(opphoerPayload, emptyList())
 
             verify {
-                db.oppdaterPayload(brev.id, payload)
+                db.oppdaterPayload(brev.id, opphoerPayload)
+                db.oppdaterPayload(brev.id, tomPayload)
+                db.hentBrevPayloadVedlegg(brev.id)
             }
 
             coVerify {

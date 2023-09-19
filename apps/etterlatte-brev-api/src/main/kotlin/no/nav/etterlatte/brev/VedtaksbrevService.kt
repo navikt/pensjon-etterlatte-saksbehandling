@@ -35,7 +35,6 @@ class VedtaksbrevService(
     private val sakOgBehandlingService: SakOgBehandlingService,
     private val adresseService: AdresseService,
     private val dokarkivService: DokarkivServiceImpl,
-    private val brevService: BrevService,
     private val brevbaker: BrevbakerService,
     private val brevDataMapper: BrevDataMapper,
     private val brevProsessTypeFactory: BrevProsessTypeFactory
@@ -123,7 +122,10 @@ class VedtaksbrevService(
             db.oppdaterPayloadVedlegg(brevId, innholdVedlegg)
         }
 
-        return brevService.hentBrevPayload(brevId)
+        return BrevService.BrevPayload(
+            innhold.payload ?: db.hentBrevPayload(brevId),
+            innholdVedlegg ?: db.hentBrevPayloadVedlegg(brevId)
+        )
     }
 
     private fun opprettBrevData(brev: Brev, behandling: Behandling, brevkode: BrevDataMapper.BrevkodePar): BrevData =

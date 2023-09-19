@@ -10,6 +10,7 @@ import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Utenlandstilsnitt
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
+import no.nav.etterlatte.libs.common.behandling.girOpphoer
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
@@ -90,7 +91,7 @@ data class ManuellRevurdering(
 
     override fun tilBeregnet(fastTrygdetid: Boolean) =
         hvisTilstandEr(
-            if (fastTrygdetid) {
+            if (fastTrygdetid || this.revurderingsaarsak.girOpphoer()) {
                 listOf(
                     BehandlingStatus.VILKAARSVURDERT,
                     BehandlingStatus.BEREGNET,

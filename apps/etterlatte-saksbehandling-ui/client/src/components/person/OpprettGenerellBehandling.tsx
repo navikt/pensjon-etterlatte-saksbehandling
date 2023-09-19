@@ -1,9 +1,10 @@
 import { Button, Heading, Modal, Select } from '@navikt/ds-react'
-import { isPending, useApiCall } from '~shared/hooks/useApiCall'
+import { isFailure, isPending, useApiCall } from '~shared/hooks/useApiCall'
 import { useState } from 'react'
 import { opprettNyGenerellBehandling } from '~shared/api/generellbehandling'
 import { GenerellBehandlingType, Innholdstyper } from '~shared/types/Generellbehandling'
 import styled from 'styled-components'
+import { ApiErrorAlert } from '~ErrorBoundary'
 
 const ButtonWrapper = styled.div`
   display: flex;
@@ -11,19 +12,26 @@ const ButtonWrapper = styled.div`
   gap: 1em;
   margin: 2rem 0rem;
 `
+type VELG = 'VELG'
+type GenBehandlingTyperOgDefaultState = GenerellBehandlingType | VELG
+
+function erGenerellBehandlingType(valg: GenBehandlingTyperOgDefaultState): valg is GenerellBehandlingType {
+  return valg !== 'VELG'
+}
 
 const OpprettGenerellBehandling = (props: { sakId: number }) => {
   const { sakId } = props
   const [opprettGenBehandlingStatus, opprettGenBehandlingKall] = useApiCall(opprettNyGenerellBehandling)
   const [open, setOpen] = useState<boolean>(false)
-  const [generellBehandlingType, setGenerellBehandlingType] = useState<GenerellBehandlingType | undefined>(undefined)
-  const initialStateOrEmpty = generellBehandlingType === undefined
+  const [generellBehandlingType, setGenerellBehandlingType] = useState<GenBehandlingTyperOgDefaultState>('VELG')
+  const uvalgt = generellBehandlingType === 'VELG'
 
   const opprettGenBehandlingKallWrapper = () => {
-    if (generellBehandlingType) {
-      opprettGenBehandlingKall({ sakId, type: generellBehandlingType })
+    if (erGenerellBehandlingType(generellBehandlingType)) {
+      opprettGenBehandlingKall({ sakId, type: generellBehandlingType }, () => setOpen(false))
     }
   }
+
   return (
     <>
       <Button onClick={() => setOpen(!open)}>Lag generell behandling</Button>
@@ -39,18 +47,23 @@ const OpprettGenerellBehandling = (props: { sakId: number }) => {
             value={generellBehandlingType}
             onChange={(e) => setGenerellBehandlingType(e.target.value as GenerellBehandlingType)}
           >
-            <option value={''}>Velg behandlingstype</option>
+            <option value={'VELG'} disabled={true}>
+              Velg behandlingstype
+            </option>
             {Object.entries(Innholdstyper).map(([type, text]) => (
               <option key={type} value={type}>
                 {text}
               </option>
             ))}
           </Select>
+          {isFailure(opprettGenBehandlingStatus) && (
+            <ApiErrorAlert>Kunne ikke opprette generell behandling</ApiErrorAlert>
+          )}
           <ButtonWrapper>
             <Button
               onClick={() => opprettGenBehandlingKallWrapper()}
               loading={isPending(opprettGenBehandlingStatus)}
-              disabled={initialStateOrEmpty}
+              disabled={uvalgt}
             >
               Opprett generell behandling
             </Button>

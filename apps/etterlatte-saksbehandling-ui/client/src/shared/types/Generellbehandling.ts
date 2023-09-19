@@ -8,7 +8,9 @@ export const Innholdstyper: Record<GenerellBehandlingType, string> = {
   UTLAND: 'Utland',
   ANNEN: 'Annen',
 }
+
 export type GenerellBehandlingType = GenerellBehandlingUtlandType | GenerellBehandlingAnnenType
+
 type GenerellBehandlingUtlandType = 'UTLAND'
 type GenerellBehandlingAnnenType = 'ANNEN'
 

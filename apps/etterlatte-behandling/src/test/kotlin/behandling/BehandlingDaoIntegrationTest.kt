@@ -99,12 +99,9 @@ internal class BehandlingDaoIntegrationTest {
     fun `skal opprette foerstegangsbehandling med persongalleri`() {
         val sak1 = sakRepo.opprettSak("123", SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr).id
 
-        val persongalleri = persongalleri()
-
         val opprettBehandlingMedPersongalleri = opprettBehandling(
             type = BehandlingType.FØRSTEGANGSBEHANDLING,
-            sakId = sak1,
-            persongalleri = persongalleri
+            sakId = sak1
         )
 
         behandlingRepo.opprettBehandling(opprettBehandlingMedPersongalleri)
@@ -112,16 +109,6 @@ internal class BehandlingDaoIntegrationTest {
             behandlingRepo.hentBehandling(opprettBehandlingMedPersongalleri.id)
         ) as Foerstegangsbehandling
         assertEquals(opprettBehandlingMedPersongalleri.id, opprettetBehandling.id)
-        /*
-        assertEquals(
-            persongalleri.avdoed,
-            opprettetBehandling.persongalleri.avdoed
-        )
-        assertEquals(
-            persongalleri.soesken,
-            opprettetBehandling.persongalleri.soesken
-        )
-         */
         assertEquals(
             opprettBehandlingMedPersongalleri.opprettet,
             opprettetBehandling.behandlingOpprettet.toTidspunkt()

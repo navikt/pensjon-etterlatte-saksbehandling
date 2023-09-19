@@ -16,7 +16,6 @@ data class OpprettBehandling(
     val type: BehandlingType,
     val sakId: Long,
     val status: BehandlingStatus,
-    val persongalleri: Persongalleri,
     val soeknadMottattDato: LocalDateTime? = null,
     val virkningstidspunkt: Virkningstidspunkt? = null,
     val revurderingsAarsak: RevurderingAarsak? = null,

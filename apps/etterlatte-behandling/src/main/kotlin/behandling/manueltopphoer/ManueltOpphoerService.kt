@@ -85,7 +85,6 @@ class RealManueltOpphoerService(
             val alleBehandlingerISak = behandlingDao.alleBehandlingerISak(opphoerRequest.sakId).filterForEnheter()
             val forrigeBehandling = alleBehandlingerISak.sisteIkkeAvbrutteBehandling()
             val virkningstidspunkt = alleBehandlingerISak.tidligsteIverksatteVirkningstidspunkt()
-            val persongalleri = runBlocking { grunnlagService.hentPersongalleri(opphoerRequest.sakId) }
 
             if (virkningstidspunkt == null) {
                 logger.warn(
@@ -100,7 +99,6 @@ class RealManueltOpphoerService(
                     type = BehandlingType.MANUELT_OPPHOER,
                     sakId = forrigeBehandling.sak.id,
                     status = BehandlingStatus.OPPRETTET,
-                    persongalleri = persongalleri,
                     opphoerAarsaker = opphoerRequest.opphoerAarsaker,
                     fritekstAarsak = opphoerRequest.fritekstAarsak,
                     virkningstidspunkt = virkningstidspunkt,

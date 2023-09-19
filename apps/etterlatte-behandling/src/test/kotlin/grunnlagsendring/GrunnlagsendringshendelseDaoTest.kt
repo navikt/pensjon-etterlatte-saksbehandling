@@ -388,13 +388,6 @@ internal class GrunnlagsendringshendelseDaoTest {
             type = BehandlingType.REVURDERING,
             sakId = sak1,
             status = BehandlingStatus.OPPRETTET,
-            persongalleri = Persongalleri(
-                soeker = "12312312312",
-                innsender = null,
-                soesken = listOf(),
-                avdoed = listOf(),
-                gjenlevende = listOf()
-            ),
             soeknadMottattDato = null,
             virkningstidspunkt = null,
             revurderingsAarsak = RevurderingAarsak.SOESKENJUSTERING,

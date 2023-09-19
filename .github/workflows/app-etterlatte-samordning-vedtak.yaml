@@ -16,9 +16,12 @@ on:
       - main
     paths:
       - apps/etterlatte-samordning-vedtak/**
+      - libs/etterlatte-beregning-model/**
       - libs/etterlatte-ktor/**
       - libs/etterlatte-sporingslogg/**
+      - libs/etterlatte-vedtaksvurdering-model/**
       - libs/ktor2client-auth-clientcredentials/**
+      - libs/ktor2client-onbehalfof/**
       - gradle/libs.versions.toml
   pull_request:
     branches:
@@ -26,7 +29,10 @@ on:
     paths:
       - apps/etterlatte-samordning-vedtak/**
       - libs/etterlatte-ktor/**
+      - libs/etterlatte-sporingslogg/**
+      - libs/etterlatte-vedtaksvurdering-model/**
       - libs/ktor2client-auth-clientcredentials/**
+      - libs/ktor2client-onbehalfof/**
       - gradle/libs.versions.toml
 
 jobs:

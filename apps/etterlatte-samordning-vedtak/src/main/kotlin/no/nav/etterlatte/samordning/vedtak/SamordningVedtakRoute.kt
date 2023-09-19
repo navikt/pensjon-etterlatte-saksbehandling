@@ -1,11 +1,14 @@
 package no.nav.etterlatte.samordning.vedtak
 
 import io.ktor.http.HttpStatusCode
+import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.call
+import io.ktor.server.auth.principal
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.route
+import no.nav.security.token.support.v2.TokenValidationContextPrincipal
 import java.time.LocalDate
 import kotlin.random.Random
 
@@ -38,7 +41,7 @@ enum class SamordningVedtakAarsak {
     ANNET
 }
 
-fun Route.samordningVedtakRoute() {
+fun Route.samordningVedtakRoute(samordningVedtakService: SamordningVedtakService) {
     route("ping") {
         get {
             call.respond("Tjeneste ok")
@@ -48,6 +51,10 @@ fun Route.samordningVedtakRoute() {
     route("api/vedtak") {
         get("{vedtakId}") {
             val vedtakId = requireNotNull(call.parameters["vedtakId"]).toLong()
+            val organisasjonsnr = call.orgNummer
+
+            // Fjern catch sammen med dummy data
+            val dto = runCatching { samordningVedtakService.hentVedtak(vedtakId, organisasjonsnr) }
 
             val dummystart = LocalDate.now().withDayOfMonth(1)
             val vedtaksinfo = dummySamordningVedtakDto(dummystart, vedtakId)
@@ -91,3 +98,15 @@ private fun dummySamordningVedtakDto(
             )
         )
 )
+
+inline val ApplicationCall.orgNummer: String
+    get() {
+        val claims =
+            this.principal<TokenValidationContextPrincipal>()
+                ?.context
+                ?.getJwtToken("maskinporten")
+                ?.jwtTokenClaims
+                ?.get("consumer") as Map<*, *>?
+                ?: throw IllegalArgumentException("Kan ikke hente ut organisasjonsnummer")
+        return (claims["ID"] as String).split(":")[1]
+    }

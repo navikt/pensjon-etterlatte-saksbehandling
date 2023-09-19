@@ -58,7 +58,13 @@ internal class MigrerSpesifikkSak(
         packet.eventName = Migreringshendelser.MIGRER_SAK
         val request = pesyssak.tilMigreringsrequest()
         packet.hendelseData = request
-        verifiserer.verifiserRequest(request)
+        try {
+            verifiserer.verifiserRequest(request)
+        } catch (e: Exception) {
+            logger.warn("Sak ${request.pesysId} har ufullstendige data i PDL, kan ikke migrere")
+            pesysRepository.oppdaterStatus(request.pesysId, Migreringsstatus.FEILA)
+            throw e
+        }
 
         if (featureToggleService.isEnabled(MigreringFeatureToggle.SendSakTilMigrering, false)) {
             sendSakTilMigrering(packet, request, context, pesyssak)

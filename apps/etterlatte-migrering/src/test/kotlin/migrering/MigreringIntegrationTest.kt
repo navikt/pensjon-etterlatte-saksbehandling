@@ -196,6 +196,7 @@ internal class MigreringIntegrationTest {
     @Test
     fun `feiler hvis en person ikke fins i PDL`() {
         testApplication {
+            val pesysid = 22974139L
             val repository = PesysRepository(datasource)
             val featureToggleService = DummyFeatureToggleService().also {
                 it.settBryter(MigreringFeatureToggle.SendSakTilMigrering, true)
@@ -228,13 +229,14 @@ internal class MigreringIntegrationTest {
                 JsonMessage.newMessage(
                     mapOf(
                         EVENT_NAME_KEY to Migreringshendelser.MIGRER_SPESIFIKK_SAK,
-                        SAK_ID_KEY to "22974139"
+                        SAK_ID_KEY to pesysid
                     )
                 ).toJson()
             )
             with(inspector.inspektør.message(0)) {
                 assertEquals(Migreringsstatus.FEILA.name, get(EVENT_NAME_KEY).textValue())
             }
+            assertEquals(Migreringsstatus.FEILA, repository.hentStatus(pesysid))
         }
     }
 }

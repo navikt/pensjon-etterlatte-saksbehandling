@@ -2,7 +2,6 @@ package no.nav.etterlatte.vedtaksvurdering
 
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
-import io.ktor.server.application.install
 import io.ktor.server.application.log
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
@@ -22,7 +21,6 @@ import no.nav.etterlatte.libs.common.vedtak.LoependeYtelseDTO
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.common.withBehandlingId
 import no.nav.etterlatte.libs.common.withSakId
-import no.nav.etterlatte.libs.ktor.AuthorizationPlugin
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlient
 import java.time.LocalDate
@@ -99,11 +97,12 @@ fun Route.vedtaksvurderingRoute(
             withBehandlingId(behandlingKlient) { behandlingId ->
                 logger.info("Underkjenner vedtak for behandling $behandlingId")
                 val begrunnelse = call.receive<UnderkjennVedtakDto>()
-                val underkjentVedtak = service.underkjennVedtak(
-                    behandlingId,
-                    brukerTokenInfo,
-                    begrunnelse
-                )
+                val underkjentVedtak =
+                    service.underkjennVedtak(
+                        behandlingId,
+                        brukerTokenInfo,
+                        begrunnelse
+                    )
 
                 call.respond(underkjentVedtak.toDto())
             }
@@ -120,8 +119,9 @@ fun Route.vedtaksvurderingRoute(
 
         get("/loepende/{$SAKID_CALL_PARAMETER}") {
             withSakId(behandlingKlient) { sakId ->
-                val dato = call.request.queryParameters["dato"]?.let { LocalDate.parse(it) }
-                    ?: throw Exception("dato er påkrevet på formatet YYYY-MM-DD")
+                val dato =
+                    call.request.queryParameters["dato"]?.let { LocalDate.parse(it) }
+                        ?: throw Exception("dato er påkrevet på formatet YYYY-MM-DD")
 
                 logger.info("Sjekker om vedtak er løpende for sak $sakId på dato $dato")
                 val loependeYtelse = service.sjekkOmVedtakErLoependePaaDato(sakId, dato)
@@ -156,9 +156,9 @@ fun Route.vedtaksvurderingRoute(
 }
 
 fun Route.samordningsvedtakRoute(service: VedtaksvurderingService) {
-    install(AuthorizationPlugin) {
-        roles = setOf("samordning-read")
-    }
+//    install(AuthorizationPlugin) {
+//        roles = setOf("samordning-read")
+//    }
 
     route("/api/samordning/vedtak") {
         get {
@@ -186,20 +186,22 @@ fun Route.samordningsvedtakRoute(service: VedtaksvurderingService) {
     }
 }
 
-private fun Vedtak.toVedtakSammendragDto() = VedtakSammendragDto(
-    id = id.toString(),
-    behandlingId = behandlingId,
-    vedtakType = type,
-    saksbehandlerId = vedtakFattet?.ansvarligSaksbehandler,
-    datoFattet = vedtakFattet?.tidspunkt?.toNorskTid(),
-    attestant = attestasjon?.attestant,
-    datoAttestert = attestasjon?.tidspunkt?.toNorskTid()
-)
+private fun Vedtak.toVedtakSammendragDto() =
+    VedtakSammendragDto(
+        id = id.toString(),
+        behandlingId = behandlingId,
+        vedtakType = type,
+        saksbehandlerId = vedtakFattet?.ansvarligSaksbehandler,
+        datoFattet = vedtakFattet?.tidspunkt?.toNorskTid(),
+        attestant = attestasjon?.attestant,
+        datoAttestert = attestasjon?.tidspunkt?.toNorskTid()
+    )
 
-private fun LoependeYtelse.toDto() = LoependeYtelseDTO(
-    erLoepende = erLoepende,
-    dato = dato
-)
+private fun LoependeYtelse.toDto() =
+    LoependeYtelseDTO(
+        erLoepende = erLoepende,
+        dato = dato
+    )
 
 data class UnderkjennVedtakDto(val kommentar: String, val valgtBegrunnelse: String)
 

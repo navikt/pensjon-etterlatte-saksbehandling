@@ -56,8 +56,8 @@ export default function AnnullerBehandling() {
         <ExpansionCard.Content>
           <Alert variant={'warning'}>
             {erFoerstegangsbehandling
-              ? 'Hvis denne behandlingen ikke kan behandles i Gjenny må sak og behandling avbrytes.'
-              : 'Hvis denne behandlingen er uaktuell, kan du avbryte den her.'}
+              ? 'Hvis denne behandlingen ikke kan behandles i Gjenny må sak og behandling annulleres.'
+              : 'Hvis denne behandlingen er uaktuell, kan du annullere den her.'}
           </Alert>
           <br />
           <div className="flex">

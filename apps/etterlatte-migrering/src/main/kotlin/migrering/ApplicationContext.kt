@@ -19,10 +19,9 @@ internal class ApplicationContext {
     private val config = ConfigFactory.load()
     val penklient = PenKlient(config, httpClient())
 
-    private val featureToggleService: FeatureToggleService =
+    val featureToggleService: FeatureToggleService =
         FeatureToggleService.initialiser(featureToggleProperties(ConfigFactory.load()))
     val pesysRepository = PesysRepository(dataSource)
-    val sakmigrerer = Sakmigrerer(pesysRepository, featureToggleService)
 }
 
 private fun featureToggleProperties(config: Config) = FeatureToggleProperties(

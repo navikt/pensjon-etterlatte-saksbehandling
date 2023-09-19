@@ -76,7 +76,7 @@ internal class MigreringIntegrationTest {
                         penKlient = mockk<PenKlient>()
                             .also { every { runBlocking { it.hentSak(any()) } } returns responsFraPEN },
                         pesysRepository = repository,
-                        sakmigrerer = Sakmigrerer(repository, featureToggleService)
+                        featureToggleService = featureToggleService
                     )
                 }
             inspector.sendTestMessage(
@@ -122,7 +122,7 @@ internal class MigreringIntegrationTest {
                         rapidsConnection = this,
                         penKlient = penKlient,
                         pesysRepository = repository,
-                        sakmigrerer = Sakmigrerer(repository, featureToggleService)
+                        featureToggleService = featureToggleService
                     )
                     LagreKopling(this, repository)
                     LyttPaaIverksattVedtak(this, repository, penKlient)

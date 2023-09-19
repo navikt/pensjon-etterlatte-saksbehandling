@@ -138,7 +138,14 @@ export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => 
           arbeidslivet og/ eller ikke har andre ytelser fra Nav.
         </BodyLong>
         <SpacingWrapper>
-          <Button variant="secondary" size="small" className="button" onClick={() => true}>
+          <Button
+            variant="secondary"
+            size="small"
+            className="button"
+            as="a"
+            href={`${configContext['gosysUrl']}/personoversikt/fnr=${behandling.søker?.foedselsnummer}`}
+            target="_blank"
+          >
             Lag oppgave til lokalkontor <ExternalLinkIcon />
           </Button>
         </SpacingWrapper>

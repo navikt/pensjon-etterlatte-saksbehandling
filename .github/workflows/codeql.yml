@@ -37,6 +37,22 @@ jobs:
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v2
         with:
+          upload: false # disable the upload here - we will upload in a different action
+          output: sarif-results
+
+      - name: filter-sarif
+        uses: advanced-security/filter-sarif@v1
+        with:
+          patterns: |
+            -**/*test*.kt
+            -**/generated-main-avro-java/**
+          input: sarif-results/java.sarif
+          output: sarif-results/java.sarif
+
+      - name: Upload SARIF
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: sarif-results/java.sarif
           category: "/language:java"
 
   analyze-javascript:
@@ -63,4 +79,19 @@ jobs:
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v2
         with:
+          upload: False # disable the upload here - we will upload in a different action
+          output: sarif-results
+
+      - name: filter-sarif
+        uses: advanced-security/filter-sarif@v1
+        with:
+          patterns: |
+            -**/*test*.kt
+          input: sarif-results/javascript.sarif
+          output: sarif-results/javascript.sarif
+
+      - name: Upload SARIF
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: sarif-results/javascript.sarif
           category: "/language:javascript"

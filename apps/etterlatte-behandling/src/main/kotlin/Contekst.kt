@@ -4,6 +4,7 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.EnhetService
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
+import no.nav.etterlatte.libs.ktor.hentTokenClaims
 import no.nav.etterlatte.tilgangsstyring.AzureGroup
 import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
 import no.nav.etterlatte.token.BrukerTokenInfo
@@ -42,7 +43,7 @@ class SystemUser(identifiedBy: TokenValidationContext) : ExternalUser(identified
     }
 
     override fun kanSetteKilde(): Boolean {
-        return identifiedBy.getJwtToken(AZURE_ISSUER).jwtTokenClaims.containsClaim("roles", "kan-sette-kilde")
+        return identifiedBy.hentTokenClaims(AZURE_ISSUER)!!.containsClaim("roles", "kan-sette-kilde")
     }
 }
 
@@ -53,7 +54,7 @@ class SaksbehandlerMedEnheterOgRoller(
 ) : ExternalUser(identifiedBy) {
 
     override fun name(): String {
-        return identifiedBy.getJwtToken(AZURE_ISSUER).jwtTokenClaims.getStringClaim("NAVident")
+        return identifiedBy.hentTokenClaims(AZURE_ISSUER)!!.getStringClaim("NAVident")
     }
 
     fun enheter() = if (saksbehandlerMedRoller.harRolleNasjonalTilgang()) {

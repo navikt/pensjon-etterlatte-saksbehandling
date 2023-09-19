@@ -20,7 +20,6 @@ import io.ktor.server.application.install
 import io.ktor.server.application.log
 import io.ktor.server.auth.Authentication
 import io.ktor.server.auth.authenticate
-import io.ktor.server.auth.principal
 import io.ktor.server.cio.CIO
 import io.ktor.server.config.HoconApplicationConfig
 import io.ktor.server.engine.applicationEngineEnvironment
@@ -46,6 +45,7 @@ import no.nav.etterlatte.kafka.LocalKafkaConfig
 import no.nav.etterlatte.kafka.standardProducer
 import no.nav.etterlatte.libs.common.logging.NAV_CONSUMER_ID
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.ktor.firstValidTokenClaims
 import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.libs.ktor.metricsModule
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
@@ -57,7 +57,6 @@ import no.nav.etterlatte.testdata.features.egendefinert.EgendefinertMeldingFeatu
 import no.nav.etterlatte.testdata.features.index.IndexFeature
 import no.nav.etterlatte.testdata.features.soeknad.OpprettSoeknadFeature
 import no.nav.etterlatte.testdata.features.standardmelding.StandardMeldingFeature
-import no.nav.security.token.support.v2.TokenValidationContextPrincipal
 import no.nav.security.token.support.v2.tokenValidationSupport
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -168,11 +167,11 @@ fun httpClient() = httpClient(
     }
 )
 
-fun PipelineContext<Unit, ApplicationCall>.navIdentFraToken() = call.principal<TokenValidationContextPrincipal>()
-    ?.context?.firstValidToken?.get()?.jwtTokenClaims?.get("NAVident")?.toString()
+fun PipelineContext<Unit, ApplicationCall>.navIdentFraToken() =
+    call.firstValidTokenClaims()?.get("NAVident")?.toString()
 
-fun PipelineContext<Unit, ApplicationCall>.usernameFraToken() = call.principal<TokenValidationContextPrincipal>()
-    ?.context?.firstValidToken?.get()?.jwtTokenClaims?.get("preferred_username")?.toString()
+fun PipelineContext<Unit, ApplicationCall>.usernameFraToken() =
+    call.firstValidTokenClaims()?.get("preferred_username")?.toString()
 
 fun getClientAccessToken(): String = runBlocking {
     azureAdClient.getAccessTokenForResource(listOf("api://${config.getString("dolly.client.id")}/.default"))

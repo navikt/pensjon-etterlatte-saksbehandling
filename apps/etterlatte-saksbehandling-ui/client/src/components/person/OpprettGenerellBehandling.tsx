@@ -1,5 +1,5 @@
-import { Button, Heading, Modal, Select } from '@navikt/ds-react'
-import { isFailure, isPending, useApiCall } from '~shared/hooks/useApiCall'
+import { Alert, Button, Heading, Modal, Select } from '@navikt/ds-react'
+import { isFailure, isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
 import { useState } from 'react'
 import { opprettNyGenerellBehandling } from '~shared/api/generellbehandling'
 import { GenerellBehandlingType, Innholdstyper } from '~shared/types/Generellbehandling'
@@ -12,6 +12,11 @@ const ButtonWrapper = styled.div`
   gap: 1em;
   margin: 2rem 0rem;
 `
+
+const AlertWrapper = styled(Alert)`
+  margin: 2rem 0rem;
+`
+
 type VELG = 'VELG'
 type GenBehandlingTyperOgDefaultState = GenerellBehandlingType | VELG
 
@@ -21,14 +26,14 @@ function erGenerellBehandlingType(valg: GenBehandlingTyperOgDefaultState): valg 
 
 const OpprettGenerellBehandling = (props: { sakId: number }) => {
   const { sakId } = props
-  const [opprettGenBehandlingStatus, opprettGenBehandlingKall] = useApiCall(opprettNyGenerellBehandling)
+  const [opprettGenBehandlingStatus, opprettGenBehandlingKall, resetkall] = useApiCall(opprettNyGenerellBehandling)
   const [open, setOpen] = useState<boolean>(false)
   const [generellBehandlingType, setGenerellBehandlingType] = useState<GenBehandlingTyperOgDefaultState>('VELG')
-  const uvalgt = generellBehandlingType === 'VELG'
+  const uValgt = generellBehandlingType === 'VELG'
 
   const opprettGenBehandlingKallWrapper = () => {
     if (erGenerellBehandlingType(generellBehandlingType)) {
-      opprettGenBehandlingKall({ sakId, type: generellBehandlingType }, () => setOpen(false))
+      opprettGenBehandlingKall({ sakId, type: generellBehandlingType }, () => {})
     }
   }
 
@@ -59,15 +64,26 @@ const OpprettGenerellBehandling = (props: { sakId: number }) => {
           {isFailure(opprettGenBehandlingStatus) && (
             <ApiErrorAlert>Kunne ikke opprette generell behandling</ApiErrorAlert>
           )}
+          {isSuccess(opprettGenBehandlingStatus) && (
+            <AlertWrapper variant="success">Behandlingen er opprettet</AlertWrapper>
+          )}
           <ButtonWrapper>
             <Button
               onClick={() => opprettGenBehandlingKallWrapper()}
               loading={isPending(opprettGenBehandlingStatus)}
-              disabled={uvalgt}
+              disabled={uValgt}
             >
               Opprett generell behandling
             </Button>
-            <Button onClick={() => setOpen(false)}>Avbryt</Button>
+            <Button
+              onClick={() => {
+                resetkall()
+                setOpen(false)
+                setGenerellBehandlingType('VELG')
+              }}
+            >
+              Avbryt
+            </Button>
           </ButtonWrapper>
         </Modal.Body>
       </Modal>

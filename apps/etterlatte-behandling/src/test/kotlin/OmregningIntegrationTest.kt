@@ -91,15 +91,16 @@ class OmregningIntegrationTest : BehandlingIntegrationTest() {
 
             val virkningstidspunkt = virkningstidspunktVurdering()
 
-            val iverksattBehandling = behandling.copy(kommerBarnetTilgode = kommerBarnetTilgode)
-                .oppdaterGyldighetsproeving(gyldighetsresultatVurdering())
-                .oppdaterVirkningstidspunkt(virkningstidspunkt)
-                .tilVilkaarsvurdert()
-                .tilTrygdetidOppdatert()
-                .tilBeregnet()
-                .tilFattetVedtak()
-                .tilAttestert()
-                .tilIverksatt()
+            val iverksattBehandling =
+                behandling.copy(kommerBarnetTilgode = kommerBarnetTilgode)
+                    .oppdaterGyldighetsproeving(gyldighetsresultatVurdering())
+                    .oppdaterVirkningstidspunkt(virkningstidspunkt)
+                    .tilVilkaarsvurdert()
+                    .tilTrygdetidOppdatert()
+                    .tilBeregnet(false)
+                    .tilFattetVedtak()
+                    .tilAttestert()
+                    .tilIverksatt()
 
             inTransaction { applicationContext.behandlingDao.lagreStatus(iverksattBehandling) }
         }

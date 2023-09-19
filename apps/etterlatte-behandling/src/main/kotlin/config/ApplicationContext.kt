@@ -247,7 +247,8 @@ class ApplicationContext(
             behandlingDao,
             behandlingService,
             grunnlagsendringshendelseService,
-            oppgaveServiceNy
+            oppgaveServiceNy,
+            featureToggleService
         )
 
     val behandlingFactory =

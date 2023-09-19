@@ -59,7 +59,7 @@ data class ManueltOpphoer(
     override val kommerBarnetTilgode: KommerBarnetTilgode?
         get() = null
 
-    override fun tilBeregnet(): ManueltOpphoer = hvisTilstandEr(
+    override fun tilBeregnet(fastTrygdetid: Boolean): ManueltOpphoer = hvisTilstandEr(
         listOf(
             BehandlingStatus.OPPRETTET,
             BehandlingStatus.BEREGNET,

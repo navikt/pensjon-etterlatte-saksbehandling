@@ -21,6 +21,14 @@ export enum KlageStatus {
   FERDIGSTILT = 'FERDIGSTILT',
 }
 
+export const teksterKlagestatus: Record<KlageStatus, string> = {
+  OPPRETTET: 'Opprettet',
+  FORMKRAV_OPPFYLT: 'Formkrav vurdert oppfylt',
+  FORMKRAV_IKKE_OPPFYLT: 'Formkrav vurdert ikke oppfylt',
+  UTFALL_VURDERT: 'Utfall av klagen vurdert',
+  FERDIGSTILT: 'Klagen ferdigstilt i Gjenny',
+}
+
 export const enum KabalStatus {}
 
 export interface VedtaketKlagenGjelder {
@@ -50,19 +58,28 @@ export enum Utfall {
   STADFESTE_VEDTAK = 'STADFESTE_VEDTAK',
 }
 
+export const teksterKlageutfall: Record<Utfall, string> = {
+  OMGJOERING: 'Omgjøring',
+  DELVIS_OMGJOERING: 'Delvis omgjøring',
+  STADFESTE_VEDTAK: 'Stadfeste vedtak',
+} as const
+
 export type KlageUtfall =
   | {
       utfall: 'OMGJOERING'
       omgjoering: Omgjoering
+      saksbehandler: KildeSaksbehandler
     }
   | {
       utfall: 'DELVIS_OMGJOERING'
       omgjoering: Omgjoering
       innstilling: InnstillingTilKabal
+      saksbehandler: KildeSaksbehandler
     }
   | {
       utfall: 'STADFESTE_VEDTAK'
       innstilling: InnstillingTilKabal
+      saksbehandler: KildeSaksbehandler
     }
 
 export type KlageUtfallUtenBrev =

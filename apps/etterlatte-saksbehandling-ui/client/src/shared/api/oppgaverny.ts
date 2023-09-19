@@ -105,8 +105,9 @@ export const redigerFristApi = async (args: {
 
 export const hentOppgaveForBehandlingUnderBehandlingIkkeattestert = async (args: {
   behandlingId: string
-}): Promise<ApiResponse<string>> => apiClient.get(`/nyeoppgaver/${args.behandlingId}/hentsaksbehandler`)
+}): Promise<ApiResponse<string>> => apiClient.get(`/nyeoppgaver/behandling/${args.behandlingId}/hentsaksbehandler`)
 
-export const hentOppgaveForBehandlingUnderBehandling = async (args: {
+export const hentSaksbehandlerForOppgaveUnderArbeid = async (args: {
   behandlingId: string
-}): Promise<ApiResponse<string | null>> => apiClient.get(`/nyeoppgaver/${args.behandlingId}/oppgaveunderarbeid`)
+}): Promise<ApiResponse<string | null>> =>
+  apiClient.get(`/nyeoppgaver/behandling/${args.behandlingId}/oppgaveunderarbeid`)

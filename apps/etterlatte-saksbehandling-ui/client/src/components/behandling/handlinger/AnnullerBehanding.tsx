@@ -38,7 +38,7 @@ export default function AnnullerBehandling() {
 
   return (
     <>
-      <SidebarPanel>
+      <SidebarPanel border>
         <Heading size={'small'} spacing>
           Avbryt {formaterBehandlingstype(behandling!!.behandlingType).toLowerCase()}
         </Heading>

@@ -64,7 +64,7 @@ export const Oversikt = ({
   }
 
   return (
-    <SidebarPanel>
+    <SidebarPanel border>
       <Heading size={'small'}>{formaterBehandlingstype(behandlingsInfo.type)}</Heading>
       <Heading size={'xsmall'} spacing>
         {hentStatus()}

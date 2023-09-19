@@ -1,15 +1,16 @@
 import { useState } from 'react'
-import { Alert, BodyLong, Button, Heading, Modal } from '@navikt/ds-react'
+import { Alert, Button, ExpansionCard, Heading, Modal } from '@navikt/ds-react'
 import { avbrytBehandling } from '~shared/api/behandling'
 import { useNavigate } from 'react-router'
 import { ButtonWrapper } from '~shared/modal/modal'
 import { IBehandlingStatus, IBehandlingsType } from '~shared/types/IDetaljertBehandling'
-import { SidebarPanel } from '~shared/components/Sidebar'
 import { hentBehandlesFraStatus } from '~components/behandling/felles/utils'
 import { useBehandling } from '~components/behandling/useBehandling'
 import { SakType } from '~shared/types/sak'
 import { isFailure, isPending, useApiCall } from '~shared/hooks/useApiCall'
 import { formaterBehandlingstype } from '~utils/formattering'
+import { ExclamationmarkTriangleFillIcon, XMarkIcon } from '@navikt/aksel-icons'
+import styled from 'styled-components'
 
 export default function AnnullerBehandling() {
   const navigate = useNavigate()
@@ -38,35 +39,51 @@ export default function AnnullerBehandling() {
 
   return (
     <>
-      <SidebarPanel>
-        <Heading size={'small'} spacing>
-          Avbryt {formaterBehandlingstype(behandling!!.behandlingType).toLowerCase()}
-        </Heading>
+      <ExpansionCardSpaced aria-labelledby={'card-heading'}>
+        <ExpansionCard.Header>
+          <div className="with-icon">
+            <div className="icon">
+              <ExclamationmarkTriangleFillIcon aria-hidden />
+            </div>
+            <div>
+              <Heading size={'xsmall'} id={'card-heading'}>
+                Annuller {formaterBehandlingstype(behandling!!.behandlingType).toLowerCase()}
+              </Heading>
+            </div>
+          </div>
+        </ExpansionCard.Header>
 
-        <BodyLong spacing size={'small'}>
-          {erFoerstegangsbehandling
-            ? 'Hvis denne behandlingen ikke kan behandles i Gjenny må sak og behandling avbrytes.'
-            : 'Hvis denne behandlingen er uaktuell, kan du avbryte den her.'}
-        </BodyLong>
+        <ExpansionCard.Content>
+          <Alert variant={'warning'}>
+            {erFoerstegangsbehandling
+              ? 'Hvis denne behandlingen ikke kan behandles i Gjenny må sak og behandling annulleres.'
+              : 'Hvis denne behandlingen er uaktuell, kan du annullere den her.'}
+          </Alert>
+          <br />
+          <div className="flex">
+            <Button variant={'danger'} onClick={() => setIsOpen(true)} icon={<XMarkIcon />}>
+              Annuller {formaterBehandlingstype(behandling!!.behandlingType).toLowerCase()}
+            </Button>
+          </div>
+        </ExpansionCard.Content>
+      </ExpansionCardSpaced>
 
-        <div className="flex">
-          <Button variant={'danger'} size={'xsmall'} className="textButton" onClick={() => setIsOpen(true)}>
-            Avbryt {formaterBehandlingstype(behandling!!.behandlingType).toLowerCase()}
-          </Button>
-        </div>
-      </SidebarPanel>
-
-      <Modal open={isOpen} onClose={() => setIsOpen(false)} aria-labelledby="modal-heading" className={'padding-modal'}>
-        <Modal.Body style={{ textAlign: 'center' }}>
+      <Modal open={isOpen} onClose={() => setIsOpen(false)} aria-labelledby="modal-heading">
+        <Modal.Header>
           <Heading level={'1'} spacing size={'medium'} id="modal-heading">
-            Er du sikker på at du vil avbryte behandlingen?
+            Er du sikker på at du vil annullere behandlingen?
           </Heading>
-          <BodyLong spacing>
+        </Modal.Header>
+
+        <Modal.Body>
+          <Alert variant={'warning'}>
             {erFoerstegangsbehandling
               ? 'Saken blir annullert og kan ikke behandles videre i Gjenny. Saken må manuelt opprettes på nytt i Pesys.'
               : 'Behandlingen blir avsluttet og kan opprettes på nytt.'}
-          </BodyLong>
+          </Alert>
+        </Modal.Body>
 
+        <Modal.Footer>
           <ButtonWrapper>
             <Button
               variant="secondary"
@@ -90,8 +107,34 @@ export default function AnnullerBehandling() {
           </ButtonWrapper>
 
           {isFailure(status) && <Alert variant={'error'}>Det oppsto en feil ved avbryting av behandlingen.</Alert>}
-        </Modal.Body>
+        </Modal.Footer>
       </Modal>
     </>
   )
 }
+
+const ExpansionCardSpaced = styled(ExpansionCard)`
+  margin: 20px 8px 0 8px;
+  border-radius: 3px;
+
+  .title {
+    white-space: nowrap;
+  }
+
+  .navds-expansioncard__header {
+    border-radius: 3px;
+  }
+
+  .with-icon {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .icon {
+    font-size: 2rem;
+    flex-shrink: 0;
+    display: grid;
+    place-content: center;
+  }
+`

@@ -192,14 +192,57 @@ internal class MigreringIntegrationTest {
             assertEquals(repository.hentStatus(pesysId.id), Migreringsstatus.FERDIG)
         }
     }
+
+    @Test
+    fun `feiler hvis en person ikke fins i PDL`() {
+        testApplication {
+            val repository = PesysRepository(datasource)
+            val featureToggleService = DummyFeatureToggleService().also {
+                it.settBryter(MigreringFeatureToggle.SendSakTilMigrering, true)
+            }
+            val responsFraPEN = objectMapper.readValue<BarnepensjonGrunnlagResponse>(
+                this::class.java.getResource("/penrespons.json")!!.readText()
+            )
+
+            val inspector = TestRapid()
+                .apply {
+                    MigrerSpesifikkSak(
+                        rapidsConnection = this,
+                        penKlient = mockk<PenKlient>()
+                            .also { every { runBlocking { it.hentSak(any()) } } returns responsFraPEN },
+                        pesysRepository = repository,
+                        featureToggleService = featureToggleService,
+                        verifiserer = Verifiserer(
+                            mockk<PDLKlient>().also {
+                                every {
+                                    it.hentPerson(
+                                        any(),
+                                        any()
+                                    )
+                                } throws IllegalStateException("")
+                            }
+                        )
+                    )
+                }
+            inspector.sendTestMessage(
+                JsonMessage.newMessage(
+                    mapOf(
+                        EVENT_NAME_KEY to Migreringshendelser.MIGRER_SPESIFIKK_SAK,
+                        SAK_ID_KEY to "22974139"
+                    )
+                ).toJson()
+            )
+            with(inspector.inspektør.message(0)) {
+                assertEquals(Migreringsstatus.FEILA.name, get(EVENT_NAME_KEY).textValue())
+            }
+        }
+    }
 }
 
 internal fun PesysRepository.hentSaker(tx: TransactionalSession? = null): List<Pesyssak> = tx.session {
     hentListe(
         "SELECT sak from pesyssak WHERE status = '${Migreringsstatus.UNDER_MIGRERING.name}'"
     ) {
-        tilPesyssak(it.string("sak"))
+        objectMapper.readValue(it.string("sak"), Pesyssak::class.java)
     }
 }
-
-private fun tilPesyssak(sak: String) = objectMapper.readValue(sak, Pesyssak::class.java)

@@ -7,6 +7,7 @@ import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
+import io.ktor.http.isSuccess
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
@@ -19,9 +20,14 @@ internal class PDLKlient(config: Config, private val pdl_app: HttpClient) {
 
     fun hentPerson(rolle: PersonRolle, folkeregisteridentifikator: Folkeregisteridentifikator): PersonDTO =
         runBlocking {
-            pdl_app.post("$url/person/v2") {
+            val response = pdl_app.post("$url/person/v2") {
                 contentType(ContentType.Application.Json)
                 setBody(HentPersonRequest(folkeregisteridentifikator, rolle, SakType.BARNEPENSJON))
-            }.body<PersonDTO>()
+            }
+            if (response.status.isSuccess()) {
+                response.body<PersonDTO>()
+            } else {
+                throw IllegalStateException("Fant ikke informasjon i PDL for person med rolle $rolle")
+            }
         }
 }

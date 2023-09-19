@@ -156,11 +156,11 @@ fun Route.vedtaksvurderingRoute(
 }
 
 fun Route.samordningsvedtakRoute(service: VedtaksvurderingService) {
-    install(AuthorizationPlugin) {
-        roles = setOf("samordning-read")
-    }
-
     route("/api/samordning/vedtak") {
+        install(AuthorizationPlugin) {
+            roles = setOf("samordning-read")
+        }
+
         get {
             val virkFom =
                 call.parameters["virkFom"]?.let { runCatching { LocalDate.parse(it) }.getOrNull() }

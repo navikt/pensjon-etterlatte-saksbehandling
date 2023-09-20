@@ -250,6 +250,7 @@ class ApplicationContext(
             grunnlagsendringshendelseService,
             oppgaveServiceNy,
             featureToggleService,
+            generellBehandlingService,
         )
 
     val behandlingFactory =

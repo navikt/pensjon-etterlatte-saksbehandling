@@ -69,6 +69,12 @@ export const HandlingerForOppgave = ({ oppgave }: { oppgave: OppgaveDTOny }) => 
             Gå til klage
           </Button>
         ) : null
+      case 'TILBAKEKREVING':
+        return erInnloggetSaksbehandlerOppgave ? (
+          <Button size="small" href={`/tilbakekreving/${referanse}`} as="a">
+            Gå til tilbakekreving
+          </Button>
+        ) : null
       default:
         return null
     }

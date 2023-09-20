@@ -11,6 +11,7 @@ import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.common.trygdetid.DetaljertBeregnetTrygdetidResultat
 import no.nav.etterlatte.libs.common.trygdetid.avtale.Trygdeavtale
 import no.nav.etterlatte.token.Saksbehandler
+import no.nav.etterlatte.token.Systembruker
 import no.nav.etterlatte.trygdetid.BeregnetTrygdetidGrunnlag
 import no.nav.etterlatte.trygdetid.DetaljertBeregnetTrygdetid
 import no.nav.etterlatte.trygdetid.LandNormalisert
@@ -26,6 +27,8 @@ import java.util.*
 import java.util.UUID.randomUUID
 
 val saksbehandler = Saksbehandler("token", "ident", null)
+
+val pesysBruker = Systembruker("", "")
 
 fun behandling(
     behandlingId: UUID = randomUUID(),
@@ -109,15 +112,16 @@ fun beregnetTrygdetid(
     tidspunkt: Tidspunkt = Tidspunkt.now()
 ) = DetaljertBeregnetTrygdetid(
     resultat =
-        DetaljertBeregnetTrygdetidResultat(
-            faktiskTrygdetidNorge = null,
-            faktiskTrygdetidTeoretisk = null,
-            fremtidigTrygdetidNorge = null,
-            fremtidigTrygdetidTeoretisk = null,
-            samletTrygdetidNorge = total,
-            samletTrygdetidTeoretisk = null,
-            prorataBroek = null
-        ),
+    DetaljertBeregnetTrygdetidResultat(
+        faktiskTrygdetidNorge = null,
+        faktiskTrygdetidTeoretisk = null,
+        fremtidigTrygdetidNorge = null,
+        fremtidigTrygdetidTeoretisk = null,
+        samletTrygdetidNorge = total,
+        samletTrygdetidTeoretisk = null,
+        prorataBroek = null,
+        overstyrt = false
+    ),
     tidspunkt = tidspunkt,
     regelResultat = "".toJsonNode()
 )
@@ -134,7 +138,7 @@ fun beregnetYrkesskadeTrygdetid() =
         resultat = DetaljertBeregnetTrygdetidResultat.fraSamletTrygdetidNorge(40),
         tidspunkt = Tidspunkt.now(),
         regelResultat =
-            """
+        """
             {
                 "verdi": {
                     "faktiskTrygdetidNorge": null,
@@ -167,5 +171,5 @@ fun beregnetYrkesskadeTrygdetid() =
                 ],
                 "opprettet": "2023-06-30T13:22:15.799509Z"
             }
-            """.trimIndent().toJsonNode()
+        """.trimIndent().toJsonNode()
     )

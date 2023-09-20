@@ -365,23 +365,23 @@ val beregnDetaljertBeregnetTrygdetid =
                 faktiskTrygdetidTeoretisk = teoretisk,
                 fremtidigTrygdetidNorge = fremtidig.first,
                 fremtidigTrygdetidTeoretisk = fremtidig.second,
-                samletTrygdetidNorge =
-                    minOf(
-                        nasjonal.verdiOrZero().plus(fremtidig.first.verdiOrZero()).normalized().years, 40
-                    ),
-                samletTrygdetidTeoretisk =
-                    minOf(
-                        teoretisk.verdiOrZero().plus(fremtidig.second.verdiOrZero()).normalized().years, 40
-                    ),
-                prorataBroek =
-                    if (nasjonal?.antallMaaneder != teoretisk?.antallMaaneder) {
-                        IntBroek(
-                            nasjonal?.antallMaaneder?.toInt() ?: 0,
-                            teoretisk?.antallMaaneder?.toInt() ?: 0
-                        )
-                    } else {
-                        null
-                    }
+                samletTrygdetidNorge = minOf(
+                    nasjonal.verdiOrZero().plus(fremtidig.first.verdiOrZero()).normalized().years,
+                    40
+                ),
+                samletTrygdetidTeoretisk = minOf(
+                    teoretisk.verdiOrZero().plus(fremtidig.second.verdiOrZero()).normalized().years,
+                    40
+                ),
+                prorataBroek = if (nasjonal?.antallMaaneder != teoretisk?.antallMaaneder) {
+                    IntBroek(
+                        nasjonal?.antallMaaneder?.toInt() ?: 0,
+                        teoretisk?.antallMaaneder?.toInt() ?: 0
+                    )
+                } else {
+                    null
+                },
+                overstyrt = false
             )
         }
 

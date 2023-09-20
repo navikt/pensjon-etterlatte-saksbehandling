@@ -11,6 +11,8 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning.RegelKilde
 import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
 import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsdato
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.toJsonNode
+import no.nav.etterlatte.libs.common.trygdetid.DetaljertBeregnetTrygdetidResultat
 import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.etterlatte.trygdetid.klienter.BehandlingKlient
 import no.nav.etterlatte.trygdetid.klienter.GrunnlagKlient
@@ -321,6 +323,24 @@ class TrygdetidService(
             block()
         } else {
             throw Exception("Kan ikke opprette/endre trygdetid da behandlingen er i feil tilstand")
+        }
+    }
+
+    fun overstyrBeregnetTrygdetid(
+        behandlingsId: UUID,
+        beregnetTrygdetid: DetaljertBeregnetTrygdetidResultat
+    ) {
+        val trygdetid = trygdetidRepository.hentTrygdetid(behandlingsId)
+            ?: throw Exception("Fant ikke gjeldende trygdetid for behandlingId=$behandlingsId")
+
+        trygdetid.oppdaterBeregnetTrygdetid(
+            DetaljertBeregnetTrygdetid(
+                resultat = beregnetTrygdetid,
+                tidspunkt = Tidspunkt.now(),
+                regelResultat = "".toJsonNode()
+            )
+        ).also { nyTrygdetid ->
+            trygdetidRepository.oppdaterTrygdetid(nyTrygdetid, true)
         }
     }
 }

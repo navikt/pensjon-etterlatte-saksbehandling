@@ -89,7 +89,7 @@ data class TrygdetidGrunnlag(
     val type: TrygdetidType,
     val bosted: String,
     val periode: TrygdetidPeriode,
-    val kilde: Grunnlagsopplysning.Saksbehandler,
+    val kilde: Grunnlagsopplysning.Kilde,
     val beregnetTrygdetid: BeregnetTrygdetidGrunnlag? = null,
     val begrunnelse: String?,
     val poengInnAar: Boolean,

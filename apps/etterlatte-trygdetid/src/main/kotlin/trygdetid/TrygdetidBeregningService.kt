@@ -40,12 +40,11 @@ object TrygdetidBeregningService {
         val grunnlag =
             TrygdetidGrunnlagMedAvdoedGrunnlag(
                 FaktumNode(
-                    verdi =
-                        TrygdetidGrunnlagMedAvdoed(
-                            trygdetidGrunnlagListe = trygdetidGrunnlag,
-                            foedselsDato = foedselsDato,
-                            doedsDato = doedsDato
-                        ),
+                    verdi = TrygdetidGrunnlagMedAvdoed(
+                        trygdetidGrunnlagListe = trygdetidGrunnlag,
+                        foedselsDato = foedselsDato,
+                        doedsDato = doedsDato
+                    ),
                     kilde = "System",
                     beskrivelse = "Beregn detaljert trygdetidsgrunnlag"
                 )
@@ -109,17 +108,16 @@ object TrygdetidBeregningService {
         val grunnlag =
             TrygdetidPeriodeGrunnlag(
                 periode =
-                    FaktumNode(
-                        verdi =
-                            TrygdetidPeriodMedPoengAar(
-                                fra = trygdetidGrunnlag.periode.fra,
-                                til = trygdetidGrunnlag.periode.til,
-                                poengInnAar = trygdetidGrunnlag.poengInnAar,
-                                poengUtAar = trygdetidGrunnlag.poengUtAar
-                            ),
-                        kilde = trygdetidGrunnlag.kilde,
-                        beskrivelse = "Periode (med poeng aar) for trygdetidsperiode"
-                    )
+                FaktumNode(
+                    verdi = TrygdetidPeriodMedPoengAar(
+                        fra = trygdetidGrunnlag.periode.fra,
+                        til = trygdetidGrunnlag.periode.til,
+                        poengInnAar = trygdetidGrunnlag.poengInnAar,
+                        poengUtAar = trygdetidGrunnlag.poengUtAar
+                    ),
+                    kilde = trygdetidGrunnlag.kilde,
+                    beskrivelse = "Periode (med poeng aar) for trygdetidsperiode"
+                )
             )
 
         val resultat = beregnTrygdetidForPeriode.eksekver(KonstantGrunnlag(grunnlag), RegelPeriode(LocalDate.now()))
@@ -132,52 +130,6 @@ object TrygdetidBeregningService {
 
                 BeregnetTrygdetidGrunnlag(
                     verdi = periodeTrygdetid,
-                    tidspunkt = Tidspunkt(periodisertResultat.opprettet),
-                    regelResultat = periodisertResultat.toJsonNode()
-                )
-            }
-
-            is RegelkjoeringResultat.UgyldigPeriode -> throw Exception("En feil oppstod under regelkjøring")
-        }
-    }
-
-    private fun beregnDetaljertTrygdetid(
-        trygdetidGrunnlag: List<TrygdetidGrunnlag>,
-        foedselsDato: LocalDate,
-        doedsDato: LocalDate
-    ): DetaljertBeregnetTrygdetid? {
-        if (trygdetidGrunnlag.isEmpty()) {
-            logger.info("Har ingen perioder med trygdetidsgrunnlag.")
-            return null
-        }
-
-        // TODO - regel forventer at det er validert mot overlappende poengAar
-
-        val grunnlag =
-            TrygdetidGrunnlagMedAvdoedGrunnlag(
-                FaktumNode(
-                    TrygdetidGrunnlagMedAvdoed(
-                        trygdetidGrunnlagListe = trygdetidGrunnlag,
-                        foedselsDato = foedselsDato,
-                        doedsDato = doedsDato
-                    ),
-                    Grunnlagsopplysning.Saksbehandler("Z12345", Tidspunkt.now()),
-                    "Trygdetid Grunnlag"
-                )
-            )
-
-        val result =
-            beregnDetaljertBeregnetTrygdetid.eksekver(KonstantGrunnlag(grunnlag), RegelPeriode(LocalDate.now()))
-
-        return when (result) {
-            is RegelkjoeringResultat.Suksess -> {
-                val periodisertResultat = result.periodiserteResultater.first().resultat
-                val periodisertVerdi = periodisertResultat.verdi
-
-                logger.info("Beregning fullførte med resultat: $periodisertVerdi")
-
-                DetaljertBeregnetTrygdetid(
-                    resultat = periodisertVerdi,
                     tidspunkt = Tidspunkt(periodisertResultat.opprettet),
                     regelResultat = periodisertResultat.toJsonNode()
                 )

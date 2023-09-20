@@ -83,8 +83,8 @@ internal class MigreringHendelser(rapidsConnection: RapidsConnection, private va
         ),
         beregnet = null,
         begrunnelse = "Migrert fra pesys",
-        poengInnAar = false,
-        poengUtAar = false,
-        prorata = false
+        poengInnAar = trygdetidsgrunnlag.poengIInnAar,
+        poengUtAar = trygdetidsgrunnlag.poengIUtAar,
+        prorata = !trygdetidsgrunnlag.ikkeIProrata
     )
 }

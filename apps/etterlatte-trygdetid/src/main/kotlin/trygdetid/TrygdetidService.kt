@@ -5,6 +5,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
+import no.nav.etterlatte.libs.common.behandling.girOpphoer
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsdata
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning.RegelKilde
@@ -241,7 +242,9 @@ class TrygdetidService(
     ): Trygdetid {
         val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
         return kopierSisteTrygdetidberegning(behandling, forrigeBehandlingId, brukerTokenInfo).also {
-            behandlingKlient.settBehandlingStatusTrygdetidOppdatert(behandlingId, brukerTokenInfo)
+            if (!behandling.revurderingsaarsak.girOpphoer()) {
+                behandlingKlient.settBehandlingStatusTrygdetidOppdatert(behandlingId, brukerTokenInfo)
+            }
         }
     }
 

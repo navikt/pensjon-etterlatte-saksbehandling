@@ -655,6 +655,7 @@ internal class TrygdetidServiceTest {
             mockk<DetaljertBehandling>().apply {
                 every { id } returns behandlingId
                 every { sak } returns sakId
+                every { revurderingsaarsak } returns RevurderingAarsak.ANNEN
             }
 
         val vilkaarsvurderingDto = mockk<VilkaarsvurderingDto>()
@@ -680,6 +681,7 @@ internal class TrygdetidServiceTest {
         verify {
             regulering.id
             regulering.sak
+            regulering.revurderingsaarsak
             vilkaarsvurderingDto.isYrkesskade()
         }
     }

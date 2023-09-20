@@ -2,6 +2,7 @@ package beregning.grunnlag
 
 import io.mockk.clearAllMocks
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlag
+import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlagOMS
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlagRepository
 import no.nav.etterlatte.beregning.grunnlag.GrunnlagMedPeriode
 import no.nav.etterlatte.beregning.grunnlag.InstitusjonsoppholdBeregningsgrunnlag
@@ -100,6 +101,37 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest {
     }
 
     @Test
+    fun `Opprettelse fungerer for OMS`() {
+        val id = UUID.randomUUID()
+
+        val institusjonsoppholdBeregningsgrunnlag =
+            listOf(
+                GrunnlagMedPeriode(
+                    fom = LocalDate.of(2022, 8, 1),
+                    tom = null,
+                    data = InstitusjonsoppholdBeregningsgrunnlag(Reduksjon.NEI_KORT_OPPHOLD)
+                )
+            )
+
+        repository.lagreOMS(
+            BeregningsGrunnlagOMS(
+                id,
+                Grunnlagsopplysning.Saksbehandler(
+                    ident = "Z123456",
+                    Tidspunkt.now()
+                ),
+                institusjonsoppholdBeregningsgrunnlag
+            )
+        )
+
+        val result = repository.finnOmstillingstoenadGrunnlagForBehandling(id)
+
+        assertNotNull(result)
+
+        assertEquals(institusjonsoppholdBeregningsgrunnlag, result?.institusjonsoppholdBeregningsgrunnlag)
+    }
+
+    @Test
     fun `Oppdatering fungerer`() {
         val id = UUID.randomUUID()
 
@@ -155,6 +187,57 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest {
         assertNotNull(result)
 
         assertEquals(oppdatertSoeskenMedIBeregning, result?.soeskenMedIBeregning)
+        assertEquals(oppdatertInstitusjonsoppholdBeregningsgrunnlag, result?.institusjonsoppholdBeregningsgrunnlag)
+        assertEquals("Z654321", result?.kilde?.ident)
+    }
+
+    @Test
+    fun `Oppdatering fungerer for OMS`() {
+        val id = UUID.randomUUID()
+
+        val initialInstitusjonsoppholdBeregningsgrunnlag =
+            listOf(
+                GrunnlagMedPeriode(
+                    fom = LocalDate.of(2022, 8, 1),
+                    tom = null,
+                    data = InstitusjonsoppholdBeregningsgrunnlag(Reduksjon.NEI_KORT_OPPHOLD)
+                )
+            )
+        val oppdatertInstitusjonsoppholdBeregningsgrunnlag =
+            listOf(
+                GrunnlagMedPeriode(
+                    fom = LocalDate.of(2022, 8, 1),
+                    tom = null,
+                    data = InstitusjonsoppholdBeregningsgrunnlag(Reduksjon.JA_VANLIG)
+                )
+            )
+
+        repository.lagreOMS(
+            BeregningsGrunnlagOMS(
+                id,
+                Grunnlagsopplysning.Saksbehandler(
+                    ident = "Z123456",
+                    Tidspunkt.now()
+                ),
+                initialInstitusjonsoppholdBeregningsgrunnlag
+            )
+        )
+
+        repository.lagreOMS(
+            BeregningsGrunnlagOMS(
+                id,
+                Grunnlagsopplysning.Saksbehandler(
+                    ident = "Z654321",
+                    Tidspunkt.now()
+                ),
+                oppdatertInstitusjonsoppholdBeregningsgrunnlag
+            )
+        )
+
+        val result = repository.finnOmstillingstoenadGrunnlagForBehandling(id)
+
+        assertNotNull(result)
+
         assertEquals(oppdatertInstitusjonsoppholdBeregningsgrunnlag, result?.institusjonsoppholdBeregningsgrunnlag)
         assertEquals("Z654321", result?.kilde?.ident)
     }

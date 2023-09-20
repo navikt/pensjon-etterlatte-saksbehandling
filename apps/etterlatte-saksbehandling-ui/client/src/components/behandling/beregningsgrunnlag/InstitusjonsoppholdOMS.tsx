@@ -34,7 +34,7 @@ const InstitusjonsoppholdOMS = (props: InstitusjonsoppholdProps) => {
     institusjonsOppholdForm: InstitusjonsoppholdGrunnlagData
   }>({
     defaultValues: {
-      institusjonsOppholdForm: mapListeFraDto(behandling.beregningsGrunnlag?.institusjonsopphold ?? []),
+      institusjonsOppholdForm: mapListeFraDto(behandling.beregningsGrunnlagOMS?.institusjonsopphold ?? []),
     },
   })
 
@@ -64,8 +64,8 @@ const InstitusjonsoppholdOMS = (props: InstitusjonsoppholdProps) => {
 
   return (
     <InstitusjonsoppholdsWrapper>
-      {(behandling.beregningsGrunnlag?.institusjonsopphold &&
-        behandling.beregningsGrunnlag?.institusjonsopphold?.length > 0) ||
+      {(behandling.beregningsGrunnlagOMS?.institusjonsopphold &&
+        behandling.beregningsGrunnlagOMS?.institusjonsopphold?.length > 0) ||
       behandles ? (
         <>
           <LovtekstMedLenke

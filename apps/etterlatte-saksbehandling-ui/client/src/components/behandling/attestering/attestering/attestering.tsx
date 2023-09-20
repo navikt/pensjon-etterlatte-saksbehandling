@@ -1,15 +1,16 @@
-import styled from 'styled-components'
 import { useBehandlingRoutes } from '~components/behandling/BehandlingRoutes'
 import { IBeslutning } from '../types'
 import { Beslutningsvalg } from './beslutningsvalg'
 import { useAppSelector } from '~store/Store'
-import { Alert } from '@navikt/ds-react'
+import { Alert, BodyShort } from '@navikt/ds-react'
 import { isFailure, isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
-import { hentOppgaveForBehandlingUnderBehandling } from '~shared/api/oppgaverny'
+import { hentSaksbehandlerForOppgaveUnderArbeid } from '~shared/api/oppgaverny'
 import { useEffect, useState } from 'react'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
+import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
+import { SidebarPanel } from '~shared/components/Sidebar'
 
 type Props = {
   setBeslutning: (value: IBeslutning) => void
@@ -19,90 +20,60 @@ type Props = {
 
 export const Attestering = ({ setBeslutning, beslutning, behandling }: Props) => {
   const { lastPage } = useBehandlingRoutes()
-
   const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.saksbehandler)
-
+  const [saksbehandlerForOppgave, hentSaksbehandlerForOppgave] = useApiCall(hentSaksbehandlerForOppgaveUnderArbeid)
   const attestantOgSaksbehandlerErSammePerson = behandling.vedtak?.saksbehandlerId === innloggetSaksbehandler.ident
-  const [saksbehandlerPaaOppgave, setSaksbehandlerPaaOppgave] = useState<string | null>(null)
-
-  const [oppgaveForBehandlingStatus, requestHentUnderbehandlingSaksbehandler] = useApiCall(
-    hentOppgaveForBehandlingUnderBehandling
-  )
+  const [oppgaveErTildeltInnloggetBruker, setOppgaveErTildeltInnloggetBruker] = useState(false)
 
   useEffect(() => {
-    requestHentUnderbehandlingSaksbehandler({ behandlingId: behandling.id }, (saksbehandler, statusCode) => {
-      if (statusCode === 200) {
-        setSaksbehandlerPaaOppgave(saksbehandler)
-      }
+    hentSaksbehandlerForOppgave({ behandlingId: behandling.id }, (saksbehandler) => {
+      setOppgaveErTildeltInnloggetBruker(saksbehandler === innloggetSaksbehandler.ident)
     })
   }, [])
 
-  const innloggetBrukerErSammeSomPaaOppgave = saksbehandlerPaaOppgave === innloggetSaksbehandler.ident
-
   return (
-    <AttesteringWrapper>
-      <div className="info">
-        <Overskrift>Kontroller opplysninger og faglige vurderinger gjort under behandling.</Overskrift>
-      </div>
-
-      {isPending(oppgaveForBehandlingStatus) && <Spinner visible label={'Henter oppgave'} />}
-      {isFailure(oppgaveForBehandlingStatus) && <ApiErrorAlert>Kunne ikke hente oppgave for behandling</ApiErrorAlert>}
-      {isSuccess(oppgaveForBehandlingStatus) && (
-        <>
-          {innloggetBrukerErSammeSomPaaOppgave ? (
-            <TextWrapper>
-              Beslutning
-              {lastPage ? (
-                <Beslutningsvalg
-                  beslutning={beslutning}
-                  setBeslutning={setBeslutning}
-                  behandling={behandling}
-                  disabled={attestantOgSaksbehandlerErSammePerson}
-                />
-              ) : (
-                <Tekst>Se gjennom alle steg før du tar en beslutning.</Tekst>
-              )}
-              {attestantOgSaksbehandlerErSammePerson && (
-                <Alert variant={'warning'}>Du kan ikke attestere en sak som du har saksbehandlet</Alert>
-              )}
-            </TextWrapper>
-          ) : (
-            <Alert variant={'warning'}>
-              Oppgaven må være tildelt deg for å kunne godkjenne eller underkjenne behandlingen
+    <SidebarPanel>
+      {isPending(saksbehandlerForOppgave) && <Spinner visible label={'Henter oppgave'} />}
+      {isFailure(saksbehandlerForOppgave) && <ApiErrorAlert>Kunne ikke hente oppgave for behandling</ApiErrorAlert>}
+      {isSuccess(saksbehandlerForOppgave) &&
+        (oppgaveErTildeltInnloggetBruker ? (
+          <>
+            <Alert variant={'info'} size={'small'}>
+              Kontroller opplysninger og faglige vurderinger gjort under behandling.
             </Alert>
-          )}
-        </>
-      )}
-    </AttesteringWrapper>
+            <br />
+
+            {lastPage ? (
+              <Beslutningsvalg
+                beslutning={beslutning}
+                setBeslutning={setBeslutning}
+                behandling={behandling}
+                disabled={attestantOgSaksbehandlerErSammePerson}
+              />
+            ) : (
+              <BodyShort size={'small'} spacing>
+                <i>Se gjennom alle steg før du tar en beslutning.</i>
+              </BodyShort>
+            )}
+
+            {attestantOgSaksbehandlerErSammePerson && (
+              <Alert variant={'warning'}>Du kan ikke attestere en sak som du har saksbehandlet</Alert>
+            )}
+          </>
+        ) : (
+          <Alert variant={'warning'}>
+            {saksbehandlerForOppgave.data ? (
+              <BodyShort>Oppgaven er tildelt {saksbehandlerForOppgave.data}.&nbsp;</BodyShort>
+            ) : (
+              <BodyShort>Oppgaven er ikke tildelt noen.&nbsp;</BodyShort>
+            )}
+            <BodyShort spacing>
+              {behandling?.status == IBehandlingStatus.FATTET_VEDTAK
+                ? 'For å kunne attestere behandlingen, må oppgaven være tildelt deg.'
+                : 'For å kunne fortsette behandling, må oppgaven være tildelt deg.'}
+            </BodyShort>
+          </Alert>
+        ))}
+    </SidebarPanel>
   )
 }
-
-const AttesteringWrapper = styled.div`
-  margin: 1em;
-
-  .info {
-    margin-top: 1em;
-    margin-bottom: 1em;
-    padding: 1em;
-  }
-`
-
-const TextWrapper = styled.div`
-  font-size: 18px;
-  font-weight: 600;
-  margin: 1em;
-`
-
-const Overskrift = styled.div`
-  font-weight: 600;
-  font-size: 16px;
-  line-height: 22px;
-  color: #3e3832;
-`
-
-const Tekst = styled.div`
-  font-size: 18px;
-  font-weight: 400;
-  color: #3e3832;
-  margin-top: 6px;
-`

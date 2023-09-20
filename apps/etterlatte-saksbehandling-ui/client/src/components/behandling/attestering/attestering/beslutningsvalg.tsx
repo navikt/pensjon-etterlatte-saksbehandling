@@ -1,4 +1,4 @@
-import { RadioGroup, Radio } from '@navikt/ds-react'
+import { Heading, Radio, RadioGroup } from '@navikt/ds-react'
 import { Underkjenn } from './underkjenn'
 import { RadioGroupWrapper } from '../styled'
 import { IBeslutning } from '../types'
@@ -15,6 +15,8 @@ type Props = {
 export const Beslutningsvalg = ({ beslutning, setBeslutning, behandling, disabled }: Props) => {
   return (
     <>
+      <Heading size={'xsmall'}>Beslutning</Heading>
+
       <RadioGroupWrapper>
         <RadioGroup
           disabled={disabled}
@@ -29,7 +31,6 @@ export const Beslutningsvalg = ({ beslutning, setBeslutning, behandling, disable
           </div>
         </RadioGroup>
       </RadioGroupWrapper>
-
       {beslutning === IBeslutning.godkjenn && <Godkjenn behandling={behandling} />}
       {beslutning === IBeslutning.underkjenn && <Underkjenn behandling={behandling} />}
     </>

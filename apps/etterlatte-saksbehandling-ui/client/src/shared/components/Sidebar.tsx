@@ -1,7 +1,7 @@
 import { ReactNode, useState } from 'react'
 import { Button } from '@navikt/ds-react'
 import { CollapsibleSidebar, SidebarContent, SidebarTools } from '~shared/styled'
-import styled from 'styled-components'
+import styled, { css } from 'styled-components'
 import { ChevronLeftDoubleIcon, ChevronRightDoubleIcon } from '@navikt/aksel-icons'
 
 export const Sidebar = ({ children }: { children: ReactNode }) => {
@@ -20,11 +20,17 @@ export const Sidebar = ({ children }: { children: ReactNode }) => {
   )
 }
 
-export const SidebarPanel = styled.div`
+export const SidebarPanel = styled.div<{ border?: boolean }>`
   margin: 20px 8px 0 8px;
   padding: 1em;
-  border: 1px solid #c7c0c0;
-  border-radius: 3px;
+
+  ${(props) =>
+    props.border
+      ? css`
+          border-radius: 3px;
+          border: 1px solid #c7c0c0;
+        `
+      : null}
 
   .flex {
     display: flex;

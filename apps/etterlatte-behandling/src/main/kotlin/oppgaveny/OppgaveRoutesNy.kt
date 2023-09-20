@@ -52,36 +52,18 @@ internal fun Route.oppgaveRoutesNy(
             }
         }
 
-        get("gosys/{id}") {
-            kunSaksbehandler {
-                val id =
-                    requireNotNull(call.parameters["id"]?.toLong()) {
-                        "Manglet påkrevd oppgave-id"
-                    }
-                val oppgave = gosysOppgaveService.hentOppgave(id, brukerTokenInfo)
-
-                call.respond(oppgave ?: HttpStatusCode.NoContent)
-            }
-        }
-
-        get("{$BEHANDLINGSID_CALL_PARAMETER}/hentsaksbehandler") {
-            kunSaksbehandler {
-                val saksbehandler = service.hentSaksbehandlerForBehandling(behandlingsId)
-                if (saksbehandler != null) {
-                    call.respond(saksbehandler)
-                } else {
-                    call.respond(HttpStatusCode.NoContent)
+        route("behandling/{$BEHANDLINGSID_CALL_PARAMETER}") {
+            get("/hentsaksbehandler") {
+                kunSaksbehandler {
+                    val saksbehandler = service.hentSaksbehandlerForBehandling(behandlingsId)
+                    call.respond(saksbehandler ?: HttpStatusCode.NoContent)
                 }
             }
-        }
 
-        get("{$BEHANDLINGSID_CALL_PARAMETER}/oppgaveunderarbeid") {
-            kunSaksbehandler {
-                val saksbehandler = service.hentSaksbehandlerForOppgaveUnderArbeid(behandlingsId)
-                if (saksbehandler != null) {
-                    call.respond(saksbehandler)
-                } else {
-                    call.respond(HttpStatusCode.NoContent)
+            get("/oppgaveunderarbeid") {
+                kunSaksbehandler {
+                    val saksbehandler = service.hentSaksbehandlerForOppgaveUnderArbeid(behandlingsId)
+                    call.respond(saksbehandler ?: HttpStatusCode.NoContent)
                 }
             }
         }
@@ -127,7 +109,16 @@ internal fun Route.oppgaveRoutesNy(
                     call.respond(gosysOppgaveService.hentOppgaver(brukerTokenInfo))
                 }
             }
+
             route("{$OPPGAVEID_GOSYS_CALL_PARAMETER}") {
+                get {
+                    kunSaksbehandler {
+                        val oppgave = gosysOppgaveService.hentOppgave(gosysOppgaveId.toLong(), brukerTokenInfo)
+
+                        call.respond(oppgave ?: HttpStatusCode.NoContent)
+                    }
+                }
+
                 post("tildel-saksbehandler") {
                     val saksbehandlerEndringDto = call.receive<SaksbehandlerEndringGosysDto>()
                     gosysOppgaveService.tildelOppgaveTilSaksbehandler(
@@ -138,6 +129,7 @@ internal fun Route.oppgaveRoutesNy(
                     )
                     call.respond(HttpStatusCode.OK)
                 }
+
                 post("endre-frist") {
                     val redigerFristRequest = call.receive<RedigerFristGosysRequest>()
                     gosysOppgaveService.endreFrist(

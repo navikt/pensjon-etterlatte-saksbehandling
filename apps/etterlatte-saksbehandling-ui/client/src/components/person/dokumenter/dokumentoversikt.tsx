@@ -12,7 +12,7 @@ export const Dokumentoversikt = (props: { fnr: string; liten?: boolean }) => {
   useEffect(() => void hentDokumenterForBruker(props.fnr), [props.fnr])
 
   return props.liten ? (
-    <SidebarPanel>
+    <SidebarPanel border>
       <DokumentlisteLiten dokumenter={dokumenter} />
     </SidebarPanel>
   ) : (

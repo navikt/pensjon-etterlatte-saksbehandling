@@ -8,7 +8,7 @@ export function KlageSidemeny() {
 
   return (
     <Sidebar>
-      <SidebarPanel>
+      <SidebarPanel border>
         <BodyShort>Her kan vi vise info om klagen, som sakid: {klage?.sak?.id}</BodyShort>
       </SidebarPanel>
       {klage?.sak.ident && <Dokumentoversikt fnr={klage.sak.ident} liten />}

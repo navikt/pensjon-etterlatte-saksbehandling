@@ -133,7 +133,6 @@ class BehandlingFactory(
                 sakId = sak.id,
                 status = BehandlingStatus.OPPRETTET,
                 soeknadMottattDato = mottattDato?.let { LocalDateTime.parse(it) },
-                persongalleri = persongalleri,
                 kilde = kilde,
                 merknad = opprettMerknad(sak, persongalleri)
             ).let { opprettBehandling ->

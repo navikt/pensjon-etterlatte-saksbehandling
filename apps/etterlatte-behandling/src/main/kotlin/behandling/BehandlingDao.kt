@@ -141,9 +141,9 @@ class BehandlingDao(
             connection().prepareStatement(
                 """
                     INSERT INTO behandling(id, sak_id, behandling_opprettet, sist_endret, status, behandlingstype, 
-                    soeknad_mottatt_dato, innsender, soeker, gjenlevende, avdoed, soesken, virkningstidspunkt,
-                    revurdering_aarsak, opphoer_aarsaker, fritekst_aarsak, prosesstype, kilde, merknad, begrunnelse)
-                    VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    soeknad_mottatt_dato, virkningstidspunkt, revurdering_aarsak, opphoer_aarsaker, fritekst_aarsak, 
+                    prosesstype, kilde, merknad, begrunnelse)
+                    VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """.trimIndent()
             )
         with(behandling) {
@@ -154,24 +154,14 @@ class BehandlingDao(
             stmt.setString(5, status.name)
             stmt.setString(6, type.name)
             stmt.setTidspunkt(7, soeknadMottattDato?.toTidspunkt())
-            with(persongalleri) {
-                stmt.setString(8, innsender)
-                stmt.setString(9, soeker)
-                stmt.setString(10, gjenlevende.toJson())
-                stmt.setString(11, avdoed.toJson())
-                stmt.setString(12, soesken.toJson())
-            }
-            stmt.setString(
-                13,
-                virkningstidspunkt?.toJson()
-            )
-            stmt.setString(14, revurderingsAarsak?.name)
-            stmt.setString(15, opphoerAarsaker?.toJson())
-            stmt.setString(16, fritekstAarsak)
-            stmt.setString(17, prosesstype.toString())
-            stmt.setString(18, kilde.toString())
-            stmt.setString(19, merknad)
-            stmt.setString(20, begrunnelse)
+            stmt.setString(8, virkningstidspunkt?.toJson())
+            stmt.setString(9, revurderingsAarsak?.name)
+            stmt.setString(10, opphoerAarsaker?.toJson())
+            stmt.setString(11, fritekstAarsak)
+            stmt.setString(12, prosesstype.toString())
+            stmt.setString(13, kilde.toString())
+            stmt.setString(14, merknad)
+            stmt.setString(15, begrunnelse)
         }
         require(stmt.executeUpdate() == 1)
     }

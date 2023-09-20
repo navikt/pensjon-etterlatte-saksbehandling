@@ -286,7 +286,6 @@ class RevurderingServiceImpl(
         status = BehandlingStatus.OPPRETTET,
         soeknadMottattDato = mottattDato?.let { LocalDateTime.parse(it) },
         revurderingsAarsak = revurderingAarsak,
-        persongalleri = persongalleri,
         virkningstidspunkt = virkningstidspunkt,
         kilde = kilde,
         prosesstype = prosessType,

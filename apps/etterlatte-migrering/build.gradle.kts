@@ -13,6 +13,7 @@ dependencies {
     implementation(project(":libs:etterlatte-ktor"))
     implementation(project(":libs:etterlatte-database"))
     implementation(project(":libs:etterlatte-funksjonsbrytere"))
+    implementation(project(":libs:etterlatte-pdl-model"))
     implementation(project(":libs:etterlatte-utbetaling-model"))
     implementation(project(":libs:ktor2client-onbehalfof"))
     testImplementation(project(":libs:testdata"))

@@ -20,6 +20,8 @@ on:
       - libs/etterlatte-funksjonsbrytere/**
       - libs/etterlatte-ktor/**
       - libs/etterlatte-database/**
+      - libs/etterlatte-pdl-model/**
+      - libs/etterlatte-utbetaling-model/**
       - libs/ktor2client-onbehalfof/**
       - gradle/libs.versions.toml
   pull_request:
@@ -31,6 +33,8 @@ on:
       - libs/etterlatte-funksjonsbrytere/**
       - libs/etterlatte-ktor/**
       - libs/etterlatte-database/**
+      - libs/etterlatte-pdl-model/**
+      - libs/etterlatte-utbetaling-model/**
       - libs/ktor2client-onbehalfof/**
       - gradle/libs.versions.toml
 

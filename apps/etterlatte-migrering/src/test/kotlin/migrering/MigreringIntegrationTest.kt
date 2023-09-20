@@ -9,6 +9,8 @@ import io.mockk.runs
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import kotliquery.TransactionalSession
+import migrering.verifisering.PDLKlient
+import migrering.verifisering.Verifiserer
 import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
@@ -76,7 +78,17 @@ internal class MigreringIntegrationTest {
                         penKlient = mockk<PenKlient>()
                             .also { every { runBlocking { it.hentSak(any()) } } returns responsFraPEN },
                         pesysRepository = repository,
-                        sakmigrerer = Sakmigrerer(repository, featureToggleService)
+                        featureToggleService = featureToggleService,
+                        verifiserer = Verifiserer(
+                            mockk<PDLKlient>().also {
+                                every {
+                                    it.hentPerson(
+                                        any(),
+                                        any()
+                                    )
+                                } returns mockk()
+                            }
+                        )
                     )
                 }
             inspector.sendTestMessage(
@@ -122,7 +134,17 @@ internal class MigreringIntegrationTest {
                         rapidsConnection = this,
                         penKlient = penKlient,
                         pesysRepository = repository,
-                        sakmigrerer = Sakmigrerer(repository, featureToggleService)
+                        featureToggleService = featureToggleService,
+                        verifiserer = Verifiserer(
+                            mockk<PDLKlient>().also {
+                                every {
+                                    it.hentPerson(
+                                        any(),
+                                        any()
+                                    )
+                                } returns mockk()
+                            }
+                        )
                     )
                     LagreKopling(this, repository)
                     LyttPaaIverksattVedtak(this, repository, penKlient)
@@ -170,14 +192,59 @@ internal class MigreringIntegrationTest {
             assertEquals(repository.hentStatus(pesysId.id), Migreringsstatus.FERDIG)
         }
     }
+
+    @Test
+    fun `feiler hvis en person ikke fins i PDL`() {
+        testApplication {
+            val pesysid = 22974139L
+            val repository = PesysRepository(datasource)
+            val featureToggleService = DummyFeatureToggleService().also {
+                it.settBryter(MigreringFeatureToggle.SendSakTilMigrering, true)
+            }
+            val responsFraPEN = objectMapper.readValue<BarnepensjonGrunnlagResponse>(
+                this::class.java.getResource("/penrespons.json")!!.readText()
+            )
+
+            val inspector = TestRapid()
+                .apply {
+                    MigrerSpesifikkSak(
+                        rapidsConnection = this,
+                        penKlient = mockk<PenKlient>()
+                            .also { every { runBlocking { it.hentSak(any()) } } returns responsFraPEN },
+                        pesysRepository = repository,
+                        featureToggleService = featureToggleService,
+                        verifiserer = Verifiserer(
+                            mockk<PDLKlient>().also {
+                                every {
+                                    it.hentPerson(
+                                        any(),
+                                        any()
+                                    )
+                                } throws IllegalStateException("")
+                            }
+                        )
+                    )
+                }
+            inspector.sendTestMessage(
+                JsonMessage.newMessage(
+                    mapOf(
+                        EVENT_NAME_KEY to Migreringshendelser.MIGRER_SPESIFIKK_SAK,
+                        SAK_ID_KEY to pesysid
+                    )
+                ).toJson()
+            )
+            with(inspector.inspektør.message(0)) {
+                assertEquals(Migreringsstatus.FEILA.name, get(EVENT_NAME_KEY).textValue())
+            }
+            assertEquals(Migreringsstatus.FEILA, repository.hentStatus(pesysid))
+        }
+    }
 }
 
 internal fun PesysRepository.hentSaker(tx: TransactionalSession? = null): List<Pesyssak> = tx.session {
     hentListe(
         "SELECT sak from pesyssak WHERE status = '${Migreringsstatus.UNDER_MIGRERING.name}'"
     ) {
-        tilPesyssak(it.string("sak"))
+        objectMapper.readValue(it.string("sak"), Pesyssak::class.java)
     }
 }
-
-private fun tilPesyssak(sak: String) = objectMapper.readValue(sak, Pesyssak::class.java)

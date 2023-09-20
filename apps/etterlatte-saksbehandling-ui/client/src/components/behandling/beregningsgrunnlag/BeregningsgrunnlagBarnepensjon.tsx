@@ -25,6 +25,7 @@ import Soeskenjustering, {
 import Spinner from '~shared/Spinner'
 import { IPdlPerson } from '~shared/types/Person'
 import { InstitusjonsoppholdGrunnlagData } from '~shared/types/Beregning'
+import { Border } from '~components/behandling/soeknadsoversikt/styled'
 
 const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer }) => {
   const { behandling } = props
@@ -121,6 +122,8 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
       {manglerSoeskenJustering && <ApiErrorAlert>Søskenjustering er ikke fylt ut </ApiErrorAlert>}
       {isFailure(endreBeregning) && <ApiErrorAlert>Kunne ikke opprette ny beregning</ApiErrorAlert>}
       {isFailure(lagreBeregningsgrunnlag) && <ApiErrorAlert>Kunne ikke lagre beregningsgrunnlag</ApiErrorAlert>}
+
+      <Border />
 
       {behandles ? (
         <BehandlingHandlingKnapper>

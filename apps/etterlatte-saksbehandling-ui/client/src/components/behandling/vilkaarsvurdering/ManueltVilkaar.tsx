@@ -1,8 +1,7 @@
 import {
   Innhold,
-  VilkaarBeskrivelse,
   Title,
-  VilkaarBorder,
+  VilkaarBeskrivelse,
   VilkaarColumn,
   VilkaarInfobokser,
   VilkaarlisteTitle,
@@ -10,12 +9,13 @@ import {
   VilkaarVurderingContainer,
   VilkaarWrapper,
 } from './styled'
-import { Vilkaar, IVilkaarsvurdering, VurderingsResultat } from '~shared/api/vilkaarsvurdering'
+import { IVilkaarsvurdering, Vilkaar, VurderingsResultat } from '~shared/api/vilkaarsvurdering'
 import { Vurdering } from './Vurdering'
 import { StatusIcon, StatusIconProps } from '~shared/icons/statusIcon'
 import { VilkaarGrunnlagsStoette } from './vilkaar/VilkaarGrunnlagsStoette'
 import { Link } from '@navikt/ds-react'
 import { ExternalLinkIcon } from '@navikt/aksel-icons'
+import { Border } from '~components/behandling/soeknadsoversikt/styled'
 
 export interface VilkaarProps {
   vilkaar: Vilkaar
@@ -46,7 +46,7 @@ export const ManueltVilkaar = (props: VilkaarProps) => {
   }
 
   return (
-    <VilkaarBorder id={vilkaar.hovedvilkaar.type}>
+    <>
       <Innhold>
         <VilkaarWrapper>
           <VilkaarInfobokser>
@@ -77,6 +77,8 @@ export const ManueltVilkaar = (props: VilkaarProps) => {
           </VilkaarVurderingColumn>
         </VilkaarWrapper>
       </Innhold>
-    </VilkaarBorder>
+
+      <Border />
+    </>
   )
 }

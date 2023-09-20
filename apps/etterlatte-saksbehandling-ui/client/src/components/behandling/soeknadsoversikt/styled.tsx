@@ -97,7 +97,7 @@ export const HeadingWrapper = styled.div`
 `
 
 export const Border = styled.div`
-  border-top: 1px solid #b0b0b0;
+  border-top: 1px solid #ccc;
   margin-bottom: 1em;
 `
 

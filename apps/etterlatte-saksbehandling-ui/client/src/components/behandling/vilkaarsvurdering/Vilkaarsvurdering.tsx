@@ -3,7 +3,6 @@ import React, { useEffect } from 'react'
 import { useLocation, useParams } from 'react-router-dom'
 import { hentVilkaarsvurdering, opprettVilkaarsvurdering } from '~shared/api/vilkaarsvurdering'
 import { ManueltVilkaar } from './ManueltVilkaar'
-import { VilkaarBorderTop } from './styled'
 import { Resultat } from './Resultat'
 import Spinner from '~shared/Spinner'
 import {
@@ -13,7 +12,7 @@ import {
 } from '~store/reducers/BehandlingReducer'
 import { useAppDispatch } from '~store/Store'
 import { Heading } from '@navikt/ds-react'
-import { HeadingWrapper } from '../soeknadsoversikt/styled'
+import { Border, HeadingWrapper } from '../soeknadsoversikt/styled'
 import { hentBehandlesFraStatus } from '~components/behandling/felles/utils'
 import { isFailure, isInitial, isPending, useApiCall } from '~shared/hooks/useApiCall'
 import { ApiErrorAlert } from '~ErrorBoundary'
@@ -69,7 +68,8 @@ export const Vilkaarsvurdering = (props: { behandling: IBehandlingReducer }) => 
 
       {behandlingId && vilkaarsvurdering && (
         <>
-          <VilkaarBorderTop />
+          <Border />
+
           {vilkaarsvurdering.vilkaar.map((value, index) => (
             <ManueltVilkaar
               key={index}

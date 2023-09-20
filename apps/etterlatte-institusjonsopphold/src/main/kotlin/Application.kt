@@ -73,7 +73,7 @@ fun startInstitusjonsoppholdLytter(
         BehandlingKlient(
             behandlingHttpClient = behandlingHttpClient,
             institusjonsoppholdKlient = institusjonsoppholdKlient,
-            resourceUrl = config.getString("behandling.resource.url")
+            resourceUrl = config.getString("etterlatte.behandling.url")
         )
 
     startLytting(

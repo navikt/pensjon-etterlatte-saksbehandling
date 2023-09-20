@@ -61,7 +61,8 @@ object SlateHelper {
                     VedtakType.INNVILGELSE -> BrevInnholdVedlegg.innvilgelseOMS()
                     VedtakType.ENDRING -> {
                         when (behandling.revurderingsaarsak) {
-                            RevurderingAarsak.INNTEKTSENDRING -> BrevInnholdVedlegg.inntektsendringOMS()
+                            RevurderingAarsak.INNTEKTSENDRING,
+                            RevurderingAarsak.ANNEN -> BrevInnholdVedlegg.inntektsendringOMS()
                             else -> null
                         }
                     }

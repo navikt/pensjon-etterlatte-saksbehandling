@@ -51,3 +51,4 @@ spec:
         - application: etterlatte-hendelser-pdl
         - application: etterlatte-behandling
         - application: etterlatte-grunnlag
+        - application: etterlatte-migrering

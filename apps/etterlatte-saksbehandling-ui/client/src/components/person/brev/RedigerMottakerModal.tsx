@@ -5,6 +5,7 @@ import { DocPencilIcon } from '@navikt/aksel-icons'
 import styled, { css } from 'styled-components'
 import { isFailure, isPending, useApiCall } from '~shared/hooks/useApiCall'
 import { oppdaterMottaker } from '~shared/api/brev'
+import { FlexRow } from '~shared/styled'
 
 enum MottakerType {
   PRIVATPERSON = 'PRIVATPERSON',
@@ -196,14 +197,14 @@ export default function RedigerMottakerModal({ brev, oppdater }: Props) {
 
           {isFailure(mottakerStatus) && <Alert variant={'error'}>Kunne ikke oppdatere mottaker...</Alert>}
 
-          <ButtonRow>
+          <FlexRow justify={'right'}>
             <Button variant={'secondary'} disabled={isPending(mottakerStatus)} onClick={avbryt}>
               Avbryt
             </Button>
             <Button variant={'primary'} loading={isPending(mottakerStatus)} onClick={lagre}>
               Lagre
             </Button>
-          </ButtonRow>
+          </FlexRow>
         </Modal.Body>
       </MottakerModal>
     </>
@@ -213,14 +214,6 @@ export default function RedigerMottakerModal({ brev, oppdater }: Props) {
 const MottakerModal = styled(Modal)`
   width: 40rem;
   padding: 3rem;
-`
-
-const ButtonRow = styled.div`
-  text-align: right;
-
-  & > button {
-    margin-left: 1rem;
-  }
 `
 
 const SkjemaGruppe = styled.div<{ inline?: boolean }>`

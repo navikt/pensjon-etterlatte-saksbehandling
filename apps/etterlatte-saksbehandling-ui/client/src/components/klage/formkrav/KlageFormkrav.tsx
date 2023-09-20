@@ -1,9 +1,8 @@
 import { Button, Heading, Radio, RadioGroup, Select } from '@navikt/ds-react'
-import { Content, ContentHeader } from '~shared/styled'
+import { Content, ContentHeader, FlexRow } from '~shared/styled'
 import { HeadingWrapper, Innhold } from '~components/behandling/soeknadsoversikt/styled'
 import { useKlage } from '~components/klage/useKlage'
 import { useNavigate } from 'react-router-dom'
-import { KnapperWrapper } from '~components/behandling/handlinger/BehandlingHandlingKnapper'
 import { isFailure, isPending, isPendingOrInitial, mapSuccess, useApiCall } from '~shared/hooks/useApiCall'
 import { oppdaterFormkravIKlage } from '~shared/api/klage'
 import { JaNei } from '~shared/types/ISvar'
@@ -18,6 +17,7 @@ import { ApiErrorAlert } from '~ErrorBoundary'
 import { formaterKanskjeStringDato, formaterVedtakType } from '~utils/formattering'
 import { FieldOrNull } from '~shared/types/util'
 import { Feilmelding, VurderingWrapper } from '~components/klage/styled'
+import { kanVurdereUtfall } from '~components/klage/stegmeny/KlageStegmeny'
 
 // Vi bruker kun id'en til vedtaket i skjemadata, og transformerer fram / tilbake før sending / lasting
 type FilledFormDataFormkrav = Omit<Formkrav, 'vedtaketKlagenGjelder'> & { vedtaketKlagenGjelderId: null | string }
@@ -77,7 +77,11 @@ export function KlageFormkrav() {
   const dispatch = useAppDispatch()
   const [iverksatteVedtak, hentIverksatteVedtak] = useApiCall(hentIverksatteVedtakISak)
 
-  const { control, handleSubmit } = useForm<FormDataFormkrav>({
+  const {
+    control,
+    handleSubmit,
+    formState: { isDirty },
+  } = useForm<FormDataFormkrav>({
     defaultValues: klageFormkravTilDefaultFormValues(klage),
   })
 
@@ -98,6 +102,15 @@ export function KlageFormkrav() {
     }
     if (!isValidFormkrav(krav)) {
       return
+    }
+    if (!isDirty) {
+      // Skjemaet er fylt ut, men med samme info som innholdet i klagen fra backend. Dermed lagrer vi ikke på nytt og
+      // bare går videre til neste riktige steg
+      if (kanVurdereUtfall(klage)) {
+        navigate(`/klage/${klage.id}/vurdering`)
+      } else {
+        navigate(`/klage/${klage.id}/oppsummering`)
+      }
     }
 
     const formkrav = mapFormkrav(krav, kjenteVedtak)
@@ -196,11 +209,11 @@ export function KlageFormkrav() {
 
           <JaNeiRadiogruppe name="erFormkraveneOppfylt" control={control} legend="Er formkravene til klagen oppfylt?" />
         </Innhold>
-        <KnapperWrapper>
+        <FlexRow justify={'center'}>
           <Button type="submit" loading={isPending(lagreFormkravStatus)}>
             Lagre vurdering av formkrav
           </Button>
-        </KnapperWrapper>
+        </FlexRow>
 
         {isFailure(lagreFormkravStatus) ? (
           <ApiErrorAlert>

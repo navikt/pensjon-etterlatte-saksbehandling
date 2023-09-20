@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Behandlingsliste } from './behandlingsliste'
 import styled from 'styled-components'
 import { IBehandlingListe } from './typer'
 import { ManueltOpphoerModal } from './ManueltOpphoerModal'
 import { hentBehandlingerForPerson } from '~shared/api/behandling'
-import { GridContainer } from '~shared/styled'
+import { FlexRow, GridContainer } from '~shared/styled'
 import Spinner from '~shared/Spinner'
 import RelevanteHendelser from '~components/person/uhaandtereHendelser/RelevanteHendelser'
 import { isFailure, isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
@@ -12,11 +12,17 @@ import { Alert, BodyShort, Heading, Link, Tag } from '@navikt/ds-react'
 import { ISak } from '~shared/types/sak'
 import { formaterSakstype } from '~utils/formattering'
 import { ExternalLinkIcon } from '@navikt/aksel-icons'
-import { OpprettKlage } from '~components/person/OpprettKlage'
+import OpprettGenerellBehandling from '~components/person/OpprettGenerellBehandling'
+import { FEATURE_TOGGLE_KAN_BRUKE_KLAGE, OpprettKlage } from '~components/person/OpprettKlage'
+import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
+import { KlageListe } from '~components/person/KlageListe'
 
+export const FEATURE_TOGGLE_KAN_BRUKE_GENERELL_BEHANDLING = 'pensjon-etterlatte.kan-bruke-generell-behandling'
 export const SakOversikt = ({ fnr }: { fnr: string }) => {
   const [sak, setSak] = useState<ISak>()
+  const skalBrukeKlage = useFeatureEnabledMedDefault(FEATURE_TOGGLE_KAN_BRUKE_KLAGE)
   const [behandlingerStatus, hentBehandlinger] = useApiCall(hentBehandlingerForPerson)
+  const kanBrukeGenerllBehandling = useFeatureEnabledMedDefault(FEATURE_TOGGLE_KAN_BRUKE_GENERELL_BEHANDLING, false)
 
   useEffect(() => {
     hentBehandlinger(fnr, (behandlinger: IBehandlingListe[]) => {
@@ -38,10 +44,11 @@ export const SakOversikt = ({ fnr }: { fnr: string }) => {
               <Tag variant={'success'} size={'medium'}>
                 {formaterSakstype(sak!!.sakType)}
               </Tag>
-              <EkstraHandlinger>
+              <FlexRow justify={'right'}>
                 <OpprettKlage sakId={sak!!.id} />
                 <ManueltOpphoerModal sakId={sak!!.id} behandlingliste={behandlingerStatus.data[0].behandlinger} />
-              </EkstraHandlinger>
+                {kanBrukeGenerllBehandling && <OpprettGenerellBehandling sakId={sak!!.id} />}
+              </FlexRow>
             </Heading>
 
             <BodyShort spacing>Denne saken tilhører enhet {sak?.enhet}.</BodyShort>
@@ -54,6 +61,7 @@ export const SakOversikt = ({ fnr }: { fnr: string }) => {
             <hr />
 
             <Behandlingsliste behandlinger={behandlingerStatus.data[0].behandlinger} />
+            {sak && skalBrukeKlage ? <KlageListe sakId={sak.id} /> : null}
           </>
         )}
       </MainContent>
@@ -79,12 +87,6 @@ const HendelseSidebar = styled.div`
   border-left: 1px solid gray;
   padding: 3em 2rem;
   margin: 0 1em;
-`
-
-const EkstraHandlinger = styled.div`
-  display: flex;
-  flex-direction: row-reverse;
-  gap: 0.5em;
 `
 
 export const HeadingWrapper = styled.div`

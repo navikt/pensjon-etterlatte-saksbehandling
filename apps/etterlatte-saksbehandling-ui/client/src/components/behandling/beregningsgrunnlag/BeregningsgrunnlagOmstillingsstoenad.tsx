@@ -22,6 +22,8 @@ import React, { useEffect, useState } from 'react'
 import InstitusjonsoppholdOMS from '~components/behandling/beregningsgrunnlag/InstitusjonsoppholdOMS'
 import { InstitusjonsoppholdGrunnlagData } from '~shared/types/Beregning'
 import { mapListeTilDto } from '~components/behandling/beregningsgrunnlag/PeriodisertBeregningsgrunnlag'
+import { Border } from '~components/behandling/soeknadsoversikt/styled'
+import Spinner from '~shared/Spinner'
 
 const BeregningsgrunnlagOmstillingsstoenad = (props: { behandling: IBehandlingReducer }) => {
   const { behandling } = props
@@ -29,7 +31,6 @@ const BeregningsgrunnlagOmstillingsstoenad = (props: { behandling: IBehandlingRe
   const dispatch = useAppDispatch()
   const behandles = hentBehandlesFraStatus(behandling.status)
   const [beregningsgrunnlag, fetchBeregningsgrunnlag] = useApiCall(hentBeregningsGrunnlagOMS)
-  const [visInstitusjonsopphold, setVisInstitusjonsopphold] = useState<boolean>(false)
   const [lagreBeregningsgrunnlagOMS, postBeregningsgrunnlag] = useApiCall(lagreBeregningsGrunnlagOMS)
   const [endreBeregning, postOpprettEllerEndreBeregning] = useApiCall(opprettEllerEndreBeregning)
   const [institusjonsoppholdsGrunnlagData, setInstitusjonsoppholdsGrunnlagData] =
@@ -46,7 +47,6 @@ const BeregningsgrunnlagOmstillingsstoenad = (props: { behandling: IBehandlingRe
         )
       }
     })
-    setVisInstitusjonsopphold(true)
   }, [])
 
   const onSubmit = () => {
@@ -73,18 +73,25 @@ const BeregningsgrunnlagOmstillingsstoenad = (props: { behandling: IBehandlingRe
 
   return (
     <>
+      <>
+        {isSuccess(beregningsgrunnlag) && (
+          <InstitusjonsoppholdOMS
+            behandling={behandling}
+            onSubmit={(institusjonsoppholdGrunnlag) => setInstitusjonsoppholdsGrunnlagData(institusjonsoppholdGrunnlag)}
+          />
+        )}
+        <Spinner visible={isPending(beregningsgrunnlag)} label={'Henter beregningsgrunnlag'} />
+        {isFailure(beregningsgrunnlag) && <ApiErrorAlert>Beregningsgrunnlag kan ikke hentes</ApiErrorAlert>}
+      </>
       {isFailure(endreBeregning) && <ApiErrorAlert>Kunne ikke opprette ny beregning</ApiErrorAlert>}
-      {visInstitusjonsopphold && isSuccess(beregningsgrunnlag) && (
-        <InstitusjonsoppholdOMS
-          behandling={behandling}
-          onSubmit={(institusjonsoppholdGrunnlag) => setInstitusjonsoppholdsGrunnlagData(institusjonsoppholdGrunnlag)}
-        />
-      )}
+      {isFailure(lagreBeregningsgrunnlagOMS) && <ApiErrorAlert>Kunne ikke lagre beregningsgrunnlag</ApiErrorAlert>}
+
+      <Border />
+
       {behandles ? (
         <BehandlingHandlingKnapper>
           <Button
             variant="primary"
-            size="medium"
             onClick={onSubmit}
             loading={isPending(lagreBeregningsgrunnlagOMS) || isPending(endreBeregning)}
           >

@@ -106,7 +106,7 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
           {visAttesteringsmodal ? (
             <SendTilAttesteringModal />
           ) : (
-            <Button loading={isPending(vedtak)} variant="primary" size="medium" onClick={opprettEllerOppdaterVedtak}>
+            <Button loading={isPending(vedtak)} variant="primary" onClick={opprettEllerOppdaterVedtak}>
               {behandlingSkalSendeBrev(behandling) ? 'Gå videre til brev' : 'Fatt vedtak'}
             </Button>
           )}

@@ -8,7 +8,7 @@ import {
   slettTotalVurdering,
   VilkaarsvurderingResultat,
 } from '~shared/api/vilkaarsvurdering'
-import { VilkaarBorder, VilkaarWrapper } from './styled'
+import { VilkaarWrapper } from './styled'
 import { Alert, BodyShort, Button, Heading, Loader, Radio, RadioGroup, Textarea } from '@navikt/ds-react'
 import { svarTilTotalResultat } from './utils'
 import { TrashIcon } from '@navikt/aksel-icons'
@@ -20,6 +20,7 @@ import { useAppDispatch } from '~store/Store'
 import { oppdaterBehandlingsstatus } from '~store/reducers/BehandlingReducer'
 import { IBehandlingStatus, IBehandlingsType } from '~shared/types/IDetaljertBehandling'
 import { SakType } from '~shared/types/sak'
+import { Border } from '~components/behandling/soeknadsoversikt/styled'
 
 type Props = {
   virkningstidspunktDato: string | undefined
@@ -191,7 +192,7 @@ export const Resultat: React.FC<Props> = ({
         </WarningAlert>
       )}
 
-      <VilkaarBorder />
+      <Border />
 
       <BehandlingHandlingKnapper>
         {vilkaarsvurdering.resultat && virkningstidspunktSamsvarer && <VilkaarsVurderingKnapper />}

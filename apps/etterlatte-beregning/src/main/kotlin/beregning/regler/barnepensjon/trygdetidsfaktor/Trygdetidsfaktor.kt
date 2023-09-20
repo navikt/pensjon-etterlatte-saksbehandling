@@ -1,6 +1,5 @@
 package no.nav.etterlatte.beregning.regler.barnepensjon.trygdetidsfaktor
 
-import no.nav.etterlatte.beregning.regler.barnepensjon.AvdoedForelder
 import no.nav.etterlatte.beregning.regler.barnepensjon.BP_1967_DATO
 import no.nav.etterlatte.beregning.regler.barnepensjon.BarnepensjonGrunnlag
 import no.nav.etterlatte.libs.regler.Regel
@@ -17,8 +16,8 @@ val trygdetidRegel: Regel<BarnepensjonGrunnlag, Beregningstall> =
     finnFaktumIGrunnlag(
         gjelderFra = BP_1967_DATO,
         beskrivelse = "Finner avdødes trygdetid",
-        finnFaktum = BarnepensjonGrunnlag::avdoedForelder,
-        finnFelt = AvdoedForelder::trygdetid
+        finnFaktum = BarnepensjonGrunnlag::avdoedesTrygdetid,
+        finnFelt = { it }
     )
 
 val maksTrygdetid = definerKonstant<BarnepensjonGrunnlag, Beregningstall>(

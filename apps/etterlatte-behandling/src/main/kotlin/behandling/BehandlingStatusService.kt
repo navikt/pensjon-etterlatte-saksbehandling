@@ -3,6 +3,8 @@ package no.nav.etterlatte.behandling
 import io.ktor.server.plugins.NotFoundException
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.hendelse.HendelseType
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -17,6 +19,12 @@ import no.nav.etterlatte.vedtaksvurdering.VedtakHendelse
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.util.*
+
+enum class BehandlingStatusServiceFeatureToggle(private val key: String) : FeatureToggle {
+    BrukFaktiskTrygdetid("pensjon-etterlatte.bp-bruk-faktisk-trygdetid");
+
+    override fun key() = key
+}
 
 interface BehandlingStatusService {
     fun settOpprettet(behandlingId: UUID, dryRun: Boolean = true)
@@ -38,9 +46,9 @@ class BehandlingStatusServiceImpl(
     private val behandlingDao: BehandlingDao,
     private val behandlingService: BehandlingService,
     private val grunnlagsendringshendelseService: GrunnlagsendringshendelseService,
-    private val oppgaveServiceNy: OppgaveServiceNy
+    private val oppgaveServiceNy: OppgaveServiceNy,
+    private val featureToggleService: FeatureToggleService
 ) : BehandlingStatusService {
-
     private val logger = LoggerFactory.getLogger(BehandlingStatusServiceImpl::class.java)
 
     override fun settOpprettet(behandlingId: UUID, dryRun: Boolean) {
@@ -68,7 +76,12 @@ class BehandlingStatusServiceImpl(
     }
 
     override fun settBeregnet(behandlingId: UUID, dryRun: Boolean) {
-        hentBehandling(behandlingId).tilBeregnet().lagreEndring(dryRun)
+        hentBehandling(behandlingId).tilBeregnet(
+            !featureToggleService.isEnabled(
+                BehandlingStatusServiceFeatureToggle.BrukFaktiskTrygdetid,
+                false
+            )
+        ).lagreEndring(dryRun)
     }
 
     override fun settAvkortet(behandlingId: UUID, dryRun: Boolean) {

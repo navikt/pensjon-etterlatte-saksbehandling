@@ -1,4 +1,4 @@
-import styled from 'styled-components'
+import styled, { css } from 'styled-components'
 
 export const Container = styled.div`
   padding: 2rem;
@@ -64,6 +64,16 @@ export const ContentHeader = styled.div`
   padding: 1em 4em;
 `
 
-export const Header = styled.div`
-  padding: 1em 2em;
+export const FlexRow = styled.div<{
+  justify?: 'left' | 'center' | 'right'
+  $spacing?: boolean
+}>`
+  display: flex;
+  justify-content: ${(props) => props.justify ?? 'left'};
+  gap: 1rem;
+  ${(props) =>
+    props.$spacing &&
+    css`
+      margin-bottom: 1rem;
+    `}
 `

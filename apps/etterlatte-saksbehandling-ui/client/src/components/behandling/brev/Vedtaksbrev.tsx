@@ -1,7 +1,7 @@
 import { Content, ContentHeader } from '~shared/styled'
 import { useEffect, useState } from 'react'
 import { Alert, ErrorMessage, Heading } from '@navikt/ds-react'
-import { HeadingWrapper } from '../soeknadsoversikt/styled'
+import { Border, HeadingWrapper } from '../soeknadsoversikt/styled'
 import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapper'
 import { hentVedtaksbrev, opprettVedtaksbrev } from '~shared/api/brev'
 import { useParams } from 'react-router-dom'
@@ -93,11 +93,11 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
         )}
       </BrevContent>
 
-      <BrevContentFooter>
-        <BehandlingHandlingKnapper>
-          {hentBehandlesFraStatus(status) && <SendTilAttesteringModal />}
-        </BehandlingHandlingKnapper>
-      </BrevContentFooter>
+      <Border />
+
+      <BehandlingHandlingKnapper>
+        {hentBehandlesFraStatus(status) && <SendTilAttesteringModal />}
+      </BehandlingHandlingKnapper>
     </Content>
   )
 }
@@ -112,10 +112,6 @@ const BrevContent = styled.div`
   display: flex;
   height: 75vh;
   max-height: 75vh;
-`
-
-const BrevContentFooter = styled.div`
-  border-top: 1px solid #c6c2bf;
 `
 
 const Sidebar = styled.div`

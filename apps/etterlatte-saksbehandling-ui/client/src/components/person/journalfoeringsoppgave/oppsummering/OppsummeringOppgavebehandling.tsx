@@ -1,7 +1,6 @@
 import { Button, Detail, Heading, Tag } from '@navikt/ds-react'
 import { useJournalfoeringOppgave } from '~components/person/journalfoeringsoppgave/useJournalfoeringOppgave'
 import AvbrytBehandleJournalfoeringOppgave from '~components/person/journalfoeringsoppgave/AvbrytBehandleJournalfoeringOppgave'
-import { KnapperWrapper } from '~components/behandling/handlinger/BehandlingHandlingKnapper'
 import { Navigate, useNavigate } from 'react-router-dom'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import { SakType } from '~shared/types/sak'
@@ -9,6 +8,7 @@ import { formaterSakstype } from '~utils/formattering'
 import { InfoList } from '~components/behandling/soeknadsoversikt/styled'
 import { FormWrapper } from '~components/person/journalfoeringsoppgave/BehandleJournalfoeringOppgave'
 import FullfoerOppgaveModal from '~components/person/journalfoeringsoppgave/oppsummering/FullfoerOppgaveModal'
+import { FlexRow } from '~shared/styled'
 
 export default function OppsummeringOppgavebehandling() {
   const { behandlingBehov, oppgave } = useJournalfoeringOppgave()
@@ -56,16 +56,18 @@ export default function OppsummeringOppgavebehandling() {
         )}
       </InfoList>
 
-      <KnapperWrapper>
-        <div>
-          <Button variant="secondary" size="medium" className="button" onClick={tilbake}>
+      <div>
+        <FlexRow justify={'center'} $spacing>
+          <Button variant="secondary" onClick={tilbake}>
             Tilbake
           </Button>
 
           <FullfoerOppgaveModal oppgave={oppgave!!} behandlingBehov={behandlingBehov!!} />
-        </div>
-        <AvbrytBehandleJournalfoeringOppgave />
-      </KnapperWrapper>
+        </FlexRow>
+        <FlexRow justify={'center'}>
+          <AvbrytBehandleJournalfoeringOppgave />
+        </FlexRow>
+      </div>
     </FormWrapper>
   )
 }

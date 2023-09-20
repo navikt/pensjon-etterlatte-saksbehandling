@@ -1,25 +1,24 @@
-import { isPending, mapApiResult, mapSuccess, useApiCall } from '~shared/hooks/useApiCall'
+import { isPending, mapApiResult, useApiCall } from '~shared/hooks/useApiCall'
 import { opprettNyKlage } from '~shared/api/klage'
-import { hentFunksjonsbrytere } from '~shared/api/feature'
-import React, { useEffect } from 'react'
 import { BodyShort, Button } from '@navikt/ds-react'
 import { ApiErrorAlert } from '~ErrorBoundary'
+import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
+import { useNavigate } from 'react-router-dom'
+import { lenkeTilKlageMedId } from '~components/person/KlageListe'
 
 export const FEATURE_TOGGLE_KAN_BRUKE_KLAGE = 'pensjon-etterlatte.kan-bruke-klage'
 
 export function OpprettKlage(props: { sakId: number }) {
   const [opprettKlageStatus, opprettKlageKall] = useApiCall(opprettNyKlage)
-  const [brytere, getBrytere] = useApiCall(hentFunksjonsbrytere)
-
-  useEffect(() => {
-    getBrytere([FEATURE_TOGGLE_KAN_BRUKE_KLAGE])
-  }, [])
+  const navigate = useNavigate()
 
   function opprettKlage() {
-    opprettKlageKall(props.sakId)
+    opprettKlageKall(props.sakId, (klage) => {
+      navigate(lenkeTilKlageMedId(klage.id))
+    })
   }
 
-  const kanBrukeKlage = mapSuccess(brytere, ([toggleKanBrukeKlage]) => toggleKanBrukeKlage.enabled) ?? false
+  const kanBrukeKlage = useFeatureEnabledMedDefault(FEATURE_TOGGLE_KAN_BRUKE_KLAGE)
 
   if (!kanBrukeKlage) {
     return null

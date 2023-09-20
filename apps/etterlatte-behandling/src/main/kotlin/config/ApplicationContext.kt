@@ -31,6 +31,7 @@ import no.nav.etterlatte.behandling.omregning.MigreringService
 import no.nav.etterlatte.behandling.omregning.OmregningService
 import no.nav.etterlatte.behandling.revurdering.RevurderingDao
 import no.nav.etterlatte.behandling.revurdering.RevurderingServiceImpl
+import no.nav.etterlatte.behandling.tilbakekreving.TilbakekrevingService
 import no.nav.etterlatte.common.klienter.PdlKlientImpl
 import no.nav.etterlatte.common.klienter.SkjermingKlient
 import no.nav.etterlatte.databaseContext
@@ -247,7 +248,8 @@ class ApplicationContext(
             behandlingDao,
             behandlingService,
             grunnlagsendringshendelseService,
-            oppgaveServiceNy
+            oppgaveServiceNy,
+            featureToggleService
         )
 
     val behandlingFactory =
@@ -281,6 +283,12 @@ class ApplicationContext(
             hendelseDao = hendelseDao,
             oppgaveServiceNy = oppgaveServiceNy
         )
+
+    val tilbakekrevingService = TilbakekrevingService(
+        sakDao = sakDao,
+        hendelseDao = hendelseDao,
+        oppgaveServiceNy = oppgaveServiceNy
+    )
 
     // Job
     val grunnlagsendringshendelseJob =

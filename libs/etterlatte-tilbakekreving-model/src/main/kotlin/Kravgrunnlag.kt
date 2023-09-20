@@ -1,4 +1,4 @@
-package no.nav.etterlatte.tilbakekreving.kravgrunnlag
+package no.nav.etterlatte.libs.common.tilbakekreving
 
 import java.math.BigDecimal
 import java.time.LocalDate

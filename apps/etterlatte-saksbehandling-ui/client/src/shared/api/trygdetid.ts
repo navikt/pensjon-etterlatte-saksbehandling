@@ -105,12 +105,37 @@ export type IOpplysningsgrunnlag = {
   }
 }
 
-export interface IDetaljertBeregnetTrygdetidResultat {
-  samletTrygdetidNorge: number
-}
-
 export interface IDetaljertBeregnetTrygdetid {
   resultat: IDetaljertBeregnetTrygdetidResultat
+  tidspunkt: Date
+}
+
+export interface IDetaljertBeregnetTrygdetidResultat {
+  faktiskTrygdetidNorge: IFaktiskTrygdetid
+  faktiskTrygdetidTeoretisk: IFaktiskTrygdetid
+  fremtidigTrygdetidNorge: IFremtidigTrygdetid
+  fremtidigTrygdetidTeoretisk: IFremtidigTrygdetid
+  samletTrygdetidNorge?: number
+  samletTrygdetidTeoretisk?: number
+  prorataBroek?: IProrataBroek
+}
+
+export interface IFaktiskTrygdetid {
+  periode?: string
+  antallMaaneder?: number
+}
+
+export interface IFremtidigTrygdetid {
+  periode?: string
+  antallMaaneder?: number
+  opptjeningstidIMaaneder?: number
+  mindreEnnFireFemtedelerAvOpptjeningstiden?: Boolean
+  nordiskKonvensjon?: Boolean
+}
+
+export interface IProrataBroek {
+  teller: number
+  nevner: number
 }
 
 export interface ITrygdetidGrunnlag {

@@ -34,6 +34,8 @@ spec:
       value: "team-rocket.institusjon-opphold-hendelser-q2"
     - name: BEHANDLING_AZURE_SCOPE
       value: api://dev-gcp.etterlatte.etterlatte-behandling/.default
+    - name: ETTERLATTE_BEHANDLING_URL
+      value: http://etterlatte-behandling
     - name: ETTERLATTE_PROXY_URL
       value: https://etterlatte-proxy.dev-fss-pub.nais.io/aad
     - name: ETTERLATTE_PROXY_OUTBOUND_SCOPE

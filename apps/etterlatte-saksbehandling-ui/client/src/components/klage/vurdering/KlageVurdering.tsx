@@ -1,14 +1,14 @@
 import { BodyShort, Button, Heading, Radio, RadioGroup, Select, Textarea } from '@navikt/ds-react'
 import React from 'react'
-import { Content, ContentHeader } from '~shared/styled'
+import { Content, ContentHeader, FlexRow } from '~shared/styled'
 import { HeadingWrapper } from '~components/behandling/soeknadsoversikt/styled'
 import { Feilmelding, Innhold, VurderingWrapper } from '~components/klage/styled'
 import { useNavigate } from 'react-router-dom'
 import { useKlage } from '~components/klage/useKlage'
-import { KnapperWrapper } from '~components/behandling/handlinger/BehandlingHandlingKnapper'
 import {
   AARSAKER_OMGJOERING,
   InnstillingTilKabalUtenBrev,
+  Klage,
   KlageUtfallUtenBrev,
   LOVHJEMLER_KLAGE,
   Omgjoering,
@@ -61,14 +61,34 @@ function mapFraFormdataTilKlageUtfall(skjema: FilledFormDataVurdering): KlageUtf
   }
 }
 
+function mapKlageTilFormdata(klage: Klage | null): FormdataVurdering {
+  if (!klage || !klage.utfall) {
+    return { utfall: null, omgjoering: null, innstilling: null }
+  }
+  const utfall = klage.utfall
+  switch (utfall.utfall) {
+    case 'DELVIS_OMGJOERING':
+      return { utfall: Utfall.DELVIS_OMGJOERING, omgjoering: utfall.omgjoering, innstilling: utfall.innstilling }
+    case 'OMGJOERING':
+      return { utfall: Utfall.OMGJOERING, omgjoering: utfall.omgjoering }
+    case 'STADFESTE_VEDTAK':
+      return { utfall: Utfall.STADFESTE_VEDTAK, innstilling: utfall.innstilling }
+  }
+}
+
 export function KlageVurdering() {
   const navigate = useNavigate()
   const klage = useKlage()
   const [lagreUtfallStatus, lagreUtfall] = useApiCall(oppdaterUtfallForKlage)
   const dispatch = useAppDispatch()
 
-  const { control, handleSubmit, watch } = useForm<FormdataVurdering>({
-    defaultValues: { utfall: null, omgjoering: null, innstilling: null },
+  const {
+    control,
+    handleSubmit,
+    watch,
+    formState: { isDirty },
+  } = useForm<FormdataVurdering>({
+    defaultValues: mapKlageTilFormdata(klage),
   })
 
   const valgtUtfall = watch('utfall')
@@ -81,6 +101,11 @@ export function KlageVurdering() {
       // Gjør noe bedre håndtering her
       return
     }
+    if (!isDirty) {
+      // Skjema er fylt ut men med samme innhold som starten => skip lagring og gå videre
+      navigate(`/klage/${klage.id}/oppsummering`)
+    }
+
     const utfall = mapFraFormdataTilKlageUtfall(skjema)
     lagreUtfall({ klageId: klage.id, utfall }, (oppdatertKlage) => {
       dispatch(addKlage(oppdatertKlage))
@@ -135,19 +160,14 @@ export function KlageVurdering() {
           </ApiErrorAlert>
         ) : null}
 
-        <KnapperWrapper>
-          <Button
-            className="button"
-            type="button"
-            variant="secondary"
-            onClick={() => navigate(`/klage/${klage?.id}/formkrav`)}
-          >
+        <FlexRow justify={'center'}>
+          <Button type="button" variant="secondary" onClick={() => navigate(`/klage/${klage?.id}/formkrav`)}>
             Gå tilbake
           </Button>
-          <Button loading={isPending(lagreUtfallStatus)} type="submit" className="button" variant="primary">
+          <Button loading={isPending(lagreUtfallStatus)} type="submit" variant="primary">
             Send inn vurdering av klagen
           </Button>
-        </KnapperWrapper>
+        </FlexRow>
       </form>
     </Content>
   )

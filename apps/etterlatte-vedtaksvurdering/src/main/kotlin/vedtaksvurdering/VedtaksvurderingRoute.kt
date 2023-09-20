@@ -2,6 +2,7 @@ package no.nav.etterlatte.vedtaksvurdering
 
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
+import io.ktor.server.application.install
 import io.ktor.server.application.log
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
@@ -21,6 +22,7 @@ import no.nav.etterlatte.libs.common.vedtak.LoependeYtelseDTO
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.common.withBehandlingId
 import no.nav.etterlatte.libs.common.withSakId
+import no.nav.etterlatte.libs.ktor.AuthorizationPlugin
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlient
 import java.time.LocalDate
@@ -155,6 +157,10 @@ fun Route.vedtaksvurderingRoute(
 
 fun Route.samordningsvedtakRoute(service: VedtaksvurderingService) {
     route("/api/samordning/vedtak") {
+        install(AuthorizationPlugin) {
+            roles = setOf("samordning-read")
+        }
+
         get {
             val virkFom =
                 call.parameters["virkFom"]?.let { runCatching { LocalDate.parse(it) }.getOrNull() }

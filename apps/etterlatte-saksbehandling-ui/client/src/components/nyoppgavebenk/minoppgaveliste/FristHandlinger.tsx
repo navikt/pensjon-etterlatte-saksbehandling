@@ -7,13 +7,7 @@ import { formaterStringDato } from '~utils/formattering'
 import { PencilIcon } from '@navikt/aksel-icons'
 import styled from 'styled-components'
 import { add, isBefore } from 'date-fns'
-
-const Buttonwrapper = styled.div`
-  margin: 4rem 1rem 1rem 1rem;
-  button:first-child {
-    margin-right: 1rem;
-  }
-`
+import { FlexRow } from '~shared/styled'
 
 const FristWrapper = styled.span<{ fristHarPassert: boolean; utenKnapp?: boolean }>`
   color: ${(p) => p.fristHarPassert && 'var(--a-text-danger)'};
@@ -83,7 +77,7 @@ export const FristHandlinger = (props: {
               {isSuccess(redigerfristSvar) && <Alert variant="success">Frist er endret</Alert>}
               {isFailure(redigerfristSvar) && <ApiErrorAlert>Kunne ikke lagre ny frist</ApiErrorAlert>}
               {!nyFrist && <Alert variant="warning">Du må velge en måned</Alert>}
-              <Buttonwrapper>
+              <FlexRow>
                 <Button
                   loading={isPending(redigerfristSvar)}
                   disabled={!nyFrist}
@@ -109,7 +103,7 @@ export const FristHandlinger = (props: {
                     Avbryt
                   </Button>
                 )}
-              </Buttonwrapper>
+              </FlexRow>
             </Modal.Body>
           </Modal>
 

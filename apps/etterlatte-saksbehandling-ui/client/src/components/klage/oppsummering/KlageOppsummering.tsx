@@ -1,11 +1,10 @@
 import { BodyShort, Button, Heading } from '@navikt/ds-react'
 import React from 'react'
-import { Content, ContentHeader } from '~shared/styled'
+import { Content, ContentHeader, FlexRow } from '~shared/styled'
 import { HeadingWrapper } from '~components/behandling/soeknadsoversikt/styled'
 import { Innhold } from '~components/klage/styled'
 import { useNavigate } from 'react-router-dom'
 import { useKlage } from '~components/klage/useKlage'
-import { KnapperWrapper } from '~components/behandling/handlinger/BehandlingHandlingKnapper'
 
 export function KlageOppsummering() {
   const navigate = useNavigate()
@@ -31,14 +30,14 @@ export function KlageOppsummering() {
         <BodyShort>Hvis stadfestelse / delvis omgjøring, vis brevet til KA / bruker med innstilling</BodyShort>
       </Innhold>
 
-      <KnapperWrapper>
+      <FlexRow justify={'center'} $spacing>
         <Button variant="secondary" onClick={() => navigate(`/klage/${klage?.id}/vurdering`)}>
           Gå tilbake
         </Button>
         <Button variant="primary" onClick={() => alert('Vi støtter ikke behandling av klage enda :(')}>
           Send av gårde greier / lag revurdering / ferdigstill klagen
         </Button>
-      </KnapperWrapper>
+      </FlexRow>
     </Content>
   )
 }

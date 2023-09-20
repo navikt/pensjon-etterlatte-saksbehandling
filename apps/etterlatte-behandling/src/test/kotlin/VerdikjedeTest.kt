@@ -65,8 +65,7 @@ import java.time.YearMonth
 import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class IntegrationTest : BehandlingIntegrationTest() {
-
+class VerdikjedeTest : BehandlingIntegrationTest() {
     @BeforeAll
     fun start() = startServer()
 
@@ -82,11 +81,12 @@ class IntegrationTest : BehandlingIntegrationTest() {
             environment {
                 config = hoconApplicationConfig
             }
-            val client = createClient {
-                install(ContentNegotiation) {
-                    jackson { registerModule(JavaTimeModule()) }
+            val client =
+                createClient {
+                    install(ContentNegotiation) {
+                        jackson { registerModule(JavaTimeModule()) }
+                    }
                 }
-            }
             application { module(applicationContext) }
 
             assertTrue(applicationContext.featureToggleService.isEnabled(FellesFeatureToggle.NoOperationToggle, false))
@@ -96,13 +96,14 @@ class IntegrationTest : BehandlingIntegrationTest() {
             }.apply {
                 assertEquals(HttpStatusCode.NotFound, status)
             }
-            val sak: Sak = client.post("/personer/saker/${SakType.BARNEPENSJON}") {
-                addAuthToken(tokenSaksbehandler)
-                contentType(ContentType.Application.Json)
-                setBody(FoedselsnummerDTO(fnr))
-            }.apply {
-                assertEquals(HttpStatusCode.OK, status)
-            }.body()
+            val sak: Sak =
+                client.post("/personer/saker/${SakType.BARNEPENSJON}") {
+                    addAuthToken(tokenSaksbehandler)
+                    contentType(ContentType.Application.Json)
+                    setBody(FoedselsnummerDTO(fnr))
+                }.apply {
+                    assertEquals(HttpStatusCode.OK, status)
+                }.body()
 
             client.get("/saker/${sak.id}") {
                 addAuthToken(tokenSaksbehandler)
@@ -113,20 +114,21 @@ class IntegrationTest : BehandlingIntegrationTest() {
                 assertEquals(SakType.BARNEPENSJON, lestSak.sakType)
             }
 
-            val behandlingId = client.post("/behandlinger/opprettbehandling") {
-                addAuthToken(systemBruker)
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                setBody(
-                    BehandlingsBehov(
-                        1,
-                        Persongalleri("søker", "innsender", emptyList(), emptyList(), emptyList()),
-                        Tidspunkt.now().toLocalDatetimeUTC().toString()
+            val behandlingId =
+                client.post("/behandlinger/opprettbehandling") {
+                    addAuthToken(systemBruker)
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    setBody(
+                        BehandlingsBehov(
+                            1,
+                            Persongalleri("søker", "innsender", emptyList(), emptyList(), emptyList()),
+                            Tidspunkt.now().toLocalDatetimeUTC().toString()
+                        )
                     )
-                )
-            }.let {
-                assertEquals(HttpStatusCode.OK, it.status)
-                UUID.fromString(it.body())
-            }
+                }.let {
+                    assertEquals(HttpStatusCode.OK, it.status)
+                    UUID.fromString(it.body())
+                }
             behandlingOpprettet = behandlingId
 
             client.get("/behandlinger/$behandlingId") {
@@ -137,12 +139,13 @@ class IntegrationTest : BehandlingIntegrationTest() {
                 it.body<DetaljertBehandling>()
             }
 
-            val oppgaver: List<OppgaveNy> = client.get("/api/nyeoppgaver") {
-                addAuthToken(tokenSaksbehandler)
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-            }.also {
-                assertEquals(HttpStatusCode.OK, it.status)
-            }.body()
+            val oppgaver: List<OppgaveNy> =
+                client.get("/api/nyeoppgaver") {
+                    addAuthToken(tokenSaksbehandler)
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                }.also {
+                    assertEquals(HttpStatusCode.OK, it.status)
+                }.body()
             val oppgaverforbehandling = oppgaver.filter { it.referanse == behandlingId.toString() }
             client.post("/api/nyeoppgaver/${oppgaverforbehandling[0].id}/tildel-saksbehandler/") {
                 addAuthToken(tokenSaksbehandler)
@@ -191,11 +194,12 @@ class IntegrationTest : BehandlingIntegrationTest() {
             }.also {
                 assertEquals(HttpStatusCode.OK, it.status)
 
-                val expected = FastsettVirkningstidspunktResponse(
-                    YearMonth.of(2022, 2),
-                    Grunnlagsopplysning.Saksbehandler.create("Saksbehandler01"),
-                    "En begrunnelse"
-                )
+                val expected =
+                    FastsettVirkningstidspunktResponse(
+                        YearMonth.of(2022, 2),
+                        Grunnlagsopplysning.Saksbehandler.create("Saksbehandler01"),
+                        "En begrunnelse"
+                    )
                 assertEquals(expected.dato, it.body<FastsettVirkningstidspunktResponse>().dato)
                 assertEquals(expected.kilde.ident, it.body<FastsettVirkningstidspunktResponse>().kilde.ident)
                 assertEquals(expected.begrunnelse, it.body<FastsettVirkningstidspunktResponse>().begrunnelse)
@@ -213,10 +217,11 @@ class IntegrationTest : BehandlingIntegrationTest() {
                 addAuthToken(tokenSaksbehandler)
             }.also {
                 applicationContext.dataSource.connection.use {
-                    val actual = BehandlingDao(
-                        KommerBarnetTilGodeDao { it },
-                        RevurderingDao { it }
-                    ) { it }.hentBehandling(behandlingId)!!
+                    val actual =
+                        BehandlingDao(
+                            KommerBarnetTilGodeDao { it },
+                            RevurderingDao { it }
+                        ) { it }.hentBehandling(behandlingId)!!
                     assertEquals(BehandlingStatus.OPPRETTET, actual.status)
                 }
 
@@ -229,10 +234,11 @@ class IntegrationTest : BehandlingIntegrationTest() {
                 setBody("{}")
             }.also {
                 applicationContext.dataSource.connection.use {
-                    val actual = BehandlingDao(
-                        KommerBarnetTilGodeDao { it },
-                        RevurderingDao { it }
-                    ) { it }.hentBehandling(behandlingId)!!
+                    val actual =
+                        BehandlingDao(
+                            KommerBarnetTilGodeDao { it },
+                            RevurderingDao { it }
+                        ) { it }.hentBehandling(behandlingId)!!
                     assertEquals(BehandlingStatus.VILKAARSVURDERT, actual.status)
                 }
 
@@ -245,10 +251,11 @@ class IntegrationTest : BehandlingIntegrationTest() {
                 setBody("{}")
             }.also {
                 applicationContext.dataSource.connection.use {
-                    val actual = BehandlingDao(
-                        KommerBarnetTilGodeDao { it },
-                        RevurderingDao { it }
-                    ) { it }.hentBehandling(behandlingId)!!
+                    val actual =
+                        BehandlingDao(
+                            KommerBarnetTilGodeDao { it },
+                            RevurderingDao { it }
+                        ) { it }.hentBehandling(behandlingId)!!
                     assertEquals(BehandlingStatus.TRYGDETID_OPPDATERT, actual.status)
                 }
 
@@ -259,10 +266,11 @@ class IntegrationTest : BehandlingIntegrationTest() {
                 addAuthToken(tokenSaksbehandler)
             }.also {
                 applicationContext.dataSource.connection.use {
-                    val actual = BehandlingDao(
-                        KommerBarnetTilGodeDao { it },
-                        RevurderingDao { it }
-                    ) { it }.hentBehandling(behandlingId)!!
+                    val actual =
+                        BehandlingDao(
+                            KommerBarnetTilGodeDao { it },
+                            RevurderingDao { it }
+                        ) { it }.hentBehandling(behandlingId)!!
                     assertEquals(BehandlingStatus.BEREGNET, actual.status)
                 }
 
@@ -274,31 +282,34 @@ class IntegrationTest : BehandlingIntegrationTest() {
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(
                     VedtakEndringDTO(
-                        vedtakOppgaveDTO = VedtakOppgaveDTO(
-                            sakId = sak.id,
-                            referanse = behandlingId.toString()
-                        ),
+                        vedtakOppgaveDTO =
+                            VedtakOppgaveDTO(
+                                sakId = sak.id,
+                                referanse = behandlingId.toString()
+                            ),
                         vedtakHendelse = VedtakHendelse(123L, Tidspunkt.now(), "Saksbehandler01", null)
                     )
                 )
             }.also {
                 applicationContext.dataSource.connection.use {
-                    val actual = BehandlingDao(
-                        KommerBarnetTilGodeDao { it },
-                        RevurderingDao { it }
-                    ) { it }.hentBehandling(behandlingId)!!
+                    val actual =
+                        BehandlingDao(
+                            KommerBarnetTilGodeDao { it },
+                            RevurderingDao { it }
+                        ) { it }.hentBehandling(behandlingId)!!
                     assertEquals(BehandlingStatus.FATTET_VEDTAK, actual.status)
                 }
 
                 assertEquals(HttpStatusCode.OK, it.status)
             }
 
-            val oppgaveroppgaveliste: List<OppgaveNy> = client.get("/api/nyeoppgaver") {
-                addAuthToken(tokenAttestant)
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-            }.also {
-                assertEquals(HttpStatusCode.OK, it.status)
-            }.body()
+            val oppgaveroppgaveliste: List<OppgaveNy> =
+                client.get("/api/nyeoppgaver") {
+                    addAuthToken(tokenAttestant)
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                }.also {
+                    assertEquals(HttpStatusCode.OK, it.status)
+                }.body()
             val oppgaverforattestant = oppgaveroppgaveliste.filter { it.referanse == behandlingId.toString() }
             val saksbehandler02 = "Saksbehandler02"
             client.post("/api/nyeoppgaver/${oppgaverforattestant[0].id}/tildel-saksbehandler") {
@@ -314,19 +325,21 @@ class IntegrationTest : BehandlingIntegrationTest() {
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(
                     VedtakEndringDTO(
-                        vedtakOppgaveDTO = VedtakOppgaveDTO(
-                            sakId = sak.id,
-                            referanse = behandlingId.toString()
-                        ),
+                        vedtakOppgaveDTO =
+                            VedtakOppgaveDTO(
+                                sakId = sak.id,
+                                referanse = behandlingId.toString()
+                            ),
                         vedtakHendelse = VedtakHendelse(123L, Tidspunkt.now(), saksbehandler02, null, null)
                     )
                 )
             }.also {
                 applicationContext.dataSource.connection.use {
-                    val actual = BehandlingDao(
-                        KommerBarnetTilGodeDao { it },
-                        RevurderingDao { it }
-                    ) { it }.hentBehandling(behandlingId)!!
+                    val actual =
+                        BehandlingDao(
+                            KommerBarnetTilGodeDao { it },
+                            RevurderingDao { it }
+                        ) { it }.hentBehandling(behandlingId)!!
                     assertEquals(BehandlingStatus.ATTESTERT, actual.status)
                 }
 
@@ -409,21 +422,21 @@ class IntegrationTest : BehandlingIntegrationTest() {
                 assertEquals(HttpStatusCode.OK, it.status)
             }
 
-            val behandlingIdNyFoerstegangsbehandling = client.post("/behandlinger/opprettbehandling") {
-                addAuthToken(systemBruker)
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                setBody(
-                    BehandlingsBehov(
-                        1,
-                        Persongalleri(fnr, "innsender", emptyList(), emptyList(), emptyList()),
-                        Tidspunkt.now().toLocalDatetimeUTC().toString()
+            val behandlingIdNyFoerstegangsbehandling =
+                client.post("/behandlinger/opprettbehandling") {
+                    addAuthToken(systemBruker)
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    setBody(
+                        BehandlingsBehov(
+                            1,
+                            Persongalleri(fnr, "innsender", emptyList(), emptyList(), emptyList()),
+                            Tidspunkt.now().toLocalDatetimeUTC().toString()
+                        )
                     )
-
-                )
-            }.let {
-                assertEquals(HttpStatusCode.OK, it.status)
-                UUID.fromString(it.body())
-            }
+                }.let {
+                    assertEquals(HttpStatusCode.OK, it.status)
+                    UUID.fromString(it.body())
+                }
 
             client.post("/api/behandling/$behandlingIdNyFoerstegangsbehandling/avbryt") {
                 addAuthToken(fagsystemTokenEY)
@@ -437,10 +450,11 @@ class IntegrationTest : BehandlingIntegrationTest() {
                 setBody(
                     ManueltOpphoerRequest(
                         sakId = sak.id,
-                        opphoerAarsaker = listOf(
-                            ManueltOpphoerAarsak.SOESKEN_DOED,
-                            ManueltOpphoerAarsak.UTFLYTTING_FRA_NORGE
-                        ),
+                        opphoerAarsaker =
+                            listOf(
+                                ManueltOpphoerAarsak.SOESKEN_DOED,
+                                ManueltOpphoerAarsak.UTFLYTTING_FRA_NORGE
+                            ),
                         fritekstAarsak = "kunne ikke behandles manuelt"
                     )
                 )

@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router'
 import { useState } from 'react'
 import { BodyLong, Button, Heading, Modal } from '@navikt/ds-react'
-import { ButtonWrapper } from '~shared/modal/modal'
+import { FlexRow } from '~shared/styled'
 
 export default function AvbrytBehandleJournalfoeringOppgave() {
   const navigate = useNavigate()
@@ -9,7 +9,7 @@ export default function AvbrytBehandleJournalfoeringOppgave() {
 
   return (
     <>
-      <Button variant={'tertiary'} className="textButton" onClick={() => setIsOpen(true)}>
+      <Button variant={'tertiary'} onClick={() => setIsOpen(true)}>
         Avbryt
       </Button>
 
@@ -24,14 +24,14 @@ export default function AvbrytBehandleJournalfoeringOppgave() {
             Det du har gjort til nå vil bli slettet og du må starte oppgavebehandlingen på nytt.
           </BodyLong>
 
-          <ButtonWrapper>
-            <Button variant="secondary" size="medium" className="button" onClick={() => setIsOpen(false)}>
+          <FlexRow justify={'center'}>
+            <Button variant="secondary" onClick={() => setIsOpen(false)}>
               Nei, fortsett
             </Button>
-            <Button variant="danger" size="medium" className="button" onClick={() => navigate('/')}>
+            <Button variant="danger" onClick={() => navigate('/')}>
               Ja, avbryt
             </Button>
-          </ButtonWrapper>
+          </FlexRow>
         </Modal.Body>
       </Modal>
     </>

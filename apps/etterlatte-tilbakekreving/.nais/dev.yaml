@@ -48,6 +48,13 @@ spec:
       value: Q1_ETTERLATTE
     - name: MQ_MANAGER
       value: MQLS04
+    - name: ETTERLATTE_BEHANDLING_URL
+      value: http://etterlatte-behandling
+    - name: ETTERLATTE_BEHANDLING_CLIENT_ID
+      value: dev-gcp.etterlatte.etterlatte-behandling
   accessPolicy:
     external:
       - host: etterlatte-unleash-api.nav.cloud.nais.io
+    outbound:
+      rules:
+        - application: etterlatte-behandling

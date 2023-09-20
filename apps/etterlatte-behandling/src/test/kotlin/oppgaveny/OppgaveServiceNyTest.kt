@@ -9,6 +9,8 @@ import no.nav.etterlatte.Context
 import no.nav.etterlatte.DatabaseKontekst
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
+import no.nav.etterlatte.SystemUser
+import no.nav.etterlatte.User
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
@@ -28,8 +30,10 @@ import no.nav.etterlatte.sak.SakDao
 import no.nav.etterlatte.sak.SakTilgangDao
 import no.nav.etterlatte.tilgangsstyring.AzureGroup
 import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
+import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.etterlatte.token.Saksbehandler
 import no.nav.security.token.support.core.jwt.JwtTokenClaims
+import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
@@ -44,8 +48,7 @@ import java.util.*
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class OppgaveServiceNyTest {
-
+internal class OppgaveServiceNyTest {
     private lateinit var dataSource: DataSource
     private lateinit var sakDao: SakDao
     private lateinit var oppgaveDaoNy: OppgaveDaoNy
@@ -67,16 +70,18 @@ class OppgaveServiceNyTest {
         postgreSQLContainer.withUrlParam("user", postgreSQLContainer.username)
         postgreSQLContainer.withUrlParam("password", postgreSQLContainer.password)
 
-        dataSource = DataSourceBuilder.createDataSource(
-            jdbcUrl = postgreSQLContainer.jdbcUrl,
-            username = postgreSQLContainer.username,
-            password = postgreSQLContainer.password
-        ).apply { migrate() }
+        dataSource =
+            DataSourceBuilder.createDataSource(
+                jdbcUrl = postgreSQLContainer.jdbcUrl,
+                username = postgreSQLContainer.username,
+                password = postgreSQLContainer.password
+            ).apply { migrate() }
 
         val connection = dataSource.connection
-        featureToggleService = DummyFeatureToggleService().also {
-            it.settBryter(OppgaveServiceFeatureToggle.EnhetFilterOppgaver, true)
-        }
+        featureToggleService =
+            DummyFeatureToggleService().also {
+                it.settBryter(OppgaveServiceFeatureToggle.EnhetFilterOppgaver, true)
+            }
         sakDao = SakDao { connection }
         oppgaveDaoNy = OppgaveDaoNyImpl { connection }
         oppgaveDaoMedEndringssporing = OppgaveDaoMedEndringssporingImpl(oppgaveDaoNy) { connection }
@@ -84,23 +89,57 @@ class OppgaveServiceNyTest {
         saktilgangDao = SakTilgangDao(dataSource)
     }
 
-    @BeforeEach
-    fun beforeEach() {
-        every { saksbehandler.enheter() } returns Enheter.nasjonalTilgangEnheter()
+    val azureGroupToGroupIDMap =
+        mapOf(
+            AzureGroup.SAKSBEHANDLER to saksbehandlerRolleDev,
+            AzureGroup.ATTESTANT to attestantRolleDev,
+            AzureGroup.STRENGT_FORTROLIG to strengtfortroligDev
+        )
+
+    private fun generateSaksbehandlerMedRoller(azureGroup: AzureGroup): SaksbehandlerMedRoller {
+        val groupId = azureGroupToGroupIDMap[azureGroup]!!
+        val jwtclaimsSaksbehandler = JWTClaimsSet.Builder().claim("groups", groupId).build()
+        return SaksbehandlerMedRoller(
+            Saksbehandler("", azureGroup.name, JwtTokenClaims(jwtclaimsSaksbehandler)),
+            mapOf(azureGroup to groupId)
+        )
+    }
+
+    private fun setNewKontekstWithMockUser(userMock: User) {
         Kontekst.set(
             Context(
-                saksbehandler,
+                userMock,
                 object : DatabaseKontekst {
                     override fun activeTx(): Connection {
                         throw IllegalArgumentException()
                     }
 
-                    override fun <T> inTransaction(gjenbruk: Boolean, block: () -> T): T {
+                    override fun <T> inTransaction(
+                        gjenbruk: Boolean,
+                        block: () -> T
+                    ): T {
                         return block()
                     }
                 }
             )
         )
+    }
+
+    private fun mockForSaksbehandlerMedRoller(
+        userSaksbehandler: SaksbehandlerMedEnheterOgRoller,
+        saksbehandlerMedRoller: SaksbehandlerMedRoller
+    ) {
+        every { userSaksbehandler.saksbehandlerMedRoller } returns saksbehandlerMedRoller
+    }
+
+    @BeforeEach
+    fun beforeEach() {
+        val saksbehandlerRoller = generateSaksbehandlerMedRoller(AzureGroup.SAKSBEHANDLER)
+        every { saksbehandler.enheter() } returns Enheter.nasjonalTilgangEnheter()
+
+        setNewKontekstWithMockUser(saksbehandler)
+
+        every { saksbehandler.saksbehandlerMedRoller } returns saksbehandlerRoller
     }
 
     @AfterEach
@@ -110,16 +149,22 @@ class OppgaveServiceNyTest {
         }
     }
 
+    @AfterAll
+    fun afterAll() {
+        postgreSQLContainer.stop()
+    }
+
     @Test
     fun `skal kunne tildele oppgave uten saksbehandler`() {
         val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
-        val nyOppgave = oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
-            "referanse",
-            opprettetSak.id,
-            OppgaveKilde.BEHANDLING,
-            OppgaveType.FOERSTEGANGSBEHANDLING,
-            null
-        )
+        val nyOppgave =
+            oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
+                "referanse",
+                opprettetSak.id,
+                OppgaveKilde.BEHANDLING,
+                OppgaveType.FOERSTEGANGSBEHANDLING,
+                null
+            )
         val nysaksbehandler = "nysaksbehandler"
         oppgaveServiceNy.tildelSaksbehandler(nyOppgave.id, nysaksbehandler)
 
@@ -128,42 +173,147 @@ class OppgaveServiceNyTest {
     }
 
     @Test
-    fun `skal ikke kunne tildele oppgave med saksbehandler`() {
+    fun `skal tildele attesteringsoppgave hvis systembruker og fatte`() {
+        val systemBruker = mockk<SystemUser>()
+        setNewKontekstWithMockUser(systemBruker)
+
         val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
-        val nyOppgave = oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
-            "referanse",
-            opprettetSak.id,
-            OppgaveKilde.BEHANDLING,
-            OppgaveType.FOERSTEGANGSBEHANDLING,
-            null
-        )
+        val referanse = "referanse"
+        val nyOppgave =
+            oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
+                referanse,
+                opprettetSak.id,
+                OppgaveKilde.BEHANDLING,
+                OppgaveType.FOERSTEGANGSBEHANDLING,
+                null
+            )
+
+        val systembruker = "systembruker"
+        val systembrukerTokenInfo = BrukerTokenInfo.of("a", systembruker, "c", "c", null)
+        oppgaveServiceNy.tildelSaksbehandler(nyOppgave.id, systembruker)
+
+        val vedtakOppgaveDTO =
+            oppgaveServiceNy.ferdigstillOppgaveUnderbehandlingOgLagNyMedType(
+                VedtakOppgaveDTO(opprettetSak.id, referanse),
+                OppgaveType.ATTESTERING,
+                null,
+                systembrukerTokenInfo
+            )
+
+        oppgaveServiceNy.tildelSaksbehandler(vedtakOppgaveDTO.id, systembruker)
+        val systembrukerOppgave = oppgaveServiceNy.hentOppgave(vedtakOppgaveDTO.id)
+        Assertions.assertEquals(systembruker, systembrukerOppgave?.saksbehandler!!)
+    }
+
+    @Test
+    fun `skal tildele attesteringsoppgave hvis rolle attestering finnes`() {
+        val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val referanse = "referanse"
+        val nyOppgave =
+            oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
+                referanse,
+                opprettetSak.id,
+                OppgaveKilde.BEHANDLING,
+                OppgaveType.FOERSTEGANGSBEHANDLING,
+                null
+            )
+
+        val vanligSaksbehandler = saksbehandler.saksbehandlerMedRoller.saksbehandler
+        oppgaveServiceNy.tildelSaksbehandler(nyOppgave.id, vanligSaksbehandler.ident)
+
+        val vedtakOppgaveDTO =
+            oppgaveServiceNy.ferdigstillOppgaveUnderbehandlingOgLagNyMedType(
+                VedtakOppgaveDTO(opprettetSak.id, referanse),
+                OppgaveType.ATTESTERING,
+                null,
+                vanligSaksbehandler
+            )
+
+        val attestantSaksbehandler = mockk<SaksbehandlerMedEnheterOgRoller>()
+        setNewKontekstWithMockUser(attestantSaksbehandler)
+        val attestantmedRoller = generateSaksbehandlerMedRoller(AzureGroup.ATTESTANT)
+        mockForSaksbehandlerMedRoller(attestantSaksbehandler, attestantmedRoller)
+
+        oppgaveServiceNy.tildelSaksbehandler(vedtakOppgaveDTO.id, attestantmedRoller.saksbehandler.ident)
+        val attestantTildeltOppgave = oppgaveServiceNy.hentOppgave(vedtakOppgaveDTO.id)
+        Assertions.assertEquals(attestantmedRoller.saksbehandler.ident, attestantTildeltOppgave?.saksbehandler!!)
+    }
+
+    @Test
+    fun `skal ikke tildele attesteringsoppgave hvis rolle saksbehandler`() {
+        val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val referanse = "referanse"
+        val nyOppgave =
+            oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
+                referanse,
+                opprettetSak.id,
+                OppgaveKilde.BEHANDLING,
+                OppgaveType.FOERSTEGANGSBEHANDLING,
+                null
+            )
+
+        val vanligSaksbehandler = saksbehandler.saksbehandlerMedRoller.saksbehandler
+        oppgaveServiceNy.tildelSaksbehandler(nyOppgave.id, vanligSaksbehandler.ident)
+
+        val vedtakOppgaveDTO =
+            oppgaveServiceNy.ferdigstillOppgaveUnderbehandlingOgLagNyMedType(
+                VedtakOppgaveDTO(opprettetSak.id, referanse),
+                OppgaveType.ATTESTERING,
+                null,
+                vanligSaksbehandler
+            )
+
+        val saksbehandlerto = mockk<SaksbehandlerMedEnheterOgRoller>()
+        setNewKontekstWithMockUser(saksbehandlerto)
+        val saksbehandlerMedRoller = generateSaksbehandlerMedRoller(AzureGroup.SAKSBEHANDLER)
+        mockForSaksbehandlerMedRoller(saksbehandlerto, saksbehandlerMedRoller)
+
+        assertThrows<BrukerManglerAttestantRolleException> {
+            oppgaveServiceNy.tildelSaksbehandler(vedtakOppgaveDTO.id, saksbehandlerMedRoller.saksbehandler.ident)
+        }
+    }
+
+    @Test
+    fun `skal ikke kunne tildele oppgave med saksbehandler felt satt`() {
+        val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val nyOppgave =
+            oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
+                "referanse",
+                opprettetSak.id,
+                OppgaveKilde.BEHANDLING,
+                OppgaveType.FOERSTEGANGSBEHANDLING,
+                null
+            )
         val nysaksbehandler = "nysaksbehandler"
         oppgaveServiceNy.tildelSaksbehandler(nyOppgave.id, nysaksbehandler)
-        val err = assertThrows<BadRequestException> {
-            oppgaveServiceNy.tildelSaksbehandler(nyOppgave.id, "enda en")
-        }
+        val err =
+            assertThrows<BadRequestException> {
+                oppgaveServiceNy.tildelSaksbehandler(nyOppgave.id, "enda en")
+            }
         Assertions.assertTrue(err.message!!.startsWith("Oppgaven har allerede en saksbehandler"))
     }
 
     @Test
     fun `skal ikke kunne tildele hvis oppgaven ikke finnes`() {
         val nysaksbehandler = "nysaksbehandler"
-        val err = assertThrows<NotFoundException> {
-            oppgaveServiceNy.tildelSaksbehandler(UUID.randomUUID(), nysaksbehandler)
-        }
+        val err =
+            assertThrows<NotFoundException> {
+                oppgaveServiceNy.tildelSaksbehandler(UUID.randomUUID(), nysaksbehandler)
+            }
         Assertions.assertTrue(err.message!!.startsWith("Oppgaven finnes ikke"))
     }
 
     @Test
     fun `skal ikke kunne tildele en lukket oppgave`() {
         val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
-        val nyOppgave = oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
-            "referanse",
-            opprettetSak.id,
-            OppgaveKilde.BEHANDLING,
-            OppgaveType.FOERSTEGANGSBEHANDLING,
-            null
-        )
+        val nyOppgave =
+            oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
+                "referanse",
+                opprettetSak.id,
+                OppgaveKilde.BEHANDLING,
+                OppgaveType.FOERSTEGANGSBEHANDLING,
+                null
+            )
         oppgaveDaoNy.endreStatusPaaOppgave(nyOppgave.id, Status.FERDIGSTILT)
         val nysaksbehandler = "nysaksbehandler"
         assertThrows<IllegalStateException> {
@@ -175,20 +325,22 @@ class OppgaveServiceNyTest {
     fun `avbrytAapneOppgaverForBehandling setter alle åpne oppgaver for behandling til avbrutt`() {
         val sak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         val behandlingsId = UUID.randomUUID().toString()
-        val oppgaveBehandling = oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
-            referanse = behandlingsId,
-            sakId = sak.id,
-            oppgaveKilde = OppgaveKilde.BEHANDLING,
-            oppgaveType = OppgaveType.FOERSTEGANGSBEHANDLING,
-            merknad = null
-        )
-        val oppgaveAttestering = oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
-            referanse = behandlingsId,
-            sakId = sak.id,
-            oppgaveKilde = OppgaveKilde.BEHANDLING,
-            oppgaveType = OppgaveType.ATTESTERING,
-            merknad = null
-        )
+        val oppgaveBehandling =
+            oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
+                referanse = behandlingsId,
+                sakId = sak.id,
+                oppgaveKilde = OppgaveKilde.BEHANDLING,
+                oppgaveType = OppgaveType.FOERSTEGANGSBEHANDLING,
+                merknad = null
+            )
+        val oppgaveAttestering =
+            oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
+                referanse = behandlingsId,
+                sakId = sak.id,
+                oppgaveKilde = OppgaveKilde.BEHANDLING,
+                oppgaveType = OppgaveType.ATTESTERING,
+                merknad = null
+            )
         oppgaveServiceNy.tildelSaksbehandler(oppgaveBehandling.id, "saksbehandler")
         oppgaveServiceNy.avbrytAapneOppgaverForBehandling(behandlingsId)
         val oppgaveBehandlingEtterAvbryt = oppgaveServiceNy.hentOppgave(oppgaveBehandling.id)
@@ -205,33 +357,40 @@ class OppgaveServiceNyTest {
         val annenBehandlingId = UUID.randomUUID().toString()
         val saksbehandler = Saksbehandler("", "saksbehandler", null)
 
-        val oppgaveFerdigstilt = oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
-            referanse = behandlingId,
-            sakId = sak.id,
-            oppgaveKilde = OppgaveKilde.BEHANDLING,
-            oppgaveType = OppgaveType.FOERSTEGANGSBEHANDLING,
-            merknad = null
-        )
+        val oppgaveFerdigstilt =
+            oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
+                referanse = behandlingId,
+                sakId = sak.id,
+                oppgaveKilde = OppgaveKilde.BEHANDLING,
+                oppgaveType = OppgaveType.FOERSTEGANGSBEHANDLING,
+                merknad = null
+            )
         oppgaveServiceNy.tildelSaksbehandler(oppgaveFerdigstilt.id, saksbehandler.ident)
         oppgaveServiceNy.ferdigStillOppgaveUnderBehandling(behandlingId, saksbehandler)
 
-        val annenbehandlingfoerstegangs = oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
-            referanse = annenBehandlingId,
-            sakId = sak.id,
-            oppgaveKilde = OppgaveKilde.BEHANDLING,
-            oppgaveType = OppgaveType.FOERSTEGANGSBEHANDLING,
-            merknad = null
-        )
+        val annenbehandlingfoerstegangs =
+            oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
+                referanse = annenBehandlingId,
+                sakId = sak.id,
+                oppgaveKilde = OppgaveKilde.BEHANDLING,
+                oppgaveType = OppgaveType.FOERSTEGANGSBEHANDLING,
+                merknad = null
+            )
         val saksbehandlerforstegangs = Saksbehandler("", "forstegangssaksbehandler", null)
         oppgaveServiceNy.tildelSaksbehandler(annenbehandlingfoerstegangs.id, saksbehandlerforstegangs.ident)
         oppgaveServiceNy.ferdigStillOppgaveUnderBehandling(annenBehandlingId, saksbehandlerforstegangs)
-        val oppgaveUnderBehandlingAnnenBehandling = oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
-            referanse = annenBehandlingId,
-            sakId = sak.id,
-            oppgaveKilde = OppgaveKilde.BEHANDLING,
-            oppgaveType = OppgaveType.ATTESTERING,
-            merknad = null
-        )
+        val oppgaveUnderBehandlingAnnenBehandling =
+            oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
+                referanse = annenBehandlingId,
+                sakId = sak.id,
+                oppgaveKilde = OppgaveKilde.BEHANDLING,
+                oppgaveType = OppgaveType.ATTESTERING,
+                merknad = null
+            )
+
+        val attestantmock = mockk<SaksbehandlerMedEnheterOgRoller>()
+        setNewKontekstWithMockUser(attestantmock)
+        mockForSaksbehandlerMedRoller(attestantmock, generateSaksbehandlerMedRoller(AzureGroup.ATTESTANT))
         oppgaveServiceNy.tildelSaksbehandler(oppgaveUnderBehandlingAnnenBehandling.id, saksbehandler.ident)
         oppgaveServiceNy.avbrytAapneOppgaverForBehandling(behandlingId)
 
@@ -244,13 +403,14 @@ class OppgaveServiceNyTest {
     @Test
     fun `skal kunne bytte oppgave med saksbehandler`() {
         val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
-        val nyOppgave = oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
-            "referanse",
-            opprettetSak.id,
-            OppgaveKilde.BEHANDLING,
-            OppgaveType.FOERSTEGANGSBEHANDLING,
-            null
-        )
+        val nyOppgave =
+            oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
+                "referanse",
+                opprettetSak.id,
+                OppgaveKilde.BEHANDLING,
+                OppgaveType.FOERSTEGANGSBEHANDLING,
+                null
+            )
         val nysaksbehandler = "nysaksbehandler"
         oppgaveServiceNy.byttSaksbehandler(nyOppgave.id, nysaksbehandler)
 
@@ -261,13 +421,14 @@ class OppgaveServiceNyTest {
     @Test
     fun `skal ikke kunne bytte saksbehandler på lukket oppgave`() {
         val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
-        val nyOppgave = oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
-            "referanse",
-            opprettetSak.id,
-            OppgaveKilde.BEHANDLING,
-            OppgaveType.FOERSTEGANGSBEHANDLING,
-            null
-        )
+        val nyOppgave =
+            oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
+                "referanse",
+                opprettetSak.id,
+                OppgaveKilde.BEHANDLING,
+                OppgaveType.FOERSTEGANGSBEHANDLING,
+                null
+            )
         oppgaveDaoNy.endreStatusPaaOppgave(nyOppgave.id, Status.FERDIGSTILT)
         val nysaksbehandler = "nysaksbehandler"
         assertThrows<IllegalStateException> {
@@ -280,22 +441,24 @@ class OppgaveServiceNyTest {
     @Test
     fun `skal ikke kunne bytte saksbehandler på en ikke eksisterende sak`() {
         val nysaksbehandler = "nysaksbehandler"
-        val err = assertThrows<NotFoundException> {
-            oppgaveServiceNy.byttSaksbehandler(UUID.randomUUID(), nysaksbehandler)
-        }
+        val err =
+            assertThrows<NotFoundException> {
+                oppgaveServiceNy.byttSaksbehandler(UUID.randomUUID(), nysaksbehandler)
+            }
         Assertions.assertTrue(err.message!!.startsWith("Oppgaven finnes ikke"))
     }
 
     @Test
     fun `skal kunne fjerne saksbehandler fra oppgave`() {
         val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
-        val nyOppgave = oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
-            "referanse",
-            opprettetSak.id,
-            OppgaveKilde.BEHANDLING,
-            OppgaveType.FOERSTEGANGSBEHANDLING,
-            null
-        )
+        val nyOppgave =
+            oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
+                "referanse",
+                opprettetSak.id,
+                OppgaveKilde.BEHANDLING,
+                OppgaveType.FOERSTEGANGSBEHANDLING,
+                null
+            )
         val nysaksbehandler = "nysaksbehandler"
         oppgaveServiceNy.tildelSaksbehandler(nyOppgave.id, nysaksbehandler)
         oppgaveServiceNy.fjernSaksbehandler(nyOppgave.id)
@@ -308,29 +471,32 @@ class OppgaveServiceNyTest {
     @Test
     fun `kan ikke fjerne saksbehandler hvis det ikke er satt på oppgaven`() {
         val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
-        val nyOppgave = oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
-            "referanse",
-            opprettetSak.id,
-            OppgaveKilde.BEHANDLING,
-            OppgaveType.FOERSTEGANGSBEHANDLING,
-            null
-        )
-        val err = assertThrows<BadRequestException> {
-            oppgaveServiceNy.fjernSaksbehandler(nyOppgave.id)
-        }
+        val nyOppgave =
+            oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
+                "referanse",
+                opprettetSak.id,
+                OppgaveKilde.BEHANDLING,
+                OppgaveType.FOERSTEGANGSBEHANDLING,
+                null
+            )
+        val err =
+            assertThrows<BadRequestException> {
+                oppgaveServiceNy.fjernSaksbehandler(nyOppgave.id)
+            }
         Assertions.assertTrue(err.message!!.startsWith("Oppgaven har ingen saksbehandler"))
     }
 
     @Test
     fun `skal ikke kunne fjerne saksbehandler på en lukket oppgave`() {
         val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
-        val nyOppgave = oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
-            "referanse",
-            opprettetSak.id,
-            OppgaveKilde.BEHANDLING,
-            OppgaveType.FOERSTEGANGSBEHANDLING,
-            null
-        )
+        val nyOppgave =
+            oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
+                "referanse",
+                opprettetSak.id,
+                OppgaveKilde.BEHANDLING,
+                OppgaveType.FOERSTEGANGSBEHANDLING,
+                null
+            )
         val saksbehandler = "saksbehandler"
         oppgaveServiceNy.tildelSaksbehandler(nyOppgave.id, saksbehandler)
         oppgaveDaoNy.endreStatusPaaOppgave(nyOppgave.id, Status.FERDIGSTILT)
@@ -345,13 +511,14 @@ class OppgaveServiceNyTest {
     @Test
     fun `kan redigere frist`() {
         val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
-        val nyOppgave = oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
-            "referanse",
-            opprettetSak.id,
-            OppgaveKilde.BEHANDLING,
-            OppgaveType.FOERSTEGANGSBEHANDLING,
-            null
-        )
+        val nyOppgave =
+            oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
+                "referanse",
+                opprettetSak.id,
+                OppgaveKilde.BEHANDLING,
+                OppgaveType.FOERSTEGANGSBEHANDLING,
+                null
+            )
         oppgaveServiceNy.tildelSaksbehandler(nyOppgave.id, "nysaksbehandler")
         val nyFrist = Tidspunkt.now().toLocalDatetimeUTC().plusMonths(4L).toTidspunkt()
         oppgaveServiceNy.redigerFrist(nyOppgave.id, nyFrist)
@@ -362,19 +529,21 @@ class OppgaveServiceNyTest {
     @Test
     fun `kan ikke redigere frist tilbake i tid`() {
         val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
-        val nyOppgave = oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
-            "referanse",
-            opprettetSak.id,
-            OppgaveKilde.BEHANDLING,
-            OppgaveType.FOERSTEGANGSBEHANDLING,
-            null
-        )
+        val nyOppgave =
+            oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
+                "referanse",
+                opprettetSak.id,
+                OppgaveKilde.BEHANDLING,
+                OppgaveType.FOERSTEGANGSBEHANDLING,
+                null
+            )
         oppgaveServiceNy.tildelSaksbehandler(nyOppgave.id, "nysaksbehandler")
         val nyFrist = Tidspunkt.now().toLocalDatetimeUTC().minusMonths(1L).toTidspunkt()
 
-        val err = assertThrows<BadRequestException> {
-            oppgaveServiceNy.redigerFrist(nyOppgave.id, nyFrist)
-        }
+        val err =
+            assertThrows<BadRequestException> {
+                oppgaveServiceNy.redigerFrist(nyOppgave.id, nyFrist)
+            }
 
         Assertions.assertTrue(err.message!!.startsWith("Tidspunkt tilbake i tid id: "))
     }
@@ -382,13 +551,14 @@ class OppgaveServiceNyTest {
     @Test
     fun `kan ikke redigere frist på en lukket oppgave`() {
         val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
-        val nyOppgave = oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
-            "referanse",
-            opprettetSak.id,
-            OppgaveKilde.BEHANDLING,
-            OppgaveType.FOERSTEGANGSBEHANDLING,
-            null
-        )
+        val nyOppgave =
+            oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
+                "referanse",
+                opprettetSak.id,
+                OppgaveKilde.BEHANDLING,
+                OppgaveType.FOERSTEGANGSBEHANDLING,
+                null
+            )
 
         oppgaveDaoNy.endreStatusPaaOppgave(nyOppgave.id, Status.FERDIGSTILT)
         assertThrows<IllegalStateException> {
@@ -405,23 +575,25 @@ class OppgaveServiceNyTest {
     fun `Håndtering av vedtaksfatting`() {
         val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         val referanse = "referanse"
-        val nyOppgave = oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
-            referanse,
-            opprettetSak.id,
-            OppgaveKilde.BEHANDLING,
-            OppgaveType.FOERSTEGANGSBEHANDLING,
-            null
-        )
+        val nyOppgave =
+            oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
+                referanse,
+                opprettetSak.id,
+                OppgaveKilde.BEHANDLING,
+                OppgaveType.FOERSTEGANGSBEHANDLING,
+                null
+            )
 
         val saksbehandler1 = Saksbehandler("", "saksbehandler", null)
         oppgaveServiceNy.tildelSaksbehandler(nyOppgave.id, saksbehandler1.ident)
 
-        val vedtakOppgaveDTO = oppgaveServiceNy.ferdigstillOppgaveUnderbehandlingOgLagNyMedType(
-            VedtakOppgaveDTO(opprettetSak.id, referanse),
-            OppgaveType.ATTESTERING,
-            null,
-            saksbehandler1
-        )
+        val vedtakOppgaveDTO =
+            oppgaveServiceNy.ferdigstillOppgaveUnderbehandlingOgLagNyMedType(
+                VedtakOppgaveDTO(opprettetSak.id, referanse),
+                OppgaveType.ATTESTERING,
+                null,
+                saksbehandler1
+            )
 
         val saksbehandlerOppgave = oppgaveServiceNy.hentOppgave(nyOppgave.id)
         Assertions.assertEquals(Status.FERDIGSTILT, saksbehandlerOppgave?.status)
@@ -433,13 +605,14 @@ class OppgaveServiceNyTest {
     fun `Kan ikke lukke oppgave hvis man ikke eier oppgaven under behandling`() {
         val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         val referanse = "referanse"
-        val nyOppgave = oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
-            referanse,
-            opprettetSak.id,
-            OppgaveKilde.BEHANDLING,
-            OppgaveType.FOERSTEGANGSBEHANDLING,
-            null
-        )
+        val nyOppgave =
+            oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
+                referanse,
+                opprettetSak.id,
+                OppgaveKilde.BEHANDLING,
+                OppgaveType.FOERSTEGANGSBEHANDLING,
+                null
+            )
 
         val saksbehandler1 = "saksbehandler"
         oppgaveServiceNy.tildelSaksbehandler(nyOppgave.id, saksbehandler1)
@@ -465,14 +638,15 @@ class OppgaveServiceNyTest {
             null
         )
 
-        val err = assertThrows<BadRequestException> {
-            oppgaveServiceNy.ferdigstillOppgaveUnderbehandlingOgLagNyMedType(
-                VedtakOppgaveDTO(opprettetSak.id, referanse),
-                OppgaveType.ATTESTERING,
-                null,
-                Saksbehandler("", "saksbehandler", null)
-            )
-        }
+        val err =
+            assertThrows<BadRequestException> {
+                oppgaveServiceNy.ferdigstillOppgaveUnderbehandlingOgLagNyMedType(
+                    VedtakOppgaveDTO(opprettetSak.id, referanse),
+                    OppgaveType.ATTESTERING,
+                    null,
+                    Saksbehandler("", "saksbehandler", null)
+                )
+            }
 
         Assertions.assertTrue(
             err.message!!.startsWith("Det må finnes en oppgave under behandling, gjelder behandling:")
@@ -484,14 +658,15 @@ class OppgaveServiceNyTest {
         val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         val referanse = "referanse"
 
-        val err = assertThrows<BadRequestException> {
-            oppgaveServiceNy.ferdigstillOppgaveUnderbehandlingOgLagNyMedType(
-                VedtakOppgaveDTO(opprettetSak.id, referanse),
-                OppgaveType.ATTESTERING,
-                null,
-                Saksbehandler("", "saksbehandler", null)
-            )
-        }
+        val err =
+            assertThrows<BadRequestException> {
+                oppgaveServiceNy.ferdigstillOppgaveUnderbehandlingOgLagNyMedType(
+                    VedtakOppgaveDTO(opprettetSak.id, referanse),
+                    OppgaveType.ATTESTERING,
+                    null,
+                    Saksbehandler("", "saksbehandler", null)
+                )
+            }
 
         Assertions.assertEquals(
             "Må ha en oppgave for å kunne lage attesteringsoppgave",
@@ -503,33 +678,36 @@ class OppgaveServiceNyTest {
     fun `Skal ikke kunne attestere vedtak hvis det finnes flere oppgaver under behandling for behandlingen`() {
         val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         val referanse = "referanse"
-        val oppgaveEn = oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
-            referanse,
-            opprettetSak.id,
-            OppgaveKilde.BEHANDLING,
-            OppgaveType.FOERSTEGANGSBEHANDLING,
-            null
-        )
+        val oppgaveEn =
+            oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
+                referanse,
+                opprettetSak.id,
+                OppgaveKilde.BEHANDLING,
+                OppgaveType.FOERSTEGANGSBEHANDLING,
+                null
+            )
 
-        val oppgaveTo = oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
-            referanse,
-            opprettetSak.id,
-            OppgaveKilde.BEHANDLING,
-            OppgaveType.FOERSTEGANGSBEHANDLING,
-            null
-        )
+        val oppgaveTo =
+            oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
+                referanse,
+                opprettetSak.id,
+                OppgaveKilde.BEHANDLING,
+                OppgaveType.FOERSTEGANGSBEHANDLING,
+                null
+            )
         val saksbehandler1 = Saksbehandler("", "saksbehandler", null)
         oppgaveServiceNy.tildelSaksbehandler(oppgaveEn.id, saksbehandler1.ident)
         oppgaveServiceNy.tildelSaksbehandler(oppgaveTo.id, saksbehandler1.ident)
 
-        val err = assertThrows<BadRequestException> {
-            oppgaveServiceNy.ferdigstillOppgaveUnderbehandlingOgLagNyMedType(
-                VedtakOppgaveDTO(opprettetSak.id, referanse),
-                OppgaveType.ATTESTERING,
-                null,
-                saksbehandler1
-            )
-        }
+        val err =
+            assertThrows<BadRequestException> {
+                oppgaveServiceNy.ferdigstillOppgaveUnderbehandlingOgLagNyMedType(
+                    VedtakOppgaveDTO(opprettetSak.id, referanse),
+                    OppgaveType.ATTESTERING,
+                    null,
+                    saksbehandler1
+                )
+            }
 
         Assertions.assertTrue(
             err.message!!.startsWith("Skal kun ha en oppgave under behandling, gjelder behandling:")
@@ -538,22 +716,24 @@ class OppgaveServiceNyTest {
 
     @Test
     fun `kan ikke fjerne saksbehandler hvis oppgaven ikke finnes`() {
-        val err = assertThrows<NotFoundException> {
-            oppgaveServiceNy.fjernSaksbehandler(UUID.randomUUID())
-        }
+        val err =
+            assertThrows<NotFoundException> {
+                oppgaveServiceNy.fjernSaksbehandler(UUID.randomUUID())
+            }
         Assertions.assertTrue(err.message!!.startsWith("Oppgaven finnes ikke"))
     }
 
     @Test
     fun `Skal kun få saker som ikke er adressebeskyttet tilbake hvis saksbehandler ikke har spesialroller`() {
         val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
-        val nyOppgave = oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
-            "referanse",
-            opprettetSak.id,
-            OppgaveKilde.BEHANDLING,
-            OppgaveType.FOERSTEGANGSBEHANDLING,
-            null
-        )
+        val nyOppgave =
+            oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
+                "referanse",
+                opprettetSak.id,
+                OppgaveKilde.BEHANDLING,
+                OppgaveType.FOERSTEGANGSBEHANDLING,
+                null
+            )
 
         val adressebeskyttetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
@@ -565,12 +745,10 @@ class OppgaveServiceNyTest {
         )
 
         saktilgangDao.oppdaterAdresseBeskyttelse(adressebeskyttetSak.id, AdressebeskyttelseGradering.STRENGT_FORTROLIG)
-        val jwtclaims = JWTClaimsSet.Builder().claim("groups", saksbehandlerRolleDev).build()
-        val saksbehandlerMedRoller = SaksbehandlerMedRoller(
-            Saksbehandler("", "ident", JwtTokenClaims(jwtclaims)),
-            mapOf(AzureGroup.SAKSBEHANDLER to saksbehandlerRolleDev)
-        )
-        val oppgaver = oppgaveServiceNy.finnOppgaverForBruker(saksbehandlerMedRoller)
+
+        val saksbehandlerRoller = generateSaksbehandlerMedRoller(AzureGroup.SAKSBEHANDLER)
+
+        val oppgaver = oppgaveServiceNy.finnOppgaverForBruker(saksbehandlerRoller)
         Assertions.assertEquals(1, oppgaver.size)
         val oppgaveUtenbeskyttelse = oppgaver[0]
         Assertions.assertEquals(nyOppgave.id, oppgaveUtenbeskyttelse.id)
@@ -588,11 +766,7 @@ class OppgaveServiceNyTest {
             merknad = null
         )
 
-        val jwtclaims = JWTClaimsSet.Builder().claim("groups", saksbehandlerRolleDev).build()
-        val saksbehandlerMedRoller = SaksbehandlerMedRoller(
-            Saksbehandler("", "ident", JwtTokenClaims(jwtclaims)),
-            mapOf(AzureGroup.SAKSBEHANDLER to saksbehandlerRolleDev)
-        )
+        val saksbehandlerMedRoller = generateSaksbehandlerMedRoller(AzureGroup.SAKSBEHANDLER)
         val oppgaverUtenEndring = oppgaveServiceNy.finnOppgaverForBruker(saksbehandlerMedRoller)
         Assertions.assertEquals(1, oppgaverUtenEndring.size)
         Assertions.assertEquals(Enheter.AALESUND.enhetNr, oppgaverUtenEndring[0].enhet)
@@ -615,21 +789,18 @@ class OppgaveServiceNyTest {
         )
 
         val adressebeskyttetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
-        val adressebeskyttetOppgave = oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
-            "referanse",
-            adressebeskyttetSak.id,
-            OppgaveKilde.BEHANDLING,
-            OppgaveType.FOERSTEGANGSBEHANDLING,
-            null
-        )
+        val adressebeskyttetOppgave =
+            oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
+                "referanse",
+                adressebeskyttetSak.id,
+                OppgaveKilde.BEHANDLING,
+                OppgaveType.FOERSTEGANGSBEHANDLING,
+                null
+            )
 
         saktilgangDao.oppdaterAdresseBeskyttelse(adressebeskyttetSak.id, AdressebeskyttelseGradering.STRENGT_FORTROLIG)
-        val jwtclaims = JWTClaimsSet.Builder().claim("groups", strengtfortroligDev).build()
-        val saksbehandlerMedRoller = SaksbehandlerMedRoller(
-            Saksbehandler("", "ident", JwtTokenClaims(jwtclaims)),
-            mapOf(AzureGroup.STRENGT_FORTROLIG to strengtfortroligDev)
-        )
-        val oppgaver = oppgaveServiceNy.finnOppgaverForBruker(saksbehandlerMedRoller)
+        val saksbehandlerMedRollerStrengtFortrolig = generateSaksbehandlerMedRoller(AzureGroup.STRENGT_FORTROLIG)
+        val oppgaver = oppgaveServiceNy.finnOppgaverForBruker(saksbehandlerMedRollerStrengtFortrolig)
         Assertions.assertEquals(1, oppgaver.size)
         val strengtFortroligOppgave = oppgaver[0]
         Assertions.assertEquals(adressebeskyttetOppgave.id, strengtFortroligOppgave.id)
@@ -648,20 +819,17 @@ class OppgaveServiceNyTest {
         )
 
         val attestantSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
-        val attestantOppgave = oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
-            "referanse",
-            attestantSak.id,
-            OppgaveKilde.BEHANDLING,
-            OppgaveType.ATTESTERING,
-            null
-        )
+        val attestantOppgave =
+            oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
+                "referanse",
+                attestantSak.id,
+                OppgaveKilde.BEHANDLING,
+                OppgaveType.ATTESTERING,
+                null
+            )
 
-        val jwtclaims = JWTClaimsSet.Builder().claim("groups", attestantRolleDev).build()
-        val saksbehandlerMedRoller = SaksbehandlerMedRoller(
-            Saksbehandler("", "ident", JwtTokenClaims(jwtclaims)),
-            mapOf(AzureGroup.ATTESTANT to attestantRolleDev)
-        )
-        val oppgaver = oppgaveServiceNy.finnOppgaverForBruker(saksbehandlerMedRoller)
+        val saksbehandlerMedRollerAttestant = generateSaksbehandlerMedRoller(AzureGroup.ATTESTANT)
+        val oppgaver = oppgaveServiceNy.finnOppgaverForBruker(saksbehandlerMedRollerAttestant)
         Assertions.assertEquals(1, oppgaver.size)
         val strengtFortroligOppgave = oppgaver[0]
         Assertions.assertEquals(attestantOppgave.id, strengtFortroligOppgave.id)
@@ -671,13 +839,14 @@ class OppgaveServiceNyTest {
     @Test
     fun `skal tracke at en tildeling av saksbehandler blir lagret med oppgaveendringer`() {
         val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
-        val nyOppgave = oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
-            "referanse",
-            opprettetSak.id,
-            OppgaveKilde.BEHANDLING,
-            OppgaveType.FOERSTEGANGSBEHANDLING,
-            null
-        )
+        val nyOppgave =
+            oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
+                "referanse",
+                opprettetSak.id,
+                OppgaveKilde.BEHANDLING,
+                OppgaveType.FOERSTEGANGSBEHANDLING,
+                null
+            )
         val nysaksbehandler = "nysaksbehandler"
         oppgaveServiceNy.tildelSaksbehandler(nyOppgave.id, nysaksbehandler)
 
@@ -697,13 +866,14 @@ class OppgaveServiceNyTest {
     fun `skal ferdigstille en oppgave hivs det finnes kun en som er under behandling`() {
         val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         val behandlingsref = UUID.randomUUID().toString()
-        val oppgave = oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
-            behandlingsref,
-            opprettetSak.id,
-            OppgaveKilde.BEHANDLING,
-            OppgaveType.FOERSTEGANGSBEHANDLING,
-            null
-        )
+        val oppgave =
+            oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
+                behandlingsref,
+                opprettetSak.id,
+                OppgaveKilde.BEHANDLING,
+                OppgaveType.FOERSTEGANGSBEHANDLING,
+                null
+            )
 
         val saksbehandler1 = Saksbehandler("", "saksbehandler01", null)
         oppgaveServiceNy.tildelSaksbehandler(oppgave.id, saksbehandler1.ident)
@@ -716,13 +886,14 @@ class OppgaveServiceNyTest {
     fun `Kan ikke ferdigstille oppgave under behandling om man ikke eier den`() {
         val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         val behandlingsref = UUID.randomUUID().toString()
-        val oppgave = oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
-            behandlingsref,
-            opprettetSak.id,
-            OppgaveKilde.BEHANDLING,
-            OppgaveType.FOERSTEGANGSBEHANDLING,
-            null
-        )
+        val oppgave =
+            oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
+                behandlingsref,
+                opprettetSak.id,
+                OppgaveKilde.BEHANDLING,
+                OppgaveType.FOERSTEGANGSBEHANDLING,
+                null
+            )
 
         val saksbehandler1 = "saksbehandler01"
         oppgaveServiceNy.tildelSaksbehandler(oppgave.id, saksbehandler1)
@@ -738,13 +909,14 @@ class OppgaveServiceNyTest {
     fun `skal lukke nye ikke ferdige eller feilregistrerte oppgaver hvis ny søknad kommer inn`() {
         val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         val behandlingsref = UUID.randomUUID().toString()
-        val oppgaveSomSkalBliAvbrutt = oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
-            behandlingsref,
-            opprettetSak.id,
-            OppgaveKilde.BEHANDLING,
-            OppgaveType.FOERSTEGANGSBEHANDLING,
-            null
-        )
+        val oppgaveSomSkalBliAvbrutt =
+            oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
+                behandlingsref,
+                opprettetSak.id,
+                OppgaveKilde.BEHANDLING,
+                OppgaveType.FOERSTEGANGSBEHANDLING,
+                null
+            )
         oppgaveServiceNy.tildelSaksbehandler(oppgaveSomSkalBliAvbrutt.id, "saksbehandler01")
 
         oppgaveServiceNy.opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(behandlingsref, opprettetSak.id)
@@ -766,7 +938,10 @@ class OppgaveServiceNyTest {
                         throw IllegalArgumentException()
                     }
 
-                    override fun <T> inTransaction(gjenbruk: Boolean, block: () -> T): T {
+                    override fun <T> inTransaction(
+                        gjenbruk: Boolean,
+                        block: () -> T
+                    ): T {
                         return block()
                     }
                 }
@@ -775,51 +950,50 @@ class OppgaveServiceNyTest {
 
         val aalesundSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         val behandlingsref = UUID.randomUUID().toString()
-        val oppgaveAalesund = oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
-            behandlingsref,
-            aalesundSak.id,
-            OppgaveKilde.BEHANDLING,
-            OppgaveType.FOERSTEGANGSBEHANDLING,
-            null
-        )
+        val oppgaveAalesund =
+            oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
+                behandlingsref,
+                aalesundSak.id,
+                OppgaveKilde.BEHANDLING,
+                OppgaveType.FOERSTEGANGSBEHANDLING,
+                null
+            )
         val saksbehandlerid = "saksbehandler01"
         oppgaveServiceNy.tildelSaksbehandler(oppgaveAalesund.id, saksbehandlerid)
 
         val saksteinskjer = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.STEINKJER.enhetNr)
         val behrefsteinkjer = UUID.randomUUID().toString()
-        val oppgavesteinskjer = oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
-            behrefsteinkjer,
-            saksteinskjer.id,
-            OppgaveKilde.BEHANDLING,
-            OppgaveType.FOERSTEGANGSBEHANDLING,
-            null
-        )
+        val oppgavesteinskjer =
+            oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
+                behrefsteinkjer,
+                saksteinskjer.id,
+                OppgaveKilde.BEHANDLING,
+                OppgaveType.FOERSTEGANGSBEHANDLING,
+                null
+            )
 
         oppgaveServiceNy.tildelSaksbehandler(oppgavesteinskjer.id, saksbehandlerid)
 
-        val jwtclaims = JWTClaimsSet.Builder().claim("groups", saksbehandlerRolleDev).build()
-        val saksbehandlerMedRoller = SaksbehandlerMedRoller(
-            Saksbehandler("", "ident", JwtTokenClaims(jwtclaims)),
-            mapOf(AzureGroup.SAKSBEHANDLER to saksbehandlerRolleDev)
-        )
+        val saksbehandlerMedRoller = generateSaksbehandlerMedRoller(AzureGroup.SAKSBEHANDLER)
         val finnOppgaverForBruker = oppgaveServiceNy.finnOppgaverForBruker(saksbehandlerMedRoller)
 
         Assertions.assertEquals(1, finnOppgaverForBruker.size)
-        val AalesundfunnetOppgave = finnOppgaverForBruker[0]
-        Assertions.assertEquals(Enheter.AALESUND.enhetNr, AalesundfunnetOppgave.enhet)
+        val aalesundfunnetOppgave = finnOppgaverForBruker[0]
+        Assertions.assertEquals(Enheter.AALESUND.enhetNr, aalesundfunnetOppgave.enhet)
     }
 
     @Test
     fun `kan hente saksbehandler på en oppgave tilknyttet behandling som er under arbeid`() {
         val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         val behandlingId = UUID.randomUUID().toString()
-        val nyOppgave = oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
-            behandlingId,
-            opprettetSak.id,
-            OppgaveKilde.BEHANDLING,
-            OppgaveType.FOERSTEGANGSBEHANDLING,
-            null
-        )
+        val nyOppgave =
+            oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
+                behandlingId,
+                opprettetSak.id,
+                OppgaveKilde.BEHANDLING,
+                OppgaveType.FOERSTEGANGSBEHANDLING,
+                null
+            )
         val saksbehandler = "saksbehandler"
 
         oppgaveServiceNy.tildelSaksbehandler(nyOppgave.id, saksbehandler)
@@ -834,13 +1008,14 @@ class OppgaveServiceNyTest {
     fun `kan hente saksbehandler på en oppgave fra revurdering`() {
         val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         val revurderingId = UUID.randomUUID().toString()
-        val nyOppgave = oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
-            revurderingId,
-            opprettetSak.id,
-            OppgaveKilde.BEHANDLING,
-            OppgaveType.REVURDERING,
-            null
-        )
+        val nyOppgave =
+            oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
+                revurderingId,
+                opprettetSak.id,
+                OppgaveKilde.BEHANDLING,
+                OppgaveType.REVURDERING,
+                null
+            )
         val saksbehandler = "saksbehandler"
 
         oppgaveServiceNy.tildelSaksbehandler(nyOppgave.id, saksbehandler)
@@ -855,24 +1030,30 @@ class OppgaveServiceNyTest {
     fun `Skal kunne hente saksbehandler på oppgave for behandling selvom den er ferdigstilt med attestering`() {
         val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         val behandlingId = UUID.randomUUID().toString()
-        val foerstegangsbehandling = oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
-            behandlingId,
-            opprettetSak.id,
-            OppgaveKilde.BEHANDLING,
-            OppgaveType.FOERSTEGANGSBEHANDLING,
-            null
-        )
+        val foerstegangsbehandling =
+            oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
+                behandlingId,
+                opprettetSak.id,
+                OppgaveKilde.BEHANDLING,
+                OppgaveType.FOERSTEGANGSBEHANDLING,
+                null
+            )
         val saksbehandler = Saksbehandler("", "saksbehandler", null)
 
         oppgaveServiceNy.tildelSaksbehandler(foerstegangsbehandling.id, saksbehandler.ident)
         oppgaveServiceNy.ferdigStillOppgaveUnderBehandling(behandlingId, saksbehandler)
-        val attestertBehandlingsoppgave = oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
-            behandlingId,
-            opprettetSak.id,
-            OppgaveKilde.BEHANDLING,
-            OppgaveType.ATTESTERING,
-            null
-        )
+        val attestertBehandlingsoppgave =
+            oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
+                behandlingId,
+                opprettetSak.id,
+                OppgaveKilde.BEHANDLING,
+                OppgaveType.ATTESTERING,
+                null
+            )
+
+        val attestantmock = mockk<SaksbehandlerMedEnheterOgRoller>()
+        setNewKontekstWithMockUser(attestantmock)
+        mockForSaksbehandlerMedRoller(attestantmock, generateSaksbehandlerMedRoller(AzureGroup.ATTESTANT))
         oppgaveServiceNy.tildelSaksbehandler(attestertBehandlingsoppgave.id, "attestant")
 
         val saksbehandlerHentet =
@@ -885,13 +1066,14 @@ class OppgaveServiceNyTest {
     fun `Får null saksbehandler ved henting på behandling hvis saksbehandler ikke satt`() {
         val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         val behandlingId = UUID.randomUUID().toString()
-        val nyOppgave = oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
-            behandlingId,
-            opprettetSak.id,
-            OppgaveKilde.BEHANDLING,
-            OppgaveType.FOERSTEGANGSBEHANDLING,
-            null
-        )
+        val nyOppgave =
+            oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
+                behandlingId,
+                opprettetSak.id,
+                OppgaveKilde.BEHANDLING,
+                OppgaveType.FOERSTEGANGSBEHANDLING,
+                null
+            )
         val saksbehandlerHentet =
             oppgaveServiceNy.hentSaksbehandlerForBehandling(UUID.fromString(behandlingId))
 

@@ -1,6 +1,5 @@
 import { Button, Select, TextField } from '@navikt/ds-react'
 import React from 'react'
-import styled from 'styled-components'
 import {
   ENHETFILTER,
   EnhetFilterKeys,
@@ -21,28 +20,14 @@ import {
 } from '~components/nyoppgavebenk/Oppgavelistafiltre'
 import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 import { FEATURE_TOGGLE_KAN_BRUKE_KLAGE } from '~components/person/OpprettKlage'
-
-const FilterFlex = styled.div`
-  display: flex;
-  gap: 2rem;
-`
-
-const ButtonWrapper = styled.div`
-  display: flex;
-  justify-content: flex-start;
-  margin: 2rem 2rem 2rem 0rem;
-  max-width: 20rem;
-  button:first-child {
-    margin-right: 1rem;
-  }
-`
+import { FlexRow } from '~shared/styled'
 
 export const FilterRad = (props: { hentOppgaver: () => void; filter: Filter; setFilter: (filter: Filter) => void }) => {
   const { hentOppgaver, filter, setFilter } = props
   const kanBrukeKlage = useFeatureEnabledMedDefault(FEATURE_TOGGLE_KAN_BRUKE_KLAGE)
   return (
     <>
-      <FilterFlex>
+      <FlexRow $spacing>
         <TextField
           label="Fødselsnummer"
           value={filter.fnrFilter}
@@ -133,13 +118,14 @@ export const FilterRad = (props: { hentOppgaver: () => void; filter: Filter; set
             </option>
           ))}
         </Select>
-      </FilterFlex>
-      <ButtonWrapper>
+      </FlexRow>
+
+      <FlexRow $spacing>
         <Button onClick={hentOppgaver}>Hent</Button>
         <Button variant="secondary" onClick={() => setFilter(initialFilter())}>
           Tilbakestill alle filtre
         </Button>
-      </ButtonWrapper>
+      </FlexRow>
     </>
   )
 }

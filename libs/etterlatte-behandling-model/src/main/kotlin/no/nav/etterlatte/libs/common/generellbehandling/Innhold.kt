@@ -12,6 +12,7 @@ sealed class Innhold {
         val tilknyttetBehandling: UUID
     ) : Innhold()
 
+    @JsonTypeName("ANNEN")
     data class Annen(
         val innhold: String
     ) : Innhold()

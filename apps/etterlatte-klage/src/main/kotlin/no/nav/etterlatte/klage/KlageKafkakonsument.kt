@@ -4,7 +4,6 @@ import io.confluent.kafka.schemaregistry.client.SchemaRegistryClientConfig
 import io.confluent.kafka.serializers.AbstractKafkaSchemaSerDeConfig
 import no.nav.etterlatte.kafka.Kafkakonfigurasjon
 import no.nav.etterlatte.kafka.Kafkakonsument
-import no.nav.etterlatte.klage.modell.BehandlingEvent
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.apache.kafka.common.serialization.StringDeserializer
 import org.slf4j.LoggerFactory
@@ -14,9 +13,9 @@ class KlageKafkakonsument(
     env: Map<String, String>,
     topic: String,
     private val behandlingKlient: BehandlingKlient
-) : Kafkakonsument<BehandlingEvent>(
+) : Kafkakonsument<String>(
     logger = LoggerFactory.getLogger(KlageKafkakonsument::class.java.name),
-    consumer = KafkaConsumer<String, BehandlingEvent>(KafkaEnvironment().generateKafkaConsumerProperties(env)),
+    consumer = KafkaConsumer<String, String>(KafkaEnvironment().generateKafkaConsumerProperties(env)),
     topic = topic,
     pollTimeoutInSeconds = Duration.ofSeconds(10L)
 

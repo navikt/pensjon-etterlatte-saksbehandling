@@ -10,6 +10,7 @@ import { OppgaveDTOny } from '~shared/api/oppgaverny'
 import { ConfigContext } from '~clientConfig'
 import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 import { FEATURE_TOGGLE_KAN_BRUKE_OPPGAVEBEHANDLING } from '~components/person/journalfoeringsoppgave/BehandleJournalfoeringOppgave'
+import { FlexRow } from '~shared/styled'
 
 const TagRow = styled.div`
   display: flex;
@@ -31,11 +32,6 @@ const BeskrivelseWrapper = styled.div`
   width: 46rem;
 `
 
-const ButtonRow = styled.div`
-  display: flex;
-  gap: 1rem;
-  justify-content: flex-end;
-`
 export const GosysOppgaveModal = ({ oppgave }: { oppgave: OppgaveDTOny }) => {
   const [open, setOpen] = useState(false)
   const { opprettet, frist, status, fnr, gjelder, enhet, saksbehandler, beskrivelse, sakType } = oppgave
@@ -97,7 +93,7 @@ export const GosysOppgaveModal = ({ oppgave }: { oppgave: OppgaveDTOny }) => {
               <BodyShort>{beskrivelse}</BodyShort>
             </div>
           </BeskrivelseWrapper>
-          <ButtonRow>
+          <FlexRow justify={'right'}>
             <Button variant="tertiary" onClick={() => setOpen(false)}>
               Avbryt
             </Button>
@@ -116,7 +112,7 @@ export const GosysOppgaveModal = ({ oppgave }: { oppgave: OppgaveDTOny }) => {
                 Åpne og rediger i Gosys
               </Button>
             )}
-          </ButtonRow>
+          </FlexRow>
         </Modal.Body>
       </Modal>
     </>

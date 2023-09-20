@@ -60,9 +60,10 @@ export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => 
           Gjenlevende sin situasjon
         </Heading>
         <BodyLong spacing>
-          Ut ifra tid etter dødsfall stilles det ulike krav til aktivitet hos søker. Innen det har gått 6 måneder etter
-          dødsfall skal søker være i minst 50 % aktivitet for å motta omstillingstønad. Videre kan det forventes 100%
-          aktivitet etter 12 måneder.
+          Det stilles ulike krav til aktivitet utifra tid etter dødsfallet. Seks måneder etter dødsfallet må gjenlevende
+          være i minst 50 % aktivitet for å ha rett til omstillingsstønad. Videre kan det stilles krav til 100 %
+          aktivitet etter 12 måneder. I visse tilfeller kan man ha rett på omstillingsstønad selv om aktivitetskravet
+          ikke er oppfylt.
         </BodyLong>
 
         <Heading size={'small'} spacing>
@@ -97,7 +98,6 @@ export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => 
               <Button
                 variant="primary"
                 size="small"
-                className="button"
                 onClick={() =>
                   lagre({ behandlingId: behandling.id, request: { aktivitet: beskrivelse } }, (lagretElement) =>
                     setAktivitetOppfolging(lagretElement)
@@ -138,7 +138,13 @@ export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => 
           arbeidslivet og/ eller ikke har andre ytelser fra Nav.
         </BodyLong>
         <SpacingWrapper>
-          <Button variant="secondary" size="small" className="button" onClick={() => true}>
+          <Button
+            variant="secondary"
+            size="small"
+            as="a"
+            href={`${configContext['gosysUrl']}/personoversikt/fnr=${behandling.søker?.foedselsnummer}`}
+            target="_blank"
+          >
             Lag oppgave til lokalkontor <ExternalLinkIcon />
           </Button>
         </SpacingWrapper>
@@ -147,7 +153,7 @@ export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => 
       <Border />
 
       <BehandlingHandlingKnapper>
-        <Button variant="primary" size="medium" onClick={() => next()}>
+        <Button variant="primary" onClick={() => next()}>
           Gå videre
         </Button>
       </BehandlingHandlingKnapper>

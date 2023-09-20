@@ -14,6 +14,7 @@ import io.ktor.http.fullPath
 import io.ktor.http.headersOf
 import io.ktor.serialization.jackson.JacksonConverter
 import io.ktor.server.config.HoconApplicationConfig
+import no.nav.etterlatte.behandling.BehandlingStatusServiceFeatureToggle
 import no.nav.etterlatte.behandling.domain.ArbeidsFordelingEnhet
 import no.nav.etterlatte.behandling.domain.SaksbehandlerEnhet
 import no.nav.etterlatte.behandling.domain.SaksbehandlerTema
@@ -57,16 +58,23 @@ import java.time.LocalDate
 import java.util.*
 
 abstract class BehandlingIntegrationTest {
-
     @Container
     private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:$POSTGRES_VERSION")
     private val server: MockOAuth2Server = MockOAuth2Server()
     protected lateinit var applicationContext: ApplicationContext
     protected lateinit var hoconApplicationConfig: HoconApplicationConfig
 
+    private fun konfigurertFeatureToggleService(): FeatureToggleService {
+        val service = DummyFeatureToggleService()
+
+        service.settBryter(BehandlingStatusServiceFeatureToggle.BrukFaktiskTrygdetid, true)
+
+        return service
+    }
+
     protected fun startServer(
         norg2Klient: Norg2Klient? = null,
-        featureToggleService: FeatureToggleService = DummyFeatureToggleService()
+        featureToggleService: FeatureToggleService = konfigurertFeatureToggleService()
     ) {
         server.start()
 

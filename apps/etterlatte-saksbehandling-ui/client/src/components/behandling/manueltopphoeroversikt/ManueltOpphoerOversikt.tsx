@@ -135,7 +135,7 @@ export const ManueltOpphoerOversikt = (props: { behandling: IBehandlingReducer }
         </SectionSpacing>
       </MainSection>
       <BehandlingHandlingKnapper>
-        <Button variant="primary" size="medium" loading={loadingBeregning} onClick={lagBeregningOgGaaVidere}>
+        <Button variant="primary" loading={loadingBeregning} onClick={lagBeregningOgGaaVidere}>
           Se over beregning
         </Button>
       </BehandlingHandlingKnapper>

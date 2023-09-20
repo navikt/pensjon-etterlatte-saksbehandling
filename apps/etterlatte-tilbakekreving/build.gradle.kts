@@ -7,6 +7,7 @@ plugins {
 
 dependencies {
     implementation(project(":libs:saksbehandling-common"))
+    implementation(project(":libs:etterlatte-tilbakekreving-model"))
     implementation(project(":libs:etterlatte-ktor"))
     implementation(project(":libs:etterlatte-database"))
     implementation(project(":libs:etterlatte-mq"))

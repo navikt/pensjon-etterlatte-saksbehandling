@@ -64,7 +64,6 @@ internal class MigrerSpesifikkSak(
         try {
             verifiserer.verifiserRequest(request)
         } catch (e: Exception) {
-            logger.warn("Sak ${request.pesysId} har ufullstendige data i PDL, kan ikke migrere")
             pesysRepository.oppdaterStatus(request.pesysId, Migreringsstatus.FEILA)
             throw e
         }

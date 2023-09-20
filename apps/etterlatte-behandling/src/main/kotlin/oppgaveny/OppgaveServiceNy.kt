@@ -29,6 +29,8 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.util.*
 
+class BrukerManglerAttestantRolleException(msg: String) : Exception(msg)
+
 class OppgaveServiceNy(
     private val oppgaveDaoNy: OppgaveDaoMedEndringssporing,
     private val sakDao: SakDao,
@@ -70,14 +72,26 @@ class OppgaveServiceNy(
             Rolle.STRENGT_FORTROLIG.takeIf { bruker.harRolleStrengtFortrolig() }
         )
 
-    private fun kanTildeleAttestantOppgave(): Boolean {
-        return when (Kontekst.get().AppUser) {
+    private fun sjekkOmkanTildeleAttestantOppgave(): Boolean {
+        val appUser = Kontekst.get().AppUser
+        return when (appUser) {
             is SystemUser -> true
             is Self -> true
-            is SaksbehandlerMedEnheterOgRoller ->
-                Kontekst.get().appUserAsSaksbehandler().saksbehandlerMedRoller.harRolleAttestant()
+            is SaksbehandlerMedEnheterOgRoller -> {
+                val saksbehandlerMedRoller = appUser.saksbehandlerMedRoller
+                if (saksbehandlerMedRoller.harRolleAttestant()) {
+                    return true
+                } else {
+                    throw BrukerManglerAttestantRolleException(
+                        "Bruker ${saksbehandlerMedRoller.saksbehandler.ident} " +
+                            "mangler attestant rolle for tildeling"
+                    )
+                }
+            }
             is ExternalUser -> throw IllegalArgumentException("ExternalUser er ikke støttet for å tildele oppgave")
-            else -> throw IllegalArgumentException("Ukjent brukertype støtter ikke tildeling av oppgave")
+            else -> throw IllegalArgumentException(
+                "Ukjent brukertype ${appUser.name()} støtter ikke tildeling av oppgave"
+            )
         }
     }
 
@@ -91,20 +105,7 @@ class OppgaveServiceNy(
                     ?: throw NotFoundException("Oppgaven finnes ikke, id: $oppgaveId")
 
             sikreAtOppgaveIkkeErAvsluttet(hentetOppgave)
-            if (hentetOppgave.erAttestering() && !kanTildeleAttestantOppgave()) {
-                val bruker = Kontekst.get().AppUser
-                if (bruker is SaksbehandlerMedEnheterOgRoller) {
-                    throw BadRequestException(
-                        "Bruker ${bruker.saksbehandlerMedRoller.saksbehandler.ident} " +
-                            "mangler attestant rolle for oppgaveid: ${hentetOppgave.id}"
-                    )
-                } else {
-                    throw BadRequestException(
-                        "Bruker ${bruker.name()} " +
-                            "mangler attestant rolle for oppgaveid: ${hentetOppgave.id}"
-                    )
-                }
-            }
+            hentetOppgave.erAttestering() && sjekkOmkanTildeleAttestantOppgave()
             if (hentetOppgave.saksbehandler.isNullOrEmpty()) {
                 oppgaveDaoNy.settNySaksbehandler(oppgaveId, saksbehandler)
             } else {

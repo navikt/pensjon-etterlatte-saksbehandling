@@ -240,6 +240,40 @@ internal class OppgaveServiceNyTest {
     }
 
     @Test
+    fun `skal ikke tildele attesteringsoppgave hvis rolle saksbehandler`() {
+        val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val referanse = "referanse"
+        val nyOppgave =
+            oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
+                referanse,
+                opprettetSak.id,
+                OppgaveKilde.BEHANDLING,
+                OppgaveType.FOERSTEGANGSBEHANDLING,
+                null
+            )
+
+        val vanligSaksbehandler = saksbehandler.saksbehandlerMedRoller.saksbehandler
+        oppgaveServiceNy.tildelSaksbehandler(nyOppgave.id, vanligSaksbehandler.ident)
+
+        val vedtakOppgaveDTO =
+            oppgaveServiceNy.ferdigstillOppgaveUnderbehandlingOgLagNyMedType(
+                VedtakOppgaveDTO(opprettetSak.id, referanse),
+                OppgaveType.ATTESTERING,
+                null,
+                vanligSaksbehandler
+            )
+
+        val saksbehandlerto = mockk<SaksbehandlerMedEnheterOgRoller>()
+        setNewKontekstWithMockUser(saksbehandlerto)
+        val saksbehandlerMedRoller = generateSaksbehandlerMedRoller(AzureGroup.SAKSBEHANDLER)
+        mockForSaksbehandlerMedRoller(saksbehandlerto, saksbehandlerMedRoller)
+
+        assertThrows<BrukerManglerAttestantRolleException> {
+            oppgaveServiceNy.tildelSaksbehandler(vedtakOppgaveDTO.id, saksbehandlerMedRoller.saksbehandler.ident)
+        }
+    }
+
+    @Test
     fun `skal ikke kunne tildele oppgave med saksbehandler felt satt`() {
         val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         val nyOppgave =

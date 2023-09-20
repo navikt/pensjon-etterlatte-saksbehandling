@@ -9,6 +9,8 @@ import no.nav.etterlatte.Context
 import no.nav.etterlatte.DatabaseKontekst
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
+import no.nav.etterlatte.SystemUser
+import no.nav.etterlatte.User
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
@@ -28,6 +30,7 @@ import no.nav.etterlatte.sak.SakDao
 import no.nav.etterlatte.sak.SakTilgangDao
 import no.nav.etterlatte.tilgangsstyring.AzureGroup
 import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
+import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.etterlatte.token.Saksbehandler
 import no.nav.security.token.support.core.jwt.JwtTokenClaims
 import org.junit.jupiter.api.AfterAll
@@ -97,15 +100,15 @@ internal class OppgaveServiceNyTest {
         val groupId = azureGroupToGroupIDMap[azureGroup]!!
         val jwtclaimsSaksbehandler = JWTClaimsSet.Builder().claim("groups", groupId).build()
         return SaksbehandlerMedRoller(
-            Saksbehandler("", "ident", JwtTokenClaims(jwtclaimsSaksbehandler)),
+            Saksbehandler("", azureGroup.name, JwtTokenClaims(jwtclaimsSaksbehandler)),
             mapOf(azureGroup to groupId)
         )
     }
 
-    private fun setNewKontekstWithMockForSaksbehandlerRoller(saksbehandlerRoller: SaksbehandlerMedRoller) {
+    private fun setNewKontekstWithMockUser(userMock: User) {
         Kontekst.set(
             Context(
-                saksbehandler,
+                userMock,
                 object : DatabaseKontekst {
                     override fun activeTx(): Connection {
                         throw IllegalArgumentException()
@@ -120,36 +123,22 @@ internal class OppgaveServiceNyTest {
                 }
             )
         )
-        every { saksbehandler.saksbehandlerMedRoller } returns saksbehandlerRoller
+    }
+
+    private fun mockForSaksbehandlerMedRoller(
+        userSaksbehandler: SaksbehandlerMedEnheterOgRoller,
+        saksbehandlerMedRoller: SaksbehandlerMedRoller
+    ) {
+        every { userSaksbehandler.saksbehandlerMedRoller } returns saksbehandlerMedRoller
     }
 
     @BeforeEach
     fun beforeEach() {
-        val jwtclaimsSaksbehandler = JWTClaimsSet.Builder().claim("groups", saksbehandlerRolleDev).build()
-        val saksbehandlerRoller =
-            SaksbehandlerMedRoller(
-                Saksbehandler("", "ident", JwtTokenClaims(jwtclaimsSaksbehandler)),
-                mapOf(AzureGroup.SAKSBEHANDLER to saksbehandlerRolleDev)
-            )
+        val saksbehandlerRoller = generateSaksbehandlerMedRoller(AzureGroup.SAKSBEHANDLER)
         every { saksbehandler.enheter() } returns Enheter.nasjonalTilgangEnheter()
 
-        Kontekst.set(
-            Context(
-                saksbehandler,
-                object : DatabaseKontekst {
-                    override fun activeTx(): Connection {
-                        throw IllegalArgumentException()
-                    }
+        setNewKontekstWithMockUser(saksbehandler)
 
-                    override fun <T> inTransaction(
-                        gjenbruk: Boolean,
-                        block: () -> T
-                    ): T {
-                        return block()
-                    }
-                }
-            )
-        )
         every { saksbehandler.saksbehandlerMedRoller } returns saksbehandlerRoller
     }
 
@@ -184,7 +173,74 @@ internal class OppgaveServiceNyTest {
     }
 
     @Test
-    fun `skal ikke kunne tildele oppgave med saksbehandler`() {
+    fun `skal tildele attesteringsoppgave hvis systembruker og fatte`() {
+        val systemBruker = mockk<SystemUser>()
+        setNewKontekstWithMockUser(systemBruker)
+
+        val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val referanse = "referanse"
+        val nyOppgave =
+            oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
+                referanse,
+                opprettetSak.id,
+                OppgaveKilde.BEHANDLING,
+                OppgaveType.FOERSTEGANGSBEHANDLING,
+                null
+            )
+
+        val systembruker = "systembruker"
+        val systembrukerTokenInfo = BrukerTokenInfo.of("a", systembruker, "c", "c", null)
+        oppgaveServiceNy.tildelSaksbehandler(nyOppgave.id, systembruker)
+
+        val vedtakOppgaveDTO =
+            oppgaveServiceNy.ferdigstillOppgaveUnderbehandlingOgLagNyMedType(
+                VedtakOppgaveDTO(opprettetSak.id, referanse),
+                OppgaveType.ATTESTERING,
+                null,
+                systembrukerTokenInfo
+            )
+
+        oppgaveServiceNy.tildelSaksbehandler(vedtakOppgaveDTO.id, systembruker)
+        val systembrukerOppgave = oppgaveServiceNy.hentOppgave(vedtakOppgaveDTO.id)
+        Assertions.assertEquals(systembruker, systembrukerOppgave?.saksbehandler!!)
+    }
+
+    @Test
+    fun `skal tildele attesteringsoppgave hvis rolle attestering finnes`() {
+        val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val referanse = "referanse"
+        val nyOppgave =
+            oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
+                referanse,
+                opprettetSak.id,
+                OppgaveKilde.BEHANDLING,
+                OppgaveType.FOERSTEGANGSBEHANDLING,
+                null
+            )
+
+        val vanligSaksbehandler = saksbehandler.saksbehandlerMedRoller.saksbehandler
+        oppgaveServiceNy.tildelSaksbehandler(nyOppgave.id, vanligSaksbehandler.ident)
+
+        val vedtakOppgaveDTO =
+            oppgaveServiceNy.ferdigstillOppgaveUnderbehandlingOgLagNyMedType(
+                VedtakOppgaveDTO(opprettetSak.id, referanse),
+                OppgaveType.ATTESTERING,
+                null,
+                vanligSaksbehandler
+            )
+
+        val attestantSaksbehandler = mockk<SaksbehandlerMedEnheterOgRoller>()
+        setNewKontekstWithMockUser(attestantSaksbehandler)
+        val attestantmedRoller = generateSaksbehandlerMedRoller(AzureGroup.ATTESTANT)
+        mockForSaksbehandlerMedRoller(attestantSaksbehandler, attestantmedRoller)
+
+        oppgaveServiceNy.tildelSaksbehandler(vedtakOppgaveDTO.id, attestantmedRoller.saksbehandler.ident)
+        val attestantTildeltOppgave = oppgaveServiceNy.hentOppgave(vedtakOppgaveDTO.id)
+        Assertions.assertEquals(attestantmedRoller.saksbehandler.ident, attestantTildeltOppgave?.saksbehandler!!)
+    }
+
+    @Test
+    fun `skal ikke kunne tildele oppgave med saksbehandler felt satt`() {
         val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         val nyOppgave =
             oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
@@ -297,7 +353,10 @@ internal class OppgaveServiceNyTest {
                 oppgaveType = OppgaveType.ATTESTERING,
                 merknad = null
             )
-        setNewKontekstWithMockForSaksbehandlerRoller(generateSaksbehandlerMedRoller(AzureGroup.ATTESTANT))
+
+        val attestantmock = mockk<SaksbehandlerMedEnheterOgRoller>()
+        setNewKontekstWithMockUser(attestantmock)
+        mockForSaksbehandlerMedRoller(attestantmock, generateSaksbehandlerMedRoller(AzureGroup.ATTESTANT))
         oppgaveServiceNy.tildelSaksbehandler(oppgaveUnderBehandlingAnnenBehandling.id, saksbehandler.ident)
         oppgaveServiceNy.avbrytAapneOppgaverForBehandling(behandlingId)
 
@@ -652,13 +711,10 @@ internal class OppgaveServiceNyTest {
         )
 
         saktilgangDao.oppdaterAdresseBeskyttelse(adressebeskyttetSak.id, AdressebeskyttelseGradering.STRENGT_FORTROLIG)
-        val jwtclaims = JWTClaimsSet.Builder().claim("groups", saksbehandlerRolleDev).build()
-        val saksbehandlerMedRoller =
-            SaksbehandlerMedRoller(
-                Saksbehandler("", "ident", JwtTokenClaims(jwtclaims)),
-                mapOf(AzureGroup.SAKSBEHANDLER to saksbehandlerRolleDev)
-            )
-        val oppgaver = oppgaveServiceNy.finnOppgaverForBruker(saksbehandlerMedRoller)
+
+        val saksbehandlerRoller = generateSaksbehandlerMedRoller(AzureGroup.SAKSBEHANDLER)
+
+        val oppgaver = oppgaveServiceNy.finnOppgaverForBruker(saksbehandlerRoller)
         Assertions.assertEquals(1, oppgaver.size)
         val oppgaveUtenbeskyttelse = oppgaver[0]
         Assertions.assertEquals(nyOppgave.id, oppgaveUtenbeskyttelse.id)
@@ -676,12 +732,7 @@ internal class OppgaveServiceNyTest {
             merknad = null
         )
 
-        val jwtclaims = JWTClaimsSet.Builder().claim("groups", saksbehandlerRolleDev).build()
-        val saksbehandlerMedRoller =
-            SaksbehandlerMedRoller(
-                Saksbehandler("", "ident", JwtTokenClaims(jwtclaims)),
-                mapOf(AzureGroup.SAKSBEHANDLER to saksbehandlerRolleDev)
-            )
+        val saksbehandlerMedRoller = generateSaksbehandlerMedRoller(AzureGroup.SAKSBEHANDLER)
         val oppgaverUtenEndring = oppgaveServiceNy.finnOppgaverForBruker(saksbehandlerMedRoller)
         Assertions.assertEquals(1, oppgaverUtenEndring.size)
         Assertions.assertEquals(Enheter.AALESUND.enhetNr, oppgaverUtenEndring[0].enhet)
@@ -714,13 +765,8 @@ internal class OppgaveServiceNyTest {
             )
 
         saktilgangDao.oppdaterAdresseBeskyttelse(adressebeskyttetSak.id, AdressebeskyttelseGradering.STRENGT_FORTROLIG)
-        val jwtclaims = JWTClaimsSet.Builder().claim("groups", strengtfortroligDev).build()
-        val saksbehandlerMedRoller =
-            SaksbehandlerMedRoller(
-                Saksbehandler("", "ident", JwtTokenClaims(jwtclaims)),
-                mapOf(AzureGroup.STRENGT_FORTROLIG to strengtfortroligDev)
-            )
-        val oppgaver = oppgaveServiceNy.finnOppgaverForBruker(saksbehandlerMedRoller)
+        val saksbehandlerMedRollerStrengtFortrolig = generateSaksbehandlerMedRoller(AzureGroup.STRENGT_FORTROLIG)
+        val oppgaver = oppgaveServiceNy.finnOppgaverForBruker(saksbehandlerMedRollerStrengtFortrolig)
         Assertions.assertEquals(1, oppgaver.size)
         val strengtFortroligOppgave = oppgaver[0]
         Assertions.assertEquals(adressebeskyttetOppgave.id, strengtFortroligOppgave.id)
@@ -748,13 +794,8 @@ internal class OppgaveServiceNyTest {
                 null
             )
 
-        val jwtclaims = JWTClaimsSet.Builder().claim("groups", attestantRolleDev).build()
-        val saksbehandlerMedRoller =
-            SaksbehandlerMedRoller(
-                Saksbehandler("", "ident", JwtTokenClaims(jwtclaims)),
-                mapOf(AzureGroup.ATTESTANT to attestantRolleDev)
-            )
-        val oppgaver = oppgaveServiceNy.finnOppgaverForBruker(saksbehandlerMedRoller)
+        val saksbehandlerMedRollerAttestant = generateSaksbehandlerMedRoller(AzureGroup.ATTESTANT)
+        val oppgaver = oppgaveServiceNy.finnOppgaverForBruker(saksbehandlerMedRollerAttestant)
         Assertions.assertEquals(1, oppgaver.size)
         val strengtFortroligOppgave = oppgaver[0]
         Assertions.assertEquals(attestantOppgave.id, strengtFortroligOppgave.id)
@@ -899,17 +940,12 @@ internal class OppgaveServiceNyTest {
 
         oppgaveServiceNy.tildelSaksbehandler(oppgavesteinskjer.id, saksbehandlerid)
 
-        val jwtclaims = JWTClaimsSet.Builder().claim("groups", saksbehandlerRolleDev).build()
-        val saksbehandlerMedRoller =
-            SaksbehandlerMedRoller(
-                Saksbehandler("", "ident", JwtTokenClaims(jwtclaims)),
-                mapOf(AzureGroup.SAKSBEHANDLER to saksbehandlerRolleDev)
-            )
+        val saksbehandlerMedRoller = generateSaksbehandlerMedRoller(AzureGroup.SAKSBEHANDLER)
         val finnOppgaverForBruker = oppgaveServiceNy.finnOppgaverForBruker(saksbehandlerMedRoller)
 
         Assertions.assertEquals(1, finnOppgaverForBruker.size)
-        val AalesundfunnetOppgave = finnOppgaverForBruker[0]
-        Assertions.assertEquals(Enheter.AALESUND.enhetNr, AalesundfunnetOppgave.enhet)
+        val aalesundfunnetOppgave = finnOppgaverForBruker[0]
+        Assertions.assertEquals(Enheter.AALESUND.enhetNr, aalesundfunnetOppgave.enhet)
     }
 
     @Test
@@ -981,7 +1017,9 @@ internal class OppgaveServiceNyTest {
                 null
             )
 
-        setNewKontekstWithMockForSaksbehandlerRoller(generateSaksbehandlerMedRoller(AzureGroup.ATTESTANT))
+        val attestantmock = mockk<SaksbehandlerMedEnheterOgRoller>()
+        setNewKontekstWithMockUser(attestantmock)
+        mockForSaksbehandlerMedRoller(attestantmock, generateSaksbehandlerMedRoller(AzureGroup.ATTESTANT))
         oppgaveServiceNy.tildelSaksbehandler(attestertBehandlingsoppgave.id, "attestant")
 
         val saksbehandlerHentet =

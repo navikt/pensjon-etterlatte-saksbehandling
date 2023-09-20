@@ -3,6 +3,7 @@ package no.nav.etterlatte.behandling
 import io.ktor.server.plugins.NotFoundException
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.generellbehandling.GenerellBehandlingService
+import no.nav.etterlatte.behandling.generellbehandling.GenerellBehandlingToggle
 import no.nav.etterlatte.behandling.hendelse.HendelseType
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
@@ -198,32 +199,34 @@ class BehandlingStatusServiceImpl(
     }
 
     private fun haandterUtland(behandling: Behandling) {
-        if (behandling.type == BehandlingType.FØRSTEGANGSBEHANDLING) {
-            if (behandling.utenlandstilsnitt?.type == UtenlandstilsnittType.UTLANDSTILSNITT) {
-                val oppgaveUtland =
-                    oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
-                        behandling.id.toString(),
-                        behandling.sak.id,
-                        OppgaveKilde.BEHANDLING,
-                        OppgaveType.UTLAND,
-                        null,
-                    )
-                val saksbehandlerFoerstegangsbehandling =
-                    oppgaveServiceNy.hentSaksbehandlerFraFoerstegangsbehandling(behandlingsId = behandling.id)
-                if (saksbehandlerFoerstegangsbehandling != null) {
-                    oppgaveServiceNy.tildelSaksbehandler(oppgaveUtland.id, saksbehandlerFoerstegangsbehandling)
-                    generellBehandlingService.opprettBehandling(
-                        GenerellBehandling.opprettFraType(
-                            GenerellBehandling.GenerellBehandlingType.UTLAND,
+        if (featureToggleService.isEnabled(GenerellBehandlingToggle.KanBrukeGenerellBehandlingToggle, false)) {
+            if (behandling.type == BehandlingType.FØRSTEGANGSBEHANDLING) {
+                if (behandling.utenlandstilsnitt?.type == UtenlandstilsnittType.UTLANDSTILSNITT) {
+                    val oppgaveUtland =
+                        oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
+                            behandling.id.toString(),
                             behandling.sak.id,
-                        ),
-                    )
-                    logger.info(
-                        "Opprettet generell behandling for utland for sak: ${behandling.sak.id} " +
-                            "og behandling: ${behandling.id}. Gjelder oppgave: ${oppgaveUtland.id}",
-                    )
-                } else {
-                    logger.error("Fant ingen saksbehandler for behandling oppgave fatting, id: ${behandling.id}")
+                            OppgaveKilde.BEHANDLING,
+                            OppgaveType.UTLAND,
+                            null,
+                        )
+                    val saksbehandlerFoerstegangsbehandling =
+                        oppgaveServiceNy.hentSaksbehandlerFraFoerstegangsbehandling(behandlingsId = behandling.id)
+                    if (saksbehandlerFoerstegangsbehandling != null) {
+                        oppgaveServiceNy.tildelSaksbehandler(oppgaveUtland.id, saksbehandlerFoerstegangsbehandling)
+                        generellBehandlingService.opprettBehandling(
+                            GenerellBehandling.opprettFraType(
+                                GenerellBehandling.GenerellBehandlingType.UTLAND,
+                                behandling.sak.id,
+                            ),
+                        )
+                        logger.info(
+                            "Opprettet generell behandling for utland for sak: ${behandling.sak.id} " +
+                                "og behandling: ${behandling.id}. Gjelder oppgave: ${oppgaveUtland.id}",
+                        )
+                    } else {
+                        logger.error("Fant ingen saksbehandler for behandling oppgave fatting, id: ${behandling.id}")
+                    }
                 }
             }
         }

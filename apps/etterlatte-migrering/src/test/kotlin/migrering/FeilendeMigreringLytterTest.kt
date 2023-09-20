@@ -34,7 +34,7 @@ import org.testcontainers.junit.jupiter.Container
 import rapidsandrivers.HENDELSE_DATA_KEY
 import java.math.BigDecimal
 import java.time.YearMonth
-import java.util.*
+import java.util.UUID
 import javax.sql.DataSource
 
 class FeilendeMigreringLytterTest {
@@ -61,7 +61,7 @@ class FeilendeMigreringLytterTest {
                     every { it.hentPesysId(behandlingId) } returns
                         Pesyskopling(
                             behandlingId = behandlingId,
-                            pesysId = pesysid
+                            pesysId = pesysid,
                         )
                 }
             val pesyssak =
@@ -79,10 +79,10 @@ class FeilendeMigreringLytterTest {
                             netto = BigDecimal.ZERO,
                             anvendtTrygdetid = BigDecimal.ZERO,
                             datoVirkFom = Tidspunkt.now(),
-                            g = BigDecimal.ZERO
+                            g = BigDecimal.ZERO,
                         ),
                     trygdetid = Trygdetid(perioder = listOf()),
-                    flyktningStatus = false
+                    flyktningStatus = false,
                 )
             repository.lagrePesyssak(pesyssak)
 
@@ -97,9 +97,9 @@ class FeilendeMigreringLytterTest {
                             PESYS_ID to pesysid,
                             HENDELSE_DATA_KEY to pesyssak.tilMigreringsrequest(),
                             FEILMELDING to IllegalStateException(),
-                            FEILENDE_STEG to Migreringshendelser.TRYGDETID
-                        )
-                    ).toJson()
+                            FEILENDE_STEG to Migreringshendelser.TRYGDETID,
+                        ),
+                    ).toJson(),
                 )
             Assertions.assertEquals(Migreringsstatus.MIGRERING_FEILA, repository.hentStatus(pesysid.id))
         }

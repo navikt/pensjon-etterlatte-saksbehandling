@@ -44,7 +44,7 @@ internal class FeilendeMigreringLytter(rapidsConnection: RapidsConnection, priva
 
     override fun haandterPakke(
         packet: JsonMessage,
-        context: MessageContext
+        context: MessageContext,
     ) {
         logger.warn("Migrering av pesyssak ${packet.pesysId} feila")
 

@@ -9,7 +9,7 @@ import no.nav.etterlatte.libs.database.opprett
 import no.nav.etterlatte.libs.database.transaction
 import no.nav.etterlatte.rapidsandrivers.migrering.MigreringRequest
 import no.nav.etterlatte.rapidsandrivers.migrering.PesysId
-import java.util.*
+import java.util.UUID
 import javax.sql.DataSource
 
 data class Pesyskopling(
@@ -92,7 +92,7 @@ internal class PesysRepository(private val dataSource: DataSource) : Transaction
         request: MigreringRequest,
         tx: TransactionalSession? = null,
         feilendeSteg: String,
-        feil: String
+        feil: String,
     ) = tx.session {
         opprett(
             """
@@ -115,9 +115,9 @@ internal class PesysRepository(private val dataSource: DataSource) : Transaction
                 Feilkjoering.PESYS_ID to request.pesysId.id,
                 Feilkjoering.REQUEST to request.toJson(),
                 Feilkjoering.FEILMELDING to feil,
-                Feilkjoering.FEILENDE_STEG to feilendeSteg
+                Feilkjoering.FEILENDE_STEG to feilendeSteg,
             ),
-            "Lagra feilkjøringsdata for $request.pesysId.id"
+            "Lagra feilkjøringsdata for $request.pesysId.id",
         )
     }
 }

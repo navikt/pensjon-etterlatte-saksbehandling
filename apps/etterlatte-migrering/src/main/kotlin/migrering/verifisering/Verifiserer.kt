@@ -20,12 +20,12 @@ internal class Verifiserer(private val pdlKlient: PDLKlient, private val reposit
         val feil = sjekkAtPersonerFinsIPDL(request)
         if (feil.isNotEmpty()) {
             logger.warn(
-                "Sak ${request.pesysId} har ufullstendige data i PDL, kan ikke migrere. Se sikkerlogg for detaljer"
+                "Sak ${request.pesysId} har ufullstendige data i PDL, kan ikke migrere. Se sikkerlogg for detaljer",
             )
             repository.lagreFeilkjoering(
                 request,
                 feil = feil.map { it.message }.toJson(),
-                feilendeSteg = Migreringshendelser.VERIFISER
+                feilendeSteg = Migreringshendelser.VERIFISER,
             )
             repository.oppdaterStatus(request.pesysId, Migreringsstatus.VERIFISERING_FEILA)
             throw samleExceptions(feil)
@@ -45,7 +45,7 @@ internal class Verifiserer(private val pdlKlient: PDLKlient, private val reposit
 
     private fun hentPerson(
         rolle: PersonRolle,
-        folkeregisteridentifikator: Folkeregisteridentifikator
+        folkeregisteridentifikator: Folkeregisteridentifikator,
     ): Result<PersonDTO> =
         try {
             Result.success(pdlKlient.hentPerson(rolle, folkeregisteridentifikator))

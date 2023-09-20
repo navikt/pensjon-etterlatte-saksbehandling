@@ -5,10 +5,10 @@ import { TilbakekrevingNavLenke } from '~components/tilbakekreving/stegmeny/Tilb
 export function TilbakekrevingStegmeny() {
   return (
     <StegMenyWrapper>
-      <TilbakekrevingNavLenke path="oversikt" description="Oversikt" enabled={true} />
-      <TilbakekrevingNavLenke path="vurdering" description="Vurdering" enabled={true} />
-      <TilbakekrevingNavLenke path="vedtak" description="Vedtak" enabled={true} />
-      <TilbakekrevingNavLenke path="brev" description="Brev" enabled={true} />
+      <TilbakekrevingNavLenke path="oversikt" description="Oversikt" enabled separator />
+      <TilbakekrevingNavLenke path="vurdering" description="Vurdering" enabled separator />
+      <TilbakekrevingNavLenke path="vedtak" description="Vedtak" enabled separator />
+      <TilbakekrevingNavLenke path="brev" description="Brev" enabled separator={false} />
     </StegMenyWrapper>
   )
 }

@@ -7,13 +7,20 @@ export const TILBAKEKREVINGSTEG = ['oversikt', 'vurdering', 'vedtak', 'brev'] as
 
 export type Tilbakekrevingsteg = (typeof TILBAKEKREVINGSTEG)[number]
 
-export function TilbakekrevingNavLenke(props: { path: Tilbakekrevingsteg; description: string; enabled: boolean }) {
-  const { path, enabled, description } = props
+export interface TilbakekrevingNavLenkeProps {
+  path: Tilbakekrevingsteg
+  description: string
+  enabled: boolean
+  separator: boolean
+}
+
+export function TilbakekrevingNavLenke(props: TilbakekrevingNavLenkeProps) {
+  const { path, description, enabled, separator } = props
 
   return (
     <li className={classNames({ disabled: !enabled })}>
       <NavLink to={path}>{description}</NavLink>
-      <Separator aria-hidden="true" />
+      {separator && <Separator aria-hidden="true" />}
     </li>
   )
 }

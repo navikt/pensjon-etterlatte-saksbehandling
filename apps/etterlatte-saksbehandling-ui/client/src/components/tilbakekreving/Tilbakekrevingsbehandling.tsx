@@ -1,4 +1,4 @@
-import { Navigate, Route, Routes, useMatch } from 'react-router-dom'
+import { Navigate, Route, Routes, useParams } from 'react-router-dom'
 import React, { useEffect } from 'react'
 import { useAppDispatch } from '~store/Store'
 import { isFailure, isPending, useApiCall } from '~shared/hooks/useApiCall'
@@ -19,25 +19,23 @@ import { TilbakekrevingBrev } from '~components/tilbakekreving/brev/Tilbakekrevi
 
 export function Tilbakekrevingsbehandling() {
   const tilbakekreving = useTilbakekreving()
-  const match = useMatch('/tilbakekreving/:tilbakekrevingId/*')
   const dispatch = useAppDispatch()
+  const { tilbakekrevingId } = useParams()
   const [fetchTilbakekrevingStatus, fetchTilbakekreving] = useApiCall(hentTilbakekreving)
   const [personStatus, hentPerson] = useApiCall(getPerson)
-
-  const tilbakekrevingIdFraUrl = match?.params.tilbakekrevingId
-  const viHarLastetRiktigTilbakekreving = tilbakekrevingIdFraUrl === tilbakekreving?.id
+  const viHarLastetRiktigTilbakekreving = tilbakekrevingId === tilbakekreving?.id
 
   useEffect(() => {
-    if (!tilbakekrevingIdFraUrl) return
+    if (!tilbakekrevingId) return
 
     fetchTilbakekreving(
-      tilbakekrevingIdFraUrl,
+      tilbakekrevingId,
       (hentetTilbakekreving) => {
         dispatch(addTilbakekreving(hentetTilbakekreving))
       },
       () => dispatch(resetTilbakekreving())
     )
-  }, [tilbakekrevingIdFraUrl])
+  }, [tilbakekrevingId])
 
   useEffect(() => {
     if (tilbakekreving?.sak.ident) {
@@ -50,7 +48,7 @@ export function Tilbakekrevingsbehandling() {
       <StatusBar result={personStatus} />
       <Spinner visible={isPending(fetchTilbakekrevingStatus)} label="Henter tilbakekrevingsbehandling" />
 
-      {tilbakekreving !== null && viHarLastetRiktigTilbakekreving && (
+      {!!tilbakekreving && viHarLastetRiktigTilbakekreving && (
         <GridContainer>
           <MainContent>
             <TilbakekrevingStegmeny />

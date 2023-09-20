@@ -1,5 +1,6 @@
 package no.nav.etterlatte
 
+import migrering.FeilendeMigreringLytter
 import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstartOgAvslutning
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.migrering.ApplicationContext
@@ -26,6 +27,7 @@ internal class Server(private val context: ApplicationContext) {
                 MigrerSpesifikkSak(rapidsConnection, penklient, pesysRepository, featureToggleService, verifiserer)
                 LagreKopling(rapidsConnection, pesysRepository)
                 LyttPaaIverksattVedtak(rapidsConnection, pesysRepository, penklient)
+                FeilendeMigreringLytter(rapidsConnection, pesysRepository)
             }.start()
         }
 }

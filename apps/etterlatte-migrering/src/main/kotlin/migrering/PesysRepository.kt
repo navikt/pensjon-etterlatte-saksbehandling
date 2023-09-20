@@ -7,7 +7,6 @@ import no.nav.etterlatte.libs.database.hent
 import no.nav.etterlatte.libs.database.oppdater
 import no.nav.etterlatte.libs.database.opprett
 import no.nav.etterlatte.libs.database.transaction
-import no.nav.etterlatte.migrering.verifisering.Verifiseringsfeil
 import no.nav.etterlatte.rapidsandrivers.migrering.MigreringRequest
 import no.nav.etterlatte.rapidsandrivers.migrering.PesysId
 import java.util.*
@@ -91,25 +90,32 @@ internal class PesysRepository(private val dataSource: DataSource) : Transaction
 
     fun lagreFeilkjoering(
         request: MigreringRequest,
-        feil: List<Verifiseringsfeil>,
-        tx: TransactionalSession? = null
+        tx: TransactionalSession? = null,
+        feilendeSteg: String,
+        feil: String
     ) = tx.session {
         opprett(
             """
                 INSERT INTO feilkjoering(
-                    ${Feilkjoering.ID}, ${Feilkjoering.PESYS_ID}, ${Feilkjoering.REQUEST}, ${Feilkjoering.FEILMELDING}
+                    ${Feilkjoering.ID}, 
+                    ${Feilkjoering.PESYS_ID}, 
+                    ${Feilkjoering.REQUEST}, 
+                    ${Feilkjoering.FEILMELDING},
+                    ${Feilkjoering.FEILENDE_STEG}
                 )
                 VALUES(
                     :${Feilkjoering.ID},
                     :${Feilkjoering.PESYS_ID},
                     :${Feilkjoering.REQUEST}::jsonb,
-                    :${Feilkjoering.FEILMELDING}::jsonb
+                    :${Feilkjoering.FEILMELDING}::jsonb,
+                    :${Feilkjoering.FEILENDE_STEG}
                 )""",
             mapOf(
                 Feilkjoering.ID to UUID.randomUUID(),
                 Feilkjoering.PESYS_ID to request.pesysId.id,
                 Feilkjoering.REQUEST to request.toJson(),
-                Feilkjoering.FEILMELDING to feil.map { it.message }.toJson()
+                Feilkjoering.FEILMELDING to feil,
+                Feilkjoering.FEILENDE_STEG to feilendeSteg
             ),
             "Lagra feilkjøringsdata for $request.pesysId.id"
         )
@@ -121,4 +127,5 @@ private object Feilkjoering {
     const val PESYS_ID = "pesys_id"
     const val REQUEST = "request"
     const val FEILMELDING = "feilmelding"
+    const val FEILENDE_STEG = "feilendeSteg"
 }

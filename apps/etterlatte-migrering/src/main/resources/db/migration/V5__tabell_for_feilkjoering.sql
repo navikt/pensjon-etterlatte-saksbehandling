@@ -6,6 +6,7 @@ CREATE TABLE feilkjoering
             REFERENCES pesyssak (id),
     request JSONB,
     feilmelding JSONB,
+    feilendeSteg TEXT,
     tidspunkt TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY(id)
 );

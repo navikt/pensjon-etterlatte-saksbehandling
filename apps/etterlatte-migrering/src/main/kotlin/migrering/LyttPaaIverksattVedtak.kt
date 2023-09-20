@@ -58,7 +58,7 @@ internal class LyttPaaIverksattVedtak(
 
             else -> {
                 logger.warn("Fikk respons med status ${respons.status} for ${respons.behandlingId}")
-                pesysRepository.oppdaterStatus(behandling.pesysId, Migreringsstatus.FEILA)
+                pesysRepository.oppdaterStatus(behandling.pesysId, Migreringsstatus.UTBETALING_FEILA)
             }
         }
     }

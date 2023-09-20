@@ -5,5 +5,6 @@ enum class Migreringsstatus {
     VERIFISERING_FEILA,
     UNDER_MIGRERING,
     FERDIG,
-    FEILA,
+    MIGRERING_FEILA,
+    UTBETALING_FEILA,
 }

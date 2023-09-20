@@ -3,6 +3,7 @@ package no.nav.etterlatte.migrering
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
+import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.rapidsandrivers.BEHOV_NAME_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
@@ -17,6 +18,7 @@ import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser.MIGRER_SPESIFIKK_SAK
 import no.nav.etterlatte.rapidsandrivers.migrering.PesysId
 import no.nav.etterlatte.rapidsandrivers.migrering.hendelseData
+import no.nav.etterlatte.rapidsandrivers.migrering.kilde
 import no.nav.etterlatte.rapidsandrivers.migrering.pesysId
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -86,6 +88,7 @@ internal class MigrerSpesifikkSak(
         packet[FNR_KEY] = request.soeker.value
         packet[BEHOV_NAME_KEY] = Opplysningstype.AVDOED_PDL_V1
         packet.pesysId = PesysId(sak.id)
+        packet.kilde = Vedtaksloesning.PESYS
         context.publish(packet.toJson())
         logger.info(
             "Migrering starta for pesys-sak ${sak.id} og melding om behandling ble sendt.",

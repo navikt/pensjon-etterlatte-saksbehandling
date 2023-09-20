@@ -144,7 +144,7 @@ export const TrygdeAvtale = ({ redigerbar }: Props) => {
         <>
           <TrygdeavtaleVisning avtaler={avtalerListe} kriterier={avtaleKriterierListe} trygdeavtale={trygdeavtale} />
           {redigerbar && (
-            <Button size="small" onClick={rediger}>
+            <Button size="small" onClick={rediger} type="button">
               Rediger
             </Button>
           )}
@@ -206,11 +206,11 @@ export const TrygdeAvtale = ({ redigerbar }: Props) => {
               </Rows>
               <Rows>
                 <FlexRow $spacing>
-                  <Button size="small" loading={isPending(lagreTrygdeavtaleRequest)} onClick={lagre}>
+                  <Button size="small" loading={isPending(lagreTrygdeavtaleRequest)} type="button" onClick={lagre}>
                     Lagre
                   </Button>
                   {harLagretVerdi && (
-                    <Button size="small" onClick={avbryt}>
+                    <Button size="small" onClick={avbryt} type="button">
                       Avbryt
                     </Button>
                   )}

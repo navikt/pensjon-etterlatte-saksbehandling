@@ -161,7 +161,7 @@ export function KlageVurdering() {
         ) : null}
 
         <FlexRow justify={'center'}>
-          <Button variant="secondary" onClick={() => navigate(`/klage/${klage?.id}/formkrav`)}>
+          <Button type="button" variant="secondary" onClick={() => navigate(`/klage/${klage?.id}/formkrav`)}>
             Gå tilbake
           </Button>
           <Button loading={isPending(lagreUtfallStatus)} type="submit" variant="primary">

@@ -2,7 +2,11 @@ package no.nav.etterlatte.oppgaveny
 
 import io.ktor.server.plugins.BadRequestException
 import io.ktor.server.plugins.NotFoundException
+import no.nav.etterlatte.ExternalUser
 import no.nav.etterlatte.Kontekst
+import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
+import no.nav.etterlatte.Self
+import no.nav.etterlatte.SystemUser
 import no.nav.etterlatte.User
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
@@ -24,6 +28,8 @@ import no.nav.etterlatte.token.BrukerTokenInfo
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.util.*
+
+class BrukerManglerAttestantRolleException(msg: String) : Exception(msg)
 
 class OppgaveServiceNy(
     private val oppgaveDaoNy: OppgaveDaoMedEndringssporing,
@@ -50,13 +56,14 @@ class OppgaveServiceNy(
     private fun List<OppgaveNy>.filterForEnheter(bruker: User) =
         this.filterOppgaverForEnheter(featureToggleService, bruker)
 
-    private fun aktuelleOppgavetyperForRolleTilSaksbehandler(roller: List<Rolle>) = roller.flatMap {
-        when (it) {
-            Rolle.SAKSBEHANDLER -> OppgaveType.values().toList() - OppgaveType.ATTESTERING
-            Rolle.ATTESTANT -> listOf(OppgaveType.ATTESTERING)
-            Rolle.STRENGT_FORTROLIG -> OppgaveType.values().toList()
-        }.distinct()
-    }
+    private fun aktuelleOppgavetyperForRolleTilSaksbehandler(roller: List<Rolle>) =
+        roller.flatMap {
+            when (it) {
+                Rolle.SAKSBEHANDLER -> OppgaveType.values().toList() - OppgaveType.ATTESTERING
+                Rolle.ATTESTANT -> listOf(OppgaveType.ATTESTERING)
+                Rolle.STRENGT_FORTROLIG -> OppgaveType.values().toList()
+            }.distinct()
+        }
 
     private fun finnAktuelleRoller(bruker: SaksbehandlerMedRoller): List<Rolle> =
         listOfNotNull(
@@ -65,12 +72,40 @@ class OppgaveServiceNy(
             Rolle.STRENGT_FORTROLIG.takeIf { bruker.harRolleStrengtFortrolig() }
         )
 
-    fun tildelSaksbehandler(oppgaveId: UUID, saksbehandler: String) {
+    private fun sjekkOmkanTildeleAttestantOppgave(): Boolean {
+        val appUser = Kontekst.get().AppUser
+        return when (appUser) {
+            is SystemUser -> true
+            is Self -> true
+            is SaksbehandlerMedEnheterOgRoller -> {
+                val saksbehandlerMedRoller = appUser.saksbehandlerMedRoller
+                if (saksbehandlerMedRoller.harRolleAttestant()) {
+                    return true
+                } else {
+                    throw BrukerManglerAttestantRolleException(
+                        "Bruker ${saksbehandlerMedRoller.saksbehandler.ident} " +
+                            "mangler attestant rolle for tildeling"
+                    )
+                }
+            }
+            is ExternalUser -> throw IllegalArgumentException("ExternalUser er ikke støttet for å tildele oppgave")
+            else -> throw IllegalArgumentException(
+                "Ukjent brukertype ${appUser.name()} støtter ikke tildeling av oppgave"
+            )
+        }
+    }
+
+    fun tildelSaksbehandler(
+        oppgaveId: UUID,
+        saksbehandler: String
+    ) {
         inTransaction(gjenbruk = true) {
-            val hentetOppgave = oppgaveDaoNy.hentOppgave(oppgaveId)
-                ?: throw NotFoundException("Oppgaven finnes ikke, id: $oppgaveId")
+            val hentetOppgave =
+                oppgaveDaoNy.hentOppgave(oppgaveId)
+                    ?: throw NotFoundException("Oppgaven finnes ikke, id: $oppgaveId")
 
             sikreAtOppgaveIkkeErAvsluttet(hentetOppgave)
+            hentetOppgave.erAttestering() && sjekkOmkanTildeleAttestantOppgave()
             if (hentetOppgave.saksbehandler.isNullOrEmpty()) {
                 oppgaveDaoNy.settNySaksbehandler(oppgaveId, saksbehandler)
             } else {
@@ -81,7 +116,10 @@ class OppgaveServiceNy(
         }
     }
 
-    fun byttSaksbehandler(oppgaveId: UUID, saksbehandler: String) {
+    fun byttSaksbehandler(
+        oppgaveId: UUID,
+        saksbehandler: String
+    ) {
         val hentetOppgave = oppgaveDaoNy.hentOppgave(oppgaveId)
         if (hentetOppgave != null) {
             sikreAtOppgaveIkkeErAvsluttet(hentetOppgave)
@@ -93,8 +131,9 @@ class OppgaveServiceNy(
 
     fun fjernSaksbehandler(oppgaveId: UUID) {
         inTransaction {
-            val hentetOppgave = oppgaveDaoNy.hentOppgave(oppgaveId)
-                ?: throw NotFoundException("Oppgaven finnes ikke, id: $oppgaveId")
+            val hentetOppgave =
+                oppgaveDaoNy.hentOppgave(oppgaveId)
+                    ?: throw NotFoundException("Oppgaven finnes ikke, id: $oppgaveId")
 
             sikreAtOppgaveIkkeErAvsluttet(hentetOppgave)
             if (hentetOppgave.saksbehandler != null) {
@@ -116,13 +155,17 @@ class OppgaveServiceNy(
         }
     }
 
-    fun redigerFrist(oppgaveId: UUID, frist: Tidspunkt) {
+    fun redigerFrist(
+        oppgaveId: UUID,
+        frist: Tidspunkt
+    ) {
         inTransaction {
             if (frist.isBefore(Tidspunkt.now())) {
                 throw BadRequestException("Tidspunkt tilbake i tid id: $oppgaveId")
             }
-            val hentetOppgave = oppgaveDaoNy.hentOppgave(oppgaveId)
-                ?: throw NotFoundException("Oppgaven finnes ikke, id: $oppgaveId")
+            val hentetOppgave =
+                oppgaveDaoNy.hentOppgave(oppgaveId)
+                    ?: throw NotFoundException("Oppgaven finnes ikke, id: $oppgaveId")
             sikreAtOppgaveIkkeErAvsluttet(hentetOppgave)
             if (hentetOppgave.saksbehandler != null) {
                 oppgaveDaoNy.redigerFrist(oppgaveId, frist)
@@ -205,8 +248,9 @@ class OppgaveServiceNy(
         saksbehandler: BrukerTokenInfo
     ): OppgaveNy {
         try {
-            val oppgaveUnderbehandling = oppgaveDaoNy.hentOppgaverForBehandling(behandlingEllerHendelseId)
-                .single { it.status == Status.UNDER_BEHANDLING }
+            val oppgaveUnderbehandling =
+                oppgaveDaoNy.hentOppgaverForBehandling(behandlingEllerHendelseId)
+                    .single { it.status == Status.UNDER_BEHANDLING }
             sikreAtSaksbehandlerSomLukkerOppgaveEierOppgaven(oppgaveUnderbehandling, saksbehandler)
             oppgaveDaoNy.endreStatusPaaOppgave(oppgaveUnderbehandling.id, Status.AVBRUTT)
             return requireNotNull(oppgaveDaoNy.hentOppgave(oppgaveUnderbehandling.id)) {
@@ -257,7 +301,10 @@ class OppgaveServiceNy(
         }
     }
 
-    fun opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(referanse: String, sakId: Long): OppgaveNy {
+    fun opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(
+        referanse: String,
+        sakId: Long
+    ): OppgaveNy {
         val oppgaverForBehandling = oppgaveDaoNy.hentOppgaverForBehandling(referanse)
         val oppgaverSomKanLukkes = oppgaverForBehandling.filter { !it.erAvsluttet() }
         oppgaverSomKanLukkes.forEach {
@@ -293,27 +340,30 @@ class OppgaveServiceNy(
     }
 
     fun hentSaksbehandlerForBehandling(behandlingsId: UUID): String? {
-        val oppgaverForBehandlingUtenAttesterting = inTransaction {
-            oppgaveDaoNy.hentOppgaverForBehandling(behandlingsId.toString())
-        }.filter {
-            it.type !== OppgaveType.ATTESTERING
-        }
+        val oppgaverForBehandlingUtenAttesterting =
+            inTransaction {
+                oppgaveDaoNy.hentOppgaverForBehandling(behandlingsId.toString())
+            }.filter {
+                it.type !== OppgaveType.ATTESTERING
+            }
         return oppgaverForBehandlingUtenAttesterting.sortedByDescending { it.opprettet }[0].saksbehandler
     }
 
     fun hentSaksbehandlerFraFoerstegangsbehandling(behandlingsId: UUID): String? {
-        val oppgaverForBehandlingFoerstegangs = inTransaction {
-            oppgaveDaoNy.hentOppgaverForBehandling(behandlingsId.toString())
-        }.filter {
-            it.type == OppgaveType.FOERSTEGANGSBEHANDLING
-        }
+        val oppgaverForBehandlingFoerstegangs =
+            inTransaction {
+                oppgaveDaoNy.hentOppgaverForBehandling(behandlingsId.toString())
+            }.filter {
+                it.type == OppgaveType.FOERSTEGANGSBEHANDLING
+            }
         return oppgaverForBehandlingFoerstegangs.sortedByDescending { it.opprettet }[0].saksbehandler
     }
 
     fun hentSaksbehandlerForOppgaveUnderArbeid(behandlingsId: UUID): String? {
-        val oppgaverforBehandling = inTransaction {
-            oppgaveDaoNy.hentOppgaverForBehandling(behandlingsId.toString())
-        }
+        val oppgaverforBehandling =
+            inTransaction {
+                oppgaveDaoNy.hentOppgaverForBehandling(behandlingsId.toString())
+            }
         return try {
             val oppgaveUnderbehandling = oppgaverforBehandling.single { it.status == Status.UNDER_BEHANDLING }
             oppgaveUnderbehandling.saksbehandler
@@ -351,8 +401,9 @@ class OppgaveServiceNy(
             }
     }
 
-    fun hentSakOgOppgaverForSak(sakId: Long) = inTransaction { sakDao.hentSak(sakId)!! }
-        .let { OppgaveListe(it, hentOppgaverForSak(it.id)) }
+    fun hentSakOgOppgaverForSak(sakId: Long) =
+        inTransaction { sakDao.hentSak(sakId)!! }
+            .let { OppgaveListe(it, hentOppgaverForSak(it.id)) }
 }
 
 fun List<OppgaveNy>.filterOppgaverForEnheter(
@@ -373,5 +424,7 @@ enum class OppgaveServiceFeatureToggle(private val key: String) : FeatureToggle 
 }
 
 enum class Rolle {
-    SAKSBEHANDLER, ATTESTANT, STRENGT_FORTROLIG
+    SAKSBEHANDLER,
+    ATTESTANT,
+    STRENGT_FORTROLIG
 }

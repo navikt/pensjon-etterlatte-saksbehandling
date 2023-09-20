@@ -12,7 +12,11 @@ import no.nav.etterlatte.libs.common.person.maskerFnr
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.slf4j.LoggerFactory
 
-class BehandlingKlient(val behandlingHttpClient: HttpClient, val institusjonsoppholdKlient: InstitusjonsoppholdKlient) {
+class BehandlingKlient(
+    val behandlingHttpClient: HttpClient,
+    val institusjonsoppholdKlient: InstitusjonsoppholdKlient,
+    val resourceUrl: String
+) {
     private val logger = LoggerFactory.getLogger(this.javaClass.name)
 
     fun haandterHendelse(record: ConsumerRecord<String, KafkaOppholdHendelse>) {
@@ -31,28 +35,30 @@ class BehandlingKlient(val behandlingHttpClient: HttpClient, val institusjonsopp
         val opphold: Institusjonsopphold = institusjonsoppholdKlient.hentDataForHendelse(oppholdHendelse.oppholdId)
 
         postTilBehandling(
-            oppholdHendelse = InstitusjonsoppholdHendelseBeriket(
-                oppholdId = oppholdHendelse.oppholdId,
-                hendelseId = oppholdHendelse.hendelseId,
-                norskident = oppholdHendelse.norskident,
-                institusjonsoppholdsType = oppholdHendelse.type,
-                institusjonsoppholdKilde = oppholdHendelse.kilde,
-                institusjonsnavn = opphold.institusjonsnavn,
-                institusjonsType = opphold.institusjonstype,
-                startdato = opphold.startdato,
-                faktiskSluttdato = opphold.faktiskSluttdato,
-                forventetSluttdato = opphold.forventetSluttdato,
-                organisasjonsnummer = opphold.organisasjonsnummer
-            )
+            oppholdHendelse =
+                InstitusjonsoppholdHendelseBeriket(
+                    oppholdId = oppholdHendelse.oppholdId,
+                    hendelseId = oppholdHendelse.hendelseId,
+                    norskident = oppholdHendelse.norskident,
+                    institusjonsoppholdsType = oppholdHendelse.type,
+                    institusjonsoppholdKilde = oppholdHendelse.kilde,
+                    institusjonsnavn = opphold.institusjonsnavn,
+                    institusjonsType = opphold.institusjonstype,
+                    startdato = opphold.startdato,
+                    faktiskSluttdato = opphold.faktiskSluttdato,
+                    forventetSluttdato = opphold.forventetSluttdato,
+                    organisasjonsnummer = opphold.organisasjonsnummer
+                )
         )
     }
 
-    fun postTilBehandling(oppholdHendelse: InstitusjonsoppholdHendelseBeriket) = runBlocking {
-        behandlingHttpClient.post(
-            "http://etterlatte-behandling/grunnlagsendringshendelse/institusjonsopphold"
-        ) {
-            contentType(ContentType.Application.Json)
-            setBody(oppholdHendelse)
+    fun postTilBehandling(oppholdHendelse: InstitusjonsoppholdHendelseBeriket) =
+        runBlocking {
+            behandlingHttpClient.post(
+                "$resourceUrl/grunnlagsendringshendelse/institusjonsopphold"
+            ) {
+                contentType(ContentType.Application.Json)
+                setBody(oppholdHendelse)
+            }
         }
-    }
 }

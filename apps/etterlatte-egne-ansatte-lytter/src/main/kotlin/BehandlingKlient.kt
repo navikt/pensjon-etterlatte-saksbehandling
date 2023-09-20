@@ -12,7 +12,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.slf4j.LoggerFactory
 
-class BehandlingKlient(val behandlingHttpClient: HttpClient) {
+class BehandlingKlient(val behandlingHttpClient: HttpClient, val url: String) {
     private val logger = LoggerFactory.getLogger(this.javaClass.name)
 
     fun haandterHendelse(record: ConsumerRecord<String, String>) {
@@ -28,9 +28,12 @@ class BehandlingKlient(val behandlingHttpClient: HttpClient) {
         postTilBehandling(fnr = fnr, skjermet = skjermet)
     }
 
-    fun postTilBehandling(fnr: String, skjermet: Boolean) = runBlocking {
+    fun postTilBehandling(
+        fnr: String,
+        skjermet: Boolean
+    ) = runBlocking {
         behandlingHttpClient.post(
-            "http://etterlatte-behandling/egenansatt"
+            "$url/egenansatt"
         ) {
             contentType(ContentType.Application.Json)
             setBody(

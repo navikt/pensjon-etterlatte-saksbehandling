@@ -134,7 +134,6 @@ const InstitusjonsoppholdBP = (props: InstitusjonsoppholdProps) => {
       ) : null}
       {behandles && (
         <Button
-          type="button"
           icon={<PlusCircleIcon title="legg til" />}
           iconPosition="left"
           variant="tertiary"

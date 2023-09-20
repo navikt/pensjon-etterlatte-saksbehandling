@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import { BodyLong, Button, Heading, Modal } from '@navikt/ds-react'
 import { useNavigate } from 'react-router'
-import { ButtonWrapper } from '~shared/modal/modal'
 import { erFerdigBehandlet } from '~components/behandling/felles/utils'
 import { useBehandling } from '~components/behandling/useBehandling'
+import { FlexRow } from '~shared/styled'
 
 export default function AvbrytBehandling() {
   const navigate = useNavigate()
@@ -11,12 +11,12 @@ export default function AvbrytBehandling() {
   const [isOpen, setIsOpen] = useState(false)
 
   return behandling?.status && erFerdigBehandlet(behandling.status) ? (
-    <Button variant={'tertiary'} className="textButton" onClick={() => navigate('/')}>
+    <Button variant={'tertiary'} onClick={() => navigate('/')}>
       Tilbake til oppgavelisten
     </Button>
   ) : (
     <>
-      <Button variant={'tertiary'} className="textButton" onClick={() => setIsOpen(true)}>
+      <Button variant={'tertiary'} onClick={() => setIsOpen(true)}>
         Avbryt
       </Button>
 
@@ -31,14 +31,14 @@ export default function AvbrytBehandling() {
             Endringene dine er lagret og du kan fortsette der du slapp når du går tilbake til saken.
           </BodyLong>
 
-          <ButtonWrapper>
-            <Button variant="secondary" size="medium" className="button" onClick={() => setIsOpen(false)}>
+          <FlexRow justify={'center'}>
+            <Button variant="secondary" onClick={() => setIsOpen(false)}>
               Nei, fortsett behandling
             </Button>
-            <Button variant="primary" size="medium" className="button" onClick={() => navigate('/')}>
+            <Button variant="primary" onClick={() => navigate('/')}>
               Ja, avbryt
             </Button>
-          </ButtonWrapper>
+          </FlexRow>
         </Modal.Body>
       </Modal>
     </>

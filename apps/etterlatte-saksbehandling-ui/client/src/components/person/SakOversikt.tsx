@@ -4,7 +4,7 @@ import styled from 'styled-components'
 import { IBehandlingListe } from './typer'
 import { ManueltOpphoerModal } from './ManueltOpphoerModal'
 import { hentBehandlingerForPerson } from '~shared/api/behandling'
-import { GridContainer } from '~shared/styled'
+import { FlexRow, GridContainer } from '~shared/styled'
 import Spinner from '~shared/Spinner'
 import RelevanteHendelser from '~components/person/uhaandtereHendelser/RelevanteHendelser'
 import { isFailure, isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
@@ -44,11 +44,11 @@ export const SakOversikt = ({ fnr }: { fnr: string }) => {
               <Tag variant={'success'} size={'medium'}>
                 {formaterSakstype(sak!!.sakType)}
               </Tag>
-              <EkstraHandlinger>
+              <FlexRow justify={'right'}>
                 <OpprettKlage sakId={sak!!.id} />
                 <ManueltOpphoerModal sakId={sak!!.id} behandlingliste={behandlingerStatus.data[0].behandlinger} />
                 {kanBrukeGenerllBehandling && <OpprettGenerellBehandling sakId={sak!!.id} />}
-              </EkstraHandlinger>
+              </FlexRow>
             </Heading>
 
             <BodyShort spacing>Denne saken tilhører enhet {sak?.enhet}.</BodyShort>
@@ -87,12 +87,6 @@ const HendelseSidebar = styled.div`
   border-left: 1px solid gray;
   padding: 3em 2rem;
   margin: 0 1em;
-`
-
-const EkstraHandlinger = styled.div`
-  display: flex;
-  flex-direction: row-reverse;
-  gap: 0.5em;
 `
 
 export const HeadingWrapper = styled.div`

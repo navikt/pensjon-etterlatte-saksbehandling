@@ -88,7 +88,7 @@ export const UtenlandstilsnittVurdering = ({
     >
       <>
         <VurderingsTitle title={'Utlandstilknytning'} />
-        <Undertekst gray={false}>Hvilken type sak er dette?</Undertekst>
+        <Undertekst $gray={false}>Hvilken type sak er dette?</Undertekst>
         <RadioGroupWrapper>
           <RadioGroup
             legend=""

@@ -126,7 +126,6 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
         <BehandlingHandlingKnapper>
           <Button
             variant="primary"
-            size="medium"
             onClick={onSubmit}
             loading={isPending(lagreBeregningsgrunnlag) || isPending(endreBeregning)}
           >

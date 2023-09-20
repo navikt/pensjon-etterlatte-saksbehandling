@@ -1,11 +1,11 @@
-import { Button, Modal, Heading, BodyShort } from '@navikt/ds-react'
+import { BodyShort, Button, Heading, Modal } from '@navikt/ds-react'
 import { useState } from 'react'
 import { handlinger } from './typer'
 import { fattVedtak as fattVedtakApi } from '~shared/api/behandling'
 import { useNavigate, useParams } from 'react-router-dom'
-import { ButtonWrapper } from '~shared/modal/modal'
 import { isFailure, isPending, useApiCall } from '~shared/hooks/useApiCall'
 import { ApiErrorAlert } from '~ErrorBoundary'
+import { FlexRow } from '~shared/styled'
 
 export const SendTilAttesteringModal: React.FC = () => {
   const navigate = useNavigate()
@@ -30,7 +30,7 @@ export const SendTilAttesteringModal: React.FC = () => {
 
   return (
     <>
-      <Button variant="primary" size="medium" className="button" onClick={() => setIsOpen(true)}>
+      <Button variant="primary" onClick={() => setIsOpen(true)}>
         {handlinger.ATTESTERING.navn}
       </Button>
       <Modal
@@ -46,27 +46,19 @@ export const SendTilAttesteringModal: React.FC = () => {
             Er du sikker på at du vil sende vedtaket til attestering?
           </Heading>
           <BodyShort spacing>Når du sender til attestering vil vedtaket låses og du får ikke gjort endringer</BodyShort>
-          <ButtonWrapper>
+          <FlexRow justify={'center'}>
             <Button
               variant="secondary"
-              size="medium"
-              className="button"
               onClick={() => {
                 setIsOpen(false)
               }}
             >
               {handlinger.ATTESTERING_MODAL.NEI.navn}
             </Button>
-            <Button
-              loading={isPending(fattVedtakStatus)}
-              variant="primary"
-              size="medium"
-              className="button"
-              onClick={send}
-            >
+            <Button loading={isPending(fattVedtakStatus)} variant="primary" onClick={send}>
               {handlinger.ATTESTERING_MODAL.JA.navn}
             </Button>
-          </ButtonWrapper>
+          </FlexRow>
           {isFailure(fattVedtakStatus) && <ApiErrorAlert>En feil skjedde under attestering av vedtaket.</ApiErrorAlert>}
         </Modal.Body>
       </Modal>

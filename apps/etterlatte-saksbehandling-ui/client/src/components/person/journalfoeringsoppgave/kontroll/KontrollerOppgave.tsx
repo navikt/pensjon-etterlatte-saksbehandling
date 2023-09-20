@@ -4,7 +4,6 @@ import { useJournalfoeringOppgave } from '~components/person/journalfoeringsoppg
 import { useAppDispatch } from '~store/Store'
 import { useNavigate, useParams } from 'react-router-dom'
 import { JaNei } from '~shared/types/ISvar'
-import { KnapperWrapper } from '~components/behandling/handlinger/BehandlingHandlingKnapper'
 import AvbrytBehandleJournalfoeringOppgave from '~components/person/journalfoeringsoppgave/AvbrytBehandleJournalfoeringOppgave'
 import { formaterFnr, formaterSakstype, formaterStringDato } from '~utils/formattering'
 import { settBehandlingBehov, settBruker, settOppgave, settSamsvar } from '~store/reducers/JournalfoeringOppgaveReducer'
@@ -17,6 +16,7 @@ import { InfoWrapper } from '~components/behandling/soeknadsoversikt/styled'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import { hentSakForPerson } from '~shared/api/behandling'
 import { FormWrapper } from '~components/person/journalfoeringsoppgave/BehandleJournalfoeringOppgave'
+import { FlexRow } from '~shared/styled'
 
 export default function KontrollerOppgave() {
   const { bruker, oppgave, samsvar, journalpost, behandlingBehov } = useJournalfoeringOppgave()
@@ -154,14 +154,16 @@ export default function KontrollerOppgave() {
         </>
       )}
 
-      <KnapperWrapper>
-        <div>
-          <Button variant="primary" className="button" onClick={neste} disabled={!kanGaaVidere}>
+      <div>
+        <FlexRow justify={'center'} $spacing>
+          <Button variant="primary" onClick={neste} disabled={!kanGaaVidere}>
             Neste
           </Button>
-        </div>
-        <AvbrytBehandleJournalfoeringOppgave />
-      </KnapperWrapper>
+        </FlexRow>
+        <FlexRow justify={'center'}>
+          <AvbrytBehandleJournalfoeringOppgave />
+        </FlexRow>
+      </div>
     </FormWrapper>
   )
 }

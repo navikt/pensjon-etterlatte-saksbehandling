@@ -1,27 +1,29 @@
 import { Button } from '@navikt/ds-react'
 import { useBehandlingRoutes } from '../BehandlingRoutes'
 import AvbrytBehandling from './AvbrytBehandling'
-import { KnapperWrapper } from './BehandlingHandlingKnapper'
 import { handlinger } from './typer'
+import { FlexRow } from '~shared/styled'
 
 export const NesteOgTilbake = () => {
   const { next, back, lastPage, firstPage } = useBehandlingRoutes()
 
   return (
-    <KnapperWrapper>
-      <div>
+    <div>
+      <FlexRow justify={'center'} $spacing>
         {!firstPage && (
-          <Button variant="secondary" size="medium" className="button" onClick={back}>
+          <Button variant="secondary" onClick={back}>
             {handlinger.TILBAKE.navn}
           </Button>
         )}
         {!lastPage && (
-          <Button variant="primary" size="medium" className="button" onClick={next}>
+          <Button variant="primary" onClick={next}>
             {handlinger.NESTE.navn}
           </Button>
         )}
-      </div>
-      <AvbrytBehandling />
-    </KnapperWrapper>
+      </FlexRow>
+      <FlexRow justify={'center'}>
+        <AvbrytBehandling />
+      </FlexRow>
+    </div>
   )
 }

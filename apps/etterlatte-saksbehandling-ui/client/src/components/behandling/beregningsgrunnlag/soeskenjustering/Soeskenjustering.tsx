@@ -145,7 +145,6 @@ const Soeskenjustering = (props: SoeskenjusteringProps) => {
           </UstiletListe>
           {behandles && (
             <NyPeriodeButton
-              type="button"
               onClick={() => append(nySoeskengrunnlagPeriode(soesken, addMonths(sisteTom || sisteFom, 1).toString()))}
             >
               Legg til periode

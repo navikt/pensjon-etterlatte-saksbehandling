@@ -1,10 +1,10 @@
 import { Alert, BodyLong, BodyShort, Button, Heading, Modal, Panel } from '@navikt/ds-react'
 import { BrevStatus, IBrev } from '~shared/types/Brev'
 import { isPending, useApiCall } from '~shared/hooks/useApiCall'
-import { ButtonWrapper } from '~shared/modal/modal'
 import { useState } from 'react'
 import { distribuerBrev, ferdigstillBrev, journalfoerBrev } from '~shared/api/brev'
 import Spinner from '~shared/Spinner'
+import { FlexRow } from '~shared/styled'
 
 interface Props {
   brev: IBrev
@@ -104,14 +104,14 @@ export default function NyttBrevHandlingerPanel({ brev, setKanRedigeres }: Props
                       angres.
                     </BodyLong>
 
-                    <ButtonWrapper>
-                      <Button variant="secondary" size="medium" className="button" onClick={() => setIsOpen(false)}>
+                    <FlexRow justify={'center'}>
+                      <Button variant="secondary" onClick={() => setIsOpen(false)}>
                         Nei, fortsett redigering
                       </Button>
-                      <Button variant="primary" size="medium" className="button" onClick={ferdigstill}>
+                      <Button variant="primary" className="button" onClick={ferdigstill}>
                         Ja, ferdigstill brev
                       </Button>
-                    </ButtonWrapper>
+                    </FlexRow>
                   </>
                 )}
               </Modal.Body>

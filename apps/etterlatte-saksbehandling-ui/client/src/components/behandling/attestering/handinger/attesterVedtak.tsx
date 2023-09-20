@@ -1,7 +1,7 @@
 import { Alert, Button } from '@navikt/ds-react'
 import { useState } from 'react'
 import { attesterVedtak } from '~shared/api/behandling'
-import { BeslutningWrapper, ButtonWrapper } from '../styled'
+import { BeslutningWrapper } from '../styled'
 import { GeneriskModal } from '~shared/modal/modal'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { useNavigate } from 'react-router'
@@ -9,6 +9,7 @@ import { behandlingSkalSendeBrev } from '~components/behandling/felles/utils'
 import { hentVedtaksbrev } from '~shared/api/brev'
 import { isPending, useApiCall } from '~shared/hooks/useApiCall'
 import { BrevStatus } from '~shared/types/Brev'
+import { FlexRow } from '~shared/styled'
 
 export const AttesterVedtak = ({ behandling, kommentar }: { behandling: IDetaljertBehandling; kommentar: string }) => {
   const navigate = useNavigate()
@@ -52,16 +53,16 @@ export const AttesterVedtak = ({ behandling, kommentar }: { behandling: IDetalje
           {error}
         </Alert>
       )}
-      <ButtonWrapper>
-        <Button variant="primary" size="medium" className="button" onClick={() => setModalisOpen(true)}>
-          {`Iverksett vedtak ${skalSendeBrev ? 'og send brev' : ''}`}
+      <FlexRow>
+        <Button variant="primary" onClick={() => setModalisOpen(true)}>
+          Iverksett vedtak {skalSendeBrev ? 'og send brev' : ''}
         </Button>
-      </ButtonWrapper>
+      </FlexRow>
       <GeneriskModal
         tittel="Er du sikker på at du vil iverksette vedtaket?"
         beskrivelse="Vedtaksbrevet sendes ut automatisk ved iverksettelse"
         tekstKnappJa="Ja, iverksett vedtak"
-        tekstKnappNei=" Nei, gå tilbake"
+        tekstKnappNei="Nei, gå tilbake"
         onYesClick={attester}
         setModalisOpen={setModalisOpen}
         open={modalisOpen}

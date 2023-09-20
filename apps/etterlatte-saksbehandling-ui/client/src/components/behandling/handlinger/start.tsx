@@ -6,7 +6,7 @@ export const Start = ({ disabled }: { disabled?: boolean }) => {
   const { next } = useBehandlingRoutes()
 
   return (
-    <Button variant="primary" size="medium" className="button" onClick={next} disabled={disabled}>
+    <Button variant="primary" onClick={next} disabled={disabled}>
       {handlinger.START.navn}
     </Button>
   )

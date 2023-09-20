@@ -24,27 +24,27 @@ export const VilkaarsVurderingKnapper = () => {
           case 'avslag':
             return (
               //TODO - Avslag
-              <Button variant="primary" size="medium" className="button" onClick={() => goto('brev')}>
+              <Button variant="primary" onClick={() => goto('brev')}>
                 {handlinger.VILKAARSVURDERING.AVSLAG.navn}
               </Button>
             )
           case 'uavklart':
             return (
               //TODO - oppdatere sak med Status "satt på vent" og Handlinger "Gjenoppta saken" i oppgavebenken
-              <Button variant="primary" size="medium" className="button" onClick={toggleVentNavn}>
+              <Button variant="primary" onClick={toggleVentNavn}>
                 {ventNavn}
               </Button>
             )
           case 'opphoer':
             return (
-              <Button variant="primary" size="medium" className="button" onClick={next}>
+              <Button variant="primary" onClick={next}>
                 {handlinger.VILKAARSVURDERING.OPPHOER.navn}
               </Button>
             )
           case 'innvilget':
           case 'endring':
             return (
-              <Button variant="primary" size="medium" className="button" onClick={next}>
+              <Button variant="primary" onClick={next}>
                 {handlinger.VILKAARSVURDERING.BEREGNE.navn}
               </Button>
             )

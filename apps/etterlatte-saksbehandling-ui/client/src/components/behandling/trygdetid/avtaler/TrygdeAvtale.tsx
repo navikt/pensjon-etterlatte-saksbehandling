@@ -8,19 +8,20 @@ import { FlexHeader, IconWrapper } from '~components/behandling/soeknadsoversikt
 import Spinner from '~shared/Spinner'
 import {
   hentAlleTrygdetidAvtaleKriterier,
-  TrygdetidAvtale,
-  TrygdetidAvtaleKriteria,
   hentAlleTrygdetidAvtaler,
   hentTrygdeavtaleForBehandling,
-  Trygdeavtale,
-  TrygdetidAvtaleOptions,
   lagreTrygdeavtaleForBehandling,
+  Trygdeavtale,
   TrygdeavtaleRequest,
+  TrygdetidAvtale,
+  TrygdetidAvtaleKriteria,
+  TrygdetidAvtaleOptions,
 } from '~shared/api/trygdetid'
 import { isFailure, isPending, useApiCall } from '~shared/hooks/useApiCall'
 import { IconSize } from '~shared/types/Icon'
-import { Innhold, FormWrapper, FormKnapper } from '../styled'
+import { FormWrapper, Innhold } from '../styled'
 import { TrygdeavtaleVisning } from './TrygdeavtaleVisning'
+import { FlexRow } from '~shared/styled'
 
 interface TrygdetidAvtaleOptionProps {
   defaultBeskrivelse: string
@@ -143,7 +144,7 @@ export const TrygdeAvtale = ({ redigerbar }: Props) => {
         <>
           <TrygdeavtaleVisning avtaler={avtalerListe} kriterier={avtaleKriterierListe} trygdeavtale={trygdeavtale} />
           {redigerbar && (
-            <Button size="small" onClick={rediger} type="button">
+            <Button size="small" onClick={rediger}>
               Rediger
             </Button>
           )}
@@ -204,16 +205,16 @@ export const TrygdeAvtale = ({ redigerbar }: Props) => {
                 </FormWrapper>
               </Rows>
               <Rows>
-                <FormKnapper>
-                  <Button size="small" loading={isPending(lagreTrygdeavtaleRequest)} type="button" onClick={lagre}>
+                <FlexRow $spacing>
+                  <Button size="small" loading={isPending(lagreTrygdeavtaleRequest)} onClick={lagre}>
                     Lagre
                   </Button>
                   {harLagretVerdi && (
-                    <Button size="small" onClick={avbryt} type="button">
+                    <Button size="small" onClick={avbryt}>
                       Avbryt
                     </Button>
                   )}
-                </FormKnapper>
+                </FlexRow>
               </Rows>
             </TrygdeAvtaleForm>
           </Innhold>

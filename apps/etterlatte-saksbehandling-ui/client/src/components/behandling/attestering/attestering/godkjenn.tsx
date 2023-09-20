@@ -23,6 +23,7 @@ export const Godkjenn = ({ behandling }: { behandling: IDetaljertBehandling }) =
           autoComplete="off"
         />
       </div>
+      <br />
       <AttesterVedtak behandling={behandling} kommentar={tilbakemeldingFraAttestant} />
     </BeslutningWrapper>
   )

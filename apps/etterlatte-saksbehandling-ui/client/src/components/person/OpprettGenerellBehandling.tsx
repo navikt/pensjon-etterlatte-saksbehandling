@@ -5,13 +5,7 @@ import { opprettNyGenerellBehandling } from '~shared/api/generellbehandling'
 import { GenerellBehandlingType, Innholdstyper } from '~shared/types/Generellbehandling'
 import styled from 'styled-components'
 import { ApiErrorAlert } from '~ErrorBoundary'
-
-const ButtonWrapper = styled.div`
-  display: flex;
-  justify-content: center;
-  gap: 1em;
-  margin: 2rem 0rem;
-`
+import { FlexRow } from '~shared/styled'
 
 const AlertWrapper = styled(Alert)`
   margin: 2rem 0rem;
@@ -67,7 +61,7 @@ const OpprettGenerellBehandling = (props: { sakId: number }) => {
           {isSuccess(opprettGenBehandlingStatus) && (
             <AlertWrapper variant="success">Behandlingen er opprettet</AlertWrapper>
           )}
-          <ButtonWrapper>
+          <FlexRow justify={'center'}>
             <Button
               onClick={() => opprettGenBehandlingKallWrapper()}
               loading={isPending(opprettGenBehandlingStatus)}
@@ -84,7 +78,7 @@ const OpprettGenerellBehandling = (props: { sakId: number }) => {
             >
               Avbryt
             </Button>
-          </ButtonWrapper>
+          </FlexRow>
         </Modal.Body>
       </Modal>
     </>

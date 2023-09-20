@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { Alert, Button, ExpansionCard, Heading, Modal } from '@navikt/ds-react'
 import { avbrytBehandling } from '~shared/api/behandling'
 import { useNavigate } from 'react-router'
-import { ButtonWrapper } from '~shared/modal/modal'
 import { IBehandlingStatus, IBehandlingsType } from '~shared/types/IDetaljertBehandling'
 import { hentBehandlesFraStatus } from '~components/behandling/felles/utils'
 import { useBehandling } from '~components/behandling/useBehandling'
@@ -11,6 +10,7 @@ import { isFailure, isPending, useApiCall } from '~shared/hooks/useApiCall'
 import { formaterBehandlingstype } from '~utils/formattering'
 import { ExclamationmarkTriangleFillIcon, XMarkIcon } from '@navikt/aksel-icons'
 import styled from 'styled-components'
+import { FlexRow } from '~shared/styled'
 
 export default function AnnullerBehandling() {
   const navigate = useNavigate()
@@ -84,27 +84,14 @@ export default function AnnullerBehandling() {
         </Modal.Body>
 
         <Modal.Footer>
-          <ButtonWrapper>
-            <Button
-              variant="secondary"
-              size="medium"
-              className="button"
-              onClick={() => setIsOpen(false)}
-              disabled={isPending(status)}
-            >
+          <FlexRow justify={'center'}>
+            <Button variant="secondary" onClick={() => setIsOpen(false)} loading={isPending(status)}>
               Nei, fortsett {formaterBehandlingstype(behandling!!.behandlingType).toLowerCase()}
             </Button>
-            <Button
-              variant="danger"
-              size="medium"
-              className="button"
-              onClick={avbryt}
-              loading={isPending(status)}
-              disabled={isPending(status)}
-            >
+            <Button variant="danger" onClick={avbryt} loading={isPending(status)}>
               Ja, avbryt {formaterBehandlingstype(behandling!!.behandlingType).toLowerCase()}
             </Button>
-          </ButtonWrapper>
+          </FlexRow>
 
           {isFailure(status) && <Alert variant={'error'}>Det oppsto en feil ved avbryting av behandlingen.</Alert>}
         </Modal.Footer>

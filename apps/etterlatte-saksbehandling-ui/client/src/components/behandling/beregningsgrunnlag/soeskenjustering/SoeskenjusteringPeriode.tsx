@@ -84,11 +84,9 @@ const SoeskenjusteringPeriode = (props: SoeskenjusteringPeriodeProps) => {
                       label="Til og med"
                       value={tom.field.value}
                     />
-                    {tom.field.value !== null && tom.field.value !== undefined ? (
-                      <FjernKnapp type="button" onClick={() => tom.field.onChange(undefined)}>
-                        Fjern sluttdato
-                      </FjernKnapp>
-                    ) : null}
+                    {tom.field.value !== null && tom.field.value !== undefined && (
+                      <FjernKnapp onClick={() => tom.field.onChange(undefined)}>Fjern sluttdato</FjernKnapp>
+                    )}
                   </MaanedvelgerMedUtnulling>
                 ) : (
                   <OppdrasSammenLes>

@@ -1,9 +1,8 @@
 import { Button, Heading, Radio, RadioGroup, Select } from '@navikt/ds-react'
-import { Content, ContentHeader } from '~shared/styled'
+import { Content, ContentHeader, FlexRow } from '~shared/styled'
 import { HeadingWrapper, Innhold } from '~components/behandling/soeknadsoversikt/styled'
 import { useKlage } from '~components/klage/useKlage'
 import { useNavigate } from 'react-router-dom'
-import { KnapperWrapper } from '~components/behandling/handlinger/BehandlingHandlingKnapper'
 import { isFailure, isPending, isPendingOrInitial, mapSuccess, useApiCall } from '~shared/hooks/useApiCall'
 import { oppdaterFormkravIKlage } from '~shared/api/klage'
 import { JaNei } from '~shared/types/ISvar'
@@ -210,11 +209,11 @@ export function KlageFormkrav() {
 
           <JaNeiRadiogruppe name="erFormkraveneOppfylt" control={control} legend="Er formkravene til klagen oppfylt?" />
         </Innhold>
-        <KnapperWrapper>
+        <FlexRow justify={'center'}>
           <Button type="submit" loading={isPending(lagreFormkravStatus)}>
             Lagre vurdering av formkrav
           </Button>
-        </KnapperWrapper>
+        </FlexRow>
 
         {isFailure(lagreFormkravStatus) ? (
           <ApiErrorAlert>

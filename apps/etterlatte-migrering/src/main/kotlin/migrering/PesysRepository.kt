@@ -8,7 +8,7 @@ import no.nav.etterlatte.libs.database.oppdater
 import no.nav.etterlatte.libs.database.opprett
 import no.nav.etterlatte.libs.database.transaction
 import no.nav.etterlatte.rapidsandrivers.migrering.PesysId
-import java.util.UUID
+import java.util.*
 import javax.sql.DataSource
 
 data class Pesyskopling(
@@ -86,4 +86,37 @@ internal class PesysRepository(private val dataSource: DataSource) : Transaction
             )
         }
     }
+
+    fun lagreFeilkjoering(
+        request: MigreringRequest,
+        feil: List<Verifiseringsfeil>,
+        tx: TransactionalSession? = null
+    ) = tx.session {
+        opprett(
+            """
+                INSERT INTO feilkjoering(
+                    ${Feilkjoering.ID}, ${Feilkjoering.PESYS_ID}, ${Feilkjoering.REQUEST}, ${Feilkjoering.FEILMELDING}
+                )
+                VALUES(
+                    :${Feilkjoering.ID},
+                    :${Feilkjoering.PESYS_ID},
+                    :${Feilkjoering.REQUEST}::jsonb,"
+                    :${Feilkjoering.FEILMELDING}::jsonb"
+                )""",
+            mapOf(
+                Feilkjoering.ID to UUID.randomUUID(),
+                Feilkjoering.PESYS_ID to request.pesysId.id,
+                Feilkjoering.REQUEST to request.toJson(),
+                Feilkjoering.FEILMELDING to feil.map { it.message }.toJson()
+            ),
+            "Lagra feilkjøringsdata for $request.pesysId.id"
+        )
+    }
+}
+
+private object Feilkjoering {
+    const val ID = "id"
+    const val PESYS_ID = "pesys_id"
+    const val REQUEST = "request"
+    const val FEILMELDING = "feilmelding"
 }

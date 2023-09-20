@@ -254,7 +254,7 @@ internal class MigreringIntegrationTest {
             with(inspector.inspektør.message(0)) {
                 assertEquals(Migreringsstatus.FEILA.name, get(EVENT_NAME_KEY).textValue())
             }
-            assertEquals(Migreringsstatus.FEILA, repository.hentStatus(pesysid))
+            assertEquals(Migreringsstatus.VERIFISERING_FEILA, repository.hentStatus(pesysid))
         }
     }
 }

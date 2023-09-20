@@ -12,6 +12,7 @@ import no.nav.etterlatte.migrering.Migreringsstatus
 import no.nav.etterlatte.migrering.PesysRepository
 import no.nav.etterlatte.rapidsandrivers.EventNames
 import no.nav.etterlatte.rapidsandrivers.migrering.KILDE
+import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser
 import no.nav.etterlatte.rapidsandrivers.migrering.PESYS_ID
 import no.nav.etterlatte.rapidsandrivers.migrering.hendelseData
 import no.nav.etterlatte.rapidsandrivers.migrering.pesysId
@@ -36,6 +37,7 @@ internal class FeilendeMigreringLytter(rapidsConnection: RapidsConnection, priva
             validate { it.requireKey(PESYS_ID) }
             validate { it.requireKey(HENDELSE_DATA_KEY) }
             validate { it.requireKey(FEILMELDING) }
+            validate { it.rejectValue(FEILENDE_STEG, Migreringshendelser.VERIFISER) }
             correlationId()
         }.register(this)
     }

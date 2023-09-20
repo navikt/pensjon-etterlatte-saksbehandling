@@ -11,6 +11,7 @@ import org.apache.kafka.common.serialization.StringSerializer
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Test
+import java.util.Properties
 
 class ApplicationTest {
     @Test

@@ -20,6 +20,7 @@ import org.apache.kafka.common.serialization.StringSerializer
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.Duration
+import java.util.Properties
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.concurrent.thread
 

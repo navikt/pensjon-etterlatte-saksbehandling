@@ -148,7 +148,7 @@ internal class BeregnBarnepensjonTest {
     }
 
     @Test
-    fun `søskenjustering påvirker ikke utbetalt beløp når redusert sats gis (10 % av G)`() {
+    fun `søskenjustering påvirker ikke utbetalt beløp når redusert sats gis (10 prosent av G)`() {
         val resultatMedSoeskenjustering =
             beregnBarnepensjon1967RegelMedInstitusjon.anvend(
                 grunnlag =

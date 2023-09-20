@@ -79,7 +79,7 @@ jobs:
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v2
         with:
-          upload: False # disable the upload here - we will upload in a different action
+          upload: false # disable the upload here - we will upload in a different action
           output: sarif-results
 
       - name: filter-sarif

@@ -92,6 +92,7 @@ internal class MigreringIntegrationTest {
                                             )
                                         } returns mockk()
                                     },
+                                    repository,
                                 ),
                         )
                     }
@@ -153,6 +154,7 @@ internal class MigreringIntegrationTest {
                                             )
                                         } returns mockk()
                                     },
+                                    repository,
                                 ),
                         )
                         LagreKopling(this, repository)
@@ -237,6 +239,7 @@ internal class MigreringIntegrationTest {
                                             )
                                         } throws IllegalStateException("")
                                     },
+                                    repository,
                                 ),
                         )
                     }

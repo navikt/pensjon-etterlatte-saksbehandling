@@ -61,12 +61,7 @@ internal class MigrerSpesifikkSak(
         packet.eventName = Migreringshendelser.MIGRER_SAK
         val request = pesyssak.tilMigreringsrequest()
         packet.hendelseData = request
-        try {
-            verifiserer.verifiserRequest(request)
-        } catch (e: Exception) {
-            pesysRepository.oppdaterStatus(request.pesysId, Migreringsstatus.FEILA)
-            throw e
-        }
+        verifiserer.verifiserRequest(request)
 
         if (featureToggleService.isEnabled(MigreringFeatureToggle.SendSakTilMigrering, false)) {
             sendSakTilMigrering(packet, request, context, pesyssak)

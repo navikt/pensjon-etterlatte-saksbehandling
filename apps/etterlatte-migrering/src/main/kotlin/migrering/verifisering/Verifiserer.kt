@@ -5,10 +5,12 @@ import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.PersonRolle
+import no.nav.etterlatte.migrering.Migreringsstatus
+import no.nav.etterlatte.migrering.PesysRepository
 import no.nav.etterlatte.rapidsandrivers.migrering.MigreringRequest
 import org.slf4j.LoggerFactory
 
-internal class Verifiserer(private val pdlKlient: PDLKlient) {
+internal class Verifiserer(private val pdlKlient: PDLKlient, private val repository: PesysRepository) {
     private val sikkerlogg = sikkerlogger()
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -18,6 +20,7 @@ internal class Verifiserer(private val pdlKlient: PDLKlient) {
             logger.warn(
                 "Sak ${request.pesysId} har ufullstendige data i PDL, kan ikke migrere. Se sikkerlogg for detaljer"
             )
+            repository.oppdaterStatus(request.pesysId, Migreringsstatus.FEILA)
             throw samleExceptions(feil)
         }
     }

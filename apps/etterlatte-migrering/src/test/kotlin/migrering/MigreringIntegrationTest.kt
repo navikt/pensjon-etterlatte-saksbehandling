@@ -9,8 +9,6 @@ import io.mockk.runs
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import kotliquery.TransactionalSession
-import migrering.verifisering.PDLKlient
-import migrering.verifisering.Verifiserer
 import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
@@ -22,6 +20,8 @@ import no.nav.etterlatte.libs.database.POSTGRES_VERSION
 import no.nav.etterlatte.libs.database.hentListe
 import no.nav.etterlatte.migrering.pen.BarnepensjonGrunnlagResponse
 import no.nav.etterlatte.migrering.pen.PenKlient
+import no.nav.etterlatte.migrering.verifisering.PDLKlient
+import no.nav.etterlatte.migrering.verifisering.Verifiserer
 import no.nav.etterlatte.opprettInMemoryDatabase
 import no.nav.etterlatte.rapidsandrivers.migrering.MigreringRequest
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser

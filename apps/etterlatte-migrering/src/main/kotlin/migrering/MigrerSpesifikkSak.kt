@@ -1,7 +1,6 @@
 package no.nav.etterlatte.migrering
 
 import kotlinx.coroutines.runBlocking
-import migrering.verifisering.Verifiserer
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
@@ -11,6 +10,7 @@ import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.etterlatte.migrering.pen.BarnepensjonGrunnlagResponse
 import no.nav.etterlatte.migrering.pen.PenKlient
 import no.nav.etterlatte.migrering.pen.tilVaarModell
+import no.nav.etterlatte.migrering.verifisering.Verifiserer
 import no.nav.etterlatte.rapidsandrivers.migrering.FNR_KEY
 import no.nav.etterlatte.rapidsandrivers.migrering.MigreringRequest
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser

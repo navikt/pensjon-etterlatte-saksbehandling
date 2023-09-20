@@ -7,6 +7,8 @@ import no.nav.etterlatte.libs.database.hent
 import no.nav.etterlatte.libs.database.oppdater
 import no.nav.etterlatte.libs.database.opprett
 import no.nav.etterlatte.libs.database.transaction
+import no.nav.etterlatte.migrering.verifisering.Verifiseringsfeil
+import no.nav.etterlatte.rapidsandrivers.migrering.MigreringRequest
 import no.nav.etterlatte.rapidsandrivers.migrering.PesysId
 import java.util.*
 import javax.sql.DataSource
@@ -100,8 +102,8 @@ internal class PesysRepository(private val dataSource: DataSource) : Transaction
                 VALUES(
                     :${Feilkjoering.ID},
                     :${Feilkjoering.PESYS_ID},
-                    :${Feilkjoering.REQUEST}::jsonb,"
-                    :${Feilkjoering.FEILMELDING}::jsonb"
+                    :${Feilkjoering.REQUEST}::jsonb,
+                    :${Feilkjoering.FEILMELDING}::jsonb
                 )""",
             mapOf(
                 Feilkjoering.ID to UUID.randomUUID(),

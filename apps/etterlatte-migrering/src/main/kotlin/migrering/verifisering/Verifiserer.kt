@@ -1,4 +1,4 @@
-package migrering.verifisering
+package no.nav.etterlatte.migrering.verifisering
 
 import no.nav.etterlatte.libs.common.logging.samleExceptions
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
@@ -51,4 +51,7 @@ internal class Verifiserer(private val pdlKlient: PDLKlient, private val reposit
 
 sealed class Verifiseringsfeil : Exception()
 
-data class FinsIkkeIPDL(val rolle: PersonRolle, val id: Folkeregisteridentifikator) : Verifiseringsfeil()
+data class FinsIkkeIPDL(val rolle: PersonRolle, val id: Folkeregisteridentifikator) : Verifiseringsfeil() {
+    override val message: String
+        get() = toString()
+}

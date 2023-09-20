@@ -1,15 +1,9 @@
 import { Button, Heading, Modal } from '@navikt/ds-react'
 import { useState } from 'react'
 import { hentDokumentPDF } from '~shared/api/dokument'
-import styled from 'styled-components'
 import Spinner from '~shared/Spinner'
 import { PdfVisning } from '~shared/brev/pdf-visning'
-
-const ButtonRow = styled.div`
-  background: white;
-  width: 100%;
-  text-align: right;
-`
+import { FlexRow } from '~shared/styled'
 
 export default function DokumentModal({
   tittel,
@@ -53,19 +47,21 @@ export default function DokumentModal({
       </Button>
 
       <Modal open={isOpen} onClose={() => setIsOpen(false)}>
-        <Modal.Body>
+        <Modal.Header>
           <Heading spacing level={'2'} size={'medium'}>
             {tittel}
           </Heading>
+        </Modal.Header>
 
+        <Modal.Body>
           <PdfVisning fileUrl={fileURL} error={error} />
           <Spinner visible={!hasLoaded} label="Laster inn PDF" />
 
-          <ButtonRow>
+          <FlexRow justify={'right'}>
             <Button variant={'secondary'} onClick={() => setIsOpen(false)}>
               Lukk
             </Button>
-          </ButtonRow>
+          </FlexRow>
         </Modal.Body>
       </Modal>
     </>

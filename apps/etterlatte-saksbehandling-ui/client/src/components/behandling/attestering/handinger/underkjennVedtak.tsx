@@ -1,6 +1,5 @@
 import { Button } from '@navikt/ds-react'
 import { useState } from 'react'
-import { ButtonWrapper } from '../styled'
 import { GeneriskModal } from '~shared/modal/modal'
 import { hentBehandling, underkjennVedtak } from '~shared/api/behandling'
 import { useNavigate } from 'react-router'
@@ -32,11 +31,9 @@ export const UnderkjennVedtak: React.FC<Props> = ({ behandling, kommentar, valgt
 
   return (
     <>
-      <ButtonWrapper>
-        <Button variant="primary" onClick={() => setModalisOpen(true)}>
-          Bekreft og send i retur
-        </Button>
-      </ButtonWrapper>
+      <Button variant="primary" onClick={() => setModalisOpen(true)}>
+        Bekreft og send i retur
+      </Button>
 
       <GeneriskModal
         tittel="Er du sikker på at vil underkjenne vedtak og sende i retur til saksbehandler?"

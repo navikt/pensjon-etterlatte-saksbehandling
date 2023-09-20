@@ -1,5 +1,5 @@
 import { BodyShort, Button, Heading, Modal } from '@navikt/ds-react'
-import styled from 'styled-components'
+import { FlexRow } from '~shared/styled'
 
 export type Props = {
   tittel: string
@@ -36,36 +36,21 @@ export const GeneriskModal = ({
           {tittel}
         </Heading>
         {beskrivelse && <BodyShort spacing>{beskrivelse}</BodyShort>}
-        <ButtonWrapper>
-          <Button
-            variant="primary"
-            size="medium"
-            className="button"
-            onClick={onYesClick}
-            disabled={!!loading}
-            loading={!!loading}
-          >
+        <FlexRow justify={'center'}>
+          <Button variant="primary" onClick={onYesClick} loading={!!loading}>
             {tekstKnappJa}
           </Button>
           <Button
             variant="secondary"
-            size="medium"
-            className="button"
             onClick={() => {
               setModalisOpen(false)
             }}
-            disabled={!!loading}
+            loading={!!loading}
           >
             {tekstKnappNei}
           </Button>
-        </ButtonWrapper>
+        </FlexRow>
       </Modal.Body>
     </Modal>
   )
 }
-
-export const ButtonWrapper = styled.div`
-  display: flex;
-  justify-content: center;
-  gap: 1em;
-`

@@ -22,6 +22,7 @@ import React, { useEffect, useState } from 'react'
 import InstitusjonsoppholdOMS from '~components/behandling/beregningsgrunnlag/InstitusjonsoppholdOMS'
 import { InstitusjonsoppholdGrunnlagData } from '~shared/types/Beregning'
 import { mapListeTilDto } from '~components/behandling/beregningsgrunnlag/PeriodisertBeregningsgrunnlag'
+import { Border } from '~components/behandling/soeknadsoversikt/styled'
 import Spinner from '~shared/Spinner'
 
 const BeregningsgrunnlagOmstillingsstoenad = (props: { behandling: IBehandlingReducer }) => {
@@ -85,11 +86,12 @@ const BeregningsgrunnlagOmstillingsstoenad = (props: { behandling: IBehandlingRe
       {isFailure(endreBeregning) && <ApiErrorAlert>Kunne ikke opprette ny beregning</ApiErrorAlert>}
       {isFailure(lagreBeregningsgrunnlagOMS) && <ApiErrorAlert>Kunne ikke lagre beregningsgrunnlag</ApiErrorAlert>}
 
+      <Border />
+
       {behandles ? (
         <BehandlingHandlingKnapper>
           <Button
             variant="primary"
-            size="medium"
             onClick={onSubmit}
             loading={isPending(lagreBeregningsgrunnlagOMS) || isPending(endreBeregning)}
           >

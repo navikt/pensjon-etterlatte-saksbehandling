@@ -1,12 +1,12 @@
 import { useState } from 'react'
 import { Alert, BodyLong, BodyShort, Button, Heading, Modal } from '@navikt/ds-react'
 import { SaktypeTag } from '~components/nyoppgavebenk/Tags'
-import { ButtonWrapper } from '~shared/modal/modal'
 import { OppgaveDTOny } from '~shared/api/oppgaverny'
 import { isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
 import { opprettBehandling } from '~shared/api/behandling'
 import { NyBehandlingRequest } from '~shared/types/IDetaljertBehandling'
 import { useNavigate } from 'react-router-dom'
+import { FlexRow } from '~shared/styled'
 
 interface ModalProps {
   oppgave: OppgaveDTOny
@@ -35,7 +35,7 @@ export default function FullfoerOppgaveModal({ oppgave, behandlingBehov }: Modal
 
   return (
     <>
-      <Button variant="primary" onClick={() => setOpen(true)} className="button">
+      <Button variant="primary" onClick={() => setOpen(true)}>
         Ferdigstill
       </Button>
 
@@ -59,21 +59,14 @@ export default function FullfoerOppgaveModal({ oppgave, behandlingBehov }: Modal
               for denne brukeren.
             </Alert>
           ) : (
-            <ButtonWrapper>
+            <FlexRow justify={'center'}>
               <Button variant="secondary" onClick={() => setOpen(false)} disabled={isPending(status)}>
                 Avbryt
               </Button>
-              <Button
-                variant="primary"
-                size="medium"
-                className="button"
-                onClick={ferdigstill}
-                loading={isPending(status)}
-                disabled={isPending(status)}
-              >
+              <Button variant="primary" onClick={ferdigstill} loading={isPending(status)} disabled={isPending(status)}>
                 Ferdigstill
               </Button>
-            </ButtonWrapper>
+            </FlexRow>
           )}
         </Modal.Body>
       </Modal>

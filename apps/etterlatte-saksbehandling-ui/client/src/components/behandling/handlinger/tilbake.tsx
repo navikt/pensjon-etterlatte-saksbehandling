@@ -8,7 +8,7 @@ export const Tilbake = () => {
   return (
     <>
       {!firstPage && (
-        <Button variant="secondary" size="medium" className="button" onClick={back}>
+        <Button variant="secondary" onClick={back}>
           {handlinger.TILBAKE.navn}
         </Button>
       )}

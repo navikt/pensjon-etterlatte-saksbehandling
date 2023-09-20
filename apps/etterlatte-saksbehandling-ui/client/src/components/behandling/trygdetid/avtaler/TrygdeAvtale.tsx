@@ -8,19 +8,20 @@ import { FlexHeader, IconWrapper } from '~components/behandling/soeknadsoversikt
 import Spinner from '~shared/Spinner'
 import {
   hentAlleTrygdetidAvtaleKriterier,
-  TrygdetidAvtale,
-  TrygdetidAvtaleKriteria,
   hentAlleTrygdetidAvtaler,
   hentTrygdeavtaleForBehandling,
-  Trygdeavtale,
-  TrygdetidAvtaleOptions,
   lagreTrygdeavtaleForBehandling,
+  Trygdeavtale,
   TrygdeavtaleRequest,
+  TrygdetidAvtale,
+  TrygdetidAvtaleKriteria,
+  TrygdetidAvtaleOptions,
 } from '~shared/api/trygdetid'
 import { isFailure, isPending, useApiCall } from '~shared/hooks/useApiCall'
 import { IconSize } from '~shared/types/Icon'
-import { Innhold, FormWrapper, FormKnapper } from '../styled'
+import { FormWrapper, Innhold } from '../styled'
 import { TrygdeavtaleVisning } from './TrygdeavtaleVisning'
+import { FlexRow } from '~shared/styled'
 
 interface TrygdetidAvtaleOptionProps {
   defaultBeskrivelse: string
@@ -204,7 +205,7 @@ export const TrygdeAvtale = ({ redigerbar }: Props) => {
                 </FormWrapper>
               </Rows>
               <Rows>
-                <FormKnapper>
+                <FlexRow $spacing>
                   <Button size="small" loading={isPending(lagreTrygdeavtaleRequest)} type="button" onClick={lagre}>
                     Lagre
                   </Button>
@@ -213,7 +214,7 @@ export const TrygdeAvtale = ({ redigerbar }: Props) => {
                       Avbryt
                     </Button>
                   )}
-                </FormKnapper>
+                </FlexRow>
               </Rows>
             </TrygdeAvtaleForm>
           </Innhold>

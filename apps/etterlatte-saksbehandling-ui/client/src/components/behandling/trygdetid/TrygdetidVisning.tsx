@@ -80,7 +80,7 @@ const TrygdetidVisning = (props: { behandling: IDetaljertBehandling }) => {
 
       {behandles ? (
         <BehandlingHandlingKnapper>
-          <Button variant="primary" size="medium" onClick={next}>
+          <Button variant="primary" onClick={next}>
             Gå videre
           </Button>
         </BehandlingHandlingKnapper>

@@ -50,12 +50,12 @@ export function Klagebehandling() {
   return (
     <>
       <StatusBar result={personStatus} />
-      <Spinner visible={isPending(fetchKlageStatus)} label="Henter klagebehandling" />
+      <KlageStegmeny />
+      {isPending(fetchKlageStatus) && <Spinner visible label="Henter klagebehandling" />}
 
-      {klage !== null && viHarLastetRiktigKlage ? (
+      {klage !== null && viHarLastetRiktigKlage && (
         <GridContainer>
           <MainContent>
-            <KlageStegmeny />
             <Routes>
               <Route path="formkrav" element={<KlageFormkrav />} />
               <Route path="vurdering" element={<KlageVurdering />} />
@@ -65,7 +65,7 @@ export function Klagebehandling() {
           </MainContent>
           <KlageSidemeny />
         </GridContainer>
-      ) : null}
+      )}
 
       {isFailure(fetchKlageStatus) && <ApiErrorAlert>Kunne ikke hente klagebehandling</ApiErrorAlert>}
     </>

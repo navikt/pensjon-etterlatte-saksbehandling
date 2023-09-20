@@ -1,9 +1,7 @@
-import { useState } from 'react'
-import { TextButton } from './TextButton'
 import { Adressevisning } from '~components/behandling/felles/Adressevisning'
-import { PersonDetailWrapper, Historikk } from '~components/behandling/soeknadsoversikt/styled'
+import { Historikk, PersonDetailWrapper } from '~components/behandling/soeknadsoversikt/styled'
 import { IAdresse } from '~shared/types/IAdresse'
-import { Label } from '@navikt/ds-react'
+import { Label, ReadMore } from '@navikt/ds-react'
 
 type Props = {
   adresser: Readonly<IAdresse[]> | undefined
@@ -12,7 +10,6 @@ type Props = {
 }
 
 export const PersonInfoAdresse = (props: Props) => {
-  const [visAdresseHistorikk, setVisAdresseHistorikk] = useState(false)
   const adresser = props.adresser ? [...props.adresser] : []
 
   const aktivAdresse: IAdresse | undefined = adresser?.find((adresse: IAdresse) => adresse.aktiv)
@@ -39,8 +36,9 @@ export const PersonInfoAdresse = (props: Props) => {
 
       {adresser && props.visHistorikk && (
         <Historikk>
-          <TextButton isOpen={visAdresseHistorikk} setIsOpen={setVisAdresseHistorikk} />
-          {visAdresseHistorikk && <Adressevisning adresser={adresser} soeknadsoversikt={true} />}
+          <ReadMore header={'Historikk'}>
+            <Adressevisning adresser={adresser} soeknadsoversikt={true} />
+          </ReadMore>
         </Historikk>
       )}
     </PersonDetailWrapper>

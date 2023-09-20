@@ -98,7 +98,6 @@ export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => 
               <Button
                 variant="primary"
                 size="small"
-                className="button"
                 onClick={() =>
                   lagre({ behandlingId: behandling.id, request: { aktivitet: beskrivelse } }, (lagretElement) =>
                     setAktivitetOppfolging(lagretElement)
@@ -142,7 +141,6 @@ export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => 
           <Button
             variant="secondary"
             size="small"
-            className="button"
             as="a"
             href={`${configContext['gosysUrl']}/personoversikt/fnr=${behandling.søker?.foedselsnummer}`}
             target="_blank"
@@ -155,7 +153,7 @@ export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => 
       <Border />
 
       <BehandlingHandlingKnapper>
-        <Button variant="primary" size="medium" onClick={() => next()}>
+        <Button variant="primary" onClick={() => next()}>
           Gå videre
         </Button>
       </BehandlingHandlingKnapper>

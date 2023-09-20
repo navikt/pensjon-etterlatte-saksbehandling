@@ -5,11 +5,11 @@ import PersongalleriOmstillingsstoenad from '~components/person/journalfoeringso
 import { formaterSakstype } from '~utils/formattering'
 import { Button, Heading, Tag } from '@navikt/ds-react'
 import AvbrytBehandleJournalfoeringOppgave from '~components/person/journalfoeringsoppgave/AvbrytBehandleJournalfoeringOppgave'
-import { KnapperWrapper } from '~components/behandling/handlinger/BehandlingHandlingKnapper'
 import { Navigate, useNavigate } from 'react-router-dom'
 import { FormWrapper } from '~components/person/journalfoeringsoppgave/BehandleJournalfoeringOppgave'
 import styled from 'styled-components'
 import { gyldigPersongalleri } from '~components/person/journalfoeringsoppgave/nybehandling/validator'
+import { FlexRow } from '~shared/styled'
 
 export default function OpprettNyBehandling() {
   const { oppgave, behandlingBehov } = useJournalfoeringOppgave()
@@ -36,23 +36,24 @@ export default function OpprettNyBehandling() {
       {sakType === SakType.OMSTILLINGSSTOENAD && <PersongalleriOmstillingsstoenad />}
       {sakType === SakType.BARNEPENSJON && <PersongalleriBarnepensjon />}
 
-      <KnapperWrapper>
-        <div>
-          <Button variant="secondary" className="button" onClick={tilbake}>
+      <div>
+        <FlexRow justify={'center'} $spacing>
+          <Button variant="secondary" onClick={tilbake}>
             Tilbake
           </Button>
 
           <Button
             variant="primary"
             onClick={neste}
-            className="button"
             disabled={!gyldigPersongalleri(sakType, behandlingBehov?.persongalleri)}
           >
             Neste
           </Button>
-        </div>
-        <AvbrytBehandleJournalfoeringOppgave />
-      </KnapperWrapper>
+        </FlexRow>
+        <FlexRow justify={'center'}>
+          <AvbrytBehandleJournalfoeringOppgave />
+        </FlexRow>
+      </div>
     </FormWrapper>
   )
 }

@@ -9,9 +9,9 @@ import { useAppDispatch } from '~store/Store'
 import { settJournalpost } from '~store/reducers/JournalfoeringOppgaveReducer'
 import Spinner from '~shared/Spinner'
 import styled from 'styled-components'
-import { ButtonWrapper } from '~components/behandling/attestering/styled'
 import DokumentModal from '../dokumenter/dokumentModal'
 import { Journalpost } from '~shared/types/Journalpost'
+import { FlexRow } from '~shared/styled'
 
 export default function VelgJournalpost() {
   const { bruker, journalpost } = useJournalfoeringOppgave()
@@ -102,17 +102,17 @@ export default function VelgJournalpost() {
                     <Table.DataCell>{journalpost.journalstatus}</Table.DataCell>
                     <Table.DataCell>{journalpost.journalposttype === 'I' ? 'Inngående' : 'Utgående'}</Table.DataCell>
                     <Table.DataCell>
-                      <ButtonWrapper>
+                      <FlexRow>
                         <DokumentModal
                           tittel={journalpost.tittel}
                           journalpostId={journalpost.journalpostId}
                           dokumentInfoId={journalpost.dokumenter[0].dokumentInfoId}
                         />
-                        &nbsp;
+
                         <Button variant={'primary'} size={'small'} onClick={() => velgJournalpost(journalpost)}>
                           Velg
                         </Button>
-                      </ButtonWrapper>
+                      </FlexRow>
                     </Table.DataCell>
                   </Table.Row>
                 ))}

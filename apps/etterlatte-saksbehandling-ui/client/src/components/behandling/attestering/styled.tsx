@@ -71,11 +71,3 @@ export const Tekst = styled.div`
 
   color: #3e3832;
 `
-
-export const ButtonWrapper = styled.div`
-  .button {
-    width: 200px;
-    padding: 0.7em 0.5em 0.7em 0.5em;
-    margin-top: 1em;
-  }
-`

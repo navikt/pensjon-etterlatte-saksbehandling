@@ -82,7 +82,7 @@ export const KommerBarnetTilGodeVurdering = ({
     >
       <div>
         <VurderingsTitle title={'Trenger avklaring'} />
-        <Undertekst gray={false}>
+        <Undertekst $gray={false}>
           Boforholdet er avklart og sannsynliggjort at pensjonen kommer barnet til gode?
         </Undertekst>
         <RadioGroupWrapper>

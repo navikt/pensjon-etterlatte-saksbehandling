@@ -1,19 +1,5 @@
 import styled from 'styled-components'
 
-export const VilkaarBorder = styled.div`
-  padding: 1em 0;
-  border-bottom: 1px solid #ccc;
-  left: 0;
-  right: 0;
-`
-
-export const VilkaarBorderTop = styled.div`
-  padding: 1em 0;
-  border-top: 1px solid #ccc;
-  left: 0;
-  right: 0;
-`
-
 export const Innhold = styled.div`
   padding: 0 2em;
 `

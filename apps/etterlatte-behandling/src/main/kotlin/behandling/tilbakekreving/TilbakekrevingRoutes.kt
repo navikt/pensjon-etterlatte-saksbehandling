@@ -13,7 +13,7 @@ import no.nav.etterlatte.libs.common.tilbakekreving.Kravgrunnlag
 
 internal fun Route.tilbakekrevingRoutes(service: TilbakekrevingService) {
     route("/tilbakekreving") {
-        post("opprett/{$SAKID_CALL_PARAMETER}") {
+        post {
             medBody<Kravgrunnlag> {
                 inTransaction {
                     service.opprettTilbakekreving(it)

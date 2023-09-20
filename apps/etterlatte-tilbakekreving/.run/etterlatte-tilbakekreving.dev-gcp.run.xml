@@ -12,20 +12,21 @@
       <env name="KRAVGRUNNLAG_MQ_NAME" value="DEV.QUEUE.2" />
       <env name="srvuser" value="admin" />
       <env name="srvpwd" value="passw0rd" />
-      <env name="ETTERLATTE_BEHANDLING_CLIENT_ID" value="59967ac8-009c-492e-a618-e5a0f6b3e4e4" />
+      <env name="ETTERLATTE_BEHANDLING_SCOPE" value="api://dev-gcp.etterlatte.etterlatte-behandling/.default" />
       <env name="ETTERLATTE_BEHANDLING_URL" value="https://etterlatte-behandling.intern.dev.nav.no" />
     </envs>
     <option name="MAIN_CLASS_NAME" value="no.nav.etterlatte.ApplicationKt" />
     <module name="pensjon-etterlatte-saksbehandling.apps.etterlatte-tilbakekreving.main" />
     <shortenClasspath name="NONE" />
     <extension name="net.ashald.envfile">
-      <option name="IS_ENABLED" value="false" />
+      <option name="IS_ENABLED" value="true" />
       <option name="IS_SUBST" value="false" />
       <option name="IS_PATH_MACRO_SUPPORTED" value="false" />
       <option name="IS_IGNORE_MISSING_FILES" value="false" />
       <option name="IS_ENABLE_EXPERIMENTAL_INTEGRATIONS" value="false" />
       <ENTRIES>
         <ENTRY IS_ENABLED="true" PARSER="runconfig" IS_EXECUTABLE="false" />
+        <ENTRY IS_ENABLED="true" PARSER="env" IS_EXECUTABLE="false" PATH="apps/etterlatte-tilbakekreving/.env.dev-gcp" />
       </ENTRIES>
     </extension>
     <method v="2">

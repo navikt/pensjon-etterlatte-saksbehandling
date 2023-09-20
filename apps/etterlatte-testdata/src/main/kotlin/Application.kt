@@ -9,9 +9,7 @@ import com.github.michaelbull.result.get
 import com.github.mustachejava.DefaultMustacheFactory
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
-import io.ktor.client.request.header
 import io.ktor.http.ContentType
-import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.serialization.jackson.jackson
 import io.ktor.server.application.ApplicationCall
@@ -20,7 +18,6 @@ import io.ktor.server.application.install
 import io.ktor.server.application.log
 import io.ktor.server.auth.Authentication
 import io.ktor.server.auth.authenticate
-import io.ktor.server.auth.principal
 import io.ktor.server.cio.CIO
 import io.ktor.server.config.HoconApplicationConfig
 import io.ktor.server.engine.applicationEngineEnvironment
@@ -44,8 +41,8 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.kafka.GcpKafkaConfig
 import no.nav.etterlatte.kafka.LocalKafkaConfig
 import no.nav.etterlatte.kafka.standardProducer
-import no.nav.etterlatte.libs.common.logging.NAV_CONSUMER_ID
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.ktor.firstValidTokenClaims
 import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.libs.ktor.metricsModule
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
@@ -57,7 +54,6 @@ import no.nav.etterlatte.testdata.features.egendefinert.EgendefinertMeldingFeatu
 import no.nav.etterlatte.testdata.features.index.IndexFeature
 import no.nav.etterlatte.testdata.features.soeknad.OpprettSoeknadFeature
 import no.nav.etterlatte.testdata.features.standardmelding.StandardMeldingFeature
-import no.nav.security.token.support.v2.TokenValidationContextPrincipal
 import no.nav.security.token.support.v2.tokenValidationSupport
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -160,19 +156,11 @@ private fun Route.api() {
     }
 }
 
-fun httpClient() = httpClient(
-    forventSuksess = true,
-    ekstraDefaultHeaders = {
-        it.header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-        it.header(NAV_CONSUMER_ID, "etterlatte-testdata")
-    }
-)
+fun PipelineContext<Unit, ApplicationCall>.navIdentFraToken() =
+    call.firstValidTokenClaims()?.get("NAVident")?.toString()
 
-fun PipelineContext<Unit, ApplicationCall>.navIdentFraToken() = call.principal<TokenValidationContextPrincipal>()
-    ?.context?.firstValidToken?.get()?.jwtTokenClaims?.get("NAVident")?.toString()
-
-fun PipelineContext<Unit, ApplicationCall>.usernameFraToken() = call.principal<TokenValidationContextPrincipal>()
-    ?.context?.firstValidToken?.get()?.jwtTokenClaims?.get("preferred_username")?.toString()
+fun PipelineContext<Unit, ApplicationCall>.usernameFraToken() =
+    call.firstValidTokenClaims()?.get("preferred_username")?.toString()
 
 fun getClientAccessToken(): String = runBlocking {
     azureAdClient.getAccessTokenForResource(listOf("api://${config.getString("dolly.client.id")}/.default"))

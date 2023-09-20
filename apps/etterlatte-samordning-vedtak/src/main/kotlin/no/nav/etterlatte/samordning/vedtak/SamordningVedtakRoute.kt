@@ -3,12 +3,11 @@ package no.nav.etterlatte.samordning.vedtak
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.call
-import io.ktor.server.auth.principal
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.route
-import no.nav.security.token.support.v2.TokenValidationContextPrincipal
+import no.nav.etterlatte.libs.ktor.hentTokenClaims
 import java.time.LocalDate
 import kotlin.random.Random
 
@@ -90,22 +89,19 @@ private fun dummySamordningVedtakDto(
     aarsak = null,
     anvendtTrygdetid = 40,
     perioder =
-        listOf(
-            SamordningVedtakPeriode(
-                fom = virkFom,
-                omstillingsstoenadBrutto = 12000,
-                omstillingsstoenadNetto = 9500
-            )
+    listOf(
+        SamordningVedtakPeriode(
+            fom = virkFom,
+            omstillingsstoenadBrutto = 12000,
+            omstillingsstoenadNetto = 9500
         )
+    )
 )
 
 inline val ApplicationCall.orgNummer: String
     get() {
         val claims =
-            this.principal<TokenValidationContextPrincipal>()
-                ?.context
-                ?.getJwtToken("maskinporten")
-                ?.jwtTokenClaims
+            this.hentTokenClaims("maskinporten")
                 ?.get("consumer") as Map<*, *>?
                 ?: throw IllegalArgumentException("Kan ikke hente ut organisasjonsnummer")
         return (claims["ID"] as String).split(":")[1]

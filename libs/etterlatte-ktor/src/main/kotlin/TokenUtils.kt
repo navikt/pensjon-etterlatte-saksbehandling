@@ -4,12 +4,10 @@ import io.ktor.http.auth.HttpAuthHeader
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.call
 import io.ktor.server.auth.parseAuthorizationHeader
-import io.ktor.server.auth.principal
 import io.ktor.util.pipeline.PipelineContext
 import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.etterlatte.token.Claims
 import no.nav.security.token.support.core.jwt.JwtTokenClaims
-import no.nav.security.token.support.v2.TokenValidationContextPrincipal
 
 const val AZURE_ISSUER = "azure"
 
@@ -28,10 +26,7 @@ inline val PipelineContext<*, ApplicationCall>.brukerTokenInfo: BrukerTokenInfo
 
 inline val ApplicationCall.brukerTokenInfo: BrukerTokenInfo
     get() {
-        val claims = this.principal<TokenValidationContextPrincipal>()
-            ?.context
-            ?.getJwtToken(AZURE_ISSUER)
-            ?.jwtTokenClaims
+        val claims = this.hentTokenClaims(AZURE_ISSUER)
         val oidSub = claims
             ?.let {
                 val oid = it.getClaim(Claims.oid)

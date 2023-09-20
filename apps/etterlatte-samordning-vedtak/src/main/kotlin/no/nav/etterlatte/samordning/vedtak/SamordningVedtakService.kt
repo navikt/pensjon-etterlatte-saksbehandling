@@ -45,7 +45,7 @@ class SamordningVedtakService(
         return SamordningVedtakDto(
             vedtakId = vedtakId,
             sakstype = "OMS",
-            virkningsdato = virkningstidspunkt.atDay(1),
+            virkningsdato = virkningstidspunkt.atStartOfMonth(),
             opphoersdato = null,
             type = type.toSamordningsvedtakType(),
             aarsak = null,
@@ -68,7 +68,7 @@ class SamordningVedtakService(
 
     private fun AvkortetYtelseDto.toSamordningVedtakPeriode(): SamordningVedtakPeriode {
         return SamordningVedtakPeriode(
-            fom = fom.atDay(1),
+            fom = fom.atStartOfMonth(),
             tom = tom?.atEndOfMonth(),
             omstillingsstoenadBrutto = ytelseFoerAvkorting,
             omstillingsstoenadNetto = ytelseEtterAvkorting,

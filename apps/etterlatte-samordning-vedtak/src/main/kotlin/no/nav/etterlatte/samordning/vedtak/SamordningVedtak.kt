@@ -2,6 +2,7 @@ package no.nav.etterlatte.samordning.vedtak
 
 import com.fasterxml.jackson.annotation.JsonInclude
 import java.time.LocalDate
+import java.time.YearMonth
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 data class SamordningVedtakDto(
@@ -35,3 +36,5 @@ enum class SamordningVedtakAarsak {
 }
 
 class VedtakFeilSakstypeException : RuntimeException()
+
+fun YearMonth.atStartOfMonth(): LocalDate = this.atDay(1)

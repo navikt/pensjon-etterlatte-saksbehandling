@@ -28,6 +28,7 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.YearMonth.now
+import java.util.UUID
 
 class SamordningVedtakServiceTest {
     private val vedtakKlient = mockk<VedtaksvurderingKlient>()
@@ -79,13 +80,13 @@ class SamordningVedtakServiceTest {
             equalityMatcher(
                 listOf(
                     SamordningVedtakPeriode(
-                        fom = now().atDay(1),
+                        fom = now().atStartOfMonth(),
                         tom = now().atEndOfMonth(),
                         omstillingsstoenadBrutto = 13000,
                         omstillingsstoenadNetto = 12000,
                     ),
                     SamordningVedtakPeriode(
-                        fom = now().plusMonths(1).atDay(1),
+                        fom = now().plusMonths(1).atStartOfMonth(),
                         tom = null,
                         omstillingsstoenadBrutto = 13000,
                         omstillingsstoenadNetto = 12000,

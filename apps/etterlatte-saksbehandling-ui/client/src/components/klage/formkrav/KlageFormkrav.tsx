@@ -209,7 +209,7 @@ export function KlageFormkrav() {
 
           <JaNeiRadiogruppe name="erFormkraveneOppfylt" control={control} legend="Er formkravene til klagen oppfylt?" />
         </Innhold>
-        <FlexRow justify={'center'}>
+        <FlexRow justify="center">
           <Button type="submit" loading={isPending(lagreFormkravStatus)}>
             Lagre vurdering av formkrav
           </Button>

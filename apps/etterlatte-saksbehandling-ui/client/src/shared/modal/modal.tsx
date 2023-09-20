@@ -29,14 +29,14 @@ export const GeneriskModal = ({
         setModalisOpen(false)
       }}
       aria-labelledby="modal-heading"
-      className={'padding-modal'}
+      className="padding-modal"
     >
       <Modal.Body>
         <Heading spacing level="1" id="modal-heading" size="medium">
           {tittel}
         </Heading>
         {beskrivelse && <BodyShort spacing>{beskrivelse}</BodyShort>}
-        <FlexRow justify={'center'}>
+        <FlexRow justify="center">
           <Button variant="primary" onClick={onYesClick} loading={!!loading}>
             {tekstKnappJa}
           </Button>

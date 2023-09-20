@@ -42,20 +42,20 @@ const handlingKnapp = (brev: IBrev) => {
   if (brev.behandlingId && brevKanEndres(brev.status)) {
     return (
       <Button
-        as={'a'}
+        as="a"
         href={`/behandling/${brev.behandlingId}/brev`}
-        variant={'secondary'}
-        title={'Gå til behandling'}
+        variant="secondary"
+        title="Gå til behandling"
         icon={<ExternalLinkIcon />}
       />
     )
   } else if (!brev.behandlingId && brev.status != BrevStatus.DISTRIBUERT) {
     return (
       <Button
-        as={'a'}
+        as="a"
         href={`/person/${brev.soekerFnr}/sak/${brev.sakId}/brev/${brev.id}`}
-        variant={'secondary'}
-        title={'Rediger'}
+        variant="secondary"
+        title="Rediger"
         icon={<DocPencilIcon />}
       />
     )
@@ -88,7 +88,7 @@ export default function BrevOversikt() {
 
       <Container>
         {isPendingOrInitial(brevListe) ? (
-          <Spinner visible label={'Henter brev for sak ...'} />
+          <Spinner visible label="Henter brev for sak ..." />
         ) : (
           <Table>
             <Table.Header>
@@ -102,13 +102,13 @@ export default function BrevOversikt() {
               </Table.Row>
             </Table.Header>
             <Table.Body>
-              {isFailure(brevListe) && <Alert variant={'error'}>Feil ved henting av brev...</Alert>}
+              {isFailure(brevListe) && <Alert variant="error">Feil ved henting av brev...</Alert>}
               {isSuccess(brevListe) &&
                 brevListe.data.map((b) => (
                   <Table.Row key={b.id}>
                     <Table.DataCell>{b.id}</Table.DataCell>
                     <Table.DataCell>
-                      <Tag variant={tagColors(b.status)} size={'medium'}>
+                      <Tag variant={tagColors(b.status)} size="medium">
                         {mapStatus(b.status)}
                       </Tag>
                     </Table.DataCell>
@@ -117,12 +117,12 @@ export default function BrevOversikt() {
                         <>
                           Vedtaksbrev{' '}
                           <Button
-                            variant={'tertiary'}
-                            as={'a'}
+                            variant="tertiary"
+                            as="a"
                             href={`/behandling/${b.behandlingId}/brev`}
                             icon={<ExternalLinkIcon />}
-                            size={'small'}
-                            title={'Gå til behandling'}
+                            size="small"
+                            title="Gå til behandling"
                           />
                         </>
                       ) : (
@@ -141,9 +141,9 @@ export default function BrevOversikt() {
 
       <Container>
         <Button
-          variant={'primary'}
+          variant="primary"
           icon={<DocPencilIcon />}
-          iconPosition={'right'}
+          iconPosition="right"
           onClick={opprettNyttBrevOgRedirect}
           loading={isPending(nyttBrevStatus)}
         >

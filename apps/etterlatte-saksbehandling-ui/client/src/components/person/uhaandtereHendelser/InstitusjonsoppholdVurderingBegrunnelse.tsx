@@ -87,7 +87,7 @@ const InstitusjonsoppholdVurderingBegrunnelse = (props: InstitusjonsoppholdProps
   return (
     <>
       <LovtekstMedLenke
-        tittel={'Institusjonsopphold'}
+        tittel="Institusjonsopphold"
         hjemler={[
           {
             tittel: '§ 18-8.Barnepensjon under opphold i institusjon',
@@ -110,7 +110,7 @@ const InstitusjonsoppholdVurderingBegrunnelse = (props: InstitusjonsoppholdProps
             <LeggTilVurderingButton onClick={() => setVurdert(true)}>Legg til vurdering</LeggTilVurderingButton>
           ) : (
             <VurderingsboksWrapper
-              tittel={''}
+              tittel=""
               vurdering={undefined}
               redigerbar={true}
               lagreklikk={lagreSvarInstitusjonsopphold}

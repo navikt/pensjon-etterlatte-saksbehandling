@@ -34,17 +34,17 @@ export default function BehandleJournalfoeringOppgave() {
   return (
     <>
       <StatusBar result={personStatus} />
-      <NavigerTilbakeMeny label={'Tilbake til oppgavebenken'} path={'/'} />
+      <NavigerTilbakeMeny label="Tilbake til oppgavebenken" path="/" />
 
       <JournalfoeringOppgaveStegmeny />
       <GridContainer>
         <Column style={{ width: '50rem' }}>
           <Container>
             <Routes>
-              <Route index element={<Navigate to={'kontroll'} />} />
-              <Route path={'/kontroll'} element={<KontrollerOppgave />} />
-              <Route path={'/nybehandling'} element={<OpprettNyBehandling />} />
-              <Route path={'/oppsummering'} element={<OppsummeringOppgavebehandling />} />
+              <Route index element={<Navigate to="kontroll" />} />
+              <Route path="/kontroll" element={<KontrollerOppgave />} />
+              <Route path="/nybehandling" element={<OpprettNyBehandling />} />
+              <Route path="/oppsummering" element={<OppsummeringOppgavebehandling />} />
             </Routes>
           </Container>
         </Column>

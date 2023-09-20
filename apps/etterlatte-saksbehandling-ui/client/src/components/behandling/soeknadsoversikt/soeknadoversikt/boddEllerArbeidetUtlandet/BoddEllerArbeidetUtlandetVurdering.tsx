@@ -53,17 +53,17 @@ export const BoddEllerArbeidetUtlandetVurdering = ({
 
   return (
     <VurderingsboksWrapper
-      tittel={''}
+      tittel=""
       subtittelKomponent={
         <>
           <BodyShort spacing>Har avdøde bodd eller arbeidet i utlandet?</BodyShort>
           {boddEllerArbeidetUtlandet ? (
-            <Label as={'p'} size="small" style={{ marginBottom: '32px' }}>
+            <Label as="p" size="small" style={{ marginBottom: '32px' }}>
               {JaNeiRec[boddEllerArbeidetUtlandet.boddEllerArbeidetUtlandet ? JaNei.JA : JaNei.NEI]}
             </Label>
           ) : (
-            <Label as={'p'} size="small" style={{ marginBottom: '32px' }}>
-              {'Ikke vurdert'}
+            <Label as="p" size="small" style={{ marginBottom: '32px' }}>
+              Ikke vurdert
             </Label>
           )}
         </>
@@ -83,7 +83,7 @@ export const BoddEllerArbeidetUtlandetVurdering = ({
       defaultRediger={boddEllerArbeidetUtlandet === null}
     >
       <>
-        <VurderingsTitle title={'Har avdøde bodd eller arbeidet i utlandet?'} />
+        <VurderingsTitle title="Har avdøde bodd eller arbeidet i utlandet?" />
         <RadioGroupWrapper>
           <RadioGroup
             legend=""

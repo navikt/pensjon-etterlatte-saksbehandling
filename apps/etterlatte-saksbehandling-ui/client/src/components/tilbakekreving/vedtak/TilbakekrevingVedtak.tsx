@@ -20,7 +20,7 @@ export function TilbakekrevingVedtak() {
       <Innhold>
         <BodyShort>Relevante ting for vedtak her</BodyShort>
       </Innhold>
-      <FlexRow justify={'center'}>
+      <FlexRow justify="center">
         <Button variant="primary" onClick={() => navigate(`/tilbakekreving/${tilbakekreving?.id}/vedtak`)}>
           Fatt vedtak
         </Button>

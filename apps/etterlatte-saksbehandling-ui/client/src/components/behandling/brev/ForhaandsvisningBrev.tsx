@@ -27,10 +27,10 @@ export default function ForhaandsvisningBrev({ brev }: { brev: IBrev }) {
 
   return (
     <Container>
-      {isPendingOrInitial(pdf) && <Spinner visible={true} label={'Klargjør forhåndsvisning av PDF ...'} />}
+      {isPendingOrInitial(pdf) && <Spinner visible={true} label="Klargjør forhåndsvisning av PDF ..." />}
       {isSuccess(pdf) && !!fileURL && <PdfViewer src={`${fileURL}#toolbar=0`} />}
       {isFailure(pdf) && (
-        <Alert variant={'error'}>
+        <Alert variant="error">
           En feil har oppstått ved henting av PDF: <code>{JSON.stringify(pdf.error)}</code>
         </Alert>
       )}

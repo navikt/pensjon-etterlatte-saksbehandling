@@ -6,11 +6,11 @@ import { FlexRow } from '~shared/styled'
 export const BehandlingHandlingKnapper = ({ children }: { children: ReactNode }) => {
   return (
     <div>
-      <FlexRow justify={'center'} $spacing>
+      <FlexRow justify="center" $spacing>
         <Tilbake />
         {children}
       </FlexRow>
-      <FlexRow justify={'center'}>
+      <FlexRow justify="center">
         <AvbrytBehandling />
       </FlexRow>
     </div>

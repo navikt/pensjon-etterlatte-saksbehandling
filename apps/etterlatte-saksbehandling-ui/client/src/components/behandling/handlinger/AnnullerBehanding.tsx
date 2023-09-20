@@ -39,14 +39,14 @@ export default function AnnullerBehandling() {
 
   return (
     <>
-      <ExpansionCardSpaced aria-labelledby={'card-heading'}>
+      <ExpansionCardSpaced aria-labelledby="card-heading">
         <ExpansionCard.Header>
           <div className="with-icon">
             <div className="icon">
               <ExclamationmarkTriangleFillIcon aria-hidden />
             </div>
             <div>
-              <Heading size={'xsmall'} id={'card-heading'}>
+              <Heading size="xsmall" id="card-heading">
                 Annuller {formaterBehandlingstype(behandling!!.behandlingType).toLowerCase()}
               </Heading>
             </div>
@@ -54,14 +54,14 @@ export default function AnnullerBehandling() {
         </ExpansionCard.Header>
 
         <ExpansionCard.Content>
-          <Alert variant={'warning'}>
+          <Alert variant="warning">
             {erFoerstegangsbehandling
               ? 'Hvis denne behandlingen ikke kan behandles i Gjenny må sak og behandling annulleres.'
               : 'Hvis denne behandlingen er uaktuell, kan du annullere den her.'}
           </Alert>
           <br />
           <div className="flex">
-            <Button variant={'danger'} onClick={() => setIsOpen(true)} icon={<XMarkIcon />}>
+            <Button variant="danger" onClick={() => setIsOpen(true)} icon={<XMarkIcon />}>
               Annuller {formaterBehandlingstype(behandling!!.behandlingType).toLowerCase()}
             </Button>
           </div>
@@ -70,13 +70,13 @@ export default function AnnullerBehandling() {
 
       <Modal open={isOpen} onClose={() => setIsOpen(false)} aria-labelledby="modal-heading">
         <Modal.Header>
-          <Heading level={'1'} spacing size={'medium'} id="modal-heading">
+          <Heading level="1" spacing size="medium" id="modal-heading">
             Er du sikker på at du vil annullere behandlingen?
           </Heading>
         </Modal.Header>
 
         <Modal.Body>
-          <Alert variant={'warning'}>
+          <Alert variant="warning">
             {erFoerstegangsbehandling
               ? 'Saken blir annullert og kan ikke behandles videre i Gjenny. Saken må manuelt opprettes på nytt i Pesys.'
               : 'Behandlingen blir avsluttet og kan opprettes på nytt.'}
@@ -84,7 +84,7 @@ export default function AnnullerBehandling() {
         </Modal.Body>
 
         <Modal.Footer>
-          <FlexRow justify={'center'}>
+          <FlexRow justify="center">
             <Button variant="secondary" onClick={() => setIsOpen(false)} loading={isPending(status)}>
               Nei, fortsett {formaterBehandlingstype(behandling!!.behandlingType).toLowerCase()}
             </Button>
@@ -93,7 +93,7 @@ export default function AnnullerBehandling() {
             </Button>
           </FlexRow>
 
-          {isFailure(status) && <Alert variant={'error'}>Det oppsto en feil ved avbryting av behandlingen.</Alert>}
+          {isFailure(status) && <Alert variant="error">Det oppsto en feil ved avbryting av behandlingen.</Alert>}
         </Modal.Footer>
       </Modal>
     </>

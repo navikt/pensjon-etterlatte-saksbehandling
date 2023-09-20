@@ -9,13 +9,13 @@ export default function AvbrytBehandleJournalfoeringOppgave() {
 
   return (
     <>
-      <Button variant={'tertiary'} onClick={() => setIsOpen(true)}>
+      <Button variant="tertiary" onClick={() => setIsOpen(true)}>
         Avbryt
       </Button>
 
-      <Modal open={isOpen} onClose={() => setIsOpen(false)} aria-labelledby="modal-heading" className={'padding-modal'}>
+      <Modal open={isOpen} onClose={() => setIsOpen(false)} aria-labelledby="modal-heading" className="padding-modal">
         <Modal.Body style={{ textAlign: 'center' }}>
-          <Heading level={'1'} spacing size={'medium'} id="modal-heading">
+          <Heading level="1" spacing size="medium" id="modal-heading">
             Er du sikker på at du vil avbryte?
           </Heading>
 
@@ -24,7 +24,7 @@ export default function AvbrytBehandleJournalfoeringOppgave() {
             Det du har gjort til nå vil bli slettet og du må starte oppgavebehandlingen på nytt.
           </BodyLong>
 
-          <FlexRow justify={'center'}>
+          <FlexRow justify="center">
             <Button variant="secondary" onClick={() => setIsOpen(false)}>
               Nei, fortsett
             </Button>

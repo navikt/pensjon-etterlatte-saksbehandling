@@ -68,8 +68,8 @@ export default function RelevanteHendelser(props: Props) {
           Nye hendelser
         </Heading>
 
-        {isFailure(hendelserStatus) && <Alert variant={'error'}>{JSON.stringify(hendelserStatus.error)}</Alert>}
-        {isPending(hendelserStatus) && <Spinner visible label={'Laster hendelser ...'} />}
+        {isFailure(hendelserStatus) && <Alert variant="error">{JSON.stringify(hendelserStatus.error)}</Alert>}
+        {isPending(hendelserStatus) && <Spinner visible label="Laster hendelser ..." />}
         {isSuccess(hendelserStatus) &&
           (relevanteHendelser.length ? (
             <>
@@ -95,21 +95,21 @@ export default function RelevanteHendelser(props: Props) {
                 </Table.Body>
               </Table>
 
-              <Alert variant={'warning'}>
+              <Alert variant="warning">
                 Ny hendelse som kan kreve revurdering. Vurder om det har konsekvens for ytelsen.
               </Alert>
             </>
           ) : (
-            <Alert variant={'info'} inline>
+            <Alert variant="info" inline>
               Ingen nye hendelser
             </Alert>
           ))}
       </FnrTilNavnMapContext.Provider>
 
       {isFailure(revurderingerStatus) && (
-        <Alert variant={'error'}>En feil skjedde under kallet for å hente støttede revurderinger</Alert>
+        <Alert variant="error">En feil skjedde under kallet for å hente støttede revurderinger</Alert>
       )}
-      {isPending(revurderingerStatus) && <Spinner visible label={'Sjekker om det kan opprettes ny behandling ...'} />}
+      {isPending(revurderingerStatus) && <Spinner visible label="Sjekker om det kan opprettes ny behandling ..." />}
       {isSuccess(revurderingerStatus) && revurderingerStatus.data.length && (
         <>
           {valgtHendelse && (

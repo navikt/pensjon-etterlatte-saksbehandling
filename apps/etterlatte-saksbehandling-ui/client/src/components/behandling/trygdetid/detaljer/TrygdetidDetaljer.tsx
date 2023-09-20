@@ -20,7 +20,7 @@ export const TrygdetidDetaljer: React.FC<Props> = ({ beregnetTrygdetid }) => {
         <IconWrapper>
           <CalendarIcon fontSize={IconSize.DEFAULT} />
         </IconWrapper>
-        <Heading size={'small'} level={'3'}>
+        <Heading size="small" level="3">
           Beregnet trygdetid
         </Heading>
       </FlexHeader>

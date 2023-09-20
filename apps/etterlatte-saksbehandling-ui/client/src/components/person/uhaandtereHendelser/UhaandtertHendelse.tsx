@@ -84,7 +84,7 @@ const UhaandtertHendelse = (props: {
                     </Button>
                   )}
                   <Button
-                    variant={'tertiary'}
+                    variant="tertiary"
                     onClick={() => setOpen(true)}
                     icon={<XMarkIcon />}
                     style={{ float: 'right' }}
@@ -126,7 +126,7 @@ const UhaandtertHendelse = (props: {
                           en revurdering ikke er nødvendig.
                         </BodyShort>
                         <Textarea
-                          label={'Begrunnelse'}
+                          label="Begrunnelse"
                           value={hendelsekommentar}
                           onChange={(e) => oppdaterKommentar(e.target.value)}
                         />

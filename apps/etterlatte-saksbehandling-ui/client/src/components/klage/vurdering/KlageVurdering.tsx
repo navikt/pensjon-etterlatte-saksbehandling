@@ -160,7 +160,7 @@ export function KlageVurdering() {
           </ApiErrorAlert>
         ) : null}
 
-        <FlexRow justify={'center'}>
+        <FlexRow justify="center">
           <Button type="button" variant="secondary" onClick={() => navigate(`/klage/${klage?.id}/formkrav`)}>
             Gå tilbake
           </Button>

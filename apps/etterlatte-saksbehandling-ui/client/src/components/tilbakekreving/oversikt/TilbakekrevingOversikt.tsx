@@ -20,7 +20,7 @@ export function TilbakekrevingOversikt() {
       <Innhold>
         <BodyShort>Informasjon om tilbakekreving her</BodyShort>
       </Innhold>
-      <FlexRow justify={'center'}>
+      <FlexRow justify="center">
         <Button variant="primary" onClick={() => navigate(`/tilbakekreving/${tilbakekreving?.id}/vurdering`)}>
           Gå til vurdering
         </Button>

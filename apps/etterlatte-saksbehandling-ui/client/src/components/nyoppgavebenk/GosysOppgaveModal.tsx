@@ -93,7 +93,7 @@ export const GosysOppgaveModal = ({ oppgave }: { oppgave: OppgaveDTOny }) => {
               <BodyShort>{beskrivelse}</BodyShort>
             </div>
           </BeskrivelseWrapper>
-          <FlexRow justify={'right'}>
+          <FlexRow justify="right">
             <Button variant="tertiary" onClick={() => setOpen(false)}>
               Avbryt
             </Button>

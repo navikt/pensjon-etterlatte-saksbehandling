@@ -37,7 +37,7 @@ export function TilbakekrevingVurdering() {
           <Table.Body>
             {tilbakekreving?.kravgrunnlag.perioder.map((periode) => {
               return (
-                <Table.Row key={'test'}>
+                <Table.Row key="test">
                   <Table.DataCell key="test">{periode.fra}</Table.DataCell>
                   <Table.DataCell key="test">{periode.beskrivelse}</Table.DataCell>
                   <Table.DataCell key="test">{periode.bruttoUtbetaling}</Table.DataCell>
@@ -54,11 +54,11 @@ export function TilbakekrevingVurdering() {
                       value=""
                       //onChange={(e) => {}}
                     >
-                      <option key={'test'}>Velg..</option>
-                      <option key={'test'}>Foreldet</option>
-                      <option key={'test'}>Ingen tilbakekreving</option>
-                      <option key={'test'}>Delvis tilbakekreving</option>
-                      <option key={'test'}>Full tilbakekreving</option>
+                      <option key="test">Velg..</option>
+                      <option key="test">Foreldet</option>
+                      <option key="test">Ingen tilbakekreving</option>
+                      <option key="test">Delvis tilbakekreving</option>
+                      <option key="test">Full tilbakekreving</option>
                     </Select>
                   </Table.DataCell>
                   <Table.DataCell key="test">
@@ -68,11 +68,11 @@ export function TilbakekrevingVurdering() {
                       value=""
                       //onChange={(e) => {}}
                     >
-                      <option key={'test'}>Velg..</option>
-                      <option key={'test'}>Ikke fordelt</option>
-                      <option key={'test'}>Bruker</option>
-                      <option key={'test'}>Nav</option>
-                      <option key={'test'}>Skylddeling</option>
+                      <option key="test">Velg..</option>
+                      <option key="test">Ikke fordelt</option>
+                      <option key="test">Bruker</option>
+                      <option key="test">Nav</option>
+                      <option key="test">Skylddeling</option>
                     </Select>
                   </Table.DataCell>
                   <Table.DataCell key="test">
@@ -82,9 +82,9 @@ export function TilbakekrevingVurdering() {
                       value=""
                       //onChange={(e) => {}}
                     >
-                      <option key={'test'}>Velg..</option>
-                      <option key={'test'}>Annet</option>
-                      <option key={'test'}>Feil regelbruk</option>
+                      <option key="test">Velg..</option>
+                      <option key="test">Annet</option>
+                      <option key="test">Feil regelbruk</option>
                     </Select>
                   </Table.DataCell>
                 </Table.Row>
@@ -93,7 +93,7 @@ export function TilbakekrevingVurdering() {
           </Table.Body>
         </Table>
       </Innhold>
-      <FlexRow justify={'center'}>
+      <FlexRow justify="center">
         <Button variant="primary" onClick={() => navigate(`/tilbakekreving/${tilbakekreving?.id}/vedtak`)}>
           Gå til vedtak
         </Button>

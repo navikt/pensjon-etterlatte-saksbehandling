@@ -38,7 +38,7 @@ export default function NyttBrev() {
   return (
     <>
       <StatusBar result={personStatus} />
-      <NavigerTilbakeMeny label={'Tilbake til brevoversikt'} path={`/person/${fnr}/sak/${sakId}/brev`} />
+      <NavigerTilbakeMeny label="Tilbake til brevoversikt" path={`/person/${fnr}/sak/${sakId}/brev`} />
 
       <GridContainer>
         <Column>{isSuccess(hentetBrev) && <NyttBrevMottaker brev={hentetBrev.data} />}</Column>

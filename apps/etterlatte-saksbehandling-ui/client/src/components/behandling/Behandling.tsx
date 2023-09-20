@@ -39,7 +39,7 @@ export const Behandling = () => {
       {behandling?.søker && <PdlPersonStatusBar person={behandling?.søker} />}
       {behandling && <StegMeny behandling={behandling} />}
 
-      {isPending(fetchBehandlingStatus) && <Spinner label={'Henter behandling ...'} visible />}
+      {isPending(fetchBehandlingStatus) && <Spinner label="Henter behandling ..." visible />}
       {isSuccess(fetchBehandlingStatus) && (
         <GridContainer>
           <MainContent>

@@ -21,26 +21,26 @@ const mapStatusTilString = (status: BrevStatus) => {
 export default function BrevStatusPanel({ brev }: { brev: IBrev }) {
   return (
     <Panel border style={{ margin: '1rem' }}>
-      <Heading size={'medium'} spacing>
+      <Heading size="medium" spacing>
         Oversikt
       </Heading>
 
-      <BodyShort spacing size={'small'}>
+      <BodyShort spacing size="small">
         <Label>ID:</Label>
         <br />
         {brev.id}
       </BodyShort>
 
-      <BodyShort spacing size={'small'}>
+      <BodyShort spacing size="small">
         <Label>Søker fnr:</Label>
         <br />
         {brev.soekerFnr}
       </BodyShort>
 
-      <BodyShort spacing size={'small'}>
+      <BodyShort spacing size="small">
         <Label>Status:</Label>
         <br />
-        <Tag variant={'info'} size={'small'}>
+        <Tag variant="info" size="small">
           {mapStatusTilString(brev.status)}
         </Tag>
       </BodyShort>

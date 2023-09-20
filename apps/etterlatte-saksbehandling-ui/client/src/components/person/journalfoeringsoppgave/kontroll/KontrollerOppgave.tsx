@@ -55,7 +55,7 @@ export default function KontrollerOppgave() {
   const kanGaaVidere = samsvar === JaNei.JA && !!journalpost
 
   if (isPending(oppgaveStatus)) {
-    return <Spinner visible label={'Henter oppgave'} />
+    return <Spinner visible label="Henter oppgave" />
   }
 
   return (
@@ -65,25 +65,25 @@ export default function KontrollerOppgave() {
       {oppgave && (
         <>
           <Panel border>
-            <Heading size={'medium'} spacing>
+            <Heading size="medium" spacing>
               Oppgave
               <br />
-              <Tag variant={'success'} size={'small'}>
+              <Tag variant="success" size="small">
                 {formaterSakstype(oppgave.sakType)}
               </Tag>
             </Heading>
 
             <InfoWrapper>
-              <Info label={'ID'} tekst={oppgave.id} />
-              <Info label={'Status'} tekst={oppgave.status} />
-              <Info label={'Type'} tekst={oppgave.type} />
-              <Info label={'Bruker'} tekst={formaterFnr(oppgave.fnr)} />
-              <Info label={'Opprettet'} tekst={formaterStringDato(oppgave.opprettet)} />
-              <Info label={'Frist'} tekst={formaterStringDato(oppgave.frist)} />
+              <Info label="ID" tekst={oppgave.id} />
+              <Info label="Status" tekst={oppgave.status} />
+              <Info label="Type" tekst={oppgave.type} />
+              <Info label="Bruker" tekst={formaterFnr(oppgave.fnr)} />
+              <Info label="Opprettet" tekst={formaterStringDato(oppgave.opprettet)} />
+              <Info label="Frist" tekst={formaterStringDato(oppgave.frist)} />
             </InfoWrapper>
             <hr />
             <div>
-              <Label size="small" as={'p'} spacing>
+              <Label size="small" as="p" spacing>
                 Beskrivelseshistorikk
               </Label>
               <BodyShort>{oppgave?.beskrivelse || 'Ingen beskrivelse'}</BodyShort>
@@ -95,19 +95,19 @@ export default function KontrollerOppgave() {
           )}
           {isSuccess(sakStatus) &&
             (sakStatus.data ? (
-              <Alert variant={'info'} inline>
+              <Alert variant="info" inline>
                 Bruker har allerede en eksisterende sak {formaterSakstype(oppgave.sakType).toLowerCase()} (id=
                 {sakStatus.data.id}). Det vil dermed bli opprettet en ny behandling tilknyttet denne saken.
               </Alert>
             ) : (
-              <Alert variant={'warning'} inline>
+              <Alert variant="warning" inline>
                 Bruker har ingen sak av typen {formaterSakstype(oppgave.sakType).toLowerCase()}. Det vil bli opprettet
                 en ny sak med behandling.
               </Alert>
             ))}
 
           <RadioGroup
-            legend={'Samsvarer oppgaven med journalposten?'}
+            legend="Samsvarer oppgaven med journalposten?"
             size="small"
             onChange={(value) => dispatch(settSamsvar(value))}
             value={samsvar || null}
@@ -120,25 +120,25 @@ export default function KontrollerOppgave() {
           </RadioGroup>
 
           {samsvar === JaNei.NEI && (
-            <Alert variant={'error'}>Oppgave og/eller journalpost må korrigeres i Gosys før du går videre</Alert>
+            <Alert variant="error">Oppgave og/eller journalpost må korrigeres i Gosys før du går videre</Alert>
           )}
 
           {samsvar === JaNei.JA && (
             <div>
               <Select
-                label={'Hvilket språk/målform er søknaden?'}
+                label="Hvilket språk/målform er søknaden?"
                 value={behandlingBehov?.spraak || ''}
                 onChange={(e) => dispatch(settBehandlingBehov({ ...behandlingBehov, spraak: e.target.value }))}
               >
                 <option>Velg ...</option>
-                <option value={'nb'}>Bokmål</option>
-                <option value={'nn'}>Nynorsk</option>
-                <option value={'en'}>Engelsk</option>
+                <option value="nb">Bokmål</option>
+                <option value="nn">Nynorsk</option>
+                <option value="en">Engelsk</option>
               </Select>
 
               <DatoVelger
-                label={'Mottatt dato'}
-                description={'Datoen søknaden ble mottatt'}
+                label="Mottatt dato"
+                description="Datoen søknaden ble mottatt"
                 value={behandlingBehov?.mottattDato ? new Date(behandlingBehov?.mottattDato) : null}
                 onChange={(mottattDato) =>
                   dispatch(
@@ -155,12 +155,12 @@ export default function KontrollerOppgave() {
       )}
 
       <div>
-        <FlexRow justify={'center'} $spacing>
+        <FlexRow justify="center" $spacing>
           <Button variant="primary" onClick={neste} disabled={!kanGaaVidere}>
             Neste
           </Button>
         </FlexRow>
-        <FlexRow justify={'center'}>
+        <FlexRow justify="center">
           <AvbrytBehandleJournalfoeringOppgave />
         </FlexRow>
       </div>

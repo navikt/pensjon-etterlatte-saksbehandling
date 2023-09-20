@@ -60,19 +60,19 @@ export default function VelgJournalpost() {
 
   return (
     <>
-      {isPendingOrInitial(journalposter) && <Spinner label={'Henter journalposter for bruker'} visible />}
+      {isPendingOrInitial(journalposter) && <Spinner label="Henter journalposter for bruker" visible />}
 
       {journalpost ? (
         <>
-          <Heading size={'medium'}>{journalpost.tittel}</Heading>
-          <Tag variant={'alt1'}>{journalpost.avsenderMottaker?.navn}</Tag>
+          <Heading size="medium">{journalpost.tittel}</Heading>
+          <Tag variant="alt1">{journalpost.avsenderMottaker?.navn}</Tag>
 
           <br />
 
-          {isPending(dokument) && <Spinner visible={true} label={'Klargjør forhåndsvisning av PDF ...'} />}
+          {isPending(dokument) && <Spinner visible={true} label="Klargjør forhåndsvisning av PDF ..." />}
           {isSuccess(dokument) && !!fileURL && <PdfViewer src={`${fileURL}#toolbar=0`} />}
           {isFailure(dokument) && (
-            <Alert variant={'error'}>
+            <Alert variant="error">
               En feil har oppstått ved henting av PDF: <code>{JSON.stringify(dokument.error)}</code>
             </Alert>
           )}
@@ -109,7 +109,7 @@ export default function VelgJournalpost() {
                           dokumentInfoId={journalpost.dokumenter[0].dokumentInfoId}
                         />
 
-                        <Button variant={'primary'} size={'small'} onClick={() => velgJournalpost(journalpost)}>
+                        <Button variant="primary" size="small" onClick={() => velgJournalpost(journalpost)}>
                           Velg
                         </Button>
                       </FlexRow>

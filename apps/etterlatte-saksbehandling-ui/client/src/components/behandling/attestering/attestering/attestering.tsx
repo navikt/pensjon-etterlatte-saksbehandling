@@ -33,12 +33,12 @@ export const Attestering = ({ setBeslutning, beslutning, behandling }: Props) =>
 
   return (
     <SidebarPanel>
-      {isPending(saksbehandlerForOppgave) && <Spinner visible label={'Henter oppgave'} />}
+      {isPending(saksbehandlerForOppgave) && <Spinner visible label="Henter oppgave" />}
       {isFailure(saksbehandlerForOppgave) && <ApiErrorAlert>Kunne ikke hente oppgave for behandling</ApiErrorAlert>}
       {isSuccess(saksbehandlerForOppgave) &&
         (oppgaveErTildeltInnloggetBruker ? (
           <>
-            <Alert variant={'info'} size={'small'}>
+            <Alert variant="info" size="small">
               Kontroller opplysninger og faglige vurderinger gjort under behandling.
             </Alert>
             <br />
@@ -51,17 +51,17 @@ export const Attestering = ({ setBeslutning, beslutning, behandling }: Props) =>
                 disabled={attestantOgSaksbehandlerErSammePerson}
               />
             ) : (
-              <BodyShort size={'small'} spacing>
+              <BodyShort size="small" spacing>
                 <i>Se gjennom alle steg før du tar en beslutning.</i>
               </BodyShort>
             )}
 
             {attestantOgSaksbehandlerErSammePerson && (
-              <Alert variant={'warning'}>Du kan ikke attestere en sak som du har saksbehandlet</Alert>
+              <Alert variant="warning">Du kan ikke attestere en sak som du har saksbehandlet</Alert>
             )}
           </>
         ) : (
-          <Alert variant={'warning'}>
+          <Alert variant="warning">
             {saksbehandlerForOppgave.data ? (
               <BodyShort>Oppgaven er tildelt {saksbehandlerForOppgave.data}.&nbsp;</BodyShort>
             ) : (

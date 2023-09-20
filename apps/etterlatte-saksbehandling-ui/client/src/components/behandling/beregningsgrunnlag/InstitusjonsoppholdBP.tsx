@@ -75,7 +75,7 @@ const InstitusjonsoppholdBP = (props: InstitusjonsoppholdProps) => {
       behandles ? (
         <>
           <LovtekstMedLenke
-            tittel={'Institusjonsopphold'}
+            tittel="Institusjonsopphold"
             hjemler={[
               {
                 tittel: '§ 18-8.Barnepensjon under opphold i institusjon',

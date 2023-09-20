@@ -34,7 +34,7 @@ export const VurderingsboksWrapper = (props: Props) => {
       {!rediger && (
         <>
           <Oppsummering>
-            <Heading size="small" level={'2'}>
+            <Heading size="small" level="2">
               {props.tittel}
             </Heading>
             {props.vurdering && (
@@ -54,7 +54,7 @@ export const VurderingsboksWrapper = (props: Props) => {
             {props.subtittelKomponent ?? <></>}
             {props.kommentar && (
               <Kommentar>
-                <Heading size="xsmall" level={'3'}>
+                <Heading size="xsmall" level="3">
                   Begrunnelse
                 </Heading>
                 <BodyShort size="small">{props.kommentar}</BodyShort>
@@ -65,8 +65,8 @@ export const VurderingsboksWrapper = (props: Props) => {
           {props.redigerbar && (
             <>
               <RedigerWrapper onClick={() => setRediger(true)}>
-                <PencilIcon aria-hidden={'true'} />
-                <span className={'text'}> Rediger</span>
+                <PencilIcon aria-hidden="true" />
+                <span className="text"> Rediger</span>
               </RedigerWrapper>
               {props.slett && (
                 <RedigerWrapper
@@ -78,11 +78,11 @@ export const VurderingsboksWrapper = (props: Props) => {
                   }}
                 >
                   {lagrer ? (
-                    <Spinner visible label={''} margin={'0'} variant={'interaction'} />
+                    <Spinner visible label="" margin="0" variant="interaction" />
                   ) : (
-                    <TrashIcon aria-hidden={'true'} />
+                    <TrashIcon aria-hidden="true" />
                   )}
-                  <span className={'text'}> Slett</span>
+                  <span className="text"> Slett</span>
                 </RedigerWrapper>
               )}
             </>
@@ -96,8 +96,8 @@ export const VurderingsboksWrapper = (props: Props) => {
             {props.lagreklikk && (
               <Button
                 loading={lagrer}
-                variant={'primary'}
-                size={'small'}
+                variant="primary"
+                size="small"
                 onClick={async () => {
                   setLagrer(true)
                   new Promise((resolve) => resolve(props.lagreklikk!!(() => setRediger(false)))).finally(() =>
@@ -109,7 +109,7 @@ export const VurderingsboksWrapper = (props: Props) => {
               </Button>
             )}
             {props.avbrytklikk && (
-              <Button variant={'secondary'} size={'small'} onClick={() => props.avbrytklikk!!(() => setRediger(false))}>
+              <Button variant="secondary" size="small" onClick={() => props.avbrytklikk!!(() => setRediger(false))}>
                 Avbryt
               </Button>
             )}

@@ -65,19 +65,19 @@ export const Oversikt = ({
 
   return (
     <SidebarPanel border>
-      <Heading size={'small'}>{formaterBehandlingstype(behandlingsInfo.type)}</Heading>
-      <Heading size={'xsmall'} spacing>
+      <Heading size="small">{formaterBehandlingstype(behandlingsInfo.type)}</Heading>
+      <Heading size="xsmall" spacing>
         {hentStatus()}
       </Heading>
       {fattetDato && <Tekst>{fattetDato}</Tekst>}
       <TagList>
         <li>
-          <Tag variant={tagColors[behandlingsInfo.sakType]} size={'small'}>
+          <Tag variant={tagColors[behandlingsInfo.sakType]} size="small">
             {formaterSakstype(behandlingsInfo.sakType)}
           </Tag>
         </li>
         <li>
-          <Tag variant={tagColors[INasjonalitetsType.NASJONAL]} size={'small'}>
+          <Tag variant={tagColors[INasjonalitetsType.NASJONAL]} size="small">
             {formaterEnumTilLesbarString(INasjonalitetsType.NASJONAL)}
           </Tag>
         </li>

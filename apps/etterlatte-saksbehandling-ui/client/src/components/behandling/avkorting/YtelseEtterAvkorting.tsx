@@ -64,7 +64,7 @@ export const YtelseEtterAvkorting = (props: {
                       <SmalCelle>
                         <Info
                           tekst={NOK(ytelse.ytelseFoerAvkorting)}
-                          label={''}
+                          label=""
                           undertekst={
                             tidligereYtelse ? `${NOK(tidligereYtelse.ytelseFoerAvkorting)} (Forrige vedtak)` : ''
                           }
@@ -75,7 +75,7 @@ export const YtelseEtterAvkorting = (props: {
                       <SmalCelle>
                         <Info
                           tekst={NOK(ytelse.avkortingsbeloep)}
-                          label={''}
+                          label=""
                           undertekst={
                             tidligereYtelse ? `${NOK(tidligereYtelse.avkortingsbeloep)} (Forrige vedtak)` : ''
                           }
@@ -86,7 +86,7 @@ export const YtelseEtterAvkorting = (props: {
                       <SmalCelle>
                         <Info
                           tekst={restanseIKroner(ytelse.restanse)}
-                          label={''}
+                          label=""
                           undertekst={
                             tidligereYtelse ? `${restanseIKroner(tidligereYtelse.restanse)} (Forrige vedtak)` : ''
                           }
@@ -98,7 +98,7 @@ export const YtelseEtterAvkorting = (props: {
                         <ManglerRegelspesifikasjon>
                           <Info
                             tekst={NOK(ytelse.ytelseEtterAvkorting)}
-                            label={''}
+                            label=""
                             undertekst={
                               tidligereYtelse ? `${NOK(tidligereYtelse.ytelseEtterAvkorting)} (Forrige vedtak)` : ''
                             }

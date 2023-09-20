@@ -6,15 +6,15 @@ export default function JournalfoeringOppgaveStegmeny() {
   return (
     <StegMenyWrapper>
       <li>
-        <NavLink to={'kontroll'}>Oppgavekontroll</NavLink>
+        <NavLink to="kontroll">Oppgavekontroll</NavLink>
       </li>
-      <Separator aria-hidden={'true'} />
+      <Separator aria-hidden="true" />
       <li>
-        <NavLink to={'nybehandling'}>Ny behandling</NavLink>
+        <NavLink to="nybehandling">Ny behandling</NavLink>
       </li>
-      <Separator aria-hidden={'true'} />
+      <Separator aria-hidden="true" />
       <li>
-        <NavLink to={'oppsummering'}>Oppsummering</NavLink>
+        <NavLink to="oppsummering">Oppsummering</NavLink>
       </li>
     </StegMenyWrapper>
   )

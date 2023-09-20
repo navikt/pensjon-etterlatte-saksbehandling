@@ -6,10 +6,10 @@ import styled from 'styled-components'
 
 export const Grunnlagopplysninger: React.FC<{ opplysninger: IGrunnlagOpplysninger }> = ({ opplysninger }) => (
   <InfoWrapper>
-    <Opplysningsgrunnlag label={'Fødselsdato'} opplysningsgrunnlag={opplysninger.avdoedFoedselsdato} />
-    <Opplysningsgrunnlag label={'16 år'} opplysningsgrunnlag={opplysninger.avdoedFylteSeksten} />
-    <Opplysningsgrunnlag label={'Dødsdato'} opplysningsgrunnlag={opplysninger.avdoedDoedsdato} />
-    <Opplysningsgrunnlag label={'66 år'} opplysningsgrunnlag={opplysninger.avdoedFyllerSeksti} />
+    <Opplysningsgrunnlag label="Fødselsdato" opplysningsgrunnlag={opplysninger.avdoedFoedselsdato} />
+    <Opplysningsgrunnlag label="16 år" opplysningsgrunnlag={opplysninger.avdoedFylteSeksten} />
+    <Opplysningsgrunnlag label="Dødsdato" opplysningsgrunnlag={opplysninger.avdoedDoedsdato} />
+    <Opplysningsgrunnlag label="66 år" opplysningsgrunnlag={opplysninger.avdoedFyllerSeksti} />
   </InfoWrapper>
 )
 

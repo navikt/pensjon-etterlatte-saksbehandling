@@ -54,7 +54,7 @@ const TrygdetidVisning = (props: { behandling: IDetaljertBehandling }) => {
     <Content>
       <ContentHeader>
         <HeadingWrapper>
-          <Heading spacing size={'large'} level={'1'}>
+          <Heading spacing size="large" level="1">
             Trygdetid
           </Heading>
           <BodyShort spacing>

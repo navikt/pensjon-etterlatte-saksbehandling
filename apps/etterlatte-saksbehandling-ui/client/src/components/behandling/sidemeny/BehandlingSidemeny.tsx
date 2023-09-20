@@ -65,7 +65,7 @@ export const BehandlingSidemeny = () => {
           {kanAttestere && (
             <>
               {isFailure(fetchVedtakStatus) && <ApiErrorAlert>Kunne ikke hente vedtak</ApiErrorAlert>}
-              {isPending(fetchVedtakStatus) && <Spinner label={'Henter vedtaksdetaljer'} visible />}
+              {isPending(fetchVedtakStatus) && <Spinner label="Henter vedtaksdetaljer" visible />}
               {isSuccess(fetchVedtakStatus) && kanAttestere && (
                 <Attestering setBeslutning={setBeslutning} beslutning={beslutning} behandling={behandling} />
               )}

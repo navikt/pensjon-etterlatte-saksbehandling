@@ -74,7 +74,7 @@ export const Trygdetid = ({ redigerbar, utenlandstilsnitt }: Props) => {
   return (
     <TrygdetidWrapper>
       <LovtekstMedLenke
-        tittel={'Avdødes trygdetid'}
+        tittel="Avdødes trygdetid"
         hjemler={[
           {
             tittel: '§ 3-5 Trygdetid ved beregning av ytelser',
@@ -114,9 +114,9 @@ export const Trygdetid = ({ redigerbar, utenlandstilsnitt }: Props) => {
         </>
       )}
       {(isPending(hentTrygdetidRequest) || isPending(hentAlleLandRequest)) && (
-        <Spinner visible={true} label={'Henter trygdetid'} />
+        <Spinner visible={true} label="Henter trygdetid" />
       )}
-      {isPending(opprettTrygdetidRequest) && <Spinner visible={true} label={'Oppretter trygdetid'} />}
+      {isPending(opprettTrygdetidRequest) && <Spinner visible={true} label="Oppretter trygdetid" />}
       {isFailure(hentTrygdetidRequest) && <ApiErrorAlert>En feil har oppstått ved henting av trygdetid</ApiErrorAlert>}
       {isFailure(opprettTrygdetidRequest) && (
         <ApiErrorAlert>En feil har oppstått ved opprettelse av trygdetid</ApiErrorAlert>

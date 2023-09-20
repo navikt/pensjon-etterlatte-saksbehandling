@@ -15,7 +15,7 @@ type Props = {
 export const Beslutningsvalg = ({ beslutning, setBeslutning, behandling, disabled }: Props) => {
   return (
     <>
-      <Heading size={'xsmall'}>Beslutning</Heading>
+      <Heading size="xsmall">Beslutning</Heading>
 
       <RadioGroupWrapper>
         <RadioGroup

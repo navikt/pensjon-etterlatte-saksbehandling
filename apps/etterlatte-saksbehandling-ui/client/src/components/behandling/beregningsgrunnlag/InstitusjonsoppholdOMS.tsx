@@ -69,7 +69,7 @@ const InstitusjonsoppholdOMS = (props: InstitusjonsoppholdProps) => {
       behandles ? (
         <>
           <LovtekstMedLenke
-            tittel={'Institusjonsopphold'}
+            tittel="Institusjonsopphold"
             hjemler={[
               {
                 tittel: '§ 17-13.Ytelser til gjenlevende ektefelle under opphold i institusjon',

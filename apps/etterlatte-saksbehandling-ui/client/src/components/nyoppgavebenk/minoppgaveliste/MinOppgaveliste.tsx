@@ -137,7 +137,7 @@ export const MinOppgaveliste = ({ oppgaver, hentOppgaver, oppdaterTildeling }: P
               onChange={(e) => {
                 setRowsPerPage(Number(e.target.value))
               }}
-              title={'Antall oppgaver som vises'}
+              title="Antall oppgaver som vises"
             >
               {[10, 20, 30, 40, 50].map((rowsPerPage) => (
                 <option key={rowsPerPage} value={rowsPerPage}>

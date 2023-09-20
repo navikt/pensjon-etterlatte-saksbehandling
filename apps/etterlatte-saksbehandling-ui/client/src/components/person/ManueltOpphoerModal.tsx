@@ -90,7 +90,7 @@ export const ManueltOpphoerModal = ({
 
   return (
     <>
-      <Button variant="danger" onClick={() => setOpen(true)} size={'small'}>
+      <Button variant="danger" onClick={() => setOpen(true)} size="small">
         Annuller saken
       </Button>
 
@@ -117,7 +117,7 @@ export const ManueltOpphoerModal = ({
               />
               {feilmelding.length > 0 ? <Feilmelding>{feilmelding}</Feilmelding> : null}
               <FormKnapper>
-                <Button loading={loading} type="submit" variant={'danger'}>
+                <Button loading={loading} type="submit" variant="danger">
                   Opphør denne saken
                 </Button>
                 <Button variant="secondary" onClick={() => setOpen(false)}>

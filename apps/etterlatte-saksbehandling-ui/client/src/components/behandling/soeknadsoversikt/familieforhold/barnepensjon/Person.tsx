@@ -46,7 +46,7 @@ export const Person = ({ person, kilde, avdoed = false, mottaker = false, gjenle
         <PersonIcon fontSize={IconSize.DEFAULT} />
       </IconWrapper>
       <PersonInfoWrapper>
-        <Heading size={'small'} level={'3'}>
+        <Heading size="small" level="3">
           {getHeaderTekst()}
         </Heading>
         <div>
@@ -55,7 +55,7 @@ export const Person = ({ person, kilde, avdoed = false, mottaker = false, gjenle
             <Link href={`/person/${person.foedselsnummer}`} target="_blank" rel="noreferrer noopener">
               ({formaterFnr(person.foedselsnummer)})
             </Link>
-            <CopyButton copyText={person.foedselsnummer} size={'small'} />
+            <CopyButton copyText={person.foedselsnummer} size="small" />
           </FnrWrapper>
         </div>
         <div>

@@ -63,24 +63,24 @@ export default function NyttBrevHandlingerPanel({ brev, setKanRedigeres }: Props
 
   return (
     <Panel>
-      <Heading spacing level="2" size={'medium'}>
+      <Heading spacing level="2" size="medium">
         Handlinger
       </Heading>
 
-      {error && <Alert variant={'error'}>{error}</Alert>}
+      {error && <Alert variant="error">{error}</Alert>}
 
-      <BodyShort spacing size={'small'}>
+      <BodyShort spacing size="small">
         {brev.status === BrevStatus.FERDIGSTILT ? (
-          <Button variant={'primary'} onClick={journalfoer} loading={isPending(journalfoerStatus)}>
+          <Button variant="primary" onClick={journalfoer} loading={isPending(journalfoerStatus)}>
             Journalfør
           </Button>
         ) : brev.status === BrevStatus.JOURNALFOERT ? (
-          <Button variant={'primary'} onClick={distribuer} loading={isPending(distribuerStatus)}>
+          <Button variant="primary" onClick={distribuer} loading={isPending(distribuerStatus)}>
             Distribuer
           </Button>
         ) : (
           <>
-            <Button variant={'primary'} onClick={() => setIsOpen(true)} loading={isPending(ferdigstillStatus)}>
+            <Button variant="primary" onClick={() => setIsOpen(true)} loading={isPending(ferdigstillStatus)}>
               Ferdigstill
             </Button>
 
@@ -88,14 +88,14 @@ export default function NyttBrevHandlingerPanel({ brev, setKanRedigeres }: Props
               open={isOpen}
               onClose={() => setIsOpen(false)}
               aria-labelledby="modal-heading"
-              className={'padding-modal'}
+              className="padding-modal"
             >
               <Modal.Body style={{ textAlign: 'center' }}>
                 {loadingMsg ? (
                   <Spinner visible label={loadingMsg} />
                 ) : (
                   <>
-                    <Heading level={'1'} spacing size={'medium'} id="modal-heading">
+                    <Heading level="1" spacing size="medium" id="modal-heading">
                       Er du sikker på at du vil ferdigstille brevet?
                     </Heading>
 
@@ -104,7 +104,7 @@ export default function NyttBrevHandlingerPanel({ brev, setKanRedigeres }: Props
                       angres.
                     </BodyLong>
 
-                    <FlexRow justify={'center'}>
+                    <FlexRow justify="center">
                       <Button variant="secondary" onClick={() => setIsOpen(false)}>
                         Nei, fortsett redigering
                       </Button>

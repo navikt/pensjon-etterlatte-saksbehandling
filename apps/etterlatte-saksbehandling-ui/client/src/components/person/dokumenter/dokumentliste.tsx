@@ -9,7 +9,7 @@ const colonner = ['Journalpost id', 'Tittel', 'Avsender/Mottaker', 'Dato', 'Stat
 
 export const Dokumentliste = ({ dokumenter }: { dokumenter: Result<Journalpost[]> }) => (
   <>
-    <Heading size={'medium'}>Dokumenter</Heading>
+    <Heading size="medium">Dokumenter</Heading>
 
     <Table zebraStripes>
       <Table.Header>
@@ -23,7 +23,7 @@ export const Dokumentliste = ({ dokumenter }: { dokumenter: Result<Journalpost[]
         {isPending(dokumenter) && (
           <Table.Row>
             <Table.DataCell colSpan={colonner.length}>
-              <Spinner margin={'0'} visible label="Henter dokumenter" />
+              <Spinner margin="0" visible label="Henter dokumenter" />
             </Table.DataCell>
           </Table.Row>
         )}
@@ -66,7 +66,7 @@ export const Dokumentliste = ({ dokumenter }: { dokumenter: Result<Journalpost[]
     </Table>
 
     {isFailure(dokumenter) && (
-      <Alert variant={'error'} style={{ marginTop: '10px' }}>
+      <Alert variant="error" style={{ marginTop: '10px' }}>
         Det har oppstått en feil ved henting av dokumenter.
       </Alert>
     )}

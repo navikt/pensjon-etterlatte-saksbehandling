@@ -18,9 +18,9 @@ export const Soesken = ({ person, familieforhold }: { person: IPdlPerson; famili
             <ChildEyesIcon />
           </span>
           {`${person.fornavn} ${person.etternavn} `}
-          <span className={'personRolle'}>({differenceInYears(new Date(), new Date(person.foedselsdato))} år)</span>
+          <span className="personRolle">({differenceInYears(new Date(), new Date(person.foedselsdato))} år)</span>
         </div>
-        <span className={'personInfo'}>{erHelsoesken(person.foedselsnummer) ? 'Helsøsken' : 'Halvsøsken'}</span>
+        <span className="personInfo">{erHelsoesken(person.foedselsnummer) ? 'Helsøsken' : 'Halvsøsken'}</span>
       </PersonHeader>
       <PersonInfoWrapper>
         <PersonInfoFnr fnr={person.foedselsnummer} />

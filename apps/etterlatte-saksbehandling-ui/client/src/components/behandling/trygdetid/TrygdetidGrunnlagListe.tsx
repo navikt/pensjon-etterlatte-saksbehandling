@@ -59,7 +59,7 @@ export const TrygdetidGrunnlagListe: React.FC<Props> = ({
         <IconWrapper>
           <CalendarIcon fontSize={IconSize.DEFAULT} />
         </IconWrapper>
-        <Heading size={'small'} level={'3'}>
+        <Heading size="small" level="3">
           {grunnlagTypeTekst} trygdetid
         </Heading>
       </FlexHeader>
@@ -70,19 +70,19 @@ export const TrygdetidGrunnlagListe: React.FC<Props> = ({
       )}
       {trygdetidGrunnlagListe.length > 0 && (
         <TableWrapper>
-          <Table size={'medium'}>
+          <Table size="medium">
             <Table.Header>
               <Table.Row>
                 <Table.HeaderCell />
-                <Table.HeaderCell scope={'col'}>Land</Table.HeaderCell>
-                <Table.HeaderCell scope={'col'}>Fra dato</Table.HeaderCell>
-                <Table.HeaderCell scope={'col'}>Til dato</Table.HeaderCell>
-                <Table.HeaderCell scope={'col'}>{grunnlagTypeTekst} trygdetid</Table.HeaderCell>
-                <Table.HeaderCell scope={'col'}>Kilde</Table.HeaderCell>
+                <Table.HeaderCell scope="col">Land</Table.HeaderCell>
+                <Table.HeaderCell scope="col">Fra dato</Table.HeaderCell>
+                <Table.HeaderCell scope="col">Til dato</Table.HeaderCell>
+                <Table.HeaderCell scope="col">{grunnlagTypeTekst} trygdetid</Table.HeaderCell>
+                <Table.HeaderCell scope="col">Kilde</Table.HeaderCell>
                 {redigerbar && (
                   <>
-                    <Table.HeaderCell scope={'col'}> </Table.HeaderCell>
-                    <Table.HeaderCell scope={'col'}> </Table.HeaderCell>
+                    <Table.HeaderCell scope="col"> </Table.HeaderCell>
+                    <Table.HeaderCell scope="col"> </Table.HeaderCell>
                   </>
                 )}
               </Table.Row>
@@ -169,21 +169,21 @@ const PeriodeRow = ({
       content={
         <>
           <ExpandableInfo>
-            <Heading size={'small'}>Begrunnelse</Heading>
+            <Heading size="small">Begrunnelse</Heading>
             {trygdetidGrunnlag.begrunnelse}
           </ExpandableInfo>
           {trygdetidGrunnlagType === ITrygdetidGrunnlagType.FAKTISK && (
             <>
               <ExpandableInfo>
-                <Heading size={'small'}>Poeng i inn år</Heading>
+                <Heading size="small">Poeng i inn år</Heading>
                 {trygdetidGrunnlag.poengInnAar ? 'Ja' : 'Nei'}
               </ExpandableInfo>
               <ExpandableInfo>
-                <Heading size={'small'}>Poeng i ut år</Heading>
+                <Heading size="small">Poeng i ut år</Heading>
                 {trygdetidGrunnlag.poengUtAar ? 'Ja' : 'Nei'}
               </ExpandableInfo>
               <ExpandableInfo>
-                <Heading size={'small'}>Ikke med i prorata</Heading>
+                <Heading size="small">Ikke med i prorata</Heading>
                 {trygdetidGrunnlag.prorata ? 'Nei' : 'Ja'}
               </ExpandableInfo>
             </>
@@ -212,7 +212,7 @@ const PeriodeRow = ({
           </Table.DataCell>
           <Table.DataCell>
             {isPending(slettTrygdetidStatus) ? (
-              <Spinner visible={true} variant={'neutral'} label="Sletter" margin={'1em'} />
+              <Spinner visible={true} variant="neutral" label="Sletter" margin="1em" />
             ) : (
               <RedigerWrapper onClick={() => slettGrunnlag(trygdetidGrunnlag.id)}>Slett</RedigerWrapper>
             )}

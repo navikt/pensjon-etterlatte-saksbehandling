@@ -97,7 +97,7 @@ export const Resultat: React.FC<Props> = ({
       <VilkaarWrapper>
         <VilkaarsvurderingContent>
           <HeadingWrapper>
-            <Heading size="small" level={'2'}>
+            <Heading size="small" level="2">
               {erRevurdering
                 ? 'Utfall etter revurdering'
                 : `Er vilkårene for ${formaterSakstype(sakstype).toLowerCase()} oppfylt?`}
@@ -119,7 +119,7 @@ export const Resultat: React.FC<Props> = ({
               )}
               {vilkaarsvurdering?.resultat?.kommentar && (
                 <Kommentar>
-                  <Heading size="xsmall" level={'3'}>
+                  <Heading size="xsmall" level="3">
                     Begrunnelse
                   </Heading>
                   <BodyShort size="small">{vilkaarsvurdering.resultat.kommentar}</BodyShort>
@@ -130,9 +130,9 @@ export const Resultat: React.FC<Props> = ({
                   {isPending(slettVurderingStatus) ? (
                     <Loader variant="interaction" />
                   ) : (
-                    <TrashIcon aria-hidden={'true'} />
+                    <TrashIcon aria-hidden="true" />
                   )}
-                  <span className={'text'}>Slett vurdering</span>
+                  <span className="text">Slett vurdering</span>
                 </SlettWrapper>
               )}
             </ContentWrapper>
@@ -173,8 +173,8 @@ export const Resultat: React.FC<Props> = ({
                 autoComplete="off"
               />
               <Button
-                variant={'primary'}
-                size={'small'}
+                variant="primary"
+                size="small"
                 onClick={lagreVilkaarsvurderingResultat}
                 loading={isPending(totalVurderingStatus)}
               >

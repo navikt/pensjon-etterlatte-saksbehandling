@@ -6,7 +6,7 @@ const FastTrygdetid = () => {
   return (
     <TrygdetidWrapper>
       <LovtekstMedLenke
-        tittel={'Trygdetid'}
+        tittel="Trygdetid"
         hjemler={[
           {
             tittel: '§ 3-5 Trygdetid ved beregning av ytelser',

@@ -13,8 +13,8 @@ const Spinner = ({ visible, label, margin = '3em', variant }: Props) => {
 
   return (
     <SpinnerWrap margin={margin}>
-      <div className={'spinner-overlay'}>
-        <div className={'spinner-content'}>
+      <div className="spinner-overlay">
+        <div className="spinner-content">
           <Loader variant={variant} />
           {label && <BodyLong spacing>{label}</BodyLong>}
         </div>

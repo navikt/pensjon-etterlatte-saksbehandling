@@ -18,53 +18,53 @@ export default function OppsummeringOppgavebehandling() {
   const tilbake = () => navigate('../nybehandling', { relative: 'path' })
 
   if (!behandlingBehov || !oppgave) {
-    return <Navigate to={'../nybehandling'} relative={'path'} />
+    return <Navigate to="../nybehandling" relative="path" />
   }
 
   return (
     <FormWrapper column>
-      <Heading size={'medium'} spacing>
+      <Heading size="medium" spacing>
         Opprett behandling fra oppgave
       </Heading>
 
       <InfoList>
         <div>
-          <Tag variant={'success'} size={'medium'}>
+          <Tag variant="success" size="medium">
             {formaterSakstype(oppgave!!.sakType)}
           </Tag>
         </div>
 
-        <Info label={'Søker'} tekst={behandlingBehov?.persongalleri?.soeker || '-'} />
-        <Info label={'Innsender'} tekst={behandlingBehov?.persongalleri?.innsender || '-'} />
+        <Info label="Søker" tekst={behandlingBehov?.persongalleri?.soeker || '-'} />
+        <Info label="Innsender" tekst={behandlingBehov?.persongalleri?.innsender || '-'} />
 
         {oppgave!!.sakType === SakType.BARNEPENSJON &&
           behandlingBehov?.persongalleri?.gjenlevende?.map((gjenlevende) => (
-            <Info key={gjenlevende} label={'Gjenlevende'} tekst={gjenlevende || ''} />
+            <Info key={gjenlevende} label="Gjenlevende" tekst={gjenlevende || ''} />
           ))}
 
         {behandlingBehov?.persongalleri?.avdoed?.map((avdoed) => (
-          <Info key={avdoed} label={'Avdød'} tekst={avdoed || ''} />
+          <Info key={avdoed} label="Avdød" tekst={avdoed || ''} />
         ))}
 
         {!behandlingBehov?.persongalleri?.soesken?.length && <Detail>Ingen barn/søsken oppgitt</Detail>}
         {behandlingBehov?.persongalleri?.soesken?.map((soeskenEllerBarn) =>
           oppgave!!.sakType === SakType.BARNEPENSJON ? (
-            <Info key={soeskenEllerBarn} label={'Søsken'} tekst={soeskenEllerBarn || ''} />
+            <Info key={soeskenEllerBarn} label="Søsken" tekst={soeskenEllerBarn || ''} />
           ) : (
-            <Info key={soeskenEllerBarn} label={'Barn'} tekst={soeskenEllerBarn || ''} />
+            <Info key={soeskenEllerBarn} label="Barn" tekst={soeskenEllerBarn || ''} />
           )
         )}
       </InfoList>
 
       <div>
-        <FlexRow justify={'center'} $spacing>
+        <FlexRow justify="center" $spacing>
           <Button variant="secondary" onClick={tilbake}>
             Tilbake
           </Button>
 
           <FullfoerOppgaveModal oppgave={oppgave!!} behandlingBehov={behandlingBehov!!} />
         </FlexRow>
-        <FlexRow justify={'center'}>
+        <FlexRow justify="center">
           <AvbrytBehandleJournalfoeringOppgave />
         </FlexRow>
       </div>

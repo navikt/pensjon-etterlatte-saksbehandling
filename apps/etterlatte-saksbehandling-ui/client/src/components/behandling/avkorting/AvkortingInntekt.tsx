@@ -92,8 +92,8 @@ export const AvkortingInntekt = (props: {
         Inntektsavkorting
       </Heading>
       <HjemmelLenke
-        tittel={'Folketrygdloven § 17-9 (mangler lenke)'}
-        lenke={'https://lovdata.no/lov/'} // TODO lenke finnes ikke enda
+        tittel="Folketrygdloven § 17-9 (mangler lenke)"
+        lenke="https://lovdata.no/lov/" // TODO lenke finnes ikke enda
       />
       <BodyShort>
         Omstillingsstønaden reduseres med 45 prosent av den gjenlevende sin inntekt som på årsbasis overstiger et halvt
@@ -128,7 +128,7 @@ export const AvkortingInntekt = (props: {
                   <Table.Row key={index}>
                     <Table.DataCell key="Inntekt">
                       {NOK(forventetInntekt)}
-                      <OmstillingsstoenadToolTip title={'Se hva forventet inntekt består av'}>
+                      <OmstillingsstoenadToolTip title="Se hva forventet inntekt består av">
                         Forventet inntekt beregnes utfra forventet årsinntekt med fratrekk for måneder før innvilgelse.
                         <br />
                         Forventet inntekt Norge = forventet årsinntekt - inntekt i måneder før innvilgelse måneder (
@@ -137,7 +137,7 @@ export const AvkortingInntekt = (props: {
                     </Table.DataCell>
                     <Table.DataCell key="Inntekt">
                       {NOK(forventetInntektUtland)}
-                      <OmstillingsstoenadToolTip title={'Se hva forventet inntekt består av'}>
+                      <OmstillingsstoenadToolTip title="Se hva forventet inntekt består av">
                         Forventet inntekt utland beregnes utfra inntekt utland med fratrekk for måneder før innvilgelse.
                         <br />
                         Forventet inntekt utland = forventet årsinntekt - inntekt i måneder før innvilgelse måneder (
@@ -157,7 +157,7 @@ export const AvkortingInntekt = (props: {
                       {inntektsgrunnlag.kilde && (
                         <Info
                           tekst={inntektsgrunnlag.kilde.ident}
-                          label={''}
+                          label=""
                           undertekst={`saksbehandler: ${formaterStringDato(inntektsgrunnlag.kilde.tidspunkt)}`}
                         />
                       )}
@@ -177,7 +177,7 @@ export const AvkortingInntekt = (props: {
               <>
                 <FormWrapper>
                   <TextField
-                    label={'Forventet årsinntekt Norge'}
+                    label="Forventet årsinntekt Norge"
                     size="medium"
                     type="text"
                     inputMode="numeric"
@@ -191,7 +191,7 @@ export const AvkortingInntekt = (props: {
                     }
                   />
                   <TextField
-                    label={'Fratrekk inn-år'}
+                    label="Fratrekk inn-år"
                     size="medium"
                     type="text"
                     inputMode="numeric"
@@ -205,7 +205,7 @@ export const AvkortingInntekt = (props: {
                     }
                   />
                   <TextField
-                    label={'Forventet årsinntekt utland'}
+                    label="Forventet årsinntekt utland"
                     size="medium"
                     type="text"
                     inputMode="numeric"
@@ -219,7 +219,7 @@ export const AvkortingInntekt = (props: {
                     }
                   />
                   <TextField
-                    label={'Fratrekk inn-år'}
+                    label="Fratrekk inn-år"
                     size="medium"
                     type="text"
                     inputMode="numeric"
@@ -234,13 +234,13 @@ export const AvkortingInntekt = (props: {
                   />
                   <DatoSection>
                     <Label>F.o.m dato</Label>
-                    <Info label={''} tekst={formaterStringDato(inntektGrunnlagForm.fom!)} />
+                    <Info label="" tekst={formaterStringDato(inntektGrunnlagForm.fom!)} />
                   </DatoSection>
                 </FormWrapper>
                 <TextAreaWrapper>
                   <SpesifikasjonLabel>
                     <Label>Spesifikasjon av inntekt</Label>
-                    <ReadMore header={'Hva regnes som inntekt?'}>
+                    <ReadMore header="Hva regnes som inntekt?">
                       Med inntekt menes all arbeidsinntekt og ytelser som likestilles med arbeidsinntekt. Likestilt med
                       arbeidsinntekt er dagpenger etter kap 4, sykepenger etter kap 8, stønad ved barns og andre
                       nærståendes sykdom etter kap 9, arbeidsavklaringspenger etter kap 11, svangerskapspenger og

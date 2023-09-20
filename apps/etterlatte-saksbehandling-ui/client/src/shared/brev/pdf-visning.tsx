@@ -33,7 +33,7 @@ export const PdfVisning = ({ fileUrl, error, loading }: Props) => {
       )}
 
       {loading ? (
-        <Spinner visible={true} label={'Klargjør forhåndsvisning av PDF ...'} />
+        <Spinner visible={true} label="Klargjør forhåndsvisning av PDF ..." />
       ) : (
         fileUrl && <PdfViewer src={`${fileUrl}#toolbar=0`} />
       )}

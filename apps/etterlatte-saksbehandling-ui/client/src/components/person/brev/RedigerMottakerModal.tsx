@@ -44,16 +44,16 @@ export default function RedigerMottakerModal({ brev, oppdater }: Props) {
   return (
     <>
       <Button
-        variant={'secondary'}
+        variant="secondary"
         onClick={() => setIsOpen(true)}
         icon={<DocPencilIcon />}
         style={{ float: 'right' }}
-        size={'small'}
+        size="small"
       />
 
       <MottakerModal open={isOpen} onClose={avbryt}>
         <Modal.Body>
-          <Heading size={'large'} spacing>
+          <Heading size="large" spacing>
             Endre mottaker
           </Heading>
 
@@ -70,24 +70,24 @@ export default function RedigerMottakerModal({ brev, oppdater }: Props) {
 
             {mottakerType == MottakerType.BEDRIFT && (
               <TextField
-                label={'Orgnummer'}
+                label="Orgnummer"
                 onChange={(e) => setMottaker({ ...mottaker, orgnummer: e.target.value })}
                 value={mottaker.orgnummer || ''}
               />
             )}
             {mottakerType == MottakerType.PRIVATPERSON && (
               <TextField
-                label={'Fødselsnummer'}
+                label="Fødselsnummer"
                 onChange={(e) => setMottaker({ ...mottaker, foedselsnummer: { value: e.target.value } })}
                 value={mottaker.foedselsnummer?.value || ''}
-                pattern={'[0-9]+'}
+                pattern="[0-9]+"
               />
             )}
           </SkjemaGruppe>
 
           <SkjemaGruppe>
             <TextField
-              label={'Navn'}
+              label="Navn"
               onChange={(e) => setMottaker({ ...mottaker, navn: e.target.value })}
               value={mottaker.navn || ''}
             />
@@ -110,7 +110,7 @@ export default function RedigerMottakerModal({ brev, oppdater }: Props) {
 
           <SkjemaGruppe>
             <TextField
-              label={'Adresselinje 1'}
+              label="Adresselinje 1"
               onChange={(e) =>
                 setMottaker({
                   ...mottaker,
@@ -121,7 +121,7 @@ export default function RedigerMottakerModal({ brev, oppdater }: Props) {
               required
             />
             <TextField
-              label={'Adresselinje 2'}
+              label="Adresselinje 2"
               onChange={(e) =>
                 setMottaker({
                   ...mottaker,
@@ -131,7 +131,7 @@ export default function RedigerMottakerModal({ brev, oppdater }: Props) {
               value={mottaker.adresse?.adresselinje2 || ''}
             />
             <TextField
-              label={'Adresselinje 3'}
+              label="Adresselinje 3"
               onChange={(e) =>
                 setMottaker({
                   ...mottaker,
@@ -144,7 +144,7 @@ export default function RedigerMottakerModal({ brev, oppdater }: Props) {
 
           <SkjemaGruppe inline>
             <TextField
-              label={'Postnummer'}
+              label="Postnummer"
               onChange={(e) =>
                 setMottaker({
                   ...mottaker,
@@ -153,10 +153,10 @@ export default function RedigerMottakerModal({ brev, oppdater }: Props) {
               }
               value={mottaker.adresse?.postnummer || ''}
               maxLength={4}
-              pattern={'[0-9]+'}
+              pattern="[0-9]+"
             />
             <TextField
-              label={'Poststed'}
+              label="Poststed"
               onChange={(e) =>
                 setMottaker({
                   ...mottaker,
@@ -169,7 +169,7 @@ export default function RedigerMottakerModal({ brev, oppdater }: Props) {
 
           <SkjemaGruppe inline>
             <TextField
-              label={'Landkode'}
+              label="Landkode"
               onChange={(e) =>
                 setMottaker({
                   ...mottaker,
@@ -177,13 +177,13 @@ export default function RedigerMottakerModal({ brev, oppdater }: Props) {
                 })
               }
               value={mottaker.adresse?.landkode || ''}
-              pattern={'[A-Z]{2}'}
+              pattern="[A-Z]{2}"
               minLength={2}
               maxLength={2}
               required
             />
             <TextField
-              label={'Land'}
+              label="Land"
               onChange={(e) =>
                 setMottaker({
                   ...mottaker,
@@ -195,13 +195,13 @@ export default function RedigerMottakerModal({ brev, oppdater }: Props) {
             />
           </SkjemaGruppe>
 
-          {isFailure(mottakerStatus) && <Alert variant={'error'}>Kunne ikke oppdatere mottaker...</Alert>}
+          {isFailure(mottakerStatus) && <Alert variant="error">Kunne ikke oppdatere mottaker...</Alert>}
 
-          <FlexRow justify={'right'}>
-            <Button variant={'secondary'} disabled={isPending(mottakerStatus)} onClick={avbryt}>
+          <FlexRow justify="right">
+            <Button variant="secondary" disabled={isPending(mottakerStatus)} onClick={avbryt}>
               Avbryt
             </Button>
-            <Button variant={'primary'} loading={isPending(mottakerStatus)} onClick={lagre}>
+            <Button variant="primary" loading={isPending(mottakerStatus)} onClick={lagre}>
               Lagre
             </Button>
           </FlexRow>

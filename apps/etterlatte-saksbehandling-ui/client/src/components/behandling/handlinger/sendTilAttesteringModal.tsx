@@ -39,14 +39,14 @@ export const SendTilAttesteringModal: React.FC = () => {
           setIsOpen(false)
         }}
         aria-labelledby="modal-heading"
-        className={'padding-modal'}
+        className="padding-modal"
       >
         <Modal.Body>
           <Heading spacing level="1" id="modal-heading" size="medium">
             Er du sikker på at du vil sende vedtaket til attestering?
           </Heading>
           <BodyShort spacing>Når du sender til attestering vil vedtaket låses og du får ikke gjort endringer</BodyShort>
-          <FlexRow justify={'center'}>
+          <FlexRow justify="center">
             <Button
               variant="secondary"
               onClick={() => {

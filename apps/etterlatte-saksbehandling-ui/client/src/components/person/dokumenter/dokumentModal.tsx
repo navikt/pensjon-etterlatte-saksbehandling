@@ -42,13 +42,13 @@ export default function DokumentModal({
 
   return (
     <>
-      <Button variant={'secondary'} size={'small'} onClick={() => open(journalpostId, dokumentInfoId)}>
+      <Button variant="secondary" size="small" onClick={() => open(journalpostId, dokumentInfoId)}>
         Åpne dokument
       </Button>
 
       <Modal open={isOpen} onClose={() => setIsOpen(false)}>
         <Modal.Header>
-          <Heading spacing level={'2'} size={'medium'}>
+          <Heading spacing level="2" size="medium">
             {tittel}
           </Heading>
         </Modal.Header>
@@ -57,8 +57,8 @@ export default function DokumentModal({
           <PdfVisning fileUrl={fileURL} error={error} />
           <Spinner visible={!hasLoaded} label="Laster inn PDF" />
 
-          <FlexRow justify={'right'}>
-            <Button variant={'secondary'} onClick={() => setIsOpen(false)}>
+          <FlexRow justify="right">
+            <Button variant="secondary" onClick={() => setIsOpen(false)}>
               Lukk
             </Button>
           </FlexRow>

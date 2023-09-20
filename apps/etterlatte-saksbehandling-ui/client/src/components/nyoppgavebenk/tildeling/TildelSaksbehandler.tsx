@@ -38,7 +38,7 @@ export const TildelSaksbehandler = (props: {
         </Alert>
       )}
       {isFailure(tildelSaksbehandlerSvar) && (
-        <Alert variant={'error'} size="small">
+        <Alert variant="error" size="small">
           Tildeling feilet
         </Alert>
       )}

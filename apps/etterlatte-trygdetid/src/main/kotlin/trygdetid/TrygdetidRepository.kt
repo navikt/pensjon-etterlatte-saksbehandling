@@ -26,7 +26,7 @@ class TrygdetidRepository(private val dataSource: DataSource) {
         using(sessionOf(dataSource)) { session ->
             queryOf(
                 statement =
-                    """
+                """
                     SELECT
                         id,
                         sak_id,
@@ -49,10 +49,11 @@ class TrygdetidRepository(private val dataSource: DataSource) {
                         prorata_broek_teller,
                         prorata_broek_nevner,
                         trygdetid_tidspunkt,
-                        trygdetid_regelresultat                     
+                        trygdetid_regelresultat,
+                        beregnet_trygdetid_overstyrt
                     FROM trygdetid 
                     WHERE behandling_id = :behandlingId
-                    """.trimIndent(),
+                """.trimIndent(),
                 paramMap = mapOf("behandlingId" to behandlingId)
             ).let { query ->
                 session.run(
@@ -77,7 +78,7 @@ class TrygdetidRepository(private val dataSource: DataSource) {
             }
         }.let { hentTrygdtidNotNull(trygdetid.behandlingId) }
 
-    fun oppdaterTrygdetid(oppdatertTrygdetid: Trygdetid): Trygdetid =
+    fun oppdaterTrygdetid(oppdatertTrygdetid: Trygdetid, overstyrt: Boolean = false): Trygdetid =
         dataSource.transaction { tx ->
             val gjeldendeTrygdetid = hentTrygdtidNotNull(oppdatertTrygdetid.behandlingId)
 
@@ -99,7 +100,12 @@ class TrygdetidRepository(private val dataSource: DataSource) {
                 .forEach { slettTrygdetidGrunnlag(it.id, tx) }
 
             if (oppdatertTrygdetid.beregnetTrygdetid != null) {
-                oppdaterBeregnetTrygdetid(oppdatertTrygdetid.behandlingId, oppdatertTrygdetid.beregnetTrygdetid, tx)
+                oppdaterBeregnetTrygdetid(
+                    oppdatertTrygdetid.behandlingId,
+                    oppdatertTrygdetid.beregnetTrygdetid,
+                    tx,
+                    overstyrt
+                )
             } else {
                 nullstillBeregnetTrygdetid(oppdatertTrygdetid.behandlingId, tx)
             }
@@ -110,15 +116,15 @@ class TrygdetidRepository(private val dataSource: DataSource) {
         tx: TransactionalSession
     ) = queryOf(
         statement =
-            """
+        """
             INSERT INTO trygdetid(id, behandling_id, sak_id) VALUES(:id, :behandlingId, :sakId)
-            """.trimIndent(),
+        """.trimIndent(),
         paramMap =
-            mapOf(
-                "id" to trygdetid.id,
-                "behandlingId" to trygdetid.behandlingId,
-                "sakId" to trygdetid.sakId
-            )
+        mapOf(
+            "id" to trygdetid.id,
+            "behandlingId" to trygdetid.behandlingId,
+            "sakId" to trygdetid.sakId
+        )
     ).let { query -> tx.update(query) }
 
     private fun opprettOpplysningsgrunnlag(
@@ -128,18 +134,18 @@ class TrygdetidRepository(private val dataSource: DataSource) {
     ) = opplysninger.forEach { opplysningsgrunnlag ->
         queryOf(
             statement =
-                """
+            """
                 INSERT INTO opplysningsgrunnlag(id, trygdetid_id, type, opplysning, kilde)
                  VALUES(:id, :trygdetidId, :type, :opplysning::JSONB, :kilde::JSONB)
-                """.trimIndent(),
+            """.trimIndent(),
             paramMap =
-                mapOf(
-                    "id" to UUID.randomUUID(),
-                    "trygdetidId" to trygdetidId,
-                    "type" to opplysningsgrunnlag.type.name,
-                    "opplysning" to opplysningsgrunnlag.opplysning.toJson(),
-                    "kilde" to opplysningsgrunnlag.kilde.toJson()
-                )
+            mapOf(
+                "id" to UUID.randomUUID(),
+                "trygdetidId" to trygdetidId,
+                "type" to opplysningsgrunnlag.type.name,
+                "opplysning" to opplysningsgrunnlag.opplysning.toJson(),
+                "kilde" to opplysningsgrunnlag.kilde.toJson()
+            )
         ).let { query -> tx.update(query) }
     }
 
@@ -150,7 +156,7 @@ class TrygdetidRepository(private val dataSource: DataSource) {
     ) {
         queryOf(
             statement =
-                """
+            """
                 INSERT INTO trygdetid_grunnlag(
                     id, 
                     trygdetid_id, 
@@ -169,24 +175,24 @@ class TrygdetidRepository(private val dataSource: DataSource) {
                 VALUES(:id, :trygdetidId, :type, :bosted, :periodeFra, :periodeTil, :kilde, 
                     :beregnetVerdi, :beregnetTidspunkt, :beregnetRegelresultat, :begrunnelse,
                     :poengInnAar, :poengUtAar, :prorata)
-                """.trimIndent(),
+            """.trimIndent(),
             paramMap =
-                mapOf(
-                    "id" to trygdetidGrunnlag.id,
-                    "trygdetidId" to trygdetidId,
-                    "type" to trygdetidGrunnlag.type.name,
-                    "bosted" to trygdetidGrunnlag.bosted,
-                    "periodeFra" to trygdetidGrunnlag.periode.fra,
-                    "periodeTil" to trygdetidGrunnlag.periode.til,
-                    "kilde" to trygdetidGrunnlag.kilde.toJson(),
-                    "beregnetVerdi" to trygdetidGrunnlag.beregnetTrygdetid?.verdi?.toString(),
-                    "beregnetTidspunkt" to trygdetidGrunnlag.beregnetTrygdetid?.tidspunkt?.toTimestamp(),
-                    "beregnetRegelresultat" to trygdetidGrunnlag.beregnetTrygdetid?.regelResultat?.toJson(),
-                    "begrunnelse" to trygdetidGrunnlag.begrunnelse,
-                    "poengInnAar" to trygdetidGrunnlag.poengInnAar,
-                    "poengUtAar" to trygdetidGrunnlag.poengUtAar,
-                    "prorata" to trygdetidGrunnlag.prorata
-                )
+            mapOf(
+                "id" to trygdetidGrunnlag.id,
+                "trygdetidId" to trygdetidId,
+                "type" to trygdetidGrunnlag.type.name,
+                "bosted" to trygdetidGrunnlag.bosted,
+                "periodeFra" to trygdetidGrunnlag.periode.fra,
+                "periodeTil" to trygdetidGrunnlag.periode.til,
+                "kilde" to trygdetidGrunnlag.kilde.toJson(),
+                "beregnetVerdi" to trygdetidGrunnlag.beregnetTrygdetid?.verdi?.toString(),
+                "beregnetTidspunkt" to trygdetidGrunnlag.beregnetTrygdetid?.tidspunkt?.toTimestamp(),
+                "beregnetRegelresultat" to trygdetidGrunnlag.beregnetTrygdetid?.regelResultat?.toJson(),
+                "begrunnelse" to trygdetidGrunnlag.begrunnelse,
+                "poengInnAar" to trygdetidGrunnlag.poengInnAar,
+                "poengUtAar" to trygdetidGrunnlag.poengUtAar,
+                "prorata" to trygdetidGrunnlag.prorata
+            )
         ).let { query -> tx.update(query) }
     }
 
@@ -196,7 +202,7 @@ class TrygdetidRepository(private val dataSource: DataSource) {
     ) {
         queryOf(
             statement =
-                """
+            """
                 UPDATE trygdetid_grunnlag
                 SET bosted = :bosted,
                  periode_fra = :periodeFra,
@@ -210,22 +216,22 @@ class TrygdetidRepository(private val dataSource: DataSource) {
                  poeng_ut_aar = :poengUtAar,
                  prorata = :prorata
                 WHERE id = :trygdetidGrunnlagId
-                """.trimIndent(),
+            """.trimIndent(),
             paramMap =
-                mapOf(
-                    "trygdetidGrunnlagId" to trygdetidGrunnlag.id,
-                    "bosted" to trygdetidGrunnlag.bosted,
-                    "periodeFra" to trygdetidGrunnlag.periode.fra,
-                    "periodeTil" to trygdetidGrunnlag.periode.til,
-                    "kilde" to trygdetidGrunnlag.kilde.toJson(),
-                    "beregnetVerdi" to trygdetidGrunnlag.beregnetTrygdetid?.verdi?.toString(),
-                    "beregnetTidspunkt" to trygdetidGrunnlag.beregnetTrygdetid?.tidspunkt?.toTimestamp(),
-                    "beregnetRegelresultat" to trygdetidGrunnlag.beregnetTrygdetid?.regelResultat?.toJson(),
-                    "begrunnelse" to trygdetidGrunnlag.begrunnelse,
-                    "poengInnAar" to trygdetidGrunnlag.poengInnAar,
-                    "poengUtAar" to trygdetidGrunnlag.poengUtAar,
-                    "prorata" to trygdetidGrunnlag.prorata
-                )
+            mapOf(
+                "trygdetidGrunnlagId" to trygdetidGrunnlag.id,
+                "bosted" to trygdetidGrunnlag.bosted,
+                "periodeFra" to trygdetidGrunnlag.periode.fra,
+                "periodeTil" to trygdetidGrunnlag.periode.til,
+                "kilde" to trygdetidGrunnlag.kilde.toJson(),
+                "beregnetVerdi" to trygdetidGrunnlag.beregnetTrygdetid?.verdi?.toString(),
+                "beregnetTidspunkt" to trygdetidGrunnlag.beregnetTrygdetid?.tidspunkt?.toTimestamp(),
+                "beregnetRegelresultat" to trygdetidGrunnlag.beregnetTrygdetid?.regelResultat?.toJson(),
+                "begrunnelse" to trygdetidGrunnlag.begrunnelse,
+                "poengInnAar" to trygdetidGrunnlag.poengInnAar,
+                "poengUtAar" to trygdetidGrunnlag.poengUtAar,
+                "prorata" to trygdetidGrunnlag.prorata
+            )
         ).let { query -> tx.update(query) }
     }
 
@@ -236,22 +242,23 @@ class TrygdetidRepository(private val dataSource: DataSource) {
         queryOf(
             statement = "DELETE FROM trygdetid_grunnlag WHERE id = :id",
             paramMap =
-                mapOf(
-                    "id" to trygdetidGrunnlagId
-                )
+            mapOf(
+                "id" to trygdetidGrunnlagId
+            )
         ).let { query -> tx.update(query) }
     }
 
     private fun oppdaterBeregnetTrygdetid(
         behandlingId: UUID,
         beregnetTrygdetid: DetaljertBeregnetTrygdetid,
-        tx: TransactionalSession
+        tx: TransactionalSession,
+        overstyrt: Boolean = false
     ) {
         val beregnetVerdi = beregnetTrygdetid.resultat
 
         queryOf(
             statement =
-                """
+            """
                 UPDATE trygdetid 
                 SET
                   faktisk_trygdetid_norge_total = :faktiskTrygdetidNorgeTotal,
@@ -274,38 +281,40 @@ class TrygdetidRepository(private val dataSource: DataSource) {
                   prorata_broek_teller = :prorataBroekTeller,
                   prorata_broek_nevner = :prorataBroekNevner,
                   trygdetid_tidspunkt = :trygdetidTidspunkt,
-                  trygdetid_regelresultat = :trygdetidRegelresultat                
+                  trygdetid_regelresultat = :trygdetidRegelresultat,
+                  beregnet_trygdetid_overstyrt = :overstyrt
                 WHERE behandling_id = :behandlingId
-                """.trimIndent(),
+            """.trimIndent(),
             paramMap =
-                mapOf(
-                    "behandlingId" to behandlingId,
-                    "faktiskTrygdetidNorgeTotal" to beregnetVerdi.faktiskTrygdetidNorge?.periode?.toString(),
-                    "faktiskTrygdetidNorgeAntallMaaneder" to beregnetVerdi.faktiskTrygdetidNorge?.antallMaaneder,
-                    "faktiskTrygdetidTeoretiskTotal" to beregnetVerdi.faktiskTrygdetidTeoretisk?.periode?.toString(),
-                    "faktiskTrygdetidTeoretiskAntallMaaneder" to
-                        beregnetVerdi.faktiskTrygdetidTeoretisk?.antallMaaneder,
-                    "fremtidigTrygdetidNorgeTotal" to beregnetVerdi.fremtidigTrygdetidNorge?.periode?.toString(),
-                    "fremtidigTrygdetidNorgeAntallMaaneder" to beregnetVerdi.fremtidigTrygdetidNorge?.antallMaaneder,
-                    "fremtidigTrygdetidNorgeOpptjeningstidMaaneder" to
-                        beregnetVerdi.fremtidigTrygdetidNorge?.opptjeningstidIMaaneder,
-                    "fremtidigTrygdetidNorgeMindreEnnFireFemtedeler" to
-                        beregnetVerdi.fremtidigTrygdetidNorge?.mindreEnnFireFemtedelerAvOpptjeningstiden,
-                    "fremtidigTrygdetidTeoretiskTotal" to
-                        beregnetVerdi.fremtidigTrygdetidTeoretisk?.periode?.toString(),
-                    "fremtidigTrygdetidTeoretiskAntallMaaneder" to
-                        beregnetVerdi.fremtidigTrygdetidTeoretisk?.antallMaaneder,
-                    "fremtidigTrygdetidTeoretiskOpptjeningstidMaaneder" to
-                        beregnetVerdi.fremtidigTrygdetidTeoretisk?.opptjeningstidIMaaneder,
-                    "fremtidigTrygdetidTeoretiskMindreEnnFireFemtedeler" to
-                        beregnetVerdi.fremtidigTrygdetidTeoretisk?.mindreEnnFireFemtedelerAvOpptjeningstiden,
-                    "samletTrygdetidNorge" to beregnetVerdi.samletTrygdetidNorge,
-                    "samletTrygdetidTeoretisk" to beregnetVerdi.samletTrygdetidTeoretisk,
-                    "prorataBroekTeller" to beregnetVerdi.prorataBroek?.teller,
-                    "prorataBroekNevner" to beregnetVerdi.prorataBroek?.nevner,
-                    "trygdetidTidspunkt" to beregnetTrygdetid.tidspunkt.toTimestamp(),
-                    "trygdetidRegelresultat" to beregnetTrygdetid.regelResultat.toJson()
-                )
+            mapOf(
+                "behandlingId" to behandlingId,
+                "faktiskTrygdetidNorgeTotal" to beregnetVerdi.faktiskTrygdetidNorge?.periode?.toString(),
+                "faktiskTrygdetidNorgeAntallMaaneder" to beregnetVerdi.faktiskTrygdetidNorge?.antallMaaneder,
+                "faktiskTrygdetidTeoretiskTotal" to beregnetVerdi.faktiskTrygdetidTeoretisk?.periode?.toString(),
+                "faktiskTrygdetidTeoretiskAntallMaaneder" to
+                    beregnetVerdi.faktiskTrygdetidTeoretisk?.antallMaaneder,
+                "fremtidigTrygdetidNorgeTotal" to beregnetVerdi.fremtidigTrygdetidNorge?.periode?.toString(),
+                "fremtidigTrygdetidNorgeAntallMaaneder" to beregnetVerdi.fremtidigTrygdetidNorge?.antallMaaneder,
+                "fremtidigTrygdetidNorgeOpptjeningstidMaaneder" to
+                    beregnetVerdi.fremtidigTrygdetidNorge?.opptjeningstidIMaaneder,
+                "fremtidigTrygdetidNorgeMindreEnnFireFemtedeler" to
+                    beregnetVerdi.fremtidigTrygdetidNorge?.mindreEnnFireFemtedelerAvOpptjeningstiden,
+                "fremtidigTrygdetidTeoretiskTotal" to
+                    beregnetVerdi.fremtidigTrygdetidTeoretisk?.periode?.toString(),
+                "fremtidigTrygdetidTeoretiskAntallMaaneder" to
+                    beregnetVerdi.fremtidigTrygdetidTeoretisk?.antallMaaneder,
+                "fremtidigTrygdetidTeoretiskOpptjeningstidMaaneder" to
+                    beregnetVerdi.fremtidigTrygdetidTeoretisk?.opptjeningstidIMaaneder,
+                "fremtidigTrygdetidTeoretiskMindreEnnFireFemtedeler" to
+                    beregnetVerdi.fremtidigTrygdetidTeoretisk?.mindreEnnFireFemtedelerAvOpptjeningstiden,
+                "samletTrygdetidNorge" to beregnetVerdi.samletTrygdetidNorge,
+                "samletTrygdetidTeoretisk" to beregnetVerdi.samletTrygdetidTeoretisk,
+                "prorataBroekTeller" to beregnetVerdi.prorataBroek?.teller,
+                "prorataBroekNevner" to beregnetVerdi.prorataBroek?.nevner,
+                "trygdetidTidspunkt" to beregnetTrygdetid.tidspunkt.toTimestamp(),
+                "trygdetidRegelresultat" to beregnetTrygdetid.regelResultat.toJson(),
+                "overstyrt" to overstyrt
+            )
         ).let { query ->
             tx.update(query)
         }
@@ -316,7 +325,7 @@ class TrygdetidRepository(private val dataSource: DataSource) {
         tx: TransactionalSession
     ) = queryOf(
         statement =
-            """
+        """
             UPDATE trygdetid 
             SET 
                 faktisk_trygdetid_norge_total = null,
@@ -336,9 +345,10 @@ class TrygdetidRepository(private val dataSource: DataSource) {
                 prorata_broek_teller = null,
                 prorata_broek_nevner = null,
                 trygdetid_tidspunkt = null,
-                trygdetid_regelresultat = null      
+                trygdetid_regelresultat = null,
+                beregnet_trygdetid_overstyrt = false
             WHERE behandling_id = :behandlingId
-            """.trimIndent(),
+        """.trimIndent(),
         paramMap = mapOf("behandlingId" to behandlingId)
     ).let { query -> tx.update(query) }
 
@@ -346,12 +356,12 @@ class TrygdetidRepository(private val dataSource: DataSource) {
         using(sessionOf(dataSource)) { session ->
             queryOf(
                 statement =
-                    """
+                """
                     SELECT id, trygdetid_id, type, bosted, periode_fra, periode_til, kilde, beregnet_verdi,
                     beregnet_tidspunkt, beregnet_regelresultat , begrunnelse, poeng_inn_aar, poeng_ut_aar, prorata
                     FROM trygdetid_grunnlag
                     WHERE trygdetid_id = :trygdetidId
-                    """.trimIndent(),
+                """.trimIndent(),
                 paramMap = mapOf("trygdetidId" to trygdetidId)
             ).let { query ->
                 session.run(
@@ -364,11 +374,11 @@ class TrygdetidRepository(private val dataSource: DataSource) {
         dataSource.transaction { tx ->
             tx.hentListe(
                 queryString =
-                    """
+                """
                     SELECT id, trygdetid_id, type, opplysning, kilde
                     FROM opplysningsgrunnlag
                     WHERE trygdetid_id = :trygdetidId
-                    """.trimIndent(),
+                """.trimIndent(),
                 params = { mapOf("trygdetidId" to trygdetidId) },
                 converter = { it.toOpplysningsgrunnlag() }
             )
@@ -378,58 +388,65 @@ class TrygdetidRepository(private val dataSource: DataSource) {
         hentTrygdetid(behandlingsId)
             ?: throw Exception("Fant ikke trygdetid for $behandlingsId")
 
+    private fun Row.toFaktiskTrygdetid(totalColumn: String, maanederColumn: String) =
+        stringOrNull(totalColumn)?.let { period ->
+            FaktiskTrygdetid(
+                periode = Period.parse(period),
+                antallMaaneder = long(maanederColumn)
+            )
+        }
+
+    private fun Row.toFremtidigTrygdetid(
+        totalColumn: String,
+        maanederColumn: String,
+        opptjeningsColumn: String,
+        fireFemtedelerColumn: String
+    ) =
+        stringOrNull(totalColumn)?.let { period ->
+            FremtidigTrygdetid(
+                periode = Period.parse(period),
+                antallMaaneder = long(maanederColumn),
+                opptjeningstidIMaaneder = long(opptjeningsColumn),
+                mindreEnnFireFemtedelerAvOpptjeningstiden =
+                boolean(fireFemtedelerColumn)
+            )
+        }
+
     private fun Row.toDetaljertBeregnetTrygdetid() =
         DetaljertBeregnetTrygdetid(
             resultat =
-                DetaljertBeregnetTrygdetidResultat(
-                    faktiskTrygdetidNorge =
-                        stringOrNull("faktisk_trygdetid_norge_total")?.let { period ->
-                            FaktiskTrygdetid(
-                                periode = Period.parse(period),
-                                antallMaaneder = long("faktisk_trygdetid_norge_antall_maaneder")
-                            )
-                        },
-                    faktiskTrygdetidTeoretisk =
-                        stringOrNull("faktisk_trygdetid_teoretisk_total")?.let { period ->
-                            FaktiskTrygdetid(
-                                periode = Period.parse(period),
-                                antallMaaneder = long("faktisk_trygdetid_teoretisk_antall_maaneder")
-                            )
-                        },
-                    fremtidigTrygdetidNorge =
-                        stringOrNull("fremtidig_trygdetid_norge_total")?.let { period ->
-                            FremtidigTrygdetid(
-                                periode = Period.parse(period),
-                                antallMaaneder = long("fremtidig_trygdetid_norge_antall_maaneder"),
-                                opptjeningstidIMaaneder = long("fremtidig_trygdetid_norge_opptjeningstid_maaneder"),
-                                mindreEnnFireFemtedelerAvOpptjeningstiden =
-                                    boolean("fremtidig_trygdetid_norge_mindre_enn_fire_femtedeler")
-                            )
-                        },
-                    fremtidigTrygdetidTeoretisk =
-                        stringOrNull("fremtidig_trygdetid_teoretisk_total")?.let { period ->
-                            FremtidigTrygdetid(
-                                periode = Period.parse(period),
-                                antallMaaneder = long("fremtidig_trygdetid_teoretisk_antall_maaneder"),
-                                opptjeningstidIMaaneder = long("fremtidig_trygdetid_teoretisk_opptjeningstid_maaneder"),
-                                mindreEnnFireFemtedelerAvOpptjeningstiden =
-                                    boolean(
-                                        "fremtidig_trygdetid_teoretisk_mindre_enn_fire_femtedeler"
-                                    )
-                            )
-                        },
-                    samletTrygdetidNorge = intOrNull("samlet_trygdetid_norge"),
-                    samletTrygdetidTeoretisk = intOrNull("samlet_trygdetid_teoretisk"),
-                    prorataBroek =
-                        IntBroek.fra(
-                            Pair(intOrNull("prorata_broek_teller"), intOrNull("prorata_broek_nevner"))
-                        )
+            DetaljertBeregnetTrygdetidResultat(
+                faktiskTrygdetidNorge = this.toFaktiskTrygdetid(
+                    totalColumn = "faktisk_trygdetid_norge_total",
+                    maanederColumn = "faktisk_trygdetid_norge_antall_maaneder"
                 ),
+                faktiskTrygdetidTeoretisk = this.toFaktiskTrygdetid(
+                    totalColumn = "faktisk_trygdetid_teoretisk_total",
+                    maanederColumn = "faktisk_trygdetid_teoretisk_antall_maaneder"
+                ),
+                fremtidigTrygdetidNorge = this.toFremtidigTrygdetid(
+                    totalColumn = "fremtidig_trygdetid_norge_total",
+                    maanederColumn = "fremtidig_trygdetid_norge_antall_maaneder",
+                    opptjeningsColumn = "fremtidig_trygdetid_norge_opptjeningstid_maaneder",
+                    fireFemtedelerColumn = "fremtidig_trygdetid_norge_mindre_enn_fire_femtedeler"
+                ),
+                fremtidigTrygdetidTeoretisk = this.toFremtidigTrygdetid(
+                    totalColumn = "fremtidig_trygdetid_teoretisk_total",
+                    maanederColumn = "fremtidig_trygdetid_teoretisk_antall_maaneder",
+                    opptjeningsColumn = "fremtidig_trygdetid_teoretisk_opptjeningstid_maaneder",
+                    fireFemtedelerColumn = "fremtidig_trygdetid_teoretisk_mindre_enn_fire_femtedeler"
+                ),
+                samletTrygdetidNorge = intOrNull("samlet_trygdetid_norge"),
+                samletTrygdetidTeoretisk = intOrNull("samlet_trygdetid_teoretisk"),
+                prorataBroek = IntBroek.fra(
+                    Pair(intOrNull("prorata_broek_teller"), intOrNull("prorata_broek_nevner"))
+                ),
+                overstyrt = boolean("beregnet_trygdetid_overstyrt")
+            ),
             tidspunkt = tidspunkt("trygdetid_tidspunkt"),
-            regelResultat =
-                string("trygdetid_regelresultat").let { regelResultat ->
-                    objectMapper.readTree(regelResultat)
-                }
+            regelResultat = string("trygdetid_regelresultat").let { regelResultat ->
+                objectMapper.readTree(regelResultat)
+            }
         )
 
     private fun Row.toTrygdetid(
@@ -440,9 +457,9 @@ class TrygdetidRepository(private val dataSource: DataSource) {
         sakId = long("sak_id"),
         behandlingId = uuid("behandling_id"),
         beregnetTrygdetid =
-            stringOrNull("trygdetid_tidspunkt")?.let {
-                this.toDetaljertBeregnetTrygdetid()
-            },
+        stringOrNull("trygdetid_tidspunkt")?.let {
+            this.toDetaljertBeregnetTrygdetid()
+        },
         trygdetidGrunnlag = trygdetidGrunnlag,
         opplysninger = opplysninger
     )
@@ -453,22 +470,22 @@ class TrygdetidRepository(private val dataSource: DataSource) {
             type = string("type").let { TrygdetidType.valueOf(it) },
             bosted = string("bosted"),
             periode =
-                TrygdetidPeriode(
-                    fra = localDate("periode_fra"),
-                    til = localDate("periode_til")
-                ),
+            TrygdetidPeriode(
+                fra = localDate("periode_fra"),
+                til = localDate("periode_til")
+            ),
             kilde = string("kilde").let { objectMapper.readValue(it) },
             beregnetTrygdetid =
-                stringOrNull("beregnet_verdi")?.let { verdi ->
-                    BeregnetTrygdetidGrunnlag(
-                        verdi = Period.parse(verdi),
-                        tidspunkt = sqlTimestamp("beregnet_tidspunkt").toTidspunkt(),
-                        regelResultat =
-                            string("beregnet_regelresultat").let {
-                                objectMapper.readTree(it)
-                            }
-                    )
-                },
+            stringOrNull("beregnet_verdi")?.let { verdi ->
+                BeregnetTrygdetidGrunnlag(
+                    verdi = Period.parse(verdi),
+                    tidspunkt = sqlTimestamp("beregnet_tidspunkt").toTidspunkt(),
+                    regelResultat =
+                    string("beregnet_regelresultat").let {
+                        objectMapper.readTree(it)
+                    }
+                )
+            },
             begrunnelse = stringOrNull("begrunnelse"),
             poengInnAar = boolean("poeng_inn_aar"),
             poengUtAar = boolean("poeng_ut_aar"),

@@ -83,7 +83,8 @@ data class DetaljertBeregnetTrygdetidResultat(
     val fremtidigTrygdetidTeoretisk: FremtidigTrygdetid?,
     val samletTrygdetidNorge: Int?,
     val samletTrygdetidTeoretisk: Int?,
-    val prorataBroek: IntBroek?
+    val prorataBroek: IntBroek?,
+    val overstyrt: Boolean
 ) {
     companion object {
         fun fraSamletTrygdetidNorge(verdi: Int) =
@@ -94,7 +95,8 @@ data class DetaljertBeregnetTrygdetidResultat(
                 fremtidigTrygdetidTeoretisk = null,
                 samletTrygdetidNorge = verdi,
                 samletTrygdetidTeoretisk = null,
-                prorataBroek = null
+                prorataBroek = null,
+                overstyrt = false
             )
     }
 }

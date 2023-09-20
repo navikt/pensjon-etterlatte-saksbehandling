@@ -91,7 +91,8 @@ enum class OppgaveType {
     UNDERKJENT,
     GOSYS,
     UTLAND,
-    KLAGE
+    KLAGE,
+    TILBAKEKREVING
 }
 
 data class SaksbehandlerEndringDto(

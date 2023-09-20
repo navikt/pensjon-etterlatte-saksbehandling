@@ -1,5 +1,6 @@
 package no.nav.etterlatte.libs.common.vedtak
 
+import com.fasterxml.jackson.databind.node.ObjectNode
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
@@ -71,3 +72,16 @@ enum class UtbetalingsperiodeType {
     OPPHOER,
     UTBETALING,
 }
+
+data class VedtakSamordningDto(
+    val vedtakId: Long,
+    val status: VedtakStatus,
+    val virkningstidspunkt: YearMonth,
+    val sak: VedtakSak,
+    val behandling: Behandling,
+    val type: VedtakType,
+    val vedtakFattet: VedtakFattet?,
+    val attestasjon: Attestasjon?,
+    val beregning: ObjectNode?,
+    val avkorting: ObjectNode?,
+)

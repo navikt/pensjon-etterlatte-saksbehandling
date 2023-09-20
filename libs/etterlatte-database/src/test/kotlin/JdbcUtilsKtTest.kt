@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Test
 import java.sql.ResultSet
 
 class JdbcUtilsKtTest {
-
     @Test
     fun `toList stopper ikke hvis block() gir null og resultset har verdier`() {
         val resultSet: ResultSet = mockk()

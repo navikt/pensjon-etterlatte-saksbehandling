@@ -12,33 +12,35 @@ import java.time.Duration
 
 class NavansattKlient(
     private val client: HttpClient,
-    private val url: String
+    private val url: String,
 ) {
     private val logger = LoggerFactory.getLogger(NavansattKlient::class.java)
 
-    private val cache = Caffeine.newBuilder()
-        .expireAfterWrite(Duration.ofMinutes(15))
-        .build<String, SaksbehandlerInfo>()
+    private val cache =
+        Caffeine.newBuilder()
+            .expireAfterWrite(Duration.ofMinutes(15))
+            .build<String, SaksbehandlerInfo>()
 
-    suspend fun hentSaksbehandlerInfo(ident: String): SaksbehandlerInfo = try {
-        val saksbehandlerCache = cache.getIfPresent(ident)
+    suspend fun hentSaksbehandlerInfo(ident: String): SaksbehandlerInfo =
+        try {
+            val saksbehandlerCache = cache.getIfPresent(ident)
 
-        if (saksbehandlerCache != null) {
-            logger.info("Fant cachet saksbehandler med ident $ident")
-            saksbehandlerCache
-        } else {
-            logger.info("Henter info om saksbehandler med ident $ident")
-
-            val response = client.get("$url/navansatt/$ident")
-
-            if (response.status.isSuccess()) {
-                response.body<SaksbehandlerInfo>()
-                    .also { cache.put(ident, it) }
+            if (saksbehandlerCache != null) {
+                logger.info("Fant cachet saksbehandler med ident $ident")
+                saksbehandlerCache
             } else {
-                throw ResponseException(response, "Ukjent feil fra navansatt api")
+                logger.info("Henter info om saksbehandler med ident $ident")
+
+                val response = client.get("$url/navansatt/$ident")
+
+                if (response.status.isSuccess()) {
+                    response.body<SaksbehandlerInfo>()
+                        .also { cache.put(ident, it) }
+                } else {
+                    throw ResponseException(response, "Ukjent feil fra navansatt api")
+                }
             }
+        } catch (exception: Exception) {
+            throw AdresseException("Feil i kall mot navansatt med ident: $ident", exception)
         }
-    } catch (exception: Exception) {
-        throw AdresseException("Feil i kall mot navansatt med ident: $ident", exception)
-    }
 }

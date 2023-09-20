@@ -20,23 +20,24 @@ import java.time.YearMonth
 import java.util.UUID.randomUUID
 
 internal class BeregningServiceTest {
-
     private val behandlingKlient = mockk<BehandlingKlientImpl>()
-    private val beregningRepository = mockk<BeregningRepository> {
-        every { lagreEllerOppdaterBeregning(any()) } returns mockk()
-    }
+    private val beregningRepository =
+        mockk<BeregningRepository> {
+            every { lagreEllerOppdaterBeregning(any()) } returns mockk()
+        }
     private val beregnBarnepensjonService = mockk<BeregnBarnepensjonService>()
     private val beregnOmstillingsstoenadService = mockk<BeregnOmstillingsstoenadService>()
     private val beregningsGrunnlagService = mockk<BeregningsGrunnlagService>()
     private val trygdetidKlient = mockk<TrygdetidKlient>()
-    private val beregningService: BeregningService = BeregningService(
-        beregningRepository = beregningRepository,
-        behandlingKlient = behandlingKlient,
-        beregnBarnepensjonService = beregnBarnepensjonService,
-        beregnOmstillingsstoenadService = beregnOmstillingsstoenadService,
-        beregningsGrunnlagService = beregningsGrunnlagService,
-        trygdetidKlient = trygdetidKlient
-    )
+    private val beregningService: BeregningService =
+        BeregningService(
+            beregningRepository = beregningRepository,
+            behandlingKlient = behandlingKlient,
+            beregnBarnepensjonService = beregnBarnepensjonService,
+            beregnOmstillingsstoenadService = beregnOmstillingsstoenadService,
+            beregningsGrunnlagService = beregningsGrunnlagService,
+            trygdetidKlient = trygdetidKlient,
+        )
 
     @Test
     fun `skal beregne barnepensjon og lagre resultatet hvis statussjekk i behandling passerer`() {

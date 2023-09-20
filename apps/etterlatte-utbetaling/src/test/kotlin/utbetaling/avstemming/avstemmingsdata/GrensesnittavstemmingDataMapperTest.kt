@@ -22,7 +22,6 @@ import java.time.Month
 import java.time.temporal.ChronoUnit
 
 internal class GrensesnittavstemmingDataMapperTest {
-
     @Test
     fun `skal opprette avstemming fra utbetaling med startmelding, datamelding og sluttmelding`() {
         val fraOgMed = Tidspunkt.now().minus(1, ChronoUnit.DAYS)
@@ -64,11 +63,12 @@ internal class GrensesnittavstemmingDataMapperTest {
         val fraOgMed = Tidspunkt.now().minus(1, ChronoUnit.DAYS)
         val til = Tidspunkt.now()
 
-        val utbetalinger = listOf(
-            utbetaling(utbetalingshendelser = listOf(utbetalingshendelse(status = UtbetalingStatus.FEILET))),
-            utbetaling(utbetalingshendelser = listOf(utbetalingshendelse(status = UtbetalingStatus.FEILET))),
-            utbetaling(utbetalingshendelser = listOf(utbetalingshendelse(status = UtbetalingStatus.FEILET)))
-        )
+        val utbetalinger =
+            listOf(
+                utbetaling(utbetalingshendelser = listOf(utbetalingshendelse(status = UtbetalingStatus.FEILET))),
+                utbetaling(utbetalingshendelser = listOf(utbetalingshendelse(status = UtbetalingStatus.FEILET))),
+                utbetaling(utbetalingshendelser = listOf(utbetalingshendelse(status = UtbetalingStatus.FEILET))),
+            )
 
         val grensesnittavstemmingDataMapper =
             GrensesnittavstemmingDataMapper(utbetalinger, fraOgMed, til, UUIDBase64(), 2)
@@ -88,11 +88,12 @@ internal class GrensesnittavstemmingDataMapperTest {
         val fraOgMed = Tidspunkt.now().minus(1, ChronoUnit.DAYS)
         val til = Tidspunkt.now()
 
-        val utbetalinger = listOf(
-            utbetaling(utbetalingshendelser = listOf(utbetalingshendelse(status = UtbetalingStatus.FEILET))),
-            utbetaling(utbetalingshendelser = listOf(utbetalingshendelse(status = UtbetalingStatus.FEILET))),
-            utbetaling(utbetalingshendelser = listOf(utbetalingshendelse(status = UtbetalingStatus.FEILET)))
-        )
+        val utbetalinger =
+            listOf(
+                utbetaling(utbetalingshendelser = listOf(utbetalingshendelse(status = UtbetalingStatus.FEILET))),
+                utbetaling(utbetalingshendelser = listOf(utbetalingshendelse(status = UtbetalingStatus.FEILET))),
+                utbetaling(utbetalingshendelser = listOf(utbetalingshendelse(status = UtbetalingStatus.FEILET))),
+            )
 
         val grensesnittavstemmingDataMapper =
             GrensesnittavstemmingDataMapper(utbetalinger, fraOgMed, til, UUIDBase64(), 2)
@@ -116,13 +117,14 @@ internal class GrensesnittavstemmingDataMapperTest {
         val fraOgMed = Tidspunkt.now().minus(1, ChronoUnit.DAYS)
         val til = Tidspunkt.now()
 
-        val utbetalinger = listOf(
-            utbetaling(utbetalingshendelser = listOf(utbetalingshendelse(status = UtbetalingStatus.SENDT))),
-            utbetaling(utbetalingshendelser = listOf(utbetalingshendelse(status = UtbetalingStatus.GODKJENT))),
-            utbetaling(utbetalingshendelser = listOf(utbetalingshendelse(status = UtbetalingStatus.GODKJENT_MED_FEIL))),
-            utbetaling(utbetalingshendelser = listOf(utbetalingshendelse(status = UtbetalingStatus.AVVIST))),
-            utbetaling(utbetalingshendelser = listOf(utbetalingshendelse(status = UtbetalingStatus.FEILET)))
-        )
+        val utbetalinger =
+            listOf(
+                utbetaling(utbetalingshendelser = listOf(utbetalingshendelse(status = UtbetalingStatus.SENDT))),
+                utbetaling(utbetalingshendelser = listOf(utbetalingshendelse(status = UtbetalingStatus.GODKJENT))),
+                utbetaling(utbetalingshendelser = listOf(utbetalingshendelse(status = UtbetalingStatus.GODKJENT_MED_FEIL))),
+                utbetaling(utbetalingshendelser = listOf(utbetalingshendelse(status = UtbetalingStatus.AVVIST))),
+                utbetaling(utbetalingshendelser = listOf(utbetalingshendelse(status = UtbetalingStatus.FEILET))),
+            )
 
         val grensesnittavstemmingDataMapper = GrensesnittavstemmingDataMapper(utbetalinger, fraOgMed, til, UUIDBase64())
         val avstemmingsmelding = grensesnittavstemmingDataMapper.opprettAvstemmingsmelding(Saktype.BARNEPENSJON)
@@ -156,22 +158,24 @@ internal class GrensesnittavstemmingDataMapperTest {
         val fraOgMed = Tidspunkt.now().minus(1, ChronoUnit.DAYS)
         val til = Tidspunkt.now()
 
-        val utbetalinger = listOf(
-            utbetaling(utbetalingshendelser = listOf(utbetalingshendelse(status = UtbetalingStatus.GODKJENT))),
-            utbetaling(utbetalingshendelser = listOf(utbetalingshendelse(status = UtbetalingStatus.GODKJENT))),
-            utbetaling(utbetalingshendelser = listOf(utbetalingshendelse(status = UtbetalingStatus.GODKJENT_MED_FEIL))),
-            utbetaling(utbetalingshendelser = listOf(utbetalingshendelse(status = UtbetalingStatus.AVVIST))),
-            utbetaling(utbetalingshendelser = listOf(utbetalingshendelse(status = UtbetalingStatus.AVVIST))),
-            utbetaling(utbetalingshendelser = listOf(utbetalingshendelse(status = UtbetalingStatus.AVVIST))),
-            utbetaling(utbetalingshendelser = listOf(utbetalingshendelse(status = UtbetalingStatus.SENDT))),
-            utbetaling(utbetalingshendelser = listOf(utbetalingshendelse(status = UtbetalingStatus.FEILET)))
-        )
-        val grensesnittavstemmingDataMapper = GrensesnittavstemmingDataMapper(
-            utbetalinger = utbetalinger,
-            periodeFraOgMed = fraOgMed,
-            periodeTil = til,
-            avstemmingId = UUIDBase64()
-        )
+        val utbetalinger =
+            listOf(
+                utbetaling(utbetalingshendelser = listOf(utbetalingshendelse(status = UtbetalingStatus.GODKJENT))),
+                utbetaling(utbetalingshendelser = listOf(utbetalingshendelse(status = UtbetalingStatus.GODKJENT))),
+                utbetaling(utbetalingshendelser = listOf(utbetalingshendelse(status = UtbetalingStatus.GODKJENT_MED_FEIL))),
+                utbetaling(utbetalingshendelser = listOf(utbetalingshendelse(status = UtbetalingStatus.AVVIST))),
+                utbetaling(utbetalingshendelser = listOf(utbetalingshendelse(status = UtbetalingStatus.AVVIST))),
+                utbetaling(utbetalingshendelser = listOf(utbetalingshendelse(status = UtbetalingStatus.AVVIST))),
+                utbetaling(utbetalingshendelser = listOf(utbetalingshendelse(status = UtbetalingStatus.SENDT))),
+                utbetaling(utbetalingshendelser = listOf(utbetalingshendelse(status = UtbetalingStatus.FEILET))),
+            )
+        val grensesnittavstemmingDataMapper =
+            GrensesnittavstemmingDataMapper(
+                utbetalinger = utbetalinger,
+                periodeFraOgMed = fraOgMed,
+                periodeTil = til,
+                avstemmingId = UUIDBase64(),
+            )
         val avstemmingsmelding = grensesnittavstemmingDataMapper.opprettAvstemmingsmelding(Saktype.BARNEPENSJON)
         val (_, dataMelding, _) = avstemmingsmelding
 
@@ -180,18 +184,15 @@ internal class GrensesnittavstemmingDataMapperTest {
             { assertEquals(2, dataMelding.grunnlag.godkjentAntall) },
             { assertEquals(BigDecimal(20_000), dataMelding.grunnlag.godkjentBelop) },
             { assertEquals(Fortegn.T, dataMelding.grunnlag.godkjentFortegn) },
-
             { assertEquals(1, dataMelding.grunnlag.varselAntall) },
             { assertEquals(BigDecimal(10_000), dataMelding.grunnlag.varselBelop) },
             { assertEquals(Fortegn.T, dataMelding.grunnlag.varselFortegn) },
-
             { assertEquals(4, dataMelding.grunnlag.avvistAntall) },
             { assertEquals(BigDecimal(40_000), dataMelding.grunnlag.avvistBelop) },
             { assertEquals(Fortegn.T, dataMelding.grunnlag.avvistFortegn) },
-
             { assertEquals(1, dataMelding.grunnlag.manglerAntall) },
             { assertEquals(BigDecimal(10_000), dataMelding.grunnlag.manglerBelop) },
-            { assertEquals(Fortegn.T, dataMelding.grunnlag.manglerFortegn) }
+            { assertEquals(Fortegn.T, dataMelding.grunnlag.manglerFortegn) },
         )
     }
 
@@ -202,12 +203,13 @@ internal class GrensesnittavstemmingDataMapperTest {
 
         val utbetalinger = emptyList<Utbetaling>()
 
-        val grensesnittavstemmingDataMapper = GrensesnittavstemmingDataMapper(
-            utbetalinger = utbetalinger,
-            periodeFraOgMed = fraOgMed,
-            periodeTil = til,
-            avstemmingId = UUIDBase64()
-        )
+        val grensesnittavstemmingDataMapper =
+            GrensesnittavstemmingDataMapper(
+                utbetalinger = utbetalinger,
+                periodeFraOgMed = fraOgMed,
+                periodeTil = til,
+                avstemmingId = UUIDBase64(),
+            )
         val avstemmingsmelding = grensesnittavstemmingDataMapper.opprettAvstemmingsmelding(Saktype.BARNEPENSJON)
         val (_, dataMelding, _) = avstemmingsmelding
 
@@ -216,7 +218,7 @@ internal class GrensesnittavstemmingDataMapperTest {
             { assertEquals(0, dataMelding.grunnlag.godkjentAntall) },
             { assertEquals(0, dataMelding.grunnlag.varselAntall) },
             { assertEquals(0, dataMelding.grunnlag.avvistAntall) },
-            { assertEquals(0, dataMelding.grunnlag.manglerAntall) }
+            { assertEquals(0, dataMelding.grunnlag.manglerAntall) },
         )
     }
 
@@ -227,12 +229,13 @@ internal class GrensesnittavstemmingDataMapperTest {
 
         val utbetalinger = emptyList<Utbetaling>()
 
-        val grensesnittavstemmingDataMapper = GrensesnittavstemmingDataMapper(
-            utbetalinger = utbetalinger,
-            periodeFraOgMed = fraOgMed,
-            periodeTil = til,
-            avstemmingId = UUIDBase64("1")
-        )
+        val grensesnittavstemmingDataMapper =
+            GrensesnittavstemmingDataMapper(
+                utbetalinger = utbetalinger,
+                periodeFraOgMed = fraOgMed,
+                periodeTil = til,
+                avstemmingId = UUIDBase64("1"),
+            )
         val avstemmingsmelding = grensesnittavstemmingDataMapper.opprettAvstemmingsmelding(Saktype.BARNEPENSJON)
         val (_, dataMelding, _) = avstemmingsmelding
 
@@ -246,12 +249,13 @@ internal class GrensesnittavstemmingDataMapperTest {
 
         val utbetalinger = emptyList<Utbetaling>()
 
-        val grensesnittavstemmingDataMapper = GrensesnittavstemmingDataMapper(
-            utbetalinger = utbetalinger,
-            periodeFraOgMed = fraOgMed,
-            periodeTil = til,
-            avstemmingId = UUIDBase64()
-        )
+        val grensesnittavstemmingDataMapper =
+            GrensesnittavstemmingDataMapper(
+                utbetalinger = utbetalinger,
+                periodeFraOgMed = fraOgMed,
+                periodeTil = til,
+                avstemmingId = UUIDBase64(),
+            )
         val avstemmingsmelding = grensesnittavstemmingDataMapper.opprettAvstemmingsmelding(Saktype.BARNEPENSJON)
         val (startmelding, dataMelding, sluttmelding) = avstemmingsmelding
 
@@ -262,96 +266,105 @@ internal class GrensesnittavstemmingDataMapperTest {
             { assertEquals("0", dataMelding.aksjon.nokkelFom) },
             { assertEquals("0", dataMelding.aksjon.nokkelFom) },
             { assertEquals("0", sluttmelding.aksjon.nokkelTom) },
-            { assertEquals("0", sluttmelding.aksjon.nokkelTom) }
+            { assertEquals("0", sluttmelding.aksjon.nokkelTom) },
         )
     }
 
     @Test
     fun `foerste og siste avstemmingsnoekkel skal finnes fra utbetalinger`() {
-        val fraOgMed = LocalDateTime.of(
-            2020,
-            Month.APRIL,
-            10,
-            14,
-            0,
-            0
-        ).minusDays(1).toNorskTidspunkt()
+        val fraOgMed =
+            LocalDateTime.of(
+                2020,
+                Month.APRIL,
+                10,
+                14,
+                0,
+                0,
+            ).minusDays(1).toNorskTidspunkt()
 
-        val til = LocalDateTime.of(
-            2022,
-            Month.JANUARY,
-            24,
-            22,
-            0,
-            0
-        ).plusHours(1).toNorskTidspunkt()
+        val til =
+            LocalDateTime.of(
+                2022,
+                Month.JANUARY,
+                24,
+                22,
+                0,
+                0,
+            ).plusHours(1).toNorskTidspunkt()
 
-        val utbetalinger = listOf(
-            utbetaling(
-                avstemmingsnoekkel = LocalDateTime.of(
-                    2020,
-                    Month.APRIL,
-                    10,
-                    14,
-                    0,
-                    0
-                ).toNorskTidspunkt()
-            ),
-            utbetaling(
-                avstemmingsnoekkel = LocalDateTime.of(
-                    2020,
-                    Month.APRIL,
-                    10,
-                    14,
-                    0,
-                    0
-                ).plusDays(1).toNorskTidspunkt()
-            ),
-            utbetaling(
-                avstemmingsnoekkel = LocalDateTime.of(
-                    2022,
-                    Month.JANUARY,
-                    24,
-                    22,
-                    0,
-                    0
-                ).toNorskTidspunkt()
-            ),
-            utbetaling(
-                avstemmingsnoekkel = LocalDateTime.of(
-                    2020,
-                    Month.APRIL,
-                    10,
-                    14,
-                    0,
-                    0
-                ).plusHours(1).toNorskTidspunkt()
-            ),
-            utbetaling(
-                avstemmingsnoekkel = LocalDateTime.of(
-                    2020,
-                    Month.APRIL,
-                    10,
-                    14,
-                    0,
-                    0
-                )
-                    .plusMinutes(2).toNorskTidspunkt()
+        val utbetalinger =
+            listOf(
+                utbetaling(
+                    avstemmingsnoekkel =
+                        LocalDateTime.of(
+                            2020,
+                            Month.APRIL,
+                            10,
+                            14,
+                            0,
+                            0,
+                        ).toNorskTidspunkt(),
+                ),
+                utbetaling(
+                    avstemmingsnoekkel =
+                        LocalDateTime.of(
+                            2020,
+                            Month.APRIL,
+                            10,
+                            14,
+                            0,
+                            0,
+                        ).plusDays(1).toNorskTidspunkt(),
+                ),
+                utbetaling(
+                    avstemmingsnoekkel =
+                        LocalDateTime.of(
+                            2022,
+                            Month.JANUARY,
+                            24,
+                            22,
+                            0,
+                            0,
+                        ).toNorskTidspunkt(),
+                ),
+                utbetaling(
+                    avstemmingsnoekkel =
+                        LocalDateTime.of(
+                            2020,
+                            Month.APRIL,
+                            10,
+                            14,
+                            0,
+                            0,
+                        ).plusHours(1).toNorskTidspunkt(),
+                ),
+                utbetaling(
+                    avstemmingsnoekkel =
+                        LocalDateTime.of(
+                            2020,
+                            Month.APRIL,
+                            10,
+                            14,
+                            0,
+                            0,
+                        )
+                            .plusMinutes(2).toNorskTidspunkt(),
+                ),
             )
-        )
 
-        val grensesnittavstemmingDataMapper = GrensesnittavstemmingDataMapper(
-            utbetalinger = utbetalinger,
-            periodeFraOgMed = fraOgMed,
-            periodeTil = til,
-            avstemmingId = UUIDBase64()
-        )
+        val grensesnittavstemmingDataMapper =
+            GrensesnittavstemmingDataMapper(
+                utbetalinger = utbetalinger,
+                periodeFraOgMed = fraOgMed,
+                periodeTil = til,
+                avstemmingId = UUIDBase64(),
+            )
         val avstemmingsmelding = grensesnittavstemmingDataMapper.opprettAvstemmingsmelding(Saktype.BARNEPENSJON)
         val (_, dataMelding, _) = avstemmingsmelding
         assertAll(
             "skal finne forste og siste avstemmingsnoekkel i liste",
             { assertEquals("2020040914", dataMelding.periode.datoAvstemtFom) },
-            { assertEquals("2022012422", dataMelding.periode.datoAvstemtTom) }
+            { assertEquals("2022012422", dataMelding.periode.datoAvstemtTom) },
         )
     }
 }

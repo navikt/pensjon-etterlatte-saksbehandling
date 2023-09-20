@@ -24,7 +24,7 @@ fun Application.metricsModule(additionalMetrics: List<MeterBinder> = emptyList()
             LogbackMetrics(),
             JvmMemoryMetrics(),
             ProcessorMetrics(),
-            UptimeMetrics()
+            UptimeMetrics(),
         ) + additionalMetrics
     }
 
@@ -38,9 +38,10 @@ fun Application.metricsModule(additionalMetrics: List<MeterBinder> = emptyList()
 object Metrikker {
     private val collectorRegistry = CollectorRegistry.defaultRegistry
 
-    val registrySaksbehandling = PrometheusMeterRegistry(
-        PrometheusConfig.DEFAULT,
-        collectorRegistry,
-        Clock.SYSTEM
-    )
+    val registrySaksbehandling =
+        PrometheusMeterRegistry(
+            PrometheusConfig.DEFAULT,
+            collectorRegistry,
+            Clock.SYSTEM,
+        )
 }

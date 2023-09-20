@@ -17,7 +17,6 @@ import org.junit.jupiter.api.TestInstance
 import trygdetid.trygdeavtale
 import java.time.LocalDate
 import java.time.Month
-import java.util.*
 import java.util.UUID.randomUUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -89,7 +88,7 @@ internal class AvtaleServiceTest {
         every { repository.opprettAvtale(capture(avtaleSlot)) } just runs
 
         service.opprettAvtale(
-            trygdeavtale(behandlingId = behandlingId, avtaleKode = "TEST", avtaleDatoKode = "TESTDATO")
+            trygdeavtale(behandlingId = behandlingId, avtaleKode = "TEST", avtaleDatoKode = "TESTDATO"),
         )
 
         avtaleSlot.captured.avtaleKode shouldBe "TEST"
@@ -107,7 +106,7 @@ internal class AvtaleServiceTest {
         every { repository.lagreAvtale(capture(avtaleSlot)) } just runs
 
         service.lagreAvtale(
-            trygdeavtale(behandlingId = behandlingId, avtaleKode = "TEST", avtaleKriteriaKode = "TESTKRITERIA")
+            trygdeavtale(behandlingId = behandlingId, avtaleKode = "TEST", avtaleKriteriaKode = "TESTKRITERIA"),
         )
 
         avtaleSlot.captured.avtaleKode shouldBe "TEST"

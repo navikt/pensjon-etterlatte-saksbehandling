@@ -27,7 +27,6 @@ import java.time.Month
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class OpplysningsuthenterOmstillingsstoenadTest {
-
     @Test
     fun `alle opplysninger skal ha innsender som kilde`() {
         opplysninger.forEach {
@@ -123,40 +122,42 @@ internal class OpplysningsuthenterOmstillingsstoenadTest {
             }
 
     companion object {
-        val opplysninger = Opplysningsuthenter().lagOpplysningsListe(
-            objectMapper.treeToValue(
-                objectMapper.readTree(lagMelding())!!["@skjema_info"]
-            ),
-            SoeknadType.OMSTILLINGSSTOENAD
-        )
+        val opplysninger =
+            Opplysningsuthenter().lagOpplysningsListe(
+                objectMapper.treeToValue(
+                    objectMapper.readTree(lagMelding())!!["@skjema_info"],
+                ),
+                SoeknadType.OMSTILLINGSSTOENAD,
+            )
+
         private fun lagMelding(): String {
             val soeknad = InnsendtSoeknadTestData.omstillingsSoeknad()
             return """
-            {
-              "@event_name": "GYLDIG_SOEKNAD:VURDERT",
-              "behandlingId": "f525f2f7-e246-43d7-b61a-5f0757472916",
-              "sakId": 1,
-              "@skjema_info": ${soeknad.toJson()},
-              "@lagret_soeknad_id": 360,
-              "@template": "soeknad",
-              "@fnr_soeker": "20110875720",
-              "@hendelse_gyldig_til": "2025-01-03T13:15:31.249299158Z",
-              "system_read_count": 1,
-              "system_participating_services": [
                 {
-                  "service": "innsendt-soeknad",
-                  "instance": "innsendt-soeknad-5df54b5547-xtntr",
-                  "time": "2022-01-03T13:45:31.249795745"
-                },
-                {
-                  "service": "sjekk-adressebeskyttelse",
-                  "instance": "sjekk-adressebeskyttelse-66bffc6ccc-4wmsn",
-                  "time": "2022-01-03T13:45:31.256701251"
+                  "@event_name": "GYLDIG_SOEKNAD:VURDERT",
+                  "behandlingId": "f525f2f7-e246-43d7-b61a-5f0757472916",
+                  "sakId": 1,
+                  "@skjema_info": ${soeknad.toJson()},
+                  "@lagret_soeknad_id": 360,
+                  "@template": "soeknad",
+                  "@fnr_soeker": "20110875720",
+                  "@hendelse_gyldig_til": "2025-01-03T13:15:31.249299158Z",
+                  "system_read_count": 1,
+                  "system_participating_services": [
+                    {
+                      "service": "innsendt-soeknad",
+                      "instance": "innsendt-soeknad-5df54b5547-xtntr",
+                      "time": "2022-01-03T13:45:31.249795745"
+                    },
+                    {
+                      "service": "sjekk-adressebeskyttelse",
+                      "instance": "sjekk-adressebeskyttelse-66bffc6ccc-4wmsn",
+                      "time": "2022-01-03T13:45:31.256701251"
+                    }
+                  ],
+                  "@adressebeskyttelse": "STRENGT_FORTROLIG_UTLAND"
                 }
-              ],
-              "@adressebeskyttelse": "STRENGT_FORTROLIG_UTLAND"
-            }
-            """.trimIndent()
+                """.trimIndent()
         }
     }
 }

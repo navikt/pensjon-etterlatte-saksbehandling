@@ -34,7 +34,7 @@ fun <T> ResultSet.toList(block: ResultSet.() -> T): List<T> {
 
 inline fun <reified T : Any> PreparedStatement.setJsonb(
     parameterIndex: Int,
-    jsonb: T?
+    jsonb: T?,
 ): PreparedStatement {
     if (jsonb == null) {
         this.setNull(parameterIndex, java.sql.Types.NULL)

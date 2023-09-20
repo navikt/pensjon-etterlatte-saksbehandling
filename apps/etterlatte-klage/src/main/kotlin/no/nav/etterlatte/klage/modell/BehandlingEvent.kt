@@ -1,7 +1,7 @@
 package no.nav.etterlatte.klage.modell
 
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 
 // se no.nav.familie.klage.kabal.OversendtKlageAnkeV3
 data class BehandlingEvent(
@@ -10,7 +10,7 @@ data class BehandlingEvent(
     val kilde: String,
     val kabalReferanse: String,
     val type: BehandlingEventType,
-    val detaljer: BehandlingDetaljer
+    val detaljer: BehandlingDetaljer,
 ) {
     fun mottattEllerAvsluttetTidspunkt(): LocalDateTime {
         val feilmelding = "Burde hatt behandlingdetaljer for event fra kabal av type $type"
@@ -21,9 +21,10 @@ data class BehandlingEvent(
             BehandlingEventType.ANKEBEHANDLING_OPPRETTET ->
                 detaljer.ankebehandlingOpprettet?.mottattKlageinstans ?: throw Feil(feilmelding)
 
-            BehandlingEventType.ANKEBEHANDLING_AVSLUTTET -> detaljer.ankebehandlingAvsluttet?.avsluttet ?: throw Feil(
-                feilmelding
-            )
+            BehandlingEventType.ANKEBEHANDLING_AVSLUTTET ->
+                detaljer.ankebehandlingAvsluttet?.avsluttet ?: throw Feil(
+                    feilmelding,
+                )
 
             BehandlingEventType.ANKE_I_TRYGDERETTENBEHANDLING_OPPRETTET ->
                 detaljer.ankeITrygderettenbehandlingOpprettet?.sendtTilTrygderetten ?: throw Feil(feilmelding)
@@ -37,13 +38,15 @@ data class BehandlingEvent(
     fun utfall(): KlageinstansUtfall? {
         val feilmelding = "Burde hatt behandlingdetaljer for event fra kabal av type $type"
         return when (type) {
-            BehandlingEventType.KLAGEBEHANDLING_AVSLUTTET -> detaljer.klagebehandlingAvsluttet?.utfall ?: throw Feil(
-                feilmelding
-            )
+            BehandlingEventType.KLAGEBEHANDLING_AVSLUTTET ->
+                detaljer.klagebehandlingAvsluttet?.utfall ?: throw Feil(
+                    feilmelding,
+                )
 
-            BehandlingEventType.ANKEBEHANDLING_AVSLUTTET -> detaljer.ankebehandlingAvsluttet?.utfall ?: throw Feil(
-                feilmelding
-            )
+            BehandlingEventType.ANKEBEHANDLING_AVSLUTTET ->
+                detaljer.ankebehandlingAvsluttet?.utfall ?: throw Feil(
+                    feilmelding,
+                )
 
             else -> null
         }
@@ -69,9 +72,8 @@ data class BehandlingDetaljer(
     val ankebehandlingOpprettet: AnkebehandlingOpprettetDetaljer? = null,
     val ankebehandlingAvsluttet: AnkebehandlingAvsluttetDetaljer? = null,
     val behandlingFeilregistrert: BehandlingFeilregistrertDetaljer? = null,
-    val ankeITrygderettenbehandlingOpprettet: AnkeITrygderettenbehandlingOpprettetDetaljer? = null
+    val ankeITrygderettenbehandlingOpprettet: AnkeITrygderettenbehandlingOpprettetDetaljer? = null,
 ) {
-
     fun journalpostReferanser(): List<String> {
         return klagebehandlingAvsluttet?.journalpostReferanser ?: ankebehandlingAvsluttet?.journalpostReferanser
             ?: listOf()
@@ -88,9 +90,8 @@ data class BehandlingDetaljer(
 data class KlagebehandlingAvsluttetDetaljer(
     val avsluttet: LocalDateTime,
     val utfall: KlageinstansUtfall,
-    val journalpostReferanser: List<String>
+    val journalpostReferanser: List<String>,
 ) {
-
     fun oppgaveTekst(): String {
         return "Hendelse fra klage av type klagebehandling avsluttet med utfall: $utfall mottatt. " +
             "Avsluttet tidspunkt: $avsluttet. " +
@@ -99,27 +100,25 @@ data class KlagebehandlingAvsluttetDetaljer(
 }
 
 data class AnkebehandlingOpprettetDetaljer(
-    val mottattKlageinstans: LocalDateTime
+    val mottattKlageinstans: LocalDateTime,
 ) {
-
-    fun oppgaveTekst(): String =
-        "Hendelse fra klage av type ankebehandling opprettet mottatt. Mottatt klageinstans: $mottattKlageinstans."
+    fun oppgaveTekst(): String = "Hendelse fra klage av type ankebehandling opprettet mottatt. Mottatt klageinstans: $mottattKlageinstans."
 }
 
 data class AnkebehandlingAvsluttetDetaljer(
     val avsluttet: LocalDateTime,
     val utfall: KlageinstansUtfall,
-    val journalpostReferanser: List<String>
+    val journalpostReferanser: List<String>,
 ) {
-
-    fun oppgaveTekst(): String = "Hendelse fra klage av type ankebehandling avsluttet med utfall: $utfall mottatt. " +
-        "Avsluttet tidspunkt: $avsluttet. " +
-        "Journalpost referanser: ${journalpostReferanser.joinToString(", ")}"
+    fun oppgaveTekst(): String =
+        "Hendelse fra klage av type ankebehandling avsluttet med utfall: $utfall mottatt. " +
+            "Avsluttet tidspunkt: $avsluttet. " +
+            "Journalpost referanser: ${journalpostReferanser.joinToString(", ")}"
 }
 
 data class BehandlingFeilregistrertDetaljer(val reason: String, val type: Type, val feilregistrert: LocalDateTime)
 
 data class AnkeITrygderettenbehandlingOpprettetDetaljer(
     val sendtTilTrygderetten: LocalDateTime,
-    val utfall: KlageinstansUtfall?
+    val utfall: KlageinstansUtfall?,
 )

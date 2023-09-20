@@ -14,17 +14,17 @@ import rapidsandrivers.DATO_KEY
 import java.time.LocalDate
 
 internal class ReguleringFeiletTest {
+    private val foersteMai2023 = LocalDate.of(2023, 5, 1)
 
-    private val `1_mai_2023` = LocalDate.of(2023, 5, 1)
-
-    private fun genererReguleringMelding() = JsonMessage.newMessage(
-        mapOf(
-            EVENT_NAME_KEY to FEILA,
-            DATO_KEY to `1_mai_2023`,
-            "aarsak" to "REGULERING",
-            "sakId" to 83L
+    private fun genererReguleringMelding() =
+        JsonMessage.newMessage(
+            mapOf(
+                EVENT_NAME_KEY to FEILA,
+                DATO_KEY to foersteMai2023,
+                "aarsak" to "REGULERING",
+                "sakId" to 83L,
+            ),
         )
-    )
 
     @Test
     fun `Skal varsle behandling om at det er en feilet regulering i en sak`() {

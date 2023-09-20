@@ -5,7 +5,7 @@ import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
 import no.nav.etterlatte.libs.common.beregning.Beregningstype
 import no.nav.etterlatte.libs.common.grunnlag.Metadata
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import java.util.*
+import java.util.UUID
 
 data class Beregning(
     val beregningId: UUID,
@@ -13,7 +13,7 @@ data class Beregning(
     val type: Beregningstype,
     val beregningsperioder: List<Beregningsperiode>,
     val beregnetDato: Tidspunkt,
-    val grunnlagMetadata: Metadata
+    val grunnlagMetadata: Metadata,
 ) {
     fun toDTO() =
         BeregningDTO(
@@ -22,6 +22,6 @@ data class Beregning(
             type = type,
             beregningsperioder = beregningsperioder,
             beregnetDato = beregnetDato,
-            grunnlagMetadata = grunnlagMetadata
+            grunnlagMetadata = grunnlagMetadata,
         )
 }

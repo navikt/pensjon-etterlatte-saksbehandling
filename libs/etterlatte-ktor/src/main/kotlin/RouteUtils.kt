@@ -12,7 +12,7 @@ import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.libs.ktor.firstValidTokenClaims
 import no.nav.etterlatte.token.Saksbehandler
 import no.nav.etterlatte.token.Systembruker
-import java.util.*
+import java.util.UUID
 
 const val BEHANDLINGSID_CALL_PARAMETER = "behandlingsid"
 const val SAKID_CALL_PARAMETER = "sakId"
@@ -21,33 +21,38 @@ const val KLAGEID_CALL_PARAMETER = "klageId"
 const val OPPGAVEID_GOSYS_CALL_PARAMETER = "gosysOppgaveId"
 
 inline val PipelineContext<*, ApplicationCall>.behandlingsId: UUID
-    get() = call.parameters[BEHANDLINGSID_CALL_PARAMETER]?.let { UUID.fromString(it) } ?: throw NullPointerException(
-        "BehandlingsId er ikke i path params"
-    )
+    get() =
+        call.parameters[BEHANDLINGSID_CALL_PARAMETER]?.let { UUID.fromString(it) } ?: throw NullPointerException(
+            "BehandlingsId er ikke i path params",
+        )
 
 inline val PipelineContext<*, ApplicationCall>.sakId: Long
-    get() = call.parameters[SAKID_CALL_PARAMETER]?.toLong() ?: throw NullPointerException(
-        "SakId er ikke i path params"
-    )
+    get() =
+        call.parameters[SAKID_CALL_PARAMETER]?.toLong() ?: throw NullPointerException(
+            "SakId er ikke i path params",
+        )
 
 inline val PipelineContext<*, ApplicationCall>.oppgaveId: UUID
-    get() = requireNotNull(call.parameters[OPPGAVEID_CALL_PARAMETER]?.let { UUID.fromString(it) }) {
-        "OppgaveId er ikke i path params"
-    }
+    get() =
+        requireNotNull(call.parameters[OPPGAVEID_CALL_PARAMETER]?.let { UUID.fromString(it) }) {
+            "OppgaveId er ikke i path params"
+        }
 
 inline val PipelineContext<*, ApplicationCall>.gosysOppgaveId: String
-    get() = requireNotNull(call.parameters[OPPGAVEID_GOSYS_CALL_PARAMETER]) {
-        "Gosys oppgaveId er ikke i path params"
-    }
+    get() =
+        requireNotNull(call.parameters[OPPGAVEID_GOSYS_CALL_PARAMETER]) {
+            "Gosys oppgaveId er ikke i path params"
+        }
 
 inline val PipelineContext<*, ApplicationCall>.klageId: UUID
-    get() = requireNotNull(call.parameters[KLAGEID_CALL_PARAMETER]?.let { UUID.fromString(it) }) {
-        "KlageId er ikke i path params"
-    }
+    get() =
+        requireNotNull(call.parameters[KLAGEID_CALL_PARAMETER]?.let { UUID.fromString(it) }) {
+            "KlageId er ikke i path params"
+        }
 
 suspend inline fun PipelineContext<*, ApplicationCall>.withBehandlingId(
     behandlingTilgangsSjekk: BehandlingTilgangsSjekk,
-    onSuccess: (id: UUID) -> Unit
+    onSuccess: (id: UUID) -> Unit,
 ) = withParam(BEHANDLINGSID_CALL_PARAMETER) { behandlingId ->
     when (brukerTokenInfo) {
         is Saksbehandler -> {
@@ -66,7 +71,7 @@ suspend inline fun PipelineContext<*, ApplicationCall>.withBehandlingId(
 
 suspend inline fun PipelineContext<*, ApplicationCall>.withSakId(
     sakTilgangsSjekk: SakTilgangsSjekk,
-    onSuccess: (id: Long) -> Unit
+    onSuccess: (id: Long) -> Unit,
 ) = call.parameters[SAKID_CALL_PARAMETER]!!.toLong().let { sakId ->
     when (brukerTokenInfo) {
         is Saksbehandler -> {
@@ -84,16 +89,17 @@ suspend inline fun PipelineContext<*, ApplicationCall>.withSakId(
 
 suspend inline fun PipelineContext<*, ApplicationCall>.withFoedselsnummer(
     personTilgangsSjekk: PersonTilgangsSjekk,
-    onSuccess: (fnr: Folkeregisteridentifikator) -> Unit
+    onSuccess: (fnr: Folkeregisteridentifikator) -> Unit,
 ) {
     val foedselsnummerDTO = call.receive<FoedselsnummerDTO>()
     val foedselsnummer = Folkeregisteridentifikator.of(foedselsnummerDTO.foedselsnummer)
     when (brukerTokenInfo) {
         is Saksbehandler -> {
-            val harTilgangTilPerson = personTilgangsSjekk.harTilgangTilPerson(
-                foedselsnummer,
-                brukerTokenInfo as Saksbehandler
-            )
+            val harTilgangTilPerson =
+                personTilgangsSjekk.harTilgangTilPerson(
+                    foedselsnummer,
+                    brukerTokenInfo as Saksbehandler,
+                )
             if (harTilgangTilPerson) {
                 onSuccess(foedselsnummer)
             } else {
@@ -106,18 +112,17 @@ suspend inline fun PipelineContext<*, ApplicationCall>.withFoedselsnummer(
 }
 
 suspend inline fun <reified T : Any> PipelineContext<*, ApplicationCall>.medBody(onSuccess: (t: T) -> Unit) {
-    val body = try {
-        call.receive<T>()
-    } catch (e: Exception) {
-        call.respond(HttpStatusCode.BadRequest, "Feil under deserialiseringen av objektet")
-        return
-    }
+    val body =
+        try {
+            call.receive<T>()
+        } catch (e: Exception) {
+            call.respond(HttpStatusCode.BadRequest, "Feil under deserialiseringen av objektet")
+            return
+        }
     onSuccess(body)
 }
 
-suspend inline fun PipelineContext<*, ApplicationCall>.kunSystembruker(
-    onSuccess: () -> Unit
-) {
+suspend inline fun PipelineContext<*, ApplicationCall>.kunSystembruker(onSuccess: () -> Unit) {
     when (brukerTokenInfo) {
         is Systembruker -> {
             onSuccess()
@@ -127,9 +132,7 @@ suspend inline fun PipelineContext<*, ApplicationCall>.kunSystembruker(
     }
 }
 
-suspend inline fun PipelineContext<*, ApplicationCall>.kunSaksbehandler(
-    onSuccess: (Saksbehandler) -> Unit
-) {
+suspend inline fun PipelineContext<*, ApplicationCall>.kunSaksbehandler(onSuccess: (Saksbehandler) -> Unit) {
     when (val token = brukerTokenInfo) {
         is Saksbehandler -> {
             onSuccess(token)
@@ -141,63 +144,72 @@ suspend inline fun PipelineContext<*, ApplicationCall>.kunSaksbehandler(
 
 suspend inline fun PipelineContext<*, ApplicationCall>.withParam(
     param: String,
-    onSuccess: (value: UUID) -> Unit
+    onSuccess: (value: UUID) -> Unit,
 ) {
     val value = call.parameters[param]
     if (value != null) {
-        val uuidParam = try {
-            UUID.fromString(value)
-        } catch (e: IllegalArgumentException) {
-            call.respond(HttpStatusCode.BadRequest, "$param må være UUID, fikk $value")
-            return
-        }
+        val uuidParam =
+            try {
+                UUID.fromString(value)
+            } catch (e: IllegalArgumentException) {
+                call.respond(HttpStatusCode.BadRequest, "$param må være UUID, fikk $value")
+                return
+            }
         onSuccess(uuidParam)
     } else {
         call.respond(HttpStatusCode.BadRequest, "$param var null, forventet en UUID")
     }
 }
 
-suspend inline fun PipelineContext<*, ApplicationCall>.hentNavidentFraToken(
-    onSuccess: (navident: String) -> Unit
-) {
+suspend inline fun PipelineContext<*, ApplicationCall>.hentNavidentFraToken(onSuccess: (navident: String) -> Unit) {
     val navident = call.firstValidTokenClaims()?.get("NAVident")?.toString()
     if (navident.isNullOrEmpty()) {
         call.respond(
             HttpStatusCode.Unauthorized,
-            "Kunne ikke hente ut navident "
+            "Kunne ikke hente ut navident ",
         )
     } else {
         onSuccess(navident)
     }
 }
 
-fun ApplicationCall.uuid(param: String) = this.parameters[param]?.let {
-    UUID.fromString(it)
-} ?: throw NullPointerException(
-    "$param er ikke i path params"
-)
+fun ApplicationCall.uuid(param: String) =
+    this.parameters[param]?.let {
+        UUID.fromString(it)
+    } ?: throw NullPointerException(
+        "$param er ikke i path params",
+    )
 
 interface IFoedselsnummerDTO {
     val foedselsnummer: String
 }
 
 data class FoedselsnummerDTO(
-    override val foedselsnummer: String
+    override val foedselsnummer: String,
 ) : IFoedselsnummerDTO
 
 data class FoedselsNummerMedGraderingDTO(
     override val foedselsnummer: String,
-    val gradering: AdressebeskyttelseGradering? = null
+    val gradering: AdressebeskyttelseGradering? = null,
 ) : IFoedselsnummerDTO
 
 interface BehandlingTilgangsSjekk {
-    suspend fun harTilgangTilBehandling(behandlingId: UUID, bruker: Saksbehandler): Boolean
+    suspend fun harTilgangTilBehandling(
+        behandlingId: UUID,
+        bruker: Saksbehandler,
+    ): Boolean
 }
 
 interface SakTilgangsSjekk {
-    suspend fun harTilgangTilSak(sakId: Long, bruker: Saksbehandler): Boolean
+    suspend fun harTilgangTilSak(
+        sakId: Long,
+        bruker: Saksbehandler,
+    ): Boolean
 }
 
 interface PersonTilgangsSjekk {
-    suspend fun harTilgangTilPerson(foedselsnummer: Folkeregisteridentifikator, bruker: Saksbehandler): Boolean
+    suspend fun harTilgangTilPerson(
+        foedselsnummer: Folkeregisteridentifikator,
+        bruker: Saksbehandler,
+    ): Boolean
 }

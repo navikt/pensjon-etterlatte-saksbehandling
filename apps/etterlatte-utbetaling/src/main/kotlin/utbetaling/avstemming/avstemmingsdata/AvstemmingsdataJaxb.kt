@@ -17,7 +17,7 @@ object GrensesnittavstemmingsdataJaxb {
             setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true)
         }.marshal(
             JAXBElement(QName("", "Avstemmingsdata"), Avstemmingsdata::class.java, avstemmingsdata),
-            stringWriter
+            stringWriter,
         )
         return stringWriter.toString()
     }
@@ -32,7 +32,7 @@ object KonsistensavstemmingsdataJaxb {
             setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true)
         }.marshal(
             JAXBElement(QName("", "Konsistensavstemmingsdata"), Konsistensavstemmingsdata::class.java, avstemmingsdata),
-            stringWriter
+            stringWriter,
         )
         return stringWriter.toString()
     }

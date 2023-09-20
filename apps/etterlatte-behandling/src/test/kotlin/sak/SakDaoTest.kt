@@ -17,7 +17,6 @@ import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class SakDaoTest {
-
     @Container
     private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:$POSTGRES_VERSION")
 
@@ -31,11 +30,12 @@ internal class SakDaoTest {
         postgreSQLContainer.withUrlParam("user", postgreSQLContainer.username)
         postgreSQLContainer.withUrlParam("password", postgreSQLContainer.password)
 
-        dataSource = DataSourceBuilder.createDataSource(
-            jdbcUrl = postgreSQLContainer.jdbcUrl,
-            username = postgreSQLContainer.username,
-            password = postgreSQLContainer.password
-        ).apply { migrate() }
+        dataSource =
+            DataSourceBuilder.createDataSource(
+                jdbcUrl = postgreSQLContainer.jdbcUrl,
+                username = postgreSQLContainer.username,
+                password = postgreSQLContainer.password,
+            ).apply { migrate() }
         val connection = dataSource.connection
         sakRepo = SakDao { connection }
         tilgangService = TilgangServiceImpl(SakTilgangDao(dataSource))
@@ -66,9 +66,10 @@ internal class SakDaoTest {
         val funnetSakermed2saker = sakRepo.finnSaker(fnr)
         Assertions.assertEquals(2, funnetSakermed2saker.size)
 
-        val sakerMedNyEnhet = funnetSakermed2saker.map {
-            GrunnlagsendringshendelseService.SakMedEnhet(it.id, Enheter.EGNE_ANSATTE.enhetNr)
-        }
+        val sakerMedNyEnhet =
+            funnetSakermed2saker.map {
+                GrunnlagsendringshendelseService.SakMedEnhet(it.id, Enheter.EGNE_ANSATTE.enhetNr)
+            }
 
         sakRepo.oppdaterEnheterPaaSaker(sakerMedNyEnhet)
 

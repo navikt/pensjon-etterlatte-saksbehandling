@@ -7,14 +7,15 @@ import no.nav.etterlatte.sikkerLogg
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Saktype
 import org.slf4j.LoggerFactory
 import java.time.Duration
-import java.util.*
+import java.util.Date
+import java.util.Timer
 
 class GrensesnittsavstemmingJob(
     private val grensesnittsavstemmingService: GrensesnittsavstemmingService,
     private val leaderElection: LeaderElection,
     private val starttidspunkt: Date,
     private val periode: Duration,
-    private val saktype: Saktype
+    private val saktype: Saktype,
 ) {
     private val log = LoggerFactory.getLogger(this::class.java)
     private val jobbNavn = this::class.simpleName
@@ -26,13 +27,13 @@ class GrensesnittsavstemmingJob(
             name = jobbNavn,
             startAt = starttidspunkt,
             period = periode.toMillis(),
-            loggerInfo = LoggerInfo(logger = log, sikkerLogg = sikkerLogg, loggTilSikkerLogg = true)
+            loggerInfo = LoggerInfo(logger = log, sikkerLogg = sikkerLogg, loggTilSikkerLogg = true),
         ) {
             Grensesnittsavstemming(
                 grensesnittsavstemmingService = grensesnittsavstemmingService,
                 leaderElection = leaderElection,
                 jobbNavn = jobbNavn!!,
-                saktype = saktype
+                saktype = saktype,
             ).run()
         }
     }
@@ -41,7 +42,7 @@ class GrensesnittsavstemmingJob(
         val grensesnittsavstemmingService: GrensesnittsavstemmingService,
         val leaderElection: LeaderElection,
         val jobbNavn: String,
-        val saktype: Saktype
+        val saktype: Saktype,
     ) {
         private val log = LoggerFactory.getLogger(this::class.java)
 

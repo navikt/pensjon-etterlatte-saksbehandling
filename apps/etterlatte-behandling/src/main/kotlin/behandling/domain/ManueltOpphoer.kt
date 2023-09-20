@@ -13,7 +13,7 @@ import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 
 data class ManueltOpphoer(
     override val id: UUID,
@@ -26,7 +26,7 @@ data class ManueltOpphoer(
     override val boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet?,
     val opphoerAarsaker: List<ManueltOpphoerAarsak>,
     val fritekstAarsak: String?,
-    override val prosesstype: Prosesstype = Prosesstype.MANUELL
+    override val prosesstype: Prosesstype = Prosesstype.MANUELL,
 ) : Behandling() {
     override val type: BehandlingType = BehandlingType.MANUELT_OPPHOER
     override val kilde = Vedtaksloesning.GJENNY
@@ -37,7 +37,7 @@ data class ManueltOpphoer(
         fritekstAarsak: String?,
         virkningstidspunkt: Virkningstidspunkt?,
         utenlandstilsnitt: Utenlandstilsnitt?,
-        boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet?
+        boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet?,
     ) : this(
         id = UUID.randomUUID(),
         sak = sak,
@@ -48,7 +48,7 @@ data class ManueltOpphoer(
         fritekstAarsak = fritekstAarsak,
         virkningstidspunkt = virkningstidspunkt,
         utenlandstilsnitt = utenlandstilsnitt,
-        boddEllerArbeidetUtlandet = boddEllerArbeidetUtlandet
+        boddEllerArbeidetUtlandet = boddEllerArbeidetUtlandet,
     )
 
     private val erFyltUt: Boolean
@@ -59,25 +59,27 @@ data class ManueltOpphoer(
     override val kommerBarnetTilgode: KommerBarnetTilgode?
         get() = null
 
-    override fun tilBeregnet(fastTrygdetid: Boolean): ManueltOpphoer = hvisTilstandEr(
-        listOf(
-            BehandlingStatus.OPPRETTET,
-            BehandlingStatus.BEREGNET,
-            BehandlingStatus.RETURNERT
-        )
-    ) {
-        endreTilStatus(BehandlingStatus.BEREGNET)
-    }
+    override fun tilBeregnet(fastTrygdetid: Boolean): ManueltOpphoer =
+        hvisTilstandEr(
+            listOf(
+                BehandlingStatus.OPPRETTET,
+                BehandlingStatus.BEREGNET,
+                BehandlingStatus.RETURNERT,
+            ),
+        ) {
+            endreTilStatus(BehandlingStatus.BEREGNET)
+        }
 
-    override fun tilAvkortet(): ManueltOpphoer = hvisTilstandEr(
-        listOf(
-            BehandlingStatus.BEREGNET,
-            BehandlingStatus.AVKORTET,
-            BehandlingStatus.RETURNERT
-        )
-    ) {
-        endreTilStatus(BehandlingStatus.BEREGNET)
-    }
+    override fun tilAvkortet(): ManueltOpphoer =
+        hvisTilstandEr(
+            listOf(
+                BehandlingStatus.BEREGNET,
+                BehandlingStatus.AVKORTET,
+                BehandlingStatus.RETURNERT,
+            ),
+        ) {
+            endreTilStatus(BehandlingStatus.BEREGNET)
+        }
 
     override fun tilFattetVedtak(): ManueltOpphoer {
         if (!erFyltUt) {
@@ -90,20 +92,24 @@ data class ManueltOpphoer(
         }
     }
 
-    override fun tilAttestert() = hvisTilstandEr(BehandlingStatus.FATTET_VEDTAK) {
-        endreTilStatus(BehandlingStatus.ATTESTERT)
-    }
+    override fun tilAttestert() =
+        hvisTilstandEr(BehandlingStatus.FATTET_VEDTAK) {
+            endreTilStatus(BehandlingStatus.ATTESTERT)
+        }
 
-    override fun tilReturnert() = hvisTilstandEr(BehandlingStatus.FATTET_VEDTAK) {
-        endreTilStatus(BehandlingStatus.RETURNERT)
-    }
+    override fun tilReturnert() =
+        hvisTilstandEr(BehandlingStatus.FATTET_VEDTAK) {
+            endreTilStatus(BehandlingStatus.RETURNERT)
+        }
 
-    override fun tilIverksatt() = hvisTilstandEr(BehandlingStatus.ATTESTERT) {
-        endreTilStatus(BehandlingStatus.IVERKSATT)
-    }
+    override fun tilIverksatt() =
+        hvisTilstandEr(BehandlingStatus.ATTESTERT) {
+            endreTilStatus(BehandlingStatus.IVERKSATT)
+        }
 
-    private fun endreTilStatus(status: BehandlingStatus) = this.copy(
-        status = status,
-        sistEndret = Tidspunkt.now().toLocalDatetimeUTC()
-    )
+    private fun endreTilStatus(status: BehandlingStatus) =
+        this.copy(
+            status = status,
+            sistEndret = Tidspunkt.now().toLocalDatetimeUTC(),
+        )
 }

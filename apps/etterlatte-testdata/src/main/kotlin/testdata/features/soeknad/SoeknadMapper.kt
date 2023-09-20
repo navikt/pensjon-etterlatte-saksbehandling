@@ -9,33 +9,36 @@ import no.nav.etterlatte.logger
 import no.nav.etterlatte.objectMapper
 import no.nav.etterlatte.testdata.JsonMessage
 import java.time.OffsetDateTime
-import java.util.*
+import java.util.UUID
 
 object SoeknadMapper {
     fun opprettSoeknadJson(
         type: String,
         gjenlevendeFnr: String,
         avdoedFnr: String,
-        barn: List<String> = emptyList()
+        barn: List<String> = emptyList(),
     ): String {
-        val message = when (type) {
-            "OMSTILLINGSSTOENAD" -> opprettJsonMessageOmstilling(
-                soekerFnr = gjenlevendeFnr,
-                avdoedFnr = avdoedFnr,
-                barn = barn
-            )
+        val message =
+            when (type) {
+                "OMSTILLINGSSTOENAD" ->
+                    opprettJsonMessageOmstilling(
+                        soekerFnr = gjenlevendeFnr,
+                        avdoedFnr = avdoedFnr,
+                        barn = barn,
+                    )
 
-            "BARNEPENSJON" -> opprettJsonMessageBarnepensjon(
-                gjenlevendeFnr,
-                avdoedFnr = avdoedFnr,
-                barnFnr = barn.first(),
-                soesken = barn.drop(1)
-            )
+                "BARNEPENSJON" ->
+                    opprettJsonMessageBarnepensjon(
+                        gjenlevendeFnr,
+                        avdoedFnr = avdoedFnr,
+                        barnFnr = barn.first(),
+                        soesken = barn.drop(1),
+                    )
 
-            else -> {
-                throw Exception("Ukjent soknad type: '$type'")
+                else -> {
+                    throw Exception("Ukjent soknad type: '$type'")
+                }
             }
-        }
 
         return message.toJson().also {
             logger.info("Opprettet json: \n$it")
@@ -46,11 +49,12 @@ object SoeknadMapper {
         gjenlevendeFnr: String,
         barnFnr: String,
         avdoedFnr: String,
-        soesken: List<String>
+        soesken: List<String>,
     ): JsonMessage {
         val mottattDato = Tidspunkt.now().toLocalDatetimeUTC()
 
-        val skjemaInfo = """
+        val skjemaInfo =
+            """
             {
               "imageTag": "ce3542f9645d280bfff9936bdd0e7efc32424de2",
               "spraak": "nb",
@@ -65,7 +69,7 @@ object SoeknadMapper {
               "mottattDato": "$mottattDato",
               "template": "barnepensjon_v2"
             }
-        """.trimIndent()
+            """.trimIndent()
 
         return JsonMessage.newMessage(
             mapOf(
@@ -75,19 +79,20 @@ object SoeknadMapper {
                 "@template" to "soeknad",
                 "@fnr_soeker" to barnFnr,
                 "@hendelse_gyldig_til" to OffsetDateTime.now().plusMinutes(60L),
-                "@adressebeskyttelse" to "UGRADERT"
-            )
+                "@adressebeskyttelse" to "UGRADERT",
+            ),
         )
     }
 
     private fun opprettJsonMessageOmstilling(
         soekerFnr: String,
         avdoedFnr: String,
-        barn: List<String>
+        barn: List<String>,
     ): JsonMessage {
         val mottattDato = Tidspunkt.now().toLocalDatetimeUTC()
 
-        val skjemaInfo = """
+        val skjemaInfo =
+            """
             {
               "imageTag": "ce3542f9645d280bfff9936bdd0e7efc32424de2",
               "spraak": "nb",
@@ -102,7 +107,7 @@ object SoeknadMapper {
               "mottattDato": "$mottattDato",
               "template": "omstillingsstoenad"
             }
-        """.trimIndent()
+            """.trimIndent()
 
         return JsonMessage.newMessage(
             mapOf(
@@ -112,63 +117,72 @@ object SoeknadMapper {
                 "@template" to "soeknad",
                 "@fnr_soeker" to soekerFnr,
                 "@hendelse_gyldig_til" to OffsetDateTime.now().plusMinutes(60L),
-                "@adressebeskyttelse" to "UGRADERT"
-            )
+                "@adressebeskyttelse" to "UGRADERT",
+            ),
         )
     }
 
-    private fun mapUtbetalingsinfo(): String = """
-        {
-            "svar": {
-              "verdi": "NORSK",
-              "innhold": "Norsk"
-            },
-            "spoersmaal": "",
-            "opplysning": {
-              "kontonummer": {
-                "svar": {
-                  "innhold": "1351.35.13513"
-                },
-                "spoersmaal": ""
-              },
-              "utenlandskBankNavn": null,
-              "utenlandskBankAdresse": null,
-              "iban": null,
-              "swift": null,
-              "skattetrekk": {
-                "svar": {
-                  "verdi": "JA",
-                  "innhold": "Ja"
-                },
-                "spoersmaal": "",
-                "opplysning": {
-                  "svar": {
-                    "innhold": "21%"
-                  },
-                  "spoersmaal": ""
-                }
-              }
-            }
-       }
-    """.trimIndent()
+    private fun mapUtbetalingsinfo(): String =
+        """
+         {
+             "svar": {
+               "verdi": "NORSK",
+               "innhold": "Norsk"
+             },
+             "spoersmaal": "",
+             "opplysning": {
+               "kontonummer": {
+                 "svar": {
+                   "innhold": "1351.35.13513"
+                 },
+                 "spoersmaal": ""
+               },
+               "utenlandskBankNavn": null,
+               "utenlandskBankAdresse": null,
+               "iban": null,
+               "swift": null,
+               "skattetrekk": {
+                 "svar": {
+                   "verdi": "JA",
+                   "innhold": "Ja"
+                 },
+                 "spoersmaal": "",
+                 "opplysning": {
+                   "svar": {
+                     "innhold": "21%"
+                   },
+                   "spoersmaal": ""
+                 }
+               }
+             }
+        }
+        """.trimIndent()
 
-    private fun mapForeldre(gjenlevendeFnr: String, avdoedFnr: String) = """
+    private fun mapForeldre(
+        gjenlevendeFnr: String,
+        avdoedFnr: String,
+    ) = """
         [
           ${mapGjenlevendeForelder(gjenlevendeFnr)},
           ${mapAvdoed(avdoedFnr)}
         ]
-    """.trimIndent()
+        """.trimIndent()
 
-    private fun mapBarnListe(barnListe: List<String>, gjenlevendeFnr: String, avdoedFnr: String): String =
+    private fun mapBarnListe(
+        barnListe: List<String>,
+        gjenlevendeFnr: String,
+        avdoedFnr: String,
+    ): String =
         barnListe.joinToString(separator = ",", prefix = "[", postfix = "]") {
             mapBarn(
                 it,
                 avdoedFnr,
-                gjenlevendeFnr
+                gjenlevendeFnr,
             )
         }
 
-    private fun mapGjenlevnde(fnr: String) = """
+    private fun mapGjenlevnde(fnr: String) =
+        """
         {
           "fornavn": {
             "svar": "LEVENDE",
@@ -245,9 +259,10 @@ object SoeknadMapper {
           },
           "type": "GJENLEVENDE"
         }
-    """.trimIndent()
+        """.trimIndent()
 
-    private fun mapAvdoed(fnr: String) = """
+    private fun mapAvdoed(fnr: String) =
+        """
         {
           "fornavn": {
             "svar": "DØD",
@@ -325,14 +340,15 @@ object SoeknadMapper {
           },
           "type": "AVDOED"
         }
-    """.trimIndent()
+        """.trimIndent()
 
     /*
-    * typer
-    *   "GJENLEVENDE_FORELDER"
-    *   "FORELDER"
-    */
-    private fun mapGjenlevendeForelder(fnr: String) = """
+     * typer
+     *   "GJENLEVENDE_FORELDER"
+     *   "FORELDER"
+     */
+    private fun mapGjenlevendeForelder(fnr: String) =
+        """
         {
           "fornavn": {
             "svar": "Levende",
@@ -364,9 +380,10 @@ object SoeknadMapper {
           },
           "type": "GJENLEVENDE_FORELDER"
         }
-    """.trimIndent()
+        """.trimIndent()
 
-    private fun mapForelder(fnr: String) = """
+    private fun mapForelder(fnr: String) =
+        """
         {
           "fornavn": {
             "svar": "Levende",
@@ -382,9 +399,13 @@ object SoeknadMapper {
           },
           "type": "FORELDER"
         }
-    """.trimIndent()
+        """.trimIndent()
 
-    private fun mapBarn(fnr: String, gjenlevende: String, avdoed: String) = """
+    private fun mapBarn(
+        fnr: String,
+        gjenlevende: String,
+        avdoed: String,
+    ) = """
         {
             "fornavn": {
               "svar": "TEST",
@@ -416,23 +437,24 @@ object SoeknadMapper {
             ],
             "type": "BARN"
         }
-    """.trimIndent()
+        """.trimIndent()
 
-    private fun mapInnsender(fnr: String) = """
-          {
-            "fornavn": {
-              "svar": "DUMMY FORNAVN",
-              "spoersmaal": ""
-            },
-            "etternavn": {
-              "svar": "DUMMY ETTERNAVN",
-              "spoersmaal": ""
-            },
-            "foedselsnummer": {
-              "svar": "$fnr",
-              "spoersmaal": ""
-            },
-            "type": "INNSENDER"
-          }
-    """.trimIndent()
+    private fun mapInnsender(fnr: String) =
+        """
+        {
+          "fornavn": {
+            "svar": "DUMMY FORNAVN",
+            "spoersmaal": ""
+          },
+          "etternavn": {
+            "svar": "DUMMY ETTERNAVN",
+            "spoersmaal": ""
+          },
+          "foedselsnummer": {
+            "svar": "$fnr",
+            "spoersmaal": ""
+          },
+          "type": "INNSENDER"
+        }
+        """.trimIndent()
 }

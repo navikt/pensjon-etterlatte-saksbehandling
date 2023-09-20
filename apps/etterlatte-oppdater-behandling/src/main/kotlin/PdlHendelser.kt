@@ -19,7 +19,7 @@ import rapidsandrivers.migrering.ListenerMedLogging
 
 internal class PdlHendelser(
     rapidsConnection: RapidsConnection,
-    private val behandlinger: BehandlingService
+    private val behandlinger: BehandlingService,
 ) : ListenerMedLogging() {
     private val logger = LoggerFactory.getLogger(PdlHendelser::class.java)
 
@@ -34,7 +34,10 @@ internal class PdlHendelser(
         }.register(this)
     }
 
-    override fun haandterPakke(packet: JsonMessage, context: MessageContext) {
+    override fun haandterPakke(
+        packet: JsonMessage,
+        context: MessageContext,
+    ) {
         logger.info("Mottatt hendelse fra pdl: ${packet["hendelse"]}")
         try {
             when (packet["hendelse"].asText()) {

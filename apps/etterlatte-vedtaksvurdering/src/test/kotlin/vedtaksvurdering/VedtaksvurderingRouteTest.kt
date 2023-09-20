@@ -50,7 +50,7 @@ import org.junit.jupiter.api.TestInstance
 import testsupport.buildTestApplicationConfigurationForOauth
 import java.math.BigDecimal
 import java.time.LocalDate
-import java.util.*
+import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class VedtaksvurderingRouteTest {
@@ -89,9 +89,10 @@ internal class VedtaksvurderingRouteTest {
             environment { config = applicationConfig }
             application { restModule(log) { vedtaksvurderingRoute(vedtaksvurderingService, behandlingKlient) } }
 
-            val response = client.get("/api/vedtak/${UUID.randomUUID()}") {
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-            }
+            val response =
+                client.get("/api/vedtak/${UUID.randomUUID()}") {
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                }
 
             response.status shouldBe HttpStatusCode.Unauthorized
         }
@@ -105,10 +106,11 @@ internal class VedtaksvurderingRouteTest {
             environment { config = applicationConfig }
             application { restModule(log) { vedtaksvurderingRoute(vedtaksvurderingService, behandlingKlient) } }
 
-            val response = client.get("/api/vedtak/${UUID.randomUUID()}") {
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                header(HttpHeaders.Authorization, "Bearer $token")
-            }
+            val response =
+                client.get("/api/vedtak/${UUID.randomUUID()}") {
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    header(HttpHeaders.Authorization, "Bearer $token")
+                }
 
             response.status shouldBe HttpStatusCode.InternalServerError
             response.bodyAsText() shouldBe "En intern feil har oppstått"
@@ -128,10 +130,11 @@ internal class VedtaksvurderingRouteTest {
             environment { config = applicationConfig }
             application { restModule(log) { vedtaksvurderingRoute(vedtaksvurderingService, behandlingKlient) } }
 
-            val response = client.get("/api/vedtak/${UUID.randomUUID()}") {
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                header(HttpHeaders.Authorization, "Bearer $token")
-            }
+            val response =
+                client.get("/api/vedtak/${UUID.randomUUID()}") {
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    header(HttpHeaders.Authorization, "Bearer $token")
+                }
 
             response.status shouldBe HttpStatusCode.NotFound
         }
@@ -151,13 +154,14 @@ internal class VedtaksvurderingRouteTest {
             environment { config = applicationConfig }
             application { restModule(log) { vedtaksvurderingRoute(vedtaksvurderingService, behandlingKlient) } }
 
-            val vedtak = client.get("/api/vedtak/${UUID.randomUUID()}") {
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                header(HttpHeaders.Authorization, "Bearer $token")
-            }.let {
-                it.status shouldBe HttpStatusCode.OK
-                deserialize<VedtakDto>(it.bodyAsText())
-            }
+            val vedtak =
+                client.get("/api/vedtak/${UUID.randomUUID()}") {
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    header(HttpHeaders.Authorization, "Bearer $token")
+                }.let {
+                    it.status shouldBe HttpStatusCode.OK
+                    deserialize<VedtakDto>(it.bodyAsText())
+                }
 
             with(vedtak) {
                 vedtakId shouldBe opprettetVedtak.id
@@ -188,23 +192,25 @@ internal class VedtaksvurderingRouteTest {
 
     @Test
     fun `skal returnere vedtaksammendrag`() {
-        val attestertVedtak = vedtak().copy(
-            status = VedtakStatus.ATTESTERT,
-            attestasjon = Attestasjon(SAKSBEHANDLER_2, ENHET_2, Tidspunkt.now())
-        )
+        val attestertVedtak =
+            vedtak().copy(
+                status = VedtakStatus.ATTESTERT,
+                attestasjon = Attestasjon(SAKSBEHANDLER_2, ENHET_2, Tidspunkt.now()),
+            )
         every { vedtaksvurderingService.hentVedtak(any<UUID>()) } returns attestertVedtak
 
         testApplication {
             environment { config = applicationConfig }
             application { restModule(log) { vedtaksvurderingRoute(vedtaksvurderingService, behandlingKlient) } }
 
-            val vedtaksammendrag = client.get("/api/vedtak/${UUID.randomUUID()}/sammendrag") {
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                header(HttpHeaders.Authorization, "Bearer $token")
-            }.let {
-                it.status shouldBe HttpStatusCode.OK
-                deserialize<VedtakSammendragDto>(it.bodyAsText())
-            }
+            val vedtaksammendrag =
+                client.get("/api/vedtak/${UUID.randomUUID()}/sammendrag") {
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    header(HttpHeaders.Authorization, "Bearer $token")
+                }.let {
+                    it.status shouldBe HttpStatusCode.OK
+                    deserialize<VedtakSammendragDto>(it.bodyAsText())
+                }
 
             vedtaksammendrag.id shouldBe attestertVedtak.id.toString()
             vedtaksammendrag.behandlingId shouldBe attestertVedtak.behandlingId
@@ -259,13 +265,14 @@ internal class VedtaksvurderingRouteTest {
             environment { config = applicationConfig }
             application { restModule(log) { vedtaksvurderingRoute(vedtaksvurderingService, behandlingKlient) } }
 
-            val vedtak = client.post("/api/vedtak/${UUID.randomUUID()}/upsert") {
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                header(HttpHeaders.Authorization, "Bearer $token")
-            }.let {
-                it.status shouldBe HttpStatusCode.OK
-                deserialize<VedtakDto>(it.bodyAsText())
-            }
+            val vedtak =
+                client.post("/api/vedtak/${UUID.randomUUID()}/upsert") {
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    header(HttpHeaders.Authorization, "Bearer $token")
+                }.let {
+                    it.status shouldBe HttpStatusCode.OK
+                    deserialize<VedtakDto>(it.bodyAsText())
+                }
 
             with(vedtak) {
                 vedtakId shouldBe opprettetVedtak.id
@@ -296,23 +303,25 @@ internal class VedtaksvurderingRouteTest {
 
     @Test
     fun `skal fatte vedtak`() {
-        val fattetVedtak = vedtak().copy(
-            status = VedtakStatus.FATTET_VEDTAK,
-            vedtakFattet = VedtakFattet(SAKSBEHANDLER_1, ENHET_1, Tidspunkt.now())
-        )
+        val fattetVedtak =
+            vedtak().copy(
+                status = VedtakStatus.FATTET_VEDTAK,
+                vedtakFattet = VedtakFattet(SAKSBEHANDLER_1, ENHET_1, Tidspunkt.now()),
+            )
         coEvery { vedtaksvurderingService.fattVedtak(any(), any()) } returns fattetVedtak
 
         testApplication {
             environment { config = applicationConfig }
             application { restModule(log) { vedtaksvurderingRoute(vedtaksvurderingService, behandlingKlient) } }
 
-            val vedtak = client.post("/api/vedtak/${UUID.randomUUID()}/fattvedtak") {
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                header(HttpHeaders.Authorization, "Bearer $token")
-            }.let {
-                it.status shouldBe HttpStatusCode.OK
-                deserialize<VedtakDto>(it.bodyAsText())
-            }
+            val vedtak =
+                client.post("/api/vedtak/${UUID.randomUUID()}/fattvedtak") {
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    header(HttpHeaders.Authorization, "Bearer $token")
+                }.let {
+                    it.status shouldBe HttpStatusCode.OK
+                    deserialize<VedtakDto>(it.bodyAsText())
+                }
 
             with(vedtak) {
                 vedtakId shouldBe fattetVedtak.id
@@ -344,25 +353,27 @@ internal class VedtaksvurderingRouteTest {
     @Test
     fun `skal attestere vedtak`() {
         val attestertVedtakKommentar = AttesterVedtakDto("Alt ser fint ut")
-        val attestertVedtak = vedtak().copy(
-            status = VedtakStatus.ATTESTERT,
-            vedtakFattet = VedtakFattet(SAKSBEHANDLER_1, ENHET_1, Tidspunkt.now()),
-            attestasjon = Attestasjon(SAKSBEHANDLER_2, ENHET_2, Tidspunkt.now())
-        )
+        val attestertVedtak =
+            vedtak().copy(
+                status = VedtakStatus.ATTESTERT,
+                vedtakFattet = VedtakFattet(SAKSBEHANDLER_1, ENHET_1, Tidspunkt.now()),
+                attestasjon = Attestasjon(SAKSBEHANDLER_2, ENHET_2, Tidspunkt.now()),
+            )
         coEvery { vedtaksvurderingService.attesterVedtak(any(), any(), any()) } returns attestertVedtak
 
         testApplication {
             environment { config = applicationConfig }
             application { restModule(log) { vedtaksvurderingRoute(vedtaksvurderingService, behandlingKlient) } }
 
-            val vedtak = client.post("/api/vedtak/${UUID.randomUUID()}/attester") {
-                setBody(attestertVedtakKommentar.toJson())
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                header(HttpHeaders.Authorization, "Bearer $token")
-            }.let {
-                it.status shouldBe HttpStatusCode.OK
-                deserialize<VedtakDto>(it.bodyAsText())
-            }
+            val vedtak =
+                client.post("/api/vedtak/${UUID.randomUUID()}/attester") {
+                    setBody(attestertVedtakKommentar.toJson())
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    header(HttpHeaders.Authorization, "Bearer $token")
+                }.let {
+                    it.status shouldBe HttpStatusCode.OK
+                    deserialize<VedtakDto>(it.bodyAsText())
+                }
 
             with(vedtak) {
                 vedtakId shouldBe attestertVedtak.id
@@ -389,7 +400,7 @@ internal class VedtaksvurderingRouteTest {
                 vedtaksvurderingService.attesterVedtak(
                     any(),
                     match { it == attestertVedtakKommentar.kommentar },
-                    match { it.ident() == SAKSBEHANDLER_1 }
+                    match { it.ident() == SAKSBEHANDLER_1 },
                 )
             }
         }
@@ -397,9 +408,10 @@ internal class VedtaksvurderingRouteTest {
 
     @Test
     fun `skal underkjenne vedtak`() {
-        val underkjentVedtak = vedtak().copy(
-            status = VedtakStatus.RETURNERT
-        )
+        val underkjentVedtak =
+            vedtak().copy(
+                status = VedtakStatus.RETURNERT,
+            )
         val begrunnelse = UnderkjennVedtakDto("Ikke bra nok begrunnet", "Annet")
         coEvery { vedtaksvurderingService.underkjennVedtak(any(), any(), any()) } returns underkjentVedtak
 
@@ -407,14 +419,15 @@ internal class VedtaksvurderingRouteTest {
             environment { config = applicationConfig }
             application { restModule(log) { vedtaksvurderingRoute(vedtaksvurderingService, behandlingKlient) } }
 
-            val vedtak = client.post("/api/vedtak/${UUID.randomUUID()}/underkjenn") {
-                setBody(begrunnelse.toJson())
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                header(HttpHeaders.Authorization, "Bearer $token")
-            }.let {
-                it.status shouldBe HttpStatusCode.OK
-                deserialize<VedtakDto>(it.bodyAsText())
-            }
+            val vedtak =
+                client.post("/api/vedtak/${UUID.randomUUID()}/underkjenn") {
+                    setBody(begrunnelse.toJson())
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    header(HttpHeaders.Authorization, "Bearer $token")
+                }.let {
+                    it.status shouldBe HttpStatusCode.OK
+                    deserialize<VedtakDto>(it.bodyAsText())
+                }
 
             with(vedtak) {
                 vedtakId shouldBe underkjentVedtak.id
@@ -441,7 +454,7 @@ internal class VedtaksvurderingRouteTest {
                 vedtaksvurderingService.underkjennVedtak(
                     any(),
                     match { it.ident() == SAKSBEHANDLER_1 },
-                    match { it == begrunnelse }
+                    match { it == begrunnelse },
                 )
             }
         }
@@ -449,9 +462,10 @@ internal class VedtaksvurderingRouteTest {
 
     @Test
     fun `skal tilbakestille vedtak`() {
-        val tilbakestiltVedtak = vedtak().copy(
-            status = VedtakStatus.RETURNERT
-        )
+        val tilbakestiltVedtak =
+            vedtak().copy(
+                status = VedtakStatus.RETURNERT,
+            )
         coEvery { vedtaksvurderingService.tilbakestillIkkeIverksatteVedtak(any()) } returns tilbakestiltVedtak
 
         testApplication {
@@ -476,7 +490,7 @@ internal class VedtaksvurderingRouteTest {
         server.issueToken(
             issuerId = AZURE_ISSUER,
             audience = CLIENT_ID,
-            claims = mapOf("navn" to "John Doe", "NAVident" to SAKSBEHANDLER_1)
+            claims = mapOf("navn" to "John Doe", "NAVident" to SAKSBEHANDLER_1),
         ).serialize()
     }
 

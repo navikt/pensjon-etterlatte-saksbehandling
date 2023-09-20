@@ -14,7 +14,6 @@ import org.slf4j.LoggerFactory
 class GrunnlagKlientException(override val message: String, override val cause: Throwable) : Exception(message, cause)
 
 class GrunnlagKlient(config: Config, httpClient: HttpClient) {
-
     private val logger = LoggerFactory.getLogger(GrunnlagKlient::class.java)
 
     private val azureAdClient = AzureAdClient(config)
@@ -23,16 +22,19 @@ class GrunnlagKlient(config: Config, httpClient: HttpClient) {
     private val clientId = config.getString("grunnlag.client.id")
     private val baseUrl = config.getString("grunnlag.resource.url")
 
-    suspend fun hentGrunnlag(sakid: Long, brukerTokenInfo: BrukerTokenInfo): Grunnlag {
+    suspend fun hentGrunnlag(
+        sakid: Long,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Grunnlag {
         try {
             logger.info("Henter grunnlag for sak med sakId=$sakid")
 
             return downstreamResourceClient.get(
                 Resource(clientId, "$baseUrl/api/grunnlag/$sakid"),
-                brukerTokenInfo
+                brukerTokenInfo,
             ).mapBoth(
                 success = { resource -> resource.response.let { deserialize(it.toString()) } },
-                failure = { throwableErrorMessage -> throw throwableErrorMessage }
+                failure = { throwableErrorMessage -> throw throwableErrorMessage },
             )
         } catch (e: Exception) {
             throw GrunnlagKlientException("Henting av grunnlag for sak med sakId=$sakid feilet", e)

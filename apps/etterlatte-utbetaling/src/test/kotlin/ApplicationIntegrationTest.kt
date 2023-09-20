@@ -30,12 +30,11 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.testcontainers.junit.jupiter.Container
-import java.util.*
+import java.util.UUID
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class ApplicationIntegrationTest {
-
     @Container
     private val postgreSQLContainer = TestContainers.postgreSQLContainer
 
@@ -47,27 +46,28 @@ class ApplicationIntegrationTest {
     fun beforeAll() {
         postgreSQLContainer.start()
 
-        val applicationProperties = ApplicationProperties(
-            dbName = postgreSQLContainer.databaseName,
-            dbHost = postgreSQLContainer.host,
-            dbPort = postgreSQLContainer.firstMappedPort,
-            dbUsername = postgreSQLContainer.username,
-            dbPassword = postgreSQLContainer.password,
-            mqHost = "mqHost",
-            mqPort = -1,
-            mqQueueManager = "QM1",
-            mqChannel = "DEV.ADMIN.SVRCONN",
-            mqSendQueue = "DEV.QUEUE.1",
-            mqKvitteringQueue = "DEV.QUEUE.2",
-            mqAvstemmingQueue = "DEV.QUEUE.1",
-            serviceUserUsername = "admin",
-            serviceUserPassword = "passw0rd",
-            leaderElectorPath = "",
-            grensesnittavstemmingEnabled = false,
-            konsistensavstemmingEnabled = false,
-            grensesnittavstemmingOMSEnabled = false,
-            konsistensavstemmingOMSEnabled = false
-        )
+        val applicationProperties =
+            ApplicationProperties(
+                dbName = postgreSQLContainer.databaseName,
+                dbHost = postgreSQLContainer.host,
+                dbPort = postgreSQLContainer.firstMappedPort,
+                dbUsername = postgreSQLContainer.username,
+                dbPassword = postgreSQLContainer.password,
+                mqHost = "mqHost",
+                mqPort = -1,
+                mqQueueManager = "QM1",
+                mqChannel = "DEV.ADMIN.SVRCONN",
+                mqSendQueue = "DEV.QUEUE.1",
+                mqKvitteringQueue = "DEV.QUEUE.2",
+                mqAvstemmingQueue = "DEV.QUEUE.1",
+                serviceUserUsername = "admin",
+                serviceUserPassword = "passw0rd",
+                leaderElectorPath = "",
+                grensesnittavstemmingEnabled = false,
+                konsistensavstemmingEnabled = false,
+                grensesnittavstemmingOMSEnabled = false,
+                konsistensavstemmingOMSEnabled = false,
+            )
 
         ApplicationContext(applicationProperties, rapidsConnection, jmsConnectionFactory = connectionFactory).also {
             dataSource = it.dataSource
@@ -81,12 +81,13 @@ class ApplicationIntegrationTest {
         sendFattetVedtakEvent(
             vedtakEvent(
                 vedtak(
-                    behandling = Behandling(
-                        id = behandlingId,
-                        type = BehandlingType.FØRSTEGANGSBEHANDLING
-                    )
-                )
-            )
+                    behandling =
+                        Behandling(
+                            id = behandlingId,
+                            type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                        ),
+                ),
+            ),
         )
 
         verify(timeout = TIMEOUT) {
@@ -98,7 +99,7 @@ class ApplicationIntegrationTest {
                             this.utbetalingResponse.status == UtbetalingStatusDto.SENDT &&
                             this.utbetalingResponse.behandlingId == behandlingId
                     }
-                }
+                },
             )
         }
     }
@@ -115,38 +116,40 @@ class ApplicationIntegrationTest {
                             this.utbetalingResponse.status == UtbetalingStatusDto.FEILET &&
                             this.utbetalingResponse.feilmelding
                                 ?.contains(
-                                    "En feil oppstod under prosessering av vedtak med vedtakId=null"
+                                    "En feil oppstod under prosessering av vedtak med vedtakId=null",
                                 ) != false &&
                             this.utbetalingResponse.behandlingId == null
                     }
-                }
+                },
             )
         }
     }
 
     @Test
     fun `skal feile dersom det finnes utbetaling for vedtaket allerede`() {
-        val behandlingId_forste = UUID.randomUUID()
-        val behandlingId_andre = UUID.randomUUID()
+        val behandlingIdForste = UUID.randomUUID()
+        val behandlingIdAndre = UUID.randomUUID()
         sendFattetVedtakEvent(
             vedtakEvent(
                 vedtak(
-                    behandling = Behandling(
-                        id = behandlingId_forste,
-                        type = BehandlingType.FØRSTEGANGSBEHANDLING
-                    )
-                )
-            )
+                    behandling =
+                        Behandling(
+                            id = behandlingIdForste,
+                            type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                        ),
+                ),
+            ),
         )
         sendFattetVedtakEvent(
             vedtakEvent(
                 vedtak(
-                    behandling = Behandling(
-                        id = behandlingId_andre,
-                        type = BehandlingType.FØRSTEGANGSBEHANDLING
-                    )
-                )
-            )
+                    behandling =
+                        Behandling(
+                            id = behandlingIdAndre,
+                            type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                        ),
+                ),
+            ),
         )
 
         verify(timeout = TIMEOUT) {
@@ -158,12 +161,12 @@ class ApplicationIntegrationTest {
                             this.utbetalingResponse.feilmelding
                                 ?.contains("Vedtak med vedtakId=1 eksisterer fra før") != false &&
                             this.utbetalingResponse.feilmelding
-                                ?.contains("behandlingId for nytt vedtak: $behandlingId_andre") == true &&
+                                ?.contains("behandlingId for nytt vedtak: $behandlingIdAndre") == true &&
                             this.utbetalingResponse.feilmelding
-                                ?.contains("behandlingId for tidligere utbetaling: $behandlingId_forste") == true &&
-                            this.utbetalingResponse.behandlingId == behandlingId_andre
+                                ?.contains("behandlingId for tidligere utbetaling: $behandlingIdForste") == true &&
+                            this.utbetalingResponse.behandlingId == behandlingIdAndre
                     }
-                }
+                },
             )
         }
     }
@@ -172,20 +175,21 @@ class ApplicationIntegrationTest {
     fun `skal feile dersom det eksisterer utbetalingslinjer med samme id som i nytt vedtak`() {
         sendFattetVedtakEvent(
             vedtakEvent(
-                vedtak()
-            )
+                vedtak(),
+            ),
         )
         val behandlingId = UUID.randomUUID()
         sendFattetVedtakEvent(
             vedtakEvent(
                 vedtak(
                     vedtakId = 2,
-                    behandling = Behandling(
-                        BehandlingType.FØRSTEGANGSBEHANDLING,
-                        behandlingId
-                    )
-                )
-            )
+                    behandling =
+                        Behandling(
+                            BehandlingType.FØRSTEGANGSBEHANDLING,
+                            behandlingId,
+                        ),
+                ),
+            ),
         )
 
         verify(timeout = TIMEOUT) {
@@ -196,11 +200,11 @@ class ApplicationIntegrationTest {
                             this.utbetalingResponse.status == UtbetalingStatusDto.FEILET &&
                             this.utbetalingResponse.feilmelding
                                 ?.contains(
-                                    "En eller flere utbetalingslinjer med id=[1] eksisterer fra før"
+                                    "En eller flere utbetalingslinjer med id=[1] eksisterer fra før",
                                 ) != false &&
                             this.utbetalingResponse.behandlingId == behandlingId
                     }
-                }
+                },
             )
         }
     }
@@ -211,12 +215,13 @@ class ApplicationIntegrationTest {
         sendFattetVedtakEvent(
             vedtakEvent(
                 vedtak(
-                    behandling = Behandling(
-                        BehandlingType.FØRSTEGANGSBEHANDLING,
-                        behandlingId
-                    )
-                )
-            )
+                    behandling =
+                        Behandling(
+                            BehandlingType.FØRSTEGANGSBEHANDLING,
+                            behandlingId,
+                        ),
+                ),
+            ),
         )
         simulerKvitteringsmeldingFraOppdrag(oppdragMedGodkjentKvittering())
 
@@ -230,7 +235,7 @@ class ApplicationIntegrationTest {
                         utbetalingResponse.vedtakId == 1L &&
                         utbetalingResponse.status == UtbetalingStatusDto.GODKJENT &&
                         utbetalingResponse.behandlingId == behandlingId
-                }
+                },
             )
         }
     }
@@ -249,7 +254,7 @@ class ApplicationIntegrationTest {
                         utbetalingResponse.vedtakId == 1L &&
                         utbetalingResponse.status == UtbetalingStatusDto.FEILET &&
                         utbetalingResponse.behandlingId == null
-                }
+                },
             )
         }
     }
@@ -260,12 +265,13 @@ class ApplicationIntegrationTest {
         sendFattetVedtakEvent(
             vedtakEvent(
                 vedtak(
-                    behandling = Behandling(
-                        BehandlingType.FØRSTEGANGSBEHANDLING,
-                        behandlingId
-                    )
-                )
-            )
+                    behandling =
+                        Behandling(
+                            BehandlingType.FØRSTEGANGSBEHANDLING,
+                            behandlingId,
+                        ),
+                ),
+            ),
         )
         simulerKvitteringsmeldingFraOppdrag(oppdragMedGodkjentKvittering()) // setter status til GODKJENT
         simulerKvitteringsmeldingFraOppdrag(oppdragMedGodkjentKvittering()) // forventer at status skal være SENDT
@@ -282,7 +288,7 @@ class ApplicationIntegrationTest {
                         utbetalingResponse.feilmelding ==
                         "Utbetalingen for vedtakId=1 har feil status (GODKJENT)" &&
                         utbetalingResponse.behandlingId == behandlingId
-                }
+                },
             )
         }
     }
@@ -293,12 +299,13 @@ class ApplicationIntegrationTest {
         sendFattetVedtakEvent(
             vedtakEvent(
                 vedtak(
-                    behandling = Behandling(
-                        BehandlingType.FØRSTEGANGSBEHANDLING,
-                        behandlingId
-                    )
-                )
-            )
+                    behandling =
+                        Behandling(
+                            BehandlingType.FØRSTEGANGSBEHANDLING,
+                            behandlingId,
+                        ),
+                ),
+            ),
         )
         simulerKvitteringsmeldingFraOppdrag(oppdragMedFeiletKvittering())
 
@@ -313,7 +320,7 @@ class ApplicationIntegrationTest {
                         utbetalingResponse.status == UtbetalingStatusDto.FEILET &&
                         utbetalingResponse.feilmelding == "KodeMelding Beskrivelse" &&
                         utbetalingResponse.behandlingId == behandlingId
-                }
+                },
             )
         }
     }
@@ -351,8 +358,8 @@ class ApplicationIntegrationTest {
         return Pair(
             message[EVENT_NAME_KEY].asText(),
             objectMapper.treeToValue(
-                message[UTBETALING_RESPONSE]
-            )
+                message[UTBETALING_RESPONSE],
+            ),
         )
     }
 }

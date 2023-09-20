@@ -12,7 +12,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 
 class InstitusjonsoppholdKlient(val institusjonsoppholdHttpKlient: HttpClient, val proxyUrl: String) {
-
     fun hentDataForHendelse(oppholdId: Long) =
         runBlocking {
             institusjonsoppholdHttpKlient.get(proxyUrl.plus("/inst2/$oppholdId?Med-Institusjonsinformasjon=true")) {
@@ -38,5 +37,5 @@ data class Institusjonsopphold(
     val overfoert: Boolean? = null,
     val registrertAv: String? = null,
     val endretAv: String? = null,
-    val endringstidspunkt: LocalDateTime? = null
+    val endringstidspunkt: LocalDateTime? = null,
 )

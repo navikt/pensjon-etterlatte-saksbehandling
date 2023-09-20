@@ -36,9 +36,10 @@ class ApplicationBuilder {
         sikkerLoggOppstartOgAvslutning("etterlatte-grunnlag")
     }
 
-    private val env = System.getenv().toMutableMap().apply {
-        put("KAFKA_CONSUMER_GROUP_ID", requireNotNull(get("NAIS_APP_NAME")).replace("-", ""))
-    }
+    private val env =
+        System.getenv().toMutableMap().apply {
+            put("KAFKA_CONSUMER_GROUP_ID", requireNotNull(get("NAIS_APP_NAME")).replace("-", ""))
+        }
     private val ds = DataSourceBuilder.createDataSource(env).also { it.migrate() }
     private val config: Config = ConfigFactory.load()
     private val pdlTjenester: HttpClient by lazy {
@@ -47,7 +48,7 @@ class ApplicationBuilder {
             azureAppJwk = config.getString("azure.app.jwk"),
             azureAppWellKnownUrl = config.getString("azure.app.well.known.url"),
             azureAppScope = config.getString("pdltjenester.azure.scope"),
-            ekstraJacksoninnstillinger = { it.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS) }
+            ekstraJacksoninnstillinger = { it.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS) },
         )
     }
     private val pdltjenesterKlient = PdlTjenesterKlientImpl(pdlTjenester, env["PDLTJENESTER_URL"]!!)
@@ -55,16 +56,17 @@ class ApplicationBuilder {
     private val behandlingKlient = BehandlingKlientImpl(config, httpClient())
     private val grunnlagService = RealGrunnlagService(pdltjenesterKlient, opplysningDao, Sporingslogg())
 
-    private val rapidsConnection = RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(env))
-        .withKtorModule {
-            restModule(sikkerLogg, routePrefix = "api", config = HoconApplicationConfig(config)) {
-                grunnlagRoute(grunnlagService, behandlingKlient)
+    private val rapidsConnection =
+        RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(env))
+            .withKtorModule {
+                restModule(sikkerLogg, routePrefix = "api", config = HoconApplicationConfig(config)) {
+                    grunnlagRoute(grunnlagService, behandlingKlient)
+                }
             }
-        }
-        .build().apply {
-            GrunnlagHendelser(this, grunnlagService)
-            MigreringHendelser(this, grunnlagService)
-        }
+            .build().apply {
+                GrunnlagHendelser(this, grunnlagService)
+                MigreringHendelser(this, grunnlagService)
+            }
 
     fun start() = setReady().also { rapidsConnection.start() }
 }

@@ -2,7 +2,7 @@ package no.nav.etterlatte.libs.common.behandling
 
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 
 /**
  * TODO:
@@ -28,7 +28,7 @@ data class DetaljertBehandling(
     val revurderingsaarsak: RevurderingAarsak? = null,
     val revurderingInfo: RevurderingInfo?,
     val prosesstype: Prosesstype, // statistikk og trygdetid
-    val enhet: String // kun statistikk
+    val enhet: String, // kun statistikk
 ) {
     fun kanVedta(type: VedtakType): Boolean {
         if (revurderingsaarsak.girOpphoer() && type != VedtakType.OPPHOER) {

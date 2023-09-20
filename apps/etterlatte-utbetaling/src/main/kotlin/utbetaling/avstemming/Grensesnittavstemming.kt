@@ -3,7 +3,8 @@ package no.nav.etterlatte.utbetaling.grensesnittavstemming
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Saktype
 import java.nio.ByteBuffer
-import java.util.*
+import java.util.Base64
+import java.util.UUID
 
 data class UUIDBase64(val value: String = encodeUUIDBase64(UUID.randomUUID())) {
     companion object {
@@ -18,7 +19,7 @@ data class UUIDBase64(val value: String = encodeUUIDBase64(UUID.randomUUID())) {
 
 data class Avstemmingsperiode(
     val fraOgMed: Tidspunkt,
-    val til: Tidspunkt
+    val til: Tidspunkt,
 ) {
     init {
         require(fraOgMed.isBefore(til)) { "fraOgMed-tidspunkt maa vaere foer til-tidspunkt" }
@@ -31,9 +32,10 @@ data class Grensesnittavstemming(
     val periode: Avstemmingsperiode,
     val antallOppdrag: Int,
     val avstemmingsdata: String,
-    val saktype: Saktype
+    val saktype: Saktype,
 )
 
 enum class Avstemmingtype {
-    GRENSESNITTAVSTEMMING, KONSISTENSAVSTEMMING
+    GRENSESNITTAVSTEMMING,
+    KONSISTENSAVSTEMMING,
 }

@@ -3,13 +3,12 @@ package no.nav.etterlatte.behandling.kommerbarnettilgode
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
-import java.util.*
+import java.util.UUID
 
 class KommerBarnetTilGodeService(
     private val kommerBarnetTilGodeDao: KommerBarnetTilGodeDao,
-    private val behandlingDao: BehandlingDao
+    private val behandlingDao: BehandlingDao,
 ) {
-
     fun lagreKommerBarnetTilgode(kommerBarnetTilgode: KommerBarnetTilgode) {
         inTransaction(true) {
             kommerBarnetTilgode.behandlingId?.let {
@@ -21,6 +20,5 @@ class KommerBarnetTilGodeService(
         }
     }
 
-    fun hentKommerBarnetTilGode(behandlingId: UUID) =
-        inTransaction(true) { kommerBarnetTilGodeDao.hentKommerBarnetTilGode(behandlingId) }
+    fun hentKommerBarnetTilGode(behandlingId: UUID) = inTransaction(true) { kommerBarnetTilGodeDao.hentKommerBarnetTilGode(behandlingId) }
 }

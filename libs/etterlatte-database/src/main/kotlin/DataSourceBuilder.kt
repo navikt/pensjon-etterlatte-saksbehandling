@@ -8,15 +8,18 @@ import org.flywaydb.core.api.output.MigrateResult
 import javax.sql.DataSource
 
 object DataSourceBuilder {
-
     private const val MAX_POOL_SIZE = 10
 
-    fun createDataSource(env: Map<String, String>, maxPoolSize: Int = MAX_POOL_SIZE): DataSource {
-        val jdbcUrl = jdbcUrl(
-            host = env.requireEnvValue("DB_HOST"),
-            port = env.requireEnvValue("DB_PORT").toInt(),
-            databaseName = env.requireEnvValue("DB_DATABASE")
-        )
+    fun createDataSource(
+        env: Map<String, String>,
+        maxPoolSize: Int = MAX_POOL_SIZE,
+    ): DataSource {
+        val jdbcUrl =
+            jdbcUrl(
+                host = env.requireEnvValue("DB_HOST"),
+                port = env.requireEnvValue("DB_PORT").toInt(),
+                databaseName = env.requireEnvValue("DB_DATABASE"),
+            )
         val username = env.requireEnvValue("DB_USERNAME")
         val password = env.requireEnvValue("DB_PASSWORD")
         return createDataSource(jdbcUrl, username, password, maxPoolSize)
@@ -26,17 +29,18 @@ object DataSourceBuilder {
         jdbcUrl: String,
         username: String,
         password: String,
-        maxPoolSize: Int = MAX_POOL_SIZE
+        maxPoolSize: Int = MAX_POOL_SIZE,
     ): DataSource {
-        val hikariConfig = HikariConfig().also {
-            it.jdbcUrl = jdbcUrl
-            it.username = username
-            it.password = password
-            it.transactionIsolation = "TRANSACTION_SERIALIZABLE"
-            it.initializationFailTimeout = 6000
-            it.maximumPoolSize = maxPoolSize
-            it.validate()
-        }
+        val hikariConfig =
+            HikariConfig().also {
+                it.jdbcUrl = jdbcUrl
+                it.username = username
+                it.password = password
+                it.transactionIsolation = "TRANSACTION_SERIALIZABLE"
+                it.initializationFailTimeout = 6000
+                it.maximumPoolSize = maxPoolSize
+                it.validate()
+            }
         return HikariDataSource(hikariConfig)
     }
 }
@@ -53,5 +57,8 @@ fun DataSource.migrate(gcp: Boolean = true): MigrateResult =
         .load()
         .migrate()
 
-fun jdbcUrl(host: String, port: Int, databaseName: String): String =
-    "jdbc:postgresql://$host:$port/$databaseName"
+fun jdbcUrl(
+    host: String,
+    port: Int,
+    databaseName: String,
+): String = "jdbc:postgresql://$host:$port/$databaseName"

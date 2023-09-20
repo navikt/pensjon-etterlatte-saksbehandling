@@ -32,9 +32,8 @@ internal class MigrerSpesifikkSak(
     private val penKlient: PenKlient,
     private val pesysRepository: PesysRepository,
     private val featureToggleService: FeatureToggleService,
-    private val verifiserer: Verifiserer
+    private val verifiserer: Verifiserer,
 ) : ListenerMedLoggingOgFeilhaandtering(MIGRER_SPESIFIKK_SAK) {
-
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     init {
@@ -45,16 +44,20 @@ internal class MigrerSpesifikkSak(
         }.register(this)
     }
 
-    override fun haandterPakke(packet: JsonMessage, context: MessageContext) {
+    override fun haandterPakke(
+        packet: JsonMessage,
+        context: MessageContext,
+    ) {
         val sakId = packet.sakId
         if (pesysRepository.hentStatus(sakId) != null) {
             logger.info("Har allerede migrert sak $sakId. Avbryter.")
             return
         }
 
-        val pesyssak = hentSak(sakId).tilVaarModell().also {
-            pesysRepository.lagrePesyssak(pesyssak = it)
-        }
+        val pesyssak =
+            hentSak(sakId).tilVaarModell().also {
+                pesysRepository.lagrePesyssak(pesyssak = it)
+            }
         packet.eventName = Migreringshendelser.MIGRER_SAK
         val request = pesyssak.tilMigreringsrequest()
         packet.hendelseData = request
@@ -84,21 +87,22 @@ internal class MigrerSpesifikkSak(
         packet: JsonMessage,
         request: MigreringRequest,
         context: MessageContext,
-        sak: Pesyssak
+        sak: Pesyssak,
     ) {
         packet[FNR_KEY] = request.soeker.value
         packet[BEHOV_NAME_KEY] = Opplysningstype.AVDOED_PDL_V1
         packet.pesysId = PesysId(sak.id)
         context.publish(packet.toJson())
         logger.info(
-            "Migrering starta for pesys-sak ${sak.id} og melding om behandling ble sendt."
+            "Migrering starta for pesys-sak ${sak.id} og melding om behandling ble sendt.",
         )
         pesysRepository.oppdaterStatus(PesysId(sak.id), Migreringsstatus.UNDER_MIGRERING)
     }
 }
 
 enum class MigreringFeatureToggle(private val key: String) : FeatureToggle {
-    SendSakTilMigrering("pensjon-etterlatte.bp-send-sak-til-migrering");
+    SendSakTilMigrering("pensjon-etterlatte.bp-send-sak-til-migrering"),
+    ;
 
     override fun key() = key
 }

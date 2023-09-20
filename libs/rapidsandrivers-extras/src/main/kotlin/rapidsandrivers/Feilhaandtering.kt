@@ -13,13 +13,14 @@ fun <T> withFeilhaandtering(
     packet: JsonMessage,
     context: MessageContext,
     feilendeSteg: String,
-    block: () -> T
-): Result<T> = try {
-    Result.success(block())
-} catch (e: Exception) {
-    feilhaandteringLogger.error("Håndtering av melding ${packet.id} feila på steg $feilendeSteg.", e)
-    packet.eventName = EventNames.FEILA
-    packet.feilendeSteg = feilendeSteg
-    context.publish(packet.toJson())
-    Result.failure(e)
-}
+    block: () -> T,
+): Result<T> =
+    try {
+        Result.success(block())
+    } catch (e: Exception) {
+        feilhaandteringLogger.error("Håndtering av melding ${packet.id} feila på steg $feilendeSteg.", e)
+        packet.eventName = EventNames.FEILA
+        packet.feilendeSteg = feilendeSteg
+        context.publish(packet.toJson())
+        Result.failure(e)
+    }

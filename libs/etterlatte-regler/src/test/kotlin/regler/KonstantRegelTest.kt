@@ -5,15 +5,15 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
 class KonstantRegelTest {
-
     private object TestGrunnlag
 
-    private val regelSomReturnererKonstantVerdi = definerKonstant<TestGrunnlag, Int>(
-        gjelderFra = GJELDER_FRA,
-        beskrivelse = "Tallet 2",
-        regelReferanse = regelReferanse,
-        verdi = 2
-    )
+    private val regelSomReturnererKonstantVerdi =
+        definerKonstant<TestGrunnlag, Int>(
+            gjelderFra = GJELDER_FRA,
+            beskrivelse = "Tallet 2",
+            regelReferanse = regelReferanse,
+            verdi = 2,
+        )
 
     @Test
     fun `skal returnere konstant verdi`() {

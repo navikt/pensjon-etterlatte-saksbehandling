@@ -18,7 +18,7 @@ import rapidsandrivers.migrering.ListenerMedLogging
 
 internal class LagreIverksattVedtak(
     rapidsConnection: RapidsConnection,
-    private val vedtaksvurderingService: VedtakService
+    private val vedtaksvurderingService: VedtakService,
 ) : ListenerMedLogging() {
     init {
         River(rapidsConnection).apply {
@@ -30,7 +30,10 @@ internal class LagreIverksattVedtak(
 
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    override fun haandterPakke(packet: JsonMessage, context: MessageContext) {
+    override fun haandterPakke(
+        packet: JsonMessage,
+        context: MessageContext,
+    ) {
         val respons = objectMapper.readValue<UtbetalingResponseDto>(packet[UTBETALING_RESPONSE].toString())
 
         try {
@@ -41,7 +44,7 @@ internal class LagreIverksattVedtak(
                     }
                         ?: logger.error(
                             "Utbetaling mangler behandlingId. " +
-                                "Kan derfor ikke lagre at vedtaket er iverksatt. Utbetaling: $respons"
+                                "Kan derfor ikke lagre at vedtaket er iverksatt. Utbetaling: $respons",
                         )
                 }
                 // Her kan vi haandtere utbetalingsproblemer om vi oensker

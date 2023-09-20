@@ -13,34 +13,36 @@ import org.slf4j.LoggerFactory
 class KravgrunnlagConsumer(
     private val connectionFactory: EtterlatteJmsConnectionFactory,
     private val queue: String,
-    private val kravgrunnlagService: KravgrunnlagService
+    private val kravgrunnlagService: KravgrunnlagService,
 ) : MessageListener {
+    fun start() =
+        connectionFactory.start(
+            listener = exceptionListener(),
+            queue = queue,
+            messageListener = this,
+        ).also { logger.info("Lytter på kravgrunnlag fra tilbakekrevingskomponenten") }
 
-    fun start() = connectionFactory.start(
-        listener = exceptionListener(),
-        queue = queue,
-        messageListener = this
-    ).also { logger.info("Lytter på kravgrunnlag fra tilbakekrevingskomponenten") }
+    override fun onMessage(message: Message) =
+        withLogContext {
+            var kravgrunnlagPayload: String? = null
+            try {
+                logger.info("Kravgrunnlag (id=${message.jmsMessageID}) mottatt ${message.deliveryCount()} gang(er)")
+                kravgrunnlagPayload = message.getBody(String::class.java)
+                val detaljertKravgrunnlag = toDetaljertKravgrunnlagDto(kravgrunnlagPayload)
+                kravgrunnlagService.opprettTilbakekreving(detaljertKravgrunnlag)
+            } catch (t: Throwable) {
+                logger.error("Feilet under mottak av kravgrunnlag (Sjekk sikkerlogg for payload", t)
+                sikkerLogg.error("Feilet under mottak av kravgrunnlag", kv("kravgrunnlag", kravgrunnlagPayload), t)
 
-    override fun onMessage(message: Message) = withLogContext {
-        var kravgrunnlagPayload: String? = null
-        try {
-            logger.info("Kravgrunnlag (id=${message.jmsMessageID}) mottatt ${message.deliveryCount()} gang(er)")
-            kravgrunnlagPayload = message.getBody(String::class.java)
-            val detaljertKravgrunnlag = toDetaljertKravgrunnlagDto(kravgrunnlagPayload)
-            kravgrunnlagService.opprettTilbakekreving(detaljertKravgrunnlag)
-        } catch (t: Throwable) {
-            logger.error("Feilet under mottak av kravgrunnlag (Sjekk sikkerlogg for payload", t)
-            sikkerLogg.error("Feilet under mottak av kravgrunnlag", kv("kravgrunnlag", kravgrunnlagPayload), t)
-
-            // Exception trigger retry - etter x forsøk vil meldingen legges på backout kø
-            throw t
+                // Exception trigger retry - etter x forsøk vil meldingen legges på backout kø
+                throw t
+            }
         }
-    }
 
-    private fun exceptionListener() = ExceptionListener {
-        logger.error("En feil oppstod med tilkoblingen mot tilbakekrevingskomponenten: ${it.message}", it)
-    }
+    private fun exceptionListener() =
+        ExceptionListener {
+            logger.error("En feil oppstod med tilkoblingen mot tilbakekrevingskomponenten: ${it.message}", it)
+        }
 
     private fun Message.deliveryCount() = this.getLongProperty("JMSXDeliveryCount")
 

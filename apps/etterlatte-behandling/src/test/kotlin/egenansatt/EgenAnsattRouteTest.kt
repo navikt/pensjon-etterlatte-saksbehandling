@@ -37,7 +37,7 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import java.util.*
+import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_METHOD)
 class EgenAnsattRouteTest : BehandlingIntegrationTest() {
@@ -59,26 +59,28 @@ class EgenAnsattRouteTest : BehandlingIntegrationTest() {
             environment {
                 config = hoconApplicationConfig
             }
-            val client = createClient {
-                install(ContentNegotiation) {
-                    jackson { registerModule(JavaTimeModule()) }
+            val client =
+                createClient {
+                    install(ContentNegotiation) {
+                        jackson { registerModule(JavaTimeModule()) }
+                    }
                 }
-            }
             application {
                 module(applicationContext)
             }
             coEvery {
                 norg2Klient.hentEnheterForOmraade(any(), any())
             } returns listOf(ArbeidsFordelingEnhet(Enheter.PORSGRUNN.navn, Enheter.PORSGRUNN.enhetNr))
-            val sak: Sak = client.post("personer/saker/${SakType.BARNEPENSJON}") {
-                addAuthToken(tokenSaksbehandler)
-                contentType(ContentType.Application.Json)
-                setBody(FoedselsnummerDTO(fnr))
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-            }.let {
-                Assertions.assertEquals(HttpStatusCode.OK, it.status)
-                it.body()
-            }
+            val sak: Sak =
+                client.post("personer/saker/${SakType.BARNEPENSJON}") {
+                    addAuthToken(tokenSaksbehandler)
+                    contentType(ContentType.Application.Json)
+                    setBody(FoedselsnummerDTO(fnr))
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                }.let {
+                    Assertions.assertEquals(HttpStatusCode.OK, it.status)
+                    it.body()
+                }
             Assertions.assertNotNull(sak.id)
             Assertions.assertEquals(Enheter.PORSGRUNN.enhetNr, sak.enhet)
 
@@ -89,22 +91,23 @@ class EgenAnsattRouteTest : BehandlingIntegrationTest() {
                     EgenAnsattSkjermet(
                         fnr = fnr,
                         inntruffet = Tidspunkt.now(),
-                        skjermet = true
-                    )
+                        skjermet = true,
+                    ),
                 )
             }.let {
                 Assertions.assertEquals(HttpStatusCode.OK, it.status)
             }
 
-            val saketterSkjerming: Sak = client.post("personer/saker/${SakType.BARNEPENSJON}") {
-                addAuthToken(systemBruker)
-                contentType(ContentType.Application.Json)
-                setBody(FoedselsnummerDTO(fnr))
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-            }.let {
-                Assertions.assertEquals(HttpStatusCode.OK, it.status)
-                it.body()
-            }
+            val saketterSkjerming: Sak =
+                client.post("personer/saker/${SakType.BARNEPENSJON}") {
+                    addAuthToken(systemBruker)
+                    contentType(ContentType.Application.Json)
+                    setBody(FoedselsnummerDTO(fnr))
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                }.let {
+                    Assertions.assertEquals(HttpStatusCode.OK, it.status)
+                    it.body()
+                }
 
             Assertions.assertEquals(sak.id, saketterSkjerming.id)
             // Denne skal alltid settes hvis noen blir skjermet hvis de ikke er adressebeskyttet(se test under)
@@ -119,22 +122,23 @@ class EgenAnsattRouteTest : BehandlingIntegrationTest() {
                     EgenAnsattSkjermet(
                         fnr = fnr,
                         inntruffet = Tidspunkt.now(),
-                        skjermet = false
-                    )
+                        skjermet = false,
+                    ),
                 )
             }.let {
                 Assertions.assertEquals(HttpStatusCode.OK, it.status)
             }
 
-            val sakUtenSkjermingIgjen: Sak = client.post("personer/saker/${SakType.BARNEPENSJON}") {
-                addAuthToken(systemBruker)
-                contentType(ContentType.Application.Json)
-                setBody(FoedselsnummerDTO(fnr))
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-            }.let {
-                Assertions.assertEquals(HttpStatusCode.OK, it.status)
-                it.body()
-            }
+            val sakUtenSkjermingIgjen: Sak =
+                client.post("personer/saker/${SakType.BARNEPENSJON}") {
+                    addAuthToken(systemBruker)
+                    contentType(ContentType.Application.Json)
+                    setBody(FoedselsnummerDTO(fnr))
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                }.let {
+                    Assertions.assertEquals(HttpStatusCode.OK, it.status)
+                    it.body()
+                }
 
             Assertions.assertEquals(sak.id, sakUtenSkjermingIgjen.id)
             Assertions.assertEquals(steinkjer.enhetNr, sakUtenSkjermingIgjen.enhet)
@@ -149,11 +153,12 @@ class EgenAnsattRouteTest : BehandlingIntegrationTest() {
             environment {
                 config = hoconApplicationConfig
             }
-            val client = createClient {
-                install(ContentNegotiation) {
-                    jackson { registerModule(JavaTimeModule()) }
+            val client =
+                createClient {
+                    install(ContentNegotiation) {
+                        jackson { registerModule(JavaTimeModule()) }
+                    }
                 }
-            }
             application {
                 module(applicationContext)
             }
@@ -161,32 +166,34 @@ class EgenAnsattRouteTest : BehandlingIntegrationTest() {
                 norg2Klient.hentEnheterForOmraade(any(), any())
             } returns listOf(ArbeidsFordelingEnhet(Enheter.PORSGRUNN.navn, Enheter.PORSGRUNN.enhetNr))
 
-            val sak: Sak = client.post("personer/saker/${SakType.BARNEPENSJON}") {
-                addAuthToken(tokenSaksbehandler)
-                contentType(ContentType.Application.Json)
-                setBody(FoedselsnummerDTO(fnr))
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-            }.let {
-                Assertions.assertEquals(HttpStatusCode.OK, it.status)
-                it.body()
-            }
+            val sak: Sak =
+                client.post("personer/saker/${SakType.BARNEPENSJON}") {
+                    addAuthToken(tokenSaksbehandler)
+                    contentType(ContentType.Application.Json)
+                    setBody(FoedselsnummerDTO(fnr))
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                }.let {
+                    Assertions.assertEquals(HttpStatusCode.OK, it.status)
+                    it.body()
+                }
             Assertions.assertNotNull(sak.id)
             Assertions.assertEquals(Enheter.PORSGRUNN.enhetNr, sak.enhet)
 
-            val behandlingId = client.post("/behandlinger/opprettbehandling") {
-                addAuthToken(tokenSaksbehandler)
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                setBody(
-                    BehandlingsBehov(
-                        sak.id,
-                        Persongalleri(fnr, "innsender", emptyList(), emptyList(), emptyList()),
-                        Tidspunkt.now().toLocalDatetimeUTC().toString()
+            val behandlingId =
+                client.post("/behandlinger/opprettbehandling") {
+                    addAuthToken(tokenSaksbehandler)
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    setBody(
+                        BehandlingsBehov(
+                            sak.id,
+                            Persongalleri(fnr, "innsender", emptyList(), emptyList(), emptyList()),
+                            Tidspunkt.now().toLocalDatetimeUTC().toString(),
+                        ),
                     )
-                )
-            }.let {
-                Assertions.assertEquals(HttpStatusCode.OK, it.status)
-                UUID.fromString(it.body())
-            }
+                }.let {
+                    Assertions.assertEquals(HttpStatusCode.OK, it.status)
+                    UUID.fromString(it.body())
+                }
 
             client.post("/grunnlagsendringshendelse/adressebeskyttelse") {
                 addAuthToken(systemBruker)
@@ -196,8 +203,8 @@ class EgenAnsattRouteTest : BehandlingIntegrationTest() {
                         hendelseId = "1",
                         fnr = fnr,
                         adressebeskyttelseGradering = AdressebeskyttelseGradering.STRENGT_FORTROLIG,
-                        endringstype = Endringstype.OPPRETTET
-                    )
+                        endringstype = Endringstype.OPPRETTET,
+                    ),
                 )
             }
 
@@ -214,22 +221,23 @@ class EgenAnsattRouteTest : BehandlingIntegrationTest() {
                     EgenAnsattSkjermet(
                         fnr = fnr,
                         inntruffet = Tidspunkt.now(),
-                        skjermet = true
-                    )
+                        skjermet = true,
+                    ),
                 )
             }.let {
                 Assertions.assertEquals(HttpStatusCode.OK, it.status)
             }
 
-            val adressebeskyttetUtenSkjerming: Sak = client.post("personer/saker/${SakType.BARNEPENSJON}") {
-                addAuthToken(systemBruker)
-                contentType(ContentType.Application.Json)
-                setBody(FoedselsnummerDTO(fnr))
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-            }.let {
-                Assertions.assertEquals(HttpStatusCode.OK, it.status)
-                it.body()
-            }
+            val adressebeskyttetUtenSkjerming: Sak =
+                client.post("personer/saker/${SakType.BARNEPENSJON}") {
+                    addAuthToken(systemBruker)
+                    contentType(ContentType.Application.Json)
+                    setBody(FoedselsnummerDTO(fnr))
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                }.let {
+                    Assertions.assertEquals(HttpStatusCode.OK, it.status)
+                    it.body()
+                }
 
             Assertions.assertNotNull(adressebeskyttetUtenSkjerming.id)
             Assertions.assertEquals(Enheter.STRENGT_FORTROLIG.enhetNr, adressebeskyttetUtenSkjerming.enhet)

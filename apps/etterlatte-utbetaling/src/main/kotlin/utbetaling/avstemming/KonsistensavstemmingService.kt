@@ -21,47 +21,51 @@ import java.time.LocalTime
 class KonsistensavstemmingService(
     private val utbetalingDao: UtbetalingDao,
     private val avstemmingDao: AvstemmingDao,
-    private val avstemmingsdataSender: AvstemmingsdataSender
+    private val avstemmingsdataSender: AvstemmingsdataSender,
 ) {
-
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     fun startKonsistensavstemming(
         dag: LocalDate,
-        saktype: Saktype
+        saktype: Saktype,
     ): List<String> {
         logger.info("Starter konsistensavstemming for ${saktype.name} paa dato $dag")
         val konsistensavstemming = lagKonsistensavstemming(dag, saktype)
         val mappetKonsistensavstemming =
             KonsistensavstemmingDataMapper(konsistensavstemming).opprettAvstemmingsmelding(saktype)
-        val sendtAvstemmingsdata = mappetKonsistensavstemming.mapIndexed { meldingNr, melding ->
-            val xmlMelding = avstemmingsdataSender.sendKonsistensavstemming(melding)
-            logger.info(
-                "Har sendt konsistensavstemmingsmelding ${meldingNr + 1} av ${mappetKonsistensavstemming.size}" +
-                    " for konsistensavstemming ${konsistensavstemming.id.value}"
-            )
-            xmlMelding
-        }
+        val sendtAvstemmingsdata =
+            mappetKonsistensavstemming.mapIndexed { meldingNr, melding ->
+                val xmlMelding = avstemmingsdataSender.sendKonsistensavstemming(melding)
+                logger.info(
+                    "Har sendt konsistensavstemmingsmelding ${meldingNr + 1} av ${mappetKonsistensavstemming.size}" +
+                        " for konsistensavstemming ${konsistensavstemming.id.value}",
+                )
+                xmlMelding
+            }
 
         avstemmingDao.opprettKonsistensavstemming(
             konsistensavstemming.copy(
-                avstemmingsdata = sendtAvstemmingsdata.joinToString("\n")
-            )
+                avstemmingsdata = sendtAvstemmingsdata.joinToString("\n"),
+            ),
         )
 
         logger.info("Konsistensavstemming for ${saktype.name} paa dato $dag utfoert")
         return sendtAvstemmingsdata
     }
 
-    fun lagKonsistensavstemming(dag: LocalDate, saktype: Saktype): Konsistensavstemming {
+    fun lagKonsistensavstemming(
+        dag: LocalDate,
+        saktype: Saktype,
+    ): Konsistensavstemming {
         val loependeYtelseFom = dag.atStartOfDay().toNorskTidspunkt()
         val registrertFoerTom = dag.minusDays(1).atTime(LocalTime.MAX).toNorskTidspunkt()
 
-        val relevanteUtbetalinger = utbetalingDao.hentUtbetalingerForKonsistensavstemming(
-            aktivFraOgMed = loependeYtelseFom,
-            opprettetFramTilOgMed = registrertFoerTom,
-            saktype = saktype
-        )
+        val relevanteUtbetalinger =
+            utbetalingDao.hentUtbetalingerForKonsistensavstemming(
+                aktivFraOgMed = loependeYtelseFom,
+                opprettetFramTilOgMed = registrertFoerTom,
+                saktype = saktype,
+            )
 
         /**
          * 1. Ta bort de utbetalingene som er opprettet etter konsistensavstemmingstidspunktet
@@ -76,57 +80,63 @@ class KonsistensavstemmingService(
          *
          * Inspirasjon og takk rettes mot su-se-bakover's implementasjon av tilsvarende
          */
-        val loependeUtbetalinger: List<OppdragForKonsistensavstemming> = relevanteUtbetalinger
-            .filter { it.opprettet <= registrertFoerTom } // 1
-            .groupBy { it.sakId } // 2
-            .mapValues { entry -> // 3
-                entry.value.map { utbetaling ->
-                    UtbetalingslinjerPerSak(
-                        sakId = 0,
-                        saktype = saktype,
-                        fnr = utbetaling.stoenadsmottaker.value,
-                        utbetalingslinjer = utbetaling.utbetalingslinjer,
-                        utbetalingslinjerTilAttestanter = utbetaling.utbetalingslinjer.map { it.id }
-                            .associateWith { listOf(utbetaling.attestant) }
+        val loependeUtbetalinger: List<OppdragForKonsistensavstemming> =
+            relevanteUtbetalinger
+                .filter { it.opprettet <= registrertFoerTom } // 1
+                .groupBy { it.sakId } // 2
+                .mapValues { entry -> // 3
+                    entry.value.map { utbetaling ->
+                        UtbetalingslinjerPerSak(
+                            sakId = 0,
+                            saktype = saktype,
+                            fnr = utbetaling.stoenadsmottaker.value,
+                            utbetalingslinjer = utbetaling.utbetalingslinjer,
+                            utbetalingslinjerTilAttestanter =
+                                utbetaling.utbetalingslinjer.map { it.id }
+                                    .associateWith { listOf(utbetaling.attestant) },
+                        )
+                    }.reduce { acc, next ->
+                        acc.copy(
+                            utbetalingslinjer = acc.utbetalingslinjer + next.utbetalingslinjer,
+                            utbetalingslinjerTilAttestanter =
+                                acc.utbetalingslinjerTilAttestanter +
+                                    next.utbetalingslinjerTilAttestanter,
+                        )
+                    }
+                } // 3
+                .mapValues { entry -> // 4
+                    val gjeldendeForKonsistensavstemming = gjeldendeLinjerForEnDato(entry.value.utbetalingslinjer, dag)
+                    entry.value.copy(
+                        utbetalingslinjer = gjeldendeForKonsistensavstemming,
                     )
-                }.reduce { acc, next ->
-                    acc.copy(
-                        utbetalingslinjer = acc.utbetalingslinjer + next.utbetalingslinjer,
-                        utbetalingslinjerTilAttestanter = acc.utbetalingslinjerTilAttestanter +
-                            next.utbetalingslinjerTilAttestanter
-                    )
-                }
-            } // 3
-            .mapValues { entry -> // 4
-                val gjeldendeForKonsistensavstemming = gjeldendeLinjerForEnDato(entry.value.utbetalingslinjer, dag)
-                entry.value.copy(
-                    utbetalingslinjer = gjeldendeForKonsistensavstemming
-                )
-            } // 4
-            .mapNotNull { (sakid, utbetalingslinjerPerSak) -> // 5
-                when (utbetalingslinjerPerSak.utbetalingslinjer.size) {
-                    0 -> null
-                    else -> OppdragForKonsistensavstemming(
-                        sakId = sakid,
-                        sakType = saktype,
-                        fnr = Foedselsnummer(utbetalingslinjerPerSak.fnr),
-                        utbetalingslinjer = utbetalingslinjerPerSak.utbetalingslinjer.map {
-                            OppdragslinjeForKonsistensavstemming(
-                                id = it.id,
-                                opprettet = it.opprettet,
-                                fraOgMed = it.periode.fra,
-                                tilOgMed = it.periode.til,
-                                forrigeUtbetalingslinjeId = it.erstatterId,
-                                beloep = it.beloep,
-                                attestanter = utbetalingslinjerPerSak
-                                    .utbetalingslinjerTilAttestanter[it.id]
-                                    ?: emptyList(),
-                                kjoereplan = it.kjoereplan
+                } // 4
+                .mapNotNull { (sakid, utbetalingslinjerPerSak) -> // 5
+                    when (utbetalingslinjerPerSak.utbetalingslinjer.size) {
+                        0 -> null
+                        else ->
+                            OppdragForKonsistensavstemming(
+                                sakId = sakid,
+                                sakType = saktype,
+                                fnr = Foedselsnummer(utbetalingslinjerPerSak.fnr),
+                                utbetalingslinjer =
+                                    utbetalingslinjerPerSak.utbetalingslinjer.map {
+                                        OppdragslinjeForKonsistensavstemming(
+                                            id = it.id,
+                                            opprettet = it.opprettet,
+                                            fraOgMed = it.periode.fra,
+                                            tilOgMed = it.periode.til,
+                                            forrigeUtbetalingslinjeId = it.erstatterId,
+                                            beloep = it.beloep,
+                                            attestanter =
+                                                utbetalingslinjerPerSak
+                                                    .utbetalingslinjerTilAttestanter[it.id]
+                                                    ?: emptyList(),
+                                            kjoereplan = it.kjoereplan,
+                                        )
+                                    },
                             )
-                        }
-                    )
-                }
-            } // 5
+                    }
+                } // 5
 
         return Konsistensavstemming(
             id = UUIDBase64(),
@@ -135,11 +145,14 @@ class KonsistensavstemmingService(
             avstemmingsdata = null,
             loependeFraOgMed = loependeYtelseFom,
             opprettetTilOgMed = registrertFoerTom,
-            loependeUtbetalinger = loependeUtbetalinger
+            loependeUtbetalinger = loependeUtbetalinger,
         )
     }
 
-    fun konsistensavstemmingErKjoertIDag(saktype: Saktype, idag: LocalDate): Boolean {
+    fun konsistensavstemmingErKjoertIDag(
+        saktype: Saktype,
+        idag: LocalDate,
+    ): Boolean {
         val tidspunktForSisteKonsistensavstemming: Tidspunkt? =
             hentSisteKonsistensavstemming(saktype)?.opprettet
 
@@ -149,8 +162,7 @@ class KonsistensavstemmingService(
         return datoForSisteKonsistensavstemming == idag
     }
 
-    fun hentSisteKonsistensavstemming(saktype: Saktype): Konsistensavstemming? =
-        avstemmingDao.hentSisteKonsistensavsvemming(saktype)
+    fun hentSisteKonsistensavstemming(saktype: Saktype): Konsistensavstemming? = avstemmingDao.hentSisteKonsistensavsvemming(saktype)
 }
 
 /**
@@ -180,15 +192,20 @@ class KonsistensavstemmingService(
  *
  *      4. Ikke er en opphørslinje (disse telles ikke som aktive)
  */
-fun gjeldendeLinjerForEnDato(utbetalingslinjer: List<Utbetalingslinje>, dato: LocalDate): List<Utbetalingslinje> {
-    val linjerSomErOpprettetOgIkkeAvsluttetPaaDato = utbetalingslinjer
-        .filter {
-            it.opprettet <= Tidspunkt.ofNorskTidssone(dato, LocalTime.MIDNIGHT)
-        } // 1
-        .filter { (it.periode.til ?: dato) >= dato } // 2
+fun gjeldendeLinjerForEnDato(
+    utbetalingslinjer: List<Utbetalingslinje>,
+    dato: LocalDate,
+): List<Utbetalingslinje> {
+    val linjerSomErOpprettetOgIkkeAvsluttetPaaDato =
+        utbetalingslinjer
+            .filter {
+                it.opprettet <= Tidspunkt.ofNorskTidssone(dato, LocalTime.MIDNIGHT)
+            } // 1
+            .filter { (it.periode.til ?: dato) >= dato } // 2
 
-    val utbetalingIdTilErstattendeUtbetalingMap = linjerSomErOpprettetOgIkkeAvsluttetPaaDato
-        .associateBy { it.erstatterId }
+    val utbetalingIdTilErstattendeUtbetalingMap =
+        linjerSomErOpprettetOgIkkeAvsluttetPaaDato
+            .associateBy { it.erstatterId }
 
     return linjerSomErOpprettetOgIkkeAvsluttetPaaDato.filter { utbetalingslinje -> // 3
         var tidligsteStartForEnErstatter: LocalDate? = null
@@ -211,5 +228,5 @@ data class UtbetalingslinjerPerSak(
     val saktype: Saktype,
     val fnr: String,
     val utbetalingslinjer: List<Utbetalingslinje>,
-    val utbetalingslinjerTilAttestanter: Map<UtbetalingslinjeId, List<NavIdent>>
+    val utbetalingslinjerTilAttestanter: Map<UtbetalingslinjeId, List<NavIdent>>,
 )

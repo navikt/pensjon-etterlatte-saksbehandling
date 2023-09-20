@@ -10,6 +10,5 @@ data class GjenlevendeForelderSoeknad(
     val foedselsnummer: Folkeregisteridentifikator,
     val adresse: String,
     val statsborgerskap: String,
-    val telefonnummer: String
-
+    val telefonnummer: String,
 )

@@ -18,7 +18,7 @@ object Kontekst : ThreadLocal<Context>()
 
 class Context(
     val AppUser: User,
-    val databasecontxt: DatabaseKontekst
+    val databasecontxt: DatabaseKontekst,
 ) {
     fun appUserAsSaksbehandler(): SaksbehandlerMedEnheterOgRoller {
         return this.AppUser as SaksbehandlerMedEnheterOgRoller
@@ -27,6 +27,7 @@ class Context(
 
 interface User {
     fun name(): String
+
     fun kanSetteKilde(): Boolean = false
 }
 
@@ -34,6 +35,7 @@ abstract class ExternalUser(val identifiedBy: TokenValidationContext) : User
 
 class Self(val prosess: String) : User {
     override fun name() = prosess
+
     override fun kanSetteKilde() = true
 }
 
@@ -50,27 +52,27 @@ class SystemUser(identifiedBy: TokenValidationContext) : ExternalUser(identified
 class SaksbehandlerMedEnheterOgRoller(
     identifiedBy: TokenValidationContext,
     private val enhetService: EnhetService,
-    val saksbehandlerMedRoller: SaksbehandlerMedRoller
+    val saksbehandlerMedRoller: SaksbehandlerMedRoller,
 ) : ExternalUser(identifiedBy) {
-
     override fun name(): String {
         return identifiedBy.hentTokenClaims(AZURE_ISSUER)!!.getStringClaim("NAVident")
     }
 
-    fun enheter() = if (saksbehandlerMedRoller.harRolleNasjonalTilgang()) {
-        Enheter.nasjonalTilgangEnheter()
-    } else {
-        runBlocking {
-            enhetService.enheterForIdent(name()).map { it.id }
+    fun enheter() =
+        if (saksbehandlerMedRoller.harRolleNasjonalTilgang()) {
+            Enheter.nasjonalTilgangEnheter()
+        } else {
+            runBlocking {
+                enhetService.enheterForIdent(name()).map { it.id }
+            }
         }
-    }
 }
 
 fun decideUser(
     principal: TokenValidationContextPrincipal,
     saksbehandlerGroupIdsByKey: Map<AzureGroup, String>,
     enhetService: EnhetService,
-    brukerTokenInfo: BrukerTokenInfo
+    brukerTokenInfo: BrukerTokenInfo,
 ): ExternalUser {
     return if (principal.context.issuers.contains(AZURE_ISSUER)) {
         if (brukerTokenInfo is Systembruker) {
@@ -79,7 +81,7 @@ fun decideUser(
             SaksbehandlerMedEnheterOgRoller(
                 principal.context,
                 enhetService,
-                SaksbehandlerMedRoller(brukerTokenInfo as Saksbehandler, saksbehandlerGroupIdsByKey)
+                SaksbehandlerMedRoller(brukerTokenInfo as Saksbehandler, saksbehandlerGroupIdsByKey),
             )
         }
     } else {
@@ -89,10 +91,17 @@ fun decideUser(
 
 interface DatabaseKontekst {
     fun activeTx(): Connection
-    fun <T> inTransaction(gjenbruk: Boolean = false, block: () -> T): T
+
+    fun <T> inTransaction(
+        gjenbruk: Boolean = false,
+        block: () -> T,
+    ): T
 }
 
-fun <T> inTransaction(gjenbruk: Boolean = false, block: () -> T): T =
+fun <T> inTransaction(
+    gjenbruk: Boolean = false,
+    block: () -> T,
+): T =
     Kontekst.get().databasecontxt.inTransaction(gjenbruk) {
         block()
     }

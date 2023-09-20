@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Test
 import java.time.YearMonth
 
 internal class GrunnbeloepRepositoryTest {
-
     @Test
     fun `skal hente alle historiske grunnbeloep`() {
         GrunnbeloepRepository.historiskeGrunnbeloep shouldHaveSize 70

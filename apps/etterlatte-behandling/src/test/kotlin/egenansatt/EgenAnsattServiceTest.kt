@@ -57,11 +57,12 @@ internal class EgenAnsattServiceTest {
         postgreSQLContainer.withUrlParam("user", postgreSQLContainer.username)
         postgreSQLContainer.withUrlParam("password", postgreSQLContainer.password)
 
-        dataSource = DataSourceBuilder.createDataSource(
-            jdbcUrl = postgreSQLContainer.jdbcUrl,
-            username = postgreSQLContainer.username,
-            password = postgreSQLContainer.password
-        ).apply { migrate() }
+        dataSource =
+            DataSourceBuilder.createDataSource(
+                jdbcUrl = postgreSQLContainer.jdbcUrl,
+                username = postgreSQLContainer.username,
+                password = postgreSQLContainer.password,
+            ).apply { migrate() }
 
         val pdlKlient = mockk<PdlKlient>()
         val norg2Klient = mockk<Norg2Klient>()
@@ -70,9 +71,10 @@ internal class EgenAnsattServiceTest {
         val skjermingKlient = mockk<SkjermingKlient>()
         val connection = dataSource.connection
         sakRepo = SakDao { connection }
-        sakService = spyk(
-            RealSakService(sakRepo, pdlKlient, norg2Klient, featureToggleService, tilgangService, skjermingKlient)
-        )
+        sakService =
+            spyk(
+                RealSakService(sakRepo, pdlKlient, norg2Klient, featureToggleService, tilgangService, skjermingKlient),
+            )
         egenAnsattService = EgenAnsattService(sakService, sikkerLogg)
 
         coEvery { skjermingKlient.personErSkjermet(any()) } returns false
@@ -94,11 +96,14 @@ internal class EgenAnsattServiceTest {
                         throw IllegalArgumentException()
                     }
 
-                    override fun <T> inTransaction(gjenbruk: Boolean, block: () -> T): T {
+                    override fun <T> inTransaction(
+                        gjenbruk: Boolean,
+                        block: () -> T,
+                    ): T {
                         return block()
                     }
-                }
-            )
+                },
+            ),
         )
     }
 

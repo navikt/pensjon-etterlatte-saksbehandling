@@ -84,7 +84,7 @@ class SamordningVedtakRouteTest {
                     header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                     header(
                         HttpHeaders.Authorization,
-                        "Bearer ${token("nav:etterlatteytelser:vedtaksinformasjon.read")}"
+                        "Bearer ${token("nav:etterlatteytelser:vedtaksinformasjon.read")}",
                     )
                 }
 
@@ -96,7 +96,7 @@ class SamordningVedtakRouteTest {
     private fun Application.samordningVedtakApi() {
         restModule(
             log,
-            additionalValidation = validateMaskinportenScope()
+            additionalValidation = validateMaskinportenScope(),
         ) { samordningVedtakRoute(samordningVedtakService = samordningVedtakService) }
     }
 
@@ -107,7 +107,7 @@ class SamordningVedtakRouteTest {
 
         return server.issueToken(
             issuerId = ISSUER_ID,
-            claims = claims
+            claims = claims,
         ).serialize()
     }
 
@@ -129,7 +129,7 @@ class SamordningVedtakRouteTest {
 
 fun buildTestApplicationConfigurationForOauth(
     port: Int,
-    issuerId: String
+    issuerId: String,
 ) = HoconApplicationConfig(
     ConfigFactory.parseMap(
         mapOf(
@@ -138,9 +138,9 @@ fun buildTestApplicationConfigurationForOauth(
                     mapOf(
                         "discoveryurl" to "http://localhost:$port/$issuerId/.well-known/openid-configuration",
                         "issuer_name" to issuerId,
-                        "validation.optional_claims" to "aud,nbf,sub"
-                    )
-                )
-        )
-    )
+                        "validation.optional_claims" to "aud,nbf,sub",
+                    ),
+                ),
+        ),
+    ),
 )

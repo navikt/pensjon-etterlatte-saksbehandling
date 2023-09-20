@@ -20,7 +20,6 @@ import java.io.FileNotFoundException
 import java.util.UUID
 
 internal class OmregningsHendelserTest {
-
     private val behandlingService = mockk<BeregningService>()
     private val trygdetidService = mockk<TrygdetidService>()
     private val inspector = TestRapid().apply { OmregningHendelser(this, behandlingService, trygdetidService) }
@@ -30,26 +29,29 @@ internal class OmregningsHendelserTest {
         val omregningsid = slot<UUID>()
         val behandlingsId = slot<UUID>()
         val forrigeBehandlingId = slot<UUID>()
-        val beregningDTO = BeregningDTO(
-            beregningId = UUID.randomUUID(),
-            behandlingId = UUID.randomUUID(),
-            type = Beregningstype.BP,
-            beregningsperioder = listOf(),
-            beregnetDato = Tidspunkt.now(),
-            grunnlagMetadata = Metadata(1234, 1)
-        )
+        val beregningDTO =
+            BeregningDTO(
+                beregningId = UUID.randomUUID(),
+                behandlingId = UUID.randomUUID(),
+                type = Beregningstype.BP,
+                beregningsperioder = listOf(),
+                beregnetDato = Tidspunkt.now(),
+                grunnlagMetadata = Metadata(1234, 1),
+            )
 
-        val returnValue = mockk<HttpResponse>().also {
-            every {
-                runBlocking { it.body<BeregningDTO>() }
-            } returns beregningDTO
-        }
+        val returnValue =
+            mockk<HttpResponse>().also {
+                every {
+                    runBlocking { it.body<BeregningDTO>() }
+                } returns beregningDTO
+            }
 
-        val noContentValue = mockk<HttpResponse>().also {
-            every {
-                runBlocking { it.status }
-            } returns HttpStatusCode.NoContent
-        }
+        val noContentValue =
+            mockk<HttpResponse>().also {
+                every {
+                    runBlocking { it.status }
+                } returns HttpStatusCode.NoContent
+            }
 
         every { behandlingService.beregn(capture(omregningsid)) }.returns(returnValue)
         every {
@@ -66,7 +68,7 @@ internal class OmregningsHendelserTest {
         Assertions.assertEquals(2, inspector.inspektør.size)
         Assertions.assertEquals(
             beregningDTO.toJson(),
-            inspector.inspektør.message(1).get(BEREGNING_KEY).toJson()
+            inspector.inspektør.message(1).get(BEREGNING_KEY).toJson(),
         )
     }
 
@@ -75,5 +77,6 @@ internal class OmregningsHendelserTest {
     }
 }
 
-fun readFile(file: String) = OmregningsHendelserTest::class.java.getResource(file)?.readText()
-    ?: throw FileNotFoundException("Fant ikke filen $file")
+fun readFile(file: String) =
+    OmregningsHendelserTest::class.java.getResource(file)?.readText()
+        ?: throw FileNotFoundException("Fant ikke filen $file")

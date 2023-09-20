@@ -4,11 +4,10 @@ import no.nav.etterlatte.libs.common.oppgaveNy.Status
 import no.nav.etterlatte.libs.database.toList
 import org.slf4j.LoggerFactory
 import java.sql.ResultSet
-import java.util.*
+import java.util.UUID
 import javax.sql.DataSource
 
 class OppgaveMetrikkerDao(private val dataSource: DataSource) {
-
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     fun hentOppgaveAntall(): OppgaveAntall {
@@ -19,20 +18,21 @@ class OppgaveMetrikkerDao(private val dataSource: DataSource) {
         return OppgaveAntall(
             totalt = totalt,
             aktive = aktive,
-            avsluttet = avsluttet
+            avsluttet = avsluttet,
         )
     }
 
     private fun hentAlleOppgaver(): List<OppgaveMetrikker> {
         dataSource.connection.use {
-            val statement = it.prepareStatement(
-                """
+            val statement =
+                it.prepareStatement(
+                    """
                     SELECT id, status
                     FROM oppgave
-                """.trimIndent()
-            )
+                    """.trimIndent(),
+                )
             return statement.executeQuery().toList {
-               asOppgaveMetrikker()
+                asOppgaveMetrikker()
             }
         }
     }
@@ -47,11 +47,11 @@ class OppgaveMetrikkerDao(private val dataSource: DataSource) {
 
 data class OppgaveMetrikker(
     val id: UUID,
-    val status: Status
+    val status: Status,
 )
 
 data class OppgaveAntall(
     val totalt: Int,
     val aktive: Int,
-    val avsluttet: Int
+    val avsluttet: Int,
 )

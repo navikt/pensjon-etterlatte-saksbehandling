@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 class MaskerFnrTest {
-
     @Test
     fun `maskerFnr bytter ut personnummer med xxxxx`() {
         assertEquals("114682*****", "11468227004".maskerFnr())

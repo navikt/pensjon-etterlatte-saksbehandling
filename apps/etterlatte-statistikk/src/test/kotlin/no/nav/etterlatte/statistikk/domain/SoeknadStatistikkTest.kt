@@ -6,7 +6,6 @@ import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
 
 class SoeknadStatistikkTest {
-
     @Test
     fun `SoeknadStatistikk kan ikke lages hvis den er inkonsekvent mellom gyldig for behandling og kriterier`() {
         assertThrows<Exception> {
@@ -14,7 +13,7 @@ class SoeknadStatistikkTest {
                 soeknadId = 1L,
                 gyldigForBehandling = false,
                 sakType = SakType.BARNEPENSJON,
-                kriterierForIngenBehandling = listOf()
+                kriterierForIngenBehandling = listOf(),
             )
         }
         assertThrows<Exception> {
@@ -22,7 +21,7 @@ class SoeknadStatistikkTest {
                 soeknadId = 1L,
                 gyldigForBehandling = true,
                 sakType = SakType.BARNEPENSJON,
-                kriterierForIngenBehandling = listOf("SOEKER_HAR_UTENLANDSADRESSE")
+                kriterierForIngenBehandling = listOf("SOEKER_HAR_UTENLANDSADRESSE"),
             )
         }
         assertDoesNotThrow {
@@ -30,7 +29,7 @@ class SoeknadStatistikkTest {
                 soeknadId = 0,
                 gyldigForBehandling = true,
                 sakType = SakType.BARNEPENSJON,
-                kriterierForIngenBehandling = listOf()
+                kriterierForIngenBehandling = listOf(),
             )
         }
         assertDoesNotThrow {
@@ -38,7 +37,7 @@ class SoeknadStatistikkTest {
                 soeknadId = 0,
                 gyldigForBehandling = false,
                 sakType = SakType.BARNEPENSJON,
-                kriterierForIngenBehandling = listOf("SOEKER_HAR_UTENLANDSADRESSE", "SOEKER_HAR_VERGE")
+                kriterierForIngenBehandling = listOf("SOEKER_HAR_UTENLANDSADRESSE", "SOEKER_HAR_VERGE"),
             )
         }
     }

@@ -44,11 +44,12 @@ internal class VedtaksvurderingRepositoryTest {
     fun beforeAll() {
         postgreSQLContainer.start()
 
-        dataSource = DataSourceBuilder.createDataSource(
-            postgreSQLContainer.jdbcUrl,
-            postgreSQLContainer.username,
-            postgreSQLContainer.password
-        ).also { it.migrate() }
+        dataSource =
+            DataSourceBuilder.createDataSource(
+                postgreSQLContainer.jdbcUrl,
+                postgreSQLContainer.username,
+                postgreSQLContainer.password,
+            ).also { it.migrate() }
 
         repository = VedtaksvurderingRepository(dataSource)
     }
@@ -95,19 +96,21 @@ internal class VedtaksvurderingRepositoryTest {
 
         val nyttVirkningstidspunkt = YearMonth.of(2023, Month.MARCH)
 
-        val oppdatertVedtak = repository.oppdaterVedtak(
-            vedtak.copy(
-                virkningstidspunkt = nyttVirkningstidspunkt,
-                type = VedtakType.OPPHOER,
-                utbetalingsperioder = listOf(
-                    Utbetalingsperiode(
-                        periode = Periode(nyttVirkningstidspunkt, null),
-                        beloep = null,
-                        type = UtbetalingsperiodeType.OPPHOER
-                    )
-                )
+        val oppdatertVedtak =
+            repository.oppdaterVedtak(
+                vedtak.copy(
+                    virkningstidspunkt = nyttVirkningstidspunkt,
+                    type = VedtakType.OPPHOER,
+                    utbetalingsperioder =
+                        listOf(
+                            Utbetalingsperiode(
+                                periode = Periode(nyttVirkningstidspunkt, null),
+                                beloep = null,
+                                type = UtbetalingsperiodeType.OPPHOER,
+                            ),
+                        ),
+                ),
             )
-        )
 
         oppdatertVedtak shouldNotBe null
         oppdatertVedtak.virkningstidspunkt shouldBe nyttVirkningstidspunkt
@@ -137,10 +140,11 @@ internal class VedtaksvurderingRepositoryTest {
 
         val vedtak = repository.opprettVedtak(nyttVedtak)
 
-        val fattetVedtak = repository.fattVedtak(
-            vedtak.behandlingId,
-            VedtakFattet(SAKSBEHANDLER_1, ENHET_1, Tidspunkt.now())
-        )
+        val fattetVedtak =
+            repository.fattVedtak(
+                vedtak.behandlingId,
+                VedtakFattet(SAKSBEHANDLER_1, ENHET_1, Tidspunkt.now()),
+            )
 
         fattetVedtak.vedtakFattet shouldNotBe null
         fattetVedtak.status shouldBe VedtakStatus.FATTET_VEDTAK
@@ -159,13 +163,14 @@ internal class VedtaksvurderingRepositoryTest {
 
         repository.fattVedtak(
             vedtak.behandlingId,
-            VedtakFattet(SAKSBEHANDLER_1, ENHET_1, Tidspunkt.now())
+            VedtakFattet(SAKSBEHANDLER_1, ENHET_1, Tidspunkt.now()),
         )
 
-        val attestertVedtak = repository.attesterVedtak(
-            vedtak.behandlingId,
-            Attestasjon(SAKSBEHANDLER_2, ENHET_2, Tidspunkt.now())
-        )
+        val attestertVedtak =
+            repository.attesterVedtak(
+                vedtak.behandlingId,
+                Attestasjon(SAKSBEHANDLER_2, ENHET_2, Tidspunkt.now()),
+            )
 
         attestertVedtak.attestasjon shouldNotBe null
         attestertVedtak.status shouldBe VedtakStatus.ATTESTERT
@@ -184,12 +189,12 @@ internal class VedtaksvurderingRepositoryTest {
 
         repository.fattVedtak(
             vedtak.behandlingId,
-            VedtakFattet(SAKSBEHANDLER_1, ENHET_1, Tidspunkt.now())
+            VedtakFattet(SAKSBEHANDLER_1, ENHET_1, Tidspunkt.now()),
         )
 
         repository.attesterVedtak(
             vedtak.behandlingId,
-            Attestasjon(SAKSBEHANDLER_2, ENHET_2, Tidspunkt.now())
+            Attestasjon(SAKSBEHANDLER_2, ENHET_2, Tidspunkt.now()),
         )
 
         val iverksattVedtak = repository.iverksattVedtak(vedtak.behandlingId)
@@ -206,12 +211,12 @@ internal class VedtaksvurderingRepositoryTest {
 
         repository.fattVedtak(
             vedtak.behandlingId,
-            VedtakFattet(SAKSBEHANDLER_1, ENHET_1, Tidspunkt.now())
+            VedtakFattet(SAKSBEHANDLER_1, ENHET_1, Tidspunkt.now()),
         )
 
         val underkjentVedtak =
             repository.underkjennVedtak(
-                vedtak.behandlingId
+                vedtak.behandlingId,
             )
 
         underkjentVedtak shouldNotBe null
@@ -228,7 +233,7 @@ internal class VedtaksvurderingRepositoryTest {
                 opprettVedtak(sakId = sakId),
                 opprettVedtak(sakId = 2),
                 opprettVedtak(sakId = sakId),
-                opprettVedtak(sakId = sakId)
+                opprettVedtak(sakId = sakId),
             )
         nyeVedtak.forEach { repository.opprettVedtak(it) }
 
@@ -248,7 +253,7 @@ internal class VedtaksvurderingRepositoryTest {
             opprettVedtak(sakId = 2, soeker = person2, virkningstidspunkt = YearMonth.of(2024, Month.JANUARY)),
             opprettVedtak(sakId = 2, soeker = person2, virkningstidspunkt = YearMonth.of(2024, Month.MARCH)),
             opprettVedtak(sakId = 1, soeker = person1, virkningstidspunkt = YearMonth.of(2024, Month.APRIL)),
-            opprettVedtak(sakId = 2, soeker = person2, virkningstidspunkt = YearMonth.of(2024, Month.JUNE))
+            opprettVedtak(sakId = 2, soeker = person2, virkningstidspunkt = YearMonth.of(2024, Month.JUNE)),
         )
             .map { repository.opprettVedtak(it) }
             .forEach { repository.iverksattVedtak(it.behandlingId) }

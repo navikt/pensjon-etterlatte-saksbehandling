@@ -25,7 +25,7 @@ import rapidsandrivers.migrering.ListenerMedLogging
 
 internal class InnsendtSoeknadRiver(
     rapidsConnection: RapidsConnection,
-    private val behandlingClient: BehandlingClient
+    private val behandlingClient: BehandlingClient,
 ) : ListenerMedLogging() {
     private val logger = LoggerFactory.getLogger(InnsendtSoeknadRiver::class.java)
 
@@ -45,23 +45,28 @@ internal class InnsendtSoeknadRiver(
         }.register(this)
     }
 
-    override fun haandterPakke(packet: JsonMessage, context: MessageContext) {
+    override fun haandterPakke(
+        packet: JsonMessage,
+        context: MessageContext,
+    ) {
         try {
             val soeknad = packet.soeknad()
 
-            val personGalleri = Persongalleri(
-                soeker = soeknad.soeker.foedselsnummer.svar.value,
-                innsender = soeknad.innsender.foedselsnummer.svar.value,
-                avdoed = listOf(soeknad.avdoed.foedselsnummer.svar.value),
-                soesken = soeknad.barn.map { it.foedselsnummer.svar.value }
-            )
+            val personGalleri =
+                Persongalleri(
+                    soeker = soeknad.soeker.foedselsnummer.svar.value,
+                    innsender = soeknad.innsender.foedselsnummer.svar.value,
+                    avdoed = listOf(soeknad.avdoed.foedselsnummer.svar.value),
+                    soesken = soeknad.barn.map { it.foedselsnummer.svar.value },
+                )
 
             // Skal vurderes manuelt av saksbehandler
-            val gyldighetsVurdering = GyldighetsResultat(
-                KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING,
-                listOf(),
-                Tidspunkt.now().toLocalDatetimeUTC()
-            )
+            val gyldighetsVurdering =
+                GyldighetsResultat(
+                    KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING,
+                    listOf(),
+                    Tidspunkt.now().toLocalDatetimeUTC(),
+                )
 
             val sak = behandlingClient.finnEllerOpprettSak(personGalleri.soeker, SakType.OMSTILLINGSSTOENAD.name)
             val behandlingId = behandlingClient.opprettBehandling(sak.id, soeknad.mottattDato, personGalleri)
@@ -72,7 +77,7 @@ internal class InnsendtSoeknadRiver(
                 packet.apply {
                     set(GyldigSoeknadVurdert.sakIdKey, sak.id)
                     set(GyldigSoeknadVurdert.behandlingIdKey, behandlingId)
-                }.toJson()
+                }.toJson(),
             )
             logger.info("Vurdert gyldighet av søknad om omstillingsstønad er fullført")
         } catch (e: Exception) {
@@ -81,9 +86,10 @@ internal class InnsendtSoeknadRiver(
         }
     }
 
-    private fun JsonMessage.soeknad() = this[FordelerFordelt.skjemaInfoKey].let {
-        objectMapper.treeToValue<Omstillingsstoenad>(
-            it
-        )
-    }
+    private fun JsonMessage.soeknad() =
+        this[FordelerFordelt.skjemaInfoKey].let {
+            objectMapper.treeToValue<Omstillingsstoenad>(
+                it,
+            )
+        }
 }

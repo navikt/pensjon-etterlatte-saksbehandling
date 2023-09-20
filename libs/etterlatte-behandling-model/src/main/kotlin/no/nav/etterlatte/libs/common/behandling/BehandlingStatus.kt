@@ -10,7 +10,8 @@ enum class BehandlingStatus {
     ATTESTERT,
     RETURNERT,
     IVERKSATT,
-    AVBRUTT;
+    AVBRUTT,
+    ;
 
     fun kanAvbrytes(): Boolean {
         return this !in iverksattEllerAttestert() && this != AVBRUTT
@@ -19,26 +20,27 @@ enum class BehandlingStatus {
     fun kanEndres() = this in BehandlingStatus.kanEndres()
 
     companion object {
-        fun underBehandling() = listOf(
-            OPPRETTET,
-            VILKAARSVURDERT,
-            TRYGDETID_OPPDATERT,
-            BEREGNET,
-            AVKORTET,
-            RETURNERT,
-            FATTET_VEDTAK
-        )
+        fun underBehandling() =
+            listOf(
+                OPPRETTET,
+                VILKAARSVURDERT,
+                TRYGDETID_OPPDATERT,
+                BEREGNET,
+                AVKORTET,
+                RETURNERT,
+                FATTET_VEDTAK,
+            )
 
-        fun iverksattEllerAttestert() = listOf(
-            IVERKSATT,
-            ATTESTERT
-        )
+        fun iverksattEllerAttestert() =
+            listOf(
+                IVERKSATT,
+                ATTESTERT,
+            )
 
         fun kanEndres() = underBehandling() - FATTET_VEDTAK
 
         fun ikkeAvbrutt() = iverksattEllerAttestert() + underBehandling()
 
-        fun skalIkkeOmregnesVedGRegulering() =
-            listOf(IVERKSATT, AVBRUTT, ATTESTERT, OPPRETTET, VILKAARSVURDERT, TRYGDETID_OPPDATERT)
+        fun skalIkkeOmregnesVedGRegulering() = listOf(IVERKSATT, AVBRUTT, ATTESTERT, OPPRETTET, VILKAARSVURDERT, TRYGDETID_OPPDATERT)
     }
 }

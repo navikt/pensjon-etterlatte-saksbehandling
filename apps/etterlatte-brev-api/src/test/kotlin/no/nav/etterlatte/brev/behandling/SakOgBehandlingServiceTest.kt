@@ -45,11 +45,10 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.YearMonth
-import java.util.*
+import java.util.UUID
 import no.nav.etterlatte.brev.behandling.Beregningsperiode as BrevBeregningsperiode
 
 internal class SakOgBehandlingServiceTest {
-
     private val vedtaksvurderingKlient = mockk<VedtaksvurderingKlient>()
     private val grunnlagKlient = mockk<GrunnlagKlient>()
     private val beregningKlient = mockk<BeregningKlient>()
@@ -64,7 +63,7 @@ internal class SakOgBehandlingServiceTest {
             beregningKlient,
             behandlingKlient,
             trygdetidKlient,
-            vilkaarsvurderingKlient
+            vilkaarsvurderingKlient,
         )
 
     @BeforeEach
@@ -91,9 +90,10 @@ internal class SakOgBehandlingServiceTest {
         coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns opprettTrygdetid()
         coEvery { vilkaarsvurderingKlient.hentVilkaarsvurdering(any(), any()) } returns opprettVilkaarsvurdering()
 
-        val behandling = runBlocking {
-            service.hentBehandling(SAK_ID, BEHANDLING_ID, BRUKERTokenInfo)
-        }
+        val behandling =
+            runBlocking {
+                service.hentBehandling(SAK_ID, BEHANDLING_ID, BRUKERTokenInfo)
+            }
 
         assertEquals(SAK_ID, behandling.sakId)
         assertEquals(BEHANDLING_ID, behandling.behandlingId)
@@ -133,9 +133,10 @@ internal class SakOgBehandlingServiceTest {
         coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns opprettTrygdetid()
         coEvery { vilkaarsvurderingKlient.hentVilkaarsvurdering(any(), any()) } returns opprettVilkaarsvurdering()
 
-        val behandling = runBlocking {
-            service.hentBehandling(SAK_ID, BEHANDLING_ID, BRUKERTokenInfo)
-        }
+        val behandling =
+            runBlocking {
+                service.hentBehandling(SAK_ID, BEHANDLING_ID, BRUKERTokenInfo)
+            }
 
         assertEquals(1, behandling.utbetalingsinfo.antallBarn)
         assertEquals(Kroner(3063), behandling.utbetalingsinfo.beloep)
@@ -143,7 +144,7 @@ internal class SakOgBehandlingServiceTest {
         assertEquals(false, behandling.utbetalingsinfo.soeskenjustering)
         assertEquals(
             listOf(BREV_BEREGNINGSPERIODE),
-            behandling.utbetalingsinfo.beregningsperioder
+            behandling.utbetalingsinfo.beregningsperioder,
         )
 
         coVerify(exactly = 1) {
@@ -167,9 +168,10 @@ internal class SakOgBehandlingServiceTest {
         coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns opprettTrygdetid()
         coEvery { vilkaarsvurderingKlient.hentVilkaarsvurdering(any(), any()) } returns opprettVilkaarsvurdering()
 
-        val behandling = runBlocking {
-            service.hentBehandling(SAK_ID, BEHANDLING_ID, BRUKERTokenInfo)
-        }
+        val behandling =
+            runBlocking {
+                service.hentBehandling(SAK_ID, BEHANDLING_ID, BRUKERTokenInfo)
+            }
 
         assertEquals(2, behandling.utbetalingsinfo.antallBarn)
         assertTrue(behandling.utbetalingsinfo.soeskenjustering)
@@ -179,60 +181,68 @@ internal class SakOgBehandlingServiceTest {
         coVerify(exactly = 1) { beregningKlient.hentBeregning(any(), any()) }
     }
 
-    private fun opprettBeregning() = mockk<BeregningDTO> {
-        every { beregningsperioder } returns listOf(
-            opprettBeregningsperiode(
-                YearMonth.now(),
-                beloep = 3063
-            )
-        )
-    }
+    private fun opprettBeregning() =
+        mockk<BeregningDTO> {
+            every { beregningsperioder } returns
+                listOf(
+                    opprettBeregningsperiode(
+                        YearMonth.now(),
+                        beloep = 3063,
+                    ),
+                )
+        }
 
-    private fun opprettBeregningSoeskenjustering() = mockk<BeregningDTO> {
-        every { beregningsperioder } returns listOf(
-            opprettBeregningsperiode(
-                YearMonth.now(),
-                beloep = 3063,
-                soeskenFlokk = listOf("barn2")
-            )
-        )
-    }
+    private fun opprettBeregningSoeskenjustering() =
+        mockk<BeregningDTO> {
+            every { beregningsperioder } returns
+                listOf(
+                    opprettBeregningsperiode(
+                        YearMonth.now(),
+                        beloep = 3063,
+                        soeskenFlokk = listOf("barn2"),
+                    ),
+                )
+        }
 
-    private fun opprettVedtak() = mockk<VedtakDto> {
-        every { sak } returns VedtakSak("ident", SakType.BARNEPENSJON, SAK_ID)
-        every { behandling.id } returns BEHANDLING_ID
-        every { behandling.revurderingsaarsak } returns null
-        every { behandling.revurderingInfo } returns null
-        every { behandling.type } returns BehandlingType.FØRSTEGANGSBEHANDLING
-        every { vedtakId } returns 123L
-        every { type } returns VedtakType.INNVILGELSE
-        every { status } returns VedtakStatus.OPPRETTET
-        every { virkningstidspunkt } returns YearMonth.now()
-        every { vedtakFattet } returns VedtakFattet(SAKSBEHANDLER_IDENT, ENHET, Tidspunkt.now())
-        every { attestasjon } returns Attestasjon(ATTESTANT_IDENT, ENHET, Tidspunkt.now())
-    }
+    private fun opprettVedtak() =
+        mockk<VedtakDto> {
+            every { sak } returns VedtakSak("ident", SakType.BARNEPENSJON, SAK_ID)
+            every { behandling.id } returns BEHANDLING_ID
+            every { behandling.revurderingsaarsak } returns null
+            every { behandling.revurderingInfo } returns null
+            every { behandling.type } returns BehandlingType.FØRSTEGANGSBEHANDLING
+            every { vedtakId } returns 123L
+            every { type } returns VedtakType.INNVILGELSE
+            every { status } returns VedtakStatus.OPPRETTET
+            every { virkningstidspunkt } returns YearMonth.now()
+            every { vedtakFattet } returns VedtakFattet(SAKSBEHANDLER_IDENT, ENHET, Tidspunkt.now())
+            every { attestasjon } returns Attestasjon(ATTESTANT_IDENT, ENHET, Tidspunkt.now())
+        }
 
-    private fun opprettGrunnlag() = GrunnlagTestData(
-        opplysningsmapSakOverrides = mapOf(
-            Opplysningstype.SPRAAK to opprettOpplysning(Spraak.NB.toJsonNode()),
-            Opplysningstype.INNSENDER_SOEKNAD_V1 to opprettOpplysning(
-                innsenderSoeknad(FNR.value).toJsonNode()
-            )
-        )
-    ).hentOpplysningsgrunnlag()
+    private fun opprettGrunnlag() =
+        GrunnlagTestData(
+            opplysningsmapSakOverrides =
+                mapOf(
+                    Opplysningstype.SPRAAK to opprettOpplysning(Spraak.NB.toJsonNode()),
+                    Opplysningstype.INNSENDER_SOEKNAD_V1 to
+                        opprettOpplysning(
+                            innsenderSoeknad(FNR.value).toJsonNode(),
+                        ),
+                ),
+        ).hentOpplysningsgrunnlag()
 
     private fun opprettOpplysning(jsonNode: JsonNode) =
         Opplysning.Konstant(
             STATISK_UUID,
             GRUNNLAGSOPPLYSNING_PDL,
-            jsonNode
+            jsonNode,
         )
 
     private fun opprettBeregningsperiode(
         fom: YearMonth,
         tom: YearMonth? = null,
         beloep: Int,
-        soeskenFlokk: List<String>? = null
+        soeskenFlokk: List<String>? = null,
     ) = Beregningsperiode(
         fom,
         tom,
@@ -241,7 +251,7 @@ internal class SakOgBehandlingServiceTest {
         null,
         1000,
         10000,
-        10
+        10,
     )
 
     private fun opprettTrygdetid() = null

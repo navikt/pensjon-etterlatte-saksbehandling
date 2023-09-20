@@ -15,7 +15,11 @@ import no.nav.etterlatte.brev.journalpost.FerdigstillJournalpostRequest
 import no.nav.etterlatte.libs.common.withFoedselsnummer
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 
-fun Route.dokumentRoute(safService: SafService, dokarkivService: DokarkivService, behandlingKlient: BehandlingKlient) {
+fun Route.dokumentRoute(
+    safService: SafService,
+    dokarkivService: DokarkivService,
+    behandlingKlient: BehandlingKlient,
+) {
     route("dokumenter") {
         post {
             withFoedselsnummer(behandlingKlient) { foedselsnummer ->
@@ -31,9 +35,10 @@ fun Route.dokumentRoute(safService: SafService, dokarkivService: DokarkivService
 
         post("{journalpostId}/ferdigstill") {
             val request = call.receive<FerdigstillJournalpostRequest>()
-            val journalpostId = requireNotNull(call.parameters["journalpostId"]) {
-                "JournalpostID er påkrevd for å kunne ferdigstille journalposten"
-            }
+            val journalpostId =
+                requireNotNull(call.parameters["journalpostId"]) {
+                    "JournalpostID er påkrevd for å kunne ferdigstille journalposten"
+                }
 
             dokarkivService.ferdigstill(journalpostId, request)
             call.respond(HttpStatusCode.OK)

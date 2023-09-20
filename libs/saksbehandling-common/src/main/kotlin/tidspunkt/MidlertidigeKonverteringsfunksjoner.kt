@@ -10,7 +10,11 @@ sia målet er å gå over til å bruke Tidspunkt ganske konsekvent
  */
 
 fun LocalDateTime.toTidspunkt(zoneId: ZoneId = standardTidssoneUTC) = Tidspunkt(atZone(zoneId).toInstant())
+
 fun LocalDateTime.toNorskTidspunkt() = toTidspunkt(zoneId = norskTidssone)
+
 fun Tidspunkt.toNorskTid(): ZonedDateTime = ZonedDateTime.ofInstant(this.instant, norskTidssone)
+
 fun Tidspunkt.toLocalDatetimeUTC(): LocalDateTime = LocalDateTime.ofInstant(this.instant, standardTidssoneUTC)
+
 fun Tidspunkt.toLocalDatetimeNorskTid(): LocalDateTime = LocalDateTime.ofInstant(this.instant, norskTidssone)

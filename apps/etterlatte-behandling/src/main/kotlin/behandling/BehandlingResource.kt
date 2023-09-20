@@ -8,11 +8,11 @@ import no.nav.etterlatte.libs.common.behandling.Utenlandstilsnitt
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.sak.Sak
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 
 data class BehandlingListe(
     val sak: Sak,
-    val behandlinger: List<BehandlingSammendrag>
+    val behandlinger: List<BehandlingSammendrag>,
 )
 
 data class BehandlingSammendrag(
@@ -26,5 +26,5 @@ data class BehandlingSammendrag(
     val aarsak: String?,
     val virkningstidspunkt: Virkningstidspunkt?,
     val utenlandstilsnitt: Utenlandstilsnitt?,
-    val boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet?
+    val boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet?,
 )

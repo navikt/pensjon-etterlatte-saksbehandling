@@ -17,7 +17,7 @@ import java.sql.ResultSet
 import java.sql.Statement
 import java.time.LocalTime
 import java.time.YearMonth
-import java.util.*
+import java.util.UUID
 import javax.sql.DataSource
 
 class StoenadRepository(private val datasource: DataSource) {
@@ -38,7 +38,7 @@ class StoenadRepository(private val datasource: DataSource) {
                     sakNummer, tekniskTid, sakYtelse, versjon, saksbehandler, attestant, vedtakLoependeFom, 
                     vedtakLoependeTom, beregning, avkorting, vedtakType, sak_utland, virkningstidspunkt, utbetalingsdato
                 FROM stoenad
-                """.trimIndent()
+                """.trimIndent(),
             ).executeQuery().toList {
                 asStoenadRad()
             }
@@ -52,7 +52,7 @@ class StoenadRepository(private val datasource: DataSource) {
                 SELECT * FROM stoenad 
                 WHERE vedtakLoependeFom <= ? AND COALESCE(vedtakLoependeTom, ?) >= ? 
                     AND tekniskTid <= ?
-                """.trimIndent()
+                """.trimIndent(),
             ).apply {
                 setDate(1, Date.valueOf(maaned.atEndOfMonth()))
                 setDate(2, Date.valueOf(maaned.atEndOfMonth()))
@@ -72,7 +72,7 @@ class StoenadRepository(private val datasource: DataSource) {
                     vedtakLoependeFom, vedtakLoependeTom, statistikkMaaned, sak_utland,
                     virkningstidspunkt, utbetalingsdato, avkortingsbeloep, aarsinntekt
                 ) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                """.trimIndent()
+                """.trimIndent(),
             ).apply {
                 setString(1, maanedStatistikkRad.fnrSoeker)
                 setJsonb(2, maanedStatistikkRad.fnrForeldre)
@@ -102,21 +102,22 @@ class StoenadRepository(private val datasource: DataSource) {
 
     fun lagreStoenadsrad(stoenadsrad: StoenadRad): StoenadRad? {
         connection.use { conn ->
-            val (statement, insertedRows) = conn.prepareStatement(
-                """
-                INSERT INTO stoenad(
-                    fnrSoeker, fnrForeldre, fnrSoesken, anvendtTrygdetid, nettoYtelse, beregningType, anvendtSats, 
-                    behandlingId, sakId, sakNummer, tekniskTid, sakYtelse, versjon, saksbehandler, attestant, 
-                    vedtakLoependeFom, vedtakLoependeTom, beregning, avkorting, vedtakType, sak_utland,
-                     virkningstidspunkt, utbetalingsdato
-                ) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                """.trimIndent(),
-                Statement.RETURN_GENERATED_KEYS
-            ).apply {
-                setStoenadRad(stoenadsrad)
-            }.let {
-                it to it.executeUpdate()
-            }
+            val (statement, insertedRows) =
+                conn.prepareStatement(
+                    """
+                    INSERT INTO stoenad(
+                        fnrSoeker, fnrForeldre, fnrSoesken, anvendtTrygdetid, nettoYtelse, beregningType, anvendtSats, 
+                        behandlingId, sakId, sakNummer, tekniskTid, sakYtelse, versjon, saksbehandler, attestant, 
+                        vedtakLoependeFom, vedtakLoependeTom, beregning, avkorting, vedtakType, sak_utland,
+                         virkningstidspunkt, utbetalingsdato
+                    ) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    """.trimIndent(),
+                    Statement.RETURN_GENERATED_KEYS,
+                ).apply {
+                    setStoenadRad(stoenadsrad)
+                }.let {
+                    it to it.executeUpdate()
+                }
             if (insertedRows == 0) {
                 return null
             }
@@ -136,7 +137,7 @@ class StoenadRepository(private val datasource: DataSource) {
                 SELECT id, statistikkMaaned, kjoertStatus, raderRegistrert, raderMedFeil 
                 FROM maanedsstatistikk_job 
                 WHERE statistikkMaaned = ?
-                """.trimIndent()
+                """.trimIndent(),
             )
                 .apply {
                     setString(1, maaned.toString())
@@ -147,7 +148,7 @@ class StoenadRepository(private val datasource: DataSource) {
                         statistikkMaaned = YearMonth.parse(getString("statistikkMaaned")),
                         kjoertStatus = KjoertStatus.valueOf(getString("kjoertStatus")),
                         raderRegistrert = getLong("raderRegistrert"),
-                        raderMedFeil = getLong("raderMedFeil")
+                        raderMedFeil = getLong("raderMedFeil"),
                     )
                 }.map { it.kjoertStatus }.toSet()
                 .let {
@@ -165,19 +166,20 @@ class StoenadRepository(private val datasource: DataSource) {
     fun lagreMaanedJobUtfoert(
         maaned: YearMonth,
         raderMedFeil: Long,
-        raderRegistrert: Long
+        raderRegistrert: Long,
     ) {
-        val kjoertStatus = when (raderMedFeil) {
-            0L -> KjoertStatus.INGEN_FEIL
-            else -> KjoertStatus.FEIL
-        }
+        val kjoertStatus =
+            when (raderMedFeil) {
+                0L -> KjoertStatus.INGEN_FEIL
+                else -> KjoertStatus.FEIL
+            }
         connection.use {
             it.prepareStatement(
                 """
                 INSERT INTO maanedsstatistikk_job (
                     statistikkMaaned, kjoertStatus, raderRegistrert, raderMedFeil
                 ) VALUES (?, ?, ?, ?)
-                """.trimIndent()
+                """.trimIndent(),
             )
                 .apply {
                     setString(1, maaned.toString())
@@ -194,14 +196,19 @@ data class MaanedstatistikkJobExecution(
     val statistikkMaaned: YearMonth,
     val kjoertStatus: KjoertStatus,
     val raderRegistrert: Long,
-    val raderMedFeil: Long
+    val raderMedFeil: Long,
 )
 
 enum class KjoertStatus {
-    INGEN_FEIL, FEIL, IKKE_KJOERT
+    INGEN_FEIL,
+    FEIL,
+    IKKE_KJOERT,
 }
 
-inline fun <reified T> PreparedStatement.setJsonb(parameterIndex: Int, jsonb: T): PreparedStatement {
+inline fun <reified T> PreparedStatement.setJsonb(
+    parameterIndex: Int,
+    jsonb: T,
+): PreparedStatement {
     val jsonObject = PGobject()
     jsonObject.type = "json"
     jsonObject.value = objectMapper.writeValueAsString(jsonb)
@@ -209,55 +216,57 @@ inline fun <reified T> PreparedStatement.setJsonb(parameterIndex: Int, jsonb: T)
     return this
 }
 
-private fun PreparedStatement.setStoenadRad(stoenadsrad: StoenadRad): PreparedStatement = this.apply {
-    setString(1, stoenadsrad.fnrSoeker)
-    setJsonb(2, stoenadsrad.fnrForeldre)
-    setJsonb(3, stoenadsrad.fnrSoesken)
-    setString(4, stoenadsrad.anvendtTrygdetid)
-    setString(5, stoenadsrad.nettoYtelse)
-    setString(6, stoenadsrad.beregningType)
-    setString(7, stoenadsrad.anvendtSats)
-    setObject(8, stoenadsrad.behandlingId)
-    setLong(9, stoenadsrad.sakId)
-    setLong(10, stoenadsrad.sakId)
-    setTidspunkt(11, stoenadsrad.tekniskTid)
-    setString(12, stoenadsrad.sakYtelse)
-    setString(13, stoenadsrad.versjon)
-    setString(14, stoenadsrad.saksbehandler)
-    setString(15, stoenadsrad.attestant)
-    setDate(16, Date.valueOf(stoenadsrad.vedtakLoependeFom))
-    setDate(17, stoenadsrad.vedtakLoependeTom?.let { Date.valueOf(it) })
-    setJsonb(18, stoenadsrad.beregning)
-    setJsonb(19, stoenadsrad.avkorting)
-    setString(20, stoenadsrad.vedtakType?.toString())
-    setString(21, stoenadsrad.sakUtland?.toString())
-    setDate(22, Date.valueOf(stoenadsrad.virkningstidspunkt?.atDay(1)))
-    setDate(23, stoenadsrad.utbetalingsdato?.let { Date.valueOf(it) })
-}
+private fun PreparedStatement.setStoenadRad(stoenadsrad: StoenadRad): PreparedStatement =
+    this.apply {
+        setString(1, stoenadsrad.fnrSoeker)
+        setJsonb(2, stoenadsrad.fnrForeldre)
+        setJsonb(3, stoenadsrad.fnrSoesken)
+        setString(4, stoenadsrad.anvendtTrygdetid)
+        setString(5, stoenadsrad.nettoYtelse)
+        setString(6, stoenadsrad.beregningType)
+        setString(7, stoenadsrad.anvendtSats)
+        setObject(8, stoenadsrad.behandlingId)
+        setLong(9, stoenadsrad.sakId)
+        setLong(10, stoenadsrad.sakId)
+        setTidspunkt(11, stoenadsrad.tekniskTid)
+        setString(12, stoenadsrad.sakYtelse)
+        setString(13, stoenadsrad.versjon)
+        setString(14, stoenadsrad.saksbehandler)
+        setString(15, stoenadsrad.attestant)
+        setDate(16, Date.valueOf(stoenadsrad.vedtakLoependeFom))
+        setDate(17, stoenadsrad.vedtakLoependeTom?.let { Date.valueOf(it) })
+        setJsonb(18, stoenadsrad.beregning)
+        setJsonb(19, stoenadsrad.avkorting)
+        setString(20, stoenadsrad.vedtakType?.toString())
+        setString(21, stoenadsrad.sakUtland?.toString())
+        setDate(22, Date.valueOf(stoenadsrad.virkningstidspunkt?.atDay(1)))
+        setDate(23, stoenadsrad.utbetalingsdato?.let { Date.valueOf(it) })
+    }
 
-private fun ResultSet.asStoenadRad(): StoenadRad = StoenadRad(
-    id = getLong("id"),
-    fnrSoeker = getString("fnrSoeker"),
-    fnrForeldre = objectMapper.readValue(getString("fnrForeldre"), Array<String>::class.java).toList(),
-    fnrSoesken = objectMapper.readValue(getString("fnrSoesken"), Array<String>::class.java).toList(),
-    anvendtTrygdetid = getString("anvendtTrygdetid"),
-    nettoYtelse = getString("nettoYtelse"),
-    beregningType = getString("beregningType"),
-    anvendtSats = getString("anvendtSats"),
-    behandlingId = getObject("behandlingId") as UUID,
-    sakId = getLong("sakId"),
-    sakNummer = getLong("sakNummer"),
-    tekniskTid = getTimestamp("tekniskTid").toTidspunkt(),
-    sakYtelse = getString("sakYtelse"),
-    versjon = getString("versjon"),
-    saksbehandler = getString("saksbehandler"),
-    attestant = getString("attestant"),
-    vedtakLoependeFom = getDate("vedtakLoependeFom").toLocalDate(),
-    vedtakLoependeTom = getDate("vedtakLoependeTom")?.toLocalDate(),
-    beregning = getString("beregning")?.let { objectMapper.readValue(it) },
-    avkorting = getString("avkorting")?.let { objectMapper.readValue(it) },
-    vedtakType = getString("vedtakType")?.let { enumValueOf<VedtakType>(it) },
-    sakUtland = getString("sak_utland")?.let { enumValueOf<SakUtland>(it) },
-    virkningstidspunkt = getDate("virkningstidspunkt")?.toLocalDate()?.let { YearMonth.of(it.year, it.monthValue) },
-    utbetalingsdato = getDate("utbetalingsdato")?.toLocalDate()
-)
+private fun ResultSet.asStoenadRad(): StoenadRad =
+    StoenadRad(
+        id = getLong("id"),
+        fnrSoeker = getString("fnrSoeker"),
+        fnrForeldre = objectMapper.readValue(getString("fnrForeldre"), Array<String>::class.java).toList(),
+        fnrSoesken = objectMapper.readValue(getString("fnrSoesken"), Array<String>::class.java).toList(),
+        anvendtTrygdetid = getString("anvendtTrygdetid"),
+        nettoYtelse = getString("nettoYtelse"),
+        beregningType = getString("beregningType"),
+        anvendtSats = getString("anvendtSats"),
+        behandlingId = getObject("behandlingId") as UUID,
+        sakId = getLong("sakId"),
+        sakNummer = getLong("sakNummer"),
+        tekniskTid = getTimestamp("tekniskTid").toTidspunkt(),
+        sakYtelse = getString("sakYtelse"),
+        versjon = getString("versjon"),
+        saksbehandler = getString("saksbehandler"),
+        attestant = getString("attestant"),
+        vedtakLoependeFom = getDate("vedtakLoependeFom").toLocalDate(),
+        vedtakLoependeTom = getDate("vedtakLoependeTom")?.toLocalDate(),
+        beregning = getString("beregning")?.let { objectMapper.readValue(it) },
+        avkorting = getString("avkorting")?.let { objectMapper.readValue(it) },
+        vedtakType = getString("vedtakType")?.let { enumValueOf<VedtakType>(it) },
+        sakUtland = getString("sak_utland")?.let { enumValueOf<SakUtland>(it) },
+        virkningstidspunkt = getDate("virkningstidspunkt")?.toLocalDate()?.let { YearMonth.of(it.year, it.monthValue) },
+        utbetalingsdato = getDate("utbetalingsdato")?.toLocalDate(),
+    )

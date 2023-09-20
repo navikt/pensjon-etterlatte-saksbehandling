@@ -26,25 +26,28 @@ class Server(private val context: ApplicationContext) {
         sikkerLoggOppstartOgAvslutning("etterlatte-vilkaarsvurdering")
     }
 
-    private val engine = with(context) {
-        embeddedServer(
-            factory = CIO,
-            environment = applicationEngineEnvironment {
-                config = HoconApplicationConfig(context.config)
-                module {
-                    restModule(sikkerLogg, withMetrics = true) {
-                        vilkaarsvurdering(vilkaarsvurderingService, behandlingKlient)
-                        migrering(migreringService, behandlingKlient, vilkaarsvurderingService)
-                    }
-                }
-                connector { port = properties.httpPort }
-            }
-        )
-    }
+    private val engine =
+        with(context) {
+            embeddedServer(
+                factory = CIO,
+                environment =
+                    applicationEngineEnvironment {
+                        config = HoconApplicationConfig(context.config)
+                        module {
+                            restModule(sikkerLogg, withMetrics = true) {
+                                vilkaarsvurdering(vilkaarsvurderingService, behandlingKlient)
+                                migrering(migreringService, behandlingKlient, vilkaarsvurderingService)
+                            }
+                        }
+                        connector { port = properties.httpPort }
+                    },
+            )
+        }
 
-    fun run() = with(context) {
-        dataSource.migrate()
-        setReady()
-        engine.start(true)
-    }
+    fun run() =
+        with(context) {
+            dataSource.migrate()
+            setReady()
+            engine.start(true)
+        }
 }

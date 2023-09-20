@@ -42,10 +42,9 @@ import org.junit.jupiter.api.Test
 import java.sql.Connection
 import java.time.LocalDateTime
 import java.time.YearMonth
-import java.util.*
+import java.util.UUID
 
 internal class GyldighetsproevingServiceImplTest {
-
     private val user = mockk<SaksbehandlerMedEnheterOgRoller>()
     private val sakDaoMock = mockk<SakDao>()
     private val behandlingDaoMock = mockk<BehandlingDao>()
@@ -53,11 +52,12 @@ internal class GyldighetsproevingServiceImplTest {
     private val behandlingHendelserKafkaProducerMock = mockk<BehandlingHendelserKafkaProducer>()
     private val featureToggleService = mockk<FeatureToggleService>()
     private val naaTid = Tidspunkt.now()
-    private val behandlingsService = GyldighetsproevingServiceImpl(
-        behandlingDaoMock,
-        featureToggleService,
-        naaTid.fixedNorskTid()
-    )
+    private val behandlingsService =
+        GyldighetsproevingServiceImpl(
+            behandlingDaoMock,
+            featureToggleService,
+            naaTid.fixedNorskTid(),
+        )
 
     @BeforeEach
     fun before() {
@@ -69,11 +69,14 @@ internal class GyldighetsproevingServiceImplTest {
                         throw IllegalArgumentException()
                     }
 
-                    override fun <T> inTransaction(gjenbruk: Boolean, block: () -> T): T {
+                    override fun <T> inTransaction(
+                        gjenbruk: Boolean,
+                        block: () -> T,
+                    ): T {
                         return block()
                     }
-                }
-            )
+                },
+            ),
         )
     }
 
@@ -91,29 +94,32 @@ internal class GyldighetsproevingServiceImplTest {
 
         every {
             behandlingDaoMock.hentBehandling(id)
-        } returns Foerstegangsbehandling(
-            id = id,
-            sak = Sak(
-                ident = "Ola Olsen",
-                sakType = SakType.BARNEPENSJON,
-                id = 1,
-                enhet = Enheter.defaultEnhet.enhetNr
-            ),
-            behandlingOpprettet = Tidspunkt.now().toLocalDatetimeUTC(),
-            sistEndret = Tidspunkt.now().toLocalDatetimeUTC(),
-            status = BehandlingStatus.OPPRETTET,
-            soeknadMottattDato = Tidspunkt.now().toLocalDatetimeUTC(),
-            gyldighetsproeving = null,
-            virkningstidspunkt = Virkningstidspunkt(
-                YearMonth.of(2022, 1),
-                Grunnlagsopplysning.Saksbehandler.create("ident"),
-                "begrunnelse"
-            ),
-            utenlandstilsnitt = null,
-            boddEllerArbeidetUtlandet = null,
-            kommerBarnetTilgode = null,
-            kilde = Vedtaksloesning.GJENNY
-        )
+        } returns
+            Foerstegangsbehandling(
+                id = id,
+                sak =
+                    Sak(
+                        ident = "Ola Olsen",
+                        sakType = SakType.BARNEPENSJON,
+                        id = 1,
+                        enhet = Enheter.defaultEnhet.enhetNr,
+                    ),
+                behandlingOpprettet = Tidspunkt.now().toLocalDatetimeUTC(),
+                sistEndret = Tidspunkt.now().toLocalDatetimeUTC(),
+                status = BehandlingStatus.OPPRETTET,
+                soeknadMottattDato = Tidspunkt.now().toLocalDatetimeUTC(),
+                gyldighetsproeving = null,
+                virkningstidspunkt =
+                    Virkningstidspunkt(
+                        YearMonth.of(2022, 1),
+                        Grunnlagsopplysning.Saksbehandler.create("ident"),
+                        "begrunnelse",
+                    ),
+                utenlandstilsnitt = null,
+                boddEllerArbeidetUtlandet = null,
+                kommerBarnetTilgode = null,
+                kilde = Vedtaksloesning.GJENNY,
+            )
 
         behandlingsService.hentFoerstegangsbehandling(id)
 
@@ -125,47 +131,52 @@ internal class GyldighetsproevingServiceImplTest {
         val id = UUID.randomUUID()
         val now = LocalDateTime.now()
 
-        val behandling = Foerstegangsbehandling(
-            id = id,
-            sak = Sak("", SakType.BARNEPENSJON, 1, Enheter.PORSGRUNN.enhetNr),
-            behandlingOpprettet = now,
-            sistEndret = now,
-            status = BehandlingStatus.OPPRETTET,
-            kommerBarnetTilgode = null,
-            virkningstidspunkt = null,
-            boddEllerArbeidetUtlandet = null,
-            utenlandstilsnitt = null,
-            soeknadMottattDato = now,
-            gyldighetsproeving = null,
-            prosesstype = Prosesstype.MANUELL,
-            kilde = Vedtaksloesning.GJENNY
-        )
+        val behandling =
+            Foerstegangsbehandling(
+                id = id,
+                sak = Sak("", SakType.BARNEPENSJON, 1, Enheter.PORSGRUNN.enhetNr),
+                behandlingOpprettet = now,
+                sistEndret = now,
+                status = BehandlingStatus.OPPRETTET,
+                kommerBarnetTilgode = null,
+                virkningstidspunkt = null,
+                boddEllerArbeidetUtlandet = null,
+                utenlandstilsnitt = null,
+                soeknadMottattDato = now,
+                gyldighetsproeving = null,
+                prosesstype = Prosesstype.MANUELL,
+                kilde = Vedtaksloesning.GJENNY,
+            )
         every { behandlingDaoMock.hentBehandling(any()) } returns behandling
 
         every { behandlingDaoMock.lagreGyldighetsproving(any()) } just Runs
 
         every { featureToggleService.isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false) } returns false
 
-        val forventetResultat = GyldighetsResultat(
-            resultat = VurderingsResultat.OPPFYLT,
-            vurderinger = listOf(
-                VurdertGyldighet(
-                    navn = GyldighetsTyper.INNSENDER_ER_GJENLEVENDE,
-                    resultat = VurderingsResultat.OPPFYLT,
-                    basertPaaOpplysninger = ManuellVurdering(
-                        begrunnelse = "begrunnelse",
-                        kilde = Grunnlagsopplysning.Saksbehandler("saksbehandler", naaTid)
-                    )
-                )
-            ),
-            vurdertDato = naaTid.toLocalDatetimeNorskTid()
-        )
+        val forventetResultat =
+            GyldighetsResultat(
+                resultat = VurderingsResultat.OPPFYLT,
+                vurderinger =
+                    listOf(
+                        VurdertGyldighet(
+                            navn = GyldighetsTyper.INNSENDER_ER_GJENLEVENDE,
+                            resultat = VurderingsResultat.OPPFYLT,
+                            basertPaaOpplysninger =
+                                ManuellVurdering(
+                                    begrunnelse = "begrunnelse",
+                                    kilde = Grunnlagsopplysning.Saksbehandler("saksbehandler", naaTid),
+                                ),
+                        ),
+                    ),
+                vurdertDato = naaTid.toLocalDatetimeNorskTid(),
+            )
 
-        val resultat = behandlingsService.lagreGyldighetsproeving(
-            id,
-            "saksbehandler",
-            JaNeiMedBegrunnelse(JaNei.JA, "begrunnelse")
-        )
+        val resultat =
+            behandlingsService.lagreGyldighetsproeving(
+                id,
+                "saksbehandler",
+                JaNeiMedBegrunnelse(JaNei.JA, "begrunnelse"),
+            )
 
         assertEquals(forventetResultat, resultat)
 
@@ -183,29 +194,32 @@ internal class GyldighetsproevingServiceImplTest {
 
         every {
             behandlingDaoMock.hentBehandling(id)
-        } returns Foerstegangsbehandling(
-            id = id,
-            sak = Sak(
-                ident = "Ola Olsen",
-                sakType = SakType.BARNEPENSJON,
-                id = 1,
-                enhet = Enheter.PORSGRUNN.enhetNr
-            ),
-            behandlingOpprettet = Tidspunkt.now().toLocalDatetimeUTC(),
-            sistEndret = Tidspunkt.now().toLocalDatetimeUTC(),
-            status = BehandlingStatus.OPPRETTET,
-            soeknadMottattDato = Tidspunkt.now().toLocalDatetimeUTC(),
-            gyldighetsproeving = null,
-            virkningstidspunkt = Virkningstidspunkt(
-                YearMonth.of(2022, 1),
-                Grunnlagsopplysning.Saksbehandler.create("ident"),
-                "begrunnelse"
-            ),
-            utenlandstilsnitt = null,
-            boddEllerArbeidetUtlandet = null,
-            kommerBarnetTilgode = null,
-            kilde = Vedtaksloesning.GJENNY
-        )
+        } returns
+            Foerstegangsbehandling(
+                id = id,
+                sak =
+                    Sak(
+                        ident = "Ola Olsen",
+                        sakType = SakType.BARNEPENSJON,
+                        id = 1,
+                        enhet = Enheter.PORSGRUNN.enhetNr,
+                    ),
+                behandlingOpprettet = Tidspunkt.now().toLocalDatetimeUTC(),
+                sistEndret = Tidspunkt.now().toLocalDatetimeUTC(),
+                status = BehandlingStatus.OPPRETTET,
+                soeknadMottattDato = Tidspunkt.now().toLocalDatetimeUTC(),
+                gyldighetsproeving = null,
+                virkningstidspunkt =
+                    Virkningstidspunkt(
+                        YearMonth.of(2022, 1),
+                        Grunnlagsopplysning.Saksbehandler.create("ident"),
+                        "begrunnelse",
+                    ),
+                utenlandstilsnitt = null,
+                boddEllerArbeidetUtlandet = null,
+                kommerBarnetTilgode = null,
+                kilde = Vedtaksloesning.GJENNY,
+            )
 
         behandlingsService.hentFoerstegangsbehandling(id)
 
@@ -224,29 +238,32 @@ internal class GyldighetsproevingServiceImplTest {
 
         every {
             behandlingDaoMock.hentBehandling(id)
-        } returns Foerstegangsbehandling(
-            id = id,
-            sak = Sak(
-                ident = "Ola Olsen",
-                sakType = SakType.BARNEPENSJON,
-                id = 1,
-                enhet = Enheter.PORSGRUNN.enhetNr
-            ),
-            behandlingOpprettet = Tidspunkt.now().toLocalDatetimeUTC(),
-            sistEndret = Tidspunkt.now().toLocalDatetimeUTC(),
-            status = BehandlingStatus.OPPRETTET,
-            soeknadMottattDato = Tidspunkt.now().toLocalDatetimeUTC(),
-            gyldighetsproeving = null,
-            virkningstidspunkt = Virkningstidspunkt(
-                YearMonth.of(2022, 1),
-                Grunnlagsopplysning.Saksbehandler.create("ident"),
-                "begrunnelse"
-            ),
-            utenlandstilsnitt = null,
-            boddEllerArbeidetUtlandet = null,
-            kommerBarnetTilgode = null,
-            kilde = Vedtaksloesning.GJENNY
-        )
+        } returns
+            Foerstegangsbehandling(
+                id = id,
+                sak =
+                    Sak(
+                        ident = "Ola Olsen",
+                        sakType = SakType.BARNEPENSJON,
+                        id = 1,
+                        enhet = Enheter.PORSGRUNN.enhetNr,
+                    ),
+                behandlingOpprettet = Tidspunkt.now().toLocalDatetimeUTC(),
+                sistEndret = Tidspunkt.now().toLocalDatetimeUTC(),
+                status = BehandlingStatus.OPPRETTET,
+                soeknadMottattDato = Tidspunkt.now().toLocalDatetimeUTC(),
+                gyldighetsproeving = null,
+                virkningstidspunkt =
+                    Virkningstidspunkt(
+                        YearMonth.of(2022, 1),
+                        Grunnlagsopplysning.Saksbehandler.create("ident"),
+                        "begrunnelse",
+                    ),
+                utenlandstilsnitt = null,
+                boddEllerArbeidetUtlandet = null,
+                kommerBarnetTilgode = null,
+                kilde = Vedtaksloesning.GJENNY,
+            )
 
         behandlingsService.hentFoerstegangsbehandling(id)
 
@@ -265,29 +282,32 @@ internal class GyldighetsproevingServiceImplTest {
 
         every {
             behandlingDaoMock.hentBehandling(id)
-        } returns Foerstegangsbehandling(
-            id = id,
-            sak = Sak(
-                ident = "Ola Olsen",
-                sakType = SakType.BARNEPENSJON,
-                id = 1,
-                enhet = Enheter.PORSGRUNN.enhetNr
-            ),
-            behandlingOpprettet = Tidspunkt.now().toLocalDatetimeUTC(),
-            sistEndret = Tidspunkt.now().toLocalDatetimeUTC(),
-            status = BehandlingStatus.OPPRETTET,
-            soeknadMottattDato = Tidspunkt.now().toLocalDatetimeUTC(),
-            gyldighetsproeving = null,
-            virkningstidspunkt = Virkningstidspunkt(
-                YearMonth.of(2022, 1),
-                Grunnlagsopplysning.Saksbehandler.create("ident"),
-                "begrunnelse"
-            ),
-            utenlandstilsnitt = null,
-            boddEllerArbeidetUtlandet = null,
-            kommerBarnetTilgode = null,
-            kilde = Vedtaksloesning.GJENNY
-        )
+        } returns
+            Foerstegangsbehandling(
+                id = id,
+                sak =
+                    Sak(
+                        ident = "Ola Olsen",
+                        sakType = SakType.BARNEPENSJON,
+                        id = 1,
+                        enhet = Enheter.PORSGRUNN.enhetNr,
+                    ),
+                behandlingOpprettet = Tidspunkt.now().toLocalDatetimeUTC(),
+                sistEndret = Tidspunkt.now().toLocalDatetimeUTC(),
+                status = BehandlingStatus.OPPRETTET,
+                soeknadMottattDato = Tidspunkt.now().toLocalDatetimeUTC(),
+                gyldighetsproeving = null,
+                virkningstidspunkt =
+                    Virkningstidspunkt(
+                        YearMonth.of(2022, 1),
+                        Grunnlagsopplysning.Saksbehandler.create("ident"),
+                        "begrunnelse",
+                    ),
+                utenlandstilsnitt = null,
+                boddEllerArbeidetUtlandet = null,
+                kommerBarnetTilgode = null,
+                kilde = Vedtaksloesning.GJENNY,
+            )
 
         assertNull(behandlingsService.hentFoerstegangsbehandling(id))
 

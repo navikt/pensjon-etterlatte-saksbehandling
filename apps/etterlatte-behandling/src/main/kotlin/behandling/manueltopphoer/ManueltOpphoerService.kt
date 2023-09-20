@@ -1,6 +1,5 @@
 package no.nav.etterlatte.behandling.manueltopphoer
 
-import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.BehandlingHendelseType
@@ -28,13 +27,12 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.oppgaveny.OppgaveServiceNy
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import java.util.*
+import java.util.UUID
 
 interface ManueltOpphoerService {
     fun hentManueltOpphoer(behandlingId: UUID): ManueltOpphoer?
-    fun opprettManueltOpphoer(
-        opphoerRequest: ManueltOpphoerRequest
-    ): ManueltOpphoer?
+
+    fun opprettManueltOpphoer(opphoerRequest: ManueltOpphoerRequest): ManueltOpphoer?
 
     fun registrerVedtakHendelse(
         behandling: UUID,
@@ -43,7 +41,7 @@ interface ManueltOpphoerService {
         inntruffet: Tidspunkt,
         saksbehandler: String?,
         kommentar: String?,
-        begrunnelse: String?
+        begrunnelse: String?,
     )
 
     fun hentManueltOpphoerInTransaction(behandlingId: UUID): ManueltOpphoer?
@@ -57,30 +55,26 @@ class RealManueltOpphoerService(
     private val behandlingHendelser: BehandlingHendelserKafkaProducer,
     private val hendelseDao: HendelseDao,
     private val grunnlagService: GrunnlagService,
-    private val featureToggleService: FeatureToggleService
+    private val featureToggleService: FeatureToggleService,
 ) : ManueltOpphoerService {
     val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
     override fun hentManueltOpphoer(behandlingId: UUID): ManueltOpphoer? =
         (behandlingDao.hentBehandling(behandlingId) as? ManueltOpphoer?).sjekkEnhet()
 
-    override fun hentManueltOpphoerInTransaction(behandlingId: UUID): ManueltOpphoer? =
-        inTransaction { hentManueltOpphoer(behandlingId) }
+    override fun hentManueltOpphoerInTransaction(behandlingId: UUID): ManueltOpphoer? = inTransaction { hentManueltOpphoer(behandlingId) }
 
-    override fun hentManueltOpphoerOgAlleIverksatteBehandlingerISak(
-        behandlingId: UUID
-    ): Pair<ManueltOpphoer, List<Behandling>>? =
+    override fun hentManueltOpphoerOgAlleIverksatteBehandlingerISak(behandlingId: UUID): Pair<ManueltOpphoer, List<Behandling>>? =
         inTransaction {
             hentManueltOpphoer(behandlingId)?.let { opphoer ->
-                val andreBehandlinger = behandlingDao.alleBehandlingerISak(opphoer.sak.id)
-                    .filter { it.id != behandlingId && it.status == BehandlingStatus.IVERKSATT }
+                val andreBehandlinger =
+                    behandlingDao.alleBehandlingerISak(opphoer.sak.id)
+                        .filter { it.id != behandlingId && it.status == BehandlingStatus.IVERKSATT }
                 opphoer to andreBehandlinger
             }
         }
 
-    override fun opprettManueltOpphoer(
-        opphoerRequest: ManueltOpphoerRequest
-    ): ManueltOpphoer? {
+    override fun opprettManueltOpphoer(opphoerRequest: ManueltOpphoerRequest): ManueltOpphoer? {
         return inTransaction {
             val alleBehandlingerISak = behandlingDao.alleBehandlingerISak(opphoerRequest.sakId).filterForEnheter()
             val forrigeBehandling = alleBehandlingerISak.sisteIkkeAvbrutteBehandling()
@@ -89,21 +83,22 @@ class RealManueltOpphoerService(
             if (virkningstidspunkt == null) {
                 logger.warn(
                     "Saken med id=${opphoerRequest.sakId} har ikke noe tidligste iverksatt virkningstidspunkt, " +
-                        "så det er ingenting å opphøre."
+                        "så det er ingenting å opphøre.",
                 )
                 return@inTransaction null
             }
 
             when (forrigeBehandling) {
-                is Foerstegangsbehandling, is Revurdering -> OpprettBehandling(
-                    type = BehandlingType.MANUELT_OPPHOER,
-                    sakId = forrigeBehandling.sak.id,
-                    status = BehandlingStatus.OPPRETTET,
-                    opphoerAarsaker = opphoerRequest.opphoerAarsaker,
-                    fritekstAarsak = opphoerRequest.fritekstAarsak,
-                    virkningstidspunkt = virkningstidspunkt,
-                    kilde = Vedtaksloesning.GJENNY
-                )
+                is Foerstegangsbehandling, is Revurdering ->
+                    OpprettBehandling(
+                        type = BehandlingType.MANUELT_OPPHOER,
+                        sakId = forrigeBehandling.sak.id,
+                        status = BehandlingStatus.OPPRETTET,
+                        opphoerAarsaker = opphoerRequest.opphoerAarsaker,
+                        fritekstAarsak = opphoerRequest.fritekstAarsak,
+                        virkningstidspunkt = virkningstidspunkt,
+                        kilde = Vedtaksloesning.GJENNY,
+                    )
 
                 is ManueltOpphoer -> {
                     logger.error("Kan ikke manuelt opphøre et manuelt opphør.")
@@ -124,14 +119,14 @@ class RealManueltOpphoerService(
                     sakId = opphoerRequest.sakId,
                     oppgaveKilde = OppgaveKilde.BEHANDLING,
                     oppgaveType = OppgaveType.MANUELT_OPPHOER,
-                    merknad = null
+                    merknad = null,
                 )
                 (behandlingDao.hentBehandling(id) as ManueltOpphoer).sjekkEnhet()
             }
         }?.also { lagretManueltOpphoer ->
             behandlingHendelser.sendMeldingForHendelse(
                 lagretManueltOpphoer,
-                BehandlingHendelseType.OPPRETTET
+                BehandlingHendelseType.OPPRETTET,
             )
             logger.info("Manuelt opphør med id=${lagretManueltOpphoer.id} er opprettet.")
         }
@@ -144,7 +139,7 @@ class RealManueltOpphoerService(
         inntruffet: Tidspunkt,
         saksbehandler: String?,
         kommentar: String?,
-        begrunnelse: String?
+        begrunnelse: String?,
     ) {
         hentManueltOpphoer(behandling)?.let { manueltOpphoer ->
             registrerVedtakHendelseFelles(
@@ -155,7 +150,7 @@ class RealManueltOpphoerService(
                 kommentar = kommentar,
                 begrunnelse = begrunnelse,
                 lagretBehandling = manueltOpphoer,
-                hendelser = hendelseDao
+                hendelser = hendelseDao,
             )
         }
     }
@@ -164,12 +159,14 @@ class RealManueltOpphoerService(
         this.sortedByDescending { it.behandlingOpprettet }
             .firstOrNull { it.status in BehandlingStatus.ikkeAvbrutt() }
 
-    private fun <T : Behandling> List<T>.filterForEnheter() = this.filterBehandlingerForEnheter(
-        featureToggleService,
-        Kontekst.get().AppUser
-    )
+    private fun <T : Behandling> List<T>.filterForEnheter() =
+        this.filterBehandlingerForEnheter(
+            featureToggleService,
+            Kontekst.get().AppUser,
+        )
 
-    private fun ManueltOpphoer?.sjekkEnhet() = this?.let { behandling ->
-        listOf(behandling).filterForEnheter().firstOrNull()
-    }
+    private fun ManueltOpphoer?.sjekkEnhet() =
+        this?.let { behandling ->
+            listOf(behandling).filterForEnheter().firstOrNull()
+        }
 }

@@ -32,7 +32,7 @@ import java.time.LocalDate
 internal fun Route.sakSystemRoutes(
     tilgangService: TilgangService,
     sakService: SakService,
-    behandlingService: BehandlingService
+    behandlingService: BehandlingService,
 ) {
     val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -45,17 +45,19 @@ internal fun Route.sakSystemRoutes(
 
         route("/{$SAKID_CALL_PARAMETER}") {
             get {
-                val sak = inTransaction {
-                    sakService.finnSak(sakId)
-                }
+                val sak =
+                    inTransaction {
+                        sakService.finnSak(sakId)
+                    }
                 call.respond(sak ?: HttpStatusCode.NotFound)
             }
 
             get("/behandlinger/sisteIverksatte") {
                 logger.info("Henter siste iverksatte behandling for $sakId")
 
-                val sisteIverksatteBehandling = behandlingService.hentSisteIverksatte(sakId)
-                    ?.let { SisteIverksatteBehandling(it.id) }
+                val sisteIverksatteBehandling =
+                    behandlingService.hentSisteIverksatte(sakId)
+                        ?.let { SisteIverksatteBehandling(it.id) }
 
                 call.respond(sisteIverksatteBehandling ?: HttpStatusCode.NotFound)
             }
@@ -83,16 +85,17 @@ internal fun Route.sakWebRoutes(
     sakService: SakService,
     behandlingService: BehandlingService,
     grunnlagsendringshendelseService: GrunnlagsendringshendelseService,
-    oppgaveServiceNy: OppgaveServiceNy
+    oppgaveServiceNy: OppgaveServiceNy,
 ) {
     val logger = LoggerFactory.getLogger(this::class.java)
 
     route("/api") {
         route("/sak/{$SAKID_CALL_PARAMETER}") {
             get {
-                val sak = inTransaction {
-                    sakService.finnSak(sakId)
-                }
+                val sak =
+                    inTransaction {
+                        sakService.finnSak(sakId)
+                    }
                 call.respond(sak ?: HttpStatusCode.NotFound)
             }
 
@@ -108,9 +111,10 @@ internal fun Route.sakWebRoutes(
         route("/personer/") {
             post("sak/{type}") {
                 withFoedselsnummerInternal(tilgangService) { fnr ->
-                    val type: SakType = requireNotNull(call.parameters["type"]) {
-                        "Mangler påkrevd parameter {type} for å hente sak på bruker"
-                    }.let { enumValueOf(it) }
+                    val type: SakType =
+                        requireNotNull(call.parameters["type"]) {
+                            "Mangler påkrevd parameter {type} for å hente sak på bruker"
+                        }.let { enumValueOf(it) }
 
                     val sak = inTransaction { sakService.finnSak(fnr.value, type) }
                     call.respond(sak ?: HttpStatusCode.NoContent)
@@ -119,22 +123,24 @@ internal fun Route.sakWebRoutes(
 
             post("behandlinger") {
                 withFoedselsnummerInternal(tilgangService) { fnr ->
-                    val behandlinger = sakService.finnSaker(fnr.value)
-                        .map { sak ->
-                            behandlingService.hentBehandlingerISak(sak.id)
-                                .map { it.toBehandlingSammendrag() }
-                                .let { BehandlingListe(sak, it) }
-                        }
+                    val behandlinger =
+                        sakService.finnSaker(fnr.value)
+                            .map { sak ->
+                                behandlingService.hentBehandlingerISak(sak.id)
+                                    .map { it.toBehandlingSammendrag() }
+                                    .let { BehandlingListe(sak, it) }
+                            }
                     call.respond(behandlinger)
                 }
             }
 
             post("oppgaver") {
                 withFoedselsnummerInternal(tilgangService) { fnr ->
-                    val oppgaver = sakService.finnSaker(fnr.value)
-                        .map { sak ->
-                            OppgaveListe(sak, oppgaveServiceNy.hentOppgaverForSak(sak.id))
-                        }
+                    val oppgaver =
+                        sakService.finnSaker(fnr.value)
+                            .map { sak ->
+                                OppgaveListe(sak, oppgaveServiceNy.hentOppgaverForSak(sak.id))
+                            }
                     call.respond(oppgaver)
                 }
             }
@@ -144,7 +150,7 @@ internal fun Route.sakWebRoutes(
                     call.respond(
                         sakService.finnSaker(fnr.value).map { sak ->
                             GrunnlagsendringsListe(grunnlagsendringshendelseService.hentAlleHendelserForSak(sak.id))
-                        }
+                        },
                     )
                 }
             }

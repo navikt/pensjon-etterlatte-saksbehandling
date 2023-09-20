@@ -71,7 +71,7 @@ class ApplicationBuilder {
             azureAppClientId = clientCredentialsConfig.getString("clientId"),
             azureAppJwk = clientCredentialsConfig.getString("clientJwk"),
             azureAppWellKnownUrl = clientCredentialsConfig.getString("wellKnownUrl"),
-            azureAppScope = config.getString("proxy.outbound")
+            azureAppScope = config.getString("proxy.outbound"),
         )
     }
 
@@ -81,14 +81,14 @@ class ApplicationBuilder {
             azureAppClientId = clientCredentialsConfig.getString("clientId"),
             azureAppJwk = clientCredentialsConfig.getString("clientJwk"),
             azureAppWellKnownUrl = clientCredentialsConfig.getString("wellKnownUrl"),
-            azureAppScope = config.getString("navansatt.outbound")
+            azureAppScope = config.getString("navansatt.outbound"),
         )
     }
 
     private val brevbaker =
         BrevbakerKlient(
             httpClient("BREVBAKER_SCOPE"),
-            env.requireEnvValue("BREVBAKER_URL")
+            env.requireEnvValue("BREVBAKER_URL"),
         )
 
     private val regoppslagKlient = RegoppslagKlient(proxyClient, env.requireEnvValue("ETTERLATTE_PROXY_URL"))
@@ -99,14 +99,15 @@ class ApplicationBuilder {
     private val behandlingKlient = BehandlingKlient(config, httpClient())
     private val trygdetidKlient = TrygdetidKlient(config, httpClient())
     private val vilkaarsvurderingKlient = VilkaarsvurderingKlient(config, httpClient())
-    private val sakOgBehandlingService = SakOgBehandlingService(
-        vedtakKlient,
-        grunnlagKlient,
-        beregningKlient,
-        behandlingKlient,
-        trygdetidKlient,
-        vilkaarsvurderingKlient
-    )
+    private val sakOgBehandlingService =
+        SakOgBehandlingService(
+            vedtakKlient,
+            grunnlagKlient,
+            beregningKlient,
+            behandlingKlient,
+            trygdetidKlient,
+            vilkaarsvurderingKlient,
+        )
     private val norg2Klient = Norg2Klient(env.requireEnvValue("NORG2_URL"), httpClient())
     private val datasource = DataSourceBuilder.createDataSource(env)
     private val db = BrevRepository(datasource)
@@ -139,7 +140,7 @@ class ApplicationBuilder {
             dokarkivService,
             brevbakerService,
             brevDataMapper,
-            brevProsessTypeFactory
+            brevProsessTypeFactory,
         )
 
     private val journalpostService =
@@ -156,25 +157,31 @@ class ApplicationBuilder {
             }
             .build()
             .apply {
-                register(object : RapidsConnection.StatusListener {
-                    override fun onStartup(rapidsConnection: RapidsConnection) {
-                        datasource.migrate()
-                    }
-                })
+                register(
+                    object : RapidsConnection.StatusListener {
+                        override fun onStartup(rapidsConnection: RapidsConnection) {
+                            datasource.migrate()
+                        }
+                    },
+                )
                 JournalfoerVedtaksbrev(this, vedtaksbrevService)
                 VedtaksbrevUnderkjent(this, vedtaksbrevService)
                 DistribuerBrev(this, vedtaksbrevService, distribusjonService)
             }
 
-    private fun featureToggleProperties(config: Config) = FeatureToggleProperties(
-        applicationName = config.getString("funksjonsbrytere.unleash.applicationName"),
-        host = config.getString("funksjonsbrytere.unleash.host"),
-        apiKey = config.getString("funksjonsbrytere.unleash.token")
-    )
+    private fun featureToggleProperties(config: Config) =
+        FeatureToggleProperties(
+            applicationName = config.getString("funksjonsbrytere.unleash.applicationName"),
+            host = config.getString("funksjonsbrytere.unleash.host"),
+            apiKey = config.getString("funksjonsbrytere.unleash.token"),
+        )
 
     fun start() = setReady().also { rapidsConnection.start() }
 
-    private fun httpClient(scope: String? = null, forventStatusSuccess: Boolean = true) = httpClient(
+    private fun httpClient(
+        scope: String? = null,
+        forventStatusSuccess: Boolean = true,
+    ) = httpClient(
         forventSuksess = forventStatusSuccess,
         ekstraJacksoninnstillinger = {
             it.addMixIn(RenderedJsonLetter.Block::class.java, BrevbakerJSONBlockMixIn::class.java)
@@ -184,11 +191,12 @@ class ApplicationBuilder {
             if (scope != null) {
                 it.install(Auth) {
                     clientCredential {
-                        config = env.toMutableMap()
-                            .apply { put("AZURE_APP_OUTBOUND_SCOPE", requireNotNull(get(scope))) }
+                        config =
+                            env.toMutableMap()
+                                .apply { put("AZURE_APP_OUTBOUND_SCOPE", requireNotNull(get(scope))) }
                     }
                 }
             }
-        }
+        },
     )
 }

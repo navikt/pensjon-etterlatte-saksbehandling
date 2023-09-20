@@ -52,7 +52,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import testsupport.buildTestApplicationConfigurationForOauth
-import java.util.*
+import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class GrunnlagRoutesKtTest {
@@ -92,10 +92,11 @@ internal class GrunnlagRoutesKtTest {
         server.issueToken(
             issuerId = AZURE_ISSUER,
             audience = CLIENT_ID,
-            claims = mapOf(
-                "navn" to "Per Persson",
-                "NAVident" to "Saksbehandler01"
-            )
+            claims =
+                mapOf(
+                    "navn" to "Per Persson",
+                    "NAVident" to "Saksbehandler01",
+                ),
         ).serialize()
     }
 
@@ -104,10 +105,11 @@ internal class GrunnlagRoutesKtTest {
         server.issueToken(
             issuerId = AZURE_ISSUER,
             audience = CLIENT_ID,
-            claims = mapOf(
-                "sub" to mittsystem,
-                "oid" to mittsystem
-            )
+            claims =
+                mapOf(
+                    "sub" to mittsystem,
+                    "oid" to mittsystem,
+                ),
         ).serialize()
     }
 
@@ -139,12 +141,13 @@ internal class GrunnlagRoutesKtTest {
             application {
                 restModule(this.log, routePrefix = "api") { grunnlagRoute(grunnlagService, behandlingKlient) }
             }
-            val response = client.get("api/grunnlag/1") {
-                headers {
-                    append(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                    append(HttpHeaders.Authorization, "Bearer $token")
+            val response =
+                client.get("api/grunnlag/1") {
+                    headers {
+                        append(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                        append(HttpHeaders.Authorization, "Bearer $token")
+                    }
                 }
-            }
 
             assertEquals(HttpStatusCode.NotFound, response.status)
         }
@@ -165,12 +168,13 @@ internal class GrunnlagRoutesKtTest {
             application {
                 restModule(this.log, routePrefix = "api") { grunnlagRoute(grunnlagService, behandlingKlient) }
             }
-            val response = client.get("api/grunnlag/1") {
-                headers {
-                    append(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                    append(HttpHeaders.Authorization, "Bearer $token")
+            val response =
+                client.get("api/grunnlag/1") {
+                    headers {
+                        append(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                        append(HttpHeaders.Authorization, "Bearer $token")
+                    }
                 }
-            }
 
             assertEquals(HttpStatusCode.OK, response.status)
             assertEquals(serialize(testData), response.body<String>())
@@ -182,12 +186,13 @@ internal class GrunnlagRoutesKtTest {
 
     @Test
     fun `roller tilknyttet person`() {
-        val response = PersonMedSakerOgRoller(
-            SOEKER_FOEDSELSNUMMER.value,
-            listOf(
-                SakOgRolle(1, Saksrolle.SOEKER)
+        val response =
+            PersonMedSakerOgRoller(
+                SOEKER_FOEDSELSNUMMER.value,
+                listOf(
+                    SakOgRolle(1, Saksrolle.SOEKER),
+                ),
             )
-        )
         every { grunnlagService.hentSakerOgRoller(any()) } returns response
 
         testApplication {
@@ -197,18 +202,20 @@ internal class GrunnlagRoutesKtTest {
             application {
                 restModule(this.log, routePrefix = "api") { grunnlagRoute(grunnlagService, behandlingKlient) }
             }
-            val httpClient = createClient {
-                install(ContentNegotiation) {
-                    jackson { registerModule(JavaTimeModule()) }
+            val httpClient =
+                createClient {
+                    install(ContentNegotiation) {
+                        jackson { registerModule(JavaTimeModule()) }
+                    }
                 }
-            }
-            val actualResponse = httpClient.post("api/grunnlag/person/roller") {
-                setBody(FoedselsnummerDTO(SOEKER_FOEDSELSNUMMER.value))
-                headers {
-                    append(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                    append(HttpHeaders.Authorization, "Bearer $systemBruker")
+            val actualResponse =
+                httpClient.post("api/grunnlag/person/roller") {
+                    setBody(FoedselsnummerDTO(SOEKER_FOEDSELSNUMMER.value))
+                    headers {
+                        append(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                        append(HttpHeaders.Authorization, "Bearer $systemBruker")
+                    }
                 }
-            }
 
             assertEquals(HttpStatusCode.OK, actualResponse.status)
             assertEquals(serialize(response), actualResponse.body<String>())
@@ -230,18 +237,20 @@ internal class GrunnlagRoutesKtTest {
             application {
                 restModule(this.log, routePrefix = "api") { grunnlagRoute(grunnlagService, behandlingKlient) }
             }
-            val httpClient = createClient {
-                install(ContentNegotiation) {
-                    jackson { registerModule(JavaTimeModule()) }
+            val httpClient =
+                createClient {
+                    install(ContentNegotiation) {
+                        jackson { registerModule(JavaTimeModule()) }
+                    }
                 }
-            }
-            val actualResponse = httpClient.post("api/grunnlag/person/saker") {
-                contentType(ContentType.Application.Json)
-                setBody(FoedselsnummerDTO(SOEKER_FOEDSELSNUMMER.value))
-                headers {
-                    append(HttpHeaders.Authorization, "Bearer $systemBruker")
+            val actualResponse =
+                httpClient.post("api/grunnlag/person/saker") {
+                    contentType(ContentType.Application.Json)
+                    setBody(FoedselsnummerDTO(SOEKER_FOEDSELSNUMMER.value))
+                    headers {
+                        append(HttpHeaders.Authorization, "Bearer $systemBruker")
+                    }
                 }
-            }
 
             assertEquals(HttpStatusCode.OK, actualResponse.status)
             assertEquals(serialize(response), actualResponse.body<String>())
@@ -254,13 +263,14 @@ internal class GrunnlagRoutesKtTest {
     @Test
     fun `Teste endepunkt for lagring av nye saksopplysninger`() {
         val sakId = 12345L
-        val opplysninger = listOf(
-            lagGrunnlagsopplysning(
-                opplysningstype = Opplysningstype.SPRAAK,
-                kilde = Grunnlagsopplysning.Privatperson("fnr", Tidspunkt.now()),
-                verdi = "nb".toJsonNode()
+        val opplysninger =
+            listOf(
+                lagGrunnlagsopplysning(
+                    opplysningstype = Opplysningstype.SPRAAK,
+                    kilde = Grunnlagsopplysning.Privatperson("fnr", Tidspunkt.now()),
+                    verdi = "nb".toJsonNode(),
+                ),
             )
-        )
 
         every { grunnlagService.lagreNyeSaksopplysninger(any(), any()) } just Runs
 
@@ -271,18 +281,20 @@ internal class GrunnlagRoutesKtTest {
             application {
                 restModule(this.log, routePrefix = "api") { grunnlagRoute(grunnlagService, behandlingKlient) }
             }
-            val httpClient = createClient {
-                install(ContentNegotiation) {
-                    jackson { registerModule(JavaTimeModule()) }
+            val httpClient =
+                createClient {
+                    install(ContentNegotiation) {
+                        jackson { registerModule(JavaTimeModule()) }
+                    }
                 }
-            }
-            val actualResponse = httpClient.post("api/grunnlag/$sakId/nye-opplysninger") {
-                contentType(ContentType.Application.Json)
-                setBody(NyeSaksopplysninger(opplysninger))
-                headers {
-                    append(HttpHeaders.Authorization, "Bearer $systemBruker")
+            val actualResponse =
+                httpClient.post("api/grunnlag/$sakId/nye-opplysninger") {
+                    contentType(ContentType.Application.Json)
+                    setBody(NyeSaksopplysninger(opplysninger))
+                    headers {
+                        append(HttpHeaders.Authorization, "Bearer $systemBruker")
+                    }
                 }
-            }
 
             assertEquals(HttpStatusCode.OK, actualResponse.status)
         }

@@ -40,11 +40,11 @@ class DatabaseContextTest {
                             "DB_USERNAME" to postgreSQLContainer.username,
                             "DB_PASSWORD" to postgreSQLContainer.password,
                             "DB_PORT" to postgreSQLContainer.firstMappedPort.toString(),
-                            "DB_DATABASE" to postgreSQLContainer.databaseName
-                        )
-                    ).also { it.migrate() }
-                )
-            )
+                            "DB_DATABASE" to postgreSQLContainer.databaseName,
+                        ),
+                    ).also { it.migrate() },
+                ),
+            ),
         )
     }
 

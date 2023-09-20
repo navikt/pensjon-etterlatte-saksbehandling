@@ -31,15 +31,15 @@ import no.nav.etterlatte.oppgave.GosysOppgaveService
 
 internal fun Route.oppgaveRoutesNy(
     service: OppgaveServiceNy,
-    gosysOppgaveService: GosysOppgaveService
+    gosysOppgaveService: GosysOppgaveService,
 ) {
     route("/api/nyeoppgaver") {
         get {
             kunSaksbehandler {
                 call.respond(
                     service.finnOppgaverForBruker(
-                        Kontekst.get().appUserAsSaksbehandler().saksbehandlerMedRoller
-                    )
+                        Kontekst.get().appUserAsSaksbehandler().saksbehandlerMedRoller,
+                    ),
                 )
             }
         }
@@ -73,7 +73,7 @@ internal fun Route.oppgaveRoutesNy(
                 val saksbehandlerEndringDto = call.receive<SaksbehandlerEndringDto>()
                 service.tildelSaksbehandler(
                     oppgaveId,
-                    saksbehandlerEndringDto.saksbehandler
+                    saksbehandlerEndringDto.saksbehandler,
                 )
                 call.respond(HttpStatusCode.OK)
             }
@@ -125,7 +125,7 @@ internal fun Route.oppgaveRoutesNy(
                         gosysOppgaveId,
                         saksbehandlerEndringDto.versjon,
                         saksbehandlerEndringDto.saksbehandler,
-                        brukerTokenInfo
+                        brukerTokenInfo,
                     )
                     call.respond(HttpStatusCode.OK)
                 }
@@ -136,7 +136,7 @@ internal fun Route.oppgaveRoutesNy(
                         gosysOppgaveId,
                         redigerFristRequest.versjon,
                         redigerFristRequest.frist,
-                        brukerTokenInfo
+                        brukerTokenInfo,
                     )
                     call.respond(HttpStatusCode.OK)
                 }

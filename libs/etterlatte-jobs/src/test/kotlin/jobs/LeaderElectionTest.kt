@@ -14,33 +14,33 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class LeaderElectionTest {
-
     companion object {
-
         private val localHostName = "localhost"
 
-        fun httpClient(response: String) = HttpClient(MockEngine) {
-            expectSuccess = true
-            engine {
-                addHandler { request ->
-                    when (request.url.fullPath) {
-                        "/" -> respond(response)
-                        else -> respond("error", HttpStatusCode.BadGateway)
+        fun httpClient(response: String) =
+            HttpClient(MockEngine) {
+                expectSuccess = true
+                engine {
+                    addHandler { request ->
+                        when (request.url.fullPath) {
+                            "/" -> respond(response)
+                            else -> respond("error", HttpStatusCode.BadGateway)
+                        }
                     }
                 }
+                install(ContentNegotiation) {
+                    register(ContentType.Application.Json, JacksonConverter(jacksonObjectMapper()))
+                }
             }
-            install(ContentNegotiation) {
-                register(ContentType.Application.Json, JacksonConverter(jacksonObjectMapper()))
-            }
-        }
     }
 
     @Test
     fun `sier ja når leader elector-pod svarer at vårt hostname er leader`() {
         val response = """{"name":"$localHostName"}"""
-        val httpClient = httpClient(
-            response
-        )
+        val httpClient =
+            httpClient(
+                response,
+            )
         val leaderElection = LeaderElection(localHostName, httpClient, "localhost")
         assertTrue(leaderElection.isLeader())
     }

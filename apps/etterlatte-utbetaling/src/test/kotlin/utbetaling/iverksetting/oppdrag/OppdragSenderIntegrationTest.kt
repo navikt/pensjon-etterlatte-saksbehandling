@@ -12,17 +12,17 @@ import org.junit.jupiter.api.TestInstance
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class OppdragSenderIntegrationTest {
-
     private val jmsConnectionFactory: EtterlatteJmsConnectionFactory = DummyJmsConnectionFactory()
     private lateinit var oppdragSender: OppdragSender
 
     @BeforeAll
     fun beforeAll() {
-        oppdragSender = OppdragSender(
-            jmsConnectionFactory = jmsConnectionFactory,
-            queue = "DEV.QUEUE.1",
-            replyQueue = "DEV.QUEUE.1"
-        )
+        oppdragSender =
+            OppdragSender(
+                jmsConnectionFactory = jmsConnectionFactory,
+                queue = "DEV.QUEUE.1",
+                replyQueue = "DEV.QUEUE.1",
+            )
     }
 
     @Test

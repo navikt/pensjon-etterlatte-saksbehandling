@@ -10,7 +10,6 @@ import no.nav.helse.rapids_rivers.MessageProblems
 import org.junit.jupiter.api.Test
 
 internal class FeilhaandteringKtTest {
-
     @Test
     fun `feilhaandtering kaster ikke feilen videre, men publiserer på feilkø`() {
         val packet = JsonMessage("{}", MessageProblems(""))

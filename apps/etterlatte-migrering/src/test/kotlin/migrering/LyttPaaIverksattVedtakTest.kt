@@ -27,11 +27,10 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
-import java.util.*
+import java.util.UUID
 import javax.sql.DataSource
 
 class LyttPaaIverksattVedtakTest {
-
     @Container
     private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:$POSTGRES_VERSION")
 
@@ -52,10 +51,11 @@ class LyttPaaIverksattVedtakTest {
             val pesysid = PesysId(1L)
             val repository =
                 spyk(PesysRepository(datasource)).also {
-                    every { it.hentPesysId(behandlingId) } returns Pesyskopling(
-                        behandlingId = behandlingId,
-                        pesysId = pesysid
-                    )
+                    every { it.hentPesysId(behandlingId) } returns
+                        Pesyskopling(
+                            behandlingId = behandlingId,
+                            pesysId = pesysid,
+                        )
                 }
 
             val penKlient = mockk<PenKlient>().also { every { runBlocking { it.opphoerSak(pesysid) } } just runs }
@@ -64,18 +64,19 @@ class LyttPaaIverksattVedtakTest {
                     LyttPaaIverksattVedtak(
                         rapidsConnection = this,
                         pesysRepository = repository,
-                        penKlient = penKlient
+                        penKlient = penKlient,
                     )
                 }.sendTestMessage(
                     JsonMessage.newMessage(
                         mapOf(
                             EVENT_NAME_KEY to EVENT_NAME_OPPDATERT,
-                            UTBETALING_RESPONSE to UtbetalingResponseDto(
-                                status = UtbetalingStatusDto.GODKJENT,
-                                behandlingId = behandlingId
-                            )
-                        )
-                    ).toJson()
+                            UTBETALING_RESPONSE to
+                                UtbetalingResponseDto(
+                                    status = UtbetalingStatusDto.GODKJENT,
+                                    behandlingId = behandlingId,
+                                ),
+                        ),
+                    ).toJson(),
                 )
 
             verify { runBlocking { penKlient.opphoerSak(pesysid) } }
@@ -89,10 +90,11 @@ class LyttPaaIverksattVedtakTest {
             val pesysid = PesysId(1L)
             val repository =
                 spyk(PesysRepository(datasource)).also {
-                    every { it.hentPesysId(behandlingId) } returns Pesyskopling(
-                        behandlingId = behandlingId,
-                        pesysId = pesysid
-                    )
+                    every { it.hentPesysId(behandlingId) } returns
+                        Pesyskopling(
+                            behandlingId = behandlingId,
+                            pesysId = pesysid,
+                        )
                 }
 
             val penKlient = mockk<PenKlient>().also { every { runBlocking { it.opphoerSak(pesysid) } } just runs }
@@ -101,18 +103,19 @@ class LyttPaaIverksattVedtakTest {
                     LyttPaaIverksattVedtak(
                         rapidsConnection = this,
                         pesysRepository = repository,
-                        penKlient = penKlient
+                        penKlient = penKlient,
                     )
                 }.sendTestMessage(
                     JsonMessage.newMessage(
                         mapOf(
                             EVENT_NAME_KEY to EVENT_NAME_OPPDATERT,
-                            UTBETALING_RESPONSE to UtbetalingResponseDto(
-                                status = UtbetalingStatusDto.AVVIST,
-                                behandlingId = behandlingId
-                            )
-                        )
-                    ).toJson()
+                            UTBETALING_RESPONSE to
+                                UtbetalingResponseDto(
+                                    status = UtbetalingStatusDto.AVVIST,
+                                    behandlingId = behandlingId,
+                                ),
+                        ),
+                    ).toJson(),
                 )
 
             verify(exactly = 0) { runBlocking { penKlient.opphoerSak(any()) } }

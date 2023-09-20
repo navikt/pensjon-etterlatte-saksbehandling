@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory
 import java.time.Clock
 import java.time.Duration
 import java.time.LocalDate
-import java.util.*
+import java.util.Timer
 
 class KonsistensavstemmingJob(
     private val konsistensavstemmingService: KonsistensavstemmingService,
@@ -19,7 +19,7 @@ class KonsistensavstemmingJob(
     private val initialDelay: Long,
     private val periode: Duration,
     private val clock: Clock,
-    private val saktype: Saktype
+    private val saktype: Saktype,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
     private val jobbNavn = this::class.simpleName
@@ -31,7 +31,7 @@ class KonsistensavstemmingJob(
             name = jobbNavn,
             initialDelay = initialDelay,
             period = periode.toMillis(),
-            loggerInfo = LoggerInfo(logger = logger, sikkerLogg = sikkerLogg, loggTilSikkerLogg = true)
+            loggerInfo = LoggerInfo(logger = logger, sikkerLogg = sikkerLogg, loggTilSikkerLogg = true),
         ) {
             Konsistensavstemming(
                 konsistensavstemmingService = konsistensavstemmingService,
@@ -39,7 +39,7 @@ class KonsistensavstemmingJob(
                 leaderElection = leaderElection,
                 jobbNavn = jobbNavn!!,
                 clock = clock,
-                saktype = saktype
+                saktype = saktype,
             ).run()
         }
     }
@@ -50,7 +50,7 @@ class KonsistensavstemmingJob(
         val leaderElection: LeaderElection,
         val jobbNavn: String,
         val clock: Clock,
-        val saktype: Saktype
+        val saktype: Saktype,
     ) {
         private val log = LoggerFactory.getLogger(this::class.java)
 
@@ -61,7 +61,7 @@ class KonsistensavstemmingJob(
                     log.info("Starter $jobbNavn")
                     if (!konsistensavstemmingService.konsistensavstemmingErKjoertIDag(
                             saktype = saktype,
-                            idag = idag
+                            idag = idag,
                         )
                     ) {
                         konsistensavstemmingService.startKonsistensavstemming(dag = idag, saktype = saktype)

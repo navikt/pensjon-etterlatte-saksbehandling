@@ -17,7 +17,7 @@ class ApplicationContext(env: Miljoevariabler) {
             azureAppClientId = env.requireEnvValue("AZURE_APP_CLIENT_ID"),
             azureAppJwk = env.requireEnvValue("AZURE_APP_JWK"),
             azureAppWellKnownUrl = env.requireEnvValue("AZURE_APP_WELL_KNOWN_URL"),
-            azureAppScope = env.requireEnvValue("ETTERLATTE_VEDTAKSVURDERING_SCOPE")
+            azureAppScope = env.requireEnvValue("ETTERLATTE_VEDTAKSVURDERING_SCOPE"),
         )
 
     private val azureAdClient = AzureAdClient(config, httpClient)
@@ -26,7 +26,7 @@ class ApplicationContext(env: Miljoevariabler) {
         VedtaksvurderingKlient(
             config,
             httpClient,
-            azureAdClient
+            azureAdClient,
         )
 
     val samordningVedtakService = SamordningVedtakService(vedtaksvurderingKlient)

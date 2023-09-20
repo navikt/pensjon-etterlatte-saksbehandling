@@ -45,7 +45,6 @@ import java.util.UUID.randomUUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class BeregningsGrunnlagRoutesTest {
-
     private val server = MockOAuth2Server()
     private lateinit var applicationConfig: HoconApplicationConfig
     private val behandlingKlient = mockk<BehandlingKlient>()
@@ -68,26 +67,27 @@ internal class BeregningsGrunnlagRoutesTest {
     @Test
     fun `skal returnere 204 naar beregnings ikke finnes`() {
         coEvery { behandlingKlient.harTilgangTilBehandling(any(), any()) } returns true
-        coEvery { behandlingKlient.hentBehandling(any(), any()) } returns DetaljertBehandling(
-            id = randomUUID(),
-            sak = 123,
-            sakType = SakType.BARNEPENSJON,
-            behandlingOpprettet = LocalDateTime.now(),
-            soeknadMottattDato = null,
-            innsender = null,
-            soeker = "diam",
-            gjenlevende = listOf(),
-            avdoed = listOf(),
-            soesken = listOf(),
-            status = BehandlingStatus.TRYGDETID_OPPDATERT,
-            behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-            virkningstidspunkt = null,
-            revurderingsaarsak = null,
-            prosesstype = Prosesstype.MANUELL,
-            boddEllerArbeidetUtlandet = null,
-            revurderingInfo = null,
-            enhet = "1111"
-        )
+        coEvery { behandlingKlient.hentBehandling(any(), any()) } returns
+            DetaljertBehandling(
+                id = randomUUID(),
+                sak = 123,
+                sakType = SakType.BARNEPENSJON,
+                behandlingOpprettet = LocalDateTime.now(),
+                soeknadMottattDato = null,
+                innsender = null,
+                soeker = "diam",
+                gjenlevende = listOf(),
+                avdoed = listOf(),
+                soesken = listOf(),
+                status = BehandlingStatus.TRYGDETID_OPPDATERT,
+                behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+                virkningstidspunkt = null,
+                revurderingsaarsak = null,
+                prosesstype = Prosesstype.MANUELL,
+                boddEllerArbeidetUtlandet = null,
+                revurderingInfo = null,
+                enhet = "1111",
+            )
 
         every { repository.finnBarnepensjonGrunnlagForBehandling(any()) } returns null
 
@@ -95,10 +95,11 @@ internal class BeregningsGrunnlagRoutesTest {
             environment { config = applicationConfig }
             application { restModule(log) { beregningsGrunnlag(service, behandlingKlient) } }
 
-            val response = client.get("/api/beregning/beregningsgrunnlag/${randomUUID()}/barnepensjon") {
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                header(HttpHeaders.Authorization, "Bearer $token")
-            }
+            val response =
+                client.get("/api/beregning/beregningsgrunnlag/${randomUUID()}/barnepensjon") {
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    header(HttpHeaders.Authorization, "Bearer $token")
+                }
 
             response.status shouldBe HttpStatusCode.NoContent
         }
@@ -109,58 +110,63 @@ internal class BeregningsGrunnlagRoutesTest {
         val idRevurdering = randomUUID()
         val idForrigeIverksatt = randomUUID()
         val sakId = 123L
-        val virkRevurdering = Virkningstidspunkt(
-            dato = YearMonth.of(2023, Month.JANUARY),
-            kilde = Grunnlagsopplysning.Saksbehandler(
-                ident = "",
-                tidspunkt = Tidspunkt.now()
-            ),
-            begrunnelse = ""
-
-        )
+        val virkRevurdering =
+            Virkningstidspunkt(
+                dato = YearMonth.of(2023, Month.JANUARY),
+                kilde =
+                    Grunnlagsopplysning.Saksbehandler(
+                        ident = "",
+                        tidspunkt = Tidspunkt.now(),
+                    ),
+                begrunnelse = "",
+            )
         coEvery { behandlingKlient.harTilgangTilBehandling(any(), any()) } returns true
-        coEvery { behandlingKlient.hentBehandling(idRevurdering, any()) } returns DetaljertBehandling(
-            id = randomUUID(),
-            sak = sakId,
-            sakType = SakType.BARNEPENSJON,
-            behandlingOpprettet = LocalDateTime.now(),
-            soeknadMottattDato = null,
-            innsender = null,
-            soeker = "",
-            gjenlevende = listOf(),
-            avdoed = listOf(),
-            soesken = listOf(),
-            status = BehandlingStatus.TRYGDETID_OPPDATERT,
-            behandlingType = BehandlingType.REVURDERING,
-            virkningstidspunkt = virkRevurdering,
-            revurderingsaarsak = null,
-            prosesstype = Prosesstype.MANUELL,
-            boddEllerArbeidetUtlandet = null,
-            revurderingInfo = null,
-            enhet = "1111"
-        )
+        coEvery { behandlingKlient.hentBehandling(idRevurdering, any()) } returns
+            DetaljertBehandling(
+                id = randomUUID(),
+                sak = sakId,
+                sakType = SakType.BARNEPENSJON,
+                behandlingOpprettet = LocalDateTime.now(),
+                soeknadMottattDato = null,
+                innsender = null,
+                soeker = "",
+                gjenlevende = listOf(),
+                avdoed = listOf(),
+                soesken = listOf(),
+                status = BehandlingStatus.TRYGDETID_OPPDATERT,
+                behandlingType = BehandlingType.REVURDERING,
+                virkningstidspunkt = virkRevurdering,
+                revurderingsaarsak = null,
+                prosesstype = Prosesstype.MANUELL,
+                boddEllerArbeidetUtlandet = null,
+                revurderingInfo = null,
+                enhet = "1111",
+            )
         coEvery {
             behandlingKlient.hentSisteIverksatteBehandling(sakId, any())
         } returns SisteIverksatteBehandling(idForrigeIverksatt)
         every { repository.finnBarnepensjonGrunnlagForBehandling(idRevurdering) } returns null
-        every { repository.finnBarnepensjonGrunnlagForBehandling(idForrigeIverksatt) } returns BeregningsGrunnlag(
-            behandlingId = idForrigeIverksatt,
-            kilde = Grunnlagsopplysning.Saksbehandler(
-                ident = "",
-                tidspunkt = Tidspunkt.now()
-            ),
-            soeskenMedIBeregning = listOf(),
-            institusjonsoppholdBeregningsgrunnlag = emptyList()
-        )
+        every { repository.finnBarnepensjonGrunnlagForBehandling(idForrigeIverksatt) } returns
+            BeregningsGrunnlag(
+                behandlingId = idForrigeIverksatt,
+                kilde =
+                    Grunnlagsopplysning.Saksbehandler(
+                        ident = "",
+                        tidspunkt = Tidspunkt.now(),
+                    ),
+                soeskenMedIBeregning = listOf(),
+                institusjonsoppholdBeregningsgrunnlag = emptyList(),
+            )
 
         testApplication {
             environment { config = applicationConfig }
             application { restModule(log) { beregningsGrunnlag(service, behandlingKlient) } }
 
-            val response = client.get("/api/beregning/beregningsgrunnlag/$idRevurdering/barnepensjon") {
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                header(HttpHeaders.Authorization, "Bearer $token")
-            }
+            val response =
+                client.get("/api/beregning/beregningsgrunnlag/$idRevurdering/barnepensjon") {
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    header(HttpHeaders.Authorization, "Bearer $token")
+                }
 
             response.status shouldBe HttpStatusCode.OK
         }
@@ -178,21 +184,23 @@ internal class BeregningsGrunnlagRoutesTest {
 
         val id = randomUUID()
 
-        every { repository.finnBarnepensjonGrunnlagForBehandling(any()) } returns BeregningsGrunnlag(
-            id,
-            Grunnlagsopplysning.Saksbehandler("Z123456", Tidspunkt.now()),
-            emptyList(),
-            emptyList()
-        )
+        every { repository.finnBarnepensjonGrunnlagForBehandling(any()) } returns
+            BeregningsGrunnlag(
+                id,
+                Grunnlagsopplysning.Saksbehandler("Z123456", Tidspunkt.now()),
+                emptyList(),
+                emptyList(),
+            )
 
         testApplication {
             environment { config = applicationConfig }
             application { restModule(log) { beregningsGrunnlag(service, behandlingKlient) } }
 
-            val response = client.get("/api/beregning/beregningsgrunnlag/$id/barnepensjon") {
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                header(HttpHeaders.Authorization, "Bearer $token")
-            }
+            val response =
+                client.get("/api/beregning/beregningsgrunnlag/$id/barnepensjon") {
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    header(HttpHeaders.Authorization, "Bearer $token")
+                }
 
             val hentet = objectMapper.readValue(response.bodyAsText(), BeregningsGrunnlag::class.java)
 
@@ -225,11 +233,12 @@ internal class BeregningsGrunnlagRoutesTest {
             environment { config = applicationConfig }
             application { restModule(log) { beregningsGrunnlag(service, behandlingKlient) } }
 
-            val client = createClient {
-                install(ContentNegotiation) {
-                    jackson { registerModule(JavaTimeModule()) }
+            val client =
+                createClient {
+                    install(ContentNegotiation) {
+                        jackson { registerModule(JavaTimeModule()) }
+                    }
                 }
-            }
 
             client.post("/api/beregning/beregningsgrunnlag/${randomUUID()}/barnepensjon") {
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
@@ -237,8 +246,8 @@ internal class BeregningsGrunnlagRoutesTest {
                 setBody(
                     BarnepensjonBeregningsGrunnlag(
                         emptyList(),
-                        emptyList()
-                    )
+                        emptyList(),
+                    ),
                 )
             }.let {
                 it.status shouldBe HttpStatusCode.NotFound
@@ -252,43 +261,47 @@ internal class BeregningsGrunnlagRoutesTest {
         coEvery { behandlingKlient.beregn(any(), any(), any()) } returns true
         every { repository.finnBarnepensjonGrunnlagForBehandling(any()) } returns null
         every { repository.lagre(any()) } returns true
-        coEvery { behandlingKlient.hentBehandling(any(), any()) } returns DetaljertBehandling(
-            id = randomUUID(),
-            sak = 123,
-            sakType = SakType.BARNEPENSJON,
-            behandlingOpprettet = LocalDateTime.now(),
-            soeknadMottattDato = null,
-            innsender = null,
-            soeker = "diam",
-            gjenlevende = listOf(),
-            avdoed = listOf(),
-            soesken = listOf(),
-            status = BehandlingStatus.TRYGDETID_OPPDATERT,
-            behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-            virkningstidspunkt = Virkningstidspunkt(
-                YearMonth.of(2023, 1),
-                kilde = Grunnlagsopplysning.Saksbehandler(
-                    ident = "",
-                    tidspunkt = Tidspunkt.now()
-                ),
-                ""
-            ),
-            revurderingsaarsak = null,
-            prosesstype = Prosesstype.MANUELL,
-            boddEllerArbeidetUtlandet = null,
-            revurderingInfo = null,
-            enhet = "1111"
-        )
+        coEvery { behandlingKlient.hentBehandling(any(), any()) } returns
+            DetaljertBehandling(
+                id = randomUUID(),
+                sak = 123,
+                sakType = SakType.BARNEPENSJON,
+                behandlingOpprettet = LocalDateTime.now(),
+                soeknadMottattDato = null,
+                innsender = null,
+                soeker = "diam",
+                gjenlevende = listOf(),
+                avdoed = listOf(),
+                soesken = listOf(),
+                status = BehandlingStatus.TRYGDETID_OPPDATERT,
+                behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+                virkningstidspunkt =
+                    Virkningstidspunkt(
+                        YearMonth.of(2023, 1),
+                        kilde =
+                            Grunnlagsopplysning.Saksbehandler(
+                                ident = "",
+                                tidspunkt = Tidspunkt.now(),
+                            ),
+                        "",
+                    ),
+                revurderingsaarsak = null,
+                prosesstype = Prosesstype.MANUELL,
+                boddEllerArbeidetUtlandet = null,
+                revurderingInfo = null,
+                enhet = "1111",
+            )
 
         testApplication {
             environment { config = applicationConfig }
             application { restModule(log) { beregningsGrunnlag(service, behandlingKlient) } }
 
-            val client = createClient {
-                install(ContentNegotiation) {
-                    jackson { registerModule(JavaTimeModule()) }
+            val client =
+                createClient {
+                    install(ContentNegotiation) {
+                        jackson { registerModule(JavaTimeModule()) }
+                    }
                 }
-            }
 
             client.post("/api/beregning/beregningsgrunnlag/${randomUUID()}/barnepensjon") {
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
@@ -296,8 +309,8 @@ internal class BeregningsGrunnlagRoutesTest {
                 setBody(
                     BarnepensjonBeregningsGrunnlag(
                         emptyList(),
-                        emptyList()
-                    )
+                        emptyList(),
+                    ),
                 )
             }.let {
                 it.status shouldBe HttpStatusCode.NoContent
@@ -311,43 +324,47 @@ internal class BeregningsGrunnlagRoutesTest {
         coEvery { behandlingKlient.beregn(any(), any(), any()) } returns true
         every { repository.finnBarnepensjonGrunnlagForBehandling(any()) } returns null
         every { repository.lagre(any()) } returns false
-        coEvery { behandlingKlient.hentBehandling(any(), any()) } returns DetaljertBehandling(
-            id = randomUUID(),
-            sak = 123,
-            sakType = SakType.BARNEPENSJON,
-            behandlingOpprettet = LocalDateTime.now(),
-            soeknadMottattDato = null,
-            innsender = null,
-            soeker = "diam",
-            gjenlevende = listOf(),
-            avdoed = listOf(),
-            soesken = listOf(),
-            status = BehandlingStatus.TRYGDETID_OPPDATERT,
-            behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-            virkningstidspunkt = Virkningstidspunkt(
-                YearMonth.of(2023, 1),
-                kilde = Grunnlagsopplysning.Saksbehandler(
-                    ident = "",
-                    tidspunkt = Tidspunkt.now()
-                ),
-                ""
-            ),
-            revurderingsaarsak = null,
-            prosesstype = Prosesstype.MANUELL,
-            boddEllerArbeidetUtlandet = null,
-            revurderingInfo = null,
-            enhet = "1111"
-        )
+        coEvery { behandlingKlient.hentBehandling(any(), any()) } returns
+            DetaljertBehandling(
+                id = randomUUID(),
+                sak = 123,
+                sakType = SakType.BARNEPENSJON,
+                behandlingOpprettet = LocalDateTime.now(),
+                soeknadMottattDato = null,
+                innsender = null,
+                soeker = "diam",
+                gjenlevende = listOf(),
+                avdoed = listOf(),
+                soesken = listOf(),
+                status = BehandlingStatus.TRYGDETID_OPPDATERT,
+                behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+                virkningstidspunkt =
+                    Virkningstidspunkt(
+                        YearMonth.of(2023, 1),
+                        kilde =
+                            Grunnlagsopplysning.Saksbehandler(
+                                ident = "",
+                                tidspunkt = Tidspunkt.now(),
+                            ),
+                        "",
+                    ),
+                revurderingsaarsak = null,
+                prosesstype = Prosesstype.MANUELL,
+                boddEllerArbeidetUtlandet = null,
+                revurderingInfo = null,
+                enhet = "1111",
+            )
 
         testApplication {
             environment { config = applicationConfig }
             application { restModule(log) { beregningsGrunnlag(service, behandlingKlient) } }
 
-            val client = createClient {
-                install(ContentNegotiation) {
-                    jackson { registerModule(JavaTimeModule()) }
+            val client =
+                createClient {
+                    install(ContentNegotiation) {
+                        jackson { registerModule(JavaTimeModule()) }
+                    }
                 }
-            }
 
             client.post("/api/beregning/beregningsgrunnlag/${randomUUID()}/barnepensjon") {
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
@@ -355,8 +372,8 @@ internal class BeregningsGrunnlagRoutesTest {
                 setBody(
                     BarnepensjonBeregningsGrunnlag(
                         emptyList(),
-                        emptyList()
-                    )
+                        emptyList(),
+                    ),
                 )
             }.let {
                 it.status shouldBe HttpStatusCode.Conflict
@@ -371,12 +388,13 @@ internal class BeregningsGrunnlagRoutesTest {
 
         coEvery { behandlingKlient.harTilgangTilBehandling(any(), any()) } returns true
         coEvery { behandlingKlient.beregn(any(), any(), any()) } returns true
-        every { repository.finnBarnepensjonGrunnlagForBehandling(forrige) } returns BeregningsGrunnlag(
-            forrige,
-            Grunnlagsopplysning.Saksbehandler("Z123456", Tidspunkt.now()),
-            emptyList(),
-            emptyList()
-        )
+        every { repository.finnBarnepensjonGrunnlagForBehandling(forrige) } returns
+            BeregningsGrunnlag(
+                forrige,
+                Grunnlagsopplysning.Saksbehandler("Z123456", Tidspunkt.now()),
+                emptyList(),
+                emptyList(),
+            )
         every { repository.finnBarnepensjonGrunnlagForBehandling(nye) } returns null
         every { repository.lagre(any()) } returns true
 
@@ -400,12 +418,13 @@ internal class BeregningsGrunnlagRoutesTest {
 
         coEvery { behandlingKlient.harTilgangTilBehandling(any(), any()) } returns true
         coEvery { behandlingKlient.beregn(any(), any(), any()) } returns true
-        every { repository.finnBarnepensjonGrunnlagForBehandling(forrige) } returns BeregningsGrunnlag(
-            forrige,
-            Grunnlagsopplysning.Saksbehandler("Z123456", Tidspunkt.now()),
-            emptyList(),
-            emptyList()
-        )
+        every { repository.finnBarnepensjonGrunnlagForBehandling(forrige) } returns
+            BeregningsGrunnlag(
+                forrige,
+                Grunnlagsopplysning.Saksbehandler("Z123456", Tidspunkt.now()),
+                emptyList(),
+                emptyList(),
+            )
         every { repository.finnBarnepensjonGrunnlagForBehandling(nye) } returns null
         every { repository.lagre(any()) } returns true
 
@@ -452,18 +471,20 @@ internal class BeregningsGrunnlagRoutesTest {
 
         coEvery { behandlingKlient.harTilgangTilBehandling(any(), any()) } returns true
         coEvery { behandlingKlient.beregn(any(), any(), any()) } returns true
-        every { repository.finnBarnepensjonGrunnlagForBehandling(forrige) } returns BeregningsGrunnlag(
-            forrige,
-            Grunnlagsopplysning.Saksbehandler("Z123456", Tidspunkt.now()),
-            emptyList(),
-            emptyList()
-        )
-        every { repository.finnBarnepensjonGrunnlagForBehandling(nye) } returns BeregningsGrunnlag(
-            nye,
-            Grunnlagsopplysning.Saksbehandler("Z123456", Tidspunkt.now()),
-            emptyList(),
-            emptyList()
-        )
+        every { repository.finnBarnepensjonGrunnlagForBehandling(forrige) } returns
+            BeregningsGrunnlag(
+                forrige,
+                Grunnlagsopplysning.Saksbehandler("Z123456", Tidspunkt.now()),
+                emptyList(),
+                emptyList(),
+            )
+        every { repository.finnBarnepensjonGrunnlagForBehandling(nye) } returns
+            BeregningsGrunnlag(
+                nye,
+                Grunnlagsopplysning.Saksbehandler("Z123456", Tidspunkt.now()),
+                emptyList(),
+                emptyList(),
+            )
         every { repository.lagre(any()) } returns true
 
         testApplication {
@@ -483,7 +504,7 @@ internal class BeregningsGrunnlagRoutesTest {
         server.issueToken(
             issuerId = AZURE_ISSUER,
             audience = CLIENT_ID,
-            claims = mapOf("navn" to "John Doe", "NAVident" to "Saksbehandler01")
+            claims = mapOf("navn" to "John Doe", "NAVident" to "Saksbehandler01"),
         ).serialize()
     }
 
@@ -491,7 +512,7 @@ internal class BeregningsGrunnlagRoutesTest {
         server.issueToken(
             issuerId = AZURE_ISSUER,
             audience = CLIENT_ID,
-            claims = mapOf("oid" to "woot", "sub" to "woot")
+            claims = mapOf("oid" to "woot", "sub" to "woot"),
         ).serialize()
     }
 

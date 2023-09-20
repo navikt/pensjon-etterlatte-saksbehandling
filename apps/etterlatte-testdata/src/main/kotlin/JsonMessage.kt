@@ -13,22 +13,22 @@ import java.net.InetAddress
 
 // Stripped down version of JsonMessage from rapids and rivers
 open class JsonMessage(
-    originalMessage: String
+    originalMessage: String,
 ) {
     companion object {
-        private val objectMapper = jacksonObjectMapper()
-            .registerModule(JavaTimeModule())
-            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-            .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+        private val objectMapper =
+            jacksonObjectMapper()
+                .registerModule(JavaTimeModule())
+                .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+                .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
 
-        private const val ReadCountKey = "system_read_count"
-        private const val ParticipatingServicesKey = "system_participating_services"
+        private const val READ_COUNT_KEY = "system_read_count"
+        private const val PARTICIPATING_SERVICES_KEY = "system_participating_services"
 
         private val serviceName: String? = System.getenv("NAIS_APP_NAME")
         private val serviceHostname = serviceName?.let { InetAddress.getLocalHost().hostName }
 
-        fun newMessage(map: Map<String, Any> = emptyMap()) =
-            objectMapper.writeValueAsString(map).let { JsonMessage(it) }
+        fun newMessage(map: Map<String, Any> = emptyMap()) = objectMapper.writeValueAsString(map).let { JsonMessage(it) }
     }
 
     private val json: JsonNode
@@ -36,18 +36,19 @@ open class JsonMessage(
 
     init {
         json = objectMapper.readTree(originalMessage)
-        set(ReadCountKey, json.path(ReadCountKey).asInt(-1) + 1)
+        set(READ_COUNT_KEY, json.path(READ_COUNT_KEY).asInt(-1) + 1)
 
         if (serviceName != null && serviceHostname != null) {
-            val entry = mapOf(
-                "service" to serviceName,
-                "instance" to serviceHostname,
-                "time" to Tidspunkt.now().toLocalDatetimeUTC()
-            )
-            if (json.path(ParticipatingServicesKey).isMissingOrNull()) {
-                set(ParticipatingServicesKey, listOf(entry))
+            val entry =
+                mapOf(
+                    "service" to serviceName,
+                    "instance" to serviceHostname,
+                    "time" to Tidspunkt.now().toLocalDatetimeUTC(),
+                )
+            if (json.path(PARTICIPATING_SERVICES_KEY).isMissingOrNull()) {
+                set(PARTICIPATING_SERVICES_KEY, listOf(entry))
             } else {
-                (json.path(ParticipatingServicesKey) as ArrayNode).add(objectMapper.valueToTree<JsonNode>(entry))
+                (json.path(PARTICIPATING_SERVICES_KEY) as ArrayNode).add(objectMapper.valueToTree<JsonNode>(entry))
             }
         }
     }
@@ -57,12 +58,15 @@ open class JsonMessage(
             "$key is unknown; keys must be declared as required, forbidden, or interesting"
         }
 
-    operator fun set(key: String, value: Any) {
+    operator fun set(
+        key: String,
+        value: Any,
+    ) {
         (json as ObjectNode).replace(
             key,
             objectMapper.valueToTree<JsonNode>(value).also {
                 recognizedKeys[key] = it
-            }
+            },
         )
     }
 

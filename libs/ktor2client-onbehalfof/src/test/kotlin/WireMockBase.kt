@@ -15,17 +15,18 @@ internal interface WireMockBase {
             }
         }
 
-        val mockHttpClient = HttpClient() {
-            expectSuccess = true
-            defaultRequest {
-                url("http://localhost:${mockServer.port()}")
-            }
-            install(ContentNegotiation) {
-                jackson {
-                    configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-                    setSerializationInclusion(JsonInclude.Include.NON_NULL)
+        val mockHttpClient =
+            HttpClient {
+                expectSuccess = true
+                defaultRequest {
+                    url("http://localhost:${mockServer.port()}")
+                }
+                install(ContentNegotiation) {
+                    jackson {
+                        configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+                        setSerializationInclusion(JsonInclude.Include.NON_NULL)
+                    }
                 }
             }
-        }
     }
 }

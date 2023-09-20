@@ -7,5 +7,5 @@ data class VedtakHendelse(
     val inntruffet: Tidspunkt,
     val saksbehandler: String? = null,
     val kommentar: String? = null,
-    val valgtBegrunnelse: String? = null
+    val valgtBegrunnelse: String? = null,
 )

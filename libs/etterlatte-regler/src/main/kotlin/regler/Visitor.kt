@@ -4,6 +4,7 @@ import java.time.LocalDate
 
 interface Visitor {
     fun visit(node: Node<*>)
+
     fun visit(node: SubsumsjonsNode<*>)
 }
 
@@ -13,7 +14,9 @@ interface RegelVisitor {
 
 class FinnAlleReglerVisitor : Visitor {
     val regler = mutableListOf<Regel<*, *>>()
+
     override fun visit(node: Node<*>) {}
+
     override fun visit(node: SubsumsjonsNode<*>) {
         regler += node.regel
     }
@@ -29,6 +32,7 @@ fun Node<*>.finnAnvendteRegler(): List<Regel<*, *>> {
 
 class FinnRegelverkKnekkpunkter : RegelVisitor {
     val knekkpunkter = mutableSetOf<LocalDate>()
+
     override fun visit(regel: Regel<*, *>) {
         knekkpunkter.add(regel.gjelderFra)
     }
@@ -44,6 +48,7 @@ fun Regel<*, *>.finnAlleKnekkpunkter(): Set<LocalDate> {
 
 class KanAnvendesPaaPeriode(val periode: RegelPeriode) : RegelVisitor {
     val ugyldigeReglerForPeriode = mutableListOf<Regel<*, *>>()
+
     override fun visit(regel: Regel<*, *>) {
         when (regel) {
             is VelgNyesteGyldigRegel<*, *> -> {

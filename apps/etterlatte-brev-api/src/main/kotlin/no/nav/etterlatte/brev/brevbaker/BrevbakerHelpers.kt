@@ -12,8 +12,10 @@ import no.nav.pensjon.brevbaker.api.model.SignerendeSaksbehandlere
 import java.time.LocalDate
 
 object BrevbakerHelpers {
-
-    fun hentBrevkode(sakType: SakType, vedtakType: VedtakType): EtterlatteBrevKode {
+    fun hentBrevkode(
+        sakType: SakType,
+        vedtakType: VedtakType,
+    ): EtterlatteBrevKode {
         return when (sakType) {
             SakType.OMSTILLINGSSTOENAD -> {
                 when (vedtakType) {
@@ -35,25 +37,28 @@ object BrevbakerHelpers {
         sakId: Long,
         soeker: Soeker,
         avsender: Avsender,
-        vergeNavn: String? = null
+        vergeNavn: String? = null,
     ) = Felles(
         dokumentDato = LocalDate.now(),
         saksnummer = sakId.toString(),
-        avsenderEnhet = NAVEnhet(
-            nettside = "nav.no",
-            navn = avsender.kontor,
-            telefonnummer = avsender.telefonnummer
-        ),
-        bruker = Bruker(
-            fornavn = soeker.fornavn,
-            mellomnavn = soeker.mellomnavn,
-            etternavn = soeker.etternavn,
-            foedselsnummer = Foedselsnummer(soeker.fnr.value)
-        ),
-        signerendeSaksbehandlere = SignerendeSaksbehandlere(
-            saksbehandler = avsender.saksbehandler,
-            attesterendeSaksbehandler = avsender.attestant
-        ),
-        vergeNavn = vergeNavn
+        avsenderEnhet =
+            NAVEnhet(
+                nettside = "nav.no",
+                navn = avsender.kontor,
+                telefonnummer = avsender.telefonnummer,
+            ),
+        bruker =
+            Bruker(
+                fornavn = soeker.fornavn,
+                mellomnavn = soeker.mellomnavn,
+                etternavn = soeker.etternavn,
+                foedselsnummer = Foedselsnummer(soeker.fnr.value),
+            ),
+        signerendeSaksbehandlere =
+            SignerendeSaksbehandlere(
+                saksbehandler = avsender.saksbehandler,
+                attesterendeSaksbehandler = avsender.attestant,
+            ),
+        vergeNavn = vergeNavn,
     )
 }

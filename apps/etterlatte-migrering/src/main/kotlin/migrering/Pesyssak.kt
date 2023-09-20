@@ -19,18 +19,19 @@ data class Pesyssak(
     val foersteVirkningstidspunkt: YearMonth,
     val beregning: Beregning,
     val trygdetid: Trygdetid,
-    val flyktningStatus: Boolean
+    val flyktningStatus: Boolean,
 ) {
-    fun tilMigreringsrequest() = MigreringRequest(
-        pesysId = PesysId(id),
-        enhet = enhet,
-        soeker = soeker,
-        gjenlevendeForelder = gjenlevendeForelder,
-        avdoedForelder = avdoedForelder,
-        virkningstidspunkt = virkningstidspunkt,
-        foersteVirkningstidspunkt = foersteVirkningstidspunkt,
-        beregning = beregning,
-        trygdetid = trygdetid,
-        flyktningStatus = flyktningStatus
-    )
+    fun tilMigreringsrequest() =
+        MigreringRequest(
+            pesysId = PesysId(id),
+            enhet = enhet,
+            soeker = soeker,
+            gjenlevendeForelder = gjenlevendeForelder,
+            avdoedForelder = avdoedForelder,
+            virkningstidspunkt = virkningstidspunkt,
+            foersteVirkningstidspunkt = foersteVirkningstidspunkt,
+            beregning = beregning,
+            trygdetid = trygdetid,
+            flyktningStatus = flyktningStatus,
+        )
 }

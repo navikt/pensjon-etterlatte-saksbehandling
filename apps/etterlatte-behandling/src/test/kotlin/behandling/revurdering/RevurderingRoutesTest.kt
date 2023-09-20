@@ -40,10 +40,11 @@ internal class RevurderingRoutesTest {
         server.start()
         val httpServer = server.config.httpServer
         hoconApplicationConfig = buildTestApplicationConfigurationForOauth(httpServer.port(), AZURE_ISSUER, CLIENT_ID)
-        every { applicationContext.tilgangService } returns mockk {
-            every { harTilgangTilBehandling(any(), any()) } returns true
-            every { harTilgangTilSak(any(), any()) } returns true
-        }
+        every { applicationContext.tilgangService } returns
+            mockk {
+                every { harTilgangTilBehandling(any(), any()) } returns true
+                every { harTilgangTilSak(any(), any()) } returns true
+            }
     }
 
     @AfterAll
@@ -60,17 +61,19 @@ internal class RevurderingRoutesTest {
             application {
                 module(applicationContext)
             }
-            val client = createClient {
-                install(ContentNegotiation) {
-                    register(ContentType.Application.Json, JacksonConverter(no.nav.etterlatte.libs.common.objectMapper))
+            val client =
+                createClient {
+                    install(ContentNegotiation) {
+                        register(ContentType.Application.Json, JacksonConverter(no.nav.etterlatte.libs.common.objectMapper))
+                    }
                 }
-            }
 
-            val response = client.post("api/revurdering/1") {
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                header(HttpHeaders.Authorization, "Bearer $token")
-                setBody(OpprettRevurderingRequest(aarsak = RevurderingAarsak.REGULERING))
-            }
+            val response =
+                client.post("api/revurdering/1") {
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    header(HttpHeaders.Authorization, "Bearer $token")
+                    setBody(OpprettRevurderingRequest(aarsak = RevurderingAarsak.REGULERING))
+                }
 
             assertEquals(HttpStatusCode.OK, response.status)
         }
@@ -81,17 +84,19 @@ internal class RevurderingRoutesTest {
         testApplication {
             environment { config = hoconApplicationConfig }
             application { module(applicationContext) }
-            val client = createClient {
-                install(ContentNegotiation) {
-                    register(ContentType.Application.Json, JacksonConverter(no.nav.etterlatte.libs.common.objectMapper))
+            val client =
+                createClient {
+                    install(ContentNegotiation) {
+                        register(ContentType.Application.Json, JacksonConverter(no.nav.etterlatte.libs.common.objectMapper))
+                    }
                 }
-            }
 
-            val response = client.post("api/revurdering/1") {
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                header(HttpHeaders.Authorization, "Bearer $token")
-                setBody("""{ "aarsak": "foo" }""")
-            }
+            val response =
+                client.post("api/revurdering/1") {
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    header(HttpHeaders.Authorization, "Bearer $token")
+                    setBody("""{ "aarsak": "foo" }""")
+                }
 
             assertEquals(HttpStatusCode.BadRequest, response.status)
         }
@@ -102,16 +107,18 @@ internal class RevurderingRoutesTest {
         testApplication {
             environment { config = hoconApplicationConfig }
             application { module(applicationContext) }
-            val client = createClient {
-                install(ContentNegotiation) {
-                    register(ContentType.Application.Json, JacksonConverter(no.nav.etterlatte.libs.common.objectMapper))
+            val client =
+                createClient {
+                    install(ContentNegotiation) {
+                        register(ContentType.Application.Json, JacksonConverter(no.nav.etterlatte.libs.common.objectMapper))
+                    }
                 }
-            }
 
-            val response = client.get("api/stoettederevurderinger/${SakType.BARNEPENSJON.name}") {
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                header(HttpHeaders.Authorization, "Bearer $token")
-            }
+            val response =
+                client.get("api/stoettederevurderinger/${SakType.BARNEPENSJON.name}") {
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    header(HttpHeaders.Authorization, "Bearer $token")
+                }
 
             val revurderingAarsak: List<RevurderingAarsak> = response.body()
             assertEquals(HttpStatusCode.OK, response.status)
@@ -120,8 +127,8 @@ internal class RevurderingRoutesTest {
             assertEquals(revurderingsaarsakerForBarnepensjon.size, revurderingAarsak.size)
             assertTrue(
                 revurderingAarsak.containsAll<Any>(
-                    revurderingsaarsakerForBarnepensjon
-                )
+                    revurderingsaarsakerForBarnepensjon,
+                ),
             )
         }
     }
@@ -131,16 +138,18 @@ internal class RevurderingRoutesTest {
         testApplication {
             environment { config = hoconApplicationConfig }
             application { module(applicationContext) }
-            val client = createClient {
-                install(ContentNegotiation) {
-                    register(ContentType.Application.Json, JacksonConverter(no.nav.etterlatte.libs.common.objectMapper))
+            val client =
+                createClient {
+                    install(ContentNegotiation) {
+                        register(ContentType.Application.Json, JacksonConverter(no.nav.etterlatte.libs.common.objectMapper))
+                    }
                 }
-            }
 
-            val response = client.get("api/stoettederevurderinger/${SakType.OMSTILLINGSSTOENAD.name}") {
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                header(HttpHeaders.Authorization, "Bearer $token")
-            }
+            val response =
+                client.get("api/stoettederevurderinger/${SakType.OMSTILLINGSSTOENAD.name}") {
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    header(HttpHeaders.Authorization, "Bearer $token")
+                }
 
             val revurderingAarsak: List<RevurderingAarsak> = response.body()
             assertEquals(HttpStatusCode.OK, response.status)
@@ -148,8 +157,8 @@ internal class RevurderingRoutesTest {
                 revurderingAarsak.containsAll(
                     RevurderingAarsak.values()
                         .filter { it.gyldigForSakType(SakType.OMSTILLINGSSTOENAD) }
-                        .filter { it.name !== RevurderingAarsak.NY_SOEKNAD.toString() }
-                )
+                        .filter { it.name !== RevurderingAarsak.NY_SOEKNAD.toString() },
+                ),
             )
         }
     }
@@ -159,16 +168,18 @@ internal class RevurderingRoutesTest {
         testApplication {
             environment { config = hoconApplicationConfig }
             application { module(applicationContext) }
-            val client = createClient {
-                install(ContentNegotiation) {
-                    register(ContentType.Application.Json, JacksonConverter(no.nav.etterlatte.libs.common.objectMapper))
+            val client =
+                createClient {
+                    install(ContentNegotiation) {
+                        register(ContentType.Application.Json, JacksonConverter(no.nav.etterlatte.libs.common.objectMapper))
+                    }
                 }
-            }
 
-            val response = client.get("api/stoettederevurderinger/ugyldigtype") {
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                header(HttpHeaders.Authorization, "Bearer $token")
-            }
+            val response =
+                client.get("api/stoettederevurderinger/ugyldigtype") {
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    header(HttpHeaders.Authorization, "Bearer $token")
+                }
 
             assertEquals(HttpStatusCode.BadRequest, response.status)
         }
@@ -178,10 +189,11 @@ internal class RevurderingRoutesTest {
         server.issueToken(
             issuerId = AZURE_ISSUER,
             audience = CLIENT_ID,
-            claims = mapOf(
-                "navn" to "John Doe",
-                "NAVident" to "Saksbehandler01"
-            )
+            claims =
+                mapOf(
+                    "navn" to "John Doe",
+                    "NAVident" to "Saksbehandler01",
+                ),
         ).serialize()
     }
 

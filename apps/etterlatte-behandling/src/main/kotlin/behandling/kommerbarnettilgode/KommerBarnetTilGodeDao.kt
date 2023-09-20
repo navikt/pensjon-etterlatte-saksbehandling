@@ -6,13 +6,13 @@ import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.database.singleOrNull
 import java.sql.Connection
-import java.util.*
+import java.util.UUID
 
 class KommerBarnetTilGodeDao(private val connection: () -> Connection) {
     fun lagreKommerBarnetTilGode(kommerBarnetTilGode: KommerBarnetTilgode) {
         if (kommerBarnetTilGode.behandlingId?.let { hentKommerBarnetTilGode(it) } != null) {
             connection().prepareStatement(
-                "UPDATE kommerbarnettilgode SET svar = ?, begrunnelse = ?, kilde = ? WHERE behandling_id = ?"
+                "UPDATE kommerbarnettilgode SET svar = ?, begrunnelse = ?, kilde = ? WHERE behandling_id = ?",
             )
                 .also {
                     it.setString(1, kommerBarnetTilGode.svar.name)
@@ -23,7 +23,7 @@ class KommerBarnetTilGodeDao(private val connection: () -> Connection) {
                 }
         } else {
             connection().prepareStatement(
-                "INSERT INTO kommerbarnettilgode(behandling_id, svar, begrunnelse, kilde) VALUES(?,?,?,?)"
+                "INSERT INTO kommerbarnettilgode(behandling_id, svar, begrunnelse, kilde) VALUES(?,?,?,?)",
             ).also {
                 it.setObject(1, kommerBarnetTilGode.behandlingId)
                 it.setString(2, kommerBarnetTilGode.svar.name)
@@ -40,7 +40,7 @@ class KommerBarnetTilGodeDao(private val connection: () -> Connection) {
                 """
                     SELECT k.svar, k.begrunnelse, k.kilde, k.behandling_id FROM kommerbarnettilgode k
                     WHERE k.behandling_id = ?
-                    """
+                    """,
             ).also { it.setObject(1, behandlingId) }
 
         return stmt.executeQuery().singleOrNull {
@@ -48,7 +48,7 @@ class KommerBarnetTilGodeDao(private val connection: () -> Connection) {
                 svar = getString("svar").let { JaNei.valueOf(it) },
                 begrunnelse = getString("begrunnelse"),
                 kilde = getString("kilde").let { objectMapper.readValue(it) },
-                behandlingId = behandlingId
+                behandlingId = behandlingId,
             )
         }
     }

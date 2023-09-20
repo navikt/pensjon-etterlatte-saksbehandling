@@ -28,7 +28,7 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.rivers.VedtakTilJournalfoering
 import no.nav.etterlatte.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
-import java.util.*
+import java.util.UUID
 
 class VedtaksbrevService(
     private val db: BrevRepository,
@@ -37,7 +37,7 @@ class VedtaksbrevService(
     private val dokarkivService: DokarkivServiceImpl,
     private val brevbaker: BrevbakerService,
     private val brevDataMapper: BrevDataMapper,
-    private val brevProsessTypeFactory: BrevProsessTypeFactory
+    private val brevProsessTypeFactory: BrevProsessTypeFactory,
 ) {
     private val logger = LoggerFactory.getLogger(VedtaksbrevService::class.java)
 
@@ -56,7 +56,7 @@ class VedtaksbrevService(
     suspend fun opprettVedtaksbrev(
         sakId: Long,
         behandlingId: UUID,
-        brukerTokenInfo: BrukerTokenInfo
+        brukerTokenInfo: BrukerTokenInfo,
     ): Brev {
         require(hentVedtaksbrev(behandlingId) == null) {
             "Vedtaksbrev finnes allerede på behandling (id=$behandlingId) og kan ikke opprettes på nytt"
@@ -68,22 +68,23 @@ class VedtaksbrevService(
 
         val prosessType = brevProsessTypeFactory.fra(behandling)
 
-        val nyttBrev = OpprettNyttBrev(
-            sakId = sakId,
-            behandlingId = behandling.behandlingId,
-            prosessType = prosessType,
-            soekerFnr = behandling.persongalleri.soeker.fnr.value,
-            mottaker = mottaker,
-            innhold = opprettInnhold(behandling, prosessType),
-            innholdVedlegg = opprettInnholdVedlegg(behandling, prosessType)
-        )
+        val nyttBrev =
+            OpprettNyttBrev(
+                sakId = sakId,
+                behandlingId = behandling.behandlingId,
+                prosessType = prosessType,
+                soekerFnr = behandling.persongalleri.soeker.fnr.value,
+                mottaker = mottaker,
+                innhold = opprettInnhold(behandling, prosessType),
+                innholdVedlegg = opprettInnholdVedlegg(behandling, prosessType),
+            )
 
         return db.opprettBrev(nyttBrev)
     }
 
     suspend fun genererPdf(
         id: BrevID,
-        brukerTokenInfo: BrukerTokenInfo
+        brukerTokenInfo: BrukerTokenInfo,
     ): Pdf {
         val brev = hentBrev(id)
 
@@ -107,7 +108,7 @@ class VedtaksbrevService(
         sakId: Long,
         brevId: Long,
         behandlingId: UUID,
-        brukerTokenInfo: BrukerTokenInfo
+        brukerTokenInfo: BrukerTokenInfo,
     ): BrevService.BrevPayload {
         val behandling = sakOgBehandlingService.hentBehandling(sakId, behandlingId, brukerTokenInfo)
         val prosessType = brevProsessTypeFactory.fra(behandling)
@@ -124,15 +125,20 @@ class VedtaksbrevService(
 
         return BrevService.BrevPayload(
             innhold.payload ?: db.hentBrevPayload(brevId),
-            innholdVedlegg ?: db.hentBrevPayloadVedlegg(brevId)
+            innholdVedlegg ?: db.hentBrevPayloadVedlegg(brevId),
         )
     }
 
-    private fun opprettBrevData(brev: Brev, behandling: Behandling, brevkode: BrevDataMapper.BrevkodePar): BrevData =
+    private fun opprettBrevData(
+        brev: Brev,
+        behandling: Behandling,
+        brevkode: BrevDataMapper.BrevkodePar,
+    ): BrevData =
         when (brev.prosessType) {
-            REDIGERBAR -> brevDataMapper.brevDataFerdigstilling(behandling, {
-                hentLagretInnhold(brev)
-            }, { hentLagretInnholdVedlegg(brev) }, brevkode)
+            REDIGERBAR ->
+                brevDataMapper.brevDataFerdigstilling(behandling, {
+                    hentLagretInnhold(brev)
+                }, { hentLagretInnholdVedlegg(brev) }, brevkode)
             AUTOMATISK -> brevDataMapper.brevData(behandling)
             MANUELL -> ManueltBrevData(hentLagretInnhold(brev))
         }
@@ -141,19 +147,26 @@ class VedtaksbrevService(
 
     private fun hentLagretInnholdVedlegg(brev: Brev) = requireNotNull(db.hentBrevPayloadVedlegg(brev.id))
 
-    private suspend fun opprettInnhold(behandling: Behandling, prosessType: BrevProsessType): BrevInnhold {
+    private suspend fun opprettInnhold(
+        behandling: Behandling,
+        prosessType: BrevProsessType,
+    ): BrevInnhold {
         val tittel = "Vedtak om ${behandling.vedtak.type.name.lowercase()}"
 
-        val payload = when (prosessType) {
-            REDIGERBAR -> brevbaker.hentRedigerbarTekstFraBrevbakeren(behandling)
-            AUTOMATISK -> null
-            MANUELL -> SlateHelper.hentInitiellPayload(behandling)
-        }
+        val payload =
+            when (prosessType) {
+                REDIGERBAR -> brevbaker.hentRedigerbarTekstFraBrevbakeren(behandling)
+                AUTOMATISK -> null
+                MANUELL -> SlateHelper.hentInitiellPayload(behandling)
+            }
 
         return BrevInnhold(tittel, behandling.spraak, payload)
     }
 
-    private fun opprettInnholdVedlegg(behandling: Behandling, prosessType: BrevProsessType): List<BrevInnholdVedlegg>? =
+    private fun opprettInnholdVedlegg(
+        behandling: Behandling,
+        prosessType: BrevProsessType,
+    ): List<BrevInnholdVedlegg>? =
         when (prosessType) {
             REDIGERBAR -> SlateHelper.hentInitiellPayloadVedlegg(behandling)
             AUTOMATISK -> null
@@ -164,7 +177,7 @@ class VedtaksbrevService(
         brev: Brev,
         behandling: Behandling,
         pdf: Pdf,
-        brukerTokenInfo: BrukerTokenInfo
+        brukerTokenInfo: BrukerTokenInfo,
     ) {
         if (behandling.vedtak.status != VedtakStatus.FATTET_VEDTAK) {
             logger.info("Vedtak status er ${behandling.vedtak.status}. Avventer ferdigstilling av brev (id=${brev.id})")
@@ -178,12 +191,15 @@ class VedtaksbrevService(
         } else {
             logger.warn(
                 "Kan ikke ferdigstille/låse brev når saksbehandler (${behandling.vedtak.saksbehandlerIdent})" +
-                    " og attestant (${brukerTokenInfo.ident()}) er samme person."
+                    " og attestant (${brukerTokenInfo.ident()}) er samme person.",
             )
         }
     }
 
-    fun journalfoerVedtaksbrev(vedtaksbrev: Brev, vedtak: VedtakTilJournalfoering): JournalpostResponse {
+    fun journalfoerVedtaksbrev(
+        vedtaksbrev: Brev,
+        vedtak: VedtakTilJournalfoering,
+    ): JournalpostResponse {
         if (vedtaksbrev.status != Status.FERDIGSTILT) {
             throw IllegalArgumentException("Ugyldig status ${vedtaksbrev.status} på vedtaksbrev (id=${vedtaksbrev.id})")
         }

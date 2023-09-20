@@ -38,11 +38,12 @@ internal class BehandlingDaoReguleringTest {
         postgreSQLContainer.withUrlParam("user", postgreSQLContainer.username)
         postgreSQLContainer.withUrlParam("password", postgreSQLContainer.password)
 
-        dataSource = DataSourceBuilder.createDataSource(
-            jdbcUrl = postgreSQLContainer.jdbcUrl,
-            username = postgreSQLContainer.username,
-            password = postgreSQLContainer.password
-        ).apply { migrate() }
+        dataSource =
+            DataSourceBuilder.createDataSource(
+                jdbcUrl = postgreSQLContainer.jdbcUrl,
+                username = postgreSQLContainer.username,
+                password = postgreSQLContainer.password,
+            ).apply { migrate() }
 
         val connection = dataSource.connection
         sakRepo = SakDao { connection }
@@ -62,11 +63,10 @@ internal class BehandlingDaoReguleringTest {
         postgreSQLContainer.stop()
     }
 
-    private fun hentMigrerbareStatuses() =
-        BehandlingStatus.values().toList() - BehandlingStatus.skalIkkeOmregnesVedGRegulering().toSet()
+    private fun hentMigrerbareStatuses() = BehandlingStatus.values().toList() - BehandlingStatus.skalIkkeOmregnesVedGRegulering().toSet()
 
     @ParameterizedTest(
-        name = "behandling med status {0} skal endres til aa vaere VILKAARSVURDERT"
+        name = "behandling med status {0} skal endres til aa vaere VILKAARSVURDERT",
     )
     @MethodSource("hentMigrerbareStatuses")
     fun `behandlinger som er beregnet maa beregnes paa nytt`(status: BehandlingStatus) {

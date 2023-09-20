@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class BrukerTokenInfoTest {
-
     @Test
     fun `er maskin-til-maskin viss oid og sub er like`() {
         assertTrue(BrukerTokenInfo.of("a", "b", "c", "c", null) is Systembruker)

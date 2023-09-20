@@ -22,29 +22,30 @@ fun httpClientClientCredentials(
     azureAppJwk: String,
     azureAppWellKnownUrl: String,
     azureAppScope: String,
-    ekstraJacksoninnstillinger: ((o: ObjectMapper) -> Unit) = { }
+    ekstraJacksoninnstillinger: ((o: ObjectMapper) -> Unit) = { },
 ) = httpClient(
     ekstraJacksoninnstillinger = ekstraJacksoninnstillinger,
     auth = {
         it.install(Auth) {
             clientCredential {
-                config = mapOf(
-                    "AZURE_APP_CLIENT_ID" to azureAppClientId,
-                    "AZURE_APP_JWK" to azureAppJwk,
-                    "AZURE_APP_WELL_KNOWN_URL" to azureAppWellKnownUrl,
-                    "AZURE_APP_OUTBOUND_SCOPE" to azureAppScope
-                )
+                config =
+                    mapOf(
+                        "AZURE_APP_CLIENT_ID" to azureAppClientId,
+                        "AZURE_APP_JWK" to azureAppJwk,
+                        "AZURE_APP_WELL_KNOWN_URL" to azureAppWellKnownUrl,
+                        "AZURE_APP_OUTBOUND_SCOPE" to azureAppScope,
+                    )
             }
         }
     },
-    forventSuksess = true
+    forventSuksess = true,
 )
 
 fun httpClient(
     forventSuksess: Boolean = false,
     ekstraJacksoninnstillinger: (o: ObjectMapper) -> Unit = { },
     auth: (cl: HttpClientConfig<OkHttpConfig>) -> Unit? = {},
-    ekstraDefaultHeaders: (builder: HttpMessageBuilder) -> Unit = {}
+    ekstraDefaultHeaders: (builder: HttpMessageBuilder) -> Unit = {},
 ) = HttpClient(OkHttp) {
     expectSuccess = forventSuksess
     install(ContentNegotiation) {

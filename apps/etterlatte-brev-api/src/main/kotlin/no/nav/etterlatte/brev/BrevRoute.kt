@@ -21,7 +21,10 @@ import kotlin.time.ExperimentalTime
 import kotlin.time.measureTimedValue
 
 @OptIn(ExperimentalTime::class)
-fun Route.brevRoute(service: BrevService, behandlingKlient: BehandlingKlient) {
+fun Route.brevRoute(
+    service: BrevService,
+    behandlingKlient: BehandlingKlient,
+) {
     val logger = LoggerFactory.getLogger("no.nav.etterlatte.brev.VedaksbrevRoute")
 
     route("brev/{id}") {
@@ -64,7 +67,7 @@ fun Route.brevRoute(service: BrevService, behandlingKlient: BehandlingKlient) {
                 withSakId(behandlingKlient) {
                     val brevId = requireNotNull(call.parameters["id"]).toLong()
 
-                    call.respond(service.hentBrevPayload(brevId) ?: HttpStatusCode.NoContent)
+                    call.respond(service.hentBrevPayload(brevId))
                 }
             }
 
@@ -142,9 +145,9 @@ fun Route.brevRoute(service: BrevService, behandlingKlient: BehandlingKlient) {
 
 data class OppdaterPayloadRequest(
     val payload: Slate,
-    val payload_vedlegg: List<BrevInnholdVedlegg>? = null
+    val payload_vedlegg: List<BrevInnholdVedlegg>? = null,
 )
 
 data class OppdaterMottakerRequest(
-    val mottaker: Mottaker
+    val mottaker: Mottaker,
 )

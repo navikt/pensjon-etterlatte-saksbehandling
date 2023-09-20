@@ -6,7 +6,7 @@ package no.nav.etterlatte.klage.modell
 enum class KabalHjemmel(
     val id: String,
     val lovKilde: LovKilde,
-    val spesifikasjon: String
+    val spesifikasjon: String,
 ) {
     // @formatter:off
 
@@ -178,5 +178,5 @@ enum class KabalHjemmel(
     // Backwards compatibility in dev with search and innstillinger. Can be removed later?
     FTL("1000", LovKilde.FOLKETRYGDLOVEN, "Folketrygdloven"),
     FTL_9("1000.009", LovKilde.FOLKETRYGDLOVEN, "Folketrygdloven kapittel 9"),
-    MANGLER("1002", LovKilde.UKJENT, "Hjemmel mangler")
+    MANGLER("1002", LovKilde.UKJENT, "Hjemmel mangler"),
 }

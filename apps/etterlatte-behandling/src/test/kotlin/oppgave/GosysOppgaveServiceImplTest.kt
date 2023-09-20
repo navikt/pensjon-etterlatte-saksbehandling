@@ -25,62 +25,65 @@ class GosysOppgaveServiceImplTest {
     fun `skal hente oppgaver og deretter folkeregisterIdent for unike identer`() {
         every { featureToggleService.isEnabled(any(), false) } returns true
 
-        coEvery { gosysOppgaveKlient.hentOppgaver(any(), brukerTokenInfo) } returns GosysOppgaver(
-            antallTreffTotalt = 3,
-            oppgaver = listOf(
-                GosysApiOppgave(
-                    id = 1,
-                    versjon = 1,
-                    tema = "EYB",
-                    behandlingstema = "",
-                    oppgavetype = "",
-                    opprettetTidspunkt = Tidspunkt.now(),
-                    tildeltEnhetsnr = "4808",
-                    tilordnetRessurs = null,
-                    aktoerId = "53771238272763",
-                    beskrivelse = "Beskrivelse av oppgaven",
-                    status = "NY",
-                    fristFerdigstillelse = LocalDate.now().plusDays(7)
-                ),
-                GosysApiOppgave(
-                    id = 2,
-                    versjon = 4,
-                    tema = "EYB",
-                    behandlingstema = "",
-                    oppgavetype = "",
-                    opprettetTidspunkt = Tidspunkt.now().minus(5L, ChronoUnit.DAYS),
-                    tildeltEnhetsnr = "4808",
-                    tilordnetRessurs = "A123456",
-                    aktoerId = "53771238272763",
-                    beskrivelse = "Beskrivelse av oppgave med id 2",
-                    status = "TIL_ATTESTERING",
-                    fristFerdigstillelse = LocalDate.now().plusDays(14)
-                ),
-                GosysApiOppgave(
-                    id = 3,
-                    versjon = 1,
-                    tema = "EYO",
-                    behandlingstema = "",
-                    oppgavetype = "",
-                    opprettetTidspunkt = Tidspunkt.now().minus(3L, ChronoUnit.DAYS),
-                    tildeltEnhetsnr = "4808",
-                    tilordnetRessurs = null,
-                    aktoerId = "78324720383742",
-                    beskrivelse = "Omstillingsstønad oppgavebeskrivelse",
-                    status = "NY",
-                    fristFerdigstillelse = LocalDate.now().plusDays(4)
-                )
+        coEvery { gosysOppgaveKlient.hentOppgaver(any(), brukerTokenInfo) } returns
+            GosysOppgaver(
+                antallTreffTotalt = 3,
+                oppgaver =
+                    listOf(
+                        GosysApiOppgave(
+                            id = 1,
+                            versjon = 1,
+                            tema = "EYB",
+                            behandlingstema = "",
+                            oppgavetype = "",
+                            opprettetTidspunkt = Tidspunkt.now(),
+                            tildeltEnhetsnr = "4808",
+                            tilordnetRessurs = null,
+                            aktoerId = "53771238272763",
+                            beskrivelse = "Beskrivelse av oppgaven",
+                            status = "NY",
+                            fristFerdigstillelse = LocalDate.now().plusDays(7),
+                        ),
+                        GosysApiOppgave(
+                            id = 2,
+                            versjon = 4,
+                            tema = "EYB",
+                            behandlingstema = "",
+                            oppgavetype = "",
+                            opprettetTidspunkt = Tidspunkt.now().minus(5L, ChronoUnit.DAYS),
+                            tildeltEnhetsnr = "4808",
+                            tilordnetRessurs = "A123456",
+                            aktoerId = "53771238272763",
+                            beskrivelse = "Beskrivelse av oppgave med id 2",
+                            status = "TIL_ATTESTERING",
+                            fristFerdigstillelse = LocalDate.now().plusDays(14),
+                        ),
+                        GosysApiOppgave(
+                            id = 3,
+                            versjon = 1,
+                            tema = "EYO",
+                            behandlingstema = "",
+                            oppgavetype = "",
+                            opprettetTidspunkt = Tidspunkt.now().minus(3L, ChronoUnit.DAYS),
+                            tildeltEnhetsnr = "4808",
+                            tilordnetRessurs = null,
+                            aktoerId = "78324720383742",
+                            beskrivelse = "Omstillingsstønad oppgavebeskrivelse",
+                            status = "NY",
+                            fristFerdigstillelse = LocalDate.now().plusDays(4),
+                        ),
+                    ),
             )
-        )
         every { pdlKlient.hentFolkeregisterIdenterForAktoerIdBolk(setOf("53771238272763", "78324720383742")) } returns
             mapOf(
                 "53771238272763" to "01010812345",
-                "78324720383742" to "29048012345"
+                "78324720383742" to "29048012345",
             )
 
-        val resultat = runBlocking {
-            service.hentOppgaver(brukerTokenInfo)
-        }
+        val resultat =
+            runBlocking {
+                service.hentOppgaver(brukerTokenInfo)
+            }
 
         resultat shouldHaveSize 3
         resultat.filter { it.fnr == "01010812345" } shouldHaveSize 2
@@ -91,7 +94,7 @@ class GosysOppgaveServiceImplTest {
     fun `kalle gosys-klient med riktige params`() {
         coEvery {
             gosysOppgaveKlient.tildelOppgaveTilSaksbehandler(
-                oppgaveId = "123", oppgaveVersjon = 2L, tildeles = "A012345", brukerTokenInfo
+                oppgaveId = "123", oppgaveVersjon = 2L, tildeles = "A012345", brukerTokenInfo,
             )
         } returns Unit
 

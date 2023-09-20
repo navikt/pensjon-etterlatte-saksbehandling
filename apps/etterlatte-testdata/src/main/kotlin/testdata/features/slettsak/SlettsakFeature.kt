@@ -22,10 +22,11 @@ object SlettsakFeature : TestDataFeature {
     override val routes: Route.() -> Unit
         get() = {
             get {
-                val model = mapOf(
-                    "beskrivelse" to beskrivelse,
-                    "path" to path
-                )
+                val model =
+                    mapOf(
+                        "beskrivelse" to beskrivelse,
+                        "path" to path,
+                    )
 
                 call.respond(MustacheContent("slett/slett-sak.hbs", model))
             }
@@ -34,20 +35,22 @@ object SlettsakFeature : TestDataFeature {
                 val sakId = requireNotNull(call.receiveParameters()["sakId"]).toLong()
 
                 try {
-                    val navIdent = requireNotNull(navIdentFraToken()) {
-                        "Nav ident mangler. Du må være innlogget for å slette en sak."
-                    }
+                    val navIdent =
+                        requireNotNull(navIdentFraToken()) {
+                            "Nav ident mangler. Du må være innlogget for å slette en sak."
+                        }
 
-                    val (partisjon, offset) = producer.publiser(
-                        sakId.toString(),
-                        JsonMessage.newMessage(
-                            mapOf(
-                                "@event_name" to "VEDLIKEHOLD:SLETT_SAK",
-                                "sakId" to sakId
-                            )
-                        ).toJson(),
-                        mapOf("NavIdent" to (navIdent.toByteArray()))
-                    )
+                    val (partisjon, offset) =
+                        producer.publiser(
+                            sakId.toString(),
+                            JsonMessage.newMessage(
+                                mapOf(
+                                    "@event_name" to "VEDLIKEHOLD:SLETT_SAK",
+                                    "sakId" to sakId,
+                                ),
+                            ).toJson(),
+                            mapOf("NavIdent" to (navIdent.toByteArray())),
+                        )
                     logger.info("Publiserer melding med partisjon: $partisjon offset: $offset")
 
                     call.respondRedirect("/$path/slettet?sakId=$sakId&partisjon=$partisjon&offset=$offset")
@@ -57,22 +60,23 @@ object SlettsakFeature : TestDataFeature {
                     call.respond(
                         MustacheContent(
                             "error.hbs",
-                            mapOf("errorMessage" to e.message, "stacktrace" to e.stackTraceToString())
-                        )
+                            mapOf("errorMessage" to e.message, "stacktrace" to e.stackTraceToString()),
+                        ),
                     )
                 }
             }
 
             get("slettet") {
-                val model = call.request.queryParameters.let {
-                    mapOf(
-                        "path" to path,
-                        "beskrivelse" to beskrivelse,
-                        "sakId" to it["sakId"]!!,
-                        "partisjon" to it["partisjon"]!!,
-                        "offset" to it["offset"]!!
-                    )
-                }
+                val model =
+                    call.request.queryParameters.let {
+                        mapOf(
+                            "path" to path,
+                            "beskrivelse" to beskrivelse,
+                            "sakId" to it["sakId"]!!,
+                            "partisjon" to it["partisjon"]!!,
+                            "offset" to it["offset"]!!,
+                        )
+                    }
 
                 call.respond(MustacheContent("slett/sletting-sendt.hbs", model))
             }

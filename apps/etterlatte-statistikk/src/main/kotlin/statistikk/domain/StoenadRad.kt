@@ -4,7 +4,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import java.time.LocalDate
 import java.time.YearMonth
-import java.util.*
+import java.util.UUID
 
 data class StoenadRad(
     val id: Long,
@@ -30,5 +30,5 @@ data class StoenadRad(
     val vedtakType: VedtakType?,
     val sakUtland: SakUtland?,
     val virkningstidspunkt: YearMonth?,
-    val utbetalingsdato: LocalDate?
+    val utbetalingsdato: LocalDate?,
 )

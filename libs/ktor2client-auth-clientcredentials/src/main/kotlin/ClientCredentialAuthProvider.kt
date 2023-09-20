@@ -28,20 +28,21 @@ class ClientCredentialAuthConfig {
 class ClientCredentialAuthProvider(config: Map<String, String>) : AuthProvider {
     override val sendWithoutRequest: Boolean = true
 
-    private val clientPropertiesConfig = ClientProperties(
-        null, // URI(conf["token_endpoint_url"]!!),
-        config["AZURE_APP_WELL_KNOWN_URL"]?.let { URI(it) },
-        OAuth2GrantType("client_credentials"),
-        config["AZURE_APP_OUTBOUND_SCOPE"]?.split(",") ?: emptyList(),
-        ClientAuthenticationProperties(
-            config["AZURE_APP_CLIENT_ID"],
-            ClientAuthenticationMethod.PRIVATE_KEY_JWT,
+    private val clientPropertiesConfig =
+        ClientProperties(
+            null, // URI(conf["token_endpoint_url"]!!),
+            config["AZURE_APP_WELL_KNOWN_URL"]?.let { URI(it) },
+            OAuth2GrantType("client_credentials"),
+            config["AZURE_APP_OUTBOUND_SCOPE"]?.split(",") ?: emptyList(),
+            ClientAuthenticationProperties(
+                config["AZURE_APP_CLIENT_ID"],
+                ClientAuthenticationMethod.PRIVATE_KEY_JWT,
+                null,
+                config["AZURE_APP_JWK"],
+            ),
+            null, // conf["resource_url"]?.let { URI(it) },
             null,
-            config["AZURE_APP_JWK"]
-        ),
-        null, // conf["resource_url"]?.let { URI(it) },
-        null
-    )
+        )
     private val httpClient = DefaultOAuth2HttpClient()
     private val accessTokenService = setupOAuth2AccessTokenService(httpClient = httpClient)
 
@@ -49,7 +50,10 @@ class ClientCredentialAuthProvider(config: Map<String, String>) : AuthProvider {
         return true
     }
 
-    override suspend fun addRequestHeaders(request: HttpRequestBuilder, authHeader: HttpAuthHeader?) {
+    override suspend fun addRequestHeaders(
+        request: HttpRequestBuilder,
+        authHeader: HttpAuthHeader?,
+    ) {
         accessTokenService.getAccessToken(clientPropertiesConfig).accessToken.also {
             request.headers[HttpHeaders.Authorization] = "Bearer $it"
         }
@@ -61,11 +65,12 @@ internal fun setupOAuth2AccessTokenService(httpClient: DefaultOAuth2HttpClient):
         null,
         null,
         ClientCredentialsTokenClient(httpClient),
-        null
+        null,
     ).also {
-        it.clientCredentialsGrantCache = OAuth2CacheFactory.accessTokenResponseCache(
-            10,
-            Duration.ofMinutes(50L).toSeconds()
-        )
+        it.clientCredentialsGrantCache =
+            OAuth2CacheFactory.accessTokenResponseCache(
+                10,
+                Duration.ofMinutes(50L).toSeconds(),
+            )
     }
 }

@@ -9,5 +9,5 @@ data class OppgaveEndring(
     val oppgaveId: UUID,
     val oppgaveFoer: OppgaveNy,
     val oppgaveEtter: OppgaveNy,
-    val tidspunkt: Tidspunkt
+    val tidspunkt: Tidspunkt,
 )

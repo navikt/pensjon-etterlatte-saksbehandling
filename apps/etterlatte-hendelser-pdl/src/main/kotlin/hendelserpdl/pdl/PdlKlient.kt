@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory
 
 class PdlKlient(
     private val httpClient: HttpClient,
-    private val url: String
+    private val url: String,
 ) {
     suspend fun hentPdlIdentifikator(fnr: String): PdlIdentifikator {
         logger.info("Henter ident fra PDL for fnr=${fnr.maskerFnr()}")

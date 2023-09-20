@@ -8,5 +8,5 @@ class KafkaEnvironment : Kafkakonfigurasjon<StringDeserializer>(
     groupId = "SKJERMING_GROUP_ID",
     deserializerClass = StringDeserializer::class.java,
     userInfoConfigKey = SchemaRegistryClientConfig.USER_INFO_CONFIG,
-    schemaRegistryUrlConfigKey = AbstractKafkaSchemaSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG
+    schemaRegistryUrlConfigKey = AbstractKafkaSchemaSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG,
 )

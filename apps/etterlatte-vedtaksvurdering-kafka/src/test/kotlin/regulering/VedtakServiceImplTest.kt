@@ -20,23 +20,25 @@ internal class VedtakServiceImplTest {
     @Test
     fun `kaller paa vedtakklient med riktig formatert url`() {
         lateinit var request: Url
-        val mockEngine = MockEngine { req ->
-            request = req.url
-            val headers = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
-            respond(
-                LoependeYtelseDTO(true, LocalDate.of(2023, 5, 1)).toJson(),
-                headers = headers
-            )
-        }
-
-        val httpClientMock = HttpClient(mockEngine) {
-            install(ContentNegotiation) {
-                register(
-                    ContentType.Application.Json,
-                    JacksonConverter(objectMapper)
+        val mockEngine =
+            MockEngine { req ->
+                request = req.url
+                val headers = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
+                respond(
+                    LoependeYtelseDTO(true, LocalDate.of(2023, 5, 1)).toJson(),
+                    headers = headers,
                 )
             }
-        }
+
+        val httpClientMock =
+            HttpClient(mockEngine) {
+                install(ContentNegotiation) {
+                    register(
+                        ContentType.Application.Json,
+                        JacksonConverter(objectMapper),
+                    )
+                }
+            }
         val vedtakService = VedtakServiceImpl(httpClientMock, "http://test")
         val dato = LocalDate.of(2023, 1, 1)
         vedtakService.harLoependeYtelserFra(1, dato)

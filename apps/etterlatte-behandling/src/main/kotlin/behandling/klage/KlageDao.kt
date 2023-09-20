@@ -13,7 +13,7 @@ import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.database.toList
 import java.sql.Connection
 import java.sql.ResultSet
-import java.util.*
+import java.util.UUID
 
 interface KlageDao {
     fun lagreKlage(klage: Klage)
@@ -21,7 +21,11 @@ interface KlageDao {
     fun hentKlage(id: UUID): Klage?
 
     fun hentKlagerISak(sakId: Long): List<Klage>
-    fun oppdaterKabalStatus(sakId: Long, kabalrespons: Kabalrespons)
+
+    fun oppdaterKabalStatus(
+        sakId: Long,
+        kabalrespons: Kabalrespons,
+    )
 }
 
 class KlageDaoImpl(private val connection: () -> Connection) : KlageDao {
@@ -36,7 +40,7 @@ class KlageDaoImpl(private val connection: () -> Connection) : KlageDao {
                             formkrav = excluded.formkrav, 
                             kabalstatus = excluded.kabalstatus, 
                             utfall = excluded.utfall
-                    """.trimIndent()
+                    """.trimIndent(),
                 )
             statement.setObject(1, klage.id)
             statement.setLong(2, klage.sak.id)
@@ -58,7 +62,7 @@ class KlageDaoImpl(private val connection: () -> Connection) : KlageDao {
                         kabalstatus, formkrav, utfall
                     FROM klage k INNER JOIN sak s on k.sak_id = s.id
                     WHERE k.id = ?
-                    """.trimIndent()
+                    """.trimIndent(),
                 )
             statement.setObject(1, id)
             return statement.executeQuery().singleOrNull {
@@ -76,7 +80,7 @@ class KlageDaoImpl(private val connection: () -> Connection) : KlageDao {
                         kabalstatus, formkrav, utfall
                     FROM klage k INNER JOIN sak s on k.sak_id = s.id
                     WHERE s.id = ?
-                    """.trimIndent()
+                    """.trimIndent(),
                 )
             statement.setLong(1, sakId)
             return statement.executeQuery().toList {
@@ -85,15 +89,19 @@ class KlageDaoImpl(private val connection: () -> Connection) : KlageDao {
         }
     }
 
-    override fun oppdaterKabalStatus(sakId: Long, kabalrespons: Kabalrespons) {
+    override fun oppdaterKabalStatus(
+        sakId: Long,
+        kabalrespons: Kabalrespons,
+    ) {
         with(connection()) {
-            val statement = prepareStatement(
-                """
+            val statement =
+                prepareStatement(
+                    """
                     UPDATE klage
                     SET kabalstatus = ?, kabalresultat = ?
                     WHERE sak_id = ?
-                """.trimIndent()
-            )
+                    """.trimIndent(),
+                )
             statement.setString(1, kabalrespons.kabalStatus.name)
             statement.setString(2, kabalrespons.resultat.name)
             statement.setObject(3, sakId)
@@ -109,13 +117,13 @@ class KlageDaoImpl(private val connection: () -> Connection) : KlageDao {
                     ident = getString("fnr"),
                     sakType = enumValueOf(getString("saktype")),
                     id = getLong("sak_id"),
-                    enhet = getString("enhet")
+                    enhet = getString("enhet"),
                 ),
             opprettet = getTidspunkt("opprettet"),
             status = enumValueOf(getString("status")),
             kabalStatus = getString("kabalstatus")?.let { enumValueOf<KabalStatus>(it) },
             formkrav = getString("formkrav")?.let { objectMapper.readValue(it) },
-            utfall = getString("utfall")?.let { objectMapper.readValue(it) }
+            utfall = getString("utfall")?.let { objectMapper.readValue(it) },
         )
     }
 }

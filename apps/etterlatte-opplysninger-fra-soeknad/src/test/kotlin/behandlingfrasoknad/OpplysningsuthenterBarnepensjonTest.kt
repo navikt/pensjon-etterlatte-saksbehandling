@@ -29,24 +29,25 @@ import java.time.Month
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class OpplysningsuthenterBarnepensjonTest {
-
     companion object {
-        val opplysninger = Opplysningsuthenter().lagOpplysningsListe(
-            objectMapper.treeToValue(
-                objectMapper.readTree(
-                    OpplysningsuthenterBarnepensjonTest::class.java.getResource("/melding.json")!!.readText()
-                )!!["@skjema_info"]
-            ),
-            SoeknadType.BARNEPENSJON
-        )
+        val opplysninger =
+            Opplysningsuthenter().lagOpplysningsListe(
+                objectMapper.treeToValue(
+                    objectMapper.readTree(
+                        OpplysningsuthenterBarnepensjonTest::class.java.getResource("/melding.json")!!.readText(),
+                    )!!["@skjema_info"],
+                ),
+                SoeknadType.BARNEPENSJON,
+            )
     }
 
     @Test
     fun `alle opplysninger skal ha innsender som kilde`() {
-        val kilde = Grunnlagsopplysning.Privatperson(
-            "03108718357",
-            LocalDateTime.parse("2022-02-14T14:37:24.573612786").toTidspunkt()
-        )
+        val kilde =
+            Grunnlagsopplysning.Privatperson(
+                "03108718357",
+                LocalDateTime.parse("2022-02-14T14:37:24.573612786").toTidspunkt(),
+            )
         opplysninger.forEach {
             assertEquals(kilde.fnr, (it.kilde as Grunnlagsopplysning.Privatperson).fnr)
             assertEquals(kilde.mottatDato, (it.kilde as Grunnlagsopplysning.Privatperson).mottatDato)

@@ -6,34 +6,30 @@ import no.nav.etterlatte.pdl.PdlVergeEllerFullmektig
 import no.nav.etterlatte.pdl.PdlVergemaalEllerFremtidsfullmakt
 
 object VergeMapper {
-
-    fun mapVerge(
-        vergemaalsListe: List<PdlVergemaalEllerFremtidsfullmakt>
-    ): List<VergemaalEllerFremtidsfullmakt> =
+    fun mapVerge(vergemaalsListe: List<PdlVergemaalEllerFremtidsfullmakt>): List<VergemaalEllerFremtidsfullmakt> =
         vergemaalsListe.map {
-            fun toVergeEllerFullmektig(
-                pdlV: PdlVergeEllerFullmektig
-            ) = VergeEllerFullmektig(
-                motpartsPersonident = pdlV.motpartsPersonident,
-                navn = pdlV.navn?.fornavn + " " + pdlV.navn?.mellomnavn + " " + pdlV.navn?.etternavn,
-                omfang = pdlV.omfang,
-                omfangetErInnenPersonligOmraade = pdlV.omfangetErInnenPersonligOmraade
-            )
+            fun toVergeEllerFullmektig(pdlV: PdlVergeEllerFullmektig) =
+                VergeEllerFullmektig(
+                    motpartsPersonident = pdlV.motpartsPersonident,
+                    navn = pdlV.navn?.fornavn + " " + pdlV.navn?.mellomnavn + " " + pdlV.navn?.etternavn,
+                    omfang = pdlV.omfang,
+                    omfangetErInnenPersonligOmraade = pdlV.omfangetErInnenPersonligOmraade,
+                )
 
             fun toVergemaal(
                 embete: String? = null,
                 type: String?,
-                vergeEllerErFullmektig: PdlVergeEllerFullmektig
+                vergeEllerErFullmektig: PdlVergeEllerFullmektig,
             ) = VergemaalEllerFremtidsfullmakt(
                 embete = embete,
                 type = type,
-                vergeEllerFullmektig = toVergeEllerFullmektig(vergeEllerErFullmektig)
+                vergeEllerFullmektig = toVergeEllerFullmektig(vergeEllerErFullmektig),
             )
 
             toVergemaal(
                 embete = it.embete,
                 type = it.type,
-                vergeEllerErFullmektig = it.vergeEllerFullmektig
+                vergeEllerErFullmektig = it.vergeEllerFullmektig,
             )
         }
 }

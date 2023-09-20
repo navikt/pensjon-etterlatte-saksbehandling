@@ -12,9 +12,16 @@ sealed class RetryResult<T> {
     }
 }
 
-suspend fun <T> retry(times: Int = 2, block: suspend () -> T) = retryInner(times, emptyList(), block)
+suspend fun <T> retry(
+    times: Int = 2,
+    block: suspend () -> T,
+) = retryInner(times, emptyList(), block)
 
-private suspend fun <T> retryInner(times: Int, exceptions: List<Exception>, block: suspend () -> T): RetryResult<T> {
+private suspend fun <T> retryInner(
+    times: Int,
+    exceptions: List<Exception>,
+    block: suspend () -> T,
+): RetryResult<T> {
     return try {
         Success(block(), exceptions)
     } catch (ex: Exception) {

@@ -18,7 +18,7 @@ private val FEBRUAR_2006 = LocalDate.of(2006, Month.FEBRUARY, 1)
 
 data class FordelerKriterierResultat(
     val kandidat: Boolean,
-    val forklaring: List<FordelerKriterie>
+    val forklaring: List<FordelerKriterie>,
 )
 
 enum class FordelerKriterie(val forklaring: String) {
@@ -50,16 +50,15 @@ enum class FordelerKriterie(val forklaring: String) {
 
     SOEKNAD_ER_IKKE_PAA_BOKMAAL("Søknaden er ikke sendt inn på bokmål"),
 
-    FAMILIERELASJON_MANGLER_IDENT("En person tilknyttet søknaden mangler en ident i PDL")
+    FAMILIERELASJON_MANGLER_IDENT("En person tilknyttet søknaden mangler en ident i PDL"),
 }
 
 class FordelerKriterier {
-
     fun sjekkMotKriterier(
         barn: Person,
         avdoed: Person,
         gjenlevende: Person?,
-        soeknad: Barnepensjon
+        soeknad: Barnepensjon,
     ): FordelerKriterierResultat {
         return fordelerKriterier(barn, avdoed, gjenlevende)
             .filter { it.blirOppfyltAv(soeknad) }
@@ -73,7 +72,7 @@ class FordelerKriterier {
     private fun fordelerKriterier(
         barn: Person,
         avdoed: Person,
-        gjenlevende: Person?
+        gjenlevende: Person?,
     ) = listOf(
         // Barn (søker)
         Kriterie(FordelerKriterie.BARN_ER_FOR_GAMMELT) { forGammel(barn) },
@@ -85,7 +84,6 @@ class FordelerKriterier {
         Kriterie(FordelerKriterie.BARN_HAR_VERGE) { harHuketAvForVerge(it) },
         Kriterie(FordelerKriterie.BARN_HAR_REGISTRERT_VERGE) { harVergemaalPDL(barn) },
         Kriterie(FordelerKriterie.BARN_HAR_FOR_GAMLE_SOESKEN) { barnHarForGamleSoesken(barn, avdoed) },
-
         // Avdød
         Kriterie(FordelerKriterie.AVDOED_ER_IKKE_REGISTRERT_SOM_DOED) { personErIkkeRegistrertDoed(avdoed) },
         Kriterie(FordelerKriterie.AVDOED_ER_IKKE_FORELDER_TIL_BARN) { ikkeForelderTilBarn(avdoed, barn) },
@@ -96,7 +94,6 @@ class FordelerKriterier {
         Kriterie(FordelerKriterie.AVDOED_HAR_DOEDSDATO_FOR_LANGT_TILBAKE_I_TID) {
             harDoedsdatoForLangtTilbakeITid(avdoed)
         },
-
         // Gjenlevende
         Kriterie(FordelerKriterie.GJENLEVENDE_MANGLER) { gjenlevende == null },
         Kriterie(FordelerKriterie.GJENLEVENDE_ER_IKKE_BOSATT_I_NORGE) {
@@ -108,16 +105,17 @@ class FordelerKriterier {
         Kriterie(FordelerKriterie.GJENLEVENDE_HAR_IKKE_FORELDREANSVAR) {
             gjenlevende == null || gjenlevendeHarIkkeForeldreansvar(barn, gjenlevende)
         },
-
         // Innsender
         Kriterie(FordelerKriterie.INNSENDER_ER_IKKE_FORELDER) { innsenderIkkeForelder(it) },
-
         Kriterie(FordelerKriterie.SOEKNAD_ER_IKKE_PAA_BOKMAAL) {
             it.spraak != Spraak.NB
-        }
+        },
     )
 
-    private fun ikkeForelderTilBarn(avdoed: Person, barn: Person): Boolean {
+    private fun ikkeForelderTilBarn(
+        avdoed: Person,
+        barn: Person,
+    ): Boolean {
         return barn.familieRelasjon?.foreldre?.let { avdoed.foedselsnummer !in it } ?: true
     }
 
@@ -133,17 +131,19 @@ class FordelerKriterier {
         return (
             person.utland?.innflyttingTilNorge?.isNotEmpty() == true ||
                 person.utland?.utflyttingFraNorge?.isNotEmpty() == true
-            )
+        )
     }
 
     private fun personErIkkeRegistrertDoed(person: Person): Boolean {
         return person.doedsdato == null
     }
 
-    private fun harDoedsdatoForLangtTilbakeITid(avdoed: Person): Boolean =
-        avdoed.doedsdato?.isBefore(LocalDate.of(2022, 6, 1)) ?: false
+    private fun harDoedsdatoForLangtTilbakeITid(avdoed: Person): Boolean = avdoed.doedsdato?.isBefore(LocalDate.of(2022, 6, 1)) ?: false
 
-    private fun gjenlevendeHarIkkeForeldreansvar(barn: Person, gjenlevende: Person): Boolean {
+    private fun gjenlevendeHarIkkeForeldreansvar(
+        barn: Person,
+        gjenlevende: Person,
+    ): Boolean {
         return barn.familieRelasjon?.ansvarligeForeldre
             ?.none { it == gjenlevende.foedselsnummer } == true
     }
@@ -160,12 +160,14 @@ class FordelerKriterier {
         return bostedsadresse?.let {
             val ugyldigAdresseType = it.type !in listOf(AdresseType.VEGADRESSE, AdresseType.MATRIKKELADRESSE)
             if (it.gyldigTilOgMed != null) {
-                val doedsdatoFoer = it.gyldigFraOgMed?.let { fom ->
-                    person.doedsdato?.isBefore(fom.toLocalDate())
-                } ?: true
-                val doedsdatoEtter = it.gyldigTilOgMed?.let { tom ->
-                    person.doedsdato?.isAfter(tom.toLocalDate())
-                } ?: true
+                val doedsdatoFoer =
+                    it.gyldigFraOgMed?.let { fom ->
+                        person.doedsdato?.isBefore(fom.toLocalDate())
+                    } ?: true
+                val doedsdatoEtter =
+                    it.gyldigTilOgMed?.let { tom ->
+                        person.doedsdato?.isAfter(tom.toLocalDate())
+                    } ?: true
                 doedsdatoFoer || doedsdatoEtter || ugyldigAdresseType
             } else {
                 ugyldigAdresseType
@@ -173,17 +175,22 @@ class FordelerKriterier {
         } ?: true
     }
 
-    private fun gjenlevendeOgBarnHarIkkeSammeAdresse(gjenlevende: Person, barn: Person): Boolean {
+    private fun gjenlevendeOgBarnHarIkkeSammeAdresse(
+        gjenlevende: Person,
+        barn: Person,
+    ): Boolean {
         val gjenlevendeAdresse = gjenlevende.bostedsadresse?.aktiv()
         val barnAdresse = barn.bostedsadresse?.aktiv()
         return !isAdresserLike(gjenlevendeAdresse, barnAdresse)
     }
 
-    private fun isAdresserLike(adresse1: Adresse?, adresse2: Adresse?) =
-        adresse1?.adresseLinje1 == adresse2?.adresseLinje1 &&
-            adresse1?.adresseLinje2 == adresse2?.adresseLinje2 &&
-            adresse1?.adresseLinje3 == adresse2?.adresseLinje3 &&
-            adresse1?.postnr == adresse2?.postnr
+    private fun isAdresserLike(
+        adresse1: Adresse?,
+        adresse2: Adresse?,
+    ) = adresse1?.adresseLinje1 == adresse2?.adresseLinje1 &&
+        adresse1?.adresseLinje2 == adresse2?.adresseLinje2 &&
+        adresse1?.adresseLinje3 == adresse2?.adresseLinje3 &&
+        adresse1?.postnr == adresse2?.postnr
 
     private fun fyller18FoerFebruar2024(foedselsdato: LocalDate): Boolean {
         return foedselsdato.isBefore(FEBRUAR_2006)
@@ -200,9 +207,10 @@ class FordelerKriterier {
     }
 
     private fun innsenderIkkeForelder(barnepensjon: Barnepensjon): Boolean {
-        return barnepensjon.innsender.foedselsnummer !in barnepensjon.foreldre
-            .filter { it.type == PersonType.GJENLEVENDE_FORELDER }
-            .map { it.foedselsnummer }
+        return barnepensjon.innsender.foedselsnummer !in
+            barnepensjon.foreldre
+                .filter { it.type == PersonType.GJENLEVENDE_FORELDER }
+                .map { it.foedselsnummer }
     }
 
     private fun harHuketAvForVerge(barnepensjon: Barnepensjon): Boolean {
@@ -227,7 +235,10 @@ class FordelerKriterier {
         return barnepensjon.soeker.utenlandsAdresse?.svar?.verdi == JaNeiVetIkke.JA
     }
 
-    private fun barnHarForGamleSoesken(barn: Person, avdoed: Person): Boolean {
+    private fun barnHarForGamleSoesken(
+        barn: Person,
+        avdoed: Person,
+    ): Boolean {
         return (avdoed.familieRelasjon?.barn ?: emptyList()).minus(barn.foedselsnummer)
             .any { soesken -> fyller18FoerFebruar2024(soesken.getBirthDate()) }
     }

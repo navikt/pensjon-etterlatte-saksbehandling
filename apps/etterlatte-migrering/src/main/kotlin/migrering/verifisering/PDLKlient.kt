@@ -18,12 +18,16 @@ import no.nav.etterlatte.libs.common.person.PersonRolle
 internal class PDLKlient(config: Config, private val pdl_app: HttpClient) {
     private val url = config.getString("pdltjenester.url")
 
-    fun hentPerson(rolle: PersonRolle, folkeregisteridentifikator: Folkeregisteridentifikator): PersonDTO =
+    fun hentPerson(
+        rolle: PersonRolle,
+        folkeregisteridentifikator: Folkeregisteridentifikator,
+    ): PersonDTO =
         runBlocking {
-            val response = pdl_app.post("$url/person/v2") {
-                contentType(ContentType.Application.Json)
-                setBody(HentPersonRequest(folkeregisteridentifikator, rolle, SakType.BARNEPENSJON))
-            }
+            val response =
+                pdl_app.post("$url/person/v2") {
+                    contentType(ContentType.Application.Json)
+                    setBody(HentPersonRequest(folkeregisteridentifikator, rolle, SakType.BARNEPENSJON))
+                }
             if (response.status.isSuccess()) {
                 response.body<PersonDTO>()
             } else {

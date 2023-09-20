@@ -9,15 +9,16 @@ fun opprettInMemoryDatabase(postgreSQLContainer: PostgreSQLContainer<Nothing>): 
     postgreSQLContainer.start()
     postgreSQLContainer.withUrlParam("user", postgreSQLContainer.username)
     postgreSQLContainer.withUrlParam("password", postgreSQLContainer.password)
-    val datasource = DataSourceBuilder.createDataSource(
-        postgreSQLContainer.jdbcUrl,
-        postgreSQLContainer.username,
-        postgreSQLContainer.password
-    ).also { it.migrate() }
+    val datasource =
+        DataSourceBuilder.createDataSource(
+            postgreSQLContainer.jdbcUrl,
+            postgreSQLContainer.username,
+            postgreSQLContainer.password,
+        ).also { it.migrate() }
     return InMemoryDatabase(postgreSQLContainer, datasource)
 }
 
 data class InMemoryDatabase(
     val sqlContainer: PostgreSQLContainer<Nothing>,
-    val dataSource: DataSource
+    val dataSource: DataSource,
 )

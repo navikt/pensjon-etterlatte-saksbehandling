@@ -25,15 +25,14 @@ import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import org.slf4j.LoggerFactory
 import rapidsandrivers.migrering.ListenerMedLogging
-import java.util.*
+import java.util.UUID
 
 data class KunneIkkeLeseVedtakException(val e: Exception) : RuntimeException(e)
 
 class VedtakMottaker(
     rapidsConnection: RapidsConnection,
-    private val utbetalingService: UtbetalingService
+    private val utbetalingService: UtbetalingService,
 ) : ListenerMedLogging() {
-
     init {
         River(rapidsConnection).apply {
             eventName(KafkaHendelseType.ATTESTERT.toString())
@@ -41,14 +40,17 @@ class VedtakMottaker(
             validate {
                 it.requireAny(
                     "vedtak.type",
-                    listOf(VedtakType.INNVILGELSE.name, VedtakType.OPPHOER.name, VedtakType.ENDRING.name)
+                    listOf(VedtakType.INNVILGELSE.name, VedtakType.OPPHOER.name, VedtakType.ENDRING.name),
                 )
             }
             correlationId()
         }.register(this)
     }
 
-    override fun haandterPakke(packet: JsonMessage, context: MessageContext) {
+    override fun haandterPakke(
+        packet: JsonMessage,
+        context: MessageContext,
+    ) {
         var vedtakId: Long? = null
         try {
             val vedtak: Utbetalingsvedtak = lesVedtak(packet).also { vedtakId = it.vedtakId }
@@ -72,7 +74,7 @@ class VedtakMottaker(
                             context,
                             vedtak.vedtakId,
                             vedtak.behandling.id,
-                            it
+                            it,
                         )
                     }
                 }
@@ -81,13 +83,13 @@ class VedtakMottaker(
                     (
                         "En eller flere utbetalingslinjer med id=[${resultat.utbetalingslinjeIDer()}] " +
                             "eksisterer fra før"
-                        ).also {
+                    ).also {
                         logger.error(it)
                         sendUtbetalingFeiletEvent(
                             context,
                             vedtak.vedtakId,
                             vedtak.behandling.id,
-                            it
+                            it,
                         )
                     }
                 }
@@ -118,42 +120,51 @@ class VedtakMottaker(
         context: MessageContext,
         vedtakId: Long? = null,
         behandlingId: UUID?,
-        beskrivelse: String
+        beskrivelse: String,
     ) {
         context.publish(
             UtbetalingEventDto(
-                utbetalingResponse = UtbetalingResponseDto(
-                    status = UtbetalingStatusDto.FEILET,
-                    vedtakId = vedtakId,
-                    behandlingId = behandlingId,
-                    feilmelding = beskrivelse
-                )
-            ).toJson()
+                utbetalingResponse =
+                    UtbetalingResponseDto(
+                        status = UtbetalingStatusDto.FEILET,
+                        vedtakId = vedtakId,
+                        behandlingId = behandlingId,
+                        feilmelding = beskrivelse,
+                    ),
+            ).toJson(),
         )
     }
 
-    private fun sendUtbetalingSendtEvent(context: MessageContext, utbetaling: Utbetaling) {
+    private fun sendUtbetalingSendtEvent(
+        context: MessageContext,
+        utbetaling: Utbetaling,
+    ) {
         context.publish(
             UtbetalingEventDto(
-                utbetalingResponse = UtbetalingResponseDto(
-                    status = UtbetalingStatusDto.valueOf(utbetaling.status().name),
-                    vedtakId = utbetaling.vedtakId.value,
-                    behandlingId = utbetaling.behandlingId.value
-                )
-            ).toJson()
+                utbetalingResponse =
+                    UtbetalingResponseDto(
+                        status = UtbetalingStatusDto.valueOf(utbetaling.status().name),
+                        vedtakId = utbetaling.vedtakId.value,
+                        behandlingId = utbetaling.behandlingId.value,
+                    ),
+            ).toJson(),
         )
     }
 
     // Mock for OMS
-    private fun sendUtbetalingSendtEventForOMSMock(context: MessageContext, utbetaling: Utbetalingsvedtak) {
+    private fun sendUtbetalingSendtEventForOMSMock(
+        context: MessageContext,
+        utbetaling: Utbetalingsvedtak,
+    ) {
         context.publish(
             UtbetalingEventDto(
-                utbetalingResponse = UtbetalingResponseDto(
-                    status = UtbetalingStatusDto.valueOf(UtbetalingStatus.GODKJENT.name),
-                    vedtakId = utbetaling.vedtakId,
-                    behandlingId = utbetaling.behandling.id
-                )
-            ).toJson()
+                utbetalingResponse =
+                    UtbetalingResponseDto(
+                        status = UtbetalingStatusDto.valueOf(UtbetalingStatus.GODKJENT.name),
+                        vedtakId = utbetaling.vedtakId,
+                        behandlingId = utbetaling.behandling.id,
+                    ),
+            ).toJson(),
         )
     }
 

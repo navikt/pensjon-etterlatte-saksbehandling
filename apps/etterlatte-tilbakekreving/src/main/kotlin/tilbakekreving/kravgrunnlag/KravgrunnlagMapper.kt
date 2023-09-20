@@ -20,30 +20,32 @@ import java.time.LocalDate
 import javax.xml.datatype.XMLGregorianCalendar
 
 object KravgrunnlagMapper {
-
-    fun toKravgrunnlag(grunnlag: DetaljertKravgrunnlagDto) = Kravgrunnlag(
-        sakId = SakId(grunnlag.fagsystemId.toLong()),
-        kravgrunnlagId = KravgrunnlagId(grunnlag.kravgrunnlagId.toLong()),
-        vedtakId = VedtakId(grunnlag.vedtakId.toLong()),
-        kontrollFelt = Kontrollfelt(grunnlag.kontrollfelt),
-        status = KravgrunnlagStatus.valueOf(grunnlag.kodeStatusKrav),
-        saksbehandler = NavIdent(grunnlag.saksbehId),
-        sisteUtbetalingslinjeId = UUID30(grunnlag.referanse),
-        grunnlagsperioder = grunnlag.tilbakekrevingsPeriode.map { periode ->
-            toGrunnlagsperiode(periode)
-        }
-    )
+    fun toKravgrunnlag(grunnlag: DetaljertKravgrunnlagDto) =
+        Kravgrunnlag(
+            sakId = SakId(grunnlag.fagsystemId.toLong()),
+            kravgrunnlagId = KravgrunnlagId(grunnlag.kravgrunnlagId.toLong()),
+            vedtakId = VedtakId(grunnlag.vedtakId.toLong()),
+            kontrollFelt = Kontrollfelt(grunnlag.kontrollfelt),
+            status = KravgrunnlagStatus.valueOf(grunnlag.kodeStatusKrav),
+            saksbehandler = NavIdent(grunnlag.saksbehId),
+            sisteUtbetalingslinjeId = UUID30(grunnlag.referanse),
+            grunnlagsperioder =
+                grunnlag.tilbakekrevingsPeriode.map { periode ->
+                    toGrunnlagsperiode(periode)
+                },
+        )
 
     private fun toGrunnlagsperiode(periode: DetaljertKravgrunnlagPeriodeDto) =
         Grunnlagsperiode(
             Periode(
                 fraOgMed = periode.periode.fom.toLocalDate(),
-                tilOgMed = periode.periode.tom.toLocalDate()
+                tilOgMed = periode.periode.tom.toLocalDate(),
             ),
             beloepSkattMnd = periode.belopSkattMnd,
-            grunnlagsbeloep = periode.tilbakekrevingsBelop.map { beloep ->
-                toGrunnlagsbeloep(beloep)
-            }
+            grunnlagsbeloep =
+                periode.tilbakekrevingsBelop.map { beloep ->
+                    toGrunnlagsbeloep(beloep)
+                },
         )
 
     private fun toGrunnlagsbeloep(beloep: DetaljertKravgrunnlagBelopDto) =
@@ -54,7 +56,7 @@ object KravgrunnlagMapper {
             beloepNyUtbetaling = beloep.belopNy,
             beloepSkalTilbakekreves = beloep.belopTilbakekreves,
             beloepSkalIkkeTilbakekreves = beloep.belopUinnkrevd,
-            skatteProsent = beloep.skattProsent
+            skatteProsent = beloep.skattProsent,
         )
 }
 

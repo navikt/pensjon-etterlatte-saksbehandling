@@ -9,10 +9,9 @@ import org.junit.jupiter.api.assertAll
 import java.time.LocalDate
 import java.time.Month
 import java.time.YearMonth
-import java.util.*
+import java.util.UUID
 
 internal class UtilsTest {
-
     @Test
     fun `skal returnere Tidspunkt-objekt for midnatt i dag for norsk vintertid`() {
         val statiskKlokke = Tidspunkt.parse("2022-01-01T21:14:29.4839104Z").fixedNorskTid()
@@ -38,7 +37,7 @@ internal class UtilsTest {
             "skal finne foerste dag i maaneden",
             { assertEquals(jan2022.year, foersteJanuar2022.year) },
             { assertEquals(jan2022.month, foersteJanuar2022.month) },
-            { assertEquals(1, foersteJanuar2022.dayOfMonth) }
+            { assertEquals(1, foersteJanuar2022.dayOfMonth) },
         )
     }
 
@@ -63,7 +62,7 @@ internal class UtilsTest {
             { assertEquals(28, sisteDagFebruar.dayOfMonth) },
             { assertEquals(april2022.year, sisteDagApril.year) },
             { assertEquals(april2022.month, sisteDagApril.month) },
-            { assertEquals(30, sisteDagApril.dayOfMonth) }
+            { assertEquals(30, sisteDagApril.dayOfMonth) },
         )
     }
 
@@ -83,7 +82,7 @@ internal class UtilsTest {
         assertAll(
             "uuid30 skal besta av uuids foerste 30 tegn med unntak av bindestrekene",
             { assertEquals(30, uuid30.value.length) },
-            { assertEquals(uuidUFoerste30Tegn, uuid30.value) }
+            { assertEquals(uuidUFoerste30Tegn, uuid30.value) },
         )
     }
 

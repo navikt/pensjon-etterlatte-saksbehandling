@@ -17,21 +17,23 @@ val institusjonsoppholdRegel: Regel<BarnepensjonGrunnlag, Prosent> =
     finnFaktumIGrunnlag(
         gjelderFra = BP_1967_DATO,
         beskrivelse = "Finner % av G mottaker skal ha for denne institusjonsoppholdytelsen",
-        finnFaktum = BarnepensjonGrunnlag::institusjonsopphold
+        finnFaktum = BarnepensjonGrunnlag::institusjonsopphold,
     ) { it?.prosentEtterReduksjon() ?: Prosent.hundre }
 
-val erBrukerIInstitusjon: Regel<BarnepensjonGrunnlag, Boolean> = finnFaktumIGrunnlag(
-    gjelderFra = BP_1967_DATO,
-    beskrivelse = "Finner om bruker har et institusjonsopphold",
-    finnFaktum = BarnepensjonGrunnlag::institusjonsopphold
-) {
-    it != null
-}
+val erBrukerIInstitusjon: Regel<BarnepensjonGrunnlag, Boolean> =
+    finnFaktumIGrunnlag(
+        gjelderFra = BP_1967_DATO,
+        beskrivelse = "Finner om bruker har et institusjonsopphold",
+        finnFaktum = BarnepensjonGrunnlag::institusjonsopphold,
+    ) {
+        it != null
+    }
 
-val institusjonsoppholdSatsRegel = RegelMeta(
-    gjelderFra = BP_1967_DATO,
-    beskrivelse = "Finner satsen for institusjonsoppholdberegning",
-    regelReferanse = RegelReferanse(id = "BP-BEREGNING-1967-REDUKSJON-INSTITUSJON")
-) benytter grunnbeloep og institusjonsoppholdRegel med { grunnbeloep, prosent ->
-    Beregningstall.somBroek(prosent).multiply(grunnbeloep.grunnbeloepPerMaaned)
-}
+val institusjonsoppholdSatsRegel =
+    RegelMeta(
+        gjelderFra = BP_1967_DATO,
+        beskrivelse = "Finner satsen for institusjonsoppholdberegning",
+        regelReferanse = RegelReferanse(id = "BP-BEREGNING-1967-REDUKSJON-INSTITUSJON"),
+    ) benytter grunnbeloep og institusjonsoppholdRegel med { grunnbeloep, prosent ->
+        Beregningstall.somBroek(prosent).multiply(grunnbeloep.grunnbeloepPerMaaned)
+    }

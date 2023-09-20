@@ -20,7 +20,7 @@ import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
 import no.nav.pensjon.brevbaker.api.model.Kroner
 import java.time.LocalDate
 import java.time.YearMonth
-import java.util.*
+import java.util.UUID
 
 data class Behandling(
     val sakId: Long,
@@ -38,7 +38,7 @@ data class Behandling(
     val virkningsdato: YearMonth? = null,
     val innvilgelsesdato: LocalDate? = null,
     val adopsjonsdato: LocalDate? = null,
-    val trygdetid: List<Trygdetidsperiode>? = null
+    val trygdetid: List<Trygdetidsperiode>? = null,
 ) {
     init {
         if (vedtak.type == VedtakType.INNVILGELSE) {
@@ -51,7 +51,7 @@ data class Trygdetidsperiode(
     val datoFOM: LocalDate,
     val datoTOM: LocalDate?,
     val land: String,
-    val opptjeningsperiode: String
+    val opptjeningsperiode: String,
 )
 
 data class ForenkletVedtak(
@@ -60,7 +60,7 @@ data class ForenkletVedtak(
     val type: VedtakType,
     val ansvarligEnhet: String,
     val saksbehandlerIdent: String,
-    val attestantIdent: String?
+    val attestantIdent: String?,
 )
 
 data class Utbetalingsinfo(
@@ -68,14 +68,14 @@ data class Utbetalingsinfo(
     val beloep: Kroner,
     val virkningsdato: LocalDate,
     val soeskenjustering: Boolean,
-    val beregningsperioder: List<Beregningsperiode>
+    val beregningsperioder: List<Beregningsperiode>,
 )
 
 data class Avkortingsinfo(
     val grunnbeloep: Kroner,
     val inntekt: Kroner,
     val virkningsdato: LocalDate,
-    val beregningsperioder: List<AvkortetBeregningsperiode>
+    val beregningsperioder: List<AvkortetBeregningsperiode>,
 )
 
 data class AvkortetBeregningsperiode(
@@ -84,7 +84,7 @@ data class AvkortetBeregningsperiode(
     val inntekt: Kroner,
     val ytelseFoerAvkorting: Kroner,
     val trygdetid: Int,
-    val utbetaltBeloep: Kroner
+    val utbetaltBeloep: Kroner,
 )
 
 data class Beregningsperiode(
@@ -93,81 +93,87 @@ data class Beregningsperiode(
     val grunnbeloep: Kroner,
     val antallBarn: Int,
     val utbetaltBeloep: Kroner,
-    val trygdetid: Int
+    val trygdetid: Int,
 )
 
 data class Persongalleri(
     val innsender: Innsender,
     val soeker: Soeker,
     val avdoed: Avdoed,
-    val verge: Verge?
+    val verge: Verge?,
 )
 
-fun Grunnlag.mapSoeker(): Soeker = with(this.soeker) {
-    val navn = hentNavn()!!.verdi
+fun Grunnlag.mapSoeker(): Soeker =
+    with(this.soeker) {
+        val navn = hentNavn()!!.verdi
 
-    Soeker(
-        fornavn = navn.fornavn.storForbokstav(),
-        mellomnavn = navn.mellomnavn?.storForbokstav(),
-        etternavn = navn.etternavn.storForbokstav(),
-        fnr = Foedselsnummer(hentFoedselsnummer()!!.verdi.value)
-    )
-}
-
-fun Grunnlag.mapAvdoed(): Avdoed = with(this.familie) {
-    val avdoed = hentAvdoed()
-
-    Avdoed(
-        navn = avdoed.hentNavn()!!.verdi.fulltNavn(),
-        doedsdato = avdoed.hentDoedsdato()!!.verdi!!
-    )
-}
-
-fun Grunnlag.mapInnsender(): Innsender = with(this.sak) {
-    val opplysning = hentKonstantOpplysning<InnsenderSoeknad>(Opplysningstype.INNSENDER_SOEKNAD_V1)
-
-    val innsender = requireNotNull(opplysning?.verdi) {
-        "Sak (id=${metadata.sakId}) mangler opplysningstype INNSENDER_SOEKNAD_V1"
+        Soeker(
+            fornavn = navn.fornavn.storForbokstav(),
+            mellomnavn = navn.mellomnavn?.storForbokstav(),
+            etternavn = navn.etternavn.storForbokstav(),
+            fnr = Foedselsnummer(hentFoedselsnummer()!!.verdi.value),
+        )
     }
 
-    Innsender(
-        navn = innsender.let { "${it.fornavn.storForbokstav()} ${it.etternavn.storForbokstav()}" },
-        fnr = Foedselsnummer(innsender.foedselsnummer.value)
-    )
-}
+fun Grunnlag.mapAvdoed(): Avdoed =
+    with(this.familie) {
+        val avdoed = hentAvdoed()
 
-fun Grunnlag.mapSpraak(): Spraak = with(this.sak) {
-    val opplysning = hentKonstantOpplysning<Spraak>(Opplysningstype.SPRAAK)
-
-    requireNotNull(opplysning?.verdi) {
-        "Sak (id=${metadata.sakId}) mangler opplysningstype SPRAAK"
+        Avdoed(
+            navn = avdoed.hentNavn()!!.verdi.fulltNavn(),
+            doedsdato = avdoed.hentDoedsdato()!!.verdi!!,
+        )
     }
-}
 
-fun Grunnlag.mapVerge(sakType: SakType): Verge? = with(this) {
-    val opplysning = sak.hentVergemaalellerfremtidsfullmakt()
+fun Grunnlag.mapInnsender(): Innsender =
+    with(this.sak) {
+        val opplysning = hentKonstantOpplysning<InnsenderSoeknad>(Opplysningstype.INNSENDER_SOEKNAD_V1)
 
-    if (opplysning?.verdi != null) {
-        TODO("Støtter ikke annen verge enn forelder – håndtering av annen verge krever ytterligere avklaringer")
-    } else if (sakType == SakType.BARNEPENSJON) {
-        val gjenlevendeNavn = hentGjenlevende().hentNavn()!!.verdi.fulltNavn()
+        val innsender =
+            requireNotNull(opplysning?.verdi) {
+                "Sak (id=${metadata.sakId}) mangler opplysningstype INNSENDER_SOEKNAD_V1"
+            }
 
-        Verge(gjenlevendeNavn)
-    } else {
-        null
+        Innsender(
+            navn = innsender.let { "${it.fornavn.storForbokstav()} ${it.etternavn.storForbokstav()}" },
+            fnr = Foedselsnummer(innsender.foedselsnummer.value),
+        )
     }
-}
+
+fun Grunnlag.mapSpraak(): Spraak =
+    with(this.sak) {
+        val opplysning = hentKonstantOpplysning<Spraak>(Opplysningstype.SPRAAK)
+
+        requireNotNull(opplysning?.verdi) {
+            "Sak (id=${metadata.sakId}) mangler opplysningstype SPRAAK"
+        }
+    }
+
+fun Grunnlag.mapVerge(sakType: SakType): Verge? =
+    with(this) {
+        val opplysning = sak.hentVergemaalellerfremtidsfullmakt()
+
+        if (opplysning?.verdi != null) {
+            TODO("Støtter ikke annen verge enn forelder – håndtering av annen verge krever ytterligere avklaringer")
+        } else if (sakType == SakType.BARNEPENSJON) {
+            val gjenlevendeNavn = hentGjenlevende().hentNavn()!!.verdi.fulltNavn()
+
+            Verge(gjenlevendeNavn)
+        } else {
+            null
+        }
+    }
 
 fun List<Beregningsperiode>.hentUtbetaltBeloep(): Int {
     // TODO: Håndter grunnbeløpsendringer
     return this.last().utbetaltBeloep.value
 }
 
-private fun Navn.fulltNavn(): String =
-    listOfNotNull(fornavn, mellomnavn, etternavn).joinToString(" ") { it.storForbokstav() }
+private fun Navn.fulltNavn(): String = listOfNotNull(fornavn, mellomnavn, etternavn).joinToString(" ") { it.storForbokstav() }
 
 private fun String.storForbokstav() = this.lowercase().storForbokstavEtter("-").storForbokstavEtter(" ")
 
-private fun String.storForbokstavEtter(delim: String) = this.split(delim).joinToString(delim) {
-    it.replaceFirstChar { c -> c.uppercase() }
-}
+private fun String.storForbokstavEtter(delim: String) =
+    this.split(delim).joinToString(delim) {
+        it.replaceFirstChar { c -> c.uppercase() }
+    }

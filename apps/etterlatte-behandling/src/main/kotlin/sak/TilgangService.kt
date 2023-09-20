@@ -4,30 +4,55 @@ import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
 
 interface TilgangService {
-    fun harTilgangTilBehandling(behandlingId: String, saksbehandlerMedRoller: SaksbehandlerMedRoller): Boolean
-    fun oppdaterAdressebeskyttelse(id: Long, adressebeskyttelseGradering: AdressebeskyttelseGradering): Int
-    fun harTilgangTilSak(sakId: Long, saksbehandlerMedRoller: SaksbehandlerMedRoller): Boolean
-    fun harTilgangTilPerson(fnr: String, saksbehandlerMedRoller: SaksbehandlerMedRoller): Boolean
-    fun harTilgangTilOppgave(oppgaveId: String, saksbehandlerMedRoller: SaksbehandlerMedRoller): Boolean
-    fun harTilgangTilKlage(klageId: String, saksbehandlerMedRoller: SaksbehandlerMedRoller): Boolean
+    fun harTilgangTilBehandling(
+        behandlingId: String,
+        saksbehandlerMedRoller: SaksbehandlerMedRoller,
+    ): Boolean
+
+    fun oppdaterAdressebeskyttelse(
+        id: Long,
+        adressebeskyttelseGradering: AdressebeskyttelseGradering,
+    ): Int
+
+    fun harTilgangTilSak(
+        sakId: Long,
+        saksbehandlerMedRoller: SaksbehandlerMedRoller,
+    ): Boolean
+
+    fun harTilgangTilPerson(
+        fnr: String,
+        saksbehandlerMedRoller: SaksbehandlerMedRoller,
+    ): Boolean
+
+    fun harTilgangTilOppgave(
+        oppgaveId: String,
+        saksbehandlerMedRoller: SaksbehandlerMedRoller,
+    ): Boolean
+
+    fun harTilgangTilKlage(
+        klageId: String,
+        saksbehandlerMedRoller: SaksbehandlerMedRoller,
+    ): Boolean
 }
 
 data class SakMedGraderingOgSkjermet(
     val id: Long,
     val adressebeskyttelseGradering: AdressebeskyttelseGradering?,
-    val erSkjermet: Boolean?
+    val erSkjermet: Boolean?,
 )
 
 data class SakMedGradering(
     val id: Long,
-    val adressebeskyttelseGradering: AdressebeskyttelseGradering?
+    val adressebeskyttelseGradering: AdressebeskyttelseGradering?,
 )
 
 class TilgangServiceImpl(
-    private val dao: SakTilgangDao
+    private val dao: SakTilgangDao,
 ) : TilgangService {
-
-    override fun harTilgangTilPerson(fnr: String, saksbehandlerMedRoller: SaksbehandlerMedRoller): Boolean {
+    override fun harTilgangTilPerson(
+        fnr: String,
+        saksbehandlerMedRoller: SaksbehandlerMedRoller,
+    ): Boolean {
         val finnSakerMedGradering = dao.finnSakerMedGraderingOgSkjerming(fnr)
         if (finnSakerMedGradering.isEmpty()) {
             return true
@@ -37,24 +62,33 @@ class TilgangServiceImpl(
         }.all { it }
     }
 
-    override fun harTilgangTilOppgave(oppgaveId: String, saksbehandlerMedRoller: SaksbehandlerMedRoller): Boolean {
+    override fun harTilgangTilOppgave(
+        oppgaveId: String,
+        saksbehandlerMedRoller: SaksbehandlerMedRoller,
+    ): Boolean {
         val sakMedGraderingOgSkjermet = dao.hentSakMedGraderingOgSkjermingPaaOppgave(oppgaveId) ?: return true
         return harTilgangSjekker(sakMedGraderingOgSkjermet, saksbehandlerMedRoller)
     }
 
-    override fun harTilgangTilKlage(klageId: String, saksbehandlerMedRoller: SaksbehandlerMedRoller): Boolean {
+    override fun harTilgangTilKlage(
+        klageId: String,
+        saksbehandlerMedRoller: SaksbehandlerMedRoller,
+    ): Boolean {
         val sakMedGraderingOgSkjermet = dao.hentSakMedGraderingOgSkjermingPaaKlage(klageId) ?: return true
         return harTilgangSjekker(sakMedGraderingOgSkjermet, saksbehandlerMedRoller)
     }
 
-    override fun harTilgangTilSak(sakId: Long, saksbehandlerMedRoller: SaksbehandlerMedRoller): Boolean {
+    override fun harTilgangTilSak(
+        sakId: Long,
+        saksbehandlerMedRoller: SaksbehandlerMedRoller,
+    ): Boolean {
         val sak = dao.hentSakMedGraderingOgSkjerming(sakId) ?: return true
         return harTilgangSjekker(sak, saksbehandlerMedRoller)
     }
 
     override fun harTilgangTilBehandling(
         behandlingId: String,
-        saksbehandlerMedRoller: SaksbehandlerMedRoller
+        saksbehandlerMedRoller: SaksbehandlerMedRoller,
     ): Boolean {
         val sakMedGraderingOgSkjermet =
             dao.hentSakMedGarderingOgSkjermingPaaBehandling(behandlingId) ?: return true
@@ -63,7 +97,7 @@ class TilgangServiceImpl(
 
     private fun harTilgangSjekker(
         sak: SakMedGraderingOgSkjermet,
-        saksbehandlerMedRoller: SaksbehandlerMedRoller
+        saksbehandlerMedRoller: SaksbehandlerMedRoller,
     ): Boolean {
         return kanBehandleEgenAnsatt(sak, saksbehandlerMedRoller) &&
             kanBehandleAdressebeskyttelse(sak, saksbehandlerMedRoller)
@@ -71,7 +105,7 @@ class TilgangServiceImpl(
 
     private fun kanBehandleEgenAnsatt(
         sak: SakMedGraderingOgSkjermet,
-        saksbehandlerMedRoller: SaksbehandlerMedRoller
+        saksbehandlerMedRoller: SaksbehandlerMedRoller,
     ): Boolean {
         return when (sak.erSkjermet) {
             true -> saksbehandlerMedRoller.harRolleEgenAnsatt()
@@ -82,7 +116,7 @@ class TilgangServiceImpl(
 
     private fun kanBehandleAdressebeskyttelse(
         sak: SakMedGraderingOgSkjermet,
-        saksbehandlerMedRoller: SaksbehandlerMedRoller
+        saksbehandlerMedRoller: SaksbehandlerMedRoller,
     ): Boolean {
         return when (sak.adressebeskyttelseGradering) {
             AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND -> saksbehandlerMedRoller.harRolleStrengtFortrolig()
@@ -93,7 +127,10 @@ class TilgangServiceImpl(
         }
     }
 
-    override fun oppdaterAdressebeskyttelse(id: Long, adressebeskyttelseGradering: AdressebeskyttelseGradering): Int {
+    override fun oppdaterAdressebeskyttelse(
+        id: Long,
+        adressebeskyttelseGradering: AdressebeskyttelseGradering,
+    ): Int {
         return dao.oppdaterAdresseBeskyttelse(id, adressebeskyttelseGradering)
     }
 }

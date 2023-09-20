@@ -18,16 +18,16 @@ import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import java.util.*
+import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class SoeknadStatistikkRiverTest {
-
     private val soeknadStatistikkService: SoeknadStatistikkService = mockk()
 
-    private val testRapid: TestRapid = TestRapid().apply {
-        SoeknadStatistikkRiver(this, soeknadStatistikkService)
-    }
+    private val testRapid: TestRapid =
+        TestRapid().apply {
+            SoeknadStatistikkRiver(this, soeknadStatistikkService)
+        }
 
     @Test
     fun `melding om soeknadStatistikk for ugyldig for behandling leses ut og håndteres`() {
@@ -41,20 +41,21 @@ internal class SoeknadStatistikkRiverTest {
                 soeknadId,
                 gyldigForBehandling,
                 sakType,
-                feilendeKriterier
+                feilendeKriterier,
             )
         } returns soeknadStatistikk
 
-        val message = JsonMessage.newMessage(
-            mapOf(
-                EVENT_NAME_KEY to EventNames.FORDELER_STATISTIKK,
-                CORRELATION_ID_KEY to UUID.randomUUID(),
-                SOEKNAD_ID_KEY to soeknadId,
-                SAK_TYPE_KEY to sakType,
-                GYLDIG_FOR_BEHANDLING_KEY to gyldigForBehandling,
-                FEILENDE_KRITERIER_KEY to feilendeKriterier
-            )
-        ).toJson()
+        val message =
+            JsonMessage.newMessage(
+                mapOf(
+                    EVENT_NAME_KEY to EventNames.FORDELER_STATISTIKK,
+                    CORRELATION_ID_KEY to UUID.randomUUID(),
+                    SOEKNAD_ID_KEY to soeknadId,
+                    SAK_TYPE_KEY to sakType,
+                    GYLDIG_FOR_BEHANDLING_KEY to gyldigForBehandling,
+                    FEILENDE_KRITERIER_KEY to feilendeKriterier,
+                ),
+            ).toJson()
 
         val inspector = testRapid.apply { sendTestMessage(message) }.inspektør
 
@@ -64,7 +65,7 @@ internal class SoeknadStatistikkRiverTest {
                 soeknadId,
                 gyldigForBehandling,
                 sakType,
-                feilendeKriterier
+                feilendeKriterier,
             )
         }
     }
@@ -81,19 +82,20 @@ internal class SoeknadStatistikkRiverTest {
                 soeknadId,
                 gyldigForBehandling,
                 sakType,
-                feilendeKriterier
+                feilendeKriterier,
             )
         } returns soeknadStatistikk
 
-        val message = JsonMessage.newMessage(
-            mapOf(
-                EVENT_NAME_KEY to EventNames.FORDELER_STATISTIKK,
-                CORRELATION_ID_KEY to UUID.randomUUID(),
-                SOEKNAD_ID_KEY to soeknadId,
-                SAK_TYPE_KEY to sakType,
-                GYLDIG_FOR_BEHANDLING_KEY to gyldigForBehandling
-            )
-        ).toJson()
+        val message =
+            JsonMessage.newMessage(
+                mapOf(
+                    EVENT_NAME_KEY to EventNames.FORDELER_STATISTIKK,
+                    CORRELATION_ID_KEY to UUID.randomUUID(),
+                    SOEKNAD_ID_KEY to soeknadId,
+                    SAK_TYPE_KEY to sakType,
+                    GYLDIG_FOR_BEHANDLING_KEY to gyldigForBehandling,
+                ),
+            ).toJson()
 
         val inspector = testRapid.apply { sendTestMessage(message) }.inspektør
 
@@ -103,7 +105,7 @@ internal class SoeknadStatistikkRiverTest {
                 soeknadId,
                 gyldigForBehandling,
                 sakType,
-                feilendeKriterier
+                feilendeKriterier,
             )
         }
     }

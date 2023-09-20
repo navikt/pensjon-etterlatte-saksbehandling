@@ -12,19 +12,20 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class GrunnlagsendringshendelseJobTest {
-
-    private val grunnlagsendringshendelseService: GrunnlagsendringshendelseService = mockk {
-        every { sjekkKlareGrunnlagsendringshendelser(any()) } returns Unit
-    }
+    private val grunnlagsendringshendelseService: GrunnlagsendringshendelseService =
+        mockk {
+            every { sjekkKlareGrunnlagsendringshendelser(any()) } returns Unit
+        }
     private val leaderElection: LeaderElection = mockk()
     private val dataSource = mockk<HikariDataSource>()
-    private val grunnlagsendringshendelseJob = GrunnlagsendringshendelseJob.SjekkKlareGrunnlagsendringshendelser(
-        grunnlagsendringshendelseService = grunnlagsendringshendelseService,
-        leaderElection = leaderElection,
-        jobbNavn = "jobb",
-        minutterGamleHendelser = 1L,
-        datasource = dataSource
-    )
+    private val grunnlagsendringshendelseJob =
+        GrunnlagsendringshendelseJob.SjekkKlareGrunnlagsendringshendelser(
+            grunnlagsendringshendelseService = grunnlagsendringshendelseService,
+            leaderElection = leaderElection,
+            jobbNavn = "jobb",
+            minutterGamleHendelser = 1L,
+            datasource = dataSource,
+        )
 
     @Test
     fun `skal ikke utfoere jobb siden pod ikke er leader`() {

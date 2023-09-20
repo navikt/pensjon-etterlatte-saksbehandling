@@ -44,47 +44,53 @@ import java.time.temporal.ChronoUnit
 class ApplicationContext(
     val properties: ApplicationProperties = ApplicationProperties.fromEnv(System.getenv()),
     val rapidsConnection: RapidsConnection = RapidApplication.create(getRapidEnv()),
-    val jmsConnectionFactory: EtterlatteJmsConnectionFactory = JmsConnectionFactory(
-        hostname = properties.mqHost,
-        port = properties.mqPort,
-        queueManager = properties.mqQueueManager,
-        channel = properties.mqChannel,
-        username = properties.serviceUserUsername,
-        password = properties.serviceUserPassword
-    )
+    val jmsConnectionFactory: EtterlatteJmsConnectionFactory =
+        JmsConnectionFactory(
+            hostname = properties.mqHost,
+            port = properties.mqPort,
+            queueManager = properties.mqQueueManager,
+            channel = properties.mqChannel,
+            username = properties.serviceUserUsername,
+            password = properties.serviceUserPassword,
+        ),
 ) {
     val clock = utcKlokke()
 
-    val dataSource = DataSourceBuilder.createDataSource(
-        jdbcUrl = jdbcUrl(
-            host = properties.dbHost,
-            port = properties.dbPort,
-            databaseName = properties.dbName
-        ),
-        username = properties.dbUsername,
-        password = properties.dbPassword
-    )
+    val dataSource =
+        DataSourceBuilder.createDataSource(
+            jdbcUrl =
+                jdbcUrl(
+                    host = properties.dbHost,
+                    port = properties.dbPort,
+                    databaseName = properties.dbName,
+                ),
+            username = properties.dbUsername,
+            password = properties.dbPassword,
+        )
 
-    val oppdragSender = OppdragSender(
-        jmsConnectionFactory = jmsConnectionFactory,
-        queue = properties.mqSendQueue,
-        replyQueue = properties.mqKvitteringQueue
-    )
+    val oppdragSender =
+        OppdragSender(
+            jmsConnectionFactory = jmsConnectionFactory,
+            queue = properties.mqSendQueue,
+            replyQueue = properties.mqKvitteringQueue,
+        )
 
     val utbetalingDao = UtbetalingDao(dataSource)
 
-    val utbetalingService = UtbetalingService(
-        oppdragMapper = OppdragMapper,
-        oppdragSender = oppdragSender,
-        utbetalingDao = utbetalingDao,
-        rapidsConnection = rapidsConnection,
-        clock = clock
-    )
+    val utbetalingService =
+        UtbetalingService(
+            oppdragMapper = OppdragMapper,
+            oppdragSender = oppdragSender,
+            utbetalingDao = utbetalingDao,
+            rapidsConnection = rapidsConnection,
+            clock = clock,
+        )
 
-    val avstemmingsdataSender = AvstemmingsdataSender(
-        jmsConnectionFactory = jmsConnectionFactory,
-        queue = properties.mqAvstemmingQueue
-    )
+    val avstemmingsdataSender =
+        AvstemmingsdataSender(
+            jmsConnectionFactory = jmsConnectionFactory,
+            queue = properties.mqAvstemmingQueue,
+        )
 
     val avstemmingDao = AvstemmingDao(dataSource)
 
@@ -93,7 +99,7 @@ class ApplicationContext(
             avstemmingDao = avstemmingDao,
             avstemmingsdataSender = avstemmingsdataSender,
             utbetalingDao = utbetalingDao,
-            clock = clock
+            clock = clock,
         )
     }
 
@@ -105,7 +111,7 @@ class ApplicationContext(
             leaderElection = leaderElection,
             starttidspunkt = Tidspunkt.now(norskKlokke()).next(LocalTime.of(3, 0, 0)),
             periode = Duration.of(1, ChronoUnit.DAYS),
-            saktype = Saktype.BARNEPENSJON
+            saktype = Saktype.BARNEPENSJON,
         )
     val grensesnittavstemmingJobOMS =
         GrensesnittsavstemmingJob(
@@ -113,42 +119,44 @@ class ApplicationContext(
             leaderElection = leaderElection,
             starttidspunkt = Tidspunkt.now(norskKlokke()).next(LocalTime.of(3, 0, 0)),
             periode = Duration.of(1, ChronoUnit.DAYS),
-            saktype = Saktype.OMSTILLINGSSTOENAD
+            saktype = Saktype.OMSTILLINGSSTOENAD,
         )
 
     val konsistensavstemmingService by lazy {
         KonsistensavstemmingService(
             utbetalingDao,
             avstemmingDao,
-            avstemmingsdataSender
+            avstemmingsdataSender,
         )
     }
 
-    val konsistensavstemmingJob = KonsistensavstemmingJob(
-        konsistensavstemmingService,
-        kjoereplanKonsistensavstemming(),
-        leaderElection,
-        initialDelay = Duration.of(2, ChronoUnit.MINUTES).toMillis(),
-        periode = Duration.of(4, ChronoUnit.HOURS),
-        clock = clock,
-        saktype = Saktype.BARNEPENSJON
-    )
+    val konsistensavstemmingJob =
+        KonsistensavstemmingJob(
+            konsistensavstemmingService,
+            kjoereplanKonsistensavstemming(),
+            leaderElection,
+            initialDelay = Duration.of(2, ChronoUnit.MINUTES).toMillis(),
+            periode = Duration.of(4, ChronoUnit.HOURS),
+            clock = clock,
+            saktype = Saktype.BARNEPENSJON,
+        )
 
-    val konsistensavstemmingJobOMS = KonsistensavstemmingJob(
-        konsistensavstemmingService,
-        kjoereplanKonsistensavstemming(),
-        leaderElection,
-        initialDelay = Duration.of(2, ChronoUnit.MINUTES).toMillis(),
-        periode = Duration.of(4, ChronoUnit.HOURS),
-        clock = clock,
-        saktype = Saktype.OMSTILLINGSSTOENAD
-    )
+    val konsistensavstemmingJobOMS =
+        KonsistensavstemmingJob(
+            konsistensavstemmingService,
+            kjoereplanKonsistensavstemming(),
+            leaderElection,
+            initialDelay = Duration.of(2, ChronoUnit.MINUTES).toMillis(),
+            periode = Duration.of(4, ChronoUnit.HOURS),
+            clock = clock,
+            saktype = Saktype.OMSTILLINGSSTOENAD,
+        )
 
     val oppgavetrigger by lazy {
         Oppgavetrigger(
             rapidsConnection = rapidsConnection,
             utbetalingService = utbetalingService,
-            grensesnittsavstemmingService = grensesnittsavstemmingService
+            grensesnittsavstemmingService = grensesnittsavstemmingService,
         )
     }
 
@@ -157,14 +165,14 @@ class ApplicationContext(
             rapidsConnection = rapidsConnection,
             utbetalingService = utbetalingService,
             jmsConnectionFactory = jmsConnectionFactory,
-            queue = properties.mqKvitteringQueue
+            queue = properties.mqKvitteringQueue,
         )
     }
 
     val vedtakMottaker by lazy {
         VedtakMottaker(
             rapidsConnection = rapidsConnection,
-            utbetalingService = utbetalingService
+            utbetalingService = utbetalingService,
         )
     }
 }
@@ -173,17 +181,18 @@ class ApplicationContext(
  * Kjøreplan får vi en gang i året fra økonomi og brukes for konsistensavstemming
  * av løpende/aktive utbetalinger
  */
-private fun kjoereplanKonsistensavstemming() = setOf(
-    5.januar(2023),
-    30.januar(2023),
-    27.februar(2023),
-    28.mars(2023),
-    25.april(2023),
-    30.mai(2023),
-    29.juni(2023),
-    28.juli(2023),
-    30.august(2023),
-    29.september(2023),
-    30.oktober(2023),
-    22.november(2023)
-)
+private fun kjoereplanKonsistensavstemming() =
+    setOf(
+        5.januar(2023),
+        30.januar(2023),
+        27.februar(2023),
+        28.mars(2023),
+        25.april(2023),
+        30.mai(2023),
+        29.juni(2023),
+        28.juli(2023),
+        30.august(2023),
+        29.september(2023),
+        30.oktober(2023),
+        22.november(2023),
+    )

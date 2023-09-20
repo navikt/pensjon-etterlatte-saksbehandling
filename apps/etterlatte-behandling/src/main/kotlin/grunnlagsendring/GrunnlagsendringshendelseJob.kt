@@ -18,7 +18,7 @@ import no.nav.etterlatte.libs.jobs.LeaderElection
 import org.slf4j.LoggerFactory
 import java.time.Duration
 import java.time.temporal.ChronoUnit
-import java.util.*
+import java.util.Timer
 import javax.sql.DataSource
 
 class GrunnlagsendringshendelseJob(
@@ -27,7 +27,7 @@ class GrunnlagsendringshendelseJob(
     private val leaderElection: LeaderElection,
     private val initialDelay: Long,
     private val periode: Duration,
-    private val minutterGamleHendelser: Long
+    private val minutterGamleHendelser: Long,
 ) {
     private val jobbNavn = this::class.simpleName
     private val logger = LoggerFactory.getLogger(this::class.java)
@@ -37,13 +37,13 @@ class GrunnlagsendringshendelseJob(
             "Setter opp GrunnlagsendringshendelseJob. LeaderElection: ${leaderElection.isLeader()} " +
                 ", initialDelay: ${Duration.of(1, ChronoUnit.MINUTES).toMillis()}" +
                 ", periode: ${periode.toMinutes()}" +
-                ", minutterGamleHendelser: $minutterGamleHendelser "
+                ", minutterGamleHendelser: $minutterGamleHendelser ",
         )
         return fixedRateCancellableTimer(
             name = jobbNavn,
             initialDelay = initialDelay,
             period = periode.toMillis(),
-            loggerInfo = LoggerInfo(logger = logger, loggTilSikkerLogg = false)
+            loggerInfo = LoggerInfo(logger = logger, loggTilSikkerLogg = false),
         ) {
             runBlocking {
                 SjekkKlareGrunnlagsendringshendelser(
@@ -51,7 +51,7 @@ class GrunnlagsendringshendelseJob(
                     leaderElection = leaderElection,
                     jobbNavn = jobbNavn!!,
                     minutterGamleHendelser = minutterGamleHendelser,
-                    datasource = datasource
+                    datasource = datasource,
                 ).run(it)
             }
         }
@@ -62,7 +62,7 @@ class GrunnlagsendringshendelseJob(
         val leaderElection: LeaderElection,
         val jobbNavn: String,
         val minutterGamleHendelser: Long,
-        val datasource: DataSource
+        val datasource: DataSource,
     ) {
         private val log = LoggerFactory.getLogger(this::class.java)
 
@@ -73,13 +73,14 @@ class GrunnlagsendringshendelseJob(
                 coroutineScope {
                     launch {
                         withContext(
-                            Dispatchers.Default + Kontekst.asContextElement(
-                                value = Context(Self("GrunnlagsendringshendelseJob"), DatabaseContext(datasource))
-                            )
+                            Dispatchers.Default +
+                                Kontekst.asContextElement(
+                                    value = Context(Self("GrunnlagsendringshendelseJob"), DatabaseContext(datasource)),
+                                ),
                         ) {
                             withLogContext(correlationId) {
                                 grunnlagsendringshendelseService.sjekkKlareGrunnlagsendringshendelser(
-                                    minutterGamleHendelser
+                                    minutterGamleHendelser,
                                 )
                             }
                         }

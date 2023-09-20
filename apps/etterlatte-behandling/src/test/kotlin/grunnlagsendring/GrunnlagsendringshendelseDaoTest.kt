@@ -15,7 +15,6 @@ import no.nav.etterlatte.ikkeSamsvarMellomPdlOgGrunnlagDoed
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
-import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -41,12 +40,11 @@ import org.junit.jupiter.api.assertAll
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
 import java.time.LocalDate
-import java.util.*
+import java.util.UUID
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class GrunnlagsendringshendelseDaoTest {
-
     @Container
     private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:$POSTGRES_VERSION")
 
@@ -61,11 +59,12 @@ internal class GrunnlagsendringshendelseDaoTest {
         postgreSQLContainer.withUrlParam("user", postgreSQLContainer.username)
         postgreSQLContainer.withUrlParam("password", postgreSQLContainer.password)
 
-        dataSource = DataSourceBuilder.createDataSource(
-            jdbcUrl = postgreSQLContainer.jdbcUrl,
-            username = postgreSQLContainer.username,
-            password = postgreSQLContainer.password
-        ).apply { migrate() }
+        dataSource =
+            DataSourceBuilder.createDataSource(
+                jdbcUrl = postgreSQLContainer.jdbcUrl,
+                username = postgreSQLContainer.username,
+                password = postgreSQLContainer.password,
+            ).apply { migrate() }
 
         val connection = dataSource.connection
         sakRepo = SakDao { connection }
@@ -91,17 +90,19 @@ internal class GrunnlagsendringshendelseDaoTest {
         val uuid = UUID.randomUUID()
         val sakid = sakRepo.opprettSak("1234", SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr).id
         val grunnlagsinformasjon = grunnlagsinformasjonDoedshendelse()
-        val hendelse = grunnlagsendringshendelseMedSamsvar(
-            id = uuid,
-            sakId = sakid,
-            type = GrunnlagsendringsType.DOEDSFALL,
-            fnr = grunnlagsinformasjon.fnr,
-            opprettet = Tidspunkt.now().toLocalDatetimeUTC(),
-            samsvarMellomKildeOgGrunnlag = samsvarDoedsdatoer(
-                grunnlagsinformasjon.doedsdato,
-                grunnlagsinformasjon.doedsdato
+        val hendelse =
+            grunnlagsendringshendelseMedSamsvar(
+                id = uuid,
+                sakId = sakid,
+                type = GrunnlagsendringsType.DOEDSFALL,
+                fnr = grunnlagsinformasjon.fnr,
+                opprettet = Tidspunkt.now().toLocalDatetimeUTC(),
+                samsvarMellomKildeOgGrunnlag =
+                    samsvarDoedsdatoer(
+                        grunnlagsinformasjon.doedsdato,
+                        grunnlagsinformasjon.doedsdato,
+                    ),
             )
-        )
         grunnlagsendringshendelsesRepo.opprettGrunnlagsendringshendelse(hendelse)
         val hendelseFraDatabase = grunnlagsendringshendelsesRepo.hentGrunnlagsendringshendelse(uuid)
 
@@ -111,7 +112,7 @@ internal class GrunnlagsendringshendelseDaoTest {
             { assertEquals(hendelse.sakId, hendelseFraDatabase!!.sakId) },
             { assertEquals(hendelse.type, hendelseFraDatabase!!.type) },
             { assertEquals(hendelse.opprettet, hendelseFraDatabase!!.opprettet) },
-            { assertEquals(hendelse.samsvarMellomKildeOgGrunnlag, hendelseFraDatabase!!.samsvarMellomKildeOgGrunnlag) }
+            { assertEquals(hendelse.samsvarMellomKildeOgGrunnlag, hendelseFraDatabase!!.samsvarMellomKildeOgGrunnlag) },
         )
     }
 
@@ -127,27 +128,30 @@ internal class GrunnlagsendringshendelseDaoTest {
         val samsvarUtflytting = samsvarUtflytting(null, null)
         val grunnlagsinfoForelderBarn = grunnlagsinformasjonForelderBarnRelasjonHendelse()
         val samsvarForelderBarn = samsvarBarn(emptyList(), emptyList())
-        val doedshendelse = grunnlagsendringshendelseMedSamsvar(
-            id = uuidDoed,
-            sakId = sakid,
-            type = GrunnlagsendringsType.DOEDSFALL,
-            fnr = grunnlagsinfoDoed.fnr,
-            samsvarMellomKildeOgGrunnlag = samsvarDoed
-        )
-        val utflyttingsHendelse = grunnlagsendringshendelseMedSamsvar(
-            id = uuidUtflytting,
-            sakId = sakid,
-            type = GrunnlagsendringsType.UTFLYTTING,
-            fnr = grunnlagsinfoUtflytting.fnr,
-            samsvarMellomKildeOgGrunnlag = samsvarUtflytting
-        )
-        val barnForeldreRelasjonHendelse = grunnlagsendringshendelseMedSamsvar(
-            id = uuidForelderBarn,
-            sakId = sakid,
-            type = GrunnlagsendringsType.FORELDER_BARN_RELASJON,
-            fnr = grunnlagsinfoForelderBarn.fnr,
-            samsvarMellomKildeOgGrunnlag = samsvarForelderBarn
-        )
+        val doedshendelse =
+            grunnlagsendringshendelseMedSamsvar(
+                id = uuidDoed,
+                sakId = sakid,
+                type = GrunnlagsendringsType.DOEDSFALL,
+                fnr = grunnlagsinfoDoed.fnr,
+                samsvarMellomKildeOgGrunnlag = samsvarDoed,
+            )
+        val utflyttingsHendelse =
+            grunnlagsendringshendelseMedSamsvar(
+                id = uuidUtflytting,
+                sakId = sakid,
+                type = GrunnlagsendringsType.UTFLYTTING,
+                fnr = grunnlagsinfoUtflytting.fnr,
+                samsvarMellomKildeOgGrunnlag = samsvarUtflytting,
+            )
+        val barnForeldreRelasjonHendelse =
+            grunnlagsendringshendelseMedSamsvar(
+                id = uuidForelderBarn,
+                sakId = sakid,
+                type = GrunnlagsendringsType.FORELDER_BARN_RELASJON,
+                fnr = grunnlagsinfoForelderBarn.fnr,
+                samsvarMellomKildeOgGrunnlag = samsvarForelderBarn,
+            )
         grunnlagsendringshendelsesRepo.opprettGrunnlagsendringshendelse(doedshendelse)
         grunnlagsendringshendelsesRepo.opprettGrunnlagsendringshendelse(utflyttingsHendelse)
         grunnlagsendringshendelsesRepo.opprettGrunnlagsendringshendelse(barnForeldreRelasjonHendelse)
@@ -167,27 +171,30 @@ internal class GrunnlagsendringshendelseDaoTest {
         val hendelseId = UUID.randomUUID()
         val sak1 = sakRepo.opprettSak("1234", SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr).id
         val grunnlagsendringstype = GrunnlagsendringsType.DOEDSFALL
-        val opprettBehandling = opprettBehandling(
-            type = BehandlingType.REVURDERING,
-            sakId = sak1,
-            revurderingAarsak = RevurderingAarsak.REGULERING
-        )
+        val opprettBehandling =
+            opprettBehandling(
+                type = BehandlingType.REVURDERING,
+                sakId = sak1,
+                revurderingAarsak = RevurderingAarsak.REGULERING,
+            )
         behandlingRepo.opprettBehandling(opprettBehandling)
 
-        val grunnlagsendringshendelseMedSamsvar = grunnlagsendringshendelseMedSamsvar(
-            id = hendelseId,
-            sakId = sak1,
-            fnr = grunnlagsinformasjonDoedshendelse().fnr,
-            type = grunnlagsendringstype,
-            status = GrunnlagsendringStatus.SJEKKET_AV_JOBB,
-            samsvarMellomKildeOgGrunnlag = null
-        )
+        val grunnlagsendringshendelseMedSamsvar =
+            grunnlagsendringshendelseMedSamsvar(
+                id = hendelseId,
+                sakId = sak1,
+                fnr = grunnlagsinformasjonDoedshendelse().fnr,
+                type = grunnlagsendringstype,
+                status = GrunnlagsendringStatus.SJEKKET_AV_JOBB,
+                samsvarMellomKildeOgGrunnlag = null,
+            )
         grunnlagsendringshendelsesRepo.opprettGrunnlagsendringshendelse(grunnlagsendringshendelseMedSamsvar)
         grunnlagsendringshendelsesRepo.settBehandlingIdForTattMedIRevurdering(hendelseId, opprettBehandling.id)
 
         grunnlagsendringshendelsesRepo.oppdaterGrunnlagsendringHistorisk(opprettBehandling.id)
-        val historiskRevurderingsHendelse = grunnlagsendringshendelsesRepo
-            .hentGrunnlagsendringshendelse(hendelseId)
+        val historiskRevurderingsHendelse =
+            grunnlagsendringshendelsesRepo
+                .hentGrunnlagsendringshendelse(hendelseId)
         assertEquals(GrunnlagsendringStatus.HISTORISK, historiskRevurderingsHendelse?.status)
         assertEquals(opprettBehandling.id, historiskRevurderingsHendelse?.behandlingId)
     }
@@ -200,38 +207,39 @@ internal class GrunnlagsendringshendelseDaoTest {
                 sakId = sakid,
                 opprettet = Tidspunkt.now().toLocalDatetimeUTC(),
                 fnr = grunnlagsinformasjonDoedshendelse().fnr,
-                samsvarMellomKildeOgGrunnlag = null
+                samsvarMellomKildeOgGrunnlag = null,
             ),
             grunnlagsendringshendelseMedSamsvar(
                 sakId = sakid,
                 opprettet = Tidspunkt.now().toLocalDatetimeUTC().minusMinutes(30),
                 fnr = grunnlagsinformasjonDoedshendelse().fnr,
-                samsvarMellomKildeOgGrunnlag = null
+                samsvarMellomKildeOgGrunnlag = null,
             ),
             grunnlagsendringshendelseMedSamsvar(
                 sakId = sakid,
                 opprettet = Tidspunkt.now().toLocalDatetimeUTC().minusHours(1), // eldre enn en time
                 fnr = grunnlagsinformasjonDoedshendelse().fnr,
-                samsvarMellomKildeOgGrunnlag = null
+                samsvarMellomKildeOgGrunnlag = null,
             ),
             grunnlagsendringshendelseMedSamsvar(
                 sakId = sakid,
                 opprettet = Tidspunkt.now().toLocalDatetimeUTC().minusDays(4), // eldre enn en time
                 fnr = grunnlagsinformasjonDoedshendelse().fnr,
-                samsvarMellomKildeOgGrunnlag = null
+                samsvarMellomKildeOgGrunnlag = null,
             ),
             grunnlagsendringshendelseMedSamsvar(
                 sakId = sakid,
                 opprettet = Tidspunkt.now().toLocalDatetimeUTC().minusYears(1), // eldre enn en time
                 fnr = grunnlagsinformasjonDoedshendelse().fnr,
-                samsvarMellomKildeOgGrunnlag = null
-            )
+                samsvarMellomKildeOgGrunnlag = null,
+            ),
         ).forEach {
             grunnlagsendringshendelsesRepo.opprettGrunnlagsendringshendelse(it)
         }
-        val hendelserEldreEnn1Time = grunnlagsendringshendelsesRepo.hentIkkeVurderteGrunnlagsendringshendelserEldreEnn(
-            60
-        )
+        val hendelserEldreEnn1Time =
+            grunnlagsendringshendelsesRepo.hentIkkeVurderteGrunnlagsendringshendelserEldreEnn(
+                60,
+            )
         assertAll(
             "henter kun grunnlagsendringshendelser som er eldre enn 1 time",
             { assertEquals(3, hendelserEldreEnn1Time.size) },
@@ -241,7 +249,7 @@ internal class GrunnlagsendringshendelseDaoTest {
                         it.opprettet <= Tidspunkt.now().toLocalDatetimeUTC().minusHours(1)
                     }
                 }
-            }
+            },
         )
     }
 
@@ -254,7 +262,7 @@ internal class GrunnlagsendringshendelseDaoTest {
                     sakId = sakid,
                     opprettet = Tidspunkt.now().toLocalDatetimeUTC(),
                     fnr = this.fnr,
-                    samsvarMellomKildeOgGrunnlag = samsvarDoedsdatoer(this.doedsdato, this.doedsdato)
+                    samsvarMellomKildeOgGrunnlag = samsvarDoedsdatoer(this.doedsdato, this.doedsdato),
                 )
             }.copy(status = GrunnlagsendringStatus.FORKASTET),
             with(grunnlagsinformasjonDoedshendelse()) {
@@ -262,42 +270,43 @@ internal class GrunnlagsendringshendelseDaoTest {
                     sakId = sakid,
                     opprettet = Tidspunkt.now().toLocalDatetimeUTC().minusMinutes(30),
                     fnr = this.fnr,
-                    samsvarMellomKildeOgGrunnlag = samsvarDoedsdatoer(this.doedsdato, this.doedsdato)
+                    samsvarMellomKildeOgGrunnlag = samsvarDoedsdatoer(this.doedsdato, this.doedsdato),
                 )
             }.copy(
-                status = GrunnlagsendringStatus.SJEKKET_AV_JOBB
+                status = GrunnlagsendringStatus.SJEKKET_AV_JOBB,
             ),
             with(
-                grunnlagsinformasjonDoedshendelse()
+                grunnlagsinformasjonDoedshendelse(),
             ) {
                 grunnlagsendringshendelseMedSamsvar(
                     sakId = sakid,
                     opprettet = Tidspunkt.now().toLocalDatetimeUTC().minusDays(4),
                     fnr = this.fnr,
-                    samsvarMellomKildeOgGrunnlag = samsvarDoedsdatoer(this.doedsdato, this.doedsdato)
+                    samsvarMellomKildeOgGrunnlag = samsvarDoedsdatoer(this.doedsdato, this.doedsdato),
                 )
             }.copy(
-                status = GrunnlagsendringStatus.VENTER_PAA_JOBB
+                status = GrunnlagsendringStatus.VENTER_PAA_JOBB,
             ),
             with(
-                grunnlagsinformasjonDoedshendelse()
+                grunnlagsinformasjonDoedshendelse(),
             ) {
                 grunnlagsendringshendelseMedSamsvar(
                     sakId = sakid,
                     opprettet = Tidspunkt.now().toLocalDatetimeUTC().minusYears(1),
                     fnr = this.fnr,
-                    samsvarMellomKildeOgGrunnlag = samsvarDoedsdatoer(this.doedsdato, this.doedsdato)
+                    samsvarMellomKildeOgGrunnlag = samsvarDoedsdatoer(this.doedsdato, this.doedsdato),
                 )
             }.copy(
-                status = GrunnlagsendringStatus.TATT_MED_I_BEHANDLING
-            )
+                status = GrunnlagsendringStatus.TATT_MED_I_BEHANDLING,
+            ),
         ).forEach {
             grunnlagsendringshendelsesRepo.opprettGrunnlagsendringshendelse(it)
         }
-        val alleHendelser = grunnlagsendringshendelsesRepo.hentGrunnlagsendringshendelserMedStatuserISak(
-            sakid,
-            GrunnlagsendringStatus.values().toList()
-        )
+        val alleHendelser =
+            grunnlagsendringshendelsesRepo.hentGrunnlagsendringshendelserMedStatuserISak(
+                sakid,
+                GrunnlagsendringStatus.values().toList(),
+            )
         assertEquals(alleHendelser.size, 4)
         assertEquals(
             alleHendelser.map { it.status }.toSet(),
@@ -305,13 +314,14 @@ internal class GrunnlagsendringshendelseDaoTest {
                 GrunnlagsendringStatus.VENTER_PAA_JOBB,
                 GrunnlagsendringStatus.TATT_MED_I_BEHANDLING,
                 GrunnlagsendringStatus.SJEKKET_AV_JOBB,
-                GrunnlagsendringStatus.FORKASTET
+                GrunnlagsendringStatus.FORKASTET,
+            ),
+        )
+        val uhaandterteHendelser =
+            grunnlagsendringshendelsesRepo.hentGrunnlagsendringshendelserMedStatuserISak(
+                sakid,
+                listOf(GrunnlagsendringStatus.VENTER_PAA_JOBB, GrunnlagsendringStatus.SJEKKET_AV_JOBB),
             )
-        )
-        val uhaandterteHendelser = grunnlagsendringshendelsesRepo.hentGrunnlagsendringshendelserMedStatuserISak(
-            sakid,
-            listOf(GrunnlagsendringStatus.VENTER_PAA_JOBB, GrunnlagsendringStatus.SJEKKET_AV_JOBB)
-        )
         assertEquals(uhaandterteHendelser.size, 2)
     }
 
@@ -326,7 +336,7 @@ internal class GrunnlagsendringshendelseDaoTest {
             type = GrunnlagsendringsType.DOEDSFALL,
             sakId = sak1,
             fnr = grunnlagsinformasjonDoedshendelse(doedsdato = doedsdato).fnr,
-            samsvarMellomKildeOgGrunnlag = null
+            samsvarMellomKildeOgGrunnlag = null,
         ).also {
             grunnlagsendringshendelsesRepo.opprettGrunnlagsendringshendelse(it)
         }
@@ -338,15 +348,14 @@ internal class GrunnlagsendringshendelseDaoTest {
             hendelseId = id1,
             foerStatus = GrunnlagsendringStatus.VENTER_PAA_JOBB,
             etterStatus = GrunnlagsendringStatus.FORKASTET,
-            samsvarMellomKildeOgGrunnlag = samsvarMellomPdlOgGrunnlag
+            samsvarMellomKildeOgGrunnlag = samsvarMellomPdlOgGrunnlag,
         )
         val hendelserEtterOppdatertStatus = grunnlagsendringshendelsesRepo.hentAlleGrunnlagsendringshendelser()
         assertAll(
             "skal oppdatere statuser for grunnlagsendringshendelser",
             { assertEquals(hendelserFoerOppdatertStatus.size, hendelserEtterOppdatertStatus.size) },
             { assertTrue(hendelserFoerOppdatertStatus.all { it.status == GrunnlagsendringStatus.VENTER_PAA_JOBB }) },
-            { assertTrue(hendelserEtterOppdatertStatus.all { it.status == GrunnlagsendringStatus.FORKASTET }) }
-
+            { assertTrue(hendelserEtterOppdatertStatus.all { it.status == GrunnlagsendringStatus.FORKASTET }) },
         )
     }
 
@@ -355,11 +364,12 @@ internal class GrunnlagsendringshendelseDaoTest {
         val hendelseId = UUID.randomUUID()
         val sak1 = sakRepo.opprettSak("1234", SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr).id
         val grunnlagsendringstype = GrunnlagsendringsType.DOEDSFALL
-        val opprettBehandling = opprettBehandling(
-            type = BehandlingType.REVURDERING,
-            sakId = sak1,
-            revurderingAarsak = RevurderingAarsak.REGULERING
-        )
+        val opprettBehandling =
+            opprettBehandling(
+                type = BehandlingType.REVURDERING,
+                sakId = sak1,
+                revurderingAarsak = RevurderingAarsak.REGULERING,
+            )
         behandlingRepo.opprettBehandling(opprettBehandling)
 
         listOf(
@@ -369,8 +379,8 @@ internal class GrunnlagsendringshendelseDaoTest {
                 fnr = grunnlagsinformasjonDoedshendelse().fnr,
                 type = grunnlagsendringstype,
                 status = GrunnlagsendringStatus.SJEKKET_AV_JOBB,
-                samsvarMellomKildeOgGrunnlag = null
-            )
+                samsvarMellomKildeOgGrunnlag = null,
+            ),
         ).forEach {
             grunnlagsendringshendelsesRepo.opprettGrunnlagsendringshendelse(it)
         }
@@ -384,24 +394,25 @@ internal class GrunnlagsendringshendelseDaoTest {
         val sak1 = sakRepo.opprettSak("1", SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr).id
         val sak2 = sakRepo.opprettSak("2", SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr).id
 
-        val behandling1 = OpprettBehandling(
-            type = BehandlingType.REVURDERING,
-            sakId = sak1,
-            status = BehandlingStatus.OPPRETTET,
-            soeknadMottattDato = null,
-            virkningstidspunkt = null,
-            revurderingsAarsak = RevurderingAarsak.SOESKENJUSTERING,
-            opphoerAarsaker = listOf(),
-            fritekstAarsak = null,
-            prosesstype = Prosesstype.MANUELL,
-            kilde = Vedtaksloesning.GJENNY,
-            merknad = null
-        )
+        val behandling1 =
+            OpprettBehandling(
+                type = BehandlingType.REVURDERING,
+                sakId = sak1,
+                status = BehandlingStatus.OPPRETTET,
+                soeknadMottattDato = null,
+                virkningstidspunkt = null,
+                revurderingsAarsak = RevurderingAarsak.SOESKENJUSTERING,
+                opphoerAarsaker = listOf(),
+                fritekstAarsak = null,
+                prosesstype = Prosesstype.MANUELL,
+                kilde = Vedtaksloesning.GJENNY,
+                merknad = null,
+            )
         val behandling2 = behandling1.copy(sakId = sak2)
         assertNotEquals(behandling1.id, behandling2.id)
 
         behandlingRepo.opprettBehandling(
-            behandling = behandling1
+            behandling = behandling1,
         )
         behandlingRepo.opprettBehandling(behandling = behandling2)
 
@@ -418,22 +429,22 @@ internal class GrunnlagsendringshendelseDaoTest {
                 sakId = sak1,
                 fnr = fnrDoedshendelse,
                 samsvarMellomKildeOgGrunnlag = samsvarMellomPdlOgGrunnlag,
-                status = GrunnlagsendringStatus.SJEKKET_AV_JOBB
+                status = GrunnlagsendringStatus.SJEKKET_AV_JOBB,
             ),
             grunnlagsendringshendelseMedSamsvar(
                 id = id2,
                 sakId = sak1,
                 fnr = fnrDoedshendelse,
                 samsvarMellomKildeOgGrunnlag = samsvarMellomPdlOgGrunnlag,
-                status = GrunnlagsendringStatus.SJEKKET_AV_JOBB
+                status = GrunnlagsendringStatus.SJEKKET_AV_JOBB,
             ),
             grunnlagsendringshendelseMedSamsvar(
                 id = id3,
                 sakId = sak2,
                 fnr = fnrDoedshendelse,
                 samsvarMellomKildeOgGrunnlag = samsvarMellomPdlOgGrunnlag,
-                status = GrunnlagsendringStatus.SJEKKET_AV_JOBB
-            )
+                status = GrunnlagsendringStatus.SJEKKET_AV_JOBB,
+            ),
         ).forEach {
             grunnlagsendringshendelsesRepo.opprettGrunnlagsendringshendelse(it)
         }
@@ -471,20 +482,20 @@ internal class GrunnlagsendringshendelseDaoTest {
                 id = id1,
                 sakId = sak1,
                 fnr = fnrDoedshendelse,
-                samsvarMellomKildeOgGrunnlag = samsvarMellomPdlOgGrunnlag
+                samsvarMellomKildeOgGrunnlag = samsvarMellomPdlOgGrunnlag,
             ),
             grunnlagsendringshendelseMedSamsvar(
                 id = id2,
                 sakId = sak2,
                 fnr = fnrDoedshendelse,
-                samsvarMellomKildeOgGrunnlag = samsvarMellomPdlOgGrunnlag
+                samsvarMellomKildeOgGrunnlag = samsvarMellomPdlOgGrunnlag,
             ),
             grunnlagsendringshendelseMedSamsvar(
                 id = id3,
                 sakId = sak2,
                 fnr = fnrDoedshendelse,
-                samsvarMellomKildeOgGrunnlag = samsvarMellomPdlOgGrunnlag
-            )
+                samsvarMellomKildeOgGrunnlag = samsvarMellomPdlOgGrunnlag,
+            ),
         ).forEach {
             grunnlagsendringshendelsesRepo.opprettGrunnlagsendringshendelse(it)
         }
@@ -492,19 +503,19 @@ internal class GrunnlagsendringshendelseDaoTest {
             hendelseId = id1,
             foerStatus = GrunnlagsendringStatus.VENTER_PAA_JOBB,
             etterStatus = GrunnlagsendringStatus.SJEKKET_AV_JOBB,
-            samsvarMellomKildeOgGrunnlag = samsvarMellomPdlOgGrunnlag
+            samsvarMellomKildeOgGrunnlag = samsvarMellomPdlOgGrunnlag,
         )
         grunnlagsendringshendelsesRepo.oppdaterGrunnlagsendringStatusOgSamsvar(
             hendelseId = id2,
             foerStatus = GrunnlagsendringStatus.VENTER_PAA_JOBB,
             etterStatus = GrunnlagsendringStatus.SJEKKET_AV_JOBB,
-            samsvarMellomKildeOgGrunnlag = samsvarMellomPdlOgGrunnlag
+            samsvarMellomKildeOgGrunnlag = samsvarMellomPdlOgGrunnlag,
         )
         grunnlagsendringshendelsesRepo.oppdaterGrunnlagsendringStatusOgSamsvar(
             hendelseId = id3,
             foerStatus = GrunnlagsendringStatus.VENTER_PAA_JOBB,
             etterStatus = GrunnlagsendringStatus.SJEKKET_AV_JOBB,
-            samsvarMellomKildeOgGrunnlag = samsvarMellomPdlOgGrunnlag
+            samsvarMellomKildeOgGrunnlag = samsvarMellomPdlOgGrunnlag,
         )
 
         val resultat = grunnlagsendringshendelsesRepo.hentGrunnlagsendringshendelserSomErSjekketAvJobb(sak2)

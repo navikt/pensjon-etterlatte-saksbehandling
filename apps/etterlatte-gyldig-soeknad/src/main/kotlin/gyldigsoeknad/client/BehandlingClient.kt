@@ -13,16 +13,16 @@ import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.sak.Sak
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 
 class BehandlingClient(
     private val sakOgBehandlingApp: HttpClient,
-    private val url: String
+    private val url: String,
 ) {
     fun opprettBehandling(
         sak: Long,
         mottattDato: LocalDateTime,
-        persongalleri: Persongalleri
+        persongalleri: Persongalleri,
     ): UUID {
         return runBlocking {
             sakOgBehandlingApp.post("$url/behandlinger/opprettbehandling") {
@@ -34,7 +34,10 @@ class BehandlingClient(
         }
     }
 
-    fun hentSak(fnr: String, saktype: String): Sak {
+    fun hentSak(
+        fnr: String,
+        saktype: String,
+    ): Sak {
         return runBlocking {
             sakOgBehandlingApp.post("$url/personer/getsak/$saktype") {
                 contentType(ContentType.Application.Json)
@@ -43,7 +46,10 @@ class BehandlingClient(
         }
     }
 
-    fun finnEllerOpprettSak(fnr: String, saktype: String): Sak {
+    fun finnEllerOpprettSak(
+        fnr: String,
+        saktype: String,
+    ): Sak {
         return runBlocking {
             sakOgBehandlingApp.post("$url/personer/saker/$saktype") {
                 contentType(ContentType.Application.Json)
@@ -52,7 +58,10 @@ class BehandlingClient(
         }
     }
 
-    fun lagreGyldighetsVurdering(behandlingsId: UUID, gyldighet: GyldighetsResultat) {
+    fun lagreGyldighetsVurdering(
+        behandlingsId: UUID,
+        gyldighet: GyldighetsResultat,
+    ) {
         return runBlocking {
             sakOgBehandlingApp.post("$url/behandlinger/$behandlingsId/gyldigfremsatt") {
                 contentType(ContentType.Application.Json)

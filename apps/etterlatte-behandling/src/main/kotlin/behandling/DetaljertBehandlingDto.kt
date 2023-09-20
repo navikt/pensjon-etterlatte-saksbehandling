@@ -14,7 +14,7 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.person.Person
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 
 /**
  * Brukes av frontend. Se IDetaljertBehandling.ts
@@ -36,10 +36,10 @@ data class DetaljertBehandlingDto(
     val kommerBarnetTilgode: KommerBarnetTilgode?,
     val revurderingsaarsak: RevurderingAarsak?,
     val revurderinginfo: RevurderingMedBegrunnelse?,
-    val begrunnelse: String?
+    val begrunnelse: String?,
 )
 
 data class Familieforhold(
     val avdoede: Grunnlagsopplysning<Person>?,
-    val gjenlevende: Grunnlagsopplysning<Person>?
+    val gjenlevende: Grunnlagsopplysning<Person>?,
 )

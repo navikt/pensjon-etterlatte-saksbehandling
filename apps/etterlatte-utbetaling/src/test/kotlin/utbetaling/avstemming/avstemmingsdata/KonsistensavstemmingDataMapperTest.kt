@@ -14,7 +14,6 @@ import java.math.BigInteger
 import java.time.LocalDate
 
 internal class KonsistensavstemmingDataMapperTest {
-
     @Test
     fun `konsistensavstemming uten noe aa avstemme skal ikke inneholde data`() {
         val konsistensavstemming = mockKonsistensavstemming(loependeUtbetalinger = emptyList())
@@ -43,34 +42,36 @@ internal class KonsistensavstemmingDataMapperTest {
         assertEquals(1, opprettetAvstemmingsmelding[1].oppdragsdataListe.first().oppdragslinjeListe.size)
         assertEquals(
             oppdragslinjer.first().id.value.toString(),
-            opprettetAvstemmingsmelding[1].oppdragsdataListe.first().oppdragslinjeListe.first().delytelseId
+            opprettetAvstemmingsmelding[1].oppdragsdataListe.first().oppdragslinjeListe.first().delytelseId,
         )
         assertEquals(
             BigDecimal.valueOf(10000L),
-            opprettetAvstemmingsmelding[1].oppdragsdataListe.first().oppdragslinjeListe.first().sats
+            opprettetAvstemmingsmelding[1].oppdragsdataListe.first().oppdragslinjeListe.first().sats,
         )
     }
 
     @Test
     fun `skal mappe konsistensavstememig for flere utbetalinger og flere utbetalingslinjer`() {
         val sakId1 = 1L
-        val oppdragslinjer1 = listOf(
-            oppdragslinjeForKonsistensavstemming(fraOgMed = LocalDate.of(2021, 1, 1))
-        )
+        val oppdragslinjer1 =
+            listOf(
+                oppdragslinjeForKonsistensavstemming(fraOgMed = LocalDate.of(2021, 1, 1)),
+            )
         val oppdrag1 =
             oppdragForKonsistensavstemming(sakId = sakId1, oppdragslinjeForKonsistensavstemming = oppdragslinjer1)
 
-        val oppdragslinjer2 = listOf(
-            oppdragslinjeForKonsistensavstemming(
-                id = 1,
-                fraOgMed = LocalDate.of(2022, 1, 1)
-            ),
-            oppdragslinjeForKonsistensavstemming(
-                id = 2,
-                fraOgMed = LocalDate.of(2022, 7, 1),
-                forrigeUtbetalingslinjeId = 1
+        val oppdragslinjer2 =
+            listOf(
+                oppdragslinjeForKonsistensavstemming(
+                    id = 1,
+                    fraOgMed = LocalDate.of(2022, 1, 1),
+                ),
+                oppdragslinjeForKonsistensavstemming(
+                    id = 2,
+                    fraOgMed = LocalDate.of(2022, 7, 1),
+                    forrigeUtbetalingslinjeId = 1,
+                ),
             )
-        )
         val sakId2 = 2L
         val oppdrag2 =
             oppdragForKonsistensavstemming(sakId = sakId2, oppdragslinjeForKonsistensavstemming = oppdragslinjer2)
@@ -85,7 +86,7 @@ internal class KonsistensavstemmingDataMapperTest {
             opprettetAvstemmingsmelding[1].oppdragsdataListe.map { it.fagsystemId }.toSet()
         assertEquals(
             setOf(sakId1.toString(), sakId2.toString()),
-            sakIderIKonsistensavstemming
+            sakIderIKonsistensavstemming,
         )
 
         val oppdragsdataForSak1 =
@@ -118,7 +119,7 @@ fun `liste av konsistensavstemmingsdata har rett struktur`(konsistensavstemmings
             .any { it.aksjonsdata.aksjonsType != "DATA" }
     ) {
         throw IllegalArgumentException(
-            "Aksjonstypen til en eller flere av meldingene mellom START og AVSL var ikke DATA"
+            "Aksjonstypen til en eller flere av meldingene mellom START og AVSL var ikke DATA",
         )
     }
 }

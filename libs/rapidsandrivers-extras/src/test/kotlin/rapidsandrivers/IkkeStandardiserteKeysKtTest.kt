@@ -3,7 +3,7 @@ package rapidsandrivers
 import no.nav.helse.rapids_rivers.JsonMessage
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
-import java.util.*
+import java.util.UUID
 
 class IkkeStandardiserteKeysKtTest {
     @Test

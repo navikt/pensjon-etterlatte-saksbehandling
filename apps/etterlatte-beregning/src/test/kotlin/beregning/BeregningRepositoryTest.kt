@@ -19,12 +19,11 @@ import org.junit.jupiter.api.TestInstance
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
 import java.time.YearMonth
-import java.util.*
+import java.util.UUID
 import java.util.UUID.randomUUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class BeregningRepositoryTest {
-
     @Container
     private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:$POSTGRES_VERSION")
     private lateinit var beregningRepository: BeregningRepository
@@ -33,11 +32,12 @@ internal class BeregningRepositoryTest {
     fun beforeAll() {
         postgreSQLContainer.start()
 
-        val ds = DataSourceBuilder.createDataSource(
-            postgreSQLContainer.jdbcUrl,
-            postgreSQLContainer.username,
-            postgreSQLContainer.password
-        ).also { it.migrate() }
+        val ds =
+            DataSourceBuilder.createDataSource(
+                postgreSQLContainer.jdbcUrl,
+                postgreSQLContainer.username,
+                postgreSQLContainer.password,
+            ).also { it.migrate() }
 
         beregningRepository = BeregningRepository(ds)
     }
@@ -84,15 +84,15 @@ internal class BeregningRepositoryTest {
 
     private fun beregning(
         behandlingId: UUID = randomUUID(),
-        datoFOM: YearMonth = YearMonth.of(2021, 2)
-    ) =
-        Beregning(
-            beregningId = randomUUID(),
-            behandlingId = behandlingId,
-            type = Beregningstype.BP,
-            beregnetDato = Tidspunkt.now(),
-            grunnlagMetadata = no.nav.etterlatte.libs.common.grunnlag.Metadata(1, 1),
-            beregningsperioder = listOf(
+        datoFOM: YearMonth = YearMonth.of(2021, 2),
+    ) = Beregning(
+        beregningId = randomUUID(),
+        behandlingId = behandlingId,
+        type = Beregningstype.BP,
+        beregnetDato = Tidspunkt.now(),
+        grunnlagMetadata = no.nav.etterlatte.libs.common.grunnlag.Metadata(1, 1),
+        beregningsperioder =
+            listOf(
                 Beregningsperiode(
                     datoFOM = datoFOM,
                     datoTOM = null,
@@ -104,8 +104,8 @@ internal class BeregningRepositoryTest {
                     trygdetid = 40,
                     regelResultat = mapOf("regel" to "resultat").toObjectNode(),
                     regelVersjon = "1",
-                    kilde = Grunnlagsopplysning.RegelKilde("regelid", Tidspunkt.now(), "1")
-                )
-            )
-        )
+                    kilde = Grunnlagsopplysning.RegelKilde("regelid", Tidspunkt.now(), "1"),
+                ),
+            ),
+    )
 }

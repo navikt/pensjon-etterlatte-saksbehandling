@@ -17,7 +17,7 @@ enum class Opplysningstype {
     SPRAAK,
     SOEKNADSTYPE_V1,
 
-    /* Grunnlag v2 */
+    // Grunnlag v2
     NAVN,
     FOEDSELSNUMMER,
     FOEDSELSDATO,
@@ -42,5 +42,5 @@ enum class Opplysningstype {
 
     SOESKEN_I_BEREGNINGEN, // Kun for soeskenjustering
 
-    HISTORISK_FORELDREANSVAR
+    HISTORISK_FORELDREANSVAR,
 }

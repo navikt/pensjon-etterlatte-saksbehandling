@@ -39,11 +39,10 @@ import org.junit.jupiter.api.TestInstance
 import testsupport.buildTestApplicationConfigurationForOauth
 import vedtaksvurdering.SAKSBEHANDLER_1
 import vedtaksvurdering.vedtak
-import java.util.*
+import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class AutomatiskBehandlingRoutesKtTest {
-
     private val server = MockOAuth2Server()
     private lateinit var applicationConfig: HoconApplicationConfig
     private val behandlingKlient = mockk<BehandlingKlient>()
@@ -81,17 +80,18 @@ internal class AutomatiskBehandlingRoutesKtTest {
             every { runBlocking { vedtaksvurderingService.opprettEllerOppdaterVedtak(any(), any()) } } returns
                 opprettetVedtak
             every { runBlocking { vedtaksvurderingService.fattVedtak(behandlingId, any()) } } returns opprettetVedtak
-            every { runBlocking { behandlingKlient.hentOppgaverForSak(any(), any()) } } returns OppgaveListe(
-                mockk(),
-                listOf(lagOppgave(behandlingId))
-            )
+            every { runBlocking { behandlingKlient.hentOppgaverForSak(any(), any()) } } returns
+                OppgaveListe(
+                    mockk(),
+                    listOf(lagOppgave(behandlingId)),
+                )
             every { runBlocking { behandlingKlient.tildelSaksbehandler(any(), any()) } } returns true
             every {
                 runBlocking {
                     vedtaksvurderingService.attesterVedtak(
                         behandlingId,
                         any(),
-                        any()
+                        any(),
                     )
                 }
             } returns opprettetVedtak
@@ -99,13 +99,14 @@ internal class AutomatiskBehandlingRoutesKtTest {
             environment { config = applicationConfig }
             application { restModule(log) { automatiskBehandlingRoutes(vedtaksvurderingService, behandlingKlient) } }
 
-            val vedtak = client.post("/api/vedtak/1/$behandlingId/automatisk") {
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                header(HttpHeaders.Authorization, "Bearer $token")
-            }.let {
-                it.status shouldBe HttpStatusCode.OK
-                deserialize<VedtakDto>(it.bodyAsText())
-            }
+            val vedtak =
+                client.post("/api/vedtak/1/$behandlingId/automatisk") {
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    header(HttpHeaders.Authorization, "Bearer $token")
+                }.let {
+                    it.status shouldBe HttpStatusCode.OK
+                    deserialize<VedtakDto>(it.bodyAsText())
+                }
 
             Assertions.assertEquals(vedtak.vedtakId, opprettetVedtak.id)
 
@@ -126,7 +127,7 @@ internal class AutomatiskBehandlingRoutesKtTest {
         server.issueToken(
             issuerId = AZURE_ISSUER,
             audience = CLIENT_ID,
-            claims = mapOf("navn" to "John Doe", "NAVident" to SAKSBEHANDLER_1)
+            claims = mapOf("navn" to "John Doe", "NAVident" to SAKSBEHANDLER_1),
         ).serialize()
     }
 
@@ -134,19 +135,20 @@ internal class AutomatiskBehandlingRoutesKtTest {
         const val CLIENT_ID = "azure-id for saksbehandler"
     }
 
-    fun lagOppgave(referanse: UUID) = OppgaveNy(
-        id = UUID.randomUUID(),
-        status = Status.UNDER_BEHANDLING,
-        enhet = "",
-        sakId = 1,
-        kilde = null,
-        type = OppgaveType.ATTESTERING,
-        saksbehandler = null,
-        referanse = referanse.toString(),
-        merknad = null,
-        sakType = SakType.BARNEPENSJON,
-        fnr = null,
-        frist = null,
-        opprettet = Tidspunkt.now()
-    )
+    fun lagOppgave(referanse: UUID) =
+        OppgaveNy(
+            id = UUID.randomUUID(),
+            status = Status.UNDER_BEHANDLING,
+            enhet = "",
+            sakId = 1,
+            kilde = null,
+            type = OppgaveType.ATTESTERING,
+            saksbehandler = null,
+            referanse = referanse.toString(),
+            merknad = null,
+            sakType = SakType.BARNEPENSJON,
+            fnr = null,
+            frist = null,
+            opprettet = Tidspunkt.now(),
+        )
 }

@@ -10,7 +10,7 @@ import no.nav.etterlatte.libs.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktorobo.Resource
 import no.nav.etterlatte.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
-import java.util.*
+import java.util.UUID
 
 class TrygdetidKlientException(override val message: String, override val cause: Throwable) :
     Exception(message, cause)
@@ -25,16 +25,16 @@ class TrygdetidKlient(config: Config, httpClient: HttpClient) {
 
     suspend fun hentTrygdetid(
         behandlingId: UUID,
-        brukerTokenInfo: BrukerTokenInfo
+        brukerTokenInfo: BrukerTokenInfo,
     ): TrygdetidDto? {
         try {
             logger.info("Henter trygdetid med behandlingid $behandlingId")
             return downstreamResourceClient.get(
                 Resource(clientId, "$resourceUrl/api/trygdetid/$behandlingId"),
-                brukerTokenInfo
+                brukerTokenInfo,
             ).mapBoth(
                 success = { resource -> resource.response.let { deserialize(it.toString()) } },
-                failure = { throwableErrorMessage -> throw throwableErrorMessage }
+                failure = { throwableErrorMessage -> throw throwableErrorMessage },
             )
         } catch (e: Exception) {
             throw TrygdetidKlientException("Henting av trygdetid for sak med behandlingsid=$behandlingId feilet", e)

@@ -16,7 +16,10 @@ import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.token.Fagsaksystem
 import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlient
 
-fun Route.automatiskBehandlingRoutes(service: VedtaksvurderingService, behandlingKlient: BehandlingKlient) {
+fun Route.automatiskBehandlingRoutes(
+    service: VedtaksvurderingService,
+    behandlingKlient: BehandlingKlient,
+) {
     route("/api/vedtak") {
         val logger = application.log
 
@@ -29,18 +32,19 @@ fun Route.automatiskBehandlingRoutes(service: VedtaksvurderingService, behandlin
                 service.fattVedtak(behandlingId, brukerTokenInfo)
 
                 logger.info("Tildeler attesteringsoppgave til systembruker")
-                val oppgaveTilAttestering = behandlingKlient.hentOppgaverForSak(sakId, brukerTokenInfo)
-                    .oppgaver
-                    .filter { it.referanse == behandlingId.toString() }
-                    .filter { it.type == OppgaveType.ATTESTERING }
-                    .filterNot { it.erAvsluttet() }
+                val oppgaveTilAttestering =
+                    behandlingKlient.hentOppgaverForSak(sakId, brukerTokenInfo)
+                        .oppgaver
+                        .filter { it.referanse == behandlingId.toString() }
+                        .filter { it.type == OppgaveType.ATTESTERING }
+                        .filterNot { it.erAvsluttet() }
                 behandlingKlient.tildelSaksbehandler(oppgaveTilAttestering.first(), brukerTokenInfo)
 
                 logger.info("Attesterer vedtak for behandling $behandlingId")
                 service.attesterVedtak(
                     behandlingId,
                     "Automatisk attestert av ${Fagsaksystem.EY.systemnavn}",
-                    brukerTokenInfo
+                    brukerTokenInfo,
                 )
 
                 call.respond(nyttVedtak.toDto())

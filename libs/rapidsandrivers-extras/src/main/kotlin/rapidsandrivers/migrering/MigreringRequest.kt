@@ -17,20 +17,21 @@ data class MigreringRequest(
     val foersteVirkningstidspunkt: YearMonth,
     val beregning: Beregning,
     val trygdetid: Trygdetid,
-    val flyktningStatus: Boolean = false
+    val flyktningStatus: Boolean = false,
 ) {
-    fun opprettPersongalleri() = Persongalleri(
-        soeker = this.soeker.value,
-        avdoed = this.avdoedForelder.map { it.ident.value },
-        gjenlevende = listOfNotNull(this.gjenlevendeForelder?.value),
-        innsender = Vedtaksloesning.PESYS.name
-    )
+    fun opprettPersongalleri() =
+        Persongalleri(
+            soeker = this.soeker.value,
+            avdoed = this.avdoedForelder.map { it.ident.value },
+            gjenlevende = listOfNotNull(this.gjenlevendeForelder?.value),
+            innsender = Vedtaksloesning.PESYS.name,
+        )
 }
 
 data class AvdoedForelder(
     val ident: Folkeregisteridentifikator,
     val doedsdato: Tidspunkt,
-    val yrkesskade: Boolean = false
+    val yrkesskade: Boolean = false,
 )
 
 data class PesysId(val id: Long)
@@ -43,18 +44,18 @@ data class Beregning(
     val anvendtTrygdetid: BigDecimal,
     val datoVirkFom: Tidspunkt,
     val g: BigDecimal,
-    val meta: BeregningMeta? = null
+    val meta: BeregningMeta? = null,
 )
 
 data class Trygdetid(
-    val perioder: List<Trygdetidsgrunnlag>
+    val perioder: List<Trygdetidsgrunnlag>,
 )
 
 data class BeregningMeta(
     val resultatType: String,
     val beregningsMetodeType: String,
     val resultatKilde: String,
-    val kravVelgType: String
+    val kravVelgType: String,
 )
 
 data class Trygdetidsgrunnlag(
@@ -68,5 +69,5 @@ data class Trygdetidsgrunnlag(
     val ikkeIProrata: Boolean,
     val faktiskTrygdetid: BigDecimal,
     val fremtidigTrygdetid: BigDecimal,
-    val anvendtTrygdetid: BigDecimal
+    val anvendtTrygdetid: BigDecimal,
 )

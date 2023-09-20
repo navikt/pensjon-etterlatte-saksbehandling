@@ -16,13 +16,11 @@ import org.junit.jupiter.api.TestInstance
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
 import trygdetid.trygdeavtale
-import java.util.*
 import java.util.UUID.randomUUID
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class AvtaleRepositoryTest {
-
     @Container
     private val postgres = PostgreSQLContainer<Nothing>("postgres:$POSTGRES_VERSION")
     private lateinit var repository: AvtaleRepository
@@ -62,11 +60,12 @@ internal class AvtaleRepositoryTest {
 
         repository.opprettAvtale(avtale)
 
-        val oppdatertAvtale = repository.hentAvtale(behandling.id)!!.copy(
-            avtaleKode = "ISR",
-            avtaleDatoKode = null,
-            avtaleKriteriaKode = "YRK_TRYGD"
-        )
+        val oppdatertAvtale =
+            repository.hentAvtale(behandling.id)!!.copy(
+                avtaleKode = "ISR",
+                avtaleDatoKode = null,
+                avtaleKriteriaKode = "YRK_TRYGD",
+            )
 
         repository.lagreAvtale(oppdatertAvtale)
 

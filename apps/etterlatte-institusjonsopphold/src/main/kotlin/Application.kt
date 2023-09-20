@@ -35,7 +35,7 @@ class Server {
                         metricsModule()
                     }
                     connector { port = 8080 }
-                }
+                },
         )
 
     fun run() {
@@ -47,7 +47,7 @@ class Server {
 
 fun startInstitusjonsoppholdLytter(
     env: Map<String, String>,
-    config: Config
+    config: Config,
 ) {
     val logger = LoggerFactory.getLogger(Application::class.java)
 
@@ -56,7 +56,7 @@ fun startInstitusjonsoppholdLytter(
             azureAppClientId = config.getString("azure.app.client.id"),
             azureAppJwk = config.getString("azure.app.jwk"),
             azureAppWellKnownUrl = config.getString("azure.app.well.known.url"),
-            azureAppScope = config.getString("azure.proxy.outbound.scope")
+            azureAppScope = config.getString("azure.proxy.outbound.scope"),
         )
 
     val institusjonsoppholdKlient = InstitusjonsoppholdKlient(proxyHttpKlient, config.getString("proxy.url"))
@@ -66,22 +66,22 @@ fun startInstitusjonsoppholdLytter(
             azureAppClientId = config.getString("azure.app.client.id"),
             azureAppJwk = config.getString("azure.app.jwk"),
             azureAppWellKnownUrl = config.getString("azure.app.well.known.url"),
-            azureAppScope = config.getString("behandling.azure.scope")
+            azureAppScope = config.getString("behandling.azure.scope"),
         )
 
     val behandlingKlient =
         BehandlingKlient(
             behandlingHttpClient = behandlingHttpClient,
             institusjonsoppholdKlient = institusjonsoppholdKlient,
-            resourceUrl = config.getString("etterlatte.behandling.url")
+            resourceUrl = config.getString("etterlatte.behandling.url"),
         )
 
     startLytting(
         konsument =
             KafkaConsumerInstitusjonsopphold(
                 env = env,
-                behandlingKlient = behandlingKlient
+                behandlingKlient = behandlingKlient,
             ),
-        logger = logger
+        logger = logger,
     )
 }

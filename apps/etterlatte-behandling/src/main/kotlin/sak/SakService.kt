@@ -22,26 +22,46 @@ import no.nav.etterlatte.tilgangsstyring.filterForEnheter
 import org.slf4j.LoggerFactory
 
 enum class SakServiceFeatureToggle(private val key: String) : FeatureToggle {
-    FiltrerMedEnhetId("pensjon-etterlatte.filtrer-saker-med-enhet-id");
+    FiltrerMedEnhetId("pensjon-etterlatte.filtrer-saker-med-enhet-id"),
+    ;
 
     override fun key() = key
 }
 
 interface SakService {
     fun hentSaker(): List<Sak>
+
     fun finnSaker(person: String): List<Sak>
+
     fun finnEllerOpprettSak(
         fnr: String,
         type: SakType,
         enhet: String? = null,
-        gradering: AdressebeskyttelseGradering? = null
+        gradering: AdressebeskyttelseGradering? = null,
     ): Sak
-    fun finnSak(person: String, type: SakType): Sak?
+
+    fun finnSak(
+        person: String,
+        type: SakType,
+    ): Sak?
+
     fun finnSak(id: Long): Sak?
+
     fun slettSak(id: Long)
-    fun markerSakerMedSkjerming(sakIder: List<Long>, skjermet: Boolean)
-    fun finnEnhetForPersonOgTema(fnr: String, tema: String, saktype: SakType): ArbeidsFordelingEnhet
+
+    fun markerSakerMedSkjerming(
+        sakIder: List<Long>,
+        skjermet: Boolean,
+    )
+
+    fun finnEnhetForPersonOgTema(
+        fnr: String,
+        tema: String,
+        saktype: SakType,
+    ): ArbeidsFordelingEnhet
+
     fun oppdaterEnhetForSaker(saker: List<GrunnlagsendringshendelseService.SakMedEnhet>)
+
     fun sjekkOmSakerErGradert(sakIder: List<Long>): List<SakMedGradering>
 }
 
@@ -51,7 +71,7 @@ class RealSakService(
     private val norg2Klient: Norg2Klient,
     private val featureToggleService: FeatureToggleService,
     private val tilgangService: TilgangService,
-    private val skjermingKlient: SkjermingKlient
+    private val skjermingKlient: SkjermingKlient,
 ) : SakService {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -61,7 +81,10 @@ class RealSakService(
 
     private fun finnSakerForPerson(person: String) = dao.finnSaker(person)
 
-    private fun finnSakerForPersonOgType(person: String, type: SakType) = finnSakerForPerson(person).find {
+    private fun finnSakerForPersonOgType(
+        person: String,
+        type: SakType,
+    ) = finnSakerForPerson(person).find {
         it.sakType == type
     }
 
@@ -75,7 +98,10 @@ class RealSakService(
         dao.slettSak(id)
     }
 
-    override fun markerSakerMedSkjerming(sakIder: List<Long>, skjermet: Boolean) {
+    override fun markerSakerMedSkjerming(
+        sakIder: List<Long>,
+        skjermet: Boolean,
+    ) {
         inTransaction {
             dao.markerSakerMedSkjerming(sakIder, skjermet)
         }
@@ -85,15 +111,16 @@ class RealSakService(
         fnr: String,
         type: SakType,
         enhet: String?,
-        gradering: AdressebeskyttelseGradering?
+        gradering: AdressebeskyttelseGradering?,
     ): Sak {
-        val sak = inTransaction {
-            finnSakerForPersonOgType(fnr, type) ?: dao.opprettSak(
-                fnr,
-                type,
-                enhet ?: finnEnhetForPersonOgTema(fnr, type.tema, type).enhetNr
-            )
-        }
+        val sak =
+            inTransaction {
+                finnSakerForPersonOgType(fnr, type) ?: dao.opprettSak(
+                    fnr,
+                    type,
+                    enhet ?: finnEnhetForPersonOgTema(fnr, type.tema, type).enhetNr,
+                )
+            }
         this.sjekkSkjerming(fnr = fnr, sakId = sak.id)
         gradering?.let {
             tilgangService.oppdaterAdressebeskyttelse(sak.id, it)
@@ -101,14 +128,18 @@ class RealSakService(
         return sak
     }
 
-    private fun sjekkSkjerming(fnr: String, sakId: Long) {
-        val erSkjermet = runBlocking {
-            skjermingKlient.personErSkjermet(fnr)
-        }
+    private fun sjekkSkjerming(
+        fnr: String,
+        sakId: Long,
+    ) {
+        val erSkjermet =
+            runBlocking {
+                skjermingKlient.personErSkjermet(fnr)
+            }
         if (erSkjermet) {
             inTransaction {
                 dao.oppdaterEnheterPaaSaker(
-                    listOf(GrunnlagsendringshendelseService.SakMedEnhet(sakId, Enheter.EGNE_ANSATTE.enhetNr))
+                    listOf(GrunnlagsendringshendelseService.SakMedEnhet(sakId, Enheter.EGNE_ANSATTE.enhetNr)),
                 )
             }
         }
@@ -129,7 +160,10 @@ class RealSakService(
         }
     }
 
-    override fun finnSak(person: String, type: SakType): Sak? {
+    override fun finnSak(
+        person: String,
+        type: SakType,
+    ): Sak? {
         return finnSakerForPersonOgType(person, type).sjekkEnhet()
     }
 
@@ -137,18 +171,23 @@ class RealSakService(
         return dao.hentSak(id).sjekkEnhet()
     }
 
-    override fun finnEnhetForPersonOgTema(fnr: String, tema: String, saktype: SakType): ArbeidsFordelingEnhet {
+    override fun finnEnhetForPersonOgTema(
+        fnr: String,
+        tema: String,
+        saktype: SakType,
+    ): ArbeidsFordelingEnhet {
         val tilknytning = pdlKlient.hentGeografiskTilknytning(fnr, saktype)
         val geografiskTilknytning = tilknytning.geografiskTilknytning()
 
         return when {
-            tilknytning.ukjent -> ArbeidsFordelingEnhet(
-                Enheter.defaultEnhet.navn,
-                Enheter.defaultEnhet.enhetNr
-            )
+            tilknytning.ukjent ->
+                ArbeidsFordelingEnhet(
+                    Enheter.defaultEnhet.navn,
+                    Enheter.defaultEnhet.enhetNr,
+                )
             geografiskTilknytning == null -> throw IngenGeografiskOmraadeFunnetForEnhet(
                 Folkeregisteridentifikator.of(fnr),
-                tema
+                tema,
             ).also {
                 logger.warn(it.message)
             }
@@ -157,22 +196,26 @@ class RealSakService(
         }
     }
 
-    private fun finnEnhetForTemaOgOmraade(tema: String, omraade: String) =
-        norg2Klient.hentEnheterForOmraade(tema, omraade).firstOrNull() ?: throw IngenEnhetFunnetException(omraade, tema)
+    private fun finnEnhetForTemaOgOmraade(
+        tema: String,
+        omraade: String,
+    ) = norg2Klient.hentEnheterForOmraade(tema, omraade).firstOrNull() ?: throw IngenEnhetFunnetException(omraade, tema)
 
-    private fun List<Sak>.filterForEnheter() = this.filterSakerForEnheter(
-        featureToggleService,
-        Kontekst.get().AppUser
-    )
+    private fun List<Sak>.filterForEnheter() =
+        this.filterSakerForEnheter(
+            featureToggleService,
+            Kontekst.get().AppUser,
+        )
 
-    private fun Sak?.sjekkEnhet() = this?.let { sak ->
-        listOf(sak).filterForEnheter().firstOrNull()
-    }
+    private fun Sak?.sjekkEnhet() =
+        this?.let { sak ->
+            listOf(sak).filterForEnheter().firstOrNull()
+        }
 }
 
 fun List<Sak>.filterSakerForEnheter(
     featureToggleService: FeatureToggleService,
-    user: User
+    user: User,
 ) = this.filterForEnheter(featureToggleService, SakServiceFeatureToggle.FiltrerMedEnhetId, user) { item, enheter ->
     enheter.contains(item.enhet)
 }

@@ -31,11 +31,9 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import testsupport.buildTestApplicationConfigurationForOauth
-import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class SakRoutesTest {
-
     private val mockOAuth2Server = MockOAuth2Server()
     private lateinit var hoconApplicationConfig: HoconApplicationConfig
     private val behandlingService = mockk<BehandlingService>(relaxUnitFun = true)
@@ -68,9 +66,10 @@ internal class SakRoutesTest {
         coEvery { behandlingService.hentSisteIverksatte(1) } returns mockk(relaxed = true)
 
         withTestApplication { client ->
-            val response = client.get("/saker/$sakId/behandlinger/sisteIverksatte") {
-                header(HttpHeaders.Authorization, "Bearer $token")
-            }
+            val response =
+                client.get("/saker/$sakId/behandlinger/sisteIverksatte") {
+                    header(HttpHeaders.Authorization, "Bearer $token")
+                }
 
             assertEquals(200, response.status.value)
         }
@@ -81,9 +80,10 @@ internal class SakRoutesTest {
         val sakId = 1
         coEvery { behandlingService.hentSisteIverksatte(1) } returns null
         withTestApplication { client ->
-            val response = client.get("/saker/$sakId/behandlinger/sisteIverksatte") {
-                header(HttpHeaders.Authorization, "Bearer $token")
-            }
+            val response =
+                client.get("/saker/$sakId/behandlinger/sisteIverksatte") {
+                    header(HttpHeaders.Authorization, "Bearer $token")
+                }
 
             assertEquals(404, response.status.value)
         }
@@ -99,23 +99,24 @@ internal class SakRoutesTest {
                     sakSystemRoutes(
                         tilgangService,
                         sakService,
-                        behandlingService
+                        behandlingService,
                     )
                     sakWebRoutes(
                         tilgangService,
                         sakService,
                         behandlingService,
                         grunnlagsendringshendelseService,
-                        oppgaveServiceNy
+                        oppgaveServiceNy,
                     )
                 }
             }
 
-            val client = createClient {
-                install(ContentNegotiation) {
-                    register(ContentType.Application.Json, JacksonConverter(objectMapper))
+            val client =
+                createClient {
+                    install(ContentNegotiation) {
+                        register(ContentType.Application.Json, JacksonConverter(objectMapper))
+                    }
                 }
-            }
 
             block(client)
         }
@@ -125,16 +126,16 @@ internal class SakRoutesTest {
         mockOAuth2Server.issueToken(
             issuerId = AZURE_ISSUER,
             audience = CLIENT_ID,
-            claims = mapOf(
-                "navn" to "John Doe",
-                "NAVident" to NAVident
-            )
+            claims =
+                mapOf(
+                    "navn" to "John Doe",
+                    "NAVident" to NAV_IDENT,
+                ),
         ).serialize()
     }
 
     private companion object {
-        val sakId: Long = 1
-        const val NAVident = "Saksbehandler01"
+        const val NAV_IDENT = "Saksbehandler01"
         const val CLIENT_ID = "mock-client-id"
     }
 }

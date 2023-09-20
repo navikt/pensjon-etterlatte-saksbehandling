@@ -3,16 +3,17 @@ package no.nav.etterlatte.libs.sporingslogg
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 
 enum class Format {
-    CEF
+    CEF,
 }
 
 enum class Severity {
-    INFO, WARN
+    INFO,
+    WARN,
 }
 
 enum class Decision {
     Permit,
-    Deny
+    Deny,
 }
 
 enum class DeviceEventClassId {
@@ -20,13 +21,14 @@ enum class DeviceEventClassId {
     Create,
     Update,
     Delete,
-    Meta;
+    Meta,
+    ;
 
     fun format() = "audit:${name.lowercase()}"
 }
 
 enum class Name(val tekst: String) {
-    OnBehalfOfAccess("On-behalf-of access")
+    OnBehalfOfAccess("On-behalf-of access"),
 }
 
 // CEF-formatet er definert på https://community.microfocus.com/cfs-file/__key/communityserver-wikis-components-files/00-00-00-00-23/3731.CommonEventFormatV25.pdf
@@ -39,10 +41,11 @@ data class CEFEntry(
     val deviceEventClassId: DeviceEventClassId,
     val name: Name,
     val severity: Severity,
-    val extension: Extension
+    val extension: Extension,
 ) {
-    fun format(): String = "$format:$versjon|$deviceVendor|etterlatte-$deviceProduct|$deviceVersion|" +
-        "${deviceEventClassId.format()}|${name.tekst}|$severity|${extension.format()}"
+    fun format(): String =
+        "$format:$versjon|$deviceVendor|etterlatte-$deviceProduct|$deviceVersion|" +
+            "${deviceEventClassId.format()}|${name.tekst}|$severity|${extension.format()}"
 }
 
 data class Extension(
@@ -51,7 +54,7 @@ data class Extension(
     val destinationUserId: String,
     val request: String? = null,
     val flexString1: Decision? = null,
-    val message: String
+    val message: String,
 ) {
     fun format(): String {
         val flexString1Formatert =

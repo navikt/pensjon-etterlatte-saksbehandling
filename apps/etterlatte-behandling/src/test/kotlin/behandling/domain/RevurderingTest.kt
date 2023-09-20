@@ -19,21 +19,21 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
-import java.util.*
+import java.util.UUID
 
 internal class RevurderingTest {
-
     @Test
     fun `regulering kan endre tilstander`() {
         val id = UUID.randomUUID()
         Revurdering.opprett(
             id = id,
-            sak = Sak(
-                ident = "",
-                sakType = SakType.BARNEPENSJON,
-                id = 1,
-                enhet = Enheter.defaultEnhet.enhetNr
-            ),
+            sak =
+                Sak(
+                    ident = "",
+                    sakType = SakType.BARNEPENSJON,
+                    id = 1,
+                    enhet = Enheter.defaultEnhet.enhetNr,
+                ),
             behandlingOpprettet = Tidspunkt.now().toLocalDatetimeUTC(),
             sistEndret = Tidspunkt.now().toLocalDatetimeUTC(),
             status = BehandlingStatus.OPPRETTET,
@@ -45,7 +45,7 @@ internal class RevurderingTest {
             prosesstype = Prosesstype.MANUELL,
             kilde = Vedtaksloesning.GJENNY,
             revurderingInfo = null,
-            begrunnelse = null
+            begrunnelse = null,
         ).tilVilkaarsvurdert().tilTrygdetidOppdatert().tilBeregnet(false)
             .tilVilkaarsvurdert().tilTrygdetidOppdatert().tilBeregnet(false).tilFattetVedtak().tilAttestert()
             .tilIverksatt()
@@ -156,11 +156,11 @@ internal class RevurderingTest {
             Assertions.assertEquals(BehandlingStatus.OPPRETTET, revurdering.tilOpprettet().status)
             Assertions.assertEquals(
                 BehandlingStatus.VILKAARSVURDERT,
-                revurdering.tilVilkaarsvurdert().status
+                revurdering.tilVilkaarsvurdert().status,
             )
             Assertions.assertEquals(
                 BehandlingStatus.TRYGDETID_OPPDATERT,
-                revurdering.tilTrygdetidOppdatert().status
+                revurdering.tilTrygdetidOppdatert().status,
             )
             Assertions.assertEquals(BehandlingStatus.BEREGNET, revurdering.tilBeregnet(false).status)
             Assertions.assertEquals(BehandlingStatus.FATTET_VEDTAK, revurdering.tilFattetVedtak().status)
@@ -175,12 +175,13 @@ private fun opprettetRevurdering(prosesstype: Prosesstype): Revurdering {
     val id = UUID.randomUUID()
     return Revurdering.opprett(
         id = id,
-        sak = Sak(
-            ident = "",
-            sakType = SakType.BARNEPENSJON,
-            id = 1,
-            enhet = Enheter.defaultEnhet.enhetNr
-        ),
+        sak =
+            Sak(
+                ident = "",
+                sakType = SakType.BARNEPENSJON,
+                id = 1,
+                enhet = Enheter.defaultEnhet.enhetNr,
+            ),
         behandlingOpprettet = Tidspunkt.now().toLocalDatetimeUTC(),
         sistEndret = Tidspunkt.now().toLocalDatetimeUTC(),
         status = BehandlingStatus.OPPRETTET,
@@ -192,6 +193,6 @@ private fun opprettetRevurdering(prosesstype: Prosesstype): Revurdering {
         prosesstype = prosesstype,
         kilde = Vedtaksloesning.GJENNY,
         revurderingInfo = null,
-        begrunnelse = null
+        begrunnelse = null,
     )
 }

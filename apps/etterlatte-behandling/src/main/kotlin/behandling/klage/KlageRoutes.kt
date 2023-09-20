@@ -25,15 +25,19 @@ import no.nav.etterlatte.libs.common.medBody
 import no.nav.etterlatte.libs.common.sakId
 
 enum class KlageFeatureToggle(private val key: String) : FeatureToggle {
-    KanBrukeKlageToggle("pensjon-etterlatte.kan-bruke-klage");
+    KanBrukeKlageToggle("pensjon-etterlatte.kan-bruke-klage"),
+    ;
 
     override fun key(): String = key
 }
 
-internal fun Route.klageRoutes(klageService: KlageService, featureToggleService: FeatureToggleService) {
+internal fun Route.klageRoutes(
+    klageService: KlageService,
+    featureToggleService: FeatureToggleService,
+) {
     suspend fun PipelineContext<Unit, ApplicationCall>.hvisEnabled(
         toggle: FeatureToggle,
-        block: suspend PipelineContext<Unit, ApplicationCall>.() -> Unit
+        block: suspend PipelineContext<Unit, ApplicationCall>.() -> Unit,
     ) {
         if (!featureToggleService.isEnabled(toggle, false)) {
             call.respond(HttpStatusCode.NotFound)
@@ -46,9 +50,10 @@ internal fun Route.klageRoutes(klageService: KlageService, featureToggleService:
         post("opprett/{$SAKID_CALL_PARAMETER}") {
             hvisEnabled(KlageFeatureToggle.KanBrukeKlageToggle) {
                 val sakId = sakId
-                val klage = inTransaction {
-                    klageService.opprettKlage(sakId)
-                }
+                val klage =
+                    inTransaction {
+                        klageService.opprettKlage(sakId)
+                    }
                 call.respond(klage)
             }
         }
@@ -56,9 +61,10 @@ internal fun Route.klageRoutes(klageService: KlageService, featureToggleService:
         route("{$KLAGEID_CALL_PARAMETER}") {
             get {
                 hvisEnabled(KlageFeatureToggle.KanBrukeKlageToggle) {
-                    val klage = inTransaction {
-                        klageService.hentKlage(klageId)
-                    }
+                    val klage =
+                        inTransaction {
+                            klageService.hentKlage(klageId)
+                        }
                     when (klage) {
                         null -> call.respond(HttpStatusCode.NotFound)
                         else -> call.respond(klage)
@@ -70,9 +76,10 @@ internal fun Route.klageRoutes(klageService: KlageService, featureToggleService:
                 hvisEnabled(KlageFeatureToggle.KanBrukeKlageToggle) {
                     kunSaksbehandler { saksbehandler ->
                         medBody<VurdereFormkravDto> { formkravDto ->
-                            val oppdatertKlage = inTransaction {
-                                klageService.lagreFormkravIKlage(klageId, formkravDto.formkrav, saksbehandler)
-                            }
+                            val oppdatertKlage =
+                                inTransaction {
+                                    klageService.lagreFormkravIKlage(klageId, formkravDto.formkrav, saksbehandler)
+                                }
                             call.respond(oppdatertKlage)
                         }
                     }
@@ -83,9 +90,10 @@ internal fun Route.klageRoutes(klageService: KlageService, featureToggleService:
                 hvisEnabled(KlageFeatureToggle.KanBrukeKlageToggle) {
                     kunSaksbehandler { saksbehandler ->
                         medBody<VurdertUtfallDto> { utfall ->
-                            val oppdatertKlage = inTransaction {
-                                klageService.lagreUtfallAvKlage(klageId, utfall.utfall, saksbehandler)
-                            }
+                            val oppdatertKlage =
+                                inTransaction {
+                                    klageService.lagreUtfallAvKlage(klageId, utfall.utfall, saksbehandler)
+                                }
                             call.respond(oppdatertKlage)
                         }
                     }
@@ -95,9 +103,10 @@ internal fun Route.klageRoutes(klageService: KlageService, featureToggleService:
 
         get("sak/{$SAKID_CALL_PARAMETER}") {
             hvisEnabled(KlageFeatureToggle.KanBrukeKlageToggle) {
-                val klager = inTransaction {
-                    klageService.hentKlagerISak(sakId)
-                }
+                val klager =
+                    inTransaction {
+                        klageService.hentKlagerISak(sakId)
+                    }
                 call.respond(klager)
             }
         }
@@ -116,4 +125,5 @@ internal fun Route.klageRoutes(klageService: KlageService, featureToggleService:
 }
 
 data class VurdereFormkravDto(val formkrav: Formkrav)
+
 data class VurdertUtfallDto(val utfall: KlageUtfallUtenBrev)

@@ -5,23 +5,24 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
 class TransformerEnRegelTest {
-
     private object TestGrunnlag
 
-    private val regel1 = definerKonstant<TestGrunnlag, Int>(
-        gjelderFra = GJELDER_FRA,
-        beskrivelse = "Tallet 5",
-        regelReferanse = regelReferanse,
-        verdi = 5
-    )
+    private val regel1 =
+        definerKonstant<TestGrunnlag, Int>(
+            gjelderFra = GJELDER_FRA,
+            beskrivelse = "Tallet 5",
+            regelReferanse = regelReferanse,
+            verdi = 5,
+        )
 
-    private val regelSomBrukerVerdienFraEnAnnenRegel = RegelMeta(
-        gjelderFra = GJELDER_FRA,
-        beskrivelse = "Regel som transformerer en annen regels resultat",
-        regelReferanse = regelReferanse
-    ) benytter regel1 med { regel1Verdi ->
-        regel1Verdi * 2
-    }
+    private val regelSomBrukerVerdienFraEnAnnenRegel =
+        RegelMeta(
+            gjelderFra = GJELDER_FRA,
+            beskrivelse = "Regel som transformerer en annen regels resultat",
+            regelReferanse = regelReferanse,
+        ) benytter regel1 med { regel1Verdi ->
+            regel1Verdi * 2
+        }
 
     @Test
     fun `Skal transformere resultatet av en annen regel`() {

@@ -7,12 +7,12 @@ interface SafService {
     suspend fun hentDokumenter(
         fnr: String,
         idType: BrukerIdType,
-        brukerTokenInfo: BrukerTokenInfo
+        brukerTokenInfo: BrukerTokenInfo,
     ): HentJournalposterResult
 
     suspend fun hentDokumentPDF(
         journalpostId: String,
         dokumentInfoId: String,
-        accessToken: String
+        accessToken: String,
     ): ByteArray
 }

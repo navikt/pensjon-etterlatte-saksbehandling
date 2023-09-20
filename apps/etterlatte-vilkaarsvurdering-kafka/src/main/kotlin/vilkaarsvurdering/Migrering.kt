@@ -17,7 +17,7 @@ import rapidsandrivers.migrering.ListenerMedLoggingOgFeilhaandtering
 
 internal class Migrering(
     rapidsConnection: RapidsConnection,
-    private val vilkaarsvurderingService: VilkaarsvurderingService
+    private val vilkaarsvurderingService: VilkaarsvurderingService,
 ) : ListenerMedLoggingOgFeilhaandtering(VILKAARSVURDER) {
     private val logger = LoggerFactory.getLogger(Migrering::class.java)
 
@@ -30,7 +30,10 @@ internal class Migrering(
         }.register(this)
     }
 
-    override fun haandterPakke(packet: JsonMessage, context: MessageContext) {
+    override fun haandterPakke(
+        packet: JsonMessage,
+        context: MessageContext,
+    ) {
         val behandlingId = packet.behandlingId
         logger.info("Mottatt vilkårs-migreringshendelse for $BEHANDLING_ID_KEY $behandlingId")
         vilkaarsvurderingService.migrer(behandlingId)

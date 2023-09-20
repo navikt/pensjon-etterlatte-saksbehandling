@@ -7,7 +7,7 @@ import java.time.LocalDate
 data class GrunnlagMedPeriode<T>(
     val data: T,
     val fom: LocalDate,
-    val tom: LocalDate? = null
+    val tom: LocalDate? = null,
 ) {
     init {
         if (tom != null && fom > tom) {
@@ -27,14 +27,13 @@ private val kastFeilUtenforPerioder =
     { dato: LocalDate, _: LocalDate, _: LocalDate? -> throw PeriodiseringAvGrunnlagFeil.DatoUtenforPerioder(dato) }
 
 object PeriodisertBeregningGrunnlag {
-
     private class Grunnlag<T>(
         opplysninger: List<GrunnlagMedPeriode<T>>,
         private val opplysningUtenforPeriode: (
             datoIPeriode: LocalDate,
             tidligsteOpplysning: LocalDate,
-            senesteOpplysning: LocalDate?
-        ) -> T = kastFeilUtenforPerioder
+            senesteOpplysning: LocalDate?,
+        ) -> T = kastFeilUtenforPerioder,
     ) : PeriodisertGrunnlag<T> {
         val sorterteOpplysninger = opplysninger.sortedBy { it.fom }
 
@@ -57,7 +56,7 @@ object PeriodisertBeregningGrunnlag {
             return (
                 sorterteOpplysninger.map { it.fom } +
                     sorterteOpplysninger.mapNotNull { it.tom?.plusDays(1) }
-                ).toSet()
+            ).toSet()
         }
 
         override fun finnGrunnlagForPeriode(datoIPeriode: LocalDate): T {
@@ -70,7 +69,7 @@ object PeriodisertBeregningGrunnlag {
     fun <T> lagKomplettPeriodisertGrunnlag(
         perioder: List<GrunnlagMedPeriode<T>>,
         fom: LocalDate,
-        tom: LocalDate?
+        tom: LocalDate?,
     ): PeriodisertGrunnlag<T> {
         val grunnlag = Grunnlag(opplysninger = perioder)
         val harGrunnlagForHelePerioden = harGrunnlagForHelePerioden(grunnlag.sorterteOpplysninger, fom, tom)
@@ -82,7 +81,7 @@ object PeriodisertBeregningGrunnlag {
 
     fun <T> lagPotensieltTomtGrunnlagMedDefaultUtenforPerioder(
         perioder: List<GrunnlagMedPeriode<T>>,
-        defaultGrunnlag: (datoIPeriode: LocalDate, foersteFom: LocalDate, senesteTom: LocalDate?) -> T
+        defaultGrunnlag: (datoIPeriode: LocalDate, foersteFom: LocalDate, senesteTom: LocalDate?) -> T,
     ): PeriodisertGrunnlag<T> =
         if (perioder.isEmpty()) {
             KonstantGrunnlag(defaultGrunnlag.invoke(LocalDate.now(), LocalDate.now(), null))
@@ -92,11 +91,11 @@ object PeriodisertBeregningGrunnlag {
 
     fun <T> lagGrunnlagMedDefaultUtenforPerioder(
         perioder: List<GrunnlagMedPeriode<T>>,
-        defaultGrunnlag: (datoIPeriode: LocalDate, foersteFom: LocalDate, senesteTom: LocalDate?) -> T
+        defaultGrunnlag: (datoIPeriode: LocalDate, foersteFom: LocalDate, senesteTom: LocalDate?) -> T,
     ): PeriodisertGrunnlag<T> {
         return Grunnlag(
             opplysninger = perioder,
-            opplysningUtenforPeriode = defaultGrunnlag
+            opplysningUtenforPeriode = defaultGrunnlag,
         )
     }
 
@@ -115,7 +114,7 @@ object PeriodisertBeregningGrunnlag {
     private fun harGrunnlagForHelePerioden(
         sortertePerioder: List<GrunnlagMedPeriode<*>>,
         fom: LocalDate,
-        tom: LocalDate?
+        tom: LocalDate?,
     ): GrunnlagForHelePerioden {
         val perioder =
             listOf(sortertePerioder.takeWhile { it.fom <= fom }.last()) + sortertePerioder.dropWhile { it.fom <= fom }
@@ -130,7 +129,7 @@ object PeriodisertBeregningGrunnlag {
 data class GrunnlagForHelePerioden(
     val ingenHullInnad: Boolean,
     val harGrunnlagIStarten: Boolean,
-    val varerUtPerioden: VarerUtPerioden
+    val varerUtPerioden: VarerUtPerioden,
 ) {
     fun harGrunnlagForHelePerioden() = ingenHullInnad && harGrunnlagIStarten && varerUtPerioden.varerUtPerioden()
 }
@@ -144,17 +143,19 @@ sealed class PeriodiseringAvGrunnlagFeil(message: String, cause: Throwable? = nu
         PeriodiseringAvGrunnlagFeil("Datoen $datoIPeriode er ikke innenfor grunnlaget")
 
     class IngenPerioder : PeriodiseringAvGrunnlagFeil("Ingen perioder for grunnlaget ble gitt for periodisering")
+
     class PerioderOverlapper : PeriodiseringAvGrunnlagFeil("Periodene for periodisering overlapper")
+
     class PerioderErIkkeKomplett(grunnlagForHelePerioden: GrunnlagForHelePerioden) :
         PeriodiseringAvGrunnlagFeil(
-            "Periodene gitt er ikke komplette for den overordnede perioden: $grunnlagForHelePerioden"
+            "Periodene gitt er ikke komplette for den overordnede perioden: $grunnlagForHelePerioden",
         )
 }
 
 fun <T> erGrunnlagLiktFoerEnDato(
     grunnlag1: List<GrunnlagMedPeriode<T>>,
     grunnlag2: List<GrunnlagMedPeriode<T>>,
-    cutoff: LocalDate
+    cutoff: LocalDate,
 ): Boolean {
     // hjelpemetode som kutter av tom på dagen før cutoff hvis den går over
     fun GrunnlagMedPeriode<T>.medNormalisertTom(): GrunnlagMedPeriode<T> {

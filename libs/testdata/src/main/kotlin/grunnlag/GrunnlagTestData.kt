@@ -18,7 +18,7 @@ data class GrunnlagTestData(
     val opplysningsmapAvdoedOverrides: Map<Opplysningstype, Opplysning<JsonNode>> = emptyMap(),
     val opplysningsmapGjenlevendeOverrides: Map<Opplysningstype, Opplysning<JsonNode>> = emptyMap(),
     val opplysningsmapHalvsoeskenOverrides: Map<Opplysningstype, Opplysning<JsonNode>> = emptyMap(),
-    val opplysningsmapSakOverrides: Map<Opplysningstype, Opplysning<JsonNode>> = emptyMap()
+    val opplysningsmapSakOverrides: Map<Opplysningstype, Opplysning<JsonNode>> = emptyMap(),
 ) {
     val soeker
         get() = personTestData(soekerTestopplysningerMap + opplysningsmapSoekerOverrides)
@@ -30,33 +30,38 @@ data class GrunnlagTestData(
         get() = personTestData(gjenlevendeTestopplysningerMap + opplysningsmapGjenlevendeOverrides)
 
     private val avdoedesBarnOverrides
-        get() = mapOf(
-            AVDOEDESBARN to Opplysning.Konstant(
-                randomUUID(),
-                kilde,
-                AvdoedesBarn(listOf(soeker, soesken, halvsoesken)).toJsonNode()
+        get() =
+            mapOf(
+                AVDOEDESBARN to
+                    Opplysning.Konstant(
+                        randomUUID(),
+                        kilde,
+                        AvdoedesBarn(listOf(soeker, soesken, halvsoesken)).toJsonNode(),
+                    ),
             )
-        )
     val avdoed
         get() = personTestData(avdoedTestopplysningerMap + avdoedesBarnOverrides + opplysningsmapAvdoedOverrides)
 
-    fun hentOpplysningsgrunnlag(): Grunnlag = Grunnlag(
-        soeker = soekerTestopplysningerMap + opplysningsmapSoekerOverrides,
-        familie = listOf(
-            soeskenTestopplysningerMap + opplysningsmapSoeskenOverrides,
-            avdoedTestopplysningerMap + avdoedesBarnOverrides + opplysningsmapAvdoedOverrides,
-            gjenlevendeTestopplysningerMap + opplysningsmapGjenlevendeOverrides,
-            halvsoeskenTestopplysningerMap + opplysningsmapHalvsoeskenOverrides
-        ),
-        sak = opplysningsmapSakOverrides,
-        metadata = Metadata(1, 15)
-    )
+    fun hentOpplysningsgrunnlag(): Grunnlag =
+        Grunnlag(
+            soeker = soekerTestopplysningerMap + opplysningsmapSoekerOverrides,
+            familie =
+                listOf(
+                    soeskenTestopplysningerMap + opplysningsmapSoeskenOverrides,
+                    avdoedTestopplysningerMap + avdoedesBarnOverrides + opplysningsmapAvdoedOverrides,
+                    gjenlevendeTestopplysningerMap + opplysningsmapGjenlevendeOverrides,
+                    halvsoeskenTestopplysningerMap + opplysningsmapHalvsoeskenOverrides,
+                ),
+            sak = opplysningsmapSakOverrides,
+            metadata = Metadata(1, 15),
+        )
 
-    fun hentPersonGalleri(): Persongalleri = Persongalleri(
-        soeker = soeker.foedselsnummer.value,
-        innsender = gjenlevende.foedselsnummer.value,
-        soesken = listOf(soesken.foedselsnummer.value, halvsoesken.foedselsnummer.value),
-        avdoed = listOf(avdoed.foedselsnummer.value),
-        gjenlevende = listOf(gjenlevende.foedselsnummer.value)
-    )
+    fun hentPersonGalleri(): Persongalleri =
+        Persongalleri(
+            soeker = soeker.foedselsnummer.value,
+            innsender = gjenlevende.foedselsnummer.value,
+            soesken = listOf(soesken.foedselsnummer.value, halvsoesken.foedselsnummer.value),
+            avdoed = listOf(avdoed.foedselsnummer.value),
+            gjenlevende = listOf(gjenlevende.foedselsnummer.value),
+        )
 }

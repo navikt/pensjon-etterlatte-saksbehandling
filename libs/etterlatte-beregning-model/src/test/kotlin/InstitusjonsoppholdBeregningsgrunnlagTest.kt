@@ -5,12 +5,11 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 class InstitusjonsoppholdBeregningsgrunnlagTest {
-
     @Test
     fun `prosentEtterReduksjon returnerer 100 for ikke redusert`() {
         assertEquals(
             Prosent.hundre,
-            InstitusjonsoppholdBeregningsgrunnlag(Reduksjon.NEI_KORT_OPPHOLD).prosentEtterReduksjon()
+            InstitusjonsoppholdBeregningsgrunnlag(Reduksjon.NEI_KORT_OPPHOLD).prosentEtterReduksjon(),
         )
     }
 
@@ -25,8 +24,8 @@ class InstitusjonsoppholdBeregningsgrunnlagTest {
             Prosent(60),
             InstitusjonsoppholdBeregningsgrunnlag(
                 Reduksjon.JA_EGEN_PROSENT_AV_G,
-                egenReduksjon = 40
-            ).prosentEtterReduksjon()
+                egenReduksjon = 40,
+            ).prosentEtterReduksjon(),
         )
     }
 }

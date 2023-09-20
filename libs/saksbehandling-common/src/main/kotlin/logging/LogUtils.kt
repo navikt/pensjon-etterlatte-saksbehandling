@@ -2,18 +2,28 @@ package no.nav.etterlatte.libs.common.logging
 
 import org.slf4j.LoggerFactory
 import org.slf4j.MDC
-import java.util.*
+import java.util.UUID
 
 const val CORRELATION_ID: String = "correlation_id"
 const val NAV_CONSUMER_ID: String = "Nav-Consumer-Id"
 
-fun <T> withLogContext(correlationId: String? = null, kv: Map<String, String> = emptyMap(), block: () -> T): T =
-    innerLogContext(correlationId, kv, block)
+fun <T> withLogContext(
+    correlationId: String? = null,
+    kv: Map<String, String> = emptyMap(),
+    block: () -> T,
+): T = innerLogContext(correlationId, kv, block)
 
-fun withLogContext(correlationId: String? = null, kv: Map<String, String> = emptyMap(), block: () -> Unit): Unit =
-    innerLogContext(correlationId, kv, block)
+fun withLogContext(
+    correlationId: String? = null,
+    kv: Map<String, String> = emptyMap(),
+    block: () -> Unit,
+): Unit = innerLogContext(correlationId, kv, block)
 
-private fun <T> innerLogContext(correlationId: String?, kv: Map<String, String> = emptyMap(), block: () -> T): T {
+private fun <T> innerLogContext(
+    correlationId: String?,
+    kv: Map<String, String> = emptyMap(),
+    block: () -> T,
+): T {
     var exceptionThrown = false
 
     try {
@@ -46,6 +56,6 @@ fun sikkerLoggOppstartOgAvslutning(applikasjonsnavn: String) {
     Runtime.getRuntime().addShutdownHook(
         Thread {
             sikkerLogg.debug("SikkerLogg: $applikasjonsnavn avslutter")
-        }
+        },
     )
 }

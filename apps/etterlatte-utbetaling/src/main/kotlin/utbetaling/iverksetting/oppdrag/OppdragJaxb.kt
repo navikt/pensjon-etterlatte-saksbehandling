@@ -25,10 +25,11 @@ object OppdragJaxb {
     }
 
     fun toOppdrag(oppdragXml: String): Oppdrag {
-        val oppdrag = jaxbContext.createUnmarshaller().unmarshal(
-            xmlInputFactory.createXMLStreamReader(StreamSource(oppdragXml.toValidXml())),
-            Oppdrag::class.java
-        )
+        val oppdrag =
+            jaxbContext.createUnmarshaller().unmarshal(
+                xmlInputFactory.createXMLStreamReader(StreamSource(oppdragXml.toValidXml())),
+                Oppdrag::class.java,
+            )
         return oppdrag.value
     }
 

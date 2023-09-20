@@ -47,12 +47,11 @@ import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class VilkaarsvurderingServiceTest {
-
     @Container
     private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:$POSTGRES_VERSION")
 
@@ -67,33 +66,36 @@ internal class VilkaarsvurderingServiceTest {
     @BeforeAll
     fun beforeAll() {
         postgreSQLContainer.start()
-        ds = DataSourceBuilder.createDataSource(
-            postgreSQLContainer.jdbcUrl,
-            postgreSQLContainer.username,
-            postgreSQLContainer.password
-        ).also { it.migrate() }
+        ds =
+            DataSourceBuilder.createDataSource(
+                postgreSQLContainer.jdbcUrl,
+                postgreSQLContainer.username,
+                postgreSQLContainer.password,
+            ).also { it.migrate() }
     }
 
     @BeforeEach
     fun beforeEach() {
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns GrunnlagTestData().hentOpplysningsgrunnlag()
         coEvery { behandlingKlient.kanSetteBehandlingStatusVilkaarsvurdert(any(), any()) } returns true
-        coEvery { behandlingKlient.hentBehandling(any(), any()) } returns mockk<DetaljertBehandling>().apply {
-            every { id } returns UUID.randomUUID()
-            every { sak } returns 1L
-            every { sakType } returns SakType.BARNEPENSJON
-            every { behandlingType } returns BehandlingType.FØRSTEGANGSBEHANDLING
-            every { soeker } returns "10095512345"
-            every { virkningstidspunkt } returns VirkningstidspunktTestData.virkningstidsunkt()
-            every { revurderingsaarsak } returns null
-        }
+        coEvery { behandlingKlient.hentBehandling(any(), any()) } returns
+            mockk<DetaljertBehandling>().apply {
+                every { id } returns UUID.randomUUID()
+                every { sak } returns 1L
+                every { sakType } returns SakType.BARNEPENSJON
+                every { behandlingType } returns BehandlingType.FØRSTEGANGSBEHANDLING
+                every { soeker } returns "10095512345"
+                every { virkningstidspunkt } returns VirkningstidspunktTestData.virkningstidsunkt()
+                every { revurderingsaarsak } returns null
+            }
 
         repository = VilkaarsvurderingRepository(ds, DelvilkaarRepository())
-        service = VilkaarsvurderingService(
-            repository,
-            behandlingKlient,
-            grunnlagKlient
-        )
+        service =
+            VilkaarsvurderingService(
+                repository,
+                behandlingKlient,
+                grunnlagKlient,
+            )
     }
 
     private fun cleanDatabase() {
@@ -116,9 +118,10 @@ internal class VilkaarsvurderingServiceTest {
     fun `Skal opprette vilkaarsvurdering for foerstegangsbehandling barnepensjon med grunnlagsopplysninger`() {
         val grunnlag: Grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
 
-        val vilkaarsvurdering = runBlocking {
-            service.opprettVilkaarsvurdering(uuid, brukerTokenInfo)
-        }
+        val vilkaarsvurdering =
+            runBlocking {
+                service.opprettVilkaarsvurdering(uuid, brukerTokenInfo)
+            }
 
         vilkaarsvurdering shouldNotBe null
         vilkaarsvurdering.behandlingId shouldBe uuid
@@ -142,19 +145,21 @@ internal class VilkaarsvurderingServiceTest {
 
     @Test
     fun `Skal opprette vilkaarsvurdering for foerstegangsbehandling omstillingssoeknad med grunnlagsopplysninger`() {
-        coEvery { behandlingKlient.hentBehandling(any(), any()) } returns mockk<DetaljertBehandling>().apply {
-            every { id } returns UUID.randomUUID()
-            every { sak } returns 2L
-            every { sakType } returns SakType.OMSTILLINGSSTOENAD
-            every { behandlingType } returns BehandlingType.FØRSTEGANGSBEHANDLING
-            every { soeker } returns "10095512345"
-            every { virkningstidspunkt } returns VirkningstidspunktTestData.virkningstidsunkt()
-            every { revurderingsaarsak } returns null
-        }
+        coEvery { behandlingKlient.hentBehandling(any(), any()) } returns
+            mockk<DetaljertBehandling>().apply {
+                every { id } returns UUID.randomUUID()
+                every { sak } returns 2L
+                every { sakType } returns SakType.OMSTILLINGSSTOENAD
+                every { behandlingType } returns BehandlingType.FØRSTEGANGSBEHANDLING
+                every { soeker } returns "10095512345"
+                every { virkningstidspunkt } returns VirkningstidspunktTestData.virkningstidsunkt()
+                every { revurderingsaarsak } returns null
+            }
 
-        val vilkaarsvurdering = runBlocking {
-            service.opprettVilkaarsvurdering(uuid, brukerTokenInfo)
-        }
+        val vilkaarsvurdering =
+            runBlocking {
+                service.opprettVilkaarsvurdering(uuid, brukerTokenInfo)
+            }
 
         vilkaarsvurdering shouldNotBe null
         vilkaarsvurdering.behandlingId shouldBe uuid
@@ -169,11 +174,12 @@ internal class VilkaarsvurderingServiceTest {
         val vilkaarsvurdering = runBlocking { opprettVilkaarsvurdering() }
 
         val vurdering = vilkaarsVurderingData()
-        val vurdertVilkaar = VurdertVilkaar(
-            vilkaarId = vilkaarsvurdering.hentVilkaarMedHovedvilkaarType(VilkaarType.BP_FORTSATT_MEDLEMSKAP)?.id!!,
-            hovedvilkaar = VilkaarTypeOgUtfall(type = VilkaarType.BP_FORTSATT_MEDLEMSKAP, resultat = Utfall.OPPFYLT),
-            vurdering = vurdering
-        )
+        val vurdertVilkaar =
+            VurdertVilkaar(
+                vilkaarId = vilkaarsvurdering.hentVilkaarMedHovedvilkaarType(VilkaarType.BP_FORTSATT_MEDLEMSKAP)?.id!!,
+                hovedvilkaar = VilkaarTypeOgUtfall(type = VilkaarType.BP_FORTSATT_MEDLEMSKAP, resultat = Utfall.OPPFYLT),
+                vurdering = vurdering,
+            )
 
         runBlocking {
             val vilkaarsvurderingOppdatert =
@@ -201,18 +207,21 @@ internal class VilkaarsvurderingServiceTest {
         val vilkaarsvurdering = runBlocking { opprettVilkaarsvurdering() }
 
         val vurdering = vilkaarsVurderingData()
-        val vurdertVilkaar = VurdertVilkaar(
-            vilkaarId = vilkaarsvurdering.hentVilkaarMedHovedvilkaarType(VilkaarType.BP_FORTSATT_MEDLEMSKAP)?.id!!,
-            hovedvilkaar = VilkaarTypeOgUtfall(
-                type = VilkaarType.BP_FORTSATT_MEDLEMSKAP,
-                resultat = Utfall.IKKE_OPPFYLT
-            ),
-            unntaksvilkaar = VilkaarTypeOgUtfall(
-                type = VilkaarType.BP_FORTSATT_MEDLEMSKAP_UNNTAK_FORELDRE_MINST_20_AAR_SAMLET_BOTID,
-                resultat = Utfall.OPPFYLT
-            ),
-            vurdering = vurdering
-        )
+        val vurdertVilkaar =
+            VurdertVilkaar(
+                vilkaarId = vilkaarsvurdering.hentVilkaarMedHovedvilkaarType(VilkaarType.BP_FORTSATT_MEDLEMSKAP)?.id!!,
+                hovedvilkaar =
+                    VilkaarTypeOgUtfall(
+                        type = VilkaarType.BP_FORTSATT_MEDLEMSKAP,
+                        resultat = Utfall.IKKE_OPPFYLT,
+                    ),
+                unntaksvilkaar =
+                    VilkaarTypeOgUtfall(
+                        type = VilkaarType.BP_FORTSATT_MEDLEMSKAP_UNNTAK_FORELDRE_MINST_20_AAR_SAMLET_BOTID,
+                        resultat = Utfall.OPPFYLT,
+                    ),
+                vurdering = vurdering,
+            )
 
         runBlocking {
             val vilkaarsvurderingOppdatert = service.oppdaterVurderingPaaVilkaar(uuid, brukerTokenInfo, vurdertVilkaar)
@@ -240,14 +249,16 @@ internal class VilkaarsvurderingServiceTest {
         val vilkaarsvurdering = runBlocking { opprettVilkaarsvurdering() }
 
         val vurdering = vilkaarsVurderingData()
-        val vurdertVilkaar = VurdertVilkaar(
-            vilkaarId = vilkaarsvurdering.hentVilkaarMedHovedvilkaarType(VilkaarType.BP_FORTSATT_MEDLEMSKAP)?.id!!,
-            hovedvilkaar = VilkaarTypeOgUtfall(
-                type = VilkaarType.BP_FORTSATT_MEDLEMSKAP,
-                resultat = Utfall.IKKE_OPPFYLT
-            ),
-            vurdering = vurdering
-        )
+        val vurdertVilkaar =
+            VurdertVilkaar(
+                vilkaarId = vilkaarsvurdering.hentVilkaarMedHovedvilkaarType(VilkaarType.BP_FORTSATT_MEDLEMSKAP)?.id!!,
+                hovedvilkaar =
+                    VilkaarTypeOgUtfall(
+                        type = VilkaarType.BP_FORTSATT_MEDLEMSKAP,
+                        resultat = Utfall.IKKE_OPPFYLT,
+                    ),
+                vurdering = vurdering,
+            )
 
         runBlocking {
             val vilkaarsvurderingOppdatert = service.oppdaterVurderingPaaVilkaar(uuid, brukerTokenInfo, vurdertVilkaar)
@@ -275,14 +286,16 @@ internal class VilkaarsvurderingServiceTest {
         coEvery { behandlingKlient.kanSetteBehandlingStatusVilkaarsvurdert(any(), any()) } returns false
 
         val vurdering = vilkaarsVurderingData()
-        val vurdertVilkaar = VurdertVilkaar(
-            vilkaarId = vilkaarsvurdering.hentVilkaarMedHovedvilkaarType(VilkaarType.BP_FORTSATT_MEDLEMSKAP)?.id!!,
-            hovedvilkaar = VilkaarTypeOgUtfall(
-                type = VilkaarType.BP_FORTSATT_MEDLEMSKAP,
-                resultat = Utfall.IKKE_OPPFYLT
-            ),
-            vurdering = vurdering
-        )
+        val vurdertVilkaar =
+            VurdertVilkaar(
+                vilkaarId = vilkaarsvurdering.hentVilkaarMedHovedvilkaarType(VilkaarType.BP_FORTSATT_MEDLEMSKAP)?.id!!,
+                hovedvilkaar =
+                    VilkaarTypeOgUtfall(
+                        type = VilkaarType.BP_FORTSATT_MEDLEMSKAP,
+                        resultat = Utfall.IKKE_OPPFYLT,
+                    ),
+                vurdering = vurdering,
+            )
 
         runBlocking {
             assertThrows<IllegalStateException> {
@@ -311,8 +324,8 @@ internal class VilkaarsvurderingServiceTest {
                         vilkaar.id,
                         VilkaarTypeOgUtfall(vilkaar.hovedvilkaar.type, Utfall.OPPFYLT),
                         null,
-                        VilkaarVurderingData("kommentar", LocalDateTime.now(), "saksbehandler")
-                    )
+                        VilkaarVurderingData("kommentar", LocalDateTime.now(), "saksbehandler"),
+                    ),
                 )
             }
             service.oppdaterTotalVurdering(
@@ -322,8 +335,8 @@ internal class VilkaarsvurderingServiceTest {
                     VilkaarsvurderingUtfall.OPPFYLT,
                     "kommentar",
                     LocalDateTime.now(),
-                    "saksbehandler"
-                )
+                    "saksbehandler",
+                ),
             )
         }
 
@@ -333,7 +346,7 @@ internal class VilkaarsvurderingServiceTest {
                 service.kopierVilkaarsvurdering(
                     nyBehandlingId,
                     vilkaarsvurdering.behandlingId,
-                    brukerTokenInfo
+                    brukerTokenInfo,
                 )
             }
 
@@ -341,7 +354,7 @@ internal class VilkaarsvurderingServiceTest {
         Assertions.assertEquals(vilkaarsvurdering.resultat, kopiertVilkaarsvurdering.resultat)
         Assertions.assertEquals(
             vilkaarsvurdering.vilkaar.map { it.vurdering },
-            kopiertVilkaarsvurdering.vilkaar.map { it.vurdering }
+            kopiertVilkaarsvurdering.vilkaar.map { it.vurdering },
         )
     }
 
@@ -352,46 +365,48 @@ internal class VilkaarsvurderingServiceTest {
 
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
         coEvery { behandlingKlient.settBehandlingStatusVilkaarsvurdert(any(), any()) } returns true
-        coEvery { behandlingKlient.hentBehandling(revurderingId, any()) } returns mockk {
-            every { id } returns revurderingId
-            every { sak } returns 1L
-            every { sakType } returns SakType.BARNEPENSJON
-            every { behandlingType } returns BehandlingType.REVURDERING
-            every { soeker } returns "10095512345"
-            every { virkningstidspunkt } returns VirkningstidspunktTestData.virkningstidsunkt()
-            every { revurderingsaarsak } returns RevurderingAarsak.REGULERING
-        }
+        coEvery { behandlingKlient.hentBehandling(revurderingId, any()) } returns
+            mockk {
+                every { id } returns revurderingId
+                every { sak } returns 1L
+                every { sakType } returns SakType.BARNEPENSJON
+                every { behandlingType } returns BehandlingType.REVURDERING
+                every { soeker } returns "10095512345"
+                every { virkningstidspunkt } returns VirkningstidspunktTestData.virkningstidsunkt()
+                every { revurderingsaarsak } returns RevurderingAarsak.REGULERING
+            }
 
         coEvery { behandlingKlient.hentSisteIverksatteBehandling(any(), any()) } returns SisteIverksatteBehandling(uuid)
 
-        val foerstegangsvilkaar = runBlocking {
-            service.opprettVilkaarsvurdering(uuid, brukerTokenInfo)
-            val vilkaarsvurdering = service.hentVilkaarsvurdering(uuid)!!
-            vilkaarsvurdering.vilkaar.forEach { vilkaar ->
-                service.oppdaterVurderingPaaVilkaar(
+        val foerstegangsvilkaar =
+            runBlocking {
+                service.opprettVilkaarsvurdering(uuid, brukerTokenInfo)
+                val vilkaarsvurdering = service.hentVilkaarsvurdering(uuid)!!
+                vilkaarsvurdering.vilkaar.forEach { vilkaar ->
+                    service.oppdaterVurderingPaaVilkaar(
+                        uuid,
+                        brukerTokenInfo,
+                        VurdertVilkaar(
+                            vilkaar.id,
+                            VilkaarTypeOgUtfall(vilkaar.hovedvilkaar.type, Utfall.OPPFYLT),
+                            null,
+                            VilkaarVurderingData("kommentar", LocalDateTime.now(), "saksbehandler"),
+                        ),
+                    )
+                }
+                service.oppdaterTotalVurdering(
                     uuid,
                     brukerTokenInfo,
-                    VurdertVilkaar(
-                        vilkaar.id,
-                        VilkaarTypeOgUtfall(vilkaar.hovedvilkaar.type, Utfall.OPPFYLT),
-                        null,
-                        VilkaarVurderingData("kommentar", LocalDateTime.now(), "saksbehandler")
-                    )
+                    VilkaarsvurderingResultat(
+                        VilkaarsvurderingUtfall.OPPFYLT,
+                        "kommentar",
+                        LocalDateTime.now(),
+                        "saksbehandler",
+                    ),
                 )
-            }
-            service.oppdaterTotalVurdering(
-                uuid,
-                brukerTokenInfo,
-                VilkaarsvurderingResultat(
-                    VilkaarsvurderingUtfall.OPPFYLT,
-                    "kommentar",
-                    LocalDateTime.now(),
-                    "saksbehandler"
-                )
-            )
 
-            service.hentVilkaarsvurdering(uuid)!!
-        }
+                service.hentVilkaarsvurdering(uuid)!!
+            }
 
         val revurderingsvilkaar = runBlocking { service.opprettVilkaarsvurdering(revurderingId, brukerTokenInfo) }
         assertIsSimilar(foerstegangsvilkaar, revurderingsvilkaar)
@@ -407,9 +422,10 @@ internal class VilkaarsvurderingServiceTest {
 
     @Test
     fun `Er ikke yrkesskade hvis ikke det er en yrkesskade oppfylt delvilkaar`() {
-        val vilkaarsvurdering = runBlocking {
-            service.opprettVilkaarsvurdering(uuid, brukerTokenInfo)
-        }
+        val vilkaarsvurdering =
+            runBlocking {
+                service.opprettVilkaarsvurdering(uuid, brukerTokenInfo)
+            }
 
         vilkaarsvurdering shouldNotBe null
         vilkaarsvurdering.behandlingId shouldBe uuid
@@ -420,9 +436,10 @@ internal class VilkaarsvurderingServiceTest {
     fun `Er yrkesskade hvis det er en yrkesskade oppfylt delvilkaar`() {
         val grunnlag: Grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
 
-        val vilkaarsvurdering = runBlocking {
-            service.opprettVilkaarsvurdering(uuid, brukerTokenInfo)
-        }
+        val vilkaarsvurdering =
+            runBlocking {
+                service.opprettVilkaarsvurdering(uuid, brukerTokenInfo)
+            }
 
         val delvilkaar = vilkaarsvurdering.vilkaar.find { it.hovedvilkaar.type == VilkaarType.BP_YRKESSKADE_AVDOED }
 
@@ -434,21 +451,25 @@ internal class VilkaarsvurderingServiceTest {
                     delvilkaar!!.id,
                     VilkaarTypeOgUtfall(VilkaarType.BP_YRKESSKADE_AVDOED, Utfall.OPPFYLT),
                     null,
-                    vilkaarsVurderingData()
-                )
+                    vilkaarsVurderingData(),
+                ),
             )
         }
 
-        val oppdatertVilkaarsvurdering = runBlocking {
-            service.hentVilkaarsvurdering(uuid)
-        }
+        val oppdatertVilkaarsvurdering =
+            runBlocking {
+                service.hentVilkaarsvurdering(uuid)
+            }
 
         oppdatertVilkaarsvurdering shouldNotBe null
         oppdatertVilkaarsvurdering!!.behandlingId shouldBe uuid
         oppdatertVilkaarsvurdering.toDto().isYrkesskade() shouldBe true
     }
 
-    private fun assertIsSimilar(v1: Vilkaarsvurdering, v2: Vilkaarsvurdering) {
+    private fun assertIsSimilar(
+        v1: Vilkaarsvurdering,
+        v2: Vilkaarsvurdering,
+    ) {
         Assertions.assertEquals(v1.resultat, v2.resultat)
         Assertions.assertEquals(v1.virkningstidspunkt, v2.virkningstidspunkt)
         Assertions.assertEquals(v1.grunnlagVersjon, v2.grunnlagVersjon)
@@ -466,6 +487,5 @@ internal class VilkaarsvurderingServiceTest {
         return service.opprettVilkaarsvurdering(uuid, brukerTokenInfo)
     }
 
-    private fun vilkaarsVurderingData() =
-        VilkaarVurderingData("en kommentar", Tidspunkt.now().toLocalDatetimeUTC(), "saksbehandler")
+    private fun vilkaarsVurderingData() = VilkaarVurderingData("en kommentar", Tidspunkt.now().toLocalDatetimeUTC(), "saksbehandler")
 }

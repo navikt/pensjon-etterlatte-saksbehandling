@@ -7,7 +7,7 @@ import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import java.time.ZonedDateTime
-import java.util.*
+import java.util.UUID
 
 /**
  * Tenkt flyt mellom statuser i Gjenny:
@@ -28,7 +28,9 @@ enum class KlageStatus {
     UTFALL_VURDERT,
 
     // potensielt en status for å markere oversendingen til Kabal
-    FERDIGSTILT; // klagen er ferdig fra gjenny sin side
+    FERDIGSTILT, // klagen er ferdig fra gjenny sin side
+
+    ;
 
     companion object {
         fun kanOppdatereFormkrav(status: KlageStatus): Boolean {
@@ -46,7 +48,7 @@ enum class KabalStatus {
     OPPRETTET,
     UTREDES,
     VENTER,
-    FERDIGSTILT
+    FERDIGSTILT,
 }
 
 enum class BehandlingResultat {
@@ -54,12 +56,12 @@ enum class BehandlingResultat {
     IKKE_MEDHOLD,
     IKKE_MEDHOLD_FORMKRAV_AVVIST,
     IKKE_SATT,
-    HENLAGT
+    HENLAGT,
 }
 
 data class Kabalrespons(
     val kabalStatus: KabalStatus,
-    val resultat: BehandlingResultat
+    val resultat: BehandlingResultat,
 )
 
 data class Klage(
@@ -69,24 +71,29 @@ data class Klage(
     val status: KlageStatus,
     val kabalStatus: KabalStatus?,
     val formkrav: FormkravMedBeslutter?,
-    val utfall: KlageUtfall?
+    val utfall: KlageUtfall?,
 ) {
-    fun oppdaterFormkrav(formkrav: Formkrav, saksbehandlerIdent: String): Klage {
+    fun oppdaterFormkrav(
+        formkrav: Formkrav,
+        saksbehandlerIdent: String,
+    ): Klage {
         if (!kanOppdatereFormkrav(this)) {
             throw IllegalStateException(
                 "Kan ikke oppdatere formkrav i klagen med id=${this.id}, på grunn av " +
-                    "tilstanden til klagen: ${this.status}"
+                    "tilstanden til klagen: ${this.status}",
             )
         }
         return this.copy(
-            formkrav = FormkravMedBeslutter(
-                formkrav = formkrav,
-                saksbehandler = Grunnlagsopplysning.Saksbehandler.create(saksbehandlerIdent)
-            ),
-            status = when (formkrav.erFormkraveneOppfylt) {
-                JaNei.JA -> KlageStatus.FORMKRAV_OPPFYLT
-                JaNei.NEI -> KlageStatus.FORMKRAV_IKKE_OPPFYLT
-            }
+            formkrav =
+                FormkravMedBeslutter(
+                    formkrav = formkrav,
+                    saksbehandler = Grunnlagsopplysning.Saksbehandler.create(saksbehandlerIdent),
+                ),
+            status =
+                when (formkrav.erFormkraveneOppfylt) {
+                    JaNei.JA -> KlageStatus.FORMKRAV_OPPFYLT
+                    JaNei.NEI -> KlageStatus.FORMKRAV_IKKE_OPPFYLT
+                },
         )
     }
 
@@ -94,12 +101,12 @@ data class Klage(
         if (!kanOppdatereUtfall(this)) {
             throw IllegalStateException(
                 "Kan ikke oppdatere utfallet i klagen med id=${this.id} på grunn av statusen" +
-                    "til klagen (${this.status})"
+                    "til klagen (${this.status})",
             )
         }
         return this.copy(
             utfall = utfallMedBrev,
-            status = KlageStatus.UTFALL_VURDERT
+            status = KlageStatus.UTFALL_VURDERT,
         )
     }
 
@@ -112,7 +119,7 @@ data class Klage(
                 status = KlageStatus.OPPRETTET,
                 kabalStatus = null,
                 formkrav = null,
-                utfall = null
+                utfall = null,
             )
         }
 
@@ -133,20 +140,20 @@ sealed class KlageUtfall {
     @JsonTypeName("OMGJOERING")
     data class Omgjoering(
         val omgjoering: KlageOmgjoering,
-        override val saksbehandler: Grunnlagsopplysning.Saksbehandler
+        override val saksbehandler: Grunnlagsopplysning.Saksbehandler,
     ) : KlageUtfall()
 
     @JsonTypeName("DELVIS_OMGJOERING")
     data class DelvisOmgjoering(
         val omgjoering: KlageOmgjoering,
         val innstilling: InnstillingTilKabal,
-        override val saksbehandler: Grunnlagsopplysning.Saksbehandler
+        override val saksbehandler: Grunnlagsopplysning.Saksbehandler,
     ) : KlageUtfall()
 
     @JsonTypeName("STADFESTE_VEDTAK")
     data class StadfesteVedtak(
         val innstilling: InnstillingTilKabal,
-        override val saksbehandler: Grunnlagsopplysning.Saksbehandler
+        override val saksbehandler: Grunnlagsopplysning.Saksbehandler,
     ) : KlageUtfall()
 }
 
@@ -156,7 +163,7 @@ enum class GrunnForOmgjoering {
     FEIL_ELLER_ENDRET_FAKTA,
     PROSESSUELL_FEIL,
     SAKEN_HAR_EN_AAPEN_BEHANDLING,
-    ANNET
+    ANNET,
 }
 
 data class KlageOmgjoering(val grunnForOmgjoering: GrunnForOmgjoering, val begrunnelse: String)
@@ -172,18 +179,18 @@ class KlageBrevInnstilling
 sealed class KlageUtfallUtenBrev {
     @JsonTypeName("OMGJOERING")
     data class Omgjoering(
-        val omgjoering: KlageOmgjoering
+        val omgjoering: KlageOmgjoering,
     ) : KlageUtfallUtenBrev()
 
     @JsonTypeName("DELVIS_OMGJOERING")
     data class DelvisOmgjoering(
         val omgjoering: KlageOmgjoering,
-        val innstilling: InnstillingTilKabalUtenBrev
+        val innstilling: InnstillingTilKabalUtenBrev,
     ) : KlageUtfallUtenBrev()
 
     @JsonTypeName("STADFESTE_VEDTAK")
     data class StadfesteVedtak(
-        val innstilling: InnstillingTilKabalUtenBrev
+        val innstilling: InnstillingTilKabalUtenBrev,
     ) : KlageUtfallUtenBrev()
 }
 
@@ -193,16 +200,17 @@ data class Formkrav(
     val erKlagenSignert: JaNei,
     val gjelderKlagenNoeKonkretIVedtaket: JaNei,
     val erKlagenFramsattInnenFrist: JaNei,
-    val erFormkraveneOppfylt: JaNei
+    val erFormkraveneOppfylt: JaNei,
 ) {
     companion object {
         fun erFormkravKonsistente(formkrav: Formkrav): Boolean {
-            val alleSvar = listOf(
-                formkrav.erKlagenSignert,
-                formkrav.erKlagerPartISaken,
-                formkrav.erKlagenFramsattInnenFrist,
-                formkrav.gjelderKlagenNoeKonkretIVedtaket
-            )
+            val alleSvar =
+                listOf(
+                    formkrav.erKlagenSignert,
+                    formkrav.erKlagerPartISaken,
+                    formkrav.erKlagenFramsattInnenFrist,
+                    formkrav.gjelderKlagenNoeKonkretIVedtaket,
+                )
 
             return if (formkrav.erFormkraveneOppfylt == JaNei.JA) {
                 formkrav.vedtaketKlagenGjelder != null && alleSvar.all { it == JaNei.JA }
@@ -217,14 +225,14 @@ data class VedtaketKlagenGjelder(
     val id: String,
     val behandlingId: String,
     val datoAttestert: ZonedDateTime?,
-    val vedtakType: VedtakType?
+    val vedtakType: VedtakType?,
 )
 
 data class FormkravMedBeslutter(
     val formkrav: Formkrav,
-    val saksbehandler: Grunnlagsopplysning.Saksbehandler
+    val saksbehandler: Grunnlagsopplysning.Saksbehandler,
 )
 
 enum class KlageHendelseType {
-    OPPRETTET
+    OPPRETTET,
 }

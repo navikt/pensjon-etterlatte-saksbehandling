@@ -10,7 +10,7 @@ data class DistribuerJournalpostRequest(
     val bestillendeFagsystem: String,
     val dokumentProdApp: String,
     val distribusjonstype: DistribusjonsType,
-    val distribusjonstidspunkt: DistribusjonsTidspunktType
+    val distribusjonstidspunkt: DistribusjonsTidspunktType,
 )
 
 data class Adresse(
@@ -21,7 +21,7 @@ data class Adresse(
     val postnummer: String?,
     val poststed: String?,
     @JsonProperty("land")
-    val landkode: String
+    val landkode: String,
 ) {
     init {
         if (adressetype == AdresseType.NORSK) {
@@ -33,9 +33,12 @@ data class Adresse(
     }
 }
 
-enum class AdresseType(@JsonValue val verdi: String) {
+enum class AdresseType(
+    @JsonValue val verdi: String,
+) {
     NORSK("norskPostadresse"),
-    UTENLANDSK("utenlandskPostadresse");
+    UTENLANDSK("utenlandskPostadresse"),
+    ;
 
     companion object {
         fun fra(s: String) = values().first { s.equals(it.verdi, ignoreCase = true) }
@@ -45,12 +48,12 @@ enum class AdresseType(@JsonValue val verdi: String) {
 enum class DistribusjonsType {
     VEDTAK,
     VIKTIG,
-    ANNET
+    ANNET,
 }
 
 enum class DistribusjonsTidspunktType {
     UMIDDELBART, // Dokumentet distribueres så fort som mulig, uansett tidspunkt.
-    KJERNETID // KJERNETID (07:00-23:00)
+    KJERNETID, // KJERNETID (07:00-23:00)
 }
 
 data class DistribuerJournalpostResponse(val bestillingsId: BestillingsID)

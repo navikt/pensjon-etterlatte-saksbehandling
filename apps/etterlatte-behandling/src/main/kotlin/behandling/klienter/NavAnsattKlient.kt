@@ -17,7 +17,7 @@ import java.time.Duration
 
 private enum class InfoType(val urlSuffix: String) {
     ENHET("enheter"),
-    TEMA("fagomrader")
+    TEMA("fagomrader"),
 }
 
 interface NavAnsattKlient {
@@ -28,33 +28,37 @@ interface NavAnsattKlient {
 
 class NavAnsattKlientImpl(
     private val client: HttpClient,
-    private val url: String
+    private val url: String,
 ) : NavAnsattKlient, Pingable {
     private val logger = LoggerFactory.getLogger(NavAnsattKlientImpl::class.java)
-    private val enhetCache = Caffeine.newBuilder()
-        .expireAfterWrite(Duration.ofMinutes(15))
-        .build<String, List<SaksbehandlerEnhet>>()
+    private val enhetCache =
+        Caffeine.newBuilder()
+            .expireAfterWrite(Duration.ofMinutes(15))
+            .build<String, List<SaksbehandlerEnhet>>()
 
-    private val temaCache = Caffeine.newBuilder()
-        .expireAfterWrite(Duration.ofMinutes(15))
-        .build<String, List<SaksbehandlerTema>>()
+    private val temaCache =
+        Caffeine.newBuilder()
+            .expireAfterWrite(Duration.ofMinutes(15))
+            .build<String, List<SaksbehandlerTema>>()
 
-    override suspend fun hentSaksbehandlerEnhet(ident: String): List<SaksbehandlerEnhet> = hentSaksbehandler(
-        ident,
-        InfoType.ENHET,
-        enhetCache
-    )
+    override suspend fun hentSaksbehandlerEnhet(ident: String): List<SaksbehandlerEnhet> =
+        hentSaksbehandler(
+            ident,
+            InfoType.ENHET,
+            enhetCache,
+        )
 
-    override suspend fun hentSaksbehandlerTema(ident: String): List<SaksbehandlerTema> = hentSaksbehandler(
-        ident,
-        InfoType.TEMA,
-        temaCache
-    )
+    override suspend fun hentSaksbehandlerTema(ident: String): List<SaksbehandlerTema> =
+        hentSaksbehandler(
+            ident,
+            InfoType.TEMA,
+            temaCache,
+        )
 
     private suspend inline fun <reified T : List<Any>> hentSaksbehandler(
         ident: String,
         infoType: InfoType,
-        cache: Cache<String, T>
+        cache: Cache<String, T>,
     ): T =
         try {
             val cachedInfo = cache.getIfPresent(ident)
@@ -91,7 +95,7 @@ class NavAnsattKlientImpl(
             logger = logger,
             serviceName = serviceName,
             beskrivelse = beskrivelse,
-            konsument = "etterlatte-behandling"
+            konsument = "etterlatte-behandling",
         )
     }
 }

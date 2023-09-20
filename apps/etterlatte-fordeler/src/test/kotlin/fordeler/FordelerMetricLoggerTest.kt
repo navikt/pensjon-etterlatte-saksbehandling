@@ -10,13 +10,13 @@ import io.prometheus.client.Counter
 import org.junit.jupiter.api.Test
 
 internal class FordelerMetricLoggerTest {
-
     private val metricKriterieIkkeOppfylt = mockk<Counter>()
     private val metricFordelerStatus = mockk<Counter>()
-    private val fordelerMetricLogger = FordelerMetricLogger(
-        kriterierIkkeOppfyltMetric = metricKriterieIkkeOppfylt,
-        fordelerStatusMetric = metricFordelerStatus
-    )
+    private val fordelerMetricLogger =
+        FordelerMetricLogger(
+            kriterierIkkeOppfyltMetric = metricKriterieIkkeOppfylt,
+            fordelerStatusMetric = metricFordelerStatus,
+        )
 
     @Test
     fun `skal logge metrikker for ikke oppfylte kriterier og fordelerstatus`() {
@@ -26,8 +26,8 @@ internal class FordelerMetricLoggerTest {
 
         fordelerMetricLogger.logMetricIkkeFordelt(
             FordelerResultat.IkkeGyldigForBehandling(
-                listOf(FordelerKriterie.BARN_ER_FOR_GAMMELT, FordelerKriterie.AVDOED_HAR_YRKESSKADE)
-            )
+                listOf(FordelerKriterie.BARN_ER_FOR_GAMMELT, FordelerKriterie.AVDOED_HAR_YRKESSKADE),
+            ),
         )
 
         verify(exactly = 1) { metricKriterieIkkeOppfylt.labels(FordelerKriterie.BARN_ER_FOR_GAMMELT.name).inc() }

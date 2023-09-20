@@ -6,7 +6,7 @@ import no.nav.etterlatte.utbetaling.config.ApplicationContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import java.util.*
+import java.util.Timer
 
 val sikkerLogg: Logger = LoggerFactory.getLogger("sikkerLogg")
 
@@ -42,13 +42,15 @@ fun rapidApplication(applicationContext: ApplicationContext): RapidsConnection =
             applicationContext.kvitteringMottaker
             applicationContext.oppgavetrigger
 
-            register(object : RapidsConnection.StatusListener {
-                override fun onStartup(rapidsConnection: RapidsConnection) {
-                    applicationContext.dataSource.migrate()
-                }
+            register(
+                object : RapidsConnection.StatusListener {
+                    override fun onStartup(rapidsConnection: RapidsConnection) {
+                        applicationContext.dataSource.migrate()
+                    }
 
-                override fun onShutdown(rapidsConnection: RapidsConnection) {
-                    applicationContext.jmsConnectionFactory.stop()
-                }
-            })
+                    override fun onShutdown(rapidsConnection: RapidsConnection) {
+                        applicationContext.jmsConnectionFactory.stop()
+                    }
+                },
+            )
         }

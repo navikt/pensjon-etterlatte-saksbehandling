@@ -32,11 +32,11 @@ import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.etterlatte.trygdetid.klienter.BehandlingKlient
 import java.lang.UnsupportedOperationException
-import java.util.*
+import java.util.UUID
 
 fun Route.trygdetid(
     trygdetidService: TrygdetidService,
-    behandlingKlient: BehandlingKlient
+    behandlingKlient: BehandlingKlient,
 ) {
     route("/api/trygdetid/{$BEHANDLINGSID_CALL_PARAMETER}") {
         val logger = application.log
@@ -70,7 +70,7 @@ fun Route.trygdetid(
                     trygdetidService.lagreTrygdetidGrunnlag(
                         behandlingsId,
                         brukerTokenInfo,
-                        trygdetidgrunnlagDto.toTrygdetidGrunnlag(brukerTokenInfo)
+                        trygdetidgrunnlagDto.toTrygdetidGrunnlag(brukerTokenInfo),
                     ).let { trygdetid -> call.respond(trygdetid.toDto()) }
                 } catch (overlappendePeriodeException: OverlappendePeriodeException) {
                     logger.info("Klarte ikke legge til ny trygdetidsperiode for $behandlingsId pga overlapp.")
@@ -85,11 +85,11 @@ fun Route.trygdetid(
                 try {
                     trygdetidService.lagreYrkesskadeTrygdetidGrunnlag(
                         behandlingsId,
-                        brukerTokenInfo
+                        brukerTokenInfo,
                     ).let { trygdetid -> call.respond(trygdetid.toDto()) }
                 } catch (overlappendePeriodeException: OverlappendePeriodeException) {
                     logger.info(
-                        "Klarte ikke legge til ny yrkesskade trygdetidsperiode for $behandlingsId pga overlapp."
+                        "Klarte ikke legge til ny yrkesskade trygdetidsperiode for $behandlingsId pga overlapp.",
                     )
                     call.respond(HttpStatusCode.Conflict)
                 }
@@ -104,7 +104,7 @@ fun Route.trygdetid(
                         trygdetidService.slettTrygdetidGrunnlag(
                             behandlingsId,
                             trygdetidGrunnlagId,
-                            brukerTokenInfo
+                            brukerTokenInfo,
                         )
                     call.respond(trygdetid.toDto())
                 }
@@ -140,13 +140,13 @@ fun Trygdetid.toDto(): TrygdetidDto =
         behandlingId = behandlingId,
         beregnetTrygdetid = beregnetTrygdetid?.toDto(),
         trygdetidGrunnlag = trygdetidGrunnlag.map { it.toDto() },
-        opplysninger = this.opplysninger.toDto()
+        opplysninger = this.opplysninger.toDto(),
     )
 
 private fun DetaljertBeregnetTrygdetid.toDto(): DetaljertBeregnetTrygdetidDto =
     DetaljertBeregnetTrygdetidDto(
         resultat = resultat,
-        tidspunkt = tidspunkt
+        tidspunkt = tidspunkt,
     )
 
 private fun List<Opplysningsgrunnlag>.toDto(): GrunnlagOpplysningerDto =
@@ -154,7 +154,7 @@ private fun List<Opplysningsgrunnlag>.toDto(): GrunnlagOpplysningerDto =
         avdoedFoedselsdato = this.finnOpplysning(TrygdetidOpplysningType.FOEDSELSDATO),
         avdoedDoedsdato = this.finnOpplysning(TrygdetidOpplysningType.DOEDSDATO),
         avdoedFylteSeksten = this.finnOpplysning(TrygdetidOpplysningType.FYLT_16),
-        avdoedFyllerSeksti = this.finnOpplysning(TrygdetidOpplysningType.FYLLER_66)
+        avdoedFyllerSeksti = this.finnOpplysning(TrygdetidOpplysningType.FYLLER_66),
     )
 
 private fun List<Opplysningsgrunnlag>.finnOpplysning(type: TrygdetidOpplysningType): OpplysningsgrunnlagDto? =
@@ -164,21 +164,21 @@ private fun Opplysningsgrunnlag.toDto(): OpplysningsgrunnlagDto =
     OpplysningsgrunnlagDto(
         opplysning = this.opplysning,
         kilde =
-        when (this.kilde) {
-            is Grunnlagsopplysning.Pdl ->
-                OpplysningkildeDto(
-                    type = this.kilde.type,
-                    tidspunkt = this.kilde.tidspunktForInnhenting.toString()
-                )
+            when (this.kilde) {
+                is Grunnlagsopplysning.Pdl ->
+                    OpplysningkildeDto(
+                        type = this.kilde.type,
+                        tidspunkt = this.kilde.tidspunktForInnhenting.toString(),
+                    )
 
-            is Grunnlagsopplysning.RegelKilde ->
-                OpplysningkildeDto(
-                    type = this.kilde.type,
-                    tidspunkt = this.kilde.ts.toString()
-                )
+                is Grunnlagsopplysning.RegelKilde ->
+                    OpplysningkildeDto(
+                        type = this.kilde.type,
+                        tidspunkt = this.kilde.ts.toString(),
+                    )
 
-            else -> throw Exception("Mangler gyldig kilde for opplysning $id")
-        }
+                else -> throw Exception("Mangler gyldig kilde for opplysning $id")
+            },
     )
 
 private fun TrygdetidGrunnlagDto.toTrygdetidGrunnlag(brukerTokenInfo: BrukerTokenInfo): TrygdetidGrunnlag =
@@ -187,15 +187,16 @@ private fun TrygdetidGrunnlagDto.toTrygdetidGrunnlag(brukerTokenInfo: BrukerToke
         type = TrygdetidType.valueOf(type),
         bosted = bosted,
         periode = TrygdetidPeriode(periodeFra, periodeTil),
-        kilde = if (brukerTokenInfo.ident() == Vedtaksloesning.PESYS.name) {
-            Grunnlagsopplysning.Pesys(Tidspunkt.now())
-        } else {
-            Grunnlagsopplysning.Saksbehandler(brukerTokenInfo.ident(), Tidspunkt.now())
-        },
+        kilde =
+            if (brukerTokenInfo.ident() == Vedtaksloesning.PESYS.name) {
+                Grunnlagsopplysning.Pesys(Tidspunkt.now())
+            } else {
+                Grunnlagsopplysning.Saksbehandler(brukerTokenInfo.ident(), Tidspunkt.now())
+            },
         begrunnelse = begrunnelse,
         poengInnAar = poengInnAar,
         poengUtAar = poengUtAar,
-        prorata = prorata
+        prorata = prorata,
     )
 
 private fun TrygdetidGrunnlag.toDto(): TrygdetidGrunnlagDto {
@@ -206,25 +207,28 @@ private fun TrygdetidGrunnlag.toDto(): TrygdetidGrunnlagDto {
         periodeFra = periode.fra,
         periodeTil = periode.til,
         beregnet =
-        beregnetTrygdetid?.let {
-            BeregnetTrygdetidGrunnlagDto(it.verdi.days, it.verdi.months, it.verdi.years)
-        },
-        kilde = when (kilde) {
-            is Grunnlagsopplysning.Saksbehandler -> TrygdetidGrunnlagKildeDto(
-                tidspunkt = kilde.tidspunkt.toString(),
-                ident = kilde.ident
-            )
+            beregnetTrygdetid?.let {
+                BeregnetTrygdetidGrunnlagDto(it.verdi.days, it.verdi.months, it.verdi.years)
+            },
+        kilde =
+            when (kilde) {
+                is Grunnlagsopplysning.Saksbehandler ->
+                    TrygdetidGrunnlagKildeDto(
+                        tidspunkt = kilde.tidspunkt.toString(),
+                        ident = kilde.ident,
+                    )
 
-            is Grunnlagsopplysning.Pesys -> TrygdetidGrunnlagKildeDto(
-                tidspunkt = kilde.tidspunkt.toString(),
-                ident = kilde.type
-            )
+                is Grunnlagsopplysning.Pesys ->
+                    TrygdetidGrunnlagKildeDto(
+                        tidspunkt = kilde.tidspunkt.toString(),
+                        ident = kilde.type,
+                    )
 
-            else -> throw UnsupportedOperationException("Kilde for trygdetid maa vaere saksbehandler eller pesys")
-        },
+                else -> throw UnsupportedOperationException("Kilde for trygdetid maa vaere saksbehandler eller pesys")
+            },
         begrunnelse = begrunnelse,
         poengInnAar = poengInnAar,
         poengUtAar = poengUtAar,
-        prorata = prorata
+        prorata = prorata,
     )
 }

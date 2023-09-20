@@ -29,12 +29,14 @@ data class Fordeling(
     val soeknadId: Long,
     val fordeltTil: Vedtaksloesning,
     val kriterier: List<FordelerKriterie>,
-    val gradering: AdressebeskyttelseGradering? = null
+    val gradering: AdressebeskyttelseGradering? = null,
 )
 
 sealed class FordelerResultat {
     class GyldigForBehandling(val gradering: AdressebeskyttelseGradering? = null) : FordelerResultat()
+
     class UgyldigHendelse(val message: String) : FordelerResultat()
+
     class IkkeGyldigForBehandling(val ikkeOppfylteKriterier: List<FordelerKriterie>) : FordelerResultat()
 }
 
@@ -44,14 +46,14 @@ class FordelerService(
     private val fordelerRepository: FordelerRepository,
     private val behandlingKlient: BehandlingKlient,
     private val klokke: Clock = utcKlokke(),
-    private val maxFordelingTilGjenny: Long
+    private val maxFordelingTilGjenny: Long,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     fun sjekkGyldighetForBehandling(event: FordelerEvent): FordelerResultat {
         if (ugyldigHendelse(event)) {
             return UgyldigHendelse(
-                "Hendelsen er ikke lenger gyldig (${hendelseGyldigTil(event)})"
+                "Hendelsen er ikke lenger gyldig (${hendelseGyldigTil(event)})",
             )
         }
         return try {
@@ -64,7 +66,7 @@ class FordelerService(
         } catch (e: FamilieRelasjonManglerIdent) {
             logger.warn(
                 "Fikk en familierelasjon som mangler ident fra PDL. Disse tilfellene støtter vi ikke per nå." +
-                    " Se sikkerlogg for detaljer"
+                    " Se sikkerlogg for detaljer",
             )
             sikkerLogg.info("Fikk en søknad med en familierelasjon som manglet ident", e)
             IkkeGyldigForBehandling(listOf(FordelerKriterie.FAMILIERELASJON_MANGLER_IDENT))
@@ -84,7 +86,7 @@ class FordelerService(
                 Fordeling(
                     it.soeknadId,
                     Vedtaksloesning.valueOf(it.fordeling),
-                    fordelerRepository.finnKriterier(it.soeknadId).map { FordelerKriterie.valueOf(it) }
+                    fordelerRepository.finnKriterier(it.soeknadId).map { FordelerKriterie.valueOf(it) },
                 )
             }
 
@@ -92,36 +94,38 @@ class FordelerService(
         fordelerRepository.lagreFordeling(FordeltTransient(soeknadId, fordeltTil.name, kriterier.map { it.name }))
     }
 
-    private fun nyFordeling(event: FordelerEvent): Fordeling = runBlocking {
-        val soeknad: Barnepensjon = event.soeknad
+    private fun nyFordeling(event: FordelerEvent): Fordeling =
+        runBlocking {
+            val soeknad: Barnepensjon = event.soeknad
 
-        val barn = pdlTjenesterKlient.hentPerson(hentBarnRequest(soeknad))
-        val avdoed = pdlTjenesterKlient.hentPerson(hentAvdoedRequest(soeknad))
-        val gjenlevende =
-            if (harGjenlevendeForeldre(soeknad)) {
-                pdlTjenesterKlient.hentPerson(hentGjenlevendeRequest(soeknad))
-            } else {
-                null
-            }
+            val barn = pdlTjenesterKlient.hentPerson(hentBarnRequest(soeknad))
+            val avdoed = pdlTjenesterKlient.hentPerson(hentAvdoedRequest(soeknad))
+            val gjenlevende =
+                if (harGjenlevendeForeldre(soeknad)) {
+                    pdlTjenesterKlient.hentPerson(hentGjenlevendeRequest(soeknad))
+                } else {
+                    null
+                }
 
-        fordelerKriterier.sjekkMotKriterier(barn, avdoed, gjenlevende, soeknad).let {
-            if (it.kandidat &&
-                fordelerRepository.antallFordeltTil(Vedtaksloesning.GJENNY.name) < maxFordelingTilGjenny
-            ) {
-                val adressebeskyttetPerson = finnAdressebeskyttetPerson(
-                    mutableListOf(barn, avdoed, gjenlevende).filterNotNull()
-                )
-                Fordeling(
-                    event.soeknadId,
-                    Vedtaksloesning.GJENNY,
-                    emptyList(),
-                    adressebeskyttetPerson?.adressebeskyttelse
-                )
-            } else {
-                Fordeling(event.soeknadId, Vedtaksloesning.PESYS, it.forklaring)
+            fordelerKriterier.sjekkMotKriterier(barn, avdoed, gjenlevende, soeknad).let {
+                if (it.kandidat &&
+                    fordelerRepository.antallFordeltTil(Vedtaksloesning.GJENNY.name) < maxFordelingTilGjenny
+                ) {
+                    val adressebeskyttetPerson =
+                        finnAdressebeskyttetPerson(
+                            mutableListOf(barn, avdoed, gjenlevende).filterNotNull(),
+                        )
+                    Fordeling(
+                        event.soeknadId,
+                        Vedtaksloesning.GJENNY,
+                        emptyList(),
+                        adressebeskyttetPerson?.adressebeskyttelse,
+                    )
+                } else {
+                    Fordeling(event.soeknadId, Vedtaksloesning.PESYS, it.forklaring)
+                }
             }
         }
-    }
 
     private fun finnAdressebeskyttetPerson(personer: List<Person>): Person? {
         return personer.firstOrNull {
@@ -129,11 +133,9 @@ class FordelerService(
         }
     }
 
-    private fun ugyldigHendelse(event: FordelerEvent) =
-        event.hendelseGyldigTil.isBefore(OffsetDateTime.now(klokke))
+    private fun ugyldigHendelse(event: FordelerEvent) = event.hendelseGyldigTil.isBefore(OffsetDateTime.now(klokke))
 
-    private fun hendelseGyldigTil(event: FordelerEvent) =
-        event.hendelseGyldigTil.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
+    private fun hendelseGyldigTil(event: FordelerEvent) = event.hendelseGyldigTil.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
 
     private fun harGjenlevendeForeldre(soeknad: Barnepensjon) =
         soeknad.foreldre.any {
@@ -142,30 +144,36 @@ class FordelerService(
 
     private fun hentGjenlevendeRequest(soeknad: Barnepensjon) =
         HentPersonRequest(
-            foedselsnummer = soeknad.foreldre.first {
-                it.type == PersonType.GJENLEVENDE_FORELDER
-            }.foedselsnummer.svar.toFolkeregisteridentifikator(),
+            foedselsnummer =
+                soeknad.foreldre.first {
+                    it.type == PersonType.GJENLEVENDE_FORELDER
+                }.foedselsnummer.svar.toFolkeregisteridentifikator(),
             rolle = PersonRolle.GJENLEVENDE,
-            saktype = SakType.BARNEPENSJON
+            saktype = SakType.BARNEPENSJON,
         )
 
     private fun hentAvdoedRequest(soeknad: Barnepensjon) =
         HentPersonRequest(
-            foedselsnummer = soeknad.foreldre.first {
-                it.type == PersonType.AVDOED
-            }.foedselsnummer.svar.toFolkeregisteridentifikator(),
+            foedselsnummer =
+                soeknad.foreldre.first {
+                    it.type == PersonType.AVDOED
+                }.foedselsnummer.svar.toFolkeregisteridentifikator(),
             rolle = PersonRolle.AVDOED,
-            saktype = SakType.BARNEPENSJON
+            saktype = SakType.BARNEPENSJON,
         )
 
     private fun hentBarnRequest(soeknad: Barnepensjon) =
         HentPersonRequest(
             foedselsnummer = soeknad.soeker.foedselsnummer.svar.toFolkeregisteridentifikator(),
             rolle = PersonRolle.BARN,
-            saktype = SakType.BARNEPENSJON
+            saktype = SakType.BARNEPENSJON,
         )
 
-    fun hentSakId(fnr: String, barnepensjon: SakType, gradering: AdressebeskyttelseGradering?): Long {
+    fun hentSakId(
+        fnr: String,
+        barnepensjon: SakType,
+        gradering: AdressebeskyttelseGradering?,
+    ): Long {
         return runBlocking {
             behandlingKlient.hentSak(fnr, barnepensjon, gradering)
         }

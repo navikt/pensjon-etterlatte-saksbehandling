@@ -21,30 +21,34 @@ internal class AdressebeskyttelseTest {
 
     @Test
     fun `Verifiser prioritering av gradering`() {
-        val graderinger1 = listOf(
-            PdlGradering.UGRADERT,
-            PdlGradering.STRENGT_FORTROLIG,
-            PdlGradering.STRENGT_FORTROLIG_UTLAND,
-            PdlGradering.FORTROLIG
-        )
+        val graderinger1 =
+            listOf(
+                PdlGradering.UGRADERT,
+                PdlGradering.STRENGT_FORTROLIG,
+                PdlGradering.STRENGT_FORTROLIG_UTLAND,
+                PdlGradering.FORTROLIG,
+            )
         assertEquals(PdlGradering.STRENGT_FORTROLIG_UTLAND, graderinger1.minOrNull())
 
-        val graderinger2 = listOf(
-            PdlGradering.FORTROLIG,
-            PdlGradering.STRENGT_FORTROLIG,
-            PdlGradering.UGRADERT
-        )
+        val graderinger2 =
+            listOf(
+                PdlGradering.FORTROLIG,
+                PdlGradering.STRENGT_FORTROLIG,
+                PdlGradering.UGRADERT,
+            )
         assertEquals(PdlGradering.STRENGT_FORTROLIG, graderinger2.minOrNull())
 
-        val graderinger3 = listOf(
-            PdlGradering.FORTROLIG,
-            PdlGradering.UGRADERT
-        )
+        val graderinger3 =
+            listOf(
+                PdlGradering.FORTROLIG,
+                PdlGradering.UGRADERT,
+            )
         assertEquals(PdlGradering.FORTROLIG, graderinger3.minOrNull())
 
-        val graderinger4 = listOf(
-            PdlGradering.UGRADERT
-        )
+        val graderinger4 =
+            listOf(
+                PdlGradering.UGRADERT,
+            )
         assertEquals(PdlGradering.UGRADERT, graderinger4.minOrNull())
 
         val graderinger5 = emptyList<PdlGradering>()

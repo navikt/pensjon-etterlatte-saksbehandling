@@ -27,14 +27,14 @@ import no.nav.etterlatte.tilgangsstyring.filterForEnheter
 import no.nav.etterlatte.token.BrukerTokenInfo
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import java.util.*
+import java.util.UUID
 
 class BrukerManglerAttestantRolleException(msg: String) : Exception(msg)
 
 class OppgaveServiceNy(
     private val oppgaveDaoNy: OppgaveDaoMedEndringssporing,
     private val sakDao: SakDao,
-    private val featureToggleService: FeatureToggleService
+    private val featureToggleService: FeatureToggleService,
 ) {
     private val logger: Logger = LoggerFactory.getLogger(this.javaClass.name)
 
@@ -53,8 +53,7 @@ class OppgaveServiceNy(
         }.filterForEnheter(Kontekst.get().AppUser)
     }
 
-    private fun List<OppgaveNy>.filterForEnheter(bruker: User) =
-        this.filterOppgaverForEnheter(featureToggleService, bruker)
+    private fun List<OppgaveNy>.filterForEnheter(bruker: User) = this.filterOppgaverForEnheter(featureToggleService, bruker)
 
     private fun aktuelleOppgavetyperForRolleTilSaksbehandler(roller: List<Rolle>) =
         roller.flatMap {
@@ -69,7 +68,7 @@ class OppgaveServiceNy(
         listOfNotNull(
             Rolle.SAKSBEHANDLER.takeIf { bruker.harRolleSaksbehandler() },
             Rolle.ATTESTANT.takeIf { bruker.harRolleAttestant() },
-            Rolle.STRENGT_FORTROLIG.takeIf { bruker.harRolleStrengtFortrolig() }
+            Rolle.STRENGT_FORTROLIG.takeIf { bruker.harRolleStrengtFortrolig() },
         )
 
     private fun sjekkOmkanTildeleAttestantOppgave(): Boolean {
@@ -84,20 +83,20 @@ class OppgaveServiceNy(
                 } else {
                     throw BrukerManglerAttestantRolleException(
                         "Bruker ${saksbehandlerMedRoller.saksbehandler.ident} " +
-                            "mangler attestant rolle for tildeling"
+                            "mangler attestant rolle for tildeling",
                     )
                 }
             }
             is ExternalUser -> throw IllegalArgumentException("ExternalUser er ikke støttet for å tildele oppgave")
             else -> throw IllegalArgumentException(
-                "Ukjent brukertype ${appUser.name()} støtter ikke tildeling av oppgave"
+                "Ukjent brukertype ${appUser.name()} støtter ikke tildeling av oppgave",
             )
         }
     }
 
     fun tildelSaksbehandler(
         oppgaveId: UUID,
-        saksbehandler: String
+        saksbehandler: String,
     ) {
         inTransaction(gjenbruk = true) {
             val hentetOppgave =
@@ -110,7 +109,7 @@ class OppgaveServiceNy(
                 oppgaveDaoNy.settNySaksbehandler(oppgaveId, saksbehandler)
             } else {
                 throw BadRequestException(
-                    "Oppgaven har allerede en saksbehandler, id: $oppgaveId"
+                    "Oppgaven har allerede en saksbehandler, id: $oppgaveId",
                 )
             }
         }
@@ -118,7 +117,7 @@ class OppgaveServiceNy(
 
     fun byttSaksbehandler(
         oppgaveId: UUID,
-        saksbehandler: String
+        saksbehandler: String,
     ) {
         val hentetOppgave = oppgaveDaoNy.hentOppgave(oppgaveId)
         if (hentetOppgave != null) {
@@ -140,7 +139,7 @@ class OppgaveServiceNy(
                 oppgaveDaoNy.fjernSaksbehandler(oppgaveId)
             } else {
                 throw BadRequestException(
-                    "Oppgaven har ingen saksbehandler, id: $oppgaveId"
+                    "Oppgaven har ingen saksbehandler, id: $oppgaveId",
                 )
             }
         }
@@ -150,14 +149,14 @@ class OppgaveServiceNy(
         if (oppgave.erAvsluttet()) {
             throw IllegalStateException(
                 "Oppgave med id ${oppgave.id} kan ikke endres siden den har " +
-                    "status ${oppgave.status}"
+                    "status ${oppgave.status}",
             )
         }
     }
 
     fun redigerFrist(
         oppgaveId: UUID,
-        frist: Tidspunkt
+        frist: Tidspunkt,
     ) {
         inTransaction {
             if (frist.isBefore(Tidspunkt.now())) {
@@ -171,7 +170,7 @@ class OppgaveServiceNy(
                 oppgaveDaoNy.redigerFrist(oppgaveId, frist)
             } else {
                 throw BadRequestException(
-                    "Oppgaven har ingen saksbehandler, id: $oppgaveId"
+                    "Oppgaven har ingen saksbehandler, id: $oppgaveId",
                 )
             }
         }
@@ -181,7 +180,7 @@ class OppgaveServiceNy(
         fattetoppgave: VedtakOppgaveDTO,
         oppgaveType: OppgaveType,
         merknad: String?,
-        saksbehandler: BrukerTokenInfo
+        saksbehandler: BrukerTokenInfo,
     ): OppgaveNy {
         val behandlingsoppgaver = oppgaveDaoNy.hentOppgaverForBehandling(fattetoppgave.referanse)
         if (behandlingsoppgaver.isEmpty()) {
@@ -196,31 +195,31 @@ class OppgaveServiceNy(
                 sakId = fattetoppgave.sakId,
                 oppgaveKilde = oppgaveUnderbehandling.kilde,
                 oppgaveType = oppgaveType,
-                merknad = merknad
+                merknad = merknad,
             )
         } catch (e: NoSuchElementException) {
             throw BadRequestException(
                 "Det må finnes en oppgave under behandling, gjelder behandling:" +
                     " ${fattetoppgave.referanse}",
-                e
+                e,
             )
         } catch (e: IllegalArgumentException) {
             throw BadRequestException(
                 "Skal kun ha en oppgave under behandling, gjelder behandling:" +
                     " ${fattetoppgave.referanse}",
-                e
+                e,
             )
         }
     }
 
     private fun sikreAtSaksbehandlerSomLukkerOppgaveEierOppgaven(
         oppgaveUnderBehandling: OppgaveNy,
-        saksbehandler: BrukerTokenInfo
+        saksbehandler: BrukerTokenInfo,
     ) {
         if (!saksbehandler.kanEndreOppgaverFor(oppgaveUnderBehandling.saksbehandler)) {
             throw FeilSaksbehandlerPaaOppgaveException(
                 "Kan ikke lukke oppgave for en annen saksbehandler oppgave:" +
-                    " ${oppgaveUnderBehandling.id}"
+                    " ${oppgaveUnderBehandling.id}",
             )
         }
     }
@@ -229,7 +228,7 @@ class OppgaveServiceNy(
 
     fun endreEnhetForOppgaverTilknyttetSak(
         sakId: Long,
-        enhetsID: String
+        enhetsID: String,
     ) {
         inTransaction {
             val oppgaverForbehandling = oppgaveDaoNy.hentOppgaverForSak(sakId)
@@ -245,7 +244,7 @@ class OppgaveServiceNy(
 
     fun avbrytOppgaveUnderBehandling(
         behandlingEllerHendelseId: String,
-        saksbehandler: BrukerTokenInfo
+        saksbehandler: BrukerTokenInfo,
     ): OppgaveNy {
         try {
             val oppgaveUnderbehandling =
@@ -260,20 +259,20 @@ class OppgaveServiceNy(
             throw BadRequestException(
                 "Det må finnes en oppgave under behandling, gjelder behandling / hendelse med ID:" +
                     " $behandlingEllerHendelseId}",
-                e
+                e,
             )
         } catch (e: IllegalArgumentException) {
             throw BadRequestException(
                 "Skal kun ha en oppgave under behandling, gjelder behandling / hendelse med ID:" +
                     " $behandlingEllerHendelseId",
-                e
+                e,
             )
         }
     }
 
     fun ferdigStillOppgaveUnderBehandling(
         behandlingEllerHendelseId: String,
-        saksbehandler: BrukerTokenInfo
+        saksbehandler: BrukerTokenInfo,
     ): OppgaveNy {
         val behandlingsoppgaver = oppgaveDaoNy.hentOppgaverForBehandling(behandlingEllerHendelseId)
         if (behandlingsoppgaver.isEmpty()) {
@@ -290,20 +289,20 @@ class OppgaveServiceNy(
             throw BadRequestException(
                 "Det må finnes en oppgave under behandling, gjelder behandling / hendelse med ID:" +
                     " $behandlingEllerHendelseId}",
-                e
+                e,
             )
         } catch (e: IllegalArgumentException) {
             throw BadRequestException(
                 "Skal kun ha en oppgave under behandling, gjelder behandling / hendelse med ID:" +
                     " $behandlingEllerHendelseId",
-                e
+                e,
             )
         }
     }
 
     fun opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(
         referanse: String,
-        sakId: Long
+        sakId: Long,
     ): OppgaveNy {
         val oppgaverForBehandling = oppgaveDaoNy.hentOppgaverForBehandling(referanse)
         val oppgaverSomKanLukkes = oppgaverForBehandling.filter { !it.erAvsluttet() }
@@ -316,7 +315,7 @@ class OppgaveServiceNy(
             sakId = sakId,
             oppgaveKilde = OppgaveKilde.BEHANDLING,
             oppgaveType = OppgaveType.FOERSTEGANGSBEHANDLING,
-            merknad = null
+            merknad = null,
         )
     }
 
@@ -325,7 +324,7 @@ class OppgaveServiceNy(
         sakId: Long,
         oppgaveKilde: OppgaveKilde?,
         oppgaveType: OppgaveType,
-        merknad: String?
+        merknad: String?,
     ): OppgaveNy {
         val sak = sakDao.hentSak(sakId)!!
         return lagreOppgave(
@@ -334,8 +333,8 @@ class OppgaveServiceNy(
                 sak = sak,
                 oppgaveKilde = oppgaveKilde,
                 oppgaveType = oppgaveType,
-                merknad = merknad
-            )
+                merknad = merknad,
+            ),
         )
     }
 
@@ -408,17 +407,18 @@ class OppgaveServiceNy(
 
 fun List<OppgaveNy>.filterOppgaverForEnheter(
     featureToggleService: FeatureToggleService,
-    user: User
+    user: User,
 ) = this.filterForEnheter(
     featureToggleService,
     OppgaveServiceFeatureToggle.EnhetFilterOppgaver,
-    user
+    user,
 ) { item, enheter ->
     enheter.contains(item.enhet)
 }
 
 enum class OppgaveServiceFeatureToggle(private val key: String) : FeatureToggle {
-    EnhetFilterOppgaver("pensjon-etterlatte.filter-oppgaver-enhet");
+    EnhetFilterOppgaver("pensjon-etterlatte.filter-oppgaver-enhet"),
+    ;
 
     override fun key() = key
 }
@@ -426,5 +426,5 @@ enum class OppgaveServiceFeatureToggle(private val key: String) : FeatureToggle 
 enum class Rolle {
     SAKSBEHANDLER,
     ATTESTANT,
-    STRENGT_FORTROLIG
+    STRENGT_FORTROLIG,
 }

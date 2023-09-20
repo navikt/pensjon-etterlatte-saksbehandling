@@ -20,19 +20,19 @@ import org.junit.jupiter.api.assertThrows
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
-import java.util.*
+import java.util.UUID
 
 internal class UtbetalingServiceTest {
-
     private val oppdragSender: OppdragSender = mockk()
     private val utbetalingDao: UtbetalingDao = mockk()
-    private val utbetalingService: UtbetalingService = UtbetalingService(
-        oppdragMapper = OppdragMapper,
-        oppdragSender = oppdragSender,
-        utbetalingDao = utbetalingDao,
-        rapidsConnection = mockk(),
-        clock = utcKlokke()
-    )
+    private val utbetalingService: UtbetalingService =
+        UtbetalingService(
+            oppdragMapper = OppdragMapper,
+            oppdragSender = oppdragSender,
+            utbetalingDao = utbetalingDao,
+            rapidsConnection = mockk(),
+            clock = utcKlokke(),
+        )
 
     /**
      * Vedtak ID 1: |---------->
@@ -40,14 +40,16 @@ internal class UtbetalingServiceTest {
      */
     @Test
     fun `skal stoppe opprettelse av utbetaling hvis vedtak finnes fra for`() {
-        every { utbetalingDao.hentUtbetaling(any()) } returns utbetaling(
-            utbetalingshendelser = listOf(
-                Utbetalingshendelse(
-                    utbetalingId = UUID.randomUUID(),
-                    status = UtbetalingStatus.GODKJENT
-                )
+        every { utbetalingDao.hentUtbetaling(any()) } returns
+            utbetaling(
+                utbetalingshendelser =
+                    listOf(
+                        Utbetalingshendelse(
+                            utbetalingId = UUID.randomUUID(),
+                            status = UtbetalingStatus.GODKJENT,
+                        ),
+                    ),
             )
-        )
         every { utbetalingDao.hentDupliserteUtbetalingslinjer(any(), any()) } returns emptyList()
 
         val vedtak = vedtakLoepende()
@@ -98,7 +100,7 @@ internal class UtbetalingServiceTest {
                             datoVedtakFom == vedtak.pensjonTilUtbetaling.first().periode.fom.toXmlDate() &&
                             sats == vedtak.pensjonTilUtbetaling.first().beloep
                     }
-                }
+                },
             )
         }
     }
@@ -110,16 +112,18 @@ internal class UtbetalingServiceTest {
     @Test
     fun `skal opprette loepende utbetaling med en tidligere loepende utbetaling`() {
         val utbetalingId = UUID.randomUUID()
-        val eksisterendeUtbetaling = utbetaling(
-            id = utbetalingId,
-            utbetalingslinjeId = 1L,
-            utbetalingshendelser = listOf(
-                Utbetalingshendelse(
-                    utbetalingId = utbetalingId,
-                    status = UtbetalingStatus.GODKJENT
-                )
+        val eksisterendeUtbetaling =
+            utbetaling(
+                id = utbetalingId,
+                utbetalingslinjeId = 1L,
+                utbetalingshendelser =
+                    listOf(
+                        Utbetalingshendelse(
+                            utbetalingId = utbetalingId,
+                            status = UtbetalingStatus.GODKJENT,
+                        ),
+                    ),
             )
-        )
         val utbetaling = utbetaling()
         every { utbetalingDao.hentUtbetaling(any()) } returns null
         every { utbetalingDao.hentDupliserteUtbetalingslinjer(any(), any()) } returns emptyList()
@@ -141,7 +145,7 @@ internal class UtbetalingServiceTest {
                             datoVedtakFom == vedtak.pensjonTilUtbetaling.first().periode.fom.toXmlDate() &&
                             sats == vedtak.pensjonTilUtbetaling.first().beloep
                     }
-                }
+                },
             )
         }
     }
@@ -153,16 +157,18 @@ internal class UtbetalingServiceTest {
     @Test
     fun `skal opprette utbetaling med opphoer`() {
         val utbetalingId = UUID.randomUUID()
-        val eksisterendeUtbetaling = utbetaling(
-            id = utbetalingId,
-            utbetalingslinjeId = 1L,
-            utbetalingshendelser = listOf(
-                Utbetalingshendelse(
-                    utbetalingId = utbetalingId,
-                    status = UtbetalingStatus.GODKJENT
-                )
+        val eksisterendeUtbetaling =
+            utbetaling(
+                id = utbetalingId,
+                utbetalingslinjeId = 1L,
+                utbetalingshendelser =
+                    listOf(
+                        Utbetalingshendelse(
+                            utbetalingId = utbetalingId,
+                            status = UtbetalingStatus.GODKJENT,
+                        ),
+                    ),
             )
-        )
         every { utbetalingDao.hentUtbetaling(any()) } returns null
         every { utbetalingDao.hentDupliserteUtbetalingslinjer(any(), any()) } returns emptyList()
         every { utbetalingDao.hentUtbetalinger(any()) } returns listOf(eksisterendeUtbetaling)
@@ -183,7 +189,7 @@ internal class UtbetalingServiceTest {
                             datoVedtakFom == vedtak.pensjonTilUtbetaling.first().periode.fom.toXmlDate() &&
                             sats == null
                     }
-                }
+                },
             )
         }
     }
@@ -245,7 +251,7 @@ internal class UtbetalingServiceTest {
                             datoVedtakFom == vedtak.pensjonTilUtbetaling[2].periode.fom.toXmlDate() &&
                             sats == vedtak.pensjonTilUtbetaling[2].beloep
                     }
-                }
+                },
             )
         }
     }
@@ -287,75 +293,83 @@ internal class UtbetalingServiceTest {
                             datoVedtakFom == vedtak.pensjonTilUtbetaling[1].periode.fom.toXmlDate() &&
                             sats == vedtak.pensjonTilUtbetaling[1].beloep
                     }
-                }
+                },
             )
         }
     }
 
     private fun YearMonth.toXmlDate() = forsteDagIMaaneden(this).toXMLDate()
 
-    private fun vedtakMedOpphoer() = utbetalingsvedtak(
-        utbetalingsperioder = listOf(
-            Utbetalingsperiode(
-                id = 2L,
-                periode = Periode(fom = YearMonth.of(2022, 10), tom = null),
-                beloep = null,
-                type = UtbetalingsperiodeType.OPPHOER
-            )
+    private fun vedtakMedOpphoer() =
+        utbetalingsvedtak(
+            utbetalingsperioder =
+                listOf(
+                    Utbetalingsperiode(
+                        id = 2L,
+                        periode = Periode(fom = YearMonth.of(2022, 10), tom = null),
+                        beloep = null,
+                        type = UtbetalingsperiodeType.OPPHOER,
+                    ),
+                ),
         )
-    )
 
-    private fun vedtakLoepende(startPeriode: YearMonth = YearMonth.of(2022, 10)) = utbetalingsvedtak(
-        vedtakId = 2,
-        utbetalingsperioder = listOf(
-            Utbetalingsperiode(
-                id = 2L,
-                periode = Periode(fom = startPeriode, tom = null),
-                beloep = BigDecimal.valueOf(3000),
-                type = UtbetalingsperiodeType.UTBETALING
-            )
+    private fun vedtakLoepende(startPeriode: YearMonth = YearMonth.of(2022, 10)) =
+        utbetalingsvedtak(
+            vedtakId = 2,
+            utbetalingsperioder =
+                listOf(
+                    Utbetalingsperiode(
+                        id = 2L,
+                        periode = Periode(fom = startPeriode, tom = null),
+                        beloep = BigDecimal.valueOf(3000),
+                        type = UtbetalingsperiodeType.UTBETALING,
+                    ),
+                ),
         )
-    )
 
-    private fun vedtakRevurderingFlerePerioder() = utbetalingsvedtak(
-        vedtakId = 2,
-        utbetalingsperioder = listOf(
-            Utbetalingsperiode(
-                id = 2L,
-                periode = Periode(fom = YearMonth.of(2021, 4), tom = YearMonth.of(2021, 8)),
-                beloep = BigDecimal.valueOf(4000),
-                type = UtbetalingsperiodeType.UTBETALING
-            ),
-            Utbetalingsperiode(
-                id = 3L,
-                periode = Periode(fom = YearMonth.of(2021, 9), tom = YearMonth.of(2021, 12)),
-                beloep = BigDecimal.valueOf(5000),
-                type = UtbetalingsperiodeType.UTBETALING
-            ),
-            Utbetalingsperiode(
-                id = 4L,
-                periode = Periode(fom = YearMonth.of(2022, 1), tom = null),
-                beloep = BigDecimal.valueOf(3000),
-                type = UtbetalingsperiodeType.UTBETALING
-            )
+    private fun vedtakRevurderingFlerePerioder() =
+        utbetalingsvedtak(
+            vedtakId = 2,
+            utbetalingsperioder =
+                listOf(
+                    Utbetalingsperiode(
+                        id = 2L,
+                        periode = Periode(fom = YearMonth.of(2021, 4), tom = YearMonth.of(2021, 8)),
+                        beloep = BigDecimal.valueOf(4000),
+                        type = UtbetalingsperiodeType.UTBETALING,
+                    ),
+                    Utbetalingsperiode(
+                        id = 3L,
+                        periode = Periode(fom = YearMonth.of(2021, 9), tom = YearMonth.of(2021, 12)),
+                        beloep = BigDecimal.valueOf(5000),
+                        type = UtbetalingsperiodeType.UTBETALING,
+                    ),
+                    Utbetalingsperiode(
+                        id = 4L,
+                        periode = Periode(fom = YearMonth.of(2022, 1), tom = null),
+                        beloep = BigDecimal.valueOf(3000),
+                        type = UtbetalingsperiodeType.UTBETALING,
+                    ),
+                ),
         )
-    )
 
-    private fun vedtakRevurderingOgOpphoer() = utbetalingsvedtak(
-        vedtakId = 2,
-        utbetalingsperioder = listOf(
-            Utbetalingsperiode(
-                id = 2L,
-                periode = Periode(fom = YearMonth.of(2022, 2), tom = YearMonth.of(2022, 8)),
-                beloep = BigDecimal.valueOf(4000),
-                type = UtbetalingsperiodeType.UTBETALING
-            ),
-            Utbetalingsperiode(
-                id = 3L,
-                periode = Periode(fom = YearMonth.of(2022, 9), tom = null),
-                beloep = null,
-                type = UtbetalingsperiodeType.OPPHOER
-            )
+    private fun vedtakRevurderingOgOpphoer() =
+        utbetalingsvedtak(
+            vedtakId = 2,
+            utbetalingsperioder =
+                listOf(
+                    Utbetalingsperiode(
+                        id = 2L,
+                        periode = Periode(fom = YearMonth.of(2022, 2), tom = YearMonth.of(2022, 8)),
+                        beloep = BigDecimal.valueOf(4000),
+                        type = UtbetalingsperiodeType.UTBETALING,
+                    ),
+                    Utbetalingsperiode(
+                        id = 3L,
+                        periode = Periode(fom = YearMonth.of(2022, 9), tom = null),
+                        beloep = null,
+                        type = UtbetalingsperiodeType.OPPHOER,
+                    ),
+                ),
         )
-    )
 }

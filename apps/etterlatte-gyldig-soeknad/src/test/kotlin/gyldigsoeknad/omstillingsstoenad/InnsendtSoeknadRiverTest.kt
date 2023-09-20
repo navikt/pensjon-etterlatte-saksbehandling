@@ -13,15 +13,15 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import java.io.FileNotFoundException
-import java.util.*
+import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class InnsendtSoeknadRiverTest {
-
     private val behandlingClientMock = mockk<BehandlingClient>()
-    private val inspector = TestRapid().apply {
-        InnsendtSoeknadRiver(this, behandlingClientMock)
-    }
+    private val inspector =
+        TestRapid().apply {
+            InnsendtSoeknadRiver(this, behandlingClientMock)
+        }
 
     @Test
     fun `skal opprette sak, initiere foerstegangsbehandling og gyldighetsvurdering til klar for manuell vurdering`() {
@@ -48,7 +48,8 @@ internal class InnsendtSoeknadRiverTest {
     companion object {
         private val melding = readFile("/innsendtsoeknad.json")
 
-        fun readFile(file: String) = Companion::class.java.getResource(file)?.readText()
-            ?: throw FileNotFoundException("Fant ikke filen $file")
+        fun readFile(file: String) =
+            Companion::class.java.getResource(file)?.readText()
+                ?: throw FileNotFoundException("Fant ikke filen $file")
     }
 }

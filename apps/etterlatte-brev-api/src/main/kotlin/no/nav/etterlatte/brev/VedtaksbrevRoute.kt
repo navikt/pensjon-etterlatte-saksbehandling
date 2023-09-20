@@ -20,7 +20,10 @@ import kotlin.time.ExperimentalTime
 import kotlin.time.measureTimedValue
 
 @OptIn(ExperimentalTime::class)
-fun Route.vedtaksbrevRoute(service: VedtaksbrevService, behandlingKlient: BehandlingKlient) {
+fun Route.vedtaksbrevRoute(
+    service: VedtaksbrevService,
+    behandlingKlient: BehandlingKlient,
+) {
     val logger = LoggerFactory.getLogger("no.nav.etterlatte.brev.VedaksbrevRoute")
 
     route("brev/behandling/{$BEHANDLINGSID_CALL_PARAMETER}") {
@@ -81,8 +84,8 @@ fun Route.vedtaksbrevRoute(service: VedtaksbrevService, behandlingKlient: Behand
                     logger.info(
                         "Oppretting av nytt innhold til brev (id=$brevId) tok ${varighet.toString(
                             DurationUnit.SECONDS,
-                            2
-                        )}"
+                            2,
+                        )}",
                     )
                     call.respond(brevPayload)
                 }
@@ -93,5 +96,5 @@ fun Route.vedtaksbrevRoute(service: VedtaksbrevService, behandlingKlient: Behand
 
 data class ResetPayloadRequest(
     val brevId: Long,
-    val sakId: Long
+    val sakId: Long,
 )

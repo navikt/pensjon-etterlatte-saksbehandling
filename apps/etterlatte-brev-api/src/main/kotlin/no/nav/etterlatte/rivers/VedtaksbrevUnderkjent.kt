@@ -11,11 +11,11 @@ import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import org.slf4j.LoggerFactory
 import rapidsandrivers.migrering.ListenerMedLogging
-import java.util.*
+import java.util.UUID
 
 internal class VedtaksbrevUnderkjent(
     rapidsConnection: RapidsConnection,
-    private val service: VedtaksbrevService
+    private val service: VedtaksbrevService,
 ) : ListenerMedLogging() {
     private val logger = LoggerFactory.getLogger(VedtaksbrevUnderkjent::class.java)
 
@@ -32,7 +32,10 @@ internal class VedtaksbrevUnderkjent(
         }.register(this)
     }
 
-    override fun haandterPakke(packet: JsonMessage, context: MessageContext) {
+    override fun haandterPakke(
+        packet: JsonMessage,
+        context: MessageContext,
+    ) {
         try {
             val vedtakId = packet["vedtak.vedtakId"].asLong()
             val behandlingId = UUID.fromString(packet["vedtak.behandling.id"].asText())

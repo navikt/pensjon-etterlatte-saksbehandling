@@ -18,9 +18,8 @@ import rapidsandrivers.migrering.ListenerMedLogging
 class Oppgavetrigger(
     rapidsConnection: RapidsConnection,
     private val utbetalingService: UtbetalingService,
-    private val grensesnittsavstemmingService: GrensesnittsavstemmingService
+    private val grensesnittsavstemmingService: GrensesnittsavstemmingService,
 ) : ListenerMedLogging() {
-
     init {
         River(rapidsConnection).apply {
             eventName("okonomi_vedtak_oppgave")
@@ -29,13 +28,16 @@ class Oppgavetrigger(
         }.register(this)
     }
 
-    override fun haandterPakke(packet: JsonMessage, context: MessageContext) {
+    override fun haandterPakke(
+        packet: JsonMessage,
+        context: MessageContext,
+    ) {
         val oppgave: Oppgave = objectMapper.readValue(packet["oppgave"].toJson())
         try {
             when (oppgave.oppgavetype) {
                 Oppgavetype.START_GRENSESNITTAVSTEMMING -> {
                     logger.info("Oppgave: Grenseavsnittsavstemmings mottatt, starter grensesnittsavstemming")
-                    /* TODO: utvid packet til aa kunne bestemme avstemming for en saktype*/
+                    // TODO: utvid packet til aa kunne bestemme avstemming for en saktype
                     grensesnittsavstemmingService.startGrensesnittsavstemming(Saktype.BARNEPENSJON)
                 }
 

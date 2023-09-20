@@ -20,7 +20,6 @@ import org.junit.jupiter.api.Test
 import kotlin.random.Random
 
 internal class AdresseServiceTest {
-
     private val norg2Mock = mockk<Norg2Klient>()
     private val navansattMock = mockk<NavansattKlient>()
     private val regoppslagMock = mockk<RegoppslagKlient>()
@@ -45,18 +44,20 @@ internal class AdresseServiceTest {
         coEvery { navansattMock.hentSaksbehandlerInfo(ATTESTANT) }
             .returns(opprettSaksbehandlerInfo(ATTESTANT, "att", "estant"))
 
-        val vedtak = ForenkletVedtak(
-            1,
-            VedtakStatus.FATTET_VEDTAK,
-            VedtakType.INNVILGELSE,
-            ANSVARLIG_ENHET,
-            SAKSBEHANDLER,
-            ATTESTANT
-        )
+        val vedtak =
+            ForenkletVedtak(
+                1,
+                VedtakStatus.FATTET_VEDTAK,
+                VedtakType.INNVILGELSE,
+                ANSVARLIG_ENHET,
+                SAKSBEHANDLER,
+                ATTESTANT,
+            )
 
-        val faktiskAvsender = runBlocking {
-            adresseService.hentAvsender(vedtak)
-        }
+        val faktiskAvsender =
+            runBlocking {
+                adresseService.hentAvsender(vedtak)
+            }
 
         faktiskAvsender.saksbehandler shouldBe "saks behandler"
         faktiskAvsender.attestant shouldBe "att estant"
@@ -79,9 +80,10 @@ internal class AdresseServiceTest {
         val sakId = Random.nextLong()
         val sak = Sak("ident", SakType.BARNEPENSJON, sakId, "enhet")
 
-        val faktiskAvsender = runBlocking {
-            adresseService.hentAvsender(sak, zIdent)
-        }
+        val faktiskAvsender =
+            runBlocking {
+                adresseService.hentAvsender(sak, zIdent)
+            }
 
         faktiskAvsender.saksbehandler shouldBe "saks behandler"
 
@@ -91,22 +93,28 @@ internal class AdresseServiceTest {
         }
     }
 
-    private fun opprettEnhet() = Norg2Enhet(
-        navn = "NAV Porsgrunn",
-        enhetNr = ANSVARLIG_ENHET,
-        kontaktinfo = Norg2Kontaktinfo(
-            telefonnummer = "00 11 22 33",
-            epost = "test@nav.no",
-            postadresse = Postadresse(
-                type = "postboksadresse",
-                postboksnummer = "012345",
-                postboksanlegg = "Testanlegget"
-            )
+    private fun opprettEnhet() =
+        Norg2Enhet(
+            navn = "NAV Porsgrunn",
+            enhetNr = ANSVARLIG_ENHET,
+            kontaktinfo =
+                Norg2Kontaktinfo(
+                    telefonnummer = "00 11 22 33",
+                    epost = "test@nav.no",
+                    postadresse =
+                        Postadresse(
+                            type = "postboksadresse",
+                            postboksnummer = "012345",
+                            postboksanlegg = "Testanlegget",
+                        ),
+                ),
         )
-    )
 
-    private fun opprettSaksbehandlerInfo(ident: String, fornavn: String, etternavn: String) =
-        SaksbehandlerInfo(ident, "navn", fornavn, etternavn, "epost@nav.no")
+    private fun opprettSaksbehandlerInfo(
+        ident: String,
+        fornavn: String,
+        etternavn: String,
+    ) = SaksbehandlerInfo(ident, "navn", fornavn, etternavn, "epost@nav.no")
 
     companion object {
         private const val ANSVARLIG_ENHET = "1234"

@@ -23,7 +23,6 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class FordelerTest {
-
     private val fordelerService = mockk<FordelerService>()
     private val fordelerMetricLogger = mockk<FordelerMetricLogger>()
     private val inspector = TestRapid().apply { Fordeler(this, fordelerService, fordelerMetricLogger) }
@@ -76,8 +75,9 @@ internal class FordelerTest {
         val allMessages = (0 until inspector.size).map { inspector.message(it) }
         assertTrue {
             allMessages.all {
-                it.get(FordelerFordelt.soeknadFordeltKey) == null || !it.get(FordelerFordelt.soeknadFordeltKey)
-                    .asBoolean()
+                it.get(FordelerFordelt.soeknadFordeltKey) == null ||
+                    !it.get(FordelerFordelt.soeknadFordeltKey)
+                        .asBoolean()
             }
         }
 
@@ -85,7 +85,7 @@ internal class FordelerTest {
             fordelerMetricLogger.logMetricIkkeFordelt(
                 match {
                     it.ikkeOppfylteKriterier.containsAll(listOf(BARN_ER_FOR_GAMMELT, AVDOED_HAR_YRKESSKADE))
-                }
+                },
             )
         }
     }
@@ -101,11 +101,12 @@ internal class FordelerTest {
     @Test
     fun `lagStatistikkMelding lager riktig statistikkmelding`() {
         val soeknadId = 1337L
-        val fordeler = Fordeler(
-            rapidsConnection = mockk(relaxed = true),
-            fordelerService = fordelerService,
-            fordelerMetricLogger = fordelerMetricLogger
-        )
+        val fordeler =
+            Fordeler(
+                rapidsConnection = mockk(relaxed = true),
+                fordelerService = fordelerService,
+                fordelerMetricLogger = fordelerMetricLogger,
+            )
         val packet: JsonMessage = mockk()
 
         every {
@@ -115,11 +116,12 @@ internal class FordelerTest {
             packet[CORRELATION_ID_KEY].textValue()
         } returns "korrelasjonsid"
 
-        val statistikkMeldingGyldig = fordeler.lagStatistikkMelding(
-            packet,
-            FordelerResultat.GyldigForBehandling(),
-            SakType.BARNEPENSJON
-        )
+        val statistikkMeldingGyldig =
+            fordeler.lagStatistikkMelding(
+                packet,
+                FordelerResultat.GyldigForBehandling(),
+                SakType.BARNEPENSJON,
+            )
         assertJsonEquals(
             """
                {
@@ -130,18 +132,20 @@ internal class FordelerTest {
                     "gyldig_for_behandling": true
                } 
             """,
-            statistikkMeldingGyldig
+            statistikkMeldingGyldig,
         )
 
-        val kriterier = listOf(
-            FordelerKriterie.BARN_ER_IKKE_BOSATT_I_NORGE
-        )
+        val kriterier =
+            listOf(
+                FordelerKriterie.BARN_ER_IKKE_BOSATT_I_NORGE,
+            )
 
-        val statistikkmeldingIkkeGyldig = fordeler.lagStatistikkMelding(
-            packet,
-            FordelerResultat.IkkeGyldigForBehandling(kriterier),
-            SakType.BARNEPENSJON
-        )
+        val statistikkmeldingIkkeGyldig =
+            fordeler.lagStatistikkMelding(
+                packet,
+                FordelerResultat.IkkeGyldigForBehandling(kriterier),
+                SakType.BARNEPENSJON,
+            )
 
         assertJsonEquals(
             """
@@ -156,7 +160,7 @@ internal class FordelerTest {
                     ]
                 }
             """,
-            statistikkmeldingIkkeGyldig
+            statistikkmeldingIkkeGyldig,
         )
     }
 
@@ -178,6 +182,9 @@ internal class FordelerTest {
 private fun String.asJsonNode(): JsonNode = objectMapper.readTree(this)
 
 // Sammenligning som ignorerer linjeskift og medlemsrekkefølge i råe JSON-strenger
-private fun assertJsonEquals(expected: String?, actual: String?) {
+private fun assertJsonEquals(
+    expected: String?,
+    actual: String?,
+) {
     assertEquals(expected?.asJsonNode(), actual?.asJsonNode())
 }

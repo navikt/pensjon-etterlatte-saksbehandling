@@ -6,10 +6,10 @@ import java.time.LocalDate
 data class ForeldreansvarPeriode(
     val fraDato: LocalDate?,
     val tilDato: LocalDate?,
-    val forelder: Folkeregisteridentifikator
+    val forelder: Folkeregisteridentifikator,
 )
 
 data class HistorikkForeldreansvar(
     val ansvarligeForeldre: List<ForeldreansvarPeriode>,
-    val foreldre: List<Folkeregisteridentifikator>
+    val foreldre: List<Folkeregisteridentifikator>,
 )

@@ -13,14 +13,14 @@ import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
-import java.util.*
+import java.util.UUID
 
 fun lagEnkelopplysningerFraPDL(
     person: Person,
     personDTO: PersonDTO,
     opplysningstype: Opplysningstype,
     fnr: Folkeregisteridentifikator,
-    personRolle: PersonRolle
+    personRolle: PersonRolle,
 ): List<Grunnlagsopplysning<JsonNode>> {
     val tidspunktForInnhenting = Tidspunkt.now()
     val opplysningsbolk = Opplysningsbolk(fnr, tidspunktForInnhenting)
@@ -28,7 +28,7 @@ fun lagEnkelopplysningerFraPDL(
     val opplysningNavn =
         OpplysningDTO(
             Navn(personDTO.fornavn.verdi, personDTO.mellomnavn?.verdi, personDTO.etternavn.verdi),
-            personDTO.fornavn.opplysningsid
+            personDTO.fornavn.opplysningsid,
         )
 
     opplysningsbolk.apply {
@@ -59,24 +59,26 @@ fun lagEnkelopplysningerFraPDL(
 
 class Opplysningsbolk(private val fnr: Folkeregisteridentifikator, private val innhentetTidspunkt: Tidspunkt) {
     private val opplysninger = mutableListOf<Grunnlagsopplysning<JsonNode>>()
+
     fun leggTilOpplysninger(
         opplysningstype: Opplysningstype,
-        grunnlagsopplysning: List<OpplysningDTO<out Any>>?
+        grunnlagsopplysning: List<OpplysningDTO<out Any>>?,
     ) {
         if (grunnlagsopplysning.isNullOrEmpty()) {
             return
         }
-        val opplysningSamlet = OpplysningDTO(
-            grunnlagsopplysning.map { it.verdi },
-            opplysningsid = grunnlagsopplysning.firstOrNull()?.opplysningsid
-        )
+        val opplysningSamlet =
+            OpplysningDTO(
+                grunnlagsopplysning.map { it.verdi },
+                opplysningsid = grunnlagsopplysning.firstOrNull()?.opplysningsid,
+            )
         leggTilOpplysning(opplysningstype, opplysningSamlet)
     }
 
     fun leggTilOpplysning(
         opplysningstype: Opplysningstype,
         opplysningDTO: OpplysningDTO<out Any>?,
-        periode: Periode? = null
+        periode: Periode? = null,
     ) {
         opplysningDTO?.let {
             opplysninger.add(
@@ -85,8 +87,8 @@ class Opplysningsbolk(private val fnr: Folkeregisteridentifikator, private val i
                     opplysningsType = opplysningstype,
                     opplysning = opplysningDTO,
                     fnr = fnr,
-                    periode = periode
-                )
+                    periode = periode,
+                ),
             )
         }
     }
@@ -97,14 +99,14 @@ class Opplysningsbolk(private val fnr: Folkeregisteridentifikator, private val i
 fun lagPdlOpplysning(
     opplysningsType: Opplysningstype,
     opplysning: Person,
-    tidspunktForInnhenting: Tidspunkt
+    tidspunktForInnhenting: Tidspunkt,
 ): Grunnlagsopplysning<JsonNode> {
     return Grunnlagsopplysning(
         UUID.randomUUID(),
         Grunnlagsopplysning.Pdl(tidspunktForInnhenting, null, null),
         opplysningsType,
         objectMapper.createObjectNode(),
-        opplysning.toJsonNode()
+        opplysning.toJsonNode(),
     )
 }
 
@@ -113,19 +115,20 @@ fun <T> lagPdlPersonopplysning(
     opplysningsType: Opplysningstype,
     opplysning: OpplysningDTO<T>,
     fnr: Folkeregisteridentifikator,
-    periode: Periode? = null
+    periode: Periode? = null,
 ): Grunnlagsopplysning<JsonNode> {
     return Grunnlagsopplysning(
         id = UUID.randomUUID(),
-        kilde = Grunnlagsopplysning.Pdl(
-            tidspunktForInnhenting = tidspunktForInnhenting,
-            registersReferanse = null,
-            opplysningId = opplysning.opplysningsid.toString()
-        ),
+        kilde =
+            Grunnlagsopplysning.Pdl(
+                tidspunktForInnhenting = tidspunktForInnhenting,
+                registersReferanse = null,
+                opplysningId = opplysning.opplysningsid.toString(),
+            ),
         opplysningType = opplysningsType,
         meta = objectMapper.valueToTree(opplysning),
         opplysning = opplysning.verdi!!.toJsonNode(),
         fnr = fnr,
-        periode = periode
+        periode = periode,
     )
 }

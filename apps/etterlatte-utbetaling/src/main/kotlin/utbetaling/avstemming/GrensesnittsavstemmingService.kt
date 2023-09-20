@@ -13,18 +13,19 @@ class GrensesnittsavstemmingService(
     private val avstemmingsdataSender: AvstemmingsdataSender,
     private val avstemmingDao: AvstemmingDao,
     private val utbetalingDao: UtbetalingDao,
-    private val clock: Clock
+    private val clock: Clock,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    fun hentNestePeriode(saktype: Saktype) = Avstemmingsperiode(
-        fraOgMed = avstemmingDao.hentSisteGrensesnittavstemming(saktype)?.periode?.til ?: MIN_INSTANT,
-        til = tidspunktMidnattIdag(clock)
-    )
+    fun hentNestePeriode(saktype: Saktype) =
+        Avstemmingsperiode(
+            fraOgMed = avstemmingDao.hentSisteGrensesnittavstemming(saktype)?.periode?.til ?: MIN_INSTANT,
+            til = tidspunktMidnattIdag(clock),
+        )
 
     fun startGrensesnittsavstemming(
         saktype: Saktype,
-        periode: Avstemmingsperiode = hentNestePeriode(saktype)
+        periode: Avstemmingsperiode = hentNestePeriode(saktype),
     ) {
         logger.info("Grensesnittavstemmer fra ${periode.fraOgMed} til ${periode.til} for ${saktype.name} ")
         val utbetalinger =
@@ -35,13 +36,14 @@ class GrensesnittsavstemmingService(
             GrensesnittavstemmingDataMapper(utbetalinger, periode.fraOgMed, periode.til, avstemmingId)
         val avstemmingsdataListe = grensesnittavstemmingDataMapper.opprettAvstemmingsmelding(saktype)
 
-        val sendtAvstemmingsdata = avstemmingsdataListe.mapIndexed { index, avstemmingsdata ->
-            val sendtAvstemmingsdata = avstemmingsdataSender.sendGrensesnittavstemming(avstemmingsdata)
-            logger.info(
-                "Grensesnittavstemmingsmelding ${index + 1} av ${avstemmingsdataListe.size} overført til Oppdrag"
-            )
-            sendtAvstemmingsdata
-        }
+        val sendtAvstemmingsdata =
+            avstemmingsdataListe.mapIndexed { index, avstemmingsdata ->
+                val sendtAvstemmingsdata = avstemmingsdataSender.sendGrensesnittavstemming(avstemmingsdata)
+                logger.info(
+                    "Grensesnittavstemmingsmelding ${index + 1} av ${avstemmingsdataListe.size} overført til Oppdrag",
+                )
+                sendtAvstemmingsdata
+            }
 
         avstemmingDao.opprettGrensesnittavstemming(
             Grensesnittavstemming(
@@ -50,13 +52,13 @@ class GrensesnittsavstemmingService(
                 antallOppdrag = utbetalinger.size,
                 opprettet = Tidspunkt.now(clock),
                 avstemmingsdata = sendtAvstemmingsdata.joinToString("\n"),
-                saktype = saktype
-            )
+                saktype = saktype,
+            ),
         )
 
         logger.info(
             "Grensesnittsvstemming fra ${periode.fraOgMed} til ${periode.til} for ${saktype.name} fullført" +
-                " - ${utbetalinger.size} oppdrag ble avstemt"
+                " - ${utbetalinger.size} oppdrag ble avstemt",
         )
     }
 

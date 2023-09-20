@@ -27,12 +27,11 @@ import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
 import java.time.LocalDate
 import java.time.YearMonth
-import java.util.*
+import java.util.UUID
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class SakRepositoryTest {
-
     @Container
     private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:$POSTGRES_VERSION")
 
@@ -44,45 +43,48 @@ class SakRepositoryTest {
         postgreSQLContainer.withUrlParam("user", postgreSQLContainer.username)
         postgreSQLContainer.withUrlParam("password", postgreSQLContainer.password)
 
-        dataSource = DataSourceBuilder.createDataSource(
-            jdbcUrl = postgreSQLContainer.jdbcUrl,
-            username = postgreSQLContainer.username,
-            password = postgreSQLContainer.password
-        )
+        dataSource =
+            DataSourceBuilder.createDataSource(
+                jdbcUrl = postgreSQLContainer.jdbcUrl,
+                username = postgreSQLContainer.username,
+                password = postgreSQLContainer.password,
+            )
 
         dataSource.migrate(gcp = false)
     }
 
-    val mockBeregning = Beregning(
-        beregningId = UUID.randomUUID(),
-        behandlingId = UUID.randomUUID(),
-        type = Beregningstype.BP,
-        beregnetDato = Tidspunkt.now(),
-        beregningsperioder = listOf()
-    )
-
-    val mockAvkorting = Avkorting(
-        listOf(
-            AvkortingGrunnlag(
-                fom = YearMonth.now(),
-                tom = null,
-                aarsinntekt = 100,
-                fratrekkInnAar = 40,
-                relevanteMaanederInnAar = 2,
-                spesifikasjon = ""
-            )
-        ),
-        listOf(
-            AvkortetYtelse(
-                fom = YearMonth.now(),
-                tom = null,
-                ytelseFoerAvkorting = 200,
-                avkortingsbeloep = 50,
-                ytelseEtterAvkorting = 150,
-                restanse = 0
-            )
+    val mockBeregning =
+        Beregning(
+            beregningId = UUID.randomUUID(),
+            behandlingId = UUID.randomUUID(),
+            type = Beregningstype.BP,
+            beregnetDato = Tidspunkt.now(),
+            beregningsperioder = listOf(),
         )
-    )
+
+    val mockAvkorting =
+        Avkorting(
+            listOf(
+                AvkortingGrunnlag(
+                    fom = YearMonth.now(),
+                    tom = null,
+                    aarsinntekt = 100,
+                    fratrekkInnAar = 40,
+                    relevanteMaanederInnAar = 2,
+                    spesifikasjon = "",
+                ),
+            ),
+            listOf(
+                AvkortetYtelse(
+                    fom = YearMonth.now(),
+                    tom = null,
+                    ytelseFoerAvkorting = 200,
+                    avkortingsbeloep = 50,
+                    ytelseEtterAvkorting = 150,
+                    restanse = 0,
+                ),
+            ),
+        )
 
     @AfterAll
     fun afterAll() {
@@ -100,39 +102,40 @@ class SakRepositoryTest {
     @Test
     fun testSakRepo() {
         val repo = SakRepository.using(dataSource)
-        val lagretRad = repo.lagreRad(
-            SakRad(
-                id = -2,
-                behandlingId = UUID.randomUUID(),
-                sakId = 1337,
-                mottattTidspunkt = Tidspunkt.now(),
-                registrertTidspunkt = Tidspunkt.now(),
-                ferdigbehandletTidspunkt = null,
-                vedtakTidspunkt = null,
-                behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-                behandlingStatus = VedtakHendelse.IVERKSATT.name,
-                behandlingResultat = null,
-                resultatBegrunnelse = "for en begrunnelse",
-                behandlingMetode = BehandlingMetode.MANUELL,
-                opprettetAv = "test",
-                ansvarligBeslutter = "test testesen",
-                aktorId = "12345678911",
-                datoFoersteUtbetaling = LocalDate.now(),
-                tekniskTid = Tidspunkt.now(),
-                sakYtelse = "En ytelse",
-                vedtakLoependeFom = LocalDate.now(),
-                vedtakLoependeTom = LocalDate.now().plusYears(3),
-                saksbehandler = "en saksbehandler",
-                ansvarligEnhet = "en enhet",
-                soeknadFormat = null,
-                sakUtland = SakUtland.NASJONAL,
-                beregning = mockBeregning,
-                avkorting = mockAvkorting,
-                sakYtelsesgruppe = SakYtelsesgruppe.EN_AVDOED_FORELDER,
-                avdoedeForeldre = emptyList(),
-                revurderingAarsak = "MIGRERING"
+        val lagretRad =
+            repo.lagreRad(
+                SakRad(
+                    id = -2,
+                    behandlingId = UUID.randomUUID(),
+                    sakId = 1337,
+                    mottattTidspunkt = Tidspunkt.now(),
+                    registrertTidspunkt = Tidspunkt.now(),
+                    ferdigbehandletTidspunkt = null,
+                    vedtakTidspunkt = null,
+                    behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+                    behandlingStatus = VedtakHendelse.IVERKSATT.name,
+                    behandlingResultat = null,
+                    resultatBegrunnelse = "for en begrunnelse",
+                    behandlingMetode = BehandlingMetode.MANUELL,
+                    opprettetAv = "test",
+                    ansvarligBeslutter = "test testesen",
+                    aktorId = "12345678911",
+                    datoFoersteUtbetaling = LocalDate.now(),
+                    tekniskTid = Tidspunkt.now(),
+                    sakYtelse = "En ytelse",
+                    vedtakLoependeFom = LocalDate.now(),
+                    vedtakLoependeTom = LocalDate.now().plusYears(3),
+                    saksbehandler = "en saksbehandler",
+                    ansvarligEnhet = "en enhet",
+                    soeknadFormat = null,
+                    sakUtland = SakUtland.NASJONAL,
+                    beregning = mockBeregning,
+                    avkorting = mockAvkorting,
+                    sakYtelsesgruppe = SakYtelsesgruppe.EN_AVDOED_FORELDER,
+                    avdoedeForeldre = emptyList(),
+                    revurderingAarsak = "MIGRERING",
+                ),
             )
-        )
 
         lagretRad shouldNotBe null
         lagretRad?.asClue { rad ->
@@ -145,39 +148,40 @@ class SakRepositoryTest {
     @Test
     fun `sakRepository lagrer ned og henter ut null for beregning riktig`() {
         val repo = SakRepository.using(dataSource)
-        val lagretRad = repo.lagreRad(
-            SakRad(
-                id = -2,
-                behandlingId = UUID.randomUUID(),
-                sakId = 1337,
-                mottattTidspunkt = Tidspunkt.now(),
-                registrertTidspunkt = Tidspunkt.now(),
-                ferdigbehandletTidspunkt = null,
-                vedtakTidspunkt = null,
-                behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-                behandlingStatus = VedtakHendelse.IVERKSATT.name,
-                behandlingResultat = null,
-                resultatBegrunnelse = "for en begrunnelse",
-                behandlingMetode = BehandlingMetode.MANUELL,
-                opprettetAv = "test",
-                ansvarligBeslutter = "test testesen",
-                aktorId = "12345678911",
-                datoFoersteUtbetaling = LocalDate.now(),
-                tekniskTid = Tidspunkt.now(),
-                sakYtelse = "En ytelse",
-                vedtakLoependeFom = LocalDate.now(),
-                vedtakLoependeTom = LocalDate.now().plusYears(3),
-                saksbehandler = "en saksbehandler",
-                ansvarligEnhet = "en enhet",
-                soeknadFormat = null,
-                sakUtland = SakUtland.NASJONAL,
-                beregning = null,
-                avkorting = null,
-                sakYtelsesgruppe = SakYtelsesgruppe.EN_AVDOED_FORELDER,
-                avdoedeForeldre = emptyList(),
-                revurderingAarsak = "MIGRERING"
+        val lagretRad =
+            repo.lagreRad(
+                SakRad(
+                    id = -2,
+                    behandlingId = UUID.randomUUID(),
+                    sakId = 1337,
+                    mottattTidspunkt = Tidspunkt.now(),
+                    registrertTidspunkt = Tidspunkt.now(),
+                    ferdigbehandletTidspunkt = null,
+                    vedtakTidspunkt = null,
+                    behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+                    behandlingStatus = VedtakHendelse.IVERKSATT.name,
+                    behandlingResultat = null,
+                    resultatBegrunnelse = "for en begrunnelse",
+                    behandlingMetode = BehandlingMetode.MANUELL,
+                    opprettetAv = "test",
+                    ansvarligBeslutter = "test testesen",
+                    aktorId = "12345678911",
+                    datoFoersteUtbetaling = LocalDate.now(),
+                    tekniskTid = Tidspunkt.now(),
+                    sakYtelse = "En ytelse",
+                    vedtakLoependeFom = LocalDate.now(),
+                    vedtakLoependeTom = LocalDate.now().plusYears(3),
+                    saksbehandler = "en saksbehandler",
+                    ansvarligEnhet = "en enhet",
+                    soeknadFormat = null,
+                    sakUtland = SakUtland.NASJONAL,
+                    beregning = null,
+                    avkorting = null,
+                    sakYtelsesgruppe = SakYtelsesgruppe.EN_AVDOED_FORELDER,
+                    avdoedeForeldre = emptyList(),
+                    revurderingAarsak = "MIGRERING",
+                ),
             )
-        )
         lagretRad shouldNotBe null
         lagretRad?.asClue { rad ->
             rad.beregning shouldBe null

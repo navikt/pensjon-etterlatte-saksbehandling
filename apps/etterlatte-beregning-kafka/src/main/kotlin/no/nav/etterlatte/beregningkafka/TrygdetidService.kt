@@ -9,9 +9,12 @@ import java.util.UUID
 
 class TrygdetidService(
     private val trygdetidApp: HttpClient,
-    private val url: String
+    private val url: String,
 ) {
-    fun kopierTrygdetidFraForrigeBehandling(behandlingId: UUID, forrigeBehandlingId: UUID) = runBlocking {
+    fun kopierTrygdetidFraForrigeBehandling(
+        behandlingId: UUID,
+        forrigeBehandlingId: UUID,
+    ) = runBlocking {
         trygdetidApp.post("$url/api/trygdetid/$behandlingId/kopier/$forrigeBehandlingId") {
             contentType(ContentType.Application.Json)
         }

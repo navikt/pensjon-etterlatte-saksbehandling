@@ -8,9 +8,9 @@ data class JournalpostResponse(
     val journalpoststatus: String? = null,
     val melding: String? = null,
     val journalpostferdigstilt: Boolean,
-    val dokumenter: List<DokarkivDokument> = emptyList()
+    val dokumenter: List<DokarkivDokument> = emptyList(),
 )
 
 data class DokarkivDokument(
-    val dokumentInfoId: String
+    val dokumentInfoId: String,
 )

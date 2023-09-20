@@ -16,7 +16,6 @@ import rapidsandrivers.migrering.ListenerMedLoggingOgFeilhaandtering
 
 internal class LagreKopling(rapidsConnection: RapidsConnection, private val pesysRepository: PesysRepository) :
     ListenerMedLoggingOgFeilhaandtering(Migreringshendelser.LAGRE_KOPLING) {
-
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     init {
@@ -28,14 +27,17 @@ internal class LagreKopling(rapidsConnection: RapidsConnection, private val pesy
         }.register(this)
     }
 
-    override fun haandterPakke(packet: JsonMessage, context: MessageContext) {
+    override fun haandterPakke(
+        packet: JsonMessage,
+        context: MessageContext,
+    ) {
         logger.info("Lagrer kopling fra pesyssak ${packet.pesysId} til behandling ${packet.behandlingId}")
         pesysRepository.lagreKoplingTilBehandling(packet.behandlingId, packet.pesysId)
         packet.eventName = Migreringshendelser.LAGRE_GRUNNLAG
         context.publish(packet.toJson())
         logger.info(
             "Publiserte oppdatert migreringshendelse for ${packet.behandlingId} " +
-                "med lagra kopling til pesyssak ${packet.pesysId}"
+                "med lagra kopling til pesyssak ${packet.pesysId}",
         )
     }
 }

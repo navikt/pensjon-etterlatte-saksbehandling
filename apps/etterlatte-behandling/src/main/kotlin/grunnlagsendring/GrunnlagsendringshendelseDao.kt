@@ -18,7 +18,7 @@ import no.nav.etterlatte.libs.database.toList
 import java.sql.Connection
 import java.sql.ResultSet
 import java.time.temporal.ChronoUnit
-import java.util.*
+import java.util.UUID
 
 class GrunnlagsendringshendelseDao(val connection: () -> Connection) {
     fun opprettGrunnlagsendringshendelse(hendelse: Grunnlagsendringshendelse): Grunnlagsendringshendelse {
@@ -29,7 +29,7 @@ class GrunnlagsendringshendelseDao(val connection: () -> Connection) {
                     INSERT INTO grunnlagsendringshendelse(id, sak_id, type, opprettet, status, hendelse_gjelder_rolle, 
                         samsvar_mellom_pdl_og_grunnlag, gjelder_person)
                     VALUES(?, ?, ?, ?, ?, ?, ?, ?)
-                    """.trimIndent()
+                    """.trimIndent(),
                 )
             with(hendelse) {
                 stmt.setObject(1, id)
@@ -57,7 +57,7 @@ class GrunnlagsendringshendelseDao(val connection: () -> Connection) {
                         samsvar_mellom_pdl_og_grunnlag, gjelder_person, kommentar
                     FROM grunnlagsendringshendelse
                     WHERE id = ?
-                    """.trimIndent()
+                    """.trimIndent(),
                 )
             stmt.setObject(1, id)
             return stmt.executeQuery().singleOrNull { asGrunnlagsendringshendelse() }
@@ -68,7 +68,7 @@ class GrunnlagsendringshendelseDao(val connection: () -> Connection) {
         hendelseId: UUID,
         foerStatus: GrunnlagsendringStatus,
         etterStatus: GrunnlagsendringStatus,
-        samsvarMellomKildeOgGrunnlag: SamsvarMellomKildeOgGrunnlag
+        samsvarMellomKildeOgGrunnlag: SamsvarMellomKildeOgGrunnlag,
     ) {
         with(connection()) {
             prepareStatement(
@@ -78,7 +78,7 @@ class GrunnlagsendringshendelseDao(val connection: () -> Connection) {
                 samsvar_mellom_pdl_og_grunnlag = ?
                 WHERE id = ?
                 AND status = ?
-                """.trimIndent()
+                """.trimIndent(),
             ).use {
                 it.setString(1, etterStatus.name)
                 it.setJsonb(2, samsvarMellomKildeOgGrunnlag)
@@ -96,7 +96,7 @@ class GrunnlagsendringshendelseDao(val connection: () -> Connection) {
                 UPDATE grunnlagsendringshendelse
                 SET status = ?
                 WHERE behandling_id = ?
-                """.trimIndent()
+                """.trimIndent(),
             ).use {
                 it.setString(1, GrunnlagsendringStatus.HISTORISK.toString())
                 it.setObject(2, behandlingId)
@@ -113,7 +113,7 @@ class GrunnlagsendringshendelseDao(val connection: () -> Connection) {
                 SET kommentar = ?,
                 status = ?
                 WHERE id = ?
-                """.trimIndent()
+                """.trimIndent(),
             ).use {
                 it.setString(1, hendelse.kommentar)
                 it.setString(2, GrunnlagsendringStatus.VURDERT_SOM_IKKE_RELEVANT.toString())
@@ -132,7 +132,7 @@ class GrunnlagsendringshendelseDao(val connection: () -> Connection) {
                     status = ?,
                     behandling_id = null 
                 WHERE behandling_id = ?
-                """.trimIndent()
+                """.trimIndent(),
             ).use {
                 it.setString(1, GrunnlagsendringStatus.SJEKKET_AV_JOBB.toString())
                 it.setObject(2, behandlingId)
@@ -143,7 +143,7 @@ class GrunnlagsendringshendelseDao(val connection: () -> Connection) {
 
     fun settBehandlingIdForTattMedIRevurdering(
         grlaghendelseId: UUID,
-        behandlingId: UUID
+        behandlingId: UUID,
     ) {
         with(connection()) {
             prepareStatement(
@@ -153,7 +153,7 @@ class GrunnlagsendringshendelseDao(val connection: () -> Connection) {
                 status = ?
                 WHERE id = ?
                 AND status = ?
-                """.trimIndent()
+                """.trimIndent(),
             ).use {
                 it.setObject(1, behandlingId)
                 it.setString(2, GrunnlagsendringStatus.TATT_MED_I_BEHANDLING.name)
@@ -172,7 +172,7 @@ class GrunnlagsendringshendelseDao(val connection: () -> Connection) {
                     SELECT id, sak_id, type, opprettet, status, behandling_id, hendelse_gjelder_rolle, 
                         samsvar_mellom_pdl_og_grunnlag, gjelder_person, kommentar
                     FROM grunnlagsendringshendelse
-                    """.trimIndent()
+                    """.trimIndent(),
                 )
             return stmt.executeQuery().toList { asGrunnlagsendringshendelse() }
         }
@@ -187,7 +187,7 @@ class GrunnlagsendringshendelseDao(val connection: () -> Connection) {
                 FROM grunnlagsendringshendelse
                 WHERE opprettet <= ?
                 AND status = ?
-                """.trimIndent()
+                """.trimIndent(),
             ).use {
                 it.setTidspunkt(1, Tidspunkt.now().minus(minutter, ChronoUnit.MINUTES))
                 it.setString(2, GrunnlagsendringStatus.VENTER_PAA_JOBB.name)
@@ -198,7 +198,7 @@ class GrunnlagsendringshendelseDao(val connection: () -> Connection) {
 
     fun hentGrunnlagsendringshendelserMedStatuserISak(
         sakId: Long,
-        statuser: List<GrunnlagsendringStatus>
+        statuser: List<GrunnlagsendringStatus>,
     ): List<Grunnlagsendringshendelse> {
         with(connection()) {
             prepareStatement(
@@ -208,7 +208,7 @@ class GrunnlagsendringshendelseDao(val connection: () -> Connection) {
                 FROM grunnlagsendringshendelse
                 WHERE sak_id = ?
                 AND status = ANY(?)
-                """.trimIndent()
+                """.trimIndent(),
             ).use {
                 it.setLong(1, sakId)
                 val statusArray = this.createArrayOf("text", statuser.toTypedArray())
@@ -221,7 +221,7 @@ class GrunnlagsendringshendelseDao(val connection: () -> Connection) {
     fun hentGrunnlagsendringshendelserMedStatuserISakAvType(
         sakId: Long,
         statuser: List<GrunnlagsendringStatus>,
-        type: GrunnlagsendringsType
+        type: GrunnlagsendringsType,
     ): List<Grunnlagsendringshendelse> {
         with(connection()) {
             prepareStatement(
@@ -232,7 +232,7 @@ class GrunnlagsendringshendelseDao(val connection: () -> Connection) {
                 WHERE sak_id = ?
                 AND type = ?
                 AND status = ANY(?)
-                """.trimIndent()
+                """.trimIndent(),
             ).use {
                 it.setLong(1, sakId)
                 it.setString(2, type.toString())
@@ -246,7 +246,7 @@ class GrunnlagsendringshendelseDao(val connection: () -> Connection) {
     fun hentGrunnlagsendringshendelserSomErSjekketAvJobb(sakId: Long): List<Grunnlagsendringshendelse> =
         hentGrunnlagsendringshendelserMedStatuserISak(
             sakId,
-            listOf(GrunnlagsendringStatus.SJEKKET_AV_JOBB)
+            listOf(GrunnlagsendringStatus.SJEKKET_AV_JOBB),
         )
 
     private fun ResultSet.asGrunnlagsendringshendelse(): Grunnlagsendringshendelse {
@@ -261,9 +261,9 @@ class GrunnlagsendringshendelseDao(val connection: () -> Connection) {
             gjelderPerson = getString("gjelder_person"),
             samsvarMellomKildeOgGrunnlag =
                 objectMapper.readValue(
-                    getString("samsvar_mellom_pdl_og_grunnlag")
+                    getString("samsvar_mellom_pdl_og_grunnlag"),
                 ),
-            kommentar = getString("kommentar")
+            kommentar = getString("kommentar"),
         )
     }
 
@@ -275,7 +275,7 @@ class GrunnlagsendringshendelseDao(val connection: () -> Connection) {
                         samsvar_mellom_pdl_og_grunnlag, gjelder_person, kommentar
                     FROM grunnlagsendringshendelse
                     WHERE behandling_id = ?
-                """.trimIndent()
+                """.trimIndent(),
             )
                 .let {
                     it.setObject(1, behandlingId)

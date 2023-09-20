@@ -4,5 +4,5 @@ enum class Migreringsstatus {
     HENTA,
     UNDER_MIGRERING,
     FERDIG,
-    FEILA
+    FEILA,
 }

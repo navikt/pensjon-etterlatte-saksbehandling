@@ -5,7 +5,7 @@ enum class Aarsak {
     FEIL_REGELVERKSFORSTÅELSE,
     FEIL_ELLER_ENDRET_FAKTA,
     FEIL_PROSESSUELL,
-    ANNET
+    ANNET,
 }
 
 enum class BehandlingEventType {
@@ -13,7 +13,7 @@ enum class BehandlingEventType {
     ANKEBEHANDLING_OPPRETTET,
     ANKEBEHANDLING_AVSLUTTET,
     ANKE_I_TRYGDERETTENBEHANDLING_OPPRETTET,
-    BEHANDLING_FEILREGISTRERT
+    BEHANDLING_FEILREGISTRERT,
 // TODO ANKE_I_TRYGDERETTENBEHANDLING_OPPRETTET skal fjernes på sikt
 }
 
@@ -27,5 +27,5 @@ enum class KlageinstansUtfall(val navn: String) {
     UGUNST("Ugunst (Ugyldig) KA"),
     AVVIST("Avvist KA"),
     INNSTILLING_STADFESTELSE("Innstilling om stadfestelse til trygderetten fra KA"),
-    INNSTILLING_AVVIST("Innstilling om avist til trygderetten fra KA")
+    INNSTILLING_AVVIST("Innstilling om avist til trygderetten fra KA"),
 }

@@ -35,7 +35,7 @@ class Server {
                         metricsModule()
                     }
                     connector { port = 8080 }
-                }
+                },
         )
 
     fun run() {
@@ -47,7 +47,7 @@ class Server {
 
 fun startEgenAnsattLytter(
     env: Map<String, String>,
-    config: Config
+    config: Config,
 ) {
     val logger = LoggerFactory.getLogger(Application::class.java)
 
@@ -56,20 +56,20 @@ fun startEgenAnsattLytter(
             azureAppClientId = config.getString("azure.app.client.id"),
             azureAppJwk = config.getString("azure.app.jwk"),
             azureAppWellKnownUrl = config.getString("azure.app.well.known.url"),
-            azureAppScope = config.getString("behandling.azure.scope")
+            azureAppScope = config.getString("behandling.azure.scope"),
         )
     val behandlingKlient =
         BehandlingKlient(
             behandlingHttpClient = behandlingHttpClient,
-            url = config.getString("etterlatte.behandling.url")
+            url = config.getString("etterlatte.behandling.url"),
         )
 
     startLytting(
         konsument =
             KafkaConsumerEgneAnsatte(
                 env = env,
-                behandlingKlient = behandlingKlient
+                behandlingKlient = behandlingKlient,
             ),
-        logger = logger
+        logger = logger,
     )
 }

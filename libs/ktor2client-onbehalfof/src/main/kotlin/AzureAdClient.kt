@@ -26,15 +26,16 @@ import kotlinx.coroutines.future.future
 import kotlinx.coroutines.runBlocking
 import java.util.concurrent.TimeUnit
 
-internal val defaultHttpClient = HttpClient {
-    expectSuccess = true
-    install(ContentNegotiation) {
-        jackson {
-            configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-            setSerializationInclusion(JsonInclude.Include.NON_NULL)
+internal val defaultHttpClient =
+    HttpClient {
+        expectSuccess = true
+        install(ContentNegotiation) {
+            jackson {
+                configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+                setSerializationInclusion(JsonInclude.Include.NON_NULL)
+            }
         }
     }
-}
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class AzureAdOpenIdConfiguration(
@@ -45,39 +46,43 @@ data class AzureAdOpenIdConfiguration(
     @JsonProperty("token_endpoint")
     val tokenEndpoint: String,
     @JsonProperty("authorization_endpoint")
-    val authorizationEndpoint: String
+    val authorizationEndpoint: String,
 )
 
 class AzureAdClient(
     private val config: Config,
     private val httpClient: HttpClient = defaultHttpClient,
-    private val cache: AsyncCache<OboTokenRequest, AccessToken> = Caffeine
-        .newBuilder()
-        .expireAfterAccess(5, TimeUnit.SECONDS)
-        .buildAsync(),
-    private val clientCredentialsCache: AsyncCache<ClientCredentialsTokenRequest, AccessToken> = Caffeine
-        .newBuilder()
-        .expireAfterAccess(5, TimeUnit.SECONDS)
-        .buildAsync()
+    private val cache: AsyncCache<OboTokenRequest, AccessToken> =
+        Caffeine
+            .newBuilder()
+            .expireAfterAccess(5, TimeUnit.SECONDS)
+            .buildAsync(),
+    private val clientCredentialsCache: AsyncCache<ClientCredentialsTokenRequest, AccessToken> =
+        Caffeine
+            .newBuilder()
+            .expireAfterAccess(5, TimeUnit.SECONDS)
+            .buildAsync(),
 ) {
-    private val openIdConfiguration: AzureAdOpenIdConfiguration = runBlocking {
-        httpClient.get(config.getString("azure.app.well.known.url")).body()
-    }
+    private val openIdConfiguration: AzureAdOpenIdConfiguration =
+        runBlocking {
+            httpClient.get(config.getString("azure.app.well.known.url")).body()
+        }
 
     private suspend inline fun fetchAccessToken(formParameters: Parameters): AccessToken =
         try {
             httpClient.submitForm(
                 url = openIdConfiguration.tokenEndpoint,
-                formParameters = formParameters
+                formParameters = formParameters,
             ).body()
         } catch (ex: Throwable) {
-            val responseBody: String? = when (ex) {
-                is ResponseException -> ex.response.bodyAsText()
-                else -> null
-            }
+            val responseBody: String? =
+                when (ex) {
+                    is ResponseException -> ex.response.bodyAsText()
+                    else -> null
+                }
             throw RuntimeException(
                 "Could not fetch access token from authority endpoint. response body: $responseBody",
-                ex
+                ex,
             )
         }
 
@@ -97,15 +102,16 @@ class AzureAdClient(
     private suspend fun <T : TokenRequest> hentAccessToken(
         params: (T) -> Parameters,
         asyncCache: AsyncCache<T, AccessToken>,
-        request: T
+        request: T,
     ): Result<AccessToken, ThrowableErrorMessage> {
         val context = currentCoroutineContext()
 
-        val value = asyncCache.get(request) { req, _ ->
-            CoroutineScope(context).future {
-                fetchAccessToken(params.invoke(req))
+        val value =
+            asyncCache.get(request) { req, _ ->
+                CoroutineScope(context).future {
+                    fetchAccessToken(params.invoke(req))
+                }
             }
-        }
 
         return value.handle { token, exception ->
             if (exception != null) {
@@ -120,7 +126,7 @@ class AzureAdClient(
     // Service-to-service access token request (on-behalf-of flow)
     suspend fun getOnBehalfOfAccessTokenForResource(
         scopes: List<String>,
-        accessToken: String
+        accessToken: String,
     ): Result<AccessToken, ThrowableErrorMessage> {
         val params = { req: OboTokenRequest ->
             Parameters.build {

@@ -26,7 +26,7 @@ object TrygdetidBeregningService {
     fun beregnTrygdetid(
         trygdetidGrunnlag: List<TrygdetidGrunnlag>,
         foedselsDato: LocalDate,
-        doedsDato: LocalDate
+        doedsDato: LocalDate,
     ): DetaljertBeregnetTrygdetid? {
         logger.info("Beregner antall år trygdetid")
 
@@ -40,20 +40,21 @@ object TrygdetidBeregningService {
         val grunnlag =
             TrygdetidGrunnlagMedAvdoedGrunnlag(
                 FaktumNode(
-                    verdi = TrygdetidGrunnlagMedAvdoed(
-                        trygdetidGrunnlagListe = trygdetidGrunnlag,
-                        foedselsDato = foedselsDato,
-                        doedsDato = doedsDato
-                    ),
+                    verdi =
+                        TrygdetidGrunnlagMedAvdoed(
+                            trygdetidGrunnlagListe = trygdetidGrunnlag,
+                            foedselsDato = foedselsDato,
+                            doedsDato = doedsDato,
+                        ),
                     kilde = "System",
-                    beskrivelse = "Beregn detaljert trygdetidsgrunnlag"
-                )
+                    beskrivelse = "Beregn detaljert trygdetidsgrunnlag",
+                ),
             )
 
         val resultat =
             beregnDetaljertBeregnetTrygdetid.eksekver(
                 KonstantGrunnlag(grunnlag),
-                RegelPeriode(LocalDate.now())
+                RegelPeriode(LocalDate.now()),
             )
         return when (resultat) {
             is RegelkjoeringResultat.Suksess -> {
@@ -64,7 +65,7 @@ object TrygdetidBeregningService {
                 DetaljertBeregnetTrygdetid(
                     resultat = detaljertTrygdetidVerdi,
                     tidspunkt = Tidspunkt(periodisertResultat.opprettet),
-                    regelResultat = periodisertResultat.toJsonNode()
+                    regelResultat = periodisertResultat.toJsonNode(),
                 )
             }
 
@@ -80,8 +81,8 @@ object TrygdetidBeregningService {
                 FaktumNode(
                     verdi = emptyList(),
                     kilde = kilde,
-                    beskrivelse = "Ingen grunnlag for yrkesskade"
-                )
+                    beskrivelse = "Ingen grunnlag for yrkesskade",
+                ),
             )
 
         val resultat = totalTrygdetidYrkesskade.eksekver(KonstantGrunnlag(grunnlag), RegelPeriode(LocalDate.now()))
@@ -94,7 +95,7 @@ object TrygdetidBeregningService {
                 DetaljertBeregnetTrygdetid(
                     resultat = DetaljertBeregnetTrygdetidResultat.fraSamletTrygdetidNorge(totaltAntallAarTrygdetid),
                     tidspunkt = Tidspunkt(periodisertResultat.opprettet),
-                    regelResultat = periodisertResultat.toJsonNode()
+                    regelResultat = periodisertResultat.toJsonNode(),
                 )
             }
 
@@ -108,16 +109,17 @@ object TrygdetidBeregningService {
         val grunnlag =
             TrygdetidPeriodeGrunnlag(
                 periode =
-                FaktumNode(
-                    verdi = TrygdetidPeriodMedPoengAar(
-                        fra = trygdetidGrunnlag.periode.fra,
-                        til = trygdetidGrunnlag.periode.til,
-                        poengInnAar = trygdetidGrunnlag.poengInnAar,
-                        poengUtAar = trygdetidGrunnlag.poengUtAar
+                    FaktumNode(
+                        verdi =
+                            TrygdetidPeriodMedPoengAar(
+                                fra = trygdetidGrunnlag.periode.fra,
+                                til = trygdetidGrunnlag.periode.til,
+                                poengInnAar = trygdetidGrunnlag.poengInnAar,
+                                poengUtAar = trygdetidGrunnlag.poengUtAar,
+                            ),
+                        kilde = trygdetidGrunnlag.kilde,
+                        beskrivelse = "Periode (med poeng aar) for trygdetidsperiode",
                     ),
-                    kilde = trygdetidGrunnlag.kilde,
-                    beskrivelse = "Periode (med poeng aar) for trygdetidsperiode"
-                )
             )
 
         val resultat = beregnTrygdetidForPeriode.eksekver(KonstantGrunnlag(grunnlag), RegelPeriode(LocalDate.now()))
@@ -131,7 +133,7 @@ object TrygdetidBeregningService {
                 BeregnetTrygdetidGrunnlag(
                     verdi = periodeTrygdetid,
                     tidspunkt = Tidspunkt(periodisertResultat.opprettet),
-                    regelResultat = periodisertResultat.toJsonNode()
+                    regelResultat = periodisertResultat.toJsonNode(),
                 )
             }
 

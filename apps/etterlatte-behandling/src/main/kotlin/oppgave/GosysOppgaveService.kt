@@ -14,52 +14,63 @@ import java.time.LocalTime
 
 interface GosysOppgaveService {
     suspend fun hentOppgaver(brukerTokenInfo: BrukerTokenInfo): List<GosysOppgave>
-    suspend fun hentOppgave(id: Long, brukerTokenInfo: BrukerTokenInfo): GosysOppgave?
+
+    suspend fun hentOppgave(
+        id: Long,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): GosysOppgave?
+
     suspend fun tildelOppgaveTilSaksbehandler(
         oppgaveId: String,
         oppgaveVersjon: Long,
         tilordnes: String,
-        brukerTokenInfo: BrukerTokenInfo
+        brukerTokenInfo: BrukerTokenInfo,
     )
+
     suspend fun endreFrist(
         oppgaveId: String,
         oppgaveVersjon: Long,
         nyFrist: Tidspunkt,
-        brukerTokenInfo: BrukerTokenInfo
+        brukerTokenInfo: BrukerTokenInfo,
     )
 }
 
 class GosysOppgaveServiceImpl(
     private val gosysOppgaveKlient: GosysOppgaveKlient,
     private val pdlKlient: PdlKlient,
-    private val featureToggleService: FeatureToggleService
+    private val featureToggleService: FeatureToggleService,
 ) : GosysOppgaveService {
-
-    private val cache = Caffeine.newBuilder()
-        .expireAfterWrite(Duration.ofMinutes(5))
-        .build<Long, GosysOppgave>()
+    private val cache =
+        Caffeine.newBuilder()
+            .expireAfterWrite(Duration.ofMinutes(5))
+            .build<Long, GosysOppgave>()
 
     override suspend fun hentOppgaver(brukerTokenInfo: BrukerTokenInfo): List<GosysOppgave> {
         if (!featureToggleService.isEnabled(GosysOppgaveServiceFeatureToggle.HentGosysOppgaver, false)) {
             return emptyList()
         }
 
-        val gosysOppgaver = gosysOppgaveKlient.hentOppgaver(
-            brukerTokenInfo = brukerTokenInfo
-        )
+        val gosysOppgaver =
+            gosysOppgaveKlient.hentOppgaver(
+                brukerTokenInfo = brukerTokenInfo,
+            )
 
         // Utveksle unike aktørIds til fnr for mapping
-        val fnrByAktoerId = if (gosysOppgaver.oppgaver.isEmpty()) {
-            emptyMap<String, String>()
-        } else {
-            val aktoerIds = gosysOppgaver.oppgaver.mapNotNull { it.aktoerId }.toSet()
-            pdlKlient.hentFolkeregisterIdenterForAktoerIdBolk(aktoerIds)
-        }
+        val fnrByAktoerId =
+            if (gosysOppgaver.oppgaver.isEmpty()) {
+                emptyMap<String, String>()
+            } else {
+                val aktoerIds = gosysOppgaver.oppgaver.mapNotNull { it.aktoerId }.toSet()
+                pdlKlient.hentFolkeregisterIdenterForAktoerIdBolk(aktoerIds)
+            }
 
         return gosysOppgaver.oppgaver.map { it.fraGosysOppgaveTilNy(fnrByAktoerId) }
     }
 
-    override suspend fun hentOppgave(id: Long, brukerTokenInfo: BrukerTokenInfo): GosysOppgave? {
+    override suspend fun hentOppgave(
+        id: Long,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): GosysOppgave? {
         return cache.getIfPresent(id) ?: gosysOppgaveKlient.hentOppgave(id, brukerTokenInfo).let {
             it.fraGosysOppgaveTilNy(pdlKlient.hentFolkeregisterIdenterForAktoerIdBolk(setOf(it.aktoerId)))
         }.also { cache.put(id, it) }
@@ -69,7 +80,7 @@ class GosysOppgaveServiceImpl(
         oppgaveId: String,
         oppgaveVersjon: Long,
         tilordnes: String,
-        brukerTokenInfo: BrukerTokenInfo
+        brukerTokenInfo: BrukerTokenInfo,
     ) {
         gosysOppgaveKlient.tildelOppgaveTilSaksbehandler(oppgaveId, oppgaveVersjon, tilordnes, brukerTokenInfo)
     }
@@ -78,17 +89,18 @@ class GosysOppgaveServiceImpl(
         oppgaveId: String,
         oppgaveVersjon: Long,
         nyFrist: Tidspunkt,
-        brukerTokenInfo: BrukerTokenInfo
+        brukerTokenInfo: BrukerTokenInfo,
     ) {
         gosysOppgaveKlient.endreFrist(oppgaveId, oppgaveVersjon, nyFrist.toLocalDate(), brukerTokenInfo)
     }
 
     companion object {
-        private val temaTilSakType = mapOf(
-            "PEN" to SakType.BARNEPENSJON,
-            "EYB" to SakType.BARNEPENSJON,
-            "EYO" to SakType.OMSTILLINGSSTOENAD
-        )
+        private val temaTilSakType =
+            mapOf(
+                "PEN" to SakType.BARNEPENSJON,
+                "EYB" to SakType.BARNEPENSJON,
+                "EYO" to SakType.OMSTILLINGSSTOENAD,
+            )
 
         private fun GosysApiOppgave.fraGosysOppgaveTilNy(fnrByAktoerId: Map<String, String?>): GosysOppgave {
             return GosysOppgave(
@@ -102,14 +114,15 @@ class GosysOppgaveServiceImpl(
                 enhet = this.tildeltEnhetsnr,
                 saksbehandler = this.tilordnetRessurs,
                 beskrivelse = this.beskrivelse,
-                sakType = temaTilSakType[this.tema]!!
+                sakType = temaTilSakType[this.tema]!!,
             )
         }
     }
 }
 
 private enum class GosysOppgaveServiceFeatureToggle(private val key: String) : FeatureToggle {
-    HentGosysOppgaver("pensjon-etterlatte.hent-gosys-oppgaver");
+    HentGosysOppgaver("pensjon-etterlatte.hent-gosys-oppgaver"),
+    ;
 
     override fun key() = key
 }

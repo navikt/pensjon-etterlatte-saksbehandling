@@ -7,7 +7,7 @@ import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.common.trygdetid.DetaljertBeregnetTrygdetidResultat
 import java.time.LocalDate
 import java.time.Period
-import java.util.*
+import java.util.UUID
 import java.util.UUID.randomUUID
 
 data class Trygdetid(
@@ -16,7 +16,7 @@ data class Trygdetid(
     val behandlingId: UUID,
     val trygdetidGrunnlag: List<TrygdetidGrunnlag> = emptyList(),
     val opplysninger: List<Opplysningsgrunnlag> = emptyList(),
-    val beregnetTrygdetid: DetaljertBeregnetTrygdetid? = null
+    val beregnetTrygdetid: DetaljertBeregnetTrygdetid? = null,
 ) {
     fun leggTilEllerOppdaterTrygdetidGrunnlag(nyttTrygdetidGrunnlag: TrygdetidGrunnlag): Trygdetid {
         val oppdatertGrunnlagListe =
@@ -35,7 +35,7 @@ data class Trygdetid(
 
     fun slettTrygdetidGrunnlag(trygdetidGrunnlagId: UUID): Trygdetid =
         this.copy(
-            trygdetidGrunnlag = this.trygdetidGrunnlag.filter { it.id != trygdetidGrunnlagId }
+            trygdetidGrunnlag = this.trygdetidGrunnlag.filter { it.id != trygdetidGrunnlagId },
         )
 
     fun oppdaterBeregnetTrygdetid(beregnetTrygdetid: DetaljertBeregnetTrygdetid): Trygdetid {
@@ -53,26 +53,26 @@ data class Trygdetid(
 data class DetaljertBeregnetTrygdetid(
     val resultat: DetaljertBeregnetTrygdetidResultat,
     val tidspunkt: Tidspunkt,
-    val regelResultat: JsonNode
+    val regelResultat: JsonNode,
 )
 
 data class Opplysningsgrunnlag(
     val id: UUID,
     val type: TrygdetidOpplysningType,
     val opplysning: JsonNode,
-    val kilde: Grunnlagsopplysning.Kilde
+    val kilde: Grunnlagsopplysning.Kilde,
 ) {
     companion object {
         fun ny(
             type: TrygdetidOpplysningType,
             kilde: Grunnlagsopplysning.Kilde?,
-            verdi: LocalDate?
+            verdi: LocalDate?,
         ): Opplysningsgrunnlag =
             Opplysningsgrunnlag(
                 id = randomUUID(),
                 type = type,
                 opplysning = verdi?.toJsonNode() ?: throw Exception("Mangler opplysning"),
-                kilde = kilde ?: throw Exception("Mangler kilde")
+                kilde = kilde ?: throw Exception("Mangler kilde"),
             )
     }
 }
@@ -81,7 +81,7 @@ enum class TrygdetidOpplysningType {
     FOEDSELSDATO,
     DOEDSDATO,
     FYLT_16,
-    FYLLER_66
+    FYLLER_66,
 }
 
 data class TrygdetidGrunnlag(
@@ -94,7 +94,7 @@ data class TrygdetidGrunnlag(
     val begrunnelse: String?,
     val poengInnAar: Boolean,
     val poengUtAar: Boolean,
-    val prorata: Boolean
+    val prorata: Boolean,
 ) {
     fun oppdaterBeregnetTrygdetid(beregnetTrygdetid: BeregnetTrygdetidGrunnlag?): TrygdetidGrunnlag {
         return this.copy(beregnetTrygdetid = beregnetTrygdetid)
@@ -107,7 +107,7 @@ data class BeregnetTrygdetidGrunnlag(val verdi: Period, val tidspunkt: Tidspunkt
 
 data class TrygdetidPeriode(
     val fra: LocalDate,
-    val til: LocalDate
+    val til: LocalDate,
 ) {
     init {
         require(fra.isBefore(til) || fra.isEqual(til)) { "Ugyldig periode, fra må være før eller lik til" }

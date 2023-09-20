@@ -22,10 +22,9 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.temporal.ChronoUnit
-import java.util.*
+import java.util.UUID
 
 internal class AvstemmingsdataJaxbTest {
-
     @Test
     fun `skal konvertere konsistensavstemmingsdata til gyldig xml`() {
         val idag = LocalDate.now()
@@ -33,12 +32,13 @@ internal class AvstemmingsdataJaxbTest {
         val tidspunktAvstemmingTom = idag.minusDays(1).atTime(LocalTime.MAX).toNorskTidspunkt()
         val oppdragslinjer = listOf(oppdragslinjeForKonsistensavstemming(fraOgMed = LocalDate.of(2022, 10, 7)))
         val oppdrag = oppdragForKonsistensavstemming(oppdragslinjeForKonsistensavstemming = oppdragslinjer)
-        val konsistensavstemming = mockKonsistensavstemming(
-            loependeUtbetalinger = listOf(oppdrag),
-            dag = idag,
-            id = konsistensavstemmingId,
-            opprettTilOgMed = tidspunktAvstemmingTom,
-        )
+        val konsistensavstemming =
+            mockKonsistensavstemming(
+                loependeUtbetalinger = listOf(oppdrag),
+                dag = idag,
+                id = konsistensavstemmingId,
+                opprettTilOgMed = tidspunktAvstemmingTom,
+            )
         val konsistensavstemmingDataMapper = KonsistensavstemmingDataMapper(konsistensavstemming)
         val (startMelding, dataMelding, sluttMelding) = konsistensavstemmingDataMapper.opprettAvstemmingsmelding(Saktype.BARNEPENSJON)
 
@@ -49,25 +49,25 @@ internal class AvstemmingsdataJaxbTest {
         assertEquals(
             gyldigKonsistensavstemmingStartMelding(
                 tidspunktAvstemmingFom = tidspunktAvstemmingTom,
-                uuid = konsistensavstemmingId
+                uuid = konsistensavstemmingId,
             ),
-            startMeldingXml
+            startMeldingXml,
         )
 
         assertEquals(
             gyldigKonsistensavstemmingDataMelding(
                 tidspunktAvstemmingTom = tidspunktAvstemmingTom,
-                uuid = konsistensavstemmingId
+                uuid = konsistensavstemmingId,
             ),
-            dataMeldingXml
+            dataMeldingXml,
         )
 
         assertEquals(
             gyldigKonsistensavstemmingAvslMelding(
                 tidspunktAvstemmingFom = tidspunktAvstemmingTom,
-                uuid = konsistensavstemmingId
+                uuid = konsistensavstemmingId,
             ),
-            sluttMeldingXml
+            sluttMeldingXml,
         )
     }
 
@@ -77,14 +77,16 @@ internal class AvstemmingsdataJaxbTest {
         val konsistensavstemmingId = UUIDBase64()
         val tidspunktAvstemmingTom = idag.minusDays(1).atTime(LocalTime.MAX).toNorskTidspunkt()
         val oppdragslinjer = listOf(oppdragslinjeForKonsistensavstemming(fraOgMed = LocalDate.of(2022, 10, 7)))
-        val oppdrag = oppdragForKonsistensavstemming(oppdragslinjeForKonsistensavstemming = oppdragslinjer, sakType = Saktype.OMSTILLINGSSTOENAD)
-        val konsistensavstemming = mockKonsistensavstemming(
-            loependeUtbetalinger = listOf(oppdrag),
-            dag = idag,
-            id = konsistensavstemmingId,
-            opprettTilOgMed = tidspunktAvstemmingTom,
-            sakType = Saktype.OMSTILLINGSSTOENAD
-        )
+        val oppdrag =
+            oppdragForKonsistensavstemming(oppdragslinjeForKonsistensavstemming = oppdragslinjer, sakType = Saktype.OMSTILLINGSSTOENAD)
+        val konsistensavstemming =
+            mockKonsistensavstemming(
+                loependeUtbetalinger = listOf(oppdrag),
+                dag = idag,
+                id = konsistensavstemmingId,
+                opprettTilOgMed = tidspunktAvstemmingTom,
+                sakType = Saktype.OMSTILLINGSSTOENAD,
+            )
         val konsistensavstemmingDataMapper = KonsistensavstemmingDataMapper(konsistensavstemming)
         val (startMelding, dataMelding, sluttMelding) = konsistensavstemmingDataMapper.opprettAvstemmingsmelding(Saktype.OMSTILLINGSSTOENAD)
 
@@ -95,60 +97,68 @@ internal class AvstemmingsdataJaxbTest {
         assertEquals(
             gyldigKonsistensavstemmingStartMeldingOMS(
                 tidspunktAvstemmingFom = tidspunktAvstemmingTom,
-                uuid = konsistensavstemmingId
+                uuid = konsistensavstemmingId,
             ),
-            startMeldingXml
+            startMeldingXml,
         )
 
         assertEquals(
             gyldigKonsistensavstemmingDataMeldingOMS(
                 tidspunktAvstemmingTom = tidspunktAvstemmingTom,
-                uuid = konsistensavstemmingId
+                uuid = konsistensavstemmingId,
             ),
-            dataMeldingXml
+            dataMeldingXml,
         )
 
         assertEquals(
             gyldigKonsistensavstemmingAvslMeldingOMS(
                 tidspunktAvstemmingFom = tidspunktAvstemmingTom,
-                uuid = konsistensavstemmingId
+                uuid = konsistensavstemmingId,
             ),
-            sluttMeldingXml
+            sluttMeldingXml,
         )
     }
 
-    private fun gyldigKonsistensavstemmingStartMelding(tidspunktAvstemmingFom: Tidspunkt, uuid: UUIDBase64) =
-        gyldigKonsistensavstemmingMelding(
-            aksjonstype = "START",
-            tidspunktAvstemmingTom = tidspunktAvstemmingFom,
-            avleverendeAvstemmingId = uuid
-        )
+    private fun gyldigKonsistensavstemmingStartMelding(
+        tidspunktAvstemmingFom: Tidspunkt,
+        uuid: UUIDBase64,
+    ) = gyldigKonsistensavstemmingMelding(
+        aksjonstype = "START",
+        tidspunktAvstemmingTom = tidspunktAvstemmingFom,
+        avleverendeAvstemmingId = uuid,
+    )
 
-    private fun gyldigKonsistensavstemmingStartMeldingOMS(tidspunktAvstemmingFom: Tidspunkt, uuid: UUIDBase64) =
-        gyldigKonsistensavstemmingMeldingOMS(
-            aksjonstype = "START",
-            tidspunktAvstemmingTom = tidspunktAvstemmingFom,
-            avleverendeAvstemmingId = uuid
-        )
+    private fun gyldigKonsistensavstemmingStartMeldingOMS(
+        tidspunktAvstemmingFom: Tidspunkt,
+        uuid: UUIDBase64,
+    ) = gyldigKonsistensavstemmingMeldingOMS(
+        aksjonstype = "START",
+        tidspunktAvstemmingTom = tidspunktAvstemmingFom,
+        avleverendeAvstemmingId = uuid,
+    )
 
-    private fun gyldigKonsistensavstemmingAvslMelding(tidspunktAvstemmingFom: Tidspunkt, uuid: UUIDBase64) =
-        gyldigKonsistensavstemmingMelding(
-            aksjonstype = "AVSL",
-            tidspunktAvstemmingTom = tidspunktAvstemmingFom,
-            avleverendeAvstemmingId = uuid
-        )
+    private fun gyldigKonsistensavstemmingAvslMelding(
+        tidspunktAvstemmingFom: Tidspunkt,
+        uuid: UUIDBase64,
+    ) = gyldigKonsistensavstemmingMelding(
+        aksjonstype = "AVSL",
+        tidspunktAvstemmingTom = tidspunktAvstemmingFom,
+        avleverendeAvstemmingId = uuid,
+    )
 
-    private fun gyldigKonsistensavstemmingAvslMeldingOMS(tidspunktAvstemmingFom: Tidspunkt, uuid: UUIDBase64) =
-        gyldigKonsistensavstemmingMeldingOMS(
-            aksjonstype = "AVSL",
-            tidspunktAvstemmingTom = tidspunktAvstemmingFom,
-            avleverendeAvstemmingId = uuid
-        )
+    private fun gyldigKonsistensavstemmingAvslMeldingOMS(
+        tidspunktAvstemmingFom: Tidspunkt,
+        uuid: UUIDBase64,
+    ) = gyldigKonsistensavstemmingMeldingOMS(
+        aksjonstype = "AVSL",
+        tidspunktAvstemmingTom = tidspunktAvstemmingFom,
+        avleverendeAvstemmingId = uuid,
+    )
 
     private fun gyldigKonsistensavstemmingMelding(
         aksjonstype: String,
         tidspunktAvstemmingTom: Tidspunkt,
-        avleverendeAvstemmingId: UUIDBase64
+        avleverendeAvstemmingId: UUIDBase64,
     ) = """
         <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
         <Konsistensavstemmingsdata>
@@ -165,12 +175,12 @@ internal class AvstemmingsdataJaxbTest {
             </aksjonsdata>
         </Konsistensavstemmingsdata>
         
-    """.trimIndent()
+        """.trimIndent()
 
     private fun gyldigKonsistensavstemmingMeldingOMS(
         aksjonstype: String,
         tidspunktAvstemmingTom: Tidspunkt,
-        avleverendeAvstemmingId: UUIDBase64
+        avleverendeAvstemmingId: UUIDBase64,
     ) = """
         <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
         <Konsistensavstemmingsdata>
@@ -187,119 +197,116 @@ internal class AvstemmingsdataJaxbTest {
             </aksjonsdata>
         </Konsistensavstemmingsdata>
         
-    """.trimIndent()
+        """.trimIndent()
 
     private fun gyldigKonsistensavstemmingDataMelding(
         uuid: UUIDBase64,
-        tidspunktAvstemmingTom: Tidspunkt
-
-    ) =
-        """
-            <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-            <Konsistensavstemmingsdata>
-                <aksjonsdata>
-                    <aksjonsType>DATA</aksjonsType>
-                    <kildeType>AVLEV</kildeType>
-                    <avstemmingType>KONS</avstemmingType>
-                    <avleverendeKomponentKode>ETTERLAT</avleverendeKomponentKode>
-                    <mottakendeKomponentKode>OS</mottakendeKomponentKode>
-                    <underkomponentKode>BARNEPE</underkomponentKode>
-                    <tidspunktAvstemmingTom>${tidsstempelMikroOppdrag.format(tidspunktAvstemmingTom.toNorskTid())}</tidspunktAvstemmingTom>
-                    <avleverendeAvstemmingId>${uuid.value}</avleverendeAvstemmingId>
-                    <brukerId>BARNEPE</brukerId>
-                </aksjonsdata>
-                <oppdragsdataListe>
-                    <fagomradeKode>BARNEPE</fagomradeKode>
-                    <fagsystemId>1</fagsystemId>
-                    <utbetalingsfrekvens>MND</utbetalingsfrekvens>
-                    <oppdragGjelderId>123456</oppdragGjelderId>
-                    <oppdragGjelderFom>1970-01-01</oppdragGjelderFom>
-                    <saksbehandlerId>EY</saksbehandlerId>
-                    <oppdragsenhetListe>
-                        <enhetType>BOS</enhetType>
-                        <enhet>4819</enhet>
-                        <enhetFom>1900-01-01T00:00:00.000</enhetFom>
-                    </oppdragsenhetListe>
-                    <oppdragslinjeListe>
-                        <delytelseId>1</delytelseId>
-                        <klassifikasjonKode>BARNEPENSJON-OPTP</klassifikasjonKode>
-                        <vedtakPeriode>
-                            <fom>2022-10-07</fom>
-                        </vedtakPeriode>
-                        <sats>10000</sats>
-                        <satstypeKode>MND</satstypeKode>
-                        <fradragTillegg>T</fradragTillegg>
-                        <brukKjoreplan>N</brukKjoreplan>
-                        <utbetalesTilId>123456</utbetalesTilId>
-                        <attestantListe>
-                            <attestantId>attestant</attestantId>
-                        </attestantListe>
-                    </oppdragslinjeListe>
-                </oppdragsdataListe>
-                <totaldata>
-                    <totalAntall>1</totalAntall>
-                    <totalBelop>10000</totalBelop>
-                    <fortegn>T</fortegn>
-                </totaldata>
-            </Konsistensavstemmingsdata>
+        tidspunktAvstemmingTom: Tidspunkt,
+    ) = """
+        <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+        <Konsistensavstemmingsdata>
+            <aksjonsdata>
+                <aksjonsType>DATA</aksjonsType>
+                <kildeType>AVLEV</kildeType>
+                <avstemmingType>KONS</avstemmingType>
+                <avleverendeKomponentKode>ETTERLAT</avleverendeKomponentKode>
+                <mottakendeKomponentKode>OS</mottakendeKomponentKode>
+                <underkomponentKode>BARNEPE</underkomponentKode>
+                <tidspunktAvstemmingTom>${tidsstempelMikroOppdrag.format(tidspunktAvstemmingTom.toNorskTid())}</tidspunktAvstemmingTom>
+                <avleverendeAvstemmingId>${uuid.value}</avleverendeAvstemmingId>
+                <brukerId>BARNEPE</brukerId>
+            </aksjonsdata>
+            <oppdragsdataListe>
+                <fagomradeKode>BARNEPE</fagomradeKode>
+                <fagsystemId>1</fagsystemId>
+                <utbetalingsfrekvens>MND</utbetalingsfrekvens>
+                <oppdragGjelderId>123456</oppdragGjelderId>
+                <oppdragGjelderFom>1970-01-01</oppdragGjelderFom>
+                <saksbehandlerId>EY</saksbehandlerId>
+                <oppdragsenhetListe>
+                    <enhetType>BOS</enhetType>
+                    <enhet>4819</enhet>
+                    <enhetFom>1900-01-01T00:00:00.000</enhetFom>
+                </oppdragsenhetListe>
+                <oppdragslinjeListe>
+                    <delytelseId>1</delytelseId>
+                    <klassifikasjonKode>BARNEPENSJON-OPTP</klassifikasjonKode>
+                    <vedtakPeriode>
+                        <fom>2022-10-07</fom>
+                    </vedtakPeriode>
+                    <sats>10000</sats>
+                    <satstypeKode>MND</satstypeKode>
+                    <fradragTillegg>T</fradragTillegg>
+                    <brukKjoreplan>N</brukKjoreplan>
+                    <utbetalesTilId>123456</utbetalesTilId>
+                    <attestantListe>
+                        <attestantId>attestant</attestantId>
+                    </attestantListe>
+                </oppdragslinjeListe>
+            </oppdragsdataListe>
+            <totaldata>
+                <totalAntall>1</totalAntall>
+                <totalBelop>10000</totalBelop>
+                <fortegn>T</fortegn>
+            </totaldata>
+        </Konsistensavstemmingsdata>
 
         """.trimIndent()
 
     private fun gyldigKonsistensavstemmingDataMeldingOMS(
         uuid: UUIDBase64,
-        tidspunktAvstemmingTom: Tidspunkt
-
-    ) =
-        """
-            <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-            <Konsistensavstemmingsdata>
-                <aksjonsdata>
-                    <aksjonsType>DATA</aksjonsType>
-                    <kildeType>AVLEV</kildeType>
-                    <avstemmingType>KONS</avstemmingType>
-                    <avleverendeKomponentKode>ETTERLAT</avleverendeKomponentKode>
-                    <mottakendeKomponentKode>OS</mottakendeKomponentKode>
-                    <underkomponentKode>OMSTILL</underkomponentKode>
-                    <tidspunktAvstemmingTom>${tidsstempelMikroOppdrag.format(tidspunktAvstemmingTom.toNorskTid())}</tidspunktAvstemmingTom>
-                    <avleverendeAvstemmingId>${uuid.value}</avleverendeAvstemmingId>
-                    <brukerId>OMSTILL</brukerId>
-                </aksjonsdata>
-                <oppdragsdataListe>
-                    <fagomradeKode>OMSTILL</fagomradeKode>
-                    <fagsystemId>1</fagsystemId>
-                    <utbetalingsfrekvens>MND</utbetalingsfrekvens>
-                    <oppdragGjelderId>123456</oppdragGjelderId>
-                    <oppdragGjelderFom>1970-01-01</oppdragGjelderFom>
-                    <saksbehandlerId>EY</saksbehandlerId>
-                    <oppdragsenhetListe>
-                        <enhetType>BOS</enhetType>
-                        <enhet>4819</enhet>
-                        <enhetFom>1900-01-01T00:00:00.000</enhetFom>
-                    </oppdragsenhetListe>
-                    <oppdragslinjeListe>
-                        <delytelseId>1</delytelseId>
-                        <klassifikasjonKode>BARNEPENSJON-OPTP</klassifikasjonKode>
-                        <vedtakPeriode>
-                            <fom>2022-10-07</fom>
-                        </vedtakPeriode>
-                        <sats>10000</sats>
-                        <satstypeKode>MND</satstypeKode>
-                        <fradragTillegg>T</fradragTillegg>
-                        <brukKjoreplan>N</brukKjoreplan>
-                        <utbetalesTilId>123456</utbetalesTilId>
-                        <attestantListe>
-                            <attestantId>attestant</attestantId>
-                        </attestantListe>
-                    </oppdragslinjeListe>
-                </oppdragsdataListe>
-                <totaldata>
-                    <totalAntall>1</totalAntall>
-                    <totalBelop>10000</totalBelop>
-                    <fortegn>T</fortegn>
-                </totaldata>
-            </Konsistensavstemmingsdata>
+        tidspunktAvstemmingTom: Tidspunkt,
+    ) = """
+        <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+        <Konsistensavstemmingsdata>
+            <aksjonsdata>
+                <aksjonsType>DATA</aksjonsType>
+                <kildeType>AVLEV</kildeType>
+                <avstemmingType>KONS</avstemmingType>
+                <avleverendeKomponentKode>ETTERLAT</avleverendeKomponentKode>
+                <mottakendeKomponentKode>OS</mottakendeKomponentKode>
+                <underkomponentKode>OMSTILL</underkomponentKode>
+                <tidspunktAvstemmingTom>${tidsstempelMikroOppdrag.format(tidspunktAvstemmingTom.toNorskTid())}</tidspunktAvstemmingTom>
+                <avleverendeAvstemmingId>${uuid.value}</avleverendeAvstemmingId>
+                <brukerId>OMSTILL</brukerId>
+            </aksjonsdata>
+            <oppdragsdataListe>
+                <fagomradeKode>OMSTILL</fagomradeKode>
+                <fagsystemId>1</fagsystemId>
+                <utbetalingsfrekvens>MND</utbetalingsfrekvens>
+                <oppdragGjelderId>123456</oppdragGjelderId>
+                <oppdragGjelderFom>1970-01-01</oppdragGjelderFom>
+                <saksbehandlerId>EY</saksbehandlerId>
+                <oppdragsenhetListe>
+                    <enhetType>BOS</enhetType>
+                    <enhet>4819</enhet>
+                    <enhetFom>1900-01-01T00:00:00.000</enhetFom>
+                </oppdragsenhetListe>
+                <oppdragslinjeListe>
+                    <delytelseId>1</delytelseId>
+                    <klassifikasjonKode>BARNEPENSJON-OPTP</klassifikasjonKode>
+                    <vedtakPeriode>
+                        <fom>2022-10-07</fom>
+                    </vedtakPeriode>
+                    <sats>10000</sats>
+                    <satstypeKode>MND</satstypeKode>
+                    <fradragTillegg>T</fradragTillegg>
+                    <brukKjoreplan>N</brukKjoreplan>
+                    <utbetalesTilId>123456</utbetalesTilId>
+                    <attestantListe>
+                        <attestantId>attestant</attestantId>
+                    </attestantListe>
+                </oppdragslinjeListe>
+            </oppdragsdataListe>
+            <totaldata>
+                <totalAntall>1</totalAntall>
+                <totalBelop>10000</totalBelop>
+                <fortegn>T</fortegn>
+            </totaldata>
+        </Konsistensavstemmingsdata>
 
         """.trimIndent()
+
     @Test
     fun `skal konvertere grensesnittavstemmingsdata til gyldig xml`() {
         val now = Tidspunkt.now()
@@ -308,19 +315,21 @@ internal class AvstemmingsdataJaxbTest {
 
         val uuid = UUIDBase64()
         val utbetalingId = UUID.randomUUID()
-        val utbetaling = listOf(
-            utbetaling(
-                id = utbetalingId,
-                avstemmingsnoekkel = til,
-                opprettet = til,
-                utbetalingshendelser = listOf(
-                    utbetalingshendelse(
-                        utbetalingId = utbetalingId,
-                        status = UtbetalingStatus.FEILET
-                    )
-                )
-            ).let { it.copy(oppdrag = oppdrag(it), kvittering = kvittering(oppdragMedFeiletKvittering())) }
-        )
+        val utbetaling =
+            listOf(
+                utbetaling(
+                    id = utbetalingId,
+                    avstemmingsnoekkel = til,
+                    opprettet = til,
+                    utbetalingshendelser =
+                        listOf(
+                            utbetalingshendelse(
+                                utbetalingId = utbetalingId,
+                                status = UtbetalingStatus.FEILET,
+                            ),
+                        ),
+                ).let { it.copy(oppdrag = oppdrag(it), kvittering = kvittering(oppdragMedFeiletKvittering())) },
+            )
 
         val grensesnittavstemmingDataMapper = GrensesnittavstemmingDataMapper(utbetaling, fraOgMed, til, uuid)
         val (startMelding, dataMelding, sluttMelding) = grensesnittavstemmingDataMapper.opprettAvstemmingsmelding(Saktype.BARNEPENSJON)
@@ -331,15 +340,15 @@ internal class AvstemmingsdataJaxbTest {
 
         assertEquals(
             gyldigGrensesnittavstemmingStartMelding(uuid, utbetaling.first().avstemmingsnoekkel),
-            startMeldingXml
+            startMeldingXml,
         )
         assertEquals(
             gyldigGrensesnittavstemmingDataMelding(uuid, fraOgMed, til, utbetaling.first().avstemmingsnoekkel),
-            dataMeldingXml
+            dataMeldingXml,
         )
         assertEquals(
             gyldigGrensesnittavstemmingSluttMelding(uuid, utbetaling.first().avstemmingsnoekkel),
-            sluttMeldingXml
+            sluttMeldingXml,
         )
     }
 
@@ -351,22 +360,27 @@ internal class AvstemmingsdataJaxbTest {
 
         val uuid = UUIDBase64()
         val utbetalingId = UUID.randomUUID()
-        val utbetaling = listOf(
-            utbetaling(
-                id = utbetalingId,
-                avstemmingsnoekkel = til,
-                opprettet = til,
-                utbetalingshendelser = listOf(
-                    utbetalingshendelse(
-                        utbetalingId = utbetalingId,
-                        status = UtbetalingStatus.FEILET
-                    )
-                )
-            ).let { it.copy(oppdrag = oppdrag(it), kvittering = kvittering(oppdragMedFeiletKvittering())) }
-        )
+        val utbetaling =
+            listOf(
+                utbetaling(
+                    id = utbetalingId,
+                    avstemmingsnoekkel = til,
+                    opprettet = til,
+                    utbetalingshendelser =
+                        listOf(
+                            utbetalingshendelse(
+                                utbetalingId = utbetalingId,
+                                status = UtbetalingStatus.FEILET,
+                            ),
+                        ),
+                ).let { it.copy(oppdrag = oppdrag(it), kvittering = kvittering(oppdragMedFeiletKvittering())) },
+            )
 
         val grensesnittavstemmingDataMapper = GrensesnittavstemmingDataMapper(utbetaling, fraOgMed, til, uuid)
-        val (startMelding, dataMelding, sluttMelding) = grensesnittavstemmingDataMapper.opprettAvstemmingsmelding(Saktype.OMSTILLINGSSTOENAD)
+        val (startMelding, dataMelding, sluttMelding) =
+            grensesnittavstemmingDataMapper.opprettAvstemmingsmelding(
+                Saktype.OMSTILLINGSSTOENAD,
+            )
 
         val startMeldingXml = GrensesnittavstemmingsdataJaxb.toXml(startMelding)
         val dataMeldingXml = GrensesnittavstemmingsdataJaxb.toXml(dataMelding)
@@ -374,34 +388,42 @@ internal class AvstemmingsdataJaxbTest {
 
         assertEquals(
             gyldigGrensesnittavstemmingStartMeldingOMS(uuid, utbetaling.first().avstemmingsnoekkel),
-            startMeldingXml
+            startMeldingXml,
         )
         assertEquals(
             gyldigGrensesnittavstemmingDataMeldingOMS(uuid, fraOgMed, til, utbetaling.first().avstemmingsnoekkel),
-            dataMeldingXml
+            dataMeldingXml,
         )
         assertEquals(
             gyldigGrensesnittavstemmingSluttMeldingOMS(uuid, utbetaling.first().avstemmingsnoekkel),
-            sluttMeldingXml
+            sluttMeldingXml,
         )
     }
 
-    private fun gyldigGrensesnittavstemmingStartMelding(uuid: UUIDBase64, avstemmingsnoekkel: Tidspunkt) =
-        gyldigGrensesnittavstemmingMelding("START", uuid, avstemmingsnoekkel)
+    private fun gyldigGrensesnittavstemmingStartMelding(
+        uuid: UUIDBase64,
+        avstemmingsnoekkel: Tidspunkt,
+    ) = gyldigGrensesnittavstemmingMelding("START", uuid, avstemmingsnoekkel)
 
-    private fun gyldigGrensesnittavstemmingStartMeldingOMS(uuid: UUIDBase64, avstemmingsnoekkel: Tidspunkt) =
-        gyldigGrensesnittavstemmingMeldingOMS("START", uuid, avstemmingsnoekkel)
+    private fun gyldigGrensesnittavstemmingStartMeldingOMS(
+        uuid: UUIDBase64,
+        avstemmingsnoekkel: Tidspunkt,
+    ) = gyldigGrensesnittavstemmingMeldingOMS("START", uuid, avstemmingsnoekkel)
 
-    private fun gyldigGrensesnittavstemmingSluttMelding(uuid: UUIDBase64, avstemmingsnoekkel: Tidspunkt) =
-        gyldigGrensesnittavstemmingMelding("AVSL", uuid, avstemmingsnoekkel)
+    private fun gyldigGrensesnittavstemmingSluttMelding(
+        uuid: UUIDBase64,
+        avstemmingsnoekkel: Tidspunkt,
+    ) = gyldigGrensesnittavstemmingMelding("AVSL", uuid, avstemmingsnoekkel)
 
-    private fun gyldigGrensesnittavstemmingSluttMeldingOMS(uuid: UUIDBase64, avstemmingsnoekkel: Tidspunkt) =
-        gyldigGrensesnittavstemmingMeldingOMS("AVSL", uuid, avstemmingsnoekkel)
+    private fun gyldigGrensesnittavstemmingSluttMeldingOMS(
+        uuid: UUIDBase64,
+        avstemmingsnoekkel: Tidspunkt,
+    ) = gyldigGrensesnittavstemmingMeldingOMS("AVSL", uuid, avstemmingsnoekkel)
 
     private fun gyldigGrensesnittavstemmingMelding(
         aksjonsType: String,
         uuid: UUIDBase64,
-        avstemmingsnoekkel: Tidspunkt
+        avstemmingsnoekkel: Tidspunkt,
     ) = """
         <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
         <Avstemmingsdata>
@@ -419,12 +441,12 @@ internal class AvstemmingsdataJaxbTest {
             </aksjon>
         </Avstemmingsdata>
         
-    """.trimIndent()
+        """.trimIndent()
 
     private fun gyldigGrensesnittavstemmingMeldingOMS(
         aksjonsType: String,
         uuid: UUIDBase64,
-        avstemmingsnoekkel: Tidspunkt
+        avstemmingsnoekkel: Tidspunkt,
     ) = """
         <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
         <Avstemmingsdata>
@@ -442,13 +464,13 @@ internal class AvstemmingsdataJaxbTest {
             </aksjon>
         </Avstemmingsdata>
         
-    """.trimIndent()
+        """.trimIndent()
 
     private fun gyldigGrensesnittavstemmingDataMelding(
         uuid: UUIDBase64,
         fra: Tidspunkt,
         til: Tidspunkt,
-        avstemmingsnoekkel: Tidspunkt
+        avstemmingsnoekkel: Tidspunkt,
     ) = """
         <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
         <Avstemmingsdata>
@@ -498,13 +520,13 @@ internal class AvstemmingsdataJaxbTest {
             </detalj>
         </Avstemmingsdata>
         
-    """.trimIndent()
+        """.trimIndent()
 
     private fun gyldigGrensesnittavstemmingDataMeldingOMS(
         uuid: UUIDBase64,
         fra: Tidspunkt,
         til: Tidspunkt,
-        avstemmingsnoekkel: Tidspunkt
+        avstemmingsnoekkel: Tidspunkt,
     ) = """
         <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
         <Avstemmingsdata>
@@ -554,5 +576,5 @@ internal class AvstemmingsdataJaxbTest {
             </detalj>
         </Avstemmingsdata>
         
-    """.trimIndent()
+        """.trimIndent()
 }

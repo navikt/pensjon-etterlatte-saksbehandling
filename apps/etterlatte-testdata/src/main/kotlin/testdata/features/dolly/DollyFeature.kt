@@ -20,7 +20,7 @@ import no.nav.etterlatte.usernameFraToken
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import testdata.features.soeknad.SoeknadMapper.opprettSoeknadJson
-import java.util.*
+import java.util.UUID
 
 class DollyFeature(private val dollyService: DollyService) : TestDataFeature {
     private val logger: Logger = LoggerFactory.getLogger(DollyFeature::class.java)
@@ -42,9 +42,9 @@ class DollyFeature(private val dollyService: DollyService) : TestDataFeature {
                         mapOf(
                             "beskrivelse" to beskrivelse,
                             "path" to path,
-                            "gruppeId" to gruppeId
-                        )
-                    )
+                            "gruppeId" to gruppeId,
+                        ),
+                    ),
                 )
             }
 
@@ -53,12 +53,13 @@ class DollyFeature(private val dollyService: DollyService) : TestDataFeature {
                     val accessToken = getClientAccessToken()
                     val gruppeId = call.request.queryParameters["gruppeId"]!!.toLong()
 
-                    val familier = try {
-                        dollyService.hentFamilier(gruppeId, accessToken)
-                    } catch (ex: Exception) {
-                        logger.error("Klarte ikke hente familier", ex)
-                        emptyList()
-                    }
+                    val familier =
+                        try {
+                            dollyService.hentFamilier(gruppeId, accessToken)
+                        } catch (ex: Exception) {
+                            logger.error("Klarte ikke hente familier", ex)
+                            emptyList()
+                        }
 
                     call.respond(familier.toJson())
                 } catch (e: Exception) {
@@ -66,8 +67,8 @@ class DollyFeature(private val dollyService: DollyService) : TestDataFeature {
                     call.respond(
                         MustacheContent(
                             "error.hbs",
-                            mapOf("errorMessage" to e.message, "stacktrace" to e.stackTraceToString())
-                        )
+                            mapOf("errorMessage" to e.message, "stacktrace" to e.stackTraceToString()),
+                        ),
                     )
                 }
             }
@@ -76,12 +77,13 @@ class DollyFeature(private val dollyService: DollyService) : TestDataFeature {
                 call.receiveParameters().let {
                     try {
                         val accessToken = getClientAccessToken()
-                        val req = BestillingRequest(
-                            it["helsoesken"]!!.toInt(),
-                            it["halvsoeskenAvdoed"]!!.toInt(),
-                            it["halvsoeskenGjenlevende"]!!.toInt(),
-                            it["gruppeId"]!!.toLong()
-                        )
+                        val req =
+                            BestillingRequest(
+                                it["helsoesken"]!!.toInt(),
+                                it["halvsoeskenAvdoed"]!!.toInt(),
+                                it["halvsoeskenGjenlevende"]!!.toInt(),
+                                it["gruppeId"]!!.toLong(),
+                            )
 
                         dollyService.opprettBestilling(generererBestilling(req), req.gruppeId, accessToken)
                             .also { bestilling ->
@@ -93,8 +95,8 @@ class DollyFeature(private val dollyService: DollyService) : TestDataFeature {
                         call.respond(
                             MustacheContent(
                                 "error.hbs",
-                                mapOf("errorMessage" to e.message, "stacktrace" to e.stackTraceToString())
-                            )
+                                mapOf("errorMessage" to e.message, "stacktrace" to e.stackTraceToString()),
+                            ),
                         )
                     }
                 }
@@ -104,25 +106,27 @@ class DollyFeature(private val dollyService: DollyService) : TestDataFeature {
                 try {
                     val noekkel = UUID.randomUUID().toString()
 
-                    val request = call.receiveParameters().let {
-                        NySoeknadRequest(
-                            it["type"]!!,
-                            it["avdoed"]!!,
-                            it["gjenlevende"]!!,
-                            objectMapper.readValue(it["barnListe"] ?: "[]", jacksonTypeRef<List<String>>())
-                        )
-                    }
+                    val request =
+                        call.receiveParameters().let {
+                            NySoeknadRequest(
+                                it["type"]!!,
+                                it["avdoed"]!!,
+                                it["gjenlevende"]!!,
+                                objectMapper.readValue(it["barnListe"] ?: "[]", jacksonTypeRef<List<String>>()),
+                            )
+                        }
 
-                    val (partisjon, offset) = producer.publiser(
-                        noekkel,
-                        opprettSoeknadJson(
-                            type = request.type,
-                            gjenlevendeFnr = request.gjenlevende,
-                            avdoedFnr = request.avdoed,
-                            barn = request.barn
-                        ),
-                        mapOf("NavIdent" to (navIdentFraToken()!!.toByteArray()))
-                    )
+                    val (partisjon, offset) =
+                        producer.publiser(
+                            noekkel,
+                            opprettSoeknadJson(
+                                type = request.type,
+                                gjenlevendeFnr = request.gjenlevende,
+                                avdoedFnr = request.avdoed,
+                                barn = request.barn,
+                            ),
+                            mapOf("NavIdent" to (navIdentFraToken()!!.toByteArray())),
+                        )
                     logger.info("Publiserer melding med partisjon: $partisjon offset: $offset")
 
                     dollyService.markerSomIBruk(request.avdoed, getClientAccessToken())
@@ -134,8 +138,8 @@ class DollyFeature(private val dollyService: DollyService) : TestDataFeature {
                     call.respond(
                         MustacheContent(
                             "error.hbs",
-                            mapOf("errorMessage" to e.message, "stacktrace" to e.stackTraceToString())
-                        )
+                            mapOf("errorMessage" to e.message, "stacktrace" to e.stackTraceToString()),
+                        ),
                     )
                 }
             }
@@ -146,10 +150,10 @@ data class NySoeknadRequest(
     val type: String,
     val avdoed: String,
     val gjenlevende: String,
-    val barn: List<String> = emptyList()
+    val barn: List<String> = emptyList(),
 )
 
 data class SoeknadResponse(
     val status: Number,
-    val noekkel: String
+    val noekkel: String,
 )

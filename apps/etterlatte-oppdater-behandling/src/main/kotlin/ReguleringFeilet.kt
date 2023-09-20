@@ -14,7 +14,7 @@ import rapidsandrivers.sakId
 
 internal class ReguleringFeilet(
     rapidsConnection: RapidsConnection,
-    private val behandlingService: BehandlingService
+    private val behandlingService: BehandlingService,
 ) : ListenerMedLogging() {
     private val logger = LoggerFactory.getLogger(ReguleringFeilet::class.java)
 
@@ -27,7 +27,10 @@ internal class ReguleringFeilet(
         }.register(this)
     }
 
-    override fun haandterPakke(packet: JsonMessage, context: MessageContext) {
+    override fun haandterPakke(
+        packet: JsonMessage,
+        context: MessageContext,
+    ) {
         logger.info("Regulering har feilet for sak ${packet.sakId}")
         behandlingService.sendReguleringFeiletHendelse(ReguleringFeiletHendelse(packet.sakId))
     }

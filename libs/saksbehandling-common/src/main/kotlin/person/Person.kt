@@ -12,7 +12,7 @@ import java.time.LocalDateTime
 enum class PDLIdentGruppeTyper(val navn: String) {
     FOLKEREGISTERIDENT("FOLKEREGISTERIDENT"), // Kan være DNR og FNR
     AKTORID("AKTORID"),
-    NPID("NPID")
+    NPID("NPID"),
 }
 
 data class Person(
@@ -35,7 +35,7 @@ data class Person(
     var utland: Utland?,
     var familieRelasjon: FamilieRelasjon?,
     var avdoedesBarn: List<Person>?,
-    var vergemaalEllerFremtidsfullmakt: List<VergemaalEllerFremtidsfullmakt>?
+    var vergemaalEllerFremtidsfullmakt: List<VergemaalEllerFremtidsfullmakt>?,
 )
 
 enum class AdresseType {
@@ -47,7 +47,7 @@ enum class AdresseType {
     UKJENT,
     POSTBOKSADRESSE,
     POSTADRESSEFRITTFORMAT,
-    UTENLANDSKADRESSEFRITTFORMAT
+    UTENLANDSKADRESSEFRITTFORMAT,
 }
 
 data class Adresse(
@@ -62,7 +62,7 @@ data class Adresse(
     val land: String? = null,
     val kilde: String,
     val gyldigFraOgMed: LocalDateTime? = null,
-    val gyldigTilOgMed: LocalDateTime? = null
+    val gyldigTilOgMed: LocalDateTime? = null,
 )
 
 enum class Sivilstatus {
@@ -75,7 +75,7 @@ enum class Sivilstatus {
     REGISTRERT_PARTNER,
     SEPARERT_PARTNER,
     SKILT_PARTNER,
-    GJENLEVENDE_PARTNER
+    GJENLEVENDE_PARTNER,
 }
 
 data class Sivilstand(
@@ -83,34 +83,33 @@ data class Sivilstand(
     val relatertVedSiviltilstand: Folkeregisteridentifikator?,
     val gyldigFraOgMed: LocalDate?,
     val bekreftelsesdato: LocalDate?,
-    val kilde: String
+    val kilde: String,
 )
 
 data class Utland(
     val innflyttingTilNorge: List<InnflyttingTilNorge>?,
-    val utflyttingFraNorge: List<UtflyttingFraNorge>?
+    val utflyttingFraNorge: List<UtflyttingFraNorge>?,
 )
 
 data class InnflyttingTilNorge(
     val fraflyttingsland: String?,
-    val dato: LocalDate?
-
+    val dato: LocalDate?,
 )
 
 data class UtflyttingFraNorge(
     val tilflyttingsland: String?,
-    val dato: LocalDate?
+    val dato: LocalDate?,
 )
 
 data class FamilieRelasjon(
     val ansvarligeForeldre: List<Folkeregisteridentifikator>?,
     val foreldre: List<Folkeregisteridentifikator>?,
-    val barn: List<Folkeregisteridentifikator>?
+    val barn: List<Folkeregisteridentifikator>?,
 )
 
 data class AvdoedesBarn(
     @JsonValue
-    val avdoedesBarn: List<Person>?
+    val avdoedesBarn: List<Person>?,
 ) {
     companion object {
         @JvmStatic
@@ -122,34 +121,33 @@ data class AvdoedesBarn(
 data class VergemaalEllerFremtidsfullmakt(
     val embete: String?,
     val type: String?,
-    val vergeEllerFullmektig: VergeEllerFullmektig
+    val vergeEllerFullmektig: VergeEllerFullmektig,
 )
 
 data class VergeEllerFullmektig(
     val motpartsPersonident: Folkeregisteridentifikator?,
     val navn: String?,
     val omfang: String?,
-    val omfangetErInnenPersonligOmraade: Boolean
+    val omfangetErInnenPersonligOmraade: Boolean,
 )
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
 sealed class PdlIdentifikator {
-
     @JsonTypeName("FOLKEREGISTERIDENT")
     data class FolkeregisterIdent(
-        val folkeregisterident: Folkeregisteridentifikator
+        val folkeregisterident: Folkeregisteridentifikator,
     ) : PdlIdentifikator()
 
     @JsonTypeName("NPID")
     data class Npid(
-        val npid: NavPersonIdent
+        val npid: NavPersonIdent,
     ) : PdlIdentifikator()
 }
 
 data class Utenlandsadresse(
     val harHattUtenlandsopphold: JaNeiVetIkke,
     val land: String?,
-    val adresse: String?
+    val adresse: String?,
 )
 
 data class UtenlandsoppholdOpplysninger(
@@ -157,21 +155,22 @@ data class UtenlandsoppholdOpplysninger(
     val land: String,
     val oppholdsType: List<OppholdUtlandType>,
     val medlemFolketrygd: JaNeiVetIkke,
-    val pensjonsutbetaling: String?
+    val pensjonsutbetaling: String?,
 )
 
 data class GeografiskTilknytning(
     val kommune: String? = null,
     val bydel: String? = null,
     val land: String? = null,
-    val ukjent: Boolean = false
+    val ukjent: Boolean = false,
 ) {
-    fun geografiskTilknytning() = when {
-        bydel != null -> bydel
-        kommune != null -> kommune
-        land != null -> land
-        else -> null
-    }
+    fun geografiskTilknytning() =
+        when {
+            bydel != null -> bydel
+            kommune != null -> kommune
+            land != null -> land
+            else -> null
+        }
 }
 
 // TODO gir denne egentlig mening i nåværende form? Aktiv tar utgangspunkt i det vi får fra PPS, men det kan
@@ -188,7 +187,8 @@ enum class AdressebeskyttelseGradering {
     STRENGT_FORTROLIG_UTLAND,
     STRENGT_FORTROLIG,
     FORTROLIG,
-    UGRADERT;
+    UGRADERT,
+    ;
 
     fun erGradert(): Boolean {
         return this == STRENGT_FORTROLIG_UTLAND || this == STRENGT_FORTROLIG || this == FORTROLIG

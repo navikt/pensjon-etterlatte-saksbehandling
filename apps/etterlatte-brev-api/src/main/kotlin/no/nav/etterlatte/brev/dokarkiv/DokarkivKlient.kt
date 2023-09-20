@@ -17,23 +17,30 @@ import org.slf4j.LoggerFactory
 class DokarkivKlient(private val client: HttpClient, private val url: String) {
     private val logger = LoggerFactory.getLogger(DokarkivKlient::class.java)
 
-    suspend fun opprettJournalpost(request: JournalpostRequest, ferdigstill: Boolean): JournalpostResponse = try {
-        client.post("$url?forsoekFerdigstill=$ferdigstill") {
-            accept(ContentType.Application.Json)
-            contentType(ContentType.Application.Json)
-            setBody(request)
-        }.body()
-    } catch (responseException: ResponseException) {
-        throw when (responseException.response.status.value) {
-            HttpStatusCode.Conflict.value -> DuplikatJournalpostException("Duplikat journalpost", responseException)
-            else -> JournalpostException("Feil i kall mot Dokarkiv", responseException)
+    suspend fun opprettJournalpost(
+        request: JournalpostRequest,
+        ferdigstill: Boolean,
+    ): JournalpostResponse =
+        try {
+            client.post("$url?forsoekFerdigstill=$ferdigstill") {
+                accept(ContentType.Application.Json)
+                contentType(ContentType.Application.Json)
+                setBody(request)
+            }.body()
+        } catch (responseException: ResponseException) {
+            throw when (responseException.response.status.value) {
+                HttpStatusCode.Conflict.value -> DuplikatJournalpostException("Duplikat journalpost", responseException)
+                else -> JournalpostException("Feil i kall mot Dokarkiv", responseException)
+            }
+        } catch (exception: Exception) {
+            logger.error("Feil i kall mot Dokarkiv: ", exception)
+            throw JournalpostException("Feil i kall mot Dokarkiv", exception)
         }
-    } catch (exception: Exception) {
-        logger.error("Feil i kall mot Dokarkiv: ", exception)
-        throw JournalpostException("Feil i kall mot Dokarkiv", exception)
-    }
 
-    suspend fun ferdigstillJournalpost(journalpostId: String, request: FerdigstillJournalpostRequest): String =
+    suspend fun ferdigstillJournalpost(
+        journalpostId: String,
+        request: FerdigstillJournalpostRequest,
+    ): String =
         client.post("$url/$journalpostId/ferdigstill") {
             contentType(ContentType.Application.Json)
             setBody(request)
@@ -41,4 +48,5 @@ class DokarkivKlient(private val client: HttpClient, private val url: String) {
 }
 
 open class JournalpostException(msg: String, cause: Throwable) : Exception(msg, cause)
+
 class DuplikatJournalpostException(msg: String, cause: Throwable) : JournalpostException(msg, cause)

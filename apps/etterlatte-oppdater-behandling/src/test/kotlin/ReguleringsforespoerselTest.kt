@@ -22,22 +22,22 @@ import rapidsandrivers.DATO_KEY
 import rapidsandrivers.SAK_ID_KEY
 import rapidsandrivers.TILBAKESTILTE_BEHANDLINGER_KEY
 import java.time.LocalDate
-import java.util.*
+import java.util.UUID
 
 internal class ReguleringsforespoerselTest {
+    private val foersteMai2023 = LocalDate.of(2023, 5, 1)
 
-    private val `1_mai_2023` = LocalDate.of(2023, 5, 1)
-
-    private fun genererReguleringMelding(dato: LocalDate) = JsonMessage.newMessage(
-        mapOf(
-            EVENT_NAME_KEY to REGULERING_EVENT_NAME,
-            DATO_KEY to dato
+    private fun genererReguleringMelding(dato: LocalDate) =
+        JsonMessage.newMessage(
+            mapOf(
+                EVENT_NAME_KEY to REGULERING_EVENT_NAME,
+                DATO_KEY to dato,
+            ),
         )
-    )
 
     @Test
     fun `kan ta imot reguleringsmelding og kalle på behandling`() {
-        val melding = genererReguleringMelding(`1_mai_2023`)
+        val melding = genererReguleringMelding(foersteMai2023)
         val vedtakServiceMock = mockk<BehandlingService>(relaxed = true)
         val inspector = TestRapid().apply { Reguleringsforespoersel(this, vedtakServiceMock) }
 
@@ -50,15 +50,16 @@ internal class ReguleringsforespoerselTest {
 
     @Test
     fun `skal lage ny melding for hver sak den faar tilbake`() {
-        val melding = genererReguleringMelding(`1_mai_2023`)
+        val melding = genererReguleringMelding(foersteMai2023)
         val vedtakServiceMock = mockk<BehandlingService>(relaxed = true)
-        every { vedtakServiceMock.hentAlleSaker() } returns Saker(
-            listOf(
-                Sak("saksbehandler1", SakType.BARNEPENSJON, 1L, "4808"),
-                Sak("saksbehandler2", SakType.BARNEPENSJON, 2L, "4808"),
-                Sak("saksbehandler1", SakType.BARNEPENSJON, 3L, "4808")
+        every { vedtakServiceMock.hentAlleSaker() } returns
+            Saker(
+                listOf(
+                    Sak("saksbehandler1", SakType.BARNEPENSJON, 1L, "4808"),
+                    Sak("saksbehandler2", SakType.BARNEPENSJON, 2L, "4808"),
+                    Sak("saksbehandler1", SakType.BARNEPENSJON, 3L, "4808"),
+                ),
             )
-        )
         val inspector = TestRapid().apply { Reguleringsforespoersel(this, vedtakServiceMock) }
 
         inspector.sendTestMessage(melding.toJson())
@@ -67,21 +68,22 @@ internal class ReguleringsforespoerselTest {
 
         for (i in 0 until inspector.inspektør.size) {
             Assertions.assertEquals(FINN_LOEPENDE_YTELSER, inspector.inspektør.message(i).get(EVENT_NAME_KEY).asText())
-            Assertions.assertEquals(`1_mai_2023`.toString(), inspector.inspektør.message(i).get(DATO_KEY).asText())
+            Assertions.assertEquals(foersteMai2023.toString(), inspector.inspektør.message(i).get(DATO_KEY).asText())
         }
     }
 
     @Test
     fun `skal sende med sakId for alle saker i basen`() {
-        val melding = genererReguleringMelding(`1_mai_2023`)
+        val melding = genererReguleringMelding(foersteMai2023)
         val behandlingServiceMock = mockk<BehandlingService>(relaxed = true)
-        every { behandlingServiceMock.hentAlleSaker() } returns Saker(
-            listOf(
-                Sak("saksbehandler1", SakType.BARNEPENSJON, 1000L, "4808"),
-                Sak("saksbehandler2", SakType.BARNEPENSJON, 1002L, "4808"),
-                Sak("saksbehandler1", SakType.BARNEPENSJON, 1003L, "4808")
+        every { behandlingServiceMock.hentAlleSaker() } returns
+            Saker(
+                listOf(
+                    Sak("saksbehandler1", SakType.BARNEPENSJON, 1000L, "4808"),
+                    Sak("saksbehandler2", SakType.BARNEPENSJON, 1002L, "4808"),
+                    Sak("saksbehandler1", SakType.BARNEPENSJON, 1003L, "4808"),
+                ),
             )
-        )
         val inspector = TestRapid().apply { Reguleringsforespoersel(this, behandlingServiceMock) }
         inspector.sendTestMessage(melding.toJson())
 
@@ -96,19 +98,21 @@ internal class ReguleringsforespoerselTest {
 
     @Test
     fun `ider fra tilbakestilte behandlinger sendes med i meldinga videre`() {
-        val melding = genererReguleringMelding(`1_mai_2023`)
+        val melding = genererReguleringMelding(foersteMai2023)
         val behandlingServiceMock = mockk<BehandlingService>(relaxed = true)
         val sakId = 1000L
-        every { behandlingServiceMock.hentAlleSaker() } returns Saker(
-            listOf(
-                Sak("saksbehandler1", SakType.BARNEPENSJON, sakId, "4808")
+        every { behandlingServiceMock.hentAlleSaker() } returns
+            Saker(
+                listOf(
+                    Sak("saksbehandler1", SakType.BARNEPENSJON, sakId, "4808"),
+                ),
             )
-        )
         val behandlingId1 = UUID.randomUUID()
         val behandlingId2 = UUID.randomUUID()
-        every { behandlingServiceMock.migrerAlleTempBehandlingerTilbakeTilVilkaarsvurdert() } returns SakIDListe(
-            listOf(BehandlingOgSak(behandlingId1, sakId), BehandlingOgSak(behandlingId2, sakId))
-        )
+        every { behandlingServiceMock.migrerAlleTempBehandlingerTilbakeTilVilkaarsvurdert() } returns
+            SakIDListe(
+                listOf(BehandlingOgSak(behandlingId1, sakId), BehandlingOgSak(behandlingId2, sakId)),
+            )
         val inspector = TestRapid().apply { Reguleringsforespoersel(this, behandlingServiceMock) }
         inspector.sendTestMessage(melding.toJson())
 
@@ -119,7 +123,7 @@ internal class ReguleringsforespoerselTest {
 
     @Test
     fun `kjoerer med feilhaandtering`() {
-        val melding = genererReguleringMelding(`1_mai_2023`)
+        val melding = genererReguleringMelding(foersteMai2023)
         val behandlingServiceMock = mockk<BehandlingService>(relaxed = true)
         coEvery {
             behandlingServiceMock.migrerAlleTempBehandlingerTilbakeTilVilkaarsvurdert()

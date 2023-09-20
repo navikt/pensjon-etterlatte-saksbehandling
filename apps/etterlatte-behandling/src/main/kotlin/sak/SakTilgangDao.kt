@@ -6,7 +6,6 @@ import no.nav.etterlatte.libs.database.toList
 import javax.sql.DataSource
 
 class SakTilgangDao(private val datasource: DataSource) {
-
     fun finnSakerMedGraderingOgSkjerming(fnr: String): List<SakMedGraderingOgSkjermet> {
         datasource.connection.use {
             val statement = it.prepareStatement("SELECT id, adressebeskyttelse, erSkjermet from sak where fnr = ?")
@@ -15,7 +14,7 @@ class SakTilgangDao(private val datasource: DataSource) {
                 SakMedGraderingOgSkjermet(
                     id = getLong(1),
                     adressebeskyttelseGradering = getString(2)?.let { AdressebeskyttelseGradering.valueOf(it) },
-                    erSkjermet = getBoolean(3)
+                    erSkjermet = getBoolean(3),
                 )
             }
         }
@@ -29,13 +28,16 @@ class SakTilgangDao(private val datasource: DataSource) {
                 SakMedGraderingOgSkjermet(
                     id = getLong(1),
                     adressebeskyttelseGradering = getString(2)?.let { AdressebeskyttelseGradering.valueOf(it) },
-                    erSkjermet = getBoolean(3)
+                    erSkjermet = getBoolean(3),
                 )
             }
         }
     }
 
-    fun oppdaterAdresseBeskyttelse(id: Long, adressebeskyttelseGradering: AdressebeskyttelseGradering): Int {
+    fun oppdaterAdresseBeskyttelse(
+        id: Long,
+        adressebeskyttelseGradering: AdressebeskyttelseGradering,
+    ): Int {
         datasource.connection.use {
             val statement = it.prepareStatement("UPDATE sak SET adressebeskyttelse = ? where id = ?")
             statement.setString(1, adressebeskyttelseGradering.toString())
@@ -46,16 +48,17 @@ class SakTilgangDao(private val datasource: DataSource) {
 
     fun hentSakMedGarderingOgSkjermingPaaBehandling(behandlingId: String): SakMedGraderingOgSkjermet? {
         datasource.connection.use {
-            val statement = it.prepareStatement(
-                "SELECT s.id, adressebeskyttelse, erSkjermet FROM behandling b" +
-                    " INNER JOIN sak s ON b.sak_id = s.id WHERE b.id = ?::uuid"
-            )
+            val statement =
+                it.prepareStatement(
+                    "SELECT s.id, adressebeskyttelse, erSkjermet FROM behandling b" +
+                        " INNER JOIN sak s ON b.sak_id = s.id WHERE b.id = ?::uuid",
+                )
             statement.setString(1, behandlingId)
             return statement.executeQuery().singleOrNull {
                 SakMedGraderingOgSkjermet(
                     id = getLong(1),
                     adressebeskyttelseGradering = getString(2)?.let { AdressebeskyttelseGradering.valueOf(it) },
-                    erSkjermet = getBoolean(3)
+                    erSkjermet = getBoolean(3),
                 )
             }
         }
@@ -63,22 +66,24 @@ class SakTilgangDao(private val datasource: DataSource) {
 
     fun hentSakMedGraderingOgSkjermingPaaOppgave(oppgaveId: String): SakMedGraderingOgSkjermet? {
         datasource.connection.use {
-            val statement = it.prepareStatement(
-                """
-                SELECT s.id as sak_id, adressebeskyttelse, erskjermet 
-                FROM oppgave o
-                INNER JOIN Sak s on o.sak_id = s.id
-                WHERE o.id = ?::uuid
-                """.trimIndent()
-            )
+            val statement =
+                it.prepareStatement(
+                    """
+                    SELECT s.id as sak_id, adressebeskyttelse, erskjermet 
+                    FROM oppgave o
+                    INNER JOIN Sak s on o.sak_id = s.id
+                    WHERE o.id = ?::uuid
+                    """.trimIndent(),
+                )
             statement.setString(1, oppgaveId)
             return statement.executeQuery().singleOrNull {
                 SakMedGraderingOgSkjermet(
                     id = getLong("sak_id"),
-                    adressebeskyttelseGradering = getString("adressebeskyttelse")?.let {
-                        AdressebeskyttelseGradering.valueOf(it)
-                    },
-                    erSkjermet = getBoolean("erskjermet")
+                    adressebeskyttelseGradering =
+                        getString("adressebeskyttelse")?.let {
+                            AdressebeskyttelseGradering.valueOf(it)
+                        },
+                    erSkjermet = getBoolean("erskjermet"),
                 )
             }
         }
@@ -86,22 +91,24 @@ class SakTilgangDao(private val datasource: DataSource) {
 
     fun hentSakMedGraderingOgSkjermingPaaKlage(klageId: String): SakMedGraderingOgSkjermet? {
         datasource.connection.use {
-            val statement = it.prepareStatement(
-                """
-                SELECT s.id as sak_id, adressebeskyttelse, erskjermet 
-                FROM klage k
-                INNER JOIN Sak s on k.sak_id = s.id
-                WHERE k.id = ?::uuid
-                """.trimIndent()
-            )
+            val statement =
+                it.prepareStatement(
+                    """
+                    SELECT s.id as sak_id, adressebeskyttelse, erskjermet 
+                    FROM klage k
+                    INNER JOIN Sak s on k.sak_id = s.id
+                    WHERE k.id = ?::uuid
+                    """.trimIndent(),
+                )
             statement.setString(1, klageId)
             return statement.executeQuery().singleOrNull {
                 SakMedGraderingOgSkjermet(
                     id = getLong("sak_id"),
-                    adressebeskyttelseGradering = getString("adressebeskyttelse")?.let {
-                        AdressebeskyttelseGradering.valueOf(it)
-                    },
-                    erSkjermet = getBoolean("erskjermet")
+                    adressebeskyttelseGradering =
+                        getString("adressebeskyttelse")?.let {
+                            AdressebeskyttelseGradering.valueOf(it)
+                        },
+                    erSkjermet = getBoolean("erskjermet"),
                 )
             }
         }

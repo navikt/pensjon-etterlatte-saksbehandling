@@ -8,16 +8,18 @@ import java.time.LocalDate
 class FinnFaktumIGrunnlagRegelTest {
     data class Grunnlag(val testVerdi2021: FaktumNode<Int>)
 
-    private val grunnlag = Grunnlag(
-        testVerdi2021 = FaktumNode(100_000, saksbehandler, "Verdi for test")
-    )
+    private val grunnlag =
+        Grunnlag(
+            testVerdi2021 = FaktumNode(100_000, saksbehandler, "Verdi for test"),
+        )
 
-    private val finnFaktumIGrunnlagRegel: Regel<Grunnlag, Int> = finnFaktumIGrunnlag(
-        gjelderFra = LocalDate.of(1900, 1, 1),
-        beskrivelse = "Finner testverdi for 2021",
-        finnFaktum = Grunnlag::testVerdi2021,
-        finnFelt = { it }
-    )
+    private val finnFaktumIGrunnlagRegel: Regel<Grunnlag, Int> =
+        finnFaktumIGrunnlag(
+            gjelderFra = LocalDate.of(1900, 1, 1),
+            beskrivelse = "Finner testverdi for 2021",
+            finnFaktum = Grunnlag::testVerdi2021,
+            finnFelt = { it },
+        )
 
     @Test
     fun `Skal hente ut faktum fra grunnlag`() {

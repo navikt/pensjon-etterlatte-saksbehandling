@@ -19,7 +19,6 @@ import org.slf4j.LoggerFactory
 class ParallelleSannheterException(override val message: String) : RuntimeException(message)
 
 class ParallelleSannheterKlient(val httpClient: HttpClient, val apiUrl: String) {
-
     suspend fun avklarNavn(pdlNavn: List<PdlNavn>) = avklar(pdlNavn, Avklaring.NAVN)
 
     suspend fun avklarAdressebeskyttelse(adressebeskyttelse: List<PdlAdressebeskyttelse>) =
@@ -28,8 +27,7 @@ class ParallelleSannheterKlient(val httpClient: HttpClient, val apiUrl: String) 
     suspend fun avklarStatsborgerskap(pdlStatsborgerskap: List<PdlStatsborgerskap>) =
         avklarNullable(pdlStatsborgerskap, Avklaring.STATSBORGERSKAP)
 
-    suspend fun avklarSivilstand(pdlSivilstand: List<PdlSivilstand>) =
-        avklarNullable(pdlSivilstand, Avklaring.SIVILSTAND)
+    suspend fun avklarSivilstand(pdlSivilstand: List<PdlSivilstand>) = avklarNullable(pdlSivilstand, Avklaring.SIVILSTAND)
 
     suspend fun avklarFoedsel(pdlFoedsel: List<PdlFoedsel>) = avklar(pdlFoedsel, Avklaring.FOEDSEL)
 
@@ -48,12 +46,18 @@ class ParallelleSannheterKlient(val httpClient: HttpClient, val apiUrl: String) 
     suspend fun avklarOppholdsadresse(pdlOppholdsadresse: List<PdlOppholdsadresse>) =
         avklarNullable(pdlOppholdsadresse, Avklaring.OPPHOLDSADRESSE)
 
-    private suspend inline fun <reified T> avklar(list: List<T>, avklaring: Avklaring): T {
+    private suspend inline fun <reified T> avklar(
+        list: List<T>,
+        avklaring: Avklaring,
+    ): T {
         return avklarNullable(list, avklaring)
             ?: throw ParallelleSannheterException("Forventet verdi for feltet ${avklaring.feltnavn}, men var null")
     }
 
-    private suspend inline fun <reified T> avklarNullable(list: List<T>, avklaring: Avklaring): T? {
+    private suspend inline fun <reified T> avklarNullable(
+        list: List<T>,
+        avklaring: Avklaring,
+    ): T? {
         val listAsJsonNode = objectMapper.readValue(list.toJson(), JsonNode::class.java)
         val nodeWithFieldName: JsonNode = objectMapper.createObjectNode().set(avklaring.feltnavn, listAsJsonNode)
         return when (list.size) {
@@ -61,17 +65,18 @@ class ParallelleSannheterKlient(val httpClient: HttpClient, val apiUrl: String) 
             1 -> list.first()
             else -> {
                 logger.info("Felt av typen ${avklaring.feltnavn} har ${list.size} elementer, sjekker mot PPS")
-                val responseAsJsonNode = retry {
-                    httpClient.post("$apiUrl/api/${avklaring.feltnavn}") {
-                        accept(Json)
-                        setBody(TextContent(nodeWithFieldName.toJson(), Json))
-                    }.body<JsonNode>()
-                }.let {
-                    when (it) {
-                        is RetryResult.Success -> it.content
-                        is RetryResult.Failure -> throw it.samlaExceptions()
+                val responseAsJsonNode =
+                    retry {
+                        httpClient.post("$apiUrl/api/${avklaring.feltnavn}") {
+                            accept(Json)
+                            setBody(TextContent(nodeWithFieldName.toJson(), Json))
+                        }.body<JsonNode>()
+                    }.let {
+                        when (it) {
+                            is RetryResult.Success -> it.content
+                            is RetryResult.Failure -> throw it.samlaExceptions()
+                        }
                     }
-                }
 
                 // Svar fra parallelle sannheter skal kun inneholde ett element
                 if (responseAsJsonNode.size() != 1) {
@@ -93,7 +98,7 @@ class ParallelleSannheterKlient(val httpClient: HttpClient, val apiUrl: String) 
         BOSTEDSADRESSE("bostedsadresse"),
         DELTBOSTEDSADRESSE("deltbostedsadresse"),
         KONTAKTADRESSE("kontaktadresse"),
-        OPPHOLDSADRESSE("oppholdsadresse")
+        OPPHOLDSADRESSE("oppholdsadresse"),
     }
 
     companion object {

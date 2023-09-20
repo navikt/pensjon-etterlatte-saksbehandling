@@ -22,10 +22,9 @@ import rapidsandrivers.migrering.ListenerMedLoggingOgFeilhaandtering
 internal class LyttPaaIverksattVedtak(
     rapidsConnection: RapidsConnection,
     private val pesysRepository: PesysRepository,
-    private val penKlient: PenKlient
+    private val penKlient: PenKlient,
 ) :
     ListenerMedLoggingOgFeilhaandtering(Migreringshendelser.IVERKSATT) {
-
     private val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
     init {
@@ -36,14 +35,17 @@ internal class LyttPaaIverksattVedtak(
         }.register(this)
     }
 
-    override fun haandterPakke(packet: JsonMessage, context: MessageContext) {
+    override fun haandterPakke(
+        packet: JsonMessage,
+        context: MessageContext,
+    ) {
         val respons = objectMapper.readValue<UtbetalingResponseDto>(packet[UTBETALING_RESPONSE].toString())
         val behandling = respons.behandlingId?.let { pesysRepository.hentPesysId(it) }
 
         if (behandling == null) {
             logger.error(
                 "Utbetaling mangler behandlingId. " +
-                    "Kan derfor ikke lagre at vedtaket er iverksatt. Utbetaling: $respons"
+                    "Kan derfor ikke lagre at vedtaket er iverksatt. Utbetaling: $respons",
             )
             return
         }

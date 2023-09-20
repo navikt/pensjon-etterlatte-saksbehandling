@@ -8,9 +8,10 @@ import java.time.LocalDate
 class BrregService(private val klient: BrregKlient) {
     private val logger = LoggerFactory.getLogger(BrregService::class.java)
 
-    private val cache = Caffeine.newBuilder()
-        .expireAfterWrite(Duration.ofDays(1))
-        .build<LocalDate, List<Enhet>>()
+    private val cache =
+        Caffeine.newBuilder()
+            .expireAfterWrite(Duration.ofDays(1))
+            .build<LocalDate, List<Enhet>>()
 
     suspend fun hentAlleStatsforvaltere(): List<Enhet> {
         val enheter = cache.getIfPresent(LocalDate.now())

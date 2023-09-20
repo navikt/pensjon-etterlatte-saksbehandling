@@ -10,8 +10,9 @@ object GrunnbeloepRepository {
     val historiskeGrunnbeloep: List<Grunnbeloep> =
         objectMapper.readValue(readFile("/grunnbelop.json"), GrunnbeloepListe::class.java).grunnbeloep
 
-    private fun readFile(file: String) = GrunnbeloepRepository::class.java.getResource("/grunnbelop.json")?.readText()
-        ?: throw FileNotFoundException("Fant ikke filen $file")
+    private fun readFile(file: String) =
+        GrunnbeloepRepository::class.java.getResource("/grunnbelop.json")?.readText()
+            ?: throw FileNotFoundException("Fant ikke filen $file")
 
     fun hentGjeldendeGrunnbeloep(dato: YearMonth): Grunnbeloep {
         return historiskeGrunnbeloep.first {
@@ -27,7 +28,7 @@ object GrunnbeloepRepository {
 
 data class GrunnbeloepListe(
     @JsonProperty("grunnbeløp")
-    val grunnbeloep: List<Grunnbeloep>
+    val grunnbeloep: List<Grunnbeloep>,
 )
 
 data class Grunnbeloep(
@@ -36,5 +37,5 @@ data class Grunnbeloep(
     val grunnbeloep: Int,
     @JsonProperty("grunnbeløpPerMåned")
     val grunnbeloepPerMaaned: Int,
-    val omregningsfaktor: BigDecimal?
+    val omregningsfaktor: BigDecimal?,
 )

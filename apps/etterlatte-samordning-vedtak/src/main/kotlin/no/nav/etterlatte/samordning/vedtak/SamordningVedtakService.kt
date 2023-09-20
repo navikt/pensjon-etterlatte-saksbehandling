@@ -7,11 +7,11 @@ import java.time.LocalDate
 import java.time.YearMonth
 
 class SamordningVedtakService(
-    private val vedtaksvurderingKlient: VedtaksvurderingKlient
+    private val vedtaksvurderingKlient: VedtaksvurderingKlient,
 ) {
     suspend fun hentVedtak(
         vedtakId: Long,
-        organisasjonsnummer: String
+        organisasjonsnummer: String,
     ): SamordningVedtakDto {
         val vedtak = vedtaksvurderingKlient.hentVedtak(vedtakId, organisasjonsnummer)
 
@@ -28,7 +28,7 @@ class SamordningVedtakService(
                 type = type.toSamordningsvedtakType(),
                 aarsak = null,
                 anvendtTrygdetid = 40,
-                perioder = utbetalingsperioder.map { it.toSamordningVedtakPeriode() }
+                perioder = utbetalingsperioder.map { it.toSamordningVedtakPeriode() },
             )
         }
     }
@@ -48,7 +48,7 @@ class SamordningVedtakService(
             fom = periode.fom.toLocalDate(),
             tom = periode.tom?.toLocalDate(),
             omstillingsstoenadBrutto = beloep?.toInt() ?: 0,
-            omstillingsstoenadNetto = 0
+            omstillingsstoenadNetto = 0,
         )
     }
 

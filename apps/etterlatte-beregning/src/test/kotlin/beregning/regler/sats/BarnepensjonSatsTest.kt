@@ -30,7 +30,6 @@ import java.time.LocalDate
 import java.time.YearMonth
 
 internal class BarnepensjonSatsTest {
-
     @BeforeEach
     fun setUp() {
         aktuelleBarnepensjonSatsRegler.clear()
@@ -65,10 +64,11 @@ internal class BarnepensjonSatsTest {
 
     @Test
     fun `soeskenIKullet skal returnere liste med soesken`() {
-        val resultat = soeskenIKullet1967.anvend(
-            grunnlag = barnepensjonGrunnlag(soeskenKull = listOf(FNR_1, FNR_2)),
-            periode = REGEL_PERIODE
-        )
+        val resultat =
+            soeskenIKullet1967.anvend(
+                grunnlag = barnepensjonGrunnlag(soeskenKull = listOf(FNR_1, FNR_2)),
+                periode = REGEL_PERIODE,
+            )
 
         resultat.verdi.size shouldBeExactly 2
         resultat.verdi.forEach { it.value shouldBeIn listOf(FNR_1, FNR_2) }
@@ -76,100 +76,110 @@ internal class BarnepensjonSatsTest {
 
     @Test
     fun `antallSoeskenIKullet skal returnere antall soesken i kullet`() {
-        val resultat = antallSoeskenIKullet1967.anvend(
-            grunnlag = barnepensjonGrunnlag(soeskenKull = listOf(FNR_1, FNR_2)),
-            periode = REGEL_PERIODE
-        )
+        val resultat =
+            antallSoeskenIKullet1967.anvend(
+                grunnlag = barnepensjonGrunnlag(soeskenKull = listOf(FNR_1, FNR_2)),
+                periode = REGEL_PERIODE,
+            )
 
         resultat.verdi shouldBeExactly 2
     }
 
     @Test
     fun `prosentSatsFoersteBarn skal returnere 40 prosent`() {
-        val resultat = prosentsatsFoersteBarnKonstant1967.anvend(
-            grunnlag = barnepensjonGrunnlag(),
-            periode = REGEL_PERIODE
-        )
+        val resultat =
+            prosentsatsFoersteBarnKonstant1967.anvend(
+                grunnlag = barnepensjonGrunnlag(),
+                periode = REGEL_PERIODE,
+            )
 
         resultat.verdi shouldBe Beregningstall(0.40)
     }
 
     @Test
     fun `prosentSatsEtterfoelgendeBarn skal returnere 25 prosent`() {
-        val resultat = prosentsatsEtterfoelgendeBarnKonstant1967.anvend(
-            grunnlag = barnepensjonGrunnlag(),
-            periode = REGEL_PERIODE
-        )
+        val resultat =
+            prosentsatsEtterfoelgendeBarnKonstant1967.anvend(
+                grunnlag = barnepensjonGrunnlag(),
+                periode = REGEL_PERIODE,
+            )
 
         resultat.verdi shouldBe Beregningstall(0.25)
     }
 
     @Test
     fun `belopForFoersteBarn skal returnere 3716,00 kroner`() {
-        val resultat = belopForFoersteBarn1967.anvend(
-            grunnlag = barnepensjonGrunnlag(),
-            periode = REGEL_PERIODE
-        )
+        val resultat =
+            belopForFoersteBarn1967.anvend(
+                grunnlag = barnepensjonGrunnlag(),
+                periode = REGEL_PERIODE,
+            )
 
         resultat.verdi shouldBe 3716.00.toBeregningstall(DESIMALER_DELBEREGNING)
     }
 
     @Test
     fun `belopForEtterfoelgendeBarn skal returnere 2322,50 kroner`() {
-        val resultat = belopForEtterfoelgendeBarn1967.anvend(
-            grunnlag = barnepensjonGrunnlag(),
-            periode = REGEL_PERIODE
-        )
+        val resultat =
+            belopForEtterfoelgendeBarn1967.anvend(
+                grunnlag = barnepensjonGrunnlag(),
+                periode = REGEL_PERIODE,
+            )
 
         resultat.verdi shouldBe 2322.50.toBeregningstall(DESIMALER_DELBEREGNING)
     }
 
     @Test
     fun `barnepensjonSatsRegel skal returnere 3716,00 kroner ved 0 soesken`() {
-        val resultat = barnepensjonSatsRegel.anvend(
-            grunnlag = barnepensjonGrunnlag(),
-            periode = REGEL_PERIODE
-        )
+        val resultat =
+            barnepensjonSatsRegel.anvend(
+                grunnlag = barnepensjonGrunnlag(),
+                periode = REGEL_PERIODE,
+            )
 
         resultat.verdi shouldBe 3716.00.toBeregningstall(DESIMALER_DELBEREGNING)
     }
 
     @Test
     fun `barnepensjonSatsRegel skal returnere 3019,25 kroner ved 1 soesken`() {
-        val resultat = barnepensjonSatsRegel.anvend(
-            grunnlag = barnepensjonGrunnlag(soeskenKull = listOf(FNR_1)),
-            periode = REGEL_PERIODE
-        )
+        val resultat =
+            barnepensjonSatsRegel.anvend(
+                grunnlag = barnepensjonGrunnlag(soeskenKull = listOf(FNR_1)),
+                periode = REGEL_PERIODE,
+            )
 
         resultat.verdi shouldBe 3019.25.toBeregningstall(DESIMALER_DELBEREGNING)
     }
 
     @Test
     fun `barnepensjonSatsRegel skal returnere 2787,00 kroner ved 2 soesken`() {
-        val resultat = barnepensjonSatsRegel.anvend(
-            grunnlag = barnepensjonGrunnlag(soeskenKull = listOf(FNR_1, FNR_2)),
-            periode = REGEL_PERIODE
-        )
+        val resultat =
+            barnepensjonSatsRegel.anvend(
+                grunnlag = barnepensjonGrunnlag(soeskenKull = listOf(FNR_1, FNR_2)),
+                periode = REGEL_PERIODE,
+            )
 
         resultat.verdi shouldBe 2787.00.toBeregningstall(DESIMALER_DELBEREGNING)
     }
 
     @Test
     fun `barnepensjonSatsRegel skal returnere 2670,887 kroner ved 3 soesken`() {
-        val resultat = barnepensjonSatsRegel.anvend(
-            grunnlag = barnepensjonGrunnlag(soeskenKull = listOf(FNR_1, FNR_2, FNR_3)),
-            periode = REGEL_PERIODE
-        )
+        val resultat =
+            barnepensjonSatsRegel.anvend(
+                grunnlag = barnepensjonGrunnlag(soeskenKull = listOf(FNR_1, FNR_2, FNR_3)),
+                periode = REGEL_PERIODE,
+            )
 
         resultat.verdi shouldBe 2670.875.toBeregningstall(DESIMALER_DELBEREGNING)
     }
 
     @Test
     fun `barnepensjonSatsRegel skal returnere grunnbeloep per maned etter nytt regelverk`() {
-        val resultat = barnepensjonSatsRegel.anvend(
-            grunnlag = barnepensjonGrunnlag(),
-            periode = RegelPeriode(LocalDate.of(2024, 1, 1))
-        )
+        val resultat =
+            barnepensjonSatsRegel.anvend(
+                grunnlag = barnepensjonGrunnlag(),
+                periode = RegelPeriode(LocalDate.of(2024, 1, 1)),
+            )
 
         resultat.verdi shouldBe 9885.toBeregningstall(DESIMALER_DELBEREGNING)
     }

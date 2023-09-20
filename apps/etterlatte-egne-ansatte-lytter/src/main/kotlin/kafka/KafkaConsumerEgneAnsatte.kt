@@ -12,14 +12,14 @@ class KafkaConsumerEgneAnsatte(
     private val behandlingKlient: BehandlingKlient,
     kafkaEnvironment: KafkaConsumerConfiguration = KafkaEnvironment(),
     pollTimeoutInSeconds: Duration = Duration.ofSeconds(10L),
-    closed: AtomicBoolean = AtomicBoolean(false)
+    closed: AtomicBoolean = AtomicBoolean(false),
 ) : Kafkakonsument<String>(
-    logger = LoggerFactory.getLogger(KafkaConsumerEgneAnsatte::class.java.name),
-    consumer = KafkaConsumer<String, String>(kafkaEnvironment.generateKafkaConsumerProperties(env)),
-    topic = env.requireEnvValue("SKJERMING_TOPIC"),
-    pollTimeoutInSeconds = pollTimeoutInSeconds,
-    closed = closed
-) {
+        logger = LoggerFactory.getLogger(KafkaConsumerEgneAnsatte::class.java.name),
+        consumer = KafkaConsumer<String, String>(kafkaEnvironment.generateKafkaConsumerProperties(env)),
+        topic = env.requireEnvValue("SKJERMING_TOPIC"),
+        pollTimeoutInSeconds = pollTimeoutInSeconds,
+        closed = closed,
+    ) {
     override fun stream() {
         stream { meldinger -> meldinger.forEach { behandlingKlient.haandterHendelse(it) } }
     }

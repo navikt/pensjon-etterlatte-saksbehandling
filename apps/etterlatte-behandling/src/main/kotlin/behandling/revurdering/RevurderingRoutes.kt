@@ -20,9 +20,7 @@ import no.nav.etterlatte.libs.common.kunSaksbehandler
 import no.nav.etterlatte.libs.common.medBody
 import no.nav.etterlatte.libs.common.sakId
 
-internal fun Route.revurderingRoutes(
-    revurderingService: RevurderingService
-) {
+internal fun Route.revurderingRoutes(revurderingService: RevurderingService) {
     val logger = application.log
 
     route("/api/revurdering") {
@@ -32,11 +30,12 @@ internal fun Route.revurderingRoutes(
                     hentNavidentFraToken { navIdent ->
                         logger.info("Lagrer revurderinginfo på behandling $behandlingsId")
                         medBody<RevurderingInfoDto> {
-                            val fikkLagret = revurderingService.lagreRevurderingInfo(
-                                behandlingsId,
-                                RevurderingMedBegrunnelse(it.info, it.begrunnelse),
-                                navIdent
-                            )
+                            val fikkLagret =
+                                revurderingService.lagreRevurderingInfo(
+                                    behandlingsId,
+                                    RevurderingMedBegrunnelse(it.info, it.begrunnelse),
+                                    navIdent,
+                                )
                             if (fikkLagret) {
                                 call.respond(HttpStatusCode.NoContent)
                             } else {
@@ -54,14 +53,15 @@ internal fun Route.revurderingRoutes(
                     logger.info("Oppretter ny revurdering på sak $sakId")
                     medBody<OpprettRevurderingRequest> { opprettRevurderingRequest ->
 
-                        val revurdering = revurderingService.opprettManuellRevurderingWrapper(
-                            sakId,
-                            opprettRevurderingRequest.aarsak,
-                            opprettRevurderingRequest.paaGrunnAvHendelseId,
-                            opprettRevurderingRequest.begrunnelse,
-                            opprettRevurderingRequest.fritekstAarsak,
-                            saksbehandler
-                        )
+                        val revurdering =
+                            revurderingService.opprettManuellRevurderingWrapper(
+                                sakId,
+                                opprettRevurderingRequest.aarsak,
+                                opprettRevurderingRequest.paaGrunnAvHendelseId,
+                                opprettRevurderingRequest.begrunnelse,
+                                opprettRevurderingRequest.fritekstAarsak,
+                                saksbehandler,
+                            )
 
                         when (revurdering) {
                             null -> call.respond(HttpStatusCode.NotFound)
@@ -75,8 +75,9 @@ internal fun Route.revurderingRoutes(
 
     route("/api/stoettederevurderinger/{saktype}") {
         get {
-            val sakType = call.parameters["saktype"]?.let { runCatching { SakType.valueOf(it) }.getOrNull() }
-                ?: return@get call.respond(HttpStatusCode.BadRequest, "Ugyldig saktype")
+            val sakType =
+                call.parameters["saktype"]?.let { runCatching { SakType.valueOf(it) }.getOrNull() }
+                    ?: return@get call.respond(HttpStatusCode.BadRequest, "Ugyldig saktype")
 
             val stoettedeRevurderinger = RevurderingAarsak.values().filter { it.erStoettaRevurdering(sakType) }
             call.respond(stoettedeRevurderinger)
@@ -88,7 +89,7 @@ data class OpprettRevurderingRequest(
     val aarsak: RevurderingAarsak,
     val paaGrunnAvHendelseId: String? = null,
     val begrunnelse: String? = null,
-    val fritekstAarsak: String? = null
+    val fritekstAarsak: String? = null,
 )
 
 data class RevurderingInfoDto(val begrunnelse: String?, val info: RevurderingInfo)

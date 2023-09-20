@@ -9,14 +9,14 @@ import java.util.UUID
 
 interface BehandlingKlient {
     suspend fun hentPersongalleri(behandlingId: UUID): Persongalleri
+
     suspend fun hentDetaljertBehandling(behandlingId: UUID): DetaljertBehandling
 }
 
 class BehandlingKlientImpl(
     private val behandlingHttpClient: HttpClient,
-    private val behandlingUrl: String
+    private val behandlingUrl: String,
 ) : BehandlingKlient {
-
     override suspend fun hentPersongalleri(behandlingId: UUID): Persongalleri {
         return hentDetaljertBehandling(behandlingId).toPersongalleri()
     }
@@ -33,10 +33,11 @@ class BehandlingKlientImpl(
 
 class KunneIkkeHenteFraBehandling(message: String, cause: Exception) : Exception(message, cause)
 
-fun DetaljertBehandling.toPersongalleri() = Persongalleri(
-    soeker = this.soeker,
-    innsender = this.innsender,
-    soesken = this.soesken ?: emptyList(),
-    avdoed = this.avdoed ?: emptyList(),
-    gjenlevende = this.gjenlevende ?: emptyList()
-)
+fun DetaljertBehandling.toPersongalleri() =
+    Persongalleri(
+        soeker = this.soeker,
+        innsender = this.innsender,
+        soesken = this.soesken ?: emptyList(),
+        avdoed = this.avdoed ?: emptyList(),
+        gjenlevende = this.gjenlevende ?: emptyList(),
+    )

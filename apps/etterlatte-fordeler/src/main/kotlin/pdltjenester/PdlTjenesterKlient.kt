@@ -21,7 +21,6 @@ import no.nav.etterlatte.libs.common.retry
 import org.slf4j.LoggerFactory
 
 class PdlTjenesterKlient(private val client: HttpClient, private val apiUrl: String) {
-
     private val logger = LoggerFactory.getLogger(PdlTjenesterKlient::class.java)
 
     suspend fun hentPerson(hentPersonRequest: HentPersonRequest): Person {
@@ -36,23 +35,25 @@ class PdlTjenesterKlient(private val client: HttpClient, private val apiUrl: Str
             when (it) {
                 is RetryResult.Success -> it.content
                 is RetryResult.Failure -> {
-                    val response = when (val exception = it.exceptions.last()) {
-                        is ClientRequestException -> exception.response
-                        is ServerResponseException -> exception.response
-                        else -> throw it.samlaExceptions()
-                    }
-                    val feilFraPdl = try {
-                        response.body<PdlFeil>()
-                    } catch (e: Exception) {
-                        throw samleExceptions(it.exceptions + e)
-                    }
+                    val response =
+                        when (val exception = it.exceptions.last()) {
+                            is ClientRequestException -> exception.response
+                            is ServerResponseException -> exception.response
+                            else -> throw it.samlaExceptions()
+                        }
+                    val feilFraPdl =
+                        try {
+                            response.body<PdlFeil>()
+                        } catch (e: Exception) {
+                            throw samleExceptions(it.exceptions + e)
+                        }
                     when (feilFraPdl.aarsak) {
                         PdlFeilAarsak.FANT_IKKE_PERSON ->
                             throw PersonFinnesIkkeException(hentPersonRequest.foedselsnummer)
 
                         PdlFeilAarsak.INGEN_IDENT_FAMILIERELASJON -> throw FamilieRelasjonManglerIdent(
                             "${hentPersonRequest.foedselsnummer} har en person i persongalleriet som " +
-                                "mangler ident: ${feilFraPdl.detaljer}"
+                                "mangler ident: ${feilFraPdl.detaljer}",
                         )
                     }
                 }

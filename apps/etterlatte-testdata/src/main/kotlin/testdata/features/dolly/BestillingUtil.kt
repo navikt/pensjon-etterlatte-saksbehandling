@@ -9,10 +9,10 @@ fun generererBestilling(bestilling: BestillingRequest): String {
 
     val barnListe = listOf(listOf(soeker), helsoesken, halvsoeskenAvdoed).flatten()
 
-    return bestillingTemplateStart + barnListe + bestillingTemplateEnd
+    return BESTLLING_TEMPLATE_START + barnListe + BESTLLING_TEMPLATE_END
 }
 
-const val bestillingTemplateStart = """
+const val BESTLLING_TEMPLATE_START = """
 {
   "antall": 1,
   "beskrivelse": null,
@@ -52,7 +52,7 @@ const val bestillingTemplateStart = """
       ],
       "forelderBarnRelasjon": """
 
-const val bestillingTemplateEnd = """,
+const val BESTLLING_TEMPLATE_END = """,
       "sivilstand": [
         {
           "id": null,
@@ -114,7 +114,8 @@ const val bestillingTemplateEnd = """,
 }
 """
 
-private fun soeskenTemplate(helsoesken: Boolean) = """
+private fun soeskenTemplate(helsoesken: Boolean) =
+    """
 {
   "id": null,
   "kilde": "Dolly",

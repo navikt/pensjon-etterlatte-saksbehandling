@@ -19,12 +19,12 @@ import no.nav.etterlatte.libs.common.withBehandlingId
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.vilkaarsvurdering.VilkaarsvurderingService
 import no.nav.etterlatte.vilkaarsvurdering.klienter.BehandlingKlient
-import java.util.*
+import java.util.UUID
 
 fun Route.migrering(
     migreringService: MigreringService,
     behandlingKlient: BehandlingKlient,
-    vilkaarsvurderingService: VilkaarsvurderingService
+    vilkaarsvurderingService: VilkaarsvurderingService,
 ) {
     route("/api/vilkaarsvurdering/migrering") {
         val logger = application.log
@@ -44,7 +44,7 @@ fun Route.migrering(
 
 private suspend fun PipelineContext<Unit, ApplicationCall>.settVilkaarsvurderingaSomHelhetSomOppfylt(
     vilkaarsvurderingService: VilkaarsvurderingService,
-    behandlingId: UUID
+    behandlingId: UUID,
 ) = vilkaarsvurderingService.oppdaterTotalVurdering(
     behandlingId,
     brukerTokenInfo,
@@ -52,6 +52,6 @@ private suspend fun PipelineContext<Unit, ApplicationCall>.settVilkaarsvurdering
         utfall = VilkaarsvurderingUtfall.OPPFYLT,
         kommentar = "Automatisk overført fra Pesys. Enkeltvilkår ikke vurdert, totalvurdering satt til oppfylt.",
         tidspunkt = Tidspunkt.now().toLocalDatetimeUTC(),
-        saksbehandler = brukerTokenInfo.ident()
-    )
+        saksbehandler = brukerTokenInfo.ident(),
+    ),
 )

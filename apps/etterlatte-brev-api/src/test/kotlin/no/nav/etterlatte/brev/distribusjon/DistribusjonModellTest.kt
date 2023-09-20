@@ -10,15 +10,16 @@ import org.junit.jupiter.api.Test
 internal class DistribusjonModellTest {
     @Test
     fun `verifiser serde`() {
-        val distAdresse = Adresse(
-            adressetype = AdresseType.NORSK,
-            adresselinje1 = "adresselinje1",
-            adresselinje2 = "adresselinje2",
-            adresselinje3 = "adresselinje3",
-            postnummer = "postnummer",
-            poststed = "poststed",
-            landkode = "NOR"
-        )
+        val distAdresse =
+            Adresse(
+                adressetype = AdresseType.NORSK,
+                adresselinje1 = "adresselinje1",
+                adresselinje2 = "adresselinje2",
+                adresselinje3 = "adresselinje3",
+                postnummer = "postnummer",
+                poststed = "poststed",
+                landkode = "NOR",
+            )
 
         val serialized = distAdresse.toJson()
 

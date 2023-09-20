@@ -10,20 +10,20 @@ import no.nav.etterlatte.pdl.PdlHentPerson
 import no.nav.etterlatte.pdl.PdlKlient
 
 object BarnekullMapper {
-
     suspend fun mapBarnekull(
         pdlKlient: PdlKlient,
         ppsKlient: ParallelleSannheterKlient,
         forelder: PdlHentPerson,
-        saktype: SakType
+        saktype: SakType,
     ): List<Person>? {
-        val barnFnr = forelder.forelderBarnRelasjon
-            ?.filter { it.relatertPersonsRolle == PdlForelderBarnRelasjonRolle.BARN }
-            ?.groupBy { it.relatertPersonsIdent }
-            ?.mapValues { it.value.maxByOrNull { fbr -> fbr.metadata.sisteRegistrertDato() } }
-            ?.map {
-                (Folkeregisteridentifikator.of(it.value?.relatertPersonsIdent))
-            }
+        val barnFnr =
+            forelder.forelderBarnRelasjon
+                ?.filter { it.relatertPersonsRolle == PdlForelderBarnRelasjonRolle.BARN }
+                ?.groupBy { it.relatertPersonsIdent }
+                ?.mapValues { it.value.maxByOrNull { fbr -> fbr.metadata.sisteRegistrertDato() } }
+                ?.map {
+                    (Folkeregisteridentifikator.of(it.value?.relatertPersonsIdent))
+                }
 
         return barnFnr?.let { fnr ->
             pdlKlient.hentPersonBolk(fnr, saktype).data?.hentPersonBolk?.map {
@@ -33,7 +33,7 @@ object BarnekullMapper {
                     Folkeregisteridentifikator.of(it.ident),
                     PersonRolle.BARN,
                     it.person!!,
-                    saktype
+                    saktype,
                 )
             }
         }

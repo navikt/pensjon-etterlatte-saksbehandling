@@ -19,16 +19,17 @@ import no.nav.helse.rapids_rivers.River
 import org.slf4j.LoggerFactory
 import rapidsandrivers.migrering.ListenerMedLogging
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 
 class BehandlinghendelseRiver(
     rapidsConnection: RapidsConnection,
-    private val service: StatistikkService
+    private val service: StatistikkService,
 ) : ListenerMedLogging() {
-    private val behandlingshendelser = listOf(
-        "BEHANDLING:AVBRUTT",
-        "BEHANDLING:OPPRETTET"
-    )
+    private val behandlingshendelser =
+        listOf(
+            "BEHANDLING:AVBRUTT",
+            "BEHANDLING:OPPRETTET",
+        )
 
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -48,34 +49,36 @@ class BehandlinghendelseRiver(
         }.register(this)
     }
 
-    override fun haandterPakke(packet: JsonMessage, context: MessageContext) =
-        try {
-            val behandling: BehandlingIntern =
-                objectMapper.treeToValue(packet[BehandlingRiverKey.behandlingObjectKey])
-            val hendelse: BehandlingHendelse = enumValueOf(packet[EVENT_NAME_KEY].textValue().split(":")[1])
-            val tekniskTid = parseTekniskTid(packet, logger)
+    override fun haandterPakke(
+        packet: JsonMessage,
+        context: MessageContext,
+    ) = try {
+        val behandling: BehandlingIntern =
+            objectMapper.treeToValue(packet[BehandlingRiverKey.behandlingObjectKey])
+        val hendelse: BehandlingHendelse = enumValueOf(packet[EVENT_NAME_KEY].textValue().split(":")[1])
+        val tekniskTid = parseTekniskTid(packet, logger)
 
-            service.registrerStatistikkForBehandlinghendelse(behandling, hendelse, tekniskTid)
-                ?.also {
-                    context.publish(
-                        mapOf(
-                            "@event_name" to "STATISTIKK:REGISTRERT",
-                            "sak_rad" to objectMapper.writeValueAsString(it)
-                        ).toJson()
-                    )
-                } ?: logger.info("Ikke registrert statistikk på pakken ${packet.correlationId}")
-        } catch (e: Exception) {
-            logger.error(
-                """
-                    Kunne ikke mappe ut statistikk for behandlingen i pakken med korrelasjonsid ${packet.correlationId}. 
-                    Dette betyr at vi ikke får oppdatert saksstatistikk for denne saken, og stopper videre 
-                    prosessering av statistikk. Må sees på snarest!
-                """.trimIndent(),
-                e
-            )
-            logger.error("Feilet på behandlingid ${packet["behandling.id"]}")
-            throw e
-        }
+        service.registrerStatistikkForBehandlinghendelse(behandling, hendelse, tekniskTid)
+            ?.also {
+                context.publish(
+                    mapOf(
+                        "@event_name" to "STATISTIKK:REGISTRERT",
+                        "sak_rad" to objectMapper.writeValueAsString(it),
+                    ).toJson(),
+                )
+            } ?: logger.info("Ikke registrert statistikk på pakken ${packet.correlationId}")
+    } catch (e: Exception) {
+        logger.error(
+            """
+            Kunne ikke mappe ut statistikk for behandlingen i pakken med korrelasjonsid ${packet.correlationId}. 
+            Dette betyr at vi ikke får oppdatert saksstatistikk for denne saken, og stopper videre 
+            prosessering av statistikk. Må sees på snarest!
+            """.trimIndent(),
+            e,
+        )
+        logger.error("Feilet på behandlingid ${packet["behandling.id"]}")
+        throw e
+    }
 }
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -85,9 +88,10 @@ data class BehandlingIntern(
     val behandlingOpprettet: LocalDateTime,
     val sistEndret: LocalDateTime,
     val status: BehandlingStatus,
-    val type: BehandlingType
+    val type: BehandlingType,
 )
 
 enum class BehandlingHendelse {
-    OPPRETTET, AVBRUTT
+    OPPRETTET,
+    AVBRUTT,
 }

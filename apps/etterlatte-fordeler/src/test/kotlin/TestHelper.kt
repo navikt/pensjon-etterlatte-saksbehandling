@@ -41,7 +41,7 @@ fun mockPerson(
     utland: Utland? = null,
     bostedsadresse: Adresse? = null,
     familieRelasjon: FamilieRelasjon? = null,
-    vergemaalEllerFremtidsfullmakt: List<VergemaalEllerFremtidsfullmakt>? = null
+    vergemaalEllerFremtidsfullmakt: List<VergemaalEllerFremtidsfullmakt>? = null,
 ) = Person(
     fornavn = "Ola",
     etternavn = "Nordmann",
@@ -61,10 +61,13 @@ fun mockPerson(
     utland = utland,
     familieRelasjon = familieRelasjon,
     avdoedesBarn = null,
-    vergemaalEllerFremtidsfullmakt = vergemaalEllerFremtidsfullmakt
+    vergemaalEllerFremtidsfullmakt = vergemaalEllerFremtidsfullmakt,
 )
 
-fun mockNorskAdresse(adresseLinje1: String = "Testveien 4", gyldigTilOgMed: LocalDateTime? = null) = Adresse(
+fun mockNorskAdresse(
+    adresseLinje1: String = "Testveien 4",
+    gyldigTilOgMed: LocalDateTime? = null,
+) = Adresse(
     type = AdresseType.VEGADRESSE,
     aktiv = true,
     coAdresseNavn = null,
@@ -76,13 +79,13 @@ fun mockNorskAdresse(adresseLinje1: String = "Testveien 4", gyldigTilOgMed: Loca
     land = null,
     kilde = "FREG",
     gyldigFraOgMed = Tidspunkt.now().toLocalDatetimeUTC().minusYears(1),
-    gyldigTilOgMed = gyldigTilOgMed
+    gyldigTilOgMed = gyldigTilOgMed,
 )
 
 fun mockUgyldigAdresse(
     type: AdresseType = AdresseType.UKJENT_BOSTED,
     gyldigFraOgMed: LocalDateTime = Tidspunkt.now().toLocalDatetimeUTC().minusYears(1),
-    gyldigTilOgMed: LocalDateTime? = null
+    gyldigTilOgMed: LocalDateTime? = null,
 ) = Adresse(
     type = type,
     aktiv = true,
@@ -95,7 +98,7 @@ fun mockUgyldigAdresse(
     land = null,
     kilde = "FREG",
     gyldigFraOgMed = gyldigFraOgMed,
-    gyldigTilOgMed = gyldigTilOgMed
+    gyldigTilOgMed = gyldigTilOgMed,
 )
 
 fun readSoknad(file: String): Barnepensjon {
@@ -103,5 +106,6 @@ fun readSoknad(file: String): Barnepensjon {
     return objectMapper.readValue(skjemaInfo, Barnepensjon::class.java)
 }
 
-fun readFile(file: String) = FordelerServiceTest::class.java.getResource(file)?.readText()
-    ?: throw FileNotFoundException("Fant ikke filen $file")
+fun readFile(file: String) =
+    FordelerServiceTest::class.java.getResource(file)?.readText()
+        ?: throw FileNotFoundException("Fant ikke filen $file")

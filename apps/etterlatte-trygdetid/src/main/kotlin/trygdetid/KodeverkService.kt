@@ -8,13 +8,15 @@ import no.nav.etterlatte.trygdetid.klienter.KodeverkResponse
 import java.util.concurrent.TimeUnit
 
 class KodeverkService(private val klient: KodeverkKlient) {
-    private val cache = Caffeine.newBuilder()
-        .expireAfterWrite(1, TimeUnit.DAYS)
-        .build<CacheKey, KodeverkResponse>()
+    private val cache =
+        Caffeine.newBuilder()
+            .expireAfterWrite(1, TimeUnit.DAYS)
+            .build<CacheKey, KodeverkResponse>()
 
     suspend fun hentAlleLand(): List<Land> {
-        val landkoder = cache.getIfPresent(CacheKey.LANDKODER)
-            ?: klient.hentLandkoder().also { cache.put(CacheKey.LANDKODER, it) }
+        val landkoder =
+            cache.getIfPresent(CacheKey.LANDKODER)
+                ?: klient.hentLandkoder().also { cache.put(CacheKey.LANDKODER, it) }
 
         return landkoder
             .betydninger
@@ -24,7 +26,7 @@ class KodeverkService(private val klient: KodeverkKlient) {
                         gyldigFra = it.gyldigFra,
                         gyldigTil = it.gyldigTil,
                         beskrivelser = it.beskrivelser,
-                        isolandkode = isoLandkode
+                        isolandkode = isoLandkode,
                     )
                 }
             }
@@ -34,8 +36,9 @@ class KodeverkService(private val klient: KodeverkKlient) {
                         isoLandkode = betydningMedIsoKode.isolandkode,
                         gyldigFra = betydningMedIsoKode.gyldigFra,
                         gyldigTil = betydningMedIsoKode.gyldigTil,
-                        beskrivelse = LandNormalisert.hentBeskrivelse(betydningMedIsoKode.isolandkode)
-                            ?.let { Beskrivelse(term = beskrivelse.term, tekst = it) } ?: beskrivelse
+                        beskrivelse =
+                            LandNormalisert.hentBeskrivelse(betydningMedIsoKode.isolandkode)
+                                ?.let { Beskrivelse(term = beskrivelse.term, tekst = it) } ?: beskrivelse,
                     )
                 }
             }
@@ -43,12 +46,12 @@ class KodeverkService(private val klient: KodeverkKlient) {
 }
 
 private enum class CacheKey {
-    LANDKODER
+    LANDKODER,
 }
 
 data class Land(
     val isoLandkode: String,
     val gyldigFra: String,
     val gyldigTil: String,
-    val beskrivelse: Beskrivelse
+    val beskrivelse: Beskrivelse,
 )

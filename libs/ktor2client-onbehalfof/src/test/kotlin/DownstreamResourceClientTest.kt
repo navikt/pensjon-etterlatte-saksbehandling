@@ -13,9 +13,10 @@ import org.junit.jupiter.api.Test
 internal class DownstreamResourceClientTest {
     private val azureAdClient = mockk<AzureAdClient>()
     private val resource = Resource("clientId1", "")
-    private val client = DownstreamResourceClient(
-        azureAdClient = azureAdClient
-    )
+    private val client =
+        DownstreamResourceClient(
+            azureAdClient = azureAdClient,
+        )
 
     @Test
     fun `egen sjekk av content-type håndterer parsede parametere`() {
@@ -32,7 +33,7 @@ internal class DownstreamResourceClientTest {
         runBlocking {
             client.get(
                 resource,
-                BrukerTokenInfo.of(accessToken = "a", oid = "b", sub = "b", saksbehandler = null, claims = null)
+                BrukerTokenInfo.of(accessToken = "a", oid = "b", sub = "b", saksbehandler = null, claims = null),
             )
         }
         verify { runBlocking { azureAdClient.getAccessTokenForResource(any()) } }
@@ -48,7 +49,7 @@ internal class DownstreamResourceClientTest {
         runBlocking {
             client.get(
                 resource,
-                BrukerTokenInfo.of(accessToken = "a", oid = "b", sub = "c", saksbehandler = "s1", claims = null)
+                BrukerTokenInfo.of(accessToken = "a", oid = "b", sub = "c", saksbehandler = "s1", claims = null),
             )
         }
         verify { runBlocking { azureAdClient.getOnBehalfOfAccessTokenForResource(any(), "a") } }

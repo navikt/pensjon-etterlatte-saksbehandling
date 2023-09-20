@@ -12,18 +12,19 @@ import java.time.LocalTime
 import java.util.UUID.randomUUID
 
 internal class OppdragJaxbTest {
-
     @Test
     fun `should generate xml from oppdrag`() {
         val behandlingId = randomUUID()
         val now = Tidspunkt.ofNorskTidssone(LocalDate.parse("2023-01-01"), LocalTime.of(0, 0, 0))
-        val oppdrag = OppdragMapper.oppdragFraUtbetaling(
-            utbetaling(behandlingId = behandlingId, avstemmingsnoekkel = now, opprettet = now),
-            true
-        )
+        val oppdrag =
+            OppdragMapper.oppdragFraUtbetaling(
+                utbetaling(behandlingId = behandlingId, avstemmingsnoekkel = now, opprettet = now),
+                true,
+            )
         val oppdragAsXml = OppdragJaxb.toXml(oppdrag)
 
-        val gyldigOppdragXml = """
+        val gyldigOppdragXml =
+            """
             <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
             <ns2:oppdrag xmlns:ns2="http://www.trygdeetaten.no/skjema/oppdrag">
                 <oppdrag-110>
@@ -65,7 +66,7 @@ internal class OppdragJaxbTest {
                 </oppdrag-110>
             </ns2:oppdrag>
 
-        """.trimIndent()
+            """.trimIndent()
 
         assertEquals(gyldigOppdragXml, oppdragAsXml)
     }

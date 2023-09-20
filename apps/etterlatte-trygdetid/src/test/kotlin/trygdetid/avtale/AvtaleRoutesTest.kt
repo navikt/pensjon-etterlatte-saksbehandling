@@ -40,12 +40,10 @@ import testsupport.buildTestApplicationConfigurationForOauth
 import trygdetid.trygdeavtale
 import java.time.LocalDate
 import java.time.Month
-import java.util.*
 import java.util.UUID.randomUUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class AvtaleRoutesTest {
-
     private val repository = mockk<AvtaleRepository>()
     private val behandlingKlient = mockk<BehandlingKlient>()
 
@@ -77,10 +75,11 @@ internal class AvtaleRoutesTest {
     @Test
     fun `skal levere informasjon om avtaler`() {
         testApplication(server.config.httpServer.port()) { client ->
-            val response = client.get("/api/trygdetid/avtaler") {
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                header(HttpHeaders.Authorization, "Bearer $token")
-            }
+            val response =
+                client.get("/api/trygdetid/avtaler") {
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    header(HttpHeaders.Authorization, "Bearer $token")
+                }
 
             response.status shouldBe HttpStatusCode.OK
 
@@ -108,10 +107,11 @@ internal class AvtaleRoutesTest {
     @Test
     fun `skal levere informasjon om avtale kriterier`() {
         testApplication(server.config.httpServer.port()) { client ->
-            val response = client.get("/api/trygdetid/avtaler/kriteria") {
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                header(HttpHeaders.Authorization, "Bearer $token")
-            }
+            val response =
+                client.get("/api/trygdetid/avtaler/kriteria") {
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    header(HttpHeaders.Authorization, "Bearer $token")
+                }
 
             response.status shouldBe HttpStatusCode.OK
 
@@ -132,10 +132,11 @@ internal class AvtaleRoutesTest {
 
             every { repository.hentAvtale(behandlingId) } returns trygdeavtale(behandlingId, avtaleKode = "TEST")
 
-            val response = client.get("/api/trygdetid/avtaler/$behandlingId") {
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                header(HttpHeaders.Authorization, "Bearer $token")
-            }
+            val response =
+                client.get("/api/trygdetid/avtaler/$behandlingId") {
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    header(HttpHeaders.Authorization, "Bearer $token")
+                }
 
             response.status shouldBe HttpStatusCode.OK
 
@@ -155,18 +156,19 @@ internal class AvtaleRoutesTest {
 
             every { repository.opprettAvtale(any()) } just runs
 
-            val response = client.post("/api/trygdetid/avtaler/$behandlingId") {
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                header(HttpHeaders.Authorization, "Bearer $token")
-                setBody(
-                    TrygdeavtaleRequest(
-                        id = null,
-                        avtaleKode = "TEST",
-                        avtaleDatoKode = "TESTDATO",
-                        avtaleKriteriaKode = "TESTKRITERIA"
+            val response =
+                client.post("/api/trygdetid/avtaler/$behandlingId") {
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    header(HttpHeaders.Authorization, "Bearer $token")
+                    setBody(
+                        TrygdeavtaleRequest(
+                            id = null,
+                            avtaleKode = "TEST",
+                            avtaleDatoKode = "TESTDATO",
+                            avtaleKriteriaKode = "TESTKRITERIA",
+                        ),
                     )
-                )
-            }
+                }
 
             response.status shouldBe HttpStatusCode.OK
 
@@ -191,18 +193,19 @@ internal class AvtaleRoutesTest {
 
             every { repository.lagreAvtale(any()) } just runs
 
-            val response = client.post("/api/trygdetid/avtaler/$behandlingId") {
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                header(HttpHeaders.Authorization, "Bearer $token")
-                setBody(
-                    TrygdeavtaleRequest(
-                        id = id,
-                        avtaleKode = "TEST",
-                        avtaleDatoKode = "TESTDATO",
-                        avtaleKriteriaKode = "TESTKRITERIA"
+            val response =
+                client.post("/api/trygdetid/avtaler/$behandlingId") {
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    header(HttpHeaders.Authorization, "Bearer $token")
+                    setBody(
+                        TrygdeavtaleRequest(
+                            id = id,
+                            avtaleKode = "TEST",
+                            avtaleDatoKode = "TESTDATO",
+                            avtaleKriteriaKode = "TESTKRITERIA",
+                        ),
                     )
-                )
-            }
+                }
 
             response.status shouldBe HttpStatusCode.OK
 
@@ -219,18 +222,22 @@ internal class AvtaleRoutesTest {
         }
     }
 
-    private fun testApplication(port: Int, block: suspend (client: HttpClient) -> Unit) {
+    private fun testApplication(
+        port: Int,
+        block: suspend (client: HttpClient) -> Unit,
+    ) {
         io.ktor.server.testing.testApplication {
             environment {
                 config = buildTestApplicationConfigurationForOauth(port, AZURE_ISSUER, AZURE_CLIENT_ID)
             }
             application { restModule(log) { avtale(service, behandlingKlient) } }
 
-            val client = createClient {
-                install(ContentNegotiation) {
-                    jackson { registerModule(JavaTimeModule()) }
+            val client =
+                createClient {
+                    install(ContentNegotiation) {
+                        jackson { registerModule(JavaTimeModule()) }
+                    }
                 }
-            }
 
             block(client)
         }
@@ -240,7 +247,7 @@ internal class AvtaleRoutesTest {
         server.issueToken(
             issuerId = AZURE_ISSUER,
             audience = AZURE_CLIENT_ID,
-            claims = mapOf("navn" to "John Doe", "NAVident" to "Saksbehandler01")
+            claims = mapOf("navn" to "John Doe", "NAVident" to "Saksbehandler01"),
         ).serialize()
     }
 

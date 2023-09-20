@@ -30,6 +30,7 @@ import java.time.temporal.ChronoUnit
 import javax.sql.DataSource
 
 val sikkerLogg: Logger = LoggerFactory.getLogger("sikkerLogg")
+
 class ApplicationContext {
     private val env = System.getenv()
     val rapidsConnection: RapidsConnection = RapidApplication.create(getRapidEnv())
@@ -80,7 +81,7 @@ class ApplicationContext {
             statistikkService,
             leaderElection,
             Duration.of(10, ChronoUnit.MINUTES).toMillis(),
-            periode = Duration.of(4, ChronoUnit.HOURS)
+            periode = Duration.of(4, ChronoUnit.HOURS),
         )
     }
 
@@ -93,7 +94,7 @@ class ApplicationContext {
             azureAppClientId = env.requireEnvValue("AZURE_APP_CLIENT_ID"),
             azureAppJwk = env.requireEnvValue("AZURE_APP_JWK"),
             azureAppWellKnownUrl = env.requireEnvValue("AZURE_APP_WELL_KNOWN_URL"),
-            azureAppScope = env.requireEnvValue("BEREGNING_AZURE_SCOPE")
+            azureAppScope = env.requireEnvValue("BEREGNING_AZURE_SCOPE"),
         )
     }
 
@@ -102,7 +103,7 @@ class ApplicationContext {
             azureAppClientId = env.requireEnvValue("AZURE_APP_CLIENT_ID"),
             azureAppJwk = env.requireEnvValue("AZURE_APP_JWK"),
             azureAppWellKnownUrl = env.requireEnvValue("AZURE_APP_WELL_KNOWN_URL"),
-            azureAppScope = env.requireEnvValue("BEHANDLING_AZURE_SCOPE")
+            azureAppScope = env.requireEnvValue("BEHANDLING_AZURE_SCOPE"),
         )
     }
 }

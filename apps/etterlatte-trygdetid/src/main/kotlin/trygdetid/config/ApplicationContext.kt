@@ -18,11 +18,12 @@ import no.nav.etterlatte.trygdetid.klienter.VilkaarsvuderingKlient
 class ApplicationContext {
     val config: Config = ConfigFactory.load()
     val properties: ApplicationProperties = ApplicationProperties.fromEnv(System.getenv())
-    val dataSource = DataSourceBuilder.createDataSource(
-        jdbcUrl = properties.jdbcUrl,
-        username = properties.dbUsername,
-        password = properties.dbPassword
-    )
+    val dataSource =
+        DataSourceBuilder.createDataSource(
+            jdbcUrl = properties.jdbcUrl,
+            username = properties.dbUsername,
+            password = properties.dbPassword,
+        )
     private val grunnlagKlient = GrunnlagKlient(config, httpClient())
     private val vilkaarsvurderingKlient = VilkaarsvuderingKlient(config, httpClient())
     val behandlingKlient = BehandlingKlient(config, httpClient())
@@ -33,7 +34,7 @@ class ApplicationContext {
             behandlingKlient = behandlingKlient,
             grunnlagKlient = grunnlagKlient,
             vilkaarsvurderingKlient = vilkaarsvurderingKlient,
-            beregnTrygdetidService = TrygdetidBeregningService
+            beregnTrygdetidService = TrygdetidBeregningService,
         )
     private val avtaleRepository = AvtaleRepository(dataSource)
     val avtaleService = AvtaleService(avtaleRepository)

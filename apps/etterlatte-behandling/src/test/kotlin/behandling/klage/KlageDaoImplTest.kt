@@ -25,7 +25,6 @@ import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class KlageDaoImplTest {
-
     private lateinit var dataSource: DataSource
     private lateinit var sakRepo: SakDao
     private lateinit var klageDao: KlageDaoImpl
@@ -39,11 +38,12 @@ internal class KlageDaoImplTest {
         postgreSQLContainer.withUrlParam("user", postgreSQLContainer.username)
         postgreSQLContainer.withUrlParam("password", postgreSQLContainer.password)
 
-        dataSource = DataSourceBuilder.createDataSource(
-            jdbcUrl = postgreSQLContainer.jdbcUrl,
-            username = postgreSQLContainer.username,
-            password = postgreSQLContainer.password
-        ).apply { migrate() }
+        dataSource =
+            DataSourceBuilder.createDataSource(
+                jdbcUrl = postgreSQLContainer.jdbcUrl,
+                username = postgreSQLContainer.username,
+                password = postgreSQLContainer.password,
+            ).apply { migrate() }
 
         val connection = dataSource.connection
         sakRepo = SakDao { connection }
@@ -69,27 +69,30 @@ internal class KlageDaoImplTest {
         val klage = Klage.ny(sak)
         klageDao.lagreKlage(klage)
 
-        val formkrav = FormkravMedBeslutter(
-            Formkrav(
-                vedtaketKlagenGjelder = VedtaketKlagenGjelder(
-                    id = "",
-                    behandlingId = "",
-                    datoAttestert = null,
-                    vedtakType = null
+        val formkrav =
+            FormkravMedBeslutter(
+                Formkrav(
+                    vedtaketKlagenGjelder =
+                        VedtaketKlagenGjelder(
+                            id = "",
+                            behandlingId = "",
+                            datoAttestert = null,
+                            vedtakType = null,
+                        ),
+                    erKlagerPartISaken = JaNei.JA,
+                    erKlagenSignert = JaNei.JA,
+                    gjelderKlagenNoeKonkretIVedtaket = JaNei.JA,
+                    erKlagenFramsattInnenFrist = JaNei.JA,
+                    erFormkraveneOppfylt = JaNei.JA,
                 ),
-                erKlagerPartISaken = JaNei.JA,
-                erKlagenSignert = JaNei.JA,
-                gjelderKlagenNoeKonkretIVedtaket = JaNei.JA,
-                erKlagenFramsattInnenFrist = JaNei.JA,
-                erFormkraveneOppfylt = JaNei.JA
-            ),
-            Grunnlagsopplysning.Saksbehandler.create("en saksbehandler")
-        )
+                Grunnlagsopplysning.Saksbehandler.create("en saksbehandler"),
+            )
 
-        val oppdatertKlage = klage.copy(
-            status = KlageStatus.FORMKRAV_OPPFYLT,
-            formkrav = formkrav
-        )
+        val oppdatertKlage =
+            klage.copy(
+                status = KlageStatus.FORMKRAV_OPPFYLT,
+                formkrav = formkrav,
+            )
         klageDao.lagreKlage(oppdatertKlage)
 
         val hentetKlage = klageDao.hentKlage(oppdatertKlage.id)

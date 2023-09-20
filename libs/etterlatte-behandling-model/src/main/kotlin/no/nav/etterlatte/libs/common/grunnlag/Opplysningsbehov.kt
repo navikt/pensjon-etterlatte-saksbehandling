@@ -6,5 +6,5 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 data class Opplysningsbehov(
     val sakid: Long,
     val sakType: SakType,
-    val persongalleri: Persongalleri
+    val persongalleri: Persongalleri,
 )

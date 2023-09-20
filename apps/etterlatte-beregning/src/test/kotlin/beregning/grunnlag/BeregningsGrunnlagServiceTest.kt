@@ -33,41 +33,45 @@ import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
 import java.time.Month
 import java.time.YearMonth
-import java.util.*
+import java.util.UUID
 import java.util.UUID.randomUUID
 
 internal class BeregningsGrunnlagServiceTest {
-
     private val behandlingKlient = mockk<BehandlingKlientImpl>()
     private val beregningsGrunnlagRepository = mockk<BeregningsGrunnlagRepository>()
-    private val beregningsGrunnlagService: BeregningsGrunnlagService = BeregningsGrunnlagService(
-        beregningsGrunnlagRepository,
-        behandlingKlient
-    )
+    private val beregningsGrunnlagService: BeregningsGrunnlagService =
+        BeregningsGrunnlagService(
+            beregningsGrunnlagRepository,
+            behandlingKlient,
+        )
 
-    private val personidenter = listOf(
-        "05108208963",
-        "18061264406"
-    )
+    private val personidenter =
+        listOf(
+            "05108208963",
+            "18061264406",
+        )
 
     @Test
     fun `skal lagre soeksken med i beregning hvis ikke det finnes`() {
-        val soeskenMedIBeregning: List<GrunnlagMedPeriode<List<SoeskenMedIBeregning>>> = listOf(
-            GrunnlagMedPeriode(
-                fom = LocalDate.of(2022, 8, 1),
-                tom = null,
-                data = listOf(
-                    SoeskenMedIBeregning(STOR_SNERK, true)
-                )
+        val soeskenMedIBeregning: List<GrunnlagMedPeriode<List<SoeskenMedIBeregning>>> =
+            listOf(
+                GrunnlagMedPeriode(
+                    fom = LocalDate.of(2022, 8, 1),
+                    tom = null,
+                    data =
+                        listOf(
+                            SoeskenMedIBeregning(STOR_SNERK, true),
+                        ),
+                ),
             )
-        )
-        val institusjonsoppholdBeregningsgrunnlag = listOf(
-            GrunnlagMedPeriode(
-                fom = LocalDate.of(2022, 8, 1),
-                tom = null,
-                data = InstitusjonsoppholdBeregningsgrunnlag(Reduksjon.NEI_KORT_OPPHOLD)
+        val institusjonsoppholdBeregningsgrunnlag =
+            listOf(
+                GrunnlagMedPeriode(
+                    fom = LocalDate.of(2022, 8, 1),
+                    tom = null,
+                    data = InstitusjonsoppholdBeregningsgrunnlag(Reduksjon.NEI_KORT_OPPHOLD),
+                ),
             )
-        )
 
         val behandling = mockBehandling(SakType.BARNEPENSJON, randomUUID())
 
@@ -82,7 +86,7 @@ internal class BeregningsGrunnlagServiceTest {
                 BarnepensjonBeregningsGrunnlag(soeskenMedIBeregning, institusjonsoppholdBeregningsgrunnlag),
                 mockk {
                     every { ident() } returns "Z123456"
-                }
+                },
             )
 
             verify(exactly = 1) { beregningsGrunnlagRepository.lagre(any()) }
@@ -97,41 +101,46 @@ internal class BeregningsGrunnlagServiceTest {
         val virk = YearMonth.of(2023, Month.JANUARY)
         val virkMock = mockk<Virkningstidspunkt>()
         every { virkMock.dato } returns virk
-        val revurdering = mockBehandling(
-            type = SakType.BARNEPENSJON,
-            uuid = randomUUID(),
-            behandlingstype = BehandlingType.REVURDERING,
-            sakId = sakId
-        )
+        val revurdering =
+            mockBehandling(
+                type = SakType.BARNEPENSJON,
+                uuid = randomUUID(),
+                behandlingstype = BehandlingType.REVURDERING,
+                sakId = sakId,
+            )
         every { revurdering.virkningstidspunkt } returns virkMock
 
         val soesken = personidenter.map { Folkeregisteridentifikator.of(it) }
 
-        val periode1 = GrunnlagMedPeriode(
-            data = soesken.map { SoeskenMedIBeregning(it, true) },
-            fom = LocalDate.of(2022, 8, 1),
-            tom = null
-        )
-        val periode2 = GrunnlagMedPeriode(
-            data = soesken.map { SoeskenMedIBeregning(it, false) },
-            fom = virk.atDay(1).minusMonths(1)
-        )
+        val periode1 =
+            GrunnlagMedPeriode(
+                data = soesken.map { SoeskenMedIBeregning(it, true) },
+                fom = LocalDate.of(2022, 8, 1),
+                tom = null,
+            )
+        val periode2 =
+            GrunnlagMedPeriode(
+                data = soesken.map { SoeskenMedIBeregning(it, false) },
+                fom = virk.atDay(1).minusMonths(1),
+            )
 
-        val grunnlagIverksatt = beregningsgrunnlag(
-            behandlingId = foerstegangsbehandling.id,
-            soeskenMedIBeregning = listOf(periode1)
-        )
-        val grunnlagEndring = beregningsgrunnlag(
-            behandlingId = revurdering.id,
-            soeskenMedIBeregning = listOf(periode1.copy(tom = periode2.fom.minusDays(1)), periode2)
-        )
+        val grunnlagIverksatt =
+            beregningsgrunnlag(
+                behandlingId = foerstegangsbehandling.id,
+                soeskenMedIBeregning = listOf(periode1),
+            )
+        val grunnlagEndring =
+            beregningsgrunnlag(
+                behandlingId = revurdering.id,
+                soeskenMedIBeregning = listOf(periode1.copy(tom = periode2.fom.minusDays(1)), periode2),
+            )
 
         coEvery { behandlingKlient.hentBehandling(foerstegangsbehandling.id, any()) } returns foerstegangsbehandling
         coEvery { behandlingKlient.beregn(revurdering.id, any(), any()) } returns true
         coEvery {
             behandlingKlient.hentSisteIverksatteBehandling(
                 sakId,
-                any()
+                any(),
             )
         } returns SisteIverksatteBehandling(foerstegangsbehandling.id)
         coEvery { behandlingKlient.hentBehandling(revurdering.id, any()) } returns revurdering
@@ -144,14 +153,16 @@ internal class BeregningsGrunnlagServiceTest {
         } returns grunnlagEndring
 
         runBlocking {
-            val lagret = beregningsGrunnlagService.lagreBarnepensjonBeregningsGrunnlag(
-                behandlingId = revurdering.id,
-                barnepensjonBeregningsGrunnlag = BarnepensjonBeregningsGrunnlag(
-                    soeskenMedIBeregning = grunnlagEndring.soeskenMedIBeregning,
-                    institusjonsopphold = grunnlagEndring.institusjonsoppholdBeregningsgrunnlag
-                ),
-                brukerTokenInfo = mockk(relaxed = true)
-            )
+            val lagret =
+                beregningsGrunnlagService.lagreBarnepensjonBeregningsGrunnlag(
+                    behandlingId = revurdering.id,
+                    barnepensjonBeregningsGrunnlag =
+                        BarnepensjonBeregningsGrunnlag(
+                            soeskenMedIBeregning = grunnlagEndring.soeskenMedIBeregning,
+                            institusjonsopphold = grunnlagEndring.institusjonsoppholdBeregningsgrunnlag,
+                        ),
+                    brukerTokenInfo = mockk(relaxed = true),
+                )
             assertFalse(lagret)
         }
 
@@ -166,41 +177,46 @@ internal class BeregningsGrunnlagServiceTest {
         val virk = YearMonth.of(2023, Month.JANUARY)
         val virkMock = mockk<Virkningstidspunkt>()
         every { virkMock.dato } returns virk
-        val revurdering = mockBehandling(
-            type = SakType.BARNEPENSJON,
-            uuid = randomUUID(),
-            behandlingstype = BehandlingType.REVURDERING,
-            sakId = sakId
-        )
+        val revurdering =
+            mockBehandling(
+                type = SakType.BARNEPENSJON,
+                uuid = randomUUID(),
+                behandlingstype = BehandlingType.REVURDERING,
+                sakId = sakId,
+            )
         every { revurdering.virkningstidspunkt } returns virkMock
 
         val soesken = personidenter.map { Folkeregisteridentifikator.of(it) }
 
-        val periode1 = GrunnlagMedPeriode(
-            data = soesken.map { SoeskenMedIBeregning(it, true) },
-            fom = LocalDate.of(2022, 8, 1),
-            tom = null
-        )
-        val periode2 = GrunnlagMedPeriode(
-            data = soesken.map { SoeskenMedIBeregning(it, false) },
-            fom = virk.atDay(1)
-        )
+        val periode1 =
+            GrunnlagMedPeriode(
+                data = soesken.map { SoeskenMedIBeregning(it, true) },
+                fom = LocalDate.of(2022, 8, 1),
+                tom = null,
+            )
+        val periode2 =
+            GrunnlagMedPeriode(
+                data = soesken.map { SoeskenMedIBeregning(it, false) },
+                fom = virk.atDay(1),
+            )
 
-        val grunnlagIverksatt = beregningsgrunnlag(
-            behandlingId = foerstegangsbehandling.id,
-            soeskenMedIBeregning = listOf(periode1)
-        )
-        val grunnlagEndring = beregningsgrunnlag(
-            behandlingId = revurdering.id,
-            soeskenMedIBeregning = listOf(periode1.copy(tom = periode2.fom.minusDays(1)), periode2)
-        )
+        val grunnlagIverksatt =
+            beregningsgrunnlag(
+                behandlingId = foerstegangsbehandling.id,
+                soeskenMedIBeregning = listOf(periode1),
+            )
+        val grunnlagEndring =
+            beregningsgrunnlag(
+                behandlingId = revurdering.id,
+                soeskenMedIBeregning = listOf(periode1.copy(tom = periode2.fom.minusDays(1)), periode2),
+            )
 
         coEvery { behandlingKlient.hentBehandling(foerstegangsbehandling.id, any()) } returns foerstegangsbehandling
         coEvery { behandlingKlient.beregn(revurdering.id, any(), any()) } returns true
         coEvery {
             behandlingKlient.hentSisteIverksatteBehandling(
                 sakId,
-                any()
+                any(),
             )
         } returns SisteIverksatteBehandling(foerstegangsbehandling.id)
         coEvery { behandlingKlient.hentBehandling(revurdering.id, any()) } returns revurdering
@@ -214,14 +230,16 @@ internal class BeregningsGrunnlagServiceTest {
         every { beregningsGrunnlagRepository.lagre(any()) } returns true
 
         runBlocking {
-            val lagret = beregningsGrunnlagService.lagreBarnepensjonBeregningsGrunnlag(
-                behandlingId = revurdering.id,
-                barnepensjonBeregningsGrunnlag = BarnepensjonBeregningsGrunnlag(
-                    soeskenMedIBeregning = grunnlagEndring.soeskenMedIBeregning,
-                    institusjonsopphold = grunnlagEndring.institusjonsoppholdBeregningsgrunnlag
-                ),
-                brukerTokenInfo = mockk(relaxed = true)
-            )
+            val lagret =
+                beregningsGrunnlagService.lagreBarnepensjonBeregningsGrunnlag(
+                    behandlingId = revurdering.id,
+                    barnepensjonBeregningsGrunnlag =
+                        BarnepensjonBeregningsGrunnlag(
+                            soeskenMedIBeregning = grunnlagEndring.soeskenMedIBeregning,
+                            institusjonsopphold = grunnlagEndring.institusjonsoppholdBeregningsgrunnlag,
+                        ),
+                    brukerTokenInfo = mockk(relaxed = true),
+                )
             assertTrue(lagret)
         }
 
@@ -240,12 +258,13 @@ internal class BeregningsGrunnlagServiceTest {
         every { beregningsGrunnlagRepository.finnBarnepensjonGrunnlagForBehandling(omregningsId) } returns null
         every {
             beregningsGrunnlagRepository.finnBarnepensjonGrunnlagForBehandling(behandlingsId)
-        } returns BeregningsGrunnlag(
-            behandlingsId,
-            Grunnlagsopplysning.Saksbehandler("Z123456", Tidspunkt.now()),
-            emptyList(),
-            emptyList()
-        )
+        } returns
+            BeregningsGrunnlag(
+                behandlingsId,
+                Grunnlagsopplysning.Saksbehandler("Z123456", Tidspunkt.now()),
+                emptyList(),
+                emptyList(),
+            )
 
         every { beregningsGrunnlagRepository.lagre(any()) } returns true
 
@@ -284,12 +303,13 @@ internal class BeregningsGrunnlagServiceTest {
 
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
         coEvery { behandlingKlient.beregn(any(), any(), any()) } returns true
-        every { beregningsGrunnlagRepository.finnBarnepensjonGrunnlagForBehandling(any()) } returns BeregningsGrunnlag(
-            behandlingsId,
-            Grunnlagsopplysning.Saksbehandler("Z123456", Tidspunkt.now()),
-            emptyList(),
-            emptyList()
-        )
+        every { beregningsGrunnlagRepository.finnBarnepensjonGrunnlagForBehandling(any()) } returns
+            BeregningsGrunnlag(
+                behandlingsId,
+                Grunnlagsopplysning.Saksbehandler("Z123456", Tidspunkt.now()),
+                emptyList(),
+                emptyList(),
+            )
 
         runBlocking {
             assertThrows<RuntimeException> {
@@ -304,13 +324,14 @@ internal class BeregningsGrunnlagServiceTest {
     fun `skal lagre default soeksken med i beregning hvis det er tom`() {
         val soeskenMedIBeregning: List<GrunnlagMedPeriode<List<SoeskenMedIBeregning>>> = emptyList()
 
-        val institusjonsoppholdBeregningsgrunnlag = listOf(
-            GrunnlagMedPeriode(
-                fom = LocalDate.of(2022, 8, 1),
-                tom = null,
-                data = InstitusjonsoppholdBeregningsgrunnlag(Reduksjon.NEI_KORT_OPPHOLD)
+        val institusjonsoppholdBeregningsgrunnlag =
+            listOf(
+                GrunnlagMedPeriode(
+                    fom = LocalDate.of(2022, 8, 1),
+                    tom = null,
+                    data = InstitusjonsoppholdBeregningsgrunnlag(Reduksjon.NEI_KORT_OPPHOLD),
+                ),
             )
-        )
 
         val behandling = mockBehandling(SakType.BARNEPENSJON, randomUUID())
 
@@ -327,7 +348,7 @@ internal class BeregningsGrunnlagServiceTest {
                 BarnepensjonBeregningsGrunnlag(soeskenMedIBeregning, institusjonsoppholdBeregningsgrunnlag),
                 mockk {
                     every { ident() } returns "Z123456"
-                }
+                },
             )
 
             assertEquals(
@@ -335,10 +356,10 @@ internal class BeregningsGrunnlagServiceTest {
                     GrunnlagMedPeriode(
                         fom = behandling.virkningstidspunkt!!.dato.atDay(1),
                         tom = null,
-                        data = emptyList()
-                    )
+                        data = emptyList(),
+                    ),
                 ),
-                slot.captured.soeskenMedIBeregning
+                slot.captured.soeskenMedIBeregning,
             )
 
             verify(exactly = 1) { beregningsGrunnlagRepository.lagre(any()) }
@@ -349,7 +370,7 @@ internal class BeregningsGrunnlagServiceTest {
         type: SakType,
         uuid: UUID,
         behandlingstype: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-        sakId: Long = 1L
+        sakId: Long = 1L,
     ): DetaljertBehandling =
         mockk<DetaljertBehandling>().apply {
             every { id } returns uuid
@@ -368,13 +389,13 @@ internal class BeregningsGrunnlagServiceTest {
         soeskenMedIBeregning: List<GrunnlagMedPeriode<List<SoeskenMedIBeregning>>> = emptyList(),
         institusjonsoppholdBeregningsgrunnlag: List<GrunnlagMedPeriode<InstitusjonsoppholdBeregningsgrunnlag>> =
             emptyList(),
-        kilde: Grunnlagsopplysning.Saksbehandler = Grunnlagsopplysning.Saksbehandler("test", Tidspunkt.now())
+        kilde: Grunnlagsopplysning.Saksbehandler = Grunnlagsopplysning.Saksbehandler("test", Tidspunkt.now()),
     ): BeregningsGrunnlag {
         return BeregningsGrunnlag(
             behandlingId = behandlingId,
             kilde = kilde,
             soeskenMedIBeregning = soeskenMedIBeregning,
-            institusjonsoppholdBeregningsgrunnlag = institusjonsoppholdBeregningsgrunnlag
+            institusjonsoppholdBeregningsgrunnlag = institusjonsoppholdBeregningsgrunnlag,
         )
     }
 }

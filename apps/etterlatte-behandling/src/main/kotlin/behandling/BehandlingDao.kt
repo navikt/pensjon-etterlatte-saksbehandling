@@ -34,19 +34,19 @@ import no.nav.etterlatte.libs.database.toList
 import java.sql.Connection
 import java.sql.ResultSet
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 
 class BehandlingDao(
     private val kommerBarnetTilGodeDao: KommerBarnetTilGodeDao,
     private val revurderingDao: RevurderingDao,
-    private val connection: () -> Connection
+    private val connection: () -> Connection,
 ) {
-
-    private val alleBehandlingerMedSak = """
+    private val alleBehandlingerMedSak =
+        """
         SELECT b.*, s.sakType, s.enhet, s.fnr 
         FROM behandling b
         INNER JOIN sak s ON b.sak_id = s.id
-    """.trimIndent()
+        """.trimIndent()
 
     fun hentBehandling(id: UUID): Behandling? {
         val stmt =
@@ -54,7 +54,7 @@ class BehandlingDao(
                 """
                     $alleBehandlingerMedSak
                     WHERE b.id = ?::UUID
-                    """
+                    """,
             )
         stmt.setObject(1, id)
 
@@ -67,9 +67,9 @@ class BehandlingDao(
         val stmt =
             connection().prepareStatement(
                 """
-                    $alleBehandlingerMedSak
-                    WHERE sak_id = ?
-                """.trimIndent()
+                $alleBehandlingerMedSak
+                WHERE sak_id = ?
+                """.trimIndent(),
             )
         stmt.setLong(1, sakid)
         return stmt.executeQuery().behandlingsListe()
@@ -77,13 +77,14 @@ class BehandlingDao(
 
     fun migrerStatusPaaAlleBehandlingerSomTrengerNyBeregning(): SakIDListe {
         with(connection()) {
-            val stmt = prepareStatement(
-                """
-                UPDATE behandling
-                SET status = '${BehandlingStatus.VILKAARSVURDERT}'
-                WHERE status <> ALL (?) RETURNING id, sak_id
-                """.trimIndent()
-            )
+            val stmt =
+                prepareStatement(
+                    """
+                    UPDATE behandling
+                    SET status = '${BehandlingStatus.VILKAARSVURDERT}'
+                    WHERE status <> ALL (?) RETURNING id, sak_id
+                    """.trimIndent(),
+                )
             stmt.setArray(1, createArrayOf("text", BehandlingStatus.skalIkkeOmregnesVedGRegulering().toTypedArray()))
 
             return SakIDListe(stmt.executeQuery().toList { BehandlingOgSak(getUUID("id"), getLong("sak_id")) })
@@ -102,49 +103,53 @@ class BehandlingDao(
             status = rs.getString("status").let { BehandlingStatus.valueOf(it) },
             virkningstidspunkt = rs.getString("virkningstidspunkt")?.let { objectMapper.readValue(it) },
             utenlandstilsnitt = rs.getString("utenlandstilsnitt")?.let { objectMapper.readValue(it) },
-            boddEllerArbeidetUtlandet = rs.getString("bodd_eller_arbeidet_utlandet")
-                ?.let { objectMapper.readValue(it) },
+            boddEllerArbeidetUtlandet =
+                rs.getString("bodd_eller_arbeidet_utlandet")
+                    ?.let { objectMapper.readValue(it) },
             kommerBarnetTilgode = kommerBarnetTilGodeDao.hentKommerBarnetTilGode(id),
             prosesstype = rs.getString("prosesstype").let { Prosesstype.valueOf(it) },
-            kilde = rs.getString("kilde").let { Vedtaksloesning.valueOf(it) }
+            kilde = rs.getString("kilde").let { Vedtaksloesning.valueOf(it) },
         )
     }
 
-    private fun asRevurdering(rs: ResultSet) = revurderingDao.asRevurdering(
-        rs,
-        mapSak(rs)
-    ) { i: UUID -> kommerBarnetTilGodeDao.hentKommerBarnetTilGode(i) }
+    private fun asRevurdering(rs: ResultSet) =
+        revurderingDao.asRevurdering(
+            rs,
+            mapSak(rs),
+        ) { i: UUID -> kommerBarnetTilGodeDao.hentKommerBarnetTilGode(i) }
 
-    private fun asManueltOpphoer(rs: ResultSet) = ManueltOpphoer(
-        id = rs.getUUID("id"),
-        sak = mapSak(rs),
-        behandlingOpprettet = rs.somLocalDateTimeUTC("behandling_opprettet"),
-        sistEndret = rs.somLocalDateTimeUTC("sist_endret"),
-        status = rs.getString("status").let { BehandlingStatus.valueOf(it) },
-        virkningstidspunkt = rs.getString("virkningstidspunkt")?.let { objectMapper.readValue(it) },
-        utenlandstilsnitt = rs.getString("utenlandstilsnitt")?.let { objectMapper.readValue(it) },
-        boddEllerArbeidetUtlandet = rs.getString("bodd_eller_arbeidet_utlandet")?.let { objectMapper.readValue(it) },
-        opphoerAarsaker = rs.getString("opphoer_aarsaker").let { objectMapper.readValue(it) },
-        fritekstAarsak = rs.getString("fritekst_aarsak"),
-        prosesstype = rs.getString("prosesstype").let { Prosesstype.valueOf(it) }
-    )
+    private fun asManueltOpphoer(rs: ResultSet) =
+        ManueltOpphoer(
+            id = rs.getUUID("id"),
+            sak = mapSak(rs),
+            behandlingOpprettet = rs.somLocalDateTimeUTC("behandling_opprettet"),
+            sistEndret = rs.somLocalDateTimeUTC("sist_endret"),
+            status = rs.getString("status").let { BehandlingStatus.valueOf(it) },
+            virkningstidspunkt = rs.getString("virkningstidspunkt")?.let { objectMapper.readValue(it) },
+            utenlandstilsnitt = rs.getString("utenlandstilsnitt")?.let { objectMapper.readValue(it) },
+            boddEllerArbeidetUtlandet = rs.getString("bodd_eller_arbeidet_utlandet")?.let { objectMapper.readValue(it) },
+            opphoerAarsaker = rs.getString("opphoer_aarsaker").let { objectMapper.readValue(it) },
+            fritekstAarsak = rs.getString("fritekst_aarsak"),
+            prosesstype = rs.getString("prosesstype").let { Prosesstype.valueOf(it) },
+        )
 
-    private fun mapSak(rs: ResultSet) = Sak(
-        id = rs.getLong("sak_id"),
-        sakType = enumValueOf(rs.getString("saktype")),
-        ident = rs.getString("fnr"),
-        enhet = rs.getString("enhet")
-    )
+    private fun mapSak(rs: ResultSet) =
+        Sak(
+            id = rs.getLong("sak_id"),
+            sakType = enumValueOf(rs.getString("saktype")),
+            ident = rs.getString("fnr"),
+            enhet = rs.getString("enhet"),
+        )
 
     fun opprettBehandling(behandling: OpprettBehandling) {
         val stmt =
             connection().prepareStatement(
                 """
-                    INSERT INTO behandling(id, sak_id, behandling_opprettet, sist_endret, status, behandlingstype, 
-                    soeknad_mottatt_dato, virkningstidspunkt, revurdering_aarsak, opphoer_aarsaker, fritekst_aarsak, 
-                    prosesstype, kilde, merknad, begrunnelse)
-                    VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                """.trimIndent()
+                INSERT INTO behandling(id, sak_id, behandling_opprettet, sist_endret, status, behandlingstype, 
+                soeknad_mottatt_dato, virkningstidspunkt, revurdering_aarsak, opphoer_aarsaker, fritekst_aarsak, 
+                prosesstype, kilde, merknad, begrunnelse)
+                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """.trimIndent(),
             )
         with(behandling) {
             stmt.setObject(1, id)
@@ -170,9 +175,9 @@ class BehandlingDao(
         val stmt =
             connection().prepareStatement(
                 """
-                    UPDATE behandling SET gyldighetssproving = ?, status = ?, sist_endret = ?
-                    WHERE id = ?
-                """.trimIndent()
+                UPDATE behandling SET gyldighetssproving = ?, status = ?, sist_endret = ?
+                WHERE id = ?
+                """.trimIndent(),
             )
         stmt.setObject(1, objectMapper.writeValueAsString(behandling.gyldighetsproeving))
         stmt.setString(2, behandling.status.name)
@@ -185,7 +190,11 @@ class BehandlingDao(
         lagreStatus(lagretBehandling.id, lagretBehandling.status, lagretBehandling.sistEndret)
     }
 
-    fun lagreStatus(behandlingId: UUID, status: BehandlingStatus, sistEndret: LocalDateTime) {
+    fun lagreStatus(
+        behandlingId: UUID,
+        status: BehandlingStatus,
+        sistEndret: LocalDateTime,
+    ) {
         val stmt =
             connection().prepareStatement("UPDATE behandling SET status = ?, sist_endret = ? WHERE id = ?")
         stmt.setString(1, status.name)
@@ -194,7 +203,10 @@ class BehandlingDao(
         require(stmt.executeUpdate() == 1)
     }
 
-    fun lagreUtenlandstilsnitt(behandlingId: UUID, utenlandstilsnitt: Utenlandstilsnitt) {
+    fun lagreUtenlandstilsnitt(
+        behandlingId: UUID,
+        utenlandstilsnitt: Utenlandstilsnitt,
+    ) {
         val stmt =
             connection().prepareStatement("UPDATE behandling SET utenlandstilsnitt = ? WHERE id = ?")
         stmt.setString(1, objectMapper.writeValueAsString(utenlandstilsnitt))
@@ -202,7 +214,10 @@ class BehandlingDao(
         require(stmt.executeUpdate() == 1)
     }
 
-    fun lagreBoddEllerArbeidetUtlandet(behandlingId: UUID, boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet) {
+    fun lagreBoddEllerArbeidetUtlandet(
+        behandlingId: UUID,
+        boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet,
+    ) {
         val stmt =
             connection().prepareStatement("UPDATE behandling SET bodd_eller_arbeidet_utlandet = ? WHERE id = ?")
         stmt.setString(1, objectMapper.writeValueAsString(boddEllerArbeidetUtlandet))
@@ -210,25 +225,29 @@ class BehandlingDao(
         require(stmt.executeUpdate() == 1)
     }
 
-    private fun ResultSet.behandlingsListe(): List<Behandling> =
-        toList { tilBehandling(getString("behandlingstype")) }.filterNotNull()
+    private fun ResultSet.behandlingsListe(): List<Behandling> = toList { tilBehandling(getString("behandlingstype")) }.filterNotNull()
 
-    private fun ResultSet.tilBehandling(key: String?) = when (key) {
-        BehandlingType.FØRSTEGANGSBEHANDLING.name -> asFoerstegangsbehandling(this)
-        BehandlingType.REVURDERING.name -> asRevurdering(this)
-        BehandlingType.MANUELT_OPPHOER.name -> asManueltOpphoer(this)
-        else -> null
-    }
+    private fun ResultSet.tilBehandling(key: String?) =
+        when (key) {
+            BehandlingType.FØRSTEGANGSBEHANDLING.name -> asFoerstegangsbehandling(this)
+            BehandlingType.REVURDERING.name -> asRevurdering(this)
+            BehandlingType.MANUELT_OPPHOER.name -> asManueltOpphoer(this)
+            else -> null
+        }
 
     private fun ResultSet.behandlingAvRettType() = tilBehandling(getString("behandlingstype"))
 
-    fun avbrytBehandling(behandlingId: UUID) = this.lagreStatus(
-        behandlingId = behandlingId,
-        status = BehandlingStatus.AVBRUTT,
-        sistEndret = Tidspunkt.now().toLocalDatetimeUTC()
-    )
+    fun avbrytBehandling(behandlingId: UUID) =
+        this.lagreStatus(
+            behandlingId = behandlingId,
+            status = BehandlingStatus.AVBRUTT,
+            sistEndret = Tidspunkt.now().toLocalDatetimeUTC(),
+        )
 
-    fun lagreNyttVirkningstidspunkt(behandlingId: UUID, virkningstidspunkt: Virkningstidspunkt) {
+    fun lagreNyttVirkningstidspunkt(
+        behandlingId: UUID,
+        virkningstidspunkt: Virkningstidspunkt,
+    ) {
         val statement = connection().prepareStatement("UPDATE behandling SET virkningstidspunkt = ? where id = ?")
         statement.setString(1, objectMapper.writeValueAsString(virkningstidspunkt))
         statement.setObject(2, behandlingId)

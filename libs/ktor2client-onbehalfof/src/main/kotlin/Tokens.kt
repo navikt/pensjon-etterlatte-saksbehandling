@@ -4,12 +4,12 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonProperty
 
 sealed class TokenRequest(
-    open val scopes: List<String>
+    open val scopes: List<String>,
 )
 
 data class OboTokenRequest(
     override val scopes: List<String>,
-    val accessToken: String
+    val accessToken: String,
 ) : TokenRequest(scopes)
 
 data class ClientCredentialsTokenRequest(override val scopes: List<String>) : TokenRequest(scopes)
@@ -21,5 +21,5 @@ data class AccessToken(
     @JsonProperty("expires_in")
     val expiresIn: Int,
     @JsonProperty("token_type")
-    val tokenType: String
+    val tokenType: String,
 )

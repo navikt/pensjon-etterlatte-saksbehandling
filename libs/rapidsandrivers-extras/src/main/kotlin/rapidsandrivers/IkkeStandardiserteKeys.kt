@@ -4,7 +4,7 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.toUUID
 import java.time.LocalDate
-import java.util.*
+import java.util.UUID
 
 const val SAK_ID_KEY = "sakId"
 const val SAK_TYPE = "sakType"
@@ -38,9 +38,10 @@ var JsonMessage.dato: LocalDate
     }
 
 var JsonMessage.tilbakestilteBehandlinger: List<UUID>
-    get() = this[TILBAKESTILTE_BEHANDLINGER_KEY].asText().trim().split(";")
-        .filter { it.isNotEmpty() }
-        .map { UUID.fromString(it) }
+    get() =
+        this[TILBAKESTILTE_BEHANDLINGER_KEY].asText().trim().split(";")
+            .filter { it.isNotEmpty() }
+            .map { UUID.fromString(it) }
     set(name) {
         this[TILBAKESTILTE_BEHANDLINGER_KEY] = name.joinToString(";") { it.toString() }
     }

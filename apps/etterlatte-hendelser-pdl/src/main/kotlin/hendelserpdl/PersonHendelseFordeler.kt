@@ -24,7 +24,7 @@ import no.nav.person.pdl.leesah.Personhendelse
 import no.nav.person.pdl.leesah.adressebeskyttelse.Gradering
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import java.util.*
+import java.util.UUID
 
 enum class LeesahOpplysningstype {
     ADRESSEBESKYTTELSE_V1,
@@ -32,12 +32,12 @@ enum class LeesahOpplysningstype {
     UTFLYTTING_FRA_NORGE,
     DOEDSFALL_V1,
     VERGEMAAL_ELLER_FREMTIDSFULLMAKT_V1,
-    SIVILSTAND_V1
+    SIVILSTAND_V1,
 }
 
 class PersonHendelseFordeler(
     private val kafkaProduser: KafkaProdusent<String, JsonMessage>,
-    private val pdlKlient: PdlKlient
+    private val pdlKlient: PdlKlient,
 ) {
     private val logger: Logger = LoggerFactory.getLogger(PersonHendelseFordeler::class.java)
     private val sikkerLogg: Logger = LoggerFactory.getLogger("sikkerLogg")
@@ -48,16 +48,18 @@ class PersonHendelseFordeler(
             return
         }
 
-        val ident = hendelse.personidenter.firstOrNull()?.let {
-            pdlKlient.hentPdlIdentifikator(it)
-        }
+        val ident =
+            hendelse.personidenter.firstOrNull()?.let {
+                pdlKlient.hentPdlIdentifikator(it)
+            }
 
         try {
             when (ident) {
-                null -> "Mottok en hendelse uten personident (hendelseId=${hendelse.hendelseId})".let {
-                    sikkerLogg.info(it, hendelse)
-                    logger.info(it)
-                }
+                null ->
+                    "Mottok en hendelse uten personident (hendelseId=${hendelse.hendelseId})".let {
+                        sikkerLogg.info(it, hendelse)
+                        logger.info(it)
+                    }
 
                 is PdlIdentifikator.Npid -> loggIgnorererNpid(hendelse.hendelseId)
                 is PdlIdentifikator.FolkeregisterIdent -> {
@@ -77,14 +79,18 @@ class PersonHendelseFordeler(
         }
     }
 
-    private fun haandterVergemaal(hendelse: Personhendelse, personnummer: PdlIdentifikator.FolkeregisterIdent) {
+    private fun haandterVergemaal(
+        hendelse: Personhendelse,
+        personnummer: PdlIdentifikator.FolkeregisterIdent,
+    ) {
         val type = hendelse.vergemaalEllerFremtidsfullmakt?.type
-        if (type !in listOf(
+        if (type !in
+            listOf(
                 "ensligMindreaarigAsylsoeker",
                 "ensligMindreaarigFlyktning",
                 "mindreaarig",
                 "midlertidigForMindreaarig",
-                "forvaltningUtenforVergemaal"
+                "forvaltningUtenforVergemaal",
             )
         ) {
             logger.info("Ignorerer vergemaalEllerFremtidsfullmakt med type=$type")
@@ -93,18 +99,19 @@ class PersonHendelseFordeler(
 
         publiserPaaRapid(
             opplysningstype = VERGEMAAL_ELLER_FREMTIDSFULLMAKT_V1,
-            hendelse = VergeMaalEllerFremtidsfullmakt(
-                hendelseId = hendelse.hendelseId,
-                endringstype = hendelse.endringstype(),
-                fnr = personnummer.folkeregisterident.value,
-                vergeIdent = hendelse.vergemaalEllerFremtidsfullmakt?.vergeEllerFullmektig?.motpartsPersonident
-            )
+            hendelse =
+                VergeMaalEllerFremtidsfullmakt(
+                    hendelseId = hendelse.hendelseId,
+                    endringstype = hendelse.endringstype(),
+                    fnr = personnummer.folkeregisterident.value,
+                    vergeIdent = hendelse.vergemaalEllerFremtidsfullmakt?.vergeEllerFullmektig?.motpartsPersonident,
+                ),
         )
     }
 
     private fun haandterAdressebeskyttelse(
         hendelse: Personhendelse,
-        personnummer: PdlIdentifikator.FolkeregisterIdent
+        personnummer: PdlIdentifikator.FolkeregisterIdent,
     ) {
         val gradering = hendelse.adressebeskyttelse?.gradering
         if (gradering == null || gradering == Gradering.UGRADERT) {
@@ -114,100 +121,111 @@ class PersonHendelseFordeler(
 
         publiserPaaRapid(
             opplysningstype = ADRESSEBESKYTTELSE_V1,
-            hendelse = Adressebeskyttelse(
-                hendelseId = hendelse.hendelseId,
-                endringstype = hendelse.endringstype(),
-                fnr = personnummer.folkeregisterident.value,
-                adressebeskyttelseGradering = gradering.let {
-                    AdressebeskyttelseGradering.valueOf(gradering.toString())
-                }
-            )
+            hendelse =
+                Adressebeskyttelse(
+                    hendelseId = hendelse.hendelseId,
+                    endringstype = hendelse.endringstype(),
+                    fnr = personnummer.folkeregisterident.value,
+                    adressebeskyttelseGradering =
+                        gradering.let {
+                            AdressebeskyttelseGradering.valueOf(gradering.toString())
+                        },
+                ),
         )
     }
 
     private fun haandterForelderBarnRelasjon(
         hendelse: Personhendelse,
-        personnummer: PdlIdentifikator.FolkeregisterIdent
+        personnummer: PdlIdentifikator.FolkeregisterIdent,
     ) {
         publiserPaaRapid(
             opplysningstype = FORELDERBARNRELASJON_V1,
-            hendelse = ForelderBarnRelasjonHendelse(
-                hendelseId = hendelse.hendelseId,
-                endringstype = hendelse.endringstype(),
-                fnr = personnummer.folkeregisterident.value,
-                relatertPersonsIdent = hendelse.forelderBarnRelasjon?.relatertPersonsIdent,
-                relatertPersonsRolle = hendelse.forelderBarnRelasjon?.relatertPersonsRolle,
-                minRolleForPerson = hendelse.forelderBarnRelasjon?.minRolleForPerson,
-                relatertPersonUtenFolkeregisteridentifikator =
-                hendelse.forelderBarnRelasjon?.relatertPersonUtenFolkeregisteridentifikator?.toString()
-            )
+            hendelse =
+                ForelderBarnRelasjonHendelse(
+                    hendelseId = hendelse.hendelseId,
+                    endringstype = hendelse.endringstype(),
+                    fnr = personnummer.folkeregisterident.value,
+                    relatertPersonsIdent = hendelse.forelderBarnRelasjon?.relatertPersonsIdent,
+                    relatertPersonsRolle = hendelse.forelderBarnRelasjon?.relatertPersonsRolle,
+                    minRolleForPerson = hendelse.forelderBarnRelasjon?.minRolleForPerson,
+                    relatertPersonUtenFolkeregisteridentifikator =
+                        hendelse.forelderBarnRelasjon?.relatertPersonUtenFolkeregisteridentifikator?.toString(),
+                ),
         )
     }
 
     private fun haandterDoedsHendelse(
         hendelse: Personhendelse,
-        personnummer: PdlIdentifikator.FolkeregisterIdent
+        personnummer: PdlIdentifikator.FolkeregisterIdent,
     ) {
         publiserPaaRapid(
             opplysningstype = DOEDSFALL_V1,
-            hendelse = Doedshendelse(
-                hendelseId = hendelse.hendelseId,
-                endringstype = hendelse.endringstype(),
-                fnr = personnummer.folkeregisterident.value,
-                doedsdato = hendelse.doedsfall?.doedsdato
-            )
+            hendelse =
+                Doedshendelse(
+                    hendelseId = hendelse.hendelseId,
+                    endringstype = hendelse.endringstype(),
+                    fnr = personnummer.folkeregisterident.value,
+                    doedsdato = hendelse.doedsfall?.doedsdato,
+                ),
         )
     }
 
     private fun haandterUtflyttingFraNorge(
         hendelse: Personhendelse,
-        personnummer: PdlIdentifikator.FolkeregisterIdent
+        personnummer: PdlIdentifikator.FolkeregisterIdent,
     ) {
         publiserPaaRapid(
             opplysningstype = UTFLYTTING_FRA_NORGE,
-            hendelse = UtflyttingsHendelse(
-                hendelseId = hendelse.hendelseId,
-                endringstype = hendelse.endringstype(),
-                fnr = personnummer.folkeregisterident.value,
-                tilflyttingsLand = hendelse.utflyttingFraNorge?.tilflyttingsland,
-                tilflyttingsstedIUtlandet = hendelse.utflyttingFraNorge?.tilflyttingsstedIUtlandet,
-                utflyttingsdato = hendelse.utflyttingFraNorge?.utflyttingsdato
-            )
+            hendelse =
+                UtflyttingsHendelse(
+                    hendelseId = hendelse.hendelseId,
+                    endringstype = hendelse.endringstype(),
+                    fnr = personnummer.folkeregisterident.value,
+                    tilflyttingsLand = hendelse.utflyttingFraNorge?.tilflyttingsland,
+                    tilflyttingsstedIUtlandet = hendelse.utflyttingFraNorge?.tilflyttingsstedIUtlandet,
+                    utflyttingsdato = hendelse.utflyttingFraNorge?.utflyttingsdato,
+                ),
         )
     }
 
     private fun haandterSivilstand(
         hendelse: Personhendelse,
-        personnummer: PdlIdentifikator.FolkeregisterIdent
+        personnummer: PdlIdentifikator.FolkeregisterIdent,
     ) {
         publiserPaaRapid(
             opplysningstype = SIVILSTAND_V1,
-            hendelse = SivilstandHendelse(
-                hendelseId = hendelse.hendelseId,
-                endringstype = hendelse.endringstype(),
-                fnr = personnummer.folkeregisterident.value,
-                type = hendelse.sivilstand?.type,
-                relatertVedSivilstand = hendelse.sivilstand?.relatertVedSivilstand,
-                gyldigFraOgMed = hendelse.sivilstand?.gyldigFraOgMed,
-                bekreftelsesdato = hendelse.sivilstand?.bekreftelsesdato
-            )
+            hendelse =
+                SivilstandHendelse(
+                    hendelseId = hendelse.hendelseId,
+                    endringstype = hendelse.endringstype(),
+                    fnr = personnummer.folkeregisterident.value,
+                    type = hendelse.sivilstand?.type,
+                    relatertVedSivilstand = hendelse.sivilstand?.relatertVedSivilstand,
+                    gyldigFraOgMed = hendelse.sivilstand?.gyldigFraOgMed,
+                    bekreftelsesdato = hendelse.sivilstand?.bekreftelsesdato,
+                ),
         )
     }
 
     private fun opplysningstyperSomHaandteres() = LeesahOpplysningstype.values().map { it.toString() }
 
-    private fun publiserPaaRapid(opplysningstype: LeesahOpplysningstype, hendelse: PdlHendelse) {
+    private fun publiserPaaRapid(
+        opplysningstype: LeesahOpplysningstype,
+        hendelse: PdlHendelse,
+    ) {
         logger.info("Publiserer at en person med fnr=${hendelse.fnr.maskerFnr()} har mottatt hendelse $opplysningstype")
 
         kafkaProduser.publiser(
             noekkel = UUID.randomUUID().toString(),
-            verdi = JsonMessage.newMessage(
-                eventName = "PDL:PERSONHENDELSE",
-                map = mapOf(
-                    "hendelse" to opplysningstype.toString(),
-                    "hendelse_data" to hendelse
-                )
-            )
+            verdi =
+                JsonMessage.newMessage(
+                    eventName = "PDL:PERSONHENDELSE",
+                    map =
+                        mapOf(
+                            "hendelse" to opplysningstype.toString(),
+                            "hendelse_data" to hendelse,
+                        ),
+                ),
         )
     }
 
@@ -216,11 +234,15 @@ class PersonHendelseFordeler(
     private fun loggIgnorererNpid(hendelseId: String) =
         logger.info("Ignorerer en hendelse med id=$hendelseId om en person som kun har NPID som identifikator")
 
-    private fun loggFeilVedHaandteringAvHendelse(hendelseId: String, opplysningstype: String, e: Exception) {
+    private fun loggFeilVedHaandteringAvHendelse(
+        hendelseId: String,
+        opplysningstype: String,
+        e: Exception,
+    ) {
         logger.error(
             "Kunne ikke haandtere $opplysningstype med id=$hendelseId. Dette skyldes sannsynligvis at " +
                 "personhendelsen ser annerledes ut enn forventet.",
-            e
+            e,
         )
     }
 }

@@ -4,5 +4,5 @@ enum class HendelseType {
     FATTET,
     ATTESTERT,
     UNDERKJENT,
-    IVERKSATT
+    IVERKSATT,
 }

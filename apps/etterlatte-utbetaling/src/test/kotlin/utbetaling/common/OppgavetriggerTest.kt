@@ -14,35 +14,39 @@ import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Test
 
 internal class OppgavetriggerTest {
-
-    private val utbetalingService = mockk<UtbetalingService>(relaxed = true) {
-        every { settKvitteringManuelt(1) } returns mockk(relaxed = true)
-        every { utbetalingDao.hentUtbetaling(1) } returns utbetaling(
-            utbetalingshendelser = listOf(
-                utbetalingshendelse(
-                    status = UtbetalingStatus.SENDT
+    private val utbetalingService =
+        mockk<UtbetalingService>(relaxed = true) {
+            every { settKvitteringManuelt(1) } returns mockk(relaxed = true)
+            every { utbetalingDao.hentUtbetaling(1) } returns
+                utbetaling(
+                    utbetalingshendelser =
+                        listOf(
+                            utbetalingshendelse(
+                                status = UtbetalingStatus.SENDT,
+                            ),
+                        ),
                 )
-            )
-        )
-        every {
-            utbetalingDao.oppdaterKvittering(
-                any(),
-                any(),
-                any()
-            )
-        } returns utbetaling(utbetalingshendelser = listOf(utbetalingshendelse(status = UtbetalingStatus.GODKJENT)))
-    }
-    private val grensesnittsavstemmingService = mockk<GrensesnittsavstemmingService>() {
-        every { startGrensesnittsavstemming(Saktype.BARNEPENSJON) } returns Unit
-    }
+            every {
+                utbetalingDao.oppdaterKvittering(
+                    any(),
+                    any(),
+                    any(),
+                )
+            } returns utbetaling(utbetalingshendelser = listOf(utbetalingshendelse(status = UtbetalingStatus.GODKJENT)))
+        }
+    private val grensesnittsavstemmingService =
+        mockk<GrensesnittsavstemmingService> {
+            every { startGrensesnittsavstemming(Saktype.BARNEPENSJON) } returns Unit
+        }
 
-    private val inspector = TestRapid().apply {
-        Oppgavetrigger(
-            rapidsConnection = this,
-            utbetalingService = utbetalingService,
-            grensesnittsavstemmingService = grensesnittsavstemmingService
-        )
-    }
+    private val inspector =
+        TestRapid().apply {
+            Oppgavetrigger(
+                rapidsConnection = this,
+                utbetalingService = utbetalingService,
+                grensesnittsavstemmingService = grensesnittsavstemmingService,
+            )
+        }
 
     @Test
     fun `melding skal starte grensesnittavstemming`() {

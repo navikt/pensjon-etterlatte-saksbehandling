@@ -40,11 +40,12 @@ internal class MetrikkerDaoTest {
         postgreSQLContainer.withUrlParam("user", postgreSQLContainer.username)
         postgreSQLContainer.withUrlParam("password", postgreSQLContainer.password)
 
-        dataSource = DataSourceBuilder.createDataSource(
-            jdbcUrl = postgreSQLContainer.jdbcUrl,
-            username = postgreSQLContainer.username,
-            password = postgreSQLContainer.password
-        ).apply { migrate() }
+        dataSource =
+            DataSourceBuilder.createDataSource(
+                jdbcUrl = postgreSQLContainer.jdbcUrl,
+                username = postgreSQLContainer.username,
+                password = postgreSQLContainer.password,
+            ).apply { migrate() }
 
         val connection = dataSource.connection
         oppgaveDaoNy = OppgaveDaoNyImpl { connection }
@@ -65,13 +66,14 @@ internal class MetrikkerDaoTest {
 
     @Test
     fun `Skal returnere antall for totalt, aktive og inaktive oppgaver`() {
-        val oppgaver = listOf(
-            lagNyOppgave(status = Status.NY),
-            lagNyOppgave(status = Status.UNDER_BEHANDLING),
-            lagNyOppgave(status = Status.AVBRUTT),
-            lagNyOppgave(status = Status.FERDIGSTILT),
-            lagNyOppgave(status = Status.FEILREGISTRERT)
-        )
+        val oppgaver =
+            listOf(
+                lagNyOppgave(status = Status.NY),
+                lagNyOppgave(status = Status.UNDER_BEHANDLING),
+                lagNyOppgave(status = Status.AVBRUTT),
+                lagNyOppgave(status = Status.FERDIGSTILT),
+                lagNyOppgave(status = Status.FEILREGISTRERT),
+            )
         oppgaver.forEach {
             oppgaveDaoNy.lagreOppgave(it)
         }
@@ -88,7 +90,7 @@ internal class MetrikkerDaoTest {
         sakType: SakType = SakType.BARNEPENSJON,
         oppgaveKilde: OppgaveKilde = OppgaveKilde.BEHANDLING,
         oppgaveType: OppgaveType = OppgaveType.FOERSTEGANGSBEHANDLING,
-        status: Status = Status.NY
+        status: Status = Status.NY,
     ) = OppgaveNy(
         id = UUID.randomUUID(),
         status = status,
@@ -101,6 +103,6 @@ internal class MetrikkerDaoTest {
         sakType = sakType,
         fnr = "",
         frist = null,
-        type = oppgaveType
+        type = oppgaveType,
     )
 }

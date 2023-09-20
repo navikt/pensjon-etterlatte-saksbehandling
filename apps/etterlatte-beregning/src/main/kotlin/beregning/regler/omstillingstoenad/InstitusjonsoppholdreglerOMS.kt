@@ -16,21 +16,23 @@ val institusjonsoppholdRegelOMS: Regel<OmstillingstoenadGrunnlag, Prosent> =
     finnFaktumIGrunnlag(
         gjelderFra = OMS_GYLDIG_FROM_TEST,
         beskrivelse = "Finner % av G mottaker skal ha for denne institusjonsoppholdytelsen",
-        finnFaktum = OmstillingstoenadGrunnlag::institusjonsopphold
+        finnFaktum = OmstillingstoenadGrunnlag::institusjonsopphold,
     ) { it?.prosentEtterReduksjon() ?: Prosent.hundre }
 
-val erBrukerIInstitusjonOMS: Regel<OmstillingstoenadGrunnlag, Boolean> = finnFaktumIGrunnlag(
-    gjelderFra = OMS_GYLDIG_FROM_TEST,
-    beskrivelse = "Finner om bruker har et institusjonsopphold",
-    finnFaktum = OmstillingstoenadGrunnlag::institusjonsopphold
-) {
-    it != null
-}
+val erBrukerIInstitusjonOMS: Regel<OmstillingstoenadGrunnlag, Boolean> =
+    finnFaktumIGrunnlag(
+        gjelderFra = OMS_GYLDIG_FROM_TEST,
+        beskrivelse = "Finner om bruker har et institusjonsopphold",
+        finnFaktum = OmstillingstoenadGrunnlag::institusjonsopphold,
+    ) {
+        it != null
+    }
 
-val institusjonsoppholdSatsRegelOMS = RegelMeta(
-    gjelderFra = OMS_GYLDIG_FROM_TEST,
-    beskrivelse = "Finner satsen for institusjonsoppholdberegning",
-    regelReferanse = RegelReferanse(id = "Finner sats for bruker, gitt at de skal ha institusjonsoppholdsats")
-) benytter grunnbeloep og institusjonsoppholdRegelOMS og faktorKonstant med { grunnbeloep, prosent, faktor ->
-    Beregningstall.somBroek(prosent).multiply(grunnbeloep.grunnbeloepPerMaaned).multiply(faktor)
-}
+val institusjonsoppholdSatsRegelOMS =
+    RegelMeta(
+        gjelderFra = OMS_GYLDIG_FROM_TEST,
+        beskrivelse = "Finner satsen for institusjonsoppholdberegning",
+        regelReferanse = RegelReferanse(id = "Finner sats for bruker, gitt at de skal ha institusjonsoppholdsats"),
+    ) benytter grunnbeloep og institusjonsoppholdRegelOMS og faktorKonstant med { grunnbeloep, prosent, faktor ->
+        Beregningstall.somBroek(prosent).multiply(grunnbeloep.grunnbeloepPerMaaned).multiply(faktor)
+    }

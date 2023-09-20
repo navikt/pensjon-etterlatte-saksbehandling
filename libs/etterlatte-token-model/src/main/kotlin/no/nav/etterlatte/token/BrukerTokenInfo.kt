@@ -8,16 +8,21 @@ sealed class BrukerTokenInfo {
     abstract fun erSammePerson(ident: String?): Boolean
 
     abstract fun accessToken(): String
+
     abstract fun kanEndreOppgaverFor(ident: String?): Boolean
 
     companion object {
-        private fun erSystembruker(oid: String?, sub: String?) = (oid == sub) && (oid != null)
+        private fun erSystembruker(
+            oid: String?,
+            sub: String?,
+        ) = (oid == sub) && (oid != null)
+
         fun of(
             accessToken: String,
             saksbehandler: String?,
             oid: String?,
             sub: String?,
-            claims: JwtTokenClaims?
+            claims: JwtTokenClaims?,
         ): BrukerTokenInfo {
             return if (erSystembruker(oid = oid, sub = sub)) {
                 Systembruker(oid!!, sub!!)
@@ -25,7 +30,7 @@ sealed class BrukerTokenInfo {
                 Saksbehandler(accessToken, saksbehandler, claims)
             } else {
                 throw Exception(
-                    "Er ikke systembruker, og Navident er null i token, sannsynligvis manglende claim NAVident"
+                    "Er ikke systembruker, og Navident er null i token, sannsynligvis manglende claim NAVident",
                 )
             }
         }
@@ -34,18 +39,23 @@ sealed class BrukerTokenInfo {
 
 data class Systembruker(val oid: String, val sub: String) : BrukerTokenInfo() {
     override fun ident() = Fagsaksystem.EY.navn
+
     override fun accessToken() = throw NotImplementedError("Kun relevant for saksbehandler")
+
     override fun erSammePerson(ident: String?) = false
+
     override fun kanEndreOppgaverFor(ident: String?) = true
 }
 
 data class Saksbehandler(
     val accessToken: String,
     val ident: String,
-    val jwtTokenClaims: JwtTokenClaims?
+    val jwtTokenClaims: JwtTokenClaims?,
 ) : BrukerTokenInfo() {
     override fun ident() = ident
+
     override fun accessToken() = accessToken
+
     override fun kanEndreOppgaverFor(ident: String?) = erSammePerson(ident)
 
     override fun erSammePerson(ident: String?) = ident == this.ident
@@ -60,5 +70,5 @@ enum class Claims {
     oid,
 
     @Suppress("ktlint:standard:enum-entry-name-case")
-    sub
+    sub,
 }

@@ -73,7 +73,7 @@ private fun pdlHttpClient(config: Config) =
         azureAppClientId = config.getString("azure.app.client.id"),
         azureAppJwk = config.getString("azure.app.jwk"),
         azureAppWellKnownUrl = config.getString("azure.app.well.known.url"),
-        azureAppScope = config.getString("pdl.azure.scope")
+        azureAppScope = config.getString("pdl.azure.scope"),
     )
 
 private fun skjermingHttpClient(config: Config) =
@@ -81,7 +81,7 @@ private fun skjermingHttpClient(config: Config) =
         azureAppClientId = config.getString("azure.app.client.id"),
         azureAppJwk = config.getString("azure.app.jwk"),
         azureAppWellKnownUrl = config.getString("azure.app.well.known.url"),
-        azureAppScope = config.getString("skjerming.azure.scope")
+        azureAppScope = config.getString("skjerming.azure.scope"),
     )
 
 private fun grunnlagHttpClient(config: Config) =
@@ -89,7 +89,7 @@ private fun grunnlagHttpClient(config: Config) =
         azureAppClientId = config.getString("azure.app.client.id"),
         azureAppJwk = config.getString("azure.app.jwk"),
         azureAppWellKnownUrl = config.getString("azure.app.well.known.url"),
-        azureAppScope = config.getString("grunnlag.azure.scope")
+        azureAppScope = config.getString("grunnlag.azure.scope"),
     )
 
 private fun navAnsattHttpClient(config: Config) =
@@ -97,14 +97,14 @@ private fun navAnsattHttpClient(config: Config) =
         azureAppClientId = config.getString("azure.app.client.id"),
         azureAppJwk = config.getString("azure.app.jwk"),
         azureAppWellKnownUrl = config.getString("azure.app.well.known.url"),
-        azureAppScope = config.getString("navansatt.azure.scope")
+        azureAppScope = config.getString("navansatt.azure.scope"),
     )
 
 private fun featureToggleProperties(config: Config) =
     FeatureToggleProperties(
         applicationName = config.getString("funksjonsbrytere.unleash.applicationName"),
         host = config.getString("funksjonsbrytere.unleash.host"),
-        apiKey = config.getString("funksjonsbrytere.unleash.token")
+        apiKey = config.getString("funksjonsbrytere.unleash.token"),
     )
 
 class ApplicationContext(
@@ -123,14 +123,14 @@ class ApplicationContext(
     val navAnsattKlient: NavAnsattKlient =
         NavAnsattKlientImpl(
             navAnsattHttpClient(config),
-            env.getValue("NAVANSATT_URL")
+            env.getValue("NAVANSATT_URL"),
         ).also {
             it.asyncPing()
         },
     val norg2Klient: Norg2Klient = Norg2KlientImpl(httpClient(), env.getValue("NORG2_URL")),
     val leaderElectionHttpClient: HttpClient = httpClient(),
     val grunnlagKlientObo: GrunnlagKlient = GrunnlagKlientObo(config, httpClient()),
-    val gosysOppgaveKlient: GosysOppgaveKlient = GosysOppgaveKlientImpl(config, httpClient())
+    val gosysOppgaveKlient: GosysOppgaveKlient = GosysOppgaveKlientImpl(config, httpClient()),
 ) {
     val httpPort = env.getOrDefault("HTTP_PORT", "8080").toInt()
     val saksbehandlerGroupIdsByKey = AzureGroup.values().associateWith { env.requireEnvValue(it.envKey) }
@@ -177,7 +177,7 @@ class ApplicationContext(
             sporingslogg = sporingslogg,
             featureToggleService = featureToggleService,
             kommerBarnetTilGodeDao = kommerBarnetTilGodeDao,
-            oppgaveServiceNy = oppgaveServiceNy
+            oppgaveServiceNy = oppgaveServiceNy,
         )
 
     val kommerBarnetTilGodeService =
@@ -195,13 +195,13 @@ class ApplicationContext(
             grunnlagsendringshendelseDao = grunnlagsendringshendelseDao,
             kommerBarnetTilGodeService = kommerBarnetTilGodeService,
             revurderingDao = revurderingDao,
-            behandlingService = behandlingService
+            behandlingService = behandlingService,
         )
 
     val gyldighetsproevingService =
         GyldighetsproevingServiceImpl(
             behandlingDao = behandlingDao,
-            featureToggleService = featureToggleService
+            featureToggleService = featureToggleService,
         )
 
     val manueltOpphoerService =
@@ -211,14 +211,14 @@ class ApplicationContext(
             behandlingHendelser = behandlingsHendelser,
             hendelseDao = hendelseDao,
             grunnlagService = grunnlagsService,
-            featureToggleService = featureToggleService
+            featureToggleService = featureToggleService,
         )
 
     val omregningService =
         OmregningService(
             behandlingService = behandlingService,
             grunnlagService = grunnlagsService,
-            revurderingService = revurderingService
+            revurderingService = revurderingService,
         )
 
     val tilgangService = TilgangServiceImpl(SakTilgangDao(dataSource))
@@ -229,7 +229,7 @@ class ApplicationContext(
             norg2Klient,
             featureToggleService,
             tilgangService,
-            skjermingKlient
+            skjermingKlient,
         )
     val enhetService = EnhetServiceImpl(navAnsattKlient)
     val grunnlagsendringshendelseService =
@@ -240,7 +240,7 @@ class ApplicationContext(
             pdlKlient = pdlKlient,
             grunnlagKlient = grunnlagKlient,
             tilgangService = tilgangService,
-            sakService = sakService
+            sakService = sakService,
         )
 
     val behandlingsStatusService =
@@ -249,7 +249,7 @@ class ApplicationContext(
             behandlingService,
             grunnlagsendringshendelseService,
             oppgaveServiceNy,
-            featureToggleService
+            featureToggleService,
         )
 
     val behandlingFactory =
@@ -262,7 +262,7 @@ class ApplicationContext(
             behandlingDao = behandlingDao,
             hendelseDao = hendelseDao,
             behandlingHendelser = behandlingsHendelser,
-            featureToggleService = featureToggleService
+            featureToggleService = featureToggleService,
         )
 
     val migreringService =
@@ -273,7 +273,7 @@ class ApplicationContext(
             kommerBarnetTilGodeService = kommerBarnetTilGodeService,
             behandlingsHendelser = behandlingsHendelser,
             behandlingService = behandlingService,
-            oppgaveServiceNy = oppgaveServiceNy
+            oppgaveServiceNy = oppgaveServiceNy,
         )
 
     val klageService =
@@ -281,14 +281,15 @@ class ApplicationContext(
             klageDao = klageDao,
             sakDao = sakDao,
             hendelseDao = hendelseDao,
-            oppgaveServiceNy = oppgaveServiceNy
+            oppgaveServiceNy = oppgaveServiceNy,
         )
 
-    val tilbakekrevingService = TilbakekrevingService(
-        sakDao = sakDao,
-        hendelseDao = hendelseDao,
-        oppgaveServiceNy = oppgaveServiceNy
-    )
+    val tilbakekrevingService =
+        TilbakekrevingService(
+            sakDao = sakDao,
+            hendelseDao = hendelseDao,
+            oppgaveServiceNy = oppgaveServiceNy,
+        )
 
     // Job
     val grunnlagsendringshendelseJob =
@@ -298,6 +299,6 @@ class ApplicationContext(
             leaderElection = leaderElectionKlient,
             initialDelay = Duration.of(1, ChronoUnit.MINUTES).toMillis(),
             periode = Duration.of(env.getValue("HENDELSE_JOB_FREKVENS").toLong(), ChronoUnit.MINUTES),
-            minutterGamleHendelser = env.getValue("HENDELSE_MINUTTER_GAMLE_HENDELSER").toLong()
+            minutterGamleHendelser = env.getValue("HENDELSE_MINUTTER_GAMLE_HENDELSER").toLong(),
         )
 }

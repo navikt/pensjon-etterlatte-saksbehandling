@@ -12,7 +12,6 @@ import no.nav.etterlatte.libs.common.medBody
 import no.nav.etterlatte.libs.common.tilbakekreving.Kravgrunnlag
 
 internal fun Route.tilbakekrevingRoutes(service: TilbakekrevingService) {
-
     route("/tilbakekreving") {
         post("opprett/{$SAKID_CALL_PARAMETER}") {
             medBody<Kravgrunnlag> {
@@ -23,5 +22,4 @@ internal fun Route.tilbakekrevingRoutes(service: TilbakekrevingService) {
             }
         }
     }
-
 }

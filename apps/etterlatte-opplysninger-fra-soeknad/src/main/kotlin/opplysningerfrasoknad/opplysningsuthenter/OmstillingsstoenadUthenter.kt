@@ -30,21 +30,22 @@ internal object OmstillingsstoenadUthenter {
             samtykke(omstillingsstoenad),
             spraak(omstillingsstoenad),
             soeknadMottattDato(omstillingsstoenad),
-            soeknadsType(omstillingsstoenad)
+            soeknadsType(omstillingsstoenad),
         )
     }
 
     private fun soeknadMottattDato(soknad: Omstillingsstoenad): Grunnlagsopplysning<SoeknadMottattDato> {
-        val opplysning = SoeknadMottattDato(
-            mottattDato = soknad.mottattDato
-        )
+        val opplysning =
+            SoeknadMottattDato(
+                mottattDato = soknad.mottattDato,
+            )
         return lagOpplysning(Opplysningstype.SOEKNAD_MOTTATT_DATO, kilde(soknad), opplysning, null)
     }
 
     private fun kilde(soknad: Omstillingsstoenad): Grunnlagsopplysning.Kilde {
         return Grunnlagsopplysning.Privatperson(
             soknad.innsender.foedselsnummer.svar.value,
-            soknad.mottattDato.toTidspunkt()
+            soknad.mottattDato.toTidspunkt(),
         )
     }
 
@@ -55,32 +56,32 @@ internal object OmstillingsstoenadUthenter {
 
     private fun soeker(soknad: Omstillingsstoenad): Grunnlagsopplysning<SoekerOmstillingSoeknad> {
         val soeker = soknad.soeker
-        val opplysning = SoekerOmstillingSoeknad(
-            PersonType.GJENLEVENDE,
-            soeker.fornavn.svar,
-            soeker.etternavn.svar,
-            soeker.foedselsnummer.svar.toFolkeregisteridentifikator(),
-            soeker.adresse?.svar,
-            soeker.statsborgerskap.svar,
-            soeker.kontaktinfo.telefonnummer.svar.innhold,
-            soeker.sivilstatus.svar
-        )
+        val opplysning =
+            SoekerOmstillingSoeknad(
+                PersonType.GJENLEVENDE,
+                soeker.fornavn.svar,
+                soeker.etternavn.svar,
+                soeker.foedselsnummer.svar.toFolkeregisteridentifikator(),
+                soeker.adresse?.svar,
+                soeker.statsborgerskap.svar,
+                soeker.kontaktinfo.telefonnummer.svar.innhold,
+                soeker.sivilstatus.svar,
+            )
         return lagOpplysning(Opplysningstype.SOEKER_SOEKNAD_V1, kilde(soknad), opplysning, null)
     }
 
     private fun innsender(soknad: Omstillingsstoenad): Grunnlagsopplysning<InnsenderSoeknad> {
-        val opplysning = InnsenderSoeknad(
-            PersonType.INNSENDER,
-            soknad.innsender.fornavn.svar,
-            soknad.innsender.etternavn.svar,
-            soknad.innsender.foedselsnummer.svar.toFolkeregisteridentifikator()
-        )
+        val opplysning =
+            InnsenderSoeknad(
+                PersonType.INNSENDER,
+                soknad.innsender.fornavn.svar,
+                soknad.innsender.etternavn.svar,
+                soknad.innsender.foedselsnummer.svar.toFolkeregisteridentifikator(),
+            )
         return lagOpplysning(Opplysningstype.INNSENDER_SOEKNAD_V1, kilde(soknad), opplysning, null)
     }
 
-    private fun utbetalingsinformasjon(
-        soknad: Omstillingsstoenad
-    ): Grunnlagsopplysning<Utbetalingsinformasjon> {
+    private fun utbetalingsinformasjon(soknad: Omstillingsstoenad): Grunnlagsopplysning<Utbetalingsinformasjon> {
         val opplysning = utbetalingsinformasjonOpplysning(soknad.utbetalingsInformasjon)
         return lagOpplysning(Opplysningstype.UTBETALINGSINFORMASJON_V1, kilde(soknad), opplysning, null)
     }

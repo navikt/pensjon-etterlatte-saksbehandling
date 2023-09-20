@@ -32,7 +32,7 @@ import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.YearMonth
-import java.util.*
+import java.util.UUID
 
 internal class MigreringHendelserTest {
     private val trygdetidService = mockk<TrygdetidService>()
@@ -48,7 +48,7 @@ internal class MigreringHendelserTest {
                 beregnetTrygdetid =
                     DetaljertBeregnetTrygdetidDto(
                         DetaljertBeregnetTrygdetidResultat.fraSamletTrygdetidNorge(40),
-                        Tidspunkt.now()
+                        Tidspunkt.now(),
                     ),
                 trygdetidGrunnlag = emptyList(),
                 opplysninger =
@@ -56,8 +56,8 @@ internal class MigreringHendelserTest {
                         avdoedDoedsdato = null,
                         avdoedFoedselsdato = null,
                         avdoedFylteSeksten = null,
-                        avdoedFyllerSeksti = null
-                    )
+                        avdoedFyllerSeksti = null,
+                    ),
             )
         val fnr = Folkeregisteridentifikator.of("12101376212")
         val request =
@@ -75,7 +75,7 @@ internal class MigreringHendelserTest {
                         netto = BigDecimal(1000),
                         anvendtTrygdetid = BigDecimal(40),
                         datoVirkFom = Tidspunkt.now(),
-                        g = BigDecimal(100000)
+                        g = BigDecimal(100000),
                     ),
                 trygdetid =
                     Trygdetid(
@@ -87,19 +87,19 @@ internal class MigreringHendelserTest {
                                 datoFom =
                                     Tidspunkt.ofNorskTidssone(
                                         LocalDate.parse("2000-01-01"),
-                                        LocalTime.of(0, 0, 0)
+                                        LocalTime.of(0, 0, 0),
                                     ),
                                 datoTom =
                                     Tidspunkt.ofNorskTidssone(
                                         LocalDate.parse("2015-01-01"),
-                                        LocalTime.of(0, 0, 0)
+                                        LocalTime.of(0, 0, 0),
                                     ),
                                 poengIInnAar = false,
                                 poengIUtAar = false,
                                 ikkeIProrata = false,
                                 faktiskTrygdetid = BigDecimal(20.5),
                                 fremtidigTrygdetid = BigDecimal(15),
-                                anvendtTrygdetid = BigDecimal(35.5)
+                                anvendtTrygdetid = BigDecimal(35.5),
                             ),
                             Trygdetidsgrunnlag(
                                 trygdetidGrunnlagId = 3L,
@@ -108,28 +108,28 @@ internal class MigreringHendelserTest {
                                 datoFom =
                                     Tidspunkt.ofNorskTidssone(
                                         LocalDate.parse("2017-01-01"),
-                                        LocalTime.of(0, 0, 0)
+                                        LocalTime.of(0, 0, 0),
                                     ),
                                 datoTom =
                                     Tidspunkt.ofNorskTidssone(
                                         LocalDate.parse("2020-01-01"),
-                                        LocalTime.of(0, 0, 0)
+                                        LocalTime.of(0, 0, 0),
                                     ),
                                 poengIInnAar = false,
                                 poengIUtAar = false,
                                 ikkeIProrata = false,
                                 faktiskTrygdetid = BigDecimal(20.5),
                                 fremtidigTrygdetid = BigDecimal(15),
-                                anvendtTrygdetid = BigDecimal(35.5)
-                            )
-                        )
-                    )
+                                anvendtTrygdetid = BigDecimal(35.5),
+                            ),
+                        ),
+                    ),
             )
         every { trygdetidService.beregnTrygdetid(capture(behandlingId)) } returns mockk()
         every {
             trygdetidService.beregnTrygdetidGrunnlag(
                 capture(behandlingId),
-                any()
+                any(),
             )
         } returns trygdetidDto
 
@@ -139,8 +139,8 @@ internal class MigreringHendelserTest {
                 mapOf(
                     BEHANDLING_ID_KEY to "a9d42eb9-561f-4320-8bba-2ba600e66e21",
                     VILKAARSVURDERT_KEY to "vilkaarsvurdert",
-                    HENDELSE_DATA_KEY to request
-                )
+                    HENDELSE_DATA_KEY to request,
+                ),
             )
 
         inspector.sendTestMessage(melding.toJson())
@@ -149,7 +149,7 @@ internal class MigreringHendelserTest {
         assertEquals(1, inspector.inspektør.size)
         assertEquals(
             trygdetidDto,
-            objectMapper.readValue<TrygdetidDto>(inspector.inspektør.message(0).get(TRYGDETID_KEY).asText())
+            objectMapper.readValue<TrygdetidDto>(inspector.inspektør.message(0).get(TRYGDETID_KEY).asText()),
         )
         coVerify(exactly = 1) { trygdetidService.beregnTrygdetid(behandlingId.captured) }
         coVerify(exactly = 2) { trygdetidService.beregnTrygdetidGrunnlag(behandlingId.captured, any()) }
@@ -165,7 +165,7 @@ internal class MigreringHendelserTest {
                 beregnetTrygdetid =
                     DetaljertBeregnetTrygdetidDto(
                         DetaljertBeregnetTrygdetidResultat.fraSamletTrygdetidNorge(40),
-                        Tidspunkt.now()
+                        Tidspunkt.now(),
                     ),
                 trygdetidGrunnlag = emptyList(),
                 opplysninger =
@@ -173,8 +173,8 @@ internal class MigreringHendelserTest {
                         avdoedDoedsdato = null,
                         avdoedFoedselsdato = null,
                         avdoedFylteSeksten = null,
-                        avdoedFyllerSeksti = null
-                    )
+                        avdoedFyllerSeksti = null,
+                    ),
             )
         val fnr = Folkeregisteridentifikator.of("12101376212")
         val request =
@@ -192,9 +192,9 @@ internal class MigreringHendelserTest {
                         netto = BigDecimal(1000),
                         anvendtTrygdetid = BigDecimal(40),
                         datoVirkFom = Tidspunkt.now(),
-                        g = BigDecimal(100000)
+                        g = BigDecimal(100000),
                     ),
-                trygdetid = Trygdetid(emptyList())
+                trygdetid = Trygdetid(emptyList()),
             )
         every { trygdetidService.beregnTrygdetid(capture(behandlingId)) } returns trygdetidDto
         every { trygdetidService.beregnTrygdetidGrunnlag(any(), any()) } returns trygdetidDto
@@ -205,8 +205,8 @@ internal class MigreringHendelserTest {
                 mapOf(
                     BEHANDLING_ID_KEY to "a9d42eb9-561f-4320-8bba-2ba600e66e21",
                     VILKAARSVURDERT_KEY to "vilkaarsvurdert",
-                    HENDELSE_DATA_KEY to request
-                )
+                    HENDELSE_DATA_KEY to request,
+                ),
             )
 
         inspector.sendTestMessage(melding.toJson())
@@ -215,7 +215,7 @@ internal class MigreringHendelserTest {
         assertEquals(1, inspector.inspektør.size)
         assertEquals(
             trygdetidDto,
-            objectMapper.readValue<TrygdetidDto>(inspector.inspektør.message(0).get(TRYGDETID_KEY).asText())
+            objectMapper.readValue<TrygdetidDto>(inspector.inspektør.message(0).get(TRYGDETID_KEY).asText()),
         )
         coVerify(exactly = 1) { trygdetidService.beregnTrygdetid(behandlingId.captured) }
         coVerify(exactly = 0) { trygdetidService.beregnTrygdetidGrunnlag(behandlingId.captured, any()) }

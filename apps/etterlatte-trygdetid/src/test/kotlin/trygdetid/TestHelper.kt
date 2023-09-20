@@ -23,7 +23,7 @@ import no.nav.etterlatte.trygdetid.TrygdetidType
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Period
-import java.util.*
+import java.util.UUID
 import java.util.UUID.randomUUID
 
 val saksbehandler = Saksbehandler("token", "ident", null)
@@ -32,7 +32,7 @@ val pesysBruker = Systembruker("", "")
 
 fun behandling(
     behandlingId: UUID = randomUUID(),
-    sakId: Long = 1
+    sakId: Long = 1,
 ) = DetaljertBehandling(
     id = behandlingId,
     sak = sakId,
@@ -51,7 +51,7 @@ fun behandling(
     revurderingsaarsak = null,
     revurderingInfo = null,
     prosesstype = Prosesstype.AUTOMATISK,
-    enhet = ""
+    enhet = "",
 )
 
 fun trygdetid(
@@ -59,14 +59,14 @@ fun trygdetid(
     sakId: Long = 1,
     beregnetTrygdetid: DetaljertBeregnetTrygdetid? = null,
     trygdetidGrunnlag: List<TrygdetidGrunnlag> = emptyList(),
-    opplysninger: List<Opplysningsgrunnlag> = emptyList()
+    opplysninger: List<Opplysningsgrunnlag> = emptyList(),
 ) = Trygdetid(
     id = randomUUID(),
     sakId = sakId,
     behandlingId = behandlingId,
     trygdetidGrunnlag = trygdetidGrunnlag,
     opplysninger = opplysninger,
-    beregnetTrygdetid = beregnetTrygdetid
+    beregnetTrygdetid = beregnetTrygdetid,
 )
 
 fun trygdetidGrunnlag(
@@ -74,12 +74,12 @@ fun trygdetidGrunnlag(
     periode: TrygdetidPeriode =
         TrygdetidPeriode(
             fra = LocalDate.of(2023, 1, 1),
-            til = LocalDate.of(2023, 2, 1)
+            til = LocalDate.of(2023, 2, 1),
         ),
     begrunnelse: String? = null,
     poengInnAar: Boolean = false,
     poengUtAar: Boolean = false,
-    prorata: Boolean = false
+    prorata: Boolean = false,
 ) = TrygdetidGrunnlag(
     id = randomUUID(),
     type = TrygdetidType.FAKTISK,
@@ -90,47 +90,47 @@ fun trygdetidGrunnlag(
     begrunnelse = begrunnelse,
     poengUtAar = poengUtAar,
     poengInnAar = poengInnAar,
-    prorata = prorata
+    prorata = prorata,
 )
 
 fun trygdeavtale(
     behandlingId: UUID,
     avtaleKode: String,
     avtaleDatoKode: String? = null,
-    avtaleKriteriaKode: String? = null
+    avtaleKriteriaKode: String? = null,
 ) = Trygdeavtale(
     id = randomUUID(),
     behandlingId = behandlingId,
     avtaleKode = avtaleKode,
     avtaleDatoKode = avtaleDatoKode,
     avtaleKriteriaKode = avtaleKriteriaKode,
-    kilde = Grunnlagsopplysning.Saksbehandler(ident = "Z123", tidspunkt = Tidspunkt.now())
+    kilde = Grunnlagsopplysning.Saksbehandler(ident = "Z123", tidspunkt = Tidspunkt.now()),
 )
 
 fun beregnetTrygdetid(
     total: Int = 0,
-    tidspunkt: Tidspunkt = Tidspunkt.now()
+    tidspunkt: Tidspunkt = Tidspunkt.now(),
 ) = DetaljertBeregnetTrygdetid(
     resultat =
-    DetaljertBeregnetTrygdetidResultat(
-        faktiskTrygdetidNorge = null,
-        faktiskTrygdetidTeoretisk = null,
-        fremtidigTrygdetidNorge = null,
-        fremtidigTrygdetidTeoretisk = null,
-        samletTrygdetidNorge = total,
-        samletTrygdetidTeoretisk = null,
-        prorataBroek = null,
-        overstyrt = false
-    ),
+        DetaljertBeregnetTrygdetidResultat(
+            faktiskTrygdetidNorge = null,
+            faktiskTrygdetidTeoretisk = null,
+            fremtidigTrygdetidNorge = null,
+            fremtidigTrygdetidTeoretisk = null,
+            samletTrygdetidNorge = total,
+            samletTrygdetidTeoretisk = null,
+            prorataBroek = null,
+            overstyrt = false,
+        ),
     tidspunkt = tidspunkt,
-    regelResultat = "".toJsonNode()
+    regelResultat = "".toJsonNode(),
 )
 
 fun beregnetTrygdetidGrunnlag(verdi: Period = Period.parse("P2Y2D")) =
     BeregnetTrygdetidGrunnlag(
         verdi = verdi,
         tidspunkt = Tidspunkt.now(),
-        regelResultat = "".toJsonNode()
+        regelResultat = "".toJsonNode(),
     )
 
 fun beregnetYrkesskadeTrygdetid() =
@@ -138,7 +138,7 @@ fun beregnetYrkesskadeTrygdetid() =
         resultat = DetaljertBeregnetTrygdetidResultat.fraSamletTrygdetidNorge(40),
         tidspunkt = Tidspunkt.now(),
         regelResultat =
-        """
+            """
             {
                 "verdi": {
                     "faktiskTrygdetidNorge": null,
@@ -171,5 +171,5 @@ fun beregnetYrkesskadeTrygdetid() =
                 ],
                 "opprettet": "2023-06-30T13:22:15.799509Z"
             }
-        """.trimIndent().toJsonNode()
+            """.trimIndent().toJsonNode(),
     )

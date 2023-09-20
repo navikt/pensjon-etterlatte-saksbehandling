@@ -30,7 +30,7 @@ class TidspunktTest {
         val medTid = tidspunkt.medTimeMinuttSekund(tid)
         assertEquals(
             medTid,
-            Tidspunkt(Instant.from(ZonedDateTime.of(localDate, LocalTime.of(20, 10, 5), standardTidssoneUTC)))
+            Tidspunkt(Instant.from(ZonedDateTime.of(localDate, LocalTime.of(20, 10, 5), standardTidssoneUTC))),
         )
     }
 
@@ -41,8 +41,8 @@ class TidspunktTest {
                 ZonedDateTime.of(
                     LocalDate.of(2022, Month.JUNE, 2),
                     LocalTime.of(10, 11, 12, 13),
-                    standardTidssoneUTC
-                )
+                    standardTidssoneUTC,
+                ),
             )
         val tidspunkt = Tidspunkt(instant)
         assertNotEquals(instant, tidspunkt.instant)

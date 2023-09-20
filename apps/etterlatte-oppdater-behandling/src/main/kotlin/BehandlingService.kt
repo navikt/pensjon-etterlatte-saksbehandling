@@ -20,19 +20,29 @@ import no.nav.etterlatte.libs.common.sak.BehandlingOgSak
 import no.nav.etterlatte.libs.common.sak.SakIDListe
 import no.nav.etterlatte.libs.common.sak.Saker
 import no.nav.etterlatte.rapidsandrivers.migrering.MigreringRequest
-import java.util.*
+import java.util.UUID
 
 interface BehandlingService {
     fun sendDoedshendelse(doedshendelse: Doedshendelse)
+
     fun sendUtflyttingshendelse(utflyttingsHendelse: UtflyttingsHendelse)
+
     fun sendForelderBarnRelasjonHendelse(forelderBarnRelasjon: ForelderBarnRelasjonHendelse)
+
     fun sendAdressebeskyttelseHendelse(adressebeskyttelse: Adressebeskyttelse)
+
     fun sendVergeMaalEllerFremtidsfullmakt(vergeMaalEllerFremtidsfullmakt: VergeMaalEllerFremtidsfullmakt)
+
     fun sendSivilstandHendelse(sivilstandHendelse: SivilstandHendelse)
+
     fun sendReguleringFeiletHendelse(reguleringFeilethendelse: ReguleringFeiletHendelse)
+
     fun hentAlleSaker(): Saker
+
     fun opprettOmregning(omregningshendelse: Omregningshendelse): OpprettOmregningResponse
+
     fun migrerAlleTempBehandlingerTilbakeTilVilkaarsvurdert(): SakIDListe
+
     fun migrer(hendelse: MigreringRequest): BehandlingOgSak
 }
 
@@ -40,7 +50,7 @@ data class ReguleringFeiletHendelse(val sakId: Long)
 
 class BehandlingServiceImpl(
     private val behandlingKlient: HttpClient,
-    private val url: String
+    private val url: String,
 ) : BehandlingService {
     override fun sendDoedshendelse(doedshendelse: Doedshendelse) {
         runBlocking {
@@ -122,12 +132,13 @@ class BehandlingServiceImpl(
         }
     }
 
-    override fun migrer(hendelse: MigreringRequest): BehandlingOgSak = runBlocking {
-        behandlingKlient.post("$url/migrering") {
-            contentType(ContentType.Application.Json)
-            setBody(hendelse)
-        }.body()
-    }
+    override fun migrer(hendelse: MigreringRequest): BehandlingOgSak =
+        runBlocking {
+            behandlingKlient.post("$url/migrering") {
+                contentType(ContentType.Application.Json)
+                setBody(hendelse)
+            }.body()
+        }
 
     override fun hentAlleSaker(): Saker =
         runBlocking {

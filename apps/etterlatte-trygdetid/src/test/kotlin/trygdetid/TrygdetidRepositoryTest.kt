@@ -24,13 +24,11 @@ import trygdetid.beregnetTrygdetidGrunnlag
 import trygdetid.trygdetid
 import trygdetid.trygdetidGrunnlag
 import java.time.LocalDate
-import java.util.*
 import java.util.UUID.randomUUID
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class TrygdetidRepositoryTest {
-
     @Container
     private val postgres = PostgreSQLContainer<Nothing>("postgres:$POSTGRES_VERSION")
     private lateinit var repository: TrygdetidRepository
@@ -64,12 +62,13 @@ internal class TrygdetidRepositoryTest {
 
         val pdl = Grunnlagsopplysning.Pdl(Tidspunkt.now(), null, "opplysningsId1")
         val regel = Grunnlagsopplysning.RegelKilde("regel", Tidspunkt.now(), "1")
-        val opplysninger = listOf(
-            Opplysningsgrunnlag.ny(TrygdetidOpplysningType.FOEDSELSDATO, pdl, foedselsdato),
-            Opplysningsgrunnlag.ny(TrygdetidOpplysningType.DOEDSDATO, pdl, doedsdato),
-            Opplysningsgrunnlag.ny(TrygdetidOpplysningType.FYLT_16, regel, seksten),
-            Opplysningsgrunnlag.ny(TrygdetidOpplysningType.FYLLER_66, regel, seksti)
-        )
+        val opplysninger =
+            listOf(
+                Opplysningsgrunnlag.ny(TrygdetidOpplysningType.FOEDSELSDATO, pdl, foedselsdato),
+                Opplysningsgrunnlag.ny(TrygdetidOpplysningType.DOEDSDATO, pdl, doedsdato),
+                Opplysningsgrunnlag.ny(TrygdetidOpplysningType.FYLT_16, regel, seksten),
+                Opplysningsgrunnlag.ny(TrygdetidOpplysningType.FYLLER_66, regel, seksti),
+            )
 
         val opprettetTrygdetid = trygdetid(behandling.id, behandling.sak, opplysninger = opplysninger)
 
@@ -119,12 +118,13 @@ internal class TrygdetidRepositoryTest {
         val behandling = behandlingMock()
         val beregnetTrygdetid = beregnetTrygdetid()
         val trygdetidGrunnlag = trygdetidGrunnlag()
-        val opprettetTrygdetid = trygdetid(
-            behandling.id,
-            behandling.sak,
-            trygdetidGrunnlag = listOf(trygdetidGrunnlag),
-            beregnetTrygdetid = beregnetTrygdetid
-        )
+        val opprettetTrygdetid =
+            trygdetid(
+                behandling.id,
+                behandling.sak,
+                trygdetidGrunnlag = listOf(trygdetidGrunnlag),
+                beregnetTrygdetid = beregnetTrygdetid,
+            )
 
         repository.opprettTrygdetid(opprettetTrygdetid)
         val trygdetid = repository.hentTrygdetid(behandling.id)
@@ -141,12 +141,13 @@ internal class TrygdetidRepositoryTest {
         val behandling = behandlingMock()
         val beregnetTrygdetid = beregnetTrygdetid()
         val trygdetidGrunnlag = trygdetidGrunnlag(poengInnAar = true, poengUtAar = true, prorata = true)
-        val opprettetTrygdetid = trygdetid(
-            behandling.id,
-            behandling.sak,
-            trygdetidGrunnlag = listOf(trygdetidGrunnlag),
-            beregnetTrygdetid = beregnetTrygdetid
-        )
+        val opprettetTrygdetid =
+            trygdetid(
+                behandling.id,
+                behandling.sak,
+                trygdetidGrunnlag = listOf(trygdetidGrunnlag),
+                beregnetTrygdetid = beregnetTrygdetid,
+            )
 
         repository.opprettTrygdetid(opprettetTrygdetid)
         val trygdetid = repository.hentTrygdetid(behandling.id)
@@ -216,10 +217,11 @@ internal class TrygdetidRepositoryTest {
     @Test
     fun `skal oppdatere et trygdetidsgrunnlag med begrunnelse`() {
         val behandling = behandlingMock()
-        val trygdetidGrunnlag = trygdetidGrunnlag(
-            beregnetTrygdetidGrunnlag = beregnetTrygdetidGrunnlag(),
-            begrunnelse = "Test"
-        )
+        val trygdetidGrunnlag =
+            trygdetidGrunnlag(
+                beregnetTrygdetidGrunnlag = beregnetTrygdetidGrunnlag(),
+                begrunnelse = "Test",
+            )
         val opprettetTrygdetid = trygdetid(behandling.id, behandling.sak, trygdetidGrunnlag = listOf(trygdetidGrunnlag))
 
         val trygdetid = repository.opprettTrygdetid(opprettetTrygdetid)
@@ -229,10 +231,11 @@ internal class TrygdetidRepositoryTest {
         lagretTrygdetid shouldNotBe null
         lagretTrygdetid?.trygdetidGrunnlag?.firstOrNull()?.begrunnelse shouldBe "Test"
 
-        val endretTrygdetidGrunnlag = trygdetidGrunnlag.copy(
-            bosted = LandNormalisert.POLEN.isoCode,
-            begrunnelse = "Test2"
-        )
+        val endretTrygdetidGrunnlag =
+            trygdetidGrunnlag.copy(
+                bosted = LandNormalisert.POLEN.isoCode,
+                begrunnelse = "Test2",
+            )
 
         val trygdetidMedOppdatertGrunnlag =
             repository.oppdaterTrygdetid(trygdetid.leggTilEllerOppdaterTrygdetidGrunnlag(endretTrygdetidGrunnlag))
@@ -246,10 +249,11 @@ internal class TrygdetidRepositoryTest {
     @Test
     fun `skal oppdatere et trygdetidsgrunnlag med poeng inn og ut aar og prorata`() {
         val behandling = behandlingMock()
-        val trygdetidGrunnlag = trygdetidGrunnlag(
-            beregnetTrygdetidGrunnlag = beregnetTrygdetidGrunnlag(),
-            begrunnelse = "Test"
-        )
+        val trygdetidGrunnlag =
+            trygdetidGrunnlag(
+                beregnetTrygdetidGrunnlag = beregnetTrygdetidGrunnlag(),
+                begrunnelse = "Test",
+            )
         val opprettetTrygdetid = trygdetid(behandling.id, behandling.sak, trygdetidGrunnlag = listOf(trygdetidGrunnlag))
 
         val trygdetid = repository.opprettTrygdetid(opprettetTrygdetid)
@@ -259,13 +263,14 @@ internal class TrygdetidRepositoryTest {
         lagretTrygdetid shouldNotBe null
         lagretTrygdetid?.trygdetidGrunnlag?.firstOrNull()?.begrunnelse shouldBe "Test"
 
-        val endretTrygdetidGrunnlag = trygdetidGrunnlag.copy(
-            bosted = LandNormalisert.POLEN.isoCode,
-            begrunnelse = "Test2",
-            poengUtAar = true,
-            poengInnAar = true,
-            prorata = true
-        )
+        val endretTrygdetidGrunnlag =
+            trygdetidGrunnlag.copy(
+                bosted = LandNormalisert.POLEN.isoCode,
+                begrunnelse = "Test2",
+                poengUtAar = true,
+                poengInnAar = true,
+                prorata = true,
+            )
 
         val trygdetidMedOppdatertGrunnlag =
             repository.oppdaterTrygdetid(trygdetid.leggTilEllerOppdaterTrygdetidGrunnlag(endretTrygdetidGrunnlag))
@@ -302,9 +307,10 @@ internal class TrygdetidRepositoryTest {
 
         trygdetidMedBeregnetTrygdetid.beregnetTrygdetid shouldBe beregnetTrygdetid
 
-        val trygdetidUtenBeregning = repository.oppdaterTrygdetid(
-            trygdetidMedBeregnetTrygdetid.nullstillBeregnetTrygdetid()
-        )
+        val trygdetidUtenBeregning =
+            repository.oppdaterTrygdetid(
+                trygdetidMedBeregnetTrygdetid.nullstillBeregnetTrygdetid(),
+            )
         trygdetidUtenBeregning.beregnetTrygdetid shouldBe null
     }
 

@@ -22,9 +22,8 @@ import rapidsandrivers.migrering.ListenerMedLogging
 
 class SoeknadStatistikkRiver(
     rapidsConnection: RapidsConnection,
-    private val statistikkService: SoeknadStatistikkService
+    private val statistikkService: SoeknadStatistikkService,
 ) : ListenerMedLogging() {
-
     private val logger = LoggerFactory.getLogger(this.javaClass)
 
     init {
@@ -38,24 +37,27 @@ class SoeknadStatistikkRiver(
         }.register(this)
     }
 
-    override fun haandterPakke(packet: JsonMessage, context: MessageContext) =
-        try {
-            val soeknadId = packet[SOEKNAD_ID_KEY].longValue()
-            val gyldigForBehandling = packet[GYLDIG_FOR_BEHANDLING_KEY].booleanValue()
-            val sakType = enumValueOf<SakType>(packet[SAK_TYPE_KEY].textValue())
-            val feilendeKriterier = when (val feilendeKriterier = packet[FEILENDE_KRITERIER_KEY]) {
+    override fun haandterPakke(
+        packet: JsonMessage,
+        context: MessageContext,
+    ) = try {
+        val soeknadId = packet[SOEKNAD_ID_KEY].longValue()
+        val gyldigForBehandling = packet[GYLDIG_FOR_BEHANDLING_KEY].booleanValue()
+        val sakType = enumValueOf<SakType>(packet[SAK_TYPE_KEY].textValue())
+        val feilendeKriterier =
+            when (val feilendeKriterier = packet[FEILENDE_KRITERIER_KEY]) {
                 is MissingNode, is NullNode -> null
                 else -> objectMapper.readValue<List<String>>(feilendeKriterier.toString())
             }
-            statistikkService.registrerSoeknadStatistikk(soeknadId, gyldigForBehandling, sakType, feilendeKriterier)
-        } catch (e: Exception) {
-            logger.error(
-                """
-                    Kunne ikke mappe ut statisikk for fordelerevent i pakken med korrelasjonsid ${packet.correlationId}.
-                    Dette betyr at statistikk for denne søknadens fordeling ikke blir med i oversikten, 
-                    så det vil være avvik. Bør fikses raskt, men stopper ikke prosessering av annen statistikk.
-                """.trimIndent(),
-                e
-            )
-        }
+        statistikkService.registrerSoeknadStatistikk(soeknadId, gyldigForBehandling, sakType, feilendeKriterier)
+    } catch (e: Exception) {
+        logger.error(
+            """
+            Kunne ikke mappe ut statisikk for fordelerevent i pakken med korrelasjonsid ${packet.correlationId}.
+            Dette betyr at statistikk for denne søknadens fordeling ikke blir med i oversikten, 
+            så det vil være avvik. Bør fikses raskt, men stopper ikke prosessering av annen statistikk.
+            """.trimIndent(),
+            e,
+        )
+    }
 }

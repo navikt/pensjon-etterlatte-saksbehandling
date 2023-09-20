@@ -12,17 +12,18 @@ import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 class OpplysningsgrunnlagMapper(
     private val grunnlaghendelser: List<OpplysningDao.GrunnlagHendelse>,
     private val sakId: Long,
-    private val persongalleri: Persongalleri
+    private val persongalleri: Persongalleri,
 ) {
     private data class GruppertHendelser(
-        val hendelser: List<OpplysningDao.GrunnlagHendelse>
+        val hendelser: List<OpplysningDao.GrunnlagHendelse>,
     ) {
         init {
             assert(alleOpplysningerErAvSammeType(hendelser.map { it.opplysning }))
         }
 
-        val opplysning: Opplysning<JsonNode> = hendelser.maxBy { hendelse -> hendelse.hendelseNummer }
-            .let { Opplysning.Konstant.create(it.opplysning) }
+        val opplysning: Opplysning<JsonNode> =
+            hendelser.maxBy { hendelse -> hendelse.hendelseNummer }
+                .let { Opplysning.Konstant.create(it.opplysning) }
 
         val opplysningstype: Opplysningstype
             get() = hendelser.first().opplysning.opplysningType
@@ -34,8 +35,7 @@ class OpplysningsgrunnlagMapper(
                 (opplysninger.size == opplysninger.filterNot { erPeriodisertOpplysning(it) }.size)
         }
 
-        private fun erPeriodisertOpplysning(grunnlagsopplysning: Grunnlagsopplysning<*>) =
-            grunnlagsopplysning.periode != null
+        private fun erPeriodisertOpplysning(grunnlagsopplysning: Grunnlagsopplysning<*>) = grunnlagsopplysning.periode != null
     }
 
     fun hentGrunnlag(): Grunnlag {
@@ -47,18 +47,19 @@ class OpplysningsgrunnlagMapper(
         val (soeker, familie) = personopplysninger.partition { it.fnr!!.value == persongalleri.soeker }
 
         val soekerMap = soeker.associateBy({ it.opplysningstype }, { it.opplysning })
-        val familieMap = familie
-            .groupBy { it.fnr }.values
-            .map { familiemedlem ->
-                familiemedlem.associateBy({ it.opplysningstype }, { it.opplysning })
-            }
+        val familieMap =
+            familie
+                .groupBy { it.fnr }.values
+                .map { familiemedlem ->
+                    familiemedlem.associateBy({ it.opplysningstype }, { it.opplysning })
+                }
         val sakMap = saksopplysninger.associateBy({ it.opplysningstype }, { it.opplysning })
 
         return Grunnlag(
             soeker = soekerMap,
             familie = familieMap,
             sak = sakMap,
-            metadata = Metadata(sakId, senestVersjon)
+            metadata = Metadata(sakId, senestVersjon),
         )
     }
 

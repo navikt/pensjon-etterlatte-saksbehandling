@@ -11,7 +11,7 @@ fun registrerVedtakHendelseFelles(
     kommentar: String?,
     begrunnelse: String?,
     lagretBehandling: Behandling,
-    hendelser: HendelseDao
+    hendelser: HendelseDao,
 ) {
     if (hendelse.kreverSaksbehandler()) {
         requireNotNullWithMessage(saksbehandler, "Vedtakshendelsen krever en saksbehandler")
@@ -29,11 +29,14 @@ fun registrerVedtakHendelseFelles(
         inntruffet,
         saksbehandler,
         kommentar,
-        begrunnelse
+        begrunnelse,
     )
 }
 
-fun requireNotNullWithMessage(value: Any?, message: String): Any {
+fun requireNotNullWithMessage(
+    value: Any?,
+    message: String,
+): Any {
     if (value == null) {
         throw NullPointerException(message)
     } else {
@@ -41,7 +44,6 @@ fun requireNotNullWithMessage(value: Any?, message: String): Any {
     }
 }
 
-private fun HendelseType.kreverSaksbehandler() =
-    this in listOf(HendelseType.FATTET, HendelseType.ATTESTERT, HendelseType.UNDERKJENT)
+private fun HendelseType.kreverSaksbehandler() = this in listOf(HendelseType.FATTET, HendelseType.ATTESTERT, HendelseType.UNDERKJENT)
 
 private fun HendelseType.erUnderkjent() = this == HendelseType.UNDERKJENT

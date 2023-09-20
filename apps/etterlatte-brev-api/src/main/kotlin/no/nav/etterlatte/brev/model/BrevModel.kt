@@ -11,7 +11,8 @@ import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
-import java.util.*
+import java.util.Locale
+import java.util.UUID
 
 typealias BrevID = Long
 
@@ -21,7 +22,7 @@ enum class Status {
     FERDIGSTILT,
     JOURNALFOERT,
     DISTRIBUERT,
-    SLETTET
+    SLETTET,
 }
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -33,7 +34,7 @@ data class Adresse(
     val postnummer: String? = null,
     val poststed: String? = null,
     val landkode: String,
-    val land: String
+    val land: String,
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -41,7 +42,7 @@ data class Mottaker(
     val navn: String,
     val foedselsnummer: Foedselsnummer? = null,
     val orgnummer: String? = null,
-    val adresse: Adresse
+    val adresse: Adresse,
 ) {
     init {
         if (foedselsnummer == null && orgnummer == null) {
@@ -50,19 +51,23 @@ data class Mottaker(
     }
 
     companion object {
-        fun fra(fnr: Folkeregisteridentifikator, regoppslag: RegoppslagResponseDTO) = Mottaker(
+        fun fra(
+            fnr: Folkeregisteridentifikator,
+            regoppslag: RegoppslagResponseDTO,
+        ) = Mottaker(
             navn = regoppslag.navn,
             foedselsnummer = Foedselsnummer(fnr.value),
-            adresse = Adresse(
-                adresseType = regoppslag.adresse.type.name,
-                adresselinje1 = regoppslag.adresse.adresselinje1,
-                adresselinje2 = regoppslag.adresse.adresselinje2,
-                adresselinje3 = regoppslag.adresse.adresselinje3,
-                postnummer = regoppslag.adresse.postnummer,
-                poststed = regoppslag.adresse.poststed,
-                landkode = regoppslag.adresse.landkode,
-                land = regoppslag.adresse.land
-            )
+            adresse =
+                Adresse(
+                    adresseType = regoppslag.adresse.type.name,
+                    adresselinje1 = regoppslag.adresse.adresselinje1,
+                    adresselinje2 = regoppslag.adresse.adresselinje2,
+                    adresselinje3 = regoppslag.adresse.adresselinje3,
+                    postnummer = regoppslag.adresse.postnummer,
+                    poststed = regoppslag.adresse.poststed,
+                    landkode = regoppslag.adresse.landkode,
+                    land = regoppslag.adresse.land,
+                ),
         )
     }
 }
@@ -74,22 +79,23 @@ data class Brev(
     val prosessType: BrevProsessType,
     val soekerFnr: String,
     val status: Status,
-    val mottaker: Mottaker
+    val mottaker: Mottaker,
 ) {
-
     fun kanEndres() = status in listOf(Status.OPPRETTET, Status.OPPDATERT)
 
     companion object {
-        fun fra(id: BrevID, opprettNyttBrev: OpprettNyttBrev) =
-            Brev(
-                id = id,
-                sakId = opprettNyttBrev.sakId,
-                behandlingId = opprettNyttBrev.behandlingId,
-                prosessType = opprettNyttBrev.prosessType,
-                soekerFnr = opprettNyttBrev.soekerFnr,
-                status = opprettNyttBrev.status,
-                mottaker = opprettNyttBrev.mottaker
-            )
+        fun fra(
+            id: BrevID,
+            opprettNyttBrev: OpprettNyttBrev,
+        ) = Brev(
+            id = id,
+            sakId = opprettNyttBrev.sakId,
+            behandlingId = opprettNyttBrev.behandlingId,
+            prosessType = opprettNyttBrev.prosessType,
+            soekerFnr = opprettNyttBrev.soekerFnr,
+            status = opprettNyttBrev.status,
+            mottaker = opprettNyttBrev.mottaker,
+        )
     }
 }
 
@@ -98,37 +104,38 @@ class Pdf(val bytes: ByteArray)
 data class BrevInnhold(
     val tittel: String,
     val spraak: Spraak,
-    val payload: Slate? = null
+    val payload: Slate? = null,
 )
 
 data class BrevInnholdVedlegg(
     val tittel: String,
     val key: BrevVedleggKey,
-    val payload: Slate? = null
+    val payload: Slate? = null,
 ) {
     companion object {
         fun inntektsendringOMS(): List<BrevInnholdVedlegg> =
             listOf(
-                utfallBeregningOMS()
+                utfallBeregningOMS(),
             )
 
         fun innvilgelseOMS(): List<BrevInnholdVedlegg> =
             listOf(
-                utfallBeregningOMS()
+                utfallBeregningOMS(),
             )
 
-        private fun utfallBeregningOMS() = BrevInnholdVedlegg(
-            tittel = "Utfall ved beregning av omstillingsstønad",
-            key = BrevVedleggKey.BEREGNING_INNHOLD,
-            payload = getJsonFile("/maler/vedlegg/oms_utfall_beregning.json").let { deserialize<Slate>(it) }
-        )
+        private fun utfallBeregningOMS() =
+            BrevInnholdVedlegg(
+                tittel = "Utfall ved beregning av omstillingsstønad",
+                key = BrevVedleggKey.BEREGNING_INNHOLD,
+                payload = getJsonFile("/maler/vedlegg/oms_utfall_beregning.json").let { deserialize<Slate>(it) },
+            )
 
         private fun getJsonFile(url: String) = javaClass.getResource(url)!!.readText()
     }
 }
 
 enum class BrevVedleggKey {
-    BEREGNING_INNHOLD
+    BEREGNING_INNHOLD,
 }
 
 data class OpprettNyttBrev(
@@ -138,7 +145,7 @@ data class OpprettNyttBrev(
     val prosessType: BrevProsessType,
     val mottaker: Mottaker,
     val innhold: BrevInnhold,
-    val innholdVedlegg: List<BrevInnholdVedlegg>?
+    val innholdVedlegg: List<BrevInnholdVedlegg>?,
 ) {
     val status: Status = Status.OPPRETTET
 }
@@ -146,7 +153,7 @@ data class OpprettNyttBrev(
 enum class BrevProsessType {
     MANUELL,
     REDIGERBAR,
-    AUTOMATISK
+    AUTOMATISK,
 }
 
 class BrevProsessTypeFactory(private val featureToggleService: FeatureToggleService) {
@@ -160,51 +167,63 @@ class BrevProsessTypeFactory(private val featureToggleService: FeatureToggleServ
     private fun omsBrev(behandling: Behandling): BrevProsessType {
         return when (behandling.vedtak.type) {
             VedtakType.INNVILGELSE -> BrevProsessType.REDIGERBAR
-            VedtakType.OPPHOER -> when (behandling.revurderingsaarsak?.redigerbartBrev) {
-                true -> BrevProsessType.REDIGERBAR
-                else -> BrevProsessType.MANUELL
-            }
+            VedtakType.OPPHOER ->
+                when (behandling.revurderingsaarsak?.redigerbartBrev) {
+                    true -> BrevProsessType.REDIGERBAR
+                    else -> BrevProsessType.MANUELL
+                }
             VedtakType.AVSLAG,
-            VedtakType.ENDRING -> when (behandling.revurderingsaarsak) {
-                RevurderingAarsak.INNTEKTSENDRING,
-                RevurderingAarsak.ANNEN -> BrevProsessType.REDIGERBAR
-                else -> BrevProsessType.MANUELL
-            }
+            VedtakType.ENDRING,
+            ->
+                when (behandling.revurderingsaarsak) {
+                    RevurderingAarsak.INNTEKTSENDRING,
+                    RevurderingAarsak.ANNEN,
+                    -> BrevProsessType.REDIGERBAR
+                    else -> BrevProsessType.MANUELL
+                }
         }
     }
 
     private fun bpBrev(behandling: Behandling): BrevProsessType {
         return when (behandling.vedtak.type) {
-            VedtakType.INNVILGELSE -> when (
-                featureToggleService.isEnabled(
-                    BrevDataFeatureToggle.NyMalInnvilgelse,
-                    false
-                )
-            ) {
-                true -> BrevProsessType.REDIGERBAR
-                false -> BrevProsessType.AUTOMATISK
-            }
+            VedtakType.INNVILGELSE ->
+                when (
+                    featureToggleService.isEnabled(
+                        BrevDataFeatureToggle.NyMalInnvilgelse,
+                        false,
+                    )
+                ) {
+                    true -> BrevProsessType.REDIGERBAR
+                    false -> BrevProsessType.AUTOMATISK
+                }
 
-            VedtakType.ENDRING -> when (behandling.revurderingsaarsak) {
-                RevurderingAarsak.SOESKENJUSTERING -> BrevProsessType.REDIGERBAR
-                RevurderingAarsak.FENGSELSOPPHOLD -> BrevProsessType.REDIGERBAR
-                RevurderingAarsak.UT_AV_FENGSEL -> BrevProsessType.REDIGERBAR
-                RevurderingAarsak.YRKESSKADE -> BrevProsessType.REDIGERBAR
-                else -> BrevProsessType.MANUELL
-            }
+            VedtakType.ENDRING ->
+                when (behandling.revurderingsaarsak) {
+                    RevurderingAarsak.SOESKENJUSTERING -> BrevProsessType.REDIGERBAR
+                    RevurderingAarsak.FENGSELSOPPHOLD -> BrevProsessType.REDIGERBAR
+                    RevurderingAarsak.UT_AV_FENGSEL -> BrevProsessType.REDIGERBAR
+                    RevurderingAarsak.YRKESSKADE -> BrevProsessType.REDIGERBAR
+                    else -> BrevProsessType.MANUELL
+                }
 
-            VedtakType.OPPHOER -> when (behandling.revurderingsaarsak?.redigerbartBrev) {
-                true -> BrevProsessType.REDIGERBAR
-                else -> BrevProsessType.MANUELL
-            }
+            VedtakType.OPPHOER ->
+                when (behandling.revurderingsaarsak?.redigerbartBrev) {
+                    true -> BrevProsessType.REDIGERBAR
+                    else -> BrevProsessType.MANUELL
+                }
 
             VedtakType.AVSLAG -> BrevProsessType.MANUELL
         }
     }
 }
 
-enum class Spraak(@get:JsonValue val verdi: String) {
-    NB("nb"), NN("nn"), EN("en");
+enum class Spraak(
+    @get:JsonValue val verdi: String,
+) {
+    NB("nb"),
+    NN("nn"),
+    EN("en"),
+    ;
 
     fun locale(): Locale =
         when (this) {

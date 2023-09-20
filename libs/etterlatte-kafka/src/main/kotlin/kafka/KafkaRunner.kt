@@ -6,7 +6,7 @@ import kotlin.system.exitProcess
 
 fun <T> startLytting(
     konsument: Kafkakonsument<T>,
-    logger: Logger
+    logger: Logger,
 ) {
     withLogContext {
         Thread {

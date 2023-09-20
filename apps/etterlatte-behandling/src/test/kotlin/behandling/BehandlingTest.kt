@@ -19,39 +19,41 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.time.YearMonth
-import java.util.*
+import java.util.UUID
 
 internal class BehandlingTest {
-
     val id = UUID.randomUUID()
     private val saksbehandler = Grunnlagsopplysning.Saksbehandler.create("saksbehandler01")
 
-    private val behandling = Foerstegangsbehandling(
-        id = id,
-        sak = Sak(
-            ident = "",
-            sakType = SakType.BARNEPENSJON,
-            id = 1,
-            enhet = Enheter.defaultEnhet.enhetNr
-        ),
-        behandlingOpprettet = Tidspunkt.now().toLocalDatetimeUTC(),
-        sistEndret = Tidspunkt.now().toLocalDatetimeUTC(),
-        status = BehandlingStatus.OPPRETTET,
-        kommerBarnetTilgode = KommerBarnetTilgode(JaNei.JA, "", saksbehandler, id),
-        virkningstidspunkt = null,
-        utenlandstilsnitt = null,
-        boddEllerArbeidetUtlandet = null,
-        soeknadMottattDato = Tidspunkt.now().toLocalDatetimeUTC(),
-        gyldighetsproeving = null,
-        kilde = Vedtaksloesning.GJENNY
-    )
+    private val behandling =
+        Foerstegangsbehandling(
+            id = id,
+            sak =
+                Sak(
+                    ident = "",
+                    sakType = SakType.BARNEPENSJON,
+                    id = 1,
+                    enhet = Enheter.defaultEnhet.enhetNr,
+                ),
+            behandlingOpprettet = Tidspunkt.now().toLocalDatetimeUTC(),
+            sistEndret = Tidspunkt.now().toLocalDatetimeUTC(),
+            status = BehandlingStatus.OPPRETTET,
+            kommerBarnetTilgode = KommerBarnetTilgode(JaNei.JA, "", saksbehandler, id),
+            virkningstidspunkt = null,
+            utenlandstilsnitt = null,
+            boddEllerArbeidetUtlandet = null,
+            soeknadMottattDato = Tidspunkt.now().toLocalDatetimeUTC(),
+            gyldighetsproeving = null,
+            kilde = Vedtaksloesning.GJENNY,
+        )
 
     private val virkningstidspunkt = Virkningstidspunkt(YearMonth.of(2021, 1), saksbehandler, "begrunnelse")
-    private val gyldighetsResultat = GyldighetsResultat(
-        VurderingsResultat.OPPFYLT,
-        listOf(),
-        Tidspunkt.now().toLocalDatetimeUTC()
-    )
+    private val gyldighetsResultat =
+        GyldighetsResultat(
+            VurderingsResultat.OPPFYLT,
+            listOf(),
+            Tidspunkt.now().toLocalDatetimeUTC(),
+        )
 
     @Test
     fun `kan oppdatere behandling når den er OPPRETTET`() {
@@ -96,7 +98,7 @@ internal class BehandlingTest {
         assertThrows<TilstandException.UgyldigTilstand> { iverksattBehandling.tilReturnert() }
         assertThrows<TilstandException.UgyldigTilstand> {
             iverksattBehandling.oppdaterVirkningstidspunkt(
-                virkningstidspunkt
+                virkningstidspunkt,
             )
         }
     }
@@ -113,9 +115,10 @@ internal class BehandlingTest {
 
     @Test
     fun `kan ikke ga fra VILKAARSVURDERT til FATTET VEDTAK`() {
-        val fyltUtBehandling = behandling
-            .oppdaterVirkningstidspunkt(virkningstidspunkt)
-            .oppdaterGyldighetsproeving(gyldighetsResultat)
+        val fyltUtBehandling =
+            behandling
+                .oppdaterVirkningstidspunkt(virkningstidspunkt)
+                .oppdaterGyldighetsproeving(gyldighetsResultat)
 
         assertThrows<TilstandException.UgyldigTilstand> { fyltUtBehandling.tilVilkaarsvurdert().tilFattetVedtak() }
         assertThrows<TilstandException.UgyldigTilstand> {

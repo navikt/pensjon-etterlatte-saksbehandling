@@ -21,7 +21,7 @@ class OpplysningDao(private val datasource: DataSource) {
     data class GrunnlagHendelse(
         val opplysning: Grunnlagsopplysning<JsonNode>,
         val sakId: Long,
-        val hendelseNummer: Long
+        val hendelseNummer: Long,
     )
 
     private fun ResultSet.asBehandlingOpplysning(): Grunnlagsopplysning<JsonNode> {
@@ -32,12 +32,13 @@ class OpplysningDao(private val datasource: DataSource) {
             meta = objectMapper.createObjectNode(),
             opplysning = getString("opplysning").deSerialize()!!,
             fnr = getString("fnr")?.let { Folkeregisteridentifikator.of(it) },
-            periode = getString("fom")?.let { fom ->
-                Periode(
-                    fom = YearMonth.parse(fom),
-                    tom = getString("tom")?.let { tom -> YearMonth.parse(tom) }
-                )
-            }
+            periode =
+                getString("fom")?.let { fom ->
+                    Periode(
+                        fom = YearMonth.parse(fom),
+                        tom = getString("tom")?.let { tom -> YearMonth.parse(tom) },
+                    )
+                },
         )
     }
 
@@ -45,39 +46,41 @@ class OpplysningDao(private val datasource: DataSource) {
         return GrunnlagHendelse(
             opplysning = asBehandlingOpplysning(),
             sakId = getLong("sak_id"),
-            hendelseNummer = getLong("hendelsenummer")
+            hendelseNummer = getLong("hendelsenummer"),
         )
     }
 
-    fun hentAlleGrunnlagForSak(sakId: Long): List<GrunnlagHendelse> = connection.use {
-        it.prepareStatement(
-            """
-            SELECT sak_id, opplysning_id, kilde, opplysning_type, opplysning, hendelsenummer, fnr, fom, tom
-            FROM grunnlagshendelse hendelse 
-            WHERE hendelse.sak_id = ?
-            """.trimIndent()
-        )
-            .apply {
-                setLong(1, sakId)
-            }.executeQuery().toList { asGrunnlagshendelse() }
-    }
+    fun hentAlleGrunnlagForSak(sakId: Long): List<GrunnlagHendelse> =
+        connection.use {
+            it.prepareStatement(
+                """
+                SELECT sak_id, opplysning_id, kilde, opplysning_type, opplysning, hendelsenummer, fnr, fom, tom
+                FROM grunnlagshendelse hendelse 
+                WHERE hendelse.sak_id = ?
+                """.trimIndent(),
+            )
+                .apply {
+                    setLong(1, sakId)
+                }.executeQuery().toList { asGrunnlagshendelse() }
+        }
 
-    fun finnHendelserIGrunnlag(sakId: Long): List<GrunnlagHendelse> = connection.use {
-        it.prepareStatement(
-            """
-            SELECT sak_id, opplysning_id, kilde, opplysning_type, opplysning, hendelsenummer, fnr, fom, tom
-            FROM grunnlagshendelse hendelse 
-            WHERE hendelse.sak_id = ? AND NOT EXISTS(SELECT 1 FROM grunnlagshendelse annen where annen.sak_id = hendelse.sak_id AND hendelse.opplysning_type = annen.opplysning_type AND annen.hendelsenummer > hendelse.hendelsenummer)
-            """.trimIndent()
-        )
-            .apply {
-                setLong(1, sakId)
-            }.executeQuery().toList { asGrunnlagshendelse() }
-    }
+    fun finnHendelserIGrunnlag(sakId: Long): List<GrunnlagHendelse> =
+        connection.use {
+            it.prepareStatement(
+                """
+                SELECT sak_id, opplysning_id, kilde, opplysning_type, opplysning, hendelsenummer, fnr, fom, tom
+                FROM grunnlagshendelse hendelse 
+                WHERE hendelse.sak_id = ? AND NOT EXISTS(SELECT 1 FROM grunnlagshendelse annen where annen.sak_id = hendelse.sak_id AND hendelse.opplysning_type = annen.opplysning_type AND annen.hendelsenummer > hendelse.hendelsenummer)
+                """.trimIndent(),
+            )
+                .apply {
+                    setLong(1, sakId)
+                }.executeQuery().toList { asGrunnlagshendelse() }
+        }
 
     fun finnNyesteOpplysningPaaFnr(
         fnr: Folkeregisteridentifikator,
-        opplysningType: Opplysningstype
+        opplysningType: Opplysningstype,
     ): GrunnlagHendelse? =
         connection.use {
             it.prepareStatement(
@@ -85,7 +88,7 @@ class OpplysningDao(private val datasource: DataSource) {
                 SELECT sak_id, opplysning_id, kilde, opplysning_type, opplysning, hendelsenummer, fnr, fom, tom
                 FROM grunnlagshendelse hendelse 
                 WHERE hendelse.fnr = ? AND hendelse.opplysning_type = ? AND NOT EXISTS(SELECT 1 FROM grunnlagshendelse annen where annen.fnr = hendelse.fnr AND hendelse.opplysning_type = annen.opplysning_type AND annen.hendelsenummer > hendelse.hendelsenummer)
-                """.trimIndent()
+                """.trimIndent(),
             )
                 .apply {
                     setString(1, fnr.value)
@@ -93,14 +96,17 @@ class OpplysningDao(private val datasource: DataSource) {
                 }.executeQuery().singleOrNull { asGrunnlagshendelse() }
         }
 
-    fun finnNyesteGrunnlag(sakId: Long, opplysningType: Opplysningstype): GrunnlagHendelse? =
+    fun finnNyesteGrunnlag(
+        sakId: Long,
+        opplysningType: Opplysningstype,
+    ): GrunnlagHendelse? =
         connection.use {
             it.prepareStatement(
                 """
                 SELECT sak_id, opplysning_id, kilde, opplysning_type, opplysning, hendelsenummer, fnr, fom, tom
                 FROM grunnlagshendelse hendelse 
                 WHERE hendelse.sak_id = ? AND hendelse.opplysning_type = ? AND NOT EXISTS(SELECT 1 FROM grunnlagshendelse annen where annen.sak_id = hendelse.sak_id AND hendelse.opplysning_type = annen.opplysning_type AND annen.hendelsenummer > hendelse.hendelsenummer)
-                """.trimIndent()
+                """.trimIndent(),
             )
                 .apply {
                     setLong(1, sakId)
@@ -108,14 +114,17 @@ class OpplysningDao(private val datasource: DataSource) {
                 }.executeQuery().singleOrNull { asGrunnlagshendelse() }
         }
 
-    fun finnGrunnlagOpptilVersjon(sakId: Long, versjon: Long): List<GrunnlagHendelse> =
+    fun finnGrunnlagOpptilVersjon(
+        sakId: Long,
+        versjon: Long,
+    ): List<GrunnlagHendelse> =
         connection.use {
             it.prepareStatement(
                 """
                 SELECT sak_id, opplysning_id, kilde, opplysning_type, opplysning, hendelsenummer, fnr, fom, tom
                 FROM grunnlagshendelse hendelse 
                 WHERE hendelse.sak_id = ? AND hendelse.hendelsenummer <= ?
-                """.trimIndent()
+                """.trimIndent(),
             )
                 .apply {
                     setLong(1, sakId)
@@ -126,13 +135,13 @@ class OpplysningDao(private val datasource: DataSource) {
     fun leggOpplysningTilGrunnlag(
         sakId: Long,
         behandlingsopplysning: Grunnlagsopplysning<JsonNode>,
-        fnr: Folkeregisteridentifikator? = null
+        fnr: Folkeregisteridentifikator? = null,
     ): Long =
         connection.use {
             it.prepareStatement(
                 """INSERT INTO grunnlagshendelse(opplysning_id, sak_id, opplysning, kilde, opplysning_type, hendelsenummer, fnr, fom, tom)
                 | VALUES(?, ?, ?, ?, ?, COALESCE((select max (hendelsenummer) + 1 from grunnlagshendelse where sak_id = ?), 1), ?, ?, ?) returning hendelsenummer 
-                """.trimMargin()
+                """.trimMargin(),
             )
                 .apply {
                     setObject(1, behandlingsopplysning.id)
@@ -151,10 +160,10 @@ class OpplysningDao(private val datasource: DataSource) {
         connection.use {
             it.prepareStatement(
                 """
-                    SELECT * FROM grunnlagshendelse
-                    WHERE opplysning LIKE ?
-                    AND opplysning_type = ?;
-                """.trimIndent()
+                SELECT * FROM grunnlagshendelse
+                WHERE opplysning LIKE ?
+                AND opplysning_type = ?;
+                """.trimIndent(),
             ).apply {
                 setString(1, "%${fnr.value}%")
                 setString(2, Opplysningstype.PERSONGALLERI_V1.name)
@@ -165,11 +174,11 @@ class OpplysningDao(private val datasource: DataSource) {
         connection.use {
             it.prepareStatement(
                 """
-                    SELECT distinct(sak_id) 
-                    FROM grunnlagshendelse
-                    WHERE opplysning LIKE ?
-                    OR fnr = ?;
-                """.trimIndent()
+                SELECT distinct(sak_id) 
+                FROM grunnlagshendelse
+                WHERE opplysning LIKE ?
+                OR fnr = ?;
+                """.trimIndent(),
             ).apply {
                 setString(1, "%${fnr.value}%")
                 setString(2, fnr.value)
@@ -178,4 +187,5 @@ class OpplysningDao(private val datasource: DataSource) {
 }
 
 fun JsonNode?.serialize() = this?.let { objectMapper.writeValueAsString(it) }
+
 fun String?.deSerialize() = this?.let { objectMapper.readValue(this, JsonNode::class.java) }

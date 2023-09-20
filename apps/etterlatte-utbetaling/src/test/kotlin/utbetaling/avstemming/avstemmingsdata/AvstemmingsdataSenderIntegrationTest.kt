@@ -22,29 +22,31 @@ import java.time.temporal.ChronoUnit
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class AvstemmingsdataSenderIntegrationTest {
-
     private val jmsConnectionFactory: EtterlatteJmsConnectionFactory = DummyJmsConnectionFactory()
     private lateinit var avstemmingsdataSender: AvstemmingsdataSender
 
     @BeforeAll
     fun beforeAll() {
-        avstemmingsdataSender = AvstemmingsdataSender(
-            jmsConnectionFactory = jmsConnectionFactory,
-            queue = "DEV.QUEUE.1"
-        )
+        avstemmingsdataSender =
+            AvstemmingsdataSender(
+                jmsConnectionFactory = jmsConnectionFactory,
+                queue = "DEV.QUEUE.1",
+            )
     }
 
     @Test
     fun `skal sende konsistensavstemmingsmeldinger paa koeen`() {
         val oppdragslinjer = listOf(oppdragslinjeForKonsistensavstemming(fraOgMed = LocalDate.of(2022, 10, 7)))
         val oppdrag = oppdragForKonsistensavstemming(oppdragslinjeForKonsistensavstemming = oppdragslinjer)
-        val konsistensavstemming = mockKonsistensavstemming(
-            loependeUtbetalinger = listOf(oppdrag),
-            sakType = Saktype.BARNEPENSJON
-        )
-        val avstemmingsdata = KonsistensavstemmingDataMapper(
-            konsistensavstemming
-        ).opprettAvstemmingsmelding(Saktype.BARNEPENSJON)
+        val konsistensavstemming =
+            mockKonsistensavstemming(
+                loependeUtbetalinger = listOf(oppdrag),
+                sakType = Saktype.BARNEPENSJON,
+            )
+        val avstemmingsdata =
+            KonsistensavstemmingDataMapper(
+                konsistensavstemming,
+            ).opprettAvstemmingsmelding(Saktype.BARNEPENSJON)
         avstemmingsdata.forEach {
             val xml = avstemmingsdataSender.sendKonsistensavstemming(it)
             assertNotNull(xml)
@@ -56,11 +58,12 @@ internal class AvstemmingsdataSenderIntegrationTest {
         val fraOgMed = Tidspunkt.now().minus(1, ChronoUnit.DAYS)
         val til = Tidspunkt.now()
 
-        val utbetalinger = listOf(
-            utbetaling(utbetalingshendelser = listOf(utbetalingshendelse(status = UtbetalingStatus.FEILET))),
-            utbetaling(utbetalingshendelser = listOf(utbetalingshendelse(status = UtbetalingStatus.FEILET))),
-            utbetaling(utbetalingshendelser = listOf(utbetalingshendelse(status = UtbetalingStatus.FEILET)))
-        )
+        val utbetalinger =
+            listOf(
+                utbetaling(utbetalingshendelser = listOf(utbetalingshendelse(status = UtbetalingStatus.FEILET))),
+                utbetaling(utbetalingshendelser = listOf(utbetalingshendelse(status = UtbetalingStatus.FEILET))),
+                utbetaling(utbetalingshendelser = listOf(utbetalingshendelse(status = UtbetalingStatus.FEILET))),
+            )
         val grensesnittavstemmingDataMapper =
             GrensesnittavstemmingDataMapper(utbetalinger, fraOgMed, til, UUIDBase64(), 2)
         val avstemmingsdata = grensesnittavstemmingDataMapper.opprettAvstemmingsmelding(Saktype.BARNEPENSJON)

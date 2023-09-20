@@ -13,14 +13,14 @@ data class VergeMaalEllerFremtidsfullmakt(
     override val hendelseId: String,
     override val endringstype: Endringstype,
     override val fnr: String,
-    val vergeIdent: String?
+    val vergeIdent: String?,
 ) : PdlHendelse
 
 data class Doedshendelse(
     override val hendelseId: String,
     override val endringstype: Endringstype,
     override val fnr: String,
-    val doedsdato: LocalDate?
+    val doedsdato: LocalDate?,
 ) : PdlHendelse
 
 data class UtflyttingsHendelse(
@@ -29,7 +29,7 @@ data class UtflyttingsHendelse(
     override val fnr: String,
     val tilflyttingsLand: String?,
     val tilflyttingsstedIUtlandet: String?,
-    val utflyttingsdato: LocalDate?
+    val utflyttingsdato: LocalDate?,
 ) : PdlHendelse
 
 data class ForelderBarnRelasjonHendelse(
@@ -39,14 +39,14 @@ data class ForelderBarnRelasjonHendelse(
     val relatertPersonsIdent: String?,
     val relatertPersonsRolle: String?,
     val minRolleForPerson: String?,
-    val relatertPersonUtenFolkeregisteridentifikator: String?
+    val relatertPersonUtenFolkeregisteridentifikator: String?,
 ) : PdlHendelse
 
 data class Adressebeskyttelse(
     override val hendelseId: String,
     override val endringstype: Endringstype,
     override val fnr: String,
-    val adressebeskyttelseGradering: AdressebeskyttelseGradering
+    val adressebeskyttelseGradering: AdressebeskyttelseGradering,
 ) : PdlHendelse
 
 data class SivilstandHendelse(
@@ -56,9 +56,12 @@ data class SivilstandHendelse(
     val type: String?,
     val relatertVedSivilstand: String?,
     val gyldigFraOgMed: LocalDate?,
-    val bekreftelsesdato: LocalDate?
+    val bekreftelsesdato: LocalDate?,
 ) : PdlHendelse
 
 enum class Endringstype {
-    OPPRETTET, KORRIGERT, ANNULLERT, OPPHOERT
+    OPPRETTET,
+    KORRIGERT,
+    ANNULLERT,
+    OPPHOERT,
 }

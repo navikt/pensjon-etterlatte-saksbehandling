@@ -36,7 +36,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.time.YearMonth
-import java.util.*
+import java.util.UUID
 
 internal class JournalfoerVedtaksbrevTest {
     private val vedtaksbrevService = mockk<VedtaksbrevService>()
@@ -51,15 +51,16 @@ internal class JournalfoerVedtaksbrevTest {
 
     @Test
     fun `Gyldig melding skal sende journalpost til distribusjon`() {
-        val brev = Brev(
-            1,
-            41,
-            BEHANDLING_ID,
-            BrevProsessType.AUTOMATISK,
-            "fnr",
-            Status.FERDIGSTILT,
-            mottaker = mockk()
-        )
+        val brev =
+            Brev(
+                1,
+                41,
+                BEHANDLING_ID,
+                BrevProsessType.AUTOMATISK,
+                "fnr",
+                Status.FERDIGSTILT,
+                mottaker = mockk(),
+            )
         val response = JournalpostResponse("1234", null, null, true, emptyList())
 
         every { vedtaksbrevService.hentVedtaksbrev(any()) } returns brev
@@ -91,15 +92,16 @@ internal class JournalfoerVedtaksbrevTest {
 
     @Test
     fun `Brev er allerede journalfoert`() {
-        val brev = Brev(
-            1,
-            41,
-            BEHANDLING_ID,
-            BrevProsessType.AUTOMATISK,
-            "fnr",
-            Status.JOURNALFOERT,
-            mottaker = mockk()
-        )
+        val brev =
+            Brev(
+                1,
+                41,
+                BEHANDLING_ID,
+                BrevProsessType.AUTOMATISK,
+                "fnr",
+                Status.JOURNALFOERT,
+                mottaker = mockk(),
+            )
 
         every { vedtaksbrevService.hentVedtaksbrev(any()) } returns brev
 
@@ -117,12 +119,13 @@ internal class JournalfoerVedtaksbrevTest {
     fun `Attestering av sak med behandlingstype MANUELT_OPPHOER`() {
         val vedtak = opprettVedtak(BehandlingType.MANUELT_OPPHOER)
 
-        val melding = JsonMessage.newMessage(
-            mapOf(
-                EVENT_NAME_KEY to KafkaHendelseType.ATTESTERT.toString(),
-                "vedtak" to vedtak
+        val melding =
+            JsonMessage.newMessage(
+                mapOf(
+                    EVENT_NAME_KEY to KafkaHendelseType.ATTESTERT.toString(),
+                    "vedtak" to vedtak,
+                ),
             )
-        )
 
         testRapid.apply { sendTestMessage(melding.toJson()) }.inspektør
 
@@ -138,8 +141,8 @@ internal class JournalfoerVedtaksbrevTest {
                 mapOf(
                     EVENT_NAME_KEY to KafkaHendelseType.ATTESTERT.toString(),
                     "vedtak" to vedtak,
-                    SKAL_SENDE_BREV to false
-                )
+                    SKAL_SENDE_BREV to false,
+                ),
             )
 
         testRapid.apply { sendTestMessage(melding.toJson()) }.inspektør
@@ -166,8 +169,8 @@ internal class JournalfoerVedtaksbrevTest {
             mapOf(
                 CORRELATION_ID_KEY to UUID.randomUUID().toString(),
                 EVENT_NAME_KEY to KafkaHendelseType.ATTESTERT.toString(),
-                "vedtak" to vedtak
-            )
+                "vedtak" to vedtak,
+            ),
         )
     }
 
@@ -181,7 +184,7 @@ internal class JournalfoerVedtaksbrevTest {
             type = VedtakType.INNVILGELSE,
             utbetalingsperioder = emptyList(),
             vedtakFattet = VedtakFattet("Z00000", "1234", Tidspunkt.now()),
-            attestasjon = Attestasjon("Z00000", "1234", Tidspunkt.now())
+            attestasjon = Attestasjon("Z00000", "1234", Tidspunkt.now()),
         )
     }
 

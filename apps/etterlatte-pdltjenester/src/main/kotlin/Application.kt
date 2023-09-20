@@ -24,18 +24,20 @@ class Server(applicationContext: ApplicationContext) {
         sikkerLoggOppstartOgAvslutning("etterlatte-pdltjenester")
     }
 
-    private val engine = embeddedServer(
-        CIO,
-        environment = applicationEngineEnvironment {
-            config = HoconApplicationConfig(applicationContext.config)
-            module {
-                restModule(sikkerLogg, withMetrics = true) {
-                    personRoute(applicationContext.personService)
-                }
-            }
-            connector { port = applicationContext.httpPort }
-        }
-    )
+    private val engine =
+        embeddedServer(
+            CIO,
+            environment =
+                applicationEngineEnvironment {
+                    config = HoconApplicationConfig(applicationContext.config)
+                    module {
+                        restModule(sikkerLogg, withMetrics = true) {
+                            personRoute(applicationContext.personService)
+                        }
+                    }
+                    connector { port = applicationContext.httpPort }
+                },
+        )
 
     fun run() = setReady().also { engine.start(true) }
 }

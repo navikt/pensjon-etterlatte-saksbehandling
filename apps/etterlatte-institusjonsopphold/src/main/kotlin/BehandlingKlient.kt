@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory
 class BehandlingKlient(
     val behandlingHttpClient: HttpClient,
     val institusjonsoppholdKlient: InstitusjonsoppholdKlient,
-    val resourceUrl: String
+    val resourceUrl: String,
 ) {
     private val logger = LoggerFactory.getLogger(this.javaClass.name)
 
@@ -24,12 +24,12 @@ class BehandlingKlient(
             "Behandler institusjonsopphold record med id: {}, partition {}, offset: {}",
             record.key(),
             record.partition(),
-            record.offset()
+            record.offset(),
         )
         val oppholdHendelse = record.value()
         logger.info(
             "Haandterer institusjonsopphold hendelse for fnr maskert " +
-                "${oppholdHendelse.norskident.maskerFnr()} hendelseId: ${oppholdHendelse.hendelseId}"
+                "${oppholdHendelse.norskident.maskerFnr()} hendelseId: ${oppholdHendelse.hendelseId}",
         )
 
         val opphold: Institusjonsopphold = institusjonsoppholdKlient.hentDataForHendelse(oppholdHendelse.oppholdId)
@@ -47,15 +47,15 @@ class BehandlingKlient(
                     startdato = opphold.startdato,
                     faktiskSluttdato = opphold.faktiskSluttdato,
                     forventetSluttdato = opphold.forventetSluttdato,
-                    organisasjonsnummer = opphold.organisasjonsnummer
-                )
+                    organisasjonsnummer = opphold.organisasjonsnummer,
+                ),
         )
     }
 
     fun postTilBehandling(oppholdHendelse: InstitusjonsoppholdHendelseBeriket) =
         runBlocking {
             behandlingHttpClient.post(
-                "$resourceUrl/grunnlagsendringshendelse/institusjonsopphold"
+                "$resourceUrl/grunnlagsendringshendelse/institusjonsopphold",
             ) {
                 contentType(ContentType.Application.Json)
                 setBody(oppholdHendelse)

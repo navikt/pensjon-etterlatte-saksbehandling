@@ -13,7 +13,7 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.util.*
+import java.util.UUID
 
 internal class DistribusjonServiceTest {
     private val mockKlient = mockk<DistribusjonKlient>()
@@ -59,12 +59,13 @@ internal class DistribusjonServiceTest {
         verify(exactly = 1) { mockDb.settBrevDistribuert(brevId, distribusjonResponse) }
     }
 
-    private fun opprettAdresse() = Adresse(
-        adresseType = "NORSKPOSTADRESSE",
-        adresselinje1 = "Fyrstikkaleen 1",
-        postnummer = "1234",
-        poststed = "Oslo",
-        land = "Norge",
-        landkode = "NOR"
-    )
+    private fun opprettAdresse() =
+        Adresse(
+            adresseType = "NORSKPOSTADRESSE",
+            adresselinje1 = "Fyrstikkaleen 1",
+            postnummer = "1234",
+            poststed = "Oslo",
+            land = "Norge",
+            landkode = "NOR",
+        )
 }

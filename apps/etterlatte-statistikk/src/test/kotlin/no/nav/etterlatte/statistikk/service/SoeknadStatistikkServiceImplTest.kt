@@ -8,7 +8,6 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
 class SoeknadStatistikkServiceImplTest {
-
     @Test
     fun `registrer soeknadstatistikk registrerer gyldig for behandling riktig`() {
         val soeknadStatistikkRepository: SoeknadStatistikkRepository = mockk()
@@ -21,12 +20,13 @@ class SoeknadStatistikkServiceImplTest {
         val soeknadId = 1337L
         val gyldigForBehandling = true
         val feilendeKriterier = null
-        val registrert = sut.registrerSoeknadStatistikk(
-            soeknadId = soeknadId,
-            gyldigForBehandling = gyldigForBehandling,
-            sakType = SakType.BARNEPENSJON,
-            feilendeKriterier = feilendeKriterier
-        )
+        val registrert =
+            sut.registrerSoeknadStatistikk(
+                soeknadId = soeknadId,
+                gyldigForBehandling = gyldigForBehandling,
+                sakType = SakType.BARNEPENSJON,
+                feilendeKriterier = feilendeKriterier,
+            )
 
         Assertions.assertEquals(registrert.soeknadId, soeknadId)
         Assertions.assertEquals(registrert.gyldigForBehandling, gyldigForBehandling)
@@ -45,12 +45,13 @@ class SoeknadStatistikkServiceImplTest {
         val soeknadId = 1337L
         val gyldigForBehandling = false
         val feilendeKriterier = listOf("SOEKER_HAR_UTENLANDSADRESSE")
-        val registrert = sut.registrerSoeknadStatistikk(
-            soeknadId = soeknadId,
-            gyldigForBehandling = gyldigForBehandling,
-            sakType = SakType.BARNEPENSJON,
-            feilendeKriterier = feilendeKriterier
-        )
+        val registrert =
+            sut.registrerSoeknadStatistikk(
+                soeknadId = soeknadId,
+                gyldigForBehandling = gyldigForBehandling,
+                sakType = SakType.BARNEPENSJON,
+                feilendeKriterier = feilendeKriterier,
+            )
 
         Assertions.assertEquals(registrert.soeknadId, soeknadId)
         Assertions.assertEquals(registrert.gyldigForBehandling, gyldigForBehandling)

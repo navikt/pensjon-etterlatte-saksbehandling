@@ -24,7 +24,7 @@ class RevurderingDao(private val connection: () -> Connection) {
     fun asRevurdering(
         rs: ResultSet,
         sak: Sak,
-        kommerBarnetTilGode: (UUID) -> KommerBarnetTilgode?
+        kommerBarnetTilGode: (UUID) -> KommerBarnetTilgode?,
     ): Revurdering {
         val id = rs.getUUID("id")
         val revurderingInfo = hentRevurderingInfoForBehandling(id)
@@ -46,20 +46,20 @@ class RevurderingDao(private val connection: () -> Connection) {
             prosesstype = rs.getString("prosesstype").let { Prosesstype.valueOf(it) },
             kilde = rs.getString("kilde").let { Vedtaksloesning.valueOf(it) },
             revurderingInfo = revurderingInfo,
-            begrunnelse = rs.getString("begrunnelse")
+            begrunnelse = rs.getString("begrunnelse"),
         )
     }
 
     fun lagreRevurderingInfo(
         id: UUID,
         revurderingMedBegrunnelse: RevurderingMedBegrunnelse,
-        kilde: Grunnlagsopplysning.Kilde
+        kilde: Grunnlagsopplysning.Kilde,
     ) {
         connection().prepareStatement(
             """
             INSERT INTO revurdering_info(behandling_id, info, kilde, begrunnelse)
             VALUES(?, ?, ?, ?) ON CONFLICT(behandling_id) DO UPDATE SET info = excluded.info, kilde = excluded.kilde, begrunnelse = excluded.begrunnelse
-            """.trimIndent()
+            """.trimIndent(),
         ).let { statement ->
             statement.setObject(1, id)
             statement.setJsonb(2, revurderingMedBegrunnelse.revurderingInfo)
@@ -74,14 +74,14 @@ class RevurderingDao(private val connection: () -> Connection) {
             """
             SELECT info, begrunnelse FROM revurdering_info 
             WHERE behandling_id = ?
-            """.trimIndent()
+            """.trimIndent(),
         ).let { statement ->
             statement.setObject(1, id)
             statement.executeQuery()
                 .singleOrNull {
                     RevurderingMedBegrunnelse(
                         getString("info")?.let { objectMapper.readValue(it) },
-                        getString("begrunnelse")
+                        getString("begrunnelse"),
                     )
                 }
         }
@@ -89,7 +89,7 @@ class RevurderingDao(private val connection: () -> Connection) {
 
 fun PreparedStatement.stringOrNull(
     index: Int,
-    text: String?
+    text: String?,
 ) = if (text != null) {
     setString(index, text)
 } else {

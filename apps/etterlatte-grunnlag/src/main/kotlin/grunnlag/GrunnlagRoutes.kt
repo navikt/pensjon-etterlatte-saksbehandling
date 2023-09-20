@@ -21,7 +21,10 @@ import no.nav.etterlatte.libs.common.sakId
 import no.nav.etterlatte.libs.common.withFoedselsnummer
 import no.nav.etterlatte.libs.common.withSakId
 
-fun Route.grunnlagRoute(grunnlagService: GrunnlagService, behandlingKlient: BehandlingKlient) {
+fun Route.grunnlagRoute(
+    grunnlagService: GrunnlagService,
+    behandlingKlient: BehandlingKlient,
+) {
     route("grunnlag") {
         get("{$SAKID_CALL_PARAMETER}") {
             withSakId(behandlingKlient) { sakId ->
@@ -109,29 +112,30 @@ fun Route.grunnlagRoute(grunnlagService: GrunnlagService, behandlingKlient: Beha
             hentNavidentFraToken { navIdent ->
                 try {
                     withFoedselsnummer(behandlingKlient) { foedselsnummer ->
-                        val opplysning = grunnlagService.hentOpplysningstypeNavnFraFnr(
-                            foedselsnummer,
-                            navIdent
-                        )
+                        val opplysning =
+                            grunnlagService.hentOpplysningstypeNavnFraFnr(
+                                foedselsnummer,
+                                navIdent,
+                            )
 
                         if (opplysning != null) {
                             call.respond(opplysning)
                         } else {
                             call.respond(
                                 HttpStatusCode.NotFound,
-                                "Gjenny har ingen navnedata på fødselsnummeret som ble etterspurt"
+                                "Gjenny har ingen navnedata på fødselsnummeret som ble etterspurt",
                             )
                         }
                     }
                 } catch (ex: InvalidFoedselsnummerException) {
                     call.respond(
                         HttpStatusCode.BadRequest,
-                        "Gjenny har ingen navnedata på fødselsnummeret som ble etterspurt"
+                        "Gjenny har ingen navnedata på fødselsnummeret som ble etterspurt",
                     )
                 } catch (ex: Exception) {
                     call.respond(
                         HttpStatusCode.NotFound,
-                        "Gjenny har ingen navnedata på fødselsnummeret som ble etterspurt"
+                        "Gjenny har ingen navnedata på fødselsnummeret som ble etterspurt",
                     )
                 }
             }
@@ -140,12 +144,12 @@ fun Route.grunnlagRoute(grunnlagService: GrunnlagService, behandlingKlient: Beha
 }
 
 private data class PersonerISakDto(
-    val personer: Map<Folkeregisteridentifikator, PersonMedNavn>
+    val personer: Map<Folkeregisteridentifikator, PersonMedNavn>,
 )
 
 data class PersonMedNavn(
     val fnr: Folkeregisteridentifikator,
     val fornavn: String,
     val etternavn: String,
-    val mellomnavn: String?
+    val mellomnavn: String?,
 )

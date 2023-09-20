@@ -27,25 +27,27 @@ object EgendefinertMeldingFeature : TestDataFeature {
                         "egendefinert/ny-melding.hbs",
                         mapOf(
                             "path" to path,
-                            "beskrivelse" to beskrivelse
-                        )
-                    )
+                            "beskrivelse" to beskrivelse,
+                        ),
+                    ),
                 )
             }
 
             post {
                 try {
-                    val navIdent = requireNotNull(navIdentFraToken()) {
-                        "Nav ident mangler. Du må være innlogget for å sende søknad."
-                    }
+                    val navIdent =
+                        requireNotNull(navIdentFraToken()) {
+                            "Nav ident mangler. Du må være innlogget for å sende søknad."
+                        }
 
-                    val (partisjon, offset) = call.receiveParameters().let {
-                        producer.publiser(
-                            requireNotNull(it["key"]),
-                            JsonMessage(requireNotNull(it["json"])).toJson(),
-                            mapOf("NavIdent" to navIdent.toByteArray())
-                        )
-                    }
+                    val (partisjon, offset) =
+                        call.receiveParameters().let {
+                            producer.publiser(
+                                requireNotNull(it["key"]),
+                                JsonMessage(requireNotNull(it["json"])).toJson(),
+                                mapOf("NavIdent" to navIdent.toByteArray()),
+                            )
+                        }
                     logger.info("Publiserer melding med partisjon: $partisjon offset: $offset")
 
                     call.respondRedirect("/$path/sendt?partisjon=$partisjon&offset=$offset")
@@ -55,8 +57,8 @@ object EgendefinertMeldingFeature : TestDataFeature {
                     call.respond(
                         MustacheContent(
                             "error.hbs",
-                            mapOf("errorMessage" to e.message, "stacktrace" to e.stackTraceToString())
-                        )
+                            mapOf("errorMessage" to e.message, "stacktrace" to e.stackTraceToString()),
+                        ),
                     )
                 }
             }
@@ -72,9 +74,9 @@ object EgendefinertMeldingFeature : TestDataFeature {
                             "path" to path,
                             "beskrivelse" to beskrivelse,
                             "partisjon" to partisjon,
-                            "offset" to offset
-                        )
-                    )
+                            "offset" to offset,
+                        ),
+                    ),
                 )
             }
         }

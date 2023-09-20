@@ -3,8 +3,9 @@ package no.nav.etterlatte.libs.common.person
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonProperty
 
-data class NavPersonIdent(@JsonProperty("value") val ident: String) {
-
+data class NavPersonIdent(
+    @JsonProperty("value") val ident: String,
+) {
     init {
         if (!ident.matches(Regex("^\\d{11}$"))) {
             throw IllegalArgumentException("Fikk en verdi som ikke er en Npid")

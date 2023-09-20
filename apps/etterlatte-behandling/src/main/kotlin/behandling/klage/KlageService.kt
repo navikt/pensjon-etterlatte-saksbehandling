@@ -17,24 +17,39 @@ import no.nav.etterlatte.sak.SakDao
 import no.nav.etterlatte.token.Saksbehandler
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import java.util.*
+import java.util.UUID
 
 interface KlageService {
     fun opprettKlage(sakId: Long): Klage
+
     fun hentKlage(id: UUID): Klage?
+
     fun hentKlagerISak(sakId: Long): List<Klage>
-    fun lagreFormkravIKlage(klageId: UUID, formkrav: Formkrav, saksbehandler: Saksbehandler): Klage
-    fun lagreUtfallAvKlage(klageId: UUID, utfall: KlageUtfallUtenBrev, saksbehandler: Saksbehandler): Klage
-    fun oppdaterKabalStatus(sakId: Long, kabalrespons: Kabalrespons)
+
+    fun lagreFormkravIKlage(
+        klageId: UUID,
+        formkrav: Formkrav,
+        saksbehandler: Saksbehandler,
+    ): Klage
+
+    fun lagreUtfallAvKlage(
+        klageId: UUID,
+        utfall: KlageUtfallUtenBrev,
+        saksbehandler: Saksbehandler,
+    ): Klage
+
+    fun oppdaterKabalStatus(
+        sakId: Long,
+        kabalrespons: Kabalrespons,
+    )
 }
 
 class KlageServiceImpl(
     private val klageDao: KlageDao,
     private val sakDao: SakDao,
     private val hendelseDao: HendelseDao,
-    private val oppgaveServiceNy: OppgaveServiceNy
+    private val oppgaveServiceNy: OppgaveServiceNy,
 ) : KlageService {
-
     private val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
     override fun opprettKlage(sakId: Long): Klage {
@@ -50,7 +65,7 @@ class KlageServiceImpl(
             sakId = sakId,
             oppgaveKilde = OppgaveKilde.EKSTERN,
             oppgaveType = OppgaveType.KLAGE,
-            merknad = null
+            merknad = null,
         )
 
         hendelseDao.klageHendelse(
@@ -60,7 +75,7 @@ class KlageServiceImpl(
             inntruffet = Tidspunkt.now(),
             saksbehandler = null,
             kommentar = null,
-            begrunnelse = null
+            begrunnelse = null,
         )
 
         return klage
@@ -74,7 +89,11 @@ class KlageServiceImpl(
         return klageDao.hentKlagerISak(sakId)
     }
 
-    override fun lagreFormkravIKlage(klageId: UUID, formkrav: Formkrav, saksbehandler: Saksbehandler): Klage {
+    override fun lagreFormkravIKlage(
+        klageId: UUID,
+        formkrav: Formkrav,
+        saksbehandler: Saksbehandler,
+    ): Klage {
         val klage = klageDao.hentKlage(klageId) ?: throw NotFoundException("Klage med id=$klageId finnes ikke")
         logger.info("Lagrer vurdering av formkrav for klage med id=$klageId")
 
@@ -82,7 +101,7 @@ class KlageServiceImpl(
             logger.warn(
                 "Mottok 'rare' formkrav fra frontend, der det er mismatch mellom svar på formkrav. Gjelder " +
                     "klagen med id=$klageId. Stopper ikke opp lagringen av formkravene, siden alt er vurdert av " +
-                    "saksbehandler."
+                    "saksbehandler.",
             )
         }
 
@@ -92,18 +111,24 @@ class KlageServiceImpl(
         return oppdatertKlage
     }
 
-    override fun lagreUtfallAvKlage(klageId: UUID, utfall: KlageUtfallUtenBrev, saksbehandler: Saksbehandler): Klage {
+    override fun lagreUtfallAvKlage(
+        klageId: UUID,
+        utfall: KlageUtfallUtenBrev,
+        saksbehandler: Saksbehandler,
+    ): Klage {
         val klage = klageDao.hentKlage(klageId) ?: throw NotFoundException("Fant ikke klage med id=$klageId")
 
-        val utfallMedBrev = when (utfall) {
-            is KlageUtfallUtenBrev.Omgjoering -> KlageUtfall.Omgjoering(
-                omgjoering = utfall.omgjoering,
-                saksbehandler = Grunnlagsopplysning.Saksbehandler.create(saksbehandler.ident)
-            )
+        val utfallMedBrev =
+            when (utfall) {
+                is KlageUtfallUtenBrev.Omgjoering ->
+                    KlageUtfall.Omgjoering(
+                        omgjoering = utfall.omgjoering,
+                        saksbehandler = Grunnlagsopplysning.Saksbehandler.create(saksbehandler.ident),
+                    )
 
-            is KlageUtfallUtenBrev.DelvisOmgjoering -> TODO("Mangler riktig håndtering av brev")
-            is KlageUtfallUtenBrev.StadfesteVedtak -> TODO("Mangler riktig håndtering av brev")
-        }
+                is KlageUtfallUtenBrev.DelvisOmgjoering -> TODO("Mangler riktig håndtering av brev")
+                is KlageUtfallUtenBrev.StadfesteVedtak -> TODO("Mangler riktig håndtering av brev")
+            }
 
         val klageMedOppdatertUtfall = klage.oppdaterUtfall(utfallMedBrev)
         klageDao.lagreKlage(klageMedOppdatertUtfall)
@@ -111,6 +136,8 @@ class KlageServiceImpl(
         return klageMedOppdatertUtfall
     }
 
-    override fun oppdaterKabalStatus(sakId: Long, kabalrespons: Kabalrespons) =
-        klageDao.oppdaterKabalStatus(sakId, kabalrespons)
+    override fun oppdaterKabalStatus(
+        sakId: Long,
+        kabalrespons: Kabalrespons,
+    ) = klageDao.oppdaterKabalStatus(sakId, kabalrespons)
 }

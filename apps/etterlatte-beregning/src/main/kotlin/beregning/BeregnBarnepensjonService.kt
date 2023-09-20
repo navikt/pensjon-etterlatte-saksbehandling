@@ -48,12 +48,13 @@ import no.nav.etterlatte.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.YearMonth
-import java.util.*
+import java.util.UUID
 
 enum class BeregnBarnepensjonServiceFeatureToggle(private val key: String) : FeatureToggle {
     BrukFaktiskTrygdetid("pensjon-etterlatte.bp-bruk-faktisk-trygdetid"),
     BrukInstitusjonsoppholdIBeregning("pensjon-etterlatte.bp-bruk-institusjonsopphold-i-beregning"),
-    BrukNyttRegelverkIBeregning("pensjon-etterlatte.bp-bruk-nytt-regelverk-i-beregning");
+    BrukNyttRegelverkIBeregning("pensjon-etterlatte.bp-bruk-nytt-regelverk-i-beregning"),
+    ;
 
     override fun key() = key
 }
@@ -64,7 +65,7 @@ class BeregnBarnepensjonService(
     private val grunnbeloepRepository: GrunnbeloepRepository = GrunnbeloepRepository,
     private val beregningsGrunnlagService: BeregningsGrunnlagService,
     private val trygdetidKlient: TrygdetidKlient,
-    private val featureToggleService: FeatureToggleService
+    private val featureToggleService: FeatureToggleService,
 ) {
     private val logger = LoggerFactory.getLogger(BeregnBarnepensjonService::class.java)
 
@@ -80,7 +81,7 @@ class BeregnBarnepensjonService(
 
     suspend fun beregn(
         behandling: DetaljertBehandling,
-        brukerTokenInfo: BrukerTokenInfo
+        brukerTokenInfo: BrukerTokenInfo,
     ): Beregning {
         val grunnlag = grunnlagKlient.hentGrunnlag(behandling.sak, brukerTokenInfo)
         val behandlingType = behandling.behandlingType
@@ -88,7 +89,7 @@ class BeregnBarnepensjonService(
 
         val beregningsGrunnlag =
             requireNotNull(
-                beregningsGrunnlagService.hentBarnepensjonBeregningsGrunnlag(behandling.id, brukerTokenInfo)
+                beregningsGrunnlagService.hentBarnepensjonBeregningsGrunnlag(behandling.id, brukerTokenInfo),
             )
 
         val trygdetid =
@@ -98,7 +99,7 @@ class BeregnBarnepensjonService(
                 } catch (e: Exception) {
                     logger.warn(
                         "Kunne ikke hente ut trygdetid for behandlingen med id=${behandling.id}. " +
-                            "Dette er ikke kritisk siden vi ikke har krav om trygdetid enda."
+                            "Dette er ikke kritisk siden vi ikke har krav om trygdetid enda.",
                     )
                     null
                 }
@@ -112,7 +113,7 @@ class BeregnBarnepensjonService(
                 trygdetid,
                 virkningstidspunkt.atDay(1),
                 null,
-                grunnlag
+                grunnlag,
             )
 
         logger.info("Beregner barnepensjon for behandlingId=${behandling.id} med behandlingType=$behandlingType")
@@ -123,7 +124,7 @@ class BeregnBarnepensjonService(
                     behandling.id,
                     grunnlag,
                     barnepensjonGrunnlag,
-                    virkningstidspunkt
+                    virkningstidspunkt,
                 )
 
             BehandlingType.REVURDERING -> {
@@ -137,7 +138,7 @@ class BeregnBarnepensjonService(
                             behandling.id,
                             grunnlag,
                             barnepensjonGrunnlag,
-                            virkningstidspunkt
+                            virkningstidspunkt,
                         )
 
                     VilkaarsvurderingUtfall.IKKE_OPPFYLT -> opphoer(behandling.id, grunnlag, virkningstidspunkt)
@@ -152,18 +153,18 @@ class BeregnBarnepensjonService(
         behandlingId: UUID,
         grunnlag: Grunnlag,
         beregningsgrunnlag: PeriodisertBarnepensjonGrunnlag,
-        virkningstidspunkt: YearMonth
+        virkningstidspunkt: YearMonth,
     ): Beregning {
         val resultat =
             if (featureToggleService.isEnabled(BrukInstitusjonsoppholdIBeregning, false)) {
                 kroneavrundetBarnepensjonRegelMedInstitusjon.eksekver(
                     grunnlag = beregningsgrunnlag,
-                    periode = RegelPeriode(virkningstidspunkt.atDay(1))
+                    periode = RegelPeriode(virkningstidspunkt.atDay(1)),
                 )
             } else {
                 kroneavrundetBarnepensjonRegel.eksekver(
                     grunnlag = beregningsgrunnlag,
-                    periode = RegelPeriode(virkningstidspunkt.atDay(1))
+                    periode = RegelPeriode(virkningstidspunkt.atDay(1)),
                 )
             }
 
@@ -173,49 +174,49 @@ class BeregnBarnepensjonService(
                     behandlingId = behandlingId,
                     grunnlagMetadata = grunnlag.metadata,
                     beregningsperioder =
-                    resultat.periodiserteResultater.map { periodisertResultat ->
-                        logger.info(
-                            "Beregnet barnepensjon for periode fra={} til={} og beløp={} med regler={}",
-                            periodisertResultat.periode.fraDato,
-                            periodisertResultat.periode.tilDato,
-                            periodisertResultat.resultat.verdi,
-                            periodisertResultat.resultat.finnAnvendteRegler()
-                                .map { "${it.regelReferanse.id} (${it.beskrivelse})" }.toSet()
-                        )
+                        resultat.periodiserteResultater.map { periodisertResultat ->
+                            logger.info(
+                                "Beregnet barnepensjon for periode fra={} til={} og beløp={} med regler={}",
+                                periodisertResultat.periode.fraDato,
+                                periodisertResultat.periode.tilDato,
+                                periodisertResultat.resultat.verdi,
+                                periodisertResultat.resultat.finnAnvendteRegler()
+                                    .map { "${it.regelReferanse.id} (${it.beskrivelse})" }.toSet(),
+                            )
 
-                        val grunnbeloep =
-                            requireNotNull(periodisertResultat.resultat.finnAnvendtGrunnbeloep(grunnbeloep)) {
-                                "Anvendt grunnbeløp ikke funnet for perioden"
-                            }
+                            val grunnbeloep =
+                                requireNotNull(periodisertResultat.resultat.finnAnvendtGrunnbeloep(grunnbeloep)) {
+                                    "Anvendt grunnbeløp ikke funnet for perioden"
+                                }
 
-                        Beregningsperiode(
-                            datoFOM = YearMonth.from(periodisertResultat.periode.fraDato),
-                            datoTOM = periodisertResultat.periode.tilDato?.let { YearMonth.from(it) },
-                            utbetaltBeloep = periodisertResultat.resultat.verdi,
-                            soeskenFlokk =
-                            beregningsgrunnlag.soeskenKull.finnGrunnlagForPeriode(
-                                periodisertResultat.periode.fraDato
-                            ).verdi.map {
-                                it.value
-                            },
-                            institusjonsopphold =
-                            beregningsgrunnlag.institusjonsopphold.finnGrunnlagForPeriode(
-                                periodisertResultat.periode.fraDato
-                            ).verdi,
-                            grunnbelopMnd = grunnbeloep.grunnbeloepPerMaaned,
-                            grunnbelop = grunnbeloep.grunnbeloep,
-                            trygdetid =
-                            beregningsgrunnlag.avdoedesTrygdetid.finnGrunnlagForPeriode(
-                                periodisertResultat.periode.fraDato
-                            ).verdi.toInteger(),
-                            regelResultat = objectMapper.valueToTree(periodisertResultat),
-                            regelVersjon = periodisertResultat.reglerVersjon
-                        )
-                    }
+                            Beregningsperiode(
+                                datoFOM = YearMonth.from(periodisertResultat.periode.fraDato),
+                                datoTOM = periodisertResultat.periode.tilDato?.let { YearMonth.from(it) },
+                                utbetaltBeloep = periodisertResultat.resultat.verdi,
+                                soeskenFlokk =
+                                    beregningsgrunnlag.soeskenKull.finnGrunnlagForPeriode(
+                                        periodisertResultat.periode.fraDato,
+                                    ).verdi.map {
+                                        it.value
+                                    },
+                                institusjonsopphold =
+                                    beregningsgrunnlag.institusjonsopphold.finnGrunnlagForPeriode(
+                                        periodisertResultat.periode.fraDato,
+                                    ).verdi,
+                                grunnbelopMnd = grunnbeloep.grunnbeloepPerMaaned,
+                                grunnbelop = grunnbeloep.grunnbeloep,
+                                trygdetid =
+                                    beregningsgrunnlag.avdoedesTrygdetid.finnGrunnlagForPeriode(
+                                        periodisertResultat.periode.fraDato,
+                                    ).verdi.toInteger(),
+                                regelResultat = objectMapper.valueToTree(periodisertResultat),
+                                regelVersjon = periodisertResultat.reglerVersjon,
+                            )
+                        },
                 )
 
             is RegelkjoeringResultat.UgyldigPeriode -> throw RuntimeException(
-                "Ugyldig regler for periode: ${resultat.ugyldigeReglerForPeriode}"
+                "Ugyldig regler for periode: ${resultat.ugyldigeReglerForPeriode}",
             )
         }
     }
@@ -223,7 +224,7 @@ class BeregnBarnepensjonService(
     private fun opphoer(
         behandlingId: UUID,
         grunnlag: Grunnlag,
-        virkningstidspunkt: YearMonth
+        virkningstidspunkt: YearMonth,
     ): Beregning {
         val grunnbeloep = grunnbeloepRepository.hentGjeldendeGrunnbeloep(virkningstidspunkt)
 
@@ -231,31 +232,31 @@ class BeregnBarnepensjonService(
             behandlingId = behandlingId,
             grunnlagMetadata = grunnlag.metadata,
             beregningsperioder =
-            listOf(
-                Beregningsperiode(
-                    datoFOM = virkningstidspunkt,
-                    datoTOM = null,
-                    utbetaltBeloep = 0,
-                    soeskenFlokk = null,
-                    grunnbelopMnd = grunnbeloep.grunnbeloepPerMaaned,
-                    grunnbelop = grunnbeloep.grunnbeloep,
-                    trygdetid = 0
-                )
-            )
+                listOf(
+                    Beregningsperiode(
+                        datoFOM = virkningstidspunkt,
+                        datoTOM = null,
+                        utbetaltBeloep = 0,
+                        soeskenFlokk = null,
+                        grunnbelopMnd = grunnbeloep.grunnbeloepPerMaaned,
+                        grunnbelop = grunnbeloep.grunnbeloep,
+                        trygdetid = 0,
+                    ),
+                ),
         )
     }
 
     private fun beregning(
         behandlingId: UUID,
         grunnlagMetadata: Metadata,
-        beregningsperioder: List<Beregningsperiode>
+        beregningsperioder: List<Beregningsperiode>,
     ) = Beregning(
         beregningId = UUID.randomUUID(),
         behandlingId = behandlingId,
         type = Beregningstype.BP,
         beregningsperioder = beregningsperioder,
         beregnetDato = Tidspunkt.now(),
-        grunnlagMetadata = grunnlagMetadata
+        grunnlagMetadata = grunnlagMetadata,
     )
 
     private fun opprettBeregningsgrunnlag(
@@ -263,77 +264,82 @@ class BeregnBarnepensjonService(
         trygdetid: TrygdetidDto?,
         fom: LocalDate,
         tom: LocalDate?,
-        grunnlag: Grunnlag
+        grunnlag: Grunnlag,
     ) = PeriodisertBarnepensjonGrunnlag(
-        soeskenKull = PeriodisertBeregningGrunnlag.lagKomplettPeriodisertGrunnlag(
-            beregningsGrunnlag.soeskenMedIBeregning.mapVerdier { soeskenMedIBeregning ->
-                FaktumNode(
-                    verdi = soeskenMedIBeregning.filter { it.skalBrukes }.map { it.foedselsnummer },
-                    kilde = beregningsGrunnlag.kilde,
-                    beskrivelse = "Søsken i kullet"
-                )
-            },
-            fom,
-            tom
-        ),
-        avdoedesTrygdetid = trygdetid?.beregnetTrygdetid?.resultat?.samletTrygdetidNorge.let { trygdetidTotal ->
-            if (trygdetidTotal != null) {
-                KonstantGrunnlag(
+        soeskenKull =
+            PeriodisertBeregningGrunnlag.lagKomplettPeriodisertGrunnlag(
+                beregningsGrunnlag.soeskenMedIBeregning.mapVerdier { soeskenMedIBeregning ->
                     FaktumNode(
-                        verdi = Beregningstall(trygdetidTotal),
-                        kilde = Grunnlagsopplysning.RegelKilde(
-                            "Trygdetid fastsatt av saksbehandler",
-                            trygdetid?.beregnetTrygdetid?.tidspunkt
-                                ?: throw Exception("Trygdetid mangler tidspunkt på beregnet trygdetid"),
-                            "1"
+                        verdi = soeskenMedIBeregning.filter { it.skalBrukes }.map { it.foedselsnummer },
+                        kilde = beregningsGrunnlag.kilde,
+                        beskrivelse = "Søsken i kullet",
+                    )
+                },
+                fom,
+                tom,
+            ),
+        avdoedesTrygdetid =
+            trygdetid?.beregnetTrygdetid?.resultat?.samletTrygdetidNorge.let { trygdetidTotal ->
+                if (trygdetidTotal != null) {
+                    KonstantGrunnlag(
+                        FaktumNode(
+                            verdi = Beregningstall(trygdetidTotal),
+                            kilde =
+                                Grunnlagsopplysning.RegelKilde(
+                                    "Trygdetid fastsatt av saksbehandler",
+                                    trygdetid?.beregnetTrygdetid?.tidspunkt
+                                        ?: throw Exception("Trygdetid mangler tidspunkt på beregnet trygdetid"),
+                                    "1",
+                                ),
+                            beskrivelse = "Trygdetid avdød forelder",
                         ),
-                        beskrivelse = "Trygdetid avdød forelder"
                     )
-                )
-            } else {
-                KonstantGrunnlag(
-                    FaktumNode(
-                        verdi = Beregningstall(FASTSATT_TRYGDETID_I_PILOT),
-                        kilde = Grunnlagsopplysning.RegelKilde("MVP hardkodet trygdetid", Tidspunkt.now(), "1"),
-                        beskrivelse = "Trygdetid avdød forelder"
+                } else {
+                    KonstantGrunnlag(
+                        FaktumNode(
+                            verdi = Beregningstall(FASTSATT_TRYGDETID_I_PILOT),
+                            kilde = Grunnlagsopplysning.RegelKilde("MVP hardkodet trygdetid", Tidspunkt.now(), "1"),
+                            beskrivelse = "Trygdetid avdød forelder",
+                        ),
                     )
-                )
-            }
-        },
-        institusjonsopphold = PeriodisertBeregningGrunnlag.lagPotensieltTomtGrunnlagMedDefaultUtenforPerioder(
-            beregningsGrunnlag.institusjonsoppholdBeregningsgrunnlag?.mapVerdier { institusjonsopphold ->
-                FaktumNode(
-                    verdi = institusjonsopphold,
-                    kilde = beregningsGrunnlag.kilde,
-                    beskrivelse = "Institusjonsopphold"
-                )
-            } ?: listOf()
-        ) { _, _, _ -> FaktumNode(null, beregningsGrunnlag.kilde, "Institusjonsopphold") },
-        avdoedeForeldre = PeriodisertBeregningGrunnlag.lagKomplettPeriodisertGrunnlag(
-            grunnlag.hentAvdoede().toPeriodisertAvdoedeGrunnlag().mapVerdier { fnrListe ->
-                FaktumNode(
-                    verdi = fnrListe,
-                    kilde = beregningsGrunnlag.kilde,
-                    beskrivelse = "Hvilke foreldre er døde"
-                )
+                }
             },
-            fom,
-            tom
-        ),
-        brukNyttRegelverk = featureToggleService.isEnabled(BrukNyttRegelverkIBeregning, false)
+        institusjonsopphold =
+            PeriodisertBeregningGrunnlag.lagPotensieltTomtGrunnlagMedDefaultUtenforPerioder(
+                beregningsGrunnlag.institusjonsoppholdBeregningsgrunnlag.mapVerdier { institusjonsopphold ->
+                    FaktumNode(
+                        verdi = institusjonsopphold,
+                        kilde = beregningsGrunnlag.kilde,
+                        beskrivelse = "Institusjonsopphold",
+                    )
+                },
+            ) { _, _, _ -> FaktumNode(null, beregningsGrunnlag.kilde, "Institusjonsopphold") },
+        avdoedeForeldre =
+            PeriodisertBeregningGrunnlag.lagKomplettPeriodisertGrunnlag(
+                grunnlag.hentAvdoede().toPeriodisertAvdoedeGrunnlag().mapVerdier { fnrListe ->
+                    FaktumNode(
+                        verdi = fnrListe,
+                        kilde = beregningsGrunnlag.kilde,
+                        beskrivelse = "Hvilke foreldre er døde",
+                    )
+                },
+                fom,
+                tom,
+            ),
+        brukNyttRegelverk = featureToggleService.isEnabled(BrukNyttRegelverkIBeregning, false),
     )
 
     companion object {
         private const val FASTSATT_TRYGDETID_I_PILOT = 40
     }
 
-    private fun List<Grunnlagsdata<JsonNode>>.toPeriodisertAvdoedeGrunnlag():
-        List<GrunnlagMedPeriode<List<Folkeregisteridentifikator>>> {
+    private fun List<Grunnlagsdata<JsonNode>>.toPeriodisertAvdoedeGrunnlag(): List<GrunnlagMedPeriode<List<Folkeregisteridentifikator>>> {
         val doede = mutableListOf<Folkeregisteridentifikator>()
         val resultat = mutableListOf<GrunnlagMedPeriode<List<Folkeregisteridentifikator>>>()
 
-        val avdoedeSortert = this.distinctBy { it.hentFoedselsnummer() }
-            .sortedBy { it.hentDoedsdato()!!.verdi!! }
+        val avdoedeSortert =
+            this.distinctBy { it.hentFoedselsnummer() }
+                .sortedBy { it.hentDoedsdato()!!.verdi!! }
         val iterator = avdoedeSortert.listIterator()
         while (iterator.hasNext()) {
             val dennePeriode = iterator.next()

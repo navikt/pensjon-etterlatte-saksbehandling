@@ -13,7 +13,7 @@ import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 
 data class AutomatiskRevurdering(
     override val id: UUID,
@@ -28,32 +28,30 @@ data class AutomatiskRevurdering(
     override val revurderingsaarsak: RevurderingAarsak,
     override val revurderingInfo: RevurderingMedBegrunnelse?,
     override val kilde: Vedtaksloesning,
-    override val begrunnelse: String?
+    override val begrunnelse: String?,
 ) : Revurdering(
-    id = id,
-    sak = sak,
-    behandlingOpprettet = behandlingOpprettet,
-    sistEndret = sistEndret,
-    status = status,
-    kommerBarnetTilgode = kommerBarnetTilgode,
-    virkningstidspunkt = virkningstidspunkt,
-    utenlandstilsnitt = utenlandstilsnitt,
-    boddEllerArbeidetUtlandet = boddEllerArbeidetUtlandet,
-    revurderingsaarsak = revurderingsaarsak,
-    revurderingInfo = revurderingInfo,
-    prosesstype = Prosesstype.AUTOMATISK,
-    kilde = kilde,
-    begrunnelse = begrunnelse
-) {
+        id = id,
+        sak = sak,
+        behandlingOpprettet = behandlingOpprettet,
+        sistEndret = sistEndret,
+        status = status,
+        kommerBarnetTilgode = kommerBarnetTilgode,
+        virkningstidspunkt = virkningstidspunkt,
+        utenlandstilsnitt = utenlandstilsnitt,
+        boddEllerArbeidetUtlandet = boddEllerArbeidetUtlandet,
+        revurderingsaarsak = revurderingsaarsak,
+        revurderingInfo = revurderingInfo,
+        prosesstype = Prosesstype.AUTOMATISK,
+        kilde = kilde,
+        begrunnelse = begrunnelse,
+    ) {
     override fun kopier() = this.copy()
 
     override fun tilOpprettet() = endreTilStatus(BehandlingStatus.OPPRETTET)
 
-    override fun tilVilkaarsvurdert() =
-        endreTilStatus(BehandlingStatus.VILKAARSVURDERT)
+    override fun tilVilkaarsvurdert() = endreTilStatus(BehandlingStatus.VILKAARSVURDERT)
 
-    override fun tilTrygdetidOppdatert() =
-        endreTilStatus(BehandlingStatus.TRYGDETID_OPPDATERT)
+    override fun tilTrygdetidOppdatert() = endreTilStatus(BehandlingStatus.TRYGDETID_OPPDATERT)
 
     override fun tilBeregnet(fastTrygdetid: Boolean) = endreTilStatus(BehandlingStatus.BEREGNET)
 
@@ -67,6 +65,5 @@ data class AutomatiskRevurdering(
 
     override fun tilIverksatt() = endreTilStatus(BehandlingStatus.IVERKSATT)
 
-    private fun endreTilStatus(status: BehandlingStatus) =
-        this.copy(status = status, sistEndret = Tidspunkt.now().toLocalDatetimeUTC())
+    private fun endreTilStatus(status: BehandlingStatus) = this.copy(status = status, sistEndret = Tidspunkt.now().toLocalDatetimeUTC())
 }

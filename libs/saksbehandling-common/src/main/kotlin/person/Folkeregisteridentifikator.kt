@@ -13,7 +13,9 @@ import java.time.temporal.ChronoUnit
  *
  * @see <a href="https://www.skatteetaten.no/person/folkeregister/fodsel-og-navnevalg/barn-fodt-i-norge/fodselsnummer">Skatteetaten om fødselsnummer</a>
  */
-class Folkeregisteridentifikator private constructor(@JsonValue val value: String) {
+class Folkeregisteridentifikator private constructor(
+    @JsonValue val value: String,
+) {
     init {
         require(FolkeregisteridentifikatorValidator.isValid(value))
     }
@@ -28,8 +30,7 @@ class Folkeregisteridentifikator private constructor(@JsonValue val value: Strin
                 throw InvalidFoedselsnummerException(fnr, e)
             }
 
-        fun isValid(fnr: String?): Boolean =
-            FolkeregisteridentifikatorValidator.isValid(fnr!!.replace(Regex("[^0-9]"), ""))
+        fun isValid(fnr: String?): Boolean = FolkeregisteridentifikatorValidator.isValid(fnr!!.replace(Regex("[^0-9]"), ""))
     }
 
     /**
@@ -117,7 +118,11 @@ class Folkeregisteridentifikator private constructor(@JsonValue val value: Strin
      */
     override fun toString(): String = this.value.replaceRange(6 until 11, "*****")
 }
-internal fun firesifretAarstallFraTosifret(year: Int, individnummer: Int): Int {
+
+internal fun firesifretAarstallFraTosifret(
+    year: Int,
+    individnummer: Int,
+): Int {
     return if (individnummer < 500) {
         (year + 1900)
     } else if ((individnummer < 750) && (54 < year)) {
@@ -130,7 +135,8 @@ internal fun firesifretAarstallFraTosifret(year: Int, individnummer: Int): Int {
         throw IllegalArgumentException("Ingen gyldig årstall funnet for individnummer $individnummer")
     }
 }
+
 class InvalidFoedselsnummerException(value: String?, cause: Throwable) : Exception(
     "Ugyldig fødselsnummer $value",
-    cause
+    cause,
 )

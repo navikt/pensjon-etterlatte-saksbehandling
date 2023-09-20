@@ -26,11 +26,10 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import testsupport.buildTestApplicationConfigurationForOauth
-import java.util.*
+import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class BehandlingsstatusRoutesTest {
-
     private val applicationContext: ApplicationContext = mockk(relaxed = true)
     private val server: MockOAuth2Server = MockOAuth2Server()
     private lateinit var hoconApplicationConfig: HoconApplicationConfig
@@ -49,16 +48,18 @@ internal class BehandlingsstatusRoutesTest {
         val httpServer = server.config.httpServer
         hoconApplicationConfig = buildTestApplicationConfigurationForOauth(httpServer.port(), AZURE_ISSUER, CLIENT_ID)
 
-        val azureAdGroupIds = mapOf(
-            Pair(AzureGroup.ATTESTANT, azureAdAttestantClaim),
-            Pair(AzureGroup.SAKSBEHANDLER, azureAdSaksbehandlerClaim)
-        )
+        val azureAdGroupIds =
+            mapOf(
+                Pair(AzureGroup.ATTESTANT, azureAdAttestantClaim),
+                Pair(AzureGroup.SAKSBEHANDLER, azureAdSaksbehandlerClaim),
+            )
 
         every { applicationContext.saksbehandlerGroupIdsByKey } returns azureAdGroupIds
 
-        every { applicationContext.tilgangService } returns mockk {
-            every { harTilgangTilBehandling(any(), any()) } returns true
-        }
+        every { applicationContext.tilgangService } returns
+            mockk {
+                every { harTilgangTilBehandling(any(), any()) } returns true
+            }
     }
 
     @AfterAll
@@ -68,9 +69,10 @@ internal class BehandlingsstatusRoutesTest {
 
     @Test
     fun `skal returnere 200 OK hvis behandlingstatus kan settes til vilkaarsvurdert`() {
-        every { applicationContext.behandlingsStatusService } returns mockk {
-            every { settVilkaarsvurdert(any(), any()) } just runs
-        }
+        every { applicationContext.behandlingsStatusService } returns
+            mockk {
+                every { settVilkaarsvurdert(any(), any()) } just runs
+            }
 
         testApplication {
             environment {
@@ -80,10 +82,11 @@ internal class BehandlingsstatusRoutesTest {
                 module(applicationContext)
             }
 
-            val response = client.get("/behandlinger/$behandlingId/vilkaarsvurder") {
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                header(HttpHeaders.Authorization, "Bearer $tokenSaksbehandler")
-            }
+            val response =
+                client.get("/behandlinger/$behandlingId/vilkaarsvurder") {
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    header(HttpHeaders.Authorization, "Bearer $tokenSaksbehandler")
+                }
 
             val operasjonGyldig: OperasjonGyldig =
                 objectMapper.readValue(response.bodyAsText(), OperasjonGyldig::class.java)
@@ -95,9 +98,10 @@ internal class BehandlingsstatusRoutesTest {
 
     @Test
     fun `skal kunne attestere med attestant rolle`() {
-        every { applicationContext.behandlingsStatusService } returns mockk {
-            every { sjekkOmKanAttestere(any()) } just runs
-        }
+        every { applicationContext.behandlingsStatusService } returns
+            mockk {
+                every { sjekkOmKanAttestere(any()) } just runs
+            }
 
         testApplication {
             environment {
@@ -107,10 +111,11 @@ internal class BehandlingsstatusRoutesTest {
                 module(applicationContext)
             }
 
-            val response = client.get("/behandlinger/$behandlingId/attester") {
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                header(HttpHeaders.Authorization, "Bearer $tokenAttestant")
-            }
+            val response =
+                client.get("/behandlinger/$behandlingId/attester") {
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    header(HttpHeaders.Authorization, "Bearer $tokenAttestant")
+                }
 
             val operasjonGyldig: OperasjonGyldig =
                 objectMapper.readValue(response.bodyAsText(), OperasjonGyldig::class.java)
@@ -122,9 +127,10 @@ internal class BehandlingsstatusRoutesTest {
 
     @Test
     fun `skal ikke kunne attestere med kun saksbehandler rolle`() {
-        every { applicationContext.behandlingsStatusService } returns mockk {
-            every { sjekkOmKanAttestere(any()) } just runs
-        }
+        every { applicationContext.behandlingsStatusService } returns
+            mockk {
+                every { sjekkOmKanAttestere(any()) } just runs
+            }
 
         testApplication {
             environment {
@@ -134,10 +140,11 @@ internal class BehandlingsstatusRoutesTest {
                 module(applicationContext)
             }
 
-            val response = client.get("/behandlinger/$behandlingId/attester") {
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                header(HttpHeaders.Authorization, "Bearer $tokenSaksbehandler")
-            }
+            val response =
+                client.get("/behandlinger/$behandlingId/attester") {
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    header(HttpHeaders.Authorization, "Bearer $tokenSaksbehandler")
+                }
 
             assertEquals(HttpStatusCode.Unauthorized, response.status)
             assertEquals("Mangler attestantrolle", response.bodyAsText())
@@ -146,14 +153,15 @@ internal class BehandlingsstatusRoutesTest {
 
     @Test
     fun `skal returnere 409 Conflict naar behandlingstatus ikke kan settes til vilkaarsvurdert`() {
-        every { applicationContext.behandlingsStatusService } returns mockk {
-            every {
-                settVilkaarsvurdert(
-                    any(),
-                    any()
-                )
-            } throws Behandling.BehandlingStoetterIkkeStatusEndringException(BehandlingStatus.VILKAARSVURDERT)
-        }
+        every { applicationContext.behandlingsStatusService } returns
+            mockk {
+                every {
+                    settVilkaarsvurdert(
+                        any(),
+                        any(),
+                    )
+                } throws Behandling.BehandlingStoetterIkkeStatusEndringException(BehandlingStatus.VILKAARSVURDERT)
+            }
 
         testApplication {
             environment {
@@ -163,10 +171,11 @@ internal class BehandlingsstatusRoutesTest {
                 module(applicationContext)
             }
 
-            val response = client.get("/behandlinger/$behandlingId/vilkaarsvurder") {
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                header(HttpHeaders.Authorization, "Bearer $tokenSaksbehandler")
-            }
+            val response =
+                client.get("/behandlinger/$behandlingId/vilkaarsvurder") {
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    header(HttpHeaders.Authorization, "Bearer $tokenSaksbehandler")
+                }
 
             assertEquals(HttpStatusCode.Conflict, response.status)
         }
@@ -176,13 +185,15 @@ internal class BehandlingsstatusRoutesTest {
         server.issueToken(
             issuerId = AZURE_ISSUER,
             audience = CLIENT_ID,
-            claims = mapOf(
-                "navn" to "John Doe",
-                Claims.NAVident.toString() to "Saksbehandler01",
-                "groups" to listOf(
-                    azureAdSaksbehandlerClaim
-                )
-            )
+            claims =
+                mapOf(
+                    "navn" to "John Doe",
+                    Claims.NAVident.toString() to "Saksbehandler01",
+                    "groups" to
+                        listOf(
+                            azureAdSaksbehandlerClaim,
+                        ),
+                ),
         ).serialize()
     }
 
@@ -190,13 +201,15 @@ internal class BehandlingsstatusRoutesTest {
         server.issueToken(
             issuerId = AZURE_ISSUER,
             audience = CLIENT_ID,
-            claims = mapOf(
-                "navn" to "John Doe",
-                Claims.NAVident.toString() to "Saksbehandler02",
-                "groups" to listOf(
-                    azureAdAttestantClaim
-                )
-            )
+            claims =
+                mapOf(
+                    "navn" to "John Doe",
+                    Claims.NAVident.toString() to "Saksbehandler02",
+                    "groups" to
+                        listOf(
+                            azureAdAttestantClaim,
+                        ),
+                ),
         ).serialize()
     }
 

@@ -13,41 +13,46 @@ import java.time.LocalTime
 import java.time.YearMonth
 
 fun BarnepensjonGrunnlagResponse.tilVaarModell(): Pesyssak {
-    val pesyssak = Pesyssak(
-        id = sakId,
-        enhet = Enhet(enhet),
-        soeker = Folkeregisteridentifikator.of(soeker),
-        gjenlevendeForelder = gjenlevendeForelder?.let { Folkeregisteridentifikator.of(it) },
-        avdoedForelder = avdoedForeldre.map {
-            AvdoedForelder(
-                ident = Folkeregisteridentifikator.of(it.ident),
-                doedsdato = tilTidspunkt(it.doedsdato)
-            )
-        },
-        virkningstidspunkt = YearMonth.from(virkningsdato),
-        foersteVirkningstidspunkt = YearMonth.from(virkningsdato), // TODO er dette feil?
-        beregning = with(beregning) {
-            Beregning(
-                brutto = brutto.toBigDecimal(),
-                netto = netto.toBigDecimal(),
-                anvendtTrygdetid = anvendtTrygdetid.toBigDecimal(),
-                datoVirkFom = tilTidspunkt(datoVirkFom),
-                g = g.toBigDecimal(),
-                meta = with(meta) {
-                    BeregningMeta(
-                        resultatType = resultatType,
-                        beregningsMetodeType = beregningsMetodeType ?: "Ukjent",
-                        resultatKilde = resultatKilde,
-                        kravVelgType = kravVelgType
+    val pesyssak =
+        Pesyssak(
+            id = sakId,
+            enhet = Enhet(enhet),
+            soeker = Folkeregisteridentifikator.of(soeker),
+            gjenlevendeForelder = gjenlevendeForelder?.let { Folkeregisteridentifikator.of(it) },
+            avdoedForelder =
+                avdoedForeldre.map {
+                    AvdoedForelder(
+                        ident = Folkeregisteridentifikator.of(it.ident),
+                        doedsdato = tilTidspunkt(it.doedsdato),
                     )
-                }
-            )
-        },
-        trygdetid = Trygdetid(
-            listOf() // TODO: Parse ordentleg
-        ),
-        flyktningStatus = false // TODO
-    )
+                },
+            virkningstidspunkt = YearMonth.from(virkningsdato),
+            foersteVirkningstidspunkt = YearMonth.from(virkningsdato), // TODO er dette feil?
+            beregning =
+                with(beregning) {
+                    Beregning(
+                        brutto = brutto.toBigDecimal(),
+                        netto = netto.toBigDecimal(),
+                        anvendtTrygdetid = anvendtTrygdetid.toBigDecimal(),
+                        datoVirkFom = tilTidspunkt(datoVirkFom),
+                        g = g.toBigDecimal(),
+                        meta =
+                            with(meta) {
+                                BeregningMeta(
+                                    resultatType = resultatType,
+                                    beregningsMetodeType = beregningsMetodeType ?: "Ukjent",
+                                    resultatKilde = resultatKilde,
+                                    kravVelgType = kravVelgType,
+                                )
+                            },
+                    )
+                },
+            trygdetid =
+                Trygdetid(
+                    listOf(), // TODO: Parse ordentleg
+                ),
+            flyktningStatus = false, // TODO
+        )
     return pesyssak
 }
 

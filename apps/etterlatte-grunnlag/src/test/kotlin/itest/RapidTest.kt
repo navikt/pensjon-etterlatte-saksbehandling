@@ -42,19 +42,21 @@ internal class RapidTest {
         postgreSQLContainer.withUrlParam("user", postgreSQLContainer.username)
         postgreSQLContainer.withUrlParam("password", postgreSQLContainer.password)
 
-        val dataSource = DataSourceBuilder.createDataSource(
-            jdbcUrl = postgreSQLContainer.jdbcUrl,
-            username = postgreSQLContainer.username,
-            password = postgreSQLContainer.password
-        )
+        val dataSource =
+            DataSourceBuilder.createDataSource(
+                jdbcUrl = postgreSQLContainer.jdbcUrl,
+                username = postgreSQLContainer.username,
+                password = postgreSQLContainer.password,
+            )
         dataSource.migrate()
 
         opplysningRepo = OpplysningDao(dataSource)
         val pdlTjenesterKlientImpl = mockk<PdlTjenesterKlientImpl>()
         grunnlagService = RealGrunnlagService(pdlTjenesterKlientImpl, opplysningRepo, mockk())
-        inspector = TestRapid().apply {
-            GrunnlagHendelser(this, grunnlagService)
-        }
+        inspector =
+            TestRapid().apply {
+                GrunnlagHendelser(this, grunnlagService)
+            }
     }
 
     @AfterAll
@@ -65,26 +67,28 @@ internal class RapidTest {
     private val fnr = Folkeregisteridentifikator.of("18057404783")
     private val tidspunkt = Tidspunkt.now()
     private val kilde = Grunnlagsopplysning.Pdl(tidspunkt, null, null)
-    private val nyOpplysning = Grunnlagsopplysning(
-        id = statiskUuid,
-        kilde = kilde,
-        opplysningType = Opplysningstype.NAVN,
-        meta = objectMapper.createObjectNode(),
-        opplysning = "Ola".toJsonNode(),
-        attestering = null,
-        fnr = fnr
-    )
+    private val nyOpplysning =
+        Grunnlagsopplysning(
+            id = statiskUuid,
+            kilde = kilde,
+            opplysningType = Opplysningstype.NAVN,
+            meta = objectMapper.createObjectNode(),
+            opplysning = "Ola".toJsonNode(),
+            attestering = null,
+            fnr = fnr,
+        )
 
     @Nested
     inner class NyOpplysning {
-        private val melding = JsonMessage.newMessage(
-            mapOf(
-                "@event_name" to "OPPLYSNING:NY",
-                "opplysning" to listOf(nyOpplysning),
-                "fnr" to fnr,
-                "sakId" to 1
-            )
-        ).toJson()
+        private val melding =
+            JsonMessage.newMessage(
+                mapOf(
+                    "@event_name" to "OPPLYSNING:NY",
+                    "opplysning" to listOf(nyOpplysning),
+                    "fnr" to fnr,
+                    "sakId" to 1,
+                ),
+            ).toJson()
 
         @Test
         fun `ny enkeltopplysning lagres i databasen med riktige verdier`() {
@@ -94,14 +98,15 @@ internal class RapidTest {
 
     @Nested
     inner class Opplysningsbehov {
-        private val melding = JsonMessage.newMessage(
-            mapOf(
-                "@behov" to Opplysningstype.SOEKER_PDL_V1,
-                "opplysning" to listOf(nyOpplysning),
-                "fnr" to fnr,
-                "sakId" to 1
-            )
-        ).toJson()
+        private val melding =
+            JsonMessage.newMessage(
+                mapOf(
+                    "@behov" to Opplysningstype.SOEKER_PDL_V1,
+                    "opplysning" to listOf(nyOpplysning),
+                    "fnr" to fnr,
+                    "sakId" to 1,
+                ),
+            ).toJson()
 
         @Test
         fun `ny enkeltopplysning lagres i databasen med riktige verdier`() {
@@ -109,7 +114,10 @@ internal class RapidTest {
         }
     }
 
-    private fun assertOpplysningBlirLagret(melding: String, expectedOpplysning: Grunnlagsopplysning<JsonNode>) {
+    private fun assertOpplysningBlirLagret(
+        melding: String,
+        expectedOpplysning: Grunnlagsopplysning<JsonNode>,
+    ) {
         inspector.sendTestMessage(melding)
         val grunnlagshendelse = opplysningRepo.finnHendelserIGrunnlag(1).first()
 

@@ -13,14 +13,14 @@ import no.nav.etterlatte.libs.common.oppgaveNy.VedtakEndringDTO
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.oppgaveny.OppgaveServiceNy
 import org.slf4j.LoggerFactory
-import java.util.*
+import java.util.UUID
 
 private val logger = LoggerFactory.getLogger("behandlingVedtakRoute")
 
 internal fun Route.behandlingVedtakRoute(
     behandlingsstatusService: BehandlingStatusService,
     oppgaveService: OppgaveServiceNy,
-    behandlingService: BehandlingService
+    behandlingService: BehandlingService,
 ) {
     fun haandterFeilIOppgaveService(e: Exception) {
         logger.error("Fikk en feil i ferdigstilling av oppgave som stopper ferdigstilling.", e)
@@ -30,9 +30,10 @@ internal fun Route.behandlingVedtakRoute(
     route("/fattvedtak") {
         post {
             val fattVedtak = call.receive<VedtakEndringDTO>()
-            val behandling = behandlingService.hentBehandling(
-                UUID.fromString(fattVedtak.vedtakOppgaveDTO.referanse)
-            )
+            val behandling =
+                behandlingService.hentBehandling(
+                    UUID.fromString(fattVedtak.vedtakOppgaveDTO.referanse),
+                )
             if (behandling == null) {
                 call.respond(HttpStatusCode.NotFound, "Fant ingen behandling")
             } else {
@@ -43,7 +44,7 @@ internal fun Route.behandlingVedtakRoute(
                             fattetoppgave = fattVedtak.vedtakOppgaveDTO,
                             oppgaveType = OppgaveType.ATTESTERING,
                             saksbehandler = brukerTokenInfo,
-                            merknad = fattVedtak.vedtakHendelse.kommentar
+                            merknad = fattVedtak.vedtakHendelse.kommentar,
                         )
                     } catch (e: Exception) {
                         haandterFeilIOppgaveService(e)
@@ -56,23 +57,25 @@ internal fun Route.behandlingVedtakRoute(
     route("/underkjennvedtak") {
         post {
             val underkjennVedtakOppgave = call.receive<VedtakEndringDTO>()
-            val behandling = behandlingService.hentBehandling(
-                UUID.fromString(underkjennVedtakOppgave.vedtakOppgaveDTO.referanse)
-            )
+            val behandling =
+                behandlingService.hentBehandling(
+                    UUID.fromString(underkjennVedtakOppgave.vedtakOppgaveDTO.referanse),
+                )
             if (behandling == null) {
                 call.respond(HttpStatusCode.NotFound, "Fant ingen behandling")
             } else {
                 inTransaction {
                     behandlingsstatusService.settReturnertVedtak(behandling, underkjennVedtakOppgave.vedtakHendelse)
-                    val merknadFraAttestant = underkjennVedtakOppgave.vedtakHendelse.let {
-                        listOfNotNull(it.valgtBegrunnelse, it.kommentar).joinToString(separator = ": ")
-                    }
+                    val merknadFraAttestant =
+                        underkjennVedtakOppgave.vedtakHendelse.let {
+                            listOfNotNull(it.valgtBegrunnelse, it.kommentar).joinToString(separator = ": ")
+                        }
                     try {
                         oppgaveService.ferdigstillOppgaveUnderbehandlingOgLagNyMedType(
                             fattetoppgave = underkjennVedtakOppgave.vedtakOppgaveDTO,
                             oppgaveType = OppgaveType.UNDERKJENT,
                             merknad = merknadFraAttestant,
-                            saksbehandler = brukerTokenInfo
+                            saksbehandler = brukerTokenInfo,
                         )
                     } catch (e: Exception) {
                         haandterFeilIOppgaveService(e)
@@ -85,9 +88,10 @@ internal fun Route.behandlingVedtakRoute(
     route("/attestervedtak") {
         post {
             val attesterVedtakOppgave = call.receive<VedtakEndringDTO>()
-            val behandling = behandlingService.hentBehandling(
-                UUID.fromString(attesterVedtakOppgave.vedtakOppgaveDTO.referanse)
-            )
+            val behandling =
+                behandlingService.hentBehandling(
+                    UUID.fromString(attesterVedtakOppgave.vedtakOppgaveDTO.referanse),
+                )
             if (behandling == null) {
                 call.respond(HttpStatusCode.NotFound, "Fant ingen behandling")
             } else {
@@ -96,7 +100,7 @@ internal fun Route.behandlingVedtakRoute(
                     try {
                         oppgaveService.ferdigStillOppgaveUnderBehandling(
                             behandlingEllerHendelseId = attesterVedtakOppgave.vedtakOppgaveDTO.referanse,
-                            saksbehandler = brukerTokenInfo
+                            saksbehandler = brukerTokenInfo,
                         )
                     } catch (e: Exception) {
                         haandterFeilIOppgaveService(e)

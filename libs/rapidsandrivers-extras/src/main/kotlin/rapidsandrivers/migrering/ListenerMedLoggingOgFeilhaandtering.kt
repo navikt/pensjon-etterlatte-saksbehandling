@@ -8,12 +8,17 @@ import no.nav.helse.rapids_rivers.River
 import rapidsandrivers.withFeilhaandtering
 
 abstract class ListenerMedLoggingOgFeilhaandtering(protected val hendelsestype: String) : River.PacketListener {
+    abstract fun haandterPakke(
+        packet: JsonMessage,
+        context: MessageContext,
+    )
 
-    abstract fun haandterPakke(packet: JsonMessage, context: MessageContext)
-    override fun onPacket(packet: JsonMessage, context: MessageContext) =
-        withLogContext(packet.correlationId) {
-            withFeilhaandtering(packet, context, hendelsestype) {
-                haandterPakke(packet, context)
-            }
+    override fun onPacket(
+        packet: JsonMessage,
+        context: MessageContext,
+    ) = withLogContext(packet.correlationId) {
+        withFeilhaandtering(packet, context, hendelsestype) {
+            haandterPakke(packet, context)
         }
+    }
 }

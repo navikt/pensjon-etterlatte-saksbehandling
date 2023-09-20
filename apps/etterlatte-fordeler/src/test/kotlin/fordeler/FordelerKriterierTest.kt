@@ -27,34 +27,39 @@ import java.time.LocalDate.of
 import java.time.LocalDateTime
 
 internal class FordelerKriterierTest {
-
     private val fordelerKriterier = FordelerKriterier()
 
     @Test
     fun `soeknad er en gyldig kandidat for fordeling`() {
-        val barn = mockPerson(
-            bostedsadresse = mockNorskAdresse(),
-            familieRelasjon = FamilieRelasjon(
-                barn = null,
-                ansvarligeForeldre = null,
-                foreldre = listOf(Folkeregisteridentifikator.of(FNR_2))
+        val barn =
+            mockPerson(
+                bostedsadresse = mockNorskAdresse(),
+                familieRelasjon =
+                    FamilieRelasjon(
+                        barn = null,
+                        ansvarligeForeldre = null,
+                        foreldre = listOf(Folkeregisteridentifikator.of(FNR_2)),
+                    ),
             )
-        )
-        val avdoed = mockPerson(
-            fnr = FNR_2,
-            doedsdato = now().plusMonths(11),
-            bostedsadresse = mockNorskAdresse(
-                gyldigTilOgMed = Tidspunkt.now().toLocalDatetimeUTC().plusMonths(11)
-            ),
-            familieRelasjon = FamilieRelasjon(
-                barn = listOf(barn.foedselsnummer),
-                ansvarligeForeldre = null,
-                foreldre = listOf(Folkeregisteridentifikator.of(FNR_2))
+        val avdoed =
+            mockPerson(
+                fnr = FNR_2,
+                doedsdato = now().plusMonths(11),
+                bostedsadresse =
+                    mockNorskAdresse(
+                        gyldigTilOgMed = Tidspunkt.now().toLocalDatetimeUTC().plusMonths(11),
+                    ),
+                familieRelasjon =
+                    FamilieRelasjon(
+                        barn = listOf(barn.foedselsnummer),
+                        ansvarligeForeldre = null,
+                        foreldre = listOf(Folkeregisteridentifikator.of(FNR_2)),
+                    ),
             )
-        )
-        val gjenlevende = mockPerson(
-            bostedsadresse = mockNorskAdresse()
-        )
+        val gjenlevende =
+            mockPerson(
+                bostedsadresse = mockNorskAdresse(),
+            )
 
         val fordelerResultat = fordelerKriterier.sjekkMotKriterier(barn, avdoed, gjenlevende, BARNEPENSJON_SOKNAD)
 
@@ -63,9 +68,10 @@ internal class FordelerKriterierTest {
 
     @Test
     fun `barn som fyller 18 foer februar 2024 er ikke en gyldig kandidat`() {
-        val barn = mockPerson(
-            foedselsdato = of(2024, 1, 31).minusYears(18)
-        )
+        val barn =
+            mockPerson(
+                foedselsdato = of(2024, 1, 31).minusYears(18),
+            )
         val avdoed = mockPerson()
         val gjenlevende = mockPerson()
 
@@ -76,26 +82,31 @@ internal class FordelerKriterierTest {
 
     @Test
     fun `Gjenlevende mangler`() {
-        val barn = mockPerson(
-            bostedsadresse = mockNorskAdresse(),
-            familieRelasjon = FamilieRelasjon(
-                barn = null,
-                ansvarligeForeldre = null,
-                foreldre = listOf(Folkeregisteridentifikator.of(FNR_2))
+        val barn =
+            mockPerson(
+                bostedsadresse = mockNorskAdresse(),
+                familieRelasjon =
+                    FamilieRelasjon(
+                        barn = null,
+                        ansvarligeForeldre = null,
+                        foreldre = listOf(Folkeregisteridentifikator.of(FNR_2)),
+                    ),
             )
-        )
-        val avdoed = mockPerson(
-            fnr = FNR_2,
-            doedsdato = now().plusMonths(11),
-            bostedsadresse = mockNorskAdresse(
-                gyldigTilOgMed = Tidspunkt.now().toLocalDatetimeUTC().plusMonths(11)
-            ),
-            familieRelasjon = FamilieRelasjon(
-                barn = listOf(barn.foedselsnummer),
-                ansvarligeForeldre = null,
-                foreldre = listOf(Folkeregisteridentifikator.of(FNR_2))
+        val avdoed =
+            mockPerson(
+                fnr = FNR_2,
+                doedsdato = now().plusMonths(11),
+                bostedsadresse =
+                    mockNorskAdresse(
+                        gyldigTilOgMed = Tidspunkt.now().toLocalDatetimeUTC().plusMonths(11),
+                    ),
+                familieRelasjon =
+                    FamilieRelasjon(
+                        barn = listOf(barn.foedselsnummer),
+                        ansvarligeForeldre = null,
+                        foreldre = listOf(Folkeregisteridentifikator.of(FNR_2)),
+                    ),
             )
-        )
 
         val fordelerResultat =
             fordelerKriterier.sjekkMotKriterier(barn, avdoed, gjenlevende = null, BARNEPENSJON_SOKNAD)
@@ -105,10 +116,11 @@ internal class FordelerKriterierTest {
 
     @Test
     fun `Skal godta bokmaal som spraak`() {
-        val barn = mockPerson(
-            foedselsaar = now().year - 15,
-            foedselsdato = now().minusYears(15)
-        )
+        val barn =
+            mockPerson(
+                foedselsaar = now().year - 15,
+                foedselsdato = now().minusYears(15),
+            )
         val avdoed = mockPerson()
         val gjenlevende = mockPerson()
 
@@ -119,10 +131,11 @@ internal class FordelerKriterierTest {
 
     @Test
     fun `Skal ikke godta nynorsk som spraak`() {
-        val barn = mockPerson(
-            foedselsaar = now().year - 15,
-            foedselsdato = now().minusYears(15)
-        )
+        val barn =
+            mockPerson(
+                foedselsaar = now().year - 15,
+                foedselsdato = now().minusYears(15),
+            )
         val avdoed = mockPerson()
         val gjenlevende = mockPerson()
         val bp = BARNEPENSJON_SOKNAD.copy(spraak = Spraak.NN)
@@ -133,10 +146,11 @@ internal class FordelerKriterierTest {
 
     @Test
     fun `Skal ikke godta engelsk som spraak`() {
-        val barn = mockPerson(
-            foedselsaar = now().year - 15,
-            foedselsdato = now().minusYears(15)
-        )
+        val barn =
+            mockPerson(
+                foedselsaar = now().year - 15,
+                foedselsdato = now().minusYears(15),
+            )
         val avdoed = mockPerson()
         val gjenlevende = mockPerson()
         val bp = BARNEPENSJON_SOKNAD.copy(spraak = Spraak.EN)
@@ -147,20 +161,23 @@ internal class FordelerKriterierTest {
 
     @Test
     fun `barn som er registrert med vergemaal er ikke en gyldig kandidat`() {
-        val barn = mockPerson(
-            vergemaalEllerFremtidsfullmakt = listOf(
-                VergemaalEllerFremtidsfullmakt(
-                    embete = "tjoho",
-                    type = "mindreaarig",
-                    vergeEllerFullmektig = VergeEllerFullmektig(
-                        motpartsPersonident = Folkeregisteridentifikator.of("08026800685"),
-                        navn = "Birger",
-                        omfang = "personligeOgOekonomiskeInteresser",
-                        omfangetErInnenPersonligOmraade = true
-                    )
-                )
+        val barn =
+            mockPerson(
+                vergemaalEllerFremtidsfullmakt =
+                    listOf(
+                        VergemaalEllerFremtidsfullmakt(
+                            embete = "tjoho",
+                            type = "mindreaarig",
+                            vergeEllerFullmektig =
+                                VergeEllerFullmektig(
+                                    motpartsPersonident = Folkeregisteridentifikator.of("08026800685"),
+                                    navn = "Birger",
+                                    omfang = "personligeOgOekonomiskeInteresser",
+                                    omfangetErInnenPersonligOmraade = true,
+                                ),
+                        ),
+                    ),
             )
-        )
         val avdoed = mockPerson()
         val gjenlevende = mockPerson()
 
@@ -186,12 +203,13 @@ internal class FordelerKriterierTest {
         val avdoed = mockPerson()
         val gjenlevende = mockPerson()
 
-        val fordelerResultat = fordelerKriterier.sjekkMotKriterier(
-            barn,
-            avdoed,
-            gjenlevende,
-            BARNEPENSJON_SOKNAD_UTENLANDSADRESSE
-        )
+        val fordelerResultat =
+            fordelerKriterier.sjekkMotKriterier(
+                barn,
+                avdoed,
+                gjenlevende,
+                BARNEPENSJON_SOKNAD_UTENLANDSADRESSE,
+            )
 
         assertTrue(fordelerResultat.forklaring.contains(FordelerKriterie.BARN_HAR_HUKET_AV_UTLANDSADRESSE))
     }
@@ -209,17 +227,20 @@ internal class FordelerKriterierTest {
 
     @Test
     fun `barn som har utvandret er ikke en gyldig kandidat`() {
-        val barn = mockPerson(
-            utland = Utland(
-                utflyttingFraNorge = listOf(
-                    UtflyttingFraNorge(
-                        tilflyttingsland = SVERIGE,
-                        dato = LocalDate.parse("2010-01-01")
-                    )
-                ),
-                innflyttingTilNorge = null
+        val barn =
+            mockPerson(
+                utland =
+                    Utland(
+                        utflyttingFraNorge =
+                            listOf(
+                                UtflyttingFraNorge(
+                                    tilflyttingsland = SVERIGE,
+                                    dato = LocalDate.parse("2010-01-01"),
+                                ),
+                            ),
+                        innflyttingTilNorge = null,
+                    ),
             )
-        )
         val avdoed = mockPerson()
         val gjenlevende = mockPerson()
 
@@ -241,9 +262,10 @@ internal class FordelerKriterierTest {
 
     @Test
     fun `barn uten bostedsadresse i Norge er ikke en gyldig kandidat`() {
-        val barn = mockPerson(
-            bostedsadresse = mockUgyldigAdresse()
-        )
+        val barn =
+            mockPerson(
+                bostedsadresse = mockUgyldigAdresse(),
+            )
         val avdoed = mockPerson()
         val gjenlevende = mockPerson()
 
@@ -254,20 +276,24 @@ internal class FordelerKriterierTest {
 
     @Test
     fun `barn med soesken (av avdoede) som fyller 18 foer februar 2024 er ikke en gyldig kandidat`() {
-        val barn = mockPerson(
-            foedselsdato = now().minusYears(10)
-        )
-        val avdoed = mockPerson(
-            bostedsadresse = mockNorskAdresse(),
-            familieRelasjon = FamilieRelasjon(
-                barn = listOf(
-                    Folkeregisteridentifikator.of(barn.foedselsnummer.value),
-                    Folkeregisteridentifikator.of(FNR_5)
-                ),
-                ansvarligeForeldre = null,
-                foreldre = null
+        val barn =
+            mockPerson(
+                foedselsdato = now().minusYears(10),
             )
-        )
+        val avdoed =
+            mockPerson(
+                bostedsadresse = mockNorskAdresse(),
+                familieRelasjon =
+                    FamilieRelasjon(
+                        barn =
+                            listOf(
+                                Folkeregisteridentifikator.of(barn.foedselsnummer.value),
+                                Folkeregisteridentifikator.of(FNR_5),
+                            ),
+                        ansvarligeForeldre = null,
+                        foreldre = null,
+                    ),
+            )
         val gjenlevende = mockPerson()
 
         val fordelerResultat = fordelerKriterier.sjekkMotKriterier(barn, avdoed, gjenlevende, BARNEPENSJON_SOKNAD)
@@ -277,21 +303,25 @@ internal class FordelerKriterierTest {
 
     @Test
     fun `barn med soesken (av avdoede) foedt senere enn februar 2006 skal ikke utelukkes som gyldig kandidat`() {
-        val barn = mockPerson(
-            foedselsaar = now().year - 10,
-            foedselsdato = now().minusYears(10)
-        )
-        val avdoed = mockPerson(
-            bostedsadresse = mockNorskAdresse(),
-            familieRelasjon = FamilieRelasjon(
-                barn = listOf(
-                    Folkeregisteridentifikator.of(barn.foedselsnummer.value),
-                    Folkeregisteridentifikator.of(FNR_1)
-                ),
-                ansvarligeForeldre = null,
-                foreldre = null
+        val barn =
+            mockPerson(
+                foedselsaar = now().year - 10,
+                foedselsdato = now().minusYears(10),
             )
-        )
+        val avdoed =
+            mockPerson(
+                bostedsadresse = mockNorskAdresse(),
+                familieRelasjon =
+                    FamilieRelasjon(
+                        barn =
+                            listOf(
+                                Folkeregisteridentifikator.of(barn.foedselsnummer.value),
+                                Folkeregisteridentifikator.of(FNR_1),
+                            ),
+                        ansvarligeForeldre = null,
+                        foreldre = null,
+                    ),
+            )
         val gjenlevende = mockPerson()
 
         val fordelerResultat = fordelerKriterier.sjekkMotKriterier(barn, avdoed, gjenlevende, BARNEPENSJON_SOKNAD)
@@ -301,21 +331,25 @@ internal class FordelerKriterierTest {
 
     @Test
     fun `avdod som ikke er forelder til soker er ikke en gyldig kandidat`() {
-        val barn = mockPerson(
-            bostedsadresse = mockNorskAdresse(),
-            familieRelasjon = FamilieRelasjon(
-                barn = null,
-                ansvarligeForeldre = null,
-                foreldre = listOf(Folkeregisteridentifikator.of(FNR_2))
+        val barn =
+            mockPerson(
+                bostedsadresse = mockNorskAdresse(),
+                familieRelasjon =
+                    FamilieRelasjon(
+                        barn = null,
+                        ansvarligeForeldre = null,
+                        foreldre = listOf(Folkeregisteridentifikator.of(FNR_2)),
+                    ),
             )
-        )
-        val avdoed = mockPerson(
-            bostedsadresse = mockNorskAdresse(),
-            doedsdato = now()
-        )
-        val gjenlevende = mockPerson(
-            bostedsadresse = mockNorskAdresse()
-        )
+        val avdoed =
+            mockPerson(
+                bostedsadresse = mockNorskAdresse(),
+                doedsdato = now(),
+            )
+        val gjenlevende =
+            mockPerson(
+                bostedsadresse = mockNorskAdresse(),
+            )
 
         val fordelerResultat = fordelerKriterier.sjekkMotKriterier(barn, avdoed, gjenlevende, BARNEPENSJON_SOKNAD)
 
@@ -325,17 +359,20 @@ internal class FordelerKriterierTest {
     @Test
     fun `avdod som har utvandret er ikke en gyldig kandidat`() {
         val barn = mockPerson()
-        val avdoed = mockPerson(
-            utland = Utland(
-                utflyttingFraNorge = listOf(
-                    UtflyttingFraNorge(
-                        tilflyttingsland = SVERIGE,
-                        dato = LocalDate.parse("2010-01-01")
-                    )
-                ),
-                innflyttingTilNorge = null
+        val avdoed =
+            mockPerson(
+                utland =
+                    Utland(
+                        utflyttingFraNorge =
+                            listOf(
+                                UtflyttingFraNorge(
+                                    tilflyttingsland = SVERIGE,
+                                    dato = LocalDate.parse("2010-01-01"),
+                                ),
+                            ),
+                        innflyttingTilNorge = null,
+                    ),
             )
-        )
         val gjenlevende = mockPerson()
 
         val fordelerResultat = fordelerKriterier.sjekkMotKriterier(barn, avdoed, gjenlevende, BARNEPENSJON_SOKNAD)
@@ -349,12 +386,13 @@ internal class FordelerKriterierTest {
         val avdoed = mockPerson()
         val gjenlevende = mockPerson()
 
-        val fordelerResultat = fordelerKriterier.sjekkMotKriterier(
-            barn,
-            avdoed,
-            gjenlevende,
-            BARNEPENSJON_SOKNAD_YRKESSKADE
-        )
+        val fordelerResultat =
+            fordelerKriterier.sjekkMotKriterier(
+                barn,
+                avdoed,
+                gjenlevende,
+                BARNEPENSJON_SOKNAD_YRKESSKADE,
+            )
 
         assertTrue(fordelerResultat.forklaring.contains(FordelerKriterie.AVDOED_HAR_YRKESSKADE))
     }
@@ -362,9 +400,10 @@ internal class FordelerKriterierTest {
     @Test
     fun `avdod som ikke er registrert som dod er ikke en gyldig kandidat`() {
         val barn = mockPerson()
-        val avdoed = mockPerson(
-            doedsdato = null
-        )
+        val avdoed =
+            mockPerson(
+                doedsdato = null,
+            )
         val gjenlevende = mockPerson()
 
         val fordelerResultat = fordelerKriterier.sjekkMotKriterier(barn, avdoed, gjenlevende, BARNEPENSJON_SOKNAD)
@@ -389,12 +428,13 @@ internal class FordelerKriterierTest {
         val avdoed = mockPerson()
         val gjenlevende = mockPerson()
 
-        val fordelerResultat = fordelerKriterier.sjekkMotKriterier(
-            barn,
-            avdoed,
-            gjenlevende,
-            BARNEPENSJON_SOKNAD_HUKET_AV_UTLAND
-        )
+        val fordelerResultat =
+            fordelerKriterier.sjekkMotKriterier(
+                barn,
+                avdoed,
+                gjenlevende,
+                BARNEPENSJON_SOKNAD_HUKET_AV_UTLAND,
+            )
 
         assertTrue(fordelerResultat.forklaring.contains(FordelerKriterie.AVDOED_HAR_HATT_UTLANDSOPPHOLD))
     }
@@ -402,9 +442,10 @@ internal class FordelerKriterierTest {
     @Test
     fun `avdod uten bostedsadresse i Norge er ikke en gyldig kandidat`() {
         val barn = mockPerson()
-        val avdoed = mockPerson(
-            bostedsadresse = mockUgyldigAdresse()
-        )
+        val avdoed =
+            mockPerson(
+                bostedsadresse = mockUgyldigAdresse(),
+            )
         val gjenlevende = mockPerson()
 
         val fordelerResultat = fordelerKriterier.sjekkMotKriterier(barn, avdoed, gjenlevende, BARNEPENSJON_SOKNAD)
@@ -415,14 +456,16 @@ internal class FordelerKriterierTest {
     @Test
     fun `avdod med gyldig bostedsadresse i Norge foer doedsdato er ikke en gyldig kandidat`() {
         val barn = mockPerson()
-        val avdoed = mockPerson(
-            doedsdato = LocalDate.parse("2022-01-03"),
-            bostedsadresse = mockUgyldigAdresse(
-                type = AdresseType.VEGADRESSE,
-                gyldigFraOgMed = LocalDateTime.parse("2022-01-01T00:00:00"),
-                gyldigTilOgMed = LocalDateTime.parse("2022-01-02T00:00:00")
+        val avdoed =
+            mockPerson(
+                doedsdato = LocalDate.parse("2022-01-03"),
+                bostedsadresse =
+                    mockUgyldigAdresse(
+                        type = AdresseType.VEGADRESSE,
+                        gyldigFraOgMed = LocalDateTime.parse("2022-01-01T00:00:00"),
+                        gyldigTilOgMed = LocalDateTime.parse("2022-01-02T00:00:00"),
+                    ),
             )
-        )
         val gjenlevende = mockPerson()
 
         val fordelerResultat = fordelerKriterier.sjekkMotKriterier(barn, avdoed, gjenlevende, BARNEPENSJON_SOKNAD)
@@ -433,14 +476,16 @@ internal class FordelerKriterierTest {
     @Test
     fun `avdod med gyldig bostedsadresse i Norge etter doedsdato er ikke en gyldig kandidat`() {
         val barn = mockPerson()
-        val avdoed = mockPerson(
-            doedsdato = LocalDate.parse("2022-01-01"),
-            bostedsadresse = mockUgyldigAdresse(
-                type = AdresseType.VEGADRESSE,
-                gyldigFraOgMed = LocalDateTime.parse("2022-01-02T00:00:00"),
-                gyldigTilOgMed = LocalDateTime.parse("2022-01-03T00:00:00")
+        val avdoed =
+            mockPerson(
+                doedsdato = LocalDate.parse("2022-01-01"),
+                bostedsadresse =
+                    mockUgyldigAdresse(
+                        type = AdresseType.VEGADRESSE,
+                        gyldigFraOgMed = LocalDateTime.parse("2022-01-02T00:00:00"),
+                        gyldigTilOgMed = LocalDateTime.parse("2022-01-03T00:00:00"),
+                    ),
             )
-        )
         val gjenlevende = mockPerson()
 
         val fordelerResultat = fordelerKriterier.sjekkMotKriterier(barn, avdoed, gjenlevende, BARNEPENSJON_SOKNAD)
@@ -454,12 +499,13 @@ internal class FordelerKriterierTest {
         val avdoed = mockPerson()
         val gjenlevende = null
 
-        val fordelerResultat = fordelerKriterier.sjekkMotKriterier(
-            barn,
-            avdoed,
-            gjenlevende,
-            BARNEPENSJON_SOKNAD_INNSENDER_IKKE_FORELDER
-        )
+        val fordelerResultat =
+            fordelerKriterier.sjekkMotKriterier(
+                barn,
+                avdoed,
+                gjenlevende,
+                BARNEPENSJON_SOKNAD_INNSENDER_IKKE_FORELDER,
+            )
 
         assertTrue(fordelerResultat.forklaring.contains(FordelerKriterie.INNSENDER_ER_IKKE_FORELDER))
     }
@@ -468,9 +514,10 @@ internal class FordelerKriterierTest {
     fun `gjenlevende uten bostedsadresse i Norge er ikke en gyldig kandidat`() {
         val barn = mockPerson()
         val avdoed = mockPerson()
-        val gjenlevende = mockPerson(
-            bostedsadresse = mockUgyldigAdresse()
-        )
+        val gjenlevende =
+            mockPerson(
+                bostedsadresse = mockUgyldigAdresse(),
+            )
 
         val fordelerResultat = fordelerKriterier.sjekkMotKriterier(barn, avdoed, gjenlevende, BARNEPENSJON_SOKNAD)
 
@@ -479,15 +526,18 @@ internal class FordelerKriterierTest {
 
     @Test
     fun `gjenlevende og barn med ulike adresser er ikke en gyldig kandidat`() {
-        val barn = mockPerson(
-            bostedsadresse = mockNorskAdresse()
-        )
-        val avdoed = mockPerson(
-            bostedsadresse = mockNorskAdresse()
-        )
-        val gjenlevende = mockPerson(
-            bostedsadresse = mockNorskAdresse(adresseLinje1 = "En annen vei 2")
-        )
+        val barn =
+            mockPerson(
+                bostedsadresse = mockNorskAdresse(),
+            )
+        val avdoed =
+            mockPerson(
+                bostedsadresse = mockNorskAdresse(),
+            )
+        val gjenlevende =
+            mockPerson(
+                bostedsadresse = mockNorskAdresse(adresseLinje1 = "En annen vei 2"),
+            )
 
         val fordelerResultat = fordelerKriterier.sjekkMotKriterier(barn, avdoed, gjenlevende, BARNEPENSJON_SOKNAD)
 
@@ -496,13 +546,15 @@ internal class FordelerKriterierTest {
 
     @Test
     fun `gjenlevende uten foreldreansvar er ikke en gyldig kandidat`() {
-        val barn = mockPerson(
-            familieRelasjon = FamilieRelasjon(
-                ansvarligeForeldre = listOf(Folkeregisteridentifikator.of(FNR_5)),
-                foreldre = null,
-                barn = null
+        val barn =
+            mockPerson(
+                familieRelasjon =
+                    FamilieRelasjon(
+                        ansvarligeForeldre = listOf(Folkeregisteridentifikator.of(FNR_5)),
+                        foreldre = null,
+                        barn = null,
+                    ),
             )
-        )
         val avdoed = mockPerson()
         val gjenlevende = mockPerson()
 

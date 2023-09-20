@@ -47,7 +47,7 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.Month
 import java.time.YearMonth
-import java.util.*
+import java.util.UUID
 import java.util.UUID.randomUUID
 
 internal class BeregnBarnepensjonServiceTest {
@@ -70,7 +70,7 @@ internal class BeregnBarnepensjonServiceTest {
             vilkaarsvurderingKlient = vilkaarsvurderingKlient,
             beregningsGrunnlagService = beregningsGrunnlagService,
             trygdetidKlient = trygdetidKlient,
-            featureToggleService = featureToggleService
+            featureToggleService = featureToggleService,
         )
     }
 
@@ -83,7 +83,7 @@ internal class BeregnBarnepensjonServiceTest {
         coEvery {
             beregningsGrunnlagService.hentBarnepensjonBeregningsGrunnlag(
                 any(),
-                any()
+                any(),
             )
         } returns barnepensjonBeregningsGrunnlag(behandling.id, emptyList())
         coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns null
@@ -121,7 +121,7 @@ internal class BeregnBarnepensjonServiceTest {
         coEvery {
             beregningsGrunnlagService.hentBarnepensjonBeregningsGrunnlag(
                 any(),
-                any()
+                any(),
             )
         } returns barnepensjonBeregningsGrunnlag(behandling.id, emptyList())
         coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns mockTrygdetid(behandling.id)
@@ -161,7 +161,7 @@ internal class BeregnBarnepensjonServiceTest {
         coEvery {
             beregningsGrunnlagService.hentBarnepensjonBeregningsGrunnlag(
                 any(),
-                any()
+                any(),
             )
         } returns barnepensjonBeregningsGrunnlag(behandling.id, listOf(FNR_1))
         coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns null
@@ -197,7 +197,7 @@ internal class BeregnBarnepensjonServiceTest {
         coEvery {
             beregningsGrunnlagService.hentBarnepensjonBeregningsGrunnlag(
                 any(),
-                any()
+                any(),
             )
         } returns barnepensjonBeregningsGrunnlag(behandling.id, listOf(FNR_1))
         coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns mockTrygdetid(behandling.id)
@@ -234,7 +234,7 @@ internal class BeregnBarnepensjonServiceTest {
         coEvery {
             beregningsGrunnlagService.hentBarnepensjonBeregningsGrunnlag(
                 any(),
-                any()
+                any(),
             )
         } returns barnepensjonBeregningsGrunnlag(behandling.id, listOf(FNR_1, FNR_2))
         coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns null
@@ -270,7 +270,7 @@ internal class BeregnBarnepensjonServiceTest {
         coEvery {
             beregningsGrunnlagService.hentBarnepensjonBeregningsGrunnlag(
                 any(),
-                any()
+                any(),
             )
         } returns barnepensjonBeregningsGrunnlag(behandling.id, listOf(FNR_1, FNR_2))
         coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns mockTrygdetid(behandling.id)
@@ -307,7 +307,7 @@ internal class BeregnBarnepensjonServiceTest {
         coEvery {
             beregningsGrunnlagService.hentBarnepensjonBeregningsGrunnlag(
                 any(),
-                any()
+                any(),
             )
         } returns barnepensjonBeregningsGrunnlag(behandling.id, emptyList())
         coEvery { vilkaarsvurderingKlient.hentVilkaarsvurdering(any(), any()) } returns
@@ -347,7 +347,7 @@ internal class BeregnBarnepensjonServiceTest {
         coEvery {
             beregningsGrunnlagService.hentBarnepensjonBeregningsGrunnlag(
                 any(),
-                any()
+                any(),
             )
         } returns barnepensjonBeregningsGrunnlag(behandling.id, emptyList())
         coEvery { vilkaarsvurderingKlient.hentVilkaarsvurdering(any(), any()) } returns
@@ -388,7 +388,7 @@ internal class BeregnBarnepensjonServiceTest {
         coEvery {
             beregningsGrunnlagService.hentBarnepensjonBeregningsGrunnlag(
                 any(),
-                any()
+                any(),
             )
         } returns barnepensjonBeregningsGrunnlag(behandling.id, emptyList())
         coEvery { vilkaarsvurderingKlient.hentVilkaarsvurdering(any(), any()) } returns
@@ -428,7 +428,7 @@ internal class BeregnBarnepensjonServiceTest {
         coEvery {
             beregningsGrunnlagService.hentBarnepensjonBeregningsGrunnlag(
                 any(),
-                any()
+                any(),
             )
         } returns barnepensjonBeregningsGrunnlag(behandling.id, emptyList())
         coEvery { vilkaarsvurderingKlient.hentVilkaarsvurdering(any(), any()) } returns
@@ -469,7 +469,7 @@ internal class BeregnBarnepensjonServiceTest {
         coEvery {
             beregningsGrunnlagService.hentBarnepensjonBeregningsGrunnlag(
                 any(),
-                any()
+                any(),
             )
         } returns barnepensjonBeregningsGrunnlag(behandling.id, emptyList())
         coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns null
@@ -505,7 +505,7 @@ internal class BeregnBarnepensjonServiceTest {
         coEvery {
             beregningsGrunnlagService.hentBarnepensjonBeregningsGrunnlag(
                 any(),
-                any()
+                any(),
             )
         } returns barnepensjonBeregningsGrunnlag(behandling.id, emptyList())
         coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns mockTrygdetid(behandling.id)
@@ -542,13 +542,13 @@ internal class BeregnBarnepensjonServiceTest {
         coEvery {
             beregningsGrunnlagService.hentBarnepensjonBeregningsGrunnlag(
                 any(),
-                any()
+                any(),
             )
         } returns
             beregningsGrunnlagMedSoesken(
                 behandling.id,
                 Triple(YearMonth.of(2023, 1), YearMonth.of(2023, 3), listOf(FNR_1, FNR_2)),
-                Triple(YearMonth.of(2023, 4), null, listOf(FNR_1))
+                Triple(YearMonth.of(2023, 4), null, listOf(FNR_1)),
             )
         coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns mockTrygdetid(behandling.id)
         featureToggleService.settBryter(BrukFaktiskTrygdetid, true)
@@ -594,11 +594,11 @@ internal class BeregnBarnepensjonServiceTest {
     fun `skal beregne barnepensjon foerstegangsbehandling - med flere avdøde foreldre og nytt regelverk`() {
         val behandling = mockBehandling(BehandlingType.FØRSTEGANGSBEHANDLING)
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns
-                grunnlagMedEkstraAvdoedForelder(LocalDate.of(2023, 11, 12))
+            grunnlagMedEkstraAvdoedForelder(LocalDate.of(2023, 11, 12))
         coEvery {
             beregningsGrunnlagService.hentBarnepensjonBeregningsGrunnlag(
                 any(),
-                any()
+                any(),
             )
         } returns barnepensjonBeregningsGrunnlag(behandling.id, emptyList())
         coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns null
@@ -632,18 +632,19 @@ internal class BeregnBarnepensjonServiceTest {
     private fun grunnlagMedEkstraAvdoedForelder(doedsdato: LocalDate): Grunnlag {
         val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
         val nyligAvdoedFoedselsnummer = Folkeregisteridentifikator.of("15447924940")
-        val nyligAvdoed: List<Grunnlagsdata<JsonNode>> = listOf(
-            mapOf(
-                Opplysningstype.DOEDSDATO to konstantOpplysning(doedsdato),
-                Opplysningstype.PERSONROLLE to konstantOpplysning(AVDOED),
-                Opplysningstype.FOEDSELSNUMMER to konstantOpplysning(nyligAvdoedFoedselsnummer)
+        val nyligAvdoed: List<Grunnlagsdata<JsonNode>> =
+            listOf(
+                mapOf(
+                    Opplysningstype.DOEDSDATO to konstantOpplysning(doedsdato),
+                    Opplysningstype.PERSONROLLE to konstantOpplysning(AVDOED),
+                    Opplysningstype.FOEDSELSNUMMER to konstantOpplysning(nyligAvdoedFoedselsnummer),
+                ),
             )
-        )
         return Grunnlag(
             grunnlag.soeker,
             grunnlag.familie + nyligAvdoed,
             grunnlag.sak,
-            grunnlag.metadata
+            grunnlag.metadata,
         )
     }
 
@@ -654,12 +655,12 @@ internal class BeregnBarnepensjonServiceTest {
 
     private fun barnepensjonBeregningsGrunnlag(
         behandlingId: UUID,
-        soesken: List<String>
+        soesken: List<String>,
     ) = BeregningsGrunnlag(
         behandlingId,
         defaultKilde(),
         soeskenMedIBeregning =
-        listOf(
+            listOf(
                 GrunnlagMedPeriode(
                     fom = VIRKNINGSTIDSPUNKT_JAN_23.minusMonths(1).atDay(1),
                     tom = null,
@@ -667,17 +668,17 @@ internal class BeregnBarnepensjonServiceTest {
                         soesken.map {
                             SoeskenMedIBeregning(
                                 Folkeregisteridentifikator.of(it),
-                                skalBrukes = true
+                                skalBrukes = true,
                             )
-                        }
-                )
+                        },
+                ),
             ),
-        institusjonsoppholdBeregningsgrunnlag = defaultInstitusjonsopphold()
+        institusjonsoppholdBeregningsgrunnlag = defaultInstitusjonsopphold(),
     )
 
     private fun beregningsGrunnlagMedSoesken(
         behandlingId: UUID,
-        vararg soesken: Triple<YearMonth, YearMonth?, List<String>>
+        vararg soesken: Triple<YearMonth, YearMonth?, List<String>>,
     ) = BeregningsGrunnlag(
         behandlingId,
         defaultKilde(),
@@ -690,12 +691,12 @@ internal class BeregnBarnepensjonServiceTest {
                         it.third.map {
                             SoeskenMedIBeregning(
                                 Folkeregisteridentifikator.of(it),
-                                skalBrukes = true
+                                skalBrukes = true,
                             )
-                        }
+                        },
                 )
             },
-        institusjonsoppholdBeregningsgrunnlag = defaultInstitusjonsopphold()
+        institusjonsoppholdBeregningsgrunnlag = defaultInstitusjonsopphold(),
     )
 
     private fun defaultKilde(): Grunnlagsopplysning.Saksbehandler =
@@ -710,13 +711,13 @@ internal class BeregnBarnepensjonServiceTest {
             GrunnlagMedPeriode(
                 fom = LocalDate.of(2022, 8, 1),
                 tom = null,
-                data = InstitusjonsoppholdBeregningsgrunnlag(Reduksjon.NEI_KORT_OPPHOLD)
-            )
+                data = InstitusjonsoppholdBeregningsgrunnlag(Reduksjon.NEI_KORT_OPPHOLD),
+            ),
         )
 
     private fun mockBehandling(
         type: BehandlingType,
-        virk: YearMonth = VIRKNINGSTIDSPUNKT_JAN_23
+        virk: YearMonth = VIRKNINGSTIDSPUNKT_JAN_23,
     ): DetaljertBehandling =
         mockk<DetaljertBehandling>().apply {
             every { id } returns randomUUID()
